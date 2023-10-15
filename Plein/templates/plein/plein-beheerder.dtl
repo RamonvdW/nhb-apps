@@ -47,6 +47,12 @@
                     {% include 'plein/card_icon.dtl' with title="Webwinkel" text="Beheer de webwinkel." icon="local_mall" url=card_url %}
                 {% endif %}
 
+                <!-- scheids -->
+                {% if rol_is_cs and is_test_server %}
+                    {% url 'Scheidsrechter:overzicht' as card_url %}
+                    {% include 'plein/card_icon.dtl' with title="Scheidsrechters" text="Voor leden van het scheidsrechterskorps" icon="sports" url=card_url %}
+                {% endif %}
+
                 <!-- opleidingen -->
                 {% if rol_is_mo %}
                     {% url 'Opleidingen:overzicht' as card_url %}

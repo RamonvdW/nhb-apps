@@ -13,7 +13,7 @@ class Rollen(enum.IntEnum):
     """
 
     # rollen staan in prio volgorde
-    ROL_BB = 2          # Manager Competitiezaken
+    ROL_BB = 2          # Manager MH
     ROL_BKO = 3         # BK organisator, specifieke competitie
     ROL_RKO = 4         # RK organisator, specifieke competitie en rayon
     ROL_RCL = 5         # Regiocompetitieleider, specifieke competitie en regio

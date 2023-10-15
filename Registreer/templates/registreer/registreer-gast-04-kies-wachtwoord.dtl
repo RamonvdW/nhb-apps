@@ -23,7 +23,7 @@
 
             <!-- dialoog venster -->
             <div style="padding:20px" class="left-align">
-                <form action="{% url 'Registreer:gast-volgende-vraag' %}" method="post" onsubmit="submit_knop.disabled=true; return true;">
+                <form action="{% url 'Registreer:gast-volgende-vraag' %}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
                     {% csrf_token %}
 
                     <!-- accessibility: zorg dat password managers weten bij welke user dit hoort -->

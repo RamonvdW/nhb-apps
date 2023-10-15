@@ -90,7 +90,7 @@
             <!-- dialoog venster -->
             <div class="white left-align z-depth-3">
                 <div class="form-padding">
-                    <form action="{{ url }}" method="post" onsubmit="submit_knop.disabled=true; return true;">
+                    <form action="{{ url }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
                         {% csrf_token %}
 
                         {% if foutmelding %}
@@ -318,7 +318,7 @@
             <h5>Verwijder buitenbaan?</h5>
             <p>Wil je de buitenbaan van vereniging<br><b>{{ ver }}</b><br>verwijderen uit het systeem?</p>
 
-            <form action="{{ url_verwijder_buitenbaan }}" method="post" onsubmit="submit_knop.disabled=true; return true;">
+            <form action="{{ url_verwijder_buitenbaan }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
                 {% csrf_token %}
                 <input type="hidden" name="verwijder_buitenbaan" value="1">
 
@@ -348,7 +348,7 @@
 
 
     <!-- voorkom dubbele posts vanuit form -->
-    <form ... method="post" onsubmit="submit_knop.disabled=true; return true;">
+    <form ... method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
        <button class="btn-sv-rood" name="submit_knop">...</button>
     </form>
 

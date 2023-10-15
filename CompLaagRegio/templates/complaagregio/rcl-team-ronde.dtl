@@ -102,7 +102,7 @@
 
             <!-- TODO -->
             <div class="center">
-                <form action="{{ url_volgende_ronde }}" method="post" onsubmit="submit_knop1.disabled=true; return true;">
+                <form action="{{ url_volgende_ronde }}" method="post" onsubmit="document.getElementById('submit_knop1').disabled=true; return true;">
                     {% csrf_token %}
                     <button class="btn-sv-rood" id="submit_knop1" type="submit">Start de eerste ronde</button>
                 </form>
@@ -219,7 +219,7 @@
 
                         <p><span class="sv-rood-text"><b>Let op: </b></span>Eventuele discussies over individuele scores moeten afgerond zijn. Na het afsluiten van deze ronde worden de teamscores{% if not toon_som %} en wedstrijdpunten{% endif %} bevroren.</p>
 
-                        <form action="{{ url_volgende_ronde }}" method="post" onsubmit="submit_knop2.disabled=true; return true;">
+                        <form action="{{ url_volgende_ronde }}" method="post" onsubmit="document.getElementById('submit_knop2').disabled=true; return true;">
                             {% csrf_token %}
                             <button class="btn-sv-rood" id="submit_knop2" type="submit">Ronde {{ deelcomp.huidige_team_ronde }} nu afsluiten</button>
                         </form>

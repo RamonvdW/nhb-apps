@@ -64,7 +64,7 @@
     </div>
 
     {% if mag_aanmelden %}
-        <form action="{{ url_aanmelden }}" method="post" onsubmit="submit_knop.disabled=true; return true;">
+        <form action="{{ url_aanmelden }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
             {% csrf_token %}
     {% endif %}
 

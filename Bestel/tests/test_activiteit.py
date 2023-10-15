@@ -8,7 +8,7 @@ from django.test import TestCase
 from django.conf import settings
 from django.utils import timezone
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse
-from Bestel.definities import BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_WACHT_OP_BETALING
+from Bestel.definities import BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_BETALING_ACTIEF
 from Bestel.models import Bestelling, BestelProduct
 from Betaal.models import BetaalInstellingenVereniging
 from Functie.models import Functie
@@ -193,7 +193,7 @@ class TestBestelActiviteit(E2EHelpers, TestCase):
                         verkoper_bic='VER2BIC',
                         verkoper_heeft_mollie=False,
                         totaal_euro='1.23',
-                        status=BESTELLING_STATUS_WACHT_OP_BETALING,
+                        status=BESTELLING_STATUS_BETALING_ACTIEF,
                         log='Een beginnetje\n')
         bestelling2.save()
         bestelling2.producten.add(product2)

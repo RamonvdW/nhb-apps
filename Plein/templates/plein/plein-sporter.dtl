@@ -52,6 +52,11 @@
             {% url 'Kalender:landing-page' as card_url %}
             {% include 'plein/card_icon.dtl' with title="Wedstrijdkalender" text="Bekijk welke wedstrijden georganiseerd worden en schrijf je in." icon="event_note" url=card_url %}
 
+            <!-- scheids -->
+            {% if url_scheids %}
+                {% include 'plein/card_icon.dtl' with title="Scheidsrechters" text="Voor leden van het scheidsrechterskorps" icon="sports" url=url_scheids %}
+            {% endif %}
+
             <!-- opleidingen -->
             {% if toon_opleidingen %}
                 {% url 'Opleidingen:overzicht' as card_url %}

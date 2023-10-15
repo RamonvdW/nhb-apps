@@ -42,7 +42,7 @@
             }
         </script>
 
-        <form action="{{ opslaan_url }}" method="post" onsubmit="submit_knop.disabled=true; return true;">
+        <form action="{{ opslaan_url }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
             {% csrf_token %}
 
             <!-- witruimte -->
@@ -157,10 +157,10 @@
             <div class="col s12">
                 <div class="white" style="padding:10px">
                     <p>Heb je meer clusters nodig?</p>
-                    <p>Neem dan contact op met de Manager Competitiezaken van het bondsbureau om cluster(s) aan te laten maken:</p>
-                    <p><code>{{ email_bondsbureau }}</code></p>
+                    <p>Neem dan contact op met MijnHandboogsport Support om cluster(s) aan te laten maken:</p>
+                    <p><code>{{ email_support }}</code></p>
                     <p>
-                        <a class="btn-sv-rood" href="mailto:{{ email_bondsbureau }}">
+                        <a class="btn-sv-rood" href="mailto:{{ email_support }}">
                             <i class="notranslate material-icons-round">email</i></a>
                     </p>
                 </div>

@@ -26,7 +26,7 @@
                 <p>Druk op de knop om volledig uit te loggen:</p>
                 <p>&nbsp;</p>
 
-                <form action="{% url 'Account:logout' %}" method="post" onsubmit="submit_knop.disabled=true; return true;">
+                <form action="{% url 'Account:logout' %}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
                     {% csrf_token %}
                     <input class="btn-sv-rood" id="submit_knop" type="submit" value="Uitloggen" autofocus>
                 </form>

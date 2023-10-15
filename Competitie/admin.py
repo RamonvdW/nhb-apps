@@ -213,17 +213,25 @@ class RegiocompetitieSporterBoogAdmin(CreateOnlyAdmin):
         return msg
 
     def get_form(self, request, obj=None, **kwargs):                    # pragma: no cover
+        """ initialisatie van het admin formulier
+            hier "vangen" we het database object waar we mee bezig gaan
+        """
         if obj:
             self.obj = obj
         return super().get_form(request, obj, **kwargs)
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):    # pragma: no cover
+        """ bepaal de relevante keuzemogelijkheden voor specifieke velden
+        """
         if db_field.name == 'indiv_klasse' and self.obj:
+            # alleen laten kiezen uit de klassen van deze competitie
             kwargs['queryset'] = (CompetitieIndivKlasse
                                   .objects
                                   .filter(competitie=self.obj.regiocompetitie.competitie)
                                   .order_by('volgorde'))
+
         elif db_field.name == 'regiocompetitie':
+            # alleen laten kiezen uit de regiocompetitie van deze competitie
             kwargs['queryset'] = (Regiocompetitie
                                   .objects
                                   .select_related('competitie',
@@ -290,12 +298,18 @@ class RegiocompetitieTeamAdmin(CreateOnlyAdmin):
         self.obj = None
 
     def get_form(self, request, obj=None, **kwargs):                    # pragma: no cover
+        """ initialisatie van het admin formulier
+            hier "vangen" we het database object waar we mee bezig gaan
+        """
         if obj:
             self.obj = obj
         return super().get_form(request, obj, **kwargs)
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):    # pragma: no cover
+        """ bepaal de relevante keuzemogelijkheden voor specifieke velden
+        """
         if db_field.name == 'team_klasse' and self.obj:
+            # alleen laten kiezen uit de team klassen van deze competitie
             kwargs['queryset'] = (CompetitieTeamKlasse
                                   .objects
                                   .filter(competitie=self.obj.regiocompetitie.competitie,
@@ -303,6 +317,7 @@ class RegiocompetitieTeamAdmin(CreateOnlyAdmin):
                                   .order_by('volgorde'))
 
         elif db_field.name == 'regiocompetitie':
+            # alleen laten kiezen uit regiocompetities van deze competitie
             kwargs['queryset'] = (Regiocompetitie
                                   .objects
                                   .select_related('competitie',
@@ -442,6 +457,9 @@ class KampioenschapTeamAdmin(CreateOnlyAdmin):
         self.boog_pks = list()
 
     def get_form(self, request, obj=None, **kwargs):                    # pragma: no cover
+        """ initialisatie van het admin formulier
+            hier "vangen" we het database object waar we mee bezig gaan
+        """
         if obj:
             self.obj = obj
             if obj.kampioenschap:
@@ -495,6 +513,8 @@ class KampioenschapTeamAdmin(CreateOnlyAdmin):
         return super().formfield_for_manytomany(db_field, request, **kwargs)
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):    # pragma: no cover
+        """ bepaal de relevante keuzemogelijkheden voor specifieke velden
+        """
         if db_field.name == 'kampioenschap':
             kwargs['queryset'] = (Kampioenschap
                                   .objects
@@ -505,6 +525,7 @@ class KampioenschapTeamAdmin(CreateOnlyAdmin):
 
         elif db_field.name == 'team_klasse':
             if self.competitie:
+                # alleen laten kiezen uit de team klassen van deze competitie
                 kwargs['queryset'] = (CompetitieTeamKlasse
                                       .objects
                                       .filter(competitie=self.competitie,
@@ -603,12 +624,18 @@ class KampioenschapSporterBoogAdmin(CreateOnlyAdmin):
         self.obj = None
 
     def get_form(self, request, obj=None, **kwargs):                    # pragma: no cover
+        """ initialisatie van het admin formulier
+            hier "vangen" we het database object waar we mee bezig gaan
+        """
         if obj:
             self.obj = obj
         return super().get_form(request, obj, **kwargs)
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):    # pragma: no cover
+        """ bepaal de relevante keuzemogelijkheden voor specifieke velden
+        """
         if db_field.name == 'indiv_klasse' and self.obj:
+            # alleen klassen laten kiezen van deze competitie
             kwargs['queryset'] = (CompetitieIndivKlasse
                                   .objects
                                   .filter(competitie=self.obj.kampioenschap.competitie)
@@ -634,11 +661,16 @@ class CompetitieMutatieAdmin(CreateOnlyAdmin):
         self.obj = None
 
     def get_form(self, request, obj=None, **kwargs):                    # pragma: no cover
+        """ initialisatie van het admin formulier
+            hier "vangen" we het database object waar we mee bezig gaan
+        """
         if obj:
             self.obj = obj
         return super().get_form(request, obj, **kwargs)
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):    # pragma: no cover
+        """ bepaal de relevante keuzemogelijkheden voor specifieke velden
+        """
         if self.obj:
             if db_field.name == 'regiocompetitie':
                 kwargs['queryset'] = (Regiocompetitie
@@ -762,6 +794,9 @@ class RegiocompetitieRondeTeamAdmin(CreateOnlyAdmin):
         self.ver = None
 
     def get_form(self, request, obj=None, **kwargs):                    # pragma: no cover
+        """ initialisatie van het admin formulier
+            hier "vangen" we het database object waar we mee bezig gaan
+        """
         if obj:
             team = obj.team
             self.deelcomp = team.regiocompetitie
@@ -772,6 +807,8 @@ class RegiocompetitieRondeTeamAdmin(CreateOnlyAdmin):
         return super().get_form(request, obj, **kwargs)
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):    # pragma: no cover
+        """ bepaal de relevante keuzemogelijkheden voor specifieke velden
+        """
         if db_field.name == 'team' and self.deelcomp:
             kwargs['queryset'] = (RegiocompetitieTeam
                                   .objects
@@ -828,6 +865,9 @@ class RegiocompetitieTeamPouleAdmin(CreateOnlyAdmin):
         self.deelcomp = None
 
     def get_form(self, request, obj=None, **kwargs):                    # pragma: no cover
+        """ initialisatie van het admin formulier
+            hier "vangen" we het database object waar we mee bezig gaan
+        """
         if obj:
             self.deelcomp = obj.regiocompetitie
         else:

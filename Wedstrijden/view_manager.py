@@ -23,7 +23,7 @@ TEMPLATE_WEDSTRIJDEN_OVERZICHT_MANAGER = 'wedstrijden/overzicht-manager.dtl'
 
 
 class KalenderManagerView(UserPassesTestMixin, View):
-    """ Via deze view kan de Manager Competitiezaken de wedstrijdkalender beheren """
+    """ Via deze view kan de BB de wedstrijdkalender beheren """
 
     # class variables shared by all instances
     template_name = TEMPLATE_WEDSTRIJDEN_OVERZICHT_MANAGER

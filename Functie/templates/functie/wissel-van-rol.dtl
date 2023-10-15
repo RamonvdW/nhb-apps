@@ -125,7 +125,7 @@
                         <h6 class="center" style="margin-bottom:10px">Verenigingen</h6>
 
                         <!-- vereniging naar keuze -->
-                        <form class="center" action="{{ url_hwl_naar_keuze }}" method="post" onsubmit="submit_knop00.disabled=true; return true;">
+                        <form class="center" action="{{ url_hwl_naar_keuze }}" method="post" onsubmit="document.getElementById('submit_knop00').disabled=true; return true;">
                             {% csrf_token %}
                             <div class="row">
                                 <div class="col s4">
@@ -175,7 +175,7 @@
                             <b>Indoor</b>
                         </div>
                         {% for obj in alle_18 %}
-                            <form style="display:inline" action="{{ obj.url }}" method="post" onsubmit="submit_knop{{ obj.pk }}.disabled=true; return true;">
+                            <form style="display:inline" action="{{ obj.url }}" method="post" onsubmit="document.getElementById('submit_knop{{ obj.pk }}').disabled=true; return true;">
                                 {% csrf_token %}
                                 <button class="btn-sv-rood" id="submit_knop{{ obj.pk }}" type="submit">{{ obj.tekst_kort }}</button>
                             </form>
@@ -192,7 +192,7 @@
                             <b>25m1pijl</b>
                         </div>
                         {% for obj in alle_25 %}
-                            <form style="display:inline" action="{{ obj.url }}" method="post" onsubmit="submit_knop{{ obj.pk }}.disabled=true; return true;">
+                            <form style="display:inline" action="{{ obj.url }}" method="post" onsubmit="document.getElementById('submit_knop{{ obj.pk }}').disabled=true; return true;">
                                 {% csrf_token %}
                                 <button class="btn-sv-blauw" id="submit_knop{{ obj.pk }}" type="submit">{{ obj.tekst_kort }}</button>
                             </form>

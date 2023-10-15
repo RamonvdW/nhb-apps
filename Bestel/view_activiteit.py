@@ -10,7 +10,7 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from django.views.generic import TemplateView
 from django.urls import reverse
 from Account.models import get_account
-from Bestel.definities import (BESTELLING_STATUS2STR, BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_WACHT_OP_BETALING,
+from Bestel.definities import (BESTELLING_STATUS2STR, BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_BETALING_ACTIEF,
                                BESTELLING_STATUS_MISLUKT)
 from Bestel.forms import ZoekBestellingForm
 from Bestel.models import Bestelling
@@ -95,7 +95,7 @@ class BestelActiviteitView(UserPassesTestMixin, TemplateView):
                                                     'ontvanger',
                                                     'ontvanger__vereniging')
                                     .filter(status__in=(BESTELLING_STATUS_NIEUW,
-                                                        BESTELLING_STATUS_WACHT_OP_BETALING,
+                                                        BESTELLING_STATUS_BETALING_ACTIEF,
                                                         BESTELLING_STATUS_MISLUKT))
                                     .order_by('-bestel_nr'))            # nieuwste eerst
                     context['zoekt_status'] = True

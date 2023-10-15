@@ -74,7 +74,7 @@
                     <p>Wil je <b>{{ obj.lid_nr_naam }}</b> toevoegen aan het RK van Rayon {{ obj.rayon_nr }}?</p>
                     <p>Sporter zal worden opgenomen in klasse <b>{{ obj.nieuwe_klasse.beschrijving }}</b> ({{ obj.nieuwe_klasse.min_ag }})</p>
 
-                    <form action="{{ obj.url }}" method="post" onsubmit="submit_knop{{ obj.pk }}.disabled=true; return true;">
+                    <form action="{{ obj.url }}" method="post" onsubmit="document.getElementById('submit_knop{{ obj.pk }}').disabled=true; return true;">
                         {% csrf_token %}
                         <input type="hidden" name="toevoegen" value="1">
 

@@ -37,7 +37,7 @@
 
             <!-- dialoog venster -->
             <div style="margin:0px 30px 30px 30px">
-                <form action="{{ opslaan_url }}" method="post" onsubmit="submit_knop.disabled=true; return true;">
+                <form action="{{ opslaan_url }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
                     {% csrf_token %}
 
                     {% if sporter_pk %}

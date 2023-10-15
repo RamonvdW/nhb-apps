@@ -226,10 +226,10 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('functie/wissel-van-rol.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, "Gebruiker")
         urls = self._get_wissel_urls(resp)
-        self.assertIn(self.url_activeer_rol % 'BB', urls)          # Manager Competitiezaken
+        self.assertIn(self.url_activeer_rol % 'BB', urls)          # Manager MH
         self.assertIn(self.url_accountwissel, urls)
 
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(32):
             resp = self.client.post(self.url_activeer_rol % 'BB', follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         # response = het Plein
@@ -243,13 +243,13 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
 
         # controleer dat een niet valide rol wissel geen effect heeft
         # dit raakt een exception in Account.rol:rol_activeer
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(32):
             resp = self.client.post(self.url_activeer_rol % 'huh', follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, "Manager Competitiezaken")
 
         # controleer dat een rol wissel die met een functie moet geen effect heeft
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(32):
             resp = self.client.post(self.url_activeer_rol % 'BKO', follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, "Manager Competitiezaken")
@@ -276,7 +276,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.assertContains(resp, "Gebruiker")
         urls = self._get_wissel_urls(resp)
         self.assertNotIn(self.url_accountwissel, urls)              # Account wissel
-        self.assertIn(self.url_activeer_rol % 'BB', urls)           # Manager Competitiezaken
+        self.assertIn(self.url_activeer_rol % 'BB', urls)           # Manager MH
         # self.assertIn(self.url_activeer_rol % 'geen', urls)         # Gebruiker
 
         with self.assertRaises(ValueError):

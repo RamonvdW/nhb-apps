@@ -165,7 +165,7 @@
                 <h5>Verwijder aanmelding?</h5>
                 <p>Wil je de aanmelding van <b>{{ sporter.volledige_naam }}</b><br>voor de wedstrijd <b>{{ inschrijving.wedstrijd.titel }}</b><br>verwijderen uit het systeem?</p>
 
-                <form action="{{ inschrijving.url_afmelden }}" method="post" onsubmit="submit_knop.disabled=true; return true;">
+                <form action="{{ inschrijving.url_afmelden }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
                     {% csrf_token %}
                     <input type="hidden" name="verwijder" value="1">
 

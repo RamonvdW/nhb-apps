@@ -297,6 +297,49 @@ class MyTestAsserts(TestCase):
             pos = html.find('<script ')
         # while
 
+    def assert_event_handlers_clean(self, html, template_name):
+        """ check all javascript embedded in event handlers
+            example: onsubmit="document.getElementById('submit_knop').disabled=true; return true;"
+        """
+
+        if not settings.TEST_VALIDATE_JAVASCRIPT:  # pragma: no cover
+            return
+
+        # search for all possible event handlers, not just a few known ones
+        pos = html.find('on')
+        while pos >= 0:
+            if pos > 0 and html[pos-1].isalnum():
+                # "on" is part of a word, so skip
+                html = html[pos:]
+            else:
+                html = html[pos:]
+                pos = html.find('="')
+                if 3 <= pos <= 14:      # oncontextmenu="
+                    event_name = html[:pos]
+                    if ' ' not in event_name and '<' not in event_name and ':' not in event_name:
+                        # print('event: %s' % repr(event_name))
+
+                        # extract the javascript
+                        html = html[pos+2:]
+                        pos = html.find('"')
+                        script = html[:pos]
+                        html = html[pos:]
+                        # print('script: %s' % repr(script))
+
+                        # wrap the snippet in a reasonable script
+                        script = "<script>function %s() { %s }</script>" % (event_name, script)
+
+                        issues = validate_javascript(script)
+                        if len(issues):
+                            msg = 'Invalid script (template: %s):\n' % template_name
+                            for issue in issues:
+                                msg += "    %s\n" % issue
+                            # for
+                            self.fail(msg=msg)
+
+            pos = html.find('on', 1)
+        # while
+
     _BLOCK_LEVEL_ELEMENTS = (
         'address', 'article', 'aside', 'canvas', 'figcaption', 'figure', 'footer',
         'blockquote', 'dd', 'div', 'dl', 'dt', 'fieldset',
@@ -456,7 +499,7 @@ class MyTestAsserts(TestCase):
     def html_assert_dubbelklik_bescherming(self, html, dtl):
         """ controleer het gebruik onsubmit in forms
 
-            <form action="{{ url_opslaan }}" method="post" onsubmit="submit_knop.disabled=true; return true;">
+            <form action="{{ url_opslaan }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
 
             <button class="btn-sv-rood" id="submit_knop" type="submit">
         """
@@ -469,24 +512,23 @@ class MyTestAsserts(TestCase):
             form = html[:form_end]
 
             # varianten:
-            #  onsubmit="submit_knop.disabled=true; return true;"
-            #  onsubmit="submit_knop1.disabled=true; return true;"
+            #  onsubmit="document.getElementById('submit_knop').disabled=true; return true;"
+            #  onsubmit="document.getElementById('submit_knop1').disabled=true; return true;"
             #  onsubmit="submit_knop1.disabled=true; submit_knop2.disabled=true; return true;"
-            ok = True
-            pos1 = form.find(' onsubmit="submit_knop')
+            #  onsubmit="document.getElementById('submit_knop').disabled=true; return true;"
+            pos1 = form.find(' onsubmit="')
             if pos1 < 0:                                # pragma: no cover
-                ok = False
                 submit = 'form heeft geen onsubmit=".."'
             else:
                 pos2 = form.find('"', pos1+11)
                 submit = form[pos1+11:pos2]
-                if '.disabled=true;' not in submit:     # pragma: no cover
-                    ok = False
-                if 'return true;' not in submit:        # pragma: no cover
-                    ok = False
-            if not ok:                                  # pragma: no cover
-                self.fail('Form without onsubmit for dubbelklik bescherming in template %s\n%s' % (repr(dtl),
-                                                                                                   repr(submit)))
+                if '.disabled=true;' not in submit or 'return true;' not in submit:            # pragma: no cover
+                    self.fail('Form onsubmit zonder met dubbelklik bescherming in template %s\n%s' % (repr(dtl),
+                                                                                                      repr(submit)))
+
+                if 'document.getElementById(' not in submit:
+                    self.fail('Form onsubmit met slechte dubbelklik bescherming in template %s\n%s' % (repr(dtl),
+                                                                                                       repr(submit)))
 
             pos_button = form.find('<button')
             button_count = 0
@@ -606,6 +648,7 @@ class MyTestAsserts(TestCase):
 
         self.assert_link_quality(html, dtl)
         self.assert_scripts_clean(html, dtl)
+        self.assert_event_handlers_clean(html, dtl)
         self.html_assert_no_div_in_p(html, dtl)
         self.html_assert_no_col_white(html, dtl)
         self.html_assert_button_vs_hyperlink(html, dtl)

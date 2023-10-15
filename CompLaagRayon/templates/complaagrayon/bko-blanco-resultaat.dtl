@@ -75,7 +75,7 @@
                     <p>Wil je <b>{{ obj.lid_nr_naam }}</b> een blanco RK resultaat geven?</p>
                     <p>Sporter kan daarmee doorstromen naar de Bondskampioenschappen</p>
 
-                    <form action="{{ obj.url }}" method="post" onsubmit="submit_knop.disabled=true; return true;">
+                    <form action="{{ obj.url }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
                         {% csrf_token %}
                         <input type="hidden" name="toevoegen" value="1">
 

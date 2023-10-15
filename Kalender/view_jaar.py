@@ -156,7 +156,7 @@ class KalenderJaarView(TemplateView):
             wed.inschrijven_voor = wed.datum_begin - timedelta(days=wed.inschrijven_tot)
             wed.inschrijven_dagen = (wed.inschrijven_voor - now_date).days
             wed.inschrijven_let_op = (wed.inschrijven_dagen <= 7)
-            wed.kan_inschrijven = (now_date < wed.inschrijven_voor)
+            wed.is_voor_sluitingsdatum = (now_date < wed.inschrijven_voor)
         # for
 
         context['wedstrijden'] = wedstrijden

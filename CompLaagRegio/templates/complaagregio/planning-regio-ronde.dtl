@@ -94,7 +94,7 @@
                     <div class="white left-align z-depth-3">
                         <div class="form-padding">
 
-                            <form action="{{ ronde_opslaan_url }}" method="post" onsubmit="submit_knop1.disabled=true; return true;">
+                            <form action="{{ ronde_opslaan_url }}" method="post" onsubmit="document.getElementById('submit_knop1').disabled=true; return true;">
                                 {% csrf_token %}
 
                                 {% if readonly %}
@@ -212,7 +212,7 @@
                 {% if url_nieuwe_wedstrijd %}
                     <tr>
                         <td colspan="{% if heeft_wkl %}5{% else %}3{% endif %}" class="center">
-                            <form action="{{ url_nieuwe_wedstrijd }}" method="post" onsubmit="submit_knop2.disabled=true; return true;">
+                            <form action="{{ url_nieuwe_wedstrijd }}" method="post" onsubmit="document.getElementById('submit_knop2').disabled=true; return true;">
                                 {% csrf_token %}
                                 <button class="btn-sv-rood vertrek_knop" id="submit_knop2" type="submit">
                                     <i class="notranslate material-icons-round">add</i></button>
@@ -259,7 +259,7 @@
                     <div class="white left-align z-depth-3">
                         <div style="padding:30px">
 
-                            <form action="{{ ronde_opslaan_url }}" method="post" onsubmit="submit_knop1.disabled=true; return true;">
+                            <form action="{{ ronde_opslaan_url }}" method="post" onsubmit="document.getElementById('submit_knop1').disabled=true; return true;">
                                 {% csrf_token %}
 
                                 {% if readonly %}
@@ -320,7 +320,7 @@
                     <h5>Verwijder blok?</h5>
                     <p>Wil je dit blok echt verwijderen uit de planning?</p>
 
-                    <form action="{{ url_verwijderen }}" method="post" onsubmit="submit_knop4.disabled=true; return true;">
+                    <form action="{{ url_verwijderen }}" method="post" onsubmit="document.getElementById('submit_knop4').disabled=true; return true;">
                         {% csrf_token %}
                         <input type="hidden" name="verwijder_ronde" value="1">
 

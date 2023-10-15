@@ -129,7 +129,7 @@ class VhpgAcceptatieView(TemplateView):
 
 class VhpgOverzichtView(UserPassesTestMixin, ListView):
 
-    """ Met deze view kan de Manager Competitiezaken een overzicht krijgen van alle beheerders
+    """ Met deze view kan de BB een overzicht krijgen van alle beheerders
         die de VHPG geaccepteerd hebben en wanneer dit voor het laatste was.
     """
 

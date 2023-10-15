@@ -8,7 +8,7 @@ from django.test import TestCase
 from django.conf import settings
 from django.utils import timezone
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse
-from Bestel.definities import BESTELLING_STATUS_WACHT_OP_BETALING, BESTELLING_STATUS_AFGEROND
+from Bestel.definities import BESTELLING_STATUS_BETALING_ACTIEF, BESTELLING_STATUS_AFGEROND
 from Bestel.models import BestelProduct, Bestelling, BestelMutatie
 from Betaal.models import BetaalInstellingenVereniging
 from Functie.models import Functie
@@ -148,7 +148,7 @@ class TestBestelOverboeking(E2EHelpers, TestCase):
                         verkoper_bic='VER2BIC',
                         verkoper_heeft_mollie=False,
                         totaal_euro='10.50',
-                        status=BESTELLING_STATUS_WACHT_OP_BETALING,
+                        status=BESTELLING_STATUS_BETALING_ACTIEF,
                         log='Een beginnetje\n')
         bestelling.save()
         bestelling.producten.add(product)
@@ -200,7 +200,7 @@ class TestBestelOverboeking(E2EHelpers, TestCase):
                         verkoper_bic='VER2BIC',
                         verkoper_heeft_mollie=False,
                         totaal_euro='1.23',
-                        status=BESTELLING_STATUS_WACHT_OP_BETALING,
+                        status=BESTELLING_STATUS_BETALING_ACTIEF,
                         log='Een beginnetje\n')
         bestelling2.save()
         bestelling2.producten.add(product2)
@@ -272,7 +272,7 @@ class TestBestelOverboeking(E2EHelpers, TestCase):
         self.assertContains(resp, 'Verwacht bedrag:')
 
         # juiste informatie maar geen bevestiging van de gebruiker
-        self.assertEqual(self.bestelling.status, BESTELLING_STATUS_WACHT_OP_BETALING)
+        self.assertEqual(self.bestelling.status, BESTELLING_STATUS_BETALING_ACTIEF)
         self.assertEqual(0, self.bestelling.transacties.count())
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_overboeking_ontvangen,
@@ -282,7 +282,7 @@ class TestBestelOverboeking(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('bestel/overboeking-ontvangen.dtl', 'plein/site_layout.dtl'))
 
         # juiste informatie en bevestiging van de gebruiker
-        self.assertEqual(self.bestelling.status, BESTELLING_STATUS_WACHT_OP_BETALING)
+        self.assertEqual(self.bestelling.status, BESTELLING_STATUS_BETALING_ACTIEF)
         self.assertEqual(0, self.bestelling.transacties.count())
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_overboeking_ontvangen,
@@ -334,7 +334,7 @@ class TestBestelOverboeking(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('bestel/overboeking-ontvangen.dtl', 'plein/site_layout.dtl'))
 
         # juiste informatie en bevestiging van de gebruiker
-        self.assertEqual(self.bestelling2.status, BESTELLING_STATUS_WACHT_OP_BETALING)
+        self.assertEqual(self.bestelling2.status, BESTELLING_STATUS_BETALING_ACTIEF)
         self.assertEqual(0, self.bestelling2.transacties.count())
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_overboeking_ontvangen,

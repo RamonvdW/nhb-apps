@@ -147,7 +147,7 @@
             <div class="white left-align z-depth-3">
                 <div class="form-padding">
 
-                    <form action="{{ url_opslaan }}" method="post" onsubmit="submit_knop1.disabled=true; return true;">
+                    <form action="{{ url_opslaan }}" method="post" onsubmit="document.getElementById('submit_knop1').disabled=true; return true;">
                         {% csrf_token %}
 
                         <table class="white">
@@ -302,7 +302,7 @@
                 <h5>Verwijder wedstrijd?</h5>
                 <p>Wil je deze wedstrijd echt verwijderen uit de planning?</p>
 
-                <form action="{{ url_verwijderen }}" method="post" onsubmit="submit_knop2.disabled=true; return true;">
+                <form action="{{ url_verwijderen }}" method="post" onsubmit="document.getElementById('submit_knop2').disabled=true; return true;">
                     {% csrf_token %}
                     <input type="hidden" name="verwijder_ronde" value="1">
 

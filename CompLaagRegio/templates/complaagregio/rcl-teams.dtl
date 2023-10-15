@@ -155,7 +155,7 @@
                                 <h5>Verwijder team?</h5>
                                 <p>Wil je team <b>{{ team.team_naam }}</b> van vereniging<br><b>{{ team.vereniging }}</b><br>verwijderen uit het systeem?</p>
 
-                                <form action="{{ team.url_verwijder }}" method="post" onsubmit="submit_knop.disabled=true; return true;">
+                                <form action="{{ team.url_verwijder }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
                                     {% csrf_token %}
                                     <input type="hidden" name="verwijderen" value="1">
 

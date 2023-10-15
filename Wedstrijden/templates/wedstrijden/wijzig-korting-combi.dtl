@@ -50,7 +50,7 @@
             <div class="white left-align z-depth-3">
                 <div class="form-padding" style="padding-top:0px">
 
-                    <form action="{{ url_opslaan }}" method="post" onsubmit="submit_knop1.disabled=true; return true;">
+                    <form action="{{ url_opslaan }}" method="post" onsubmit="document.getElementById('submit_knop1').disabled=true; return true;">
                         {% csrf_token %}
 
                         <table class="white">
@@ -112,7 +112,7 @@
                 <h5>Korting verwijderen?</h5>
                 <p>Wil je deze korting echt verwijderen?</p>
 
-                <form action="{{ url_verwijder }}" method="post" onsubmit="submit_knop2.disabled=true; return true;">
+                <form action="{{ url_verwijder }}" method="post" onsubmit="document.getElementById('submit_knop2').disabled=true; return true;">
                     {% csrf_token %}
                     <input type="hidden" name="verwijder" value="1">
 

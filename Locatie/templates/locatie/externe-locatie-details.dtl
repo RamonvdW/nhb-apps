@@ -96,7 +96,7 @@
             <div style="margin:30px 30px 30px 30px" class="left-align">
 
                 {% if url_opslaan %}
-                    <form action="{{ url_opslaan }}" method="post" onsubmit="submit_knop1.disabled=true; return true;">
+                    <form action="{{ url_opslaan }}" method="post" onsubmit="document.getElementById('submit_knop1').disabled=true; return true;">
                         {% csrf_token %}
                 {% endif %}
 
@@ -309,7 +309,7 @@
                 <h5>Verwijder locatie?</h5>
                 <p>Wil je deze locatie van vereniging<br><b>{{ ver }}</b><br>verwijderen uit het systeem?</p>
 
-                <form action="{{ url_verwijder }}" method="post" onsubmit="submit_knop2.disabled=true; return true;">
+                <form action="{{ url_verwijder }}" method="post" onsubmit="document.getElementById('submit_knop2').disabled=true; return true;">
                     {% csrf_token %}
                     <input type="hidden" name="verwijder" value="1">
 

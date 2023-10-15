@@ -59,11 +59,16 @@ class HistKampTeamAdmin(admin.ModelAdmin):
         self.obj = None
 
     def get_form(self, request, obj=None, **kwargs):                    # pragma: no cover
+        """ initialisatie van het admin formulier
+            hier "vangen" we het database object waar we mee bezig gaan
+        """
         if obj:
             self.obj = obj
         return super().get_form(request, obj, **kwargs)
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):    # pragma: no cover
+        """ bepaal de relevante keuzemogelijkheden voor specifieke velden
+        """
         if db_field.name in ('lid_1', 'lid_2', 'lid_3', 'lid_4'):
             if self.obj:
                 hist_seizoen = self.obj.seizoen
