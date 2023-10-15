@@ -260,7 +260,7 @@ class WedstrijdDetailsView(UserPassesTestMixin, TemplateView):
                                         id_li='id_hsr_niet_%s' % dag.gekozen_hoofd_sr.pk,
                                         scheids=dag.gekozen_hoofd_sr,
                                         is_selected=True,
-                                        niet_beschikbaar=True)
+                                        waarschuw_niet_meer_beschikbaar=True)
                     beschikbaar_hsr.insert(1, niet_meer_hsr)
 
                 gekozen_srs = [gekozen_sr.pk
@@ -287,6 +287,10 @@ class WedstrijdDetailsView(UserPassesTestMixin, TemplateView):
                     else:
                         beschikbaar.is_selected = False
 
+                    beschikbaar.waarschuw_niet_meer_beschikbaar = beschikbaar.is_selected and beschikbaar.opgaaf != BESCHIKBAAR_JA
+                    if beschikbaar.waarschuw_niet_meer_beschikbaar:
+                        beschikbaar.is_onzeker = False  # voorkom disable van checkbox
+
                     beschikbaar_sr.append(beschikbaar)
                 # for
 
@@ -301,7 +305,7 @@ class WedstrijdDetailsView(UserPassesTestMixin, TemplateView):
                                         sel='sr_%s_niet_%s' % (dag.dag_offset, gekozen_sr.pk),
                                         scheids=gekozen_sr,
                                         is_selected=True,
-                                        niet_beschikbaar=True)
+                                        waarschuw_niet_meer_beschikbaar=True)
                         beschikbaar_sr.insert(0, niet_meer_sr)
                 # for
 
