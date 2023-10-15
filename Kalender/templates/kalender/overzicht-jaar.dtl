@@ -191,7 +191,7 @@
                         <td class="hide-on-small-only">
                             {% if not wed.is_ter_info %}
                                 <span>{{ wed.inschrijven_voor }}</span>
-                                {% if wed.kan_inschrijven %}
+                                {% if wed.is_voor_sluitingsdatum %}
                                     {% if wed.inschrijven_let_op %}
                                         <br><span class="sv-rood-text">(nog maar {{ wed.inschrijven_dagen }} dagen)</span>
                                     {% endif %}
@@ -202,7 +202,7 @@
                         </td>
                         <td class="center">
                             {% if wed.url_details %}
-                                <a class="{% if wed.kan_inschrijven %}btn-sv-rood{% else %}btn-sv-blauw{% endif %}" href="{{ wed.url_details }}">
+                                <a class="{% if wed.is_voor_sluitingsdatum %}btn-sv-rood{% else %}btn-sv-blauw{% endif %}" href="{{ wed.url_details }}">
                                     <!--<i class="notranslate material-icons-round">play_arrow</i>-->Details</a>
                             {% endif %}
                         </td>

@@ -113,32 +113,37 @@ class WedstrijdDetailsView(TemplateView):
         # for
         context['toon_sessies'] = heeft_sessies
 
-        # om aan te melden is een account nodig
-        # extern beheerder wedstrijden kan je niet voor aanmelden
-        # een wedstrijd zonder sessie is een placeholder op de agenda
-        context['kan_aanmelden'] = self.request.user.is_authenticated and not wedstrijd.extern_beheerd
-
         # inschrijven moet voor de sluitingsdatum
-        context['kan_inschrijven'] = now_date < wedstrijd.inschrijven_voor
+        context['is_voor_sluitingsdatum'] = now_date < wedstrijd.inschrijven_voor
 
-        if wedstrijd.is_ter_info:
-            context['toon_inschrijven'] = False
-        else:
-            context['toon_inschrijven'] = (context['kan_aanmelden'] and
-                                           context['kan_inschrijven'] and
-                                           context['toon_sessies']) or (wedstrijd.extern_beheerd and
-                                                                        wedstrijd.contact_website)
+        context['kan_aanmelden'] = False
+        context['hint_inloggen'] = False
+
+        if not wedstrijd.extern_beheerd:
+            # om aan te melden is een account nodig
+            # extern beheerder wedstrijden kan je niet voor aanmelden
+            # een wedstrijd zonder sessie is een placeholder op de agenda
+            context['kan_aanmelden'] = self.request.user.is_authenticated
+            context['hint_inloggen'] = not self.request.user.is_authenticated
 
         if context['kan_aanmelden']:
             context['menu_toon_mandje'] = True
 
-            if context['kan_inschrijven']:
+            if context['is_voor_sluitingsdatum']:
                 context['url_inschrijven_sporter'] = reverse('Wedstrijden:inschrijven-sporter',
                                                              kwargs={'wedstrijd_pk': wedstrijd.pk})
                 context['url_inschrijven_groepje'] = reverse('Wedstrijden:inschrijven-groepje',
                                                              kwargs={'wedstrijd_pk': wedstrijd.pk})
                 context['url_inschrijven_familie'] = reverse('Wedstrijden:inschrijven-familie',
                                                              kwargs={'wedstrijd_pk': wedstrijd.pk})
+
+        # inschrijf sectie (kaartjes) tonen voor deze wedstrijd?
+        context['toon_inschrijven'] = False
+        if not wedstrijd.is_ter_info:
+            if wedstrijd.extern_beheerd and wedstrijd.contact_website:
+                context['toon_inschrijven'] = context['is_voor_sluitingsdatum']
+            elif heeft_sessies:
+                context['toon_inschrijven'] = context['is_voor_sluitingsdatum']
 
         url_terug = reverse('Kalender:maand',
                             kwargs={'jaar': wedstrijd.datum_begin.year,
@@ -163,9 +168,9 @@ def inschrijving_open_of_404(wedstrijd):
 
     now_date = timezone.now().date()
     wedstrijd.inschrijven_voor = wedstrijd.datum_begin - timedelta(days=wedstrijd.inschrijven_tot)
-    kan_inschrijven = now_date < wedstrijd.inschrijven_voor
+    is_voor_sluitingsdatum = now_date < wedstrijd.inschrijven_voor
 
-    if not kan_inschrijven:
+    if not is_voor_sluitingsdatum:
         raise Http404('Inschrijving is gesloten')
 
 
