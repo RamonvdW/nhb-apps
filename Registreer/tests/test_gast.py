@@ -327,7 +327,8 @@ class TestRegistreerGast(E2EHelpers, TestCase):
 
         # herhaal verzoek met te veel verzoeken in de afgelopen minuut
         tracker = GastRegistratieRateTracker.objects.first()
-        tracker.teller_minuut = 50
+        tracker.teller_minuut = 3 + 1
+        tracker.teller_uur = 3
         tracker.save(update_fields=['teller_minuut'])
 
         with self.assert_max_queries(20):
@@ -348,7 +349,7 @@ class TestRegistreerGast(E2EHelpers, TestCase):
         # herhaal met veel verzoeker in het afgelopen uur
         tracker = GastRegistratieRateTracker.objects.first()
         tracker.teller_minuut = 1
-        tracker.teller_uur = 100
+        tracker.teller_uur = 10 + 1
         tracker.save(update_fields=['teller_minuut', 'teller_uur'])
 
         with self.assert_max_queries(20):
