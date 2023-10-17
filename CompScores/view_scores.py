@@ -153,7 +153,7 @@ def mag_deelcomp_wedstrijd_wijzigen(wedstrijd, functie_nu, deelcomp):
     return False
 
 
-def bepaal_match_en_deelcomp_of_404(match_pk):
+def bepaal_match_en_deelcomp_of_404(match_pk, mag_database_wijzigen=False):
     try:
         match_pk = int(match_pk[:6])        # afkappen voor de veiligheid
         match = (CompetitieMatch
@@ -180,9 +180,16 @@ def bepaal_match_en_deelcomp_of_404(match_pk):
         else:
             uitslag.max_score = 250
             uitslag.afstand = 25
-        uitslag.save()            # TODO: mag niet tijdens GET
-        match.uitslag = uitslag
-        match.save()              # TODO: mag niet tijdens GET
+
+        if mag_database_wijzigen:
+            uitslag.save()
+            match.uitslag = uitslag
+            match.save(update_fields=['uitslag'])
+    else:
+        uitslag = match.uitslag
+
+    match.max_score = uitslag.max_score
+    match.afstand = uitslag.afstand
 
     return match, deelcomp, ronde
 
@@ -270,26 +277,27 @@ class WedstrijdUitslagInvoerenView(UserPassesTestMixin, TemplateView):
             raise PermissionDenied('Niet de beheerder')
 
         context['is_controle'] = self.is_controle
-        context['is_akkoord'] = match.uitslag.is_bevroren
+        context['is_akkoord'] = (match.uitslag and match.uitslag.is_bevroren)
 
         if self.is_controle:
             context['url_geef_akkoord'] = reverse('CompScores:uitslag-accorderen',
                                                   kwargs={'match_pk': match.pk})
 
-        scores = (match
-                  .uitslag
-                  .scores
-                  .filter(type=SCORE_TYPE_SCORE)
-                  .exclude(waarde=SCORE_WAARDE_VERWIJDERD)
-                  .select_related('sporterboog',
-                                  'sporterboog__boogtype',
-                                  'sporterboog__sporter',
-                                  'sporterboog__sporter__bij_vereniging')
-                  .order_by('sporterboog__sporter__lid_nr',
-                            'sporterboog__pk'))             # belangrijk i.v.m. zelfde volgorde by dynamisch toevoegen
-        context['scores'] = scores
+        if match.uitslag:
+            scores = (match
+                      .uitslag
+                      .scores
+                      .filter(type=SCORE_TYPE_SCORE)
+                      .exclude(waarde=SCORE_WAARDE_VERWIJDERD)
+                      .select_related('sporterboog',
+                                      'sporterboog__boogtype',
+                                      'sporterboog__sporter',
+                                      'sporterboog__sporter__bij_vereniging')
+                      .order_by('sporterboog__sporter__lid_nr',
+                                'sporterboog__pk'))        # belangrijk i.v.m. zelfde volgorde by dynamisch toevoegen
+            context['scores'] = scores
 
-        self._team_naam_toevoegen(scores, deelcomp)
+            self._team_naam_toevoegen(scores, deelcomp)
 
         context['url_check_bondsnummer'] = reverse('CompScores:dynamic-check-bondsnummer')
         context['url_opslaan'] = reverse('CompScores:dynamic-scores-opslaan')
@@ -344,7 +352,7 @@ class WedstrijdUitslagControlerenView(WedstrijdUitslagInvoerenView):
         rol_nu, functie_nu = rol_get_huidige_functie(self.request)
 
         match_pk = kwargs['match_pk'][:6]     # afkappen voor de veiligheid
-        match, deelcomp, _ = bepaal_match_en_deelcomp_of_404(match_pk)
+        match, deelcomp, _ = bepaal_match_en_deelcomp_of_404(match_pk, mag_database_wijzigen=True)
 
         if not mag_deelcomp_wedstrijd_wijzigen(match, functie_nu, deelcomp):
             raise PermissionDenied('Niet de beheerder')
@@ -538,20 +546,6 @@ class DynamicScoresOpslaanView(UserPassesTestMixin, View):
         return rol_nu in (Rollen.ROL_RCL, Rollen.ROL_HWL, Rollen.ROL_WL)
 
     @staticmethod
-    def laad_match_of_404(data):
-        try:
-            match_pk = int(str(data['wedstrijd_pk'])[:6])   # afkappen voor de veiligheid
-            match = (CompetitieMatch
-                     .objects
-                     .select_related('uitslag')
-                     .prefetch_related('uitslag__scores')
-                     .get(pk=match_pk))
-        except (KeyError, ValueError, CompetitieMatch.DoesNotExist):
-            raise Http404('Wedstrijd niet gevonden')
-
-        return match
-
-    @staticmethod
     def nieuwe_score(bulk, uitslag, sporterboog_pk, waarde, when, door_account):
         # print('nieuwe score: %s = %s' % (sporterboog_pk, waarde))
         try:
@@ -664,17 +658,13 @@ class DynamicScoresOpslaanView(UserPassesTestMixin, View):
             raise Http404('Geen valide verzoek')
 
         # print('data:', repr(data))
+        try:
+            match_pk = str(data['wedstrijd_pk'])[:6]  # afkappen voor de veiligheid
+        except KeyError:
+            raise Http404('Wedstrijd niet gevonden')
 
-        match = self.laad_match_of_404(data)
+        match, deelcomp, ronde = bepaal_match_en_deelcomp_of_404(match_pk, mag_database_wijzigen=True)
         uitslag = match.uitslag
-        if not uitslag:
-            raise Http404('Geen wedstrijduitslag')
-
-        # controleer toestemming om scores op te slaan voor deze wedstrijd
-        rondes = match.regiocompetitieronde_set.all()
-        if len(rondes) == 0:
-            raise Http404('Geen competitie wedstrijd')
-        ronde = rondes[0]
 
         rol_nu, functie_nu = rol_get_huidige_functie(request)
         if not mag_deelcomp_wedstrijd_wijzigen(match, functie_nu, ronde.regiocompetitie):
@@ -713,7 +703,7 @@ class WedstrijdUitslagBekijkenView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         match_pk = kwargs['match_pk'][:6]     # afkappen voor de veiligheid
-        match, deelcomp, ronde = bepaal_match_en_deelcomp_of_404(match_pk)
+        match, deelcomp, ronde = bepaal_match_en_deelcomp_of_404(match_pk, mag_database_wijzigen=True)
 
         scores = (match
                   .uitslag
@@ -749,7 +739,8 @@ class WedstrijdUitslagBekijkenView(UserPassesTestMixin, TemplateView):
         # for
 
         # vereniging kan 2 leden met dezelfde naam en boog hebben, daarom lid_nr
-        te_sorteren = [(score.vereniging_str, score.schutter_str, score.boog_str, score.lid_nr, score) for score in scores]
+        te_sorteren = [(score.vereniging_str, score.schutter_str, score.boog_str, score.lid_nr, score)
+                       for score in scores]
         te_sorteren.sort()
         scores = [score for _, _, _, _, score in te_sorteren]
 
@@ -1069,15 +1060,18 @@ class ScoresRegioTeamsView(UserPassesTestMixin, TemplateView):
         context['deelcomp'] = deelcomp
 
         if 1 <= deelcomp.huidige_team_ronde <= 7:
-            context['alle_regels'], context['aantal_keuzes_nodig'], context['anchor'] = self._bepaal_teams_en_scores(deelcomp)
+            tup = self._bepaal_teams_en_scores(deelcomp)
+            context['alle_regels'], context['aantal_keuzes_nodig'], context['anchor'] = tup
             context['url_opslaan'] = reverse('CompScores:selecteer-team-scores',
                                              kwargs={'deelcomp_pk': deelcomp.pk})
 
         comp = deelcomp.competitie
         context['kruimels'] = (
             (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
-            (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
-            (reverse('CompLaagRegio:start-volgende-team-ronde', kwargs={'deelcomp_pk': deelcomp.pk}), 'Team Ronde'),
+            (reverse('CompBeheer:overzicht',
+                     kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (reverse('CompLaagRegio:start-volgende-team-ronde',
+                     kwargs={'deelcomp_pk': deelcomp.pk}), 'Team Ronde'),
             (None, 'Team scores')
         )
 

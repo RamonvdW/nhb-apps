@@ -22,6 +22,7 @@ from Vereniging.models import Vereniging
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 import datetime
+import json
 
 
 class TestCompLaagRegioPlanning(E2EHelpers, TestCase):
@@ -39,6 +40,7 @@ class TestCompLaagRegioPlanning(E2EHelpers, TestCase):
     url_wijzig_wedstrijd = '/bondscompetities/regio/planning/wedstrijd/wijzig/%s/'          # match_pk
     url_verwijder_wedstrijd = '/bondscompetities/regio/planning/wedstrijd/verwijder/%s/'    # match_pk
     url_score_invoeren = '/bondscompetities/scores/uitslag-invoeren/%s/'                    # match_pk
+    url_uitslag_opslaan = '/bondscompetities/scores/dynamic/scores-opslaan/'
     url_afsluiten_regio = '/bondscompetities/regio/planning/%s/afsluiten/'                  # deelcomp_pk
     url_klassengrenzen_vaststellen = '/bondscompetities/beheer/%s/klassengrenzen-vaststellen/'  # comp_pk
 
@@ -1281,10 +1283,14 @@ class TestCompLaagRegioPlanning(E2EHelpers, TestCase):
         self.assert_is_redirect_not_plein(resp)  # check for success
         match_pk = CompetitieMatch.objects.latest('pk').pk
 
-        url = self.url_score_invoeren % match_pk
+        # maak de data set
+        json_data = {'wedstrijd_pk': match_pk}
         with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 200)
+            resp = self.client.post(self.url_uitslag_opslaan,
+                                    json.dumps(json_data),
+                                    content_type='application/json')
+        json_data = self.assert200_json(resp)
+        self.assertEqual(json_data['done'], 1)
 
         # hang er een score aan
         wed = CompetitieMatch.objects.get(pk=match_pk)
