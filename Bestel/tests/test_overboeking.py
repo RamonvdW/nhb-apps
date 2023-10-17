@@ -263,8 +263,7 @@ class TestBestelOverboeking(E2EHelpers, TestCase):
 
         # bestelnummer + bedrag
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_overboeking_ontvangen,
-                                    {'kenmerk': '1234', 'bedrag': '1'})
+            resp = self.client.post(self.url_overboeking_ontvangen, {'kenmerk': '1234', 'bedrag': '1', 'snel': '1'})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('bestel/overboeking-ontvangen.dtl', 'plein/site_layout.dtl'))
@@ -290,6 +289,9 @@ class TestBestelOverboeking(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('bestel/overboeking-ontvangen.dtl', 'plein/site_layout.dtl'))
+        # coverage: 2e verzoek voor dezelfde mutatie
+        resp = self.client.post(self.url_overboeking_ontvangen,
+                                {'kenmerk': '1234', 'bedrag': '10,50', 'actie': 'registreer', 'snel': '1'})
 
         self.assertEqual(1, BestelMutatie.objects.count())
         f1, f2 = self.verwerk_bestel_mutaties()

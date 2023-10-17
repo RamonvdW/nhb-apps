@@ -47,10 +47,9 @@ class OverboekingOntvangenView(UserPassesTestMixin, TemplateView):
                            .order_by('aangemaakt'))[:250]:
 
             # handmatige overboekingen zoeken
-            for transactie in bestelling.transacties.all():
-                if transactie.is_handmatig:
-                    transactie.bestelling = bestelling
-                    overboekingen.append(transactie)
+            for transactie in bestelling.transacties.filter(is_handmatig=True):
+                transactie.bestelling = bestelling
+                overboekingen.append(transactie)
             # for
 
             if len(overboekingen) >= 100:       # pragma: no cover

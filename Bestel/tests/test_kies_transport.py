@@ -139,6 +139,8 @@ class TestBestelBestelling(E2EHelpers, TestCase):
             with self.assert_max_queries(20):
                 resp = self.client.post(self.url_kies_transport, {'snel': 1, 'keuze': 'ophalen'})
             self.assert_is_redirect(resp, self.url_mandje_toon)
+            # coverage: 2e verzoek voor dezelfde mutatie
+            resp = self.client.post(self.url_kies_transport, {'snel': 1, 'keuze': 'ophalen'})
 
             self.verwerk_bestel_mutaties()
 

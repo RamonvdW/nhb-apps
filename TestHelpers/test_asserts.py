@@ -246,7 +246,7 @@ class MyTestAsserts(TestCase):
                 link = content[:pos+4]
                 content = content[pos+4:]
                 # check the link (skip if plain button with onclick handler)
-                if link.find('href="') >= 0:
+                if link.find('href="') >= 0:                                                # pragma: no branch
                     # filter out website-internal links
                     if link.find('href="/') < 0 and link.find('href="#') < 0:
                         if link.find('href=""') >= 0 or link.find('href="mailto:"') >= 0:   # pragma: no cover
@@ -282,19 +282,62 @@ class MyTestAsserts(TestCase):
                     self.fail(msg=msg)
 
             pos = script.find('console.log')
-            if pos >= 0:        # pragma: no cover
+            if pos >= 0:                    # pragma: no cover
                 self.fail(msg='Detected console.log usage in script from template %s' % template_name)
 
             pos = script.find('/*')
-            if pos >= 0:        # pragma: no cover
+            if pos >= 0:                    # pragma: no cover
                 self.fail(msg='Found block comment in script from template %s' % template_name)
 
             # tel het aantal newlines in het script
-            if script.count('\n') >= 3:
+            if script.count('\n') >= 3:     # pragma: no cover
                 self.fail(msg='Missing semi-colons in script in template %s' % template_name)
 
             html = html[pos+9:]
             pos = html.find('<script ')
+        # while
+
+    def assert_event_handlers_clean(self, html, template_name):
+        """ check all javascript embedded in event handlers
+            example: onsubmit="document.getElementById('submit_knop').disabled=true; return true;"
+        """
+
+        if not settings.TEST_VALIDATE_JAVASCRIPT:  # pragma: no cover
+            return
+
+        # search for all possible event handlers, not just a few known ones
+        pos = html.find('on')
+        while pos >= 0:
+            if pos > 0 and html[pos-1].isalnum():
+                # "on" is part of a word, so skip
+                html = html[pos:]
+            else:
+                html = html[pos:]
+                pos = html.find('="')
+                if 3 <= pos <= 14:      # oncontextmenu="
+                    event_name = html[:pos]
+                    if ' ' not in event_name and '<' not in event_name and ':' not in event_name:
+                        # print('event: %s' % repr(event_name))
+
+                        # extract the javascript
+                        html = html[pos+2:]
+                        pos = html.find('"')
+                        script = html[:pos]
+                        html = html[pos:]
+                        # print('script: %s' % repr(script))
+
+                        # wrap the snippet in a reasonable script
+                        script = "<script>function %s() { %s }</script>" % (event_name, script)
+
+                        issues = validate_javascript(script)
+                        if len(issues):         # pragma: no cover
+                            msg = 'Invalid script (template: %s):\n' % template_name
+                            for issue in issues:
+                                msg += "    %s\n" % issue
+                            # for
+                            self.fail(msg=msg)
+
+            pos = html.find('on', 1)
         # while
 
     _BLOCK_LEVEL_ELEMENTS = (
@@ -479,11 +522,11 @@ class MyTestAsserts(TestCase):
             else:
                 pos2 = form.find('"', pos1+11)
                 submit = form[pos1+11:pos2]
-                if '.disabled=true;' not in submit or 'return true;' not in submit:            # pragma: no cover
+                if '.disabled=true;' not in submit or 'return true;' not in submit:             # pragma: no cover
                     self.fail('Form onsubmit zonder met dubbelklik bescherming in template %s\n%s' % (repr(dtl),
                                                                                                       repr(submit)))
 
-                if 'document.getElementById(' not in submit:
+                if 'document.getElementById(' not in submit:                                    # pragma: no cover
                     self.fail('Form onsubmit met slechte dubbelklik bescherming in template %s\n%s' % (repr(dtl),
                                                                                                        repr(submit)))
 
@@ -554,7 +597,7 @@ class MyTestAsserts(TestCase):
             pos_end = html.find('</a>', pos_a+2)
             link = html[pos_a:pos_end+4]
 
-            if link.find(' href="') < 0:
+            if link.find(' href="') < 0:                                        # pragma: no cover
                 # geen href
                 # print('link: %s' % repr(link))
                 msg = "Link should <button> in %s:\n%s" % (dtl, link)
@@ -567,7 +610,7 @@ class MyTestAsserts(TestCase):
         pos = html.find('<i class=')
         while pos > 0:
             pos2 = html.find('</i>', pos+1)
-            if pos2 > 0:
+            if pos2 > 0:                                                        # pragma: no branch
                 tag_i = html[pos:pos2]
                 if 'material-icons' in tag_i:
                     # class secondary-content is used to dynamically plug an icon from within a script
@@ -575,7 +618,7 @@ class MyTestAsserts(TestCase):
                         pos2 = tag_i.rfind('>')
                         icon_name = tag_i[pos2+1:]
                         # print('icon_name: %s' % repr(icon_name))
-                        if icon_name not in GLYPH_NAMES_PRESENT:
+                        if icon_name not in GLYPH_NAMES_PRESENT:                # pragma: no cover
                             self.fail('Bug in template %s: Material Icon name %s is not in the reduced font!' % (
                                         repr(dtl), repr(icon_name)))
 
@@ -605,6 +648,7 @@ class MyTestAsserts(TestCase):
 
         self.assert_link_quality(html, dtl)
         self.assert_scripts_clean(html, dtl)
+        self.assert_event_handlers_clean(html, dtl)
         self.html_assert_no_div_in_p(html, dtl)
         self.html_assert_no_col_white(html, dtl)
         self.html_assert_button_vs_hyperlink(html, dtl)
@@ -705,7 +749,7 @@ class MyTestAsserts(TestCase):
 
         self.assertTrue(resp.url.startswith, '/account/login/')
 
-    def check_concurrency_risks(self, tracer):         # pragma: no cover
+    def check_concurrency_risks(self, tracer):
         found_delete = False
         found_insert = False
         found_update = False
