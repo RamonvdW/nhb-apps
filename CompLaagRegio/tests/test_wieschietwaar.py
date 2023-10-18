@@ -213,7 +213,7 @@ class TestCompLaagRegioWieSchietWaar(E2EHelpers, TestCase):
 
     def _maak_wedstrijden(self):
         # maak een ronde + plan
-        ronde = maak_regiocompetitie_ronde(self.deelcomp_regio)
+        ronde = maak_regiocompetitie_ronde(self.deelcomp_regio, mag_database_wijzigen=True)
         self.ronde = ronde
 
         de_tijd = datetime.time(hour=20)

@@ -759,21 +759,28 @@ class TestCompLaagRegioPlanning(E2EHelpers, TestCase):
 
         url = self.url_planning_regio % self.deelcomp_regio101_25.pk
 
-        # haal de (lege) planning op. Dit maakt ook meteen de enige ronde aan
-        self.assertEqual(RegiocompetitieRonde.objects.count(), 0)
+        # haal de (lege) planning op
+        self.assertEqual(RegiocompetitieRonde.objects.filter(regiocompetitie=self.deelcomp_regio101_25).count(), 0)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('complaagregio/planning-regio-methode1.dtl', 'plein/site_layout.dtl'))
-        self.assertEqual(RegiocompetitieRonde.objects.count(), 2)        # TODO: als het de enige ronde is, waarom dan van 0 naar 2?
+        self.assertEqual(RegiocompetitieRonde.objects.filter(regiocompetitie=self.deelcomp_regio101_25).count(), 0)
 
-        # probeer een ronde aan te maken
+        # doe een POST om de eerste ronde aan te maken
         with self.assert_max_queries(20):
             resp = self.client.post(url)
-        self.assert404(resp, 'Verkeerde inschrijfmethode')
+        self.assert_is_redirect(resp, url)
+        self.assertEqual(RegiocompetitieRonde.objects.count(), 2)
 
-        # haal de planning op (maakt opnieuw een ronde aan)
+        # probeer nog een ronde aan te maken
+        with self.assert_max_queries(20):
+            resp = self.client.post(url)
+        self.assert_is_redirect(resp, url)
+        self.assertEqual(RegiocompetitieRonde.objects.count(), 2)
+
+        # haal de planning op
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
@@ -865,14 +872,20 @@ class TestCompLaagRegioPlanning(E2EHelpers, TestCase):
 
         url = self.url_planning_regio % self.deelcomp_regio101_18.pk
 
-        # haal de (lege) planning op. Dit maakt ook meteen de enige ronde aan
+        # haal de (lege) planning op
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('complaagregio/planning-regio-methode1.dtl', 'plein/site_layout.dtl'))
 
-        ronde_pk = RegiocompetitieRonde.objects.filter(regiocompetitie=self.deelcomp_regio101_18)[0].pk
+        # doe een POST om de eerste ronde aan te maken
+        self.assertEqual(0, RegiocompetitieRonde.objects.filter(regiocompetitie=self.deelcomp_regio101_18).count())
+        with self.assert_max_queries(20):
+            resp = self.client.post(url)
+        self.assert_is_redirect(resp, url)
+
+        ronde_pk = RegiocompetitieRonde.objects.filter(regiocompetitie=self.deelcomp_regio101_18).first().pk
         url_ronde = self.url_planning_regio_ronde_methode1 % ronde_pk
 
         # maak een wedstrijd aan
@@ -907,11 +920,17 @@ class TestCompLaagRegioPlanning(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_rcl101_25)
         self.e2e_wissel_naar_functie(self.functie_rcl101_25)
 
-        # haal de (lege) planning op. Dit maakt ook meteen de enige ronde aan in de regio en 1 cluster
+        # haal de (lege) planning op.
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
+
+        # doe een POST om de eerste ronde aan te maken
+        with self.assert_max_queries(20):
+            resp = self.client.post(url)
+        self.assert_is_redirect(resp, url)
+        self.assertEqual(RegiocompetitieRonde.objects.count(), 2)
 
         url_ronde = self.url_planning_regio_ronde_methode1 % 999999
         resp = self.client.get(url_ronde)

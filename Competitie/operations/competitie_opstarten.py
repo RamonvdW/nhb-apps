@@ -86,7 +86,7 @@ def bepaal_volgende_week_nummer(deelcomp, cluster):
     return nieuwe_week_nr
 
 
-def maak_regiocompetitie_ronde(deelcomp, cluster=None):
+def maak_regiocompetitie_ronde(deelcomp, cluster=None, mag_database_wijzigen=False):
     """ Maak een nieuwe regiocompetitie ronde object aan
         geef er een uniek week nummer aan.
     """
@@ -99,7 +99,9 @@ def maak_regiocompetitie_ronde(deelcomp, cluster=None):
         ronde.regiocompetitie = deelcomp
         ronde.cluster = cluster
         ronde.week_nr = nieuwe_week_nr
-        ronde.save()
+
+        if mag_database_wijzigen:
+            ronde.save()
     else:
         # maximum aantal rondes is al aangemaakt
         ronde = None

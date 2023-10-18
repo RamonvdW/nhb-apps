@@ -52,7 +52,7 @@ class KampioenschapAdmin(CreateOnlyAdmin):
 
 class RegiocompetitieRondeAdmin(CreateOnlyAdmin):
 
-    list_filter = ('regiocompetitie__is_afgesloten', 'regiocompetitie__regio')
+    list_filter = ('regiocompetitie__competitie', 'regiocompetitie__is_afgesloten', 'regiocompetitie__regio')
 
     list_select_related = ('regiocompetitie', 'regiocompetitie__regio')
 

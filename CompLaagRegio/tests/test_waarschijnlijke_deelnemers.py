@@ -197,7 +197,7 @@ class TestCompLaagRegioWaarschijnlijkeDeelnemers(E2EHelpers, TestCase):
         self.wedstrijden = list()
 
         # maak een ronde + plan
-        ronde = maak_regiocompetitie_ronde(self.deelcomp_regio_18)
+        ronde = maak_regiocompetitie_ronde(self.deelcomp_regio_18, mag_database_wijzigen=True)
         self.ronde = ronde
 
         de_tijd = datetime.time(hour=20)
@@ -600,7 +600,7 @@ class TestCompLaagRegioWaarschijnlijkeDeelnemers(E2EHelpers, TestCase):
         self.ronde.matches.clear()
         self.deelcomp_regio_18 = Regiocompetitie.objects.get(regio=self.regio_111,
                                                              competitie__afstand=25)
-        ronde = maak_regiocompetitie_ronde(self.deelcomp_regio_18)
+        ronde = maak_regiocompetitie_ronde(self.deelcomp_regio_18, mag_database_wijzigen=True)
         ronde.matches.add(self.wedstrijden[0])
 
         url = self.url_waarschijnlijke % self.wedstrijden[0].pk

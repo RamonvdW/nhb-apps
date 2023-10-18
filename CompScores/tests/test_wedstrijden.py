@@ -194,7 +194,7 @@ class TestCompScoresWedstrijden(E2EHelpers, TestCase):
         self.wedstrijden = list()
 
         # maak een ronde + plan
-        ronde = maak_regiocompetitie_ronde(self.deelcomp_regio_18)
+        ronde = maak_regiocompetitie_ronde(self.deelcomp_regio_18, mag_database_wijzigen=True)
         self.ronde = ronde
 
         de_tijd = datetime.time(hour=20)
