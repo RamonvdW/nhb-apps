@@ -20,7 +20,7 @@ et-xmlfile==1.1.0
     # via openpyxl
 google-api-core==2.12.0
     # via google-api-python-client
-google-api-python-client==2.103.0
+google-api-python-client==2.104.0
     # via -r requirements.in
 google-auth==2.23.3
     # via
@@ -46,7 +46,7 @@ oauthlib==3.2.2
     # via requests-oauthlib
 openpyxl==3.1.2
     # via -r requirements.in
-pillow==10.0.1
+pillow==10.1.0
     # via -r requirements.in
 protobuf==4.24.4
     # via
@@ -87,7 +87,7 @@ typing-extensions==4.8.0
     #   qrcode
 uritemplate==4.1.1
     # via google-api-python-client
-urllib3==2.0.6
+urllib3==2.0.7
     # via
     #   mollie-api-python
     #   requests
