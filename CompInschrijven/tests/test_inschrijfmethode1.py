@@ -156,14 +156,14 @@ class TestCompInschrijvenMethode1(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_rcl101_18)
 
         # maak wedstrijden 1 voor inschrijfmethode 1
-        # haal de (lege) planning op. Dit maakt ook meteen de enige ronde aan
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_planning_regio % self.deelcomp.pk)
-        self.assertEqual(resp.status_code, 200)  # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagregio/planning-regio-methode1.dtl', 'plein/site_layout.dtl'))
 
-        ronde_pk = RegiocompetitieRonde.objects.filter(regiocompetitie=self.deelcomp)[0].pk
+        # doe een POST om de eerste ronde aan te maken
+        url = self.url_planning_regio % self.deelcomp.pk
+        with self.assert_max_queries(20):
+            resp = self.client.post(url)
+        self.assert_is_redirect(resp, url)
+
+        ronde_pk = RegiocompetitieRonde.objects.filter(regiocompetitie=self.deelcomp).first().pk
         url_ronde = self.url_planning_regio_ronde_methode1 % ronde_pk
 
         # maak 5 wedstrijden aan
