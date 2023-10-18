@@ -177,7 +177,7 @@
                         {% for obj in alle_18 %}
                             <form style="display:inline" action="{{ obj.url }}" method="post" onsubmit="document.getElementById('submit_knop{{ obj.pk }}').disabled=true; return true;">
                                 {% csrf_token %}
-                                <button class="btn-sv-rood" id="submit_knop{{ obj.pk }}" type="submit">{{ obj.tekst_kort }}</button>
+                                <button class="btn-sv-rood" style="margin:1px" id="submit_knop{{ obj.pk }}" type="submit">{{ obj.tekst_kort }}</button>
                             </form>
                             {% if obj.do_break_selective %}<span class="hide-on-large-and-up"><br></span>{% endif %}
                             {% if obj.do_break %}<br>{% endif %}
@@ -194,7 +194,7 @@
                         {% for obj in alle_25 %}
                             <form style="display:inline" action="{{ obj.url }}" method="post" onsubmit="document.getElementById('submit_knop{{ obj.pk }}').disabled=true; return true;">
                                 {% csrf_token %}
-                                <button class="btn-sv-blauw" id="submit_knop{{ obj.pk }}" type="submit">{{ obj.tekst_kort }}</button>
+                                <button class="btn-sv-blauw" style="margin:1px" id="submit_knop{{ obj.pk }}" type="submit">{{ obj.tekst_kort }}</button>
                             </form>
                             {% if obj.do_break_selective %}<span class="hide-on-large-and-up"><br></span>{% endif %}
                             {% if obj.do_break %}<br>{% endif %}
