@@ -212,7 +212,7 @@ class TestWedstrijdenAanmeldingen(E2EHelpers, TestCase):
                                                                         'boog': self.boog_c.pk})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('wedstrijdinschrijv/inschrijven-toegevoegd-aan-mandje.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijdinschrijven/inschrijven-toegevoegd-aan-mandje.dtl', 'plein/site_layout.dtl'))
         self.assertEqual(2, WedstrijdInschrijving.objects.count())
         self.inschrijving1c = WedstrijdInschrijving.objects.exclude(pk=self.inschrijving1r.pk)[0]
 
@@ -224,7 +224,7 @@ class TestWedstrijdenAanmeldingen(E2EHelpers, TestCase):
                                                                         'boog': self.boog_c.pk})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('wedstrijdinschrijv/inschrijven-toegevoegd-aan-mandje.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijdinschrijven/inschrijven-toegevoegd-aan-mandje.dtl', 'plein/site_layout.dtl'))
         self.assertEqual(3, WedstrijdInschrijving.objects.count())
         self.inschrijving2 = WedstrijdInschrijving.objects.exclude(pk__in=(self.inschrijving1r.pk,
                                                                            self.inschrijving1c.pk))[0]
