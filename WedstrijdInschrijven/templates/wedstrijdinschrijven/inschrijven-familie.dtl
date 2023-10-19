@@ -267,6 +267,6 @@
         
     {% endif %}     <!-- al_ingeschreven -->
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="wedstrijden-inschrijven-familie" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="wedstrijdinschrijven-familie" %}
 
 {% endblock %}

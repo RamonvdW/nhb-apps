@@ -284,14 +284,13 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
         functie_rcl = Functie.objects.get(rol='RCL', comp_type='18', regio=self.deelcomp_regio.regio)
         self.e2e_wissel_naar_functie(functie_rcl)
 
+        # doe een POST om de eerste ronde aan te maken
         url = self.url_planning_regio % self.deelcomp_regio.pk
-
-        # haal de (lege) planning op. Dit maakt ook meteen de enige ronde aan
         with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 200)  # 200 = OK
+            resp = self.client.post(url)
+        self.assert_is_redirect(resp, url)
 
-        ronde_pk = RegiocompetitieRonde.objects.filter(regiocompetitie=self.deelcomp_regio)[0].pk
+        ronde_pk = RegiocompetitieRonde.objects.filter(regiocompetitie=self.deelcomp_regio).first().pk
 
         # haal de ronde planning op
         url_ronde = self.url_planning_regio_ronde_methode1 % ronde_pk

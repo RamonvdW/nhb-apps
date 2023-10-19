@@ -6,7 +6,7 @@
 
 from django.urls import path
 from Wedstrijden import (view_vereniging, view_manager, view_wijzig_wedstrijd, view_wijzig_sessies,
-                         view_inschrijven, view_kwalificatie_scores, view_aanmeldingen, view_korting)
+                         view_kwalificatie_scores, view_aanmeldingen, view_korting, view_wedstrijd_details)
 
 app_name = 'Wedstrijden'
 
@@ -14,52 +14,10 @@ app_name = 'Wedstrijden'
 
 urlpatterns = [
 
-    # inschrijven
+    # wedstrijd details
     path('<wedstrijd_pk>/details/',
-         view_inschrijven.WedstrijdDetailsView.as_view(),
+         view_wedstrijd_details.WedstrijdDetailsView.as_view(),
          name='wedstrijd-details'),
-
-    path('inschrijven/<wedstrijd_pk>/sporter/<boog_afk>/',
-         view_inschrijven.WedstrijdInschrijvenSporter.as_view(),
-         name='inschrijven-sporter-boog'),
-
-    path('inschrijven/<wedstrijd_pk>/sporter/',
-         view_inschrijven.WedstrijdInschrijvenSporter.as_view(),
-         name='inschrijven-sporter'),
-
-    path('inschrijven/<wedstrijd_pk>/groep/<lid_nr>/<boog_afk>/',
-         view_inschrijven.WedstrijdInschrijvenGroepje.as_view(),
-         name='inschrijven-groepje-lid-boog'),
-
-    path('inschrijven/<wedstrijd_pk>/groep/',
-         view_inschrijven.WedstrijdInschrijvenGroepje.as_view(),
-         name='inschrijven-groepje'),
-
-    path('inschrijven/<wedstrijd_pk>/familie/<lid_nr>/<boog_afk>/',
-         view_inschrijven.WedstrijdInschrijvenFamilie.as_view(),
-         name='inschrijven-familie-lid-boog'),
-
-    path('inschrijven/<wedstrijd_pk>/familie/',
-         view_inschrijven.WedstrijdInschrijvenFamilie.as_view(),
-         name='inschrijven-familie'),
-
-    path('inschrijven/<wedstrijd_pk>/handmatig/<lid_nr>/<boog_afk>/',
-         view_inschrijven.WedstrijdInschrijvenHandmatig.as_view(),
-         name='inschrijven-handmatig-lid-boog'),
-
-    path('inschrijven/<wedstrijd_pk>/handmatig/',
-         view_inschrijven.WedstrijdInschrijvenHandmatig.as_view(),
-         name='inschrijven-handmatig'),
-
-    # toevoegen aan winkelwagentje
-    path('inschrijven/toevoegen-mandje/',
-         view_inschrijven.ToevoegenAanMandjeView.as_view(),
-         name='inschrijven-toevoegen-aan-mandje'),
-
-    path('inschrijven/kwalificatie-scores-doorgeven/<inschrijving_pk>/',
-         view_kwalificatie_scores.KwalificatieScoresOpgevenView.as_view(),
-         name='inschrijven-kwalificatie-scores'),
-
 
     # afmelden
     path('afmelden/<inschrijving_pk>/',

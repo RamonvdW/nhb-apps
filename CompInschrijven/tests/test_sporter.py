@@ -653,21 +653,14 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
         functie_rcl101 = Functie.objects.get(rol='RCL', comp_type='18', regio=regio_101)
         self.e2e_wissel_naar_functie(functie_rcl101)
 
+
+        # doe een POST om de eerste ronde aan te maken
         url = self.url_planning_regio % deelcomp.pk
-
-        # TODO: commentaar hieronder zegt GET doet iets aanmaken. Moet niet!
-
-        # haal de (lege) planning op. Dit maakt ook meteen de enige ronde aan
         with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 200)  # 200 = OK
+            resp = self.client.post(url)
+        self.assert_is_redirect(resp, url)
 
-        # haal de planning op (maakt opnieuw een ronde aan)
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 200)  # 200 = OK
-
-        ronde_pk = RegiocompetitieRonde.objects.filter(regiocompetitie=deelcomp)[0].pk
+        ronde_pk = RegiocompetitieRonde.objects.filter(regiocompetitie=deelcomp).first().pk
 
         # haal de ronde planning op
         url_ronde = self.url_planning_regio_ronde_methode1 % ronde_pk

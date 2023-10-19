@@ -54,6 +54,7 @@ urlpatterns = [
     path('vereniging/locatie/',             include('Locatie.urls')),
     path('webwinkel/',                      include('Webwinkel.urls')),
     path('wedstrijden/',                    include('Wedstrijden.urls')),
+    path('wedstrijden/inschrijven/',        include('WedstrijdInschrijven.urls')),
 
     # direct van oude urls naar nieuwe urls
     # path('sporter/bondspas/', lambda request: redirect('ledenpas/', permanent=True)),

@@ -26,7 +26,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2023-10-18'
+SITE_VERSIE = '2023-10-19'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -67,6 +67,7 @@ INSTALLED_APPS = [
     'Vereniging.apps.VerenigingConfig',
     'Webwinkel.apps.WebwinkelConfig',
     'Wedstrijden.apps.WedstrijdenConfig',
+    'WedstrijdInschrijven.apps.WedstrijdInschrijvenConfig',
     'django.contrib.staticfiles',   # gather static files from modules helper
     'django.contrib.sessions',      # support for database-backed sessions; needed for logged-in user
     'django.contrib.auth',          # authenticatie framework

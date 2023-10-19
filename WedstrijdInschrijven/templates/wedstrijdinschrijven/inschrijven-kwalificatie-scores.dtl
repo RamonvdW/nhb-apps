@@ -149,6 +149,6 @@
     </script>
 
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="wedstrijden-inschrijven-kwalificatie-scores" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="wedstrijdinschrijven-kwalificatie-scores" %}
 
 {% endblock %}

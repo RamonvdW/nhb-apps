@@ -205,7 +205,7 @@ class KalenderAanmeldingenView(UserPassesTestMixin, TemplateView):
                                                   kwargs={'wedstrijd_pk': wedstrijd.pk})
 
         if self.rol_nu == Rollen.ROL_HWL:
-            context['url_toevoegen'] = reverse('Wedstrijden:inschrijven-handmatig',
+            context['url_toevoegen'] = reverse('WedstrijdInschrijven:inschrijven-handmatig',
                                                kwargs={'wedstrijd_pk': wedstrijd.pk})
 
         if self.rol_nu in (Rollen.ROL_HWL, Rollen.ROL_SEC):
