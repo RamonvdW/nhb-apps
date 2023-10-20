@@ -5,6 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
+from django.utils import timezone
 from BasisTypen.definities import GESLACHT_ANDERS, GESLACHT_ALLE, ORGANISATIE_WA
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse
 from Functie.operations import maak_functie
@@ -13,13 +14,13 @@ from Locatie.models import Locatie
 from Sporter.models import Sporter, SporterBoog
 from Sporter.operations import get_sporter_voorkeuren
 from Vereniging.models import Vereniging
-from Wedstrijden.definities import INSCHRIJVING_STATUS_AFGEMELD
+from Wedstrijden.definities import (INSCHRIJVING_STATUS_AFGEMELD, WEDSTRIJD_BEGRENZING_VERENIGING,
+                                    WEDSTRIJD_BEGRENZING_REGIO, WEDSTRIJD_BEGRENZING_RAYON)
 from Wedstrijden.models import Wedstrijd, WedstrijdSessie, WedstrijdInschrijving
 from TestHelpers.e2ehelpers import E2EHelpers
-import datetime
 
 
-class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
+class TestWedstrijdInschrijven(E2EHelpers, TestCase):
 
     """ tests voor de Wedstrijden applicatie, module Inschrijven """
 
@@ -73,6 +74,7 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
         self.account = self.e2e_create_account(str(self.lid_nr), 'test@test.not', 'Voornaam')
 
         self.boog_r = boog_r = BoogType.objects.get(afkorting='R')
+        self.boog_tr = BoogType.objects.get(afkorting='TR')
 
         sporter = Sporter(
                     lid_nr=self.lid_nr,
@@ -106,12 +108,13 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
                     adres_code='1234AB56',
                     bij_vereniging=self.ver1)
         sporter2.save()
-        get_sporter_voorkeuren(sporter2)
+        get_sporter_voorkeuren(sporter2)        # TODO: ontbreek hier 'mag_database_wijzigen=True' ?
 
-        SporterBoog(
-                sporter=sporter2,
-                boogtype=boog_r,
-                voor_wedstrijd=True).save()
+        self.sporterboog2 = SporterBoog(
+                                sporter=sporter2,
+                                boogtype=boog_r,
+                                voor_wedstrijd=True)
+        self.sporterboog2.save()
 
         # voeg een locatie toe
         locatie = Locatie(
@@ -138,7 +141,7 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
                         max_sporters=50)
         sessie.save()
         self.wedstrijd.sessies.add(sessie)
-        wkls_r = self.wedstrijd.wedstrijdklassen.filter(boogtype__afkorting='R')
+        wkls_r = self.wedstrijd.wedstrijdklassen.filter(boogtype__afkorting__in=('R', 'TR'))
         sessie.wedstrijdklassen.set(wkls_r)
         self.sessie_r = sessie
         self.wkls_r = wkls_r
@@ -206,7 +209,7 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
                         .select_related('wedstrijd',
                                         'sporterboog',
                                         'sporterboog__sporter')
-                        .all())[0]
+                        .get(sporterboog=self.sporterboog))
         self.assertTrue(str(inschrijving) != '')
         self.assertTrue(inschrijving.korte_beschrijving() != '')
         inschrijving.wedstrijd.titel = 'Dit is een erg lange titel die afgekapt gaat worden door de functie'
@@ -215,6 +218,24 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
         # wel ingeschreven pagina
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_inschrijven_sporter % self.wedstrijd.pk)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('wedstrijdinschrijven/inschrijven-sporter.dtl', 'plein/site_layout.dtl'))
+
+        # zet tweede boog en probeer opnieuw in te schrijven
+        sporterboog = SporterBoog.objects.get(boogtype=self.boog_tr, sporter=self.sporter)
+        sporterboog.voor_wedstrijd = True
+        sporterboog.save()
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_inschrijven_sporter_boog % (self.wedstrijd.pk, 'TR'))
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('wedstrijdinschrijven/inschrijven-sporter.dtl', 'plein/site_layout.dtl'))
+
+        # zet all boog voorkeuren uit
+        SporterBoog.objects.filter(sporter=self.sporter).update(voor_wedstrijd=False)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_inschrijven_sporter_boog % (self.wedstrijd.pk, 'TR'))
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('wedstrijdinschrijven/inschrijven-sporter.dtl', 'plein/site_layout.dtl'))
@@ -398,9 +419,22 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('wedstrijdinschrijven/inschrijven-groepje.dtl', 'plein/site_layout.dtl'))
 
-        resp = self.client.get(self.url_inschrijven_familie_lid_boog % (self.wedstrijd.pk, self.lid_nr, 'r'))
+        url = self.url_inschrijven_familie_lid_boog % (self.wedstrijd.pk, self.lid_nr, 'r')
+        resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('wedstrijdinschrijven/inschrijven-familie.dtl', 'plein/site_layout.dtl'))
+
+        # corner case: na sluitingsdatum
+        self.wedstrijd.datum_begin = timezone.now().date()
+        self.wedstrijd.save(update_fields=['datum_begin'])
+        resp = self.client.get(url)
+        self.assert404(resp, 'Inschrijving is gesloten')
+
+        # corner case: extern beheerde website
+        self.wedstrijd.extern_beheerd = True
+        self.wedstrijd.save(update_fields=['extern_beheerd'])
+        resp = self.client.get(url)
+        self.assert404(resp, 'Externe inschrijving')
 
     def test_handmatig_hwl(self):
         # de HWL kan handmatig sporters toevoegen aan zijn wedstrijd
@@ -600,5 +634,117 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('wedstrijdinschrijven/inschrijven-handmatig.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
 
+    def test_begrenzing_vereniging(self):
+        self.e2e_login_and_pass_otp(self.account)
+
+        url = self.url_inschrijven_sporter_boog % (self.wedstrijd.pk, 'R')
+
+        self.wedstrijd.begrenzing = WEDSTRIJD_BEGRENZING_VERENIGING
+        self.wedstrijd.save(update_fields=['begrenzing'])
+
+        # wel compatible met doelgroep
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('wedstrijdinschrijven/inschrijven-sporter.dtl', 'plein/site_layout.dtl'))
+
+        # zet de wedstrijd over op een andere vereniging dan die van de sporter (self.ver1 / regio 112)
+        ver2 = Vereniging(
+                        ver_nr=1001,
+                        naam="Andere Club",
+                        regio=Regio.objects.get(regio_nr=101))      # andere regio en rayon
+        ver2.save()
+        self.wedstrijd.organiserende_vereniging = ver2
+        self.wedstrijd.save(update_fields=['organiserende_vereniging'])
+
+        # niet compatibel met doelgroep
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('wedstrijdinschrijven/inschrijven-sporter.dtl', 'plein/site_layout.dtl'))
+
+    def test_begrenzing_regio(self):
+        self.e2e_login_and_pass_otp(self.account)
+
+        url = self.url_inschrijven_sporter_boog % (self.wedstrijd.pk, 'R')
+
+        self.wedstrijd.begrenzing = WEDSTRIJD_BEGRENZING_REGIO
+        self.wedstrijd.save(update_fields=['begrenzing'])
+
+        # zet de wedstrijd over op een andere vereniging dan die van de sporter (self.ver1 / regio 112)
+        ver2 = Vereniging(
+                    ver_nr=1001,
+                    naam="Andere Club",
+                    regio=self.ver1.regio)      # zelfde regio
+        ver2.save()
+        self.wedstrijd.organiserende_vereniging = ver2
+        self.wedstrijd.save(update_fields=['organiserende_vereniging'])
+
+        # wel compatible met doelgroep
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('wedstrijdinschrijven/inschrijven-sporter.dtl', 'plein/site_layout.dtl'))
+
+        ver2.regio = Regio.objects.get(regio_nr=101)      # andere regio
+        ver2.save(update_fields=['regio'])
+
+        # niet compatibel met doelgroep
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('wedstrijdinschrijven/inschrijven-sporter.dtl', 'plein/site_layout.dtl'))
+
+    def test_begrenzing_rayon(self):
+        self.e2e_login_and_pass_otp(self.account)
+
+        url = self.url_inschrijven_sporter_boog % (self.wedstrijd.pk, 'R')
+
+        self.wedstrijd.begrenzing = WEDSTRIJD_BEGRENZING_RAYON
+        self.wedstrijd.save(update_fields=['begrenzing'])
+
+        # zet de wedstrijd over op een andere vereniging dan die van de sporter (self.ver1 / regio 112)
+        ver2 = Vereniging(
+                    ver_nr=1001,
+                    naam="Andere Club",
+                    regio=Regio.objects.get(regio_nr=111))  # zelfde rayon als 112
+        ver2.save()
+        self.wedstrijd.organiserende_vereniging = ver2
+        self.wedstrijd.save(update_fields=['organiserende_vereniging'])
+
+        # wel compatible met doelgroep
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('wedstrijdinschrijven/inschrijven-sporter.dtl', 'plein/site_layout.dtl'))
+
+        ver2.regio = Regio.objects.get(regio_nr=101)  # andere rayon
+        ver2.save(update_fields=['regio'])
+
+        # niet compatibel met doelgroep
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('wedstrijdinschrijven/inschrijven-sporter.dtl', 'plein/site_layout.dtl'))
+
+    def test_geen_wedstrijden(self):
+        # vereniging mag niet meedoen aan wedstrijden
+        self.ver1.geen_wedstrijden = True
+        self.ver1.save(update_fields=['geen_wedstrijden'])
+
+        self.e2e_login_and_pass_otp(self.account)
+
+        url = self.url_inschrijven_sporter_boog % (self.wedstrijd.pk, 'R')
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('wedstrijdinschrijven/inschrijven-sporter.dtl', 'plein/site_layout.dtl'))
 
 # end of file

@@ -305,6 +305,8 @@ class WedstrijdInschrijvenSporter(UserPassesTestMixin, TemplateView):
                     context['uitleg_geslacht'] = True
                     if kan_aanmelden:
                         context['uitleg_geslacht'] = False
+            else:
+                context['leeftijd'] = '?'
 
             context['kan_aanmelden'] = kan_aanmelden
 
