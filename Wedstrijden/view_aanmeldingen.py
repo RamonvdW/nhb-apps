@@ -21,7 +21,7 @@ from Sporter.models import SporterVoorkeuren, get_sporter
 from Sporter.operations import get_sporter_voorkeuren
 from Wedstrijden.definities import (INSCHRIJVING_STATUS_TO_SHORT_STR, INSCHRIJVING_STATUS_AFGEMELD,
                                     INSCHRIJVING_STATUS_RESERVERING_MANDJE, INSCHRIJVING_STATUS_DEFINITIEF,
-                                    KWALIFICATIE_CHECK2STR)
+                                    KWALIFICATIE_CHECK2STR, KWALIFICATIE_CHECK_AFGEKEURD)
 from Wedstrijden.models import Wedstrijd, WedstrijdInschrijving, Kwalificatiescore
 from decimal import Decimal
 from codecs import BOM_UTF8
@@ -48,7 +48,12 @@ def get_inschrijving_mh_bestel_nr(inschrijving):
 
 
 def get_kwalificatie_scores(inschrijving):
+    """ bepaal de kwalificatie-scores van een inschrijving:
+        - de maximaal 3 opgegeven scores
+        - de 4 beste resultaten uit de regiocompetitie
 
+        Geeft een lijst met 0 tot 5 Kwalificatiescore records terug.
+    """
     unsorted = list()
 
     # pak de handmatig opgegeven kwalificatiescores erbij
@@ -56,6 +61,7 @@ def get_kwalificatie_scores(inschrijving):
               .objects
               .filter(inschrijving=inschrijving)
               .exclude(resultaat=0)
+              .exclude(check_status=KWALIFICATIE_CHECK_AFGEKEURD)
               .order_by('-resultaat'))  # hoogste eerst
 
     for score in scores:
@@ -75,13 +81,14 @@ def get_kwalificatie_scores(inschrijving):
                      .get(sporterboog=inschrijving.sporterboog,
                           regiocompetitie__competitie__afstand='18'))
     except RegiocompetitieSporterBoog.DoesNotExist:
+        # doet niet mee aan de competitie
         pass
     else:
         scores = [deelnemer.score1, deelnemer.score2, deelnemer.score3, deelnemer.score4,
                   deelnemer.score5, deelnemer.score6, deelnemer.score7]
         scores = [score for score in scores if score > 0]
-        scores.sort(reverse=True)  # hoogste eerst
-        scores = scores[:4]  # top 4
+        scores.sort(reverse=True)    # hoogste eerst
+        scores = scores[:4]          # top 4
         scores.extend([0, 0, 0, 0])  # minimaal 4
 
         # eerste 60 pijlen score uit de bondscompetitie
@@ -108,7 +115,9 @@ def get_kwalificatie_scores(inschrijving):
             tup = (score.resultaat, score.datum, score)
             unsorted.append(tup)
 
+    # sorteer de samengevoegde lijst van opgegeven wedstrijdresultaten en automatische data van de bondscompetities
     unsorted.sort(reverse=True)     # hoogste resultaat eerst
+
     return [score for _, _, score in unsorted]
 
 

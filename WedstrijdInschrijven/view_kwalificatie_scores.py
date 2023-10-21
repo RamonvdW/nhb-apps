@@ -51,6 +51,7 @@ class KwalificatieScoresOpgevenView(UserPassesTestMixin, TemplateView):
             inschrijving = (WedstrijdInschrijving
                             .objects
                             .select_related('sporterboog__sporter',
+                                            'wedstrijd',
                                             'koper')
                             .get(pk=inschrijving_pk,
                                  wedstrijd__eis_kwalificatie_scores=True))
@@ -100,7 +101,10 @@ class KwalificatieScoresOpgevenView(UserPassesTestMixin, TemplateView):
                                    .filter(inschrijving=inschrijving)
                                    .order_by('datum'))
 
-        context['eerste_keer'] = len(kwalificatie_scores) == 0
+        context['eerste_keer'] = inschrijving.status in (INSCHRIJVING_STATUS_RESERVERING_MANDJE,
+                                                         INSCHRIJVING_STATUS_RESERVERING_BESTELD)
+        if len(kwalificatie_scores) > 0:
+            context['eerste_keer'] = False
 
         while len(kwalificatie_scores) < 3:
             score = Kwalificatiescore(inschrijving=inschrijving, datum=datetime.date(jaar, 12, 31))     # 31 december
@@ -166,6 +170,7 @@ class KwalificatieScoresOpgevenView(UserPassesTestMixin, TemplateView):
             inschrijving = (WedstrijdInschrijving
                             .objects
                             .select_related('sporterboog__sporter',
+                                            'wedstrijd',
                                             'koper')
                             .get(pk=inschrijving_pk,
                                  wedstrijd__eis_kwalificatie_scores=True))
@@ -182,7 +187,9 @@ class KwalificatieScoresOpgevenView(UserPassesTestMixin, TemplateView):
         begin_datum = datetime.date(jaar, 9, 1)      # 1 september
         eind_datum = wedstrijd.datum_begin - datetime.timedelta(days=1 + wedstrijd.datum_begin.weekday())
 
-        eerste_keer = False
+
+        eerste_keer = inschrijving.status in (INSCHRIJVING_STATUS_RESERVERING_MANDJE,
+                                              INSCHRIJVING_STATUS_RESERVERING_BESTELD)
         qset = (Kwalificatiescore
                 .objects
                 .filter(inschrijving=inschrijving)
@@ -195,7 +202,8 @@ class KwalificatieScoresOpgevenView(UserPassesTestMixin, TemplateView):
             kwalificatie_scores = list()
         else:
             kwalificatie_scores = list(qset)
-            eerste_keer = len(kwalificatie_scores) == 0
+            if len(kwalificatie_scores) > 0:
+                eerste_keer = False
 
         while len(kwalificatie_scores) < 3:
             score = Kwalificatiescore(inschrijving=inschrijving, datum=datetime.date(jaar, 12, 31))     # 31 december

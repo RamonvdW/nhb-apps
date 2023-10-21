@@ -24,7 +24,7 @@ from Sporter.operations import get_sporter_voorkeuren
 from Wedstrijden.definities import (INSCHRIJVING_STATUS_AFGEMELD, INSCHRIJVING_STATUS_DEFINITIEF,
                                     INSCHRIJVING_STATUS_TO_STR, WEDSTRIJD_BEGRENZING_TO_STR,
                                     WEDSTRIJD_BEGRENZING_VERENIGING, WEDSTRIJD_BEGRENZING_REGIO,
-                                    WEDSTRIJD_BEGRENZING_RAYON)
+                                    WEDSTRIJD_BEGRENZING_RAYON, WEDSTRIJD_BEGRENZING_WERELD)
 from Wedstrijden.models import Wedstrijd, WedstrijdSessie, WedstrijdInschrijving
 from datetime import timedelta
 
@@ -101,6 +101,10 @@ def get_sessies(wedstrijd, sporter, voorkeuren, wedstrijdboog_pk):
     # for
 
     compatible_doelgroep = True
+
+    if sporter.is_gast:
+        if wedstrijd.begrenzing != WEDSTRIJD_BEGRENZING_WERELD:
+            compatible_doelgroep = False
 
     if wedstrijd.begrenzing == WEDSTRIJD_BEGRENZING_VERENIGING:
         if sporter.bij_vereniging != wedstrijd.organiserende_vereniging:

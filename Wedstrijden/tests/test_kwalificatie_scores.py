@@ -197,8 +197,7 @@ class TestWedstrijdenKwalificatieScores(E2EHelpers, TestCase):
                                           'score1_naam': 'Test naam',
                                           'score1_waar': 'Test plaats',
                                           'score1_result': '123'})
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('wedstrijdinschrijven/inschrijven-toegevoegd-aan-mandje.dtl', 'plein/site_layout.dtl'))
+        self.assert_is_redirect(resp, '/plein/')
 
         self.assertEqual(3, Kwalificatiescore.objects.count())
 
@@ -211,8 +210,7 @@ class TestWedstrijdenKwalificatieScores(E2EHelpers, TestCase):
                                           'score1_naam': 'Test naam',
                                           'score1_waar': 'Test plaats',
                                           'score1_result': '234'})
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('wedstrijdinschrijven/inschrijven-toegevoegd-aan-mandje.dtl', 'plein/site_layout.dtl'))
+        self.assert_is_redirect(resp, '/plein/')
 
         self.assertEqual(6, Kwalificatiescore.objects.count())
 
