@@ -15,6 +15,7 @@ from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
 from Wedstrijden.definities import WEDSTRIJD_DISCIPLINE_3D
 from Wedstrijden.models import Wedstrijd
+from unittest.mock import patch
 import datetime
 
 
@@ -73,16 +74,6 @@ class TestWedstrijdenVereniging(E2EHelpers, TestCase):
 
         return locatie
 
-    @staticmethod
-    def _stub_timezone_now_2022_11_2():
-        # geef een vaste datum terug van 2 november 2022 10:00
-        return datetime.datetime(2022, 11, 2, 10, tzinfo=datetime.timezone.utc)
-
-    @staticmethod
-    def _stub_timezone_now_2022_06_1():
-        # geef een vaste datum terug van 1 juni 2022 10:00
-        return datetime.datetime(2022, 6, 1, 10, tzinfo=datetime.timezone.utc)
-
     def test_maak_wedstrijd(self):
         # anon mag niet
         with self.assert_max_queries(20):
@@ -134,9 +125,11 @@ class TestWedstrijdenVereniging(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('wedstrijden/nieuwe-wedstrijd-kies-type.dtl', 'plein/site_layout.dtl'))
 
         # maak een nieuwe wedstrijd aan
-        timezone.now = self._stub_timezone_now_2022_06_1
-        with self.assert_max_queries(20):
-            resp = self.client.post(self.url_wedstrijden_maak_nieuw, {'keuze': 'wa'})
+        with patch('django.utils.timezone.now') as mock_timezone_now:
+            # geef een vaste datum terug van 1 juni 2022 10:00
+            mock_timezone_now.return_value = datetime.datetime(2022, 6, 1, 10, tzinfo=datetime.timezone.utc)
+            with self.assert_max_queries(20):
+                resp = self.client.post(self.url_wedstrijden_maak_nieuw, {'keuze': 'wa'})
         self.assert_is_redirect_not_plein(resp)
         self.assertEqual(1, Wedstrijd.objects.count())
         wedstrijd = Wedstrijd.objects.get(organisatie=ORGANISATIE_WA)
@@ -160,11 +153,13 @@ class TestWedstrijdenVereniging(E2EHelpers, TestCase):
         self.assertEqual(wedstrijd.boogtypen.count(), 5)
         self.assertEqual(wedstrijd.wedstrijdklassen.count(), 70)        # gender-neutrale klassen zijn niet gekozen
 
-        # fake de huidige datum in November zodat de begindatum in het volgende jaar komt
-        timezone.now = self._stub_timezone_now_2022_11_2
         # maak nog een wedstrijd aan
-        with self.assert_max_queries(20):
-            resp = self.client.post(self.url_wedstrijden_maak_nieuw, {'keuze': 'ifaa'})
+        with patch('django.utils.timezone.now') as mock_timezone_now:
+            # geef een vaste datum terug van 2 november 2022 10:00
+            # zodat de datum_begin over de jaargrens geduwd wordt, onafhankelijk van de wallclock tijdens de test
+            mock_timezone_now.return_value = datetime.datetime(2022, 11, 2, 10, tzinfo=datetime.timezone.utc)
+            with self.assert_max_queries(20):
+                resp = self.client.post(self.url_wedstrijden_maak_nieuw, {'keuze': 'ifaa'})
         self.assert_is_redirect_not_plein(resp)
         self.assertEqual(3, Wedstrijd.objects.count())
         wedstrijd = Wedstrijd.objects.get(organisatie=ORGANISATIE_IFAA)
