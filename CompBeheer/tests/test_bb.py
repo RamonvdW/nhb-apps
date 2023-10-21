@@ -425,7 +425,7 @@ class TestCompBeheerBB(E2EHelpers, TestCase):
                          .objects
                          .select_related('competitie', 'regio')
                          .filter(regio__regio_nr=101)):
-            if deelcomp.competitie.afstand == '18':
+            if deelcomp.competitie.is_indoor():
                 self.assertEqual(deelcomp.inschrijf_methode, INSCHRIJF_METHODE_1)
             else:
                 self.assertEqual(deelcomp.inschrijf_methode, INSCHRIJF_METHODE_2)
@@ -436,7 +436,7 @@ class TestCompBeheerBB(E2EHelpers, TestCase):
                          .select_related('competitie', 'regio')
                          .filter(regio__regio_nr=105)):
             self.assertEqual(deelcomp.inschrijf_methode, INSCHRIJF_METHODE_3)
-            if deelcomp.competitie.afstand == '18':
+            if deelcomp.competitie.is_indoor():
                 self.assertEqual(deelcomp.toegestane_dagdelen, dagdelen_105_18)
             else:
                 self.assertEqual(deelcomp.toegestane_dagdelen, dagdelen_105_25)

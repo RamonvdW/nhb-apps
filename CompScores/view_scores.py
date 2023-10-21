@@ -174,7 +174,7 @@ def bepaal_match_en_deelcomp_of_404(match_pk, mag_database_wijzigen=False):
     # maak de uitslag aan indien nog niet gedaan
     if not match.uitslag:
         uitslag = Uitslag()
-        if deelcomp.competitie.afstand == '18':
+        if deelcomp.competitie.is_indoor():
             uitslag.max_score = 300
             uitslag.afstand = 18
         else:

@@ -125,7 +125,7 @@ class RayonTeamsTemplateView(TemplateView):
 
             context['rayon'] = self.functie_nu.rayon
 
-        if comp.afstand == '18':
+        if comp.is_indoor():
             aantal_pijlen = 30
         else:
             aantal_pijlen = 25

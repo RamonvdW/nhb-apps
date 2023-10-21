@@ -632,7 +632,7 @@ class LedenIngeschrevenView(UserPassesTestMixin, ListView):
             deelnemer.eigen_blazoen_ja_nee = '-'
             if deelnemer.sporterboog.sporter.lid_nr in wens_eigen_blazoen:
                 wkl = deelnemer.indiv_klasse
-                if comp.afstand == '18':
+                if comp.is_indoor():
                     # Indoor
                     if wkl.blazoen1_regio != wkl.blazoen2_regio:
                         # er is keuze

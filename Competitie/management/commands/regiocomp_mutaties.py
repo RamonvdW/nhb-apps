@@ -1120,7 +1120,7 @@ class Command(BaseCommand):
             iedereen die scores neergezet heeft in het RK komt in de lijst
         """
 
-        if comp.afstand == '18':
+        if comp.is_indoor():
             aantal_pijlen = 2.0 * 30
         else:
             aantal_pijlen = 2.0 * 25
@@ -1297,7 +1297,7 @@ class Command(BaseCommand):
 
     def _maak_deelnemerslijst_bk_teams(self, comp):
         # deelfactor om van RK uitslag (60 of 50 pijlen) naar gemiddelde te gaan
-        if comp.afstand == '18':
+        if comp.is_indoor():
             aantal_pijlen = 2.0 * 30
         else:
             aantal_pijlen = 2.0 * 25

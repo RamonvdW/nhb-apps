@@ -272,7 +272,7 @@ def bepaal_klassengrenzen_teams(comp):
     #      - de sporters sorteren op AG
     #      - per groepje van 4 som van beste 3 = team AG
 
-    if comp.afstand == '18':
+    if comp.is_indoor():
         aantal_pijlen = 30
     else:
         aantal_pijlen = 25

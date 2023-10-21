@@ -250,7 +250,7 @@ class LijstBkSelectieAlsBestandView(LijstBkSelectieView):
         writer = csv.writer(response, delimiter=";")      # ; is good for dutch regional settings
         writer.writerow(['Rank', 'Bondsnummer', 'Naam', 'Vereniging', 'Label', 'Klasse', 'RK score', 'Notities'])
 
-        if deelkamp.competitie.afstand == '18':
+        if deelkamp.competitie.is_indoor():
             aantal_pijlen = 2 * 30
         else:
             aantal_pijlen = 2 * 25

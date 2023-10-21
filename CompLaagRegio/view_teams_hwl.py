@@ -136,7 +136,7 @@ class TeamsRegioView(UserPassesTestMixin, TemplateView):
         mag_wijzigen = (now < einde) and not self.readonly
         context['mag_wijzigen'] = mag_wijzigen
 
-        if deelcomp.competitie.afstand == '18':
+        if deelcomp.competitie.is_indoor():
             aantal_pijlen = 30
         else:
             aantal_pijlen = 25
@@ -703,7 +703,7 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
         boog_pks = boog_typen.values_list('pk', flat=True)
         context['boog_typen'] = boog_typen
 
-        if deelcomp.competitie.afstand == '18':
+        if deelcomp.competitie.is_indoor():
             aantal_pijlen = 30
         else:
             aantal_pijlen = 25

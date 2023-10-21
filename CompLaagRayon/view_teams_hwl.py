@@ -122,7 +122,7 @@ class TeamsRkView(UserPassesTestMixin, TemplateView):
 
     def _get_rk_teams(self, deelkamp, is_vastgesteld):
 
-        if deelkamp.competitie.afstand == '18':
+        if deelkamp.competitie.is_indoor():
             aantal_pijlen = 30
         else:
             aantal_pijlen = 25
@@ -455,7 +455,7 @@ class RKTeamsKoppelLedenView(UserPassesTestMixin, TemplateView):
         boog_pks = boog_typen.values_list('pk', flat=True)
         context['boog_typen'] = boog_typen
 
-        if comp.afstand == '18':
+        if comp.is_indoor():
             aantal_pijlen = 30
         else:
             aantal_pijlen = 25

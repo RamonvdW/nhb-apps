@@ -429,7 +429,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
 
             comp = deelnemer.regiocompetitie.competitie
 
-            if comp.afstand == '18':
+            if comp.is_indoor():
                 deelnemer.competitie_str = "18m Indoor"
             else:
                 deelnemer.competitie_str = "25m 1pijl"

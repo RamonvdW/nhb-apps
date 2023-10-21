@@ -860,7 +860,7 @@ class TestData(object):
         competities_aanmaken(begin_jaar)
 
         for comp in Competitie.objects.all():
-            if comp.afstand == '18':
+            if comp.is_indoor():
                 self.comp18 = comp
             else:
                 self.comp25 = comp
@@ -871,7 +871,7 @@ class TestData(object):
                          .select_related('competitie',
                                          'regio')
                          .all()):
-            is_18 = deelcomp.competitie.afstand == '18'
+            is_18 = deelcomp.competitie.is_indoor()
             regio_nr = deelcomp.regio.regio_nr
             if is_18:
                 self.deelcomp18_regio[regio_nr] = deelcomp
@@ -885,7 +885,7 @@ class TestData(object):
                          .select_related('competitie',
                                          'rayon')
                          .all()):
-            is_18 = deelkamp.competitie.afstand == '18'
+            is_18 = deelkamp.competitie.is_indoor()
 
             if deelkamp.deel == DEEL_BK:
                 if is_18:
@@ -950,7 +950,7 @@ class TestData(object):
                        .all()):
 
             afkorting = klasse.boogtype.afkorting
-            if klasse.competitie.afstand == '18':
+            if klasse.competitie.is_indoor():
                 klassen = self.comp18_klassen_indiv
             else:
                 klassen = self.comp25_klassen_indiv
@@ -969,7 +969,7 @@ class TestData(object):
 
             afkorting = klasse.team_type.afkorting
 
-            if klasse.competitie.afstand == '18':
+            if klasse.competitie.is_indoor():
                 klassen = self.comp18_klassen_teams
                 klassen_rk_bk = self.comp18_klassen_rk_bk_teams
             else:
@@ -1170,7 +1170,7 @@ class TestData(object):
     def maak_poules(self, deelcomp):
         """ Maak poules en vul deze met teams """
 
-        if deelcomp.competitie.afstand == '18':
+        if deelcomp.competitie.is_indoor():
             regioteams = self.comp18_regioteams
             poules = self.comp18_poules
         else:

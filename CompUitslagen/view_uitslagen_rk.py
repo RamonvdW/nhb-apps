@@ -471,7 +471,7 @@ class UitslagenRayonTeamsView(TemplateView):
                 teamklasse2match[klasse.pk] = match
         # for
 
-        if comp.afstand == '18':
+        if comp.is_indoor():
             aantal_pijlen = 30
         else:
             aantal_pijlen = 25

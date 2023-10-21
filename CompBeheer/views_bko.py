@@ -230,7 +230,7 @@ class KlassengrenzenVaststellenRkBkTeamsView(UserPassesTestMixin, TemplateView):
     def _bepaal_klassengrenzen(self, comp):
         tts, tt2wkl, tt2sterktes, niet_compleet_team = self._tel_rk_teams(comp)
 
-        if comp.afstand == '18':
+        if comp.is_indoor():
             aantal_pijlen = 30
         else:
             aantal_pijlen = 25

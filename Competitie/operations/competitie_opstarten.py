@@ -185,7 +185,7 @@ def _maak_competitieklassen(comp):
         het min_ag per klasse wordt later ingevuld
     """
 
-    is_18m = comp.afstand == '18'
+    is_18m = comp.is_indoor()
 
     if True:
         volgorde2lkl_pks = dict()     # [volgorde] = [LeeftijdsKlasse.pk, ...]

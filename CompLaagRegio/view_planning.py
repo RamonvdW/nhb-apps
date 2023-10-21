@@ -477,7 +477,7 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
 
         start_week = settings.COMPETITIES_START_WEEK
         eind_week = settings.COMPETITIE_25M_LAATSTE_WEEK
-        if ronde.regiocompetitie.competitie.afstand == '18':
+        if ronde.regiocompetitie.competitie.is_indoor():
             eind_week = settings.COMPETITIE_18M_LAATSTE_WEEK
         eind_week += 1  # de hele week mag nog gebruikt worden
         begin_jaar = ronde.regiocompetitie.competitie.begin_jaar
@@ -543,7 +543,7 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
                     niet_gebruikt[100000 + wkl.pk] = (1000 + wkl.volgorde, wkl.beschrijving)
                 # for
 
-        is_18m = ronde.regiocompetitie.competitie.afstand == '18'
+        is_18m = ronde.regiocompetitie.competitie.is_indoor()
 
         for match in context['wedstrijden']:
             match.aantal_sporters = 0
@@ -658,7 +658,7 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
                 raise Http404('Geen valide week nummer')
 
             eind_week = settings.COMPETITIE_25M_LAATSTE_WEEK
-            if ronde.regiocompetitie.competitie.afstand == '18':
+            if ronde.regiocompetitie.competitie.is_indoor():
                 eind_week = settings.COMPETITIE_18M_LAATSTE_WEEK
 
             if eind_week < settings.COMPETITIES_START_WEEK:
@@ -970,7 +970,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
             raise PermissionDenied('Niet de beheerder')
 
         context['competitie'] = comp = ronde.regiocompetitie.competitie
-        is_25m = (comp.afstand == '25')
+        is_25m = (comp.is_25m1pijl())
 
         context['regio'] = ronde.regiocompetitie.regio
         context['ronde'] = ronde
@@ -981,7 +981,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
             week = settings.COMPETITIES_START_WEEK
             context['datum_eerste'] = competitie_week_nr_to_date(jaar, week)
 
-            if ronde.regiocompetitie.competitie.afstand == '18':
+            if ronde.regiocompetitie.competitie.is_indoor():
                 week = settings.COMPETITIE_18M_LAATSTE_WEEK + 1
             else:
                 week = settings.COMPETITIE_25M_LAATSTE_WEEK + 1

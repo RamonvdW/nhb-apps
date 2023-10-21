@@ -77,13 +77,13 @@ class CompetitieStatistiekView(UserPassesTestMixin, TemplateView):
                 if ag < floor:                  # pragma: no branch
                     aantal_teams_ag_nul += 1
 
-                if comp.afstand == '18':
+                if comp.is_indoor():
                     aantal_18m_teams[regio_nr] += 1
                 else:
                     aantal_25m_teams[regio_nr] += 1
             # for
 
-            if comp.afstand == '18':
+            if comp.is_indoor():
                 context['totaal_18m_indiv'] = aantal_indiv
                 context['aantal_18m_teams_niet_af'] = aantal_teams_ag_nul
             else:

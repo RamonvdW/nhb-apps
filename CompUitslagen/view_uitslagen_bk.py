@@ -110,7 +110,7 @@ class UitslagenBKIndivView(TemplateView):
 
         wkl2limiet = dict()    # [pk] = aantal
 
-        if comp.afstand == '18':
+        if comp.is_indoor():
             aantal_pijlen = 2 * 30
         else:
             aantal_pijlen = 2 * 25
@@ -357,7 +357,7 @@ class UitslagenBKTeamsView(TemplateView):
         # for
 
         # voor conversie team gemiddelde naar RK score
-        if comp.afstand == '18':
+        if comp.is_indoor():
             aantal_pijlen = 2 * 30
         else:
             aantal_pijlen = 2 * 25
