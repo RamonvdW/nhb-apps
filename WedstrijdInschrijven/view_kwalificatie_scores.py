@@ -15,7 +15,8 @@ from Competitie.models import RegiocompetitieSporterBoog
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige
 from Kalender.view_maand import MAAND2URL
-from Wedstrijden.definities import KWALIFICATIE_CHECK_NOG_DOEN, KWALIFICATIE_CHECK2STR
+from Wedstrijden.definities import (KWALIFICATIE_CHECK_NOG_DOEN, KWALIFICATIE_CHECK2STR,
+                                    INSCHRIJVING_STATUS_RESERVERING_MANDJE, INSCHRIJVING_STATUS_RESERVERING_BESTELD)
 from Wedstrijden.models import WedstrijdInschrijving, Kwalificatiescore
 import datetime
 
@@ -65,6 +66,12 @@ class KwalificatieScoresOpgevenView(UserPassesTestMixin, TemplateView):
 
         context['sporter'] = inschrijving.sporterboog.sporter
 
+        context['wedstrijd'] = wedstrijd = inschrijving.wedstrijd
+        wedstrijd.plaats_str = wedstrijd.locatie.plaats
+
+        wedstrijd.inschrijven_voor = wedstrijd.datum_begin - datetime.timedelta(days=wedstrijd.inschrijven_tot)
+        context['mag_aanpassen'] = mag_aanpassen = timezone.now().date() < wedstrijd.inschrijven_voor
+
         # zoek de bondscompetitie Indoor scores erbij
         try:
             deelnemer = (RegiocompetitieSporterBoog
@@ -82,13 +89,9 @@ class KwalificatieScoresOpgevenView(UserPassesTestMixin, TemplateView):
             scores = [str(score) for score in scores]
             context['indoor_scores'] = ", ".join(scores)
 
-        context['wedstrijd'] = wedstrijd = inschrijving.wedstrijd
-        wedstrijd.plaats_str = wedstrijd.locatie.plaats
-
-        jaar = wedstrijd.datum_begin.year - 1
-
         # einddatum is de zondag van het weekend voor de wedstrijd
         # weekday 0 = maandag
+        jaar = wedstrijd.datum_begin.year - 1
         context['eind_datum'] = wedstrijd.datum_begin - datetime.timedelta(days=1+wedstrijd.datum_begin.weekday())
         context['begin_datum'] = datetime.date(jaar, 9, 1)      # 1 september
 
@@ -116,8 +119,9 @@ class KwalificatieScoresOpgevenView(UserPassesTestMixin, TemplateView):
         # for
         context['kwalificatie_scores'] = kwalificatie_scores
 
-        context['url_opslaan'] = reverse('WedstrijdInschrijven:inschrijven-kwalificatie-scores',
-                                         kwargs={'inschrijving_pk': inschrijving.pk})
+        if mag_aanpassen:
+            context['url_opslaan'] = reverse('WedstrijdInschrijven:inschrijven-kwalificatie-scores',
+                                             kwargs={'inschrijving_pk': inschrijving.pk})
 
         url_kalender = reverse('Kalender:maand',
                                kwargs={'jaar': wedstrijd.datum_begin.year,
@@ -187,6 +191,10 @@ class KwalificatieScoresOpgevenView(UserPassesTestMixin, TemplateView):
         begin_datum = datetime.date(jaar, 9, 1)      # 1 september
         eind_datum = wedstrijd.datum_begin - datetime.timedelta(days=1 + wedstrijd.datum_begin.weekday())
 
+        wedstrijd.inschrijven_voor = wedstrijd.datum_begin - datetime.timedelta(days=wedstrijd.inschrijven_tot)
+        mag_aanpassen = timezone.now().date() < wedstrijd.inschrijven_voor
+        if not mag_aanpassen:
+            raise Http404('Mag niet meer aanpassen')
 
         eerste_keer = inschrijving.status in (INSCHRIJVING_STATUS_RESERVERING_MANDJE,
                                               INSCHRIJVING_STATUS_RESERVERING_BESTELD)
