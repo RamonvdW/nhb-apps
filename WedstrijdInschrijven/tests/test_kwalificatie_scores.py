@@ -214,6 +214,7 @@ class TestWedstrijdInschrijvenKwalificatieScores(E2EHelpers, TestCase):
         self.assertEqual(score.naam, 'Test naam')
         self.assertEqual(score.waar, 'Test plaats')
         self.assertEqual(score.resultaat, 123)
+        self.assertTrue(str(score) != '')       # coverage for admin function
 
         # nog een keer opslaan, geen wijzigingen
         with self.assert_max_queries(20):

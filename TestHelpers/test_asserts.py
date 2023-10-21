@@ -772,7 +772,7 @@ class MyTestAsserts(TestCase):
         # for
 
         do_report = False
-        if found_delete or found_insert or found_update:
+        if found_delete or found_insert or found_update:        # pragma: no branch
             if not tracer.modify_acceptable:
                 do_report = True
 
@@ -793,7 +793,7 @@ class MyTestAsserts(TestCase):
                     pos2 = sql.find('"', pos1 + 2)
                     table_name = sql[pos1 + 2:pos2]
                     cmd = "SELECT"
-                    if " FOR UPDATE" in sql:
+                    if " FOR UPDATE" in sql:                # pragma: no cover
                         cmd += '.. FOR UPDATE'
 
                 elif sql.startswith('INSERT INTO '):
@@ -802,19 +802,19 @@ class MyTestAsserts(TestCase):
                     pos2 = sql.find('"', pos1 + 2)
                     table_name = sql[pos1 + 2:pos2]
 
-                elif sql.startswith('UPDATE '):
+                elif sql.startswith('UPDATE '):             # pragma: no branch
                     cmd = 'UPDATE'
                     pos1 = sql.find(' "')
                     pos2 = sql.find('"', pos1 + 2)
                     table_name = sql[pos1 + 2:pos2]
 
-                elif sql.startswith('DELETE FROM '):
+                elif sql.startswith('DELETE FROM '):        # pragma: no cover
                     cmd = 'DELETE FROM'
                     pos1 = sql.find(' "')
                     pos2 = sql.find('"', pos1 + 2)
                     table_name = sql[pos1 + 2:pos2]
 
-                elif sql.startswith('SAVEPOINT'):
+                elif sql.startswith('SAVEPOINT'):           # pragma: no cover
                     try:
                         cmd = renames[sql]
                     except KeyError:
@@ -822,16 +822,16 @@ class MyTestAsserts(TestCase):
                         cmd = renames[sql] = '#' + str(savepoint_nr)
                     cmd += ' savepoint'
 
-                elif sql.startswith('RELEASE SAVEPOINT'):
+                elif sql.startswith('RELEASE SAVEPOINT'):   # pragma: no cover
                     cmd = renames[sql[8:]] + ' release'
 
                 else:
-                    cmd = '?? unknown sql: %s' % repr(sql)
+                    cmd = '?? unknown sql: %s' % repr(sql)  # pragma: no cover
 
                 explain.append(cmd + ' ' + table_name)
             # for
 
-            if FAIL_UNSAFE_DATABASE_MODIFICATION:
+            if FAIL_UNSAFE_DATABASE_MODIFICATION:           # pragma: no cover
                 self.fail(msg='Found database modification outside POST or background task:' +
                               '\n   ' +
                               '\n   '.join(explain))
