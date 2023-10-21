@@ -160,6 +160,9 @@
         <div class="col s12">
             <h3 class="sv-blauw-text">Regiocompetitie</h3>
             <p>Niet alle 16 regio's organiseren een teamcompetitie.</p>
+            {% if toon_teams_persoonlijk %}
+                <p>{{ jouw_regio_team_comp }}</p>
+            {% endif %}
         </div>
     </div>
 
@@ -196,6 +199,9 @@
             <div class="white" style="padding:10px">
                 <p>De meeste regio's hebben vaste teams waarin altijd dezelfde sporters staan opgesteld.</p>
                 <p>In een paar regio's wordt het systeem "voortschrijdend gemiddelde" gebruikt waarbij de sporters elke ronde kunnen promoveren naar een ander team van dezelfde vereniging in een hogere wedstrijdklasse.</p>
+                {% if toon_teams_persoonlijk %}
+                    <p>In jouw regio ({{ jouw_regio.regio_nr }}) is gekozen voor {% if jouw_regio_vaste_teams %}vaste teams{% else %}voortschrijdend gemiddelde{% endif %}.</p>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -280,7 +286,7 @@
             <div class="white" style="padding:10px">
                 <p>Bij aankomst en aanmelden worden eventuele invallers gecontroleerd op aanvangsgemiddelde.</p>
                 <p>Het RK teams begint met 60 (Indoor) of 50 (25m1pijl) pijlen per sporter.<br>De team score is de som van de 3 hoogste scores (van de 3 of 4 sporters).</p>
-                <p>De eindstand van de kwalificaties is de eindresultaat van het RK teams 25m1pijl.<br>Bij de Indoor bepaalt dit welke 4 of 8 teams doorgaan naar de finale.</p>
+                <p>De eindstand van de kwalificaties is het eindresultaat van het RK teams 25m1pijl.<br>Bij de Indoor bepaalt dit welke 4 of 8 teams doorgaan naar de finale.</p>
                 <p></p>
             </div>
         </div>
