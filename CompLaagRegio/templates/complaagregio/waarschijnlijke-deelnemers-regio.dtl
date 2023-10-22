@@ -56,7 +56,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <p>Deze lijst is gebaseerd op de gegevens van: <b>{{ vastgesteld }}</b>.</p>
+            <p>Deze lijst is gebaseerd op de gegevens van: <b>{{ vastgesteld.date }} om {{ vastgesteld.time }}</b></p>
             <a class="btn-sv-rood" href="{{ url_download }}">
                 <i class="notranslate material-icons-round left">download</i>Download lijst</a>
         </div>

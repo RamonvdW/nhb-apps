@@ -358,7 +358,6 @@ class TestCompLaagRegioWaarschijnlijkeDeelnemers(E2EHelpers, TestCase):
                 indiv_klasse=klasse).save()
 
     def _maak_teams_18(self):
-
         teamtype_r = TeamType.objects.get(afkorting='R2')       # zowel DT als 40cm blazoen
         teamtype_c = TeamType.objects.get(afkorting='C')        # alleen DT blazoen
         teamtype_bb = TeamType.objects.get(afkorting='BB2')     # alleen 40cm blazoen
@@ -409,7 +408,6 @@ class TestCompLaagRegioWaarschijnlijkeDeelnemers(E2EHelpers, TestCase):
         team.save()
 
     def _maak_teams_25(self):
-
         teamtype_r = TeamType.objects.get(afkorting='R2')       # alleen 60cm blazoen
         teamtype_c = TeamType.objects.get(afkorting='C')        # 60cm en DT blazoen
 
@@ -548,6 +546,25 @@ class TestCompLaagRegioWaarschijnlijkeDeelnemers(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('complaagregio/waarschijnlijke-deelnemers-regio.dtl', 'plein/site_layout.dtl'))
+
+        # maak een wedstrijd die niet bij een ronde hoort
+        match = CompetitieMatch(
+                    competitie=self.comp_18,
+                    beschrijving='Special',
+                    vereniging=self.functie_sec.vereniging,
+                    datum_wanneer='2022-02-22',
+                    tijd_begin_wedstrijd='02:22')
+        match.save()
+
+        url = self.url_waarschijnlijke % match.pk
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assert404(resp, 'Geen competitie wedstrijd')
+
+        url = self.url_waarschijnlijke_bestand % match.pk
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assert404(resp, 'Geen competitie wedstrijd')
 
     def test_bad(self):
         # geen toegang tot de pagina

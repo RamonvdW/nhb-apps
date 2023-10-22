@@ -7,6 +7,7 @@
 from django.urls import reverse
 from django.http import Http404, HttpResponse
 from django.utils import timezone
+from django.utils.formats import localize
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Competitie.models import RegiocompetitieTeam, CompetitieMatch
@@ -49,7 +50,8 @@ class WaarschijnlijkeDeelnemersView(UserPassesTestMixin, TemplateView):
             match = (CompetitieMatch
                      .objects
                      .select_related('vereniging')
-                     .get(pk=match_pk))
+                     .get(pk=match_pk,
+                          vereniging=self.functie_nu.vereniging))       # alleen van eigen vereniging
         except (ValueError, CompetitieMatch.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
@@ -63,13 +65,15 @@ class WaarschijnlijkeDeelnemersView(UserPassesTestMixin, TemplateView):
             match.beschrijving2 = ''
 
         ronde = match.regiocompetitieronde_set.select_related('regiocompetitie', 'regiocompetitie__competitie').first()
+        if not ronde:
+            raise Http404('Geen competitie wedstrijd')
         deelcomp = ronde.regiocompetitie
         comp = deelcomp.competitie
         afstand = comp.afstand
 
         context['deelcomp'] = deelcomp
         context['wedstrijd'] = match
-        context['vastgesteld'] = timezone.now()
+        context['vastgesteld'] = timezone.localtime(timezone.now())
         context['is_25m1p'] = (afstand == '25')
 
         team_pk2naam = dict()
@@ -140,14 +144,14 @@ class WaarschijnlijkeDeelnemersAlsBestandView(UserPassesTestMixin, TemplateView)
             match = (CompetitieMatch
                      .objects
                      .select_related('vereniging')
-                     .get(pk=match_pk))
+                     .get(pk=match_pk,
+                          vereniging=self.functie_nu.vereniging))  # alleen van eigen vereniging
         except (ValueError, CompetitieMatch.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
-        rondes = match.regiocompetitieronde_set.select_related('regiocompetitie', 'regiocompetitie__competitie').all()
-        if len(rondes) == 0:
-            raise Http404('Verkeerde competitie')
-        ronde = rondes[0]
+        ronde = match.regiocompetitieronde_set.select_related('regiocompetitie', 'regiocompetitie__competitie').first()
+        if not ronde:
+            raise Http404('Geen competitie wedstrijd')
         deelcomp = ronde.regiocompetitie
         afstand = deelcomp.competitie.afstand
 
@@ -157,7 +161,7 @@ class WaarschijnlijkeDeelnemersAlsBestandView(UserPassesTestMixin, TemplateView)
             team_pk2naam[team.pk] = team.maak_team_naam_kort()
         # for
 
-        vastgesteld = timezone.now()
+        vastgesteld = timezone.localtime(timezone.now())
 
         sporters, teams = bepaal_waarschijnlijke_deelnemers(afstand, deelcomp, match)
 
@@ -198,6 +202,9 @@ class WaarschijnlijkeDeelnemersAlsBestandView(UserPassesTestMixin, TemplateView)
             row.append(sporter.notitie)
             writer.writerow(row)
         # for
+
+        writer.writerow([])
+        writer.writerow(['Vastgesteld op %s om %s' % (localize(vastgesteld.date()), localize(vastgesteld.time()))])
 
         return response
 
