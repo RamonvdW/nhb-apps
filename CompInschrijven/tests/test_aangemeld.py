@@ -6,7 +6,7 @@
 
 from django.test import TestCase
 from BasisTypen.models import BoogType
-from Competitie.definities import DEEL_RK, DEEL_BK
+from Competitie.definities import DEEL_RK, DEEL_BK, INSCHRIJF_METHODE_3
 from Competitie.models import Competitie, Regiocompetitie, RegiocompetitieSporterBoog, Kampioenschap
 from Competitie.operations import competities_aanmaken
 from Competitie.test_utils.tijdlijn import zet_competitie_fases, zet_competitie_fase_regio_inschrijven
@@ -29,6 +29,7 @@ class TestCompInschrijvenAangemeld(E2EHelpers, TestCase):
     url_aangemeld_alles = '/bondscompetities/deelnemen/%s/lijst-regiocompetitie/alles/'     # comp_pk
     url_aangemeld_rayon = '/bondscompetities/deelnemen/%s/lijst-regiocompetitie/rayon-%s/'  # comp_pk, rayon_pk
     url_aangemeld_regio = '/bondscompetities/deelnemen/%s/lijst-regiocompetitie/regio-%s/'  # comp_pk, regio_pk
+    url_aangemeld_regio_bestand = url_aangemeld_regio + 'als-bestand/'                      # comp_pk, regio_pk
     url_klassengrenzen = '/bondscompetities/beheer/%s/klassengrenzen-vaststellen/'          # comp_pk
     url_inschrijven = '/bondscompetities/deelnemen/leden-aanmelden/%s/'                     # comp.pk
 
@@ -116,7 +117,6 @@ class TestCompInschrijvenAangemeld(E2EHelpers, TestCase):
         hwl.save()
 
     def _doe_inschrijven(self, comp):
-
         url_inschrijven = self.url_inschrijven % comp.pk
 
         # meld een bak leden aan voor de competitie
@@ -212,6 +212,10 @@ class TestCompInschrijvenAangemeld(E2EHelpers, TestCase):
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_aangemeld_regio % (comp.pk, self.regio_101.pk))
+        self.assert403(resp)
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_aangemeld_regio_bestand % (comp.pk, self.regio_101.pk))
         self.assert403(resp)
 
     def test_overzicht_bb(self):
@@ -338,6 +342,12 @@ class TestCompInschrijvenAangemeld(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('compinschrijven/lijst-aangemeld-regio.dtl', 'plein/site_layout.dtl'))
 
+        # corner-case
+        url = self.url_aangemeld_rayon % (comp.pk, 999999)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assert404(resp, 'Rayon niet gevonden')
+
     def test_overzicht_rcl(self):
         comp = Competitie.objects.get(afstand='18')
         functie_rcl = Regiocompetitie.objects.get(competitie=comp, regio=self.regio_101).functie
@@ -371,6 +381,21 @@ class TestCompInschrijvenAangemeld(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('compinschrijven/lijst-aangemeld-regio.dtl', 'plein/site_layout.dtl'))
 
+        # regio 101, bestand
+        url = self.url_aangemeld_regio_bestand % (comp.pk, self.regio_101.pk)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assert200_is_bestand_csv(resp)
+
+        # regio 101, bestand met dagdeel
+        deelcomp = Regiocompetitie.objects.get(competitie=comp, regio=self.regio_101)
+        deelcomp.inschrijf_methode = INSCHRIJF_METHODE_3
+        deelcomp.save(update_fields=['inschrijf_methode'])
+        url = self.url_aangemeld_regio_bestand % (comp.pk, self.regio_101.pk)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assert200_is_bestand_csv(resp)
+
     def test_bad_rcl(self):
         comp = Competitie.objects.get(afstand='25')
         functie_rcl = Regiocompetitie.objects.get(competitie=comp,
@@ -399,6 +424,17 @@ class TestCompInschrijvenAangemeld(E2EHelpers, TestCase):
         url = self.url_aangemeld_regio % (comp.pk, 999999)
         resp = self.client.get(url)
         self.assert404(resp, 'Verkeerde competitie fase')
+
+        zet_competitie_fase_regio_inschrijven(comp)
+
+        url = self.url_aangemeld_regio % (comp.pk, 999999)
+        resp = self.client.get(url)
+        self.assert404(resp, 'Regio niet gevonden')
+
+        Regiocompetitie.objects.filter(regio=self.regio_101).delete()
+        url = self.url_aangemeld_regio % (comp.pk, 101)
+        resp = self.client.get(url)
+        self.assert404(resp, 'Competitie niet gevonden')
 
     @staticmethod
     def _vind_tabel_regel_met(resp, zoekterm):

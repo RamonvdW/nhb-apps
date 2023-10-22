@@ -56,7 +56,8 @@ DAGDEEL2LABEL = {
     'ZOo': ("Zo-Och", "Zondagochtend"),
     'ZOm': ("Zo-Mi", "Zondagmiddag"),
     'ZOa': ("Zo-Av", "Zondagavond"),
-    'WE': ("Weekend", "Weekend")
+    'WE': ("Weekend", "Weekend"),
+    '': ("?", "?")
 }
 
 
