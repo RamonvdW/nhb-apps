@@ -19,8 +19,8 @@ from Sporter.models import Sporter, SporterBoog
 from Sporter.operations import get_sporterboog
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
-from Wedstrijden.definities import (INSCHRIJVING_STATUS_DEFINITIEF, WEDSTRIJD_STATUS_GEACCEPTEERD,
-                                    WEDSTRIJD_DISCIPLINE_INDOOR,
+from Wedstrijden.definities import (WEDSTRIJD_STATUS_GEACCEPTEERD, WEDSTRIJD_DISCIPLINE_INDOOR,
+                                    INSCHRIJVING_STATUS_RESERVERING_MANDJE, INSCHRIJVING_STATUS_DEFINITIEF,
                                     KWALIFICATIE_CHECK_GOED, KWALIFICATIE_CHECK_NOG_DOEN)
 from Wedstrijden.models import Wedstrijd, WedstrijdSessie, WedstrijdInschrijving, Kwalificatiescore
 import datetime
@@ -153,7 +153,7 @@ class TestWedstrijdInschrijvenKwalificatieScores(E2EHelpers, TestCase):
 
         inschrijving1 = WedstrijdInschrijving(
                             wanneer=now,
-                            status=INSCHRIJVING_STATUS_DEFINITIEF,
+                            status=INSCHRIJVING_STATUS_RESERVERING_MANDJE,
                             wedstrijd=wedstrijd,
                             sessie=sessie,
                             sporterboog=self.sporterboog1_r,
@@ -186,7 +186,7 @@ class TestWedstrijdInschrijvenKwalificatieScores(E2EHelpers, TestCase):
         # log in as sporter
         self.e2e_login(self.account_sporter1)
 
-        url = self.url_kwalificatie_scores % self.inschrijving1.pk
+        url = self.url_kwalificatie_scores % self.inschrijving1.pk      # status = mandje
 
         with self.assert_max_queries(20):
             resp = self.client.get(url)
@@ -246,6 +246,9 @@ class TestWedstrijdInschrijvenKwalificatieScores(E2EHelpers, TestCase):
         self.assertIn('Check status automatisch terug gezet', score.log)
         self.assertEqual(score.check_status, KWALIFICATIE_CHECK_NOG_DOEN)
 
+        self.inschrijving1.status = INSCHRIJVING_STATUS_DEFINITIEF
+        self.inschrijving1.save(update_fields=['status'])
+
         # maak een extra record te veel aan
         score.pk = None
         score.save()
@@ -274,6 +277,23 @@ class TestWedstrijdInschrijvenKwalificatieScores(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('wedstrijdinschrijven/inschrijven-kwalificatie-scores.dtl', 'plein/site_layout.dtl'))
+
+        # te dicht op de wedstrijd
+        self.wedstrijd.datum_begin = timezone.now().date()
+        self.wedstrijd.save(update_fields=['datum_begin'])
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('wedstrijdinschrijven/inschrijven-kwalificatie-scores.dtl', 'plein/site_layout.dtl'))
+
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'score1_datum': self.kwalificatie_datum,
+                                          'score1_naam': 'Test naam',
+                                          'score1_waar': 'Test plaats',
+                                          'score1_result': '123'})
+        self.assert404(resp, 'Mag niet meer aanpassen')
 
         # niet de sporter (geen account) en niet de koper, dan mag je niet wijzigen
         self.sporter1.account = None

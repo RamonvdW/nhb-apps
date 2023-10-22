@@ -52,6 +52,11 @@
                 <p>Je kan je scores van 180 pijlen opgeven. Het totaal bepaalt je ranking op de deelnemerslijst.</p>
                 <p>Je kan 3 resultaten van een 60 pijlen A-status Indoor wedstrijd doorgeven.<br>De wedstrijden moeten tussen {{ begin_datum }} en {{ eind_datum }} gehouden zijn.</p>
                 <p>Je mag ook 4 scores uit de bondscompetitie Indoor gebruiken. Dit gaat automatisch.{% if indoor_scores %}<br>(jouw 4 beste scores op dit moment zijn: {{ indoor_scores }}){% else %}<br>(we hebben nog geen scores gevonden){% endif %}</p>
+                {% if aanpassen_mag %}
+                    <p>De kwalificatiescores mogen aangepast worden voor {{ aanpassen_mag_tot }}.</p>
+                {% else %}
+                    <p>De kwalificatiescores kunnen niet meer aangepast worden.</p>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -70,60 +75,100 @@
     <div class="row-sv-blauw">
         <div class="col s12 l10 offset-l1 xl8 offset-xl2">
 
-            <!-- dialoog venster -->
-            <div class="white left-align z-depth-3">
-                <div class="form-padding">
-                    <form action="{{ url_opslaan }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
-                        {% csrf_token %}
+            {% if aanpassen_mag %}
 
-                        <table>
-                            {% for score in kwalificatie_scores %}
-                                <tr>
-                                    <td colspan="2"><h6 class="sv-blauw-text center">Jouw resultaat van een 60-pijlen Indoor A-status wedstrijd</h6></td>
-                                </tr>
+                <!-- dialoog venster -->
+                <div class="white left-align{% if aanpassen_mag %} z-depth-3{% endif %}">
+                    <div class="form-padding">
+                        <form action="{{ url_opslaan }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
+                            {% csrf_token %}
 
-                                <tr>
-                                    <th>Datum</th>
-                                    <td>
-                                        <input type="hidden" id="{{ score.datum_id }}b" name="{{ score.name_str }}_datum">
-                                        <input type="text" class="nl_datepicker" id="{{ score.datum_id }}" onchange="converteer_datum('{{ score.datum_id }}', '{{ score.datum_id }}b')">
-                                    </td>
-                                </tr>
+                            <table>
+                                {% for score in kwalificatie_scores %}
+                                    <tr>
+                                        <td colspan="2"><h6 class="sv-blauw-text center">Jouw resultaat van een 60-pijlen Indoor A-status wedstrijd</h6></td>
+                                    </tr>
 
-                                <tr>
-                                    <th>Beschrijving</th>
-                                    <td>
-                                        <input type="text" name="{{ score.name_str }}_naam" value="{{ score.naam }}" maxlength="50" placeholder="Hoe heet de wedstrijd?">
-                                    </td>
-                                </tr>
+                                    <tr>
+                                        <th>Datum</th>
+                                        <td>
+                                            <input type="hidden" id="{{ score.datum_id }}b" name="{{ score.name_str }}_datum">
+                                            <input type="text" class="nl_datepicker" id="{{ score.datum_id }}" onchange="converteer_datum('{{ score.datum_id }}', '{{ score.datum_id }}b')">
+                                        </td>
+                                    </tr>
 
-                                <tr>
-                                    <th>Waar</th>
-                                    <td>
-                                        <input type="text" name="{{ score.name_str }}_waar" value="{{ score.waar }}" maxlength="50" placeholder="Plaats (en eventueel land)">
-                                    </td>
-                                </tr>
+                                    <tr>
+                                        <th>Beschrijving</th>
+                                        <td>
+                                            <input type="text" name="{{ score.name_str }}_naam" value="{{ score.naam }}" maxlength="50" placeholder="Hoe heet de wedstrijd?">
+                                        </td>
+                                    </tr>
 
-                                <tr>
-                                    <th>Resultaat (totaal 60 pijlen)</th>
-                                    <td>
-                                        <input type="number" name="{{ score.name_str }}_result" value="{{ score.resultaat }}" min="0" max="600">
-                                    </td>
-                                </tr>
-                            {% endfor %}
+                                    <tr>
+                                        <th>Waar</th>
+                                        <td>
+                                            <input type="text" name="{{ score.name_str }}_waar" value="{{ score.waar }}" maxlength="50" placeholder="Plaats (en eventueel land)">
+                                        </td>
+                                    </tr>
 
-                        </table>
+                                    <tr>
+                                        <th>Resultaat (totaal 60 pijlen)</th>
+                                        <td>
+                                            <input type="number" name="{{ score.name_str }}_result" value="{{ score.resultaat }}" min="0" max="600">
+                                        </td>
+                                    </tr>
+                                {% endfor %}
 
+                            </table>
 
-                        <div class="center" style="margin-top:30px">
-                            <!-- button -->
-                            <button class="btn-sv-rood" id="submit_knop" type="submit">
-                                <i class="notranslate material-icons-round left">check</i>Opslaan</button>
-                        </div>
-
-                    </form>
+                            <div class="center" style="margin-top:30px">
+                                <!-- button -->
+                                <button class="btn-sv-rood" id="submit_knop" type="submit">
+                                    <i class="notranslate material-icons-round left">check</i>Opslaan</button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
-            </div>
+
+            {% else %}
+
+                <!-- blauwe balk met informatie in tabel-vorm:  label - info -->
+                <div class="row-sv-blauw">
+                    <div class="col s12 l10 offset-l1">
+                        <div class="white" style="padding:20px">
+                            <table>
+                                {% for score in kwalificatie_scores %}
+                                    <tr>
+                                        <td colspan="2"><h6 class="sv-blauw-text center">Jouw resultaat van een 60-pijlen Indoor A-status wedstrijd</h6></td>
+                                    </tr>
+
+                                    <tr>
+                                        <th>Datum</th>
+                                        <td>{{ score.datum }}
+                                    </tr>
+
+                                    <tr>
+                                        <th>Beschrijving</th>
+                                        <td>{{ score.naam }}</td>
+                                    </tr>
+
+                                    <tr>
+                                        <th>Waar</th>
+                                        <td>{{ score.waar }}</td>
+                                    </tr>
+
+                                    <tr>
+                                        <th>Resultaat (totaal 60 pijlen)</th>
+                                        <td>{{ score.resultaat }}</td>
+                                    </tr>
+                                {% endfor %}
+
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            {% endif %}
 
         </div>
     </div>
