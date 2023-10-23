@@ -52,8 +52,8 @@
                 <p>Je kan je scores van 180 pijlen opgeven. Het totaal bepaalt je ranking op de deelnemerslijst.</p>
                 <p>Je kan 3 resultaten van een 60 pijlen A-status Indoor wedstrijd doorgeven.<br>De wedstrijden moeten tussen {{ begin_datum }} en {{ eind_datum }} gehouden zijn.</p>
                 <p>Je mag ook 4 scores uit de bondscompetitie Indoor gebruiken. Dit gaat automatisch.{% if indoor_scores %}<br>(jouw 4 beste scores op dit moment zijn: {{ indoor_scores }}){% else %}<br>(we hebben nog geen scores gevonden){% endif %}</p>
-                {% if aanpassen_mag %}
-                    <p>De kwalificatiescores mogen aangepast worden voor {{ aanpassen_mag_tot }}.</p>
+                {% if mag_aanpassen %}
+                    <p>De kwalificatiescores mogen aangepast worden tot en met {{ aanpassen_mag_tot }}.</p>
                 {% else %}
                     <p>De kwalificatiescores kunnen niet meer aangepast worden.</p>
                 {% endif %}
@@ -75,10 +75,10 @@
     <div class="row-sv-blauw">
         <div class="col s12 l10 offset-l1 xl8 offset-xl2">
 
-            {% if aanpassen_mag %}
+            {% if mag_aanpassen %}
 
                 <!-- dialoog venster -->
-                <div class="white left-align{% if aanpassen_mag %} z-depth-3{% endif %}">
+                <div class="white left-align{% if mag_aanpassen %} z-depth-3{% endif %}">
                     <div class="form-padding">
                         <form action="{{ url_opslaan }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
                             {% csrf_token %}

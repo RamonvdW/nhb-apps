@@ -69,7 +69,7 @@ class KwalificatieScoresOpgevenView(UserPassesTestMixin, TemplateView):
         context['wedstrijd'] = wedstrijd = inschrijving.wedstrijd
         wedstrijd.plaats_str = wedstrijd.locatie.plaats
 
-        wedstrijd.inschrijven_voor = wedstrijd.datum_begin - datetime.timedelta(days=wedstrijd.inschrijven_tot)
+        wedstrijd.inschrijven_voor = wedstrijd.datum_begin - datetime.timedelta(days=wedstrijd.inschrijven_tot+1)
         context['aanpassen_mag_tot'] = wedstrijd.inschrijven_voor
         context['mag_aanpassen'] = mag_aanpassen = timezone.now().date() < wedstrijd.inschrijven_voor
 
