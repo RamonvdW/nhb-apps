@@ -68,6 +68,9 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.functie_wl.vereniging = ver
         self.functie_wl.save()
 
+        self.functie_cs = maak_functie("CS test", "CS")
+        self.functie_cs.save()
+
         # maak een test lid aan
         sporter = Sporter(
                         lid_nr=100001,
@@ -490,6 +493,23 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.assertContains(resp, "Sporter")
         urls = self._get_wissel_urls(resp)
         self.assertIn(self.url_activeer_functie % self.functie_sup.pk, urls)
+        self.assertIn(self.url_activeer_rol % 'sporter', urls)
+
+    def test_cs(self):
+        # CS = Commissie Scheidsrechters
+        self.functie_cs.accounts.add(self.account_normaal)
+        self.e2e_account_accepteert_vhpg(self.account_normaal)
+        self.e2e_login_and_pass_otp(self.account_normaal)
+        self.e2e_wissel_naar_functie(self.functie_cs)
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_wissel_van_rol)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('functie/wissel-van-rol.dtl', 'plein/site_layout.dtl'))
+        self.assertContains(resp, "Sporter")
+        urls = self._get_wissel_urls(resp)
+        self.assertIn(self.url_activeer_functie % self.functie_cs.pk, urls)
         self.assertIn(self.url_activeer_rol % 'sporter', urls)
 
     def test_functie_geen_rol(self):

@@ -15,11 +15,11 @@ def add_vereniging_new(apps, _):
 
     # maak een cache
     ver_nr2ver = dict()     # [ver_nr] = Vereniging()
-    for ver in ver_klas.objects.all():
+    for ver in ver_klas.objects.all():          # pragma: no cover
         ver_nr2ver[ver.ver_nr] = ver
     # for
 
-    for obj in fix_klas.objects.exclude(vereniging=None).select_related('vereniging'):
+    for obj in fix_klas.objects.exclude(vereniging=None).select_related('vereniging'):      # pragma: no cover
         obj.vereniging_new = ver_nr2ver[obj.vereniging.ver_nr]
         obj.save(update_fields=['vereniging_new'])
     # for
