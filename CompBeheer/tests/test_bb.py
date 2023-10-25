@@ -11,7 +11,7 @@ from Competitie.models import (Competitie, Regiocompetitie, Kampioenschap,
                                CompetitieIndivKlasse, CompetitieTeamKlasse, CompetitieMutatie)
 from Competitie.operations import competities_aanmaken, aanvangsgemiddelden_vaststellen_voor_afstand
 from Competitie.test_utils.tijdlijn import zet_competitie_fase_regio_prep, zet_competitie_fase_afsluiten
-from Functie.operations import maak_functie
+from Functie.tests.helpers import maak_functie
 from Geo.models import Regio
 from HistComp.definities import HISTCOMP_TYPE_18, HIST_BOGEN_DEFAULT
 from HistComp.models import HistCompSeizoen, HistCompRegioIndiv
@@ -425,7 +425,7 @@ class TestCompBeheerBB(E2EHelpers, TestCase):
                          .objects
                          .select_related('competitie', 'regio')
                          .filter(regio__regio_nr=101)):
-            if deelcomp.competitie.afstand == '18':
+            if deelcomp.competitie.is_indoor():
                 self.assertEqual(deelcomp.inschrijf_methode, INSCHRIJF_METHODE_1)
             else:
                 self.assertEqual(deelcomp.inschrijf_methode, INSCHRIJF_METHODE_2)
@@ -436,7 +436,7 @@ class TestCompBeheerBB(E2EHelpers, TestCase):
                          .select_related('competitie', 'regio')
                          .filter(regio__regio_nr=105)):
             self.assertEqual(deelcomp.inschrijf_methode, INSCHRIJF_METHODE_3)
-            if deelcomp.competitie.afstand == '18':
+            if deelcomp.competitie.is_indoor():
                 self.assertEqual(deelcomp.toegestane_dagdelen, dagdelen_105_18)
             else:
                 self.assertEqual(deelcomp.toegestane_dagdelen, dagdelen_105_25)

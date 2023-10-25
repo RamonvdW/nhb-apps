@@ -241,13 +241,13 @@ class TestData(object):
 
         self._accounts_beheerders = list()      # 1 per vereniging, voor BKO, RKO, RCL
 
-        self.afkorting2teamtype_nhb = dict()    # [team afkorting] = TeamType()
+        self.afkorting2teamtype_khsn = dict()   # [team afkorting] = TeamType()
 
         self.afkorting2boogtype_khsn = dict()   # [boog afkorting] = BoogType()
         self.afkorting2boogtype_ifaa = dict()   # [boog afkorting] = BoogType()
 
         for teamtype in get_organisatie_teamtypen(ORGANISATIE_KHSN):
-            self.afkorting2teamtype_nhb[teamtype.afkorting] = teamtype
+            self.afkorting2teamtype_khsn[teamtype.afkorting] = teamtype
         # for
         del teamtype
         for boogtype in get_organisatie_boogtypen(ORGANISATIE_KHSN):
@@ -860,7 +860,7 @@ class TestData(object):
         competities_aanmaken(begin_jaar)
 
         for comp in Competitie.objects.all():
-            if comp.afstand == '18':
+            if comp.is_indoor():
                 self.comp18 = comp
             else:
                 self.comp25 = comp
@@ -871,7 +871,7 @@ class TestData(object):
                          .select_related('competitie',
                                          'regio')
                          .all()):
-            is_18 = deelcomp.competitie.afstand == '18'
+            is_18 = deelcomp.competitie.is_indoor()
             regio_nr = deelcomp.regio.regio_nr
             if is_18:
                 self.deelcomp18_regio[regio_nr] = deelcomp
@@ -885,7 +885,7 @@ class TestData(object):
                          .select_related('competitie',
                                          'rayon')
                          .all()):
-            is_18 = deelkamp.competitie.afstand == '18'
+            is_18 = deelkamp.competitie.is_indoor()
 
             if deelkamp.deel == DEEL_BK:
                 if is_18:
@@ -950,7 +950,7 @@ class TestData(object):
                        .all()):
 
             afkorting = klasse.boogtype.afkorting
-            if klasse.competitie.afstand == '18':
+            if klasse.competitie.is_indoor():
                 klassen = self.comp18_klassen_indiv
             else:
                 klassen = self.comp25_klassen_indiv
@@ -969,7 +969,7 @@ class TestData(object):
 
             afkorting = klasse.team_type.afkorting
 
-            if klasse.competitie.afstand == '18':
+            if klasse.competitie.is_indoor():
                 klassen = self.comp18_klassen_teams
                 klassen_rk_bk = self.comp18_klassen_rk_bk_teams
             else:
@@ -1132,7 +1132,7 @@ class TestData(object):
                             regiocompetitie=deelcomp,
                             vereniging=ver,
                             volg_nr=next_nr,
-                            team_type=self.afkorting2teamtype_nhb[afkorting],
+                            team_type=self.afkorting2teamtype_khsn[afkorting],
                             team_naam='%s-%s-%s' % (ver_nr, next_nr, afkorting),
                             team_klasse=klasse)
                 bulk.append(team)
@@ -1170,7 +1170,7 @@ class TestData(object):
     def maak_poules(self, deelcomp):
         """ Maak poules en vul deze met teams """
 
-        if deelcomp.competitie.afstand == '18':
+        if deelcomp.competitie.is_indoor():
             regioteams = self.comp18_regioteams
             poules = self.comp18_poules
         else:
@@ -1423,7 +1423,7 @@ class TestData(object):
                                 kampioenschap=deelkamp,
                                 vereniging=ver,
                                 volg_nr=next_nr,
-                                team_type=self.afkorting2teamtype_nhb[afkorting],
+                                team_type=self.afkorting2teamtype_khsn[afkorting],
                                 team_naam='rk-%s-%s-%s' % (ver_nr, next_nr, afkorting),
                                 # team_klasse wordt later bepaald door de BKO
                                 aanvangsgemiddelde=ag)
@@ -1548,7 +1548,7 @@ class TestData(object):
             # vertaal boogtype naar teamtype
             if afkorting in ('R', 'BB'):                                            # pragma: no branch
                 afkorting += '2'            # R2, BB2
-            teamtype = self.afkorting2teamtype_nhb[afkorting]
+            teamtype = self.afkorting2teamtype_khsn[afkorting]
 
             aantal = len(deelnemers)
             while aantal > 0:

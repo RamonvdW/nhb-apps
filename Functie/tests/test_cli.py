@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from Functie.operations import maak_functie
+from Functie.tests.helpers import maak_functie
 from Geo.models import Regio
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -203,19 +203,32 @@ class TestFunctieCli(E2EHelpers, TestCase):
 
         with self.assert_max_queries(59):
             f1, f2 = self.run_management_command('check_beheerders')
+        # print('f2:', f2.getvalue())
         self.assertTrue('[100042] Kees Pijlpunt' in f2.getvalue())
         self.assertTrue('LET OP: geen actief lid' in f2.getvalue())
+
+        # restore
+        sporter.is_actief_lid = True
+        sporter.save(update_fields=['is_actief_lid'])
 
         # maak een account BB, dan wordt de functie-check niet gedaan
         self.account_normaal.is_staff = True
         self.account_normaal.save(update_fields=['is_staff'])
-        sporter.is_actief_lid = True
-        sporter.save(update_fields=['is_actief_lid'])
 
-        with self.assert_max_queries(55):
-            f1, f2 = self.run_management_command('check_beheerders', '--otp_uit')
+        with self.assert_max_queries(59):
+            f1, f2 = self.run_management_command('check_beheerders')
         # print('f1:', f1.getvalue())
         # print('f2:', f2.getvalue())
         self.assertFalse('[100042] Kees Pijlpunt' in f2.getvalue())
+
+        # restore
+        self.account_normaal.is_staff = False
+        self.account_normaal.save(update_fields=['is_staff'])
+
+        with self.assert_max_queries(56):
+            f1, f2 = self.run_management_command('check_beheerders', '--otp_uit')
+        # print('f1:', f1.getvalue())
+        # print('f2:', f2.getvalue())
+        self.assertTrue('[100042] Kees Pijlpunt' in f2.getvalue())
 
 # end of file

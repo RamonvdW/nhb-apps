@@ -13,7 +13,7 @@ from Score.models import Score, Uitslag
 from Sporter.models import Sporter, SporterBoog
 from Vereniging.models import Vereniging
 from Wedstrijden.definities import (WEDSTRIJD_STATUS_CHOICES, WEDSTRIJD_STATUS_ONTWERP, WEDSTRIJD_STATUS_TO_STR,
-                                    WEDSTRIJD_BEGRENZING, WEDSTRIJD_BEGRENZING_LANDELIJK,
+                                    WEDSTRIJD_BEGRENZING, WEDSTRIJD_BEGRENZING_WERELD,
                                     WEDSTRIJD_DISCIPLINES, WEDSTRIJD_DISCIPLINE_OUTDOOR,
                                     WEDSTRIJD_WA_STATUS, WEDSTRIJD_WA_STATUS_B,
                                     WEDSTRIJD_KORTING_SOORT_CHOICES, WEDSTRIJD_KORTING_VERENIGING,
@@ -109,7 +109,7 @@ class Wedstrijd(models.Model):
     locatie = models.ForeignKey(Locatie, on_delete=models.PROTECT)
 
     # begrenzing
-    begrenzing = models.CharField(max_length=1, default=WEDSTRIJD_BEGRENZING_LANDELIJK, choices=WEDSTRIJD_BEGRENZING)
+    begrenzing = models.CharField(max_length=1, default=WEDSTRIJD_BEGRENZING_WERELD, choices=WEDSTRIJD_BEGRENZING)
 
     # WA, IFAA of nationaal
     organisatie = models.CharField(max_length=1, choices=ORGANISATIES, default=ORGANISATIE_WA)

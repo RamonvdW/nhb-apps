@@ -267,7 +267,7 @@ class Command(BaseCommand):
 
             comp = deelcomp.competitie
 
-            if comp.afstand == '18':
+            if comp.is_indoor():
                 pijlen_per_ronde = 30
                 max_score = 300
                 comp_afstand = 18

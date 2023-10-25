@@ -80,7 +80,7 @@ class RegistreerGastView(TemplateView):
         with transaction.atomic():
             tracker, _ = GastRegistratieRateTracker.objects.get_or_create(from_ip=from_ip)
 
-            if tracker.teller_minuut <= 5 and tracker.teller_uur <= 30:
+            if tracker.teller_minuut <= 3 and tracker.teller_uur <= 10:
                 mag_door = True
 
                 if tracker.minuut != minuut:

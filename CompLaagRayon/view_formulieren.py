@@ -79,7 +79,7 @@ class DownloadRkFormulierView(UserPassesTestMixin, TemplateView):
 
         comp = deelkamp.competitie
         # TODO: check fase
-        if comp.afstand == '18':
+        if comp.is_indoor():
             aantal_pijlen = 30
             if match.locatie:
                 context['aantal_banen'] = match.locatie.banen_18m
@@ -286,7 +286,7 @@ class FormulierIndivAlsBestandView(UserPassesTestMixin, TemplateView):
 
         aantal_banen = 16
         if match.locatie:
-            if comp.afstand == '18':
+            if comp.is_indoor():
                 aantal_banen = match.locatie.banen_18m
             else:
                 aantal_banen = match.locatie.banen_25m
@@ -305,7 +305,7 @@ class FormulierIndivAlsBestandView(UserPassesTestMixin, TemplateView):
             lid2voorkeuren[voorkeuren.sporter.lid_nr] = voorkeuren
         # for
 
-        if comp.afstand == '18':
+        if comp.is_indoor():
             excel_name = 'template-excel-rk-indoor-indiv.xlsx'
             ws_name = 'Voorronde'
         else:
@@ -500,7 +500,7 @@ class FormulierTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
         comp = deelkamp.competitie
         # TODO: check fase
 
-        if comp.afstand == '18':
+        if comp.is_indoor():
             aantal_pijlen = 30
         else:
             aantal_pijlen = 25
@@ -522,7 +522,7 @@ class FormulierTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
         fname += klasse_str.lower().replace(' ', '-')
         fname += '.xlsx'
 
-        if comp.afstand == '18':
+        if comp.is_indoor():
             excel_name = 'template-excel-rk-indoor-teams.xlsx'
         else:
             excel_name = 'template-excel-rk-25m1pijl-teams.xlsx'

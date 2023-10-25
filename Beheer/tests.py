@@ -71,7 +71,7 @@ BEHEER_PAGINAS = (
     '/beheer/Registreer/gastregistratie/',
     '/beheer/Registreer/gastregistratieratetracker/',
     '/beheer/Scheidsrechter/scheidsbeschikbaarheid/',
-    '/beheer/Scheidsrechter/wedstrijddagscheids/',
+    '/beheer/Scheidsrechter/wedstrijddagscheidsrechters/',
     '/beheer/Score/aanvangsgemiddelde/',
     '/beheer/Score/aanvangsgemiddeldehist/',
     '/beheer/Score/score/',

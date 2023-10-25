@@ -55,44 +55,65 @@
     <div class="row-sv-blauw">
         <div class="col s12">
             <table class="white">
-                <thead>
+                {% if url_init_planning %}
+                    <thead>
+                        <tr>
+                            <th>Beschrijving</th>
+                            <th class="center">Wedstrijden</th>
+                            <th class="center"><!-- kolom voor knoppen --></th>
+                        </tr>
+                    </thead>
+
+                    <tr>
+                        <td colspan="3" class="center">
+                            <form action="{{ url_init_planning }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
+                                {% csrf_token %}
+                                <button class="btn-sv-rood" type="submit" id="submit_knop">Begin planning</button>
+                            </form>
+                        </td>
+                    </tr>
+
+                {% else %}
+
+                    <thead>
+                        <tr>
+                            {% if clusters %}
+                                <th class="center">Cluster</th>
+                            {% endif %}
+                            <th>Beschrijving</th>
+                            <th class="center">Wedstrijden</th>
+                            <th class="center"><!-- kolom voor knoppen --></th>
+                        </tr>
+                    </thead>
+
                     <tr>
                         {% if clusters %}
-                            <th class="center">Cluster</th>
+                            <td class="center">{{ regio.regio_nr }}</td>
                         {% endif %}
-                        <th>Beschrijving</th>
-                        <th class="center">Wedstrijden</th>
-                        <th class="center"><!-- kolom voor knoppen --></th>
-                    </tr>
-                </thead>
-
-                <tr>
-                    {% if clusters %}
-                        <td class="center">{{ regio.regio_nr }}</td>
-                    {% endif %}
-                    <td>{{ regio_ronde.beschrijving }}</td>
-                    <td class="center">{{ regio_ronde.wedstrijden_count }}</td>
-
-                    <td class="center">
-                        <a class="btn-sv-rood" href="{{ regio_ronde.url }}">
-                            <img src="{% static 'plein/zoom_in.svg' %}" height="36" alt="Details">
-                        </a>
-                    </td>
-                </tr>
-
-                {% for cluster in clusters %}
-                    <tr>
-                        <td class="center">{{ cluster.cluster_code }}</td>
-                        <td>{{ cluster.naam }}</td>
-                        <td class="center">{{ cluster.wedstrijden_count }}</td>
+                        <td>{{ regio_ronde.beschrijving }}</td>
+                        <td class="center">{{ regio_ronde.wedstrijden_count }}</td>
 
                         <td class="center">
-                            <a class="btn-sv-rood" href="{{ cluster.ronde_url }}">
+                            <a class="btn-sv-rood" href="{{ regio_ronde.url }}">
                                 <img src="{% static 'plein/zoom_in.svg' %}" height="36" alt="Details">
                             </a>
                         </td>
                     </tr>
-                {% endfor %}
+
+                    {% for cluster in clusters %}
+                        <tr>
+                            <td class="center">{{ cluster.cluster_code }}</td>
+                            <td>{{ cluster.naam }}</td>
+                            <td class="center">{{ cluster.wedstrijden_count }}</td>
+
+                            <td class="center">
+                                <a class="btn-sv-rood" href="{{ cluster.ronde_url }}">
+                                    <img src="{% static 'plein/zoom_in.svg' %}" height="36" alt="Details">
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% endif %}
             </table>
         </div>
     </div>

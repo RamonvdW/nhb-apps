@@ -160,7 +160,7 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('functie/wissel-van-rol.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, 'Gebruiker')
-        self.assertContains(resp, 'Manager Competitiezaken')
+        self.assertContains(resp, 'Manager MH')
 
     def test_wissel_geblokkeerd(self):
         # login als admin

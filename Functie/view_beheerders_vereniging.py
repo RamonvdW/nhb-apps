@@ -42,6 +42,7 @@ class BeheerdersVerenigingView(UserPassesTestMixin, ListView):
         unsorted = list()
         for obj in (Functie
                     .objects
+                    .exclude(rol='MWW')     # is ook gekoppeld aan een vereniging, maar hebben we hier niet nodig
                     .filter(vereniging=functie_nu.vereniging)):
 
             # zet beheerders en urls voor de knoppen

@@ -68,7 +68,7 @@
                     <tr>
                         <td>{{ functie.vereniging }}</td>
                         <td>{{ functie.beschrijving }}</td>
-                        <td>{{ functie.bevestigde_email }}</td>
+                        <td><code>{{ functie.bevestigde_email }}</code></td>
                     </tr>
                 {% endfor %}
             </table>

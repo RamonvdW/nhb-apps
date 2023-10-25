@@ -179,7 +179,7 @@ class PlanningView(UserPassesTestMixin, TemplateView):
 
             obj.is_overbelast = False
             if obj.locatie:
-                if deelkamp.competitie.afstand == '18':
+                if deelkamp.competitie.is_indoor():
                     obj.capaciteit = obj.locatie.max_sporters_18m
                 else:
                     obj.capaciteit = obj.locatie.max_sporters_25m
@@ -412,7 +412,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
             raise Http404('Geen BK wedstrijd')
         deelkamp = deelkamps[0]
         comp = deelkamp.competitie
-        is_25m = (comp.afstand == '25')
+        is_25m = (comp.is_25m1pijl())
 
         # is dit de beheerder?
         if deelkamp.functie != self.functie_nu:
@@ -510,7 +510,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
             raise Http404('Niet de beheerder')
 
         comp = deelkamp.competitie
-        is_25m = (comp.afstand == '25')
+        is_25m = (comp.is_25m1pijl())
 
         # weekdag is een cijfer van 0 tm 6
         # aanvang bestaat uit vier cijfers, zoals 0830
@@ -686,7 +686,7 @@ class WijzigLimietenView(UserPassesTestMixin, TemplateView):
             raise Http404('Niet de beheerder')
 
         comp = deelkamp.competitie
-        if comp.afstand == '25':
+        if comp.is_25m1pijl():
             indiv_limieten = settings.COMPETITIE_25M_INDIV_LIMIETEN
             teams_limieten = settings.COMPETITIE_25M_TEAMS_LIMIETEN
         else:
@@ -775,7 +775,7 @@ class WijzigLimietenView(UserPassesTestMixin, TemplateView):
             raise Http404('Niet de beheerder')
 
         comp = deelkamp.competitie
-        if comp.afstand == '25':
+        if comp.is_25m1pijl():
             indiv_limieten = settings.COMPETITIE_25M_INDIV_LIMIETEN
             teams_limieten = settings.COMPETITIE_25M_TEAMS_LIMIETEN
         else:

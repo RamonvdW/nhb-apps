@@ -6,7 +6,7 @@
 
 from django.test import TestCase
 from django.utils import timezone
-from Functie.operations import maak_functie
+from Functie.tests.helpers import maak_functie
 from Geo.models import Regio
 from Locatie.models import Locatie
 from Wedstrijden.definities import WEDSTRIJD_STATUS_GEACCEPTEERD

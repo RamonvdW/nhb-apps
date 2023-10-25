@@ -147,7 +147,7 @@ class RegioTeamsTemplateView(TemplateView):
             context['rayon'] = self.functie_nu.regio.rayon
             context['regio'] = self.functie_nu.regio
 
-        if comp.afstand == '18':
+        if comp.is_indoor():
             aantal_pijlen = 30
         else:
             aantal_pijlen = 25
@@ -341,7 +341,7 @@ class RegioTeamsAlsBestand(UserPassesTestMixin, View):
         comp = deelcomp.competitie
         comp.bepaal_fase()
 
-        if comp.afstand == '18':
+        if comp.is_indoor():
             aantal_pijlen = 30
         else:
             aantal_pijlen = 25

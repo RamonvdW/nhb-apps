@@ -28,7 +28,7 @@
 
         {% include 'plein/site_layout_fonts.dtl' %}
 
-        <link rel="stylesheet" href="{% static 'css/materialize-new-181.css' %}">
+        <link rel="stylesheet" href="{% static 'css/materialize-new-212.css' %}">
 
         {% include 'plein/site_layout_favicons.dtl' %}
 
@@ -66,11 +66,11 @@
                         {% if menu_voornaam %}
                             <li>
                                 <!-- position:relative + z-index=2: knop boven op het logo -->
-                                <a href="#" class="btn-sv-rood dropdown-trigger" data-target="navbar-dropdown" style="position:relative; z-index:2; margin-top:14px">
+                                <button class="btn-sv-rood dropdown-trigger" data-target="navbar-dropdown" style="position:relative; z-index:2; margin-top:14px; margin-right:15px" aria-label="Menu">
                                     <span class="hide-on-small-only">{{ menu_voornaam|escape }}</span>
                                     <i class="notranslate material-icons-round right hide-on-small-only" style="line-height:36px">expand_more</i>
                                     <i class="notranslate material-icons-round       hide-on-med-and-up" style="line-height:36px">expand_more</i>
-                                </a>
+                                </button>
                             </li>
                         {% elif not verberg_login_knop %}
                             <li>
@@ -142,9 +142,13 @@
             {% block broodkruimels %}
                 {% if kruimels %}
                     <div style="padding:10px; display:flex">
-                        <button class="broodkruimels-btn-back" onclick="history.go(-1)">
-                            <!--svg xmlns="http://www.w3.org/2000/svg" viewBox="0 96 960 960" height="25" width="25"><path d="M447 875 169 597q-5-5-7-10t-2-11q0-6 2-11t7-10l279-279q8-8 20-8t21 9q9 9 9 21t-9 21L262 546h496q13 0 21.5 8.5T788 576q0 13-8.5 21.5T758 606H262l228 228q8 8 8 20t-9 21q-9 9-21 9t-21-9Z"/></svg-->
-                            <i class="notranslate material-icons-round">arrow_back</i>
+                        <button class="broodkruimels-btn-back" onclick="history.go(-1)" aria-label="Terug">
+                            <!-- embedding the svg results in quicker rendering
+                                 (no waiting for the icons fonts to load) -->
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-arrow-left-square" viewBox="0 0 16 16">
+                                <!-- source: https://github.com/twbs/icons (arrow left square) -->
+                                <path d="M15 2a1 1 0 0 0-1-1H2a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V2zM0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2zm11.5 5.5a.5.5 0 0 1 0 1H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5H11.5z"/>
+                            </svg>
                         </button>
 
                         <!--div class="valign-wrapper" style="height:25px" -->

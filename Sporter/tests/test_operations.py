@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from Functie.operations import maak_functie
+from Functie.tests.helpers import maak_functie
 from Geo.models import Regio, Rayon
 from Sporter.models import Sporter
 from Sporter.operations import get_request_regio_nr, get_request_rayon_nr

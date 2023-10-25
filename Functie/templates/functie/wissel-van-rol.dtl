@@ -177,7 +177,7 @@
                         {% for obj in alle_18 %}
                             <form style="display:inline" action="{{ obj.url }}" method="post" onsubmit="document.getElementById('submit_knop{{ obj.pk }}').disabled=true; return true;">
                                 {% csrf_token %}
-                                <button class="btn-sv-rood" id="submit_knop{{ obj.pk }}" type="submit">{{ obj.tekst_kort }}</button>
+                                <button class="btn-sv-rood" style="margin:1px" id="submit_knop{{ obj.pk }}" type="submit">{{ obj.tekst_kort }}</button>
                             </form>
                             {% if obj.do_break_selective %}<span class="hide-on-large-and-up"><br></span>{% endif %}
                             {% if obj.do_break %}<br>{% endif %}
@@ -194,7 +194,7 @@
                         {% for obj in alle_25 %}
                             <form style="display:inline" action="{{ obj.url }}" method="post" onsubmit="document.getElementById('submit_knop{{ obj.pk }}').disabled=true; return true;">
                                 {% csrf_token %}
-                                <button class="btn-sv-blauw" id="submit_knop{{ obj.pk }}" type="submit">{{ obj.tekst_kort }}</button>
+                                <button class="btn-sv-blauw" style="margin:1px" id="submit_knop{{ obj.pk }}" type="submit">{{ obj.tekst_kort }}</button>
                             </form>
                             {% if obj.do_break_selective %}<span class="hide-on-large-and-up"><br></span>{% endif %}
                             {% if obj.do_break %}<br>{% endif %}
@@ -218,8 +218,8 @@
                     <h4>Help anderen</h4>
                     <p>Vanuit je <i>huidige</i> rol heb je de mogelijkheid om andere beheerders te helpen door naar <b>hun rol</b> te wisselen.<br>Na het wisselen zie je de website precies zoals zij hem zien. Je kan altijd weer terug.</p>
                     <p class="sv-rood-text">
-                            <!-- hierarchie -->
-                        <span>De hi&euml;rarchie is BB</span>
+                            <!-- hiërarchie -->
+                        <span>De hi&euml;rarchie is Manager MH</span>
                         <span style="position: relative; bottom: .15em;"> &rarr; </span>
                         <span>BKO</span>
                         <span style="position: relative; bottom: .15em;"> &rarr; </span>

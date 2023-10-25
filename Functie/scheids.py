@@ -15,7 +15,10 @@ def zet_sessionvar_is_scheids(account, request):
     """ zet een session variabele die onthoudt of de sporter ook scheidsrechter is
     """
 
-    is_scheids = False
+    if account.is_authenticated:        # pragma: no branch
+        is_scheids = account.scheids != SCHEIDS_NIET
+    else:                               # pragma: no cover
+        is_scheids = False
 
     request.session[SESSIONVAR_SCHEIDS] = is_scheids
 

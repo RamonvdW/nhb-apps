@@ -8,13 +8,11 @@ from django.test import TestCase
 from django.utils import timezone
 from BasisTypen.definities import ORGANISATIE_KHSN
 from BasisTypen.models import KalenderWedstrijdklasse
-from Competitie.models import Regiocompetitie, RegiocompetitieSporterBoog
-from Competitie.tests.test_helpers import maak_competities_en_zet_fase_c
 from Functie.models import Functie
+from Functie.tests.helpers import maak_functie
 from Geo.models import Regio
 from Locatie.definities import BAAN_TYPE_EXTERN
 from Locatie.models import Locatie
-from Score.operations import score_indiv_ag_opslaan
 from Sporter.models import Sporter, SporterBoog
 from Sporter.operations import get_sporterboog
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -34,10 +32,9 @@ class TestWedstrijdenKwalificatieScores(E2EHelpers, TestCase):
     test_after = ('Sporter', 'Competitie')
 
     url_kwalificatie_scores = '/wedstrijden/inschrijven/kwalificatie-scores-doorgeven/%s/'  # inschrijving_pk
-    url_check_lijst = '/wedstrijden/manager/check-kwalificatie-scores/%s/'                 # wedstrijd_pk
+    url_check_lijst = '/wedstrijden/manager/check-kwalificatie-scores/%s/'                  # wedstrijd_pk
     url_check_wedstrijd = '/wedstrijden/manager/check-kwalificatie-scores/wedstrijd/%s/'    # score_pk
     url_aanmelden = '/bondscompetities/deelnemen/aanmelden/%s/%s/'             # deelcomp_pk, sporterboog_pk
-    url_profiel = '/sporter/'
 
     def setUp(self):
         """ initialisatie van de test case """
@@ -58,6 +55,10 @@ class TestWedstrijdenKwalificatieScores(E2EHelpers, TestCase):
                     regio=Regio.objects.get(pk=111))
         ver.save()
         self.ver = ver
+
+        self.functie_hwl = maak_functie('HWL 1000', rol='HWL')
+        self.functie_hwl.vereniging = ver
+        self.functie_hwl.save(update_fields=['vereniging'])
 
         # maak een sporter aan
         sporter1 = Sporter(
@@ -181,156 +182,21 @@ class TestWedstrijdenKwalificatieScores(E2EHelpers, TestCase):
         jaar = inschrijving1.wedstrijd.datum_begin.year - 1
         self.kwalificatie_datum = datetime.date(jaar, 9, 1)      # 1 september
 
-    def test_anon(self):
-        resp = self.client.get(self.url_kwalificatie_scores % 999999)
-        self.assert403(resp, 'Geen toegang')
+        # maak een test vereniging
+        ver = Vereniging(
+                    naam="Grotere Club",
+                    ver_nr=1001,
+                    regio=Regio.objects.get(pk=101))
+        ver.save()
+        self.ver2 = ver
 
+
+    def test_anon(self):
         resp = self.client.get(self.url_check_lijst % 999999)
         self.assert403(resp, 'Geen toegang')
 
         resp = self.client.get(self.url_check_wedstrijd % 999999)
         self.assert403(resp, 'Geen toegang')
-
-    def test_sporter(self):
-        # log in as sporter
-        self.e2e_login(self.account_sporter1)
-
-        url = self.url_kwalificatie_scores % self.inschrijving1.pk
-
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('wedstrijden/inschrijven-kwalificatie-scores.dtl', 'plein/site_layout.dtl'))
-
-        self.e2e_assert_other_http_commands_not_supported(url, post=False)
-
-        # voer de kwalificatie-scores in
-        self.assertEqual(0, Kwalificatiescore.objects.count())
-        with self.assert_max_queries(20):
-            resp = self.client.post(url, {'score1_datum': self.kwalificatie_datum,
-                                          'score1_naam': 'Test naam',
-                                          'score1_waar': 'Test plaats',
-                                          'score1_result': '123',
-                                          'score2_datum': '2000-01-01',     # fout
-                                          'score2_result': '601'})          # fout
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('wedstrijden/inschrijven-toegevoegd-aan-mandje.dtl', 'plein/site_layout.dtl'))
-        self.assertEqual(3, Kwalificatiescore.objects.count())
-
-        score = Kwalificatiescore.objects.exclude(naam='').first()
-        self.assertEqual(score.naam, 'Test naam')
-        self.assertEqual(score.waar, 'Test plaats')
-        self.assertEqual(score.resultaat, 123)
-
-        # nog een keer opslaan, geen wijzigingen
-        with self.assert_max_queries(20):
-            resp = self.client.post(url, {'score1_datum': self.kwalificatie_datum,
-                                          'score1_naam': 'Test naam',
-                                          'score1_waar': 'Test plaats',
-                                          'score1_result': '123'})
-        self.assert_is_redirect(resp, '/plein/')
-
-        # echte wijziging terwijl nog niet gecontroleerd
-        with self.assert_max_queries(20):
-            resp = self.client.post(url, {'score1_datum': self.kwalificatie_datum + datetime.timedelta(days=1),
-                                          'score1_naam': 'Test naam 2',
-                                          'score1_waar': 'Test plaats 2',
-                                          'score1_result': '124'})
-        self.assert_is_redirect(resp, '/plein/')
-
-        # echte wijziging terwijl al gecontroleerd
-        score.check_status = KWALIFICATIE_CHECK_GOED
-        score.save(update_fields=['check_status'])
-        with self.assert_max_queries(20):
-            resp = self.client.post(url, {'score1_datum': self.kwalificatie_datum,
-                                          'score1_naam': 'Test naam 2',
-                                          'score1_waar': 'Test plaats 2',
-                                          'score1_result': '125'})      # changed
-        self.assert_is_redirect(resp, '/plein/')
-
-        score = Kwalificatiescore.objects.get(pk=score.pk)
-        self.assertIn('Check status automatisch terug gezet', score.log)
-        self.assertEqual(score.check_status, KWALIFICATIE_CHECK_NOG_DOEN)
-
-        # maak een extra record te veel aan
-        score.pk = None
-        score.save()
-
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('wedstrijden/inschrijven-kwalificatie-scores.dtl', 'plein/site_layout.dtl'))
-
-        with self.assert_max_queries(20):
-            resp = self.client.post(url, {'score1_datum': self.kwalificatie_datum,
-                                          'score1_naam': 'Test naam',
-                                          'score1_waar': 'Test plaats',
-                                          'score1_result': '123'})
-        self.assert_is_redirect(resp, '/plein/')
-        self.assertEqual(3, Kwalificatiescore.objects.count())
-
-        # sporter mag wijzigingen als iemand anders de aankoop gedaan heeft
-        self.account_twee = self.e2e_create_account('twee', 'twee@test.com', 'Twee')
-        self.inschrijving1.koper = self.account_twee
-        self.inschrijving1.save(update_fields=['koper'])
-
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('wedstrijden/inschrijven-kwalificatie-scores.dtl', 'plein/site_layout.dtl'))
-
-        # niet de sporter (geen account) en niet de koper, dan mag je niet wijzigen
-        self.sporter1.account = None
-        self.sporter1.save(update_fields=['account'])
-        resp = self.client.get(url)
-        self.assert404(resp, 'Mag niet wijzigen')
-        resp = self.client.post(url)
-        self.assert404(resp, 'Mag niet wijzigen')
-
-        # corner cases
-        self.inschrijving1.wedstrijd.eis_kwalificatie_scores = False
-        self.inschrijving1.wedstrijd.save(update_fields=['eis_kwalificatie_scores'])
-        resp = self.client.get(url)
-        self.assert404(resp, 'Inschrijving niet gevonden')
-
-        resp = self.client.get(self.url_kwalificatie_scores % 999999)
-        self.assert404(resp, 'Inschrijving niet gevonden')
-        resp = self.client.post(self.url_kwalificatie_scores % 999999)
-        self.assert404(resp, 'Inschrijving niet gevonden')
-
-    def test_sporter_met_bondscompetitie(self):
-        # sporter is ook deelnemer in de bondscompetities
-        self.comp_18, _ = maak_competities_en_zet_fase_c()
-
-        self.e2e_login(self.account_sporter1)
-
-        # schrijf de sporter in voor de 18m Recurve
-        deelcomp = Regiocompetitie.objects.get(competitie__afstand='18', regio=self.ver.regio)
-        res = score_indiv_ag_opslaan(self.sporterboog1_r, 18, 8.18, None, 'Test')
-        self.assertTrue(res)
-        url = self.url_aanmelden % (deelcomp.pk, self.sporterboog1_r.pk)
-        with self.assert_max_queries(21):
-            resp = self.client.post(url, {'opmerking': 'test van de 18m'})
-        self.assert_is_redirect(resp, self.url_profiel)
-
-        self.assertEqual(1, RegiocompetitieSporterBoog.objects.count())
-        deelnemer = RegiocompetitieSporterBoog.objects.first()
-        deelnemer.score1 = 234
-        deelnemer.score2 = 245
-        deelnemer.save(update_fields=['score1', 'score2'])
-
-        url = self.url_kwalificatie_scores % self.inschrijving1.pk
-
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('wedstrijden/inschrijven-kwalificatie-scores.dtl', 'plein/site_layout.dtl'))
-        self.assertContains(resp, '245, 234')
 
     def _store_kwalificatiescores(self):
 
@@ -345,8 +211,7 @@ class TestWedstrijdenKwalificatieScores(E2EHelpers, TestCase):
                                           'score1_naam': 'Test naam',
                                           'score1_waar': 'Test plaats',
                                           'score1_result': '123'})
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('wedstrijden/inschrijven-toegevoegd-aan-mandje.dtl', 'plein/site_layout.dtl'))
+        self.assert_is_redirect(resp, '/plein/')
 
         self.assertEqual(3, Kwalificatiescore.objects.count())
 
@@ -359,8 +224,7 @@ class TestWedstrijdenKwalificatieScores(E2EHelpers, TestCase):
                                           'score1_naam': 'Test naam',
                                           'score1_waar': 'Test plaats',
                                           'score1_result': '234'})
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('wedstrijden/inschrijven-toegevoegd-aan-mandje.dtl', 'plein/site_layout.dtl'))
+        self.assert_is_redirect(resp, '/plein/')
 
         self.assertEqual(6, Kwalificatiescore.objects.count())
 
@@ -381,11 +245,28 @@ class TestWedstrijdenKwalificatieScores(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('wedstrijden/check-kwalificatie-scores.dtl', 'plein/site_layout.dtl'))
 
+        # als HWL van de organiserende vereniging
+        self.e2e_wissel_naar_functie(self.functie_hwl)
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('wedstrijden/check-kwalificatie-scores.dtl', 'plein/site_layout.dtl'))
+
         # corner cases
         resp = self.client.get(self.url_check_lijst % 999999)
         self.assert404(resp, 'Wedstrijd niet gevonden')
 
-    def test_check_wedstrijd(self):
+        # corner case: verkeerde HWL
+        self.wedstrijd.organiserende_vereniging = self.ver2
+        self.wedstrijd.save(update_fields=['organiserende_vereniging'])
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assert403(resp, 'Niet de organisator')
+
+    def test_scores_goedkeuren_mwz(self):
         # check alle kwalificatie-scores gerelateerd aan dezelfde wedstrijd
 
         self._store_kwalificatiescores()
@@ -401,7 +282,8 @@ class TestWedstrijdenKwalificatieScores(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('wedstrijden/check-kwalificatie-scores-wedstrijd.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijden/check-kwalificatie-scores-wedstrijd.dtl',
+                                         'plein/site_layout.dtl'))
 
         # post zonder data
         resp = self.client.post(url)
@@ -470,5 +352,101 @@ class TestWedstrijdenKwalificatieScores(E2EHelpers, TestCase):
                                 json.dumps(json_data),
                                 content_type='application/json')
         self.assert404(resp, 'Wedstrijd niet gevonden')
+
+    def test_scores_goedkeuren_hwl(self):
+        # check alle kwalificatie-scores gerelateerd aan dezelfde wedstrijd
+
+        self._store_kwalificatiescores()
+
+        # wissel naar de Manager Wedstrijdzaken
+        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_wissel_naar_functie(self.functie_hwl)
+
+        score = Kwalificatiescore.objects.filter(datum=self.kwalificatie_datum).first()
+        url = self.url_check_wedstrijd % score.pk
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('wedstrijden/check-kwalificatie-scores-wedstrijd.dtl',
+                                         'plein/site_layout.dtl'))
+
+        # post zonder data
+        resp = self.client.post(url)
+        self.assert404(resp, 'Geen valide verzoek')
+
+        # post met garbage
+        resp = self.client.post(url, data={'dit is geen': 'JSON'})
+        self.assert404(resp, 'Geen valide verzoek')
+
+        # post met json maar foute inhoud
+        json_data = {'niet_nodig': 'hoi'}
+        resp = self.client.post(url,
+                                json.dumps(json_data),
+                                content_type='application/json')
+        self.assert404(resp, 'Geen valide verzoek')
+
+        # keur een kwalificatiescore goed
+        self.assertEqual(score.check_status, KWALIFICATIE_CHECK_NOG_DOEN)
+        json_data = {'keuze': 1}
+        resp = self.client.post(url,
+                                json.dumps(json_data),
+                                content_type='application/json')
+        self.assert200_json(resp)
+        score = Kwalificatiescore.objects.get(pk=score.pk)
+        self.assertEqual(score.check_status, KWALIFICATIE_CHECK_GOED)
+        self.assertIn('Goedgekeurd door', score.log)
+
+        # keur een kwalificatiescore af
+        json_data = {'keuze': 3}
+        resp = self.client.post(url,
+                                json.dumps(json_data),
+                                content_type='application/json')
+        self.assert200_json(resp)
+        score = Kwalificatiescore.objects.get(pk=score.pk)
+        self.assertEqual(score.check_status, KWALIFICATIE_CHECK_AFGEKEURD)
+        self.assertIn('Afgekeurd door', score.log)
+
+        # zet een kwalificatiescore terug naar "nog te doen"
+        json_data = {'keuze': 2}
+        resp = self.client.post(url,
+                                json.dumps(json_data),
+                                content_type='application/json')
+        self.assert200_json(resp)
+        score = Kwalificatiescore.objects.get(pk=score.pk)
+        self.assertEqual(score.check_status, KWALIFICATIE_CHECK_NOG_DOEN)
+        self.assertIn("Terug gezet naar 'nog te doen' door", score.log)
+
+        # geen wijziging
+        resp = self.client.post(url,
+                                json.dumps(json_data),
+                                content_type='application/json')
+        self.assert200_json(resp)
+
+        # corner cases
+        json_data = {'keuze': 999999}
+        resp = self.client.post(url,
+                                json.dumps(json_data),
+                                content_type='application/json')
+        self.assert404(resp, 'Geen valide verzoek')
+
+        resp = self.client.get(self.url_check_wedstrijd % 999999)
+        self.assert404(resp, 'Wedstrijd niet gevonden')
+
+        json_data = {'keuze': 1}
+        resp = self.client.post(self.url_check_wedstrijd % 999999,
+                                json.dumps(json_data),
+                                content_type='application/json')
+        self.assert404(resp, 'Wedstrijd niet gevonden')
+
+        # corner case: verkeerde HWL
+        self.wedstrijd.organiserende_vereniging = self.ver2
+        self.wedstrijd.save(update_fields=['organiserende_vereniging'])
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assert403(resp, 'Niet de organisator')
+
 
 # end of file

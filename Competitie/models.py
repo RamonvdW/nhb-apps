@@ -170,8 +170,14 @@ class Competitie(models.Model):
         """ geef een tekstuele afkorting van dit object, voor in de admin interface """
         return self.beschrijving
 
+    def is_indoor(self):
+        return self.afstand == '18'
+
+    def is_25m1pijl(self):
+        return self.afstand == '25'
+
     def titel(self):
-        if self.afstand == '18':
+        if self.is_indoor():
             msg = 'Indoor'
         else:
             msg = '25m 1pijl'
@@ -218,8 +224,7 @@ class Competitie(models.Model):
         return "%s/%s" % (self.begin_jaar, self.begin_jaar + 1)
 
     def maak_seizoen_url(self):
-        return self.pk
-        # return '%s-%s-%s' % (AFSTAND2URL[self.afstand], self.begin_jaar, self.begin_jaar + 1)
+        return '%s-%s-%s' % (AFSTAND2URL[self.afstand], self.begin_jaar, self.begin_jaar + 1)
 
     objects = models.Manager()      # for the editor only
 

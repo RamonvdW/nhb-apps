@@ -8,8 +8,9 @@ from django.conf import settings
 from django.test import TestCase, Client
 from django.contrib.sessions.backends.db import SessionStore
 from Account.models import AccountSessions
+from Functie.models import Functie
 from Functie.rol import SESSIONVAR_ROL_MAG_WISSELEN
-from Functie.operations import maak_functie, Functie
+from Functie.tests.helpers import maak_functie
 from Geo.models import Rayon, Regio
 from Logboek.models import LogboekRegel
 from Mailer.models import MailQueue
@@ -227,7 +228,7 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
         with self.assert_max_queries(30):
             resp = self.client.post(self.url_activeer_rol % 'BB', follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assertContains(resp, "Manager Competitiezaken")
+        self.assertContains(resp, "Manager MH")
 
         # juiste URL om BKO te koppelen
         url = self.url_wijzig_ontvang % self.functie_bko.pk

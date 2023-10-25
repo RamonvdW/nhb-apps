@@ -21,12 +21,19 @@ from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
 import datetime
+import json
 import io
 
 
 class TestCompLaagRegioCliRegiocompTussenstand(E2EHelpers, TestCase):
 
     """ unittests voor de CompLaagRegio applicatie, management command regiocomp_tussenstand """
+
+    url_planning_regio = '/bondscompetities/regio/planning/%s/'                  # deelcomp_pk
+    url_planning_regio_ronde = '/bondscompetities/regio/planning/ronde/%s/'      # ronde_pk
+    url_uitslag_invoeren = '/bondscompetities/scores/uitslag-invoeren/%s/'       # match_pk
+    url_inschrijven = '/bondscompetities/deelnemen/leden-aanmelden/%s/'          # comp_pk
+    url_uitslag_opslaan = '/bondscompetities/scores/dynamic/scores-opslaan/'
 
     def _maak_competitie_aan(self):
         # maak de competitie aan
@@ -68,10 +75,17 @@ class TestCompLaagRegioCliRegiocompTussenstand(E2EHelpers, TestCase):
         # laat de wedstrijd.uitslag aanmaken en pas de wedstrijd nog wat aan
         self.uitslagen = list()
         uur = 1
-        for pk in match_pks[:]:     # copy to ensure stable
+        for match_pk in match_pks[:]:     # copy to ensure stable
+            # maak de data set
+            json_data = {'wedstrijd_pk': match_pk}
             with self.assert_max_queries(20):
-                self.client.get(self.url_uitslag_invoeren % pk)
-            match = CompetitieMatch.objects.get(pk=pk)
+                resp = self.client.post(self.url_uitslag_opslaan,
+                                        json.dumps(json_data),
+                                        content_type='application/json')
+            json_data = self.assert200_json(resp)
+            self.assertEqual(json_data['done'], 1)
+
+            match = CompetitieMatch.objects.get(pk=match_pk)
             self.assertIsNotNone(match.uitslag)
             match.vereniging = self.ver
             match.tijd_begin_wedstrijd = "%02d:00" % uur
@@ -194,11 +208,6 @@ class TestCompLaagRegioCliRegiocompTussenstand(E2EHelpers, TestCase):
 
     def setUp(self):
         """ initialisatie van de test case """
-
-        self.url_planning_regio = '/bondscompetities/regio/planning/%s/'                  # deelcomp_pk
-        self.url_planning_regio_ronde = '/bondscompetities/regio/planning/ronde/%s/'      # ronde_pk
-        self.url_uitslag_invoeren = '/bondscompetities/scores/uitslag-invoeren/%s/'       # match_pk
-        self.url_inschrijven = '/bondscompetities/deelnemen/leden-aanmelden/%s/'          # comp_pk
 
         # deze test is afhankelijk van de standaard regio's
         self.regio_101 = Regio.objects.get(regio_nr=101)

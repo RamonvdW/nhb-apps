@@ -40,9 +40,9 @@ urlpatterns = [
          view_email_beheerders.OverzichtEmailsSecHwlView.as_view(),
          name='emails-sec-hwl'),
 
-    path('overzicht/beheerders/rcl/',
-         view_email_beheerders.OverzichtEmailsRclView.as_view(),
-         name='emails-rcl'),
+    path('overzicht/beheerders/competitie/',
+         view_email_beheerders.OverzichtEmailsCompetitieBeheerdersView.as_view(),
+         name='emails-beheerders'),
 
     path('activeer-functie/<str:functie_pk>/',
          view_activeer_rol.ActiveerRolView.as_view(),

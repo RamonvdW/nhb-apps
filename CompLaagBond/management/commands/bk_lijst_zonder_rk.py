@@ -39,7 +39,7 @@ class Command(BaseCommand):
 
     def _write_teams(self, wb):
 
-        if self.comp.afstand == '18':
+        if self.comp.is_indoor():
             aantal_pijlen = 30
         else:
             aantal_pijlen = 25

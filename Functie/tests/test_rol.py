@@ -6,7 +6,8 @@
 
 from django.test import TestCase
 from Functie.definities import Rollen
-from Functie.operations import maak_functie, maak_account_vereniging_secretaris
+from Functie.operations import maak_account_vereniging_secretaris
+from Functie.tests.helpers import maak_functie
 from Functie.rol import (SESSIONVAR_ROL_HUIDIGE, SESSIONVAR_ROL_MAG_WISSELEN,
                          SESSIONVAR_ROL_PALLET_FUNCTIES, SESSIONVAR_ROL_PALLET_VAST,
                          SESSIONVAR_ROL_BESCHRIJVING, SESSIONVAR_ROL_HUIDIGE_FUNCTIE_PK,

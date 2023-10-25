@@ -8,13 +8,13 @@ from django.test import TestCase
 from django.utils import timezone
 from BasisTypen.models import BoogType
 from Competitie.definities import DEEL_RK, DEEL_BK, DEELNAME_NEE, DEELNAME_JA, KAMP_RANK_BLANCO, KAMP_RANK_NO_SHOW
-from Competitie.models import (Competitie, Regiocompetitie, Kampioenschap,
+from Competitie.models import (Competitie, Regiocompetitie, Kampioenschap, KampioenschapTeam,
                                CompetitieIndivKlasse, CompetitieTeamKlasse,
                                RegiocompetitieSporterBoog, KampioenschapSporterBoog,
                                RegiocompetitieTeam, RegiocompetitieRondeTeam)
 from Competitie.test_utils.tijdlijn import (zet_competitie_fases, zet_competitie_fase_regio_inschrijven,
                                             zet_competitie_fase_regio_wedstrijden, zet_competitie_fase_regio_afsluiten)
-from Functie.operations import maak_functie
+from Functie.tests.helpers import maak_functie
 from Geo.models import Rayon, Regio
 from HistComp.models import HistCompSeizoen, HistCompRegioTeam
 from Locatie.models import Locatie
@@ -173,6 +173,11 @@ class TestCompBeheerBko(E2EHelpers, TestCase):
                                                                 is_voor_teams_rk_bk=False,
                                                                 volgorde=15)      # klasse 15 = R, ERE
 
+        self.comp25_teamklasse_rk_ere_r = CompetitieTeamKlasse.objects.get(
+                                                                competitie=self.comp_25,
+                                                                is_voor_teams_rk_bk=True,
+                                                                volgorde=115)     # klasse 115 = R, ERE
+
         self.comp25_teamklasse_regio_ere_c = CompetitieTeamKlasse.objects.get(
                                                                 competitie=self.comp_25,
                                                                 is_voor_teams_rk_bk=False,
@@ -252,7 +257,7 @@ class TestCompBeheerBko(E2EHelpers, TestCase):
                     regiocompetitie=self.regiocomp25_101,
                     vereniging=self.sporterboog_1r.sporter.bij_vereniging,
                     volg_nr=1,
-                    team_type=self.testdata.afkorting2teamtype_nhb['R2'],
+                    team_type=self.testdata.afkorting2teamtype_khsn['R2'],
                     team_naam='Test test 1',
                     aanvangsgemiddelde="26.5",
                     team_klasse=self.comp25_teamklasse_regio_ere_r)
@@ -275,7 +280,7 @@ class TestCompBeheerBko(E2EHelpers, TestCase):
                     regiocompetitie=self.regiocomp25_101,
                     vereniging=self.sporterboog_1r.sporter.bij_vereniging,
                     volg_nr=2,
-                    team_type=self.testdata.afkorting2teamtype_nhb['C'],
+                    team_type=self.testdata.afkorting2teamtype_khsn['C'],
                     team_naam='Test test 2',
                     aanvangsgemiddelde="29.8",
                     team_klasse=self.comp25_teamklasse_regio_ere_c)
@@ -286,7 +291,7 @@ class TestCompBeheerBko(E2EHelpers, TestCase):
                     regiocompetitie=self.regiocomp25_101,
                     vereniging=self.sporterboog_1r.sporter.bij_vereniging,
                     volg_nr=3,
-                    team_type=self.testdata.afkorting2teamtype_nhb['R2'],
+                    team_type=self.testdata.afkorting2teamtype_khsn['R2'],
                     team_naam='Test test 2',
                     aanvangsgemiddelde="25.5",
                     team_klasse=self.comp25_teamklasse_regio_ere_r)
@@ -342,6 +347,27 @@ class TestCompBeheerBko(E2EHelpers, TestCase):
                                  bij_vereniging=self.sporterboog_2c.sporter.bij_vereniging,
                                  indiv_klasse=self.comp25_klasse_c,
                                  result_rank=KAMP_RANK_NO_SHOW).save()         # komt niet in aanmerking
+
+    def _maak_rk_teams(self, kampioenschap):
+
+        self._inschrijven_kamp_indiv(kampioenschap)
+
+        team = KampioenschapTeam(
+                    kampioenschap=kampioenschap,
+                    vereniging=self.ver_101,
+                    volg_nr=1,
+                    team_type=self.testdata.afkorting2teamtype_khsn['R2'],
+                    team_naam='test team',
+                    deelname=DEELNAME_JA,
+                    aanvangsgemiddelde=3*8.0,
+                    team_klasse=self.comp25_teamklasse_rk_ere_r,
+                    result_rank=1,          # moet >= 1 zijn
+                    result_volgorde=1,
+                    result_teamscore=123)
+        team.save()
+
+        leden = KampioenschapSporterBoog.objects.filter(bij_vereniging=self.ver_101)
+        team.gekoppelde_leden.set(leden)
 
     def test_bad(self):
         # moet BKO zijn
@@ -625,8 +651,8 @@ class TestCompBeheerBko(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wissel_naar_functie(self.functie_bko_25)
 
-        # TODO: maak RK teams met resultaten aan, voor een betere test
-
+        # maak RK teams met resultaten aan, voor een betere test
+        self._maak_rk_teams(self.deelkamp_rayon1_25)
         url = self.url_doorzetten_rk_naar_bk_teams % self.comp_25.pk
 
         # fase L: pagina zonder knop 'doorzetten'

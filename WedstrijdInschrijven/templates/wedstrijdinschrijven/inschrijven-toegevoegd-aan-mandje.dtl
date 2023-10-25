@@ -55,6 +55,6 @@
     </div>
 
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="wedstrijden-inschrijven-toegevoegd-aan-mandje" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="wedstrijdinschrijven-toegevoegd-aan-mandje" %}
 
 {% endblock %}

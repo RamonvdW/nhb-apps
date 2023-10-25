@@ -8,7 +8,7 @@ from django.db import migrations, models
 
 
 ADMINISTRATIEVE_REGIO = 100
-VER_NR = 1368
+WEBWINKEL_VERKOPENDE_VER_NR = 1368
 
 
 def init_functies_bondscompetitie_2019(apps, _):
@@ -70,11 +70,12 @@ def init_functies_extra(apps, _):
     functie_klas = apps.get_model('Functie', 'Functie')
     ver_klas = apps.get_model('NhbStructuur', 'NhbVereniging')
 
-    ver = ver_klas.objects.get(ver_nr=VER_NR)
-
     functie_klas(rol='MO', beschrijving='Manager Opleidingen').save()
     functie_klas(rol='MWZ', beschrijving='Manager Wedstrijdzaken').save()
     functie_klas(rol='SUP', beschrijving='Support').save()
+
+    # MWW is gekoppeld aan vereniging 1368 omdat dat de verkopende vereniging is waar de betalingen op binnen komen
+    ver = ver_klas.objects.get(ver_nr=WEBWINKEL_VERKOPENDE_VER_NR)
     functie_klas(rol='MWW', beschrijving='Manager Webwinkel', vereniging=ver).save()
 
 

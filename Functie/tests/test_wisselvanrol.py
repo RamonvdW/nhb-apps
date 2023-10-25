@@ -9,7 +9,8 @@ from Competitie.definities import DEEL_RK, DEEL_BK
 from Competitie.models import Competitie, CompetitieMatch, Kampioenschap
 from Functie.definities import Rollen
 from Functie.models import Functie
-from Functie.operations import maak_functie, account_needs_vhpg
+from Functie.operations import account_needs_vhpg
+from Functie.tests.helpers import maak_functie
 from Functie.rol import rol_get_huidige_functie
 from Geo.models import Rayon, Regio
 from Sporter.models import Sporter
@@ -66,6 +67,9 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.functie_wl = maak_functie("WL test", "WL")
         self.functie_wl.vereniging = ver
         self.functie_wl.save()
+
+        self.functie_cs = maak_functie("CS test", "CS")
+        self.functie_cs.save()
 
         # maak een test lid aan
         sporter = Sporter(
@@ -138,7 +142,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('functie/wissel-van-rol.dtl', 'plein/site_layout.dtl'))
-        self.assertNotContains(resp, 'Manager Competitiezaken')
+        self.assertNotContains(resp, 'Manager MH')
         self.assertContains(resp, 'Gebruiker')
         self.assertContains(resp, 'Maak afspraken over het omgaan met persoonsgegevens.')
 
@@ -155,7 +159,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('functie/wissel-van-rol.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, 'Admin site')
         self.assertContains(resp, 'Account wissel')
-        self.assertContains(resp, 'Manager Competitiezaken')
+        self.assertContains(resp, 'Manager MH')
         self.assertContains(resp, 'Gebruiker')
 
         self.assert_template_used(resp, ('functie/wissel-van-rol.dtl', 'plein/site_layout.dtl'))
@@ -237,7 +241,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
             resp = self.client.get(self.url_wissel_van_rol)
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('functie/wissel-van-rol.dtl', 'plein/site_layout.dtl'))
-        self.assertContains(resp, "Manager Competitiezaken")
+        self.assertContains(resp, "Manager MH")
         urls = self._get_wissel_urls(resp)
         self.assertIn(self.url_accountwissel, urls)
 
@@ -246,13 +250,13 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         with self.assert_max_queries(32):
             resp = self.client.post(self.url_activeer_rol % 'huh', follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assertContains(resp, "Manager Competitiezaken")
+        self.assertContains(resp, "Manager MH")
 
         # controleer dat een rol wissel die met een functie moet geen effect heeft
         with self.assert_max_queries(32):
             resp = self.client.post(self.url_activeer_rol % 'BKO', follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assertContains(resp, "Manager Competitiezaken")
+        self.assertContains(resp, "Manager MH")
 
         with self.assert_max_queries(31):
             resp = self.client.post(self.url_activeer_rol % 'geen', follow=True)
@@ -489,6 +493,23 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.assertContains(resp, "Sporter")
         urls = self._get_wissel_urls(resp)
         self.assertIn(self.url_activeer_functie % self.functie_sup.pk, urls)
+        self.assertIn(self.url_activeer_rol % 'sporter', urls)
+
+    def test_cs(self):
+        # CS = Commissie Scheidsrechters
+        self.functie_cs.accounts.add(self.account_normaal)
+        self.e2e_account_accepteert_vhpg(self.account_normaal)
+        self.e2e_login_and_pass_otp(self.account_normaal)
+        self.e2e_wissel_naar_functie(self.functie_cs)
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_wissel_van_rol)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('functie/wissel-van-rol.dtl', 'plein/site_layout.dtl'))
+        self.assertContains(resp, "Sporter")
+        urls = self._get_wissel_urls(resp)
+        self.assertIn(self.url_activeer_functie % self.functie_cs.pk, urls)
         self.assertIn(self.url_activeer_rol % 'sporter', urls)
 
     def test_functie_geen_rol(self):

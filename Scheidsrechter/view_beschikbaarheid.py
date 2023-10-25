@@ -17,7 +17,7 @@ from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige
 from Functie.scheids import gebruiker_is_scheids
 from Scheidsrechter.definities import BESCHIKBAAR_LEEG, BESCHIKBAAR_JA, BESCHIKBAAR_DENK, BESCHIKBAAR_NEE, BESCHIKBAAR2STR
-from Scheidsrechter.models import WedstrijdDagScheids, ScheidsBeschikbaarheid
+from Scheidsrechter.models import WedstrijdDagScheidsrechters, ScheidsBeschikbaarheid
 from Sporter.models import Sporter, get_sporter
 from TijdelijkeCodes.definities import RECEIVER_SCHEIDS_BESCHIKBAAR
 from TijdelijkeCodes.operations import set_tijdelijke_codes_receiver
@@ -63,41 +63,22 @@ class BeschikbaarheidOpvragenView(UserPassesTestMixin, View):
         except (ValueError, Wedstrijd.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
-        vraag_sr4 = list()
-        vraag_sr3 = list()
-
+        vraag = list()
         aantal_dagen = (wedstrijd.datum_einde - wedstrijd.datum_begin).days + 1
-        volgorde = 0
         for dag_nr in range(aantal_dagen):
-            for scheids_nr in range(wedstrijd.aantal_scheids):
-                if scheids_nr == 0:
-                    titel = 'Hoofdscheidsrechter'
-                    is_hoofd_sr = True
-                else:
-                    titel = 'Assistent SR %s' % scheids_nr      # 1, 2, 3, etc.
-                    is_hoofd_sr = False
+            obj, is_new = (WedstrijdDagScheidsrechters
+                           .objects
+                           .get_or_create(wedstrijd=wedstrijd,
+                                          dag_offset=dag_nr))
 
-                volgorde += 1
-                obj, is_new = (WedstrijdDagScheids
-                               .objects
-                               .get_or_create(wedstrijd=wedstrijd,
-                                              dag_offset=dag_nr,
-                                              volgorde=volgorde,
-                                              titel=titel,
-                                              is_hoofd_sr=is_hoofd_sr))
-
-                if is_new:
-                    # voor deze dag een verzoek versturen
-                    datum = wedstrijd.datum_begin + datetime.timedelta(days=dag_nr)
-                    vraag = vraag_sr4 if is_hoofd_sr else vraag_sr3
-                    if datum not in vraag:
-                        vraag.append(datum)
-            # for
+            if is_new:
+                # voor deze dag een verzoek versturen
+                datum = wedstrijd.datum_begin + datetime.timedelta(days=dag_nr)
+                vraag.append(datum)
         # for
 
         # TODO: stuur e-mails naar SR
-        # print('vraag_sr4: %s' % repr(vraag_sr4))
-        # print('vraag_sr3: %s' % repr(vraag_sr3))
+        # print('vraag: %s' % repr(vraag))
 
         url = reverse('Scheidsrechter:overzicht')
         return HttpResponseRedirect(url)
@@ -146,21 +127,13 @@ class WijzigBeschikbaarheidView(UserPassesTestMixin, TemplateView):
                              .values_list('pk', flat=True))
 
         # kijk voor welke dagen we beschikbaarheid nodig hebben
-        dagen = (WedstrijdDagScheids
+        dagen = (WedstrijdDagScheidsrechters
                  .objects
                  .select_related('wedstrijd',
                                  'wedstrijd__locatie')
-                 .filter(wedstrijd__pk__in=wedstrijd_pks,
-                         volgorde__lte=2)       # 1=hoofd, >1=assistent
+                 .filter(wedstrijd__pk__in=wedstrijd_pks)
                  .order_by('wedstrijd__datum_begin',
                            'wedstrijd__pk'))
-
-        if not self.is_sr4_of_hoger:
-            # deze scheidsrechter is geen hoofdscheidsrechter
-            dagen = dagen.filter(is_hoofd_sr=False)
-        else:
-            # voorkom dubbelen
-            dagen = dagen.filter(is_hoofd_sr=True)
 
         datums = list()
         for dag in dagen:
@@ -220,19 +193,13 @@ class WijzigBeschikbaarheidView(UserPassesTestMixin, TemplateView):
                              .values_list('pk', flat=True))
 
         # kijk voor welke dagen we beschikbaarheid nodig hebben
-        dagen = (WedstrijdDagScheids
+        dagen = (WedstrijdDagScheidsrechters
                  .objects
                  .select_related('wedstrijd')
-                 .filter(wedstrijd__pk__in=wedstrijd_pks,
-                         volgorde__lte=2))      # 1=hoofd, 2=assistent#1
+                 .filter(wedstrijd__pk__in=wedstrijd_pks))
 
-        if not self.is_sr4_of_hoger:
-            # deze scheidsrechter is geen hoofdscheidsrechter
-            dagen = dagen.filter(is_hoofd_sr=False)
-        else:
-            # voorkom dubbelen
-            dagen = dagen.filter(is_hoofd_sr=True)
-
+        # beschikbaarheid is voor specifieke datums
+        # dus als de wedstrijd verplaatst worden naar een andere datum, dan geldt de beschikbaarheid niet meer
         datums = list()
         for dag in dagen:
             dag.datum = dag.wedstrijd.datum_begin + datetime.timedelta(days=dag.dag_offset)
@@ -255,7 +222,6 @@ class WijzigBeschikbaarheidView(UserPassesTestMixin, TemplateView):
         when_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M:%S')
 
         for dag in dagen:
-
             name = 'wedstrijd_%s_dag_%s' % (dag.wedstrijd.pk, dag.dag_offset)
             keuze = request.POST.get(name, '')[:6]      # afkappen voor de veiligheid
 
@@ -290,7 +256,7 @@ class WijzigBeschikbaarheidView(UserPassesTestMixin, TemplateView):
 
 
 class BeschikbaarheidInzienView(UserPassesTestMixin, TemplateView):
-    """ Django class-based view voor de scheidsrechters """
+    """ Django class-based view voor de Commissie Scheidsrechters om de opgaaf van de SR's te zien """
 
     # class variables shared by all instances
     template_name = TEMPLATE_BESCHIKBAARHEID_INZIEN
@@ -307,12 +273,11 @@ class BeschikbaarheidInzienView(UserPassesTestMixin, TemplateView):
 
         vorige_week = (timezone.now() - datetime.timedelta(days=7)).date()
 
-        dagen = (WedstrijdDagScheids
+        dagen = (WedstrijdDagScheidsrechters
                  .objects
                  .select_related('wedstrijd',
                                  'wedstrijd__locatie')
-                 .filter(wedstrijd__datum_begin__gte=vorige_week,
-                         is_hoofd_sr=True)
+                 .filter(wedstrijd__datum_begin__gte=vorige_week)
                  .order_by('wedstrijd__datum_begin',
                            'wedstrijd__pk'))
 

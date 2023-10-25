@@ -16,14 +16,6 @@ EMAIL_TEMPLATE_ROLLEN_GEWIJZIGD = 'email_functie/rollen-gewijzigd.dtl'
 EMAIL_TEMPLATE_BEVESTIG_TOEGANG_EMAIL = 'email_functie/bevestig-toegang-email.dtl'
 
 
-def maak_functie(beschrijving, rol):
-    """ Deze helper geeft het Functie-object terug met de gevraagde parameters
-        De eerste keer wordt deze aangemaakt.
-    """
-    functie, _ = Functie.objects.get_or_create(beschrijving=beschrijving, rol=rol)
-    return functie      # caller kan zelf andere velden invullen
-
-
 def functie_wijziging_stuur_email_notificatie(account, door_naam, functie_beschrijving, add=False, remove=False):
 
     """ Stuur een e-mail naar 'account' om te melden dat de rollen gewijzigd zijn

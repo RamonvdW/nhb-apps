@@ -6,7 +6,7 @@
 
 from django.test import TestCase
 from Functie.models import Functie
-from Functie.operations import maak_functie
+from Functie.tests.helpers import maak_functie
 from Geo.models import Regio, Cluster
 from Locatie.definities import (BAAN_TYPE_ONBEKEND, BAAN_TYPE_BINNEN_VOLLEDIG_OVERDEKT, BAAN_TYPE_BINNEN_BUITEN,
                                 BAAN_TYPE_BUITEN, BAAN_TYPE_EXTERN)

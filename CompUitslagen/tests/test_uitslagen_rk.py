@@ -284,7 +284,7 @@ class TestCompUitslagenRK(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('compuitslagen/uitslagen-rk-teams.dtl', 'plein/site_layout.dtl'))
 
-        # klassegrenzen vaststellen (fase J --> K)
+        # klassengrenzen vaststellen (fase J --> K)
         url = self.url_teams_klassengrenzen_vaststellen % self.testdata.comp25.pk
         resp = self.client.post(url)
         self.assert_is_redirect_not_plein(resp)
@@ -324,12 +324,24 @@ class TestCompUitslagenRK(E2EHelpers, TestCase):
         team.deelname = DEELNAME_NEE
         team.save(update_fields=['deelname'])
 
+        deelkamp = self.testdata.deelkamp25_rk[1]       # rayon 1
         url = self.url_uitslagen_rk_teams_n % (self.testdata.comp25.pk, 1, 'R2')
         with self.assert_max_queries(24):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('compuitslagen/uitslagen-rk-teams.dtl', 'plein/site_layout.dtl'))
+
+        # is afgesloten
+        deelkamp.is_afgesloten = True
+        deelkamp.save(update_fields=['is_afgesloten'])
+        with self.assert_max_queries(24):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('compuitslagen/uitslagen-rk-teams.dtl', 'plein/site_layout.dtl'))
+        # deelkamp.is_afgesloten = False
+        # deelkamp.save(update_fields=['is_afgesloten'])
 
         # wissel naar een HWL
         self.e2e_login_and_pass_otp(self.testdata.account_hwl[self.ver_nr])

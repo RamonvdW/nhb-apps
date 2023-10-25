@@ -33,10 +33,20 @@ def get_kaartjes_beheer(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_in
     else:
         tekst = "Landelijk overzicht van de verenigingen, accommodaties en indeling in clusters."
     kaartje = SimpleNamespace(
-                    prio=7,
+                    prio=6,
                     titel="Verenigingen",
                     icoon="share_location",
                     tekst=tekst,
+                    url=url)
+    kaartjes_algemeen.append(kaartje)
+
+    # Beheerders
+    url = reverse('Functie:overzicht')
+    kaartje = SimpleNamespace(
+                    prio=7,
+                    titel="Beheerders",
+                    icoon="face",
+                    tekst="Toon wie beheerders van de bondscompetitie zijn, koppel andere beheerders of wijzig contactgegevens.",
                     url=url)
     kaartjes_algemeen.append(kaartje)
 

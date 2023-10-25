@@ -46,7 +46,7 @@ class ScheidsBeschikbaarheid(models.Model):
     objects = models.Manager()      # for the editor only
 
 
-class WedstrijdDagScheids(models.Model):
+class WedstrijdDagScheidsrechters(models.Model):
     """ Bijhouden van de scheidsrechter behoefte voor een specifieke wedstrijd
         en de gekozen scheidsrechters.
     """
@@ -58,29 +58,26 @@ class WedstrijdDagScheids(models.Model):
     # eerste dag is 0
     dag_offset = models.SmallIntegerField(default=0)
 
-    # om in consistente volgorde te kunnen tonen
-    volgorde = models.SmallIntegerField(default=0)
+    # welke hoofdscheidsrechter is gekozen?
+    gekozen_hoofd_sr = models.ForeignKey(Sporter, on_delete=models.SET_NULL, related_name='gekozen_hoofd_sr',
+                                         null=True, blank=True)              # mag leeg zijn
 
-    # wat voor soort behoefte gaat dit om?
-    # Hoofdscheidsrechter / Assistent SR, etc.
-    titel = models.CharField(max_length=20, default='')
-
-    is_hoofd_sr = models.BooleanField(default=False)
-
-    # welke scheidsrechter is gekozen voor deze positie?
-    gekozen = models.ForeignKey(Sporter, on_delete=models.SET_NULL,
-                                null=True, blank=True)              # mag leeg zijn
+    # welke scheidsrechters zijn gekozen?
+    gekozen_sr1 = models.ForeignKey(Sporter, on_delete=models.SET_NULL, related_name='gekozen_sr1', null=True, blank=True)
+    gekozen_sr2 = models.ForeignKey(Sporter, on_delete=models.SET_NULL, related_name='gekozen_sr2', null=True, blank=True)
+    gekozen_sr3 = models.ForeignKey(Sporter, on_delete=models.SET_NULL, related_name='gekozen_sr3', null=True, blank=True)
+    gekozen_sr4 = models.ForeignKey(Sporter, on_delete=models.SET_NULL, related_name='gekozen_sr4', null=True, blank=True)
+    gekozen_sr5 = models.ForeignKey(Sporter, on_delete=models.SET_NULL, related_name='gekozen_sr5', null=True, blank=True)
+    gekozen_sr6 = models.ForeignKey(Sporter, on_delete=models.SET_NULL, related_name='gekozen_sr6', null=True, blank=True)
+    gekozen_sr7 = models.ForeignKey(Sporter, on_delete=models.SET_NULL, related_name='gekozen_sr7', null=True, blank=True)
+    gekozen_sr8 = models.ForeignKey(Sporter, on_delete=models.SET_NULL, related_name='gekozen_sr8', null=True, blank=True)
+    gekozen_sr9 = models.ForeignKey(Sporter, on_delete=models.SET_NULL, related_name='gekozen_sr9', null=True, blank=True)
 
     def __str__(self):
-        msg = "[%s +%s] %s = " % (self.wedstrijd.datum_begin, self.dag_offset, self.titel)
-        if self.gekozen:
-            msg += self.gekozen.lid_nr_en_volledige_naam()
-        else:
-            msg += '?'
-        return msg
+        return "[%s +%s]" % (self.wedstrijd.datum_begin, self.dag_offset)
 
     class Meta:
-        verbose_name_plural = verbose_name = "Wedstrijddag scheids"
+        verbose_name_plural = verbose_name = "Wedstrijddag scheidsrechters"
 
     objects = models.Manager()      # for the editor only
 

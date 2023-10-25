@@ -8,7 +8,8 @@ from django.test import TestCase
 from Competitie.definities import DEEL_RK, DEEL_BK
 from Competitie.models import Regiocompetitie, Kampioenschap
 from Competitie.operations import competities_aanmaken
-from Functie.operations import maak_functie, Functie
+from Functie.models import Functie
+from Functie.tests.helpers import maak_functie
 from Geo.models import Rayon, Regio
 from Mailer.models import MailQueue
 from TestHelpers.e2ehelpers import E2EHelpers

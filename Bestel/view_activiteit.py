@@ -124,9 +124,11 @@ class BestelActiviteitView(UserPassesTestMixin, TemplateView):
 
         if form.is_bound:
             if not form.cleaned_data['webwinkel']:
+                # vinkje is niet gezet, dus webwinkel producten zijn niet gewenst --> behoud waar deze None is
                 bestellingen = bestellingen.filter(producten__webwinkel_keuze=None)
 
             if not form.cleaned_data['wedstrijden']:
+                # vinkje is niet gezet, dus wedstrijd bestellingen zijn niet gewenst --> behoud waar deze None is
                 bestellingen = bestellingen.filter(producten__wedstrijd_inschrijving=None)
 
         # bepaal het aantal bestellingen sinds het begin van de maand

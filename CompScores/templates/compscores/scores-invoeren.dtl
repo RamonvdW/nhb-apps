@@ -584,7 +584,7 @@
 
             // /\D/.test() matches digits and returns true if there are non-digits
             const value = el.value;
-            if (/\D/.test(value) || value < 0 || value > {{ wedstrijd.uitslag.max_score }}) {
+            if (/\D/.test(value) || value < 0 || value > {{ wedstrijd.max_score }}) {
                 color = "red";
             }
 

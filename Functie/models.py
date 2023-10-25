@@ -82,6 +82,12 @@ class Functie(models.Model):
     # SEC/HWL/WL only: vereniging
     vereniging = models.ForeignKey(Vereniging, on_delete=models.CASCADE, null=True, blank=True)
 
+    def is_indoor(self):
+        return self.comp_type == '18'
+
+    def is_25m1pijl(self):
+        return self.comp_type == '25'
+
     def __str__(self):
         """ Geef een string terug voor gebruik in de admin interface """
         return self.beschrijving

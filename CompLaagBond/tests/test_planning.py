@@ -10,7 +10,7 @@ from Competitie.definities import DEEL_RK, DEEL_BK
 from Competitie.models import (Regiocompetitie, Kampioenschap,
                                CompetitieIndivKlasse, CompetitieTeamKlasse, CompetitieMatch,
                                KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet)
-from Functie.operations import maak_functie
+from Functie.tests.helpers import maak_functie
 from Locatie.models import Locatie
 from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers

@@ -246,7 +246,7 @@ class MyTestAsserts(TestCase):
                 link = content[:pos+4]
                 content = content[pos+4:]
                 # check the link (skip if plain button with onclick handler)
-                if link.find('href="') >= 0:
+                if link.find('href="') >= 0:                                                # pragma: no branch
                     # filter out website-internal links
                     if link.find('href="/') < 0 and link.find('href="#') < 0:
                         if link.find('href=""') >= 0 or link.find('href="mailto:"') >= 0:   # pragma: no cover
@@ -282,15 +282,15 @@ class MyTestAsserts(TestCase):
                     self.fail(msg=msg)
 
             pos = script.find('console.log')
-            if pos >= 0:        # pragma: no cover
+            if pos >= 0:                    # pragma: no cover
                 self.fail(msg='Detected console.log usage in script from template %s' % template_name)
 
             pos = script.find('/*')
-            if pos >= 0:        # pragma: no cover
+            if pos >= 0:                    # pragma: no cover
                 self.fail(msg='Found block comment in script from template %s' % template_name)
 
             # tel het aantal newlines in het script
-            if script.count('\n') >= 3:
+            if script.count('\n') >= 3:     # pragma: no cover
                 self.fail(msg='Missing semi-colons in script in template %s' % template_name)
 
             html = html[pos+9:]
@@ -330,7 +330,7 @@ class MyTestAsserts(TestCase):
                         script = "<script>function %s() { %s }</script>" % (event_name, script)
 
                         issues = validate_javascript(script)
-                        if len(issues):
+                        if len(issues):         # pragma: no cover
                             msg = 'Invalid script (template: %s):\n' % template_name
                             for issue in issues:
                                 msg += "    %s\n" % issue
@@ -522,11 +522,11 @@ class MyTestAsserts(TestCase):
             else:
                 pos2 = form.find('"', pos1+11)
                 submit = form[pos1+11:pos2]
-                if '.disabled=true;' not in submit or 'return true;' not in submit:            # pragma: no cover
+                if '.disabled=true;' not in submit or 'return true;' not in submit:             # pragma: no cover
                     self.fail('Form onsubmit zonder met dubbelklik bescherming in template %s\n%s' % (repr(dtl),
                                                                                                       repr(submit)))
 
-                if 'document.getElementById(' not in submit:
+                if 'document.getElementById(' not in submit:                                    # pragma: no cover
                     self.fail('Form onsubmit met slechte dubbelklik bescherming in template %s\n%s' % (repr(dtl),
                                                                                                        repr(submit)))
 
@@ -597,7 +597,7 @@ class MyTestAsserts(TestCase):
             pos_end = html.find('</a>', pos_a+2)
             link = html[pos_a:pos_end+4]
 
-            if link.find(' href="') < 0:
+            if link.find(' href="') < 0:                                        # pragma: no cover
                 # geen href
                 # print('link: %s' % repr(link))
                 msg = "Link should <button> in %s:\n%s" % (dtl, link)
@@ -610,7 +610,7 @@ class MyTestAsserts(TestCase):
         pos = html.find('<i class=')
         while pos > 0:
             pos2 = html.find('</i>', pos+1)
-            if pos2 > 0:
+            if pos2 > 0:                                                        # pragma: no branch
                 tag_i = html[pos:pos2]
                 if 'material-icons' in tag_i:
                     # class secondary-content is used to dynamically plug an icon from within a script
@@ -618,7 +618,7 @@ class MyTestAsserts(TestCase):
                         pos2 = tag_i.rfind('>')
                         icon_name = tag_i[pos2+1:]
                         # print('icon_name: %s' % repr(icon_name))
-                        if icon_name not in GLYPH_NAMES_PRESENT:
+                        if icon_name not in GLYPH_NAMES_PRESENT:                # pragma: no cover
                             self.fail('Bug in template %s: Material Icon name %s is not in the reduced font!' % (
                                         repr(dtl), repr(icon_name)))
 
@@ -749,7 +749,7 @@ class MyTestAsserts(TestCase):
 
         self.assertTrue(resp.url.startswith, '/account/login/')
 
-    def check_concurrency_risks(self, tracer):         # pragma: no cover
+    def check_concurrency_risks(self, tracer):
         found_delete = False
         found_insert = False
         found_update = False
@@ -772,7 +772,7 @@ class MyTestAsserts(TestCase):
         # for
 
         do_report = False
-        if found_delete or found_insert or found_update:
+        if found_delete or found_insert or found_update:        # pragma: no branch
             if not tracer.modify_acceptable:
                 do_report = True
 
@@ -793,7 +793,7 @@ class MyTestAsserts(TestCase):
                     pos2 = sql.find('"', pos1 + 2)
                     table_name = sql[pos1 + 2:pos2]
                     cmd = "SELECT"
-                    if " FOR UPDATE" in sql:
+                    if " FOR UPDATE" in sql:                # pragma: no cover
                         cmd += '.. FOR UPDATE'
 
                 elif sql.startswith('INSERT INTO '):
@@ -802,19 +802,19 @@ class MyTestAsserts(TestCase):
                     pos2 = sql.find('"', pos1 + 2)
                     table_name = sql[pos1 + 2:pos2]
 
-                elif sql.startswith('UPDATE '):
+                elif sql.startswith('UPDATE '):             # pragma: no branch
                     cmd = 'UPDATE'
                     pos1 = sql.find(' "')
                     pos2 = sql.find('"', pos1 + 2)
                     table_name = sql[pos1 + 2:pos2]
 
-                elif sql.startswith('DELETE FROM '):
+                elif sql.startswith('DELETE FROM '):        # pragma: no cover
                     cmd = 'DELETE FROM'
                     pos1 = sql.find(' "')
                     pos2 = sql.find('"', pos1 + 2)
                     table_name = sql[pos1 + 2:pos2]
 
-                elif sql.startswith('SAVEPOINT'):
+                elif sql.startswith('SAVEPOINT'):           # pragma: no cover
                     try:
                         cmd = renames[sql]
                     except KeyError:
@@ -822,16 +822,16 @@ class MyTestAsserts(TestCase):
                         cmd = renames[sql] = '#' + str(savepoint_nr)
                     cmd += ' savepoint'
 
-                elif sql.startswith('RELEASE SAVEPOINT'):
+                elif sql.startswith('RELEASE SAVEPOINT'):   # pragma: no cover
                     cmd = renames[sql[8:]] + ' release'
 
                 else:
-                    cmd = '?? unknown sql: %s' % repr(sql)
+                    cmd = '?? unknown sql: %s' % repr(sql)  # pragma: no cover
 
                 explain.append(cmd + ' ' + table_name)
             # for
 
-            if FAIL_UNSAFE_DATABASE_MODIFICATION:
+            if FAIL_UNSAFE_DATABASE_MODIFICATION:           # pragma: no cover
                 self.fail(msg='Found database modification outside POST or background task:' +
                               '\n   ' +
                               '\n   '.join(explain))

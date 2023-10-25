@@ -45,7 +45,7 @@
                                 {% for dag in dagen %}
                                     {% if forloop.first %}
                                         <tr>
-                                            <th colspan="2">Aantal scheidsrechters</th>
+                                            <th>Aantal scheidsrechters nodig</th>
                                             <td>
                                                 <select name="aantal_scheids" onchange="gewijzigd()">
                                                     {% for value, tekst in keuze_aantal_scheids %}
@@ -57,20 +57,20 @@
                                     {% endif %}
 
                                     <tr>
-                                        <th>Hoofdscheidsrechter</th>
-                                        <td>{{ dag.datum }}</td>
+                                        <td colspan="2" class="center">
+                                            <h6 class="sv-blauw-text">{{ dag.datum }}</h6>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>Hoofd<wbr>scheidsrechter</th>
                                         <td>
                                             <ul>
                                                 {% for beschikbaar in dag.beschikbaar_hoofd_sr %}
                                                     <li>
-                                                        <label class="black-text" for="{{ beschikbaar.id_li1 }}">
-                                                            <input class="with-gap" type="radio" name="{{ dag.nr_hsr }}" value="{{ beschikbaar.pk }}" id="{{ beschikbaar.id_li1 }}"{% if beschikbaar.is_onzeker %} disabled{% else %}{% if beschikbaar.is_selected %} checked{% endif %} onchange="gewijzigd()"{% endif %}>
-                                                            <span>{{ beschikbaar.scheids.volledige_naam }}{% if beschikbaar.is_onzeker %} (overweegt){% endif %}</span>
+                                                        <label class="black-text" for="{{ beschikbaar.id_li }}">
+                                                            <input class="with-gap" type="radio" required name="{{ dag.nr_hsr }}" value="{{ beschikbaar.pk }}" id="{{ beschikbaar.id_li }}"{% if beschikbaar.is_onzeker %} disabled{% else %}{% if beschikbaar.is_selected %} checked{% endif %} onchange="gewijzigd()"{% endif %}>
+                                                            <span>{% if beschikbaar.scheids %}{{ beschikbaar.scheids.volledige_naam }}{% else %}<i>nog niet gekozen</i>{% endif %}{% if beschikbaar.is_onzeker %} (overweegt){% endif %}{% if beschikbaar.waarschuw_niet_meer_beschikbaar %}<span class="sv-rood-text"> LET OP: Niet meer beschikbaar</span>{% endif %}</span>
                                                         </label>
-                                                    </li>
-                                                {% empty %}
-                                                    <li>
-                                                        <span>Nog niemand beschikbaar</span>
                                                     </li>
                                                 {% endfor %}
                                             </ul>
@@ -78,23 +78,28 @@
                                     </tr>
 
                                     <tr>
-                                        <th>Hulpscheidsrechter</th>
-                                        <td>{{ dag.datum }}</td>
+                                        <th>Additionele scheidsrechters</th>
                                         <td>
                                             <ul>
                                                 {% for beschikbaar in dag.beschikbaar_sr %}
                                                     <li>
-                                                        <label class="black-text" for="{{ beschikbaar.id_li2 }}">
-                                                            <input class="with-gap" type="radio" name="{{ dag.nr_sr }}" value="{{ beschikbaar.pk }}" id="{{ beschikbaar.id_li2 }}"{% if beschikbaar.is_onzeker %} disabled{% else %}{% if beschikbaar.is_selected %} checked{% endif %} onchange="gewijzigd()"{% endif %}>
-                                                            <span>{{ beschikbaar.scheids.volledige_naam }}{% if beschikbaar.is_onzeker %} (overweegt){% endif %}</span>
+                                                        <label class="black-text" for="{{ beschikbaar.id_li }}">
+                                                            <input class="filled-in" type="checkbox" name="{{ beschikbaar.sel }}" id="{{ beschikbaar.id_li }}"{% if beschikbaar.is_onzeker %} disabled{% else %}{% if beschikbaar.is_selected %} checked{% endif %} onchange="gewijzigd()"{% endif %}>
+                                                            <span>{{ beschikbaar.scheids.volledige_naam }}{% if beschikbaar.is_onzeker %} (overweegt){% endif %}{% if beschikbaar.waarschuw_niet_meer_beschikbaar %}<span class="sv-rood-text"> LET OP: Niet meer beschikbaar</span>{% endif %}</span>
                                                         </label>
                                                     </li>
                                                 {% empty %}
                                                     <li>
-                                                        <span>Nog niemand beschikbaar</span>
+                                                        <i>Nog niemand beschikbaar</i>
                                                     </li>
                                                 {% endfor %}
                                             </ul>
+                                        </td>
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td class="center">
+                                            <i>Geen beschikbaarheid aanwezig</i>
                                         </td>
                                     </tr>
                                 {% endfor %}
@@ -120,15 +125,24 @@
 
             </div>
         </div>
-    {% endif %}
 
-
-    <!-- banner -->
-    <div class="row center">
-        <div class="col s12">
-            <h3 class="page-banner">Wedstrijd details</h3>
+        <!-- witruimte -->
+        <div class="row center">
+            <div class="col s12">
+                <h4>Wedstrijd details</h4>
+            </div>
         </div>
-    </div>
+
+    {% else %}
+
+        <!-- banner -->
+        <div class="row center">
+            <div class="col s12">
+                <h3 class="page-banner">Wedstrijd details</h3>
+            </div>
+        </div>
+
+    {% endif %}
 
     <!-- blauwe balk met informatie tabel -->
     <div class="row-sv-blauw">
@@ -256,7 +270,7 @@
         </div>
 
         {% if toon_sessies %}
-            <div class="col s12">
+            <div class="col s12 l10 offset-l1 xl8 offset-xl2">
                                         <!-- not: popout !! -->
                 <ul id="sessies" class="collapsible z-depth-0 white" style="margin-top:30px; margin-bottom:0">
                     <li>
@@ -272,11 +286,7 @@
                         <li>
                             <div class="collapsible-header white center" style="display:block">
                                 {% if sessie.beschrijving %}<span>{{ sessie.beschrijving }}</span><br>{% endif %}
-                                <b>{{ sessie.datum }}, {{ sessie.tijd_begin }} - {{ sessie.tijd_einde }}</b>
-                                <br>
-                                {% if kan_inschrijven %}
-                                    <span>{{ sessie.aantal_beschikbaar }} plaatsen beschikbaar (van de {{ sessie.max_sporters }})</span><br>
-                                {% endif %}
+                                <b>{{ sessie.datum }}, {{ sessie.tijd_begin }} - {{ sessie.tijd_einde }}</b><br>
                                 <span>{{ sessie.klassen|length }} wedstrijdklassen</span>
                                 <i class="material-icons-round notranslate sv-rood-text secondary-content"><!-- wordt gezet in in/uitklappen_klaar() in Plein/js/site_layout.js --></i>
                             </div>

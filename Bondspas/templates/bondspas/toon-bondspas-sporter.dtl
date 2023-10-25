@@ -14,6 +14,14 @@
     <div class="row center">
         <div class="col s12">
             <h3 class="page-banner">Jouw digitale bondspas</h3>
+
+            <!-- download knop wordt pas zichtbaar nadat het plaatje opgehaald is -->
+            <div id="id_download_knop" style="display:none">
+                <form action="{{ url_download }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
+                    {% csrf_token %}
+                    <button class="btn-sv-rood" id="submit_knop" type="submit">Download</button>
+                </form>
+            </div>
         </div>
     </div>
 
@@ -52,6 +60,10 @@
                     // "Je bondspas wordt opgehaald" bericht weghalen
                     const el = document.getElementById('id_even_wachten');
                     el.style.display = "none";
+
+                    // download knop zichtbaar maken
+                    const el_dl = document.getElementById('id_download_knop');
+                    el_dl.style.display = "inherit";
                 }
             }
         }

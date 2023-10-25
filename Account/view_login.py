@@ -76,9 +76,9 @@ class LoginView(TemplateView):
                 if account.is_geblokkeerd_tot > now:
                     schrijf_in_logboek(account, 'Inloggen',
                                        'Mislukte inlog vanaf IP %s voor geblokkeerd account %s' % (
-                                           from_ip, repr(login_naam)))
+                                           from_ip, repr(account.username)))
                     my_logger.info(
-                        '%s LOGIN Mislukte inlog voor geblokkeerd account %s' % (from_ip, repr(login_naam)))
+                        '%s LOGIN Mislukte inlog voor geblokkeerd account %s' % (from_ip, repr(account.username)))
                     context = {'account': account}
                     httpresp = render(self.request, TEMPLATE_GEBLOKKEERD, context)
                     return httpresp, None
@@ -125,7 +125,7 @@ class LoginView(TemplateView):
 
                 schrijf_in_logboek(account, 'Inlog geblokkeerd',
                                    'Account %s wordt geblokkeerd tot %s' % (
-                                       repr(login_naam),
+                                       repr(account.username),
                                        account.is_geblokkeerd_tot.strftime('%Y-%m-%d %H:%M:%S')))
 
                 context = {'account': account}
@@ -155,7 +155,10 @@ class LoginView(TemplateView):
         # integratie met de authenticatie laag van Django
         login(self.request, account)
 
-        my_logger.info('%s LOGIN op account %s' % (from_ip, repr(account.username)))
+        my_logger.info('%s LOGIN op account %s (met %s)' % (
+                        from_ip,
+                        repr(account.username),
+                        'e-mailadres' if '@' in login_naam else 'lidnummer'))
 
         if account.verkeerd_wachtwoord_teller > 0:
             account.verkeerd_wachtwoord_teller = 0

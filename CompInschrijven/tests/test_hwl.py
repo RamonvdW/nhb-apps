@@ -7,7 +7,8 @@
 from django.test import TestCase
 from django.utils import timezone
 from BasisTypen.definities import BOOGTYPE_AFKORTING_RECURVE
-from Functie.operations import maak_functie, Functie
+from Functie.models import Functie
+from Functie.tests.helpers import maak_functie
 from Geo.models import Regio
 from Competitie.definities import DEEL_RK, INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3
 from Competitie.models import (Competitie, Regiocompetitie, CompetitieIndivKlasse, RegiocompetitieSporterBoog,
@@ -284,14 +285,13 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
         functie_rcl = Functie.objects.get(rol='RCL', comp_type='18', regio=self.deelcomp_regio.regio)
         self.e2e_wissel_naar_functie(functie_rcl)
 
+        # doe een POST om de eerste ronde aan te maken
         url = self.url_planning_regio % self.deelcomp_regio.pk
-
-        # haal de (lege) planning op. Dit maakt ook meteen de enige ronde aan
         with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 200)  # 200 = OK
+            resp = self.client.post(url)
+        self.assert_is_redirect(resp, url)
 
-        ronde_pk = RegiocompetitieRonde.objects.filter(regiocompetitie=self.deelcomp_regio)[0].pk
+        ronde_pk = RegiocompetitieRonde.objects.filter(regiocompetitie=self.deelcomp_regio).first().pk
 
         # haal de ronde planning op
         url_ronde = self.url_planning_regio_ronde_methode1 % ronde_pk

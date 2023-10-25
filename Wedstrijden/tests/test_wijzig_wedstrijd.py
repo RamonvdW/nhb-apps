@@ -6,7 +6,7 @@
 
 from django.test import TestCase, override_settings
 from BasisTypen.models import KalenderWedstrijdklasse
-from Functie.operations import maak_functie
+from Functie.tests.helpers import maak_functie
 from Geo.models import Regio
 from Locatie.models import Locatie
 from Sporter.models import Sporter
@@ -907,6 +907,19 @@ class TestWedstrijdenWijzigWedstrijd(E2EHelpers, TestCase):
 
         wedstrijd = Wedstrijd.objects.get(pk=wedstrijd.pk)
         self.assertFalse(wedstrijd.is_ter_info)
+
+        # haal als HWL het overzicht op met een 'ter info' wedstrijd
+        wedstrijd.is_ter_info = True
+        wedstrijd.save(update_fields=['is_ter_info'])
+
+        self.e2e_wissel_naar_functie(self.functie_hwl)
+        self.e2e_check_rol('HWL')
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('wedstrijden/wijzig-wedstrijd.dtl', 'plein/site_layout.dtl'))
 
 
 # end of file

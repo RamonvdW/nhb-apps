@@ -14,7 +14,7 @@ from Competitie.models import (Competitie, Regiocompetitie, CompetitieIndivKlass
                                Kampioenschap)
 from Competitie.operations import competities_aanmaken
 from Competitie.test_utils.tijdlijn import zet_competitie_fases
-from Functie.operations import maak_functie
+from Functie.tests.helpers import maak_functie
 from Geo.models import Rayon, Regio, Cluster
 from Locatie.models import Locatie
 from Sporter.models import Sporter, SporterBoog

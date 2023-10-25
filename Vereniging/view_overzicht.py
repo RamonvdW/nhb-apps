@@ -156,7 +156,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                 kaartje.titel = "Aanmelden"
                 kaartje.tekst = 'Leden aanmelden voor de %s.' % comp.beschrijving
                 kaartje.url = reverse('CompInschrijven:leden-aanmelden', kwargs={'comp_pk': comp.pk})
-                if comp.afstand == '18':
+                if comp.is_indoor():
                     kaartje.img = static('plein/badge_discipline_indoor.png')
                 else:
                     kaartje.img = static('plein/badge_discipline_25m1p.png')
@@ -243,7 +243,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                         kaartje.tekst = "Overzicht ingeschreven leden."
                         kaartje.url = reverse('CompInschrijven:leden-ingeschreven',
                                               kwargs={'deelcomp_pk': deelcomp.pk})
-                        if comp.afstand == '18':
+                        if comp.is_indoor():
                             kaartje.img = static('plein/badge_discipline_indoor.png')
                         else:
                             kaartje.img = static('plein/badge_discipline_25m1p.png')

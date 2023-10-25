@@ -482,14 +482,6 @@ class TestCompScoresScores(E2EHelpers, TestCase):
                                     content_type='application/json')
         self.assert404(resp, 'Wedstrijd niet gevonden')
 
-        # post met wedstrijd_pk die nog geen uitslag heeft
-        json_data = {'wedstrijd_pk': self.match18_pk}
-        with self.assert_max_queries(20):
-            resp = self.client.post(self.url_uitslag_opslaan,
-                                    json.dumps(json_data),
-                                    content_type='application/json')
-        self.assert404(resp, 'Geen wedstrijduitslag')
-
         # post met wedstrijd_pk waar deze RCL geen toegang toe heeft
         with self.assert_max_queries(20):
             self.client.get(self.url_uitslag_invoeren % self.wedstrijd25_pk)
@@ -517,7 +509,7 @@ class TestCompScoresScores(E2EHelpers, TestCase):
             resp = self.client.post(self.url_uitslag_opslaan,
                                     json.dumps(json_data),
                                     content_type='application/json')
-        self.assert404(resp, 'Geen competitie wedstrijd')
+        self.assert404(resp, 'Geen regio wedstrijd')
 
         self.assertTrue(str(wedstrijd2) != '')
         wedstrijd2.vereniging = self.testdata.vereniging[self.testdata.regio_ver_nrs[111][0]]
@@ -583,24 +575,10 @@ class TestCompScoresScores(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
 
-        json_data = {'wedstrijd_pk': self.match18_pk,
-                     self.testdata.comp25_deelnemers[0].sporterboog.pk: 120,
-                     self.testdata.comp25_deelnemers[6].sporterboog.pk: 129}
-        with self.assert_max_queries(20):
-            resp = self.client.post(self.url_uitslag_opslaan,
-                                    json.dumps(json_data),
-                                    content_type='application/json')
-        self.assert404(resp, 'Geen wedstrijduitslag')
-
     def _maak_uitslag(self, match_pk):
         # log in als RCL om de wedstrijduitslag in te voeren
         self.e2e_login_and_pass_otp(self.testdata.comp18_account_rcl[101])
         self.e2e_wissel_naar_functie(self.testdata.comp18_functie_rcl[101])
-
-        # voer een wedstrijd.uitslag in
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_uitslag_invoeren % self.match18_pk)     # garandeert wedstrijd.uitslag
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
 
         # maak de data set
         json_data = {'wedstrijd_pk': match_pk}

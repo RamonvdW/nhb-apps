@@ -429,7 +429,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
 
             comp = deelnemer.regiocompetitie.competitie
 
-            if comp.afstand == '18':
+            if comp.is_indoor():
                 deelnemer.competitie_str = "18m Indoor"
             else:
                 deelnemer.competitie_str = "25m 1pijl"
@@ -454,7 +454,30 @@ class ProfielView(UserPassesTestMixin, TemplateView):
         heeft_wedstrijden = False
 
         vandaag = timezone.now().date()
-        wedstrijden = list()
+        wedstrijden = (WedstrijdInschrijving
+                       .objects
+                       .filter(sporterboog__sporter=self.sporter,
+                               wedstrijd__datum_begin__gte=vandaag)
+                       .select_related('wedstrijd',
+                                       'wedstrijd__locatie')
+                       .order_by('wedstrijd__datum_begin'))
+
+        for inschrijving in wedstrijden:
+            wedstrijd = inschrijving.wedstrijd
+
+            inschrijving.datum_str = maak_compacte_wanneer_str(wedstrijd.datum_begin, wedstrijd.datum_einde)
+
+            inschrijving.plaats_str = wedstrijd.locatie.plaats
+
+            if wedstrijd.eis_kwalificatie_scores:       # TODO: einddatum voor wijzigingen
+                inschrijving.url_kwalificatie_scores = reverse('WedstrijdInschrijven:inschrijven-kwalificatie-scores',
+                                                               kwargs={'inschrijving_pk': inschrijving.pk})
+
+            inschrijving.url_details = reverse('Wedstrijden:wedstrijd-details',
+                                               kwargs={'wedstrijd_pk': wedstrijd.pk})
+
+            heeft_wedstrijden = True
+        # for
 
         return heeft_wedstrijden, wedstrijden
 

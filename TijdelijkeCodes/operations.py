@@ -152,6 +152,16 @@ def maak_tijdelijke_code_deelname_kampioenschap(kampioen, **kwargs):
     return settings.SITE_URL + reverse('TijdelijkeCodes:tijdelijke-url', args=[url_code])
 
 
+def maak_tijdelijke_code_scheids_beschikbaarheid(wedstrijd, **kwargs):
+    """ Maak een tijdelijke URL aan die gebruikt kan worden door een scheidsrechter
+        om de beschikbaarheid voor een wedstrijd te benaderen.
+    """
+    url_code = _maak_unieke_code(**kwargs, pk=wedstrijd.pk)
+    func = tijdelijke_code_dispatcher.get_saver()
+    func(url_code, dispatch_to=RECEIVER_SCHEIDS_BESCHIKBAAR, geldig_dagen=7, wedstrijd=wedstrijd)
+    return settings.SITE_URL + reverse('TijdelijkeCodes:tijdelijke-url', args=[url_code])
+
+
 def do_dispatch(request, obj):
     """ Deze functie wordt aangeroepen vanuit de view die de ontvangen url_code
         opgezocht heeft in de database.
@@ -183,6 +193,11 @@ def do_dispatch(request, obj):
         func = tijdelijke_code_dispatcher.get_receiver(obj.dispatch_to)
         redirect = func(request, obj.hoort_bij_kampioen)
 
+    elif obj.dispatch_to == RECEIVER_SCHEIDS_BESCHIKBAAR:
+        # referentie = Wedstrijd, Sporter
+        func = tijdelijke_code_dispatcher.get_receiver(obj.dispatch_to)
+        redirect = func(request, obj.hoort_bij_wedstrijd, obj.hoort_bij_sporter)
+
     return redirect
 
 
@@ -208,6 +223,9 @@ def beschrijving_activiteit(obj):
 
     if obj.dispatch_to == RECEIVER_DEELNAME_KAMPIOENSCHAP:
         return "je beschikbaarheid voor een kampioenschap door te geven"
+
+    if obj.dispatch_to == RECEIVER_SCHEIDS_BESCHIKBAAR:
+        return "je beschikbaarheid als scheidsrechter door te geven"
 
     return "????"
 

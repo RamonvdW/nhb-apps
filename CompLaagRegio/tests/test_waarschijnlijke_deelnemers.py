@@ -6,7 +6,7 @@
 
 from django.test import TestCase
 from BasisTypen.models import BoogType, TeamType
-from Functie.operations import maak_functie
+from Functie.tests.helpers import maak_functie
 from Geo.models import Regio, Cluster
 from Competitie.definities import INSCHRIJF_METHODE_1
 from Competitie.models import (Regiocompetitie, CompetitieMatch, CompetitieIndivKlasse, CompetitieTeamKlasse,
@@ -197,7 +197,7 @@ class TestCompLaagRegioWaarschijnlijkeDeelnemers(E2EHelpers, TestCase):
         self.wedstrijden = list()
 
         # maak een ronde + plan
-        ronde = maak_regiocompetitie_ronde(self.deelcomp_regio_18)
+        ronde = maak_regiocompetitie_ronde(self.deelcomp_regio_18, mag_database_wijzigen=True)
         self.ronde = ronde
 
         de_tijd = datetime.time(hour=20)
@@ -358,7 +358,6 @@ class TestCompLaagRegioWaarschijnlijkeDeelnemers(E2EHelpers, TestCase):
                 indiv_klasse=klasse).save()
 
     def _maak_teams_18(self):
-
         teamtype_r = TeamType.objects.get(afkorting='R2')       # zowel DT als 40cm blazoen
         teamtype_c = TeamType.objects.get(afkorting='C')        # alleen DT blazoen
         teamtype_bb = TeamType.objects.get(afkorting='BB2')     # alleen 40cm blazoen
@@ -409,7 +408,6 @@ class TestCompLaagRegioWaarschijnlijkeDeelnemers(E2EHelpers, TestCase):
         team.save()
 
     def _maak_teams_25(self):
-
         teamtype_r = TeamType.objects.get(afkorting='R2')       # alleen 60cm blazoen
         teamtype_c = TeamType.objects.get(afkorting='C')        # 60cm en DT blazoen
 
@@ -549,6 +547,25 @@ class TestCompLaagRegioWaarschijnlijkeDeelnemers(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('complaagregio/waarschijnlijke-deelnemers-regio.dtl', 'plein/site_layout.dtl'))
 
+        # maak een wedstrijd die niet bij een ronde hoort
+        match = CompetitieMatch(
+                    competitie=self.comp_18,
+                    beschrijving='Special',
+                    vereniging=self.functie_sec.vereniging,
+                    datum_wanneer='2022-02-22',
+                    tijd_begin_wedstrijd='02:22')
+        match.save()
+
+        url = self.url_waarschijnlijke % match.pk
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assert404(resp, 'Geen competitie wedstrijd')
+
+        url = self.url_waarschijnlijke_bestand % match.pk
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assert404(resp, 'Geen competitie wedstrijd')
+
     def test_bad(self):
         # geen toegang tot de pagina
         self.client.logout()
@@ -600,7 +617,7 @@ class TestCompLaagRegioWaarschijnlijkeDeelnemers(E2EHelpers, TestCase):
         self.ronde.matches.clear()
         self.deelcomp_regio_18 = Regiocompetitie.objects.get(regio=self.regio_111,
                                                              competitie__afstand=25)
-        ronde = maak_regiocompetitie_ronde(self.deelcomp_regio_18)
+        ronde = maak_regiocompetitie_ronde(self.deelcomp_regio_18, mag_database_wijzigen=True)
         ronde.matches.add(self.wedstrijden[0])
 
         url = self.url_waarschijnlijke % self.wedstrijden[0].pk

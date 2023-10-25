@@ -44,7 +44,7 @@ def uitslag_regio_indiv_naar_histcomp(comp):
                         indiv_bogen=bogen,
                         team_typen=teamtypen)
 
-    if comp.afstand == '18':
+    if comp.is_indoor():
         hist_seizoen.aantal_beste_scores = settings.COMPETITIE_18M_MINIMUM_SCORES_VOOR_AG
     else:
         hist_seizoen.aantal_beste_scores = settings.COMPETITIE_25M_MINIMUM_SCORES_VOOR_AG

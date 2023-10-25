@@ -32,6 +32,7 @@ from Wedstrijden.definities import (WEDSTRIJD_STATUS_GEACCEPTEERD, WEDSTRIJD_KOR
                                     INSCHRIJVING_STATUS_DEFINITIEF, INSCHRIJVING_STATUS_AFGEMELD)
 from Wedstrijden.models import Wedstrijd, WedstrijdSessie, WedstrijdInschrijving, WedstrijdKorting
 from decimal import Decimal
+import datetime
 import io
 
 
@@ -141,7 +142,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
                         contact_naam='Organ is a Tie',
                         voorwaarden_a_status_when=now,
                         prijs_euro_normaal=10.00,
-                        prijs_euro_onder18=10.00)
+                        prijs_euro_onder18=42.00)
         wedstrijd.save()
         wedstrijd.sessies.add(sessie)
         # wedstrijd.boogtypen.add()
@@ -815,6 +816,30 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         urls = [url for url in urls if url.startswith('/wedstrijden/inschrijven/kwalificatie-scores-doorgeven/')]
         self.assertEqual(1, len(urls))
 
+    def test_prijs_onder18(self):
+        now = timezone.now().date()
+        self.sporter.geboorte_datum = now - datetime.timedelta(days=16*365)
+        self.sporter.save(update_fields=['geboorte_datum'])
+
+        self.korting.delete()
+
+        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_check_rol('sporter')
+
+        # bestel wedstrijddeelname
+        bestel_mutatieverzoek_inschrijven_wedstrijd(self.account_admin, self.inschrijving, snel=True)
+        f1, f2 = self.verwerk_bestel_mutaties()
+        # print('\nf1:', f1.getvalue(), '\nf2:', f2.getvalue())
+
+        self.assertEqual(0, Bestelling.objects.count())
+        resp = self.client.post(self.url_mandje_bestellen, {'snel': 1})
+        self.assert_is_redirect(resp, self.url_bestellingen_overzicht)
+        self.verwerk_bestel_mutaties()
+        self.assertEqual(1, Bestelling.objects.count())
+        bestelling = Bestelling.objects.first()
+
+        self.assertEqual(bestelling.totaal_euro, 42.0)
+
     def test_mutatie(self):
         # een paar corner cases
         bestel_mutatieverzoek_inschrijven_wedstrijd(self.account_admin, self.inschrijving, snel=True)
@@ -1006,6 +1031,8 @@ class TestBestelBestelling(E2EHelpers, TestCase):
 
         # afmelden voor de wedstrijd
         bestel_mutatieverzoek_afmelden_wedstrijd(inschrijving, snel=True)
+        # coverage: 2e verzoek voor dezelfde mutatie
+        bestel_mutatieverzoek_afmelden_wedstrijd(inschrijving, snel=True)
         self.verwerk_bestel_mutaties()
         inschrijving = WedstrijdInschrijving.objects.get(pk=self.inschrijving.pk)
         self.assertEqual(inschrijving.status, INSCHRIJVING_STATUS_AFGEMELD)
@@ -1016,6 +1043,8 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         self.e2e_check_rol('sporter')
 
         # bestel wedstrijddeelname
+        bestel_mutatieverzoek_inschrijven_wedstrijd(self.account_admin, self.inschrijving, snel=True)
+        # coverage: 2e verzoek voor dezelfde mutatie
         bestel_mutatieverzoek_inschrijven_wedstrijd(self.account_admin, self.inschrijving, snel=True)
         self.verwerk_bestel_mutaties()
 
@@ -1052,10 +1081,17 @@ class TestBestelBestelling(E2EHelpers, TestCase):
                             is_restitutie=False,
                             bedrag_euro_klant=Decimal('10'),
                             bedrag_euro_boeking=Decimal('9.75'),
-                            klant_naam="Pietje Pijlsnel",
+                            klant_naam="",            # sommige diensten geven de naam niet door
                             klant_account="1234.5678.9012.3456")
         transactie.save()
         bestelling.transacties.add(transactie)
+
+        # haal de details op (met de lege klant naam)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_bestelling_details % bestelling.bestel_nr)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('bestel/toon-bestelling-details.dtl', 'plein/site_layout.dtl'))
 
         # nu is er genoeg ontvangen
         with self.assert_max_queries(20):
@@ -1113,6 +1149,8 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         self.product.save(update_fields=['onbeperkte_voorraad'])
         bestel_mutatieverzoek_inschrijven_wedstrijd(self.account_admin, self.inschrijving, snel=True)
         bestel_mutatieverzoek_webwinkel_keuze(self.account_admin, self.keuze, snel=True)
+        # coverage: 2e verzoek voor dezelfde mutatie
+        bestel_mutatieverzoek_webwinkel_keuze(self.account_admin, self.keuze, snel=True)
         self.verwerk_bestel_mutaties()
 
         # zet het mandje om in een bestelling
@@ -1134,9 +1172,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, self.url_bestellingen_overzicht)
 
         # dubbele annuleer werkt niet omdat de dubbele mutatie niet aangemaakt wordt
-        url = self.url_annuleer_bestelling % bestelling.bestel_nr
-        with self.assert_max_queries(20):
-            resp = self.client.post(url, {'snel': 1})
+        resp = self.client.post(url, {'snel': 1})
         self.assert_is_redirect(resp, self.url_bestellingen_overzicht)
 
         bestelling = Bestelling.objects.get(pk=bestelling.pk)
@@ -1166,6 +1202,11 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('bestel/toon-bestelling-details.dtl', 'plein/site_layout.dtl'))
+
+        # dubbele annuleren werkt niet (verkeerde status)
+        url = self.url_annuleer_bestelling % bestelling.bestel_nr
+        resp = self.client.post(url, {'snel': 1})
+        self.assert_is_redirect(resp, self.url_bestellingen_overzicht)
 
         # corner cases
         resp = self.client.post(self.url_annuleer_bestelling % 999999, {'snel': 1})

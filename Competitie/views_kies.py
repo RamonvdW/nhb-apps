@@ -59,7 +59,7 @@ class CompetitieKiesView(TemplateView):
             if comp.is_openbaar:
                 comps.append(comp)
 
-                if comp.afstand == '18':
+                if comp.is_indoor():
                     comp.img_src = static('plein/badge_discipline_indoor.png')
                 else:
                     comp.img_src = static('plein/badge_discipline_25m1p.png')

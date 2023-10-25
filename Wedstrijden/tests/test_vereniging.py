@@ -5,8 +5,9 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
+from django.utils import timezone
 from BasisTypen.definities import ORGANISATIE_WA, ORGANISATIE_KHSN, ORGANISATIE_IFAA
-from Functie.operations import maak_functie
+from Functie.tests.helpers import maak_functie
 from Geo.models import Regio
 from Locatie.models import Locatie
 from Sporter.models import Sporter
@@ -14,6 +15,8 @@ from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
 from Wedstrijden.definities import WEDSTRIJD_DISCIPLINE_3D
 from Wedstrijden.models import Wedstrijd
+from unittest.mock import patch
+import datetime
 
 
 class TestWedstrijdenVereniging(E2EHelpers, TestCase):
@@ -122,11 +125,16 @@ class TestWedstrijdenVereniging(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('wedstrijden/nieuwe-wedstrijd-kies-type.dtl', 'plein/site_layout.dtl'))
 
         # maak een nieuwe wedstrijd aan
-        with self.assert_max_queries(20):
-            resp = self.client.post(self.url_wedstrijden_maak_nieuw, {'keuze': 'wa'})
+        with patch('django.utils.timezone.now') as mock_timezone_now:
+            # geef een vaste datum terug van 1 juni 2022 10:00
+            mock_timezone_now.return_value = datetime.datetime(2022, 6, 1, 10, tzinfo=datetime.timezone.utc)
+            with self.assert_max_queries(20):
+                resp = self.client.post(self.url_wedstrijden_maak_nieuw, {'keuze': 'wa'})
         self.assert_is_redirect_not_plein(resp)
         self.assertEqual(1, Wedstrijd.objects.count())
         wedstrijd = Wedstrijd.objects.get(organisatie=ORGANISATIE_WA)
+        self.assertEqual(wedstrijd.datum_begin.year, 2022)
+        self.assertEqual(wedstrijd.datum_begin.month, 8)
         self.assertEqual(wedstrijd.boogtypen.count(), 5)
         self.assertEqual(wedstrijd.wedstrijdklassen.count(), 40)
 
@@ -146,12 +154,18 @@ class TestWedstrijdenVereniging(E2EHelpers, TestCase):
         self.assertEqual(wedstrijd.wedstrijdklassen.count(), 70)        # gender-neutrale klassen zijn niet gekozen
 
         # maak nog een wedstrijd aan
-        with self.assert_max_queries(20):
-            resp = self.client.post(self.url_wedstrijden_maak_nieuw, {'keuze': 'ifaa'})
+        with patch('django.utils.timezone.now') as mock_timezone_now:
+            # geef een vaste datum terug van 2 november 2022 10:00
+            # zodat de datum_begin over de jaargrens geduwd wordt, onafhankelijk van de wallclock tijdens de test
+            mock_timezone_now.return_value = datetime.datetime(2022, 11, 2, 10, tzinfo=datetime.timezone.utc)
+            with self.assert_max_queries(20):
+                resp = self.client.post(self.url_wedstrijden_maak_nieuw, {'keuze': 'ifaa'})
         self.assert_is_redirect_not_plein(resp)
         self.assertEqual(3, Wedstrijd.objects.count())
         wedstrijd = Wedstrijd.objects.get(organisatie=ORGANISATIE_IFAA)
         self.assertEqual(wedstrijd.boogtypen.count(), 12)
+        self.assertEqual(wedstrijd.datum_begin.year, 2023)
+        self.assertEqual(wedstrijd.datum_begin.month, 2)
         self.assertEqual(wedstrijd.discipline, WEDSTRIJD_DISCIPLINE_3D)
         self.assertEqual(wedstrijd.wedstrijdklassen.count(), 144)
 

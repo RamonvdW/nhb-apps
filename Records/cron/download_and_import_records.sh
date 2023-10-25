@@ -13,11 +13,10 @@ RECORDS="/tmp/downloader/records.json"      # note: download_gsheet.py contains 
 USER_WWW="$1"
 
 ID=$(id -u)
-ID_ROOT=$(id -u root)
 ID_WWW=$(id -u "$USER_WWW")
-if [ "$ID" -ne "$ID_ROOT" ] && [ "$ID" -ne "$ID_WWW" ]
+if [ "$ID" -ne "$ID_WWW" ]
 then
-    echo "Please run with sudo"
+    echo "Please run with sudo -u $USER_WWW"
     exit 1
 fi
 
@@ -45,10 +44,11 @@ mkdir -p "$TMPDIR"
 cp "./downloader_service-account.json" "$TMPDIR/service-account.json"
 
 # calculate the checksum for the latest downloaded file
-LATEST_FILE=$(ls -1t "$SPOOLDIR"/records_*.json | head -1)
+LATEST_FILE=$(find "$SPOOLDIR" -name 'records_*json' | sort | tail -1)
 LATEST_HASH="none"
 if [ -e "$LATEST_FILE" ]
 then
+    echo "[INFO] Latest records file is $LATEST_FILE" >> "$LOG"
     LATEST_HASH=$(sha1sum < "$LATEST_FILE")
     echo "[INFO] Hash of previously downloaded records: $LATEST_HASH" >> "$LOG"
 fi

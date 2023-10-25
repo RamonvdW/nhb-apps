@@ -81,11 +81,12 @@
   }
 }
 
-// Shared focus button style
+//// Shared focus button style
 .btn,
 .btn-floating {
   &:focus {
-    background-color: darken($button-raised-background, 10%);
+    outline: 2px solid black;   // keep in sync with button:focus in _forms.scss
+    //background-color: darken($button-raised-background, 10%);
   }
 }
 

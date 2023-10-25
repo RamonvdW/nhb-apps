@@ -182,7 +182,7 @@ class FormulierBkIndivAlsBestandView(UserPassesTestMixin, TemplateView):
 
         aantal_banen = 16
         if match.locatie:
-            if comp.afstand == '18':
+            if comp.is_indoor():
                 aantal_banen = match.locatie.banen_18m
             else:
                 aantal_banen = match.locatie.banen_25m
@@ -201,7 +201,7 @@ class FormulierBkIndivAlsBestandView(UserPassesTestMixin, TemplateView):
             lid2voorkeuren[voorkeuren.sporter.lid_nr] = voorkeuren
         # for
 
-        if comp.afstand == '18':
+        if comp.is_indoor():
             excel_name = 'template-excel-bk-indoor-indiv.xlsx'
             ws_name = 'Voorronde'
         else:
@@ -379,7 +379,7 @@ class FormulierBkTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
         comp = deelkamp_bk.competitie
         # TODO: check fase
 
-        if comp.afstand == '18':
+        if comp.is_indoor():
             aantal_pijlen = 30
         else:
             aantal_pijlen = 25
@@ -401,7 +401,7 @@ class FormulierBkTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
         fname += klasse_str.lower().replace(' ', '-')
         fname += '.xlsx'
 
-        if comp.afstand == '18':
+        if comp.is_indoor():
             excel_name = 'template-excel-bk-indoor-teams.xlsx'
         else:
             excel_name = 'template-excel-bk-25m1pijl-teams.xlsx'
@@ -430,7 +430,7 @@ class FormulierBkTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
             max_teams = 8
 
             # maximaal 4 teams naar de finale, dus verwijder het blad voor 8 team finale
-            if comp.afstand == '18':
+            if comp.is_indoor():
                 del prg['Finales 8 teams']
 
             # verwijder 4 regels in Uitslag (voor teams 9..12)

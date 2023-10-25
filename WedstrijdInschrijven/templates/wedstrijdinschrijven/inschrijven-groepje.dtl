@@ -311,6 +311,6 @@
 
     {% endif %}     <!-- geselecteerd -->
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="wedstrijden-inschrijven-groepje" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="wedstrijdinschrijven-groepje" %}
 
 {% endblock %}

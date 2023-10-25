@@ -95,7 +95,7 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
         return self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL)
 
-    def _get_methode_1(self, context, deelcomp):
+    def _get_methode_1(self, context, deelcomp, mag_database_wijzigen=False):
         self.template_name = self.template2
 
         # zoek de regio planning op
@@ -110,18 +110,23 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
         # for
 
         if not regio_ronde:
-            # maak de enige ronde automatisch aan
-            regio_ronde = maak_regiocompetitie_ronde(deelcomp, cluster=None)
-            if not regio_ronde:
-                raise Http404('Limiet bereikt')
-            regio_ronde.week_nr = 0
-            regio_ronde.beschrijving = "Alle regio wedstrijden"
-            regio_ronde.save()
+            if mag_database_wijzigen:
+                # maak de enige ronde automatisch aan
+                regio_ronde = maak_regiocompetitie_ronde(deelcomp, cluster=None)
+                if not regio_ronde:
+                    raise Http404('Limiet bereikt')
+                regio_ronde.week_nr = 0
+                regio_ronde.beschrijving = "Alle regio wedstrijden"
+                regio_ronde.save()
+            else:
+                context['url_init_planning'] = reverse('CompLaagRegio:regio-planning',
+                                                       kwargs={'deelcomp_pk': deelcomp.pk})
 
-        regio_ronde.wedstrijden_count = regio_ronde.matches.count()
-        regio_ronde.url = reverse('CompLaagRegio:regio-methode1-planning',
-                                  kwargs={'ronde_pk': regio_ronde.pk})
-        context['regio_ronde'] = regio_ronde
+        else:
+            regio_ronde.wedstrijden_count = regio_ronde.matches.count()
+            regio_ronde.url = reverse('CompLaagRegio:regio-methode1-planning',
+                                      kwargs={'ronde_pk': regio_ronde.pk})
+            context['regio_ronde'] = regio_ronde
 
         # zorg dat de clusters een ronde hebben
         for cluster in (Cluster
@@ -133,10 +138,10 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
                         .select_related('regio')
                         .order_by('letter')):
 
-            if cluster.vereniging_set.count() > 0:
+            if mag_database_wijzigen and cluster.vereniging_set.count() > 0:
                 # maak de enige ronde automatisch aan
                 if cluster.regiocompetitieronde_set.filter(regiocompetitie=deelcomp).count() == 0:
-                    maak_regiocompetitie_ronde(deelcomp, cluster)
+                    maak_regiocompetitie_ronde(deelcomp, cluster, mag_database_wijzigen)
         # for
 
         # zoek de bruikbare clusters
@@ -151,12 +156,13 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
                         .order_by('letter')):
 
             if cluster.vereniging_set.count() > 0:
-                ronde = cluster.regiocompetitieronde_set.filter(regiocompetitie=deelcomp)[0]
-                cluster.wedstrijden_count = ronde.matches.count()
-                cluster.ronde_url = reverse('CompLaagRegio:regio-methode1-planning',
-                                            kwargs={'ronde_pk': ronde.pk})
+                ronde = cluster.regiocompetitieronde_set.filter(regiocompetitie=deelcomp).first()
+                if ronde:
+                    cluster.wedstrijden_count = ronde.matches.count()
+                    cluster.ronde_url = reverse('CompLaagRegio:regio-methode1-planning',
+                                                kwargs={'ronde_pk': ronde.pk})
 
-                clusters.append(cluster)
+                    clusters.append(cluster)
         # for
 
     def _get_methode_2_3(self, context, deelcomp, mag_wijzigen):
@@ -275,10 +281,13 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
             raise Http404('Competitie niet gevonden')
 
         if deelcomp.inschrijf_methode == INSCHRIJF_METHODE_1:
-            # inschrijfmethode 1 heeft maar 1 ronde en die wordt automatisch aangemaakt
-            raise Http404('Verkeerde inschrijfmethode')
+            # wordt alleen gebruikt om de planning te initialiseren
+            context = dict()
+            self._get_methode_1(context, deelcomp, mag_database_wijzigen=True)
+            url = reverse('CompLaagRegio:regio-planning', kwargs={'deelcomp_pk': deelcomp.pk})
+            return HttpResponseRedirect(url)
 
-        ronde = maak_regiocompetitie_ronde(deelcomp=deelcomp)  # checkt ook maximum aantal toegestaan
+        ronde = maak_regiocompetitie_ronde(deelcomp=deelcomp, mag_database_wijzigen=True)
         if ronde:
             # nieuwe ronde is aangemaakt
             next_url = reverse('CompLaagRegio:regio-ronde-planning', kwargs={'ronde_pk': ronde.pk})
@@ -394,7 +403,7 @@ class RegioClusterPlanningView(UserPassesTestMixin, TemplateView):
         except (ValueError, Regiocompetitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')
 
-        ronde = maak_regiocompetitie_ronde(deelcomp=deelcomp, cluster=cluster)
+        ronde = maak_regiocompetitie_ronde(deelcomp=deelcomp, cluster=cluster, mag_database_wijzigen=True)
 
         if ronde:
             next_url = reverse('CompLaagRegio:regio-ronde-planning', kwargs={'ronde_pk': ronde.pk})
@@ -468,7 +477,7 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
 
         start_week = settings.COMPETITIES_START_WEEK
         eind_week = settings.COMPETITIE_25M_LAATSTE_WEEK
-        if ronde.regiocompetitie.competitie.afstand == '18':
+        if ronde.regiocompetitie.competitie.is_indoor():
             eind_week = settings.COMPETITIE_18M_LAATSTE_WEEK
         eind_week += 1  # de hele week mag nog gebruikt worden
         begin_jaar = ronde.regiocompetitie.competitie.begin_jaar
@@ -534,7 +543,7 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
                     niet_gebruikt[100000 + wkl.pk] = (1000 + wkl.volgorde, wkl.beschrijving)
                 # for
 
-        is_18m = ronde.regiocompetitie.competitie.afstand == '18'
+        is_18m = ronde.regiocompetitie.competitie.is_indoor()
 
         for match in context['wedstrijden']:
             match.aantal_sporters = 0
@@ -649,7 +658,7 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
                 raise Http404('Geen valide week nummer')
 
             eind_week = settings.COMPETITIE_25M_LAATSTE_WEEK
-            if ronde.regiocompetitie.competitie.afstand == '18':
+            if ronde.regiocompetitie.competitie.is_indoor():
                 eind_week = settings.COMPETITIE_18M_LAATSTE_WEEK
 
             if eind_week < settings.COMPETITIES_START_WEEK:
@@ -961,7 +970,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
             raise PermissionDenied('Niet de beheerder')
 
         context['competitie'] = comp = ronde.regiocompetitie.competitie
-        is_25m = (comp.afstand == '25')
+        is_25m = (comp.is_25m1pijl())
 
         context['regio'] = ronde.regiocompetitie.regio
         context['ronde'] = ronde
@@ -972,7 +981,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
             week = settings.COMPETITIES_START_WEEK
             context['datum_eerste'] = competitie_week_nr_to_date(jaar, week)
 
-            if ronde.regiocompetitie.competitie.afstand == '18':
+            if ronde.regiocompetitie.competitie.is_indoor():
                 week = settings.COMPETITIE_18M_LAATSTE_WEEK + 1
             else:
                 week = settings.COMPETITIE_25M_LAATSTE_WEEK + 1

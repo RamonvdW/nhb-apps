@@ -7,7 +7,7 @@
 from django.test import TestCase
 from BasisTypen.definities import SCHEIDS_VERENIGING
 from Bestel.models import BestelMandje, BestelProduct
-from Functie.operations import maak_functie
+from Functie.tests.helpers import maak_functie
 from Geo.models import Rayon, Regio
 from Sporter.models import Sporter
 from Registreer.models import GastRegistratie
@@ -173,7 +173,7 @@ class TestPlein(E2EHelpers, TestCase):
             resp = self.client.get(self.url_plein)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         urls = self.extract_all_urls(resp)
-        #self.assertIn(self.url_scheids, urls)
+        self.assertIn(self.url_scheids, urls)
 
     def test_plein_admin(self):
         self.functie_mo.accounts.add(self.testdata.account_admin)
@@ -206,7 +206,7 @@ class TestPlein(E2EHelpers, TestCase):
             resp = self.client.get(self.url_plein)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('plein/plein-beheerder.dtl', 'plein/site_layout.dtl'))
-        self.assertContains(resp, 'Manager Competitiezaken')
+        self.assertContains(resp, 'Manager MH')
 
         # bko
         self.e2e_wissel_naar_functie(self.functie_bko)
@@ -287,7 +287,7 @@ class TestPlein(E2EHelpers, TestCase):
             resp = self.client.get(self.url_plein)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('plein/plein-beheerder.dtl', 'plein/site_layout.dtl'))
-        #self.assertContains(resp, 'Commissie Scheidsrechters')
+        self.assertContains(resp, 'Commissie Scheidsrechters')
 
         # support
         self.e2e_wissel_naar_functie(self.functie_sup)
