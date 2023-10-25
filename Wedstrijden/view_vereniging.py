@@ -71,10 +71,13 @@ class VerenigingWedstrijdenView(UserPassesTestMixin, View):
             disc2str = ORGANISATIE_WEDSTRIJD_DISCIPLINE_STRS[wed.organisatie]
             wed.disc_str = ORGANISATIES2SHORT_STR[wed.organisatie] + ' / '
             wed.disc_str += disc2str[wed.discipline]
+            wed.status_str = WEDSTRIJD_STATUS_TO_STR[wed.status]
             wed.url_wijzig = reverse('Wedstrijden:wijzig-wedstrijd', kwargs={'wedstrijd_pk': wed.pk})
             wed.url_sessies = reverse('Wedstrijden:wijzig-sessies', kwargs={'wedstrijd_pk': wed.pk})
             wed.url_aanmeldingen = reverse('Wedstrijden:aanmeldingen', kwargs={'wedstrijd_pk': wed.pk})
-            wed.status_str = WEDSTRIJD_STATUS_TO_STR[wed.status]
+            if wed.eis_kwalificatie_scores:
+                wed.url_check_kwalificatie_scores = reverse('Wedstrijden:check-kwalificatie-scores',
+                                                            kwargs={'wedstrijd_pk': wed.pk})
         # for
 
         context['wedstrijden'] = wedstrijden

@@ -17,15 +17,16 @@ def functie_post_login_redirect_plugin(request, account):
         Return: "url" of None = geen redirect
     """
 
-    if account.otp_is_actief:
-        # 2FA check altijd aanbieden aan account met BB rol of admin access
-        if account.is_staff or account.is_BB:
-            return reverse('Account:otp-controle')
-
-        # alleen 2FA check aanbieden als er ook functies aan gekoppeld zijn
-        # dit voorkomt 2FA check voor ex-managers
-        if account.functie_set.count() > 0:
-            return reverse('Account:otp-controle')
+    # gebruikersvriendelijker om uit te stellen totdat wissel van rol gekozen wordt
+    # if account.otp_is_actief:
+    #     # 2FA check altijd aanbieden aan account met BB rol of admin access
+    #     if account.is_staff or account.is_BB:
+    #         return reverse('Account:otp-controle')
+    #
+    #     # alleen 2FA check aanbieden als er ook functies aan gekoppeld zijn
+    #     # dit voorkomt 2FA check voor ex-managers
+    #     if account.functie_set.count() > 0:
+    #         return reverse('Account:otp-controle')
 
     return None
 

@@ -8,10 +8,11 @@ from django.http import Http404, UnreadablePostError, JsonResponse
 from django.urls import reverse
 from django.utils import timezone
 from django.views.generic import TemplateView
+from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
 from Functie.definities import Rollen
-from Functie.rol import rol_get_huidige
+from Functie.rol import rol_get_huidige_functie
 from Wedstrijden.definities import (KWALIFICATIE_CHECK_GOED, KWALIFICATIE_CHECK_NOG_DOEN, KWALIFICATIE_CHECK_AFGEKEURD,
                                     WEDSTRIJD_STATUS_URL_WACHT_OP_GEACCEPTEERD)
 from Wedstrijden.models import Wedstrijd, Kwalificatiescore
@@ -35,12 +36,12 @@ class CheckKwalificatieScoresView(UserPassesTestMixin, TemplateView):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.rol_nu = None
+        self.rol_nu, self.functie_nu = None, None
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        self.rol_nu = rol_get_huidige(self.request)
-        return self.rol_nu in (Rollen.ROL_MWZ, Rollen.ROL_BB)
+        self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
+        return self.rol_nu in (Rollen.ROL_MWZ, Rollen.ROL_BB, Rollen.ROL_HWL)
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -52,6 +53,11 @@ class CheckKwalificatieScoresView(UserPassesTestMixin, TemplateView):
             wedstrijd = Wedstrijd.objects.get(pk=wedstrijd_pk)
         except (ValueError, Wedstrijd.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
+
+        if self.rol_nu == Rollen.ROL_HWL:
+            # controleer dat dit de HWL van de wedstrijd is
+            if wedstrijd.organiserende_vereniging != self.functie_nu.vereniging:
+                raise PermissionDenied('Niet de organisator')
 
         context['wed'] = wedstrijd
 
@@ -119,12 +125,12 @@ class CheckKwalificatieScoresWedstrijdView(UserPassesTestMixin, TemplateView):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.rol_nu = None
+        self.rol_nu, self.functie_nu = None, None
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        self.rol_nu = rol_get_huidige(self.request)
-        return self.rol_nu in (Rollen.ROL_MWZ, Rollen.ROL_BB)
+        self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
+        return self.rol_nu in (Rollen.ROL_MWZ, Rollen.ROL_BB, Rollen.ROL_HWL)
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -139,6 +145,11 @@ class CheckKwalificatieScoresWedstrijdView(UserPassesTestMixin, TemplateView):
 
         context['ref_score'] = ref_score
         wedstrijd = ref_score.inschrijving.wedstrijd
+
+        if self.rol_nu == Rollen.ROL_HWL:
+            # controleer dat dit de HWL van de wedstrijd is
+            if wedstrijd.organiserende_vereniging != self.functie_nu.vereniging:
+                raise PermissionDenied('Niet de organisator')
 
         scores = (Kwalificatiescore
                   .objects
