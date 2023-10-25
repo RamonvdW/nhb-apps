@@ -9,7 +9,7 @@ from Account.models import Account
 from BasisTypen.definities import ORGANISATIE_WA
 from BasisTypen.models import BoogType
 from Geo.models import Regio
-from Functie.operations import maak_functie
+from Functie.tests.helpers import maak_functie
 from Score.models import Aanvangsgemiddelde
 from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren
 from Sporter.operations import get_sporter_voorkeuren, get_sporter_voorkeuren_wedstrijdbogen, get_sporterboog

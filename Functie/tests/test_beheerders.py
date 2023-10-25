@@ -6,7 +6,7 @@
 
 from django.test import TestCase
 from Functie.models import Functie
-from Functie.operations import maak_functie
+from Functie.tests.helpers import maak_functie
 from Geo.models import Rayon, Regio
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -332,6 +332,8 @@ class TestFunctieBeheerders(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('functie/emails-beheerders.dtl', 'plein/site_layout.dtl'))
 
         # RKO Indoor
+        self.assertTrue(self.functie_rko3_18.is_indoor())
+        self.assertFalse(self.functie_rko3_18.is_25m1pijl())
         self.e2e_wissel_naar_functie(self.functie_rko3_18)
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_beheerders_competitie)
@@ -340,6 +342,8 @@ class TestFunctieBeheerders(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('functie/emails-beheerders.dtl', 'plein/site_layout.dtl'))
 
         # RKO 25m1pijl
+        self.assertFalse(self.functie_rko2_25.is_indoor())
+        self.assertTrue(self.functie_rko2_25.is_25m1pijl())
         self.e2e_wissel_naar_functie(self.functie_rko2_25)
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_beheerders_competitie)

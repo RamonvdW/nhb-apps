@@ -9,7 +9,8 @@ from Competitie.definities import DEEL_RK, DEEL_BK
 from Competitie.models import Competitie, CompetitieMatch, Kampioenschap
 from Functie.definities import Rollen
 from Functie.models import Functie
-from Functie.operations import maak_functie, account_needs_vhpg
+from Functie.operations import account_needs_vhpg
+from Functie.tests.helpers import maak_functie
 from Functie.rol import rol_get_huidige_functie
 from Geo.models import Rayon, Regio
 from Sporter.models import Sporter

@@ -9,7 +9,7 @@ from django.conf import settings
 from Betaal.models import BetaalMutatie, BetaalActief, BetaalTransactie, BetaalInstellingenVereniging
 from Betaal.mutaties import betaal_mutatieverzoek_start_ontvangst, betaal_mutatieverzoek_payment_status_changed
 from Bestel.models import Bestelling, BestelMutatie
-from Functie.operations import maak_functie
+from Functie.tests.helpers import maak_functie
 from Geo.models import Regio
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging

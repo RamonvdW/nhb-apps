@@ -9,7 +9,7 @@ from django.utils import timezone
 from BasisTypen.models import BoogType
 from Bestel.models import BestelProduct
 from Competitie.models import Competitie, CompetitieIndivKlasse, Regiocompetitie, RegiocompetitieSporterBoog
-from Functie.operations import maak_functie
+from Functie.tests.helpers import maak_functie
 from Geo.models import Regio
 from Locatie.models import Locatie
 from Sporter.models import Sporter, SporterBoog

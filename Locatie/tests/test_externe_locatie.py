@@ -6,7 +6,7 @@
 
 from django.test import TestCase
 from Functie.models import Functie
-from Functie.operations import maak_functie
+from Functie.tests.helpers import maak_functie
 from Geo.models import Rayon, Regio
 from Locatie.definities import BAAN_TYPE_EXTERN
 from Locatie.models import Locatie

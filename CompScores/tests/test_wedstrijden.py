@@ -6,7 +6,7 @@
 
 from django.test import TestCase
 from BasisTypen.models import BoogType
-from Functie.operations import maak_functie
+from Functie.tests.helpers import maak_functie
 from Geo.models import Regio
 from Competitie.models import (CompetitieIndivKlasse, Regiocompetitie, CompetitieMatch, RegiocompetitieSporterBoog,
                                Kampioenschap, DEEL_RK, DEEL_BK)

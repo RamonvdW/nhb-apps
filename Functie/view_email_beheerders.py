@@ -205,7 +205,7 @@ class OverzichtEmailsCompetitieBeheerdersView(UserPassesTestMixin, TemplateView)
         context['kruimels'] = (
             (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
             (reverse('Functie:overzicht'), 'Beheerders'),
-            (None, 'E-mailadressen RCLs')
+            (None, 'E-mailadressen beheerders')
         )
 
         return context

@@ -12,7 +12,7 @@ from Bestel.definities import BESTELLING_STATUS_BETALING_ACTIEF, BESTELLING_STAT
 from Bestel.models import BestelProduct, Bestelling, BestelMutatie
 from Betaal.models import BetaalInstellingenVereniging
 from Functie.models import Functie
-from Functie.operations import maak_functie
+from Functie.tests.helpers import maak_functie
 from Geo.models import Regio
 from Locatie.models import Locatie
 from Sporter.models import Sporter, SporterBoog

@@ -7,7 +7,7 @@
 from django.test import TestCase
 from BasisTypen.definities import SCHEIDS_VERENIGING
 from Bestel.models import BestelMandje, BestelProduct
-from Functie.operations import maak_functie
+from Functie.tests.helpers import maak_functie
 from Geo.models import Rayon, Regio
 from Sporter.models import Sporter
 from Registreer.models import GastRegistratie

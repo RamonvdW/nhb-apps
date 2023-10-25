@@ -8,8 +8,9 @@ from django.conf import settings
 from django.test import TestCase, Client
 from django.contrib.sessions.backends.db import SessionStore
 from Account.models import AccountSessions
+from Functie.models import Functie
 from Functie.rol import SESSIONVAR_ROL_MAG_WISSELEN
-from Functie.operations import maak_functie, Functie
+from Functie.tests.helpers import maak_functie
 from Geo.models import Rayon, Regio
 from Logboek.models import LogboekRegel
 from Mailer.models import MailQueue

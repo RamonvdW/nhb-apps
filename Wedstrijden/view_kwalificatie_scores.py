@@ -105,11 +105,18 @@ class CheckKwalificatieScoresView(UserPassesTestMixin, TemplateView):
             lijst.append(obj)
         # for
 
-        context['kruimels'] = (
-            (reverse('Wedstrijden:manager-status',
-                     kwargs={'status': WEDSTRIJD_STATUS_URL_WACHT_OP_GEACCEPTEERD}), 'Wedstrijdkalender'),
-            (None, 'Check kwalificatiescores'),
-        )
+        if self.rol_nu == Rollen.ROL_HWL:
+            context['kruimels'] = (
+                (reverse('Vereniging:overzicht'), 'Beheer vereniging'),
+                (reverse('Wedstrijden:vereniging'), 'Wedstrijdkalender'),
+                (None, 'Check kwalificatiescores'),
+            )
+        else:
+            context['kruimels'] = (
+                (reverse('Wedstrijden:manager-status',
+                         kwargs={'status': WEDSTRIJD_STATUS_URL_WACHT_OP_GEACCEPTEERD}), 'Wedstrijdkalender'),
+                (None, 'Check kwalificatiescores'),
+            )
 
         return context
 
@@ -180,13 +187,22 @@ class CheckKwalificatieScoresWedstrijdView(UserPassesTestMixin, TemplateView):
 
         context['scores'] = scores
 
-        context['kruimels'] = (
-            (reverse('Wedstrijden:manager-status',
-                     kwargs={'status': WEDSTRIJD_STATUS_URL_WACHT_OP_GEACCEPTEERD}), 'Wedstrijdkalender'),
-            (reverse('Wedstrijden:check-kwalificatie-scores',
-                     kwargs={'wedstrijd_pk': wedstrijd.pk}), 'Check kwalificatiescores'),
-            (None, 'Controleer wedstrijd')
-        )
+        if self.rol_nu == Rollen.ROL_HWL:
+            context['kruimels'] = (
+                (reverse('Vereniging:overzicht'), 'Beheer vereniging'),
+                (reverse('Wedstrijden:vereniging'), 'Wedstrijdkalender'),
+                (reverse('Wedstrijden:check-kwalificatie-scores',
+                         kwargs={'wedstrijd_pk': wedstrijd.pk}), 'Check kwalificatiescores'),
+                (None, 'Controleer wedstrijd')
+            )
+        else:
+            context['kruimels'] = (
+                (reverse('Wedstrijden:manager-status',
+                         kwargs={'status': WEDSTRIJD_STATUS_URL_WACHT_OP_GEACCEPTEERD}), 'Wedstrijdkalender'),
+                (reverse('Wedstrijden:check-kwalificatie-scores',
+                         kwargs={'wedstrijd_pk': wedstrijd.pk}), 'Check kwalificatiescores'),
+                (None, 'Controleer wedstrijd')
+            )
 
         return context
 

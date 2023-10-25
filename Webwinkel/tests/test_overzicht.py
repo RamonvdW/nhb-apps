@@ -7,7 +7,7 @@
 from django.test import TestCase
 from Bestel.definities import BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_AFGEROND
 from Bestel.models import Bestelling
-from Functie.operations import Functie
+from Functie.models import Functie
 from Geo.models import Regio
 from Mailer.models import MailQueue
 from Sporter.models import Sporter

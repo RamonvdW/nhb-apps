@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from Functie.operations import maak_functie
+from Functie.tests.helpers import maak_functie
 from Geo.models import Regio
 from Competitie.models import Competitie, CompetitieIndivKlasse, Regiocompetitie
 from Competitie.operations import competities_aanmaken

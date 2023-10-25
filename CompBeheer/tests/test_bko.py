@@ -14,7 +14,7 @@ from Competitie.models import (Competitie, Regiocompetitie, Kampioenschap, Kampi
                                RegiocompetitieTeam, RegiocompetitieRondeTeam)
 from Competitie.test_utils.tijdlijn import (zet_competitie_fases, zet_competitie_fase_regio_inschrijven,
                                             zet_competitie_fase_regio_wedstrijden, zet_competitie_fase_regio_afsluiten)
-from Functie.operations import maak_functie
+from Functie.tests.helpers import maak_functie
 from Geo.models import Rayon, Regio
 from HistComp.models import HistCompSeizoen, HistCompRegioTeam
 from Locatie.models import Locatie

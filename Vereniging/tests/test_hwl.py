@@ -6,7 +6,7 @@
 
 from django.test import TestCase
 from django.utils import timezone
-from Functie.operations import maak_functie
+from Functie.tests.helpers import maak_functie
 from Geo.models import Regio
 from Competitie.definities import DEEL_RK, INSCHRIJF_METHODE_1
 from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieMatch,

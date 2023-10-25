@@ -69,7 +69,7 @@
                 {% for functie in alle %}
                     <tr>
                         <td>{{ functie.beschrijving }}</td>
-                        <td>{{ functie.bevestigde_email }}</td>
+                        <td><code>{{ functie.bevestigde_email }}</code></td>
                     </tr>
                 {% endfor %}
             </table>

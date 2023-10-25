@@ -8,7 +8,7 @@ from django.test import TestCase
 from BasisTypen.models import TeamType
 from Competitie.models import Competitie, Regiocompetitie, RegiocompetitieTeam
 from Functie.definities import Rollen
-from Functie.operations import maak_functie
+from Functie.tests.helpers import maak_functie
 from Geo.models import Regio
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers

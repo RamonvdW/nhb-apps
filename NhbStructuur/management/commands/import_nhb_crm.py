@@ -15,7 +15,8 @@ from django.core.exceptions import ValidationError
 from Account.models import Account
 from BasisTypen.definities import SCHEIDS_NIET, SCHEIDS_BOND, SCHEIDS_VERENIGING, SCHEIDS_INTERNATIONAAL
 from Functie.models import Functie
-from Functie.operations import maak_functie, maak_account_vereniging_secretaris
+from Functie.operations import maak_account_vereniging_secretaris
+from Functie.tests.helpers import maak_functie
 from Geo.models import Rayon, Regio
 from Locatie.definities import BAAN_TYPE_BUITEN, BAAN_TYPE_EXTERN
 from Locatie.models import Locatie

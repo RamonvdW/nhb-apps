@@ -6,7 +6,7 @@
 
 from django.test import TestCase, override_settings
 from BasisTypen.models import KalenderWedstrijdklasse
-from Functie.operations import maak_functie
+from Functie.tests.helpers import maak_functie
 from Geo.models import Regio
 from Locatie.models import Locatie
 from Sporter.models import Sporter

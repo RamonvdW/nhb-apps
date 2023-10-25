@@ -12,7 +12,7 @@ from Competitie.test_utils.tijdlijn import (evaluatie_datum, zet_competitie_fase
                                             zet_competitie_fase_regio_wedstrijden,
                                             zet_competitie_fase_regio_inschrijven)
 from Competitie.tests.test_helpers import maak_competities_en_zet_fase_c
-from Functie.operations import maak_functie
+from Functie.tests.helpers import maak_functie
 from Geo.models import Regio
 from HistComp.definities import HISTCOMP_TYPE_18, HIST_BOGEN_DEFAULT
 from HistComp.models import HistCompSeizoen, HistCompRegioIndiv

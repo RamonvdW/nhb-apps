@@ -7,7 +7,7 @@
 from django.test import TestCase
 from BasisTypen.models import BoogType
 from Competitie.models import Competitie, CompetitieMatch
-from Functie.operations import maak_functie
+from Functie.tests.helpers import maak_functie
 from Geo.models import Regio
 from Score.definities import SCORE_WAARDE_VERWIJDERD, SCORE_TYPE_GEEN
 from Score.models import Score, ScoreHist, Uitslag

@@ -6,7 +6,7 @@
 
 from django.test import TestCase
 from Betaal.models import BetaalInstellingenVereniging
-from Functie.operations import maak_functie
+from Functie.tests.helpers import maak_functie
 from Geo.models import Regio
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging

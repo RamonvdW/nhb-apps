@@ -7,7 +7,7 @@
 from django.test import TestCase
 from django.utils import timezone
 from BasisTypen.definities import ORGANISATIE_WA, ORGANISATIE_KHSN, ORGANISATIE_IFAA
-from Functie.operations import maak_functie
+from Functie.tests.helpers import maak_functie
 from Geo.models import Regio
 from Locatie.models import Locatie
 from Sporter.models import Sporter
