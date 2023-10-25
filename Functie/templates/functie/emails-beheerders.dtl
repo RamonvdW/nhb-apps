@@ -21,7 +21,10 @@
     <div class="row center">
         <div class="col s12">
             <h3 class="page-banner">Beheerder e-mailadressen</h3>
-            <p>Hieronder staan de {{ aantal }} bij ons bekende e-mailadressen van de RCLs.</p>
+
+            <p>Jouw huidige rol is: <b>{{ huidige_rol }}</b></p>
+
+            <p>Hieronder staan de {{ aantal }} bij ons bekende e-mailadressen {{ geo_str }}.</p>
 
             <a class="btn-sv-rood" href="#" onclick="copy_to_clipboard()">
                 <i class="notranslate material-icons-round left">content_copy</i>Kopieer naar mijn klembord</a>
@@ -73,6 +76,6 @@
         </div>
     </div>
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="functie-emails-rcl" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="functie-emails-beheerders" %}
 
 {% endblock %}

@@ -182,7 +182,7 @@ class LijstBeheerdersView(UserPassesTestMixin, ListView):
                                       .order_by('username'))
 
         if self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_MWZ, Rollen.ROL_BKO, Rollen.ROL_RKO):
-            context['url_rcl'] = reverse('Functie:emails-rcl')
+            context['url_rcl'] = reverse('Functie:emails-beheerders')
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),

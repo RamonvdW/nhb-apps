@@ -93,10 +93,12 @@ class KwalificatieScoresOpgevenView(UserPassesTestMixin, TemplateView):
         # einddatum is de zondag van het weekend voor de wedstrijd
         # weekday 0 = maandag
         jaar = wedstrijd.datum_begin.year - 1
-        context['eind_datum'] = wedstrijd.datum_begin - datetime.timedelta(days=1+wedstrijd.datum_begin.weekday())
+        eind_datum = min(timezone.now().date(),
+                         wedstrijd.datum_begin - datetime.timedelta(days=1+wedstrijd.datum_begin.weekday()))
+        context['eind_datum'] = eind_datum
         context['begin_datum'] = datetime.date(jaar, 9, 1)      # 1 september
 
-        context['eind_jaar'] = context['eind_datum'].year
+        context['eind_jaar'] = eind_datum.year
         context['begin_jaar'] = context['begin_datum'].year
 
         # zoek de eerder opgegeven kwalificatie scores erbij

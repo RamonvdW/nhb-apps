@@ -24,7 +24,7 @@
             {% if url_rcl %}
                 <p>
                     <a class="btn-sv-rood" href="{{ url_rcl }}">
-                        <i class="notranslate material-icons-round left">email</i>E-mailadressen van RCL</a>
+                        <i class="notranslate material-icons-round left">email</i>E-mailadressen van de beheerders</a>
                 </p>
             {% endif %}
 

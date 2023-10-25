@@ -180,7 +180,7 @@
             <div class="white" style="padding:10px">
                 <p>De teams schieten allemaal 7 rondes.<br>De hoogste 3 individuele scores (van de 3 of 4 sporters) opgeteld is team score voor die ronde.</p>
                 <p>In een enkele regio wordt gekeken naar de totale teamscore over 7 rondes.</p>
-                <p>In de andere regio's kunnen per ronde wedstrijdpunten verdiend kunnen worden<br>aan de hand van de ranking op teamscore of bij winst tegen een directe tegenstander.</p>
+                <p>In de andere regio's kunnen per ronde wedstrijdpunten verdiend worden<br>aan de hand van de ranking op teamscore of bij winst tegen een directe tegenstander.</p>
             </div>
         </div>
     </div>
@@ -198,7 +198,7 @@
         <div class="col s12 m10 offset-m1 l8 offset-l2">
             <div class="white" style="padding:10px">
                 <p>De meeste regio's hebben vaste teams waarin altijd dezelfde sporters staan opgesteld.</p>
-                <p>In een paar regio's wordt het systeem "voortschrijdend gemiddelde" gebruikt waarbij de sporters elke ronde kunnen promoveren naar een ander team van dezelfde vereniging in een hogere wedstrijdklasse.</p>
+                <p>In een paar regio's wordt het systeem "voortschrijdend gemiddelde" gebruikt waarbij de sporters elke ronde kunnen promoveren naar een ander team van dezelfde vereniging in een hogere wedstrijdklasse, maar ook kunnen degraderen naar een lagere klasse.</p>
                 {% if toon_teams_persoonlijk %}
                     <p>In jouw regio ({{ jouw_regio.regio_nr }}) is gekozen voor {% if jouw_regio_vaste_teams %}vaste teams{% else %}voortschrijdend gemiddelde{% endif %}.</p>
                 {% endif %}
@@ -267,7 +267,7 @@
             <div class="white" style="padding:10px">
                 <p>Per sporter wordt het gemiddelde uit de individuele regiocompetitie gebruikt als sterkte.</p>
                 <p>De sterkte van elk team wordt bepaald door de 3 sterkste sporters van het team.</p>
-                <p>Nadat de open inschrijving voor het RK is gesloten worden alle teams op sterkte verdeeld over de wedstrijdklassen.<br>Per klasse worden de 12 sterkste teams uitgenodigd.</p>
+                <p>Nadat de open inschrijving voor het RK is gesloten worden alle teams op sterkte verdeeld over de wedstrijdklassen.<br>Per klasse worden maximaal de 12 sterkste teams uitgenodigd.</p>
             </div>
         </div>
     </div>
@@ -356,7 +356,7 @@
         <div class="col s12 m10 offset-m1 l8 offset-l2">
             <div class="white" style="padding:10px">
                 <p>Landelijk wordt per wedstrijdklasse een BK teams georganiseerd.</p>
-                <p>De ERE klassen bestaat uit 12 teams; overige wedstrijdklassen uit 8 teams.<br>Dezelfde 3 of 4 sporters als aangemeld voor het RK teams worden verwacht op het BK teams.</p>
+                <p>De ERE klassen bestaat uit maximaal 12 teams; overige wedstrijdklassen uit maximaal 8 teams.<br>Dezelfde 3 of 4 sporters als aangemeld voor het RK teams worden verwacht op het BK teams.</p>
                 <p>De teams worden uitgenodigd aan de hand van de eindstand van het RK teams, samengevoegd en landelijk vergeleken.</p>
                 <p>Wedstrijdverloop is gelijk aan het de rayonkampioenschappen.</p>
             </div>

@@ -22,7 +22,7 @@ class TestFunctieBeheerders(E2EHelpers, TestCase):
 
     url_overzicht = '/functie/overzicht/'
     url_beheerders_sec_hwl = '/functie/overzicht/beheerders/sec-hwl/'
-    url_beheerders_rcl = '/functie/overzicht/beheerders/rcl/'
+    url_beheerders_competitie = '/functie/overzicht/beheerders/competitie/'
     url_wijzig = '/functie/wijzig/'
     url_activeer_functie = '/functie/activeer-functie/%s/'
     url_activeer_rol = '/functie/activeer-rol/%s/'
@@ -41,10 +41,13 @@ class TestFunctieBeheerders(E2EHelpers, TestCase):
         self.account_beh2 = self.e2e_create_account('testbeheerder2', 'beh2@test.nhb', 'Beheerder2', accepteer_vhpg=True)
         self.account_ander = self.e2e_create_account('anderlid', 'anderlid@test.nhb', 'Ander')
 
-        self.functie_bko = Functie.objects.get(comp_type='18', rol='BKO')
-        self.functie_rko3 = Functie.objects.get(comp_type='18', rol='RKO', rayon=Rayon.objects.get(rayon_nr=3))
-        self.functie_rcl111 = Functie.objects.get(comp_type='18', rol='RCL', regio=Regio.objects.get(regio_nr=111))
-        self.functie_rcl101 = Functie.objects.get(comp_type='18', rol='RCL', regio=Regio.objects.get(regio_nr=101))
+        self.functie_mwz = Functie.objects.get(rol='MWZ')
+        self.functie_bko_18 = Functie.objects.get(comp_type='18', rol='BKO')
+        self.functie_bko_25 = Functie.objects.get(comp_type='25', rol='BKO')
+        self.functie_rko3_18 = Functie.objects.get(comp_type='18', rol='RKO', rayon=Rayon.objects.get(rayon_nr=3))
+        self.functie_rko2_25 = Functie.objects.get(comp_type='25', rol='RKO', rayon=Rayon.objects.get(rayon_nr=2))
+        self.functie_rcl111_18 = Functie.objects.get(comp_type='18', rol='RCL', regio=Regio.objects.get(regio_nr=111))
+        self.functie_rcl101_18 = Functie.objects.get(comp_type='18', rol='RCL', regio=Regio.objects.get(regio_nr=101))
 
         # maak een test vereniging
         ver = Vereniging(
@@ -151,7 +154,7 @@ class TestFunctieBeheerders(E2EHelpers, TestCase):
         # controleer de Wijzig knoppen op de functie-overzicht pagina voor verschillende rollen
 
         # neem de BKO 18m rol aan
-        self.e2e_wissel_naar_functie(self.functie_bko)
+        self.e2e_wissel_naar_functie(self.functie_bko_18)
         self.e2e_check_rol('BKO')
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_overzicht)
@@ -163,7 +166,7 @@ class TestFunctieBeheerders(E2EHelpers, TestCase):
         self.assertEqual(len(urls), 4)      # 4x RKO
 
         # neem de RKO Rayon 3 Indoor rol aan
-        self.e2e_wissel_naar_functie(self.functie_rko3)
+        self.e2e_wissel_naar_functie(self.functie_rko3_18)
         self.e2e_check_rol('RKO')
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_overzicht)
@@ -175,7 +178,7 @@ class TestFunctieBeheerders(E2EHelpers, TestCase):
         self.assertEqual(len(urls), 4)      # 4x RCL
 
         # neem de RCL Rayon 111 Indoor aan
-        self.e2e_wissel_naar_functie(self.functie_rcl111)
+        self.e2e_wissel_naar_functie(self.functie_rcl111_18)
         self.e2e_check_rol('RCL')
 
         # controleer de Wijzig knoppen op de functie-overzicht pagina
@@ -267,7 +270,7 @@ class TestFunctieBeheerders(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('functie/overzicht-vereniging.dtl', 'plein/site_layout.dtl'))
 
-    def test_sec_hwl(self):
+    def test_emails_sec_hwl(self):
         self.e2e_login_and_pass_otp(self.account_admin)
         self.e2e_wisselnaarrol_bb()
 
@@ -277,7 +280,7 @@ class TestFunctieBeheerders(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('functie/emails-sec-hwl.dtl', 'plein/site_layout.dtl'))
 
-        self.e2e_wissel_naar_functie(self.functie_rko3)
+        self.e2e_wissel_naar_functie(self.functie_rko3_18)
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_beheerders_sec_hwl)
@@ -285,7 +288,7 @@ class TestFunctieBeheerders(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('functie/emails-sec-hwl.dtl', 'plein/site_layout.dtl'))
 
-        self.e2e_wissel_naar_functie(self.functie_rcl111)
+        self.e2e_wissel_naar_functie(self.functie_rcl111_18)
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_beheerders_sec_hwl)
@@ -293,28 +296,61 @@ class TestFunctieBeheerders(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('functie/emails-sec-hwl.dtl', 'plein/site_layout.dtl'))
 
-    def test_rcl(self):
+    def test_emails_beheerders(self):
         self.e2e_login_and_pass_otp(self.account_admin)
         self.e2e_wisselnaarrol_bb()
 
+        # BB
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_beheerders_rcl)
+            resp = self.client.get(self.url_beheerders_competitie)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('functie/emails-rcl.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('functie/emails-beheerders.dtl', 'plein/site_layout.dtl'))
 
-        self.e2e_wissel_naar_functie(self.functie_rko3)
-
+        # MWZ
+        self.e2e_wissel_naar_functie(self.functie_mwz)
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_beheerders_rcl)
+            resp = self.client.get(self.url_beheerders_competitie)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('functie/emails-rcl.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('functie/emails-beheerders.dtl', 'plein/site_layout.dtl'))
 
-        self.e2e_wissel_naar_functie(self.functie_rcl111)
-
+        # BKO Indoor
+        self.e2e_wissel_naar_functie(self.functie_bko_18)
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_beheerders_rcl)
+            resp = self.client.get(self.url_beheerders_competitie)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('functie/emails-beheerders.dtl', 'plein/site_layout.dtl'))
+
+        # BKO 25m1pijl
+        self.e2e_wissel_naar_functie(self.functie_bko_25)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_beheerders_competitie)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('functie/emails-beheerders.dtl', 'plein/site_layout.dtl'))
+
+        # RKO Indoor
+        self.e2e_wissel_naar_functie(self.functie_rko3_18)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_beheerders_competitie)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('functie/emails-beheerders.dtl', 'plein/site_layout.dtl'))
+
+        # RKO 25m1pijl
+        self.e2e_wissel_naar_functie(self.functie_rko2_25)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_beheerders_competitie)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('functie/emails-beheerders.dtl', 'plein/site_layout.dtl'))
+
+        # RCL
+        self.e2e_wissel_naar_functie(self.functie_rcl111_18)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_beheerders_competitie)
         self.assert403(resp, 'Geen toegang')
 
 
