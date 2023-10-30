@@ -165,9 +165,10 @@ def inline_styles(html):
         pos1 = styles.find('{')
         pos2 = styles.find('}')
         style = styles[pos1+1:pos2]
+        tags = styles[:pos1].split(',')
         styles = styles[pos2+1:]
 
-        for tag in styles[:pos1].split(','):
+        for tag in tags:
             pos1 = html.find('<' + tag)
             while pos1 > 0:
                 pos2 = html.find('>', pos1+1)
