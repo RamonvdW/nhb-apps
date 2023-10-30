@@ -1,6 +1,6 @@
 {% extends 'email_mailer/email_basis.dtl' %}
 {% comment %}
-                Copyright (c) 2022 Ramon van der Winkel.
+                Copyright (c) 2023 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -23,6 +23,9 @@
     |E-mail: {{ contact_email }}
     |
     |Je kan meer details over deze inschrijving terugvinden op MijnHandboogsport onder Mijn pagina.
+    {% if geen_account %}
+    |(nadat je een account aangemaakt hebt).
+    {% endif %}
     |
     |Veel plezier op deze wedstrijd!
 {% endblock %}
@@ -47,9 +50,9 @@
     <br>
     <div>De wedstrijd wordt georganiseerd door {{ wed_org_ver }}.</div>
     <div>Telefoon: {{ contact_tel }}</div>
-    <div>E-mail: <a href="mailto:{{ contact_email }}"><code>mailto:{{ contact_email }}</code></a></div>
+    <div>E-mail: <a href="mailto:{{ contact_email }}"><code>{{ contact_email }}</code></a></div>
     <br>
-    <div>Je kan meer details over deze inschrijving terugvinden op MijnHandboogsport onder Mijn pagina.</div>
+    <div>Je kan meer details over deze inschrijving terugvinden op MijnHandboogsport onder Mijn pagina.{% if geen_account %}<br>(nadat je een account aangemaakt hebt).{% endif %}</div>
     <br>
     <div>Veel plezier op deze wedstrijd!</div>
 {% endblock %}

@@ -463,6 +463,7 @@ def wedstrijden_plugin_inschrijving_is_betaald(stdout, product: BestelProduct):
                 'aanwezig_tijd': aanwezig.strftime('%H:%M'),
                 'contact_email': inschrijving.wedstrijd.contact_email,
                 'contact_tel': inschrijving.wedstrijd.contact_telefoon,
+                'geen_account': sporter.account is None,
                 'naam_site': settings.NAAM_SITE,
             }
 
