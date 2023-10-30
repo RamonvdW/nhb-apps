@@ -697,7 +697,7 @@ class Command(BaseCommand):
                     # TODO: ondersteuning voor gratis producten in de webwinkel
                     for product in bestelling.producten.all():
                         if product.wedstrijd_inschrijving:
-                            wedstrijden_plugin_inschrijving_is_betaald(product)
+                            wedstrijden_plugin_inschrijving_is_betaald(self.stdout, product)
                     # for
 
                     bestelling.status = BESTELLING_STATUS_AFGEROND
@@ -805,7 +805,7 @@ class Command(BaseCommand):
                 bevat_webwinkel = False
                 for product in bestelling.producten.all():
                     if product.wedstrijd_inschrijving:
-                        wedstrijden_plugin_inschrijving_is_betaald(product)
+                        wedstrijden_plugin_inschrijving_is_betaald(self.stdout, product)
                     elif product.webwinkel_keuze:
                         bevat_webwinkel = True
                 # for
@@ -898,7 +898,7 @@ class Command(BaseCommand):
             bevat_webwinkel = False
             for product in bestelling.producten.all():
                 if product.wedstrijd_inschrijving:
-                    wedstrijden_plugin_inschrijving_is_betaald(product)
+                    wedstrijden_plugin_inschrijving_is_betaald(self.stdout, product)
                 elif product.webwinkel_keuze:
                     bevat_webwinkel = True
             # for

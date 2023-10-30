@@ -82,6 +82,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
                     contact_email='info@bb.not',
                     telefoonnummer='12345678')
         ver.save()
+        self.ver1 = ver
 
         instellingen = BetaalInstellingenVereniging(
                             vereniging=ver,
@@ -136,6 +137,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
                         datum_begin=datum,
                         datum_einde=datum,
                         locatie=locatie,
+                        minuten_voor_begin_sessie_aanwezig_zijn=42,
                         organiserende_vereniging=ver,
                         contact_email='organisatie@ver.not',
                         contact_telefoon='0600000001',
@@ -759,8 +761,21 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         # self.assertEqual(status, 'error')
 
     def test_nul_bedrag(self):
-        self.e2e_login_and_pass_otp(self.account_admin)
-        self.e2e_check_rol('sporter')
+        # inschrijving door iemand anders
+        account_koper = self.e2e_create_account('koper', 'koper@test.com', 'Koper')
+        self.inschrijving.koper = account_koper
+        self.inschrijving.save(update_fields=['koper'])
+
+        sporter_koper = Sporter(
+                        lid_nr=102000,
+                        voornaam='Ko',
+                        achternaam='de Koper',
+                        geboorte_datum='1986-08-08',
+                        sinds_datum='2010-08-08',
+                        account=account_koper,
+                        bij_vereniging=self.ver1)
+        sporter_koper.save()
+        self.e2e_login(account_koper)
 
         # maak de wedstrijd gratis
         self.wedstrijd.prijs_euro_normaal = Decimal('0')
@@ -768,11 +783,12 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         self.wedstrijd.save(update_fields=['prijs_euro_normaal', 'prijs_euro_onder18'])
 
         # bestel wedstrijddeelname
-        bestel_mutatieverzoek_inschrijven_wedstrijd(self.account_admin, self.inschrijving, snel=True)
+        bestel_mutatieverzoek_inschrijven_wedstrijd(account_koper, self.inschrijving, snel=True)
         self.verwerk_bestel_mutaties()
 
         # zet het mandje om in een bestelling
         self.assertEqual(0, Bestelling.objects.count())
+        self.assertEqual(0, MailQueue.objects.count())
         resp = self.client.post(self.url_mandje_bestellen, {'snel': 1})
         self.assert_is_redirect(resp, self.url_bestellingen_overzicht)
         f1, f2 = self.verwerk_bestel_mutaties()
@@ -780,7 +796,99 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         self.assertTrue(' wordt meteen afgerond' in f2.getvalue())
         self.assertEqual(1, Bestelling.objects.count())
         bestelling = Bestelling.objects.first()
+        self.assertEqual(bestelling.status, BESTELLING_STATUS_AFGEROND)
+
+        self.assertEqual(2, MailQueue.objects.count())
+        mail = MailQueue.objects.get(mail_to=account_koper.bevestigde_email)
+        self.assert_consistent_email_html_text(mail, ignore=('>Prijs:',))
+        self.assert_email_html_ok(mail)
+
+        mail = MailQueue.objects.get(mail_to=self.sporter.account.bevestigde_email)
+        # print('\nmail_text = %s' % mail.mail_text)
+        # print('mail_html = %s' % mail.mail_html)
+        self.assertTrue(self.wedstrijd.locatie.plaats in mail.mail_text)
+        self.assertTrue('09:18' in mail.mail_text)        # 10:00 - 42min
+        self.assert_consistent_email_html_text(mail)
+        self.assert_email_html_ok(mail)
+
+    def test_nul_bedrag_geen_email(self):
+        # inschrijving door iemand anders
+        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_check_rol('sporter')
+
+        account_koper = self.e2e_create_account('koper', 'koper@test.com', 'Koper')
+        self.inschrijving.koper = account_koper
+        self.inschrijving.save(update_fields=['koper'])
+
+        # maak de wedstrijd gratis
+        self.wedstrijd.prijs_euro_normaal = Decimal('0')
+        self.wedstrijd.prijs_euro_onder18 = Decimal('0')
+        self.wedstrijd.save(update_fields=['prijs_euro_normaal', 'prijs_euro_onder18'])
+
+        sporter = self.inschrijving.sporterboog.sporter
+        sporter.account = None
+        # sporter.email = ''        # is al leeg
+        sporter.save(update_fields=['account'])
+
+        # bestel wedstrijddeelname
+        bestel_mutatieverzoek_inschrijven_wedstrijd(self.account_admin, self.inschrijving, snel=True)
+        self.verwerk_bestel_mutaties()
+
+        # zet het mandje om in een bestelling
+        self.assertEqual(0, Bestelling.objects.count())
+        self.assertEqual(0, MailQueue.objects.count())
+        resp = self.client.post(self.url_mandje_bestellen, {'snel': 1})
+        self.assert_is_redirect(resp, self.url_bestellingen_overzicht)
+        f1, f2 = self.verwerk_bestel_mutaties()
+        # print('\nf1:', f1.getvalue(), '\nf2:', f2.getvalue())
+        self.assertTrue(' wordt meteen afgerond' in f2.getvalue())
+        self.assertEqual(1, Bestelling.objects.count())
+        bestelling = Bestelling.objects.first()
+
+        self.assertEqual(bestelling.status, BESTELLING_STATUS_AFGEROND)
         # TODO: niet af?
+
+    def test_nul_bedrag_geen_account(self):
+        # inschrijving door iemand anders
+        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_check_rol('sporter')
+
+        account_koper = self.e2e_create_account('koper', 'koper@test.com', 'Koper')
+        self.inschrijving.koper = account_koper
+        self.inschrijving.save(update_fields=['koper'])
+
+        # maak de wedstrijd gratis
+        self.wedstrijd.organisatie = ORGANISATIE_IFAA      # geeft schietstijl ipv boogtype
+        self.wedstrijd.prijs_euro_normaal = Decimal('0')
+        self.wedstrijd.prijs_euro_onder18 = Decimal('0')
+        self.wedstrijd.save(update_fields=['prijs_euro_normaal', 'prijs_euro_onder18', 'organisatie'])
+
+        sporter = self.inschrijving.sporterboog.sporter
+        sporter.account = None
+        sporter.email = 'sporter@test.not'
+        sporter.save(update_fields=['account', 'email'])
+
+        # bestel wedstrijddeelname
+        bestel_mutatieverzoek_inschrijven_wedstrijd(self.account_admin, self.inschrijving, snel=True)
+        self.verwerk_bestel_mutaties()
+
+        # zet het mandje om in een bestelling
+        self.assertEqual(0, Bestelling.objects.count())
+        self.assertEqual(0, MailQueue.objects.count())
+        resp = self.client.post(self.url_mandje_bestellen, {'snel': 1})
+        self.assert_is_redirect(resp, self.url_bestellingen_overzicht)
+        f1, f2 = self.verwerk_bestel_mutaties()
+        # print('\nf1:', f1.getvalue(), '\nf2:', f2.getvalue())
+        self.assertTrue(' wordt meteen afgerond' in f2.getvalue())
+        self.assertEqual(1, Bestelling.objects.count())
+        bestelling = Bestelling.objects.first()
+
+        self.assertEqual(bestelling.status, BESTELLING_STATUS_AFGEROND)
+        # TODO: niet af?
+
+        self.assertEqual(2, MailQueue.objects.count())
+        mail = MailQueue.objects.get(mail_to=sporter.email)
+        self.assertTrue('Schietstijl:' in mail.mail_text)
 
     def test_kwalificatie_scores(self):
         self.e2e_login_and_pass_otp(self.account_admin)
@@ -796,6 +904,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
 
         # zet het mandje om in een bestelling
         self.assertEqual(0, Bestelling.objects.count())
+        self.assertEqual(0, MailQueue.objects.count())
         resp = self.client.post(self.url_mandje_bestellen, {'snel': 1})
         self.assert_is_redirect(resp, self.url_bestellingen_overzicht)
         f1, f2 = self.verwerk_bestel_mutaties()

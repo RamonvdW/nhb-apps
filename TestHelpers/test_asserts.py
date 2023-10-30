@@ -1117,6 +1117,10 @@ class MyTestAsserts(TestCase):
             pos = html.find(open_tag)
             while pos > 0:
                 pos2 = html.find(sluit_tag, pos + len(open_tag))
+
+                # capture extra space left behind in situation "Email: <a"
+                if pos > 0 and html[pos-1] == ' ':
+                    pos -= 1
                 html = html[:pos] + html[pos2 + len(sluit_tag):]
                 pos = html.find(open_tag)
         # for
