@@ -26,7 +26,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2023-10-25'
+SITE_VERSIE = '2023-10-30'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -148,7 +148,7 @@ SECURE_HSTS_SECONDS = 17280000      # 17280000 = 200 days
 
 
 # Password validation
-# https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
+# https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -166,8 +166,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 
 # Internationalization
-# https://docs.djangoproject.com/en/2.2/topics/i18n/
-# LANGUAGE_CODE = 'en-us'
+# https://docs.djangoproject.com/en/4.2/topics/i18n/
 LANGUAGE_CODE = 'nl-NL'     # provides wanted date/time output format
 TIME_ZONE = 'Europe/Amsterdam'
 USE_I18N = True
@@ -183,7 +182,7 @@ ROOT_URLCONF = 'SiteMain.core.urls'
 
 
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/2.2/howto/static-files/
+# https://docs.djangoproject.com/en/4.2/howto/static-files/
 STATIC_URL = '/static/'             # url
 STATIC_ROOT = 'SiteMain/.static'    # relative to project top-dir
 STATICFILES_DIRS = [
@@ -487,14 +486,6 @@ LOGGING = {
         'django': {
             'handlers': ['syslog'],
             'level': 'ERROR'            # Note: WARNING gives 1 log line for every code 404 (resource not found)
-        },
-        'saml2': {
-            'handlers': ['syslog'],
-            'level': 'WARNING'
-        },
-        'djangosaml2idp': {
-            'handlers': ['syslog'],
-            'level': 'WARNING'
         },
         'xmlschema': {
             'handlers': ['syslog'],
