@@ -10,13 +10,12 @@
     |Je bent ingeschreven op een wedstrijd door {{ koper_volledige_naam }}.
     |
     |Wedstrijd: {{ wed_titel }}
-    |Plaats: {{ wed_plaats }}
+    |Locatie: {{ wed_adres }}
     |Wanneer: {{ wed_datum }}
     |Aanwezig zijn om: {{ aanwezig_tijd }}
     |
     |Reserveringsnummer: {{ reserveringsnummer }}
     |Klasse: {{ wed_klasse }}
-    |{{ boog_of_stijl }}: {{ boog }}
     |
     |De wedstrijd wordt georganiseerd door {{ wed_org_ver }}.
     |Telefoon: {{ contact_tel }}
@@ -37,7 +36,7 @@
     <br>
     <table>
         <tr><th>Wedstrijd:</th><td>{{ wed_titel }}</td></tr>
-        <tr><th>Plaats:</th><td>{{ wed_plaats }}</td></tr>
+        <tr><th>Locatie:</th><td>{{ wed_adres }}</td></tr>
         <tr><th>Wanneer:</th><td>{{ wed_datum }}</td></tr>
         <tr><th>Aanwezig zijn om:</th><td>{{ aanwezig_tijd }}</td></tr>
     </table>
@@ -45,7 +44,6 @@
     <table>
         <tr><th>Reserveringsnummer:</th><td>{{ reserveringsnummer }}</td></tr>
         <tr><th>Klasse:</th><td>{{ wed_klasse }}</td></tr>
-        <tr><th>{{ boog_of_stijl }}:</th><td>{{ boog }}</td></tr>
     </table>
     <br>
     <div>De wedstrijd wordt georganiseerd door {{ wed_org_ver }}.</div>

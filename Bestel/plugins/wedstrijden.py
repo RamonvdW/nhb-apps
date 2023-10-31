@@ -454,11 +454,9 @@ def wedstrijden_plugin_inschrijving_is_betaald(stdout, product: BestelProduct):
                 'koper_volledige_naam': koper_account.volledige_naam(),
                 'reserveringsnummer': settings.TICKET_NUMMER_START__WEDSTRIJD + inschrijving.pk,
                 'wed_titel': inschrijving.wedstrijd.titel,
-                'wed_plaats': inschrijving.wedstrijd.locatie.plaats,
+                'wed_adres': inschrijving.wedstrijd.locatie.adres.replace('\n', ', '),
                 'wed_datum': inschrijving.sessie.datum,
                 'wed_klasse': inschrijving.wedstrijdklasse.beschrijving,
-                'boog_of_stijl': 'Boog',
-                'boog': inschrijving.sporterboog.boogtype.beschrijving,
                 'wed_org_ver': inschrijving.wedstrijd.organiserende_vereniging,
                 'aanwezig_tijd': aanwezig.strftime('%H:%M'),
                 'contact_email': inschrijving.wedstrijd.contact_email,
@@ -468,7 +466,6 @@ def wedstrijden_plugin_inschrijving_is_betaald(stdout, product: BestelProduct):
             }
 
             if inschrijving.wedstrijd.organisatie == ORGANISATIE_IFAA:
-                context['boog_of_stijl'] = 'Schietstijl'
                 context['wed_klasse'] += ' [%s]' % inschrijving.wedstrijdklasse.afkorting
 
             mail_body = render_email_template(context, EMAIL_TEMPLATE_INFO_INSCHRIJVING_WEDSTRIJD)

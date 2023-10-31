@@ -118,7 +118,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
                         buiten_banen=10,
                         buiten_max_afstand=90,
                         adres='Schietweg 1, Boogdorp',
-                        plaats='Boogdrop')
+                        plaats='Boogdorp')
         locatie.save()
         locatie.verenigingen.add(ver)
 
@@ -888,7 +888,8 @@ class TestBestelBestelling(E2EHelpers, TestCase):
 
         self.assertEqual(2, MailQueue.objects.count())
         mail = MailQueue.objects.get(mail_to=sporter.email)
-        self.assertTrue('Schietstijl:' in mail.mail_text)
+        self.assertTrue('Aanwezig zijn om:' in mail.mail_text)
+        # self.assertTrue('Schietstijl:' in mail.mail_text)
 
     def test_kwalificatie_scores(self):
         self.e2e_login_and_pass_otp(self.account_admin)
