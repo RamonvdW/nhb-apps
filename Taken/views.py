@@ -141,7 +141,7 @@ class DetailsView(UserPassesTestMixin, TemplateView):
         if not taak.is_afgerond:
             if taak.log != "":
                 taak.log += "\n"
-            taak.log += "[%s] %s heeft deze taak gesloten" % (timezone.now().strftime('%Y-%m-%d om %H:%M'), account)
+            taak.log += "[%s] %s heeft deze taak gesloten" % (timezone.localtime(timezone.now()).strftime('%Y-%m-%d om %H:%M'), account)
             taak.is_afgerond = True
             taak.save(update_fields=['log', 'is_afgerond'])
 

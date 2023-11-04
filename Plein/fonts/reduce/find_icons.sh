@@ -30,6 +30,9 @@ HANDLED+="|kaartje.icon|kaartje.icoon|ander.icoon|{{ korting.icon_name }}"
 # dynamische icons vanuit script
 grep set_collapsible_icon\(id, Plein/js/site_layout.js | tr \" \' |cut -d\' -f2 >> "$OUT_TMP"
 
+# icons vanuit de Records module, eervolle vermeldingen
+./manage.py shell -c 'from Records.models import AnderRecord; qset=AnderRecord.objects.all().values_list("icoon", flat=True); print("\\n".join(qset))' >> "$OUT_TMP"
+
 echo "[INFO] Checking for missed situations"
 grep -vE "$HANDLED" "$OUT_TMP" | sort -u > "$OUT"
 rm "$OUT_TMP"
