@@ -10,6 +10,7 @@ arrow_downward
 arrow_forward
 arrow_forward_ios
 article
+auto_awesome
 backspace
 badge
 block

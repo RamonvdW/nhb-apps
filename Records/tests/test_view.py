@@ -7,7 +7,7 @@
 from django.test import TestCase
 from django.utils.dateparse import parse_date
 from Records.definities import LEEFTIJDSCATEGORIE, GESLACHT, MATERIAALKLASSE, DISCIPLINE
-from Records.models import IndivRecord
+from Records.models import IndivRecord, AnderRecord
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
@@ -277,5 +277,19 @@ class TestRecordsView(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assertContains(resp, 'Para Schutter')
         self.assertContains(resp, 'Open')
+
+    def test_eervol(self):
+        # eervolle vermelding
+        AnderRecord(
+            titel='Guiness Book',
+            icoon='auto_awesome',
+            tekst='test',
+            url='https://www.handboogsport.nl').save()
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_overzicht)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_template_used(resp, ('records/records_overzicht.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
 
 # end of file
