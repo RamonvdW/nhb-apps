@@ -506,7 +506,12 @@ def wedstrijden_plugin_beschrijf_product(inschrijving):
     beschrijving.append(tup)
 
     sessie = inschrijving.sessie
-    tup = ('Sessie', '%s om %s' % (sessie.datum, sessie.tijd_begin.strftime('%H:%M')))
+    tup = ('Sessie', '%s vanaf %s' % (sessie.datum, sessie.tijd_begin.strftime('%H:%M')))
+    beschrijving.append(tup)
+
+    aanwezig = datetime.datetime.combine(inschrijving.sessie.datum, inschrijving.sessie.tijd_begin)
+    aanwezig -= datetime.timedelta(minutes=inschrijving.wedstrijd.minuten_voor_begin_sessie_aanwezig_zijn)
+    tup = ('Aanwezig zijn om', aanwezig.strftime('%H:%M'))
     beschrijving.append(tup)
 
     sporterboog = inschrijving.sporterboog

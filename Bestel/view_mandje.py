@@ -93,10 +93,14 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
                          .producten
                          .select_related('wedstrijd_inschrijving',
                                          'wedstrijd_inschrijving__wedstrijd',
+                                         'wedstrijd_inschrijving__wedstrijd__locatie',
+                                         'wedstrijd_inschrijving__wedstrijd__organiserende_vereniging',
+                                         'wedstrijd_inschrijving__wedstrijdklasse',
                                          'wedstrijd_inschrijving__sessie',
                                          'wedstrijd_inschrijving__sporterboog',
                                          'wedstrijd_inschrijving__sporterboog__boogtype',
                                          'wedstrijd_inschrijving__sporterboog__sporter',
+                                         'wedstrijd_inschrijving__sporterboog__sporter__bij_vereniging',
                                          'webwinkel_keuze',
                                          'webwinkel_keuze__product')
                          .order_by('pk'))       # volgorde waarop ze in het mandje gelegd zijn
