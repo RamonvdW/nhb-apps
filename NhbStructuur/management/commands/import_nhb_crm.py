@@ -760,7 +760,7 @@ class Command(BaseCommand):
     def _import_clubs_secretaris(self, data):
         """ voor elke club, koppel de secretaris aan een Sporter """
 
-        if self._check_keys(data[0].keys(), EXPECTED_CLUB_KEYS, (), "club"):
+        if self._check_keys(data[0].keys(), EXPECTED_CLUB_KEYS, OPTIONAL_CLUB_KEYS, "club"):
             return
 
         for club in data:
@@ -1602,7 +1602,7 @@ class Command(BaseCommand):
     def _import_locaties(self, data):
         """ Importeert data van verenigingen als basis voor locaties """
 
-        if self._check_keys(data[0].keys(), EXPECTED_CLUB_KEYS, (), "club"):
+        if self._check_keys(data[0].keys(), EXPECTED_CLUB_KEYS, OPTIONAL_CLUB_KEYS, "club"):
             return
 
         # voor overige velden, zie _import_clubs
