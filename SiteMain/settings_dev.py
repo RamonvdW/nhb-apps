@@ -38,7 +38,7 @@ if ENABLE_DEBUG_TOOLBAR:                            # pragma: no cover
     INSTALLED_APPS.append('debug_toolbar')
     MIDDLEWARE.insert(0, 'debug_toolbar.middleware.DebugToolbarMiddleware')
 
-    # fallback loader as requested by Debug Toolbar config check, but not really used
+    # fallback loader as requested by Debug Toolbar config check
     TEMPLATES.append(
         {
             'NAME': 'default',

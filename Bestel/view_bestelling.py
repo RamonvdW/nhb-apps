@@ -140,6 +140,9 @@ class ToonBestellingDetailsView(UserPassesTestMixin, TemplateView):
                      .producten
                      .select_related('wedstrijd_inschrijving',
                                      'wedstrijd_inschrijving__wedstrijd',
+                                     'wedstrijd_inschrijving__wedstrijd__locatie',
+                                     'wedstrijd_inschrijving__wedstrijd__organiserende_vereniging',
+                                     'wedstrijd_inschrijving__wedstrijdklasse',
                                      'wedstrijd_inschrijving__sessie',
                                      'wedstrijd_inschrijving__sporterboog',
                                      'wedstrijd_inschrijving__sporterboog__boogtype',
