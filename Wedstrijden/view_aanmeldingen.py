@@ -417,6 +417,7 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
                              'Lid nr', 'Sporter', 'E-mailadres', 'Geslacht', 'Boog', 'Ver nr', 'Vereniging',
                              'Para classificatie', 'Voorwerpen op schietlijn', 'Para opmerking'])
 
+        output = list()
         for aanmelding in aanmeldingen:
             sporterboog = aanmelding.sporterboog
             sporter = sporterboog.sporter
@@ -476,7 +477,7 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
 
                 score_180p = score1_60p + score2_60p + score3_60p
 
-                writer.writerow([
+                row = [
                     str(reserveringsnummer),
                     timezone.localtime(aanmelding.wanneer).strftime('%Y-%m-%d %H:%M'),
                     INSCHRIJVING_STATUS_TO_SHORT_STR[aanmelding.status],
@@ -501,9 +502,12 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
                     score3_60p,
                     sporter.para_classificatie,
                     para_materiaal,
-                    para_notitie])
+                    para_notitie]
+
+                tup = (aanmelding.sessie.datum, aanmelding.sessie.tijd_begin, aanmelding.wedstrijdklasse.afkorting,
+                       0 - score_180p, aanmelding.wanneer, aanmelding.pk, row)
             else:
-                writer.writerow([
+                row = [
                     str(reserveringsnummer),
                     timezone.localtime(aanmelding.wanneer).strftime('%Y-%m-%d %H:%M'),
                     INSCHRIJVING_STATUS_TO_SHORT_STR[aanmelding.status],
@@ -524,7 +528,18 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
                     ver_str,
                     sporter.para_classificatie,
                     para_materiaal,
-                    para_notitie])
+                    para_notitie]
+
+                tup = (aanmelding.sessie.datum, aanmelding.sessie.tijd_begin, aanmelding.wedstrijdklasse.afkorting,
+                       0, aanmelding.wanneer, aanmelding.pk, row)
+
+            output.append(tup)
+        # for
+
+        output.sort()
+        for tup in output:
+            row = tup[-1]
+            writer.writerow(row)
         # for
 
         return response
