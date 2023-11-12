@@ -6,7 +6,7 @@
 
 from django.db import models
 from django.db.models.constraints import UniqueConstraint
-from Scheidsrechter.definities import BESCHIKBAAR_CHOICES, BESCHIKBAAR2STR, BESCHIKBAAR_LEEG
+from Scheidsrechter.definities import BESCHIKBAAR_CHOICES, BESCHIKBAAR2STR, BESCHIKBAAR_LEEG, SCHEIDS_MUTATIE_TO_STR
 from Sporter.models import Sporter
 from Wedstrijden.models import Wedstrijd
 
@@ -63,15 +63,32 @@ class WedstrijdDagScheidsrechters(models.Model):
                                          null=True, blank=True)              # mag leeg zijn
 
     # welke scheidsrechters zijn gekozen?
-    gekozen_sr1 = models.ForeignKey(Sporter, on_delete=models.SET_NULL, related_name='gekozen_sr1', null=True, blank=True)
-    gekozen_sr2 = models.ForeignKey(Sporter, on_delete=models.SET_NULL, related_name='gekozen_sr2', null=True, blank=True)
-    gekozen_sr3 = models.ForeignKey(Sporter, on_delete=models.SET_NULL, related_name='gekozen_sr3', null=True, blank=True)
-    gekozen_sr4 = models.ForeignKey(Sporter, on_delete=models.SET_NULL, related_name='gekozen_sr4', null=True, blank=True)
-    gekozen_sr5 = models.ForeignKey(Sporter, on_delete=models.SET_NULL, related_name='gekozen_sr5', null=True, blank=True)
-    gekozen_sr6 = models.ForeignKey(Sporter, on_delete=models.SET_NULL, related_name='gekozen_sr6', null=True, blank=True)
-    gekozen_sr7 = models.ForeignKey(Sporter, on_delete=models.SET_NULL, related_name='gekozen_sr7', null=True, blank=True)
-    gekozen_sr8 = models.ForeignKey(Sporter, on_delete=models.SET_NULL, related_name='gekozen_sr8', null=True, blank=True)
-    gekozen_sr9 = models.ForeignKey(Sporter, on_delete=models.SET_NULL, related_name='gekozen_sr9', null=True, blank=True)
+    gekozen_sr1 = models.ForeignKey(Sporter, on_delete=models.SET_NULL, related_name='gekozen_sr1',
+                                    null=True, blank=True)
+
+    gekozen_sr2 = models.ForeignKey(Sporter, on_delete=models.SET_NULL, related_name='gekozen_sr2',
+                                    null=True, blank=True)
+
+    gekozen_sr3 = models.ForeignKey(Sporter, on_delete=models.SET_NULL, related_name='gekozen_sr3',
+                                    null=True, blank=True)
+
+    gekozen_sr4 = models.ForeignKey(Sporter, on_delete=models.SET_NULL, related_name='gekozen_sr4',
+                                    null=True, blank=True)
+
+    gekozen_sr5 = models.ForeignKey(Sporter, on_delete=models.SET_NULL, related_name='gekozen_sr5',
+                                    null=True, blank=True)
+
+    gekozen_sr6 = models.ForeignKey(Sporter, on_delete=models.SET_NULL, related_name='gekozen_sr6',
+                                    null=True, blank=True)
+
+    gekozen_sr7 = models.ForeignKey(Sporter, on_delete=models.SET_NULL, related_name='gekozen_sr7',
+                                    null=True, blank=True)
+
+    gekozen_sr8 = models.ForeignKey(Sporter, on_delete=models.SET_NULL, related_name='gekozen_sr8',
+                                    null=True, blank=True)
+
+    gekozen_sr9 = models.ForeignKey(Sporter, on_delete=models.SET_NULL, related_name='gekozen_sr9',
+                                    null=True, blank=True)
 
     def __str__(self):
         return "[%s +%s]" % (self.wedstrijd.datum_begin, self.dag_offset)
@@ -80,6 +97,44 @@ class WedstrijdDagScheidsrechters(models.Model):
         verbose_name_plural = verbose_name = "Wedstrijddag scheidsrechters"
 
     objects = models.Manager()      # for the editor only
+
+
+class ScheidsMutatie(models.Model):
+    """ Deze tabel houdt de mutaties bij aangevraagd zijn en door de achtergrond taak afgehandeld moeten worden.
+        Alle verzoeken tot mutaties worden hier aan toegevoegd en na afhandelen bewaard zodat er geschiedenis is.
+    """
+
+    # datum/tijdstip van mutatie
+    when = models.DateTimeField(auto_now_add=True)      # automatisch invullen
+
+    # wat is de wijziging (zie SCHEIDS_MUTATIE_*)
+    mutatie = models.PositiveSmallIntegerField(default=0)
+
+    # is deze mutatie al verwerkt?
+    is_verwerkt = models.BooleanField(default=False)
+
+    # door wie is de mutatie geïnitieerd
+    # als het een account is, dan volledige naam + rol
+    # als er geen account is (sporter zonder account) dan lid details
+    door = models.CharField(max_length=50, default='')
+
+    # voor welke wedstrijd is de behoefte?
+    wedstrijd = models.ForeignKey(Wedstrijd, on_delete=models.CASCADE)
+
+    class Meta:
+        verbose_name = "Scheids mutatie"
+
+    def __str__(self):
+        """ geef een tekstuele afkorting van dit object, voor in de admin interface """
+        msg = "[%s]" % self.when
+        if not self.is_verwerkt:
+            msg += " (nog niet verwerkt)"
+        try:
+            msg += " %s (%s)" % (self.mutatie, SCHEIDS_MUTATIE_TO_STR[self.mutatie])
+        except KeyError:
+            msg += " %s (???)" % self.mutatie
+
+        return msg
 
 
 # end of file
