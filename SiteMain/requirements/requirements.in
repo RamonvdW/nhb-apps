@@ -24,6 +24,9 @@ qrcode
 google-auth
 google-api-python-client
 
+# lat/lon en reistijd berekenen
+googlemaps
+
 # collecting payment service provide
 mollie-api-python
 

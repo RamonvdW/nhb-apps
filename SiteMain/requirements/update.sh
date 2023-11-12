@@ -15,7 +15,7 @@ do
     IN="$req.in"
     echo "[INFO] Creating $OUT"
     [ -f "$OUT" ] && rm "$OUT"
-    pip-compile --resolver=backtracking -q "$IN"
+    pip-compile --resolver=backtracking --strip-extras -q "$IN"
 done
 
 # end of file
