@@ -231,6 +231,9 @@ class ExterneLocatieDetailsView(TemplateView):
                             repr(locatie.adres.replace('\n', ', ')))
             schrijf_in_logboek(door_account, 'Accommodaties', activiteit)
             locatie.adres = data
+            # zorg dat de lat/lon opnieuw vastgesteld gaat worden
+            locatie.adres_lat = ''
+            locatie.adres_lon = ''
 
         data = request.POST.get('plaats', '')[:50]
         if locatie.plaats != data:

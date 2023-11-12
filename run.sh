@@ -19,12 +19,26 @@ else
     DEBUG=1
     SETTINGS="$SETTINGS_DEV"
 fi
+echo "[INFO] Using config $SETTINGS"
 
-./manage.py check || exit 1
+echo "[INFO] Running system check"
+CHECK=$(./manage.py check --settings="$SETTINGS")
+RES=$?
+if [ $RES -ne 0 ]
+then
+    echo "$CHECK"
+    exit 1
+fi
 
 echo "[INFO] Refreshing static files"
 rm -rf "$STATIC_DIR"*
-./manage.py collectstatic -l
+COLLECT=$(./manage.py collectstatic -l)
+RES=$?
+if [ $RES -ne 0 ]
+then
+    echo "$COLLECT"
+    exit 1
+fi
 
 # start the background processes
 echo "[INFO] Starting Mollie simulator"
@@ -59,7 +73,7 @@ then
     EXTRA_ARGS="--insecure"
 fi
 
-echo "[INFO] Starting runserver with config $SETTINGS"
+echo "[INFO] Starting runserver"
 ./manage.py runserver --settings="$SETTINGS" --skip-checks $EXTRA_ARGS
 
 # kill the background processes
