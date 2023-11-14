@@ -131,6 +131,75 @@ def mailer_notify_internal_error(tb):
                 enforce_whitelist=False)
 
 
+def inline_styles(html):
+    """ E-mail programs have the tendency to drop the <styles> section declared in the header,
+        causing the layout to break. To avoid this, inlines the styles.
+
+        <head>
+            <style>
+                table {
+                    text-align: left;
+                    border: 1px solid lightgrey;
+                    border-collapse: collapse;
+                    padding: 10px 0 10px 0;
+                }
+                th,td {
+                    border: 1px solid lightgrey;
+                    padding: 10px;
+                }
+                h1 {
+                    margin: 30px 0 10px 0;
+                    color: #0aa0e1;
+                    font-size: large;
+                }
+            </style>
+    """
+    tag2style = dict()  # [tag] = style
+
+    # convert the style definitions into a table
+    pos1 = html.find('<style>')
+    pos2 = html.find('</style>')
+    styles = html[pos1+7:pos2]
+    html = html[:pos1] + html[pos2+8:]
+    while len(styles) > 0:
+        pos1 = styles.find('{')
+        pos2 = styles.find('}')
+        style = styles[pos1+1:pos2]
+        tags = styles[:pos1].split(',')
+        styles = styles[pos2+1:]
+
+        for tag in tags:
+            pos1 = html.find('<' + tag)
+            while pos1 > 0:
+                pos2 = html.find('>', pos1+1)
+                html1 = html[:pos1]
+                sub = html[pos1:pos2]
+                html2 = html[pos2:]
+
+                pos = sub.find(' style="')
+                if pos >= 0:
+                    # prepend with the extra styles
+                    new_styles = list()
+                    for sub_style in style.split(';'):
+                        keyword, _ = sub_style.split(':')
+                        if keyword not in sub:
+                            # this one is new
+                            new_styles.append(sub_style)
+                    # for
+                    sub = sub[:pos+8] + ";".join(new_styles) + ';' + sub[pos+8:]
+                else:
+                    # insert the styles
+                    sub += ' style="' + style + '"'
+
+                html = html1 + sub + html2
+                pos1 = html.find('<' + tag, pos1+1)
+            # while
+        # for
+    # while
+
+    return html
+
+
 def render_email_template(context, email_template_name):
     """
         Verwerk een django email template tot een mail body.
@@ -158,6 +227,8 @@ def render_email_template(context, email_template_name):
     text_content = text_content[text_content.find('|')+1:]      # strip all before first pipeline, including pipeline
     text_content = text_content.replace('|', '\n')
     text_content = unescape(text_content)
+
+    html_content = inline_styles(html_content)
 
     return text_content, html_content, email_template_name
 

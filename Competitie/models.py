@@ -1047,10 +1047,8 @@ class KampioenschapTeam(models.Model):
 
 
 class CompetitieMutatie(models.Model):
-    """ Deze tabel houdt de mutaties bij de lijst van (reserve-)sporters van
-        de RK en BK wedstrijden.
-        Alle verzoeken tot mutaties worden hier aan toegevoegd en na afhandelen bewaard
-        zodat er een geschiedenis is.
+    """ Deze tabel houdt de mutaties bij aangevraagd zijn en door de achtergrond taak afgehandeld moeten worden.
+        Alle verzoeken tot mutaties worden hier aan toegevoegd en na afhandelen bewaard zodat er geschiedenis is.
     """
 
     # datum/tijdstip van mutatie
@@ -1131,7 +1129,7 @@ class CompetitieTaken(models.Model):
                                           on_delete=models.SET_NULL)
 
     # wat is de hoogste mutatie tot nu toe verwerkt in de deelnemerslijst?
-    hoogste_mutatie = models.ForeignKey(CompetitieMutatie,
+    hoogste_mutatie = models.ForeignKey(CompetitieMutatie,              # TODO: afschaffen, zie BetaalMutatie
                                         null=True, blank=True,
                                         on_delete=models.SET_NULL)
 

@@ -19,12 +19,26 @@ else
     DEBUG=1
     SETTINGS="$SETTINGS_DEV"
 fi
+echo "[INFO] Using config $SETTINGS"
 
-./manage.py check || exit 1
+echo "[INFO] Running system check"
+CHECK=$(./manage.py check --settings="$SETTINGS")
+RES=$?
+if [ $RES -ne 0 ]
+then
+    echo "$CHECK"
+    exit 1
+fi
 
 echo "[INFO] Refreshing static files"
 rm -rf "$STATIC_DIR"*
-./manage.py collectstatic -l
+COLLECT=$(./manage.py collectstatic -l)
+RES=$?
+if [ $RES -ne 0 ]
+then
+    echo "$COLLECT"
+    exit 1
+fi
 
 # start the background processes
 echo "[INFO] Starting Mollie simulator"
@@ -47,6 +61,10 @@ echo "[INFO] Starting regiocomp_tussenstand (runtime: $BG_DURATION minutes)"
 pkill -f regiocomp_tussenstand
 ./manage.py regiocomp_tussenstand --settings="$SETTINGS" $BG_DURATION &
 
+echo "[INFO] Starting scheids_mutaties (runtime: $BG_DURATION minutes)"
+pkill -f scheids_mutaties
+./manage.py scheids_mutaties --settings="$SETTINGS" $BG_DURATION &
+
 # wacht tot alle achtergrondtaken gestart zijn
 sleep 0.8
 
@@ -59,7 +77,7 @@ then
     EXTRA_ARGS="--insecure"
 fi
 
-echo "[INFO] Starting runserver with config $SETTINGS"
+echo "[INFO] Starting runserver"
 ./manage.py runserver --settings="$SETTINGS" --skip-checks $EXTRA_ARGS
 
 # kill the background processes
@@ -68,6 +86,7 @@ pkill -f regiocomp_tussenstand
 pkill -f regiocomp_mutaties
 pkill -f bestel_mutaties
 pkill -f betaal_mutaties
+pkill -f scheids_mutaties
 pkill -f websim_betaal
 
 # end of file

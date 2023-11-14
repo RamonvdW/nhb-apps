@@ -53,7 +53,11 @@
                             {% endfor %}
                         </td>
                         <td>
-                            <a class="btn-sv-rood" href="{{ wed.url_controle }}">Controle</a>
+                            {% if wed.is_todo %}
+                                <a class="btn-sv-rood" href="{{ wed.url_controle }}">Controle</a>
+                            {% else %}
+                                <a class="btn-sv-blauw" href="{{ wed.url_controle }}">Bekijk</a>
+                            {% endif %}
                         </td>
                     </tr>
                 {% endfor %}

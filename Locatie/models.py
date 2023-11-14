@@ -32,7 +32,7 @@ class Locatie(models.Model):
     # welke disciplines kunnen hier georganiseerd worden?
     discipline_25m1pijl = models.BooleanField(default=False)
     discipline_outdoor = models.BooleanField(default=False)
-    discipline_indoor = models.BooleanField(default=False)      # Indoor = 18m/25m 3pijl, True als banen_18m>0 of banen_25m>0
+    discipline_indoor = models.BooleanField(default=False)  # Indoor=18m/25m 3pijl, True als banen_18m>0 of banen_25m>0
     discipline_clout = models.BooleanField(default=False)
     discipline_veld = models.BooleanField(default=False)
     discipline_run = models.BooleanField(default=False)
