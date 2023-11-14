@@ -95,10 +95,6 @@ class Sporter(models.Model):
     # geslacht (M/V/X)
     geslacht = models.CharField(max_length=1, choices=GESLACHT_MVX)
 
-    # code waarmee leden die op hetzelfde adres wonen gevonden kunnen worden
-    # let op: niet gebruiken als deze leeg is
-    adres_code = models.CharField(max_length=30, default='', blank=True)
-
     # officieel geregistreerde para classificatie
     para_classificatie = models.CharField(max_length=30, blank=True)
 
@@ -127,6 +123,14 @@ class Sporter(models.Model):
     postadres_1 = models.CharField(max_length=100, default='', blank=True)
     postadres_2 = models.CharField(max_length=100, default='', blank=True)
     postadres_3 = models.CharField(max_length=100, default='', blank=True)
+
+    # code waarmee leden die op hetzelfde adres wonen gevonden kunnen worden
+    # let op: niet gebruiken als deze leeg is
+    adres_code = models.CharField(max_length=30, default='', blank=True)
+
+    # postadres vertaald naar lat/lon
+    adres_lat = models.CharField(max_length=10, default='')    # 51.5037503
+    adres_lon = models.CharField(max_length=10, default='')    # 5.3670660
 
     # om overleden leden eenvoudig speciaal te kunnen behandelen hebben we dit veld als filter optie
     is_overleden = models.BooleanField(default=False)

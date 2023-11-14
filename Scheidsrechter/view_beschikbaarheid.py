@@ -16,6 +16,7 @@ from BasisTypen.definities import SCHEIDS_NIET, SCHEIDS_BOND, SCHEIDS_INTERNATIO
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige
 from Functie.scheids import gebruiker_is_scheids
+from Locatie.models import Reistijd
 from Scheidsrechter.definities import BESCHIKBAAR_LEEG, BESCHIKBAAR_JA, BESCHIKBAAR_DENK, BESCHIKBAAR_NEE, BESCHIKBAAR2STR
 from Scheidsrechter.models import WedstrijdDagScheidsrechters, ScheidsBeschikbaarheid
 from Sporter.models import Sporter, get_sporter
@@ -135,11 +136,26 @@ class WijzigBeschikbaarheidView(UserPassesTestMixin, TemplateView):
                  .order_by('wedstrijd__datum_begin',
                            'wedstrijd__pk'))
 
+        lat_lon2reistijd_min = dict()
+        for reistijd in Reistijd.objects.filter(vanaf_lat=self.sporter.adres_lat, vanaf_lon=self.sporter.adres_lon):
+            lat_lon2reistijd_min[(reistijd.naar_lat, reistijd.naar_lon)] = reistijd.reistijd_min
+
         datums = list()
         for dag in dagen:
             datum = dag.wedstrijd.datum_begin + datetime.timedelta(days=dag.dag_offset)
             if datum not in datums:
                 datums.append(datum)
+
+            dag.reistijd = "?"
+            if self.sporter.adres_lat:
+                locatie = dag.wedstrijd.locatie
+                if locatie.adres_lat:
+                    try:
+                        reistijd = lat_lon2reistijd_min[(locatie.adres_lat, locatie.adres_lon)]
+                        if reistijd > 0:
+                            dag.reistijd = reistijd
+                    except KeyError:
+                        pass
         # for
 
         keuzes = dict()     # [datum] = keuze

@@ -32,7 +32,7 @@ class Locatie(models.Model):
     # welke disciplines kunnen hier georganiseerd worden?
     discipline_25m1pijl = models.BooleanField(default=False)
     discipline_outdoor = models.BooleanField(default=False)
-    discipline_indoor = models.BooleanField(default=False)      # Indoor = 18m/25m 3pijl, True als banen_18m>0 of banen_25m>0
+    discipline_indoor = models.BooleanField(default=False)  # Indoor=18m/25m 3pijl, True als banen_18m>0 of banen_25m>0
     discipline_clout = models.BooleanField(default=False)
     discipline_veld = models.BooleanField(default=False)
     discipline_run = models.BooleanField(default=False)
@@ -58,9 +58,6 @@ class Locatie(models.Model):
 
     # plaats van deze locatie, om eenvoudig weer te kunnen geven op de kalender
     plaats = models.CharField(max_length=50, blank=True, default='')
-
-    # postcode zonder huisnummer, wordt gebruikt voor reistijd bepaling (zie Reistijd)
-    postcode = models.CharField(max_length=6, default='')         # 1234AB
 
     # coördinaten voor het adres
     adres_lat = models.CharField(max_length=10, default='')       # 51.5037503
@@ -121,16 +118,10 @@ class Reistijd(models.Model):
         Deze komen uit OR voor zowel leden als het doel.
     """
 
-    # postcode van het vertrekpunt
-    vanaf_postcode = models.CharField(max_length=6, default='')         # 1234AB
-
     # coördinaten voor het vertrekpunt
     # note: 5e decimaal is ~1 meter
     vanaf_lat = models.CharField(max_length=10, default='')             # 51.5037503
     vanaf_lon = models.CharField(max_length=10, default='')             # 5.3670660
-
-    # postcode van het doel
-    naar_postcode = models.CharField(max_length=6, default='')
 
     # coördinaten voor het doel
     naar_lat = models.CharField(max_length=10, default='')
@@ -142,6 +133,11 @@ class Reistijd(models.Model):
 
     # bijhouden hoe oud deze informatie is
     op_datum = models.DateField(default='2000-01-01')
+
+    def __str__(self):
+        return "%s minuten van %s, %s --> %s, %s" % (self.reistijd_min,
+                                                     self.vanaf_lat, self.vanaf_lon,
+                                                     self.naar_lat, self.naar_lon)
 
     class Meta:
         """ meta data voor de admin interface """

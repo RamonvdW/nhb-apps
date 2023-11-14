@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.contrib import admin
-from Locatie.models import Locatie
+from Locatie.models import Locatie, Reistijd
 
 
 class LocatieAdmin(admin.ModelAdmin):      # pragma: no cover
@@ -29,5 +29,6 @@ class LocatieAdmin(admin.ModelAdmin):      # pragma: no cover
 
 
 admin.site.register(Locatie, LocatieAdmin)
+admin.site.register(Reistijd)
 
 # end of file

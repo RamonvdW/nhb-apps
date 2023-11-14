@@ -7,10 +7,8 @@
 from django.contrib import admin
 from BasisTypen.definities import SCHEIDS_NIET
 from Scheidsrechter.definities import SCHEIDS2LEVEL
-from Scheidsrechter.models import ScheidsBeschikbaarheid, WedstrijdDagScheidsrechters
+from Scheidsrechter.models import ScheidsBeschikbaarheid, WedstrijdDagScheidsrechters, ScheidsMutatie
 from Sporter.models import Sporter
-from Wedstrijden.definities import WEDSTRIJD_STATUS_GEACCEPTEERD
-from Wedstrijden.models import Wedstrijd
 
 
 class WedstrijdDagScheidsrechtersAdmin(admin.ModelAdmin):
@@ -71,5 +69,6 @@ class ScheidsBeschikbaarheidAdmin(admin.ModelAdmin):
 
 admin.site.register(ScheidsBeschikbaarheid, ScheidsBeschikbaarheidAdmin)
 admin.site.register(WedstrijdDagScheidsrechters, WedstrijdDagScheidsrechtersAdmin)
+admin.site.register(ScheidsMutatie)
 
 # end of file

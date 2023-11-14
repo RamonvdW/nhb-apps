@@ -68,7 +68,8 @@ class CheckKwalificatieScoresView(UserPassesTestMixin, TemplateView):
         context['eind_datum'] = wedstrijd.datum_begin - datetime.timedelta(days=1+wedstrijd.datum_begin.weekday())
         context['begin_datum'] = datetime.date(jaar, 9, 1)      # 1 september
 
-        wedstrijden = OrderedDict()        # [(datum, plaats)] = [Kwalificatiescore(), ..]
+        wedstrijden = OrderedDict()     # [(datum, plaats)] = [Kwalificatiescore(), ..]
+        todo = dict()                   # [(datum, plaats)] = True/False
         for score in (Kwalificatiescore
                       .objects
                       .filter(inschrijving__wedstrijd=wedstrijd)
@@ -77,6 +78,7 @@ class CheckKwalificatieScoresView(UserPassesTestMixin, TemplateView):
                                       'inschrijving__sporterboog__sporter')
                       .order_by('datum',            # oudste eerst
                                 '-resultaat')):     # hoogste eerst
+
             sporterboog = score.inschrijving.sporterboog
             score.sporter_str = sporterboog.sporter.lid_nr_en_volledige_naam()
             score.boog_str = sporterboog.boogtype.beschrijving
@@ -87,6 +89,12 @@ class CheckKwalificatieScoresView(UserPassesTestMixin, TemplateView):
                 wedstrijden[tup].append(score)
             except KeyError:
                 wedstrijden[tup] = [score]
+
+            if score.check_status == KWALIFICATIE_CHECK_NOG_DOEN:
+                todo[tup] = True
+            else:
+                if tup not in todo.keys():
+                    todo[tup] = False
         # for
 
         context['wedstrijden'] = lijst = list()
@@ -101,6 +109,7 @@ class CheckKwalificatieScoresView(UserPassesTestMixin, TemplateView):
                             datum=datum,
                             waar=waar,
                             scores=scores,
+                            is_todo=todo[tup],
                             url_controle=url_controle)
             lijst.append(obj)
         # for

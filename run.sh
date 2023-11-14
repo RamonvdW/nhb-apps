@@ -61,6 +61,10 @@ echo "[INFO] Starting regiocomp_tussenstand (runtime: $BG_DURATION minutes)"
 pkill -f regiocomp_tussenstand
 ./manage.py regiocomp_tussenstand --settings="$SETTINGS" $BG_DURATION &
 
+echo "[INFO] Starting scheids_mutaties (runtime: $BG_DURATION minutes)"
+pkill -f scheids_mutaties
+./manage.py scheids_mutaties --settings="$SETTINGS" $BG_DURATION &
+
 # wacht tot alle achtergrondtaken gestart zijn
 sleep 0.8
 
@@ -82,6 +86,7 @@ pkill -f regiocomp_tussenstand
 pkill -f regiocomp_mutaties
 pkill -f bestel_mutaties
 pkill -f betaal_mutaties
+pkill -f scheids_mutaties
 pkill -f websim_betaal
 
 # end of file
