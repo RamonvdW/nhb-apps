@@ -187,6 +187,9 @@ def get_sessies(wedstrijd, sporter, voorkeuren, wedstrijdboog_pk):
         sessie.compatible_doelgroep = compatible_doelgroep
 
         sessie.prijs_euro_sporter = wedstrijd.bepaal_prijs_voor_sporter(sporter)
+
+        if sessie.aantal_beschikbaar <= 0:
+            sessie.kan_aanmelden = False
     # for
 
     # sorteer de wedstrijdklassen
