@@ -12,7 +12,7 @@ from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige
 from Functie.scheids import gebruiker_is_scheids
 from Scheidsrechter.definities import SCHEIDS2LEVEL
-from Sporter.models import Sporter
+from Sporter.models import SporterVoorkeuren, Sporter
 
 TEMPLATE_KORPS = 'scheidsrechter/korps.dtl'
 TEMPLATE_KORPS_CONTACT = 'scheidsrechter/korps-contactgegevens.dtl'
@@ -40,35 +40,49 @@ class KorpsView(UserPassesTestMixin, TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
+        lid_nr2voorkeuren = dict()
+        for voorkeuren in SporterVoorkeuren.objects.exclude(sporter__scheids=SCHEIDS_NIET).select_related('sporter'):
+            lid_nr2voorkeuren[voorkeuren.sporter.lid_nr] = voorkeuren
+        # for
+
         korps = (Sporter
                  .objects
                  .exclude(scheids=SCHEIDS_NIET)
-                 .exclude(is_overleden=True)
-                 .order_by('scheids',
-                           'sinds_datum'))
+                 .exclude(is_overleden=True))
 
-        sr3 = list()
-        sr4 = list()
-        sr5 = list()
-
+        alle = list()
         for sporter in korps:
             if sporter.scheids == SCHEIDS_INTERNATIONAAL:
-                sr5.append(sporter)
+                sporter.scheids_str = 'SR5'
+                order = 1
             elif sporter.scheids == SCHEIDS_BOND:
-                sr4.append(sporter)
+                sporter.scheids_str = 'SR4'
+                order = 2
             else:
-                sr3.append(sporter)
-        # for
+                sporter.scheids_str = 'SR3'
+                order = 3
 
-        for lijst in (sr3, sr4, sr5):
-            if len(lijst) > 0:
-                sporter = lijst[0]
-                sporter.is_break = True
-                sporter.scheids_str = SCHEIDS_TO_STR[sporter.scheids]
-        # for
+            sporter.opt_email = '-'
+            sporter.opt_telefoon = '-'
 
-        context['korps'] = sr5 + sr4 + sr3
-        context['aantal'] = len(korps)
+            try:
+                voorkeuren = lid_nr2voorkeuren[sporter.lid_nr]
+            except KeyError:
+                pass
+            else:
+                if voorkeuren.scheids_opt_in_korps_email:
+                    sporter.opt_email = sporter.email
+
+                if voorkeuren.scheids_opt_in_korps_tel_nr:
+                    sporter.opt_telefoon = sporter.telefoon
+
+            tup = (order, sporter.achternaam, sporter.voornaam, sporter.lid_nr, sporter)
+            alle.append(tup)
+        # for
+        alle.sort()
+
+        context['korps'] = [tup[-1] for tup in alle]
+        context['aantal'] = len(alle)
 
         context['kruimels'] = (
             (reverse('Scheidsrechter:overzicht'), 'Scheidsrechters'),
@@ -98,21 +112,44 @@ class KorpsMetContactGegevensView(UserPassesTestMixin, TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
+        lid_nr2voorkeuren = dict()
+        for voorkeuren in SporterVoorkeuren.objects.exclude(sporter__scheids=SCHEIDS_NIET).select_related('sporter'):
+            lid_nr2voorkeuren[voorkeuren.sporter.lid_nr] = voorkeuren
+        # for
+
         korps = list()
-        for scheids in (Sporter
+        for sporter in (Sporter
                         .objects
                         .exclude(scheids=SCHEIDS_NIET)
                         .exclude(is_overleden=True)):
 
-            scheids.level_str = SCHEIDS2LEVEL[scheids.scheids]
+            sporter.level_str = SCHEIDS2LEVEL[sporter.scheids]
+            sporter.delen_str = 'Onbekend'
 
-            tup = (10 - int(scheids.level_str[-1]), scheids.sinds_datum, scheids.pk, scheids)
+            try:
+                voorkeuren = lid_nr2voorkeuren[sporter.lid_nr]
+            except KeyError:
+                sporter.delen_str = 'Onbekend'
+            else:
+                delen_korps = voorkeuren.scheids_opt_in_korps_tel_nr or voorkeuren.scheids_opt_in_korps_email
+                delen_ver = voorkeuren.scheids_opt_in_ver_tel_nr or voorkeuren.scheids_opt_in_ver_email
+
+                if delen_korps and delen_ver:
+                    sporter.delen_str = 'Ja'
+                elif delen_korps:
+                    sporter.delen_str = 'Alleen korps'
+                elif delen_ver:
+                    sporter.delen_str = 'Alleen wedstrijd'
+                else:
+                    sporter.delen_str = 'Geen keuze'
+
+            tup = (10 - int(sporter.level_str[-1]), sporter.achternaam, sporter.voornaam, sporter.lid_nr, sporter)
             korps.append(tup)
         # for
 
         korps.sort()
 
-        context['korps'] = [scheids for _, _, _, scheids in korps]
+        context['korps'] = [tup[-1] for tup in korps]
         context['aantal'] = len(korps)
 
         context['kruimels'] = (

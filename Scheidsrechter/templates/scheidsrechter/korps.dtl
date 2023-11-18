@@ -5,6 +5,7 @@
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
+{% load overig_filters %}
 
 {% block title %}Korps{% endblock %}
 
@@ -15,22 +16,34 @@
         <div class="col s12">
             <h3 class="page-banner">Korps scheidsrechters</h3>
             <p>Hieronder volgt de lijst van alle {{ aantal }} scheidsrechters</p>
+            <p>SR5 = Internationaal scheidsrechter<br>SR4 = Bondsscheidsrechter<br>SR3 = Verenigingsscheidsrechter</p>
+            <p>Contactgegevens worden alleen getoond als de scheidsrechter daarvoor gekozen heeft</p>
         </div>
     </div>
 
     <!-- blauwe balk met informatie in een tabel -->
     <div class="row-sv-blauw">
-        <div class="col s12 m8 offset-m2 l6 offset-l3 xl4 offset-xl4">
-            <table class="white">
-                {% for sporter in korps %}
-                    {% if sporter.is_break %}
-                        <tr>
-                            <td class="center sv-blauw-text"><h6>{{ sporter.scheids_str }}</h6></td>
-                        </tr>
-                    {% endif %}
-
+        <div class="col s12 l10 offset-l1 xl8 offset-xl2">
+            <table class="white" id="table1">
+                <thead>
+                    <tr>        <!-- filter veld -->
+                        <td colspan="2" class="table-filter"><input class="table-filter" autofocus oninput="myTableFilter(this, 'table1')" placeholder="Zoeken"/></td>
+                        <td colspan="2"><!-- contactgegevens --></td>
+                    </tr>
                     <tr>
-                        <td class="center">{{ sporter.volledige_naam }}</td>
+                        <th data-filter="on">Naam</th>
+                        <th class="center" data-filter="on">Niveau</th>
+                        <th>Telefoon</th>
+                        <th>Email</th>
+                    </tr>
+                </thead>
+
+                {% for sporter in korps %}
+                    <tr>
+                        <td>{{ sporter.volledige_naam }}</td>
+                        <td class="center">{{ sporter.scheids_str }}</td>
+                        <td>{{ sporter.opt_telefoon }}</td>
+                        <td><code>{{ sporter.opt_email|wbr_email }}</code></td>
                     </tr>
                 {% endfor %}
             </table>
