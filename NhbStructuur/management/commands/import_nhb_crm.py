@@ -1078,6 +1078,7 @@ class Command(BaseCommand):
             lid_adres_code = ''
             postcode = member['postal_code']
             postadres = member['address']
+            # lat_lon = (member['latitude'], member['longitude'])  --> is van dorp ipv adres?
             if postcode is not None and postadres is not None:
                 postcode = postcode.upper()     # sommige postcodes zijn kleine letters
                 pos = postadres.find(postcode)
@@ -1091,6 +1092,15 @@ class Command(BaseCommand):
                     spl = sub_postadres.split(' ')              # scheid straatnaam en huisnummer
                     huis_nr = spl[-1]
                     lid_adres_code = postcode.replace(' ', '') + huis_nr
+
+                # try:
+                #     check_lat_lon = self._postcode2latlon[postcode]
+                # except KeyError:
+                #     self._postcode2latlon[postcode] = lat_lon
+                # else:
+                #     if check_lat_lon != lat_lon:
+                #         self.stdout.write('[DEBUG] Multiple lat_lon for postal_code %s: %s, %s' % (
+                #                           repr(postcode), repr(check_lat_lon), repr(lat_lon)))
 
             lid_postadres = list()
             if postadres is not None:
