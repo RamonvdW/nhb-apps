@@ -126,7 +126,7 @@ class KorpsMetContactGegevensView(UserPassesTestMixin, TemplateView):
                         .exclude(is_overleden=True)):
 
             sporter.level_str = SCHEIDS2LEVEL[sporter.scheids]
-            sporter.delen_tel_str = sporter.delen_email_str = 'Onbekend'
+            sporter.delen_tel_str = sporter.delen_email_str = 'Geen account'
 
             try:
                 voorkeuren = lid_nr2voorkeuren[sporter.lid_nr]
