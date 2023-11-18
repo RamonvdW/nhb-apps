@@ -10,7 +10,7 @@ from BasisTypen.definities import SCHEIDS_BOND, SCHEIDS_VERENIGING
 from BasisTypen.models import KalenderWedstrijdklasse
 from Functie.models import Functie
 from Geo.models import Regio
-from Locatie.models import Locatie
+from Locatie.models import Locatie, Reistijd
 from Scheidsrechter.definities import BESCHIKBAAR_LEEG
 from Scheidsrechter.models import ScheidsBeschikbaarheid, WedstrijdDagScheidsrechters
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -46,12 +46,18 @@ class TestScheidsrechterBeschikbaarheid(E2EHelpers, TestCase):
         for sporter in data.sporters_scheids[SCHEIDS_BOND]:             # pragma: no branch
             if sporter.account is not None:                             # pragma: no branch
                 cls.sr4_met_account = sporter
+                sporter.adres_lat = 'sr4_lat'
+                sporter.adres_lon = 'sr4_lon'
+                sporter.save(update_fields=['adres_lat', 'adres_lon'])
                 break
         # for
 
         for sporter in data.sporters_scheids[SCHEIDS_VERENIGING]:       # pragma: no branch
             if sporter.account is not None:                             # pragma: no branch
                 cls.sr3_met_account = sporter
+                sporter.adres_lat = 'sr3_lat'
+                sporter.adres_lon = 'sr3_lon'
+                sporter.save(update_fields=['adres_lat', 'adres_lon'])
                 break
         # for
 
@@ -78,9 +84,12 @@ class TestScheidsrechterBeschikbaarheid(E2EHelpers, TestCase):
                         buiten_banen=10,
                         buiten_max_afstand=90,
                         adres="Schietweg 1, Spanningen",
-                        plaats="Spanningen")
+                        plaats="Spanningen",
+                        adres_lat='loc_lat',
+                        adres_lon='loc_lon')
         locatie.save()
         locatie.verenigingen.add(ver)
+        self.locatie = locatie
 
         sessie = WedstrijdSessie(
                     datum=datum,
@@ -169,6 +178,14 @@ class TestScheidsrechterBeschikbaarheid(E2EHelpers, TestCase):
         self.client.logout()
         self.e2e_login(self.sr3_met_account.account)
 
+        # zet de reistijd
+        reistijd = Reistijd(vanaf_lat='sr3_lat',
+                            vanaf_lon='sr3_lon',
+                            naar_lat=self.locatie.adres_lat,
+                            naar_lon=self.locatie.adres_lon,
+                            reistijd_min=0)         # 0 = nog niet uitgerekend
+        reistijd.save()
+
         # beschikbaarheid
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_beschikbaarheid_wijzigen)
@@ -185,8 +202,11 @@ class TestScheidsrechterBeschikbaarheid(E2EHelpers, TestCase):
         self.assertEqual(1, ScheidsBeschikbaarheid.objects.count())
         beschikbaar = ScheidsBeschikbaarheid.objects.first()
         self.assertEqual(beschikbaar.opgaaf, 'N')       # 3 = Nee
-
         self.assertTrue(str(beschikbaar) != '')
+
+        # zet de reistijd
+        reistijd.reistijd_min = 42
+        reistijd.save(update_fields=['reistijd_min'])
 
         # opgegeven beschikbaarheid inzien
         with self.assert_max_queries(20):
@@ -206,6 +226,9 @@ class TestScheidsrechterBeschikbaarheid(E2EHelpers, TestCase):
         # forceer een niet theoretisch keuze
         beschikbaar.opgaaf = BESCHIKBAAR_LEEG
         beschikbaar.save(update_fields=['opgaaf'])
+
+        self.locatie.adres_lat = ''
+        self.locatie.save(update_fields=['adres_lat'])
 
         # opgegeven beschikbaarheid inzien
         with self.assert_max_queries(20):
@@ -267,6 +290,9 @@ class TestScheidsrechterBeschikbaarheid(E2EHelpers, TestCase):
         self.assertEqual(1, ScheidsBeschikbaarheid.objects.count())
         beschikbaar = ScheidsBeschikbaarheid.objects.first()
         self.assertEqual(beschikbaar.opgaaf, 'J')       # 1 = Ja
+
+        self.sr4_met_account.adres_lat = ''
+        self.sr4_met_account.save(update_fields=['adres_lat'])
 
         # beschikbaarheid
         with self.assert_max_queries(20):

@@ -10,7 +10,7 @@ from BasisTypen.definities import SCHEIDS_BOND, SCHEIDS_VERENIGING
 from BasisTypen.models import KalenderWedstrijdklasse
 from Functie.models import Functie
 from Geo.models import Regio
-from Locatie.models import Locatie
+from Locatie.models import Locatie, Reistijd
 from Scheidsrechter.definities import BESCHIKBAAR_JA, BESCHIKBAAR_NEE, BESCHIKBAAR_DENK
 from Scheidsrechter.models import WedstrijdDagScheidsrechters, ScheidsBeschikbaarheid
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -56,6 +56,9 @@ class TestScheidsrechterWedstrijden(E2EHelpers, TestCase):
         for sporter in data.sporters_scheids[SCHEIDS_BOND]:             # pragma: no branch
             if sporter.account is not None:
                 cls.sr3_met_account = sporter
+                sporter.adres_lat = 'sr3_lat'
+                sporter.adres_lon = 'sr3_lon'
+                sporter.save(update_fields=['adres_lat', 'adres_lon'])
                 break
         # for
 
@@ -95,9 +98,12 @@ class TestScheidsrechterWedstrijden(E2EHelpers, TestCase):
                         buiten_banen=10,
                         buiten_max_afstand=90,
                         adres='Schietweg 1, Boogdorp',
-                        plaats='Boogdrop')
+                        plaats='Boogdrop',
+                        adres_lat='loc_lat',
+                        adres_lon='loc_lon')
         locatie.save()
         locatie.verenigingen.add(ver)
+        self.locatie = locatie
 
         sessie = WedstrijdSessie(
                     datum=datum,
@@ -137,6 +143,13 @@ class TestScheidsrechterWedstrijden(E2EHelpers, TestCase):
 
     def test_sr3(self):
         self.e2e_login(self.sr3_met_account.account)
+
+        # zet de reistijd
+        Reistijd(vanaf_lat='sr3_lat',
+                 vanaf_lon='sr3_lon',
+                 naar_lat=self.locatie.adres_lat,
+                 naar_lon=self.locatie.adres_lon,
+                 reistijd_min=42).save()
 
         # wedstrijden
         with self.assert_max_queries(20):
