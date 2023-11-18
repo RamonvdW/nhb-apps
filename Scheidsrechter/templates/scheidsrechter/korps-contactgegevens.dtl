@@ -16,6 +16,7 @@
         <div class="col s12">
             <h3 class="page-banner">Korps scheidsrechters</h3>
             <p>Hieronder volgt de lijst van alle {{ aantal }} scheidsrechters, inclusief alle bekende contactgegevens</p>
+            <p class="hide-on-small-only"><i>(kolommen 'deelt' is met korps, wedstrijdorganisatie)</i></p>
         </div>
     </div>
 
@@ -25,16 +26,18 @@
             <table class="white" id="tabel1">
                 <thead>
                     <tr>        <!-- filter veld -->
-                        <td colspan="5" class="table-filter">
+                        <td colspan="2" class="table-filter">
                             <input class="table-filter" oninput="myTableFilter(this, 'tabel1')" placeholder="Zoeken" autofocus/>
                         </td>
+                        <td colspan="4"></td>
                     </tr>
                     <tr>
                         <th data-filter="on">Naam</th>
                         <th data-filter="on" class="center">Niveau</th>
-                        <th data-filter="on">Telefoon</th>
-                        <th data-filter="on">E-mail</th>
-                        <th data-filter="on">Delen?</th>
+                        <th>Telefoon</th>
+                        <th class="hide-on-small-only">Deelt tel.nr</th>
+                        <th>E-mail</th>
+                        <th class="hide-on-small-only">Deelt e-mail</th>
                     </tr>
                 </thead>
 
@@ -44,8 +47,9 @@
                             <td>{{ sporter.volledige_naam }}</td>
                             <td class="center">{{ sporter.level_str }}</td>
                             <td>{{ sporter.telefoon }}</td>
+                            <td class="hide-on-small-only">{{ sporter.delen_tel_str }}</td>
                             <td><code>{{ sporter.email|wbr_email }}</code></td>
-                            <td>{{ sporter.delen_str }}</td>
+                            <td class="hide-on-small-only">{{ sporter.delen_email_str }}</td>
                         </tr>
                     {% endfor %}
                 </tbody>

@@ -117,6 +117,8 @@ class KorpsMetContactGegevensView(UserPassesTestMixin, TemplateView):
             lid_nr2voorkeuren[voorkeuren.sporter.lid_nr] = voorkeuren
         # for
 
+        ja_nee = {True: 'Ja', False: 'Nee'}
+
         korps = list()
         for sporter in (Sporter
                         .objects
@@ -124,24 +126,18 @@ class KorpsMetContactGegevensView(UserPassesTestMixin, TemplateView):
                         .exclude(is_overleden=True)):
 
             sporter.level_str = SCHEIDS2LEVEL[sporter.scheids]
-            sporter.delen_str = 'Onbekend'
+            sporter.delen_tel_str = sporter.delen_email_str = 'Onbekend'
 
             try:
                 voorkeuren = lid_nr2voorkeuren[sporter.lid_nr]
             except KeyError:
-                sporter.delen_str = 'Onbekend'
+                pass
             else:
-                delen_korps = voorkeuren.scheids_opt_in_korps_tel_nr or voorkeuren.scheids_opt_in_korps_email
-                delen_ver = voorkeuren.scheids_opt_in_ver_tel_nr or voorkeuren.scheids_opt_in_ver_email
+                sporter.delen_tel_str = '%s, %s' % (ja_nee[voorkeuren.scheids_opt_in_korps_tel_nr],
+                                                    ja_nee[voorkeuren.scheids_opt_in_ver_tel_nr])
 
-                if delen_korps and delen_ver:
-                    sporter.delen_str = 'Ja'
-                elif delen_korps:
-                    sporter.delen_str = 'Alleen korps'
-                elif delen_ver:
-                    sporter.delen_str = 'Alleen wedstrijd'
-                else:
-                    sporter.delen_str = 'Geen keuze'
+                sporter.delen_email_str = '%s, %s' % (ja_nee[voorkeuren.scheids_opt_in_korps_email],
+                                                      ja_nee[voorkeuren.scheids_opt_in_ver_email])
 
             tup = (10 - int(sporter.level_str[-1]), sporter.achternaam, sporter.voornaam, sporter.lid_nr, sporter)
             korps.append(tup)
