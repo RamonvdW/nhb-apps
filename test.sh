@@ -172,6 +172,8 @@ then
     [ $RES -eq 3 ] && ABORTED=1
 fi
 
+echo "[INFO] Starting websim tasks"
+
 # start the mail transport service simulator
 python3 $PY_OPTS ./Mailer/test_tools/websim_mailer.py &
 PID_WEBSIM1=$!
@@ -179,6 +181,10 @@ PID_WEBSIM1=$!
 # start the payment service simulator
 python3 $PY_OPTS ./Betaal/test-tools/websim_betaal_test.py &
 PID_WEBSIM2=$!
+
+# start the payment service simulator
+python3 $PY_OPTS ./Locatie/test_tools/websim_gmaps.py &
+PID_WEBSIM3=$!
 
 # check all websim programs have started properly
 sleep 0.5               # give python some time to load everything
@@ -195,6 +201,14 @@ RES=$?
 if [ $RES -ne 0 ]
 then
     echo "[ERROR] Betaal service simulator failed to start"
+    exit
+fi
+
+kill -0 $PID_WEBSIM3    # check the simulator is running
+RES=$?
+if [ $RES -ne 0 ]
+then
+    echo "[ERROR] Google Maps simulator failed to start"
     exit
 fi
 
@@ -252,10 +266,13 @@ fi
 
 # stop the websim tools
 # use bash construct to prevent the Terminated message on the console
+echo "[INFO] Terminating websim tasks"
 kill $PID_WEBSIM1
 wait $PID_WEBSIM1 2>/dev/null
 kill $PID_WEBSIM2
 wait $PID_WEBSIM2 2>/dev/null
+kill $PID_WEBSIM3
+wait $PID_WEBSIM3 2>/dev/null
 
 # cleanup test data directories
 rm -rf "$TEST_DIR"

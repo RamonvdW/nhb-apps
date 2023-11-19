@@ -36,7 +36,11 @@ class Command(BaseCommand):
 
     def _connect_gmaps(self):
         # TODO: error handling
-        self._gmaps = googlemaps.Client(key=settings.MAPS_API_KEY)
+        if settings.GMAPS_API:
+            self.stdout.write('[INFO] Using server URL %s' % repr(settings.GMAPS_API))
+            self._gmaps = googlemaps.Client(key=settings.GMAPS_KEY, base_url=settings.GMAPS_API)
+        else:
+            self._gmaps = googlemaps.Client(key=settings.GMAPS_KEY)
 
     def _get_adres_lat_lon(self, adres):
 
@@ -82,6 +86,8 @@ class Command(BaseCommand):
             return 16 * 60      # geef een gek getal terug wat om aandacht vraagt
 
         try:
+            # pp = pprint.PrettyPrinter()
+            # pp.pprint(results)
             result = results[0]      # maximaal 1 resultaat omdat alternatives = False
             leg = result['legs'][0]
             # del leg['steps']

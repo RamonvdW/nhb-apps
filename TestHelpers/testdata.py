@@ -399,7 +399,7 @@ class TestData(object):
 
         Sporter(
             lid_nr=200002,
-            voornaam='BB',
+            voornaam='Bond',
             achternaam='de Admin',
             unaccented_naam='BB de Admin',
             geboorte_datum='1900-01-01',
