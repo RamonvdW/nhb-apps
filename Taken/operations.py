@@ -181,8 +181,8 @@ def maak_taak(**kwargs):
 
 
 def herinner_aan_taken():
-    """ Deze functie wordt aangeroepen vanuit de stuur_emails cli om herinneringsmails
-        te maken voor openstaande taken (elke 15 min dus).
+    """ Deze functie wordt aangeroepen vanuit de stuur_mails cli van de Mailer applicatie
+        om herinneringsmails te maken voor openstaande taken (elke 15 min dus).
     """
 
     taken_functie = dict()      # [toegekend_aan_functie] = aantal
