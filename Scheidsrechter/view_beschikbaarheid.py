@@ -19,6 +19,7 @@ from Functie.scheids import gebruiker_is_scheids
 from Locatie.models import Reistijd
 from Scheidsrechter.definities import BESCHIKBAAR_LEEG, BESCHIKBAAR_JA, BESCHIKBAAR_DENK, BESCHIKBAAR_NEE, BESCHIKBAAR2STR
 from Scheidsrechter.models import WedstrijdDagScheidsrechters, ScheidsBeschikbaarheid
+from Scheidsrechter.mutaties import scheids_mutatieverzoek_beschikbaarheid_opvragen
 from Sporter.models import Sporter, get_sporter
 from TijdelijkeCodes.definities import RECEIVER_SCHEIDS_BESCHIKBAAR
 from TijdelijkeCodes.operations import set_tijdelijke_codes_receiver
@@ -51,6 +52,7 @@ class BeschikbaarheidOpvragenView(UserPassesTestMixin, View):
             deze functie wordt aangeroepen als op de knop Beschikbaarheid Opvragen gedrukt is.
         """
 
+        snel = str(request.POST.get('snel', ''))[:1]
         wedstrijd_pk = request.POST.get('wedstrijd', '')[:6]    # afkappen voor de veiligheid
 
         try:
@@ -64,22 +66,10 @@ class BeschikbaarheidOpvragenView(UserPassesTestMixin, View):
         except (ValueError, Wedstrijd.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
-        vraag = list()
-        aantal_dagen = (wedstrijd.datum_einde - wedstrijd.datum_begin).days + 1
-        for dag_nr in range(aantal_dagen):
-            obj, is_new = (WedstrijdDagScheidsrechters
-                           .objects
-                           .get_or_create(wedstrijd=wedstrijd,
-                                          dag_offset=dag_nr))
+        account = get_account(request)
+        door_str = "CS %s" % account.volledige_naam()
 
-            if is_new:
-                # voor deze dag een verzoek versturen
-                datum = wedstrijd.datum_begin + datetime.timedelta(days=dag_nr)
-                vraag.append(datum)
-        # for
-
-        # TODO: stuur e-mails naar SR
-        # print('vraag: %s' % repr(vraag))
+        scheids_mutatieverzoek_beschikbaarheid_opvragen(wedstrijd, door_str, snel)
 
         url = reverse('Scheidsrechter:overzicht')
         return HttpResponseRedirect(url)
