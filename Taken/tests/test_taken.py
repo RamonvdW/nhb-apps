@@ -236,14 +236,18 @@ class TestTakenTaken(E2EHelpers, TestCase):
         # controleer dat de herinnering pas gestuurd worden na 7 dagen
         self.functie_mwz.laatste_email_over_taken = timezone.now() - datetime.timedelta(days=7) + datetime.timedelta(hours=1)
         self.functie_mwz.save(update_fields=['laatste_email_over_taken'])
-
         herinner_aan_taken()
         self.assertEqual(3, MailQueue.objects.count())
 
         self.functie_mwz.laatste_email_over_taken = timezone.now() - datetime.timedelta(days=7) - datetime.timedelta(hours=1)
         self.functie_mwz.save(update_fields=['laatste_email_over_taken'])
-
         herinner_aan_taken()
         self.assertEqual(4, MailQueue.objects.count())
+
+        # corner case
+        self.functie_mwz.laatste_email_over_taken = None
+        self.functie_mwz.save(update_fields=['laatste_email_over_taken'])
+        herinner_aan_taken()
+        self.assertEqual(5, MailQueue.objects.count())
 
 # end of file

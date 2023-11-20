@@ -203,7 +203,9 @@ def monitor_payment_changes():
                         except requests.exceptions.ConnectionError as exc:
                             out_warning('Failed to invoked webhook: %s' % repr(exc))
                         else:
-                            out_debug('Webhook POST result with payment_id=%s: %s, %s' % (payment_id, r.status_code, r.reason))
+                            out_debug('Webhook POST result with payment_id=%s: %s, %s' % (payment_id,
+                                                                                          r.status_code,
+                                                                                          r.reason))
 
                             if r.status_code == 200:
                                 data['reported_status'] = status
@@ -470,7 +472,8 @@ class MyHandler(BaseHTTPRequestHandler):
         elif body == b'status=expire':
             self._change_payment_status(resp, 'expire')
         else:
-            out_debug('POST checkout done: Niet ondersteunde methode voor payment_id %s: %s' % (repr(payment_id), repr(body)))
+            out_debug('POST checkout done: Niet ondersteunde methode voor payment_id %s: %s' % (repr(payment_id),
+                                                                                                repr(body)))
             self.send_response(404)
             self.end_headers()
             return
@@ -548,7 +551,8 @@ class MyServerThread(threading.Thread):
         self.daemon = True
         self.start()
 
-    def dummy(self):
+    @staticmethod
+    def dummy():
         return None
 
     def run(self):

@@ -18,7 +18,7 @@ TEST_EMAIL_ADRES = 'schutter@test.not'
 
 class TestMailerCliGoedBase(E2EHelpers, TestCase):
 
-    """ tests voor de Mailer applicatie """
+    """ tests voor de Mailer applicatie, management commando's """
 
     test_after = ('Mailer.tests.test_operations', )
 
