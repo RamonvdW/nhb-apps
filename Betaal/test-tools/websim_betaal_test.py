@@ -70,10 +70,11 @@ class MyServer(BaseHTTPRequestHandler):
 
     # noinspection PyTypeChecker
     def do_GET(self):
-        # print("[DEBUG] {websim_betaal_test} GET request,\nPath: %s\nHeaders:\n%s" % (str(self.path), str(self.headers)))
+        # print("[DEBUG] {websim_betaal_test} GET request,\nPath: %s\nHeaders:\n%s" % (str(self.path),
+        #                                                                              str(self.headers)))
 
         if self.path.startswith('/v2/payments/'):
-            payment_id = self.path[13:13+30]
+            # payment_id = self.path[13:13+30]
             # print('[DEBUG] {websim_betaal_test} GET payment_id: %s' % repr(payment_id))
 
             payment_id = '1234AbcdEFGH'     # the only one we support
@@ -88,7 +89,6 @@ class MyServer(BaseHTTPRequestHandler):
 
             if 'status' in resp and resp['status'] == 'open':
                 # transition to another state
-                test_code = 0
                 description = resp['description']
                 if description.startswith('Test betaling '):
                     test_code = description[14:]
@@ -142,7 +142,9 @@ class MyServer(BaseHTTPRequestHandler):
                                                         'value': '%.2f' % value}
                         del resp['isCancelable']
                         del resp['_links']['checkout']
-                        # '_links': {'changePaymentState': {'href': 'https://www.mollie.com/checkout/test-mode?method=ideal&token=3.210mge', 'type': 'text/html'},
+                        # '_links': {'changePaymentState': {
+                        #            'href': 'https://www.mollie.com/checkout/test-mode?method=ideal&token=3.210mge',
+                        #            'type': 'text/html'},
 
                     elif test_code == "43":
                         # transition to 'canceled'
@@ -182,7 +184,8 @@ class MyServer(BaseHTTPRequestHandler):
         self.end_headers()
 
     def do_POST(self):
-        # print("[DEBUG] {websim_betaal_test} POST request,\nPath: %s\nHeaders:\n%s" % (str(self.path), str(self.headers)))
+        # print("[DEBUG] {websim_betaal_test} POST request,\nPath: %s\nHeaders:\n%s" % (str(self.path),
+        #                                                                               str(self.headers)))
 
         auth = self.headers.get('authorization')
         if auth and auth.startswith('Bearer '):
@@ -242,7 +245,6 @@ class MyServer(BaseHTTPRequestHandler):
         links['dashboard'] = {'href': MY_URL_DASHBOARD % payment_id, 'type': 'text/html'}
         # links['documentation'] =
 
-        test_code = 0
         if description.startswith('Test betaling '):
             test_code = description[14:]
             if test_code[-1] == '+':
@@ -282,7 +284,9 @@ class MyServer(BaseHTTPRequestHandler):
             # 45 = bijna leeg antwoord (+expired?!)
             # 46 = foute status
             # 47 = foute  id
-            if test_code in ("39", "40", "41", "42", "421", "422", "423", "424", "425", "426", "427", "428", "429", "43", "44", "45", "46", "47"):
+            if test_code in ("39", "40", "41", "42",
+                             "421", "422", "423", "424", "425", "426", "427", "428", "429",
+                             "43", "44", "45", "46", "47"):
                 self._write_response(200, resp)
         else:
             # geen corner-case
