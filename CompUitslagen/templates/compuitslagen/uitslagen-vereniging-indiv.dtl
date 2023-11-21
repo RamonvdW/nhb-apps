@@ -87,7 +87,7 @@
     <div class="row center">
         <div class="col s12">
             <h4>Ranking</h4>
-            <p>{{ aantal_deelnemers }} sporters van deze vereniging doen met dit type boog</p>
+            <p>{{ aantal_deelnemers }} sporters van deze vereniging doen mee met dit type boog</p>
         </div>
     </div>
 
