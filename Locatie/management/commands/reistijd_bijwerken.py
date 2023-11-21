@@ -35,12 +35,14 @@ class Command(BaseCommand):
         self._future_saturday_0800 = date
 
     def _connect_gmaps(self):
-        # TODO: error handling
-        if settings.GMAPS_API:
+        options = {'key': settings.GMAPS_KEY}
+
+        if settings.GMAPS_API:      # pragma: no branch
             self.stdout.write('[INFO] Using server URL %s' % repr(settings.GMAPS_API))
-            self._gmaps = googlemaps.Client(key=settings.GMAPS_KEY, base_url=settings.GMAPS_API)
-        else:
-            self._gmaps = googlemaps.Client(key=settings.GMAPS_KEY)
+            options['base_url'] = settings.GMAPS_API
+
+        # TODO: error handling
+        self._gmaps = googlemaps.Client(**options)
 
     def _get_adres_lat_lon(self, adres):
 
