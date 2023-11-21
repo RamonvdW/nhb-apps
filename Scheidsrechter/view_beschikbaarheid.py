@@ -69,7 +69,7 @@ class BeschikbaarheidOpvragenView(UserPassesTestMixin, View):
         account = get_account(request)
         door_str = "CS %s" % account.volledige_naam()
 
-        scheids_mutatieverzoek_beschikbaarheid_opvragen(wedstrijd, door_str, snel)
+        scheids_mutatieverzoek_beschikbaarheid_opvragen(wedstrijd, door_str, snel == '1')
 
         url = reverse('Scheidsrechter:overzicht')
         return HttpResponseRedirect(url)
