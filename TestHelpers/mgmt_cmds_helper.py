@@ -8,7 +8,6 @@ from django.core import management
 from django.test import TestCase, override_settings
 import io
 
-
 TEST_BETAAL_API_URL = 'http://localhost:8125'
 TEST_GMAPS_API_URL = 'http://localhost:8126'
 
