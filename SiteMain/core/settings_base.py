@@ -26,7 +26,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2023-11-20'
+SITE_VERSIE = '2023-11-22'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -216,6 +216,7 @@ BACKGROUND_SYNC__REGIOCOMP_MUTATIES = BACKGROUND_SYNC_POORT + 1
 BACKGROUND_SYNC__BONDSPAS_DOWNLOADER = BACKGROUND_SYNC_POORT + 2
 BACKGROUND_SYNC__BESTEL_MUTATIES = BACKGROUND_SYNC_POORT + 3
 BACKGROUND_SYNC__BETAAL_MUTATIES = BACKGROUND_SYNC_POORT + 4
+BACKGROUND_SYNC__SCHEIDS_MUTATIES = BACKGROUND_SYNC_POORT + 5
 
 # our own test runner that executes the tests ordered by application hierarchy indicators to ensure that
 # low-level errors are reported before applications depending that (broken) functionality report failures
@@ -532,10 +533,6 @@ TICKET_NUMMER_START__WEDSTRIJD = 7000000
 # wordt gebruikt als verenigingen via de bond betalingen mogen ontvangen
 BETAAL_VIA_BOND_VER_NR = 1368
 
-# implementation uses this instead of built-in default, to allow override during testing
-BETAAL_API = 'https://api.mollie.com'
-
-
 # welke vereniging(en) mogen een uitvoerende vereniging aanwijzen (en daar een locatie van kiezen)?
 WEDSTRIJDEN_KIES_UITVOERENDE_VERENIGING = (1368,)
 
@@ -554,6 +551,13 @@ TEST_VALIDATE_JAVASCRIPT = False
 
 # use the complete font files or the subset files?
 USE_SUBSET_FONT_FILES = True
+
+# implementation uses this instead of built-in default, to allow override during testing
+BETAAL_API = 'https://api.mollie.com'
+
+# ability to override the server URL for test purposes
+# None = use built-in default
+GMAPS_API = None
 
 
 # end of file

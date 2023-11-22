@@ -38,7 +38,6 @@ class TestBestelBetaling(E2EHelpers, TestCase):
     url_check_status = '/bestel/check-status/%s/'           # bestel_nr
     url_na_de_betaling = '/bestel/na-de-betaling/%s/'       # bestel_nr
 
-    url_websim_api = 'http://localhost:8125'
     url_betaal_webhook = '/bestel/betaal/webhooks/mollie/'
 
     def setUp(self):
@@ -166,7 +165,7 @@ class TestBestelBetaling(E2EHelpers, TestCase):
         url_betaling_gedaan = '/plein/'     # TODO: betere url kiezen
         description = 'Test betaling 421'       # 421 = paid, iDEAL
         betaal_mutatieverzoek_start_ontvangst(bestelling, description, self.wedstrijd.prijs_euro_normaal, url_betaling_gedaan, snel=True)
-        self.verwerk_betaal_mutaties(self.url_websim_api)
+        self.verwerk_betaal_mutaties()
 
         # check dat de transactie inderdaad opgestart is
         bestelling = Bestelling.objects.select_related('betaal_mutatie', 'betaal_actief').get(pk=bestelling.pk)
@@ -199,7 +198,7 @@ class TestBestelBetaling(E2EHelpers, TestCase):
 
         # laat de mutatie verwerken die door de callback aangemaakt is
         count = BetaalTransactie.objects.count()
-        f1, f2 = self.verwerk_betaal_mutaties(self.url_websim_api)
+        f1, f2 = self.verwerk_betaal_mutaties()
         # print('\nf1:', f1.getvalue(), '\nf2:', f2.getvalue())
         self.assertTrue('status aangepast: open --> paid' in f2.getvalue())
 

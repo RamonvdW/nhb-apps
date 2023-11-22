@@ -9,7 +9,7 @@
 from django.conf import settings
 from django.utils.formats import localize
 from Bestel.definities import BESTEL_TRANSPORT_NVT, BESTEL_TRANSPORT_VERZEND, BESTEL_TRANSPORT_OPHALEN
-from Webwinkel.definities import KEUZE_STATUS_GEANNULEERD
+from Webwinkel.definities import KEUZE_STATUS_GEANNULEERD, VERZENDKOSTEN_BRIEFPOST, VERZENDKOSTEN_PAKKETPOST
 from decimal import Decimal
 
 
@@ -58,9 +58,17 @@ def webwinkel_plugin_bepaal_verzendkosten_mandje(stdout, mandje):
     """ bereken de verzendkosten voor fysieke producten in het mandje """
 
     webwinkel_count = 0
-    for product in mandje.producten.all():
+    webwinkel_briefpost = 0
+    webwinkel_pakketpost = 0
+    for product in mandje.producten.select_related('webwinkel_keuze__product').all():
         if product.webwinkel_keuze:
             webwinkel_count += 1
+
+            if product.webwinkel_keuze.product.type_verzendkosten == VERZENDKOSTEN_BRIEFPOST:
+                webwinkel_briefpost += 1
+
+            if product.webwinkel_keuze.product.type_verzendkosten == VERZENDKOSTEN_PAKKETPOST:
+                webwinkel_pakketpost += 1
     # for
 
     mandje.verzendkosten_euro = Decimal(0)
@@ -73,7 +81,10 @@ def webwinkel_plugin_bepaal_verzendkosten_mandje(stdout, mandje):
 
         if mandje.transport == BESTEL_TRANSPORT_VERZEND:
             # zet de kosten voor het verzenden (ophalen is gratis)
-            mandje.verzendkosten_euro = Decimal(settings.WEBWINKEL_PAKKET_GROOT_VERZENDKOSTEN_EURO)
+            if webwinkel_pakketpost > 0:
+                mandje.verzendkosten_euro = Decimal(settings.WEBWINKEL_PAKKET_GROOT_VERZENDKOSTEN_EURO)
+            elif webwinkel_briefpost > 0:
+                mandje.verzendkosten_euro = Decimal(settings.WEBWINKEL_BRIEF_VERZENDKOSTEN_EURO)
     else:
         # geen verzendkosten
         mandje.transport = BESTEL_TRANSPORT_NVT
@@ -85,9 +96,17 @@ def webwinkel_plugin_bepaal_verzendkosten_bestelling(stdout, transport, bestelli
     """ bereken de verzendkosten voor fysieke producten in het mandje """
 
     webwinkel_count = 0
-    for product in bestelling.producten.all():
+    webwinkel_briefpost = 0
+    webwinkel_pakketpost = 0
+    for product in bestelling.producten.select_related('webwinkel_keuze__product').all():
         if product.webwinkel_keuze:
             webwinkel_count += 1
+
+            if product.webwinkel_keuze.product.type_verzendkosten == VERZENDKOSTEN_BRIEFPOST:
+                webwinkel_briefpost += 1
+
+            if product.webwinkel_keuze.product.type_verzendkosten == VERZENDKOSTEN_PAKKETPOST:
+                webwinkel_pakketpost += 1
     # for
 
     if webwinkel_count == 0:
@@ -97,8 +116,10 @@ def webwinkel_plugin_bepaal_verzendkosten_bestelling(stdout, transport, bestelli
 
     if transport == BESTEL_TRANSPORT_VERZEND:
         # wel verzendkosten
-        # TODO: briefpost
-        bestelling.verzendkosten_euro = Decimal(settings.WEBWINKEL_PAKKET_GROOT_VERZENDKOSTEN_EURO)
+        if webwinkel_pakketpost > 0:
+            bestelling.verzendkosten_euro = Decimal(settings.WEBWINKEL_PAKKET_GROOT_VERZENDKOSTEN_EURO)
+        elif webwinkel_briefpost > 0:
+            bestelling.verzendkosten_euro = Decimal(settings.WEBWINKEL_BRIEF_VERZENDKOSTEN_EURO)
     else:
         # geen verzendkosten
         bestelling.verzendkosten_euro = Decimal(0)
