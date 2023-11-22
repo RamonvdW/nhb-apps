@@ -1144,10 +1144,12 @@ class TeamsRegioInvallersKoppelLedenView(UserPassesTestMixin, TemplateView):
                     if deelnemer.pk == uitvaller.pk:
                         is_uitvaller = "1" if deelnemer.origineel_team_lid else "0"
                         id_invaller = group_str + '_door_%s' % deelnemer.pk
-                        toon_checked = True
-                        zoek_checked = False
                         if deelnemer.pk in deelnemers_feitelijk_pks:
                             deelnemers_feitelijk_pks.remove(deelnemer.pk)
+                            toon_checked = True
+                        else:
+                            toon_checked = False
+                        zoek_checked = not toon_checked
                         tup = (is_uitvaller, deelnemer.invaller_gem_str, id_invaller, deelnemer.pk, deelnemer.naam_str, toon_checked)
                         invallers.append(tup)
                         break
