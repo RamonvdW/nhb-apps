@@ -9,6 +9,10 @@ from django.test import TestCase, override_settings
 import io
 
 
+TEST_BETAAL_API = 'http://localhost:8125'
+TEST_GMAPS_API = 'http://localhost:8126'
+
+
 class MyMgmtCommandHelper(TestCase):
 
     """ Helpers om de response pagina's te controleren op status en inhoud
@@ -84,13 +88,21 @@ class MyMgmtCommandHelper(TestCase):
         return f1, f2
 
     @staticmethod
-    def verwerk_betaal_mutaties(betaal_api):
+    def verwerk_betaal_mutaties():
         # vraag de achtergrondtaak om de mutaties te verwerken
         f1 = io.StringIO()
         f2 = io.StringIO()
-        with override_settings(BETAAL_API=betaal_api):
+        with override_settings(BETAAL_API=TEST_BETAAL_API):
             management.call_command('betaal_mutaties', '1', '--quick', stderr=f1, stdout=f2)
+        return f1, f2
 
+    @staticmethod
+    def verwerk_scheids_mutaties():
+        # vraag de achtergrondtaak om de mutaties te verwerken
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        with override_settings(GMAPS_API=TEST_GMAPS_API):
+            management.call_command('scheids_mutaties', '1', '--quick', stderr=f1, stdout=f2)
         return f1, f2
 
 # end of file

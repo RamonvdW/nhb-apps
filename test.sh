@@ -172,6 +172,8 @@ then
     [ $RES -eq 3 ] && ABORTED=1
 fi
 
+echo "[INFO] Starting websim tasks"
+
 # start the mail transport service simulator
 python3 $PY_OPTS ./Mailer/test_tools/websim_mailer.py &
 PID_WEBSIM1=$!
@@ -252,6 +254,7 @@ fi
 
 # stop the websim tools
 # use bash construct to prevent the Terminated message on the console
+echo "[INFO] Terminating websim tasks"
 kill $PID_WEBSIM1
 wait $PID_WEBSIM1 2>/dev/null
 kill $PID_WEBSIM2
