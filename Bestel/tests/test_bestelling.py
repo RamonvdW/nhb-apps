@@ -25,6 +25,7 @@ from Mailer.models import MailQueue
 from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
+from Webwinkel.definities import VERZENDKOSTEN_BRIEFPOST
 from Webwinkel.models import WebwinkelProduct, WebwinkelKeuze
 from Wedstrijden.definities import (WEDSTRIJD_STATUS_GEACCEPTEERD, WEDSTRIJD_KORTING_VERENIGING,
                                     WEDSTRIJD_KORTING_SPORTER,
@@ -243,10 +244,11 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         self.assertEqual(0, Bestelling.objects.count())
         resp = self.client.post(self.url_mandje_bestellen, {'snel': 1})
         self.assert_is_redirect(resp, self.url_bestellingen_overzicht)
-        self.verwerk_bestel_mutaties()
+        self.verwerk_bestel_mutaties(kosten_pakket=10.42, kosten_brief=5.43)
         self.assertEqual(1, Bestelling.objects.count())
 
         bestelling = Bestelling.objects.prefetch_related('producten').first()
+        self.assertEqual(str(bestelling.verzendkosten_euro), '10.42')
         self.assertEqual(2, bestelling.producten.count())
         product1 = bestelling.producten.filter(webwinkel_keuze=None).first()
 
@@ -254,6 +256,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         mail = MailQueue.objects.first()
         self.assert_email_html_ok(mail)
         self.assert_consistent_email_html_text(mail, ignore=('>Prijs:', '>Korting:'))
+        self.assertTrue('Verzendkosten' in mail.mail_text)
 
         # bekijk de bestellingen
         with self.assert_max_queries(20):
@@ -308,6 +311,49 @@ class TestBestelBestelling(E2EHelpers, TestCase):
 
         resp = self.client.get(self.url_bestelling_details % '1=5')
         self.assert404(resp, 'Niet gevonden')
+
+    def test_briefpost(self):
+        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_check_rol('sporter')
+
+        self.product.type_verzendkosten = VERZENDKOSTEN_BRIEFPOST
+        self.product.save(update_fields=['type_verzendkosten'])
+
+        # bestel de producten
+        bestel_mutatieverzoek_webwinkel_keuze(self.account_admin, self.keuze, snel=True)
+        self.verwerk_bestel_mutaties()
+
+        # zet het mandje om in een bestelling
+        self.assertEqual(0, Bestelling.objects.count())
+        resp = self.client.post(self.url_mandje_bestellen, {'snel': 1})
+        self.assert_is_redirect(resp, self.url_bestellingen_overzicht)
+        self.verwerk_bestel_mutaties(kosten_pakket=10.42, kosten_brief=5.43)
+        self.assertEqual(1, Bestelling.objects.count())
+
+        bestelling = Bestelling.objects.first()
+        self.assertEqual(1, bestelling.producten.count())
+        self.assertEqual(str(bestelling.verzendkosten_euro), '5.43')
+
+        self.assertEqual(1, MailQueue.objects.count())
+        mail = MailQueue.objects.first()
+        self.assert_email_html_ok(mail)
+        self.assert_consistent_email_html_text(mail, ignore=('>Prijs:', '>Korting:'))
+        self.assertTrue('Verzendkosten' in mail.mail_text)
+
+        # bekijk de bestellingen
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_bestellingen_overzicht)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('bestel/toon-bestellingen.dtl', 'plein/site_layout.dtl'))
+
+        # haal de details op
+        url = self.url_bestelling_details % bestelling.bestel_nr
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('bestel/toon-bestelling-details.dtl', 'plein/site_layout.dtl'))
 
     def test_geen_instellingen(self):
         self.e2e_login_and_pass_otp(self.account_admin)

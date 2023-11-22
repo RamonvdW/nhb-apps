@@ -66,7 +66,7 @@ class MyMgmtCommandHelper(TestCase):
         f2 = io.StringIO()
 
         with override_settings(WEBWINKEL_PAKKET_GROOT_VERZENDKOSTEN_EURO=kosten_pakket,
-                               WEBWINKEL_PAKKET_KLEIN_VERZENDKOSTEN_EURO=kosten_brief):
+                               WEBWINKEL_BRIEF_VERZENDKOSTEN_EURO=kosten_brief):
             management.call_command('bestel_mutaties', '1', '--quick', stderr=f1, stdout=f2)
 
         if fail_on_error:
