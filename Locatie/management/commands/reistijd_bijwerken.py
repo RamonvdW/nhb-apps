@@ -14,7 +14,6 @@ from Locatie.models import Locatie, Reistijd
 from Sporter.models import Sporter
 import googlemaps
 import datetime
-import pprint
 
 
 class Command(BaseCommand):
@@ -35,23 +34,35 @@ class Command(BaseCommand):
         self._future_saturday_0800 = date
 
     def _connect_gmaps(self):
+        """ Init de google maps library
+            Return: True  = success
+                    False = failure
+        """
         options = {'key': settings.GMAPS_KEY}
 
         if settings.GMAPS_API:      # pragma: no branch
-            self.stdout.write('[INFO] Using server URL %s' % repr(settings.GMAPS_API))
+            self.stdout.write('[INFO] Server URL %s' % repr(settings.GMAPS_API))
             options['base_url'] = settings.GMAPS_API
 
-        # TODO: error handling
-        self._gmaps = googlemaps.Client(**options)
+        try:
+            self._gmaps = googlemaps.Client(**options)
+        except Exception as exc:
+            self.stderr.write('[ERROR] Fout tijdens gmaps init: %s' % str(exc))
+            return False
+
+        return True
 
     def _get_adres_lat_lon(self, adres):
 
-        # TODO: error handling
-        results = self._gmaps.geocode(adres, region='nl')
+        try:
+            results = self._gmaps.geocode(adres, region='nl')
+        except googlemaps.exceptions.ApiError as exc:
+            self.stderr.write('[ERROR] Fout van gmaps geocode: %s' % str(exc))
+            return None, None
 
         # geocode return a list of results
         if len(results) < 1:
-            self.stderr.write('[WARNING] No results from geocode for adres=%s' % repr(adres))
+            self.stderr.write('[WARNING] Geen geocode resultaten voor adres=%s' % repr(adres))
             return None, None
 
         try:
@@ -65,8 +76,8 @@ class Command(BaseCommand):
             lat = location['lat']
             lon = location['lng']
 
-        except (KeyError, IndexError) as exc:
-            self.stderr.write('[WARNING] Could not extract lat/lng from geocode results %s' % repr(results))
+        except (KeyError, IndexError):
+            self.stderr.write('[WARNING] Kan geen lat/lng halen uit geocode results %s' % repr(results))
             return None, None
 
         return lat, lon
@@ -83,7 +94,7 @@ class Command(BaseCommand):
                                 alternatives=False,
                                 arrival_time=self._future_saturday_0800)
         except googlemaps.exceptions.ApiError as exc:
-            self.stdout.write('[ERROR] Failed to get directions from %s to %s: error %s' % (
+            self.stderr.write('[ERROR] Fout van gmaps directions route van %s naar %s: error %s' % (
                                 repr(vanaf_lat_lon), repr(naar_lat_lon), str(exc)))
             return 16 * 60      # geef een gek getal terug wat om aandacht vraagt
 
@@ -98,11 +109,11 @@ class Command(BaseCommand):
             duration = leg['duration']
             secs = duration['value']
         except (KeyError, IndexError):
-            self.stdout.write('[ERROR] Failed to extract minutes from %s' % repr(results))
+            self.stderr.write('[ERROR] Onvolledig directions antwoord: %s' % repr(results))
             mins = 17 * 60      # geef een gek getal terug wat om aandacht vraagt
         else:
             mins = int(round(secs / 60, 0))
-            self.stdout.write('[INFO] Duration %s is %s seconds is %s minutes' % (repr(duration['text']), secs, mins))
+            self.stdout.write('[INFO] Reistijd %s is %s seconden; is %s minuten' % (repr(duration['text']), secs, mins))
 
         return mins
 
@@ -122,7 +133,7 @@ class Command(BaseCommand):
                 locatie.adres_lat = "%2.6f" % adres_lat
                 locatie.adres_lon = "%2.6f" % adres_lon
             else:
-                self.stderr.write('[WARNING] No lat/lon for locatie pk=%s' % locatie.pk)
+                self.stderr.write('[WARNING] Geen lat/lon voor locatie pk=%s' % locatie.pk)
 
                 # voorkom dat we keer op keer blijven proberen
                 locatie.adres_lat = '?'
@@ -149,7 +160,7 @@ class Command(BaseCommand):
                     locatie.adres_lat = "%2.6f" % adres_lat
                     locatie.adres_lon = "%2.6f" % adres_lon
                 else:
-                    self.stderr.write('[WARNING] Geen lat/lon for locatie pk=%s met adres %s' % (
+                    self.stderr.write('[WARNING] Geen lat/lon voor locatie pk=%s met adres %s' % (
                                         locatie.pk, repr(locatie.adres)))
 
                     # voorkom dat we keer op keer blijven proberen
@@ -165,7 +176,8 @@ class Command(BaseCommand):
         for sporter in (Sporter
                         .objects
                         .exclude(scheids=SCHEIDS_NIET)
-                        .filter(adres_lat='')):
+                        .filter(adres_lat='',
+                                is_actief_lid=True)):
 
             adres = sporter.postadres_1
             if sporter.postadres_2:
@@ -183,7 +195,7 @@ class Command(BaseCommand):
                 sporter.adres_lat = "%2.6f" % adres_lat
                 sporter.adres_lon = "%2.6f" % adres_lon
             else:
-                self.stderr.write('[WARNING] Geen lat/lon for sporter %s met adres %s' % (
+                self.stderr.write('[WARNING] Geen lat/lon voor sporter %s met adres %s' % (
                                     sporter.lid_nr, repr(adres)))
 
                 # voorkom dat we keer op keer blijven proberen
@@ -212,12 +224,12 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
 
-        self._connect_gmaps()
-
-        self._update_scheids()
-        self._update_locaties_uit_crm()
-        self._update_locaties_overig()
-        self._update_reistijd()
+        if self._connect_gmaps():
+            # connection success
+            self._update_scheids()
+            self._update_locaties_uit_crm()
+            self._update_locaties_overig()
+            self._update_reistijd()
 
 
 # end of file

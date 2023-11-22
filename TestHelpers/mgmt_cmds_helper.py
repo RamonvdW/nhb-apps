@@ -9,8 +9,8 @@ from django.test import TestCase, override_settings
 import io
 
 
-TEST_BETAAL_API = 'http://localhost:8125'
-TEST_GMAPS_API = 'http://localhost:8126'
+TEST_BETAAL_API_URL = 'http://localhost:8125'
+TEST_GMAPS_API_URL = 'http://localhost:8126'
 
 
 class MyMgmtCommandHelper(TestCase):
@@ -92,7 +92,7 @@ class MyMgmtCommandHelper(TestCase):
         # vraag de achtergrondtaak om de mutaties te verwerken
         f1 = io.StringIO()
         f2 = io.StringIO()
-        with override_settings(BETAAL_API=TEST_BETAAL_API):
+        with override_settings(BETAAL_API=TEST_BETAAL_API_URL):
             management.call_command('betaal_mutaties', '1', '--quick', stderr=f1, stdout=f2)
         return f1, f2
 
@@ -101,7 +101,7 @@ class MyMgmtCommandHelper(TestCase):
         # vraag de achtergrondtaak om de mutaties te verwerken
         f1 = io.StringIO()
         f2 = io.StringIO()
-        with override_settings(GMAPS_API=TEST_GMAPS_API):
+        with override_settings(GMAPS_API=TEST_GMAPS_API_URL):
             management.call_command('scheids_mutaties', '1', '--quick', stderr=f1, stdout=f2)
         return f1, f2
 

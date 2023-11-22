@@ -27,40 +27,55 @@ class MyServer(BaseHTTPRequestHandler):
         # split the request
         args = url_encoded_args.replace('%2C', ',').replace('+', ' ')
         spl = args.split('&')
-        # print('args:', repr(spl))
+        print('args:', repr(spl))
 
-        leg1 = {
-            "distance": {"text": "15.4km", "value": 15444},
-            "duration": {"text": "17 mins", "value": 1030},
-            "end_address": "whatever",
-            "end_location": {"lat": 0.0, "lng": 0.0},
-            "start_address": "where ever",
-            "start_location": {"lat": 1.0, "lng": 1.1},
-            "steps": [],  # not used
-            "traffic_speed_entry": [],
-            "via_waypoints": []
-        }
+        if 'destination=incompleet' in args:
+            # onvolledig antwoord geven
+            data = {
+                "geocoded_waypoints": [],  # list of dicts
+                "routes": [],
+                "status": "OK",
+            }
 
-        route1 = {
-            "bounds": {'northeast': {'lat': 0.0, 'lng': 0.0},
-                       'southwest': {'lat': 1.0, 'lng': 1.0}},
-            "copyrights": "yeah",
-            "legs": [
-                leg1,
-            ],
-            "overview_polyline": {"points": "some_encoding"},
-            "summary": "N2",
-            "warnings": [],
-            "waypoint_order": []
-        }
+        elif 'destination=geef fout' in args:
+            # fout terug geven
+            data = {
+                "status": "STATUS_ERROR",
+            }
 
-        data = {
-            "geocoded_waypoints": [],  # list of dicts
-            "routes": [
-                route1,
-            ],
-            "status": "OK",
-        }
+        else:
+            leg1 = {
+                "distance": {"text": "15.4km", "value": 15444},
+                "duration": {"text": "17 mins", "value": 1030},
+                "end_address": "whatever",
+                "end_location": {"lat": 0.0, "lng": 0.0},
+                "start_address": "where ever",
+                "start_location": {"lat": 1.0, "lng": 1.1},
+                "steps": [],  # not used
+                "traffic_speed_entry": [],
+                "via_waypoints": []
+            }
+
+            route1 = {
+                "bounds": {'northeast': {'lat': 0.0, 'lng': 0.0},
+                           'southwest': {'lat': 1.0, 'lng': 1.0}},
+                "copyrights": "yeah",
+                "legs": [
+                    leg1,
+                ],
+                "overview_polyline": {"points": "some_encoding"},
+                "summary": "N2",
+                "warnings": [],
+                "waypoint_order": []
+            }
+
+            data = {
+                "geocoded_waypoints": [],  # list of dicts
+                "routes": [
+                    route1,
+                ],
+                "status": "OK",
+            }
 
         data = json.dumps(data)
         enc_data = data.encode()  # convert string to bytes
@@ -85,50 +100,79 @@ class MyServer(BaseHTTPRequestHandler):
         spl = args.split('&')
         # print('args:', repr(spl))
 
-        result1 = {
-            "address_components": [
-                {
-                    "long_name": "42",
-                    "short_name": "42",
-                    "types": ["street_number"],
-                },
-                {
-                    "long_name": "Straatnaam",
-                    "short_name": "Straatnaam",
-                    "types": ["route"],
-                },
-                {
-                    "long_name": "City",
-                    "short_name": "City",
-                    "types": ["locality", "political"],
-                },
-                {
-                    "long_name": "Netherlands",
-                    "short_name": "NL",
-                    "types": ["country", "political"],
-                },
-                {
-                    "long_name": "1234 AB",
-                    "short_name": "1234 AB",
-                    "types": ["postal_code"],
-                }
-            ],
-            "formatted_address": "Straatnaam 42, 1234 AB City, Netherlands",
-            "geometry": {
-                "bounds": {'northeast': {'lat': 30.0, 'lng': 3.0},
-                           'southwest': {'lat': 50.0, 'lng': 6.0}},
-                "location": {"lat": 42.0, "lng": 5.123},
-            },
-            "place_id": "whatever",
-            "types": ["premise"],
-        }
+        if '123ERR ' in args:
+            # fout status
+            data = {
+                "results": [],
+                "status": "UNKNOWN_ERROR",
+            }
 
-        data = {
-            "results": [
-                result1,
-            ],
-            "status": "OK",
-        }
+        elif '0000XX ' in args:
+            # leeg resultaat
+            data = {
+                "results": [],
+                "status": "OK",
+            }
+
+        elif '42GEEN' in args:
+            result1 = {
+                "geometry": {
+                    "location": {"lat": 42.0, "long": 5.123},
+                },
+            }
+
+            data = {
+                "results": [
+                    result1,
+                ],
+                "status": "OK",
+            }
+
+        else:
+            result1 = {
+                "address_components": [
+                    {
+                        "long_name": "42",
+                        "short_name": "42",
+                        "types": ["street_number"],
+                    },
+                    {
+                        "long_name": "Straatnaam",
+                        "short_name": "Straatnaam",
+                        "types": ["route"],
+                    },
+                    {
+                        "long_name": "City",
+                        "short_name": "City",
+                        "types": ["locality", "political"],
+                    },
+                    {
+                        "long_name": "Netherlands",
+                        "short_name": "NL",
+                        "types": ["country", "political"],
+                    },
+                    {
+                        "long_name": "1234 AB",
+                        "short_name": "1234 AB",
+                        "types": ["postal_code"],
+                    }
+                ],
+                "formatted_address": "Straatnaam 42, 1234 AB City, Netherlands",
+                "geometry": {
+                    "bounds": {'northeast': {'lat': 30.0, 'lng': 3.0},
+                               'southwest': {'lat': 50.0, 'lng': 6.0}},
+                    "location": {"lat": 42.0, "lng": 5.123},
+                },
+                "place_id": "whatever",
+                "types": ["premise"],
+            }
+
+            data = {
+                "results": [
+                    result1,
+                ],
+                "status": "OK",
+            }
 
         data = json.dumps(data)
         enc_data = data.encode()  # convert string to bytes

@@ -557,7 +557,7 @@ BETAAL_API = 'https://api.mollie.com'
 
 # ability to override the server URL for test purposes
 # None = use built-in default
-GMAPS_API = None
+GMAPS_API_URL = None
 
 
 # end of file
