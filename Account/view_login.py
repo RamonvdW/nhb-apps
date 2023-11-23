@@ -232,7 +232,7 @@ class LoginView(TemplateView):
             # gebruiker mag het nog een keer proberen
             if len(form.errors) == 0:
                 form.add_error(None,
-                               'de combinatie van inlog naam en wachtwoord worden niet herkend. Probeer het nog eens.')
+                               'de combinatie van inlog naam en wachtwoord wordt niet herkend. Probeer het nog eens.')
 
         # still here --> re-render with error message
         context = {
