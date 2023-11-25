@@ -136,10 +136,11 @@ class TestScheidsrechterWedstrijden(E2EHelpers, TestCase):
 
     def test_anon(self):
         resp = self.client.get(self.url_wedstrijden)
-        self.assert403(resp)
+        self.assert_is_redirect_login(resp, self.url_wedstrijden)
 
-        resp = self.client.get(self.url_wedstrijd_details % self.wedstrijd.pk)
-        self.assert403(resp)
+        url = self.url_wedstrijd_details % self.wedstrijd.pk
+        resp = self.client.get(url)
+        self.assert_is_redirect_login(resp, url)
 
     def test_sr3(self):
         self.e2e_login(self.sr3_met_account.account)

@@ -8,6 +8,7 @@ from django.test import TestCase
 from Functie.tests.helpers import maak_functie
 from Geo.models import Regio
 from Locatie.models import Locatie
+from Mailer.models import MailQueue
 from Taken.models import Taak
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
@@ -56,6 +57,10 @@ class TestWedstrijdenManager(E2EHelpers, TestCase):
                             naam="Kleine Club",
                             regio=Regio.objects.get(regio_nr=112))
         self.ver2.save()
+
+        self.functie_cs = maak_functie('Commissie Scheidsrechters', 'CS')
+        self.functie_cs.bevestigde_email = 'cs@khsn.not'
+        self.functie_cs.save(update_fields=['bevestigde_email'])
 
     @staticmethod
     def _maak_externe_locatie(ver):
@@ -265,5 +270,9 @@ class TestWedstrijdenManager(E2EHelpers, TestCase):
         self.assertEqual(wedstrijd.status, 'A')
 
         self.assertEqual(2, Taak.objects.count())       # 1 voor de HWL, 1 voor CS
+
+        mail = MailQueue.objects.filter(mail_to=self.functie_cs.bevestigde_email).first()
+        self.assert_email_html_ok(mail)
+        self.assert_consistent_email_html_text(mail)
 
 # end of file

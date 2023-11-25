@@ -45,10 +45,10 @@ class TestScheidsrechterKorps(E2EHelpers, TestCase):
 
     def test_anon(self):
         resp = self.client.get(self.url_korps)
-        self.assert403(resp)
+        self.assert_is_redirect_login(resp, self.url_korps)
 
         resp = self.client.get(self.url_korps_met_contact)
-        self.assert403(resp)
+        self.assert_is_redirect_login(resp, self.url_korps_met_contact)
 
     def test_scheids(self):
         self.e2e_login(self.scheids_met_account.account)

@@ -144,13 +144,13 @@ class TestScheidsrechterBeschikbaarheid(E2EHelpers, TestCase):
 
     def test_anon(self):
         resp = self.client.get(self.url_beschikbaarheid_opvragen)
-        self.assert403(resp)
+        self.assert_is_redirect_login(resp, self.url_beschikbaarheid_opvragen)
 
         resp = self.client.get(self.url_beschikbaarheid_wijzigen)
-        self.assert403(resp)
+        self.assert_is_redirect_login(resp,self.url_beschikbaarheid_wijzigen)
 
         resp = self.client.get(self.url_beschikbaarheid_inzien)
-        self.assert403(resp)
+        self.assert_is_redirect_login(resp, self.url_beschikbaarheid_inzien)
 
     def test_sr3(self):
         self.e2e_login(self.sr3_met_account.account)

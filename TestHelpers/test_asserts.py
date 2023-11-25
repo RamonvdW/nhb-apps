@@ -738,7 +738,7 @@ class MyTestAsserts(TestCase):
 
         self.assertNotEqual(resp.url, '/plein/')    # redirect naar plein is typisch een reject om rechten
 
-    def assert_is_redirect_login(self, resp):
+    def assert_is_redirect_login(self, resp, next_url=None):
         if resp.status_code != 302:                     # pragma: no cover
             # geef een iets uitgebreider antwoord
             msg = "status_code: %s != 302" % resp.status_code
@@ -748,6 +748,9 @@ class MyTestAsserts(TestCase):
             self.fail(msg=msg)
 
         self.assertTrue(resp.url.startswith, '/account/login/')
+        if next_url:
+            next_param = '?next=%s' % next_url
+            self.assertTrue(next_param in resp.url)
 
     def check_concurrency_risks(self, tracer):
         found_delete = False

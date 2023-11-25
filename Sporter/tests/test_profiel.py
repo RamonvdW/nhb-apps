@@ -208,7 +208,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         # zonder login --> terug naar het plein
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_profiel)
-        self.assert403(resp)
+        self.assert_is_redirect_login(resp, self.url_profiel)
 
     def test_compleet(self):
         # log in as sporter
@@ -404,7 +404,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         # zonder login --> terug naar het plein
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_profiel)
-        self.assert403(resp)
+        self.assert_is_redirect_login(resp, self.url_profiel)
 
         # log in as sporter
         self.e2e_login(self.account_normaal)

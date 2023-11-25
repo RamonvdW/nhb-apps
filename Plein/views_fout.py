@@ -7,10 +7,12 @@
 from django.conf import settings
 from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.urls import Resolver404
+from django.utils.http import urlencode
 from django.shortcuts import render, reverse
 from django.views.generic import View
 from django.views.defaults import ERROR_PAGE_TEMPLATE
 from django.core.exceptions import PermissionDenied
+from Account.models import get_account
 from Functie.rol import rol_get_huidige_functie
 from Mailer.operations import mailer_notify_internal_error
 from SiteMain.core import urls
@@ -40,10 +42,13 @@ def site_handler403_permission_denied(request, exception=None):
     if not request.user.is_authenticated:
         url = reverse('Account:login')
 
-        # next_url werkt niet want er moet eerst nog van rol gewisseld worden
-        #   en het blokkeert redirect naar 2FA check
-        # from django.utils.http import urlencode
-        # url += '?%s' % urlencode({'next': request.path})
+        # TODO: next_url voor URL naar beheerdersfunctie doorgeven aan 2FA controle
+
+        # whitelist een aantal urls die we willen ondersteunen
+        if request.path.startswith('/sporter/') or request.path.startswith('/scheidsrechter/'):
+            next_url = '?%s' % urlencode({'next': request.path})
+            next_url = next_url.replace('%2F', '/')
+            url += next_url
 
         return HttpResponseRedirect(url)
 

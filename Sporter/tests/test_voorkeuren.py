@@ -109,7 +109,7 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
         # zonder login
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_voorkeuren)
-        self.assert403(resp)
+        self.assert_is_redirect_login(resp, self.url_voorkeuren)
 
         # met sporter-login wel toegankelijk
         self.e2e_login(self.account_normaal)

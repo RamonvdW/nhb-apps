@@ -47,7 +47,7 @@ class TestScheidsrechterOverzicht(E2EHelpers, TestCase):
         self.assertNotIn(self.url_overzicht, urls)
 
         resp = self.client.get(self.url_overzicht)
-        self.assert403(resp)
+        self.assert_is_redirect_login(resp, self.url_overzicht)
 
     def test_sr3(self):
         self.e2e_login(self.sr3_met_account.account)

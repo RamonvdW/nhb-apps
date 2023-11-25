@@ -262,6 +262,7 @@ class LoginView(TemplateView):
                 try:
                     resolve(next_url)
                 except Resolver404:
+                    # niet gevonden
                     pass
                 else:
                     # is valide url
@@ -269,7 +270,7 @@ class LoginView(TemplateView):
 
             return HttpResponseRedirect(reverse('Plein:plein'))
 
-        form = LoginForm(initial={'next': next_url})
+        form = LoginForm(initial={'next_url': next_url})
 
         context = dict()
         context['form'] = form

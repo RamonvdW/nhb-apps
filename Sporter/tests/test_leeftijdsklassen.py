@@ -563,7 +563,7 @@ class TestSporterLeeftijdsklassen(E2EHelpers, TestCase):
         # zonder login
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_leeftijdsklassen)
-        self.assert403(resp)
+        self.assert_is_redirect_login(resp, self.url_leeftijdsklassen)
 
         # inlog, geen lid
         self.e2e_login(self.account_admin)
