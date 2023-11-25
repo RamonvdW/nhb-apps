@@ -8,6 +8,7 @@ from django.test import TestCase
 from Functie.tests.helpers import maak_functie
 from Geo.models import Regio
 from Locatie.models import Locatie
+from Taken.models import Taak
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
 from Wedstrijden.models import Wedstrijd
@@ -182,12 +183,16 @@ class TestWedstrijdenManager(E2EHelpers, TestCase):
         wedstrijd = Wedstrijd.objects.get(pk=wedstrijd.pk)
         self.assertEqual(wedstrijd.status, 'W')
 
+        Taak.objects.all().delete()
+
         # van Wacht-op-goedkeuring door naar Geaccepteerd
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'verder': 'ja'})
         self.assert_is_redirect(resp, self.url_wedstrijden_manager)
         wedstrijd = Wedstrijd.objects.get(pk=wedstrijd.pk)
         self.assertEqual(wedstrijd.status, 'A')
+
+        self.assertEqual(1, Taak.objects.count())       # 1 voor de HWL, 0 voor CS
 
         # van Geaccepteerd kan je niet verder of terug
         with self.assert_max_queries(20):
@@ -218,5 +223,47 @@ class TestWedstrijdenManager(E2EHelpers, TestCase):
             resp = self.client.post(self.url_wedstrijden_zet_status % 999999, {})
         self.assert404(resp, 'Wedstrijd niet gevonden')
 
+    def test_goedkeuren_met_scheids(self):
+        self.e2e_login_and_pass_otp(self.account_admin)
+
+        # wissel naar HWL en maak een wedstrijd aan
+        self.e2e_wissel_naar_functie(self.functie_hwl)
+        self._maak_externe_locatie(self.ver1)
+        resp = self.client.post(self.url_wedstrijden_maak_nieuw, {'keuze': 'khsn'})
+        self.assert_is_redirect_not_plein(resp)
+
+        self.assertEqual(1, Wedstrijd.objects.count())
+        wedstrijd = Wedstrijd.objects.first()
+        url = self.url_wedstrijden_wijzig_wedstrijd % wedstrijd.pk
+        self.assert_is_redirect(resp, url)
+
+        wedstrijd.verkoopvoorwaarden_status_acceptatie = True
+        wedstrijd.save(update_fields=['verkoopvoorwaarden_status_acceptatie'])
+
+        url = self.url_wedstrijden_zet_status % wedstrijd.pk
+
+        # doorzetten naar 'Wacht op goedkeuring'
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'verder': 'ja'})
+        self.assert_is_redirect(resp, self.url_wedstrijden_vereniging)
+        wedstrijd.refresh_from_db()
+        self.assertEqual(wedstrijd.status, 'W')
+
+        # wissel naar BB/MWZ
+        self.e2e_wisselnaarrol_bb()
+
+        wedstrijd.aantal_scheids = 2
+        wedstrijd.save(update_fields=['aantal_scheids'])
+
+        Taak.objects.all().delete()
+
+        # van Wacht-op-goedkeuring door naar Geaccepteerd
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'verder': 'ja'})
+        self.assert_is_redirect(resp, self.url_wedstrijden_manager)
+        wedstrijd = Wedstrijd.objects.get(pk=wedstrijd.pk)
+        self.assertEqual(wedstrijd.status, 'A')
+
+        self.assertEqual(2, Taak.objects.count())       # 1 voor de HWL, 1 voor CS
 
 # end of file
