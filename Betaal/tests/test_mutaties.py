@@ -4,24 +4,26 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.test import TestCase
 from django.conf import settings
+from django.test import TestCase, override_settings
+from django.core import management
 from Betaal.models import BetaalMutatie, BetaalActief, BetaalTransactie, BetaalInstellingenVereniging
 from Betaal.mutaties import betaal_mutatieverzoek_start_ontvangst, betaal_mutatieverzoek_payment_status_changed
 from Bestel.models import Bestelling, BestelMutatie
 from Functie.tests.helpers import maak_functie
 from Geo.models import Regio
 from TestHelpers.e2ehelpers import E2EHelpers
+from TestHelpers.mgmt_cmds_helper import TEST_BETAAL_API_URL
 from Vereniging.models import Vereniging
 from decimal import Decimal
 from mollie.api.client import Client
+import io
 
 
 class TestBetaalMutaties(E2EHelpers, TestCase):
 
     """ tests voor de Betaal-applicatie, interactie achtergrond taak met CPSP """
 
-    url_websim_api = 'http://localhost:8125'
     url_betaal_webhook = '/bestel/betaal/webhooks/mollie/'
 
     def setUp(self):
@@ -49,11 +51,8 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
         instellingen.save()
         self.instellingen = instellingen
 
-    def _run_achtergrondtaak(self, betaal_api=None, debug=False):
-        if betaal_api is None:
-            betaal_api = self.url_websim_api
-
-        f1, f2 = self.verwerk_betaal_mutaties(betaal_api)
+    def _run_achtergrondtaak(self, debug=False):
+        f1, f2 = self.verwerk_betaal_mutaties()
         if debug:           # pragma: no cover
             print('f1: %s' % f1.getvalue())
             print('f2: %s' % f2.getvalue())
@@ -64,7 +63,7 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
         beschrijving = 'Test betaling %s' % test_code
         bedrag_euro_str = '42.99'
 
-        mollie_client = Client(api_endpoint=self.url_websim_api)
+        mollie_client = Client(api_endpoint=TEST_BETAAL_API_URL)
         mollie_client.set_api_key('test_1234prep')
         mollie_webhook_url = url_betaling_gedaan = settings.SITE_URL + '/plein/'
 
@@ -338,7 +337,10 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
                         True)       # snel
 
         # run with wrong port
-        f1, f2 = self._run_achtergrondtaak(betaal_api=self.url_websim_api[:-2] + '99')
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        with override_settings(BETAAL_API=TEST_BETAAL_API_URL[:-2] + '99'):
+            management.call_command('betaal_mutaties', '1', '--quick', stderr=f1, stdout=f2)
         self.assertTrue('Unable to communicate' in f1.getvalue())
 
         mutatie1 = betaal_mutatieverzoek_start_ontvangst(

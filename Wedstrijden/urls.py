@@ -86,7 +86,7 @@ urlpatterns = [
          name='wijzig-wedstrijd'),
 
     path('<wedstrijd_pk>/zet-status/',
-         view_wijzig_wedstrijd.ZetStatusWedstrijdView.as_view(),
+         view_manager.ZetStatusWedstrijdView.as_view(),
          name='zet-status'),
 
     path('<wedstrijd_pk>/sessies/',
