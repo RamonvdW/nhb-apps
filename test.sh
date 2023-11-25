@@ -213,6 +213,7 @@ then
 fi
 
 # set high performance
+OLD_PERF=$(powerprofilesctl get)
 powerprofilesctl set performance
 
 # -u = unbuffered stdin/stdout --> also ensures the order of stdout/stderr lines
@@ -309,8 +310,8 @@ then
     ASK_LAUNCH=1
 fi
 
-# set normal performance
-powerprofilesctl set balanced
+# restore performance mode
+powerprofilesctl set $OLD_PERF
 
 if [ $COVERAGE_RED -ne 0 ]
 then
