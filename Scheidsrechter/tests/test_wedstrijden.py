@@ -196,8 +196,9 @@ class TestScheidsrechterWedstrijden(E2EHelpers, TestCase):
         # beschikbaarheid opvragen
         self.assertEqual(0, WedstrijdDagScheidsrechters.objects.count())
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_beschikbaarheid_opvragen, {'wedstrijd': self.wedstrijd.pk})
+            resp = self.client.post(self.url_beschikbaarheid_opvragen, {'wedstrijd': self.wedstrijd.pk, 'snel': 1})
         self.assert_is_redirect(resp, self.url_overzicht)
+        self.verwerk_scheids_mutaties()
         self.assertEqual(1, WedstrijdDagScheidsrechters.objects.count())
 
         # wedstrijd details (beschikbaarheid opgevraagd)
@@ -304,8 +305,9 @@ class TestScheidsrechterWedstrijden(E2EHelpers, TestCase):
         # beschikbaarheid opvragen
         self.assertEqual(0, WedstrijdDagScheidsrechters.objects.count())
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_beschikbaarheid_opvragen, {'wedstrijd': self.wedstrijd.pk})
+            resp = self.client.post(self.url_beschikbaarheid_opvragen, {'wedstrijd': self.wedstrijd.pk, 'snel': 1})
         self.assert_is_redirect(resp, self.url_overzicht)
+        self.verwerk_scheids_mutaties()
         self.assertEqual(1, WedstrijdDagScheidsrechters.objects.count())
         dag = WedstrijdDagScheidsrechters.objects.first()
 
