@@ -42,67 +42,70 @@
                             {% csrf_token %}
 
                             <table>
-                                {% for dag in dagen %}
-                                    {% if forloop.first %}
+                                    <tr>
+                                        <th>Aantal scheidsrechters nodig</th>
+                                        <td>
+                                            <select name="aantal_scheids" onchange="gewijzigd()">
+                                                {% for value, tekst in keuze_aantal_scheids %}
+                                                    <option value="{{ value }}"{% if wed.aantal_scheids == value %} selected{% endif %}>{{ tekst }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </td>
+                                    </tr>
+
+                                    {% for dag in dagen %}
                                         <tr>
-                                            <th>Aantal scheidsrechters nodig</th>
-                                            <td>
-                                                <select name="aantal_scheids" onchange="gewijzigd()">
-                                                    {% for value, tekst in keuze_aantal_scheids %}
-                                                        <option value="{{ value }}"{% if wed.aantal_scheids == value %} selected{% endif %}>{{ tekst }}</option>
-                                                    {% endfor %}
-                                                </select>
+                                            <td colspan="2" class="center">
+                                                <h6 class="sv-blauw-text">{{ dag.datum }}</h6>
                                             </td>
                                         </tr>
-                                    {% endif %}
+                                        <tr>
+                                            <th>Hoofd<wbr>scheidsrechter</th>
+                                            <td>
+                                                <ul>
+                                                    {% for beschikbaar in dag.beschikbaar_hoofd_sr %}
+                                                        <li>
+                                                            <label class="black-text" for="{{ beschikbaar.id_li }}">
+                                                                <input class="with-gap" type="radio" required name="{{ dag.nr_hsr }}" value="{{ beschikbaar.pk }}" id="{{ beschikbaar.id_li }}"{% if beschikbaar.is_onzeker %} disabled{% else %}{% if beschikbaar.is_selected %} checked{% endif %} onchange="gewijzigd()"{% endif %}>
+                                                                <span>{% if beschikbaar.scheids %}{{ beschikbaar.scheids.volledige_naam }}{% else %}<i>nog niet gekozen</i>{% endif %}{% if beschikbaar.is_onzeker %} (overweegt){% endif %}{% if beschikbaar.waarschuw_niet_meer_beschikbaar %}<span class="sv-rood-text"> LET OP: Niet meer beschikbaar</span>{% endif %}</span>
+                                                            </label>
+                                                        </li>
+                                                    {% endfor %}
+                                                </ul>
+                                            </td>
+                                        </tr>
 
-                                    <tr>
-                                        <td colspan="2" class="center">
-                                            <h6 class="sv-blauw-text">{{ dag.datum }}</h6>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <th>Hoofd<wbr>scheidsrechter</th>
-                                        <td>
-                                            <ul>
-                                                {% for beschikbaar in dag.beschikbaar_hoofd_sr %}
-                                                    <li>
-                                                        <label class="black-text" for="{{ beschikbaar.id_li }}">
-                                                            <input class="with-gap" type="radio" required name="{{ dag.nr_hsr }}" value="{{ beschikbaar.pk }}" id="{{ beschikbaar.id_li }}"{% if beschikbaar.is_onzeker %} disabled{% else %}{% if beschikbaar.is_selected %} checked{% endif %} onchange="gewijzigd()"{% endif %}>
-                                                            <span>{% if beschikbaar.scheids %}{{ beschikbaar.scheids.volledige_naam }}{% else %}<i>nog niet gekozen</i>{% endif %}{% if beschikbaar.is_onzeker %} (overweegt){% endif %}{% if beschikbaar.waarschuw_niet_meer_beschikbaar %}<span class="sv-rood-text"> LET OP: Niet meer beschikbaar</span>{% endif %}</span>
-                                                        </label>
-                                                    </li>
-                                                {% endfor %}
-                                            </ul>
-                                        </td>
-                                    </tr>
+                                        <tr>
+                                            <th>Additionele scheidsrechters</th>
+                                            <td>
+                                                <ul>
+                                                    {% for beschikbaar in dag.beschikbaar_sr %}
+                                                        <li>
+                                                            <label class="black-text" for="{{ beschikbaar.id_li }}">
+                                                                <input class="filled-in" type="checkbox" name="{{ beschikbaar.sel }}" id="{{ beschikbaar.id_li }}"{% if beschikbaar.is_onzeker %} disabled{% else %}{% if beschikbaar.is_selected %} checked{% endif %} onchange="gewijzigd()"{% endif %}>
+                                                                <span>{{ beschikbaar.scheids.volledige_naam }}{% if beschikbaar.is_onzeker %} (overweegt){% endif %}{% if beschikbaar.waarschuw_niet_meer_beschikbaar %}<span class="sv-rood-text"> LET OP: Niet meer beschikbaar</span>{% endif %}</span>
+                                                            </label>
+                                                        </li>
+                                                    {% empty %}
+                                                        <li>
+                                                            <i>Nog niemand beschikbaar</i>
+                                                        </li>
+                                                    {% endfor %}
+                                                </ul>
+                                            </td>
+                                        </tr>
 
-                                    <tr>
-                                        <th>Additionele scheidsrechters</th>
-                                        <td>
-                                            <ul>
-                                                {% for beschikbaar in dag.beschikbaar_sr %}
-                                                    <li>
-                                                        <label class="black-text" for="{{ beschikbaar.id_li }}">
-                                                            <input class="filled-in" type="checkbox" name="{{ beschikbaar.sel }}" id="{{ beschikbaar.id_li }}"{% if beschikbaar.is_onzeker %} disabled{% else %}{% if beschikbaar.is_selected %} checked{% endif %} onchange="gewijzigd()"{% endif %}>
-                                                            <span>{{ beschikbaar.scheids.volledige_naam }}{% if beschikbaar.is_onzeker %} (overweegt){% endif %}{% if beschikbaar.waarschuw_niet_meer_beschikbaar %}<span class="sv-rood-text"> LET OP: Niet meer beschikbaar</span>{% endif %}</span>
-                                                        </label>
-                                                    </li>
-                                                {% empty %}
-                                                    <li>
-                                                        <i>Nog niemand beschikbaar</i>
-                                                    </li>
-                                                {% endfor %}
-                                            </ul>
-                                        </td>
-                                    </tr>
-                                {% empty %}
-                                    <tr>
-                                        <td class="center">
-                                            <i>Geen beschikbaarheid aanwezig</i>
-                                        </td>
-                                    </tr>
-                                {% endfor %}
+                                    {% empty %}
+
+                                        {% if not url_opvragen %}
+                                            <tr>
+                                                <td colspan="2" class="center">
+                                                    <i>Nog geen beschikbaarheid aanwezig</i>
+                                                </td>
+                                            </tr>
+                                        {% endif %}
+
+                                    {% endfor %}
                             </table>
 
                             <div class="center" style="margin-top:30px">

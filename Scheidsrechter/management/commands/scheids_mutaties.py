@@ -9,20 +9,30 @@
 """
 
 from django.conf import settings
-from django.core.management.base import BaseCommand
+from django.urls import reverse
+from django.utils.formats import date_format
 from django.db.utils import DataError, OperationalError, IntegrityError
+from django.core.management.base import BaseCommand
+from Account.models import Account
 from BasisTypen.definities import SCHEIDS_NIET, SCHEIDS_VERENIGING
+from Functie.models import Functie
 from Locatie.models import Reistijd
+from Mailer.operations import mailer_queue_email, render_email_template
 from Overig.background_sync import BackgroundSync
 from Scheidsrechter.definities import SCHEIDS_MUTATIE_BESCHIKBAARHEID_OPVRAGEN
 from Scheidsrechter.models import WedstrijdDagScheidsrechters, ScheidsMutatie
 from Sporter.models import Sporter
+from Wedstrijden.models import Wedstrijd
 import traceback
 import datetime
 import sys
 
 
+EMAIL_TEMPLATE_BESCHIKBAARHEID_OPGEVEN = 'email_scheidsrechter/beschikbaarheid-opgeven.dtl'
+
+
 class Command(BaseCommand):
+
     help = "Scheidsrechter mutaties verwerken"
 
     def __init__(self, stdout=None, stderr=None, no_color=False, force_color=False):
@@ -35,24 +45,71 @@ class Command(BaseCommand):
 
         self._hoogste_mutatie_pk = None
 
+        functie_cs = Functie.objects.get(rol='CS')
+        self._email_cs = functie_cs.bevestigde_email
+
     def add_arguments(self, parser):
         parser.add_argument('duration', type=int,
                             choices={1, 2, 5, 7, 10, 15, 20, 30, 45, 60},
                             help="Aantal minuten actief blijven")
         parser.add_argument('--quick', action='store_true')     # for testing
 
+    def stuur_email_naar_sr_beschikbaarheid_opgeven(self, wedstrijd: Wedstrijd, datums: list, account: Account):
+        """ Stuur een e-mail om de beschikbaarheid op te vragen """
+
+        soort_sr = '%s scheidsrechter' % wedstrijd.aantal_scheids
+        if wedstrijd.aantal_scheids > 1:
+            soort_sr += 's'
+
+        if len(datums) > 1:
+            zelfde_maand = True
+            maand = datums[0].month
+            for datum in datums[1:]:
+                if datum.month != maand:
+                    zelfde_maand = False
+            # for
+            if zelfde_maand:
+                # 5 + 6 november 2023
+                wed_datums = " + ".join([str(datum.day) for datum in datums])
+                wed_datums += date_format(datums[0], " F Y")
+            else:
+                # 30 november 2023 + 1 december 2023
+                wed_datums = " + ".join([date_format(datum, "j F Y") for datum in datums])
+        else:
+            # 1 november 2023
+            wed_datums = date_format(datums[0], "j F Y")
+
+        url = settings.SITE_URL + reverse('Scheidsrechter:overzicht')
+
+        context = {
+            'voornaam': account.get_first_name(),
+            'soort_sr': soort_sr,
+            'wed_titel': wedstrijd.titel,
+            'wed_plaats': wedstrijd.locatie.plaats,
+            'wed_datum': wed_datums,
+            'email_cs': self._email_cs,
+            'url_beschikbaarheid': url,
+        }
+
+        mail_body = render_email_template(context, EMAIL_TEMPLATE_BESCHIKBAARHEID_OPGEVEN)
+
+        mailer_queue_email(account.bevestigde_email,
+                           'Beschikbaarheid opgeven voor %s' % wed_datums,
+                           mail_body)
+
     def _reistijd_opvragen(self, locatie, sporter):
         """ vraag de reistijd op tussen de postcode van de sporter/scheidsrechter en de locatie """
 
         # nieuwe verzoeken worden door het management commando "reistijd berekenen" verwerkt
         if sporter.adres_lat and sporter.adres_lon:
-            Reistijd.objects.get_or_create(
-                                vanaf_lat=sporter.adres_lat,
-                                vanaf_lon=sporter.adres_lon,
-                                naar_lat=locatie.adres_lat,
-                                naar_lon=locatie.adres_lon)
+            _ = Reistijd.objects.get_or_create(
+                                    vanaf_lat=sporter.adres_lat,
+                                    vanaf_lon=sporter.adres_lon,
+                                    naar_lat=locatie.adres_lat,
+                                    naar_lon=locatie.adres_lon)
+            # wordt later verwerkt (door een achtergrondtaak)
         else:
-            self.stdout.write('[WARNING] Nog geen lat/lon voor sporter %s' % sporter.lid_nr)
+            self.stdout.write('[WARNING] Nog geen lat/lon bekend voor sporter %s' % sporter.lid_nr)
 
     def _verwerk_mutatie_beschikbaarheid_opvragen(self, mutatie):
         wedstrijd = mutatie.wedstrijd
@@ -76,6 +133,9 @@ class Command(BaseCommand):
         # doorloop alle scheidsrechters
         qset = Sporter.objects.exclude(scheids=SCHEIDS_NIET)
 
+        # alleen SR's hanteren die een account aangemaakt hebben
+        qset = qset.exclude(account=None)
+
         # alleen een hoofdscheidsrechter nodig? --> dan niet SR3 vragen
         if wedstrijd.aantal_scheids <= 1:
             qset = qset.exclude(scheids=SCHEIDS_VERENIGING)
@@ -85,7 +145,10 @@ class Command(BaseCommand):
             # reisafstand laten berekenen voor deze SR
             self._reistijd_opvragen(wedstrijd.locatie, sporter)
 
-            # TODO: stuur e-mail naar SR
+            # stuur een e-mail
+            if len(vraag):
+                # minimaal 1 datum
+                self.stuur_email_naar_sr_beschikbaarheid_opgeven(wedstrijd, vraag, sporter.account)
         # for
 
     def _verwerk_mutatie(self, mutatie):

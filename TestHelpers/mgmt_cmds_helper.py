@@ -96,12 +96,12 @@ class MyMgmtCommandHelper(TestCase):
         return f1, f2
 
     @staticmethod
-    def verwerk_scheids_mutaties():
+    def verwerk_scheids_mutaties(seconden=1):
         # vraag de achtergrondtaak om de mutaties te verwerken
         f1 = io.StringIO()
         f2 = io.StringIO()
         with override_settings(GMAPS_API=TEST_GMAPS_API_URL):
-            management.call_command('scheids_mutaties', '1', '--quick', stderr=f1, stdout=f2)
+            management.call_command('scheids_mutaties', str(0 + seconden), '--quick', stderr=f1, stdout=f2)
         return f1, f2
 
 # end of file
