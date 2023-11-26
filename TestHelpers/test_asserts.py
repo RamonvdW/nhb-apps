@@ -750,7 +750,9 @@ class MyTestAsserts(TestCase):
         self.assertTrue(resp.url.startswith, '/account/login/')
         if next_url:
             next_param = '?next=%s' % next_url
-            self.assertTrue(next_param in resp.url)
+            if next_param not in resp.url:
+                msg = 'next url %s ontbreekt in %s' % (repr(next_url), repr(resp.url))
+                self.fail(msg=msg)
 
     def check_concurrency_risks(self, tracer):
         found_delete = False

@@ -45,10 +45,24 @@ def site_handler403_permission_denied(request, exception=None):
         # TODO: next_url voor URL naar beheerdersfunctie doorgeven aan 2FA controle
 
         # whitelist een aantal urls die we willen ondersteunen
-        if request.path.startswith('/sporter/') or request.path.startswith('/scheidsrechter/'):
-            next_url = '?%s' % urlencode({'next': request.path})
-            next_url = next_url.replace('%2F', '/')
-            url += next_url
+        params = dict()
+
+        if request.path.startswith('/sporter/bondspas/'):
+            # vervang alle mogelijke urls naar een basale
+            params['next'] = '/sporter/bondspas/toon/'
+
+        elif request.path.startswith('/sporter/'):
+            # sporter, geen dynamische url voor de bondspas
+            params['next'] = request.path
+
+        elif request.path.startswith('/scheidsrechter/'):
+            # sommige sporters zijn ook scheidsrechter
+            params['next'] = request.path
+
+        if len(params) > 0:
+            params_str = urlencode(params)
+            params_str = params_str.replace('%2F', '/')     # re-beautify
+            url = url + '?' + params_str
 
         return HttpResponseRedirect(url)
 

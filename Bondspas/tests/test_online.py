@@ -59,16 +59,17 @@ class TestBondspas(E2EHelpers, TestCase):
     def test_toon(self):
         # anon
         resp = self.client.get(self.url_toon_sporter)
-        self.assert403(resp)
+        self.assert_is_redirect_login(resp, self.url_toon_sporter)
 
         resp = self.client.get(self.url_ophalen)
-        self.assert403(resp)
+        self.assert_is_redirect_login(resp, self.url_toon_sporter)
 
         resp = self.client.post(self.url_ophalen)
-        self.assert403(resp)
+        self.assert_is_redirect_login(resp, self.url_toon_sporter)
 
-        resp = self.client.get(self.url_toon_van % 99999)
-        self.assert403(resp)
+        url = self.url_toon_van % 99999
+        resp = self.client.get(url)
+        self.assert_is_redirect_login(resp, self.url_toon_sporter)
 
         # sporter
         self.e2e_login(self.account)
