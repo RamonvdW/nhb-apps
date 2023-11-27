@@ -33,7 +33,7 @@
     </table>
     <br>
     <div>We willen je verzoeken om binnen een paar dagen je beschikbaarheid door te geven in MijnHandboogsport. Hiervoor kan je gebruik maken van deze link:<br>
-        <a href="{{ url_beschikbaarheid }}">{{ url_beschikbaarheid }}</a>.</div>
+        <a href="{{ url_beschikbaarheid }}">{{ url_beschikbaarheid }}</a></div>
     <br>
     <div>Eventuele vragen kan je sturen naar <a href="mailto:{{ email_cs }}">{{ email_cs }}</a></div>
     <br>

@@ -40,9 +40,9 @@ class Command(BaseCommand):
         """
         options = {'key': settings.GMAPS_KEY}
 
-        if settings.GMAPS_API:      # pragma: no branch
-            self.stdout.write('[INFO] Server URL %s' % repr(settings.GMAPS_API))
-            options['base_url'] = settings.GMAPS_API
+        if settings.GMAPS_API_URL:      # pragma: no branch
+            self.stdout.write('[INFO] Server URL %s' % repr(settings.GMAPS_API_URL))
+            options['base_url'] = settings.GMAPS_API_URL
 
         try:
             self._gmaps = googlemaps.Client(**options)
