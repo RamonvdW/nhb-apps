@@ -143,7 +143,7 @@ class TestRegistreerLid(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('registreer/registreer-lid.dtl', 'plein/site_layout.dtl'))
         self.assertFormError(resp.context['form'], None,
-                             'de combinatie van bondsnummer en e-mailadres worden niet herkend. Probeer het nog eens.')
+                             'de combinatie van bondsnummer en e-mailadres wordt niet herkend. Probeer het nog eens.')
 
         # zwak wachtwoord: te kort
         with self.assert_max_queries(20):

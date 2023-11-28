@@ -110,6 +110,9 @@ class Account(AbstractUser):
 
         return self.username
 
+    def is_scheids(self):
+        return self.scheids != SCHEIDS_NIET
+
     def get_account_full_name(self):
         """ Deze functie wordt aangeroepen vanuit de site feedback om een volledige
             referentie aan de gebruiker te krijgen.

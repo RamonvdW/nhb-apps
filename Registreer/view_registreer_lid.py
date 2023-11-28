@@ -105,7 +105,7 @@ def sporter_create_account_normaal(lid_nr_str, email, nieuw_wachtwoord):
 
     # vergelijk e-mailadres hoofdletter ongevoelig
     if email.lower() != sporter.email.lower():
-        raise AccountCreateError('de combinatie van bondsnummer en e-mailadres worden niet herkend.' +
+        raise AccountCreateError('de combinatie van bondsnummer en e-mailadres wordt niet herkend.' +
                                  ' Probeer het nog eens.')
 
     if not sporter.is_actief_lid or not sporter.bij_vereniging:

@@ -64,7 +64,7 @@
             {% endfor %}
 
             {% url 'HistComp:top' as card_url %}
-            {% include 'plein/card_icon.dtl' with title="Uitslag vorig seizoen" text="De uitslag van vorig seizoen is hier in te zien." icon="undo" url=card_url %}
+            {% include 'plein/card_icon.dtl' with title="Uitslag vorig seizoen" text="De uitslag van eerdere seizoenen is hier in te zien." icon="undo" url=card_url %}
         </div>
     </div>
 

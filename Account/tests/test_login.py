@@ -66,7 +66,8 @@ class TestAccountLogin(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/login.dtl', 'plein/site_layout.dtl'))
-        self.assertFormError(resp.context['form'], None, 'de combinatie van inlog naam en wachtwoord worden niet herkend. Probeer het nog eens.')
+        self.assertFormError(resp.context['form'], None,
+                             'de combinatie van inlog naam en wachtwoord wordt niet herkend. Probeer het nog eens.')
 
     def test_inlog_form_niet_compleet(self):
         # test inlog via het inlog formulier, met niet complete parameters
@@ -90,7 +91,8 @@ class TestAccountLogin(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/login.dtl', 'plein/site_layout.dtl'))
-        self.assertFormError(resp.context['form'], None, 'de combinatie van inlog naam en wachtwoord worden niet herkend. Probeer het nog eens.')
+        self.assertFormError(resp.context['form'], None,
+                             'de combinatie van inlog naam en wachtwoord wordt niet herkend. Probeer het nog eens.')
         self.account_normaal = Account.objects.get(username='normaal')
         self.assertEqual(self.account_normaal.verkeerd_wachtwoord_teller, 1)
 

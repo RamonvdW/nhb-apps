@@ -42,7 +42,7 @@ then
 fi
 
 # alles ouder dan 60 dagen mag wag
-echo "[INFO] Removing old files"
+echo "[INFO] Removing old files" >> "$LOG"
 find "$SPOOLDIR" -type f -mtime +60 -exec rm {} + &>> "$LOG"
 
 URL=$(head -1 "$CONFIGFILE")
