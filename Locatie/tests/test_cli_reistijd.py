@@ -31,17 +31,21 @@ class TestLocatieCliReistijd(E2EHelpers, TestCase):
                         postadres_3='',
                         adres_code='1234AB',
                         scheids=SCHEIDS_BOND)
-        #scheids.save()
+        # scheids.save()
         self.scheids = scheids
+
+    def _reistijd_bijwerken(self):
+        with override_settings(GMAPS_API_URL=TEST_GMAPS_API_URL):
+            f1, f2 = self.run_management_command('reistijd_bijwerken')
+        return f1, f2
 
     def test_basic(self):
         # niets te doen
-        with override_settings(GMAPS_API=TEST_GMAPS_API_URL):
-            f1, f2 = self.run_management_command('reistijd_bijwerken')
+        f1, f2 = self._reistijd_bijwerken()
         # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
         self.assertEqual(f1.getvalue(), '')
 
-        with override_settings(GMAPS_API=TEST_GMAPS_API_URL, GMAPS_KEY='garbage'):
+        with override_settings(GMAPS_API_URL=TEST_GMAPS_API_URL, GMAPS_KEY='garbage'):
             f1, f2 = self.run_management_command('reistijd_bijwerken')
         # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
         self.assertTrue('[ERROR] Fout tijdens gmaps init: Invalid API key provided' in f1.getvalue())
@@ -55,8 +59,7 @@ class TestLocatieCliReistijd(E2EHelpers, TestCase):
                         adres_uit_crm=True)
         locatie.save()
 
-        with override_settings(GMAPS_API=TEST_GMAPS_API_URL):
-            f1, f2 = self.run_management_command('reistijd_bijwerken')
+        f1, f2 = self._reistijd_bijwerken()
         # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
         self.assertEqual(f1.getvalue(), '')
 
@@ -73,8 +76,7 @@ class TestLocatieCliReistijd(E2EHelpers, TestCase):
                         adres_uit_crm=True)
         locatie.save()
 
-        with override_settings(GMAPS_API=TEST_GMAPS_API_URL):
-            f1, f2 = self.run_management_command('reistijd_bijwerken')
+        f1, f2 = self._reistijd_bijwerken()
         # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
         self.assertTrue('[ERROR] Fout van gmaps geocode: UNKNOWN_ERROR' in f1.getvalue())
         self.assertTrue('[WARNING] Geen lat/lon voor locatie pk=' in f1.getvalue())
@@ -92,8 +94,7 @@ class TestLocatieCliReistijd(E2EHelpers, TestCase):
                         adres_uit_crm=True)
         locatie.save()
 
-        with override_settings(GMAPS_API=TEST_GMAPS_API_URL):
-            f1, f2 = self.run_management_command('reistijd_bijwerken')
+        f1, f2 = self._reistijd_bijwerken()
         # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
         self.assertTrue('[WARNING] Geen geocode resultaten voor adres=' in f1.getvalue())
         self.assertTrue('[WARNING] Geen lat/lon voor locatie pk=' in f1.getvalue())
@@ -111,8 +112,7 @@ class TestLocatieCliReistijd(E2EHelpers, TestCase):
                         adres_uit_crm=True)
         locatie.save()
 
-        with override_settings(GMAPS_API=TEST_GMAPS_API_URL):
-            f1, f2 = self.run_management_command('reistijd_bijwerken')
+        f1, f2 = self._reistijd_bijwerken()
         # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
         self.assertTrue('[WARNING] Kan geen lat/lng halen uit geocode results ' in f1.getvalue())
         self.assertTrue('[WARNING] Geen lat/lon voor locatie pk=' in f1.getvalue())
@@ -131,8 +131,7 @@ class TestLocatieCliReistijd(E2EHelpers, TestCase):
                         adres_uit_crm=False)
         locatie.save()
 
-        with override_settings(GMAPS_API=TEST_GMAPS_API_URL):
-            f1, f2 = self.run_management_command('reistijd_bijwerken')
+        f1, f2 = self._reistijd_bijwerken()
         # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
         # self.assertTrue('[WARNING] No lat/lon for locatie pk=' in f1.getvalue())
         self.assertEqual(f1.getvalue(), '')
@@ -150,8 +149,7 @@ class TestLocatieCliReistijd(E2EHelpers, TestCase):
                         adres_uit_crm=False)
         locatie.save()
 
-        with override_settings(GMAPS_API=TEST_GMAPS_API_URL):
-            f1, f2 = self.run_management_command('reistijd_bijwerken')
+        f1, f2 = self._reistijd_bijwerken()
         # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
         self.assertTrue('[WARNING] Kan geen lat/lng halen uit geocode results ' in f1.getvalue())
         self.assertTrue('[WARNING] Geen lat/lon voor locatie pk=' in f1.getvalue())
@@ -169,8 +167,7 @@ class TestLocatieCliReistijd(E2EHelpers, TestCase):
                         adres_uit_crm=False)
         locatie.save()
 
-        with override_settings(GMAPS_API=TEST_GMAPS_API_URL):
-            f1, f2 = self.run_management_command('reistijd_bijwerken')
+        f1, f2 = self._reistijd_bijwerken()
         # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
 
         locatie.refresh_from_db()
@@ -195,8 +192,7 @@ class TestLocatieCliReistijd(E2EHelpers, TestCase):
                     scheids=SCHEIDS_BOND)
         sporter.save()
 
-        with override_settings(GMAPS_API=TEST_GMAPS_API_URL):
-            f1, f2 = self.run_management_command('reistijd_bijwerken')
+        f1, f2 = self._reistijd_bijwerken()
         # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
         self.assertEqual(f1.getvalue(), '')
 
@@ -212,8 +208,7 @@ class TestLocatieCliReistijd(E2EHelpers, TestCase):
         sporter.adres_lon = ''
         sporter.save(update_fields=['postadres_2', 'postadres_3', 'adres_lat', 'adres_lon'])
 
-        with override_settings(GMAPS_API=TEST_GMAPS_API_URL):
-            f1, f2 = self.run_management_command('reistijd_bijwerken')
+        f1, f2 = self._reistijd_bijwerken()
         # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
         self.assertTrue('[WARNING] Geen lat/lon voor sporter 123456 met adres' in f1.getvalue())
 
@@ -233,8 +228,7 @@ class TestLocatieCliReistijd(E2EHelpers, TestCase):
                             reistijd_min=0)         # 0 = nog niet uitgerekend
         reistijd.save()
 
-        with override_settings(GMAPS_API=TEST_GMAPS_API_URL):
-            f1, f2 = self.run_management_command('reistijd_bijwerken')
+        f1, f2 = self._reistijd_bijwerken()
         # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
         self.assertEqual(f1.getvalue(), '')
         self.assertTrue("[INFO] Reistijd '17 mins' is 1030 seconden; is 17 minuten" in f2.getvalue())
@@ -254,8 +248,7 @@ class TestLocatieCliReistijd(E2EHelpers, TestCase):
                             reistijd_min=0)         # 0 = nog niet uitgerekend
         reistijd.save()
 
-        with override_settings(GMAPS_API=TEST_GMAPS_API_URL):
-            f1, f2 = self.run_management_command('reistijd_bijwerken')
+        f1, f2 = self._reistijd_bijwerken()
         # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
         self.assertTrue("[ERROR] Onvolledig directions antwoord: " in f1.getvalue())
 
@@ -274,8 +267,7 @@ class TestLocatieCliReistijd(E2EHelpers, TestCase):
                             reistijd_min=0)         # 0 = nog niet uitgerekend
         reistijd.save()
 
-        with override_settings(GMAPS_API=TEST_GMAPS_API_URL):
-            f1, f2 = self.run_management_command('reistijd_bijwerken')
+        f1, f2 = self._reistijd_bijwerken()
         # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
         self.assertTrue("[ERROR] Fout van gmaps directions route van" in f1.getvalue())
 

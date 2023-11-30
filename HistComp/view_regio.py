@@ -141,7 +141,7 @@ class HistRegioIndivView(TemplateView):
         try:
             regio_nr = kwargs['regio_nr'][:3]    # afkappen voor de veiligheid
             regio_nr = int(regio_nr)
-        except (KeyError, TypeError, IndexError):
+        except (KeyError, TypeError, IndexError, ValueError):
             regio_nr = 0
 
         if not (101 <= regio_nr <= 116):
@@ -291,7 +291,7 @@ class HistRegioTeamsView(TemplateView):
         try:
             regio_nr = kwargs['regio_nr'][:3]    # afkappen voor de veiligheid
             regio_nr = int(regio_nr)
-        except (KeyError, TypeError, IndexError):
+        except (KeyError, TypeError, IndexError, ValueError):
             regio_nr = 0
 
         if not (101 <= regio_nr <= 116):
