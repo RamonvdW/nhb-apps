@@ -205,7 +205,8 @@ class WedstrijdKorting(models.Model):
     # de korting kan voor een specifieke sporter zijn (voorbeeld: winnaar van vorige jaar)
     # de korting kan voor alle leden van een vereniging zijn (voorbeeld: de organiserende vereniging)
     # de korting kan een combinatie-korting geven (meerdere wedstrijden)
-    soort = models.CharField(max_length=1, choices=WEDSTRIJD_KORTING_SOORT_CHOICES, default=WEDSTRIJD_KORTING_VERENIGING)
+    soort = models.CharField(max_length=1, choices=WEDSTRIJD_KORTING_SOORT_CHOICES,
+                                           default=WEDSTRIJD_KORTING_VERENIGING)
 
     # tot wanneer geldig?
     geldig_tot_en_met = models.DateField()

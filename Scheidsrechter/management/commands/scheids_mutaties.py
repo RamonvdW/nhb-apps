@@ -19,7 +19,7 @@ from Functie.models import Functie
 from Locatie.models import Reistijd
 from Mailer.operations import mailer_queue_email, render_email_template
 from Overig.background_sync import BackgroundSync
-from Scheidsrechter.definities import SCHEIDS_MUTATIE_BESCHIKBAARHEID_OPVRAGEN
+from Scheidsrechter.definities import SCHEIDS_MUTATIE_BESCHIKBAARHEID_OPVRAGEN, SCHEIDS_MUTATIE_STUUR_NOTIFICATIES
 from Scheidsrechter.models import WedstrijdDagScheidsrechters, ScheidsMutatie
 from Sporter.models import Sporter
 from Wedstrijden.models import Wedstrijd

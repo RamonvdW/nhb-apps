@@ -53,7 +53,8 @@ def _get_targets_indiv(comp):
     targets2 = dict()
     for tup, klassen in targets.items():
         age_min, age_max, geslacht, boogtype = tup
-        # print("age=%s..%s, boogtype=%s, wkl=%s, %s" % (age_min, age_max, boogtype.afkorting, repr(wedstrklassen), wedstrklassen[-1].is_onbekend))
+        # print("age=%s..%s, boogtype=%s, wkl=%s, %s" % (
+        #          age_min, age_max, boogtype.afkorting, repr(wedstrklassen), wedstrklassen[-1].is_onbekend))
         tup = (age_min, age_max, boogtype, geslacht, klassen[-1].is_onbekend)
         targets2[tup] = klassen
     # for

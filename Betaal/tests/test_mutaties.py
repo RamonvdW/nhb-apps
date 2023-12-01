@@ -59,7 +59,8 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
 
         return f1, f2
 
-    def _prep_mollie_websim(self, test_code):
+    @staticmethod
+    def _prep_mollie_websim(test_code):
         beschrijving = 'Test betaling %s' % test_code
         bedrag_euro_str = '42.99'
 

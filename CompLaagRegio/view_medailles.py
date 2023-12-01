@@ -80,7 +80,8 @@ class ToonMedailles(UserPassesTestMixin, TemplateView):
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
         return self.rol_nu == Rollen.ROL_RCL
 
-    def bepaal_uitslag(self, deelcomp, min_aantal_scores):
+    @staticmethod
+    def bepaal_uitslag(deelcomp, min_aantal_scores):
 
         uitslag = list()
 

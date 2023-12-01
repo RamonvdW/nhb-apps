@@ -76,7 +76,9 @@ class Command(BaseCommand):         # pragma: no cover      # FUTURE: commando i
                 soort += ' (60p)'
 
         if soort not in settings.RECORDS_TOEGESTANE_SOORTEN:
-            self.stderr.write('[ERROR] Kan RecordName %s niet vertalen naar een toegestane record_soort (gemaakt: %s)' % (wa_rec['RecordName'], soort))
+            self.stderr.write(
+                '[ERROR] Kan RecordName %s niet vertalen naar een toegestane record_soort (gemaakt: %s)' % (
+                    wa_rec['RecordName'], soort))
             self._error_count += 1
             return None
 
@@ -123,20 +125,24 @@ class Command(BaseCommand):         # pragma: no cover      # FUTURE: commando i
         if wa_rec['ParaAr'] == 'True':
             # is een para record
             if nhb_rec.para_klasse == '':
-                self.stdout.write('[WARNING] Record %s-%s zou een para klasse moeten hebben (WA: cat=%s)' % (nhb_rec.discipline, nhb_rec.volg_nr, cat))
+                self.stdout.write('[WARNING] Record %s-%s zou een para klasse moeten hebben (WA: cat=%s)' % (
+                                    nhb_rec.discipline, nhb_rec.volg_nr, cat))
                 self._warning_count += 1
         else:
             # is geen para record
             if nhb_rec.para_klasse != '':
-                self.stdout.write('[WARNING] Record %s-%s is onverwacht een para klasse (WA: cat=%s)' % (nhb_rec.discipline, nhb_rec.volg_nr, cat))
+                self.stdout.write('[WARNING] Record %s-%s is onverwacht een para klasse (WA: cat=%s)' % (
+                                    nhb_rec.discipline, nhb_rec.volg_nr, cat))
                 self._warning_count += 1
 
         # nhb_rec.geslacht
         if nhb_rec.geslacht == 'M' and 'M' not in cat:
-            self.stdout.write('[WARNING] Record %s-%s is onverwacht geslacht=M (WA: cat=%s)' % (nhb_rec.discipline, nhb_rec.volg_nr, cat))
+            self.stdout.write('[WARNING] Record %s-%s is onverwacht geslacht=M (WA: cat=%s)' % (
+                                nhb_rec.discipline, nhb_rec.volg_nr, cat))
             self._warning_count += 1
         elif nhb_rec.geslacht == 'V' and 'W' not in cat:
-            self.stdout.write('[WARNING] Record %s-%s is onverwacht geslacht=V (WA: cat=%s)' % (nhb_rec.discipline, nhb_rec.volg_nr, cat))
+            self.stdout.write('[WARNING] Record %s-%s is onverwacht geslacht=V (WA: cat=%s)' % (
+                                nhb_rec.discipline, nhb_rec.volg_nr, cat))
             self._warning_count += 1
 
         # leeftijdscategorie = models.CharField(max_length=1, choices=LEEFTIJDSCATEGORIE)
@@ -145,12 +151,14 @@ class Command(BaseCommand):         # pragma: no cover      # FUTURE: commando i
 
         # datum = models.DateField()               # dates before 1950 mean "no date known"
         if str(nhb_rec.datum) != wa_rec['Date']:
-            self.stdout.write('[WARNING] Record %s-%s heeft andere datum (%s, WA: %s)' % (nhb_rec.discipline, nhb_rec.volg_nr, nhb_rec.datum, wa_rec['Date']))
+            self.stdout.write('[WARNING] Record %s-%s heeft andere datum (%s, WA: %s)' % (
+                                nhb_rec.discipline, nhb_rec.volg_nr, nhb_rec.datum, wa_rec['Date']))
             self._warning_count += 1
 
         # plaats = models.CharField(max_length=50)
         if wa_rec['Plaats'] != nhb_rec.plaats:
-            self.stdout.write('[WARNING] Record %s-%s heeft andere plaats (%s, WA: %s)' % (nhb_rec.discipline, nhb_rec.volg_nr, nhb_rec.plaats, wa_rec['Plaats']))
+            self.stdout.write('[WARNING] Record %s-%s heeft andere plaats (%s, WA: %s)' % (
+                                nhb_rec.discipline, nhb_rec.volg_nr, nhb_rec.plaats, wa_rec['Plaats']))
             self._warning_count += 1
 
         # land = models.CharField(max_length=50)
@@ -160,12 +168,14 @@ class Command(BaseCommand):         # pragma: no cover      # FUTURE: commando i
         if nhb_rec.is_european_record and wa_rec['Type'] not in ('WR', 'ER'):
             # onderdruk bij ER indien ook al WR gematcht
             if not nhb_rec.wa_match:
-                self.stdout.write('[WARNING] Record %s-%s heeft ER vlag maar WA type is %s' % (nhb_rec.discipline, nhb_rec.volg_nr, wa_rec['Type']))
+                self.stdout.write('[WARNING] Record %s-%s heeft ER vlag maar WA type is %s' % (
+                                    nhb_rec.discipline, nhb_rec.volg_nr, wa_rec['Type']))
                 self._warning_count += 1
 
         # is_world_record = models.BooleanField(default=False)
         if nhb_rec.is_world_record and wa_rec['Type'] != 'WR':
-            self.stdout.write('[WARNING] Record %s-%s heeft WR vlag maar WA type is %s' % (nhb_rec.discipline, nhb_rec.volg_nr, wa_rec['Type']))
+            self.stdout.write('[WARNING] Record %s-%s heeft WR vlag maar WA type is %s' % (
+                                nhb_rec.discipline, nhb_rec.volg_nr, wa_rec['Type']))
             self._warning_count += 1
 
     def _read_ned_wa(self, csv_reader):
@@ -199,7 +209,8 @@ class Command(BaseCommand):         # pragma: no cover      # FUTURE: commando i
         for nhb_rec in self._cache_nhb.values():
             if nhb_rec.is_european_record or nhb_rec.is_world_record:
                 if not nhb_rec.wa_match:
-                    self.stdout.write('[WARNING] Record %s-%s heeft ER/WR vlag maar geen WA match' % (nhb_rec.discipline, nhb_rec.volg_nr))
+                    self.stdout.write('[WARNING] Record %s-%s heeft ER/WR vlag maar geen WA match' % (
+                                        nhb_rec.discipline, nhb_rec.volg_nr))
                     self.stdout.write('          nhb_rec=%s' % nhb_rec)
                     self._warning_count += 1
         # for
@@ -225,7 +236,8 @@ class Command(BaseCommand):         # pragma: no cover      # FUTURE: commando i
 
         self._check_onbekende_os_wr_er()
 
-        self.stdout.write('Vergelijking met WA: %s fouten, %s waarschuwingen' % (self._error_count, self._warning_count))
+        self.stdout.write('Vergelijking met WA: %s fouten, %s waarschuwingen' % (self._error_count,
+                                                                                 self._warning_count))
 
         self.stdout.write('Done')
 

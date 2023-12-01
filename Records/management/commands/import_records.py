@@ -129,7 +129,8 @@ class Command(BaseCommand):
                     val = None
                 if val and curr_record:
                     if record.leeftijdscategorie != curr_record.leeftijdscategorie:
-                        wijzigingen.append('leeftijdscategorie: %s --> %s' % (repr(curr_record.leeftijdscategorie), repr(record.leeftijdscategorie)))
+                        wijzigingen.append('leeftijdscategorie: %s --> %s' % (repr(curr_record.leeftijdscategorie),
+                                                                              repr(record.leeftijdscategorie)))
                         curr_record.leeftijdscategorie = record.leeftijdscategorie
 
                 # 3 = Materiaalklasse
@@ -141,7 +142,8 @@ class Command(BaseCommand):
                     val = None
                 if val and curr_record:
                     if record.materiaalklasse != curr_record.materiaalklasse:
-                        wijzigingen.append('materiaalklasse: %s --> %s' % (repr(curr_record.materiaalklasse), repr(record.materiaalklasse)))
+                        wijzigingen.append('materiaalklasse: %s --> %s' % (repr(curr_record.materiaalklasse),
+                                                                           repr(record.materiaalklasse)))
                         curr_record.materiaalklasse = record.materiaalklasse
 
                 # 4 = Discipline
@@ -166,7 +168,8 @@ class Command(BaseCommand):
                     record.soort_record = val
                 if val and curr_record:
                     if curr_record.soort_record != record.soort_record:
-                        wijzigingen.append('soort_record: %s --> %s' % (repr(curr_record.soort_record), repr(record.soort_record)))
+                        wijzigingen.append('soort_record: %s --> %s' % (repr(curr_record.soort_record),
+                                                                        repr(record.soort_record)))
                         curr_record.soort_record = record.soort_record
 
                 # 6 = Para klasse
@@ -178,7 +181,8 @@ class Command(BaseCommand):
                     record.para_klasse = val
                 if curr_record:
                     if curr_record.para_klasse != record.para_klasse:
-                        wijzigingen.append('para_klasse: %s --> %s' % (repr(curr_record.para_klasse), repr(record.para_klasse)))
+                        wijzigingen.append('para_klasse: %s --> %s' % (repr(curr_record.para_klasse),
+                                                                       repr(record.para_klasse)))
                         curr_record.para_klasse = record.para_klasse
 
                 # 7 = Verbeterbaar
@@ -329,7 +333,8 @@ class Command(BaseCommand):
 
                     if curr_record:
                         if curr_record.is_european_record != record.is_european_record:
-                            wijzigingen.append('is_european_record: %s --> %s' % (repr(curr_record.is_european_record), repr(record.is_european_record)))
+                            wijzigingen.append('is_european_record: %s --> %s' % (repr(curr_record.is_european_record),
+                                                                                  repr(record.is_european_record)))
                             curr_record.is_european_record = record.is_european_record
 
                     # 17 = Ook WR
@@ -345,7 +350,8 @@ class Command(BaseCommand):
 
                     if curr_record:
                         if curr_record.is_world_record != record.is_world_record:
-                            wijzigingen.append('is_world_record: %s --> %s' % (repr(curr_record.is_world_record), repr(record.is_world_record)))
+                            wijzigingen.append('is_world_record: %s --> %s' % (repr(curr_record.is_world_record),
+                                                                               repr(record.is_world_record)))
                             curr_record.is_world_record = record.is_world_record
 
                     # 18 = Notities
@@ -353,7 +359,8 @@ class Command(BaseCommand):
                     record.score_notitie = val
                     if curr_record:
                         if curr_record.score_notitie != record.score_notitie:
-                            wijzigingen.append('score_notitie: %s --> %s' % (repr(curr_record.score_notitie), repr(record.score_notitie)))
+                            wijzigingen.append('score_notitie: %s --> %s' % (repr(curr_record.score_notitie),
+                                                                             repr(record.score_notitie)))
                             curr_record.score_notitie = record.score_notitie
 
                 else:
@@ -364,7 +371,8 @@ class Command(BaseCommand):
                     record.score_notitie = val
                     if curr_record:
                         if curr_record.score_notitie != record.score_notitie:
-                            wijzigingen.append('score_notitie: %s --> %s' % (repr(curr_record.score_notitie), repr(record.score_notitie)))
+                            wijzigingen.append('score_notitie: %s --> %s' % (repr(curr_record.score_notitie),
+                                                                             repr(record.score_notitie)))
                             curr_record.score_notitie = record.score_notitie
             # if
 
@@ -375,7 +383,9 @@ class Command(BaseCommand):
                 if curr_record:
                     if len(wijzigingen):
                         # rapporteer de wijzigingen die we door gaan voeren
-                        self.stdout.write('[INFO] Wijzigingen voor record %s-%s: %s' % (blad, record.volg_nr, "\n          "+"\n          ".join(wijzigingen)))
+                        self.stdout.write(
+                            '[INFO] Wijzigingen voor record %s-%s: %s' % (
+                                blad, record.volg_nr, "\n          "+"\n          ".join(wijzigingen)))
                         self.count_wijzigingen += len(wijzigingen)
                         if not self.dryrun:
                             curr_record.save()
@@ -432,26 +442,25 @@ class Command(BaseCommand):
             for obj in objs[1:]:
                 if obj.datum == prev_obj.datum and obj.score == prev_obj.score and obj.x_count == prev_obj.x_count:
                     if obj.score_notitie != "gedeeld" or prev_obj.score_notitie != "gedeeld":
-                        self.stderr.write("[WARNING] Identieke datum en score voor records %s-%s en %s-%s" % (disc, prev_obj.volg_nr,
-                                                                                                              disc, obj.volg_nr))
+                        self.stderr.write("[WARNING] Identieke datum en score voor records %s-%s en %s-%s" % (
+                            disc, prev_obj.volg_nr, disc, obj.volg_nr))
                         self.count_waarschuwing += 1
                 elif obj.score > prev_obj.score or (obj.score == prev_obj.score and obj.x_count >= prev_obj.x_count):
                     if obj.x_count + prev_obj.x_count > 0:
-                        self.stderr.write("[WARNING] Score niet consecutief voor records %s-%s en %s-%s (%s(%sX) >= %s(%sX))" % (disc, prev_obj.volg_nr,
-                                                                                                                                 disc, obj.volg_nr,
-                                                                                                                                 obj.score, obj.x_count, prev_obj.score, prev_obj.x_count))
+                        self.stderr.write(
+                            "[WARNING] Score niet consecutief voor records %s-%s en %s-%s (%s(%sX) >= %s(%sX))" % (
+                                disc, prev_obj.volg_nr, disc, obj.volg_nr,
+                                obj.score, obj.x_count, prev_obj.score, prev_obj.x_count))
                         self.count_waarschuwing += 1
                     else:
-                        self.stderr.write("[WARNING] Score niet consecutief voor records %s-%s en %s-%s (%s >= %s)" % (disc, prev_obj.volg_nr,
-                                                                                                                       disc, obj.volg_nr,
-                                                                                                                       obj.score, prev_obj.score))
+                        self.stderr.write("[WARNING] Score niet consecutief voor records %s-%s en %s-%s (%s >= %s)" % (
+                            disc, prev_obj.volg_nr, disc, obj.volg_nr, obj.score, prev_obj.score))
                         self.count_waarschuwing += 1
 
                 if prev_obj.max_score != obj.max_score:
-                    self.stderr.write('[ERROR] Max score (afgeleide van aantal pijlen) is niet consistent in soort %s tussen records %s-%s en %s-%s (%s != %s)' % (repr(srec),
-                                                                                                                                                                   disc, prev_obj.volg_nr,
-                                                                                                                                                                   disc, obj.volg_nr,
-                                                                                                                                                                   prev_obj.max_score, obj.max_score))
+                    self.stderr.write(
+                        '[ERROR] Max score (afgeleide van aantal pijlen) is niet consistent in soort %s tussen records %s-%s en %s-%s (%s != %s)' % (
+                            repr(srec), disc, prev_obj.volg_nr, disc, obj.volg_nr, prev_obj.max_score, obj.max_score))
                     self.count_andere_errors += 1
 
                 prev_obj = obj

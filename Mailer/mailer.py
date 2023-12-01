@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2022 Ramon van der Winkel.
+#  Copyright (c) 2020-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -64,7 +64,8 @@ def send_mail_postmark(obj, stdout=None, stderr=None):
             obj.log += "  response encoding:%s, status_code:%s\n" % (repr(resp.encoding), repr(resp.status_code))
             obj.log += "  full response: %s\n" % repr(resp.text)
             if stdout:
-                stdout.write("[WARNING] Mail niet kunnen versturen! response encoding:%s, status_code:%s" % (repr(resp.encoding), repr(resp.status_code)))
+                stdout.write("[WARNING] Mail niet kunnen versturen! response encoding:%s, status_code:%s" % (
+                                repr(resp.encoding), repr(resp.status_code)))
                 stdout.write("  full response: %s" % repr(resp.text))
 
     obj.save()

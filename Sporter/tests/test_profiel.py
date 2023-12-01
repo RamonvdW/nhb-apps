@@ -184,7 +184,8 @@ class TestSporterProfiel(E2EHelpers, TestCase):
 
         self.boog_R = BoogType.objects.get(afkorting='R')
 
-    def _prep_voorkeuren(self, sporter):
+    @staticmethod
+    def _prep_voorkeuren(sporter):
         get_sporterboog(sporter, mag_database_wijzigen=True)
 
         # zet een wedstrijd voorkeur voor Recurve en informatie voorkeur voor Barebow

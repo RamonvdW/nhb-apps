@@ -62,8 +62,8 @@ class TijdelijkeCode(models.Model):
 
     hoort_bij_sporter = models.ForeignKey(
                                         Sporter,
-                                        on_delete = models.CASCADE,
-                                        blank = True, null = True)      # optioneel
+                                        on_delete=models.CASCADE,
+                                        blank=True, null=True)          # optioneel
 
     # in de toekomst meer mogelijkheden, zoals taken
 

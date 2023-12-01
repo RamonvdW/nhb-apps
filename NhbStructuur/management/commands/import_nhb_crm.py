@@ -523,8 +523,9 @@ class Command(BaseCommand):
                 ver_iban = str(ver_iban)
                 # correcte situatie
                 if len(ver_bic) not in (8, 11):
-                    self.stderr.write('[ERROR] Vereniging %s heeft BIC %s met foute length %s (verwacht: 8 of 11) horende bij IBAN %s' % (
-                                        ver_nr, repr(ver_bic), len(ver_bic), repr(ver_iban)))
+                    self.stderr.write(
+                        '[ERROR] Vereniging %s heeft BIC %s met foute length %s (verwacht: 8 of 11) horende bij IBAN %s' % (
+                            ver_nr, repr(ver_bic), len(ver_bic), repr(ver_iban)))
                     self._count_errors += 1
                     ver_bic = None
 
@@ -721,8 +722,9 @@ class Command(BaseCommand):
                     if rol == 'SEC':
                         # secretaris functie krijgt email uit CRM
                         if functie.bevestigde_email != ver_email and functie.bevestigde_email != "":
-                            self.stdout.write('[INFO] Wijziging van secretaris email voor vereniging %s: "%s" --> "%s"' % (
-                                                    ver_nr, functie.bevestigde_email, ver_email))
+                            self.stdout.write(
+                                '[INFO] Wijziging van secretaris email voor vereniging %s: "%s" --> "%s"' % (
+                                    ver_nr, functie.bevestigde_email, ver_email))
                             self._count_wijzigingen += 1
                         functie.bevestigde_email = ver_email
                         functie.nieuwe_email = ''       # voor de zekerheid opruimen
@@ -753,7 +755,8 @@ class Command(BaseCommand):
                         obj.delete()
                         self._count_verwijderingen += 1
                     except ProtectedError as exc:       # pragma: no cover
-                        self.stderr.write('[ERROR] Onverwachte fout bij het verwijderen van een vereniging: %s' % str(exc))
+                        self.stderr.write(
+                            '[ERROR] Onverwachte fout bij het verwijderen van een vereniging: %s' % str(exc))
                         self._count_errors += 1
         # while
 
@@ -844,12 +847,14 @@ class Command(BaseCommand):
                         else:
                             # nog niet gekoppeld
                             if maak_account_vereniging_secretaris(obj, account):
-                                self.stdout.write("[INFO] Secretaris %s van vereniging %s is gekoppeld aan SEC functie en krijgt een e-mail" % (
-                                                        sporter.lid_nr, obj.ver_nr))
+                                self.stdout.write(
+                                    "[INFO] Secretaris %s van vereniging %s is gekoppeld aan SEC functie en krijgt een e-mail" % (
+                                            sporter.lid_nr, obj.ver_nr))
                                 sec_account_pks.append(account.pk)
                             else:
-                                self.stdout.write("[WARNING] Secretaris %s van vereniging %s heeft nog geen bevestigd e-mailadres" % (
-                                                        sporter.lid_nr, obj.ver_nr))
+                                self.stdout.write(
+                                    "[WARNING] Secretaris %s van vereniging %s heeft nog geen bevestigd e-mailadres" % (
+                                        sporter.lid_nr, obj.ver_nr))
                                 self._count_warnings += 1
                 # for
 
@@ -1447,7 +1452,13 @@ class Command(BaseCommand):
             if obj.is_actief_lid:
                 nieuwe_lijst = list()
                 for sterk in lid_sterk:
-                    # sterk = {"date": "1990-01-01", "skill_level_code": "R1000", "skill_level_name": "Recurve 1000", "discipline_code": "REC", "discipline_name": "Recurve", "category_name": "Senior"}
+                    # sterk = {"date": "1990-01-01",
+                    #          "skill_level_code": "R1000",
+                    #          "skill_level_name": "Recurve 1000",
+                    #          "discipline_code": "REC",
+                    #          "discipline_name": "Recurve",
+                    #          "category_name": "Senior"
+                    #          }
                     cat = sterk['category_name']
                     disc = sterk['discipline_name']
                     datum_raw = sterk['date']
@@ -1483,14 +1494,16 @@ class Command(BaseCommand):
                             huidige_lijst.remove(found)
                         else:
                             # toevoegen
-                            self.stdout.write('[INFO] Lid %s: nieuwe speelsterkte %s, %s, %s' % (lid_nr, datum, disc, beschr))
+                            self.stdout.write('[INFO] Lid %s: nieuwe speelsterkte %s, %s, %s' % (
+                                                lid_nr, datum, disc, beschr))
 
                             try:
                                 volgorde = self._speelsterkte2volgorde[(disc, beschr)]
                             except KeyError:
                                 volgorde = 9999
-                                self.stdout.write('[WARNING] Kan speelsterkte volgorde niet vaststellen voor: (%s, %s)' % (
-                                                        repr(disc), repr(beschr)))
+                                self.stdout.write(
+                                    '[WARNING] Kan speelsterkte volgorde niet vaststellen voor: (%s, %s)' % (
+                                        repr(disc), repr(beschr)))
                                 self._count_warnings += 1
 
                             sterk = Speelsterkte(
@@ -1561,7 +1574,8 @@ class Command(BaseCommand):
 
         # for member
 
-        # self.stdout.write('[DEBUG] Volgende %s bondsnummers moeten verwijderd worden: %s' % (len(lid_nrs), repr(lid_nrs)))
+        # self.stdout.write('[DEBUG] Volgende %s bondsnummers moeten verwijderd worden: %s' % (len(lid_nrs),
+        #                                                                                      repr(lid_nrs)))
         while len(lid_nrs) > 0:
             lid_nr = lid_nrs.pop(0)
             obj = self._vind_sporter(lid_nr)
@@ -1767,7 +1781,8 @@ class Command(BaseCommand):
         self._import_locaties(data['clubs'])
 
         self.stdout.write('Import van CRM data is klaar')
-        # self.stdout.write("Read %s lines; skipped %s dupes; skipped %s errors; added %s records" % (line_nr, dupe_count, error_count, added_count))
+        # self.stdout.write("Read %s lines; skipped %s dupes; skipped %s errors; added %s records" % (
+        #                       line_nr, dupe_count, error_count, added_count))
 
         count_sterkte = Speelsterkte.objects.count()
         count_diploma = OpleidingDiploma.objects.count()

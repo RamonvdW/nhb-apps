@@ -70,7 +70,8 @@ class AanvangsgemiddeldeHist(models.Model):
         else:
             account_str = 'systeem'
 
-        return "[%s] %s --> %s: %s / door %s" % (localize(self.when), self.oude_waarde, self.nieuwe_waarde, self.notitie, account_str)
+        return "[%s] %s --> %s: %s / door %s" % (
+                    localize(self.when), self.oude_waarde, self.nieuwe_waarde, self.notitie, account_str)
 
     class Meta:
         # TODO: constraint toevoegen voor maximaal 1 AG per SporterBoog?
@@ -150,7 +151,8 @@ class ScoreHist(models.Model):
     notitie = models.CharField(max_length=100)
 
     def __str__(self):
-        return "[%s] (%s) %s --> %s: %s" % (localize(self.when), self.door_account, self.oude_waarde, self.nieuwe_waarde, self.notitie)
+        return "[%s] (%s) %s --> %s: %s" % (
+                    localize(self.when), self.door_account, self.oude_waarde, self.nieuwe_waarde, self.notitie)
 
     class Meta:
         indexes = [

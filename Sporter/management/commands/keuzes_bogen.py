@@ -32,7 +32,8 @@ class Command(BaseCommand):
             self.boog_pk2beschrijving[boogtype.pk] = "%s-%s" % (org_str, boogtype.beschrijving)
         # for
 
-    def _tel_eerste(self, sporter2bogen, aantal):
+    @staticmethod
+    def _tel_eerste(sporter2bogen, aantal):
         eerste = list(sporter2bogen.values())[0]
         post_del = list()
         for lid_nr, bogen in sporter2bogen.items():

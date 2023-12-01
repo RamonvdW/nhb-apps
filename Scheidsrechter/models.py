@@ -62,7 +62,7 @@ class WedstrijdDagScheidsrechters(models.Model):
     gekozen_hoofd_sr = models.ForeignKey(Sporter, on_delete=models.SET_NULL, related_name='gekozen_hoofd_sr',
                                          null=True, blank=True)              # mag leeg zijn
 
-    # welke scheidsrechters zijn gekozen?
+    # welke scheidsrechters zijn er nog meer gekozen?
     gekozen_sr1 = models.ForeignKey(Sporter, on_delete=models.SET_NULL, related_name='gekozen_sr1',
                                     null=True, blank=True)
 

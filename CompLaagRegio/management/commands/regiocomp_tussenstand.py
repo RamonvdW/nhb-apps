@@ -290,7 +290,9 @@ class Command(BaseCommand):
                 else:
                     # tot nu toe hebben we de verwijderde scores meegenomen zodat we deze
                     # change-trigger krijgen. Nu moeten de verwijderde scores eruit
-                    scores = [score for afstand, score in tups if score.waarde != SCORE_WAARDE_VERWIJDERD and afstand == comp_afstand]
+                    scores = [score
+                              for afstand, score in tups
+                              if score.waarde != SCORE_WAARDE_VERWIJDERD and afstand == comp_afstand]
 
                     # nieuwe scores toevoegen
                     curr_scores = deelnemer.scores.all()
@@ -307,7 +309,9 @@ class Command(BaseCommand):
 
                     # door waarde te filteren op max_score voorkomen we problemen
                     # die anders pas naar boven komen tijdens de save()
-                    waardes = [score.waarde for afstand, score in tups if score.waarde <= max_score and afstand == comp_afstand]
+                    waardes = [score.waarde
+                               for afstand, score in tups
+                               if score.waarde <= max_score and afstand == comp_afstand]
 
                     waardes.extend([0, 0, 0, 0, 0, 0, 0])
                     waardes = waardes[:7]
@@ -344,7 +348,9 @@ class Command(BaseCommand):
                                         # dit is de nieuwe klasse
                                         self.stdout.write(
                                             '[INFO] Verplaats %s (%sm) met nieuw AG %.3f naar klasse %s' % (
-                                                deelnemer.sporterboog.sporter.lid_nr, klasse.competitie.afstand, new_ag, klasse))
+                                                deelnemer.sporterboog.sporter.lid_nr,
+                                                klasse.competitie.afstand,
+                                                new_ag, klasse))
                                         deelnemer.indiv_klasse = klasse
                                         break
                                 # for
@@ -406,7 +412,8 @@ class Command(BaseCommand):
 
                     # is de team score aangepast?
                     if ronde_team.team_score != team_score:
-                        # print('nieuwe team_score voor team %s: %s --> %s' % (ronde_team, ronde_team.team_score, team_score))
+                        # print('nieuwe team_score voor team %s: %s --> %s' % (
+                        #           ronde_team, ronde_team.team_score, team_score))
                         ronde_team.team_score = team_score
                         ronde_team.save(update_fields=['team_score'])
 
