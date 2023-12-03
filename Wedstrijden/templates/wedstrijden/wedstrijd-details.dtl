@@ -187,7 +187,7 @@
             {% if toon_sessies %}
 
                                         <!-- not: popout !! -->
-                <ul id="sessies" class="collapsible z-depth-0 white" style="margin-top:50px; margin-bottom:0px">
+                <ul id="sessies" class="collapsible z-depth-0 white" style="margin-top:50px; margin-bottom:0">
                     <li>
                         <div class="collapsible-header white center" style="display:block; cursor:inherit">
                             <h6 class="sv-blauw-text">Sessies</h6>

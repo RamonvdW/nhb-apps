@@ -191,7 +191,8 @@ class BetaalMutatie(models.Model):
         return msg
 
 
-# TODO: boekhouding: betaald bedrag, ingehouden transactiekosten door CPSP, ontvangen bedrag, uitbetaalde bedragen, opsplitsing btw/transactiekosten
+# TODO: boekhouding: betaald bedrag, ingehouden transactiekosten door CPSP, ontvangen bedrag, uitbetaalde bedragen,
+#                   opsplitsing btw/transactiekosten
 
 
 # end of file

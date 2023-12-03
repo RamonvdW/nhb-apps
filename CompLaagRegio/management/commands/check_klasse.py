@@ -114,14 +114,17 @@ class Command(BaseCommand):
                     print('Aspirant met geslacht anders mogelijk in te hogen gender-neutrale klasse ingedeeld')
                     # omdat wedstrijdgeslacht niet ingesteld is
                     oude_klasse = deelnemer.indiv_klasse
-                    oude_max_leeftijd = max([lkl.max_wedstrijdleeftijd for lkl in deelnemer.indiv_klasse.leeftijdsklassen.all()])
+                    oude_max_leeftijd = max([lkl.max_wedstrijdleeftijd
+                                             for lkl in deelnemer.indiv_klasse.leeftijdsklassen.all()])
                     print(deelnemer, wedstrijdleeftijd, '\n          ', oude_klasse, '<=', oude_max_leeftijd, 'jaar')
                     bepaler.bepaal_klasse_deelnemer(deelnemer, GESLACHT_MAN)
                     alt_h = deelnemer.indiv_klasse
-                    alt_h_leeftijd = max([lkl.max_wedstrijdleeftijd for lkl in deelnemer.indiv_klasse.leeftijdsklassen.all()])
+                    alt_h_leeftijd = max([lkl.max_wedstrijdleeftijd
+                                          for lkl in deelnemer.indiv_klasse.leeftijdsklassen.all()])
                     bepaler.bepaal_klasse_deelnemer(deelnemer, GESLACHT_VROUW)
                     alt_d = deelnemer.indiv_klasse
-                    alt_d_leeftijd = max([lkl.max_wedstrijdleeftijd for lkl in deelnemer.indiv_klasse.leeftijdsklassen.all()])
+                    alt_d_leeftijd = max([lkl.max_wedstrijdleeftijd
+                                          for lkl in deelnemer.indiv_klasse.leeftijdsklassen.all()])
 
                     if alt_d_leeftijd != oude_max_leeftijd or alt_d_leeftijd != oude_max_leeftijd:
                         print('    alt_h: %s <= %s jaar' % (alt_h, alt_h_leeftijd))

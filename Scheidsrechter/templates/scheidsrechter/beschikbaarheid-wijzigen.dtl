@@ -15,6 +15,7 @@
         <div class="col s12">
             <h3 class="page-banner">Beschikbaarheid</h3>
             <p>Pas je beschikbaarheid aan voor de toekomstige wedstrijden.</p>
+            <p>Reistijd is slechts een indicatie: vanaf jouw woonadres naar de wedstrijdlocatie, met auto of motor, op een zaterdagochtend.</p>
         </div>
     </div>
 
@@ -62,12 +63,11 @@
                             <tr>
                                 <th>Datum</th>
                                 <th>Wedstrijd</th>
-                                <th class="center">
-                                    <span class="hide-on-med-and-down">Scheidsrechters</span>
-                                    <span class="hide-on-large-and-up">#SR</span>
-                                </th>
+                                {% comment %}<th class="center hide-on-small-only"><!-- knop --></th> {% endcomment %}
+                                <th class="center hide-on-small-only">Jouw reistijd</th>
+                                <th class="center hide-on-med-and-down">Scheidsrechters</th>
                                 <th class="center">Maak je keuze</th>
-                                <th class="center">Jouw beschikbaarheid</th>
+                                <th class="center hide-on-small-only">Jouw beschikbaarheid</th>
                             </tr>
                         </thead>
 
@@ -75,9 +75,17 @@
                             <tr>
                                 <td>{{ dag.datum|date:'l' }}<br>{{ dag.datum }}</td>
 
-                                <td>{{ dag.wedstrijd.titel }}<br>{{ dag.wedstrijd.locatie.plaats }}</td>
+                                <td>{{ dag.wedstrijd.titel }}<br>{{ dag.wedstrijd.locatie.plaats }}<span class="hide-on-med-and-up"><br>(jouw reistijd: {{ dag.reistijd }} minuten)</span></td>
 
-                                <td class="center">{{ dag.wedstrijd.aantal_scheids }}</td>
+                                {% comment %}
+                                <td class="center hide-on-small-only">
+                                    <a class="btn-sv-rood" href="{{ dag.url_details }}">Details</a>
+                                </td>
+                                {% endcomment %}
+
+                                <td class="center hide-on-small-only">{% if dag.reistijd %}{{ dag.reistijd }} minutes{% else %}<i>Nog niet bepaald</i>{% endif %}</td>
+
+                                <td class="center hide-on-med-and-down">{{ dag.wedstrijd.aantal_scheids }}</td>
 
                                 <td class="center">
                                     <button type="button" class="btn-sv-keuze" id="{{ dag.id }}-ja" onclick="wijzig('{{ dag.id }}', 1)">
@@ -93,7 +101,7 @@
                                     </button>
                                 </td>
 
-                                <td class="center sv-rood-text" id="{{ dag.id }}-gekozen">Nog geen keuze</td>
+                                <td class="center sv-rood-text hide-on-small-only" id="{{ dag.id }}-gekozen">Nog geen keuze</td>
                             </tr>
                         {% empty %}
                             <tr>

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -69,7 +69,8 @@ class HierarchyRunner(DiscoverRunner):
                 new_suite.addTest(test)
             else:
                 if type(test.test_after) != tuple:      # pragma: no cover
-                    raise TypeError("Expected tuple but got test_after = %s on %s" % (type(test.test_after), repr(test)))
+                    raise TypeError("Expected tuple but got test_after = %s on %s" % (type(test.test_after),
+                                                                                      repr(test)))
 
                 ref = repr(test)[1:].split(" ")[0]      # extracts the class name
 

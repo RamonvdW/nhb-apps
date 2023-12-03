@@ -26,7 +26,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2023-11-28'
+SITE_VERSIE = '2023-12-03'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -557,7 +557,7 @@ BETAAL_API = 'https://api.mollie.com'
 
 # ability to override the server URL for test purposes
 # None = use built-in default
-GMAPS_API = None
+GMAPS_API_URL = None
 
 
 # end of file

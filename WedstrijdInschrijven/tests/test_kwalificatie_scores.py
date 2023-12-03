@@ -249,6 +249,9 @@ class TestWedstrijdInschrijvenKwalificatieScores(E2EHelpers, TestCase):
         self.inschrijving1.status = INSCHRIJVING_STATUS_DEFINITIEF
         self.inschrijving1.save(update_fields=['status'])
 
+        self.assertTrue(str(self.inschrijving1) != '')
+        self.assertTrue(self.inschrijving1.korte_beschrijving() != '')
+
         # maak een extra record te veel aan
         score.pk = None
         score.save()

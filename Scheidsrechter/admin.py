@@ -7,10 +7,8 @@
 from django.contrib import admin
 from BasisTypen.definities import SCHEIDS_NIET
 from Scheidsrechter.definities import SCHEIDS2LEVEL
-from Scheidsrechter.models import ScheidsBeschikbaarheid, WedstrijdDagScheidsrechters
+from Scheidsrechter.models import ScheidsBeschikbaarheid, WedstrijdDagScheidsrechters, ScheidsMutatie
 from Sporter.models import Sporter
-from Wedstrijden.definities import WEDSTRIJD_STATUS_GEACCEPTEERD
-from Wedstrijden.models import Wedstrijd
 
 
 class WedstrijdDagScheidsrechtersAdmin(admin.ModelAdmin):
@@ -20,8 +18,9 @@ class WedstrijdDagScheidsrechtersAdmin(admin.ModelAdmin):
         ('Hoofdscheidsrechter', {'fields': ('gekozen_hoofd_sr',)}),
         ('Scheidsrechters', {'fields': ('gekozen_sr1', 'gekozen_sr2', 'gekozen_sr3', 'gekozen_sr4', 'gekozen_sr5',
                                         'gekozen_sr6', 'gekozen_sr7', 'gekozen_sr8', 'gekozen_sr9')}),
+        ('Berichtgeving', {'fields': ('notified_srs',)})
     )
-    readonly_fields = ('wedstrijd', 'dag_offset')
+    readonly_fields = ('wedstrijd', 'dag_offset', 'notified_srs')
 
     def __init__(self, model, admin_site):
         super().__init__(model, admin_site)
@@ -71,5 +70,6 @@ class ScheidsBeschikbaarheidAdmin(admin.ModelAdmin):
 
 admin.site.register(ScheidsBeschikbaarheid, ScheidsBeschikbaarheidAdmin)
 admin.site.register(WedstrijdDagScheidsrechters, WedstrijdDagScheidsrechtersAdmin)
+admin.site.register(ScheidsMutatie)
 
 # end of file

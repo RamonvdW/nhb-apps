@@ -9,7 +9,7 @@ from BasisTypen.definities import SCHEIDS_NIET, SCHEIDS_BOND, SCHEIDS_INTERNATIO
 from Functie.models import Functie
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
-from Sporter.models import Sporter
+from Sporter.models import Sporter, SporterVoorkeuren
 
 
 class TestScheidsrechterKorps(E2EHelpers, TestCase):
@@ -41,16 +41,21 @@ class TestScheidsrechterKorps(E2EHelpers, TestCase):
         """ initialisatie van de test case """
         self.assertIsNotNone(self.scheids_met_account)
         self.functie_cs = Functie.objects.get(rol='CS')
+        self.voorkeuren = SporterVoorkeuren.objects.get(sporter=self.scheids_met_account)
 
     def test_anon(self):
         resp = self.client.get(self.url_korps)
-        self.assert403(resp)
+        self.assert_is_redirect_login(resp, self.url_korps)
 
         resp = self.client.get(self.url_korps_met_contact)
-        self.assert403(resp)
+        self.assert_is_redirect_login(resp, self.url_korps_met_contact)
 
     def test_scheids(self):
         self.e2e_login(self.scheids_met_account.account)
+
+        self.scheids_met_account.telefoon = '+3123456789'
+        self.scheids_met_account.email = 'scheids@ergens.nl'
+        self.scheids_met_account.save(update_fields=['telefoon', 'email'])
 
         # korps
         with self.assert_max_queries(20):
@@ -58,8 +63,33 @@ class TestScheidsrechterKorps(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('scheidsrechter/korps.dtl', 'plein/site_layout.dtl'))
+        html = resp.content.decode('utf-8').replace('<wbr>', '')
+        self.assertFalse('+3123456789' in html)
+        self.assertFalse('@ergens' in html)
 
-        # korps met contactgegevens
+        # zet voorkeuren voor delen
+        self.voorkeuren.scheids_opt_in_korps_tel_nr = True
+        self.voorkeuren.scheids_opt_in_korps_email = True
+        self.voorkeuren.save(update_fields=['scheids_opt_in_korps_tel_nr', 'scheids_opt_in_korps_email'])
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_korps)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('scheidsrechter/korps.dtl', 'plein/site_layout.dtl'))
+        html = resp.content.decode('utf-8').replace('<wbr>', '')
+        self.assertTrue('+3123456789' in html)
+        self.assertTrue('scheids@ergens.nl' in html)
+
+        # corner case: geen voorkeuren
+        self.voorkeuren.delete()
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_korps)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('scheidsrechter/korps.dtl', 'plein/site_layout.dtl'))
+
+        # korps overzicht met contactgegevens is niet toegankelijk
         resp = self.client.get(self.url_korps_met_contact)
         self.assert403(resp, 'Geen toegang')
 
@@ -86,6 +116,7 @@ class TestScheidsrechterKorps(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('scheidsrechter/korps.dtl', 'plein/site_layout.dtl'))
 
         # korps met contactgegevens
+        self.voorkeuren.delete()            # corner case
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_korps_met_contact)
         self.assertEqual(resp.status_code, 200)     # 200 = OK

@@ -1169,7 +1169,7 @@ M.AutoInit = function (context) {
 
   var registry = {
     Autocomplete: root.querySelectorAll('.autocomplete:not(.no-autoinit)'),
-    //Carousel: root.querySelectorAll('.carousel:not(.no-autoinit)'),
+    Carousel: root.querySelectorAll('.carousel:not(.no-autoinit)'),
     Chips: root.querySelectorAll('.chips:not(.no-autoinit)'),
     Collapsible: root.querySelectorAll('.collapsible:not(.no-autoinit)'),
     Datepicker: root.querySelectorAll('.datepicker:not(.no-autoinit)'),
@@ -4012,7 +4012,7 @@ $jscomp.polyfill = function (e, r, p, m) {
     M.initializeJqueryWrapper(Parallax, 'parallax', 'M_Parallax');
   }
 })(cash);
-/*
+
 ;(function ($, anim) {
   'use strict';
 
@@ -4026,7 +4026,7 @@ $jscomp.polyfill = function (e, r, p, m) {
   /**
    * @class
    *
-   *
+   */
 
   var Tabs = function (_Component6) {
     _inherits(Tabs, _Component6);
@@ -4036,7 +4036,7 @@ $jscomp.polyfill = function (e, r, p, m) {
      * @constructor
      * @param {Element} el
      * @param {Object} options
-     *
+     */
     function Tabs(el, options) {
       _classCallCheck(this, Tabs);
 
@@ -4051,7 +4051,7 @@ $jscomp.polyfill = function (e, r, p, m) {
        * @prop {Function} onShow
        * @prop {Boolean} swipeable
        * @prop {Number} responsiveThreshold
-       *
+       */
       _this22.options = $.extend({}, Tabs.defaults, options);
 
       // Setup
@@ -4080,7 +4080,7 @@ $jscomp.polyfill = function (e, r, p, m) {
 
       /**
        * Teardown component
-       *
+       */
       value: function destroy() {
         this._removeEventHandlers();
         this._indicator.parentNode.removeChild(this._indicator);
@@ -4096,7 +4096,7 @@ $jscomp.polyfill = function (e, r, p, m) {
 
       /**
        * Setup Event Handlers
-       *
+       */
 
     }, {
       key: "_setupEventHandlers",
@@ -4110,7 +4110,7 @@ $jscomp.polyfill = function (e, r, p, m) {
 
       /**
        * Remove Event Handlers
-       *
+       */
 
     }, {
       key: "_removeEventHandlers",
@@ -4121,7 +4121,7 @@ $jscomp.polyfill = function (e, r, p, m) {
 
       /**
        * Handle window Resize
-       *
+       */
 
     }, {
       key: "_handleWindowResize",
@@ -4137,7 +4137,7 @@ $jscomp.polyfill = function (e, r, p, m) {
       /**
        * Handle tab click
        * @param {Event} e
-       *
+       */
 
     }, {
       key: "_handleTabClick",
@@ -4212,7 +4212,7 @@ $jscomp.polyfill = function (e, r, p, m) {
 
       /**
        * Generate elements for tab indicator.
-       *
+       */
 
     }, {
       key: "_createIndicator",
@@ -4233,7 +4233,7 @@ $jscomp.polyfill = function (e, r, p, m) {
 
       /**
        * Setup first active tab link.
-       *
+       */
 
     }, {
       key: "_setupActiveTabLink",
@@ -4262,7 +4262,7 @@ $jscomp.polyfill = function (e, r, p, m) {
 
       /**
        * Setup swipeable tabs
-       *
+       */
 
     }, {
       key: "_setupSwipeableTabs",
@@ -4311,7 +4311,7 @@ $jscomp.polyfill = function (e, r, p, m) {
 
       /**
        * Teardown normal tabs.
-       *
+       */
 
     }, {
       key: "_teardownSwipeableTabs",
@@ -4326,7 +4326,7 @@ $jscomp.polyfill = function (e, r, p, m) {
 
       /**
        * Setup normal tabs.
-       *
+       */
 
     }, {
       key: "_setupNormalTabs",
@@ -4344,7 +4344,7 @@ $jscomp.polyfill = function (e, r, p, m) {
 
       /**
        * Teardown normal tabs.
-       *
+       */
 
     }, {
       key: "_teardownNormalTabs",
@@ -4362,7 +4362,7 @@ $jscomp.polyfill = function (e, r, p, m) {
 
       /**
        * set tabs and tab width
-       *
+       */
 
     }, {
       key: "_setTabsAndTabWidth",
@@ -4374,7 +4374,7 @@ $jscomp.polyfill = function (e, r, p, m) {
       /**
        * Finds right attribute for indicator based on active tab.
        * @param {cash} el
-       *
+       */
 
     }, {
       key: "_calcRightPos",
@@ -4385,7 +4385,7 @@ $jscomp.polyfill = function (e, r, p, m) {
       /**
        * Finds left attribute for indicator based on active tab.
        * @param {cash} el
-       *
+       */
 
     }, {
       key: "_calcLeftPos",
@@ -4402,7 +4402,7 @@ $jscomp.polyfill = function (e, r, p, m) {
       /**
        * Animates Indicator to active tab.
        * @param {Number} prevIndex
-       *
+       */
 
     }, {
       key: "_animateIndicator",
@@ -4437,7 +4437,7 @@ $jscomp.polyfill = function (e, r, p, m) {
       /**
        * Select tab.
        * @param {String} tabId
-       *
+       */
 
     }, {
       key: "select",
@@ -4455,7 +4455,7 @@ $jscomp.polyfill = function (e, r, p, m) {
 
       /**
        * Get Instance
-       *
+       */
 
     }, {
       key: "getInstance",
@@ -4479,7 +4479,7 @@ $jscomp.polyfill = function (e, r, p, m) {
     M.initializeJqueryWrapper(Tabs, 'tabs', 'M_Tabs');
   }
 })(cash, M.anime);
-*/
+
 ;(function ($, anim) {
   'use strict';
 

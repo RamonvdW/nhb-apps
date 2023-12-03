@@ -39,7 +39,11 @@ class Command(BaseCommand):
                                 competitie=deelkamp.competitie)
                         .order_by('volgorde')):
 
-                kampioenen = KampioenschapSporterBoog.objects.filter(kampioenschap=deelkamp, indiv_klasse=wkl).exclude(deelname=DEELNAME_NEE)
+                kampioenen = (KampioenschapSporterBoog
+                              .objects
+                              .filter(kampioenschap=deelkamp,
+                                      indiv_klasse=wkl)
+                              .exclude(deelname=DEELNAME_NEE))
                 heeft_kampioen = 1 == kampioenen.filter(result_rank=1).count()
                 aantal = kampioenen.count()
 
@@ -69,7 +73,8 @@ class Command(BaseCommand):
                         self.stdout.write('[DEBUG] nr=%s, rank=%s, volgorde=%s' % (nr, rank, volgorde))
 
                     if nr != volgorde:
-                        self.stdout.write('[WARNING] Onverwachte result_volgorde: %s voor deelnemer %s' % (volgorde, kampioen))
+                        self.stdout.write('[WARNING] Onverwachte result_volgorde: %s voor deelnemer %s' % (
+                                            volgorde, kampioen))
 
                     if nr == 1:
                         check_rank = (1,)
@@ -87,8 +92,9 @@ class Command(BaseCommand):
                         check_rank = (nr,)
 
                     if rank not in check_rank:
-                        self.stdout.write('[WARNING] Onverwachte result_rank: %s (verwacht: %s) voor deelnemer %s in klasse %s' % (
-                                            rank, "/".join([str(rank) for rank in check_rank]), kampioen, kampioen.indiv_klasse))
+                        self.stdout.write(
+                            '[WARNING] Onverwachte result_rank: %s (verwacht: %s) voor deelnemer %s in klasse %s' % (
+                                rank, "/".join([str(rank) for rank in check_rank]), kampioen, kampioen.indiv_klasse))
                 # for
             # for
         # for

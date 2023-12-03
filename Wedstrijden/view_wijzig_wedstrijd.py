@@ -17,14 +17,11 @@ from Account.models import get_account
 from BasisTypen.definities import GESLACHT_ALLE, ORGANISATIES2LONG_STR, ORGANISATIE_WA, ORGANISATIE_IFAA
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse
 from BasisTypen.operations import get_organisatie_boogtypen, get_organisatie_klassen
-from Betaal.models import BetaalInstellingenVereniging
 from Functie.definities import Rollen
-from Functie.models import Functie
 from Functie.rol import rol_get_huidige_functie
 from Locatie.definities import BAAN_TYPE_BUITEN, BAAN_TYPE_EXTERN
 from Locatie.models import Locatie
 from Sporter.models import get_sporter
-from Taken.operations import maak_taak
 from Vereniging.models import Vereniging
 from Wedstrijden.definities import (ORGANISATIE_WEDSTRIJD_DISCIPLINE_STRS, WEDSTRIJD_STATUS_TO_STR,
                                     WEDSTRIJD_WA_STATUS_TO_STR, WEDSTRIJD_STATUS_ONTWERP, WEDSTRIJD_STATUS2URL,
@@ -32,8 +29,8 @@ from Wedstrijden.definities import (ORGANISATIE_WEDSTRIJD_DISCIPLINE_STRS, WEDST
                                     WEDSTRIJD_STATUS_GEANNULEERD, WEDSTRIJD_WA_STATUS_A, WEDSTRIJD_WA_STATUS_B,
                                     WEDSTRIJD_DUUR_MAX_DAGEN, WEDSTRIJD_BEGRENZING_TO_STR, AANTAL_SCHEIDS_GEEN_KEUZE)
 from Wedstrijden.models import Wedstrijd
-import datetime
 from types import SimpleNamespace
+import datetime
 
 TEMPLATE_WEDSTRIJDEN_WIJZIG_WEDSTRIJD = 'wedstrijden/wijzig-wedstrijd.dtl'
 
@@ -698,133 +695,5 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
 
         return HttpResponseRedirect(url)
 
-
-class ZetStatusWedstrijdView(UserPassesTestMixin, View):
-
-    """ Via deze view kan de BB of HWL de wedstrijd status aanpassen """
-
-    # class variables shared by all instances
-    raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
-    permission_denied_message = 'Geen toegang'
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.rol_nu, self.functie_nu = None, None
-
-    def test_func(self):
-        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_MWZ, Rollen.ROL_HWL)
-
-    @staticmethod
-    def _maak_taak_voor_bb(wedstrijd, msg):
-        now = timezone.now()
-        stamp_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
-        taak_deadline = now + datetime.timedelta(days=3)
-        taak_log = "[%s] Taak aangemaakt" % stamp_str
-        taak_tekst = msg % "%s van vereniging %s" % (repr(wedstrijd.titel), wedstrijd.organiserende_vereniging)
-        taak_tekst += '\n\nGa naar de Wedstrijdkalender om deze wedstrijd te behandelen.'
-
-        # maak een taak voor de Manager Wedstrijdzaken
-        functie_mwz = Functie.objects.get(rol='MWZ')
-        maak_taak(
-            toegekend_aan_functie=functie_mwz,
-            deadline=taak_deadline,
-            beschrijving=taak_tekst,
-            log=taak_log)
-
-    @staticmethod
-    def _maak_taak_voor_hwl(wedstrijd, msg):
-        now = timezone.now()
-        stamp_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
-        taak_deadline = now + datetime.timedelta(days=3)
-        taak_log = "[%s] Taak aangemaakt" % stamp_str
-        taak_tekst = msg % repr(wedstrijd.titel)
-        taak_tekst += '\n\nGa naar de Wedstrijdkalender om deze wedstrijd te behandelen.'
-
-        # maak een taak aan voor de HWL van de organiserende vereniging
-        functie_hwl = wedstrijd.organiserende_vereniging.functie_set.filter(rol='HWL')[0]
-        maak_taak(
-            toegekend_aan_functie=functie_hwl,
-            deadline=taak_deadline,
-            beschrijving=taak_tekst,
-            log=taak_log)
-
-    @staticmethod
-    def _garandeer_instellingen_bestaat(ver):
-        """ BetaalInstellingenVereniging is noodzakelijk voor een inschrijving,
-            maar wordt pas aangemaakt als de vereniging het kaartje Financieel gebruikt.
-            Omdat handmatige overschrijving nu ook kan, zorgen we hier dat het record bestaat.
-        """
-        _ = BetaalInstellingenVereniging.objects.get_or_create(vereniging=ver)
-
-    def post(self, request, *args, **kwargs):
-
-        try:
-            wedstrijd_pk = int(str(kwargs['wedstrijd_pk'])[:6])     # afkappen voor de veiligheid
-            wedstrijd = (Wedstrijd
-                         .objects
-                         .get(pk=wedstrijd_pk))
-        except Wedstrijd.DoesNotExist:
-            raise Http404('Wedstrijd niet gevonden')
-
-        terug = request.POST.get('terug', '')
-        verder = request.POST.get('verder', '')
-        annuleer = request.POST.get('annuleer', '')
-
-        # FUTURE: zet wijzigingen in het logboek, of begin een logboekje per wedstrijd
-
-        if self.rol_nu == Rollen.ROL_HWL:
-            if wedstrijd.organiserende_vereniging != self.functie_nu.vereniging:
-                raise PermissionDenied('Wedstrijd niet van jouw vereniging')
-
-            next_url = reverse('Wedstrijden:vereniging')
-
-            if wedstrijd.status == WEDSTRIJD_STATUS_ONTWERP and verder:
-                self._garandeer_instellingen_bestaat(wedstrijd.organiserende_vereniging)
-
-                if not wedstrijd.verkoopvoorwaarden_status_acceptatie:
-                    raise Http404('Verkoopvoorwaarden')
-
-                # verzoek tot goedkeuring
-                wedstrijd.status = WEDSTRIJD_STATUS_WACHT_OP_GOEDKEURING
-                wedstrijd.save(update_fields=['status'])
-                # maak een taak aan voor de BB
-                self._maak_taak_voor_bb(wedstrijd, 'Wedstrijd %s is ingediend voor goedkeuring')
-
-        else:
-            next_url = reverse('Wedstrijden:manager')
-
-            if annuleer:
-                # annuleer deze wedstrijd
-                wedstrijd.status = WEDSTRIJD_STATUS_GEANNULEERD
-                wedstrijd.save(update_fields=['status'])
-
-                # maak een taak aan voor de HWL
-                self._maak_taak_voor_hwl(wedstrijd, "Wedstrijd %s is nu geannuleerd")
-
-            elif wedstrijd.status == WEDSTRIJD_STATUS_ONTWERP:
-                if verder:
-                    wedstrijd.status = WEDSTRIJD_STATUS_WACHT_OP_GOEDKEURING
-                    wedstrijd.save(update_fields=['status'])
-
-            elif wedstrijd.status == WEDSTRIJD_STATUS_WACHT_OP_GOEDKEURING:
-                if terug:
-                    # afgekeurd --> terug naar ontwerp
-                    wedstrijd.status = WEDSTRIJD_STATUS_ONTWERP
-                    wedstrijd.save(update_fields=['status'])
-
-                    # maak een taak aan voor de HWL
-                    self._maak_taak_voor_hwl(wedstrijd, "Wedstrijd %s is terug gezet naar de status 'ontwerp'")
-
-                elif verder:
-                    # goedgekeurd --> naar geaccepteerd
-                    wedstrijd.status = WEDSTRIJD_STATUS_GEACCEPTEERD
-                    wedstrijd.save(update_fields=['status'])
-
-                    # maak een taak aan voor de HWL
-                    self._maak_taak_voor_hwl(wedstrijd, "Wedstrijd %s is nu geaccepteerd en openbaar")
-
-        return HttpResponseRedirect(next_url)
 
 # end of file

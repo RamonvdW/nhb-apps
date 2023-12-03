@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022 Ramon van der Winkel.
+#  Copyright (c) 2022-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -54,7 +54,8 @@ class Command(BaseCommand):
                 self._check_foto_gebruik(product, foto, 'locatie')
                 self._check_foto_bestand(foto, 'locatie')
             else:
-                self.stdout.write('[WARNING] Product pk=%s (%s) heeft geen omslagfoto' % (product.pk, product.omslag_titel))
+                self.stdout.write('[WARNING] Product pk=%s (%s) heeft geen omslagfoto' % (product.pk,
+                                                                                          product.omslag_titel))
                 self.aantal_nok += 1
 
             nr = 0

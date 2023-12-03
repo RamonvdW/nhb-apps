@@ -99,7 +99,8 @@ class Command(BaseCommand):
                                                                                               limiet))
 
             block.append('[INFO] rank %2d, volgorde %3d, gem=%.3f, deelname=%s, sporterboog %s' % (
-                                kampioen.rank, kampioen.volgorde, kampioen.gemiddelde, kampioen.deelname, kampioen.sporterboog))
+                                kampioen.rank, kampioen.volgorde, kampioen.gemiddelde,
+                                kampioen.deelname, kampioen.sporterboog))
 
             if kampioen.sporterboog.pk not in sporterboog_pks:
                 sporterboog_pks.append(kampioen.sporterboog.pk)

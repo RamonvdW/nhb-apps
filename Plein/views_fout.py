@@ -7,10 +7,12 @@
 from django.conf import settings
 from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.urls import Resolver404
+from django.utils.http import urlencode
 from django.shortcuts import render, reverse
 from django.views.generic import View
 from django.views.defaults import ERROR_PAGE_TEMPLATE
 from django.core.exceptions import PermissionDenied
+from Account.models import get_account
 from Functie.rol import rol_get_huidige_functie
 from Mailer.operations import mailer_notify_internal_error
 from SiteMain.core import urls
@@ -40,10 +42,27 @@ def site_handler403_permission_denied(request, exception=None):
     if not request.user.is_authenticated:
         url = reverse('Account:login')
 
-        # next_url werkt niet want er moet eerst nog van rol gewisseld worden
-        #   en het blokkeert redirect naar 2FA check
-        # from django.utils.http import urlencode
-        # url += '?%s' % urlencode({'next': request.path})
+        # TODO: next_url voor URL naar beheerdersfunctie doorgeven aan 2FA controle
+
+        # whitelist een aantal urls die we willen ondersteunen
+        params = dict()
+
+        if request.path.startswith('/sporter/bondspas/'):
+            # vervang alle mogelijke urls naar een basale
+            params['next'] = '/sporter/bondspas/toon/'
+
+        elif request.path.startswith('/sporter/'):
+            # sporter, geen dynamische url voor de bondspas
+            params['next'] = request.path
+
+        elif request.path.startswith('/scheidsrechter/'):
+            # sommige sporters zijn ook scheidsrechter
+            params['next'] = request.path
+
+        if len(params) > 0:
+            params_str = urlencode(params)
+            params_str = params_str.replace('%2F', '/')     # re-beautify
+            url = url + '?' + params_str
 
         return HttpResponseRedirect(url)
 

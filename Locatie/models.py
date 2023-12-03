@@ -59,6 +59,10 @@ class Locatie(models.Model):
     # plaats van deze locatie, om eenvoudig weer te kunnen geven op de kalender
     plaats = models.CharField(max_length=50, blank=True, default='')
 
+    # coördinaten voor het adres
+    adres_lat = models.CharField(max_length=10, default='')       # 51.5037503
+    adres_lon = models.CharField(max_length=10, default='')       # 5.3670660
+
     # handmatig ingevoerd of uit de CRM (=bevroren)
     adres_uit_crm = models.BooleanField(default=False)
 
@@ -104,6 +108,41 @@ class Locatie(models.Model):
     class Meta:
         """ meta data voor de admin interface """
         verbose_name = "Locatie"
+
+
+class Reistijd(models.Model):
+
+    """ Reistijd met de auto/motor, tussen twee postcodes.
+
+        Coördination zijn nodig voor de API die we gebruiken.
+        Deze komen uit OR voor zowel leden als het doel.
+    """
+
+    # coördinaten voor het vertrekpunt
+    # note: 5e decimaal is ~1 meter
+    vanaf_lat = models.CharField(max_length=10, default='')             # 51.5037503
+    vanaf_lon = models.CharField(max_length=10, default='')             # 5.3670660
+
+    # coördinaten voor het doel
+    naar_lat = models.CharField(max_length=10, default='')
+    naar_lon = models.CharField(max_length=10, default='')
+
+    # reistijd enkele richting met auto/motor, in minuten
+    # aankomsttijd 08:00 op een zaterdag of zondag
+    reistijd_min = models.PositiveSmallIntegerField(default=0)   # max 32767
+
+    # bijhouden hoe oud deze informatie is
+    op_datum = models.DateField(default='2000-01-01')
+
+    def __str__(self):
+        return "%s minuten van %s, %s --> %s, %s" % (self.reistijd_min,
+                                                     self.vanaf_lat, self.vanaf_lon,
+                                                     self.naar_lat, self.naar_lon)
+
+    class Meta:
+        """ meta data voor de admin interface """
+        verbose_name = "Reistijd"
+        verbose_name_plural = "Reistijden"
 
 
 # end of file

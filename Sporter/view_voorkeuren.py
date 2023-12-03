@@ -11,7 +11,7 @@ from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
 from BasisTypen.definities import (GESLACHT_MAN, GESLACHT_VROUW, GESLACHT_ANDERS, GESLACHT_MV_MEERVOUD,
-                                   ORGANISATIE_IFAA)
+                                   ORGANISATIE_IFAA, SCHEIDS_NIET)
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie, rol_mag_wisselen
 from Sporter.models import Sporter, get_sporter
@@ -146,6 +146,18 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
             voorkeuren.wedstrijd_geslacht_gekozen = gekozen
             voorkeuren.wedstrijd_geslacht = keuze
 
+        keuze = self.request.POST.get('sr_korps_email', None) is not None
+        voorkeuren.scheids_opt_in_korps_email = keuze
+
+        keuze = self.request.POST.get('sr_korps_tel', None) is not None
+        voorkeuren.scheids_opt_in_korps_tel_nr = keuze
+
+        keuze = self.request.POST.get('sr_wed_email', None) is not None
+        voorkeuren.scheids_opt_in_ver_email = keuze
+
+        keuze = self.request.POST.get('sr_wed_tel', None) is not None
+        voorkeuren.scheids_opt_in_ver_tel_nr = keuze
+
         voorkeuren.save()
 
     def post(self, request, *args, **kwargs):
@@ -250,6 +262,8 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
             if rol_mag_wisselen(self.request):
                 # sporter is beheerder, dus toon opt-out opties
                 context['account'] = self.sporter.account
+
+            context['toon_contact_sr'] = self.sporter.scheids != SCHEIDS_NIET
 
         context['toon_bondscompetities'] = not self.sporter.is_gast
         context['opslaan_url'] = reverse('Sporter:voorkeuren')

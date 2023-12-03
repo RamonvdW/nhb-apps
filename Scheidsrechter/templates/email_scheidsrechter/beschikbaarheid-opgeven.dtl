@@ -1,0 +1,56 @@
+{% extends 'email_mailer/email_basis.dtl' %}
+{% comment %}
+                Copyright (c) 2023 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% block inhoud_text %}
+    |Hallo {{ voornaam }}!
+    |
+    |We zijn op zoek naar {{ soort_sr }} voor de volgende wedstrijd:
+    |
+    |Wedstrijd: {{ wed_titel }}
+    |Plaats: {{ wed_plaats }}
+    |Wanneer: {{ wed_datum }}
+    |
+    |We willen je verzoeken om binnen een paar dagen je beschikbaarheid door te geven in MijnHandboogsport. Hiervoor kan je gebruik maken van deze link:
+    |{{ url_beschikbaarheid }}
+    |
+    |Eventuele vragen kan je sturen naar {{ email_cs }}
+    |
+    |Alvast bedankt!
+{% endblock %}
+
+{% block inhoud_html %}
+    <div>Hallo {{ voornaam }}!</div>
+    <br>
+    <div>We zijn op zoek naar {{ soort_sr }} voor de volgende wedstrijd:</div>
+    <br>
+    <table>
+        <tr><th>Wedstrijd:</th><td>{{ wed_titel }}</td></tr>
+        <tr><th>Plaats:</th><td>{{ wed_plaats }}</td></tr>
+        <tr><th>Wanneer:</th><td>{{ wed_datum }}</td></tr>
+    </table>
+    <br>
+    <div>We willen je verzoeken om binnen een paar dagen je beschikbaarheid door te geven in MijnHandboogsport. Hiervoor kan je gebruik maken van deze link:<br>
+        <a href="{{ url_beschikbaarheid }}">{{ url_beschikbaarheid }}</a></div>
+    <br>
+    <div>Eventuele vragen kan je sturen naar <a href="mailto:{{ email_cs }}">{{ email_cs }}</a></div>
+    <br>
+    <div>Alvast bedankt!</div>
+{% endblock %}
+
+
+{% block footer_text %}
+    |
+    |Commissie Scheidsrechters
+{% endblock %}
+
+{% block footer_html %}
+    <br>
+    <div>Commissie Scheidsrechters</div>
+    <br>
+    <div>
+        <img src="{{ logo_url }}" height="{{ logo_height }}" width="{{ logo_width }}" alt="KHSN logo">
+    </div>
+{% endblock %}

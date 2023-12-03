@@ -103,12 +103,14 @@ class Command(BaseCommand):
             do_save = False
 
             if ag_teams_str != str(deelnemer.ag_voor_team):
-                self.stdout.write('deelnemer %s : AG team %s --> %s' % (deelnemer, deelnemer.ag_voor_team, ag_teams_str))
+                self.stdout.write('deelnemer %s : AG team %s --> %s' % (
+                                    deelnemer, deelnemer.ag_voor_team, ag_teams_str))
                 deelnemer.ag_voor_team = ag_teams
                 do_save = True
 
             if ag_indiv_str != str(deelnemer.ag_voor_indiv):
-                self.stdout.write('deelnemer %s : AG indiv %s --> %s' % (deelnemer, deelnemer.ag_voor_indiv, ag_indiv_str))
+                self.stdout.write('deelnemer %s : AG indiv %s --> %s' % (
+                                    deelnemer, deelnemer.ag_voor_indiv, ag_indiv_str))
                 deelnemer.ag_voor_indiv = ag_indiv
                 do_save = True
 

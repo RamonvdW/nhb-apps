@@ -345,7 +345,8 @@ class BepaalAutomatischeKorting(object):
         self._analyseer_kortingen_recursief_combi(alle_inschrijvingen)
 
         if self._max_korting_pks:
-            self._stdout.write('maximale korting is %.2f met kortingen %s' % (self._max_korting_euro, repr(self._max_korting_pks)))
+            self._stdout.write('maximale korting is %.2f met kortingen %s' % (float(self._max_korting_euro),
+                                                                              repr(self._max_korting_pks)))
             self._kortingen_toepassen(alle_inschrijvingen, self._max_korting_pks)
 
 

@@ -29,9 +29,12 @@ class Command(BaseCommand):
             for team in self.teams[1:]:
                 if team.team_score > 0 and team.team_score == prev_team.team_score:
                     if prev_team.team_punten != team.team_punten:
-                        self.stdout.write('[WARNING] Verschillende WP voor zelfde score! Corrigeer in ronde team pk %s' % team.pk)
-                        self.stdout.write('   %3s  %2s  %s' % (prev_team.team_score, prev_team.team_punten, prev_team))
-                        self.stdout.write('   %3s  %2s  %s' % (team.team_score, team.team_punten, team))
+                        self.stdout.write(
+                            '[WARNING] Verschillende WP voor zelfde score! Corrigeer in ronde team pk %s' % team.pk)
+                        self.stdout.write(
+                            '   %3s  %2s  %s' % (prev_team.team_score, prev_team.team_punten, prev_team))
+                        self.stdout.write(
+                            '   %3s  %2s  %s' % (team.team_score, team.team_punten, team))
 
                 prev_team = team
             # for

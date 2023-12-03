@@ -16,10 +16,10 @@ OUT="$SCRIPT_DIR/needed-glyphs_material-icons-round.txt"
 HANDLED='@@@'   # dummy, to allow concatenation
 
 echo "[INFO] Searching for icons in templates and sources"
-grep material-icons-round */templates/*/*dtl | grep -v secondary-content | sed -s 's/material-icons-round/@/' | cut -d@ -f2- | cut -d\> -f2- | sed -s 's#</i>#@#' | cut -d@ -f1 > "$OUT_TMP"
+grep material-icons-round -- */templates/*/*dtl | grep -v secondary-content | sed -s 's/material-icons-round/@/' | cut -d@ -f2- | cut -d\> -f2- | sed -s 's#</i>#@#' | cut -d@ -f1 > "$OUT_TMP"
 
 # handle include 'plein/card_..' icon="xxx"
-grep icon= */templates/*/*dtl | sed 's/icon=/@/' | cut -d@ -f2 | cut -d\" -f2 >> "$OUT_TMP"
+grep icon= -- */templates/*/*dtl | sed 's/icon=/@/' | cut -d@ -f2 | cut -d\" -f2 >> "$OUT_TMP"
 HANDLED+="|{{ icon }}"       # in Plein/templates/plain/card_*dtl
 
 # handle {{ korting.icon_name }}

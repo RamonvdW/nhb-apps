@@ -91,7 +91,7 @@ def registreer_opschonen(stdout):
 
         # echt verwijderen
         if gast.sporter:
-            gast.sporter.delete()
+            gast.sporter.delete()           # verwijdert ook SporterVoorkeuren en SporterBoog
         if gast.account:
             gast.account.delete()
         gast.delete()

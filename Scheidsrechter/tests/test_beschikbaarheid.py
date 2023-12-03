@@ -10,9 +10,9 @@ from BasisTypen.definities import SCHEIDS_BOND, SCHEIDS_VERENIGING
 from BasisTypen.models import KalenderWedstrijdklasse
 from Functie.models import Functie
 from Geo.models import Regio
-from Locatie.models import Locatie
+from Locatie.models import Locatie, Reistijd
 from Scheidsrechter.definities import BESCHIKBAAR_LEEG
-from Scheidsrechter.models import ScheidsBeschikbaarheid, WedstrijdDagScheidsrechters
+from Scheidsrechter.models import ScheidsBeschikbaarheid, WedstrijdDagScheidsrechters, ScheidsMutatie
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 from Vereniging.models import Vereniging
@@ -46,12 +46,18 @@ class TestScheidsrechterBeschikbaarheid(E2EHelpers, TestCase):
         for sporter in data.sporters_scheids[SCHEIDS_BOND]:             # pragma: no branch
             if sporter.account is not None:                             # pragma: no branch
                 cls.sr4_met_account = sporter
+                sporter.adres_lat = 'sr4_lat'
+                sporter.adres_lon = 'sr4_lon'
+                sporter.save(update_fields=['adres_lat', 'adres_lon'])
                 break
         # for
 
         for sporter in data.sporters_scheids[SCHEIDS_VERENIGING]:       # pragma: no branch
             if sporter.account is not None:                             # pragma: no branch
                 cls.sr3_met_account = sporter
+                sporter.adres_lat = 'sr3_lat'
+                sporter.adres_lon = 'sr3_lon'
+                sporter.save(update_fields=['adres_lat', 'adres_lon'])
                 break
         # for
 
@@ -78,9 +84,12 @@ class TestScheidsrechterBeschikbaarheid(E2EHelpers, TestCase):
                         buiten_banen=10,
                         buiten_max_afstand=90,
                         adres="Schietweg 1, Spanningen",
-                        plaats="Spanningen")
+                        plaats="Spanningen",
+                        adres_lat='loc_lat',
+                        adres_lon='loc_lon')
         locatie.save()
         locatie.verenigingen.add(ver)
+        self.locatie = locatie
 
         sessie = WedstrijdSessie(
                     datum=datum,
@@ -135,13 +144,13 @@ class TestScheidsrechterBeschikbaarheid(E2EHelpers, TestCase):
 
     def test_anon(self):
         resp = self.client.get(self.url_beschikbaarheid_opvragen)
-        self.assert403(resp)
+        self.assert_is_redirect_login(resp, self.url_beschikbaarheid_opvragen)
 
         resp = self.client.get(self.url_beschikbaarheid_wijzigen)
-        self.assert403(resp)
+        self.assert_is_redirect_login(resp,self.url_beschikbaarheid_wijzigen)
 
         resp = self.client.get(self.url_beschikbaarheid_inzien)
-        self.assert403(resp)
+        self.assert_is_redirect_login(resp, self.url_beschikbaarheid_inzien)
 
     def test_sr3(self):
         self.e2e_login(self.sr3_met_account.account)
@@ -162,12 +171,24 @@ class TestScheidsrechterBeschikbaarheid(E2EHelpers, TestCase):
 
         self.assertEqual(0, WedstrijdDagScheidsrechters.objects.count())
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_beschikbaarheid_opvragen, {'wedstrijd': self.wedstrijd.pk})
+            resp = self.client.post(self.url_beschikbaarheid_opvragen, {'wedstrijd': self.wedstrijd.pk, 'snel': 1})
         self.assert_is_redirect(resp, self.url_overzicht)
+        self.assertEqual(1, ScheidsMutatie.objects.count())
+        mutatie = ScheidsMutatie.objects.first()
+        f1, f2 = self.verwerk_scheids_mutaties()
+        # print('\nf1:', f1.getvalue(), '\nf2:', f2.getvalue())
         self.assertEqual(2, WedstrijdDagScheidsrechters.objects.count())
 
         self.client.logout()
         self.e2e_login(self.sr3_met_account.account)
+
+        # zet de reistijd
+        reistijd = Reistijd(vanaf_lat='sr3_lat',
+                            vanaf_lon='sr3_lon',
+                            naar_lat=self.locatie.adres_lat,
+                            naar_lon=self.locatie.adres_lon,
+                            reistijd_min=0)         # 0 = nog niet uitgerekend
+        reistijd.save()
 
         # beschikbaarheid
         with self.assert_max_queries(20):
@@ -185,8 +206,11 @@ class TestScheidsrechterBeschikbaarheid(E2EHelpers, TestCase):
         self.assertEqual(1, ScheidsBeschikbaarheid.objects.count())
         beschikbaar = ScheidsBeschikbaarheid.objects.first()
         self.assertEqual(beschikbaar.opgaaf, 'N')       # 3 = Nee
-
         self.assertTrue(str(beschikbaar) != '')
+
+        # zet de reistijd
+        reistijd.reistijd_min = 42
+        reistijd.save(update_fields=['reistijd_min'])
 
         # opgegeven beschikbaarheid inzien
         with self.assert_max_queries(20):
@@ -207,6 +231,9 @@ class TestScheidsrechterBeschikbaarheid(E2EHelpers, TestCase):
         beschikbaar.opgaaf = BESCHIKBAAR_LEEG
         beschikbaar.save(update_fields=['opgaaf'])
 
+        self.locatie.adres_lat = ''
+        self.locatie.save(update_fields=['adres_lat'])
+
         # opgegeven beschikbaarheid inzien
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_beschikbaarheid_wijzigen)
@@ -220,15 +247,21 @@ class TestScheidsrechterBeschikbaarheid(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_cs)
         self.e2e_check_rol('CS')
 
+        # prep
         self.assertEqual(0, WedstrijdDagScheidsrechters.objects.count())
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_beschikbaarheid_opvragen, {'wedstrijd': self.wedstrijd.pk})
+            resp = self.client.post(self.url_beschikbaarheid_opvragen, {'wedstrijd': self.wedstrijd.pk, 'snel': 1})
         self.assert_is_redirect(resp, self.url_overzicht)
-        self.assertEqual(2, WedstrijdDagScheidsrechters.objects.count())
+        self.assertEqual(1, ScheidsMutatie.objects.count())
 
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_beschikbaarheid_opvragen, {'wedstrijd': self.wedstrijd2.pk})
+            resp = self.client.post(self.url_beschikbaarheid_opvragen, {'wedstrijd': self.wedstrijd2.pk, 'snel': 1})
         self.assert_is_redirect(resp, self.url_overzicht)
+        self.assertEqual(2, ScheidsMutatie.objects.count())
+
+        mutatie = ScheidsMutatie.objects.first()
+        f1, f2 = self.verwerk_scheids_mutaties()
+        # print('\nf1:', f1.getvalue(), '\nf2:', f2.getvalue())
         self.assertEqual(3, WedstrijdDagScheidsrechters.objects.count())
 
         dag = WedstrijdDagScheidsrechters.objects.first()
@@ -268,6 +301,9 @@ class TestScheidsrechterBeschikbaarheid(E2EHelpers, TestCase):
         beschikbaar = ScheidsBeschikbaarheid.objects.first()
         self.assertEqual(beschikbaar.opgaaf, 'J')       # 1 = Ja
 
+        self.sr4_met_account.adres_lat = ''
+        self.sr4_met_account.save(update_fields=['adres_lat'])
+
         # beschikbaarheid
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_beschikbaarheid_wijzigen)
@@ -290,9 +326,15 @@ class TestScheidsrechterBeschikbaarheid(E2EHelpers, TestCase):
 
         # beschikbaarheid opvragen voor een wedstrijd
         self.assertEqual(0, WedstrijdDagScheidsrechters.objects.count())
+        self.assertEqual(0, ScheidsMutatie.objects.count())
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_beschikbaarheid_opvragen, {'wedstrijd': self.wedstrijd.pk})
+            resp = self.client.post(self.url_beschikbaarheid_opvragen, {'wedstrijd': self.wedstrijd.pk, 'snel': 1})
         self.assert_is_redirect(resp, self.url_overzicht)
+        self.assertEqual(1, ScheidsMutatie.objects.count())
+        mutatie = ScheidsMutatie.objects.first()
+        self.assertEqual(mutatie.door, 'CS Bond de Admin')
+        f1, f2 = self.verwerk_scheids_mutaties()
+        # print('\nf1:', f1.getvalue(), '\nf2:', f2.getvalue())
         self.assertEqual(2, WedstrijdDagScheidsrechters.objects.count())
 
         # verhoog het aantal scheidsrechters en stuur nieuwe verzoeken
@@ -300,7 +342,7 @@ class TestScheidsrechterBeschikbaarheid(E2EHelpers, TestCase):
         self.wedstrijd.save(update_fields=['aantal_scheids'])
 
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_beschikbaarheid_opvragen, {'wedstrijd': self.wedstrijd.pk})
+            resp = self.client.post(self.url_beschikbaarheid_opvragen, {'wedstrijd': self.wedstrijd.pk, 'snel': 1})
         self.assert_is_redirect(resp, self.url_overzicht)
         self.assertEqual(2, WedstrijdDagScheidsrechters.objects.count())
 
@@ -328,9 +370,14 @@ class TestScheidsrechterBeschikbaarheid(E2EHelpers, TestCase):
 
         # beschikbaarheid opvragen voor een wedstrijd
         self.assertEqual(0, WedstrijdDagScheidsrechters.objects.count())
+        self.assertEqual(0, ScheidsMutatie.objects.count())
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_beschikbaarheid_opvragen, {'wedstrijd': self.wedstrijd.pk})
+            resp = self.client.post(self.url_beschikbaarheid_opvragen, {'wedstrijd': self.wedstrijd.pk, 'snel': 1})
         self.assert_is_redirect(resp, self.url_overzicht)
+        self.assertEqual(0, WedstrijdDagScheidsrechters.objects.count())
+        self.assertEqual(1, ScheidsMutatie.objects.count())
+        f1, f2 = self.verwerk_scheids_mutaties()
+        # print('\nf1:', f1.getvalue(), '\nf2:', f2.getvalue())
         self.assertEqual(2, WedstrijdDagScheidsrechters.objects.count())
 
         # beschikbaarheid inzien voor een wedstrijd

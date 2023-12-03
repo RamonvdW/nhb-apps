@@ -22,8 +22,8 @@ class BestelMandjeAdmin(admin.ModelAdmin):
 
     @staticmethod
     def producten_in_mandje(obj):     # pragma: no cover
-        return "\n".join(['(pk %s) %s' % (product.pk, product) for product in
-                                          obj.producten.select_related('wedstrijd_inschrijving').all()])
+        return "\n".join(['(pk %s) %s' % (product.pk, product)
+                          for product in obj.producten.select_related('wedstrijd_inschrijving').all()])
 
 
 class BestellingAdmin(admin.ModelAdmin):

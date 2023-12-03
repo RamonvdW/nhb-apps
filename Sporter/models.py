@@ -95,10 +95,6 @@ class Sporter(models.Model):
     # geslacht (M/V/X)
     geslacht = models.CharField(max_length=1, choices=GESLACHT_MVX)
 
-    # code waarmee leden die op hetzelfde adres wonen gevonden kunnen worden
-    # let op: niet gebruiken als deze leeg is
-    adres_code = models.CharField(max_length=30, default='', blank=True)
-
     # officieel geregistreerde para classificatie
     para_classificatie = models.CharField(max_length=30, blank=True)
 
@@ -127,6 +123,14 @@ class Sporter(models.Model):
     postadres_1 = models.CharField(max_length=100, default='', blank=True)
     postadres_2 = models.CharField(max_length=100, default='', blank=True)
     postadres_3 = models.CharField(max_length=100, default='', blank=True)
+
+    # code waarmee leden die op hetzelfde adres wonen gevonden kunnen worden
+    # let op: niet gebruiken als deze leeg is
+    adres_code = models.CharField(max_length=30, default='', blank=True)
+
+    # postadres vertaald naar lat/lon
+    adres_lat = models.CharField(max_length=10, default='', blank=True)    # 51.5037503
+    adres_lon = models.CharField(max_length=10, default='', blank=True)    # 5.3670660
 
     # om overleden leden eenvoudig speciaal te kunnen behandelen hebben we dit veld als filter optie
     is_overleden = models.BooleanField(default=False)
@@ -269,6 +273,15 @@ class SporterVoorkeuren(models.Model):
     # automatisch gelijk gesteld aan het geslacht voor sporters met geslacht='M' of 'V'
     wedstrijd_geslacht_gekozen = models.BooleanField(default=True)
     wedstrijd_geslacht = models.CharField(max_length=1, choices=GESLACHT_MV, default=GESLACHT_MAN)
+
+    # opt-in voor het delen van contactgegevens met het korps SR
+    scheids_opt_in_korps_tel_nr = models.BooleanField(default=False)
+    scheids_opt_in_korps_email = models.BooleanField(default=False)
+
+    # opt-in voor het delen van contactgegevens met de organiserende vereniging
+    # van een wedstrijd waar de SR voor geselecteerd is
+    scheids_opt_in_ver_tel_nr = models.BooleanField(default=False)
+    scheids_opt_in_ver_email = models.BooleanField(default=False)
 
     class Meta:
         """ meta data voor de admin interface """

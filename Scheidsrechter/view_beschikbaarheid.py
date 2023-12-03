@@ -16,8 +16,10 @@ from BasisTypen.definities import SCHEIDS_NIET, SCHEIDS_BOND, SCHEIDS_INTERNATIO
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige
 from Functie.scheids import gebruiker_is_scheids
+from Locatie.models import Reistijd
 from Scheidsrechter.definities import BESCHIKBAAR_LEEG, BESCHIKBAAR_JA, BESCHIKBAAR_DENK, BESCHIKBAAR_NEE, BESCHIKBAAR2STR
 from Scheidsrechter.models import WedstrijdDagScheidsrechters, ScheidsBeschikbaarheid
+from Scheidsrechter.mutaties import scheids_mutatieverzoek_beschikbaarheid_opvragen
 from Sporter.models import Sporter, get_sporter
 from TijdelijkeCodes.definities import RECEIVER_SCHEIDS_BESCHIKBAAR
 from TijdelijkeCodes.operations import set_tijdelijke_codes_receiver
@@ -50,6 +52,7 @@ class BeschikbaarheidOpvragenView(UserPassesTestMixin, View):
             deze functie wordt aangeroepen als op de knop Beschikbaarheid Opvragen gedrukt is.
         """
 
+        snel = str(request.POST.get('snel', ''))[:1]
         wedstrijd_pk = request.POST.get('wedstrijd', '')[:6]    # afkappen voor de veiligheid
 
         try:
@@ -63,22 +66,10 @@ class BeschikbaarheidOpvragenView(UserPassesTestMixin, View):
         except (ValueError, Wedstrijd.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
-        vraag = list()
-        aantal_dagen = (wedstrijd.datum_einde - wedstrijd.datum_begin).days + 1
-        for dag_nr in range(aantal_dagen):
-            obj, is_new = (WedstrijdDagScheidsrechters
-                           .objects
-                           .get_or_create(wedstrijd=wedstrijd,
-                                          dag_offset=dag_nr))
+        account = get_account(request)
+        door_str = "CS %s" % account.volledige_naam()
 
-            if is_new:
-                # voor deze dag een verzoek versturen
-                datum = wedstrijd.datum_begin + datetime.timedelta(days=dag_nr)
-                vraag.append(datum)
-        # for
-
-        # TODO: stuur e-mails naar SR
-        # print('vraag: %s' % repr(vraag))
+        scheids_mutatieverzoek_beschikbaarheid_opvragen(wedstrijd, door_str, snel == '1')
 
         url = reverse('Scheidsrechter:overzicht')
         return HttpResponseRedirect(url)
@@ -135,11 +126,28 @@ class WijzigBeschikbaarheidView(UserPassesTestMixin, TemplateView):
                  .order_by('wedstrijd__datum_begin',
                            'wedstrijd__pk'))
 
+        lat_lon2reistijd_min = dict()
+        for reistijd in Reistijd.objects.filter(vanaf_lat=self.sporter.adres_lat, vanaf_lon=self.sporter.adres_lon):
+            lat_lon2reistijd_min[(reistijd.naar_lat, reistijd.naar_lon)] = reistijd.reistijd_min
+        # for
+
         datums = list()
         for dag in dagen:
             datum = dag.wedstrijd.datum_begin + datetime.timedelta(days=dag.dag_offset)
             if datum not in datums:
                 datums.append(datum)
+
+            if self.sporter.adres_lat:
+                locatie = dag.wedstrijd.locatie
+                if locatie.adres_lat:
+                    try:
+                        reistijd = lat_lon2reistijd_min[(locatie.adres_lat, locatie.adres_lon)]
+                        if reistijd > 0:
+                            dag.reistijd = reistijd
+                    except KeyError:
+                        pass
+
+            # dag.url_details = reverse('Scheidsrechter:wedstrijd-details', kwargs={'wedstrijd_pk': dag.wedstrijd.pk})
         # for
 
         keuzes = dict()     # [datum] = keuze

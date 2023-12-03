@@ -78,7 +78,7 @@
                 {% for team in teams %}
                     {{ team.pk }}: '{{ team.naam_str }}',
                 {% endfor %}
-        };
+        };                                      // puntkomma moet blijven!
         {% endif %}
 
         function opzoeken_hide_status()

@@ -121,7 +121,8 @@ def bereken_leeftijdsklassen_bondscompetitie(geboorte_jaar, wedstrijdgeslacht_nh
 
         Retourneert:
                 wedstrijdleeftijd, lkl_lst
-                lkl_lst is een lijst van wedstrijdklassen voor de seizoenen -1, 0, +1, +2, +3 ten opzicht van huidige seizoen
+                lkl_lst is een lijst van wedstrijdklassen voor de seizoenen -1, 0, +1, +2, +3
+                    ten opzicht van huidige seizoen
                 Voorbeeld:
                     leeftijd = 14
                     lkl_lst=({seizoen:'2018/2019', tekst:'Onder 14 Jongens'},      # 0 = 13
@@ -378,7 +379,8 @@ def bereken_leeftijdsklasse_ifaa(wedstrijdleeftijd, wedstrijdgeslacht):
 
     gevonden_lkl = None
 
-    # print('bereken_leeftijdsklasse_ifaa: wedstrijdleeftijd=%s, wedstrijdgeslacht=%s' % (wedstrijdleeftijd, wedstrijdgeslacht))
+    # print('bereken_leeftijdsklasse_ifaa: wedstrijdleeftijd=%s, wedstrijdgeslacht=%s' % (
+    #           wedstrijdleeftijd, wedstrijdgeslacht))
 
     # selecteer een geslacht-specifieke wedstrijdklasse
     prev_lkl = None
