@@ -80,25 +80,27 @@
                                             </td>
                                         </tr>
 
-                                        <tr>
-                                            <th>Additionele scheidsrechters</th>
-                                            <td>
-                                                <ul>
-                                                    {% for beschikbaar in dag.beschikbaar_sr %}
-                                                        <li>
-                                                            <label class="black-text" for="{{ beschikbaar.id_li }}">
-                                                                <input class="filled-in" type="checkbox" name="{{ beschikbaar.sel }}" id="{{ beschikbaar.id_li }}"{% if beschikbaar.is_onzeker %} disabled{% else %}{% if beschikbaar.is_selected %} checked{% endif %} onchange="gewijzigd()"{% endif %}>
-                                                                <span>{{ beschikbaar.scheids.volledige_naam }}{% if beschikbaar.is_onzeker %} (overweegt){% endif %}{% if beschikbaar.waarschuw_niet_meer_beschikbaar %}<span class="sv-rood-text"> LET OP: Niet meer beschikbaar</span>{% endif %}</span>
-                                                            </label>
-                                                        </li>
-                                                    {% empty %}
-                                                        <li>
-                                                            <i>Nog niemand beschikbaar</i>
-                                                        </li>
-                                                    {% endfor %}
-                                                </ul>
-                                            </td>
-                                        </tr>
+                                        {% if dag.toon_additionele_sr %}
+                                            <tr>
+                                                <th>Additionele scheidsrechters</th>
+                                                <td>
+                                                    <ul>
+                                                        {% for beschikbaar in dag.beschikbaar_sr %}
+                                                            <li>
+                                                                <label class="black-text" for="{{ beschikbaar.id_li }}">
+                                                                    <input class="filled-in" type="checkbox" name="{{ beschikbaar.sel }}" id="{{ beschikbaar.id_li }}"{% if beschikbaar.is_onzeker %} disabled{% else %}{% if beschikbaar.is_selected %} checked{% endif %} onchange="gewijzigd()"{% endif %}>
+                                                                    <span>{{ beschikbaar.scheids.volledige_naam }}{% if beschikbaar.is_onzeker %} (overweegt){% endif %}{% if beschikbaar.waarschuw_niet_meer_beschikbaar %}<span class="sv-rood-text"> LET OP: Niet meer beschikbaar</span>{% endif %}</span>
+                                                                </label>
+                                                            </li>
+                                                        {% empty %}
+                                                            <li>
+                                                                <i>Nog niemand beschikbaar</i>
+                                                            </li>
+                                                        {% endfor %}
+                                                    </ul>
+                                                </td>
+                                            </tr>
+                                        {% endif %}
 
                                     {% empty %}
 

@@ -54,6 +54,9 @@ class Command(BaseCommand):
 
     def _get_adres_lat_lon(self, adres):
 
+        # vervang newlines
+        adres = adres.replace('\n', '; ')
+
         try:
             results = self._gmaps.geocode(adres, region='nl')
         except googlemaps.exceptions.ApiError as exc:
