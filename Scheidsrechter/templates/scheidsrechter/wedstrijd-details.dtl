@@ -136,7 +136,7 @@
                                     {% csrf_token %}
                                     <input type="hidden" name="wedstrijd" value="{{ wed.pk }}">
                                     <input type="hidden" name="notify" value="J">
-                                    <button class="btn-sv-blauw nav_weg_knop" id="submit_knop3" type="submit">Stuur notificatie mails</button>
+                                    <button class="btn-sv-blauw nav_weg_knop" id="submit_knop3" type="submit">Stuur notificatie e-mails</button>
                                 </form>
                             </div>
 

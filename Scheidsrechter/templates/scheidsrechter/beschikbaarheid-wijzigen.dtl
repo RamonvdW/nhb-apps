@@ -83,7 +83,7 @@
                                 </td>
                                 {% endcomment %}
 
-                                <td class="center hide-on-small-only">{{ dag.reistijd }} minuten</td>
+                                <td class="center hide-on-small-only">{% if dag.reistijd %}{{ dag.reistijd }} minutes{% else %}<i>Nog niet bepaald</i>{% endif %}</td>
 
                                 <td class="center hide-on-med-and-down">{{ dag.wedstrijd.aantal_scheids }}</td>
 

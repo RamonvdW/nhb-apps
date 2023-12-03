@@ -315,6 +315,11 @@ class WedstrijdDetailsView(UserPassesTestMixin, TemplateView):
                         bevat_fouten = True
                 # for
 
+                if len(beschikbaar_hsr) == 1:
+                    # alleen de optie "nog niet gekozen" is beschikbaar
+                    # voorkom dat de knop "Stuur notificatie emails" getoond wordt
+                    bevat_fouten = True
+
                 dag = SimpleNamespace(
                         datum=datum,
                         nr_hsr="hsr_%s" % dag.dag_offset,

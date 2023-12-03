@@ -129,6 +129,7 @@ class WijzigBeschikbaarheidView(UserPassesTestMixin, TemplateView):
         lat_lon2reistijd_min = dict()
         for reistijd in Reistijd.objects.filter(vanaf_lat=self.sporter.adres_lat, vanaf_lon=self.sporter.adres_lon):
             lat_lon2reistijd_min[(reistijd.naar_lat, reistijd.naar_lon)] = reistijd.reistijd_min
+        # for
 
         datums = list()
         for dag in dagen:
@@ -136,7 +137,6 @@ class WijzigBeschikbaarheidView(UserPassesTestMixin, TemplateView):
             if datum not in datums:
                 datums.append(datum)
 
-            dag.reistijd = "?"
             if self.sporter.adres_lat:
                 locatie = dag.wedstrijd.locatie
                 if locatie.adres_lat:
