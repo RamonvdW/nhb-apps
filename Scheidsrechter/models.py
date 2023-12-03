@@ -90,6 +90,13 @@ class WedstrijdDagScheidsrechters(models.Model):
     gekozen_sr9 = models.ForeignKey(Sporter, on_delete=models.SET_NULL, related_name='gekozen_sr9',
                                     null=True, blank=True)
 
+    # welke scheidsrechters hebben een mailtje gekregen dat ze gekozen zijn voor een wedstrijd?
+    # wordt gebruikt om de juiste mailtjes te sturen (je bent gekozen / niet meer gekozen) en geen dubbele mailtjes
+    notified_srs = models.ManyToManyField(to=Sporter, related_name='notified_sr')
+
+    # wanneer is de laatste ronde van notificatie mails gestuurd en door wie werd dat gevraagd?
+    notified_laatste = models.CharField(max_length=100, default='', blank=True)
+
     def __str__(self):
         return "[%s +%s]" % (self.wedstrijd.datum_begin, self.dag_offset)
 

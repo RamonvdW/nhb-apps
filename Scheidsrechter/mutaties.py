@@ -6,7 +6,7 @@
 
 from django.conf import settings
 from django.utils import timezone
-from Scheidsrechter.definities import SCHEIDS_MUTATIE_BESCHIKBAARHEID_OPVRAGEN
+from Scheidsrechter.definities import SCHEIDS_MUTATIE_BESCHIKBAARHEID_OPVRAGEN, SCHEIDS_MUTATIE_STUUR_NOTIFICATIES
 from Scheidsrechter.models import ScheidsMutatie
 from Overig.background_sync import BackgroundSync
 import datetime
@@ -51,6 +51,35 @@ def scheids_mutatieverzoek_beschikbaarheid_opvragen(wedstrijd, door_str, snel):
         mutatie, is_created = ScheidsMutatie.objects.get_or_create(
                                         when__gt=recent,
                                         mutatie=SCHEIDS_MUTATIE_BESCHIKBAARHEID_OPVRAGEN,
+                                        door=door_str,
+                                        wedstrijd=wedstrijd)
+    except ScheidsMutatie.objects.MultipleObjectsReturned:      # pragma: no cover
+        # al meerdere verzoeken in de queue
+        mutatie = None
+    else:
+        mutatie.save()
+
+        if is_created:                                          # pragma: no branch
+            # wacht kort op de achtergrondtaak
+            _scheids_ping_achtergrondtaak(mutatie, snel)
+
+    return mutatie
+
+
+def scheids_mutatieverzoek_stuur_notificaties(wedstrijd, door_str, snel):
+    """
+        Eerste keer of wijziging in de gekozen scheidsrechters voor een wedstrijd.
+        Achtergrondtaak stuurt een mail naar de wedstrijdleiding en de betroffen scheidsrechters.
+    """
+
+    recent = timezone.now() - datetime.timedelta(seconds=30)
+
+    # zet dit verzoek door naar het mutaties process
+    # voorkom duplicates (niet 100%)
+    try:
+        mutatie, is_created = ScheidsMutatie.objects.get_or_create(
+                                        when__gt=recent,
+                                        mutatie=SCHEIDS_MUTATIE_STUUR_NOTIFICATIES,
                                         door=door_str,
                                         wedstrijd=wedstrijd)
     except ScheidsMutatie.objects.MultipleObjectsReturned:      # pragma: no cover

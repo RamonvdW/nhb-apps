@@ -151,6 +151,10 @@ class Command(BaseCommand):
                 self.stuur_email_naar_sr_beschikbaarheid_opgeven(wedstrijd, vraag, sporter.account)
         # for
 
+    def _verwerk_mutatie_stuur_notificaties(self, mutatie):
+        wedstrijd = mutatie.wedstrijd
+
+
     def _verwerk_mutatie(self, mutatie):
         code = mutatie.mutatie
 
@@ -158,10 +162,15 @@ class Command(BaseCommand):
             self.stdout.write('[INFO] Verwerk mutatie %s: Beschikbaarheid opvragen' % mutatie.pk)
             self._verwerk_mutatie_beschikbaarheid_opvragen(mutatie)
 
+        elif code == SCHEIDS_MUTATIE_STUUR_NOTIFICATIES:
+            self.stdout.write('[INFO] Verwerk mutatie %s: Scheidsrechters gekozen' % mutatie.pk)
+            self._verwerk_mutatie_stuur_notificaties(mutatie)
+
         else:
             self.stdout.write('[ERROR] Onbekende mutatie code %s (pk=%s)' % (code, mutatie.pk))
 
     def _verwerk_nieuwe_mutaties(self):
+        """ Deze routine wordt aangeroepen als het aantal mutaties in de database gewijzigd is """
         begin = datetime.datetime.now()
 
         try:
@@ -172,7 +181,7 @@ class Command(BaseCommand):
         # als hierna een extra mutatie aangemaakt wordt dan verwerken we een record
         # misschien dubbel, maar daar kunnen we tegen
 
-        if self._hoogste_mutatie_pk:
+        if self._hoogste_mutatie_pk:        # staat initieel op None
             # gebruik deze informatie om te filteren
             self.stdout.write('[INFO] vorige hoogste BetaalMutatie pk is %s' % self._hoogste_mutatie_pk)
             qset = (ScheidsMutatie
@@ -183,7 +192,7 @@ class Command(BaseCommand):
                     .objects
                     .all())         # deferred
 
-        mutatie_pks = qset.order_by('pk').values_list('pk', flat=True)     # deferred
+        mutatie_pks = qset.exclude(is_verwerkt=True).order_by('pk').values_list('pk', flat=True)     # deferred
 
         self._hoogste_mutatie_pk = mutatie_latest.pk
 
@@ -200,6 +209,7 @@ class Command(BaseCommand):
 
             if not mutatie.is_verwerkt:
                 self._verwerk_mutatie(mutatie)
+
                 mutatie.is_verwerkt = True
                 mutatie.save(update_fields=['is_verwerkt'])
                 did_useful_work = True

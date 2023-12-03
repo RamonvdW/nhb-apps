@@ -63,6 +63,7 @@
                             <tr>
                                 <th>Datum</th>
                                 <th>Wedstrijd</th>
+                                {% comment %}<th class="center hide-on-small-only"><!-- knop --></th> {% endcomment %}
                                 <th class="center hide-on-small-only">Jouw reistijd</th>
                                 <th class="center hide-on-med-and-down">Scheidsrechters</th>
                                 <th class="center">Maak je keuze</th>
@@ -75,6 +76,12 @@
                                 <td>{{ dag.datum|date:'l' }}<br>{{ dag.datum }}</td>
 
                                 <td>{{ dag.wedstrijd.titel }}<br>{{ dag.wedstrijd.locatie.plaats }}<span class="hide-on-med-and-up"><br>(jouw reistijd: {{ dag.reistijd }} minuten)</span></td>
+
+                                {% comment %}
+                                <td class="center hide-on-small-only">
+                                    <a class="btn-sv-rood" href="{{ dag.url_details }}">Details</a>
+                                </td>
+                                {% endcomment %}
 
                                 <td class="center hide-on-small-only">{{ dag.reistijd }} minuten</td>
 

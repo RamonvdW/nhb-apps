@@ -146,6 +146,8 @@ class WijzigBeschikbaarheidView(UserPassesTestMixin, TemplateView):
                             dag.reistijd = reistijd
                     except KeyError:
                         pass
+
+            # dag.url_details = reverse('Scheidsrechter:wedstrijd-details', kwargs={'wedstrijd_pk': dag.wedstrijd.pk})
         # for
 
         keuzes = dict()     # [datum] = keuze

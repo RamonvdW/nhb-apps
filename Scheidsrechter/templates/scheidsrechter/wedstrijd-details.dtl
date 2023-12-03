@@ -24,8 +24,13 @@
                 // het formulier is aangepast en moet opgeslagen worden
 
                 // enable de 'opslaan' knop
-                const el = document.getElementById("submit_knop1");
-                el.disabled = false;
+                document.getElementById("submit_knop1").disabled = false;
+
+                // disable knoppen waarmee we weg kunnen navigeren
+                const els = document.getElementsByClassName("nav_weg_knop");
+                Array.prototype.forEach.call(els, function (el) {
+                    el.classList.add('disabled');
+                })
 
                 // TODO: gekozen hoofd sr grijs maken in lijst van hulp sr
                 // zie filters voor uitlezen radio lijstjes
@@ -115,6 +120,7 @@
                         </form>
 
                         {% if url_opvragen %}
+
                             <div class="center" style="margin-top:30px">
                                 <form action="{{ url_opvragen }}" method="post" onsubmit="document.getElementById('submit_knop2').disabled=true; return true;">
                                     {% csrf_token %}
@@ -122,6 +128,18 @@
                                     <button class="btn-sv-rood" id="submit_knop2" type="submit">Beschikbaarheid opvragen</button>
                                 </form>
                             </div>
+
+                        {% elif url_notify %}
+
+                            <div style="margin-top:30px">
+                                <form action="{{ url_notify }}" method="post" onsubmit="document.getElementById('submit_knop3').disabled=true; return true;">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="wedstrijd" value="{{ wed.pk }}">
+                                    <input type="hidden" name="notify" value="J">
+                                    <button class="btn-sv-blauw nav_weg_knop" id="submit_knop3" type="submit">Stuur notificatie mails</button>
+                                </form>
+                            </div>
+
                         {% endif %}
                     </div>
                 </div>
@@ -198,7 +216,7 @@
                         <span>{{ wed.locatie.adres|linebreaksbr }}</span>
                         {% if url_map %}
                             <br><br>
-                            <a class="btn-sv-blauw" href="{{ url_map }}" target="_blank" rel="noopener noreferrer">
+                            <a class="btn-sv-blauw nav_weg_knop" href="{{ url_map }}" target="_blank" rel="noopener noreferrer">
                                 <i class="notranslate material-icons-round left">open_in_new</i>Toon op de kaart</a>
                         {% endif %}
                     </td>

@@ -11,12 +11,14 @@ from django.utils.http import urlencode
 from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
+from Account.models import get_account
 from BasisTypen.definities import ORGANISATIE_IFAA
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige
 from Functie.scheids import gebruiker_is_scheids
 from Scheidsrechter.definities import SCHEIDS_VERENIGING, BESCHIKBAAR_DENK, BESCHIKBAAR_NEE, BESCHIKBAAR_JA
 from Scheidsrechter.models import WedstrijdDagScheidsrechters, ScheidsBeschikbaarheid
+from Scheidsrechter.mutaties import scheids_mutatieverzoek_stuur_notificaties
 from Wedstrijden.definities import (WEDSTRIJD_STATUS_ONTWERP, WEDSTRIJD_ORGANISATIE_TO_STR,
                                     ORGANISATIE_WA, WEDSTRIJD_WA_STATUS_TO_STR,
                                     WEDSTRIJD_BEGRENZING_TO_STR)
@@ -224,6 +226,7 @@ class WedstrijdDetailsView(UserPassesTestMixin, TemplateView):
 
                 beschikbaar_hsr = list()
                 beschikbaar_sr = list()
+                bevat_fouten = False
 
                 geen_hsr = SimpleNamespace(
                                     pk='geen',
@@ -255,6 +258,7 @@ class WedstrijdDetailsView(UserPassesTestMixin, TemplateView):
 
                 if not hsr_nog_beschikbaar and dag.gekozen_hoofd_sr:
                     # gekozen hoofdscheidsrechter is niet meer beschikbaar
+                    bevat_fouten = True
                     niet_meer_hsr = SimpleNamespace(
                                         pk=0,       # wordt gebruikt als value
                                         id_li='id_hsr_niet_%s' % dag.gekozen_hoofd_sr.pk,
@@ -289,6 +293,7 @@ class WedstrijdDetailsView(UserPassesTestMixin, TemplateView):
 
                     beschikbaar.waarschuw_niet_meer_beschikbaar = beschikbaar.is_selected and beschikbaar.opgaaf != BESCHIKBAAR_JA
                     if beschikbaar.waarschuw_niet_meer_beschikbaar:
+                        bevat_fouten = True
                         beschikbaar.is_onzeker = False  # voorkom disable van checkbox
 
                     beschikbaar_sr.append(beschikbaar)
@@ -307,14 +312,22 @@ class WedstrijdDetailsView(UserPassesTestMixin, TemplateView):
                                         is_selected=True,
                                         waarschuw_niet_meer_beschikbaar=True)
                         beschikbaar_sr.insert(0, niet_meer_sr)
+                        bevat_fouten = True
                 # for
 
                 dag = SimpleNamespace(
                         datum=datum,
                         nr_hsr="hsr_%s" % dag.dag_offset,
                         beschikbaar_hoofd_sr=beschikbaar_hsr,
-                        beschikbaar_sr=beschikbaar_sr)
+                        beschikbaar_sr=beschikbaar_sr,
+                        bevat_fouten=bevat_fouten)
                 dagen.append(dag)
+            # for
+
+            context['url_notify'] = context['url_wijzigen']
+            for dag in dagen:
+                if dag.bevat_fouten:
+                    context['url_notify'] = None
             # for
 
         context['kruimels'] = (
@@ -350,8 +363,11 @@ class WedstrijdDetailsView(UserPassesTestMixin, TemplateView):
         else:
             if 0 <= aantal_scheids <= 9:
                 wedstrijd.aantal_scheids = aantal_scheids
+                # TODO: bij wijziging 1 naar >1 moeten we beschikbaarheid SR3 op gaan vragen
 
         wedstrijd.save(update_fields=['aantal_scheids'])
+
+        do_notify = False
 
         # koppel de scheidsrechters voor elke dag
         for dag in WedstrijdDagScheidsrechters.objects.filter(wedstrijd=wedstrijd).order_by('dag_offset'):
@@ -409,9 +425,18 @@ class WedstrijdDetailsView(UserPassesTestMixin, TemplateView):
             dag.gekozen_sr9 = gekozen_srs[8]
 
             dag.save(update_fields=['gekozen_hoofd_sr',
-                                    'gekozen_sr1', 'gekozen_sr2', 'gekozen_sr3', 'gekozen_sr4',
-                                    'gekozen_sr5', 'gekozen_sr6', 'gekozen_sr7', 'gekozen_sr8', 'gekozen_sr9'])
+                                    'gekozen_sr1', 'gekozen_sr2', 'gekozen_sr3', 'gekozen_sr4', 'gekozen_sr5',
+                                    'gekozen_sr6', 'gekozen_sr7', 'gekozen_sr8', 'gekozen_sr9'])
         # for
+
+        do_notify = str(request.POST.get('notify', ''))[:1] == 'J'
+        if do_notify:
+            account = get_account(request)
+            door_str = "CS %s" % account.volledige_naam()
+
+            snel = str(request.POST.get('snel', ''))[:1]
+
+            scheids_mutatieverzoek_stuur_notificaties(wedstrijd, door_str, snel == '1')
 
         url = reverse('Scheidsrechter:wedstrijden')
         return HttpResponseRedirect(url)
