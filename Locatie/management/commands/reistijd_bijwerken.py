@@ -55,6 +55,7 @@ class Command(BaseCommand):
     def _get_adres_lat_lon(self, adres):
 
         # vervang newlines
+        adres = adres.replace('\r\n', '; ')
         adres = adres.replace('\n', '; ')
 
         try:
