@@ -5,6 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import reverse
+from django.conf import settings
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Functie.definities import Rollen
@@ -56,6 +57,8 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
             context['tekst_beschikbaarheid'] = "Bekijk de opgegeven beschikbaarheid."
 
             context['rol'] = 'Commissie Scheidsrechters'
+
+        context['url_handleiding_scheidsrechters'] = settings.URL_PDF_HANDLEIDING_SCHEIDSRECHTERS
 
         context['kruimels'] = (
             (None, 'Scheidsrechters'),
