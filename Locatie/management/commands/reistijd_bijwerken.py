@@ -60,7 +60,7 @@ class Command(BaseCommand):
 
         try:
             results = self._gmaps.geocode(adres, region='nl')
-        except googlemaps.exceptions.ApiError as exc:
+        except (googlemaps.exceptions.ApiError, googlemaps.exceptions.HTTPError) as exc:
             self.stderr.write('[ERROR] Fout van gmaps geocode: %s' % str(exc))
             raise ResourceWarning()
 
@@ -97,7 +97,7 @@ class Command(BaseCommand):
                                 units="metric",
                                 alternatives=False,
                                 arrival_time=self._future_saturday_0800)
-        except googlemaps.exceptions.ApiError as exc:
+        except (googlemaps.exceptions.ApiError, googlemaps.exceptions.HTTPError) as exc:
             self.stderr.write('[ERROR] Fout van gmaps directions route van %s naar %s: error %s' % (
                                 repr(vanaf_lat_lon), repr(naar_lat_lon), str(exc)))
             return 16 * 60      # geef een gek getal terug wat om aandacht vraagt
