@@ -562,8 +562,7 @@ GMAPS_API_URL = None
 # voor sommige adressen werkt de geocode API niet...
 # hier geven we het handmatige antwoord.
 GEOCODE_FALLBACK = {
-    "HEIDSEWEG 72A 5812AB HEIDE": (51.50199, 5.94793),
-    "HEIDSEWEG 72A 5812 AB HEIDE": (51.50199, 5.94793),
+    "Uitkijktoren Steltloper": (52.58492, 5.36359),
 }
 
 
