@@ -54,13 +54,17 @@ class Command(BaseCommand):
 
     def _get_adres_lat_lon(self, adres):
 
+        # vervang newlines
+        adres = adres.replace('\r\n', '; ')
+        adres = adres.replace('\n', '; ')
+
         try:
             results = self._gmaps.geocode(adres, region='nl')
         except googlemaps.exceptions.ApiError as exc:
             self.stderr.write('[ERROR] Fout van gmaps geocode: %s' % str(exc))
-            return None, None
+            raise ResourceWarning()
 
-        # geocode return a list of results
+        # geocode returns a list of results
         if len(results) < 1:
             self.stderr.write('[WARNING] Geen geocode resultaten voor adres=%s' % repr(adres))
             return None, None
@@ -78,7 +82,7 @@ class Command(BaseCommand):
 
         except (KeyError, IndexError):
             self.stderr.write('[WARNING] Kan geen lat/lng halen uit geocode results %s' % repr(results))
-            return None, None
+            return ResourceWarning()
 
         return lat, lon
 
@@ -125,21 +129,25 @@ class Command(BaseCommand):
                                 adres_lat='')
                         .exclude(zichtbaar=False)):
 
-            adres_lat, adres_lon = self._get_adres_lat_lon(locatie.adres)
-
-            if adres_lat and adres_lon:
-                # afkappen voor storage
-                # 5 decimalen geeft ongeveer 1 meter nauwkeurigheid
-                locatie.adres_lat = "%2.6f" % adres_lat
-                locatie.adres_lon = "%2.6f" % adres_lon
+            try:
+                adres_lat, adres_lon = self._get_adres_lat_lon(locatie.adres)
+            except ResourceWarning:
+                # silently ignore
+                pass
             else:
-                self.stderr.write('[WARNING] Geen lat/lon voor locatie pk=%s' % locatie.pk)
+                if adres_lat and adres_lon:
+                    # afkappen voor storage
+                    # 5 decimalen geeft ongeveer 1 meter nauwkeurigheid
+                    locatie.adres_lat = "%2.6f" % adres_lat
+                    locatie.adres_lon = "%2.6f" % adres_lon
+                else:
+                    self.stderr.write('[WARNING] Geen lat/lon voor locatie pk=%s' % locatie.pk)
 
-                # voorkom dat we keer op keer blijven proberen
-                locatie.adres_lat = '?'
-                locatie.adres_lon = '?'
+                    # voorkom dat we keer op keer blijven proberen
+                    locatie.adres_lat = '?'
+                    locatie.adres_lon = '?'
 
-            locatie.save(update_fields=['adres_lat', 'adres_lon'])
+                locatie.save(update_fields=['adres_lat', 'adres_lon'])
         # for
 
     def _update_locaties_overig(self):
@@ -152,22 +160,26 @@ class Command(BaseCommand):
 
             if locatie.adres.strip() not in ('', '(diverse)'):
 
-                adres_lat, adres_lon = self._get_adres_lat_lon(locatie.adres)
-
-                if adres_lat and adres_lon:
-                    # afkappen voor storage
-                    # 5 decimalen geeft ongeveer 1 meter nauwkeurigheid
-                    locatie.adres_lat = "%2.6f" % adres_lat
-                    locatie.adres_lon = "%2.6f" % adres_lon
+                try:
+                    adres_lat, adres_lon = self._get_adres_lat_lon(locatie.adres)
+                except ResourceWarning:
+                    # silently ignore
+                    pass
                 else:
-                    self.stderr.write('[WARNING] Geen lat/lon voor locatie pk=%s met adres %s' % (
-                                        locatie.pk, repr(locatie.adres)))
+                    if adres_lat and adres_lon:
+                        # afkappen voor storage
+                        # 5 decimalen geeft ongeveer 1 meter nauwkeurigheid
+                        locatie.adres_lat = "%2.6f" % adres_lat
+                        locatie.adres_lon = "%2.6f" % adres_lon
+                    else:
+                        self.stderr.write('[WARNING] Geen lat/lon voor locatie pk=%s met adres %s' % (
+                                            locatie.pk, repr(locatie.adres)))
 
-                    # voorkom dat we keer op keer blijven proberen
-                    locatie.adres_lat = '?'
-                    locatie.adres_lon = '?'
+                        # voorkom dat we keer op keer blijven proberen
+                        locatie.adres_lat = '?'
+                        locatie.adres_lon = '?'
 
-                locatie.save(update_fields=['adres_lat', 'adres_lon'])
+                    locatie.save(update_fields=['adres_lat', 'adres_lon'])
         # for
 
     def _update_scheids(self):
@@ -187,22 +199,53 @@ class Command(BaseCommand):
                 adres += ", "
                 adres += sporter.postadres_3
 
-            adres_lat, adres_lon = self._get_adres_lat_lon(adres)
+            try:
+                adres_lat, adres_lon = self._get_adres_lat_lon(adres)
+            except ResourceWarning:
+                # silently ignore
+                pass
+            else:
+                if adres_lat and adres_lon:
+                    # afkappen voor storage
+                    # 5 decimalen geeft ongeveer 1 meter nauwkeurigheid
+                    sporter.adres_lat = "%2.6f" % adres_lat
+                    sporter.adres_lon = "%2.6f" % adres_lon
+                else:
+                    self.stderr.write('[WARNING] Geen lat/lon voor sporter %s met adres %s' % (
+                                        sporter.lid_nr, repr(adres)))
 
-            if adres_lat and adres_lon:
+                    # voorkom dat we keer op keer blijven proberen
+                    sporter.adres_lat = '?'
+                    sporter.adres_lon = '?'
+
+                sporter.save(update_fields=['adres_lat', 'adres_lon'])
+        # for
+
+    def _update_locaties_fallback(self):
+        # kijk of er een handmatige fallback is
+        for locatie in (Locatie
+                        .objects
+                        .filter(adres_lat='?')
+                        .exclude(zichtbaar=False)):
+
+            adres = locatie.adres.upper()
+            adres = adres.replace('\r\n', ' ')
+            adres = adres.replace('\n', ' ')
+            adres = adres.replace('  ', ' ')
+
+            try:
+                adres_lat, adres_lon = settings.GEOCODE_FALLBACK[adres]
+            except KeyError:
+                adres_lat, adres_lon = None, None
+
+            if isinstance(adres_lat, float) and isinstance(adres_lon, float):
                 # afkappen voor storage
                 # 5 decimalen geeft ongeveer 1 meter nauwkeurigheid
-                sporter.adres_lat = "%2.6f" % adres_lat
-                sporter.adres_lon = "%2.6f" % adres_lon
+                locatie.adres_lat = "%2.6f" % adres_lat
+                locatie.adres_lon = "%2.6f" % adres_lon
+                locatie.save(update_fields=['adres_lat', 'adres_lon'])
             else:
-                self.stderr.write('[WARNING] Geen lat/lon voor sporter %s met adres %s' % (
-                                    sporter.lid_nr, repr(adres)))
-
-                # voorkom dat we keer op keer blijven proberen
-                sporter.adres_lat = '?'
-                sporter.adres_lon = '?'
-
-            sporter.save(update_fields=['adres_lat', 'adres_lon'])
+                self.stdout.write('[WARNING] No fallback for locatie pk=%s met adres %s' % (locatie.pk, repr(adres)))
         # for
 
     def _update_reistijd(self):
@@ -229,6 +272,7 @@ class Command(BaseCommand):
             self._update_scheids()
             self._update_locaties_uit_crm()
             self._update_locaties_overig()
+            self._update_locaties_fallback()
             self._update_reistijd()
 
 

@@ -60,8 +60,8 @@ class Locatie(models.Model):
     plaats = models.CharField(max_length=50, blank=True, default='')
 
     # coördinaten voor het adres
-    adres_lat = models.CharField(max_length=10, default='')       # 51.5037503
-    adres_lon = models.CharField(max_length=10, default='')       # 5.3670660
+    adres_lat = models.CharField(max_length=10, blank=True, default='')       # 51.5037503
+    adres_lon = models.CharField(max_length=10, blank=True, default='')       # 5.3670660
 
     # handmatig ingevoerd of uit de CRM (=bevroren)
     adres_uit_crm = models.BooleanField(default=False)

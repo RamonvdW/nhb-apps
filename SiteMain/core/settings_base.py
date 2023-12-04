@@ -26,7 +26,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2023-12-03'
+SITE_VERSIE = '2023-12-04'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -558,6 +558,13 @@ BETAAL_API = 'https://api.mollie.com'
 # ability to override the server URL for test purposes
 # None = use built-in default
 GMAPS_API_URL = None
+
+# voor sommige adressen werkt de geocode API niet...
+# hier geven we het handmatige antwoord.
+GEOCODE_FALLBACK = {
+    "HEIDSEWEG 72A 5812AB HEIDE": (51.50199, 5.94793),
+    "HEIDSEWEG 72A 5812 AB HEIDE": (51.50199, 5.94793),
+}
 
 
 # end of file

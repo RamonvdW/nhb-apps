@@ -273,47 +273,50 @@ class WedstrijdDetailsView(UserPassesTestMixin, TemplateView):
                                                   dag.gekozen_sr7, dag.gekozen_sr8, dag.gekozen_sr9)
                                if gekozen_sr is not None]
 
-                # haal de beschikbare scheidsrechters op
-                for beschikbaar in (ScheidsBeschikbaarheid
-                                    .objects
-                                    .filter(wedstrijd=wedstrijd,
-                                            datum=datum)
-                                    .exclude(opgaaf=BESCHIKBAAR_NEE)
-                                    .select_related('scheids')
-                                    .order_by('scheids__lid_nr')):
+                if True or len(gekozen_srs) > 0 or wedstrijd.aantal_scheids > 1:
+                    dag.toon_additionele_sr = True
 
-                    beschikbaar.id_li = 'id_sr_%s' % beschikbaar.pk
-                    beschikbaar.sel = 'sr_%s_%s' % (dag.dag_offset, beschikbaar.pk)
-                    beschikbaar.is_onzeker = (beschikbaar.opgaaf == BESCHIKBAAR_DENK)
-                    if beschikbaar.scheids.pk in gekozen_srs:
-                        beschikbaar.is_selected = True
-                        gekozen_srs.remove(beschikbaar.scheids.pk)
-                    else:
-                        beschikbaar.is_selected = False
+                    # haal de beschikbare scheidsrechters op
+                    for beschikbaar in (ScheidsBeschikbaarheid
+                                        .objects
+                                        .filter(wedstrijd=wedstrijd,
+                                                datum=datum)
+                                        .exclude(opgaaf=BESCHIKBAAR_NEE)
+                                        .select_related('scheids')
+                                        .order_by('scheids__lid_nr')):
 
-                    beschikbaar.waarschuw_niet_meer_beschikbaar = beschikbaar.is_selected and beschikbaar.opgaaf != BESCHIKBAAR_JA
-                    if beschikbaar.waarschuw_niet_meer_beschikbaar:
-                        bevat_fouten = True
-                        beschikbaar.is_onzeker = False  # voorkom disable van checkbox
+                        beschikbaar.id_li = 'id_sr_%s' % beschikbaar.pk
+                        beschikbaar.sel = 'sr_%s_%s' % (dag.dag_offset, beschikbaar.pk)
+                        beschikbaar.is_onzeker = (beschikbaar.opgaaf == BESCHIKBAAR_DENK)
+                        if beschikbaar.scheids.pk in gekozen_srs:
+                            beschikbaar.is_selected = True
+                            gekozen_srs.remove(beschikbaar.scheids.pk)
+                        else:
+                            beschikbaar.is_selected = False
 
-                    beschikbaar_sr.append(beschikbaar)
-                # for
+                        beschikbaar.waarschuw_niet_meer_beschikbaar = beschikbaar.is_selected and beschikbaar.opgaaf != BESCHIKBAAR_JA
+                        if beschikbaar.waarschuw_niet_meer_beschikbaar:
+                            bevat_fouten = True
+                            beschikbaar.is_onzeker = False  # voorkom disable van checkbox
 
-                # kijk welke scheidsrechters nog over zijn en dus niet meer kunnen
-                for gekozen_sr in (dag.gekozen_sr1, dag.gekozen_sr2, dag.gekozen_sr3,
-                                   dag.gekozen_sr4, dag.gekozen_sr5, dag.gekozen_sr6,
-                                   dag.gekozen_sr7, dag.gekozen_sr8, dag.gekozen_sr9):
+                        beschikbaar_sr.append(beschikbaar)
+                    # for
 
-                    if gekozen_sr and gekozen_sr.pk in gekozen_srs:
-                        niet_meer_sr = SimpleNamespace(
-                                        id_li='id_sr_niet_%s' % gekozen_sr.pk,
-                                        sel='sr_%s_niet_%s' % (dag.dag_offset, gekozen_sr.pk),
-                                        scheids=gekozen_sr,
-                                        is_selected=True,
-                                        waarschuw_niet_meer_beschikbaar=True)
-                        beschikbaar_sr.insert(0, niet_meer_sr)
-                        bevat_fouten = True
-                # for
+                    # kijk welke scheidsrechters nog over zijn en dus niet meer kunnen
+                    for gekozen_sr in (dag.gekozen_sr1, dag.gekozen_sr2, dag.gekozen_sr3,
+                                       dag.gekozen_sr4, dag.gekozen_sr5, dag.gekozen_sr6,
+                                       dag.gekozen_sr7, dag.gekozen_sr8, dag.gekozen_sr9):
+
+                        if gekozen_sr and gekozen_sr.pk in gekozen_srs:
+                            niet_meer_sr = SimpleNamespace(
+                                            id_li='id_sr_niet_%s' % gekozen_sr.pk,
+                                            sel='sr_%s_niet_%s' % (dag.dag_offset, gekozen_sr.pk),
+                                            scheids=gekozen_sr,
+                                            is_selected=True,
+                                            waarschuw_niet_meer_beschikbaar=True)
+                            beschikbaar_sr.insert(0, niet_meer_sr)
+                            bevat_fouten = True
+                    # for
 
                 if len(beschikbaar_hsr) == 1:
                     # alleen de optie "nog niet gekozen" is beschikbaar
@@ -325,7 +328,8 @@ class WedstrijdDetailsView(UserPassesTestMixin, TemplateView):
                         nr_hsr="hsr_%s" % dag.dag_offset,
                         beschikbaar_hoofd_sr=beschikbaar_hsr,
                         beschikbaar_sr=beschikbaar_sr,
-                        bevat_fouten=bevat_fouten)
+                        bevat_fouten=bevat_fouten,
+                        toon_additionele_sr=dag.toon_additionele_sr)
                 dagen.append(dag)
             # for
 
