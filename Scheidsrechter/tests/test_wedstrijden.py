@@ -11,8 +11,10 @@ from BasisTypen.models import KalenderWedstrijdklasse
 from Functie.models import Functie
 from Geo.models import Regio
 from Locatie.models import Locatie, Reistijd
+from Mailer.models import MailQueue
 from Scheidsrechter.definities import BESCHIKBAAR_JA, BESCHIKBAAR_NEE, BESCHIKBAAR_DENK
-from Scheidsrechter.models import WedstrijdDagScheidsrechters, ScheidsBeschikbaarheid
+from Scheidsrechter.models import WedstrijdDagScheidsrechters, ScheidsBeschikbaarheid, ScheidsMutatie
+from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 from Vereniging.models import Vereniging
@@ -80,6 +82,8 @@ class TestScheidsrechterWedstrijden(E2EHelpers, TestCase):
         """ initialisatie van de test case """
         self.assertIsNotNone(self.sr3_met_account)
         self.functie_cs = Functie.objects.get(rol='CS')
+        self.functie_cs.bevestigde_email = 'cs@khsn.not'
+        self.functie_cs.save(update_fields=['bevestigde_email'])
 
         # maak een wedstrijd aan waar scheidsrechters op nodig zijn
         ver = Vereniging(
@@ -97,7 +101,7 @@ class TestScheidsrechterWedstrijden(E2EHelpers, TestCase):
                         discipline_outdoor=True,
                         buiten_banen=10,
                         buiten_max_afstand=90,
-                        adres='Schietweg 1, Boogdorp',
+                        adres='Schietweg 1\n1234 AB Boogdrop',
                         plaats='Boogdrop',
                         adres_lat='loc_lat',
                         adres_lon='loc_lon')
@@ -124,7 +128,10 @@ class TestScheidsrechterWedstrijden(E2EHelpers, TestCase):
                         voorwaarden_a_status_when=now,
                         prijs_euro_normaal=10.00,
                         prijs_euro_onder18=10.00,
-                        aantal_scheids=2)
+                        aantal_scheids=2,
+                        contact_email='org@ver.not',
+                        contact_telefoon='+31234567890',
+                        contact_naam='De Organisator')
         wedstrijd.save()
         wedstrijd.sessies.add(sessie)
         # wedstrijd.boogtypen.add()
@@ -194,13 +201,21 @@ class TestScheidsrechterWedstrijden(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('scheidsrechter/wedstrijd-details.dtl', 'plein/site_layout.dtl'))
 
+        # controleer dat notificaties nog niet gestuurd kunnen worden
+        self.assertFalse('Stuur notificatie e-mails' in resp.content.decode('utf-8'))
+
         # beschikbaarheid opvragen
         self.assertEqual(0, WedstrijdDagScheidsrechters.objects.count())
+        self.assertEqual(0, MailQueue.objects.count())
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_beschikbaarheid_opvragen, {'wedstrijd': self.wedstrijd.pk, 'snel': 1})
         self.assert_is_redirect(resp, self.url_overzicht)
         self.verwerk_scheids_mutaties()
         self.assertEqual(1, WedstrijdDagScheidsrechters.objects.count())
+
+        mail = MailQueue.objects.first()
+        self.assert_email_html_ok(mail)
+        self.assert_consistent_email_html_text(mail)
 
         # wedstrijd details (beschikbaarheid opgevraagd)
         url = self.url_wedstrijd_details % self.wedstrijd.pk
@@ -308,12 +323,20 @@ class TestScheidsrechterWedstrijden(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_beschikbaarheid_opvragen, {'wedstrijd': self.wedstrijd.pk, 'snel': 1})
         self.assert_is_redirect(resp, self.url_overzicht)
+
         self.verwerk_scheids_mutaties()
         self.assertEqual(1, WedstrijdDagScheidsrechters.objects.count())
         dag = WedstrijdDagScheidsrechters.objects.first()
 
+        MailQueue.objects.all().delete()
+
         # geeft SR beschikbaarheid in
         self._zet_beschikbaarheid(self.wedstrijd, 0)
+
+        # corner case: scheidsrechter zonder account
+        sr = Sporter.objects.get(pk=self.lijst_sr_scheids_pk[1])
+        sr.account = None
+        sr.save(update_fields=['account'])
 
         url = self.url_wedstrijd_details % self.wedstrijd.pk
 
@@ -338,6 +361,33 @@ class TestScheidsrechterWedstrijden(E2EHelpers, TestCase):
         self.assertEqual(dag.gekozen_sr2.pk, self.lijst_sr_scheids_pk[1])
         self.assertIsNone(dag.gekozen_sr3)
 
+        # wedstrijd details
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('scheidsrechter/wedstrijd-details.dtl', 'plein/site_layout.dtl'))
+
+        # controleer dat notificaties verstuurd kunnen worden
+        self.assertTrue('Stuur notificatie e-mails' in resp.content.decode('utf-8'))
+
+        # stuur notificaties
+        self.assertEqual(0, MailQueue.objects.count())
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'notify': 'J', 'snel': 1})
+        self.assert_is_redirect(resp, self.url_wedstrijden)
+
+        self.verwerk_scheids_mutaties()
+
+        # controleer dat 3 scheidsrechters gekozen zijn en maar 2 een mailtje krijgen
+        dag.refresh_from_db()
+        self.assertEqual(3, dag.notified_srs.count())
+
+        self.assertEqual(2, MailQueue.objects.count())
+        mail = MailQueue.objects.first()
+        self.assert_email_html_ok(mail)
+        self.assert_consistent_email_html_text(mail)
+
         # niet meer beschikbaar maken
         beschikbaar = ScheidsBeschikbaarheid(pk=self.hsr_beschikbaar_pk)
         beschikbaar.opgaaf = BESCHIKBAAR_NEE
@@ -354,15 +404,19 @@ class TestScheidsrechterWedstrijden(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('scheidsrechter/wedstrijd-details.dtl', 'plein/site_layout.dtl'))
 
+        dag.refresh_from_db()
+        self.assertEqual(3, dag.notified_srs.count())
+
         # keuze uitzetten
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'aantal_scheids': self.wedstrijd.aantal_scheids,
                                           'hsr_0':  'geen'})
         self.assert_is_redirect(resp, self.url_wedstrijden)
-        dag = WedstrijdDagScheidsrechters.objects.get(pk=dag.pk)
+        dag.refresh_from_db()
         self.assertIsNone(dag.gekozen_hoofd_sr)
         self.assertIsNone(dag.gekozen_sr1)
         self.assertIsNone(dag.gekozen_sr2)
+        self.assertEqual(3, dag.notified_srs.count())
 
         # wedstrijd details
         with self.assert_max_queries(20):
@@ -370,6 +424,27 @@ class TestScheidsrechterWedstrijden(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('scheidsrechter/wedstrijd-details.dtl', 'plein/site_layout.dtl'))
+
+        # controleer dat notificaties verstuurd kunnen worden
+        self.assertTrue('Stuur notificatie e-mails' in resp.content.decode('utf-8'))
+
+        # stuur notificaties
+        ScheidsMutatie.objects.all().delete()       # verwijder oude, ivm speed limiter
+        MailQueue.objects.all().delete()
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'notify': 'J', 'snel': 1})
+        self.assert_is_redirect(resp, self.url_wedstrijden)
+
+        self.verwerk_scheids_mutaties()
+
+        # controleer dat 3 scheidsrechters een mailtje krijgen
+        dag.refresh_from_db()
+        self.assertEqual(0, dag.notified_srs.count())
+
+        self.assertEqual(2, MailQueue.objects.count())
+        mail = MailQueue.objects.first()
+        self.assert_email_html_ok(mail)
+        self.assert_consistent_email_html_text(mail)
 
         # corner cases
         with self.assert_max_queries(20):

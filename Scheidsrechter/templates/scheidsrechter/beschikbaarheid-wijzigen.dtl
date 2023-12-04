@@ -75,7 +75,7 @@
                             <tr>
                                 <td>{{ dag.datum|date:'l' }}<br>{{ dag.datum }}</td>
 
-                                <td>{{ dag.wedstrijd.titel }}<br>{{ dag.wedstrijd.locatie.plaats }}<span class="hide-on-med-and-up"><br>(jouw reistijd: {{ dag.reistijd }} minuten)</span></td>
+                                <td>{{ dag.wedstrijd.titel }}<br>{{ dag.wedstrijd.locatie.plaats }}{% if dag.reistijd %}<span class="hide-on-med-and-up"><br>{{ dag.reistijd }} minuten</span>{% endif %}</td>
 
                                 {% comment %}
                                 <td class="center hide-on-small-only">
@@ -83,7 +83,7 @@
                                 </td>
                                 {% endcomment %}
 
-                                <td class="center hide-on-small-only">{% if dag.reistijd %}{{ dag.reistijd }} minutes{% else %}<i>Nog niet bepaald</i>{% endif %}</td>
+                                <td class="center hide-on-small-only">{% if dag.reistijd %}{{ dag.reistijd }} minuten{% else %}<i>Nog niet bepaald</i>{% endif %}</td>
 
                                 <td class="center hide-on-med-and-down">{{ dag.wedstrijd.aantal_scheids }}</td>
 

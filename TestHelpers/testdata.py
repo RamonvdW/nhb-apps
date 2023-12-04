@@ -577,6 +577,7 @@ class TestData(object):
         lid_nr = MIN_LID_NR
         bulk = list()
         geslacht_voornaam2para = dict()  # [geslacht + voornaam] = (voorwerpen, opmerking)
+        sr_credits = 25
         for _, ver in ver_unsorted:
 
             self.ver_sporters[ver.ver_nr] = list()
@@ -585,6 +586,12 @@ class TestData(object):
             for wleeftijd, geslacht, voornaam, _, flags in self.leden:
                 _, _, para_code, para_voorwerpen, para_opmerking, sr = flags
                 geslacht_voornaam2para[geslacht + voornaam] = (para_voorwerpen, para_opmerking)
+
+                if sr:
+                    if sr_credits > 0:
+                        sr_credits -= 1
+                    else:
+                        sr = 0
 
                 lid_nr += 1
                 achternaam = "Lid%s van Club%s" % (lid_nr, ver.ver_nr)

@@ -4,24 +4,22 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.test import TestCase, override_settings
-from django.core import management
+from django.test import TestCase
 from django.utils import timezone
 from BasisTypen.definities import SCHEIDS_BOND, SCHEIDS_VERENIGING
 from BasisTypen.models import KalenderWedstrijdklasse
 from Functie.models import Functie
 from Geo.models import Regio
-from Locatie.models import Locatie, Reistijd
-from Scheidsrechter.definities import BESCHIKBAAR_LEEG
-from Scheidsrechter.models import ScheidsBeschikbaarheid, WedstrijdDagScheidsrechters, ScheidsMutatie
+from Locatie.models import Locatie
+from Scheidsrechter.definities import SCHEIDS_MUTATIE_BESCHIKBAARHEID_OPVRAGEN
+from Scheidsrechter.models import ScheidsMutatie
 from Scheidsrechter.mutaties import scheids_mutaties_ping
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 from Vereniging.models import Vereniging
-from Wedstrijden.definities import WEDSTRIJD_STATUS_GEACCEPTEERD, ORGANISATIE_IFAA
+from Wedstrijden.definities import WEDSTRIJD_STATUS_GEACCEPTEERD
 from Wedstrijden.models import WedstrijdSessie, Wedstrijd
 import datetime
-import io
 
 
 class TestScheidsrechterBeschikbaarheid(E2EHelpers, TestCase):
@@ -143,9 +141,16 @@ class TestScheidsrechterBeschikbaarheid(E2EHelpers, TestCase):
         # corner case: ping de achtergrondtaak zonder dat er een mutatie is
         scheids_mutaties_ping.ping()
 
-        # corner case: pad in de code waar 5 seconden gewacht wordt
-        f1, f2 = self.verwerk_scheids_mutaties(2)
-        print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
+        # corner case: pad door de code waar 5 seconden gewacht wordt
+        self.verwerk_scheids_mutaties(2)
+        # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
+
+        mutatie = ScheidsMutatie()
+        self.assertTrue(str(mutatie) != '')
+
+        mutatie.is_verwerkt = True
+        mutatie.mutatie = SCHEIDS_MUTATIE_BESCHIKBAARHEID_OPVRAGEN
+        self.assertTrue(str(mutatie) != '')
 
 
 # end of file

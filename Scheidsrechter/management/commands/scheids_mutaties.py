@@ -31,6 +31,7 @@ import sys
 
 EMAIL_TEMPLATE_BESCHIKBAARHEID_OPGEVEN = 'email_scheidsrechter/beschikbaarheid-opgeven.dtl'
 EMAIL_TEMPLATE_VOOR_WEDSTRIJDDAG_GEKOZEN = 'email_scheidsrechter/voor-wedstrijddag-gekozen.dtl'
+EMAIL_TEMPLATE_VOOR_WEDSTRIJDDAG_NIET_MEER_NODIG = 'email_scheidsrechter/voor-wedstrijddag-niet-meer-nodig.dtl'
 
 
 class Command(BaseCommand):
@@ -137,8 +138,34 @@ class Command(BaseCommand):
                            mail_body)
 
     def stuur_email_naar_sr_voor_wedstrijddag_niet_meer_nodig(self, dag, sporter):
+        """ Stuur een e-mail om de de-keuze te melden """
+
         self.stdout.write('[INFO] Stuur e-mail naar SR %s: voor wedstrijd niet meer nodig' % sporter.lid_nr)
 
+        if not sporter.account:
+            self.stderr.write('[ERROR] Sporter %s heeft geen account. Mail wordt niet gestuurd.' % sporter.lid_nr)
+            return
+
+        account = sporter.account
+        wedstrijd = dag.wedstrijd
+
+        datum = wedstrijd.datum_begin + datetime.timedelta(days=dag.dag_offset)
+        wed_datum = date_format(datum, "j F Y")
+
+        context = {
+            'voornaam': account.get_first_name(),
+
+            'wed_titel': wedstrijd.titel,
+            'wed_datum': wed_datum,
+
+            'email_cs': self._email_cs,
+        }
+
+        mail_body = render_email_template(context, EMAIL_TEMPLATE_VOOR_WEDSTRIJDDAG_NIET_MEER_NODIG)
+
+        mailer_queue_email(account.bevestigde_email,
+                           'Niet meer nodig voor wedstrijd %s' % wed_datum,
+                           mail_body)
 
     def _reistijd_opvragen(self, locatie, sporter):
         """ vraag de reistijd op tussen de postcode van de sporter/scheidsrechter en de locatie """
@@ -211,15 +238,13 @@ class Command(BaseCommand):
             dag.save(update_fields=['notified_laatste'])
 
             notified_pks = list(dag.notified_srs.all().values_list('pk', flat=True))
-            print('notified_pks: %s' % notified_pks)
 
             for sporter in (dag.gekozen_hoofd_sr, dag.gekozen_sr1, dag.gekozen_sr2, dag.gekozen_sr3, dag.gekozen_sr4,
                             dag.gekozen_sr5, dag.gekozen_sr6, dag.gekozen_sr7, dag.gekozen_sr8, dag.gekozen_sr9):
                 if sporter:
-                    if sporter.pk  in notified_pks:
+                    if sporter.pk in notified_pks:
                         # sporter heeft al eens een berichtje gehad, dus deze kunnen we overslaan
                         notified_pks.remove(sporter.pk)
-                        print('sporter al notified: %s' % sporter)
                     else:
                         # sporter is nieuw gekozen en moet een berichtje krijgen
                         self.stuur_email_naar_sr_voor_wedstrijddag_gekozen(dag, sporter)
@@ -227,7 +252,6 @@ class Command(BaseCommand):
             # for
 
             # alle overgebleven srs zijn niet meer gekozen en kunnen dus een afmelding krijgen
-            print('overgebleven notified_pks:', notified_pks)
             for sporter in Sporter.objects.filter(pk__in=notified_pks):
                 self.stuur_email_naar_sr_voor_wedstrijddag_niet_meer_nodig(dag, sporter)
                 dag.notified_srs.remove(sporter)

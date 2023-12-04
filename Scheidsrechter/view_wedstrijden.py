@@ -390,8 +390,6 @@ class WedstrijdDetailsView(UserPassesTestMixin, TemplateView):
 
             wedstrijd.save(update_fields=['aantal_scheids'])
 
-            do_notify = False
-
             # koppel de scheidsrechters voor elke dag
             for dag in WedstrijdDagScheidsrechters.objects.filter(wedstrijd=wedstrijd).order_by('dag_offset'):
                 datum = wedstrijd.datum_begin + datetime.timedelta(days=dag.dag_offset)
