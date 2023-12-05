@@ -26,7 +26,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2023-12-04'
+SITE_VERSIE = '2023-12-05'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -558,12 +558,6 @@ BETAAL_API = 'https://api.mollie.com'
 # ability to override the server URL for test purposes
 # None = use built-in default
 GMAPS_API_URL = None
-
-# voor sommige adressen werkt de geocode API niet...
-# hier geven we het handmatige antwoord.
-GEOCODE_FALLBACK = {
-    "Uitkijktoren Steltloper": (52.58492, 5.36359),
-}
 
 
 # end of file

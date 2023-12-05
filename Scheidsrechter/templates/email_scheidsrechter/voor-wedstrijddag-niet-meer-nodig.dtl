@@ -1,0 +1,48 @@
+{% extends 'email_mailer/email_basis.dtl' %}
+{% comment %}
+                Copyright (c) 2023 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% block inhoud_text %}
+    |Hallo {{ voornaam }}!
+    |
+    |We hebben je afgemeld, dus je bent niet meer geselecteerd als scheidsrechter voor de volgende wedstrijd:
+    |
+    |Wedstrijd: {{ wed_titel }}
+    |Wanneer: {{ wed_datum }}
+    |
+    |Voor eventuele vragen kan je ons bereiken op {{ email_cs }}
+    |
+    |Succes gewenst!
+{% endblock %}
+
+{% block inhoud_html %}
+    <div>Hallo {{ voornaam }}!</div>
+    <br>
+    <div>We hebben je afgemeld, dus je bent niet meer geselecteerd als scheidsrechter voor de volgende wedstrijd:</div>
+    <br>
+    <table>
+        <tr><th>Wedstrijd:</th><td>{{ wed_titel }}</td></tr>
+        <tr><th>Wanneer:</th><td>{{ wed_datum }}</td></tr>
+    </table>
+    <br>
+    <div>Voor eventuele vragen kan je ons bereiken op <a href="mailto:{{ email_cs }}"><code>{{ email_cs }}</code></a></div>
+    <br>
+    <div>Succes gewenst!</div>
+{% endblock %}
+
+
+{% block footer_text %}
+    |
+    |Commissie Scheidsrechters
+{% endblock %}
+
+{% block footer_html %}
+    <br>
+    <div>Commissie Scheidsrechters</div>
+    <br>
+    <div>
+        <img src="{{ logo_url }}" height="{{ logo_height }}" width="{{ logo_width }}" alt="KHSN logo">
+    </div>
+{% endblock %}
