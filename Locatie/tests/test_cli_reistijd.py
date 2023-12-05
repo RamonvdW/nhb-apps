@@ -79,12 +79,12 @@ class TestLocatieCliReistijd(E2EHelpers, TestCase):
         f1, f2 = self._reistijd_bijwerken()
         # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
         self.assertTrue('[ERROR] Fout van gmaps geocode: UNKNOWN_ERROR' in f1.getvalue())
-        self.assertTrue('[WARNING] Geen lat/lon voor locatie pk=' in f1.getvalue())
+        # self.assertTrue('[WARNING] Geen lat/lon voor locatie pk=' in f1.getvalue())
 
         locatie.refresh_from_db()
         # print('lat/lon=%s/%s' % (repr(locatie.adres_lat), repr(locatie.adres_lon)))
-        self.assertEqual(locatie.adres_lat, '?')
-        self.assertEqual(locatie.adres_lon, '?')
+        self.assertEqual(locatie.adres_lat, '')
+        self.assertEqual(locatie.adres_lon, '')
 
         # geen resultaat
         locatie = Locatie(
@@ -115,12 +115,12 @@ class TestLocatieCliReistijd(E2EHelpers, TestCase):
         f1, f2 = self._reistijd_bijwerken()
         # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
         self.assertTrue('[WARNING] Kan geen lat/lng halen uit geocode results ' in f1.getvalue())
-        self.assertTrue('[WARNING] Geen lat/lon voor locatie pk=' in f1.getvalue())
+        # self.assertTrue('[WARNING] Geen lat/lon voor locatie pk=' in f1.getvalue())
 
         locatie.refresh_from_db()
         # print('lat/lon=%s/%s' % (repr(locatie.adres_lat), repr(locatie.adres_lon)))
-        self.assertEqual(locatie.adres_lat, '?')
-        self.assertEqual(locatie.adres_lon, '?')
+        self.assertEqual(locatie.adres_lat, '')
+        self.assertEqual(locatie.adres_lon, '')
 
     def test_geocode_overig(self):
         # incompleet resultaat
@@ -152,12 +152,12 @@ class TestLocatieCliReistijd(E2EHelpers, TestCase):
         f1, f2 = self._reistijd_bijwerken()
         # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
         self.assertTrue('[WARNING] Kan geen lat/lng halen uit geocode results ' in f1.getvalue())
-        self.assertTrue('[WARNING] Geen lat/lon voor locatie pk=' in f1.getvalue())
+        # self.assertTrue('[WARNING] Geen lat/lon voor locatie pk=' in f1.getvalue())
 
         locatie.refresh_from_db()
         # print('lat/lon=%s/%s' % (repr(locatie.adres_lat), repr(locatie.adres_lon)))
-        self.assertEqual(locatie.adres_lat, '?')
-        self.assertEqual(locatie.adres_lon, '?')
+        self.assertEqual(locatie.adres_lat, '')
+        self.assertEqual(locatie.adres_lon, '')
 
         # adres "diverse"
         locatie = Locatie(
@@ -210,12 +210,12 @@ class TestLocatieCliReistijd(E2EHelpers, TestCase):
 
         f1, f2 = self._reistijd_bijwerken()
         # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
-        self.assertTrue('[WARNING] Geen lat/lon voor sporter 123456 met adres' in f1.getvalue())
+        self.assertTrue('[WARNING] Kan geen lat/lng halen uit geocode results' in f1.getvalue())
 
         sporter.refresh_from_db()
         # print('lat/lon=%s/%s' % (repr(sporter.adres_lat), repr(sporter.adres_lon)))
-        self.assertEqual(sporter.adres_lat, '?')
-        self.assertEqual(sporter.adres_lon, '?')
+        self.assertEqual(sporter.adres_lat, '')
+        self.assertEqual(sporter.adres_lon, '')
 
     def test_reistijd(self):
         self.scheids.save()

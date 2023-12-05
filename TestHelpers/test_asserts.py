@@ -255,10 +255,10 @@ class MyTestAsserts(TestCase):
                         elif link.find('href="mailto:') < 0 and link.find('javascript:history.go(-1)') < 0:
                             # remainder must be links that leave the website
                             # these must target a blank window
-                            if 'target="_blank"' not in link:            # pragma: no cover
+                            if not is_email and 'target="_blank"' not in link:              # pragma: no cover
                                 self.fail(msg='Missing target="_blank" in link %s on page %s' % (
                                             link, template_name))
-                            if not is_email and 'rel="noopener noreferrer"' not in link:  # pragma: no cover
+                            if not is_email and 'rel="noopener noreferrer"' not in link:    # pragma: no cover
                                 self.fail(msg='Missing rel="noopener noreferrer" in link %s on page %s' % (
                                             link, template_name))
             else:
@@ -999,6 +999,25 @@ class MyTestAsserts(TestCase):
         html = html.replace('&nbsp;', ' ')
         html = html.replace('&euro;', '€')
         html = html.replace('&quot;', '"')
+
+        # verwijder alle <a href="mailto:.."> en behoud alleen het e-mailadres
+        pos = html.find('<a href="mailto:')
+        while pos > 0:
+            pos2 = html.find('"><code>', pos)
+            if pos2 > 0:
+                pos3 = html.find('</code></a>', pos2)
+                html = html[:pos3] + html[pos3+11:]
+                html = html[:pos] + html[pos2+8:]
+            else:
+                # try without <code>
+                pos2 = html.find('">', pos)
+                pos3 = html.find('</a>', pos2)
+                html = html[:pos3] + html[pos3+4:]
+                html = html[:pos] + html[pos2+2:]
+
+            # nog een?
+            pos = html.find('<a href="mailto:')
+        # while
 
         th_matched = list()
 

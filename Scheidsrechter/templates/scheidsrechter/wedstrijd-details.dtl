@@ -134,6 +134,8 @@
                         {% elif url_notify %}
 
                             <div style="margin-top:30px">
+                                <p>{% if notify_last %}Vorige notificatie: {{ notify_last }}{% else %}<i>Er is nog geen notificatie verstuurd</i>{% endif %}</p>
+
                                 <form action="{{ url_notify }}" method="post" onsubmit="document.getElementById('submit_knop3').disabled=true; return true;">
                                     {% csrf_token %}
                                     <input type="hidden" name="wedstrijd" value="{{ wed.pk }}">

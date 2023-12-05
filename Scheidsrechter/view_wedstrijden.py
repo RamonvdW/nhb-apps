@@ -214,6 +214,7 @@ class WedstrijdDetailsView(UserPassesTestMixin, TemplateView):
                 context['url_opvragen'] = reverse('Scheidsrechter:beschikbaarheid-opvragen')
 
             context['dagen'] = dagen = list()
+            context['notify_last'] = None
             for dag in (WedstrijdDagScheidsrechters
                         .objects
                         .filter(wedstrijd=wedstrijd)
@@ -273,8 +274,9 @@ class WedstrijdDetailsView(UserPassesTestMixin, TemplateView):
                                                   dag.gekozen_sr7, dag.gekozen_sr8, dag.gekozen_sr9)
                                if gekozen_sr is not None]
 
-                if True or len(gekozen_srs) > 0 or wedstrijd.aantal_scheids > 1:
-                    dag.toon_additionele_sr = True
+                toon_additionele_sr = False
+                if len(gekozen_srs) > 0 or wedstrijd.aantal_scheids > 1:
+                    toon_additionele_sr = True
 
                     # haal de beschikbare scheidsrechters op
                     for beschikbaar in (ScheidsBeschikbaarheid
@@ -323,13 +325,16 @@ class WedstrijdDetailsView(UserPassesTestMixin, TemplateView):
                     # voorkom dat de knop "Stuur notificatie emails" getoond wordt
                     bevat_fouten = True
 
+                if context['notify_last'] is None:
+                    context['notify_last'] = dag.notified_laatste
+
                 dag = SimpleNamespace(
                         datum=datum,
                         nr_hsr="hsr_%s" % dag.dag_offset,
                         beschikbaar_hoofd_sr=beschikbaar_hsr,
                         beschikbaar_sr=beschikbaar_sr,
                         bevat_fouten=bevat_fouten,
-                        toon_additionele_sr=dag.toon_additionele_sr)
+                        toon_additionele_sr=toon_additionele_sr)
                 dagen.append(dag)
             # for
 
@@ -363,81 +368,6 @@ class WedstrijdDetailsView(UserPassesTestMixin, TemplateView):
         if self.rol_nu != Rollen.ROL_CS:
             raise PermissionDenied('Mag niet wijzigen')
 
-        # aantal scheidsrechters
-        aantal_scheids_str = request.POST.get('aantal_scheids', '')
-        try:
-            aantal_scheids = int(aantal_scheids_str[:3])  # afkappen voor de veiligheid
-        except ValueError:
-            wedstrijd.aantal_scheids = 1        # minimum is 1, anders verdwijnt de wedstrijd uit de lijst
-        else:
-            if 0 <= aantal_scheids <= 9:
-                wedstrijd.aantal_scheids = aantal_scheids
-                # TODO: bij wijziging 1 naar >1 moeten we beschikbaarheid SR3 op gaan vragen
-
-        wedstrijd.save(update_fields=['aantal_scheids'])
-
-        do_notify = False
-
-        # koppel de scheidsrechters voor elke dag
-        for dag in WedstrijdDagScheidsrechters.objects.filter(wedstrijd=wedstrijd).order_by('dag_offset'):
-            datum = wedstrijd.datum_begin + datetime.timedelta(days=dag.dag_offset)
-
-            # haal de radiobutton keuze op
-            nr_hsr = "hsr_%s" % dag.dag_offset
-            gekozen = request.POST.get(nr_hsr, '')
-            gekozen = str(gekozen)[:6]      # afkappen voor de veiligheid
-            if gekozen:
-                if gekozen == 'geen':
-                    dag.gekozen_hoofd_sr = None
-                else:
-                    try:
-                        pk = int(gekozen)
-                        beschikbaar = (ScheidsBeschikbaarheid
-                                       .objects
-                                       .filter(wedstrijd=wedstrijd,
-                                               datum=datum,
-                                               opgaaf=BESCHIKBAAR_JA)           # exclude NEE en DENK
-                                       .select_related('scheids')
-                                       .get(pk=pk))
-                    except (ValueError, ScheidsBeschikbaarheid.DoesNotExist):
-                        raise Http404('Slechte parameter (1)')
-
-                    dag.gekozen_hoofd_sr = beschikbaar.scheids
-
-            # kijk welke scheidsrechters gekozen zijn
-            gekozen_srs = list()
-            for beschikbaar in (ScheidsBeschikbaarheid
-                                .objects
-                                .filter(wedstrijd=wedstrijd,
-                                        datum=datum)
-                                .filter(opgaaf=BESCHIKBAAR_JA)      # exclude NEE en DENK
-                                .select_related('scheids')):
-
-                sel = 'sr_%s_%s' % (dag.dag_offset, beschikbaar.pk)
-                gekozen = request.POST.get(sel, '')
-                if gekozen:
-                    if dag.gekozen_hoofd_sr != beschikbaar.scheids:
-                        gekozen_srs.append(beschikbaar.scheids)
-            # for
-
-            # zorg dat er minimaal 9 entries in de lijst staan
-            gekozen_srs.extend([None]*9)
-
-            dag.gekozen_sr1 = gekozen_srs[0]
-            dag.gekozen_sr2 = gekozen_srs[1]
-            dag.gekozen_sr3 = gekozen_srs[2]
-            dag.gekozen_sr4 = gekozen_srs[3]
-            dag.gekozen_sr5 = gekozen_srs[4]
-            dag.gekozen_sr6 = gekozen_srs[5]
-            dag.gekozen_sr7 = gekozen_srs[6]
-            dag.gekozen_sr8 = gekozen_srs[7]
-            dag.gekozen_sr9 = gekozen_srs[8]
-
-            dag.save(update_fields=['gekozen_hoofd_sr',
-                                    'gekozen_sr1', 'gekozen_sr2', 'gekozen_sr3', 'gekozen_sr4', 'gekozen_sr5',
-                                    'gekozen_sr6', 'gekozen_sr7', 'gekozen_sr8', 'gekozen_sr9'])
-        # for
-
         do_notify = str(request.POST.get('notify', ''))[:1] == 'J'
         if do_notify:
             account = get_account(request)
@@ -446,6 +376,79 @@ class WedstrijdDetailsView(UserPassesTestMixin, TemplateView):
             snel = str(request.POST.get('snel', ''))[:1]
 
             scheids_mutatieverzoek_stuur_notificaties(wedstrijd, door_str, snel == '1')
+        else:
+            # aantal scheidsrechters
+            aantal_scheids_str = request.POST.get('aantal_scheids', '')
+            try:
+                aantal_scheids = int(aantal_scheids_str[:3])  # afkappen voor de veiligheid
+            except ValueError:
+                wedstrijd.aantal_scheids = 1        # minimum is 1, anders verdwijnt de wedstrijd uit de lijst
+            else:
+                if 0 <= aantal_scheids <= 9:
+                    wedstrijd.aantal_scheids = aantal_scheids
+                    # TODO: bij wijziging 1 naar >1 moeten we beschikbaarheid SR3 op gaan vragen
+
+            wedstrijd.save(update_fields=['aantal_scheids'])
+
+            # koppel de scheidsrechters voor elke dag
+            for dag in WedstrijdDagScheidsrechters.objects.filter(wedstrijd=wedstrijd).order_by('dag_offset'):
+                datum = wedstrijd.datum_begin + datetime.timedelta(days=dag.dag_offset)
+
+                # haal de radiobutton keuze op
+                nr_hsr = "hsr_%s" % dag.dag_offset
+                gekozen = request.POST.get(nr_hsr, '')
+                gekozen = str(gekozen)[:6]      # afkappen voor de veiligheid
+                if gekozen:
+                    if gekozen == 'geen':
+                        dag.gekozen_hoofd_sr = None
+                    else:
+                        try:
+                            pk = int(gekozen)
+                            beschikbaar = (ScheidsBeschikbaarheid
+                                           .objects
+                                           .filter(wedstrijd=wedstrijd,
+                                                   datum=datum,
+                                                   opgaaf=BESCHIKBAAR_JA)           # exclude NEE en DENK
+                                           .select_related('scheids')
+                                           .get(pk=pk))
+                        except (ValueError, ScheidsBeschikbaarheid.DoesNotExist):
+                            raise Http404('Slechte parameter (1)')
+
+                        dag.gekozen_hoofd_sr = beschikbaar.scheids
+
+                # kijk welke scheidsrechters gekozen zijn
+                gekozen_srs = list()
+                for beschikbaar in (ScheidsBeschikbaarheid
+                                    .objects
+                                    .filter(wedstrijd=wedstrijd,
+                                            datum=datum)
+                                    .filter(opgaaf=BESCHIKBAAR_JA)      # exclude NEE en DENK
+                                    .select_related('scheids')):
+
+                    sel = 'sr_%s_%s' % (dag.dag_offset, beschikbaar.pk)
+                    gekozen = request.POST.get(sel, '')
+                    if gekozen:
+                        if dag.gekozen_hoofd_sr != beschikbaar.scheids:
+                            gekozen_srs.append(beschikbaar.scheids)
+                # for
+
+                # zorg dat er minimaal 9 entries in de lijst staan
+                gekozen_srs.extend([None]*9)
+
+                dag.gekozen_sr1 = gekozen_srs[0]
+                dag.gekozen_sr2 = gekozen_srs[1]
+                dag.gekozen_sr3 = gekozen_srs[2]
+                dag.gekozen_sr4 = gekozen_srs[3]
+                dag.gekozen_sr5 = gekozen_srs[4]
+                dag.gekozen_sr6 = gekozen_srs[5]
+                dag.gekozen_sr7 = gekozen_srs[6]
+                dag.gekozen_sr8 = gekozen_srs[7]
+                dag.gekozen_sr9 = gekozen_srs[8]
+
+                dag.save(update_fields=['gekozen_hoofd_sr',
+                                        'gekozen_sr1', 'gekozen_sr2', 'gekozen_sr3', 'gekozen_sr4', 'gekozen_sr5',
+                                        'gekozen_sr6', 'gekozen_sr7', 'gekozen_sr8', 'gekozen_sr9'])
+            # for
 
         url = reverse('Scheidsrechter:wedstrijden')
         return HttpResponseRedirect(url)

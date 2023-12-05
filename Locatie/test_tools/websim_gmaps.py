@@ -27,7 +27,7 @@ class MyServer(BaseHTTPRequestHandler):
         # split the request
         args = url_encoded_args.replace('%2C', ',').replace('+', ' ')
         spl = args.split('&')
-        print('args:', repr(spl))
+        # print('args:', repr(spl))
 
         if 'destination=incompleet' in args:
             # onvolledig antwoord geven

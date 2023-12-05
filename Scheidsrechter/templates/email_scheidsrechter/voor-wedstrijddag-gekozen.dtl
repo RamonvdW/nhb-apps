@@ -1,0 +1,67 @@
+{% extends 'email_mailer/email_basis.dtl' %}
+{% comment %}
+                Copyright (c) 2023 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% block inhoud_text %}
+    |Hallo {{ voornaam }}!
+    |
+    |Je bent geselecteerd als scheidsrechter voor de volgende wedstrijd:
+    |
+    |Wedstrijd: {{ wed_titel }}
+    |Wanneer: {{ wed_datum }}
+    |Adres: {% for adres in wed_adres %}{% if not forloop.first %}
+    |       {% endif %}{{ adres }}{% endfor %}
+    |
+    |Wedstrijdorganisatie:
+    |Naam: {{ org_naam }}
+    |Telefoon: {{ org_tel }}
+    |Email: {% if org_email %}{{ org_email }}{% else %}Onbekend{% endif %}
+    |
+    |Jouw contactgegevens zijn gedeeld met de wedstrijdorganisatie.
+    |
+    |Voor eventuele vragen kan je ons bereiken op {{ email_cs }}
+    |
+    |Succes gewenst!
+{% endblock %}
+
+{% block inhoud_html %}
+    <div>Hallo {{ voornaam }}!</div>
+    <br>
+    <div>Je bent geselecteerd als scheidsrechter voor de volgende wedstrijd:</div>
+    <br>
+    <table>
+        <tr><th>Wedstrijd:</th><td>{{ wed_titel }}</td></tr>
+        <tr><th>Wanneer:</th><td>{{ wed_datum }}</td></tr>
+        <tr><th>Adres:</th><td>{% for adres in wed_adres %}{{ adres }}<br>{% endfor %}</td></tr>
+    </table>
+    <br>
+    <div>Wedstrijdorganisatie:</div>
+    <table>
+        <tr><th>Naam:</th><td>{{ org_naam }}</td></tr>
+        <tr><th>Telefoon:</th><td>{{ org_tel }}</td></tr>
+        <tr><th>Email:</th><td>{% if org_email %}<a href="mailto:{{ org_email }}"><code>{{ org_email }}</code></a>{% else %}<i>Onbekend</i>{% endif %}</td></tr>
+    </table>
+    <br>
+    <div>Jouw contactgegevens zijn gedeeld met de wedstrijdorganisatie.</div>
+    <br>
+    <div>Voor eventuele vragen kan je ons bereiken op <a href="mailto:{{ email_cs }}"><code>{{ email_cs }}</code></a></div>
+    <br>
+    <div>Succes gewenst!</div>
+{% endblock %}
+
+
+{% block footer_text %}
+    |
+    |Commissie Scheidsrechters
+{% endblock %}
+
+{% block footer_html %}
+    <br>
+    <div>Commissie Scheidsrechters</div>
+    <br>
+    <div>
+        <img src="{{ logo_url }}" height="{{ logo_height }}" width="{{ logo_width }}" alt="KHSN logo">
+    </div>
+{% endblock %}

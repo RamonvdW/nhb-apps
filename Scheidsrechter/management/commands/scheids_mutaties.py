@@ -10,6 +10,7 @@
 
 from django.conf import settings
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.formats import date_format
 from django.db.utils import DataError, OperationalError, IntegrityError
 from django.core.management.base import BaseCommand
@@ -29,6 +30,8 @@ import sys
 
 
 EMAIL_TEMPLATE_BESCHIKBAARHEID_OPGEVEN = 'email_scheidsrechter/beschikbaarheid-opgeven.dtl'
+EMAIL_TEMPLATE_VOOR_WEDSTRIJDDAG_GEKOZEN = 'email_scheidsrechter/voor-wedstrijddag-gekozen.dtl'
+EMAIL_TEMPLATE_VOOR_WEDSTRIJDDAG_NIET_MEER_NODIG = 'email_scheidsrechter/voor-wedstrijddag-niet-meer-nodig.dtl'
 
 
 class Command(BaseCommand):
@@ -97,6 +100,73 @@ class Command(BaseCommand):
                            'Beschikbaarheid opgeven voor %s' % wed_datums,
                            mail_body)
 
+    def stuur_email_naar_sr_voor_wedstrijddag_gekozen(self, dag: WedstrijdDagScheidsrechters, sporter: Sporter):
+        """ Stuur een e-mail om de keuze te melden """
+
+        self.stdout.write('[INFO] Stuur e-mail naar SR %s: voor wedstrijd gekozen' % sporter.lid_nr)
+
+        if not sporter.account:
+            self.stderr.write('[ERROR] Sporter %s heeft geen account. Mail wordt niet gestuurd.' % sporter.lid_nr)
+            return
+
+        account = sporter.account
+        wedstrijd = dag.wedstrijd
+
+        datum = wedstrijd.datum_begin + datetime.timedelta(days=dag.dag_offset)
+        wed_datum = date_format(datum, "j F Y")
+
+        wed_adres = wedstrijd.locatie.adres.replace('\r\n', '\n')
+
+        context = {
+            'voornaam': account.get_first_name(),
+
+            'wed_titel': wedstrijd.titel,
+            'wed_datum': wed_datum,
+            'wed_adres': wed_adres.split('\n'),
+
+            'org_email': wedstrijd.contact_email,
+            'org_naam': wedstrijd.contact_naam,
+            'org_tel': wedstrijd.contact_telefoon,
+
+            'email_cs': self._email_cs,
+        }
+
+        mail_body = render_email_template(context, EMAIL_TEMPLATE_VOOR_WEDSTRIJDDAG_GEKOZEN)
+
+        mailer_queue_email(account.bevestigde_email,
+                           'Geselecteerd voor wedstrijd %s' % wed_datum,
+                           mail_body)
+
+    def stuur_email_naar_sr_voor_wedstrijddag_niet_meer_nodig(self, dag, sporter):
+        """ Stuur een e-mail om de de-keuze te melden """
+
+        self.stdout.write('[INFO] Stuur e-mail naar SR %s: voor wedstrijd niet meer nodig' % sporter.lid_nr)
+
+        if not sporter.account:
+            self.stderr.write('[ERROR] Sporter %s heeft geen account. Mail wordt niet gestuurd.' % sporter.lid_nr)
+            return
+
+        account = sporter.account
+        wedstrijd = dag.wedstrijd
+
+        datum = wedstrijd.datum_begin + datetime.timedelta(days=dag.dag_offset)
+        wed_datum = date_format(datum, "j F Y")
+
+        context = {
+            'voornaam': account.get_first_name(),
+
+            'wed_titel': wedstrijd.titel,
+            'wed_datum': wed_datum,
+
+            'email_cs': self._email_cs,
+        }
+
+        mail_body = render_email_template(context, EMAIL_TEMPLATE_VOOR_WEDSTRIJDDAG_NIET_MEER_NODIG)
+
+        mailer_queue_email(account.bevestigde_email,
+                           'Niet meer nodig voor wedstrijd %s' % wed_datum,
+                           mail_body)
+
     def _reistijd_opvragen(self, locatie, sporter):
         """ vraag de reistijd op tussen de postcode van de sporter/scheidsrechter en de locatie """
 
@@ -154,6 +224,41 @@ class Command(BaseCommand):
     def _verwerk_mutatie_stuur_notificaties(self, mutatie):
         wedstrijd = mutatie.wedstrijd
 
+        when_str = timezone.localtime(mutatie.when).strftime('%Y-%m-%d om %H:%M')
+
+        for dag in (WedstrijdDagScheidsrechters
+                    .objects
+                    .filter(wedstrijd=wedstrijd)
+                    .select_related('wedstrijd',
+                                    'gekozen_hoofd_sr',
+                                    'gekozen_sr1', 'gekozen_sr2', 'gekozen_sr3', 'gekozen_sr4', 'gekozen_sr5',
+                                    'gekozen_sr6', 'gekozen_sr7', 'gekozen_sr8', 'gekozen_sr9')):
+
+            dag.notified_laatste = '%s door %s' % (when_str, mutatie.door)
+            dag.save(update_fields=['notified_laatste'])
+
+            notified_pks = list(dag.notified_srs.all().values_list('pk', flat=True))
+
+            for sporter in (dag.gekozen_hoofd_sr, dag.gekozen_sr1, dag.gekozen_sr2, dag.gekozen_sr3, dag.gekozen_sr4,
+                            dag.gekozen_sr5, dag.gekozen_sr6, dag.gekozen_sr7, dag.gekozen_sr8, dag.gekozen_sr9):
+                if sporter:
+                    if sporter.pk in notified_pks:
+                        # sporter heeft al eens een berichtje gehad, dus deze kunnen we overslaan
+                        notified_pks.remove(sporter.pk)
+                    else:
+                        # sporter is nieuw gekozen en moet een berichtje krijgen
+                        self.stuur_email_naar_sr_voor_wedstrijddag_gekozen(dag, sporter)
+                        dag.notified_srs.add(sporter)
+            # for
+
+            # alle overgebleven srs zijn niet meer gekozen en kunnen dus een afmelding krijgen
+            for sporter in Sporter.objects.filter(pk__in=notified_pks):
+                self.stuur_email_naar_sr_voor_wedstrijddag_niet_meer_nodig(dag, sporter)
+                dag.notified_srs.remove(sporter)
+            # for
+        # for
+
+        # stuur de mailtjes (voor alle dagen in 1x)
 
     def _verwerk_mutatie(self, mutatie):
         code = mutatie.mutatie

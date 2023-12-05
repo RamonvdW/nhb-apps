@@ -43,7 +43,7 @@ def scheids_mutatieverzoek_beschikbaarheid_opvragen(wedstrijd, door_str, snel):
         snel = True: niet wachten op reactie achtergrond taak (voor testen)
     """
 
-    recent = timezone.now() - datetime.timedelta(seconds=30)
+    recent = timezone.now() - datetime.timedelta(seconds=15)
 
     # zet dit verzoek door naar het mutaties process
     # voorkom duplicates (niet 100%)
@@ -72,7 +72,7 @@ def scheids_mutatieverzoek_stuur_notificaties(wedstrijd, door_str, snel):
         Achtergrondtaak stuurt een mail naar de wedstrijdleiding en de betroffen scheidsrechters.
     """
 
-    recent = timezone.now() - datetime.timedelta(seconds=30)
+    recent = timezone.now() - datetime.timedelta(seconds=15)
 
     # zet dit verzoek door naar het mutaties process
     # voorkom duplicates (niet 100%)

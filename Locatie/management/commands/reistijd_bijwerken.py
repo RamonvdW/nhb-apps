@@ -82,7 +82,7 @@ class Command(BaseCommand):
 
         except (KeyError, IndexError):
             self.stderr.write('[WARNING] Kan geen lat/lng halen uit geocode results %s' % repr(results))
-            return ResourceWarning()
+            raise ResourceWarning()
 
         return lat, lon
 
@@ -245,7 +245,7 @@ class Command(BaseCommand):
                 locatie.adres_lon = "%2.6f" % adres_lon
                 locatie.save(update_fields=['adres_lat', 'adres_lon'])
             else:
-                self.stdout.write('[WARNING] No fallback for locatie pk=%s met adres %s' % (locatie.pk, repr(adres)))
+                self.stdout.write('[WARNING] Geen fallback voor locatie pk=%s met adres %s' % (locatie.pk, repr(adres)))
         # for
 
     def _update_reistijd(self):

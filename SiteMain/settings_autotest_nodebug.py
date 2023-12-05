@@ -8,11 +8,10 @@
     Django settings for the NhbApps project during automated testing.
 """
 
-from SiteMain.core.settings_base import *         # noqa
+from SiteMain.settings_autotest import *         # noqa
 
 DEBUG = False
-
-# significant speed up by reducing calculation time for secure password handling
-PASSWORD_HASHERS = ['django.contrib.auth.hashers.MD5PasswordHasher']
+ENABLE_DEBUG_TOOLBAR = False
+ENABLE_DJANGO_EXTENSIONS = False
 
 # end of file
