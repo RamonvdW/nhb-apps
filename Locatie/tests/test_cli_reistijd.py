@@ -89,7 +89,7 @@ class TestLocatieCliReistijd(E2EHelpers, TestCase):
         # geen resultaat
         locatie = Locatie(
                         naam='Test2',
-                        adres='Peeslaan 42, 0000XX Boogdorp',       # 0000XX = geen resultaat geven
+                        adres='Peeslaan 42, 0000XX Boogdorp',       # 0000XX = leeg resultaat
                         plaats='Boogdorp',
                         adres_uit_crm=True)
         locatie.save()
@@ -123,10 +123,10 @@ class TestLocatieCliReistijd(E2EHelpers, TestCase):
         self.assertEqual(locatie.adres_lon, '')
 
     def test_geocode_overig(self):
-        # incompleet resultaat
+        # normaal resultaat
         locatie = Locatie(
                         naam='Test2',
-                        adres='Peeslaan 42, 1234AB Boogdorp',       # 42GEEN = geen resultaat geven
+                        adres='Peeslaan 42, 1234AB Boogdorp',
                         plaats='Boogdorp',
                         adres_uit_crm=False)
         locatie.save()
@@ -217,6 +217,50 @@ class TestLocatieCliReistijd(E2EHelpers, TestCase):
         self.assertEqual(sporter.adres_lat, '')
         self.assertEqual(sporter.adres_lon, '')
 
+        # foutsituatie
+        sporter.postadres_2 = '0000XX Boogstad'  # 0000XX = Leeg resultaat
+        sporter.postadres_3 = 'Nederland'
+        sporter.adres_lat = ''
+        sporter.adres_lon = ''
+        sporter.save(update_fields=['postadres_2', 'postadres_3', 'adres_lat', 'adres_lon'])
+
+        f1, f2 = self._reistijd_bijwerken()
+        print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
+        self.assertTrue("[WARNING] Geen geocode resultaten voor adres='Whatever, 0000XX" in f1.getvalue())
+        self.assertTrue("[WARNING] Geen lat/lon voor sporter 123456 met adres 'Whatever, 0000XX" in f1.getvalue())
+
+        sporter.refresh_from_db()
+        # print('lat/lon=%s/%s' % (repr(sporter.adres_lat), repr(sporter.adres_lon)))
+        self.assertEqual(sporter.adres_lat, '?')
+        self.assertEqual(sporter.adres_lon, '?')
+
+    def test_geocode_fallback(self):
+        # incompleet resultaat
+        locatie = Locatie(
+                        naam='Test2',
+                        adres='Peeslaan 41, 0000XX Boogdorp',
+                        plaats='Boogdorp',
+                        adres_uit_crm=False)
+        locatie.save()
+
+        f1, f2 = self._reistijd_bijwerken()
+        # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
+        self.assertTrue('[WARNING] Geen geocode resultaten voor adres=' in f1.getvalue())
+        self.assertTrue('[WARNING] Geen lat/lon voor locatie pk=' in f1.getvalue())
+
+        locatie.refresh_from_db()
+        # print('lat/lon=%s/%s' % (repr(locatie.adres_lat), repr(locatie.adres_lon)))
+        self.assertEqual(locatie.adres_lat, '?')
+        self.assertEqual(locatie.adres_lon, '?')
+
+        # fallback laten gebruiken
+        fallback = {'PEESLAAN 41, 0000XX BOOGDORP': (1.23, 4.56)}
+        with override_settings(GEOCODE_FALLBACK=fallback):
+            f1, f2 = self._reistijd_bijwerken()
+        # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
+
+        self.assertFalse('[WARNING] Geen fallback voor locatie pk=' in f2.getvalue())
+
     def test_reistijd(self):
         self.scheids.save()
 
@@ -270,5 +314,6 @@ class TestLocatieCliReistijd(E2EHelpers, TestCase):
         f1, f2 = self._reistijd_bijwerken()
         # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
         self.assertTrue("[ERROR] Fout van gmaps directions route van" in f1.getvalue())
+
 
 # end of file

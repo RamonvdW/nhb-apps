@@ -121,45 +121,14 @@ class Command(BaseCommand):
 
         return mins
 
-    def _update_locaties_uit_crm(self):
-        # adressen uit het CRM aanvullen met lat/lon
+    def _update_locaties(self):
+        # adressen van de locaties aanvullen met lat/lon
         for locatie in (Locatie
                         .objects
-                        .filter(adres_uit_crm=True,
-                                adres_lat='')
-                        .exclude(zichtbaar=False)):
-
-            try:
-                adres_lat, adres_lon = self._get_adres_lat_lon(locatie.adres)
-            except ResourceWarning:
-                # silently ignore
-                pass
-            else:
-                if adres_lat and adres_lon:
-                    # afkappen voor storage
-                    # 5 decimalen geeft ongeveer 1 meter nauwkeurigheid
-                    locatie.adres_lat = "%2.6f" % adres_lat
-                    locatie.adres_lon = "%2.6f" % adres_lon
-                else:
-                    self.stderr.write('[WARNING] Geen lat/lon voor locatie pk=%s' % locatie.pk)
-
-                    # voorkom dat we keer op keer blijven proberen
-                    locatie.adres_lat = '?'
-                    locatie.adres_lon = '?'
-
-                locatie.save(update_fields=['adres_lat', 'adres_lon'])
-        # for
-
-    def _update_locaties_overig(self):
-        # adressen van overige locaties aanvullen met lat/lon
-        for locatie in (Locatie
-                        .objects
-                        .filter(adres_uit_crm=False,
-                                adres_lat='')
+                        .filter(adres_lat='')
                         .exclude(zichtbaar=False)):
 
             if locatie.adres.strip() not in ('', '(diverse)'):
-
                 try:
                     adres_lat, adres_lon = self._get_adres_lat_lon(locatie.adres)
                 except ResourceWarning:
@@ -270,8 +239,7 @@ class Command(BaseCommand):
         if self._connect_gmaps():
             # connection success
             self._update_scheids()
-            self._update_locaties_uit_crm()
-            self._update_locaties_overig()
+            self._update_locaties()
             self._update_locaties_fallback()
             self._update_reistijd()
 
