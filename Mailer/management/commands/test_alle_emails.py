@@ -364,6 +364,12 @@ class Command(BaseCommand):
         # TODO: gast-afgewezen
         pass
 
+    def test_scheids(self):
+        # TODO: beschikbaarheid-opgeven
+        # TODO: voor-wedstrijddag-gekozen
+        # TODO: voor-wedstrijddag-niet-meer-nodig
+        pass
+
     def _test_taken(self):
         self.stdout.write('Maak mail voor Taken - Nieuwe taak')
         stuur_email_nieuwe_taak(self.to_email, 42)

@@ -152,5 +152,14 @@ class TestScheidsrechterBeschikbaarheid(E2EHelpers, TestCase):
         mutatie.mutatie = SCHEIDS_MUTATIE_BESCHIKBAARHEID_OPVRAGEN
         self.assertTrue(str(mutatie) != '')
 
+    def test_mainloop(self):
+        ScheidsMutatie(
+                mutatie=42,
+                door='test 1',
+                wedstrijd=self.wedstrijd).save()
+
+        f1, f2 = self.verwerk_scheids_mutaties(2)
+        # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
+        self.assertTrue("[ERROR] Onbekende mutatie code 42" in f2.getvalue())
 
 # end of file

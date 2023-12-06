@@ -74,8 +74,6 @@ class TestScheidsrechterWedstrijden(E2EHelpers, TestCase):
         for sporter in data.sporters_scheids[SCHEIDS_VERENIGING]:       # pragma: no branch
             if sporter.account is not None:
                 cls.lijst_sr.append(sporter)
-                if len(cls.lijst_sr) == 10:
-                    break
         # for
 
     def setUp(self):

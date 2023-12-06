@@ -283,6 +283,7 @@ class TestLocatieCliReistijd(E2EHelpers, TestCase):
 
         reistijd.refresh_from_db()
         self.assertEqual(reistijd.reistijd_min, 17)
+        self.assertTrue(str(reistijd) != '')
 
         # incompleet verzoek
         reistijd = Reistijd(vanaf_lat='sr3_lat',

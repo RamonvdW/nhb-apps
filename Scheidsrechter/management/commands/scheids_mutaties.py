@@ -280,15 +280,15 @@ class Command(BaseCommand):
 
         try:
             mutatie_latest = ScheidsMutatie.objects.latest('pk')
-        except ScheidsMutatie.DoesNotExist:
+        except ScheidsMutatie.DoesNotExist:             # pragma: no cover
             # alle mutatie records zijn verwijderd
             return
         # als hierna een extra mutatie aangemaakt wordt dan verwerken we een record
         # misschien dubbel, maar daar kunnen we tegen
 
-        if self._hoogste_mutatie_pk:        # staat initieel op None
+        if self._hoogste_mutatie_pk:        # staat initieel op None        # pragma: no cover
             # gebruik deze informatie om te filteren
-            self.stdout.write('[INFO] vorige hoogste BetaalMutatie pk is %s' % self._hoogste_mutatie_pk)
+            self.stdout.write('[INFO] vorige hoogste ScheidsMutatie pk is %s' % self._hoogste_mutatie_pk)
             qset = (ScheidsMutatie
                     .objects
                     .filter(pk__gt=self._hoogste_mutatie_pk))
@@ -312,7 +312,7 @@ class Command(BaseCommand):
                                        'wedstrijd__locatie')
                        .get(pk=pk))
 
-            if not mutatie.is_verwerkt:
+            if not mutatie.is_verwerkt:             # pragma: no branch
                 self._verwerk_mutatie(mutatie)
 
                 mutatie.is_verwerkt = True
@@ -320,11 +320,10 @@ class Command(BaseCommand):
                 did_useful_work = True
         # for
 
-        if did_useful_work:
-            self.stdout.write('[INFO] nieuwe hoogste ScheidsMutatie pk is %s' % self._hoogste_mutatie_pk)
+        self.stdout.write('[INFO] nieuwe hoogste ScheidsMutatie pk is %s' % self._hoogste_mutatie_pk)
 
-            klaar = datetime.datetime.now()
-            self.stdout.write('[INFO] Mutaties verwerkt in %s seconden' % (klaar - begin))
+        klaar = datetime.datetime.now()
+        self.stdout.write('[INFO] Mutaties verwerkt in %s seconden' % (klaar - begin))
 
     def _monitor_nieuwe_mutaties(self):
         # monitor voor nieuwe mutaties

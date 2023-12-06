@@ -6,23 +6,21 @@
 
 from django.views import View
 from django.urls import reverse
-from django.http import HttpResponseRedirect, HttpResponse, Http404
+from django.http import HttpResponseRedirect, Http404
 from django.utils import timezone
-from django.shortcuts import render
 from Account.models import get_account
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from BasisTypen.definities import SCHEIDS_NIET, SCHEIDS_BOND, SCHEIDS_INTERNATIONAAL
+from BasisTypen.definities import SCHEIDS_BOND, SCHEIDS_INTERNATIONAAL
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige
 from Functie.scheids import gebruiker_is_scheids
 from Locatie.models import Reistijd
-from Scheidsrechter.definities import BESCHIKBAAR_LEEG, BESCHIKBAAR_JA, BESCHIKBAAR_DENK, BESCHIKBAAR_NEE, BESCHIKBAAR2STR
+from Scheidsrechter.definities import (BESCHIKBAAR_LEEG, BESCHIKBAAR_JA, BESCHIKBAAR_DENK, BESCHIKBAAR_NEE,
+                                       BESCHIKBAAR2STR)
 from Scheidsrechter.models import WedstrijdDagScheidsrechters, ScheidsBeschikbaarheid
 from Scheidsrechter.mutaties import scheids_mutatieverzoek_beschikbaarheid_opvragen
-from Sporter.models import Sporter, get_sporter
-from TijdelijkeCodes.definities import RECEIVER_SCHEIDS_BESCHIKBAAR
-from TijdelijkeCodes.operations import set_tijdelijke_codes_receiver
+from Sporter.models import get_sporter
 from Wedstrijden.definities import WEDSTRIJD_STATUS_GEACCEPTEERD
 from Wedstrijden.models import Wedstrijd
 import datetime
@@ -243,7 +241,6 @@ class WijzigBeschikbaarheidView(UserPassesTestMixin, TemplateView):
                                         wedstrijd=dag.wedstrijd,
                                         datum=dag.datum)
 
-                opgaaf = BESCHIKBAAR_LEEG
                 if keuze == '1':
                     opgaaf = BESCHIKBAAR_JA
                 elif keuze == '2':
@@ -342,82 +339,6 @@ class BeschikbaarheidInzienView(UserPassesTestMixin, TemplateView):
         )
 
         return context
-
-
-class BeschikbaarheidOpslaanView(View):
-    """ Behandel de ingediende wijziging """
-
-    @staticmethod
-    def post(request, *args, **kwargs):
-        """
-            deze functie wordt aangeroepen als op de knop GA DOOR gedrukt
-            is na het volgen van een tijdelijke url.
-            Zoek de bijbehorende data op en roept de juiste dispatcher aan.
-        """
-
-        wedstrijd_pk = request.POST.get('wedstrijd', '')[:6]    # afkappen voor de veiligheid
-        scheids_pk = request.POST.get('scheids', '')[:6]        # afkappen voor de veiligheid
-        keuze = request.POST.get('keuze', '')[:1]               # afkappen voor de veiligheid
-
-        try:
-            wedstrijd_pk = int(wedstrijd_pk)
-            wedstrijd = (Wedstrijd
-                         .objects
-                         .get(pk=wedstrijd_pk,
-                              status=WEDSTRIJD_STATUS_GEACCEPTEERD,
-                              toon_op_kalender=True,
-                              is_ter_info=False))
-        except (ValueError, Wedstrijd.DoesNotExist):
-            raise Http404('Wedstrijd niet gevonden')
-
-        if request.user.is_authenticated:
-            # namens zichzelf
-            account = get_account(request)
-            sporter = get_sporter(account)
-            if scheids_pk != sporter.pk:
-                raise Http404('Verkeerde gebruiker')
-
-            url = reverse('Scheidsrechter:overzicht')
-
-        else:
-            # niet ingelogd, dus dit is via de tijdelijke code
-            try:
-                sporter_pk = int(scheids_pk)
-                sporter = (Sporter
-                           .objects
-                           .exclude(scheids=SCHEIDS_NIET)
-                           .get(pk=sporter_pk))
-            except (ValueError, Sporter.DoesNotExist):
-                raise Http404('Gebruiker niet gevonden')
-
-            url = reverse('Plein:plein')
-
-        # kijk voor welke dagen we beschikbaarheid nodig hebben
-        dagen = WedstrijdDagScheids.objects.filter(wedstrijd=wedstrijd)
-
-
-        return HttpResponseRedirect(url)
-
-
-def receive_scheids_beschikbaarheid(request, wedstrijd, sporter):
-    """ deze functie wordt aangeroepen als een tijdelijke url gevolgd wordt
-        door een scheidsrechter om zijn beschikbaarheid voor een wedstrijd door te geven.
-
-        We moeten een url teruggeven waar een http-redirect naar gedaan kan worden
-        of een HttpResponse object.
-
-        We geven een pagina terug waarop de keuzes gemaakt kunnen worden en ingediend worden.
-    """
-
-    context = dict()
-    context['url'] = reverse('Scheidsrechter:beschikbaarheid-doorgeven')
-    context['wedstrijd'] = wedstrijd
-    context['scheids'] = sporter
-
-    return render(request, TEMPLATE_BESCHIKBAARHEID, context)
-
-
-set_tijdelijke_codes_receiver(RECEIVER_SCHEIDS_BESCHIKBAAR, receive_scheids_beschikbaarheid)
 
 
 # end of file
