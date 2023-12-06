@@ -5,6 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
+from BasisTypen.definities import SCHEIDS_NIET, SCHEIDS_BOND
 from TestHelpers.e2ehelpers import E2EHelpers
 
 
@@ -42,5 +43,9 @@ class TestAccountHelpers(E2EHelpers, TestCase):
         self.assertEqual(account.volledige_naam(), 'normaal')
         self.assertEqual(account.get_account_full_name(), 'normaal (normaal)')
 
+        account.scheids = SCHEIDS_NIET
+        self.assertFalse(account.is_scheids())
+        account.scheids = SCHEIDS_BOND
+        self.assertTrue(account.is_scheids())
 
 # end of file
