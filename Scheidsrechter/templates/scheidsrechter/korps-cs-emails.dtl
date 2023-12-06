@@ -1,0 +1,48 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2023 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Korps e-mailadressen{% endblock %}
+
+{% block pagina %}
+
+    <script>
+        function copy_to_clipboard() {
+            const el = document.getElementById('copy_source')
+            navigator.clipboard.writeText(el.innerText)
+        }
+    </script>
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Korps e-mailadressen</h3>
+
+            <p>Hieronder staan de {{ aantal }} bij de KHSN bekende e-mailadressen van de scheidsrechters</p>
+
+            <a class="btn-sv-rood" href="#" onclick="copy_to_clipboard()">
+                <i class="notranslate material-icons-round left">content_copy</i>Kopieer naar mijn klembord</a>
+        </div>
+    </div>
+
+    <!-- blauwe balk -->
+    <div class="row-sv-blauw">
+        <div class="col s12">
+            <table class="white">
+                <tr>
+                    <td>
+                        <code id="copy_source" style="font-size: 60%">{{ emails }}</code>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="scheidsrechter-korps-cs-emails" %}
+
+{% endblock %}

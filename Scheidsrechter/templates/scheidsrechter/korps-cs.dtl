@@ -16,6 +16,12 @@
         <div class="col s12">
             <h3 class="page-banner">Korps scheidsrechters</h3>
             <p>Hieronder volgt de lijst van alle {{ aantal }} scheidsrechters, inclusief alle bekende contactgegevens</p>
+
+            <p>
+                <a class="btn-sv-rood" href="{{ url_emails }}">
+                    <i class="notranslate material-icons-round left">email</i>Alle e-mailadressen</a>
+            </p>
+
             <p class="hide-on-small-only"><i>(kolommen 'deelt' is met korps, wedstrijdorganisatie)</i></p>
         </div>
     </div>
@@ -57,6 +63,6 @@
         </div>
     </div>
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="scheidsrechter-korps-met-contactgegevens" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="scheidsrechter-korps-cs" %}
 
 {% endblock %}

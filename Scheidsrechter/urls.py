@@ -21,8 +21,12 @@ urlpatterns = [
          name='korps'),
 
     path('korps-met-contactgegevens/',
-         view_korps.KorpsMetContactGegevensView.as_view(),
+         view_korps.KorpsMetContactgegevensView.as_view(),
          name='korps-met-contactgegevens'),
+
+    path('korps-emailadressen/',
+         view_korps.KorpsEmailadressenView.as_view(),
+         name='korps-emails'),
 
     path('wedstrijden/',
          view_wedstrijden.WedstrijdenView.as_view(),
