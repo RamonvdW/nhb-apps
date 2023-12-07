@@ -750,7 +750,7 @@ class MyTestAsserts(TestCase):
         self.assertTrue(resp.url.startswith, '/account/login/')
         if next_url:
             next_param = '?next=%s' % next_url
-            if next_param not in resp.url:
+            if next_param not in resp.url:              # pragma: no cover
                 msg = 'next url %s ontbreekt in %s' % (repr(next_url), repr(resp.url))
                 self.fail(msg=msg)
 
@@ -1143,7 +1143,7 @@ class MyTestAsserts(TestCase):
                 pos2 = html.find(sluit_tag, pos + len(open_tag))
 
                 # capture extra space left behind in situation "Email: <a"
-                if pos > 0 and html[pos-1] == ' ':
+                if pos > 0 and html[pos-1] == ' ':              # pragma: no cover
                     pos -= 1
                 html = html[:pos] + html[pos2 + len(sluit_tag):]
                 pos = html.find(open_tag)
