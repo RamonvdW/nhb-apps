@@ -97,9 +97,7 @@ def save_tijdelijke_code(url_code, dispatch_to,
                             hoort_bij_account=account,
                             hoort_bij_gast_reg=gast,
                             hoort_bij_functie=functie,
-                            hoort_bij_kampioen=kampioen,
-                            hoort_bij_wedstrijd=wedstrijd,
-                            hoort_bij_sporter=sporter)
+                            hoort_bij_kampioen=kampioen)
     obj.save()
 
     return obj
