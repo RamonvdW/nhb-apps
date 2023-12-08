@@ -363,11 +363,16 @@ class Command(BaseCommand):
         self.stop_at = now + datetime.timedelta(minutes=duration)
 
         if stop_minute:
-            if now.minute < stop_minute < self.stop_at.minute:
+            delta = stop_minute - now.minute
+            if delta < 0:
+                delta += 60
+            stop_at_exact = now + datetime.timedelta(minutes=delta)
+            stop_at_exact -= datetime.timedelta(seconds=self.stop_at.second,
+                                                microseconds=self.stop_at.microsecond)
+            self.stdout.write('[INFO] Calculated stop at is %s' % stop_at_exact)
+            if stop_at_exact < self.stop_at:
                 # run duration passes the requested stop minute
-                self.stop_at -= datetime.timedelta(minutes=self.stop_at.minute - stop_minute,
-                                                   seconds=self.stop_at.second,
-                                                   microseconds=self.stop_at.microsecond)
+                self.stop_at = stop_at_exact
 
         # test moet snel stoppen dus interpreteer duration in seconden
         if options['quick']:        # pragma: no branch
