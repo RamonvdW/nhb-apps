@@ -252,8 +252,11 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument('duration', type=int,
-                            choices={1, 2, 5, 7, 10, 15, 20, 30, 45, 60},
-                            help="Aantal minuten actief blijven")
+                            choices=(1, 2, 5, 7, 10, 15, 20, 30, 45, 60),
+                            help="Maximum aantal minuten actief blijven")
+        parser.add_argument('--stop_exactly', type=int, default=None,
+                            choices=(0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60),
+                            help="Stop op deze minuut")
         parser.add_argument('--quick', action='store_true')             # for testing
         parser.add_argument('--fake-hoogste', action='store_true')      # for testing
 
@@ -1117,12 +1120,18 @@ class Command(BaseCommand):
 
     def _set_stop_time(self, **options):
         # bepaal wanneer we moeten stoppen (zoals gevraagd)
-        # trek er nog eens 15 seconden vanaf, om overlap van twee cron jobs te voorkomen
         duration = options['duration']
+        stop_minute = options['stop_exactly']
 
-        self.stop_at = (datetime.datetime.now()
-                        + datetime.timedelta(minutes=duration)
-                        - datetime.timedelta(seconds=15))
+        now = datetime.datetime.now()
+        self.stop_at = now + datetime.timedelta(minutes=duration)
+
+        if stop_minute:
+            if now.minute < stop_minute < self.stop_at.minute:
+                # run duration passes the requested stop minute
+                self.stop_at -= datetime.timedelta(minutes=self.stop_at.minute - stop_minute,
+                                                   seconds=self.stop_at.second,
+                                                   microseconds=self.stop_at.microsecond)
 
         # test moet snel stoppen dus interpreteer duration in seconden
         if options['quick']:        # pragma: no branch
