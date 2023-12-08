@@ -172,7 +172,8 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
                 lid_nr = int(zoekterm[:6])
                 sporter = (Sporter
                            .objects
-                           .select_related('account')
+                           .select_related('account',
+                                           'bij_vereniging__regio')
                            .prefetch_related('account__functie_set',
                                              'account__vhpg')
                            .get(lid_nr=lid_nr))
@@ -180,7 +181,8 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
             except (ValueError, Sporter.DoesNotExist):
                 sporters = (Sporter
                             .objects
-                            .select_related('account')
+                            .select_related('account',
+                                            'bij_vereniging__regio')
                             .prefetch_related('account__functie_set',
                                               'account__vhpg')
                             .filter(unaccented_naam__icontains=zoekterm)
