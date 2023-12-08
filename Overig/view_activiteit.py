@@ -202,7 +202,9 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
             sporter.kan_loskoppelen = False
 
             if sporter.bij_vereniging:
-                sporter.ver_str = str(sporter.bij_vereniging)
+                sporter.ver_str = "%s (%s, regio %s)" % (str(sporter.bij_vereniging),
+                                                         sporter.bij_vereniging.plaats,
+                                                         sporter.bij_vereniging.regio.regio_nr)
             else:
                 sporter.ver_str = 'Geen'
 
