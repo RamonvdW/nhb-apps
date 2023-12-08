@@ -38,7 +38,7 @@ class TestCompetitieCliRegiocompMutaties(E2EHelpers, TestCase):
 
     def test_stop_exactly(self):
         now = datetime.datetime.now()
-        if now.minute == 0:
+        if now.minute == 0:                             # pragma: no cover
             print('Waiting until clock is past xx:00')
             while now.minute == 0:
                 time.sleep(5)
@@ -46,7 +46,7 @@ class TestCompetitieCliRegiocompMutaties(E2EHelpers, TestCase):
             # while
 
         now = datetime.datetime.now()
-        if now.second > 55:
+        if now.second > 55:                             # pragma: no cover
             print('Waiting until clock is past xx:xx:59')
             while now.second > 55:
                 time.sleep(5)
@@ -64,7 +64,7 @@ class TestCompetitieCliRegiocompMutaties(E2EHelpers, TestCase):
         # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
 
         now = datetime.datetime.now()
-        if now.minute == 59:
+        if now.minute == 59:                             # pragma: no cover
             print('Waiting until clock is past xx:59')
             while now.minute == 59:
                 time.sleep(5)
