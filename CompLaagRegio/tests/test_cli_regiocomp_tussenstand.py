@@ -5,7 +5,6 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from django.core import management
 from BasisTypen.models import BoogType
 from Competitie.definities import DEEL_BK
 from Competitie.models import (Competitie, CompetitieIndivKlasse, Regiocompetitie,
@@ -22,7 +21,7 @@ from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
 import datetime
 import json
-import io
+import time
 
 
 class TestCompLaagRegioCliRegiocompTussenstand(E2EHelpers, TestCase):
@@ -264,10 +263,8 @@ class TestCompLaagRegioCliRegiocompTussenstand(E2EHelpers, TestCase):
         ScoreHist.objects.all().delete()
         Score.objects.all().delete()
 
-        f1 = io.StringIO()
-        f2 = io.StringIO()
         with self.assert_max_queries(114):
-            management.call_command('regiocomp_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
+            f1, f2 = self.run_management_command('regiocomp_tussenstand', '2', '--quick')
         self.assertTrue(f1.getvalue() == '')
         self.assertTrue('Klaar' in f2.getvalue())
 
@@ -275,10 +272,9 @@ class TestCompLaagRegioCliRegiocompTussenstand(E2EHelpers, TestCase):
         # maak een paar score + scorehist
         self._score_opslaan(self.uitslagen[0], self.sporterboog_100001, 123)
         self._score_opslaan(self.uitslagen[2], self.sporterboog_100001, 124)
-        f1 = io.StringIO()
-        f2 = io.StringIO()
+
         with self.assert_max_queries(176):
-            management.call_command('regiocomp_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
+            f1, f2 = self.run_management_command('regiocomp_tussenstand', '2', '--quick')
         self.assertTrue('Scores voor 1 deelnemers bijgewerkt' in f2.getvalue())
 
         deelnemer = RegiocompetitieSporterBoog.objects.get(sporterboog=self.sporterboog_100001)
@@ -296,17 +292,13 @@ class TestCompLaagRegioCliRegiocompTussenstand(E2EHelpers, TestCase):
         #           deelnemer.laagste_score_nr, deelnemer.totaal, deelnemer.gemiddelde))
 
         # nog een keer - nu wordt er niets bijgewerkt omdat er geen nieuwe scores zijn
-        f1 = io.StringIO()
-        f2 = io.StringIO()
         with self.assert_max_queries(173):
-            management.call_command('regiocomp_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
+            f1, f2 = self.run_management_command('regiocomp_tussenstand', '2', '--quick')
         self.assertTrue('Scores voor 0 deelnemers bijgewerkt' in f2.getvalue())
 
         # nog een keer met 'all'
-        f1 = io.StringIO()
-        f2 = io.StringIO()
         with self.assert_max_queries(174):
-            management.call_command('regiocomp_tussenstand', '2', '--quick', '--all', stderr=f1, stdout=f2)
+            f1, f2 = self.run_management_command('regiocomp_tussenstand', '2', '--quick', '--all')
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
         self.assertTrue('Scores voor 1 deelnemers bijgewerkt' in f2.getvalue())
@@ -320,10 +312,8 @@ class TestCompLaagRegioCliRegiocompTussenstand(E2EHelpers, TestCase):
         self._score_opslaan(self.uitslagen[4], self.sporterboog_100001, 127)
         self._score_opslaan(self.uitslagen[5], self.sporterboog_100001, 128)
         self._score_opslaan(self.uitslagen[6], self.sporterboog_100001, 129)
-        f1 = io.StringIO()
-        f2 = io.StringIO()
         with self.assert_max_queries(182):
-            management.call_command('regiocomp_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
+            f1, f2 = self.run_management_command('regiocomp_tussenstand', '2', '--quick')
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
         self.assertTrue('Scores voor 1 deelnemers bijgewerkt' in f2.getvalue())
@@ -346,10 +336,8 @@ class TestCompLaagRegioCliRegiocompTussenstand(E2EHelpers, TestCase):
         score.waarde = SCORE_WAARDE_VERWIJDERD
         score.save()
 
-        f1 = io.StringIO()
-        f2 = io.StringIO()
         with self.assert_max_queries(176):
-            management.call_command('regiocomp_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
+            f1, f2 = self.run_management_command('regiocomp_tussenstand', '2', '--quick')
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
         self.assertTrue('Scores voor 1 deelnemers bijgewerkt' in f2.getvalue())
@@ -413,10 +401,8 @@ class TestCompLaagRegioCliRegiocompTussenstand(E2EHelpers, TestCase):
 
         self._score_opslaan(self.uitslagen[4], self.sporterboog_100005, 128)
 
-        f1 = io.StringIO()
-        f2 = io.StringIO()
         with self.assert_max_queries(191):
-            management.call_command('regiocomp_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
+            f1, f2 = self.run_management_command('regiocomp_tussenstand', '2', '--quick')
         # print("f2: %s" % f2.getvalue())
         self.assertTrue('[INFO] Verplaats 100001 (18m) met nieuw AG 4.167 naar klasse Recurve klasse' in f2.getvalue())
 
@@ -437,10 +423,8 @@ class TestCompLaagRegioCliRegiocompTussenstand(E2EHelpers, TestCase):
         self._score_opslaan(self.uitslagen[5], self.sporterboog_100001, 129)
         self._score_opslaan(self.uitslagen[6], self.sporterboog_100001, 128)
 
-        f1 = io.StringIO()
-        f2 = io.StringIO()
         with self.assert_max_queries(182):
-            management.call_command('regiocomp_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
+            f1, f2 = self.run_management_command('regiocomp_tussenstand', '2', '--quick')
         # print("f2: %s" % f2.getvalue())
         self.assertTrue('[INFO] Verplaats 100001 (18m) met nieuw AG 4.133 naar klasse Recurve klasse' in f2.getvalue())
 
@@ -450,10 +434,9 @@ class TestCompLaagRegioCliRegiocompTussenstand(E2EHelpers, TestCase):
         # maak een paar score + scorehist
         self._score_opslaan(self.uitslagen[0], self.sporterboog_100001, 123)
         self._score_opslaan(self.uitslagen[2], self.sporterboog_100001, 124)
-        f1 = io.StringIO()
-        f2 = io.StringIO()
+
         with self.assert_max_queries(176):
-            management.call_command('regiocomp_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
+            f1, f2 = self.run_management_command('regiocomp_tussenstand', '2', '--quick')
         self.assertTrue('Scores voor 1 deelnemers bijgewerkt' in f2.getvalue())
 
         deelnemer = RegiocompetitieSporterBoog.objects.get(sporterboog=self.sporterboog_100001)
@@ -464,10 +447,8 @@ class TestCompLaagRegioCliRegiocompTussenstand(E2EHelpers, TestCase):
         sporter.bij_vereniging = None
         sporter.save(update_fields=['bij_vereniging'])
 
-        f1 = io.StringIO()
-        f2 = io.StringIO()
         with self.assert_max_queries(174):
-            management.call_command('regiocomp_tussenstand', '2', '--all', '--quick', stderr=f1, stdout=f2)
+            f1, f2 = self.run_management_command('regiocomp_tussenstand', '2', '--all', '--quick')
         self.assertFalse("[INFO] Verwerk overstap" in f2.getvalue())
 
         # maak een tweede vereniging aan
@@ -482,10 +463,8 @@ class TestCompLaagRegioCliRegiocompTussenstand(E2EHelpers, TestCase):
         sporter.bij_vereniging = ver
         sporter.save(update_fields=['bij_vereniging'])
 
-        f1 = io.StringIO()
-        f2 = io.StringIO()
         with self.assert_max_queries(178):
-            management.call_command('regiocomp_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
+            f1, f2 = self.run_management_command('regiocomp_tussenstand', '2', '--quick')
         self.assertTrue("[INFO] Verwerk overstap 100001: [101] [1000] Grote Club --> [116] [1100] Zuidelijke Club"
                         in f2.getvalue())
 
@@ -495,10 +474,8 @@ class TestCompLaagRegioCliRegiocompTussenstand(E2EHelpers, TestCase):
         sporter.bij_vereniging = self.ver
         sporter.save(update_fields=['bij_vereniging'])
 
-        f1 = io.StringIO()
-        f2 = io.StringIO()
         with self.assert_max_queries(178):
-            management.call_command('regiocomp_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
+            f1, f2 = self.run_management_command('regiocomp_tussenstand', '2', '--quick')
         self.assertTrue("[INFO] Verwerk overstap 100001: [116] [1100] Zuidelijke Club --> [116] [1000] Grote Club"
                         in f2.getvalue())
 
@@ -510,10 +487,8 @@ class TestCompLaagRegioCliRegiocompTussenstand(E2EHelpers, TestCase):
         # for
         sporter.bij_vereniging = ver
         sporter.save()
-        f1 = io.StringIO()
-        f2 = io.StringIO()
         with self.assert_max_queries(173):
-            management.call_command('regiocomp_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
+            f1, f2 = self.run_management_command('regiocomp_tussenstand', '2', '--quick')
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
         self.assertFalse('Verwerk overstap' in f2.getvalue())
@@ -524,20 +499,16 @@ class TestCompLaagRegioCliRegiocompTussenstand(E2EHelpers, TestCase):
         # maak een paar score + scorehist
         self._score_opslaan(self.uitslagen[0], self.sporterboog_100001, 123)
         self._score_opslaan(self.uitslagen[2], self.sporterboog_100001, 124)
-        f1 = io.StringIO()
-        f2 = io.StringIO()
         with self.assert_max_queries(176):
-            management.call_command('regiocomp_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
+            f1, f2 = self.run_management_command('regiocomp_tussenstand', '2', '--quick')
         self.assertTrue('Scores voor 1 deelnemers bijgewerkt' in f2.getvalue())
 
         # schrijf een schutter uit
         sporter = self.sporterboog_100001.sporter
         sporter.bij_vereniging = None
         sporter.save()
-        f1 = io.StringIO()
-        f2 = io.StringIO()
         with self.assert_max_queries(176, check_duration=False):        # 7 seconden is boven de limiet
-            management.call_command('regiocomp_tussenstand', '7', '--quick', stderr=f1, stdout=f2)
+            f1, f2 = self.run_management_command('regiocomp_tussenstand', '7', '--quick')
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
 
@@ -545,6 +516,46 @@ class TestCompLaagRegioCliRegiocompTussenstand(E2EHelpers, TestCase):
         deelnemer = RegiocompetitieSporterBoog.objects.get(sporterboog__sporter__lid_nr=100001)
         self.assertIsNone(deelnemer.sporterboog.sporter.bij_vereniging)
         self.assertIsNotNone(deelnemer.bij_vereniging)
+
+    def test_stop_exactly(self):
+        now = datetime.datetime.now()
+        if now.minute == 0:
+            print('Waiting until clock is past xx:00')
+            while now.minute == 0:
+                time.sleep(5)
+                now = datetime.datetime.now()
+            # while
+
+        now = datetime.datetime.now()
+        if now.second > 55:
+            print('Waiting until clock is past xx:xx:59')
+            while now.second > 55:
+                time.sleep(5)
+                now = datetime.datetime.now()
+            # while
+
+        # trigger the current minute
+        f1, f2 = self.run_management_command('regiocomp_tussenstand', '1', '--quick',
+                                             '--stop_exactly=%s' % now.minute)
+        # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
+
+        # trigger the negative case
+        f1, f2 = self.run_management_command('regiocomp_tussenstand', '1', '--quick',
+                                             '--stop_exactly=%s' % (now.minute - 1))
+        # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
+
+        now = datetime.datetime.now()
+        if now.minute == 59:
+            print('Waiting until clock is past xx:59')
+            while now.minute == 59:
+                time.sleep(5)
+                now = datetime.datetime.now()
+            # while
+
+        # trigger the positive case
+        f1, f2 = self.run_management_command('regiocomp_tussenstand', '1', '--quick',
+                                             '--stop_exactly=%s' % (now.minute + 1))
+        # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
 
     # TODO: test garantie dat overstapper na fase G niet meer verwerkt wordt en vereniging voor RK rayon bevroren is
 

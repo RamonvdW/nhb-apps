@@ -6,7 +6,6 @@
 
 from django.conf import settings
 from django.test import TestCase, override_settings
-from django.core import management
 from Betaal.models import BetaalMutatie, BetaalActief, BetaalTransactie, BetaalInstellingenVereniging
 from Betaal.mutaties import betaal_mutatieverzoek_start_ontvangst, betaal_mutatieverzoek_payment_status_changed
 from Bestel.models import Bestelling, BestelMutatie
@@ -17,7 +16,8 @@ from TestHelpers.mgmt_cmds_helper import TEST_BETAAL_API_URL
 from Vereniging.models import Vereniging
 from decimal import Decimal
 from mollie.api.client import Client
-import io
+import datetime
+import time
 
 
 class TestBetaalMutaties(E2EHelpers, TestCase):
@@ -200,7 +200,8 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
                         True)  # snel
 
         f1, f2 = self._run_achtergrondtaak()
-        self.assertTrue('[ERROR] Missing mandatory information in create payment response: None, None, None' in f1.getvalue())
+        self.assertTrue('[ERROR] Missing mandatory information in create payment response: None, None, None'
+                        in f1.getvalue())
         self.assertTrue("[ERROR] Onverwachte status 'bogus' in create payment response" in f1.getvalue())
 
     def test_bad_api_key(self):
@@ -338,10 +339,8 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
                         True)       # snel
 
         # run with wrong port
-        f1 = io.StringIO()
-        f2 = io.StringIO()
         with override_settings(BETAAL_API=TEST_BETAAL_API_URL[:-2] + '99'):
-            management.call_command('betaal_mutaties', '1', '--quick', stderr=f1, stdout=f2)
+            f1, f2 = self.run_management_command('betaal_mutaties', '1', '--quick')
         self.assertTrue('Unable to communicate' in f1.getvalue())
 
         mutatie1 = betaal_mutatieverzoek_start_ontvangst(
@@ -639,6 +638,46 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
         f1, f2, = self._run_achtergrondtaak()
 
         self.assertTrue('[ERROR] Unexpected exception from Mollie payments.get: Invalid payment ID' in f1.getvalue())
+
+    def test_stop_exactly(self):
+        now = datetime.datetime.now()
+        if now.minute == 0:
+            print('Waiting until clock is past xx:00')
+            while now.minute == 0:
+                time.sleep(5)
+                now = datetime.datetime.now()
+            # while
+
+        now = datetime.datetime.now()
+        if now.second > 55:
+            print('Waiting until clock is past xx:xx:59')
+            while now.second > 55:
+                time.sleep(5)
+                now = datetime.datetime.now()
+            # while
+
+        # trigger the current minute
+        f1, f2 = self.run_management_command('betaal_mutaties', '1', '--quick',
+                                             '--stop_exactly=%s' % now.minute)
+        # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
+
+        # trigger the negative case
+        f1, f2 = self.run_management_command('betaal_mutaties', '1', '--quick',
+                                             '--stop_exactly=%s' % (now.minute - 1))
+        # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
+
+        now = datetime.datetime.now()
+        if now.minute == 59:
+            print('Waiting until clock is past xx:59')
+            while now.minute == 59:
+                time.sleep(5)
+                now = datetime.datetime.now()
+            # while
+
+        # trigger the positive case
+        f1, f2 = self.run_management_command('betaal_mutaties', '1', '--quick',
+                                             '--stop_exactly=%s' % (now.minute + 1))
+        # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
 
 
 # end of file

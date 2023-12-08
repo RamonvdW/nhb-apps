@@ -20,6 +20,7 @@ from Vereniging.models import Vereniging
 from Wedstrijden.definities import WEDSTRIJD_STATUS_GEACCEPTEERD
 from Wedstrijden.models import WedstrijdSessie, Wedstrijd
 import datetime
+import time
 
 
 class TestScheidsrechterBeschikbaarheid(E2EHelpers, TestCase):
@@ -161,5 +162,43 @@ class TestScheidsrechterBeschikbaarheid(E2EHelpers, TestCase):
         f1, f2 = self.verwerk_scheids_mutaties(2)
         # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
         self.assertTrue("[ERROR] Onbekende mutatie code 42" in f2.getvalue())
+
+    def test_stop_exactly(self):
+        now = datetime.datetime.now()
+        if now.minute == 0:
+            print('Waiting until clock is past xx:00')
+            while now.minute == 0:
+                time.sleep(5)
+                now = datetime.datetime.now()
+            # while
+
+        now = datetime.datetime.now()
+        if now.second > 55:
+            print('Waiting until clock is past xx:xx:59')
+            while now.second > 55:
+                time.sleep(5)
+                now = datetime.datetime.now()
+            # while
+
+        # trigger the current minute
+        f1, f2 = self.run_management_command('scheids_mutaties', '1', '--quick', '--stop_exactly=%s' % now.minute)
+        # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
+
+        # trigger the negative case
+        f1, f2 = self.run_management_command('scheids_mutaties', '1', '--quick', '--stop_exactly=%s' % (now.minute - 1))
+        # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
+
+        now = datetime.datetime.now()
+        if now.minute == 59:
+            print('Waiting until clock is past xx:59')
+            while now.minute == 59:
+                time.sleep(5)
+                now = datetime.datetime.now()
+            # while
+
+        # trigger the positive case
+        f1, f2 = self.run_management_command('scheids_mutaties', '1', '--quick', '--stop_exactly=%s' % (now.minute + 1))
+        # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
+
 
 # end of file

@@ -10,6 +10,7 @@ from Mailer.models import MailQueue, mailer_opschonen
 from Mailer.operations import mailer_queue_email, mailer_notify_internal_error
 from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
+import time
 import io
 
 
@@ -23,19 +24,15 @@ class TestMailerCliGoedBase(E2EHelpers, TestCase):
     test_after = ('Mailer.tests.test_operations', )
 
     def test_leeg(self):
-        f1 = io.StringIO()
-        f2 = io.StringIO()
         with self.assert_max_queries(20):
-            management.call_command('stuur_mails', '1', '--quick', stderr=f1, stdout=f2)
+            f1, f2 = self.run_management_command('stuur_mails', '1', '--quick')
         self.assertTrue('[INFO] Aantal oude mails geprobeerd te versturen: 0' in f2.getvalue())
         self.assertTrue('[INFO] Aantal nieuwe mails geprobeerd te versturen: 0' in f2.getvalue())
         self.assertEqual(f1.getvalue(), '')
 
     def test_status_mail_queue(self):
-        f1 = io.StringIO()
-        f2 = io.StringIO()
         with self.assert_max_queries(20):
-            management.call_command('status_mail_queue', stderr=f1, stdout=f2)
+            f1, f2 = self.run_management_command('status_mail_queue')
         self.assertTrue('MQ: 0' in f2.getvalue())
         self.assertEqual(f1.getvalue(), '')
 
@@ -52,10 +49,8 @@ class TestMailerCliGoedBase(E2EHelpers, TestCase):
         self.assertFalse(obj.is_verstuurd)
         self.assertEqual(obj.aantal_pogingen, 0)
 
-        f1 = io.StringIO()
-        f2 = io.StringIO()
         with self.assert_max_queries(20):
-            management.call_command('stuur_mails', '1', '--quick', stderr=f1, stdout=f2)
+            f1, f2 = self.run_management_command('stuur_mails', '1', '--quick')
 
         obj = MailQueue.objects.first()
         self.assertEqual(obj.aantal_pogingen, 1)
@@ -73,10 +68,8 @@ class TestMailerCliGoedBase(E2EHelpers, TestCase):
         self.assertFalse(obj.is_verstuurd)
         self.assertFalse('(verstuurd)' in str(obj))
 
-        f1 = io.StringIO()
-        f2 = io.StringIO()
         with self.assert_max_queries(20):
-            management.call_command('stuur_mails', '1', '--quick', stderr=f1, stdout=f2)
+            f1, f2 = self.run_management_command('stuur_mails', '1', '--quick')
 
         self.assertTrue('[INFO] Aantal oude mails geprobeerd te versturen: 1' in f2.getvalue())
         self.assertTrue('[INFO] Aantal nieuwe mails geprobeerd te versturen: 0' in f2.getvalue())
@@ -96,10 +89,8 @@ class TestMailerCliGoedBase(E2EHelpers, TestCase):
         self.assertEqual(len(objs), 0)
         mailer_queue_email(TEST_EMAIL_ADRES, 'onderwerp_1', 'body\ndoei!\n')
 
-        f1 = io.StringIO()
-        f2 = io.StringIO()
         with self.assert_max_queries(20):
-            management.call_command('stuur_mails', '--skip_old', '--quick', '1', stderr=f1, stdout=f2)
+            f1, f2 = self.run_management_command('stuur_mails', '--skip_old', '--quick', '1')
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
 
@@ -119,10 +110,8 @@ class TestMailerCliGoedBase(E2EHelpers, TestCase):
         self.assertEqual(len(objs), 0)
         mailer_queue_email(TEST_EMAIL_ADRES, 'onderwerp delay', 'body\ndoei!\n')
 
-        f1 = io.StringIO()
-        f2 = io.StringIO()
         with self.assert_max_queries(20, check_duration=False):
-            management.call_command('stuur_mails', '1', '--quick', stderr=f1, stdout=f2)
+            f1, f2 = self.run_management_command('stuur_mails', '1', '--quick')
         self.assertTrue('[INFO] Aantal oude mails geprobeerd te versturen: 1' in f2.getvalue())
         self.assertTrue('[INFO] Aantal nieuwe mails geprobeerd te versturen: 0' in f2.getvalue())
         self.assertEqual(f1.getvalue(), '')
@@ -151,10 +140,8 @@ class TestMailerCliGoedBase(E2EHelpers, TestCase):
         obj.is_blocked = True
         obj.save(update_fields=['toegevoegd_op', 'is_blocked'])
 
-        f1 = io.StringIO()
-        f2 = io.StringIO()
         with self.assert_max_queries(20, check_duration=False):
-            management.call_command('stuur_mails', '1', '--quick', stderr=f1, stdout=f2)
+            f1, f2 = self.run_management_command('stuur_mails', '1', '--quick')
         # print('f1: %s' % f1.getvalue())
         # print('f2: %s' % f2.getvalue())
         self.assertTrue('blocked mails over 1 month old' in f2.getvalue())
@@ -174,6 +161,43 @@ class TestMailerCliGoedBase(E2EHelpers, TestCase):
         mailer_opschonen(f1)
         self.assertFalse('Verwijder' in f1.getvalue())
 
+    def test_stop_exactly(self):
+        now = datetime.datetime.now()
+        if now.minute == 0:
+            print('Waiting until clock is past xx:00')
+            while now.minute == 0:
+                time.sleep(5)
+                now = datetime.datetime.now()
+            # while
+
+        now = datetime.datetime.now()
+        if now.second > 55:
+            print('Waiting until clock is past xx:xx:59')
+            while now.second > 55:
+                time.sleep(5)
+                now = datetime.datetime.now()
+            # while
+
+        # trigger the current minute
+        f1, f2 = self.run_management_command('stuur_mails', '1', '--quick', '--stop_exactly=%s' % now.minute)
+        # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
+
+        # trigger the negative case
+        f1, f2 = self.run_management_command('stuur_mails', '1', '--quick', '--stop_exactly=%s' % (now.minute - 1))
+        # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
+
+        now = datetime.datetime.now()
+        if now.minute == 59:
+            print('Waiting until clock is past xx:59')
+            while now.minute == 59:
+                time.sleep(5)
+                now = datetime.datetime.now()
+            # while
+
+        # trigger the positive case
+        f1, f2 = self.run_management_command('stuur_mails', '1', '--quick', '--stop_exactly=%s' % (now.minute + 1))
+        # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
+
 
 class TestMailerCliBadBase(E2EHelpers, TestCase):
 
@@ -181,11 +205,15 @@ class TestMailerCliBadBase(E2EHelpers, TestCase):
 
     test_after = ('Mailer.tests.test_operations',)
 
-    def test_stuur_mails_bad_duration(self):
-        f1 = io.StringIO()
-        f2 = io.StringIO()
+    def test_stuur_mails_bad_args(self):
         with self.assertRaises(management.base.CommandError):
-            management.call_command('stuur_mails', '99999', stderr=f1, stdout=f2)
+            self.run_management_command('stuur_mails', '99999')
+
+        with self.assertRaises(management.base.CommandError):
+            self.run_management_command('stuur_mails', '1', '--quick', '--stop_exactly')
+
+        with self.assertRaises(management.base.CommandError):
+            self.run_management_command('stuur_mails', '1', '--quick', '--stop_exactly=99999')
 
     def test_stuur_mail_no_connect(self):
         # deze test eist dat de URL wijst naar een poort waar niet op gereageerd wordt
@@ -202,10 +230,8 @@ class TestMailerCliBadBase(E2EHelpers, TestCase):
         self.assertEqual(obj.aantal_pogingen, 0)
 
         # probeer te versturen
-        f1 = io.StringIO()
-        f2 = io.StringIO()
         with self.assert_max_queries(20, check_duration=False):     # duurt 7 seconden
-            management.call_command('stuur_mails', '7', '--quick', stderr=f1, stdout=f2)
+            f1, f2 = self.run_management_command('stuur_mails', '7', '--quick')
 
         obj = MailQueue.objects.first()
         self.assertEqual(obj.aantal_pogingen, 1)

@@ -254,8 +254,7 @@ class Command(BaseCommand):
         parser.add_argument('duration', type=int,
                             choices=(1, 2, 5, 7, 10, 15, 20, 30, 45, 60),
                             help="Maximum aantal minuten actief blijven")
-        parser.add_argument('--stop_exactly', type=int, default=None,
-                            choices=(0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60),
+        parser.add_argument('--stop_exactly', type=int, default=None, choices=range(60),
                             help="Stop op deze minuut")
         parser.add_argument('--quick', action='store_true')             # for testing
         parser.add_argument('--fake-hoogste', action='store_true')      # for testing
@@ -1126,7 +1125,7 @@ class Command(BaseCommand):
         now = datetime.datetime.now()
         self.stop_at = now + datetime.timedelta(minutes=duration)
 
-        if stop_minute:
+        if isinstance(stop_minute, int):
             delta = stop_minute - now.minute
             if delta < 0:
                 delta += 60
