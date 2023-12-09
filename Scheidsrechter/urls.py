@@ -32,9 +32,17 @@ urlpatterns = [
          view_wedstrijden.WedstrijdenView.as_view(),
          name='wedstrijden'),
 
-    path('wedstrijden/details/<wedstrijd_pk>/',
+    path('wedstrijden/<wedstrijd_pk>/details/',
          view_wedstrijden.WedstrijdDetailsView.as_view(),
          name='wedstrijd-details'),
+
+    path('wedstrijden/<wedstrijd_pk>/kies-scheidsrechters/',
+         view_wedstrijden.WedstrijdDetailsCSView.as_view(),
+         name='wedstrijd-kies-scheidsrechters'),
+
+    path('wedstrijden/<wedstrijd_pk>/geselecteerde-scheidsrechters/',
+         view_wedstrijden.WedstrijdHWLContactView.as_view(),
+         name='wedstrijd-hwl-contact'),
 
     path('beschikbaarheid-opvragen/',
          view_beschikbaarheid.BeschikbaarheidOpvragenView.as_view(),
@@ -45,7 +53,7 @@ urlpatterns = [
          name='beschikbaarheid-wijzigen'),
 
     path('beschikbaarheid-inzien/',
-         view_beschikbaarheid.BeschikbaarheidInzienView.as_view(),
+         view_beschikbaarheid.BeschikbaarheidInzienCSView.as_view(),
          name='beschikbaarheid-inzien'),
 ]
 

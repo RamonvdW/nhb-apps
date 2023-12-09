@@ -23,6 +23,7 @@ from Overig.background_sync import BackgroundSync
 from Scheidsrechter.definities import SCHEIDS_MUTATIE_BESCHIKBAARHEID_OPVRAGEN, SCHEIDS_MUTATIE_STUUR_NOTIFICATIES
 from Scheidsrechter.models import WedstrijdDagScheidsrechters, ScheidsMutatie
 from Sporter.models import Sporter
+from Taken.operations import maak_taak
 from Wedstrijden.models import Wedstrijd
 import traceback
 import datetime
@@ -223,10 +224,36 @@ class Command(BaseCommand):
                 self.stuur_email_naar_sr_beschikbaarheid_opgeven(wedstrijd, vraag, sporter.account)
         # for
 
+    def _maak_taak_voor_hwl(self, wedstrijd):
+        now = timezone.now()
+        stamp_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
+        taak_deadline = now + datetime.timedelta(days=3)
+        taak_log = "[%s] Taak aangemaakt" % stamp_str
+        taak_tekst = "Scheidsrechters zijn geselecteerd.\n\n"
+
+        taak_tekst += "Er is een wijziging doorgevoerd voor de volgende wedstrijd:\n"
+        taak_tekst += "Titel: %s\n" % wedstrijd.titel
+
+        datum_str = wedstrijd.datum_begin.strftime('%Y-%m-%d')
+        taak_tekst += "Datum: %s\n" % datum_str
+
+        taak_tekst += "\nOnder Wedstrijden kan je de namen en contactgegevens inzien."
+
+        # maak een taak aan voor de HWL van de organiserende vereniging
+        functie_hwl = wedstrijd.organiserende_vereniging.functie_set.filter(rol='HWL').first()
+        if functie_hwl:  # pragma: no branch
+            maak_taak(
+                toegekend_aan_functie=functie_hwl,
+                deadline=taak_deadline,
+                beschrijving=taak_tekst,
+                log=taak_log)
+
     def _verwerk_mutatie_stuur_notificaties(self, mutatie):
         wedstrijd = mutatie.wedstrijd
 
         when_str = timezone.localtime(mutatie.when).strftime('%Y-%m-%d om %H:%M')
+
+        notify_hwl = False
 
         for dag in (WedstrijdDagScheidsrechters
                     .objects
@@ -251,16 +278,19 @@ class Command(BaseCommand):
                         # sporter is nieuw gekozen en moet een berichtje krijgen
                         self.stuur_email_naar_sr_voor_wedstrijddag_gekozen(dag, sporter)
                         dag.notified_srs.add(sporter)
+                        notify_hwl = True
             # for
 
             # alle overgebleven srs zijn niet meer gekozen en kunnen dus een afmelding krijgen
             for sporter in Sporter.objects.filter(pk__in=notified_pks):
                 self.stuur_email_naar_sr_voor_wedstrijddag_niet_meer_nodig(dag, sporter)
                 dag.notified_srs.remove(sporter)
+                notify_hwl = True
             # for
         # for
 
-        # stuur de mailtjes (voor alle dagen in 1x)
+        # maak een taak voor de HWL van de organiserende vereniging
+        self._maak_taak_voor_hwl(wedstrijd)
 
     def _verwerk_mutatie(self, mutatie):
         code = mutatie.mutatie

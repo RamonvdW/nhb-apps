@@ -26,7 +26,7 @@ from Wedstrijden.models import Wedstrijd
 import datetime
 
 TEMPLATE_BESCHIKBAARHEID_WIJZIGEN = 'scheidsrechter/beschikbaarheid-wijzigen.dtl'
-TEMPLATE_BESCHIKBAARHEID_INZIEN = 'scheidsrechter/beschikbaarheid-inzien.dtl'
+TEMPLATE_BESCHIKBAARHEID_INZIEN_CS = 'scheidsrechter/beschikbaarheid-inzien-cs.dtl'
 
 
 class BeschikbaarheidOpvragenView(UserPassesTestMixin, View):
@@ -260,11 +260,11 @@ class WijzigBeschikbaarheidView(UserPassesTestMixin, TemplateView):
         return HttpResponseRedirect(url)
 
 
-class BeschikbaarheidInzienView(UserPassesTestMixin, TemplateView):
+class BeschikbaarheidInzienCSView(UserPassesTestMixin, TemplateView):
     """ Django class-based view voor de Commissie Scheidsrechters om de opgaaf van de SR's te zien """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_BESCHIKBAARHEID_INZIEN
+    template_name = TEMPLATE_BESCHIKBAARHEID_INZIEN_CS
     raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
     permission_denied_message = 'Geen toegang'
 
@@ -321,16 +321,35 @@ class BeschikbaarheidInzienView(UserPassesTestMixin, TemplateView):
         for dag in dagen:
             try:
                 tup = (dag.wedstrijd.pk, dag.datum)
-                keuzes = wedstrijd_dag2beschikbaar[tup]
+                beschikbaar = wedstrijd_dag2beschikbaar[tup]
             except KeyError:
-                keuzes = list()
+                beschikbaar = list()
 
-            for keuze in keuzes:
-                tup = (opgaaf2order[keuze.opgaaf], keuze.scheids.volledige_naam(), BESCHIKBAAR2STR[keuze.opgaaf])
+            srs = [sr
+                   for sr in (dag.gekozen_sr1, dag.gekozen_sr2, dag.gekozen_sr3, dag.gekozen_sr4, dag.gekozen_sr5,
+                              dag.gekozen_sr6, dag.gekozen_sr7, dag.gekozen_sr8, dag.gekozen_sr9)
+                   if sr is not None]
+
+            for keuze in beschikbaar:
+                is_hsr = keuze.scheids == dag.gekozen_hoofd_sr
+                is_sr = keuze.scheids in srs
+
+                is_probleem = (is_hsr or is_sr) and keuze.opgaaf != BESCHIKBAAR_JA
+
+                tup = (not is_hsr,
+                       not is_sr,
+                       opgaaf2order[keuze.opgaaf],
+                       keuze.scheids.volledige_naam(),
+                       BESCHIKBAAR2STR[keuze.opgaaf],
+                       is_hsr,
+                       is_sr,
+                       is_probleem)
+
                 dag.beschikbaar.append(tup)
             # for
 
             dag.beschikbaar.sort()   # sorteer op opgaaf, dan op naam
+            dag.beschikbaar = [tup[2:] for tup in dag.beschikbaar]
         # for
 
         context['kruimels'] = (

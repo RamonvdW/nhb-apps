@@ -366,7 +366,7 @@ class TestScheidsrechterBeschikbaarheid(E2EHelpers, TestCase):
             resp = self.client.get(self.url_beschikbaarheid_inzien)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('scheidsrechter/beschikbaarheid-inzien.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('scheidsrechter/beschikbaarheid-inzien-cs.dtl', 'plein/site_layout.dtl'))
 
         # beschikbaarheid opvragen voor een wedstrijd
         self.assertEqual(0, WedstrijdDagScheidsrechters.objects.count())
@@ -385,7 +385,7 @@ class TestScheidsrechterBeschikbaarheid(E2EHelpers, TestCase):
             resp = self.client.get(self.url_beschikbaarheid_inzien)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('scheidsrechter/beschikbaarheid-inzien.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('scheidsrechter/beschikbaarheid-inzien-cs.dtl', 'plein/site_layout.dtl'))
 
         # SR4 geeft beschikbaarheid door
         self.e2e_login(self.sr4_met_account.account)
@@ -402,7 +402,7 @@ class TestScheidsrechterBeschikbaarheid(E2EHelpers, TestCase):
             resp = self.client.get(self.url_beschikbaarheid_inzien)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('scheidsrechter/beschikbaarheid-inzien.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('scheidsrechter/beschikbaarheid-inzien-cs.dtl', 'plein/site_layout.dtl'))
 
     # TODO: keuze SR maken
 

@@ -1,0 +1,335 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2021-2023 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Kies scheidsrechters{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Kies scheidsrechters</h3>
+            <p>voor de Commissie Scheidsrechters</p>
+        </div>
+    </div>
+
+    <script>
+        function gewijzigd() {
+            // het formulier is aangepast en moet opgeslagen worden
+
+            // enable de 'opslaan' knop
+            document.getElementById("submit_knop1").disabled = false;
+
+            // disable knoppen waarmee we weg kunnen navigeren
+            const els = document.getElementsByClassName("nav_weg_knop");
+            Array.prototype.forEach.call(els, function (el) {
+                el.classList.add('disabled');
+            })
+
+            // TODO: gekozen hoofd sr grijs maken in lijst van hulp sr
+            // zie filters voor uitlezen radio lijstjes
+        }
+    </script>
+
+    <div class="row-sv-blauw">
+        <div class="col s12">
+
+            <!-- dialoog venster -->
+            <div class="white left-align z-depth-3" style="margin-top:30px">
+                <div class="form-padding">
+                    <form action="{{ url_wijzigen }}" method="post" onsubmit="document.getElementById('submit_knop1').disabled=true; return true;">
+                        {% csrf_token %}
+
+                        <table>
+                                <tr>
+                                    <th>Aantal scheidsrechters nodig</th>
+                                    <td>
+                                        <select name="aantal_scheids" onchange="gewijzigd()">
+                                            {% for value, tekst in keuze_aantal_scheids %}
+                                                <option value="{{ value }}"{% if wed.aantal_scheids == value %} selected{% endif %}>{{ tekst }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </td>
+                                </tr>
+
+                                {% for dag in dagen %}
+                                    <tr>
+                                        <td colspan="2" class="center">
+                                            <h6 class="sv-blauw-text">{{ dag.datum }}</h6>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>Hoofd<wbr>scheidsrechter</th>
+                                        <td>
+                                            <ul>
+                                                {% for beschikbaar in dag.beschikbaar_hoofd_sr %}
+                                                    <li>
+                                                        <label class="black-text" for="{{ beschikbaar.id_li }}">
+                                                            <input class="with-gap" type="radio" required name="{{ dag.nr_hsr }}" value="{{ beschikbaar.pk }}" id="{{ beschikbaar.id_li }}"{% if beschikbaar.is_onzeker %} disabled{% else %}{% if beschikbaar.is_selected %} checked{% endif %} onchange="gewijzigd()"{% endif %}>
+                                                            <span>{% if beschikbaar.scheids %}{{ beschikbaar.scheids.volledige_naam }}{% else %}<i>nog niet gekozen</i>{% endif %}{% if beschikbaar.is_onzeker %} (overweegt){% endif %}{% if beschikbaar.waarschuw_niet_meer_beschikbaar %}<span class="sv-rood-text"> LET OP: Niet meer beschikbaar</span>{% endif %}</span>
+                                                        </label>
+                                                    </li>
+                                                {% endfor %}
+                                            </ul>
+                                        </td>
+                                    </tr>
+
+                                    {% if dag.toon_additionele_sr %}
+                                        <tr>
+                                            <th>Additionele scheidsrechters</th>
+                                            <td>
+                                                <ul>
+                                                    {% for beschikbaar in dag.beschikbaar_sr %}
+                                                        <li>
+                                                            <label class="black-text" for="{{ beschikbaar.id_li }}">
+                                                                <input class="filled-in" type="checkbox" name="{{ beschikbaar.sel }}" id="{{ beschikbaar.id_li }}"{% if beschikbaar.is_onzeker %} disabled{% else %}{% if beschikbaar.is_selected %} checked{% endif %} onchange="gewijzigd()"{% endif %}>
+                                                                <span>{{ beschikbaar.scheids.volledige_naam }}{% if beschikbaar.is_onzeker %} (overweegt){% endif %}{% if beschikbaar.waarschuw_niet_meer_beschikbaar %}<span class="sv-rood-text"> LET OP: Niet meer beschikbaar</span>{% endif %}</span>
+                                                            </label>
+                                                        </li>
+                                                    {% empty %}
+                                                        <li>
+                                                            <i>Nog niemand beschikbaar</i>
+                                                        </li>
+                                                    {% endfor %}
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    {% endif %}
+
+                                    <tr>
+                                        <th>Notificaties zijn verstuurd aan</th>
+                                        <td>
+                                            {% for sr in dag.notified_wie %}
+                                                <span>{{ sr.volledige_naam }}</span><br>
+                                            {% empty %}
+                                                <i>Nog geen</i>
+                                            {% endfor %}
+                                        </td>
+                                    </tr>
+                                {% empty %}
+
+                                    {% if not url_opvragen %}
+                                        <tr>
+                                            <td colspan="2" class="center">
+                                                <i>Nog geen beschikbaarheid aanwezig</i>
+                                            </td>
+                                        </tr>
+                                    {% endif %}
+
+                                {% endfor %}
+                        </table>
+
+                        <div class="center" style="margin-top:30px">
+                            <button class="btn-sv-rood" id="submit_knop1" type="submit" disabled>
+                                <i class="notranslate material-icons-round left">check</i>Wijzigen opslaan</button>
+                        </div>
+                    </form>
+
+                    {% if url_opvragen %}
+
+                        <div class="center" style="margin-top:30px">
+                            <form action="{{ url_opvragen }}" method="post" onsubmit="document.getElementById('submit_knop2').disabled=true; return true;">
+                                {% csrf_token %}
+                                <input type="hidden" name="wedstrijd" value="{{ wed.pk }}">
+                                <button class="btn-sv-rood" id="submit_knop2" type="submit">Beschikbaarheid opvragen</button>
+                            </form>
+                        </div>
+
+                    {% elif url_notify %}
+
+                        <div style="margin-top:30px">
+                            <p>{% if notify_last %}Vorige notificatie: {{ notify_last }}{% else %}<i>Er is nog geen notificatie verstuurd</i>{% endif %}</p>
+
+                            <form action="{{ url_notify }}" method="post" onsubmit="document.getElementById('submit_knop3').disabled=true; return true;">
+                                {% csrf_token %}
+                                <input type="hidden" name="wedstrijd" value="{{ wed.pk }}">
+                                <input type="hidden" name="notify" value="J">
+                                <button class="btn-sv-blauw nav_weg_knop" id="submit_knop3" type="submit">Stuur notificatie e-mails</button>
+                            </form>
+                        </div>
+
+                    {% endif %}
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>Wedstrijd details</h4>
+        </div>
+    </div>
+
+    <!-- blauwe balk met informatie tabel -->
+    <div class="row-sv-blauw">
+        <div class="col s12 l10 offset-l1 xl8 offset-xl2">
+            <table class="white">
+
+                <tr>
+                    <td colspan="2" class="center sv-blauw-text">
+                        <h6>Informatie</h6>
+                    </td>
+                </tr>
+
+                <tr>
+                    <th>Titel</th>
+                    <td>{{ wed.titel }}</td>
+                </tr>
+
+                <tr>
+                    <th>Organiserende vereniging</th>
+                    <td>{{ wed.organiserende_vereniging }}</td>
+                </tr>
+
+                {% if wed.datum_begin == wed.datum_einde %}
+                    <tr>
+                        <th>Datum wedstrijd</th>
+                        <td>{{ wed.datum_begin }}</td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <th>Datums wedstrijd</th>
+                        <td>{{ wed.datum_begin }} - {{ wed.datum_einde }}</td>
+                    </tr>
+                {% endif %}
+
+                <tr>
+                    <th>Volgens regels van</th>
+                    <td>{{ wed.organisatie_str }}</td>
+                </tr>
+
+                {% if toon_wa_status %}
+                    <tr>
+                        <th>WA-status</th>
+                        <td>{{ wed.wa_status_str }}</td>
+                    </tr>
+                {% endif %}
+
+                <tr>
+                    <th>Wedstrijd locatie</th>
+                    <td>
+                        <span>{{ wed.locatie.adres|linebreaksbr }}</span>
+                        {% if url_map %}
+                            <br><br>
+                            <a class="btn-sv-blauw nav_weg_knop" href="{{ url_map }}" target="_blank" rel="noopener noreferrer">
+                                <i class="notranslate material-icons-round left">open_in_new</i>Toon op de kaart</a>
+                        {% endif %}
+                    </td>
+                </tr>
+
+                <tr>
+                    <th>Doelgroep</th>
+                    <td>{{ wed.begrenzing_str }}</td>
+                </tr>
+
+                <tr>
+                    <th>Bijzonder<wbr>heden</th>
+                    <td>{{ wed.bijzonderheden|linebreaksbr }}</td>
+                </tr>
+
+                <tr>                         <!-- F = IFAA -->
+                    <th>{% if wed.organisatie == 'F' %}Toegestane schietstijlen{% else %}Toegestane bogen{% endif %}</th>
+                    <td>
+                        {% for boog in wed.boogtypen.all %}
+                            <span>{{ boog.beschrijving }}</span><br>
+                        {% endfor %}
+                    </td>
+                </tr>
+
+                <tr>
+                    <th>Aanwezig melden</th>
+                    <td>{{ wed.minuten_voor_begin_sessie_aanwezig_zijn }} minuten van te voren</td>
+                </tr>
+
+
+                <tr>
+                    <td colspan="2" class="center sv-blauw-text">
+                        <h6>Contactgegevens organisatie</h6>
+                    </td>
+                </tr>
+
+                <tr>
+                    <th>Naam</th>
+                    <td>{{ wed.contact_naam }}</td>
+                </tr>
+
+                <tr>
+                    <th>Telefoon<wbr>nummer</th>
+                    <td>{{ wed.contact_telefoon }}</td>
+                </tr>
+
+                <tr>
+                    <th>E-mailadres</th>
+                    <td>{{ wed.contact_email }}</td>
+                </tr>
+
+
+                <tr>
+                    <td colspan="2" class="center sv-blauw-text"><h6>Scheidsrechter behoefte</h6></td>
+                </tr>
+
+                <tr>
+                    <th>Aantal banen tegelijk actief</th>
+                    <td>{{ wed.aantal_banen }} banen</td>
+                </tr>
+
+                <tr>
+                    <th>Eigen scheids<wbr>rechters (namen)</th>
+                    <td>{{ wed.scheidsrechters|linebreaksbr }}</td>
+                </tr>
+
+                <tr>
+                    <th>Behoefte scheidsrechters</th>
+                    <td>{{ wed.behoefte_str }}</td>
+                </tr>
+            </table>
+        </div>
+
+        {% if toon_sessies %}
+            <div class="col s12 l10 offset-l1 xl8 offset-xl2">
+                                        <!-- not: popout !! -->
+                <ul id="sessies" class="collapsible z-depth-0 white" style="margin-top:30px; margin-bottom:0">
+                    <li>
+                        <div class="collapsible-header white center" style="display:block; cursor:inherit">
+                            <h6 class="sv-blauw-text">Sessies</h6>
+                            {% if wed.organisatie == 'N' %}
+                                <p>Klassen zonder man/vrouw benoeming zijn genderneutraal</p>
+                            {% endif %}
+                        </div>
+                    </li>
+
+                    {% for sessie in sessies %}
+                        <li>
+                            <div class="collapsible-header white center" style="display:block">
+                                {% if sessie.beschrijving %}<span>{{ sessie.beschrijving }}</span><br>{% endif %}
+                                <b>{{ sessie.datum }}, {{ sessie.tijd_begin }} - {{ sessie.tijd_einde }}</b><br>
+                                <span>{{ sessie.klassen|length }} wedstrijdklassen</span>
+                                <i class="material-icons-round notranslate sv-rood-text secondary-content"><!-- wordt gezet in in/uitklappen_klaar() in Plein/js/site_layout.js --></i>
+                            </div>
+                            <div class="collapsible-body white center">
+                                <span>
+                                    {% for klasse in sessie.klassen %}
+                                        <span>{{ klasse.beschrijving }}</span><br>
+                                    {% endfor %}
+                                </span>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+
+            </div>
+        {% endif %}
+
+    </div>
+
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="scheidsrechter-wedstrijd-details" %}
+
+{% endblock %}

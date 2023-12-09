@@ -29,7 +29,7 @@
                             <tr>
                                 <th>Datum</th>
                                 <th>Wedstrijd</th>
-                                <th>Nodig</th>
+                                <th class="hide-on-small-only center">Nodig</th>
                                 <th>Naam</th>
                                 <th>Beschikbaarheid</th>
                             </tr>
@@ -41,17 +41,18 @@
 
                                 <td>{{ dag.wedstrijd.titel }}<br>{{ dag.wedstrijd.locatie.plaats }}</td>
 
-                                <td>{{ dag.wedstrijd.aantal_scheids }}</td>
+                                <td class="hide-on-small-only center">{{ dag.wedstrijd.aantal_scheids }}</td>
 
                                 <td>
-                                    {% for code, naam, beschikbaar in dag.beschikbaar%}
-                                        <span>{{ naam }}</span><br>
+                                    {% for code, naam, beschikbaar, is_hsr, is_sr, is_probleem in dag.beschikbaar %}
+                                        <span{% if is_hsr or is_sr %} class="sv-blauw-text"{% endif %}>{% if is_hsr %}<b>{{ naam }}</b>{% else %}{{ naam }}{% endif %}</span>
+                                        <br>
                                     {% endfor %}
                                 </td>
 
                                 <td>
-                                    {% for code, naam, beschikbaar in dag.beschikbaar %}
-                                        <span>{{ beschikbaar }}</span><br>
+                                    {% for code, naam, beschikbaar, is_hsr, is_sr, is_probleem in dag.beschikbaar %}
+                                        <span{% if is_probleem %} class="sv-rood-text"{% endif %}>{{ beschikbaar }}</span><br>
                                     {% endfor %}
                                 </td>
                             </tr>
