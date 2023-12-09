@@ -31,7 +31,9 @@ class TestScheidsrechterWedstrijden(E2EHelpers, TestCase):
 
     url_overzicht = '/scheidsrechter/'
     url_wedstrijden = '/scheidsrechter/wedstrijden/'
-    url_wedstrijd_details = '/scheidsrechter/wedstrijden/details/%s/'     # wedstrijd_pk
+    url_wedstrijd_details = '/scheidsrechter/wedstrijden/%s/details/'                            # wedstrijd_pk
+    url_wedstrijd_cs_koppel_sr = '/scheidsrechter/wedstrijden/%s/kies-scheidsrechters/'          # wedstrijd_pk
+    url_wedstrijd_hwl_contact = '/scheidsrechter/wedstrijden/%s/geselecteerde-scheidsrechters/'  # wedstrijd_pk
     url_beschikbaarheid_opvragen = '/scheidsrechter/beschikbaarheid-opvragen/'
 
     testdata = None
@@ -147,6 +149,14 @@ class TestScheidsrechterWedstrijden(E2EHelpers, TestCase):
         resp = self.client.get(url)
         self.assert_is_redirect_login(resp, url)
 
+        url = self.url_wedstrijd_cs_koppel_sr % self.wedstrijd.pk
+        resp = self.client.get(url)
+        self.assert_is_redirect_login(resp, url)
+
+        url = self.url_wedstrijd_hwl_contact % self.wedstrijd.pk
+        resp = self.client.get(url)
+        self.assert_is_redirect_login(resp, url)
+
     def test_sr3(self):
         self.e2e_login(self.sr3_met_account.account)
 
@@ -172,12 +182,8 @@ class TestScheidsrechterWedstrijden(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('scheidsrechter/wedstrijd-details.dtl', 'plein/site_layout.dtl'))
 
-        # corner case
-        resp = self.client.post(url)
-        self.assert403(resp, 'Mag niet wijzigen')
-
         self.e2e_assert_other_http_commands_not_supported(self.url_wedstrijden)
-        self.e2e_assert_other_http_commands_not_supported(self.url_wedstrijd_details % 999999, post=False)
+        self.e2e_assert_other_http_commands_not_supported(self.url_wedstrijd_details % 999999)
 
     def test_cs_opvragen(self):
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
@@ -192,12 +198,12 @@ class TestScheidsrechterWedstrijden(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('scheidsrechter/wedstrijden.dtl', 'plein/site_layout.dtl'))
 
         # wedstrijd details
-        url = self.url_wedstrijd_details % self.wedstrijd.pk
+        url = self.url_wedstrijd_cs_koppel_sr % self.wedstrijd.pk
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('scheidsrechter/wedstrijd-details.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('scheidsrechter/wedstrijd-cs-kies-sr.dtl', 'plein/site_layout.dtl'))
 
         # controleer dat notificaties nog niet gestuurd kunnen worden
         self.assertFalse('Stuur notificatie e-mails' in resp.content.decode('utf-8'))
@@ -216,12 +222,12 @@ class TestScheidsrechterWedstrijden(E2EHelpers, TestCase):
         self.assert_consistent_email_html_text(mail)
 
         # wedstrijd details (beschikbaarheid opgevraagd)
-        url = self.url_wedstrijd_details % self.wedstrijd.pk
+        url = self.url_wedstrijd_cs_koppel_sr % self.wedstrijd.pk
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('scheidsrechter/wedstrijd-details.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('scheidsrechter/wedstrijd-cs-kies-sr.dtl', 'plein/site_layout.dtl'))
 
         # wijzig het aantal benodigde scheidsrechters
         with self.assert_max_queries(20):
@@ -243,10 +249,10 @@ class TestScheidsrechterWedstrijden(E2EHelpers, TestCase):
         wedstrijd = Wedstrijd.objects.get(pk=self.wedstrijd.pk)
         self.assertEqual(1, wedstrijd.aantal_scheids)       # default
 
-        resp = self.client.get(self.url_wedstrijd_details % 999999)
+        resp = self.client.get(self.url_wedstrijd_cs_koppel_sr % 999999)
         self.assert404(resp, 'Wedstrijd niet gevonden')
 
-        resp = self.client.post(self.url_wedstrijd_details % 999999)
+        resp = self.client.post(self.url_wedstrijd_cs_koppel_sr % 999999)
         self.assert404(resp, 'Wedstrijd niet gevonden')
 
         self.wedstrijd.locatie.adres_uit_crm = True
@@ -256,7 +262,7 @@ class TestScheidsrechterWedstrijden(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('scheidsrechter/wedstrijd-details.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('scheidsrechter/wedstrijd-cs-kies-sr.dtl', 'plein/site_layout.dtl'))
 
         self.wedstrijd.locatie.plaats = '(diverse)'
         self.wedstrijd.locatie.save(update_fields=['plaats'])
@@ -267,7 +273,9 @@ class TestScheidsrechterWedstrijden(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('scheidsrechter/wedstrijd-details.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('scheidsrechter/wedstrijd-cs-kies-sr.dtl', 'plein/site_layout.dtl'))
+
+        self.e2e_assert_other_http_commands_not_supported(self.url_wedstrijd_cs_koppel_sr % 999999, post=False)
 
     def _zet_beschikbaarheid(self, wedstrijd, dag_offset):
         datum = wedstrijd.datum_begin + timedelta(days=dag_offset)
@@ -336,14 +344,14 @@ class TestScheidsrechterWedstrijden(E2EHelpers, TestCase):
         sr.account = None
         sr.save(update_fields=['account'])
 
-        url = self.url_wedstrijd_details % self.wedstrijd.pk
+        url = self.url_wedstrijd_cs_koppel_sr % self.wedstrijd.pk
 
         # wedstrijd details
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('scheidsrechter/wedstrijd-details.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('scheidsrechter/wedstrijd-cs-kies-sr.dtl', 'plein/site_layout.dtl'))
 
         # maak keuzes
         with self.assert_max_queries(20):
@@ -364,7 +372,7 @@ class TestScheidsrechterWedstrijden(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('scheidsrechter/wedstrijd-details.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('scheidsrechter/wedstrijd-cs-kies-sr.dtl', 'plein/site_layout.dtl'))
 
         # controleer dat notificaties verstuurd kunnen worden
         self.assertTrue('Stuur notificatie e-mails' in resp.content.decode('utf-8'))
@@ -400,7 +408,7 @@ class TestScheidsrechterWedstrijden(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('scheidsrechter/wedstrijd-details.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('scheidsrechter/wedstrijd-cs-kies-sr.dtl', 'plein/site_layout.dtl'))
 
         dag.refresh_from_db()
         self.assertEqual(3, dag.notified_srs.count())
@@ -421,7 +429,7 @@ class TestScheidsrechterWedstrijden(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('scheidsrechter/wedstrijd-details.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('scheidsrechter/wedstrijd-cs-kies-sr.dtl', 'plein/site_layout.dtl'))
 
         # controleer dat notificaties verstuurd kunnen worden
         self.assertTrue('Stuur notificatie e-mails' in resp.content.decode('utf-8'))

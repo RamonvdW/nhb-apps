@@ -239,12 +239,15 @@ class Command(BaseCommand):
 
         taak_tekst += "\nOnder Wedstrijden kan je de namen en contactgegevens inzien."
 
+        taak_onderwerp = "Scheidsrechters zijn geselecteerd"
+
         # maak een taak aan voor de HWL van de organiserende vereniging
         functie_hwl = wedstrijd.organiserende_vereniging.functie_set.filter(rol='HWL').first()
         if functie_hwl:  # pragma: no branch
             maak_taak(
                 toegekend_aan_functie=functie_hwl,
                 deadline=taak_deadline,
+                onderwerp=taak_onderwerp,
                 beschrijving=taak_tekst,
                 log=taak_log)
 
