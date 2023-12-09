@@ -1427,6 +1427,7 @@ class AfsluitenRegiocompView(UserPassesTestMixin, TemplateView):
             taak_tekst = "Ter info: De regiocompetitie %s is zojuist afgesloten door RCL %s" % (
                             str(deelcomp), account.volledige_naam())
             taak_tekst += "\nAls RKO kan je onder Bondscompetities, Planning Rayon de status van elke regio zien."
+            taak_onderwerp = "Regiocompetitie %s is afgesloten" % deelcomp.regio.regio_nr
             taak_log = "[%s] Taak aangemaakt" % stamp_str
 
             # maak een taak aan voor de RKO
@@ -1437,6 +1438,7 @@ class AfsluitenRegiocompView(UserPassesTestMixin, TemplateView):
             maak_taak(toegekend_aan_functie=functie_rko,
                       deadline=taak_deadline,
                       aangemaakt_door=account,
+                      onderwerp=taak_onderwerp,
                       beschrijving=taak_tekst,
                       log=taak_log)
 

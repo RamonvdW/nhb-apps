@@ -663,11 +663,14 @@ class Command(BaseCommand):
 
         taak_deadline = now + datetime.timedelta(days=5)
 
+        taak_onderwerp = "Koppel invallers %s ronde %s" % (comp.beschrijving, ronde_nr)
+
         for functie_hwl in Functie.objects.filter(rol='HWL', vereniging__ver_nr__in=taak_ver):
             # maak een taak aan voor deze BKO
             maak_taak(toegekend_aan_functie=functie_hwl,
                       deadline=taak_deadline,
                       aangemaakt_door=None,  # systeem
+                      onderwerp=taak_onderwerp,
                       beschrijving=taak_tekst,
                       log=taak_log)
         # for
@@ -982,13 +985,15 @@ class Command(BaseCommand):
             now = timezone.now()
             stamp_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
             taak_deadline = now
-            taak_tekst = "Ter info: De deelnemerslijst voor jouw Rayonkampioenschappen zijn zojuist vastgesteld door de BKO"
+            taak_onderwerp = "Deelnemerslijsten RK zijn vastgesteld"
+            taak_tekst = "Ter info: De deelnemerslijsten voor jouw Rayonkampioenschappen zijn vastgesteld door de BKO"
             taak_log = "[%s] Taak aangemaakt" % stamp_str
 
             # maak een taak aan voor deze BKO
             maak_taak(toegekend_aan_functie=functie_rko,
                       deadline=taak_deadline,
                       aangemaakt_door=None,         # systeem
+                      onderwerp=taak_onderwerp,
                       beschrijving=taak_tekst,
                       log=taak_log)
 

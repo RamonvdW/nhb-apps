@@ -101,6 +101,8 @@ class Command(BaseCommand):
 
                     beschrijving = '\n'.join(regels)
 
+                    taak_onderwerp = "Nieuwe inschrijvingen %s" % deelcomp.competitie.beschrijving
+
                     # maak een taak aan met alle details
                     taak_log = "[%s] Taak aangemaakt" % stamp_str
                     taak_deadline = now + timedelta(days=7)
@@ -115,6 +117,7 @@ class Command(BaseCommand):
                         maak_taak(toegekend_aan_functie=functie,
                                   deadline=taak_deadline,
                                   aangemaakt_door=None,  # systeem
+                                  onderwerp=taak_onderwerp,
                                   beschrijving=beschrijving,
                                   log=taak_log)
                         aantal_nieuwe_taken += 1

@@ -372,7 +372,7 @@ class Command(BaseCommand):
 
     def _test_taken(self):
         self.stdout.write('Maak mail voor Taken - Nieuwe taak')
-        stuur_email_nieuwe_taak(self.to_email, 42)
+        stuur_email_nieuwe_taak(self.to_email, 'Nieuwe taak', 42)
         self._check_mail_gemaakt()
 
         self.stdout.write('Maak mail voor Taken - Herinnering')

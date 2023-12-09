@@ -88,6 +88,16 @@ class Functie(models.Model):
     def is_25m1pijl(self):
         return self.comp_type == '25'
 
+    def kort(self):
+        msg = self.rol
+        if self.rayon:
+            msg += str(self.rayon_id)       # gelijk aan rayon_nr
+        elif self.regio:
+            msg += str(self.regio_id)       # gelijk aan regio_nr
+        elif self.vereniging:
+            msg += " " + str(self.vereniging.ver_nr)
+        return msg
+
     def __str__(self):
         """ Geef een string terug voor gebruik in de admin interface """
         return self.beschrijving

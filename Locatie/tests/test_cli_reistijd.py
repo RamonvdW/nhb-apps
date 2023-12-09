@@ -225,7 +225,7 @@ class TestLocatieCliReistijd(E2EHelpers, TestCase):
         sporter.save(update_fields=['postadres_2', 'postadres_3', 'adres_lat', 'adres_lon'])
 
         f1, f2 = self._reistijd_bijwerken()
-        print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
+        # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
         self.assertTrue("[WARNING] Geen geocode resultaten voor adres='Whatever, 0000XX" in f1.getvalue())
         self.assertTrue("[WARNING] Geen lat/lon voor sporter 123456 met adres 'Whatever, 0000XX" in f1.getvalue())
 

@@ -32,6 +32,9 @@ class Taak(models.Model):
                                         null=True, blank=True,
                                         related_name='account_taken_aangemaakt')
 
+    # een korte versie van de taak die we kunnen tonen in de takenlijst en de e-mail
+    onderwerp = models.CharField(max_length=100, default='')
+
     # beschrijving van de uit te voeren taak
     beschrijving = models.TextField(max_length=5000)
 
@@ -39,16 +42,10 @@ class Taak(models.Model):
     log = models.TextField(max_length=5000, blank=True)
 
     def __str__(self):
-        msg = str(self.pk)
+        msg = "[" + self.toegekend_aan_functie.kort() + "] "
         if self.is_afgerond:
-            msg += " (afgerond)"
-        msg += " [%s] " % self.toegekend_aan_functie
-
-        pos = self.beschrijving.find('\n')
-        if pos < 0 or pos > 200:
-            pos = 200
-        msg += self.beschrijving[:pos]
-        return msg
+            msg += "(afgerond) "
+        return msg + self.onderwerp
 
     class Meta:
         """ meta data voor de admin interface """

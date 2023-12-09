@@ -46,6 +46,7 @@ def store_feedback(gebruiker_str, rol_str, op_pagina, volledige_url, bevinding, 
         maak_taak(toegekend_aan_functie=functie,
                   deadline=taak_deadline,
                   aangemaakt_door=None,         # None = 'systeem'
+                  onderwerp=taak_tekst,
                   beschrijving=taak_tekst,
                   log=taak_log)
 
