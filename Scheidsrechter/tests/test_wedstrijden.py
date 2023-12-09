@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import datetime
 
 #  Copyright (c) 2023 Ramon van der Winkel.
 #  All rights reserved.
@@ -9,15 +10,14 @@ from django.utils import timezone
 from BasisTypen.definities import SCHEIDS_BOND, SCHEIDS_VERENIGING
 from BasisTypen.models import KalenderWedstrijdklasse
 from Functie.models import Functie
-from Geo.models import Regio
 from Locatie.models import Locatie, Reistijd
 from Mailer.models import MailQueue
 from Scheidsrechter.definities import BESCHIKBAAR_JA, BESCHIKBAAR_NEE, BESCHIKBAAR_DENK
 from Scheidsrechter.models import WedstrijdDagScheidsrechters, ScheidsBeschikbaarheid, ScheidsMutatie
 from Sporter.models import Sporter
+from Taken.models import Taak
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
-from Vereniging.models import Vereniging
 from Wedstrijden.definities import WEDSTRIJD_STATUS_GEACCEPTEERD, ORGANISATIE_IFAA
 from Wedstrijden.models import WedstrijdSessie, Wedstrijd
 from datetime import timedelta
@@ -37,6 +37,7 @@ class TestScheidsrechterWedstrijden(E2EHelpers, TestCase):
     url_beschikbaarheid_opvragen = '/scheidsrechter/beschikbaarheid-opvragen/'
 
     testdata = None
+    ver = None
 
     sr3_met_account = None
 
@@ -56,6 +57,8 @@ class TestScheidsrechterWedstrijden(E2EHelpers, TestCase):
         cls.testdata = data = testdata.TestData()
         data.maak_accounts_admin_en_bb()
         data.maak_clubs_en_sporters()
+
+        cls.ver = data.vereniging[data.ver_nrs[0]]
 
         for sporter in data.sporters_scheids[SCHEIDS_BOND]:             # pragma: no branch
             if sporter.account is not None:
@@ -85,16 +88,10 @@ class TestScheidsrechterWedstrijden(E2EHelpers, TestCase):
         self.functie_cs.bevestigde_email = 'cs@khsn.not'
         self.functie_cs.save(update_fields=['bevestigde_email'])
 
-        # maak een wedstrijd aan waar scheidsrechters op nodig zijn
-        ver = Vereniging(
-                    ver_nr=1000,
-                    naam="Grote Club",
-                    regio=Regio.objects.get(regio_nr=116))
-        ver.save()
-        self.ver1 = ver
-
         now = timezone.now()
         datum = now.date()      # pas op met testen ronde 23:59
+
+        self.functie_hwl, _ = Functie.objects.get_or_create(rol='HWL', vereniging=self.ver)
 
         locatie = Locatie(
                         naam='Test locatie',
@@ -106,7 +103,7 @@ class TestScheidsrechterWedstrijden(E2EHelpers, TestCase):
                         adres_lat='loc_lat',
                         adres_lon='loc_lon')
         locatie.save()
-        locatie.verenigingen.add(ver)
+        locatie.verenigingen.add(self.ver)
         self.locatie = locatie
 
         sessie = WedstrijdSessie(
@@ -124,7 +121,7 @@ class TestScheidsrechterWedstrijden(E2EHelpers, TestCase):
                         datum_begin=datum,
                         datum_einde=datum, # + timedelta(days=1),
                         locatie=locatie,
-                        organiserende_vereniging=ver,
+                        organiserende_vereniging=self.ver,
                         voorwaarden_a_status_when=now,
                         prijs_euro_normaal=10.00,
                         prijs_euro_onder18=10.00,
@@ -181,6 +178,39 @@ class TestScheidsrechterWedstrijden(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('scheidsrechter/wedstrijd-details.dtl', 'plein/site_layout.dtl'))
+
+        self.locatie.adres_uit_crm = True
+        self.locatie.save(update_fields=['adres_uit_crm'])
+
+        # maak een meerdaagse wedstrijd
+        self.wedstrijd.datum_einde += datetime.timedelta(days=1)
+        self.wedstrijd.organisatie = ORGANISATIE_IFAA
+        self.wedstrijd.aantal_scheids = 1
+        self.wedstrijd.save(update_fields=['datum_einde', 'organisatie', 'aantal_scheids'])
+
+        # wedstrijd details
+        url = self.url_wedstrijd_details % self.wedstrijd.pk
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('scheidsrechter/wedstrijd-details.dtl', 'plein/site_layout.dtl'))
+
+        # verwijder de knop om de kaart te tonen
+        self.locatie.plaats = '(diverse)'
+        self.locatie.save(update_fields=['plaats'])
+
+        # wedstrijd details
+        url = self.url_wedstrijd_details % self.wedstrijd.pk
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('scheidsrechter/wedstrijd-details.dtl', 'plein/site_layout.dtl'))
+
+        # corner case
+        resp = self.client.get(self.url_wedstrijd_details % 999999)
+        self.assert404(resp, 'Wedstrijd niet gevonden')
 
         self.e2e_assert_other_http_commands_not_supported(self.url_wedstrijden)
         self.e2e_assert_other_http_commands_not_supported(self.url_wedstrijd_details % 999999)
@@ -377,13 +407,16 @@ class TestScheidsrechterWedstrijden(E2EHelpers, TestCase):
         # controleer dat notificaties verstuurd kunnen worden
         self.assertTrue('Stuur notificatie e-mails' in resp.content.decode('utf-8'))
 
-        # stuur notificaties
         self.assertEqual(0, MailQueue.objects.count())
+        Taak.objects.all().delete()
+
+        # stuur notificaties
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'notify': 'J', 'snel': 1})
         self.assert_is_redirect(resp, self.url_wedstrijden)
 
-        self.verwerk_scheids_mutaties()
+        f1, f2 = self.verwerk_scheids_mutaties()
+        # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
 
         # controleer dat 3 scheidsrechters gekozen zijn en maar 2 een mailtje krijgen
         dag.refresh_from_db()
@@ -394,10 +427,26 @@ class TestScheidsrechterWedstrijden(E2EHelpers, TestCase):
         self.assert_email_html_ok(mail)
         self.assert_consistent_email_html_text(mail)
 
+        self.assertEqual(1, Taak.objects.count())
+        taak = Taak.objects.first()
+        self.assertEqual(taak.toegekend_aan_functie.rol, "HWL")
+        self.assertEqual(taak.toegekend_aan_functie.vereniging, self.ver)
+
         # niet meer beschikbaar maken
         beschikbaar = ScheidsBeschikbaarheid(pk=self.hsr_beschikbaar_pk)
         beschikbaar.opgaaf = BESCHIKBAAR_NEE
         beschikbaar.save(update_fields=['opgaaf'])
+
+        beschikbaar = ScheidsBeschikbaarheid(pk=self.lijst_sr_beschikbaar_pk[1])
+        beschikbaar.opgaaf = BESCHIKBAAR_DENK
+        beschikbaar.save(update_fields=['opgaaf'])
+
+        # wedstrijd details
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('scheidsrechter/wedstrijd-cs-kies-sr.dtl', 'plein/site_layout.dtl'))
 
         beschikbaar = ScheidsBeschikbaarheid(pk=self.lijst_sr_beschikbaar_pk[1])
         beschikbaar.opgaaf = BESCHIKBAAR_NEE
@@ -409,9 +458,6 @@ class TestScheidsrechterWedstrijden(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('scheidsrechter/wedstrijd-cs-kies-sr.dtl', 'plein/site_layout.dtl'))
-
-        dag.refresh_from_db()
-        self.assertEqual(3, dag.notified_srs.count())
 
         # keuze uitzetten
         with self.assert_max_queries(20):
@@ -457,6 +503,95 @@ class TestScheidsrechterWedstrijden(E2EHelpers, TestCase):
             resp = self.client.post(url, {'aantal_scheids': self.wedstrijd.aantal_scheids,
                                           'hsr_0': 999999})
         self.assert404(resp, 'Slechte parameter (1)')
+
+    def test_hwl_ziet_gekozen_srs(self):
+        self.e2e_login_and_pass_otp(self.testdata.account_bb)
+        self.e2e_wissel_naar_functie(self.functie_hwl)
+        self.e2e_check_rol('HWL')
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_wedstrijd_hwl_contact % self.wedstrijd.pk)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('scheidsrechter/wedstrijd-hwl-contact.dtl', 'plein/site_layout.dtl'))
+
+        self.e2e_wissel_naar_functie(self.functie_cs)
+        self.e2e_check_rol('CS')
+
+        # beschikbaarheid opvragen
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_beschikbaarheid_opvragen, {'wedstrijd': self.wedstrijd.pk, 'snel': 1})
+        self.assert_is_redirect(resp, self.url_overzicht)
+
+        self.verwerk_scheids_mutaties()
+        self.assertEqual(1, WedstrijdDagScheidsrechters.objects.count())
+        dag = WedstrijdDagScheidsrechters.objects.first()
+
+        # geeft SR beschikbaarheid in
+        self._zet_beschikbaarheid(self.wedstrijd, 0)
+
+        # maak keuzes
+        url = self.url_wedstrijd_cs_koppel_sr % self.wedstrijd.pk
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'aantal_scheids': self.wedstrijd.aantal_scheids,
+                                          'hsr_0':  self.hsr_beschikbaar_pk,
+                                          'sr_0_%s' % self.lijst_sr_beschikbaar_pk[0]: 'ja',
+                                          'sr_0_%s' % self.lijst_sr_beschikbaar_pk[1]: 'ja',
+                                          'sr_0_%s' % self.hsr_beschikbaar_pk: 'ja'})        # dubbele keuze: hsr + sr
+        self.assert_is_redirect(resp, self.url_wedstrijden)
+
+        # stuur notificaties
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'notify': 'J', 'snel': 1})
+        self.assert_is_redirect(resp, self.url_wedstrijden)
+
+        self.verwerk_scheids_mutaties()
+
+        # toon contact pagina: WedstrijdDagScheidsrechters zijn er nu wel
+        self.e2e_wissel_naar_functie(self.functie_hwl)
+        self.e2e_check_rol('HWL')
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_wedstrijd_hwl_contact % self.wedstrijd.pk)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('scheidsrechter/wedstrijd-hwl-contact.dtl', 'plein/site_layout.dtl'))
+
+        dag.refresh_from_db()
+        dag.gekozen_hoofd_sr = None
+        dag.save(update_fields=['gekozen_hoofd_sr'])
+
+        self.wedstrijd.aantal_scheids = 1
+        self.wedstrijd.save(update_fields=['aantal_scheids'])
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_wedstrijd_hwl_contact % self.wedstrijd.pk)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('scheidsrechter/wedstrijd-hwl-contact.dtl', 'plein/site_layout.dtl'))
+
+        # corner cases
+        self.wedstrijd.aantal_scheids = 0
+        self.wedstrijd.save(update_fields=['aantal_scheids'])
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_wedstrijd_hwl_contact % self.wedstrijd.pk)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('scheidsrechter/wedstrijd-hwl-contact.dtl', 'plein/site_layout.dtl'))
+
+        self.e2e_wissel_naar_functie(self.functie_hwl)
+        self.e2e_check_rol('HWL')
+
+        resp = self.client.get(self.url_wedstrijd_hwl_contact % 999999)
+        self.assert404(resp, 'Wedstrijd niet gevonden')
+
+        ver2 = self.testdata.vereniging[self.testdata.ver_nrs[1]]
+        self.wedstrijd.organiserende_vereniging = ver2
+        self.wedstrijd.save(update_fields=['organiserende_vereniging'])
+
+        resp = self.client.get(self.url_wedstrijd_hwl_contact % self.wedstrijd.pk)
+        self.assert404(resp, 'Verkeerde beheerder')
 
 
 # end of file

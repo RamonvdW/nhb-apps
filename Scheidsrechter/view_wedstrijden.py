@@ -462,9 +462,6 @@ class WedstrijdDetailsCSView(UserPassesTestMixin, TemplateView):
         except (ValueError, Wedstrijd.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
-        if self.rol_nu != Rollen.ROL_CS:
-            raise PermissionDenied('Mag niet wijzigen')
-
         do_notify = str(request.POST.get('notify', ''))[:1] == 'J'
         if do_notify:
             account = get_account(request)

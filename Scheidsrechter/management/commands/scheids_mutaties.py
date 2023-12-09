@@ -225,6 +225,9 @@ class Command(BaseCommand):
         # for
 
     def _maak_taak_voor_hwl(self, wedstrijd):
+        self.stdout.write('[INFO] Maak taak voor HWL %s voor wedstrijd pk=%s' % (
+                          wedstrijd.organiserende_vereniging.ver_nr, wedstrijd.pk))
+
         now = timezone.now()
         stamp_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
         taak_deadline = now + datetime.timedelta(days=3)
@@ -250,6 +253,8 @@ class Command(BaseCommand):
                 onderwerp=taak_onderwerp,
                 beschrijving=taak_tekst,
                 log=taak_log)
+        else:
+            self.stderr.write('[ERROR] HWL functie niet gevonden!')
 
     def _verwerk_mutatie_stuur_notificaties(self, mutatie):
         wedstrijd = mutatie.wedstrijd
@@ -293,7 +298,8 @@ class Command(BaseCommand):
         # for
 
         # maak een taak voor de HWL van de organiserende vereniging
-        self._maak_taak_voor_hwl(wedstrijd)
+        if notify_hwl:
+            self._maak_taak_voor_hwl(wedstrijd)
 
     def _verwerk_mutatie(self, mutatie):
         code = mutatie.mutatie
