@@ -28,8 +28,10 @@ class ScheidsBeschikbaarheid(models.Model):
     # de laatste keuze voor de beschikbaarheid
     opgaaf = models.CharField(max_length=1, choices=BESCHIKBAAR_CHOICES, default=BESCHIKBAAR_LEEG)
 
+    opmerking = models.CharField(max_length=100, default='', blank=True)
+
     # logboekje van de gemaakte wijzigingen
-    log = models.TextField(default='')
+    log = models.TextField(default='', blank=True)
 
     def __str__(self):
         return "%s  %s: %s (%s)" % (self.scheids.lid_nr, self.datum, BESCHIKBAAR2STR[self.opgaaf], self.wedstrijd.titel)
