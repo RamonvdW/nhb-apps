@@ -18,15 +18,15 @@
 {% include 'plein/card_logo.dtl' with title="Lowlands Series" text="Wedstrijden volgens internationaal format,<br>met finales en prijzengeld." img_src=img_src img_height=65 img_width=109 img_style="margin:5px" url="https://www.handboogsport.nl/lowlands-shootout/" extern_open=True %}
 
 
-<!-- JeugdFita Cup -->
+<!-- JeugdFita Cup
 {% static 'plein/logo_jeugdfita_200x228.png' as img_src %}
 {% include 'plein/card_logo.dtl' with title="JeugdFita Cup" text="Outdoor wedstrijden speciaal voor de jeugd tot en met 20 jaar." img_src=img_src img_height=75 img_width=65 url="https://www.handboogsport.nl/jeugdfita/" extern_open=True %}
+-->
 
-
-<!-- Free Your Mind -->
+<!-- Free Your Mind
 {% static 'plein/logo_hero_512x512.png' as img_src %}
 {% include 'plein/card_logo.dtl' with title="Free your mind" text="Wil je zelf beginnen met handboogschieten?<br>Deze site helpt je op gang." img_src=img_src img_height=75 img_width=75 url="https://www.handboogsport.nl/freeyourmind/" extern_open=True %}
-
+-->
 
 <!-- Zoek een vereniging -->
 {% static 'plein/logo_hero_512x512.png' as img_src %}
