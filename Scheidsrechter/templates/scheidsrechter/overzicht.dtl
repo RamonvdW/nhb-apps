@@ -50,9 +50,11 @@
 
             {% include 'plein/card_icon.dtl' with title="Handleiding" text="Instructies over gebruik MijnHandboogsport door scheidsrechters en de commissie." icon="article" extern_open=True url=url_handleiding_scheidsrechters %}
 
+            <!--
             {% include 'plein/card_icon.dtl' with title="Een" text="Hier komt het 1e document dat vaak nodig is" icon="description" url='#' %}
             {% include 'plein/card_icon.dtl' with title="Twee" text="Hier komt het 2e document dat vaak nodig is" icon="create" url='#' %}
             {% include 'plein/card_icon.dtl' with title="Drie" text="Hier komt het 3e document dat vaak nodig is" icon="gavel" url='#' %}
+            -->
 
         </div>
     </div>

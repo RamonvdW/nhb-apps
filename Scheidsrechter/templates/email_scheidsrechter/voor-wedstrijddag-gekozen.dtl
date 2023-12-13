@@ -19,7 +19,7 @@
     |Telefoon: {{ org_tel }}
     |Email: {% if org_email %}{{ org_email }}{% else %}Onbekend{% endif %}
     |
-    |Jouw contactgegevens zijn gedeeld met de wedstrijdorganisatie.
+    |De wedstrijdorganisatie heeft nu toegang tot de door jou gedeelde contactgegevens.
     |
     |Voor eventuele vragen kan je ons bereiken op {{ email_cs }}
     |
@@ -44,7 +44,7 @@
         <tr><th>Email:</th><td>{% if org_email %}<a href="mailto:{{ org_email }}"><code>{{ org_email }}</code></a>{% else %}<i>Onbekend</i>{% endif %}</td></tr>
     </table>
     <br>
-    <div>Jouw contactgegevens zijn gedeeld met de wedstrijdorganisatie.</div>
+    <div>De wedstrijdorganisatie heeft nu toegang tot de door jou gedeelde contactgegevens.</div>
     <br>
     <div>Voor eventuele vragen kan je ons bereiken op <a href="mailto:{{ email_cs }}"><code>{{ email_cs }}</code></a></div>
     <br>
