@@ -85,7 +85,7 @@ class Command(BaseCommand):
             # 1 november 2023
             wed_datums = date_format(datums[0], "j F Y")
 
-        url = settings.SITE_URL + reverse('Scheidsrechter:overzicht')
+        url = settings.SITE_URL + reverse('Scheidsrechter:beschikbaarheid-wijzigen')
 
         context = {
             'voornaam': account.get_first_name(),
@@ -126,6 +126,7 @@ class Command(BaseCommand):
             'wed_titel': wedstrijd.titel,
             'wed_datum': wed_datum,
             'wed_adres': wed_adres.split('\n'),
+            'url_wed_details': reverse('Scheidsrechter:wedstrijd-details', kwargs={'wedstrijd_pk': wedstrijd.pk}),
 
             'org_email': wedstrijd.contact_email,
             'org_naam': wedstrijd.contact_naam,

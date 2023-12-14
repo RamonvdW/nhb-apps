@@ -17,7 +17,7 @@ from Functie.rol import rol_get_huidige
 from Functie.scheids import gebruiker_is_scheids
 from Locatie.models import Reistijd
 from Scheidsrechter.definities import (BESCHIKBAAR_LEEG, BESCHIKBAAR_JA, BESCHIKBAAR_DENK, BESCHIKBAAR_NEE,
-                                       BESCHIKBAAR2STR)
+                                       BESCHIKBAAR2STR, SCHEIDS2LEVEL)
 from Scheidsrechter.models import WedstrijdDagScheidsrechters, ScheidsBeschikbaarheid
 from Scheidsrechter.mutaties import scheids_mutatieverzoek_beschikbaarheid_opvragen
 from Sporter.models import get_sporter
@@ -339,7 +339,7 @@ class BeschikbaarheidInzienCSView(UserPassesTestMixin, TemplateView):
                 tup = (not is_hsr,
                        not is_sr,
                        opgaaf2order[keuze.opgaaf],
-                       keuze.scheids.volledige_naam(),
+                       "%s: %s" % (SCHEIDS2LEVEL[keuze.scheids.scheids], keuze.scheids.volledige_naam()),
                        BESCHIKBAAR2STR[keuze.opgaaf],
                        is_hsr,
                        is_sr,

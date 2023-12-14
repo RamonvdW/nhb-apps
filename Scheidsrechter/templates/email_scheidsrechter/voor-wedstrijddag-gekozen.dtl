@@ -14,7 +14,11 @@
     |Adres: {% for adres in wed_adres %}{% if not forloop.first %}
     |       {% endif %}{{ adres }}{% endfor %}
     |
-    |Wedstrijdorganisatie:
+    |Meer details zijn online in te zien via deze link:
+    |{{ url_wed_details }}
+    |
+    |Contactgegevens wedstrijdorganisatie:
+    |
     |Naam: {{ org_naam }}
     |Telefoon: {{ org_tel }}
     |Email: {% if org_email %}{{ org_email }}{% else %}Onbekend{% endif %}
@@ -37,7 +41,11 @@
         <tr><th>Adres:</th><td>{% for adres in wed_adres %}{{ adres }}<br>{% endfor %}</td></tr>
     </table>
     <br>
-    <div>Wedstrijdorganisatie:</div>
+    <div>Meer details zijn online in te zien via deze link:<br>
+        <a href="{{ url_wed_details }}">{{ url_wed_details }}</a></div>
+    <br>
+    <div>Contactgegevens wedstrijdorganisatie:</div>
+    <br>
     <table>
         <tr><th>Naam:</th><td>{{ org_naam }}</td></tr>
         <tr><th>Telefoon:</th><td>{{ org_tel }}</td></tr>

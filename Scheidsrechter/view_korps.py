@@ -7,7 +7,7 @@
 from django.urls import reverse
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from BasisTypen.definities import SCHEIDS_NIET, SCHEIDS_BOND, SCHEIDS_INTERNATIONAAL, SCHEIDS_TO_STR
+from BasisTypen.definities import SCHEIDS_NIET
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige
 from Functie.scheids import gebruiker_is_scheids
@@ -53,15 +53,7 @@ class KorpsView(UserPassesTestMixin, TemplateView):
 
         alle = list()
         for sporter in korps:
-            if sporter.scheids == SCHEIDS_INTERNATIONAAL:
-                sporter.scheids_str = 'SR5'
-                order = 1
-            elif sporter.scheids == SCHEIDS_BOND:
-                sporter.scheids_str = 'SR4'
-                order = 2
-            else:
-                sporter.scheids_str = 'SR3'
-                order = 3
+            sporter.level_str = SCHEIDS2LEVEL[sporter.scheids]
 
             sporter.opt_email = '-'
             sporter.opt_telefoon = '-'
@@ -77,7 +69,7 @@ class KorpsView(UserPassesTestMixin, TemplateView):
                 if voorkeuren.scheids_opt_in_korps_tel_nr:
                     sporter.opt_telefoon = sporter.telefoon
 
-            tup = (order, sporter.achternaam, sporter.voornaam, sporter.lid_nr, sporter)
+            tup = (sporter.voornaam, sporter.achternaam, sporter.lid_nr, sporter)
             alle.append(tup)
         # for
         alle.sort()
@@ -140,7 +132,7 @@ class KorpsMetContactgegevensView(UserPassesTestMixin, TemplateView):
                 sporter.delen_email_str = '%s, %s' % (ja_nee[voorkeuren.scheids_opt_in_korps_email],
                                                       ja_nee[voorkeuren.scheids_opt_in_ver_email])
 
-            tup = (10 - int(sporter.level_str[-1]), sporter.achternaam, sporter.voornaam, sporter.lid_nr, sporter)
+            tup = (sporter.voornaam, sporter.achternaam, sporter.lid_nr, sporter)
             korps.append(tup)
         # for
 

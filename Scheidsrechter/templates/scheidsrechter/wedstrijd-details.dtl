@@ -81,7 +81,7 @@
                 </tr>
 
                 <tr>
-                    <th>Bijzonder<wbr>heden</th>
+                    <th style="width:35%">Bijzonder<wbr>heden</th>
                     <td>{{ wed.bijzonderheden|linebreaksbr }}</td>
                 </tr>
 
@@ -123,7 +123,7 @@
 
 
                 <tr>
-                    <td colspan="2" class="center sv-blauw-text"><h6>Scheidsrechter behoefte</h6></td>
+                    <td colspan="2" class="center sv-blauw-text"><h6>Scheidsrechters</h6></td>
                 </tr>
 
                 <tr>
@@ -140,6 +140,23 @@
                     <th>Behoefte scheidsrechters</th>
                     <td>{{ wed.behoefte_str }}</td>
                 </tr>
+
+                {% for dag in wed.gekozen_per_dag %}
+                    <tr>
+                        <th class="sv-rood-text">Geselecteerd<br>voor {{ dag.wed_datum }}</th>
+                        <td>{% if dag.gekozen_hoofd_sr %}{{ dag.gekozen_hoofd_sr.level_naam_str }} (hoofdscheidsrechter)<br>{% endif %}
+                            {% for sr in dag.gekozen_srs %}
+                                <span>{{ sr.level_naam_str }}</span><br>
+                            {% endfor %}
+                            {% if dag.gekozen_srs_geen %}<i>Nog niet bekend</i>{% endif %}
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <th class="sv-rood-text">Geselecteerd</th>
+                        <td><i>Nog niet bekend</i></td>
+                    </tr>
+                {% endfor %}
             </table>
         </div>
 

@@ -8,15 +8,16 @@ from django.urls import reverse
 from django.http import HttpResponseRedirect, Http404
 from django.utils import timezone
 from django.utils.http import urlencode
+from django.utils.formats import date_format
 from django.views.generic import TemplateView
-from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
 from BasisTypen.definities import ORGANISATIE_IFAA
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige, rol_get_huidige_functie
 from Functie.scheids import gebruiker_is_scheids
-from Scheidsrechter.definities import SCHEIDS_VERENIGING, BESCHIKBAAR_DENK, BESCHIKBAAR_NEE, BESCHIKBAAR_JA
+from Scheidsrechter.definities import (SCHEIDS_VERENIGING, SCHEIDS2LEVEL,
+                                       BESCHIKBAAR_DENK, BESCHIKBAAR_NEE, BESCHIKBAAR_JA)
 from Scheidsrechter.models import WedstrijdDagScheidsrechters, ScheidsBeschikbaarheid
 from Scheidsrechter.mutaties import scheids_mutatieverzoek_stuur_notificaties
 from Sporter.models import SporterVoorkeuren
@@ -191,6 +192,38 @@ class WedstrijdDetailsView(UserPassesTestMixin, TemplateView):
         if wedstrijd.aantal_scheids > 1:
             wedstrijd.behoefte_str += 's'
 
+        wedstrijd.gekozen_per_dag = list()
+        for dag in (WedstrijdDagScheidsrechters
+                    .objects
+                    .filter(wedstrijd=wedstrijd)
+                    .select_related('gekozen_hoofd_sr',
+                                    'gekozen_sr1', 'gekozen_sr2', 'gekozen_sr3', 'gekozen_sr4', 'gekozen_sr5',
+                                    'gekozen_sr6', 'gekozen_sr7', 'gekozen_sr8', 'gekozen_sr9')
+                    .order_by('dag_offset')):       # chronologisch
+
+            datum = wedstrijd.datum_begin + datetime.timedelta(days=dag.dag_offset)
+            dag.wed_datum = date_format(datum, "j F Y")
+
+            dag.gekozen_srs = list()
+
+            dag.gekozen_srs_geen = True
+
+            sr = dag.gekozen_hoofd_sr
+            if sr:
+                sr.level_naam_str = '%s: %s' % (SCHEIDS2LEVEL[sr.scheids], sr.volledige_naam())
+                dag.gekozen_srs_geen = False
+
+            for sr in (dag.gekozen_sr1, dag.gekozen_sr2, dag.gekozen_sr3, dag.gekozen_sr4, dag.gekozen_sr5,
+                       dag.gekozen_sr6, dag.gekozen_sr7, dag.gekozen_sr8, dag.gekozen_sr9):
+                if sr:
+                    sr.level_naam_str = '%s: %s' % (SCHEIDS2LEVEL[sr.scheids], sr.volledige_naam())
+                    dag.gekozen_srs_geen = False
+                    dag.gekozen_srs.append(sr)
+            # for
+
+            wedstrijd.gekozen_per_dag.append(dag)
+        # for
+
         context['kruimels'] = (
             (reverse('Scheidsrechter:overzicht'), 'Scheidsrechters'),
             (reverse('Scheidsrechter:wedstrijden'), 'Wedstrijden'),
@@ -342,13 +375,15 @@ class WedstrijdDetailsCSView(UserPassesTestMixin, TemplateView):
                                         opgaaf=BESCHIKBAAR_JA)
                                 .exclude(scheids__scheids=SCHEIDS_VERENIGING)  # mag geen hoofdscheidsrechter zijn
                                 .select_related('scheids')
-                                .order_by('scheids__lid_nr')):
+                                .order_by('scheids__voornaam', 'scheids__achternaam', 'scheids__lid_nr')):
 
                 beschikbaar.id_li = 'id_hsr_%s' % beschikbaar.pk
                 beschikbaar.is_onzeker = (beschikbaar.opgaaf == BESCHIKBAAR_DENK)
                 beschikbaar.is_selected = (dag.gekozen_hoofd_sr == beschikbaar.scheids)
                 hsr_nog_beschikbaar |= (dag.gekozen_hoofd_sr == beschikbaar.scheids)
 
+                beschikbaar.level_naam_str = "%s: %s" % (SCHEIDS2LEVEL[beschikbaar.scheids.scheids],
+                                                         beschikbaar.scheids.volledige_naam())
                 beschikbaar_hsr.append(beschikbaar)
             # for
 
@@ -360,7 +395,9 @@ class WedstrijdDetailsCSView(UserPassesTestMixin, TemplateView):
                                     id_li='id_hsr_niet_%s' % dag.gekozen_hoofd_sr.pk,
                                     scheids=dag.gekozen_hoofd_sr,
                                     is_selected=True,
-                                    waarschuw_niet_meer_beschikbaar=True)
+                                    waarschuw_niet_meer_beschikbaar=True,
+                                    level_naam_str="%s: %s" % (SCHEIDS2LEVEL[dag.gekozen_hoofd_sr.scheids],
+                                                               dag.gekozen_hoofd_sr.volledige_naam()))
                 beschikbaar_hsr.insert(1, niet_meer_hsr)
 
             gekozen_srs = [gekozen_sr.pk
@@ -380,7 +417,7 @@ class WedstrijdDetailsCSView(UserPassesTestMixin, TemplateView):
                                             datum=datum)
                                     .exclude(opgaaf=BESCHIKBAAR_NEE)
                                     .select_related('scheids')
-                                    .order_by('scheids__lid_nr')):
+                                    .order_by('scheids__voornaam', 'scheids__achternaam', 'scheids__lid_nr')):
 
                     beschikbaar.id_li = 'id_sr_%s' % beschikbaar.pk
                     beschikbaar.sel = 'sr_%s_%s' % (dag.dag_offset, beschikbaar.pk)
@@ -396,6 +433,8 @@ class WedstrijdDetailsCSView(UserPassesTestMixin, TemplateView):
                         bevat_fouten = True
                         beschikbaar.is_onzeker = False  # voorkom disable van checkbox
 
+                    beschikbaar.level_naam_str = "%s: %s" % (SCHEIDS2LEVEL[beschikbaar.scheids.scheids],
+                                                             beschikbaar.scheids.volledige_naam())
                     beschikbaar_sr.append(beschikbaar)
                 # for
 
@@ -410,7 +449,9 @@ class WedstrijdDetailsCSView(UserPassesTestMixin, TemplateView):
                                         sel='sr_%s_niet_%s' % (dag.dag_offset, gekozen_sr.pk),
                                         scheids=gekozen_sr,
                                         is_selected=True,
-                                        waarschuw_niet_meer_beschikbaar=True)
+                                        waarschuw_niet_meer_beschikbaar=True,
+                                        level_naam_str="%s: %s" % (SCHEIDS2LEVEL[gekozen_sr.scheids],
+                                                                   gekozen_sr.volledige_naam()))
                         beschikbaar_sr.insert(0, niet_meer_sr)
                         bevat_fouten = True
                 # for
@@ -449,7 +490,8 @@ class WedstrijdDetailsCSView(UserPassesTestMixin, TemplateView):
 
         return context
 
-    def post(self, request, *args, **kwargs):
+    @staticmethod
+    def post(request, *args, **kwargs):
         """ deze functie wordt aangeroepen om de POST request af te handelen """
 
         # print('POST: %s' % repr(list(request.POST.items())))
