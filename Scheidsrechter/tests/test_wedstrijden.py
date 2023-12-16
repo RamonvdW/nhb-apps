@@ -331,6 +331,7 @@ class TestScheidsrechterWedstrijden(E2EHelpers, TestCase):
                 self.hsr_niet_beschikbaar_pk = beschikbaar.pk
         # for
 
+        self.lijst_sr_beschikbaar_pk = list()
         for sr in self.lijst_sr:
             opgaaf = keuzes[keuze_nr]
             keuze_nr = (keuze_nr + 1) % len(keuzes)
@@ -592,6 +593,64 @@ class TestScheidsrechterWedstrijden(E2EHelpers, TestCase):
 
         resp = self.client.get(self.url_wedstrijd_hwl_contact % self.wedstrijd.pk)
         self.assert404(resp, 'Verkeerde beheerder')
+
+    def test_sr_ziet_gekozen_sr(self):
+        # kijk als sporter naar de wedstrijd pagina: gekozen scheidsrechters worden getoond
+        self.e2e_login(self.sr3_met_account.account)
+
+        # geen sr gekozen; geen beschikbaarheid opgevraagd
+        url = self.url_wedstrijd_details % self.wedstrijd.pk
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('scheidsrechter/wedstrijd-details.dtl', 'plein/site_layout.dtl'))
+
+        # beschikbaarheid opvragen
+        self.e2e_login_and_pass_otp(self.testdata.account_bb)
+        self.e2e_wissel_naar_functie(self.functie_cs)
+        self.e2e_check_rol('CS')
+        resp = self.client.post(self.url_beschikbaarheid_opvragen, {'wedstrijd': self.wedstrijd.pk, 'snel': 1})
+        self.assert_is_redirect(resp, self.url_overzicht)
+
+        self.verwerk_scheids_mutaties()
+
+        # geeft SR beschikbaarheid in
+        self._zet_beschikbaarheid(self.wedstrijd, 0)
+
+        # kijk als sporter naar de wedstrijd pagina: gekozen scheidsrechters worden getoond
+        self.e2e_login(self.sr3_met_account.account)
+
+        # geen sr gekozen; beschikbaarheid opgevraagd
+        url = self.url_wedstrijd_details % self.wedstrijd.pk
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('scheidsrechter/wedstrijd-details.dtl', 'plein/site_layout.dtl'))
+
+        # maak keuzes
+        self.e2e_login_and_pass_otp(self.testdata.account_bb)
+        self.e2e_wissel_naar_functie(self.functie_cs)
+        self.e2e_check_rol('CS')
+
+        url = self.url_wedstrijd_cs_koppel_sr % self.wedstrijd.pk
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'aantal_scheids': self.wedstrijd.aantal_scheids,
+                                          'hsr_0':  self.hsr_beschikbaar_pk,
+                                          'sr_0_%s' % self.lijst_sr_beschikbaar_pk[0]: 'ja',
+                                          'sr_0_%s' % self.lijst_sr_beschikbaar_pk[1]: 'ja'})
+        self.assert_is_redirect(resp, self.url_wedstrijden)
+
+        # kijk als sporter naar de wedstrijd pagina: gekozen scheidsrechters worden getoond
+        self.e2e_login(self.sr3_met_account.account)
+
+        url = self.url_wedstrijd_details % self.wedstrijd.pk
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('scheidsrechter/wedstrijd-details.dtl', 'plein/site_layout.dtl'))
 
 
 # end of file

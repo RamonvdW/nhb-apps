@@ -339,7 +339,7 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
                         True)       # snel
 
         # run with wrong port
-        with override_settings(BETAAL_API=TEST_BETAAL_API_URL[:-2] + '99'):
+        with override_settings(BETAAL_API_URL=TEST_BETAAL_API_URL[:-2] + '99'):
             f1, f2 = self.run_management_command('betaal_mutaties', '1', '--quick')
         self.assertTrue('Unable to communicate' in f1.getvalue())
 

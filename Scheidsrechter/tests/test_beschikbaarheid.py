@@ -404,6 +404,5 @@ class TestScheidsrechterBeschikbaarheid(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('scheidsrechter/beschikbaarheid-inzien-cs.dtl', 'plein/site_layout.dtl'))
 
-    # TODO: keuze SR maken
 
 # end of file

@@ -577,7 +577,7 @@ class Command(BaseCommand):
             self._clear_instellingen_cache()
 
             # maak een Mollie-client instantie aan
-            mollie_client = Client(api_endpoint=settings.BETAAL_API)
+            mollie_client = Client(api_endpoint=settings.BETAAL_API_URL)
 
             # verdeel de producten in het mandje naar vereniging waar de betaling heen moet
             ontvanger2producten = dict()      # [ver_nr] = [MandjeProduct, ...]
