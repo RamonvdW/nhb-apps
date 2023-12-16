@@ -122,6 +122,7 @@ class WijzigBeschikbaarheidView(UserPassesTestMixin, TemplateView):
                                  'wedstrijd__locatie')
                  .filter(wedstrijd__pk__in=wedstrijd_pks)
                  .order_by('wedstrijd__datum_begin',       # chronologische volgorde
+                           'dag_offset',
                            'wedstrijd__pk'))
 
         lat_lon2reistijd_min = dict()
