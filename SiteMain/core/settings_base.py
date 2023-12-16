@@ -38,9 +38,19 @@
 
 import os
 
+# implementation uses this instead of built-in default, to allow override during testing
+# None = use built-in default
+BETAAL_API_URL = None
+
+# ability to override the server URL for test purposes
+# None = use built-in default
+GMAPS_API_URL = None
+
+
 # import install-specific settings from a separate file
 # that is easy to replace as part of the deployment process
 from SiteMain.settings_local import *
+
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 PROJ_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -573,13 +583,5 @@ TEST_VALIDATE_JAVASCRIPT = False
 
 # use the complete font files or the subset files?
 USE_SUBSET_FONT_FILES = True
-
-# implementation uses this instead of built-in default, to allow override during testing
-BETAAL_API_URL = 'https://api.mollie.com'
-
-# ability to override the server URL for test purposes
-# None = use built-in default
-GMAPS_API_URL = None
-
 
 # end of file
