@@ -10,7 +10,6 @@ from Locatie.models import Locatie, Reistijd
 from Locatie.operations import ReistijdBepalen
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
-from TestHelpers.mgmt_cmds_helper import TEST_GMAPS_API_URL
 import io
 
 
@@ -42,9 +41,8 @@ class TestLocatieCliReistijd(E2EHelpers, TestCase):
         stdout = io.StringIO()
         stderr = io.StringIO()
 
-        with override_settings(GMAPS_API_URL=TEST_GMAPS_API_URL):
-            bepaler = ReistijdBepalen(stdout, stderr)
-            bepaler.run()
+        bepaler = ReistijdBepalen(stdout, stderr)
+        bepaler.run()
 
         return stderr, stdout
 
@@ -57,16 +55,15 @@ class TestLocatieCliReistijd(E2EHelpers, TestCase):
         # trigger hergebruik gmaps instantie
         stdout = io.StringIO()
         stderr = io.StringIO()
-        with override_settings(GMAPS_API_URL=TEST_GMAPS_API_URL):
-            bepaler = ReistijdBepalen(stdout, stderr)
-            bepaler.run()
-            bepaler.run()  # triggers gmap connection already done
+        bepaler = ReistijdBepalen(stdout, stderr)
+        bepaler.run()
+        bepaler.run()  # triggers gmap connection already done
 
     def test_bad_key(self):
         stdout = io.StringIO()
         stderr = io.StringIO()
 
-        with override_settings(GMAPS_API_URL=TEST_GMAPS_API_URL, GMAPS_KEY='garbage'):
+        with override_settings(GMAPS_KEY='garbage'):
             bepaler = ReistijdBepalen(stdout, stderr)
             bepaler.run()
         # print('\nf1: %s\nf2: %s' % (stdout.getvalue(), stderr.getvalue()))

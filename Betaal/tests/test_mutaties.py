@@ -12,7 +12,6 @@ from Bestel.models import Bestelling, BestelMutatie
 from Functie.tests.helpers import maak_functie
 from Geo.models import Regio
 from TestHelpers.e2ehelpers import E2EHelpers
-from TestHelpers.mgmt_cmds_helper import TEST_BETAAL_API_URL
 from Vereniging.models import Vereniging
 from decimal import Decimal
 from mollie.api.client import Client
@@ -64,7 +63,7 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
         beschrijving = 'Test betaling %s' % test_code
         bedrag_euro_str = '42.99'
 
-        mollie_client = Client(api_endpoint=TEST_BETAAL_API_URL)
+        mollie_client = Client(api_endpoint=settings.BETAAL_API_URL)
         mollie_client.set_api_key('test_1234prep')
         mollie_webhook_url = url_betaling_gedaan = settings.SITE_URL + '/plein/'
 
@@ -339,7 +338,7 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
                         True)       # snel
 
         # run with wrong port
-        with override_settings(BETAAL_API_URL=TEST_BETAAL_API_URL[:-2] + '99'):
+        with override_settings(BETAAL_API_URL=settings.BETAAL_API_URL[:-2] + '99'):
             f1, f2 = self.run_management_command('betaal_mutaties', '1', '--quick')
         self.assertTrue('Unable to communicate' in f1.getvalue())
 
