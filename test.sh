@@ -162,9 +162,9 @@ PID_TAIL=$(jobs -p | tail -1)
 if [ $KEEP_DB -ne 1 ]
 then
     echo "[INFO] Deleting test database"
-    sudo -u postgres dropdb --if-exists test_data3
-    sudo -u postgres createdb -E UTF8 test_data3
-    sudo -u postgres psql -d test_data3 -c 'create schema myschema authorization django'
+    sudo -u postgres dropdb --if-exists test_data3 || exit 1
+    sudo -u postgres createdb -E UTF8 test_data3 || exit 1
+    sudo -u postgres psql -d test_data3 -q -c 'GRANT CREATE ON SCHEMA public TO django' || exit 1
     echo "[INFO] Creating clean database; running migrations and performing run with nodebug"
 
     # add coverage with no-debug

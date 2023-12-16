@@ -15,9 +15,6 @@ def init_functies_scheidsrechters(apps, _):
     functie_klas = apps.get_model('Functie', 'Functie')
 
     functie_klas(rol='CS', beschrijving='Commissie Scheidsrechters').save()
-    #functie_klas(rol='SR3', beschrijving='Verenigingsscheidsrechter (SR3)').save()
-    #functie_klas(rol='SR4', beschrijving='Bondsscheidsrechter (SR4)').save()
-    #functie_klas(rol='SR5', beschrijving='Scheidsrechter internationaal (SR5)').save()
 
 
 class Migration(migrations.Migration):

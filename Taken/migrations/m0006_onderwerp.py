@@ -11,7 +11,7 @@ def zet_onderwerp(apps, _):
 
     klas_taak = apps.get_model('Taken', 'Taak')
 
-    for taak in klas_taak.objects.all():
+    for taak in klas_taak.objects.all():                            # pragma: no cover
         taak.onderwerp = taak.beschrijving.split('\n')[0][:100]
         taak.save(update_fields=['onderwerp'])
     # for

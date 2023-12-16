@@ -315,6 +315,8 @@ class WedstrijdDetailsCSView(UserPassesTestMixin, TemplateView):
         if wedstrijd.aantal_scheids > 1:
             wedstrijd.behoefte_str += 's'
 
+        context['aantal_additionele_sr'] = wedstrijd.aantal_scheids - 1
+
         context['url_wijzigen'] = reverse('Scheidsrechter:wedstrijd-kies-scheidsrechters',
                                           kwargs={'wedstrijd_pk': wedstrijd.pk})
 

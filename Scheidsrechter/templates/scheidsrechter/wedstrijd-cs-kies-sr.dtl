@@ -81,7 +81,7 @@
 
                                     {% if dag.toon_additionele_sr %}
                                         <tr>
-                                            <th>Additionele scheidsrechters</th>
+                                            <th>{{ aantal_additionele_sr }} additionele scheidsrechters</th>
                                             <td>
                                                 <ul>
                                                     {% for beschikbaar in dag.beschikbaar_sr %}

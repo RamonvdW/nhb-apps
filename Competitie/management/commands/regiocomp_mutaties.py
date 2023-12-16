@@ -651,7 +651,11 @@ class Command(BaseCommand):
             alleen verenigingen met een team staan in taak_ver
         """
 
-        # TODO: onderdruk taak generatie aan het einde van de competitie (als dit administratief is)
+        comp.bepaal_fase()
+        if comp.fase_teams > 'F':
+            # voorbij de wedstrijden fase, dus vanaf nu is de RCL waarschijnlijk bezig om de laatste hand
+            # aan de uitslag te leggen en dan willen we de HWLs niet meer triggeren.
+            return
 
         now = timezone.now()
         stamp_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
@@ -666,7 +670,7 @@ class Command(BaseCommand):
         taak_onderwerp = "Koppel invallers %s ronde %s" % (comp.beschrijving, ronde_nr)
 
         for functie_hwl in Functie.objects.filter(rol='HWL', vereniging__ver_nr__in=taak_ver):
-            # maak een taak aan voor deze BKO
+            # maak een taak aan voor deze HWL
             maak_taak(toegekend_aan_functie=functie_hwl,
                       deadline=taak_deadline,
                       aangemaakt_door=None,  # systeem

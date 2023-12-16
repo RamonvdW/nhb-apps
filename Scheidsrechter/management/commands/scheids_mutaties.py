@@ -18,6 +18,7 @@ from Account.models import Account
 from BasisTypen.definities import SCHEIDS_NIET, SCHEIDS_VERENIGING
 from Functie.models import Functie
 from Locatie.models import Reistijd
+from Locatie.operations import ReistijdBepalen
 from Mailer.operations import mailer_queue_email, render_email_template
 from Overig.background_sync import BackgroundSync
 from Scheidsrechter.definities import SCHEIDS_MUTATIE_BESCHIKBAARHEID_OPVRAGEN, SCHEIDS_MUTATIE_STUUR_NOTIFICATIES
@@ -224,6 +225,10 @@ class Command(BaseCommand):
                 # minimaal 1 datum
                 self.stuur_email_naar_sr_beschikbaarheid_opgeven(wedstrijd, vraag, sporter.account)
         # for
+
+        # verwerk de nieuwe verzoeken voor reistijd
+        bepaler = ReistijdBepalen(self.stdout, self.stderr)
+        bepaler.run()
 
     def _maak_taak_voor_hwl(self, wedstrijd):
         self.stdout.write('[INFO] Maak taak voor HWL %s voor wedstrijd pk=%s' % (
