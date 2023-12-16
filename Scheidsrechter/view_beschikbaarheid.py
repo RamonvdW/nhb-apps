@@ -121,7 +121,7 @@ class WijzigBeschikbaarheidView(UserPassesTestMixin, TemplateView):
                  .select_related('wedstrijd',
                                  'wedstrijd__locatie')
                  .filter(wedstrijd__pk__in=wedstrijd_pks)
-                 .order_by('-wedstrijd__datum_begin',       # nieuwste bovenaan
+                 .order_by('wedstrijd__datum_begin',       # chronologische volgorde
                            'wedstrijd__pk'))
 
         lat_lon2reistijd_min = dict()
@@ -283,7 +283,8 @@ class BeschikbaarheidInzienCSView(UserPassesTestMixin, TemplateView):
                  .select_related('wedstrijd',
                                  'wedstrijd__locatie')
                  .filter(wedstrijd__datum_begin__gte=vorige_week)
-                 .order_by('-wedstrijd__datum_begin',       # nieuwste bovenaan
+                 .order_by('wedstrijd__datum_begin',       # chronologische volgorde
+                           'dag_offset',
                            'wedstrijd__pk'))
 
         opgaaf2order = {
