@@ -54,6 +54,14 @@ class TestLocatieCliReistijd(E2EHelpers, TestCase):
         # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
         self.assertEqual(f1.getvalue(), '')
 
+        # trigger hergebruik gmaps instantie
+        stdout = io.StringIO()
+        stderr = io.StringIO()
+        with override_settings(GMAPS_API_URL=TEST_GMAPS_API_URL):
+            bepaler = ReistijdBepalen(stdout, stderr)
+            bepaler.run()
+            bepaler.run()  # triggers gmap connection already done
+
     def test_bad_key(self):
         stdout = io.StringIO()
         stderr = io.StringIO()
@@ -61,7 +69,6 @@ class TestLocatieCliReistijd(E2EHelpers, TestCase):
         with override_settings(GMAPS_API_URL=TEST_GMAPS_API_URL, GMAPS_KEY='garbage'):
             bepaler = ReistijdBepalen(stdout, stderr)
             bepaler.run()
-            bepaler.run()       # triggers gmap connection already done
         # print('\nf1: %s\nf2: %s' % (stdout.getvalue(), stderr.getvalue()))
         self.assertTrue('[ERROR] Fout tijdens gmaps init: Invalid API key provided' in stderr.getvalue())
 
