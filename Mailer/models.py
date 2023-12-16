@@ -34,7 +34,7 @@ class MailQueue(models.Model):
     mail_html = models.TextField(default='')
 
     # logboekje
-    log = models.TextField()
+    log = models.TextField(blank=True)
 
     # voor assert_email_html_ok en assert_consistent_email_text
     template_used = models.CharField(max_length=100, default='')

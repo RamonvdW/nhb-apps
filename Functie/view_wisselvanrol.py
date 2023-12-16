@@ -5,6 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import reverse
+from django.conf import settings
 from django.http import HttpResponseRedirect
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
@@ -336,6 +337,7 @@ class WisselVanRolView(UserPassesTestMixin, TemplateView):
 
         if not self.account.otp_is_actief:
             context['show_otp_koppelen'] = True
+            context['url_handleiding_beheerders'] = settings.URL_PDF_HANDLEIDING_BEHEERDERS
         else:
             # tweede factor is al gekoppeld, maar misschien nog niet gecontroleerd
             context['show_otp_controle'] = not otp_is_controle_gelukt(self.request)

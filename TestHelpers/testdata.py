@@ -142,6 +142,7 @@ class TestData(object):
 
         # verenigingen
         self.regio_ver_nrs = dict()             # [regio_nr] = list(ver_nrs)
+        self.ver_nrs = list()                   # [ver_nr, ...]
         self.vereniging = dict()                # [ver_nr] = Vereniging()
 
         self.account_sec = dict()               # [ver_nr] = Account
@@ -478,6 +479,7 @@ class TestData(object):
 
             for nr in range(aantal):
                 ver_nr = MIN_VER_NR + regio.regio_nr * 10 + nr + 1
+                self.ver_nrs.append(ver_nr)
 
                 ver = Vereniging(
                             ver_nr=ver_nr,

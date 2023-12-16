@@ -182,7 +182,7 @@ def inline_styles(html):
                     new_styles = list()
                     for sub_style in style.split(';'):
                         keyword, _ = sub_style.split(':')
-                        if keyword not in sub:
+                        if keyword not in sub:                  # pragma: no branch
                             # this one is new
                             new_styles.append(sub_style)
                     # for

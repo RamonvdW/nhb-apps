@@ -73,6 +73,8 @@ class WedstrijdSessie(models.Model):
         verbose_name = "Wedstrijd sessie"
         verbose_name_plural = "Wedstrijd sessies"
 
+    objects = models.Manager()      # for the editor only
+
 
 class Wedstrijd(models.Model):
 
@@ -197,6 +199,8 @@ class Wedstrijd(models.Model):
         verbose_name = "Wedstrijd"
         verbose_name_plural = "Wedstrijden"
 
+    objects = models.Manager()      # for the editor only
+
 
 class WedstrijdKorting(models.Model):
 
@@ -232,6 +236,8 @@ class WedstrijdKorting(models.Model):
     class Meta:
         verbose_name = "Wedstrijd korting"
         verbose_name_plural = "Wedstrijd kortingen"
+
+    objects = models.Manager()      # for the editor only
 
 
 class WedstrijdInschrijving(models.Model):
@@ -298,6 +304,8 @@ class WedstrijdInschrijving(models.Model):
                                     name='Geen dubbele wedstrijd inschrijving'),
         ]
 
+    objects = models.Manager()      # for the editor only
+
 
 class Kwalificatiescore(models.Model):
 
@@ -324,6 +332,8 @@ class Kwalificatiescore(models.Model):
 
     def __str__(self):
         return "[%s] %s: %s (%s)" % (self.datum, self.resultaat, self.naam, self.waar)
+
+    objects = models.Manager()      # for the editor only
 
 
 # end of file

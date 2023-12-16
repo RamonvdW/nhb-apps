@@ -57,14 +57,14 @@ class TestTakenTaken(E2EHelpers, TestCase):
 
     def test_stuur_email_nieuwe_taak(self):
         self.assertEqual(0, MailQueue.objects.count())
-        stuur_email_nieuwe_taak(self.emailadres, 1)         # 1 taak
+        stuur_email_nieuwe_taak(self.emailadres, 'test', 1)         # 1 taak
         self.assertEqual(1, MailQueue.objects.count())
 
         mail = MailQueue.objects.first()
         self.assert_email_html_ok(mail)
         self.assert_consistent_email_html_text(mail)
 
-        stuur_email_nieuwe_taak(self.emailadres, 2)         # 2 taken
+        stuur_email_nieuwe_taak(self.emailadres, 'test', 2)         # 2 taken
         self.assertEqual(2, MailQueue.objects.count())
 
     def test_maak_taak(self):

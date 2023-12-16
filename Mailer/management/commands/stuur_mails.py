@@ -31,8 +31,10 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument('duration', type=int,
-                            choices={1, 2, 5, 7, 10, 15, 20, 30, 45, 60},
-                            help="Aantal minuten actief blijven")
+                            choices=(1, 2, 5, 7, 10, 15, 20, 30, 45, 60),
+                            help="Maximum aantal minuten actief blijven")
+        parser.add_argument('--stop_exactly', type=int, default=None, choices=range(60),
+                            help="Stop op deze minuut")
         parser.add_argument('--quick', action='store_true')     # for testing
         parser.add_argument('--skip_old', action='store_true')  # for testing
 
@@ -92,12 +94,24 @@ class Command(BaseCommand):
 
     def _set_stop_time(self, **options):
         # bepaal wanneer we moeten stoppen (zoals gevraagd)
-        # trek er nog eens 15 seconden vanaf, om overlap van twee cron jobs te voorkomen
         duration = options['duration']
+        stop_minute = options['stop_exactly']
 
-        self.stop_at = (datetime.datetime.now()
-                        + datetime.timedelta(minutes=duration)
-                        - datetime.timedelta(seconds=15))
+        now = datetime.datetime.now()
+        self.stop_at = now + datetime.timedelta(minutes=duration)
+
+        if isinstance(stop_minute, int):
+            delta = stop_minute - now.minute
+            if delta < 0:
+                delta += 60
+            if delta != 0:    # avoid stopping in start minute
+                stop_at_exact = now + datetime.timedelta(minutes=delta)
+                stop_at_exact -= datetime.timedelta(seconds=self.stop_at.second,
+                                                    microseconds=self.stop_at.microsecond)
+                self.stdout.write('[INFO] Calculated stop at is %s' % stop_at_exact)
+                if stop_at_exact < self.stop_at:
+                    # run duration passes the requested stop minute
+                    self.stop_at = stop_at_exact
 
         # test moet snel stoppen dus interpreteer duration in seconden
         if options['quick']:        # pragma: no branch

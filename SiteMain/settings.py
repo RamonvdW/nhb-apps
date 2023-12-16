@@ -7,15 +7,29 @@
 """
     Django settings for the NhbApps project for Server deployment.
 
-    For more information on this file, see
-    https://docs.djangoproject.com/en/2.2/topics/settings/
-
-    For the full list of settings and their values, see
-    https://docs.djangoproject.com/en/3.0/ref/settings/
+    this file is included by django.conf.settings
+    
+    Normal:       (wsgi.py or ./manage.py cmd)
+      SiteMain/settings.py
+          includes SiteMain/core/settings_base.py
+              includes SiteMain/settings_local.py for site specific settings  <-- replaced on real deployment
+          provides additional items that are part of the release
+    
+    Autotest via test.sh  (uses ./manage.py cmd --settings=SiteMain.settings_autotest)
+      SiteMain/settings_autotest[_nodebug].py
+          includes SiteMain/core/settings_base.py
+              includes SiteMain/settings_local.py for site specific settings
+          provides additional items that are part of the release
+      provides changes to to settings for autotest
+    
+    Dev server via run.sh  (uses ./manage.py cmd --settings=SiteMain.settings_dev)
+      SiteMain/settings_dev.py
+          includes SiteMain/core/settings_base.py
+              includes SiteMain/settings_local.py for site specific settings
+          provides additional items that are part of the release
+      provides changes to to settings for autotest
 """
 
-# import install-specific settings from a separate file
-# that is easy to replace as part of the deployment process
 from SiteMain.core.settings_base import *         # noqa
 
 # end of file

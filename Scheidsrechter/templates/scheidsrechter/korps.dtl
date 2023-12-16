@@ -41,7 +41,7 @@
                 {% for sporter in korps %}
                     <tr>
                         <td>{{ sporter.volledige_naam }}</td>
-                        <td class="center">{{ sporter.scheids_str }}</td>
+                        <td class="center">{{ sporter.level_str }}</td>
                         <td>{{ sporter.opt_telefoon }}</td>
                         <td><code>{{ sporter.opt_email|wbr_email }}</code></td>
                     </tr>

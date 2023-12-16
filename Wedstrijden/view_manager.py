@@ -144,19 +144,22 @@ class ZetStatusWedstrijdView(UserPassesTestMixin, View):
         return self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_MWZ, Rollen.ROL_HWL)
 
     @staticmethod
-    def _maak_taak_voor_bb(wedstrijd, msg):
+    def _maak_taak_voor_bb(wedstrijd):
         now = timezone.now()
         stamp_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
         taak_deadline = now + datetime.timedelta(days=3)
         taak_log = "[%s] Taak aangemaakt" % stamp_str
-        taak_tekst = msg % "%s van vereniging %s" % (repr(wedstrijd.titel), wedstrijd.organiserende_vereniging)
+        taak_tekst = "Wedstrijd %s van vereniging %s is ingediend voor goedkeuring" % (
+                        repr(wedstrijd.titel), wedstrijd.organiserende_vereniging)
         taak_tekst += '\n\nGa naar de Wedstrijdkalender om deze wedstrijd te behandelen.'
+        taak_onderwerp = "Verzoek goedkeuring nieuwe wedstrijden"
 
         # maak een taak voor de Manager Wedstrijdzaken
         functie_mwz = Functie.objects.get(rol='MWZ')
         maak_taak(
             toegekend_aan_functie=functie_mwz,
             deadline=taak_deadline,
+            onderwerp=taak_onderwerp,
             beschrijving=taak_tekst,
             log=taak_log)
 
@@ -168,6 +171,7 @@ class ZetStatusWedstrijdView(UserPassesTestMixin, View):
         taak_log = "[%s] Taak aangemaakt" % stamp_str
         taak_tekst = msg % repr(wedstrijd.titel)
         taak_tekst += '\n\nGa naar de Wedstrijdkalender om deze wedstrijd te behandelen.'
+        taak_onderwerp = "Wedstrijdstatus is aangepast"
 
         # maak een taak aan voor de HWL van de organiserende vereniging
         functie_hwl = wedstrijd.organiserende_vereniging.functie_set.filter(rol='HWL').first()
@@ -175,6 +179,7 @@ class ZetStatusWedstrijdView(UserPassesTestMixin, View):
             maak_taak(
                 toegekend_aan_functie=functie_hwl,
                 deadline=taak_deadline,
+                onderwerp=taak_onderwerp,
                 beschrijving=taak_tekst,
                 log=taak_log)
 
@@ -186,12 +191,14 @@ class ZetStatusWedstrijdView(UserPassesTestMixin, View):
         taak_log = "[%s] Taak aangemaakt" % stamp_str
         taak_tekst = "Wedstrijd %s is op de kalender gezet en heeft scheidsrechter(s) nodig." % repr(wedstrijd.titel)
         taak_tekst += '\n\nGa naar de Scheidsrechters, Wedstrijdkalender om deze wedstrijd te behandelen.'
+        taak_onderwerp = "Nieuwe wedstrijd op de kalender"
 
         # maak een taak aan voor de CS
         functie_cs = Functie.objects.get(rol='CS')
         maak_taak(
             toegekend_aan_functie=functie_cs,
             deadline=taak_deadline,
+            onderwerp=taak_onderwerp,
             beschrijving=taak_tekst,
             log=taak_log)
 
@@ -235,7 +242,7 @@ class ZetStatusWedstrijdView(UserPassesTestMixin, View):
                 wedstrijd.status = WEDSTRIJD_STATUS_WACHT_OP_GOEDKEURING
                 wedstrijd.save(update_fields=['status'])
                 # maak een taak aan voor de BB
-                self._maak_taak_voor_bb(wedstrijd, 'Wedstrijd %s is ingediend voor goedkeuring')
+                self._maak_taak_voor_bb(wedstrijd)
 
         else:
             next_url = reverse('Wedstrijden:manager')

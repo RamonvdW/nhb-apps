@@ -26,7 +26,7 @@
                     <tr>
                         <th>Wanneer</th>
                         <th>Plaats</th>
-                        <th class="center">Scheidsrechters</th>
+                        <th class="hide-on-small-only center">Scheidsrechters</th>
                         <th>Titel</th>
                         <th><!-- knoppen --></th>
                     </tr>
@@ -35,7 +35,7 @@
                     <tr>
                         <td>{{ obj.datum_begin }}{% if obj.datum_begin != obj.datum_einde %} - {{ obj.datum_einde }}{% endif %}</td>
                         <td>{{ obj.locatie.plaats }}</td>
-                        <td class="center">{{ obj.aantal_scheids }}</td>
+                        <td class="hide-on-small-only center">{{ obj.aantal_scheids }}{% if obj.aantal_dagen %} ({{ obj.aantal_dagen }}x){% endif %}</td>
                         <td>{{ obj.titel }}</td>
                         <td>
                             {% if obj.nog_opvragen %}

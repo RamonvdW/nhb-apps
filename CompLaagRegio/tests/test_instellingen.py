@@ -272,10 +272,7 @@ class TestCompLaagRegioInstellingen(E2EHelpers, TestCase):
         self.assertTrue(deelcomp_pre.regio_organiseert_teamcompetitie)
         self.assertTrue(deelcomp_pre.regio_heeft_vaste_teams)
         self.assertEqual(deelcomp_pre.regio_team_punten_model, oude_punten)
-        if oude_punten == 'F1':
-            nieuwe_punten = '2P'
-        else:
-            nieuwe_punten = 'SS'
+        nieuwe_punten = '2P'
 
         # all params present
         with self.assert_max_queries(20):

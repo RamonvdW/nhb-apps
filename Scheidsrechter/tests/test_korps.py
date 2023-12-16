@@ -19,7 +19,8 @@ class TestScheidsrechterKorps(E2EHelpers, TestCase):
     test_after = ('Account',)
 
     url_korps = '/scheidsrechter/korps/'
-    url_korps_met_contact = '/scheidsrechter/korps-met-contactgegevens/'
+    url_korps_cs = '/scheidsrechter/korps-met-contactgegevens/'
+    url_korps_cs_emails = '/scheidsrechter/korps-emailadressen/'
 
     testdata = None
 
@@ -47,8 +48,11 @@ class TestScheidsrechterKorps(E2EHelpers, TestCase):
         resp = self.client.get(self.url_korps)
         self.assert_is_redirect_login(resp, self.url_korps)
 
-        resp = self.client.get(self.url_korps_met_contact)
-        self.assert_is_redirect_login(resp, self.url_korps_met_contact)
+        resp = self.client.get(self.url_korps_cs)
+        self.assert_is_redirect_login(resp, self.url_korps_cs)
+
+        resp = self.client.get(self.url_korps_cs_emails)
+        self.assert_is_redirect_login(resp, self.url_korps_cs_emails)
 
     def test_scheids(self):
         self.e2e_login(self.scheids_met_account.account)
@@ -90,7 +94,7 @@ class TestScheidsrechterKorps(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('scheidsrechter/korps.dtl', 'plein/site_layout.dtl'))
 
         # korps overzicht met contactgegevens is niet toegankelijk
-        resp = self.client.get(self.url_korps_met_contact)
+        resp = self.client.get(self.url_korps_cs)
         self.assert403(resp, 'Geen toegang')
 
         # corner case: geen scheidsrechters
@@ -100,6 +104,12 @@ class TestScheidsrechterKorps(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('scheidsrechter/korps.dtl', 'plein/site_layout.dtl'))
+
+        resp = self.client.get(self.url_korps_cs)
+        self.assert403(resp, 'Geen toegang')
+
+        resp = self.client.get(self.url_korps_cs_emails)
+        self.assert403(resp, 'Geen toegang')
 
     def test_cs(self):
         self.functie_cs.accounts.add(self.scheids_met_account.account)
@@ -118,13 +128,21 @@ class TestScheidsrechterKorps(E2EHelpers, TestCase):
         # korps met contactgegevens
         self.voorkeuren.delete()            # corner case
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_korps_met_contact)
+            resp = self.client.get(self.url_korps_cs)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('scheidsrechter/korps-contactgegevens.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('scheidsrechter/korps-cs.dtl', 'plein/site_layout.dtl'))
+
+        # vraag de e-mailadressen op
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_korps_cs_emails)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('scheidsrechter/korps-cs-emails.dtl', 'plein/site_layout.dtl'))
 
         self.e2e_assert_other_http_commands_not_supported(self.url_korps)
-        self.e2e_assert_other_http_commands_not_supported(self.url_korps_met_contact)
+        self.e2e_assert_other_http_commands_not_supported(self.url_korps_cs)
+        self.e2e_assert_other_http_commands_not_supported(self.url_korps_cs_emails)
 
 
 # end of file

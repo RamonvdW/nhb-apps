@@ -463,12 +463,14 @@ class RegistreerGastVolgendeVraagView(View):
         taak_deadline = now + datetime.timedelta(days=7)
         taak_tekst = "Er is zojuist een nieuwe gast-account aangemaakt. Het bondsnummer is %s.\n" % gast.lid_nr
         taak_tekst += "Als secretaris van vereniging %s kan je de details inzien." % settings.EXTERN_VER_NR
+        taak_onderwerp = "Nieuw gast-account %s" % gast.lid_nr
         taak_log = "[%s] Taak aangemaakt" % stamp_str
 
         # maak een taak aan voor deze BKO
         maak_taak(toegekend_aan_functie=functie_sec,
                   deadline=taak_deadline,
                   aangemaakt_door=None,  # systeem
+                  onderwerp=taak_onderwerp,
                   beschrijving=taak_tekst,
                   log=taak_log)
 

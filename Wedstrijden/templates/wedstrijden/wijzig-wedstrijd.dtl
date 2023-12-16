@@ -520,7 +520,10 @@
                                         </select>
                                     {% else %}
                                         {% if wed.aantal_scheids_str %}
-                                            <span>{{ wed.aantal_scheids_str }}</span>
+                                            <span style="padding-right:20px">{{ wed.aantal_scheids_str }}</span>
+                                            {% if wed.url_sr_contact %}
+                                                <a class="btn-sv-rood" href="{{ wed.url_sr_contact }}">Details</a>
+                                            {% endif %}
                                         {% else %}
                                             <i>Nog niet bekend</i>
                                         {% endif %}

@@ -110,7 +110,7 @@ class PleinView(View):
                 # kijk of we iets in het mandje zit, zodat we het knopje kunnen tonen
                 eval_mandje_inhoud(request)
 
-                if gebruiker_is_scheids(self.request) and settings.ENABLE_SCHEIDS:
+                if gebruiker_is_scheids(self.request):
                     context['url_scheids'] = reverse('Scheidsrechter:overzicht')
 
             elif rol_nu == Rollen.ROL_NONE or rol_nu is None:
@@ -123,8 +123,7 @@ class PleinView(View):
 
                 if rol_nu == Rollen.ROL_BB:
                     context['rol_is_bb'] = True
-                    if settings.ENABLE_SCHEIDS:
-                        context['url_scheids'] = reverse('Scheidsrechter:overzicht')
+                    context['url_scheids'] = reverse('Scheidsrechter:overzicht')
 
                 elif rol_nu == Rollen.ROL_MO:
                     context['rol_is_mo'] = True

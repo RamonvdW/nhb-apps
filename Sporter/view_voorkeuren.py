@@ -263,7 +263,7 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
                 # sporter is beheerder, dus toon opt-out opties
                 context['account'] = self.sporter.account
 
-            context['toon_contact_sr'] = False   # self.sporter.scheids != SCHEIDS_NIET
+            context['toon_contact_sr'] = self.sporter.scheids != SCHEIDS_NIET
 
         context['toon_bondscompetities'] = not self.sporter.is_gast
         context['opslaan_url'] = reverse('Sporter:voorkeuren')

@@ -21,16 +21,28 @@ urlpatterns = [
          name='korps'),
 
     path('korps-met-contactgegevens/',
-         view_korps.KorpsMetContactGegevensView.as_view(),
+         view_korps.KorpsMetContactgegevensView.as_view(),
          name='korps-met-contactgegevens'),
+
+    path('korps-emailadressen/',
+         view_korps.KorpsEmailadressenView.as_view(),
+         name='korps-emails'),
 
     path('wedstrijden/',
          view_wedstrijden.WedstrijdenView.as_view(),
          name='wedstrijden'),
 
-    path('wedstrijden/details/<wedstrijd_pk>/',
+    path('wedstrijden/<wedstrijd_pk>/details/',
          view_wedstrijden.WedstrijdDetailsView.as_view(),
          name='wedstrijd-details'),
+
+    path('wedstrijden/<wedstrijd_pk>/kies-scheidsrechters/',
+         view_wedstrijden.WedstrijdDetailsCSView.as_view(),
+         name='wedstrijd-kies-scheidsrechters'),
+
+    path('wedstrijden/<wedstrijd_pk>/geselecteerde-scheidsrechters/',
+         view_wedstrijden.WedstrijdHWLContactView.as_view(),
+         name='wedstrijd-hwl-contact'),
 
     path('beschikbaarheid-opvragen/',
          view_beschikbaarheid.BeschikbaarheidOpvragenView.as_view(),
@@ -40,12 +52,8 @@ urlpatterns = [
          view_beschikbaarheid.WijzigBeschikbaarheidView.as_view(),
          name='beschikbaarheid-wijzigen'),
 
-    path('beschikbaarheid-doorgeven/dynamic/',
-         view_beschikbaarheid.BeschikbaarheidOpslaanView.as_view(),
-         name='beschikbaarheid-doorgeven'),
-
     path('beschikbaarheid-inzien/',
-         view_beschikbaarheid.BeschikbaarheidInzienView.as_view(),
+         view_beschikbaarheid.BeschikbaarheidInzienCSView.as_view(),
          name='beschikbaarheid-inzien'),
 ]
 

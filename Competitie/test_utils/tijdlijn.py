@@ -195,15 +195,15 @@ def zet_competitie_fases(comp, indiv_fase, team_fase):
 
     # sommige fases kunnen alleen synchroon gezet worden
     if indiv_fase in ('A', 'B', 'F', 'G', 'Q', 'Z'):
-        if team_fase != indiv_fase:
+        if team_fase != indiv_fase:                                         # pragma: no cover
             raise NotImplementedError("Combinatie indiv_fase=%s en team_fase=%s niet ondersteund" % (
                                         indiv_fase, team_fase))
 
-    if indiv_fase in ('C', 'D') and team_fase not in ('C', 'D'):
+    if indiv_fase in ('C', 'D') and team_fase not in ('C', 'D'):            # pragma: no cover
         raise NotImplementedError("Combinatie indiv_fase=%s en team_fase=%s niet ondersteund" % (
                                         indiv_fase, team_fase))
 
-    if isinstance(comp.begin_fase_L_indiv, str):
+    if isinstance(comp.begin_fase_L_indiv, str):                            # pragma: no cover
         raise NotImplementedError("Kan niet rekenen met string datums (object moet uit database geladen zijn)")
 
     if indiv_fase == 'Z':

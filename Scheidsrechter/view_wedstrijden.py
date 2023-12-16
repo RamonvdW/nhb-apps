@@ -8,26 +8,30 @@ from django.urls import reverse
 from django.http import HttpResponseRedirect, Http404
 from django.utils import timezone
 from django.utils.http import urlencode
+from django.utils.formats import date_format
 from django.views.generic import TemplateView
-from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
 from BasisTypen.definities import ORGANISATIE_IFAA
 from Functie.definities import Rollen
-from Functie.rol import rol_get_huidige
+from Functie.rol import rol_get_huidige, rol_get_huidige_functie
 from Functie.scheids import gebruiker_is_scheids
-from Scheidsrechter.definities import SCHEIDS_VERENIGING, BESCHIKBAAR_DENK, BESCHIKBAAR_NEE, BESCHIKBAAR_JA
+from Scheidsrechter.definities import (SCHEIDS_VERENIGING, SCHEIDS2LEVEL,
+                                       BESCHIKBAAR_DENK, BESCHIKBAAR_NEE, BESCHIKBAAR_JA)
 from Scheidsrechter.models import WedstrijdDagScheidsrechters, ScheidsBeschikbaarheid
 from Scheidsrechter.mutaties import scheids_mutatieverzoek_stuur_notificaties
+from Sporter.models import SporterVoorkeuren
 from Wedstrijden.definities import (WEDSTRIJD_STATUS_ONTWERP, WEDSTRIJD_ORGANISATIE_TO_STR,
                                     ORGANISATIE_WA, WEDSTRIJD_WA_STATUS_TO_STR,
-                                    WEDSTRIJD_BEGRENZING_TO_STR)
+                                    WEDSTRIJD_BEGRENZING_TO_STR, AANTAL_SCHEIDS_GEEN_KEUZE)
 from Wedstrijden.models import Wedstrijd, WedstrijdSessie
 from types import SimpleNamespace
 import datetime
 
 TEMPLATE_WEDSTRIJDEN = 'scheidsrechter/wedstrijden.dtl'
 TEMPLATE_WEDSTRIJD_DETAILS = 'scheidsrechter/wedstrijd-details.dtl'
+TEMPLATE_WEDSTRIJD_CS_KIES_SR = 'scheidsrechter/wedstrijd-cs-kies-sr.dtl'
+TEMPLATE_WEDSTRIJD_HWL_CONTACT = 'scheidsrechter/wedstrijd-hwl-contact.dtl'
 
 
 class WedstrijdenView(UserPassesTestMixin, TemplateView):
@@ -76,17 +80,23 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
                        .filter(aantal_scheids__gte=1,
                                datum_begin__gte=vorige_week)
                        .select_related('locatie')
-                       .order_by('-datum_begin'))       # nieuwste bovenaan
+                       .order_by('datum_begin'))       # nieuwste bovenaan
 
         for wedstrijd in wedstrijden:
             wedstrijd.organisatie_str = WEDSTRIJD_ORGANISATIE_TO_STR[wedstrijd.organisatie]
             if wedstrijd.organisatie == ORGANISATIE_WA:
                 wedstrijd.organisatie_str += ' ' + WEDSTRIJD_WA_STATUS_TO_STR[wedstrijd.wa_status]
 
-            wedstrijd.url_details = reverse('Scheidsrechter:wedstrijd-details',
-                                            kwargs={'wedstrijd_pk': wedstrijd.pk})
+            if wedstrijd.datum_begin != wedstrijd.datum_einde:
+                wedstrijd.aantal_dagen = (wedstrijd.datum_einde - wedstrijd.datum_begin).days + 1
 
-            wedstrijd.nog_opvragen = self.is_cs and (wedstrijd.pk not in wedstrijd_pks)
+            if self.is_cs:
+                wedstrijd.url_details = reverse('Scheidsrechter:wedstrijd-kies-scheidsrechters',
+                                                kwargs={'wedstrijd_pk': wedstrijd.pk})
+                wedstrijd.nog_opvragen = wedstrijd.pk not in wedstrijd_pks
+            else:
+                wedstrijd.url_details = reverse('Scheidsrechter:wedstrijd-details',
+                                                kwargs={'wedstrijd_pk': wedstrijd.pk})
         # for
 
         context['wedstrijden'] = wedstrijden
@@ -116,11 +126,7 @@ class WedstrijdDetailsView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu = rol_get_huidige(self.request)
-        if self.rol_nu == Rollen.ROL_CS:
-            return True
-        if self.rol_nu == Rollen.ROL_SPORTER and gebruiker_is_scheids(self.request):
-            return True
-        return False
+        return self.rol_nu == Rollen.ROL_SPORTER and gebruiker_is_scheids(self.request)
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -186,163 +192,37 @@ class WedstrijdDetailsView(UserPassesTestMixin, TemplateView):
         if wedstrijd.aantal_scheids > 1:
             wedstrijd.behoefte_str += 's'
 
-        if self.rol_nu == Rollen.ROL_CS:
-            context['url_wijzigen'] = reverse('Scheidsrechter:wedstrijd-details',
-                                              kwargs={'wedstrijd_pk': wedstrijd.pk})
+        wedstrijd.gekozen_per_dag = list()
+        for dag in (WedstrijdDagScheidsrechters
+                    .objects
+                    .filter(wedstrijd=wedstrijd)
+                    .select_related('gekozen_hoofd_sr',
+                                    'gekozen_sr1', 'gekozen_sr2', 'gekozen_sr3', 'gekozen_sr4', 'gekozen_sr5',
+                                    'gekozen_sr6', 'gekozen_sr7', 'gekozen_sr8', 'gekozen_sr9')
+                    .order_by('dag_offset')):       # chronologisch
 
-            context['keuze_aantal_scheids'] = [
-                (1, '1 scheidsrechter'),
-                (2, '2 scheidsrechters'),
-                (3, '3 scheidsrechters'),
-                (4, '4 scheidsrechters'),
-                (5, '5 scheidsrechters'),
-                (6, '6 scheidsrechters'),
-                (7, '7 scheidsrechters'),
-                (8, '8 scheidsrechters'),
-                (9, '9 scheidsrechters'),
-            ]
+            datum = wedstrijd.datum_begin + datetime.timedelta(days=dag.dag_offset)
+            dag.wed_datum = date_format(datum, "j F Y")
 
-            context['hulp_sr'] = hulp_sr = list()
-            for lp in range(wedstrijd.aantal_scheids-1):
-                beschikbaar_sr = SimpleNamespace()
-                hulp_sr.append(beschikbaar_sr)
+            dag.gekozen_srs = list()
+
+            dag.gekozen_srs_geen = True
+
+            sr = dag.gekozen_hoofd_sr
+            if sr:
+                sr.level_naam_str = '%s: %s' % (SCHEIDS2LEVEL[sr.scheids], sr.volledige_naam())
+                dag.gekozen_srs_geen = False
+
+            for sr in (dag.gekozen_sr1, dag.gekozen_sr2, dag.gekozen_sr3, dag.gekozen_sr4, dag.gekozen_sr5,
+                       dag.gekozen_sr6, dag.gekozen_sr7, dag.gekozen_sr8, dag.gekozen_sr9):
+                if sr:
+                    sr.level_naam_str = '%s: %s' % (SCHEIDS2LEVEL[sr.scheids], sr.volledige_naam())
+                    dag.gekozen_srs_geen = False
+                    dag.gekozen_srs.append(sr)
             # for
 
-            # knop om behoefte op te vragen
-            aantal_dagen = (wedstrijd.datum_einde - wedstrijd.datum_begin).days + 1
-            if WedstrijdDagScheidsrechters.objects.filter(wedstrijd=wedstrijd).count() < aantal_dagen:
-                context['url_opvragen'] = reverse('Scheidsrechter:beschikbaarheid-opvragen')
-
-            context['dagen'] = dagen = list()
-            context['notify_last'] = None
-            for dag in (WedstrijdDagScheidsrechters
-                        .objects
-                        .filter(wedstrijd=wedstrijd)
-                        .select_related('gekozen_hoofd_sr',
-                                        'gekozen_sr1', 'gekozen_sr2', 'gekozen_sr3', 'gekozen_sr4', 'gekozen_sr5',
-                                        'gekozen_sr6', 'gekozen_sr7', 'gekozen_sr8', 'gekozen_sr9')
-                        .order_by('dag_offset')):
-
-                datum = wedstrijd.datum_begin + datetime.timedelta(days=dag.dag_offset)
-
-                beschikbaar_hsr = list()
-                beschikbaar_sr = list()
-                bevat_fouten = False
-
-                geen_hsr = SimpleNamespace(
-                                    pk='geen',
-                                    scheids=None,
-                                    is_selected=dag.gekozen_hoofd_sr is None,
-                                    id_li='id_hsr_%s_geen' % dag.dag_offset,
-                                    is_onzeker=False,
-                                    sel='geen')
-                beschikbaar_hsr.append(geen_hsr)
-
-                # voeg de beschikbare hoofdscheidsrechter toe
-                hsr_nog_beschikbaar = False
-                for beschikbaar in (ScheidsBeschikbaarheid
-                                    .objects
-                                    .filter(wedstrijd=wedstrijd,
-                                            datum=datum,
-                                            opgaaf=BESCHIKBAAR_JA)
-                                    .exclude(scheids__scheids=SCHEIDS_VERENIGING)  # mag geen hoofdscheidsrechter zijn
-                                    .select_related('scheids')
-                                    .order_by('scheids__lid_nr')):
-
-                    beschikbaar.id_li = 'id_hsr_%s' % beschikbaar.pk
-                    beschikbaar.is_onzeker = (beschikbaar.opgaaf == BESCHIKBAAR_DENK)
-                    beschikbaar.is_selected = (dag.gekozen_hoofd_sr == beschikbaar.scheids)
-                    hsr_nog_beschikbaar |= (dag.gekozen_hoofd_sr == beschikbaar.scheids)
-
-                    beschikbaar_hsr.append(beschikbaar)
-                # for
-
-                if not hsr_nog_beschikbaar and dag.gekozen_hoofd_sr:
-                    # gekozen hoofdscheidsrechter is niet meer beschikbaar
-                    bevat_fouten = True
-                    niet_meer_hsr = SimpleNamespace(
-                                        pk=0,       # wordt gebruikt als value
-                                        id_li='id_hsr_niet_%s' % dag.gekozen_hoofd_sr.pk,
-                                        scheids=dag.gekozen_hoofd_sr,
-                                        is_selected=True,
-                                        waarschuw_niet_meer_beschikbaar=True)
-                    beschikbaar_hsr.insert(1, niet_meer_hsr)
-
-                gekozen_srs = [gekozen_sr.pk
-                               for gekozen_sr in (dag.gekozen_sr1, dag.gekozen_sr2, dag.gekozen_sr3,
-                                                  dag.gekozen_sr4, dag.gekozen_sr5, dag.gekozen_sr6,
-                                                  dag.gekozen_sr7, dag.gekozen_sr8, dag.gekozen_sr9)
-                               if gekozen_sr is not None]
-
-                toon_additionele_sr = False
-                if len(gekozen_srs) > 0 or wedstrijd.aantal_scheids > 1:
-                    toon_additionele_sr = True
-
-                    # haal de beschikbare scheidsrechters op
-                    for beschikbaar in (ScheidsBeschikbaarheid
-                                        .objects
-                                        .filter(wedstrijd=wedstrijd,
-                                                datum=datum)
-                                        .exclude(opgaaf=BESCHIKBAAR_NEE)
-                                        .select_related('scheids')
-                                        .order_by('scheids__lid_nr')):
-
-                        beschikbaar.id_li = 'id_sr_%s' % beschikbaar.pk
-                        beschikbaar.sel = 'sr_%s_%s' % (dag.dag_offset, beschikbaar.pk)
-                        beschikbaar.is_onzeker = (beschikbaar.opgaaf == BESCHIKBAAR_DENK)
-                        if beschikbaar.scheids.pk in gekozen_srs:
-                            beschikbaar.is_selected = True
-                            gekozen_srs.remove(beschikbaar.scheids.pk)
-                        else:
-                            beschikbaar.is_selected = False
-
-                        beschikbaar.waarschuw_niet_meer_beschikbaar = beschikbaar.is_selected and beschikbaar.opgaaf != BESCHIKBAAR_JA
-                        if beschikbaar.waarschuw_niet_meer_beschikbaar:
-                            bevat_fouten = True
-                            beschikbaar.is_onzeker = False  # voorkom disable van checkbox
-
-                        beschikbaar_sr.append(beschikbaar)
-                    # for
-
-                    # kijk welke scheidsrechters nog over zijn en dus niet meer kunnen
-                    for gekozen_sr in (dag.gekozen_sr1, dag.gekozen_sr2, dag.gekozen_sr3,
-                                       dag.gekozen_sr4, dag.gekozen_sr5, dag.gekozen_sr6,
-                                       dag.gekozen_sr7, dag.gekozen_sr8, dag.gekozen_sr9):
-
-                        if gekozen_sr and gekozen_sr.pk in gekozen_srs:
-                            niet_meer_sr = SimpleNamespace(
-                                            id_li='id_sr_niet_%s' % gekozen_sr.pk,
-                                            sel='sr_%s_niet_%s' % (dag.dag_offset, gekozen_sr.pk),
-                                            scheids=gekozen_sr,
-                                            is_selected=True,
-                                            waarschuw_niet_meer_beschikbaar=True)
-                            beschikbaar_sr.insert(0, niet_meer_sr)
-                            bevat_fouten = True
-                    # for
-
-                if len(beschikbaar_hsr) == 1:
-                    # alleen de optie "nog niet gekozen" is beschikbaar
-                    # voorkom dat de knop "Stuur notificatie emails" getoond wordt
-                    bevat_fouten = True
-
-                if context['notify_last'] is None:
-                    context['notify_last'] = dag.notified_laatste
-
-                dag = SimpleNamespace(
-                        datum=datum,
-                        nr_hsr="hsr_%s" % dag.dag_offset,
-                        beschikbaar_hoofd_sr=beschikbaar_hsr,
-                        beschikbaar_sr=beschikbaar_sr,
-                        bevat_fouten=bevat_fouten,
-                        toon_additionele_sr=toon_additionele_sr)
-                dagen.append(dag)
-            # for
-
-            context['url_notify'] = context['url_wijzigen']
-            for dag in dagen:
-                if dag.bevat_fouten:
-                    context['url_notify'] = None
-            # for
+            wedstrijd.gekozen_per_dag.append(dag)
+        # for
 
         context['kruimels'] = (
             (reverse('Scheidsrechter:overzicht'), 'Scheidsrechters'),
@@ -352,7 +232,268 @@ class WedstrijdDetailsView(UserPassesTestMixin, TemplateView):
 
         return context
 
-    def post(self, request, *args, **kwargs):
+
+class WedstrijdDetailsCSView(UserPassesTestMixin, TemplateView):
+
+    """ Django class-based view voor de scheidsrechters """
+
+    # class variables shared by all instances
+    template_name = TEMPLATE_WEDSTRIJD_CS_KIES_SR
+    raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.rol_nu = None
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        self.rol_nu = rol_get_huidige(self.request)
+        return self.rol_nu == Rollen.ROL_CS
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        try:
+            wedstrijd_pk = str(kwargs['wedstrijd_pk'])[:6]     # afkappen voor de veiligheid
+            wedstrijd = (Wedstrijd
+                         .objects
+                         .exclude(status=WEDSTRIJD_STATUS_ONTWERP)
+                         .exclude(is_ter_info=True)
+                         .exclude(toon_op_kalender=False)
+                         .select_related('organiserende_vereniging',
+                                         'locatie')
+                         .prefetch_related('boogtypen',
+                                           'sessies')
+                         .get(pk=wedstrijd_pk))
+        except Wedstrijd.DoesNotExist:
+            raise Http404('Wedstrijd niet gevonden')
+
+        context['wed'] = wedstrijd
+
+        wedstrijd.organisatie_str = WEDSTRIJD_ORGANISATIE_TO_STR[wedstrijd.organisatie]
+
+        wedstrijd.begrenzing_str = WEDSTRIJD_BEGRENZING_TO_STR[wedstrijd.begrenzing]
+
+        if wedstrijd.organisatie == ORGANISATIE_WA:
+            context['toon_wa_status'] = True
+            wedstrijd.wa_status_str = WEDSTRIJD_WA_STATUS_TO_STR[wedstrijd.wa_status]
+
+        toon_kaart = wedstrijd.locatie.plaats != '(diverse)' and wedstrijd.locatie.adres != '(diverse)'
+        if toon_kaart:
+            zoekterm = wedstrijd.locatie.adres
+            if wedstrijd.locatie.adres_uit_crm:
+                # voeg de naam van de vereniging toe aan de zoekterm, voor beter resultaat
+                zoekterm = wedstrijd.organiserende_vereniging.naam + ' ' + zoekterm
+            zoekterm = zoekterm.replace('\n', ' ').replace('\r', '').replace('  ', ' ')
+            context['url_map'] = 'https://google.nl/maps?' + urlencode({'q': zoekterm})
+
+        sessie_pks = list(wedstrijd.sessies.values_list('pk', flat=True))
+        context['sessies'] = sessies = (WedstrijdSessie
+                                        .objects
+                                        .filter(pk__in=sessie_pks)
+                                        .prefetch_related('wedstrijdklassen')
+                                        .order_by('datum',
+                                                  'tijd_begin',
+                                                  'pk'))
+
+        heeft_sessies = False
+        for sessie in sessies:
+            heeft_sessies = True
+            sessie.klassen = sessie.wedstrijdklassen.order_by('volgorde')
+
+            if wedstrijd.organisatie == ORGANISATIE_IFAA:
+                # voeg afkorting toe aan klasse beschrijving
+                for klasse in sessie.klassen:
+                    klasse.beschrijving += ' [%s]' % klasse.afkorting
+                # for
+        # for
+        context['toon_sessies'] = heeft_sessies
+
+        wedstrijd.behoefte_str = '%s scheidsrechter' % wedstrijd.aantal_scheids
+        if wedstrijd.aantal_scheids > 1:
+            wedstrijd.behoefte_str += 's'
+
+        context['aantal_additionele_sr'] = wedstrijd.aantal_scheids - 1
+
+        context['url_wijzigen'] = reverse('Scheidsrechter:wedstrijd-kies-scheidsrechters',
+                                          kwargs={'wedstrijd_pk': wedstrijd.pk})
+
+        context['keuze_aantal_scheids'] = [
+            (1, '1 scheidsrechter'),
+            (2, '2 scheidsrechters'),
+            (3, '3 scheidsrechters'),
+            (4, '4 scheidsrechters'),
+            (5, '5 scheidsrechters'),
+            (6, '6 scheidsrechters'),
+            (7, '7 scheidsrechters'),
+            (8, '8 scheidsrechters'),
+            (9, '9 scheidsrechters'),
+        ]
+
+        context['hulp_sr'] = hulp_sr = list()
+        for lp in range(wedstrijd.aantal_scheids-1):
+            beschikbaar_sr = SimpleNamespace()
+            hulp_sr.append(beschikbaar_sr)
+        # for
+
+        # knop om behoefte op te vragen
+        aantal_dagen = (wedstrijd.datum_einde - wedstrijd.datum_begin).days + 1
+        if WedstrijdDagScheidsrechters.objects.filter(wedstrijd=wedstrijd).count() < aantal_dagen:
+            context['url_opvragen'] = reverse('Scheidsrechter:beschikbaarheid-opvragen')
+
+        context['dagen'] = dagen = list()
+        context['notify_last'] = None
+        for dag in (WedstrijdDagScheidsrechters
+                    .objects
+                    .filter(wedstrijd=wedstrijd)
+                    .select_related('gekozen_hoofd_sr',
+                                    'gekozen_sr1', 'gekozen_sr2', 'gekozen_sr3', 'gekozen_sr4', 'gekozen_sr5',
+                                    'gekozen_sr6', 'gekozen_sr7', 'gekozen_sr8', 'gekozen_sr9')
+                    .order_by('dag_offset')):
+
+            datum = wedstrijd.datum_begin + datetime.timedelta(days=dag.dag_offset)
+
+            beschikbaar_hsr = list()
+            beschikbaar_sr = list()
+            bevat_fouten = False
+
+            geen_hsr = SimpleNamespace(
+                                pk='geen',
+                                scheids=None,
+                                is_selected=dag.gekozen_hoofd_sr is None,
+                                id_li='id_hsr_%s_geen' % dag.dag_offset,
+                                is_onzeker=False,
+                                sel='geen')
+            beschikbaar_hsr.append(geen_hsr)
+
+            # voeg de beschikbare hoofdscheidsrechter toe
+            hsr_nog_beschikbaar = False
+            for beschikbaar in (ScheidsBeschikbaarheid
+                                .objects
+                                .filter(wedstrijd=wedstrijd,
+                                        datum=datum,
+                                        opgaaf=BESCHIKBAAR_JA)
+                                .exclude(scheids__scheids=SCHEIDS_VERENIGING)  # mag geen hoofdscheidsrechter zijn
+                                .select_related('scheids')
+                                .order_by('scheids__voornaam', 'scheids__achternaam', 'scheids__lid_nr')):
+
+                beschikbaar.id_li = 'id_hsr_%s' % beschikbaar.pk
+                beschikbaar.is_onzeker = (beschikbaar.opgaaf == BESCHIKBAAR_DENK)
+                beschikbaar.is_selected = (dag.gekozen_hoofd_sr == beschikbaar.scheids)
+                hsr_nog_beschikbaar |= (dag.gekozen_hoofd_sr == beschikbaar.scheids)
+
+                beschikbaar.level_naam_str = "%s: %s" % (SCHEIDS2LEVEL[beschikbaar.scheids.scheids],
+                                                         beschikbaar.scheids.volledige_naam())
+                beschikbaar_hsr.append(beschikbaar)
+            # for
+
+            if not hsr_nog_beschikbaar and dag.gekozen_hoofd_sr:
+                # gekozen hoofdscheidsrechter is niet meer beschikbaar
+                bevat_fouten = True
+                niet_meer_hsr = SimpleNamespace(
+                                    pk=0,       # wordt gebruikt als value
+                                    id_li='id_hsr_niet_%s' % dag.gekozen_hoofd_sr.pk,
+                                    scheids=dag.gekozen_hoofd_sr,
+                                    is_selected=True,
+                                    waarschuw_niet_meer_beschikbaar=True,
+                                    level_naam_str="%s: %s" % (SCHEIDS2LEVEL[dag.gekozen_hoofd_sr.scheids],
+                                                               dag.gekozen_hoofd_sr.volledige_naam()))
+                beschikbaar_hsr.insert(1, niet_meer_hsr)
+
+            gekozen_srs = [gekozen_sr.pk
+                           for gekozen_sr in (dag.gekozen_sr1, dag.gekozen_sr2, dag.gekozen_sr3,
+                                              dag.gekozen_sr4, dag.gekozen_sr5, dag.gekozen_sr6,
+                                              dag.gekozen_sr7, dag.gekozen_sr8, dag.gekozen_sr9)
+                           if gekozen_sr is not None]
+
+            toon_additionele_sr = False
+            if len(gekozen_srs) > 0 or wedstrijd.aantal_scheids > 1:
+                toon_additionele_sr = True
+
+                # haal de beschikbare scheidsrechters op
+                for beschikbaar in (ScheidsBeschikbaarheid
+                                    .objects
+                                    .filter(wedstrijd=wedstrijd,
+                                            datum=datum)
+                                    .exclude(opgaaf=BESCHIKBAAR_NEE)
+                                    .select_related('scheids')
+                                    .order_by('scheids__voornaam', 'scheids__achternaam', 'scheids__lid_nr')):
+
+                    beschikbaar.id_li = 'id_sr_%s' % beschikbaar.pk
+                    beschikbaar.sel = 'sr_%s_%s' % (dag.dag_offset, beschikbaar.pk)
+                    beschikbaar.is_onzeker = (beschikbaar.opgaaf == BESCHIKBAAR_DENK)
+                    if beschikbaar.scheids.pk in gekozen_srs:
+                        beschikbaar.is_selected = True
+                        gekozen_srs.remove(beschikbaar.scheids.pk)
+                    else:
+                        beschikbaar.is_selected = False
+
+                    beschikbaar.waarschuw_niet_meer_beschikbaar = beschikbaar.is_selected and beschikbaar.opgaaf != BESCHIKBAAR_JA
+                    if beschikbaar.waarschuw_niet_meer_beschikbaar:
+                        bevat_fouten = True
+                        beschikbaar.is_onzeker = False  # voorkom disable van checkbox
+
+                    beschikbaar.level_naam_str = "%s: %s" % (SCHEIDS2LEVEL[beschikbaar.scheids.scheids],
+                                                             beschikbaar.scheids.volledige_naam())
+                    beschikbaar_sr.append(beschikbaar)
+                # for
+
+                # kijk welke scheidsrechters nog over zijn en dus niet meer kunnen
+                for gekozen_sr in (dag.gekozen_sr1, dag.gekozen_sr2, dag.gekozen_sr3,
+                                   dag.gekozen_sr4, dag.gekozen_sr5, dag.gekozen_sr6,
+                                   dag.gekozen_sr7, dag.gekozen_sr8, dag.gekozen_sr9):
+
+                    if gekozen_sr and gekozen_sr.pk in gekozen_srs:
+                        niet_meer_sr = SimpleNamespace(
+                                        id_li='id_sr_niet_%s' % gekozen_sr.pk,
+                                        sel='sr_%s_niet_%s' % (dag.dag_offset, gekozen_sr.pk),
+                                        scheids=gekozen_sr,
+                                        is_selected=True,
+                                        waarschuw_niet_meer_beschikbaar=True,
+                                        level_naam_str="%s: %s" % (SCHEIDS2LEVEL[gekozen_sr.scheids],
+                                                                   gekozen_sr.volledige_naam()))
+                        beschikbaar_sr.insert(0, niet_meer_sr)
+                        bevat_fouten = True
+                # for
+
+            if len(beschikbaar_hsr) == 1:
+                # alleen de optie "nog niet gekozen" is beschikbaar
+                # voorkom dat de knop "Stuur notificatie emails" getoond wordt
+                bevat_fouten = True
+
+            notified_lijst = [sr for sr in dag.notified_srs.order_by('lid_nr')]
+
+            context['notify_last'] = dag.notified_laatste
+
+            dag = SimpleNamespace(
+                    datum=datum,
+                    nr_hsr="hsr_%s" % dag.dag_offset,
+                    beschikbaar_hoofd_sr=beschikbaar_hsr,
+                    beschikbaar_sr=beschikbaar_sr,
+                    bevat_fouten=bevat_fouten,
+                    toon_additionele_sr=toon_additionele_sr,
+                    notified_wie=notified_lijst)
+            dagen.append(dag)
+        # for
+
+        context['url_notify'] = context['url_wijzigen']
+        for dag in dagen:
+            if dag.bevat_fouten:
+                context['url_notify'] = None
+        # for
+
+        context['kruimels'] = (
+            (reverse('Scheidsrechter:overzicht'), 'Scheidsrechters'),
+            (reverse('Scheidsrechter:wedstrijden'), 'Wedstrijden'),
+            (None, 'Kies scheidsrechters'),
+        )
+
+        return context
+
+    @staticmethod
+    def post(request, *args, **kwargs):
         """ deze functie wordt aangeroepen om de POST request af te handelen """
 
         # print('POST: %s' % repr(list(request.POST.items())))
@@ -364,9 +505,6 @@ class WedstrijdDetailsView(UserPassesTestMixin, TemplateView):
                          .get(pk=wedstrijd_pk))
         except (ValueError, Wedstrijd.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
-
-        if self.rol_nu != Rollen.ROL_CS:
-            raise PermissionDenied('Mag niet wijzigen')
 
         do_notify = str(request.POST.get('notify', ''))[:1] == 'J'
         if do_notify:
@@ -452,5 +590,95 @@ class WedstrijdDetailsView(UserPassesTestMixin, TemplateView):
 
         url = reverse('Scheidsrechter:wedstrijden')
         return HttpResponseRedirect(url)
+
+
+class WedstrijdHWLContactView(UserPassesTestMixin, TemplateView):
+
+    """ Django class-based view voor de scheidsrechters """
+
+    # class variables shared by all instances
+    template_name = TEMPLATE_WEDSTRIJD_HWL_CONTACT
+    raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.rol_nu, self.functie_nu = None, None
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
+        return self.rol_nu == Rollen.ROL_HWL
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        try:
+            wedstrijd_pk = str(kwargs['wedstrijd_pk'])[:6]     # afkappen voor de veiligheid
+            wedstrijd = (Wedstrijd
+                         .objects
+                         .exclude(status=WEDSTRIJD_STATUS_ONTWERP)
+                         .exclude(is_ter_info=True)
+                         .exclude(toon_op_kalender=False)
+                         .exclude(aantal_scheids=AANTAL_SCHEIDS_GEEN_KEUZE)
+                         .get(pk=wedstrijd_pk))
+        except Wedstrijd.DoesNotExist:
+            raise Http404('Wedstrijd niet gevonden')
+
+        if wedstrijd.organiserende_vereniging != self.functie_nu.vereniging:
+            raise Http404('Verkeerde beheerders')
+
+        context['wed'] = wedstrijd
+
+        wedstrijd.behoefte_str = '%s scheidsrechter' % wedstrijd.aantal_scheids
+        if wedstrijd.aantal_scheids > 1:
+            wedstrijd.behoefte_str += 's'
+
+        if wedstrijd.aantal_scheids > 0:
+            wedstrijd.dagen = dagen = (WedstrijdDagScheidsrechters
+                                       .objects
+                                       .filter(wedstrijd=wedstrijd)
+                                       .prefetch_related('notified_srs')
+                                       .order_by('dag_offset'))
+
+            srs_pks = list()
+            for dag in dagen:
+                dag.datum = wedstrijd.datum_begin + datetime.timedelta(days=dag.dag_offset)
+
+                srs_pks.extend([sr.pk for sr in dag.notified_srs.all()])
+            # for
+
+            sr2voorkeur = dict()
+            for voorkeur in SporterVoorkeuren.objects.filter(sporter__pk__in=srs_pks):
+                sr2voorkeur[voorkeur.sporter.pk] = (voorkeur.scheids_opt_in_ver_tel_nr,
+                                                    voorkeur.scheids_opt_in_ver_email)
+            # for
+
+            for dag in dagen:
+                sr = dag.gekozen_hoofd_sr
+                if sr and sr.pk in srs_pks:
+                    dag.hoofd_sr_naam = sr.volledige_naam()
+
+                dag.srs = srs = list()
+                for sr in dag.notified_srs.all():
+                    sr.give_tel_nr, sr.give_email = sr2voorkeur[sr.pk]
+                    tup = (sr.lid_nr, sr)
+                    srs.append(tup)
+                # for
+
+                srs.sort()
+                dag.toon_srs = len(srs) > 0
+            # for
+
+        context['kruimels'] = (
+            (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
+            (reverse('Wedstrijden:vereniging'), 'Wedstrijdkalender'),
+            (reverse('Wedstrijden:wijzig-wedstrijd', kwargs={'wedstrijd_pk': wedstrijd.pk}), 'Wijzig wedstrijd'),
+            (None, 'Scheidsrechters')
+        )
+
+        return context
+
 
 # end of file

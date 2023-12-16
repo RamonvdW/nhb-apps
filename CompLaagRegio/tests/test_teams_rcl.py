@@ -13,11 +13,13 @@ from Competitie.models import (Competitie, Regiocompetitie, CompetitieIndivKlass
                                RegiocompetitieTeam, RegiocompetitieTeamPoule, RegiocompetitieRondeTeam,
                                Kampioenschap)
 from Competitie.operations import competities_aanmaken
-from Competitie.test_utils.tijdlijn import zet_competitie_fases
+from Competitie.test_utils.tijdlijn import (zet_competitie_fase_rk_wedstrijden, zet_competitie_fase_regio_inschrijven,
+                                            zet_competitie_fase_regio_afsluiten)
 from Functie.tests.helpers import maak_functie
 from Geo.models import Rayon, Regio, Cluster
 from Locatie.models import Locatie
 from Sporter.models import Sporter, SporterBoog
+from Taken.models import Taak
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 from Vereniging.models import Vereniging
@@ -30,9 +32,6 @@ class TestCompLaagRegioTeams(E2EHelpers, TestCase):
 
     test_after = ('Competitie.tests.test_overzicht', 'Competitie.tests.test_tijdlijn')
 
-    url_afsluiten_regio = '/bondscompetities/regio/planning/%s/afsluiten/'        # deelcomp_pk
-    url_regio_instellingen = '/bondscompetities/regio/instellingen/%s/regio-%s/'  # comp_pk, regio-nr
-    url_regio_globaal = '/bondscompetities/regio/instellingen/%s/globaal/'        # comp_pk
     url_ag_controle = '/bondscompetities/regio/%s/ag-controle/regio-%s/'          # comp_pk, regio-nr
     url_regio_teams = '/bondscompetities/regio/%s/teams/'                         # deelcomp_pk
     url_regio_teams_alle = '/bondscompetities/regio/%s/teams/%s/'                 # comp_pk, subset=auto/alle/rayon_nr
@@ -84,6 +83,11 @@ class TestCompLaagRegioTeams(E2EHelpers, TestCase):
                     regio=self.regio_112)
         ver.save()
         self.ver_112 = ver
+
+        # maak HWL functie aan voor deze vereniging
+        self.functie_hwl1111 = maak_functie("HWL Vereniging %s" % ver.ver_nr, "HWL")
+        self.functie_hwl1111.vereniging = ver
+        self.functie_hwl1111.save()
 
         # maak een test vereniging
         ver = Vereniging(
@@ -484,7 +488,7 @@ class TestCompLaagRegioTeams(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
 
         # verkeerde fase
-        zet_competitie_fases(self.comp_18, 'K', 'K')
+        zet_competitie_fase_rk_wedstrijden(self.comp_18)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assert404(resp, 'Verkeerde competitie fase')
@@ -605,6 +609,8 @@ class TestCompLaagRegioTeams(E2EHelpers, TestCase):
         self.deelcomp_regio112_18.regio_team_punten_model = TEAM_PUNTEN_MODEL_FORMULE1
         self.deelcomp_regio112_18.save(update_fields=['regio_team_punten_model'])
 
+        zet_competitie_fase_regio_inschrijven(self.comp_18)
+
         # maak een paar teams aan
         self._maak_teams(self.deelcomp_regio112_18)
 
@@ -620,7 +626,11 @@ class TestCompLaagRegioTeams(E2EHelpers, TestCase):
             resp = self.client.post(url, {'snel': 1})
         self.assert_is_redirect(resp, self.url_overzicht_beheer % self.deelcomp_regio112_18.competitie.pk)
 
+        self.assertEqual(0, Taak.objects.count())
         self.verwerk_regiocomp_mutaties()
+
+        # controleer dat de HWLs een taak gekregen hebben
+        self.assertTrue(Taak.objects.count() > 0)
 
         self.deelcomp_regio112_18 = Regiocompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
         self.assertEqual(self.deelcomp_regio112_18.huidige_team_ronde, 1)
@@ -759,12 +769,19 @@ class TestCompLaagRegioTeams(E2EHelpers, TestCase):
             ronde_team.save(update_fields=['team_score', 'ronde_nr'])
         # for
 
+        # zet fase G waarin we geen taken meer aanmaken
+        zet_competitie_fase_regio_afsluiten(self.comp_18)
+
         CompetitieMutatie.objects.all().delete()
+        Taak.objects.all().delete()
 
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'snel': 1})
         self.assert_is_redirect(resp, self.url_overzicht_beheer % self.deelcomp_regio112_18.competitie.pk)
+
         self.verwerk_regiocomp_mutaties()
+
+        self.assertEqual(0, Taak.objects.count())
 
         self.deelcomp_regio112_18 = Regiocompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
         self.assertEqual(self.deelcomp_regio112_18.huidige_team_ronde, 99)

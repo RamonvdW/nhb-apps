@@ -5,20 +5,52 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 """
-Django settings for the NhbApps project.
+    Django settings for the NhbApps project.
 
-For more information on this file, see
-https://docs.djangoproject.com/en/2.2/topics/settings/
+    For more information on this file, see
+    https://docs.djangoproject.com/en/4.2/topics/settings/
 
-For the full list of settings and their values, see
-https://docs.djangoproject.com/en/2.2/ref/settings/
+    For the full list of settings and their values, see
+    https://docs.djangoproject.com/en/4.2/ref/settings/
+
+    this file is included by django.conf.settings
+
+    Normal:       (wsgi.py or ./manage.py cmd)
+      SiteMain/settings.py
+          includes SiteMain/core/settings_base.py
+              includes SiteMain/settings_local.py for site specific settings  <-- replaced on real deployment
+          provides additional items that are part of the release
+
+    Autotest via test.sh  (uses ./manage.py cmd --settings=SiteMain.settings_autotest)
+      SiteMain/settings_autotest[_nodebug].py
+          includes SiteMain/core/settings_base.py
+              includes SiteMain/settings_local.py for site specific settings
+          provides additional items that are part of the release
+      provides changes to to settings for autotest
+
+    Dev server via run.sh  (uses ./manage.py cmd --settings=SiteMain.settings_dev)
+      SiteMain/settings_dev.py
+          includes SiteMain/core/settings_base.py
+              includes SiteMain/settings_local.py for site specific settings
+          provides additional items that are part of the release
+      provides changes to to settings for autotest
 """
 
 import os
 
+# implementation uses this instead of built-in default, to allow override during testing
+# None = use built-in default
+BETAAL_API_URL = None
+
+# ability to override the server URL for test purposes
+# None = use built-in default
+GMAPS_API_URL = None
+
+
 # import install-specific settings from a separate file
 # that is easy to replace as part of the deployment process
 from SiteMain.settings_local import *
+
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 PROJ_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -26,7 +58,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2023-12-05'
+SITE_VERSIE = '2023-12-16'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -551,13 +583,5 @@ TEST_VALIDATE_JAVASCRIPT = False
 
 # use the complete font files or the subset files?
 USE_SUBSET_FONT_FILES = True
-
-# implementation uses this instead of built-in default, to allow override during testing
-BETAAL_API = 'https://api.mollie.com'
-
-# ability to override the server URL for test purposes
-# None = use built-in default
-GMAPS_API_URL = None
-
 
 # end of file

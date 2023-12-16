@@ -55,16 +55,6 @@ class TijdelijkeCode(models.Model):
                                         on_delete=models.CASCADE,
                                         blank=True, null=True)          # optioneel
 
-    hoort_bij_wedstrijd = models.ForeignKey(
-                                        Wedstrijd,
-                                        on_delete=models.CASCADE,
-                                        blank=True, null=True)          # optioneel
-
-    hoort_bij_sporter = models.ForeignKey(
-                                        Sporter,
-                                        on_delete=models.CASCADE,
-                                        blank=True, null=True)          # optioneel
-
     # in de toekomst meer mogelijkheden, zoals taken
 
     objects = models.Manager()      # for the editor only
@@ -81,10 +71,6 @@ class TijdelijkeCode(models.Model):
             hoort_bij.append('functie: %s' % self.hoort_bij_functie)
         if self.hoort_bij_kampioen:
             hoort_bij.append('kampioen: %s' % self.hoort_bij_kampioen)
-        if self.hoort_bij_wedstrijd:
-            hoort_bij.append('wedstrijd: %s' % self.hoort_bij_wedstrijd)
-        if self.hoort_bij_sporter:
-            hoort_bij.append('sporter: %s' % self.hoort_bij_sporter)
         msg += ' (%s)' % ", ".join(hoort_bij)
         return msg
 
@@ -111,9 +97,7 @@ def save_tijdelijke_code(url_code, dispatch_to,
                             hoort_bij_account=account,
                             hoort_bij_gast_reg=gast,
                             hoort_bij_functie=functie,
-                            hoort_bij_kampioen=kampioen,
-                            hoort_bij_wedstrijd=wedstrijd,
-                            hoort_bij_sporter=sporter)
+                            hoort_bij_kampioen=kampioen)
     obj.save()
 
     return obj

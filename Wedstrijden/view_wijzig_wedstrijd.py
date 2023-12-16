@@ -21,6 +21,7 @@ from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
 from Locatie.definities import BAAN_TYPE_BUITEN, BAAN_TYPE_EXTERN
 from Locatie.models import Locatie
+from Scheidsrechter.models import WedstrijdDagScheidsrechters
 from Sporter.models import get_sporter
 from Vereniging.models import Vereniging
 from Wedstrijden.definities import (ORGANISATIE_WEDSTRIJD_DISCIPLINE_STRS, WEDSTRIJD_STATUS_TO_STR,
@@ -371,13 +372,13 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
             elif wedstrijd.aantal_scheids == 0:
                 wedstrijd.aantal_scheids_str = 'Geen scheidsrechters'
             elif wedstrijd.aantal_scheids == 1:
-                # TODO: duidelijker maken: SR4, SR3?
                 wedstrijd.aantal_scheids_str = '1 scheidsrechter'
             else:   # wedstrijd.aantal_scheids > 1:
-                # TODO: duidelijker maken: 1x SR4 + 2x SR3, eventueel "hoofdscheidsrechter" noemen
                 wedstrijd.aantal_scheids_str = '%s scheidsrechters' % wedstrijd.aantal_scheids
 
-            # TODO: namen van de scheidsrechters toevoegen indien bekend
+            if wedstrijd.aantal_scheids not in (0, AANTAL_SCHEIDS_GEEN_KEUZE):
+                wedstrijd.url_sr_contact = reverse('Scheidsrechter:wedstrijd-hwl-contact',
+                                                   kwargs={'wedstrijd_pk': wedstrijd.pk})
 
         context['url_opslaan'] = reverse('Wedstrijden:wijzig-wedstrijd',
                                          kwargs={'wedstrijd_pk': wedstrijd.pk})

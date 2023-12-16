@@ -63,6 +63,8 @@
         <div class="row-sv-blauw">
             <div class="col s12">
                 {% if show_otp_koppelen %}
+                    {% include 'plein/card_icon.dtl' with title="Voor beheerders" text="Instructies voor beheerders: uitleg over de tweede factor en wissel-van-rol." icon="article" extern_open=True url=url_handleiding_beheerders %}
+
                     {% url 'Account:otp-koppelen-stap1' as card_url %}
                     {% include 'plein/card_icon.dtl' with title="Koppel 2e factor" text="Verplicht voor gebruikers met toegang tot persoonsgegevens." icon="lock" url=card_url %}
                 {% endif %}

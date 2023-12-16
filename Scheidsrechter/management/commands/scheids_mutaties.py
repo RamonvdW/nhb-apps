@@ -18,11 +18,13 @@ from Account.models import Account
 from BasisTypen.definities import SCHEIDS_NIET, SCHEIDS_VERENIGING
 from Functie.models import Functie
 from Locatie.models import Reistijd
+from Locatie.operations import ReistijdBepalen
 from Mailer.operations import mailer_queue_email, render_email_template
 from Overig.background_sync import BackgroundSync
 from Scheidsrechter.definities import SCHEIDS_MUTATIE_BESCHIKBAARHEID_OPVRAGEN, SCHEIDS_MUTATIE_STUUR_NOTIFICATIES
 from Scheidsrechter.models import WedstrijdDagScheidsrechters, ScheidsMutatie
 from Sporter.models import Sporter
+from Taken.operations import maak_taak
 from Wedstrijden.models import Wedstrijd
 import traceback
 import datetime
@@ -53,8 +55,10 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument('duration', type=int,
-                            choices={1, 2, 5, 7, 10, 15, 20, 30, 45, 60},
-                            help="Aantal minuten actief blijven")
+                            choices=(1, 2, 5, 7, 10, 15, 20, 30, 45, 60),
+                            help="Maximum aantal minuten actief blijven")
+        parser.add_argument('--stop_exactly', type=int, default=None, choices=range(60),
+                            help="Stop op deze minuut")
         parser.add_argument('--quick', action='store_true')     # for testing
 
     def stuur_email_naar_sr_beschikbaarheid_opgeven(self, wedstrijd: Wedstrijd, datums: list, account: Account):
@@ -82,7 +86,7 @@ class Command(BaseCommand):
             # 1 november 2023
             wed_datums = date_format(datums[0], "j F Y")
 
-        url = settings.SITE_URL + reverse('Scheidsrechter:overzicht')
+        url = settings.SITE_URL + reverse('Scheidsrechter:beschikbaarheid-wijzigen')
 
         context = {
             'voornaam': account.get_first_name(),
@@ -123,6 +127,7 @@ class Command(BaseCommand):
             'wed_titel': wedstrijd.titel,
             'wed_datum': wed_datum,
             'wed_adres': wed_adres.split('\n'),
+            'url_wed_details': reverse('Scheidsrechter:wedstrijd-details', kwargs={'wedstrijd_pk': wedstrijd.pk}),
 
             'org_email': wedstrijd.contact_email,
             'org_naam': wedstrijd.contact_naam,
@@ -221,10 +226,48 @@ class Command(BaseCommand):
                 self.stuur_email_naar_sr_beschikbaarheid_opgeven(wedstrijd, vraag, sporter.account)
         # for
 
+        # verwerk de nieuwe verzoeken voor reistijd
+        bepaler = ReistijdBepalen(self.stdout, self.stderr)
+        bepaler.run()
+
+    def _maak_taak_voor_hwl(self, wedstrijd):
+        self.stdout.write('[INFO] Maak taak voor HWL %s voor wedstrijd pk=%s' % (
+                          wedstrijd.organiserende_vereniging.ver_nr, wedstrijd.pk))
+
+        now = timezone.now()
+        stamp_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
+        taak_deadline = now + datetime.timedelta(days=3)
+        taak_log = "[%s] Taak aangemaakt" % stamp_str
+        taak_tekst = "Scheidsrechters zijn geselecteerd.\n\n"
+
+        taak_tekst += "Er is een wijziging doorgevoerd voor de volgende wedstrijd:\n"
+        taak_tekst += "Titel: %s\n" % wedstrijd.titel
+
+        datum_str = wedstrijd.datum_begin.strftime('%Y-%m-%d')
+        taak_tekst += "Datum: %s\n" % datum_str
+
+        taak_tekst += "\nOnder Wedstrijden kan je de namen en contactgegevens inzien."
+
+        taak_onderwerp = "Scheidsrechters zijn geselecteerd"
+
+        # maak een taak aan voor de HWL van de organiserende vereniging
+        functie_hwl = wedstrijd.organiserende_vereniging.functie_set.filter(rol='HWL').first()
+        if functie_hwl:  # pragma: no branch
+            maak_taak(
+                toegekend_aan_functie=functie_hwl,
+                deadline=taak_deadline,
+                onderwerp=taak_onderwerp,
+                beschrijving=taak_tekst,
+                log=taak_log)
+        else:
+            self.stderr.write('[ERROR] HWL functie niet gevonden!')
+
     def _verwerk_mutatie_stuur_notificaties(self, mutatie):
         wedstrijd = mutatie.wedstrijd
 
         when_str = timezone.localtime(mutatie.when).strftime('%Y-%m-%d om %H:%M')
+
+        notify_hwl = False
 
         for dag in (WedstrijdDagScheidsrechters
                     .objects
@@ -249,16 +292,20 @@ class Command(BaseCommand):
                         # sporter is nieuw gekozen en moet een berichtje krijgen
                         self.stuur_email_naar_sr_voor_wedstrijddag_gekozen(dag, sporter)
                         dag.notified_srs.add(sporter)
+                        notify_hwl = True
             # for
 
             # alle overgebleven srs zijn niet meer gekozen en kunnen dus een afmelding krijgen
             for sporter in Sporter.objects.filter(pk__in=notified_pks):
                 self.stuur_email_naar_sr_voor_wedstrijddag_niet_meer_nodig(dag, sporter)
                 dag.notified_srs.remove(sporter)
+                notify_hwl = True
             # for
         # for
 
-        # stuur de mailtjes (voor alle dagen in 1x)
+        # maak een taak voor de HWL van de organiserende vereniging
+        if notify_hwl:
+            self._maak_taak_voor_hwl(wedstrijd)
 
     def _verwerk_mutatie(self, mutatie):
         code = mutatie.mutatie
@@ -280,15 +327,15 @@ class Command(BaseCommand):
 
         try:
             mutatie_latest = ScheidsMutatie.objects.latest('pk')
-        except ScheidsMutatie.DoesNotExist:
+        except ScheidsMutatie.DoesNotExist:             # pragma: no cover
             # alle mutatie records zijn verwijderd
             return
         # als hierna een extra mutatie aangemaakt wordt dan verwerken we een record
         # misschien dubbel, maar daar kunnen we tegen
 
-        if self._hoogste_mutatie_pk:        # staat initieel op None
+        if self._hoogste_mutatie_pk:        # staat initieel op None        # pragma: no cover
             # gebruik deze informatie om te filteren
-            self.stdout.write('[INFO] vorige hoogste BetaalMutatie pk is %s' % self._hoogste_mutatie_pk)
+            self.stdout.write('[INFO] vorige hoogste ScheidsMutatie pk is %s' % self._hoogste_mutatie_pk)
             qset = (ScheidsMutatie
                     .objects
                     .filter(pk__gt=self._hoogste_mutatie_pk))
@@ -312,7 +359,7 @@ class Command(BaseCommand):
                                        'wedstrijd__locatie')
                        .get(pk=pk))
 
-            if not mutatie.is_verwerkt:
+            if not mutatie.is_verwerkt:             # pragma: no branch
                 self._verwerk_mutatie(mutatie)
 
                 mutatie.is_verwerkt = True
@@ -320,11 +367,10 @@ class Command(BaseCommand):
                 did_useful_work = True
         # for
 
-        if did_useful_work:
-            self.stdout.write('[INFO] nieuwe hoogste ScheidsMutatie pk is %s' % self._hoogste_mutatie_pk)
+        self.stdout.write('[INFO] nieuwe hoogste ScheidsMutatie pk is %s' % self._hoogste_mutatie_pk)
 
-            klaar = datetime.datetime.now()
-            self.stdout.write('[INFO] Mutaties verwerkt in %s seconden' % (klaar - begin))
+        klaar = datetime.datetime.now()
+        self.stdout.write('[INFO] Mutaties verwerkt in %s seconden' % (klaar - begin))
 
     def _monitor_nieuwe_mutaties(self):
         # monitor voor nieuwe mutaties
@@ -354,12 +400,24 @@ class Command(BaseCommand):
 
     def _set_stop_time(self, **options):
         # bepaal wanneer we moeten stoppen (zoals gevraagd)
-        # trek er nog eens 15 seconden vanaf, om overlap van twee cron jobs te voorkomen
         duration = options['duration']
+        stop_minute = options['stop_exactly']
 
-        self.stop_at = (datetime.datetime.now()
-                        + datetime.timedelta(minutes=duration)
-                        - datetime.timedelta(seconds=15))
+        now = datetime.datetime.now()
+        self.stop_at = now + datetime.timedelta(minutes=duration)
+
+        if isinstance(stop_minute, int):
+            delta = stop_minute - now.minute
+            if delta < 0:
+                delta += 60
+            if delta != 0:    # avoid stopping in start minute
+                stop_at_exact = now + datetime.timedelta(minutes=delta)
+                stop_at_exact -= datetime.timedelta(seconds=self.stop_at.second,
+                                                    microseconds=self.stop_at.microsecond)
+                self.stdout.write('[INFO] Calculated stop at is %s' % stop_at_exact)
+                if stop_at_exact < self.stop_at:
+                    # run duration passes the requested stop minute
+                    self.stop_at = stop_at_exact
 
         # test moet snel stoppen dus interpreteer duration in seconden
         if options['quick']:        # pragma: no branch

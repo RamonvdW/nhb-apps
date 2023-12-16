@@ -101,7 +101,7 @@ def stuur_email_taak_herinnering(emailadres, aantal_open):
                        mail_body)
 
 
-def stuur_email_nieuwe_taak(emailadres, aantal_open):
+def stuur_email_nieuwe_taak(emailadres, onderwerp, aantal_open):
 
     # op het moment van sturen..
     if aantal_open == 1:
@@ -117,7 +117,7 @@ def stuur_email_nieuwe_taak(emailadres, aantal_open):
     mail_body = render_email_template(context, EMAIL_TEMPLATE_NIEUWE_TAAK)
 
     mailer_queue_email(emailadres,
-                       'Er is een nieuwe taak voor jou',
+                       onderwerp,
                        mail_body)
 
 
@@ -156,6 +156,8 @@ def maak_taak(**kwargs):
 
             aangemaakt_door = <Account> (of None voor 'systeem')
 
+            onderwerp = "korte beschrijving"
+
             beschrijving = "beschrijving van de taak - call for action of informatie"
 
             log = begin van het logboek, typisch "[%s] Taak aangemaakt" % now
@@ -177,7 +179,7 @@ def maak_taak(**kwargs):
                        .filter(toegekend_aan_functie=functie)
                        .count())
 
-        stuur_email_nieuwe_taak(functie.bevestigde_email, aantal_open)
+        stuur_email_nieuwe_taak(functie.bevestigde_email, taak.onderwerp, aantal_open)
 
 
 def herinner_aan_taken():
