@@ -575,7 +575,7 @@ TEST_VALIDATE_JAVASCRIPT = False
 USE_SUBSET_FONT_FILES = True
 
 # implementation uses this instead of built-in default, to allow override during testing
-BETAAL_API = 'https://api.mollie.com'
+BETAAL_API_URL = 'https://api.mollie.com'
 
 # ability to override the server URL for test purposes
 # None = use built-in default

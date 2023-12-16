@@ -49,7 +49,7 @@ TEST_VALIDATE_JAVASCRIPT = True
 
 # enable html validation using the Nu Html Checker (v.Nu)
 # WARNING: increases test run duration significantly (triple!)
-#TEST_VALIDATE_HTML = True
+TEST_VALIDATE_HTML = True
 
 
 # end of file
