@@ -214,10 +214,11 @@
             <div class="col s12">
                 <h4>Kies een sessie</h4>
                 {% if not kan_aanmelden %}
+                    <p><span  class="sv-rood-text">Je kan niet inschrijven op deze wedstrijd:</span> geen beschikbare sessie gevonden.</p>
                     {% if wed.begrenzing_str %}
-                        <p class="sv-rood-text">Je kan niet inschrijven op deze wedstrijd.<br>De doelgroep voor de wedstrijd is: {{ wed.begrenzing_str }}.</p>
+                        <p>De doelgroep voor de wedstrijd is: <span class="sv-rood-text">{{ wed.begrenzing_str }}</span>.</p>
                     {% else %}
-                        <p class="sv-rood-text">Je kan niet inschrijven op deze wedstrijd.<br>Dit kan komen door je leeftijd en/of de gekozen bogen onder Mijn pagina, Voorkeuren.</p>
+                        <p>Mogelijk oorzaken: de sessies zitten vol / je leeftijd versus de wedstrijdklassen / de gekozen bogen onder Mijn pagina, Voorkeuren.</p>
                     {% endif %}
 
                 {% else %}
@@ -230,7 +231,7 @@
             </div>
         </div>
 
-        {% if kan_aanmelden %}
+        {% if True or kan_aanmelden %}
 
             <div class="row-sv-blauw">
                 <div class="col s12">
