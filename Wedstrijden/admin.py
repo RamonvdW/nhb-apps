@@ -59,6 +59,8 @@ class WedstrijdSessieAdmin(admin.ModelAdmin):             # pragma: no cover
 
     search_fields = ('pk',)
 
+    list_filter = ('datum',)
+
     readonly_fields = ('wedstrijdklassen',)
 
     def get_queryset(self, request):
@@ -85,7 +87,7 @@ class WedstrijdInschrijvingAdmin(admin.ModelAdmin):
 
     readonly_fields = ('wanneer', 'wedstrijd', 'sessie', 'sporterboog', 'koper')
 
-    list_filter = ('status',)
+    list_filter = ('status', 'wedstrijd')
 
     search_fields = ('sporterboog__sporter__lid_nr',)
 
