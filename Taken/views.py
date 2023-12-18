@@ -47,7 +47,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                             .select_related('toegekend_aan_functie',
                                             'aangemaakt_door')
                             .order_by('is_afgerond',
-                                      'deadline')[:50])
+                                      '-deadline')[:50])        # nieuwste bovenaan
 
         count_open = count_afgerond = 0
         for taak in context['taken']:
