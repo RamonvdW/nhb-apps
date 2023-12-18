@@ -18,7 +18,7 @@ from Locatie.models import Locatie
 from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
-from Wedstrijden.definities import (WEDSTRIJD_STATUS_GEACCEPTEERD, INSCHRIJVING_STATUS_AFGEMELD,
+from Wedstrijden.definities import (WEDSTRIJD_STATUS_GEACCEPTEERD, INSCHRIJVING_STATUS_VERWIJDERD,
                                     WEDSTRIJD_KORTING_VERENIGING, WEDSTRIJD_KORTING_SPORTER,
                                     WEDSTRIJD_KORTING_COMBI)
 from Wedstrijden.models import Wedstrijd, WedstrijdSessie, WedstrijdInschrijving, WedstrijdKorting
@@ -390,7 +390,7 @@ class TestBestelKortingen(E2EHelpers, TestCase):
         self.verwerk_bestel_mutaties()
 
         inschrijving1 = WedstrijdInschrijving.objects.get(pk=inschrijving1_sporter1.pk)
-        self.assertEqual(inschrijving1.status, INSCHRIJVING_STATUS_AFGEMELD)
+        self.assertEqual(inschrijving1.status, INSCHRIJVING_STATUS_VERWIJDERD)
         self.assertIsNone(inschrijving1.korting)
 
         inschrijving2 = WedstrijdInschrijving.objects.get(pk=inschrijving2_sporter1.pk)

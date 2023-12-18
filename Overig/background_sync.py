@@ -43,9 +43,14 @@ class BackgroundSync(object):
 
     def _setup_receiver(self):
         if not self._conn:
-            self._sock.bind(self._address)
-            self._sock.setblocking(False)
-            self._conn = 1
+            try:
+                self._sock.bind(self._address)
+            except OSError:
+                # typisch: Address already in use
+                pass
+            else:
+                self._sock.setblocking(False)
+                self._conn = 1
 
     def ping(self):
         self._sock.sendto(b'ping', self._address)

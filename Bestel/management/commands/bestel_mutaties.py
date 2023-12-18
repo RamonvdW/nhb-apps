@@ -28,7 +28,7 @@ from Bestel.plugins.product_info import beschrijf_product, beschrijf_korting
 from Bestel.plugins.wedstrijden import (wedstrijden_plugin_automatische_kortingen_toepassen,
                                         wedstrijden_plugin_inschrijven, wedstrijden_plugin_verwijder_reservering,
                                         wedstrijden_plugin_afmelden, wedstrijden_plugin_inschrijving_is_betaald)
-from Bestel.plugins.webwinkel import (webwinkel_plug_reserveren, webwinkel_plugin_verwijder_reservering,
+from Bestel.plugins.webwinkel import (webwinkel_plugin_reserveren, webwinkel_plugin_verwijder_reservering,
                                       webwinkel_plugin_bepaal_kortingen, webwinkel_plugin_bepaal_verzendkosten_mandje,
                                       webwinkel_plugin_bepaal_verzendkosten_bestelling)
 from Betaal.models import BetaalInstellingenVereniging, BetaalTransactie
@@ -464,7 +464,7 @@ class Command(BaseCommand):
         if mandje:                                  # pragma: no branch
             webwinkel_keuze = mutatie.webwinkel_keuze
 
-            prijs_euro = webwinkel_plug_reserveren(webwinkel_keuze)
+            prijs_euro = webwinkel_plugin_reserveren(webwinkel_keuze)
 
             # maak een product regel aan voor de bestelling
             product = BestelProduct(
@@ -492,7 +492,7 @@ class Command(BaseCommand):
         else:
             self.stdout.write('[WARNING] Kan mandje niet vinden voor mutatie pk=%s' % mutatie.pk)
 
-    def _verwerk_mutatie_verwijder(self, mutatie):
+    def _verwerk_mutatie_verwijder_uit_mandje(self, mutatie):
         """ een bestelling mag uit het mandje voordat de betaling gestart is """
 
         if not mutatie.product:
@@ -1007,7 +1007,7 @@ class Command(BaseCommand):
 
         elif code == BESTEL_MUTATIE_VERWIJDER:
             self.stdout.write('[INFO] Verwerk mutatie %s: verwijder product uit mandje' % mutatie.pk)
-            self._verwerk_mutatie_verwijder(mutatie)
+            self._verwerk_mutatie_verwijder_uit_mandje(mutatie)
 
         elif code == BESTEL_MUTATIE_MAAK_BESTELLINGEN:
             self.stdout.write('[INFO] Verwerk mutatie %s: mandje omzetten in bestelling(en)' % mutatie.pk)
