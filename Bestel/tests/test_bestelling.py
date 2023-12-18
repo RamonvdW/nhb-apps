@@ -29,7 +29,8 @@ from Webwinkel.models import WebwinkelProduct, WebwinkelKeuze
 from Wedstrijden.definities import (WEDSTRIJD_STATUS_GEACCEPTEERD, WEDSTRIJD_KORTING_VERENIGING,
                                     WEDSTRIJD_KORTING_SPORTER,
                                     INSCHRIJVING_STATUS_RESERVERING_MANDJE, INSCHRIJVING_STATUS_RESERVERING_BESTELD,
-                                    INSCHRIJVING_STATUS_DEFINITIEF, INSCHRIJVING_STATUS_AFGEMELD)
+                                    INSCHRIJVING_STATUS_DEFINITIEF, INSCHRIJVING_STATUS_AFGEMELD,
+                                    INSCHRIJVING_STATUS_VERWIJDERD)
 from Wedstrijden.models import Wedstrijd, WedstrijdSessie, WedstrijdInschrijving, WedstrijdKorting
 from decimal import Decimal
 import datetime
@@ -1049,9 +1050,9 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         f1, f2 = self.verwerk_bestel_mutaties()
         # print('\nf1:', f1.getvalue(), '\nf2:', f2.getvalue())
         self.assertTrue(' met status="besteld" afmelden voor wedstrijd' in f2.getvalue())
-        self.assertTrue('status Gereserveerd, wacht op betaling --> Afgemeld' in f2.getvalue())
+        self.assertTrue('status Gereserveerd, wacht op betaling --> Verwijderd' in f2.getvalue())
         inschrijving = WedstrijdInschrijving.objects.get(pk=self.inschrijving.pk)
-        self.assertEqual(inschrijving.status, INSCHRIJVING_STATUS_AFGEMELD)
+        self.assertEqual(inschrijving.status, INSCHRIJVING_STATUS_VERWIJDERD)
 
         # nog een keer afmelden
         bestel_mutatieverzoek_afmelden_wedstrijd(inschrijving, snel=True)
@@ -1121,7 +1122,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         bestel_mutatieverzoek_afmelden_wedstrijd(inschrijving, snel=True)
         self.verwerk_bestel_mutaties()
         inschrijving = WedstrijdInschrijving.objects.get(pk=self.inschrijving.pk)
-        self.assertEqual(inschrijving.status, INSCHRIJVING_STATUS_AFGEMELD)
+        self.assertEqual(inschrijving.status, INSCHRIJVING_STATUS_VERWIJDERD)
 
     def test_afmelden_na_betalen(self):
         # inschrijven, bestellen, betalen, afmelden

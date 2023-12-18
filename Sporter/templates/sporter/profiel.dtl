@@ -306,13 +306,13 @@
                     {% for obj in wedstrijden %}
                         <tr>
                             <td>{{ obj.datum_str }}</td>
-                            <td>{{ obj.wedstrijd.titel }}</td>
+                            <td>{{ obj.wedstrijd.titel }}{% if obj.status_str %}<br><span class="sv-rood-text">Let op: {{ obj.status_str }}</span>{% endif %}</td>
                             <td>{{ obj.plaats_str }}</td>
                             <td>
                                 <a class="btn-sv-blauw" href="{{ obj.url_details }}">Details</a>
                                 {% if obj.url_kwalificatie_scores %}
                                     <br>
-                                    <a style="margin-top:10px" class="btn-sv-rood" href="{{ obj.url_kwalificatie_scores }}">Kwalificatiescores</a>
+                                    <a style="margin-top:10px" class="{% if obj.mag_kwalificatiescores_aanpassen %}btn-sv-rood{% else %}btn-sv-blauw{% endif %}" href="{{ obj.url_kwalificatie_scores }}">Kwalificatiescores</a>
                                 {% endif %}
                             </td>
                         </tr>

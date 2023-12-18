@@ -13,7 +13,7 @@ from Bestel.models import BestelProduct
 from Mailer.operations import mailer_queue_email, mailer_email_is_valide, render_email_template
 from Wedstrijden.definities import (WEDSTRIJD_KORTING_COMBI, WEDSTRIJD_KORTING_SPORTER, WEDSTRIJD_KORTING_VERENIGING,
                                     INSCHRIJVING_STATUS_DEFINITIEF, INSCHRIJVING_STATUS_AFGEMELD,
-                                    INSCHRIJVING_STATUS_TO_STR)
+                                    INSCHRIJVING_STATUS_VERWIJDERD, INSCHRIJVING_STATUS_TO_STR)
 from Wedstrijden.models import WedstrijdKorting, WedstrijdInschrijving
 from decimal import Decimal
 import datetime
@@ -393,16 +393,20 @@ def wedstrijden_plugin_afmelden(inschrijving):
 
 
 def wedstrijden_plugin_verwijder_reservering(stdout, inschrijving):
-
-    # zet de inschrijving om in status=afgemeld
-    # dit heeft de voorkeur over het verwijderen van inschrijvingen,
+    # zet de inschrijving om in status=afgemeld of verwijderd
+    # dit heeft de voorkeur over het echt verwijderen van inschrijvingen,
     # want als er wel een betaling volgt dan kunnen we die nergens aan koppelen
     oude_status = inschrijving.status
 
     stamp_str = timezone.localtime(timezone.now()).strftime('%Y-%m-%d om %H:%M')
-    msg = "[%s] Afgemeld voor de wedstrijd en reservering verwijderd\n" % stamp_str
 
-    inschrijving.status = INSCHRIJVING_STATUS_AFGEMELD
+    if inschrijving.status == INSCHRIJVING_STATUS_DEFINITIEF:
+        msg = "[%s] Afgemeld voor de wedstrijd en reservering verwijderd\n" % stamp_str
+        inschrijving.status = INSCHRIJVING_STATUS_AFGEMELD
+    else:
+        msg = "[%s] Reservering voor wedstrijd verwijderd\n" % stamp_str
+        inschrijving.status = INSCHRIJVING_STATUS_VERWIJDERD
+
     inschrijving.korting = None
     inschrijving.log += msg
     inschrijving.save(update_fields=['status', 'log', 'korting'])
@@ -414,8 +418,10 @@ def wedstrijden_plugin_verwijder_reservering(stdout, inschrijving):
         sessie.aantal_inschrijvingen -= 1
         sessie.save(update_fields=['aantal_inschrijvingen'])
 
-    stdout.write('[INFO] Inschrijving pk=%s status %s --> Afgemeld' % (inschrijving.pk,
-                                                                       INSCHRIJVING_STATUS_TO_STR[oude_status]))
+    stdout.write('[INFO] Inschrijving pk=%s status %s --> %s' % (
+                    inschrijving.pk,
+                    INSCHRIJVING_STATUS_TO_STR[oude_status],
+                    INSCHRIJVING_STATUS_TO_STR[inschrijving.status]))
 
 
 def wedstrijden_plugin_inschrijving_is_betaald(stdout, product: BestelProduct):

@@ -13,7 +13,7 @@ from Webwinkel.definities import KEUZE_STATUS_GEANNULEERD, VERZENDKOSTEN_BRIEFPO
 from decimal import Decimal
 
 
-def webwinkel_plug_reserveren(webwinkel_keuze):
+def webwinkel_plugin_reserveren(webwinkel_keuze):
     """
         Deze functie wordt vanuit de achtergrondtaak aangeroepen om een product te reserveren.
         Dit hoort bij het toevoegen aan het mandje.
