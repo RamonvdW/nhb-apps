@@ -101,13 +101,15 @@
                 <tr>
                     <th>Status</th>
                     <td>{% if inschrijving.status == 'R' %}
-                            <span>In mandje</span><span class="grey-text"> | Besteld | Definitief | Afgemeld</span>
+                            <span>In mandje</span><span class="grey-text"> | Besteld | Definitief | Afgemeld | Verwijderd</span>
                         {% elif inschrijving.status == 'B' %}
-                            <span class="grey-text">In mandje | </span><span>Besteld</span><span class="grey-text"> | Definitief | Afgemeld</span>
+                            <span class="grey-text">In mandje | </span><span>Besteld</span><span class="grey-text"> | Definitief | Afgemeld | Verwijderd</span>
                         {% elif inschrijving.status == 'D' %}
-                            <span class="grey-text">In mandje | Besteld | </span><span>Definitief</span><span class="grey-text"> | Afgemeld</span>
+                            <span class="grey-text">In mandje | Besteld | </span><span>Definitief</span><span class="grey-text"> | Afgemeld | Verwijderd</span>
                         {% elif inschrijving.status == 'A' %}
-                            <span class="grey-text">In mandje | Besteld | Definitief | </span><span>Afgemeld</span>
+                            <span class="grey-text">In mandje | Besteld | Definitief | </span><span>Afgemeld</span><span class="grey-text"> | Verwijderd</span>
+                        {% elif inschrijving.status == 'V' %}
+                            <span class="grey-text">In mandje | Besteld | Definitief | Afgemeld | </span><span>Verwijderd</span>
                         {% else %}
                             <span class="sv-rood-text"><i>Onbekend!</i></span>
                         {% endif %}
