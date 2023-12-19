@@ -21,6 +21,7 @@ from Sporter.models import SporterVoorkeuren, get_sporter
 from Sporter.operations import get_sporter_voorkeuren
 from Wedstrijden.definities import (INSCHRIJVING_STATUS_TO_SHORT_STR, INSCHRIJVING_STATUS_AFGEMELD,
                                     INSCHRIJVING_STATUS_RESERVERING_MANDJE, INSCHRIJVING_STATUS_DEFINITIEF,
+                                    INSCHRIJVING_STATUS_VERWIJDERD,
                                     KWALIFICATIE_CHECK2STR, KWALIFICATIE_CHECK_AFGEKEURD)
 from Wedstrijden.models import Wedstrijd, WedstrijdInschrijving, Kwalificatiescore
 from decimal import Decimal
@@ -176,7 +177,7 @@ class KalenderAanmeldingenView(UserPassesTestMixin, TemplateView):
             sporterboog = aanmelding.sporterboog
             sporter = sporterboog.sporter
 
-            if aanmelding.status != INSCHRIJVING_STATUS_AFGEMELD:
+            if aanmelding.status not in (INSCHRIJVING_STATUS_AFGEMELD, INSCHRIJVING_STATUS_VERWIJDERD):
                 aantal_aanmeldingen += 1
                 aanmelding.volg_nr = aantal_aanmeldingen
                 aanmelding.reserveringsnummer = aanmelding.pk + settings.TICKET_NUMMER_START__WEDSTRIJD
