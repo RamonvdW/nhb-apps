@@ -23,11 +23,12 @@
         <div class="col s12 l10 offset-l1 xl8 offset-xl2">
             <div class="white" style="padding:10px">
                 <p>We hebben een plekje voor je <b>gereserveerd</b> voor de gekozen wedstrijd.</p>
+                <p>Je inschrijving voor de wedstrijd is pas definitief na het <b>afronden</b> van je bestelling en eventuele <b>betaling</b>.</p>
+                <br>
+                <p class="sv-rood-text">Let op: na 3 dagen verwijderen we deze reservering automatisch</p>
                 <br>
                 <p>Rechts bovenin vind je de knop voor je <b>winkelmandje</b>.</p>
-                <p>Je kan meerdere producten toevoegen aan je mandje en daarna in &eacute;&eacute;n keer <b>bestellen</b> en afrekenen.</p>
-                <br>
-                <p>Let op: na <b>betaling</b> is je inschrijving voor de wedstrijd pas definitief.</p>
+                <p>Je kan meerdere producten toevoegen aan je mandje en daarna in &eacute;&eacute;n keer de bestellen afronden en afrekenen.</p>
             </div>
         </div>
     </div>
