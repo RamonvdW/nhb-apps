@@ -22,7 +22,8 @@ from Kalender.view_maand import MAAND2URL
 from Sporter.models import Sporter, SporterBoog, get_sporter
 from Sporter.operations import get_sporter_voorkeuren
 from Wedstrijden.definities import (INSCHRIJVING_STATUS_AFGEMELD, INSCHRIJVING_STATUS_DEFINITIEF,
-                                    INSCHRIJVING_STATUS_TO_STR, WEDSTRIJD_BEGRENZING_TO_STR,
+                                    INSCHRIJVING_STATUS_VERWIJDERD, INSCHRIJVING_STATUS_TO_STR,
+                                    WEDSTRIJD_BEGRENZING_TO_STR,
                                     WEDSTRIJD_BEGRENZING_VERENIGING, WEDSTRIJD_BEGRENZING_REGIO,
                                     WEDSTRIJD_BEGRENZING_RAYON, WEDSTRIJD_BEGRENZING_WERELD)
 from Wedstrijden.models import Wedstrijd, WedstrijdSessie, WedstrijdInschrijving
@@ -91,7 +92,7 @@ def get_sessies(wedstrijd, sporter, voorkeuren, wedstrijdboog_pk):
                                          'sporterboog__boogtype')
                          .filter(sessie__pk__in=sessie_pks,
                                  sporterboog__sporter=sporter)
-                         .exclude(status=INSCHRIJVING_STATUS_AFGEMELD)):
+                         .exclude(status__in=(INSCHRIJVING_STATUS_AFGEMELD, INSCHRIJVING_STATUS_VERWIJDERD))):
 
         sessie_pk = inschrijving.sessie.pk
         try:
@@ -797,7 +798,7 @@ class ToevoegenAanMandjeView(UserPassesTestMixin, View):
                 .objects
                 .filter(wedstrijd=wedstrijd,
                         sporterboog=sporterboog,
-                        status=INSCHRIJVING_STATUS_AFGEMELD))
+                        status__in=(INSCHRIJVING_STATUS_AFGEMELD, INSCHRIJVING_STATUS_VERWIJDERD)))
         if qset.count() > 0:
             qset.delete()
 
