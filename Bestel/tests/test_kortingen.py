@@ -366,7 +366,9 @@ class TestBestelKortingen(E2EHelpers, TestCase):
 
         inschrijving1 = WedstrijdInschrijving.objects.get(pk=inschrijving1_sporter1.pk)
         inschrijving2 = WedstrijdInschrijving.objects.get(pk=inschrijving2_sporter1.pk)
-        kortingen = [korting for korting in (inschrijving1.korting, inschrijving2.korting) if korting is not None]
+        kortingen = [korting
+                     for korting in (inschrijving1.korting, inschrijving2.korting)
+                     if korting is not None]
         self.assertEqual(len(kortingen), 1)
         self.assertEqual(kortingen[0].pk, self.combi_korting1.pk)
 
