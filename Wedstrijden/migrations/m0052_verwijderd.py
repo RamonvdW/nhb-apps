@@ -13,7 +13,7 @@ def zet_status_verwijderd(apps, _):
 
     klas = apps.get_model('Wedstrijden', 'WedstrijdInschrijving')
 
-    for obj in klas.objects.filter(status=INSCHRIJVING_STATUS_AFGEMELD):
+    for obj in klas.objects.filter(status=INSCHRIJVING_STATUS_AFGEMELD):            # pragma: no cover
         # analyseer de datums in de log: allemaal dezelfde = zelf verwijderd
         eerste_datum = None
         biggest_delta = 0
