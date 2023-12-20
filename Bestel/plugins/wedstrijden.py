@@ -92,7 +92,7 @@ class BepaalAutomatischeKorting(object):
                        .objects
                        .filter(sporterboog__sporter__lid_nr=lid_nr)
                        .filter(korting=None)                            # niet stapelen
-                       .exclude(status=INSCHRIJVING_STATUS_AFGEMELD)
+                       .exclude(status__in=(INSCHRIJVING_STATUS_AFGEMELD, INSCHRIJVING_STATUS_VERWIJDERD))
                        .exclude(wedstrijd__pk__in=nieuwe_pks)
                        .values_list('wedstrijd__pk', flat=True))
             self._lid_nr2wedstrijd_pks_eerder[lid_nr] = pks
