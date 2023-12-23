@@ -111,7 +111,7 @@ class ScoresRegioView(UserPassesTestMixin, TemplateView):
             beschrijving = match2beschrijving[match.pk]
             if match.beschrijving != beschrijving:
                 match.beschrijving = beschrijving
-                match.save()
+                match.save()                        # TODO: voorkomen dat dit nodig is + uitstellen tot de POST
 
             # geef RCL de mogelijkheid om de scores aan te passen
             # de HWL/WL krijgen deze link vanuit Vereniging.Wedstrijden
@@ -943,7 +943,7 @@ class ScoresRegioTeamsView(UserPassesTestMixin, TemplateView):
                           sporterboog=sporterboog)
             bulk.append(score)
         # for
-        Score.objects.bulk_create(bulk)
+        Score.objects.bulk_create(bulk)         # TODO: mag_database_wijzigen?
         del bulk
         del nieuwe_pks
 
