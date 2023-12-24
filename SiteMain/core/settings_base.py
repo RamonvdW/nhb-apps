@@ -58,7 +58,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2023-12-23'
+SITE_VERSIE = '2023-12-24'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -170,6 +170,9 @@ TEMPLATES = [
     },
 ]
 
+# avoid conflicts with other Django applications
+SESSION_COOKIE_NAME = 'mh_session_id'
+CSRF_COOKIE_NAME = 'mh_csrf_token'
 
 # point out location of WSGI application for django runserver command
 WSGI_APPLICATION = 'SiteMain.core.wsgi.application'
