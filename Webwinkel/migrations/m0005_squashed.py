@@ -5,7 +5,19 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db import migrations, models
+from Webwinkel.definities import WEBWINKEL_VERKOPENDE_VER_NR
 from decimal import Decimal
+
+
+def maak_functie_mww(apps, _):
+
+    # haal de klassen op die van toepassing zijn op het moment van migratie
+    functie_klas = apps.get_model('Functie', 'Functie')
+    ver_klas = apps.get_model('Vereniging', 'Vereniging')
+
+    # MWW is gekoppeld aan vereniging 1368 omdat dat de verkopende vereniging is waar de betalingen op binnen komen
+    ver = ver_klas.objects.get(ver_nr=WEBWINKEL_VERKOPENDE_VER_NR)
+    functie_klas(rol='MWW', beschrijving='Manager Webwinkel', vereniging=ver).save()
 
 
 class Migration(migrations.Migration):
@@ -17,7 +29,9 @@ class Migration(migrations.Migration):
 
     # volgorde afdwingen
     dependencies = [
-        ('Account', 'm0023_squashed'),
+        ('Account', 'm0030_squashed'),
+        ('Functie', 'm0025_squashed'),
+        ('Vereniging', 'm0007_squashed'),
     ]
 
     # migratie functies
@@ -50,10 +64,13 @@ class Migration(migrations.Migration):
                 ('prijs_euro', models.DecimalField(decimal_places=2, default=Decimal('0'), max_digits=6)),
                 ('onbeperkte_voorraad', models.BooleanField(default=False)),
                 ('aantal_op_voorraad', models.PositiveSmallIntegerField(default=0)),
-                ('bestel_begrenzing', models.CharField(blank=True, default='1', help_text='1-10,20,25,30,50', max_length=100)),
+                ('bestel_begrenzing', models.CharField(blank=True, default='1', help_text='1-10,20,25,30,50',
+                                                       max_length=100)),
                 ('fotos', models.ManyToManyField(blank=True, to='Webwinkel.webwinkelfoto')),
-                ('omslag_foto', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.SET_NULL, related_name='omslagfoto', to='Webwinkel.webwinkelfoto')),
-                ('type_verzendkosten', models.CharField(choices=[('pak', 'Pakketpost'), ('brief', 'Briefpost')], default='pak', max_length=5)),
+                ('omslag_foto', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.SET_NULL,
+                                                  related_name='omslagfoto', to='Webwinkel.webwinkelfoto')),
+                ('type_verzendkosten', models.CharField(choices=[('pak', 'Pakketpost'), ('brief', 'Briefpost')],
+                                                        default='pak', max_length=5)),
             ],
             options={
                 'verbose_name': 'Webwinkel product',
@@ -65,7 +82,9 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('wanneer', models.DateTimeField()),
-                ('status', models.CharField(choices=[('M', 'Reservering'), ('B', 'Besteld'), ('BO', 'Betaald'), ('A', 'Geannuleerd')], default='M', max_length=2)),
+                ('status', models.CharField(choices=[('M', 'Reservering'), ('B', 'Besteld'), ('BO', 'Betaald'),
+                                                     ('A', 'Geannuleerd')],
+                                            default='M', max_length=2)),
                 ('aantal', models.PositiveSmallIntegerField(default=1)),
                 ('totaal_euro', models.DecimalField(decimal_places=2, default=Decimal('0'), max_digits=6)),
                 ('ontvangen_euro', models.DecimalField(decimal_places=2, default=Decimal('0'), max_digits=6)),
@@ -74,6 +93,7 @@ class Migration(migrations.Migration):
                 ('product', models.ForeignKey(on_delete=models.deletion.PROTECT, to='Webwinkel.webwinkelproduct')),
             ],
         ),
+        migrations.RunPython(maak_functie_mww, reverse_code=migrations.RunPython.noop)
     ]
 
 # end of file

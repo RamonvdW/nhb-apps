@@ -29,10 +29,10 @@ def maak_vereniging_extern(apps, _):
     ver_nr = settings.EXTERN_VER_NR
 
     # haal de klassen op die van toepassing zijn tijdens deze migratie
-    ver_klas = apps.get_model('NhbStructuur', 'NhbVereniging')
-    regio_klas = apps.get_model('NhbStructuur', 'NhbRegio')
-    functie_klas = apps.get_model('Functie', 'Functie')
+    ver_klas = apps.get_model('Vereniging', 'Vereniging')
     sec_klas = apps.get_model('Vereniging', 'Secretaris')
+    regio_klas = apps.get_model('Geo', 'Regio')
+    functie_klas = apps.get_model('Functie', 'Functie')
 
     # zoek regio 100 op
     regio100 = regio_klas.objects.get(regio_nr=100)
@@ -63,18 +63,12 @@ class Migration(migrations.Migration):
     # dit is de eerste
     initial = True
 
-    replaces = [('Registreer', 'm0001_initial'),
-                ('Registreer', 'm0002_more'),
-                ('Registreer', 'm0003_kan_aanmaken'),
-                ('Registreer', 'm0004_opruimen')]
-
     # volgorde afdwingen
     dependencies = [
-        ('Account', 'm0027_squashed'),
-        ('Functie', 'm0019_squashed'),
-        ('NhbStructuur', 'm0034_squashed'),
-        ('Sporter', 'm0025_squashed'),
-        ('Vereniging', 'm0001_initial'),
+        ('Account', 'm0030_squashed'),
+        ('Functie', 'm0025_squashed'),
+        ('Sporter', 'm0031_squashed'),
+        ('Vereniging', 'm0007_squashed'),
     ]
 
     # migratie functies
@@ -104,14 +98,17 @@ class Migration(migrations.Migration):
                 ('voornaam', models.CharField(max_length=50)),
                 ('achternaam', models.CharField(max_length=100)),
                 ('geboorte_datum', models.DateField(default='2000-01-01', validators=[validate_geboorte_datum])),
-                ('geslacht', models.CharField(choices=[('M', 'Man'), ('V', 'Vrouw'), ('X', 'Anders')], default='M', max_length=1)),
+                ('geslacht', models.CharField(choices=[('M', 'Man'), ('V', 'Vrouw'), ('X', 'Anders')],
+                                              default='M', max_length=1)),
                 ('eigen_sportbond_naam', models.CharField(blank=True, default='', max_length=100)),
                 ('eigen_lid_nummer', models.CharField(blank=True, default='', max_length=25)),
                 ('club', models.CharField(blank=True, default='', max_length=100)),
                 ('land', models.CharField(blank=True, default='', max_length=100)),
                 ('telefoon', models.CharField(blank=True, default='', max_length=25)),
-                ('account', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.SET_NULL, to='Account.account')),
-                ('sporter', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.CASCADE, to='Sporter.sporter')),
+                ('account', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.SET_NULL,
+                                              to='Account.account')),
+                ('sporter', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.CASCADE,
+                                              to='Sporter.sporter')),
                 ('wa_id', models.CharField(blank=True, default='', max_length=8)),
                 ('club_plaats', models.CharField(blank=True, default='', max_length=50)),
             ],

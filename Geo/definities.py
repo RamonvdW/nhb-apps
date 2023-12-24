@@ -14,5 +14,7 @@ CLUSTER_GEBRUIK2STR = {
     '25': '25m 1pijl'
 }
 
+ADMINISTRATIEVE_REGIO = 100
+
 
 # end of file
