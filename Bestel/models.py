@@ -98,6 +98,9 @@ class BestelMandje(models.Model):
     # het af te rekenen totaalbedrag
     totaal_euro = models.DecimalField(max_digits=7, decimal_places=2, default=Decimal(0))           # max 99999,99
 
+    # maximaal 1x per dag mag een e-mail herinnering verstuurd worden als er nog producten in het mandje liggen
+    vorige_herinnering = models.DateField(default='2000-01-01')
+
     def bepaal_totaalprijs_opnieuw(self):
         """ Bepaal het totaal_euro veld opnieuw, gebaseerd op alles wat in het mandje ligt
 
