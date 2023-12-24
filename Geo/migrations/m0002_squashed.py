@@ -52,6 +52,7 @@ def init_regios(apps, _):
     regio = regio_klas(
                 regio_nr=100,
                 rayon=rayons[1],
+                rayon_nr=rayons[1].rayon_nr,
                 naam="Regio 100",
                 is_administratief=True)
     bulk.append(regio)
@@ -66,7 +67,8 @@ def init_regios(apps, _):
             regio = regio_klas(
                         regio_nr=regio_nr,
                         naam="Regio %s" % regio_nr,
-                        rayon=rayon)
+                        rayon=rayon,
+                        rayon_nr=rayon.rayon_nr)
             bulk.append(regio)
             regio_nr += 1
         # for
