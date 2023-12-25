@@ -13,7 +13,7 @@ from django.core.management.base import BaseCommand
 from django.core.validators import URLValidator
 from django.core.exceptions import ValidationError
 from Account.models import Account
-from BasisTypen.definities import SCHEIDS_NIET, SCHEIDS_BOND, SCHEIDS_VERENIGING, SCHEIDS_INTERNATIONAAL
+from BasisTypen.definities import SCHEIDS_NIET
 from Functie.models import Functie
 from Functie.operations import maak_account_vereniging_secretaris
 from Functie.tests.helpers import maak_functie
@@ -22,6 +22,7 @@ from Locatie.definities import BAAN_TYPE_BUITEN, BAAN_TYPE_EXTERN
 from Locatie.models import Locatie
 from Logboek.models import schrijf_in_logboek
 from Mailer.operations import mailer_email_is_valide, mailer_notify_internal_error
+from Opleidingen.definities import CODE_SR_VER, CODE_SR_BOND, CODE_SR_INTERNATIONAAL, CODE2SCHEIDS
 from Opleidingen.models import OpleidingDiploma
 from Overig.helpers import maak_unaccented
 from Records.models import IndivRecord
@@ -59,16 +60,6 @@ EXPECTED_MEMBER_KEYS = ('club_number', 'member_number', 'name', 'prefix', 'first
                         'iso_abbr', 'latitude', 'longitude', 'blocked', 'wa_id', 'date_of_death')
 OPTIONAL_MEMBER_KEYS = ('skill_levels', 'educations')
 SKIP_VER_NR = (settings.EXTERN_VER_NR,)
-
-CODE_SR_VER = '040'
-CODE_SR_BOND = '041'
-CODE_SR_INTERNATIONAAL = '042'
-
-CODE2SCHEIDS = {
-    CODE_SR_VER: SCHEIDS_VERENIGING,
-    CODE_SR_BOND: SCHEIDS_BOND,
-    CODE_SR_INTERNATIONAAL: SCHEIDS_INTERNATIONAAL
-}
 
 
 class Command(BaseCommand):
@@ -524,7 +515,7 @@ class Command(BaseCommand):
                 # correcte situatie
                 if len(ver_bic) not in (8, 11):
                     self.stderr.write(
-                        '[ERROR] Vereniging %s heeft BIC %s met foute length %s (verwacht: 8 of 11) horende bij IBAN %s' % (
+                        '[ERROR] Vereniging %s heeft BIC %s met foute lengte %s (niet 8 of 11) horende bij IBAN %s' % (
                             ver_nr, repr(ver_bic), len(ver_bic), repr(ver_iban)))
                     self._count_errors += 1
                     ver_bic = None
@@ -1088,7 +1079,8 @@ class Command(BaseCommand):
                 postcode = postcode.upper()     # sommige postcodes zijn kleine letters
                 pos = postadres.find(postcode)
                 if pos < 0:
-                    self.stderr.write('[ERROR] Postcode %s niet gevonden in adres %s' % (repr(postcode), repr(postadres)))
+                    self.stderr.write('[ERROR] Postcode %s niet gevonden in adres %s' % (repr(postcode),
+                                                                                         repr(postadres)))
                     self._count_errors += 1
                 else:
                     # typisch: "Straatnaam 123\n1234 ZZ  Plaats\n"
@@ -1350,10 +1342,13 @@ class Command(BaseCommand):
                         self._count_wijzigingen += 1
 
                     if obj.postadres_1 != lid_postadres[0] or obj.postadres_2 != lid_postadres[1] or obj.postadres_3 != lid_postadres[2]:
-                        self.stdout.write('[INFO] Lid %s: postadres_1 %s --> %s' % (lid_nr, repr(obj.postadres_1), repr(lid_postadres[0])))
-                        self.stdout.write('[INFO] Lid %s: postadres_2 %s --> %s' % (lid_nr, repr(obj.postadres_2), repr(lid_postadres[1])))
+                        self.stdout.write('[INFO] Lid %s: postadres_1 %s --> %s' % (
+                                            lid_nr, repr(obj.postadres_1), repr(lid_postadres[0])))
+                        self.stdout.write('[INFO] Lid %s: postadres_2 %s --> %s' % (
+                                            lid_nr, repr(obj.postadres_2), repr(lid_postadres[1])))
                         if obj.postadres_3 != lid_postadres[2]:     # voorkomt vele '' --> ''
-                            self.stdout.write('[INFO] Lid %s: postadres_3 %s --> %s' % (lid_nr, repr(obj.postadres_3), repr(lid_postadres[2])))
+                            self.stdout.write('[INFO] Lid %s: postadres_3 %s --> %s' % (
+                                            lid_nr, repr(obj.postadres_3), repr(lid_postadres[2])))
                         obj.postadres_1 = lid_postadres[0]
                         obj.postadres_2 = lid_postadres[1]
                         obj.postadres_3 = lid_postadres[2]
