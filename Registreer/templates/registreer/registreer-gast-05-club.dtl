@@ -34,12 +34,12 @@
 
                     <div class="input-field">
                         <label for="id_club">Naam van de club:</label>
-                        <input id="id_club" class="with-gap" type="text" name="club" value="{{ club }}" required autofocus>
+                        <input id="id_club" type="text" name="club" value="{{ club }}" required autofocus>
                     </div>
 
                     <div class="input-field">
                         <label for="id_plaats">Plaats:</label>
-                        <input id="id_plaats" class="with-gap" type="text" name="plaats" value="{{ plaats }}" required>
+                        <input id="id_plaats" type="text" name="plaats" value="{{ plaats }}" required>
                     </div>
 
                     <p class="center">

@@ -37,13 +37,13 @@
                     {% if moet_oude_ww_weten %}
                         <div class="input-field">
                             <label for="id_huidige">Huidige wachtwoord:</label>
-                            <input class="with-gap" type="password" autofocus name="huidige" value="" required id="id_huidige" autocomplete="current-password">
+                            <input type="password" autofocus name="huidige" value="" required id="id_huidige" autocomplete="current-password">
                         </div>
                     {% endif %}
 
                     <div class="input-field">
                         <label for="id_nieuwe">Nieuwe wachtwoord:</label>
-                        <input class="with-gap" type="password" name="nieuwe" value="" required id="id_nieuwe" autocomplete="new-password"{% if not moet_oude_ww_weten %} autofocus{% endif %}>
+                        <input type="password" name="nieuwe" value="" required id="id_nieuwe" autocomplete="new-password"{% if not moet_oude_ww_weten %} autofocus{% endif %}>
                     </div>
 
                     <p class="center">

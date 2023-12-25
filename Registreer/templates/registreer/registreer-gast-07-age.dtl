@@ -35,17 +35,17 @@
 
                     <div class="input-field">
                         <label for="id_jaar">Geboortejaar:</label>
-                        <input id="id_jaar" class="with-gap" type="number" name="jaar" value="{{ jaar }}" placeholder="1997" required autofocus>
+                        <input id="id_jaar" type="number" name="jaar" value="{{ jaar }}" placeholder="1997" required autofocus>
                     </div>
 
                     <div class="input-field">
                         <label for="id_maand">Geboortemaand (nummer):</label>
-                        <input id="id_maand" class="with-gap" type="number" name="maand" value="{{ maand }}" placeholder="1" required>
+                        <input id="id_maand" type="number" name="maand" value="{{ maand }}" placeholder="1" required>
                     </div>
 
                     <div class="input-field">
                         <label for="id_dag">Geboortedag:</label>
-                        <input id="id_dag" class="with-gap" type="number" name="dag" placeholder="28" value="{{ dag }}" required>
+                        <input id="id_dag" type="number" name="dag" placeholder="28" value="{{ dag }}" required>
                     </div>
 
                     <p class="center">

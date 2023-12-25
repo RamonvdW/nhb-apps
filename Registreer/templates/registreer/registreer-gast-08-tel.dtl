@@ -34,7 +34,7 @@
 
                     <div class="input-field">
                         <label for="id_tel">Telefoonnummer (internationaal):</label>
-                        <input id="id_tel" class="with-gap" type="tel" name="tel" value="{{ tel }}" placeholder="+32 112 2334455" required>
+                        <input id="id_tel" type="tel" name="tel" value="{{ tel }}" placeholder="+32 112 2334455" required>
                     </div>
 
                     <p class="center">

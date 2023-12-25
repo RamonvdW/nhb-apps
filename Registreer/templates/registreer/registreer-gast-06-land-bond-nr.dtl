@@ -35,17 +35,17 @@
 
                     <div class="input-field">
                         <label for="id_nieuwe">Naam van de nationale federatie:</label>
-                        <input id="id_nieuwe" class="with-gap" type="text" name="bond" value="{{ bond }}" required autofocus>
+                        <input id="id_nieuwe" type="text" name="bond" value="{{ bond }}" required autofocus>
                     </div>
 
                     <div class="input-field">
                         <label for="id_land">In land:</label>
-                        <input id="id_land" class="with-gap" type="text" name="land" value="{{ land }}" required>
+                        <input id="id_land" type="text" name="land" value="{{ land }}" required>
                     </div>
 
                     <div class="input-field">
                         <label for="id_lid_nr">Jouw nummer van lidmaatschap:</label>
-                        <input id="id_lid_nr" class="with-gap" type="text" name="lid_nr" value="{{ lid_nr }}" required>
+                        <input id="id_lid_nr" type="text" name="lid_nr" value="{{ lid_nr }}" required>
                     </div>
 
                     <p class="center">

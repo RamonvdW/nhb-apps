@@ -36,7 +36,7 @@
 
                     <div class="input-field">
                         <label for="id_pass">Kies je wachtwoord:</label>
-                        <input id="id_pass" class="with-gap" type="password" name="pass" value="" required autocomplete="new-password" autofocus>
+                        <input id="id_pass" type="password" name="pass" value="" required autocomplete="new-password" autofocus>
                     </div>
 
                     <p class="center">

@@ -34,7 +34,7 @@
 
                     <div class="input-field">
                         <label for="id_wa_id">World Archery ID:</label>
-                        <input id="id_wa_id" class="with-gap" type="text" name="wa_id" value="{{ wa_id }}" autofocus>
+                        <input id="id_wa_id" type="text" name="wa_id" value="{{ wa_id }}" autofocus>
                     </div>
 
                     <p class="center">
