@@ -63,9 +63,11 @@ class WedstrijdDagScheidsrechtersAdmin(admin.ModelAdmin):
 class ScheidsBeschikbaarheidAdmin(admin.ModelAdmin):
 
     fieldsets = (
-        ('', {'fields': ('scheids', 'wedstrijd', 'datum', 'opgaaf', 'log')},),
+        ('', {'fields': ('scheids', 'wedstrijd', 'datum', 'opgaaf', 'opmerking', 'log')},),
     )
     readonly_fields = ('scheids', 'wedstrijd', 'datum')
+
+    search_fields = ('scheids__voornaam', 'scheids__achternaam')
 
 
 admin.site.register(ScheidsBeschikbaarheid, ScheidsBeschikbaarheidAdmin)

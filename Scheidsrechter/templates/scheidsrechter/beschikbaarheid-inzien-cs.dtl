@@ -25,39 +25,30 @@
             <div class="white left-align z-depth-3" style="margin-top:30px">
                 <div class="form-padding">
                     <table>
-                        <thead>
-                            <tr>
-                                <th>Datum</th>
-                                <th>Wedstrijd</th>
-                                <th class="hide-on-small-only center">Nodig</th>
-                                <th>Naam</th>
-                                <th>Beschikbaarheid</th>
-                            </tr>
-                        </thead>
-
                         {% for dag in dagen %}
                             <tr>
-                                <td>{{ dag.datum }}</td>
-
-                                <td>{{ dag.wedstrijd.titel }}<br>{{ dag.wedstrijd.locatie.plaats }}</td>
-
-                                <td class="hide-on-small-only center">{{ dag.wedstrijd.aantal_scheids }}</td>
-
-                                <td>
-                                    {% for code, naam, beschikbaar, is_hsr, is_sr, is_probleem in dag.beschikbaar %}
-                                        <span{% if is_hsr or is_sr %} class="sv-blauw-text"{% endif %}>{% if is_hsr %}<b>{{ naam }}</b>{% else %}{{ naam }}{% endif %}</span>
-                                        <br>
-                                    {% endfor %}
-                                </td>
-
-                                <td>
-                                    {% for code, naam, beschikbaar, is_hsr, is_sr, is_probleem in dag.beschikbaar %}
-                                        <span{% if is_probleem %} class="sv-rood-text"{% endif %}>{{ beschikbaar }}</span><br>
-                                    {% endfor %}
-                                </td>
+                                <td colspan="4" class="center">
+                                    <h6 class="sv-blauw-text">{{ dag.wedstrijd.titel }}</h6>
+                                    <h6>{{ dag.datum }}</h6>
+                                    <p>Aantal scheidsrechters nodig: {{ dag.wedstrijd.aantal_scheids }}</p></td>
                             </tr>
-                        {% endfor %}
 
+                            <tr>
+                                <th>Naam</th>
+                                <th class="center">Niveau</th>
+                                <th class="center">Beschikbaarheid</th>
+                                <th>Notities</th>
+                            </tr>
+
+                            {% for code, niveau, naam, beschikbaar, opmerking, is_hsr, is_sr, is_probleem in dag.beschikbaar %}
+                                <tr{% if is_probleem %} class="sv-rood-text"{% endif %}>
+                                    <td {% if is_hsr or is_sr %} class="sv-blauw-text"{% endif %}>{% if is_hsr %}<b>{{ naam }}</b>{% else %}{{ naam }}{% endif %}</td>
+                                    <td class="center{% if is_hsr or is_sr %} sv-blauw-text{% endif %}">{{ niveau }}</td>
+                                    <td class="center">{{ beschikbaar }}</td>
+                                    <td>{{ opmerking }}</td>
+                                </tr>
+                            {% endfor %}
+                        {% endfor %}
                     </table>
                 </div>
             </div>

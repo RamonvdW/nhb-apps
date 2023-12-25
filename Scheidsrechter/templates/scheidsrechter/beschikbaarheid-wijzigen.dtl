@@ -26,6 +26,7 @@
             let el3 = document.getElementById(groep + '-nee');
             let el4 = document.getElementById(groep + '-gekozen');
             let el5 = document.getElementById(groep);
+            let el6 = document.getElementById(groep + '-toon-note')
 
             el5.value = keuze;
 
@@ -39,16 +40,28 @@
             if (keuze === 1) {
                 el1.classList.add('keuze-ja');
                 el4.innerHTML = "Ja, ik kan";
-                el4.classList.remove('sv-rood-text')
+                el4.classList.remove('sv-rood-text');
+                el6.classList.add('hide');
             } else if (keuze === 2) {
                 el2.classList.add('keuze-mss');
                 el4.innerHTML = "Nog niet zeker";
-                el4.classList.remove('sv-rood-text')
+                el4.classList.remove('sv-rood-text');
+                el6.classList.remove('hide');
             } else if (keuze === 3) {
                 el3.classList.add('keuze-nee');
                 el4.innerHTML = "Niet beschikbaar";
-                el4.classList.remove('sv-rood-text')
+                el4.classList.remove('sv-rood-text');
+                el6.classList.remove('hide');
             }
+        }
+
+        function wijzig_notitie(groep) {
+            let el1 = document.getElementById(groep + '-note-in');
+            let el2 = document.getElementById(groep + '-note-uit');
+            el2.value = el1.value
+
+            // enable de 'opslaan' knop
+            el_opslaan.disabled = false;
         }
     </script>
 
@@ -62,12 +75,8 @@
                         <thead>
                             <tr>
                                 <th>Datum</th>
-                                <th>Wedstrijd</th>
-                                {% comment %}<th class="center hide-on-small-only"><!-- knop --></th> {% endcomment %}
-                                <th class="center hide-on-small-only">Jouw reistijd</th>
-                                <th class="center hide-on-med-and-down">Scheidsrechters</th>
+                                <th>Details</th>
                                 <th class="center">Maak je keuze</th>
-                                <th class="center hide-on-small-only">Jouw beschikbaarheid</th>
                             </tr>
                         </thead>
 
@@ -75,17 +84,19 @@
                             <tr>
                                 <td>{{ dag.datum|date:'l' }}<br>{{ dag.datum }}</td>
 
-                                <td>{{ dag.wedstrijd.titel }}<br>{{ dag.wedstrijd.locatie.plaats }}{% if dag.reistijd %}<span class="hide-on-med-and-up"><br>{{ dag.reistijd }} minuten</span>{% endif %}</td>
-
-                                {% comment %}
-                                <td class="center hide-on-small-only">
-                                    <a class="btn-sv-rood" href="{{ dag.url_details }}">Details</a>
+                                <td>
+                                    <b>Wedstrijd</b>: {{ dag.wedstrijd.titel }}<br>
+                                    <b>Plaats</b>: {{ dag.wedstrijd.locatie.plaats }}<br>
+                                    <b>Aantal SR nodig</b>: {{ dag.wedstrijd.aantal_scheids }}<br>
+                                    {% if dag.reistijd %}
+                                        <b>Reistijd</b>: {{ dag.reistijd }} minuten<br>
+                                    {% endif %}
+                                    <b>Beschikbaarheid</b>: <span class="sv-rood-text" id="{{ dag.id }}-gekozen">Nog geen keuze gemaakt</span>
+                                    <br>
+                                    <div id="{{ dag.id }}-toon-note" class="hide">
+                                        <input type="text" id="{{ dag.id }}-note-in" name="{{ dag.id }}-note" maxlength="100" value="{{ dag.opmerking }}" placeholder="Kort bericht aan de commissie (optioneel)" oninput="wijzig_notitie('{{ dag.id }}')">
+                                    </div>
                                 </td>
-                                {% endcomment %}
-
-                                <td class="center hide-on-small-only">{% if dag.reistijd %}{{ dag.reistijd }} minuten{% else %}<i>Nog niet bepaald</i>{% endif %}</td>
-
-                                <td class="center hide-on-med-and-down">{{ dag.wedstrijd.aantal_scheids }}</td>
 
                                 <td class="center">
                                     <button type="button" class="btn-sv-keuze" id="{{ dag.id }}-ja" onclick="wijzig('{{ dag.id }}', 1)">
@@ -100,8 +111,6 @@
                                         <i class="material-icons-round notranslate">close</i>
                                     </button>
                                 </td>
-
-                                <td class="center sv-rood-text hide-on-small-only" id="{{ dag.id }}-gekozen">Nog geen keuze</td>
                             </tr>
                         {% empty %}
                             <tr>
@@ -119,6 +128,7 @@
                         {% csrf_token %}
                         {% for dag in dagen %}
                             <input type="hidden" id="{{ dag.id }}" name="{{ dag.name }}" value="{{ dag.keuze }}">
+                            <input type="hidden" id="{{ dag.id }}-note-uit" name="{{ dag.name }}-opmerking" value="{{ dag.opmerking }}">
                         {% endfor %}
 
                         <div class="center" style="margin-top:30px">

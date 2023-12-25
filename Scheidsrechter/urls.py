@@ -21,11 +21,11 @@ urlpatterns = [
          name='korps'),
 
     path('korps-met-contactgegevens/',
-         view_korps.KorpsMetContactgegevensView.as_view(),
+         view_korps.KorpsCSView.as_view(),
          name='korps-met-contactgegevens'),
 
     path('korps-emailadressen/',
-         view_korps.KorpsEmailadressenView.as_view(),
+         view_korps.KorpsCSAlleEmailsView.as_view(),
          name='korps-emails'),
 
     path('wedstrijden/',

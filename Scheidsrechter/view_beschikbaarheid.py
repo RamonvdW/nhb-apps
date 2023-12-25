@@ -150,6 +150,7 @@ class WijzigBeschikbaarheidView(UserPassesTestMixin, TemplateView):
         # for
 
         keuzes = dict()     # [datum] = keuze
+        opmerking = dict()  # [datum] = opmerking
         for keuze in ScheidsBeschikbaarheid.objects.filter(datum__in=datums, scheids=self.sporter):
             datum = keuze.datum
             if keuze.opgaaf == BESCHIKBAAR_JA:
@@ -160,6 +161,7 @@ class WijzigBeschikbaarheidView(UserPassesTestMixin, TemplateView):
                 keuzes[datum] = 3
             else:
                 keuzes[datum] = 0
+            opmerking[datum] = keuze.opmerking
         # for
 
         context['dagen'] = dagen
@@ -167,10 +169,13 @@ class WijzigBeschikbaarheidView(UserPassesTestMixin, TemplateView):
             dag.datum = dag.wedstrijd.datum_begin + datetime.timedelta(days=dag.dag_offset)
             dag.id = "dag-%s" % dag.pk
             dag.name = 'wedstrijd_%s_dag_%s' % (dag.wedstrijd.pk, dag.dag_offset)
+            dag.keuze = 0
+            dag.opmerking = ''
             try:
                 dag.keuze = keuzes[dag.datum]
+                dag.opmerking = opmerking[dag.datum]
             except KeyError:
-                dag.keuze = 0
+                pass
         # for
 
         context['url_opslaan'] = reverse('Scheidsrechter:beschikbaarheid-wijzigen')
@@ -230,7 +235,8 @@ class WijzigBeschikbaarheidView(UserPassesTestMixin, TemplateView):
 
         for dag in dagen:
             name = 'wedstrijd_%s_dag_%s' % (dag.wedstrijd.pk, dag.dag_offset)
-            keuze = request.POST.get(name, '')[:6]      # afkappen voor de veiligheid
+            keuze = request.POST.get(name, '')[:6]                       # afkappen voor de veiligheid
+            opmerking = request.POST.get(name + '-opmerking', '')[:100]  # afkappen voor de veiligheid
 
             if keuze in ('1', '2', '3'):
                 try:
@@ -241,6 +247,8 @@ class WijzigBeschikbaarheidView(UserPassesTestMixin, TemplateView):
                                         scheids=self.sporter,
                                         wedstrijd=dag.wedstrijd,
                                         datum=dag.datum)
+
+                do_save = False
 
                 if keuze == '1':
                     opgaaf = BESCHIKBAAR_JA
@@ -254,6 +262,14 @@ class WijzigBeschikbaarheidView(UserPassesTestMixin, TemplateView):
                                                                     BESCHIKBAAR2STR[beschikbaar.opgaaf],
                                                                     BESCHIKBAAR2STR[opgaaf])
                     beschikbaar.opgaaf = opgaaf
+                    do_save = True
+
+                if opmerking != beschikbaar.opmerking:
+                    beschikbaar.log += '[%s] Notitie: %s\n' % (when_str, opmerking)
+                    beschikbaar.opmerking = opmerking
+                    do_save = True
+
+                if do_save:
                     beschikbaar.save()
         # for
 
@@ -338,11 +354,18 @@ class BeschikbaarheidInzienCSView(UserPassesTestMixin, TemplateView):
 
                 is_probleem = (is_hsr or is_sr) and keuze.opgaaf != BESCHIKBAAR_JA
 
+                # opmerking niet meer tonen als keuze Ja is
+                # (opmerking blijft behouden in de database)
+                if keuze.opgaaf == BESCHIKBAAR_JA:
+                    keuze.opmerking = ''
+
                 tup = (not is_hsr,
                        not is_sr,
                        opgaaf2order[keuze.opgaaf],
-                       "%s: %s" % (SCHEIDS2LEVEL[keuze.scheids.scheids], keuze.scheids.volledige_naam()),
+                       SCHEIDS2LEVEL[keuze.scheids.scheids],
+                       keuze.scheids.volledige_naam(),
                        BESCHIKBAAR2STR[keuze.opgaaf],
+                       keuze.opmerking,
                        is_hsr,
                        is_sr,
                        is_probleem)
@@ -352,6 +375,7 @@ class BeschikbaarheidInzienCSView(UserPassesTestMixin, TemplateView):
 
             dag.beschikbaar.sort()   # sorteer op opgaaf, dan op naam
             dag.beschikbaar = [tup[2:] for tup in dag.beschikbaar]
+            dag.aantal = len(dag.beschikbaar)
         # for
 
         context['kruimels'] = (
