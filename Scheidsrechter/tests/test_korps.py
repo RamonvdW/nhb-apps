@@ -7,9 +7,11 @@
 from django.test import TestCase
 from BasisTypen.definities import SCHEIDS_NIET, SCHEIDS_BOND, SCHEIDS_INTERNATIONAAL
 from Functie.models import Functie
+from Opleidingen.definities import CODE_SR_BOND
+from Opleidingen.models import OpleidingDiploma
+from Sporter.models import Sporter, SporterVoorkeuren
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
-from Sporter.models import Sporter, SporterVoorkeuren
 
 
 class TestScheidsrechterKorps(E2EHelpers, TestCase):
@@ -41,6 +43,11 @@ class TestScheidsrechterKorps(E2EHelpers, TestCase):
     def setUp(self):
         """ initialisatie van de test case """
         self.assertIsNotNone(self.scheids_met_account)
+        OpleidingDiploma(
+                sporter=self.scheids_met_account,
+                code=CODE_SR_BOND,
+                beschrijving='test',
+                datum_begin='1990-01-01').save()
         self.functie_cs = Functie.objects.get(rol='CS')
         self.voorkeuren = SporterVoorkeuren.objects.get(sporter=self.scheids_met_account)
 
