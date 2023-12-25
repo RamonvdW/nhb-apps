@@ -748,10 +748,10 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         self.assertTrue("[ERROR] Kan vereniging 'y' voor lid 100024 niet vinden" in f1.getvalue())
         self.assertTrue("[ERROR] Foutief bondsnummer: ggg (geen getal)" in f1.getvalue())
         self.assertTrue("[WARNING] Kan speelsterkte volgorde niet vaststellen voor" in f2.getvalue())
-        self.assertTrue("[ERROR] Vereniging 1001 heeft BIC '1234' met foute length 4 (verwacht: 8 of 11) horende bij IBAN '1234'" in f1.getvalue())
-        self.assertTrue("[ERROR] Vereniging 1001 heeft IBAN '1234' met foute length 4 (verwacht: 18)" in f1.getvalue())
-        # self.assertTrue("[ERROR] Vereniging 1042 heeft BIC 'fout lengte' met foute length 12 (verwacht: 8 of 11) horende bij IBAN 'Wat een grap'" in f1.getvalue())
-        self.assertTrue("[ERROR] Vereniging 1042 heeft IBAN 'Wat een grap' met foute length 12 (verwacht: 18)" in f1.getvalue())
+        self.assertTrue("[ERROR] Vereniging 1001 heeft BIC '1234' met foute lengte 4 (niet 8 of 11) horende bij IBAN '1234'" in f1.getvalue())
+        self.assertTrue("[ERROR] Vereniging 1001 heeft IBAN '1234' met foute lengte 4 (niet 18)" in f1.getvalue())
+        # self.assertTrue("[ERROR] Vereniging 1042 heeft BIC 'fout lengte' met foute lengte 12 (niet 8 of 11) horende bij IBAN 'Wat een grap'" in f1.getvalue())
+        self.assertTrue("[ERROR] Vereniging 1042 heeft IBAN 'Wat een grap' met foute lengte 12 (niet 18)" in f1.getvalue())
 
     def test_speelsterkte(self):
         # controleer dat de import tegen niet-nummers kan
@@ -771,7 +771,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         self.assertTrue("[WARNING] Vereniging 1042 heeft een BIC zonder IBAN: 'ABNANL2A', None" in f2.getvalue())
         self.assertTrue("[WARNING] Vereniging 1000 heeft een onbekende BIC code 'HUH2HUH2' horende bij IBAN 'NL91ABNA0417164300'" in f2.getvalue())
         self.assertTrue("ERROR] Vereniging 1043 heeft een foutieve IBAN: 'NL91ABNA0417164309'" in f1.getvalue())
-        self.assertTrue("[ERROR] Vereniging 1044 heeft IBAN 'NL91ABNA0TEKORT' met foute length 15 (verwacht: 18)" in f1.getvalue())
+        self.assertTrue("[ERROR] Vereniging 1044 heeft IBAN 'NL91ABNA0TEKORT' met foute lengte 15 (niet 18)" in f1.getvalue())
 
     def test_crash(self):
         self.assertEqual(0, MailQueue.objects.count())

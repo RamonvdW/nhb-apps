@@ -521,7 +521,7 @@ class Command(BaseCommand):
                     ver_bic = None
 
                 if len(ver_iban) != 18:
-                    self.stderr.write('[ERROR] Vereniging %s heeft IBAN %s met foute length %s (verwacht: 18)' % (
+                    self.stderr.write('[ERROR] Vereniging %s heeft IBAN %s met foute lengte %s (niet 18)' % (
                                         ver_nr, repr(ver_iban), len(ver_iban)))
                     self._count_errors += 1
                     ver_bic = None
