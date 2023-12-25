@@ -4,7 +4,7 @@ select:focus {
 }
 
 button:focus {
-  outline: 2px solid black;
+  outline: 2px solid black;   // keep in sync with btn:focus in _buttons.scss and btn-sv-keuze:focus in sv-post.scss
 }
 
 // note: do not use the same focus effects as for hover --> it is confusing because focus sticks after click!

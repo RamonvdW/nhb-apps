@@ -561,8 +561,7 @@ input.table-filter {
     @extend .z-depth-1-half;
   }
   &:focus {
-    outline: none;        // prevent border (see _forms.scss) after clicking non-navigating button
-    //outline: $select-focus;   // soft version, same as for drop-down menu button in navbar, but effect is weird
+    outline: 2px solid black;   // // keep in sync with button:focus in _forms.scss and btn:focus in _buttons.scss
   }
 
   margin: 2px;    // voorkom dat de knoppen aan elkaar plakken (horizontaal of verticaal)
