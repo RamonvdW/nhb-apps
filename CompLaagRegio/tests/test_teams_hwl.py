@@ -29,7 +29,7 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
 
     """ tests voor de CompLaagRegio applicatie, Teams functies voor de HWL """
 
-    test_after = ('BasisTypen', 'NhbStructuur', 'Functie', 'Sporter', 'Competitie')
+    test_after = ('BasisTypen', 'ImportCRM', 'Functie', 'Sporter', 'Competitie')
 
     url_koppelen = '/bondscompetities/regio/teams-vereniging/koppelen/%s/'                      # team_pk
     url_maak_team = '/bondscompetities/regio/teams-vereniging/%s/'                              # deelcomp_pk

@@ -24,7 +24,7 @@ class TestCompScoresWedstrijden(E2EHelpers, TestCase):
 
     """ tests voor de CompScores applicatie, functies voor Wedstrijden """
 
-    test_after = ('BasisTypen', 'NhbStructuur', 'Functie', 'Sporter', 'Competitie')
+    test_after = ('BasisTypen', 'ImportCRM', 'Functie', 'Sporter', 'Competitie')
 
     url_scores = '/bondscompetities/scores/bij-de-vereniging/'
     url_wedstrijden = '/bondscompetities/scores/wedstrijden-bij-de-vereniging/'

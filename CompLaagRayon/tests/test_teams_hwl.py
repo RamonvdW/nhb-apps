@@ -27,7 +27,7 @@ class TestCompLaagRayonVerenigingTeams(E2EHelpers, TestCase):
 
     """ Tests voor de CompLaagRayon applicatie, functies voor de HWL """
 
-    test_after = ('BasisTypen', 'NhbStructuur', 'Functie', 'Sporter', 'Competitie')
+    test_after = ('BasisTypen', 'ImportCRM', 'Functie', 'Sporter', 'Competitie')
 
     url_rk_teams = '/bondscompetities/rk/teams-vereniging/%s/'                      # deelcomp_rk_pk
     url_rk_teams_nieuw = '/bondscompetities/rk/teams-vereniging/%s/nieuw/'          # deelcomp_rk_pk

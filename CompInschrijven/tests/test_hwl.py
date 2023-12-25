@@ -30,7 +30,7 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
 
     """ tests voor de CompInschrijven applicatie, functies voor de HWL """
 
-    test_after = ('BasisTypen', 'NhbStructuur', 'Functie', 'Sporter', 'Competitie')
+    test_after = ('BasisTypen', 'ImportCRM', 'Functie', 'Sporter', 'Competitie')
 
     url_aanmelden = '/bondscompetities/deelnemen/leden-aanmelden/%s/'               # comp_pk
     url_ingeschreven = '/bondscompetities/deelnemen/leden-ingeschreven/%s/'         # deelcomp_pk

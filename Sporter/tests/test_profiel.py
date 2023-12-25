@@ -43,7 +43,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
 
     """ tests voor de Sporter applicatie, module Profiel """
 
-    test_after = ('NhbStructuur', 'HistComp', 'Competitie', 'Functie')
+    test_after = ('ImportCRM', 'HistComp', 'Competitie', 'Functie')
 
     url_profiel = '/sporter/'
     url_voorkeuren = '/sporter/voorkeuren/'

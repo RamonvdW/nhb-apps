@@ -22,7 +22,7 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
 
     """ tests voor de Vereniging applicatie, functie Accommodaties """
 
-    test_after = ('BasisTypen', 'NhbStructuur', 'Functie')
+    test_after = ('BasisTypen', 'ImportCRM', 'Functie')
 
     url_externe_locaties = '/vereniging/locatie/%s/extern/'               # ver_nr
     url_externe_locatie_details = '/vereniging/locatie/%s/extern/%s/'     # ver_nr, locatie_pk

@@ -28,7 +28,7 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
 
     """ tests voor de CompInschrijven applicatie; module Aanmelden/Afmelden sporter """
 
-    test_after = ('Account', 'NhbStructuur', 'Competitie')
+    test_after = ('Account', 'ImportCRM', 'Competitie')
 
     url_profiel = '/sporter/'
     url_voorkeuren = '/sporter/voorkeuren/'

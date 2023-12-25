@@ -28,7 +28,7 @@ class TestRegistreerBeheer(E2EHelpers, TestCase):
 
     """ tests voor de Vereniging applicatie, module gast-accounts """
 
-    test_after = ('BasisTypen', 'NhbStructuur', 'Functie', 'Sporter', 'Competitie')
+    test_after = ('BasisTypen', 'ImportCRM', 'Functie', 'Sporter', 'Competitie')
 
     url_gast_accounts = '/account/registreer/beheer-gast-accounts/'
     url_gast_details = '/account/registreer/beheer-gast-accounts/%s/details/'   # lid_nr

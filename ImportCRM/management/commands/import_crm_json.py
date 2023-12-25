@@ -35,7 +35,7 @@ import logging
 import json
 import sys
 
-my_logger = logging.getLogger('NHBApps.NhbStructuur')
+my_logger = logging.getLogger('NHBApps.ImportCRM')
 
 
 def get_vereniging_str(ver):
@@ -95,8 +95,8 @@ class Command(BaseCommand):
         self.dryrun = False
 
         self._cache_account = dict()    # [username] = Account()
-        self._cache_rayon = dict()      # [rayon_nr] = NhbRayon()
-        self._cache_regio = dict()      # [regio_nr] = NhbRegio()
+        self._cache_rayon = dict()      # [rayon_nr] = Rayon()
+        self._cache_regio = dict()      # [regio_nr] = Regio()
         self._cache_ver = dict()        # [ver_nr] = Vereniging()
         self._cache_sec = dict()        # [ver_nr] = Secretaris()
         self._cache_sporter = dict()    # [lid_nr] = Sporter()
@@ -1190,7 +1190,7 @@ class Command(BaseCommand):
                     # krimp de lijst zodat verwijderde leden over blijven
                     lid_nrs.remove(lid_nr)
                 except ValueError:          # pragma: no cover
-                    self.stderr.write("[ERROR] Unexpected: lid_nr %s onverwacht niet in lijst bestaande nhb nrs" % (
+                    self.stderr.write("[ERROR] Unexpected: lid_nr %s onverwacht niet in lijst bestaande nummers" % (
                                             repr(lid_nr)))
                     self._count_errors += 1
                 else:
@@ -1844,14 +1844,14 @@ class Command(BaseCommand):
             lst = traceback.format_tb(tups[2])
             tb = traceback.format_exception(*tups)
 
-            tb_msg_start = 'Unexpected error during import_nhb_crm\n'
+            tb_msg_start = 'Unexpected error during import_crm_json\n'
             tb_msg_start += '\n'
             tb_msg = tb_msg_start + '\n'.join(tb)
 
             # full traceback to syslog
             my_logger.error(tb_msg)
 
-            self.stderr.write('[ERROR] Onverwachte fout tijdens import_nhb_crm: ' + str(exc))
+            self.stderr.write('[ERROR] Onverwachte fout tijdens import_crm_json: ' + str(exc))
             self.stderr.write('Traceback:')
             self.stderr.write(''.join(lst))
 

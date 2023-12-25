@@ -89,11 +89,11 @@ then
     else
         echo "[INFO] Importing new data set" >> "$LOG"
 
-        # move from NhbStructuur/cron/ to top-dir
+        # move from ImportCRM/cron/ to top-dir
         cd ../..
 
         # -u = unbuffered --> needed to maintain the order of stdout and stderr lines
-        python3 -u ./manage.py import_nhb_crm "$SPOOLFILE" &>> "$LOG"
+        python3 -u ./manage.py import_crm_json "$SPOOLFILE" &>> "$LOG"
     fi
 
     echo "[INFO] Import finished" >> "$LOG"

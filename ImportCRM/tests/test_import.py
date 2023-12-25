@@ -25,11 +25,11 @@ import datetime
 import io
 
 
-IMPORT_COMMAND = 'import_nhb_crm'
+IMPORT_COMMAND = 'import_crm_json'
 OPTION_DRY_RUN = '--dryrun'
 OPTION_SIM = '--sim_now=2020-07-01'
 
-TESTFILES_PATH = './NhbStructuur/tests/testfiles/'
+TESTFILES_PATH = './ImportCRM/tests/testfiles/'
 
 TESTFILE_NOT_EXISTING = TESTFILES_PATH + 'notexisting.json'
 TESTFILE_01_EMPTY = TESTFILES_PATH + 'testfile_01.json'
@@ -57,9 +57,9 @@ TESTFILE_22_CRASH = TESTFILES_PATH + 'testfile_22.json'
 TESTFILE_23_DIPLOMA = TESTFILES_PATH + 'testfile_23.json'
 
 
-class TestNhbStructuurImport(E2EHelpers, TestCase):
+class TestImportCRMImport(E2EHelpers, TestCase):
 
-    """ tests voor de NhbStructuur applicatie, functie Import uit CRM """
+    """ tests voor de ImportCRM applicatie, management commando import_crm_json """
 
     def setUp(self):
         """ initialisatie van de test case """
@@ -125,7 +125,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         # print("f2: %s" % f2.getvalue())
         self.assertTrue("[WARNING] Vereniging 1000 (Grote Club) heeft geen secretaris!" in f2.getvalue())
         self.assertTrue("[ERROR] Kan secretaris 1 van vereniging 1001 niet vinden" in f1.getvalue())
-        self.assertTrue("[ERROR] Lid 100024 heeft geen valide e-mail (enige@nhb)" in f1.getvalue())
+        self.assertTrue("[ERROR] Lid 100024 heeft geen valide e-mail (enige@khsn)" in f1.getvalue())
         self.assertTrue("[INFO] Wijziging naam rayon 4: 'Rayon 4' --> 'Rayon 99'" in f2.getvalue())
         self.assertTrue("[INFO] Wijziging naam regio 101: 'Regio 101' --> 'Regio 99'" in f2.getvalue())
         self.assertTrue("[INFO] Lid 100001: naam Ramon de Tester --> Voornaam van der Achternaam" in f2.getvalue())
@@ -786,7 +786,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
                                   stdout=f2)
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
-        self.assertTrue("[ERROR] Onverwachte fout tijdens import_nhb_crm: crash test" in f1.getvalue())
+        self.assertTrue("[ERROR] Onverwachte fout tijdens import_crm_json: crash test" in f1.getvalue())
 
         self.assertEqual(1, MailQueue.objects.count())
 

@@ -24,7 +24,7 @@ class TestCompLaagRegioWieSchietWaar(E2EHelpers, TestCase):
 
     """ tests voor de CompLaagRegio applicatie, functies voor Wie schiet waar """
 
-    test_after = ('BasisTypen', 'NhbStructuur', 'Functie', 'Sporter', 'Competitie')
+    test_after = ('BasisTypen', 'ImportCRM', 'Functie', 'Sporter', 'Competitie')
 
     url_aanmelden = '/bondscompetities/deelnemen/leden-aanmelden/%s/'                      # comp.pk
     url_wieschietwaar = '/bondscompetities/regio/wie-schiet-waar/%s/'                      # deelcomp_pk
