@@ -21,8 +21,8 @@
     <!-- blauwe balk met informatie in een tabel -->
     <div class="row-sv-blauw">
         <div class="col s12">
-            <div class="white" style="padding:0 10px 0 10px">
-                <table class="white">
+            <div class="sv-kader" style="padding:0 10px 0 10px">
+                <table class="sv-kader">
                     {% for obj in object_list %}
                         <tr>
                             <td>
@@ -74,7 +74,7 @@
         </div>
 
         <div class="col s7 m5 xl3" style="margin-top:50px">
-            <table class="white">
+            <table class="sv-kader">
                 <tr>
                     <th>Aantal nog aanwezig:</th>
                     <td style="width:10%">{{ count_aanwezig }}</td>

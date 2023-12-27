@@ -26,7 +26,7 @@
     <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2 xl6 offset-xl3">
 
-            <table class="white">
+            <table class="sv-kader">
                 <tr>
                     <td colspan="2"><h5 class="sv-blauw-text center">Status</h5></td>
                 </tr>
@@ -135,11 +135,11 @@
         <!-- blauwe balk met informatie label : info -->
         <div class="row-sv-blauw">
             <div class="col s12 m10 offset-m1 l8 offset-l2 xl6 offset-xl3">
-                <table class="white">
+                <table class="sv-kader">
                     {% for match in sporter_matches %}
                         <tr><td>
 
-                            <table class="white">
+                            <table class="sv-kader">
                                 <tr>
                                     <th>Naam</th>
                                     <td><span{% if match.is_match_lid_nr %} class="green-text"{% endif %}>[{{ match.lid_nr }}]&nbsp;</span>
@@ -216,7 +216,7 @@
     <!-- blauwe balk met informatie label : info -->
     <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
-            <table class="white">
+            <table class="sv-kader">
                 <tr>
                     <th>Mandje</th>
                     <td>{% if gast_mandje %}{{ gast_mandje }}{% else %}<i>Geen</i>{% endif %}</td>

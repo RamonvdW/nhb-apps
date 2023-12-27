@@ -21,7 +21,7 @@
     <!-- blauwe balk met informatie label : info -->
     <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
-            <table class="white">
+            <table class="sv-kader">
                 <tr>
                     <th>Competitie</th>
                     <td>{{ deelkamp.competitie.beschrijving }}</td>
@@ -68,16 +68,16 @@
         <!-- blauwe balk met informatie in een tabel -->
         <div class="row-sv-blauw">
             <div class="col s12">
-                <table class="white">
+                <table class="sv-kader">
 
                     {% for deelnemer in deelnemers_indiv %}
                         {% if deelnemer.break_before %}
                             {% if not forloop.first %}
-                                <tr>
+                                <tr class="sv-table-onderrand">
                                     <td colspan="6" class="sv-table-onderrand" style="height:50px"></td>
                                 </tr>
                             {% endif %}
-                            <tr>
+                            <tr class="sv-table-sectie-header">
                                 <td colspan="6" class="center">
                                     <h5>{{ deelnemer.indiv_klasse.beschrijving }}</h5>
                                     <br>
@@ -138,7 +138,7 @@
         <!-- blauwe balk met informatie in een tabel -->
         <div class="row-sv-blauw">
             <div class="col s12">
-                <table class="white">
+                <table class="sv-kader">
 
                     {% if geen_klassengrenzen %}
                         <tr class="white">
@@ -151,11 +151,11 @@
                     {% for team in deelnemers_teams %}
                         {% if team.break_before %}
                             {% if not forloop.first %}
-                                <tr>
+                                <tr class="sv-table-onderrand">
                                     <td colspan="5" class="sv-table-onderrand" style="height:50px"></td>
                                 </tr>
                             {% endif %}
-                            <tr>
+                            <tr class="sv-table-sectie-header">
                                 <td colspan="5" class="center">
                                     <h5>{{ team.team_klasse.beschrijving }}</h5>
                                     <a class="btn-sv-rood" href="{{ team.url_download_teams }}">

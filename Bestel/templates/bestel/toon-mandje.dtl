@@ -78,10 +78,10 @@
             <div class="col s12 l10 offset-l1 xl8 offset-xl2">
 
                 <!-- dialoog venster -->
-                <div class="white left-align z-depth-3">
+                <div class="sv-kader left-align z-depth-3">
                     <div class="form-padding" style="padding-top:0">
 
-                        <table class="white">
+                        <table>
 
                             <tr><td colspan="4" class="center"><h6>Gekozen producten</h6></td></tr>
 
@@ -191,7 +191,7 @@
             <!-- blauw balk met wit informatie veld -->
             <div class="row-sv-blauw">
                 <div class="col s12 l10 offset-l1 xl8 offset-xl2">
-                    <div class="white" style="padding:10px">
+                    <div class="sv-kader" style="padding:10px">
 
                         {% if ophalen_ver %}
 

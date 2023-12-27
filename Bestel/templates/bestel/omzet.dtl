@@ -21,8 +21,8 @@
     <!-- blauwe balk met informatie label : info -->
     <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
-            <div class="white" style="padding:0 15px 0 15px">
-                <table class="white">
+            <div class="sv-kader" style="padding:0 15px 0 15px">
+                <table class="sv-kader">
                     <thead>
                         <tr>
                             <th>Periode</th>

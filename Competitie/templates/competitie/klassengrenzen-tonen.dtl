@@ -35,7 +35,7 @@
             </div>
         </div>
 
-        <table class="white">
+        <table class="sv-kader">
             <tr class="row-sv-blauw">
                 <td class="sv-table-zijrand" rowspan="{{ aantal_indiv_regels }}"></td>
                 <th>Materiaalklasse</th>
@@ -64,8 +64,8 @@
             {% endfor %}
 
             <!-- blauwe onderrand -->
-            <tr>
-                <td colspan="2"  class="sv-table-onderrand"></td>
+            <tr class="sv-table-onderrand">
+                <td colspan="2" class="sv-table-onderrand"></td>
                 {% if toon_aantal %}
                     <td  class="sv-table-onderrand"></td>
                 {% endif %}
@@ -83,7 +83,7 @@
             </div>
         </div>
 
-        <table class="white">
+        <table class="sv-kader">
             <tr class="row-sv-blauw">
                 <td class="sv-table-zijrand" rowspan="{{ aantal_team_regels }}"></td>
                 <th>Materiaalklasse</th>
@@ -114,7 +114,7 @@
             {% endfor %}
 
             <!-- blauwe onderrand -->
-            <tr>
+            <tr class="sv-table-onderrand">
                 <td colspan="2"  class="sv-table-onderrand"></td>
                 {% if toon_aantal %}
                     <td  class="sv-table-onderrand"></td>
@@ -136,7 +136,7 @@
             </div>
         </div>
 
-        <table class="white">
+        <table class="sv-kader">
             <tr class="row-sv-blauw">
                 <td class="sv-table-zijrand" rowspan="{{ aantal_team_rk_bk_regels }}"></td>
                 <th>Materiaalklasse</th>
@@ -175,7 +175,7 @@
             {% endfor %}
 
             <!-- blauwe onderrand -->
-            <tr>
+            <tr class="sv-table-onderrand">
                 <td colspan="2"  class="sv-table-onderrand"></td>
                 {% if toon_aantal %}
                     <td  class="sv-table-onderrand"></td>

@@ -34,7 +34,7 @@
     <!-- blauwe balk met informatie -->
     <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
-            <table class="white">
+            <table class="sv-kader">
                 <tr>
                     <th>Competitie</th>
                     <td>{{ comp.beschrijving }}</td>
@@ -68,7 +68,7 @@
     <!-- blauwe balk met filters -->
     <div class="row-sv-blauw">
         <div class="col s12 m6 offset-m3 l4 offset-l4" style="margin-bottom:15px">
-            <div class="white left-align" style="padding:10px">
+            <div class="sv-kader left-align" style="padding:10px">
                 <p><b>Kies een boog type:</b></p>
                 <ul id="id_boog">
                     {% for boog in boog_filters %}
@@ -125,17 +125,17 @@
             </div>
         {% endif %}
 
-        <table class="white">
+        <table class="sv-kader">
             {% for obj in deelnemers %}
 
                 {% if obj.break_klasse %}
                     {% if not obj.is_eerste_break %}
-                        <tr>
+                        <tr class="sv-table-onderrand">
                             <td colspan="6" class="sv-table-onderrand"></td>
                         </tr>
                     {% endif %}
 
-                    <tr>
+                    <tr class="sv-table-sectie-header">
                         <td colspan="8" class="center">
                             <h5>{{ obj.klasse_str }}</h5>
                             {% if obj.match %}
@@ -202,7 +202,7 @@
 
             {% endfor %}
 
-            <tr>
+            <tr class="sv-table-onderrand">
                 <td colspan="6" class="sv-table-onderrand"></td>
             </tr>
         </table>

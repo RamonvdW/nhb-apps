@@ -23,7 +23,7 @@
 
         <!-- filter: para classificatie -->
         <div class="col s6 l3" style="margin-bottom:15px">
-            <div class="white left-align" style="padding:10px">
+            <div class="sv-kader left-align" style="padding:10px">
                 <p><b>Para classificatie:</b></p>
                 <ul>
                     {% for filter in para_filters %}
@@ -43,7 +43,7 @@
 
         <!-- filter: leeftijdsklassen -->
         <div class="col s6 l3" style="margin-bottom:15px">
-            <div class="white left-align" style="padding:10px">
+            <div class="sv-kader left-align" style="padding:10px">
                 <p><b>Leeftijdsklasse:</b></p>
                 {% if toon_lcat %}
                     <ul>
@@ -68,7 +68,7 @@
 
         <!-- filter: materiaalklasse -->
         <div class="col l3 hide-on-med-and-down" style="margin-bottom:15px">
-            <div class="white left-align" style="padding:10px">
+            <div class="sv-kader left-align" style="padding:10px">
                 <p><b>Boog type:</b></p>
                 <ul>
                     {% for filter in makl_filters %}
@@ -89,7 +89,7 @@
         <!-- filter: record soorten -->
         {% if toon_soorten %}
             <div class="col s6 l3 hide-on-med-and-down" style="margin-bottom:15px">
-                <div class="white left-align" style="padding:10px">
+                <div class="sv-kader left-align" style="padding:10px">
                     <p><b>Soort record:</b></p>
                     <ul>
                         {% for filter in soorten %}
@@ -116,7 +116,7 @@
 
         <!-- filter: materiaalklasse -->
         <div class="col s6 l3" style="margin-bottom:15px">
-            <div class="white left-align" style="padding:10px">
+            <div class="sv-kader left-align" style="padding:10px">
                 <p><b>Boog type:</b></p>
                 <ul>
                     {% for filter in makl_filters %}
@@ -137,7 +137,7 @@
         <!-- filter: record soorten -->
         {% if toon_soorten %}
             <div class="col s6 l3" style="margin-bottom:15px">
-                <div class="white left-align" style="padding:10px">
+                <div class="sv-kader left-align" style="padding:10px">
                     <p><b>Soort record:</b></p>
                     <ul>
                         {% for filter in soorten %}
@@ -161,7 +161,7 @@
 
         <!-- filter: geslacht -->
         <div class="col s6 l3">
-            <div class="white left-align" style="padding:10px">
+            <div class="sv-kader left-align" style="padding:10px">
                 <p><b>Geslacht:</b></p>
                 <ul>
                     {% for filter in gesl_filters %}
@@ -181,7 +181,7 @@
 
         <!-- filter: discipline -->
         <div class="col s6 l3" style="margin-bottom:15px">
-            <div class="white left-align" style="padding:10px">
+            <div class="sv-kader left-align" style="padding:10px">
                 <p><b>Discipline:</b></p>
                 <ul>
                     {% for filter in disc_filters %}
@@ -201,7 +201,7 @@
 
         <!-- filter: verbeterbaar -->
         <div class="col s6 l3">
-            <div class="white left-align" style="padding:10px">
+            <div class="sv-kader left-align" style="padding:10px">
                 <p><b>Verbeterbaar:</b></p>
                 {% if toon_verb %}
                     <ul>
@@ -241,7 +241,7 @@
         <!-- blauwe balk met informatie label : info -->
         <div class="row-sv-blauw">
             <div class="col s12 m10 offset-m1 l8 offset-l2">
-                <table class="white">
+                <table class="sv-kader">
                     <tr>
                         <th>Toegekend</th>
                         <td>
@@ -371,7 +371,7 @@
         <!-- blauwe balk met informatie label : info -->
         <div class="row-sv-blauw">
             <div class="col s12 m10 offset-m1 l8 offset-l2">
-                <table class="white">
+                <table class="sv-kader">
                     <thead>
                         <tr>
                             <th>Score</th>

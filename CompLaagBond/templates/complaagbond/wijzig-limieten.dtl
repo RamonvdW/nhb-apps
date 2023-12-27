@@ -46,10 +46,10 @@
             <div class="col s12">
 
                 <!-- dialoog venster -->
-                <div class="white left-align z-depth-3">
+                <div class="sv-kader left-align z-depth-3">
                     <div class="form-padding">
 
-                        <table class="white">
+                        <table class="sv-kader">
                             <tr>
                                 <th>Klasse</th>
                                 <th>Limiet</th>
@@ -86,9 +86,9 @@
             <div class="col s12">
 
                 <!-- dialoog venster -->
-                <div class="white left-align z-depth-3">
+                <div class="sv-kader left-align z-depth-3">
                     <div style="padding:30px">
-                        <table class="white">
+                        <table class="sv-kader">
                             <tr>
                                 <th>Klasse</th>
                                 <th>Limiet</th>

@@ -29,7 +29,7 @@
     <!-- blauwe balk met informatie in een tabel -->
     <div class="row-sv-blauw">
         <div class="col s12">
-            <table class="white">
+            <table class="sv-kader">
                 <thead>
                     <tr>
                         <th>Beschrijving</th>
@@ -68,7 +68,7 @@
     <!-- blauwe balk met informatie in een tabel -->
     <div class="row-sv-blauw">
         <div class="col s12">
-            <table class="white">
+            <table class="sv-kader">
                 <thead>
                     <tr>
                         <th>Beschrijving</th>

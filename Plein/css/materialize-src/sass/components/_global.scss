@@ -440,11 +440,22 @@ table {
   }
 }
 
-tr {
+// separator line between table body rows
+table tbody tr {
   border-bottom: 1px solid $table-border-color;
 }
 
-td, th{
+// no line for the last row in the table
+table tbody tr:last-child {
+  border-bottom: none;
+}
+
+// line at the end of the table heading (if present)
+table thead tr:last-child {
+  border-bottom: 1px solid $table-border-color;
+}
+
+td, th {
   padding: 15px 5px;
   display: table-cell;
   text-align: left;

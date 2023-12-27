@@ -24,7 +24,7 @@
     <p>Hieronder kan je zien welke populaire browsers we ondersteunen en vanaf welke versie:</p>
 
     <div class="sv-blauw-hoofd" style="padding:3px">
-        <table class="white">
+        <table class="sv-kader">
 
             <thead>
                 <tr class="sv-blauw-hoofd white-text">

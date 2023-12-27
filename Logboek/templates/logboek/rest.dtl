@@ -16,7 +16,7 @@
     <!-- blauwe balk met resultaten -->
     <div class="row-sv-blauw">
         <div class="col s12">
-            <ul class="collection white left-align">
+            <ul class="collection sv-kader left-align">
                 {% for obj in object_list %}
                     <li class="collection-item">
                         <span>{{ obj.toegevoegd_op|date:"l j F Y" }} om {{ obj.toegevoegd_op|date:"H:i" }}: {{ obj.gebruikte_functie }}</span><br>

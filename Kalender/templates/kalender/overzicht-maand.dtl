@@ -77,7 +77,7 @@
 
         <!-- zoek tekst -->
         <div class="col s12 m12 l6" style="margin-bottom:15px">
-            <div class="white z-depth-3 left-align" style="padding:10px">
+            <div class="sv-kader z-depth-3 left-align" style="padding:10px">
 
                 <p><b>Zoek naar:</b></p>
                 <div class="input-text">
@@ -95,7 +95,7 @@
 
         <!-- filter: bogen -->
         <div class="col s12 m6 l3" style="margin-bottom:15px">
-            <div class="white left-align" style="padding:10px">
+            <div class="sv-kader left-align" style="padding:10px">
                 <p><b>Bogen:</b></p>
                 <ul>
                     {% for filter in bogen_filter %}
@@ -115,7 +115,7 @@
 
         <!-- filter: soort wedstrijd -->
         <div class="col s12 m6 l3">
-            <div class="white left-align" style="padding:10px">
+            <div class="sv-kader left-align" style="padding:10px">
                 <p><b>Soort wedstrijd:</b></p>
                 <ul>
                     {% for filter in soort_filter %}
@@ -136,7 +136,7 @@
     </div>
 
     <!-- maand titel met knoppen prev/next -->
-    <table class="white">
+    <table class="sv-kader">
         <tr style="border-bottom:none">
             <!-- knop -->
             <td class="right-align">
@@ -162,7 +162,7 @@
     <!-- blauwe balk met informatie in een tabel -->
     <div class="row-sv-blauw">
         <div class="col s12">
-            <table class="white">
+            <table class="sv-kader">
                 <thead>
                     <tr>
                         <th>Wanneer</th>

@@ -90,17 +90,17 @@
 
     <!-- blauwe balk met dialoog venster -->
     <div class="row-sv-blauw">
-        <div class="col s10 offset-s1 m12{% if url_opslaan %} white z-depth-3{% endif %}">
+        <div class="col s10 offset-s1 m12 sv-kader{% if url_opslaan %} z-depth-3{% endif %}">
 
             <!-- dialoog venster -->
-            <div style="margin:30px 30px 30px 30px" class="left-align">
+            <div class="left-align">
 
                 {% if url_opslaan %}
                     <form action="{{ url_opslaan }}" method="post" onsubmit="document.getElementById('submit_knop1').disabled=true; return true;">
                         {% csrf_token %}
                 {% endif %}
 
-                        <table class="white">
+                        <table class="sv-kader">
                             <tr>
                                 <th style="width:50%">Korte naam van de locatie</th>
                                 <td>

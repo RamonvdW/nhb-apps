@@ -41,7 +41,7 @@
     <!-- blauw balk met wit informatie veld -->
     <div class="row-sv-blauw">
         <div class="col s12 m8 offset-m2 l6 offset-l3">
-            <table class="white">
+            <table class="sv-kader">
                 <tr>
                     <th>Wedstrijdklassen</th>
                     <th class="center">Minimaal gemiddelde</th>
@@ -77,17 +77,17 @@
     <div class="row-sv-blauw">
         <div class="col s12">
 
-            <table class="white">
+            <table class="sv-kader">
 
                 {% for obj in deelnemers %}
 
                     {% if obj.break_klasse %}
                         {% if not forloop.first %}
-                            <tr>
+                            <tr class="sv-table-onderrand">
                                 <td colspan="4" class="sv-table-onderrand" style="height:50px"></td>
                             </tr>
                         {% endif %}
-                        <tr>
+                        <tr class="sv-table-sectie-header">
                             <td colspan="4" class="center">
                                 <h5>{{ obj.klasse_str }}</h5>
                             </td>

@@ -47,13 +47,13 @@
         <div class="col s12">
 
             <!-- dialoog venster -->
-            <div class="white left-align z-depth-3">
+            <div class="sv-kader left-align z-depth-3">
                 <div class="form-padding" style="padding-top:0px">
 
                     <form action="{{ url_opslaan }}" method="post" onsubmit="document.getElementById('submit_knop1').disabled=true; return true;">
                         {% csrf_token %}
 
-                        <table class="white">
+                        <table class="sv-kader">
 
                             <tr>
                                 <th>Bruikbaar tot en met</th>

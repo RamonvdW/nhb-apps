@@ -20,7 +20,7 @@
     <!-- blauw balk met wit informatie veld -->
     <div class="row-sv-blauw">
         <div class="col s12">
-            <div class="white" style="padding:10px">
+            <div class="sv-kader" style="padding:10px">
 
                 <p>Het koppelen van de tweede factor is gelukt.</p>
                 <p>Naast de inlog met gebruikersnaam en wachtwoord vraagt deze website vanaf nu bij een rol wissel ook om de tweede-factor code.</p>

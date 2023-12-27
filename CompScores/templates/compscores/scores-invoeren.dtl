@@ -39,7 +39,7 @@
     <!-- blauwe balk met informatie label : info -->
     <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
-            <table class="white">
+            <table class="sv-kader">
                 <tr>
                     <th>Competitie</th>
                     <td>{{ deelcomp.competitie.beschrijving }}</td>
@@ -603,9 +603,9 @@
     <div class="row-sv-blauw">
         <div class="col s12">
 
-            <div class="white left-align z-depth-3">
+            <div class="sv-kader left-align z-depth-3">
 
-                <table class="white" id="table1">
+                <table class="sv-kader" id="table1">
 
                     <thead>
                         <tr>        <!-- filter veld -->
@@ -672,7 +672,7 @@
         <!-- Hieronder: zoekveld voor ander lid (nhb-nr >> naam + vereniging) -->
 
         <div class="col s12 m10 offset-m1" style="margin-top:50px">
-            <div class="white left-align z-depth-3 center">
+            <div class="sv-kader left-align z-depth-3 center">
 
                 <!-- dialoog venster -->
                 <h5 style="padding:30px">Zoeken en toevoegen</h5>

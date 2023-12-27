@@ -21,7 +21,7 @@
     <!-- blauwe balk met informatie label : info -->
     <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
-            <table class="white">
+            <table class="sv-kader">
                 <tr>
                     <th>Competitie</th>
                     <td>{{ comp.beschrijving }}</td>
@@ -66,7 +66,7 @@
 
             <!-- filter: rayon -->
             <div class="col s6 offset-s3 m4 offset-m4 xl2 offset-xl5" style="margin-bottom:15px">
-                <div class="white left-align" style="padding:10px">
+                <div class="sv-kader left-align" style="padding:10px">
                     <p><b>Kies een rayon:</b></p>
                     <ul id="id_subset">
                         {% for obj in filters %}
@@ -108,11 +108,11 @@
     </div>
 
     <!-- blauwe balk met informatie in een tabel -->
-    <table class="white">
+    <table class="sv-kader">
 
         {% for team in regioteams_niet_af %}
             {% if team.break_before %}
-                <tr>
+                <tr class="sv-table-sectie-header">
                     <td colspan="{{ hdr_cols }}">
                         <h5 class="sv-rood-text center">Nog niet geplaatste teams</h5>
                     </td>
@@ -175,7 +175,7 @@
             </tr>
         {% endfor %}
         {% if regioteams_niet_af %}
-            <tr>
+            <tr class="sv-table-onderrand">
                 <td colspan="{{ cols }}" class="sv-table-onderrand"></td>
             </tr>
         {% endif %}
@@ -221,7 +221,7 @@
                 </tr>
             {% endfor %}
 
-            <tr>
+            <tr class="sv-table-onderrand">
                 <td colspan="{{ cols }}" class="sv-table-onderrand"></td>
             </tr>
         {% endfor %}

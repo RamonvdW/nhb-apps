@@ -22,7 +22,7 @@
         <div class="col s12">
 
             <!-- dialoog venster -->
-            <div class="white left-align z-depth-3" style="margin-top:30px">
+            <div class="sv-kader left-align z-depth-3" style="margin-top:30px">
                 <div class="form-padding">
                     <table>
                         {% for dag in dagen %}

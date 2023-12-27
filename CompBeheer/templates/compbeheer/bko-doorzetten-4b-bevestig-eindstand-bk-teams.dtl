@@ -20,7 +20,7 @@
     <!-- blauw balk met wit informatie veld -->
     <div class="row-sv-blauw">
         <div class="col s12">
-            <div class="white center" style="padding:10px">
+            <div class="sv-kader center" style="padding:10px">
                 <p>Als BKO wil je de eindstand van de Bondskampioenschappen <b>teams</b> bevestigen.</p>
                 <p>Hiermee zet je de teamcompetitie door naar de volgende fase.</p>
 

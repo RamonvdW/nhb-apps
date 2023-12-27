@@ -20,7 +20,7 @@
     <!-- blauw balk met wit informatie vlak -->
     <div class="row-sv-blauw">
         <div class="col s12">
-            <div class="white center" style="padding:10px">
+            <div class="sv-kader center" style="padding:10px">
                 <p>We hebben een e-mail gestuurd naar het door jouw opgegeven e-mailadres.</p>
 
                 <p>Volg de instructies in de e-mail om je wachtwoord te wijzigen. Daarna kan je inloggen.</p>

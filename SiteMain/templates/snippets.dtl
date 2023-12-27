@@ -32,7 +32,7 @@
     <!-- blauw balk met wit informatie veld -->
     <div class="row-sv-blauw">
         <div class="col s12">
-            <div class="white" style="padding:10px">
+            <div class="sv-kader" style="padding:10px">
                 <p>Je hebt laten zien dat je toegang hebt tot je e-mail.</p>
 
                 <p>
@@ -47,7 +47,7 @@
     <!-- blauwe balk met informatie in tabel-vorm:  label - info -->
     <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
-            <table class="white">
+            <table class="sv-kader">
                 <tr>
                     <th></th>
                     <td>{{ x }}</td>
@@ -88,7 +88,7 @@
         <div class="col s12">
 
             <!-- dialoog venster -->
-            <div class="white left-align z-depth-3">
+            <div class="sv-kader left-align z-depth-3">
                 <div class="form-padding">
                     <form action="{{ url }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
                         {% csrf_token %}
@@ -141,7 +141,7 @@
 
         <!-- filter: xxx -->
         <div class="col s3" style="margin-bottom:15px">
-            <div class="white left-align" style="padding:10px">
+            <div class="sv-kader left-align" style="padding:10px">
                 <p><b>Kies een xxx type:</b></p>
                 <ul>
                     {% for filter in xxx_filters %}
@@ -165,7 +165,7 @@
     <!-- blauwe balk met informatie in een tabel -->
     <div class="row-sv-blauw">
         <div class="col s12">
-            <table class="white">
+            <table class="sv-kader">
                 <thead>
                     <tr>
                         <th>Datum</th>
@@ -197,7 +197,7 @@
 
 
     <!-- tabel met filter -->
-    <table class="white" id="tabel_hulp">
+    <table class="sv-kader" id="tabel_hulp">
         <thead>
             <tr>        <!-- filter veld -->
                 <td colspan="3" class="table-filter">
@@ -231,7 +231,7 @@
 
 
     <!-- scherm-brede tabel met dunne blauw rand -->
-    <table class="white">
+    <table class="sv-kader">
         {% for obj in deelnemers %}
             {% if forloop.first %}
                 {% comment %}
@@ -257,9 +257,17 @@
 
             {% if obj.break_klasse %}
                 {% if not obj.is_eerste_groep %}
-                    <tr>
+                    <tr class="sv-table-onderrand">
                         <td class="sv-table-onderrand hide-on-small-only" colspan="13"></td>
                         <td class="sv-table-onderrand hide-on-med-and-up" colspan="4" ></td>
+                    </tr>
+                {% endif %}
+
+                {% if obj.show_header %}
+                    <tr class="sv-table-sectie-header">     <!-- voorkomt grijze lijn -->
+                        <td colspan="6" class="center">
+                            <h5>{{ obj.header }}</h5>
+                        </td>
                     </tr>
                 {% endif %}
 
@@ -301,7 +309,7 @@
 
         {% endfor %}
 
-        <tr>            <!-- possibly add  data-tablefilter="stop"  when filter does not work -->
+        <tr class="sv-table-onderrand">            <!-- possibly add  data-tablefilter="stop"  when filter does not work -->
             <td class="sv-table-onderrand hide-on-small-only" colspan="13"></td>
             <td class="sv-table-onderrand hide-on-med-and-up" colspan="4" ></td>
         </tr>

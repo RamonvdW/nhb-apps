@@ -20,7 +20,7 @@
 
     <!-- blauwe balk met kaartjes -->
     <div class="row-sv-blauw">
-        <div class="col s10 offset-s1 m8 offset-m2 l6 offset-l3 xl4 offset-xl4 white z-depth-3">
+        <div class="col s10 offset-s1 m8 offset-m2 l6 offset-l3 xl4 offset-xl4 sv-kader z-depth-3">
 
             <!-- dialoog venster -->
             <div style="padding:20px">
@@ -60,7 +60,7 @@
     <!-- blauw balk met wit informatie veld -->
     <div class="row-sv-blauw">
         <div class="col s12 l10 offset-l1 xl8 offset-xl2">
-            <div class="white" style="padding:10px">
+            <div class="sv-kader" style="padding:10px">
                 <p>Tik de 6-cijferige code over uit je authenticatie app (waarschijnlijk op je mobiel).</p>
 
                 {% if toon_hulp %}
@@ -88,7 +88,7 @@
         <!-- blauw balk met wit informatie veld -->
         <div class="row-sv-blauw">
             <div class="col s12">
-                <div class="white" style="padding:10px">
+                <div class="sv-kader" style="padding:10px">
                     <p>De koppeling met je tweede factor moet soms opnieuw gedaan worden, bijvoorbeeld als je een nieuwe mobiel aangeschaft hebt.</p>
                     <p>Neem daarvoor contact met ons op via <code>{{ email_support }}</code></p>
                 </div>

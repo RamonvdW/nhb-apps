@@ -40,7 +40,7 @@
         <div class="col s12">
 
             <!-- dialoog venster -->
-            <div class="white left-align z-depth-3" style="margin-top:30px">
+            <div class="sv-kader left-align z-depth-3" style="margin-top:30px">
                 <div class="form-padding">
                     <form action="{{ url_wijzigen }}" method="post" onsubmit="document.getElementById('submit_knop1').disabled=true; return true;">
                         {% csrf_token %}
@@ -170,7 +170,7 @@
     <!-- blauwe balk met informatie tabel -->
     <div class="row-sv-blauw">
         <div class="col s12 l10 offset-l1 xl8 offset-xl2">
-            <table class="white">
+            <table class="sv-kader">
 
                 <tr>
                     <td colspan="2" class="center sv-blauw-text">
@@ -323,7 +323,6 @@
                         </li>
                     {% endfor %}
                 </ul>
-
             </div>
         {% endif %}
 
