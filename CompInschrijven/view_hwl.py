@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2023 Ramon van der Winkel.
+#  Copyright (c) 2019-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -88,7 +88,7 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
 
         leeftijdsklassen = get_competitie_indiv_leeftijdsklassen(comp)
 
-        # sorteer jeugd op geboorte jaar en daarna naam
+        # sorteer jeugd op geboortejaar en daarna naam
         for obj in (Sporter
                     .objects
                     .filter(bij_vereniging=hwl_ver,
@@ -180,12 +180,17 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
             obj.volgorde = nr
         # for
 
+        # grootste vereniging heeft een paar honderd leden
+        sporter_pks = [sporter.pk for sporter in objs]
+        handled_pks = list()
+
         # zoek de bogen informatie bij elk lid
-        # split per schutter-boog
+        # split per sporter-boog
         objs2 = list()
         for sporterboog in (SporterBoog
                             .objects
                             .filter(voor_wedstrijd=True,
+                                    sporter__pk__in=sporter_pks,
                                     boogtype__afkorting__in=boogtype_afkortingen)
                             .select_related('sporter',
                                             'boogtype')
@@ -195,19 +200,24 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                                       'sporter__voornaam')
                             .only('sporter__lid_nr',
                                   'boogtype__afkorting',
-                                  'boogtype__beschrijving')):
+                                  'boogtype__beschrijving',
+                                  'boogtype__volgorde')):
             try:
                 sporter = sporter_dict[sporterboog.sporter.lid_nr]
             except KeyError:
                 # sporterboog niet van deze vereniging
-                # TODO: beter filteren om minder vaak hier te komen
                 pass
             else:
+                if sporter.pk not in handled_pks:
+                    handled_pks.append(sporter.pk)
+
+                boogtype = sporterboog.boogtype
+
                 # maak een kopie van de sporter en maak het uniek voor dit boogtype
                 obj = copy.copy(sporter)
-                obj.afkorting = sporterboog.boogtype.afkorting
-                obj.boogtype = sporterboog.boogtype.beschrijving
-                obj.check = "lid_%s_boogtype_%s" % (sporter.lid_nr, sporterboog.boogtype.pk)
+                obj.afkorting = boogtype.afkorting
+                obj.boogtype = boogtype.beschrijving
+                obj.check = "lid_%s_boogtype_%s" % (sporter.lid_nr, boogtype.pk)
                 obj.mag_teamschieten = True
                 if obj.leeftijdsklasse and obj.leeftijdsklasse.is_aspirant_klasse():
                     obj.mag_teamschieten = False
@@ -232,11 +242,25 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                 try:
                     obj.wil_competitie = wil_competitie[sporterboog.sporter.lid_nr]
                 except KeyError:
-                    # schutter had geen voorkeuren
+                    # sporter heeft geen voorkeuren
                     # dit is een opt-out, dus standaard True
                     obj.wil_competitie = True
 
-                tup = (sporter.volgorde, sporterboog.boogtype.volgorde, obj)
+                tup = (sporter.volgorde, boogtype.volgorde, obj)
+                objs2.append(tup)
+        # for
+
+        for pk in sporter_pks:
+            if pk not in handled_pks:
+                sporter = sporter_dict[pk]
+
+                # maak een kopie van de sporter en maak het uniek voor dit boogtype
+                obj = copy.copy(sporter)
+                obj.afkorting = '?'
+                obj.boogtype = None
+                obj.mag_teamschieten = False
+
+                tup = (sporter.volgorde, 99, sporter)
                 objs2.append(tup)
         # for
 

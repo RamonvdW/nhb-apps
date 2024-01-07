@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2023 Ramon van der Winkel.
+#  Copyright (c) 2020-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -409,7 +409,7 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
         self._zet_ag(100003, 18)
         self._zet_ag(100003, 25)
 
-        with self.assert_max_queries(26):
+        with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -448,7 +448,7 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
         self.assert404(resp, 'Sporter niet gevonden')
 
         # haal het aanmeld-scherm op zodat er al ingeschreven leden bij staan
-        with self.assert_max_queries(26):
+        with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
