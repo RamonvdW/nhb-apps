@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2023 Ramon van der Winkel.
+                Copyright (c) 2020-2024 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -194,7 +194,7 @@
                                         <td class="grey-text">{{ obj.lid_nr_en_volledige_naam }}</td>
                                         <td class="grey-text">{{ obj.leeftijd }}</td>
                                         <td class="grey-text hide-on-small-only">{{ obj.leeftijdsklasse.beschrijving }}</td>
-                                        <td class="grey-text">{{ obj.boogtype }}</td>
+                                        <td class="grey-text">{% if obj.boogtype %}{{ obj.boogtype }}{% else %}<i class="sv-rood-text">Niet ingesteld</i>{% endif %}</td>
                                         <td><!-- geen aanvangsgemiddelde --></td>
                                     {% else %}
                                         <td class="center">
@@ -212,7 +212,7 @@
                                         <td>{{ obj.lid_nr_en_volledige_naam }}</td>
                                         <td>{{ obj.leeftijd }}</td>
                                         <td class="hide-on-small-only">{{ obj.leeftijdsklasse.beschrijving }}</td>
-                                        <td>{{ obj.boogtype }}</td>
+                                        <td>{% if obj.boogtype %}{{ obj.boogtype }}{% else %}<i class="sv-rood-text">Niet ingesteld</i>{% endif %}</td>
                                         <td class="center">{{ obj.ag|floatformat:3 }}</td>
                                     {% endif %}
                                 </tr>
@@ -247,7 +247,7 @@
                                     <!-- wil niet meedoen, dus kan niet aanmelden -->
                                     <td><!-- geen checkbox --></td>
                                     <td class="grey-text">{{ obj.lid_nr_en_volledige_naam }}</td>
-                                    <td class="grey-text">{{ obj.boogtype }}</td>
+                                    <td class="grey-text">{% if obj.boogtype %}{{ obj.boogtype }}{% else %}<i class="sv-rood-text">Niet ingesteld</i>{% endif %}</td>
                                     <td><!-- geen aanvangsgemiddelde --></td>
                                 {% else %}
                                     <td class="center">
@@ -263,7 +263,7 @@
                                         {% endif %}
                                     </td>
                                     <td>{{ obj.lid_nr_en_volledige_naam }}</td>
-                                    <td>{{ obj.boogtype }}</td>
+                                    <td>{% if obj.boogtype %}{{ obj.boogtype }}{% else %}<i class="sv-rood">Niet ingesteld</i>{% endif %}</td>
                                     <td class="center">{{ obj.ag|floatformat:3 }}</td>
                                 {% endif %}
                             </tr>
@@ -281,7 +281,7 @@
         </div>
     </div>
 
-    <p class="center">Sporter naam in grijs: die heeft "voorkeur voor de bondscompetities" niet aangevinkt staan (onder voorkeuren).</p>
+    <p class="center">Sporter naam in grijs: heeft "voorkeur voor de bondscompetities" niet aangevinkt staan (onder voorkeuren) of geen wedstrijdboog ingesteld.</p>
 
     {% if mag_aanmelden %}
         </form>
