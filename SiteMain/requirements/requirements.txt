@@ -12,25 +12,25 @@ certifi==2023.11.17
     # via requests
 charset-normalizer==3.3.2
     # via requests
-django==4.2.7
+django==4.2.9
     # via
     #   -c constraints.in
     #   -r requirements.in
 et-xmlfile==1.1.0
     # via openpyxl
-google-api-core==2.14.0
+google-api-core==2.15.0
     # via google-api-python-client
-google-api-python-client==2.109.0
+google-api-python-client==2.112.0
     # via -r requirements.in
-google-auth==2.24.0
+google-auth==2.26.1
     # via
     #   -r requirements.in
     #   google-api-core
     #   google-api-python-client
     #   google-auth-httplib2
-google-auth-httplib2==0.1.1
+google-auth-httplib2==0.2.0
     # via google-api-python-client
-googleapis-common-protos==1.61.0
+googleapis-common-protos==1.62.0
     # via google-api-core
 googlemaps==4.10.0
     # via -r requirements.in
@@ -48,13 +48,13 @@ oauthlib==3.2.2
     # via requests-oauthlib
 openpyxl==3.1.2
     # via -r requirements.in
-pillow==10.1.0
+pillow==10.2.0
     # via -r requirements.in
 protobuf==4.25.1
     # via
     #   google-api-core
     #   googleapis-common-protos
-psycopg==3.1.14
+psycopg==3.1.16
     # via -r requirements.in
 pyasn1==0.5.1
     # via
@@ -66,7 +66,7 @@ pyotp==2.9.0
     # via -r requirements.in
 pyparsing==3.1.1
     # via httplib2
-pypdf==3.17.1
+pypdf==3.17.4
     # via -r requirements.in
 pypng==0.20220715.0
     # via qrcode
@@ -84,7 +84,7 @@ rsa==4.9
     # via google-auth
 sqlparse==0.4.4
     # via django
-typing-extensions==4.8.0
+typing-extensions==4.9.0
     # via
     #   psycopg
     #   qrcode
