@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2023 Ramon van der Winkel.
+#  Copyright (c) 2019-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -560,6 +560,26 @@ class RkBkIndivKlasseFilter(admin.SimpleListFilter):
         return queryset
 
 
+class VerenigingMismatchFilter(admin.SimpleListFilter):
+
+    title = 'mismatch vereniging'
+
+    parameter_name = 'mismatch'
+
+    def lookups(self, request, model_admin):
+        return (
+            ('Geen', 'Geen vereniging'),
+            ('Ja', 'Overgestapt'),
+        )
+
+    def queryset(self, request, queryset):
+        if self.value() == 'Geen':
+            queryset = queryset.filter(sporterboog__sporter__bij_vereniging=None)
+        if self.value() == 'Ja':
+            queryset = queryset.exclude(sporterboog__sporter__bij_vereniging=F('bij_vereniging'))
+        return queryset
+
+
 class KampioenschapSporterBoogAdmin(CreateOnlyAdmin):
 
     fieldsets = (
@@ -612,9 +632,9 @@ class KampioenschapSporterBoogAdmin(CreateOnlyAdmin):
                    'kampioenschap__deel',
                    'kampioenschap__rayon',
                    'deelname',
+                   VerenigingMismatchFilter,
                    'sporterboog__boogtype',
                    RkBkIndivKlasseFilter,
-                   ('sporterboog__sporter__bij_vereniging', admin.EmptyFieldListFilter),
                    'sporterboog__sporter__bij_vereniging')
 
     ordering = ['volgorde']
