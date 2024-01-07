@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2023 Ramon van der Winkel.
+#  Copyright (c) 2019-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -58,7 +58,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2023-12-27'
+SITE_VERSIE = '2024-01-07'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -343,25 +343,25 @@ RECORDS_TOEGESTANE_PARA_KLASSEN = (
 # volgorde: lager = beter
 SPEELSTERKTE_VOLGORDE = (
     # discipline, beschrijving, volgorde
-    ('NHB Graadspelden Schutter', 'Grootmeesterschutter', 1),       # 1e graad (3 van de 4)
-    ('NHB Graadspelden Schutter', 'Meesterschutter', 2),            # 2e graad (3 van de 4)
-    ('NHB Graadspelden Schutter', 'Allroundschutter', 3),           # 3e graad (4 van de 4)
+    ('KHSN Graadspelden Schutter', 'Grootmeesterschutter', 1),       # 1e graad (3 van de 4)
+    ('KHSN Graadspelden Schutter', 'Meesterschutter', 2),            # 2e graad (3 van de 4)
+    ('KHSN Graadspelden Schutter', 'Allroundschutter', 3),           # 3e graad (4 van de 4)
 
-    ('NHB Graadspelden Indoor', '1e Graad Indoor', 10),
-    ('NHB Graadspelden Indoor', '2e Graad Indoor', 11),
-    ('NHB Graadspelden Indoor', '3e Graad Indoor', 12),
+    ('KHSN Graadspelden Indoor', '1e Graad Indoor', 10),
+    ('KHSN Graadspelden Indoor', '2e Graad Indoor', 11),
+    ('KHSN Graadspelden Indoor', '3e Graad Indoor', 12),
 
-    ('NHB Graadspelden Outdoor', '1e Graad Outdoor', 20),
-    ('NHB Graadspelden Outdoor', '2e Graad Outdoor', 21),
-    ('NHB Graadspelden Outdoor', '3e Graad Outdoor', 22),
+    ('KHSN Graadspelden Outdoor', '1e Graad Outdoor', 20),
+    ('KHSN Graadspelden Outdoor', '2e Graad Outdoor', 21),
+    ('KHSN Graadspelden Outdoor', '3e Graad Outdoor', 22),
 
-    ('NHB Graadspelden Veld', '1e Graad Veld', 30),
-    ('NHB Graadspelden Veld', '2e Graad Veld', 31),
-    ('NHB Graadspelden Veld', '3e Graad Veld', 32),
+    ('KHSN Graadspelden Veld', '1e Graad Veld', 30),
+    ('KHSN Graadspelden Veld', '2e Graad Veld', 31),
+    ('KHSN Graadspelden Veld', '3e Graad Veld', 32),
 
-    ('NHB Graadspelden Short Metric', '1e Graad Short Metric', 40),
-    ('NHB Graadspelden Short Metric', '2e Graad Short Metric', 41),
-    ('NHB Graadspelden Short Metric', '3e Graad Short Metric', 42),
+    ('KHSN Graadspelden Short Metric', '1e Graad Short Metric', 40),
+    ('KHSN Graadspelden Short Metric', '2e Graad Short Metric', 41),
+    ('KHSN Graadspelden Short Metric', '3e Graad Short Metric', 42),
 
     ('Compound', 'Compound 1400', 100),
     ('Compound', 'Compound 1350', 101),
@@ -404,10 +404,10 @@ SPEELSTERKTE_VOLGORDE = (
     ('Recurve', 'Recurve Master 1000', 155),
 
     # tussenspelden alleen op het RK in het eigen rayon
-    ('NHB Tussenspelden', '1250', 200),
-    ('NHB Tussenspelden', '1150', 201),
-    ('NHB Tussenspelden', '1050', 202),
-    ('NHB Tussenspelden', '950',  203),
+    ('KHSN Tussenspelden', '1250', 200),
+    ('KHSN Tussenspelden', '1150', 201),
+    ('KHSN Tussenspelden', '1050', 202),
+    ('KHSN Tussenspelden', '950',  203),
 
     # arrowhead
     ('Veld', 'Goud',   300),
