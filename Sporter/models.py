@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2023 Ramon van der Winkel.
+#  Copyright (c) 2020-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -219,7 +219,7 @@ class Speelsterkte(models.Model):
     beschrijving = models.CharField(max_length=50)
 
     # beschrijving van de discipline, zoals "Recurve" en "Compound"
-    # maar ook "World Archery Target Awards" en "NHB tussenspelden"
+    # maar ook "World Archery Target Awards" en "KHSN tussenspelden"
     discipline = models.CharField(max_length=50)
 
     # Senior / Master / Cadet

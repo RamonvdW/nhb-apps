@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2023 Ramon van der Winkel.
+#  Copyright (c) 2021-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -101,7 +101,7 @@ def maak_bondspas_regels(sporter, jaar_pas, jaar_wedstrijdklasse):
     # for
 
     # toon de basis codes alleen als er geen hogere codes zijn
-    # iemand met "meesterschutter" hoeft geen beginnen awards meer te zien
+    # iemand met "meesterschutter" hoeft geen beginner-awards meer te zien
     if len(afkortingen) == 0:
         afkortingen = afkortingen_basis
 
