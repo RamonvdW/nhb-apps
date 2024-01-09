@@ -69,15 +69,17 @@ class VerenigingAccommodatieDetailsView(UserPassesTestMixin, TemplateView):
         binnen_locatie = None
         buiten_locatie = None
         externe_locaties = list()
-        for loc in ver.locatie_set.exclude(zichtbaar=False):
-            if loc.baan_type == BAAN_TYPE_EXTERN and loc.zichtbaar:
-                externe_locaties.append(loc)
+        for loc in ver.locatie_set.all():
+            if loc.baan_type == BAAN_TYPE_EXTERN:
+                if loc.zichtbaar:
+                    externe_locaties.append(loc)
             elif loc.baan_type == BAAN_TYPE_BUITEN:
                 # ook zichtbaar=False doorlaten!
                 buiten_locatie = loc
             else:
                 # BAAN_TYPE_BINNEN_VOLLEDIG_OVERDEKT, BAAN_TYPE_BINNEN_BUITEN of BAAN_TYPE_ONBEKEND
-                binnen_locatie = loc
+                if loc.zichtbaar:
+                    binnen_locatie = loc
         # for
 
         return binnen_locatie, buiten_locatie, externe_locaties, ver
