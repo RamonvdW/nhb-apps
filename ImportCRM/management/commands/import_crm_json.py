@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2023 Ramon van der Winkel.
+#  Copyright (c) 2019-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -1244,11 +1244,6 @@ class Command(BaseCommand):
                                 lid_blocked = True
                             else:
                                 self._count_uitgeschreven += 1
-
-                        # FUTURE: overschrijven tijdens regiocompetitie, bij afsluiten team ronde
-
-                        # let op: tijdens fase G van de competitie wordt de vereniging bevroren en moet de sporter
-                        #         uitkomen op het RK van het rayon waarin die vereniging valt
 
                     if lid_blocked:
                         if obj.is_actief_lid:

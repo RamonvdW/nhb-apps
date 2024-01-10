@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2023 Ramon van der Winkel.
+#  Copyright (c) 2019-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -82,8 +82,8 @@ def bepaal_fase_indiv(comp) -> str:
         # in RK fase
 
         # fase K begint 2 weken voor fase L
-        begin_fase_k = comp.begin_fase_L_indiv - datetime.timedelta(days=14)
-        if vandaag < begin_fase_k:
+        comp.begin_fase_K_indiv = comp.begin_fase_L_indiv - datetime.timedelta(days=14)
+        if vandaag < comp.begin_fase_K_indiv:
             # fase J: bevestig deelname of afmelden
             return 'J'
 
