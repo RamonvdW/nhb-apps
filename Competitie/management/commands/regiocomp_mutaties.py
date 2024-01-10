@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2023 Ramon van der Winkel.
+#  Copyright (c) 2020-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -31,7 +31,8 @@ from Competitie.operations import (competities_aanmaken, bepaal_startjaar_nieuwe
                                    aanvangsgemiddelden_vaststellen_voor_afstand,
                                    uitslag_regio_indiv_naar_histcomp, uitslag_regio_teams_naar_histcomp,
                                    uitslag_rk_indiv_naar_histcomp, uitslag_rk_teams_naar_histcomp,
-                                   uitslag_bk_indiv_naar_histcomp, uitslag_bk_teams_naar_histcomp)
+                                   uitslag_bk_indiv_naar_histcomp, uitslag_bk_teams_naar_histcomp,
+                                   competitie_hanteer_overstap_sporter)
 from Functie.models import Functie
 from Logboek.models import schrijf_in_logboek
 from Mailer.operations import mailer_notify_internal_error
@@ -1661,6 +1662,8 @@ class Command(BaseCommand):
 
         if options['all']:
             self.taken.hoogste_mutatie = None
+
+        competitie_hanteer_overstap_sporter(self.stdout)
 
         # verstuur uitnodigingen naar de sporters
         self._verstuur_uitnodigingen()
