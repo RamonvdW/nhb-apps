@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2022-2023 Ramon van der Winkel.
+                Copyright (c) 2022-2024 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -60,30 +60,27 @@
                     </tr>
                 {% endif %}
 
-                <!-- btw -->
-                {% if bestelling.btw_percentage_cat1 or bestelling.btw_percentage_cat2 or bestelling.btw_percentage_cat3 %}
-                    <tr>
-                        <td class="hide-on-small-only" style="padding-left:20px"></td>
-                        <td>
-                            {% if bestelling.btw_percentage_cat1 %}<span>BTW {{ bestelling.btw_percentage_cat1 }}</span><br>{% endif %}
-                            {% if bestelling.btw_percentage_cat2 %}<span>BTW {{ bestelling.btw_percentage_cat2 }}</span><br>{% endif %}
-                            {% if bestelling.btw_percentage_cat3 %}<span>BTW {{ bestelling.btw_percentage_cat3 }}</span><br>{% endif %}
-                        </td>
-                        <td class="right-align" style="padding-right:20px">
-                            {% if bestelling.btw_percentage_cat1 %}<span>&euro;&nbsp;{{ bestelling.btw_euro_cat1 }}</span><br>{% endif %}
-                            {% if bestelling.btw_percentage_cat2 %}<span>&euro;&nbsp;{{ bestelling.btw_euro_cat2 }}</span><br>{% endif %}
-                            {% if bestelling.btw_percentage_cat3 %}<span>&euro;&nbsp;{{ bestelling.btw_euro_cat3 }}</span><br>{% endif %}
-                        </td>
-                    </tr>
-                {% endif %}
-
-
                 <!-- totaal -->
                 <tr>
                     <td class="hide-on-small-only"></td>
                     <td class="right-align"><b>Totale kosten</b></td>
                     <td class="right-align" style="padding-right:20px"><b>&euro;&nbsp;{{ bestelling.totaal_euro }}</b></td>
                 </tr>
+
+                {% comment %}
+                <!-- btw -->
+                {% if bestelling.btw_percentage_cat1 or bestelling.btw_percentage_cat2 or bestelling.btw_percentage_cat3 %}
+                    <tr>
+                        <td class="hide-on-small-only" style="padding-left:20px">Waarvan BTW</td>
+                        <td>
+                            {% if bestelling.btw_percentage_cat1 %}<span>{{ bestelling.btw_percentage_cat1 }}%: &euro;&nbsp;{{ bestelling.btw_euro_cat1 }}</span><br>{% endif %}
+                            {% if bestelling.btw_percentage_cat2 %}<span>{{ bestelling.btw_percentage_cat2 }}%: &euro;&nbsp;{{ bestelling.btw_euro_cat2 }}</span><br>{% endif %}
+                            {% if bestelling.btw_percentage_cat3 %}<span>{{ bestelling.btw_percentage_cat3 }}%: &euro;&nbsp;{{ bestelling.btw_euro_cat3 }}</span><br>{% endif %}
+                        </td>
+                        <td style="padding-right:20px"></td>
+                    </tr>
+                {% endif %}
+                {% endcomment %}
 
                 <!-- transacties -->
                 {% for transactie in transacties %}
@@ -173,8 +170,8 @@
 
                 <tr>
                     <td></td>
-                    <th class="sv-table-col-small hide-on-small-only">Naam:<br>Adres:<br><br>KvK nummer:<br>IBAN:<br>BIC:<br>E-mail:<br>Telefoon:</th>
-                    <td class="sv-table-col-small">{{ bestelling.verkoper_naam }}<br>{{ bestelling.verkoper_adres1 }}<br>{{ bestelling.verkoper_adres2 }}<br>{{ bestelling.verkoper_kvk }}<br>{{ bestelling.verkoper_iban }}<br>{{ bestelling.verkoper_bic }}<br>{{ bestelling.verkoper_email }}<br>{{ bestelling.verkoper_telefoon }}</td>
+                    <th class="sv-table-col-small hide-on-small-only">Naam:<br>Adres:<br><br>KvK nummer:<br>{% if bestelling.verkoper_btw_nr %}BTW nummer:<br>{% endif %}IBAN:<br>BIC:<br>E-mail:<br>Telefoon:</th>
+                    <td class="sv-table-col-small">{{ bestelling.verkoper_naam }}<br>{{ bestelling.verkoper_adres1 }}<br>{{ bestelling.verkoper_adres2 }}<br>{{ bestelling.verkoper_kvk }}<br>{% if bestelling.verkoper_btw_nr %}{{ bestelling.verkoper_btw_nr }}<br>{% endif %}{{ bestelling.verkoper_iban }}<br>{{ bestelling.verkoper_bic }}<br>{{ bestelling.verkoper_email }}<br>{{ bestelling.verkoper_telefoon }}</td>
                     <td></td>
                 </tr>
             </table>

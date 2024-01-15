@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2023 Ramon van der Winkel.
+#  Copyright (c) 2022-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -87,10 +87,12 @@ class BestelMandje(models.Model):
     verzendkosten_euro = models.DecimalField(max_digits=6, decimal_places=2, default=Decimal(0))    # max 9999,99
 
     # belasting in verschillende categorieën: leeg = niet gebruikt
-    btw_percentage_cat1 = models.CharField(max_length=5, default='', blank=True)
+    btw_percentage_cat1 = models.CharField(max_length=5, default='', blank=True)        # 21,00
     btw_percentage_cat2 = models.CharField(max_length=5, default='', blank=True)
     btw_percentage_cat3 = models.CharField(max_length=5, default='', blank=True)
 
+    # het aantal van het totaal voor elk van de BTW percentages
+    # (dus niet optellen bij het totaal!)
     btw_euro_cat1 = models.DecimalField(max_digits=6, decimal_places=2, default=Decimal(0))         # max 9999,99
     btw_euro_cat2 = models.DecimalField(max_digits=6, decimal_places=2, default=Decimal(0))         # max 9999,99
     btw_euro_cat3 = models.DecimalField(max_digits=6, decimal_places=2, default=Decimal(0))         # max 9999,99
@@ -112,9 +114,6 @@ class BestelMandje(models.Model):
             self.totaal_euro -= product.korting_euro
         # for
         self.totaal_euro += self.verzendkosten_euro
-        self.totaal_euro += self.btw_euro_cat1
-        self.totaal_euro += self.btw_euro_cat2
-        self.totaal_euro += self.btw_euro_cat3
         self.save(update_fields=['totaal_euro'])
 
     def __str__(self):
@@ -151,6 +150,7 @@ class Bestelling(models.Model):
     verkoper_adres1 = models.CharField(max_length=100, default='', blank=True)      # straat
     verkoper_adres2 = models.CharField(max_length=100, default='', blank=True)      # postcode, plaats
     verkoper_kvk = models.CharField(max_length=15, default='', blank=True)
+    verkoper_btw_nr = models.CharField(max_length=15, default='', blank=True)
     verkoper_email = models.EmailField(default='', blank=True)
     verkoper_telefoon = models.CharField(max_length=20, default='', blank=True)
 

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2023 Ramon van der Winkel.
+#  Copyright (c) 2022-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -8,7 +8,7 @@ from django.urls import reverse
 from django.shortcuts import render
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Bestel.definities import BESTELLING_STATUS_AFGEROND
+from Bestel.definities import BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_GEANNULEERD
 from Bestel.models import Bestelling
 from Bestel.operations.mutaties import bestel_overboeking_ontvangen
 from Functie.definities import Rollen
@@ -37,14 +37,12 @@ class OverboekingOntvangenView(UserPassesTestMixin, TemplateView):
         return self.functie_nu and self.rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL, Rollen.ROL_MWW)
 
     def _zoek_overboekingen(self):
-
         overboekingen = list()
-
         for bestelling in (Bestelling
                            .objects
                            .filter(ontvanger__vereniging__ver_nr=self.functie_nu.vereniging.ver_nr)
                            .prefetch_related('transacties')
-                           .order_by('aangemaakt'))[:250]:
+                           .order_by('-aangemaakt'))[:250]:         # nieuwste eerst
 
             # handmatige overboekingen zoeken
             for transactie in bestelling.transacties.filter(is_handmatig=True):
@@ -126,10 +124,13 @@ class OverboekingOntvangenView(UserPassesTestMixin, TemplateView):
                 elif bestelling.status == BESTELLING_STATUS_AFGEROND:
                     context['fout_kenmerk'] = 'Betaling is al geregistreerd'
 
+                elif bestelling.status == BESTELLING_STATUS_GEANNULEERD:
+                    context['fout_kenmerk'] = 'Bestelling is geannuleerd'
+
                 else:
                     verschil_euro = abs(bestelling.totaal_euro - bedrag_euro)
-                    # TODO: willen we anders omgaan met te veel / te weinig betaald?
-                    if verschil_euro < Decimal('0.01'):
+                    mag_afwijken = request.POST.get('accept_bedrag', False)
+                    if verschil_euro < Decimal('0.01') or mag_afwijken:
                         if actie == 'regis':  # afgekapte 'registreer'
                             # gebruiker heeft gevraagd om op te slaan
                             snel = str(request.POST.get('snel', ''))[:1]
@@ -140,6 +141,7 @@ class OverboekingOntvangenView(UserPassesTestMixin, TemplateView):
                             context['kenmerk'] = ''
                         else:
                             context['was_foutvrij'] = True
+                            context['akkoord_afwijking'] = mag_afwijken
 
                     else:
                         context['fout_bedrag'] = ('Verwacht bedrag: € %.2f' % bestelling.totaal_euro).replace('.', ',')

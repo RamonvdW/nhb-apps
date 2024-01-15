@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2023 Ramon van der Winkel.
+#  Copyright (c) 2019-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -24,6 +24,7 @@ from Geo.models import Rayon, Regio, Cluster
 from Score.models import Score, ScoreHist, Uitslag
 from Sporter.models import SporterBoog
 from Vereniging.models import Vereniging
+import datetime
 import logging
 
 my_logger = logging.getLogger('NHBApps.Competitie')
@@ -186,6 +187,7 @@ class Competitie(models.Model):
 
     def bepaal_fase(self):
         """ bepaalde huidige fase van de competitie en zet self.fase_indiv en self.fase_teams """
+        self.begin_fase_K_indiv = self.begin_fase_L_indiv - datetime.timedelta(days=14)
         self.fase_indiv = bepaal_fase_indiv(self)
         self.fase_teams = bepaal_fase_teams(self)
         # print('competitie: afstand=%s, fase_indiv=%s, fase_teams=%s' % (

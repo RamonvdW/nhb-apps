@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2023 Ramon van der Winkel.
+#  Copyright (c) 2021-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -142,7 +142,8 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
                     product.kan_afrekenen = False
 
                 if product.korting_euro and not product.gebruikte_korting_str:
-                    # print('Onverwacht: product %s (pk=%s) heeft korting %s' % (product, product.pk, product.korting_euro))
+                    # print('Onverwacht: product %s (pk=%s) heeft korting %s' % (
+                    #           product, product.pk, product.korting_euro))
                     product.gebruikte_korting_str = "Onbekende korting"
                     bevat_fout = True
 
@@ -161,9 +162,6 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
                 controleer_euro = Decimal(0)
 
             controleer_euro += mandje.verzendkosten_euro
-            controleer_euro += mandje.btw_euro_cat1
-            controleer_euro += mandje.btw_euro_cat2
-            controleer_euro += mandje.btw_euro_cat3
 
             if controleer_euro != mandje.totaal_euro:
                 bevat_fout = True

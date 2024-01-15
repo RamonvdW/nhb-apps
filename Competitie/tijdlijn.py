@@ -82,7 +82,6 @@ def bepaal_fase_indiv(comp) -> str:
         # in RK fase
 
         # fase K begint 2 weken voor fase L
-        comp.begin_fase_K_indiv = comp.begin_fase_L_indiv - datetime.timedelta(days=14)
         if vandaag < comp.begin_fase_K_indiv:
             # fase J: bevestig deelname of afmelden
             return 'J'

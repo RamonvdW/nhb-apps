@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2023 Ramon van der Winkel.
+#  Copyright (c) 2022-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -255,7 +255,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         self.assertEqual(1, MailQueue.objects.count())
         mail = MailQueue.objects.first()
         self.assert_email_html_ok(mail)
-        self.assert_consistent_email_html_text(mail, ignore=('>Prijs:', '>Korting:'))
+        self.assert_consistent_email_html_text(mail, ignore=('>Bedrag:', '>Korting:'))
         self.assertTrue('Verzendkosten' in mail.mail_text)
 
         # bekijk de bestellingen
@@ -337,7 +337,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         self.assertEqual(1, MailQueue.objects.count())
         mail = MailQueue.objects.first()
         self.assert_email_html_ok(mail)
-        self.assert_consistent_email_html_text(mail, ignore=('>Prijs:', '>Korting:'))
+        self.assert_consistent_email_html_text(mail, ignore=('>Bedrag:', '>Korting:'))
         self.assertTrue('Verzendkosten' in mail.mail_text)
 
         # bekijk de bestellingen
@@ -500,7 +500,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         self.assertEqual(MailQueue.objects.count(), 1)
         mail = MailQueue.objects.first()
         self.assert_email_html_ok(mail)
-        self.assert_consistent_email_html_text(mail, ignore=('>Prijs:', '>Korting:'))
+        self.assert_consistent_email_html_text(mail, ignore=('>Bedrag:', '>Korting:'))
 
         bestelling = Bestelling.objects.get(pk=bestelling.pk)
         self.assertEqual(bestelling.status, BESTELLING_STATUS_AFGEROND)
@@ -846,7 +846,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
 
         self.assertEqual(2, MailQueue.objects.count())
         mail = MailQueue.objects.get(mail_to=account_koper.bevestigde_email)
-        self.assert_consistent_email_html_text(mail, ignore=('>Prijs:',))
+        self.assert_consistent_email_html_text(mail)
         self.assert_email_html_ok(mail)
 
         mail = MailQueue.objects.get(mail_to=self.sporter.account.bevestigde_email)
@@ -1340,7 +1340,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         self.assertEqual(1, MailQueue.objects.count())
         mail = MailQueue.objects.first()
         self.assert_email_html_ok(mail)
-        self.assert_consistent_email_html_text(mail, ignore=('>Prijs:', '>Korting:'))
+        self.assert_consistent_email_html_text(mail, ignore=('>Bedrag:', '>Korting:'))
 
         # bekijk de lijst van bestellingen, met de geannuleerde bestelling
         with self.assert_max_queries(20):

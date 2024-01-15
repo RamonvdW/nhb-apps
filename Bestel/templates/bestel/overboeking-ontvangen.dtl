@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2022-2023 Ramon van der Winkel.
+                Copyright (c) 2022-2024 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -54,6 +54,17 @@
                             </tr>
 
                         </table>
+
+                        {% if fout_bedrag and bedrag != '' %}
+                            <div class="center">
+                                <label>
+                                    <input type="checkbox" class="filled-in" name="accept_bedrag"{% if akkoord_afwijking %} checked{% endif %}>
+                                    <span class="black-text">Afwijkend bedrag accepteren</span>
+                                </label>
+                            </div>
+                        {% elif akkoord_afwijking %}
+                            <input type="hidden" name="accept_bedrag" value="ja">
+                        {% endif %}
 
                         <!-- controleer knop -->
                         <div class="center" style="margin-top:30px">

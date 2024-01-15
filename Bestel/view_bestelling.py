@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2023 Ramon van der Winkel.
+#  Copyright (c) 2022-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -179,9 +179,6 @@ class ToonBestellingDetailsView(UserPassesTestMixin, TemplateView):
             controleer_euro = Decimal(0)
 
         controleer_euro += bestelling.verzendkosten_euro
-        controleer_euro += bestelling.btw_euro_cat1
-        controleer_euro += bestelling.btw_euro_cat2
-        controleer_euro += bestelling.btw_euro_cat3
 
         if controleer_euro != bestelling.totaal_euro:
             bevat_fout = True
