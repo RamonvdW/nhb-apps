@@ -21,6 +21,7 @@ def competitie_hanteer_overstap_sporter(stdout):
                                      'bij_vereniging',
                                      'sporterboog__boogtype',
                                      'sporterboog__sporter__bij_vereniging')
+                     .exclude(sporterboog__sporter__bij_vereniging=None)
                      .exclude(sporterboog__sporter__bij_vereniging=F('bij_vereniging'))):
 
         comp = kampioen.kampioenschap.competitie
