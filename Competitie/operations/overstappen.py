@@ -34,8 +34,8 @@ def competitie_hanteer_overstap_sporter(stdout):
         rayon_nieuw = nieuwe_vereniging.regio.rayon_nr
         binnen_zelfde_rayon = rayon_oud == rayon_nieuw
 
-        # RK deelname: tijdens fase J mag de sporter overstappen worden binnen hetzelfde rayon
-        if comp.fase_indiv == 'J' and binnen_zelfde_rayon:
+        # RK deelname: tijdens fase J en K mag de sporter overstappen binnen hetzelfde rayon
+        if comp.fase_indiv in ('J', 'K') and binnen_zelfde_rayon:
             kamp_str = "[%s] %s (%s)" % (
                         kampioen.sporterboog.sporter.lid_nr,
                         kampioen.sporterboog.sporter.volledige_naam(),
