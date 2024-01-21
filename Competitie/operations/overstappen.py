@@ -42,7 +42,7 @@ def competitie_hanteer_overstap_sporter(stdout):
                         kampioen.sporterboog.boogtype.beschrijving)
 
             stdout.write(
-                '[INFO] Overstap van [%s] naar [%s] in rayon %s tijdens fase J van %s geaccepteerd voor (pk=%s) %s' % (
+                '[INFO] Overstap van [%s] naar [%s] in rayon %s tijdens fase J/K van %s geaccepteerd voor (pk=%s) %s' % (
                             oude_vereniging.ver_nr, nieuwe_vereniging.ver_nr, rayon_oud,
                             comp.beschrijving, kampioen.pk, kamp_str))
 
