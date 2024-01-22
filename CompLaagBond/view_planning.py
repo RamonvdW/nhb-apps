@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2023 Ramon van der Winkel.
+#  Copyright (c) 2019-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -372,10 +372,30 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
     @staticmethod
     def _get_dagen(deelkamp, wedstrijd):
         opt_dagen = list()
-        when = deelkamp.competitie.begin_fase_P_indiv
-        stop = deelkamp.competitie.einde_fase_P_indiv
+        when = min(deelkamp.competitie.begin_fase_P_indiv, deelkamp.competitie.begin_fase_P_teams)
+        stop = min(deelkamp.competitie.einde_fase_P_indiv, deelkamp.competitie.einde_fase_P_teams)
         weekdag_nr = 0
         limit = 30
+        while limit > 0 and when <= stop:
+            obj = SimpleNamespace()
+            obj.weekdag_nr = weekdag_nr
+            obj.datum = when
+            obj.actief = (when == wedstrijd.datum_wanneer)
+            opt_dagen.append(obj)
+
+            limit -= 1
+            when += datetime.timedelta(days=1)
+            weekdag_nr += 1
+        # while
+
+        # skip alle dagen tot het volgende blok
+        stop = max(deelkamp.competitie.begin_fase_P_indiv, deelkamp.competitie.begin_fase_P_teams)
+        while when < stop:
+            when += datetime.timedelta(days=1)
+            weekdag_nr += 1
+        # while
+
+        stop = max(deelkamp.competitie.einde_fase_P_indiv, deelkamp.competitie.einde_fase_P_teams)
         while limit > 0 and when <= stop:
             obj = SimpleNamespace()
             obj.weekdag_nr = weekdag_nr
@@ -536,7 +556,10 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
         match.datum_wanneer = deelkamp.competitie.begin_fase_P_indiv + datetime.timedelta(days=weekdag)
 
         # check dat datum_wanneer nu in de ingesteld BK periode valt
-        if not (comp.begin_fase_P_indiv <= match.datum_wanneer <= comp.einde_fase_P_indiv):
+        begin = min(comp.begin_fase_P_indiv, comp.begin_fase_P_teams)
+        einde = max(comp.einde_fase_P_indiv, comp.einde_fase_P_teams)
+        if not ((comp.begin_fase_P_indiv <= match.datum_wanneer <= comp.einde_fase_P_indiv) or
+                (comp.begin_fase_P_teams <= match.datum_wanneer <= comp.einde_fase_P_teams)):
             raise Http404('Geen valide datum')
 
         # vertaal aanvang naar een tijd

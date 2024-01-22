@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2023 Ramon van der Winkel.
+#  Copyright (c) 2020-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -123,6 +123,17 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         url_klassengrenzen_vaststellen = self.url_klassengrenzen_vaststellen % self.testdata.comp18.pk
         resp = self.client.post(url_klassengrenzen_vaststellen)
         self.assert_is_redirect_not_plein(resp)  # check for success
+
+        # BK wedstrijden datums
+        bk_datum = timezone.now() + datetime.timedelta(days=7)
+        self.testdata.comp18.begin_fase_P_indiv = bk_datum
+        self.testdata.comp18.einde_fase_P_indiv = bk_datum + datetime.timedelta(days=1)
+
+        bk_datum += datetime.timedelta(days=7)
+        self.testdata.comp18.begin_fase_P_teams = bk_datum
+        self.testdata.comp18.einde_fase_P_teams = bk_datum + datetime.timedelta(days=1)
+        self.testdata.comp18.save(update_fields=['begin_fase_P_indiv', 'einde_fase_P_indiv',
+                                                 'begin_fase_P_teams', 'einde_fase_P_teams'])
 
         self.deelkamp_bk_18 = Kampioenschap.objects.filter(competitie=self.testdata.comp18,
                                                            deel=DEEL_BK)[0]
