@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023 Ramon van der Winkel.
+#  Copyright (c) 2023-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -21,9 +21,9 @@ from Scheidsrechter.definities import (SCHEIDS_VERENIGING, SCHEIDS2LEVEL,
 from Scheidsrechter.models import WedstrijdDagScheidsrechters, ScheidsBeschikbaarheid
 from Scheidsrechter.mutaties import scheids_mutatieverzoek_stuur_notificaties
 from Sporter.models import SporterVoorkeuren
-from Wedstrijden.definities import (WEDSTRIJD_STATUS_ONTWERP, WEDSTRIJD_ORGANISATIE_TO_STR,
+from Wedstrijden.definities import (WEDSTRIJD_STATUS_GEACCEPTEERD, WEDSTRIJD_ORGANISATIE_TO_STR,
                                     ORGANISATIE_WA, WEDSTRIJD_WA_STATUS_TO_STR,
-                                    WEDSTRIJD_BEGRENZING_TO_STR, AANTAL_SCHEIDS_GEEN_KEUZE)
+                                    WEDSTRIJD_BEGRENZING_TO_STR, AANTAL_SCHEIDS_GEEN_KEUZE, AANTAL_SCHEIDS_EIGEN)
 from Wedstrijden.models import Wedstrijd, WedstrijdSessie
 from types import SimpleNamespace
 import datetime
@@ -74,10 +74,10 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
 
         wedstrijden = (Wedstrijd
                        .objects
-                       .exclude(status=WEDSTRIJD_STATUS_ONTWERP)
                        .exclude(is_ter_info=True)
                        .exclude(toon_op_kalender=False)
-                       .filter(aantal_scheids__gte=1,
+                       .filter(status=WEDSTRIJD_STATUS_GEACCEPTEERD,
+                               aantal_scheids__gte=1,
                                datum_begin__gte=vorige_week)
                        .select_related('locatie')
                        .order_by('datum_begin'))       # nieuwste bovenaan
@@ -87,13 +87,20 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
             if wedstrijd.organisatie == ORGANISATIE_WA:
                 wedstrijd.organisatie_str += ' ' + WEDSTRIJD_WA_STATUS_TO_STR[wedstrijd.wa_status]
 
+            wedstrijd.aantal_str = str(wedstrijd.aantal_scheids)
+
             if wedstrijd.datum_begin != wedstrijd.datum_einde:
                 wedstrijd.aantal_dagen = (wedstrijd.datum_einde - wedstrijd.datum_begin).days + 1
+                wedstrijd.aantal_str += ' (%sx)' % wedstrijd.aantal_dagen
+
+            if wedstrijd.aantal_scheids == AANTAL_SCHEIDS_EIGEN:
+                wedstrijd.aantal_str = 'n.v.t.'
 
             if self.is_cs:
                 wedstrijd.url_details = reverse('Scheidsrechter:wedstrijd-kies-scheidsrechters',
                                                 kwargs={'wedstrijd_pk': wedstrijd.pk})
-                wedstrijd.nog_opvragen = wedstrijd.pk not in wedstrijd_pks
+                wedstrijd.nog_opvragen = (wedstrijd.pk not in wedstrijd_pks and
+                                          wedstrijd.aantal_scheids != AANTAL_SCHEIDS_EIGEN)
             else:
                 wedstrijd.url_details = reverse('Scheidsrechter:wedstrijd-details',
                                                 kwargs={'wedstrijd_pk': wedstrijd.pk})
@@ -136,7 +143,7 @@ class WedstrijdDetailsView(UserPassesTestMixin, TemplateView):
             wedstrijd_pk = str(kwargs['wedstrijd_pk'])[:6]     # afkappen voor de veiligheid
             wedstrijd = (Wedstrijd
                          .objects
-                         .exclude(status=WEDSTRIJD_STATUS_ONTWERP)
+                         .filter(status=WEDSTRIJD_STATUS_GEACCEPTEERD)
                          .exclude(is_ter_info=True)
                          .exclude(toon_op_kalender=False)
                          .select_related('organiserende_vereniging',
@@ -191,6 +198,10 @@ class WedstrijdDetailsView(UserPassesTestMixin, TemplateView):
         wedstrijd.behoefte_str = '%s scheidsrechter' % wedstrijd.aantal_scheids
         if wedstrijd.aantal_scheids > 1:
             wedstrijd.behoefte_str += 's'
+        if wedstrijd.aantal_scheids == AANTAL_SCHEIDS_EIGEN:
+            wedstrijd.behoefte_str = 'Geen (eigen scheidsrechters)'
+
+        wedstrijd.geen_selectie = wedstrijd.aantal_scheids == AANTAL_SCHEIDS_EIGEN
 
         wedstrijd.gekozen_per_dag = list()
         for dag in (WedstrijdDagScheidsrechters
@@ -259,7 +270,7 @@ class WedstrijdDetailsCSView(UserPassesTestMixin, TemplateView):
             wedstrijd_pk = str(kwargs['wedstrijd_pk'])[:6]     # afkappen voor de veiligheid
             wedstrijd = (Wedstrijd
                          .objects
-                         .exclude(status=WEDSTRIJD_STATUS_ONTWERP)
+                         .filter(status=WEDSTRIJD_STATUS_GEACCEPTEERD)
                          .exclude(is_ter_info=True)
                          .exclude(toon_op_kalender=False)
                          .select_related('organiserende_vereniging',
@@ -314,11 +325,16 @@ class WedstrijdDetailsCSView(UserPassesTestMixin, TemplateView):
         wedstrijd.behoefte_str = '%s scheidsrechter' % wedstrijd.aantal_scheids
         if wedstrijd.aantal_scheids > 1:
             wedstrijd.behoefte_str += 's'
+        if wedstrijd.aantal_scheids == AANTAL_SCHEIDS_EIGEN:
+            wedstrijd.behoefte_str = 'Geen (eigen scheidsrechters)'
 
         context['aantal_additionele_sr'] = wedstrijd.aantal_scheids - 1
 
-        context['url_wijzigen'] = reverse('Scheidsrechter:wedstrijd-kies-scheidsrechters',
-                                          kwargs={'wedstrijd_pk': wedstrijd.pk})
+        if wedstrijd.aantal_scheids == AANTAL_SCHEIDS_EIGEN:
+            context['url_wijzigen'] = None
+        else:
+            context['url_wijzigen'] = reverse('Scheidsrechter:wedstrijd-kies-scheidsrechters',
+                                              kwargs={'wedstrijd_pk': wedstrijd.pk})
 
         context['keuze_aantal_scheids'] = [
             (1, '1 scheidsrechter'),
@@ -634,6 +650,8 @@ class WedstrijdHWLContactView(UserPassesTestMixin, TemplateView):
         wedstrijd.behoefte_str = '%s scheidsrechter' % wedstrijd.aantal_scheids
         if wedstrijd.aantal_scheids > 1:
             wedstrijd.behoefte_str += 's'
+        if wedstrijd.aantal_scheids == AANTAL_SCHEIDS_EIGEN:
+            wedstrijd.behoefte_str = 'Geen (eigen scheidsrechters)'
 
         if wedstrijd.aantal_scheids > 0:
             wedstrijd.dagen = dagen = (WedstrijdDagScheidsrechters

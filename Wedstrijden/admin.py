@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2023 Ramon van der Winkel.
+#  Copyright (c) 2020-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -11,7 +11,7 @@ from Wedstrijden.models import Wedstrijd, WedstrijdSessie, WedstrijdKorting, Wed
 class WedstrijdAdmin(admin.ModelAdmin):                 # pragma: no cover
     """ Admin configuratie voor Wedstrijd """
 
-    list_filter = ('status', 'extern_beheerd', 'is_ter_info', 'organisatie', 'wa_status', 'discipline',
+    list_filter = ('status', 'extern_beheerd', 'is_ter_info', 'toon_op_kalender', 'organisatie', 'wa_status', 'discipline',
                    'aantal_scheids')
 
     readonly_fields = ('sessies', 'boogtypen', 'wedstrijdklassen')

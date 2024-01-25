@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2023 Ramon van der Winkel.
+#  Copyright (c) 2020-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db import models
 from Account.models import Account
-from BasisTypen.definities import ORGANISATIES, ORGANISATIE_WA, SCHEIDS_CHOICES, SCHEIDS_NIET
+from BasisTypen.definities import ORGANISATIES, ORGANISATIE_WA
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse
 from Locatie.models import Locatie
 from Score.models import Score, Uitslag

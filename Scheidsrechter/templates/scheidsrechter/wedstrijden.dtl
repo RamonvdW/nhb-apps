@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2023 Ramon van der Winkel.
+                Copyright (c) 2023-2024 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -35,7 +35,7 @@
                     <tr>
                         <td>{{ obj.datum_begin }}{% if obj.datum_begin != obj.datum_einde %} - {{ obj.datum_einde }}{% endif %}</td>
                         <td>{{ obj.locatie.plaats }}</td>
-                        <td class="hide-on-small-only center">{{ obj.aantal_scheids }}{% if obj.aantal_dagen %} ({{ obj.aantal_dagen }}x){% endif %}</td>
+                        <td class="hide-on-small-only center">{{ obj.aantal_str }}</td>
                         <td>{{ obj.titel }}</td>
                         <td>
                             {% if obj.nog_opvragen %}
