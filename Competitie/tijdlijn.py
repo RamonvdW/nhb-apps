@@ -52,6 +52,8 @@ evaluatie_datum = EvaluatieDatum()
 def bepaal_fase_indiv(comp) -> str:
     """ bepaal de fase van de individuele competitie """
 
+    comp.begin_fase_K_indiv = comp.begin_fase_L_indiv - datetime.timedelta(days=14)
+
     # fase A was totdat dit object gemaakt werd
 
     if comp.is_afgesloten:

@@ -1,0 +1,128 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2021-2024 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+{% load overig_filters %}
+
+{% block title %}Wedstrijd details{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Wedstrijd details</h3>
+        </div>
+    </div>
+
+
+    <!-- blauwe balk met informatie tabel -->
+    <div class="row-sv-blauw">
+        <div class="col s12 l10 offset-l1 xl8 offset-xl2">
+            <table class="sv-kader">
+
+                <tr>
+                    <td colspan="2" class="center sv-blauw-text">
+                        <h6>Informatie</h6>
+                    </td>
+                </tr>
+
+                <tr>
+                    <th>Titel</th>
+                    <td>{{ match.beschrijving }}</td>
+                </tr>
+
+                <tr>
+                    <th>Organiserende vereniging</th>
+                    <td>{{ match.vereniging }}</td>
+                </tr>
+
+                <tr>
+                    <th>Datum wedstrijd</th>
+                    <td>{{ match.datum_wanneer }}</td>
+                </tr>
+
+                <tr>
+                    <th>Aanvang wedstrijd</th>
+                    <td>{{ match.tijd_begin_wedstrijd }}</td>
+                </tr>
+
+                <tr>
+                    <th>WA-status</th>
+                    <td>A-status</td>
+                </tr>
+
+                <tr>
+                    <th>Wedstrijd locatie</th>
+                    <td>
+                        <span>{{ match.locatie.adres|linebreaksbr }}</span>
+                        {% if url_map %}
+                            <br><br>
+                            <a class="btn-sv-blauw nav_weg_knop" href="{{ url_map }}" target="_blank" rel="noopener noreferrer">
+                                <i class="notranslate material-icons-round left">open_in_new</i>Toon op de kaart</a>
+                        {% endif %}
+                    </td>
+                </tr>
+
+                <tr>
+                    <td colspan="2" class="center sv-blauw-text">
+                        <h6>Contactgegevens organisatie</h6>
+                    </td>
+                </tr>
+
+                <tr>
+                    <th>Naam</th>
+                    <td>{% if match.contact_naam %}{{ match.contact_naam }}{% else %}<i>Onbekend</i>{% endif %}</td>
+                </tr>
+
+                <tr>
+                    <th>Telefoon<wbr>nummer</th>
+                    <td>{% if match.contact_telefoon %}{{ match.contact_telefoon }}{% else %}<i>Onbekend</i>{% endif %}</td>
+                </tr>
+
+                <tr>
+                    <th>E-mailadres</th>
+                    <td>{% if match.contact_email %}<code>{{ match.contact_email|wbr_email }}</code>{% else %}<i>Onbekend</i>{% endif %}</td>
+                </tr>
+
+
+                <tr>
+                    <td colspan="2" class="center sv-blauw-text"><h6>Scheidsrechters</h6></td>
+                </tr>
+
+                <tr>
+                    <th>Behoefte scheidsrechters</th>
+                    <td>{{ match.aantal_scheids }}</td>
+                </tr>
+
+                <tr>
+                    <th class="sv-rood-text">Geselecteerd</th>
+                    <td>{% if match.gekozen_sr %}{{ match.gekozen_sr.level_naam_str }}{% else %}<i>Nog niet bekend</i>{% endif %}</td>
+                </tr>
+
+
+                <tr>
+                    <td colspan="2" class="center sv-blauw-text"><h6>Wedstrijdklassen</h6></td>
+                </tr>
+
+                <tr>
+                    <td></td>
+                    <td>
+                        {% for klasse in match.klassen %}
+                            {{ klasse }}<br>
+                        {% endfor %}
+                    </td>
+                </tr>
+
+            </table>
+        </div>
+
+    </div>
+
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="scheidsrechter-wedstrijd-details" %}
+
+{% endblock %}

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2023 Ramon van der Winkel.
+#  Copyright (c) 2019-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -225,6 +225,9 @@ class TemplateCompetitieIndivKlasse(models.Model):
     blazoen_18m_rk_bk = models.CharField(max_length=2, choices=BLAZOEN_CHOICES, default=BLAZOEN_40CM)
     blazoen_25m_rk_bk = models.CharField(max_length=2, choices=BLAZOEN_CHOICES, default=BLAZOEN_60CM)
 
+    # krijgt deze wedstrijdklasse een scheidsrechter toegekend op het RK en BK?
+    krijgt_scheids_rk_bk = models.BooleanField(default=False)
+
     def __str__(self):
         """ Lever een tekstuele beschrijving voor de admin interface """
         return "%s [%s]" % (self.beschrijving, self.boogtype.afkorting)
@@ -277,6 +280,9 @@ class TemplateCompetitieTeamKlasse(models.Model):
     # op welk soort blazoen schiet deze klasse in de kampioenschappen
     blazoen_18m_rk_bk = models.CharField(max_length=2, choices=BLAZOEN_CHOICES, default=BLAZOEN_40CM)
     blazoen_25m_rk_bk = models.CharField(max_length=2, choices=BLAZOEN_CHOICES, default=BLAZOEN_60CM)
+
+    # krijgt deze wedstrijdklasse een scheidsrechter toegekend op het RK en BK?
+    krijgt_scheids_rk_bk = models.BooleanField(default=False)
 
     def __str__(self):
         """ Lever een tekstuele beschrijving voor de admin interface """

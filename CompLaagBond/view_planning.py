@@ -241,7 +241,8 @@ class PlanningView(UserPassesTestMixin, TemplateView):
         match = CompetitieMatch(
                     competitie=deelkamp.competitie,
                     datum_wanneer=deelkamp.competitie.begin_fase_P_indiv,
-                    tijd_begin_wedstrijd=datetime.time(hour=10, minute=0, second=0))
+                    tijd_begin_wedstrijd=datetime.time(hour=10, minute=0, second=0),
+                    beschrijving='BK, ' + deelkamp.competitie.beschrijving)
         match.save()
 
         deelkamp.rk_bk_matches.add(match)

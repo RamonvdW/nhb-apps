@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023 Ramon van der Winkel.
+#  Copyright (c) 2023-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from Scheidsrechter import view_overzicht, view_korps, view_beschikbaarheid, view_wedstrijden
+from Scheidsrechter import view_overzicht, view_korps, view_beschikbaarheid, view_wedstrijden, view_competitie
 
 app_name = 'Scheidsrechter'
 
@@ -55,6 +55,19 @@ urlpatterns = [
     path('beschikbaarheid-inzien/',
          view_beschikbaarheid.BeschikbaarheidInzienCSView.as_view(),
          name='beschikbaarheid-inzien'),
+
+    path('bondscompetitie/',
+         view_competitie.CompetitieMatchesView.as_view(),
+         name='competitie'),
+
+    path('bondscompetitie/<match_pk>/details/',
+         view_competitie.MatchDetailsView.as_view(),
+         name='match-details'),
+
+    path('bondscompetitie/<match_pk>/kies-scheidsrechter/',
+         view_competitie.MatchDetailsCSView.as_view(),
+         name='match-kies-scheidsrechter'),
+
 ]
 
 

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2023 Ramon van der Winkel.
+#  Copyright (c) 2020-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -44,6 +44,7 @@ class Migration(migrations.Migration):
         ('Wedstrijden', 'm0053_squashed'),
     ]
 
+    # migratie functies
     operations = [
         migrations.CreateModel(
             name='Competitie',

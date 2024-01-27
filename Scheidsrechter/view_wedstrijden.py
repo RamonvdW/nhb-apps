@@ -83,9 +83,9 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
                        .order_by('datum_begin'))       # nieuwste bovenaan
 
         for wedstrijd in wedstrijden:
-            wedstrijd.organisatie_str = WEDSTRIJD_ORGANISATIE_TO_STR[wedstrijd.organisatie]
-            if wedstrijd.organisatie == ORGANISATIE_WA:
-                wedstrijd.organisatie_str += ' ' + WEDSTRIJD_WA_STATUS_TO_STR[wedstrijd.wa_status]
+            # wedstrijd.organisatie_str = WEDSTRIJD_ORGANISATIE_TO_STR[wedstrijd.organisatie]
+            # if wedstrijd.organisatie == ORGANISATIE_WA:
+            #     wedstrijd.organisatie_str += ' ' + WEDSTRIJD_WA_STATUS_TO_STR[wedstrijd.wa_status]
 
             wedstrijd.aantal_str = str(wedstrijd.aantal_scheids)
 
@@ -446,7 +446,8 @@ class WedstrijdDetailsCSView(UserPassesTestMixin, TemplateView):
                     else:
                         beschikbaar.is_selected = False
 
-                    beschikbaar.waarschuw_niet_meer_beschikbaar = beschikbaar.is_selected and beschikbaar.opgaaf != BESCHIKBAAR_JA
+                    beschikbaar.waarschuw_niet_meer_beschikbaar = (beschikbaar.is_selected and
+                                                                   beschikbaar.opgaaf != BESCHIKBAAR_JA)
                     if beschikbaar.waarschuw_niet_meer_beschikbaar:
                         bevat_fouten = True
                         beschikbaar.is_onzeker = False  # voorkom disable van checkbox
@@ -634,7 +635,6 @@ class WedstrijdHWLContactView(UserPassesTestMixin, TemplateView):
             wedstrijd_pk = str(kwargs['wedstrijd_pk'])[:6]     # afkappen voor de veiligheid
             wedstrijd = (Wedstrijd
                          .objects
-                         .exclude(status=WEDSTRIJD_STATUS_ONTWERP)
                          .exclude(is_ter_info=True)
                          .exclude(toon_op_kalender=False)
                          .exclude(aantal_scheids=AANTAL_SCHEIDS_GEEN_KEUZE)

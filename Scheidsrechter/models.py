@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023 Ramon van der Winkel.
+#  Copyright (c) 2023-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db import models
 from django.db.models.constraints import UniqueConstraint
+from Competitie.models import CompetitieMatch
 from Scheidsrechter.definities import BESCHIKBAAR_CHOICES, BESCHIKBAAR2STR, BESCHIKBAAR_LEEG, SCHEIDS_MUTATIE_TO_STR
 from Sporter.models import Sporter
 from Wedstrijden.models import Wedstrijd
@@ -54,7 +55,7 @@ class WedstrijdDagScheidsrechters(models.Model):
     """
 
     # voor welke wedstrijd is de behoefte?
-    wedstrijd = models.ForeignKey(Wedstrijd, on_delete=models.CASCADE)
+    wedstrijd = models.ForeignKey(Wedstrijd, on_delete=models.CASCADE, null=True, blank=True)
 
     # voor elke dag van de wedstrijd een specifieke behoefte
     # eerste dag is 0

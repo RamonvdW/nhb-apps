@@ -22,9 +22,8 @@ from Functie.models import Functie
 from Locatie.models import Locatie
 from Geo.models import Rayon, Regio, Cluster
 from Score.models import Score, ScoreHist, Uitslag
-from Sporter.models import SporterBoog
+from Sporter.models import Sporter, SporterBoog
 from Vereniging.models import Vereniging
-import datetime
 import logging
 
 my_logger = logging.getLogger('NHBApps.Competitie')
@@ -187,7 +186,6 @@ class Competitie(models.Model):
 
     def bepaal_fase(self):
         """ bepaalde huidige fase van de competitie en zet self.fase_indiv en self.fase_teams """
-        self.begin_fase_K_indiv = self.begin_fase_L_indiv - datetime.timedelta(days=14)
         self.fase_indiv = bepaal_fase_indiv(self)
         self.fase_teams = bepaal_fase_teams(self)
         # print('competitie: afstand=%s, fase_indiv=%s, fase_teams=%s' % (
@@ -283,6 +281,9 @@ class CompetitieIndivKlasse(models.Model):
     # op welk soort blazoen schiet deze klasse in de kampioenschappen (geen keuze)
     blazoen_rk_bk = models.CharField(max_length=2, choices=BLAZOEN_CHOICES, default=BLAZOEN_40CM)
 
+    # krijgt deze wedstrijdklasse een scheidsrechter toegekend op het RK en BK?
+    krijgt_scheids_rk_bk = models.BooleanField(default=False)
+
     # TODO: standaard limiet toevoegen voor elke klasse: 24
 
     def __str__(self):
@@ -352,6 +353,9 @@ class CompetitieTeamKlasse(models.Model):
 
     # op welk soort blazoen schiet deze klasse in de kampioenschappen
     blazoen_rk_bk = models.CharField(max_length=2, choices=BLAZOEN_CHOICES, default=BLAZOEN_40CM)
+
+    # krijgt deze wedstrijdklasse een scheidsrechter toegekend op het RK en BK?
+    krijgt_scheids_rk_bk = models.BooleanField(default=False)
 
     # TODO: standaard limiet toevoegen voor elke klasse: ERE=12, rest=8
 
@@ -436,6 +440,13 @@ class CompetitieMatch(models.Model):
     # uitslag / scores
     uitslag = models.ForeignKey(Uitslag, on_delete=models.PROTECT,
                                 blank=True, null=True)
+
+    # benodigde scheidsrechters
+    aantal_scheids = models.IntegerField(default=0)
+
+    # de gekozen scheidsrechter
+    gekozen_sr = models.ForeignKey(Sporter, on_delete=models.SET_NULL, related_name='gekozen_sr',
+                                   null=True, blank=True)              # mag leeg zijn
 
     def __str__(self):
         """ geef een tekstuele afkorting van dit object, voor in de admin interface """

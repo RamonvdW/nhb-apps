@@ -1,0 +1,62 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2023-2024 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Wedstrijden{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Bondscompetitie</h3>
+            <p>RK en BK wedstrijden waar een scheidsrechter nodig is</p>
+        </div>
+    </div>
+
+    <!-- blauwe balk met informatie in een tabel -->
+    <div class="row-sv-blauw">
+        <div class="col s12">
+            <table class="sv-kader">
+                <thead>
+                    <tr>
+                        <th>Wanneer</th>
+                        <th>Plaats</th>
+                        <th class="hide-on-small-only center">Scheidsrechters</th>
+                        <th>Titel</th>
+                        <th><!-- knoppen --></th>
+                    </tr>
+                </thead>
+                {% for obj in matches %}
+                    <tr>
+                        <td>{{ obj.datum_wanneer }}</td>
+                        <td>{{ obj.locatie.plaats }}</td>
+                        <td class="hide-on-small-only center">{{ obj.aantal_str }}</td>
+                        <td>{{ obj.beschrijving }}</td>
+                        <td>
+                            {% if obj.nog_opvragen %}
+                                <a class="btn-sv-blauw" href="{{ obj.url_details }}">
+                                    <i class="material-icons-round left notranslate">priority_high</i>Nieuw</a>
+                            {% else %}
+                                <a class="btn-sv-rood" href="{{ obj.url_details }}">{% if is_cs %}Wijzig{% else %}Details{% endif %}</a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="6">
+                            <i>Geen toekomstige wedstrijden met scheidsrechter behoefte</i>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="scheidsrechter-wedstrijden" %}
+
+{% endblock %}
