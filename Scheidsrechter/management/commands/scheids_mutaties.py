@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023 Ramon van der Winkel.
+#  Copyright (c) 2023-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -121,18 +121,17 @@ class Command(BaseCommand):
 
         wed_adres = wedstrijd.locatie.adres.replace('\r\n', '\n')
 
+        url = settings.SITE_URL + reverse('Scheidsrechter:wedstrijd-details', kwargs={'wedstrijd_pk': wedstrijd.pk})
+
         context = {
             'voornaam': account.get_first_name(),
-
             'wed_titel': wedstrijd.titel,
             'wed_datum': wed_datum,
             'wed_adres': wed_adres.split('\n'),
-            'url_wed_details': reverse('Scheidsrechter:wedstrijd-details', kwargs={'wedstrijd_pk': wedstrijd.pk}),
-
+            'url_wed_details': url,
             'org_email': wedstrijd.contact_email,
             'org_naam': wedstrijd.contact_naam,
             'org_tel': wedstrijd.contact_telefoon,
-
             'email_cs': self._email_cs,
         }
 
@@ -159,10 +158,8 @@ class Command(BaseCommand):
 
         context = {
             'voornaam': account.get_first_name(),
-
             'wed_titel': wedstrijd.titel,
             'wed_datum': wed_datum,
-
             'email_cs': self._email_cs,
         }
 
