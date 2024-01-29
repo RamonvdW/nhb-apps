@@ -55,7 +55,7 @@ class WedstrijdDagScheidsrechters(models.Model):
     """
 
     # voor welke wedstrijd is de behoefte?
-    wedstrijd = models.ForeignKey(Wedstrijd, on_delete=models.CASCADE, null=True, blank=True)
+    wedstrijd = models.ForeignKey(Wedstrijd, on_delete=models.CASCADE)
 
     # voor elke dag van de wedstrijd een specifieke behoefte
     # eerste dag is 0
@@ -129,7 +129,7 @@ class ScheidsMutatie(models.Model):
     door = models.CharField(max_length=50, default='')
 
     # voor welke wedstrijd is de behoefte?
-    wedstrijd = models.ForeignKey(Wedstrijd, on_delete=models.CASCADE)
+    wedstrijd = models.ForeignKey(Wedstrijd, on_delete=models.CASCADE, null=True, blank=True)
 
     class Meta:
         verbose_name = "Scheids mutatie"

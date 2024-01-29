@@ -94,6 +94,9 @@ class Wedstrijd(models.Model):
     #           als er inschrijvingen aan hangen dan wil je de wedstrijd niet verwijderen
     toon_op_kalender = models.BooleanField(default=True)
 
+    # voor intern gebruik (scheidsrechter beschikbaarheid RK/BK competitie)?
+    verstop_voor_mwz = models.BooleanField(default=False)
+
     # wanneer is de wedstrijd (kan meerdere dagen beslaan)
     datum_begin = models.DateField()
     datum_einde = models.DateField()

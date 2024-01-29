@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023 Ramon van der Winkel.
+#  Copyright (c) 2023-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -19,7 +19,8 @@ from Locatie.models import Reistijd
 from Scheidsrechter.definities import (BESCHIKBAAR_LEEG, BESCHIKBAAR_JA, BESCHIKBAAR_DENK, BESCHIKBAAR_NEE,
                                        BESCHIKBAAR2STR, SCHEIDS2LEVEL)
 from Scheidsrechter.models import WedstrijdDagScheidsrechters, ScheidsBeschikbaarheid
-from Scheidsrechter.mutaties import scheids_mutatieverzoek_beschikbaarheid_opvragen
+from Scheidsrechter.mutaties import (scheids_mutatieverzoek_beschikbaarheid_opvragen,
+                                     scheids_mutatieverzoek_competitie_beschikbaarheid_opvragen)
 from Sporter.models import get_sporter
 from Wedstrijden.definities import WEDSTRIJD_STATUS_GEACCEPTEERD
 from Wedstrijden.models import Wedstrijd
@@ -73,6 +74,38 @@ class BeschikbaarheidOpvragenView(UserPassesTestMixin, View):
         return HttpResponseRedirect(url)
 
 
+class BeschikbaarheidCompetitieOpvragenView(UserPassesTestMixin, View):
+
+    """ Deze view wordt gebruikt als iemand van de Commissie Scheidsrechters de beschikbaarheid voor
+        de bondscompetitie Indoor op wil vragen. De achtergrondtaak handelt dit af.
+    """
+
+    # class variables shared by all instances
+    raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        rol_nu = rol_get_huidige(self.request)
+        return rol_nu == Rollen.ROL_CS
+
+    @staticmethod
+    def post(request, *args, **kwargs):
+        """
+            deze functie wordt aangeroepen als op de knop Beschikbaarheid Opvragen gedrukt is.
+        """
+
+        snel = str(request.POST.get('snel', ''))[:1]
+
+        account = get_account(request)
+        door_str = "CS %s" % account.volledige_naam()
+
+        scheids_mutatieverzoek_competitie_beschikbaarheid_opvragen(door_str, snel == '1')
+
+        url = reverse('Scheidsrechter:overzicht')
+        return HttpResponseRedirect(url)
+
+
 class WijzigBeschikbaarheidView(UserPassesTestMixin, TemplateView):
 
     """ Django class-based view voor de scheidsrechters """
@@ -112,7 +145,6 @@ class WijzigBeschikbaarheidView(UserPassesTestMixin, TemplateView):
                                      status=WEDSTRIJD_STATUS_GEACCEPTEERD,
                                      datum_begin__gte=vorige_week)
                              .exclude(is_ter_info=True)
-                             .exclude(toon_op_kalender=False)
                              .values_list('pk', flat=True))
 
         # kijk voor welke dagen we beschikbaarheid nodig hebben
@@ -201,7 +233,6 @@ class WijzigBeschikbaarheidView(UserPassesTestMixin, TemplateView):
                                      status=WEDSTRIJD_STATUS_GEACCEPTEERD,
                                      datum_begin__gte=vorige_week)
                              .exclude(is_ter_info=True)
-                             .exclude(toon_op_kalender=False)
                              .values_list('pk', flat=True))
 
         # kijk voor welke dagen we beschikbaarheid nodig hebben

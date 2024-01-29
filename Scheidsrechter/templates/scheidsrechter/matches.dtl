@@ -18,6 +18,28 @@
         </div>
     </div>
 
+    {% if url_opvragen %}
+
+        <!-- blauw balk met wit informatie veld -->
+        <div class="row-sv-blauw">
+            <div class="col s12 m12 l10 offset-l1 xl8 offset-xl2">
+                <div class="sv-kader" style="padding:10px">
+                    <p>Er zijn nieuwe datums voor de RK/BK wedstrijden waarvoor beschikbaarheid opgevraagd kan worden.</p>
+
+                    <form action="{{ url_opvragen }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
+                        {% csrf_token %}
+
+                        <!-- button -->
+                        <p class="center">
+                            <button class="btn-sv-rood" id="submit_knop" type="submit">Beschikbaarheid opvragen</button>
+                        </p>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    {% endif %}
+
     <!-- blauwe balk met informatie in een tabel -->
     <div class="row-sv-blauw">
         <div class="col s12">

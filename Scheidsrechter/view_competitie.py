@@ -59,6 +59,40 @@ class CompetitieMatchesView(UserPassesTestMixin, TemplateView):
             return True
         return False
 
+    def _check_wedstrijd_rk(self, alle_datums, een_match):
+        if not een_match:
+            return False
+
+        pos = een_match.beschrijving.find(', ')
+        titel = 'RK wedstrijden' + een_match.beschrijving[pos:]
+
+        wedstrijd = Wedstrijd.objects.filter(titel=titel, toon_op_kalender=False, verstop_voor_mwz=True).first()
+        if not wedstrijd:
+            # moet nog opgevraagd worden
+            return True
+
+        # TODO: check of alle ScheidsDag compleet is
+        print('RK gevonden: %s' % wedstrijd)
+
+        return False
+
+    def _check_wedstrijd_bk(self, alle_datums, een_match):
+        if not een_match:
+            return False
+
+        pos = een_match.beschrijving.find(', ')
+        titel = 'BK wedstrijden' + een_match.beschrijving[pos:]
+
+        wedstrijd = Wedstrijd.objects.filter(titel=titel, toon_op_kalender=False, verstop_voor_mwz=True).first()
+        if not wedstrijd:
+            # moet nog opgevraagd worden
+            return True
+
+        # TODO: check of alle ScheidsDag compleet is
+        print('BK gevonden: %s' % wedstrijd)
+
+        return False
+
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
@@ -69,8 +103,16 @@ class CompetitieMatchesView(UserPassesTestMixin, TemplateView):
                    .objects
                    .exclude(aantal_scheids__lt=1)
                    .filter(datum_wanneer__gte=vorige_week)
-                   .order_by('datum_wanneer',       # nieuwste bovenaan
+                   .order_by('datum_wanneer',       # oudste bovenaan
                              'beschrijving'))       # want veel dezelfde datum
+
+        context['matches'] = matches
+        context['is_cs'] = self.is_cs
+
+        alle_rk_datums = list()
+        alle_bk_datums = list()
+
+        een_match = None
 
         for match in matches:
 
@@ -79,17 +121,45 @@ class CompetitieMatchesView(UserPassesTestMixin, TemplateView):
             if self.is_cs:
                 match.url_details = reverse('Scheidsrechter:match-kies-scheidsrechter',
                                             kwargs={'match_pk': match.pk})
+
+                een_match = match
+
+                if match.beschrijving.startswith('BK'):
+                    if match.datum_wanneer not in alle_bk_datums:
+                        alle_bk_datums.append(match.datum_wanneer)
+                else:
+                    if match.datum_wanneer not in alle_rk_datums:
+                        alle_rk_datums.append(match.datum_wanneer)
             else:
                 match.url_details = reverse('Scheidsrechter:match-details',
                                             kwargs={'match_pk': match.pk})
         # for
 
-        context['matches'] = matches
-        context['is_cs'] = self.is_cs
+        if self.is_cs:
+            # kijk of de beschikbaarheid van het RK of BK nog opgevraagd moet worden
+            if self._check_wedstrijd_rk(alle_rk_datums, een_match):
+                context['url_opvragen'] = reverse('Scheidsrechter:competitie-beschikbaarheid-opvragen')
+
+            if self._check_wedstrijd_bk(alle_bk_datums, een_match):
+                context['url_opvragen'] = reverse('Scheidsrechter:competitie-beschikbaarheid-opvragen')
+
+            # rk_wedstrijd = Wedstrijd.objects.filter(titel=rk_titel).first()
+            # if rk_count == 0:
+            #     context['url_opvragen_rk'] = reverse('Scheidsrechter:competitie-beschikbaarheid-opvragen')
+            #
+            # if bk_count == 0:
+            #     context['url_opvragen_bk'] = reverse('Scheidsrechter:competitie-beschikbaarheid-opvragen')
+
+            # if match.datum_wanneer not in alle_datums:
+            #     alle_datums.append(match.datum_wanneer)
+            # # knop om behoefte op te vragen
+            # aantal_dagen = (wedstrijd.datum_einde - wedstrijd.datum_begin).days + 1
+            # if WedstrijdDagScheidsrechters.objects.filter(wedstrijd=wedstrijd).count() < aantal_dagen:
+            #     context['url_opvragen'] = reverse('Scheidsrechter:beschikbaarheid-opvragen')
 
         context['kruimels'] = (
             (reverse('Scheidsrechter:overzicht'), 'Scheidsrechters'),
-            (None, 'Wedstrijden')
+            (None, 'Bondscompetitie')
         )
 
         return context

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2023 Ramon van der Winkel.
+#  Copyright (c) 2021-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -92,7 +92,8 @@ class KalenderManagerView(UserPassesTestMixin, View):
         # pak de 50 meest recente wedstrijden
         wedstrijden = (Wedstrijd
                        .objects
-                       .filter(datum_begin__gte=datum_vanaf)
+                       .filter(datum_begin__gte=datum_vanaf,
+                               verstop_voor_mwz=False)
                        .order_by('datum_begin'))
 
         if status:
@@ -216,7 +217,8 @@ class ZetStatusWedstrijdView(UserPassesTestMixin, View):
             wedstrijd_pk = int(str(kwargs['wedstrijd_pk'])[:6])     # afkappen voor de veiligheid
             wedstrijd = (Wedstrijd
                          .objects
-                         .get(pk=wedstrijd_pk))
+                         .get(pk=wedstrijd_pk,
+                              verstop_voor_mwz=False))
         except Wedstrijd.DoesNotExist:
             raise Http404('Wedstrijd niet gevonden')
 

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023 Ramon van der Winkel.
+#  Copyright (c) 2023-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -16,15 +16,21 @@ from django.db.utils import DataError, OperationalError, IntegrityError
 from django.core.management.base import BaseCommand
 from Account.models import Account
 from BasisTypen.definities import SCHEIDS_NIET, SCHEIDS_VERENIGING
+from Competitie.models import CompetitieMatch
 from Functie.models import Functie
-from Locatie.models import Reistijd
+from Locatie.models import Reistijd, Locatie
 from Locatie.operations import ReistijdBepalen
 from Mailer.operations import mailer_queue_email, render_email_template
 from Overig.background_sync import BackgroundSync
-from Scheidsrechter.definities import SCHEIDS_MUTATIE_BESCHIKBAARHEID_OPVRAGEN, SCHEIDS_MUTATIE_STUUR_NOTIFICATIES
+from Scheidsrechter.definities import (SCHEIDS_MUTATIE_BESCHIKBAARHEID_OPVRAGEN,
+                                       SCHEIDS_MUTATIE_STUUR_NOTIFICATIES,
+                                       SCHEIDS_MUTATIE_COMPETITIE_BESCHIKBAARHEID_OPVRAGEN)
 from Scheidsrechter.models import WedstrijdDagScheidsrechters, ScheidsMutatie
 from Sporter.models import Sporter
 from Taken.operations import maak_taak
+from Vereniging.models import Vereniging
+from Wedstrijden.definities import (WEDSTRIJD_STATUS_GEACCEPTEERD, WEDSTRIJD_BEGRENZING_LANDELIJK,
+                                    WEDSTRIJD_DISCIPLINE_INDOOR)
 from Wedstrijden.models import Wedstrijd
 import traceback
 import datetime
@@ -53,6 +59,20 @@ class Command(BaseCommand):
         functie_cs = Functie.objects.get(rol='CS')
         self._email_cs = functie_cs.bevestigde_email
 
+        ver_nr = settings.WEDSTRIJDEN_KIES_UITVOERENDE_VERENIGING[0]
+        self.ver_bondsbureau = Vereniging.objects.get(ver_nr=ver_nr)
+
+        loc, is_created = Locatie.objects.get_or_create(naam='Placeholder RK/BK voor SR',
+                                                        zichtbaar=False,
+                                                        discipline_indoor=True,
+                                                        adres='(diverse)',
+                                                        plaats='(diverse)',
+                                                        notities='Automatisch aangemaakt voor opvragen SR naar RK/BK')
+        if is_created:
+            loc.verenigingen.add(self.ver_bondsbureau)
+        self.locatie_placeholder = loc
+
+
     def add_arguments(self, parser):
         parser.add_argument('duration', type=int,
                             choices=(1, 2, 5, 7, 10, 15, 20, 30, 45, 60),
@@ -64,9 +84,13 @@ class Command(BaseCommand):
     def stuur_email_naar_sr_beschikbaarheid_opgeven(self, wedstrijd: Wedstrijd, datums: list, account: Account):
         """ Stuur een e-mail om de beschikbaarheid op te vragen """
 
-        soort_sr = '%s scheidsrechter' % wedstrijd.aantal_scheids
-        if wedstrijd.aantal_scheids > 1:
-            soort_sr += 's'
+        if wedstrijd.aantal_scheids > 0:
+            soort_sr = '%s scheidsrechter' % wedstrijd.aantal_scheids
+            if wedstrijd.aantal_scheids > 1:
+                soort_sr += 's'
+        else:
+            # uitzonderingssituatie: aantal niet ingevuld (komt voor bij RK/BK)
+            soort_sr = 'scheidsrechters'
 
         if len(datums) > 1:
             zelfde_maand = True
@@ -121,18 +145,17 @@ class Command(BaseCommand):
 
         wed_adres = wedstrijd.locatie.adres.replace('\r\n', '\n')
 
+        url = settings.SITE_URL + reverse('Scheidsrechter:wedstrijd-details', kwargs={'wedstrijd_pk': wedstrijd.pk})
+
         context = {
             'voornaam': account.get_first_name(),
-
             'wed_titel': wedstrijd.titel,
             'wed_datum': wed_datum,
             'wed_adres': wed_adres.split('\n'),
-            'url_wed_details': reverse('Scheidsrechter:wedstrijd-details', kwargs={'wedstrijd_pk': wedstrijd.pk}),
-
+            'url_wed_details': url,
             'org_email': wedstrijd.contact_email,
             'org_naam': wedstrijd.contact_naam,
             'org_tel': wedstrijd.contact_telefoon,
-
             'email_cs': self._email_cs,
         }
 
@@ -159,10 +182,8 @@ class Command(BaseCommand):
 
         context = {
             'voornaam': account.get_first_name(),
-
             'wed_titel': wedstrijd.titel,
             'wed_datum': wed_datum,
-
             'email_cs': self._email_cs,
         }
 
@@ -229,6 +250,124 @@ class Command(BaseCommand):
         # verwerk de nieuwe verzoeken voor reistijd
         bepaler = ReistijdBepalen(self.stdout, self.stderr)
         bepaler.run()
+
+    def _verwerk_mutatie_beschikbaarheid_competitie_opvragen(self, mutatie):
+        """ maak een placeholder Wedstrijd aan voor de RK en BK matches van de competitie """
+
+        self.stdout.write('[INFO] Beschikbaarheid SR opvragen voor de competitie')
+
+        dit_jaar = timezone.make_aware(datetime.datetime(year=timezone.now().year, month=1, day=1))
+
+        matches = (CompetitieMatch
+                   .objects
+                   .exclude(aantal_scheids__lt=1)
+                   .filter(datum_wanneer__gte=dit_jaar)
+                   .order_by('datum_wanneer',       # oudste bovenaan
+                             'beschrijving'))       # want veel dezelfde datum
+
+        alle_rk_datums = list()
+        alle_bk_datums = list()
+
+        een_match = None
+
+        for match in matches:
+            een_match = match
+            if match.beschrijving.startswith('BK'):
+                if match.datum_wanneer not in alle_bk_datums:
+                    alle_bk_datums.append(match.datum_wanneer)
+            else:
+                if match.datum_wanneer not in alle_rk_datums:
+                    alle_rk_datums.append(match.datum_wanneer)
+        # for
+
+        pos = een_match.beschrijving.find(', ')
+        titel = ' wedstrijden' + een_match.beschrijving[pos:]
+
+        if len(alle_rk_datums) > 0:
+            rk_titel = 'RK' + titel
+            rk_wedstrijd, _ = Wedstrijd.objects.get_or_create(titel=rk_titel,
+                                                              toon_op_kalender=False, verstop_voor_mwz=True,
+                                                              datum_begin=alle_rk_datums[0],
+                                                              datum_einde=alle_rk_datums[-1],
+                                                              organiserende_vereniging=self.ver_bondsbureau,
+                                                              locatie=self.locatie_placeholder,
+                                                              discipline=WEDSTRIJD_DISCIPLINE_INDOOR,
+                                                              begrenzing=WEDSTRIJD_BEGRENZING_LANDELIJK,
+                                                              status=WEDSTRIJD_STATUS_GEACCEPTEERD,
+                                                              aantal_scheids=7)        # per dag
+            rk_wedstrijd.save()
+
+            vraag = list()
+            for datum in alle_rk_datums:
+                dag_nr = (datum - rk_wedstrijd.datum_begin).days
+
+                _, is_new = (WedstrijdDagScheidsrechters
+                             .objects
+                             .get_or_create(wedstrijd=rk_wedstrijd,
+                                            dag_offset=dag_nr))
+
+                if is_new:
+                    # voor deze dag een verzoek versturen
+                    vraag.append(datum)
+            # for
+
+            if len(vraag):
+                datums_str = ", ".join(datum.strftime('%Y-%m-%d') for datum in vraag)
+                self.stdout.write('[INFO] Stuur verzoeken voor RK datums: %s' % datums_str)
+
+                # doorloop alle scheidsrechters
+                qset = Sporter.objects.exclude(scheids=SCHEIDS_NIET)
+
+                # alleen SR's hanteren die een account aangemaakt hebben
+                qset = qset.exclude(account=None)
+
+                for sporter in qset:
+                    # stuur een e-mail
+                    self.stuur_email_naar_sr_beschikbaarheid_opgeven(rk_wedstrijd, vraag, sporter.account)
+                # for
+
+        if len(alle_bk_datums) > 0:
+            bk_titel = 'BK' + titel
+            bk_wedstrijd, _ = Wedstrijd.objects.get_or_create(titel=bk_titel,
+                                                              toon_op_kalender=False, verstop_voor_mwz=True,
+                                                              datum_begin=alle_bk_datums[0],
+                                                              datum_einde=alle_bk_datums[-1],
+                                                              organiserende_vereniging=self.ver_bondsbureau,
+                                                              locatie=self.locatie_placeholder,
+                                                              discipline=WEDSTRIJD_DISCIPLINE_INDOOR,
+                                                              begrenzing=WEDSTRIJD_BEGRENZING_LANDELIJK,
+                                                              status=WEDSTRIJD_STATUS_GEACCEPTEERD,
+                                                              aantal_scheids=6)        # per dag
+            bk_wedstrijd.save()
+
+            vraag = list()
+            for datum in alle_bk_datums:
+                dag_nr = (datum - bk_wedstrijd.datum_begin).days
+
+                _, is_new = (WedstrijdDagScheidsrechters
+                             .objects
+                             .get_or_create(wedstrijd=bk_wedstrijd,
+                                            dag_offset=dag_nr))
+
+                if is_new:
+                    # voor deze dag een verzoek versturen
+                    vraag.append(datum)
+            # for
+
+            if len(vraag):
+                datums_str = ", ".join(datum.strftime('%Y-%m-%d') for datum in vraag)
+                self.stdout.write('[INFO] Stuur verzoeken voor BK datums: %s' % datums_str)
+
+                # doorloop alle scheidsrechters
+                qset = Sporter.objects.exclude(scheids=SCHEIDS_NIET)
+
+                # alleen SR's hanteren die een account aangemaakt hebben
+                qset = qset.exclude(account=None)
+
+                for sporter in qset:
+                    # stuur een e-mail
+                    self.stuur_email_naar_sr_beschikbaarheid_opgeven(bk_wedstrijd, vraag, sporter.account)
+                # for
 
     def _maak_taak_voor_hwl(self, wedstrijd):
         self.stdout.write('[INFO] Maak taak voor HWL %s voor wedstrijd pk=%s' % (
@@ -317,6 +456,10 @@ class Command(BaseCommand):
         elif code == SCHEIDS_MUTATIE_STUUR_NOTIFICATIES:
             self.stdout.write('[INFO] Verwerk mutatie %s: Scheidsrechters gekozen' % mutatie.pk)
             self._verwerk_mutatie_stuur_notificaties(mutatie)
+
+        elif code == SCHEIDS_MUTATIE_COMPETITIE_BESCHIKBAARHEID_OPVRAGEN:
+            self.stdout.write('[INFO] Verwerk mutatie %s: Beschikbaarheid competitie opvragen' % mutatie.pk)
+            self._verwerk_mutatie_beschikbaarheid_competitie_opvragen(mutatie)
 
         else:
             self.stdout.write('[ERROR] Onbekende mutatie code %s (pk=%s)' % (code, mutatie.pk))

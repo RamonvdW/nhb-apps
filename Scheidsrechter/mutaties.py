@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2023 Ramon van der Winkel.
+#  Copyright (c) 2021-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.conf import settings
 from django.utils import timezone
-from Scheidsrechter.definities import SCHEIDS_MUTATIE_BESCHIKBAARHEID_OPVRAGEN, SCHEIDS_MUTATIE_STUUR_NOTIFICATIES
+from Scheidsrechter.definities import (SCHEIDS_MUTATIE_BESCHIKBAARHEID_OPVRAGEN, SCHEIDS_MUTATIE_STUUR_NOTIFICATIES,
+                                       SCHEIDS_MUTATIE_COMPETITIE_BESCHIKBAARHEID_OPVRAGEN)
 from Scheidsrechter.models import ScheidsMutatie
 from Overig.background_sync import BackgroundSync
 import datetime
@@ -83,6 +84,35 @@ def scheids_mutatieverzoek_stuur_notificaties(wedstrijd, door_str, snel):
                                         door=door_str,
                                         wedstrijd=wedstrijd)
     except ScheidsMutatie.objects.MultipleObjectsReturned:      # pragma: no cover
+        # al meerdere verzoeken in de queue
+        mutatie = None
+    else:
+        mutatie.save()
+
+        if is_created:                                          # pragma: no branch
+            # wacht kort op de achtergrondtaak
+            _scheids_ping_achtergrondtaak(mutatie, snel)
+
+    return mutatie
+
+
+def scheids_mutatieverzoek_competitie_beschikbaarheid_opvragen(door_str, snel):
+    """
+        Beschikbaarheid van SR opvragen voor specifieke wedstrijd.
+
+        snel = True: niet wachten op reactie achtergrond taak (voor testen)
+    """
+
+    recent = timezone.now() - datetime.timedelta(seconds=15)
+
+    # zet dit verzoek door naar het mutaties process
+    # voorkom duplicates (niet 100%)
+    try:
+        mutatie, is_created = ScheidsMutatie.objects.get_or_create(
+                                        when__gt=recent,
+                                        mutatie=SCHEIDS_MUTATIE_COMPETITIE_BESCHIKBAARHEID_OPVRAGEN,
+                                        door=door_str)
+    except ScheidsMutatie.MultipleObjectsReturned:              # pragma: no cover
         # al meerdere verzoeken in de queue
         mutatie = None
     else:
