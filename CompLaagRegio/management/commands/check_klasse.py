@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2023 Ramon van der Winkel.
+#  Copyright (c) 2021-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -111,12 +111,12 @@ class Command(BaseCommand):
                 wedstrijdleeftijd = deelnemer.sporterboog.sporter.bereken_wedstrijdleeftijd_wa(jaartal)
 
                 if wedstrijdgeslacht == GESLACHT_ANDERS and wedstrijdleeftijd < 18:
-                    print('Aspirant met geslacht anders mogelijk in te hogen gender-neutrale klasse ingedeeld')
+                    self.stdout.write('Aspirant met geslacht anders mogelijk in te hogen gender-neutrale klasse ingedeeld')
                     # omdat wedstrijdgeslacht niet ingesteld is
                     oude_klasse = deelnemer.indiv_klasse
                     oude_max_leeftijd = max([lkl.max_wedstrijdleeftijd
                                              for lkl in deelnemer.indiv_klasse.leeftijdsklassen.all()])
-                    print(deelnemer, wedstrijdleeftijd, '\n          ', oude_klasse, '<=', oude_max_leeftijd, 'jaar')
+                    self.stdout.write(deelnemer, wedstrijdleeftijd, '\n          ', oude_klasse, '<=', oude_max_leeftijd, 'jaar')
                     bepaler.bepaal_klasse_deelnemer(deelnemer, GESLACHT_MAN)
                     alt_h = deelnemer.indiv_klasse
                     alt_h_leeftijd = max([lkl.max_wedstrijdleeftijd
@@ -127,8 +127,8 @@ class Command(BaseCommand):
                                           for lkl in deelnemer.indiv_klasse.leeftijdsklassen.all()])
 
                     if alt_d_leeftijd != oude_max_leeftijd or alt_d_leeftijd != oude_max_leeftijd:
-                        print('    alt_h: %s <= %s jaar' % (alt_h, alt_h_leeftijd))
-                        print('    alt_d: %s <= %s jaar' % (alt_d, alt_d_leeftijd))
+                        self.stdout.write('    alt_h: %s <= %s jaar' % (alt_h, alt_h_leeftijd))
+                        self.stdout.write('    alt_d: %s <= %s jaar' % (alt_d, alt_d_leeftijd))
 
             else:
                 indiv_ag = deelnemer.ag_voor_indiv

@@ -19,7 +19,7 @@ from Functie.scheids import gebruiker_is_scheids
 from Scheidsrechter.definities import (SCHEIDS_VERENIGING, SCHEIDS2LEVEL,
                                        BESCHIKBAAR_DENK, BESCHIKBAAR_NEE, BESCHIKBAAR_JA)
 from Scheidsrechter.models import WedstrijdDagScheidsrechters, ScheidsBeschikbaarheid
-from Scheidsrechter.mutaties import scheids_mutatieverzoek_stuur_notificaties
+from Scheidsrechter.mutaties import scheids_mutatieverzoek_stuur_notificaties_wedstrijd
 from Sporter.models import SporterVoorkeuren
 from Wedstrijden.definities import (WEDSTRIJD_STATUS_GEACCEPTEERD, WEDSTRIJD_ORGANISATIE_TO_STR,
                                     ORGANISATIE_WA, WEDSTRIJD_WA_STATUS_TO_STR,
@@ -61,7 +61,8 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        vorige_week = timezone.now().date() - datetime.timedelta(days=7)
+        vandaag = timezone.now().date()
+        vorige_week = vandaag - datetime.timedelta(days=7)
 
         if self.is_cs:
             wedstrijd_pks = list(WedstrijdDagScheidsrechters
@@ -88,6 +89,8 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
             #     wedstrijd.organisatie_str += ' ' + WEDSTRIJD_WA_STATUS_TO_STR[wedstrijd.wa_status]
 
             wedstrijd.aantal_str = str(wedstrijd.aantal_scheids)
+
+            wedstrijd.mag_wijzigen = self.is_cs and wedstrijd.datum_einde >= vandaag
 
             if wedstrijd.datum_begin != wedstrijd.datum_einde:
                 wedstrijd.aantal_dagen = (wedstrijd.datum_einde - wedstrijd.datum_begin).days + 1
@@ -322,12 +325,6 @@ class WedstrijdDetailsCSView(UserPassesTestMixin, TemplateView):
         # for
         context['toon_sessies'] = heeft_sessies
 
-        wedstrijd.behoefte_str = '%s scheidsrechter' % wedstrijd.aantal_scheids
-        if wedstrijd.aantal_scheids > 1:
-            wedstrijd.behoefte_str += 's'
-        if wedstrijd.aantal_scheids == AANTAL_SCHEIDS_EIGEN:
-            wedstrijd.behoefte_str = 'Geen (eigen scheidsrechters)'
-
         context['aantal_additionele_sr'] = wedstrijd.aantal_scheids - 1
 
         if wedstrijd.aantal_scheids == AANTAL_SCHEIDS_EIGEN:
@@ -530,7 +527,7 @@ class WedstrijdDetailsCSView(UserPassesTestMixin, TemplateView):
 
             snel = str(request.POST.get('snel', ''))[:1]
 
-            scheids_mutatieverzoek_stuur_notificaties(wedstrijd, door_str, snel == '1')
+            scheids_mutatieverzoek_stuur_notificaties_wedstrijd(wedstrijd, door_str, snel == '1')
         else:
             # aantal scheidsrechters
             aantal_scheids_str = request.POST.get('aantal_scheids', '')

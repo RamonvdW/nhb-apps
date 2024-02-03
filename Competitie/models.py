@@ -444,10 +444,6 @@ class CompetitieMatch(models.Model):
     # benodigde scheidsrechters
     aantal_scheids = models.IntegerField(default=0)
 
-    # de gekozen scheidsrechter
-    gekozen_sr = models.ForeignKey(Sporter, on_delete=models.SET_NULL, related_name='gekozen_sr',
-                                   null=True, blank=True)              # mag leeg zijn
-
     def __str__(self):
         """ geef een tekstuele afkorting van dit object, voor in de admin interface """
         extra = ""

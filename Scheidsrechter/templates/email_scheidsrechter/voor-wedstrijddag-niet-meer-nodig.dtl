@@ -1,6 +1,6 @@
 {% extends 'email_mailer/email_basis.dtl' %}
 {% comment %}
-                Copyright (c) 2023 Ramon van der Winkel.
+                Copyright (c) 2023-2024 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -11,10 +11,11 @@
     |
     |Wedstrijd: {{ wed_titel }}
     |Wanneer: {{ wed_datum }}
+    |Vereniging: {{ wed_ver }}
     |
     |Voor eventuele vragen kan je ons bereiken op {{ email_cs }}
     |
-    |Succes gewenst!
+    |Vriendelijke groet,
 {% endblock %}
 
 {% block inhoud_html %}
@@ -25,11 +26,12 @@
     <table>
         <tr><th>Wedstrijd:</th><td>{{ wed_titel }}</td></tr>
         <tr><th>Wanneer:</th><td>{{ wed_datum }}</td></tr>
+        <tr><th>Vereniging:</th><td>{{ wed_ver }}</td></tr>
     </table>
     <br>
     <div>Voor eventuele vragen kan je ons bereiken op <a href="mailto:{{ email_cs }}"><code>{{ email_cs }}</code></a></div>
     <br>
-    <div>Succes gewenst!</div>
+    <div>Vriendelijke groet,</div>
 {% endblock %}
 
 

@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2021-2024 Ramon van der Winkel.
+                Copyright (c) 2024 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -14,9 +14,152 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Wedstrijd details</h3>
+            <h3 class="page-banner">RK/BK wedstrijd details</h3>
         </div>
     </div>
+
+
+    <script>
+        function gewijzigd() {
+            // het formulier is aangepast en moet opgeslagen worden
+
+            // enable de 'opslaan' knop
+            document.getElementById("submit_knop1").disabled = false;
+
+            // disable knoppen waarmee we weg kunnen navigeren
+            const els = document.getElementsByClassName("nav_weg_knop");
+            Array.prototype.forEach.call(els, function (el) {
+                el.classList.add('disabled');
+            })
+
+            // TODO: gekozen hoofd sr grijs maken in lijst van hulp sr
+            // zie filters voor uitlezen radio lijstjes
+        }
+    </script>
+
+    {% if url_wijzigen %}
+
+        <div class="row-sv-blauw">
+            <div class="col s12">
+
+                <!-- dialoog venster -->
+                <div class="sv-kader left-align z-depth-3" style="margin-top:30px">
+                    <div class="form-padding">
+                        <form action="{{ url_wijzigen }}" method="post" onsubmit="document.getElementById('submit_knop1').disabled=true; return true;">
+                            {% csrf_token %}
+
+                            <table>
+                                <tr>
+                                    <th>Aantal scheidsrechters nodig</th>
+                                    <td>
+                                        <select name="aantal_scheids" onchange="gewijzigd()">
+                                            {% for value, tekst in keuze_aantal_scheids %}
+                                                <option value="{{ value }}"{% if match.aantal_scheids == value %} selected{% endif %}>{{ tekst }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </td>
+                                </tr>
+
+                                {% if match_sr %}
+                                    <tr>
+                                        <th>Hoofd<wbr>scheidsrechter</th>
+                                        <td>
+                                            <ul>
+                                                {% for beschikbaar in match_sr.beschikbaar_hoofd_sr %}
+                                                    <li>
+                                                        <label class="black-text" for="{{ beschikbaar.id_li }}">
+                                                            <input class="with-gap" type="radio" required name="{{ match_sr.nr_hsr }}" value="{{ beschikbaar.pk }}" id="{{ beschikbaar.id_li }}"{% if beschikbaar.is_onzeker %} disabled{% else %}{% if beschikbaar.is_selected %} checked{% endif %} onchange="gewijzigd()"{% endif %}>
+                                                            <span>{% if beschikbaar.scheids %}{{ beschikbaar.level_naam_str }}{% else %}<i>nog niet gekozen</i>{% endif %}{% if beschikbaar.is_onzeker %} (overweegt){% endif %}{% if beschikbaar.waarschuw_niet_meer_beschikbaar %}<span class="sv-rood-text"> LET OP: Niet meer beschikbaar</span>{% endif %}</span>
+                                                        </label>
+                                                    </li>
+                                                {% endfor %}
+                                            </ul>
+                                        </td>
+                                    </tr>
+
+                                    {% if match_sr.toon_additionele_sr %}
+                                        <tr>
+                                            <th>{{ aantal_additionele_sr }} additionele scheidsrechters</th>
+                                            <td>
+                                                <ul>
+                                                    {% for beschikbaar in match_sr.beschikbaar_sr %}
+                                                        <li>
+                                                            <label class="black-text" for="{{ beschikbaar.id_li }}">
+                                                                <input class="filled-in" type="checkbox" name="{{ beschikbaar.sel }}" id="{{ beschikbaar.id_li }}"{% if beschikbaar.is_onzeker %} disabled{% else %}{% if beschikbaar.is_selected %} checked{% endif %} onchange="gewijzigd()"{% endif %}>
+                                                                <span>{{ beschikbaar.level_naam_str }}{% if beschikbaar.is_onzeker %} [overweegt]{% endif %}{% if beschikbaar.waarschuw_niet_meer_beschikbaar %}<span class="sv-rood-text"> LET OP: Niet meer beschikbaar</span>{% endif %}</span>
+                                                            </label>
+                                                        </li>
+                                                    {% empty %}
+                                                        <li>
+                                                            <i>Nog niemand beschikbaar</i>
+                                                        </li>
+                                                    {% endfor %}
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    {% endif %}
+
+                                    <tr>
+                                        <th>Notificaties zijn verstuurd aan</th>
+                                        <td>
+                                            {% for sr in match_sr.notified_wie %}
+                                                <span>{{ sr.volledige_naam }}</span><br>
+                                            {% empty %}
+                                                <i>Nog geen</i>
+                                            {% endfor %}
+                                        </td>
+                                    </tr>
+
+                                {% else %}
+
+                                    {% if not url_opvragen %}
+                                        <tr>
+                                            <td colspan="2" class="center">
+                                                <i>Nog geen beschikbaarheid aanwezig</i>
+                                            </td>
+                                        </tr>
+                                    {% endif %}
+
+                                {% endif %}
+                            </table>
+
+                            <div class="center" style="margin-top:30px">
+                                <button class="btn-sv-rood" id="submit_knop1" type="submit" disabled>
+                                    <i class="notranslate material-icons-round left">check</i>Wijzigen opslaan</button>
+                            </div>
+                        </form>
+
+                        {% if url_opvragen %}
+
+                            <div class="center" style="margin-top:30px">
+                                <form action="{{ url_opvragen }}" method="post" onsubmit="document.getElementById('submit_knop2').disabled=true; return true;">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="wedstrijd" value="{{ wed.pk }}">
+                                    <button class="btn-sv-rood" id="submit_knop2" type="submit">Beschikbaarheid opvragen</button>
+                                </form>
+                            </div>
+
+                        {% elif url_notify %}
+
+                            <div style="margin-top:30px">
+                                <p>{% if notify_last %}Vorige notificatie: {{ notify_last }}{% else %}<i>Er is nog geen notificatie verstuurd</i>{% endif %}</p>
+
+                                <form action="{{ url_notify }}" method="post" onsubmit="document.getElementById('submit_knop3').disabled=true; return true;">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="wedstrijd" value="{{ wed.pk }}">
+                                    <input type="hidden" name="notify" value="J">
+                                    <button class="btn-sv-blauw nav_weg_knop" id="submit_knop3" type="submit">Stuur notificatie e-mails</button>
+                                </form>
+                            </div>
+
+                        {% endif %}
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    {% endif %}     <!-- url_wijzigen -->
 
 
     <!-- blauwe balk met informatie tabel -->
@@ -88,22 +231,6 @@
                     <td>{% if match.contact_email %}<code>{{ match.contact_email|wbr_email }}</code>{% else %}<i>Onbekend</i>{% endif %}</td>
                 </tr>
 
-
-                <tr>
-                    <td colspan="2" class="center sv-blauw-text"><h6>Scheidsrechters</h6></td>
-                </tr>
-
-                <tr>
-                    <th>Behoefte scheidsrechters</th>
-                    <td>{{ match.aantal_scheids }}</td>
-                </tr>
-
-                <tr>
-                    <th class="sv-rood-text">Geselecteerd</th>
-                    <td>{% if match.gekozen_sr %}{{ match.gekozen_sr.level_naam_str }}{% else %}<i>Nog niet bekend</i>{% endif %}</td>
-                </tr>
-
-
                 <tr>
                     <td colspan="2" class="center sv-blauw-text"><h6>Wedstrijdklassen</h6></td>
                 </tr>
@@ -123,6 +250,6 @@
     </div>
 
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="scheidsrechter-wedstrijd-details" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="scheidsrechter-match-cs-kies-sr" %}
 
 {% endblock %}

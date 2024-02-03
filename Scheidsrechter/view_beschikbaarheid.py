@@ -136,7 +136,8 @@ class WijzigBeschikbaarheidView(UserPassesTestMixin, TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        vorige_week = (timezone.now() - datetime.timedelta(days=7)).date()
+        vandaag = timezone.now().date()
+        vorige_week = vandaag - datetime.timedelta(days=7)
 
         # wedstrijden in de toekomst
         wedstrijd_pks = list(Wedstrijd
@@ -167,6 +168,8 @@ class WijzigBeschikbaarheidView(UserPassesTestMixin, TemplateView):
             datum = dag.wedstrijd.datum_begin + datetime.timedelta(days=dag.dag_offset)
             if datum not in datums:
                 datums.append(datum)
+
+            dag.mag_wijzigen = datum >= vandaag
 
             if self.sporter.adres_lat:
                 locatie = dag.wedstrijd.locatie
@@ -223,6 +226,8 @@ class WijzigBeschikbaarheidView(UserPassesTestMixin, TemplateView):
         """ deze functie wordt aangeroepen als de OPSLAAN knop gebruikt wordt
             we slaan de gemaakte keuzes op
         """
+
+        # print('POST: %s' % repr(list(request.POST.items())))
 
         vorige_week = (timezone.now() - datetime.timedelta(days=7)).date()
 

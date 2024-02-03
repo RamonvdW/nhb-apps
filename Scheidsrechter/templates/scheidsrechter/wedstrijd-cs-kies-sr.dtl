@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2021-2024 Ramon van der Winkel.
+                Copyright (c) 2023-2024 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -48,82 +48,82 @@
                             {% csrf_token %}
 
                             <table>
+                                <tr>
+                                    <th>Aantal scheidsrechters nodig</th>
+                                    <td>
+                                        <select name="aantal_scheids" onchange="gewijzigd()">
+                                            {% for value, tekst in keuze_aantal_scheids %}
+                                                <option value="{{ value }}"{% if wed.aantal_scheids == value %} selected{% endif %}>{{ tekst }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </td>
+                                </tr>
+
+                                {% for dag in dagen %}
                                     <tr>
-                                        <th>Aantal scheidsrechters nodig</th>
+                                        <td colspan="2" class="center">
+                                            <h6 class="sv-blauw-text">{{ dag.datum }}</h6>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>Hoofd<wbr>scheidsrechter</th>
                                         <td>
-                                            <select name="aantal_scheids" onchange="gewijzigd()">
-                                                {% for value, tekst in keuze_aantal_scheids %}
-                                                    <option value="{{ value }}"{% if wed.aantal_scheids == value %} selected{% endif %}>{{ tekst }}</option>
+                                            <ul>
+                                                {% for beschikbaar in dag.beschikbaar_hoofd_sr %}
+                                                    <li>
+                                                        <label class="black-text" for="{{ beschikbaar.id_li }}">
+                                                            <input class="with-gap" type="radio" required name="{{ dag.nr_hsr }}" value="{{ beschikbaar.pk }}" id="{{ beschikbaar.id_li }}"{% if beschikbaar.is_onzeker %} disabled{% else %}{% if beschikbaar.is_selected %} checked{% endif %} onchange="gewijzigd()"{% endif %}>
+                                                            <span>{% if beschikbaar.scheids %}{{ beschikbaar.level_naam_str }}{% else %}<i>nog niet gekozen</i>{% endif %}{% if beschikbaar.is_onzeker %} (overweegt){% endif %}{% if beschikbaar.waarschuw_niet_meer_beschikbaar %}<span class="sv-rood-text"> LET OP: Niet meer beschikbaar</span>{% endif %}</span>
+                                                        </label>
+                                                    </li>
                                                 {% endfor %}
-                                            </select>
+                                            </ul>
                                         </td>
                                     </tr>
 
-                                    {% for dag in dagen %}
+                                    {% if dag.toon_additionele_sr %}
                                         <tr>
-                                            <td colspan="2" class="center">
-                                                <h6 class="sv-blauw-text">{{ dag.datum }}</h6>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <th>Hoofd<wbr>scheidsrechter</th>
+                                            <th>{{ aantal_additionele_sr }} additionele scheidsrechters</th>
                                             <td>
                                                 <ul>
-                                                    {% for beschikbaar in dag.beschikbaar_hoofd_sr %}
+                                                    {% for beschikbaar in dag.beschikbaar_sr %}
                                                         <li>
                                                             <label class="black-text" for="{{ beschikbaar.id_li }}">
-                                                                <input class="with-gap" type="radio" required name="{{ dag.nr_hsr }}" value="{{ beschikbaar.pk }}" id="{{ beschikbaar.id_li }}"{% if beschikbaar.is_onzeker %} disabled{% else %}{% if beschikbaar.is_selected %} checked{% endif %} onchange="gewijzigd()"{% endif %}>
-                                                                <span>{% if beschikbaar.scheids %}{{ beschikbaar.level_naam_str }}{% else %}<i>nog niet gekozen</i>{% endif %}{% if beschikbaar.is_onzeker %} (overweegt){% endif %}{% if beschikbaar.waarschuw_niet_meer_beschikbaar %}<span class="sv-rood-text"> LET OP: Niet meer beschikbaar</span>{% endif %}</span>
+                                                                <input class="filled-in" type="checkbox" name="{{ beschikbaar.sel }}" id="{{ beschikbaar.id_li }}"{% if beschikbaar.is_onzeker %} disabled{% else %}{% if beschikbaar.is_selected %} checked{% endif %} onchange="gewijzigd()"{% endif %}>
+                                                                <span>{{ beschikbaar.level_naam_str }}{% if beschikbaar.is_onzeker %} [overweegt]{% endif %}{% if beschikbaar.waarschuw_niet_meer_beschikbaar %}<span class="sv-rood-text"> LET OP: Niet meer beschikbaar</span>{% endif %}</span>
                                                             </label>
+                                                        </li>
+                                                    {% empty %}
+                                                        <li>
+                                                            <i>Nog niemand beschikbaar</i>
                                                         </li>
                                                     {% endfor %}
                                                 </ul>
                                             </td>
                                         </tr>
+                                    {% endif %}
 
-                                        {% if dag.toon_additionele_sr %}
-                                            <tr>
-                                                <th>{{ aantal_additionele_sr }} additionele scheidsrechters</th>
-                                                <td>
-                                                    <ul>
-                                                        {% for beschikbaar in dag.beschikbaar_sr %}
-                                                            <li>
-                                                                <label class="black-text" for="{{ beschikbaar.id_li }}">
-                                                                    <input class="filled-in" type="checkbox" name="{{ beschikbaar.sel }}" id="{{ beschikbaar.id_li }}"{% if beschikbaar.is_onzeker %} disabled{% else %}{% if beschikbaar.is_selected %} checked{% endif %} onchange="gewijzigd()"{% endif %}>
-                                                                    <span>{{ beschikbaar.level_naam_str }}{% if beschikbaar.is_onzeker %} [overweegt]{% endif %}{% if beschikbaar.waarschuw_niet_meer_beschikbaar %}<span class="sv-rood-text"> LET OP: Niet meer beschikbaar</span>{% endif %}</span>
-                                                                </label>
-                                                            </li>
-                                                        {% empty %}
-                                                            <li>
-                                                                <i>Nog niemand beschikbaar</i>
-                                                            </li>
-                                                        {% endfor %}
-                                                    </ul>
-                                                </td>
-                                            </tr>
-                                        {% endif %}
+                                    <tr>
+                                        <th>Notificaties zijn verstuurd aan</th>
+                                        <td>
+                                            {% for sr in dag.notified_wie %}
+                                                <span>{{ sr.volledige_naam }}</span><br>
+                                            {% empty %}
+                                                <i>Nog geen</i>
+                                            {% endfor %}
+                                        </td>
+                                    </tr>
+                                {% empty %}
 
+                                    {% if not url_opvragen %}
                                         <tr>
-                                            <th>Notificaties zijn verstuurd aan</th>
-                                            <td>
-                                                {% for sr in dag.notified_wie %}
-                                                    <span>{{ sr.volledige_naam }}</span><br>
-                                                {% empty %}
-                                                    <i>Nog geen</i>
-                                                {% endfor %}
+                                            <td colspan="2" class="center">
+                                                <i>Nog geen beschikbaarheid aanwezig</i>
                                             </td>
                                         </tr>
-                                    {% empty %}
+                                    {% endif %}
 
-                                        {% if not url_opvragen %}
-                                            <tr>
-                                                <td colspan="2" class="center">
-                                                    <i>Nog geen beschikbaarheid aanwezig</i>
-                                                </td>
-                                            </tr>
-                                        {% endif %}
-
-                                    {% endfor %}
+                                {% endfor %}
                             </table>
 
                             <div class="center" style="margin-top:30px">
@@ -288,11 +288,6 @@
                     <th>Eigen scheids<wbr>rechters (namen)</th>
                     <td>{{ wed.scheidsrechters|linebreaksbr }}</td>
                 </tr>
-
-                <tr>
-                    <th>Behoefte scheidsrechters</th>
-                    <td>{{ wed.behoefte_str }}</td>
-                </tr>
             </table>
         </div>
 
@@ -333,6 +328,6 @@
     </div>
 
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="scheidsrechter-wedstrijd-details" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="scheidsrechter-wedstrijd-cs-kies-sr" %}
 
 {% endblock %}

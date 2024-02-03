@@ -100,7 +100,13 @@
 
                 <tr>
                     <th class="sv-rood-text">Geselecteerd</th>
-                    <td>{% if match.gekozen_sr %}{{ match.gekozen_sr.level_naam_str }}{% else %}<i>Nog niet bekend</i>{% endif %}</td>
+                    <td>
+                        {% for sr_level_naam_str in match.gekozen %}
+                            <span>{{ sr_level_naam_str }}</span><br>
+                        {% empty %}
+                            <i>Nog niet bekend</i>
+                        {% endfor %}
+                    </td>
                 </tr>
 
 
@@ -123,6 +129,6 @@
     </div>
 
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="scheidsrechter-wedstrijd-details" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="scheidsrechter-match-details" %}
 
 {% endblock %}

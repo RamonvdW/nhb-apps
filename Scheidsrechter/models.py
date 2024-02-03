@@ -46,15 +46,13 @@ class ScheidsBeschikbaarheid(models.Model):
                 name='Een per scheidsrechter en wedstrijd dag')
         ]
 
-    objects = models.Manager()      # for the editor only
-
 
 class WedstrijdDagScheidsrechters(models.Model):
-    """ Bijhouden van de scheidsrechter behoefte voor een specifieke wedstrijd
-        en de gekozen scheidsrechters.
+    """ Bijhouden van de gekozen scheidsrechters voor een specifieke wedstrijd
+        en de communicatie daarover.
     """
 
-    # voor welke wedstrijd is de behoefte?
+    # voor welke wedstrijd gaat dit?
     wedstrijd = models.ForeignKey(Wedstrijd, on_delete=models.CASCADE)
 
     # voor elke dag van de wedstrijd een specifieke behoefte
@@ -106,7 +104,38 @@ class WedstrijdDagScheidsrechters(models.Model):
     class Meta:
         verbose_name_plural = verbose_name = "Wedstrijddag scheidsrechters"
 
-    objects = models.Manager()      # for the editor only
+
+class MatchScheidsrechters(models.Model):
+    """ Bijhouden van de gekozen scheidsrechters voor een specifieke bondscompetitie wedstrijd
+        en de communicatie daarover.
+    """
+
+    # voor welke bondscompetitie RK/BK wedstrijd gaat dit
+    match = models.ForeignKey(CompetitieMatch, on_delete=models.CASCADE)
+
+    # welke hoofdscheidsrechter is gekozen?
+    gekozen_hoofd_sr = models.ForeignKey(Sporter, on_delete=models.SET_NULL, related_name='match_gekozen_hoofd_sr',
+                                         null=True, blank=True)              # mag leeg zijn
+
+    # welke scheidsrechters zijn er nog meer gekozen?
+    gekozen_sr1 = models.ForeignKey(Sporter, on_delete=models.SET_NULL, related_name='match_gekozen_sr1',
+                                    null=True, blank=True)
+
+    gekozen_sr2 = models.ForeignKey(Sporter, on_delete=models.SET_NULL, related_name='match_gekozen_sr2',
+                                    null=True, blank=True)
+
+    # welke scheidsrechters hebben een mailtje gekregen dat ze gekozen zijn voor een wedstrijd?
+    # wordt gebruikt om de juiste mailtjes te sturen (je bent gekozen / niet meer gekozen) en geen dubbele mailtjes
+    notified_srs = models.ManyToManyField(to=Sporter, related_name='match_notified_sr')
+
+    # wanneer is de laatste ronde van notificatie mails gestuurd en door wie werd dat gevraagd?
+    notified_laatste = models.CharField(max_length=100, default='', blank=True)
+
+    def __str__(self):
+        return "[%s]" % (self.match.datum_wanneer)
+
+    class Meta:
+        verbose_name_plural = verbose_name = "Match scheidsrechters"
 
 
 class ScheidsMutatie(models.Model):
@@ -128,8 +157,11 @@ class ScheidsMutatie(models.Model):
     # als er geen account is (sporter zonder account) dan lid details
     door = models.CharField(max_length=50, default='')
 
-    # voor welke wedstrijd is de behoefte?
+    # voor welke wedstrijd is dit verzoek?
     wedstrijd = models.ForeignKey(Wedstrijd, on_delete=models.CASCADE, null=True, blank=True)
+
+    # voor welke bondscompetitie match is dit verzoek?
+    match = models.ForeignKey(CompetitieMatch, on_delete=models.CASCADE, null=True, blank=True)
 
     class Meta:
         verbose_name = "Scheids mutatie"

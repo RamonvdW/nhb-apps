@@ -159,7 +159,7 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
             obj.schutters_count = 0
 
             obj.wkl_namen = list()
-            for wkl in obj.indiv_klassen.order_by('volgorde'):      # FUTURE: order_by zorgt voor extra database accesses
+            for wkl in obj.indiv_klassen.order_by('volgorde'):     # FUTURE: order_by zorgt voor extra database accesses
                 obj.wkl_namen.append(wkl.beschrijving)
                 niet_gebruikt[100000 + wkl.pk] = None
 
@@ -170,7 +170,7 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
                     pass
             # for
 
-            for wkl in obj.team_klassen.order_by('volgorde'):       # FUTURE: order_by zorgt voor extra database accesses
+            for wkl in obj.team_klassen.order_by('volgorde'):      # FUTURE: order_by zorgt voor extra database accesses
                 obj.wkl_namen.append(wkl.beschrijving)
                 niet_gebruikt[200000 + wkl.pk] = None
 
@@ -501,8 +501,10 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
-            (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
-            (reverse('CompLaagRayon:planning', kwargs={'deelkamp_pk': deelkamp.pk}), 'Planning RK'),
+            (reverse('CompBeheer:overzicht',
+                     kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (reverse('CompLaagRayon:planning',
+                     kwargs={'deelkamp_pk': deelkamp.pk}), 'Planning RK'),
             (None, 'Wijzig RK wedstrijd')
         )
 
@@ -657,6 +659,21 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
         if len(gekozen_team_klassen):
             match.team_klassen.add(*gekozen_team_klassen)
 
+        # update aantal scheidsrechters nodig
+        sr_nodig = False
+        for obj in match.indiv_klassen.all():
+            sr_nodig |= obj.krijgt_scheids_rk_bk
+        # for
+        for obj in match.team_klassen.all():
+            sr_nodig |= obj.krijgt_scheids_rk_bk
+        # for
+
+        if sr_nodig:
+            match.aantal_scheids = 1
+        else:
+            match.aantal_scheids = 0
+        match.save(update_fields=['aantal_scheids'])
+
         url = reverse('CompLaagRayon:planning', kwargs={'deelkamp_pk': deelkamp.pk})
         return HttpResponseRedirect(url)
 
@@ -752,7 +769,8 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
         comp = deelkamp.competitie
         context['kruimels'] = (
             (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
-            (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (reverse('CompBeheer:overzicht',
+                     kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
             (None, 'RK limieten')
         )
 

@@ -378,6 +378,23 @@
     </ul>
 
 
+    <!-- floating action button -->
+    <script>
+        function gewijzigd() {
+            // het formulier is aangepast en moet opgeslagen worden
+
+            // enable de 'opslaan' knop
+            const el = document.getElementById("submit_knop");
+            el.disabled = false;
+            el.parentElement.style.display = "block";
+        }
+    </script>
+    <div class="fixed-action-btn" style="display: none">
+        <button class="btn-sv-rood" id="submit_knop" type="submit" disabled>
+            <i class="notranslate material-icons-round left">check</i>Voorkeuren opslaan</button>
+    </div>
+
+
 
 {% include 'feedback/sidebar.dtl' with op_pagina="app-snippets" %}
 

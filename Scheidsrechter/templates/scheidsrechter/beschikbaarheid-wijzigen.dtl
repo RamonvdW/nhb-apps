@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2021-2023 Ramon van der Winkel.
+                Copyright (c) 2023-2024 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -32,6 +32,7 @@
 
             // enable de 'opslaan' knop
             el_opslaan.disabled = false;
+            el_opslaan.parentElement.style.display = "block";
 
             el1.classList.remove('keuze-ja');
             el2.classList.remove('keuze-mss');
@@ -62,6 +63,7 @@
 
             // enable de 'opslaan' knop
             el_opslaan.disabled = false;
+            el_opslaan.parentElement.style.display = "block";
         }
     </script>
 
@@ -91,26 +93,28 @@
                                     {% if dag.reistijd %}
                                         <b>Reistijd</b>: {{ dag.reistijd }} minuten<br>
                                     {% endif %}
-                                    <b>Beschikbaarheid</b>: <span class="sv-rood-text" id="{{ dag.id }}-gekozen">Nog geen keuze gemaakt</span>
+                                    <b>Beschikbaarheid</b>: {% if dag.mag_wijzigen %}<span class="sv-rood-text" id="{{ dag.id }}-gekozen">Nog geen keuze gemaakt</span>{% else %}<span id="{{ dag.id }}-gekozen">Geen keuze gemaakt</span>{% endif %}
                                     <br>
                                     <div id="{{ dag.id }}-toon-note" class="hide">
                                         <input type="text" id="{{ dag.id }}-note-in" name="{{ dag.id }}-note" maxlength="100" value="{{ dag.opmerking }}" placeholder="Kort bericht aan de commissie (optioneel)" oninput="wijzig_notitie('{{ dag.id }}')">
                                     </div>
                                 </td>
 
-                                <td class="center">
-                                    <button type="button" class="btn-sv-keuze" id="{{ dag.id }}-ja" onclick="wijzig('{{ dag.id }}', 1)">
-                                        <i class="material-icons-round notranslate">done</i>
-                                    </button>
-                                    <br class="hide-on-large-and-up">
-                                    <button type="button" class="btn-sv-keuze" id="{{ dag.id }}-mss" onclick="wijzig('{{ dag.id }}', 2)">
-                                        <i class="material-icons-round notranslate">question_mark</i>
-                                    </button>
-                                    <br class="hide-on-large-and-up">
-                                    <button type="button" class="btn-sv-keuze" id="{{ dag.id }}-nee" onclick="wijzig('{{ dag.id }}', 3)">
-                                        <i class="material-icons-round notranslate">close</i>
-                                    </button>
-                                </td>
+                                {% if dag.mag_wijzigen %}
+                                    <td class="center">
+                                        <button type="button" class="btn-sv-keuze" id="{{ dag.id }}-ja" onclick="wijzig('{{ dag.id }}', 1)">
+                                            <i class="material-icons-round notranslate">done</i>
+                                        </button>
+                                        <br class="hide-on-large-and-up">
+                                        <button type="button" class="btn-sv-keuze" id="{{ dag.id }}-mss" onclick="wijzig('{{ dag.id }}', 2)">
+                                            <i class="material-icons-round notranslate">question_mark</i>
+                                        </button>
+                                        <br class="hide-on-large-and-up">
+                                        <button type="button" class="btn-sv-keuze" id="{{ dag.id }}-nee" onclick="wijzig('{{ dag.id }}', 3)">
+                                            <i class="material-icons-round notranslate">close</i>
+                                        </button>
+                                    </td>
+                                {% endif %}
                             </tr>
                         {% empty %}
                             <tr>
@@ -131,7 +135,9 @@
                             <input type="hidden" id="{{ dag.id }}-note-uit" name="{{ dag.name }}-opmerking" value="{{ dag.opmerking }}">
                         {% endfor %}
 
-                        <div class="center" style="margin-top:30px">
+
+                        <!-- floating action button -->
+                        <div class="fixed-action-btn" style="display: none">
                             <button class="btn-sv-rood" id="submit_knop" type="submit" disabled>
                                 <i class="notranslate material-icons-round left">check</i>Opslaan</button>
                         </div>
@@ -146,7 +152,9 @@
         // stel all keuzeknoppen in op de juiste kleur
         const init = [
             {% for dag in dagen %}
-                ["{{ dag.id }}", {{ dag.keuze }}],
+                {% if dag.mag_wijzigen %}
+                    ["{{ dag.id }}", {{ dag.keuze }}],
+                {% endif %}
             {% endfor %}
         ];
 
@@ -157,8 +165,9 @@
                 wijzig(tup[0], tup[1]);
             });
 
-            // disable de 'opslaan' knop
+            // disable de 'opslaan' knop weer
             el_opslaan.disabled = true;
+            el_opslaan.parentElement.style.display = "none";
         })
     </script>
 

@@ -554,11 +554,10 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
             raise Http404('Geen valide verzoek')
 
         # weekdag is een offset ten opzicht van de eerste toegestane BK wedstrijddag
-        match.datum_wanneer = deelkamp.competitie.begin_fase_P_indiv + datetime.timedelta(days=weekdag)
+        begin = min(comp.begin_fase_P_indiv, comp.begin_fase_P_teams)
+        match.datum_wanneer = begin + datetime.timedelta(days=weekdag)
 
         # check dat datum_wanneer nu in de ingesteld BK periode valt
-        begin = min(comp.begin_fase_P_indiv, comp.begin_fase_P_teams)
-        einde = max(comp.einde_fase_P_indiv, comp.einde_fase_P_teams)
         if not ((comp.begin_fase_P_indiv <= match.datum_wanneer <= comp.einde_fase_P_indiv) or
                 (comp.begin_fase_P_teams <= match.datum_wanneer <= comp.einde_fase_P_teams)):
             raise Http404('Geen valide datum')
@@ -668,6 +667,21 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
 
         if len(gekozen_team_klassen):
             match.team_klassen.add(*gekozen_team_klassen)
+
+        # update aantal scheidsrechters nodig
+        sr_nodig = False
+        for obj in match.indiv_klassen.all():
+            sr_nodig |= obj.krijgt_scheids_rk_bk
+        # for
+        for obj in match.team_klassen.all():
+            sr_nodig |= obj.krijgt_scheids_rk_bk
+        # for
+
+        if sr_nodig:
+            match.aantal_scheids = 1
+        else:
+            match.aantal_scheids = 0
+        match.save(update_fields=['aantal_scheids'])
 
         url = reverse('CompLaagBond:planning', kwargs={'deelkamp_pk': deelkamp.pk})
         return HttpResponseRedirect(url)

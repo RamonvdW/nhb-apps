@@ -40,12 +40,6 @@ class Migration(migrations.Migration):
             name='aantal_scheids',
             field=models.IntegerField(default=0),
         ),
-        migrations.AddField(
-            model_name='competitiematch',
-            name='gekozen_sr',
-            field=models.ForeignKey(blank=True, null=True, on_delete=models.deletion.SET_NULL,
-                                    related_name='gekozen_sr', to='Sporter.sporter'),
-        ),
     ]
 
 # end of file

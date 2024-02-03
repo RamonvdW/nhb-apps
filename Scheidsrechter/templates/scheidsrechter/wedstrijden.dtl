@@ -38,11 +38,15 @@
                         <td class="hide-on-small-only center">{{ obj.aantal_str }}</td>
                         <td>{{ obj.titel }}</td>
                         <td>
-                            {% if obj.nog_opvragen %}
-                                <a class="btn-sv-blauw" href="{{ obj.url_details }}">
-                                    <i class="material-icons-round left notranslate">priority_high</i>Nieuw</a>
+                            {% if obj.mag_wijzigen %}
+                                {% if obj.nog_opvragen %}
+                                    <a class="btn-sv-blauw" href="{{ obj.url_details }}">
+                                        <i class="material-icons-round left notranslate">priority_high</i>Nieuw</a>
+                                {% else %}
+                                    <a class="btn-sv-rood" href="{{ obj.url_details }}">Wijzig</a>
+                                {% endif %}
                             {% else %}
-                                <a class="btn-sv-rood" href="{{ obj.url_details }}">{% if is_cs %}Wijzig{% else %}Details{% endif %}</a>
+                                <a class="btn-sv-blauw" href="{{ obj.url_details }}">Details</a>
                             {% endif %}
                         </td>
                     </tr>
