@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#  Copyright (c) 2019-2023 Ramon van der Winkel.
+#  Copyright (c) 2019-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -342,7 +342,7 @@ then
 
     echo
     echo "Launching firefox"
-    firefox $REPORT_DIR/index.html &
+    firefox $REPORT_DIR/index.html &>/dev/null &
 
     echo "Done"
 fi
