@@ -19,6 +19,7 @@ from Functie.scheids import gebruiker_is_scheids
 from Scheidsrechter.definities import SCHEIDS2LEVEL, BESCHIKBAAR_DENK, BESCHIKBAAR_NEE, BESCHIKBAAR_JA
 from Scheidsrechter.models import MatchScheidsrechters, ScheidsBeschikbaarheid
 from Scheidsrechter.mutaties import scheids_mutatieverzoek_stuur_notificaties_match
+from Scheidsrechter.operations import get_bezette_scheidsrechters
 from Sporter.models import SporterVoorkeuren
 from Wedstrijden.models import Wedstrijd
 from types import SimpleNamespace
@@ -385,6 +386,8 @@ class MatchDetailsCSView(UserPassesTestMixin, TemplateView):
                     sr.level_naam_str = '%s: %s' % (SCHEIDS2LEVEL[sr.scheids], sr.volledige_naam())
             # for
 
+            bezette_srs = get_bezette_scheidsrechters(match.datum_wanneer, ignore_match=match)
+
             beschikbaar_hsr = list()
             beschikbaar_sr = list()
             bevat_fouten = False
@@ -409,12 +412,17 @@ class MatchDetailsCSView(UserPassesTestMixin, TemplateView):
                                 .order_by('scheids__voornaam', 'scheids__achternaam', 'scheids__lid_nr')):
 
                 beschikbaar.id_li = 'id_hsr_%s' % beschikbaar.pk
-                beschikbaar.is_onzeker = (beschikbaar.opgaaf == BESCHIKBAAR_DENK)
+                # beschikbaar.is_onzeker = (beschikbaar.opgaaf == BESCHIKBAAR_DENK)
                 beschikbaar.is_selected = (match_sr.gekozen_hoofd_sr == beschikbaar.scheids)
                 hsr_nog_beschikbaar |= (match_sr.gekozen_hoofd_sr == beschikbaar.scheids)
 
                 beschikbaar.level_naam_str = "%s: %s" % (SCHEIDS2LEVEL[beschikbaar.scheids.scheids],
                                                          beschikbaar.scheids.volledige_naam())
+
+                if beschikbaar.scheids.lid_nr in bezette_srs:
+                    beschikbaar.is_onzeker = True
+                    beschikbaar.level_naam_str += ' [bezet]'
+
                 beschikbaar_hsr.append(beschikbaar)
             # for
 
@@ -465,6 +473,14 @@ class MatchDetailsCSView(UserPassesTestMixin, TemplateView):
 
                     beschikbaar.level_naam_str = "%s: %s" % (SCHEIDS2LEVEL[beschikbaar.scheids.scheids],
                                                              beschikbaar.scheids.volledige_naam())
+
+                    if beschikbaar.scheids.lid_nr in bezette_srs:
+                        beschikbaar.is_onzeker = True
+                        beschikbaar.level_naam_str += ' [bezet]'
+                    else:
+                        if beschikbaar.is_onzeker:
+                            beschikbaar.level_naam_str += ' [overweegt]'
+
                     beschikbaar_sr.append(beschikbaar)
                 # for
 
