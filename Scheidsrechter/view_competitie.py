@@ -20,7 +20,6 @@ from Scheidsrechter.definities import SCHEIDS2LEVEL, BESCHIKBAAR_DENK, BESCHIKBA
 from Scheidsrechter.models import MatchScheidsrechters, ScheidsBeschikbaarheid
 from Scheidsrechter.mutaties import scheids_mutatieverzoek_stuur_notificaties_match
 from Sporter.models import SporterVoorkeuren
-from Wedstrijden.definities import AANTAL_SCHEIDS_GEEN_KEUZE, AANTAL_SCHEIDS_EIGEN
 from Wedstrijden.models import Wedstrijd
 from types import SimpleNamespace
 import datetime
@@ -28,7 +27,7 @@ import datetime
 TEMPLATE_MATCHES = 'scheidsrechter/matches.dtl'
 TEMPLATE_MATCH_DETAILS = 'scheidsrechter/match-details.dtl'
 TEMPLATE_MATCH_CS_KIES_SR = 'scheidsrechter/match-cs-kies-sr.dtl'
-TEMPLATE_WEDSTRIJD_HWL_CONTACT = 'scheidsrechter/wedstrijd-hwl-contact.dtl'
+TEMPLATE_WEDSTRIJD_HWL_CONTACT = 'scheidsrechter/match-hwl-contact.dtl'
 
 
 class CompetitieMatchesView(UserPassesTestMixin, TemplateView):
@@ -619,7 +618,7 @@ class MatchDetailsCSView(UserPassesTestMixin, TemplateView):
         return HttpResponseRedirect(url)
 
 
-class WedstrijdHWLContactView(UserPassesTestMixin, TemplateView):
+class MatchHWLContactView(UserPassesTestMixin, TemplateView):
 
     """ Django class-based view voor de scheidsrechters """
 
@@ -642,67 +641,51 @@ class WedstrijdHWLContactView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            wedstrijd_pk = str(kwargs['wedstrijd_pk'])[:6]     # afkappen voor de veiligheid
-            wedstrijd = (Wedstrijd
-                         .objects
-                         .exclude(is_ter_info=True)
-                         .exclude(toon_op_kalender=False)
-                         .exclude(aantal_scheids=AANTAL_SCHEIDS_GEEN_KEUZE)
-                         .get(pk=wedstrijd_pk))
+            match_pk = str(kwargs['match_pk'])[:6]     # afkappen voor de veiligheid
+            match = (CompetitieMatch
+                     .objects
+                     .filter(competitie__afstand=18)
+                     .exclude(vereniging=None)
+                     .select_related('vereniging',
+                                     'locatie')
+                     .prefetch_related('indiv_klassen',
+                                       'team_klassen')
+                     .get(pk=match_pk))
         except Wedstrijd.DoesNotExist:
             raise Http404('Wedstrijd niet gevonden')
 
-        if wedstrijd.organiserende_vereniging != self.functie_nu.vereniging:
+        if match.vereniging != self.functie_nu.vereniging:
             raise Http404('Verkeerde beheerders')
 
-        context['wed'] = wedstrijd
+        context['match'] = match
 
-        wedstrijd.behoefte_str = '%s scheidsrechter' % wedstrijd.aantal_scheids
-        if wedstrijd.aantal_scheids > 1:
-            wedstrijd.behoefte_str += 's'
-        if wedstrijd.aantal_scheids == AANTAL_SCHEIDS_EIGEN:
-            wedstrijd.behoefte_str = 'Geen (eigen scheidsrechters)'
+        if match.aantal_scheids > 0:
+            match_sr = MatchScheidsrechters.objects.filter(match=match).first()
+            if match_sr:
+                srs_pks = [sr.pk for sr in match_sr.notified_srs.all()]
 
-        if wedstrijd.aantal_scheids > 0:
-            wedstrijd.dagen = dagen = (WedstrijdDagScheidsrechters
-                                       .objects
-                                       .filter(wedstrijd=wedstrijd)
-                                       .prefetch_related('notified_srs')
-                                       .order_by('dag_offset'))
+                sr2voorkeur = dict()
+                for voorkeur in SporterVoorkeuren.objects.filter(sporter__pk__in=srs_pks):
+                    sr2voorkeur[voorkeur.sporter.pk] = (voorkeur.scheids_opt_in_ver_tel_nr,
+                                                        voorkeur.scheids_opt_in_ver_email)
+                # for
 
-            srs_pks = list()
-            for dag in dagen:
-                dag.datum = wedstrijd.datum_begin + datetime.timedelta(days=dag.dag_offset)
-
-                srs_pks.extend([sr.pk for sr in dag.notified_srs.all()])
-            # for
-
-            sr2voorkeur = dict()
-            for voorkeur in SporterVoorkeuren.objects.filter(sporter__pk__in=srs_pks):
-                sr2voorkeur[voorkeur.sporter.pk] = (voorkeur.scheids_opt_in_ver_tel_nr,
-                                                    voorkeur.scheids_opt_in_ver_email)
-            # for
-
-            for dag in dagen:
-                sr = dag.gekozen_hoofd_sr
+                sr = match_sr.gekozen_hoofd_sr
                 if sr and sr.pk in srs_pks:
-                    dag.hoofd_sr_naam = sr.volledige_naam()
+                    context['hoofd_sr_naam'] = sr.volledige_naam()
 
-                dag.srs = srs = list()
-                for sr in dag.notified_srs.all():
+                context['srs'] = srs = list()
+                for sr in match_sr.notified_srs.all():
                     sr.give_tel_nr, sr.give_email = sr2voorkeur[sr.pk]
                     tup = (sr.lid_nr, sr)
                     srs.append(tup)
                 # for
-
                 srs.sort()
-                dag.toon_srs = len(srs) > 0
             # for
 
         context['kruimels'] = (
             (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
-            (reverse('Wedstrijden:vereniging'), 'Wedstrijdkalender'),
-            (reverse('Wedstrijden:wijzig-wedstrijd', kwargs={'wedstrijd_pk': wedstrijd.pk}), 'Wijzig wedstrijd'),
+            (reverse('CompScores:wedstrijden'), 'Competitie wedstrijden'),
             (None, 'Scheidsrechters')
         )
 

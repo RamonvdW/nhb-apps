@@ -72,6 +72,10 @@ urlpatterns = [
          view_beschikbaarheid.BeschikbaarheidCompetitieOpvragenView.as_view(),
          name='competitie-beschikbaarheid-opvragen'),
 
+    path('bondscompetities/<match_pk>/geselecteerde-scheidsrechters/',
+         view_competitie.MatchHWLContactView.as_view(),
+         name='match-hwl-contact'),
+
 ]
 
 

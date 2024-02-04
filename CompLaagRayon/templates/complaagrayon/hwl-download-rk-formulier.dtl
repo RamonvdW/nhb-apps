@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2021-2023 Ramon van der Winkel.
+                Copyright (c) 2021-2024 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -50,6 +50,22 @@
                     <th>Wanneer</th>
                     <td>{{ wedstrijd.datum_wanneer }} om {{ wedstrijd.tijd_begin_wedstrijd }}</td>
                 </tr>
+
+                {% if url_sr_contact %}
+                    <tr>
+                        <th>Scheidsrechters</th>
+                        <td>
+                            {% if aantal_sr_str %}
+                                <span style="padding-right:20px">{{ aantal_sr_str }}</span>
+                                {% if url_sr_contact %}
+                                    <a class="btn-sv-rood" href="{{ url_sr_contact }}">Details</a>
+                                {% endif %}
+                            {% else %}
+                                <i>Nog niet bekend</i>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endif %}
             </table>
         </div>
     </div>
