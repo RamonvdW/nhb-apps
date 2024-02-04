@@ -110,6 +110,9 @@ scoreboard
 search
 security
 sell
+sentiment_dissatisfied
+sentiment_neutral
+sentiment_satisfied
 settings
 share_location
 shopping_cart

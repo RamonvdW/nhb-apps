@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 {% comment %}
-                Copyright (c) 2019-2023 Ramon van der Winkel.
+                Copyright (c) 2019-2024 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -28,7 +28,7 @@
 
         {% include 'plein/site_layout_fonts.dtl' %}
 
-        <link rel="stylesheet" href="{% static 'css/materialize-new-239.css' %}">
+        <link rel="stylesheet" href="{% static 'css/materialize-new-240.css' %}">
 
         {% include 'plein/site_layout_favicons.dtl' %}
 
@@ -41,7 +41,8 @@
         <div class="navbar-fixed">
             <nav class="sv-grijs">
                 <div class="nav-wrapper">
-                                                    <!-- logo links; brand-logo voorkomt button wrap -->
+
+                    <!-- logo links;         brand-logo voorkomt button wrap -->
                     <a href="/plein/" class="brand-logo left">
                                                                    <!-- aspect ratio: 400x92 -> 270x62 -->
                         <img src="{% static 'plein/logo_with_text_khsn.png' %}" width="270" height="62" alt="KHSN logo">
