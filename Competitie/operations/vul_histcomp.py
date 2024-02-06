@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023 Ramon van der Winkel.
+#  Copyright (c) 2023-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -475,7 +475,24 @@ def uitslag_rk_teams_naar_histcomp(comp):
 
                 lid_nr = team_lid.sporterboog.sporter.lid_nr
                 tup = (team_lid.indiv_klasse.beschrijving, lid_nr)
-                hist_indiv = indiv_klasse_lid_nr2hist[tup]
+                try:
+                    hist_indiv = indiv_klasse_lid_nr2hist[tup]
+                except KeyError:
+                    # sporter heeft niet individueel meegedaan
+                    # maak een lege sporter aan
+                    hist_indiv = HistKampIndiv(
+                                    seizoen=hist_seizoen,
+                                    indiv_klasse='',
+                                    sporter_lid_nr=lid_nr,
+                                    sporter_naam=team_lid.sporterboog.sporter.volledige_naam(),
+                                    boogtype=team_lid.sporterboog.boogtype.afkorting,
+                                    vereniging_nr=ver.ver_nr,
+                                    vereniging_naam=ver.naam,
+                                    vereniging_plaats=ver.plaats,
+                                    rayon_nr=team.kampioenschap.rayon.rayon_nr,
+                                    rank_rk=0)
+                    hist_indiv.save()
+
                 hist_indiv.teams_rk_score_1 = s1
                 hist_indiv.teams_rk_score_2 = s2
                 hist_indiv.save(update_fields=['teams_rk_score_1', 'teams_rk_score_2'])
