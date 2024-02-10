@@ -56,7 +56,7 @@
                 {% for obj in matches %}
                     <tr>
                         <td>{{ obj.datum_wanneer }}</td>
-                        <td>{{ obj.locatie.plaats }}</td>
+                        <td>{% if obj.locatie %}{{ obj.locatie.plaats }}{% else %}<i>Onbekend</i>{% endif %}</td>
                         <td class="hide-on-small-only center">{{ obj.aantal_str }}</td>
                         <td>{{ obj.beschrijving }}</td>
                         <td>

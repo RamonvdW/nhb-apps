@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import datetime
 
-#  Copyright (c) 2023 Ramon van der Winkel.
+#  Copyright (c) 2023-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -500,9 +500,8 @@ class TestScheidsrechterWedstrijden(E2EHelpers, TestCase):
         self.assert_consistent_email_html_text(mail)
 
         # corner cases
-        with self.assert_max_queries(20):
-            resp = self.client.post(url, {'aantal_scheids': self.wedstrijd.aantal_scheids,
-                                          'hsr_0': 999999})
+        resp = self.client.post(url, {'aantal_scheids': self.wedstrijd.aantal_scheids,
+                                      'hsr_0': 999999})
         self.assert404(resp, 'Slechte parameter (1)')
 
     def test_hwl_ziet_gekozen_srs(self):

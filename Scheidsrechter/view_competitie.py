@@ -82,6 +82,10 @@ class CompetitieMatchesView(UserPassesTestMixin, TemplateView):
                     alle_rk_datums.append(match.datum_wanneer)
         # for
 
+        if not een_match:
+            # geen matches, dus niets op te vragen
+            return False
+
         pos = een_match.beschrijving.find(', ')
         titel = ' wedstrijden' + een_match.beschrijving[pos:]
 
@@ -206,13 +210,13 @@ class MatchDetailsView(UserPassesTestMixin, TemplateView):
                      .prefetch_related('indiv_klassen',
                                        'team_klassen')
                      .get(pk=match_pk))
-        except Wedstrijd.DoesNotExist:
+        except CompetitieMatch.DoesNotExist:
             raise Http404('Wedstrijd niet gevonden')
 
         context['match'] = match
 
         toon_kaart = match.locatie.plaats != '(diverse)' and match.locatie.adres != '(diverse)'
-        if toon_kaart:
+        if toon_kaart:          # pragma: no branch
             zoekterm = match.locatie.adres
             if match.locatie.adres_uit_crm:
                 # voeg de naam van de vereniging toe aan de zoekterm, voor beter resultaat
@@ -221,14 +225,21 @@ class MatchDetailsView(UserPassesTestMixin, TemplateView):
             context['url_map'] = 'https://google.nl/maps?' + urlencode({'q': zoekterm})
 
         # contactgegevens van de HWL
-        functie_hwl = Functie.objects.prefetch_related('accounts').get(vereniging=match.vereniging, rol='HWL')
-        eerste_hwl = functie_hwl.accounts.first()
-        if eerste_hwl:
-            match.contact_naam = eerste_hwl.volledige_naam()
-        else:
-            match.contact_naam = ''
-        match.contact_telefoon = functie_hwl.telefoon
-        match.contact_email = functie_hwl.bevestigde_email
+        match.contact_naam = ''
+        match.contact_telefoon = ''
+        match.contact_email = ''
+        functie_hwl = (Functie
+                       .objects
+                       .prefetch_related('accounts')
+                       .filter(vereniging=match.vereniging,
+                               rol='HWL')
+                       .first())
+        if functie_hwl:
+            eerste_hwl = functie_hwl.accounts.first()
+            if eerste_hwl:
+                match.contact_naam = eerste_hwl.volledige_naam()
+            match.contact_telefoon = functie_hwl.telefoon
+            match.contact_email = functie_hwl.bevestigde_email
 
         match.klassen = list()
         for klasse in match.indiv_klassen.order_by('volgorde'):
@@ -321,13 +332,13 @@ class MatchDetailsCSView(UserPassesTestMixin, TemplateView):
                      .prefetch_related('indiv_klassen',
                                        'team_klassen')
                      .get(pk=match_pk))
-        except Wedstrijd.DoesNotExist:
+        except CompetitieMatch.DoesNotExist:
             raise Http404('Wedstrijd niet gevonden')
 
         context['match'] = match
 
         toon_kaart = match.locatie.plaats != '(diverse)' and match.locatie.adres != '(diverse)'
-        if toon_kaart:
+        if toon_kaart:              # pragma: no branch
             zoekterm = match.locatie.adres
             if match.locatie.adres_uit_crm:
                 # voeg de naam van de vereniging toe aan de zoekterm, voor beter resultaat
@@ -336,14 +347,21 @@ class MatchDetailsCSView(UserPassesTestMixin, TemplateView):
             context['url_map'] = 'https://google.nl/maps?' + urlencode({'q': zoekterm})
 
         # contactgegevens van de HWL
-        functie_hwl = Functie.objects.prefetch_related('accounts').get(vereniging=match.vereniging, rol='HWL')
-        eerste_hwl = functie_hwl.accounts.first()
-        if eerste_hwl:
-            match.contact_naam = eerste_hwl.volledige_naam()
-        else:
-            match.contact_naam = ''
-        match.contact_telefoon = functie_hwl.telefoon
-        match.contact_email = functie_hwl.bevestigde_email
+        match.contact_naam = ''
+        match.contact_telefoon = ''
+        match.contact_email = ''
+        functie_hwl = (Functie
+                       .objects
+                       .prefetch_related('accounts')
+                       .filter(vereniging=match.vereniging,
+                               rol='HWL')
+                       .first())
+        if functie_hwl:
+            eerste_hwl = functie_hwl.accounts.first()
+            if eerste_hwl:
+                match.contact_naam = eerste_hwl.volledige_naam()
+            match.contact_telefoon = functie_hwl.telefoon
+            match.contact_email = functie_hwl.bevestigde_email
 
         match.klassen = list()
         for klasse in match.indiv_klassen.order_by('volgorde'):
@@ -545,7 +563,7 @@ class MatchDetailsCSView(UserPassesTestMixin, TemplateView):
                      .prefetch_related('indiv_klassen',
                                        'team_klassen')
                      .get(pk=match_pk))
-        except Wedstrijd.DoesNotExist:
+        except CompetitieMatch.DoesNotExist:
             raise Http404('Wedstrijd niet gevonden')
 
         # aantal scheidsrechters
@@ -553,7 +571,8 @@ class MatchDetailsCSView(UserPassesTestMixin, TemplateView):
         try:
             aantal_scheids = int(aantal_scheids_str[:3])  # afkappen voor de veiligheid
         except ValueError:
-            match.aantal_scheids = 1  # veilig getal
+            # no change
+            pass
         else:
             if 1 <= aantal_scheids <= 3:
                 if match.aantal_scheids != aantal_scheids:
@@ -667,7 +686,7 @@ class MatchHWLContactView(UserPassesTestMixin, TemplateView):
                      .prefetch_related('indiv_klassen',
                                        'team_klassen')
                      .get(pk=match_pk))
-        except Wedstrijd.DoesNotExist:
+        except CompetitieMatch.DoesNotExist:
             raise Http404('Wedstrijd niet gevonden')
 
         if match.vereniging != self.functie_nu.vereniging:

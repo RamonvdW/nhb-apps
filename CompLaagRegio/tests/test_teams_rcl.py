@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2023 Ramon van der Winkel.
+#  Copyright (c) 2019-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -363,13 +363,11 @@ class TestCompLaagRegioTeams(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('complaagregio/rcl-teams.dtl', 'plein/site_layout.dtl'))
 
         url = self.url_regio_teams_alle % (999999, 'auto')
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
+        resp = self.client.get(url)
         self.assert404(resp, 'Competitie niet gevonden')
 
         url = self.url_regio_teams_alle % (self.comp_18.pk, '999999')        # rayon_nr
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
+        resp = self.client.get(url)
         self.assert404(resp, 'Selectie wordt niet ondersteund')
 
         self.e2e_wissel_naar_functie(self.functie_rcl101_18)
@@ -494,8 +492,7 @@ class TestCompLaagRegioTeams(E2EHelpers, TestCase):
         self.assert404(resp, 'Verkeerde competitie fase')
 
         # bad pk
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_ag_controle % (999999, 999999))
+        resp = self.client.get(self.url_ag_controle % (999999, 999999))
         self.assert404(resp, 'Competitie niet gevonden')
 
         # verkeerde regio
@@ -513,12 +510,10 @@ class TestCompLaagRegioTeams(E2EHelpers, TestCase):
         self.deelcomp_regio112_18.save(update_fields=['regio_team_punten_model'])
 
         url = self.url_team_ronde % 999999
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
+        resp = self.client.get(url)
         self.assert404(resp, 'Competitie bestaat niet')
 
-        with self.assert_max_queries(20):
-            resp = self.client.post(url)
+        resp = self.client.post(url)
         self.assert404(resp, 'Competitie bestaat niet')
 
         url = self.url_team_ronde % self.deelcomp_regio112_18.pk

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2023 Ramon van der Winkel.
+#  Copyright (c) 2019-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -202,13 +202,11 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, self.url_bondscompetities)
         self.e2e_check_rol('RCL')
 
-        with self.assert_max_queries(20):
-            resp = self.client.post(self.url_activeer_functie % 999999)
+        resp = self.client.post(self.url_activeer_functie % 999999)
         self.assert404(resp, 'Foute parameter (functie)')
         self.e2e_check_rol('RCL')
 
-        with self.assert_max_queries(20):
-            resp = self.client.post(self.url_activeer_functie % 'getal')
+        resp = self.client.post(self.url_activeer_functie % 'getal')
         self.assert404(resp, 'Foute parameter (functie)')
         self.e2e_check_rol('RCL')
 

@@ -318,6 +318,8 @@ class Command(BaseCommand):
         # doorloop alle scheidsrechters
         qset = Sporter.objects.exclude(scheids=SCHEIDS_NIET)
 
+        qset = qset.exclude(lid_nr__in=settings.LID_NRS_GEEN_SCHEIDS_BESCHIKBAARHEID_OPVRAGEN)
+
         # alleen SR's hanteren die een account aangemaakt hebben
         qset = qset.exclude(account=None)
 
@@ -449,6 +451,8 @@ class Command(BaseCommand):
                 # doorloop alle scheidsrechters
                 qset = Sporter.objects.exclude(scheids=SCHEIDS_NIET)
 
+                qset = qset.exclude(lid_nr__in=settings.LID_NRS_GEEN_SCHEIDS_BESCHIKBAARHEID_OPVRAGEN)
+
                 # alleen SR's hanteren die een account aangemaakt hebben
                 qset = qset.exclude(account=None)
 
@@ -456,6 +460,7 @@ class Command(BaseCommand):
                     # stuur een e-mail
                     self.stuur_email_naar_sr_beschikbaarheid_opgeven(rk_wedstrijd, vraag, sporter.account)
                 # for
+        del alle_rk_datums
 
         if len(alle_bk_datums) > 0:
             vraag = list()
@@ -474,7 +479,7 @@ class Command(BaseCommand):
                                                                   status=WEDSTRIJD_STATUS_GEACCEPTEERD,
                                                                   aantal_scheids=6)        # per dag
                 # voor alle datums moeten we een verzoek moeten sturen
-                vraag.extend(alle_rk_datums)
+                vraag.extend(alle_bk_datums)
             else:
                 # check the datums
                 if bk_wedstrijd.datum_begin != alle_bk_datums[0] or bk_wedstrijd.datum_einde != alle_bk_datums[-1]:
@@ -493,6 +498,8 @@ class Command(BaseCommand):
 
                 # doorloop alle scheidsrechters
                 qset = Sporter.objects.exclude(scheids=SCHEIDS_NIET)
+
+                qset = qset.exclude(lid_nr__in=settings.LID_NRS_GEEN_SCHEIDS_BESCHIKBAARHEID_OPVRAGEN)
 
                 # alleen SR's hanteren die een account aangemaakt hebben
                 qset = qset.exclude(account=None)

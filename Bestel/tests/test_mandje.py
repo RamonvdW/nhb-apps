@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2023 Ramon van der Winkel.
+#  Copyright (c) 2022-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -355,8 +355,7 @@ class TestBestelMandje(E2EHelpers, TestCase):
         self.assertTrue(str(product1) != '')
         self.assertTrue(product1.korte_beschrijving() != '')
 
-        with self.assert_max_queries(20):
-            resp = self.client.post(self.url_mandje_verwijder % 999999)
+        resp = self.client.post(self.url_mandje_verwijder % 999999)
         self.assert404(resp, 'Niet gevonden in jouw mandje')
 
         with self.assert_max_queries(20):

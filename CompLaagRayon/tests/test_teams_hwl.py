@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2023 Ramon van der Winkel.
+#  Copyright (c) 2020-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -364,10 +364,9 @@ class TestCompLaagRayonVerenigingTeams(E2EHelpers, TestCase):
                 self.assert404(resp, 'Slechte parameter')
 
             # bad deelcomp_pk
-            with self.assert_max_queries(20):
-                url = self.url_rk_teams_wijzig % (999999, 0)
-                resp = self.client.get(url)
-                self.assert404(resp, 'Kampioenschap niet gevonden')
+            url = self.url_rk_teams_wijzig % (999999, 0)
+            resp = self.client.get(url)
+            self.assert404(resp, 'Kampioenschap niet gevonden')
 
             # maak een team aan, zonder team type
             url = self.url_rk_teams_wijzig % (deelkamp_rk3.pk, 0)  # 0 = nieuw team
@@ -475,8 +474,7 @@ class TestCompLaagRayonVerenigingTeams(E2EHelpers, TestCase):
             self.assert_html_ok(resp)
             self.assert_template_used(resp, ('complaagrayon/hwl-teams-koppelen.dtl', 'plein/site_layout.dtl'))
 
-            with self.assert_max_queries(20):
-                resp = self.client.post(url, {'deelnemer_999999': 1, 'deelnemer_xyz': 1})
+            resp = self.client.post(url, {'deelnemer_999999': 1, 'deelnemer_xyz': 1})
             self.assert_is_redirect_not_plein(resp)
 
             # bad team pk

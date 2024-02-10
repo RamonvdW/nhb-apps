@@ -28,6 +28,7 @@ urlpatterns = [
          view_korps.KorpsCSAlleEmailsView.as_view(),
          name='korps-emails'),
 
+
     path('wedstrijden/',
          view_wedstrijden.WedstrijdenView.as_view(),
          name='wedstrijden'),
@@ -44,6 +45,7 @@ urlpatterns = [
          view_wedstrijden.WedstrijdHWLContactView.as_view(),
          name='wedstrijd-hwl-contact'),
 
+
     path('beschikbaarheid-opvragen/',
          view_beschikbaarheid.BeschikbaarheidOpvragenView.as_view(),
          name='beschikbaarheid-opvragen'),
@@ -56,6 +58,7 @@ urlpatterns = [
          view_beschikbaarheid.BeschikbaarheidInzienCSView.as_view(),
          name='beschikbaarheid-inzien'),
 
+
     path('bondscompetitie/',
          view_competitie.CompetitieMatchesView.as_view(),
          name='competitie'),
@@ -64,7 +67,7 @@ urlpatterns = [
          view_competitie.MatchDetailsView.as_view(),
          name='match-details'),
 
-    path('bondscompetitie/<match_pk>/kies-scheidsrechter/',
+    path('bondscompetitie/<match_pk>/kies-scheidsrechters/',
          view_competitie.MatchDetailsCSView.as_view(),
          name='match-kies-scheidsrechter'),
 
@@ -72,7 +75,7 @@ urlpatterns = [
          view_beschikbaarheid.BeschikbaarheidCompetitieOpvragenView.as_view(),
          name='competitie-beschikbaarheid-opvragen'),
 
-    path('bondscompetities/<match_pk>/geselecteerde-scheidsrechters/',
+    path('bondscompetitie/<match_pk>/geselecteerde-scheidsrechters/',
          view_competitie.MatchHWLContactView.as_view(),
          name='match-hwl-contact'),
 

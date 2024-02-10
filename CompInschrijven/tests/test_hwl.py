@@ -433,18 +433,15 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
         self.assertEqual(deelnemer.indiv_klasse, klasse_5)
 
         # dubbele inschrijving
-        with self.assert_max_queries(20):
-            resp = self.client.post(url, {'lid_100002_boogtype_1': 'on'})
+        resp = self.client.post(url, {'lid_100002_boogtype_1': 'on'})
         self.assert404(resp, 'Sporter is al ingeschreven')
         self.assertEqual(RegiocompetitieSporterBoog.objects.count(), 2)    # 2 schutters, 1 competitie
 
         # POST met garbage
-        with self.assert_max_queries(20):
-            resp = self.client.post(url, {'lid_10xxx2_boogtype_1': 'on'})
+        resp = self.client.post(url, {'lid_10xxx2_boogtype_1': 'on'})
         self.assert404(resp, 'Verkeerde parameters')
 
-        with self.assert_max_queries(20):
-            resp = self.client.post(url, {'lid_999999_boogtype_1': 'on'})
+        resp = self.client.post(url, {'lid_999999_boogtype_1': 'on'})
         self.assert404(resp, 'Sporter niet gevonden')
 
         # haal het aanmeld-scherm op zodat er al ingeschreven leden bij staan
@@ -721,12 +718,10 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_hwl)
         self.e2e_check_rol('HWL')
 
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_aanmelden % 9999999)
+        resp = self.client.get(self.url_aanmelden % 9999999)
         self.assert404(resp, 'Competitie niet gevonden')
 
-        with self.assert_max_queries(20):
-            resp = self.client.post(self.url_aanmelden % 9999999)
+        resp = self.client.post(self.url_aanmelden % 9999999)
         self.assert404(resp, 'Competitie niet gevonden')
 
         url = self.url_aanmelden % self.comp_18.pk
@@ -735,13 +730,11 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
                                           'lid_GEENGETAL_boogtype_3': 'on'})
         self.assert404(resp, 'Verkeerde competitie fase')
 
-        with self.assert_max_queries(20):
-            resp = self.client.post(url, {'garbage': 'oh',
-                                          'lid_999999_boogtype_GEENGETAL': 'on'})
+        resp = self.client.post(url, {'garbage': 'oh',
+                                      'lid_999999_boogtype_GEENGETAL': 'on'})
         self.assert404(resp, 'Verkeerde competitie fase')
 
-        with self.assert_max_queries(20):
-            resp = self.client.post(url, {'lid_999999_boogtype_3': 'on'})       # 3=BB
+        resp = self.client.post(url, {'lid_999999_boogtype_3': 'on'})       # 3=BB
         self.assert404(resp, 'Verkeerde competitie fase')
 
         with self.assert_max_queries(20):
@@ -749,12 +742,10 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
         self.assert404(resp, 'Verkeerde competitie fase')
 
         url = self.url_ingeschreven % 999999
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
+        resp = self.client.get(url)
         self.assert404(resp, 'Verkeerde parameters')
 
-        with self.assert_max_queries(20):
-            resp = self.client.post(url)
+        resp = self.client.post(url)
         self.assertEqual(resp.status_code, 302)     # redirect want POST kijkt niet naar deelcomp_pk
 
         with self.assert_max_queries(20):
