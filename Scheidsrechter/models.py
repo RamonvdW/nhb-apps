@@ -132,7 +132,7 @@ class MatchScheidsrechters(models.Model):
     notified_laatste = models.CharField(max_length=100, default='', blank=True)
 
     def __str__(self):
-        return "[%s]" % (self.match.datum_wanneer)
+        return "[%s]" % self.match.datum_wanneer
 
     class Meta:
         verbose_name_plural = verbose_name = "Match scheidsrechters"

@@ -129,24 +129,14 @@
                             </div>
                         </form>
 
-                        {% if url_opvragen %}
-
-                            <div class="center" style="margin-top:30px">
-                                <form action="{{ url_opvragen }}" method="post" onsubmit="document.getElementById('submit_knop2').disabled=true; return true;">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="wedstrijd" value="{{ wed.pk }}">
-                                    <button class="btn-sv-rood" id="submit_knop2" type="submit">Beschikbaarheid opvragen</button>
-                                </form>
-                            </div>
-
-                        {% elif url_notify %}
+                        {% if url_notify %}
 
                             <div style="margin-top:30px">
                                 <p>{% if notify_last %}Vorige notificatie: {{ notify_last }}{% else %}<i>Er is nog geen notificatie verstuurd</i>{% endif %}</p>
 
                                 <form action="{{ url_notify }}" method="post" onsubmit="document.getElementById('submit_knop3').disabled=true; return true;">
                                     {% csrf_token %}
-                                    <input type="hidden" name="wedstrijd" value="{{ wed.pk }}">
+                                    <input type="hidden" name="match" value="{{ match.pk }}">
                                     <input type="hidden" name="notify" value="J">
                                     <button class="btn-sv-blauw nav_weg_knop" id="submit_knop3" type="submit">Stuur notificatie e-mails</button>
                                 </form>
@@ -201,11 +191,15 @@
                 <tr>
                     <th>Wedstrijd locatie</th>
                     <td>
-                        <span>{{ match.locatie.adres|linebreaksbr }}</span>
-                        {% if url_map %}
-                            <br><br>
-                            <a class="btn-sv-blauw nav_weg_knop" href="{{ url_map }}" target="_blank" rel="noopener noreferrer">
-                                <i class="notranslate material-icons-round left">open_in_new</i>Toon op de kaart</a>
+                        {% if match.locatie %}
+                            <span>{{ match.locatie.adres|linebreaksbr }}</span>
+                            {% if url_map %}
+                                <br><br>
+                                <a class="btn-sv-blauw nav_weg_knop" href="{{ url_map }}" target="_blank" rel="noopener noreferrer">
+                                    <i class="notranslate material-icons-round left">open_in_new</i>Toon op de kaart</a>
+                            {% endif %}
+                        {% else %}
+                            <i>Onbekend</i>
                         {% endif %}
                     </td>
                 </tr>

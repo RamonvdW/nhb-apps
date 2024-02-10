@@ -412,6 +412,8 @@ class Command(BaseCommand):
         # for
 
         pos = een_match.beschrijving.find(', ')
+        if pos < 0:
+            pos = 0
         titel = ' wedstrijden' + een_match.beschrijving[pos:]
 
         if len(alle_rk_datums) > 0:
