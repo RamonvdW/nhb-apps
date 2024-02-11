@@ -691,7 +691,7 @@ class MatchHWLContactView(UserPassesTestMixin, TemplateView):
             raise Http404('Wedstrijd niet gevonden')
 
         if match.vereniging != self.functie_nu.vereniging:
-            raise Http404('Verkeerde beheerders')
+            raise Http404('Verkeerde beheerder')
 
         context['match'] = match
 
