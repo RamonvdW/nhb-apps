@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2023 Ramon van der Winkel.
+#  Copyright (c) 2022-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -66,7 +66,8 @@ class BestellingAdmin(admin.ModelAdmin):
                         'verkoper_email',
                         'verkoper_telefoon',
                         'verkoper_iban',
-                        'verkoper_bic')
+                        'verkoper_bic',
+                        'verkoper_btw_nr')
              }),
         ('Transactie',
             {'fields': ('status',

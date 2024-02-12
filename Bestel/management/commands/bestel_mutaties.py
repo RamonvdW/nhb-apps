@@ -705,7 +705,7 @@ class Command(BaseCommand):
                         bestelling.verkoper_btw_nr = settings.WEBWINKEL_VERKOPER_BTW_NR
 
                 bestelling.totaal_euro = totaal_euro
-                bestelling.save(update_fields=['totaal_euro'])
+                bestelling.save(update_fields=['totaal_euro', 'verkoper_btw_nr'])
 
                 totaal_euro_str = "€ %.2f" % totaal_euro
                 totaal_euro_str = totaal_euro_str.replace('.', ',')     # nederlandse komma
