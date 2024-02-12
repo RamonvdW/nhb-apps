@@ -204,6 +204,7 @@ def stuur_email_webwinkel_backoffice(bestelling, email_backoffice):
         'totaal_euro_str': totaal_euro_str,
         'producten': producten,
         'transacties': transacties,
+        'waarschuw_test_server': settings.IS_TEST_SERVER,
     }
 
     mail_body = render_email_template(context, EMAIL_TEMPLATE_BACKOFFICE_VERSTUREN)

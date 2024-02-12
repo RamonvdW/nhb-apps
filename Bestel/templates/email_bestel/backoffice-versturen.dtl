@@ -10,6 +10,10 @@
     |
     |Deze e-mail is de bevestiging van een verkoop via {{ naam_site }} en opdracht tot het versturen van de gekochten producten.
     |
+    {% if waarschuw_test_server %}
+        |LET OP: DIT KOMT VAN DE TESTOMGEVING EN IS GEEN ECHTE BESTELLING!
+        |
+    {% endif %}
     |Bestelnummer: {{ bestelling.mh_bestel_nr }}
     |Betaalstatus: Voldaan
     |
@@ -53,13 +57,13 @@
     {% if bestelling.btw_percentage_cat1 or bestelling.btw_percentage_cat2 or bestelling.btw_percentage_cat3 %}
         |
         {% if bestelling.btw_percentage_cat1 %}
-            |(inclusief BTW {{ bestelling.btw_percentage_cat1 }}%: € {{ bestelling.btw_euro_cat1 }})
+            |Waarvan BTW {{ bestelling.btw_percentage_cat1 }}%: € {{ bestelling.btw_euro_cat1 }}
         {% endif %}
         {% if bestelling.btw_percentage_cat2 %}
-            |(inclusief BTW {{ bestelling.btw_percentage_cat2 }}%: € {{ bestelling.btw_euro_cat2 }})
+            |Waarvan BTW {{ bestelling.btw_percentage_cat2 }}%: € {{ bestelling.btw_euro_cat2 }}
         {% endif %}
         {% if bestelling.btw_percentage_cat3 %}
-            |(inclusief BTW {{ bestelling.btw_percentage_cat3 }}%: € {{ bestelling.btw_euro_cat3 }})
+            |Waarvan BTW {{ bestelling.btw_percentage_cat3 }}%: € {{ bestelling.btw_euro_cat3 }}
         {% endif %}
     {% endif %}
 
@@ -95,8 +99,12 @@
     <div>Hallo backoffice!</div>
     <br>
     <div>Deze e-mail is de bevestiging van een verkoop via {{ naam_site }} en opdracht tot het versturen van de gekochten producten.</div>
-
     <br>
+
+    {% if waarschuw_test_server %}
+        <div>LET OP: DIT KOMT VAN DE TESTOMGEVING EN IS GEEN ECHTE BESTELLING!</div>
+        <br>
+    {% endif %}
 
     <table>
         <tr><th>Bestelnummer:</th><td>{{ bestelling.mh_bestel_nr }}</td></tr>
@@ -159,21 +167,21 @@
         {% if bestelling.btw_percentage_cat1 %}
             <tr>
                 <td></td>
-                <td>Inclusief BTW {{ bestelling.btw_percentage_cat1 }}%:</td>
+                <td>Waarvan BTW {{ bestelling.btw_percentage_cat1 }}%</td>
                 <td style="text-align:right;vertical-align:top">&euro;&nbsp;{{ bestelling.btw_euro_cat1 }}</td>
             </tr>
         {% endif %}
         {% if bestelling.btw_percentage_cat2 %}
             <tr>
                 <td></td>
-                <td>Inclusief BTW {{ bestelling.btw_percentage_cat2 }}%:</td>
+                <td>Waarvan BTW {{ bestelling.btw_percentage_cat2 }}%</td>
                 <td style="text-align:right;vertical-align:top">&euro;&nbsp;{{ bestelling.btw_euro_cat2 }}</td>
             </tr>
         {% endif %}
         {% if bestelling.btw_percentage_cat3 %}
             <tr>
                 <td></td>
-                <td>Inclusief BTW {{ bestelling.btw_percentage_cat3 }}%:</td>
+                <td>Waarvan BTW {{ bestelling.btw_percentage_cat3 }}%</td>
                 <td style="text-align:right;vertical-align:top">&euro;&nbsp;{{ bestelling.btw_euro_cat3 }}</td>
             </tr>
         {% endif %}

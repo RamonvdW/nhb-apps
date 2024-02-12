@@ -44,13 +44,13 @@
     {% if bestelling.btw_percentage_cat1 or bestelling.btw_percentage_cat2 or bestelling.btw_percentage_cat3 %}
         |
         {% if bestelling.btw_percentage_cat1 %}
-            |(inclusief BTW {{ bestelling.btw_percentage_cat1 }}%: € {{ bestelling.btw_euro_cat1 }})
+            |Inclusief BTW {{ bestelling.btw_percentage_cat1 }}%: € {{ bestelling.btw_euro_cat1 }}
         {% endif %}
         {% if bestelling.btw_percentage_cat2 %}
-            |(inclusief BTW {{ bestelling.btw_percentage_cat2 }}%: € {{ bestelling.btw_euro_cat2 }})
+            |Inclusief BTW {{ bestelling.btw_percentage_cat2 }}%: € {{ bestelling.btw_euro_cat2 }}
         {% endif %}
         {% if bestelling.btw_percentage_cat3 %}
-            |(inclusief BTW {{ bestelling.btw_percentage_cat3 }}%: € {{ bestelling.btw_euro_cat3 }})
+            |Inclusief BTW {{ bestelling.btw_percentage_cat3 }}%: € {{ bestelling.btw_euro_cat3 }}
         {% endif %}
     {% endif %}
 
