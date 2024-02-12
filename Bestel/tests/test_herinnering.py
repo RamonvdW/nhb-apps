@@ -7,16 +7,11 @@
 from django.test import TestCase
 from django.conf import settings
 from django.utils import timezone
-from BasisTypen.definities import ORGANISATIE_IFAA
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse
-from Bestel.definities import (BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_BETALING_ACTIEF, BESTELLING_STATUS_NIEUW,
-                               BESTELLING_STATUS_MISLUKT, BESTELLING_STATUS_GEANNULEERD)
-from Bestel.models import BestelMandje, BestelMutatie, Bestelling
+from Bestel.models import BestelMandje
 from Bestel.operations.mutaties import (bestel_mutatieverzoek_inschrijven_wedstrijd,
-                                        bestel_mutatieverzoek_webwinkel_keuze,
-                                        bestel_mutatieverzoek_betaling_afgerond,
-                                        bestel_mutatieverzoek_afmelden_wedstrijd)
-from Betaal.models import BetaalInstellingenVereniging, BetaalActief, BetaalTransactie, BetaalMutatie
+                                        bestel_mutatieverzoek_webwinkel_keuze)
+from Betaal.models import BetaalInstellingenVereniging
 from Functie.models import Functie
 from Geo.models import Regio
 from Locatie.models import Locatie
@@ -24,17 +19,10 @@ from Mailer.models import MailQueue
 from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
-from Webwinkel.definities import VERZENDKOSTEN_BRIEFPOST
 from Webwinkel.models import WebwinkelProduct, WebwinkelKeuze
-from Wedstrijden.definities import (WEDSTRIJD_STATUS_GEACCEPTEERD, WEDSTRIJD_KORTING_VERENIGING,
-                                    WEDSTRIJD_KORTING_SPORTER,
-                                    INSCHRIJVING_STATUS_RESERVERING_MANDJE, INSCHRIJVING_STATUS_RESERVERING_BESTELD,
-                                    INSCHRIJVING_STATUS_DEFINITIEF, INSCHRIJVING_STATUS_AFGEMELD,
-                                    INSCHRIJVING_STATUS_VERWIJDERD)
+from Wedstrijden.definities import WEDSTRIJD_STATUS_GEACCEPTEERD, WEDSTRIJD_KORTING_VERENIGING
 from Wedstrijden.models import Wedstrijd, WedstrijdSessie, WedstrijdInschrijving, WedstrijdKorting
 from decimal import Decimal
-import datetime
-import time
 
 
 class TestBestelHerinnering(E2EHelpers, TestCase):
