@@ -113,14 +113,33 @@ class MatchScheidsrechtersAdmin(admin.ModelAdmin):
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 
+class ScheidsFilter(admin.SimpleListFilter):
+
+    title = 'Scheidsrechter'
+
+    parameter_name = 'Scheids'
+
+    def lookups(self, request, model_admin):
+        qset = Sporter.objects.exclude(scheids=SCHEIDS_NIET).order_by('scheids', 'lid_nr')
+        return [(sporter.lid_nr, sporter.lid_nr_en_volledige_naam()) for sporter in qset]
+
+    def queryset(self, request, qs):
+        if self.value():
+            qs = qs.filter(scheids__lid_nr=self.value())
+        return qs
+
+
 class ScheidsBeschikbaarheidAdmin(admin.ModelAdmin):
 
     fieldsets = (
         ('', {'fields': ('scheids', 'wedstrijd', 'datum', 'opgaaf', 'opmerking', 'log')},),
     )
+
     readonly_fields = ('scheids', 'wedstrijd', 'datum')
 
     search_fields = ('scheids__voornaam', 'scheids__achternaam')
+
+    list_filter = ('opgaaf', ScheidsFilter,)
 
 
 admin.site.register(ScheidsBeschikbaarheid, ScheidsBeschikbaarheidAdmin)
