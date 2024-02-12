@@ -1,0 +1,36 @@
+{% extends 'email_mailer/email_basis.dtl' %}
+{% comment %}
+                Copyright (c) 2024 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+
+{% block inhoud_text %}
+    |Hallo {{ voornaam }},
+    |
+    |Deze e-mail is herinnering van {{ naam_site }}.
+    |
+    |Je hebt nog {{ num_prod }} product{% if num_prod > 1 %}en{% endif %} in je mandje liggen.
+    |Misschien ben je vergeten de bestelling af te ronden?
+    |
+    |{% if num_prod == 1 %}Dit product blijft{% else %}Deze producten blijven{% endif %} maar een paar dagen voor jou gereserveerd.
+    |
+    |Ga dus naar {{ naam_site }} en zet je mandje om in een bestelling.
+    |
+    |Bedankt voor je aandacht!
+{% endblock %}
+
+{% block inhoud_html %}
+    <div>Hallo {{ voornaam }},</div>
+    <br>
+    <div>Deze e-mail is herinnering van {{ naam_site }}.</div>
+    <br>
+    <div>Je hebt nog {{ num_prod }} product{% if num_prod > 1 %}en{% endif %} in je mandje liggen.</div>
+    <div>Misschien ben je vergeten de bestelling af te ronden?</div>
+    <br>
+    <div>{% if num_prod == 1 %}Dit product blijft{% else %}Deze producten blijven{% endif %} maar een paar dagen voor jou gereserveerd.</div>
+    <br>
+    <div>Ga dus naar {{ naam_site }} en zet je mandje om in een bestelling.</div>
+    <br>
+    <div>Bedankt voor je aandacht!</div>
+{% endblock %}
