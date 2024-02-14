@@ -282,7 +282,8 @@ class CompetitieIndivKlasse(models.Model):
     blazoen_rk_bk = models.CharField(max_length=2, choices=BLAZOEN_CHOICES, default=BLAZOEN_40CM)
 
     # krijgt deze wedstrijdklasse een scheidsrechter toegekend op het RK en BK?
-    krijgt_scheids_rk_bk = models.BooleanField(default=False)
+    krijgt_scheids_rk = models.BooleanField(default=False)
+    krijgt_scheids_bk = models.BooleanField(default=False)
 
     # TODO: standaard limiet toevoegen voor elke klasse: 24
 
@@ -355,7 +356,8 @@ class CompetitieTeamKlasse(models.Model):
     blazoen_rk_bk = models.CharField(max_length=2, choices=BLAZOEN_CHOICES, default=BLAZOEN_40CM)
 
     # krijgt deze wedstrijdklasse een scheidsrechter toegekend op het RK en BK?
-    krijgt_scheids_rk_bk = models.BooleanField(default=False)
+    krijgt_scheids_rk = models.BooleanField(default=False)
+    krijgt_scheids_bk = models.BooleanField(default=False)
 
     # TODO: standaard limiet toevoegen voor elke klasse: ERE=12, rest=8
 

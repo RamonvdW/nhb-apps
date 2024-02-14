@@ -57,7 +57,7 @@ class BasisTypenTemplateCompetitieIndivKlasseAdmin(BasisTypenReadonlyMetVolgorde
     fieldsets = (
         (None, {'fields': ('volgorde', 'beschrijving', 'boogtype', 'gebruik_18m', 'gebruik_25m')}),
         ('Details', {'fields': ('leeftijdsklassen', 'is_aspirant_klasse', 'is_onbekend', 'niet_voor_rk_bk',
-                                'krijgt_scheids_rk_bk')}),
+                                'krijgt_scheids_rk', 'krijgt_scheids_bk')}),
         ('Titels', {'fields': ('titel_bk_18m', 'titel_bk_25m')}),
         ('Blazoenen Indoor', {'fields': ('blazoen1_18m_regio', 'blazoen2_18m_regio', 'blazoen_18m_rk_bk')}),
         ('Blazoenen 25m 1pijl', {'fields': ('blazoen1_25m_regio', 'blazoen2_25m_regio', 'blazoen_25m_rk_bk')})
@@ -87,7 +87,7 @@ class BasisTypenTemplateCompetitieTeamKlasseAdmin(BasisTypenReadonlyMetVolgordeA
     # record weergave
     fieldsets = (
         (None, {'fields': ('volgorde', 'beschrijving', 'team_type', 'gebruik_18m', 'gebruik_25m',
-                           'krijgt_scheids_rk_bk')}),
+                           'krijgt_scheids_rk', 'krijgt_scheids_bk')}),
         ('Titels', {'fields': ('titel_bk_18m', 'titel_bk_25m')}),
         ('Blazoenen Indoor', {'fields': ('blazoen1_18m_regio', 'blazoen2_18m_regio', 'blazoen_18m_rk_bk')}),
         ('Blazoenen 25m 1pijl', {'fields': ('blazoen1_25m_regio', 'blazoen2_25m_regio', 'blazoen_25m_rk_bk')})

@@ -24,6 +24,8 @@ class WedstrijdDagScheidsrechtersAdmin(admin.ModelAdmin):
 
     readonly_fields = ('wedstrijd', 'dag_offset', 'notified_srs')
 
+    list_filter = ('wedstrijd',)
+
     ordering = ('-wedstrijd__datum_begin', 'dag_offset')
 
     def __init__(self, model, admin_site):

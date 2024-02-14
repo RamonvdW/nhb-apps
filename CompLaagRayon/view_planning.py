@@ -662,10 +662,10 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
         # update aantal scheidsrechters nodig
         sr_nodig = False
         for obj in match.indiv_klassen.all():
-            sr_nodig |= obj.krijgt_scheids_rk_bk
+            sr_nodig |= obj.krijgt_scheids_rk
         # for
         for obj in match.team_klassen.all():
-            sr_nodig |= obj.krijgt_scheids_rk_bk
+            sr_nodig |= obj.krijgt_scheids_rk
         # for
 
         if sr_nodig:

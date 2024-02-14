@@ -11,20 +11,27 @@ def zet_scheids_rk_bk(apps, _):
     """ Indoor wedstrijden kunnen scheidsrechter krijgen voor RK/BK aan de hand van de template """
 
     basis_indiv_klas = apps.get_model('BasisTypen', 'TemplateCompetitieIndivKlasse')
-    volgordes = list(basis_indiv_klas.objects.filter(krijgt_scheids_rk_bk=True).values_list('volgorde', flat=True))
     indiv_klas = apps.get_model('Competitie', 'CompetitieIndivKlasse')
-    indiv_klas.objects.filter(volgorde__in=volgordes, competitie__afstand='18').update(krijgt_scheids_rk_bk=True)
+    volgordes = list(basis_indiv_klas.objects.filter(krijgt_scheids_rk=True).values_list('volgorde', flat=True))
+    indiv_klas.objects.filter(volgorde__in=volgordes, competitie__afstand='18').update(krijgt_scheids_rk=True)
+
+    volgordes = list(basis_indiv_klas.objects.filter(krijgt_scheids_bk=True).values_list('volgorde', flat=True))
+    indiv_klas.objects.filter(volgorde__in=volgordes, competitie__afstand='18').update(krijgt_scheids_bk=True)
 
     basis_team_klas = apps.get_model('BasisTypen', 'TemplateCompetitieTeamKlasse')
-    volgordes = list(basis_team_klas.objects.filter(krijgt_scheids_rk_bk=True).values_list('volgorde', flat=True))
-    volgordes = [volgorde + 100 for volgorde in volgordes]  # RK/BK klassen hebben aparte nummering
     team_klas = apps.get_model('Competitie', 'CompetitieTeamKlasse')
-    team_klas.objects.filter(volgorde__in=volgordes, competitie__afstand='18').update(krijgt_scheids_rk_bk=True)
+    volgordes = list(basis_team_klas.objects.filter(krijgt_scheids_rk=True).values_list('volgorde', flat=True))
+    volgordes = [volgorde + 100 for volgorde in volgordes]  # RK/BK klassen hebben aparte nummering
+    team_klas.objects.filter(volgorde__in=volgordes, competitie__afstand='18').update(krijgt_scheids_rk=True)
+
+    volgordes = list(basis_team_klas.objects.filter(krijgt_scheids_bk=True).values_list('volgorde', flat=True))
+    volgordes = [volgorde + 100 for volgorde in volgordes]  # RK/BK klassen hebben aparte nummering
+    team_klas.objects.filter(volgorde__in=volgordes, competitie__afstand='18').update(krijgt_scheids_bk=True)
 
 
 def zet_aantal_scheids(apps, _):
-    """ als een de team/indiv klassen de vlag krijgt_scheids_rk_bk=True heeft dan krijgt de CompetitieMatch
-        aantal_scheids=1, anders 0.
+    """ als een de team/indiv klassen de vlag krijgt_scheids_rk/bk=True heeft
+        dan krijgt de CompetitieMatch aantal_scheids=1 (normaal 0).
     """
 
     match_klas = apps.get_model('Competitie', 'CompetitieMatch')
@@ -37,11 +44,17 @@ def zet_aantal_scheids(apps, _):
 
     # vind the matches in de omgekeerde volgorde
     match_pks = list()
-    for indiv in indiv_klas.objects.filter(krijgt_scheids_rk_bk=True).prefetch_related('competitiematch_set'):
+    for indiv in indiv_klas.objects.filter(krijgt_scheids_rk=True).prefetch_related('competitiematch_set'):
+        match_pks.extend(list(indiv.competitiematch_set.values_list('pk', flat=True)))
+    # for
+    for indiv in indiv_klas.objects.filter(krijgt_scheids_bk=True).prefetch_related('competitiematch_set'):
         match_pks.extend(list(indiv.competitiematch_set.values_list('pk', flat=True)))
     # for
 
-    for team in team_klas.objects.filter(krijgt_scheids_rk_bk=True).prefetch_related('competitiematch_set'):
+    for team in team_klas.objects.filter(krijgt_scheids_rk=True).prefetch_related('competitiematch_set'):
+        match_pks.extend(list(team.competitiematch_set.values_list('pk', flat=True)))
+    # for
+    for team in team_klas.objects.filter(krijgt_scheids_bk=True).prefetch_related('competitiematch_set'):
         match_pks.extend(list(team.competitiematch_set.values_list('pk', flat=True)))
     # for
 
@@ -72,12 +85,22 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AddField(
             model_name='competitieindivklasse',
-            name='krijgt_scheids_rk_bk',
+            name='krijgt_scheids_rk',
+            field=models.BooleanField(default=False),
+        ),
+        migrations.AddField(
+            model_name='competitieindivklasse',
+            name='krijgt_scheids_bk',
             field=models.BooleanField(default=False),
         ),
         migrations.AddField(
             model_name='competitieteamklasse',
-            name='krijgt_scheids_rk_bk',
+            name='krijgt_scheids_rk',
+            field=models.BooleanField(default=False),
+        ),
+        migrations.AddField(
+            model_name='competitieteamklasse',
+            name='krijgt_scheids_bk',
             field=models.BooleanField(default=False),
         ),
         migrations.RunPython(zet_scheids_rk_bk, reverse_code=migrations.RunPython.noop),

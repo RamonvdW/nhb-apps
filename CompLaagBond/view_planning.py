@@ -214,7 +214,8 @@ class PlanningView(UserPassesTestMixin, TemplateView):
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
-            (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (reverse('CompBeheer:overzicht',
+                     kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
             (None, 'Planning')
         )
 
@@ -500,7 +501,8 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
-            (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (reverse('CompBeheer:overzicht',
+                     kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
             (reverse('CompLaagBond:planning', kwargs={'deelkamp_pk': deelkamp.pk}), 'Planning BK'),
             (None, 'Wijzig BK wedstrijd')
         )
@@ -671,10 +673,10 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
         # update aantal scheidsrechters nodig
         sr_nodig = False
         for obj in match.indiv_klassen.all():
-            sr_nodig |= obj.krijgt_scheids_rk_bk
+            sr_nodig |= obj.krijgt_scheids_bk
         # for
         for obj in match.team_klassen.all():
-            sr_nodig |= obj.krijgt_scheids_rk_bk
+            sr_nodig |= obj.krijgt_scheids_bk
         # for
 
         if sr_nodig:
@@ -789,7 +791,8 @@ class WijzigLimietenView(UserPassesTestMixin, TemplateView):
         comp = deelkamp.competitie
         context['kruimels'] = (
             (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
-            (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (reverse('CompBeheer:overzicht',
+                     kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
             (None, 'BK limieten')
         )
 

@@ -72,18 +72,20 @@ class CompetitieAdmin(admin.ModelAdmin):
 
 class CompetitieIndivKlasseAdmin(admin.ModelAdmin):
 
-    list_filter = ('competitie', 'boogtype', 'is_ook_voor_rk_bk', 'titel_bk', 'krijgt_scheids_rk_bk')
+    list_filter = ('competitie', 'boogtype', 'is_ook_voor_rk_bk', 'titel_bk', 'krijgt_scheids_rk', 'krijgt_scheids_bk')
 
     list_select_related = ('competitie', 'boogtype')
 
-    readonly_fields = ('competitie', 'volgorde', 'boogtype', 'is_ook_voor_rk_bk', 'krijgt_scheids_rk_bk', 'is_onbekend', 'is_aspirant_klasse')
+    readonly_fields = ('competitie', 'volgorde', 'boogtype', 'is_ook_voor_rk_bk', 'krijgt_scheids_rk',
+                       'krijgt_scheids_bk', 'is_onbekend', 'is_aspirant_klasse')
 
     ordering = ('volgorde',)
 
 
 class CompetitieTeamKlasseAdmin(admin.ModelAdmin):
 
-    list_filter = ('competitie', 'team_afkorting', 'is_voor_teams_rk_bk', 'titel_bk', 'krijgt_scheids_rk_bk')
+    list_filter = ('competitie', 'team_afkorting', 'is_voor_teams_rk_bk', 'titel_bk',
+                   'krijgt_scheids_rk', 'krijgt_scheids_bk')
 
     list_select_related = ('competitie',)
 
@@ -91,7 +93,8 @@ class CompetitieTeamKlasseAdmin(admin.ModelAdmin):
 
     filter_horizontal = ('boog_typen',)
 
-    readonly_fields = ('competitie', 'volgorde', 'team_type', 'krijgt_scheids_rk_bk', 'team_afkorting', 'is_voor_teams_rk_bk')
+    readonly_fields = ('competitie', 'volgorde', 'team_type', 'krijgt_scheids_rk', 'krijgt_scheids_bk',
+                       'team_afkorting', 'is_voor_teams_rk_bk')
 
 
 class CompetitieMatchAdmin(admin.ModelAdmin):

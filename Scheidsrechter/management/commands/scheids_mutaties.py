@@ -376,6 +376,28 @@ class Command(BaseCommand):
                 obj.save(update_fields=['dag_offset'])
         # for
 
+    def _maak_competitie_wedstrijddagscheidsrechters(self, wedstrijd, alle_datums):
+        datum2dag_sr = dict()
+        for obj in WedstrijdDagScheidsrechters.objects.filter(wedstrijd=wedstrijd):
+            datum = wedstrijd.datum_begin + datetime.timedelta(days=obj.dag_offset)
+            datum2dag_sr[datum] = obj
+        # for
+
+        bulk = list()
+        for datum in alle_datums:
+            try:
+                obj = datum2dag_sr[datum]
+            except KeyError:
+                # bestaat nog niet
+                dag_offset = (datum - wedstrijd.datum_begin).days
+                dag_sr = WedstrijdDagScheidsrechters(wedstrijd=wedstrijd,
+                                                     dag_offset=dag_offset)
+                bulk.append(dag_sr)
+        # for
+
+        if len(bulk):
+            WedstrijdDagScheidsrechters.objects.bulk_create(bulk)
+
     def _verwerk_mutatie_beschikbaarheid_opvragen_competitie(self, mutatie):
         """ maak een placeholder Wedstrijd aan voor de RK en BK matches van de competitie;
             als er datumreeks van de wedstrijd niet meer klopt, pas deze dan aan;
@@ -446,9 +468,11 @@ class Command(BaseCommand):
 
                     self._adjust_rk_bk_datum_reeks(rk_wedstrijd, alle_rk_datums)
 
-            if len(vraag):
+            if len(vraag) and rk_wedstrijd.datum_einde > timezone.now().date():
                 datums_str = ", ".join(datum.strftime('%Y-%m-%d') for datum in vraag)
                 self.stdout.write('[INFO] Vraag beschikbaarheid op voor RK datums: %s' % datums_str)
+
+                self._maak_competitie_wedstrijddagscheidsrechters(rk_wedstrijd, alle_rk_datums)
 
                 # doorloop alle scheidsrechters
                 qset = Sporter.objects.exclude(scheids=SCHEIDS_NIET)
@@ -494,9 +518,11 @@ class Command(BaseCommand):
 
                     self._adjust_rk_bk_datum_reeks(bk_wedstrijd, alle_bk_datums)
 
-            if len(vraag):
+            if len(vraag) and bk_wedstrijd.datum_einde > timezone.now().date():
                 datums_str = ", ".join(datum.strftime('%Y-%m-%d') for datum in vraag)
                 self.stdout.write('[INFO] Vraag beschikbaarheid op voor BK datums: %s' % datums_str)
+
+                self._maak_competitie_wedstrijddagscheidsrechters(bk_wedstrijd, alle_bk_datums)
 
                 # doorloop alle scheidsrechters
                 qset = Sporter.objects.exclude(scheids=SCHEIDS_NIET)

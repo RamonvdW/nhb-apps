@@ -144,7 +144,7 @@ class WijzigBeschikbaarheidView(UserPassesTestMixin, TemplateView):
                              .objects
                              .filter(aantal_scheids__gte=1,
                                      status=WEDSTRIJD_STATUS_GEACCEPTEERD,
-                                     datum_begin__gte=vorige_week)
+                                     datum_einde__gte=vorige_week)
                              .exclude(is_ter_info=True)
                              .values_list('pk', flat=True))
 
@@ -236,7 +236,7 @@ class WijzigBeschikbaarheidView(UserPassesTestMixin, TemplateView):
                              .objects
                              .filter(aantal_scheids__gte=1,
                                      status=WEDSTRIJD_STATUS_GEACCEPTEERD,
-                                     datum_begin__gte=vorige_week)
+                                     datum_einde__gte=vorige_week)
                              .exclude(is_ter_info=True)
                              .values_list('pk', flat=True))
 
@@ -335,7 +335,7 @@ class BeschikbaarheidInzienCSView(UserPassesTestMixin, TemplateView):
                  .objects
                  .select_related('wedstrijd',
                                  'wedstrijd__locatie')
-                 .filter(wedstrijd__datum_begin__gte=vorige_week)
+                 .filter(wedstrijd__datum_einde__gte=vorige_week)
                  .order_by('wedstrijd__datum_begin',       # chronologische volgorde
                            'dag_offset',
                            'wedstrijd__pk'))
@@ -389,11 +389,6 @@ class BeschikbaarheidInzienCSView(UserPassesTestMixin, TemplateView):
                 is_sr = keuze.scheids in srs
 
                 is_probleem = (is_hsr or is_sr) and keuze.opgaaf != BESCHIKBAAR_JA
-
-                # opmerking niet meer tonen als keuze Ja is
-                # (opmerking blijft behouden in de database)
-                if keuze.opgaaf == BESCHIKBAAR_JA:
-                    keuze.opmerking = ''
 
                 tup = (not is_hsr,
                        not is_sr,

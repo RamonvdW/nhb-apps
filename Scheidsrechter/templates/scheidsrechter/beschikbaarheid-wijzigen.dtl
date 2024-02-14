@@ -42,7 +42,7 @@
                 el1.classList.add('keuze-ja');
                 el4.innerHTML = "Ja, ik kan";
                 el4.classList.remove('sv-rood-text');
-                el6.classList.add('hide');
+                el6.classList.remove('hide');
             } else if (keuze === 2) {
                 el2.classList.add('keuze-mss');
                 el4.innerHTML = "Nog niet zeker";
