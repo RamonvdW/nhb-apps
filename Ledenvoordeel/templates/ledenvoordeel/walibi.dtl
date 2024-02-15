@@ -1,0 +1,42 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2024 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Walibi{% endblock %}
+
+{% block pagina %}
+
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>Walibi</h4>
+            <p>Als KHSN lid krijg je .... korting? .. op vertoon van je bondspas aan de kassa?</p>
+        </div>
+    </div>
+
+    <!-- QR code moet hier komen -->
+    <div class="row-sv-blauw">
+        <div class="col s12 l6 offset-l3">
+            <div class="sv-kader" style="padding:10px">
+                <h5>Scan deze QR-code bij de kassa</h5>
+                <!-- {{ qrcode }}    < ! -- geeft plaatje in svg tags, welke met display:inline getoond wordt -->
+            </div>
+        </div>
+    </div>
+
+    <!-- blauwe balk met kaartjes -->
+    <div class="row-sv-blauw">
+        <div class="col s12">
+            <!-- walibi (extern) -->
+            {% include 'plein/card_icon.dtl' with title="Walibi" text="Bezoek de website van Walibi Holland." icon="attractions" url=url_walibi extern_open=True %}
+        </div>
+    </div>
+
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="ledenvoordeel-walibi" %}
+
+{% endblock %}

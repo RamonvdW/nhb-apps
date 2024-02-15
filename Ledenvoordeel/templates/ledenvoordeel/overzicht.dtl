@@ -1,0 +1,32 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2024 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Ledenvoordeel{% endblock %}
+
+{% block pagina %}
+
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>Ledenvoordeel</h4>
+            <p>Op deze pagina verzamelen we voordelen voor onze leden.</p>
+        </div>
+    </div>
+
+    <!-- blauwe balk met kaartjes -->
+    <div class="row-sv-blauw">
+        <div class="col s12">
+            <!-- walibi -->
+            {% url 'Ledenvoordeel:walibi' as card_url %}
+            {% include 'plein/card_icon.dtl' with title="Walibi" text="Bla bla bla." icon="attractions" url=card_url %}
+        </div>
+    </div>
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="ledenvoordeel-overzicht" %}
+
+{% endblock %}

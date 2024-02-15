@@ -58,7 +58,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2024-02-14'
+SITE_VERSIE = '2024-02-15'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -84,6 +84,7 @@ INSTALLED_APPS = [
     'ImportCRM.apps.ImportCRMConfig',
     'Kalender.apps.KalenderConfig',
     'Locatie.apps.LocatieConfig',
+    'Ledenvoordeel.apps.LedenvoordeelConfig',
     'Logboek.apps.LogboekConfig',
     'Mailer.apps.MailerConfig',
     'Opleidingen.apps.OpleidingenConfig',
