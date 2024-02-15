@@ -10,6 +10,7 @@ arrow_downward
 arrow_forward
 arrow_forward_ios
 article
+attractions
 auto_awesome
 backspace
 badge
@@ -101,6 +102,7 @@ receipt
 receipt_long
 recent_actors
 record_voice_over
+redeem
 remove
 report_problem
 rule
