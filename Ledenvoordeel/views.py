@@ -8,6 +8,7 @@ from django.conf import settings
 from django.urls import reverse
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
+from Account.models import get_account
 from Functie.rol import rol_get_huidige, Rollen
 
 TEMPLATE_VOORDEEL_OVERZICHT = 'ledenvoordeel/overzicht.dtl'
@@ -23,13 +24,17 @@ class VoordeelOverzichtView(UserPassesTestMixin, TemplateView):
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
     permission_denied_message = 'Geen toegang'
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.rol_nu, self.functie_nu = None, None
-
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        return rol_get_huidige(self.request) == Rollen.ROL_SPORTER
+        if rol_get_huidige(self.request) != Rollen.ROL_SPORTER:
+            return False
+
+        if self.request.user.is_authenticated:
+            account = get_account(self.request)
+            if account.is_gast:
+                return False
+
+        return True
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -51,13 +56,17 @@ class VoordeelWalibiView(UserPassesTestMixin, TemplateView):
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
     permission_denied_message = 'Geen toegang'
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.rol_nu, self.functie_nu = None, None
-
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        return rol_get_huidige(self.request) == Rollen.ROL_SPORTER
+        if rol_get_huidige(self.request) != Rollen.ROL_SPORTER:
+            return False
+
+        if self.request.user.is_authenticated:
+            account = get_account(self.request)
+            if account.is_gast:
+                return False
+
+        return True
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """

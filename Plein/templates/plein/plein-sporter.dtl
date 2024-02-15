@@ -72,8 +72,9 @@
             {% include 'plein/card_icon.dtl' with title="Records" text="Alle handboogsport records van nederlandse sporters." icon="insights" url=card_url %}
 
             <!-- ledenvoordeel -->
-            {% url 'Ledenvoordeel:overzicht' as card_url %}
-            {% include 'plein/card_icon.dtl' with title="Ledenvoordeel" text="Bekijk de aanbiedingen voor KHSN leden!" icon="redeem" url=card_url %}
+            {% if url_voordeel %}
+                {% include 'plein/card_icon.dtl' with title="Ledenvoordeel" text="Bekijk de aanbiedingen voor KHSN leden!" icon="redeem" url=url_voordeel %}
+            {% endif %}
         </div>
     </div>
 
