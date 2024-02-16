@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023 Ramon van der Winkel.
+#  Copyright (c) 2023-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -170,6 +170,7 @@ class HistRkIndivView(TemplateView):
                            rayon_nr=rayon_nr,
                            boogtype=boog_type,
                            rank_rk__lte=100)
+                   .exclude(rank_rk=0)                  # 0 = niet meegedaan
                    .order_by('indiv_klasse',
                              'rank_rk',                 # laagste eerst
                              '-rk_score_totaal'))       # hoogste eerst
