@@ -8,7 +8,7 @@
 {% block inhoud_text %}
     |Hallo {{ voornaam }},
     |
-    |Deze e-mail is herinnering van {{ naam_site }}.
+    |Deze e-mail is een herinnering van {{ naam_site }}.
     |
     |Je hebt nog {{ num_prod }} product{% if num_prod > 1 %}en{% endif %} in je mandje liggen.
     |Misschien ben je vergeten de bestelling af te ronden?
@@ -23,7 +23,7 @@
 {% block inhoud_html %}
     <div>Hallo {{ voornaam }},</div>
     <br>
-    <div>Deze e-mail is herinnering van {{ naam_site }}.</div>
+    <div>Deze e-mail is een herinnering van {{ naam_site }}.</div>
     <br>
     <div>Je hebt nog {{ num_prod }} product{% if num_prod > 1 %}en{% endif %} in je mandje liggen.</div>
     <div>Misschien ben je vergeten de bestelling af te ronden?</div>
