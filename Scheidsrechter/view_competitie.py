@@ -384,8 +384,9 @@ class MatchDetailsCSView(UserPassesTestMixin, TemplateView):
         # zoek de RK/BK wedstrijd erbij
         rk_bk_wedstrijd = self._vind_wedstrijd(match)
 
-        # zoek de reistijden erbij
-        reistijd_min = self._get_alle_sr_reistijd(rk_bk_wedstrijd.locatie)
+        if rk_bk_wedstrijd:
+            # zoek de reistijden erbij
+            reistijd_min = self._get_alle_sr_reistijd(rk_bk_wedstrijd.locatie)
 
         context['keuze_aantal_scheids'] = [
             # (0, 'Geen scheidsrechters'),
