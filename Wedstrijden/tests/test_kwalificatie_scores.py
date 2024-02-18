@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2023 Ramon van der Winkel.
+#  Copyright (c) 2021-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -189,7 +189,6 @@ class TestWedstrijdenKwalificatieScores(E2EHelpers, TestCase):
                     regio=Regio.objects.get(pk=101))
         ver.save()
         self.ver2 = ver
-
 
     def test_anon(self):
         resp = self.client.get(self.url_check_lijst % 999999)

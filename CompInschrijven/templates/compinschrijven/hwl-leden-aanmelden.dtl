@@ -42,7 +42,7 @@
     <!-- blauw balk met wit informatie veld -->
     <div class="row-sv-blauw">
         <div class="col s12">
-            <div class="white" style="padding:10px">
+            <div class="sv-kader" style="padding:10px">
                 {% if mag_aanmelden %}
                     <p>Als hoofdwedstrijdleider kan je via deze pagina leden van vereniging [{{ ver.ver_nr }}] {{ ver.naam }} te {{ ver.plaats }} aanmelden voor de <b>{{ comp.beschrijving }}</b>.</p>
 
@@ -73,9 +73,9 @@
         <div class="col s12">
 
             <!-- dialoog venster -->
-            <div class="white left-align z-depth-3">
+            <div class="sv-kader left-align z-depth-3">
                 <div class="form-padding">
-                    <table class="white">
+                    <table class="sv-kader">
                         <tr>
                             <td><b>Voorkeuren voor aanmelden in bulk</b></td>
                         </tr>
@@ -167,7 +167,7 @@
                         <br>
                         <h5 class="center sv-blauw-text">Jeugd</h5>
 
-                        <table class="white" id="table1">
+                        <table class="sv-kader" id="table1">
                             <thead>
                                 <tr>        <!-- filter veld -->
                                     <td></td>
@@ -224,7 +224,7 @@
                     <br>
                     <h5 class="center sv-blauw-text">Senioren</h5>
 
-                    <table class="white" id="table2">
+                    <table class="sv-kader" id="table2">
                         <thead>
                             <tr>        <!-- filter veld -->
                                 <td></td>

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2023 Ramon van der Winkel.
+#  Copyright (c) 2022-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -8,7 +8,8 @@ from django.test import TestCase
 from django.conf import settings
 from django.utils import timezone
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse
-from Bestel.definities import BESTELLING_STATUS_BETALING_ACTIEF, BESTELLING_STATUS_AFGEROND
+from Bestel.definities import (BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_BETALING_ACTIEF, BESTELLING_STATUS_AFGEROND,
+                               BESTELLING_STATUS_GEANNULEERD)
 from Bestel.models import BestelProduct, Bestelling, BestelMutatie
 from Betaal.models import BetaalInstellingenVereniging
 from Functie.models import Functie
@@ -314,6 +315,17 @@ class TestBestelOverboeking(E2EHelpers, TestCase):
         # self.bestelling.status = BESTELLING_STATUS_WACHT_OP_BETALING
         # self.bestelling.save(update_fields=['status'])
 
+        # bestelling is geannuleerd
+        self.bestelling.status = BESTELLING_STATUS_GEANNULEERD
+        self.bestelling.save(update_fields=['status'])
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_overboeking_ontvangen,
+                                    {'kenmerk': '1234', 'bedrag': '1'})
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('bestel/overboeking-ontvangen.dtl', 'plein/site_layout.dtl'))
+        self.assertContains(resp, 'Bestelling is geannuleerd')
+
         # bestelling voor andere vereniging
         self.instellingen.vereniging = self.ver2
         self.instellingen.save(update_fields=['vereniging'])
@@ -355,5 +367,42 @@ class TestBestelOverboeking(E2EHelpers, TestCase):
         self.assertEqual(self.bestelling2.status, BESTELLING_STATUS_AFGEROND)
         self.assertEqual(1, self.bestelling2.transacties.count())
 
+    def test_afwijkend_bedrag(self):
+        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_wissel_naar_functie(self.functie_mww)
+
+        self.bestelling2.status = BESTELLING_STATUS_NIEUW
+        self.bestelling2.save(update_fields=['status'])
+
+        # afwijkend bedrag
+        self.assertEqual(0, BestelMutatie.objects.count())
+        self.assertEqual(0, self.bestelling2.transacties.count())
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_overboeking_ontvangen,
+                                    {'kenmerk': self.bestelling2.bestel_nr, 'bedrag': '1,00',   # moet zijn: 1,23
+                                     'actie': 'registreer', 'snel': '1'})
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('bestel/overboeking-ontvangen.dtl', 'plein/site_layout.dtl'))
+
+        self.assertContains(resp, 'Afwijkend bedrag')
+        self.assertEqual(0, BestelMutatie.objects.count())
+        self.assertEqual(0, self.bestelling2.transacties.count())
+
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_overboeking_ontvangen,
+                                    {'kenmerk': self.bestelling2.bestel_nr, 'bedrag': '1,00',   # moet zijn: 1,23
+                                     'actie': 'registreer', 'accept_bedrag': 'ja', 'snel': '1'})
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('bestel/overboeking-ontvangen.dtl', 'plein/site_layout.dtl'))
+
+        self.assertEqual(1, BestelMutatie.objects.count())
+        f1, f2 = self.verwerk_bestel_mutaties()
+
+        self.assertTrue("[INFO] Overboeking 1.00 euro ontvangen voor bestelling MH-1235" in f2.getvalue())
+        self.bestelling2 = Bestelling.objects.get(pk=self.bestelling2.pk)
+        self.assertEqual(self.bestelling2.status, BESTELLING_STATUS_BETALING_ACTIEF)
+        self.assertEqual(1, self.bestelling2.transacties.count())
 
 # end of file

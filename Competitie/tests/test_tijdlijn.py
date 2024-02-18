@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2023 Ramon van der Winkel.
+#  Copyright (c) 2020-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -31,7 +31,7 @@ class TestCompetitieTijdlijn(E2EHelpers, TestCase):
             print(msg)
         print('  afstand: %s' % repr(comp.afstand))
         print('  begin_jaar: %s' % repr(comp.begin_jaar))
-        print('  klassegrenzen_vastgesteld: %s' % repr(comp.klassengrenzen_vastgesteld))
+        print('  klassengrenzen_vastgesteld: %s' % repr(comp.klassengrenzen_vastgesteld))
         print('  begin_fase_C: %s' % repr(comp.begin_fase_C))
         print('  begin_fase_F: %s' % repr(comp.begin_fase_F))
         print('  einde_fase_F: %s' % repr(comp.einde_fase_F))

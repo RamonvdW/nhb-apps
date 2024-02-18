@@ -20,7 +20,7 @@
         <!-- blauwe balk met informatie label : info -->
     <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
-            <table class="white">
+            <table class="sv-kader">
                 <tr>
                     <th>Competitie</th>
                     <td>{{ competitie.beschrijving }}</td>
@@ -144,13 +144,13 @@
         <div class="col s12">
 
             <!-- dialoog venster -->
-            <div class="white left-align z-depth-3">
+            <div class="sv-kader left-align z-depth-3">
                 <div class="form-padding">
 
                     <form action="{{ url_opslaan }}" method="post" onsubmit="document.getElementById('submit_knop1').disabled=true; return true;">
                         {% csrf_token %}
 
-                        <table class="white">
+                        <table class="sv-kader">
 
                             <tr>
                                 <th>Datum wedstrijd</th>

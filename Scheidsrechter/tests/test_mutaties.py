@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023 Ramon van der Winkel.
+#  Copyright (c) 2023-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -11,7 +11,7 @@ from BasisTypen.models import KalenderWedstrijdklasse
 from Functie.models import Functie
 from Geo.models import Regio
 from Locatie.models import Locatie
-from Scheidsrechter.definities import SCHEIDS_MUTATIE_BESCHIKBAARHEID_OPVRAGEN
+from Scheidsrechter.definities import SCHEIDS_MUTATIE_WEDSTRIJD_BESCHIKBAARHEID_OPVRAGEN
 from Scheidsrechter.models import ScheidsMutatie
 from Scheidsrechter.mutaties import scheids_mutaties_ping
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -150,7 +150,7 @@ class TestScheidsrechterBeschikbaarheid(E2EHelpers, TestCase):
         self.assertTrue(str(mutatie) != '')
 
         mutatie.is_verwerkt = True
-        mutatie.mutatie = SCHEIDS_MUTATIE_BESCHIKBAARHEID_OPVRAGEN
+        mutatie.mutatie = SCHEIDS_MUTATIE_WEDSTRIJD_BESCHIKBAARHEID_OPVRAGEN
         self.assertTrue(str(mutatie) != '')
 
     def test_mainloop(self):

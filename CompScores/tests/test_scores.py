@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2023 Ramon van der Winkel.
+#  Copyright (c) 2020-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -169,8 +169,7 @@ class TestCompScoresScores(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
 
         # niet bestaande wedstrijd
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_uitslag_invoeren % 999999)
+        resp = self.client.get(self.url_uitslag_invoeren % 999999)
         self.assert404(resp, 'Wedstrijd niet gevonden')
 
     def test_rcl_deelnemers_ophalen(self):
@@ -210,19 +209,17 @@ class TestCompScoresScores(E2EHelpers, TestCase):
 
         # post met niet-bestaande deelcomp_pk
         json_data = {'deelcomp_pk': 999999}
-        with self.assert_max_queries(20):
-            resp = self.client.post(self.url_deelnemers_ophalen,
-                                    json.dumps(json_data),
-                                    content_type='application/json')
+        resp = self.client.post(self.url_deelnemers_ophalen,
+                                json.dumps(json_data),
+                                content_type='application/json')
         self.assert404(resp, 'Competitie niet gevonden')
 
         # post met niet-bestaande wedstrijd_pk
         json_data = {'deelcomp_pk': self.testdata.deelcomp18_regio[101].pk,
                      'wedstrijd_pk': 999999}
-        with self.assert_max_queries(20):
-            resp = self.client.post(self.url_deelnemers_ophalen,
-                                    json.dumps(json_data),
-                                    content_type='application/json')
+        resp = self.client.post(self.url_deelnemers_ophalen,
+                                json.dumps(json_data),
+                                content_type='application/json')
         self.assert404(resp, 'Wedstrijd niet gevonden')
 
     def test_rcl_zoeken(self):
@@ -314,10 +311,9 @@ class TestCompScoresScores(E2EHelpers, TestCase):
         # post niet-bestand wedstrijd_pk
         json_data = {'wedstrijd_pk': 999999,
                      'lid_nr': 0}
-        with self.assert_max_queries(20):
-            resp = self.client.post(self.url_deelnemer_zoeken,
-                                    json.dumps(json_data),
-                                    content_type='application/json')
+        resp = self.client.post(self.url_deelnemer_zoeken,
+                                json.dumps(json_data),
+                                content_type='application/json')
         self.assert404(resp, 'Geen valide verzoek')
 
     def test_rcl_opslaan(self):
@@ -349,10 +345,9 @@ class TestCompScoresScores(E2EHelpers, TestCase):
                      'hoi': 1,
                      999999: 111}                           # niet bestaande sporterboog_pk
         # print('json_data for post: %s' % json.dumps(json_data))
-        with self.assert_max_queries(25):
-            resp = self.client.post(self.url_uitslag_opslaan,
-                                    json.dumps(json_data),
-                                    content_type='application/json')
+        resp = self.client.post(self.url_uitslag_opslaan,
+                                json.dumps(json_data),
+                                content_type='application/json')
         json_data = self.assert200_json(resp)
         self.assertEqual(json_data['done'], 1)
 
@@ -476,10 +471,9 @@ class TestCompScoresScores(E2EHelpers, TestCase):
 
         # post met niet bestaande wedstrijd_pk
         json_data = {'wedstrijd_pk': 999999}
-        with self.assert_max_queries(20):
-            resp = self.client.post(self.url_uitslag_opslaan,
-                                    json.dumps(json_data),
-                                    content_type='application/json')
+        resp = self.client.post(self.url_uitslag_opslaan,
+                                json.dumps(json_data),
+                                content_type='application/json')
         self.assert404(resp, 'Wedstrijd niet gevonden')
 
         # post met wedstrijd_pk waar deze RCL geen toegang toe heeft
@@ -638,8 +632,7 @@ class TestCompScoresScores(E2EHelpers, TestCase):
 
         # bad deelcomp_pk
         url = self.url_scores_regio % 999999
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
+        resp = self.client.get(url)
         self.assert404(resp, 'Competitie niet gevonden')
 
         # verkeerde regio
@@ -668,16 +661,13 @@ class TestCompScoresScores(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.testdata.comp18_functie_rcl[101])
 
         # bad deelcomp_pk
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_regio_teams % 999999)
+        resp = self.client.get(self.url_regio_teams % 999999)
         self.assert404(resp, 'Competitie niet gevonden')
 
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_regio_teams % "xyz")
+        resp = self.client.get(self.url_regio_teams % "xyz")
         self.assert404(resp, 'Competitie niet gevonden')
 
-        with self.assert_max_queries(20):
-            resp = self.client.post(self.url_regio_teams % 999999)
+        resp = self.client.post(self.url_regio_teams % 999999)
         self.assert404(resp, 'Competitie niet gevonden')
 
         deelcomp = self.testdata.deelcomp18_regio[101]

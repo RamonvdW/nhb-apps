@@ -21,11 +21,11 @@
     <!-- blauwe balk met informatie in een tabel -->
     <div class="row-sv-blauw">
         <div class="col s12 xl10 offset-xl1">
-            <table class="white">
+            <table class="sv-kader">
                 {% for obj in kandidaten %}
                     {% if obj.break_klasse %}
 
-                        <tr>
+                        <tr class="sv-table-sectie-header">
                             <td colspan="6" class="center">
                                 <h5>{{ obj.indiv_klasse.beschrijving }}</h5>
                             </td>

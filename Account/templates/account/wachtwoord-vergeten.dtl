@@ -20,7 +20,7 @@
 
     <!-- blauwe balk met dialoog venster -->
     <div class="row-sv-blauw">
-        <div class="col s10 offset-s1 m8 offset-m2 l6 offset-l3 xl6 offset-xl3 white z-depth-3">
+        <div class="col s10 offset-s1 m8 offset-m2 l6 offset-l3 xl6 offset-xl3 sv-kader z-depth-3">
 
             <!-- dialoog venster -->
             <div style="padding:20px" class="left-align">
@@ -37,12 +37,12 @@
 
                     <div class="input-field">
                         <label class="black-text" for="id_lid_nr">Bondsnummer:</label>
-                        <input class="with-gap" autofocus required type="text" name="lid_nr" minlength="6" maxlength="6" value="" inputmode="numeric" id="id_lid_nr">
+                        <input autofocus required type="text" name="lid_nr" minlength="6" maxlength="6" value="" inputmode="numeric" id="id_lid_nr">
                     </div>
 
                     <div class="input-field">
                         <label class="black-text" for="id_email">E-mailadres:</label>
-                        <input class="with-gap" type="email" name="email" value="" required id="id_email" autocomplete="email" inputmode="email">
+                        <input type="email" name="email" value="" required id="id_email" autocomplete="email" inputmode="email">
                     </div>
 
                     <p class="center-align">

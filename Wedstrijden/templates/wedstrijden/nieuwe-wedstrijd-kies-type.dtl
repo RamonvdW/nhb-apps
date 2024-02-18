@@ -34,7 +34,7 @@
             inp = document.createElement('input');
             inp.type = "hidden";
             inp.name = "csrfmiddlewaretoken";
-            inp.value = getCookie('csrftoken');
+            inp.value = getCookie('mh_csrf_token');
             form.appendChild(inp);
 
             form.style.display = 'hidden';
@@ -68,7 +68,7 @@
     <!-- blauw balk met wit informatie veld -->
     <div class="row-sv-blauw">
         <div class="col s12">
-            <div class="white" style="padding:10px">
+            <div class="sv-kader" style="padding:10px">
                 <h5>World Archery</h5>
                 <p>Vijf typen bogen: Recurve, Compound, Barebow, Traditional en Longbow</p>
                 <p>Vier leeftijdsklassen: Onder 18, Onder 21, 21+ en 50+</p>

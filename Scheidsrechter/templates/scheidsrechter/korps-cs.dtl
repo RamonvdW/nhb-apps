@@ -29,7 +29,7 @@
     <!-- blauwe balk met informatie in een tabel -->
     <div class="row-sv-blauw">
         <div class="col s12">
-            <table class="white" id="tabel1">
+            <table class="sv-kader" id="tabel1">
                 <thead>
                     <tr>        <!-- filter veld -->
                         <td colspan="2" class="table-filter">
@@ -40,9 +40,10 @@
                     <tr>
                         <th data-filter="on">Naam</th>
                         <th data-filter="on" class="center">Niveau</th>
-                        <th>Telefoon</th>
+                        <th class="hide-on-small-only center">Behaald</th>
+                        <th class="hide-on-small-only">Telefoon</th>
                         <th class="hide-on-small-only center">Deelt tel.nr</th>
-                        <th>E-mail</th>
+                        <th><span class="hide-on-small-only">E-mail</span><span class="hide-on-med-and-up">Contact<wbr>gegevens</span></th>
                         <th class="hide-on-small-only center">Deelt e-mail</th>
                     </tr>
                 </thead>
@@ -52,9 +53,10 @@
                         <tr>
                             <td>{{ sporter.volledige_naam }}</td>
                             <td class="center">{{ sporter.level_str }}</td>
-                            <td>{{ sporter.telefoon }}</td>
+                            <td class="hide-on-small-only center">{{ sporter.level_sinds }}</td>
+                            <td class="hide-on-small-only">{{ sporter.telefoon }}</td>
                             <td class="hide-on-small-only center">{{ sporter.delen_tel_str }}</td>
-                            <td><code>{{ sporter.email|wbr_email }}</code></td>
+                            <td><span class="hide-on-med-and-up">{{ sporter.telefoon }}<br></span><code>{{ sporter.email|wbr_email }}</code></td>
                             <td class="hide-on-small-only center">{{ sporter.delen_email_str }}</td>
                         </tr>
                     {% endfor %}

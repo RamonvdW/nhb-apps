@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2023 Ramon van der Winkel.
+#  Copyright (c) 2022-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -110,20 +110,6 @@ def _beschrijf_bestelling(bestelling):
                         prijs_euro="0,00")
         producten.append(product)
 
-    # voeg de eventuele BTW toe
-    for btw_euro, btw_tekst in [(bestelling.btw_euro_cat1, bestelling.btw_percentage_cat1),
-                                (bestelling.btw_euro_cat2, bestelling.btw_percentage_cat2),
-                                (bestelling.btw_euro_cat3, bestelling.btw_percentage_cat3)]:
-
-        if btw_euro > 0.001:
-
-            product = SimpleNamespace(
-                            regel_nr=0,     # geen nummer tonen
-                            beschrijving=[(btw_tekst, "")],
-                            prijs_euro=btw_euro)
-            producten.append(product)
-    # for
-
     return producten
 
 
@@ -218,6 +204,7 @@ def stuur_email_webwinkel_backoffice(bestelling, email_backoffice):
         'totaal_euro_str': totaal_euro_str,
         'producten': producten,
         'transacties': transacties,
+        'waarschuw_test_server': settings.IS_TEST_SERVER,
     }
 
     mail_body = render_email_template(context, EMAIL_TEMPLATE_BACKOFFICE_VERSTUREN)
@@ -402,7 +389,7 @@ class Command(BaseCommand):
     def _mandje_bepaal_btw(mandje):
         """ bereken de btw voor de producten in het mandje """
 
-        # nog niet ondersteund: toon voorlopig helemaal niets
+        # begin met een schone lei
         mandje.btw_percentage_cat1 = ""
         mandje.btw_euro_cat1 = Decimal(0)
 
@@ -412,15 +399,41 @@ class Command(BaseCommand):
         mandje.btw_percentage_cat3 = ""
         mandje.btw_euro_cat3 = Decimal(0)
 
+        # kijk hoeveel euro aan webwinkel producten in het mandje liggen
+        totaal_euro = Decimal(0)
+        for product in mandje.producten.exclude(webwinkel_keuze=None):
+            totaal_euro += product.prijs_euro
+            totaal_euro -= product.korting_euro
+        # for
+
+        totaal_euro += mandje.verzendkosten_euro
+
+        if totaal_euro > 0:
+            # converteer percentage (21,0) naar string "21.0%"
+            btw_str = "%.2f" % settings.WEBWINKEL_BTW_PERCENTAGE
+            while btw_str[-1] == '0':
+                btw_str = btw_str[:-1]      # 21,10 --> 21,1 / 21,00 --> 21,
+            btw_str = btw_str.replace('.', ',')       # localize
+            if btw_str[-1] == ",":
+                btw_str = btw_str[:-1]      # drop the trailing dot/comma
+            mandje.btw_percentage_cat1 = btw_str
+
+            # het totaalbedrag is inclusief BTW, dus 100% + BTW% (was: 121%)
+            # reken uit hoeveel daarvan de BTW is
+            btw_deel = Decimal(settings.WEBWINKEL_BTW_PERCENTAGE / (100 + settings.WEBWINKEL_BTW_PERCENTAGE))
+            btw = totaal_euro * btw_deel
+            btw = round(btw, 2)             # afronden op 2 decimalen
+            mandje.btw_euro_cat1 = btw
+
         mandje.save(update_fields=['btw_percentage_cat1', 'btw_euro_cat1',
                                    'btw_percentage_cat2', 'btw_euro_cat2',
                                    'btw_percentage_cat3', 'btw_euro_cat3'])
 
     @staticmethod
-    def _bestelling_bepaal_btw(bestelling):
+    def _bestelling_bepaal_btw(bestelling: Bestelling):
         """ bereken de btw voor de producten in een bestelling """
 
-        # nog niet ondersteund: toon voorlopig helemaal niets
+        # begin met een schone lei
         bestelling.btw_percentage_cat1 = ""
         bestelling.btw_euro_cat1 = Decimal(0)
 
@@ -429,6 +442,32 @@ class Command(BaseCommand):
 
         bestelling.btw_percentage_cat3 = ""
         bestelling.btw_euro_cat3 = Decimal(0)
+
+        # kijk hoeveel euro aan webwinkel producten in deze bestelling zitten
+        totaal_euro = Decimal(0)
+        for product in bestelling.producten.exclude(webwinkel_keuze=None):
+            totaal_euro += product.prijs_euro
+            totaal_euro -= product.korting_euro
+        # for
+
+        totaal_euro += bestelling.verzendkosten_euro
+
+        if totaal_euro > 0:
+            # converteer percentage (21.1) naar string "21,1"
+            btw_str = "%.2f" % settings.WEBWINKEL_BTW_PERCENTAGE
+            while btw_str[-1] == '0':
+                btw_str = btw_str[:-1]      # 21,10 --> 21,1 / 21,00 --> 21,
+            btw_str = btw_str.replace('.', ',')       # localize
+            if btw_str[-1] == ",":
+                btw_str = btw_str[:-1]      # drop the trailing dot/comma
+            bestelling.btw_percentage_cat1 = btw_str
+
+            # het totaalbedrag is inclusief BTW, dus 100% + BTW% (was: 121%)
+            # reken uit hoeveel daarvan de BTW is
+            btw_deel = Decimal(settings.WEBWINKEL_BTW_PERCENTAGE / (100 + settings.WEBWINKEL_BTW_PERCENTAGE))
+            btw = totaal_euro * btw_deel
+            btw = round(btw, 2)             # afronden op 2 decimalen
+            bestelling.btw_euro_cat1 = btw
 
         bestelling.save(update_fields=['btw_percentage_cat1', 'btw_euro_cat1',
                                        'btw_percentage_cat2', 'btw_euro_cat2',
@@ -654,15 +693,19 @@ class Command(BaseCommand):
 
                 webwinkel_plugin_bepaal_verzendkosten_bestelling(self.stdout, mandje.transport, bestelling)
 
+                totaal_euro += bestelling.verzendkosten_euro
+
                 self._bestelling_bepaal_btw(bestelling)
 
-                totaal_euro += bestelling.verzendkosten_euro
-                totaal_euro += bestelling.btw_euro_cat1
-                totaal_euro += bestelling.btw_euro_cat2
-                totaal_euro += bestelling.btw_euro_cat3
+                # toon het BTW nummer alleen als het relevant is
+                if ver_nr == settings.WEBWINKEL_VERKOPER_VER_NR:
+                    if (bestelling.btw_percentage_cat1
+                            or bestelling.btw_percentage_cat2
+                            or bestelling.btw_percentage_cat3):
+                        bestelling.verkoper_btw_nr = settings.WEBWINKEL_VERKOPER_BTW_NR
 
                 bestelling.totaal_euro = totaal_euro
-                bestelling.save(update_fields=['totaal_euro'])
+                bestelling.save(update_fields=['totaal_euro', 'verkoper_btw_nr'])
 
                 totaal_euro_str = "€ %.2f" % totaal_euro
                 totaal_euro_str = totaal_euro_str.replace('.', ',')     # nederlandse komma
@@ -687,9 +730,12 @@ class Command(BaseCommand):
                         inschrijving.save(update_fields=['status'])
                 # for
 
+                totaal_euro_str = "€ %.2f" % totaal_euro
+                totaal_euro_str = totaal_euro_str.replace('.', ',')     # nederlandse komma
+
                 self.stdout.write(
-                  "[INFO] %s producten voor totaal %s uit mandje van account pk=%s (%s) omgezet in bestelling pk=%s" % (
-                      len(producten), totaal_euro, mutatie.account.pk, mutatie.account.volledige_naam(), bestelling.pk))
+                    "[INFO] %s producten voor totaal %s uit mandje van account pk=%s (%s) omgezet in bestelling pk=%s" % (
+                        len(producten), totaal_euro_str, mutatie.account.pk, mutatie.account.volledige_naam(), bestelling.pk))
             # for
 
             # kijk welke bestellingen een nul-bedrag hebben en daarom meteen afgerond kunnen worden
@@ -911,6 +957,10 @@ class Command(BaseCommand):
 
             # stuur een e-mail aan de koper
             stuur_email_naar_koper_betaalbevestiging(bestelling)
+
+        else:
+            bestelling.status = BESTELLING_STATUS_BETALING_ACTIEF
+            bestelling.save(update_fields=['status'])
 
     def _verwerk_mutatie_annuleer_bestelling(self, mutatie):
         """ Annulering van een bestelling + verwijderen van de reserveringen + bevestig via e-mail """

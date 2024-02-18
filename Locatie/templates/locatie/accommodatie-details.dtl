@@ -58,136 +58,128 @@
 
                 <!-- blauwe balk met informatie in een tabel -->
                 <div class="row-sv-blauw">
-                    <div class="col s10 offset-s1 m12{% if not readonly %} white z-depth-3{% endif %}">
+                    <div class="col s10 offset-s1 m12 sv-kader{% if not readonly %} z-depth-3{% endif %}">
 
-                        {% if not readonly %}
-                            <!-- dialoog venster -->
-                            <div style="margin:30px 30px 30px 30px" class="left-align">
-                        {% endif %}
+                        <table>
+                            <tr>
+                                <th>Adres van de accommodatie</th>
+                                <td>{{ locatie.adres|linebreaksbr }}</td>
+                            </tr>
 
-                                <table class="white">
-                                    <tr>
-                                        <th>Adres van de accommodatie</th>
-                                        <td>{{ locatie.adres|linebreaksbr }}</td>
-                                    </tr>
+                            <tr>
+                                <th>Plaats (voor de wedstrijdkalender)</th>
+                                <td>{{ locatie.plaats }}</td>
+                            </tr>
 
-                                    <tr>
-                                        <th>Plaats (voor de wedstrijdkalender)</th>
-                                        <td>{{ locatie.plaats }}</td>
-                                    </tr>
-
-                                    <tr>
-                                        <th>Type baan voor 18m/25m wedstrijden</th>
-                                        <td>
-                                            {% if readonly %}
-                                                <span>{{ locatie.baan_type_str }}</span>
-                                            {% else %}
-                                                <ul id="id_baantype">
-                                                    <li>
-                                                        <label class="black-text" for="id_baantype_X">
-                                                            <input class="with-gap" type="radio" name="baan_type" value="X" required id="id_baantype_X"{%if locatie.baan_type == "X" %} checked{% endif %} onchange="gewijzigd()">
-                                                            <span>Onbekend</span>
-                                                        </label>
-                                                    </li>
-                                                    <li>
-                                                        <label class="black-text" for="id_baantype_O">
-                                                            <input class="with-gap" type="radio" name="baan_type" value="O" required id="id_baantype_O"{%if locatie.baan_type == "O" %} checked{% endif %} onchange="gewijzigd()">
-                                                            <span>Volledig overdekte binnenbaan</span>
-                                                        </label>
-                                                    </li>
-                                                    <li>
-                                                        <label class="black-text" for="id_baantype_H">
-                                                            <input class="with-gap" type="radio" name="baan_type" value="H" required id="id_baantype_H"{%if locatie.baan_type == "H" %} checked{% endif %} onchange="gewijzigd()">
-                                                            <span>Half overdekt (binnen-buiten schieten)</span>
-                                                        </label>
-                                                    </li>
-                                                </ul>
-                                            {% endif %}
-                                        </td>
-                                    </tr>
-
-                                    <tr>
-                                        <th>Aantal banen 18 meter</th>
-                                        <td>
-                                            {% if readonly %}
-                                                <span>{{ locatie.banen_18m }} banen</span>
-                                            {% else %}
-                                                <select id="banen_18" name="banen_18m" onchange="gewijzigd()">
-                                                    <option value="0"{%if locatie.banen_18m == 0 %} selected{% endif %}>Geen banen</option>
-                                                    <option value="1"{%if locatie.banen_18m == 1 %} selected{% endif %}>1 baan</option>
-                                                    {% for baan in banen %}
-                                                        <option value="{{ baan }}"{%if locatie.banen_18m == baan %} selected{% endif %}>{{ baan }} banen</option>
-                                                    {% endfor %}
-                                                </select>
-                                            {% endif %}
-                                        </td>
-                                    </tr>
-
-                                    <tr>
-                                        <th>Aantal banen 25 meter</th>
-                                        <td>
-                                            {% if readonly %}
-                                                <span>{{ locatie.banen_25m }} banen</span>
-                                            {% else %}
-                                                <select id="banen_25" name="banen_25m" onchange="gewijzigd()">
-                                                    <option value="0"{%if locatie.banen_25m == 0 %} selected{% endif %}>Geen banen</option>
-                                                    <option value="1"{%if locatie.banen_25m == 1 %} selected{% endif %}>1 baan</option>
-                                                    {% for baan in banen %}
-                                                        <option value="{{ baan }}"{%if locatie.banen_25m == baan %} selected{% endif %}>{{ baan }} banen</option>
-                                                    {% endfor %}
-                                                </select>
-                                            {% endif %}
-                                        </td>
-                                    </tr>
-
-                                    <tr>
-                                        <th>Maximum aantal sporters op 18 meter</th>
-                                        <td>
-                                            {% if readonly %}
-                                                <span>{{ locatie.max_sporters_18m }} sporters</span>
-                                            {% else %}
-                                                <input type="number" min="0" max="99" name="max_sporters_18m" value="{{ locatie.max_sporters_18m }}" onchange="gewijzigd()">
-                                            {% endif %}
-                                        </td>
-                                    </tr>
-
-                                    <tr>
-                                        <th>Maximum aantal sporters op 25 meter</th>
-                                        <td>
-                                            {% if readonly %}
-                                                <span>{{ locatie.max_sporters_25m }} sporters</span>
-                                            {% else %}
-                                                <input type="number" min="0" max="99" name="max_sporters_25m" value="{{ locatie.max_sporters_25m }}" onchange="gewijzigd()">
-                                            {% endif %}
-                                        </td>
-                                    </tr>
-
-                                    {% if locatie.other_ver.count %}
-                                        <tr>
-                                            <th>Wordt ook gebruikt door vereniging</th>
-                                            <td>
-                                                {% for ver in locatie.other_ver.all %}
-                                                    <span>{{ ver }}</span><br>
-                                                {% endfor %}
-                                            </td>
-                                        </tr>
+                            <tr>
+                                <th>Type baan voor 18m/25m wedstrijden</th>
+                                <td>
+                                    {% if readonly %}
+                                        <span>{{ locatie.baan_type_str }}</span>
+                                    {% else %}
+                                        <ul id="id_baantype">
+                                            <li>
+                                                <label class="black-text" for="id_baantype_X">
+                                                    <input class="with-gap" type="radio" name="baan_type" value="X" required id="id_baantype_X"{%if locatie.baan_type == "X" %} checked{% endif %} onchange="gewijzigd()">
+                                                    <span>Onbekend</span>
+                                                </label>
+                                            </li>
+                                            <li>
+                                                <label class="black-text" for="id_baantype_O">
+                                                    <input class="with-gap" type="radio" name="baan_type" value="O" required id="id_baantype_O"{%if locatie.baan_type == "O" %} checked{% endif %} onchange="gewijzigd()">
+                                                    <span>Volledig overdekte binnenbaan</span>
+                                                </label>
+                                            </li>
+                                            <li>
+                                                <label class="black-text" for="id_baantype_H">
+                                                    <input class="with-gap" type="radio" name="baan_type" value="H" required id="id_baantype_H"{%if locatie.baan_type == "H" %} checked{% endif %} onchange="gewijzigd()">
+                                                    <span>Half overdekt (binnen-buiten schieten)</span>
+                                                </label>
+                                            </li>
+                                        </ul>
                                     {% endif %}
+                                </td>
+                            </tr>
 
-                                    <tr>
-                                        <th>Bijzonderheden</th>
-                                        <td style="vertical-align: top">
-                                            {% if readonly %}
-                                                <span>{{ locatie.notities|linebreaksbr }}</span>
-                                            {% else %}
-                                                <textarea name="notities" class="materialize-textarea" oninput="gewijzigd()">{{ locatie.notities }}</textarea>
-                                            {% endif %}
-                                        </td>
-                                    </tr>
+                            <tr>
+                                <th>Aantal banen 18 meter</th>
+                                <td>
+                                    {% if readonly %}
+                                        <span>{{ locatie.banen_18m }} banen</span>
+                                    {% else %}
+                                        <select id="banen_18" name="banen_18m" onchange="gewijzigd()">
+                                            <option value="0"{%if locatie.banen_18m == 0 %} selected{% endif %}>Geen banen</option>
+                                            <option value="1"{%if locatie.banen_18m == 1 %} selected{% endif %}>1 baan</option>
+                                            {% for baan in banen %}
+                                                <option value="{{ baan }}"{%if locatie.banen_18m == baan %} selected{% endif %}>{{ baan }} banen</option>
+                                            {% endfor %}
+                                        </select>
+                                    {% endif %}
+                                </td>
+                            </tr>
 
-                                </table>
-                        {% if not readonly %}
-                            </div>
-                        {% endif %}
+                            <tr>
+                                <th>Aantal banen 25 meter</th>
+                                <td>
+                                    {% if readonly %}
+                                        <span>{{ locatie.banen_25m }} banen</span>
+                                    {% else %}
+                                        <select id="banen_25" name="banen_25m" onchange="gewijzigd()">
+                                            <option value="0"{%if locatie.banen_25m == 0 %} selected{% endif %}>Geen banen</option>
+                                            <option value="1"{%if locatie.banen_25m == 1 %} selected{% endif %}>1 baan</option>
+                                            {% for baan in banen %}
+                                                <option value="{{ baan }}"{%if locatie.banen_25m == baan %} selected{% endif %}>{{ baan }} banen</option>
+                                            {% endfor %}
+                                        </select>
+                                    {% endif %}
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th>Maximum aantal sporters op 18 meter</th>
+                                <td>
+                                    {% if readonly %}
+                                        <span>{{ locatie.max_sporters_18m }} sporters</span>
+                                    {% else %}
+                                        <input type="number" min="0" max="99" name="max_sporters_18m" value="{{ locatie.max_sporters_18m }}" onchange="gewijzigd()">
+                                    {% endif %}
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th>Maximum aantal sporters op 25 meter</th>
+                                <td>
+                                    {% if readonly %}
+                                        <span>{{ locatie.max_sporters_25m }} sporters</span>
+                                    {% else %}
+                                        <input type="number" min="0" max="99" name="max_sporters_25m" value="{{ locatie.max_sporters_25m }}" onchange="gewijzigd()">
+                                    {% endif %}
+                                </td>
+                            </tr>
+
+                            {% if locatie.other_ver.count %}
+                                <tr>
+                                    <th>Wordt ook gebruikt door vereniging</th>
+                                    <td>
+                                        {% for ver in locatie.other_ver.all %}
+                                            <span>{{ ver }}</span><br>
+                                        {% endfor %}
+                                    </td>
+                                </tr>
+                            {% endif %}
+
+                            <tr>
+                                <th>Bijzonderheden</th>
+                                <td style="vertical-align: top">
+                                    {% if readonly %}
+                                        <span>{{ locatie.notities|linebreaksbr }}</span>
+                                    {% else %}
+                                        <textarea name="notities" class="materialize-textarea" oninput="gewijzigd()">{{ locatie.notities }}</textarea>
+                                    {% endif %}
+                                </td>
+                            </tr>
+
+                        </table>
                     </div>
                 </div>
             {% endif %}     <!-- binnen locatie -->
@@ -219,8 +211,8 @@
 
                 <!-- blauwe balk met informatie in een tabel -->
                 <div class="row-sv-blauw">
-                    <div class="col s10 offset-s1 m12{% if not readonly %} white z-depth-3{% endif %}">
-                        <table class="white">
+                    <div class="col s10 offset-s1 m12 sv-kader{% if not readonly %} z-depth-3{% endif %}">
+                        <table>
 
                             <tr>
                                 <th>Adres van de accommodatie</th>
@@ -326,7 +318,7 @@
                 <!-- blauwe balk met informatie in een tabel -->
                 <div class="row-sv-blauw">
                     <div class="col s10 offset-s1 m12">
-                        <table class="white">
+                        <table class="sv-kader">
                             <tr>
                                 <th>Naam</th>
                                 <th>Disciplines</th>
@@ -367,7 +359,7 @@
         <!-- blauwe balk met informatie in een tabel -->
         <div class="row-sv-blauw">
             <div class="col s12">
-                <table class="white">
+                <table class="sv-kader">
                     <tr>
                         <th>Regio</th>
                         <td>{{ ver.regio }}</td>

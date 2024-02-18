@@ -10,7 +10,7 @@
 // dan het hard zwart (ivm contrast grijze achtergrond)
 // omzetten naar het wat zachtere off-black
 .white {
-    @extend .white;
+    background-color: #fff;
     color: $off-black;
 }
 
@@ -290,9 +290,14 @@
 // tabel decoration
 // blauw rand rondom + header
 //
+.sv-table-sectie-header {
+  border-bottom: none;    // geen separator line
+}
+
 .sv-table-header {
   @extend .sv-blauw-hoofd;
   color: white;
+  border-bottom: none;    // geen separator line
 }
 
 .sv-table-zijrand {
@@ -301,10 +306,16 @@
   width: 3px;
 }
 
+// geen separator lijn voor de laatste regel voor een break
+.sv-table-pre-break {
+  border-bottom: none;
+}
+
 .sv-table-onderrand {
   @extend .sv-blauw-hoofd;
-  padding: 0px;
-  height: 3px;
+  padding: 0;
+  height: 3px;            // (werkt op td)
+  border-bottom: none;    // (werkt op tr) geen separator line
 }
 
 // zo smal mogelijke tabel kolom, zonder wrapping
@@ -561,8 +572,7 @@ input.table-filter {
     @extend .z-depth-1-half;
   }
   &:focus {
-    outline: none;        // prevent border (see _forms.scss) after clicking non-navigating button
-    //outline: $select-focus;   // soft version, same as for drop-down menu button in navbar, but effect is weird
+    outline: 2px solid black;   // // keep in sync with button:focus in _forms.scss and btn:focus in _buttons.scss
   }
 
   margin: 2px;    // voorkom dat de knoppen aan elkaar plakken (horizontaal of verticaal)
@@ -706,6 +716,11 @@ input.table-filter {
        -moz-user-select: none; /* Old versions of Firefox */
         -ms-user-select: none; /* Internet Explorer/Edge */
             user-select: none; /* Non-prefixed version, currently supported by Chrome, Edge, Opera and Firefox */
+}
+
+.sv-kader {
+  @extend .white;
+  border-radius: 3px;   // scherpe hoekje eraf
 }
 
 // end of file

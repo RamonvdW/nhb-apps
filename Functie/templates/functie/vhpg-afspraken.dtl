@@ -24,7 +24,7 @@
         <div class="col s12 l10 offset-l1 xl8 offset-xl2">
 
             <!-- dialoog venster -->
-            <div class="white left-align">
+            <div class="sv-kader left-align">
                 <div style="padding:15px 30px 5px 30px">
 
                     <div class="row">

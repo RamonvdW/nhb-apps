@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 {% comment %}
-                Copyright (c) 2019-2023 Ramon van der Winkel.
+                Copyright (c) 2019-2024 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -28,7 +28,7 @@
 
         {% include 'plein/site_layout_fonts.dtl' %}
 
-        <link rel="stylesheet" href="{% static 'css/materialize-new-213.css' %}">
+        <link rel="stylesheet" href="{% static 'css/materialize-new-240.css' %}">
 
         {% include 'plein/site_layout_favicons.dtl' %}
 
@@ -41,18 +41,19 @@
         <div class="navbar-fixed">
             <nav class="sv-grijs">
                 <div class="nav-wrapper">
-                    <!-- logo aan de linker kant -->
-                    <a href="/plein/" style="z-index:1;padding-top:1px">
+
+                    <!-- logo links;         brand-logo voorkomt button wrap -->
+                    <a href="/plein/" class="brand-logo left">
                                                                    <!-- aspect ratio: 400x92 -> 270x62 -->
-                        <img src="{% static 'plein/logo_with_text_khsn.png' %}" width="270" height="62" alt="KHSN logo" style="padding-left:7px">
+                        <img src="{% static 'plein/logo_with_text_khsn.png' %}" width="270" height="62" alt="KHSN logo">
                     </a>
 
                     <!-- login/quick access knop aan de rechter kant -->
-                    <ul id="nav-mobile" class="right">
+                    <ul class="right">
                         {% if menu_toon_mandje %}
                             <li>
                                 <!-- position:relative + z-index=2: knop boven op het logo -->
-                                <a href="{% url 'Bestel:toon-inhoud-mandje' %}" class="btn-sv-rood" style="position:relative; z-index:2; margin-top:14px" aria-label="Mandje">
+                                <a href="{% url 'Bestel:toon-inhoud-mandje' %}" class="btn-sv-rood" style="position:relative; margin-top:14px" aria-label="Mandje">
                                     {% if menu_mandje_aantal %}
                                         <i class="notranslate material-icons-round left" style="line-height:36px">shopping_cart</i>
                                         <span>{{ menu_mandje_aantal }}</span>
@@ -66,7 +67,7 @@
                         {% if menu_voornaam %}
                             <li>
                                 <!-- position:relative + z-index=2: knop boven op het logo -->
-                                <button class="btn-sv-rood dropdown-trigger" data-target="navbar-dropdown" style="position:relative; z-index:2; margin-top:14px; margin-right:15px" aria-label="Menu">
+                                <button class="btn-sv-rood dropdown-trigger" data-target="navbar-dropdown" style="position:relative; margin-top:14px; margin-right:15px" aria-label="Menu">
                                     <span class="hide-on-small-only">{{ menu_voornaam|escape }}</span>
                                     <i class="notranslate material-icons-round right hide-on-small-only" style="line-height:36px">expand_more</i>
                                     <i class="notranslate material-icons-round       hide-on-med-and-up" style="line-height:36px">expand_more</i>
@@ -127,7 +128,7 @@
 
             <!-- screen-size indicator labels -->
             {% if menu_toon_schermgrootte %}
-                <div style="position: fixed; left: 250px; top: 2px; font-size:10px">
+                <div style="position:fixed; left:250px; top:2px; font-size:10px">
                     <span class="hide-unless-small">Small</span>
                     <span class="hide-unless-medium">Medium</span>
                     <span class="hide-unless-large">Large</span>

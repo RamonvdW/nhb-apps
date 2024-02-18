@@ -21,7 +21,7 @@
     <!-- blauwe balk met informatie in een tabel -->
     <div class="row-sv-blauw">
         <div class="col s12">
-            <table class="white">
+            <table class="sv-kader">
                 <thead>
                     <tr>
                         <th>Datum</th>
@@ -61,7 +61,7 @@
     <!-- blauwe balk met informatie label : info -->
     <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 xl8 offset-xl2">
-            <table class="white">
+            <table class="sv-kader">
                 <tr>
                     <td>Vragen over deelname aan een <b>wedstrijd of evenement</b></td>
                     <td>Neem contact op met de organisator</td>

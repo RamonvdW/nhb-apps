@@ -25,7 +25,7 @@
 
     <!-- blauwe balk met dialoog -->
     <div class="row-sv-blauw">
-        <div class="col s10 offset-s1 l8 offset-l2 white z-depth-3">
+        <div class="col s10 offset-s1 l8 offset-l2 sv-kader z-depth-3">
 
             <!-- dialoog venster -->
             <div style="padding:20px">

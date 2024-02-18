@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023 Ramon van der Winkel.
+#  Copyright (c) 2023-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -19,7 +19,8 @@ from Locatie.models import Reistijd
 from Scheidsrechter.definities import (BESCHIKBAAR_LEEG, BESCHIKBAAR_JA, BESCHIKBAAR_DENK, BESCHIKBAAR_NEE,
                                        BESCHIKBAAR2STR, SCHEIDS2LEVEL)
 from Scheidsrechter.models import WedstrijdDagScheidsrechters, ScheidsBeschikbaarheid
-from Scheidsrechter.mutaties import scheids_mutatieverzoek_beschikbaarheid_opvragen
+from Scheidsrechter.mutaties import (scheids_mutatieverzoek_beschikbaarheid_opvragen,
+                                     scheids_mutatieverzoek_competitie_beschikbaarheid_opvragen)
 from Sporter.models import get_sporter
 from Wedstrijden.definities import WEDSTRIJD_STATUS_GEACCEPTEERD
 from Wedstrijden.models import Wedstrijd
@@ -73,6 +74,38 @@ class BeschikbaarheidOpvragenView(UserPassesTestMixin, View):
         return HttpResponseRedirect(url)
 
 
+class BeschikbaarheidCompetitieOpvragenView(UserPassesTestMixin, View):
+
+    """ Deze view wordt gebruikt als iemand van de Commissie Scheidsrechters de beschikbaarheid voor
+        de bondscompetitie Indoor op wil vragen. De achtergrondtaak handelt dit af.
+    """
+
+    # class variables shared by all instances
+    raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        rol_nu = rol_get_huidige(self.request)
+        return rol_nu == Rollen.ROL_CS
+
+    @staticmethod
+    def post(request, *args, **kwargs):
+        """
+            deze functie wordt aangeroepen als op de knop Beschikbaarheid Opvragen gedrukt is.
+        """
+
+        snel = str(request.POST.get('snel', ''))[:1]
+
+        account = get_account(request)
+        door_str = "CS %s" % account.volledige_naam()
+
+        scheids_mutatieverzoek_competitie_beschikbaarheid_opvragen(door_str, snel == '1')
+
+        url = reverse('Scheidsrechter:overzicht')
+        return HttpResponseRedirect(url)
+
+
 class WijzigBeschikbaarheidView(UserPassesTestMixin, TemplateView):
 
     """ Django class-based view voor de scheidsrechters """
@@ -103,16 +136,16 @@ class WijzigBeschikbaarheidView(UserPassesTestMixin, TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        vorige_week = (timezone.now() - datetime.timedelta(days=7)).date()
+        vandaag = timezone.now().date()
+        vorige_week = vandaag - datetime.timedelta(days=7)
 
         # wedstrijden in de toekomst
         wedstrijd_pks = list(Wedstrijd
                              .objects
                              .filter(aantal_scheids__gte=1,
                                      status=WEDSTRIJD_STATUS_GEACCEPTEERD,
-                                     datum_begin__gte=vorige_week)
+                                     datum_einde__gte=vorige_week)
                              .exclude(is_ter_info=True)
-                             .exclude(toon_op_kalender=False)
                              .values_list('pk', flat=True))
 
         # kijk voor welke dagen we beschikbaarheid nodig hebben
@@ -136,6 +169,8 @@ class WijzigBeschikbaarheidView(UserPassesTestMixin, TemplateView):
             if datum not in datums:
                 datums.append(datum)
 
+            dag.mag_wijzigen = datum >= vandaag
+
             if self.sporter.adres_lat:
                 locatie = dag.wedstrijd.locatie
                 if locatie.adres_lat:
@@ -150,6 +185,7 @@ class WijzigBeschikbaarheidView(UserPassesTestMixin, TemplateView):
         # for
 
         keuzes = dict()     # [datum] = keuze
+        opmerking = dict()  # [datum] = opmerking
         for keuze in ScheidsBeschikbaarheid.objects.filter(datum__in=datums, scheids=self.sporter):
             datum = keuze.datum
             if keuze.opgaaf == BESCHIKBAAR_JA:
@@ -160,6 +196,7 @@ class WijzigBeschikbaarheidView(UserPassesTestMixin, TemplateView):
                 keuzes[datum] = 3
             else:
                 keuzes[datum] = 0
+            opmerking[datum] = keuze.opmerking
         # for
 
         context['dagen'] = dagen
@@ -167,10 +204,13 @@ class WijzigBeschikbaarheidView(UserPassesTestMixin, TemplateView):
             dag.datum = dag.wedstrijd.datum_begin + datetime.timedelta(days=dag.dag_offset)
             dag.id = "dag-%s" % dag.pk
             dag.name = 'wedstrijd_%s_dag_%s' % (dag.wedstrijd.pk, dag.dag_offset)
+            dag.keuze = 0
+            dag.opmerking = ''
             try:
                 dag.keuze = keuzes[dag.datum]
+                dag.opmerking = opmerking[dag.datum]
             except KeyError:
-                dag.keuze = 0
+                pass
         # for
 
         context['url_opslaan'] = reverse('Scheidsrechter:beschikbaarheid-wijzigen')
@@ -187,6 +227,8 @@ class WijzigBeschikbaarheidView(UserPassesTestMixin, TemplateView):
             we slaan de gemaakte keuzes op
         """
 
+        # print('POST: %s' % repr(list(request.POST.items())))
+
         vorige_week = (timezone.now() - datetime.timedelta(days=7)).date()
 
         # wedstrijden in de toekomst
@@ -194,9 +236,8 @@ class WijzigBeschikbaarheidView(UserPassesTestMixin, TemplateView):
                              .objects
                              .filter(aantal_scheids__gte=1,
                                      status=WEDSTRIJD_STATUS_GEACCEPTEERD,
-                                     datum_begin__gte=vorige_week)
+                                     datum_einde__gte=vorige_week)
                              .exclude(is_ter_info=True)
-                             .exclude(toon_op_kalender=False)
                              .values_list('pk', flat=True))
 
         # kijk voor welke dagen we beschikbaarheid nodig hebben
@@ -230,7 +271,8 @@ class WijzigBeschikbaarheidView(UserPassesTestMixin, TemplateView):
 
         for dag in dagen:
             name = 'wedstrijd_%s_dag_%s' % (dag.wedstrijd.pk, dag.dag_offset)
-            keuze = request.POST.get(name, '')[:6]      # afkappen voor de veiligheid
+            keuze = request.POST.get(name, '')[:6]                       # afkappen voor de veiligheid
+            opmerking = request.POST.get(name + '-opmerking', '')[:100]  # afkappen voor de veiligheid
 
             if keuze in ('1', '2', '3'):
                 try:
@@ -241,6 +283,8 @@ class WijzigBeschikbaarheidView(UserPassesTestMixin, TemplateView):
                                         scheids=self.sporter,
                                         wedstrijd=dag.wedstrijd,
                                         datum=dag.datum)
+
+                do_save = False
 
                 if keuze == '1':
                     opgaaf = BESCHIKBAAR_JA
@@ -254,6 +298,14 @@ class WijzigBeschikbaarheidView(UserPassesTestMixin, TemplateView):
                                                                     BESCHIKBAAR2STR[beschikbaar.opgaaf],
                                                                     BESCHIKBAAR2STR[opgaaf])
                     beschikbaar.opgaaf = opgaaf
+                    do_save = True
+
+                if opmerking != beschikbaar.opmerking:
+                    beschikbaar.log += '[%s] Notitie: %s\n' % (when_str, opmerking)
+                    beschikbaar.opmerking = opmerking
+                    do_save = True
+
+                if do_save:
                     beschikbaar.save()
         # for
 
@@ -283,7 +335,7 @@ class BeschikbaarheidInzienCSView(UserPassesTestMixin, TemplateView):
                  .objects
                  .select_related('wedstrijd',
                                  'wedstrijd__locatie')
-                 .filter(wedstrijd__datum_begin__gte=vorige_week)
+                 .filter(wedstrijd__datum_einde__gte=vorige_week)
                  .order_by('wedstrijd__datum_begin',       # chronologische volgorde
                            'dag_offset',
                            'wedstrijd__pk'))
@@ -341,8 +393,10 @@ class BeschikbaarheidInzienCSView(UserPassesTestMixin, TemplateView):
                 tup = (not is_hsr,
                        not is_sr,
                        opgaaf2order[keuze.opgaaf],
-                       "%s: %s" % (SCHEIDS2LEVEL[keuze.scheids.scheids], keuze.scheids.volledige_naam()),
+                       SCHEIDS2LEVEL[keuze.scheids.scheids],
+                       keuze.scheids.volledige_naam(),
                        BESCHIKBAAR2STR[keuze.opgaaf],
+                       keuze.opmerking,
                        is_hsr,
                        is_sr,
                        is_probleem)
@@ -352,6 +406,7 @@ class BeschikbaarheidInzienCSView(UserPassesTestMixin, TemplateView):
 
             dag.beschikbaar.sort()   # sorteer op opgaaf, dan op naam
             dag.beschikbaar = [tup[2:] for tup in dag.beschikbaar]
+            dag.aantal = len(dag.beschikbaar)
         # for
 
         context['kruimels'] = (

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2023 Ramon van der Winkel.
+#  Copyright (c) 2021-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -21,14 +21,14 @@ from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
 from Locatie.definities import BAAN_TYPE_BUITEN, BAAN_TYPE_EXTERN
 from Locatie.models import Locatie
-from Scheidsrechter.models import WedstrijdDagScheidsrechters
 from Sporter.models import get_sporter
 from Vereniging.models import Vereniging
 from Wedstrijden.definities import (ORGANISATIE_WEDSTRIJD_DISCIPLINE_STRS, WEDSTRIJD_STATUS_TO_STR,
                                     WEDSTRIJD_WA_STATUS_TO_STR, WEDSTRIJD_STATUS_ONTWERP, WEDSTRIJD_STATUS2URL,
                                     WEDSTRIJD_STATUS_WACHT_OP_GOEDKEURING, WEDSTRIJD_STATUS_GEACCEPTEERD,
                                     WEDSTRIJD_STATUS_GEANNULEERD, WEDSTRIJD_WA_STATUS_A, WEDSTRIJD_WA_STATUS_B,
-                                    WEDSTRIJD_DUUR_MAX_DAGEN, WEDSTRIJD_BEGRENZING_TO_STR, AANTAL_SCHEIDS_GEEN_KEUZE)
+                                    WEDSTRIJD_DUUR_MAX_DAGEN, WEDSTRIJD_BEGRENZING_TO_STR,
+                                    AANTAL_SCHEIDS_GEEN_KEUZE, AANTAL_SCHEIDS_EIGEN)
 from Wedstrijden.models import Wedstrijd
 from types import SimpleNamespace
 import datetime
@@ -354,6 +354,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
 
             context['keuze_aantal_scheids'] = [
                 (AANTAL_SCHEIDS_GEEN_KEUZE, 'Nog geen keuze gemaakt'),
+                (AANTAL_SCHEIDS_EIGEN, 'Eigen scheidsrechters'),
                 (0, 'Geen scheidsrechters'),
                 (1, '1 scheidsrechter'),
                 (2, '2 scheidsrechters'),
@@ -658,7 +659,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
                 except ValueError:
                     wedstrijd.aantal_scheids = AANTAL_SCHEIDS_GEEN_KEUZE
                 else:
-                    if 0 <= aantal_scheids <= 9:
+                    if 0 <= aantal_scheids <= 9 or aantal_scheids == AANTAL_SCHEIDS_EIGEN:
                         wedstrijd.aantal_scheids = aantal_scheids
 
             if not limit_edits:

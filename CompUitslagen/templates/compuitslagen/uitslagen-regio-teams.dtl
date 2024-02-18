@@ -33,7 +33,7 @@
     <!-- blauwe balk met informatie -->
     <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
-            <table class="white">
+            <table class="sv-kader">
                 <tr>
                     <th>Competitie</th>
                     <td>{{ deelcomp.competitie.beschrijving }}</td>
@@ -69,7 +69,7 @@
     <div class="row-sv-blauw">
 
         <div class="col s12 m4 offset-m1 l3" style="margin-bottom:15px">
-            <div class="white left-align" style="padding:10px">
+            <div class="sv-kader left-align" style="padding:10px">
                 <p><b>Kies een regio:</b></p>
                 <ul>
                     {% for filter in regio_filters %}
@@ -88,7 +88,7 @@
         </div>
 
         <div class="col s12 m5 l4" style="margin-bottom:15px">
-            <div class="white left-align" style="padding:10px">
+            <div class="sv-kader left-align" style="padding:10px">
                 <p><b>Kies een team type:</b></p>
                 <ul>
                     {% for filter in teamtype_filters %}
@@ -108,7 +108,7 @@
 
         {% if deelcomp.regio_organiseert_teamcompetitie %}
             <div class="col s12 m6 l5">
-                <div class="white left-align" style="padding:10px">
+                <div class="sv-kader left-align" style="padding:10px">
                     <p><b>Kies een vereniging:</b></p>
                     <ul>
                         <li>
@@ -136,7 +136,7 @@
 
     {% if deelcomp.regio_organiseert_teamcompetitie %}
 
-        <table class="white">
+        <table class="sv-kader">
             {% for team in teams %}
                 {% if forloop.first %}      <!-- alleen toevoegen als er teams zijn, anders probleem met colspan=2 -->
                     {% comment %}
@@ -167,7 +167,7 @@
 
                 {% if team.break_poule %}
                     {% if team.schema %}
-                        <tr>
+                        <tr class="sv-table-sectie-header">
                             <td colspan="20" class="center">
                                 <h6>Wedstrijdschema</h6>
                             </td>
@@ -194,7 +194,7 @@
                                             </td>
                                         </tr>
                                     {% endfor %}
-                                    <tr>
+                                    <tr class="sv-table-onderrand">
                                         <td colspan="3" class="sv-table-onderrand"></td>
                                     </tr>
                                 </table>
@@ -217,7 +217,7 @@
                 {% endif %}
 
                 {% if team.break_klasse %}
-                    <tr>
+                    <tr class="sv-table-sectie-header">
                         <td colspan="20" class="center"><h5>Klasse: {{ team.klasse_str }}</h5></td>
                     </tr>
                     <tr class="sv-table-header">
@@ -244,7 +244,7 @@
                     </tr>
 
                     {% if team.onderrand %}
-                        <tr>
+                        <tr class="sv-table-onderrand">
                             <td colspan="18" class="sv-table-onderrand"></td>
                         </tr>
                     {% endif %}

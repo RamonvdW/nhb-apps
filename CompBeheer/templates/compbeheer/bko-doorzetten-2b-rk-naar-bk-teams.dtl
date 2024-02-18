@@ -20,7 +20,7 @@
     <!-- blauw balk met wit informatie veld -->
     <div class="row-sv-blauw">
         <div class="col s12">
-            <div class="white" style="padding:10px">
+            <div class="sv-kader" style="padding:10px">
                 <p>Als BKO wil je de competitie doorzetten naar de volgende fase: van rayonkampioenschappen naar bondskampioenschappen.</p>
                 <p>Dit is een eenmalige maar belangrijke actie, waardoor de sporters die voldoen aan de vereisten doorgezet worden naar de BKs.</p>
 
@@ -56,9 +56,9 @@
         <!-- blauw balk met wit informatie veld -->
         <div class="row-sv-blauw">
             <div class="col s12 m8 offset-m2 l6 offset-l3 xl4 offset-xl4">
-                <div class="white" style="padding:10px">
+                <div class="sv-kader" style="padding:10px">
 
-                    <table class="white">
+                    <table class="sv-kader">
                         <thead>
                             <tr>
                                 <th class="center">Rayon</th>

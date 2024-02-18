@@ -21,7 +21,7 @@
     <!-- blauwe balk met informatie label : info -->
     <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
-            <table class="white">
+            <table class="sv-kader">
                 <tr>
                     <th>Competitie</th>
                     <td>{{ deelcomp.competitie.beschrijving }}</td>
@@ -69,7 +69,7 @@
             <!-- blauwe balk met informatie in een tabel -->
             <div class="row-sv-blauw">
                 <div class="col s12">
-                    <table class="white">
+                    <table class="sv-kader">
                         <thead>
                             <tr>
                                 <th>Vereniging</th>
@@ -133,13 +133,13 @@
         <!-- blauwe balk met informatie in een tabel -->
         <div class="row-sv-blauw">
             <div class="col s12">
-                <table class="white">
+                <table class="sv-kader">
                     {% if toon_h2h %}
 
                         <!-- directe tegenstanders -->
                         {% for regel in alle_regels %}
                             {% if regel.break_poule %}
-                                <tr>
+                                <tr class="sv-table-sectie-header">
                                     <td colspan="4" class="center"><h6>{{ regel.poule_str }}</h6></td>
                                 </tr>
                                 <tr>
@@ -167,7 +167,7 @@
                         <!-- formule 1 -->
                         {% for regel in alle_regels %}
                             {% if regel.break_poule %}
-                                <tr>
+                                <tr class="sv-table-sectie-header">
                                     <td colspan="4" class="center"><h6>{{ regel.poule_str }}</h6></td>
                                 </tr>
                                 <tr>
@@ -213,7 +213,7 @@
         <!-- blauw balk met wit informatie veld -->
         <div class="row-sv-blauw">
             <div class="col s12">
-                <div class="white" style="padding:10px">
+                <div class="sv-kader" style="padding:10px">
 
                     {% if is_redelijk %}
 

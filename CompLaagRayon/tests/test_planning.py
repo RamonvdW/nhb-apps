@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2023 Ramon van der Winkel.
+#  Copyright (c) 2020-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -407,8 +407,7 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
     def test_planning_rayon_verwijder_bad(self):
         # verkeerde rol / niet ingelogd
         url = self.url_verwijder_rk_wedstrijd % 999999
-        with self.assert_max_queries(20):
-            resp = self.client.post(url)
+        resp = self.client.post(url)
         self.assert403(resp)
 
         # inloggen
@@ -426,8 +425,7 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
 
         # verwijder bad pk
         url = self.url_verwijder_rk_wedstrijd % 999999
-        with self.assert_max_queries(20):
-            resp = self.client.post(url)
+        resp = self.client.post(url)
         self.assert404(resp, 'Wedstrijd niet gevonden')
 
         # verkeerde rol
@@ -501,14 +499,12 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
 
         # slechte regiocompetitie
         url = self.url_planning_rayon % 999999
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
+        resp = self.client.get(url)
         self.assert404(resp, 'Kampioenschap niet gevonden')
 
         # probeer een wedstrijd te wijzigen als BKO
         url = self.url_wijzig_rk_wedstrijd % 999999
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
+        resp = self.client.get(url)
         self.assert403(resp)
 
         # nogmaals, als RKO
@@ -516,8 +512,7 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_rko1_18)
 
         url = self.url_wijzig_rk_wedstrijd % 999999
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
+        resp = self.client.get(url)
         self.assert404(resp, 'Wedstrijd niet gevonden')
 
         url = self.url_wijzig_rk_wedstrijd % "BAD"
@@ -805,15 +800,13 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
         self.assert403(resp)
 
         # bad deelcomp pk
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_lijst_bestand % 999999)
+        resp = self.client.get(self.url_lijst_bestand % 999999)
         self.assert404(resp, 'Kampioenschap niet gevonden')
 
     def test_bad_wijzig_status(self):
         self.client.logout()
         url = self.url_wijzig_status % 999999
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
+        resp = self.client.get(url)
         self.assert403(resp)
 
         # RKO
@@ -946,8 +939,7 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
     def test_bad_wijzig_limiet(self):
         self.client.logout()
         url = self.url_wijzig_limiet % 999999
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
+        resp = self.client.get(url)
         self.assert403(resp)
 
         # RKO

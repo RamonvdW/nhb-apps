@@ -37,10 +37,10 @@
 
         <!-- blauwe balk met informatie in een tabel -->
         <div class="row-sv-blauw">
-            <div class="col s12 white left-align">
+            <div class="col s12 sv-kader left-align">
                 <p>Dit is het automatisch berekende voorstel voor de klassengrenzen:</p>
 
-                <table class="white">
+                <table class="sv-kader">
                     <thead>
                         <tr>
                             <th>Team type</th>

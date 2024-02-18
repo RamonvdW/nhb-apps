@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2023 Ramon van der Winkel.
+#  Copyright (c) 2020-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -15,6 +15,7 @@ from Competitie.models import (CompetitieIndivKlasse, CompetitieTeamKlasse, Kamp
                                KampioenschapSporterBoog, KampioenschapTeam, CompetitieMatch)
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
+from Scheidsrechter.models import MatchScheidsrechters
 from Sporter.models import SporterVoorkeuren
 from tempfile import NamedTemporaryFile
 from copy import copy
@@ -223,6 +224,22 @@ class DownloadRkFormulierView(UserPassesTestMixin, TemplateView):
                     team.gekoppelde_leden_lijst.append(lid)
                 # for
             # for
+
+        if match.aantal_scheids > 0:
+            match_sr = MatchScheidsrechters.objects.filter(match=match).first()
+            if match_sr:
+                aantal = 0
+                for sr in (match_sr.gekozen_hoofd_sr, match_sr.gekozen_sr1, match_sr.gekozen_sr2):
+                    if sr:
+                        aantal += 1
+                # for
+                if aantal > 0:
+                    context['aantal_sr_str'] = "%s scheidsrechter" % aantal
+                    if aantal > 1:
+                        context['aantal_sr_str'] += 's'
+
+                    context['url_sr_contact'] = reverse('Scheidsrechter:match-hwl-contact',
+                                                        kwargs={'match_pk': match.pk})
 
         context['kruimels'] = (
             (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),

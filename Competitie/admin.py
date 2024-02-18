@@ -7,6 +7,7 @@
 from django.contrib import admin
 from django.db.models import F
 from django.contrib.admin.widgets import FilteredSelectMultiple
+from BasisTypen.definities import SCHEIDS_NIET
 from BasisTypen.models import TeamType
 from Competitie.definities import DEEL_BK, DEEL_RK
 from Competitie.models import (Competitie, Regiocompetitie, RegiocompetitieRonde,
@@ -15,6 +16,7 @@ from Competitie.models import (Competitie, Regiocompetitie, RegiocompetitieRonde
                                CompetitieMatch, RegiocompetitieSporterBoog, KampioenschapSporterBoog,
                                RegiocompetitieTeam, RegiocompetitieTeamPoule, RegiocompetitieRondeTeam,
                                KampioenschapTeam, CompetitieMutatie, Kampioenschap)
+from Sporter.models import Sporter
 
 
 class CreateOnlyAdmin(admin.ModelAdmin):
@@ -70,22 +72,29 @@ class CompetitieAdmin(admin.ModelAdmin):
 
 class CompetitieIndivKlasseAdmin(admin.ModelAdmin):
 
-    list_filter = ('competitie', 'boogtype', 'is_ook_voor_rk_bk', 'titel_bk')
+    list_filter = ('competitie', 'boogtype', 'is_ook_voor_rk_bk', 'titel_bk', 'krijgt_scheids_rk', 'krijgt_scheids_bk')
 
     list_select_related = ('competitie', 'boogtype')
+
+    readonly_fields = ('competitie', 'volgorde', 'boogtype', 'is_ook_voor_rk_bk', 'krijgt_scheids_rk',
+                       'krijgt_scheids_bk', 'is_onbekend', 'is_aspirant_klasse')
 
     ordering = ('volgorde',)
 
 
 class CompetitieTeamKlasseAdmin(admin.ModelAdmin):
 
-    list_filter = ('competitie', 'team_afkorting', 'is_voor_teams_rk_bk', 'titel_bk')
+    list_filter = ('competitie', 'team_afkorting', 'is_voor_teams_rk_bk', 'titel_bk',
+                   'krijgt_scheids_rk', 'krijgt_scheids_bk')
 
     list_select_related = ('competitie',)
 
     ordering = ('volgorde',)
 
     filter_horizontal = ('boog_typen',)
+
+    readonly_fields = ('competitie', 'volgorde', 'team_type', 'krijgt_scheids_rk', 'krijgt_scheids_bk',
+                       'team_afkorting', 'is_voor_teams_rk_bk')
 
 
 class CompetitieMatchAdmin(admin.ModelAdmin):
@@ -94,7 +103,33 @@ class CompetitieMatchAdmin(admin.ModelAdmin):
 
     list_select_related = ('competitie', 'vereniging')
 
+    list_filter = ('competitie', 'aantal_scheids')
+
     # TODO: filter toepasselijke indiv_klassen / team_klassen aan de hand van obj.competitie
+
+    def __init__(self, model, admin_site):
+        super().__init__(model, admin_site)
+        self.obj = None
+
+    def get_form(self, request, obj=None, **kwargs):                    # pragma: no cover
+        """ initialisatie van het admin formulier
+            hier "vangen" we het database object waar we mee bezig gaan
+        """
+        if obj:
+            self.obj = obj
+        return super().get_form(request, obj, **kwargs)
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):    # pragma: no cover
+        """ bepaal de relevante keuzemogelijkheden voor specifieke velden
+        """
+        if db_field.name == 'gekozen_sr' and self.obj:
+            # alleen laten kiezen uit scheidsrechters
+            kwargs['queryset'] = (Sporter
+                                  .objects
+                                  .exclude(scheids=SCHEIDS_NIET)
+                                  .order_by('lid_nr'))
+
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 
 class TeamAGListFilter(admin.SimpleListFilter):

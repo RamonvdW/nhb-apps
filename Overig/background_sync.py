@@ -35,14 +35,14 @@ class BackgroundSync(object):
     def __init__(self, poort_nummer):
         self._sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self._address = ('localhost', poort_nummer)
-        self._conn = None
+        self._is_setup = False
         self._listener = None
 
     def __del__(self):
         self._sock.close()
 
     def _setup_receiver(self):
-        if not self._conn:
+        if not self._is_setup:
             try:
                 self._sock.bind(self._address)
             except OSError:
@@ -50,7 +50,7 @@ class BackgroundSync(object):
                 pass
             else:
                 self._sock.setblocking(False)
-                self._conn = 1
+                self._is_setup = True
 
     def ping(self):
         self._sock.sendto(b'ping', self._address)
@@ -61,19 +61,20 @@ class BackgroundSync(object):
 
         self._setup_receiver()
 
-        # wait for data to arrive, or timeout
-        select.select((self._sock,), (), (), timeout)
+        if self._is_setup:
+            # wait for data to arrive, or timeout
+            select.select((self._sock,), (), (), timeout)
 
-        # try to read the data, regardless of whether anything arrived
-        # this works because the socket is non-blocking
-        try:
-            data = self._sock.recv(10)
-        except BlockingIOError:
-            # no data received
-            pass
-        else:
-            # receive some data
-            got_ping = True
+            # try to read the data, regardless of whether anything arrived
+            # this works because the socket is non-blocking
+            try:
+                data = self._sock.recv(10)
+            except BlockingIOError:
+                # no data received
+                pass
+            else:
+                # receive some data
+                got_ping = True
 
         return got_ping
 

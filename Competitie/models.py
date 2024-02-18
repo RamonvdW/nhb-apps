@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2023 Ramon van der Winkel.
+#  Copyright (c) 2019-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -22,7 +22,7 @@ from Functie.models import Functie
 from Locatie.models import Locatie
 from Geo.models import Rayon, Regio, Cluster
 from Score.models import Score, ScoreHist, Uitslag
-from Sporter.models import SporterBoog
+from Sporter.models import Sporter, SporterBoog
 from Vereniging.models import Vereniging
 import logging
 
@@ -281,6 +281,10 @@ class CompetitieIndivKlasse(models.Model):
     # op welk soort blazoen schiet deze klasse in de kampioenschappen (geen keuze)
     blazoen_rk_bk = models.CharField(max_length=2, choices=BLAZOEN_CHOICES, default=BLAZOEN_40CM)
 
+    # krijgt deze wedstrijdklasse een scheidsrechter toegekend op het RK en BK?
+    krijgt_scheids_rk = models.BooleanField(default=False)
+    krijgt_scheids_bk = models.BooleanField(default=False)
+
     # TODO: standaard limiet toevoegen voor elke klasse: 24
 
     def __str__(self):
@@ -350,6 +354,10 @@ class CompetitieTeamKlasse(models.Model):
 
     # op welk soort blazoen schiet deze klasse in de kampioenschappen
     blazoen_rk_bk = models.CharField(max_length=2, choices=BLAZOEN_CHOICES, default=BLAZOEN_40CM)
+
+    # krijgt deze wedstrijdklasse een scheidsrechter toegekend op het RK en BK?
+    krijgt_scheids_rk = models.BooleanField(default=False)
+    krijgt_scheids_bk = models.BooleanField(default=False)
 
     # TODO: standaard limiet toevoegen voor elke klasse: ERE=12, rest=8
 
@@ -434,6 +442,9 @@ class CompetitieMatch(models.Model):
     # uitslag / scores
     uitslag = models.ForeignKey(Uitslag, on_delete=models.PROTECT,
                                 blank=True, null=True)
+
+    # benodigde scheidsrechters
+    aantal_scheids = models.IntegerField(default=0)
 
     def __str__(self):
         """ geef een tekstuele afkorting van dit object, voor in de admin interface """

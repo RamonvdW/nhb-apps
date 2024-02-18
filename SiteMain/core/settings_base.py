@@ -58,7 +58,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2024-02-06'
+SITE_VERSIE = '2024-02-18'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -81,11 +81,12 @@ INSTALLED_APPS = [
     'Functie.apps.FunctieConfig',
     'Geo.apps.GeoConfig',
     'HistComp.apps.HistCompConfig',
+    'ImportCRM.apps.ImportCRMConfig',
     'Kalender.apps.KalenderConfig',
     'Locatie.apps.LocatieConfig',
+    'Ledenvoordeel.apps.LedenvoordeelConfig',
     'Logboek.apps.LogboekConfig',
     'Mailer.apps.MailerConfig',
-    'NhbStructuur.apps.NhbStructuurConfig',
     'Opleidingen.apps.OpleidingenConfig',
     'Overig.apps.OverigConfig',
     'Plein.apps.PleinConfig',
@@ -170,6 +171,9 @@ TEMPLATES = [
     },
 ]
 
+# avoid conflicts with other Django applications
+SESSION_COOKIE_NAME = 'mh_session_id'
+CSRF_COOKIE_NAME = 'mh_csrf_token'
 
 # point out location of WSGI application for django runserver command
 WSGI_APPLICATION = 'SiteMain.core.wsgi.application'

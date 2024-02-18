@@ -201,11 +201,13 @@ class TestScheidsrechterBeschikbaarheid(E2EHelpers, TestCase):
         self.assertEqual(0, ScheidsBeschikbaarheid.objects.count())
         name = 'wedstrijd_%s_dag_%s' % (self.wedstrijd.pk, 0)
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_beschikbaarheid_wijzigen, {name: '3'})
+            resp = self.client.post(self.url_beschikbaarheid_wijzigen, {name: '3',
+                                                                        name + '-opmerking': 'Test opmerking SR3'})
         self.assert_is_redirect(resp, self.url_overzicht)
         self.assertEqual(1, ScheidsBeschikbaarheid.objects.count())
         beschikbaar = ScheidsBeschikbaarheid.objects.first()
         self.assertEqual(beschikbaar.opgaaf, 'N')       # 3 = Nee
+        self.assertEqual(beschikbaar.opmerking, 'Test opmerking SR3')
         self.assertTrue(str(beschikbaar) != '')
 
         # zet de reistijd

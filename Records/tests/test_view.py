@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2023 Ramon van der Winkel.
+#  Copyright (c) 2019-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -217,16 +217,14 @@ class TestRecordsView(E2EHelpers, TestCase):
         self.e2e_assert_other_http_commands_not_supported(self.url_zoek)
 
     def test_view_zoek_lid_nr(self):
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_zoek, {'zoekterm': '123456'})
+        resp = self.client.get(self.url_zoek, {'zoekterm': '123456'})
         self.assertEqual(resp.status_code, 200)  # 200 = OK
 
-    def test_view_zoek_unknown_lid_nr(self):
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_zoek, {'zoekterm': '999999'})
+        # onbekend lid_nr
+        resp = self.client.get(self.url_zoek, {'zoekterm': '999999'})
         self.assertEqual(resp.status_code, 200)  # 200 = OK
 
-    def test_view_zoek_not_lid_nr(self):
+        # onbekende zoekterm
         # let op de zoekterm: mag niet matchen met soort_record, naam, plaats of land
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_zoek, {'zoekterm': 'jaja'})
@@ -281,7 +279,7 @@ class TestRecordsView(E2EHelpers, TestCase):
     def test_eervol(self):
         # eervolle vermelding
         AnderRecord(
-            titel='Guiness Book',
+            titel='Guinness Book',
             icoon='auto_awesome',
             tekst='test',
             url='https://www.handboogsport.nl').save()

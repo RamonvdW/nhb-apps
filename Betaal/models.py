@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2023 Ramon van der Winkel.
+#  Copyright (c) 2022-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -130,7 +130,9 @@ class BetaalTransactie(models.Model):
 
     def __str__(self):
         """ Lever een tekstuele beschrijving voor de admin interface """
-        return "%s - %s - %s" % (self.payment_id, self.when, self.beschrijving)
+        return "[%s] %s - %s - %s euro %s" % (self.pk, self.payment_id,
+                                              localtime(self.when).strftime('%Y-%m-%d %H:%M:%S'), self.beschrijving,
+                                              self.bedrag_euro_klant)
 
     class Meta:
         verbose_name = "Betaal transactie"

@@ -42,7 +42,7 @@
             inp = document.createElement('input');
             inp.type = "hidden";
             inp.name = "csrfmiddlewaretoken";
-            inp.value = getCookie('csrftoken');
+            inp.value = getCookie('mh_csrf_token');
             form.appendChild(inp);
 
             form.style.display = 'hidden';
@@ -59,13 +59,13 @@
 
             {% if mag_afmelden %}
                 <!-- dialoog venster -->
-                <div class="white left-align z-depth-3">
+                <div class="sv-kader left-align z-depth-3">
                     <div class="form-padding">
                         <form action="{{ afmelden_url }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
                         {% csrf_token %}
             {% endif %}
 
-                        <table class="white" id="table1">
+                        <table class="sv-kader" id="table1">
                             <thead>
                                 <tr>        <!-- filter veld -->
                                     {% if mag_afmelden %}

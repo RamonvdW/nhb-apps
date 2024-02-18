@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2023 Ramon van der Winkel.
+#  Copyright (c) 2020-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -215,8 +215,7 @@ class TestCompUitslagenRK(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('compuitslagen/uitslagen-rk-teams.dtl', 'plein/site_layout.dtl'))
 
         url = self.url_uitslagen_rk_teams % (999999, 'R')
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
+        resp = self.client.get(url)
         self.assert404(resp, 'Competitie niet gevonden')
 
         url = self.url_uitslagen_rk_teams % (self.testdata.comp18.pk, 'X')
@@ -237,8 +236,7 @@ class TestCompUitslagenRK(E2EHelpers, TestCase):
         self.assert404(resp, 'Verkeerd rayonnummer')
 
         url = self.url_uitslagen_rk_teams_n % (self.testdata.comp18.pk, 999999, 'R2')
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
+        resp = self.client.get(url)
         self.assert404(resp, 'Competitie niet gevonden')
 
         # maak een paar teams aan

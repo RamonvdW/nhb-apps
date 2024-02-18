@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2023 Ramon van der Winkel.
+#  Copyright (c) 2019-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -12,23 +12,29 @@
     having to edit the settings.py file.
 """
 
+# SECURITY WARNING: don't run with debug turned on in production!
+DEBUG = False
+ENABLE_DEBUG_TOOLBAR = False
+
 # the secret below ensures an adversary cannot fake aspects like a session-id
 # just make sure it is unique per installation and keep it private
-# details: https://docs.djangoproject.com/en/2.2/ref/settings/#secret-key
+# details: https://docs.djangoproject.com/en/4.2/ref/settings/#secret-key
 SECRET_KEY = '1234-replace-with-your-own-secret-key-56789abcdefg'
 
 BASE_URL = "yourdomain.com"
 
-# SITE_URL wordt gebruikt door Overige:tijdelijke urls
+# SITE_URL wordt gebruikt door TijdelijkeCodes, maar ook voor alle urls in e-mails
 #SITE_URL = "https://" + BASE_URL
 SITE_URL = "http://localhost:8000"
 
-ALLOWED_HOSTS = ['localhost']
+ALLOWED_HOSTS = [
+    'localhost',
+]
 
 IS_TEST_SERVER = True
 
 # Database
-# https://docs.djangoproject.com/en/3.2/ref/settings/#databases
+# https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -48,28 +54,31 @@ OTP_ISSUER_NAME = "yourdomain.com"
 
 NAAM_SITE = "YourSite (dev)"
 
-EMAIL_BONDSBUREAU = "info@handboogsport.nl"
+# aparte namen voor gebruik in e-mailafschrift bestelling
+AFSCHRIFT_SITE_NAAM = "YourSite"
+AFSCHRIFT_SITE_URL = "yourdomain.com"
+
+# contactgegevens 1e en 2e lijns support
+EMAIL_BONDSBUREAU = "info@yourdomain.com"
 EMAIL_SUPPORT = EMAIL_BONDSBUREAU
 
 URL_PDF_HANDLEIDING_LEDEN = 'https://yourstite/static/manual_members.pdf'
 URL_PDF_HANDLEIDING_BEHEERDERS = 'https://yoursite/static/manual_managers.pdf'
 URL_PDF_HANDLEIDING_VERENIGINGEN = 'https://yoursitestatic/manual_clubs.pdf'
-
+URL_PDF_HANDLEIDING_SCHEIDSRECHTERS = 'https://yoursitestatic/manual_judges.pdf'
 
 # sending e-mail via Postmark
 #POSTMARK_URL = 'https://api.postmarkapp.com/email'
 #POSTMARK_API_KEY = 'postmark private api key'
 #EMAIL_FROM_ADDRESS = 'noreply@yourdomain.com'         # zie ook https://nl.wikipedia.org/wiki/Noreply
 
-
+# e-mailadres om crashes te melden
 EMAIL_DEVELOPER_TO = 'developer@yourdomain.com'
 EMAIL_DEVELOPER_SUBJ = 'Internal Server Error: ' + NAAM_SITE
-
 
 # users allowed to send to in this test setup
 # if empty, allows sending to anybody
 EMAIL_ADDRESS_WHITELIST = ()
-
 
 # url van het document privacyverklaring
 PRIVACYVERKLARING_URL = 'url to privacy statement html, pdf or googledoc, etc'
@@ -103,18 +112,18 @@ BONDSPAS_FONT_BOLD = '/usr/share/fonts/truetype/liberation2/LiberationSans-Bold.
 INSTALL_PATH = '/directory/on/server/nhbapps-venv/project/'
 
 # toon het kaartje Opleidingen?
-TOON_OPLEIDINGEN = True
+TOON_OPLEIDINGEN = False
 
 # bekende BIC codes, voor controle rekeninggegevens tijdens import uit CRM
 BEKENDE_BIC_CODES = (
-    'ABNANL2A',
-    'FRBKNL2L',
-    'INGBNL2A',
-    'KNABNL2H',
-    'RABONL2U',
-    'RBRBNL21',
-    'SNSBNL2A',
-    'TRIONL2U'
+    'ABNANL2A',     # ABN AMRO bank
+    'ASNBNL21',     # Volksbank / ASN bank
+    'INGBNL2A',     # ING bank
+    'KNABNL2H',     # Knab (Aegon) --> ASR
+    'RABONL2U',     # Rabobank
+    'RBRBNL21',     # Volksbank / Regiobank
+    'SNSBNL2A',     # SNS bank
+    'TRIONL2U',     # Triodos bank
 )
 
 # na hoeveel dagen moet een product in het mandje automatisch vervallen?
@@ -131,11 +140,36 @@ WEBWINKEL_FOTOS_DIR = '/directory/on/server/webwinkel_fotos'
 
 # welke vereniging is de verkoper
 WEBWINKEL_VERKOPER_VER_NR = 1368
+WEBWINKEL_VERKOPER_BTW_NR = "012345678B99"
 
-# verzendkosten voor een pakketje tot 10kg via PostNL
-WEBWINKEL_PAKKET_VERZENDKOSTEN_EURO = 6.75      # 6.95 vanaf 1 jan 2023
+# verzendkosten webwinkel
+WEBWINKEL_PAKKET_GROOT_VERZENDKOSTEN_EURO = 6.95
+WEBWINKEL_BRIEF_VERZENDKOSTEN_EURO = 4.25
 
-# verzendkosten briefpost tot 350g via PostNL
-WEBWINKEL_BRIEF_VERZENDKOSTEN_EURO = 4.04       # 4.15 vanaf 1 jan 2023
+# ophalen op bondsbureau aan/uit zetten
+WEBWINKEL_TRANSPORT_OPHALEN_MAG = True
+
+# BTW percentage voor alle producten in de webwinkel, inclusief transportkosten
+WEBWINKEL_BTW_PERCENTAGE = 21.0
+
+# Mollie endpoint URL override
+# (None = use library provided default)
+BETAAL_API_URL = None
+
+# google maps URL (override) and API key
+# (None = use library provided default)
+GMAPS_API_URL = None  
+GMAPS_KEY = 'AIzaDummy'
+
+# voor sommige adressen werkt de geocode API niet...
+# hier geven we het handmatige antwoord.
+GEOCODE_FALLBACK = {
+    "HEIDSEWEG 72A 5812AB HEIDE": (51.50199, 5.94793),
+    "HEIDSEWEG 72A 5812 AB HEIDE": (51.50199, 5.94793),
+    "HTTPS://GOO.GL/MAPS/5UHRTFEC4W7UAP2R7": (52.99786, 6.59954),
+}
+
+# lidnummers van de scheidsrechters die geen mailtjes met beschikbaarheidsverzoeken willen ontvangen
+LID_NRS_GEEN_SCHEIDS_BESCHIKBAARHEID_OPVRAGEN = ()
 
 # end of file

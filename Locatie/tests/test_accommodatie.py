@@ -23,7 +23,7 @@ class TestLocatieAccommodatie(E2EHelpers, TestCase):
 
     """ tests voor de Vereniging applicatie, functie Accommodaties """
 
-    test_after = ('BasisTypen', 'NhbStructuur', 'Functie')
+    test_after = ('BasisTypen', 'ImportCRM', 'Functie')
 
     url_ver_overzicht = '/vereniging/'
     url_locatie = '/vereniging/locatie/%s/'   # ver_nr

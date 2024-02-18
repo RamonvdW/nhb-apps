@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2023 Ramon van der Winkel.
+#  Copyright (c) 2020-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import reverse
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.definities import DEEL_RK
+from Competitie.definities import DEEL_RK, DEEL_BK
 from Competitie.models import RegiocompetitieRonde, CompetitieMatch, Kampioenschap
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving
@@ -66,32 +66,40 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
         matches = (CompetitieMatch
                    .objects
                    .filter(pk__in=pks)
+                   .prefetch_related('kampioenschap_set',
+                                     'regiocompetitieronde_set')
                    .order_by('datum_wanneer',
                              'tijd_begin_wedstrijd'))
 
         for match in matches:
+
+            rondes = match.regiocompetitieronde_set.all()
+
+            deelkamps = match.kampioenschap_set.all()
+            if len(deelkamps) > 0:
+                match.deelkamp = deelkamps[0]
+            else:
+                match.deelkamp = None
+
             # voor competitiewedstrijden wordt de beschrijving ingevuld
             # als de instellingen van de ronde opgeslagen worden
             # dit is slechts fall-back
             if match.beschrijving == "":
                 # maak een passende beschrijving voor deze wedstrijd
-                rondes = match.regiocompetitieronde_set.all()
                 if len(rondes) > 0:
                     ronde = rondes[0]
                     match.beschrijving1 = ronde.regiocompetitie.competitie.beschrijving
                     match.beschrijving2 = ronde.beschrijving
                 else:
-                    deelkamps = match.kampioenschap_set.all()
-                    if len(deelkamps) > 0:      # pragma: no branch
-                        deelkamp = deelkamps[0]
-                        match.beschrijving1 = deelkamp.competitie.beschrijving
-                        if deelkamp.deel == DEEL_RK:
+                    if match.deelkamp:
+                        match.beschrijving1 = match.deelkamp.competitie.beschrijving
+                        if match.deelkamp.deel == DEEL_RK:
                             match.beschrijving2 = "Rayonkampioenschappen"
                         else:
                             match.beschrijving2 = "Bondskampioenschappen"
             else:
                 msg = match.beschrijving
-                pos = msg.find(' - ')
+                pos = msg.find(' - ')           # TODO: is dit nog actueel?
                 if pos > 0:
                     match.beschrijving1 = msg[:pos].strip()
                     match.beschrijving2 = msg[pos+3:].strip()
@@ -99,13 +107,14 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
                     match.beschrijving1 = msg
                     match.beschrijving2 = ''
 
-            match.is_rk = (match.beschrijving2 == 'Rayonkampioenschappen')
-            match.is_bk = (match.beschrijving2 == 'Bondskampioenschappen')
+            match.is_rk = (match.deelkamp and match.deelkamp.deel == DEEL_RK)
+            match.is_bk = (match.deelkamp and match.deelkamp.deel == DEEL_BK)
             match.opvallen = (match.is_rk or match.is_bk) and is_mix
 
             match.toon_geen_uitslag = True
 
             if match.is_rk or match.is_bk:
+                # geen knop nodig om de uitslag in te voeren
                 match.toon_nvt = True
             else:
                 match.toon_nvt = False

@@ -85,7 +85,7 @@
 .btn,
 .btn-floating {
   &:focus {
-    outline: 2px solid black;   // keep in sync with button:focus in _forms.scss
+    outline: 2px solid black;   // keep in sync with button:focus in _forms.scss and btn-sv-keuze:focus in sv-post.scss
     //background-color: darken($button-raised-background, 10%);
   }
 }

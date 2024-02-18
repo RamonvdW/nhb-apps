@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2023 Ramon van der Winkel.
+                Copyright (c) 2023-2024 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -29,6 +29,10 @@
             <!-- wedstrijdkalender -->
             {% url 'Scheidsrechter:wedstrijden' as card_url %}
             {% include 'plein/card_icon.dtl' with title="Wedstrijdkalender" text="Bekijk welke wedstrijden scheidsrechters nodig hebben." icon="event_note" url=card_url %}
+
+            <!-- competitiewedstrijden -->
+            {% url 'Scheidsrechter:competitie' as card_url %}
+            {% include 'plein/card_icon.dtl' with title="Bondscompetitie" text="Bekijk welke RK/BK wedstrijden een scheidsrechter nodig hebben." icon="my_location" url=card_url %}
 
             <!-- beschikbaarheid -->
             {% include 'plein/card_icon.dtl' with title="Beschikbaarheid" text=tekst_beschikbaarheid icon="event_available" url=url_beschikbaarheid %}

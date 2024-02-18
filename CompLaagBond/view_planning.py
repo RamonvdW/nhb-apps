@@ -21,6 +21,7 @@ from Functie.rol import rol_get_huidige_functie
 from Locatie.models import Locatie
 from Logboek.models import schrijf_in_logboek
 from Overig.background_sync import BackgroundSync
+from Scheidsrechter.mutaties import scheids_mutatieverzoek_bepaal_reistijd_naar_alle_wedstrijdlocaties
 from Vereniging.models import Vereniging
 from types import SimpleNamespace
 import datetime
@@ -214,7 +215,8 @@ class PlanningView(UserPassesTestMixin, TemplateView):
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
-            (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (reverse('CompBeheer:overzicht',
+                     kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
             (None, 'Planning')
         )
 
@@ -241,7 +243,8 @@ class PlanningView(UserPassesTestMixin, TemplateView):
         match = CompetitieMatch(
                     competitie=deelkamp.competitie,
                     datum_wanneer=deelkamp.competitie.begin_fase_P_indiv,
-                    tijd_begin_wedstrijd=datetime.time(hour=10, minute=0, second=0))
+                    tijd_begin_wedstrijd=datetime.time(hour=10, minute=0, second=0),
+                    beschrijving='BK, ' + deelkamp.competitie.beschrijving)
         match.save()
 
         deelkamp.rk_bk_matches.add(match)
@@ -499,7 +502,8 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
-            (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (reverse('CompBeheer:overzicht',
+                     kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
             (reverse('CompLaagBond:planning', kwargs={'deelkamp_pk': deelkamp.pk}), 'Planning BK'),
             (None, 'Wijzig BK wedstrijd')
         )
@@ -553,11 +557,10 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
             raise Http404('Geen valide verzoek')
 
         # weekdag is een offset ten opzicht van de eerste toegestane BK wedstrijddag
-        match.datum_wanneer = deelkamp.competitie.begin_fase_P_indiv + datetime.timedelta(days=weekdag)
+        begin = min(comp.begin_fase_P_indiv, comp.begin_fase_P_teams)
+        match.datum_wanneer = begin + datetime.timedelta(days=weekdag)
 
         # check dat datum_wanneer nu in de ingesteld BK periode valt
-        begin = min(comp.begin_fase_P_indiv, comp.begin_fase_P_teams)
-        einde = max(comp.einde_fase_P_indiv, comp.einde_fase_P_teams)
         if not ((comp.begin_fase_P_indiv <= match.datum_wanneer <= comp.einde_fase_P_indiv) or
                 (comp.begin_fase_P_teams <= match.datum_wanneer <= comp.einde_fase_P_teams)):
             raise Http404('Geen valide datum')
@@ -601,6 +604,11 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
                     if keep:
                         loc = ver_loc
                 # for
+
+            if match.locatie != loc:
+                # laat de reisafstand alvast bijwerken
+                snel = str(request.POST.get('snel', ''))[:1]  # voor autotest
+                scheids_mutatieverzoek_bepaal_reistijd_naar_alle_wedstrijdlocaties('Planning BK', snel == '1')
 
             match.locatie = loc
 
@@ -667,6 +675,21 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
 
         if len(gekozen_team_klassen):
             match.team_klassen.add(*gekozen_team_klassen)
+
+        # update aantal scheidsrechters nodig
+        sr_nodig = False
+        for obj in match.indiv_klassen.all():
+            sr_nodig |= obj.krijgt_scheids_bk
+        # for
+        for obj in match.team_klassen.all():
+            sr_nodig |= obj.krijgt_scheids_bk
+        # for
+
+        if sr_nodig:
+            match.aantal_scheids = 1
+        else:
+            match.aantal_scheids = 0
+        match.save(update_fields=['aantal_scheids'])
 
         url = reverse('CompLaagBond:planning', kwargs={'deelkamp_pk': deelkamp.pk})
         return HttpResponseRedirect(url)
@@ -774,7 +797,8 @@ class WijzigLimietenView(UserPassesTestMixin, TemplateView):
         comp = deelkamp.competitie
         context['kruimels'] = (
             (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
-            (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (reverse('CompBeheer:overzicht',
+                     kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
             (None, 'BK limieten')
         )
 

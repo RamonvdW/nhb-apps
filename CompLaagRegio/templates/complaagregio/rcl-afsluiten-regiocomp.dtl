@@ -20,7 +20,7 @@
     <!-- blauw balk met wit informatie veld -->
     <div class="row-sv-blauw">
         <div class="col s12">
-            <div class="white" style="padding:10px">
+            <div class="sv-kader" style="padding:10px">
 
             {% if url_afsluiten %}
                 <p>Als RCL wil je de regiocompetitie in jouw regio afsluiten.</p>

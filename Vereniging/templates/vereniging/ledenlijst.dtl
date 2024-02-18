@@ -31,7 +31,7 @@
         <div class="row-sv-blauw">
             <div class="col s12">
 
-                <table class="white" id="table1">
+                <table class="sv-kader" id="table1">
                     <thead>
                         <tr>        <!-- filter veld -->
                             <td colspan="4" class="table-filter">
@@ -88,7 +88,7 @@
     <div class="row-sv-blauw">
         <div class="col s12">
 
-            <table class="white" id="table2">
+            <table class="sv-kader" id="table2">
                 <thead>
                     <tr>        <!-- filter veld -->
                         <td colspan="4" class="table-filter"><input class="table-filter" oninput="myTableFilter(this, 'table2')" placeholder="Zoeken"/></td>
@@ -141,7 +141,7 @@
         <div class="row-sv-blauw">
             <div class="col s12">
 
-                <table class="white">
+                <table class="sv-kader">
                     <thead>
                         <tr>
                             <th>Bonds<wbr>nummer</th>

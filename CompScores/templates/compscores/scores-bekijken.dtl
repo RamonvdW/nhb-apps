@@ -20,7 +20,7 @@
     <!-- blauwe balk met informatie label : info -->
     <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
-            <table class="white">
+            <table class="sv-kader">
                 <tr>
                     <th>Competitie</th>
                     <td>{{ deelcomp.competitie.beschrijving }}</td>
@@ -56,7 +56,7 @@
         </div>
     </div>
 
-    <table class="white">
+    <table class="sv-kader">
         <tr class="sv-table-header">
             <td rowspan="{{ aantal_regels }}" class="sv-table-zijrand"></td>
             <th>Vereniging</th>
@@ -75,7 +75,7 @@
             </tr>
         {% endfor %}
 
-        <tr>
+        <tr class="sv-table-onderrand">
             <td colspan="4" class="sv-table-onderrand"></td>
         </tr>
     </table>

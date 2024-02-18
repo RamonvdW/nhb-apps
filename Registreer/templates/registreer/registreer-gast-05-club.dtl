@@ -20,7 +20,7 @@
 
     <!-- blauwe balk met dialoog venster -->
     <div class="row-sv-blauw">
-        <div class="col s10 offset-s1 m8 offset-m2 l6 offset-l3 xl4 offset-xl4 white z-depth-3">
+        <div class="col s10 offset-s1 m8 offset-m2 l6 offset-l3 xl4 offset-xl4 sv-kader z-depth-3">
 
             <!-- dialoog venster -->
             <div style="padding:20px" class="left-align">
@@ -34,12 +34,12 @@
 
                     <div class="input-field">
                         <label for="id_club">Naam van de club:</label>
-                        <input id="id_club" class="with-gap" type="text" name="club" value="{{ club }}" required autofocus>
+                        <input id="id_club" type="text" name="club" value="{{ club }}" required autofocus>
                     </div>
 
                     <div class="input-field">
                         <label for="id_plaats">Plaats:</label>
-                        <input id="id_plaats" class="with-gap" type="text" name="plaats" value="{{ plaats }}" required>
+                        <input id="id_plaats" type="text" name="plaats" value="{{ plaats }}" required>
                     </div>
 
                     <p class="center">

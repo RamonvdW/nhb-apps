@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2019-2023 Ramon van der Winkel.
+                Copyright (c) 2019-2024 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -70,6 +70,11 @@
             <!-- records -->
             {% url 'Records:overzicht' as card_url %}
             {% include 'plein/card_icon.dtl' with title="Records" text="Alle handboogsport records van nederlandse sporters." icon="insights" url=card_url %}
+
+            <!-- ledenvoordeel -->
+            {% if url_voordeel %}
+                {% include 'plein/card_icon.dtl' with title="Ledenvoordeel" text="Bekijk de aanbiedingen voor KHSN leden!" icon="redeem" url=url_voordeel %}
+            {% endif %}
         </div>
     </div>
 
@@ -110,6 +115,6 @@
     </div>
 
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="plein-schutter" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="plein-sporter" %}
 
 {% endblock %}

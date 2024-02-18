@@ -70,6 +70,10 @@ nav {
       transform: translateX(-50%);
     }
 
+    &.left {
+      left: 0.5rem;
+    }
+
     @media #{$medium-and-down} {
       left: 50%;
       transform: translateX(-50%);
@@ -79,7 +83,9 @@ nav {
         transform: none;
       }
 
-      &.left { left: 0.5rem; }
+      &.left {
+        left: 0.5rem;
+      }
       &.right {
         right: 0.5rem;
         left: auto;

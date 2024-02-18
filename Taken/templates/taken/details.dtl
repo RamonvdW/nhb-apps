@@ -21,7 +21,7 @@
     <div class="row-sv-blauw">
         <div class="col s12">
 
-            <table class="white">
+            <table class="sv-kader">
                 <tr>
                     <th>Taak nummer</th>
                     <td>{{ taak.pk }}</td>

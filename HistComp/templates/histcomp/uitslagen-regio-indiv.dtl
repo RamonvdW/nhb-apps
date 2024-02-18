@@ -21,7 +21,7 @@
     <!-- blauwe balk met informatie -->
     <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
-            <table class="white">
+            <table class="sv-kader">
                 <tr>
                     <th>Competitie</th>
                     <td>{{ comp_beschrijving }}</td>
@@ -48,7 +48,7 @@
     <!-- blauwe balk met filters -->
     <div class="row-sv-blauw">
         <div class="col s12 m6 l3 offset-l3" style="margin-bottom:15px">
-            <div class="white left-align" style="padding:10px">
+            <div class="sv-kader left-align" style="padding:10px">
                 <p><b>Kies een boog type:</b></p>
                 <ul>
                     {% for filter in boog_filters %}
@@ -67,7 +67,7 @@
         </div>
 
         <div class="col s12 m6 l3" style="margin-bottom:15px">
-            <div class="white left-align" style="padding:10px">
+            <div class="sv-kader left-align" style="padding:10px">
                 <p><b>Kies een regio:</b></p>
                 <ul>
                     {% for filter in regio_filters %}
@@ -89,7 +89,7 @@
 
     {% if heeft_deelnemers %}
 
-        <table class="white">
+        <table class="sv-kader">
             {% for indiv in uitslag %}
                 {% if forloop.first %}      <!-- alleen toevoegen als er deelnemers zijn, anders probleem met colspan=2 -->
                     {% comment %}
@@ -115,12 +115,12 @@
 
                 {% if indiv.break_klasse %}
                     {% if not indiv.is_eerste_groep %}
-                        <tr>
+                        <tr class="sv-table-onderrand">
                             <td class="sv-table-onderrand" colspan="13"></td>
                         </tr>
                     {% endif %}
 
-                    <tr>
+                    <tr class="sv-table-sectie-header">
                         <td class="center" colspan="13"><h5>{{ indiv.indiv_klasse }}</h5></td>
                     </tr>
 
@@ -163,7 +163,7 @@
 
             {% endfor %}
 
-            <tr>
+            <tr class="sv-table-onderrand">
                 <td class="sv-table-onderrand" colspan="13"></td>
             </tr>
         </table>

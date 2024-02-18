@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2023 Ramon van der Winkel.
+#  Copyright (c) 2019-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -24,6 +24,7 @@ from Functie.rol import rol_get_huidige_functie
 from Locatie.models import Locatie
 from Logboek.models import schrijf_in_logboek
 from Overig.background_sync import BackgroundSync
+from Scheidsrechter.mutaties import scheids_mutatieverzoek_bepaal_reistijd_naar_alle_wedstrijdlocaties
 from Vereniging.models import Vereniging
 from types import SimpleNamespace
 import datetime
@@ -159,7 +160,7 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
             obj.schutters_count = 0
 
             obj.wkl_namen = list()
-            for wkl in obj.indiv_klassen.order_by('volgorde'):      # FUTURE: order_by zorgt voor extra database accesses
+            for wkl in obj.indiv_klassen.order_by('volgorde'):     # FUTURE: order_by zorgt voor extra database accesses
                 obj.wkl_namen.append(wkl.beschrijving)
                 niet_gebruikt[100000 + wkl.pk] = None
 
@@ -170,7 +171,7 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
                     pass
             # for
 
-            for wkl in obj.team_klassen.order_by('volgorde'):       # FUTURE: order_by zorgt voor extra database accesses
+            for wkl in obj.team_klassen.order_by('volgorde'):      # FUTURE: order_by zorgt voor extra database accesses
                 obj.wkl_namen.append(wkl.beschrijving)
                 niet_gebruikt[200000 + wkl.pk] = None
 
@@ -250,7 +251,8 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
             deelkamp_pk = int(kwargs['deelkamp_pk'][:6])  # afkappen voor de veiligheid
             deelkamp = (Kampioenschap
                         .objects
-                        .select_related('competitie')
+                        .select_related('competitie',
+                                        'rayon')
                         .get(pk=deelkamp_pk,
                              deel=DEEL_RK,
                              rayon=self.functie_nu.rayon))  # moet juiste rayon zijn
@@ -260,7 +262,8 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
         match = CompetitieMatch(
                     competitie=deelkamp.competitie,
                     datum_wanneer=deelkamp.competitie.begin_fase_L_indiv,
-                    tijd_begin_wedstrijd=datetime.time(hour=10, minute=0, second=0))
+                    tijd_begin_wedstrijd=datetime.time(hour=10, minute=0, second=0),
+                    beschrijving='RK Rayon %s, %s' % (deelkamp.rayon.rayon_nr, deelkamp.competitie.beschrijving))
         match.save()
 
         deelkamp.rk_bk_matches.add(match)
@@ -461,7 +464,7 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
                 locaties = match.vereniging.locatie_set.exclude(zichtbaar=False).all()
                 if locaties.count() > 0:
                     match.locatie = locaties[0]
-                    match.save()
+                    match.save()                    # TODO: illegale save!
 
         context['all_locaties'] = all_locs = list()
         for ver in verenigingen:
@@ -499,8 +502,10 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
-            (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
-            (reverse('CompLaagRayon:planning', kwargs={'deelkamp_pk': deelkamp.pk}), 'Planning RK'),
+            (reverse('CompBeheer:overzicht',
+                     kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (reverse('CompLaagRayon:planning',
+                     kwargs={'deelkamp_pk': deelkamp.pk}), 'Planning RK'),
             (None, 'Wijzig RK wedstrijd')
         )
 
@@ -605,6 +610,11 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
                         loc = ver_loc
                 # for
 
+            if match.locatie != loc:
+                # laat de reisafstand alvast bijwerken
+                snel = str(request.POST.get('snel', ''))[:1]  # voor autotest
+                scheids_mutatieverzoek_bepaal_reistijd_naar_alle_wedstrijdlocaties('Planning RK', snel == '1')
+
             match.locatie = loc
 
         match.save()
@@ -654,6 +664,21 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
 
         if len(gekozen_team_klassen):
             match.team_klassen.add(*gekozen_team_klassen)
+
+        # update aantal scheidsrechters nodig
+        sr_nodig = False
+        for obj in match.indiv_klassen.all():
+            sr_nodig |= obj.krijgt_scheids_rk
+        # for
+        for obj in match.team_klassen.all():
+            sr_nodig |= obj.krijgt_scheids_rk
+        # for
+
+        if sr_nodig:
+            match.aantal_scheids = 1
+        else:
+            match.aantal_scheids = 0
+        match.save(update_fields=['aantal_scheids'])
 
         url = reverse('CompLaagRayon:planning', kwargs={'deelkamp_pk': deelkamp.pk})
         return HttpResponseRedirect(url)
@@ -750,7 +775,8 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
         comp = deelkamp.competitie
         context['kruimels'] = (
             (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
-            (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (reverse('CompBeheer:overzicht',
+                     kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
             (None, 'RK limieten')
         )
 

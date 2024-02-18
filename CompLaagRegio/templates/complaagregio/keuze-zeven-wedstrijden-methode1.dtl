@@ -59,12 +59,12 @@
         <div class="col s12">
 
             <!-- dialoog venster -->
-            <div class="white left-align z-depth-3">
+            <div class="sv-kader left-align z-depth-3">
                 <div class="form-padding">
                         <form action="{{ url_opslaan }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
                             {% csrf_token %}
 
-                            <table class="white">
+                            <table class="sv-kader">
 
                                 {% if wedstrijden_1 %}    <!-- inschrijfmethode 1 -->
                                     <tr>

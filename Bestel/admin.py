@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2023 Ramon van der Winkel.
+#  Copyright (c) 2022-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.contrib import admin
+from django.db.models import Count
 from Bestel.models import BestelProduct, BestelMandje, Bestelling, BestelMutatie, BESTEL_MUTATIE_TO_STR
 
 
@@ -13,12 +14,35 @@ class BestelProductAdmin(admin.ModelAdmin):
     readonly_fields = ('wedstrijd_inschrijving',)
 
 
+class MandjeLeegFilter(admin.SimpleListFilter):
+
+    title = 'Mandje is leeg'
+
+    parameter_name = 'is_leeg'
+
+    def lookups(self, request, model_admin):
+        return [('0', 'Leeg'),
+                ('1', 'Niet leeg')]
+
+    def queryset(self, request, qs):
+        qs = qs.annotate(num_prod=Count("producten"))
+        if self.value() == '0':
+            # leeg
+            qs = qs.filter(num_prod=0)
+        else:
+            # niet leeg
+            qs = qs.exclude(num_prod=0)
+        return qs
+
+
 class BestelMandjeAdmin(admin.ModelAdmin):
 
     readonly_fields = ('account', 'producten_in_mandje')
     exclude = ('producten',)
 
     search_fields = ('account__username', 'account__unaccented_naam')
+
+    list_filter = (MandjeLeegFilter,)
 
     @staticmethod
     def producten_in_mandje(obj):     # pragma: no cover
@@ -66,7 +90,8 @@ class BestellingAdmin(admin.ModelAdmin):
                         'verkoper_email',
                         'verkoper_telefoon',
                         'verkoper_iban',
-                        'verkoper_bic')
+                        'verkoper_bic',
+                        'verkoper_btw_nr')
              }),
         ('Transactie',
             {'fields': ('status',

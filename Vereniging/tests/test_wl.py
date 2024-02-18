@@ -23,7 +23,7 @@ class TestVerenigingWL(E2EHelpers, TestCase):
 
     """ tests voor de Vereniging applicatie, functies voor de WL """
 
-    test_after = ('BasisTypen', 'NhbStructuur', 'Functie', 'Sporter', 'Competitie')
+    test_after = ('BasisTypen', 'ImportCRM', 'Functie', 'Sporter', 'Competitie')
 
     url_overzicht = '/vereniging/'
     url_ledenlijst = '/vereniging/leden-lijst/'

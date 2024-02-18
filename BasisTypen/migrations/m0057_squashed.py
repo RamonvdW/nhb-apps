@@ -698,8 +698,6 @@ class Migration(migrations.Migration):
     # dit is de eerste
     initial = True
 
-    replaces = [('BasisTypen', 'm0054_squashed'),]
-
     # volgorde afdwingen
     dependencies = []
 

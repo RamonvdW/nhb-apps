@@ -32,7 +32,7 @@
     <!-- blauwe balk met informatie -->
     <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
-            <table class="white">
+            <table class="sv-kader">
                 <tr>
                     <th>Competitie</th>
                     <td>{{ deelcomp.competitie.beschrijving }}</td>
@@ -57,7 +57,7 @@
     <!-- blauwe balk met informatie in een tabel -->
     <div class="row-sv-blauw">
         <div class="col s12">
-            <table class="white" id="medal-table">
+            <table class="sv-kader" id="medal-table">
 
                 {% for obj in deelnemers %}
                     {% if obj.break_klasse %}
@@ -67,7 +67,7 @@
                             </tr>
                         {% endif %}
 
-                        <tr>
+                        <tr class="sv-table-sectie-header">
                             <td class="center" colspan="5"><h5>{{ obj.klasse_str }}</h5></td>
                         </tr>
 

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2023 Ramon van der Winkel.
+#  Copyright (c) 2020-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -20,7 +20,7 @@ class Rollen(enum.IntEnum):
     ROL_HWL = 6         # Hoofdwedstrijdleider van een vereniging, alle competities
     ROL_WL = 7          # Wedstrijdleider van een vereniging, alle competities
     ROL_SEC = 10        # Secretaris van een vereniging
-    ROL_SPORTER = 20    # Individuele sporter en lid
+    ROL_SPORTER = 20    # Individuele sporter en (gast-)lid
     ROL_MWZ = 30        # Manager Wedstrijdzaken
     ROL_MO = 40         # Manager Opleidingen
     ROL_MWW = 50        # Manager Webwinkel

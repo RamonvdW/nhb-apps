@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2021-2023 Ramon van der Winkel.
+                Copyright (c) 2021-2024 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -21,7 +21,7 @@
     <!-- blauwe balk met informatie label : info -->
     <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
-            <table class="white">
+            <table class="sv-kader">
                 <tr>
                     <th>Competitie</th>
                     <td>{{ deelkamp.competitie.beschrijving }}</td>
@@ -50,6 +50,22 @@
                     <th>Wanneer</th>
                     <td>{{ wedstrijd.datum_wanneer }} om {{ wedstrijd.tijd_begin_wedstrijd }}</td>
                 </tr>
+
+                {% if url_sr_contact %}
+                    <tr>
+                        <th>Scheidsrechters</th>
+                        <td>
+                            {% if aantal_sr_str %}
+                                <span style="padding-right:20px">{{ aantal_sr_str }}</span>
+                                {% if url_sr_contact %}
+                                    <a class="btn-sv-rood" href="{{ url_sr_contact }}">Details</a>
+                                {% endif %}
+                            {% else %}
+                                <i>Nog niet bekend</i>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endif %}
             </table>
         </div>
     </div>
@@ -68,16 +84,16 @@
         <!-- blauwe balk met informatie in een tabel -->
         <div class="row-sv-blauw">
             <div class="col s12">
-                <table class="white">
+                <table class="sv-kader">
 
                     {% for deelnemer in deelnemers_indiv %}
                         {% if deelnemer.break_before %}
                             {% if not forloop.first %}
-                                <tr>
+                                <tr class="sv-table-onderrand">
                                     <td colspan="6" class="sv-table-onderrand" style="height:50px"></td>
                                 </tr>
                             {% endif %}
-                            <tr>
+                            <tr class="sv-table-sectie-header">
                                 <td colspan="6" class="center">
                                     <h5>{{ deelnemer.indiv_klasse.beschrijving }}</h5>
                                     <br>
@@ -138,7 +154,7 @@
         <!-- blauwe balk met informatie in een tabel -->
         <div class="row-sv-blauw">
             <div class="col s12">
-                <table class="white">
+                <table class="sv-kader">
 
                     {% if geen_klassengrenzen %}
                         <tr class="white">
@@ -151,11 +167,11 @@
                     {% for team in deelnemers_teams %}
                         {% if team.break_before %}
                             {% if not forloop.first %}
-                                <tr>
+                                <tr class="sv-table-onderrand">
                                     <td colspan="5" class="sv-table-onderrand" style="height:50px"></td>
                                 </tr>
                             {% endif %}
-                            <tr>
+                            <tr class="sv-table-sectie-header">
                                 <td colspan="5" class="center">
                                     <h5>{{ team.team_klasse.beschrijving }}</h5>
                                     <a class="btn-sv-rood" href="{{ team.url_download_teams }}">

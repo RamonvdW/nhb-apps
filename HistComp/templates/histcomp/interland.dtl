@@ -21,7 +21,7 @@
     <!-- blauw balk met wit informatie veld -->
     <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
-            <div class="white" style="padding:10px">
+            <div class="sv-kader" style="padding:10px">
                 <p>Onderstaande sporters hebben minimaal <b>{{ minimum_aantal_scores }}</b> scores neergezet in het seizoen.</p>
 
                 <p>De wedstrijdleeftijd is berekend voor het jaar: <b>{{ wedstrijd_jaar }}</b>.</p>
@@ -45,11 +45,11 @@
     <!-- blauwe balk met informatie in een tabel -->
     <div class="row-sv-blauw">
         <div class="col s12">
-            <table class="white">
+            <table class="sv-kader">
 
                 {% for klasse in klassen %}
                     {% if not forloop.first %}
-                        <tr>
+                        <tr class="sv-table-onderrand">
                             <td colspan="6" class="sv-table-onderrand" style="height:50px"></td>
                         </tr>
                     {% endif %}

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2023 Ramon van der Winkel.
+#  Copyright (c) 2022-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -661,21 +661,23 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
         # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
 
         # trigger the negative case
+        prev_min = (now.minute - 1) % 60
         f1, f2 = self.run_management_command('betaal_mutaties', '1', '--quick',
-                                             '--stop_exactly=%s' % (now.minute - 1))
+                                             '--stop_exactly=%s' % prev_min)
         # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
 
-        now = datetime.datetime.now()
-        if now.minute == 59:                             # pragma: no cover
-            print('Waiting until clock is past xx:59')
-            while now.minute == 59:
-                time.sleep(5)
-                now = datetime.datetime.now()
-            # while
+        # now = datetime.datetime.now()
+        # if now.minute == 59:                             # pragma: no cover
+        #     print('Waiting until clock is past xx:59')
+        #     while now.minute == 59:
+        #         time.sleep(5)
+        #         now = datetime.datetime.now()
+        #     # while
 
         # trigger the positive case
+        next_min = (now.minute + 1) % 60
         f1, f2 = self.run_management_command('betaal_mutaties', '1', '--quick',
-                                             '--stop_exactly=%s' % (now.minute + 1))
+                                             '--stop_exactly=%s' % next_min)
         # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
 
 

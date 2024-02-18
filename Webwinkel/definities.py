@@ -4,6 +4,8 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
+from Vereniging.definities import VER_NR_BONDSBUREAU
+
 THUMB_SIZE = (96, 96)
 
 KEUZE_STATUS_RESERVERING_MANDJE = 'M'        # in mandje; moet nog omgezet worden in een bestelling
@@ -43,5 +45,7 @@ VERZENDKOSTEN_CHOICES = (
     (VERZENDKOSTEN_PAKKETPOST, "Pakketpost"),
     (VERZENDKOSTEN_BRIEFPOST, "Briefpost"),
 )
+
+WEBWINKEL_VERKOPENDE_VER_NR = VER_NR_BONDSBUREAU
 
 # end of file

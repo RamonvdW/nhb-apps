@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2023 Ramon van der Winkel.
+#  Copyright (c) 2020-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db import models
 from Account.models import Account
-from BasisTypen.definities import ORGANISATIES, ORGANISATIE_WA, SCHEIDS_CHOICES, SCHEIDS_NIET
+from BasisTypen.definities import ORGANISATIES, ORGANISATIE_WA
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse
 from Locatie.models import Locatie
 from Score.models import Score, Uitslag
@@ -93,6 +93,9 @@ class Wedstrijd(models.Model):
     # use case: 2-daagse wedstrijd wordt geannuleerd en vervangen door twee 1-daagse wedstrijden
     #           als er inschrijvingen aan hangen dan wil je de wedstrijd niet verwijderen
     toon_op_kalender = models.BooleanField(default=True)
+
+    # voor intern gebruik (scheidsrechter beschikbaarheid RK/BK competitie)?
+    verstop_voor_mwz = models.BooleanField(default=False)
 
     # wanneer is de wedstrijd (kan meerdere dagen beslaan)
     datum_begin = models.DateField()

@@ -31,7 +31,7 @@
     <!-- blauwe balk met informatie -->
     <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
-            <table class="white">
+            <table class="sv-kader">
                 <tr>
                     <th>Competitie</th>
                     <td>{{ deelkamp.competitie.beschrijving }}</td>
@@ -58,7 +58,7 @@
     <!-- blauwe balk met filters -->
     <div class="row-sv-blauw">
         <div class="col s12 m6 l4 offset-l2 xl3 offset-xl3" style="margin-bottom:15px">
-            <div class="white left-align" style="padding:10px">
+            <div class="sv-kader left-align" style="padding:10px">
                 <p><b>Kies een team type:</b></p>
                 <ul>
                     {% for filter in teamtype_filters %}
@@ -77,7 +77,7 @@
         </div>
 
         <div class="col s12 m6 l4 xl3" style="margin-bottom:15px">
-            <div class="white left-align" style="padding:10px">
+            <div class="sv-kader left-align" style="padding:10px">
                 <p><b>Kies een rayon:</b></p>
                 <ul>
                     {% for filter in rayon_filters %}
@@ -120,16 +120,16 @@
     {% endif %}
 
     {% if not geen_teams %}
-        <table class="white">
+        <table class="sv-kader">
             {% for team in rk_teams %}
                 {% if team.break_klasse %}
                     {% if not forloop.first %}
-                        <tr>
+                        <tr class="sv-table-onderrand">
                             <td colspan="5" class="sv-table-onderrand"></td>
                         </tr>
                     {% endif %}
 
-                    <tr>
+                    <tr class="sv-table-sectie-header">
                         <td colspan="7" class="center">
                             <h5>{{ team.klasse_str }}</h5>
                             {% if team.match %}
@@ -238,7 +238,7 @@
 
             {% endfor %}
 
-            <tr>
+            <tr class="sv-table-onderrand">
                 <td colspan="5" class="sv-table-onderrand"></td>
             </tr>
         </table>

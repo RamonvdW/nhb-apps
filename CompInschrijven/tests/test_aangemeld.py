@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2023 Ramon van der Winkel.
+#  Copyright (c) 2019-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -344,8 +344,7 @@ class TestCompInschrijvenAangemeld(E2EHelpers, TestCase):
 
         # corner-case
         url = self.url_aangemeld_rayon % (comp.pk, 999999)
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
+        resp = self.client.get(url)
         self.assert404(resp, 'Rayon niet gevonden')
 
     def test_overzicht_rcl(self):

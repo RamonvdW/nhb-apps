@@ -45,6 +45,10 @@ echo "[INFO] Starting Mollie simulator"
 pkill -f websim_betaal
 python3 ./Betaal/test-tools/websim_betaal.py &
 
+echo "[INFO] Starting Google Maps simulator"
+pkill -f websim_gmaps
+python3 ./Locatie/test_tools/websim_gmaps.py &
+
 echo "[INFO] Starting betaal_mutaties (runtime: $BG_DURATION minutes)"
 pkill -f betaal_mutaties
 ./manage.py betaal_mutaties --settings="$SETTINGS" $BG_DURATION &
@@ -87,6 +91,7 @@ pkill -f regiocomp_mutaties
 pkill -f bestel_mutaties
 pkill -f betaal_mutaties
 pkill -f scheids_mutaties
+pkill -f websim_gmaps
 pkill -f websim_betaal
 
 # end of file

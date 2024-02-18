@@ -11,6 +11,8 @@ from BasisTypen.definities import SCHEIDS_NIET
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige
 from Functie.scheids import gebruiker_is_scheids
+from Opleidingen.definities import CODE2SCHEIDS
+from Opleidingen.models import OpleidingDiploma
 from Scheidsrechter.definities import SCHEIDS2LEVEL
 from Sporter.models import SporterVoorkeuren, Sporter
 
@@ -85,7 +87,7 @@ class KorpsView(UserPassesTestMixin, TemplateView):
         return context
 
 
-class KorpsMetContactgegevensView(UserPassesTestMixin, TemplateView):
+class KorpsCSView(UserPassesTestMixin, TemplateView):
 
     """ Django class-based view voor de scheidsrechters """
 
@@ -112,6 +114,21 @@ class KorpsMetContactgegevensView(UserPassesTestMixin, TemplateView):
 
         ja_nee = {True: 'Ja', False: 'Nee'}
 
+        pks = list(Sporter
+                   .objects
+                   .exclude(scheids=SCHEIDS_NIET)
+                   .exclude(is_overleden=True)
+                   .values_list('pk', flat=True))
+
+        sporter_scheids2datum = dict()
+        for diploma in (OpleidingDiploma
+                        .objects
+                        .filter(sporter__pk__in=pks,
+                                code__in=CODE2SCHEIDS.keys())
+                        .select_related('sporter')):
+            sporter_scheids2datum[(diploma.sporter.pk, CODE2SCHEIDS[diploma.code])] = diploma.datum_begin
+        # for
+
         korps = list()
         for sporter in (Sporter
                         .objects
@@ -119,6 +136,12 @@ class KorpsMetContactgegevensView(UserPassesTestMixin, TemplateView):
                         .exclude(is_overleden=True)):
 
             sporter.level_str = SCHEIDS2LEVEL[sporter.scheids]
+
+            try:
+                sporter.level_sinds = sporter_scheids2datum[(sporter.pk, sporter.scheids)]
+            except KeyError:
+                sporter.level_sinds = '?'
+
             sporter.delen_tel_str = sporter.delen_email_str = 'Geen account'
 
             try:
@@ -151,7 +174,7 @@ class KorpsMetContactgegevensView(UserPassesTestMixin, TemplateView):
         return context
 
 
-class KorpsEmailadressenView(UserPassesTestMixin, TemplateView):
+class KorpsCSAlleEmailsView(UserPassesTestMixin, TemplateView):
 
     """ Deze view is voor de CS en geeft een knip-en-plak-baar overzicht van
         van de e-mailadressen van alle SRs.

@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2023 Ramon van der Winkel.
+                Copyright (c) 2023-2024 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -21,7 +21,7 @@
 
     <!-- sfeerfoto -->
     <div class="center" style="margin-top:50px; margin-bottom:30px">
-        <img src="{% static 'plein/team_sfeer_1.jpg' %}" style="width:70%; height:auto" loading="lazy" alt="sfeerfoto"><br>
+        <img src="{% static 'competitie/team_sfeer_1.jpg' %}" style="width:70%; height:auto" loading="lazy" alt="sfeerfoto"><br>
         <code style="font-size:12px">Sfeerfoto van een teamwedstrijd</code>
         <p>
             <a class="btn-sv-rood" href="https://handboogsport.smugmug.com/Indoor/" target="_blank" rel="noopener noreferrer">
@@ -40,7 +40,7 @@
     <!-- blauw balk met wit informatie veld -->
     <div class="row-sv-blauw">
         <div class="col s12 l10 offset-l1 xl8 offset-xl2">
-            <div class="white" style="padding:10px">
+            <div class="sv-kader" style="padding:10px">
                 <p>De competities Indoor en de 25m1pijl kennen ook een teamcompetitie.<br>Deze doorlopen dezelfde 3 fases en geografische opdeling als de individuele competities: regio, RK en BK.</p>
                 <p>Je moet je inschrijven voor de individuele competitie en kan daarna in een team geplaatst worden.</p>
                 <p>De vereniging schrijft de teams in.<br>Per team worden 3 tot 4 sporters van de eigen vereniging opgesteld.</p>
@@ -61,7 +61,7 @@
     <!-- blauwe balk met informatie in tabel-vorm:  label - info -->
     <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
-            <table class="white">
+            <table class="sv-kader">
                 <thead>
                     <tr>
                         <th>Team type</th>
@@ -117,7 +117,7 @@
     <!-- blauw balk met wit informatie veld -->
     <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
-            <div class="white" style="padding:10px">
+            <div class="sv-kader" style="padding:10px">
                 <p>De team sterkte wordt bepaald door de sporters die bij de inschrijving worden opgesteld in het team.<br>Van de 3 tot 4 sporters worden de hoogste 3 aanvangsgemiddelden gebruikt in de berekening.</p>
                 <p>Je kan je eigen aanvangsgemiddelde (AG) terug zien op Mijn pagina.<br>Dit is je gemiddelde van vorig seizoen tijdens de regiocompetitie fase.</p>
                 <p>Heb je vorig jaar niet meegedaan met de regiocompetitie?<br>Dan moet de vereniging een geschat AG opgeven. Dit heeft geen invloed op jouw klasse in de individuele competitie.</p>
@@ -137,7 +137,7 @@
     <!-- blauw balk met wit informatie veld -->
     <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
-            <div class="white" style="padding:10px">
+            <div class="sv-kader" style="padding:10px">
                 <p>De recurve teams worden verdeeld over 5 wedstrijdklassen (ERE, A, B, C, D).<br>Compound kent 2 wedstrijdklassen (ERE, A).<br>Barebow, Traditional en Longbow hebben 1 wedstrijdklasse (ERE).</p>
             </div>
         </div>
@@ -146,7 +146,7 @@
 
     <!-- sfeerfoto -->
     <div class="center" style="margin-top:50px; margin-bottom:30px">
-        <img src="{% static 'plein/team_sfeer_4.jpg' %}" style="width:70%; height:auto" loading="lazy" alt="sfeerfoto"><br>
+        <img src="{% static 'competitie/team_sfeer_4.jpg' %}" style="width:70%; height:auto" loading="lazy" alt="sfeerfoto"><br>
         <code style="font-size:12px">Sfeerfoto van een teamwedstrijd</code>
         <p>
             <a class="btn-sv-rood" href="https://handboogsport.smugmug.com/Indoor/" target="_blank" rel="noopener noreferrer">
@@ -177,7 +177,7 @@
     <!-- blauw balk met wit informatie veld -->
     <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
-            <div class="white" style="padding:10px">
+            <div class="sv-kader" style="padding:10px">
                 <p>De teams schieten allemaal 7 rondes.<br>De hoogste 3 individuele scores (van de 3 of 4 sporters) opgeteld is team score voor die ronde.</p>
                 <p>In een enkele regio wordt gekeken naar de totale teamscore over 7 rondes.</p>
                 <p>In de andere regio's kunnen per ronde wedstrijdpunten verdiend worden<br>aan de hand van de ranking op teamscore of bij winst tegen een directe tegenstander.</p>
@@ -196,7 +196,7 @@
     <!-- blauw balk met wit informatie veld -->
     <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
-            <div class="white" style="padding:10px">
+            <div class="sv-kader" style="padding:10px">
                 <p>De meeste regio's hebben vaste teams waarin altijd dezelfde sporters staan opgesteld.</p>
                 <p>In een paar regio's wordt het systeem "voortschrijdend gemiddelde" gebruikt waarbij de sporters elke ronde kunnen promoveren naar een ander team van dezelfde vereniging in een hogere wedstrijdklasse, maar ook kunnen degraderen naar een lagere klasse.</p>
                 {% if toon_teams_persoonlijk %}
@@ -217,7 +217,7 @@
     <!-- blauw balk met wit informatie veld -->
     <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
-            <div class="white" style="padding:10px">
+            <div class="sv-kader" style="padding:10px">
                 <p>Als je een keer niet kan, dan kan jouw vereniging een invaller sturen.<br>Er is afgesproken dat de invaller geen hoger aanvangsgemiddelde mag hebben dan de uitvaller.</p>
                 <p>Dit geldt tijdens de regiocompetitie, maar ook op het RK en BK.</p>
             </div>
@@ -227,7 +227,7 @@
 
     <!-- sfeerfoto -->
     <div class="center" style="margin-top:50px; margin-bottom:30px">
-        <img src="{% static 'plein/team_sfeer_5.jpg' %}" style="width:70%; height:auto" loading="lazy" alt="sfeerfoto"><br>
+        <img src="{% static 'competitie/team_sfeer_5.jpg' %}" style="width:70%; height:auto" loading="lazy" alt="sfeerfoto"><br>
         <code style="font-size:12px">Sfeerfoto van een teamwedstrijd</code>
         <p>
             <a class="btn-sv-rood" href="https://handboogsport.smugmug.com/Indoor/" target="_blank" rel="noopener noreferrer">
@@ -246,7 +246,7 @@
     <!-- blauw balk met wit informatie veld -->
     <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
-            <div class="white" style="padding:10px">
+            <div class="sv-kader" style="padding:10px">
                 <p>Elk van de 4 rayons organiseert een eigen RK voor de teams van de verenigingen (van de 4 regio's) in het rayon.</p>
                 <p>De vereniging schrijft de teams in voor het RK.<br>Per team worden 3 tot 4 sporters van de eigen vereniging opgesteld.<br>Deze sporters moeten 6 of meer scores hebben in de regiocompetitie.</p>
                 <p>De RK teams hebben een aparte inschrijving, onafhankelijk van de regiocompetitie.</p>
@@ -264,7 +264,7 @@
     <!-- blauw balk met wit informatie veld -->
     <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
-            <div class="white" style="padding:10px">
+            <div class="sv-kader" style="padding:10px">
                 <p>Per sporter wordt het gemiddelde uit de individuele regiocompetitie gebruikt als sterkte.</p>
                 <p>De sterkte van elk team wordt bepaald door de 3 sterkste sporters van het team.</p>
                 <p>Nadat de open inschrijving voor het RK is gesloten worden alle teams op sterkte verdeeld over de wedstrijdklassen.<br>Per klasse worden maximaal de 12 sterkste teams uitgenodigd.</p>
@@ -283,7 +283,7 @@
     <!-- blauw balk met wit informatie veld -->
     <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
-            <div class="white" style="padding:10px">
+            <div class="sv-kader" style="padding:10px">
                 <p>Bij aankomst en aanmelden worden eventuele invallers gecontroleerd op aanvangsgemiddelde.</p>
                 <p>Het RK teams begint met 60 (Indoor) of 50 (25m1pijl) pijlen per sporter.<br>De team score is de som van de 3 hoogste totaalscores (van de 3 of 4 sporters).</p>
                 <p>De eindstand van de kwalificaties is het eindresultaat van het RK teams 25m1pijl.<br>Bij de Indoor bepaalt dit welke 4 of 8 teams doorgaan naar de finale.</p>
@@ -304,11 +304,11 @@
     <!-- blauw balk met wit informatie veld -->
     <div class="row-sv-blauw">
         <div class="col s12">
-            <div class="white" style="padding:10px">
+            <div class="sv-kader" style="padding:10px">
                 <p>In de ERE wedstrijdklassen beginnen 8 teams in de kwartfinale.<br>Overige wedstrijdklassen beginnen met 4 teams in de half finale.</p>
                 <p>De winnaars van de halve finales gaan naar de gouden finale voor plaats 1 en 2.<br>De overige twee teams uit de halve finales gaan naar de bronzen finale voor plaats 3 en 4.</p>
 
-                <table class="white">
+                <table class="sv-kader">
                     <tr>
                         <td class="center"><b>Kwart finale</b><br>(8 teams)</td>
                         <td class="center"><b>Halve finale</b><br>(4 teams)</td>
@@ -354,7 +354,7 @@
     <!-- blauw balk met wit informatie veld -->
     <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
-            <div class="white" style="padding:10px">
+            <div class="sv-kader" style="padding:10px">
                 <p>Landelijk wordt per wedstrijdklasse een BK teams georganiseerd.</p>
                 <p>De ERE klassen bestaat uit maximaal 12 teams; overige wedstrijdklassen uit maximaal 8 teams.<br>Dezelfde 3 of 4 sporters als aangemeld voor het RK teams worden verwacht op het BK teams.</p>
                 <p>De teams worden uitgenodigd aan de hand van de eindstand van het RK teams, samengevoegd en landelijk vergeleken.</p>
@@ -366,7 +366,7 @@
 
     <!-- sfeerfoto -->
     <div class="center" style="margin-top:50px; margin-bottom:30px">
-        <img src="{% static 'plein/team_sfeer_2.jpg' %}" style="width:70%; height:auto" loading="lazy" alt="sfeerfoto"><br>
+        <img src="{% static 'competitie/team_sfeer_2.jpg' %}" style="width:70%; height:auto" loading="lazy" alt="sfeerfoto"><br>
         <code style="font-size:12px">Sfeerfoto van een teamwedstrijd</code>
         <p>
             <a class="btn-sv-rood" href="https://handboogsport.smugmug.com/Indoor/" target="_blank" rel="noopener noreferrer">

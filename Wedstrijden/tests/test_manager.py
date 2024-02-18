@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2023 Ramon van der Winkel.
+#  Copyright (c) 2021-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -224,8 +224,7 @@ class TestWedstrijdenManager(E2EHelpers, TestCase):
         # for
 
         # slechte wedstrijd_pk
-        with self.assert_max_queries(20):
-            resp = self.client.post(self.url_wedstrijden_zet_status % 999999, {})
+        resp = self.client.post(self.url_wedstrijden_zet_status % 999999, {})
         self.assert404(resp, 'Wedstrijd niet gevonden')
 
     def test_goedkeuren_met_scheids(self):

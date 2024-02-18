@@ -28,7 +28,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
 
     """ tests voor de Vereniging applicatie, functies voor de HWL """
 
-    test_after = ('BasisTypen', 'NhbStructuur', 'Functie', 'Sporter', 'Competitie')
+    test_after = ('BasisTypen', 'ImportCRM', 'Functie', 'Sporter', 'Competitie')
 
     url_overzicht = '/vereniging/'
     url_ledenlijst = '/vereniging/leden-lijst/'

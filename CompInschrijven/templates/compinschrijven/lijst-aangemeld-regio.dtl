@@ -29,9 +29,9 @@
     <!-- blauw balk met wit informatie veld -->
     <div class="row-sv-blauw">
         <div class="col s12">
-            <div class="white" style="padding:10px">
+            <div class="sv-kader" style="padding:10px">
 
-                <div class="white shrink-wrap-5">
+                <div class="sv-kader shrink-wrap-5">
 
                     {% if zoom_alles_url %}
                         <a class="margin-5 btn-sv-rood btn-small" href="{{ zoom_alles_url }}">Alles</a>
@@ -114,13 +114,13 @@
 
     {% if object_list.count %}
 
-        <table class="white">
+        <table class="sv-kader">
 
             {% for obj in object_list %}
 
                 {% if obj.nieuwe_klasse %}
                     {% if not forloop.first %}
-                        <tr>
+                        <tr class="sv-table-onderrand">
                             <td colspan="4" class="sv-table-onderrand"></td>
                         </tr>
                     {% endif %}
@@ -149,7 +149,7 @@
 
             {% endfor %}
 
-            <tr>
+            <tr class="sv-table-onderrand">
                 <td colspan="4" class="sv-table-onderrand"></td>
             </tr>
         </table>

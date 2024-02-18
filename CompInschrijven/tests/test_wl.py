@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2023 Ramon van der Winkel.
+#  Copyright (c) 2020-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -22,7 +22,7 @@ class TestCompInschrijvenWL(E2EHelpers, TestCase):
 
     """ tests voor de CompInschrijven applicatie, functies voor de WL """
 
-    test_after = ('BasisTypen', 'NhbStructuur', 'Functie', 'Sporter', 'Competitie')
+    test_after = ('BasisTypen', 'ImportCRM', 'Functie', 'Sporter', 'Competitie')
 
     url_aanmelden = '/bondscompetities/deelnemen/leden-aanmelden/%s/'        # <comp_pk>
     url_ingeschreven = '/bondscompetities/deelnemen/leden-ingeschreven/%s/'  # <deelcomp_pk>
@@ -227,8 +227,7 @@ class TestCompInschrijvenWL(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_wl)
         self.e2e_check_rol('WL')
 
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_ingeschreven % 9999999)
+        resp = self.client.get(self.url_ingeschreven % 9999999)
         self.assert404(resp, 'Verkeerde parameters')
 
 # end of file

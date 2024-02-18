@@ -88,7 +88,7 @@ class TestAccountCli(E2EHelpers, TestCase):
 
         f1 = io.StringIO()
         with self.assert_max_queries(20):
-            management.call_command('maak_account', 'Voornaam', 'nieuwelogin', 'nieuwwachtwoord', 'nieuw.nhb.test', stderr=f1, stdout=f2)
+            management.call_command('maak_account', 'Voornaam', 'nieuwelogin', 'nieuwwachtwoord', 'nieuw.khsn.test', stderr=f1, stdout=f2)
         self.assertEqual(f1.getvalue(), 'Dat is geen valide e-mail\n')
 
     def test_maak_beheerder(self):

@@ -16,7 +16,7 @@ class TestCompLaagRegioMedailles(E2EHelpers, TestCase):
 
     """ tests voor de CompLaagRegio applicatie, functies voor Medailles """
 
-    test_after = ('BasisTypen', 'NhbStructuur', 'Functie', 'Sporter', 'Competitie')
+    test_after = ('BasisTypen', 'ImportCRM', 'Functie', 'Sporter', 'Competitie')
 
     url_medailles = '/bondscompetities/regio/medailles/regio-%s/'      # regio nr
 

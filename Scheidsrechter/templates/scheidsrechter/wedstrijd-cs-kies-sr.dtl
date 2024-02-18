@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2021-2023 Ramon van der Winkel.
+                Copyright (c) 2023-2024 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -36,16 +36,18 @@
         }
     </script>
 
-    <div class="row-sv-blauw">
-        <div class="col s12">
+    {% if url_wijzigen %}
 
-            <!-- dialoog venster -->
-            <div class="white left-align z-depth-3" style="margin-top:30px">
-                <div class="form-padding">
-                    <form action="{{ url_wijzigen }}" method="post" onsubmit="document.getElementById('submit_knop1').disabled=true; return true;">
-                        {% csrf_token %}
+        <div class="row-sv-blauw">
+            <div class="col s12">
 
-                        <table>
+                <!-- dialoog venster -->
+                <div class="sv-kader left-align z-depth-3" style="margin-top:30px">
+                    <div class="form-padding">
+                        <form action="{{ url_wijzigen }}" method="post" onsubmit="document.getElementById('submit_knop1').disabled=true; return true;">
+                            {% csrf_token %}
+
+                            <table>
                                 <tr>
                                     <th>Aantal scheidsrechters nodig</th>
                                     <td>
@@ -122,43 +124,45 @@
                                     {% endif %}
 
                                 {% endfor %}
-                        </table>
+                            </table>
 
-                        <div class="center" style="margin-top:30px">
-                            <button class="btn-sv-rood" id="submit_knop1" type="submit" disabled>
-                                <i class="notranslate material-icons-round left">check</i>Wijzigen opslaan</button>
-                        </div>
-                    </form>
+                            <div class="center" style="margin-top:30px">
+                                <button class="btn-sv-rood" id="submit_knop1" type="submit" disabled>
+                                    <i class="notranslate material-icons-round left">check</i>Wijzigen opslaan</button>
+                            </div>
+                        </form>
 
-                    {% if url_opvragen %}
+                        {% if url_opvragen %}
 
-                        <div class="center" style="margin-top:30px">
-                            <form action="{{ url_opvragen }}" method="post" onsubmit="document.getElementById('submit_knop2').disabled=true; return true;">
-                                {% csrf_token %}
-                                <input type="hidden" name="wedstrijd" value="{{ wed.pk }}">
-                                <button class="btn-sv-rood" id="submit_knop2" type="submit">Beschikbaarheid opvragen</button>
-                            </form>
-                        </div>
+                            <div class="center" style="margin-top:30px">
+                                <form action="{{ url_opvragen }}" method="post" onsubmit="document.getElementById('submit_knop2').disabled=true; return true;">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="wedstrijd" value="{{ wed.pk }}">
+                                    <button class="btn-sv-rood" id="submit_knop2" type="submit">Beschikbaarheid opvragen</button>
+                                </form>
+                            </div>
 
-                    {% elif url_notify %}
+                        {% elif url_notify %}
 
-                        <div style="margin-top:30px">
-                            <p>{% if notify_last %}Vorige notificatie: {{ notify_last }}{% else %}<i>Er is nog geen notificatie verstuurd</i>{% endif %}</p>
+                            <div style="margin-top:30px">
+                                <p>{% if notify_last %}Vorige notificatie: {{ notify_last }}{% else %}<i>Er is nog geen notificatie verstuurd</i>{% endif %}</p>
 
-                            <form action="{{ url_notify }}" method="post" onsubmit="document.getElementById('submit_knop3').disabled=true; return true;">
-                                {% csrf_token %}
-                                <input type="hidden" name="wedstrijd" value="{{ wed.pk }}">
-                                <input type="hidden" name="notify" value="J">
-                                <button class="btn-sv-blauw nav_weg_knop" id="submit_knop3" type="submit">Stuur notificatie e-mails</button>
-                            </form>
-                        </div>
+                                <form action="{{ url_notify }}" method="post" onsubmit="document.getElementById('submit_knop3').disabled=true; return true;">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="wedstrijd" value="{{ wed.pk }}">
+                                    <input type="hidden" name="notify" value="J">
+                                    <button class="btn-sv-blauw nav_weg_knop" id="submit_knop3" type="submit">Stuur notificatie e-mails</button>
+                                </form>
+                            </div>
 
-                    {% endif %}
+                        {% endif %}
+                    </div>
                 </div>
-            </div>
 
+            </div>
         </div>
-    </div>
+
+    {% endif %}     <!-- url_wijzigen -->
 
     <!-- witruimte -->
     <div class="row center">
@@ -170,7 +174,7 @@
     <!-- blauwe balk met informatie tabel -->
     <div class="row-sv-blauw">
         <div class="col s12 l10 offset-l1 xl8 offset-xl2">
-            <table class="white">
+            <table class="sv-kader">
 
                 <tr>
                     <td colspan="2" class="center sv-blauw-text">
@@ -284,11 +288,6 @@
                     <th>Eigen scheids<wbr>rechters (namen)</th>
                     <td>{{ wed.scheidsrechters|linebreaksbr }}</td>
                 </tr>
-
-                <tr>
-                    <th>Behoefte scheidsrechters</th>
-                    <td>{{ wed.behoefte_str }}</td>
-                </tr>
             </table>
         </div>
 
@@ -323,13 +322,12 @@
                         </li>
                     {% endfor %}
                 </ul>
-
             </div>
         {% endif %}
 
     </div>
 
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="scheidsrechter-wedstrijd-details" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="scheidsrechter-wedstrijd-cs-kies-sr" %}
 
 {% endblock %}

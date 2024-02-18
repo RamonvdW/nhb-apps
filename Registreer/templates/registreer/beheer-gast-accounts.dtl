@@ -24,7 +24,7 @@
     <div class="row-sv-blauw">
         <div class="col s12">
 
-            <table class="white" id="table2">
+            <table class="sv-kader" id="table2">
                 <thead>
                     <tr>        <!-- filter veld -->
                         <td colspan="2" class="table-filter">
@@ -79,7 +79,7 @@
         <div class="row-sv-blauw">
             <div class="col s12">
 
-                <table class="white" id="table3">
+                <table class="sv-kader" id="table3">
                     <thead>
                         <tr>        <!-- filter veld -->
                             <td colspan="2" class="table-filter">

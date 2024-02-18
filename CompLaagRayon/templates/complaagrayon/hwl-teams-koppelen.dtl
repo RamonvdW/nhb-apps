@@ -41,13 +41,13 @@
         <div class="col s12">
 
             <!-- dialoog venster -->
-            <div class="white left-align z-depth-3">
+            <div class="sv-kader left-align z-depth-3">
                 <div class="form-padding">
 
                     <form action="{{ url_opslaan }}" method="post" onsubmit="document.getElementById('submit_knop1').disabled=true; return true;">
                         {% csrf_token %}
 
-                        <table class="white">
+                        <table class="sv-kader">
 
                             <tr>
                                 <td>Vereniging</td>
@@ -156,7 +156,7 @@
     <!-- blauw balk met wit informatie veld -->
     <div class="row-sv-blauw">
         <div class="col s12">
-            <div class="white" style="padding:10px">
+            <div class="sv-kader" style="padding:10px">
                 {% if alleen_bekijken %}
                     <p>Er kunnen geen wijzigingen meer gedaan worden. {% if rk_team.team_klasse %}Dit team is geplaatst voor het RK teams!<br>Invallers kunnen doorgegevens worden op de wedstrijddag.{% else %}Teamleden die niet gerechtigd waren om deel te nemen aan de Rayonkampioenschappen zijn verwijderd.</p><p class="sv-rood-text">Dit team is niet compleet en daarom niet geplaatst.{% endif %}</p>
                 {% else %}

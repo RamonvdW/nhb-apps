@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2023 Ramon van der Winkel.
+                Copyright (c) 2023-2024 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -21,7 +21,7 @@
     <!-- blauwe balk met informatie in een tabel -->
     <div class="row-sv-blauw">
         <div class="col s12">
-            <table class="white">
+            <table class="sv-kader">
                 <thead>
                     <tr>
                         <th>Wanneer</th>
@@ -35,14 +35,18 @@
                     <tr>
                         <td>{{ obj.datum_begin }}{% if obj.datum_begin != obj.datum_einde %} - {{ obj.datum_einde }}{% endif %}</td>
                         <td>{{ obj.locatie.plaats }}</td>
-                        <td class="hide-on-small-only center">{{ obj.aantal_scheids }}{% if obj.aantal_dagen %} ({{ obj.aantal_dagen }}x){% endif %}</td>
+                        <td class="hide-on-small-only center">{{ obj.aantal_str }}</td>
                         <td>{{ obj.titel }}</td>
                         <td>
-                            {% if obj.nog_opvragen %}
-                                <a class="btn-sv-blauw" href="{{ obj.url_details }}">
-                                    <i class="material-icons-round left notranslate">priority_high</i>Nieuw</a>
+                            {% if obj.mag_wijzigen %}
+                                {% if obj.nog_opvragen %}
+                                    <a class="btn-sv-blauw" href="{{ obj.url_details }}">
+                                        <i class="material-icons-round left notranslate">priority_high</i>Nieuw</a>
+                                {% else %}
+                                    <a class="btn-sv-rood" href="{{ obj.url_details }}">Wijzig</a>
+                                {% endif %}
                             {% else %}
-                                <a class="btn-sv-rood" href="{{ obj.url_details }}">{% if is_cs %}Wijzig{% else %}Details{% endif %}</a>
+                                <a class="btn-sv-blauw" href="{{ obj.url_details }}">Details</a>
                             {% endif %}
                         </td>
                     </tr>

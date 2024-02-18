@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2022-2023 Ramon van der Winkel.
+                Copyright (c) 2022-2024 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -23,7 +23,7 @@
         <div class="col s12 m8 offset-m2 l6 offset-l3 xl4 offset-xl4">
 
             <!-- dialoog venster -->
-            <div class="white left-align z-depth-3">
+            <div class="sv-kader left-align z-depth-3">
                 <div class="form-padding">
                     <form action="{{ url_opslaan }}" method="post" onsubmit="document.getElementById('submit_knop1').disabled=true; {% if was_foutvrij %}document.getElementById('submit_knop2').disabled=true; {% endif %}return true;">
                         {% csrf_token %}
@@ -54,6 +54,17 @@
                             </tr>
 
                         </table>
+
+                        {% if fout_bedrag and bedrag != '' %}
+                            <div class="center">
+                                <label>
+                                    <input type="checkbox" class="filled-in" name="accept_bedrag"{% if akkoord_afwijking %} checked{% endif %}>
+                                    <span class="black-text">Afwijkend bedrag accepteren</span>
+                                </label>
+                            </div>
+                        {% elif akkoord_afwijking %}
+                            <input type="hidden" name="accept_bedrag" value="ja">
+                        {% endif %}
 
                         <!-- controleer knop -->
                         <div class="center" style="margin-top:30px">
@@ -104,7 +115,7 @@
     <!-- blauwe balk met informatie in een tabel -->
     <div class="row-sv-blauw">
         <div class="col s12">
-            <table class="white">
+            <table class="sv-kader">
                 <thead>
                     <tr>
                         <th>Datum</th>

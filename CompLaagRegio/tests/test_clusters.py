@@ -15,7 +15,7 @@ class TestCompLaagRegioClusters(E2EHelpers, TestCase):
 
     """ Tests voor de CompLaagRegio applicatie, Wijzig Clusters functies """
 
-    test_after = ('BasisTypen', 'NhbStructuur', 'Functie', 'Sporter', 'Competitie')
+    test_after = ('BasisTypen', 'ImportCRM', 'Functie', 'Sporter', 'Competitie')
 
     url_clusters = '/bondscompetities/regio/clusters/'
 

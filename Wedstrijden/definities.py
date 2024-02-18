@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2023 Ramon van der Winkel.
+#  Copyright (c) 2020-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -181,6 +181,7 @@ WEDSTRIJD_KORTING_SOORT_TO_STR = {
 
 # speciale waarde voor Wedstrijd.aantal_scheids
 AANTAL_SCHEIDS_GEEN_KEUZE = -1
+AANTAL_SCHEIDS_EIGEN = 99
 
 KWALIFICATIE_CHECK_AFGEKEURD = 'A'
 KWALIFICATIE_CHECK_NOG_DOEN = 'N'

@@ -1,0 +1,88 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2024 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Wedstrijden{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Bondscompetitie</h3>
+            <p>RK en BK wedstrijden waar een scheidsrechter nodig is</p>
+        </div>
+    </div>
+
+    {% if url_opvragen %}
+
+        <!-- blauw balk met wit informatie veld -->
+        <div class="row-sv-blauw">
+            <div class="col s12 m12 l10 offset-l1 xl8 offset-xl2">
+                <div class="sv-kader" style="padding:10px">
+                    <p>Er zijn nieuwe datums voor de RK/BK wedstrijden waarvoor beschikbaarheid opgevraagd kan worden.</p>
+
+                    <form action="{{ url_opvragen }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
+                        {% csrf_token %}
+
+                        <!-- button -->
+                        <p class="center">
+                            <button class="btn-sv-rood" id="submit_knop" type="submit">Beschikbaarheid opvragen</button>
+                        </p>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    {% endif %}
+
+    <!-- blauwe balk met informatie in een tabel -->
+    <div class="row-sv-blauw">
+        <div class="col s12">
+            <table class="sv-kader">
+                <thead>
+                    <tr>
+                        <th>Wanneer</th>
+                        <th>Plaats</th>
+                        <th class="hide-on-small-only center">Scheidsrechters</th>
+                        <th>Titel</th>
+                        <th><!-- knoppen --></th>
+                    </tr>
+                </thead>
+                {% for obj in matches %}
+                    <tr>
+                        <td>{{ obj.datum_wanneer }}</td>
+                        <td>{% if obj.locatie %}{{ obj.locatie.plaats }}{% else %}<i>Onbekend</i>{% endif %}</td>
+                        <td class="hide-on-small-only center">{{ obj.aantal_str }}</td>
+                        <td>{{ obj.beschrijving }}</td>
+                        <td>
+                            {% if obj.nog_opvragen %}
+                                <a class="btn-sv-blauw" href="{{ obj.url_details }}">
+                                    <i class="material-icons-round left notranslate">priority_high</i>Nieuw</a>
+                            {% else %}
+                                {% if obj.mag_wijzigen %}
+                                    <a class="btn-sv-rood" href="{{ obj.url_details }}">Wijzig</a>
+                                {% else %}
+                                    <a class="btn-sv-blauw" href="{{ obj.url_details }}">Details</a>
+                                {% endif %}
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="5">
+                            <i>Geen toekomstige wedstrijden met scheidsrechter behoefte</i>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="scheidsrechter-matches" %}
+
+{% endblock %}
