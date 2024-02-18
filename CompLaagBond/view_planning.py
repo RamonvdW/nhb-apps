@@ -21,6 +21,7 @@ from Functie.rol import rol_get_huidige_functie
 from Locatie.models import Locatie
 from Logboek.models import schrijf_in_logboek
 from Overig.background_sync import BackgroundSync
+from Scheidsrechter.mutaties import scheids_mutatieverzoek_bepaal_reistijd_naar_alle_wedstrijdlocaties
 from Vereniging.models import Vereniging
 from types import SimpleNamespace
 import datetime
@@ -603,6 +604,11 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
                     if keep:
                         loc = ver_loc
                 # for
+
+            if match.locatie != loc:
+                # laat de reisafstand alvast bijwerken
+                snel = str(request.POST.get('snel', ''))[:1]  # voor autotest
+                scheids_mutatieverzoek_bepaal_reistijd_naar_alle_wedstrijdlocaties('Planning BK', snel == '1')
 
             match.locatie = loc
 

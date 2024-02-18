@@ -9,7 +9,8 @@ from django.utils import timezone
 from Scheidsrechter.definities import (SCHEIDS_MUTATIE_WEDSTRIJD_BESCHIKBAARHEID_OPVRAGEN,
                                        SCHEIDS_MUTATIE_STUUR_NOTIFICATIES_WEDSTRIJD,
                                        SCHEIDS_MUTATIE_STUUR_NOTIFICATIES_MATCH,
-                                       SCHEIDS_MUTATIE_COMPETITIE_BESCHIKBAARHEID_OPVRAGEN)
+                                       SCHEIDS_MUTATIE_COMPETITIE_BESCHIKBAARHEID_OPVRAGEN,
+                                       SCHEIDS_MUTATIE_REISTIJD_SR_BEPALEN)
 from Scheidsrechter.models import ScheidsMutatie
 from Overig.background_sync import BackgroundSync
 import datetime
@@ -22,7 +23,7 @@ import time
 scheids_mutaties_ping = BackgroundSync(settings.BACKGROUND_SYNC__SCHEIDS_MUTATIES)
 
 
-def _scheids_ping_achtergrondtaak(mutatie, snel):
+def _scheids_ping_achtergrondtaak(mutatie, snel: bool):
 
     # ping het achtergrond process
     scheids_mutaties_ping.ping()
@@ -39,7 +40,7 @@ def _scheids_ping_achtergrondtaak(mutatie, snel):
         # while
 
 
-def scheids_mutatieverzoek_beschikbaarheid_opvragen(wedstrijd, door_str, snel):
+def scheids_mutatieverzoek_beschikbaarheid_opvragen(wedstrijd, door_str, snel: bool):
     """
         Beschikbaarheid van SR opvragen voor specifieke wedstrijd.
 
@@ -69,7 +70,7 @@ def scheids_mutatieverzoek_beschikbaarheid_opvragen(wedstrijd, door_str, snel):
     return mutatie
 
 
-def scheids_mutatieverzoek_stuur_notificaties_wedstrijd(wedstrijd, door_str, snel):
+def scheids_mutatieverzoek_stuur_notificaties_wedstrijd(wedstrijd, door_str, snel: bool):
     """
         Eerste keer of wijziging in de gekozen scheidsrechters voor een wedstrijd.
         Achtergrondtaak stuurt een mail naar de wedstrijdleiding en de betroffen scheidsrechters.
@@ -98,7 +99,7 @@ def scheids_mutatieverzoek_stuur_notificaties_wedstrijd(wedstrijd, door_str, sne
     return mutatie
 
 
-def scheids_mutatieverzoek_stuur_notificaties_match(match, door_str, snel):
+def scheids_mutatieverzoek_stuur_notificaties_match(match, door_str, snel: bool):
     """
         Eerste keer of wijziging in de gekozen scheidsrechters voor een bondscompetitie wedstrijd.
         Achtergrondtaak stuurt een mail naar de wedstrijdleiding en de betroffen scheidsrechters.
@@ -127,7 +128,7 @@ def scheids_mutatieverzoek_stuur_notificaties_match(match, door_str, snel):
     return mutatie
 
 
-def scheids_mutatieverzoek_competitie_beschikbaarheid_opvragen(door_str, snel):
+def scheids_mutatieverzoek_competitie_beschikbaarheid_opvragen(door_str, snel: bool):
     """
         Beschikbaarheid van SR opvragen voor specifieke wedstrijd.
 
@@ -142,6 +143,30 @@ def scheids_mutatieverzoek_competitie_beschikbaarheid_opvragen(door_str, snel):
         mutatie, is_created = ScheidsMutatie.objects.get_or_create(
                                         when__gt=recent,
                                         mutatie=SCHEIDS_MUTATIE_COMPETITIE_BESCHIKBAARHEID_OPVRAGEN,
+                                        door=door_str)
+    except ScheidsMutatie.MultipleObjectsReturned:              # pragma: no cover
+        # al meerdere verzoeken in de queue
+        mutatie = None
+    else:
+        mutatie.save()
+
+        if is_created:                                          # pragma: no branch
+            # wacht kort op de achtergrondtaak
+            _scheids_ping_achtergrondtaak(mutatie, snel)
+
+    return mutatie
+
+
+def scheids_mutatieverzoek_bepaal_reistijd_naar_alle_wedstrijdlocaties(door_str, snel: bool):
+
+    recent = timezone.now() - datetime.timedelta(seconds=15)
+
+    # zet dit verzoek door naar het mutaties process
+    # voorkom duplicates (niet 100%)
+    try:
+        mutatie, is_created = ScheidsMutatie.objects.get_or_create(
+                                        when__gt=recent,
+                                        mutatie=SCHEIDS_MUTATIE_REISTIJD_SR_BEPALEN,
                                         door=door_str)
     except ScheidsMutatie.MultipleObjectsReturned:              # pragma: no cover
         # al meerdere verzoeken in de queue

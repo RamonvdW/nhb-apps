@@ -16,6 +16,7 @@ from Functie.definities import Rollen
 from Functie.models import Functie
 from Functie.rol import rol_get_huidige, rol_get_huidige_functie
 from Functie.scheids import gebruiker_is_scheids
+from Locatie.models import Reistijd
 from Scheidsrechter.definities import SCHEIDS2LEVEL, BESCHIKBAAR_DENK, BESCHIKBAAR_NEE, BESCHIKBAAR_JA
 from Scheidsrechter.models import MatchScheidsrechters, ScheidsBeschikbaarheid
 from Scheidsrechter.mutaties import scheids_mutatieverzoek_stuur_notificaties_match
@@ -307,6 +308,7 @@ class MatchDetailsCSView(UserPassesTestMixin, TemplateView):
                          .filter(titel=titel,
                                  toon_op_kalender=False, verstop_voor_mwz=True,
                                  datum_begin__gt=dit_jaar)
+                         .select_related('locatie')
                          .first())
 
             if wedstrijd:
@@ -316,6 +318,13 @@ class MatchDetailsCSView(UserPassesTestMixin, TemplateView):
         # for
 
         return None
+
+    def _get_alle_sr_reistijd(self, locatie):
+        reistijd_min = dict()  # [(adres_lat, adres_lon)] = reistijd in minuten
+        for reistijd in Reistijd.objects.filter(naar_lat=locatie.adres_lat, naar_lon=locatie.adres_lon):
+            reistijd_min[(reistijd.vanaf_lat, reistijd.vanaf_lon)] = reistijd.reistijd_min
+        # for
+        return reistijd_min
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -375,6 +384,9 @@ class MatchDetailsCSView(UserPassesTestMixin, TemplateView):
         # zoek de RK/BK wedstrijd erbij
         rk_bk_wedstrijd = self._vind_wedstrijd(match)
 
+        # zoek de reistijden erbij
+        reistijd_min = self._get_alle_sr_reistijd(rk_bk_wedstrijd.locatie)
+
         context['keuze_aantal_scheids'] = [
             # (0, 'Geen scheidsrechters'),
             (1, '1 scheidsrechter'),
@@ -428,7 +440,9 @@ class MatchDetailsCSView(UserPassesTestMixin, TemplateView):
                                         datum=match.datum_wanneer,
                                         opgaaf=BESCHIKBAAR_JA)
                                 .select_related('scheids')
-                                .order_by('scheids__voornaam', 'scheids__achternaam', 'scheids__lid_nr')):
+                                .order_by('scheids__voornaam',
+                                          'scheids__achternaam',
+                                          'scheids__lid_nr')):
 
                 beschikbaar.id_li = 'id_hsr_%s' % beschikbaar.pk
                 # beschikbaar.is_onzeker = (beschikbaar.opgaaf == BESCHIKBAAR_DENK)
@@ -441,6 +455,14 @@ class MatchDetailsCSView(UserPassesTestMixin, TemplateView):
                 if beschikbaar.scheids.lid_nr in bezette_srs:
                     beschikbaar.is_onzeker = True
                     beschikbaar.level_naam_str += ' [bezet]'
+                else:
+                    # voeg reistijd toe
+                    scheids = beschikbaar.scheids
+                    try:
+                        mins = reistijd_min[(scheids.adres_lat, scheids.adres_lon)]
+                    except KeyError:
+                        mins = '??'
+                    beschikbaar.level_naam_str += ' (reistijd %s min)' % mins
 
                 beschikbaar_hsr.append(beschikbaar)
             # for

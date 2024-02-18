@@ -25,7 +25,8 @@ from Overig.background_sync import BackgroundSync
 from Scheidsrechter.definities import (SCHEIDS_MUTATIE_WEDSTRIJD_BESCHIKBAARHEID_OPVRAGEN,
                                        SCHEIDS_MUTATIE_STUUR_NOTIFICATIES_WEDSTRIJD,
                                        SCHEIDS_MUTATIE_STUUR_NOTIFICATIES_MATCH,
-                                       SCHEIDS_MUTATIE_COMPETITIE_BESCHIKBAARHEID_OPVRAGEN)
+                                       SCHEIDS_MUTATIE_COMPETITIE_BESCHIKBAARHEID_OPVRAGEN,
+                                       SCHEIDS_MUTATIE_REISTIJD_SR_BEPALEN)
 from Scheidsrechter.models import WedstrijdDagScheidsrechters, MatchScheidsrechters, ScheidsMutatie
 from Sporter.models import Sporter
 from Taken.operations import maak_taak
@@ -694,6 +695,44 @@ class Command(BaseCommand):
         if notify_hwl:
             self._maak_taak_hwl_voor_match(match)
 
+    def _verwerk_mutatie_reistijd_scheidsrechters_bepalen(self):
+        # bepaal de reisafstand voor alle scheidsrechters naar alle wedstrijdlocaties die in gebruik zijn,
+        # inclusief bondscompetitie RK/BK (voor zover nog niet bekend)
+
+        self.stdout.write('[INFO] Reistijd scheidsrechters opvragen naar locatie wedstrijden / Indoor RK/BK')
+
+        date_now = timezone.now().date()
+
+        # reistijd opvragen naar locaties van toekomstige wedstrijden
+        for wedstrijd in (Wedstrijd
+                          .objects
+                          .filter(datum_einde__gte=date_now,
+                                  aantal_scheids__gte=1)
+                          .exclude(locatie=None)
+                          .select_related('locatie')):
+
+            locatie = wedstrijd.locatie
+
+            for scheids in Sporter.objects.exclude(scheids=SCHEIDS_NIET):
+                self._reistijd_opvragen(locatie, scheids)
+            # for
+        # for
+
+        # reistijd opvragen naar locaties van toekomstige bondscompetities Indoor RK/BK matches
+        for match in (CompetitieMatch
+                      .objects
+                      .filter(competitie__afstand=18,
+                              aantal_scheids__gte=1)
+                      .exclude(locatie=None)
+                      .select_related('locatie')):
+
+            locatie = match.locatie
+
+            for scheids in Sporter.objects.exclude(scheids=SCHEIDS_NIET):
+                self._reistijd_opvragen(locatie, scheids)
+            # for
+        # for
+
     def _verwerk_mutatie(self, mutatie):
         code = mutatie.mutatie
 
@@ -712,6 +751,10 @@ class Command(BaseCommand):
         elif code == SCHEIDS_MUTATIE_STUUR_NOTIFICATIES_MATCH:
             self.stdout.write('[INFO] Verwerk mutatie %s: Notificaties sturen voor competitie match' % mutatie.pk)
             self._verwerk_mutatie_stuur_notificaties_competitie(mutatie)
+
+        elif code == SCHEIDS_MUTATIE_REISTIJD_SR_BEPALEN:
+            self.stdout.write('[INFO] Verwerk mutatie %s: Reistijd bepalen voor scheidsrechters' % mutatie.pk)
+            self._verwerk_mutatie_reistijd_scheidsrechters_bepalen()
 
         else:
             self.stdout.write('[ERROR] Onbekende mutatie code %s (pk=%s)' % (code, mutatie.pk))
