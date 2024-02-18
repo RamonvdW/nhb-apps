@@ -115,7 +115,8 @@ class PleinView(View):
 
                 account = get_account(request)
                 if not account.is_gast:
-                    context['url_voordeel'] = reverse('Ledenvoordeel:overzicht')
+                    # context['url_voordeel'] = reverse('Ledenvoordeel:overzicht')
+                    pass
 
             elif rol_nu == Rollen.ROL_NONE or rol_nu is None:
                 # gebruik de bezoeker pagina
