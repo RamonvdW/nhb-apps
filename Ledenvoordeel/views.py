@@ -72,7 +72,8 @@ class VoordeelWalibiView(UserPassesTestMixin, TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        context['url_walibi'] = settings.WALIBI_URL
+        context['url_walibi_algemeen'] = settings.WALIBI_URL_ALGEMEEN
+        context['url_walibi_korting'] = settings.WALIBI_URL_KORTING
 
         context['kruimels'] = (
             (reverse('Ledenvoordeel:overzicht'), 'Ledenvoordeel'),

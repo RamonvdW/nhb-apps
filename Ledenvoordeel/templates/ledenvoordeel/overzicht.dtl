@@ -22,8 +22,9 @@
     <div class="row-sv-blauw">
         <div class="col s12">
             <!-- walibi -->
+            {% static 'ledenvoordeel/logo_walibi_374x374.png' as img_src %}
             {% url 'Ledenvoordeel:walibi' as card_url %}
-            {% include 'plein/card_icon.dtl' with title="Walibi" text="Bla bla bla." icon="attractions" url=card_url %}
+            {% include 'plein/card_logo.dtl' with title="Walibi Holland" text="Met korting naar Walibi Holland." img_src=img_src img_height=75 img_width=75 url=card_url %}
         </div>
     </div>
 
