@@ -709,6 +709,7 @@ class Command(BaseCommand):
                           .filter(datum_einde__gte=date_now,
                                   aantal_scheids__gte=1)
                           .exclude(locatie=None)
+                          .exclude(locatie__plaats='(diverse)')     # niet specifiek genoeg
                           .select_related('locatie')):
 
             locatie = wedstrijd.locatie

@@ -386,7 +386,9 @@ class MatchDetailsCSView(UserPassesTestMixin, TemplateView):
 
         if rk_bk_wedstrijd:
             # zoek de reistijden erbij
-            reistijd_min = self._get_alle_sr_reistijd(rk_bk_wedstrijd.locatie)
+            reistijd_min = self._get_alle_sr_reistijd(match.locatie)
+        else:
+            reistijd_min = dict()
 
         context['keuze_aantal_scheids'] = [
             # (0, 'Geen scheidsrechters'),
