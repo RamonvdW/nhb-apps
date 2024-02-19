@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2023 Ramon van der Winkel.
+#  Copyright (c) 2019-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
 from Account.models import Account
 from Geo.models import Regio
+from Mailer.models import MailQueue
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
@@ -19,9 +20,12 @@ class TestSporterLogin(E2EHelpers, TestCase):
 
     test_after = ('Account',)
 
+    url_plein = '/plein/'
+    url_ww_vergeten = '/account/wachtwoord-vergeten/'
+
     def setUp(self):
         """ initialisatie van de test case """
-        self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.com', 'Normaal')
+        self.account_normaal = self.e2e_create_account('100001', 'normaal@test.com', 'Normaal')
 
         # maak een test vereniging
         ver = Vereniging(
@@ -47,7 +51,7 @@ class TestSporterLogin(E2EHelpers, TestCase):
     def test_normaal(self):
         self.e2e_login(self.account_normaal)
         with self.assert_max_queries(20):
-            resp = self.client.get('/plein/')
+            resp = self.client.get(self.url_plein)
         self.assert_template_used(resp, ('plein/plein-sporter.dtl',))
 
     def test_inactief_normaal(self):
@@ -82,7 +86,7 @@ class TestSporterLogin(E2EHelpers, TestCase):
 
         self.e2e_login(self.account_normaal)
         with self.assert_max_queries(20):
-            resp = self.client.get('/plein/')
+            resp = self.client.get(self.url_plein)
         self.assert_template_used(resp, ('plein/plein-bezoeker.dtl',))
 
     def test_overdracht_naam(self):
@@ -135,5 +139,32 @@ class TestSporterLogin(E2EHelpers, TestCase):
         self.sporter_100001.save(update_fields=['email'])
 
         self.e2e_login(self.account_normaal)    # checkt login success
+
+    def test_ww_vergeten_nieuwe_email(self):
+        # wachtwoord vergeten in combinatie met nieuwe e-mail
+
+        nieuwe_email = 'nieuwe@email.nl'
+
+        account = self.account_normaal
+        account.nieuwe_email = ''
+        account.save(update_fields=['nieuwe_email'])
+        self.assertTrue(account.email_is_bevestigd)
+        self.sporter_100001.email = nieuwe_email
+        self.sporter_100001.save(update_fields=['email'])
+
+        self.assertEqual(0, MailQueue.objects.count())
+
+        resp = self.client.post(self.url_ww_vergeten, {'lid_nr': self.sporter_100001.lid_nr,
+                                                       'email': nieuwe_email.upper()})
+        # self.e2e_dump_resp(resp)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('account/wachtwoord-vergeten-email.dtl', 'plein/site_layout.dtl'))
+
+        self.assertEqual(1, MailQueue.objects.count())
+
+        mail = MailQueue.objects.first()
+        self.assertEqual(mail.mail_to, nieuwe_email)
+
 
 # end of file

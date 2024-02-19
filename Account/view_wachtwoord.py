@@ -14,7 +14,7 @@ from django.urls import reverse
 from Account.models import Account, get_account
 from Account.operations.wachtwoord import account_test_wachtwoord_sterkte
 from Account.operations.otp import otp_zet_control_niet_gelukt
-from Account.view_login import account_plugins_login_gate
+from Account.plugin_manager import account_plugins_login_gate, account_plugins_ww_vergeten
 from Functie.rol import rol_bepaal_beschikbare_rollen
 from Logboek.models import schrijf_in_logboek
 from Mailer.operations import render_email_template, mailer_queue_email, mailer_email_is_valide
@@ -33,21 +33,24 @@ EMAIL_TEMPLATE_WACHTWOORD_VERGETEN = 'email_account/wachtwoord-vergeten.dtl'
 my_logger = logging.getLogger('NHBApps.Account')
 
 
-def account_stuur_email_wachtwoord_vergeten(account, **kwargs):
+def account_stuur_email_wachtwoord_vergeten(account, email=None, **kwargs):
     """ Stuur een mail naar het adres om te vragen om een bevestiging.
         Gebruik een tijdelijke URL die, na het volgen, weer in deze module uit komt.
     """
 
+    if not email:
+        email = account.bevestigde_email
+
     # maak de url aan om het e-mailadres te bevestigen
     context = {
-        'url': maak_tijdelijke_code_wachtwoord_vergeten(account, **kwargs),
+        'url': maak_tijdelijke_code_wachtwoord_vergeten(account, email=email, **kwargs),
         'naam_site': settings.NAAM_SITE,
         'contact_email': settings.EMAIL_BONDSBUREAU,
     }
 
     mail_body = render_email_template(context, EMAIL_TEMPLATE_WACHTWOORD_VERGETEN)
 
-    mailer_queue_email(account.bevestigde_email,
+    mailer_queue_email(email,
                        'Wachtwoord vergeten',
                        mail_body,
                        enforce_whitelist=False)         # deze mails altijd doorlaten
@@ -97,6 +100,11 @@ class WachtwoordVergetenView(TemplateView):
                 context['foutmelding'] = 'Voer het e-mailadres en bondsnummer in van een bestaand account'
                 # (niet te veel wijzer maken over de combi bondsnummer en e-mailadres)
             else:
+                # loop de plugins af om een eventueel nieuw e-mailadres uit de CRM te krijgen
+                for _, func in account_plugins_ww_vergeten:
+                    func(request, from_ip, account)
+                # for
+
                 if account.bevestigde_email.lower() != email and account.nieuwe_email.lower() != email:
                     # geen match
                     context['foutmelding'] = 'Voer het e-mailadres en bondsnummer in van een bestaand account'
