@@ -150,12 +150,13 @@ def receive_wachtwoord_vergeten(request, account):
 
     # FUTURE: als WW vergeten via Account.nieuwe_email ging, dan kunnen we die als bevestigd markeren
 
-    for _, func, _ in account_plugins_login_gate:
-        httpresp = func(request, from_ip, account)
-        if httpresp:
-            # plugin has decided that the user may not login
-            # and has generated/rendered an HttpResponse that we cannot handle here
-            return httpresp
+    for _, func, skip in account_plugins_login_gate:
+        if not skip:
+            httpresp = func(request, from_ip, account)
+            if httpresp:
+                # plugin has decided that the user may not login
+                # and has generated/rendered an HttpResponse that we cannot handle here
+                return httpresp
 
     otp_zet_control_niet_gelukt(request)
 
