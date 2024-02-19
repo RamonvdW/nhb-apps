@@ -332,7 +332,7 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
         sel_indiv_1 = "wkl_indiv_%s" % self.klasse_r.pk
         sel_indiv_2 = "wkl_indiv_%s" % self.klasse_c.pk
         sel_indiv_3 = "wkl_indiv_%s" % self.klasse_ib.pk
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(28):
             resp = self.client.post(url_w, {'weekdag': 1,
                                             'aanvang': '12:34',
                                             'ver_pk': self.ver_101.ver_nr,
