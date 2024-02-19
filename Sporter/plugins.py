@@ -1,14 +1,18 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2023 Ramon van der Winkel.
+#  Copyright (c) 2020-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.shortcuts import render
-from Account.plugin_manager import account_add_plugin_login_gate
+from Account.plugin_manager import account_add_plugin_login_gate, account_add_plugin_ww_vergeten
 from Logboek.models import schrijf_in_logboek
 import logging
 
+"""
+    registratie van de plugins bij importeren van dit bestaand
+    import in Sporter.apps.ready
+"""
 
 TEMPLATE_SPORTER_LOGIN_GEBLOKKEERD = 'sporter/login-geblokkeerd-geen-vereniging.dtl'
 
@@ -17,7 +21,6 @@ my_logger = logging.getLogger('NHBApps.Sporter')
 
 def sporter_login_plugin(request, from_ip, account):
     """ Deze functie wordt aangeroepen vanuit de Account login view
-        (de koppeling wordt gelegd in Sporter.apps.ready)
 
         Hier controleren we of het lid wel in mag loggen
         ook zetten we het nieuwe_email veld indien nodig
@@ -73,6 +76,30 @@ def sporter_login_plugin(request, from_ip, account):
 
 # registreer de plugin
 account_add_plugin_login_gate(20, sporter_login_plugin, False)
+
+
+def sporter_ww_vergeten_plugin(request, from_ip, account):
+    """ Deze functie wordt aangeroepen vanuit de Account wachtwoord vergeten view
+        Hier zetten we een eventueel aangepast e-mailadres uit het CRM door naar het account.
+    """
+
+    # zoek het Sporter record dat bij dit account hoort
+    if account.sporter_set.all().count() == 1:
+        sporter = account.sporter_set.first()
+
+        if not (account.is_staff or account.is_BB):  # beschermt management rollen tegen CRM ongelukken
+            if not sporter.is_actief_lid:
+                # lid mag geen gebruik (meer) maken van de faciliteiten
+                return
+
+        # propageer een eventueel nieuw email adres uit de CRM data naar het Account
+        if account.bevestigde_email != sporter.email:
+            account.nieuwe_email = sporter.email
+            account.save(update_fields=['nieuwe_email'])
+
+
+# registreer de plugin
+account_add_plugin_ww_vergeten(20, sporter_ww_vergeten_plugin)
 
 
 # end of file
