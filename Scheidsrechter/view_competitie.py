@@ -718,6 +718,8 @@ class MatchHWLContactView(UserPassesTestMixin, TemplateView):
             raise Http404('Verkeerde beheerder')
 
         context['match'] = match
+        context['vereniging'] = match.vereniging
+        context['locatie'] = match.locatie
 
         if match.aantal_scheids > 0:
             match_sr = MatchScheidsrechters.objects.filter(match=match).first()

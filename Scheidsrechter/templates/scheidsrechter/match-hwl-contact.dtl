@@ -36,6 +36,16 @@
                 </tr>
 
                 <tr>
+                    <th>Bij vereniging</th>
+                    <td>{{ vereniging }}</td>
+                </tr>
+
+                <tr>
+                    <th>Locatie</th>
+                    <td>{{ locatie.adres|linebreaksbr }}</td>
+                </tr>
+
+                <tr>
                     <th>Hoofd<wbr>scheidsrechter</th>
                     <td>{% if hoofd_sr_naam %}{{ hoofd_sr_naam }}{% else %}<i>Nog niet bekend</i>{% endif %}</td>
                 </tr>
