@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2023 Ramon van der Winkel.
+                Copyright (c) 2020-2024 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -52,6 +52,8 @@
                                 <td>
                                     {% if obj.url_lijst %}
                                         <a class="btn-sv-rood" href="{{ obj.url_lijst }}">{% if obj.is_rk %}RK programma{% elif obj.is_bk %}BK programma{% else %}Toon lijst{% endif %}</a>
+                                    {% elif obj.is_bk %}
+                                        <i>BK programma wordt toegestuurd</i>
                                     {% endif %}
                                 </td>
                             {% endif %}
