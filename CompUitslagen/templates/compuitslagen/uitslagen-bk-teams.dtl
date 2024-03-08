@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2023 Ramon van der Winkel.
+                Copyright (c) 2020-2024 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -214,7 +214,13 @@
                                 {% endif %}
                             {% endfor %}
                         {% else %}
-                            <i class="grey-text">{% if team.niet_deelgenomen %}-{% else %}komt later{% endif %}</i>
+                            {% if team.niet_deelgenomen %}
+                                <i class="grey-text">-</i>
+                            {% elif team.is_reserve %}
+                                <i>Reserve</i>
+                            {% else %}
+                                <i class="grey-text">komt later</i>
+                            {% endif %}
                         {% endif %}
                     </td>
 
@@ -228,7 +234,7 @@
                             {% if team.niet_deelgenomen %}
                                 <i>Afgemeld</i>
                             {% elif team.is_reserve %}
-                                <i>Reserve</i>
+                                <i><!--Reserve--></i>
                             {% else %}
                                 <span>{{ team.rk_kampioen_label }}</span>
                             {% endif %}

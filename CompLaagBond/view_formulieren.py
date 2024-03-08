@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023 Ramon van der Winkel.
+#  Copyright (c) 2023-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -17,6 +17,7 @@ from Competitie.models import (Kampioenschap, CompetitieMatch,
                                CompetitieTeamKlasse, KampioenschapTeamKlasseLimiet, KampioenschapTeam)
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
+from Scheidsrechter.models import MatchScheidsrechters
 from Sporter.models import SporterVoorkeuren
 from tempfile import NamedTemporaryFile
 from types import SimpleNamespace
@@ -28,6 +29,7 @@ import os
 
 
 TEMPLATE_DOWNLOAD_BK_FORMULIEREN = 'complaagbond/bko-download-bk-formulieren.dtl'
+TEMPLATE_HWL_BK_MATCH_INFORMATIE = 'complaagbond/hwl-bk-match-info.dtl'
 
 CONTENT_TYPE_XLSX = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
 
@@ -675,6 +677,79 @@ class FormulierBkTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
         prg.save(response)
 
         return response
+
+
+class InformatieHWLView(UserPassesTestMixin, TemplateView):
+
+    """ Toon de BKO de lijst van BK programma's die gedownload kunnen worden """
+
+    # class variables shared by all instances
+    template_name = TEMPLATE_HWL_BK_MATCH_INFORMATIE
+    raise_exception = True  # genereer PermissionDefined als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
+    geef_teams = False
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.functie_nu = None
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
+        return self.functie_nu and rol_nu == Rollen.ROL_HWL
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        try:
+            match_pk = int(kwargs['match_pk'][:6])      # afkappen voor de veiligheid
+            match = (CompetitieMatch
+                     .objects
+                     .select_related('vereniging',
+                                     'locatie')
+                     .prefetch_related('indiv_klassen',
+                                       'team_klassen')
+                     .get(pk=match_pk))
+        except (ValueError, CompetitieMatch.DoesNotExist):
+            raise Http404('Wedstrijd niet gevonden')
+
+        if match.vereniging != self.functie_nu.vereniging:
+            raise Http404('Niet de beheerder')
+
+        context['wedstrijd'] = match
+        context['vereniging'] = match.vereniging        # als we hier komen is dit altijd bekend
+        context['locatie'] = match.locatie
+
+        comp = match.competitie
+        # TODO: begrens toegang ahv de fase
+        context['comp'] = match.competitie
+
+        match.klassen_lijst = list()
+        for klasse in match.indiv_klassen.select_related('boogtype').all():
+            match.klassen_lijst.append(klasse.beschrijving)
+        # for
+        for klasse in match.team_klassen.all():
+            match.klassen_lijst.append(klasse.beschrijving)
+        # for
+
+        if match.aantal_scheids > 0:
+            match_sr = MatchScheidsrechters.objects.filter(match=match).first()
+            if match_sr:
+                aantal = 0
+                for sr in (match_sr.gekozen_hoofd_sr, match_sr.gekozen_sr1, match_sr.gekozen_sr2):
+                    if sr:
+                        aantal += 1
+                # for
+                if aantal > 0:
+                    context['aantal_sr_str'] = "%s scheidsrechter" % aantal
+                    if aantal > 1:
+                        context['aantal_sr_str'] += 's'
+
+                    context['url_sr_contact'] = reverse('Scheidsrechter:match-hwl-contact',
+                                                        kwargs={'match_pk': match.pk})
+
+        return context
 
 
 # end of file

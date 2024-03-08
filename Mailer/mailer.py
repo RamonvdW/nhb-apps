@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2023 Ramon van der Winkel.
+#  Copyright (c) 2020-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -87,11 +87,11 @@ def send_mail(obj, stdout=None, stderr=None):
 
     # voorkom problemen en dubbel zenden
     if not obj.is_verstuurd and obj.aantal_pogingen < 25:
-        now = timezone.now()
+        now = timezone.localtime(timezone.now())
 
         obj.laatste_poging = now
         obj.aantal_pogingen += 1
-        obj.log += "[INFO] Nieuwe poging om %s\n" % str(now)
+        obj.log += "[INFO] Nieuwe poging om %s\n" % now.strftime('%Y-%m-%d %H:%M:%S')
         obj.save()
 
         send_mail_postmark(obj, stdout, stderr)

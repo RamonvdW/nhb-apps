@@ -36,7 +36,12 @@
                 </tr>
                 <tr>
                     <th>Wedstrijdklassen</th>
-                    <td>{% for klasse in wedstrijd.klassen_lijst %}{{ klasse }}<br>{% endfor %}</td>
+                    <td>{% for klasse in wedstrijd.klassen_lijst %}
+                            <span>{{ klasse }}</span><br>
+                        {% empty %}
+                            <i>Nog niet bekend</i>
+                        {% endfor %}
+                    </td>
                 </tr>
                 <tr>
                     <th>Bij vereniging</th>

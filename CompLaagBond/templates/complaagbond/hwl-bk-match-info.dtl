@@ -1,0 +1,73 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2024 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}BK informatie{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">BK informatie</h3>
+        </div>
+    </div>
+
+
+    <!-- blauwe balk met informatie label : info -->
+    <div class="row-sv-blauw">
+        <div class="col s12 m10 offset-m1 l8 offset-l2">
+            <table class="sv-kader">
+                <tr>
+                    <th>Competitie</th>
+                    <td>{{ comp.beschrijving }}</td>
+                </tr>
+                <tr>
+                    <th>Wedstrijd</th>
+                    <td>Bondskampioenschappen</td>
+                </tr>
+                <tr>
+                    <th>Wedstrijdklassen</th>
+                    <td>{% for klasse in wedstrijd.klassen_lijst %}{{ klasse }}<br>{% endfor %}</td>
+                </tr>
+                <tr>
+                    <th>Bij vereniging</th>
+                    <td>{{ vereniging }}</td>
+                </tr>
+                <tr>
+                    <th>Wanneer</th>
+                    <td>{{ wedstrijd.datum_wanneer }} om {{ wedstrijd.tijd_begin_wedstrijd }}</td>
+                </tr>
+
+                {% if url_sr_contact %}
+                    <tr>
+                        <th>Scheidsrechters</th>
+                        <td>
+                            {% if aantal_sr_str %}
+                                <span style="padding-right:20px">{{ aantal_sr_str }}</span>
+                                {% if url_sr_contact %}
+                                    <a class="btn-sv-rood" href="{{ url_sr_contact }}">Details</a>
+                                {% endif %}
+                            {% else %}
+                                <i>Nog niet bekend</i>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endif %}
+
+                <tr>
+                    <th>BK programma</th>
+                    <td>Het BK programma wordt per e-mail toegestuurd vanuit het bondsbureau</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="complaagbond-hwl-match-info" %}
+
+{% endblock %}

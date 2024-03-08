@@ -141,6 +141,8 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
                     match.url_lijst = reverse('CompLaagRayon:download-formulier',
                                               kwargs={'match_pk': match.pk})
                 elif match.is_bk:
+                    match.url_lijst = reverse('CompLaagBond:bk-match-informatie',
+                                              kwargs={'match_pk': match.pk})
                     # geen knoppen - formulier wordt door BKO opgestuurd
                     pass
 

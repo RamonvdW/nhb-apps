@@ -162,10 +162,13 @@ PID_TAIL=$(jobs -p | tail -1)
 if [ $KEEP_DB -ne 1 ]
 then
     echo "[INFO] Deleting test database"
+    old_pwd="$PWD"
+    cd /tmp
     sudo -u postgres dropdb --if-exists test_data3 || exit 1
     sudo -u postgres createdb -E UTF8 test_data3 || exit 1
     sudo -u postgres psql -d test_data3 -q -c 'GRANT CREATE ON SCHEMA public TO django' || exit 1
     echo "[INFO] Creating clean database; running migrations and performing run with nodebug"
+    cd "$old_pwd"
 
     # add coverage with no-debug
     python3 $PY_OPTS -u $PYCOV ./manage.py test --keepdb --noinput --settings=SiteMain.settings_autotest_nodebug -v 2 Plein.tests.tests.TestPlein.test_quick &>>"$LOG"
