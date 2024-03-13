@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2023 Ramon van der Winkel.
+                Copyright (c) 2020-2024 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -137,6 +137,16 @@
                                                         <i>Niet geschoten</i>
                                                     {% endfor %}
                                                 {% endif %}
+                                            </td>
+                                        </tr>
+                                    {% empty %}
+                                        <tr>
+                                            <td colspan="3">
+                                                <div style="padding:10px 30px 10px 30px">
+                                                    <div class="sv-rood white-text z-depth-3 center" style="padding:10px"">
+                                                        <b>LET OP: dit team heeft 0 sporters; vraag de HWL dit te corrigeren</b>
+                                                    </div>
+                                                </div>
                                             </td>
                                         </tr>
                                     {% endfor %}

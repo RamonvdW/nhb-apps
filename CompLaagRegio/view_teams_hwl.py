@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2023 Ramon van der Winkel.
+#  Copyright (c) 2021-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -385,7 +385,8 @@ class WijzigRegioTeamsView(UserPassesTestMixin, TemplateView):
         else:
             context['kruimels'] = (
                 (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
-                (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+                (reverse('CompBeheer:overzicht',
+                         kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
                 (None, 'Teams'),    # TODO: details invullen
                 (None, 'Wijzig team')
             )
@@ -964,7 +965,8 @@ class TeamsRegioInvallersView(UserPassesTestMixin, TemplateView):
         unsorted_deelnemers = list()
         for deelnemer in deelnemers:
             deelnemer.boog_str = deelnemer.sporterboog.boogtype.beschrijving
-            deelnemer.naam_str = "[%s] %s" % (deelnemer.sporterboog.sporter.lid_nr, deelnemer.sporterboog.sporter.volledige_naam())
+            deelnemer.naam_str = "[%s] %s" % (deelnemer.sporterboog.sporter.lid_nr,
+                                              deelnemer.sporterboog.sporter.volledige_naam())
 
             gem = deelnemer.gemiddelde_begin_team_ronde
             gem_str = "%.3f" % gem
@@ -1150,7 +1152,8 @@ class TeamsRegioInvallersKoppelLedenView(UserPassesTestMixin, TemplateView):
                         else:
                             toon_checked = False
                         zoek_checked = not toon_checked
-                        tup = (is_uitvaller, deelnemer.invaller_gem_str, id_invaller, deelnemer.pk, deelnemer.naam_str, toon_checked)
+                        tup = (is_uitvaller, deelnemer.invaller_gem_str, id_invaller, deelnemer.pk, deelnemer.naam_str,
+                               toon_checked)
                         invallers.append(tup)
                         break
             # for
@@ -1158,7 +1161,8 @@ class TeamsRegioInvallersKoppelLedenView(UserPassesTestMixin, TemplateView):
             for deelnemer in deelnemers:
                 # mag deze persoon invallen?
                 if deelnemer.pk not in deelnemers_bezet_pks:
-                    if deelnemer.pk != uitvaller.pk and deelnemer.gemiddelde_begin_team_ronde <= uitvaller.gemiddelde_begin_team_ronde:
+                    if (deelnemer.pk != uitvaller.pk and
+                            deelnemer.gemiddelde_begin_team_ronde <= uitvaller.gemiddelde_begin_team_ronde):
                         is_uitvaller = "1" if deelnemer.origineel_team_lid else "0"
                         id_invaller = group_str + '_door_%s' % deelnemer.pk
                         toon_checked = False
@@ -1166,12 +1170,13 @@ class TeamsRegioInvallersKoppelLedenView(UserPassesTestMixin, TemplateView):
                             toon_checked = True
                             zoek_checked = False
                             deelnemers_feitelijk_pks.remove(deelnemer.pk)
-                        tup = (is_uitvaller, deelnemer.invaller_gem_str, id_invaller, deelnemer.pk, deelnemer.naam_str, toon_checked)
+                        tup = (is_uitvaller, deelnemer.invaller_gem_str, id_invaller, deelnemer.pk, deelnemer.naam_str,
+                               toon_checked)
                         invallers.append(tup)
             # for
 
-            # voeg de optie "Geen invaller" toe
-            tup = (False, "", group_str + "_door_geen", uniq_nr, "Geen invaller", zoek_checked)
+            # voeg de optie "Geen invaller beschikbaar" toe
+            tup = (False, "", group_str + "_door_geen", uniq_nr, "Geen invaller beschikbaar", zoek_checked)
             uniq_nr += 1
             invallers.append(tup)
         # while
