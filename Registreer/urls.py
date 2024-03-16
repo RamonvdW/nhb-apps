@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023 Ramon van der Winkel.
+#  Copyright (c) 2023-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -51,6 +51,10 @@ urlpatterns = [
     path('beheer-gast-accounts/opheffen/',
          view_beheer_sec.GastAccountOpheffenView.as_view(),
          name='opheffen'),
+
+    path('beheer-gast-accounts/overzetten/<van_lid_nr>/<naar_lid_nr>/',
+         view_beheer_sec.BestellingOverzettenView.as_view(),
+         name='bestellingen-overzetten'),
 ]
 
 # end of file

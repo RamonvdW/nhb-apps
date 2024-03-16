@@ -770,7 +770,7 @@ class RondeTeamVerFilter(admin.SimpleListFilter):
         for team in teams.order_by('vereniging__ver_nr', 'volg_nr'):
             tups.append((team.pk, team.maak_team_naam()))
         # for
-        # print('looksup: aantal=%s' % len(tups))
+        # print('lookups: aantal=%s' % len(tups))
         return tups
 
     def queryset(self, request, queryset):
