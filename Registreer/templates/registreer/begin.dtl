@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2023 Ramon van der Winkel.
+                Copyright (c) 2023-2024 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -15,9 +15,6 @@
         <div class="col s12">
             <h3 class="page-banner">Account aanmaken</h3>
             <p>KHSN-leden kunnen een account aanmaken met hun bondsnummer en het e-mailadres dat bekend is bij de bond.</p>
-            {% if gast_is_open %}
-                <p>Nog geen lid? Met een gast-account kun je begrensd gebruik maken deze site.</p>
-            {% endif %}
         </div>
     </div>
 
@@ -27,17 +24,28 @@
         <div class="col s12">
             <!-- voor leden -->
             {% include 'plein/card_icon.dtl' with title="voor KHSN leden" text="Doorloop eenmalig de korte registratie procedure en krijg toegang tot de hele site." icon="badge" url=url_registreer_nhb %}
-
-            {% if gast_is_open %}
-                <!-- voor gast-account -->
-                {% include 'plein/card_icon.dtl' with title="Gast-account" text="Maak een gast-account om deze site te ontdekken en in te schrijven op wedstrijden." icon="explore" url=url_registreer_gast %}
-            {% endif %}
         </div>
     </div>
 
     {% if gast_is_open %}
 
-        <!-- banner -->
+        <!-- tussenkopje -->
+        <div class="row center">
+            <div class="col s12">
+                <h4>Gast-account</h4>
+                <p>Nog geen lid van de KHSN? Met een gast-account kun je begrensd gebruik maken deze site.</p>
+            </div>
+        </div>
+
+        <!-- blauwe balk met kaartjes -->
+        <div class="row-sv-blauw">
+            <div class="col s12">
+                <!-- voor gast-account -->
+                {% include 'plein/card_icon.dtl' with title="Gast-account" text="Maak een gast-account om deze site te ontdekken en in te schrijven op wedstrijden." icon="explore" url=url_registreer_gast %}
+            </div>
+        </div>
+
+        <!-- tussenkopje -->
         <div class="row center">
             <div class="col s12">
                 <h4>English</h4>
