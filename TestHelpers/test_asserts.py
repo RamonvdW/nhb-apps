@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2023 Ramon van der Winkel.
+#  Copyright (c) 2019-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -999,6 +999,10 @@ class MyTestAsserts(TestCase):
         html = html.replace('&nbsp;', ' ')
         html = html.replace('&euro;', '€')
         html = html.replace('&quot;', '"')
+
+        # verwijder opmaak uit de HTML die niet voorkomt in de plaintext versie
+        html = html.replace('</code>', '')
+        html = html.replace('<code>', '')
 
         # verwijder alle <a href="mailto:.."> en behoud alleen het e-mailadres
         pos = html.find('<a href="mailto:')
