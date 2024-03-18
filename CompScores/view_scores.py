@@ -1058,8 +1058,11 @@ class ScoresRegioTeamsView(UserPassesTestMixin, TemplateView):
             raise Http404('Geen teamcompetitie in deze regio')
 
         context['deelcomp'] = deelcomp
+        context['huidige_ronde'] = '-'
 
         if 1 <= deelcomp.huidige_team_ronde <= 7:
+            context['huidige_ronde'] = deelcomp.huidige_team_ronde
+
             tup = self._bepaal_teams_en_scores(deelcomp)
             context['alle_regels'], context['aantal_keuzes_nodig'], context['anchor'] = tup
             context['url_opslaan'] = reverse('CompScores:selecteer-team-scores',

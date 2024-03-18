@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2023 Ramon van der Winkel.
+                Copyright (c) 2023-2024 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -137,9 +137,14 @@
             <div class="col s12 m10 offset-m1 l8 offset-l2 xl6 offset-xl3">
                 <table class="sv-kader">
                     {% for match in sporter_matches %}
-                        <tr><td>
+                        {% if not forloop.first %}
+                            <tr>
+                                <td colspan="2" class="sv-table-header"></td>
+                            </tr>
+                        {% endif %}
 
-                            <table class="sv-kader">
+                        <tr><td>
+                            <table>
                                 <tr>
                                     <th>Naam</th>
                                     <td><span{% if match.is_match_lid_nr %} class="green-text"{% endif %}>[{{ match.lid_nr }}]&nbsp;</span>
@@ -171,8 +176,8 @@
                                     <td>{% if match.heeft_account %}Ja{% else %}Nee{% endif %}</td>
                                 </tr>
                             </table>
-
                         </td></tr>
+
                     {% endfor %}
                 </table>
 
@@ -202,7 +207,6 @@
                 </form>
             </div>
         </div>
-
     {% endif %}
 
 
@@ -210,6 +214,11 @@
     <div class="row center">
         <div class="col s12">
             <h4>Gebruik van dit gast-account</h4>
+            {% if overzetten_url %}
+                <p>
+                    <a class="btn-sv-rood modal-trigger" href="#bevestig_overzetten">Overzetten naar {{ overzetten_naar_lid_nr }}</a>
+                </p>
+            {% endif %}
         </div>
     </div>
 
@@ -244,6 +253,30 @@
             </table>
         </div>
     </div>
+
+    {% if overzetten_url %}
+        <div class="modal" id="bevestig_overzetten">
+            <div class="modal-content center">
+                <h5>Bestellingen overzetten</h5>
+                <p>Je hebt gecontroleerd dat het gast-account overeenkomt een bekend lid.</p>
+                <p>Wil je alle bestellingen van {{ gast.sporter.lid_nr }} overzetten naar {{ overzetten_naar_lid_nr }}?</p>
+                <p>(nadat dit gedaan is kan je het gast-account opheffen)</p>
+
+                <form action="{{ overzetten_url }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
+                    {% csrf_token %}
+
+                    <div class="modal-footer" style="text-align:center; display:block">
+                        <div style="display:inline-block; width:50%">
+                            <button class="btn-sv-rood" id="submit_knop" type="submit">Ja</button>
+                        </div>
+                        <div style="display:inline-block; width:50%">
+                            <a href="#" class="btn-sv-blauw modal-close">Nee</a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    {% endif %}
 
 
     {% include 'feedback/sidebar.dtl' with op_pagina="registreer-beheer-gast-account-details" %}

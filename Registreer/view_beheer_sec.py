@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023 Ramon van der Winkel.
+#  Copyright (c) 2023-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -177,6 +177,8 @@ class GastAccountDetailsView(UserPassesTestMixin, TemplateView):
         beste_pks = [pk for count, pk in best[:10] if count > 1]
 
         context['heeft_matches'] = len(beste_pks) > 0
+        context['overzetten_naar_sporter'] = None
+        hoogste_ophef = 0
 
         matches = (Sporter
                    .objects
@@ -205,24 +207,32 @@ class GastAccountDetailsView(UserPassesTestMixin, TemplateView):
 
             match.heeft_account = (match.account is not None)
 
+            match.ophef = 0
+
             if match.is_match_geboorte_datum:
-                gast.ophef += 1
+                match.ophef += 1
             if match.is_match_email:
-                gast.ophef += 5
+                match.ophef += 5
             if match.is_match_lid_nr:
-                gast.ophef += 5
+                match.ophef += 5
             if match.is_match_voornaam:
-                gast.ophef += 1
+                match.ophef += 1
             if match.is_match_achternaam:
-                gast.ophef += 1
+                match.ophef += 1
             if match.is_match_geslacht:
-                gast.ophef += 1
+                match.ophef += 1
             if match.is_match_vereniging:
-                gast.ophef += 1
+                match.ophef += 1
             if match.is_match_plaats:
-                gast.ophef += 1
+                match.ophef += 1
             if match.heeft_account:
-                gast.ophef += 5
+                match.ophef += 5
+
+            if match.ophef > hoogste_ophef:
+                context['overzetten_naar_lid_nr'] = match.lid_nr
+                hoogste_ophef = match.ophef
+
+            gast.ophef += match.ophef
         # for
 
         context['sporter_matches'] = matches
@@ -260,6 +270,11 @@ class GastAccountDetailsView(UserPassesTestMixin, TemplateView):
             if inschrijving.status == INSCHRIJVING_STATUS_DEFINITIEF:
                 gast.ophef = -100
         # for
+
+        if gast.ophef < 0 and context['overzetten_naar_lid_nr']:
+            context['overzetten_url'] = reverse('Registreer:bestellingen-overzetten',
+                                                kwargs={'van_lid_nr': gast.sporter.lid_nr,
+                                                        'naar_lid_nr': context['overzetten_naar_lid_nr']})
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -361,5 +376,93 @@ class GastAccountOpheffenView(UserPassesTestMixin, View):
                                mail_body)
 
         return HttpResponseRedirect(reverse('Registreer:beheer-gast-accounts'))
+
+
+class BestellingOverzettenView(UserPassesTestMixin, View):
+    """ deze view wordt gebruikt door de SEC 8000 om de bestellingen van een gast-account over te zetten naar
+        een normaal account. Dit maakt het gast-account "vrij" zodat het kan worden opgeheven.
+    """
+
+    raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.rol_nu, self.functie_nu = None, None
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
+        return self.functie_nu and self.functie_nu.rol == 'SEC' and self.functie_nu.vereniging.is_extern
+
+    @staticmethod
+    def post(request, *args, **kwargs):
+        van_lid_nr = kwargs['van_lid_nr']
+        naar_lid_nr = kwargs['naar_lid_nr']
+
+        try:
+            gast = GastRegistratie.objects.select_related('account', 'sporter').get(lid_nr=van_lid_nr)
+        except (ValueError, GastRegistratie.DoesNotExist):
+            raise Http404('Gast-account niet gevonden')
+
+        try:
+            sporter = Sporter.objects.select_related('account').get(lid_nr=naar_lid_nr)
+        except (ValueError, GastRegistratie.DoesNotExist):
+            raise Http404('Sporter niet gevonden')
+
+        if not sporter.account:
+            raise Http404('Sporter heeft nog geen account')
+
+        # maak een SporterBoog vertaling
+        afk2sb = dict()
+        for sb in sporter.sporterboog_set.all():
+            afk2sb[sb.boogtype.afkorting] = sb
+        # for
+
+        for bestelling in (Bestelling
+                           .objects
+                           .filter(account=gast.account)
+                           .prefetch_related('producten')
+                           .select_related('account')):
+
+            if bestelling.account == gast.account:
+                bestelling.account = sporter.account
+
+            for product in (bestelling.
+                            producten.
+                            select_related('wedstrijd_inschrijving',
+                                           'wedstrijd_inschrijving__sporterboog__sporter',
+                                           'wedstrijd_inschrijving__sporterboog__boogtype',
+                                           'webwinkel_keuze')
+                            .all()):
+
+                inschrijving = product.wedstrijd_inschrijving
+                if inschrijving:
+                    if gast.sporter == inschrijving.sporterboog.sporter:
+                        afk = inschrijving.sporterboog.boogtype.afkorting
+                        try:
+                            sb = afk2sb[afk]
+                        except ValueError:
+                            raise Http404('SporterBoog ontbreekt voor boog %s' % repr(afk))
+                        else:
+                            inschrijving.sporterboog = sb
+
+                    if inschrijving.koper == gast:
+                        inschrijving.koper = sporter.account
+
+                    inschrijving.save(update_fields=['koper', 'sporterboog'])
+
+                keuze = product.webwinkel_keuze
+                if keuze:
+                    if keuze.koper == gast.account:
+                        keuze.koper = sporter.account
+                        keuze.save(update_fields=['koper'])
+            # for
+
+            bestelling.save(update_fields=['account'])
+        # for
+
+        url = reverse('Registreer:beheer-gast-account-details', kwargs={'lid_nr': gast.lid_nr})
+        return HttpResponseRedirect(url)
 
 # end of file

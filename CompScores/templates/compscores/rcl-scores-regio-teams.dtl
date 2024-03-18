@@ -32,7 +32,7 @@
                 </tr>
                 <tr>
                     <th>Huidige ronde</th>
-                    <td>{% if deelcomp.huidige_team_ronde <= 7 %}{{ deelcomp.huidige_team_ronde }}{% else %}-{% endif %}</td>
+                    <td>{{ huidige_ronde }}</td>
                 </tr>
             </table>
         </div>
@@ -121,7 +121,7 @@
                                                     {% for wedstrijd, score in deelnemer.gevonden_scores %}
                                                         <!-- TODO: extra class nodig voor line-height compatible met input -->
                                                         {% if wedstrijd %}
-                                                            <span class="input{% if score.block_selection %} grey-text{% endif %}" style="line-height:25px">{{ wedstrijd.datum_wanneer }} om {{ wedstrijd.tijd_begin_wedstrijd }} bij {{ wedstrijd.vereniging.naam }}</span><br>
+                                                            <span class="input{% if score.block_selection %} grey-text{% endif %}" style="line-height:25px; white-space:nowrap">{{ wedstrijd.datum_wanneer }} om {{ wedstrijd.tijd_begin_wedstrijd }} bij {{ wedstrijd.vereniging.naam }}</span><br>
                                                         {% else %}
                                                             <span class="input" style="line-height:25px"><i>Niet geschoten</i></span><br>
                                                         {% endif %}
@@ -129,7 +129,7 @@
                                                 {% else %}
                                                     {% for wedstrijd, score in deelnemer.gevonden_scores %}
                                                         {% if wedstrijd %}
-                                                            <span{% if score.block_selection %} class="grey-text"{% endif %}>{{ wedstrijd.datum_wanneer }} om {{ wedstrijd.tijd_begin_wedstrijd }} bij {{ wedstrijd.vereniging.naam }}</span><br>
+                                                            <span{% if score.block_selection %} class="grey-text"{% endif %} style="white-space:nowrap">{{ wedstrijd.datum_wanneer }} om {{ wedstrijd.tijd_begin_wedstrijd }} bij {{ wedstrijd.vereniging.naam }}</span><br>
                                                         {% else %}
                                                             <i>Niet geschoten</i>
                                                         {% endif %}
