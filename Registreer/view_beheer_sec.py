@@ -66,8 +66,9 @@ class GastAccountsView(UserPassesTestMixin, TemplateView):
 
             # zoek de laatste-inlog bij elk lid
             # SEC mag de voorkeuren van de sporters aanpassen
-            gast.url_details = reverse('Registreer:beheer-gast-account-details',
-                                       kwargs={'lid_nr': gast.lid_nr})
+            if gast.lid_nr > 0:
+                gast.url_details = reverse('Registreer:beheer-gast-account-details',
+                                           kwargs={'lid_nr': gast.lid_nr})
 
             gast.geen_inlog = 0
             if gast.account:
