@@ -15,7 +15,7 @@ from Competitie.definities import (AFSTANDEN, AFSTAND2URL,
                                    TEAM_PUNTEN, TEAM_PUNTEN_MODEL_TWEE,
                                    DAGDELEN,
                                    DEELNAME_CHOICES, DEELNAME_ONBEKEND,
-                                   MUTATIE_TO_STR, MUTATIE_KAMP_AANMELDEN, MUTATIE_KAMP_AFMELDEN, MUTATIE_KAMP_CUT)
+                                   MUTATIE_TO_STR, MUTATIE_KAMP_AANMELDEN_INDIV, MUTATIE_KAMP_AFMELDEN_INDIV, MUTATIE_KAMP_CUT)
 from Competitie.tijdlijn import bepaal_fase_indiv, bepaal_fase_teams
 from Functie.definities import Rollen
 from Functie.models import Functie
@@ -1121,7 +1121,7 @@ class CompetitieMutatie(models.Model):
         except KeyError:
             msg += " %s (???)" % self.mutatie
 
-        if self.mutatie in (MUTATIE_KAMP_AANMELDEN, MUTATIE_KAMP_AFMELDEN):
+        if self.mutatie in (MUTATIE_KAMP_AANMELDEN_INDIV, MUTATIE_KAMP_AFMELDEN_INDIV):
             msg += " - %s" % self.deelnemer
 
         if self.mutatie == MUTATIE_KAMP_CUT:

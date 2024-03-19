@@ -12,7 +12,7 @@ from django.core.exceptions import PermissionDenied
 from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
-from Competitie.definities import MUTATIE_KAMP_AFMELDEN, MUTATIE_KAMP_AANMELDEN
+from Competitie.definities import MUTATIE_KAMP_AFMELDEN_INDIV, MUTATIE_KAMP_AANMELDEN_INDIV
 from Competitie.models import KampioenschapSporterBoog, CompetitieMutatie
 from Functie.definities import Rollen, rol2url
 from Functie.rol import rol_get_huidige_functie
@@ -137,11 +137,11 @@ class WijzigStatusRkDeelnemerView(UserPassesTestMixin, TemplateView):
             if not deelnemer.bij_vereniging:
                 # kan niet bevestigen zonder verenigingslid te zijn
                 raise Http404('Sporter moet lid zijn bij een vereniging')
-            mutatie = CompetitieMutatie(mutatie=MUTATIE_KAMP_AANMELDEN,
+            mutatie = CompetitieMutatie(mutatie=MUTATIE_KAMP_AANMELDEN_INDIV,
                                         deelnemer=deelnemer,
                                         door=door_str)
         elif afmelden == "1":
-            mutatie = CompetitieMutatie(mutatie=MUTATIE_KAMP_AFMELDEN,
+            mutatie = CompetitieMutatie(mutatie=MUTATIE_KAMP_AFMELDEN_INDIV,
                                         deelnemer=deelnemer,
                                         door=door_str)
         else:

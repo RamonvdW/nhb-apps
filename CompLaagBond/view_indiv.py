@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023 Ramon van der Winkel.
+#  Copyright (c) 2023-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -14,7 +14,7 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
 from Competitie.definities import (DEEL_BK,
                                    DEELNAME_JA, DEELNAME_NEE,
-                                   MUTATIE_KAMP_AFMELDEN, MUTATIE_KAMP_AANMELDEN)
+                                   MUTATIE_KAMP_AFMELDEN_INDIV, MUTATIE_KAMP_AANMELDEN_INDIV)
 from Competitie.models import (Kampioenschap, KampioenschapSporterBoog, KampioenschapIndivKlasseLimiet,
                                CompetitieMutatie)
 from Functie.definities import Rollen
@@ -405,11 +405,11 @@ class WijzigStatusBkDeelnemerView(UserPassesTestMixin, TemplateView):
             if not deelnemer.bij_vereniging:
                 # kan niet bevestigen zonder verenigingslid te zijn
                 raise Http404('Sporter moet lid zijn bij een vereniging')
-            mutatie = CompetitieMutatie(mutatie=MUTATIE_KAMP_AANMELDEN,
+            mutatie = CompetitieMutatie(mutatie=MUTATIE_KAMP_AANMELDEN_INDIV,
                                         deelnemer=deelnemer,
                                         door=door_str)
         elif afmelden == "1":
-            mutatie = CompetitieMutatie(mutatie=MUTATIE_KAMP_AFMELDEN,
+            mutatie = CompetitieMutatie(mutatie=MUTATIE_KAMP_AFMELDEN_INDIV,
                                         deelnemer=deelnemer,
                                         door=door_str)
         else:

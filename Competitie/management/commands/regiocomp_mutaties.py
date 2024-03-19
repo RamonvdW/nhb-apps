@@ -17,7 +17,9 @@ from BasisTypen.definities import ORGANISATIE_KHSN
 from BasisTypen.operations import get_organisatie_teamtypen
 from Competitie.definities import (DEEL_RK, DEEL_BK, DEELNAME_JA, DEELNAME_NEE, DEELNAME_ONBEKEND, KAMP_RANK_BLANCO,
                                    MUTATIE_AG_VASTSTELLEN_18M, MUTATIE_AG_VASTSTELLEN_25M, MUTATIE_COMPETITIE_OPSTARTEN,
-                                   MUTATIE_INITIEEL, MUTATIE_KAMP_CUT, MUTATIE_KAMP_AANMELDEN, MUTATIE_KAMP_AFMELDEN,
+                                   MUTATIE_INITIEEL, MUTATIE_KAMP_CUT,
+                                   MUTATIE_KAMP_AANMELDEN_INDIV, MUTATIE_KAMP_AFMELDEN_INDIV,
+                                   MUTATIE_KAMP_TEAMS_NUMMEREN,
                                    MUTATIE_REGIO_TEAM_RONDE, MUTATIE_EXTRA_RK_DEELNEMER,
                                    MUTATIE_DOORZETTEN_REGIO_NAAR_RK,
                                    MUTATIE_KAMP_INDIV_DOORZETTEN_NAAR_BK, MUTATIE_KAMP_TEAMS_DOORZETTEN_NAAR_BK,
@@ -655,7 +657,7 @@ class Command(BaseCommand):
         comp.bepaal_fase()
         if comp.fase_teams > 'F':
             # voorbij de wedstrijden fase, dus vanaf nu is de RCL waarschijnlijk bezig om de laatste hand
-            # aan de uitslag te leggen en dan willen we de HWLs niet meer triggeren.
+            # aan de uitslag te leggen en dan willen we de HWLs niet meer kietelen.
             return
 
         now = timezone.now()
@@ -1351,8 +1353,14 @@ class Command(BaseCommand):
 
             teams_per_ver = dict()  # [ver_nr] = count
 
-            # TODO: volgens reglement Indoor doorzetten: ERE=2 finalisten per rayon + 4 landelijk resultaat; rest=1 finalist per rayon + 4 landelijke resultaat, max 2 per ver per klasse
-            # TODO: volgens reglement 25m1pijl doorzetten: ERE=max 32 teams, B=max 16 teams, C+D samen max 16 teams. Alle volgens landelijk resultaat.
+            # TODO: volgens reglement Indoor doorzetten:
+            #   ERE=2 finalisten per rayon + 4 landelijk resultaat;
+            #   rest=1 finalist per rayon + 4 landelijke resultaat
+            # TODO: volgens reglement 25m1pijl doorzetten:
+            #   ERE=max 32 teams,
+            #   B=max 16 teams,
+            #   C+D samen max 16 teams.
+            #   Alle volgens landelijk resultaat.
 
             # haal alle teams uit de RK op
             for rk_team in (KampioenschapTeam
@@ -1450,6 +1458,26 @@ class Command(BaseCommand):
             deelkamp = deelnemer.kampioenschap
             self._verwerk_mutatie_initieel_klasse_indiv(deelkamp, deelnemer.indiv_klasse)
 
+    def _verwerk_mutatie_teams_opnieuw_nummeren(self, deelkamp, team_klasse):
+        self.stdout.write('[INFO] Teams opnieuw nummeren voor kampioenschap %s team klasse %s' % (deelkamp,
+                                                                                                  team_klasse))
+        # alleen de rank aanpassen
+        rank = 0
+        for team in (KampioenschapTeam
+                     .objects
+                     .filter(kampioenschap=deelkamp,
+                             team_klasse=team_klasse)
+                     .order_by('-aanvangsgemiddelde',       # hoogste boven
+                               'volgorde')):                # consistent in geval gelijke score / blanco score
+
+            if team.deelname == DEELNAME_NEE:
+                team.rank = 0
+            else:
+                rank += 1
+                team.rank = rank
+            team.save(update_fields=['rank'])
+        # for
+
     @staticmethod
     def _verwerk_mutatie_afsluiten_bk_indiv(comp):
         """ BK individueel afsluiten """
@@ -1476,7 +1504,7 @@ class Command(BaseCommand):
             comp.bk_teams_afgesloten = True
             comp.save(update_fields=['bk_teams_afgesloten'])
 
-    def _verwerk_mutatie(self, mutatie):
+    def _verwerk_mutatie(self, mutatie: CompetitieMutatie):
         code = mutatie.mutatie
 
         if code == MUTATIE_COMPETITIE_OPSTARTEN:
@@ -1505,11 +1533,11 @@ class Command(BaseCommand):
                 self._verwerk_mutatie_kamp_cut_team(mutatie.kampioenschap, mutatie.team_klasse,
                                                     mutatie.cut_oud, mutatie.cut_nieuw)
 
-        elif code == MUTATIE_KAMP_AANMELDEN:
+        elif code == MUTATIE_KAMP_AANMELDEN_INDIV:
             self.stdout.write('[INFO] Verwerk mutatie %s: aanmelden' % mutatie.pk)
             self._verwerk_mutatie_kamp_aanmelden(mutatie.deelnemer)
 
-        elif code == MUTATIE_KAMP_AFMELDEN:
+        elif code == MUTATIE_KAMP_AFMELDEN_INDIV:
             self.stdout.write('[INFO] Verwerk mutatie %s: afmelden' % mutatie.pk)
             self._verwerk_mutatie_afmelden_indiv(mutatie.deelnemer)
 
@@ -1536,6 +1564,10 @@ class Command(BaseCommand):
         elif code == MUTATIE_KLEINE_KLASSE_INDIV:
             self.stdout.write('[INFO] Verwerk mutatie %s: kleine klassen indiv' % mutatie.pk)
             self._verwerk_mutatie_klein_klassen_indiv(mutatie.deelnemer, mutatie.indiv_klasse)
+
+        elif code == MUTATIE_KAMP_TEAMS_NUMMEREN:
+            self.stdout.write('[INFO] Verwerk mutatie %s: teams opnieuw nummeren' % mutatie.pk)
+            self._verwerk_mutatie_teams_opnieuw_nummeren(mutatie.kampioenschap, mutatie.team_klasse)
 
         elif code == MUTATIE_KAMP_INDIV_AFSLUITEN:
             self.stdout.write('[INFO] Verwerk mutatie %s: afsluiten BK indiv' % mutatie.pk)

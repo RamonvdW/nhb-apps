@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2023 Ramon van der Winkel.
+#  Copyright (c) 2019-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -399,7 +399,7 @@ class UitslagenBKTeamsView(TemplateView):
                                        'feitelijke_leden')
                      .order_by('team_klasse__volgorde',      # klassen in de uitslag
                                'result_rank',                # teams binnen elke klasse
-                               'volgorde')):                 # niet meegedaan
+                               'volgorde')):                 # indien niet meegedaan
 
             if team.team_klasse != prev_klasse:
                 teller = self._finalize_klasse(deelkamp_bk, klasse_teams_done, klasse_teams_plan, klasse_teams_afgemeld)
