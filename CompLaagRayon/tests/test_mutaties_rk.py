@@ -9,7 +9,7 @@ from django.core import management
 from BasisTypen.models import BoogType
 from Competitie.definities import (MUTATIE_INITIEEL, MUTATIE_COMPETITIE_OPSTARTEN,
                                    MUTATIE_AG_VASTSTELLEN_18M, MUTATIE_AG_VASTSTELLEN_25M,
-                                   MUTATIE_KAMP_CUT, MUTATIE_KAMP_AFMELDEN,
+                                   MUTATIE_KAMP_CUT, MUTATIE_KAMP_AFMELDEN_INDIV,
                                    DEELNAME_ONBEKEND, DEELNAME_JA, DEELNAME_NEE)
 from Competitie.models import (Competitie, CompetitieIndivKlasse,
                                KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet,
@@ -874,7 +874,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
         mutatie.mutatie = MUTATIE_KAMP_CUT
         self.assertTrue(str(mutatie) != "")     # wel een beschrijving
 
-        mutatie.mutatie = MUTATIE_KAMP_AFMELDEN
+        mutatie.mutatie = MUTATIE_KAMP_AFMELDEN_INDIV
         self.assertTrue(str(mutatie) != "")     # wel een beschrijving
 
         mutatie.is_verwerkt = True

@@ -472,6 +472,7 @@ class KampioenschapTeamAdmin(CreateOnlyAdmin):
     list_filter = ('kampioenschap__competitie',
                    KampioenschapTypeFilter,
                    'team_type',
+                   'is_reserve',
                    'deelname',
                    'vereniging__regio__rayon',
                    TeamKlassenFilter,

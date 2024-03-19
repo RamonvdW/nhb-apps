@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023 Ramon van der Winkel.
+#  Copyright (c) 2023-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -11,13 +11,15 @@ from django.views.generic import TemplateView, View
 from django.core.exceptions import PermissionDenied
 from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
+from Account.models import get_account
 from BasisTypen.definities import ORGANISATIE_WA
 from BasisTypen.models import BoogType
-from Competitie.definities import DEEL_BK, DEELNAME_JA, DEELNAME_NEE
-from Competitie.models import Kampioenschap, KampioenschapTeam
-from Functie.definities import Rollen
+from Competitie.definities import DEEL_BK, DEELNAME_JA, DEELNAME_NEE, MUTATIE_KAMP_TEAMS_NUMMEREN
+from Competitie.models import Kampioenschap, KampioenschapTeam, CompetitieMutatie
+from Functie.definities import Rollen, rol2url
 from Functie.rol import rol_get_huidige_functie
 from Overig.background_sync import BackgroundSync
+import time
 
 TEMPLATE_COMPBOND_BK_TEAMS = 'complaagbond/bk-teams.dtl'
 
@@ -194,20 +196,50 @@ class WijzigStatusBkTeamView(UserPassesTestMixin, View):
         if self.functie_nu != team.kampioenschap.functie:
             raise PermissionDenied('Niet de beheerder')
 
+        opnieuw_nummeren = False
+
         if status in ("beschikbaar", "toch_ja"):
             # toch_ja is voor eerder afgemelde deelnemers
             # beschikbaar is voor reserve teams
             team.deelname = DEELNAME_JA
             team.save(update_fields=['deelname'])
+            opnieuw_nummeren = True
 
         elif status == "afmelden":
             team.deelname = DEELNAME_NEE
             team.save(update_fields=['deelname'])
+            opnieuw_nummeren = True
 
         elif status == "maak_deelnemer":
             # roep het reserve-team op
             team.is_reserve = False
             team.save(update_fields=['is_reserve'])
+            opnieuw_nummeren = True
+
+        if opnieuw_nummeren:
+            account = get_account(request)
+            door_str = "%s %s" % (rol2url[self.rol_nu], account.volledige_naam())
+
+            mutatie = CompetitieMutatie(mutatie=MUTATIE_KAMP_TEAMS_NUMMEREN,
+                                        door=door_str,
+                                        kampioenschap=team.kampioenschap,
+                                        team_klasse=team.team_klasse)
+            mutatie.save()
+            mutatie_ping.ping()
+
+            # wacht op verwerking door achtergrond-taak voordat we verder gaan
+            snel = str(request.POST.get('snel', ''))[:1]        # voor autotest
+
+            if snel != '1':         # pragma: no cover
+                # wacht 3 seconden tot de mutatie uitgevoerd is
+                interval = 0.2      # om steeds te verdubbelen
+                total = 0.0         # om een limiet te stellen
+                while not mutatie.is_verwerkt and total + interval <= 3.0:
+                    time.sleep(interval)
+                    total += interval   # 0.0 --> 0.2, 0.6, 1.4, 3.0, 6.2
+                    interval *= 2       # 0.2 --> 0.4, 0.8, 1.6, 3.2
+                    mutatie = CompetitieMutatie.objects.get(pk=mutatie.pk)
+                # while
 
         url = reverse('CompLaagBond:bk-teams',
                       kwargs={'deelkamp_pk': team.kampioenschap.pk})
