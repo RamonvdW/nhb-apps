@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2023 Ramon van der Winkel.
+#  Copyright (c) 2021-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -30,28 +30,24 @@ class Command(BaseCommand):
                         .order_by('vereniging', 'rol')):
 
             functie_getoond = False
-            for account in functie.accounts.prefetch_related('sporter_set').all():
+
+            account_pks = list(functie.accounts.values_list('pk', flat=True))
+            for sporter in Sporter.objects.filter(account__in=account_pks).select_related('bij_vereniging'):
                 let_op = ''
-                try:
-                    sporter = account.sporter_set.prefetch_related('bij_vereniging').all()[0]
-                except IndexError:
-                    sporter = None
-                    let_op = 'LET OP: account heeft geen koppeling met KHSN lid'
-                else:
-                    if not sporter.bij_vereniging or not sporter.is_actief_lid:
-                        # deze melding komt na 15 januari
-                        let_op = 'LET OP: geen lid meer bij een vereniging'
-                    elif functie.vereniging and sporter.bij_vereniging != functie.vereniging:
-                        # functie voor beheerder van een vereniging
-                        # lid is overgestapt
-                        let_op = 'LET OP: geen lid bij deze vereniging'
+                if not sporter.bij_vereniging or not sporter.is_actief_lid:
+                    # deze melding komt na 15 januari
+                    let_op = 'LET OP: geen lid meer bij een vereniging'
+                elif functie.vereniging and sporter.bij_vereniging != functie.vereniging:
+                    # functie voor beheerder van een vereniging
+                    # lid is overgestapt
+                    let_op = 'LET OP: geen lid bij deze vereniging'
 
                 if toon_alle or len(let_op) > 0:
                     if not functie_getoond:                                         # pragma: no branch
                         self.stdout.write('Functie: %s' % functie.beschrijving)
                         functie_getoond = True
 
-                    self.stdout.write('  [%s] %s  %s' % (account.username, account.volledige_naam(), let_op))
+                    self.stdout.write('  [%s] %s  %s' % (sporter.lid_nr, sporter.volledige_naam(), let_op))
             # for
         # for
 
@@ -83,5 +79,23 @@ class Command(BaseCommand):
         else:
             if not otp_uit:
                 self.stdout.write('Gebruik --otp_uit om 2FA uit te zetten voor deze accounts')
+
+    """
+        performance debug helper:
+    
+        from django.db import connection
+    
+            q_begin = len(connection.queries)
+    
+            # queries here
+    
+            print('queries: %s' % (len(connection.queries) - q_begin))
+            for obj in connection.queries[q_begin:]:
+                print('%10s %s' % (obj['time'], obj['sql'][:200]))
+            # for
+            sys.exit(1)
+    
+        test uitvoeren met DEBUG=True via --settings=SiteMain.settings_dev anders wordt er niets bijgehouden
+    """
 
 # end of file

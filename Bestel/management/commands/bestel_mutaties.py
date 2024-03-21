@@ -1235,7 +1235,7 @@ class Command(BaseCommand):
         # for
         sys.exit(1)
 
-    test uitvoeren met --debug-mode anders wordt er niets bijgehouden
+    test uitvoeren met DEBUG=True via --settings=SiteMain.settings_dev anders wordt er niets bijgehouden
 """
 
 # end of file
