@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2023 Ramon van der Winkel.
+#  Copyright (c) 2019-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -28,7 +28,7 @@ class RegistreerNormaalForm(forms.Form):
         Dit formulier wordt gebruikt om een nieuw account aan te maken
         met een bondsnummer.
     """
-    nhb_nummer = forms.CharField(
+    lid_nr = forms.CharField(
                         label='Bondsnummer',
                         min_length=6,
                         max_length=6,
@@ -48,15 +48,15 @@ class RegistreerNormaalForm(forms.Form):
     def is_valid(self):
         valid = super(forms.Form, self).is_valid()
         if valid:
-            nhb_nummer = self.cleaned_data.get('nhb_nummer')
+            lid_nr = self.cleaned_data.get('lid_nr')
             email = self.cleaned_data.get('email')
             nieuw_wachtwoord = self.cleaned_data.get('nieuw_wachtwoord')
 
-            if nhb_nummer == "" or email == "" or nieuw_wachtwoord == "":
+            if lid_nr == "" or email == "" or nieuw_wachtwoord == "":
                 self.add_error(None, 'niet alle velden zijn ingevuld')
                 valid = False
             else:
-                valid, errmsg = account_test_wachtwoord_sterkte(nieuw_wachtwoord, nhb_nummer)
+                valid, errmsg = account_test_wachtwoord_sterkte(nieuw_wachtwoord, lid_nr)
                 if not valid:
                     self.add_error(None, errmsg)
         else:

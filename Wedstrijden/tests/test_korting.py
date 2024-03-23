@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2023 Ramon van der Winkel.
+#  Copyright (c) 2021-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -277,20 +277,27 @@ class TestWedstrijdenKorting(E2EHelpers, TestCase):
 
         resp = self.client.post(self.url_korting_wijzig % korting_sporter.pk, {'geldig_tm': datum_str,
                                                                                'voor_lid_nr': self.sporter.lid_nr,
-                                                                               'wedstrijd_%s' % self.wedstrijd1.pk: 'ja'})
+                                                                               'wedstrijd_%s' % self.wedstrijd1.pk: 'ja'
+                                                                               })
         self.assert_is_redirect_not_plein(resp)
 
         # korting voor vereniging
-        resp = self.client.post(self.url_korting_wijzig % korting_ver.pk, {'geldig_tm': datum_str,
-                                                                           'percentage': 25,
-                                                                           'voor_onze_ver': 'ja'})
+        resp = self.client.post(self.url_korting_wijzig % korting_ver.pk,
+                                {
+                                    'geldig_tm': datum_str,
+                                    'percentage': 25,
+                                    'voor_onze_ver': 'ja'
+                                })
         self.assert_is_redirect_not_plein(resp)
 
         # wijzig korting combi
-        resp = self.client.post(self.url_korting_wijzig % korting_combi.pk, {'geldig_tm': datum_str,
-                                                                             'percentage': 50,
-                                                                             'wedstrijd_' + str(self.wedstrijd2.pk): 'ja',
-                                                                             'wedstrijd_' + str(self.wedstrijd3.pk): 'ja'})
+        resp = self.client.post(self.url_korting_wijzig % korting_combi.pk,
+                                {
+                                    'geldig_tm': datum_str,
+                                    'percentage': 50,
+                                    'wedstrijd_' + str(self.wedstrijd2.pk): 'ja',
+                                    'wedstrijd_' + str(self.wedstrijd3.pk): 'ja'
+                                })
         self.assert_is_redirect_not_plein(resp)
 
         # verwijder een korting

@@ -49,9 +49,11 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
         #   comp_type: 18/25
         #       rol: BKO, RKO (4x), RCL (16x)
 
-        self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.nhb', 'Normaal')
-        self.account_beh1 = self.e2e_create_account('testbeheerder1', 'beh1@test.nhb', 'Beheerder1', accepteer_vhpg=True)
-        self.account_beh2 = self.e2e_create_account('testbeheerder2', 'beh2@test.nhb', 'Beheerder2', accepteer_vhpg=True)
+        self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.mh', 'Normaal')
+        self.account_beh1 = self.e2e_create_account('testbeheerder1', 'beh1@test.mh', 'Beheerder1',
+                                                    accepteer_vhpg=True)
+        self.account_beh2 = self.e2e_create_account('testbeheerder2', 'beh2@test.mh', 'Beheerder2',
+                                                    accepteer_vhpg=True)
         self.account_ander = self.e2e_create_account('anderlid', 'anderlid@test.nhb', 'Ander')
 
         self.functie_bko = Functie.objects.get(comp_type='18', rol='BKO')
@@ -319,7 +321,8 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
         # controleer correctheid toevoeging in het logboek
         regel = LogboekRegel.objects.first()
         self.assertEqual(regel.gebruikte_functie, 'Rollen')
-        self.assertEqual(regel.activiteit, 'Sporter 100042 (Beh eerder) is beheerder gemaakt voor functie RKO Rayon 3 Indoor')
+        self.assertEqual(regel.activiteit,
+                         'Sporter 100042 (Beh eerder) is beheerder gemaakt voor functie RKO Rayon 3 Indoor')
 
         # check dat de BKO geen RCL kan koppelen
         # juiste URL om RCL te koppelen
@@ -368,7 +371,8 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
         regel = LogboekRegel.objects.first()
         self.assertEqual(regel.gebruikte_functie, 'Rollen')
         # beh1 is geen nhb lid
-        self.assertEqual(regel.activiteit, 'Account Beheerder1 (testbeheerder1) is beheerder gemaakt voor functie RCL Regio 111 Indoor')
+        self.assertEqual(regel.activiteit,
+                         'Account Beheerder1 (testbeheerder1) is beheerder gemaakt voor functie RCL Regio 111 Indoor')
 
         # koppel een RCL van het verkeerde rayon
         url = self.url_wijzig_ontvang % self.functie_rcl101.pk

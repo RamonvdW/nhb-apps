@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023 Ramon van der Winkel.
+#  Copyright (c) 2023-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -48,7 +48,8 @@ class TestCompLaagBondIndiv(E2EHelpers, TestCase):
 
         # we hebben heel veel sporters in Recurve klasse 6
         # (waarschijnlijk omdat de klassengrenzen niet vastgesteld zijn)
-        grote_klasse = KampioenschapSporterBoog.objects.filter(kampioenschap=data.deelkamp18_bk, volgorde=20)[0].indiv_klasse
+        kamp = KampioenschapSporterBoog.objects.filter(kampioenschap=data.deelkamp18_bk, volgorde=20).first()
+        grote_klasse = kamp.indiv_klasse
         KampioenschapIndivKlasseLimiet(kampioenschap=data.deelkamp18_bk, indiv_klasse=grote_klasse, limiet=8).save()
 
         # zet een sporter met kampioen label op 'deelname onzeker'

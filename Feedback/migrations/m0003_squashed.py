@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2023 Ramon van der Winkel.
+#  Copyright (c) 2022-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -29,7 +29,8 @@ class Migration(migrations.Migration):
                 ('in_rol', models.CharField(blank=True, default='?', max_length=100)),
                 ('op_pagina', models.CharField(max_length=50)),
                 ('volledige_url', models.CharField(blank=True, max_length=250, null=True)),
-                ('bevinding', models.CharField(choices=[('8', 'Tevreden'), ('6', 'Bruikbaar'), ('4', 'Moet beter')], max_length=1)),
+                ('bevinding', models.CharField(choices=[('8', 'Tevreden'), ('6', 'Bruikbaar'), ('4', 'Moet beter')],
+                                               max_length=1)),
                 ('is_afgehandeld', models.BooleanField(default=False)),
                 ('feedback', models.TextField()),
             ],

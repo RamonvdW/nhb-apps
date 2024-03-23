@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2023 Ramon van der Winkel.
+#  Copyright (c) 2022-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -164,7 +164,8 @@ class TestBestelBetaling(E2EHelpers, TestCase):
         # betaling opstarten
         url_betaling_gedaan = '/plein/'     # TODO: betere url kiezen
         description = 'Test betaling 421'       # 421 = paid, iDEAL
-        betaal_mutatieverzoek_start_ontvangst(bestelling, description, self.wedstrijd.prijs_euro_normaal, url_betaling_gedaan, snel=True)
+        betaal_mutatieverzoek_start_ontvangst(bestelling, description, self.wedstrijd.prijs_euro_normaal,
+                                              url_betaling_gedaan, snel=True)
         self.verwerk_betaal_mutaties()
 
         # check dat de transactie inderdaad opgestart is

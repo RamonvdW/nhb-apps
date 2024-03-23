@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2023 Ramon van der Winkel.
+#  Copyright (c) 2022-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -61,7 +61,11 @@ class TestCompLaagRayonCliImportUitslagRkIndiv(E2EHelpers, TestCase):
         zet_competitie_fase_rk_wedstrijden(data.comp25)
 
         # prev_klasse = None
-        # for deelnemer in KampioenschapSporterBoog.objects.filter(kampioenschap__competitie__afstand=18).prefetch_related('indiv_klasse').order_by('indiv_klasse__volgorde'):
+        # for deelnemer in (KampioenschapSporterBoog
+        #                   .objects
+        #                   .filter(kampioenschap__competitie__afstand=18)
+        #                   .prefetch_related('indiv_klasse')
+        #                   .order_by('indiv_klasse__volgorde')):
         #     if deelnemer.indiv_klasse.pk != prev_klasse:
         #         print('---', deelnemer.indiv_klasse)
         #         prev_klasse = deelnemer.indiv_klasse.pk
@@ -76,7 +80,8 @@ class TestCompLaagRayonCliImportUitslagRkIndiv(E2EHelpers, TestCase):
         self.run_management_command('import_uitslag_rk_25m1pijl_indiv', 'bestand')
         self.assertTrue('[ERROR] Kan het excel bestand niet openen')
 
-        f1, f2 = self.run_management_command('import_uitslag_rk_25m1pijl_indiv', self.real_testfile_25m1pijl, '--dryrun')
+        f1, f2 = self.run_management_command('import_uitslag_rk_25m1pijl_indiv', self.real_testfile_25m1pijl,
+                                             '--dryrun')
         # print('\nf1: %s' % f1.getvalue())
         # print('\nf2: %s' % f2.getvalue())
         self.assertTrue('[ERROR] Score is niet aflopend op regel 11' in f1.getvalue())
@@ -106,7 +111,8 @@ class TestCompLaagRayonCliImportUitslagRkIndiv(E2EHelpers, TestCase):
         self.run_management_command('import_uitslag_rk_indoor_indiv', 'bestand')
         self.assertTrue('[ERROR] Kan het excel bestand niet openen')
 
-        f1, f2 = self.run_management_command('import_uitslag_rk_indoor_indiv', self.real_testfile_indoor, '--dryrun', '--verbose')
+        f1, f2 = self.run_management_command('import_uitslag_rk_indoor_indiv', self.real_testfile_indoor,
+                                             '--dryrun', '--verbose')
         _ = (f1, f2)
         # print('f1:', f1.getvalue())
         # print('f2:', f2.getvalue())

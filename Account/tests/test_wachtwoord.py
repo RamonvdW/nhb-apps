@@ -54,7 +54,7 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
         # controleer dat we nu ingelogd zijn!
         self.e2e_assert_logged_in()
 
-        nieuw_ww = 'nieuwWwoord'
+        nieuw_ww = 'nieuwWwoord'    # noqa
 
         # foutief huidige wachtwoord
         with self.assert_max_queries(20):

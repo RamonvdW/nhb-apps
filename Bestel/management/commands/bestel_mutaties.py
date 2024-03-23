@@ -635,7 +635,7 @@ class Command(BaseCommand):
                                                           .wedstrijd_inschrijving
                                                           .wedstrijd
                                                           .organiserende_vereniging)
-                    ontvanger_ver_nr = instellingen.vereniging.ver_nr       # kan nu ook "via nhb" zijn
+                    ontvanger_ver_nr = instellingen.vereniging.ver_nr       # kan nu ook "via KHSN" zijn
                     try:
                         ontvanger2producten[ontvanger_ver_nr].append(product)
                     except KeyError:
@@ -734,8 +734,9 @@ class Command(BaseCommand):
                 totaal_euro_str = totaal_euro_str.replace('.', ',')     # nederlandse komma
 
                 self.stdout.write(
-                    "[INFO] %s producten voor totaal %s uit mandje van account pk=%s (%s) omgezet in bestelling pk=%s" % (
-                        len(producten), totaal_euro_str, mutatie.account.pk, mutatie.account.volledige_naam(), bestelling.pk))
+                    "[INFO] %s producten voor totaal %s uit mandje account pk=%s (%s) omgezet in bestelling pk=%s" % (
+                        len(producten), totaal_euro_str, mutatie.account.pk, mutatie.account.volledige_naam(),
+                        bestelling.pk))
             # for
 
             # kijk welke bestellingen een nul-bedrag hebben en daarom meteen afgerond kunnen worden

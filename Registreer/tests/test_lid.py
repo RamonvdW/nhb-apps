@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2023 Ramon van der Winkel.
+#  Copyright (c) 2019-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -25,7 +25,7 @@ class TestRegistreerLid(E2EHelpers, TestCase):
     test_after = ('Account',)
 
     url_tijdelijk = '/tijdelijke-codes/%s/'
-    url_registreer_nhb = '/account/registreer/lid/'
+    url_registreer_khsn = '/account/registreer/lid/'
 
     testdata = None
 
@@ -80,7 +80,7 @@ class TestRegistreerLid(E2EHelpers, TestCase):
     def test_get(self):
         # test registratie via het formulier
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_registreer_nhb)
+            resp = self.client.get(self.url_registreer_khsn)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('registreer/registreer-lid.dtl', 'plein/site_layout.dtl'))
@@ -88,8 +88,8 @@ class TestRegistreerLid(E2EHelpers, TestCase):
     def test_post(self):
         # partial fields
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_registreer_nhb,
-                                    {'nhb_nummer': '100001',
+            resp = self.client.post(self.url_registreer_khsn,
+                                    {'lid_nr': '100001',
                                      'email': 'rdetester@gmail.not',
                                      'nieuw_wachtwoord': ''})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
@@ -99,8 +99,8 @@ class TestRegistreerLid(E2EHelpers, TestCase):
 
         # invalid fields
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_registreer_nhb,
-                                    {'nhb_nummer': '100678',
+            resp = self.client.post(self.url_registreer_khsn,
+                                    {'lid_nr': '100678',
                                      'email': 'is geen email',
                                      'nieuw_wachtwoord': E2EHelpers.WACHTWOORD})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
@@ -110,8 +110,8 @@ class TestRegistreerLid(E2EHelpers, TestCase):
 
         # bad fields
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_registreer_nhb,
-                                    {'nhb_nummer': 'hallo!',
+            resp = self.client.post(self.url_registreer_khsn,
+                                    {'lid_nr': 'hallo!',
                                      'email': 'test@test.not',
                                      'nieuw_wachtwoord': E2EHelpers.WACHTWOORD},
                                     follow=True)
@@ -122,8 +122,8 @@ class TestRegistreerLid(E2EHelpers, TestCase):
 
         # niet bestaand nummer
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_registreer_nhb,
-                                    {'nhb_nummer': '999999',
+            resp = self.client.post(self.url_registreer_khsn,
+                                    {'lid_nr': '999999',
                                      'email': 'test@test.not',
                                      'nieuw_wachtwoord': E2EHelpers.WACHTWOORD},
                                     follow=True)
@@ -134,8 +134,8 @@ class TestRegistreerLid(E2EHelpers, TestCase):
 
         # verkeerde email
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_registreer_nhb,
-                                    {'nhb_nummer': '100001',
+            resp = self.client.post(self.url_registreer_khsn,
+                                    {'lid_nr': '100001',
                                      'email': 'rdetester@gmail.yes',
                                      'nieuw_wachtwoord': E2EHelpers.WACHTWOORD},
                                     follow=True)
@@ -147,8 +147,8 @@ class TestRegistreerLid(E2EHelpers, TestCase):
 
         # zwak wachtwoord: te kort
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_registreer_nhb,
-                                    {'nhb_nummer': '100001',
+            resp = self.client.post(self.url_registreer_khsn,
+                                    {'lid_nr': '100001',
                                      'email': 'rdetester@gmail.not',
                                      'nieuw_wachtwoord': 'te kort'},
                                     follow=False)
@@ -159,8 +159,8 @@ class TestRegistreerLid(E2EHelpers, TestCase):
 
         # zwak wachtwoord: verboden reeks
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_registreer_nhb,
-                                    {'nhb_nummer': '100001',
+            resp = self.client.post(self.url_registreer_khsn,
+                                    {'lid_nr': '100001',
                                      'email': 'rdetester@gmail.not',
                                      'nieuw_wachtwoord': 'handboogsport'},
                                     follow=False)
@@ -171,10 +171,10 @@ class TestRegistreerLid(E2EHelpers, TestCase):
 
         # zwak wachtwoord: bondsnummer in wachtwoord
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_registreer_nhb,
-                                    {'nhb_nummer': '100001',
+            resp = self.client.post(self.url_registreer_khsn,
+                                    {'lid_nr': '100001',
                                      'email': 'rdetester@gmail.not',
-                                     'nieuw_wachtwoord': 'yoho100001jaha'},
+                                     'nieuw_wachtwoord': 'yoho100001jaha'},  # noqa
                                     follow=False)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -183,8 +183,8 @@ class TestRegistreerLid(E2EHelpers, TestCase):
 
         # zwak wachtwoord: te weinig verschillende tekens
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_registreer_nhb,
-                                    {'nhb_nummer': '100001',
+            resp = self.client.post(self.url_registreer_khsn,
+                                    {'lid_nr': '100001',
                                      'email': 'rdetester@gmail.not',
                                      'nieuw_wachtwoord': 'jaJAjaJAjaJA'},
                                     follow=False)
@@ -200,8 +200,8 @@ class TestRegistreerLid(E2EHelpers, TestCase):
         sec.sporters.add(self.sporter_100001)
 
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_registreer_nhb,
-                                    {'nhb_nummer': '100002',
+            resp = self.client.post(self.url_registreer_khsn,
+                                    {'lid_nr': '100002',
                                      'email': 'rdetester@gmail.not',
                                      'nieuw_wachtwoord': E2EHelpers.WACHTWOORD},
                                     follow=True)
@@ -211,8 +211,8 @@ class TestRegistreerLid(E2EHelpers, TestCase):
 
     def test_geen_email_geen_sec(self):
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_registreer_nhb,
-                                    {'nhb_nummer': '100002',
+            resp = self.client.post(self.url_registreer_khsn,
+                                    {'lid_nr': '100002',
                                      'email': 'rdetester@gmail.not',
                                      'nieuw_wachtwoord': E2EHelpers.WACHTWOORD},
                                     follow=True)
@@ -224,8 +224,8 @@ class TestRegistreerLid(E2EHelpers, TestCase):
         self.sporter_100002.bij_vereniging = None
         self.sporter_100002.save(update_fields=['bij_vereniging'])
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_registreer_nhb,
-                                    {'nhb_nummer': '100002',
+            resp = self.client.post(self.url_registreer_khsn,
+                                    {'lid_nr': '100002',
                                      'email': 'rdetester@gmail.not',
                                      'nieuw_wachtwoord': E2EHelpers.WACHTWOORD},
                                     follow=True)
@@ -241,8 +241,8 @@ class TestRegistreerLid(E2EHelpers, TestCase):
 
         # doorloop de registratie
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_registreer_nhb,
-                                    {'nhb_nummer': '100001',
+            resp = self.client.post(self.url_registreer_khsn,
+                                    {'lid_nr': '100001',
                                      'email': 'norMAAl@test.com',    # dekt case-insensitive e-mailadres
                                      'nieuw_wachtwoord': E2EHelpers.WACHTWOORD},
                                     follow=True)
@@ -302,8 +302,8 @@ class TestRegistreerLid(E2EHelpers, TestCase):
 
     def test_bestaat_al(self):
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_registreer_nhb,
-                                    {'nhb_nummer': '100001',
+            resp = self.client.post(self.url_registreer_khsn,
+                                    {'lid_nr': '100001',
                                      'email': 'normaal@test.com',
                                      'nieuw_wachtwoord': E2EHelpers.WACHTWOORD},
                                     follow=True)
@@ -313,8 +313,8 @@ class TestRegistreerLid(E2EHelpers, TestCase):
 
         # tweede poging
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_registreer_nhb,
-                                    {'nhb_nummer': '100001',
+            resp = self.client.post(self.url_registreer_khsn,
+                                    {'lid_nr': '100001',
                                      'email': 'normaal@test.com',
                                      'nieuw_wachtwoord': E2EHelpers.WACHTWOORD},
                                     follow=True)
@@ -328,8 +328,8 @@ class TestRegistreerLid(E2EHelpers, TestCase):
         self.sporter_100001.save()
 
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_registreer_nhb,
-                                    {'nhb_nummer': '100001',
+            resp = self.client.post(self.url_registreer_khsn,
+                                    {'lid_nr': '100001',
                                      'email': self.sporter_100001.email,
                                      'nieuw_wachtwoord': E2EHelpers.WACHTWOORD},
                                     follow=True)
@@ -352,8 +352,8 @@ class TestRegistreerLid(E2EHelpers, TestCase):
         self.assertEqual(functie.accounts.count(), 0)
 
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_registreer_nhb,
-                                    {'nhb_nummer': '100001',
+            resp = self.client.post(self.url_registreer_khsn,
+                                    {'lid_nr': '100001',
                                      'email': 'normaal@test.com',
                                      'nieuw_wachtwoord': E2EHelpers.WACHTWOORD},
                                     follow=True)
@@ -376,8 +376,8 @@ class TestRegistreerLid(E2EHelpers, TestCase):
         self.sporter_100001.save()
 
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_registreer_nhb,
-                                    {'nhb_nummer': '100001',
+            resp = self.client.post(self.url_registreer_khsn,
+                                    {'lid_nr': '100001',
                                      'email': self.sporter_100001.email,
                                      'nieuw_wachtwoord': E2EHelpers.WACHTWOORD},
                                     follow=True)

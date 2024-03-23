@@ -91,7 +91,7 @@ class TestFunctieCli(E2EHelpers, TestCase):
 
     def test_maak_rcl_bad(self):
         with self.assert_max_queries(20):
-            f1, f2 = self.run_management_command('maak_rcl', 'bestaatniet', '18', '000')
+            f1, f2 = self.run_management_command('maak_rcl', 'bestaat_niet', '18', '000')
         self.assertTrue("Account matching query does not exist" in f1.getvalue())
         self.assertTrue("Functie matching query does not exist" in f1.getvalue())
         self.assertTrue(f2.getvalue() == '')
@@ -137,7 +137,7 @@ class TestFunctieCli(E2EHelpers, TestCase):
             f1, f2 = self.run_management_command('check_beheerders')
         self.assertTrue(f1.getvalue() == '')
         # print('f2:', f2.getvalue())
-        self.assertFalse("LET OP:" in f2.getvalue())    # we klagen niet meer over account niet gekoppeld aand sporter
+        self.assertFalse("LET OP:" in f2.getvalue())    # we klagen niet meer over account niet gekoppeld aan sporter
 
         # maak account aan sporter
         sporter = Sporter(

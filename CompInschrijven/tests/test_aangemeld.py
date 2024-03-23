@@ -159,7 +159,7 @@ class TestCompInschrijvenAangemeld(E2EHelpers, TestCase):
                             bij_vereniging=ver,
                             is_actief_lid=True,
                             geslacht='M',
-                            geboorte_datum = datetime.date(2000, 1, 1),      # senior
+                            geboorte_datum=datetime.date(2000, 1, 1),      # senior
                             sinds_datum=datetime.date(2010, 1, 1))
                 if barebow_boog_pk:
                     sporter.geboorte_datum = datetime.date(2019-12, 1, 1)   # aspirant
@@ -473,7 +473,7 @@ class TestCompInschrijvenAangemeld(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(functie_rcl)
 
         inschrijving = RegiocompetitieSporterBoog.objects.filter(bij_vereniging=self._ver).first()
-        naam_str = "[" + str(inschrijving.sporterboog.sporter.lid_nr) + "] " + inschrijving.sporterboog.sporter.volledige_naam()
+        naam_str = inschrijving.sporterboog.sporter.lid_nr_en_volledige_naam()
         ver_str = str(self._ver)            # [ver_nr] Vereniging
 
         # controleer dat de sporter bij de juiste vereniging staat

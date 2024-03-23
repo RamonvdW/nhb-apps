@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2023 Ramon van der Winkel.
+#  Copyright (c) 2022-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -60,7 +60,7 @@ class Command(BaseCommand):
         # for
 
     def _filter_deelnemers(self, team_klasse):
-        # reduceer het aantal KampioenschapSporterBoog aan de hand van de bogen die toegestaan zijn in deze wedstrijdklasse
+        # reduceer het aantal KampioenschapSporterBoog aan de hand van de bogen toegestaan in deze wedstrijdklasse
         afkortingen = list(team_klasse.boog_typen.values_list('afkorting', flat=True))
         self.stdout.write('[INFO] Toegestane bogen in team klasse %s = %s' % (team_klasse, ",".join(afkortingen)))
 
@@ -68,7 +68,9 @@ class Command(BaseCommand):
 
         for lid_nr in self.deelnemers.keys():
             deelnemers = self.deelnemers[lid_nr]
-            self.deelnemers[lid_nr] = [deelnemer for deelnemer in deelnemers if deelnemer.sporterboog.boogtype.afkorting in afkortingen]
+            self.deelnemers[lid_nr] = [deelnemer
+                                       for deelnemer in deelnemers
+                                       if deelnemer.sporterboog.boogtype.afkorting in afkortingen]
         # for
 
         # count2 = sum([len(deelnemers) for deelnemers in self.deelnemers.values()])
@@ -88,7 +90,8 @@ class Command(BaseCommand):
                                        'feitelijke_leden')):
 
             self.teams_cache.append(team)
-            self.team_lid_nrs[team.pk] = [deelnemer.sporterboog.sporter.lid_nr for deelnemer in team.gekoppelde_leden.all()]
+            self.team_lid_nrs[team.pk] = [deelnemer.sporterboog.sporter.lid_nr
+                                          for deelnemer in team.gekoppelde_leden.all()]
         # for
 
     def _sort_op_gemiddelde(self, lid_nrs):
@@ -202,7 +205,8 @@ class Command(BaseCommand):
             except ValueError:
                 pass
 
-            # self.stdout.write('[DEBUG] regel %s: ver_nr=%s, ver_naam=%s, team_naam=%s' % (row, ver_nr, repr(ver_naam), repr(team_naam)))
+            # self.stdout.write('[DEBUG] regel %s: ver_nr=%s, ver_naam=%s, team_naam=%s' % (
+            #                       row, ver_nr, repr(ver_naam), repr(team_naam)))
 
             if ver_nr < 0:
                 continue
@@ -210,7 +214,8 @@ class Command(BaseCommand):
             # zoek het team erbij
             kamp_team = self._get_team(team_naam, ver_nr, row_nr, team_klasse)
             if kamp_team is None:
-                self.stdout.write('[WARNING] Team %s op regel %s niet herkend voor klasse %s' % (repr(team_naam), row, team_klasse))
+                self.stdout.write('[WARNING] Team %s op regel %s niet herkend voor klasse %s' % (
+                                    repr(team_naam), row, team_klasse))
                 continue
 
             if team_klasse is None:
@@ -290,7 +295,9 @@ class Command(BaseCommand):
                             uitvallers.pop(0)
                     # while
 
-                    feitelijke_deelnemers = [deelnemer for deelnemer in feitelijke_deelnemers if deelnemer.sporterboog.sporter.lid_nr not in afgekeurd]
+                    feitelijke_deelnemers = [deelnemer
+                                             for deelnemer in feitelijke_deelnemers
+                                             if deelnemer.sporterboog.sporter.lid_nr not in afgekeurd]
 
             if len(feitelijke_deelnemers) > 0:
                 kamp_team.result_teamscore = 0

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2023 Ramon van der Winkel.
+#  Copyright (c) 2019-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -109,7 +109,7 @@ class Command(BaseCommand):
                         curr_record.geslacht = record.geslacht
 
                 # 2 = Leeftijdscategorie
-                # M(aster) / S(enior) / J(unior) / C(adet) / nvt = U(niform)
+                # M(naster) / S(senior) / J(junior) / C(cadet) / nvt = U(uniform)
                 # 50+ / 21+ / Onder 21 / Onder 18 / nvt
                 val = row[2]
                 if val == 'nvt':

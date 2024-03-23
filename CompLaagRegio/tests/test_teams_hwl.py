@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2023 Ramon van der Winkel.
+#  Copyright (c) 2020-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -103,7 +103,7 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
                     geboorte_datum=datetime.date(year=jaar-12, month=3, day=4),
                     sinds_datum=datetime.date(year=jaar-3, month=11, day=12),
                     bij_vereniging=ver)
-        sporter.account=self.e2e_create_account(sporter.lid_nr, sporter.email, sporter.voornaam)  # last_login=None
+        sporter.account = self.e2e_create_account(sporter.lid_nr, sporter.email, sporter.voornaam)  # last_login=None
         sporter.save()
         self.sporter_100002 = sporter
 

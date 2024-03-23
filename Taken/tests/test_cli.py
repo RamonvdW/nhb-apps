@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2023 Ramon van der Winkel.
+#  Copyright (c) 2020-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -55,7 +55,8 @@ class TestTakenCLI(E2EHelpers, TestCase):
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
         self.assertEqual(f1.getvalue(), '')
-        self.assertTrue('Taak aangemaakt door normal voor functie Manager Wedstrijdzaken met deadline 2020-02-03' in f2.getvalue())
+        self.assertTrue('Taak aangemaakt door normal voor functie Manager Wedstrijdzaken met deadline 2020-02-03'
+                        in f2.getvalue())
 
         self.assertEqual(1, Taak.objects.count())
         taak = Taak.objects.first()

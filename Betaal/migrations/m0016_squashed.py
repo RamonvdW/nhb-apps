@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023 Ramon van der Winkel.
+#  Copyright (c) 2023-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -44,7 +44,8 @@ class Migration(migrations.Migration):
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('when', models.DateTimeField(auto_now_add=True)),
                 ('payment_id', models.CharField(max_length=64)),
-                ('ontvanger', models.ForeignKey(on_delete=models.deletion.PROTECT, to='Betaal.betaalinstellingenvereniging')),
+                ('ontvanger', models.ForeignKey(on_delete=models.deletion.PROTECT,
+                                                to='Betaal.betaalinstellingenvereniging')),
                 ('log', models.TextField(default='')),
                 ('payment_status', models.CharField(default='', max_length=15)),
             ],
@@ -63,7 +64,8 @@ class Migration(migrations.Migration):
                 ('beschrijving', models.CharField(max_length=100)),
                 ('bedrag_euro', models.DecimalField(decimal_places=2, default=0.0, max_digits=7)),
                 ('payment_id', models.CharField(blank=True, max_length=64)),
-                ('ontvanger', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.PROTECT, to='Betaal.betaalinstellingenvereniging')),
+                ('ontvanger', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.PROTECT,
+                                                to='Betaal.betaalinstellingenvereniging')),
                 ('url_betaling_gedaan', models.CharField(default='', max_length=100)),
                 ('url_checkout', models.CharField(blank=True, default='', max_length=200)),
             ],

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2023 Ramon van der Winkel.
+#  Copyright (c) 2020-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -57,7 +57,8 @@ def end_of_run():
                         print('[WARNING] Missing assert_html_ok coverage for template %s' % repr(dtl_str))
 
                 if is_email_template and dtl_str not in consistent_email_templates:
-                    print('[WARNING] Missing assert_consistent_email_html_text coverage for e-mail template %s' % repr(dtl_str))
+                    print('[WARNING] Missing assert_consistent_email_html_text coverage for e-mail template %s' %
+                          repr(dtl_str))
         # for
 
 

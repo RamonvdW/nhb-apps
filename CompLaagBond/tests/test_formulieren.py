@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023 Ramon van der Winkel.
+#  Copyright (c) 2023-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -68,14 +68,14 @@ class TestCompLaagBondFormulieren(E2EHelpers, TestCase):
         # zet de competitie in fase O (=vereiste vaststellen klassengrenzen)
         zet_competitie_fase_bk_prep(self.testdata.comp18)
 
-        # stel de klassegrenzen vast
-        #resp = self.client.post(self.url_klassengrenzen_teams_vaststellen % self.testdata.comp18.pk)
+        # stel de klassengrenzen vast
+        # resp = self.client.post(self.url_klassengrenzen_teams_vaststellen % self.testdata.comp18.pk)
         # self.e2e_dump_resp(resp)
-        #self.assert_is_redirect_not_plein(resp)
+        # self.assert_is_redirect_not_plein(resp)
 
         # zet de competities in fase P
-        #zet_competitie_fase_bk_wedstrijden(self.testdata.comp18)
-        #zet_competitie_fase_bk_wedstrijden(self.testdata.comp25)
+        # zet_competitie_fase_bk_wedstrijden(self.testdata.comp18)
+        # zet_competitie_fase_bk_wedstrijden(self.testdata.comp25)
 
         loc = Locatie(banen_18m=8,
                       banen_25m=8,

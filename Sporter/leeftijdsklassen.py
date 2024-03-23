@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2023 Ramon van der Winkel.
+#  Copyright (c) 2019-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -12,9 +12,9 @@ from BasisTypen.definities import (GESLACHT_ALLE, GESLACHT_ANDERS, GESLACHT_MAN,
 from BasisTypen.models import Leeftijdsklasse, TemplateCompetitieIndivKlasse
 
 
-def bereken_leeftijdsklassen_khsn(geboorte_jaar, wedstrijdgeslacht_nhb, huidige_jaar):
+def bereken_leeftijdsklassen_khsn(geboorte_jaar, wedstrijdgeslacht_khsn, huidige_jaar):
     """ retourneert de wedstrijdklassen voor een sporter vanaf 1 jaar terug tot 4 jaar vooruit.
-        wedstrijdgeslacht_nhb kan zijn GESLACHT_MAN, GESLACHT_VROUW of GESLACHT_ANDERS
+        wedstrijdgeslacht_khsn kan zijn GESLACHT_MAN, GESLACHT_VROUW of GESLACHT_ANDERS
 
         Retourneert:
             Huidige jaar, Leeftijd, False, None, None als het geen jonge schutter betreft
@@ -67,7 +67,7 @@ def bereken_leeftijdsklassen_khsn(geboorte_jaar, wedstrijdgeslacht_nhb, huidige_
         # for
 
     # nu uitbreiden met een specifiek geslacht, indien gekozen
-    if wedstrijdgeslacht_nhb != GESLACHT_ANDERS:
+    if wedstrijdgeslacht_khsn != GESLACHT_ANDERS:
         # haal alle leeftijdsklassen op en vul de min/max leeftijden aan
         alle_lkl = list()
         prev_lkl = None
@@ -75,7 +75,7 @@ def bereken_leeftijdsklassen_khsn(geboorte_jaar, wedstrijdgeslacht_nhb, huidige_
         for lkl in (Leeftijdsklasse
                     .objects
                     .filter(organisatie__in=(ORGANISATIE_WA, ORGANISATIE_KHSN),
-                            wedstrijd_geslacht__in=wedstrijdgeslacht_nhb)
+                            wedstrijd_geslacht__in=wedstrijdgeslacht_khsn)
                     .order_by('volgorde')):
 
             if lkl.min_wedstrijdleeftijd == 0:
@@ -114,10 +114,10 @@ def bereken_leeftijdsklassen_khsn(geboorte_jaar, wedstrijdgeslacht_nhb, huidige_
     return huidige_jaar, wedstrijdleeftijd, lkl_dit_jaar, lkl_lst
 
 
-def bereken_leeftijdsklassen_bondscompetitie(geboorte_jaar, wedstrijdgeslacht_nhb, huidige_jaar, huidige_maand):
+def bereken_leeftijdsklassen_bondscompetitie(geboorte_jaar, wedstrijdgeslacht_khsn, huidige_jaar, huidige_maand):
     """ retourneert de wedstrijdklassen voor een sporter vanaf 1 jaar terug tot 4 jaar vooruit
         voor de bondscompetities van de KHSN.
-        wedstrijdgeslacht_nhb kan zijn GESLACHT_MAN, GESLACHT_VROUW of GESLACHT_ANDERS
+        wedstrijdgeslacht_khsn kan zijn GESLACHT_MAN, GESLACHT_VROUW of GESLACHT_ANDERS
 
         Retourneert:
                 wedstrijdleeftijd, lkl_lst
@@ -136,8 +136,8 @@ def bereken_leeftijdsklassen_bondscompetitie(geboorte_jaar, wedstrijdgeslacht_nh
     # de meeste sporters met geslacht 'anders' zullen dus in een gender-neutrale klasse komen
     # een jonge sporter met geslacht 'anders' die nog geen wedstrijdgeslacht gekozen heeft,
     # die moeten we dus forceren in een van de klasse.
-    if wedstrijdgeslacht_nhb == GESLACHT_ANDERS:
-        wedstrijdgeslacht_nhb = GESLACHT_MAN
+    if wedstrijdgeslacht_khsn == GESLACHT_ANDERS:
+        wedstrijdgeslacht_khsn = GESLACHT_MAN
 
     leeftijd2tekst_w = dict()  # [leeftijd] = beschrijving voor wedstrijdgeslacht
     leeftijd2tekst_g = dict()  # [leeftijd] = beschrijving voor gender-neutraal
@@ -160,7 +160,7 @@ def bereken_leeftijdsklassen_bondscompetitie(geboorte_jaar, wedstrijdgeslacht_nh
     for lkl in (Leeftijdsklasse
                 .objects
                 .filter(pk__in=lkl_pks,
-                        wedstrijd_geslacht__in=(wedstrijdgeslacht_nhb, GESLACHT_ALLE))
+                        wedstrijd_geslacht__in=(wedstrijdgeslacht_khsn, GESLACHT_ALLE))
                 .order_by('volgorde')):        # jongste sporters eerst
 
         lkl.min_wedstrijdleeftijd = min_wedstrijdleeftijd
@@ -195,7 +195,6 @@ def bereken_leeftijdsklassen_bondscompetitie(geboorte_jaar, wedstrijdgeslacht_nh
 
     # bereken de wedstrijdklassen en competitieklassen
     lkl_lst = list()
-    lkl_volgende_competitie = '?'
     for n in (-1, 0, 1, 2, 3):
         seizoen = '%s/%s' % (eerste_jaar+n, eerste_jaar+n+1)
 
@@ -348,8 +347,6 @@ def bereken_leeftijdsklasse_wa(wedstrijdleeftijd, wedstrijdgeslacht):
                 .filter(organisatie=ORGANISATIE_WA,
                         wedstrijd_geslacht=wedstrijdgeslacht)
                 .order_by('volgorde')):                              # pragma: no branch
-
-        klasse_compat_geslacht = klasse_compat_leeftijd = False
 
         # check leeftijd is compatible
         if lkl.leeftijd_is_compatible(wedstrijdleeftijd):

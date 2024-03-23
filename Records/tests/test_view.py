@@ -242,7 +242,7 @@ class TestRecordsView(E2EHelpers, TestCase):
 
     def test_view_zoek_plaats_case_insensitive(self):
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_zoek, {'zoekterm': 'PENdal'})
+            resp = self.client.get(self.url_zoek, {'zoekterm': 'PENdal'})       # noqa
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assertContains(resp, "Resultaten")
         self.assertContains(resp, "1 record")

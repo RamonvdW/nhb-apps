@@ -170,7 +170,7 @@ class RegistreerLidView(TemplateView):
 
         if form.is_valid():
             # compleetheid en wachtwoord sterkte worden gecontroleerd door het formulier
-            nummer = form.cleaned_data.get('nhb_nummer')
+            nummer = form.cleaned_data.get('lid_nr')
             email = form.cleaned_data.get('email')
             nieuw_wachtwoord = form.cleaned_data.get('nieuw_wachtwoord')
             from_ip = get_safe_from_ip(request)
@@ -182,7 +182,7 @@ class RegistreerLidView(TemplateView):
             except SporterGeenEmail as exc:
                 schrijf_in_logboek(account=None,
                                    gebruikte_functie="Registreer met bondsnummer",
-                                   activiteit='NHB lid %s heeft geen email adres.' % nummer)
+                                   activiteit='KHSN lid %s heeft geen email adres.' % nummer)
                 my_logger.info('%s REGISTREER Geblokkeerd voor bondsnummer %s (geen email)' % (
                                     from_ip, repr(nummer)))
 

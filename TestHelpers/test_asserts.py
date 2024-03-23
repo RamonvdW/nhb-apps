@@ -499,7 +499,8 @@ class MyTestAsserts(TestCase):
     def html_assert_dubbelklik_bescherming(self, html, dtl):
         """ controleer het gebruik onsubmit in forms
 
-            <form action="{{ url_opslaan }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
+            <form action="{{ url_opslaan }}" method="post"
+                  onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
 
             <button class="btn-sv-rood" id="submit_knop" type="submit">
         """

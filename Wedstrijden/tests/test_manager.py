@@ -213,7 +213,7 @@ class TestWedstrijdenManager(E2EHelpers, TestCase):
         self.assertEqual(wedstrijd.status, 'A')
 
         # Annuleer
-        for status in "OWAX":
+        for status in "OWAX":   # noqa
             wedstrijd.status = status
             wedstrijd.save()
             with self.assert_max_queries(20):

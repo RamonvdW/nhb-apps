@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2023 Ramon van der Winkel.
+#  Copyright (c) 2020-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -46,13 +46,14 @@ class Aanvangsgemiddelde(models.Model):
 
 
 class AanvangsgemiddeldeHist(models.Model):
-    """ Bijhouden van de geschiedenis van een aanvangsgemiddelde: vaststellen of invoeer + wijzigingen """
+    """ Bijhouden van de geschiedenis van een aanvangsgemiddelde: vaststellen of invoer + wijzigingen """
 
     # datum/tijdstip
     when = models.DateTimeField(auto_now_add=True)      # automatisch invullen
 
     # waar gaat dit over?
-    ag = models.ForeignKey(Aanvangsgemiddelde, on_delete=models.CASCADE, null=True, related_name='ag_hist')     # TODO: null=True kan weg?
+    ag = models.ForeignKey(Aanvangsgemiddelde, on_delete=models.CASCADE, null=True,     # TODO: null=True kan weg?
+                           related_name='ag_hist')
 
     # oude en nieuwe waarde
     oude_waarde = models.DecimalField(max_digits=6, decimal_places=3)     # max = 10,000

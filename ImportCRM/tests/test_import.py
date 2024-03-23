@@ -110,10 +110,14 @@ class TestImportCRMImport(E2EHelpers, TestCase):
                                                  report_exit_code=False)
         # print("\nf1:\n%s" % f1.getvalue())
         # print("f2:\n%s" % f2.getvalue())
-        self.assertTrue("[ERROR] [FATAL] Verplichte sleutel 'rayons' niet aanwezig in de 'top-level' data" in f1.getvalue())
-        self.assertTrue("[ERROR] [FATAL] Verplichte sleutel 'regions' niet aanwezig in de 'top-level' data" in f1.getvalue())
-        self.assertTrue("[ERROR] [FATAL] Verplichte sleutel 'clubs' niet aanwezig in de 'top-level' data" in f1.getvalue())
-        self.assertTrue("[ERROR] [FATAL] Verplichte sleutel 'members' niet aanwezig in de 'top-level' data" in f1.getvalue())
+        self.assertTrue("[ERROR] [FATAL] Verplichte sleutel 'rayons' niet aanwezig in de 'top-level' data"
+                        in f1.getvalue())
+        self.assertTrue("[ERROR] [FATAL] Verplichte sleutel 'regions' niet aanwezig in de 'top-level' data"
+                        in f1.getvalue())
+        self.assertTrue("[ERROR] [FATAL] Verplichte sleutel 'clubs' niet aanwezig in de 'top-level' data"
+                        in f1.getvalue())
+        self.assertTrue("[ERROR] [FATAL] Verplichte sleutel 'members' niet aanwezig in de 'top-level' data"
+                        in f1.getvalue())
         # self.assertEqual(f2.getvalue(), '')
 
     def test_import(self):
@@ -135,8 +139,11 @@ class TestImportCRMImport(E2EHelpers, TestCase):
         self.assertTrue("[INFO] Lid 100001: sinds_datum: 2010-11-12 --> 2000-01-01" in f2.getvalue())
         self.assertTrue("[INFO] Lid 100001: nieuwe speelsterkte 1990-01-01, Recurve, Recurve 1000" in f2.getvalue())
         self.assertTrue("[WARNING] Vereniging 1000 heeft geen KvK nummer" in f2.getvalue())
-        self.assertTrue("[INFO] Wijziging van website van vereniging 1000:  --> https://www.groteclub.archery" in f2.getvalue())
-        self.assertTrue("[WARNING] Vereniging 1042 website url: 'www.vasteclub.archery' bevat fout (['Voer een geldige URL in.'])" in f2.getvalue())
+        self.assertTrue("[INFO] Wijziging van website van vereniging 1000:  --> https://www.groteclub.archery"
+                        in f2.getvalue())
+        self.assertTrue(
+            "[WARNING] Vereniging 1042 website url: 'www.vasteclub.archery' bevat fout (['Voer een geldige URL in.'])"
+            in f2.getvalue())
         self.assertTrue("[INFO] Lidmaatschap voor 100101 gaat pas in op datum: '2080-06-06'" in f2.getvalue())
         ver = Vereniging.objects.get(ver_nr=1001)
         self.assertEqual(ver.website, "http://www.somewhere.test")
@@ -148,7 +155,9 @@ class TestImportCRMImport(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             f1, f2 = self.run_management_command(IMPORT_COMMAND,
                                                  TESTFILE_04_UNICODE_ERROR)
-        self.assertTrue("[ERROR] Bestand heeft unicode problemen ('rawunicodeescape' codec can't decode bytes in position 180-181: truncated" in f1.getvalue())
+        self.assertTrue(
+            "[ERROR] Bestand heeft unicode problemen ('rawunicodeescape' codec can't decode bytes in position 180-181:"
+            in f1.getvalue())
         # self.assertEqual(f2.getvalue(), '')
 
     def test_missing_keys(self):
@@ -174,7 +183,8 @@ class TestImportCRMImport(E2EHelpers, TestCase):
             f1, f2 = self.run_management_command(IMPORT_COMMAND,
                                                  TESTFILE_06_BAD_RAYON_REGIO)
         self.assertTrue("[ERROR] Onbekend rayon {'rayon_number': 0, 'name': 'Rayon 0'}" in f1.getvalue())
-        self.assertTrue("[ERROR] Onbekende regio {'region_number': 0, 'name': 'Regio 0', 'rayon_number': 1}" in f1.getvalue())
+        self.assertTrue("[ERROR] Onbekende regio {'region_number': 0, 'name': 'Regio 0', 'rayon_number': 1}"
+                        in f1.getvalue())
         # self.assertEqual(f2.getvalue(), '')
 
     def test_geen_data(self):
@@ -192,7 +202,8 @@ class TestImportCRMImport(E2EHelpers, TestCase):
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
         self.assertTrue("[INFO] Nieuwe locatie voor adres 'Oude pijlweg 1\\n1234 AB Doelstad'" in f2.getvalue())
-        self.assertTrue("[INFO] Vereniging [1000] Grote Club gekoppeld aan locatie 'Oude pijlweg 1\\n1234 AB Doelstad'" in f2.getvalue())
+        self.assertTrue("[INFO] Vereniging [1000] Grote Club gekoppeld aan locatie 'Oude pijlweg 1\\n1234 AB Doelstad'"
+                        in f2.getvalue())
 
         ver = Vereniging.objects.get(ver_nr=1000)
 
@@ -209,15 +220,22 @@ class TestImportCRMImport(E2EHelpers, TestCase):
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
         self.assertTrue("[INFO] Wijziging van regio van vereniging 1000: 111 --> 112" in f2.getvalue())
-        self.assertTrue('[INFO] Wijziging van naam van vereniging 1000: "Grote Club" --> "Nieuwe Grote Club"' in f2.getvalue())
+        self.assertTrue('[INFO] Wijziging van naam van vereniging 1000: "Grote Club" --> "Nieuwe Grote Club"' in
+                        f2.getvalue())
         self.assertTrue("[ERROR] Kan vereniging 1001 niet wijzigen naar onbekende regio 199" in f1.getvalue())
         self.assertTrue("[ERROR] Vereniging 1002 hoort bij onbekende regio 199" in f1.getvalue())
         self.assertTrue("[INFO] Vereniging 1001 secretarissen: geen --> 100001" in f2.getvalue())
         self.assertTrue('[INFO] Wijziging van plaats van vereniging 1000: "Stad" --> "Stadia"' in f2.getvalue())
-        self.assertTrue('[INFO] Wijziging van secretaris email voor vereniging 1000: "test@groteclub.archery" --> "andere@groteclub.archery"' in f2.getvalue())
+        self.assertTrue(
+            'Wijziging van secretaris email voor vereniging 1000: "test@groteclub.archery" --> "andere@groteclub.archer'
+            in f2.getvalue())
         self.assertTrue("[INFO] Nieuwe locatie voor adres 'Nieuwe pijlweg 1\\n1234 AB Doelstad'" in f2.getvalue())
-        self.assertTrue("[INFO] Vereniging [1000] Nieuwe Grote Club ontkoppeld van locatie met adres 'Oude pijlweg 1\\n1234 AB Doelstad'" in f2.getvalue())
-        self.assertTrue("[INFO] Vereniging [1000] Nieuwe Grote Club gekoppeld aan locatie 'Nieuwe pijlweg 1\\n1234 AB Doelstad'" in f2.getvalue())
+        self.assertTrue(
+            "Vereniging [1000] Nieuwe Grote Club ontkoppeld van locatie met adres 'Oude pijlweg 1\\n1234 AB Doelstad"
+            in f2.getvalue())
+        self.assertTrue(
+            "[INFO] Vereniging [1000] Nieuwe Grote Club gekoppeld aan locatie 'Nieuwe pijlweg 1\\n1234 AB Doelstad'"
+            in f2.getvalue())
         self.assertTrue("[WARNING] Vereniging 1002 KvK nummer 'X15' moet 8 cijfers bevatten" in f2.getvalue())
         self.assertTrue("[WARNING] Vereniging 1042 KvK nummer '1234' moet 8 cijfers bevatten" in f2.getvalue())
 
@@ -319,7 +337,8 @@ class TestImportCRMImport(E2EHelpers, TestCase):
         self.assertTrue("Lid 100998" not in f2.getvalue())
         self.assertTrue("[WARNING] Lid 100997: onbalans in haakjes in " in f2.getvalue())
         self.assertTrue("[WARNING] Lid 100996: rare tekens in naam " in f2.getvalue())
-        self.assertTrue("[WARNING] Lid 100995: verwijder toevoeging achternaam: 'Dienbaar (Tini)' --> 'Dienbaar'" in f2.getvalue())
+        self.assertTrue("[WARNING] Lid 100995: verwijder toevoeging achternaam: 'Dienbaar (Tini)' --> 'Dienbaar'"
+                        in f2.getvalue())
 
     def test_datum_zonder_eeuw(self):
         # sommige leden hebben een geboortedatum zonder eeuw
@@ -329,11 +348,13 @@ class TestImportCRMImport(E2EHelpers, TestCase):
                                                  OPTION_SIM)
 
         # print(f1.getvalue(), f2.getvalue())
-        self.assertTrue("[WARNING] Lid 100999 geboortedatum gecorrigeerd van 0030-05-05 naar 1930-05-05" in f2.getvalue())
+        self.assertTrue("[WARNING] Lid 100999 geboortedatum gecorrigeerd van 0030-05-05 naar 1930-05-05"
+                        in f2.getvalue())
         sporter = Sporter.objects.get(lid_nr=100999)
         self.assertEqual(sporter.geboorte_datum.year, 1930)
 
-        self.assertTrue("[WARNING] Lid 100998 geboortedatum gecorrigeerd van 0010-05-05 naar 2010-05-05" in f2.getvalue())
+        self.assertTrue("[WARNING] Lid 100998 geboortedatum gecorrigeerd van 0010-05-05 naar 2010-05-05"
+                        in f2.getvalue())
         sporter = Sporter.objects.get(lid_nr=100998)
         self.assertEqual(sporter.geboorte_datum.year, 2010)
         self.assertTrue("[ERROR] Lid 100997 heeft geen valide geboortedatum: 1810-05-05" in f1.getvalue())
@@ -478,7 +499,8 @@ class TestImportCRMImport(E2EHelpers, TestCase):
                                                  OPTION_SIM)
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
-        self.assertTrue("[WARNING] Secretaris 100024 van vereniging 2000 heeft nog geen bevestigd e-mailadres" in f2.getvalue())
+        self.assertTrue("[WARNING] Secretaris 100024 van vereniging 2000 heeft nog geen bevestigd e-mailadres"
+                        in f2.getvalue())
         self.assertEqual(functie.accounts.count(), 1)
 
         # koppelen aan functie SEC na bevestigen e-mailadres
@@ -738,8 +760,10 @@ class TestImportCRMImport(E2EHelpers, TestCase):
         self.assertTrue("[ERROR] Onbekend rayon {'rayon_number': 'x', 'name': 'Rayon 1'}" in f1.getvalue())
         self.assertTrue("[ERROR] Onbekend rayon {'rayon_number': 5, 'name': 'Rayon 5'}" in f1.getvalue())
         self.assertTrue("[ERROR] Foutief regio nummer: 'a101' (geen getal)" in f1.getvalue())
-        self.assertTrue("[ERROR] Onbekende regio {'region_number': 'a101', 'name': 'Regio 99', 'rayon_number': 1}" in f1.getvalue())
-        self.assertTrue("[ERROR] Onbekende regio {'region_number': '99', 'name': 'Regio 99', 'rayon_number': 'x'}" in f1.getvalue())
+        self.assertTrue("[ERROR] Onbekende regio {'region_number': 'a101', 'name': 'Regio 99', 'rayon_number': 1}"
+                        in f1.getvalue())
+        self.assertTrue("[ERROR] Onbekende regio {'region_number': '99', 'name': 'Regio 99', 'rayon_number': 'x'}"
+                        in f1.getvalue())
         self.assertTrue("[ERROR] Foutief verenigingsnummer: 'y' (geen getal)" in f1.getvalue())
         self.assertTrue("[ERROR] Foutief regio nummer: 'z' (geen getal)" in f1.getvalue())
         self.assertTrue("[ERROR] Vereniging 1001 hoort bij onbekende regio z" in f1.getvalue())
@@ -748,10 +772,12 @@ class TestImportCRMImport(E2EHelpers, TestCase):
         self.assertTrue("[ERROR] Kan vereniging 'y' voor lid 100024 niet vinden" in f1.getvalue())
         self.assertTrue("[ERROR] Foutief bondsnummer: ggg (geen getal)" in f1.getvalue())
         self.assertTrue("[WARNING] Kan speelsterkte volgorde niet vaststellen voor" in f2.getvalue())
-        self.assertTrue("[ERROR] Vereniging 1001 heeft BIC '1234' met foute lengte 4 (niet 8 of 11) horende bij IBAN '1234'" in f1.getvalue())
+        self.assertTrue(
+            "[ERROR] Vereniging 1001 heeft BIC '1234' met foute lengte 4 (niet 8 of 11) horende bij IBAN '1234'"
+            in f1.getvalue())
         self.assertTrue("[ERROR] Vereniging 1001 heeft IBAN '1234' met foute lengte 4 (niet 18)" in f1.getvalue())
-        # self.assertTrue("[ERROR] Vereniging 1042 heeft BIC 'fout lengte' met foute lengte 12 (niet 8 of 11) horende bij IBAN 'Wat een grap'" in f1.getvalue())
-        self.assertTrue("[ERROR] Vereniging 1042 heeft IBAN 'Wat een grap' met foute lengte 12 (niet 18)" in f1.getvalue())
+        self.assertTrue("[ERROR] Vereniging 1042 heeft IBAN 'Wat een grap' met foute lengte 12 (niet 18)"
+                        in f1.getvalue())
 
     def test_speelsterkte(self):
         # controleer dat de import tegen niet-nummers kan
@@ -767,11 +793,15 @@ class TestImportCRMImport(E2EHelpers, TestCase):
         f1, f2 = self.run_management_command(IMPORT_COMMAND,
                                              TESTFILE_21_IBAN_BIC)
 
-        self.assertTrue("[WARNING] Vereniging 1001 heeft een IBAN zonder BIC: None, 'NL91ABNA0417164300'" in f2.getvalue())
-        self.assertTrue("[WARNING] Vereniging 1042 heeft een BIC zonder IBAN: 'ABNANL2A', None" in f2.getvalue())
-        self.assertTrue("[WARNING] Vereniging 1000 heeft een onbekende BIC code 'HUH2HUH2' horende bij IBAN 'NL91ABNA0417164300'" in f2.getvalue())
+        self.assertTrue("[WARNING] Vereniging 1001 heeft een IBAN zonder BIC: None, 'NL91ABNA0417164300'"
+                        in f2.getvalue())
+        self.assertTrue("[WARNING] Vereniging 1042 heeft een BIC zonder IBAN: 'ABNANL2A', None" in f2.getvalue())   # noqa
+        self.assertTrue(
+            "[WARNING] Vereniging 1000 heeft een onbekende BIC code 'HUH2HUH2' horende bij IBAN 'NL91ABNA0417164300'"  # noqa
+            in f2.getvalue())
         self.assertTrue("ERROR] Vereniging 1043 heeft een foutieve IBAN: 'NL91ABNA0417164309'" in f1.getvalue())
-        self.assertTrue("[ERROR] Vereniging 1044 heeft IBAN 'NL91ABNA0TEKORT' met foute lengte 15 (niet 18)" in f1.getvalue())
+        self.assertTrue("[ERROR] Vereniging 1044 heeft IBAN 'NL91ABNA0TEKORT' met foute lengte 15 (niet 18)"
+                        in f1.getvalue())
 
     def test_crash(self):
         self.assertEqual(0, MailQueue.objects.count())

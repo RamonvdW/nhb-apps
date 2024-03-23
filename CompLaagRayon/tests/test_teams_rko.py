@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2023 Ramon van der Winkel.
+#  Copyright (c) 2019-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -135,7 +135,7 @@ class TestCompLaagRayonTeams(E2EHelpers, TestCase):
         # wordt BKO
         self.e2e_wissel_naar_functie(self.testdata.comp25_functie_bko)
 
-        # stel de RK/BK klassegrenzen vast
+        # stel de RK/BK klassengrenzen vast
         zet_competitie_fase_rk_prep(self.testdata.comp25)
         resp = self.client.post(self.url_teams_klassengrenzen_vaststellen % self.testdata.comp25.pk)
         self.assert_is_redirect_not_plein(resp)

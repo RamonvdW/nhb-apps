@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2023 Ramon van der Winkel.
+#  Copyright (c) 2020-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -100,7 +100,8 @@ class Migration(migrations.Migration):
                 ('teams_rk_score_2', models.PositiveSmallIntegerField(default=0)),
                 ('teams_bk_score_1', models.PositiveSmallIntegerField(default=0)),
                 ('teams_bk_score_2', models.PositiveSmallIntegerField(default=0)),
-                ('titel_code_rk', models.CharField(choices=[(' ', 'None'), ('R', 'RK'), ('B', 'BK'), ('N', 'NK')], default=' ', max_length=1)),
+                ('titel_code_rk', models.CharField(choices=[(' ', 'None'), ('R', 'RK'), ('B', 'BK'), ('N', 'NK')],
+                                                   default=' ', max_length=1)),
             ],
             options={
                 'verbose_name': 'Hist indiv RK',
@@ -126,11 +127,16 @@ class Migration(migrations.Migration):
                 ('score_lid_2', models.PositiveSmallIntegerField(default=0)),
                 ('score_lid_3', models.PositiveSmallIntegerField(default=0)),
                 ('score_lid_4', models.PositiveSmallIntegerField(default=0)),
-                ('lid_1', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.CASCADE, related_name='team_lid_1', to='HistComp.histkampindiv')),
-                ('lid_2', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.CASCADE, related_name='team_lid_2', to='HistComp.histkampindiv')),
-                ('lid_3', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.CASCADE, related_name='team_lid_3', to='HistComp.histkampindiv')),
-                ('lid_4', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.CASCADE, related_name='team_lid_4', to='HistComp.histkampindiv')),
-                ('titel_code', models.CharField(choices=[(' ', 'None'), ('R', 'RK'), ('B', 'BK'), ('N', 'NK')], default=' ', max_length=1)),
+                ('lid_1', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.CASCADE,
+                                            related_name='team_lid_1', to='HistComp.histkampindiv')),
+                ('lid_2', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.CASCADE,
+                                            related_name='team_lid_2', to='HistComp.histkampindiv')),
+                ('lid_3', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.CASCADE,
+                                            related_name='team_lid_3', to='HistComp.histkampindiv')),
+                ('lid_4', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.CASCADE,
+                                            related_name='team_lid_4', to='HistComp.histkampindiv')),
+                ('titel_code', models.CharField(choices=[(' ', 'None'), ('R', 'RK'), ('B', 'BK'), ('N', 'NK')],
+                                                default=' ', max_length=1)),
             ],
             options={
                 'verbose_name': 'Hist rk/bk teams',
@@ -180,7 +186,8 @@ class Migration(migrations.Migration):
                 ('vereniging_naam', models.CharField(max_length=50)),
                 ('vereniging_plaats', models.CharField(default='', max_length=35)),
                 ('rank_bk', models.PositiveSmallIntegerField(default=0)),
-                ('titel_code_bk', models.CharField(choices=[(' ', 'None'), ('R', 'RK'), ('B', 'BK'), ('N', 'NK')], default=' ', max_length=1)),
+                ('titel_code_bk', models.CharField(choices=[(' ', 'None'), ('R', 'RK'), ('B', 'BK'), ('N', 'NK')],
+                                                   default=' ', max_length=1)),
                 ('bk_score_1', models.PositiveSmallIntegerField(default=0)),
                 ('bk_score_2', models.PositiveSmallIntegerField(default=0)),
                 ('bk_score_totaal', models.PositiveSmallIntegerField(default=0)),

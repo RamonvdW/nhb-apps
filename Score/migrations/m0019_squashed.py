@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2023 Ramon van der Winkel.
+#  Copyright (c) 2020-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -30,12 +30,14 @@ class Migration(migrations.Migration):
                 ('waarde', models.PositiveSmallIntegerField()),
                 ('afstand_meter', models.PositiveSmallIntegerField()),
                 ('type', models.CharField(choices=[('S', 'Score'), ('G', 'Geen score')], default='S', max_length=1)),
-                ('sporterboog', models.ForeignKey(null=True, on_delete=models.deletion.PROTECT, to='Sporter.sporterboog')),
+                ('sporterboog', models.ForeignKey(null=True, on_delete=models.deletion.PROTECT,
+                                                  to='Sporter.sporterboog')),
             ],
         ),
         migrations.AddConstraint(
             model_name='score',
-            constraint=models.UniqueConstraint(condition=models.Q(('type', 'G')), fields=('sporterboog', 'type'), name='max 1 geen score per sporterboog'),
+            constraint=models.UniqueConstraint(condition=models.Q(('type', 'G')), fields=('sporterboog', 'type'),
+                                               name='max 1 geen score per sporterboog'),
         ),
         migrations.CreateModel(
             name='ScoreHist',
@@ -44,7 +46,8 @@ class Migration(migrations.Migration):
                 ('oude_waarde', models.PositiveSmallIntegerField()),
                 ('nieuwe_waarde', models.PositiveSmallIntegerField()),
                 ('notitie', models.CharField(max_length=100)),
-                ('door_account', models.ForeignKey(null=True, on_delete=models.deletion.SET_NULL, to='Account.account')),
+                ('door_account', models.ForeignKey(null=True, on_delete=models.deletion.SET_NULL,
+                                                   to='Account.account')),
                 ('score', models.ForeignKey(null=True, on_delete=models.deletion.CASCADE, to='Score.score')),
                 ('when', models.DateTimeField(auto_now_add=True)),
             ],
@@ -79,7 +82,8 @@ class Migration(migrations.Migration):
             name='Aanvangsgemiddelde',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('doel', models.CharField(choices=[('i', 'Individueel'), ('t', 'Teamcompetitie')], default='i', max_length=1)),
+                ('doel', models.CharField(choices=[('i', 'Individueel'), ('t', 'Teamcompetitie')], default='i',
+                                          max_length=1)),
                 ('waarde', models.DecimalField(decimal_places=3, max_digits=6)),
                 ('afstand_meter', models.PositiveSmallIntegerField()),
                 ('boogtype', models.ForeignKey(on_delete=models.deletion.PROTECT, to='BasisTypen.boogtype')),
@@ -94,13 +98,15 @@ class Migration(migrations.Migration):
                 ('oude_waarde', models.DecimalField(decimal_places=3, max_digits=6)),
                 ('nieuwe_waarde', models.DecimalField(decimal_places=3, max_digits=6)),
                 ('notitie', models.CharField(max_length=100)),
-                ('ag', models.ForeignKey(null=True, on_delete=models.deletion.CASCADE, related_name='ag_hist', to='Score.aanvangsgemiddelde')),
-                ('door_account', models.ForeignKey(null=True, on_delete=models.deletion.SET_NULL, to='Account.account')),
+                ('ag', models.ForeignKey(null=True, on_delete=models.deletion.CASCADE, related_name='ag_hist',
+                                         to='Score.aanvangsgemiddelde')),
+                ('door_account', models.ForeignKey(null=True, on_delete=models.deletion.SET_NULL,
+                                                   to='Account.account')),
             ],
         ),
         migrations.AddIndex(
             model_name='aanvangsgemiddeldehist',
-            index=models.Index(fields=['when'], name='Score_aanva_when_9de5cf_idx'),
+            index=models.Index(fields=['when'], name='Score_aanva_when_9de5cf_idx'),        # noqa
         ),
     ]
 

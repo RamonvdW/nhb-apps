@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2023 Ramon van der Winkel.
+#  Copyright (c) 2022-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -86,13 +86,19 @@ class TestCompLaagRayonImportUitslagRkTeams(E2EHelpers, TestCase):
         f1, f2 = self.run_management_command('import_uitslag_rk_25m1pijl_teams', self.test_file_25m, '--dryrun')
         # print('\nf1:', f1.getvalue())
         # print('\nf2:', f2.getvalue())
-        self.assertTrue('[ERROR] Te hoog gemiddelde 8.916 voor invaller 301834 voor team team-4091-2-R2 van vereniging 4091' in f1.getvalue())
+        self.assertTrue(
+            '[ERROR] Te hoog gemiddelde 8.916 voor invaller 301834 voor team team-4091-2-R2 van vereniging 4091'
+            in f1.getvalue())
         self.assertTrue('[ERROR] Lid 302093 is niet van vereniging 4121!' in f1.getvalue())
         self.assertTrue('[ERROR] Lid 123456 is niet gekwalificeerd voor dit kampioenschap!' in f1.getvalue())
-        self.assertTrue("[ERROR] Kan team 'Niet bestaand team' van vereniging 4121 op regel 51 niet vinden" in f1.getvalue())
-        self.assertTrue("[ERROR] Te veel invallers voor team 'team-4121-2-R2' met max 2 sporters (vereniging 4121" in f1.getvalue())
+        self.assertTrue("[ERROR] Kan team 'Niet bestaand team' van vereniging 4121 op regel 51 niet vinden"
+                        in f1.getvalue())
+        self.assertTrue("[ERROR] Te veel invallers voor team 'team-4121-2-R2' met max 2 sporters (vereniging 4121"
+                        in f1.getvalue())
 
-        self.assertTrue("[WARNING] Team 'team-4111-2-R2' op regel 45 niet herkend voor klasse Recurve klasse B [R2] (25.128) (RK/BK)" in f2.getvalue())
+        self.assertTrue(
+            "[WARNING] Team 'team-4111-2-R2' op regel 45 niet herkend voor klasse Recurve klasse B [R2] (25.128) (RK/BK"
+            in f2.getvalue())
         self.assertTrue('[WARNING] Geen scores voor sporter 301826 op regel 13' in f2.getvalue())
 
         # echte import
@@ -122,14 +128,17 @@ class TestCompLaagRayonImportUitslagRkTeams(E2EHelpers, TestCase):
         f1, f2 = self.run_management_command('import_uitslag_rk_indoor_teams', self.test_file2_18m)
         # print('\nf1:', f1.getvalue())
         # print('\nf2:', f2.getvalue())
-        self.assertTrue("[ERROR] Kan team 'team-4122-' van vereniging 4122 op regel 33 niet kiezen uit" in f1.getvalue())
+        self.assertTrue("[ERROR] Kan team 'team-4122-' van vereniging 4122 op regel 33 niet kiezen uit"
+                        in f1.getvalue())
         self.assertTrue("[ERROR] Kan team 'team-4122-' van vereniging 4122 op regel 33 niet vinden" in f1.getvalue())
         self.assertTrue("[ERROR] Lid 301948 is niet van vereniging 4122" in f1.getvalue())
         self.assertTrue("[ERROR] Lid 123456 is niet gekwalificeerd voor dit kampioenschap!" in f1.getvalue())
         self.assertTrue("[ERROR] Probleem met de scores op regel 16" in f1.getvalue())
         self.assertTrue("[INFO] Uitslag wordt van blad 'Finales 8 teams' gehaald" in f2.getvalue())
-        self.assertTrue("[WARNING] Aangepaste team naam: 'team-4122-5-R2' --> 'Aangepast team-4122-5-R2'" in f2.getvalue())
-        self.assertTrue("[WARNING] Team 4122 van vereniging team-4122-3-R2 heeft niet meegedaan (geen scores)" in f2.getvalue())
+        self.assertTrue("[WARNING] Aangepaste team naam: 'team-4122-5-R2' --> 'Aangepast team-4122-5-R2'"
+                        in f2.getvalue())
+        self.assertTrue("[WARNING] Team 4122 van vereniging team-4122-3-R2 heeft niet meegedaan (geen scores)"
+                        in f2.getvalue())
 
         team1 = KampioenschapTeam.objects.get(team_naam='team-4122-5-R2', kampioenschap__competitie__afstand=18)
         team2 = KampioenschapTeam.objects.get(team_naam='team-4121-7-R2', kampioenschap__competitie__afstand=18)

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2023 Ramon van der Winkel.
+#  Copyright (c) 2020-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -125,7 +125,7 @@ class LijstBeheerdersView(UserPassesTestMixin, ListView):
     def _zet_accounts(objs):
         """ als we de template door functie.accounts.all() laten lopen dan resulteert
             elke lookup in een database query voor het volledige account record.
-            Hier doen we het iets efficienter.
+            Hier doen we het iets efficiënter.
         """
         for obj in objs:
             obj.beheerders = [account.volledige_naam() for account in obj.accounts.all()]

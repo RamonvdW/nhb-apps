@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023 Ramon van der Winkel.
+#  Copyright (c) 2023-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -66,11 +66,21 @@ class TestCompLaagRayonCliOverig(E2EHelpers, TestCase):
         self.verwerk_regiocomp_mutaties()
 
         # verpruts een ranking/volgorde
-        deelnemer = KampioenschapSporterBoog.objects.filter(sporterboog__boogtype__afkorting='R', volgorde=self.cut).order_by('indiv_klasse__volgorde')[0]
+        deelnemer = (KampioenschapSporterBoog
+                     .objects
+                     .filter(sporterboog__boogtype__afkorting='R',
+                             volgorde=self.cut)
+                     .order_by('indiv_klasse__volgorde')
+                     .first())
         deelnemer.volgorde = 2
         deelnemer.save(update_fields=['volgorde'])
 
-        deelnemer = KampioenschapSporterBoog.objects.filter(sporterboog__boogtype__afkorting='R', volgorde=1).order_by('indiv_klasse__volgorde')[0]
+        deelnemer = (KampioenschapSporterBoog
+                     .objects
+                     .filter(sporterboog__boogtype__afkorting='R',
+                             volgorde=1)
+                     .order_by('indiv_klasse__volgorde')
+                     .first())
         deelnemer.rank = 0
         deelnemer.save(update_fields=['rank'])
 

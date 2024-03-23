@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2023 Ramon van der Winkel.
+#  Copyright (c) 2019-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -122,14 +122,16 @@ class TestRecordsCliImport(E2EHelpers, TestCase):
         # kapot bestand
         with self.assert_max_queries(20):
             f1, f2 = self.run_management_command('import_records', './Records/management/testfiles/testfile_01.json')
-        self.assertTrue(f1.getvalue().startswith("[ERROR] Probleem met het JSON formaat in bestand './Records/management/testfiles/testfile_01.json'"))
+        self.assertTrue(f1.getvalue().startswith(
+            "[ERROR] Probleem met het JSON formaat in bestand './Records/management/testfiles/testfile_01.json'"))
         self.assertEqual(f2.getvalue(), '')
 
     def test_extra_sheet(self):
         # onverwacht tabblad
         # verkeerde headers
         with self.assert_max_queries(20):
-            f1, f2 = self.run_management_command('import_records', './Records/management/testfiles/testfile_02.json', '--dryrun')
+            f1, f2 = self.run_management_command('import_records', './Records/management/testfiles/testfile_02.json',
+                                                 '--dryrun')
         self.assertTrue('[ERROR] Niet ondersteunde tabblad naam: Onbekende blad naam' in f1.getvalue())
         self.assertTrue('[ERROR] Kolom headers kloppen niet voor range Data team' in f1.getvalue())
         self.assertTrue('Samenvatting: ' in f2.getvalue())
@@ -196,7 +198,8 @@ class TestRecordsCliImport(E2EHelpers, TestCase):
 
     def test_foutvrij_dryrun(self):
         with self.assert_max_queries(25):
-            f1, f2 = self.run_management_command('import_records', './Records/management/testfiles/testfile_06.json', '--dryrun')
+            f1, f2 = self.run_management_command('import_records', './Records/management/testfiles/testfile_06.json',
+                                                 '--dryrun')
         self.assertTrue("DRY RUN\nSamenvatting: 5 records;" in f2.getvalue())
 
     def test_onbekend_bondsnummer(self):
@@ -230,7 +233,8 @@ class TestRecordsCliImport(E2EHelpers, TestCase):
             f1, f2 = self.run_management_command('import_records', './Records/management/testfiles/testfile_10.json')
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
-        self.assertTrue("[WARNING] Score niet consecutief voor records OD-101 en OD-100 (1200(57X) >= 1200(56X))" in f1.getvalue())
+        self.assertTrue("[WARNING] Score niet consecutief voor records OD-101 en OD-100 (1200(57X) >= 1200(56X))"
+                        in f1.getvalue())
         self.assertTrue("[WARNING] Identieke datum en score voor records OD-202 en OD-102" in f1.getvalue())
         self.assertTrue("[WARNING] Score niet consecutief voor records OD-401 en OD-400 (400 >= 300)" in f1.getvalue())
 

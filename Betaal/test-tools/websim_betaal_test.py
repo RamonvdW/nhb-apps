@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2023 Ramon van der Winkel.
+#  Copyright (c) 2022-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -69,7 +69,7 @@ class MyServer(BaseHTTPRequestHandler):
             self.wfile.write(enc_data)
 
     # noinspection PyTypeChecker
-    def do_GET(self):
+    def do_GET(self):   # noqa
         # print("[DEBUG] {websim_betaal_test} GET request,\nPath: %s\nHeaders:\n%s" % (str(self.path),
         #                                                                              str(self.headers)))
 
@@ -183,7 +183,7 @@ class MyServer(BaseHTTPRequestHandler):
         self.send_response(500)
         self.end_headers()
 
-    def do_POST(self):
+    def do_POST(self):      # noqa
         # print("[DEBUG] {websim_betaal_test} POST request,\nPath: %s\nHeaders:\n%s" % (str(self.path),
         #                                                                               str(self.headers)))
 

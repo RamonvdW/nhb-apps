@@ -20,7 +20,8 @@ class TestCompLaagRayonFormulieren(E2EHelpers, TestCase):
 
     """ tests voor de CompLaagRayon applicatie, Formulieren functie """
 
-    test_after = ('Competitie.tests.test_overzicht', 'CompBeheer.tests.test_bko', 'CompLaagRayon.tests.test_teams_rko', 'CompLaagRayon.tests.test_teams_rko')
+    test_after = ('Competitie.tests.test_overzicht', 'CompBeheer.tests.test_bko', 'CompLaagRayon.tests.test_teams_rko',
+                  'CompLaagRayon.tests.test_teams_rko')
 
     url_forms = '/bondscompetities/rk/download-formulier/%s/'                             # match_pk
     url_forms_download_indiv = '/bondscompetities/rk/download-formulier-indiv/%s/%s/'     # match_pk, klasse_pk
@@ -68,7 +69,7 @@ class TestCompLaagRayonFormulieren(E2EHelpers, TestCase):
         # zet de competitie in fase J (=vereiste vaststellen klassengrenzen)
         zet_competitie_fase_rk_prep(self.testdata.comp18)
 
-        # stel de klassegrenzen vast
+        # stel de klassengrenzen vast
         resp = self.client.post(self.url_klassengrenzen_teams_vaststellen % self.testdata.comp18.pk)
         # self.e2e_dump_resp(resp)
         self.assert_is_redirect_not_plein(resp)

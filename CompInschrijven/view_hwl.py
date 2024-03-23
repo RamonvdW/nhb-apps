@@ -473,7 +473,7 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
         for key, _ in request.POST.items():
             # key = 'lid_NNNNNN_boogtype_MM' (of iets anders)
             spl = key.split('_')
-            # spl = ('lid', 'NNNNNN', 'boogtype', 'MM')
+            # spl = ('lid', 'NNNNNN', 'boogtype', 'MM')     # noqa
             if len(spl) == 4 and spl[0] == 'lid' and spl[2] == 'boogtype':
                 # dit lijkt ergens op - converteer de getallen (geeft ook input bescherming)
                 try:

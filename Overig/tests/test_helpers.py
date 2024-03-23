@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -33,13 +33,13 @@ class TestOverigHelpers(TestCase):
         self.client.META['REMOTE_ADDR'] = ''
         self.assertEqual(get_safe_from_ip(self.client), "")
 
-        self.client.META['REMOTE_ADDR'] = '0000:1111:2222:3344:5555:6666:aabb:ccdd:EEFF'
-        self.assertEqual(get_safe_from_ip(self.client), '0000:1111:2222:3344:5555:6666:aabb:ccdd:EEFF')
+        self.client.META['REMOTE_ADDR'] = '0000:1111:2222:3344:5555:6666:aabb:ccdd:EEFF'                    # noqa
+        self.assertEqual(get_safe_from_ip(self.client), '0000:1111:2222:3344:5555:6666:aabb:ccdd:EEFF')     # noqa
 
         self.client.META['REMOTE_ADDR'] = 'wat een puinhoop\0<li>'
         self.assertEqual(get_safe_from_ip(self.client), 'aee')
 
         self.assertEqual(maak_unaccented('Ramõn'), 'Ramon')
-        self.assertEqual(maak_unaccented('Hé däär ên ìetsỳ'), 'He daar en ietsy')
+        self.assertEqual(maak_unaccented('Hé däär ên ìetsỳ'), 'He daar en ietsy')       # noqa
 
 # end of file
