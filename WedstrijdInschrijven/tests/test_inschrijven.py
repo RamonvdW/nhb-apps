@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2023 Ramon van der Winkel.
+#  Copyright (c) 2022-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -24,7 +24,7 @@ class TestWedstrijdInschrijven(E2EHelpers, TestCase):
 
     """ tests voor de Wedstrijden applicatie, module Inschrijven """
 
-    test_after = ('Wedstrijden.tests.test_wedstrijd',)
+    test_after = ('Wedstrijden.tests.test_wedstrijd_details',)
 
     url_wedstrijden_sessies = '/wedstrijden/%s/sessies/'                               # wedstrijd_pk
     url_wedstrijden_wijzig_wedstrijd = '/wedstrijden/%s/wijzig/'                       # wedstrijd_pk

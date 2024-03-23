@@ -25,7 +25,7 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
 
     """ tests voor de Functie applicatie, functionaliteit Koppel bestuurders """
 
-    test_after = ('Account', 'Functie.tests.test_overzicht')
+    test_after = ('Account', 'Functie.tests.test_beheerders')
 
     url_overzicht = '/functie/overzicht/'
     url_overzicht_vereniging = '/functie/overzicht/vereniging/'

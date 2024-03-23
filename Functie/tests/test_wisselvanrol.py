@@ -885,6 +885,12 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         resp = self.client.post(self.url_activeer_functie_hwl, {'ver_nr': self.ver1000.ver_nr})
         self.assert_is_redirect(resp, '/vereniging/')
 
-    # TODO: test maken waarbij gebruiker aan 2x rol zit met dezelfde 'volgorde' (gaf sorteerprobleem), zowel 2xBKO als 2xHWL
+    def test_kort(self):
+        self.assertTrue(self.functie_rko.kort() != '')
+        self.assertTrue(self.functie_rcl.kort() != '')
+        self.assertTrue(self.functie_hwl.kort() != '')
+        self.assertTrue(self.functie_mwz.kort() != '')
+
+# FUTURE: test maken met gebruiker in 2x rol met dezelfde 'volgorde' (gaf sorteerprobleem), zowel 2xBKO als 2xHWL
 
 # end of file
