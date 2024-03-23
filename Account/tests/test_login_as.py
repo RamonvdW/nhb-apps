@@ -35,7 +35,7 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
 
     def setUp(self):
         """ initialisatie van de test case """
-        self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.nhb', 'Normaal')
+        self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.mh', 'Normaal')
 
         self._login_plugin_mode = 0
         account_add_plugin_login_gate(10, self._login_plugin, False)
