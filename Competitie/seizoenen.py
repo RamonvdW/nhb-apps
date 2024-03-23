@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023 Ramon van der Winkel.
+#  Copyright (c) 2023-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from Competitie.models import Competitie
 import logging
 
-my_logger = logging.getLogger('NHBApps.Competitie')
+my_logger = logging.getLogger('MH.Competitie')
 
 
 class SeizoenCache(object):

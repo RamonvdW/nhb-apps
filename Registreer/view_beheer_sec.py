@@ -30,7 +30,7 @@ TEMPLATE_GAST_ACCOUNTS = 'registreer/beheer-gast-accounts.dtl'
 TEMPLATE_GAST_ACCOUNT_DETAILS = 'registreer/beheer-gast-account-details.dtl'
 EMAIL_TEMPLATE_GAST_AFGEWEZEN = 'email_registreer/gast-afgewezen.dtl'
 
-my_logger = logging.getLogger('NHBApps.Registreer')
+my_logger = logging.getLogger('MH.Registreer')
 
 
 class GastAccountsView(UserPassesTestMixin, TemplateView):

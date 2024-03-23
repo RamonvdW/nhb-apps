@@ -26,7 +26,7 @@ from Sporter.models import Sporter, SporterBoog
 from Vereniging.models import Vereniging
 import logging
 
-my_logger = logging.getLogger('NHBApps.Competitie')
+my_logger = logging.getLogger('MH.Competitie')
 
 
 class Competitie(models.Model):

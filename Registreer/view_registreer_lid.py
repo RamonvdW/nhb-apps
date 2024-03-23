@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2023 Ramon van der Winkel.
+#  Copyright (c) 2020-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -27,7 +27,7 @@ TEMPLATE_REGISTREER_BEVESTIG_EMAIL = 'registreer/registreer-lid-01-bevestig-emai
 TEMPLATE_REGISTREER_EMAIL_BEVESTIGD = 'registreer/registreer-lid-02-email-bevestigd.dtl'
 EMAIL_TEMPLATE_REGISTREER_LID_BEVESTIG = 'email_registreer/lid-bevestig-toegang-email.dtl'
 
-my_logger = logging.getLogger('NHBApps.Registreer')
+my_logger = logging.getLogger('MH.Registreer')
 
 
 def registreer_receive_bevestiging_aanmaken_account(request, account):

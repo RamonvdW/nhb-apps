@@ -16,7 +16,7 @@ import logging
 
 TEMPLATE_SPORTER_LOGIN_GEBLOKKEERD = 'sporter/login-geblokkeerd-geen-vereniging.dtl'
 
-my_logger = logging.getLogger('NHBApps.Sporter')
+my_logger = logging.getLogger('MH.Sporter')
 
 
 def sporter_login_plugin(request, from_ip, account):

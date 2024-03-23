@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2023 Ramon van der Winkel.
+#  Copyright (c) 2019-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -21,7 +21,7 @@ from types import SimpleNamespace
 from typing import Tuple
 import logging
 
-my_logger = logging.getLogger('NHBApps.Functie')
+my_logger = logging.getLogger('MH.Functie')
 
 SESSIONVAR_ROL_PALLET_VAST = 'gebruiker_rol_pallet_vast'
 SESSIONVAR_ROL_PALLET_FUNCTIES = 'gebruiker_rol_pallet_functies'

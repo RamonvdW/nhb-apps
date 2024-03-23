@@ -47,7 +47,7 @@ import sys
 
 VOLGORDE_PARKEER = 22222        # hoog en past in PositiveSmallIntegerField
 
-my_logger = logging.getLogger('NHBApps.RegiocompMutaties')
+my_logger = logging.getLogger('MH.RegiocompMutaties')
 
 # TODO: opsplitsen naar CompLaag*/operations/xxx
 
