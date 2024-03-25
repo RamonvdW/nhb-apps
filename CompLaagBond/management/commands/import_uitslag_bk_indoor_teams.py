@@ -459,7 +459,9 @@ class Command(BaseCommand):
 
         # de rest (van de 8 finalisten) is 5e
         # result_volgorde is al gezet, gebaseerd op aflopende scores
+        #                                       .. van de voorronde, welke hoger kan zijn dan de finale!
         min_rank = 5
+        rest = list()
         for team_naam in vijfden:
             try:
                 kamp_team = self.deelnemende_teams[team_naam]
@@ -468,9 +470,15 @@ class Command(BaseCommand):
             else:
                 kamp_team.result_rank = 5
                 finale_team_pks.append(kamp_team.pk)
-                min_rank += 1
-                if not self.dryrun:
-                    kamp_team.save(update_fields=['result_rank'])
+                tup = (kamp_team.result_volgorde, kamp_team.pk, kamp_team)
+                rest.append(tup)
+        # for
+        rest.sort()     # op result_volgorde
+        for _, _, kamp_team in rest:
+            kamp_team.result_volgorde = min_rank
+            min_rank += 1
+            if not self.dryrun:
+                kamp_team.save(update_fields=['result_rank', 'result_volgorde'])
         # for
 
     @staticmethod
