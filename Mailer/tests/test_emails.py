@@ -21,7 +21,7 @@ class TestMailerEmails(E2EHelpers, TestCase):
         self.e2e_create_account('123456', TEST_EMAIL_ADRES, 'Test')
 
         f1, f2 = self.run_management_command('test_alle_emails', TEST_EMAIL_ADRES)
-        print('f1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
+        # print('f1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
         self.assertFalse("[ERROR]" in f1.getvalue())
         self.assertFalse("[ERROR]" in f2.getvalue())
         self.assertTrue('[WARNING] E-mailadres is niet white-listed' in f2.getvalue())
@@ -35,6 +35,7 @@ class TestMailerEmails(E2EHelpers, TestCase):
 
         with override_settings(EMAIL_ADDRESS_WHITELIST=(TEST_EMAIL_ADRES,)):
             f1, f2 = self.run_management_command('test_alle_emails', TEST_EMAIL_ADRES)
+            # print('\nf1:\n%sf2:\n%s' % (f1.getvalue(), f2.getvalue()))
             self.assertTrue('[WARNING] E-mailadres is niet white-listed' not in f2.getvalue())
 
     def test_status_mail_queue(self):

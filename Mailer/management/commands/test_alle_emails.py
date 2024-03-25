@@ -18,6 +18,7 @@ from Bestel.management.commands.bestel_mutaties import stuur_email_naar_koper_be
 from Bestel.definities import BESTELLING_STATUS_NIEUW
 from Bestel.models import Bestelling, BestelProduct
 from Betaal.models import BetaalInstellingenVereniging, BetaalTransactie
+from Competitie.models import Competitie, CompetitieMatch
 from Functie.models import Functie
 from Functie.view_koppel_beheerder import functie_wijziging_stuur_email_notificatie, functie_vraag_email_bevestiging
 from Geo.models import Regio
@@ -29,6 +30,7 @@ from Scheidsrechter.management.commands.scheids_mutaties import (stuur_email_naa
                                                                  stuur_email_naar_sr_voor_wedstrijddag_niet_meer_nodig,
                                                                  stuur_email_naar_sr_voor_match_gekozen,
                                                                  stuur_email_naar_sr_voor_match_niet_meer_nodig)
+from Scheidsrechter.models import WedstrijdDagScheidsrechters
 from Sporter.models import Sporter, SporterBoog
 from Taken.operations import stuur_email_nieuwe_taak, stuur_email_taak_herinnering
 from TestHelpers.e2ehelpers import TEST_WACHTWOORD
@@ -43,7 +45,7 @@ class Command(BaseCommand):
 
     help = "Stuur alle mogelijke e-mails"
 
-    aantal_verwacht = 10
+    aantal_verwacht = 14
 
     test_regio_nr = 100
     test_ver_nr = 9999
@@ -109,6 +111,7 @@ class Command(BaseCommand):
                         bij_vereniging=ver,
                         account=self.account)
         sporter1.save()
+        self.sporter1 = sporter1
 
         sporter2 = Sporter(
                         lid_nr=self.test_lid_nr - 1,
@@ -247,6 +250,22 @@ class Command(BaseCommand):
         transactie.save()
         bestelling.transacties.add(transactie)
 
+        comp = Competitie(
+                    beschrijving='Test competitie',
+                    afstand=18,
+                    begin_jaar=2000)
+        comp.save()
+
+        match = CompetitieMatch(
+                        competitie=comp,
+                        beschrijving='Test match',
+                        datum_wanneer='2000-01-01',
+                        tijd_begin_wedstrijd='09:00',
+                        aantal_scheids=1)
+        match.save()
+        match.refresh_from_db()     # provides strings converted to proper structures
+        self.match = match
+
     def _database_opschonen(self):
         try:
             ver = Vereniging.objects.get(ver_nr=self.test_ver_nr)
@@ -381,14 +400,24 @@ class Command(BaseCommand):
         stuur_email_naar_sr_beschikbaarheid_opgeven(self.wedstrijd, [datum], self.account, email_cs)
         self._check_mail_gemaakt()
 
-        #stuur_email_naar_sr_voor_wedstrijddag_gekozen(dag, sporter, email_cs)
-        #stuur_email_naar_sr_voor_wedstrijddag_niet_meer_nodig(dag, sporter, email_cs)
-        #stuur_email_naar_sr_voor_match_gekozen(match, sporter, email_cs)
-        #stuur_email_naar_sr_voor_match_niet_meer_nodig(match, sporter, email_cs)
-        # TODO: beschikbaarheid-opgeven
-        # TODO: voor-wedstrijddag-gekozen
-        # TODO: voor-wedstrijddag-niet-meer-nodig
-        pass
+        dag = WedstrijdDagScheidsrechters(wedstrijd=self.wedstrijd)
+        dag.save()
+
+        self.stdout.write('Maak mail voor SR - Gekozen voor wedstrijd')
+        stuur_email_naar_sr_voor_wedstrijddag_gekozen(dag, self.sporter1, email_cs)
+        self._check_mail_gemaakt()
+
+        self.stdout.write('Maak mail voor SR - Niet meer nodig voor wedstrijd')
+        stuur_email_naar_sr_voor_wedstrijddag_niet_meer_nodig(dag, self.sporter1, email_cs)
+        self._check_mail_gemaakt()
+
+        self.stdout.write('Maak mail voor SR - Gekozen voor match')
+        stuur_email_naar_sr_voor_match_gekozen(self.match, self.sporter1, email_cs)
+        self._check_mail_gemaakt()
+
+        self.stdout.write('Maak mail voor SR - Niet meer nodig voor match')
+        stuur_email_naar_sr_voor_match_niet_meer_nodig(self.match, self.sporter1, email_cs)
+        self._check_mail_gemaakt()
 
     def _test_taken(self):
         self.stdout.write('Maak mail voor Taken - Nieuwe taak')
