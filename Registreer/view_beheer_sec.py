@@ -307,6 +307,7 @@ class GastAccountDetailsView(UserPassesTestMixin, TemplateView):
 
         context['kruimels'] = (
             (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
+            (reverse('Registreer:beheer-gast-accounts'), "Gast accounts"),
             (None, "Gast account details")
         )
 
