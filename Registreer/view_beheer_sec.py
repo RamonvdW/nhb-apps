@@ -30,7 +30,7 @@ TEMPLATE_GAST_ACCOUNTS = 'registreer/beheer-gast-accounts.dtl'
 TEMPLATE_GAST_ACCOUNT_DETAILS = 'registreer/beheer-gast-account-details.dtl'
 EMAIL_TEMPLATE_GAST_AFGEWEZEN = 'email_registreer/gast-afgewezen.dtl'
 
-my_logger = logging.getLogger('NHBApps.Registreer')
+my_logger = logging.getLogger('MH.Registreer')
 
 
 class GastAccountsView(UserPassesTestMixin, TemplateView):
@@ -66,8 +66,9 @@ class GastAccountsView(UserPassesTestMixin, TemplateView):
 
             # zoek de laatste-inlog bij elk lid
             # SEC mag de voorkeuren van de sporters aanpassen
-            gast.url_details = reverse('Registreer:beheer-gast-account-details',
-                                       kwargs={'lid_nr': gast.lid_nr})
+            if gast.lid_nr > 0:
+                gast.url_details = reverse('Registreer:beheer-gast-account-details',
+                                           kwargs={'lid_nr': gast.lid_nr})
 
             gast.geen_inlog = 0
             if gast.account:
@@ -306,6 +307,7 @@ class GastAccountDetailsView(UserPassesTestMixin, TemplateView):
 
         context['kruimels'] = (
             (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
+            (reverse('Registreer:beheer-gast-accounts'), "Gast accounts"),
             (None, "Gast account details")
         )
 

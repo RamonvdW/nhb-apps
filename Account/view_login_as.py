@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2023 Ramon van der Winkel.
+#  Copyright (c) 2019-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -27,7 +27,7 @@ import logging
 TEMPLATE_LOGIN_AS_ZOEK = 'account/login-as-zoek.dtl'
 TEMPLATE_LOGIN_AS_GO = 'account/login-as-go.dtl'
 
-my_logger = logging.getLogger('NHBApps.Account')
+my_logger = logging.getLogger('MH.Account')
 
 
 def receiver_account_wissel(request, account):

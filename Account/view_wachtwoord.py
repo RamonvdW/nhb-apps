@@ -30,7 +30,7 @@ TEMPLATE_WW_WIJZIGEN = 'account/wachtwoord-wijzigen.dtl'
 
 EMAIL_TEMPLATE_WACHTWOORD_VERGETEN = 'email_account/wachtwoord-vergeten.dtl'
 
-my_logger = logging.getLogger('NHBApps.Account')
+my_logger = logging.getLogger('MH.Account')
 
 
 def account_stuur_email_wachtwoord_vergeten(account, email=None, **kwargs):

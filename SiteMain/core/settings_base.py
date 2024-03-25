@@ -49,7 +49,7 @@ GMAPS_API_URL = None
 
 # import install-specific settings from a separate file
 # that is easy to replace as part of the deployment process
-from SiteMain.settings_local import *
+from SiteMain.settings_local import *       # noqa
 
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -58,7 +58,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2024-03-19'
+SITE_VERSIE = '2024-03-25'
 
 # modules van de site
 INSTALLED_APPS = [

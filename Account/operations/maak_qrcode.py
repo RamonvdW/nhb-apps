@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2023 Ramon van der Winkel.
+#  Copyright (c) 2019-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -16,7 +16,7 @@ import qrcode
 import pyotp
 import io
 
-my_logger = logging.getLogger('NHBApps.Account')
+my_logger = logging.getLogger('MH.Account')
 
 
 # the QR code versie bepaalt het aantal data plekken in de code

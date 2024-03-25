@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023 Ramon van der Winkel.
+#  Copyright (c) 2023-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -84,7 +84,8 @@ class Command(BaseCommand):
             self.teams_cache.append(team)
             self.team_lid_nrs[team.pk] = [deelnemer.sporterboog.sporter.lid_nr
                                           for deelnemer in team.gekoppelde_leden.all()]
-            # self.stdout.write('[DEBUG] team %s, gekoppelde_leden: %s' % (repr(team.team_naam), repr(self.team_lid_nrs[team.pk])))
+            # self.stdout.write('[DEBUG] team %s, gekoppelde_leden: %s' % (repr(team.team_naam),
+            #                                                              repr(self.team_lid_nrs[team.pk])))
         # for
 
     def _sort_op_gemiddelde(self, lid_nrs):
@@ -126,7 +127,7 @@ class Command(BaseCommand):
     def _get_team(self, team_naam, ver_nr, row_nr):
         if self.verbose:
             self.stdout.write('[DEBUG] get_team: team_klasse=%s' % repr(self.team_klasse))
-            
+
         up_naam = team_naam.upper()
         sel_teams = list()
         for team in self.teams_cache:
@@ -458,7 +459,9 @@ class Command(BaseCommand):
 
         # de rest (van de 8 finalisten) is 5e
         # result_volgorde is al gezet, gebaseerd op aflopende scores
+        #                                       .. van de voorronde, welke hoger kan zijn dan de finale!
         min_rank = 5
+        rest = list()
         for team_naam in vijfden:
             try:
                 kamp_team = self.deelnemende_teams[team_naam]
@@ -467,9 +470,15 @@ class Command(BaseCommand):
             else:
                 kamp_team.result_rank = 5
                 finale_team_pks.append(kamp_team.pk)
-                min_rank += 1
-                if not self.dryrun:
-                    kamp_team.save(update_fields=['result_rank'])
+                tup = (kamp_team.result_volgorde, kamp_team.pk, kamp_team)
+                rest.append(tup)
+        # for
+        rest.sort()     # op result_volgorde
+        for _, _, kamp_team in rest:
+            kamp_team.result_volgorde = min_rank
+            min_rank += 1
+            if not self.dryrun:
+                kamp_team.save(update_fields=['result_rank', 'result_volgorde'])
         # for
 
     @staticmethod
