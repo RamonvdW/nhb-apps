@@ -399,6 +399,7 @@ class UitslagenBKTeamsView(TemplateView):
                                        'feitelijke_leden')
                      .order_by('team_klasse__volgorde',      # klassen in de uitslag
                                'result_rank',                # teams binnen elke klasse
+                               'result_volgorde',            # indien gelijke rank (uitgevallen in finales)
                                'volgorde')):                 # indien niet meegedaan
 
             if team.team_klasse != prev_klasse:
