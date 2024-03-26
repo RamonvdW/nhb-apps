@@ -567,7 +567,7 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
         # 'method': 'bancontact',
         # 'details': {'consumerName': None,                       # LET OP!
         #             'consumerAccount': 'BE12345678901234',
-        #             'consumerBic': 'AXABBE22'},
+        #             'consumerBic': 'AXABBE22'},               # noqa
         bestelling = Bestelling(
                             bestel_nr=1,
                             account=self.account,

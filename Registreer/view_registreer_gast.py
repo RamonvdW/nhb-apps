@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023 Ramon van der Winkel.
+#  Copyright (c) 2023-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -14,7 +14,7 @@ from django.views.generic import View, TemplateView
 from Account.models import get_account
 from Account.operations.aanmaken import AccountCreateError, account_create
 from Account.operations.wachtwoord import account_test_wachtwoord_sterkte
-from Account.view_wachtwoord import auto_login_gast_account
+from Account.operations.login import auto_login_gast_account
 from BasisTypen.definities import GESLACHT2STR
 from Functie.models import Functie
 from Functie.rol import rol_bepaal_beschikbare_rollen
@@ -53,7 +53,7 @@ TEMPLATE_REGISTREER_GAST_CONFIRM = 'registreer/registreer-gast-25-confirm.dtl'
 EMAIL_TEMPLATE_GAST_BEVESTIG_EMAIL = 'email_registreer/gast-bevestig-toegang-email.dtl'
 EMAIL_TEMPLATE_GAST_LID_NR = 'email_registreer/gast-tijdelijk-bondsnummer.dtl'
 
-my_logger = logging.getLogger('NHBApps.Registreer')
+my_logger = logging.getLogger('MH.Registreer')
 
 
 class RegistreerGastView(TemplateView):

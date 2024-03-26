@@ -33,13 +33,10 @@ EMAIL_TEMPLATE_WACHTWOORD_VERGETEN = 'email_account/wachtwoord-vergeten.dtl'
 my_logger = logging.getLogger('MH.Account')
 
 
-def account_stuur_email_wachtwoord_vergeten(account, email=None, **kwargs):
+def account_stuur_email_wachtwoord_vergeten(account, email, **kwargs):
     """ Stuur een mail naar het adres om te vragen om een bevestiging.
         Gebruik een tijdelijke URL die, na het volgen, weer in deze module uit komt.
     """
-
-    if not email:
-        email = account.bevestigde_email
 
     # maak de url aan om het e-mailadres te bevestigen
     context = {
@@ -179,34 +176,6 @@ def receive_wachtwoord_vergeten(request, account):
 
 
 set_tijdelijke_codes_receiver(RECEIVER_WACHTWOORD_VERGETEN, receive_wachtwoord_vergeten)
-
-
-def auto_login_gast_account(request, account):
-    """ automatisch inlog op een nieuw account; wordt gebruikt voor aanmaken gast-account.
-    """
-    # integratie met de authenticatie laag van Django
-    login(request, account)
-
-    from_ip = get_safe_from_ip(request)
-    my_logger.info('%s LOGIN automatische inlog voor gast-account %s' % (
-                        from_ip, repr(account.username)))
-
-    # we slaan de typische plug-ins over omdat we geen pagina of redirect kunnen doorgeven
-
-    otp_zet_control_niet_gelukt(request)
-
-    # gebruiker mag NIET aangemeld blijven
-    # zorg dat de session-cookie snel verloopt
-    request.session.set_expiry(0)
-
-    # schrijf in het logboek
-    schrijf_in_logboek(account=None,
-                       gebruikte_functie="Inloggen (code)",
-                       activiteit="Automatische inlog op gast-account %s vanaf IP %s" % (
-                                        repr(account.get_account_full_name()), from_ip))
-
-    # zorg dat de rollen goed ingesteld staan
-    rol_bepaal_beschikbare_rollen(request, account)
 
 
 class NieuwWachtwoordView(UserPassesTestMixin, TemplateView):

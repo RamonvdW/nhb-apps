@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2023 Ramon van der Winkel.
+#  Copyright (c) 2019-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -22,9 +22,9 @@ class TestAccountCli(E2EHelpers, TestCase):
 
     def setUp(self):
         """ initialisatie van de test case """
-        usermodel = get_user_model()
-        usermodel.objects.create_user('normaal', 'normaal@test.com', 'wachtwoord')
-        usermodel.objects.create_user('admin', 'admin@test.com', 'wachtwoord')
+        user = get_user_model()
+        user.objects.create_user('normaal', 'normaal@test.com', 'wachtwoord')
+        user.objects.create_user('admin', 'admin@test.com', 'wachtwoord')
         self.account_admin = Account.objects.get(username='admin')
         self.account_normaal = Account.objects.get(username='normaal')
 
@@ -57,21 +57,22 @@ class TestAccountCli(E2EHelpers, TestCase):
 
         # exception case
         with self.assert_max_queries(20):
-            management.call_command('deblok_account', 'nietbestaand', stderr=f1, stdout=f2)
+            management.call_command('deblok_account', 'niet_bestaand', stderr=f1, stdout=f2)
         self.assertEqual(f1.getvalue(), 'Account matching query does not exist.\n')
 
     def test_maak_account(self):
         with self.assertRaises(ObjectDoesNotExist):
-            Account.objects.get(username='nieuwelogin')
+            Account.objects.get(username='nieuwe_login')
         f1 = io.StringIO()
         f2 = io.StringIO()
         with self.assert_max_queries(20):
-            management.call_command('maak_account', 'Voornaam', 'nieuwelogin', 'nieuwwachtwoord', 'nieuw@test.not', stderr=f1, stdout=f2)
+            management.call_command('maak_account', 'Voornaam', 'nieuwe_login', 'nieuw_wachtwoord',
+                                    'nieuw@test.not', stderr=f1, stdout=f2)
         self.assertEqual(f1.getvalue(), '')
-        self.assertEqual(f2.getvalue(), "Aanmaken van account 'nieuwelogin' is gelukt\n")
+        self.assertEqual(f2.getvalue(), "Aanmaken van account 'nieuwe_login' is gelukt\n")
 
-        account = Account.objects.get(username='nieuwelogin')
-        self.assertEqual(account.username, 'nieuwelogin')
+        account = Account.objects.get(username='nieuwe_login')
+        self.assertEqual(account.username, 'nieuwe_login')
         self.assertEqual(account.first_name, 'Voornaam')
         self.assertEqual(account.email, '')
         self.assertTrue(account.is_active)
@@ -83,12 +84,14 @@ class TestAccountCli(E2EHelpers, TestCase):
         # exception cases
         f1 = io.StringIO()
         with self.assert_max_queries(20):
-            management.call_command('maak_account', 'Voornaam', 'nieuwelogin', 'nieuwwachtwoord', 'nieuw@test.not', stderr=f1, stdout=f2)
+            management.call_command('maak_account', 'Voornaam', 'nieuwe_login', 'nieuw_wachtwoord',
+                                    'nieuw@test.not', stderr=f1, stdout=f2)
         self.assertEqual(f1.getvalue(), 'Account bestaat al\n')
 
         f1 = io.StringIO()
         with self.assert_max_queries(20):
-            management.call_command('maak_account', 'Voornaam', 'nieuwelogin', 'nieuwwachtwoord', 'nieuw.khsn.test', stderr=f1, stdout=f2)
+            management.call_command('maak_account', 'Voornaam', 'nieuwe_login', 'nieuw_wachtwoord',
+                                    'nieuw.mh.test', stderr=f1, stdout=f2)
         self.assertEqual(f1.getvalue(), 'Dat is geen valide e-mail\n')
 
     def test_maak_beheerder(self):
@@ -104,7 +107,7 @@ class TestAccountCli(E2EHelpers, TestCase):
 
         # exception case
         with self.assert_max_queries(20):
-            management.call_command('maak_beheerder', 'nietbestaand', stderr=f1, stdout=f2)
+            management.call_command('maak_beheerder', 'niet_bestaand', stderr=f1, stdout=f2)
         self.assertEqual(f1.getvalue(), 'Account matching query does not exist.\n')
 
     def test_reset_otp(self):
@@ -112,7 +115,7 @@ class TestAccountCli(E2EHelpers, TestCase):
         f1 = io.StringIO()
         f2 = io.StringIO()
         with self.assert_max_queries(20):
-            management.call_command('reset_otp', 'noujazeg', stderr=f1, stdout=f2)
+            management.call_command('reset_otp', 'nou ja zeg', stderr=f1, stdout=f2)
         self.assertEqual(f1.getvalue(), "Account matching query does not exist.\n")
         self.assertEqual(f2.getvalue(), '')
 
@@ -156,14 +159,15 @@ class TestAccountCli(E2EHelpers, TestCase):
 
         # exception case
         with self.assert_max_queries(20):
-            management.call_command('deblok_account', 'nietbestaand', stderr=f1, stdout=f2)
+            management.call_command('deblok_account', 'niet_bestaand', stderr=f1, stdout=f2)
         self.assertEqual(f1.getvalue(), 'Account matching query does not exist.\n')
 
     def test_zet_geheim(self):
         f1 = io.StringIO()
         f2 = io.StringIO()
         with self.assert_max_queries(20):
-            management.call_command('zet_2fa_geheim', '--zet-actief', 'normaal', '1234567890123456', stderr=f1, stdout=f2)
+            management.call_command('zet_2fa_geheim', '--zet-actief', 'normaal', '1234567890123456',
+                                    stderr=f1, stdout=f2)
         # print('f1:', f1.getvalue())
         # print('f2:', f2.getvalue())
         self.assertTrue("2FA is opgeslagen voor account 'normaal'" in f2.getvalue())
@@ -172,7 +176,8 @@ class TestAccountCli(E2EHelpers, TestCase):
         f1 = io.StringIO()
         f2 = io.StringIO()
         with self.assert_max_queries(20):
-            management.call_command('zet_2fa_geheim', 'normaal', '1234567890123456', stderr=f1, stdout=f2)
+            management.call_command('zet_2fa_geheim', 'normaal', '1234567890123456',
+                                    stderr=f1, stdout=f2)
         # print('f1:', f1.getvalue())
         # print('f2:', f2.getvalue())
         self.assertTrue("2FA is opgeslagen voor account 'normaal'" in f2.getvalue())
@@ -180,13 +185,14 @@ class TestAccountCli(E2EHelpers, TestCase):
         f1 = io.StringIO()
         f2 = io.StringIO()
         with self.assert_max_queries(20):
-            management.call_command('zet_2fa_geheim', 'nietbestaand', '1', stderr=f1, stdout=f2)
+            management.call_command('zet_2fa_geheim', 'niet_bestaand', '1', stderr=f1, stdout=f2)
         self.assertEqual(f1.getvalue(), 'Foutief 2FA geheim: moet 16 of 32 tekens lang zijn\n')
 
         f1 = io.StringIO()
         f2 = io.StringIO()
         with self.assert_max_queries(20):
-            management.call_command('zet_2fa_geheim', 'nietbestaand', '1234567890123456', stderr=f1, stdout=f2)
+            management.call_command('zet_2fa_geheim', 'niet_bestaand', '1234567890123456',
+                                    stderr=f1, stdout=f2)
         self.assertEqual(f1.getvalue(), 'Account matching query does not exist.\n')
 
     def test_maak_bb(self):
@@ -195,23 +201,24 @@ class TestAccountCli(E2EHelpers, TestCase):
         f1 = io.StringIO()
         f2 = io.StringIO()
         with self.assert_max_queries(20):
-            management.call_command('maak_bb', 'nietbestaand', stderr=f1, stdout=f2)
+            management.call_command('maak_bb', 'niet_bestaand', stderr=f1, stdout=f2)
 
         self.assertTrue('Kies een van --set_bb of --clr_bb' in f1.getvalue())
 
         f1 = io.StringIO()
         f2 = io.StringIO()
         with self.assert_max_queries(20):
-            management.call_command('maak_bb', '--set_bb', '--clr_bb', 'nietbestaand', stderr=f1, stdout=f2)
+            management.call_command('maak_bb', '--set_bb', '--clr_bb', 'niet_bestaand',
+                                    stderr=f1, stdout=f2)
 
         self.assertTrue('Kies --set_bb of --clr_bb, niet beide' in f1.getvalue())
 
         f1 = io.StringIO()
         f2 = io.StringIO()
         with self.assert_max_queries(20):
-            management.call_command('maak_bb', '--clr_bb', 'nietbestaand', stderr=f1, stdout=f2)
+            management.call_command('maak_bb', '--clr_bb', 'niet_bestaand', stderr=f1, stdout=f2)
 
-        self.assertTrue("Geen account met de inlog naam 'nietbestaand'" in f1.getvalue())
+        self.assertTrue("Geen account met de inlog naam 'niet_bestaand'" in f1.getvalue())
 
         f1 = io.StringIO()
         f2 = io.StringIO()

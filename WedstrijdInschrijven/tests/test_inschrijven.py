@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2023 Ramon van der Winkel.
+#  Copyright (c) 2022-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
 from django.utils import timezone
-from BasisTypen.definities import GESLACHT_ANDERS, GESLACHT_ALLE, ORGANISATIE_WA
+from BasisTypen.definities import GESLACHT_ANDERS, GESLACHT_ALLE
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse
 from Functie.tests.helpers import maak_functie
 from Geo.models import Regio
@@ -24,7 +24,7 @@ class TestWedstrijdInschrijven(E2EHelpers, TestCase):
 
     """ tests voor de Wedstrijden applicatie, module Inschrijven """
 
-    test_after = ('Wedstrijden.tests.test_wedstrijd',)
+    test_after = ('Wedstrijden.tests.test_wedstrijd_details',)
 
     url_wedstrijden_sessies = '/wedstrijden/%s/sessies/'                               # wedstrijd_pk
     url_wedstrijden_wijzig_wedstrijd = '/wedstrijden/%s/wijzig/'                       # wedstrijd_pk
@@ -91,7 +91,7 @@ class TestWedstrijdInschrijven(E2EHelpers, TestCase):
         self.sporter_voorkeuren = get_sporter_voorkeuren(sporter, mag_database_wijzigen=True)
 
         # maak alle SporterBoog aan
-        resp = self.client.post(self.url_sporter_voorkeuren, {'sporter_pk' : sporter.pk,
+        resp = self.client.post(self.url_sporter_voorkeuren, {'sporter_pk': sporter.pk,
                                                               'schiet_R': 'on'})
         self.assert_is_redirect_not_plein(resp)
 
@@ -201,7 +201,8 @@ class TestWedstrijdInschrijven(E2EHelpers, TestCase):
                                                                         'klasse': self.wkls_r[0].pk})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('wedstrijdinschrijven/inschrijven-toegevoegd-aan-mandje.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijdinschrijven/inschrijven-toegevoegd-aan-mandje.dtl',
+                                         'plein/site_layout.dtl'))
         self.assertEqual(1, WedstrijdInschrijving.objects.count())
 
         inschrijving = (WedstrijdInschrijving
@@ -320,7 +321,8 @@ class TestWedstrijdInschrijven(E2EHelpers, TestCase):
                                                                         'klasse': self.wkls_r[0].pk})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('wedstrijdinschrijven/inschrijven-toegevoegd-aan-mandje.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijdinschrijven/inschrijven-toegevoegd-aan-mandje.dtl',
+                                         'plein/site_layout.dtl'))
 
         # al wel ingeschreven
         with self.assert_max_queries(20):
@@ -370,7 +372,8 @@ class TestWedstrijdInschrijven(E2EHelpers, TestCase):
                                                                         'goto': 'F'})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('wedstrijdinschrijven/inschrijven-toegevoegd-aan-mandje.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijdinschrijven/inschrijven-toegevoegd-aan-mandje.dtl',
+                                         'plein/site_layout.dtl'))
 
         # al wel ingeschreven
         with self.assert_max_queries(21):
@@ -472,14 +475,18 @@ class TestWedstrijdInschrijven(E2EHelpers, TestCase):
         resp = self.client.post(url, {'sporterboog': 999999, 'sessie': 999999, 'klasse': 999999})
         self.assert404(resp, 'Onderdeel van verzoek niet gevonden')
 
-        resp = self.client.post(url, {'sporterboog': 999999, 'sessie': self.sessie_r.pk, 'klasse': self.wkls_r[0].pk})
+        resp = self.client.post(url, {'sporterboog': 999999,
+                                      'sessie': self.sessie_r.pk,
+                                      'klasse': self.wkls_r[0].pk})
         self.assert404(resp, 'Onderdeel van verzoek niet gevonden')
 
         self.assertEqual(0, WedstrijdInschrijving.objects.count())
 
         # echt aanmelden
         with self.assert_max_queries(20):
-            resp = self.client.post(url, {'sporterboog': self.sporterboog.pk, 'sessie': self.sessie_r.pk, 'klasse': self.wkls_r[0].pk,
+            resp = self.client.post(url, {'sporterboog': self.sporterboog.pk,
+                                          'sessie': self.sessie_r.pk,
+                                          'klasse': self.wkls_r[0].pk,
                                           'snel': 1})
         self.assert_is_redirect(resp, self.url_aanmeldingen % self.wedstrijd.pk)
 
@@ -487,7 +494,9 @@ class TestWedstrijdInschrijven(E2EHelpers, TestCase):
 
         # al aangemeld
         with self.assert_max_queries(20):
-            resp = self.client.post(url, {'sporterboog': self.sporterboog.pk, 'sessie': self.sessie_r.pk, 'klasse': self.wkls_r[0].pk})
+            resp = self.client.post(url, {'sporterboog': self.sporterboog.pk,
+                                          'sessie': self.sessie_r.pk,
+                                          'klasse': self.wkls_r[0].pk})
         self.assert_is_redirect(resp, self.url_aanmeldingen % self.wedstrijd.pk)
 
         self.assertEqual(1, WedstrijdInschrijving.objects.count())
@@ -502,7 +511,9 @@ class TestWedstrijdInschrijven(E2EHelpers, TestCase):
 
         # opnieuw aanmelden
         with self.assert_max_queries(25):
-            resp = self.client.post(url, {'sporterboog': self.sporterboog.pk, 'sessie': self.sessie_r.pk, 'klasse': self.wkls_r[0].pk,
+            resp = self.client.post(url, {'sporterboog': self.sporterboog.pk,
+                                          'sessie': self.sessie_r.pk,
+                                          'klasse': self.wkls_r[0].pk,
                                           'snel': 1})
         self.assert_is_redirect(resp, self.url_aanmeldingen % self.wedstrijd.pk)
 
@@ -551,7 +562,9 @@ class TestWedstrijdInschrijven(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_template_used(resp, ('wedstrijdinschrijven/inschrijven-handmatig.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
-        self.assertNotContains(resp, 'Om in te kunnen schrijven op deze wedstrijd moet deze sporter eerst instellen om met de mannen of vrouwen mee te doen')
+        self.assertNotContains(
+            resp,
+            'Om in te kunnen schrijven op deze wedstrijd moet deze sporter eerst instellen om met de mannen of vrouwen mee te doen')
 
         # geen geslacht gekozen
         self.sporter_voorkeuren.wedstrijd_geslacht_gekozen = False
@@ -568,7 +581,9 @@ class TestWedstrijdInschrijven(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_template_used(resp, ('wedstrijdinschrijven/inschrijven-handmatig.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
-        self.assertContains(resp, 'Om in te kunnen schrijven op deze wedstrijd moet deze sporter eerst instellen om met de mannen of vrouwen mee te doen')
+        self.assertContains(
+            resp,
+            'Om in te kunnen schrijven op deze wedstrijd moet deze sporter eerst instellen om met de mannen of vrouwen mee te doen')
 
         # niet bestaande wedstrijd
         url = self.url_inschrijven_handmatig % 999999

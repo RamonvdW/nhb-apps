@@ -94,7 +94,7 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
                         lid_nr=100003,
                         geslacht="X",
                         voornaam="RamonX",
-                        achternaam="de Xester",
+                        achternaam="de Xester",     # noqa
                         email="",
                         geboorte_datum=datetime.date(year=1972, month=3, day=4),
                         sinds_datum=datetime.date(year=2010, month=11, day=12),
@@ -326,7 +326,7 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/wachtwoord-wijzigen.dtl', 'plein/site_layout.dtl'))
 
-        nieuw_ww = 'GratisNieuwGheim'
+        nieuw_ww = 'GratisNieuwGheim'       # noqa
 
         # foutief huidige wachtwoord
         with self.assert_max_queries(20):

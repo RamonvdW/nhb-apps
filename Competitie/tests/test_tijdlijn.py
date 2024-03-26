@@ -78,7 +78,7 @@ class TestCompetitieTijdlijn(E2EHelpers, TestCase):
         zet_competitie_fases(comp, 'A', 'A')
         self.assertEqual(bepaal_fase_indiv(comp), 'A')
 
-        sequence = 'BCDFGJKLNOPQZQPONLKJGFDCB'
+        sequence = 'BCDFGJKLNOPQZQPONLKJGFDCB'      # noqa
         for fase in sequence:
             zet_competitie_fases(comp, fase, fase)
             # if fase in ('P', 'Q'):
@@ -120,7 +120,8 @@ class TestCompetitieTijdlijn(E2EHelpers, TestCase):
         self.assertEqual(bepaal_fase_indiv(comp), 'A')
         self.assertEqual(bepaal_fase_teams(comp), 'A')
 
-        sequence = 'BCFGJKLNOPQZQPONLKJGFCB'        # let op: D wordt niet ondersteund
+        # let op: D wordt niet ondersteund
+        sequence = 'BCFGJKLNOPQZQPONLKJGFCB'        # noqa
         for fase in sequence:
             zet_competitie_fases(comp, fase, fase)
             # if fase in ('L', 'N'):

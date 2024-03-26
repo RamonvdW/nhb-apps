@@ -652,7 +652,6 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
         functie_rcl101 = Functie.objects.get(rol='RCL', comp_type='18', regio=regio_101)
         self.e2e_wissel_naar_functie(functie_rcl101)
 
-
         # doe een POST om de eerste ronde aan te maken
         url = self.url_planning_regio % deelcomp.pk
         with self.assert_max_queries(20):

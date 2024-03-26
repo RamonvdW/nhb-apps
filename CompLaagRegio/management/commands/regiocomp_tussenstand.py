@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2023 Ramon van der Winkel.
+#  Copyright (c) 2020-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -326,7 +326,10 @@ class Command(BaseCommand):
                     deelnemer.score7 = waardes[6]
                     deelnemer.aantal_scores = len(waardes) - waardes.count(0)
                     deelnemer.laagste_score_nr, laagste = self._bepaal_laagste_nr(waardes)
-                    deelnemer.gemiddelde, deelnemer.totaal = self._bepaal_gemiddelde_en_totaal(waardes, comp.aantal_scores_voor_rk_deelname, pijlen_per_ronde)
+                    deelnemer.gemiddelde, deelnemer.totaal = self._bepaal_gemiddelde_en_totaal(
+                                                                    waardes,
+                                                                    comp.aantal_scores_voor_rk_deelname,
+                                                                    pijlen_per_ronde)
 
                     # kijk of verplaatsing uit klasse onbekend van toepassing is
                     if deelnemer.ag_voor_indiv < 0.001:

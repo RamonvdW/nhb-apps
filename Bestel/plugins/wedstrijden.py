@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2023 Ramon van der Winkel.
+#  Copyright (c) 2022-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -227,7 +227,7 @@ class BepaalAutomatischeKorting(object):
                 inschrijving.korting = None
         # for
 
-    def _analyseer_kortingen_recursief_combi(self, alle_inschrijvingen, gebruikte_kortingen=[]):
+    def _analyseer_kortingen_recursief_combi(self, alle_inschrijvingen, gebruikte_kortingen=()):
         # self._stdout.write('zoek_kortingen_recursief_combi: gebruikte_kortingen: %s' % gebruikte_kortingen)
 
         gebruikte_kortingen = list(gebruikte_kortingen)     # maak een kopie

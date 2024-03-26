@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2023 Ramon van der Winkel.
+#  Copyright (c) 2019-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -20,13 +20,13 @@ class TestAccountOpWachtwoord(E2EHelpers, TestCase):
         res, msg = account_test_wachtwoord_sterkte('KHSN123456', '123456')
         self.assertEqual((res, msg), (False, "wachtwoord bevat een verboden reeks"))
 
-        res, msg = account_test_wachtwoord_sterkte('xxxxxXXXXX', '123456')
+        res, msg = account_test_wachtwoord_sterkte('xxxxxXXXXX', '123456')      # noqa
         self.assertEqual((res, msg), (False, "wachtwoord bevat te veel gelijke tekens"))
 
-        res, msg = account_test_wachtwoord_sterkte('jajajaJAJAJA', '123456')
+        res, msg = account_test_wachtwoord_sterkte('jajajaJAJAJA', '123456')    # noqa
         self.assertEqual((res, msg), (False, "wachtwoord bevat te veel gelijke tekens"))
 
-        res, msg = account_test_wachtwoord_sterkte('blablabla', '123456')
+        res, msg = account_test_wachtwoord_sterkte('blablabla', '123456')       # noqa
         self.assertEqual((res, msg), (False, "wachtwoord bevat te veel gelijke tekens"))
 
         res, msg = account_test_wachtwoord_sterkte('grootGROOT', '123456')
@@ -44,13 +44,13 @@ class TestAccountOpWachtwoord(E2EHelpers, TestCase):
         res, msg = account_test_wachtwoord_sterkte('HandBoogSport', '123456')
         self.assertEqual((res, msg), (False, "wachtwoord is niet sterk genoeg"))
 
-        res, msg = account_test_wachtwoord_sterkte('qwertyuiop', '123456')
+        res, msg = account_test_wachtwoord_sterkte('qwertyuiop', '123456')      # noqa
         self.assertEqual((res, msg), (False, "wachtwoord is niet sterk genoeg"))
 
         res, msg = account_test_wachtwoord_sterkte('234567890', '123456')
         self.assertEqual((res, msg), (False, "wachtwoord is niet sterk genoeg"))
 
-        res, msg = account_test_wachtwoord_sterkte('zxcvbnm,.', '123456')
+        res, msg = account_test_wachtwoord_sterkte('zxcvbnm,.', '123456')       # noqa
         self.assertEqual((res, msg), (False, "wachtwoord is niet sterk genoeg"))
 
         res, msg = account_test_wachtwoord_sterkte('passWORD!', '123456')

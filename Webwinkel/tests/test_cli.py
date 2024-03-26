@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2023 Ramon van der Winkel.
+#  Copyright (c) 2022-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -155,27 +155,31 @@ class TestWebwinkelCli(E2EHelpers, TestCase):
         with override_settings(WEBWINKEL_FOTOS_DIR=self.foto_dir):
             # fotobestand niet gevonden
             with self.assert_max_queries(20):
-                f1, f2 = self.run_management_command('koppel_fotos', 'Test titel 9999', 'foto1.jpg', report_exit_code=False)
+                f1, f2 = self.run_management_command('koppel_fotos', 'Test titel 9999', 'foto1.jpg',
+                                                     report_exit_code=False)
             # print("\nf1:\n%s\nf2:\n%s" % (f1.getvalue(), f2.getvalue()))
             self.assertTrue("[ERROR] Kan foto niet vinden: " in f1.getvalue())
             self.assertTrue("foto1.jpg" in f1.getvalue())
 
             # product niet gevonden
             with self.assert_max_queries(20):
-                f1, f2 = self.run_management_command('koppel_fotos', 'Test titel 9999', self.foto2.locatie, report_exit_code=False)
+                f1, f2 = self.run_management_command('koppel_fotos', 'Test titel 9999', self.foto2.locatie,
+                                                     report_exit_code=False)
             # print("\nf1:\n%s\nf2:\n%s" % (f1.getvalue(), f2.getvalue()))
             self.assertTrue("[ERROR] Product niet gevonden" in f1.getvalue())
             self.assertTrue("[INFO] Zoek product met omslag_titel 'Test titel 9999'" in f2.getvalue())
 
             # meerdere producten matchen
             with self.assert_max_queries(20):
-                f1, f2 = self.run_management_command('koppel_fotos', 'Test titel', self.foto2.locatie, report_exit_code=False)
+                f1, f2 = self.run_management_command('koppel_fotos', 'Test titel', self.foto2.locatie,
+                                                     report_exit_code=False)
             # print("\nf1:\n%s\nf2:\n%s" % (f1.getvalue(), f2.getvalue()))
             self.assertTrue("[ERROR] Meerdere producten gevonden:" in f1.getvalue())
 
             # koppel omslagfoto aan product
             with self.assert_max_queries(20):
-                f1, f2 = self.run_management_command('koppel_fotos', 'Test titel 1', self.foto2.locatie, report_exit_code=False)
+                f1, f2 = self.run_management_command('koppel_fotos', 'Test titel 1', self.foto2.locatie,
+                                                     report_exit_code=False)
             # print("\nf1:\n%s\nf2:\n%s" % (f1.getvalue(), f2.getvalue()))
             self.assertTrue("[INFO] Zoek product met omslag_titel 'Test titel 1'" in f2.getvalue())
             self.assertTrue("[INFO] Gevonden product: 'Test titel 1'" in f2.getvalue())
@@ -183,7 +187,8 @@ class TestWebwinkelCli(E2EHelpers, TestCase):
 
             # koppel meerdere foto's aan product + maak thumbnail (van garbage)
             with self.assert_max_queries(20):
-                f1, f2 = self.run_management_command('koppel_fotos', 'Test titel 1', self.foto2.locatie, self.foto2.locatie, report_exit_code=False)
+                f1, f2 = self.run_management_command('koppel_fotos', 'Test titel 1', self.foto2.locatie,
+                                                     self.foto2.locatie, report_exit_code=False)
             # print("\nf1:\n%s\nf2:\n%s" % (f1.getvalue(), f2.getvalue()))
             self.assertTrue("[INFO] Zoek product met omslag_titel 'Test titel 1'" in f2.getvalue())
             self.assertTrue("[INFO] Gevonden product: 'Test titel 1'" in f2.getvalue())
@@ -196,7 +201,8 @@ class TestWebwinkelCli(E2EHelpers, TestCase):
 
             # koppel meerdere foto's aan product + maak thumbnail
             with self.assert_max_queries(20):
-                f1, f2 = self.run_management_command('koppel_fotos', 'Test titel 1', self.foto2.locatie, self.foto2.locatie, report_exit_code=False)
+                f1, f2 = self.run_management_command('koppel_fotos', 'Test titel 1', self.foto2.locatie,
+                                                     self.foto2.locatie, report_exit_code=False)
             # print("\nf1:\n%s\nf2:\n%s" % (f1.getvalue(), f2.getvalue()))
             self.assertTrue("[INFO] Zoek product met omslag_titel 'Test titel 1'" in f2.getvalue())
             self.assertTrue("[INFO] Gevonden product: 'Test titel 1'" in f2.getvalue())
@@ -209,7 +215,8 @@ class TestWebwinkelCli(E2EHelpers, TestCase):
             self.foto2.locatie_thumb = 'xxx'
             self.foto2.save()
             with self.assert_max_queries(20):
-                f1, f2 = self.run_management_command('koppel_fotos', 'Test titel 1', self.foto2.locatie, self.foto2.locatie, report_exit_code=False)
+                f1, f2 = self.run_management_command('koppel_fotos', 'Test titel 1', self.foto2.locatie,
+                                                     self.foto2.locatie, report_exit_code=False)
             # print("\nf1:\n%s\nf2:\n%s" % (f1.getvalue(), f2.getvalue()))
             self.assertTrue("[INFO] Gevonden product: 'Test titel 1'" in f2.getvalue())
             self.assertTrue("[INFO] Foto 'test_1.jpg' was al gekoppeld als omslagfoto" in f2.getvalue())
@@ -218,7 +225,8 @@ class TestWebwinkelCli(E2EHelpers, TestCase):
 
             # verwijder een foto
             with self.assert_max_queries(20):
-                f1, f2 = self.run_management_command('koppel_fotos', 'Test titel 1', self.foto2.locatie, report_exit_code=False)
+                f1, f2 = self.run_management_command('koppel_fotos', 'Test titel 1', self.foto2.locatie,
+                                                     report_exit_code=False)
             # print("\nf1:\n%s\nf2:\n%s" % (f1.getvalue(), f2.getvalue()))
             self.assertTrue("[INFO] Foto 'test_1.jpg' was al gekoppeld als omslagfoto" in f2.getvalue())
             self.assertFalse("[INFO] Foto 'test_1.jpg' was al gekoppeld aan product" in f2.getvalue())

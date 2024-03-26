@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2023 Ramon van der Winkel.
+#  Copyright (c) 2021-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -192,7 +192,8 @@ class TestWedstrijdInschrijvenKwalificatieScores(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('wedstrijdinschrijven/inschrijven-kwalificatie-scores.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijdinschrijven/inschrijven-kwalificatie-scores.dtl',
+                                         'plein/site_layout.dtl'))
 
         self.e2e_assert_other_http_commands_not_supported(url, post=False)
 
@@ -207,7 +208,8 @@ class TestWedstrijdInschrijvenKwalificatieScores(E2EHelpers, TestCase):
                                           'score2_result': '601'})          # fout
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('wedstrijdinschrijven/inschrijven-toegevoegd-aan-mandje.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijdinschrijven/inschrijven-toegevoegd-aan-mandje.dtl',
+                                         'plein/site_layout.dtl'))
         self.assertEqual(3, Kwalificatiescore.objects.count())
 
         score = Kwalificatiescore.objects.exclude(naam='').first()
@@ -260,7 +262,8 @@ class TestWedstrijdInschrijvenKwalificatieScores(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('wedstrijdinschrijven/inschrijven-kwalificatie-scores.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijdinschrijven/inschrijven-kwalificatie-scores.dtl',
+                                         'plein/site_layout.dtl'))
 
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'score1_datum': self.kwalificatie_datum,
@@ -279,7 +282,8 @@ class TestWedstrijdInschrijvenKwalificatieScores(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('wedstrijdinschrijven/inschrijven-kwalificatie-scores.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijdinschrijven/inschrijven-kwalificatie-scores.dtl',
+                                         'plein/site_layout.dtl'))
 
         # te dicht op de wedstrijd
         self.wedstrijd.datum_begin = timezone.now().date()
@@ -289,7 +293,8 @@ class TestWedstrijdInschrijvenKwalificatieScores(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('wedstrijdinschrijven/inschrijven-kwalificatie-scores.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijdinschrijven/inschrijven-kwalificatie-scores.dtl',
+                                         'plein/site_layout.dtl'))
 
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'score1_datum': self.kwalificatie_datum,
@@ -344,7 +349,8 @@ class TestWedstrijdInschrijvenKwalificatieScores(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('wedstrijdinschrijven/inschrijven-kwalificatie-scores.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijdinschrijven/inschrijven-kwalificatie-scores.dtl',
+                                         'plein/site_layout.dtl'))
         self.assertContains(resp, '245, 234')
 
 # end of file

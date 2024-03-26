@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023 Ramon van der Winkel.
+#  Copyright (c) 2023-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -71,7 +71,8 @@ class Command(BaseCommand):
                     rank, naam, ver, score1, score2, _, count10, count9, _ = parts
                     ver = ver[:4]
                     if self.verbose:
-                        self.stdout.write('   %s %s %s %s %s %s %s' % (rank, ver, naam, score1, score2, count10, count9))
+                        self.stdout.write('   %s %s %s %s %s %s %s' % (
+                            rank, ver, naam, score1, score2, count10, count9))
 
                     ver_nr = int(ver)
                     score1 += '/'
@@ -121,7 +122,8 @@ class Command(BaseCommand):
 
                         rank_doorlopend += 1
 
-                        # print('rank_doorlopend=%s, totaal=%s, prev_totaal=%s, counts_str=%s, prev_counts_str=%s' % (rank_doorlopend, totaal, prev_totaal, counts_str, prev_counts_str))
+                        # print('rank_doorlopend=%s, totaal=%s, prev_totaal=%s, counts_str=%s, prev_counts_str=%s' % (
+                        #           rank_doorlopend, totaal, prev_totaal, counts_str, prev_counts_str))
 
                         if totaal == prev_totaal:
                             if rank_deze > 3:

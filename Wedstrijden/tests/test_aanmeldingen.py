@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2023 Ramon van der Winkel.
+#  Copyright (c) 2022-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -25,7 +25,7 @@ class TestWedstrijdenAanmeldingen(E2EHelpers, TestCase):
 
     """ tests voor de Wedstrijden applicatie, module Aanmeldingen """
 
-    test_after = ('Wedstrijden.tests.test_wedstrijd',)
+    test_after = ('Wedstrijden.tests.test_wedstrijd_details',)
 
     url_aanmeldingen_wedstrijd = '/wedstrijden/%s/aanmeldingen/'                    # wedstrijd_pk
     url_details_aanmelding = '/wedstrijden/details-aanmelding/%s/'                  # inschrijving_pk
@@ -199,7 +199,8 @@ class TestWedstrijdenAanmeldingen(E2EHelpers, TestCase):
                                                                         'boog': self.boog_r.pk})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('wedstrijdinschrijven/inschrijven-toegevoegd-aan-mandje.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijdinschrijven/inschrijven-toegevoegd-aan-mandje.dtl',
+                                         'plein/site_layout.dtl'))
 
         self.assertEqual(1, WedstrijdInschrijving.objects.count())
         self.inschrijving1r = WedstrijdInschrijving.objects.first()
@@ -212,7 +213,8 @@ class TestWedstrijdenAanmeldingen(E2EHelpers, TestCase):
                                                                         'boog': self.boog_c.pk})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('wedstrijdinschrijven/inschrijven-toegevoegd-aan-mandje.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijdinschrijven/inschrijven-toegevoegd-aan-mandje.dtl',
+                                         'plein/site_layout.dtl'))
         self.assertEqual(2, WedstrijdInschrijving.objects.count())
         self.inschrijving1c = WedstrijdInschrijving.objects.exclude(pk=self.inschrijving1r.pk)[0]
 
@@ -224,7 +226,8 @@ class TestWedstrijdenAanmeldingen(E2EHelpers, TestCase):
                                                                         'boog': self.boog_c.pk})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('wedstrijdinschrijven/inschrijven-toegevoegd-aan-mandje.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijdinschrijven/inschrijven-toegevoegd-aan-mandje.dtl',
+                                         'plein/site_layout.dtl'))
         self.assertEqual(3, WedstrijdInschrijving.objects.count())
         self.inschrijving2 = WedstrijdInschrijving.objects.exclude(pk__in=(self.inschrijving1r.pk,
                                                                            self.inschrijving1c.pk))[0]

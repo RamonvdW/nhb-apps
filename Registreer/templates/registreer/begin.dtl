@@ -23,7 +23,7 @@
     <div class="row-sv-blauw">
         <div class="col s12">
             <!-- voor leden -->
-            {% include 'plein/card_icon.dtl' with title="voor KHSN leden" text="Doorloop eenmalig de korte registratie procedure en krijg toegang tot de hele site." icon="badge" url=url_registreer_nhb %}
+            {% include 'plein/card_icon.dtl' with title="voor KHSN leden" text="Doorloop eenmalig de korte registratie procedure en krijg toegang tot de hele site." icon="badge" url=url_registreer_khsn %}
         </div>
     </div>
 

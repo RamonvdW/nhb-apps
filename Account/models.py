@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2023 Ramon van der Winkel.
+#  Copyright (c) 2019-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -20,10 +20,7 @@ class Account(AbstractUser):
     """ definitie van een account waarmee een gebruiker in kan loggen """
 
     # (replaced) username --> 150 to 50 chars
-    username = models.CharField(
-                    max_length=50,
-                    unique=True,
-                    help_text="Inlog naam")
+    username = models.CharField(max_length=50, unique=True)
     # (inherited) password
     # (inherited) date_joined
     # (inherited) last_login
@@ -39,35 +36,23 @@ class Account(AbstractUser):
     # om in te zoeken: volledige naam zonder leestekens
     unaccented_naam = models.CharField(max_length=200, default='', blank=True)
 
-    vraag_nieuw_wachtwoord = models.BooleanField(
-                                    default=False,
-                                    help_text="Moet de gebruiker een nieuw wachtwoord opgeven bij volgende inlog?")
+    vraag_nieuw_wachtwoord = models.BooleanField(default=False)
 
     laatste_inlog_poging = models.DateTimeField(blank=True, null=True)
 
     # verkeerd wachtwoord opgegeven via login of wijzig-wachtwoord
-    verkeerd_wachtwoord_teller = models.IntegerField(
-                                    default=0,
-                                    help_text="Aantal mislukte inlog pogingen op rij")
+    verkeerd_wachtwoord_teller = models.IntegerField(default=0)
 
-    is_geblokkeerd_tot = models.DateTimeField(
-                                    blank=True, null=True,
-                                    help_text="Login niet mogelijk tot")
+    is_geblokkeerd_tot = models.DateTimeField(blank=True, null=True)
 
     # speciale vlag om dit account alle rechten te geven
-    is_BB = models.BooleanField(
-                        default=False,
-                        help_text="Manager MH")
+    is_BB = models.BooleanField(default=False)
 
     # TOTP ondersteuning
-    otp_code = models.CharField(
-                        max_length=32,          # 32-char base32 encoded secret
-                        default="", blank=True,
-                        help_text="OTP code")
+    # 32-char base32 encoded secret
+    otp_code = models.CharField(max_length=32, default="", blank=True)
 
-    otp_is_actief = models.BooleanField(
-                        default=False,
-                        help_text="Is OTP verificatie gelukt")
+    otp_is_actief = models.BooleanField(default=False)
 
     otp_controle_gelukt_op = models.DateTimeField(blank=True, null=True)
 

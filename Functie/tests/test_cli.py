@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2023 Ramon van der Winkel.
+#  Copyright (c) 2020-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -91,7 +91,7 @@ class TestFunctieCli(E2EHelpers, TestCase):
 
     def test_maak_rcl_bad(self):
         with self.assert_max_queries(20):
-            f1, f2 = self.run_management_command('maak_rcl', 'bestaatniet', '18', '000')
+            f1, f2 = self.run_management_command('maak_rcl', 'bestaat_niet', '18', '000')
         self.assertTrue("Account matching query does not exist" in f1.getvalue())
         self.assertTrue("Functie matching query does not exist" in f1.getvalue())
         self.assertTrue(f2.getvalue() == '')
@@ -136,9 +136,10 @@ class TestFunctieCli(E2EHelpers, TestCase):
         with self.assert_max_queries(57):
             f1, f2 = self.run_management_command('check_beheerders')
         self.assertTrue(f1.getvalue() == '')
-        self.assertTrue("LET OP: account heeft geen koppeling met KHSN lid" in f2.getvalue())
+        # print('f2:', f2.getvalue())
+        self.assertFalse("LET OP:" in f2.getvalue())    # we klagen niet meer over account niet gekoppeld aan sporter
 
-        # maak account ook nhblid
+        # maak account aan sporter
         sporter = Sporter(
                     lid_nr=100042,
                     voornaam='Kees',

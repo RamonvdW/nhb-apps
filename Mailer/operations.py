@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2023 Ramon van der Winkel.
+#  Copyright (c) 2020-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -64,7 +64,7 @@ def mailer_queue_email(to_address, onderwerp, mail_body, enforce_whitelist=True)
 
 def mailer_obfuscate_email(email):
     """ Helper functie om een email adres te maskeren
-        voorbeeld: nhb.whatever@gmail.com --> nh####w@gmail.com
+        voorbeeld: whatever@gmail.com --> wh####w@gmail.com
     """
     try:
         user, domein = email.rsplit("@", 1)
@@ -154,8 +154,6 @@ def inline_styles(html):
                 }
             </style>
     """
-    tag2style = dict()  # [tag] = style
-
     # convert the style definitions into a table
     pos1 = html.find('<style>')
     pos2 = html.find('</style>')

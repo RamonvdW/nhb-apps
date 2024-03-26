@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2023 Ramon van der Winkel.
+#  Copyright (c) 2019-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -51,6 +51,17 @@ class TestFunctieRol(E2EHelpers, TestCase):
 
     def test_maak_sec(self):
         self.assertEqual(self.functie_sec.accounts.count(), 0)
+
+        # e-mail moet bevestigd zijn (anders kunnen we de mail niet sturen)
+        self.account_normaal.email_is_bevestigd = False
+        self.account_normaal.save(update_fields=['email_is_bevestigd'])
+        added = maak_account_vereniging_secretaris(self.ver1, self.account_normaal)
+        self.assertFalse(added)
+        self.assertEqual(self.functie_sec.accounts.count(), 0)
+
+        # normale situatie
+        self.account_normaal.email_is_bevestigd = True
+        self.account_normaal.save(update_fields=['email_is_bevestigd'])
         added = maak_account_vereniging_secretaris(self.ver1, self.account_normaal)
         self.assertTrue(added)
         self.assertEqual(self.functie_sec.accounts.count(), 1)
@@ -60,7 +71,7 @@ class TestFunctieRol(E2EHelpers, TestCase):
         self.assert_email_html_ok(mail)
         self.assert_consistent_email_html_text(mail)
 
-        # opnieuw toevoegen heeft geen effect
+        # dubbel koppelen wordt voorkomen
         added = maak_account_vereniging_secretaris(self.ver1, self.account_normaal)
         self.assertFalse(added)
         self.assertEqual(self.functie_sec.accounts.count(), 1)

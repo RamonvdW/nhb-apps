@@ -47,7 +47,7 @@ import sys
 
 VOLGORDE_PARKEER = 22222        # hoog en past in PositiveSmallIntegerField
 
-my_logger = logging.getLogger('NHBApps.RegiocompMutaties')
+my_logger = logging.getLogger('MH.RegiocompMutaties')
 
 # TODO: opsplitsen naar CompLaag*/operations/xxx
 
@@ -1759,7 +1759,7 @@ class Command(BaseCommand):
         # for
         sys.exit(1)
 
-    test uitvoeren met --debug-mode anders wordt er niets bijgehouden
+    test uitvoeren met DEBUG=True via --settings=SiteMain.settings_dev anders wordt er niets bijgehouden
 """
 
 # end of file

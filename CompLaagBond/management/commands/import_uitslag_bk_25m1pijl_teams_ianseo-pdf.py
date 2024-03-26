@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2023 Ramon van der Winkel.
+#  Copyright (c) 2022-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -146,7 +146,9 @@ class Command(BaseCommand):
 
         for lid_nr in self.deelnemers.keys():
             deelnemers = self.deelnemers[lid_nr]
-            self.deelnemers[lid_nr] = [deelnemer for deelnemer in deelnemers if deelnemer.sporterboog.boogtype.afkorting in afkortingen]
+            self.deelnemers[lid_nr] = [deelnemer
+                                       for deelnemer in deelnemers
+                                       if deelnemer.sporterboog.boogtype.afkorting in afkortingen]
         # for
 
         # count2 = sum([len(deelnemers) for deelnemers in self.deelnemers.values()])
@@ -169,9 +171,9 @@ class Command(BaseCommand):
             self.pk2team[team.pk] = team
             self.team_gekoppelde_pks[team.pk] = [deelnemer.pk for deelnemer in team.gekoppelde_leden.all()]
 
-            #print('team: %s' % team, team.team_klasse)
-            #for deelnemer in team.gekoppelde_leden.all():
-            #    print('  deelnemer: %s' % deelnemer)
+            # print('team: %s' % team, team.team_klasse)
+            # for deelnemer in team.gekoppelde_leden.all():
+            #     print('  deelnemer: %s' % deelnemer)
         # for
 
     def _sort_op_gemiddelde(self, lid_nrs):
@@ -298,7 +300,8 @@ class Command(BaseCommand):
         for regel in regels:
             sporter_naam, team_naam, score1, score2, count10, count9 = regel
             if self.verbose:
-                self.stdout.write('[INFO] Data in: %s %s %s %s %s %s' % (repr(sporter_naam), repr(team_naam), score1, score2, count10, count9))
+                self.stdout.write('[INFO] Data in: %s %s %s %s %s %s' % (
+                                    repr(sporter_naam), repr(team_naam), score1, score2, count10, count9))
 
             dit_team = None
             for team in self.teams_cache:
@@ -354,7 +357,8 @@ class Command(BaseCommand):
 
                 if invaller.gemiddelde > uitvaller.gemiddelde:
                     self.stdout.write('[INFO] Uitvaller %s heeft gemiddelde %s' % (uitvaller, uitvaller.gemiddelde))
-                    self.stderr.write('[ERROR] Invaller %s heeft hoger gemiddelde (%s) dan uitvaller' % (invaller, invaller.gemiddelde))
+                    self.stderr.write('[ERROR] Invaller %s heeft hoger gemiddelde (%s) dan uitvaller' % (
+                                            invaller, invaller.gemiddelde))
                     return
 
             # sla de team leden en hun bijdrage op
@@ -397,8 +401,6 @@ class Command(BaseCommand):
 
         self.dryrun = options['dryrun']
         self.verbose = options['verbose']
-
-        #print()
 
         # open de kopie, zodat we die aan kunnen passen
         fpath = options['bestand']

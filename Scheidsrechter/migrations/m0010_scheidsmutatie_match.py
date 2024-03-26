@@ -22,7 +22,8 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='scheidsmutatie',
             name='match',
-            field=models.ForeignKey(blank=True, null=True, on_delete=models.deletion.CASCADE, to='Competitie.competitiematch'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=models.deletion.CASCADE,
+                                    to='Competitie.competitiematch'),
         ),
     ]
 

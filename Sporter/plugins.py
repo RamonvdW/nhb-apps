@@ -16,7 +16,7 @@ import logging
 
 TEMPLATE_SPORTER_LOGIN_GEBLOKKEERD = 'sporter/login-geblokkeerd-geen-vereniging.dtl'
 
-my_logger = logging.getLogger('NHBApps.Sporter')
+my_logger = logging.getLogger('MH.Sporter')
 
 
 def sporter_login_plugin(request, from_ip, account):
@@ -38,9 +38,11 @@ def sporter_login_plugin(request, from_ip, account):
                 # lid mag geen gebruik (meer) maken van de faciliteiten
 
                 schrijf_in_logboek(account, 'Inloggen',
-                                   'Mislukte inlog vanaf IP %s voor inactief account %s' % (from_ip, repr(account.username)))
+                                   'Mislukte inlog vanaf IP %s voor inactief account %s' % (from_ip,
+                                                                                            repr(account.username)))
 
-                my_logger.info('%s LOGIN Geblokkeerde inlog voor inactief account %s' % (from_ip, repr(account.username)))
+                my_logger.info('%s LOGIN Geblokkeerde inlog voor inactief account %s' % (from_ip,
+                                                                                         repr(account.username)))
 
                 context = {'account': account, 'verberg_login_knop': True}
                 return render(request, TEMPLATE_SPORTER_LOGIN_GEBLOKKEERD, context)

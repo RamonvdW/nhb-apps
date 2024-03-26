@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2023 Ramon van der Winkel.
+#  Copyright (c) 2021-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -223,7 +223,7 @@ class TestCompLaagRegioCli(E2EHelpers, TestCase):
             f1, f2 = self.run_management_command('boogtype_transfer', '123456', 'X', '18')
         self.assertTrue('[ERROR] Onbekend boog type:' in f1.getvalue())
 
-        # competitie is nog in fase A en heeft geen vastgestelde klassegrenzen
+        # competitie is nog in fase A en heeft geen vastgestelde klassengrenzen
         with self.assert_max_queries(20):
             f1, f2 = self.run_management_command('boogtype_transfer', '123456', 'R', '18')
         self.assertTrue('[ERROR] Kan de competitie niet vinden' in f1.getvalue())

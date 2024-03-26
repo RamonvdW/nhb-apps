@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2023 Ramon van der Winkel.
+#  Copyright (c) 2021-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -40,7 +40,7 @@ DEBUG = True
 USE_SUBSET_FONT_FILES = False
 
 # debug toolbar for database access analysis
-#ENABLE_DEBUG_TOOLBAR = True
+# ENABLE_DEBUG_TOOLBAR = True
 
 
 # django-extensions

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2023 Ramon van der Winkel.
+#  Copyright (c) 2020-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -27,7 +27,7 @@ TEMPLATE_REGISTREER_BEVESTIG_EMAIL = 'registreer/registreer-lid-01-bevestig-emai
 TEMPLATE_REGISTREER_EMAIL_BEVESTIGD = 'registreer/registreer-lid-02-email-bevestigd.dtl'
 EMAIL_TEMPLATE_REGISTREER_LID_BEVESTIG = 'email_registreer/lid-bevestig-toegang-email.dtl'
 
-my_logger = logging.getLogger('NHBApps.Registreer')
+my_logger = logging.getLogger('MH.Registreer')
 
 
 def registreer_receive_bevestiging_aanmaken_account(request, account):
@@ -170,7 +170,7 @@ class RegistreerLidView(TemplateView):
 
         if form.is_valid():
             # compleetheid en wachtwoord sterkte worden gecontroleerd door het formulier
-            nummer = form.cleaned_data.get('nhb_nummer')
+            nummer = form.cleaned_data.get('lid_nr')
             email = form.cleaned_data.get('email')
             nieuw_wachtwoord = form.cleaned_data.get('nieuw_wachtwoord')
             from_ip = get_safe_from_ip(request)
@@ -182,7 +182,7 @@ class RegistreerLidView(TemplateView):
             except SporterGeenEmail as exc:
                 schrijf_in_logboek(account=None,
                                    gebruikte_functie="Registreer met bondsnummer",
-                                   activiteit='NHB lid %s heeft geen email adres.' % nummer)
+                                   activiteit='KHSN lid %s heeft geen email adres.' % nummer)
                 my_logger.info('%s REGISTREER Geblokkeerd voor bondsnummer %s (geen email)' % (
                                     from_ip, repr(nummer)))
 

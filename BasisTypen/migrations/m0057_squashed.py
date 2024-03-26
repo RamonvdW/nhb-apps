@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2023 Ramon van der Winkel.
+#  Copyright (c) 2020-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -717,7 +717,7 @@ class Migration(migrations.Migration):
                 'verbose_name': 'Boog type',
                 'verbose_name_plural': 'Boog typen',
                 'ordering': ['volgorde'],
-                'indexes': [models.Index(fields=['afkorting'], name='BasisTypen__afkorti_0bf4b9_idx')],
+                'indexes': [models.Index(fields=['afkorting'], name='BasisTypen__afkorti_0bf4b9_idx')],     # noqa
             },
         ),
         migrations.CreateModel(
@@ -727,11 +727,13 @@ class Migration(migrations.Migration):
                 ('afkorting', models.CharField(max_length=5)),
                 ('beschrijving', models.CharField(max_length=80)),
                 ('klasse_kort', models.CharField(max_length=30)),
-                ('wedstrijd_geslacht', models.CharField(choices=[('M', 'Man'), ('V', 'Vrouw'), ('A', 'Genderneutraal')], max_length=1)),
+                ('wedstrijd_geslacht', models.CharField(choices=[('M', 'Man'), ('V', 'Vrouw'), ('A', 'Genderneutraal')],
+                                                        max_length=1)),
                 ('min_wedstrijdleeftijd', models.IntegerField()),
                 ('max_wedstrijdleeftijd', models.IntegerField()),
                 ('volgorde', models.PositiveSmallIntegerField(default=0)),
-                ('organisatie', models.CharField(choices=[('W', 'World Archery'), ('N', 'KHSN'), ('F', 'IFAA')], default='W', max_length=1)),
+                ('organisatie', models.CharField(choices=[('W', 'World Archery'), ('N', 'KHSN'), ('F', 'IFAA')],
+                                                 default='W', max_length=1)),
             ],
             options={
                 'verbose_name': 'Leeftijdsklasse',
@@ -754,7 +756,8 @@ class Migration(migrations.Migration):
                 'verbose_name': 'Team type',
                 'verbose_name_plural': 'Team typen',
                 'ordering': ['volgorde'],
-                'indexes': [models.Index(fields=['afkorting'], name='BasisTypen__afkorti_6ad4da_idx'), models.Index(fields=['volgorde'], name='BasisTypen__volgord_4984e4_idx')],
+                'indexes': [models.Index(fields=['afkorting'], name='BasisTypen__afkorti_6ad4da_idx'),  # noqa
+                            models.Index(fields=['volgorde'], name='BasisTypen__volgord_4984e4_idx')],  # noqa
             },
         ),
         migrations.CreateModel(
@@ -808,7 +811,7 @@ class Migration(migrations.Migration):
                 'verbose_name': 'Template Competitie Team Klasse',
                 'verbose_name_plural': 'Template Competitie Team Klassen',
                 'ordering': ['volgorde'],
-                'indexes': [models.Index(fields=['volgorde'], name='BasisTypen__volgord_4d62f0_idx')],
+                'indexes': [models.Index(fields=['volgorde'], name='BasisTypen__volgord_4d62f0_idx')],  # noqa
             },
         ),
         migrations.CreateModel(
@@ -820,14 +823,15 @@ class Migration(migrations.Migration):
                 ('volgorde', models.PositiveIntegerField()),
                 ('boogtype', models.ForeignKey(on_delete=models.deletion.PROTECT, to='BasisTypen.boogtype')),
                 ('leeftijdsklasse', models.ForeignKey(on_delete=models.deletion.PROTECT, to='BasisTypen.leeftijdsklasse')),
-                ('organisatie', models.CharField(choices=[('W', 'World Archery'), ('N', 'KHSN'), ('F', 'IFAA')], default='W', max_length=1)),
+                ('organisatie', models.CharField(choices=[('W', 'World Archery'), ('N', 'KHSN'), ('F', 'IFAA')],
+                                                 default='W', max_length=1)),
                 ('afkorting', models.CharField(default='?', max_length=10)),
             ],
             options={
                 'verbose_name': 'Kalender Wedstrijdklasse',
                 'verbose_name_plural': 'Kalender Wedstrijdklassen',
                 'ordering': ['volgorde'],
-                'indexes': [models.Index(fields=['volgorde'], name='BasisTypen__volgord_246cec_idx')],
+                'indexes': [models.Index(fields=['volgorde'], name='BasisTypen__volgord_246cec_idx')],  # noqa
             },
         ),
         migrations.RunPython(init_leeftijdsklassen),

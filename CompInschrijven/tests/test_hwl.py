@@ -104,7 +104,8 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
                     sinds_datum=datetime.date(year=jaar-3, month=11, day=12),
                     bij_vereniging=ver)
         sporter.save()
-        sporter.account = self.e2e_create_account(sporter.lid_nr, sporter.email, sporter.voornaam)  # heeft last_login=None
+        sporter.account = self.e2e_create_account(sporter.lid_nr,                       # heeft last_login=None
+                                                  sporter.email, sporter.voornaam)
         sporter.save(update_fields=['account'])
         self.sporter_100002 = sporter
 
@@ -128,7 +129,7 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
                     voornaam="Cadet",
                     achternaam="de Jeugd",
                     email="",
-                    geboorte_datum=datetime.date(year=jaar-13, month=3, day=4),    # 13=asp, maar 14 in 2e jaar competitie!
+                    geboorte_datum=datetime.date(year=jaar-13, month=3, day=4),  # 13=asp, maar 14 in 2e jaar comp
                     sinds_datum=datetime.date(year=jaar-3, month=11, day=12),
                     bij_vereniging=ver)
         sporter.save()
@@ -762,7 +763,9 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
         url = self.url_aanmelden % self.comp_18.pk
         zet_competitie_fase_regio_inschrijven(self.comp_18)
         # zet het min_ag te hoog
-        for klasse in CompetitieIndivKlasse.objects.filter(competitie=self.comp_18, boogtype__afkorting='R', min_ag__lt=8.0):
+        for klasse in CompetitieIndivKlasse.objects.filter(competitie=self.comp_18,
+                                                           boogtype__afkorting='R',
+                                                           min_ag__lt=8.0):
             klasse.min_ag = 8.0     # > 7.42 van zet_ag
             klasse.save(update_fields=['min_ag'])
         # for

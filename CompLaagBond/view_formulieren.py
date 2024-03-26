@@ -577,7 +577,7 @@ class FormulierBkTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
         d_align = ws['D18'].alignment
         d_format = ws['D18'].number_format
 
-        efgh_font = ws['E18'].font
+        efgh_font = ws['E18'].font          # noqa
         e_align = ws['E18'].alignment
 
         f_align = ws['F18'].alignment

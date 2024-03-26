@@ -31,7 +31,7 @@
                         {% csrf_token %}
 
                         <div class="input-field">
-                            {{ form.nhb_nummer.label_tag }}{{ form.nhb_nummer }}
+                            {{ form.lid_nr.label_tag }}{{ form.lid_nr }}
                         </div>
 
                         <div class="input-field">

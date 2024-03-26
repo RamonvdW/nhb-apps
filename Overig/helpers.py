@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -27,7 +27,7 @@ def get_safe_from_ip(request):
             pass
         else:
             for char in from_ip:
-                if char in '0123456789ABCDEFabcdef:.':
+                if char in '0123456789ABCDEFabcdef:.':      # noqa
                     safe_ip += char
             # for
 

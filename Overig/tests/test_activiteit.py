@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2023 Ramon van der Winkel.
+#  Copyright (c) 2020-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -38,8 +38,8 @@ class TestOverigActiviteit(E2EHelpers, TestCase):
     def setUp(self):
         """ initialisatie van de test case """
         self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.com', 'Normaal')
-        self.account_100001 = self.e2e_create_account('100001', 'nhb100001@test.com', 'Norma de Schutter')
-        self.account_100002 = self.e2e_create_account('100002', 'nhb100002@test.com', 'Pilla de Schutter')
+        self.account_100001 = self.e2e_create_account('100001', 'lid100001@test.com', 'Norma de Schutter')
+        self.account_100002 = self.e2e_create_account('100002', 'lid100002@test.com', 'Pijl de Schutter')
 
         account = self.account_100001
         account.otp_controle_gelukt_op = account.last_login = timezone.now() - datetime.timedelta(days=1)
@@ -373,7 +373,7 @@ class TestOverigActiviteit(E2EHelpers, TestCase):
 
     def test_loskoppelen(self):
         self.testdata.account_admin.otp_is_actief = True
-        self.testdata.account_admin.otp_code = "ABCDEFGHIJKLMNOP"
+        self.testdata.account_admin.otp_code = "ABCDEFGHIJKLMNOP"       # noqa
         self.testdata.account_admin.save()
 
         self.e2e_login_and_pass_otp(self.testdata.account_admin)

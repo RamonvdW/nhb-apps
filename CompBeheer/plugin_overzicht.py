@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2023 Ramon van der Winkel.
+#  Copyright (c) 2019-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -46,7 +46,8 @@ def get_kaartjes_beheer(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_in
                     prio=7,
                     titel="Beheerders",
                     icoon="face",
-                    tekst="Toon wie beheerders van de bondscompetitie zijn, koppel andere beheerders of wijzig contactgegevens.",
+                    tekst="Toon wie beheerders van de bondscompetitie zijn, " +
+                          "koppel andere beheerders of wijzig contactgegevens.",
                     url=url)
     kaartjes_algemeen.append(kaartje)
 

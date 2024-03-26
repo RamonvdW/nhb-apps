@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2023 Ramon van der Winkel.
+#  Copyright (c) 2021-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -49,7 +49,7 @@ TEST_VALIDATE_JAVASCRIPT = True
 
 # enable html validation using the Nu Html Checker (v.Nu)
 # WARNING: increases test run duration significantly (triple!)
-#TEST_VALIDATE_HTML = True
+# TEST_VALIDATE_HTML = True
 
 
 # end of file

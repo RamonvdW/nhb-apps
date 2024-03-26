@@ -410,6 +410,7 @@ class TestScheidsrechterWedstrijden(E2EHelpers, TestCase):
 
         self.assertEqual(0, MailQueue.objects.count())
         Taak.objects.all().delete()
+        self.assertEqual(0, dag.notified_srs.count())
 
         # stuur notificaties
         with self.assert_max_queries(20):
@@ -421,7 +422,7 @@ class TestScheidsrechterWedstrijden(E2EHelpers, TestCase):
 
         # controleer dat 3 scheidsrechters gekozen zijn en maar 2 een mailtje krijgen
         dag.refresh_from_db()
-        self.assertEqual(3, dag.notified_srs.count())
+        self.assertEqual(2, dag.notified_srs.count())
 
         self.assertEqual(2, MailQueue.objects.count())
         mail = MailQueue.objects.first()
@@ -469,7 +470,7 @@ class TestScheidsrechterWedstrijden(E2EHelpers, TestCase):
         self.assertIsNone(dag.gekozen_hoofd_sr)
         self.assertIsNone(dag.gekozen_sr1)
         self.assertIsNone(dag.gekozen_sr2)
-        self.assertEqual(3, dag.notified_srs.count())
+        self.assertEqual(2, dag.notified_srs.count())
 
         # wedstrijd details
         with self.assert_max_queries(20):

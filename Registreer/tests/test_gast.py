@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023 Ramon van der Winkel.
+#  Copyright (c) 2023-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -147,7 +147,8 @@ class TestRegistreerGast(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_registreer_gast)
 
-        self.assertContains(resp, 'Registratie van gast-accounts is op dit moment niet mogelijk. Probeer het later nog eens.')
+        self.assertContains(resp,
+                            'Registratie van gast-accounts is op dit moment niet mogelijk. Probeer het later nog eens.')
 
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_registreer_gast,
@@ -159,7 +160,8 @@ class TestRegistreerGast(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('registreer/registreer-gast.dtl', 'plein/site_layout.dtl'))
 
-        self.assertContains(resp, 'Registratie van gast-accounts is op dit moment niet mogelijk. Probeer het later nog eens.')
+        self.assertContains(resp,
+                            'Registratie van gast-accounts is op dit moment niet mogelijk. Probeer het later nog eens.')
 
         self.assertEqual(0, GastRegistratie.objects.count())
 
@@ -194,9 +196,10 @@ class TestRegistreerGast(E2EHelpers, TestCase):
         # email ontbreek
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_registreer_gast,
-                                    {'achternaam': 'test',
-                                     'voornaam': 'test',
-                                     # 'email': 'test@test'
+                                    {
+                                        'achternaam': 'test',
+                                        'voornaam': 'test',
+                                        # 'email': 'test@test'
                                     },
                                     follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK

@@ -319,7 +319,8 @@ class MatchDetailsCSView(UserPassesTestMixin, TemplateView):
 
         return None
 
-    def _get_alle_sr_reistijd(self, locatie):
+    @staticmethod
+    def _get_alle_sr_reistijd(locatie):
         reistijd_min = dict()  # [(adres_lat, adres_lon)] = reistijd in minuten
         for reistijd in Reistijd.objects.filter(naar_lat=locatie.adres_lat, naar_lon=locatie.adres_lon):
             reistijd_min[(reistijd.vanaf_lat, reistijd.vanaf_lon)] = reistijd.reistijd_min

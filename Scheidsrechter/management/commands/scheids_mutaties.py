@@ -44,6 +44,180 @@ EMAIL_TEMPLATE_VOOR_WEDSTRIJDDAG_GEKOZEN = 'email_scheidsrechter/voor-wedstrijdd
 EMAIL_TEMPLATE_VOOR_WEDSTRIJDDAG_NIET_MEER_NODIG = 'email_scheidsrechter/voor-wedstrijddag-niet-meer-nodig.dtl'
 
 
+def stuur_email_naar_sr_beschikbaarheid_opgeven(wedstrijd: Wedstrijd, datums: list, account: Account, email_cs):
+    """ Stuur een e-mail om de beschikbaarheid op te vragen """
+
+    if wedstrijd.aantal_scheids > 0:
+        soort_sr = '%s scheidsrechter' % wedstrijd.aantal_scheids
+        if wedstrijd.aantal_scheids > 1:
+            soort_sr += 's'
+    else:
+        # uitzonderingssituatie: aantal niet ingevuld (komt voor bij RK/BK)
+        soort_sr = 'scheidsrechters'
+
+    if len(datums) > 1:
+        zelfde_maand = True
+        maand = datums[0].month
+        for datum in datums[1:]:
+            if datum.month != maand:
+                zelfde_maand = False
+        # for
+        if zelfde_maand:
+            # 5 + 6 november 2023
+            wed_datums = " + ".join([str(datum.day) for datum in datums])
+            wed_datums += date_format(datums[0], " F Y")
+        else:
+            # 30 november 2023 + 1 december 2023
+            wed_datums = " + ".join([date_format(datum, "j F Y") for datum in datums])
+    else:
+        # 1 november 2023
+        wed_datums = date_format(datums[0], "j F Y")
+
+    url = settings.SITE_URL + reverse('Scheidsrechter:beschikbaarheid-wijzigen')
+
+    context = {
+        'voornaam': account.get_first_name(),
+        'soort_sr': soort_sr,
+        'wed_titel': wedstrijd.titel,
+        'wed_plaats': wedstrijd.locatie.plaats,
+        'wed_datum': wed_datums,
+        'email_cs': email_cs,
+        'url_beschikbaarheid': url,
+    }
+
+    mail_body = render_email_template(context, EMAIL_TEMPLATE_BESCHIKBAARHEID_OPGEVEN)
+
+    mailer_queue_email(account.bevestigde_email,
+                       'Beschikbaarheid opgeven voor %s' % wed_datums,
+                       mail_body)
+
+
+def stuur_email_naar_sr_voor_wedstrijddag_gekozen(dag: WedstrijdDagScheidsrechters, sporter: Sporter, email_cs):
+    """ Stuur een e-mail om de keuze te melden """
+
+    account = sporter.account
+    wedstrijd = dag.wedstrijd
+    datum = wedstrijd.datum_begin + datetime.timedelta(days=dag.dag_offset)
+    wed_datum = date_format(datum, "j F Y")
+    wed_adres = wedstrijd.locatie.adres.replace('\r\n', '\n')
+    url = settings.SITE_URL + reverse('Scheidsrechter:wedstrijd-details', kwargs={'wedstrijd_pk': wedstrijd.pk})
+
+    context = {
+        'voornaam': account.get_first_name(),
+        'wed_titel': wedstrijd.titel,
+        'wed_datum': wed_datum,
+        'wed_ver': wedstrijd.organiserende_vereniging.ver_nr_en_naam(),
+        'wed_adres': wed_adres.split('\n'),
+        'url_wed_details': url,
+        'org_email': wedstrijd.contact_email,
+        'org_naam': wedstrijd.contact_naam,
+        'org_tel': wedstrijd.contact_telefoon,
+        'email_cs': email_cs,
+    }
+
+    mail_body = render_email_template(context, EMAIL_TEMPLATE_VOOR_WEDSTRIJDDAG_GEKOZEN)
+
+    mailer_queue_email(account.bevestigde_email,
+                       'Geselecteerd voor wedstrijd %s' % wed_datum,
+                       mail_body)
+
+
+def stuur_email_naar_sr_voor_wedstrijddag_niet_meer_nodig(dag, sporter: Sporter, email_cs):
+    """ Stuur een e-mail om de de-keuze te melden """
+
+    account = sporter.account
+    wedstrijd = dag.wedstrijd
+    datum = wedstrijd.datum_begin + datetime.timedelta(days=dag.dag_offset)
+    wed_datum = date_format(datum, "j F Y")
+
+    context = {
+        'voornaam': account.get_first_name(),
+        'wed_titel': wedstrijd.titel,
+        'wed_datum': wed_datum,
+        'wed_ver': wedstrijd.organiserende_vereniging.ver_nr_en_naam(),
+        'email_cs': email_cs,
+    }
+
+    mail_body = render_email_template(context, EMAIL_TEMPLATE_VOOR_WEDSTRIJDDAG_NIET_MEER_NODIG)
+
+    mailer_queue_email(account.bevestigde_email,
+                       'Niet meer nodig voor wedstrijd %s' % wed_datum,
+                       mail_body)
+
+
+def stuur_email_naar_sr_voor_match_gekozen(match: CompetitieMatch, sporter: Sporter, email_cs):
+    """ Stuur een e-mail om de keuze te melden """
+
+    account = sporter.account
+    wed_datum = date_format(match.datum_wanneer, "j F Y")
+    contact_naam = 'Niet beschikbaar'
+    contact_email = 'Onbekend'
+    contact_telefoon = 'Onbekend'
+    wed_ver = 'Nog niet bekend'
+
+    if match.vereniging:
+        wed_ver = match.vereniging.ver_nr_en_naam()
+        functie_hwl = match.vereniging.functie_set.filter(rol='HWL').first()
+        if functie_hwl:
+            if functie_hwl.bevestigde_email:
+                contact_email = functie_hwl.bevestigde_email
+            if functie_hwl.telefoon:
+                contact_telefoon = functie_hwl.telefoon
+            account_hwl = functie_hwl.accounts.first()
+            if account_hwl:
+                contact_naam = account_hwl.volledige_naam()
+
+    if match.locatie:
+        wed_adres = match.locatie.adres.replace('\r\n', '\n')
+    else:
+        wed_adres = 'Nog niet bekend'
+
+    url = settings.SITE_URL + reverse('Scheidsrechter:match-details', kwargs={'match_pk': match.pk})
+
+    context = {
+        'voornaam': account.get_first_name(),
+        'wed_titel': match.beschrijving,
+        'wed_datum': wed_datum,
+        'wed_ver': wed_ver,
+        'wed_adres': wed_adres.split('\n'),
+        'url_wed_details': url,
+        'org_email': contact_email,
+        'org_naam': contact_naam,
+        'org_tel': contact_telefoon,
+        'email_cs': email_cs,
+    }
+
+    mail_body = render_email_template(context, EMAIL_TEMPLATE_VOOR_WEDSTRIJDDAG_GEKOZEN)
+
+    mailer_queue_email(account.bevestigde_email,
+                       'Geselecteerd voor wedstrijd %s' % wed_datum,
+                       mail_body)
+
+
+def stuur_email_naar_sr_voor_match_niet_meer_nodig(match: CompetitieMatch, sporter: Sporter, email_cs):
+    """ Stuur een e-mail om de de-keuze te melden """
+
+    account = sporter.account
+    wed_datum = date_format(match.datum_wanneer, "j F Y")
+    wed_ver = 'Nog niet bekend'
+    if match.vereniging:
+        wed_ver = match.vereniging.ver_nr_en_naam()
+
+    context = {
+        'voornaam': account.get_first_name(),
+        'wed_titel': match.beschrijving,
+        'wed_datum': wed_datum,
+        'wed_ver': wed_ver,
+        'email_cs': email_cs,
+    }
+
+    mail_body = render_email_template(context, EMAIL_TEMPLATE_VOOR_WEDSTRIJDDAG_NIET_MEER_NODIG)
+
+    mailer_queue_email(account.bevestigde_email,
+                       'Niet meer nodig voor wedstrijd %s' % wed_datum,
+                       mail_body)
+
+
 class Command(BaseCommand):
 
     help = "Scheidsrechter mutaties verwerken"
@@ -81,207 +255,6 @@ class Command(BaseCommand):
         parser.add_argument('--stop_exactly', type=int, default=None, choices=range(60),
                             help="Stop op deze minuut")
         parser.add_argument('--quick', action='store_true')     # for testing
-
-    def stuur_email_naar_sr_beschikbaarheid_opgeven(self, wedstrijd: Wedstrijd, datums: list, account: Account):
-        """ Stuur een e-mail om de beschikbaarheid op te vragen """
-
-        if wedstrijd.aantal_scheids > 0:
-            soort_sr = '%s scheidsrechter' % wedstrijd.aantal_scheids
-            if wedstrijd.aantal_scheids > 1:
-                soort_sr += 's'
-        else:
-            # uitzonderingssituatie: aantal niet ingevuld (komt voor bij RK/BK)
-            soort_sr = 'scheidsrechters'
-
-        if len(datums) > 1:
-            zelfde_maand = True
-            maand = datums[0].month
-            for datum in datums[1:]:
-                if datum.month != maand:
-                    zelfde_maand = False
-            # for
-            if zelfde_maand:
-                # 5 + 6 november 2023
-                wed_datums = " + ".join([str(datum.day) for datum in datums])
-                wed_datums += date_format(datums[0], " F Y")
-            else:
-                # 30 november 2023 + 1 december 2023
-                wed_datums = " + ".join([date_format(datum, "j F Y") for datum in datums])
-        else:
-            # 1 november 2023
-            wed_datums = date_format(datums[0], "j F Y")
-
-        url = settings.SITE_URL + reverse('Scheidsrechter:beschikbaarheid-wijzigen')
-
-        context = {
-            'voornaam': account.get_first_name(),
-            'soort_sr': soort_sr,
-            'wed_titel': wedstrijd.titel,
-            'wed_plaats': wedstrijd.locatie.plaats,
-            'wed_datum': wed_datums,
-            'email_cs': self._email_cs,
-            'url_beschikbaarheid': url,
-        }
-
-        mail_body = render_email_template(context, EMAIL_TEMPLATE_BESCHIKBAARHEID_OPGEVEN)
-
-        mailer_queue_email(account.bevestigde_email,
-                           'Beschikbaarheid opgeven voor %s' % wed_datums,
-                           mail_body)
-
-    def stuur_email_naar_sr_voor_wedstrijddag_gekozen(self, dag: WedstrijdDagScheidsrechters, sporter: Sporter):
-        """ Stuur een e-mail om de keuze te melden """
-
-        self.stdout.write('[INFO] Stuur e-mail naar SR %s: voor wedstrijd gekozen' % sporter.lid_nr)
-
-        if not sporter.account:
-            self.stderr.write('[ERROR] Sporter %s heeft geen account. Mail wordt niet gestuurd.' % sporter.lid_nr)
-            return
-
-        account = sporter.account
-        wedstrijd = dag.wedstrijd
-
-        datum = wedstrijd.datum_begin + datetime.timedelta(days=dag.dag_offset)
-        wed_datum = date_format(datum, "j F Y")
-
-        wed_adres = wedstrijd.locatie.adres.replace('\r\n', '\n')
-
-        url = settings.SITE_URL + reverse('Scheidsrechter:wedstrijd-details', kwargs={'wedstrijd_pk': wedstrijd.pk})
-
-        context = {
-            'voornaam': account.get_first_name(),
-            'wed_titel': wedstrijd.titel,
-            'wed_datum': wed_datum,
-            'wed_ver': wedstrijd.organiserende_vereniging.ver_nr_en_naam(),
-            'wed_adres': wed_adres.split('\n'),
-            'url_wed_details': url,
-            'org_email': wedstrijd.contact_email,
-            'org_naam': wedstrijd.contact_naam,
-            'org_tel': wedstrijd.contact_telefoon,
-            'email_cs': self._email_cs,
-        }
-
-        mail_body = render_email_template(context, EMAIL_TEMPLATE_VOOR_WEDSTRIJDDAG_GEKOZEN)
-
-        mailer_queue_email(account.bevestigde_email,
-                           'Geselecteerd voor wedstrijd %s' % wed_datum,
-                           mail_body)
-
-    def stuur_email_naar_sr_voor_wedstrijddag_niet_meer_nodig(self, dag, sporter: Sporter):
-        """ Stuur een e-mail om de de-keuze te melden """
-
-        self.stdout.write('[INFO] Stuur e-mail naar SR %s: voor wedstrijd niet meer nodig' % sporter.lid_nr)
-
-        if not sporter.account:
-            self.stderr.write('[ERROR] Sporter %s heeft geen account. Mail wordt niet gestuurd.' % sporter.lid_nr)
-            return
-
-        account = sporter.account
-        wedstrijd = dag.wedstrijd
-
-        datum = wedstrijd.datum_begin + datetime.timedelta(days=dag.dag_offset)
-        wed_datum = date_format(datum, "j F Y")
-
-        context = {
-            'voornaam': account.get_first_name(),
-            'wed_titel': wedstrijd.titel,
-            'wed_datum': wed_datum,
-            'wed_ver': wedstrijd.organiserende_vereniging.ver_nr_en_naam(),
-            'email_cs': self._email_cs,
-        }
-
-        mail_body = render_email_template(context, EMAIL_TEMPLATE_VOOR_WEDSTRIJDDAG_NIET_MEER_NODIG)
-
-        mailer_queue_email(account.bevestigde_email,
-                           'Niet meer nodig voor wedstrijd %s' % wed_datum,
-                           mail_body)
-
-    def stuur_email_naar_sr_voor_match_gekozen(self, match: CompetitieMatch, sporter: Sporter):
-        """ Stuur een e-mail om de keuze te melden """
-
-        self.stdout.write('[INFO] Stuur e-mail naar SR %s: voor competitie match gekozen' % sporter.lid_nr)
-
-        if not sporter.account:
-            self.stderr.write('[ERROR] Sporter %s heeft geen account. Mail wordt niet gestuurd.' % sporter.lid_nr)
-            return
-
-        account = sporter.account
-
-        wed_datum = date_format(match.datum_wanneer, "j F Y")
-
-        contact_naam = 'Niet beschikbaar'
-        contact_email = 'Onbekend'
-        contact_telefoon = 'Onbekend'
-        wed_ver = 'Nog niet bekend'
-
-        if match.vereniging:
-            wed_ver = match.vereniging.ver_nr_en_naam()
-            functie_hwl = match.vereniging.functie_set.filter(rol='HWL').first()
-            if functie_hwl:
-                if functie_hwl.bevestigde_email:
-                    contact_email = functie_hwl.bevestigde_email
-                if functie_hwl.telefoon:
-                    contact_telefoon = functie_hwl.telefoon
-                account_hwl = functie_hwl.accounts.first()
-                if account_hwl:
-                    contact_naam = account_hwl.volledige_naam()
-
-        if match.locatie:
-            wed_adres = match.locatie.adres.replace('\r\n', '\n')
-        else:
-            wed_adres = 'Nog niet bekend'
-
-        url = settings.SITE_URL + reverse('Scheidsrechter:match-details', kwargs={'match_pk': match.pk})
-
-        context = {
-            'voornaam': account.get_first_name(),
-            'wed_titel': match.beschrijving,
-            'wed_datum': wed_datum,
-            'wed_ver': wed_ver,
-            'wed_adres': wed_adres.split('\n'),
-            'url_wed_details': url,
-            'org_email': contact_email,
-            'org_naam': contact_naam,
-            'org_tel': contact_telefoon,
-            'email_cs': self._email_cs,
-        }
-
-        mail_body = render_email_template(context, EMAIL_TEMPLATE_VOOR_WEDSTRIJDDAG_GEKOZEN)
-
-        mailer_queue_email(account.bevestigde_email,
-                           'Geselecteerd voor wedstrijd %s' % wed_datum,
-                           mail_body)
-
-    def stuur_email_naar_sr_voor_match_niet_meer_nodig(self, match: CompetitieMatch, sporter: Sporter):
-        """ Stuur een e-mail om de de-keuze te melden """
-
-        self.stdout.write('[INFO] Stuur e-mail naar SR %s: voor competitie match niet meer nodig' % sporter.lid_nr)
-
-        if not sporter.account:
-            self.stderr.write('[ERROR] Sporter %s heeft geen account. Mail wordt niet gestuurd.' % sporter.lid_nr)
-            return
-
-        account = sporter.account
-
-        wed_datum = date_format(match.datum_wanneer, "j F Y")
-
-        wed_ver = 'Nog niet bekend'
-        if match.vereniging:
-            wed_ver = match.vereniging.ver_nr_en_naam()
-
-        context = {
-            'voornaam': account.get_first_name(),
-            'wed_titel': match.beschrijving,
-            'wed_datum': wed_datum,
-            'wed_ver': wed_ver,
-            'email_cs': self._email_cs,
-        }
-
-        mail_body = render_email_template(context, EMAIL_TEMPLATE_VOOR_WEDSTRIJDDAG_NIET_MEER_NODIG)
-
-        mailer_queue_email(account.bevestigde_email,
-                           'Niet meer nodig voor wedstrijd %s' % wed_datum,
-                           mail_body)
 
     def _reistijd_opvragen(self, locatie, sporter):
         """ vraag de reistijd op tussen de postcode van de sporter/scheidsrechter en de locatie """
@@ -336,7 +309,7 @@ class Command(BaseCommand):
             # stuur een e-mail
             if len(vraag):
                 # minimaal 1 datum
-                self.stuur_email_naar_sr_beschikbaarheid_opgeven(wedstrijd, vraag, sporter.account)
+                stuur_email_naar_sr_beschikbaarheid_opgeven(wedstrijd, vraag, sporter.account, self._email_cs)
         # for
 
         # verwerk de nieuwe verzoeken voor reistijd
@@ -377,7 +350,8 @@ class Command(BaseCommand):
                 obj.save(update_fields=['dag_offset'])
         # for
 
-    def _maak_competitie_wedstrijddagscheidsrechters(self, wedstrijd, alle_datums):
+    @staticmethod
+    def _maak_competitie_wedstrijddagscheidsrechters(wedstrijd, alle_datums):
         datum2dag_sr = dict()
         for obj in WedstrijdDagScheidsrechters.objects.filter(wedstrijd=wedstrijd):
             datum = wedstrijd.datum_begin + datetime.timedelta(days=obj.dag_offset)
@@ -387,7 +361,7 @@ class Command(BaseCommand):
         bulk = list()
         for datum in alle_datums:
             try:
-                obj = datum2dag_sr[datum]
+                _ = datum2dag_sr[datum]
             except KeyError:
                 # bestaat nog niet
                 dag_offset = (datum - wedstrijd.datum_begin).days
@@ -485,7 +459,7 @@ class Command(BaseCommand):
 
                 for sporter in qset:
                     # stuur een e-mail
-                    self.stuur_email_naar_sr_beschikbaarheid_opgeven(rk_wedstrijd, vraag, sporter.account)
+                    stuur_email_naar_sr_beschikbaarheid_opgeven(rk_wedstrijd, vraag, sporter.account, self._email_cs)
                 # for
         del alle_rk_datums
 
@@ -535,7 +509,7 @@ class Command(BaseCommand):
 
                 for sporter in qset:
                     # stuur een e-mail
-                    self.stuur_email_naar_sr_beschikbaarheid_opgeven(bk_wedstrijd, vraag, sporter.account)
+                    stuur_email_naar_sr_beschikbaarheid_opgeven(bk_wedstrijd, vraag, sporter.account, self._email_cs)
                 # for
 
     def _maak_taak_hwl_voor_wedstrijd(self, wedstrijd: Wedstrijd):
@@ -633,16 +607,27 @@ class Command(BaseCommand):
                         notified_pks.remove(sporter.pk)
                     else:
                         # sporter is nieuw gekozen en moet een berichtje krijgen
-                        self.stuur_email_naar_sr_voor_wedstrijddag_gekozen(dag, sporter)
-                        dag.notified_srs.add(sporter)
-                        notify_hwl = True
+                        self.stdout.write('[INFO] Stuur e-mail naar SR %s: voor wedstrijd gekozen' % sporter.lid_nr)
+
+                        if not sporter.account:
+                            self.stderr.write(
+                                '[ERROR] Sporter %s heeft geen account. Mail wordt niet gestuurd.' % sporter.lid_nr)
+                        else:
+                            stuur_email_naar_sr_voor_wedstrijddag_gekozen(dag, sporter, self._email_cs)
+                            dag.notified_srs.add(sporter)
+                            notify_hwl = True
             # for
 
             # alle overgebleven srs zijn niet meer gekozen en kunnen dus een afmelding krijgen
             for sporter in Sporter.objects.filter(pk__in=notified_pks):
-                self.stuur_email_naar_sr_voor_wedstrijddag_niet_meer_nodig(dag, sporter)
-                dag.notified_srs.remove(sporter)
-                notify_hwl = True
+                self.stdout.write('[INFO] Stuur e-mail naar SR %s: voor wedstrijd niet meer nodig' % sporter.lid_nr)
+                if not sporter.account:
+                    self.stderr.write(
+                        '[ERROR] Sporter %s heeft geen account. Mail wordt niet gestuurd.' % sporter.lid_nr)
+                else:
+                    stuur_email_naar_sr_voor_wedstrijddag_niet_meer_nodig(dag, sporter, self._email_cs)
+                    dag.notified_srs.remove(sporter)
+                    notify_hwl = True
             # for
         # for
 
@@ -678,16 +663,30 @@ class Command(BaseCommand):
                         notified_pks.remove(sporter.pk)
                     else:
                         # sporter is nieuw gekozen en moet een berichtje krijgen
-                        self.stuur_email_naar_sr_voor_match_gekozen(match, sporter)
-                        match_sr.notified_srs.add(sporter)
-                        notify_hwl = True
+                        self.stdout.write(
+                            '[INFO] Stuur e-mail naar SR %s: voor competitie match gekozen' % sporter.lid_nr)
+
+                        if not sporter.account:
+                            self.stderr.write(
+                                '[ERROR] Sporter %s heeft geen account. Mail wordt niet gestuurd.' % sporter.lid_nr)
+                        else:
+                            stuur_email_naar_sr_voor_match_gekozen(match, sporter, self._email_cs)
+                            match_sr.notified_srs.add(sporter)
+                            notify_hwl = True
             # for
 
             # alle overgebleven srs zijn niet meer gekozen en kunnen dus een afmelding krijgen
             for sporter in Sporter.objects.filter(pk__in=notified_pks):
-                self.stuur_email_naar_sr_voor_match_niet_meer_nodig(match, sporter)
-                match_sr.notified_srs.remove(sporter)
-                notify_hwl = True
+                self.stdout.write(
+                    '[INFO] Stuur e-mail naar SR %s: voor competitie match niet meer nodig' % sporter.lid_nr)
+
+                if not sporter.account:
+                    self.stderr.write(
+                        '[ERROR] Sporter %s heeft geen account. Mail wordt niet gestuurd.' % sporter.lid_nr)
+                else:
+                    stuur_email_naar_sr_voor_match_niet_meer_nodig(match, sporter, self._email_cs)
+                    match_sr.notified_srs.remove(sporter)
+                    notify_hwl = True
             # for
         # for
 
@@ -787,7 +786,6 @@ class Command(BaseCommand):
 
         self._hoogste_mutatie_pk = mutatie_latest.pk
 
-        did_useful_work = False
         for pk in mutatie_pks:
             # we halen de records hier 1 voor 1 op
             # zodat we verse informatie hebben inclusief de vorige mutatie
@@ -803,7 +801,6 @@ class Command(BaseCommand):
 
                 mutatie.is_verwerkt = True
                 mutatie.save(update_fields=['is_verwerkt'])
-                did_useful_work = True
         # for
 
         self.stdout.write('[INFO] nieuwe hoogste ScheidsMutatie pk is %s' % self._hoogste_mutatie_pk)
@@ -901,7 +898,7 @@ class Command(BaseCommand):
         # for
         sys.exit(1)
 
-    test uitvoeren met --debug-mode anders wordt er niets bijgehouden
+    test uitvoeren met DEBUG=True via --settings=SiteMain.settings_dev anders wordt er niets bijgehouden
 """
 
 # end of file

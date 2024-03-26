@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2023 Ramon van der Winkel.
+#  Copyright (c) 2021-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -58,7 +58,9 @@ class TestData(object):
     """
 
     OTP_CODE = "test"
-    WACHTWOORD = "qewretrytuyi"  # sterk genoeg default wachtwoord
+
+    # sterk genoeg default wachtwoord
+    WACHTWOORD = "qewretrytuyi"     # noqa
 
     url_inschrijven = '/bondscompetities/deelnemen/leden-aanmelden/%s/'  # comp_pk
     url_account_login = '/account/login/'

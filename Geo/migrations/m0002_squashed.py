@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023 Ramon van der Winkel.
+#  Copyright (c) 2023-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -98,7 +98,7 @@ def init_clusters(apps, _):
             bulk.append(cluster)
 
         # maak 4 clusters aan voor de 25m
-        for letter in 'efgh':
+        for letter in 'efgh':  # noqa
             cluster = cluster_klas(
                             regio=regio,
                             gebruik='25',

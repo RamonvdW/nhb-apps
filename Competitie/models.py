@@ -15,7 +15,8 @@ from Competitie.definities import (AFSTANDEN, AFSTAND2URL,
                                    TEAM_PUNTEN, TEAM_PUNTEN_MODEL_TWEE,
                                    DAGDELEN,
                                    DEELNAME_CHOICES, DEELNAME_ONBEKEND,
-                                   MUTATIE_TO_STR, MUTATIE_KAMP_AANMELDEN_INDIV, MUTATIE_KAMP_AFMELDEN_INDIV, MUTATIE_KAMP_CUT)
+                                   MUTATIE_TO_STR, MUTATIE_KAMP_AANMELDEN_INDIV, MUTATIE_KAMP_AFMELDEN_INDIV,
+                                   MUTATIE_KAMP_CUT)
 from Competitie.tijdlijn import bepaal_fase_indiv, bepaal_fase_teams
 from Functie.definities import Rollen
 from Functie.models import Functie
@@ -26,7 +27,7 @@ from Sporter.models import Sporter, SporterBoog
 from Vereniging.models import Vereniging
 import logging
 
-my_logger = logging.getLogger('NHBApps.Competitie')
+my_logger = logging.getLogger('MH.Competitie')
 
 
 class Competitie(models.Model):

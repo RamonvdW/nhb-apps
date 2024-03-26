@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023 Ramon van der Winkel.
+#  Copyright (c) 2023-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -35,7 +35,7 @@ class RegistreerBeginView(TemplateView):
 
         context['gast_is_open'] = registratie_gast_is_open()
 
-        context['url_registreer_nhb'] = reverse('Registreer:lid')
+        context['url_registreer_khsn'] = reverse('Registreer:lid')
         context['url_registreer_gast'] = reverse('Registreer:gast')
 
         context['kruimels'] = (

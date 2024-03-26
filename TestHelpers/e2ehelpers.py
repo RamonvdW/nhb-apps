@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2023 Ramon van der Winkel.
+#  Copyright (c) 2019-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -19,6 +19,9 @@ import pyotp
 # debug optie: toon waar in de code de queries vandaan komen
 FAIL_UNSAFE_DATABASE_MODIFICATION = False
 
+# sterk genoeg default wachtwoord
+TEST_WACHTWOORD = "qewretrytuyi"        # noqa
+
 
 class E2EHelpers(MyTestAsserts, MyMgmtCommandHelper, TestCase):
 
@@ -27,7 +30,7 @@ class E2EHelpers(MyTestAsserts, MyMgmtCommandHelper, TestCase):
         mixin class voor django.test.TestCase
     """
 
-    WACHTWOORD = "qewretrytuyi"     # sterk genoeg default wachtwoord
+    WACHTWOORD = TEST_WACHTWOORD
 
     client: Client                  # for code completion / code inspection
 
@@ -41,7 +44,7 @@ class E2EHelpers(MyTestAsserts, MyMgmtCommandHelper, TestCase):
 
     def e2e_create_account(self, username, email, voornaam, accepteer_vhpg=False):
         """ Maak een Account aan in de database van de website """
-        account = account_create(username, voornaam, '', self.WACHTWOORD, email, True)
+        account = account_create(username, voornaam, '', TEST_WACHTWOORD, email, True)
 
         # zet OTP actief (een test kan deze altijd weer uit zetten)
         account.otp_code = "whatever"
@@ -63,7 +66,7 @@ class E2EHelpers(MyTestAsserts, MyMgmtCommandHelper, TestCase):
     def e2e_login_no_check(self, account, wachtwoord=None, follow=False):
         """ log in op de website via de voordeur, zodat alle rechten geëvalueerd worden """
         if not wachtwoord:
-            wachtwoord = self.WACHTWOORD
+            wachtwoord = TEST_WACHTWOORD
         resp = self.client.post('/account/login/', {'login_naam': account.username,
                                                     'wachtwoord': wachtwoord},
                                 follow=follow)

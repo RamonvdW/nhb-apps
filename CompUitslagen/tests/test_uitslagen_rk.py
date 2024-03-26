@@ -150,7 +150,7 @@ class TestCompUitslagenRK(E2EHelpers, TestCase):
         match.locatie = None
         match.save(update_fields=['locatie'])
 
-        # als BKO: klassegrenzen RK/BK teams vaststellen (J --> K)
+        # als BKO: klassengrenzen RK/BK teams vaststellen (J --> K)
         url = self.url_teams_klassengrenzen_vaststellen % self.testdata.comp18.pk
         resp = self.client.post(url)
         self.assert_is_redirect_not_plein(resp)

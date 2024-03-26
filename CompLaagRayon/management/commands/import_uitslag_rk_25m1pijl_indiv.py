@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2023 Ramon van der Winkel.
+#  Copyright (c) 2022-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -148,7 +148,8 @@ class Command(BaseCommand):
                                     deelnemer = kandidaat
                             # for
                         if deelnemer is None:
-                            self.stderr.write('[ERROR] Kan deelnemer niet bepalen voor regel %s. Keuze uit %s' % (row, repr(deelnemers)))
+                            self.stderr.write('[ERROR] Kan deelnemer niet bepalen voor regel %s. Keuze uit %s' % (
+                                                row, repr(deelnemers)))
                             continue    # met de while
 
                         dupe_check = False
@@ -175,10 +176,12 @@ class Command(BaseCommand):
                                 if self.verbose:
                                     self.stdout.write('[WARNING] Regel %s wordt overgeslagen (geen scores)' % row)
                             else:
-                                self.stderr.write('[ERROR] Probleem met scores op regel %s: %s en %s' % (row, repr(score1), repr(score2)))
+                                self.stderr.write('[ERROR] Probleem met scores op regel %s: %s en %s' % (
+                                                        row, repr(score1), repr(score2)))
                         else:
                             if score1 > 250 or score2 > 250:
-                                self.stderr.write('[ERROR] Te hoge scores op regel %s: %s en %s' % (row, score1, score2))
+                                self.stderr.write('[ERROR] Te hoge scores op regel %s: %s en %s' % (
+                                                        row, score1, score2))
 
                             counts = list()
                             try:
@@ -198,12 +201,14 @@ class Command(BaseCommand):
                                 else:
                                     c8 = 0
                             except (TypeError, ValueError) as err:
-                                self.stderr.write('[ERROR] Probleem met 10/9/8 count op regel %s: %s' % (row, str(err)))
+                                self.stderr.write('[ERROR] Probleem met 10/9/8 count op regel %s: %s' % (
+                                                        row, str(err)))
                                 counts_str = ''
                             else:
                                 counts_str = ", ".join(counts)
                                 if c10 + c9 + c8 > (2 * 25):
-                                    self.stderr.write('[ERROR] Te veel 10/9/8-en op regel %s: %s / %s / %s' % (row, c10, c9, c8))
+                                    self.stderr.write('[ERROR] Te veel 10/9/8-en op regel %s: %s / %s / %s' % (
+                                                            row, c10, c9, c8))
 
                             totaal = score1 + score2
                             if totaal > 0:                  # soms wordt 0,0 ingevuld bij niet aanwezig
@@ -228,7 +233,8 @@ class Command(BaseCommand):
                                 prev_counts_str = counts_str
 
                                 if self.verbose:
-                                    self.stdout.write('%s: %s, scores: %s %s %s' % (rank, deelnemer, score1, score2, counts_str))
+                                    self.stdout.write('%s: %s, scores: %s %s %s' % (
+                                                            rank, deelnemer, score1, score2, counts_str))
 
                                 opslaan = True
                                 if dupe_check:
@@ -239,14 +245,16 @@ class Command(BaseCommand):
                                                                          deelnemer.result_score_2,
                                                                          deelnemer.result_counts,
                                                                          score1, score2, counts_str)
-                                        self.stderr.write('[ERROR] Deelnemer pk=%s heeft al andere resultaten! (%s): %s' % (
-                                                            deelnemer.pk, deelnemer, diff))
+                                        self.stderr.write(
+                                            '[ERROR] Deelnemer pk=%s heeft al andere resultaten! (%s): %s' % (
+                                                deelnemer.pk, deelnemer, diff))
 
                                     else:
                                         # allow counts to change from empty to non-empty
                                         if deelnemer.result_counts == '' and deelnemer.result_counts != counts_str:
                                             diff = "%s -> %s" % (deelnemer.result_counts, counts_str)
-                                            self.stderr.write('[WARNING] Deelnemer pk=%s krijgt nieuwe result_counts (%s): %s' % (
+                                            self.stderr.write(
+                                                '[WARNING] Deelnemer pk=%s krijgt nieuwe result_counts (%s): %s' % (
                                                                 deelnemer.pk, deelnemer, diff))
                                         elif deelnemer.result_counts != counts_str:
                                             opslaan = False
@@ -254,7 +262,8 @@ class Command(BaseCommand):
                                                                              deelnemer.result_score_2,
                                                                              deelnemer.result_counts,
                                                                              score1, score2, counts_str)
-                                            self.stderr.write('[ERROR] Deelnemer pk=%s heeft al andere resultaten! (%s): %s' % (
+                                            self.stderr.write(
+                                                '[ERROR] Deelnemer pk=%s heeft al andere resultaten! (%s): %s' % (
                                                                 deelnemer.pk, deelnemer, diff))
 
                                 if opslaan:

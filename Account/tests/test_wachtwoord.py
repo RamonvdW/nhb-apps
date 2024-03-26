@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2023 Ramon van der Winkel.
+#  Copyright (c) 2019-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
+from django.http import HttpResponseRedirect
+from django.urls import reverse
+from Account.plugin_manager import account_add_plugin_login_gate
 from Mailer.models import MailQueue
 from TijdelijkeCodes.models import TijdelijkeCode
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -18,9 +21,16 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
     url_wijzig = '/account/nieuw-wachtwoord/'
     url_tijdelijk = '/tijdelijke-codes/%s/'       # code
 
+    def _login_gate_blocks(self, request, from_ip, account):
+        if self.block_login:
+            return HttpResponseRedirect(reverse('Account:logout'))
+        return None
+
     def setUp(self):
         """ initialisatie van de test case """
         self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.com', 'Normaal')
+        self.block_login = False
+        account_add_plugin_login_gate(11, self._login_gate_blocks, False)
 
     def test_wijzig_anon(self):
         # niet ingelogd
@@ -44,7 +54,7 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
         # controleer dat we nu ingelogd zijn!
         self.e2e_assert_logged_in()
 
-        nieuw_ww = 'nieuwWwoord'
+        nieuw_ww = 'nieuwWwoord'    # noqa
 
         # foutief huidige wachtwoord
         with self.assert_max_queries(20):
@@ -195,10 +205,9 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
         # raak het pad in receive_wachtwoord_vergeten waarbij plugin blokkeert
 
         # zet de blokkade
-        self.account_normaal.email_is_bevestigd = False
-        self.account_normaal.save(update_fields=['email_is_bevestigd'])
+        self.block_login = True
 
-        # gebruiker moet valide e-mailadres invoeren via POST
+        # vraag om de tijdelijke code
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_vergeten, {'lid_nr': 'normaal',
                                                         'email': 'normaal@test.com'})
@@ -211,8 +220,9 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
         url = self.url_tijdelijk % obj.url_code
         with self.assert_max_queries(20):
             resp = self.client.post(url)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('account/email-bevestig-huidige.dtl', 'plein/site_layout.dtl'))
+        self.assert_is_redirect(resp, '/account/logout/')
+
+        self.block_login = False
 
     def test_vergeten_ingelogd(self):
         # log in als admin

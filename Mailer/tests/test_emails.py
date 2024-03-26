@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2023 Ramon van der Winkel.
+#  Copyright (c) 2022-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -8,7 +8,7 @@ from django.test import TestCase, override_settings
 from TestHelpers.e2ehelpers import E2EHelpers
 
 
-TEST_EMAIL_ADRES = 'schutter@test.not'
+TEST_EMAIL_ADRES = 'manager@mh.not'
 
 
 class TestMailerEmails(E2EHelpers, TestCase):
@@ -35,6 +35,7 @@ class TestMailerEmails(E2EHelpers, TestCase):
 
         with override_settings(EMAIL_ADDRESS_WHITELIST=(TEST_EMAIL_ADRES,)):
             f1, f2 = self.run_management_command('test_alle_emails', TEST_EMAIL_ADRES)
+            # print('\nf1:\n%sf2:\n%s' % (f1.getvalue(), f2.getvalue()))
             self.assertTrue('[WARNING] E-mailadres is niet white-listed' not in f2.getvalue())
 
     def test_status_mail_queue(self):

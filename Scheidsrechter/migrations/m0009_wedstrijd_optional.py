@@ -22,7 +22,8 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='scheidsmutatie',
             name='wedstrijd',
-            field=models.ForeignKey(blank=True, null=True, on_delete=models.deletion.CASCADE, to='Wedstrijden.wedstrijd'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=models.deletion.CASCADE,
+                                    to='Wedstrijden.wedstrijd'),
         ),
     ]
 

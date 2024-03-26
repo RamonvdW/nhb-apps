@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2023 Ramon van der Winkel.
+#  Copyright (c) 2022-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -18,17 +18,26 @@ from Bestel.management.commands.bestel_mutaties import stuur_email_naar_koper_be
 from Bestel.definities import BESTELLING_STATUS_NIEUW
 from Bestel.models import Bestelling, BestelProduct
 from Betaal.models import BetaalInstellingenVereniging, BetaalTransactie
+from Competitie.models import Competitie, CompetitieMatch
 from Functie.models import Functie
 from Functie.view_koppel_beheerder import functie_wijziging_stuur_email_notificatie, functie_vraag_email_bevestiging
 from Geo.models import Regio
 from Locatie.models import Locatie
 from Mailer.models import MailQueue
 from Mailer.operations import mailer_email_is_valide
+from Scheidsrechter.management.commands.scheids_mutaties import (stuur_email_naar_sr_beschikbaarheid_opgeven,
+                                                                 stuur_email_naar_sr_voor_wedstrijddag_gekozen,
+                                                                 stuur_email_naar_sr_voor_wedstrijddag_niet_meer_nodig,
+                                                                 stuur_email_naar_sr_voor_match_gekozen,
+                                                                 stuur_email_naar_sr_voor_match_niet_meer_nodig)
+from Scheidsrechter.models import WedstrijdDagScheidsrechters
 from Sporter.models import Sporter, SporterBoog
 from Taken.operations import stuur_email_nieuwe_taak, stuur_email_taak_herinnering
+from TestHelpers.e2ehelpers import TEST_WACHTWOORD
 from Vereniging.models import Vereniging
 from Wedstrijden.definities import WEDSTRIJD_STATUS_GEACCEPTEERD, INSCHRIJVING_STATUS_RESERVERING_BESTELD
 from Wedstrijden.models import Wedstrijd, WedstrijdSessie, WedstrijdInschrijving
+from datetime import datetime
 from decimal import Decimal
 
 
@@ -36,7 +45,7 @@ class Command(BaseCommand):
 
     help = "Stuur alle mogelijke e-mails"
 
-    aantal_verwacht = 9
+    aantal_verwacht = 14
 
     test_regio_nr = 100
     test_ver_nr = 9999
@@ -45,7 +54,7 @@ class Command(BaseCommand):
     test_functie_beschrijving = 'Test functie 9999'
     test_locatie_naam = 'Test locatie 999999'
     test_sessie_beschrijving = 'Test sessie 99999'
-    test_wachtwoord = "qewretrytuyi"     # sterk genoeg default wachtwoord
+    test_wachtwoord = TEST_WACHTWOORD
     test_email = 'testertje@vander.test'
 
     def __init__(self, stdout=None, stderr=None, no_color=False, force_color=False):
@@ -102,6 +111,7 @@ class Command(BaseCommand):
                         bij_vereniging=ver,
                         account=self.account)
         sporter1.save()
+        self.sporter1 = sporter1
 
         sporter2 = Sporter(
                         lid_nr=self.test_lid_nr - 1,
@@ -156,6 +166,7 @@ class Command(BaseCommand):
                         organiserende_vereniging=ver)
         wedstrijd.save()
         wedstrijd.sessies.add(sessie)
+        self.wedstrijd = wedstrijd
 
         wkls_r = KalenderWedstrijdklasse.objects.filter(buiten_gebruik=False, boogtype=boog_r)
         wkls_c = KalenderWedstrijdklasse.objects.filter(buiten_gebruik=False, boogtype=boog_c)
@@ -239,6 +250,22 @@ class Command(BaseCommand):
         transactie.save()
         bestelling.transacties.add(transactie)
 
+        comp = Competitie(
+                    beschrijving='Test competitie',
+                    afstand=18,
+                    begin_jaar=2000)
+        comp.save()
+
+        match = CompetitieMatch(
+                        competitie=comp,
+                        beschrijving='Test match',
+                        datum_wanneer='2000-01-01',
+                        tijd_begin_wedstrijd='09:00',
+                        aantal_scheids=1)
+        match.save()
+        match.refresh_from_db()     # provides strings converted to proper structures
+        self.match = match
+
     def _database_opschonen(self):
         try:
             ver = Vereniging.objects.get(ver_nr=self.test_ver_nr)
@@ -321,7 +348,7 @@ class Command(BaseCommand):
 
     def _test_account(self):
         self.stdout.write('Maak mail voor Account - Wachtwoord vergeten')
-        account_stuur_email_wachtwoord_vergeten(self.account, test=1)
+        account_stuur_email_wachtwoord_vergeten(self.account, email=self.account.bevestigde_email, test=1)
         self._check_mail_gemaakt()
 
         self.stdout.write('Maak mail voor Account - Bevestig toegang e-mail')
@@ -354,21 +381,43 @@ class Command(BaseCommand):
         functie_wijziging_stuur_email_notificatie(self.account, 'not used', 'Test functie', remove=True)
         self._check_mail_gemaakt()
 
-    def test_registreer(self):
+    def _test_registreer(self):
         # TODO: lid-bevestig-toegang-email
         pass
 
-    def test_registreer_gast(self):
+    def _test_registreer_gast(self):
+        # TODO: gast-afgewezen
         # TODO: gast-bevestig-toegang-email
         # TODO: gast-tijdelijk-bondsnummer
-        # TODO: gast-afgewezen
+        # TODO: gast-verwijder
         pass
 
-    def test_scheids(self):
-        # TODO: beschikbaarheid-opgeven
-        # TODO: voor-wedstrijddag-gekozen
-        # TODO: voor-wedstrijddag-niet-meer-nodig
-        pass
+    def _test_scheids(self):
+        email_cs = 'scheids@mh.not'
+        datum = datetime(2000, 1, 1)
+
+        self.stdout.write('Maak mail voor SR - Beschikbaarheid opgeven')
+        stuur_email_naar_sr_beschikbaarheid_opgeven(self.wedstrijd, [datum], self.account, email_cs)
+        self._check_mail_gemaakt()
+
+        dag = WedstrijdDagScheidsrechters(wedstrijd=self.wedstrijd)
+        dag.save()
+
+        self.stdout.write('Maak mail voor SR - Gekozen voor wedstrijd')
+        stuur_email_naar_sr_voor_wedstrijddag_gekozen(dag, self.sporter1, email_cs)
+        self._check_mail_gemaakt()
+
+        self.stdout.write('Maak mail voor SR - Niet meer nodig voor wedstrijd')
+        stuur_email_naar_sr_voor_wedstrijddag_niet_meer_nodig(dag, self.sporter1, email_cs)
+        self._check_mail_gemaakt()
+
+        self.stdout.write('Maak mail voor SR - Gekozen voor match')
+        stuur_email_naar_sr_voor_match_gekozen(self.match, self.sporter1, email_cs)
+        self._check_mail_gemaakt()
+
+        self.stdout.write('Maak mail voor SR - Niet meer nodig voor match')
+        stuur_email_naar_sr_voor_match_niet_meer_nodig(self.match, self.sporter1, email_cs)
+        self._check_mail_gemaakt()
 
     def _test_taken(self):
         self.stdout.write('Maak mail voor Taken - Nieuwe taak')
@@ -411,6 +460,9 @@ class Command(BaseCommand):
             self._test_account()
             self._test_bestel()
             self._test_functie()
+            self._test_registreer()
+            self._test_registreer_gast()
+            self._test_scheids()
             self._test_taken()
             # fout 500 e-mail wordt niet getest
 
