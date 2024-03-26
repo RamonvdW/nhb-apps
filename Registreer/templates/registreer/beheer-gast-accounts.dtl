@@ -113,7 +113,9 @@
                             </td>
 
                             <td>
-                                <a class="btn-sv-blauw" href="{{ gast.url_details }}">Details</a>
+                                {% if gast.url_details %}
+                                    <a class="btn-sv-blauw" href="{{ gast.url_details }}">Details</a>
+                                {% endif %}
                             </td>
                         </tr>
                     {% endfor %}
