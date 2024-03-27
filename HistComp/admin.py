@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2023 Ramon van der Winkel.
+#  Copyright (c) 2019-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -50,7 +50,7 @@ class HistKampTeamAdmin(admin.ModelAdmin):
 
     autocomplete_fields = ('lid_1', 'lid_2', 'lid_3', 'lid_4')
 
-    list_filter = ('seizoen__seizoen', 'seizoen__comp_type', 'team_type')
+    list_filter = ('seizoen__seizoen', 'seizoen__comp_type', 'rk_of_bk', 'team_type')
 
     ordering = ['rank', 'team_type', 'teams_klasse']
 
