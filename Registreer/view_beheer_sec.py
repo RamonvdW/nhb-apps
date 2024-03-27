@@ -178,7 +178,7 @@ class GastAccountDetailsView(UserPassesTestMixin, TemplateView):
         beste_pks = [pk for count, pk in best[:10] if count > 1]
 
         context['heeft_matches'] = len(beste_pks) > 0
-        context['overzetten_naar_sporter'] = None
+        context['overzetten_naar_lid_nr'] = None
         hoogste_ophef = 0
 
         matches = (Sporter

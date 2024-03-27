@@ -585,14 +585,44 @@ def uitslag_bk_teams_naar_histcomp(comp):
                         titel_code=titel_code)
 
             unsorted = list()
-            for team_lid in team.feitelijke_leden.select_related('indiv_klasse', 'sporterboog__sporter').all():
-
+            for team_lid in team.feitelijke_leden.select_related('indiv_klasse',
+                                                                 'sporterboog__sporter',
+                                                                 'sporterboog__boogtype').all():
                 s1 = team_lid.result_bk_teamscore_1
                 s2 = team_lid.result_bk_teamscore_2
 
-                lid_nr = team_lid.sporterboog.sporter.lid_nr
+                sporter = team_lid.sporterboog.sporter
+                lid_nr = sporter.lid_nr
                 tup = (team_lid.indiv_klasse.beschrijving, lid_nr)
-                hist_indiv = indiv_klasse_lid_nr2hist[tup]
+                try:
+                    hist_indiv = indiv_klasse_lid_nr2hist[tup]
+                except KeyError:
+                    hist_indiv = None
+
+                if not hist_indiv:
+                    tup = ('', lid_nr)      # indien sporter niet individueel meegedaan heeft
+                    try:
+                        hist_indiv = indiv_klasse_lid_nr2hist[tup]
+                    except KeyError:
+                        hist_indiv = None
+
+                if not hist_indiv:
+                    # aanmaken
+                    ver = team_lid.bij_vereniging
+                    hist_indiv = HistKampIndiv(
+                                    seizoen=hist_seizoen,
+                                    indiv_klasse='',
+                                    sporter_lid_nr=lid_nr,
+                                    sporter_naam=sporter.volledige_naam(),
+                                    boogtype=team_lid.sporterboog.boogtype.afkorting,
+                                    vereniging_nr=ver.ver_nr,
+                                    vereniging_naam=ver.naam,
+                                    vereniging_plaats=ver.plaats,
+                                    rayon_nr=ver.regio.rayon_nr,
+                                    rank_rk=0)
+                    hist_indiv.save()
+                    indiv_klasse_lid_nr2hist[tup] = hist_indiv
+
                 hist_indiv.teams_bk_score_1 = s1
                 hist_indiv.teams_bk_score_2 = s2
                 hist_indiv.save(update_fields=['teams_bk_score_1', 'teams_bk_score_2'])

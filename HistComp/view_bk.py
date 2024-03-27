@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023 Ramon van der Winkel.
+#  Copyright (c) 2023-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -309,6 +309,9 @@ class HistBkTeamsView(TemplateView):
 
             # verwijder lege posities
             team.deelnemers = [lid for lid in team.deelnemers if lid]
+
+            # sorteer aflopen op prestatie
+            team.deelnemers.sort(key=lambda x: x.team_score, reverse=True)  # hoogste score eerst
 
             team.titel = HISTCOMP_TITEL2STR[team.titel_code]
 
