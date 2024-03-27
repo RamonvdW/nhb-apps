@@ -131,9 +131,9 @@ class Command(BaseCommand):
         for gast in GastRegistratie.objects.all():
 
             if gast.fase == REGISTRATIE_FASE_AFGEWEZEN:
-                print('%6s (afgewezen)' % gast.lid_nr)
+                self.stdout.write('%6s (afgewezen)' % gast.lid_nr)
             else:
-                print('%6s' % gast.lid_nr)
+                self.stdout.write('%6s' % gast.lid_nr)
 
             matches = self._zoek_matches(gast)
             for match in matches:
@@ -142,8 +142,6 @@ class Command(BaseCommand):
                                      match.is_match_lid_nr, match.is_match_voornaam, match.is_match_achternaam,
                                      match.is_match_geslacht, match.is_match_vereniging, match.is_match_plaats,
                                      match.heeft_account))
-
-
 
 
 # end of file
