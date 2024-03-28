@@ -60,8 +60,8 @@ class BeschikbaarheidOpvragenView(UserPassesTestMixin, View):
                          .objects
                          .get(pk=wedstrijd_pk,
                               status=WEDSTRIJD_STATUS_GEACCEPTEERD,
-                              toon_op_kalender=True,
-                              is_ter_info=False))
+                              # is_ter_info=False,
+                              toon_op_kalender=True))
         except (ValueError, Wedstrijd.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
