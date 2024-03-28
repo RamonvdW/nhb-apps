@@ -60,8 +60,8 @@ class BeschikbaarheidOpvragenView(UserPassesTestMixin, View):
                          .objects
                          .get(pk=wedstrijd_pk,
                               status=WEDSTRIJD_STATUS_GEACCEPTEERD,
-                              toon_op_kalender=True,
-                              is_ter_info=False))
+                              # is_ter_info=False,
+                              toon_op_kalender=True))
         except (ValueError, Wedstrijd.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
@@ -145,7 +145,7 @@ class WijzigBeschikbaarheidView(UserPassesTestMixin, TemplateView):
                              .filter(aantal_scheids__gte=1,
                                      status=WEDSTRIJD_STATUS_GEACCEPTEERD,
                                      datum_einde__gte=vorige_week)
-                             .exclude(is_ter_info=True)
+                             #.exclude(is_ter_info=True)
                              .values_list('pk', flat=True))
 
         # kijk voor welke dagen we beschikbaarheid nodig hebben
@@ -237,7 +237,7 @@ class WijzigBeschikbaarheidView(UserPassesTestMixin, TemplateView):
                              .filter(aantal_scheids__gte=1,
                                      status=WEDSTRIJD_STATUS_GEACCEPTEERD,
                                      datum_einde__gte=vorige_week)
-                             .exclude(is_ter_info=True)
+                             #.exclude(is_ter_info=True)
                              .values_list('pk', flat=True))
 
         # kijk voor welke dagen we beschikbaarheid nodig hebben

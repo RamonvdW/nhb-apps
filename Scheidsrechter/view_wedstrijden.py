@@ -75,7 +75,7 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
 
         wedstrijden = (Wedstrijd
                        .objects
-                       .exclude(is_ter_info=True)
+                       #.exclude(is_ter_info=True)
                        .exclude(toon_op_kalender=False)
                        .filter(status=WEDSTRIJD_STATUS_GEACCEPTEERD,
                                aantal_scheids__gte=1,
@@ -147,7 +147,7 @@ class WedstrijdDetailsView(UserPassesTestMixin, TemplateView):
             wedstrijd = (Wedstrijd
                          .objects
                          .filter(status=WEDSTRIJD_STATUS_GEACCEPTEERD)
-                         .exclude(is_ter_info=True)
+                         #.exclude(is_ter_info=True)
                          .exclude(toon_op_kalender=False)
                          .select_related('organiserende_vereniging',
                                          'locatie')
@@ -274,7 +274,7 @@ class WedstrijdDetailsCSView(UserPassesTestMixin, TemplateView):
             wedstrijd = (Wedstrijd
                          .objects
                          .filter(status=WEDSTRIJD_STATUS_GEACCEPTEERD)
-                         .exclude(is_ter_info=True)
+                         #.exclude(is_ter_info=True)
                          .exclude(toon_op_kalender=False)
                          .select_related('organiserende_vereniging',
                                          'locatie')
@@ -632,7 +632,7 @@ class WedstrijdHWLContactView(UserPassesTestMixin, TemplateView):
             wedstrijd_pk = str(kwargs['wedstrijd_pk'])[:6]     # afkappen voor de veiligheid
             wedstrijd = (Wedstrijd
                          .objects
-                         .exclude(is_ter_info=True)
+                         #.exclude(is_ter_info=True)
                          .exclude(toon_op_kalender=False)
                          .exclude(aantal_scheids=AANTAL_SCHEIDS_GEEN_KEUZE)
                          .get(pk=wedstrijd_pk))
