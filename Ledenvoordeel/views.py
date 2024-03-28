@@ -26,15 +26,12 @@ class VoordeelOverzichtView(UserPassesTestMixin, TemplateView):
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        if rol_get_huidige(self.request) != Rollen.ROL_SPORTER:
-            return False
-
         if self.request.user.is_authenticated:
             account = get_account(self.request)
             if account.is_gast:
                 return False
 
-        return True
+        return rol_get_huidige(self.request) == Rollen.ROL_SPORTER
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -58,15 +55,12 @@ class VoordeelWalibiView(UserPassesTestMixin, TemplateView):
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        if rol_get_huidige(self.request) != Rollen.ROL_SPORTER:
-            return False
-
         if self.request.user.is_authenticated:
             account = get_account(self.request)
             if account.is_gast:
                 return False
 
-        return True
+        return rol_get_huidige(self.request) == Rollen.ROL_SPORTER
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
