@@ -145,7 +145,7 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
         self.e2e_assert_logged_in()
 
         # wijzig door alleen het nieuwe wachtwoord op te geven
-        nieuw_ww = 'nieuwWwoord'
+        nieuw_ww = 'nieuwWwoord'        # noqa
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_wijzig, {'nieuwe': nieuw_ww})
         self.assert_is_redirect(resp, '/plein/')

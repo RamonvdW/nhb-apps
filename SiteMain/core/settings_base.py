@@ -58,7 +58,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2024-03-28'
+SITE_VERSIE = '2024-04-05'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -208,7 +208,7 @@ TIME_ZONE = 'Europe/Amsterdam'
 USE_I18N = True
 
 # sla alle datums in de database op als UTC
-# dit doet PostgreSQL sowieso, onafhankelijk van deze instelling
+# dit doet PostgreSQL sowieso, onafhankelijk van deze instelling        # noqa
 # alleen vertalen bij presentatie naar de gebruiker toe
 USE_TZ = True
 
@@ -222,7 +222,7 @@ ROOT_URLCONF = 'SiteMain.core.urls'
 STATIC_URL = '/static/'             # url
 STATIC_ROOT = 'SiteMain/.static'    # relative to project top-dir
 STATICFILES_DIRS = [
-    ("webwinkel_fotos", WEBWINKEL_FOTOS_DIR),
+    ("webwinkel_fotos", WEBWINKEL_FOTOS_DIR),       # noqa
 ]
 STATICFILES_FINDER = [
     'django.contrib.staticfiles.finders.FileSystemFinder',
@@ -477,7 +477,7 @@ OPLEIDING_CODES = (
     ('065', 'TTR', 'Spec. aantekening Traditioneel (HBT2)', ()),
     ('066', '', 'Basisschot bijscholing', ()),
     ('066a', '', 'Bewijs deelname Basisschot (geen cert)', ()),
-    ('067', 'TTR', 'Certif. aantekening Traditioneel (HBT3)', ()),
+    ('067', 'TTR', 'Certif. aantekening Traditioneel (HBT3)', ()),      # noqa
     ('068', '', 'Ianseo scoreverwerking', ()),
 
     ('074', '', 'Sportief coachen', ()),
@@ -488,7 +488,7 @@ OPLEIDING_CODES = (
     ('083', '', 'Beoordelaar (portfolio/pvb)', ()),
     ('084a', '', '(Bij-)scholing opl. opleiders-expert ASK', ()),
 
-    ('085', 'TCO', 'Technical Control Officer (IFAA/DFBV)', ()),
+    ('085', 'TCO', 'Technical Control Officer (IFAA/DFBV)', ()),        # noqa
     ('086', '', 'Certificaat WA level 1 Coach', ()),
     ('087', '', 'Certificaat WA level 2 Coach', ()),
 )
@@ -579,7 +579,7 @@ WEDSTRIJDEN_KIES_UITVOERENDE_VERENIGING = (1368,)
 # let op: zonder DEBUG=True geen static files in dev omgeving!
 DEBUG = False
 
-# HTML validation using v.Nu (see TestHelpers/e2ehelpers.py)
+# HTML validation using v.Nu (see TestHelpers/e2ehelpers.py)        # noqa
 TEST_VALIDATE_HTML = False
 
 # JS validation using ESprima

@@ -112,7 +112,7 @@ class Migration(migrations.Migration):
             options={
                 'verbose_name': 'Competitie team klasse',
                 'verbose_name_plural': 'Competitie team klassen',
-                'indexes': [models.Index(fields=['volgorde'], name='Competitie__volgord_054e8a_idx')],
+                'indexes': [models.Index(fields=['volgorde'], name='Competitie__volgord_054e8a_idx')],      # noqa
             },
         ),
         migrations.CreateModel(
@@ -144,7 +144,7 @@ class Migration(migrations.Migration):
             options={
                 'verbose_name': 'Competitie indiv klasse',
                 'verbose_name_plural': 'Competitie indiv klassen',
-                'indexes': [models.Index(fields=['volgorde'], name='Competitie__volgord_476d31_idx')],
+                'indexes': [models.Index(fields=['volgorde'], name='Competitie__volgord_476d31_idx')],      # noqa
             },
         ),
         migrations.CreateModel(
@@ -266,7 +266,7 @@ class Migration(migrations.Migration):
                 'verbose_name': 'Regiocompetitie sporterboog',
                 'verbose_name_plural': 'Regiocompetitie sportersboog',
                 'indexes': [models.Index(fields=['aantal_scores'], name='Competitie__aantal__955e64_idx'),
-                            models.Index(fields=['-gemiddelde'], name='Competitie__gemidde_1225ce_idx'),
+                            models.Index(fields=['-gemiddelde'], name='Competitie__gemidde_1225ce_idx'),        # noqa
                             models.Index(fields=['aantal_scores', 'regiocompetitie'],
                                          name='Competitie__aantal__258001_idx')],
             },
@@ -324,10 +324,11 @@ class Migration(migrations.Migration):
             options={
                 'verbose_name': 'Kampioenschap sporterboog',
                 'verbose_name_plural': 'Kampioenschap sportersboog',
-                'indexes': [models.Index(fields=['-gemiddelde'], name='Competitie__gemidde_e5f73d_idx'),
-                            models.Index(fields=['volgorde'], name='Competitie__volgord_b01f18_idx'),
+                'indexes': [models.Index(fields=['-gemiddelde'], name='Competitie__gemidde_e5f73d_idx'),    # noqa
+                            models.Index(fields=['volgorde'], name='Competitie__volgord_b01f18_idx'),       # noqa
                             models.Index(fields=['rank'], name='Competitie__rank_3b305c_idx'),
-                            models.Index(fields=['volgorde', '-gemiddelde'], name='Competitie__volgord_0ec600_idx')],
+                            models.Index(fields=['volgorde', '-gemiddelde'],
+                                         name='Competitie__volgord_0ec600_idx')],                           # noqa
             },
         ),
         migrations.CreateModel(

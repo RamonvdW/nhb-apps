@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2023 Ramon van der Winkel.
+#  Copyright (c) 2020-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -221,7 +221,7 @@ class RegiocompetitieAanmeldenView(View):
     """ Deze class wordt gebruikt om een sporterboog in te schrijven voor een regiocompetitie
         methode 1 of 2: direct geaccepteerd
 
-        methode 3: nhblid heeft voorkeuren opgegeven: dagdeel, team schieten, opmerking
+        methode 3: sporter heeft voorkeuren opgegeven: dagdeel, team schieten, opmerking
     """
     @staticmethod
     def post(request, *args, **kwargs):
@@ -396,7 +396,7 @@ class RegiocompetitieAfmeldenView(View):
         """ Deze functie wordt aangeroepen als de sporter op zijn profiel pagina
             de knop Uitschrijven gebruikt voor een specifieke regiocompetitie.
         """
-        # voorkom misbruik: ingelogd als niet geblokkeerd nhblid vereist
+        # voorkom misbruik: ingelogd als niet geblokkeerd sporter vereist
         sporter = None
         if request.user.is_authenticated:
             account = get_account(request)
@@ -419,7 +419,7 @@ class RegiocompetitieAfmeldenView(View):
             # niet bestaand record
             raise Http404('Inschrijving niet gevonden')
 
-        # controleer dat deze inschrijving bij het nhblid hoort
+        # controleer dat deze inschrijving bij het sporter hoort
         if deelnemer.sporterboog.sporter != sporter:
             raise PermissionDenied('Je kan alleen jezelf uitschrijven')
 
