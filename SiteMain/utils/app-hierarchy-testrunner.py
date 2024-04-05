@@ -105,7 +105,7 @@ class HierarchyRunner(DiscoverRunner):
         limiter = len(after)
         while limiter > 0 and len(after) > 0:
 
-            # print('\nlimiter=%s' % limiter)
+            # print('\n' + 'limiter=%s' % limiter)
             # for ref, test_after in after.items():
             #     print('%-50s %s' % (ref, test_after))
 

@@ -35,6 +35,7 @@
                     <tr>
                         <th data-filter="on">Bonds<wbr>nummer</th>
                         <th data-filter="on">Naam</th>
+                        <th data-filter="on">Land</th>
                         <th>Laatste inlog</th>
                         <th><!-- kolom voor knoppen --></th>
                     </tr>
@@ -44,6 +45,7 @@
                     <tr>
                         <td>{% if gast.lid_nr > 0 %}{{ gast.lid_nr }}{% else %}<i>Geen</i>{% endif %}</td>
                         <td>{{ gast.volledige_naam }}</td>
+                        <td>{{ gast.land }}</td>
 
                         <td>
                             {% if gast.geen_inlog == 1 %}

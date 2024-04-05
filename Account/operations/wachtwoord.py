@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2023 Ramon van der Winkel.
+#  Copyright (c) 2019-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -35,20 +35,20 @@ VERBODEN_WOORDEN_IN_WACHTWOORD = (
     '74123',
     '32147',
     # keyboard walks
-    'qwert',
-    'werty',
-    'ertyu',
-    'rtyui',
-    'tyuio',
-    'yuiop',
-    'asdfg',
-    'sdfgh',
-    'dfghj',
-    'fghjk',
-    'ghjkl',
-    'zxcvb',
-    'xcvbn',
-    'cvbnm'
+    'qwert',        # noqa
+    'werty',        # noqa
+    'ertyu',        # noqa
+    'rtyui',        # noqa
+    'tyuio',        # noqa
+    'yuiop',        # noqa
+    'asdfg',        # noqa
+    'sdfgh',        # noqa
+    'dfghj',        # noqa
+    'fghjk',        # noqa
+    'ghjkl',        # noqa
+    'zxcvb',        # noqa
+    'xcvbn',        # noqa
+    'cvbnm'         # noqa
 )
 
 
@@ -75,7 +75,7 @@ def account_test_wachtwoord_sterkte(wachtwoord, verboden_str):
     lower_wachtwoord = wachtwoord.lower()
 
     # tel het aantal unieke tekens dat gebruikt is
-    # (voorkomt wachtwoorden zoals jajajajajaja of xxxxxxxxxx)
+    # (voorkomt wachtwoorden zoals jajajajajaja of xxxxxxxxxx)      # noqa
     if len(set(lower_wachtwoord)) < 5:
         return False, "wachtwoord bevat te veel gelijke tekens"
 

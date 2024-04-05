@@ -786,7 +786,7 @@ class Migration(migrations.Migration):
                 'verbose_name': 'Template Competitie Indiv Klasse',
                 'verbose_name_plural': 'Template Competitie Indiv Klassen',
                 'ordering': ['volgorde'],
-                'indexes': [models.Index(fields=['volgorde'], name='BasisTypen__volgord_48eb00_idx')],
+                'indexes': [models.Index(fields=['volgorde'], name='BasisTypen__volgord_48eb00_idx')],      # noqa
             },
         ),
         migrations.CreateModel(

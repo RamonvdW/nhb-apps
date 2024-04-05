@@ -118,24 +118,24 @@ class MyServer(BaseHTTPRequestHandler):
                         resp['details'] = details = dict()
                         if resp['method'] == 'ideal':
                             details['consumerName'] = 'T. TEST'
-                            details['consumerAccount'] = 'NL72RABO0110438885'
-                            details['consumerBic'] = 'RABONL2U'
+                            details['consumerAccount'] = 'NL72RABO0110438885'       # noqa
+                            details['consumerBic'] = 'RABONL2U'                     # noqa
                         elif resp['method'] == 'creditcard':
                             details['cardHolder'] = 'T. TEST'
                             details['cardNumber'] = '12345678901234'
-                            details['cardLabel'] = 'Dankort'
+                            details['cardLabel'] = 'Dankort'                        # noqa
                             details['cardCountryCode'] = 'DK'
                         elif resp['method'] == 'paypal':
                             details['consumerName'] = 'T. TEST'
                             details['consumerAccount'] = 'paypaluser@somewhere.nz'
                             details['paypalReference'] = '9AL35361CF606152E'
-                            details['paypalPayerId'] = 'WDJJHEBZ4X2LY'
+                            details['paypalPayerId'] = 'WDJJHEBZ4X2LY'              # noqa
                             details['paypalFee'] = {'currency': resp['amount']['currency'],
                                                     'value': '2.50'}
                         elif resp['method'] == 'bancontact':
                             details['consumerName'] = None
-                            details['consumerAccount'] = 'BE72RABO0110438885'
-                            details['consumerBic'] = 'AXABBE22'
+                            details['consumerAccount'] = 'BE72RABO0110438885'       # noqa
+                            details['consumerBic'] = 'AXABBE22'                     # noqa
                         value = float(resp['amount']['value']) - 0.26
                         if test_code != '429':
                             resp['settlementAmount'] = {'currency': resp['amount']['currency'],
@@ -236,7 +236,7 @@ class MyServer(BaseHTTPRequestHandler):
         resp['status'] = 'open'
         resp['isCancelable'] = False
         resp['profileId'] = 'ofl_Ab1235ef'
-        resp['sequenceType'] = 'oneoff'
+        resp['sequenceType'] = 'oneoff'     # noqa
         resp['redirectUrl'] = redirect_url
         resp['webhookUrl'] = webhook_url
         resp['_links'] = links = dict()
