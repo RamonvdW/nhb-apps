@@ -58,7 +58,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2024-04-05'
+SITE_VERSIE = '2024-04-07'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -409,6 +409,13 @@ SPEELSTERKTE_VOLGORDE = (
     ('KHSN Tussenspelden', '1150', 201),
     ('KHSN Tussenspelden', '1050', 202),
     ('KHSN Tussenspelden', '950',  203),
+
+    # nieuwe arrowhead (sinds eind 2023)
+    ('Veld 24', 'Goud24',  290),
+    ('Veld 24', 'Zwart24', 291),
+    ('Veld 24', 'Wit24',   292),
+    ('Veld 24', 'Grijs24', 293),
+    ('Veld 24', 'Groen24', 294),
 
     # arrowhead
     ('Veld', 'Goud',   300),
