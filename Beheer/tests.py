@@ -231,6 +231,13 @@ class TestBeheer(E2EHelpers, TestCase):
         resp = self.client.get('/beheer/Opleidingen/opleidingdiploma/?heeft_account=Ja')
         self.assertEqual(resp.status_code, 200)  # 200 = OK
 
+        # Reistijden
+        resp = self.client.get('/beheer/Locatie/reistijd/?reistijd_vastgesteld=nul')
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+
+        resp = self.client.get('/beheer/Locatie/reistijd/?reistijd_vastgesteld=1')
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+
         # Competitie
         resp = self.client.get('/beheer/Competitie/regiocompetitiesporterboog/?Zelfstandig=HWL')
         self.assertEqual(resp.status_code, 200)  # 200 = OK

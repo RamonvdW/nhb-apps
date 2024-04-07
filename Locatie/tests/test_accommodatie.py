@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2023 Ramon van der Winkel.
+#  Copyright (c) 2020-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -26,7 +26,7 @@ class TestLocatieAccommodatie(E2EHelpers, TestCase):
     test_after = ('BasisTypen', 'ImportCRM', 'Functie')
 
     url_ver_overzicht = '/vereniging/'
-    url_locatie = '/vereniging/locatie/%s/'   # ver_nr
+    url_locaties = '/vereniging/locatie/%s/'   # ver_nr
     url_login = '/account/login/'
 
     lange_tekst = "Dit is een heel verhaal van minimaal 200 tekens zodat we de limiet van 500 tekens bereiken " + \
@@ -114,7 +114,7 @@ class TestLocatieAccommodatie(E2EHelpers, TestCase):
         # anon
         self.e2e_logout()
 
-        url = self.url_locatie % self.ver1.ver_nr
+        url = self.url_locaties % self.ver1.ver_nr
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assert403(resp, 'Geen toegang')
@@ -125,7 +125,7 @@ class TestLocatieAccommodatie(E2EHelpers, TestCase):
         self.e2e_check_rol('BB')
 
         # specifieke locatie
-        url = self.url_locatie % self.ver1.ver_nr
+        url = self.url_locaties % self.ver1.ver_nr
         resp = self.client.get(url)
         self.assert403(resp, 'Geen toegang')
 
@@ -134,7 +134,7 @@ class TestLocatieAccommodatie(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_hwl)
         self.e2e_check_rol("HWL")
 
-        url = self.url_locatie % self.ver1.ver_nr
+        url = self.url_locaties % self.ver1.ver_nr
 
         with self.assert_max_queries(20):
             resp = self.client.get(url)
@@ -181,6 +181,9 @@ class TestLocatieAccommodatie(E2EHelpers, TestCase):
         urls = self.extract_all_urls(resp, skip_menu=True)
         self.assertEqual(urls, [url, url])      # nu wel een opslaan knop + verwijder buitenbaan knop
 
+        loc1.zichtbaar = False
+        loc1.save(update_fields=['zichtbaar'])
+
         loc2 = self.ver1.locatie_set.filter(baan_type=BAAN_TYPE_BUITEN).first()
         self.assertEqual(loc2.naam, '')
         self.assertTrue(loc2.zichtbaar)
@@ -225,7 +228,7 @@ class TestLocatieAccommodatie(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_sec)
         self.e2e_check_rol("SEC")
 
-        url = self.url_locatie % self.ver1.ver_nr
+        url = self.url_locaties % self.ver1.ver_nr
 
         with self.assert_max_queries(20):
             resp = self.client.get(url)
@@ -250,7 +253,7 @@ class TestLocatieAccommodatie(E2EHelpers, TestCase):
 
         # maak nog een vereniging
         ver2 = self._maak_vereniging_en_functies(1001, "Grote Club")
-        url = self.url_locatie % ver2.ver_nr
+        url = self.url_locaties % ver2.ver_nr
         loc2 = self._maak_accommodatie(ver2)
 
         # "verkeerde" SEC mag wel inzien, maar niet wijzigen
@@ -272,7 +275,7 @@ class TestLocatieAccommodatie(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_wl)
         self.e2e_check_rol("WL")
 
-        url = self.url_locatie % self.ver1.ver_nr
+        url = self.url_locaties % self.ver1.ver_nr
 
         # maak een externe locatie ana
         loc1 = self._maak_accommodatie(self.ver1, BAAN_TYPE_EXTERN)
@@ -293,7 +296,7 @@ class TestLocatieAccommodatie(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('locatie/accommodatie-details.dtl', 'plein/site_layout.dtl'))
 
         # corner cases
-        resp = self.client.get(self.url_locatie % 999999)
+        resp = self.client.get(self.url_locaties % 999999)
         self.assert404(resp, 'Geen valide vereniging')
 
         self.functie_hwl.delete()
@@ -314,7 +317,7 @@ class TestLocatieAccommodatie(E2EHelpers, TestCase):
         # maak dit de vereniging voor gast-accounts
         self.ver1.is_extern = True
         self.ver1.save()
-        url = self.url_locatie % self.ver1.ver_nr
+        url = self.url_locaties % self.ver1.ver_nr
 
         self.functie_hwl.delete()
         self.functie_wl.delete()
@@ -326,7 +329,7 @@ class TestLocatieAccommodatie(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('locatie/accommodatie-details.dtl', 'plein/site_layout.dtl'))
 
     def test_sporter(self):
-        url = self.url_locatie % self.ver1.ver_nr
+        url = self.url_locaties % self.ver1.ver_nr
 
         self.client.logout()
         with self.assert_max_queries(20):
@@ -344,7 +347,7 @@ class TestLocatieAccommodatie(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_hwl)
         self.e2e_check_rol("HWL")
 
-        url = self.url_locatie % self.ver1.ver_nr
+        url = self.url_locaties % self.ver1.ver_nr
 
         # maak de binnenbaan aan
         loc1 = self._maak_accommodatie(self.ver1)
@@ -464,7 +467,7 @@ class TestLocatieAccommodatie(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_hwl)
         self.e2e_check_rol("HWL")
 
-        url = self.url_locatie % self.ver1.ver_nr
+        url = self.url_locaties % self.ver1.ver_nr
 
         # maak de (binnen-)accommodatie aan (verplicht voor een buitenbaan)
         loc1 = self._maak_accommodatie(self.ver1)
