@@ -140,3 +140,4 @@ visibility
 warning
 waving_hand
 wb_sunny
+zoom_in
