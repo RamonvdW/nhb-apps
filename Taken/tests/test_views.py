@@ -1,15 +1,17 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2023 Ramon van der Winkel.
+#  Copyright (c) 2019-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
 from Functie.models import Functie
+from Geo.models import Regio
 from Taken.models import Taak
 from Taken.operations import eval_open_taken, SESSIONVAR_TAAK_EVAL_AFTER
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
+from Vereniging.models import Vereniging
 
 
 class TestTakenViews(E2EHelpers, TestCase):
@@ -41,6 +43,23 @@ class TestTakenViews(E2EHelpers, TestCase):
         self.functie_mwz.bevestigde_email = self.emailadres2
         self.functie_mwz.laatste_email_over_taken = None
         self.functie_mwz.save(update_fields=['bevestigde_email', 'laatste_email_over_taken'])
+
+        ver = Vereniging(
+                    ver_nr=1000,
+                    naam="Grote Club",
+                    regio=Regio.objects.get(regio_nr=112),
+                    contact_email='info@bb.not')
+        ver.save()
+
+        self.functie_hwl, _ = Functie.objects.get_or_create(rol='HWL', vereniging=ver)
+        self.functie_hwl.bevestigde_email = self.emailadres2
+        self.functie_hwl.laatste_email_over_taken = None
+        self.functie_hwl.save(update_fields=['bevestigde_email', 'laatste_email_over_taken'])
+
+        self.functie_wl, _ = Functie.objects.get_or_create(rol='WL', vereniging=ver)
+        self.functie_wl.bevestigde_email = self.emailadres2
+        self.functie_wl.laatste_email_over_taken = None
+        self.functie_wl.save(update_fields=['bevestigde_email', 'laatste_email_over_taken'])
 
         # maak een taak aan
         taak = Taak(toegekend_aan_functie=self.functie_sup,
@@ -75,6 +94,7 @@ class TestTakenViews(E2EHelpers, TestCase):
 
         self.e2e_login_and_pass_otp(self.testdata.account_admin)
         self.e2e_wisselnaarrol_bb()
+        self.e2e_wissel_naar_functie(self.functie_sup)
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_overzicht)
@@ -157,6 +177,29 @@ class TestTakenViews(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(url)
         self.assert403(resp)
+
+    def test_hwl(self):
+        self.functie_hwl.accounts.add(self.testdata.account_admin)
+
+        self.e2e_login_and_pass_otp(self.testdata.account_admin)
+        self.e2e_wisselnaarrol_bb()
+        self.e2e_wissel_naar_functie(self.functie_wl)
+
+        # huidige functie WL is niet toegekend, maar we laten wel de taken van die functie zien
+
+        # maak een taak aan
+        taak = Taak(toegekend_aan_functie=self.functie_wl,
+                    deadline='2020-01-01',
+                    beschrijving='Testje taak voor WL')
+        taak.save()
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_overzicht)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('taken/overzicht.dtl', 'plein/site_layout.dtl'))
+
+        self.assertContains(resp, 'Testje taak voor WL')
 
 
 # end of file
