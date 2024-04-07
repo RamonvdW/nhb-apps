@@ -55,8 +55,8 @@
                                 <td>{{ taak.titel }}</td>
                                 <td>
                                     <a class="btn-sv-rood" href="{{ taak.url }}">
-                                        <i class="material-icons-round left hide-on-small-and-down">zoom_in</i>
-                                        <i class="material-icons-round hide-on-med-and-up">zoom_in</i>
+                                        <i class="material-icons-round left hide-on-small-and-down notranslate">zoom_in</i>
+                                        <i class="material-icons-round hide-on-med-and-up notranslate">zoom_in</i>
                                         <span class="hide-on-small-and-down">Details</span>
                                     </a>
                                 </td>

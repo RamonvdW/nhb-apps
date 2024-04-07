@@ -215,9 +215,10 @@ class TestFunctieBeheerders(E2EHelpers, TestCase):
         self.assertEqual(len(urls), 0)      # geen wijzig knoppen voor de HWL
 
         # controleer inhoudelijk op 2xRCL, 2xRKO en 2xBKO (18m en 25m)
-        self.assertContains(resp, "BKO", count=2)
-        self.assertContains(resp, "RKO", count=2)
-        self.assertContains(resp, "RCL", count=2)
+        # self.e2e_dump_resp(resp)
+        self.assertContains(resp, "BKO", count=4)   # 2 functions, but double entries due to responsive entries
+        self.assertContains(resp, "RKO", count=4)
+        self.assertContains(resp, "RCL", count=4)
 
         # haal het overzicht van verenigingsbestuurders op
         with self.assert_max_queries(20):
