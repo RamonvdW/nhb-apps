@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2023 Ramon van der Winkel.
+#  Copyright (c) 2020-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -109,7 +109,7 @@ class SpeelsterkteAdmin(admin.ModelAdmin):
 
     search_fields = ('beschrijving', 'category', 'discipline', 'sporter__unaccented_naam', 'sporter__lid_nr')
 
-    list_filter = ('discipline', 'beschrijving', 'category')
+    list_filter = ('discipline', 'pas_code', 'category', 'beschrijving')
 
     readonly_fields = ('sporter',)
 
