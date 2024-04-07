@@ -1,10 +1,11 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2023 Ramon van der Winkel.
+                Copyright (c) 2020-2024 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
+{% load overig_filters %}   <!-- wbr_email -->
 
 {% block title %}Beheerders{% endblock %}
 
@@ -84,7 +85,10 @@
 
                 {% for obj in object_list %}
                     <tr>
-                        <td style="vertical-align: top">{{ obj.beschrijving }}</td>
+                        <td style="vertical-align: top">
+                            <span class="hide-on-small-only">{{ obj.beschrijving }}</span>
+                            <span class="hide-on-med-and-up">{{ obj.rol }}</span>
+                        </td>
 
                         <td style="vertical-align: top">
                             {% for beheerder in obj.beheerders %}
@@ -103,13 +107,16 @@
                             {% if obj.wijzig_url %}
                                 <br><br>
                                 <a class="btn-sv-rood" href="{{ obj.wijzig_url }}">
-                                    <i class="notranslate material-icons-round left">group_add</i>Wijzig beheerders</a>
+                                    <i class="notranslate material-icons-round left hide-on-small-only">group_add</i>
+                                    <i class="notranslate material-icons-round hide-on-med-and-up">group_add</i>
+                                    <span class="hide-on-small-only">Wijzig</span>
+                                </a>
                             {% endif %}
                         </td>
 
                         <td style="vertical-align: top">
                             {% if obj.bevestigde_email %}
-                                <code>{{ obj.bevestigde_email }}</code>
+                                <code>{{ obj.bevestigde_email|wbr_email }}</code>
                             {% else %}
                                 {% if obj.email_url %}
                                     <i class="sv-rood-text">Geen</i>
@@ -118,17 +125,13 @@
                                 {% endif %}
                             {% endif %}
 
-                            <!-- in geval van 2, 3, 4 beheerders: voeg extra breaks toe voor het e-mailadres -->
-                            {% for beheerder in obj.beheerders %}
-                                {% if not forloop.first %}
-                                    <br>
-                                {% endif %}
-                            {% endfor %}
-
                             {% if obj.email_url %}
                                 <br><br>
                                 <a class="btn-sv-rood" href="{{ obj.email_url }}">
-                                    <i class="notranslate material-icons-round left">alternate_email</i>Wijzig e-mail</a>
+                                    <i class="notranslate material-icons-round left hide-on-small-only">alternate_email</i>
+                                    <i class="notranslate material-icons-round hide-on-med-and-up">alternate_email</i>
+                                    <span class="hide-on-small-only">Wijzig</span>
+                                </a>
                             {% endif %}
                         </td>
                     </tr>
@@ -140,4 +143,3 @@
     {% include 'feedback/sidebar.dtl' with op_pagina="functie-overzicht" %}
 
 {% endblock %}
-
