@@ -119,7 +119,7 @@ pyparsing==3.1.2
     # via
     #   -r requirements.txt
     #   httplib2
-pypdf==4.1.0
+pypdf==4.2.0
     # via -r requirements.txt
 pypng==0.20220715.0
     # via
