@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2021-2023 Ramon van der Winkel.
+                Copyright (c) 2021-2024 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -85,7 +85,7 @@
                                 <tr>
                                     <td>{{ team.vereniging }}</td>
                                     <td>{{ team.team_type.beschrijving }}</td>
-                                    <td class="center{% if team.aantal_sporters < 3 %} sv-rood-text"{% endif %}">{{ team.aantal_sporters }}</td>
+                                    <td class="center{% if team.aantal_sporters < 3 %} sv-rood-text{% endif %}">{{ team.aantal_sporters }}</td>
                                     <td>{% if team.poule %}{{ team.poule }}{% else %}<span class="sv-rood-text">Geen</span>{% endif %}</td>
                                     <td>{{ team.team_naam }}</td>
                                 </tr>
