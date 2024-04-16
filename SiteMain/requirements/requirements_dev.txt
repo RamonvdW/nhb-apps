@@ -45,7 +45,7 @@ google-api-core==2.18.0
     # via
     #   -r requirements.txt
     #   google-api-python-client
-google-api-python-client==2.125.0
+google-api-python-client==2.126.0
     # via -r requirements.txt
 google-auth==2.29.0
     # via
@@ -70,7 +70,7 @@ httplib2==0.22.0
     #   -r requirements.txt
     #   google-api-python-client
     #   google-auth-httplib2
-idna==3.6
+idna==3.7
     # via
     #   -r requirements.txt
     #   requests
@@ -146,7 +146,7 @@ rsa==4.9
     #   google-auth
 soupsieve==2.5
     # via beautifulsoup4
-sqlparse==0.4.4
+sqlparse==0.5.0
     # via
     #   -r requirements.txt
     #   django

@@ -20,7 +20,7 @@ et-xmlfile==1.1.0
     # via openpyxl
 google-api-core==2.18.0
     # via google-api-python-client
-google-api-python-client==2.125.0
+google-api-python-client==2.126.0
     # via -r requirements.in
 google-auth==2.29.0
     # via
@@ -38,7 +38,7 @@ httplib2==0.22.0
     # via
     #   google-api-python-client
     #   google-auth-httplib2
-idna==3.6
+idna==3.7
     # via requests
 mollie-api-python==2.13.0
     # via
@@ -85,7 +85,7 @@ requests-oauthlib==2.0.0
     # via mollie-api-python
 rsa==4.9
     # via google-auth
-sqlparse==0.4.4
+sqlparse==0.5.0
     # via django
 typing-extensions==4.11.0
     # via
