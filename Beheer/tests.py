@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2023 Ramon van der Winkel.
+#  Copyright (c) 2020-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -203,6 +203,13 @@ class TestBeheer(E2EHelpers, TestCase):
         resp = self.client.get('/beheer/Betaal/betaalinstellingenvereniging/?Mollie=1')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
 
+        # Bestel
+        resp = self.client.get('/beheer/Bestel/bestelmandje/?is_leeg=0')
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+
+        resp = self.client.get('/beheer/Bestel/bestelmandje/?is_leeg=1')
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+
         # Feedback
         resp = self.client.get('/beheer/Feedback/feedback/?is_afgehandeld=0')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
@@ -222,6 +229,13 @@ class TestBeheer(E2EHelpers, TestCase):
 
         # Opleiding
         resp = self.client.get('/beheer/Opleidingen/opleidingdiploma/?heeft_account=Ja')
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+
+        # Reistijden
+        resp = self.client.get('/beheer/Locatie/reistijd/?reistijd_vastgesteld=nul')
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+
+        resp = self.client.get('/beheer/Locatie/reistijd/?reistijd_vastgesteld=1')
         self.assertEqual(resp.status_code, 200)  # 200 = OK
 
         # Competitie

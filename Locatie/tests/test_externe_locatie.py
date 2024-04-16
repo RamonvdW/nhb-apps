@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2023 Ramon van der Winkel.
+#  Copyright (c) 2020-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -24,6 +24,7 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
 
     test_after = ('BasisTypen', 'ImportCRM', 'Functie')
 
+    url_locaties = '/vereniging/locatie/%s/'                              # ver_nr
     url_externe_locaties = '/vereniging/locatie/%s/extern/'               # ver_nr
     url_externe_locatie_details = '/vereniging/locatie/%s/extern/%s/'     # ver_nr, locatie_pk
 
@@ -209,6 +210,15 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         self.assertEqual(locatie.naam, '')
 
         # haal de niet-lege lijst met locaties op
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('locatie/externe-locaties.dtl', 'plein/site_layout.dtl'))
+        urls = self.extract_all_urls(resp, skip_menu=True)
+        self.assertEqual(len(urls), 2)      # wijzig-knop is erbij gekomen
+
+        # haal de lijst met locaties op
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
@@ -438,8 +448,15 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
             resp = self.client.post(url2, {'verwijder': 'ja'})
         self.assert_is_redirect(resp, url)
 
-        locatie = Locatie.objects.get(pk=locatie.pk)
+        locatie.refresh_from_db()
         self.assertFalse(locatie.zichtbaar)
 
+        # haal de lijst met locaties op
+        url = self.url_locaties % self.ver2.ver_nr
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('locatie/accommodatie-details.dtl', 'plein/site_layout.dtl'))
 
 # end of file
