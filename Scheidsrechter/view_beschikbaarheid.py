@@ -188,15 +188,16 @@ class WijzigBeschikbaarheidView(UserPassesTestMixin, TemplateView):
         opmerking = dict()  # [datum] = opmerking
         for keuze in ScheidsBeschikbaarheid.objects.filter(datum__in=datums, scheids=self.sporter):
             datum = keuze.datum
+            idx = (keuze.datum, keuze.wedstrijd.pk)
             if keuze.opgaaf == BESCHIKBAAR_JA:
-                keuzes[datum] = 1
+                keuzes[idx] = 1
             elif keuze.opgaaf == BESCHIKBAAR_DENK:
-                keuzes[datum] = 2
+                keuzes[idx] = 2
             elif keuze.opgaaf == BESCHIKBAAR_NEE:
-                keuzes[datum] = 3
+                keuzes[idx] = 3
             else:
-                keuzes[datum] = 0
-            opmerking[datum] = keuze.opmerking
+                keuzes[idx] = 0
+            opmerking[idx] = keuze.opmerking
         # for
 
         context['dagen'] = dagen
@@ -206,9 +207,10 @@ class WijzigBeschikbaarheidView(UserPassesTestMixin, TemplateView):
             dag.name = 'wedstrijd_%s_dag_%s' % (dag.wedstrijd.pk, dag.dag_offset)
             dag.keuze = 0
             dag.opmerking = ''
+            idx = (dag.datum, dag.wedstrijd.pk)
             try:
-                dag.keuze = keuzes[dag.datum]
-                dag.opmerking = opmerking[dag.datum]
+                dag.keuze = keuzes[idx]
+                dag.opmerking = opmerking[idx]
             except KeyError:
                 pass
         # for
