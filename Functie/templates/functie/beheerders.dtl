@@ -55,7 +55,10 @@
 
                 {% if accounts_it %}
                     <tr>
-                        <td style="vertical-align: top">IT beheerder</td>
+                        <td style="vertical-align: top">
+                            <span class="hide-on-small-only">IT beheerder</span>
+                            <span class="hide-on-med-and-up">IT</span>
+                        </td>
                         <td>
                             {% for obj in accounts_it %}
                                 {% if not forloop.first %}
@@ -70,7 +73,10 @@
 
                 {% if accounts_bb %}
                     <tr>
-                        <td style="vertical-align: top">Manager MH</td>
+                        <td style="vertical-align: top">
+                            <span class="hide-on-small-only">Manager MH</span>
+                            <span class="hide-on-med-and-up">BB</span>
+                        </td>
                         <td>
                             {% for obj in accounts_bb %}
                                 {% if not forloop.first %}

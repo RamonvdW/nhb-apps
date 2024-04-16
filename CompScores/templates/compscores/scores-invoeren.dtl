@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2023 Ramon van der Winkel.
+                Copyright (c) 2020-2024 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -311,8 +311,7 @@
 
                         {% if deelcomp.regio_organiseert_teamcompetitie %}
                             let team_pk = deelnemer['team_pk'];
-                            let team_naam = team_pk2naam[team_pk];
-                            new_row.cells[5].innerHTML = team_naam;
+                            new_row.cells[5].innerHTML = team_pk2naam[team_pk];
                         {% endif %}
 
                         // maak de nieuwe row zichtbaar
@@ -693,7 +692,7 @@
                 <p id="id_zoekstatus" class="center hide">Status</p>
 
                 <!-- zoekresultaten -->
-                <div id="id_zoekresultaten" class="hide" style="padding:0px 30px 0px 30px">
+                <div id="id_zoekresultaten" class="hide" style="padding:0 30px 0 30px">
                     <!-- element om ontvangen zoekresultaat in op te slaan -->
                     <div id="id_zoekresultaat" style="display:none"></div>
 
