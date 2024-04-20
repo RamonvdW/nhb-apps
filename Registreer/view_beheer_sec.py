@@ -409,7 +409,7 @@ class BestellingOverzettenView(UserPassesTestMixin, View):
 
         try:
             sporter = Sporter.objects.select_related('account').get(lid_nr=naar_lid_nr)
-        except (ValueError, GastRegistratie.DoesNotExist):
+        except (ValueError, Sporter.DoesNotExist):
             raise Http404('Sporter niet gevonden')
 
         if not sporter.account:
@@ -427,8 +427,7 @@ class BestellingOverzettenView(UserPassesTestMixin, View):
                            .prefetch_related('producten')
                            .select_related('account')):
 
-            if bestelling.account == gast.account:
-                bestelling.account = sporter.account
+            bestelling.account = sporter.account
 
             for product in (bestelling.
                             producten.
@@ -444,12 +443,12 @@ class BestellingOverzettenView(UserPassesTestMixin, View):
                         afk = inschrijving.sporterboog.boogtype.afkorting
                         try:
                             sb = afk2sb[afk]
-                        except ValueError:
-                            raise Http404('SporterBoog ontbreekt voor boog %s' % repr(afk))
+                        except KeyError:
+                            raise Http404('SporterBoog ontbreekt voor boog %s' % afk)
                         else:
                             inschrijving.sporterboog = sb
 
-                    if inschrijving.koper == gast:
+                    if inschrijving.koper == gast.account:
                         inschrijving.koper = sporter.account
 
                     inschrijving.save(update_fields=['koper', 'sporterboog'])

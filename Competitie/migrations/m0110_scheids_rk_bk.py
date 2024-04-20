@@ -44,22 +44,22 @@ def zet_aantal_scheids(apps, _):
 
     # vind the matches in de omgekeerde volgorde
     match_pks = list()
-    for indiv in indiv_klas.objects.filter(krijgt_scheids_rk=True).prefetch_related('competitiematch_set'):
+    for indiv in indiv_klas.objects.filter(krijgt_scheids_rk=True).prefetch_related('competitiematch_set'):     # pragma: no cover
         match_pks.extend(list(indiv.competitiematch_set.values_list('pk', flat=True)))
     # for
-    for indiv in indiv_klas.objects.filter(krijgt_scheids_bk=True).prefetch_related('competitiematch_set'):
+    for indiv in indiv_klas.objects.filter(krijgt_scheids_bk=True).prefetch_related('competitiematch_set'):     # pragma: no cover
         match_pks.extend(list(indiv.competitiematch_set.values_list('pk', flat=True)))
     # for
 
-    for team in team_klas.objects.filter(krijgt_scheids_rk=True).prefetch_related('competitiematch_set'):
+    for team in team_klas.objects.filter(krijgt_scheids_rk=True).prefetch_related('competitiematch_set'):       # pragma: no cover
         match_pks.extend(list(team.competitiematch_set.values_list('pk', flat=True)))
     # for
-    for team in team_klas.objects.filter(krijgt_scheids_bk=True).prefetch_related('competitiematch_set'):
+    for team in team_klas.objects.filter(krijgt_scheids_bk=True).prefetch_related('competitiematch_set'):       # pragma: no cover
         match_pks.extend(list(team.competitiematch_set.values_list('pk', flat=True)))
     # for
 
     need_sr_pks = list()
-    for kamp in kamp_klas.objects.all().prefetch_related('rk_bk_matches'):
+    for kamp in kamp_klas.objects.all().prefetch_related('rk_bk_matches'):     # pragma: no cover
         pks = list(kamp.rk_bk_matches.values_list('pk', flat=True))
         for pk in pks:
             if pk in match_pks:
