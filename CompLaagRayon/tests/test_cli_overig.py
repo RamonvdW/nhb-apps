@@ -6,7 +6,8 @@
 
 from django.test import TestCase
 from Competitie.definities import MUTATIE_INITIEEL
-from Competitie.models import (CompetitieIndivKlasse, CompetitieMutatie,
+from Competitie.models import (CompetitieMutatie, CompetitieMatch,
+                               CompetitieIndivKlasse, CompetitieTeamKlasse,
                                KampioenschapIndivKlasseLimiet, KampioenschapSporterBoog, KampioenschapTeam)
 from Competitie.test_utils.tijdlijn import zet_competitie_fase_rk_prep
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -39,13 +40,22 @@ class TestCompLaagRayonCliOverig(E2EHelpers, TestCase):
                   .objects
                   .filter(competitie=data.comp18,
                           boogtype=data.afkorting2boogtype_khsn['R'],
-                          beschrijving__contains="Recurve klasse 6"))[0]
+                          beschrijving__contains="Recurve klasse 6")
+                  .first())
+        cls.indiv_klasse = klasse
 
         # zet de cut op 16 voor de gekozen klasse
         KampioenschapIndivKlasseLimiet(
                 kampioenschap=data.deelkamp18_rk[cls.rayon_nr],
                 indiv_klasse=klasse,
                 limiet=cls.cut).save()
+
+        klasse = (CompetitieTeamKlasse
+                  .objects
+                  .filter(competitie=data.comp18,
+                          team_type=data.afkorting2teamtype_khsn['TR'])
+                  .first())
+        cls.team_klasse = klasse
 
         team = KampioenschapTeam(
                     kampioenschap=data.deelkamp18_rk[cls.rayon_nr])
@@ -128,6 +138,36 @@ class TestCompLaagRayonCliOverig(E2EHelpers, TestCase):
         _ = (f1, f2)
         # print('f1:', f1.getvalue())
         # print('f2:', f2.getvalue())
+
+    def test_check_rk_downloads(self):
+        deelkamp = self.testdata.deelkamp18_rk[1]
+        ver_nr = self.testdata.ver_nrs[0]
+        match = CompetitieMatch(
+                        competitie=deelkamp.competitie,
+                        beschrijving='Test',
+                        vereniging=self.testdata.vereniging[ver_nr],        # noodzakelijk
+                        datum_wanneer='2000-01-01',
+                        tijd_begin_wedstrijd='10:00')
+        match.save()
+        match.indiv_klassen.add(self.indiv_klasse)
+        match.team_klassen.add(self.team_klasse)
+        deelkamp.rk_bk_matches.add(match)
+
+        f1, f2 = self.run_management_command('check_rk_downloads', '18', 'indiv')
+        _ = (f1, f2)
+
+        f1, f2 = self.run_management_command('check_rk_downloads', '18', 'teams')
+        _ = (f1, f2)
+        # print('f1:', f1.getvalue())
+        # print('f2:', f2.getvalue())
+
+        # make nog een competitie aan
+        self.testdata.maak_bondscompetities(2018)
+
+        f1, f2 = self.run_management_command('check_rk_downloads', '25', 'indiv')
+        _ = (f1, f2)
+        f1, f2 = self.run_management_command('check_rk_downloads', '25', 'teams')
+        _ = (f1, f2)
 
 
 # end of file
