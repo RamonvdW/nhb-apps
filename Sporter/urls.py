@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2023 Ramon van der Winkel.
+#  Copyright (c) 2020-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -23,10 +23,6 @@ urlpatterns = [
     path('voorkeuren/',
          view_voorkeuren.VoorkeurenView.as_view(),
          name='voorkeuren'),
-
-    path('leeftijdsklassen/',
-         view_leeftijdsklassen.redirect_leeftijdsklassen,       # FUTURE: verwijder in 2024
-         name='oud-leeftijdsklassen'),
 
     path('leeftijden/persoonlijk/',
          view_leeftijdsklassen.WedstrijdLeeftijdenPersoonlijkView.as_view(),

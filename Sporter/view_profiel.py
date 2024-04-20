@@ -15,7 +15,9 @@ from Account.models import get_account
 from BasisTypen.models import BoogType
 from Bestel.models import Bestelling
 from Competitie.definities import DEEL_RK, INSCHRIJF_METHODE_1, DEELNAME_NEE
-from Competitie.models import Competitie, Regiocompetitie, RegiocompetitieSporterBoog, KampioenschapSporterBoog
+from Competitie.models_competitie import Competitie
+from Competitie.models_laag_regio import Regiocompetitie, RegiocompetitieSporterBoog
+from Competitie.models_laag_kamp import KampioenschapSporterBoog
 from Functie.definities import Rollen
 from Functie.models import Functie
 from Functie.rol import rol_get_huidige

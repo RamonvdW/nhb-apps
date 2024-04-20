@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2023 Ramon van der Winkel.
+#  Copyright (c) 2021-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -13,7 +13,8 @@ from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.models import TeamType
 from Competitie.definities import DEEL_RK
-from Competitie.models import Kampioenschap, RegiocompetitieSporterBoog, KampioenschapSporterBoog, KampioenschapTeam
+from Competitie.models_laag_regio import RegiocompetitieSporterBoog
+from Competitie.models_laag_kamp import Kampioenschap, KampioenschapSporterBoog, KampioenschapTeam
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
 from Score.definities import AG_NUL

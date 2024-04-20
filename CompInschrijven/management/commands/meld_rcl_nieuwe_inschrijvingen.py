@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2023 Ramon van der Winkel.
+#  Copyright (c) 2021-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.utils import timezone
 from django.core.management.base import BaseCommand
-from Competitie.models import Regiocompetitie, RegiocompetitieSporterBoog
+from Competitie.models_laag_regio import Regiocompetitie, RegiocompetitieSporterBoog
 from Functie.models import Functie
 from Taken.operations import check_taak_bestaat, maak_taak
 from datetime import timedelta

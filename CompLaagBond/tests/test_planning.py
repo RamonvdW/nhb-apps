@@ -7,9 +7,9 @@
 from django.test import TestCase
 from django.utils import timezone
 from Competitie.definities import DEEL_RK, DEEL_BK
-from Competitie.models import (Regiocompetitie, Kampioenschap,
-                               CompetitieIndivKlasse, CompetitieTeamKlasse, CompetitieMatch,
-                               KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet)
+from Competitie.models_competitie import CompetitieIndivKlasse, CompetitieTeamKlasse, CompetitieMatch
+from Competitie.models_laag_regio import Regiocompetitie
+from Competitie.models_laag_kamp import Kampioenschap, KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet
 from Functie.tests.helpers import maak_functie
 from Locatie.models import Locatie
 from Sporter.models import Sporter, SporterBoog

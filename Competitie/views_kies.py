@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2023 Ramon van der Winkel.
+#  Copyright (c) 2019-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import reverse
 from django.views.generic import TemplateView
 from django.templatetags.static import static
-from Competitie.models import Competitie
+from Competitie.models_competitie import Competitie
 from Competitie.operations import bepaal_startjaar_nieuwe_competitie
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige, rol_get_beschrijving

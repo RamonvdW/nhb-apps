@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2023 Ramon van der Winkel.
+#  Copyright (c) 2019-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -9,7 +9,7 @@ from django.http import HttpResponseRedirect
 from django.views.generic import TemplateView
 from django.utils.safestring import mark_safe
 from Account.models import get_account
-from Competitie.models import Competitie, get_competitie_boog_typen
+from Competitie.models_competitie import Competitie, get_competitie_boog_typen
 from Competitie.seizoenen import get_comp_pk
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige

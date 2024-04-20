@@ -12,7 +12,6 @@ from django.shortcuts import render, reverse
 from django.views.generic import View
 from django.views.defaults import ERROR_PAGE_TEMPLATE
 from django.core.exceptions import PermissionDenied
-from Account.models import get_account
 from Functie.rol import rol_get_huidige_functie
 from Mailer.operations import mailer_notify_internal_error
 from SiteMain.core import urls

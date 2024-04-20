@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2023 Ramon van der Winkel.
+#  Copyright (c) 2022-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 # verwijder onnodige (oude) data van voorgaande competities
 
 from django.core.management.base import BaseCommand
-from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
-                               KampioenschapSporterBoog, KampioenschapTeam)
+from Competitie.models_competitie import Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse
+from Competitie.models_laag_kamp import KampioenschapSporterBoog, KampioenschapTeam
 import openpyxl
 from openpyxl.styles import Alignment, Font, DEFAULT_FONT
 

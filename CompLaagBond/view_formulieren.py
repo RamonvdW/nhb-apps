@@ -12,9 +12,9 @@ from django.views.generic import TemplateView
 from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Competitie.definities import DEEL_BK, DEEL_RK, DEELNAME_NEE, DEELNAME2STR
-from Competitie.models import (Kampioenschap, CompetitieMatch,
-                               CompetitieIndivKlasse, KampioenschapIndivKlasseLimiet, KampioenschapSporterBoog,
-                               CompetitieTeamKlasse, KampioenschapTeamKlasseLimiet, KampioenschapTeam)
+from Competitie.models_competitie import CompetitieMatch, CompetitieIndivKlasse, CompetitieTeamKlasse
+from Competitie.models_laag_kamp import (Kampioenschap, KampioenschapSporterBoog, KampioenschapTeam,
+                                         KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet)
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
 from Scheidsrechter.models import MatchScheidsrechters
@@ -107,7 +107,8 @@ class DownloadBkFormulierenView(TemplateView):
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
-            (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (reverse('CompBeheer:overzicht',
+                     kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
             (None, "BK programma's")
         )
 
@@ -299,7 +300,7 @@ class FormulierBkIndivAlsBestandView(UserPassesTestMixin, TemplateView):
                 # ws['I' + row].font = copy(i_font)
 
             if is_deelnemer:
-                ws['A' + row] = baan_nr
+                ws['A' + row] = str(baan_nr)
                 ws['B' + row] = baan_letter
 
                 baan_nr += 1
@@ -333,7 +334,7 @@ class FormulierBkIndivAlsBestandView(UserPassesTestMixin, TemplateView):
         # geef het aangepaste BK programma aan de client
         response = HttpResponse(content_type=CONTENT_TYPE_XLSX)
         response['Content-Disposition'] = 'attachment; filename="%s"' % fname
-        prg.save(response)
+        prg.save(response)      # noqa
 
         return response
 
@@ -674,7 +675,7 @@ class FormulierBkTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
         # geef het aangepaste BK programma aan de client
         response = HttpResponse(content_type=CONTENT_TYPE_XLSX)
         response['Content-Disposition'] = 'attachment; filename="%s"' % fname
-        prg.save(response)
+        prg.save(response)      # noqa
 
         return response
 
@@ -723,7 +724,7 @@ class InformatieHWLView(UserPassesTestMixin, TemplateView):
 
         comp = match.competitie
         # TODO: begrens toegang ahv de fase
-        context['comp'] = match.competitie
+        context['comp'] = comp
 
         match.klassen_lijst = list()
         for klasse in match.indiv_klassen.select_related('boogtype').all():

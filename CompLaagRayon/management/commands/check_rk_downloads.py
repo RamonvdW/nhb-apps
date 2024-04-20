@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023 Ramon van der Winkel.
+#  Copyright (c) 2023-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.core.management.base import BaseCommand
-from Competitie.definities import DEEL_RK, DEELNAME_NEE
-from Competitie.models import Kampioenschap, CompetitieMatch, KampioenschapSporterBoog, KampioenschapTeam
-from Competitie.tijdlijn import bepaal_fase_indiv
+from Competitie.definities import DEEL_RK
+from Competitie.models_competitie import CompetitieMatch
+from Competitie.models_laag_kamp import Kampioenschap, KampioenschapSporterBoog, KampioenschapTeam
 
 
 class Command(BaseCommand):

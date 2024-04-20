@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023 Ramon van der Winkel.
+#  Copyright (c) 2023-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
 from Competitie.definities import DEELNAME_NEE
-from Competitie.models import KampioenschapSporterBoog
+from Competitie.models_laag_kamp import KampioenschapSporterBoog
 from Competitie.test_utils.tijdlijn import zet_competitie_fase_rk_prep, zet_competitie_fase_bk_wedstrijden
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata

@@ -4,10 +4,7 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from Competitie.models import Competitie
-import logging
-
-my_logger = logging.getLogger('MH.Competitie')
+from Competitie.models_competitie import Competitie
 
 
 class SeizoenCache(object):

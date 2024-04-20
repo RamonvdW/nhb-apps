@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2023 Ramon van der Winkel.
+#  Copyright (c) 2021-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -8,7 +8,8 @@
 # door een foutje was deze berekend over de 3 laagste gemiddelden in plaats van de 3 hoogste
 
 from django.core.management.base import BaseCommand
-from Competitie.models import Competitie, KampioenschapTeam
+from Competitie.models_competitie import Competitie
+from Competitie.models_laag_kamp import KampioenschapTeam
 
 
 class Command(BaseCommand):

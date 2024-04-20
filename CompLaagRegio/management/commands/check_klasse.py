@@ -6,7 +6,8 @@
 
 from django.core.management.base import BaseCommand
 from BasisTypen.definities import GESLACHT_MAN, GESLACHT_VROUW, GESLACHT_ANDERS
-from Competitie.models import CompetitieIndivKlasse, RegiocompetitieSporterBoog
+from Competitie.models_competitie import CompetitieIndivKlasse
+from Competitie.models_laag_regio import RegiocompetitieSporterBoog
 from Competitie.operations.klassengrenzen import KlasseBepaler
 from Sporter.models import SporterVoorkeuren
 
@@ -38,7 +39,7 @@ class Command(BaseCommand):
             comp_pk = klasse.competitie.pk
             volgorde = klasse.volgorde
 
-            lkl_lst = list(klasse.leeftijdsklassen.values_list('afkorting', flat=True))
+            lkl_lst: list[str] = list(klasse.leeftijdsklassen.values_list('afkorting', flat=True))
             lkl_lst.sort()
             lkl_str = "/".join(lkl_lst)
             volgorde2leeftijdsklassen[(comp_pk, volgorde)] = lkl_str

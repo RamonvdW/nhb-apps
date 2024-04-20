@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2023 Ramon van der Winkel.
+#  Copyright (c) 2022-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -14,7 +14,7 @@ from Account.models import get_account
 from BasisTypen.definities import GESLACHT2STR
 from Bestel.operations.mutaties import (bestel_mutatieverzoek_afmelden_wedstrijd,
                                         bestel_mutatieverzoek_verwijder_product_uit_mandje)
-from Competitie.models import RegiocompetitieSporterBoog
+from Competitie.models_laag_regio import RegiocompetitieSporterBoog
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige, rol_get_huidige_functie
 from Sporter.models import SporterVoorkeuren, get_sporter

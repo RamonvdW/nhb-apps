@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2023 Ramon van der Winkel.
+#  Copyright (c) 2020-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -10,7 +10,8 @@ from django.utils import timezone
 from django.utils.formats import localize
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.models import RegiocompetitieTeam, CompetitieMatch
+from Competitie.models_competitie import CompetitieMatch
+from Competitie.models_laag_regio import RegiocompetitieTeam
 from Competitie.operations.wedstrijdcapaciteit import bepaal_waarschijnlijke_deelnemers, bepaal_blazoen_behoefte
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie

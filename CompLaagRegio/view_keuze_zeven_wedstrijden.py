@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2023 Ramon van der Winkel.
+#  Copyright (c) 2020-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -13,7 +13,8 @@ from Account.models import get_account
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige, rol_get_huidige_functie
 from Competitie.definities import INSCHRIJF_METHODE_1
-from Competitie.models import RegiocompetitieRonde, RegiocompetitieSporterBoog, CompetitieMatch
+from Competitie.models_competitie import CompetitieMatch
+from Competitie.models_laag_regio import RegiocompetitieRonde, RegiocompetitieSporterBoog
 
 
 TEMPLATE_SPORTER_KEUZE7WEDSTRIJDEN = 'complaagregio/keuze-zeven-wedstrijden-methode1.dtl'
