@@ -737,18 +737,20 @@ class Command(BaseCommand):
                 self.stderr.write('[ERROR] Kan vereniging %s met %s leden niet verwijderen' % (str(obj), leden_count))
                 self._count_errors += 1
             else:
-                self.stdout.write('[INFO] Vereniging %s wordt nu verwijderd' % str(obj))
                 if not self.dryrun:
                     # kan alleen als er geen leden meer aan hangen --> de modellen beschermen dit automatisch
                     # vang de gerelateerde exceptie af
+                    msg = str(obj)
                     try:
                         del self._cache_ver[obj.pk]
                         obj.delete()
                         self._count_verwijderingen += 1
+                        self.stdout.write('[INFO] Vereniging %s is verwijderd' % msg)
                     except ProtectedError as exc:       # pragma: no cover
-                        self.stderr.write(
-                            '[ERROR] Onverwachte fout bij het verwijderen van een vereniging: %s' % str(exc))
-                        self._count_errors += 1
+                        self.stdout.write(
+                            '[WARNING] Vereniging %s is nog in gebruik en kan daarom niet verwijderen' % msg)
+                        self.stdout.write('[DEBUG] Reden: %s' % str(exc))
+                        self._count_warnings += 1
         # while
 
     def _import_clubs_secretaris(self, data):
