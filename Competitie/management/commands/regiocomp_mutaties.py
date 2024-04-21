@@ -253,7 +253,7 @@ class Command(BaseCommand):
             self._verwerk_mutatie_initieel_deelkamp(deelkamp)
         # for
 
-    def _verwerk_mutatie_afmelden_indiv(self, deelnemer):
+    def _verwerk_mutatie_afmelden_indiv(self, door:str, deelnemer: KampioenschapSporterBoog):
         # de deelnemer is al afgemeld en behoudt zijn 'volgorde' zodat de RKO/BKO
         # 'm in grijs kan zien in de tabel
 
@@ -262,8 +262,13 @@ class Command(BaseCommand):
 
         # daarna wordt de 'rank' aan voor alle sporters in deze klasse opnieuw vastgesteld
 
+        now = timezone.now()
+        stamp_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
+        msg = '[%s] Aanmelding (door %s): %s\n' % (stamp_str, door, deelnemer)
+
         deelnemer.deelname = DEELNAME_NEE
-        deelnemer.save(update_fields=['deelname'])
+        deelnemer.logboek += msg
+        deelnemer.save(update_fields=['deelname', 'logboek'])
         self.stdout.write('[INFO] Afmelding voor (rank=%s, volgorde=%s): %s' % (
                             deelnemer.rank, deelnemer.volgorde, deelnemer.sporterboog))
 
@@ -444,9 +449,16 @@ class Command(BaseCommand):
         # deel de rank nummers opnieuw uit
         self._update_rank_nummers(deelkamp, indiv_klasse)
 
-    def _verwerk_mutatie_kamp_aanmelden(self, deelnemer):
+    def _verwerk_mutatie_kamp_aanmelden(self, door: str, deelnemer: KampioenschapSporterBoog):
+        now = timezone.now()
+        stamp_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
+        msg = '[%s] Aanmelding (door %s): %s\n' % (stamp_str, door, deelnemer)
+
         if deelnemer.deelname != DEELNAME_JA:
             if deelnemer.deelname == DEELNAME_NEE:
+                deelnemer.logboek += msg
+                deelnemer.save(update_fields=['logboek'])
+
                 self._opnieuw_aanmelden_indiv(deelnemer)
             else:
                 deelnemer.deelname = DEELNAME_JA
@@ -1506,7 +1518,7 @@ class Command(BaseCommand):
             comp.bk_teams_afgesloten = True
             comp.save(update_fields=['bk_teams_afgesloten'])
 
-    def _verwerk_mutatie(self, mutatie: CompetitieMutatie):
+    def _verwerk_mutatie(self, mutatie):
         code = mutatie.mutatie
 
         if code == MUTATIE_COMPETITIE_OPSTARTEN:
@@ -1537,11 +1549,11 @@ class Command(BaseCommand):
 
         elif code == MUTATIE_KAMP_AANMELDEN_INDIV:
             self.stdout.write('[INFO] Verwerk mutatie %s: aanmelden' % mutatie.pk)
-            self._verwerk_mutatie_kamp_aanmelden(mutatie.deelnemer)
+            self._verwerk_mutatie_kamp_aanmelden(mutatie.door, mutatie.deelnemer)
 
         elif code == MUTATIE_KAMP_AFMELDEN_INDIV:
             self.stdout.write('[INFO] Verwerk mutatie %s: afmelden' % mutatie.pk)
-            self._verwerk_mutatie_afmelden_indiv(mutatie.deelnemer)
+            self._verwerk_mutatie_afmelden_indiv(mutatie.door, mutatie.deelnemer)
 
         elif code == MUTATIE_REGIO_TEAM_RONDE:
             self.stdout.write('[INFO] Verwerk mutatie %s: regio team ronde' % mutatie.pk)
