@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2023 Ramon van der Winkel.
+#  Copyright (c) 2020-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -26,7 +26,7 @@ class MyServer(BaseHTTPRequestHandler):
     def handle_get_directions(self, url_encoded_args):
         # split the request
         args = url_encoded_args.replace('%2C', ',').replace('+', ' ')
-        spl = args.split('&')
+        # spl = args.split('&')
         # print('args:', repr(spl))
 
         if 'destination=incompleet' in args:
@@ -97,7 +97,7 @@ class MyServer(BaseHTTPRequestHandler):
     def handle_get_geocode(self, url_encoded_args):
         # split the request
         args = url_encoded_args.replace('%2C', ',').replace('+', ' ')
-        spl = args.split('&')
+        # spl = args.split('&')
         # print('args:', repr(spl))
 
         if '123ERR ' in args:
@@ -191,7 +191,7 @@ class MyServer(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write("GET request for {}".format(self.path).encode('utf-8'))
 
-    def do_GET(self):
+    def do_GET(self):       # noqa
         # print("GET request,\nPath: %s\nHeaders:\n%s" % (str(self.path), str(self.headers)))
 
         if self.path.startswith('/maps/api/directions/json?'):
@@ -205,7 +205,7 @@ class MyServer(BaseHTTPRequestHandler):
 
 def main():
     print('[INFO] Starting test gmaps http server on port 8126')
-    httpd = HTTPServer(('localhost', 8126), MyServer)
+    httpd = HTTPServer(('localhost', 8126), MyServer)       # noqa
 
     try:
         httpd.serve_forever()
@@ -223,4 +223,3 @@ else:
     print("Unsupported websim_gmaps.py import. Stack: %s" % inspect.stack(0))
 
 # end of file
-

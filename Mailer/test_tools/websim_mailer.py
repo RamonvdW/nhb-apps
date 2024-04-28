@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2023 Ramon van der Winkel.
+#  Copyright (c) 2020-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -30,9 +30,9 @@ class MyServer(BaseHTTPRequestHandler):
     #    self.end_headers()
     #    self.wfile.write("GET request for {}".format(self.path).encode('utf-8'))
 
-    def do_POST(self):
-        datalen = int(self.headers['Content-Length'])
-        data = self.rfile.read(datalen).decode('utf-8')
+    def do_POST(self):                                          # noqa
+        data_len = int(self.headers['Content-Length'])
+        data = self.rfile.read(data_len).decode('utf-8')
         # print("POST request\nPath: %s\nHeaders:\n%s\n\nBody:\n%s" % (str(self.path), str(self.headers), data))
 
         if "faal" in data:
@@ -50,7 +50,7 @@ class MyServer(BaseHTTPRequestHandler):
 
 def main():
     print('[INFO] Starting test mailer http server on port 8123')
-    httpd = HTTPServer(('localhost', 8123), MyServer)
+    httpd = HTTPServer(('localhost', 8123), MyServer)           # noqa
 
     try:
         httpd.serve_forever()
@@ -68,4 +68,3 @@ else:
     print("Unsupported websim_mailer.py import. Stack: %s" % inspect.stack(0))
 
 # end of file
-
