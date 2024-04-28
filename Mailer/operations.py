@@ -230,4 +230,5 @@ def render_email_template(context, email_template_name):
 
     return text_content, html_content, email_template_name
 
+
 # end of file

@@ -13,6 +13,7 @@
 
 from django.conf import settings
 from django.utils import timezone
+from Mailer.report import emailadres_is_geblokkeerd
 import requests
 
 
@@ -43,6 +44,8 @@ def send_mail_postmark(obj, stdout=None, stderr=None):
         'Content-Type': 'application/json',
     }
 
+    flag_bad = False
+
     try:
         resp = requests.post(
                         settings.POSTMARK_URL,
@@ -68,7 +71,20 @@ def send_mail_postmark(obj, stdout=None, stderr=None):
                                 repr(resp.encoding), repr(resp.status_code)))
                 stdout.write("  full response: %s" % repr(resp.text))
 
+            if '"ErrorCode":406,':
+                # You tried to send to recipient(s) that have been marked as inactive.
+                # Found inactive addresses: x@yyy.
+                # Inactive recipients are ones that have generated a hard bounce, a spam complain,
+                # or a manual suppression.
+                obj.log += "[WARNING] ErrorCode 406 ontdekt in reactie, dus zet is_blocked = True\n"
+                obj.is_blocked = True
+
+                flag_bad = True
+
     obj.save()
+
+    if flag_bad:
+        emailadres_is_geblokkeerd(obj.mail_to)
 
 
 def send_mail(obj, stdout=None, stderr=None):

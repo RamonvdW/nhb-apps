@@ -35,8 +35,17 @@ class MyServer(BaseHTTPRequestHandler):
         data = self.rfile.read(data_len).decode('utf-8')
         # print("POST request\nPath: %s\nHeaders:\n%s\n\nBody:\n%s" % (str(self.path), str(self.headers), data))
 
-        if "faal" in data:
-            self.send_error(401,     # mailgun: 'unauthorized'
+        resp = ''
+
+        if "@bounce.now" in data:
+            self.send_response(422)         # postmark: inactive e-mail
+            resp = '{"ErrorCode":406,"Message":"You tried to send to recipient(s) tht have been marked as inactive. "'
+            resp += "Found inactive addresses: xx@bounce.now. "
+            resp += "Inactive recipients are ones that have guaranteed a hard bounce, a spam complains, "
+            resp += 'or a manual suppression"}'
+
+        elif "faal" in data:
+            self.send_error(401,            # mailgun: 'unauthorized'
                             "Gesimuleerde faal")
         else:
             if "delay" in data:
@@ -45,7 +54,9 @@ class MyServer(BaseHTTPRequestHandler):
 
         self.send_header('Content-type', 'text/html')
         self.end_headers()
-        # self.wfile.write("POST request for {}".format(self.path).encode('utf-8'))
+
+        if resp:
+            self.wfile.write(resp.encode('utf-8'))
 
 
 def main():
