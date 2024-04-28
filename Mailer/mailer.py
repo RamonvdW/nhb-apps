@@ -71,7 +71,7 @@ def send_mail_postmark(obj, stdout=None, stderr=None):
                                 repr(resp.encoding), repr(resp.status_code)))
                 stdout.write("  full response: %s" % repr(resp.text))
 
-            if '"ErrorCode":406,':
+            if '"ErrorCode":406,' in resp.text:
                 # You tried to send to recipient(s) that have been marked as inactive.
                 # Found inactive addresses: x@yyy.
                 # Inactive recipients are ones that have generated a hard bounce, a spam complain,
