@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2021-2023 Ramon van der Winkel.
+                Copyright (c) 2021-2024 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -102,6 +102,7 @@
                 {% else %}
                     <p>{{ teams|length }} teams van dit team type</p>
                 {% endif %}
+                <p>De team score (per ronde) is de som van de 3 hoogste scores. De laagste score is doorgestreept.</p>
             </div>
         </div>
 
