@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2023 Ramon van der Winkel.
+#  Copyright (c) 2020-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -25,13 +25,6 @@ from types import SimpleNamespace
 
 TEMPLATE_LEEFTIJDSKLASSEN = 'sporter/jouw_leeftijdsklassen.dtl'
 TEMPLATE_LEEFTIJDSGROEPEN = 'sporter/leeftijdsgroepen.dtl'
-
-
-def redirect_leeftijdsklassen(request):
-    """ Deze functie wordt gebruikt om een oude URL om te leiden naar de nieuwe """
-    # FUTURE: verwijder in 2024
-    url = reverse('Sporter:leeftijdsgroepen-persoonlijk')
-    return HttpResponseRedirect(url)
 
 
 class WedstrijdLeeftijdenPersoonlijkView(UserPassesTestMixin, TemplateView):

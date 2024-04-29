@@ -41,9 +41,12 @@
                             {% if obj.mag_wijzigen %}
                                 {% if obj.nog_opvragen %}
                                     <a class="btn-sv-blauw" href="{{ obj.url_details }}">
-                                        <i class="material-icons-round left notranslate">priority_high</i>Nieuw</a>
+                                        <i class="material-icons-round notranslate">priority_high</i>
+                                    </a>
                                 {% else %}
-                                    <a class="btn-sv-rood" href="{{ obj.url_details }}">Wijzig</a>
+                                    <a class="btn-sv-rood" href="{{ obj.url_details }}">
+                                        <i class="material-icons-round notranslate">edit</i>
+                                    </a>
                                 {% endif %}
                             {% else %}
                                 <a class="btn-sv-blauw" href="{{ obj.url_details }}">Details</a>

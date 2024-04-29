@@ -55,9 +55,7 @@
                                 <td>{{ taak.titel }}</td>
                                 <td>
                                     <a class="btn-sv-rood" href="{{ taak.url }}">
-                                        <i class="material-icons-round left hide-on-small-and-down notranslate">zoom_in</i>
-                                        <i class="material-icons-round hide-on-med-and-up notranslate">zoom_in</i>
-                                        <span class="hide-on-small-and-down">Details</span>
+                                        <img src="{% static 'plein/zoom_in.svg' %}" height="36" alt="Toon">
                                     </a>
                                 </td>
                             </tr>
@@ -86,7 +84,7 @@
                 <table class="sv-kader">
                     <thead>
                         <tr>
-                            <th class="center">Nummer</th>
+                            <th class="hide-on-small-and-down center">Nummer</th>
                             <th class="center">Functie</th>
                             <th class="center">Deadline</th>
                             <th>Beschrijving</th>
@@ -97,12 +95,17 @@
                     {% for taak in taken %}
                         {% if taak.is_afgerond %}
                             <tr>
-                                <td class="center">{{ taak.pk }}</td>
-                                <td class="center{% if taak.is_huidige_rol %} sv-blauw-text{% endif %}">{{ taak.toegekend_aan_functie.beschrijving }}</td>
+                                <td class="hide-on-small-and-down center">{{ taak.pk }}</td>
+                                <td class="center{% if taak.is_huidige_rol %} sv-blauw-text{% endif %}">
+                                    <span class="hide-on-small-and-down">{{ taak.toegekend_aan_functie.beschrijving }}</span>
+                                    <span class="hide-on-med-and-up">{{ taak.toegekend_aan_functie.rol }}</span>
+                                </td>
                                 <td class="center">{{ taak.deadline|date:"Y-m-d" }}</td>
                                 <td>{{ taak.titel }}</td>
                                 <td>
-                                    <a class="btn-sv-rood" href="{{ taak.url }}">Details</a>
+                                    <a class="btn-sv-rood" href="{{ taak.url }}">
+                                        <img src="{% static 'plein/zoom_in.svg' %}" height="36" alt="Toon">
+                                    </a>
                                 </td>
                             </tr>
                         {% endif %}

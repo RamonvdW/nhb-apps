@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2023 Ramon van der Winkel.
+                Copyright (c) 2020-2024 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -356,7 +356,7 @@
                 <div class="sv-kader" style="padding:10px">
                     <h6 class="center-align">Uitleg 'Voorkeur voor eigen blazoen'</h6>
                     <p>Deze voorkeur geeft aan dat je liever op een eigen Dutch Target 3-spot of een 60cm 4-spot wilt schieten in plaats van op een 40cm / 60cm blazoen waar tot 4 sporters op schieten.</p>
-                    <p>Als je het vakje aankruist zal, waar mogelijk, jouw voorkeur worden doorgegeven aan de wedstrijdleider.</p>
+                    <p>Als je het vakje aanvinkt zal, waar mogelijk, jouw voorkeur worden doorgegeven aan de wedstrijdleider.</p>
                     <p>Noteer dat dit een voorkeur is, maar geen recht. Als er bijvoorbeeld geen ruimte is op de accommodatie, dan moet je toch op een gedeeld 40cm of 60cm blazoen schieten.</p>
                 </div>
             </div>

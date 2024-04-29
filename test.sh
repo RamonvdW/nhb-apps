@@ -259,13 +259,14 @@ fi
 
 if [ $RES -eq 0 ] && [ $# -eq 0 ]
 then
+    echo "[INFO] Running help for each management command" >>"$LOG"
     echo "[INFO] Running help for each management command"
     for cmd_file in $(find -- */management/commands -name \*py | sed 's/\.py$//g');
     do
         cmd=$(basename "$cmd_file")
         echo -n '.'
         echo "[INFO] ./manage.py help $cmd" >>"$LOG"
-        python3 $PY_OPTS -u $PYCOV ./manage.py help "$cmd" &>>"$LOG"
+        python3 $PY_OPTS -u $PYCOV ./manage.py help "$cmd" &>>/dev/null    # ignore output
     done
     echo
 fi
@@ -351,4 +352,3 @@ then
 fi
 
 # end of file
-

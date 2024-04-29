@@ -139,7 +139,7 @@
                     {% for match in sporter_matches %}
                         {% if not forloop.first %}
                             <tr>
-                                <td colspan="2" class="sv-table-header"></td>
+                                <td class="sv-table-header"></td>
                             </tr>
                         {% endif %}
 
