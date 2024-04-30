@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#  Copyright (c) 2023 Ramon van der Winkel.
+#  Copyright (c) 2023-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -26,12 +26,15 @@ WORK_DIR="/tmp/update_fonts.$$"
 
 KEEP_DOWNLOAD_DIR=0
 
+ADD_LICENSE_PY="$STYLE_DIR/add_license_url.py"
+
 
 update_fonts()
 {
     URL="$1"
     FNAME="$2"
     EXT="$3"
+    LICENSE_URL="$4"
 
     echo "[INFO] Checking $FNAME"
 
@@ -66,7 +69,13 @@ update_fonts()
         # download the new file
         DL_FILE2="$WORK_DIR/$NEW_NAME"
         curl $CURL_OPTIONS -o "$DL_FILE2" $URL2
-    
+
+        # add a license url inside the font metadata, if needed
+        if [ ! -z "$LICENSE_URL" ]
+        then
+            python -u $ADD_LICENSE_PY "$DL_FILE2" "$LICENSE_URL"
+        fi
+
         OLD_NAME=$(ls -1 "$STATIC_DIR/$FNAME"-v*"$EXT")
         echo "[WARNING] Found updated version"
         echo "          NEW=$DL_FILE2"
@@ -80,7 +89,7 @@ update_fonts()
 mkdir "$WORK_DIR"
 
 # Material Icons Round are for the icons on the site
-update_fonts "$URL_ICONS" "$FNAME_ICONS" "$EXT_ICONS"
+update_fonts "$URL_ICONS" "$FNAME_ICONS" "$EXT_ICONS" "https://www.apache.org/licenses/LICENSE-2.0.html"
 
 # Open Sans is the main font
 update_fonts "$URL_OPEN_SANS" "$FNAME_OPEN_SANS" "$EXT_OPEN_SANS"

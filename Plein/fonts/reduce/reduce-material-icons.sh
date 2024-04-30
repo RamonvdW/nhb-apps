@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#  Copyright (c) 2023 Ramon van der Winkel.
+#  Copyright (c) 2023-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -27,7 +27,7 @@ echo "[INFO] Source: $FULL"
 
 # reduceer
 rm -f "$OTF_DEST"
-pyftsubset "$OTF_SOURCE" --output-file="$OTF_DEST" --glyphs-file="$GLYPH_NAMES" --unicodes=5f-7a,30-39 --no-layout-closure
+pyftsubset "$OTF_SOURCE" --output-file="$OTF_DEST" --glyphs-file="$GLYPH_NAMES" --unicodes=5f-7a,30-39 --no-layout-closure --name-IDs=*
 
 if [ -e "$OTF_DEST" ]
 then

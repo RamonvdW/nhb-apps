@@ -11,6 +11,8 @@ from Competitie.operations import (uitslag_regio_indiv_naar_histcomp, uitslag_re
                                    uitslag_bk_indiv_naar_histcomp, uitslag_bk_teams_naar_histcomp)
 
 
+# TODO: is dit commando nog nodig?
+
 class Command(BaseCommand):
     help = "Zet competitie uitslag om in historische uitslag"
 
