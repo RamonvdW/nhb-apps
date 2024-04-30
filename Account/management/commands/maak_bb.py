@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021 Ramon van der Winkel.
+#  Copyright (c) 2021-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -34,7 +34,7 @@ class Command(BaseCommand):
         for username in options['username']:
             try:
                 account = Account.objects.get(username=username)
-            except Account.DoesNotExist as exc:
+            except Account.DoesNotExist:
                 self.stderr.write('Geen account met de inlog naam %s' % repr(username))
             else:
                 if options['set_bb']:

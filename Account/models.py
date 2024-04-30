@@ -173,7 +173,7 @@ def get_account(request: HttpRequest) -> Account:
         De authentication middleware zet request.user gelijk aan AUTH_USER_MODEL
         Als request.user.is_authenticated == False dan wordt een AnonymousUser terug gegeven
     """
-    return request.user         # compatible met Account (ook al klopt het type niet)
+    return request.user         # noqa (compatible met Account, ook al klopt het type niet)
 
 
 # end of file

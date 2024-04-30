@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2021-2023 Ramon van der Winkel.
+                Copyright (c) 2021-2024 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -93,6 +93,9 @@
                 {% url 'Functie:overzicht' as card_url %}
                 {% include 'plein/card_icon.dtl' with title="Beheerders" text="Toon wie beheerders van de bondscompetitie zijn, koppel andere beheerders of wijzig contactgegevens." icon="face" url=card_url %}
 
+                {% url 'Vereniging:lijst' as card_url %}
+                {% include 'plein/card_icon.dtl' with title="Verenigingen" text=tekst_verenigingen icon="share_location" url=card_url %}
+            
                 {% include 'plein/card_icon.dtl' with title="Statistiek" text="Toon statistiek over de inschrijvingen." icon="query_stats" url=url_statistiek %}
             </div>
         </div>

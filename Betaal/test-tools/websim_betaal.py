@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2023 Ramon van der Winkel.
+#  Copyright (c) 2022-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -317,9 +317,20 @@ class MyHandler(BaseHTTPRequestHandler):
         page += '<p>%s %s</p>' % (amount['value'], amount['currency'])
 
         if status == 'open':
-            page += '<form method="post" action="{{url}}"><input type="hidden" name="status" value="pay"><button style="margin:50px">Pay</button></form>'
-            page += '<form method="post" action="{{url}}"><input type="hidden" name="status" value="cancel"><button style="margin:50px">Cancel</button></form>'
-            page += '<form method="post" action="{{url}}"><input type="hidden" name="status" value="expire"><button style="margin:50px">Expire</button></form>'
+            page += """
+                <form method="post" action="{{url}}">
+                    <input type="hidden" name="status" value="pay">
+                    <button style="margin:50px">Pay</button>
+                </form>
+                <form method="post" action="{{url}}">
+                    <input type="hidden" name="status" value="cancel">
+                    <button style="margin:50px">Cancel</button>
+                </form>
+                <form method="post" action="{{url}}">
+                    <input type="hidden" name="status" value="expire">
+                    <button style="margin:50px">Expire</button>
+                </form>
+            """
 
         page += '</div></body></html>'
 
@@ -344,7 +355,7 @@ class MyHandler(BaseHTTPRequestHandler):
             self.wfile.flush()
 
     # noinspection PyTypeChecker
-    def do_GET(self):
+    def do_GET(self):               # noqa
         # get rid of trivial requests we do not support, to avoid logging them
         if self.path.startswith('/favicon.ico'):
             self.send_response(404)     # not found
@@ -380,7 +391,6 @@ class MyHandler(BaseHTTPRequestHandler):
             self.end_headers()
 
     def _handle_post_create_payment(self, data):
-
         try:
             webhook_url = data['webhookUrl']
             redirect_url = data['redirectUrl']
@@ -429,8 +439,8 @@ class MyHandler(BaseHTTPRequestHandler):
             payment['details'] = details = dict()
             if payment['method'] == 'ideal':
                 details['consumerName'] = 'T. TEST'
-                details['consumerAccount'] = 'NL72RABO0110438885'
-                details['consumerBic'] = 'RABONL2U'
+                details['consumerAccount'] = 'NL72RABO0110438885'       # noqa
+                details['consumerBic'] = 'RABONL2U'                     # noqa
             value = float(payment['amount']['value']) - 0.26
             payment['settlementAmount'] = {'currency': payment['amount']['currency'],
                                            'value': '%.2f' % value}
@@ -486,7 +496,7 @@ class MyHandler(BaseHTTPRequestHandler):
 
         # monitor roept de webhook aan
 
-    def do_POST(self):
+    def do_POST(self):              # noqa
         # out_debug("POST request,\nPath: %s\nHeaders:\n%s" % (str(self.path), str(self.headers)))
         out_debug('POST %s' % repr(self.path))
 
@@ -556,7 +566,7 @@ class MyServerThread(threading.Thread):
         return None
 
     def run(self):
-        httpd = HTTPServer(self._addr, MyHandler, bind_and_activate=False)
+        httpd = HTTPServer(self._addr, MyHandler, bind_and_activate=False)      # noqa
 
         # prevent the HTTP server from re-binding every handler.
         # see https://stackoverflow.com/questions/46210672/
@@ -581,7 +591,7 @@ def main():
     sock.listen(5)      # 5 = queue depth, maar ivm connection keep-alive ook max. aantal verbindingen
 
     # start 5 server instanties
-    x = [MyServerThread(addr, sock),
+    x = [MyServerThread(addr, sock),        # noqa
          MyServerThread(addr, sock),
          MyServerThread(addr, sock),
          MyServerThread(addr, sock),

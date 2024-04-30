@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2023 Ramon van der Winkel.
+#  Copyright (c) 2020-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -23,7 +23,7 @@ class Command(BaseCommand):
     def get_account(self, username):
         try:
             account = Account.objects.get(username=username)
-        except Account.DoesNotExist as exc:
+        except Account.DoesNotExist:
             self.stderr.write("[ERROR] Kan account %s niet vinden" % username)
             account = None
         return account
@@ -31,7 +31,7 @@ class Command(BaseCommand):
     def get_vereniging(self, ver_nr):
         try:
             ver = Vereniging.objects.get(ver_nr=ver_nr)
-        except Vereniging.DoesNotExist as exc:
+        except Vereniging.DoesNotExist:
             self.stderr.write("[ERROR] Kan vereniging %s niet vinden" % ver_nr)
             ver = None
         return ver
@@ -39,7 +39,7 @@ class Command(BaseCommand):
     def get_functie_hwl(self, ver):
         try:
             functie = Functie.objects.get(rol='HWL', vereniging=ver)
-        except Functie.DoesNotExist as exc:
+        except Functie.DoesNotExist:
             self.stderr.write("[ERROR] Kan HWL functie van vereniging %s niet vinden" % ver.ver_nr)
             functie = None
         return functie

@@ -295,7 +295,7 @@ class MyServer(BaseHTTPRequestHandler):
 
 def main():
     # print('[INFO] {websim_betaal_test} Starting test payment http server on port %s' % MY_PORT)
-    httpd = HTTPServer(('localhost', MY_PORT), MyServer)
+    httpd = HTTPServer(('localhost', MY_PORT), MyServer)        # noqa
 
     try:
         httpd.serve_forever()

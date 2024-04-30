@@ -12,7 +12,7 @@ def zet_match_beschrijving(apps, _):
 
     kamp_klas = apps.get_model('Competitie', 'Kampioenschap')
 
-    for kamp in kamp_klas.objects.prefetch_related('rk_bk_matches').select_related('competitie', 'rayon').all():
+    for kamp in kamp_klas.objects.prefetch_related('rk_bk_matches').select_related('competitie', 'rayon').all():    # pragma: no cover
         if kamp.rayon:
             msg = 'RK Rayon %s' % kamp.rayon.rayon_nr
         else:

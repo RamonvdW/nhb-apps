@@ -60,7 +60,7 @@ class OverboekingOntvangenView(UserPassesTestMixin, TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        context['ver'] = ver = self.functie_nu.vereniging
+        context['ver'] = self.functie_nu.vereniging
 
         context['overboekingen'] = self._zoek_overboekingen()
         context['kenmerk'] = context['bedrag'] = ''
@@ -86,8 +86,8 @@ class OverboekingOntvangenView(UserPassesTestMixin, TemplateView):
 
         context = dict()
 
-        context['ver'] = ver = self.functie_nu.vereniging
-        context['url_opslaan'] = url = reverse('Bestel:overboeking-ontvangen')
+        context['ver'] = self.functie_nu.vereniging
+        context['url_opslaan'] = reverse('Bestel:overboeking-ontvangen')
 
         actie = request.POST.get('actie', '')[:5]
         bedrag = request.POST.get('bedrag', '')[:20].strip()
