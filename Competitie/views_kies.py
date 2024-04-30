@@ -91,6 +91,15 @@ class CompetitieKiesView(TemplateView):
             context['toon_rol'] = True
             context['huidige_rol'] = rol_get_beschrijving(self.request)
 
+            # Verenigingen
+            if rol_nu in (Rollen.ROL_RCL, Rollen.ROL_HWL):
+                tekst = "Overzicht van de verenigingen in jouw regio"
+            elif rol_nu == Rollen.ROL_RKO:
+                tekst = "Overzicht van de verenigingen, accommodaties en indeling in clusters in jouw rayon."
+            else:
+                tekst = "Landelijk overzicht van de verenigingen, accommodaties en indeling in clusters."
+            context['tekst_verenigingen'] = tekst
+
             if rol_nu == Rollen.ROL_BB:
                 context['toon_management'] = True
 
