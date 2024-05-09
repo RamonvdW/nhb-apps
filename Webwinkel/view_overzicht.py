@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2023 Ramon van der Winkel.
+#  Copyright (c) 2022-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -17,6 +17,7 @@ from Bestel.operations.mutaties import bestel_mutatieverzoek_webwinkel_keuze
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige
 from Webwinkel.models import WebwinkelProduct, WebwinkelKeuze
+from types import SimpleNamespace
 
 
 TEMPLATE_WEBWINKEL_OVERZICHT = 'webwinkel/overzicht.dtl'
@@ -31,15 +32,13 @@ class OverzichtView(TemplateView):
     # class variables shared by all instances
     template_name = TEMPLATE_WEBWINKEL_OVERZICHT
 
-    def get_context_data(self, **kwargs):
-        """ called by the template system to get the context data for the template """
-        context = super().get_context_data(**kwargs)
-
-        context['producten'] = producten = (WebwinkelProduct
-                                            .objects
-                                            .exclude(mag_tonen=False)
-                                            .select_related('omslag_foto')
-                                            .order_by('volgorde'))
+    @staticmethod
+    def _get_producten():
+        producten = (WebwinkelProduct
+                     .objects
+                     .exclude(mag_tonen=False)
+                      .select_related('omslag_foto')
+                     .order_by('volgorde'))
 
         prev_sectie = None
         for product in producten:
@@ -60,6 +59,17 @@ class OverzichtView(TemplateView):
 
             product.url_details = reverse('Webwinkel:product', kwargs={'product_pk': product.pk})
         # for
+
+        return producten
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        context['producten'] = self._get_producten()
+
+        context['url_spelden'] = reverse('Spelden:begin')
+        context['img_spelden'] = static('spelden/grootmeester.png')
 
         if rol_get_huidige(self.request) == Rollen.ROL_SPORTER:
             context['menu_toon_mandje'] = True

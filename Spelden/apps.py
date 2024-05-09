@@ -7,9 +7,9 @@
 from django.apps import AppConfig
 
 
-class PrestatiespeldenConfig(AppConfig):
+class SpeldenConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'Prestatiespelden'
+    name = 'Spelden'
 
 
 # end of file
