@@ -8,7 +8,7 @@ from django.conf import settings
 from django.test import TestCase
 from django.utils import timezone
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse
-from Bestel.models import Bestelling
+from Bestel.models import Bestelling, BestelProduct, WebwinkelKeuze
 from Functie.tests.helpers import maak_functie
 from Geo.models import Regio
 from Locatie.models import Locatie
@@ -19,6 +19,7 @@ from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 from Vereniging.models import Vereniging
+from Webwinkel.models import WebwinkelProduct
 from Wedstrijden.definities import INSCHRIJVING_STATUS_DEFINITIEF
 from Wedstrijden.models import WedstrijdInschrijving, Wedstrijd, WedstrijdSessie
 import datetime
@@ -33,6 +34,7 @@ class TestRegistreerBeheer(E2EHelpers, TestCase):
     url_gast_accounts = '/account/registreer/beheer-gast-accounts/'
     url_gast_details = '/account/registreer/beheer-gast-accounts/%s/details/'   # lid_nr
     url_opheffen = '/account/registreer/beheer-gast-accounts/opheffen/'
+    url_overzetten = '/account/registreer/beheer-gast-accounts/overzetten/%s/%s/'  # van_lid_nr, naar_lid_nr
 
     testdata = None
 
@@ -67,6 +69,7 @@ class TestRegistreerBeheer(E2EHelpers, TestCase):
                     sinds_datum=datetime.date(year=2010, month=11, day=12),
                     bij_vereniging=ver)
         sporter.save()
+        self.sporter_100001 = sporter
 
         self.account_sec = self.e2e_create_account(sporter.lid_nr, sporter.email, sporter.voornaam, accepteer_vhpg=True)
 
@@ -119,8 +122,8 @@ class TestRegistreerBeheer(E2EHelpers, TestCase):
         gast.account = self.account_800001
         gast.save(update_fields=['sporter', 'account'])
 
-        boog_r = BoogType.objects.get(afkorting='R')
-        self.sporterboog_800001 = SporterBoog(sporter=sporter, boogtype=boog_r)
+        self.boog_r = BoogType.objects.get(afkorting='R')
+        self.sporterboog_800001 = SporterBoog(sporter=sporter, boogtype=self.boog_r)
         self.sporterboog_800001.save()
 
     def test_anon(self):
@@ -133,6 +136,9 @@ class TestRegistreerBeheer(E2EHelpers, TestCase):
         self.assert403(resp)
 
         resp = self.client.post(self.url_opheffen)
+        self.assert403(resp)
+
+        resp = self.client.post(self.url_overzetten % (999999, 999999))
         self.assert403(resp)
 
     def test_overzicht(self):
@@ -372,5 +378,118 @@ class TestRegistreerBeheer(E2EHelpers, TestCase):
         gast2 = GastRegistratie.objects.get(lid_nr=gast2.lid_nr)
         self.assertEqual(gast2.fase, REGISTRATIE_FASE_AFGEWEZEN)
 
+    def test_bestelling_overzetten(self):
+
+        # maak een nieuwe sporter aan voor de overdracht
+        sporter = Sporter(
+                    lid_nr=100002,
+                    geslacht="M",
+                    voornaam="Lid",
+                    achternaam="Geworden",
+                    email="lidgeworden@gmail.not",
+                    geboorte_datum=datetime.date(year=1972, month=3, day=4),
+                    sinds_datum=datetime.date(year=2010, month=11, day=12),
+                    bij_vereniging=self.ver1)
+        sporter.save()
+
+        van_lid_nr = self.gast_800001.lid_nr
+        naar_lid_nr = sporter.lid_nr
+        url = self.url_overzetten % (van_lid_nr, naar_lid_nr)
+
+        # wordt SEC van de vereniging voor gast-accounts
+        self.e2e_login_and_pass_otp(self.account_sec)
+        self.e2e_wissel_naar_functie(self.functie_sec_extern)
+        self.e2e_check_rol('SEC')
+
+        # niet bestaand gastaccount
+        resp = self.client.post(self.url_overzetten % (999999, 999999))
+        self.assert404(resp, 'Gast-account niet gevonden')
+
+        # niet bestaande sporter
+        resp = self.client.post(self.url_overzetten % (van_lid_nr, 999999))
+        self.assert404(resp, 'Sporter niet gevonden')
+
+        # sporter heeft geen account
+        resp = self.client.post(url)
+        self.assert404(resp, 'Sporter heeft nog geen account')
+
+        account = self.e2e_create_account(str(sporter.lid_nr), sporter.email, sporter.voornaam)
+        sporter.account = account
+        sporter.save(update_fields=['account'])
+
+        # maak een bestelling aan
+        bestelling = Bestelling(bestel_nr=1, account=self.account_800001)
+        bestelling.save()
+
+        # maak een inschrijving op een wedstrijd aan
+        locatie = Locatie(
+                        naam='locatie',
+                        adres='',
+                        notities='')
+        locatie.save()
+
+        datum = "2000-01-01"
+        wedstrijd = Wedstrijd(
+                        titel='test',
+                        datum_begin=datum,
+                        datum_einde=datum,
+                        organiserende_vereniging=self.ver1,
+                        locatie=locatie)
+        wedstrijd.save()
+        sessie = WedstrijdSessie(datum=datum, tijd_begin="10:00", tijd_einde="11:00")
+        sessie.save()
+
+        klasse = KalenderWedstrijdklasse.objects.first()
+        inschrijving = WedstrijdInschrijving(
+                            wanneer=timezone.now(),
+                            wedstrijd=wedstrijd,
+                            sessie=sessie,
+                            sporterboog=self.sporterboog_800001,
+                            wedstrijdklasse=klasse,
+                            koper=self.account_800001)
+        inschrijving.save()
+
+        webwinkel_product = WebwinkelProduct()
+        webwinkel_product.save()
+        keuze = WebwinkelKeuze(
+                    wanneer=timezone.now(),
+                    koper=self.account_800001,
+                    product=webwinkel_product)
+        keuze.save()
+
+        prod = BestelProduct(
+                    wedstrijd_inschrijving=inschrijving,
+                    webwinkel_keuze=keuze)
+        prod.save()
+        bestelling.producten.add(prod)
+
+        resp = self.client.post(url)
+        self.assert404(resp, 'SporterBoog ontbreekt voor boog R')
+
+        SporterBoog(sporter=sporter, boogtype=self.boog_r).save()
+
+        resp = self.client.post(url)
+        url_redir = self.url_gast_details % van_lid_nr
+        self.assert_is_redirect(resp, url_redir)
+
+        # nog een keer, andere paden door de code
+        bestelling.refresh_from_db()
+        bestelling.account = self.account_800001
+        bestelling.save(update_fields=['account'])
+        resp = self.client.post(url)
+        url_redir = self.url_gast_details % van_lid_nr
+        self.assert_is_redirect(resp, url_redir)
+
+        # derde keer door de code
+        prod.webwinkel_keuze = None
+        prod.wedstrijd_inschrijving = None
+        prod.save()
+        bestelling.account = self.account_800001
+        bestelling.save(update_fields=['account'])
+        resp = self.client.post(url)
+        url_redir = self.url_gast_details % van_lid_nr
+        self.assert_is_redirect(resp, url_redir)
+
+        self.e2e_assert_other_http_commands_not_supported(url, get=True, post=False)
 
 # end of file

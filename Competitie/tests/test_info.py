@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2023 Ramon van der Winkel.
+#  Copyright (c) 2020-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
 from BasisTypen.models import TeamType
-from Competitie.models import Competitie, Regiocompetitie, RegiocompetitieTeam
+from Competitie.models_competitie import Competitie
+from Competitie.models_laag_regio import Regiocompetitie, RegiocompetitieTeam
 from Functie.definities import Rollen
 from Functie.tests.helpers import maak_functie
 from Geo.models import Regio

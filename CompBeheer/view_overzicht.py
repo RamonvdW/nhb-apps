@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2023 Ramon van der Winkel.
+#  Copyright (c) 2019-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -9,7 +9,9 @@ from django.http import Http404
 from django.views.generic import TemplateView
 from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.models import Competitie, Regiocompetitie, Kampioenschap
+from Competitie.models_competitie import Competitie
+from Competitie.models_laag_regio import Regiocompetitie
+from Competitie.models_laag_kamp import Kampioenschap
 from Competitie.tijdlijn import maak_comp_fase_beschrijvingen
 from CompBeheer.plugin_overzicht import get_kaartjes_beheer
 from CompLaagRegio.plugin_overzicht import get_kaartjes_regio

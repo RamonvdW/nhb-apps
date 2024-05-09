@@ -15,8 +15,8 @@ from Account.models import get_account
 from Competitie.definities import (DEEL_BK,
                                    DEELNAME_JA, DEELNAME_NEE,
                                    MUTATIE_KAMP_AFMELDEN_INDIV, MUTATIE_KAMP_AANMELDEN_INDIV)
-from Competitie.models import (Kampioenschap, KampioenschapSporterBoog, KampioenschapIndivKlasseLimiet,
-                               CompetitieMutatie)
+from Competitie.models_laag_kamp import Kampioenschap, KampioenschapSporterBoog, KampioenschapIndivKlasseLimiet
+from Competitie.models_mutatie import CompetitieMutatie
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
 from Overig.background_sync import BackgroundSync
@@ -185,7 +185,8 @@ class LijstBkSelectieView(UserPassesTestMixin, TemplateView):
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
-            (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (reverse('CompBeheer:overzicht',
+                     kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
             (None, 'BK selectie')
         )
 
@@ -365,8 +366,10 @@ class WijzigStatusBkDeelnemerView(UserPassesTestMixin, TemplateView):
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
-            (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
-            (reverse('CompLaagBond:bk-selectie', kwargs={'deelkamp_pk': deelnemer.kampioenschap.pk}), 'BK selectie'),
+            (reverse('CompBeheer:overzicht',
+                     kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (reverse('CompLaagBond:bk-selectie',
+                     kwargs={'deelkamp_pk': deelnemer.kampioenschap.pk}), 'BK selectie'),
             (None, 'Wijzig sporter status')
         )
 

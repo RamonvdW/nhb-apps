@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2023 Ramon van der Winkel.
+#  Copyright (c) 2019-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -11,7 +11,7 @@ from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
 from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.models import Regiocompetitie, RegiocompetitieTeam, RegiocompetitieTeamPoule
+from Competitie.models_laag_regio import Regiocompetitie, RegiocompetitieTeam, RegiocompetitieTeamPoule
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
 

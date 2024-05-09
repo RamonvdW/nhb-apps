@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023 Ramon van der Winkel.
+#  Copyright (c) 2023-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.core.management.base import BaseCommand
-from Competitie.models import CompetitieTeamKlasse, RegiocompetitieSporterBoog, RegiocompetitieTeam
+from Competitie.models_competitie import CompetitieTeamKlasse
+from Competitie.models_laag_regio import RegiocompetitieSporterBoog, RegiocompetitieTeam
 from Score.definities import AG_NUL
 
 

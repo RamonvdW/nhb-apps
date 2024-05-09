@@ -8,8 +8,9 @@ from django.conf import settings
 from django.test import TestCase
 from BasisTypen.models import BoogType
 from Competitie.definities import DEEL_RK, DEEL_BK, INSCHRIJF_METHODE_1
-from Competitie.models import (Competitie, Regiocompetitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
-                               RegiocompetitieRonde, CompetitieMatch, RegiocompetitieSporterBoog, Kampioenschap)
+from Competitie.models_competitie import Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse, CompetitieMatch
+from Competitie.models_laag_regio import Regiocompetitie, RegiocompetitieRonde, RegiocompetitieSporterBoog
+from Competitie.models_laag_kamp import Kampioenschap
 from Competitie.operations import competities_aanmaken
 from Competitie.test_utils.tijdlijn import zet_competitie_fase_regio_wedstrijden, zet_competitie_fase_regio_afsluiten
 from CompLaagRegio.view_planning import competitie_week_nr_to_date
@@ -45,7 +46,7 @@ class TestCompLaagRegioPlanning(E2EHelpers, TestCase):
     url_klassengrenzen_vaststellen = '/bondscompetities/beheer/%s/klassengrenzen-vaststellen/'  # comp_pk
 
     testdata = None
-    
+
     @classmethod
     def setUpTestData(cls):
         cls.testdata = testdata.TestData()

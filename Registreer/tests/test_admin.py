@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023 Ramon van der Winkel.
+#  Copyright (c) 2023-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -22,8 +22,6 @@ class TestRegistreerAdmin(E2EHelpers, TestCase):
         pass
 
     def test_filters(self):
-        factory = RequestFactory()
-
         # GastRegistratieFaseFilter
         worker = (admin.GastRegistratieFaseFilter(None,
                                                   {'fase_filter': None},

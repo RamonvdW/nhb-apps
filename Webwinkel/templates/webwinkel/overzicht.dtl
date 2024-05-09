@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2022-2023 Ramon van der Winkel.
+                Copyright (c) 2022-2024 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -58,19 +58,11 @@
 
             {% endif %}
 
-                    <!-- old: <div class="sv-card-content" style="padding:0"> -->
                     <div class="sv-card-content-webwinkel">
 
-                        <!-- old: <div class="card-image" style="top:0; left:0; width:224px; height:224px; overflow:hidden"> -->
                         <div class="sv-card-image-webwinkel">
-
                             <!-- achtergrondplaatje -->
-                            <!-- old: <img src="{{ product.omslag_foto_src }}" alt="product"{% if product.is_uitverkocht %} style="opacity:0.5"{% endif %}> -->
                             <img src="{{ product.omslag_foto_src }}" alt="product"{% if product.is_uitverkocht %} class="sv-card-image-onscherp"{% endif %}>
-
-                            <!-- titel
-                            <div class="card-title" style="bottom:revert; top:0; color:black; padding:0; width:100%">{{ title }}</div>
-                            -->
                         </div>
 
                         {% if product.is_uitverkocht %}
@@ -83,7 +75,6 @@
 
                         {% endif %}
 
-                        <!-- old: <div style="position:absolute; bottom:10px; right:10px; color: white; background-color:rgba(0,0,0,.5); padding:3px">&euro;&nbsp;{{ product.prijs_euro }}</div> -->
                         <div class="sv-card-webwinkel-prijs">&euro;&nbsp;{{ product.prijs_euro }}</div>
 
                     </div>

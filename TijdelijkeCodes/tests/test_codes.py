@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2023 Ramon van der Winkel.
+#  Copyright (c) 2019-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
 from django.http import HttpResponseRedirect
 from BasisTypen.models import BoogType
-from Competitie.models import Competitie, CompetitieIndivKlasse, Kampioenschap, KampioenschapSporterBoog
+from Competitie.models_competitie import Competitie, CompetitieIndivKlasse
+from Competitie.models_laag_kamp import Kampioenschap, KampioenschapSporterBoog
 from Functie.models import Functie
 from Geo.models import Rayon
 from Sporter.models import SporterBoog, Sporter

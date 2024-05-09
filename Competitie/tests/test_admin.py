@@ -1,16 +1,14 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023 Ramon van der Winkel.
+#  Copyright (c) 2023-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase, RequestFactory
 from BasisTypen.models import TeamType
 from Competitie import admin
-from Competitie.models import (RegiocompetitieSporterBoog,
-                               RegiocompetitieTeam, RegiocompetitieRondeTeam,
-                               KampioenschapTeam,
-                               KampioenschapIndivKlasseLimiet)
+from Competitie.models_laag_regio import RegiocompetitieSporterBoog, RegiocompetitieTeam, RegiocompetitieRondeTeam
+from Competitie.models_laag_kamp import KampioenschapTeam, KampioenschapIndivKlasseLimiet
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 

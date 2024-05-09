@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2023 Ramon van der Winkel.
+#  Copyright (c) 2021-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
 from BasisTypen.models import BoogType
-from Competitie.models import Competitie, CompetitieMatch, Kampioenschap
+from Competitie.models_competitie import Competitie, CompetitieMatch
+from Competitie.models_laag_kamp import Kampioenschap
 from Competitie.tests.test_helpers import maak_competities_en_zet_fase_c
 from Score.definities import SCORE_TYPE_GEEN
 from Score.models import Score, ScoreHist

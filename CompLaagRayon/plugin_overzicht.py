@@ -5,7 +5,8 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import reverse
-from Competitie.models import Kampioenschap, DEEL_RK
+from Competitie.definities import DEEL_RK
+from Competitie.models_laag_kamp import Kampioenschap
 from Functie.definities import Rollen
 from types import SimpleNamespace
 

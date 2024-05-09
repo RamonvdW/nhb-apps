@@ -1,16 +1,17 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023 Ramon van der Winkel.
+#  Copyright (c) 2023-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.core.management.base import BaseCommand
 from Competitie.definities import DEEL_RK, DEELNAME_NEE
-from Competitie.models import Kampioenschap, CompetitieIndivKlasse, KampioenschapSporterBoog
+from Competitie.models_competitie import CompetitieIndivKlasse
+from Competitie.models_laag_kamp import Kampioenschap, KampioenschapSporterBoog
 
 
 class Command(BaseCommand):
-    help = "Importeer uitslag kampioenschap"
+    help = "Controleer de RK uitslagen"
 
     def __init__(self, stdout=None, stderr=None, no_color=False, force_color=False):
         super().__init__(stdout, stderr, no_color, force_color)
@@ -28,7 +29,8 @@ class Command(BaseCommand):
         for deelkamp in (Kampioenschap
                          .objects
                          .filter(competitie__afstand=afstand,
-                                 deel=DEEL_RK).order_by('rayon__rayon_nr')):
+                                 deel=DEEL_RK)
+                         .order_by('rayon__rayon_nr')):
 
             self.stdout.write('[INFO] %s' % deelkamp)
 

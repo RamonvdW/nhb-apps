@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2023 Ramon van der Winkel.
+#  Copyright (c) 2020-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -11,8 +11,8 @@ from BasisTypen.definities import ORGANISATIE_KHSN
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse
 from Bestel.models import Bestelling
 from Competitie.definities import DEELNAME_JA, DEELNAME_NEE, INSCHRIJF_METHODE_1
-from Competitie.models import (Regiocompetitie, RegiocompetitieSporterBoog,
-                               Kampioenschap, KampioenschapSporterBoog)
+from Competitie.models_laag_regio import Regiocompetitie, RegiocompetitieSporterBoog
+from Competitie.models_laag_kamp import Kampioenschap, KampioenschapSporterBoog
 from Competitie.test_utils.tijdlijn import (zet_competitie_fases,
                                             zet_competitie_fase_regio_prep, zet_competitie_fase_regio_inschrijven,
                                             zet_competitie_fase_regio_wedstrijden, zet_competitie_fase_regio_afsluiten,

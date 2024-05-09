@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023 Ramon van der Winkel.
+#  Copyright (c) 2023-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -13,8 +13,9 @@ from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
 from Competitie.definities import DEEL_BK, MUTATIE_KLEINE_KLASSE_INDIV
-from Competitie.models import (CompetitieIndivKlasse, CompetitieMutatie,
-                               Kampioenschap, KampioenschapSporterBoog)
+from Competitie.models_competitie import CompetitieIndivKlasse
+from Competitie.models_laag_kamp import Kampioenschap, KampioenschapSporterBoog
+from Competitie.models_mutatie import CompetitieMutatie
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
 from Logboek.models import schrijf_in_logboek

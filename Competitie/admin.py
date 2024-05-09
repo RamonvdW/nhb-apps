@@ -10,12 +10,12 @@ from django.contrib.admin.widgets import FilteredSelectMultiple
 from BasisTypen.definities import SCHEIDS_NIET
 from BasisTypen.models import TeamType
 from Competitie.definities import DEEL_BK, DEEL_RK
-from Competitie.models import (Competitie, Regiocompetitie, RegiocompetitieRonde,
-                               CompetitieIndivKlasse, CompetitieTeamKlasse,
-                               KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet,
-                               CompetitieMatch, RegiocompetitieSporterBoog, KampioenschapSporterBoog,
-                               RegiocompetitieTeam, RegiocompetitieTeamPoule, RegiocompetitieRondeTeam,
-                               KampioenschapTeam, CompetitieMutatie, Kampioenschap)
+from Competitie.models_competitie import Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse, CompetitieMatch
+from Competitie.models_laag_regio import (Regiocompetitie, RegiocompetitieRonde, RegiocompetitieSporterBoog,
+                                          RegiocompetitieTeam, RegiocompetitieTeamPoule, RegiocompetitieRondeTeam)
+from Competitie.models_laag_kamp import (KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet,
+                                         KampioenschapSporterBoog, KampioenschapTeam, Kampioenschap)
+from Competitie.models_mutatie import CompetitieMutatie
 from Sporter.models import Sporter
 
 
@@ -635,7 +635,8 @@ class KampioenschapSporterBoogAdmin(CreateOnlyAdmin):
         ('Status aanmelding',
             {'fields': ('deelname',
                         'volgorde',
-                        'rank'),
+                        'rank',
+                        'logboek'),
              }),
         ('Resultaten',
             {'fields': ('result_rank',

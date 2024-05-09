@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2023 Ramon van der Winkel.
+#  Copyright (c) 2019-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -9,9 +9,9 @@ from django.http import Http404
 from django.views.generic import TemplateView
 from django.utils.safestring import mark_safe
 from Competitie.definities import TEAM_PUNTEN_MODEL_TWEE, TEAM_PUNTEN_MODEL_SOM_SCORES
-from Competitie.models import (Competitie, Regiocompetitie,
-                               RegiocompetitieTeamPoule, RegiocompetitieTeam, RegiocompetitieRondeTeam,
-                               RegiocompetitieSporterBoog)
+from Competitie.models_competitie import Competitie
+from Competitie.models_laag_regio import (Regiocompetitie, RegiocompetitieTeamPoule, RegiocompetitieTeam,
+                                          RegiocompetitieRondeTeam, RegiocompetitieSporterBoog)
 from Competitie.seizoenen import get_comp_pk
 from Competitie.operations.poules import maak_poule_schema
 from Geo.models import Regio

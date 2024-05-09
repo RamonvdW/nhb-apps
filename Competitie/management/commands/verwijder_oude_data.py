@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2023 Ramon van der Winkel.
+#  Copyright (c) 2021-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 # verwijder onnodige (oude) data van voorgaande competities
 
 from django.core.management.base import BaseCommand
-from Competitie.models import CompetitieMatch
+from Competitie.models_competitie import CompetitieMatch
 from Score.definities import SCORE_TYPE_GEEN
 from Score.models import Score, ScoreHist
 from Sporter.models import SporterBoog

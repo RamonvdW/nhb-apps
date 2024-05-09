@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023 Ramon van der Winkel.
+#  Copyright (c) 2023-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -67,6 +67,7 @@ class TestRegistreerBegin(E2EHelpers, TestCase):
         self.client.logout()
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_begin)
+        # TODO: check resp
 
 
 # end of file

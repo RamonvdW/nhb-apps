@@ -15,7 +15,8 @@ from Account.models import get_account
 from BasisTypen.definities import ORGANISATIE_WA
 from BasisTypen.models import BoogType
 from Competitie.definities import DEEL_BK, DEELNAME_JA, DEELNAME_NEE, MUTATIE_KAMP_TEAMS_NUMMEREN
-from Competitie.models import Kampioenschap, KampioenschapTeam, CompetitieMutatie
+from Competitie.models_laag_kamp import Kampioenschap, KampioenschapTeam
+from Competitie.models_mutatie import CompetitieMutatie
 from Functie.definities import Rollen, rol2url
 from Functie.rol import rol_get_huidige_functie
 from Overig.background_sync import BackgroundSync

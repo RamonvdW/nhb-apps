@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2019-2023 Ramon van der Winkel.
+                Copyright (c) 2019-2024 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -161,10 +161,10 @@
 
                 <p>&nbsp;</p>
                 <p>Directe link naar het aanvraagformulier:
-                    <a class="btn-sv-rood" href="https://docs.google.com/spreadsheets/d/1hTMVLe_HmMqCdOeoauW7n8PFf0CvuEXORX7gRWzqLoA/edit?usp=sharing" target="_blank" rel="noopener noreferrer">
+                    <a class="btn-sv-rood" href="{{ url_record_formulier }}" target="_blank" rel="noopener noreferrer">
                         <i class="notranslate material-icons-round left">open_in_new</i>Openen</a></p>
                 <p>Mocht deze niet werken, kijk dan <code>www.handboogsport.nl</code> onder Procedures:
-                    <a class="btn-sv-rood" href="https://www.handboogsport.nl/de-nhb/#procedures" target="_blank" rel="noopener noreferrer">
+                    <a class="btn-sv-rood" href="{{ url_spelden_procedures }}" target="_blank" rel="noopener noreferrer">
                         <i class="notranslate material-icons-round left">open_in_new</i>Link</a></p>
 
             </div>

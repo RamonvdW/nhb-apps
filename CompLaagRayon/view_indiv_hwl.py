@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2023 Ramon van der Winkel.
+#  Copyright (c) 2019-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -9,7 +9,7 @@ from django.http import Http404
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Competitie.definities import DEEL_RK, DEELNAME_JA, DEELNAME_NEE
-from Competitie.models import Kampioenschap, KampioenschapSporterBoog
+from Competitie.models_laag_kamp import Kampioenschap, KampioenschapSporterBoog
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
 

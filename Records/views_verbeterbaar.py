@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2023 Ramon van der Winkel.
+#  Copyright (c) 2019-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import reverse
 from django.http import Http404
+from django.conf import settings
 from django.views.generic import ListView, TemplateView
 from django.templatetags.static import static
 from Records.definities import (disc2str, disc2url, url2disc,
@@ -222,6 +223,9 @@ class RecordsVerbeterbaarInDiscipline(TemplateView):
         aantal_gekozen = len(qset)
         context['lege_lijst'] = (aantal_gekozen == 0)
         context['aantal_regels'] = aantal_gekozen + 2
+
+        context['url_spelden_procedures'] = settings.URL_SPELDEN_PROCEDURES
+        context['url_record_formulier'] = settings.URL_RECORD_AANVRAAGFORMULIER
 
         context['kruimels'] = (
             (reverse('Records:overzicht'), 'Records'),

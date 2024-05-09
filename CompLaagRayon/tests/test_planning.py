@@ -7,9 +7,11 @@
 from django.test import TestCase
 from BasisTypen.models import BoogType
 from Competitie.definities import DEEL_BK, DEEL_RK, DEELNAME_NEE, DEELNAME_JA, DEELNAME_ONBEKEND, INSCHRIJF_METHODE_1
-from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
-                               Regiocompetitie, RegiocompetitieSporterBoog, Kampioenschap, KampioenschapSporterBoog,
-                               KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet, CompetitieMutatie)
+from Competitie.models_competitie import Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse
+from Competitie.models_laag_regio import Regiocompetitie, RegiocompetitieSporterBoog
+from Competitie.models_laag_kamp import (Kampioenschap, KampioenschapSporterBoog,
+                                         KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet)
+from Competitie.models_mutatie import CompetitieMutatie
 from Competitie.operations import competities_aanmaken
 from Competitie.test_utils.tijdlijn import (evaluatie_datum, zet_competitie_fase_rk_prep,
                                             zet_competitie_fase_regio_afsluiten)
@@ -341,8 +343,9 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
                                             sel_indiv_1: "on",
                                             sel_indiv_2: "on",
                                             sel_indiv_3: "on",
-                                            "wkl_indiv_": "on",         # bad
-                                            "wkl_indiv_bad": "on"})     # bad
+                                            '"wkl_indiv_': "on",         # bad
+                                            '"wkl_indiv_bad': "on",      # bad
+                                            '"snel': 1})
         self.assert_is_redirect_not_plein(resp)  # check for success
 
         # wissel naar BKO en haal de planning op

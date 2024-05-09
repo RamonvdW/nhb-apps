@@ -7,7 +7,8 @@
 from django.test import TestCase, override_settings
 from django.utils import timezone
 from Competitie.definities import DEEL_RK
-from Competitie.models import CompetitieMatch, KampioenschapSporterBoog, KampioenschapTeam
+from Competitie.models_competitie import CompetitieMatch
+from Competitie.models_laag_kamp import KampioenschapSporterBoog, KampioenschapTeam
 from Competitie.test_utils.tijdlijn import zet_competitie_fase_bk_prep
 from Locatie.models import Locatie
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -26,6 +27,7 @@ class TestCompLaagBondFormulieren(E2EHelpers, TestCase):
     url_forms_teams = '/bondscompetities/bk/formulieren/teams/%s/'               # deelkamp_pk
     url_forms_download_indiv = '/bondscompetities/bk/formulieren/indiv/download/%s/%s/'   # match_pk, klasse_pk
     url_forms_download_teams = '/bondscompetities/bk/formulieren/teams/download/%s/%s/'   # match_pk, klasse_pk
+    url_sr_info = '/bondscompetities/bk/informatie-hwl/%s/'    # match_pk
 
     testdata = None
     ver_nr = 0
@@ -52,6 +54,8 @@ class TestCompLaagBondFormulieren(E2EHelpers, TestCase):
 
         ver_nr = data.regio_ver_nrs[111][0]
         cls.ver = data.vereniging[ver_nr]
+
+        cls.functie_hwl = data.functie_hwl[ver_nr]
 
         s2 = timezone.now()
         d = s2 - s1
@@ -147,6 +151,9 @@ class TestCompLaagBondFormulieren(E2EHelpers, TestCase):
         self.assert_is_redirect_login(resp)
 
         resp = self.client.get(self.url_forms_download_teams % (999999, 999999))
+        self.assert_is_redirect_login(resp)
+
+        resp = self.client.get(self.url_sr_info % 999999)
         self.assert_is_redirect_login(resp)
 
     def test_bad(self):
@@ -253,5 +260,29 @@ class TestCompLaagBondFormulieren(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assert404(resp, 'Kan BK programma niet openen')
 
+    def test_sr_info(self):
+        # HWL kan toegekende SR zien
+        self.e2e_wissel_naar_functie(self.functie_hwl)
+
+        url = self.url_sr_info % self.match.pk
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('complaagbond/hwl-bk-match-info.dtl', 'plein/site_layout.dtl'))
+
+        # SR nodig
+        self.match.aantal_scheids = 1
+        self.match.save(update_fields=['aantal_scheids'])
+
+        # niet bestaande match
+        resp = self.client.get(self.url_sr_info % 999999)
+        self.assert404(resp, "Wedstrijd niet gevonden")
+
+        # verkeerde HWL
+        self.e2e_wissel_naar_functie(self.testdata.functie_hwl[self.ver.ver_nr + 1])
+        url = self.url_sr_info % self.match.pk
+        resp = self.client.get(url)
+        self.assert404(resp, 'Niet de beheerder')
 
 # end of file

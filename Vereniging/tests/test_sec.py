@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2023 Ramon van der Winkel.
+#  Copyright (c) 2020-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
 from Functie.tests.helpers import maak_functie
 from Geo.models import Regio
-from Competitie.models import Competitie, CompetitieIndivKlasse, RegiocompetitieSporterBoog
+from Competitie.models_competitie import Competitie, CompetitieIndivKlasse
+from Competitie.models_laag_regio import RegiocompetitieSporterBoog
 from Competitie.test_utils.tijdlijn import zet_competitie_fase_regio_inschrijven
 from Competitie.operations import competities_aanmaken
 from HistComp.definities import HISTCOMP_TYPE_18, HIST_BOGEN_DEFAULT

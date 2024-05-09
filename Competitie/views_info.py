@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2023 Ramon van der Winkel.
+#  Copyright (c) 2020-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -10,7 +10,7 @@ from django.views.generic import TemplateView
 from django.utils.safestring import mark_safe
 from Account.models import get_account
 from BasisTypen.models import TemplateCompetitieIndivKlasse
-from Competitie.models import Regiocompetitie, RegiocompetitieTeam
+from Competitie.models_laag_regio import Regiocompetitie, RegiocompetitieTeam
 from Geo.models import Regio
 from Sporter.models import Sporter
 

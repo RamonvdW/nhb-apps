@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023 Ramon van der Winkel.
+#  Copyright (c) 2023-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
 from django.utils import timezone
 from Competitie.definities import DEELNAME_JA, DEELNAME_NEE, DEELNAME_ONBEKEND
-from Competitie.models import KampioenschapTeam
+from Competitie.models_laag_kamp import KampioenschapTeam
 from Competitie.test_utils.tijdlijn import (zet_competitie_fase_bk_wedstrijden, zet_competitie_fase_bk_prep,
                                             zet_competitie_fase_rk_wedstrijden)
 from TestHelpers.e2ehelpers import E2EHelpers

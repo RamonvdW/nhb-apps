@@ -6,8 +6,9 @@
 
 from django.test import TestCase
 from django.utils import timezone
-from Competitie.models import (Regiocompetitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
-                               RegiocompetitieTeam, RegiocompetitieSporterBoog, RegiocompetitieRondeTeam)
+from Competitie.models_competitie import CompetitieIndivKlasse, CompetitieTeamKlasse
+from Competitie.models_laag_regio import (Regiocompetitie, RegiocompetitieTeam, RegiocompetitieSporterBoog,
+                                          RegiocompetitieRondeTeam)
 from Competitie.test_utils.tijdlijn import (evaluatie_datum, zet_competitie_fases,
                                             zet_competitie_fase_regio_wedstrijden,
                                             zet_competitie_fase_regio_inschrijven)
