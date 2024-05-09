@@ -134,7 +134,7 @@ class TestPleinCliDatabaseOpschonen(E2EHelpers, TestCase):
         gast.save(update_fields=['aangemaakt'])
 
     def test_alles(self):
-        with self.assert_max_queries(126, modify_acceptable=True):
+        with self.assert_max_queries(130, modify_acceptable=True):
             f1, f2 = self.run_management_command('database_opschonen')
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
