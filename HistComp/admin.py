@@ -30,7 +30,7 @@ class HistCompRegioTeamAdmin(admin.ModelAdmin):
 
 class HistKampIndivRKAdmin(admin.ModelAdmin):
 
-    list_filter = ('seizoen__seizoen', 'seizoen__comp_type', 'boogtype')
+    list_filter = ('seizoen__seizoen', 'seizoen__comp_type', 'boogtype', 'rayon_nr', 'indiv_klasse')
 
     search_fields = ('sporter_lid_nr',)
 
