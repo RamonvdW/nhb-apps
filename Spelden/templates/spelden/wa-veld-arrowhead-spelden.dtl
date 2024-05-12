@@ -1,0 +1,236 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2024 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Arrowhead spelden{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Arrowhead spelden</h3>
+            <p>Arrowhead spelden kunnen behaald worden op een World Archery veldwedstrijden van 24 of 48 doelen.</p>
+            <p>Deze sterren zijn beschikbaar voor Recurve, Compound en Barebow.</p>
+        </div>
+    </div>
+
+    <!-- blauwe balk met informatie in tabel-vorm:  label - info -->
+    <div class="row-sv-blauw">
+        <div class="col s12 m6 offset-m3 l4 offset-l4">
+            <table class="sv-kader">
+                <thead>
+                    <tr>
+                        <th class="center">Speld</th>
+                        <th class="center">Afbeelding</th>
+                    </tr>
+                </thead>
+
+                <tr>
+                    <td class="center">Groen</td>
+                    <td class="center"><img width="150px" src="{% static 'spelden/arrowhead_groen.png' %}" alt="Groen"></td>
+                </tr>
+
+                <tr>
+                    <td class="center">Grijs</td>
+                    <td class="center"><img width="150px" src="{% static 'spelden/arrowhead_grijs.png' %}" alt="Grijs"></td>
+                </tr>
+
+                <tr>
+                    <td class="center">Wit</td>
+                    <td class="center"><img width="150px" src="{% static 'spelden/arrowhead_wit.png' %}" alt="Wit"></td>
+                </tr>
+
+                <tr>
+                    <td class="center">Zwart</td>
+                    <td class="center"><img width="150px" src="{% static 'spelden/arrowhead_zwart.png' %}" alt="Zwart"></td>
+                </tr>
+
+                <tr>
+                    <td class="center">Goud</td>
+                    <td class="center"><img width="150px" src="{% static 'spelden/arrowhead_goud.png' %}" alt="Goud"></td>
+                </tr>
+
+            </table>
+        </div>
+    </div>
+
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>24 doelen</h4>
+            <p>The arrowhead spelden zijn te behalen op een wedstrijd met 24 doelen.</p>
+            <p>Onderstaande tabel toont de score voor 48 doelen voor dames en heren met de verschillende bogen.</p>
+        </div>
+    </div>
+
+    <!-- blauwe balk met informatie in tabel-vorm:  label - info -->
+    <div class="row-sv-blauw">
+        <div class="col s12 m10 offset-m1 l8 offset-l2">
+            <table class="sv-kader">
+                <thead>
+                    <tr>
+                        <th class="center"></th>
+                        <th class="center" colspan="2">Recurve</th>
+                        <th class="center" colspan="2">Compound</th>
+                        <th class="center" colspan="2">Barebow</th>
+                    </tr>
+                    <tr>
+                        <th class="center">Speld</th>
+                        <th class="center">Heren</th>
+                        <th class="center">Dames</th>
+                        <th class="center">Heren</th>
+                        <th class="center">Dames</th>
+                        <th class="center">Heren</th>
+                        <th class="center">Dames</th>
+                    </tr>
+                </thead>
+
+                <tr>
+                    <td class="center">Groen</td>
+                    <td class="center">219</td>
+                    <td class="center">196</td>
+                    <td class="center">292</td>
+                    <td class="center">275</td>
+                    <td class="center">191</td>
+                    <td class="center">182</td>
+                </tr>
+
+                <tr>
+                    <td class="center">Grijs</td>
+                    <td class="center">275</td>
+                    <td class="center">257</td>
+                    <td class="center">340</td>
+                    <td class="center">325</td>
+                    <td class="center">250</td>
+                    <td class="center">238</td>
+                </tr>
+
+                <tr>
+                    <td class="center">Wit</td>
+                    <td class="center">309</td>
+                    <td class="center">293</td>
+                    <td class="center">367</td>
+                    <td class="center">352</td>
+                    <td class="center">287</td>
+                    <td class="center">272</td>
+                </tr>
+
+                <tr>
+                    <td class="center">Zwart</td>
+                    <td class="center">333</td>
+                    <td class="center">320</td>
+                    <td class="center">387</td>
+                    <td class="center">373</td>
+                    <td class="center">315</td>
+                    <td class="center">295</td>
+                </tr>
+
+                <tr>
+                    <td class="center">Goud</td>
+                    <td class="center">351</td>
+                    <td class="center">340</td>
+                    <td class="center">401</td>
+                    <td class="center">389</td>
+                    <td class="center">336</td>
+                    <td class="center">313</td>
+                </tr>
+
+            </table>
+        </div>
+    </div>
+
+
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>48 doelen</h4>
+            <p>The arrowhead spelden zijn ook te behalen op een wedstrijd met 48 doelen, mits alle doelen geschoten zijn.</p>
+            <p>Onderstaande tabel toont de score voor 48 doelen voor dames en heren met de verschillende bogen.</p>
+        </div>
+    </div>
+
+    <!-- blauwe balk met informatie in tabel-vorm:  label - info -->
+    <div class="row-sv-blauw">
+        <div class="col s12 m10 offset-m1 l8 offset-l2">
+            <table class="sv-kader">
+                <thead>
+                    <tr>
+                        <th class="center"></th>
+                        <th class="center" colspan="2">Recurve</th>
+                        <th class="center" colspan="2">Compound</th>
+                        <th class="center" colspan="2">Barebow</th>
+                    </tr>
+                    <tr>
+                        <th class="center">Speld</th>
+                        <th class="center">Heren</th>
+                        <th class="center">Dames</th>
+                        <th class="center">Heren</th>
+                        <th class="center">Dames</th>
+                        <th class="center">Heren</th>
+                        <th class="center">Dames</th>
+                    </tr>
+                </thead>
+
+                <tr>
+                    <td class="center">Groen</td>
+                    <td class="center"></td>
+                    <td class="center"></td>
+                    <td class="center"></td>
+                    <td class="center"></td>
+                    <td class="center"></td>
+                    <td class="center"></td>
+                </tr>
+
+                <tr>
+                    <td class="center">Grijs</td>
+                    <td class="center"></td>
+                    <td class="center"></td>
+                    <td class="center"></td>
+                    <td class="center"></td>
+                    <td class="center"></td>
+                    <td class="center"></td>
+                </tr>
+
+                <tr>
+                    <td class="center">Wit</td>
+                    <td class="center"></td>
+                    <td class="center"></td>
+                    <td class="center"></td>
+                    <td class="center"></td>
+                    <td class="center"></td>
+                    <td class="center"></td>
+                </tr>
+
+                <tr>
+                    <td class="center">Zwart</td>
+                    <td class="center"></td>
+                    <td class="center"></td>
+                    <td class="center"></td>
+                    <td class="center"></td>
+                    <td class="center"></td>
+                    <td class="center"></td>
+                </tr>
+
+                <tr>
+                    <td class="center">Goud</td>
+                    <td class="center"></td>
+                    <td class="center"></td>
+                    <td class="center"></td>
+                    <td class="center"></td>
+                    <td class="center"></td>
+                    <td class="center"></td>
+                </tr>
+
+            </table>
+        </div>
+    </div>
+
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="spelden-arrowhead" %}
+
+{% endblock %}

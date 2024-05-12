@@ -1,0 +1,213 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2024 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Sterspelden{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Sterspelden</h3>
+            <p>Sterspelden kunnen behaald worden op een A-status outdoorwedstrijd wedstrijd met 4 afstanden, ook bekend als een World Archery 1440-ronde.</p>
+            <p>Deze sterren zijn beschikbaar voor Recurve en Compound.</p>
+        </div>
+    </div>
+
+    <!-- blauw balk met wit informatie veld -->
+    <div class="row-sv-blauw">
+        <div class="col s12 m10 offset-m1 l8 offset-l2">
+            <div class="sv-kader" style="padding:10px">
+                <div style="display:inline-block">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Leeftijdsklasse</th>
+                                <th>Geslacht</th>
+                                <th>Afstanden</th>
+                                <th>Soort speld</th>
+                            </tr>
+                        </thead>
+
+                        <tr>
+                            <td rowspan="2">50+</td>
+                            <td>Heren</td>
+                            <td>70, 60, 50, 30 meter</td>
+                            <td rowspan="2">Zilveren ster</td>
+                        </tr>
+                        <tr>
+                            <td>Dames</td>
+                            <td>60, 50, 40, 30 meter</td>
+                        </tr>
+
+                        <tr>
+                            <td rowspan="2">Senioren</td>
+                            <td>Heren</td>
+                            <td>90, 70, 50, 30 meter</td>
+                            <td rowspan="2">Ster</td>
+                        </tr>
+                        <tr>
+                            <td>Dames</td>
+                            <td>70, 60, 50, 30 meter</td>
+                        </tr>
+
+                        <tr>
+                            <td rowspan="2">Onder 21</td>
+                            <td>Heren</td>
+                            <td>90, 70, 50, 30 meter</td>
+                            <td rowspan="2">Ster</td>
+                        </tr>
+                        <tr>
+                            <td>Dames</td>
+                            <td>70, 60, 50, 30 meter</td>
+                        </tr>
+
+                        <tr>
+                            <td rowspan="2">Onder 18</td>
+                            <td>Heren</td>
+                            <td>70, 60, 50, 30 meter</td>
+                            <td rowspan="2">Zilveren ster</td>
+                        </tr>
+                        <tr>
+                            <td>Dames</td>
+                            <td>60, 50, 40, 30 meter</td>
+                        </tr>
+
+                    </table>
+                </div>
+
+                <p>Tel de scores van de 4 afstanden op en kijk hieronder welke speld je kan behalen.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>Recurve boog</h4>
+            <p>Onderstaand sterren zijn beschikbaar als je met de recurve boog je score behaald hebt</p>
+        </div>
+    </div>
+
+    <!-- blauwe balk met informatie in tabel-vorm:  label - info -->
+    <div class="row-sv-blauw">
+        <div class="col s12 m10 offset-m1 l8 offset-l2">
+            <table class="sv-kader">
+                <thead>
+                    <tr>
+                        <th class="center">Totale score (of hoger)</th>
+                        <th class="center">Ster</th>
+                        <th class="center">Zilveren ster</th>
+                    </tr>
+                </thead>
+
+                <tr>
+                    <td class="center">1000</td>
+                    <td class="center"><img width="150px" src="{% static 'spelden/ster_1000.png' %}" alt="Ster 1000"></td>
+                    <td class="center"><img width="150px" src="{% static 'spelden/zilveren_ster_1000.png' %}" alt="Zilveren ster 1000"></td>
+                </tr>
+
+                <tr>
+                    <td class="center">1100</td>
+                    <td class="center"><img width="150px" src="{% static 'spelden/ster_1100.png' %}" alt="Ster 1100"></td>
+                    <td class="center"><img width="150px" src="{% static 'spelden/zilveren_ster_1100.png' %}" alt="Zilveren ster 1100"></td>
+                </tr>
+
+                <tr>
+                    <td class="center">1200</td>
+                    <td class="center"><img width="150px" src="{% static 'spelden/ster_1200.png' %}" alt="Ster 1200"></td>
+                    <td class="center"><img width="150px" src="{% static 'spelden/zilveren_ster_1200.png' %}" alt="Zilveren ster 1200"></td>
+                </tr>
+
+                <tr>
+                    <td class="center">1300</td>
+                    <td class="center"><img width="150px" src="{% static 'spelden/ster_1300.png' %}" alt="Ster 1300"></td>
+                    <td class="center"><img width="150px" src="{% static 'spelden/zilveren_ster_1300.png' %}" alt="Zilveren ster 1300"></td>
+                </tr>
+
+                <tr>
+                    <td class="center">1350</td>
+                    <td class="center"><img width="150px" src="{% static 'spelden/ster_1350.png' %}" alt="Ster 1350"></td>
+                    <td class="center">n.v.t.</td>
+                </tr>
+
+                <tr>
+                    <td class="center">1400</td>
+                    <td class="center"><img width="150px" src="{% static 'spelden/ster_1400.png' %}" alt="Ster 1400"></td>
+                    <td class="center">n.v.t.</td>
+                </tr>
+
+            </table>
+        </div>
+    </div>
+
+
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>Compound boog</h4>
+            <p>Onderstaand sterren zijn beschikbaar als je met de compound boog je score behaald hebt</p>
+        </div>
+    </div>
+
+    <!-- blauwe balk met informatie in tabel-vorm:  label - info -->
+    <div class="row-sv-blauw">
+        <div class="col s12 m10 offset-m1 l8 offset-l2">
+            <table class="sv-kader">
+                <thead>
+                    <tr>
+                        <th class="center">Totale score (of hoger)</th>
+                        <th class="center">Ster</th>
+                        <th class="center">Zilveren ster</th>
+                    </tr>
+                </thead>
+
+                <tr>
+                    <td class="center">1000</td>
+                    <td class="center"><img width="150px" src="{% static 'spelden/ster_1000_compound.png' %}" alt="Ster 1000"></td>
+                    <td class="center"><img width="150px" src="{% static 'spelden/zilveren_ster_1000_compound.png' %}" alt="Zilveren ster 1000"></td>
+                </tr>
+
+                <tr>
+                    <td class="center">1100</td>
+                    <td class="center"><img width="150px" src="{% static 'spelden/ster_1100_compound.png' %}" alt="Ster 1100"></td>
+                    <td class="center"><img width="150px" src="{% static 'spelden/zilveren_ster_1100_compound.png' %}" alt="Zilveren ster 1100"></td>
+                </tr>
+
+                <tr>
+                    <td class="center">1200</td>
+                    <td class="center"><img width="150px" src="{% static 'spelden/ster_1200_compound.png' %}" alt="Ster 1200"></td>
+                    <td class="center"><img width="150px" src="{% static 'spelden/zilveren_ster_1200_compound.png' %}" alt="Zilveren ster 1200"></td>
+                </tr>
+
+                <tr>
+                    <td class="center">1300</td>
+                    <td class="center"><img width="150px" src="{% static 'spelden/ster_1300_compound.png' %}" alt="Ster 1300"></td>
+                    <td class="center"><img width="150px" src="{% static 'spelden/zilveren_ster_1300_compound.png' %}" alt="Zilveren ster 1300"></td>
+                </tr>
+
+                <tr>
+                    <td class="center">1350</td>
+                    <td class="center"><img width="150px" src="{% static 'spelden/ster_1350_compound.png' %}" alt="Ster 1350"></td>
+                    <td class="center">n.v.t.</td>
+                </tr>
+
+                <tr>
+                    <td class="center">1400</td>
+                    <td class="center"><img width="150px" src="{% static 'spelden/ster_1400_compound.png' %}" alt="Ster 1400"></td>
+                    <td class="center">n.v.t.</td>
+                </tr>
+
+            </table>
+        </div>
+    </div>
+
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="spelden-sterspelden" %}
+
+{% endblock %}
