@@ -17,6 +17,25 @@ urlpatterns = [
          views.BeginView.as_view(),
          name='begin'),
 
+    path('graadspelden/',
+         views.GraadspeldenView.as_view(),
+         name='groep-graadspelden'),
+
+    path('tussenspelden/',
+         views.TussenspeldenView.as_view(),
+         name='groep-tussenspelden'),
+
+    path('target-awards/',
+         views.TargetAwardsView.as_view(),
+         name='groep-target-awards'),
+
+    path('sterspelden/',
+         views.SterspeldenView.as_view(),
+         name='groep-sterspelden'),
+
+    path('arrowhead/',
+         views.ArrowheadView.as_view(),
+         name='groep-arrowhead'),
 ]
 
 # end of file

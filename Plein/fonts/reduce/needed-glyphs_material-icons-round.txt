@@ -10,7 +10,6 @@ arrow_downward
 arrow_forward
 arrow_forward_ios
 article
-attractions
 auto_awesome
 backspace
 badge
@@ -130,6 +129,7 @@ thumb_down
 thumbs_up_down
 thumb_up
 travel_explore
+trending_up
 tune
 undo
 verified
@@ -140,4 +140,3 @@ visibility
 warning
 waving_hand
 wb_sunny
-zoom_in

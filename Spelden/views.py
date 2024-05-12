@@ -21,6 +21,11 @@ from types import SimpleNamespace
 
 
 TEMPLATE_PRESTATIESPELDEN_BEGIN = 'spelden/begin.dtl'
+TEMPLATE_PRESTATIESPELDEN_GRAADSPELDEN = 'spelden/khsn-graadspelden.dtl'
+TEMPLATE_PRESTATIESPELDEN_TUSSENSPELDEN = 'spelden/khsn-outdoor-tussenspelden.dtl'
+TEMPLATE_PRESTATIESPELDEN_TARGET_AWARDS = 'spelden/wa-indoor-target-awards.dtl'
+TEMPLATE_PRESTATIESPELDEN_STERSPELDEN = 'spelden/wa-outdoor-sterspelden.dtl'
+TEMPLATE_PRESTATIESPELDEN_ARROWHEAD = 'spelden/wa-veld-arrowhead-spelden.dtl'
 
 
 class BeginView(TemplateView):
@@ -43,5 +48,121 @@ class BeginView(TemplateView):
         )
 
         return context
+
+
+class GraadspeldenView(TemplateView):
+
+    """ Via deze view laten we alle producten zien als kaartjes """
+
+    # class variables shared by all instances
+    template_name = TEMPLATE_PRESTATIESPELDEN_GRAADSPELDEN
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        if rol_get_huidige(self.request) == Rollen.ROL_SPORTER:
+            context['menu_toon_mandje'] = True
+
+        context['kruimels'] = (
+            (reverse('Webwinkel:overzicht'), 'Webwinkel'),
+            (reverse('Spelden:begin'), 'Spelden'),
+            (None, 'Graadspelden')
+        )
+
+        return context
+
+
+class TussenspeldenView(TemplateView):
+
+    """ Via deze view laten we alle producten zien als kaartjes """
+
+    # class variables shared by all instances
+    template_name = TEMPLATE_PRESTATIESPELDEN_TUSSENSPELDEN
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        if rol_get_huidige(self.request) == Rollen.ROL_SPORTER:
+            context['menu_toon_mandje'] = True
+
+        context['kruimels'] = (
+            (reverse('Webwinkel:overzicht'), 'Webwinkel'),
+            (reverse('Spelden:begin'), 'Spelden'),
+            (None, 'Tussenspelden')
+        )
+
+        return context
+
+
+class TargetAwardsView(TemplateView):
+
+    """ Via deze view laten we alle producten zien als kaartjes """
+
+    # class variables shared by all instances
+    template_name = TEMPLATE_PRESTATIESPELDEN_TARGET_AWARDS
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        if rol_get_huidige(self.request) == Rollen.ROL_SPORTER:
+            context['menu_toon_mandje'] = True
+
+        context['kruimels'] = (
+            (reverse('Webwinkel:overzicht'), 'Webwinkel'),
+            (reverse('Spelden:begin'), 'Spelden'),
+            (None, 'Target awards')
+        )
+
+        return context
+
+
+class SterspeldenView(TemplateView):
+
+    """ Via deze view laten we alle producten zien als kaartjes """
+
+    # class variables shared by all instances
+    template_name = TEMPLATE_PRESTATIESPELDEN_STERSPELDEN
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        if rol_get_huidige(self.request) == Rollen.ROL_SPORTER:
+            context['menu_toon_mandje'] = True
+
+        context['kruimels'] = (
+            (reverse('Webwinkel:overzicht'), 'Webwinkel'),
+            (reverse('Spelden:begin'), 'Spelden'),
+            (None, 'Sterspelden')
+        )
+
+        return context
+
+
+class ArrowheadView(TemplateView):
+
+    """ Via deze view laten we alle producten zien als kaartjes """
+
+    # class variables shared by all instances
+    template_name = TEMPLATE_PRESTATIESPELDEN_ARROWHEAD
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        if rol_get_huidige(self.request) == Rollen.ROL_SPORTER:
+            context['menu_toon_mandje'] = True
+
+        context['kruimels'] = (
+            (reverse('Webwinkel:overzicht'), 'Webwinkel'),
+            (reverse('Spelden:begin'), 'Spelden'),
+            (None, 'Arrowhead spelden')
+        )
+
+        return context
+
 
 # end of file
