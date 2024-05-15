@@ -175,6 +175,8 @@ class PleinView(View):
         context['email_support'] = settings.EMAIL_SUPPORT
         context['url_email_support'] = 'mailto:' + settings.EMAIL_SUPPORT
 
+        context['canonical'] = reverse('Plein:plein')
+
         return render(request, template, context)
 
 

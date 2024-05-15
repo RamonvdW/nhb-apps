@@ -138,6 +138,10 @@ class CompetitieOverzichtView(TemplateView):
         if rol_get_huidige(self.request) in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL):
             context['url_beheer'] = reverse('CompBeheer:overzicht', kwargs={'comp_pk': self.comp.pk})
 
+        # verwijs de url met comp.pk naar de url met het seizoen
+        context['canonical'] = reverse('Competitie:overzicht',
+                                       kwargs={'comp_pk_of_seizoen': self.comp.maak_seizoen_url()})
+
         context['kruimels'] = (
             (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
             (None, self.comp.beschrijving.replace(' competitie', ''))

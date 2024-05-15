@@ -275,6 +275,8 @@ class LoginView(TemplateView):
         context = dict()
         context['form'] = form
         context['verberg_login_knop'] = True
+        if next_url:
+            context['canonical'] = reverse('Account:login')
 
         context['kruimels'] = (
             (None, 'Inloggen'),

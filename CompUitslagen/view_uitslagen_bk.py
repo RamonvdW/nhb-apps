@@ -209,6 +209,10 @@ class UitslagenBKIndivView(TemplateView):
             context['deelnemers'] = deelnemers
             context['heeft_deelnemers'] = (len(deelnemers) > 0)
 
+        context['canonical'] = reverse('CompUitslagen:uitslagen-bk-indiv',
+                                       kwargs={'comp_pk_of_seizoen': comp.maak_seizoen_url(),
+                                               'comp_boog': comp_boog})
+
         context['kruimels'] = (
             (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
             (reverse('Competitie:overzicht', kwargs={'comp_pk_of_seizoen': comp.maak_seizoen_url()}),
@@ -535,6 +539,10 @@ class UitslagenBKTeamsView(TemplateView):
         totaal_lijst.extend(klasse_teams_afgemeld)
 
         context['geen_teams'] = len(totaal_lijst) == 0
+
+        context['canonical'] = reverse('CompUitslagen:uitslagen-bk-teams',
+                                       kwargs={'comp_pk_of_seizoen': comp.maak_seizoen_url(),
+                                               'team_type': teamtype_afkorting})
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),

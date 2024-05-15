@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023 Ramon van der Winkel.
+#  Copyright (c) 2023-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -135,7 +135,7 @@ class HistRegioIndivView(TemplateView):
             boog_type = HIST_BOOG_DEFAULT
 
         context['boog_type'] = boog_type        # 'R', etc.
-        context['boog_type_url'] = HIST_BOOG2URL[boog_type]
+        context['boog_type_url'] = boog_type_url = HIST_BOOG2URL[boog_type]
 
         # optioneel: regio nummer
         try:
@@ -220,6 +220,12 @@ class HistRegioIndivView(TemplateView):
 
         context['heeft_deelnemers'] = len(uitslag) > 0
 
+        context['canonical'] = reverse('HistComp:uitslagen-regio-indiv-n',
+                                       kwargs={'seizoen': seizoen_url,
+                                               'histcomp_type': histcomp_type_url,
+                                               'boog_type': boog_type_url,
+                                               'regio_nr': regio_nr})
+
         url_top = reverse('HistComp:seizoen-top', kwargs={'seizoen': seizoen_url, 'histcomp_type': histcomp_type_url})
 
         context['kruimels'] = (
@@ -285,7 +291,7 @@ class HistRegioTeamsView(TemplateView):
             team_type = HIST_TEAM_DEFAULT
 
         context['team_type'] = team_type        # 'R', etc.
-        context['team_type_url'] = HIST_TEAM2URL[team_type]
+        context['team_type_url'] = team_type_url = HIST_TEAM2URL[team_type]
 
         # optioneel: regio nummer
         try:
@@ -367,6 +373,12 @@ class HistRegioTeamsView(TemplateView):
             team.is_eerste_groep = True
 
         context['heeft_teams'] = len(uitslag) > 0
+
+        context['canonical'] = reverse('HistComp:uitslagen-regio-teams-n',
+                                       kwargs={'seizoen': seizoen_url,
+                                               'histcomp_type': histcomp_type_url,
+                                               'team_type': team_type_url,
+                                               'regio_nr': regio_nr})
 
         url_top = reverse('HistComp:seizoen-top', kwargs={'seizoen': seizoen_url, 'histcomp_type': histcomp_type_url})
 

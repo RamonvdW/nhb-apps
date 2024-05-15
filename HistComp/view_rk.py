@@ -134,7 +134,7 @@ class HistRkIndivView(TemplateView):
             boog_type = HIST_BOOG_DEFAULT
 
         context['boog_type'] = boog_type        # 'R', etc.
-        context['boog_type_url'] = HIST_BOOG2URL[boog_type]
+        context['boog_type_url'] = boog_type_url = HIST_BOOG2URL[boog_type]
 
         # optioneel: rayon nummer
         try:
@@ -233,6 +233,12 @@ class HistRkIndivView(TemplateView):
 
         context['heeft_deelnemers'] = len(uitslag) > 0
 
+        context['canonical'] = reverse('HistComp:uitslagen-rk-indiv-n',
+                                       kwargs={'seizoen': seizoen_url,
+                                               'histcomp_type': histcomp_type_url,
+                                               'boog_type': boog_type_url,
+                                               'rayon_nr': rayon_nr})
+
         url_top = reverse('HistComp:seizoen-top', kwargs={'seizoen': seizoen_url, 'histcomp_type': histcomp_type_url})
 
         context['kruimels'] = (
@@ -298,7 +304,7 @@ class HistRkTeamsView(TemplateView):
             team_type = HIST_TEAM_DEFAULT
 
         context['team_type'] = team_type        # 'R', etc.
-        context['team_type_url'] = HIST_TEAM2URL[team_type]
+        context['team_type_url'] = team_type_url = HIST_TEAM2URL[team_type]
 
         # optioneel: rayon nummer
         try:
@@ -391,6 +397,12 @@ class HistRkTeamsView(TemplateView):
             team.is_eerste_groep = True
 
         context['heeft_teams'] = len(uitslag) > 0
+
+        context['canonical'] = reverse('HistComp:uitslagen-rk-teams-n',
+                                       kwargs={'seizoen': seizoen_url,
+                                               'histcomp_type': histcomp_type_url,
+                                               'team_type': team_type_url,
+                                               'rayon_nr': rayon_nr})
 
         url_top = reverse('HistComp:seizoen-top', kwargs={'seizoen': seizoen_url, 'histcomp_type': histcomp_type_url})
 
