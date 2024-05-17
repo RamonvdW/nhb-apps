@@ -162,6 +162,14 @@ class Bestelling(models.Model):
     # de bestelde producten met prijs en korting
     producten = models.ManyToManyField(BestelProduct)
 
+    # afleveradres: automatisch voor leden, handmatig voor gastaccounts (kan ook buitenlands adres zijn)
+    # (gebaseerd op info van https://docs.superoffice.com/nl/company/learn/address-formats.html)
+    afleveradres_regel_1 = models.CharField(max_length=75, default='')
+    afleveradres_regel_2 = models.CharField(max_length=75, default='')
+    afleveradres_regel_3 = models.CharField(max_length=75, default='')
+    afleveradres_regel_4 = models.CharField(max_length=75, default='')      # postcode + plaats
+    afleveradres_regel_5 = models.CharField(max_length=75, default='')      # land
+
     # verzendkosten
     transport = models.CharField(max_length=1, default=BESTEL_TRANSPORT_NVT, choices=BESTEL_TRANSPORT_OPTIES)
     verzendkosten_euro = models.DecimalField(max_digits=6, decimal_places=2, default=Decimal(0))    # max 9999,99

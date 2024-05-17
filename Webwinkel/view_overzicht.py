@@ -157,10 +157,8 @@ class ProductView(TemplateView):
         if not self.request.user.is_authenticated:
             context['moet_inloggen'] = True
         else:
-            account = get_account(self.request)
-            if not account.is_gast:
-                context['url_toevoegen'] = reverse('Webwinkel:product', kwargs={'product_pk': product.pk})
-                context['menu_toon_mandje'] = True
+            context['url_toevoegen'] = reverse('Webwinkel:product', kwargs={'product_pk': product.pk})
+            context['menu_toon_mandje'] = True
 
         context['kruimels'] = (
             (reverse('Webwinkel:overzicht'), 'Webwinkel'),
@@ -172,7 +170,7 @@ class ProductView(TemplateView):
     def post(self, request, *args, **kwargs):
 
         account = get_account(self.request)
-        if not account.is_authenticated or account.is_gast:
+        if not account.is_authenticated:
             raise Http404('Geen toegang')
 
         try:
