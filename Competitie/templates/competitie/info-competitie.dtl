@@ -488,7 +488,7 @@ In de shoot-off wordt 1 pijl gesloten en beslist de scheidsrechter welke pijl he
     <div class="row center">
         <div class="col s12">
             <h4>Teams</h4>
-            <p>Naast de individuele competitie wordt er ook een teamcompetitie georganiseerd</p>
+            <p>Naast de individuele competitie wordt er ook een teamcompetitie georganiseerd.</p>
         </div>
     </div>
 
@@ -506,4 +506,3 @@ In de shoot-off wordt 1 pijl gesloten en beslist de scheidsrechter welke pijl he
     {% include 'feedback/sidebar.dtl' with op_pagina="competitie-info-competitie" %}
 
 {% endblock %}
-
