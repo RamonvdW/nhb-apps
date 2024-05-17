@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2023 Ramon van der Winkel.
+#  Copyright (c) 2021-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -10,6 +10,8 @@
 from django.core.management.base import BaseCommand
 from Account.models import accounts_opschonen
 from Beheer.views import beheer_opschonen
+from Bestel.operations.opschonen import bestel_opschonen
+from Betaal.operations import betaal_opschonen
 from Feedback.models import feedback_opschonen
 from Logboek.models import logboek_opschonen
 from Mailer.models import mailer_opschonen
@@ -31,6 +33,8 @@ class Command(BaseCommand):
         taken_opschonen(self.stdout)
         tijdelijke_url_opschonen(self.stdout)
         registreer_opschonen(self.stdout)
+        bestel_opschonen(self.stdout)
+        betaal_opschonen(self.stdout)
 
         self.stdout.write('Klaar')
 

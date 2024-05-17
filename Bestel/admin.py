@@ -66,11 +66,13 @@ class BestellingAdmin(admin.ModelAdmin):
 
     fieldsets = (
         ('Inhoud',
-            {'fields': ('producten',)}),
+            {'fields': ('aangemaakt',
+                        'producten',)}),
         ('Koper',
             {'fields': ('bestel_nr',
                         'account',
-                        'aangemaakt')
+                        'afleveradres_regel_1', 'afleveradres_regel_2', 'afleveradres_regel_3',
+                        'afleveradres_regel_4', 'afleveradres_regel_5')
              }),
         ('Kosten',
             {'fields': ('verzendkosten_euro',
