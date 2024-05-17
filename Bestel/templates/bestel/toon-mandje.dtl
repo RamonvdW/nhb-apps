@@ -165,11 +165,16 @@
                         {% endif %}
 
                         <div class="center" style="margin-top:30px">
-                            <form action="{{ url_bestellen }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
-                                {% csrf_token %}
-                                <button class="btn-sv-rood" id="submit_knop" type="submit"{% if not url_bestellen %} disabled{% endif %}>
+                            {% if url_bestellen %}
+                                <form action="{{ url_bestellen }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
+                                    {% csrf_token %}
+                                    <button class="btn-sv-rood" id="submit_knop" type="submit">
+                                        <i class="notranslate material-icons-round left">shopping_cart_checkout</i>Bestelling afronden</button>
+                                </form>
+                            {% else %}
+                                <button class="btn-sv-rood" disabled>
                                     <i class="notranslate material-icons-round left">shopping_cart_checkout</i>Bestelling afronden</button>
-                            </form>
+                            {% endif %}
                         </div>
 
                     </div>
