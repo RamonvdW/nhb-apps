@@ -25,6 +25,8 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
 
+        bestel_opschonen(self.stdout)
+        betaal_opschonen(self.stdout)
         accounts_opschonen(self.stdout)
         beheer_opschonen(self.stdout)
         feedback_opschonen(self.stdout)
@@ -33,8 +35,6 @@ class Command(BaseCommand):
         taken_opschonen(self.stdout)
         tijdelijke_url_opschonen(self.stdout)
         registreer_opschonen(self.stdout)
-        bestel_opschonen(self.stdout)
-        betaal_opschonen(self.stdout)
 
         self.stdout.write('Klaar')
 
