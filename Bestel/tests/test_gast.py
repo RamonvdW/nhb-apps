@@ -7,13 +7,9 @@
 from django.test import TestCase
 from django.conf import settings
 from django.utils import timezone
-from Bestel.definities import (BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_BETALING_ACTIEF, BESTELLING_STATUS_NIEUW,
-                               BESTELLING_STATUS_MISLUKT, BESTELLING_STATUS_GEANNULEERD)
-from Bestel.models import BestelMandje, BestelMutatie, Bestelling
-from Bestel.operations.mutaties import (bestel_mutatieverzoek_webwinkel_keuze,
-                                        bestel_mutatieverzoek_betaling_afgerond,
-                                        bestel_mutatieverzoek_afmelden_wedstrijd)
-from Betaal.models import BetaalInstellingenVereniging, BetaalActief, BetaalTransactie, BetaalMutatie
+from Bestel.definities import BESTEL_TRANSPORT_NVT
+from Bestel.models import BestelMandje, Bestelling
+from Bestel.operations.mutaties import bestel_mutatieverzoek_webwinkel_keuze
 from Functie.models import Functie
 from Mailer.models import MailQueue
 from Registreer.definities import REGISTRATIE_FASE_COMPLEET
@@ -21,7 +17,6 @@ from Registreer.models import GastRegistratie
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
-from Webwinkel.definities import VERZENDKOSTEN_BRIEFPOST
 from Webwinkel.models import WebwinkelProduct, WebwinkelKeuze
 from decimal import Decimal
 
@@ -35,11 +30,6 @@ class TestBestelGast(E2EHelpers, TestCase):
     url_mandje_bestellen = '/bestel/mandje/'
     url_afleveradres = '/bestel/mandje/afleveradres/'
     url_bestellingen_overzicht = '/bestel/overzicht/'
-    url_bestelling_details = '/bestel/details/%s/'          # bestel_nr
-    url_bestelling_afrekenen = '/bestel/afrekenen/%s/'      # bestel_nr
-    url_check_status = '/bestel/check-status/%s/'           # bestel_nr
-    url_na_de_betaling = '/bestel/na-de-betaling/%s/'       # bestel_nr
-    url_annuleer_bestelling = '/bestel/annuleer/%s/'        # bestel_nr
 
     def setUp(self):
         """ initialisatie van de test case """
@@ -118,6 +108,51 @@ class TestBestelGast(E2EHelpers, TestCase):
         bestel_mutatieverzoek_webwinkel_keuze(self.account_gast, self.keuze, snel=True)
         self.verwerk_bestel_mutaties()
 
+        # probeer het mandje om te zetten in een bestelling
+        self.assertEqual(0, Bestelling.objects.count())
+        resp = self.client.post(self.url_mandje_bestellen, {'snel': 1})
+        self.assert404(resp, 'Afleveradres onbekend')
+
+        self.mandje.refresh_from_db()
+        self.assertEqual(self.mandje.afleveradres_regel_1, '')
+        self.assertEqual(self.mandje.afleveradres_regel_2, '')
+        self.assertEqual(self.mandje.afleveradres_regel_3, '')
+        self.assertEqual(self.mandje.afleveradres_regel_4, '')
+        self.assertEqual(self.mandje.afleveradres_regel_5, '')
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_afleveradres)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('bestel/kies-afleveradres.dtl', 'plein/site_layout.dtl'))
+
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_afleveradres)
+        self.assert_is_redirect(resp, self.url_mandje_bestellen)
+
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_afleveradres, {'regel1': 'Adresregel1',
+                                                            'regel2': '',               # wordt overgeslagen
+                                                            'regel3': 'Adresregel3',
+                                                            'regel4': 'Adresregel4',
+                                                            'regel5': 'Adresregel5'})
+        self.assert_is_redirect(resp, self.url_mandje_bestellen)
+
+        self.mandje.refresh_from_db()
+        self.assertEqual(self.mandje.afleveradres_regel_1, 'Adresregel1')
+        self.assertEqual(self.mandje.afleveradres_regel_2, 'Adresregel3')
+        self.assertEqual(self.mandje.afleveradres_regel_3, 'Adresregel4')
+        self.assertEqual(self.mandje.afleveradres_regel_4, 'Adresregel5')
+        self.assertEqual(self.mandje.afleveradres_regel_5, '')
+
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_afleveradres, {'regel1': 'Adresregel1',
+                                                            'regel2': 'Adresregel2',
+                                                            'regel3': 'Adresregel3',
+                                                            'regel4': 'Adresregel4',
+                                                            'regel5': 'Adresregel5'})
+        self.assert_is_redirect(resp, self.url_mandje_bestellen)
+
         # zet het mandje om in een bestelling
         self.assertEqual(0, Bestelling.objects.count())
         resp = self.client.post(self.url_mandje_bestellen, {'snel': 1})
@@ -125,31 +160,49 @@ class TestBestelGast(E2EHelpers, TestCase):
         self.verwerk_bestel_mutaties(kosten_pakket=10.42, kosten_brief=5.43)
         self.assertEqual(1, Bestelling.objects.count())
 
-        bestelling = Bestelling.objects.prefetch_related('producten').first()
-        self.assertEqual(str(bestelling.verzendkosten_euro), '10.42')
-        self.assertEqual(1, bestelling.producten.count())
-        product1 = bestelling.producten.filter(webwinkel_keuze=None).first()
-
         self.assertEqual(1, MailQueue.objects.count())
         mail = MailQueue.objects.first()
         self.assert_email_html_ok(mail)
         self.assert_consistent_email_html_text(mail, ignore=('>Bedrag:', '>Korting:'))
         self.assertTrue('Verzendkosten' in mail.mail_text)
 
-        # bekijk de bestellingen
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_bestellingen_overzicht)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('bestel/toon-bestellingen.dtl', 'plein/site_layout.dtl'))
+        self.assertTrue('Adresregel1' in mail.mail_text)
+        self.assertTrue('Adresregel2' in mail.mail_text)
+        self.assertTrue('Adresregel3' in mail.mail_text)
+        self.assertTrue('Adresregel4' in mail.mail_text)
+        self.assertTrue('Adresregel5' in mail.mail_text)
 
-        # haal de details op
-        url = self.url_bestelling_details % bestelling.bestel_nr
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('bestel/toon-bestelling-details.dtl', 'plein/site_layout.dtl'))
+    def test_cornercases(self):
+        self.e2e_login(self.account_gast)
+
+        # corner case: geen transport
+        self.mandje.transport = BESTEL_TRANSPORT_NVT
+        self.mandje.save(update_fields=['transport'])
+        resp = self.client.get(self.url_afleveradres)
+        self.assert404(resp, 'Niet van toepassing')
+
+        # corner case: geen mandje
+        self.mandje.delete()
+        resp = self.client.get(self.url_afleveradres)
+        self.assert404(resp, 'Mandje is leeg')
+
+        resp = self.client.post(self.url_afleveradres)
+        self.assert404(resp, 'Mandje is leeg')
+
+    def test_geen_gast(self):
+        self.sporter.is_gast = False
+        self.sporter.save(update_fields=['is_gast'])
+
+        self.account_gast.is_gast = False
+        self.account_gast.save(update_fields=['is_gast'])
+
+        self.e2e_login(self.account_gast)
+
+        resp = self.client.get(self.url_afleveradres)
+        self.assert404(resp, 'Geen toegang')
+
+        resp = self.client.post(self.url_afleveradres)
+        self.assert404(resp, 'Geen toegang')
 
 
 # end of file

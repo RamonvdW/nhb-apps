@@ -407,7 +407,7 @@ class Command(BaseCommand):
         mandje.btw_percentage_cat3 = ""
         mandje.btw_euro_cat3 = Decimal(0)
 
-        # kijk hoeveel euro aan webwinkel producten in het mandje liggen
+        # kijk hoeveel euro aan webwinkelproducten in het mandje liggen
         totaal_euro = Decimal(0)
         for product in mandje.producten.exclude(webwinkel_keuze=None):
             totaal_euro += product.prijs_euro
@@ -451,7 +451,7 @@ class Command(BaseCommand):
         bestelling.btw_percentage_cat3 = ""
         bestelling.btw_euro_cat3 = Decimal(0)
 
-        # kijk hoeveel euro aan webwinkel producten in deze bestelling zitten
+        # kijk hoeveel euro aan webwinkelproducten in deze bestelling zitten
         totaal_euro = Decimal(0)
         for product in bestelling.producten.exclude(webwinkel_keuze=None):
             totaal_euro += product.prijs_euro
@@ -710,7 +710,7 @@ class Command(BaseCommand):
 
                 self._bestelling_bepaal_btw(bestelling)
 
-                # toon het BTW nummer alleen als het relevant is
+                # toon het BTW-nummer alleen als het relevant is
                 if ver_nr == settings.WEBWINKEL_VERKOPER_VER_NR:
                     if (bestelling.btw_percentage_cat1
                             or bestelling.btw_percentage_cat2

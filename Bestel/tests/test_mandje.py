@@ -79,7 +79,8 @@ class TestBestelMandje(E2EHelpers, TestCase):
                         geboorte_datum='1966-06-06',
                         sinds_datum='2020-02-02',
                         account=account,
-                        bij_vereniging=ver)
+                        bij_vereniging=ver,
+                        postadres_1='Postadres1')
         sporter.save()
         self.sporter = sporter
 
@@ -297,6 +298,10 @@ class TestBestelMandje(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('bestel/toon-mandje.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, 'Onbekend product')
+
+        mandje.delete()
+        resp = self.client.post(self.url_mandje_toon)
+        self.assert404(resp, 'Mandje niet gevonden')
 
         # veroorzaak een exception
         BetaalInstellingenVereniging.objects.all().delete()

@@ -1,22 +1,18 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023 Ramon van der Winkel.
+#  Copyright (c) 2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-
-from django.conf import settings
 from django.http import HttpResponseRedirect, Http404
 from django.shortcuts import reverse
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
-from Bestel.definities import BESTEL_TRANSPORT_NVT, BESTEL_TRANSPORT_VERZEND, BESTEL_TRANSPORT_OPHALEN
+from Bestel.definities import BESTEL_TRANSPORT_NVT
 from Bestel.models import BestelMandje
-from Bestel.operations.mutaties import bestel_mutatieverzoek_transport
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige
-from Vereniging.models import Vereniging
 
 
 TEMPLATE_BESTEL_AFLEVERADRES = 'bestel/kies-afleveradres.dtl'
@@ -90,8 +86,6 @@ class WijzigAfleveradresView(UserPassesTestMixin, TemplateView):
                 regels.append(regel)
         # for
         regels.extend(['', '', '', '', ''])
-
-        print('regels: %s' % repr(regels))
 
         mandje.afleveradres_regel_1 = regels[0]
         mandje.afleveradres_regel_2 = regels[1]
