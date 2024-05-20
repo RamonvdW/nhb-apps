@@ -97,6 +97,8 @@ class TestBestelBestelling(E2EHelpers, TestCase):
                         achternaam='de Admin',
                         geboorte_datum='1966-06-06',
                         sinds_datum='2020-02-02',
+                        postadres_1='Snelweg 12',
+                        postadres_2='9999ZZ Boogdorp',
                         account=account,
                         bij_vereniging=ver)
         sporter.save()

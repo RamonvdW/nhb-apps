@@ -20,14 +20,14 @@
     |Koper en verzendadres
     |
     |{{ koper_sporter.volledige_naam }}
-    |{{ bestelling.verzendadres_regel_1 }}
-    |{{ bestelling.verzendadres_regel_2 }}
-    {% if bestelling.verzendadres_regel_3 %}
-        |{{ bestelling.verzendadres_regel_3 }}
-        {% if bestelling.verzendadres_regel_4 %}
-            |{{ bestelling.verzendadres_regel_4 }}
-            {% if bestelling.verzendadres_regel_5 %}
-                |{{ bestelling.verzendadres_regel_5 }}
+    |{{ bestelling.afleveradres_regel_1 }}
+    |{{ bestelling.afleveradres_regel_2 }}
+    {% if bestelling.afleveradres_regel_3 %}
+        |{{ bestelling.afleveradres_regel_3 }}
+        {% if bestelling.afleveradres_regel_4 %}
+            |{{ bestelling.afleveradres_regel_4 }}
+            {% if bestelling.afleveradres_regel_5 %}
+                |{{ bestelling.afleveradres_regel_5 }}
             {% endif %}
         {% endif %}
     {% endif %}
@@ -119,14 +119,14 @@
 
     <h1>Koper en verzendadres</h1>
 
-    <p>{{ koper_sporter.volledige_naam }}<br>{{ bestelling.verzendadres_regel_1 }}<br>
-        <span>{{ bestelling.verzendadres_regel_2 }}</span>
-        {% if bestelling.verzendadres_regel_3 %}
-            <br><span>{{ bestelling.verzendadres_regel_3 }}</span>
-            {% if bestelling.verzendadres_regel_4 %}
-                <br><span>{{ bestelling.verzendadres_regel_4 }}</span>
-                {% if bestelling.verzendadres_regel_5 %}
-                    <br><span>{{ bestelling.verzendadres_regel_5 }}</span>
+    <p>{{ koper_sporter.volledige_naam }}<br>{{ bestelling.afleveradres_regel_1 }}<br>
+        <span>{{ bestelling.afleveradres_regel_2 }}</span>
+        {% if bestelling.afleveradres_regel_3 %}
+            <br><span>{{ bestelling.afleveradres_regel_3 }}</span>
+            {% if bestelling.afleveradres_regel_4 %}
+                <br><span>{{ bestelling.afleveradres_regel_4 }}</span>
+                {% if bestelling.afleveradres_regel_5 %}
+                    <br><span>{{ bestelling.afleveradres_regel_5 }}</span>
                 {% endif %}
             {% endif %}
         {% endif %}

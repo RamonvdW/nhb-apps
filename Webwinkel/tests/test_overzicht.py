@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2023 Ramon van der Winkel.
+#  Copyright (c) 2022-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -124,6 +124,9 @@ class TestWebwinkelOverzicht(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('webwinkel/product.dtl', 'plein/site_layout.dtl'))
+
+        resp = self.client.post(self.url_webwinkel_product % self.product.pk)
+        self.assert404(resp, 'Geen toegang')
 
         # controleer dat het mandje niet getoond wordt
         urls = self.extract_all_urls(resp)
@@ -273,6 +276,8 @@ class TestWebwinkelOverzicht(E2EHelpers, TestCase):
 
         self.assertEqual(2, WebwinkelKeuze.objects.count())
 
+        self.verwerk_bestel_mutaties()
+
         keuze = WebwinkelKeuze.objects.first()
         self.assertTrue(keuze.korte_beschrijving() != '')
         self.assertTrue(str(keuze) != '')
@@ -375,6 +380,8 @@ class TestWebwinkelOverzicht(E2EHelpers, TestCase):
 
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'aantal': '1', 'snel': 1})
-        self.assert404(resp, 'Geen toegang')
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('webwinkel/toegevoegd-aan-mandje.dtl', 'plein/site_layout.dtl'))
 
 # end of file

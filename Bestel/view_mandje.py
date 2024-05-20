@@ -244,6 +244,37 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
 
         account = get_account(self.request)
 
+        try:
+            mandje = BestelMandje.objects.prefetch_related('producten').get(account=account)
+        except BestelMandje.DoesNotExist:
+            # geen mandje
+            raise Http404('Mandje niet gevonden')
+
+        # nu kunnen we het afleveradres permanent maken, ook voor leden
+
+        if mandje.transport == BESTEL_TRANSPORT_VERZEND:
+            if not account.is_gast:
+                # volwaardig lid: afleveradres automatisch invullen
+                sporter = get_sporter(account)
+                mandje.afleveradres_regel_1 = sporter.postadres_1
+                mandje.afleveradres_regel_2 = sporter.postadres_2
+                mandje.afleveradres_regel_3 = sporter.postadres_3
+
+            geen_afleveradres = True
+            for nr in (1, 2, 3, 4, 5):
+                regel_str = 'afleveradres_regel_%s' % nr
+                regel = getattr(mandje, regel_str)
+                if regel:
+                    geen_afleveradres = False
+                    break       # from the for
+            # for
+
+            if geen_afleveradres:
+                raise Http404('Afleveradres onbekend')
+
+        mandje.save(update_fields=['afleveradres_regel_1', 'afleveradres_regel_2', 'afleveradres_regel_3',
+                                   'afleveradres_regel_4', 'afleveradres_regel_5'])
+
         bestel_mutatieverzoek_maak_bestellingen(account, snel == '1')
         # achtergrondtaak zet het mandje om in bestellingen
 
