@@ -78,11 +78,11 @@
         | Het pakketje wordt verstuurd naar het volgende adres:
         |    {{ bestelling.afleveradres_regel_1 }}
         |    {{ bestelling.afleveradres_regel_2 }}
-        {% if bestelling.afleveradres_3 %}
+        {% if bestelling.afleveradres_regel_3 %}
         |    {{ bestelling.afleveradres_regel_3 }}
-            {% if bestelling.afleveradres_4 %}
+            {% if bestelling.afleveradres_regel_4 %}
             |    {{ bestelling.afleveradres_regel_4 }}
-                {% if bestelling.afleveradres_5 %}
+                {% if bestelling.afleveradres_regel_5 %}
                 |    {{ bestelling.afleveradres_regel_5 }}
                 {% endif %}
             {% endif %}
@@ -216,11 +216,11 @@
 
         <p>Het pakketje zal worden verstuurd naar het volgende adres:</p>
         <p>{{ bestelling.afleveradres_regel_1 }}<br>{{ bestelling.afleveradres_regel_2 }}
-        {% if bestelling.afleveradres_3 %}
+        {% if bestelling.afleveradres_regel_3 %}
             <br><span>{{ bestelling.afleveradres_regel_3 }}</span>
-            {% if bestelling.afleveradres_4 %}
+            {% if bestelling.afleveradres_regel_4 %}
                 <br><span>{{ bestelling.afleveradres_regel_4 }}</span>
-                {% if bestelling.afleveradres_5 %}
+                {% if bestelling.afleveradres_regel_5 %}
                     <br><span>{{ bestelling.afleveradres_regel_5 }}</span>
                 {% endif %}
             {% endif %}

@@ -50,7 +50,6 @@ def betaal_opschonen(stdout):
                 .filter(when__lt=max_age))
 
         count = objs.count()
-        print(count)
         if count > 0:
             stdout.write('[INFO] Verwijder %s oude betaal-transactie records' % count)
             objs.delete()

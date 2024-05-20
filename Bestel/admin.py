@@ -29,9 +29,10 @@ class MandjeLeegFilter(admin.SimpleListFilter):
         if self.value() == '0':
             # leeg
             qs = qs.filter(num_prod=0)
-        else:
+        elif self.value() == '1':
             # niet leeg
             qs = qs.exclude(num_prod=0)
+        # else: alle
         return qs
 
 

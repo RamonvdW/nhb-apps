@@ -35,7 +35,7 @@ def bestel_opschonen(stdout):
         objs = (BestelMandje
                 .objects
                 .annotate(num_producten=Count("producten"))
-                .exclude(num_producten=0))
+                .filter(num_producten=0))
 
         count = objs.count()
         if count > 0:

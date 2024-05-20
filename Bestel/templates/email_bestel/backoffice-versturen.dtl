@@ -17,13 +17,19 @@
     |Bestelnummer: {{ bestelling.mh_bestel_nr }}
     |Betaalstatus: Voldaan
     |
-    |Koper
+    |Koper en verzendadres
     |
     |{{ koper_sporter.volledige_naam }}
-    |{{ koper_sporter.postadres_1 }}
-    |{{ koper_sporter.postadres_2 }}
-    {% if koper_sporter.postadres_3 %}
-        |{{ koper_sporter.postadres_3 }}
+    |{{ bestelling.verzendadres_regel_1 }}
+    |{{ bestelling.verzendadres_regel_2 }}
+    {% if bestelling.verzendadres_regel_3 %}
+        |{{ bestelling.verzendadres_regel_3 }}
+        {% if bestelling.verzendadres_regel_4 %}
+            |{{ bestelling.verzendadres_regel_4 }}
+            {% if bestelling.verzendadres_regel_5 %}
+                |{{ bestelling.verzendadres_regel_5 }}
+            {% endif %}
+        {% endif %}
     {% endif %}
 
     |
@@ -111,10 +117,20 @@
         <tr><th>Betaalstatus:</th><td>Voldaan</td></tr>
     </table>
 
-    <h1>Koper</h1>
+    <h1>Koper en verzendadres</h1>
 
-    <p>{{ koper_sporter.volledige_naam }}<br>{{ koper_sporter.postadres_1 }}<br>{{ koper_sporter.postadres_2 }}{% if koper_sporter.postadres_3 %}<br>{{ koper_sporter.postadres_3 }}{% endif %}</p>
-
+    <p>{{ koper_sporter.volledige_naam }}<br>{{ bestelling.verzendadres_regel_1 }}<br>
+        <span>{{ bestelling.verzendadres_regel_2 }}</span>
+        {% if bestelling.verzendadres_regel_3 %}
+            <br><span>{{ bestelling.verzendadres_regel_3 }}</span>
+            {% if bestelling.verzendadres_regel_4 %}
+                <br><span>{{ bestelling.verzendadres_regel_4 }}</span>
+                {% if bestelling.verzendadres_regel_5 %}
+                    <br><span>{{ bestelling.verzendadres_regel_5 }}</span>
+                {% endif %}
+            {% endif %}
+        {% endif %}
+    </p>
 
     <h1>Producten</h1>
 
