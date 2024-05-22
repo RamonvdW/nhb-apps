@@ -75,7 +75,7 @@ pypng==0.20220715.0
     # via qrcode
 qrcode==7.4.2
     # via -r requirements.in
-requests==2.31.0
+requests==2.32.2
     # via
     #   google-api-core
     #   googlemaps

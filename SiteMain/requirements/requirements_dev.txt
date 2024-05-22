@@ -129,7 +129,7 @@ pyyaml==6.0.1
     # via html5validator
 qrcode==7.4.2
     # via -r requirements.txt
-requests==2.31.0
+requests==2.32.2
     # via
     #   -r requirements.txt
     #   google-api-core
