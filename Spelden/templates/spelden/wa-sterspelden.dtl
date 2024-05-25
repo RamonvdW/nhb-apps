@@ -27,7 +27,7 @@
                     <table>
                         <thead>
                             <tr>
-                                <th class="center">Leeftijds<wbr>klasse</th>
+                                <th class="center">Leeftijds<wbr>klassen</th>
                                 <th class="center">Geslacht</th>
                                 <th class="center">Afstanden (meter)</th>
                                 <th class="center">Soort speld</th>
@@ -35,18 +35,7 @@
                         </thead>
 
                         <tr>
-                            <td class="center" rowspan="2">50+</td>
-                            <td class="center">Heren</td>
-                            <td class="center">70, 60, 50, 30</td>
-                            <td class="center" rowspan="2">Zilveren ster</td>
-                        </tr>
-                        <tr>
-                            <td class="center">Dames</td>
-                            <td class="center">60, 50, 40, 30</td>
-                        </tr>
-
-                        <tr>
-                            <td class="center" rowspan="2">Senioren</td>
+                            <td class="center" rowspan="2">Senioren<br>Onder 21</td>
                             <td class="center">Heren</td>
                             <td class="center">90, 70, 50, 30</td>
                             <td class="center" rowspan="2">Ster</td>
@@ -57,18 +46,7 @@
                         </tr>
 
                         <tr>
-                            <td class="center" rowspan="2">Onder 21</td>
-                            <td class="center">Heren</td>
-                            <td class="center">90, 70, 50, 30</td>
-                            <td rowspan="2" class="center">Ster</td>
-                        </tr>
-                        <tr>
-                            <td class="center">Dames</td>
-                            <td class="center">70, 60, 50, 30</td>
-                        </tr>
-
-                        <tr>
-                            <td class="center" rowspan="2">Onder 18</td>
+                            <td class="center" rowspan="2">50+<br>Onder 18</td>
                             <td class="center">Heren</td>
                             <td class="center">70, 60, 50, 30</td>
                             <td class="center" rowspan="2">Zilveren ster</td>
@@ -90,7 +68,7 @@
     <div class="row center">
         <div class="col s12">
             <h4>Recurve boog</h4>
-            <p>Onderstaand sterren zijn beschikbaar als je met de recurve boog je score behaald hebt</p>
+            <p>Onderstaand spelden zijn beschikbaar als je met je recurve boog de score behaald hebt</p>
         </div>
     </div>
 
@@ -151,7 +129,7 @@
     <div class="row center">
         <div class="col s12">
             <h4>Compound boog</h4>
-            <p>Onderstaand sterren zijn beschikbaar als je met de compound boog je score behaald hebt</p>
+            <p>Onderstaand spelden zijn beschikbaar als je met je compound boog de score behaald hebt</p>
         </div>
     </div>
 

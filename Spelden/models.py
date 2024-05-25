@@ -27,7 +27,7 @@ class Speld(models.Model):
 
     # beschrijving
     # (Grijs, Wit, 1000, etc.)
-    beschrijving = models.CharField(max_length=20)
+    beschrijving = models.CharField(max_length=30)
 
     # recurve, compound, etc.
     # optioneel: niet gezet = geldt voor alle bogen
@@ -42,30 +42,34 @@ class Speld(models.Model):
         verbose_name_plural = "Spelden"
 
 
-class SpeldLimiet(models.Model):
-
-    # opsplitsing in leeftijdsklasse en geslacht
-    # (O14/O18/O21/Senior/50+, M/V)
-    leeftijdsklasse = models.ForeignKey(Leeftijdsklasse, on_delete=models.PROTECT)
-
-    # afstand (in meters)
-    afstand = models.PositiveSmallIntegerField()
-
-    # aantal doelen
-    aantal_doelen = models.PositiveSmallIntegerField()
+class SpeldScore(models.Model):
 
     # welke speld kan er behaald worden?
     speld = models.ForeignKey(Speld, on_delete=models.PROTECT)
 
+    # recurve, compound, etc.
+    boog_type = models.ForeignKey(BoogType, on_delete=models.PROTECT)
+
+    # specialisatie in leeftijdsklasse en geslacht
+    # (O14/O18/O21/Senior/50+, M/V)
+    leeftijdsklasse = models.ForeignKey(Leeftijdsklasse, on_delete=models.PROTECT,
+                                        null=True, blank=True)      # optioneel
+
     # benodigde score
     benodigde_score = models.PositiveSmallIntegerField()
+
+    # afstand (in meters), optioneel
+    afstand = models.PositiveSmallIntegerField(default=0)
+
+    # aantal doelen, optioneel
+    aantal_doelen = models.PositiveSmallIntegerField(default=0)
 
     def __str__(self):
         return "%s %s %s" % (self.afstand, self.aantal_doelen, self.benodigde_score)
 
     class Meta:
-        verbose_name = "Speld limiet"
-        verbose_name_plural = "Speld limieten"
+        verbose_name = "Speld score"
+        verbose_name_plural = "Speld scores"
 
 
 class SpeldAanvraag(models.Model):
