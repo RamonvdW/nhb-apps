@@ -84,21 +84,21 @@ class TestSpeldenInfoViews(E2EHelpers, TestCase):
             resp = self.client.get(self.url_arrowhead)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('spelden/wa-veld-arrowhead-spelden.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('spelden/wa-arrowhead-spelden.dtl', 'plein/site_layout.dtl'))
 
         # sterspelden
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_sterspelden)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('spelden/wa-outdoor-sterspelden.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('spelden/wa-sterspelden.dtl', 'plein/site_layout.dtl'))
 
         # target
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_target_awards)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('spelden/wa-indoor-target-awards.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('spelden/wa-target-awards.dtl', 'plein/site_layout.dtl'))
 
     def test_sporter(self):
         self.e2e_login(self.account_sporter)
@@ -129,20 +129,20 @@ class TestSpeldenInfoViews(E2EHelpers, TestCase):
             resp = self.client.get(self.url_arrowhead)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('spelden/wa-veld-arrowhead-spelden.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('spelden/wa-arrowhead-spelden.dtl', 'plein/site_layout.dtl'))
 
         # sterspelden
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_sterspelden)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('spelden/wa-outdoor-sterspelden.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('spelden/wa-sterspelden.dtl', 'plein/site_layout.dtl'))
 
         # target
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_target_awards)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('spelden/wa-indoor-target-awards.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('spelden/wa-target-awards.dtl', 'plein/site_layout.dtl'))
 
 # end of file

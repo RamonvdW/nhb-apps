@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2024 Ramon van der Winkel.
+#  Copyright (c) 2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -10,8 +10,12 @@ from django.db.models.deletion import PROTECT, CASCADE
 
 class Migration(migrations.Migration):
 
+    """ Migratie class voor dit deel van de applicatie """
+
+    # dit is de eerste
     initial = True
 
+    # volgorde afdwingen
     dependencies = [
         ('BasisTypen', 'm0058_scheids_rk_bk'),
         ('Account', 'm0030_squashed'),
@@ -19,6 +23,7 @@ class Migration(migrations.Migration):
         ('Sporter', 'm0031_squashed'),
     ]
 
+    # migratie functies
     operations = [
         migrations.CreateModel(
             name='SpeldAanvraag',

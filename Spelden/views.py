@@ -23,9 +23,9 @@ from types import SimpleNamespace
 TEMPLATE_PRESTATIESPELDEN_BEGIN = 'spelden/begin.dtl'
 TEMPLATE_PRESTATIESPELDEN_GRAADSPELDEN = 'spelden/khsn-graadspelden.dtl'
 TEMPLATE_PRESTATIESPELDEN_TUSSENSPELDEN = 'spelden/khsn-outdoor-tussenspelden.dtl'
-TEMPLATE_PRESTATIESPELDEN_TARGET_AWARDS = 'spelden/wa-indoor-target-awards.dtl'
-TEMPLATE_PRESTATIESPELDEN_STERSPELDEN = 'spelden/wa-outdoor-sterspelden.dtl'
-TEMPLATE_PRESTATIESPELDEN_ARROWHEAD = 'spelden/wa-veld-arrowhead-spelden.dtl'
+TEMPLATE_PRESTATIESPELDEN_TARGET_AWARDS = 'spelden/wa-target-awards.dtl'
+TEMPLATE_PRESTATIESPELDEN_STERSPELDEN = 'spelden/wa-sterspelden.dtl'
+TEMPLATE_PRESTATIESPELDEN_ARROWHEAD = 'spelden/wa-arrowhead-spelden.dtl'
 
 
 class BeginView(TemplateView):

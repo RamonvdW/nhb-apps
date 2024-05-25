@@ -1,0 +1,256 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2024 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Target awards{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Target awards</h3>
+            <p>Deze World Archery spelden zijn te behalen op specifieke wedstrijden als er geschoten is met recurve, compound of barebow.</p>
+        </div>
+    </div>
+
+    <!-- blauw balk met wit informatie veld -->
+    <div class="row-sv-blauw">
+        <div class="col s12 m10 offset-m1 l8 offset-l2">
+            <div class="sv-kader" style="padding:10px">
+                <div style="display:inline-block">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th class="center">Leeftijds<wbr>klasse</th>
+                                <th class="center">Boog type</th>
+                                <th class="center">Wedstrijden</th>
+                                <th class="center">Aantal pijlen</th>
+                                <th class="center">Soort speld</th>
+                            </tr>
+                        </thead>
+
+                        <!-- 50+ -->
+                        <tr>
+                            <td class="center" rowspan="7">50+</td>
+                            <td class="center">Recurve</td>
+                            <td class="center">70m ronde</td>
+                            <td class="center">72</td>
+                            <td class="center" rowspan="7">Zilveren Target Award</td>
+                        </tr>
+                        <tr>
+                            <td class="center" rowspan="2">Recurve<br>Compound<br>Barebow</td>
+                            <td class="center">900 ronde<br>(60m, 50m, 40m)</td>
+                            <td class="center">3x30</td>
+                        </tr>
+                        <tr>
+                            <td class="center">25m ronde</td>
+                            <td class="center">60</td>
+                        </tr>
+                        <tr>
+                            <td class="center">Recurve</td>
+                            <td class="center">18m ronde</td>
+                            <td class="center">60</td>
+                        </tr>
+                        <tr>
+                            <td class="center" rowspan="2">Barebow</td>
+                            <td class="center">Barebow 18m ronde</td>
+                            <td class="center">60</td>
+                        </tr>
+                        <tr>
+                            <td class="center">Barebow 50m ronde</td>
+                            <td class="center">72</td>
+                        </tr>
+                        <tr>
+                            <td class="center">Compound</td>
+                            <td class="center">Compound 50m ronde</td>
+                            <td class="center">72</td>
+                        </tr>
+
+
+                        <!-- Senioren -->
+                        <tr>
+                            <td class="center" rowspan="7">Senioren</td>
+                            <td class="center">Recurve</td>
+                            <td class="center">70m ronde</td>
+                            <td class="center">72</td>
+                            <td class="center" rowspan="7">Target Award</td>
+                        </tr>
+                        <tr>
+                            <td class="center" rowspan="2">Recurve<br>Compound<br>Barebow</td>
+                            <td class="center">900 ronde<br>(60m, 50m, 40m)</td>
+                            <td class="center">3x30</td>
+                        </tr>
+                        <tr>
+                            <td class="center">25m ronde</td>
+                            <td class="center">60</td>
+                        </tr>
+                        <tr>
+                            <td class="center">Recurve</td>
+                            <td class="center">18m ronde</td>
+                            <td class="center">60</td>
+                        </tr>
+                        <tr>
+                            <td class="center" rowspan="2">Barebow</td>
+                            <td class="center">Barebow 18m ronde</td>
+                            <td class="center">60</td>
+                        </tr>
+                        <tr>
+                            <td class="center">Barebow 50m ronde</td>
+                            <td class="center">72</td>
+                        </tr>
+                        <tr>
+                            <td class="center">Compound</td>
+                            <td class="center">Compound 50m ronde</td>
+                            <td class="center">72</td>
+                        </tr>
+
+
+                        <!-- Onder 21 -->
+                        <tr>
+                            <td class="center" rowspan="7">Onder 21</td>
+                            <td class="center">Recurve</td>
+                            <td class="center">70m ronde</td>
+                            <td class="center">72</td>
+                            <td class="center" rowspan="7">Target Award</td>
+                        </tr>
+                        <tr>
+                            <td class="center" rowspan="2">Recurve<br>Compound<br>Barebow</td>
+                            <td class="center">900 ronde<br>(60m, 50m, 40m)</td>
+                            <td class="center">3x30</td>
+                        </tr>
+                        <tr>
+                            <td class="center">25m ronde</td>
+                            <td class="center">60</td>
+                        </tr>
+                        <tr>
+                            <td class="center">Recurve</td>
+                            <td class="center">18m ronde</td>
+                            <td class="center">60</td>
+                        </tr>
+                        <tr>
+                            <td class="center" rowspan="2">Barebow</td>
+                            <td class="center">Barebow 18m ronde</td>
+                            <td class="center">60</td>
+                        </tr>
+                        <tr>
+                            <td class="center">Barebow 50m ronde</td>
+                            <td class="center">72</td>
+                        </tr>
+                        <tr>
+                            <td class="center">Compound</td>
+                            <td class="center">Compound 50m ronde</td>
+                            <td class="center">72</td>
+                        </tr>
+
+
+                        <!-- Onder 18 -->
+                        <tr>
+                            <td class="center" rowspan="7">Onder 18</td>
+                            <td class="center">Recurve</td>
+                            <td class="center">70m ronde</td>
+                            <td class="center">72</td>
+                            <td class="center" rowspan="7">Zilveren Target Award</td>
+                        </tr>
+                        <tr>
+                            <td class="center" rowspan="2">Recurve<br>Compound<br>Barebow</td>
+                            <td class="center">900 ronde<br>(60m, 50m, 40m)</td>
+                            <td class="center">3x30</td>
+                        </tr>
+                        <tr>
+                            <td class="center">25m ronde</td>
+                            <td class="center">60</td>
+                        </tr>
+                        <tr>
+                            <td class="center">Recurve</td>
+                            <td class="center">18m ronde</td>
+                            <td class="center">60</td>
+                        </tr>
+                        <tr>
+                            <td class="center" rowspan="2">Barebow</td>
+                            <td class="center">Barebow 18m ronde</td>
+                            <td class="center">60</td>
+                        </tr>
+                        <tr>
+                            <td class="center">Barebow 50m ronde</td>
+                            <td class="center">72</td>
+                        </tr>
+                        <tr>
+                            <td class="center">Compound</td>
+                            <td class="center">Compound 50m ronde</td>
+                            <td class="center">72</td>
+                        </tr>
+
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>De spelden</h4>
+        </div>
+    </div>
+
+    <!-- blauwe balk met informatie in tabel-vorm:  label - info -->
+    <div class="row-sv-blauw">
+        <div class="col s12 m10 offset-m1 l8 offset-l2">
+            <table class="sv-kader">
+                <thead>
+                    <tr>
+                        <th class="center">Totale score (of hoger)</th>
+                        <th class="center">Target Award</th>
+                        <th class="center">Zilveren Target Award</th>
+                    </tr>
+                </thead>
+
+                <tr>
+                    <td class="center">Wit</td>
+                    <td class="center"><img width="150px" src="{% static 'spelden/target_award_wit.png' %}" alt="Target award wit"></td>
+                    <td class="center"><img width="150px" src="{% static 'spelden/zilveren_target_award_wit.png' %}" alt="Zilveren target award wit"></td>
+                </tr>
+
+                <tr>
+                    <td class="center">Zwart</td>
+                    <td class="center"><img width="150px" src="{% static 'spelden/target_award_zwart.png' %}" alt="Target award zwart"></td>
+                    <td class="center"><img width="150px" src="{% static 'spelden/zilveren_target_award_zwart.png' %}" alt="Zilveren target award zwart"></td>
+                </tr>
+
+                <tr>
+                    <td class="center">Blauw</td>
+                    <td class="center"><img width="150px" src="{% static 'spelden/target_award_blauw.png' %}" alt="Target award blauw"></td>
+                    <td class="center"><img width="150px" src="{% static 'spelden/zilveren_target_award_blauw.png' %}" alt="Zilveren target award blauw"></td>
+                </tr>
+
+                <tr>
+                    <td class="center">Rood</td>
+                    <td class="center"><img width="150px" src="{% static 'spelden/target_award_rood.png' %}" alt="Target award rood"></td>
+                    <td class="center"><img width="150px" src="{% static 'spelden/zilveren_target_award_rood.png' %}" alt="Zilveren target award rood"></td>
+                </tr>
+
+                <tr>
+                    <td class="center">Goud</td>
+                    <td class="center"><img width="150px" src="{% static 'spelden/target_award_goud.png' %}" alt="Target award goud"></td>
+                    <td class="center"><img width="150px" src="{% static 'spelden/zilveren_target_award_goud.png' %}" alt="Zilveren target award goud"></td>
+                </tr>
+
+                <tr>
+                    <td class="center">Purper</td>
+                    <td class="center"><img width="150px" src="{% static 'spelden/target_award_purper.png' %}" alt="Target award purper"></td>
+                    <td class="center"><img width="150px" src="{% static 'spelden/zilveren_target_award_purper.png' %}" alt="Zilveren target award purper"></td>
+                </tr>
+
+            </table>
+        </div>
+    </div>
+
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="spelden-wa-target-awards" %}
+
+{% endblock %}

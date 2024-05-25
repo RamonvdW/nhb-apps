@@ -68,6 +68,8 @@ class OverzichtView(TemplateView):
 
         context['producten'] = self._get_producten()
 
+        # iedereen mag de informatie over de spelden zien
+        # begrenzing voor bestellen (alleen leden) volgt verderop
         context['url_spelden'] = reverse('Spelden:begin')
         context['img_spelden'] = static('spelden/grootmeester.png')
 

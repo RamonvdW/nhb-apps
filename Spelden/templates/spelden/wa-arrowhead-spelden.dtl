@@ -231,6 +231,6 @@
     </div>
 
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="spelden-arrowhead" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="spelden-wa-arrowhead-spelden" %}
 
 {% endblock %}

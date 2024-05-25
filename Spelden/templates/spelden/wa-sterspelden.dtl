@@ -15,7 +15,7 @@
         <div class="col s12">
             <h3 class="page-banner">Sterspelden</h3>
             <p>Sterspelden kunnen behaald worden op een A-status outdoorwedstrijd wedstrijd met 4 afstanden, ook bekend als een World Archery 1440-ronde.</p>
-            <p>Deze sterren zijn beschikbaar voor Recurve en Compound.</p>
+            <p>Deze spelden zijn beschikbaar voor Recurve en Compound.</p>
         </div>
     </div>
 
@@ -27,55 +27,55 @@
                     <table>
                         <thead>
                             <tr>
-                                <th>Leeftijdsklasse</th>
-                                <th>Geslacht</th>
-                                <th>Afstanden</th>
-                                <th>Soort speld</th>
+                                <th class="center">Leeftijds<wbr>klasse</th>
+                                <th class="center">Geslacht</th>
+                                <th class="center">Afstanden (meter)</th>
+                                <th class="center">Soort speld</th>
                             </tr>
                         </thead>
 
                         <tr>
-                            <td rowspan="2">50+</td>
-                            <td>Heren</td>
-                            <td>70, 60, 50, 30 meter</td>
-                            <td rowspan="2">Zilveren ster</td>
+                            <td class="center" rowspan="2">50+</td>
+                            <td class="center">Heren</td>
+                            <td class="center">70, 60, 50, 30</td>
+                            <td class="center" rowspan="2">Zilveren ster</td>
                         </tr>
                         <tr>
-                            <td>Dames</td>
-                            <td>60, 50, 40, 30 meter</td>
-                        </tr>
-
-                        <tr>
-                            <td rowspan="2">Senioren</td>
-                            <td>Heren</td>
-                            <td>90, 70, 50, 30 meter</td>
-                            <td rowspan="2">Ster</td>
-                        </tr>
-                        <tr>
-                            <td>Dames</td>
-                            <td>70, 60, 50, 30 meter</td>
+                            <td class="center">Dames</td>
+                            <td class="center">60, 50, 40, 30</td>
                         </tr>
 
                         <tr>
-                            <td rowspan="2">Onder 21</td>
-                            <td>Heren</td>
-                            <td>90, 70, 50, 30 meter</td>
-                            <td rowspan="2">Ster</td>
+                            <td class="center" rowspan="2">Senioren</td>
+                            <td class="center">Heren</td>
+                            <td class="center">90, 70, 50, 30</td>
+                            <td class="center" rowspan="2">Ster</td>
                         </tr>
                         <tr>
-                            <td>Dames</td>
-                            <td>70, 60, 50, 30 meter</td>
+                            <td class="center">Dames</td>
+                            <td class="center">70, 60, 50, 30</td>
                         </tr>
 
                         <tr>
-                            <td rowspan="2">Onder 18</td>
-                            <td>Heren</td>
-                            <td>70, 60, 50, 30 meter</td>
-                            <td rowspan="2">Zilveren ster</td>
+                            <td class="center" rowspan="2">Onder 21</td>
+                            <td class="center">Heren</td>
+                            <td class="center">90, 70, 50, 30</td>
+                            <td rowspan="2" class="center">Ster</td>
                         </tr>
                         <tr>
-                            <td>Dames</td>
-                            <td>60, 50, 40, 30 meter</td>
+                            <td class="center">Dames</td>
+                            <td class="center">70, 60, 50, 30</td>
+                        </tr>
+
+                        <tr>
+                            <td class="center" rowspan="2">Onder 18</td>
+                            <td class="center">Heren</td>
+                            <td class="center">70, 60, 50, 30</td>
+                            <td class="center" rowspan="2">Zilveren ster</td>
+                        </tr>
+                        <tr>
+                            <td class="center">Dames</td>
+                            <td class="center">60, 50, 40, 30</td>
                         </tr>
 
                     </table>
@@ -208,6 +208,6 @@
     </div>
 
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="spelden-sterspelden" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="spelden-wa-sterspelden" %}
 
 {% endblock %}
