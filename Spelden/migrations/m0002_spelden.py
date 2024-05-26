@@ -12,6 +12,7 @@ from Spelden.definities import (SPELD_CATEGORIE_WA_STER, SPELD_CATEGORIE_WA_STER
                                 SPELD_CATEGORIE_NL_GRAADSPELD_OUTDOOR, SPELD_CATEGORIE_NL_GRAADSPELD_VELD,
                                 SPELD_CATEGORIE_NL_GRAADSPELD_SHORT_METRIC, SPELD_CATEGORIE_NL_GRAADSPELD_ALGEMEEN,
                                 SPELD_CATEGORIE_NL_TUSSENSPELD)
+from decimal import Decimal
 
 
 def maak_spelden_wa_ster(apps, _):
@@ -144,30 +145,24 @@ def maak_spelden_wa_arrowhead(apps, _):
         speld_klas(
             volgorde=2001,
             categorie=SPELD_CATEGORIE_WA_ARROWHEAD,
-            beschrijving="Groen",
-            boog_type=None),
+            beschrijving="Groen"),
         speld_klas(
             volgorde=2002,
             categorie=SPELD_CATEGORIE_WA_ARROWHEAD,
-            beschrijving="Grijs",
-            boog_type=None),
+            beschrijving="Grijs"),
         speld_klas(
             volgorde=2003,
             categorie=SPELD_CATEGORIE_WA_ARROWHEAD,
-            beschrijving="Wit",
-            boog_type=None),
+            beschrijving="Wit"),
         speld_klas(
             volgorde=2004,
             categorie=SPELD_CATEGORIE_WA_ARROWHEAD,
-            beschrijving="Zwart",
-            boog_type=None),
+            beschrijving="Zwart"),
         speld_klas(
             volgorde=2005,
             categorie=SPELD_CATEGORIE_WA_ARROWHEAD,
-            beschrijving="Goud",
-            boog_type=None),
+            beschrijving="Goud"),
     ]
-
     speld_klas.objects.bulk_create(bulk)
 
 
@@ -180,73 +175,59 @@ def maak_spelden_wa_target_awards(apps, _):
         speld_klas(
             volgorde=3001,
             categorie=SPELD_CATEGORIE_WA_TARGET_AWARD,
-            beschrijving="Wit",
-            boog_type=None),
+            beschrijving="Wit"),
         speld_klas(
             volgorde=3002,
             categorie=SPELD_CATEGORIE_WA_TARGET_AWARD,
-            beschrijving="Zwart",
-            boog_type=None),
+            beschrijving="Zwart"),
         speld_klas(
             volgorde=3003,
             categorie=SPELD_CATEGORIE_WA_TARGET_AWARD,
-            beschrijving="Blauw",
-            boog_type=None),
+            beschrijving="Blauw"),
         speld_klas(
             volgorde=3004,
             categorie=SPELD_CATEGORIE_WA_TARGET_AWARD,
-            beschrijving="Rood",
-            boog_type=None),
+            beschrijving="Rood"),
         speld_klas(
             volgorde=3005,
             categorie=SPELD_CATEGORIE_WA_TARGET_AWARD,
-            beschrijving="Goud",
-            boog_type=None),
+            beschrijving="Goud"),
         speld_klas(
             volgorde=3006,
             categorie=SPELD_CATEGORIE_WA_TARGET_AWARD,
-            beschrijving="Purper",
-            boog_type=None),
+            beschrijving="Purper"),
 
         # WA zilveren target award
         speld_klas(
             volgorde=3101,
             categorie=SPELD_CATEGORIE_WA_TARGET_AWARD_ZILVER,
-            beschrijving="Wit",
-            boog_type=None),
+            beschrijving="Wit"),
         speld_klas(
             volgorde=3102,
             categorie=SPELD_CATEGORIE_WA_TARGET_AWARD_ZILVER,
-            beschrijving="Zwart",
-            boog_type=None),
+            beschrijving="Zwart"),
         speld_klas(
             volgorde=3103,
             categorie=SPELD_CATEGORIE_WA_TARGET_AWARD_ZILVER,
-            beschrijving="Blauw",
-            boog_type=None),
+            beschrijving="Blauw"),
         speld_klas(
             volgorde=3104,
             categorie=SPELD_CATEGORIE_WA_TARGET_AWARD_ZILVER,
-            beschrijving="Rood",
-            boog_type=None),
+            beschrijving="Rood"),
         speld_klas(
             volgorde=3105,
             categorie=SPELD_CATEGORIE_WA_TARGET_AWARD_ZILVER,
-            beschrijving="Goud",
-            boog_type=None),
+            beschrijving="Goud"),
         speld_klas(
             volgorde=3106,
             categorie=SPELD_CATEGORIE_WA_TARGET_AWARD_ZILVER,
-            beschrijving="Purper",
-            boog_type=None),
-
+            beschrijving="Purper"),
     ]
-
     speld_klas.objects.bulk_create(bulk)
 
 
 def maak_spelden_nl_tussenspelden(apps, _):
-
+    # haal de klassen op die van toepassing zijn op het moment van migratie
     speld_klas = apps.get_model('Spelden', 'Speld')
 
     bulk = [
@@ -254,29 +235,29 @@ def maak_spelden_nl_tussenspelden(apps, _):
         speld_klas(
             volgorde=4001,
             categorie=SPELD_CATEGORIE_NL_TUSSENSPELD,
-            beschrijving="950",
-            boog_type=None),
+            beschrijving="Wit",
+            prijs_euro=5),
         speld_klas(
             volgorde=4002,
             categorie=SPELD_CATEGORIE_NL_TUSSENSPELD,
-            beschrijving="1050",
-            boog_type=None),
+            beschrijving="Grijs",
+            prijs_euro=5),
         speld_klas(
             volgorde=4003,
             categorie=SPELD_CATEGORIE_NL_TUSSENSPELD,
-            beschrijving="1150",
-            boog_type=None),
+            beschrijving="Zwart",
+            prijs_euro=5),
         speld_klas(
             volgorde=4004,
             categorie=SPELD_CATEGORIE_NL_TUSSENSPELD,
-            beschrijving="1250",
-            boog_type=None),
+            beschrijving="Blauw",
+            prijs_euro=0),      # TODO: is deze gratis, of geldt "hoogste is gratis, lagere 5,-" per bestelling?
     ]
-
     speld_klas.objects.bulk_create(bulk)
 
 
 def maak_spelden_nl_graadspelden(apps, _):
+    # haal de klassen op die van toepassing zijn op het moment van migratie
     speld_klas = apps.get_model('Spelden', 'Speld')
 
     bulk = [
@@ -285,87 +266,86 @@ def maak_spelden_nl_graadspelden(apps, _):
             volgorde=5001,
             categorie=SPELD_CATEGORIE_NL_GRAADSPELD_INDOOR,
             beschrijving="1e graad Indoor",
-            boog_type=None),
+            prijs_euro=5),
         speld_klas(
             volgorde=5002,
             categorie=SPELD_CATEGORIE_NL_GRAADSPELD_INDOOR,
             beschrijving="2e graad Indoor",
-            boog_type=None),
+            prijs_euro=5),
         speld_klas(
             volgorde=5003,
             categorie=SPELD_CATEGORIE_NL_GRAADSPELD_INDOOR,
             beschrijving="1e graad Indoor",
-            boog_type=None),
+            prijs_euro=5),
 
         # Outdoor
         speld_klas(
             volgorde=5101,
             categorie=SPELD_CATEGORIE_NL_GRAADSPELD_OUTDOOR,
             beschrijving="1e graad Outdoor",
-            boog_type=None),
+            prijs_euro=5),
         speld_klas(
             volgorde=5102,
             categorie=SPELD_CATEGORIE_NL_GRAADSPELD_OUTDOOR,
             beschrijving="2e graad Outdoor",
-            boog_type=None),
+            prijs_euro=5),
         speld_klas(
             volgorde=5103,
             categorie=SPELD_CATEGORIE_NL_GRAADSPELD_OUTDOOR,
             beschrijving="3e graad Outdoor",
-            boog_type=None),
+            prijs_euro=5),
 
         # Veld
         speld_klas(
             volgorde=5201,
             categorie=SPELD_CATEGORIE_NL_GRAADSPELD_VELD,
             beschrijving="1e graad Veld",
-            boog_type=None),
+            prijs_euro=5),
         speld_klas(
             volgorde=5202,
             categorie=SPELD_CATEGORIE_NL_GRAADSPELD_VELD,
             beschrijving="2e graad Veld",
-            boog_type=None),
+            prijs_euro=5),
         speld_klas(
             volgorde=5203,
             categorie=SPELD_CATEGORIE_NL_GRAADSPELD_VELD,
             beschrijving="3e graad Veld",
-            boog_type=None),
+            prijs_euro=5),
 
         # Short Metric
         speld_klas(
             volgorde=5301,
             categorie=SPELD_CATEGORIE_NL_GRAADSPELD_SHORT_METRIC,
             beschrijving="1e graad Short Metric",
-            boog_type=None),
+            prijs_euro=5),
         speld_klas(
             volgorde=5302,
             categorie=SPELD_CATEGORIE_NL_GRAADSPELD_SHORT_METRIC,
             beschrijving="2e graad Short Metric",
-            boog_type=None),
+            prijs_euro=5),
         speld_klas(
             volgorde=5303,
             categorie=SPELD_CATEGORIE_NL_GRAADSPELD_SHORT_METRIC,
             beschrijving="3e graad Short Metric",
-            boog_type=None),
+            prijs_euro=5),
 
         # Algemeen
         speld_klas(
             volgorde=5401,
             categorie=SPELD_CATEGORIE_NL_GRAADSPELD_ALGEMEEN,
             beschrijving="Grootmeesterschutter",        # 1e graad (3 van de 4)
-            boog_type=None),
+            prijs_euro=5),
         speld_klas(
             volgorde=5402,
             categorie=SPELD_CATEGORIE_NL_GRAADSPELD_ALGEMEEN,
             beschrijving="Meesterschutter",             # 2e graad (3 van de 4)
-            boog_type=None),
+            prijs_euro=5),
         speld_klas(
             volgorde=5403,
             categorie=SPELD_CATEGORIE_NL_GRAADSPELD_ALGEMEEN,
             beschrijving="Allroundschutter",            # 3e graad (4 van de 4)
-            boog_type=None),
+            prijs_euro=5),
     ]
-
     speld_klas.objects.bulk_create(bulk)
 
 
@@ -395,6 +375,7 @@ class Migration(migrations.Migration):
                                                         ('Nga', 'NL graadspeld algemeen'), ('Nt', 'NL tussenspeld')],
                                                max_length=3)),
                 ('boog_type', models.ForeignKey(blank=True, null=True, on_delete=PROTECT, to='BasisTypen.boogtype')),
+                ('prijs_euro', models.DecimalField(decimal_places=2, default=Decimal('0'), max_digits=6)),
             ],
             options={
                 'verbose_name': 'Speld',

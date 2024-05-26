@@ -22,7 +22,7 @@ from types import SimpleNamespace
 
 TEMPLATE_PRESTATIESPELDEN_BEGIN = 'spelden/begin.dtl'
 TEMPLATE_PRESTATIESPELDEN_GRAADSPELDEN = 'spelden/khsn-graadspelden.dtl'
-TEMPLATE_PRESTATIESPELDEN_TUSSENSPELDEN = 'spelden/khsn-outdoor-tussenspelden.dtl'
+TEMPLATE_PRESTATIESPELDEN_TUSSENSPELDEN = 'spelden/khsn-tussenspelden.dtl'
 TEMPLATE_PRESTATIESPELDEN_TARGET_AWARDS = 'spelden/wa-target-awards.dtl'
 TEMPLATE_PRESTATIESPELDEN_STERSPELDEN = 'spelden/wa-sterspelden.dtl'
 TEMPLATE_PRESTATIESPELDEN_ARROWHEAD = 'spelden/wa-arrowhead-spelden.dtl'
@@ -86,6 +86,14 @@ class TussenspeldenView(TemplateView):
 
         if rol_get_huidige(self.request) == Rollen.ROL_SPORTER:
             context['menu_toon_mandje'] = True
+
+        now = timezone.now()
+        context['url_wedstrijdkalender'] = reverse('Kalender:jaar',
+                                                   kwargs={'maand': now.month,
+                                                           'jaar': now.year,
+                                                           'soort': 'khsn',
+                                                           'bogen': 'alle'})
+        context['url_wedstrijdkalender'] += '?zoek=Outdoor'
 
         context['kruimels'] = (
             (reverse('Webwinkel:overzicht'), 'Webwinkel'),

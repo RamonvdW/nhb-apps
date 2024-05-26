@@ -13,6 +13,7 @@ from Spelden.definities import (SPELD_CATEGORIE_CHOICES, SPELD_CATEGORIE_WA_STER
                                 WEDSTRIJD_DISCIPLINE_CHOICES, WEDSTRIJD_DISCIPLINE_OUTDOOR)
 from Sporter.models import Sporter
 from Wedstrijden.models import Wedstrijd
+from decimal import Decimal
 
 
 class Speld(models.Model):
@@ -34,6 +35,9 @@ class Speld(models.Model):
     boog_type = models.ForeignKey(BoogType, on_delete=models.PROTECT,
                                   null=True, blank=True)
 
+    # de prijs voor dit product
+    prijs_euro = models.DecimalField(max_digits=6, decimal_places=2, default=Decimal(0))        # max 9999,99
+
     def __str__(self):
         return "%s %s %s" % (self.categorie, self.volgorde, self.beschrijving)
 
@@ -44,24 +48,28 @@ class Speld(models.Model):
 
 class SpeldScore(models.Model):
 
+    # beschrijving van het soort wedstrijd waarop de speld te behalen is
+    wedstrijd_soort = models.CharField(max_length=20)
+
     # welke speld kan er behaald worden?
     speld = models.ForeignKey(Speld, on_delete=models.PROTECT)
 
-    # recurve, compound, etc.
-    boog_type = models.ForeignKey(BoogType, on_delete=models.PROTECT)
+    # (optioneel) recurve, compound, etc.
+    boog_type = models.ForeignKey(BoogType, on_delete=models.PROTECT,
+                                  null=True, blank=True)
 
-    # specialisatie in leeftijdsklasse en geslacht
+    # (optioneel) specialisatie in leeftijdsklasse en geslacht
     # (O14/O18/O21/Senior/50+, M/V)
     leeftijdsklasse = models.ForeignKey(Leeftijdsklasse, on_delete=models.PROTECT,
-                                        null=True, blank=True)      # optioneel
+                                        null=True, blank=True)
 
     # benodigde score
     benodigde_score = models.PositiveSmallIntegerField()
 
-    # afstand (in meters), optioneel
+    # (optioneel) afstand in meters
     afstand = models.PositiveSmallIntegerField(default=0)
 
-    # aantal doelen, optioneel
+    # (optioneel) aantal doelen - wordt alleen gebruikt bij Veld
     aantal_doelen = models.PositiveSmallIntegerField(default=0)
 
     def __str__(self):

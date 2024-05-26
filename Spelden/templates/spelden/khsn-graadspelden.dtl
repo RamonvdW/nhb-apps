@@ -17,7 +17,7 @@
         </div>
     </div>
 
-    
-    {% include 'feedback/sidebar.dtl' with op_pagina="spelden-graadspelden" %}
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="spelden-khsn-graadspelden" %}
 
 {% endblock %}

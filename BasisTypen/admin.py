@@ -40,7 +40,7 @@ class BoogTypeAdmin(BasisTypenReadonlyAdmin):
 
 class BasisTypenLeeftijdsklasseAdmin(BasisTypenReadonlyMetVolgordeAdmin):
 
-    list_filter = ('organisatie', 'wedstrijd_geslacht',)
+    list_filter = ('organisatie', 'wedstrijd_geslacht', 'volgorde')
 
 
 class BasisTypenTemplateCompetitieIndivKlasseAdmin(BasisTypenReadonlyMetVolgordeAdmin):
