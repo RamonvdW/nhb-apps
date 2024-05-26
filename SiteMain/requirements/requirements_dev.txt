@@ -22,7 +22,7 @@ charset-normalizer==3.3.2
     # via
     #   -r requirements.txt
     #   requests
-coverage==7.5.1
+coverage==7.5.2
     # via -r requirements_dev.in
 django==4.2.13
     # via
@@ -39,13 +39,13 @@ et-xmlfile==1.1.0
     # via
     #   -r requirements.txt
     #   openpyxl
-fonttools==4.51.0
+fonttools==4.52.1
     # via -r requirements_dev.in
 google-api-core==2.19.0
     # via
     #   -r requirements.txt
     #   google-api-python-client
-google-api-python-client==2.129.0
+google-api-python-client==2.130.0
     # via -r requirements.txt
 google-auth==2.29.0
     # via
@@ -151,7 +151,7 @@ sqlparse==0.5.0
     #   -r requirements.txt
     #   django
     #   django-debug-toolbar
-typing-extensions==4.11.0
+typing-extensions==4.12.0
     # via
     #   -r requirements.txt
     #   psycopg
