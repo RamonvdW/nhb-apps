@@ -334,7 +334,12 @@ class FormulierBkIndivAlsBestandView(UserPassesTestMixin, TemplateView):
             ws['I' + row].number_format = copy(i_format)
 
             if para_notities:
-                ws['Q' + row] = para_notities
+                if comp.is_indoor():
+                    # Indoor
+                    ws['P' + row] = para_notities
+                else:
+                    # 25m1pijl
+                    ws['U' + row] = para_notities
         # for
 
         # geef het aangepaste BK programma aan de client
