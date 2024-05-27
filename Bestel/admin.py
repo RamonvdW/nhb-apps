@@ -68,11 +68,11 @@ class BestellingAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Inhoud',
             {'fields': ('aangemaakt',
-                        'producten',)}),
+                        'producten')
+            }),
         ('Koper',
             {'fields': ('bestel_nr',
-                        'account',
-                        'aangemaakt')
+                        'account')
              }),
         ('Kosten',
             {'fields': ('verzendkosten_euro',
