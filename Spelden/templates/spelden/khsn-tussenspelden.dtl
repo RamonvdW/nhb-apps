@@ -14,62 +14,10 @@
     <div class="row center">
         <div class="col s12">
             <h3 class="page-banner">Tussenspelden</h3>
-            <p>De tussenspelden zijn te behalen op het Rayonkampioenschap Outdoor van het eigen rayon.</p>
+            <p>Tussenspelden zijn te behalen op het Rayonkampioenschap Outdoor van het eigen rayon.</p>
+            <p class="sv-rood-text">Waarom heten deze "tussenspelden"? Waar tussen?</p>
             <p>Kijk op de wedstrijdkalender wanneer deze georganiseerd wordt.</p>
             <p><a class="btn-sv-blauw" href="{{ url_wedstrijdkalender }}">wedstrijdkalender</a></p>
-        </div>
-    </div>
-
-        <!-- blauw balk met wit informatie veld -->
-    <div class="row-sv-blauw">
-        <div class="col s12 m10 offset-m1 l8 offset-l2">
-            <div class="sv-kader" style="padding:10px">
-                <div style="display:inline-block">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th class="center">Leeftijds<wbr>klassen</th>
-                                <th class="center">Geslacht</th>
-                                <th class="center">Afstanden (meter)</th>
-                                <th class="center">Soort speld</th>
-                            </tr>
-                        </thead>
-
-                        <tr>
-                            <td class="center" rowspan="2">Senioren<br>Onder 21</td>
-                            <td class="center">Heren</td>
-                            <td class="center">90, 70, 50, 30</td>
-                            <td class="center" rowspan="2">Ster</td>
-                        </tr>
-                        <tr>
-                            <td class="center">Dames</td>
-                            <td class="center">70, 60, 50, 30</td>
-                        </tr>
-
-                        <tr>
-                            <td class="center" rowspan="2">50+<br>Onder 18</td>
-                            <td class="center">Heren</td>
-                            <td class="center">70, 60, 50, 30</td>
-                            <td class="center" rowspan="2">Zilveren ster</td>
-                        </tr>
-                        <tr>
-                            <td class="center">Dames</td>
-                            <td class="center">60, 50, 40, 30</td>
-                        </tr>
-
-                    </table>
-                </div>
-
-                <p>Tel de scores van de 4 afstanden op en kijk hieronder welke speld je kan behalen.</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- witruimte -->
-    <div class="row center">
-        <div class="col s12">
-            <h4>De spelden</h4>
-            <p>Onderstaand spelden zijn beschikbaar</p>
         </div>
     </div>
 
@@ -79,27 +27,32 @@
             <table class="sv-kader">
                 <thead>
                     <tr>
-                        <th class="center">Totale score (of hoger)</th>
+                        <th class="center">Kleur</th>
+                        <th class="center">Score</th>
                         <th class="center">Tussenspeld</th>
                     </tr>
                 </thead>
 
                 <tr>
+                    <td class="center">Wit</td>
                     <td class="center">950</td>
                     <td class="center"><img width="150px" src="{% static 'spelden/tussenspeld_wit.png' %}" alt="wit"></td>
                 </tr>
 
                 <tr>
+                    <td class="center">Grijs</td>
                     <td class="center">1050</td>
                     <td class="center"><img width="150px" src="{% static 'spelden/tussenspeld_grijs.png' %}" alt="grijs"></td>
                 </tr>
 
                 <tr>
+                    <td class="center">Zwart</td>
                     <td class="center">1150</td>
                     <td class="center"><img width="150px" src="{% static 'spelden/tussenspeld_zwart.png' %}" alt="zwart"></td>
                 </tr>
 
                 <tr>
+                    <td class="center">Blauw</td>
                     <td class="center">1250</td>
                     <td class="center"><img width="150px" src="{% static 'spelden/tussenspeld_blauw.png' %}" alt="blauw"></td>
                 </tr>
@@ -107,9 +60,6 @@
             </table>
         </div>
     </div>
-
-
-
 
     {% include 'feedback/sidebar.dtl' with op_pagina="spelden-khsn-tussenspelden" %}
 

@@ -929,7 +929,7 @@ def maak_speldscores_wa_arrowhead(apps, _):
 
     # maak nu de 48-doelen scores: dit is (in 2024) het dubbele van de 24-doelen scores
     bulk = list()
-    for obj in score_klas.objects.all():
+    for obj in score_klas.objects.filter(speld__volgorde__in=(2001, 2002, 2003, 2004, 2005)):
         obj.pk = None
         obj.aantal_doelen *= 2
         obj.benodigde_score *= 2

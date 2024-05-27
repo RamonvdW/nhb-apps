@@ -17,6 +17,14 @@ urlpatterns = [
          views.BeginView.as_view(),
          name='begin'),
 
+    path('meesterspelden/',
+         views.MeesterspeldenView.as_view(),
+         name='groep-meesterspelden'),
+
+    path('meesterspelden/hall-of-fame/',
+         views.HallOfFameView.as_view(),
+         name='meesterspelden-hall-of-fame'),
+
     path('graadspelden/',
          views.GraadspeldenView.as_view(),
          name='groep-graadspelden'),

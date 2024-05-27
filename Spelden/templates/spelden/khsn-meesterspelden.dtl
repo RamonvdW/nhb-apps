@@ -1,0 +1,95 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2024 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Graadspelden{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">KHSN meesterspelden</h3>
+            <p>Voor sporters die graadspelden behaald hebben in meerdere disciplines zijn er uitzonderlijk graadspelden.</p>
+            <p><a class="btn-sv-rood" href="{{ url_hall_of_fame }}">Hall of fame</a></p>
+        </div>
+    </div>
+
+    <!-- blauwe balk met informatie in tabel-vorm:  label - info -->
+    <div class="row-sv-blauw">
+        <div class="col s12 m10 offset-m1 l8 offset-l2">
+            <table class="sv-kader">
+                <thead>
+                    <tr>
+                        <th class="center">Speld</th>
+                        <th class="center">Behaald door</th>
+                        <th class="center">Eisen</th>
+                    </tr>
+                </thead>
+
+                <tr>
+                    <td class="center">Grootmeesterschutter</td>
+                    <td class="center">{{ aantal_gm }} sporters</td>
+                    <td class="center">1e graadspeld behaald in drie disciplines</td>
+                </tr>
+
+                <tr>
+                    <td class="center">Meesterschutter</td>
+                    <td class="center">{{ aantal_ms }} sporters</td>
+                    <td class="center">2e graadspeld behaald in drie disciplines</td>
+                </tr>
+
+                <tr>
+                    <td class="center">Allroundschutter</td>
+                    <td class="center">{{ aantal_as }} sporters</td>
+                    <td class="center">3e graadspeld behaald in alle vier de disciplines</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>Spelden</h4>
+        </div>
+    </div>
+
+    <!-- blauwe balk met informatie in tabel-vorm:  label - info -->
+    <div class="row-sv-blauw">
+        <div class="col s12 m10 offset-m1 l8 offset-l2">
+            <table class="sv-kader">
+                <thead>
+                    <tr>
+                        <th class="center">Speld</th>
+                        <th class="center">Afbeelding</th>
+                    </tr>
+                </thead>
+
+                <tr>
+                    <td class="center">Grootmeesterschutter</td>
+                    <td class="center"><img width="150px" src="{% static 'spelden/graadspeld_grootmeesterschutter.png' %}" alt="blauw"></td>
+                </tr>
+
+                <tr>
+                    <td class="center">Meesterschutter</td>
+                    <td class="center"><img width="150px" src="{% static 'spelden/graadspeld_meesterschutter.png' %}" alt="blauw"></td>
+                </tr>
+
+                <tr>
+                    <td class="center">Allroundschutter</td>
+                    <td class="center"><img width="150px" src="{% static 'spelden/graadspeld_allroundschutter.png' %}" alt="blauw"></td>
+                </tr>
+
+            </table>
+        </div>
+    </div>
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="spelden-khsn-graadspelden" %}
+
+{% endblock %}

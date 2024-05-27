@@ -5,14 +5,9 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from BasisTypen.models import BoogType
-from Competitie.models_competitie import Competitie, CompetitieMatch
-from Functie.tests.helpers import maak_functie
 from Geo.models import Regio
-from Score.definities import SCORE_WAARDE_VERWIJDERD, SCORE_TYPE_GEEN
-from Score.models import Score, ScoreHist, Uitslag
-from Score.operations import score_indiv_ag_opslaan
-from Sporter.models import Sporter, SporterBoog
+from Spelden.models import Speld, SpeldScore, SpeldAanvraag
+from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
 import datetime
@@ -24,6 +19,8 @@ class TestSpeldenInfoViews(E2EHelpers, TestCase):
 
     url_begin = '/webwinkel/spelden/'
     url_graadspelden = '/webwinkel/spelden/graadspelden/'
+    url_meesterspelden = '/webwinkel/spelden/meesterspelden/'
+    url_hall_of_fame = '/webwinkel/spelden/meesterspelden/hall-of-fame/'
     url_tussenspelden = '/webwinkel/spelden/tussenspelden/'
     url_arrowhead = '/webwinkel/spelden/arrowhead/'
     url_sterspelden = '/webwinkel/spelden/sterspelden/'
@@ -65,6 +62,20 @@ class TestSpeldenInfoViews(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('spelden/begin.dtl', 'plein/site_layout.dtl'))
 
+        # meesterspelden
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_meesterspelden)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('spelden/khsn-meesterspelden.dtl', 'plein/site_layout.dtl'))
+
+        # meesterspelden hall of fame
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_hall_of_fame)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('spelden/khsn-meesterspelden_hall-of-fame.dtl', 'plein/site_layout.dtl'))
+
         # graadspelden
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_graadspelden)
@@ -100,6 +111,15 @@ class TestSpeldenInfoViews(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('spelden/wa-target-awards.dtl', 'plein/site_layout.dtl'))
 
+        speld = Speld.objects.first()
+        self.assertTrue(str(speld) != '')
+
+        speld_score = SpeldScore.objects.first()
+        self.assertTrue(str(speld_score) != '')
+
+        aanvraag = SpeldAanvraag(door_account=self.account_sporter, datum_wedstrijd='Hallo')
+        self.assertTrue(str(aanvraag) != '')
+
     def test_sporter(self):
         self.e2e_login(self.account_sporter)
 
@@ -109,6 +129,20 @@ class TestSpeldenInfoViews(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('spelden/begin.dtl', 'plein/site_layout.dtl'))
+
+        # meesterspelden
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_meesterspelden)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('spelden/khsn-meesterspelden.dtl', 'plein/site_layout.dtl'))
+
+        # meesterspelden hall of fame
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_hall_of_fame)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('spelden/khsn-meesterspelden_hall-of-fame.dtl', 'plein/site_layout.dtl'))
 
         # graadspelden
         with self.assert_max_queries(20):

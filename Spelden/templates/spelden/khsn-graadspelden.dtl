@@ -14,9 +14,102 @@
     <div class="row center">
         <div class="col s12">
             <h3 class="page-banner">KHSN graadspelden</h3>
+            <p>Er zijn drie niveaus: 1e, 2e en 3e graad.</p>
+            <p>In vier discipline kunnen deze graadspelden afzonderlijk behaald worden.</p>
         </div>
     </div>
 
+
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>Disciplines</h4>
+            <p>Korte beschrijving van het wedstrijd format.</p>
+        </div>
+    </div>
+
+    <!-- blauwe balk met informatie in tabel-vorm:  label - info -->
+    <div class="row-sv-blauw">
+        <div class="col s12 m10 offset-m1 l8 offset-l2">
+            <table class="sv-kader">
+                <thead>
+                    <tr>
+                        <th class="center">Discipline</th>
+                        <th class="center">Afstanden</th>
+                        <th class="center">Aantal doelen</th>
+                        <th class="center">Aantal pijlen</th>
+                    </tr>
+                </thead>
+
+                <tr>
+                    <td class="center">Indoor</td>
+                    <td class="center">18 meter</td>
+                    <td class="center">n.v.t.</td>
+                    <td class="center">2x 30</td>
+                </tr>
+
+                <tr>
+                    <td class="center">Outdoor</td>
+                    <td class="center">90, 70, 50, 30 meter</td>
+                    <td class="center">n.v.t.</td>
+                    <td class="center">4x 36</td>
+                </tr>
+
+                <tr>
+                    <td class="center">Short Metric</td>
+                    <td class="center">50 en 30 meter</td>
+                    <td class="center">n.v.t.</td>
+                    <td class="center">2x 36</td>
+                </tr>
+
+                <tr>
+                    <td class="center">Veld</td>
+                    <td class="center">n.v.t.</td>
+                    <td class="center">24 doelen</td>
+                    <td class="center">n.v.t.</td>
+                </tr>
+
+            </table>
+        </div>
+    </div>
+
+
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>Scores</h4>
+            <p>Hieronder staan de te behalen scores.</p>
+            <p>Het maakt niet uit welke boog je gebruikt.</p>
+        </div>
+    </div>
+
+    <!-- blauwe balk met informatie in tabel-vorm:  label - info -->
+    <div class="row-sv-blauw">
+        <div class="col s12 m10 offset-m1 l8 offset-l2">
+            <table class="sv-kader">
+                <thead>
+                    <tr>
+                        <th class="center">Discipline</th>
+                        <th class="center">Score heren</th>
+                        <th class="center">Score dames</th>
+                        <th>Graadspeld</th>
+                    </tr>
+                </thead>
+
+                {% for speld_score in speld_scores %}
+                    <tr>
+                        {% if speld_score.break_discipline %}
+                            <td class="center" rowspan="3">{{ speld_score.discipline }}</td>
+                        {% endif %}
+                        <td class="center">{{ speld_score.benodigde_score }}</td>
+                        <td class="center">{{ speld_score.benodigde_score_vrouw }}</td>
+                        <td>{{ speld_score.speld.beschrijving }}</td>
+                    </tr>
+                {% endfor %}
+
+            </table>
+        </div>
+    </div>
 
     {% include 'feedback/sidebar.dtl' with op_pagina="spelden-khsn-graadspelden" %}
 

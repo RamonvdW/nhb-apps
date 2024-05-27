@@ -78,7 +78,7 @@
             <table class="sv-kader">
                 <thead>
                     <tr>
-                        <th class="center">Totale score (of hoger)</th>
+                        <th class="center">Benodigde score</th>
                         <th class="center">Ster</th>
                         <th class="center">Zilveren ster</th>
                     </tr>
@@ -139,7 +139,7 @@
             <table class="sv-kader">
                 <thead>
                     <tr>
-                        <th class="center">Totale score (of hoger)</th>
+                        <th class="center">Benodigde score</th>
                         <th class="center">Ster</th>
                         <th class="center">Zilveren ster</th>
                     </tr>

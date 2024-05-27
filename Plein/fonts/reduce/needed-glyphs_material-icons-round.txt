@@ -18,6 +18,7 @@ book
 build
 card_membership
 check
+checklist
 chevron_left
 chevron_right
 close
@@ -140,3 +141,4 @@ visibility
 warning
 waving_hand
 wb_sunny
+zoom_out_map

@@ -275,7 +275,7 @@ def maak_spelden_nl_graadspelden(apps, _):
         speld_klas(
             volgorde=5003,
             categorie=SPELD_CATEGORIE_NL_GRAADSPELD_INDOOR,
-            beschrijving="1e graad Indoor",
+            beschrijving="3e graad Indoor",
             prijs_euro=5),
 
         # Outdoor

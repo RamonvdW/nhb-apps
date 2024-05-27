@@ -1,0 +1,115 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2024 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Hall of Fame{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Hall of Fame</h3>
+            <p>Onderstaande sporters hebben de hoogste graadspelden behaald</p>
+        </div>
+    </div>
+
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>Grootmeesterschutter</h4>
+            <p>In minimaal 3 disciplines hebben deze sporters de 1e graadspeld behaald.</p>
+        </div>
+    </div>
+
+    <!-- blauwe balk met informatie in tabel-vorm:  label - info -->
+    <div class="row-sv-blauw">
+        <div class="col s12 m10 offset-m1 l8 offset-l2">
+            <table class="sv-kader">
+                <thead>
+                    <tr>
+                        <th class="center">Naam</th>
+                        <th class="center">Lid bij vereniging</th>
+                    </tr>
+                </thead>
+
+                {% for obj in leden_gm %}
+                    <tr>
+                        <td class="center">{{ obj.sporter.volledige_naam }}</td>
+                        <td class="center">{% if obj.sporter.bij_vereniging %}{{ obj.sporter.bij_vereniging }}{% else %}-{% endif %}</td>
+                    </tr>
+                {% endfor %}
+
+            </table>
+        </div>
+    </div>
+
+
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>Meesterschutter</h4>
+            <p>In minimaal 3 disciplines hebben deze sporters de 2e graadspeld behaald.</p>
+        </div>
+    </div>
+
+    <!-- blauwe balk met informatie in tabel-vorm:  label - info -->
+    <div class="row-sv-blauw">
+        <div class="col s12 m10 offset-m1 l8 offset-l2">
+            <table class="sv-kader">
+                <thead>
+                    <tr>
+                        <th class="center">Naam</th>
+                        <th class="center">Lid bij vereniging</th>
+                    </tr>
+                </thead>
+
+                {% for obj in leden_ms %}
+                    <tr>
+                        <td class="center">{{ obj.sporter.volledige_naam }}</td>
+                        <td class="center">{% if obj.sporter.bij_vereniging %}{{ obj.sporter.bij_vereniging }}{% else %}-{% endif %}</td>
+                    </tr>
+                {% endfor %}
+
+            </table>
+        </div>
+    </div>
+
+
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>Allroundschutter</h4>
+            <p>In alle vier de disciplines hebben deze sporters de 3e graadspeld behaald.</p>
+        </div>
+    </div>
+
+    <!-- blauwe balk met informatie in tabel-vorm:  label - info -->
+    <div class="row-sv-blauw">
+        <div class="col s12 m10 offset-m1 l8 offset-l2">
+            <table class="sv-kader">
+                <thead>
+                    <tr>
+                        <th class="center">Naam</th>
+                        <th class="center">Lid bij vereniging</th>
+                    </tr>
+                </thead>
+
+                {% for obj in leden_as %}
+                    <tr>
+                        <td class="center">{{ obj.sporter.volledige_naam }}</td>
+                        <td class="center">{% if obj.sporter.bij_vereniging %}{{ obj.sporter.bij_vereniging }}{% else %}-{% endif %}</td>
+                    </tr>
+                {% endfor %}
+
+            </table>
+        </div>
+    </div>
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="spelden-khsn-meesterspelden-hall-of-fame" %}
+
+{% endblock %}
