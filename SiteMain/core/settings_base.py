@@ -58,7 +58,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2024-05-15'
+SITE_VERSIE = '2024-05-27'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -213,7 +213,7 @@ USE_I18N = True
 USE_TZ = True
 
 
-# top-level URL verdeling naar apps
+# top-level URL-verdeling naar apps
 ROOT_URLCONF = 'SiteMain.core.urls'
 
 
@@ -417,7 +417,7 @@ SPEELSTERKTE_VOLGORDE = (
     ('Veld 24', 'Grijs24', 293),
     ('Veld 24', 'Groen24', 294),
 
-    # arrowhead
+    # arrowhead (historisch)
     ('Veld', 'Goud',   300),
     ('Veld', 'Zilver', 301),
     ('Veld', 'Wit',    302),
@@ -425,10 +425,6 @@ SPEELSTERKTE_VOLGORDE = (
     ('Veld', 'Grijs',  304),
     ('Veld', 'Bruin',  305),
     ('Veld', 'Groen',  306),
-
-    # ('Veld', 'Rode posten', 0),
-    # ('Veld', 'Blauwe posten', 0),
-    # ('Veld', 'Gele posten', 0),
 
     # Compound/Recurve
     ('World Archery Target Awards', 'Purper', 500),
