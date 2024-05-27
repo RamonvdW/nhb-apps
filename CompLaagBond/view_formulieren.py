@@ -272,8 +272,13 @@ class FormulierBkIndivAlsBestandView(UserPassesTestMixin, TemplateView):
         baan_letter = 'A'
         deelnemer_nr = 0
 
-        row1_nr = 9 - 1
-        row2_nr = 39 - 1
+        if comp.is_indoor():
+            row1_nr = 9 - 1
+            row2_nr = 39 - 1
+        else:
+            row1_nr = 8 - 1
+            row2_nr = 37 - 1
+
         for deelnemer in deelnemers:
 
             para_notities = ''
