@@ -240,7 +240,13 @@ class FormulierBkIndivAlsBestandView(UserPassesTestMixin, TemplateView):
             ws['G5'] = match.locatie.adres      # adres van de locatie
         else:
             ws['G5'] = 'Onbekend'
-        ws['J5'] = 'Datum: ' + match.datum_wanneer.strftime('%Y-%m-%d')
+
+        if comp.is_indoor():
+            # BK Indoor indiv
+            ws['J5'] = 'Datum: ' + match.datum_wanneer.strftime('%Y-%m-%d')
+        else:
+            # BK 25m1pijl indiv
+            ws['M5'] = 'Datum: ' + match.datum_wanneer.strftime('%Y-%m-%d')
 
         ws['A35'] = 'Deze gegevens zijn opgehaald op %s' % vastgesteld.strftime('%Y-%m-%d %H:%M:%S')
 
