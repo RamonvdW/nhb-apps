@@ -248,7 +248,12 @@ class FormulierBkIndivAlsBestandView(UserPassesTestMixin, TemplateView):
             # BK 25m1pijl indiv
             ws['M5'] = 'Datum: ' + match.datum_wanneer.strftime('%Y-%m-%d')
 
-        ws['A35'] = 'Deze gegevens zijn opgehaald op %s' % vastgesteld.strftime('%Y-%m-%d %H:%M:%S')
+        if comp.is_indoor():
+            # BK Indoor indiv
+            ws['A35'] = 'Deze gegevens zijn opgehaald op %s' % vastgesteld.strftime('%Y-%m-%d %H:%M:%S')
+        else:
+            # BK 25m1pijl indiv
+            ws['A73'] = 'Deze gegevens zijn opgehaald op %s' % vastgesteld.strftime('%Y-%m-%d %H:%M:%S')
 
         # i_font = ws['I8'].font
         i_align = ws['I8'].alignment            # gemiddelde: right align
@@ -273,11 +278,13 @@ class FormulierBkIndivAlsBestandView(UserPassesTestMixin, TemplateView):
         deelnemer_nr = 0
 
         if comp.is_indoor():
+            # BK Indoor indiv
             row1_nr = 9 - 1
             row2_nr = 39 - 1
         else:
+            # BK 25m1pijl indiv
             row1_nr = 8 - 1
-            row2_nr = 37 - 1
+            row2_nr = 77 - 1        # formulier kan 64 deelnemers aan (120 totaal in BK)
 
         for deelnemer in deelnemers:
 
