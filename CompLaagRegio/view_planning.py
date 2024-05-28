@@ -199,7 +199,7 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
             if cluster.vereniging_set.count() > 0:
                 context['clusters'].append(cluster)
                 # tel het aantal rondes voor dit cluster
-                cluster.ronde_count = cluster.regiocompetitieronde_set.count()
+                cluster.ronde_count = cluster.regiocompetitieronde_set.filter(regiocompetitie=deelcomp).count()
                 cluster.url_bekijk = reverse('CompLaagRegio:regio-cluster-planning',
                                              kwargs={'cluster_pk': cluster.pk,
                                                      'deelcomp_pk': deelcomp.pk})
