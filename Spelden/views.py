@@ -11,7 +11,8 @@ from BasisTypen.definities import GESLACHT_VROUW
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige
 from Spelden.definities import (SPELD_CATEGORIE_NL_GRAADSPELD_INDOOR, SPELD_CATEGORIE_NL_GRAADSPELD_OUTDOOR,
-                                SPELD_CATEGORIE_NL_GRAADSPELD_VELD, SPELD_CATEGORIE_NL_GRAADSPELD_SHORT_METRIC)
+                                SPELD_CATEGORIE_NL_GRAADSPELD_VELD, SPELD_CATEGORIE_NL_GRAADSPELD_SHORT_METRIC,
+                                SPELD_CATEGORIE_WA_ARROWHEAD)
 from Spelden.models import SpeldScore
 from Spelden.operations import tel_hall_of_fame
 from Sporter.models import Speelsterkte
@@ -248,13 +249,47 @@ class ArrowheadView(TemplateView):
 
         qset = (SpeldScore
                 .objects
-                .filter(speld__volgorde__in=(2001, 2002, 2003, 2004, 2005))
-                .order_by('boog_type__volgorde',
-                          'speld__volgorde',
+                .filter(speld__categorie=SPELD_CATEGORIE_WA_ARROWHEAD)
+                .select_related('leeftijdsklasse',
+                                'boog_type',
+                                'speld')
+                .order_by('speld__volgorde',
+                          'boog_type__volgorde',
                           'leeftijdsklasse__wedstrijd_geslacht'))
 
-        context['ah_24'] = qset.filter(aantal_doelen=24)
-        context['ah_48'] = qset.filter(aantal_doelen=48)
+        context['ah_24'] = spelden = list()
+        speld = None
+        for obj in qset.filter(aantal_doelen=24):
+            kleur = obj.speld.beschrijving.split()[-1]
+            if speld is None or speld['kleur'] != kleur:
+                speld = {
+                    'kleur': kleur,
+                    'R': dict(),
+                    'C': dict(),
+                    'BB': dict()
+                }
+                spelden.append(speld)
+
+            scores = speld[obj.boog_type.afkorting]
+            scores[obj.leeftijdsklasse.wedstrijd_geslacht] = obj.benodigde_score
+        # for
+
+        context['ah_48'] = spelden = list()
+        speld = None
+        for obj in qset.filter(aantal_doelen=48):
+            kleur = obj.speld.beschrijving.split()[-1]
+            if speld is None or speld['kleur'] != kleur:
+                speld = {
+                    'kleur': kleur,
+                    'R': dict(),
+                    'C': dict(),
+                    'BB': dict()
+                }
+                spelden.append(speld)
+
+            scores = speld[obj.boog_type.afkorting]
+            scores[obj.leeftijdsklasse.wedstrijd_geslacht] = obj.benodigde_score
+        # for
 
         context['kruimels'] = (
             (reverse('Webwinkel:overzicht'), 'Webwinkel'),

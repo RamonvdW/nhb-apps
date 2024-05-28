@@ -8,12 +8,17 @@ from django.contrib import admin
 from Spelden.models import Speld, SpeldScore, SpeldAanvraag, SpeldBijlage
 
 
+class SpeldAdmin(admin.ModelAdmin):
+
+    list_filter = ('categorie', 'boog_type', 'volgorde')
+
+
 class SpeldScoreAdmin(admin.ModelAdmin):
 
     list_filter = ('wedstrijd_soort', 'leeftijdsklasse__wedstrijd_geslacht', 'afstand', 'speld', 'boog_type')
 
 
-admin.site.register(Speld)
+admin.site.register(Speld, SpeldAdmin)
 admin.site.register(SpeldScore, SpeldScoreAdmin)
 admin.site.register(SpeldAanvraag)
 admin.site.register(SpeldBijlage)

@@ -90,55 +90,17 @@
                     </tr>
                 </thead>
 
-                <tr>
-                    <td class="center">Groen</td>
-                    <td class="center">219</td>
-                    <td class="center">196</td>
-                    <td class="center">292</td>
-                    <td class="center">275</td>
-                    <td class="center">191</td>
-                    <td class="center">182</td>
-                </tr>
-
-                <tr>
-                    <td class="center">Grijs</td>
-                    <td class="center">275</td>
-                    <td class="center">257</td>
-                    <td class="center">340</td>
-                    <td class="center">325</td>
-                    <td class="center">250</td>
-                    <td class="center">238</td>
-                </tr>
-
-                <tr>
-                    <td class="center">Wit</td>
-                    <td class="center">309</td>
-                    <td class="center">293</td>
-                    <td class="center">367</td>
-                    <td class="center">352</td>
-                    <td class="center">287</td>
-                    <td class="center">272</td>
-                </tr>
-
-                <tr>
-                    <td class="center">Zwart</td>
-                    <td class="center">333</td>
-                    <td class="center">320</td>
-                    <td class="center">387</td>
-                    <td class="center">373</td>
-                    <td class="center">315</td>
-                    <td class="center">295</td>
-                </tr>
-
-                <tr>
-                    <td class="center">Goud</td>
-                    <td class="center">351</td>
-                    <td class="center">340</td>
-                    <td class="center">401</td>
-                    <td class="center">389</td>
-                    <td class="center">336</td>
-                    <td class="center">313</td>
-                </tr>
+                {% for speld in ah_24 %}
+                    <tr>
+                        <td class="center">{{ speld.kleur }}</td>
+                        <td class="center">{{ speld.R.M }}</td>
+                        <td class="center">{{ speld.R.V }}</td>
+                        <td class="center">{{ speld.C.M }}</td>
+                        <td class="center">{{ speld.C.V }}</td>
+                        <td class="center">{{ speld.BB.M }}</td>
+                        <td class="center">{{ speld.BB.V }}</td>
+                    </tr>
+                {% endfor %}
 
             </table>
         </div>
@@ -176,55 +138,17 @@
                     </tr>
                 </thead>
 
-                <tr>
-                    <td class="center">Groen</td>
-                    <td class="center"></td>
-                    <td class="center"></td>
-                    <td class="center"></td>
-                    <td class="center"></td>
-                    <td class="center"></td>
-                    <td class="center"></td>
-                </tr>
-
-                <tr>
-                    <td class="center">Grijs</td>
-                    <td class="center"></td>
-                    <td class="center"></td>
-                    <td class="center"></td>
-                    <td class="center"></td>
-                    <td class="center"></td>
-                    <td class="center"></td>
-                </tr>
-
-                <tr>
-                    <td class="center">Wit</td>
-                    <td class="center"></td>
-                    <td class="center"></td>
-                    <td class="center"></td>
-                    <td class="center"></td>
-                    <td class="center"></td>
-                    <td class="center"></td>
-                </tr>
-
-                <tr>
-                    <td class="center">Zwart</td>
-                    <td class="center"></td>
-                    <td class="center"></td>
-                    <td class="center"></td>
-                    <td class="center"></td>
-                    <td class="center"></td>
-                    <td class="center"></td>
-                </tr>
-
-                <tr>
-                    <td class="center">Goud</td>
-                    <td class="center"></td>
-                    <td class="center"></td>
-                    <td class="center"></td>
-                    <td class="center"></td>
-                    <td class="center"></td>
-                    <td class="center"></td>
-                </tr>
+                {% for speld in ah_48 %}
+                    <tr>
+                        <td class="center">{{ speld.kleur }}</td>
+                        <td class="center">{{ speld.R.M }}</td>
+                        <td class="center">{{ speld.R.V }}</td>
+                        <td class="center">{{ speld.C.M }}</td>
+                        <td class="center">{{ speld.C.V }}</td>
+                        <td class="center">{{ speld.BB.M }}</td>
+                        <td class="center">{{ speld.BB.V }}</td>
+                    </tr>
+                {% endfor %}
 
             </table>
         </div>
