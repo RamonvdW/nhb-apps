@@ -51,7 +51,7 @@ VOLGORDE_PARKEER = 22222        # hoog en past in PositiveSmallIntegerField
 
 my_logger = logging.getLogger('MH.RegiocompMutaties')
 
-# TODO: opsplitsen naar CompLaag*/operations/xxx
+# FUTURE: opsplitsen naar CompLaag*/operations/xxx
 
 
 class Command(BaseCommand):
@@ -1110,7 +1110,7 @@ class Command(BaseCommand):
     def _verwerk_mutatie_regio_afsluiten(self, comp):
         """ de BKO heeft gevraagd de regiocompetitie af te sluiten en alles klaar te maken voor het RK """
 
-        # TODO: verplaats naar CompLaagRegio/operations/...
+        # FUTURE: verplaats naar CompLaagRegio/operations/...
 
         # controleer dat de competitie in fase G is
         if not comp.regiocompetitie_is_afgesloten:

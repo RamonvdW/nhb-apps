@@ -35,7 +35,7 @@ class BestelProduct(models.Model):
     # de korting op deze regel (ook een positief bedrag!)
     korting_euro = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal(0))     # max 999,99
 
-    # TODO: gedeeltelijke terugstorting bijhouden
+    # FUTURE: gedeeltelijke terugstorting bijhouden
 
     # TODO: traceer gestuurde e-mails (voor sturen herinnering)
 
@@ -48,7 +48,7 @@ class BestelProduct(models.Model):
         elif self.webwinkel_keuze:
             msg += str(self.webwinkel_keuze)
         else:
-            # TODO: andere producten
+            # FUTURE: andere producten
             msg += '?'
 
         msg += ' %s' % self.prijs_euro

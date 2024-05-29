@@ -585,7 +585,7 @@ class TestCompBeheerBB(E2EHelpers, TestCase):
         self.assert_is_redirect_not_plein(resp)        # redirect = success
         count = CompetitieIndivKlasse.objects.filter(competitie=comp18, min_ag__gt=0).count()
         self.assertTrue(count > 20)
-        # TODO: check nog meer velden van de aangemaakte objecten
+        # FUTURE: check nog meer velden van de aangemaakte objecten
 
         # coverage: nog een keer vaststellen
         with self.assert_max_queries(20):
