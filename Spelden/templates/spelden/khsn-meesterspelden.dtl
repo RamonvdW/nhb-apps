@@ -14,7 +14,7 @@
     <div class="row center">
         <div class="col s12">
             <h3 class="page-banner">KHSN meesterspelden</h3>
-            <p>Voor sporters die graadspelden behaald hebben in meerdere disciplines zijn er uitzonderlijk graadspelden.</p>
+            <p>Voor sporters die graadspelden behaald hebben in meerdere disciplines zijn er uitzonderlijke graadspelden.</p>
             <p><a class="btn-sv-rood" href="{{ url_hall_of_fame }}">Hall of fame</a></p>
         </div>
     </div>

@@ -15,7 +15,7 @@
         <div class="col s12">
             <h3 class="page-banner">Tussenspelden</h3>
             <p>Tussenspelden zijn te behalen op het Rayonkampioenschap Outdoor van het eigen rayon.</p>
-            <p class="sv-rood-text">Waarom heten deze "tussenspelden"? Waar tussen?</p>
+            <p class="sv-rood-text">Waarom heten deze "tussenspelden"? Waar tussen? Hoeveel pijlen?</p>
             <p>Kijk op de wedstrijdkalender wanneer deze georganiseerd wordt.</p>
             <p><a class="btn-sv-blauw" href="{{ url_wedstrijdkalender }}">wedstrijdkalender</a></p>
         </div>
@@ -28,7 +28,7 @@
                 <thead>
                     <tr>
                         <th class="center">Kleur</th>
-                        <th class="center">Score</th>
+                        <th class="center">Benodigde score (of hoger)</th>
                         <th class="center">Tussenspeld</th>
                     </tr>
                 </thead>

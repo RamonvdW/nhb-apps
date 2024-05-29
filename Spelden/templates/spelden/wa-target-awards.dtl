@@ -100,7 +100,7 @@
             <table class="sv-kader">
                 <thead>
                     <tr>
-                        <th class="center">Totale score (of hoger)</th>
+                        <th class="center">Kleur</th>
                         <th class="center">Target Award</th>
                         <th class="center">Zilveren Target Award</th>
                     </tr>
