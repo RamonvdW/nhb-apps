@@ -278,11 +278,14 @@ class TestRecordsView(E2EHelpers, TestCase):
 
     def test_eervol(self):
         # eervolle vermelding
-        AnderRecord(
-            titel='Guinness Book',
-            icoon='auto_awesome',
-            tekst='test',
-            url='https://www.handboogsport.nl').save()
+        ander = AnderRecord(
+                    titel='Guinness Book',
+                    icoon='auto_awesome',
+                    tekst='test',
+                    url='https://www.handboogsport.nl')
+        ander.save()
+
+        self.assertTrue(str(ander) != '')
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_overzicht)

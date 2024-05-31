@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2023 Ramon van der Winkel.
+#  Copyright (c) 2019-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -83,7 +83,7 @@ class RecordsOverzichtView(ListView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        context['andere_records'] = AnderRecord.objects.order_by('pk')
+        context['andere_records'] = AnderRecord.objects.order_by('volgorde')
 
         context['kruimels'] = (
             (None, 'Records'),

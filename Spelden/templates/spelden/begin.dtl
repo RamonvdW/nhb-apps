@@ -72,7 +72,7 @@
 
             <!-- KHSN meesterspelden -->
             {% url 'Spelden:groep-meesterspelden' as card_url %}
-            {% include 'plein/card_icon.dtl' with title="Meesterspelden" text="KHSN meesterspelden" icon="checklist" url=card_url %}
+            {% include 'plein/card_icon.dtl' with title="Meesterspelden" text="KHSN meesterspelden" icon="category" url=card_url %}
         </div>
     </div>
 

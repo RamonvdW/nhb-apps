@@ -17,8 +17,8 @@ block
 book
 build
 card_membership
+category
 check
-checklist
 chevron_left
 chevron_right
 close
