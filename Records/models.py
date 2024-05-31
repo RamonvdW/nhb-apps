@@ -145,7 +145,7 @@ class AnderRecord(models.Model):
 
     """ vrij-formaat rapport met een referentie naar een nieuwsbericht """
 
-    # in welke volgorde tonen?
+    # controleer volgorde waarin de artikelen getoond worden: voor hoog (=nieuwste = vooraan) naar laag
     volgorde = models.PositiveSmallIntegerField(default=0)
 
     # titel van het kaartje

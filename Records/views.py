@@ -83,7 +83,7 @@ class RecordsOverzichtView(ListView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        context['andere_records'] = AnderRecord.objects.order_by('volgorde')
+        context['andere_records'] = AnderRecord.objects.order_by('-volgorde')       # hoogste eerst
 
         context['kruimels'] = (
             (None, 'Records'),
