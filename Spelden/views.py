@@ -14,7 +14,7 @@ from Spelden.definities import (SPELD_CATEGORIE_NL_GRAADSPELD_INDOOR, SPELD_CATE
                                 SPELD_CATEGORIE_NL_GRAADSPELD_VELD, SPELD_CATEGORIE_NL_GRAADSPELD_SHORT_METRIC,
                                 SPELD_CATEGORIE_WA_ARROWHEAD)
 from Spelden.models import SpeldScore
-from Spelden.operations import tel_hall_of_fame
+from Spelden.operations import get_hall_of_fame, tel_hall_of_fame
 from Sporter.models import Speelsterkte
 
 
@@ -59,18 +59,7 @@ class HallOfFameView(TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        qset = Speelsterkte.objects.order_by('datum', 'sporter__lid_nr').select_related('sporter',
-                                                                                        'sporter__bij_vereniging')
-
-        leden = qset.filter(pas_code='GM')
-        lid_nrs = list(leden.values_list('sporter__lid_nr', flat=True))
-        context['leden_gm'] = leden
-
-        leden = qset.filter(pas_code='MS').exclude(sporter__lid_nr__in=lid_nrs)
-        context['leden_ms'] = leden
-
-        leden = qset.filter(pas_code='AS')
-        context['leden_as'] = leden
+        context['leden_gm'], context['leden_ms'], context['leden_as'] = get_hall_of_fame()
 
         context['kruimels'] = (
             (reverse('Webwinkel:overzicht'), 'Webwinkel'),
