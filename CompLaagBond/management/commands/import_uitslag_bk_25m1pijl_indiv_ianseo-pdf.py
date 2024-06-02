@@ -213,8 +213,8 @@ class Command(BaseCommand):
         deelnemer = deelnemers[0]
         self.stdout.write('[INFO] Gevonden deelnemer: %s' % deelnemer)
 
-        if deelnemer.sporterboog.sporter.bij_vereniging.ver_nr != ver_nr:
-            self.stderr.write('[ERROR] Deelnemer pk=%s heeft vereniging %s maar uitslag zegt %s' % (
+        if deelnemer.bij_vereniging.ver_nr != ver_nr:
+            self.stderr.write('[WARNING] Deelnemer pk=%s heeft vereniging %s maar uitslag zegt %s' % (
                         deelnemer.pk,
                         deelnemer.sporterboog.sporter.bij_vereniging.ver_nr,
                         ver_nr))
@@ -300,10 +300,9 @@ class Command(BaseCommand):
             if not toon_counts:
                 deelnemer.result_counts = ''
 
-            self.stdout.write('  %s %s %s %s %s' % (
+            self.stdout.write('  %s %s %s %s' % (
                 rank,
                 totaal,
-                zelfde_score,
                 deelnemer.result_counts,
                 deelnemer.sporterboog.sporter.lid_nr_en_volledige_naam()))
 
