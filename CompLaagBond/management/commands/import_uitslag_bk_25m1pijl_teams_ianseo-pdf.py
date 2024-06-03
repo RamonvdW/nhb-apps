@@ -118,7 +118,8 @@ class Command(BaseCommand):
                                           'kampioenschap__rayon',
                                           'sporterboog__sporter',
                                           'sporterboog__boogtype',
-                                          'indiv_klasse')):
+                                          'indiv_klasse',
+                                          'bij_vereniging')):
 
             lid_nr = deelnemer.sporterboog.sporter.lid_nr
             ver_nr = deelnemer.bij_vereniging.ver_nr
