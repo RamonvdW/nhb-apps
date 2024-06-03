@@ -72,7 +72,9 @@ class BestellingAdmin(admin.ModelAdmin):
             }),
         ('Koper',
             {'fields': ('bestel_nr',
-                        'account')
+                        'account',
+                        'afleveradres_regel_1', 'afleveradres_regel_2', 'afleveradres_regel_3',
+                        'afleveradres_regel_4', 'afleveradres_regel_5')
              }),
         ('Kosten',
             {'fields': ('verzendkosten_euro',

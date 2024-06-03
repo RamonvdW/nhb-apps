@@ -20,6 +20,7 @@ from Betaal.models import BetaalInstellingenVereniging
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige
 from Registreer.definities import REGISTRATIE_FASE_COMPLEET
+from Sporter.models import get_sporter
 from Vereniging.models import Vereniging
 from decimal import Decimal
 
@@ -189,7 +190,7 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
 
             elif mandje.transport == BESTEL_TRANSPORT_VERZEND:
                 context['toon_transport'] = settings.WEBWINKEL_TRANSPORT_OPHALEN_MAG
-                sporter = account.sporter_set.first()
+                sporter = get_sporter(account)
                 context['koper_sporter'] = sporter
 
         context['mandje_is_leeg'] = mandje_is_leeg

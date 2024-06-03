@@ -244,7 +244,7 @@
                             <td colspan="2">
                                 <label>
                                     <input type="checkbox" class="filled-in" name="para_voorwerpen"{% if voorkeuren.para_voorwerpen %} checked{% endif %} onchange="gewijzigd()">
-                                    <span class="black-text">Ik blijf op de schietlijn zitten of gebruik voorwerpen die op de schietlijn blijven staan</span>
+                                    <span class="black-text">Ik blijf op de schietlijn zitten of gebruik voorwerpen die op de schietlijn blijven staan.</span>
                                 </label>
 
                                 <p>Let op: alleen een officieel geregistreerde classificatie geeft <i>recht</i> op extra ruimte op de schietlijn.</p>

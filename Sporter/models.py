@@ -208,7 +208,7 @@ class Sporter(models.Model):
 class Speelsterkte(models.Model):
     """ Deze tabel houdt de behaalde spelden/veren/schilden bij """
 
-    # TODO: verminder duplicatie door BasisType speelsterkte aan te maken
+    # TODO: verplaats naar Spelden + koppel aan echte Speld records (=reduceer duplicatie)
 
     # welke sporter heeft deze speelsterkte behaald?
     sporter = models.ForeignKey(Sporter, on_delete=models.CASCADE)

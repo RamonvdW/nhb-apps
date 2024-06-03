@@ -17,7 +17,7 @@ def scrub_input_name(name):
     """
 
     # remove characters typically not found in name
-    for char in '<>#/()*&^%$@!=+_{}[]:;"\\|<>.?~`\'':        # TODO: add digits?
+    for char in '<>#/()*&^%$@!=+_{}[]:;"\\|<>.?~`\'':        # Let op: cijfers zijn toegestaan voor naam vereniging
         name = name.replace(char, '')
     # for
     return name

@@ -1157,7 +1157,7 @@ class MyTestAsserts(TestCase):
         html = html.replace('<br>', '')
         html = html.replace('<div>.</div>', '')     # was punt aan einde regel achter "a" tag
 
-        for tag in ('p', 'span', 'a', 'code', 'div', 'td', 'tr', 'thead', 'table', 'body'):
+        for tag in ('span', 'a', 'code', 'p', 'div', 'td', 'tr', 'thead', 'table', 'body'):
             part = '<' + tag + '></' + tag + '>'
             html = html.replace(part, '')
         # for

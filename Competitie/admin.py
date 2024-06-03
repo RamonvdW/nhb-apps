@@ -62,7 +62,7 @@ class RegiocompetitieRondeAdmin(CreateOnlyAdmin):
 
     filter_horizontal = ('matches',)
 
-    # TODO: filter matches op verenigingen in de regio
+    # FUTURE: filter matches op verenigingen in de regio
 
 
 class CompetitieAdmin(admin.ModelAdmin):
@@ -105,7 +105,7 @@ class CompetitieMatchAdmin(admin.ModelAdmin):
 
     list_filter = ('competitie', 'aantal_scheids')
 
-    # TODO: filter toepasselijke indiv_klassen / team_klassen aan de hand van obj.competitie
+    # FUTURE: filter toepasselijke indiv_klassen / team_klassen aan de hand van obj.competitie
 
     def __init__(self, model, admin_site):
         super().__init__(model, admin_site)

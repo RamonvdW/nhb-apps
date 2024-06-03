@@ -158,7 +158,7 @@ class KampioenschapSporterBoog(models.Model):
     # de regio scores: hoogste score gaat voor
     # de RK scores: hoogste score gaat voor
     # scores zijn als string opgeslagen zodat er gesorteerd kan worden
-    # "AAABBBCCCDDDEEEFFFGGG" met AAA..GGG=7 scores van 3 cijfers, gesorteerd van beste naar slechtste score
+    # noqa "AAABBBCCCDDDEEEFFFGGG" met AAA..GGG=7 scores van 3 cijfers, gesorteerd van beste naar slechtste score
     gemiddelde_scores = models.CharField(max_length=24, default='', blank=True)
 
     # resultaat van het individuele kampioenschap
