@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2023 Ramon van der Winkel.
+#  Copyright (c) 2019-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -143,12 +143,32 @@ class BesteIndivRecords(models.Model):
 
 class AnderRecord(models.Model):
 
-    # vrij-formaat rapport met een referentie naar een nieuwsbericht
+    """ vrij-formaat rapport met een referentie naar een nieuwsbericht """
 
+    # controleer volgorde waarin de artikelen getoond worden: voor hoog (=nieuwste = vooraan) naar laag
+    volgorde = models.PositiveSmallIntegerField(default=0)
+
+    # titel van het kaartje
     titel = models.CharField(max_length=30)
+
+    # icoon van het kaartje
     icoon = models.CharField(max_length=20)
+
+    # tekst voor op het kaartje
     tekst = models.CharField(max_length=100)
+
+    # URL naar het nieuwsbericht
     url = models.CharField(max_length=100)
+
+    # publicatiedatum
+    datum = models.DateField(default='2000-01-01')
+
+    def __str__(self):
+        return "[%s] %s" % (self.volgorde, self.titel)
+
+    class Meta:
+        verbose_name = 'Ander record'
+        verbose_name_plural = 'Andere records'
 
 
 # end of file
