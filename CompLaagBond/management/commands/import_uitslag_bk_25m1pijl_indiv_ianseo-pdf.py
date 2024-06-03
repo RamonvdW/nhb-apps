@@ -108,6 +108,7 @@ class Command(BaseCommand):
         self.verbose = False
         self.deelnemers = dict()            # [NAAM VOOR ACHTER | NAAM ACHTER VOOR] = [KampioenschapSporterBoog, ...]
         self.indiv_klasse = None
+        self.uitslag = list()
 
     def add_arguments(self, parser):
         parser.add_argument('--dryrun', action='store_true')
@@ -314,6 +315,32 @@ class Command(BaseCommand):
             if not self.dryrun:
                 deelnemer.save(update_fields=['result_rank', 'result_volgorde',
                                               'result_score_1', 'result_score_2', 'result_counts'])
+
+            self.uitslag.append(deelnemer)
+        # for
+
+    def _verwijder_onnodige_result_counts(self):
+        aantal = len(self.uitslag)
+        prev_totaal = None
+        for nr in range(aantal):
+            deelnemer = self.uitslag[nr]
+            totaal = deelnemer.result_score_1 + deelnemer.result_score_2
+
+            if deelnemer.result_counts:
+                keep_counts_due_to_prev = (totaal == prev_totaal)
+                if nr < aantal - 1:
+                    next_deelnemer = self.uitslag[nr+1]
+                    next_totaal = next_deelnemer.result_score_1 + next_deelnemer.result_score_2
+                    keep_counts_due_to_next = (totaal == next_totaal)
+                else:
+                    keep_counts_due_to_next = False
+
+                if deelnemer.result_counts:
+                    if not (keep_counts_due_to_prev or keep_counts_due_to_next):
+                        deelnemer.result_counts = ''
+                        deelnemer.save(update_fields=['result_counts'])
+
+            prev_totaal = totaal
         # for
 
     def handle(self, *args, **options):
@@ -333,7 +360,7 @@ class Command(BaseCommand):
         del lees
 
         self._deelnemers_ophalen()
-
         self._verwerk_uitslag(regels)
+        self._verwijder_onnodige_result_counts()
 
 # end of file
