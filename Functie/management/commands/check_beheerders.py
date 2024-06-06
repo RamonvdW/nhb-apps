@@ -6,6 +6,7 @@
 
 # toon de beheerders van elke functies en eventuele bijzonderheden
 
+from django.conf import settings
 from django.core.management.base import BaseCommand
 from Functie.models import Functie
 from Sporter.models import Sporter
@@ -27,6 +28,7 @@ class Command(BaseCommand):
                         .objects
                         .prefetch_related('accounts')
                         .select_related('vereniging')
+                        .exclude(vereniging__ver_nr=settings.EXTERN_VER_NR)
                         .order_by('vereniging', 'rol')):
 
             functie_getoond = False
