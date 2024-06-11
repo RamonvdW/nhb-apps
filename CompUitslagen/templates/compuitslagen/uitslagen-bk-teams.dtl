@@ -114,12 +114,12 @@
                 {% if team.break_klasse %}
                     {% if not forloop.first %}
                         <tr class="sv-table-onderrand">
-                            <td colspan="6" class="sv-table-onderrand"></td>
+                            <td colspan="7" class="sv-table-onderrand"></td>
                         </tr>
                     {% endif %}
 
                     <tr class="sv-table-sectie-header">
-                        <td colspan="8" class="center">
+                        <td colspan="9" class="center">
                             <h5>{{ team.klasse_str }}</h5>
                             {% if team.match %}
                                 {% if comp.bk_is_afgelast %}<s>{% endif %}
@@ -142,6 +142,7 @@
                         <th>Team</th>
                         <th class="center hide-on-small-only">{% if not team.klasse_heeft_uitslag %}RK score{% endif %}</th>
                         <th class="right-align" style="padding-right:10px">BK scores</th>
+                        <th><!-- telling 10-en en 9-ens --></th>
                         <th class="hide-on-small-only"></th>       <!-- label -->
                         <td rowspan="{{ team.aantal_regels }}" class="sv-table-zijrand"></td>
                     </tr>
@@ -224,6 +225,16 @@
                         {% endif %}
                     </td>
 
+                    <!-- telling 10-en en 9-ens -->
+                    <td>
+                        {% if team.klasse_heeft_uitslag %}
+                            <span>{{ team.result_counts }}</span><br>
+                            {% for deelnemer in team.deelnemers %}
+                                <br>
+                            {% endfor %}
+                        {% endif %}
+                    </td>
+
                     <!-- label -->
                     <td class="hide-on-small-only center">
                         {% if team.klasse_heeft_uitslag %}
@@ -246,7 +257,7 @@
             {% endfor %}
 
             <tr class="sv-table-onderrand">
-                <td colspan="6" class="sv-table-onderrand"></td>
+                <td colspan="7" class="sv-table-onderrand"></td>
             </tr>
         </table>
 

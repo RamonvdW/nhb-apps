@@ -295,6 +295,8 @@ class KampioenschapTeam(models.Model):
 
     result_teamscore = models.PositiveSmallIntegerField(default=0)          # max = 32767
 
+    result_counts = models.CharField(max_length=20, default='', blank=True)     # 25m1pijl: 5x10 3x9
+
     def __str__(self):
         """ geef een tekstuele afkorting van dit object, voor in de admin interface """
         return "%s: %s (deelname=%s, rank=%s, volgorde=%s)" % (self.vereniging,

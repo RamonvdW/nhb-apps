@@ -62,6 +62,7 @@ class LeesPdf(object):
             self.regels.append(self.huidige_regel)
             self.huidige_regel = list()
 
+        tabs = list()
         lst = list()
 
         for regel in self.regels:
@@ -79,9 +80,17 @@ class LeesPdf(object):
 
                 tup = (naam, team_naam, score1, score2, count10, count9)
                 lst.append(tup)
+            else:
+                # nieuwe tabel
+                if 'Land / Vereniging' in regel:
+                    tabs.append(lst)
+                    lst = list()
         # for
 
-        return lst
+        if len(lst):
+            tabs.append(lst)
+
+        return tabs
 
 
 class Command(BaseCommand):
@@ -96,7 +105,7 @@ class Command(BaseCommand):
         self.verbose = False
         self.deelnemers = dict()            # [lid_nr] = [KampioenschapSporterBoog, ...]
         self.teams_cache = list()           # [KampioenschapTeam, ...]
-        self.pk2team = dict()               # [team.pk] = KampioenschapTeam
+        self.pk2team: dict[int, KampioenschapTeam] = dict()    # [team.pk] = KampioenschapTeam
         self.team_gekoppelde_pks = dict()   # [team.pk] = [KampioenschapSporterBoog.pk, ...]
         self.ver_lid_nrs = dict()           # [ver_nr] = [lid_nr, ...]
         self.kamp_lid_nrs = list()          # [lid_nr, ...]     iedereen die geplaatst is voor de kampioenschappen
@@ -267,13 +276,14 @@ class Command(BaseCommand):
                     match_count += 1
                 elif deelnemer.sporterboog.boogtype.afkorting in team.team_type.afkorting:
                     match_count += 1
-                if match_count > 0:
+                if match_count > 1:
                     # print('   (%s) %s' % (match_count, deelnemer))
                     tup = (match_count, deelnemer.pk, len(matches), deelnemer)
                     matches.append(tup)
             # for
             if len(matches) > 0:
                 matches.sort(reverse=True)      # hoogste aantal eerst
+                # print('matches: %s' % repr(matches))
                 match_count, _, _, deelnemer = matches[0]
                 if match_count > deze_match_count:
                     deze_match_count = match_count
@@ -324,6 +334,10 @@ class Command(BaseCommand):
 
                 deelnemer.result_bk_teamscore_1 = score1
                 deelnemer.result_bk_teamscore_2 = score2
+
+                # voor doorgave naar teamresultaat
+                deelnemer._count_10 = count10
+                deelnemer._count_9 = count9
         # for
 
         # werk elk van de teams bij
@@ -366,18 +380,33 @@ class Command(BaseCommand):
             if not self.dryrun:
                 for deelnemer in deelnemers:
                     deelnemer.save(update_fields=['result_bk_teamscore_1', 'result_bk_teamscore_2'])
+                # for
 
             team.feitelijke_leden.set(deelnemers)
 
             # bepaal de team score
-            bijdragen = [deelnemer.result_bk_teamscore_1 + deelnemer.result_bk_teamscore_2 for deelnemer in deelnemers]
-            bijdragen.sort(reverse=True)                    # hoogste eerst
-            # print('bijdragen: %s' % repr(bijdragen))
-            team.result_teamscore = sum(bijdragen[:3])      # som van de beste 3 bijdragen
+            bijdragen = [(deelnemer.result_bk_teamscore_1 + deelnemer.result_bk_teamscore_2, deelnemer._count_10, deelnemer._count_9)
+                         for deelnemer in deelnemers]
+            bijdragen.sort(reverse=True)    # hoogste eerst
 
-            bijdragen.insert(0, team.result_teamscore)      # totaal vooraan
-            bijdragen.append(team)
-            kamp_teams.append(bijdragen)
+            score = sum([tup[0] for tup in bijdragen[:3]])
+            count_10 = sum([tup[1] for tup in bijdragen[:3]])
+            count_9 = sum([tup[2] for tup in bijdragen[:3]])
+
+            team.result_teamscore = score
+            team.result_counts = '%sx10 %sx9' % (count_10, count_9)
+
+            tup = (score, count_10, count_9, team)
+            kamp_teams.append(tup)
+        # for
+
+        scores2count = dict()
+        for tup in kamp_teams:
+            score = tup[0]
+            try:
+                scores2count[score] += 1
+            except KeyError:
+                scores2count[score] = 1
         # for
 
         # bepaal de uitslag
@@ -390,12 +419,16 @@ class Command(BaseCommand):
                 rank += 1
                 kamp_team.result_rank = rank
                 kamp_team.result_volgorde = rank
+
+                if scores2count[kamp_team.result_teamscore] <= 1:
+                    # maar 1 team met deze score, dus telling 10-en / 9-ens is niet relevant
+                    kamp_team.result_counts = ''
             else:
                 kamp_team.result_rank = 0
                 kamp_team.result_volgorde = 0
-            self.stdout.write(" %2d. (%s) %s" % (kamp_team.result_rank, kamp_team.result_teamscore, kamp_team))
+            self.stdout.write(" %2d. (%s %s) %s" % (kamp_team.result_rank, kamp_team.result_teamscore, kamp_team.result_counts, kamp_team))
             if not self.dryrun:
-                kamp_team.save(update_fields=['result_rank', 'result_teamscore'])
+                kamp_team.save(update_fields=['result_rank', 'result_teamscore', 'result_counts'])
         # for
 
     def handle(self, *args, **options):
@@ -408,15 +441,19 @@ class Command(BaseCommand):
         self.stdout.write('[INFO] Lees bestand %s' % repr(fpath))
         lees = LeesPdf(start_at="Totale score", stop_at="150 pijlen")
         try:
-            regels = lees.extract_from_pdf(fpath)
+            tabs = lees.extract_from_pdf(fpath)
         except FileNotFoundError:
             self.stderr.write('[ERROR] Kan bestand niet vinden')
             return
         del lees
 
-        self._deelnemers_ophalen()
-        self._teams_ophalen()
+        # elke klasse apart verwerken
+        for regels in tabs:
+            # verse lijsten ophalen, want verwerk_uitslag past deze aan
+            self._deelnemers_ophalen()
+            self._teams_ophalen()
 
-        self._verwerk_uitslag(regels)
+            self._verwerk_uitslag(regels)
+        # for
 
 # end of file
