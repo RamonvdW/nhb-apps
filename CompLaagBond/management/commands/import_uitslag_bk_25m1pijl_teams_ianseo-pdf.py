@@ -150,7 +150,7 @@ class Command(BaseCommand):
     def _filter_deelnemers(self, team_klasse):
         # reduceer aantal KampioenschapSporterBoog aan de hand van de toegestaan bogen in deze wedstrijdklasse
         afkortingen = list(team_klasse.boog_typen.values_list('afkorting', flat=True))
-        self.stdout.write('[INFO] Toegestane bogen in team klasse %s = %s' % (team_klasse, ",".join(afkortingen)))
+        self.stdout.write('[INFO] Toegestane bogen: %s' % ",".join(afkortingen))
 
         # count1 = sum([len(deelnemers) for deelnemers in self.deelnemers.values()])
 
@@ -245,12 +245,6 @@ class Command(BaseCommand):
                 team_klasse = pk2klasse[pk]
         # for
 
-        if not team_klasse:
-            self.stderr.write('[ERROR] Kan team klasse niet bepalen (0 matches op team naam)')
-            return None
-
-        self.stdout.write('[INFO] Team klasse: %s' % team_klasse.beschrijving)
-
         return team_klasse
 
     def _bepaal_deelnemer(self, team, sporter_naam):
@@ -303,7 +297,10 @@ class Command(BaseCommand):
 
         team_klasse = self._bepaal_klasse(regels)
         if not team_klasse:
+            self.stderr.write('[ERROR] Kan team klasse niet bepalen (0 matches op team naam)')
             return
+        self.stdout.write('[INFO] Uitslag voor team klasse: %s' % team_klasse.beschrijving)
+
         self._filter_deelnemers(team_klasse)
 
         team2sporters = dict()       # [team.pk] = [sporter_naam, ...]
@@ -431,6 +428,24 @@ class Command(BaseCommand):
                 kamp_team.save(update_fields=['result_rank', 'result_teamscore', 'result_counts'])
         # for
 
+    def _merge_tabs(self, tabs):
+        self._teams_ophalen()
+
+        tabs2 = list()
+        prev_klasse = None
+        for regels in tabs:
+            team_klasse = self._bepaal_klasse(regels)
+            if team_klasse == prev_klasse:
+                # merge!
+                self.stdout.write("[INFO] Uitslag voor klasse %s stond verdeeld over 2 pagina's" % repr(team_klasse))
+                tabs2[-1].extend(regels)
+            else:
+                tabs2.append(regels)
+            prev_klasse = team_klasse
+        # for
+
+        return tabs2
+
     def handle(self, *args, **options):
 
         self.dryrun = options['dryrun']
@@ -446,6 +461,9 @@ class Command(BaseCommand):
             self.stderr.write('[ERROR] Kan bestand niet vinden')
             return
         del lees
+
+        # combineer tabellen die over twee bladzijden verdeeld zijn
+        tabs = self._merge_tabs(tabs)
 
         # elke klasse apart verwerken
         for regels in tabs:
