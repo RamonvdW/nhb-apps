@@ -17,35 +17,39 @@
         </div>
     </div>
 
-    <!-- witruimte -->
-    <div class="row center">
-        <div class="col s12">
-            <h4>Prestatiespelden</h4>
+    {% if url_speldencd %}
+
+        <!-- witruimte -->
+        <div class="row center">
+            <div class="col s12">
+                <h4>Prestatiespelden</h4>
+            </div>
         </div>
-    </div>
 
-    <!-- blauwe balk met kaartjes -->
-    <div class="row-sv-blauw">
-        <div class="col s12">
+        <!-- blauwe balk met kaartjes -->
+        <div class="row-sv-blauw">
+            <div class="col s12">
 
-            <a href="{{ url_spelden }}">
-                <div class="sv-card">
-                    <div class="sv-card-content-webwinkel">
+                <a href="{{ url_spelden }}">
+                    <div class="sv-card">
+                        <div class="sv-card-content-webwinkel">
 
-                        <div class="sv-card-image-webwinkel">
-                            <!-- achtergrondplaatje -->
-                            <img src="{{ img_spelden }}" alt="product">
+                            <div class="sv-card-image-webwinkel">
+                                <!-- achtergrondplaatje -->
+                                <img src="{{ img_spelden }}" alt="product">
+                            </div>
+
+                            <div class="sv-card-webwinkel-titel">Prestatiespelden</div>
+
+                            <div class="sv-card-webwinkel-prijs">Vanaf &euro;&nbsp;5,-</div>
                         </div>
-
-                        <div class="sv-card-webwinkel-titel">Prestatiespelden</div>
-
-                        <div class="sv-card-webwinkel-prijs">Vanaf &euro;&nbsp;5,-</div>
                     </div>
-                </div>
-            </a>
+                </a>
 
+            </div>
         </div>
-    </div>
+
+    {% endif %}
 
     {% for product in producten %}
 

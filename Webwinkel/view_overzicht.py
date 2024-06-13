@@ -6,6 +6,7 @@
 
 from django.http import Http404
 from django.urls import reverse
+from django.conf import settings
 from django.utils import timezone
 from django.utils.formats import localize
 from django.shortcuts import render
@@ -70,8 +71,9 @@ class OverzichtView(TemplateView):
 
         # iedereen mag de informatie over de spelden zien
         # begrenzing voor bestellen (alleen leden) volgt verderop
-        context['url_spelden'] = reverse('Spelden:begin')
-        context['img_spelden'] = static('spelden/grootmeester.png')
+        if settings.WEBWINKEL_TOON_PRESTATIESPELDEN:
+            context['url_spelden'] = reverse('Spelden:begin')
+            context['img_spelden'] = static('spelden/grootmeester.png')
 
         if rol_get_huidige(self.request) == Rollen.ROL_SPORTER:
             context['menu_toon_mandje'] = True
