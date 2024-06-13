@@ -437,7 +437,8 @@ class Command(BaseCommand):
             team_klasse = self._bepaal_klasse(regels)
             if team_klasse == prev_klasse:
                 # merge!
-                self.stdout.write("[INFO] Uitslag voor klasse %s stond verdeeld over 2 pagina's" % repr(team_klasse))
+                self.stdout.write(
+                    "[INFO] Uitslag voor klasse %s stond verdeeld over 2 pagina's" % team_klasse.beschrijving)
                 tabs2[-1].extend(regels)
             else:
                 tabs2.append(regels)

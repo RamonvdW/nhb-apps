@@ -7,6 +7,8 @@
 from django.test import TestCase
 from django.utils import timezone
 from Account.operations.aanmaken import account_create
+from Bestel.models import BestelMandje, Bestelling
+from Betaal.models import BetaalInstellingenVereniging, BetaalMutatie, BetaalActief, BetaalTransactie
 from Feedback.models import Feedback
 from Feedback.operations import store_feedback
 from Logboek.models import LogboekRegel, schrijf_in_logboek
@@ -18,6 +20,7 @@ from Sporter.models import Sporter
 from Taken.models import Taak
 from TestHelpers.e2ehelpers import E2EHelpers
 from TijdelijkeCodes.models import save_tijdelijke_code
+from Vereniging.models import Vereniging
 import datetime
 
 
@@ -32,6 +35,9 @@ class TestPleinCliDatabaseOpschonen(E2EHelpers, TestCase):
 
     def setUp(self):
         """ initialisatie van de test case """
+
+        ten_days_ago = timezone.now() - datetime.timedelta(days=10)
+        two_years_ago = timezone.now() - datetime.timedelta(days=365+365+1)
 
         # maak een onvoltooid account aan
         account = account_create(
@@ -71,11 +77,10 @@ class TestPleinCliDatabaseOpschonen(E2EHelpers, TestCase):
              deadline='2020-01-01',
              beschrijving='test').save()
 
-        long_ago = timezone.now() - datetime.timedelta(days=10)
         gast = GastRegistratie(lid_nr=800001,
                                email_is_bevestigd=True, email=self.gast_email_een)
         gast.save()
-        gast.aangemaakt = long_ago
+        gast.aangemaakt = ten_days_ago
         gast.save(update_fields=['aangemaakt'])
 
         # maak een onvoltooid account aan
@@ -94,12 +99,12 @@ class TestPleinCliDatabaseOpschonen(E2EHelpers, TestCase):
                                fase=REGISTRATIE_FASE_CLUB,
                                account=account)
         gast.save()
-        gast.aangemaakt = long_ago
+        gast.aangemaakt = ten_days_ago
         gast.save(update_fields=['aangemaakt'])
 
         gast = GastRegistratie(lid_nr=800003, email_is_bevestigd=False)
         gast.save()
-        gast.aangemaakt = long_ago
+        gast.aangemaakt = ten_days_ago
         gast.save(update_fields=['aangemaakt'])
 
         # maak een onvoltooid account aan
@@ -124,22 +129,52 @@ class TestPleinCliDatabaseOpschonen(E2EHelpers, TestCase):
                                email_is_bevestigd=True, email=self.gast_email_vier,
                                account=account, sporter=sporter)
         gast.save()
-        gast.aangemaakt = long_ago
+        gast.aangemaakt = ten_days_ago
         gast.save(update_fields=['aangemaakt'])
 
         # complete registraties mogen niet automatisch verwijderd worden
         gast = GastRegistratie(lid_nr=800005, fase=REGISTRATIE_FASE_COMPLEET)
         gast.save()
-        gast.aangemaakt = long_ago
+        gast.aangemaakt = ten_days_ago
         gast.save(update_fields=['aangemaakt'])
 
+        mandje = BestelMandje(account=account)
+        mandje.save()
+
+        bestelling = Bestelling(bestel_nr=1)
+        bestelling.save()
+        bestelling.aangemaakt = two_years_ago
+        bestelling.save()
+
+        mutatie = BetaalMutatie()
+        mutatie.save()
+        mutatie.when = two_years_ago
+        mutatie.save()
+
+        ver = Vereniging.objects.first()
+        ontvanger = BetaalInstellingenVereniging(mollie_api_key='1234', vereniging=ver)
+        ontvanger.save()
+
+        actief = BetaalActief(payment_id='123', ontvanger=ontvanger)
+        actief.save()
+        actief.when = two_years_ago
+        actief.save()
+
+        transactie = BetaalTransactie(when=two_years_ago)
+        transactie.save()
+
     def test_alles(self):
-        with self.assert_max_queries(126, modify_acceptable=True):
+        with self.assert_max_queries(152, modify_acceptable=True):
             f1, f2 = self.run_management_command('database_opschonen')
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
         self.assertTrue(f1.getvalue() == '')
         self.assertTrue("Klaar" in f2.getvalue())
+        self.assertTrue("[INFO] Verwijder 1 oude bestellingen" in f2.getvalue())
+        self.assertTrue("[INFO] Verwijder 1 lege mandjes" in f2.getvalue())
+        self.assertTrue("[INFO] Verwijder 1 oude betaal mutatie records" in f2.getvalue())
+        self.assertTrue("[INFO] Verwijder 1 oude betaal-actief records" in f2.getvalue())
+        self.assertTrue("[INFO] Verwijder 1 oude betaal-transactie records" in f2.getvalue())
         self.assertTrue("[INFO] Verwijder onvoltooid account Voornaam Achternaam (test)" in f2.getvalue())
         self.assertTrue("[INFO] Verwijder 1 oude logboek regels" in f2.getvalue())
         self.assertTrue("[INFO] Verwijder 1 oude emails" in f2.getvalue())
@@ -148,7 +183,7 @@ class TestPleinCliDatabaseOpschonen(E2EHelpers, TestCase):
         self.assertTrue('[INFO] Verwijder niet afgeronde gast-account registratie 800001 in fase 0' in f2.getvalue())
 
         # nog een keer aanroepen terwijl er niets meer te verwijderen valt
-        with self.assert_max_queries(10):
+        with self.assert_max_queries(14):
             f1, f2 = self.run_management_command('database_opschonen')
         self.assertTrue(f1.getvalue() == '')
         self.assertTrue("Klaar" in f2.getvalue())

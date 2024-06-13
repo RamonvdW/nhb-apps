@@ -1024,7 +1024,6 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
 
         if not match.vereniging and verenigingen.count() > 0:
             match.vereniging = verenigingen[0]
-            match.save()
 
         if not match.locatie and match.vereniging:
             # alle binnen accommodaties hebben discipline_indoor=True
@@ -1047,7 +1046,6 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
                         if locatie.banen_18m > 0:
                             match.locatie = locatie
                 # for
-                match.save()
 
         context['all_locaties'] = all_locs = list()
         pks = [ver.pk for ver in verenigingen]

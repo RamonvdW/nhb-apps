@@ -162,15 +162,20 @@
 
                         {% if bevat_fout %}
                             <p class="center sv-rood-text">Het is niet mogelijk om af te rekenen.<br>Neem contact op met de helpdesk.</p>
-                        {% else %}
-                            <div class="center" style="margin-top:30px">
+                        {% endif %}
+
+                        <div class="center" style="margin-top:30px">
+                            {% if url_bestellen %}
                                 <form action="{{ url_bestellen }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
                                     {% csrf_token %}
                                     <button class="btn-sv-rood" id="submit_knop" type="submit">
                                         <i class="notranslate material-icons-round left">shopping_cart_checkout</i>Bestelling afronden</button>
                                 </form>
-                            </div>
-                        {% endif %}
+                            {% else %}
+                                <button class="btn-sv-rood" disabled>
+                                    <i class="notranslate material-icons-round left">shopping_cart_checkout</i>Bestelling afronden</button>
+                            {% endif %}
+                        </div>
 
                     </div>
                 </div>
@@ -196,12 +201,14 @@
                         {% if ophalen_ver %}
 
                             <p>Je hebt gekozen om de producten op te halen op het bondsbureau:</p>
-                            <p>{{ ophalen_ver.adres_regel1 }}<br>{{ ophalen_ver.adres_regel2 }}</p>
+                            <p><code>{{ ophalen_ver.adres_regel1 }}<br>{{ ophalen_ver.adres_regel2 }}</code></p>
 
                         {% else %}
 
                             <p>De producten worden verstuurd naar jouw postadres:</p>
-                            <p>{{ koper_sporter.postadres_1 }}<br>{{ koper_sporter.postadres_2 }}{% if koper_sporter.postadres_3 %}<br>{{ koper_sporter.postadres_3 }}{% endif %}</p>
+                            <p>
+                                <code>{{ mandje.afleveradres_regel_1 }}<br>{{ mandje.afleveradres_regel_2 }}{% if mandje.afleveradres_regel_3 %}<br>{{ mandje.afleveradres_regel_3 }}{% endif %}</code>
+                            </p>
                             <p>Als dit adres niet klopt (of onvolledig is) vraag dan de secretaris van jouw vereniging om dit aan te passen.</p>
 
                         {% endif %}
@@ -217,6 +224,55 @@
 
         {% endif %}
 
+
+        {% if url_afleveradres %}
+
+            <!-- witruimte -->
+            <div class="row center">
+                <div class="col s12">
+                    <h4>Levering</h4>
+                </div>
+            </div>
+
+            <!-- blauw balk met wit informatie veld -->
+            <div class="row-sv-blauw">
+                <div class="col s12 l8 offset-l2">
+                    <div class="sv-kader" style="padding:10px">
+
+                        {% if geen_afleveradres %}
+                            <p>We hebben een adres nodig om je bestelling naartoe te sturen</p>
+                            <p>
+                                <a class="btn-sv-rood" href="{{ url_afleveradres }}">
+                                    <i class="material-icons-round left notranslate">local_shipping</i>Invoeren</a>
+                            </p>
+
+                        {% else %}
+
+                            <p>De producten worden verstuurd naar het volgende adres:</p>
+                            <p>
+                                <code>{{ mandje.afleveradres_regel_1 }}</code><br>
+                                <code>{{ mandje.afleveradres_regel_2 }}</code>
+                                {% if mandje.afleveradres_regel_3 %}
+                                    <br><code>{{ mandje.afleveradres_regel_3 }}</code>
+                                    {% if mandje.afleveradres_regel_4 %}
+                                        <br><code>{{ mandje.afleveradres_regel_4 }}</code>
+                                        {% if mandje.afleveradres_regel_5 %}
+                                            <br><code>{{ mandje.afleveradres_regel_5 }}</code>
+                                        {% endif %}
+                                    {% endif %}
+                                {% endif %}
+                            </p>
+
+                            <p style="padding-top:10px">
+                                <a class="btn-sv-blauw" href="{{ url_afleveradres }}">
+                                    <i class="material-icons-round left notranslate">local_shipping</i>Wijzig</a>
+                        </p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+        {% endif %}
 
         <!-- witruimte -->
         <div class="row center">

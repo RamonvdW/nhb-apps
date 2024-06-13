@@ -112,7 +112,6 @@ class ScoresRegioView(UserPassesTestMixin, TemplateView):
             beschrijving = match2beschrijving[match.pk]
             if match.beschrijving != beschrijving:
                 match.beschrijving = beschrijving
-                match.save()                        # TODO: voorkomen dat dit nodig is + uitstellen tot de POST
 
             # geef RCL de mogelijkheid om de scores aan te passen
             # de HWL/WL krijgen deze link vanuit Vereniging.Wedstrijden
@@ -787,8 +786,8 @@ class ScoresRegioTeamsView(UserPassesTestMixin, TemplateView):
 
         used_score_pks = list()
 
-        deelnemer2sporter_cache = dict()        # [deelnemer_pk] = (sporterboog_pk, naam_str)
-        sporterboog_cache = dict()              # [sporterboog_pk] = SporterBoog
+        deelnemer2sporter_cache: dict[int, tuple[int, str]] = dict()    # [deelnemer_pk] = (sporterboog_pk, naam_str)
+        sporterboog_cache: dict[int, SporterBoog] = dict()              # [sporterboog_pk] = SporterBoog
         for deelnemer in (RegiocompetitieSporterBoog
                           .objects
                           .select_related('sporterboog',

@@ -6,6 +6,7 @@
 
 from django.http import Http404
 from django.urls import reverse
+from django.conf import settings
 from django.utils import timezone
 from django.utils.formats import localize
 from django.shortcuts import render
@@ -68,8 +69,11 @@ class OverzichtView(TemplateView):
 
         context['producten'] = self._get_producten()
 
-        # context['url_spelden'] = reverse('Spelden:begin')
-        # context['img_spelden'] = static('spelden/grootmeester.png')
+        # iedereen mag de informatie over de spelden zien
+        # begrenzing voor bestellen (alleen leden) volgt verderop
+        if settings.WEBWINKEL_TOON_PRESTATIESPELDEN:
+            context['url_spelden'] = reverse('Spelden:begin')
+            context['img_spelden'] = static('spelden/grootmeester.png')
 
         if rol_get_huidige(self.request) == Rollen.ROL_SPORTER:
             context['menu_toon_mandje'] = True
@@ -157,10 +161,8 @@ class ProductView(TemplateView):
         if not self.request.user.is_authenticated:
             context['moet_inloggen'] = True
         else:
-            account = get_account(self.request)
-            if not account.is_gast:
-                context['url_toevoegen'] = reverse('Webwinkel:product', kwargs={'product_pk': product.pk})
-                context['menu_toon_mandje'] = True
+            context['url_toevoegen'] = reverse('Webwinkel:product', kwargs={'product_pk': product.pk})
+            context['menu_toon_mandje'] = True
 
         context['kruimels'] = (
             (reverse('Webwinkel:overzicht'), 'Webwinkel'),
@@ -172,7 +174,7 @@ class ProductView(TemplateView):
     def post(self, request, *args, **kwargs):
 
         account = get_account(self.request)
-        if not account.is_authenticated or account.is_gast:
+        if not account.is_authenticated:
             raise Http404('Geen toegang')
 
         try:

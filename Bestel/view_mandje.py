@@ -183,16 +183,40 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
 
         mandje, producten, ontvanger2product_pks, mandje_is_leeg, bevat_fout = self._beschrijf_inhoud_mandje(account)
 
+        toon_transport = False
         if mandje:
             if mandje.transport == BESTEL_TRANSPORT_OPHALEN:
-                context['toon_transport'] = True
+                toon_transport = True
                 context['ophalen_ver'] = Vereniging.objects.get(ver_nr=settings.WEBWINKEL_VERKOPER_VER_NR)
 
             elif mandje.transport == BESTEL_TRANSPORT_VERZEND:
-                context['toon_transport'] = settings.WEBWINKEL_TRANSPORT_OPHALEN_MAG
+                toon_transport = settings.WEBWINKEL_TRANSPORT_OPHALEN_MAG
                 sporter = get_sporter(account)
                 context['koper_sporter'] = sporter
 
+        geen_afleveradres = toon_transport
+        if toon_transport and not mandje_is_leeg:
+            if account.is_gast:
+                # geef gastaccounts mogelijkheid om afleveradres in te voeren
+                toon_transport = False
+                context['url_afleveradres'] = reverse('Bestel:wijzig-afleveradres')
+            else:
+                # volwaardig lid: afleveradres automatisch invullen
+                sporter = get_sporter(account)
+                mandje.afleveradres_regel_1 = sporter.postadres_1
+                mandje.afleveradres_regel_2 = sporter.postadres_2
+                mandje.afleveradres_regel_3 = sporter.postadres_3
+
+            for nr in (1, 2, 3, 4, 5):
+                regel_str = 'afleveradres_regel_%s' % nr
+                regel = getattr(mandje, regel_str)
+                if regel:
+                    geen_afleveradres = False
+                    break       # from the for
+            # for
+
+        context['geen_afleveradres'] = geen_afleveradres
+        context['toon_transport'] = toon_transport
         context['mandje_is_leeg'] = mandje_is_leeg
         context['mandje'] = mandje
         context['producten'] = producten
@@ -202,7 +226,7 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
         context['url_voorwaarden_wedstrijden'] = settings.VERKOOPVOORWAARDEN_WEDSTRIJDEN_URL
         context['url_voorwaarden_webwinkel'] = settings.VERKOOPVOORWAARDEN_WEBWINKEL_URL
 
-        if not (bevat_fout or mandje_is_leeg):
+        if not (bevat_fout or mandje_is_leeg or geen_afleveradres):
             context['url_bestellen'] = reverse('Bestel:toon-inhoud-mandje')
 
         context['kruimels'] = (
@@ -219,6 +243,37 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
         snel = str(request.POST.get('snel', ''))[:1]
 
         account = get_account(self.request)
+
+        try:
+            mandje = BestelMandje.objects.prefetch_related('producten').get(account=account)
+        except BestelMandje.DoesNotExist:
+            # geen mandje
+            raise Http404('Mandje niet gevonden')
+
+        # nu kunnen we het afleveradres permanent maken, ook voor leden
+
+        if mandje.transport == BESTEL_TRANSPORT_VERZEND:
+            if not account.is_gast:
+                # volwaardig lid: afleveradres automatisch invullen
+                sporter = get_sporter(account)
+                mandje.afleveradres_regel_1 = sporter.postadres_1
+                mandje.afleveradres_regel_2 = sporter.postadres_2
+                mandje.afleveradres_regel_3 = sporter.postadres_3
+
+            geen_afleveradres = True
+            for nr in (1, 2, 3, 4, 5):
+                regel_str = 'afleveradres_regel_%s' % nr
+                regel = getattr(mandje, regel_str)
+                if regel:
+                    geen_afleveradres = False
+                    break       # from the for
+            # for
+
+            if geen_afleveradres:
+                raise Http404('Afleveradres onbekend')
+
+        mandje.save(update_fields=['afleveradres_regel_1', 'afleveradres_regel_2', 'afleveradres_regel_3',
+                                   'afleveradres_regel_4', 'afleveradres_regel_5'])
 
         bestel_mutatieverzoek_maak_bestellingen(account, snel == '1')
         # achtergrondtaak zet het mandje om in bestellingen

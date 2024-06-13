@@ -136,6 +136,13 @@ def stuur_email_naar_koper_bestelling_details(bestelling):
     totaal_euro_str = "%.2f" % bestelling.totaal_euro
     totaal_euro_str = totaal_euro_str.replace('.', ',')       # nederlandse komma
 
+    heeft_afleveradres = False
+    for nr in (1, 2, 3, 4, 5):
+        regel = getattr(bestelling, 'afleveradres_regel_%s' % nr)
+        if regel:
+            heeft_afleveradres = True
+    # for
+
     context = {
         'voornaam': account.get_first_name(),
         'naam_site': settings.NAAM_SITE,
@@ -144,6 +151,7 @@ def stuur_email_naar_koper_bestelling_details(bestelling):
         'producten': producten,
         'bestel_status': BESTELLING_STATUS2STR[bestelling.status],
         'kan_betalen': bestelling.status not in (BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_GEANNULEERD),
+        'heeft_afleveradres': heeft_afleveradres,
     }
 
     if bestelling.status == BESTELLING_STATUS_NIEUW:

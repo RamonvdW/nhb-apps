@@ -162,7 +162,7 @@ class TestBestelBetaling(E2EHelpers, TestCase):
         bestelling = Bestelling.objects.first()
 
         # betaling opstarten
-        url_betaling_gedaan = '/plein/'     # TODO: betere url kiezen
+        url_betaling_gedaan = '/plein/'     # FUTURE: betere url kiezen
         description = 'Test betaling 421'       # 421 = paid, iDEAL
         betaal_mutatieverzoek_start_ontvangst(bestelling, description, self.wedstrijd.prijs_euro_normaal,
                                               url_betaling_gedaan, snel=True)

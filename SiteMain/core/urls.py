@@ -54,6 +54,7 @@ urlpatterns = [
     path('vereniging/',                     include('Vereniging.urls')),
     path('vereniging/locatie/',             include('Locatie.urls')),
     path('webwinkel/',                      include('Webwinkel.urls')),
+    path('webwinkel/spelden/',              include('Spelden.urls')),
     path('wedstrijden/',                    include('Wedstrijden.urls')),
     path('wedstrijden/inschrijven/',        include('WedstrijdInschrijven.urls')),
 

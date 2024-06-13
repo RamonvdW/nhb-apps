@@ -84,11 +84,6 @@ class LeesPdf(object):
                 count9 = int(count9)
                 ver_nr = int(ver_nr)
 
-                if naam == 'TIMMERMANS Herman':
-                    naam2 = 'TIMMERMANS Hans'
-                    print('[WARNING] Vervang naam: %s --> %s' % (repr(naam), repr(naam2)))
-                    naam = naam2
-
                 tup = (naam, ver_nr, score1, score2, count10, count9)
                 lst.append(tup)
         # for
