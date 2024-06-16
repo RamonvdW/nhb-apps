@@ -264,7 +264,7 @@ class Command(BaseCommand):
 
         now = timezone.now()
         stamp_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
-        msg = '[%s] Aanmelding (door %s): %s\n' % (stamp_str, door, deelnemer)
+        msg = '[%s] Deelname op Nee gezet want afmelding ontvangen van  %s\n' % (stamp_str, door)
 
         deelnemer.deelname = DEELNAME_NEE
         deelnemer.logboek += msg
@@ -313,7 +313,8 @@ class Command(BaseCommand):
 
                     # zet het nieuwe plekje
                     reserve.volgorde = slechter[0].volgorde
-                    reserve.save(update_fields=['volgorde'])
+                    reserve.logboek += '[%s] Reserve wordt deelnemer\n' % stamp_str
+                    reserve.save(update_fields=['volgorde', 'logboek'])
 
                     self.stdout.write('[INFO] Reserve krijgt nieuwe volgorde=%s' % reserve.volgorde)
 
@@ -328,6 +329,9 @@ class Command(BaseCommand):
 
     def _opnieuw_aanmelden_indiv(self, deelnemer):
         # meld de deelnemer opnieuw aan door hem bij de reserves te zetten
+
+        now = timezone.now()
+        stamp_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
 
         # sporter wordt van zijn oude 'volgorde' weggehaald
         # iedereen schuift een plekje op
@@ -371,6 +375,7 @@ class Command(BaseCommand):
         if deelnemers_count >= limiet:
             # er zijn genoeg sporters, dus deze her-aanmelding moet op de reserve-lijst
             self.stdout.write('[INFO] Naar de reserve-lijst')
+            deelnemer.logboek += '[%s] Naar de reserve-lijst\n' % stamp_str
 
             # zoek een plekje in de reserve-lijst
             objs = (KampioenschapSporterBoog
@@ -413,6 +418,7 @@ class Command(BaseCommand):
                                    .count()) + 1
         else:
             self.stdout.write('[INFO] Naar deelnemers-lijst')
+            deelnemer.logboek += '[%s] Direct naar de deelnemerslijst\n' % stamp_str
 
             # er is geen reserve-lijst in deze klasse
             # de sporter gaat dus meteen de deelnemers lijst in
@@ -444,7 +450,8 @@ class Command(BaseCommand):
 
         deelnemer.volgorde = nieuwe_volgorde
         deelnemer.deelname = DEELNAME_JA
-        deelnemer.save(update_fields=['volgorde', 'deelname'])
+        deelnemer.logboek += '[%s] Deelname op Ja gezet\n' % stamp_str
+        deelnemer.save(update_fields=['volgorde', 'deelname', 'logboek'])
 
         # deel de rank nummers opnieuw uit
         self._update_rank_nummers(deelkamp, indiv_klasse)
@@ -452,17 +459,20 @@ class Command(BaseCommand):
     def _verwerk_mutatie_kamp_aanmelden(self, door: str, deelnemer: KampioenschapSporterBoog):
         now = timezone.now()
         stamp_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
-        msg = '[%s] Aanmelding (door %s): %s\n' % (stamp_str, door, deelnemer)
+
+        msg = '[%s] Mutatie door %s\n' % (stamp_str, door)
+        deelnemer.logboek += msg
+        deelnemer.save(update_fields=['logboek'])
 
         if deelnemer.deelname != DEELNAME_JA:
             if deelnemer.deelname == DEELNAME_NEE:
-                deelnemer.logboek += msg
-                deelnemer.save(update_fields=['logboek'])
-
+                # Nee naar Ja
                 self._opnieuw_aanmelden_indiv(deelnemer)
             else:
+                # Ja of Onbekend naar Ja
                 deelnemer.deelname = DEELNAME_JA
-                deelnemer.save(update_fields=['deelname'])
+                deelnemer.logboek += '[%s] Deelname op Ja gezet\n' % stamp_str
+                deelnemer.save(update_fields=['deelname', 'logboek'])
                 # verder hoeven we niets te doen: volgorde en rank blijft hetzelfde
 
     @staticmethod
@@ -932,6 +942,9 @@ class Command(BaseCommand):
             ook wordt hier de vereniging van de sporter bevroren.
         """
 
+        stamp_str = timezone.localtime(timezone.now()).strftime('%Y-%m-%d om %H:%M')
+        msg = "[%s] Toegevoegd aan de RK indiv deelnemerslijst\n" % stamp_str
+
         # sporters moeten in het rayon van hun huidige vereniging geplaatst worden
         rayon_nr2deelkamp = dict()
         for deelkamp in (Kampioenschap
@@ -968,11 +981,13 @@ class Command(BaseCommand):
                                     bij_vereniging=ver,             # bevries vereniging
                                     kampioen_label=deelnemer.kampioen_label,
                                     gemiddelde=deelnemer.gemiddelde,
-                                    gemiddelde_scores=deelnemer.regio_scores)
+                                    gemiddelde_scores=deelnemer.regio_scores,
+                                    logboek=msg)
 
                     if not deelnemer.inschrijf_voorkeur_rk_bk:
                         # bij inschrijven al afgemeld voor RK/BK
                         kampioen.deelname = DEELNAME_NEE
+                        kampioen.logboek += '[%s] Deelname op Nee gezet want geen voorkeur RK/BK' % stamp_str
 
                     bulk_lijst.append(kampioen)
                     if len(bulk_lijst) > 150:       # pragma: no cover
@@ -1148,6 +1163,9 @@ class Command(BaseCommand):
             iedereen die scores neergezet heeft in het RK komt in de lijst
         """
 
+        stamp_str = timezone.localtime(timezone.now()).strftime('%Y-%m-%d om %H:%M')
+        msg = "[%s] Toegevoegd aan de BK indiv deelnemerslijst\n" % stamp_str
+
         if comp.is_indoor():
             aantal_pijlen = 2.0 * 30
         else:
@@ -1188,11 +1206,13 @@ class Command(BaseCommand):
                         indiv_klasse=kampioen.indiv_klasse,
                         bij_vereniging=kampioen.bij_vereniging,
                         gemiddelde=gemiddelde,
-                        gemiddelde_scores=gemiddelde_scores)
+                        gemiddelde_scores=gemiddelde_scores,
+                        logboek=msg)
 
             if kampioen.result_rank == 1:
                 nieuw.kampioen_label = 'Kampioen %s' % kampioen.kampioenschap.rayon.naam
                 nieuw.deelname = DEELNAME_JA
+                nieuw.logboek += '[%s] Deelname op Ja gezet, want kampioen RK\n' % stamp_str
 
             bulk.append(nieuw)
 
