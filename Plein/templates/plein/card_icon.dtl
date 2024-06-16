@@ -1,5 +1,5 @@
 {% comment %}
-                Copyright (c) 2020-2023 Ramon van der Winkel.
+                Copyright (c) 2020-2024 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -14,6 +14,7 @@
         url         = de url waar je heen gaat na klikken op het kaartje
         onclick     = alternatief voor de url - roept een javascript functie aan
         extern_open = openen in een apart tabblad
+        modal_id    = id van de modal dialog die geopend moet worden (optioneel)
 
     Hierdoor is mogelijk om centraal de code van een kaartje aan te passen.
 
@@ -27,6 +28,8 @@
     <!-- de hele kaart is klikbaar -->
     {% if onclick %}
         <a href="#" onclick="{{ onclick }}">
+    {% elif modal_id %}
+        <a class="modal-trigger" href="#{{ modal_id }}">
     {% else %}
         <a href="{{ url }}"{% if extern_open %} target="_blank" rel="noopener noreferrer"{% endif %}>
     {% endif %}
