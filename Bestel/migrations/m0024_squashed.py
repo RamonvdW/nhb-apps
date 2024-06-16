@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2023 Ramon van der Winkel.
+#  Copyright (c) 2022-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -27,10 +27,6 @@ class Migration(migrations.Migration):
 
     # dit is de eerste
     initial = True
-
-    replaces = [('Bestel', 'm0021_squashed'),
-                ('Bestel', 'm0022_fix_auto_date'),
-                ('Bestel', 'm0023_renames')]
 
     # volgorde afdwingen
     dependencies = [

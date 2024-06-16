@@ -8,9 +8,7 @@ from django.db import migrations, models
 
 
 def init_taken(apps, _):
-    """ Maak de enige tabel regel aan die gebruikt wordt door het cron job
-        regiocomp_upd_tussenstand.
-    """
+    """ Maak de enige tabel regel aan die gebruikt wordt door het management commando regiocomp_tussenstand """
     # haal de klassen op die van toepassing zijn tijdens deze migratie
     taken_klas = apps.get_model('Competitie', 'CompetitieTaken')
 
@@ -19,23 +17,19 @@ def init_taken(apps, _):
 
 class Migration(migrations.Migration):
 
-    """ Migratie class voor dit deel van de applicatie """
+    replaces = [('Competitie', 'm0108_squashed'),
+                ('Competitie', 'm0109_match_scheids'),
+                ('Competitie', 'm0110_scheids_rk_bk'),
+                ('Competitie', 'm0111_logboekjes'),
+                ('Competitie', 'm0112_team_result_counts')]
 
     # dit is de eerste
     initial = True
 
-    replaces = [('Competitie', 'm0101_squashed'),
-                ('Competitie', 'm0102_vereniging_1'),
-                ('Competitie', 'm0103_vereniging_2'),
-                ('Competitie', 'm0104_locatie'),
-                ('Competitie', 'm0105_fase_d'),
-                ('Competitie', 'm0106_geo_1'),
-                ('Competitie', 'm0107_geo_2')]
-
     # volgorde afdwingen
     dependencies = [
         ('Account', 'm0030_squashed'),
-        ('BasisTypen', 'm0057_squashed'),
+        ('BasisTypen', 'm0058_scheids_rk_bk'),
         ('Functie', 'm0025_squashed'),
         ('Geo', 'm0002_squashed'),
         ('Score', 'm0019_squashed'),
@@ -108,6 +102,8 @@ class Migration(migrations.Migration):
                                                  to='Competitie.competitie')),
                 ('team_type', models.ForeignKey(on_delete=models.deletion.PROTECT, to='BasisTypen.teamtype')),
                 ('titel_bk', models.CharField(default='', max_length=30)),
+                ('krijgt_scheids_rk', models.BooleanField(default=False)),
+                ('krijgt_scheids_bk', models.BooleanField(default=False)),
             ],
             options={
                 'verbose_name': 'Competitie team klasse',
@@ -140,6 +136,8 @@ class Migration(migrations.Migration):
                                                  to='Competitie.competitie')),
                 ('leeftijdsklassen', models.ManyToManyField(to='BasisTypen.leeftijdsklasse')),
                 ('titel_bk', models.CharField(default='', max_length=30)),
+                ('krijgt_scheids_rk', models.BooleanField(default=False)),
+                ('krijgt_scheids_bk', models.BooleanField(default=False)),
             ],
             options={
                 'verbose_name': 'Competitie indiv klasse',
@@ -164,6 +162,7 @@ class Migration(migrations.Migration):
                                               to='Score.uitslag')),
                 ('vereniging', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.PROTECT,
                                                  to='Vereniging.vereniging')),
+                ('aantal_scheids', models.IntegerField(default=0)),
             ],
             options={
                 'verbose_name': 'Competitie match',
@@ -320,6 +319,7 @@ class Migration(migrations.Migration):
                 ('result_bk_teamscore_2', models.PositiveSmallIntegerField(default=0)),
                 ('indiv_klasse', models.ForeignKey(on_delete=models.deletion.CASCADE,
                                                    to='Competitie.competitieindivklasse')),
+                ('logboek', models.TextField(blank=True)),
             ],
             options={
                 'verbose_name': 'Kampioenschap sporterboog',
@@ -370,7 +370,6 @@ class Migration(migrations.Migration):
                 ('team_punten', models.PositiveSmallIntegerField(default=0)),
                 ('team', models.ForeignKey(on_delete=models.deletion.CASCADE,
                                            to='Competitie.regiocompetitieteam')),
-                ('logboek', models.TextField(blank=True, max_length=1024)),
                 ('deelnemers_feitelijk', models.ManyToManyField(blank=True, related_name='teamronde_feitelijk',
                                                                 to='Competitie.regiocompetitiesporterboog')),
                 ('deelnemers_geselecteerd', models.ManyToManyField(blank=True, related_name='teamronde_geselecteerd',
@@ -379,6 +378,7 @@ class Migration(migrations.Migration):
                                                                to='Score.scorehist')),
                 ('scores_feitelijk', models.ManyToManyField(blank=True, related_name='teamronde_feitelijk',
                                                             to='Score.score')),
+                ('logboek', models.TextField(blank=True)),
             ],
         ),
         migrations.CreateModel(
@@ -436,6 +436,7 @@ class Migration(migrations.Migration):
                 ('result_rank', models.PositiveSmallIntegerField(default=0)),
                 ('result_volgorde', models.PositiveSmallIntegerField(default=0)),
                 ('result_teamscore', models.PositiveSmallIntegerField(default=0)),
+                ('result_counts', models.CharField(blank=True, default='', max_length=20)),
                 ('team_klasse', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.CASCADE,
                                                   to='Competitie.competitieteamklasse')),
                 ('rank', models.PositiveSmallIntegerField(default=0)),
@@ -484,7 +485,7 @@ class Migration(migrations.Migration):
                                                       blank=True, null=True, to='Competitie.competitiemutatie')),
             ],
         ),
-        migrations.RunPython(init_taken),
+        migrations.RunPython(code=init_taken),
     ]
 
 # end of file

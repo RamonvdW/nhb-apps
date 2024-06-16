@@ -20,14 +20,6 @@ class Migration(migrations.Migration):
     # dit is de eerste
     initial = True
 
-    replaces = [('Scheidsrechter', 'm0001_initial'),
-                ('Scheidsrechter', 'm0002_is_hoofd_sr'),
-                ('Scheidsrechter', 'm0003_constraints'),
-                ('Scheidsrechter', 'm0004_refactor'),
-                ('Scheidsrechter', 'm0005_mutaties'),
-                ('Scheidsrechter', 'm0006_notificaties'),
-                ('Scheidsrechter', 'm0007_opmerking')]
-
     # volgorde afdwingen
     dependencies = [
         ('Sporter', 'm0031_squashed'),

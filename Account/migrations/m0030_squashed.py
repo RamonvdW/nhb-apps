@@ -16,10 +16,6 @@ class Migration(migrations.Migration):
     # dit is de eerste
     initial = True
 
-    replaces = [('Account', 'm0027_squashed'),
-                ('Account', 'm0028_scheids'),
-                ('Account', 'm0029_manager_mh')]
-
     # volgorde afdwingen
     dependencies = [
         ('auth', '0012_alter_user_first_name_max_length'),

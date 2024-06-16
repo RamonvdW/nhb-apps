@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2023 Ramon van der Winkel.
+#  Copyright (c) 2020-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -75,13 +75,6 @@ class Migration(migrations.Migration):
 
     # dit is de eerste
     initial = True
-
-    replaces = [('Functie', 'm0019_squashed'),
-                ('Functie', 'm0020_vereniging_1'),
-                ('Functie', 'm0021_vereniging_2'),
-                ('Functie', 'm0022_scheidsrechters'),
-                ('Functie', 'm0023_geo_1'),
-                ('Functie', 'm0024_geo_2')]
 
     # volgorde afdwingen
     dependencies = [

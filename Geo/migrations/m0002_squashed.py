@@ -117,13 +117,8 @@ class Migration(migrations.Migration):
     # dit is de eerste
     initial = True
 
-    replaces = [
-        ('Geo', 'm0001_initial_copy')
-    ]
-
     # volgorde afdwingen
-    dependencies = [
-    ]
+    dependencies = []
 
     # migratie functies
     operations = [

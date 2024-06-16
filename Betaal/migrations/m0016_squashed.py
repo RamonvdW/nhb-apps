@@ -14,10 +14,6 @@ class Migration(migrations.Migration):
     # dit is de eerste
     initial = True
 
-    replaces = [('Betaal', 'm0013_squashed'),
-                ('Betaal', 'm0014_vereniging_1'),
-                ('Betaal', 'm0015_vereniging_2')]
-
     # volgorde afdwingen
     dependencies = [
         ('Vereniging', 'm0007_squashed'),
