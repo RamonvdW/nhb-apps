@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023 Ramon van der Winkel.
+#  Copyright (c) 2023-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -14,14 +14,10 @@ class Migration(migrations.Migration):
     # dit is de eerste
     initial = True
 
-    replaces = [('TijdelijkeCodes', 'm0004_squashed'),
-                ('TijdelijkeCodes', 'm0005_scheids_beschikbaarheid'),
-                ('TijdelijkeCodes', 'm0006_cleanup_unused')]
-
     # volgorde afdwingen
     dependencies = [
         ('Account', 'm0030_squashed'),
-        ('Competitie', 'm0108_squashed'),
+        ('Competitie', 'm0113_squashed'),
         ('Functie', 'm0025_squashed'),
         ('Registreer', 'm0005_squashed'),
     ]

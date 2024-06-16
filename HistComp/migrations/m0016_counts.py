@@ -13,14 +13,22 @@ class Migration(migrations.Migration):
 
     # volgorde afdwingen
     dependencies = [
-        ('Competitie', 'm0111_logboekjes'),
+        ('HistComp', 'm0015_squashed'),
     ]
 
-    # migratie functies
+    # migration functions
     operations = [
+        migrations.RenameModel(
+            old_name='HistKampIndiv',
+            new_name='HistKampIndivRK',
+        ),
+        migrations.AlterModelOptions(
+            name='histkampteam',
+            options={'verbose_name': 'Hist RK/BK teams', 'verbose_name_plural': 'Hist RK/BK teams'},
+        ),
         migrations.AddField(
-            model_name='kampioenschapteam',
-            name='result_counts',
+            model_name='histkampteam',
+            name='team_score_counts',
             field=models.CharField(blank=True, default='', max_length=20),
         ),
     ]

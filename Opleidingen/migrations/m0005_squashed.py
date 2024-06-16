@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2023 Ramon van der Winkel.
+#  Copyright (c) 2022-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -22,9 +22,6 @@ class Migration(migrations.Migration):
 
     # dit is de eerste
     initial = True
-
-    replaces = [('Opleidingen', 'm0003_squashed'),
-                ('Opleidingen', 'm0004_locatie')]
 
     # volgorde afdwingen
     dependencies = [

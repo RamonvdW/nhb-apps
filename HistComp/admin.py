@@ -7,7 +7,7 @@
 from django.contrib import admin
 from HistComp.models import (HistCompSeizoen,
                              HistCompRegioIndiv, HistCompRegioTeam,
-                             HistKampIndiv, HistKampIndivBK, HistKampTeam)
+                             HistKampIndivRK, HistKampIndivBK, HistKampTeam)
 
 
 class HistCompSeizoenAdmin(admin.ModelAdmin):
@@ -75,7 +75,7 @@ class HistKampTeamAdmin(admin.ModelAdmin):
             else:
                 hist_seizoen = None     # finds nothing until hist_seizoen has been filled in
 
-            kwargs['queryset'] = (HistKampIndiv
+            kwargs['queryset'] = (HistKampIndivRK
                                   .objects
                                   .filter(seizoen=hist_seizoen)
                                   .order_by('sporter_lid_nr'))
@@ -86,7 +86,7 @@ class HistKampTeamAdmin(admin.ModelAdmin):
 admin.site.register(HistCompSeizoen, HistCompSeizoenAdmin)
 admin.site.register(HistCompRegioIndiv, HistCompRegioIndivAdmin)
 admin.site.register(HistCompRegioTeam, HistCompRegioTeamAdmin)
-admin.site.register(HistKampIndiv, HistKampIndivRKAdmin)
+admin.site.register(HistKampIndivRK, HistKampIndivRKAdmin)
 admin.site.register(HistKampIndivBK, HistKampIndivBKAdmin)
 admin.site.register(HistKampTeam, HistKampTeamAdmin)
 

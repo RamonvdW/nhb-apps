@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2023 Ramon van der Winkel.
+#  Copyright (c) 2021-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -21,20 +21,6 @@ class Migration(migrations.Migration):
 
     # dit is de eerste
     initial = True
-
-    replaces = [('Wedstrijden', 'm0040_squashed'),
-                ('Wedstrijden', 'm0041_vereniging_1'),
-                ('Wedstrijden', 'm0042_vereniging_2'),
-                ('Wedstrijden', 'm0043_locatie_1'),
-                ('Wedstrijden', 'm0044_locatie_2'),
-                ('Wedstrijden', 'm0045_locatie_3'),
-                ('Wedstrijden', 'm0046_kwalificatiescores'),
-                ('Wedstrijden', 'm0047_aantal_scheids'),
-                ('Wedstrijden', 'm0048_fix_auto_now'),
-                ('Wedstrijden', 'm0049_check_kwalificatiescore'),
-                ('Wedstrijden', 'm0050_kwalificatiescores_log'),
-                ('Wedstrijden', 'm0051_begrenzing_wereld'),
-                ('Wedstrijden', 'm0052_verwijderd')]
 
     # volgorde afdwingen
     dependencies = [

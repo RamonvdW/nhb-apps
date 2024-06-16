@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2023 Ramon van der Winkel.
+#  Copyright (c) 2019-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -189,7 +189,7 @@ class HistCompRegioTeam(models.Model):
     objects = models.Manager()      # for the editor only
 
 
-class HistKampIndiv(models.Model):
+class HistKampIndivRK(models.Model):
 
     """ Resultaat van de RK voor een individuele sporter """
 
@@ -323,21 +323,23 @@ class HistKampTeam(models.Model):
 
     # behaalde score, rank en bijbehorende titel
     team_score = models.PositiveSmallIntegerField()
+    team_score_counts = models.CharField(max_length=20, default='', blank=True)     # 25m1pijl: 5x10 3x9
+
     rank = models.PositiveSmallIntegerField()
     titel_code = models.CharField(max_length=1, choices=HISTCOMP_TITEL_CHOICES, default=HISTCOMP_TITEL_NONE)
 
     # wie schoten voor dit team: geeft lid nummer, naam en boog
     # deze sporters waren ook voor het RK geplaatst
-    lid_1 = models.ForeignKey(HistKampIndiv, on_delete=models.CASCADE,
+    lid_1 = models.ForeignKey(HistKampIndivRK, on_delete=models.CASCADE,
                               null=True, blank=True,
                               related_name='team_lid_1')
-    lid_2 = models.ForeignKey(HistKampIndiv, on_delete=models.CASCADE,
+    lid_2 = models.ForeignKey(HistKampIndivRK, on_delete=models.CASCADE,
                               null=True, blank=True,
                               related_name='team_lid_2')
-    lid_3 = models.ForeignKey(HistKampIndiv, on_delete=models.CASCADE,
+    lid_3 = models.ForeignKey(HistKampIndivRK, on_delete=models.CASCADE,
                               null=True, blank=True,
                               related_name='team_lid_3')
-    lid_4 = models.ForeignKey(HistKampIndiv, on_delete=models.CASCADE,
+    lid_4 = models.ForeignKey(HistKampIndivRK, on_delete=models.CASCADE,
                               null=True, blank=True,
                               related_name='team_lid_4')
 
@@ -353,7 +355,7 @@ class HistKampTeam(models.Model):
 
     class Meta:
         """ meta data voor de admin interface """
-        verbose_name = verbose_name_plural = "Hist rk/bk teams"
+        verbose_name = verbose_name_plural = "Hist RK/BK teams"
 
     objects = models.Manager()      # for the editor only
 

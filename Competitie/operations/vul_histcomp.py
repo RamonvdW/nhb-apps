@@ -13,7 +13,7 @@ from HistComp.definities import (HISTCOMP_RK, HISTCOMP_BK,
                                  HISTCOMP_TITEL_NONE, HISTCOMP_TITEL_RK, HISTCOMP_TITEL_BK, HISTCOMP_TITEL_NK)
 from HistComp.models import (HistCompSeizoen,
                              HistCompRegioIndiv, HistCompRegioTeam,
-                             HistKampIndiv, HistKampIndivBK, HistKampTeam)
+                             HistKampIndivRK, HistKampIndivBK, HistKampTeam)
 
 
 def uitslag_regio_indiv_naar_histcomp(comp):
@@ -224,7 +224,7 @@ def uitslag_rk_indiv_naar_histcomp(comp):
             if deelnemer.result_rank == 1:
                 titel_code = HISTCOMP_TITEL_RK
 
-            hist = HistKampIndiv(
+            hist = HistKampIndivRK(
                             seizoen=hist_seizoen,
                             indiv_klasse=deelnemer.indiv_klasse.beschrijving,
                             sporter_lid_nr=sporter.lid_nr,
@@ -244,7 +244,7 @@ def uitslag_rk_indiv_naar_histcomp(comp):
             bulk.append(hist)
     # for
 
-    HistKampIndiv.objects.bulk_create(bulk)
+    HistKampIndivRK.objects.bulk_create(bulk)
 
     hist_seizoen.heeft_uitslag_rk_indiv = True
     hist_seizoen.save(update_fields=['heeft_uitslag_rk_indiv'])
@@ -426,7 +426,7 @@ def uitslag_rk_teams_naar_histcomp(comp):
         return
 
     indiv_klasse_lid_nr2hist = dict()
-    for hist in HistKampIndiv.objects.filter(seizoen=hist_seizoen):
+    for hist in HistKampIndivRK.objects.filter(seizoen=hist_seizoen):
         tup = (hist.indiv_klasse, hist.sporter_lid_nr)
         indiv_klasse_lid_nr2hist[tup] = hist
     # for
@@ -453,6 +453,7 @@ def uitslag_rk_teams_naar_histcomp(comp):
             if team.result_rank == 1:
                 titel_code = HISTCOMP_TITEL_RK
 
+            # FUTURE: 25m1p counts (9x10 20x9)
             hist = HistKampTeam(
                         seizoen=hist_seizoen,
                         rk_of_bk=HISTCOMP_RK,
@@ -480,7 +481,7 @@ def uitslag_rk_teams_naar_histcomp(comp):
                 except KeyError:
                     # sporter heeft niet individueel meegedaan
                     # maak een lege sporter aan
-                    hist_indiv = HistKampIndiv(
+                    hist_indiv = HistKampIndivRK(
                                     seizoen=hist_seizoen,
                                     indiv_klasse='',
                                     sporter_lid_nr=lid_nr,
@@ -542,7 +543,7 @@ def uitslag_bk_teams_naar_histcomp(comp):
         return
 
     indiv_klasse_lid_nr2hist = dict()
-    for hist in HistKampIndiv.objects.filter(seizoen=hist_seizoen):
+    for hist in HistKampIndivRK.objects.filter(seizoen=hist_seizoen):
         tup = (hist.indiv_klasse, hist.sporter_lid_nr)
         indiv_klasse_lid_nr2hist[tup] = hist
     # for
@@ -581,6 +582,7 @@ def uitslag_bk_teams_naar_histcomp(comp):
                         vereniging_plaats=ver.plaats,
                         team_nr=team.volg_nr,
                         team_score=team.result_teamscore,
+                        team_score_counts=team.result_counts,
                         rank=team.result_rank,
                         titel_code=titel_code)
 
@@ -609,7 +611,7 @@ def uitslag_bk_teams_naar_histcomp(comp):
                 if not hist_indiv:
                     # aanmaken
                     ver = team_lid.bij_vereniging
-                    hist_indiv = HistKampIndiv(
+                    hist_indiv = HistKampIndivRK(
                                     seizoen=hist_seizoen,
                                     indiv_klasse='',
                                     sporter_lid_nr=lid_nr,

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2023 Ramon van der Winkel.
+#  Copyright (c) 2022-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -16,12 +16,6 @@ class Migration(migrations.Migration):
         ('Vereniging', 'm0006_squashed1'),
         ('Sporter', 'm0031_squashed'),
     ]
-
-    replaces = [('Vereniging', 'm0001_initial'),
-                ('Vereniging', 'm0002_vereniging_1'),
-                ('Vereniging', 'm0003_vereniging_2'),
-                ('Vereniging', 'm0004_geo_1'),
-                ('Vereniging', 'm0005_geo_2')]
 
     # migratie functies
     operations = [
