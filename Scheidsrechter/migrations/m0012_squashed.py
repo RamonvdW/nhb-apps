@@ -17,13 +17,19 @@ class Migration(migrations.Migration):
 
     """ Migratie class voor dit deel van de applicatie """
 
+    replaces = [('Scheidsrechter', 'm0008_squashed'),
+                ('Scheidsrechter', 'm0009_wedstrijd_optional'),
+                ('Scheidsrechter', 'm0010_scheidsmutatie_match'),
+                ('Scheidsrechter', 'm0011_matchscheidsrechters')]
+
     # dit is de eerste
     initial = True
 
     # volgorde afdwingen
     dependencies = [
+        ('Competitie', 'm0113_squashed'),
         ('Sporter', 'm0031_squashed'),
-        ('Wedstrijden', 'm0053_squashed'),
+        ('Wedstrijden', 'm0053_verstop'),
     ]
 
     # migratie functies
@@ -86,6 +92,25 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.CreateModel(
+            name='MatchScheidsrechters',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('notified_laatste', models.CharField(blank=True, default='', max_length=100)),
+                ('gekozen_hoofd_sr', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.SET_NULL,
+                                                       related_name='match_gekozen_hoofd_sr', to='Sporter.sporter')),
+                ('gekozen_sr1', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.SET_NULL,
+                                                  related_name='match_gekozen_sr1', to='Sporter.sporter')),
+                ('gekozen_sr2', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.SET_NULL,
+                                                  related_name='match_gekozen_sr2', to='Sporter.sporter')),
+                ('match', models.ForeignKey(on_delete=models.deletion.CASCADE, to='Competitie.competitiematch')),
+                ('notified_srs', models.ManyToManyField(related_name='match_notified_sr', to='Sporter.sporter')),
+            ],
+            options={
+                'verbose_name': 'Match scheidsrechters',
+                'verbose_name_plural': 'Match scheidsrechters',
+            },
+        ),
+        migrations.CreateModel(
             name='ScheidsMutatie',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
@@ -93,7 +118,10 @@ class Migration(migrations.Migration):
                 ('mutatie', models.PositiveSmallIntegerField(default=0)),
                 ('is_verwerkt', models.BooleanField(default=False)),
                 ('door', models.CharField(default='', max_length=50)),
-                ('wedstrijd', models.ForeignKey(on_delete=models.deletion.CASCADE, to='Wedstrijden.wedstrijd')),
+                ('wedstrijd', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.CASCADE,
+                                                to='Wedstrijden.wedstrijd')),
+                ('match', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.CASCADE,
+                                            to='Competitie.competitiematch')),
             ],
             options={
                 'verbose_name': 'Scheids mutatie',
