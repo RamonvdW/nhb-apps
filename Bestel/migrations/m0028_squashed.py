@@ -25,6 +25,11 @@ class Migration(migrations.Migration):
 
     """ Migratie class voor dit deel van de applicatie """
 
+    replaces = [('Bestel', 'm0024_squashed'),
+                ('Bestel', 'm0025_herinnering'),
+                ('Bestel', 'm0026_verkoper_btw_nr'),
+                ('Bestel', 'm0027_afleveradres')]
+
     # dit is de eerste
     initial = True
 
@@ -101,6 +106,12 @@ class Migration(migrations.Migration):
                 ('transport', models.CharField(choices=[('N', 'Niet van toepassing'), ('V', 'Verzend'),
                                                         ('O', 'Ophalen')],
                                                default='N', max_length=1)),
+                ('verkoper_btw_nr', models.CharField(blank=True, default='', max_length=15)),
+                ('afleveradres_regel_1', models.CharField(blank=True, default='', max_length=100)),
+                ('afleveradres_regel_2', models.CharField(blank=True, default='', max_length=100)),
+                ('afleveradres_regel_3', models.CharField(blank=True, default='', max_length=100)),
+                ('afleveradres_regel_4', models.CharField(blank=True, default='', max_length=100)),
+                ('afleveradres_regel_5', models.CharField(blank=True, default='', max_length=100)),
             ],
             options={
                 'verbose_name': 'Bestelling',
@@ -124,6 +135,12 @@ class Migration(migrations.Migration):
                 ('transport', models.CharField(choices=[('N', 'Niet van toepassing'), ('V', 'Verzend'),
                                                         ('O', 'Ophalen')],
                                                default='N', max_length=1)),
+                ('vorige_herinnering', models.DateField(default='2000-01-01')),
+                ('afleveradres_regel_1', models.CharField(blank=True, default='', max_length=100)),
+                ('afleveradres_regel_2', models.CharField(blank=True, default='', max_length=100)),
+                ('afleveradres_regel_3', models.CharField(blank=True, default='', max_length=100)),
+                ('afleveradres_regel_4', models.CharField(blank=True, default='', max_length=100)),
+                ('afleveradres_regel_5', models.CharField(blank=True, default='', max_length=100)),
             ],
             options={
                 'verbose_name': 'Mandje',
