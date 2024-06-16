@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2023 Ramon van der Winkel.
+                Copyright (c) 2020-2024 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -129,7 +129,7 @@
 
                     <!-- team nummer + team leden -->
                     <td>
-                        <!-- <b>{{ team.team_nr }}</b> -->
+                        {% if team.team_score_counts %}({{ team.team_score_counts }}){% endif %}
                         {% for deelnemer in team.deelnemers %}
                             <br><span>{{ deelnemer.naam_str }}</span>
                         {% endfor %}

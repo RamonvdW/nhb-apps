@@ -17,7 +17,7 @@
         </div>
     </div>
 
-    {% if url_speldencd %}
+    {% if url_spelden %}
 
         <!-- witruimte -->
         <div class="row center">

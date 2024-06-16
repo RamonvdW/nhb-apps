@@ -14,7 +14,7 @@ from HistComp.definities import (HISTCOMP_RK, HISTCOMP_TYPE_18,
                                  HIST_BOOG_DEFAULT, HIST_BOOG2URL, URL2HIST_BOOG, HIST_BOOG2STR,
                                  HIST_TEAM_DEFAULT, HIST_TEAM2URL, URL2HIST_TEAM, HIST_TEAM2STR,
                                  HIST_KLASSE2VOLGORDE, HISTCOMP_TITEL2STR)
-from HistComp.models import HistCompSeizoen, HistKampIndiv, HistKampTeam
+from HistComp.models import HistCompSeizoen, HistKampIndivRK, HistKampTeam
 from Sporter.operations import get_request_rayon_nr
 from types import SimpleNamespace
 
@@ -164,7 +164,7 @@ class HistRkIndivView(TemplateView):
         context['comp_beschrijving'] = '%s seizoen %s' % (HISTCOMP_TYPE2STR[histcomp_type], seizoen_str)
         context['boog_beschrijving'] = HIST_BOOG2STR[boog_type]
 
-        uitslag = (HistKampIndiv
+        uitslag = (HistKampIndivRK
                    .objects
                    .filter(seizoen=hist_seizoen,
                            rayon_nr=rayon_nr,

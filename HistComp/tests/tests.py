@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2023 Ramon van der Winkel.
+#  Copyright (c) 2019-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
 from HistComp.definities import HISTCOMP_TYPE_18, HIST_BOGEN_DEFAULT, HIST_TEAM_TYPEN_DEFAULT, HISTCOMP_RK, HISTCOMP_BK
 from HistComp.models import (HistCompSeizoen,
-                             HistCompRegioIndiv, HistKampIndiv, HistKampIndivBK,
+                             HistCompRegioIndiv, HistKampIndivRK, HistKampIndivBK,
                              HistCompRegioTeam, HistKampTeam)
 from TestHelpers.e2ehelpers import E2EHelpers
 
@@ -123,7 +123,7 @@ class TestHistComp(E2EHelpers, TestCase):
         team.vereniging_plaats = ''
         team.save()
 
-        rec = HistKampIndiv(
+        rec = HistKampIndivRK(
                     seizoen=self.hist_seizoen,
                     indiv_klasse='Recurve klasse 1',
                     sporter_lid_nr=100001,
@@ -213,6 +213,7 @@ class TestHistComp(E2EHelpers, TestCase):
 
         team.pk = None
         team.teams_klasse = 'Recurve klasse A'
+        team.team_score_counts = '##COUNTS##'
         team.save()
 
         team.pk = None
@@ -237,6 +238,37 @@ class TestHistComp(E2EHelpers, TestCase):
         rec.save()
         self.hist_kamp_indiv_bk = rec
 
+        rec = HistKampIndivBK(
+                    seizoen=self.hist_seizoen,
+                    bk_indiv_klasse='Recurve klasse 2',     # anders dan vorige sporter
+                    sporter_lid_nr=100099,
+                    sporter_naam='Archy van de Bond',
+                    boogtype='R',
+                    vereniging_nr=1001,
+                    vereniging_naam='De bond',
+                    vereniging_plaats='',       # corner case
+                    rank_bk=2,
+                    bk_score_1=102,
+                    bk_score_2=102,
+                    bk_score_totaal=204,
+                    bk_counts='')
+        rec.save()
+
+        rec = HistKampIndivBK(
+                    seizoen=self.hist_seizoen,
+                    bk_indiv_klasse='Recurve klasse 2',     # zelfde als vorige sporter
+                    sporter_lid_nr=100098,
+                    sporter_naam='Argy van de Bond',
+                    boogtype='R',
+                    vereniging_nr=1001,
+                    vereniging_naam='De bond',
+                    vereniging_plaats='Arnhem',
+                    rank_bk=3,
+                    bk_score_1=102,
+                    bk_score_2=100,
+                    bk_score_totaal=202,
+                    bk_counts='')
+        rec.save()
         HistCompSeizoen(
                 seizoen='2017/2018',
                 comp_type=HISTCOMP_TYPE_18,
@@ -496,6 +528,7 @@ class TestHistComp(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('histcomp/uitslagen-bk-teams.dtl', 'plein/site_layout.dtl'))
+        self.assertContains(resp, '##COUNTS##')      # 25m1p telling 10-en en 9-ens
 
         url = self.url_bk_teams % ('x', 'x', 'x')
         resp = self.client.get(url)
