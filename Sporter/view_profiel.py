@@ -199,7 +199,8 @@ class ProfielView(UserPassesTestMixin, TemplateView):
                               .objects
                               .select_related('regiocompetitie',
                                               'sporterboog')
-                              .filter(sporterboog__sporter=self.sporter))
+                              .filter(sporterboog__sporter=self.sporter,
+                                      regiocompetitie__competitie__in=comps))
 
         if not self.voorkeuren.voorkeur_meedoen_competitie:
             if len(inschrijvingen) == 0:        # niet nodig om "afmelden" knoppen te tonen
@@ -211,7 +212,8 @@ class ProfielView(UserPassesTestMixin, TemplateView):
                                           'kampioenschap__competitie',
                                           'kampioenschap__rayon',
                                           'sporterboog')
-                          .filter(sporterboog__sporter=self.sporter))
+                          .filter(sporterboog__sporter=self.sporter,
+                                  kampioenschap__competitie__in=comps))
 
         objs = list()
         comp_pks = [comp.pk for comp in comps]
@@ -222,7 +224,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
                          .objects
                          .select_related('competitie')
                          .exclude(competitie__is_afgesloten=True)
-                         .filter(competitie__pk__in=comp_pks,
+                         .filter(competitie__in=comps,
                                  regio=regio)
                          .order_by('competitie__afstand')):
             comp = deelcomp.competitie
@@ -430,7 +432,8 @@ class ProfielView(UserPassesTestMixin, TemplateView):
                                           'regiocompetitie__competitie',
                                           'sporterboog',
                                           'sporterboog__boogtype')
-                          .filter(sporterboog__sporter=self.sporter)
+                          .filter(sporterboog__sporter=self.sporter,
+                                  regiocompetitie__competitie__is_afgesloten=False)
                           .order_by('regiocompetitie__competitie__afstand')):
 
             comp = deelnemer.regiocompetitie.competitie
@@ -531,7 +534,8 @@ class ProfielView(UserPassesTestMixin, TemplateView):
             context['competities'] = comps = self._find_competities()
 
             regiocomps, gebruik_knoppen = self._find_regiocompetities(comps,
-                                                                      boog_afk2sporterboog, boog_afkorting_wedstrijd)
+                                                                      boog_afk2sporterboog,
+                                                                      boog_afkorting_wedstrijd)
             context['regiocompetities'] = regiocomps
             context['hint_voorkeuren'] = regiocomps is not None and len(regiocomps) == 0
             context['gebruik_knoppen'] = gebruik_knoppen

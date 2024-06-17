@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2023 Ramon van der Winkel.
+#  Copyright (c) 2020-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -59,22 +59,22 @@ def taken_opschonen(stdout):
     """ deze functie wordt typisch 1x per dag aangeroepen om de database
         tabellen van deze applicatie op te kunnen schonen.
 
-        We verwijderen taken die afgerond en een deadline meer dan 3 kwartalen geleden.
+        We verwijderen taken met een deadline meer dan 5 weken geleden.
+        Ook niet afgehandelde taken worden opgeruimd.
     """
 
     now = timezone.now()
-    oud = now - datetime.timedelta(days=92)
+    oud = now - datetime.timedelta(days=7*5)
 
     aantal = 0
     for obj in (Taak
                 .objects
-                .filter(is_afgerond=True,
-                        deadline__lt=oud)):
+                .filter(deadline__lt=oud)):
         aantal += 1
         obj.delete()
     # for
 
     if aantal > 0:
-        stdout.write('[INFO] Aantal oude afgehandelde taken verwijderd: %s' % aantal)
+        stdout.write('[INFO] Aantal oude taken verwijderd: %s' % aantal)
 
 # end of file
