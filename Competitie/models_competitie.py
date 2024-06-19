@@ -5,25 +5,13 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db import models
-from Account.models import Account
 from BasisTypen.definities import BLAZOEN_CHOICES, BLAZOEN_40CM
-from BasisTypen.models import (BoogType, Leeftijdsklasse, TeamType,
-                               TemplateCompetitieIndivKlasse, TemplateCompetitieTeamKlasse)
-from Competitie.definities import (AFSTANDEN, AFSTAND2URL,
-                                   DEEL_BK, DEEL_RK,
-                                   INSCHRIJF_METHODES, INSCHRIJF_METHODE_2,
-                                   TEAM_PUNTEN, TEAM_PUNTEN_MODEL_TWEE,
-                                   DAGDELEN,
-                                   DEELNAME_CHOICES, DEELNAME_ONBEKEND,
-                                   MUTATIE_TO_STR, MUTATIE_KAMP_AANMELDEN_INDIV, MUTATIE_KAMP_AFMELDEN_INDIV,
-                                   MUTATIE_KAMP_CUT)
+from BasisTypen.models import BoogType, Leeftijdsklasse, TeamType
+from Competitie.definities import AFSTANDEN, AFSTAND2URL
 from Competitie.tijdlijn import bepaal_fase_indiv, bepaal_fase_teams
 from Functie.definities import Rollen
-from Functie.models import Functie
 from Locatie.models import Locatie
-from Geo.models import Rayon, Regio, Cluster
-from Score.models import Score, ScoreHist, Uitslag
-from Sporter.models import Sporter, SporterBoog
+from Score.models import Uitslag
 from Vereniging.models import Vereniging
 import logging
 

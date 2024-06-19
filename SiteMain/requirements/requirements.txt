@@ -8,7 +8,7 @@ asgiref==3.8.1
     # via django
 cachetools==5.3.3
     # via google-auth
-certifi==2024.2.2
+certifi==2024.6.2
     # via requests
 charset-normalizer==3.3.2
     # via requests
@@ -20,9 +20,9 @@ et-xmlfile==1.1.0
     # via openpyxl
 google-api-core==2.19.0
     # via google-api-python-client
-google-api-python-client==2.130.0
+google-api-python-client==2.133.0
     # via -r requirements.in
-google-auth==2.29.0
+google-auth==2.30.0
     # via
     #   -r requirements.in
     #   google-api-core
@@ -30,7 +30,7 @@ google-auth==2.29.0
     #   google-auth-httplib2
 google-auth-httplib2==0.2.0
     # via google-api-python-client
-googleapis-common-protos==1.63.0
+googleapis-common-protos==1.63.1
     # via google-api-core
 googlemaps==4.10.0
     # via -r requirements.in
@@ -46,7 +46,7 @@ mollie-api-python==2.13.0
     #   -r requirements.in
 oauthlib==3.2.2
     # via requests-oauthlib
-openpyxl==3.1.2
+openpyxl==3.1.4
     # via -r requirements.in
 pillow==10.3.0
     # via -r requirements.in
@@ -75,7 +75,7 @@ pypng==0.20220715.0
     # via qrcode
 qrcode==7.4.2
     # via -r requirements.in
-requests==2.32.2
+requests==2.32.3
     # via
     #   google-api-core
     #   googlemaps
@@ -87,13 +87,13 @@ rsa==4.9
     # via google-auth
 sqlparse==0.5.0
     # via django
-typing-extensions==4.12.0
+typing-extensions==4.12.2
     # via
     #   psycopg
     #   qrcode
 uritemplate==4.1.1
     # via google-api-python-client
-urllib3==2.2.1
+urllib3==2.2.2
     # via
     #   mollie-api-python
     #   requests

@@ -14,7 +14,7 @@ cachetools==5.3.3
     # via
     #   -r requirements.txt
     #   google-auth
-certifi==2024.2.2
+certifi==2024.6.2
     # via
     #   -r requirements.txt
     #   requests
@@ -22,14 +22,14 @@ charset-normalizer==3.3.2
     # via
     #   -r requirements.txt
     #   requests
-coverage==7.5.2
+coverage==7.5.3
     # via -r requirements_dev.in
 django==4.2.13
     # via
     #   -r requirements.txt
     #   django-debug-toolbar
     #   django-extensions
-django-debug-toolbar==4.3.0
+django-debug-toolbar==4.4.2
     # via -r requirements_dev.in
 django-extensions==3.2.3
     # via -r requirements_dev.in
@@ -39,15 +39,15 @@ et-xmlfile==1.1.0
     # via
     #   -r requirements.txt
     #   openpyxl
-fonttools==4.52.1
+fonttools==4.53.0
     # via -r requirements_dev.in
 google-api-core==2.19.0
     # via
     #   -r requirements.txt
     #   google-api-python-client
-google-api-python-client==2.130.0
+google-api-python-client==2.133.0
     # via -r requirements.txt
-google-auth==2.29.0
+google-auth==2.30.0
     # via
     #   -r requirements.txt
     #   google-api-core
@@ -57,7 +57,7 @@ google-auth-httplib2==0.2.0
     # via
     #   -r requirements.txt
     #   google-api-python-client
-googleapis-common-protos==1.63.0
+googleapis-common-protos==1.63.1
     # via
     #   -r requirements.txt
     #   google-api-core
@@ -80,9 +80,9 @@ oauthlib==3.2.2
     # via
     #   -r requirements.txt
     #   requests-oauthlib
-openpyxl==3.1.2
+openpyxl==3.1.4
     # via -r requirements.txt
-packaging==24.0
+packaging==24.1
     # via pip-review
 pillow==10.3.0
     # via -r requirements.txt
@@ -129,7 +129,7 @@ pyyaml==6.0.1
     # via html5validator
 qrcode==7.4.2
     # via -r requirements.txt
-requests==2.32.2
+requests==2.32.3
     # via
     #   -r requirements.txt
     #   google-api-core
@@ -151,7 +151,7 @@ sqlparse==0.5.0
     #   -r requirements.txt
     #   django
     #   django-debug-toolbar
-typing-extensions==4.12.0
+typing-extensions==4.12.2
     # via
     #   -r requirements.txt
     #   psycopg
@@ -160,7 +160,7 @@ uritemplate==4.1.1
     # via
     #   -r requirements.txt
     #   google-api-python-client
-urllib3==2.2.1
+urllib3==2.2.2
     # via
     #   -r requirements.txt
     #   mollie-api-python
