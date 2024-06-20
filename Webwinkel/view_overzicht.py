@@ -38,7 +38,7 @@ class OverzichtView(TemplateView):
         producten = (WebwinkelProduct
                      .objects
                      .exclude(mag_tonen=False)
-                      .select_related('omslag_foto')
+                     .select_related('omslag_foto')
                      .order_by('volgorde'))
 
         prev_sectie = None
@@ -74,6 +74,11 @@ class OverzichtView(TemplateView):
         if settings.WEBWINKEL_TOON_PRESTATIESPELDEN:
             context['url_spelden'] = reverse('Spelden:begin')
             context['img_spelden'] = static('spelden/grootmeester.png')
+
+        if settings.WEBWINKEL_URL_KLEDING:
+            context['url_kleding'] = settings.WEBWINKEL_URL_KLEDING
+            context['kleding_vanaf'] = settings.WEBWINKEL_KLEDING_VANAF
+            context['img_kleding'] = static('webwinkel/kleding.png')
 
         if rol_get_huidige(self.request) == Rollen.ROL_SPORTER:
             context['menu_toon_mandje'] = True

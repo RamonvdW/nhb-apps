@@ -51,6 +51,49 @@
 
     {% endif %}
 
+
+    {% if url_kleding %}
+
+        <!-- witruimte -->
+        <div class="row center">
+            <div class="col s12">
+                <h4>Kleding</h4>
+                <p>Kleding wordt aangeboden via de Errea webshop</p>
+            </div>
+        </div>
+
+        <!-- blauwe balk met kaartjes -->
+        <div class="row-sv-blauw">
+            <div class="col s12">
+
+                <a href="{{ url_kleding }}" target="_blank" rel="noopener noreferrer">
+                    <div class="sv-card">
+                        <div class="sv-card-content-webwinkel">
+
+                            <div class="sv-card-image-webwinkel">
+                                <!-- achtergrondplaatje -->
+                                <img src="{{ img_kleding }}" alt="product">
+                            </div>
+
+                            <div style="position:absolute; right:6px; top:6px">
+                                <i class="notranslate material-icons-round sv-blauw-text">open_in_new</i>
+                            </div>
+
+                            <div class="sv-card-webwinkel-titel">Errea webshop</div>
+
+                            {% if kleding_vanaf %}
+                                <div class="sv-card-webwinkel-prijs">Vanaf &euro;&nbsp;{{ kleding_vanaf }},-</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </a>
+
+            </div>
+        </div>
+
+    {% endif %}
+
+
     {% for product in producten %}
 
         {% if product.sectie_afsluiten %}
