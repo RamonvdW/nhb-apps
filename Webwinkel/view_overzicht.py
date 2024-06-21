@@ -38,7 +38,7 @@ class OverzichtView(TemplateView):
         producten = (WebwinkelProduct
                      .objects
                      .exclude(mag_tonen=False)
-                      .select_related('omslag_foto')
+                     .select_related('omslag_foto')
                      .order_by('volgorde'))
 
         prev_sectie = None
@@ -58,7 +58,12 @@ class OverzichtView(TemplateView):
                 if product.aantal_op_voorraad < 1:
                     product.is_uitverkocht = True
 
-            product.url_details = reverse('Webwinkel:product', kwargs={'product_pk': product.pk})
+            product.is_extern = product.beschrijving.startswith('http')
+            if product.is_extern:
+                # is_extern geeft ook icoontje in de rechter bovenhoek
+                product.url_details = product.beschrijving
+            else:
+                product.url_details = reverse('Webwinkel:product', kwargs={'product_pk': product.pk})
         # for
 
         return producten
