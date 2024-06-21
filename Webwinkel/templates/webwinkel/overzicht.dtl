@@ -131,7 +131,7 @@
             {% if not product.is_uitverkocht %}
 
                 <!-- de hele kaart is klikbaar -->
-                <a href="{{ product.url_details }}">
+                <a href="{{ product.url_details }}"{% if is_extern %} target="_blank" rel="noopener noreferrer"{% endif %}>
 
             {% endif %}
 
@@ -147,6 +147,12 @@
                             <div class="sv-card-schuine-banner">Tijdelijk uitverkocht</div>
 
                         {% else %}
+
+                            {% if product.is_extern %}
+                                <div style="position:absolute; right:6px; top:6px">
+                                    <i class="notranslate material-icons-round sv-blauw-text">open_in_new</i>
+                                </div>
+                            {% endif %}
 
                             <div class="sv-card-webwinkel-titel">{{ product.omslag_titel }}</div>
 

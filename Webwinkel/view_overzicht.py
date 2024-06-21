@@ -58,7 +58,12 @@ class OverzichtView(TemplateView):
                 if product.aantal_op_voorraad < 1:
                     product.is_uitverkocht = True
 
-            product.url_details = reverse('Webwinkel:product', kwargs={'product_pk': product.pk})
+            product.is_extern = product.beschrijving.startswith('http')
+            if product.is_extern:
+                # is_extern geeft ook icoontje in de rechter bovenhoek
+                product.url_details = product.beschrijving
+            else:
+                product.url_details = reverse('Webwinkel:product', kwargs={'product_pk': product.pk})
         # for
 
         return producten
@@ -74,11 +79,6 @@ class OverzichtView(TemplateView):
         if settings.WEBWINKEL_TOON_PRESTATIESPELDEN:
             context['url_spelden'] = reverse('Spelden:begin')
             context['img_spelden'] = static('spelden/grootmeester.png')
-
-        if settings.WEBWINKEL_URL_KLEDING:
-            context['url_kleding'] = settings.WEBWINKEL_URL_KLEDING
-            context['kleding_vanaf'] = settings.WEBWINKEL_KLEDING_VANAF
-            context['img_kleding'] = static('webwinkel/kleding.png')
 
         if rol_get_huidige(self.request) == Rollen.ROL_SPORTER:
             context['menu_toon_mandje'] = True
