@@ -196,7 +196,11 @@ class Wedstrijd(models.Model):
 
     def __str__(self):
         """ geef een beschrijving terug voor de admin interface """
-        return "%s [%s] %s" % (self.datum_begin, WEDSTRIJD_STATUS_TO_STR[self.status], self.titel)
+        msg = str(self.datum_begin)
+        if self.organiserende_vereniging:
+            msg += ' [%s]' % self.organiserende_vereniging.ver_nr
+        msg += ' %s %s' % (WEDSTRIJD_STATUS_TO_STR[self.status], self.titel)
+        return msg
 
     class Meta:
         verbose_name = "Wedstrijd"

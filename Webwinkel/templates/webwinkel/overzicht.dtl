@@ -115,7 +115,7 @@
 
                         {% endif %}
 
-                        <div class="sv-card-webwinkel-prijs">&euro;&nbsp;{{ product.prijs_euro }}</div>
+                        <div class="sv-card-webwinkel-prijs">{% if product.is_extern %}vanaf {% endif %}&euro;&nbsp;{{ product.prijs_euro }}</div>
 
                     </div>
 

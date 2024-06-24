@@ -12,7 +12,7 @@ class WedstrijdAdmin(admin.ModelAdmin):                 # pragma: no cover
     """ Admin configuratie voor Wedstrijd """
 
     list_filter = ('status', 'extern_beheerd', 'is_ter_info', 'toon_op_kalender', 'organisatie', 'wa_status',
-                   'discipline', 'aantal_scheids')
+                   'discipline', 'aantal_scheids', 'organiserende_vereniging')
 
     readonly_fields = ('sessies', 'boogtypen', 'wedstrijdklassen')
 
@@ -87,9 +87,31 @@ class WedstrijdInschrijvingAdmin(admin.ModelAdmin):
 
     readonly_fields = ('wanneer', 'wedstrijd', 'sessie', 'sporterboog', 'koper')
 
-    list_filter = ('status', 'wedstrijd')
+    list_filter = ('status', 'wedstrijd__organiserende_vereniging', 'wedstrijd')
 
     search_fields = ('sporterboog__sporter__lid_nr',)
+
+    def __init__(self, model, admin_site):
+        super().__init__(model, admin_site)
+        self.vereniging = None
+
+    def get_form(self, request, obj=None, **kwargs):                    # pragma: no cover
+        """ initialisatie van het admin formulier
+            hier "vangen" we het database object waar we mee bezig gaan
+        """
+        if obj and obj.wedstrijd:
+            self.vereniging = obj.wedstrijd.organiserende_vereniging
+
+        return super().get_form(request, obj, **kwargs)
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):    # pragma: no cover
+        """ bepaal de relevante keuzemogelijkheden voor specifieke velden
+        """
+        if db_field.name == 'korting' and self.vereniging:
+            # toon alleen de kortingen van deze vereniging
+            kwargs['queryset'] = WedstrijdKorting.objects.filter(uitgegeven_door=self.vereniging)
+
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 
 class KwalificatiescoreAdmin(admin.ModelAdmin):
