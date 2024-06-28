@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023 Ramon van der Winkel.
+#  Copyright (c) 2023-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -39,7 +39,7 @@ class GastRegistratieAdmin(admin.ModelAdmin):
 
     autocomplete_fields = ('account', 'sporter')
 
-    list_filter = (GastRegistratieFaseFilter,)
+    list_filter = (GastRegistratieFaseFilter, 'land')
 
 
 class GastRegistratieRateTrackerAdmin(admin.ModelAdmin):

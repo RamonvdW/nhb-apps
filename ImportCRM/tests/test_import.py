@@ -18,9 +18,8 @@ from Opleidingen.models import OpleidingDiploma
 from Records.models import IndivRecord
 from Score.operations import score_indiv_ag_opslaan
 from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren
-from Vereniging.models2 import Secretaris
 from TestHelpers.e2ehelpers import E2EHelpers
-from Vereniging.models import Vereniging
+from Vereniging.models import Vereniging, Secretaris
 import datetime
 import io
 

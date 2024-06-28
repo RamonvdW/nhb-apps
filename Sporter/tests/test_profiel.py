@@ -29,10 +29,9 @@ from Score.models import Score, ScoreHist
 from Score.operations import score_indiv_ag_opslaan
 from Sporter.models import Sporter, SporterVoorkeuren, SporterBoog
 from Sporter.operations import get_sporterboog
-from Vereniging.models2 import Secretaris
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers.testdata import TestData
-from Vereniging.models import Vereniging
+from Vereniging.models import Vereniging, Secretaris
 from Wedstrijden.definities import (INSCHRIJVING_STATUS_DEFINITIEF, WEDSTRIJD_STATUS_GEACCEPTEERD,
                                     WEDSTRIJD_DISCIPLINE_INDOOR)
 from Wedstrijden.models import Wedstrijd, WedstrijdSessie, WedstrijdInschrijving

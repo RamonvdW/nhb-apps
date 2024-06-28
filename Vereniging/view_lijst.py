@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2023 Ramon van der Winkel.
+#  Copyright (c) 2019-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -14,8 +14,7 @@ from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige, rol_get_huidige_functie, rol_get_beschrijving
 from Functie.models import Functie
 from Locatie.definities import BAAN_TYPE_BUITEN, BAAN_TYPE_EXTERN, BAANTYPE2STR
-from Vereniging.models import Vereniging
-from Vereniging.models2 import Secretaris
+from Vereniging.models import Vereniging, Secretaris
 
 TEMPLATE_LIJST = 'vereniging/lijst.dtl'
 TEMPLATE_LIJST_DETAILS = 'vereniging/lijst-details.dtl'

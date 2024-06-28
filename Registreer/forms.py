@@ -20,6 +20,9 @@ def scrub_input_name(name):
     for char in '<>#/()*&^%$@!=+_{}[]:;"\\|<>.?~`\'':        # Let op: cijfers zijn toegestaan voor naam vereniging
         name = name.replace(char, '')
     # for
+
+    name = name.strip()     # remove spaces
+
     return name
 
 

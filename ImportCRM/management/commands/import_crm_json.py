@@ -27,8 +27,7 @@ from Opleidingen.models import OpleidingDiploma
 from Overig.helpers import maak_unaccented
 from Records.models import IndivRecord
 from Sporter.models import Sporter, Speelsterkte
-from Vereniging.models import Vereniging
-from Vereniging.models2 import Secretaris
+from Vereniging.models import Vereniging, Secretaris
 import traceback
 import datetime
 import logging
