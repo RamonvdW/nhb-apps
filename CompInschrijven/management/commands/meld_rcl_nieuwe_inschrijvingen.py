@@ -6,7 +6,7 @@
 
 from django.utils import timezone
 from django.core.management.base import BaseCommand
-from Competitie.models_laag_regio import Regiocompetitie, RegiocompetitieSporterBoog
+from Competitie.models import Regiocompetitie, RegiocompetitieSporterBoog
 from Functie.models import Functie
 from Taken.operations import check_taak_bestaat, maak_taak
 from datetime import timedelta

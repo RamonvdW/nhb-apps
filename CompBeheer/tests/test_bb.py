@@ -7,10 +7,8 @@
 from django.test import TestCase
 from BasisTypen.models import BoogType
 from Competitie.definities import INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_2, INSCHRIJF_METHODE_3, DAGDEEL_AFKORTINGEN
-from Competitie.models_competitie import Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse
-from Competitie.models_laag_regio import Regiocompetitie
-from Competitie.models_laag_kamp import Kampioenschap
-from Competitie.models_mutatie import CompetitieMutatie
+from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse, Regiocompetitie, Kampioenschap,
+                               CompetitieMutatie)
 from Competitie.operations import competities_aanmaken, aanvangsgemiddelden_vaststellen_voor_afstand
 from Competitie.test_utils.tijdlijn import zet_competitie_fase_regio_prep, zet_competitie_fase_afsluiten
 from Functie.tests.helpers import maak_functie

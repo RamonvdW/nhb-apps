@@ -12,9 +12,9 @@ from Account.models import get_account
 from Competitie.definities import (DEEL_RK, DEEL_BK,
                                    DEELNAME_NEE,
                                    KAMP_RANK_RESERVE, KAMP_RANK_NO_SHOW, KAMP_RANK_BLANCO)
-from Competitie.models_competitie import Competitie, CompetitieMatch
-from Competitie.models_laag_kamp import (KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet,
-                                         Kampioenschap, KampioenschapSporterBoog, KampioenschapTeam)
+from Competitie.models import (Competitie, CompetitieMatch,
+                               KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet,
+                               Kampioenschap, KampioenschapSporterBoog, KampioenschapTeam)
 from Competitie.seizoenen import get_comp_pk
 from Functie.rol import rol_get_huidige_functie
 from Sporter.models import Sporter

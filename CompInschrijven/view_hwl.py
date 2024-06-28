@@ -13,8 +13,8 @@ from Account.models import get_account
 from BasisTypen.definities import (MAXIMALE_LEEFTIJD_JEUGD, MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT,
                                    BLAZOEN_60CM_4SPOT, BLAZOEN_DT)
 from Competitie.definities import DAGDELEN, DAGDEEL_AFKORTINGEN, INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3
-from Competitie.models_competitie import Competitie, CompetitieMatch, get_competitie_indiv_leeftijdsklassen
-from Competitie.models_laag_regio import Regiocompetitie, RegiocompetitieRonde, RegiocompetitieSporterBoog
+from Competitie.models import (Competitie, CompetitieMatch, get_competitie_indiv_leeftijdsklassen,
+                               Regiocompetitie, RegiocompetitieRonde, RegiocompetitieSporterBoog)
 from Competitie.operations import KlasseBepaler
 from Competitie.operations import get_competitie_bogen
 from Functie.definities import Rollen

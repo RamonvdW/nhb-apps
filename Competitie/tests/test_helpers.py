@@ -4,7 +4,7 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from Competitie.models_competitie import Competitie
+from Competitie.models import Competitie
 from Competitie.operations import (competities_aanmaken, aanvangsgemiddelden_vaststellen_voor_afstand,
                                    competitie_klassengrenzen_vaststellen)
 from Competitie.test_utils.tijdlijn import zet_competitie_fase_regio_inschrijven

@@ -14,11 +14,10 @@ from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
 from Competitie.definities import DEEL_RK, INSCHRIJF_METHODE_1, MUTATIE_KAMP_CUT, DEELNAME_NEE
-from Competitie.models_competitie import CompetitieIndivKlasse, CompetitieTeamKlasse, CompetitieMatch
-from Competitie.models_laag_regio import Regiocompetitie, RegiocompetitieRonde
-from Competitie.models_laag_kamp import (Kampioenschap, KampioenschapSporterBoog, KampioenschapTeam,
-                                         KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet)
-from Competitie.models_mutatie import CompetitieMutatie
+from Competitie.models import (CompetitieIndivKlasse, CompetitieTeamKlasse, CompetitieMatch, CompetitieMutatie,
+                               Regiocompetitie, RegiocompetitieRonde,
+                               Kampioenschap, KampioenschapSporterBoog, KampioenschapTeam,
+                               KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet)
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
 from Locatie.models import Locatie

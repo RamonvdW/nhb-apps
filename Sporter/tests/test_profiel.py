@@ -11,8 +11,7 @@ from BasisTypen.definities import ORGANISATIE_KHSN
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse
 from Bestel.models import Bestelling
 from Competitie.definities import DEELNAME_JA, DEELNAME_NEE, INSCHRIJF_METHODE_1
-from Competitie.models_laag_regio import Regiocompetitie, RegiocompetitieSporterBoog
-from Competitie.models_laag_kamp import Kampioenschap, KampioenschapSporterBoog
+from Competitie.models import Regiocompetitie, RegiocompetitieSporterBoog, Kampioenschap, KampioenschapSporterBoog
 from Competitie.test_utils.tijdlijn import (zet_competitie_fases,
                                             zet_competitie_fase_regio_prep, zet_competitie_fase_regio_inschrijven,
                                             zet_competitie_fase_regio_wedstrijden, zet_competitie_fase_regio_afsluiten,
@@ -130,7 +129,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
                     naam="Ramon de Tester",
                     datum=parse_date('2012-12-12'),
                     plaats="Top stad",
-                    land='Verwegistan',
+                    land='Verwegistan',     # noqa
                     score=290,
                     max_score=300)
         rec.save()
@@ -692,7 +691,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
                         discipline_indoor=True,
                         banen_18m=15,
                         max_sporters_18m=15*4,
-                        adres='Sportstraat 1, Pijlstad',
+                        adres='Sportstraat 1, Pijlstad',        # noqa
                         plaats='Pijlstad')
         locatie.save()
         locatie.verenigingen.add(self.ver)

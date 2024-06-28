@@ -7,7 +7,7 @@
 # verwijder de probleem data: dubbele sporterboog en te veel scores
 
 from django.core.management.base import BaseCommand
-from Competitie.models_laag_regio import RegiocompetitieSporterBoog
+from Competitie.models import RegiocompetitieSporterBoog
 from Score.definities import SCORE_TYPE_SCORE
 from Score.models import Score
 

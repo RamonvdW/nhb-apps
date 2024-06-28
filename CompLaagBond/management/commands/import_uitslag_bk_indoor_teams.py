@@ -6,7 +6,7 @@
 
 from django.core.management.base import BaseCommand
 from Competitie.definities import DEEL_RK, DEEL_BK
-from Competitie.models_laag_kamp import KampioenschapSporterBoog, KampioenschapTeam
+from Competitie.models import KampioenschapSporterBoog, KampioenschapTeam
 from openpyxl.utils.exceptions import InvalidFileException
 from decimal import Decimal
 import openpyxl

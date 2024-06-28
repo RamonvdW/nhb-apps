@@ -6,7 +6,7 @@
 
 from django.test import TestCase
 from BasisTypen.models import TemplateCompetitieIndivKlasse, TeamType
-from Competitie.models_competitie import Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse
+from Competitie.models import Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse
 from Competitie.tijdlijn import bepaal_fase_indiv, bepaal_fase_teams
 from Competitie.test_utils.tijdlijn import zet_competitie_fases
 from TestHelpers.e2ehelpers import E2EHelpers

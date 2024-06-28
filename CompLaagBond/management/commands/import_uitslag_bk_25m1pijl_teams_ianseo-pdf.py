@@ -6,7 +6,7 @@
 
 from django.core.management.base import BaseCommand
 from Competitie.definities import DEEL_BK, DEEL_RK
-from Competitie.models_laag_kamp import KampioenschapSporterBoog, KampioenschapTeam
+from Competitie.models import KampioenschapSporterBoog, KampioenschapTeam
 from pypdf import PdfReader
 import sys
 

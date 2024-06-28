@@ -6,7 +6,7 @@
 
 from django.core.management.base import BaseCommand
 from Competitie.definities import TEAM_PUNTEN_MODEL_FORMULE1
-from Competitie.models_laag_regio import RegiocompetitieTeamPoule, RegiocompetitieRondeTeam
+from Competitie.models import RegiocompetitieTeamPoule, RegiocompetitieRondeTeam
 
 
 class Command(BaseCommand):

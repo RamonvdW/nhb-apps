@@ -7,7 +7,7 @@
 # verwijder onnodige (oude) data van voorgaande competities
 
 from django.core.management.base import BaseCommand
-from Competitie.models_competitie import CompetitieMatch
+from Competitie.models import CompetitieMatch
 from Score.definities import SCORE_TYPE_GEEN
 from Score.models import Score, ScoreHist
 from Sporter.models import SporterBoog

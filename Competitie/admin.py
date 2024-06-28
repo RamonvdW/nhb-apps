@@ -10,12 +10,11 @@ from django.contrib.admin.widgets import FilteredSelectMultiple
 from BasisTypen.definities import SCHEIDS_NIET
 from BasisTypen.models import TeamType
 from Competitie.definities import DEEL_BK, DEEL_RK
-from Competitie.models_competitie import Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse, CompetitieMatch
-from Competitie.models_laag_regio import (Regiocompetitie, RegiocompetitieRonde, RegiocompetitieSporterBoog,
-                                          RegiocompetitieTeam, RegiocompetitieTeamPoule, RegiocompetitieRondeTeam)
-from Competitie.models_laag_kamp import (KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet,
-                                         KampioenschapSporterBoog, KampioenschapTeam, Kampioenschap)
-from Competitie.models_mutatie import CompetitieMutatie
+from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse, CompetitieMatch,
+                               Regiocompetitie, RegiocompetitieRonde, RegiocompetitieSporterBoog, RegiocompetitieTeam,
+                               RegiocompetitieTeamPoule, RegiocompetitieRondeTeam,
+                               KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet, KampioenschapSporterBoog,
+                               KampioenschapTeam, Kampioenschap, CompetitieMutatie)
 from Sporter.models import Sporter
 
 

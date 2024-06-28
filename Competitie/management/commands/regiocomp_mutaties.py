@@ -25,12 +25,12 @@ from Competitie.definities import (DEEL_RK, DEEL_BK, DEELNAME_JA, DEELNAME_NEE, 
                                    MUTATIE_KAMP_INDIV_DOORZETTEN_NAAR_BK, MUTATIE_KAMP_TEAMS_DOORZETTEN_NAAR_BK,
                                    MUTATIE_KLEINE_KLASSE_INDIV,
                                    MUTATIE_KAMP_INDIV_AFSLUITEN, MUTATIE_KAMP_TEAMS_AFSLUITEN)
-from Competitie.models_competitie import Competitie, CompetitieTeamKlasse
-from Competitie.models_laag_regio import (Regiocompetitie, RegiocompetitieSporterBoog, RegiocompetitieTeam,
-                                          RegiocompetitieRondeTeam)
-from Competitie.models_laag_kamp import (Kampioenschap, KampioenschapSporterBoog, KampioenschapTeam,
-                                         KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet)
-from Competitie.models_mutatie import CompetitieMutatie, CompetitieTaken
+from Competitie.models import (Competitie, CompetitieTeamKlasse,
+                               Regiocompetitie, RegiocompetitieSporterBoog, RegiocompetitieTeam,
+                               RegiocompetitieRondeTeam,
+                               Kampioenschap, KampioenschapSporterBoog, KampioenschapTeam,
+                               KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet,
+                               CompetitieMutatie, CompetitieTaken)
 from Competitie.operations import (competities_aanmaken, bepaal_startjaar_nieuwe_competitie,
                                    aanvangsgemiddelden_vaststellen_voor_afstand,
                                    uitslag_regio_indiv_naar_histcomp, uitslag_regio_teams_naar_histcomp,

@@ -12,8 +12,7 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
 from BasisTypen.definities import MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT
 from Competitie.definities import INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3, DAGDELEN, DAGDEEL_AFKORTINGEN
-from Competitie.models_competitie import CompetitieMatch
-from Competitie.models_laag_regio import Regiocompetitie, RegiocompetitieRonde, RegiocompetitieSporterBoog
+from Competitie.models import CompetitieMatch, Regiocompetitie, RegiocompetitieRonde, RegiocompetitieSporterBoog
 from Competitie.operations import KlasseBepaler
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige

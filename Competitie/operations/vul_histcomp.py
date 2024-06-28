@@ -6,9 +6,9 @@
 
 from django.conf import settings
 from Competitie.definities import DEEL_RK, DEEL_BK, KAMP_RANK_BLANCO, KAMP_RANK_ALLEEN_TEAM, DEELNAME_NEE
-from Competitie.models_competitie import CompetitieIndivKlasse
-from Competitie.models_laag_regio import RegiocompetitieSporterBoog, RegiocompetitieRondeTeam
-from Competitie.models_laag_kamp import KampioenschapSporterBoog, KampioenschapTeam
+from Competitie.models import (CompetitieIndivKlasse,
+                               RegiocompetitieSporterBoog, RegiocompetitieRondeTeam,
+                               KampioenschapSporterBoog, KampioenschapTeam)
 from HistComp.definities import (HISTCOMP_RK, HISTCOMP_BK,
                                  HISTCOMP_TITEL_NONE, HISTCOMP_TITEL_RK, HISTCOMP_TITEL_BK, HISTCOMP_TITEL_NK)
 from HistComp.models import (HistCompSeizoen,

@@ -6,11 +6,11 @@
 
 from django.core.management.base import BaseCommand
 from Competitie.definities import DEEL_RK, DEELNAME_NEE
-from Competitie.models_competitie import CompetitieIndivKlasse
-from Competitie.models_laag_kamp import Kampioenschap, KampioenschapSporterBoog
+from Competitie.models import CompetitieIndivKlasse, Kampioenschap, KampioenschapSporterBoog
 
 
 class Command(BaseCommand):
+
     help = "Controleer de RK uitslagen"
 
     def __init__(self, stdout=None, stderr=None, no_color=False, force_color=False):

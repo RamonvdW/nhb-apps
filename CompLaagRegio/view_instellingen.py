@@ -13,8 +13,7 @@ from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Competitie.definities import (INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_2, TEAM_PUNTEN,
                                    TEAM_PUNTEN_MODEL_FORMULE1, TEAM_PUNTEN_MODEL_TWEE, TEAM_PUNTEN_MODEL_SOM_SCORES)
-from Competitie.models_competitie import Competitie
-from Competitie.models_laag_regio import Regiocompetitie
+from Competitie.models import Competitie, Regiocompetitie
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
 from types import SimpleNamespace

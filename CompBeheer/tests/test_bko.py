@@ -8,10 +8,9 @@ from django.test import TestCase
 from django.utils import timezone
 from BasisTypen.models import BoogType
 from Competitie.definities import DEEL_RK, DEEL_BK, DEELNAME_NEE, DEELNAME_JA, KAMP_RANK_BLANCO, KAMP_RANK_NO_SHOW
-from Competitie.models_competitie import Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse
-from Competitie.models_laag_regio import (Regiocompetitie, RegiocompetitieSporterBoog,
-                                          RegiocompetitieTeam, RegiocompetitieRondeTeam)
-from Competitie.models_laag_kamp import Kampioenschap, KampioenschapSporterBoog, KampioenschapTeam
+from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse, Regiocompetitie,
+                               RegiocompetitieSporterBoog, RegiocompetitieTeam, RegiocompetitieRondeTeam, Kampioenschap,
+                               KampioenschapSporterBoog, KampioenschapTeam)
 from Competitie.test_utils.tijdlijn import (zet_competitie_fases, zet_competitie_fase_regio_inschrijven,
                                             zet_competitie_fase_regio_wedstrijden, zet_competitie_fase_regio_afsluiten)
 from Functie.tests.helpers import maak_functie

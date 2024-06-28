@@ -18,7 +18,7 @@ from Bestel.management.commands.bestel_mutaties import stuur_email_naar_koper_be
 from Bestel.definities import BESTELLING_STATUS_NIEUW
 from Bestel.models import Bestelling, BestelProduct
 from Betaal.models import BetaalInstellingenVereniging, BetaalTransactie
-from Competitie.models_competitie import Competitie, CompetitieMatch
+from Competitie.models import Competitie, CompetitieMatch
 from Functie.models import Functie
 from Functie.view_koppel_beheerder import functie_wijziging_stuur_email_notificatie, functie_vraag_email_bevestiging
 from Geo.models import Regio

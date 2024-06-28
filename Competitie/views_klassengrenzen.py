@@ -9,7 +9,7 @@ from django.shortcuts import render, reverse
 from django.views.generic import View
 from django.utils.safestring import mark_safe
 from BasisTypen.definities import BLAZOEN2STR
-from Competitie.models_competitie import Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse
+from Competitie.models import Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige
 from Score.definities import AG_NUL

@@ -7,8 +7,8 @@
 # verwijder onnodige (oude) data van voorgaande competities
 
 from django.core.management.base import BaseCommand
-from Competitie.models_competitie import Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse
-from Competitie.models_laag_kamp import KampioenschapSporterBoog, KampioenschapTeam
+from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
+                               KampioenschapSporterBoog, KampioenschapTeam)
 import openpyxl
 from openpyxl.styles import Alignment, Font, DEFAULT_FONT
 

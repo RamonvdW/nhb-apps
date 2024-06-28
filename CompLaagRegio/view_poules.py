@@ -11,7 +11,7 @@ from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
 from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.models_laag_regio import Regiocompetitie, RegiocompetitieTeam, RegiocompetitieTeamPoule
+from Competitie.models import Regiocompetitie, RegiocompetitieTeam, RegiocompetitieTeamPoule
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
 

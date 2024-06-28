@@ -8,7 +8,7 @@ from django.core.management.base import BaseCommand
 from Competitie.definities import (DEEL_RK,
                                    DEELNAME_NEE, DEELNAME_JA,
                                    KAMP_RANK_NO_SHOW, KAMP_RANK_RESERVE)
-from Competitie.models_laag_kamp import KampioenschapSporterBoog
+from Competitie.models import KampioenschapSporterBoog
 from openpyxl.utils.exceptions import InvalidFileException
 import openpyxl
 import zipfile

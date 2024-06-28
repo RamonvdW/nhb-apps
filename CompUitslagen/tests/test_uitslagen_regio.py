@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2023 Ramon van der Winkel.
+#  Copyright (c) 2020-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -16,10 +16,10 @@ class TestCompUitslagenRegio(E2EHelpers, TestCase):
 
     test_after = ('Competitie.tests.test_overzicht', 'Competitie.tests.test_tijdlijn')
 
-    url_uitslagen_regio = '/bondscompetities/uitslagen/%s/regio-individueel/%s/'                    # comp_pk, comp_boog
-    url_uitslagen_regio_n = '/bondscompetities/uitslagen/%s/regio-individueel/%s/%s/'               # comp_pk. regio_nr, comp_boog
-    url_uitslagen_regio_teams = '/bondscompetities/uitslagen/%s/regio-teams/%s/'                    # comp_pk, team_type
-    url_uitslagen_regio_teams_n = '/bondscompetities/uitslagen/%s/regio-teams/%s/%s/'               # comp_pk, regio_nr, team_type
+    url_uitslagen_regio = '/bondscompetities/uitslagen/%s/regio-individueel/%s/'        # comp_pk, comp_boog
+    url_uitslagen_regio_n = '/bondscompetities/uitslagen/%s/regio-individueel/%s/%s/'   # comp_pk. regio_nr, comp_boog
+    url_uitslagen_regio_teams = '/bondscompetities/uitslagen/%s/regio-teams/%s/'        # comp_pk, team_type
+    url_uitslagen_regio_teams_n = '/bondscompetities/uitslagen/%s/regio-teams/%s/%s/'   # comp_pk, regio_nr, team_type
 
     regio_nr = 101
     ver_nr = 0      # wordt in setUpTestData ingevuld

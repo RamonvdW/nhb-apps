@@ -6,7 +6,7 @@
 
 from django.core.management.base import BaseCommand
 from Competitie.definities import DEEL_BK
-from Competitie.models_laag_kamp import Kampioenschap, KampioenschapSporterBoog, KampioenschapIndivKlasseLimiet
+from Competitie.models import Kampioenschap, KampioenschapSporterBoog, KampioenschapIndivKlasseLimiet
 
 
 class Command(BaseCommand):

@@ -9,8 +9,8 @@ from BasisTypen.models import BoogType, TeamType
 from Functie.tests.helpers import maak_functie
 from Geo.models import Regio, Cluster
 from Competitie.definities import INSCHRIJF_METHODE_1
-from Competitie.models_competitie import CompetitieMatch, CompetitieIndivKlasse, CompetitieTeamKlasse
-from Competitie.models_laag_regio import Regiocompetitie, RegiocompetitieSporterBoog, RegiocompetitieTeam
+from Competitie.models import (CompetitieMatch, CompetitieIndivKlasse, CompetitieTeamKlasse,
+                               Regiocompetitie, RegiocompetitieSporterBoog, RegiocompetitieTeam)
 from Competitie.operations import maak_regiocompetitie_ronde
 from Competitie.tests.test_helpers import maak_competities_en_zet_fase_c
 from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren

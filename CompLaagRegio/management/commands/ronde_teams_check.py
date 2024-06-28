@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.core.management.base import BaseCommand
-from Competitie.models_laag_regio import RegiocompetitieRondeTeam
+from Competitie.models import RegiocompetitieRondeTeam
 
 
 class Command(BaseCommand):

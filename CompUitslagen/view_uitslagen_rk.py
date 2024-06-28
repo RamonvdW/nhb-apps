@@ -10,10 +10,9 @@ from django.views.generic import TemplateView
 from django.utils.safestring import mark_safe
 from Account.models import get_account
 from Competitie.definities import DEEL_RK, DEELNAME_NEE, KAMP_RANK_RESERVE, KAMP_RANK_NO_SHOW, KAMP_RANK_BLANCO
-from Competitie.models_competitie import Competitie, CompetitieMatch
-from Competitie.models_laag_regio import Regiocompetitie, RegiocompetitieSporterBoog
-from Competitie.models_laag_kamp import (Kampioenschap, KampioenschapSporterBoog, KampioenschapTeam,
-                                         KampioenschapIndivKlasseLimiet)
+from Competitie.models import (Competitie, CompetitieMatch, Regiocompetitie, RegiocompetitieSporterBoog,
+                               Kampioenschap, KampioenschapSporterBoog, KampioenschapTeam,
+                               KampioenschapIndivKlasseLimiet)
 from Competitie.seizoenen import get_comp_pk
 from Functie.rol import rol_get_huidige_functie
 from Geo.models import Rayon

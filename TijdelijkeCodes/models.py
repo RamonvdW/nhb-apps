@@ -8,7 +8,7 @@ from django.db import models
 from django.utils import timezone
 from datetime import timedelta
 from Account.models import Account
-from Competitie.models_laag_kamp import KampioenschapSporterBoog
+from Competitie.models import KampioenschapSporterBoog
 from Functie.models import Functie
 from Sporter.models import Sporter
 from Registreer.models import GastRegistratie

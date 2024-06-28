@@ -7,8 +7,7 @@
 from django.test import TestCase
 from django.utils import timezone
 from Competitie.definities import DEELNAME_ONBEKEND
-from Competitie.models_laag_kamp import KampioenschapIndivKlasseLimiet, KampioenschapSporterBoog
-from Competitie.models_mutatie import CompetitieMutatie
+from Competitie.models import KampioenschapIndivKlasseLimiet, KampioenschapSporterBoog, CompetitieMutatie
 from Competitie.test_utils.tijdlijn import zet_competitie_fase_bk_wedstrijden, zet_competitie_fase_rk_wedstrijden
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata

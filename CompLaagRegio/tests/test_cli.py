@@ -6,9 +6,9 @@
 
 from django.test import TestCase
 from BasisTypen.models import TemplateCompetitieIndivKlasse, BoogType, TeamType, Leeftijdsklasse
-from Competitie.models_competitie import Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse
-from Competitie.models_laag_regio import (Regiocompetitie, RegiocompetitieSporterBoog, RegiocompetitieTeam,
-                                          RegiocompetitieRondeTeam)
+from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
+                               Regiocompetitie, RegiocompetitieSporterBoog, RegiocompetitieTeam,
+                               RegiocompetitieRondeTeam)
 from Competitie.test_utils.tijdlijn import zet_competitie_fases, zet_competitie_fase_regio_inschrijven
 from Functie.models import Functie
 from Geo.models import Regio

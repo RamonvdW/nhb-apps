@@ -6,7 +6,7 @@
 
 from django.utils import timezone
 from django.test import TestCase
-from Competitie.models_competitie import Competitie
+from Competitie.models import Competitie
 from Competitie.test_utils.tijdlijn import zet_competitie_fases
 from Competitie.tests.test_helpers import maak_competities_en_zet_fase_c
 from Functie.definities import Rollen

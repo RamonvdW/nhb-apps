@@ -7,9 +7,7 @@
 from django.test import TestCase
 from BasisTypen.models import BoogType
 from Competitie.definities import DEEL_RK, DEEL_BK
-from Competitie.models_competitie import Competitie
-from Competitie.models_laag_regio import Regiocompetitie, RegiocompetitieSporterBoog
-from Competitie.models_laag_kamp import Kampioenschap
+from Competitie.models import Competitie, Regiocompetitie, RegiocompetitieSporterBoog, Kampioenschap
 from Competitie.operations import competities_aanmaken
 from Competitie.test_utils.tijdlijn import zet_competitie_fase_regio_inschrijven
 from Functie.tests.helpers import maak_functie

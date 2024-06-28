@@ -6,7 +6,7 @@
 
 from django.urls import reverse
 from django.utils.formats import localize
-from Competitie.models_laag_regio import Regiocompetitie
+from Competitie.models import Regiocompetitie
 from Functie.definities import Rollen
 from Score.operations import wanneer_ag_vastgesteld
 from types import SimpleNamespace

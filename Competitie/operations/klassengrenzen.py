@@ -7,7 +7,7 @@
 from django.utils import timezone
 from BasisTypen.definities import (MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT,
                                    GESLACHT_MAN, GESLACHT_VROUW, GESLACHT_ANDERS, GESLACHT_ALLE)
-from Competitie.models_competitie import CompetitieIndivKlasse, CompetitieTeamKlasse
+from Competitie.models import CompetitieIndivKlasse, CompetitieTeamKlasse
 from Score.definities import AG_NUL, AG_LAAGSTE_NIET_NUL, AG_DOEL_INDIV
 from Score.models import Aanvangsgemiddelde
 from Sporter.models import Sporter

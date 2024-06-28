@@ -12,8 +12,7 @@ from django.core.exceptions import PermissionDenied
 from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Competitie.definities import DEEL_RK, DEELNAME_JA, DEELNAME_NEE
-from Competitie.models_competitie import Competitie, CompetitieTeamKlasse
-from Competitie.models_laag_kamp import KampioenschapTeam, Kampioenschap
+from Competitie.models import Competitie, CompetitieTeamKlasse, KampioenschapTeam, Kampioenschap
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
 from Geo.models import Rayon

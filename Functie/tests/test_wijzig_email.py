@@ -6,8 +6,7 @@
 
 from django.test import TestCase
 from Competitie.definities import DEEL_RK, DEEL_BK
-from Competitie.models_laag_regio import Regiocompetitie
-from Competitie.models_laag_kamp import Kampioenschap
+from Competitie.models import Regiocompetitie, Kampioenschap
 from Competitie.operations import competities_aanmaken
 from Functie.models import Functie
 from Functie.tests.helpers import maak_functie

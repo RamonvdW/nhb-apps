@@ -10,9 +10,8 @@ from django.views.generic import TemplateView
 from django.utils.safestring import mark_safe
 from Account.models import get_account
 from Competitie.definities import TEAM_PUNTEN_MODEL_SOM_SCORES
-from Competitie.models_competitie import Competitie
-from Competitie.models_laag_regio import (Regiocompetitie, RegiocompetitieTeam, RegiocompetitieRondeTeam,
-                                          RegiocompetitieSporterBoog)
+from Competitie.models import (Competitie, Regiocompetitie, RegiocompetitieSporterBoog,
+                               RegiocompetitieTeam, RegiocompetitieRondeTeam)
 from Competitie.seizoenen import get_comp_pk
 from Functie.rol import rol_get_huidige_functie
 from Sporter.models import get_sporter

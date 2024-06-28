@@ -8,8 +8,7 @@ from django.test import TestCase
 from django.utils import timezone
 from BasisTypen.models import BoogType
 from Bestel.models import BestelProduct
-from Competitie.models_competitie import Competitie, CompetitieIndivKlasse
-from Competitie.models_laag_regio import Regiocompetitie, RegiocompetitieSporterBoog
+from Competitie.models import Competitie, CompetitieIndivKlasse, Regiocompetitie, RegiocompetitieSporterBoog
 from Functie.tests.helpers import maak_functie
 from Geo.models import Regio
 from Locatie.models import Locatie

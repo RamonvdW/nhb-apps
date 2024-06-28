@@ -10,7 +10,7 @@ from django.utils import timezone
 from django.utils.http import urlencode
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.models_competitie import CompetitieMatch
+from Competitie.models import CompetitieMatch
 from Account.models import get_account
 from Functie.definities import Rollen
 from Functie.models import Functie

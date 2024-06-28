@@ -4,7 +4,7 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from Competitie.models_competitie import Competitie
+from Competitie.models import Competitie
 
 
 class SeizoenCache(object):

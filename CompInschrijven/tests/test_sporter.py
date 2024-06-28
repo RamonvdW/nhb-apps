@@ -7,8 +7,8 @@
 from django.test import TestCase
 from django.utils import timezone
 from Competitie.definities import INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3
-from Competitie.models_competitie import CompetitieIndivKlasse, CompetitieMatch
-from Competitie.models_laag_regio import Regiocompetitie, RegiocompetitieSporterBoog, RegiocompetitieRonde
+from Competitie.models import (CompetitieIndivKlasse, CompetitieMatch,
+                               Regiocompetitie, RegiocompetitieSporterBoog, RegiocompetitieRonde)
 from Competitie.test_utils.tijdlijn import zet_competitie_fases
 from Competitie.tests.test_helpers import maak_competities_en_zet_fase_c
 from Functie.models import Functie

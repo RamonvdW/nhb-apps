@@ -13,8 +13,7 @@ from Account.models import get_account
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige, rol_get_huidige_functie
 from Competitie.definities import INSCHRIJF_METHODE_1
-from Competitie.models_competitie import CompetitieMatch
-from Competitie.models_laag_regio import RegiocompetitieRonde, RegiocompetitieSporterBoog
+from Competitie.models import CompetitieMatch, RegiocompetitieRonde, RegiocompetitieSporterBoog
 
 
 TEMPLATE_SPORTER_KEUZE7WEDSTRIJDEN = 'complaagregio/keuze-zeven-wedstrijden-methode1.dtl'

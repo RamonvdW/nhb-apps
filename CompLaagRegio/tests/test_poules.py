@@ -8,10 +8,10 @@ from django.test import TestCase
 from django.core import management
 from BasisTypen.models import BoogType, TeamType
 from Competitie.definities import DEEL_RK, DEEL_BK, TEAM_PUNTEN_MODEL_FORMULE1
-from Competitie.models_competitie import Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse
-from Competitie.models_laag_regio import (Regiocompetitie, RegiocompetitieTeam, RegiocompetitieTeamPoule,
-                                          RegiocompetitieRondeTeam)
-from Competitie.models_laag_kamp import Kampioenschap
+from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
+                               Regiocompetitie, RegiocompetitieTeam, RegiocompetitieTeamPoule,
+                               RegiocompetitieRondeTeam,
+                               Kampioenschap)
 from Competitie.operations import competities_aanmaken
 from Competitie.test_utils.tijdlijn import (evaluatie_datum, zet_competitie_fases,
                                             zet_competitie_fase_regio_wedstrijden,

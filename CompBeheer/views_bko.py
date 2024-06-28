@@ -16,10 +16,7 @@ from Account.models import get_account
 from Competitie.definities import (MUTATIE_DOORZETTEN_REGIO_NAAR_RK,
                                    MUTATIE_KAMP_INDIV_DOORZETTEN_NAAR_BK, MUTATIE_KAMP_TEAMS_DOORZETTEN_NAAR_BK,
                                    MUTATIE_KAMP_INDIV_AFSLUITEN, MUTATIE_KAMP_TEAMS_AFSLUITEN)
-from Competitie.models_competitie import Competitie, CompetitieTeamKlasse
-from Competitie.models_laag_regio import Regiocompetitie
-from Competitie.models_laag_kamp import KampioenschapTeam
-from Competitie.models_mutatie import CompetitieMutatie
+from Competitie.models import Competitie, CompetitieTeamKlasse, Regiocompetitie, KampioenschapTeam, CompetitieMutatie
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
 from Overig.background_sync import BackgroundSync

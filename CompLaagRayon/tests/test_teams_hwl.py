@@ -9,9 +9,9 @@ from django.utils import timezone
 from Functie.tests.helpers import maak_functie
 from Geo.models import Regio
 from Competitie.definities import DEEL_RK
-from Competitie.models_competitie import CompetitieIndivKlasse
-from Competitie.models_laag_regio import Regiocompetitie, RegiocompetitieSporterBoog
-from Competitie.models_laag_kamp import KampioenschapTeam, Kampioenschap
+from Competitie.models import (CompetitieIndivKlasse,
+                               Regiocompetitie, RegiocompetitieSporterBoog,
+                               KampioenschapTeam, Kampioenschap)
 from Competitie.test_utils.tijdlijn import evaluatie_datum, zet_competitie_fase_regio_wedstrijden
 from Competitie.tests.test_helpers import maak_competities_en_zet_fase_c
 from HistComp.definities import HISTCOMP_TYPE_18, HIST_BOGEN_DEFAULT

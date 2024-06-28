@@ -10,7 +10,7 @@ from BasisTypen.models import TeamType
 from Competitie.definities import (INSCHRIJF_METHODES, INSCHRIJF_METHODE_2,
                                    TEAM_PUNTEN, TEAM_PUNTEN_MODEL_TWEE,
                                    DAGDELEN)
-from Competitie.models_competitie import Competitie, CompetitieMatch, CompetitieIndivKlasse, CompetitieTeamKlasse
+from Competitie.models.models_competitie import Competitie, CompetitieMatch, CompetitieIndivKlasse, CompetitieTeamKlasse
 from Functie.models import Functie
 from Geo.models import Regio, Cluster
 from Score.models import Score, ScoreHist

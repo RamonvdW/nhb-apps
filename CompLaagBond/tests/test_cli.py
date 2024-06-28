@@ -7,9 +7,9 @@
 from django.test import TestCase
 from BasisTypen.models import BoogType
 from Competitie.definities import DEEL_RK, DEEL_BK
-from Competitie.models_competitie import Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse
-from Competitie.models_laag_kamp import (Kampioenschap, KampioenschapTeam, KampioenschapSporterBoog,
-                                         KampioenschapIndivKlasseLimiet)
+from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
+                               Kampioenschap, KampioenschapTeam, KampioenschapSporterBoog,
+                               KampioenschapIndivKlasseLimiet)
 from Competitie.operations import competities_aanmaken
 from Geo.models import Regio
 from Sporter.models import Sporter, SporterBoog

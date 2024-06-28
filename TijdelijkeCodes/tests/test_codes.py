@@ -7,8 +7,7 @@
 from django.test import TestCase
 from django.http import HttpResponseRedirect
 from BasisTypen.models import BoogType
-from Competitie.models_competitie import Competitie, CompetitieIndivKlasse
-from Competitie.models_laag_kamp import Kampioenschap, KampioenschapSporterBoog
+from Competitie.models import Competitie, CompetitieIndivKlasse, Kampioenschap, KampioenschapSporterBoog
 from Functie.models import Functie
 from Geo.models import Rayon
 from Sporter.models import SporterBoog, Sporter
