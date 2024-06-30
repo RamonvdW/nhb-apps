@@ -25,7 +25,7 @@ class TestBestelGast(E2EHelpers, TestCase):
 
     """ tests voor de Bestel-applicatie, module bestellingen door gast account """
 
-    test_after = ('Bestel.tests.test_mandje', 'Bestel.tests.test_bestelling', 'Registreer.test_gast')
+    test_after = ('Bestel.tests.test_mandje', 'Bestel.tests.test_bestelling', 'Registreer.tests.test_gast')
 
     url_mandje_bestellen = '/bestel/mandje/'
     url_afleveradres = '/bestel/mandje/afleveradres/'

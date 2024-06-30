@@ -120,6 +120,14 @@
                         </li>
                     {% endif %}
 
+                    {% if menu_url_bondspas %}
+                        <li class="divider"></li>
+                        <li>
+                            <a href="{{ menu_url_bondspas }}">
+                                <i class="notranslate material-icons-round sv-rood-text">card_membership</i>Toon bondspas</a>
+                        </li>
+                    {% endif %}
+
                     {% if menu_url_uitloggen %}
                         <li class="divider"></li>
                         <li>
