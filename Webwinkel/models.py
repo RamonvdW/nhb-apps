@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2023 Ramon van der Winkel.
+#  Copyright (c) 2022-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -47,6 +47,9 @@ class WebwinkelProduct(models.Model):
 
     # onder welke sectie wordt deze gegroepeerd op de voorpagina
     sectie = models.CharField(max_length=50, default='', blank=True)
+
+    # subtitel is alleen van toepassing op het eerste product in die sectie (met de laagste volgorde)
+    sectie_subtitel = models.CharField(max_length=250, default='', blank=True)
 
     # de titel voor op de omslag
     omslag_titel = models.CharField(max_length=25, default='', blank=True)
