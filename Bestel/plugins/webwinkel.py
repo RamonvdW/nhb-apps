@@ -137,7 +137,10 @@ def webwinkel_plugin_beschrijf_product(keuze):
 
     product = keuze.product
 
-    tup = ('Titel', product.omslag_titel)
+    msg = product.omslag_titel
+    if product.kleding_maat:
+        msg += ', maat %s' % product.kleding_maat
+    tup = ('Titel', msg)
     beschrijving.append(tup)
 
     tup = ('Prijs per stuk', '€ ' + localize(product.prijs_euro))

@@ -41,8 +41,17 @@ class OverzichtView(TemplateView):
                      .select_related('omslag_foto')
                      .order_by('volgorde'))
 
+        objs = list()
+
         prev_sectie = None
+        prev_titel = ''
         for product in producten:
+            # kleding in verschillende maten hebben dezelfde omslag titel
+            # toon alleen de eerste
+            if product.omslag_titel != prev_titel:
+                objs.append(product)
+                prev_titel = product.omslag_titel
+
             if product.sectie != prev_sectie:
                 if prev_sectie is not None:
                     product.sectie_afsluiten = True
@@ -56,7 +65,9 @@ class OverzichtView(TemplateView):
 
             if not product.onbeperkte_voorraad:
                 if product.aantal_op_voorraad < 1:
-                    product.is_uitverkocht = True
+                    # voorkom uitverkocht als het eerste product op is
+                    if not product.kleding_maat:
+                        product.is_uitverkocht = True
 
             product.is_extern = product.beschrijving.startswith('http')
             if product.is_extern:
@@ -66,7 +77,7 @@ class OverzichtView(TemplateView):
                 product.url_details = reverse('Webwinkel:product', kwargs={'product_pk': product.pk})
         # for
 
-        return producten
+        return objs
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -114,6 +125,28 @@ class ProductView(TemplateView):
 
         context['product'] = product
 
+        if product.kleding_maat:
+            product.sel_opts_maat = sel_opts = list()
+            voorraad = 0
+            for maat in (WebwinkelProduct
+                         .objects
+                         .filter(omslag_titel=product.omslag_titel)
+                         .order_by('volgorde')):
+
+                msg = product.omslag_titel + ', maat %s' % maat.kleding_maat
+
+                if maat.aantal_op_voorraad > 0:
+                    voorraad += maat.aantal_op_voorraad
+                    msg += ' (nog %s beschikbaar)' % maat.aantal_op_voorraad
+                else:
+                    msg += '  (uitverkocht)'
+
+                tup = (maat.kleding_maat, msg)
+                sel_opts.append(tup)
+            # for
+
+            product.aantal_op_voorraad = voorraad
+
         if product.eenheid:
             if ',' in product.eenheid:
                 aantal_enkel, aantal_meer = product.eenheid.split(',')
@@ -128,7 +161,7 @@ class ProductView(TemplateView):
             product.aantal_str = '%s %s' % (product.aantal_op_voorraad, aantal_meer)
             limiet_aantal = product.aantal_op_voorraad
 
-        product.sel_opts = sel_opts = list()
+        product.sel_opts_aantal = sel_opts = list()
         opties = product.bestel_begrenzing.strip()
         if not opties:
             opties = '1-5'
@@ -198,6 +231,20 @@ class ProductView(TemplateView):
             aantal = int(aantal)
         except (ValueError, TypeError):
             raise Http404('Foutieve parameter')
+
+        if product.kleding_maat:
+            maat = request.POST.get('maat', '')[:10]        # afkappen voor de veiligheid
+
+            # zoek het juiste product erbij
+            try:
+                product = (WebwinkelProduct
+                           .objects
+                           .prefetch_related('fotos')
+                           .get(omslag_titel=product.omslag_titel,
+                                mag_tonen=True,
+                                kleding_maat=maat))
+            except (ValueError, TypeError, WebwinkelProduct.DoesNotExist):
+                raise Http404('Product met maat niet gevonden')
 
         # check of het aantal toegestaan is
         is_goed = False

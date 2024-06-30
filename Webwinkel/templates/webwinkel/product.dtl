@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2022-2023 Ramon van der Winkel.
+                Copyright (c) 2022-2024 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -107,10 +107,25 @@
                         <form action="{{ url_toevoegen }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
                             {% csrf_token %}
 
+                            {% if product.kleding_maat %}
+
+                                <div class="input-field">
+                                    <div class="select-wrapper">
+                                        <select name="maat">
+                                            {% for maat, msg in product.sel_opts_maat %}
+                                                <option value="{{ maat }}"{% if maat == 'M' %} selected{% endif %}>{{ msg }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <label class="black-text">Kies een maat</label>
+                                </div>
+
+                            {% endif %}
+
                             <div class="input-field">
                                 <div class="select-wrapper">
                                     <select name="aantal">
-                                        {% for aantal, msg in product.sel_opts %}
+                                        {% for aantal, msg in product.sel_opts_aantal %}
                                             <option value="{{ aantal }}">{{ msg }}</option>
                                         {% endfor %}
                                     </select>
