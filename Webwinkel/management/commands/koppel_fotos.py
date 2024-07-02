@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2023 Ramon van der Winkel.
+#  Copyright (c) 2022-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -21,7 +21,8 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument('omslag_titel', nargs=1, help="Omslag titel van het (bestaande) product")
-        parser.add_argument('foto_locatie', type=str, nargs="+", action='store', help="Locatie van het foto bestand")
+        parser.add_argument('foto_locatie', type=str, nargs="+", action='store',
+                            help="Locatie van het foto bestanden (1e = omslag)")
 
     def handle(self, *args, **options):
         # controleer dat de foto's bestaan

@@ -73,6 +73,10 @@ class WebwinkelProduct(models.Model):
     # bij leeg wordt "stuks" gebruikt
     eenheid = models.CharField(max_length=50, default='', blank=True)
 
+    # maat (alleen voor kleding)
+    # voorbeeld: XL
+    kleding_maat = models.CharField(max_length=10, default='', blank=True)
+
     # de prijs voor dit product
     prijs_euro = models.DecimalField(max_digits=6, decimal_places=2, default=Decimal(0))        # max 9999,99
 
@@ -92,7 +96,10 @@ class WebwinkelProduct(models.Model):
 
     def __str__(self):
         """ geef een beschrijving terug voor de admin interface """
-        return "[%s] %s" % (self.volgorde, self.omslag_titel)
+        msg = "[%s] %s" % (self.volgorde, self.omslag_titel)
+        if self.kleding_maat:
+            msg += ' (maat %s)' % self.kleding_maat
+        return msg
 
     class Meta:
         verbose_name = "Webwinkel product"
