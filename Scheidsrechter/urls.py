@@ -58,6 +58,9 @@ urlpatterns = [
          view_beschikbaarheid.BeschikbaarheidInzienCSView.as_view(),
          name='beschikbaarheid-inzien'),
 
+    path('beschikbaarheid-inzien/statistiek/',
+         view_beschikbaarheid.BeschikbaarheidStatsCSView.as_view(),
+         name='beschikbaarheid-stats'),
 
     path('bondscompetitie/',
          view_competitie.CompetitieMatchesView.as_view(),

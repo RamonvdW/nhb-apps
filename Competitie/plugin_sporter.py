@@ -40,16 +40,29 @@ def get_sporter_competities(sporter: Sporter,
                             wedstrijdbogen: list,
                             boog_afk2sporterboog: dict):
     """
-        wedstrijdbogen: lijst van boog afkortingen waarmee dit lid wil schieten
-        boog_afk2sporterboog: de SporterBoog dit lid voor elk relevant boogtype
+        wedstrijdbogen: lijst van afkortingen van de bogen waarmee deze sporter wil schieten
+        boog_afk2sporterboog: de SporterBoog van dit lid voor elk relevant boogtype
 
         returns: comps
-            comps = lijst van actieve competities + fase informatie
+            lijst_competities = lijst van actieve competities + fase informatie
+            lijst_inschrijven = lijst van Regiocompetitie waar de sporter op in kan schrijven
+
+            lijst_regio       = lijst van Regiocompetitie waar de sporter op in kan schrijven
+                                heeft:
+                                    is_ingeschreven = True/False: al ingeschreven?      # TODO: niet meer nodig?
+                                    boog_niet_meer = True/False: boog niet meer gekozen?
+                                    boog_beschrijving = boog_dict[afk].beschrijving
+                                    url_afmelden = URL om af te melden - gebruik POST
+                                    url_aanmelden       # TODO: niet meer nodig?
+                                    url_schietmomenten
+
+            lijst_rk          = lijst van KampioenschapSporterBoog RK waar de sporter voor gekwalificeerd is
+            lijst_bk          = lijst van KampioenschapSporterBoog BK waar de sporter voor gekwalificeerd is
     """
 
     # bepaal de competities die we willen tonen
     pk2comp = dict()        # [comp.pk] = Competitie
-    comps = list()
+    lijst_competities = list()
     for comp in (Competitie
                  .objects
                  .exclude(is_afgesloten=True)
@@ -82,7 +95,7 @@ def get_sporter_competities(sporter: Sporter,
 
             comp.boog_afk = [boogtype.afkorting for boogtype in comp.boogtypen.all()]
 
-            comps.append(comp)
+            lijst_competities.append(comp)
             pk2comp[comp.pk] = comp
     # for
 
@@ -98,10 +111,10 @@ def get_sporter_competities(sporter: Sporter,
                           .select_related('regiocompetitie',
                                           'sporterboog')
                           .filter(sporterboog__sporter=sporter,
-                                  regiocompetitie__competitie__in=comps)
+                                  regiocompetitie__competitie__in=lijst_competities)
                           .order_by('regiocompetitie__competitie__afstand'))
 
-    regio_kan_inschrijven = list()
+    lijst_inschrijven = list()
     lijst_regio = list()
 
     # zoek regiocompetities in deze regio (typisch zijn er 2 in de regio: 18m en 25m)
@@ -109,7 +122,7 @@ def get_sporter_competities(sporter: Sporter,
     for deelcomp in (Regiocompetitie
                      .objects
                      .select_related('competitie')
-                     .filter(competitie__in=comps,
+                     .filter(competitie__in=lijst_competities,
                              regio=regio)
                      .order_by('competitie__afstand')):
 
@@ -128,9 +141,10 @@ def get_sporter_competities(sporter: Sporter,
                     obj.is_ingeschreven = False
 
                     if obj.is_ingeschreven:
+                        # TODO: niet te bereiken
                         lijst_regio.append(obj)
                     else:
-                        regio_kan_inschrijven.append(obj)
+                        lijst_inschrijven.append(obj)
 
                     # zoek uit of de sporter al ingeschreven is
                     inschrijving = None
@@ -196,13 +210,13 @@ def get_sporter_competities(sporter: Sporter,
                                       'kampioenschap__rayon',
                                       'sporterboog')
                       .filter(sporterboog__sporter=sporter,
-                              kampioenschap__competitie__in=comps)
+                              kampioenschap__competitie__in=lijst_competities)
                       .order_by('kampioenschap__competitie__afstand',
                                 'sporterboog__boogtype__afkorting'))
 
     for kamp in (Kampioenschap
                  .objects
-                 .filter(competitie__in=comps)
+                 .filter(competitie__in=lijst_competities)
                  .select_related('competitie')
                  .order_by('competitie__afstand')):
 
@@ -236,7 +250,7 @@ def get_sporter_competities(sporter: Sporter,
                         # TODO: team
     # for
 
-    return comps, regio_kan_inschrijven, lijst_regio, lijst_rk, lijst_bk
+    return lijst_competities, lijst_inschrijven, lijst_regio, lijst_rk, lijst_bk
 
 
 # end of file
