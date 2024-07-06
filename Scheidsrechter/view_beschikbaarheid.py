@@ -24,10 +24,12 @@ from Scheidsrechter.mutaties import (scheids_mutatieverzoek_beschikbaarheid_opvr
 from Sporter.models import get_sporter
 from Wedstrijden.definities import WEDSTRIJD_STATUS_GEACCEPTEERD
 from Wedstrijden.models import Wedstrijd
+from collections import OrderedDict
 import datetime
 
 TEMPLATE_BESCHIKBAARHEID_WIJZIGEN = 'scheidsrechter/beschikbaarheid-wijzigen.dtl'
 TEMPLATE_BESCHIKBAARHEID_INZIEN_CS = 'scheidsrechter/beschikbaarheid-inzien-cs.dtl'
+TEMPLATE_BESCHIKBAARHEID_STATS_CS = 'scheidsrechter/beschikbaarheid-stats-cs.dtl'
 
 
 class BeschikbaarheidOpvragenView(UserPassesTestMixin, View):
@@ -414,6 +416,67 @@ class BeschikbaarheidInzienCSView(UserPassesTestMixin, TemplateView):
         context['kruimels'] = (
             (reverse('Scheidsrechter:overzicht'), 'Scheidsrechters'),
             (None, 'Beschikbaarheid')
+        )
+
+        return context
+
+
+class BeschikbaarheidStatsCSView(UserPassesTestMixin, TemplateView):
+    """ Django class-based view voor de Commissie Scheidsrechters
+        om statistiek over de opgegeven beschikbaarheid te krijgen
+    """
+
+    # class variables shared by all instances
+    template_name = TEMPLATE_BESCHIKBAARHEID_STATS_CS
+    raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        return rol_get_huidige(self.request) == Rollen.ROL_CS
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        context['counts'] = counts = OrderedDict()
+
+        opgaaf2str = {
+            BESCHIKBAAR_JA: 'ja',
+            BESCHIKBAAR_DENK: 'denk',
+            BESCHIKBAAR_NEE: 'nee',
+            BESCHIKBAAR_LEEG: 'leeg',
+        }
+
+        for obj in (ScheidsBeschikbaarheid
+                    .objects
+                    .select_related('scheids')
+                    .order_by('scheids')):
+
+            lid_nr = obj.scheids.lid_nr
+            if lid_nr not in counts:
+                counts[lid_nr] = {'opmerking': 0,
+                                  'naam': obj.scheids.volledige_naam(),
+                                  'level_str': SCHEIDS2LEVEL[obj.scheids.scheids]}
+                for opgaaf in opgaaf2str.values():
+                    counts[lid_nr][opgaaf] = 0
+                # for
+
+            counts[lid_nr][opgaaf2str[obj.opgaaf]] += 1
+            if obj.opmerking:
+                counts[lid_nr]['opmerking'] += 1
+        # for
+
+        for count in counts.values():
+            count['totaal'] = totaal = count['ja'] + count['denk'] + count['nee']
+            count['ja_perc'] = '%.0f%%' % ((count['ja'] * 100) / totaal)
+            count['denk_perc'] = '%.0f%%' % ((count['denk'] * 100) / totaal)
+            count['nee_perc'] = '%.0f%%' % ((count['nee'] * 100) / totaal)
+
+        context['kruimels'] = (
+            (reverse('Scheidsrechter:overzicht'), 'Scheidsrechters'),
+            (reverse('Scheidsrechter:beschikbaarheid-inzien'), 'Beschikbaarheid'),
+            (None, 'Statistiek')
         )
 
         return context
