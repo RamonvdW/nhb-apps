@@ -15,6 +15,11 @@
         <div class="col s12">
             <h3 class="page-banner">Beschikbaarheid</h3>
             <p>Bekijk de beschikbaarheid opgegeven door de scheidsrechters.</p>
+            {% if url_stats %}
+                <p>
+                    <a class="btn-sv-rood" href="{{ url_stats }}">Statistiek</a>
+                </p>
+            {% endif %}
         </div>
     </div>
 

@@ -413,6 +413,8 @@ class BeschikbaarheidInzienCSView(UserPassesTestMixin, TemplateView):
             dag.aantal = len(dag.beschikbaar)
         # for
 
+        context['url_stats'] = reverse('Scheidsrechter:beschikbaarheid-stats')
+
         context['kruimels'] = (
             (reverse('Scheidsrechter:overzicht'), 'Scheidsrechters'),
             (None, 'Beschikbaarheid')
