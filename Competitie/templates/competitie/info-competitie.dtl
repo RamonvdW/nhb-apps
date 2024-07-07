@@ -21,7 +21,7 @@
 
     <!-- sfeerfoto -->
     <div class="center" style="margin-top:50px; margin-bottom:30px">
-        <img src="{% static 'competitie/indoor_sfeer_1.jpg' %}" style="width:70%; height:auto" loading="lazy" alt="sfeerfoto"><br>
+        <img src="{% static 'competitie/indoor_sfeer_1.webp' %}" style="width:70%; height:auto" loading="lazy" alt="sfeerfoto"><br>
         <code style="font-size:12px">Sfeerfoto van een wedstrijd binnenshuis</code>
         <p>
             <a class="btn-sv-rood" href="https://handboogsport.smugmug.com/Indoor/" target="_blank" rel="noopener noreferrer">
@@ -81,7 +81,7 @@
 
     <!-- sfeerfoto -->
     <div class="center" style="margin-top:50px; margin-bottom:30px">
-        <img src="{% static 'competitie/indoor_sfeer_2.jpg' %}" style="width:70%; height:auto" loading="lazy" alt="sfeerfoto"><br>
+        <img src="{% static 'competitie/indoor_sfeer_2.webp' %}" style="width:70%; height:auto" loading="lazy" alt="sfeerfoto"><br>
         <code style="font-size:12px">Sfeerfoto van een wedstrijd binnenshuis</code>
     </div>
 
@@ -154,7 +154,7 @@
 
     <!-- sfeerfoto -->
     <div class="center" style="margin-top:50px; margin-bottom:30px">
-        <img src="{% static 'competitie/indoor_sfeer_4.jpg' %}" style="width:70%; height:auto" loading="lazy" alt="sfeerfoto"><br>
+        <img src="{% static 'competitie/indoor_sfeer_4.webp' %}" style="width:70%; height:auto" loading="lazy" alt="sfeerfoto"><br>
         <code style="font-size:12px">Sfeerfoto van een wedstrijd binnenshuis</code>
     </div>
 
@@ -194,7 +194,7 @@ Nieuwe sporters krijgen na 3 scores hun speelsterkte vastgesteld.</p>
 
     <!-- sfeerfoto -->
     <div class="center" style="margin-top:50px; margin-bottom:30px">
-        <img src="{% static 'competitie/indoor_sfeer_3.jpg' %}" style="width:70%; height:auto" loading="lazy" alt="sfeerfoto"><br>
+        <img src="{% static 'competitie/indoor_sfeer_3.webp' %}" style="width:70%; height:auto" loading="lazy" alt="sfeerfoto"><br>
         <code style="font-size:12px">Sfeerfoto van een wedstrijd binnenshuis</code>
     </div>
 
@@ -373,7 +373,7 @@ In de shoot-off wordt 1 pijl gesloten en beslist de scheidsrechter welke pijl he
 
     <!-- sfeerfoto -->
     <div class="center" style="margin-top:50px; margin-bottom:30px">
-        <img src="{% static 'competitie/indoor_sfeer_5.jpg' %}" style="width:70%; height:auto" loading="lazy" alt="sfeerfoto"><br>
+        <img src="{% static 'competitie/indoor_sfeer_5.webp' %}" style="width:70%; height:auto" loading="lazy" alt="sfeerfoto"><br>
         <code style="font-size:12px">Sfeerfoto van een wedstrijd binnenshuis</code>
     </div>
 
