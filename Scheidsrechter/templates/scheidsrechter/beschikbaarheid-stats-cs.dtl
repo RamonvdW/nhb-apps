@@ -1,0 +1,55 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2024 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Statistiek{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Statistiek beschikbaarheid</h3>
+        </div>
+    </div>
+
+    <!-- blauwe balk met informatie in een tabel -->
+    <div class="row-sv-blauw">
+        <div class="col s12">
+            <table class="sv-kader">
+                <thead>
+                    <tr>
+                        <th>Scheidsrechter</th>
+                        <th class="center">Niveau</th>
+                        <th class="center">Reacties</th>
+                        <th class="center">Ja</th>
+                        <th class="center">Denk</th>
+                        <th class="center">Nee</th>
+                        <!-- th class="center">Geen reactie</th -->
+                        <th class="center">Opmerkingen</th>
+                    </tr>
+                </thead>
+
+                {% for sb in counts.values %}
+                    <tr>
+                        <td>{{ sb.naam }}</td>
+                        <td class="center">{{ sb.level_str }}</td>
+                        <td class="center">{{ sb.totaal }}</td>
+                        <td class="center">{{ sb.ja_perc }}</td>
+                        <td class="center">{{ sb.denk_perc }}</td>
+                        <td class="center">{{ sb.nee_perc }}</td>
+                        <!-- td class="center">{{ sb.leeg }}</td -->
+                        <td class="center">{{ sb.opmerking }}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="scheidsrechter-beschikbaarheid-wijzigen" %}
+
+{% endblock %}
