@@ -61,7 +61,7 @@ class OverzichtView(TemplateView):
             if product.omslag_foto:
                 product.omslag_foto_src = static("webwinkel_fotos/" + product.omslag_foto.locatie)
             else:
-                product.omslag_foto_src = static("plein/logo_khsn_192x192.png")
+                product.omslag_foto_src = static("plein/logo_khsn_192x192.webp")
 
             if not product.onbeperkte_voorraad:
                 if product.aantal_op_voorraad < 1:

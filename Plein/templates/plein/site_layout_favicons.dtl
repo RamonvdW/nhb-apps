@@ -1,5 +1,5 @@
 {% comment %}
-                Copyright (c) 2020-2023 Ramon van der Winkel.
+                Copyright (c) 2020-2024 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -22,7 +22,7 @@
 <link rel="apple-touch-icon" href="{% static 'plein/apple-touch-icon.png' %}">
 
 <!-- TODO: nog nodig? -->
-<link rel="icon" href="{% static 'plein/logo_khsn_192x192.png' %}" sizes="192x192">
+<link rel="icon" href="{% static 'plein/logo_khsn_192x192.webp' %}" sizes="192x192">
 
 {% comment %}
 https://www.w3schools.com/tags/att_link_sizes.asp
@@ -38,7 +38,7 @@ Sizes def: https://www.dofactory.com/html/rel/icon
     [12:02:39] GET /static/plein/apple-touch-icon.png HTTP/2.0" 200         # from this snippet
     [12:02:39] GET /apple-touch-icon-precomposed.png HTTP/2.0" 410          # own initiative
     [12:02:39] GET /favicon.ico HTTP/2.0" 200                               # own initiative, alias from webserver
-    [12:02:39] GET /static/plein/logo_khsn_192x192.png HTTP/2.0" 200        # from this snippet
+    [12:02:39] GET /static/plein/logo_khsn_192x192.webp HTTP/2.0" 200       # from this snippet
 {% endcomment %}
 
 <!-- end of file -->
