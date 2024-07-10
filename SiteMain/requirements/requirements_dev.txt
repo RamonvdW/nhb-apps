@@ -24,7 +24,7 @@ charset-normalizer==3.3.2
     #   requests
 coverage==7.5.4
     # via -r requirements_dev.in
-django==4.2.13
+django==4.2.14
     # via
     #   -r requirements.txt
     #   django-debug-toolbar
@@ -45,9 +45,9 @@ google-api-core==2.19.1
     # via
     #   -r requirements.txt
     #   google-api-python-client
-google-api-python-client==2.136.0
+google-api-python-client==2.137.0
     # via -r requirements.txt
-google-auth==2.31.0
+google-auth==2.32.0
     # via
     #   -r requirements.txt
     #   google-api-core
