@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2023 Ramon van der Winkel.
+#  Copyright (c) 2022-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -28,6 +28,9 @@ urlpatterns = [
          view_manager.ManagerView.as_view(),
          name='manager'),
 
+    path('manager/voorraad/',
+         view_manager.WebwinkelVoorraadView.as_view(),
+         name='voorraad'),
 ]
 
 # end of file
