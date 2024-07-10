@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2022-2023 Ramon van der Winkel.
+                Copyright (c) 2022-2024 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -22,12 +22,13 @@
         <div class="col s12">
 
             <!-- betalingen doorgeven -->
-            {% url 'Bestel:overboeking-ontvangen' as card_url %}
-            {% include 'plein/card_icon.dtl' with title="Overboekingen" text="Geef de ontvangen betaling voor een MH bestelling door." icon="euro_symbol" url=card_url %}
+            {% include 'plein/card_icon.dtl' with title="Overboekingen" text="Geef de ontvangen betaling voor een MH bestelling door." icon="euro_symbol" url=url_overboeking %}
 
-            <!-- betalingen -->
-            {% include 'plein/card_icon.dtl' with title='Bestellingen' text="Toon de bestellingen en betalingen." icon="shopping_cart" url=bestellingen_url %}
+            <!-- bestellingen -->
+            {% include 'plein/card_icon.dtl' with title='Bestellingen' text="Toon de bestellingen en betalingen." icon="shopping_cart" url=url_bestellingen %}
 
+            <!-- voorraad -->
+            {% include 'plein/card_icon.dtl' with title='Voorraad' text="Toon de actuele voorraad." icon="inventory" url=url_voorraad %}
         </div>
     </div>
 

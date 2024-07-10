@@ -1,0 +1,48 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2024 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Voorraad{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Voorraad</h3>
+            <p>Onderstaande tabel toont het aantal producten nog op voorraad volgens de administration van de webwinkel.</p>
+        </div>
+    </div>
+
+    <!-- blauwe balk met informatie in een tabel -->
+    <div class="row-sv-blauw">
+        <div class="col s12">
+            <table class="sv-kader">
+                <thead>
+                    <tr>
+                        <th class="center">Product</th>
+                        <th class="center">Voorraad</th>
+                        <th class="center">Aantal in verpakking</th>
+                    </tr>
+                </thead>
+
+                {% for product in voorraad %}
+                    {% if not product.is_extern %}
+                        <tr>
+                            <td class="center">{{ product.omslag_titel }}</td>
+                            <td class="center">{% if product.onbeperkte_voorraad %}Onbeperkt{% else %}{{ product.aantal_op_voorraad }}{% endif %}</td>
+                            <td class="center">{{ product.bevat_aantal }}</td>
+                        </tr>
+                    {% endif %}
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="webwinkel-voorraad" %}
+
+{% endblock %}
