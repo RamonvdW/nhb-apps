@@ -70,6 +70,7 @@ import_contacts
 inbox
 info
 insights
+inventory
 join_full
 leaderboard
 local_mall
