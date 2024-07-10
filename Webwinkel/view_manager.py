@@ -70,13 +70,11 @@ class WebwinkelVoorraadView(UserPassesTestMixin, TemplateView):
         # for
 
         context['kruimels'] = (
-            (reverse('Webwinkel:overzicht'), 'Webwinkel'),
+            (reverse('Webwinkel:manager'), 'Webwinkel'),
             (None, 'Voorraad'),
         )
 
         return context
-
-
 
 
 # end of file
