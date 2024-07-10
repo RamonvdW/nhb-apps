@@ -33,7 +33,7 @@
                 {% for product in voorraad %}
                     {% if not product.is_extern %}
                         <tr>
-                            <td class="center">{{ product.omslag_titel }}</td>
+                            <td class="center">{{ product.omslag_titel }}{% if product.kleding_maat %}, maat {{ product.kleding_maat }}{% endif %}</td>
                             <td class="center">{% if product.onbeperkte_voorraad %}Onbeperkt{% else %}{{ product.aantal_op_voorraad }}{% endif %}</td>
                             <td class="center">{{ product.bevat_aantal }}</td>
                         </tr>
