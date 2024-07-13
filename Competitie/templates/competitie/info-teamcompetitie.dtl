@@ -21,7 +21,7 @@
 
     <!-- sfeerfoto -->
     <div class="center" style="margin-top:50px; margin-bottom:30px">
-        <img src="{% static 'competitie/team_sfeer_1.webp' %}" style="width:70%; height:auto" loading="lazy" alt="sfeerfoto"><br>
+        <img class="sv-foto-groot" src="{% static 'competitie/team_sfeer_1.webp' %}" loading="lazy" alt="sfeerfoto"><br>
         <code style="font-size:12px">Sfeerfoto van een teamwedstrijd</code>
         <p>
             <a class="btn-sv-rood" href="https://handboogsport.smugmug.com/Indoor/" target="_blank" rel="noopener noreferrer">
@@ -146,7 +146,7 @@
 
     <!-- sfeerfoto -->
     <div class="center" style="margin-top:50px; margin-bottom:30px">
-        <img src="{% static 'competitie/team_sfeer_4.webp' %}" style="width:70%; height:auto" loading="lazy" alt="sfeerfoto"><br>
+        <img class="sv-foto-groot" src="{% static 'competitie/team_sfeer_4.webp' %}" loading="lazy" alt="sfeerfoto"><br>
         <code style="font-size:12px">Sfeerfoto van een teamwedstrijd</code>
         <p>
             <a class="btn-sv-rood" href="https://handboogsport.smugmug.com/Indoor/" target="_blank" rel="noopener noreferrer">
@@ -227,7 +227,7 @@
 
     <!-- sfeerfoto -->
     <div class="center" style="margin-top:50px; margin-bottom:30px">
-        <img src="{% static 'competitie/team_sfeer_5.webp' %}" style="width:70%; height:auto" loading="lazy" alt="sfeerfoto"><br>
+        <img class="sv-foto-groot" src="{% static 'competitie/team_sfeer_5.webp' %}" loading="lazy" alt="sfeerfoto"><br>
         <code style="font-size:12px">Sfeerfoto van een teamwedstrijd</code>
         <p>
             <a class="btn-sv-rood" href="https://handboogsport.smugmug.com/Indoor/" target="_blank" rel="noopener noreferrer">
@@ -366,7 +366,7 @@
 
     <!-- sfeerfoto -->
     <div class="center" style="margin-top:50px; margin-bottom:30px">
-        <img src="{% static 'competitie/team_sfeer_2.webp' %}" style="width:70%; height:auto" loading="lazy" alt="sfeerfoto"><br>
+        <img class="sv-foto-groot" src="{% static 'competitie/team_sfeer_2.webp' %}" loading="lazy" alt="sfeerfoto"><br>
         <code style="font-size:12px">Sfeerfoto van een teamwedstrijd</code>
         <p>
             <a class="btn-sv-rood" href="https://handboogsport.smugmug.com/Indoor/" target="_blank" rel="noopener noreferrer">

@@ -32,27 +32,27 @@
 
                 <tr>
                     <td class="center">Groen</td>
-                    <td class="center"><img width="150" src="{% static 'spelden/arrowhead_groen.png' %}" alt="Groen"></td>
+                    <td class="center"><img class="sv-foto-speld" src="{% static 'spelden/arrowhead_groen.png' %}" alt="speld"></td>
                 </tr>
 
                 <tr>
                     <td class="center">Grijs</td>
-                    <td class="center"><img width="150" src="{% static 'spelden/arrowhead_grijs.png' %}" alt="Grijs"></td>
+                    <td class="center"><img class="sv-foto-speld" src="{% static 'spelden/arrowhead_grijs.png' %}" alt="speld"></td>
                 </tr>
 
                 <tr>
                     <td class="center">Wit</td>
-                    <td class="center"><img width="150" src="{% static 'spelden/arrowhead_wit.png' %}" alt="Wit"></td>
+                    <td class="center"><img class="sv-foto-speld" src="{% static 'spelden/arrowhead_wit.png' %}" alt="speld"></td>
                 </tr>
 
                 <tr>
                     <td class="center">Zwart</td>
-                    <td class="center"><img width="150" src="{% static 'spelden/arrowhead_zwart.png' %}" alt="Zwart"></td>
+                    <td class="center"><img class="sv-foto-speld" src="{% static 'spelden/arrowhead_zwart.png' %}" alt="speld"></td>
                 </tr>
 
                 <tr>
                     <td class="center">Goud</td>
-                    <td class="center"><img width="150" src="{% static 'spelden/arrowhead_goud.png' %}" alt="Goud"></td>
+                    <td class="center"><img class="sv-foto-speld" src="{% static 'spelden/arrowhead_goud.png' %}" alt="speld"></td>
                 </tr>
 
             </table>

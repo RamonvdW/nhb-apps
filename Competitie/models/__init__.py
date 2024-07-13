@@ -12,4 +12,15 @@ from .models_laag_regio import (Regiocompetitie, RegiocompetitieRonde, Regiocomp
                                 RegiocompetitieTeamPoule, RegiocompetitieRondeTeam)
 from .models_mutatie import CompetitieMutatie, CompetitieTaken, update_uitslag_teamcompetitie
 
+
+__all__ = [Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse, CompetitieMatch,
+           get_competitie_boog_typen, get_competitie_indiv_leeftijdsklassen,
+           Kampioenschap, KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet,
+           KampioenschapSporterBoog, KampioenschapTeam,
+           Regiocompetitie, RegiocompetitieRonde, RegiocompetitieSporterBoog, RegiocompetitieTeam,
+           RegiocompetitieTeamPoule, RegiocompetitieRondeTeam,
+           CompetitieMutatie, CompetitieTaken, update_uitslag_teamcompetitie
+           ]
+
+
 # end of file
