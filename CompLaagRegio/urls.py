@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2023 Ramon van der Winkel.
+#  Copyright (c) 2019-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
 from CompLaagRegio import (view_clusters, view_planning, view_instellingen, view_teams_rcl, view_poules, view_teams_hwl,
                            view_keuze_zeven_wedstrijden, view_wieschietwaar, view_waarschijnlijke_deelnemers,
-                           view_medailles)
+                           view_medailles, view_sporter_deelname)
 
 app_name = 'CompLaagRegio'
 
@@ -136,6 +136,10 @@ urlpatterns = [
     path('keuze-zeven-wedstrijden/<deelnemer_pk>/',
          view_keuze_zeven_wedstrijden.KeuzeZevenWedstrijdenView.as_view(),
          name='keuze-zeven-wedstrijden'),
+
+    path('voorkeur-rk/',
+         view_sporter_deelname.SporterVoorkeurRkView.as_view(),
+         name='voorkeur-rk'),
 
     # RCL
     path('medailles/regio-<regio>/',

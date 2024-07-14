@@ -6,6 +6,7 @@
 
 from django.http import HttpResponseRedirect, Http404
 from django.urls import reverse
+from django.utils import timezone
 from django.views.generic import View, TemplateView
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
@@ -216,26 +217,34 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
         return context
 
 
-class RegiocompetitieAanmeldenView(View):
+class RegiocompetitieAanmeldenView(UserPassesTestMixin, View):
 
     """ Deze class wordt gebruikt om een sporterboog in te schrijven voor een regiocompetitie
         methode 1 of 2: direct geaccepteerd
 
         methode 3: sporter heeft voorkeuren opgegeven: dagdeel, team schieten, opmerking
     """
+
+    raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        # gebruiker moet ingelogd zijn en rol Sporter gekozen hebben
+        return rol_get_huidige(self.request) == Rollen.ROL_SPORTER
+
     @staticmethod
     def post(request, *args, **kwargs):
         """ Deze functie wordt aangeroepen als de sporter op zijn profiel pagina
             de knop Aanmelden gebruikt voor een specifieke regiocompetitie en boogtype.
         """
         # voorkom misbruik: ingelogd als niet geblokkeerde sporter vereist
-        sporter = None
-        if request.user.is_authenticated:
-            account = get_account(request)
-            sporter = get_sporter(account)
-            if sporter:
-                if not (sporter.is_actief_lid and sporter.bij_vereniging):
-                    sporter = None
+        account = get_account(request)
+        sporter = get_sporter(account)
+        if sporter:
+            if not (sporter.is_actief_lid and sporter.bij_vereniging):
+                sporter = None
+
         if not sporter:
             raise Http404('Sporter niet gevonden')
 
@@ -280,6 +289,9 @@ class RegiocompetitieAanmeldenView(View):
 
         # urlconf parameters geaccepteerd
 
+        now = timezone.now()
+        when_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
+
         voorkeuren = get_sporter_voorkeuren(sporter, mag_database_wijzigen=True)
         if voorkeuren.wedstrijd_geslacht_gekozen:
             wedstrijdgeslacht = voorkeuren.wedstrijd_geslacht   # M/V
@@ -292,6 +304,7 @@ class RegiocompetitieAanmeldenView(View):
         # bepaal in welke wedstrijdklasse de sporter komt
         age = sporterboog.sporter.bereken_wedstrijdleeftijd_wa(deelcomp.competitie.begin_jaar + 1)
 
+        msg = '[%s] Zelfstandig aangemeld\n' % when_str
         aanmelding = RegiocompetitieSporterBoog(
                             regiocompetitie=deelcomp,
                             sporterboog=sporterboog,
@@ -299,7 +312,8 @@ class RegiocompetitieAanmeldenView(View):
                             ag_voor_indiv=AG_NUL,
                             ag_voor_team=AG_NUL,
                             ag_voor_team_mag_aangepast_worden=True,
-                            aangemeld_door=account)
+                            aangemeld_door=account,
+                            logboekje=msg)
 
         # haal AG op, indien aanwezig
         ags = Aanvangsgemiddelde.objects.filter(sporterboog=sporterboog,
@@ -347,6 +361,8 @@ class RegiocompetitieAanmeldenView(View):
         if request.POST.get('geen_rk', '') != '':
             # sporter wil zich alvast afmelden voor het RK
             aanmelding.inschrijf_voorkeur_rk_bk = False
+            msg = '[%s] Bij inschrijving geen voorkeur voor RK\n' % when_str
+            aanmelding.logboekje += msg
 
         # kijk of er velden van een formulier bij zitten
         if methode == INSCHRIJF_METHODE_3:
@@ -430,7 +446,11 @@ class RegiocompetitieAfmeldenView(View):
             raise Http404('Competitie is in de verkeerde fase')
 
         # schrijf de sporter uit
-        deelnemer.delete()
+        try:
+            deelnemer.delete()
+        except RegiocompetitieSporterBoog.DoesNotExist:
+            # silently ignore (kan voorkomen bij parallelle posts)
+            pass
 
         return HttpResponseRedirect(reverse('Sporter:profiel'))
 

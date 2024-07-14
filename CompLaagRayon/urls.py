@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2023 Ramon van der Winkel.
+#  Copyright (c) 2019-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -49,10 +49,15 @@ urlpatterns = [
          name='lijst-rk-als-bestand'),
 
 
-    # HWL/RKO: individueel
+    # RK/HWL: individueel
     path('lijst/wijzig-status-rk-deelnemer/<deelnemer_pk>/',
          view_indiv_wijzig_status.WijzigStatusRkDeelnemerView.as_view(),
          name='wijzig-status-rk-deelnemer'),
+
+    # Sporter: deelname bevestigen
+    path('wijzig-status-rk-deelname/',
+         view_indiv_wijzig_status.SporterWijzigStatusRkDeelnameView.as_view(),
+         name='wijzig-status-rk-deelname'),
 
 
     # RKO: RK teams

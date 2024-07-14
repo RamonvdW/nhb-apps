@@ -195,6 +195,9 @@ class RegiocompetitieSporterBoog(models.Model):
     # aangemeld door
     aangemeld_door = models.ForeignKey(Account, on_delete=models.SET_NULL, null=True, blank=True)
 
+    # historie over belangrijke acties
+    logboekje = models.TextField(default='', blank=True)
+
     def __str__(self):
         """ geef een tekstuele afkorting van dit object, voor in de admin interface """
         # deze naam wordt gebruikt in de admin interface, dus kort houden

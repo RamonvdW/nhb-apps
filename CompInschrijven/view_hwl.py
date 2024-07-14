@@ -6,6 +6,7 @@
 
 from django.http import HttpResponseRedirect, Http404
 from django.urls import reverse
+from django.utils import timezone
 from django.views.generic import ListView
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
@@ -413,6 +414,9 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
 
         # rol is HWL (zie test_func)
 
+        now = timezone.now()
+        when_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
+
         # bepaal de inschrijfmethode voor deze regio
         hwl_regio = self.functie_nu.vereniging.regio
 
@@ -526,6 +530,8 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                 age = sporterboog.sporter.bereken_wedstrijdleeftijd_wa(deelcomp.competitie.begin_jaar + 1)
 
                 door_account = get_account(request)
+                msg = '[%s] Aangemeld door HWL: %s\n' % (when_str, door_account.get_account_full_name())
+
                 aanmelding = RegiocompetitieSporterBoog(
                                     regiocompetitie=deelcomp,
                                     sporterboog=sporterboog,
@@ -533,7 +539,8 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                                     ag_voor_indiv=AG_NUL,
                                     ag_voor_team=AG_NUL,
                                     ag_voor_team_mag_aangepast_worden=True,
-                                    aangemeld_door=door_account)
+                                    aangemeld_door=door_account,
+                                    logboekje=msg)
 
                 # zoek de aanvangsgemiddelden er bij, indien beschikbaar
                 for ag in Aanvangsgemiddelde.objects.filter(sporterboog=sporterboog,
@@ -575,6 +582,9 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                     aanmelding.inschrijf_voorkeur_team = bulk_team
 
                 aanmelding.inschrijf_voorkeur_rk_bk = bulk_voorkeur_rk_bk
+                if not bulk_voorkeur_rk_bk:
+                    msg = '[%s] Bij inschrijving alvast afgemeld voor RK\n' % when_str
+                    aanmelding.logboekje += msg
 
                 aanmelding.inschrijf_voorkeur_dagdeel = bulk_dagdeel
                 aanmelding.inschrijf_notitie = bulk_opmerking

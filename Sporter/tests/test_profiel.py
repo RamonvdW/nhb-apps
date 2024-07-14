@@ -267,7 +267,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         sporterboog_bb = SporterBoog.objects.get(boogtype__afkorting='R')
         sporterboog_bb.voor_wedstrijd = False
         sporterboog_bb.save()
-        with self.assert_max_queries(29):
+        with self.assert_max_queries(28):
             resp = self.client.get(self.url_profiel)
         urls = self.extract_all_urls(resp, skip_menu=True)
         # print('urls:', urls)
@@ -412,7 +412,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
 
         # competitie wordt niet getoond in vroege fases
         zet_competitie_fase_regio_prep(self.comp_18)
-        with self.assert_max_queries(25):
+        with self.assert_max_queries(26):
             resp = self.client.get(self.url_profiel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -420,7 +420,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         # met standaard voorkeuren worden de regiocompetities getoond
         voorkeuren, _ = SporterVoorkeuren.objects.get_or_create(sporter=self.sporter1)
         self.assertTrue(voorkeuren.voorkeur_meedoen_competitie)
-        with self.assert_max_queries(25):
+        with self.assert_max_queries(26):
             resp = self.client.get(self.url_profiel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -430,7 +430,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         # uitgezet worden de regiocompetities niet getoond
         voorkeuren.voorkeur_meedoen_competitie = False
         voorkeuren.save()
-        with self.assert_max_queries(22):
+        with self.assert_max_queries(26):
             resp = self.client.get(self.url_profiel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -612,13 +612,13 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         deelnemer.inschrijf_voorkeur_rk_bk = False
         deelnemer.save(update_fields=['inschrijf_voorkeur_rk_bk'])
 
-        with self.assert_max_queries(27):
+        with self.assert_max_queries(28):
             resp = self.client.get(self.url_profiel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('sporter/profiel.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, 'Je bent ingeschreven')
-        self.assertContains(resp, 'Je bent alvast afgemeld voor de Rayonkampioenschappen')
+        self.assertContains(resp, 'Je bent alvast afgemeld')
 
         # RK fase
         zet_competitie_fase_rk_prep(comp_18)

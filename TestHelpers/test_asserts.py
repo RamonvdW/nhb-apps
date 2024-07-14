@@ -442,10 +442,9 @@ class MyTestAsserts(TestCase):
         pos = html.find('##BUG')
         if pos >= 0:                        # pragma: no cover
             msg = html[pos:]
-            context = html[pos-30:]
-            pos = msg.find('##', 3)
-            msg = msg[:pos+2]
-            context = context[:pos+30]
+            end_pos = msg.find('##', 3)     # find terminating ##
+            msg = msg[:end_pos+2]
+            context = html[pos-80:pos+80]
             self.fail(msg='Bug in template %s: %s\nContext: %s' % (repr(dtl), msg, context))
 
     def html_assert_form_csrf(self, html, dtl):
