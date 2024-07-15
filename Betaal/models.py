@@ -182,13 +182,17 @@ class BetaalMutatie(models.Model):
 
     def __str__(self):
         """ Lever een tekstuele beschrijving voor de admin interface """
-        msg = "[%s]" % self.when
+        msg = "[" + localtime(self.when).strftime('%Y-%m-%d %H:%M:%S') + "] "
+
         if not self.is_verwerkt:
-            msg += " (nog niet verwerkt)"
+            msg += "(nog niet verwerkt)"
         try:
-            msg += " %s (%s)" % (self.code, BETAAL_MUTATIE_TO_STR[self.code])
+            msg += "%s (%s)" % (self.code, BETAAL_MUTATIE_TO_STR[self.code])
         except KeyError:
-            msg += " %s (???)" % self.code
+            msg += "%s (???)" % self.code
+
+        msg = msg + ' ' + self.beschrijving
+        msg = msg.replace(' MijnHandboogsport', '')
 
         return msg
 
