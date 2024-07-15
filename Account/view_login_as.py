@@ -7,7 +7,7 @@
 from django.shortcuts import render
 from django.urls import reverse
 from django.http import Http404
-from django.contrib.auth import login
+from django.contrib.auth import login, logout
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.views.generic import ListView
 from django.db.models import Q
@@ -39,19 +39,29 @@ def receiver_account_wissel(request, account):
     old_last_login = account.last_login
 
     # integratie met de authenticatie laag van Django
-    login(request, account)
+    logout(request)             # einde oude sessie
+    login(request, account)     # maakt nieuwe sessie
 
     from_ip = get_safe_from_ip(request)
     my_logger.info('%s LOGIN automatische inlog met account %s' % (from_ip, repr(account.username)))
 
     for _, func, skip in account_plugins_login_gate:
         if not skip:
-            httpresp = func(request, from_ip, account)
-            if httpresp:
+            http_resp = func(request, from_ip, account)
+            if http_resp:
                 # plugin has decided that the user may not login
                 # and has generated/rendered an HttpResponse that we cannot handle here
-                return httpresp
+
+                # integratie met de authenticatie laag van Django
+                # dit wist ook de session data gekoppeld aan het cookie van de gebruiker
+                logout(request)
+
+                return http_resp
     # for
+
+    # track het session_id in de log zodat we deze kunnen koppelen aan de webserver logs
+    session_id = request.session.session_key
+    my_logger.info('Account %s has SESSION %s' % (repr(account.username), repr(session_id)))
 
     if account.otp_is_actief:
         # fake de OTP passage
@@ -69,7 +79,8 @@ def receiver_account_wissel(request, account):
     # schrijf in het logboek
     schrijf_in_logboek(account=None,
                        gebruikte_functie="Inloggen (code)",
-                       activiteit="Automatische inlog als gebruiker %s vanaf IP %s" % (repr(account.username), from_ip))
+                       activiteit="Automatische inlog als gebruiker %s vanaf IP %s" % (repr(account.username),
+                                                                                       repr(from_ip)))
 
     # zorg dat de rollen meteen beschikbaar zijn
     rol_bepaal_beschikbare_rollen(request, account)

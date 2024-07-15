@@ -54,8 +54,12 @@ class LogoutView(UserPassesTestMixin, TemplateView):
         """ deze functie wordt aangeroepen als een POST request ontvangen is
             we zorgen voor het uitloggen en sturen door naar een andere pagina
         """
+
         from_ip = get_safe_from_ip(request)
+        session_id = request.session.session_key
         account = get_account(request)
+
+        my_logger.info('Account %s END SESSION %s' % (repr(account.username), repr(session_id)))
         my_logger.info('%s LOGOUT voor account %s' % (from_ip, repr(account.username)))
 
         # integratie met de authenticatie laag van Django
