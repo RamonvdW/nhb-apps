@@ -60,6 +60,9 @@ def receiver_account_wissel(request, account):
 
     # track het session_id in de log zodat we deze kunnen koppelen aan de webserver logs
     session_id = request.session.session_key
+    if session_id is None:
+        request.session.create()
+        session_id = request.session.session_key
     my_logger.info('Account %s has SESSION %s' % (repr(account.username), repr(session_id)))
 
     if account.otp_is_actief:
