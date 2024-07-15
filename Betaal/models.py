@@ -165,11 +165,11 @@ class BetaalMutatie(models.Model):
     # het bedrag
     bedrag_euro = models.DecimalField(max_digits=7, decimal_places=2, default=0.0)         # max 99999,99
 
-    # waar naartoe als de betaling gedaan is?
+    # waar naartoe (bij ons) als de betaling gedaan is?
     url_betaling_gedaan = models.CharField(max_length=100, default='')
 
     # waar naartoe om de betaling te doen (bij de CPSP)
-    url_checkout = models.CharField(max_length=200, default='', blank=True)
+    url_checkout = models.CharField(max_length=400, default='', blank=True)
 
     # BETAAL_MUTATIE_START_RESTITUTIE:
     # BETAAL_MUTATIE_PAYMENT_STATUS_CHANGED:
