@@ -39,7 +39,8 @@ def receiver_account_wissel(request, account):
     old_last_login = account.last_login
 
     # integratie met de authenticatie laag van Django
-    login(request, account)
+    logout(request)             # einde oude sessie
+    login(request, account)     # maakt nieuwe sessie
 
     from_ip = get_safe_from_ip(request)
     my_logger.info('%s LOGIN automatische inlog met account %s' % (from_ip, repr(account.username)))
@@ -60,9 +61,6 @@ def receiver_account_wissel(request, account):
 
     # track het session_id in de log zodat we deze kunnen koppelen aan de webserver logs
     session_id = request.session.session_key
-    if session_id is None:
-        request.session.create()
-        session_id = request.session.session_key
     my_logger.info('Account %s has SESSION %s' % (repr(account.username), repr(session_id)))
 
     if account.otp_is_actief:

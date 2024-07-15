@@ -85,7 +85,7 @@ class LoginView(TemplateView):
 
         return None, account
 
-    def _probeer_login(self, request, form, account):
+    def _probeer_login(self, form, account):
         """ Kijk of het wachtwoord goed is en het account niet geblokkeerd is
 
             Returns:
@@ -217,7 +217,7 @@ class LoginView(TemplateView):
 
             if account:
                 # account bestaat
-                login_success, http_resp = self._probeer_login(request, form, account)
+                login_success, http_resp = self._probeer_login(form, account)
 
                 if login_success:
                     # login gelukt
