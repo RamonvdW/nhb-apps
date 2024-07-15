@@ -76,7 +76,7 @@ class LoginView(TemplateView):
                 if account.is_geblokkeerd_tot > now:
                     schrijf_in_logboek(account, 'Inloggen',
                                        'Mislukte inlog vanaf IP %s voor geblokkeerd account %s' % (
-                                           from_ip, repr(account.username)))
+                                           repr(from_ip), repr(account.username)))
                     my_logger.info(
                         '%s LOGIN Mislukte inlog voor geblokkeerd account %s' % (from_ip, repr(account.username)))
                     context = {'account': account}
@@ -85,7 +85,7 @@ class LoginView(TemplateView):
 
         return None, account
 
-    def _probeer_login(self, form, account):
+    def _probeer_login(self, request, form, account):
         """ Kijk of het wachtwoord goed is en het account niet geblokkeerd is
 
             Returns:
@@ -109,7 +109,7 @@ class LoginView(TemplateView):
             # onthoudt precies wanneer dit was
             account.laatste_inlog_poging = timezone.now()
             schrijf_in_logboek(account, 'Inloggen',
-                               'Mislukte inlog vanaf IP %s voor account %s' % (from_ip, repr(login_naam)))
+                               'Mislukte inlog vanaf IP %s voor account %s' % (repr(from_ip), repr(login_naam)))
             my_logger.info('%s LOGIN Mislukte inlog voor account %s' % (from_ip, repr(login_naam)))
 
             # onthoudt hoe vaak dit verkeerd gegaan is
@@ -118,19 +118,18 @@ class LoginView(TemplateView):
 
             # bij te veel pogingen, blokkeer het account
             if account.verkeerd_wachtwoord_teller >= settings.AUTH_BAD_PASSWORD_LIMIT:
-                account.is_geblokkeerd_tot = (timezone.now()
-                                              + timedelta(minutes=settings.AUTH_BAD_PASSWORD_LOCKOUT_MINS))
-                account.verkeerd_wachtwoord_teller = 0  # daarna weer volle mogelijkheden
+                blokkeer_tot = timezone.now() + timedelta(minutes=settings.AUTH_BAD_PASSWORD_LOCKOUT_MINS)
+                account.is_geblokkeerd_tot = blokkeer_tot
+                account.verkeerd_wachtwoord_teller = 0      # na blokkade weer volle mogelijkheden
                 account.save(update_fields=['is_geblokkeerd_tot', 'verkeerd_wachtwoord_teller'])
 
                 schrijf_in_logboek(account, 'Inlog geblokkeerd',
-                                   'Account %s wordt geblokkeerd tot %s' % (
-                                       repr(account.username),
-                                       account.is_geblokkeerd_tot.strftime('%Y-%m-%d %H:%M:%S')))
+                                   'Account %s wordt geblokkeerd tot %s' % (repr(account.username),
+                                                                            blokkeer_tot.strftime('%Y-%m-%d %H:%M:%S')))
 
                 context = {'account': account}
-                httpresp = render(self.request, TEMPLATE_GEBLOKKEERD, context)
-                return False, httpresp
+                http_resp = render(self.request, TEMPLATE_GEBLOKKEERD, context)
+                return False, http_resp
 
             # wachtwoord klopt niet, doe opnieuw
             return False, None
@@ -140,8 +139,8 @@ class LoginView(TemplateView):
 
         # kijk of er een reden is om gebruik van het account te weren
         for _, func, _ in account_plugins_login_gate:
-            httpresp = func(self.request, from_ip, account)
-            if httpresp:
+            http_resp = func(self.request, from_ip, account)
+            if http_resp:
                 # plugin has decided that the user may not login
                 # and has generated/rendered an HttpResponse
 
@@ -149,7 +148,7 @@ class LoginView(TemplateView):
                 # dit wist ook de session data gekoppeld aan het cookie van de gebruiker
                 logout(self.request)
 
-                return False, httpresp
+                return False, http_resp
         # for
 
         # integratie met de authenticatie laag van Django
@@ -170,7 +169,7 @@ class LoginView(TemplateView):
             # zorg dat de session-cookie snel verloopt
             self.request.session.set_expiry(0)
 
-        # de OTP control is nog niet uitgevoerd
+        # de OTP controle is nog niet uitgevoerd
         otp_zet_control_niet_gelukt(self.request)
         rol_bepaal_beschikbare_rollen(self.request, account)
 
@@ -211,23 +210,28 @@ class LoginView(TemplateView):
         account = None
 
         if form.is_valid():
-            httpresp, account = self._zoek_account(form)
-            if httpresp:
+            http_resp, account = self._zoek_account(form)
+            if http_resp:
                 # account is geblokkeerd
-                return httpresp
+                return http_resp
 
             if account:
                 # account bestaat
-                login_success, httpresp = self._probeer_login(form, account)
+                login_success, http_resp = self._probeer_login(request, form, account)
 
                 if login_success:
                     # login gelukt
+
+                    # track het session_id in de log zodat we deze kunnen koppelen aan de webserver logs
+                    session_id = request.session.session_key
+                    my_logger.info('Account %s has SESSION %s' % (repr(account.username), repr(session_id)))
+
                     url = self._get_redirect(form, account)
                     return HttpResponseRedirect(url)
 
-                if httpresp:
-                    # geknikkerd met foutmelding
-                    return httpresp
+                if http_resp:
+                    # eruit geknikkerd met foutmelding
+                    return http_resp
 
             # gebruiker mag het nog een keer proberen
             if len(form.errors) == 0:
