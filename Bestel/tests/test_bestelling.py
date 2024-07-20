@@ -10,7 +10,7 @@ from django.utils import timezone
 from BasisTypen.definities import ORGANISATIE_IFAA
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse
 from Bestel.definities import (BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_BETALING_ACTIEF, BESTELLING_STATUS_NIEUW,
-                               BESTELLING_STATUS_MISLUKT, BESTELLING_STATUS_GEANNULEERD)
+                               BESTELLING_STATUS_MISLUKT, BESTELLING_STATUS_GEANNULEERD, BESTEL_MUTATIE_ANNULEER)
 from Bestel.models import BestelMandje, BestelMutatie, Bestelling
 from Bestel.operations.mutaties import (bestel_mutatieverzoek_inschrijven_wedstrijd,
                                         bestel_mutatieverzoek_webwinkel_keuze,
@@ -1004,8 +1004,8 @@ class TestBestelBestelling(E2EHelpers, TestCase):
 
         # duration > 1
         # fake-hoogste
-        f1, f2 = self.run_management_command('bestel_mutaties', '2', '--fake-hoogste', '--quick')
-        self.assertTrue('[INFO] vorige hoogste BestelMutatie pk is -1' in f2.getvalue())
+        f1, f2 = self.run_management_command('bestel_mutaties', '60', '--quick')
+        self.assertTrue('[INFO] vorige hoogste BestelMutatie pk is 0' in f2.getvalue())
 
         # geen nuttig werk gedaan
         self.verwerk_bestel_mutaties()
@@ -1383,6 +1383,11 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         self.assertTrue(' niet annuleren, want status ' in f2.getvalue())
 
         self.assertEqual(1, MailQueue.objects.count())
+
+        # trigger een fout in de achtergrondtaak: annuleer mutatie zonder bestelling
+        BestelMutatie(code=BESTEL_MUTATIE_ANNULEER).save()
+        f1, f2, = self.verwerk_bestel_mutaties(fail_on_error=False)
+        self.assertTrue('[ERROR] Onverwachte fout tijdens bestel_mutaties' in f1.getvalue())
 
     def test_check_status(self):
         # de dynamische aspecten van een bestelling
