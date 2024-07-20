@@ -50,8 +50,8 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
         instellingen.save()
         self.instellingen = instellingen
 
-    def _run_achtergrondtaak(self, debug=False):
-        f1, f2 = self.verwerk_betaal_mutaties()
+    def _run_achtergrondtaak(self, debug=False, seconden=1):
+        f1, f2 = self.verwerk_betaal_mutaties(seconden)
         if debug:           # pragma: no cover
             print('f1: %s' % f1.getvalue())
             print('f2: %s' % f2.getvalue())
@@ -203,7 +203,7 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
                         in f1.getvalue())
         self.assertTrue("[ERROR] Onverwachte status 'bogus' in create payment response" in f1.getvalue())
 
-        betaal_mutatieverzoek_start_ontvangst(
+        mutatie = betaal_mutatieverzoek_start_ontvangst(
                         bestelling,
                         "Test betaling 48",  # 48 triggert te lange checkout URL
                         bestelling.totaal_euro,
@@ -214,6 +214,53 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
         # print('\nf1:', f1.getvalue(), '\nf2:', f2.getvalue())
         self.assertTrue('[ERROR] Onverwachte fout tijdens betaal_mutaties:' in f1.getvalue())
         self.assertTrue('value too long for type character varying' in f1.getvalue())
+
+        # het is niet meer mogelijk om database transacties te doen totdat deze testcase eindigt
+
+    def test_max_pogingen(self):
+        bestelling = Bestelling(
+                            bestel_nr=1,
+                            account=self.account,
+                            ontvanger=self.instellingen,
+                            totaal_euro=Decimal('45.45'))
+        bestelling.save()
+
+        url_betaling_gedaan = settings.SITE_URL + '/plein/'
+
+        mutatie = betaal_mutatieverzoek_start_ontvangst(
+                        bestelling,
+                        "Test betaling 38",  # 38 triggert betaling "failed"
+                        bestelling.totaal_euro,
+                        url_betaling_gedaan,
+                        True)  # snel
+
+        f1, f2 = self._run_achtergrondtaak()
+        # print('\nf1:', f1.getvalue(), '\nf2:', f2.getvalue())
+        self.assertTrue('[INFO] 1 BetaalMutaties verwerkt in 0' in f2.getvalue())
+
+        mutatie.refresh_from_db()
+        self.assertTrue(mutatie.is_verwerkt)
+        self.assertEqual(mutatie.pogingen, 1)
+
+        mutatie.is_verwerkt = False
+        mutatie.pogingen = 4
+        mutatie.save()
+
+        f1, f2 = self._run_achtergrondtaak()
+        # print('\nf1:', f1.getvalue(), '\nf2:', f2.getvalue())
+        self.assertTrue('[INFO] 1 BetaalMutaties verwerkt in 0' in f2.getvalue())
+
+        mutatie.refresh_from_db()
+        self.assertTrue(mutatie.is_verwerkt)
+        self.assertEqual(mutatie.pogingen, 5)
+
+        # het maximum is 5, dus de volgende keer wordt deze mutatie niet meer verwerkt
+        mutatie.is_verwerkt = False
+        mutatie.save()
+
+        f1, f2 = self._run_achtergrondtaak(seconden=60)
+        # print('\nf1:', f1.getvalue(), '\nf2:', f2.getvalue())
+        self.assertFalse('[INFO] 1 BetaalMutaties verwerkt in 0' in f2.getvalue())
 
     def test_bad_api_key(self):
         self.instellingen.mollie_api_key = 'bad_1234'
@@ -628,7 +675,11 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
                                 mollie_api_key='test_1234bond')
         instellingen_bond.save()
 
+        # heeft Mollie key, dus hoeft niet handmatig
+        self.assertFalse(self.instellingen.moet_handmatig())
         self.instellingen.akkoord_via_bond = True
+        self.assertFalse(self.instellingen.moet_handmatig())
+
         self.instellingen.save(update_fields=['akkoord_via_bond'])
 
         bestelling = Bestelling(
@@ -649,6 +700,10 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
         f1, f2, = self._run_achtergrondtaak()
 
         self.assertTrue('[ERROR] Unexpected exception from Mollie payments.get: Invalid payment ID' in f1.getvalue())
+
+        self.instellingen.mollie_api_key = ''
+        self.instellingen.akkoord_via_bond = False
+        self.assertTrue(self.instellingen.moet_handmatig())
 
     def test_stop_exactly(self):
         now = datetime.datetime.now()

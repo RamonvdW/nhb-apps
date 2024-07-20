@@ -286,7 +286,7 @@ class MyServer(BaseHTTPRequestHandler):
             # 44 = expired
             # 45 = bijna leeg antwoord (+expired?!)
             # 46 = foute status
-            # 47 = foute  id
+            # 47 = foute id
             # 48 = te lange checkout URL
             if test_code in ("39", "40", "41", "42",
                              "421", "422", "423", "424", "425", "426", "427", "428", "429",
