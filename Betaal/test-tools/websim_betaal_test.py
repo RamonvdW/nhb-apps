@@ -275,6 +275,9 @@ class MyServer(BaseHTTPRequestHandler):
                 resp['id_original'] = resp['id']
                 resp['id'] = 'tr_FoutjeBedankt'
 
+            if test_code == "48":
+                links['checkout']['href'] = 'http://way.too.long/' + "1234567890" * 50
+
             # 39 = failed
             # 40 = pending
             # 41 = open
@@ -284,9 +287,10 @@ class MyServer(BaseHTTPRequestHandler):
             # 45 = bijna leeg antwoord (+expired?!)
             # 46 = foute status
             # 47 = foute  id
+            # 48 = te lange checkout URL
             if test_code in ("39", "40", "41", "42",
                              "421", "422", "423", "424", "425", "426", "427", "428", "429",
-                             "43", "44", "45", "46", "47"):
+                             "43", "44", "45", "46", "47", "48"):
                 self._write_response(200, resp)
         else:
             # geen corner-case

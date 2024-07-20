@@ -6,6 +6,7 @@
 
 from django.conf import settings
 from django.utils import timezone
+from django.db.transaction import TransactionManagementError
 from django.template.loader import render_to_string
 from django.templatetags.static import static
 from Mailer.models import MailQueue
@@ -114,21 +115,28 @@ def mailer_notify_internal_error(tb):
     # kijk of hetzelfde rapport de afgelopen 24 uur al verstuurd is
     now = timezone.now()    # in utc
     recent = now - datetime.timedelta(days=1)
-    count = (MailQueue
-             .objects
-             .filter(toegevoegd_op__gt=recent,
-                     mail_to=settings.EMAIL_DEVELOPER_TO,
-                     mail_subj=settings.EMAIL_DEVELOPER_SUBJ,
-                     mail_text=tb)
-             .count())
 
-    if count == 0:
-        # nog niet gerapporteerd in de afgelopen 24 uur
-        mailer_queue_email(
-                settings.EMAIL_DEVELOPER_TO,
-                settings.EMAIL_DEVELOPER_SUBJ,
-                tb,
-                enforce_whitelist=False)
+    try:
+        count = (MailQueue
+                 .objects
+                 .filter(toegevoegd_op__gt=recent,
+                         mail_to=settings.EMAIL_DEVELOPER_TO,
+                         mail_subj=settings.EMAIL_DEVELOPER_SUBJ,
+                         mail_text=tb)
+                 .count())
+
+        if count == 0:
+            # nog niet gerapporteerd in de afgelopen 24 uur
+            mailer_queue_email(
+                    settings.EMAIL_DEVELOPER_TO,
+                    settings.EMAIL_DEVELOPER_SUBJ,
+                    tb,
+                    enforce_whitelist=False)
+
+    except TransactionManagementError:
+        # hier komen we alleen tijdens een autotest, welke automatisch in een atomic transaction uitgevoerd wordt
+        # als er een database fout opgetreden is, dan kunnen we geen nieuwe queries meer doen om een mail op te slaan.
+        pass
 
 
 def inline_styles(html):

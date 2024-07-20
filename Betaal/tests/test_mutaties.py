@@ -184,14 +184,14 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
 
         url_betaling_gedaan = settings.SITE_URL + '/plein/'
 
-        mutatie = betaal_mutatieverzoek_start_ontvangst(
+        betaal_mutatieverzoek_start_ontvangst(
                         bestelling,
                         "Test betaling 45",     # 45 triggert onvolledige response
                         bestelling.totaal_euro,
                         url_betaling_gedaan,
                         True)       # snel
 
-        mutatie = betaal_mutatieverzoek_start_ontvangst(
+        betaal_mutatieverzoek_start_ontvangst(
                         bestelling,
                         "Test betaling 46",  # 46 triggert bogus status
                         bestelling.totaal_euro,
@@ -202,6 +202,18 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
         self.assertTrue('[ERROR] Missing mandatory information in create payment response: None, None, None'
                         in f1.getvalue())
         self.assertTrue("[ERROR] Onverwachte status 'bogus' in create payment response" in f1.getvalue())
+
+        betaal_mutatieverzoek_start_ontvangst(
+                        bestelling,
+                        "Test betaling 48",  # 48 triggert te lange checkout URL
+                        bestelling.totaal_euro,
+                        url_betaling_gedaan,
+                        True)  # snel
+
+        f1, f2 = self._run_achtergrondtaak()
+        # print('\nf1:', f1.getvalue(), '\nf2:', f2.getvalue())
+        self.assertTrue('[ERROR] Onverwachte fout tijdens betaal_mutaties:' in f1.getvalue())
+        self.assertTrue('value too long for type character varying' in f1.getvalue())
 
     def test_bad_api_key(self):
         self.instellingen.mollie_api_key = 'bad_1234'
