@@ -12,6 +12,7 @@ from Functie.view_vhpg import account_vhpg_is_geaccepteerd
 from TestHelpers.test_asserts import MyTestAsserts
 from TestHelpers.query_tracer import MyQueryTracer
 from TestHelpers.mgmt_cmds_helper import MyMgmtCommandHelper
+from TestHelpers.app_hierarchy_testrunner import test_cases_counted
 from contextlib import contextmanager
 import webbrowser
 import tempfile
@@ -35,6 +36,8 @@ class E2EHelpers(MyTestAsserts, MyMgmtCommandHelper, TestCase):
     WACHTWOORD = TEST_WACHTWOORD
 
     client: Client                  # for code completion / code inspection
+
+    test_case_count = test_cases_counted
 
     def e2e_logout(self):
         # in case the test client behaves different from the real website, we can compensate here
@@ -293,8 +296,8 @@ class E2EHelpers(MyTestAsserts, MyMgmtCommandHelper, TestCase):
                 print(report)
 
     @staticmethod
-    def e2e_open_in_browser(resp):          # pragma: no cover
-        if resp.status_code == 200:
+    def e2e_open_in_browser(resp, show=True):
+        if show and resp.status_code == 200:            # pragma: no cover
             msg = resp.content.decode('utf-8')
 
             msg = msg.replace('/static/', '/tmp/tmp_html/static/')

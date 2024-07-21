@@ -257,7 +257,7 @@ BACKGROUND_SYNC__SCHEIDS_MUTATIES = BACKGROUND_SYNC_POORT + 5
 
 # our own test runner that executes the tests ordered by application hierarchy indicators to ensure that
 # low-level errors are reported before applications depending that (broken) functionality report failures
-TEST_RUNNER = 'SiteMain.utils.app-hierarchy-testrunner.HierarchyRunner'
+TEST_RUNNER = 'TestHelpers.app_hierarchy_testrunner.HierarchyRunner'
 
 # applicatie specifieke settings
 MINIMUM_LEEFTIJD_LID = 5

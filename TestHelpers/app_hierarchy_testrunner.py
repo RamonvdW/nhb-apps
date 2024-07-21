@@ -7,6 +7,9 @@
 from django.test.runner import DiscoverRunner
 from unittest import TestSuite
 
+# totaal aantal test cases in scope van deze run
+test_cases_counted = 0
+
 
 class HierarchyRunner(DiscoverRunner):
 
@@ -38,10 +41,14 @@ class HierarchyRunner(DiscoverRunner):
         """
         new_suite = self.test_suite()
 
+        global test_cases_counted
+        test_cases_counted = 0
+
         # gather all the test cases, for checking the test_after references
         known_tests = list()
         for test in suite:
             test_name = test.id()           # includes the test function name
+            test_cases_counted += 1
             pos = test_name.rfind('.')
             test_name = test_name[:pos]     # remove the function name
             if test_name not in known_tests:

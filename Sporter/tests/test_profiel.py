@@ -4,9 +4,9 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.utils.dateparse import parse_date
 from django.test import TestCase
 from django.utils import timezone
+from django.utils.dateparse import parse_date
 from BasisTypen.definities import ORGANISATIE_KHSN
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse
 from Bestel.models import Bestelling
@@ -52,11 +52,13 @@ class TestSporterProfiel(E2EHelpers, TestCase):
     url_profiel_test = '/sporter/profiel-test/%s/'                                 # test case nummer
 
     testdata = None
+    show_in_browser = False
 
     @classmethod
     def setUpTestData(cls):
         cls.testdata = TestData()
         cls.testdata.maak_accounts_admin_en_bb()
+        cls.show_in_browser = cls.test_case_count < 50
 
     def setUp(self):
         """ initialisatie van de test case """
@@ -217,27 +219,12 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         self.e2e_login(self.account_normaal)
         self._prep_voorkeuren(self.sporter1)
 
-        with self.assert_max_queries(22):
-            resp = self.client.get(self.url_profiel)
-        self.assertNotContains(resp, 'De volgende competities worden georganiseerd')
-
         # competitie aanmaken
         comp_18, comp_25 = maak_competities_en_zet_fase_c()
 
         # log in as sporter
         self.e2e_login(self.account_normaal)
         self._prep_voorkeuren(self.sporter1)
-
-        # controleer dat inschrijven mogelijk is
-        with self.assert_max_queries(26):
-            resp = self.client.get(self.url_profiel)
-        self.assertContains(resp, 'De volgende competities worden georganiseerd')
-        self.assertContains(resp, 'De inschrijving is open tot ')
-        self.assertContains(resp, 'De volgende competities passen bij de bogen waar jij mee schiet')
-        urls = self.extract_all_urls(resp, skip_menu=True)
-        # print('urls:', urls)
-        urls = [url for url in urls if '/bondscompetities/deelnemen/aanmelden/' in url]
-        self.assertEqual(len(urls), 2)
 
         # schrijf de sporter in voor de 18m Recurve
         sporterboog = SporterBoog.objects.get(boogtype__afkorting='R')
@@ -769,9 +756,10 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         self.e2e_login(self.account_normaal)
         resp = self.client.get(self.url_profiel_test % case_nr, data={"tekst": case_tekst})
         self.assertEqual(resp.status_code, 200)  # 200 = OK
-        # self.e2e_open_in_browser(resp)
+        self.e2e_open_in_browser(resp, self.show_in_browser)
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('sporter/profiel.dtl', 'plein/site_layout.dtl'))
+        self.assertNotContains(resp, 'De volgende competities worden georganiseerd')
 
     def test_competitie_case_2(self):
         case_nr = 2
@@ -781,9 +769,16 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         self._competitie_aanmaken()                 # zet fase C, dus openbaar en klaar voor inschrijving
         resp = self.client.get(self.url_profiel_test % case_nr, data={"tekst": case_tekst})
         self.assertEqual(resp.status_code, 200)  # 200 = OK
-        # self.e2e_open_in_browser(resp)
+        self.e2e_open_in_browser(resp, self.show_in_browser)
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('sporter/profiel.dtl', 'plein/site_layout.dtl'))
+        self.assertContains(resp, 'De volgende competities worden georganiseerd')
+        self.assertContains(resp, 'De inschrijving is open tot ')
+        self.assertContains(resp, 'De volgende competities passen bij de bogen waar jij mee schiet')
+        urls = self.extract_all_urls(resp, skip_menu=True)
+        # print('urls:', urls)
+        urls = [url for url in urls if '/bondscompetities/deelnemen/aanmelden/' in url]
+        self.assertEqual(len(urls), 2)
 
     def _regio_inschrijven(self, do_18=True, do_25=True, wil_rk_18=True, wil_rk_25=True):
         if do_18:
@@ -851,9 +846,13 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         self._regio_inschrijven(do_18=False)
         resp = self.client.get(self.url_profiel_test % case_nr, data={"tekst": case_tekst})
         self.assertEqual(resp.status_code, 200)  # 200 = OK
-        # self.e2e_open_in_browser(resp)
+        self.e2e_open_in_browser(resp, self.show_in_browser)
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('sporter/profiel.dtl', 'plein/site_layout.dtl'))
+        urls = self.extract_all_urls(resp, skip_menu=True)
+        print('urls:', urls)
+        urls = [url for url in urls if '/bondscompetities/deelnemen/aanmelden/' in url]
+        self.assertEqual(len(urls), 1)
 
     def test_competitie_case_4(self):
         case_nr = 4
@@ -864,7 +863,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         self._regio_inschrijven(wil_rk_25=False)
         resp = self.client.get(self.url_profiel_test % case_nr, data={"tekst": case_tekst})
         self.assertEqual(resp.status_code, 200)  # 200 = OK
-        self.e2e_open_in_browser(resp)
+        self.e2e_open_in_browser(resp, self.show_in_browser)
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('sporter/profiel.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, 'Je bent alvast afgemeld')
@@ -883,7 +882,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
 
         resp = self.client.get(self.url_profiel_test % case_nr, data={"tekst": case_tekst})
         self.assertEqual(resp.status_code, 200)  # 200 = OK
-        # self.e2e_open_in_browser(resp)
+        self.e2e_open_in_browser(resp, self.show_in_browser)
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('sporter/profiel.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, 'Deze boog is niet meer ingesteld als wedstrijdboog')
@@ -902,7 +901,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         self._regio_inschrijven(do_25=False)
         resp = self.client.get(self.url_profiel_test % case_nr, data={"tekst": case_tekst})
         self.assertEqual(resp.status_code, 200)  # 200 = OK
-        self.e2e_open_in_browser(resp)
+        self.e2e_open_in_browser(resp, self.show_in_browser)
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('sporter/profiel.dtl', 'plein/site_layout.dtl'))
 

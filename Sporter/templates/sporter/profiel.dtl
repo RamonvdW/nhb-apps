@@ -202,7 +202,7 @@
                                 </td>
 
                                 <!-- knoppen -->
-                                <td class="right-align">
+                                <td class="right-align" style="padding:5px 5px">
                                     {% if deelnemer.url_schietmomenten %}
                                         <a class="multi-btn-sv-rood" href="{{ deelnemer.url_schietmomenten }}">
                                             <span class="hide-on-small-only">Kies dagen</span>
@@ -281,7 +281,7 @@
                                 </td>
 
                                 <!-- knoppen -->
-                                <td class="right-align">
+                                <td class="right-align" style="padding:5px 5px">
                                     {% if deelnemer.is_fase_rk %}
                                         {% if deelnemer.rk_inschrijving %}
                                             <!-- is al doorgestroomd naar het RK -->
@@ -454,7 +454,7 @@
                                 <td class="center">Wacht op einde RK</td>
 
                                 <!-- knoppen -->
-                                <td class="right-align">
+                                <td class="right-align" style="padding:5px 5px">
 
                                 </td>
                             </tr>
@@ -515,7 +515,7 @@
                             <tr>
                                 <td class="center">{{ deelcomp.competitie.beschrijving }}</td>
                                 <td class="center">{{ deelcomp.boog_beschrijving }}</td>
-                                <td class="right-align">
+                                <td class="right-align" style="padding:5px 5px">
                                     {% if deelcomp.url_aanmelden %}
                                         <a class="multi-btn-sv-rood" href="{{ deelcomp.url_aanmelden }}">
                                             <span class="hide-on-small-only">Aanmelden</span>
