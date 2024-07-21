@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from Sporter import view_profiel, view_voorkeuren, view_leeftijdsklassen
+from Sporter import view_profiel, view_profiel_test, view_voorkeuren, view_leeftijdsklassen
 
 app_name = 'Sporter'
 
@@ -31,6 +31,11 @@ urlpatterns = [
     path('leeftijden/',
          view_leeftijdsklassen.InfoLeeftijdenView.as_view(),
          name='leeftijdsgroepen'),
+
+    path('profiel-test/<int:case>/',
+         view_profiel_test.ProfielTestView.as_view(),
+         name='profiel-test'),
+
 ]
 
 # end of file
