@@ -244,7 +244,8 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
     def test_bad(self):
         # inschrijven als anon
         resp = self.client.post(self.url_aanmelden % (0, 0))
-        self.assert404(resp, 'Sporter niet gevonden')
+        self.assert_is_redirect_login(resp)
+        # self.assert404(resp, 'Sporter niet gevonden')
 
         # log in as BB en maak de competitie aan
         self.e2e_login_and_pass_otp(self.testdata.account_admin)
@@ -254,7 +255,8 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
         # corner-case: afmelden als niet-lid
         self.testdata.account_admin.sporter_set.all().delete()
         resp = self.client.post(self.url_aanmelden % (0, 0))
-        self.assert404(resp, 'Sporter niet gevonden')
+        self.assert403(resp, "Geen toegang")        # huidige rol is niet sporter
+        # self.assert404(resp, 'Sporter niet gevonden')
 
         # haal de bevestig pagina op als BB
         url = self.url_bevestig_aanmelden % (0, 0)
