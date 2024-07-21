@@ -9,7 +9,7 @@ from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
 from BasisTypen.models import BoogType
-from Competitie.models.competitie import Competitie
+from Competitie.models.competitie import Competitie, CompetitieIndivKlasse
 from Competitie.models.laag_regio import Regiocompetitie, RegiocompetitieSporterBoog
 from Competitie.plugin_sporter import get_sporter_competities
 from Functie.definities import Rollen
@@ -66,110 +66,27 @@ class ProfielTestView(UserPassesTestMixin, TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
         context['case_nr'] = case_nr = int(kwargs['case'])
+        context['case_tekst'] = self.request.GET.get('tekst', '??')
+
         context['sporter'] = self.sporter
 
         boog_afk2sporterboog, wedstrijdbogen = get_sporter_gekozen_bogen(self.sporter, self.alle_bogen)
         context['moet_bogen_kiezen'] = len(wedstrijdbogen) == 0
 
-        print(boog_afk2sporterboog)
-        print(wedstrijdbogen)
-
         context['toon_bondscompetities'] = False
         if self.ver:
-
-            comp18 = Competitie.objects.filter(afstand=18).first()
-            comp25 = Competitie.objects.filter(afstand=25).first()
-
-            regiocomp18 = Regiocompetitie.objects.get(competitie=comp18, regio=self.ver.regio)
-            regiocomp25 = Regiocompetitie.objects.get(competitie=comp25, regio=self.ver.regio)
 
             # case 1 toont geen bondscompetities
             # dekt ook: geen voorkeur voor de bondscompetities
             context['toon_bondscompetities'] = case_nr > 1
 
             # er is een Indoor en 25m1pijl competitie
-
-            # case 2: niet ingeschreven, kan inschrijven op beide competities met recurve boog
-
-            # inschrijven op de regiocompetitie individueel
-            if case_nr > 2:
-                boog_afk = wedstrijdbogen[0]
-                sb = boog_afk2sporterboog[boog_afk]
-
-                RegiocompetitieSporterBoog(
-                    regiocompetitie=regiocomp18,
-                    sporterboog=sb,
-                    bij_vereniging=self.ver,
-                    # ag_voor_indiv="10,000",
-                    # ag_voor_team="10,000",
-                    ag_voor_team_mag_aangepast_worden=False,
-
-                # individuele klasse
-                indiv_klasse = models.ForeignKey(CompetitieIndivKlasse,
-                                                 on_delete=models.CASCADE)
-
-                # alle scores van deze sporterboog in deze competitie
-                scores = models.ManyToManyField(Score,
-                                                blank=True)  # mag leeg zijn / gemaakt worden
-
-                score1 = models.PositiveIntegerField(default=0)
-                score2 = models.PositiveIntegerField(default=0)
-                score3 = models.PositiveIntegerField(default=0)
-                score4 = models.PositiveIntegerField(default=0)
-                score5 = models.PositiveIntegerField(default=0)
-                score6 = models.PositiveIntegerField(default=0)
-                score7 = models.PositiveIntegerField(default=0)
-
-                # som van de beste 6 van score1..score7
-                totaal = models.PositiveIntegerField(default=0)
-
-                # aantal scores dat tot nu toe neergezet is (om eenvoudig te kunnen filteren)
-                aantal_scores = models.PositiveSmallIntegerField(default=0)
-
-                # welke van score1..score7 is de laagste?
-                laagste_score_nr = models.PositiveIntegerField(default=0)  # 1..7
-
-                # gemiddelde over de 6 beste scores, dus exclusief laatste_score_nr
-                gemiddelde = models.DecimalField(max_digits=5, decimal_places=3, default=0.0)  # 10,000
-
-                # bovenstaand gemiddelde vastgesteld aan het begin van de huidige team ronde
-                gemiddelde_begin_team_ronde = models.DecimalField(max_digits=5, decimal_places=3, default=0.0)  # 10,000
-
-                # voorkeuren opgegeven bij het inschrijven:
-
-                # (opt-in) Deelname aan de teamcompetitie gewenst?
-                inschrijf_voorkeur_team = models.BooleanField(default=False)
-
-                # (opt-out) Uitnodiging voor deelname aan het RK en BK gewenst?
-                inschrijf_voorkeur_rk_bk = models.BooleanField(default=True)
-
-                # opmerking vrije tekst
-                inschrijf_notitie = models.TextField(default="", blank=True)
-
-                # voorkeur dagdelen (methode 3)
-                inschrijf_voorkeur_dagdeel = models.CharField(max_length=3, choices=DAGDELEN, default="GN")
-
-                # voorkeur schietmomenten (methode 1)
-                inschrijf_gekozen_matches = models.ManyToManyField(CompetitieMatch, blank=True)
-
-                # aangemeld door
-                aangemeld_door = models.ForeignKey(Account, on_delete=models.SET_NULL, null=True, blank=True)
-
-                # historie over belangrijke acties
-                logboekje = models.TextField(default='', blank=True)
-
-
-
-                )
-
-            # case 3: ingeschreven
-
             lijst_comps, lijst_kan_inschrijven, lijst_inschrijvingen = get_sporter_competities(self.sporter,
                                                                                                wedstrijdbogen,
                                                                                                boog_afk2sporterboog)
-            print('case: %s' % case_nr)
-            print('   lijst_kan_inschrijven:', lijst_kan_inschrijven)
-            print('   lijst_inschrijvingen:', lijst_inschrijvingen)
+            # print('case: %s' % case_nr)
+            # print('   lijst_kan_inschrijven:', lijst_kan_inschrijven)
+            # print('   lijst_inschrijvingen:', lijst_inschrijvingen)
 
             context['competities'] = lijst_comps
             context['comp_kan_inschrijven'] = len(lijst_kan_inschrijven) > 0

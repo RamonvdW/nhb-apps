@@ -70,10 +70,14 @@ def get_sporter_competities(sporter: Sporter,
                         boog_niet_meer: True = boog niet meer gekozen
                         boog_beschrijving = Tekstuele beschrijving van de boog, zoals "Recurve"
                         url_afmelden = POST URL om af te melden van de regiocompetitie
+                        id_afmelden = unieke identificatie string voor gebruik als html "id"
                         is_afgemeld_voor_rk = True als sporter alvast afgemeld is voor RK
                         url_voorkeur_rk = POST URL om voorkeur RK in te stellen tijdens regio fase
                         url_schietmomenten = URL om 7 schietmomenten te kiezen (inschrijfmethode 1)
                         rk_inschrijving: KampioenschapSporterBoog voor RK waar sporter voor gekwalificeerd is
+                        url_rk_deelnemers = URL naar pagina met hele RK deelnemers lijst
+                        url_status_rk_deelname = URL om deelname RK aan te passen (gebruik POST)
+                        id_deelname_rk = unieke identificatie string voor gebruik als html "id"
                         bk_inschrijving: KampioenschapSporterBoog voor BK waar sporter individueel voor gekwalificeerd is
     """
 
@@ -232,6 +236,7 @@ def get_sporter_competities(sporter: Sporter,
             if comp.fase_indiv <= 'C':
                 inschrijving.url_afmelden = reverse('CompInschrijven:afmelden',
                                                     kwargs={'deelnemer_pk': inschrijving.pk})
+                inschrijving.id_afmelden = 'bevestig_uitschrijven_%s' % inschrijving.pk
 
             lijst_inschrijvingen.append(inschrijving)
     # for
@@ -270,7 +275,7 @@ def get_sporter_competities(sporter: Sporter,
                                                                  'rayon_nr': kamp.rayon.rayon_nr})
 
                 inschrijving.url_status_rk_deelname = reverse('CompLaagRayon:wijzig-status-rk-deelname')
-                inschrijving.id_deelname_rk = 'id_deelname_rk_%s' % deelnemer.pk
+                inschrijving.id_deelname_rk = 'deelname_rk_%s' % deelnemer.pk
 
                 # TODO: team
 

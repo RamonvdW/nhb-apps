@@ -11,7 +11,8 @@ from BasisTypen.definities import ORGANISATIE_KHSN
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse
 from Bestel.models import Bestelling
 from Competitie.definities import DEELNAME_JA, DEELNAME_NEE, INSCHRIJF_METHODE_1
-from Competitie.models import Regiocompetitie, RegiocompetitieSporterBoog, Kampioenschap, KampioenschapSporterBoog
+from Competitie.models import (Regiocompetitie, RegiocompetitieSporterBoog, Kampioenschap, KampioenschapSporterBoog,
+                               CompetitieIndivKlasse)
 from Competitie.test_utils.tijdlijn import (zet_competitie_fases,
                                             zet_competitie_fase_regio_prep, zet_competitie_fase_regio_inschrijven,
                                             zet_competitie_fase_regio_wedstrijden, zet_competitie_fase_regio_afsluiten,
@@ -52,8 +53,6 @@ class TestSporterProfiel(E2EHelpers, TestCase):
 
     testdata = None
 
-    TEST_CASE_NRS_BONDSCOMPETITIES = (2,)     # range(1, 20+1)
-
     @classmethod
     def setUpTestData(cls):
         cls.testdata = TestData()
@@ -85,6 +84,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
                         email=self.account_normaal.email)
         sporter.save()
         self.sporter1 = sporter
+        self.sporterboog = None
 
         functie_hwl = maak_functie('HWL ver 1000', 'HWL')
         functie_hwl.accounts.add(self.account_normaal)
@@ -185,8 +185,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
 
         self.boog_R = BoogType.objects.get(afkorting='R')
 
-    @staticmethod
-    def _prep_voorkeuren(sporter):
+    def _prep_voorkeuren(self, sporter):
         get_sporterboog(sporter, mag_database_wijzigen=True)
 
         # zet een wedstrijd voorkeur voor Recurve en informatie voorkeur voor Barebow
@@ -194,6 +193,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         sporterboog.voor_wedstrijd = True
         sporterboog.heeft_interesse = False
         sporterboog.save()
+        self.sporterboog = sporterboog
 
         for boog in ('C', 'TR', 'LB'):
             sporterboog = SporterBoog.objects.get(boogtype__afkorting=boog)
@@ -763,20 +763,148 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         urls = [url for url in urls if url.startswith('/wedstrijden/inschrijven/kwalificatie-scores-doorgeven/')]
         self.assertEqual(1, len(urls))
 
-    def test_profiel_bondscompetities(self):
-        # log in as sporter
+    def test_competitie_case_1(self):
+        case_nr = 1
+        case_tekst = 'toon geen bondscompetities'
+        self.e2e_login(self.account_normaal)
+        resp = self.client.get(self.url_profiel_test % case_nr, data={"tekst": case_tekst})
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        # self.e2e_open_in_browser(resp)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('sporter/profiel.dtl', 'plein/site_layout.dtl'))
+
+    def test_competitie_case_2(self):
+        case_nr = 2
+        case_tekst = 'niet ingeschreven, kan inschrijven op beide competities met recurve boog'
         self.e2e_login(self.account_normaal)
         self._prep_voorkeuren(self.sporter1)
         self._competitie_aanmaken()                 # zet fase C, dus openbaar en klaar voor inschrijving
+        resp = self.client.get(self.url_profiel_test % case_nr, data={"tekst": case_tekst})
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        # self.e2e_open_in_browser(resp)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('sporter/profiel.dtl', 'plein/site_layout.dtl'))
 
-        # test cases voor de bondscompetities zijn ingebouwd in een speciale view
-        for case_nr in self.TEST_CASE_NRS_BONDSCOMPETITIES:
-            resp = self.client.get(self.url_profiel_test % case_nr)
-            self.assertEqual(resp.status_code, 200)  # 200 = OK
-            self.assert_html_ok(resp)
-            self.assert_template_used(resp, ('sporter/profiel.dtl', 'plein/site_layout.dtl'))
+    def _regio_inschrijven(self, do_18=True, do_25=True, wil_rk_18=True, wil_rk_25=True):
+        if do_18:
+            regiocomp18 = Regiocompetitie.objects.get(competitie=self.comp_18, regio=self.ver.regio)
+            indiv18 = (CompetitieIndivKlasse
+                       .objects
+                       .filter(competitie=self.comp_18,
+                               boogtype=self.boog_R)
+                       .order_by('volgorde')  # klasse 1 eerst
+                       .first())
 
-            self.e2e_open_in_browser(resp)
-        # for
+            deelnemer18 = RegiocompetitieSporterBoog(
+                                regiocompetitie=regiocomp18,
+                                sporterboog=self.sporterboog,
+                                bij_vereniging=self.ver,
+                                # ag_voor_indiv="10,000",
+                                # ag_voor_team="10,000",
+                                ag_voor_team_mag_aangepast_worden=False,
+                                indiv_klasse=indiv18,
+                                # inschrijf_voorkeur_team=False,
+                                inschrijf_voorkeur_rk_bk=wil_rk_18,
+                                # inschrijf_voorkeur_dagdeel=models.CharField(max_length=3, choices=DAGDELEN, default="GN")
+                                # inschrijf_gekozen_matches=models.ManyToManyField(CompetitieMatch, blank=True)
+                                aangemeld_door=self.account_normaal)
+
+            deelnemer18.save()
+        else:
+            deelnemer18 = None
+
+        if do_25:
+            regiocomp25 = Regiocompetitie.objects.get(competitie=self.comp_25, regio=self.ver.regio)
+            indiv25 = (CompetitieIndivKlasse
+                       .objects
+                       .filter(competitie=self.comp_25,
+                               boogtype=self.boog_R)
+                       .order_by('volgorde')  # klasse 1 eerst
+                       .first())
+
+            deelnemer25 = RegiocompetitieSporterBoog(
+                                regiocompetitie=regiocomp25,
+                                sporterboog=self.sporterboog,
+                                bij_vereniging=self.ver,
+                                # ag_voor_indiv="10,000",
+                                # ag_voor_team="10,000",
+                                ag_voor_team_mag_aangepast_worden=False,
+                                indiv_klasse=indiv25,
+                                # inschrijf_voorkeur_team=False,
+                                inschrijf_voorkeur_rk_bk=wil_rk_25,
+                                # inschrijf_voorkeur_dagdeel=models.CharField(max_length=3, choices=DAGDELEN, default="GN")
+                                # inschrijf_gekozen_matches=models.ManyToManyField(CompetitieMatch, blank=True)
+                                aangemeld_door=self.account_normaal)
+
+            deelnemer25.save()
+        else:
+            deelnemer25 = None
+
+        return deelnemer18, deelnemer25
+
+    def test_competitie_case_3(self):
+        case_nr = 3
+        case_tekst = '1x ingeschreven + mogelijkheid tot uitschrijven'
+        self.e2e_login(self.account_normaal)
+        self._prep_voorkeuren(self.sporter1)        # zet R als wedstrijdboog
+        self._competitie_aanmaken()                 # zet fase C, dus openbaar en klaar voor inschrijving
+        self._regio_inschrijven(do_18=False)
+        resp = self.client.get(self.url_profiel_test % case_nr, data={"tekst": case_tekst})
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        # self.e2e_open_in_browser(resp)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('sporter/profiel.dtl', 'plein/site_layout.dtl'))
+
+    def test_competitie_case_4(self):
+        case_nr = 4
+        case_tekst = '2x ingeschreven, afgemeld voor RK 25m1pijl + mogelijkheid tot uitschrijven'
+        self.e2e_login(self.account_normaal)
+        self._prep_voorkeuren(self.sporter1)        # zet R als wedstrijdboog
+        self._competitie_aanmaken()                 # zet fase C, dus openbaar en klaar voor inschrijving
+        self._regio_inschrijven(wil_rk_25=False)
+        resp = self.client.get(self.url_profiel_test % case_nr, data={"tekst": case_tekst})
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.e2e_open_in_browser(resp)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('sporter/profiel.dtl', 'plein/site_layout.dtl'))
+        self.assertContains(resp, 'Je bent alvast afgemeld')
+
+    def test_competitie_case_5(self):
+        case_nr = 5
+        case_tekst = '1x nog ingeschreven'
+        self.e2e_login(self.account_normaal)
+        self._prep_voorkeuren(self.sporter1)        # zet R als wedstrijdboog
+        self._competitie_aanmaken()                 # zet fase C, dus openbaar en klaar voor inschrijving
+        self._regio_inschrijven(do_25=False)
+
+        # zet de wedstrijdboog uit
+        self.sporterboog.voor_wedstrijd = False
+        self.sporterboog.save(update_fields=['voor_wedstrijd'])
+
+        resp = self.client.get(self.url_profiel_test % case_nr, data={"tekst": case_tekst})
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        # self.e2e_open_in_browser(resp)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('sporter/profiel.dtl', 'plein/site_layout.dtl'))
+        self.assertContains(resp, 'Deze boog is niet meer ingesteld als wedstrijdboog')
+        self.assertContains(resp, 'Je bent nog ingeschreven')
+
+    def test_competitie_case_6(self):
+        case_nr = 6
+        case_tekst = '7 wedstrijdmomenten aanpassen'
+        self.e2e_login(self.account_normaal)
+        self._prep_voorkeuren(self.sporter1)        # zet R als wedstrijdboog
+        self._competitie_aanmaken()                 # zet fase C, dus openbaar en klaar voor inschrijving
+
+        # zet alle regio's over naar inschrijfmethode 1
+        Regiocompetitie.objects.update(inschrijf_methode=INSCHRIJF_METHODE_1)
+
+        self._regio_inschrijven(do_25=False)
+        resp = self.client.get(self.url_profiel_test % case_nr, data={"tekst": case_tekst})
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.e2e_open_in_browser(resp)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('sporter/profiel.dtl', 'plein/site_layout.dtl'))
+
 
 # end of file

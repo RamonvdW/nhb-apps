@@ -66,7 +66,7 @@
             <h3 class="page-banner">Mijn pagina</h3>
             <p>Op deze pagina verzamelen we informatie die voor jou interessant is.</p>
             {% if case_nr is not None %}
-                <p style="color:red">Case nr: {{ case_nr }}</p>
+                <p style="color:red">Case nr: {{ case_nr }}<br>{{ case_tekst }}</p>
             {% endif %}
         </div>
     </div>
@@ -168,6 +168,12 @@
                                 <td colspan="4" class="center">Je bent ingeschreven voor de <b>{{ deelnemer.competitie.beschrijving }}</b> met de <b>{{ deelnemer.boog_beschrijving }}</b> boog</td>
                             </tr>
 
+                            {% if deelnemer.boog_niet_meer and deelnemer.url_afmelden %}
+                                <tr class="sv-rood">
+                                    <td colspan="4" class="white-text center">Deze boog is niet meer ingesteld als wedstrijdboog (onder voorkeuren)</td>
+                                </tr>
+                            {% endif %}
+
                             <tr>
                                 <th class="center">Fase</th>
                                 <th class="center">Status</th>
@@ -183,7 +189,7 @@
                                     {% if deelnemer.is_fase_regio %}
                                         {% if deelnemer.boog_niet_meer %}
                                             {% if deelnemer.url_afmelden %}
-                                                <span class="sv-rood-text">Niet meer wedstrijdboog voorkeur.<br>Je bent nog ingeschreven</span>
+                                                <span class="sv-rood-text">Je bent nog ingeschreven</span>
                                             {% else %}
                                                 <span>Je bent ingeschreven (afmelden kan niet meer)</span>
                                             {% endif %}
@@ -196,13 +202,16 @@
                                 </td>
 
                                 <!-- knoppen -->
-                                <td class="right" style="margin-right:10px">
+                                <td class="right-align">
                                     {% if deelnemer.url_schietmomenten %}
-                                        <a class="btn-sv-rood" href="{{ deelnemer.url_schietmomenten }}">Kies dagen</a>
+                                        <a class="multi-btn-sv-rood" href="{{ deelnemer.url_schietmomenten }}">
+                                            <span class="hide-on-small-only">Kies dagen</span>
+                                            <i class="hide-on-med-and-up material-icons-round notranslate">edit</i>
+                                        </a>
                                     {% endif %}
 
                                     {% if deelnemer.url_afmelden %}
-                                        <a class="btn-sv-blauw modal-trigger" href="#{{ deelnemer.id_afmelden }}">
+                                        <a class="multi-btn-sv-blauw modal-trigger" href="#{{ deelnemer.id_afmelden }}">
                                             <span class="hide-on-small-only">Uitschrijven</span>
                                             <i class="hide-on-med-and-up material-icons-round notranslate">remove</i>
                                         </a>
@@ -272,14 +281,14 @@
                                 </td>
 
                                 <!-- knoppen -->
-                                <td class="right" style="margin-right:10px">
+                                <td class="right-align">
                                     {% if deelnemer.is_fase_rk %}
                                         {% if deelnemer.rk_inschrijving %}
                                             <!-- is al doorgestroomd naar het RK -->
 
                                             {% if deelnemer.rk_inschrijving.deelname == '?' %}
                                                 <!-- deelname onbekend -->
-                                                <a class="btn-sv-rood modal-trigger" href="#{{ deelnemer.id_deelname_rk }}">
+                                                <a class="multi-btn-sv-rood modal-trigger" href="#{{ deelnemer.id_deelname_rk }}">
                                                     <span class="hide-on-small-only">Geef door</span>
                                                     <i class="hide-on-med-and-up material-icons-round notranslate">question_mark</i>
                                                 </a>
@@ -304,7 +313,7 @@
 
                                             {% elif deelnemer.rk_inschrijving.deelname == 'N' %}
                                                 <!-- afgemeld voor RK -->
-                                                <a class="btn-sv-blauw modal-trigger" href="#{{ deelnemer.id_deelname_rk }}">
+                                                <a class="multi-btn-sv-blauw modal-trigger" href="#{{ deelnemer.id_deelname_rk }}">
                                                     <span class="hide-on-small-only">Aanpassen</span>
                                                     <i class="hide-on-med-and-up material-icons-round notranslate">add</i>
                                                 </a>
@@ -331,7 +340,7 @@
 
                                             {% else %}
                                                 <!-- aangemeld voor RK -->
-                                                <a class="btn-sv-blauw modal-trigger" href="#{{ deelnemer.id_deelname_rk }}">
+                                                <a class="multi-btn-sv-blauw modal-trigger" href="#{{ deelnemer.id_deelname_rk }}">
                                                     <span class="hide-on-small-only">Afmelden</span>
                                                     <i class="hide-on-med-and-up material-icons-round notranslate">remove</i>
                                                 </a>
@@ -361,7 +370,7 @@
                                             {% endif %}
 
                                             {% if deelnemer.url_rk_deelnemers %}
-                                                <a class="btn-sv-blauw" href="{{ deelnemer.url_rk_deelnemers }}">RK lijsten</a>
+                                                <a class="multi-btn-sv-blauw" href="{{ deelnemer.url_rk_deelnemers }}">RK lijsten</a>
                                             {% endif %}
                                         {% endif %}
 
@@ -371,7 +380,7 @@
                                             <!-- alvast afgemeld voor het RK -->
 
                                             <!-- geef mogelijkheid om toch mee te doen -->
-                                            <a class="btn-sv-rood modal-trigger" href="#id_voorkeur_rk_{{ deelnemer.pk }}">
+                                            <a class="multi-btn-sv-rood modal-trigger" href="#id_voorkeur_rk_{{ deelnemer.pk }}">
                                                 <span class="hide-on-small-only">Aanpassen</span>
                                                 <i class="hide-on-med-and-up material-icons-round notranslate">edit</i>
                                             </a>
@@ -380,7 +389,7 @@
                                             <div class="modal" id="id_voorkeur_rk_{{ deelnemer.pk }}">
                                                 <div class="modal-content center">
                                                     <h5>Toch meedoen met het RK?</h5>
-                                                    <p>Je bent alvast afgemeld voor het RK. Aan het einde van de regiocompetitie fase van de <b>{{ deelnemer.regiocompetitie.competitie.beschrijving }}</b> stroom je daarom niet door naar de deelnemerslijst van het RK.</p>
+                                                    <p>Je bent alvast afgemeld voor het RK. Aan het einde van de regiocompetitie fase van de <b>{{ deelnemer.regiocompetitie.competitie.beschrijving }}</b> stroom je daarom <span class="sv-rood-text">niet</span> door naar de deelnemerslijst van het RK.</p>
                                                     <p>Wil je toch meedoen?</p>
 
                                                     <div class="modal-footer" style="text-align:center; display:block">
@@ -396,7 +405,7 @@
 
                                         {% else %}
                                             <!-- geef mogelijkheid om alvast af te melden voor RK  -->
-                                            <a class="btn-sv-rood modal-trigger" href="#id_voorkeur_rk_{{ deelnemer.pk }}">
+                                            <a class="multi-btn-sv-rood modal-trigger" href="#id_voorkeur_rk_{{ deelnemer.pk }}">
                                                 <span class="hide-on-small-only">Voorkeur</span>
                                                 <i class="hide-on-med-and-up material-icons-round notranslate">edit</i>
                                             </a>
@@ -405,7 +414,7 @@
                                             <div class="modal" id="id_voorkeur_rk_{{ deelnemer.pk }}">
                                                 <div class="modal-content center">
                                                     <h5>Afmelden voor het RK?</h5>
-                                                    <p>Als je geen mogelijkheid (of zin) hebt om mee te doen aan de rayonkampioenschappen van de <b>{{ deelnemer.competitie.beschrijving }}</b>, dan kan je je nu alvast afmelden. Aan het einde van de regiocompetitie stroom je dan niet door naar de deelnemerslijst van het RK.</p>
+                                                    <p>Als je geen mogelijkheid (of zin) hebt om mee te doen aan de rayonkampioenschappen van de <b>{{ deelnemer.competitie.beschrijving }}</b>, dan kan je je nu alvast afmelden. Aan het einde van de regiocompetitie stroom je dan <span class="sv-rood-text">niet</span> door naar de deelnemerslijst van het RK.</p>
                                                     <p>Wil je je afmelden voor het RK?</p>
 
                                                     <div class="modal-footer" style="text-align:center; display:block">
@@ -445,7 +454,7 @@
                                 <td class="center">Wacht op einde RK</td>
 
                                 <!-- knoppen -->
-                                <td class="right" style="margin-right:10px">
+                                <td class="right-align">
 
                                 </td>
                             </tr>
@@ -506,9 +515,9 @@
                             <tr>
                                 <td class="center">{{ deelcomp.competitie.beschrijving }}</td>
                                 <td class="center">{{ deelcomp.boog_beschrijving }}</td>
-                                <td class="right" style="margin-right:10px">
+                                <td class="right-align">
                                     {% if deelcomp.url_aanmelden %}
-                                        <a class="btn-sv-rood" href="{{ deelcomp.url_aanmelden }}">
+                                        <a class="multi-btn-sv-rood" href="{{ deelcomp.url_aanmelden }}">
                                             <span class="hide-on-small-only">Aanmelden</span>
                                             <i class="hide-on-med-and-up material-icons-round notranslate">add</i>
                                         </a>
