@@ -11,6 +11,10 @@ from unittest import TestSuite
 test_cases_counted = 0
 
 
+def get_test_cases_count():
+    return test_cases_counted
+
+
 class HierarchyRunner(DiscoverRunner):
 
     """ variant of the DiscoverRunner with ability to provide 'test_after' keyword in TestCase to refer to

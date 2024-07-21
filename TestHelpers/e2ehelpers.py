@@ -12,7 +12,7 @@ from Functie.view_vhpg import account_vhpg_is_geaccepteerd
 from TestHelpers.test_asserts import MyTestAsserts
 from TestHelpers.query_tracer import MyQueryTracer
 from TestHelpers.mgmt_cmds_helper import MyMgmtCommandHelper
-from TestHelpers.app_hierarchy_testrunner import test_cases_counted
+from TestHelpers.app_hierarchy_testrunner import get_test_cases_count
 from contextlib import contextmanager
 import webbrowser
 import tempfile
@@ -37,7 +37,13 @@ class E2EHelpers(MyTestAsserts, MyMgmtCommandHelper, TestCase):
 
     client: Client                  # for code completion / code inspection
 
-    test_case_count = test_cases_counted
+    @staticmethod
+    def is_small_test_run():
+        count = get_test_cases_count()
+        if count < 25:
+            print('[INFO] This is a small test run (%s cases)' % count)
+            return True
+        return False
 
     def e2e_logout(self):
         # in case the test client behaves different from the real website, we can compensate here
