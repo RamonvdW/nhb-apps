@@ -293,13 +293,13 @@ class E2EHelpers(MyTestAsserts, MyMgmtCommandHelper, TestCase):
                 print(report)
 
     @staticmethod
-    def e2e_open_in_browser(resp):
+    def e2e_open_in_browser(resp):          # pragma: no cover
         if resp.status_code == 200:
             msg = resp.content.decode('utf-8')
 
-            msg = msg.replace('/static/', '/tmp/static/')
+            msg = msg.replace('/static/', '/tmp/tmp_html/static/')
 
-            f = tempfile.NamedTemporaryFile(mode='wb', delete=False, suffix='.html')
+            f = tempfile.NamedTemporaryFile(mode='wb', delete=False, suffix='.html', dir='/tmp/tmp_html/')
             f.write(msg.encode('utf-8'))
             f.close()
             fname = f.name

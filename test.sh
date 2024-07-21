@@ -12,8 +12,8 @@ TEST_DIR="./SiteMain/tmp_test_data"
 TEST_DIR_FOTOS_WEBWINKEL="$TEST_DIR/webwinkel"
 REPORT_DIR="/tmp/covhtml"
 LOG="/tmp/test_out.txt"
-TMP_HTML="/tmp/out_html/"             # used by e2e_open_in_browser()
-STATIC_DIR="$PWD/SiteMain/.static"    # must be full path
+TMP_HTML="/tmp/tmp_html/"             # used by e2e_open_in_browser()
+STATIC_DIR="$PWD/SiteMain/.static/"   # must be full path
 
 # -Wa = enable deprecation warnings
 PY_OPTS="-Wa"
@@ -53,12 +53,6 @@ fi
 rm -rf "$TEST_DIR" &> /dev/null
 mkdir "$TEST_DIR"
 mkdir "$TEST_DIR_FOTOS_WEBWINKEL"
-
-# create a link from /tmp/static to the actual static dir
-# used to load static content from html written by e2e_open_in_browser()
-rm -rf "$TMP_HTML"
-mkdir -p "$TMP_HTML"
-ln -s "$STATIC_DIR" "$TMP_HTML/static/"
 
 echo
 echo "****************************** START OF TEST RUN ******************************"
@@ -154,10 +148,23 @@ then
     python3 $PY_OPTS ./manage.py check --tag admin --tag models || exit $?
 fi
 
-ABORTED=0
+echo "[INFO] Refreshing static files"
+rm -rf "$STATIC_DIR"*     # keeps top directory
+COLLECT=$(./manage.py collectstatic --link)
+RES=$?
+if [ $RES -ne 0 ]
+then
+    echo "$COLLECT"
+    exit 1
+fi
+
+# create a link from /tmp/static to the actual static dir
+# used to load static content from html written by e2e_open_in_browser()
+rm -rf "$TMP_HTML"
+mkdir -p "$TMP_HTML"
+ln -s "$STATIC_DIR" "$TMP_HTML/static"
 
 export COVERAGE_FILE="/tmp/.coverage.$$"
-
 python3 $PY_OPTS -m coverage erase
 
 echo "[INFO] Capturing output in $LOG"
@@ -166,6 +173,8 @@ echo "[INFO] Capturing output in $LOG"
 tail -f "$LOG" --pid=$$ | python -u ./SiteMain/utils/number_tests.py | grep --color -E "FAIL$|ERROR$|" &
 PID_TAIL=$(jobs -p | tail -1)
 # echo "PID_TAIL=$PID_TAIL"
+
+ABORTED=0
 
 if [ $KEEP_DB -ne 1 ]
 then
