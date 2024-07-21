@@ -1,0 +1,25 @@
+# Definitie shirts
+
+Delete=1-9
+
+Beschrijving=Ben jij de MH supporter?
+Prijs=29.95
+Bestelbegrenzing=1-3
+
+Sectie=Shirts
+SectieSub=Shirts waarmee je kan laten zien dat je achter MijnHandboogsport staat!
+
+OmslagTitel=Test-shirt
+Volgorde=1
+
+Maat=YXS
+Voorraad=6
+Save
+KoppelFotos=test-shirt.webp niet-bestaand.webp
+Maat=XXS
+Save
+Maat=XS
+Voorraad=10
+Save
+
+Onbekend

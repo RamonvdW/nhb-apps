@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2023 Ramon van der Winkel.
+#  Copyright (c) 2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -9,6 +9,7 @@
 from django.core import management
 from django.core.management.base import BaseCommand
 from Webwinkel.models import WebwinkelProduct
+import sys
 import io
 
 
@@ -46,9 +47,7 @@ class Command(BaseCommand):
 
         return bad
 
-    def handle(self, *args, **options):
-        fname = options['bestand']
-
+    def _lees_bestand(self, fname):
         product = WebwinkelProduct()
 
         self.stdout.write('[INFO] Lees bestand %s' % repr(fname))
@@ -123,6 +122,15 @@ class Command(BaseCommand):
 
             # for
         # with
+
+    def handle(self, *args, **options):
+        fname = options['bestand']
+
+        try:
+            self._lees_bestand(fname)
+        except FileNotFoundError as exc:
+            self.stderr.write('[ERROR] Kan bestand %s niet laden: %s' % (repr(fname), str(exc)))
+            sys.exit(1)
 
 # end of file
 

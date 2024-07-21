@@ -42,7 +42,7 @@ TEMPLATES[0]['OPTIONS']['string_if_invalid'] = '##BUG %s ##'
 # significant speed up by reducing calculation time for secure password handling
 PASSWORD_HASHERS = ['django.contrib.auth.hashers.MD5PasswordHasher']
 
-WEBWINKEL_FOTOS_DIR = 'data_test/webwinkel'
+WEBWINKEL_FOTOS_DIR = 'Webwinkel/test-files/'
 
 # enable javascript validation using ESprima
 TEST_VALIDATE_JAVASCRIPT = True
