@@ -13,6 +13,8 @@ from TestHelpers.test_asserts import MyTestAsserts
 from TestHelpers.query_tracer import MyQueryTracer
 from TestHelpers.mgmt_cmds_helper import MyMgmtCommandHelper
 from contextlib import contextmanager
+import webbrowser
+import tempfile
 import pyotp
 
 
@@ -290,5 +292,18 @@ class E2EHelpers(MyTestAsserts, MyMgmtCommandHelper, TestCase):
             if report:                      # pragma: no cover
                 print(report)
 
+    @staticmethod
+    def e2e_open_in_browser(resp):
+        if resp.status_code == 200:
+            msg = resp.content.decode('utf-8')
+
+            msg = msg.replace('/static/', '/tmp/static/')
+
+            f = tempfile.NamedTemporaryFile(mode='wb', delete=False, suffix='.html')
+            f.write(msg.encode('utf-8'))
+            f.close()
+            fname = f.name
+
+            webbrowser.open_new_tab(fname)      # will hang here for a few seconds unless browser already open
 
 # end of file

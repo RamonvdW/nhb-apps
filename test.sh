@@ -12,6 +12,8 @@ TEST_DIR="./SiteMain/tmp_test_data"
 TEST_DIR_FOTOS_WEBWINKEL="$TEST_DIR/webwinkel"
 REPORT_DIR="/tmp/covhtml"
 LOG="/tmp/test_out.txt"
+TMP_HTML="/tmp/out_html/"             # used by e2e_open_in_browser()
+STATIC_DIR="$PWD/SiteMain/.static"    # must be full path
 
 # -Wa = enable deprecation warnings
 PY_OPTS="-Wa"
@@ -51,6 +53,12 @@ fi
 rm -rf "$TEST_DIR" &> /dev/null
 mkdir "$TEST_DIR"
 mkdir "$TEST_DIR_FOTOS_WEBWINKEL"
+
+# create a link from /tmp/static to the actual static dir
+# used to load static content from html written by e2e_open_in_browser()
+rm -rf "$TMP_HTML"
+mkdir -p "$TMP_HTML"
+ln -s "$STATIC_DIR" "$TMP_HTML/static/"
 
 echo
 echo "****************************** START OF TEST RUN ******************************"
