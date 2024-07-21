@@ -8,13 +8,12 @@ from django.http import Http404
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
+from BasisTypen.definities import ORGANISATIE_WA
 from BasisTypen.models import BoogType
-from Competitie.models.competitie import Competitie, CompetitieIndivKlasse
-from Competitie.models.laag_regio import Regiocompetitie, RegiocompetitieSporterBoog
 from Competitie.plugin_sporter import get_sporter_competities
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige
-from Sporter.operations import get_sporter_gekozen_bogen
+from Sporter.operations import get_sporter_gekozen_bogen, get_sporter_voorkeuren
 
 TEMPLATE_PROFIEL = 'sporter/profiel.dtl'
 
@@ -34,7 +33,7 @@ class ProfielTestView(UserPassesTestMixin, TemplateView):
         self.sporter = None
         self.ver = None
         self.voorkeuren = None
-        self.alle_bogen = BoogType.objects.all()
+        self.alle_competitie_bogen = BoogType.objects.filter(organisatie=ORGANISATIE_WA)
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
@@ -65,12 +64,13 @@ class ProfielTestView(UserPassesTestMixin, TemplateView):
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
-        context['case_nr'] = case_nr = int(kwargs['case'])
-        context['case_tekst'] = self.request.GET.get('tekst', '??')
+        context['case_nr'] = case_nr = kwargs['case'][:6]                     # afkappen voor de veiligheid
+        context['case_tekst'] = self.request.GET.get('tekst', '??')[:100]     # afkappen voor de veiligheid
 
         context['sporter'] = self.sporter
+        self.voorkeuren = get_sporter_voorkeuren(self.sporter)
 
-        boog_afk2sporterboog, wedstrijdbogen = get_sporter_gekozen_bogen(self.sporter, self.alle_bogen)
+        boog_afk2sporterboog, wedstrijdbogen = get_sporter_gekozen_bogen(self.sporter, self.alle_competitie_bogen)
         context['moet_bogen_kiezen'] = len(wedstrijdbogen) == 0
 
         context['toon_bondscompetities'] = False
@@ -78,7 +78,7 @@ class ProfielTestView(UserPassesTestMixin, TemplateView):
 
             # case 1 toont geen bondscompetities
             # dekt ook: geen voorkeur voor de bondscompetities
-            context['toon_bondscompetities'] = case_nr > 1
+            context['toon_bondscompetities'] = True
 
             # er is een Indoor en 25m1pijl competitie
             lijst_comps, lijst_kan_inschrijven, lijst_inschrijvingen = get_sporter_competities(self.sporter,
@@ -94,6 +94,11 @@ class ProfielTestView(UserPassesTestMixin, TemplateView):
 
             context['comp_is_ingeschreven'] = len(lijst_inschrijvingen) > 0
             context['comp_inschrijvingen_sb'] = lijst_inschrijvingen
+
+            if not self.voorkeuren.voorkeur_meedoen_competitie:
+                if len(lijst_inschrijvingen) == 0:
+                    # niet ingeschreven en geen interesse
+                    context['toon_bondscompetities'] = False
 
         context['geen_basic'] = True        # onderdrukt delen van het profiel
 

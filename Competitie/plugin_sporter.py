@@ -112,7 +112,7 @@ def get_sporter_competities(sporter: Sporter,
                 if comp.fase_indiv == 'C':
                     comp.fase = FASE_INSCHRIJVEN
                     comp.status_str = 'De inschrijving is open tot %s' % localize(comp.begin_fase_D_indiv)
-                else:
+                elif 'C' < comp.fase_indiv <= 'F':
                     # tijdens de hele wedstrijden fase kan er aangemeld worden
                     comp.fase = FASE_REGIOWEDSTRIJDEN
                     if now <= comp.einde_fase_F:
@@ -123,10 +123,10 @@ def get_sporter_competities(sporter: Sporter,
             # maak een lijst van boog afkortingen om verderop te matches tegen een SporterBoog
             comp.boog_afkortingen = [boogtype.afkorting for boogtype in comp.boogtypen.all()]
 
-            # als de competitie nog in de prep fase is, dan nog niet tonen
-            if comp.fase != FASE_PREP:
-                lijst_competities.append(comp)
-                pk2comp[comp.pk] = comp
+        # als de competitie nog in de prep fase is, dan nog niet tonen
+        if comp.fase != FASE_PREP:
+            lijst_competities.append(comp)
+            pk2comp[comp.pk] = comp
     # for
 
     # stel vast welke boogtypen de sporter mee wil schieten (opt-in)
@@ -157,62 +157,58 @@ def get_sporter_competities(sporter: Sporter,
                              regio=regio)
                      .order_by('competitie__afstand')):
 
-        comp_pk = deelcomp.competitie.pk
-        try:
-            comp = pk2comp[comp_pk]
-        except KeyError:
-            pass
-        else:
-            # doorloop elk boogtype waar de sporter informatie/wedstrijden voorkeur voor heeft
-            for afk in wedstrijdbogen:
-                if afk in comp.boog_afkortingen:
-                    obj = copy.copy(deelcomp)
+        comp = pk2comp[deelcomp.competitie.pk]
 
-                    obj.boog_afkorting = afk
-                    obj.boog_beschrijving = boog_dict[afk].beschrijving     # TODO: nodig?
-                    obj.boog_niet_meer = False
+        # doorloop elk boogtype waar de sporter informatie/wedstrijden voorkeur voor heeft
+        for afk in wedstrijdbogen:
+            if afk in comp.boog_afkortingen:
+                obj = copy.copy(deelcomp)
 
-                    # zoek uit of de sporter al ingeschreven is
-                    inschrijving = None
-                    sporterboog = boog_afk2sporterboog[afk]
-                    for zoek in inschrijvingen:
-                        if zoek.sporterboog == sporterboog and zoek.regiocompetitie == obj:
-                            inschrijving = zoek
-                            break   # from the for
-                    # for
+                obj.boog_afkorting = afk
+                obj.boog_beschrijving = boog_dict[afk].beschrijving     # TODO: nodig?
+                obj.boog_niet_meer = False
 
-                    if inschrijving:
-                        inschrijvingen.remove(inschrijving)     # afgehandeld
+                # zoek uit of de sporter al ingeschreven is
+                inschrijving = None
+                sporterboog = boog_afk2sporterboog[afk]
+                for zoek in inschrijvingen:
+                    if zoek.sporterboog == sporterboog and zoek.regiocompetitie == obj:
+                        inschrijving = zoek
+                        break   # from the for
+                # for
 
-                        # maak informatie makkelijk beschikbaar
-                        inschrijving.competitie = comp
-                        inschrijving.boog_beschrijving = boog_dict[afk].beschrijving
+                if inschrijving:
+                    inschrijvingen.remove(inschrijving)     # afgehandeld
 
-                        lijst_inschrijvingen.append(inschrijving)
+                    # maak informatie makkelijk beschikbaar
+                    inschrijving.competitie = comp
+                    inschrijving.boog_beschrijving = boog_dict[afk].beschrijving
 
-                        tup = (sporterboog.pk, comp.pk)
-                        sb2inschrijving[tup] = inschrijving
+                    lijst_inschrijvingen.append(inschrijving)
 
-                        if comp.fase == FASE_INSCHRIJVEN:
-                            inschrijving.url_afmelden = reverse('CompInschrijven:afmelden',
-                                                                kwargs={'deelnemer_pk': inschrijving.pk})
-                            inschrijving.id_afmelden = 'bevestig_uitschrijven_%s' % inschrijving.pk
+                    tup = (sporterboog.pk, comp.pk)
+                    sb2inschrijving[tup] = inschrijving
 
-                        if comp.fase in (FASE_INSCHRIJVEN, FASE_REGIOWEDSTRIJDEN):
-                            inschrijving.is_afgemeld_voor_rk = not inschrijving.inschrijf_voorkeur_rk_bk
-                            inschrijving.url_voorkeur_rk = reverse('CompLaagRegio:voorkeur-rk')
+                    if comp.fase == FASE_INSCHRIJVEN:
+                        inschrijving.url_afmelden = reverse('CompInschrijven:afmelden',
+                                                            kwargs={'deelnemer_pk': inschrijving.pk})
+                        inschrijving.id_afmelden = 'bevestig_uitschrijven_%s' % inschrijving.pk
 
-                            if obj.inschrijf_methode == INSCHRIJF_METHODE_1:
-                                inschrijving.url_schietmomenten = reverse('CompLaagRegio:keuze-zeven-wedstrijden',
-                                                                          kwargs={'deelnemer_pk': inschrijving.pk})
+                    if comp.fase in (FASE_INSCHRIJVEN, FASE_REGIOWEDSTRIJDEN):
+                        inschrijving.is_afgemeld_voor_rk = not inschrijving.inschrijf_voorkeur_rk_bk
+                        inschrijving.url_voorkeur_rk = reverse('CompLaagRegio:voorkeur-rk')
 
-                    else:
-                        # niet ingeschreven
-                        if comp.is_open_voor_inschrijven():
-                            lijst_kan_inschrijven.append(obj)
-                            obj.url_aanmelden = reverse('CompInschrijven:bevestig-aanmelden',
-                                                        kwargs={'sporterboog_pk': sporterboog.pk,
-                                                                'deelcomp_pk': obj.pk})
+                        if obj.inschrijf_methode == INSCHRIJF_METHODE_1:
+                            inschrijving.url_schietmomenten = reverse('CompLaagRegio:keuze-zeven-wedstrijden',
+                                                                      kwargs={'deelnemer_pk': inschrijving.pk})
+
+                else:
+                    # niet ingeschreven
+                    if comp.is_open_voor_inschrijven():
+                        lijst_kan_inschrijven.append(obj)
+                        obj.url_aanmelden = reverse('CompInschrijven:bevestig-aanmelden',
+                                                    kwargs={'sporterboog_pk': sporterboog.pk,
+                                                            'deelcomp_pk': obj.pk})
 
             # for wedstrijdboog
     # for
@@ -225,20 +221,15 @@ def get_sporter_competities(sporter: Sporter,
         inschrijving.boog_niet_meer = True
         inschrijving.boog_beschrijving = boog_dict[afk].beschrijving
 
-        comp_pk = inschrijving.regiocompetitie.competitie.pk
-        try:
-            comp = pk2comp[comp_pk]
-        except KeyError:
-            pass
-        else:
-            inschrijving.competitie = comp
+        comp = pk2comp[inschrijving.regiocompetitie.competitie.pk]
+        inschrijving.competitie = comp
 
-            if comp.fase_indiv <= 'C':
-                inschrijving.url_afmelden = reverse('CompInschrijven:afmelden',
-                                                    kwargs={'deelnemer_pk': inschrijving.pk})
-                inschrijving.id_afmelden = 'bevestig_uitschrijven_%s' % inschrijving.pk
+        if comp.fase_indiv == 'C':
+            inschrijving.url_afmelden = reverse('CompInschrijven:afmelden',
+                                                kwargs={'deelnemer_pk': inschrijving.pk})
+            inschrijving.id_afmelden = 'bevestig_uitschrijven_%s' % inschrijving.pk
 
-            lijst_inschrijvingen.append(inschrijving)
+        lijst_inschrijvingen.append(inschrijving)
     # for
 
     # RK en BK

@@ -11,10 +11,10 @@ from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.db.models import Q
 from Account.models import get_account
+from BasisTypen.definities import ORGANISATIE_WA
 from BasisTypen.models import BoogType
 from Bestel.models import Bestelling
-from Competitie.definities import DEEL_RK, INSCHRIJF_METHODE_1, DEELNAME_NEE
-from Competitie.models import Regiocompetitie, RegiocompetitieSporterBoog, KampioenschapSporterBoog
+from Competitie.models import RegiocompetitieSporterBoog
 from Competitie.plugin_sporter import get_sporter_competities
 from Functie.definities import Rollen
 from Functie.models import Functie
@@ -35,7 +35,6 @@ from Wedstrijden.definities import (INSCHRIJVING_STATUS_RESERVERING_MANDJE, INSC
 from Wedstrijden.models import WedstrijdInschrijving
 import datetime
 import logging
-import copy
 
 
 TEMPLATE_PROFIEL = 'sporter/profiel.dtl'
@@ -58,7 +57,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
         self.sporter = None
         self.ver = None
         self.voorkeuren = None
-        self.alle_bogen = BoogType.objects.all()
+        self.alle_competitie_bogen = BoogType.objects.filter(organisatie=ORGANISATIE_WA)
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
@@ -95,7 +94,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
     def _find_histcomp_scores(self):
         """ Zoek alle scores van deze sporter """
         boogtype2str = dict()
-        for boog in self.alle_bogen:
+        for boog in self.alle_competitie_bogen:
             boogtype2str[boog.afkorting] = boog.beschrijving
         # for
 
@@ -357,7 +356,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
         if not self.sporter.is_gast:
             context['url_bondspas'] = reverse('Bondspas:toon-bondspas')
 
-        boog_afk2sporterboog, wedstrijdbogen = get_sporter_gekozen_bogen(self.sporter, self.alle_bogen)
+        boog_afk2sporterboog, wedstrijdbogen = get_sporter_gekozen_bogen(self.sporter, self.alle_competitie_bogen)
         context['moet_bogen_kiezen'] = len(wedstrijdbogen) == 0
 
         context['toon_bondscompetities'] = False

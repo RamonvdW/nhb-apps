@@ -32,7 +32,7 @@ urlpatterns = [
          view_leeftijdsklassen.InfoLeeftijdenView.as_view(),
          name='leeftijdsgroepen'),
 
-    path('profiel-test/<int:case>/',
+    path('profiel-test/<case>/',
          view_profiel_test.ProfielTestView.as_view(),
          name='profiel-test'),
 
