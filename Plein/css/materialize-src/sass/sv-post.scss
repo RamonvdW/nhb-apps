@@ -101,6 +101,22 @@
 
 
 //-----------------------------------
+// meerdere knoppen dicht op elkaar
+//
+// margin voorkomt "plakken" tegen elkaar, zowel horizontaal als verticaal
+//
+.multi-btn-sv-blauw {
+  @extend .btn-sv-blauw;
+  margin: 5px;
+}
+
+.multi-btn-sv-rood {
+  @extend .btn-sv-rood;
+  margin: 5px;
+}
+
+
+//-----------------------------------
 // download button
 //
 .btn-sv-download {
