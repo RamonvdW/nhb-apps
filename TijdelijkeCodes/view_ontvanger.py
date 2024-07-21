@@ -49,7 +49,7 @@ class OntvangerView(View):
                 context['activiteit'] = beschrijving_activiteit(obj)
             else:
                 # verlopen link
-                # opruimen gebeurt dagelijks (zie models_laag_regio.py)
+                # opruimen gebeurt dagelijks (zie tijdelijke_url_opschonen in models.py)
                 pass
         # for
 
