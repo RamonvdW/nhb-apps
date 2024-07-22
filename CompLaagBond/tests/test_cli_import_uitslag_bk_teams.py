@@ -18,11 +18,11 @@ class TestCompLaagBondCliImportUitslagBkTeams(E2EHelpers, TestCase):
 
     url_vaststellen = '/bondscompetities/beheer/%s/doorzetten/rk-bk-teams-klassengrenzen-vaststellen/'  # comp_pk
 
-    real_testfile_pdf_25m1pijl = 'CompLaagBond/management/testfiles/test_bk-25m1pijl-teams_pdf.pdf'
-    real_testfile_indoor_f8 = 'CompLaagBond/management/testfiles/test_bk-indoor-teams_f8.xlsx'
-    real_testfile_indoor_f4_1234 = 'CompLaagBond/management/testfiles/test_bk-indoor-teams_f4_1234.xlsx'
-    real_testfile_indoor_f4_2143 = 'CompLaagBond/management/testfiles/test_bk-indoor-teams_f4_2143.xlsx'
-    real_testfile_25m1pijl = 'CompLaagBond/management/testfiles/test_bk-25m1pijl-teams.xlsx'
+    real_testfile_pdf_25m1pijl = 'CompLaagBond/test-files/test_bk-25m1pijl-teams_pdf.pdf'
+    real_testfile_indoor_f8 = 'CompLaagBond/test-files/test_bk-indoor-teams_f8.xlsx'
+    real_testfile_indoor_f4_1234 = 'CompLaagBond/test-files/test_bk-indoor-teams_f4_1234.xlsx'
+    real_testfile_indoor_f4_2143 = 'CompLaagBond/test-files/test_bk-indoor-teams_f4_2143.xlsx'
+    real_testfile_25m1pijl = 'CompLaagBond/test-files/test_bk-25m1pijl-teams.xlsx'
 
     testdata = None
     rayon_nr = 3
