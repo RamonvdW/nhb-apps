@@ -28,7 +28,7 @@ IMPORT_COMMAND = 'import_crm_json'
 OPTION_DRY_RUN = '--dryrun'
 OPTION_SIM = '--sim_now=2020-07-01'
 
-TESTFILES_PATH = './ImportCRM/tests/testfiles/'
+TESTFILES_PATH = './ImportCRM/test-files/'
 
 TESTFILE_NOT_EXISTING = TESTFILES_PATH + 'notexisting.json'
 TESTFILE_01_EMPTY = TESTFILES_PATH + 'testfile_01.json'

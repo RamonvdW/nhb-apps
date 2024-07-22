@@ -16,8 +16,8 @@ class TestCompLaagRayonCliImportUitslagRkIndiv(E2EHelpers, TestCase):
 
     """ tests voor de CompLaagRayon applicatie, import van de RK/BK uitslag """
 
-    real_testfile_25m1pijl = 'CompLaagRayon/management/testfiles/test_rk-25m1pijl-indiv.xlsx'
-    real_testfile_indoor = 'CompLaagRayon/management/testfiles/test_rk-indoor-indiv.xlsx'
+    real_testfile_25m1pijl = 'CompLaagRayon/test-files/test_rk-25m1pijl-indiv.xlsx'
+    real_testfile_indoor = 'CompLaagRayon/test-files/test_rk-indoor-indiv.xlsx'
 
     testdata = None
     rayon_nr = 3

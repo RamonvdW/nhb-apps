@@ -17,9 +17,9 @@ class TestCompLaagRayonImportUitslagRkTeams(E2EHelpers, TestCase):
 
     url_klassengrenzen_teams_vaststellen = '/bondscompetities/beheer/%s/doorzetten/rk-bk-teams-klassengrenzen-vaststellen/'  # comp_pk
 
-    test_file_25m = 'CompLaagRayon/management/testfiles/test_rk-25m1pijl-teams.xlsx'
-    test_file1_18m = 'CompLaagRayon/management/testfiles/test_rk-indoor-teams_4.xlsx'
-    test_file2_18m = 'CompLaagRayon/management/testfiles/test_rk-indoor-teams_8.xlsx'
+    test_file_25m = 'CompLaagRayon/test-files/test_rk-25m1pijl-teams.xlsx'
+    test_file1_18m = 'CompLaagRayon/test-files/test_rk-indoor-teams_4.xlsx'
+    test_file2_18m = 'CompLaagRayon/test-files/test_rk-indoor-teams_8.xlsx'
 
     testdata = None
     rayon_nr = 3
