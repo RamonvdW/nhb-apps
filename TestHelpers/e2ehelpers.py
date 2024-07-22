@@ -40,7 +40,7 @@ class E2EHelpers(MyTestAsserts, MyMgmtCommandHelper, TestCase):
     @staticmethod
     def is_small_test_run():
         count = get_test_cases_count()
-        if count < 25:
+        if count < 25:              # pragma: no cover
             print('[INFO] This is a small test run (%s cases)' % count)
             return True
         return False

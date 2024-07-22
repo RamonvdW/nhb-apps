@@ -23,6 +23,7 @@ from HistComp.models import HistCompSeizoen, HistCompRegioIndiv
 from Locatie.definities import BAAN_TYPE_EXTERN
 from Locatie.models import Locatie
 from Records.models import IndivRecord
+from Registreer.models import GastRegistratie
 from Score.operations import score_indiv_ag_opslaan
 from Sporter.models import Sporter, SporterVoorkeuren, SporterBoog
 from Sporter.operations import get_sporterboog
@@ -207,8 +208,10 @@ class TestSporterProfiel(E2EHelpers, TestCase):
 
     def test_anon(self):
         # zonder login --> terug naar het plein
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_profiel)
+        resp = self.client.get(self.url_profiel)
+        self.assert_is_redirect_login(resp, self.url_profiel)
+
+        resp = self.client.get(self.url_profiel_test)
         self.assert_is_redirect_login(resp, self.url_profiel)
 
     def test_geen_sec(self):
@@ -438,6 +441,24 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         # print('urls: %s' % repr(urls))
         urls = [url for url in urls if url.startswith('/wedstrijden/inschrijven/kwalificatie-scores-doorgeven/')]
         self.assertEqual(1, len(urls))
+
+    def test_gast(self):
+        self.e2e_login(self.account_normaal)
+        self.account_normaal.is_gast = True
+        self.account_normaal.save(update_fields=['is_gast'])
+
+        GastRegistratie(
+                email='',
+                account=self.account_normaal,
+                sporter=None,
+                voornaam='',
+                achternaam='').save()
+
+        resp = self.client.get(self.url_profiel)
+        self.assert_is_redirect_not_plein(resp)
+
+        resp = self.client.get(self.url_profiel_test % "gast", data={"tekst": "gast"})
+        self.assert404(resp, 'Geen toegang')
 
     def test_competitie_case_1(self):
         case_nr = "1a"

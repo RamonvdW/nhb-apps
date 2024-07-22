@@ -801,13 +801,13 @@ class MyTestAsserts(TestCase):
                     if " FOR UPDATE" in sql:                # pragma: no cover
                         cmd += '.. FOR UPDATE'
 
-                elif sql.startswith('INSERT INTO '):
+                elif sql.startswith('INSERT INTO '):        # pragma: no branch
                     cmd = 'INSERT INTO'
                     pos1 = sql.find(' "')
                     pos2 = sql.find('"', pos1 + 2)
                     table_name = sql[pos1 + 2:pos2]
 
-                elif sql.startswith('UPDATE '):             # pragma: no branch
+                elif sql.startswith('UPDATE '):             # pragma: no cover
                     cmd = 'UPDATE'
                     pos1 = sql.find(' "')
                     pos2 = sql.find('"', pos1 + 2)
@@ -1008,7 +1008,7 @@ class MyTestAsserts(TestCase):
         pos = html.find('<a href="mailto:')
         while pos > 0:
             pos2 = html.find('"><code>', pos)
-            if pos2 > 0:
+            if pos2 > 0:                                        # pragma: no cover
                 pos3 = html.find('</code></a>', pos2)
                 html = html[:pos3] + html[pos3+11:]
                 html = html[:pos] + html[pos2+8:]

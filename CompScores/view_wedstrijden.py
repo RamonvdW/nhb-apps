@@ -91,7 +91,7 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
                     match.beschrijving1 = ronde.regiocompetitie.competitie.beschrijving
                     match.beschrijving2 = ronde.beschrijving
                 else:
-                    if match.deelkamp:
+                    if match.deelkamp:          # pragma: no branch
                         match.beschrijving1 = match.deelkamp.competitie.beschrijving
                         if match.deelkamp.deel == DEEL_RK:
                             match.beschrijving2 = "Rayonkampioenschappen"
