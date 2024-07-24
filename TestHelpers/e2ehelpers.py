@@ -39,9 +39,9 @@ class E2EHelpers(MyTestAsserts, MyMgmtCommandHelper, TestCase):
 
     @staticmethod
     def is_small_test_run():
-        count = get_test_cases_count()
-        if count < 25:              # pragma: no cover
-            print('[INFO] This is a small test run (%s cases)' % count)
+        app_count, fpath_count, testcase_count = get_test_cases_count()
+        if app_count == 1 and fpath_count == 1:              # pragma: no cover
+            print('[INFO] This is a small test run (1 app, 1 file, %s cases)' % testcase_count)
             return True
         return False
 
@@ -313,6 +313,11 @@ class E2EHelpers(MyTestAsserts, MyMgmtCommandHelper, TestCase):
             f.close()
             fname = f.name
 
-            webbrowser.open_new_tab(fname)      # will hang here for a few seconds unless browser already open
+            try:
+                # will hang here for a few seconds, unless browser already open
+                webbrowser.open_new_tab(fname)
+            except KeyboardInterrupt:
+                # capture user interrupt due to long wait
+                pass
 
 # end of file

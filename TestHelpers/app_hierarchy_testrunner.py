@@ -8,11 +8,14 @@ from django.test.runner import DiscoverRunner
 from unittest import TestSuite
 
 # totaal aantal test cases in scope van deze run
-test_cases_counted = 0
+scope_count_apps = list()
+scope_count_fpaths = list()
+scope_count_test_cases = 0
 
 
 def get_test_cases_count():
-    return test_cases_counted
+    """ Geeft terug hoeveel apps, test files en test cases in scope zijn """
+    return len(scope_count_apps), len(scope_count_fpaths), scope_count_test_cases
 
 
 class HierarchyRunner(DiscoverRunner):
@@ -45,14 +48,26 @@ class HierarchyRunner(DiscoverRunner):
         """
         new_suite = self.test_suite()
 
-        global test_cases_counted
-        test_cases_counted = 0
+        global scope_count_apps, scope_count_fpaths, scope_count_test_cases
+        scope_count_apps = list()
+        scope_count_fpaths = list()
+        scope_count_test_cases = 0
 
         # gather all the test cases, for checking the test_after references
         known_tests = list()
         for test in suite:
             test_name = test.id()           # includes the test function name
-            test_cases_counted += 1
+
+            spl = test_name.split('.')
+            if len(spl) >= 4:
+                # spl parts: app, [subdirectory], file, test class, test function
+                if spl[0] not in scope_count_apps:
+                    scope_count_apps.append(spl[0])
+                test_fpath = ".".join(spl[0:-2])
+                if test_fpath not in scope_count_fpaths:
+                    scope_count_fpaths.append(test_fpath)
+                scope_count_test_cases += 1
+
             pos = test_name.rfind('.')
             test_name = test_name[:pos]     # remove the function name
             if test_name not in known_tests:
