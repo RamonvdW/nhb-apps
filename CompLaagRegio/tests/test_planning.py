@@ -1445,12 +1445,11 @@ class TestCompLaagRegioPlanning(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
+        html = self.assert_html_ok(resp)
         self.assert_template_used(resp, ('complaagregio/planning-regio.dtl', 'plein/site_layout.dtl'))
 
         # zoek alle weeknummers op
         parts = list()
-        html = str(resp.content)
         # zoek de tabel met de weeknummers
         html = html[html.find('<h4>Wedstrijd blokken</h4>'):]
         html = html[:html.find('<form>')]
