@@ -261,7 +261,7 @@
   // enlarge from 90 to 100 px
   // remove bottom margin from 5px to 0 to simulate center-align
   height: 100px;
-  margin-bottom: 0px;
+  margin-bottom: 0;
 
   @media #{$small-and-down} {
     height: 60px;

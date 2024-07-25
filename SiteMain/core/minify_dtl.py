@@ -285,6 +285,18 @@ def minify_template(contents):
     return new_contents
 
 
+def minify_html(contents):
+    contents = remove_html_comments(contents)
+    contents = minify_template(contents)            # OK on pure html
+    contents = minify_scripts(contents)
+
+    # remove terminating newline
+    while len(contents) > 0 and contents[-1] == '\n':
+        contents = contents[:-1]
+
+    return contents
+
+
 class Loader(AppDirectoriesLoader):
     """ template loader die template files opschoont vlak na inladen.
         hierdoor kunnen de .dtl sources leesbaar blijven

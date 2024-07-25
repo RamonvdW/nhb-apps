@@ -11,7 +11,7 @@ from Mailer.models import MailQueue
 from TestHelpers.template_status import consistent_email_templates, included_templates, validated_templates
 from TestHelpers.validate_html import validate_html
 from TestHelpers.validate_js import validate_javascript
-from SiteMain.core.minify_dtl import minify_scripts
+from SiteMain.core.minify_dtl import minify_scripts, minify_html
 from bs4 import BeautifulSoup
 import json
 
@@ -641,6 +641,9 @@ class MyTestAsserts(TestCase):
         html = response.content.decode('utf-8')
         html = self.remove_debug_toolbar(html)
 
+        if not settings.ENABLE_MINIFY:
+            html = minify_html(html)
+
         dtl = self.get_useful_template_name(response)
         # print('useful template name:', dtl)
         if dtl not in validated_templates:
@@ -677,6 +680,8 @@ class MyTestAsserts(TestCase):
                     msg += "    %s\n" % issue
                 # for
                 self.fail(msg=msg)
+
+        return html
 
     @staticmethod
     def get_templates_not_used(resp, template_names):

@@ -67,11 +67,11 @@
 
                 if (volgorde === nr) {
                     // el_thumb1.classList.add("sv-foto-thumb-selected")
-                    el_thumb2.classList.add("sv-foto-thumb-selected")
+                    el_thumb2.classList.add("sv-foto-thumb-selected");
                     el_img.hidden = false;
                 } else {
                     // el_thumb1.classList.remove("sv-foto-thumb-selected")
-                    el_thumb2.classList.remove("sv-foto-thumb-selected")
+                    el_thumb2.classList.remove("sv-foto-thumb-selected");
                     el_img.hidden = true;
                 }
 
