@@ -58,7 +58,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2024-07-24'
+SITE_VERSIE = '2024-07-25'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -582,6 +582,9 @@ WEDSTRIJDEN_KIES_UITVOERENDE_VERENIGING = (1368,)
 # SECURITY WARNING: don't run with debug turned on in production!
 # let op: zonder DEBUG=True geen static files in dev omgeving!
 DEBUG = False
+
+# minify html en javascript
+ENABLE_MINIFY = True
 
 # HTML validation using v.Nu (see TestHelpers/e2ehelpers.py)        # noqa
 TEST_VALIDATE_HTML = False

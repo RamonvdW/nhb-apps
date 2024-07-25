@@ -211,6 +211,9 @@
                                     {% endif %}
 
                                     {% if deelnemer.url_afmelden %}
+                                        {% if deelnemer.url_schietmomenten %}
+                                            <br>
+                                        {% endif %}
                                         <a class="multi-btn-sv-blauw modal-trigger" href="#{{ deelnemer.id_afmelden }}">
                                             <span class="hide-on-small-only">Uitschrijven</span>
                                             <i class="hide-on-med-and-up material-icons-round notranslate">remove</i>
@@ -260,12 +263,16 @@
                                             <!-- is al doorgestroomd naar het RK -->
                                             <span>Je hebt je gekwalificeerd voor het RK in Rayon {{ deelnemer.rk_inschrijving.kampioenschap.rayon.rayon_nr }}</span>
                                             {% if deelnemer.rk_inschrijving.rank > 0 %}
-                                                <br><span>Op de RK lijst sta je op plaats {{ deelnemer.rk_inschrijving.rank }}</span>
+                                                <br>
+                                                <span>Op de RK lijst sta je op plaats {{ deelnemer.rk_inschrijving.rank }}</span>
                                             {% endif %}
+
                                             {% if deelnemer.rk_inschrijving.deelname == 'N' %}
-                                                <br><span>Je bent afgemeld</span>
+                                                <br>
+                                                <span>Je bent afgemeld</span>
                                             {% elif deelnemer.rk_inschrijving.deelname == '?' %}
-                                                <br><span class="sv-rood-text">Laat weten of je mee kan doen</span>
+                                                <br>
+                                                <span class="sv-rood-text">Laat weten of je mee kan doen</span>
                                             {% endif %}
                                         {% else %}
                                             <span>Je bent geen deelnemer in het RK</span>
@@ -284,6 +291,11 @@
                                 <td class="right-align" style="padding:5px 5px">
                                     {% if deelnemer.is_fase_rk %}
                                         {% if deelnemer.rk_inschrijving %}
+                                            {% if deelnemer.url_rk_deelnemers %}
+                                                <a class="multi-btn-sv-blauw" href="{{ deelnemer.url_rk_deelnemers }}">RK lijsten</a>
+                                                <br>
+                                            {% endif %}
+
                                             <!-- is al doorgestroomd naar het RK -->
 
                                             {% if deelnemer.rk_inschrijving.deelname == '?' %}
@@ -313,7 +325,7 @@
 
                                             {% elif deelnemer.rk_inschrijving.deelname == 'N' %}
                                                 <!-- afgemeld voor RK -->
-                                                <a class="multi-btn-sv-blauw modal-trigger" href="#{{ deelnemer.id_deelname_rk }}">
+                                                <a class="multi-btn-sv-rood modal-trigger" href="#{{ deelnemer.id_deelname_rk }}">
                                                     <span class="hide-on-small-only">Aanpassen</span>
                                                     <i class="hide-on-med-and-up material-icons-round notranslate">add</i>
                                                 </a>
@@ -350,7 +362,7 @@
                                                     <div class="modal-content center">
                                                         <h5>Afmelden voor het RK?</h5>
                                                         <p>Je hebt je gekwalificeerd voor de Rayonkampioenschappen van de <b>{{ deelnemer.regiocompetitie.competitie.beschrijving }}</b> en staat op de deelnemerslijst.</p>
-                                                        <p>Als je niet deel kan nemen, meld je dan af. Daarmee geef je ruimte aan een ander sporters om deel te nemen.</p>
+                                                        <p>Als je niet deel kan nemen, meld je dan af. Daarmee geef je ruimte aan een andere sporters om deel te nemen.</p>
                                                         <p>Wil je je afmelden?</p>
 
                                                         <div class="modal-footer" style="text-align:center; display:block">
@@ -367,10 +379,6 @@
 
                                             {% if url_status_rk_deelname %}
                                                 <!-- bevestigd-->
-                                            {% endif %}
-
-                                            {% if deelnemer.url_rk_deelnemers %}
-                                                <a class="multi-btn-sv-blauw" href="{{ deelnemer.url_rk_deelnemers }}">RK lijsten</a>
                                             {% endif %}
                                         {% endif %}
 
@@ -451,7 +459,31 @@
                                 </td>
 
                                 <!-- status -->
-                                <td class="center">Wacht op einde RK</td>
+                                <td class="center">
+                                    {% if deelnemer.is_fase_bk %}
+                                        {% if deelnemer.bk_inschrijving %}
+                                            <!-- is doorgestroomd naar het BK -->
+                                            <span>Je hebt je gekwalificeerd voor het BK</span>
+                                            {% if deelnemer.bk_inschrijving.rank > 0 %}
+                                                <br>
+                                                <span>Op de BK lijst sta je op plaats {{ deelnemer.bk_inschrijving.rank }}</span>
+                                            {% endif %}
+
+                                            {% if deelnemer.bk_inschrijving.deelname == 'N' %}
+                                                <br>
+                                                <span>Je bent afgemeld</span>
+                                            {% elif deelnemer.bk_inschrijving.deelname == '?' %}
+                                                <br>
+                                                <span class="sv-rood-text">Laat weten of je mee kan doen</span>
+                                            {% endif %}
+                                        {% else %}
+                                            <span>Je bent geen deelnemer in het BK</span>
+                                        {% endif %}
+                                    {% else %}
+                                        <!-- regio of RK fase -->
+                                        <span>Wacht op einde RK</span>
+                                    {% endif %}
+                                </td>
 
                                 <!-- knoppen -->
                                 <td class="right-align" style="padding:5px 5px">

@@ -39,10 +39,17 @@ ENABLE_DJANGO_EXTENSIONS = False
 # ask the template engine to insert a special pattern in the output in case of template problems
 TEMPLATES[0]['OPTIONS']['string_if_invalid'] = '##BUG %s ##'
 
+# template debugging must be enabled for coverage measurement with django-coverage-plugin
+TEMPLATES[0]['OPTIONS']['debug'] = True
+
 # significant speed up by reducing calculation time for secure password handling
 PASSWORD_HASHERS = ['django.contrib.auth.hashers.MD5PasswordHasher']
 
 WEBWINKEL_FOTOS_DIR = 'Webwinkel/test-files/'
+
+# zet minify uit ivm coverage meting van de template files
+# (die kan niet tegen aanpassing ten opzicht van source files)
+ENABLE_MINIFY = False
 
 # enable javascript validation using ESprima
 TEST_VALIDATE_JAVASCRIPT = True

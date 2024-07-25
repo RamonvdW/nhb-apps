@@ -11,6 +11,7 @@ from Mailer.models import MailQueue
 from TestHelpers.template_status import consistent_email_templates, included_templates, validated_templates
 from TestHelpers.validate_html import validate_html
 from TestHelpers.validate_js import validate_javascript
+from SiteMain.core.minify_dtl import minify_scripts
 from bs4 import BeautifulSoup
 import json
 
@@ -280,6 +281,9 @@ class MyTestAsserts(TestCase):
                         msg += "    %s\n" % issue
                     # for
                     self.fail(msg=msg)
+
+            if not settings.ENABLE_MINIFY:          # pragma: no branch
+                script = minify_scripts(script)
 
             pos = script.find('console.log')
             if pos >= 0:                    # pragma: no cover

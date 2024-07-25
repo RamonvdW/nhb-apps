@@ -80,7 +80,7 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
                         lid_nr=100002,
                         geslacht="V",
                         voornaam="Ramona",
-                        achternaam="de Testerin",
+                        achternaam="de Testerin",       # noqa
                         email="",
                         geboorte_datum=datetime.date(year=1972, month=3, day=4),
                         sinds_datum=datetime.date(year=2010, month=11, day=12),
@@ -263,7 +263,7 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
             resp = self.client.post(self.url_voorkeuren, {'sporter_pk': '100001', 'schiet_R': 'on', 'info_C': 'on'})
         self.assert_is_redirect(resp, '/vereniging/leden-voorkeuren/')
 
-        # controleer dat de post werkte
+        # controleer dat de post werkt
         obj_r = SporterBoog.objects.get(sporter__lid_nr=100001, boogtype__afkorting='R')
         obj_c = SporterBoog.objects.get(sporter__lid_nr=100001, boogtype__afkorting='C')
         self.assertTrue(obj_r.voor_wedstrijd)
@@ -446,6 +446,12 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
         account = self.account_hwl
         self.assertFalse(account.optout_nieuwe_taak)
         self.assertFalse(account.optout_herinnering_taken)
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_voorkeuren)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('sporter/voorkeuren.dtl', 'plein/site_layout.dtl'))
 
         # wijzig zonder opt-out te doen
         with self.assert_max_queries(33):

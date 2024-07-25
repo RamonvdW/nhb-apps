@@ -10,14 +10,16 @@ from django.utils.dateparse import parse_date
 from BasisTypen.definities import ORGANISATIE_KHSN
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse
 from Bestel.models import Bestelling
-from Competitie.definities import DEELNAME_JA, DEELNAME_NEE, INSCHRIJF_METHODE_1
+from Competitie.definities import DEELNAME_JA, DEELNAME_NEE, DEELNAME_ONBEKEND, INSCHRIJF_METHODE_1
 from Competitie.models import (Regiocompetitie, RegiocompetitieSporterBoog, Kampioenschap, KampioenschapSporterBoog,
                                CompetitieIndivKlasse)
 from Competitie.test_utils.tijdlijn import (zet_competitie_fase_regio_prep, zet_competitie_fase_regio_inschrijven,
-                                            zet_competitie_fase_regio_wedstrijden)
+                                            zet_competitie_fase_regio_wedstrijden,
+                                            zet_competitie_fase_rk_prep, zet_competitie_fase_rk_wedstrijden,
+                                            zet_competitie_fase_bk_prep, zet_competitie_fase_bk_wedstrijden)
 from Competitie.tests.test_helpers import competities_aanmaken, maak_competities_en_zet_fase_c
 from Functie.tests.helpers import maak_functie
-from Geo.models import Regio
+from Geo.models import Regio, Rayon
 from HistComp.definities import HISTCOMP_TYPE_18
 from HistComp.models import HistCompSeizoen, HistCompRegioIndiv
 from Locatie.definities import BAAN_TYPE_EXTERN
@@ -63,11 +65,14 @@ class TestSporterProfiel(E2EHelpers, TestCase):
 
         self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.com', 'Normaal')
 
+        self.regio = Regio.objects.get(pk=111)
+        self.rayon = Rayon.objects.get(rayon_nr=self.regio.rayon_nr)
+
         # maak een test vereniging
         ver = Vereniging(
                     naam="Grote Club",
                     ver_nr=1000,
-                    regio=Regio.objects.get(pk=111))
+                    regio=self.regio)
         ver.save()
         self.ver = ver
 
@@ -213,6 +218,18 @@ class TestSporterProfiel(E2EHelpers, TestCase):
 
         resp = self.client.get(self.url_profiel_test)
         self.assert_is_redirect_login(resp, self.url_profiel)
+
+    def test_geen_ver(self):
+        # log in as sporter
+        self.e2e_login(self.account_normaal)
+
+        self.sporter1.bij_vereniging = None
+        self.sporter1.save(update_fields=['bij_vereniging'])
+
+        resp = self.client.get(self.url_profiel_test)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('sporter/profiel.dtl', 'plein/site_layout.dtl'))
 
     def test_geen_sec(self):
         # log in as sporter
@@ -544,8 +561,8 @@ class TestSporterProfiel(E2EHelpers, TestCase):
                                 indiv_klasse=indiv18,
                                 # inschrijf_voorkeur_team=False,
                                 inschrijf_voorkeur_rk_bk=wil_rk_18,
-                                # inschrijf_voorkeur_dagdeel=models.CharField(max_length=3, choices=DAGDELEN, default="GN")
-                                # inschrijf_gekozen_matches=models.ManyToManyField(CompetitieMatch, blank=True)
+                                # inschrijf_voorkeur_dagdeel=
+                                # inschrijf_gekozen_matches=
                                 aangemeld_door=self.account_normaal)
 
             deelnemer18.save()
@@ -571,8 +588,8 @@ class TestSporterProfiel(E2EHelpers, TestCase):
                                 indiv_klasse=indiv25,
                                 # inschrijf_voorkeur_team=False,
                                 inschrijf_voorkeur_rk_bk=wil_rk_25,
-                                # inschrijf_voorkeur_dagdeel=models.CharField(max_length=3, choices=DAGDELEN, default="GN")
-                                # inschrijf_gekozen_matches=models.ManyToManyField(CompetitieMatch, blank=True)
+                                # inschrijf_voorkeur_dagdeel=
+                                # inschrijf_gekozen_matches=
                                 aangemeld_door=self.account_normaal)
 
             deelnemer25.save()
@@ -580,6 +597,21 @@ class TestSporterProfiel(E2EHelpers, TestCase):
             deelnemer25 = None
 
         return deelnemer18, deelnemer25
+
+    def _stroom_door_naar_rk(self, deelnemer: RegiocompetitieSporterBoog) -> KampioenschapSporterBoog:
+
+        kampioenschap = Kampioenschap.objects.get(competitie=deelnemer.regiocompetitie.competitie,
+                                                  rayon=self.rayon)
+
+        kampioen = KampioenschapSporterBoog(
+                        kampioenschap=kampioenschap,
+                        sporterboog=deelnemer.sporterboog,
+                        indiv_klasse=deelnemer.indiv_klasse,
+                        #deelname=DEELNAME_ONBEKEND
+                        bij_vereniging=self.ver)
+        kampioen.save()
+
+        return kampioen
 
     def test_competitie_case_3(self):
         case_nr = 3
@@ -677,8 +709,8 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         urls2 = [url for url in urls if '/bondscompetities/regio/keuze-zeven-wedstrijden/' in url]
         self.assertEqual(len(urls2), 1)
 
-    def test_competitie_case_7(self):
-        case_nr = 7
+    def test_competitie_case_7a(self):
+        case_nr = "7a"
         case_tekst = '1x ingeschreven, uitschrijven kan niet meer, 1x laat aanmelden mogelijk, voorkeur RK instellen'
         self.e2e_login(self.account_normaal)
         self._prep_voorkeuren(self.sporter1)        # zet R als wedstrijdboog
@@ -699,6 +731,143 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         self.assertEqual(len(urls2), 0)
         urls2 = [url for url in urls if '/bondscompetities/regio/voorkeur-rk/' in url]
         self.assertEqual(len(urls2), 1)
+
+    def test_competitie_case_7b(self):
+        case_nr = "7b"
+        case_tekst = '2x ingeschreven, voorkeur RK: is afgemeld, kan aangepast worden'
+        self.e2e_login(self.account_normaal)
+        self._prep_voorkeuren(self.sporter1)        # zet R als wedstrijdboog
+        self._competitie_aanmaken()                 # zet fase C, dus openbaar en klaar voor inschrijving
+        self._regio_inschrijven(wil_rk_25=False)
+        zet_competitie_fase_regio_wedstrijden(self.comp_18)
+        zet_competitie_fase_regio_wedstrijden(self.comp_25)
+        resp = self.client.get(self.url_profiel_test % case_nr, data={"tekst": case_tekst})
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.e2e_open_in_browser(resp, self.show_in_browser)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('sporter/profiel.dtl', 'plein/site_layout.dtl'))
+        urls = self.extract_all_urls(resp, skip_menu=True)
+        # print('urls:', urls)
+        urls2 = [url for url in urls if '/bondscompetities/deelnemen/aanmelden/' in url]
+        self.assertEqual(len(urls2), 0)
+        urls2 = [url for url in urls if '/bondscompetities/deelnemen/afmelden/' in url]
+        self.assertEqual(len(urls2), 0)
+        urls2 = [url for url in urls if '/bondscompetities/regio/voorkeur-rk/' in url]
+        self.assertEqual(len(urls2), 2)
+
+    def test_competitie_case_8(self):
+        case_nr = 8
+        case_tekst = 'RK prep, niet gekwalificeerd voor RK'
+        self.e2e_login(self.account_normaal)
+        self._prep_voorkeuren(self.sporter1)        # zet R als wedstrijdboog
+        self._competitie_aanmaken()                 # zet fase C, dus openbaar en klaar voor inschrijving
+        deelnemer18, _ = self._regio_inschrijven(do_25=False)
+        zet_competitie_fase_rk_prep(self.comp_25)
+        zet_competitie_fase_rk_prep(self.comp_18)
+        resp = self.client.get(self.url_profiel_test % case_nr, data={"tekst": case_tekst})
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.e2e_open_in_browser(resp, self.show_in_browser)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('sporter/profiel.dtl', 'plein/site_layout.dtl'))
+        self.assertContains(resp, 'Je bent geen deelnemer in het RK')
+        urls = self.extract_all_urls(resp, skip_menu=True)
+        urls2 = [url for url in urls if '/bondscompetities/deelnemen/afmelden/' in url]
+        self.assertEqual(len(urls2), 0)
+        urls2 = [url for url in urls if '/bondscompetities/rk/wijzig-status-rk-deelname/' in url]
+        self.assertEqual(len(urls2), 0)
+
+    def test_competitie_case_9a(self):
+        case_nr = "9a"
+        case_tekst = 'RK prep, 1x doorgestroomd naar RK, deelname nog niet doorgegeven'
+        self.e2e_login(self.account_normaal)
+        self._prep_voorkeuren(self.sporter1)  # zet R als wedstrijdboog
+        self._competitie_aanmaken()  # zet fase C, dus openbaar en klaar voor inschrijving
+        deelnemer18, _ = self._regio_inschrijven(do_25=False)
+        kamp_rk18 = self._stroom_door_naar_rk(deelnemer18)
+        self.assertEqual(kamp_rk18.deelname, DEELNAME_ONBEKEND)
+        zet_competitie_fase_rk_prep(self.comp_25)
+        zet_competitie_fase_rk_prep(self.comp_18)
+        resp = self.client.get(self.url_profiel_test % case_nr, data={"tekst": case_tekst})
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.e2e_open_in_browser(resp, self.show_in_browser)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('sporter/profiel.dtl', 'plein/site_layout.dtl'))
+        self.assertContains(resp, 'Je hebt je gekwalificeerd voor het RK in Rayon 3')
+        self.assertContains(resp, 'Laat weten of je mee kan doen')
+        urls = self.extract_all_urls(resp, skip_menu=True)
+        # print('urls:', urls)
+        urls2 = [url for url in urls if '/bondscompetities/rk/wijzig-status-rk-deelname/' in url]
+        self.assertEqual(len(urls2), 2)
+
+    def test_competitie_case_9b(self):
+        case_nr = "9b"
+        case_tekst = 'RK prep, 1x doorgestroomd naar RK, deelname = NEE, kan nog wijzigen'
+        self.e2e_login(self.account_normaal)
+        self._prep_voorkeuren(self.sporter1)  # zet R als wedstrijdboog
+        self._competitie_aanmaken()  # zet fase C, dus openbaar en klaar voor inschrijving
+        deelnemer18, _ = self._regio_inschrijven(do_25=False)
+        kamp_rk18 = self._stroom_door_naar_rk(deelnemer18)
+        kamp_rk18.deelname = DEELNAME_NEE
+        kamp_rk18.save(update_fields=['deelname'])
+        zet_competitie_fase_rk_prep(self.comp_25)
+        zet_competitie_fase_rk_prep(self.comp_18)
+        resp = self.client.get(self.url_profiel_test % case_nr, data={"tekst": case_tekst})
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.e2e_open_in_browser(resp, self.show_in_browser)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('sporter/profiel.dtl', 'plein/site_layout.dtl'))
+        self.assertContains(resp, 'Je hebt je gekwalificeerd voor het RK in Rayon 3')
+        self.assertContains(resp, 'Je bent afgemeld')
+        urls = self.extract_all_urls(resp, skip_menu=True)
+        # print('urls:', urls)
+        urls2 = [url for url in urls if '/bondscompetities/rk/wijzig-status-rk-deelname/' in url]
+        self.assertEqual(len(urls2), 1)
+
+    def test_competitie_case_9c(self):
+        case_nr = "9c"
+        case_tekst = 'RK prep, 1x doorgestroomd naar RK, deelname = JA, kan nog wijzigen'
+        self.e2e_login(self.account_normaal)
+        self._prep_voorkeuren(self.sporter1)  # zet R als wedstrijdboog
+        self._competitie_aanmaken()  # zet fase C, dus openbaar en klaar voor inschrijving
+        deelnemer18, _ = self._regio_inschrijven(do_25=False)
+        zet_competitie_fase_rk_prep(self.comp_18)
+        zet_competitie_fase_rk_wedstrijden(self.comp_25)
+        kamp_rk18 = self._stroom_door_naar_rk(deelnemer18)
+        kamp_rk18.deelname = DEELNAME_JA
+        kamp_rk18.rank = 15
+        kamp_rk18.save(update_fields=['deelname', 'rank'])
+        resp = self.client.get(self.url_profiel_test % case_nr, data={"tekst": case_tekst})
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.e2e_open_in_browser(resp, self.show_in_browser)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('sporter/profiel.dtl', 'plein/site_layout.dtl'))
+        self.assertContains(resp, 'Je hebt je gekwalificeerd voor het RK in Rayon 3')
+        self.assertContains(resp, 'Op de RK lijst sta je op plaats 15')
+        urls = self.extract_all_urls(resp, skip_menu=True)
+        # print('urls:', urls)
+        urls2 = [url for url in urls if '/bondscompetities/rk/wijzig-status-rk-deelname/' in url]
+        self.assertEqual(len(urls2), 1)
+
+    def test_competitie_case_10(self):
+        case_nr = 10
+        case_tekst = 'BK prep, niet gekwalificeerd voor BK'
+        self.e2e_login(self.account_normaal)
+        self._prep_voorkeuren(self.sporter1)        # zet R als wedstrijdboog
+        self._competitie_aanmaken()                 # zet fase C, dus openbaar en klaar voor inschrijving
+        deelnemer18, _ = self._regio_inschrijven(do_25=False)
+        zet_competitie_fase_rk_prep(self.comp_25)
+        zet_competitie_fase_bk_prep(self.comp_18)
+        resp = self.client.get(self.url_profiel_test % case_nr, data={"tekst": case_tekst})
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.e2e_open_in_browser(resp, self.show_in_browser)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('sporter/profiel.dtl', 'plein/site_layout.dtl'))
+        self.assertContains(resp, 'Je bent geen deelnemer in het BK')
+        urls = self.extract_all_urls(resp, skip_menu=True)
+        urls2 = [url for url in urls if '/bondscompetities/deelnemen/afmelden/' in url]
+        self.assertEqual(len(urls2), 0)
+        urls2 = [url for url in urls if '/bondscompetities/rk/wijzig-status-rk-deelname/' in url]
+        self.assertEqual(len(urls2), 0)
 
 
 # end of file

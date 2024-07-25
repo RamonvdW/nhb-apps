@@ -31,8 +31,8 @@ touch "$LOG"
 COV_INCLUDE_3RD_PARTY=""
 #COV_INCLUDE_3RD_PARTY="mollie"
 
-PYCOV=""
-PYCOV="-m coverage run --append --branch"       # --pylib
+COVRC="--rcfile=./SiteMain/utils/coverage.rc"
+PYCOV="-m coverage run $COVRC --append --branch"       # --pylib
 [ -n "$COV_INCLUDE_3RD_PARTY" ] && PYCOV+=" --include=*${COV_INCLUDE_3RD_PARTY}*"
 
 export PYTHONDONTWRITEBYTECODE=1
@@ -314,18 +314,18 @@ then
 
     if [ -z "$FOCUS" ] || [ $FORCE_FULL_COV -ne 0 ]
     then
-        python3 -m coverage report --precision=$PRECISION --skip-covered --fail-under=$COV_AT_LEAST $OMIT 2>&1 | tee -a "$LOG"
+        python3 -m coverage report $COVRC --precision=$PRECISION --skip-covered --fail-under=$COV_AT_LEAST $OMIT 2>&1 | tee -a "$LOG"
         res=${PIPESTATUS[0]}
         if [ $res -gt 0 ] && [ -z "$ARGS" ]
         then
             COVERAGE_RED=1
         fi
 
-        python3 -m coverage html -d "$REPORT_DIR" --precision=$PRECISION --skip-covered $OMIT &>>"$LOG"
+        python3 -m coverage html $COVRC -d "$REPORT_DIR" --precision=$PRECISION --skip-covered $OMIT &>>"$LOG"
     else
         [ -n "$COV_INCLUDE" ] && COV_INCLUDE="--include=$COV_INCLUDE"
-        python3 -m coverage report --precision=$PRECISION $COV_INCLUDE $OMIT
-        python3 -m coverage html -d "$REPORT_DIR" --precision=$PRECISION --skip-covered $COV_INCLUDE $OMIT &>>"$LOG"
+        python3 -m coverage report $COVRC --precision=$PRECISION $COV_INCLUDE $OMIT
+        python3 -m coverage html $COVRC -d "$REPORT_DIR" --precision=$PRECISION --skip-covered $COV_INCLUDE $OMIT &>>"$LOG"
     fi
 
     rm "$COVERAGE_FILE"

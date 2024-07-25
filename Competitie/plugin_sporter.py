@@ -104,8 +104,17 @@ def get_sporter_competities(sporter: Sporter,
 
             if comp.rk_indiv_afgesloten and comp.rk_teams_afgesloten:
                 comp.fase = FASE_BK
+                if comp.fase_indiv < 'P':
+                    comp.status_str = 'Voorbereidingen'
+                else:
+                    comp.status_str = 'Wedstrijden'
             elif comp.regiocompetitie_is_afgesloten:
                 comp.fase = FASE_RK
+
+                if comp.fase_indiv < 'L':
+                    comp.status_str = 'Voorbereidingen'
+                else:
+                    comp.status_str = 'Wedstrijden'
             else:
                 comp.status_str = 'De inschrijving is gesloten'
 

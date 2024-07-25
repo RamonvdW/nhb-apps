@@ -42,6 +42,8 @@ USE_SUBSET_FONT_FILES = False
 # debug toolbar for database access analysis
 # ENABLE_DEBUG_TOOLBAR = True
 
+# disable minify for debugging (default = True)
+# ENABLE_MINIFY = False
 
 # django-extensions
 #   very useful for show_urls:
