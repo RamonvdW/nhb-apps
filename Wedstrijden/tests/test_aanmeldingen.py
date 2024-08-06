@@ -137,10 +137,6 @@ class TestWedstrijdenAanmeldingen(E2EHelpers, TestCase):
         url = self.url_wedstrijden_wijzig_wedstrijd % self.wedstrijd.pk
         self.assert_is_redirect(resp, url)
 
-        # coverage, zonder organiserende_vereniging
-        self.assertIsNone(self.wedstrijd.organiserende_vereniging)
-        self.assertTrue(str(self.wedstrijd) != "")
-
         # maak een R sessie aan
         sessie = WedstrijdSessie(
                         datum=self.wedstrijd.datum_begin,

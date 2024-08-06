@@ -197,8 +197,7 @@ class Wedstrijd(models.Model):
     def __str__(self):
         """ geef een beschrijving terug voor de admin interface """
         msg = str(self.datum_begin)
-        if self.organiserende_vereniging:
-            msg += ' [%s]' % self.organiserende_vereniging.ver_nr
+        msg += ' [%s]' % self.organiserende_vereniging.ver_nr
         msg += ' %s %s' % (WEDSTRIJD_STATUS_TO_STR[self.status], self.titel)
         return msg
 
