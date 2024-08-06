@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2023 Ramon van der Winkel.
+#  Copyright (c) 2020-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -8,6 +8,7 @@ from django.utils import timezone
 from django.test import TestCase
 from Competitie.test_utils.tijdlijn import zet_competitie_fases
 from Competitie.tests.test_helpers import maak_competities_en_zet_fase_c
+from Functie.models import Functie
 from Functie.tests.helpers import maak_functie
 from Geo.models import Regio
 from Sporter.models import Sporter
@@ -39,6 +40,9 @@ class TestCompetitieKies(E2EHelpers, TestCase):
         self.functie_hwl = maak_functie("HWL test", "HWL")
         self.functie_hwl.vereniging = ver
         self.functie_hwl.save()
+
+        # maak de RKO functie
+        self.functie_rko = Functie.objects.filter(rol='RKO').first()
 
         # maak een volwassen test lid aan (komt in groep met klasse onbekend)
         sporter = Sporter(
@@ -131,5 +135,19 @@ class TestCompetitieKies(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/kies.dtl', 'plein/site_layout.dtl'))
 
+    def test_rko(self):
+        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_wissel_naar_functie(self.functie_rko)
+        self.e2e_check_rol('RKO')
+
+        now = timezone.now()
+        begin_jaar = now.year
+        maak_competities_en_zet_fase_c(startjaar=begin_jaar)
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_kies)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/kies.dtl', 'plein/site_layout.dtl'))
 
 # end of file

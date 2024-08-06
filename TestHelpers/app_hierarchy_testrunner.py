@@ -59,7 +59,7 @@ class HierarchyRunner(DiscoverRunner):
             test_name = test.id()           # includes the test function name
 
             spl = test_name.split('.')
-            if len(spl) >= 4:
+            if len(spl) >= 4:               # pragma: no branch
                 # spl parts: app, [subdirectory], file, test class, test function
                 if spl[0] not in scope_count_apps:
                     scope_count_apps.append(spl[0])

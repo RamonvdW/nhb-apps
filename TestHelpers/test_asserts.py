@@ -641,7 +641,7 @@ class MyTestAsserts(TestCase):
         html = response.content.decode('utf-8')
         html = self.remove_debug_toolbar(html)
 
-        if not settings.ENABLE_MINIFY:
+        if not settings.ENABLE_MINIFY:          # pragma: no branch
             html = minify_html(html)
 
         dtl = self.get_useful_template_name(response)
