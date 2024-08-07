@@ -131,7 +131,9 @@
                 <table class="sv-kader">
                     {% if competities %}
                         <tr>
-                            <td colspan="3" class="center"><h6>De volgende competities worden georganiseerd</h6></td>
+                            <td colspan="3" class="center">
+                                <h6>De volgende competities worden georganiseerd</h6>
+                            </td>
                         </tr>
 
                         <tr>
@@ -165,12 +167,12 @@
                         <table class="sv-kader">
 
                             <tr>
-                                <td colspan="4" class="center">Je bent ingeschreven voor de <b>{{ deelnemer.competitie.beschrijving }}</b> met de <b>{{ deelnemer.boog_beschrijving }}</b> boog</td>
+                                <td colspan="3" class="center">Je bent ingeschreven voor de <b>{{ deelnemer.competitie.beschrijving }}</b> met de <b>{{ deelnemer.boog_beschrijving }}</b> boog</td>
                             </tr>
 
                             {% if deelnemer.boog_niet_meer and deelnemer.url_afmelden %}
                                 <tr class="sv-rood">
-                                    <td colspan="4" class="white-text center">Deze boog is niet meer ingesteld als wedstrijdboog (onder voorkeuren)</td>
+                                    <td colspan="3" class="white-text center">Deze boog is niet meer ingesteld als wedstrijdboog (onder voorkeuren)</td>
                                 </tr>
                             {% endif %}
 
@@ -531,7 +533,7 @@
                     <table class="sv-kader">
 
                         <tr>
-                            <td colspan="4" class="center">
+                            <td colspan="3" class="center">
                                 <h6>De volgende competities passen bij de bogen waar jij mee schiet. Doe je mee?</h6>
                             </td>
                         </tr>
