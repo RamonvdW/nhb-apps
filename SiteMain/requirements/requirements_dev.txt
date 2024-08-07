@@ -10,7 +10,7 @@ asgiref==3.8.1
     #   django
 beautifulsoup4==4.12.3
     # via -r requirements_dev.in
-cachetools==5.3.3
+cachetools==5.4.0
     # via
     #   -r requirements.txt
     #   google-auth
@@ -22,14 +22,18 @@ charset-normalizer==3.3.2
     # via
     #   -r requirements.txt
     #   requests
-coverage==7.5.4
-    # via -r requirements_dev.in
-django==4.2.14
+coverage==7.6.1
+    # via
+    #   -r requirements_dev.in
+    #   django-coverage-plugin
+django==4.2.15
     # via
     #   -r requirements.txt
     #   django-debug-toolbar
     #   django-extensions
-django-debug-toolbar==4.4.5
+django-coverage-plugin==3.1.0
+    # via -r requirements_dev.in
+django-debug-toolbar==4.4.6
     # via -r requirements_dev.in
 django-extensions==3.2.3
     # via -r requirements_dev.in
@@ -45,7 +49,7 @@ google-api-core==2.19.1
     # via
     #   -r requirements.txt
     #   google-api-python-client
-google-api-python-client==2.137.0
+google-api-python-client==2.139.0
     # via -r requirements.txt
 google-auth==2.32.0
     # via
@@ -86,17 +90,17 @@ packaging==24.1
     # via pip-review
 pillow==10.4.0
     # via -r requirements.txt
-pip-licenses==4.4.0
+pip-licenses==5.0.0
     # via -r requirements_dev.in
 pip-review==1.3.0
     # via -r requirements_dev.in
-prettytable==3.10.0
+prettytable==3.10.2
     # via pip-licenses
 proto-plus==1.24.0
     # via
     #   -r requirements.txt
     #   google-api-core
-protobuf==5.27.2
+protobuf==5.27.3
     # via
     #   -r requirements.txt
     #   google-api-core
@@ -119,7 +123,7 @@ pyparsing==3.1.2
     # via
     #   -r requirements.txt
     #   httplib2
-pypdf==4.2.0
+pypdf==4.3.1
     # via -r requirements.txt
 pypng==0.20220715.0
     # via
@@ -146,11 +150,13 @@ rsa==4.9
     #   google-auth
 soupsieve==2.5
     # via beautifulsoup4
-sqlparse==0.5.0
+sqlparse==0.5.1
     # via
     #   -r requirements.txt
     #   django
     #   django-debug-toolbar
+tomli==2.0.1
+    # via pip-licenses
 typing-extensions==4.12.2
     # via
     #   -r requirements.txt
