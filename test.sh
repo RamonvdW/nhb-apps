@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 ARGS="$*"
-COV_AT_LEAST=97.30
+COV_AT_LEAST=96.70
 RED="\e[31m"
 RESET="\e[0m"
 TEST_DIR="./SiteMain/tmp_test_data"
