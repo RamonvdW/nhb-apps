@@ -24,6 +24,7 @@ comp_fase_kort = {
     'O': 'voorbereiding BK',
     'P': 'wedstrijden BK',
     'Q': 'einde competitie',
+    'Z': 'afgesloten',
 }
 
 
