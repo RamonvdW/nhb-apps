@@ -7,7 +7,7 @@
 from django.test import TestCase
 from django.utils import timezone
 from BasisTypen.definities import SCHEIDS_BOND, SCHEIDS_VERENIGING
-from Competitie.models_competitie import CompetitieMatch, CompetitieIndivKlasse, CompetitieTeamKlasse
+from Competitie.models import CompetitieMatch, CompetitieIndivKlasse, CompetitieTeamKlasse
 from Functie.models import Functie
 from Locatie.models import Locatie
 from Mailer.models import MailQueue

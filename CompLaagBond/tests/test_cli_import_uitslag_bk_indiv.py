@@ -6,7 +6,7 @@
 
 from django.test import TestCase
 from Competitie.definities import DEELNAME_NEE
-from Competitie.models_laag_kamp import KampioenschapSporterBoog
+from Competitie.models import KampioenschapSporterBoog
 from Competitie.test_utils.tijdlijn import zet_competitie_fase_bk_wedstrijden
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
@@ -16,9 +16,10 @@ class TestCompLaagBondCliImportUitslagBkIndiv(E2EHelpers, TestCase):
 
     """ tests voor de CompLaagBond applicatie, import van de BK uitslag """
 
-    real_testfile_excel_25m1pijl = 'CompLaagBond/management/testfiles/test_bk-25m1pijl-indiv.xlsx'
-    real_testfile_excel_indoor = 'CompLaagBond/management/testfiles/test_bk-indoor-indiv.xlsx'
-    real_testfile_html_25m1pijl = 'CompLaagBond/management/testfiles/ianseo_html_25m1pijl_indiv.txt'
+    real_testfile_excel_25m1pijl = 'CompLaagBond/test-files/test_bk-25m1pijl-indiv.xlsx'
+    real_testfile_excel_indoor = 'CompLaagBond/test-files/test_bk-indoor-indiv.xlsx'
+    real_testfile_ianseo_html_25m1pijl = 'CompLaagBond/test-files/ianseo_html_25m1pijl_indiv.txt'
+    real_testfile_ianseo_pdf_25m1pijl = 'CompLaagBond/test-files/ianseo_pdf_25m1pijl_indiv.pdf'
 
     testdata = None
     rayon_nr = 3
@@ -53,6 +54,14 @@ class TestCompLaagBondCliImportUitslagBkIndiv(E2EHelpers, TestCase):
                                                          sporterboog__sporter__lid_nr=301842)
         deelnemer.result_rank = 5
         deelnemer.save(update_fields=['result_rank'])
+
+        deelnemer = KampioenschapSporterBoog.objects.get(kampioenschap__competitie__afstand='25',
+                                                         sporterboog__sporter__lid_nr=301842)
+        cls.deelnemer_25a = deelnemer
+
+        deelnemer = KampioenschapSporterBoog.objects.get(kampioenschap__competitie__afstand='25',
+                                                         sporterboog__sporter__lid_nr=301844)
+        cls.deelnemer_25b = deelnemer
 
         # verander de RK deelnemers in BK deelnemers
         for deelnemer in KampioenschapSporterBoog.objects.filter(kampioenschap__competitie__afstand='18'):
@@ -127,14 +136,53 @@ class TestCompLaagBondCliImportUitslagBkIndiv(E2EHelpers, TestCase):
         self.assertTrue('[ERROR] Kan het html bestand niet openen' in f1.getvalue())
 
         f1, f2 = self.run_management_command('import_uitslag_bk_25m1pijl_indiv_ianseo-html',
-                                             self.real_testfile_html_25m1pijl,
+                                             self.real_testfile_ianseo_html_25m1pijl,
                                              '--dryrun', '--verbose')
         # print('f1:', f1.getvalue())
         # print('f2:', f2.getvalue())
 
         f1, f2 = self.run_management_command('import_uitslag_bk_25m1pijl_indiv_ianseo-html',
-                                             self.real_testfile_html_25m1pijl)
+                                             self.real_testfile_ianseo_html_25m1pijl)
         # print('f1:', f1.getvalue())
         # print('f2:', f2.getvalue())
+
+    def test_ianseo_pdf_25m(self):
+        # bestand NOK
+        f1, f2 = self.run_management_command('import_uitslag_bk_25m1pijl_indiv_ianseo-pdf', 'bestand')
+        self.assertTrue('[ERROR] Kan het bestand niet vinden' in f1.getvalue())
+
+        f1, f2 = self.run_management_command('import_uitslag_bk_25m1pijl_indiv_ianseo-pdf',
+                                             self.real_testfile_ianseo_pdf_25m1pijl,
+                                             '--dryrun', '--verbose')
+        # print('f1:', f1.getvalue())
+        # print('f2:', f2.getvalue())
+
+        # zorg dat een lid uit real_testfile_ianseo_pdf_25m1pijl bestaat
+        sporter = self.deelnemer_25a.sporterboog.sporter
+        sporter.achternaam = 'Van der V' + 'en'
+        sporter.voornaam = 'Jo' + 'ep'
+        sporter.save()      # wordt een nieuw record, want lid_nr is PK
+
+        ver = self.testdata.vereniging[self.testdata.ver_nrs[0]]
+        ver.ver_nr = 1178       # is ook PK, dus geeft nieuw record
+        ver.save()
+        self.deelnemer_25b.bij_vereniging = ver
+        self.deelnemer_25b.save(update_fields=['bij_vereniging'])
+        sporter = self.deelnemer_25b.sporterboog.sporter
+        sporter.bij_vereniging = ver
+        sporter.voornaam = 'F' + 'rank'
+        sporter.achternaam = 'Wijn' + 'en'
+        sporter.save()
+
+        f1, f2 = self.run_management_command('import_uitslag_bk_25m1pijl_indiv_ianseo-pdf',
+                                             self.real_testfile_ianseo_pdf_25m1pijl)
+        # print('f1:', f1.getvalue())
+        # print('f2:', f2.getvalue())
+
+        # controleer dat de data aangekomen is
+        self.deelnemer_25a.refresh_from_db()
+        self.assertEqual(self.deelnemer_25a.result_score_1, 232)
+        self.assertEqual(self.deelnemer_25a.result_score_2, 238)
+
 
 # end of file

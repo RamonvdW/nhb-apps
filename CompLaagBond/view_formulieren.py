@@ -12,9 +12,9 @@ from django.views.generic import TemplateView
 from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Competitie.definities import DEEL_BK, DEEL_RK, DEELNAME_NEE, DEELNAME2STR
-from Competitie.models_competitie import CompetitieMatch, CompetitieIndivKlasse, CompetitieTeamKlasse
-from Competitie.models_laag_kamp import (Kampioenschap, KampioenschapSporterBoog, KampioenschapTeam,
-                                         KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet)
+from Competitie.models import (CompetitieMatch, CompetitieIndivKlasse, CompetitieTeamKlasse,
+                               Kampioenschap, KampioenschapSporterBoog, KampioenschapTeam,
+                               KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet)
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
 from Scheidsrechter.models import MatchScheidsrechters

@@ -5,8 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.core.management.base import BaseCommand
-from Competitie.models_competitie import CompetitieTeamKlasse
-from Competitie.models_laag_regio import RegiocompetitieSporterBoog, RegiocompetitieTeam
+from Competitie.models import CompetitieTeamKlasse, RegiocompetitieSporterBoog, RegiocompetitieTeam
 from Score.definities import AG_NUL
 
 

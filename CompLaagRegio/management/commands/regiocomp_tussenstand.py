@@ -10,10 +10,9 @@
 from django.core.management.base import BaseCommand
 from django.db.models import F, Q
 from django.db.utils import DataError, OperationalError, IntegrityError
-from Competitie.models_competitie import Competitie, CompetitieIndivKlasse
-from Competitie.models_laag_regio import (Regiocompetitie, RegiocompetitieRonde, RegiocompetitieSporterBoog,
-                                          RegiocompetitieTeam, RegiocompetitieRondeTeam)
-from Competitie.models_mutatie import CompetitieTaken
+from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTaken,
+                               Regiocompetitie, RegiocompetitieRonde, RegiocompetitieSporterBoog,
+                               RegiocompetitieTeam, RegiocompetitieRondeTeam)
 from Score.definities import SCORE_WAARDE_VERWIJDERD
 from Score.models import ScoreHist
 import traceback

@@ -17,8 +17,7 @@ from Locatie.definities import BAAN_TYPE_BUITEN, BAAN_TYPE_EXTERN, BAANTYPE2STR
 from Locatie.forms import AccommodatieDetailsForm
 from Locatie.models import Locatie
 from Logboek.models import schrijf_in_logboek
-from Vereniging.models import Vereniging
-from Vereniging.models2 import Secretaris
+from Vereniging.models import Vereniging, Secretaris
 
 
 TEMPLATE_ACCOMMODATIE_DETAILS = 'locatie/accommodatie-details.dtl'

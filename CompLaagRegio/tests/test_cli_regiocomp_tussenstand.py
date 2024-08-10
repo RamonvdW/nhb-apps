@@ -7,9 +7,9 @@
 from django.test import TestCase
 from BasisTypen.models import BoogType
 from Competitie.definities import DEEL_BK
-from Competitie.models_competitie import Competitie, CompetitieIndivKlasse, CompetitieMatch
-from Competitie.models_laag_regio import Regiocompetitie, RegiocompetitieRonde, RegiocompetitieSporterBoog
-from Competitie.models_laag_kamp import Kampioenschap
+from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieMatch,
+                               Regiocompetitie, RegiocompetitieRonde, RegiocompetitieSporterBoog,
+                               Kampioenschap)
 from Competitie.operations import competities_aanmaken, competitie_klassengrenzen_vaststellen
 from Competitie.test_utils.tijdlijn import zet_competitie_fases
 from Geo.models import Regio
@@ -119,7 +119,7 @@ class TestCompLaagRegioCliRegiocompTussenstand(E2EHelpers, TestCase):
                     lid_nr=100002,
                     geslacht="M",
                     voornaam="Ramon",
-                    achternaam="het Testertje",
+                    achternaam="het Testertje",     # noqa
                     email="rdetestertje@test.not",
                     geboorte_datum=datetime.date(year=2008, month=3, day=4),
                     sinds_datum=datetime.date(year=2015, month=11, day=12),

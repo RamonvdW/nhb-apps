@@ -6,7 +6,7 @@
 
 from django.db import models
 from django.db.models.constraints import UniqueConstraint
-from Competitie.models_competitie import CompetitieMatch
+from Competitie.models import CompetitieMatch
 from Scheidsrechter.definities import BESCHIKBAAR_CHOICES, BESCHIKBAAR2STR, BESCHIKBAAR_LEEG, SCHEIDS_MUTATIE_TO_STR
 from Sporter.models import Sporter
 from Wedstrijden.models import Wedstrijd

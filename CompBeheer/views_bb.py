@@ -16,8 +16,7 @@ from Account.models import get_account
 from BasisTypen.models import TemplateCompetitieIndivKlasse, TemplateCompetitieTeamKlasse
 from Competitie.definities import (MUTATIE_COMPETITIE_OPSTARTEN,
                                    MUTATIE_AG_VASTSTELLEN_18M, MUTATIE_AG_VASTSTELLEN_25M)
-from Competitie.models_competitie import Competitie
-from Competitie.models_mutatie import CompetitieMutatie
+from Competitie.models import Competitie, CompetitieMutatie
 from Competitie.operations import (bepaal_startjaar_nieuwe_competitie, bepaal_klassengrenzen_indiv,
                                    bepaal_klassengrenzen_teams, competitie_klassengrenzen_vaststellen)
 from Functie.definities import Rollen

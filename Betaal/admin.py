@@ -54,7 +54,7 @@ class BetaalMutatieAdmin(admin.ModelAdmin):
 
     search_fields = ('payment_id', 'beschrijving')
 
-    list_filter = ('code',)
+    list_filter = ('is_verwerkt', 'pogingen', 'code')
 
 
 admin.site.register(BetaalInstellingenVereniging, BetaalInstellingenVerenigingAdmin)

@@ -8,9 +8,9 @@ from django.conf import settings
 from django.test import TestCase
 from BasisTypen.models import BoogType
 from Competitie.definities import DEEL_RK, DEEL_BK, INSCHRIJF_METHODE_1
-from Competitie.models_competitie import Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse, CompetitieMatch
-from Competitie.models_laag_regio import Regiocompetitie, RegiocompetitieRonde, RegiocompetitieSporterBoog
-from Competitie.models_laag_kamp import Kampioenschap
+from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse, CompetitieMatch,
+                               Regiocompetitie, RegiocompetitieRonde, RegiocompetitieSporterBoog,
+                               Kampioenschap)
 from Competitie.operations import competities_aanmaken
 from Competitie.test_utils.tijdlijn import zet_competitie_fase_regio_wedstrijden, zet_competitie_fase_regio_afsluiten
 from CompLaagRegio.view_planning import competitie_week_nr_to_date
@@ -1110,7 +1110,7 @@ class TestCompLaagRegioPlanning(E2EHelpers, TestCase):
         self.assert404(resp, 'Geen valide verzoek')
 
         resp = self.client.post(self.url_wijzig_wedstrijd % match_pk,
-                                {'weekdag': 'x', 'ver_pk': 'x', 'aanvang': 'xxxxx'})
+                                {'weekdag': 'x', 'ver_pk': 'x', 'aanvang': 'xxxxx'})        # noqa
         self.assert404(resp, 'Geen valide verzoek')
 
         resp = self.client.post(self.url_wijzig_wedstrijd % match_pk,
@@ -1445,12 +1445,11 @@ class TestCompLaagRegioPlanning(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
+        html = self.assert_html_ok(resp)
         self.assert_template_used(resp, ('complaagregio/planning-regio.dtl', 'plein/site_layout.dtl'))
 
         # zoek alle weeknummers op
         parts = list()
-        html = str(resp.content)
         # zoek de tabel met de weeknummers
         html = html[html.find('<h4>Wedstrijd blokken</h4>'):]
         html = html[:html.find('<form>')]

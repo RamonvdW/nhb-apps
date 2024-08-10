@@ -15,10 +15,9 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
 from Competitie.definities import (TEAM_PUNTEN_MODEL_FORMULE1, TEAM_PUNTEN_MODEL_TWEE, TEAM_PUNTEN_F1,
                                    MUTATIE_REGIO_TEAM_RONDE)
-from Competitie.models_competitie import Competitie, CompetitieTeamKlasse
-from Competitie.models_laag_regio import (Regiocompetitie, RegiocompetitieSporterBoog,
-                                          RegiocompetitieTeam, RegiocompetitieTeamPoule, RegiocompetitieRondeTeam)
-from Competitie.models_mutatie import CompetitieMutatie
+from Competitie.models import (Competitie, CompetitieTeamKlasse, CompetitieMutatie,
+                               Regiocompetitie, RegiocompetitieSporterBoog,
+                               RegiocompetitieTeam, RegiocompetitieTeamPoule, RegiocompetitieRondeTeam)
 from Competitie.operations.poules import maak_poule_schema
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving
@@ -756,22 +755,22 @@ class StartVolgendeTeamRondeView(UserPassesTestMixin, TemplateView):
             if 1 <= deelcomp.huidige_team_ronde <= 7:
                 context['alle_regels'], context['is_redelijk'] = self._bepaal_wedstrijdpunten(deelcomp)
 
-            if deelcomp.regio_team_punten_model == TEAM_PUNTEN_MODEL_FORMULE1:
-                context['toon_f1'] = True
-                context['wp_model_str'] = 'Formule 1'
-            elif deelcomp.regio_team_punten_model == TEAM_PUNTEN_MODEL_TWEE:
-                context['toon_h2h'] = True
-                context['wp_model_str'] = '2 punten, directe tegenstanders'
-            else:
-                context['toon_som'] = True
-                context['wp_model_str'] = 'Som van de scores'
-
             if deelcomp.huidige_team_ronde <= 7:
                 context['url_team_scores'] = reverse('CompScores:selecteer-team-scores',
                                                      kwargs={'deelcomp_pk': deelcomp.pk})
 
                 context['url_volgende_ronde'] = reverse('CompLaagRegio:start-volgende-team-ronde',
                                                         kwargs={'deelcomp_pk': deelcomp.pk})
+
+        if deelcomp.regio_team_punten_model == TEAM_PUNTEN_MODEL_FORMULE1:
+            context['toon_f1'] = True
+            context['wp_model_str'] = 'Formule 1'
+        elif deelcomp.regio_team_punten_model == TEAM_PUNTEN_MODEL_TWEE:
+            context['toon_h2h'] = True
+            context['wp_model_str'] = '2 punten, directe tegenstanders'
+        else:
+            context['toon_som'] = True
+            context['wp_model_str'] = 'Som van de scores'
 
         comp = deelcomp.competitie
         context['kruimels'] = (

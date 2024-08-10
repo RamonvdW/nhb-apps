@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from Competitie.models_laag_kamp import KampioenschapTeam
+from Competitie.models import KampioenschapTeam
 from Competitie.test_utils.tijdlijn import zet_competitie_fase_rk_prep, zet_competitie_fase_rk_wedstrijden
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
@@ -17,9 +17,9 @@ class TestCompLaagRayonImportUitslagRkTeams(E2EHelpers, TestCase):
 
     url_klassengrenzen_teams_vaststellen = '/bondscompetities/beheer/%s/doorzetten/rk-bk-teams-klassengrenzen-vaststellen/'  # comp_pk
 
-    test_file_25m = 'CompLaagRayon/management/testfiles/test_rk-25m1pijl-teams.xlsx'
-    test_file1_18m = 'CompLaagRayon/management/testfiles/test_rk-indoor-teams_4.xlsx'
-    test_file2_18m = 'CompLaagRayon/management/testfiles/test_rk-indoor-teams_8.xlsx'
+    test_file_25m = 'CompLaagRayon/test-files/test_rk-25m1pijl-teams.xlsx'
+    test_file1_18m = 'CompLaagRayon/test-files/test_rk-indoor-teams_4.xlsx'
+    test_file2_18m = 'CompLaagRayon/test-files/test_rk-indoor-teams_8.xlsx'
 
     testdata = None
     rayon_nr = 3

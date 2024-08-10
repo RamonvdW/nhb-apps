@@ -7,7 +7,7 @@
 from django.urls import reverse
 from django.views.generic import TemplateView
 from django.templatetags.static import static
-from Competitie.models_competitie import Competitie
+from Competitie.models import Competitie
 from Competitie.operations import bepaal_startjaar_nieuwe_competitie
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige, rol_get_beschrijving

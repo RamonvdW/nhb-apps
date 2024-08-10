@@ -10,7 +10,7 @@ from django.views.generic import TemplateView
 from django.utils.safestring import mark_safe
 from Account.models import get_account
 from BasisTypen.models import TemplateCompetitieIndivKlasse
-from Competitie.models_laag_regio import Regiocompetitie, RegiocompetitieTeam
+from Competitie.models import Regiocompetitie, RegiocompetitieTeam
 from Geo.models import Regio
 from Sporter.models import Sporter
 

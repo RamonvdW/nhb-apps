@@ -8,8 +8,7 @@
 # door een foutje was deze berekend over de 3 laagste gemiddelden in plaats van de 3 hoogste
 
 from django.core.management.base import BaseCommand
-from Competitie.models_competitie import Competitie
-from Competitie.models_laag_kamp import KampioenschapTeam
+from Competitie.models import Competitie, KampioenschapTeam
 
 
 class Command(BaseCommand):

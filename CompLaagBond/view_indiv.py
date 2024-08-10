@@ -15,8 +15,7 @@ from Account.models import get_account
 from Competitie.definities import (DEEL_BK,
                                    DEELNAME_JA, DEELNAME_NEE,
                                    MUTATIE_KAMP_AFMELDEN_INDIV, MUTATIE_KAMP_AANMELDEN_INDIV)
-from Competitie.models_laag_kamp import Kampioenschap, KampioenschapSporterBoog, KampioenschapIndivKlasseLimiet
-from Competitie.models_mutatie import CompetitieMutatie
+from Competitie.models import Kampioenschap, KampioenschapSporterBoog, KampioenschapIndivKlasseLimiet, CompetitieMutatie
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
 from Overig.background_sync import BackgroundSync

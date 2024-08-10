@@ -13,8 +13,7 @@ from TijdelijkeCodes.models import TijdelijkeCode
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 from Sporter.models import Sporter
-from Vereniging.models import Vereniging
-from Vereniging.models2 import Secretaris
+from Vereniging.models import Vereniging, Secretaris
 import datetime
 
 

@@ -86,37 +86,37 @@
 
                 <tr>
                     <td class="center">1000</td>
-                    <td class="center"><img width="150" src="{% static 'spelden/ster_1000.png' %}" alt="Ster 1000"></td>
-                    <td class="center"><img width="150" src="{% static 'spelden/zilveren_ster_1000.png' %}" alt="Zilveren ster 1000"></td>
+                    <td class="center"><img class="sv-foto-speld" src="{% static 'spelden/ster_1000.png' %}" alt="Ster 1000"></td>
+                    <td class="center"><img class="sv-foto-speld" src="{% static 'spelden/zilveren_ster_1000.png' %}" alt="Zilveren ster 1000"></td>
                 </tr>
 
                 <tr>
                     <td class="center">1100</td>
-                    <td class="center"><img width="150" src="{% static 'spelden/ster_1100.png' %}" alt="Ster 1100"></td>
-                    <td class="center"><img width="150" src="{% static 'spelden/zilveren_ster_1100.png' %}" alt="Zilveren ster 1100"></td>
+                    <td class="center"><img class="sv-foto-speld" src="{% static 'spelden/ster_1100.png' %}" alt="Ster 1100"></td>
+                    <td class="center"><img class="sv-foto-speld" src="{% static 'spelden/zilveren_ster_1100.png' %}" alt="Zilveren ster 1100"></td>
                 </tr>
 
                 <tr>
                     <td class="center">1200</td>
-                    <td class="center"><img width="150" src="{% static 'spelden/ster_1200.png' %}" alt="Ster 1200"></td>
-                    <td class="center"><img width="150" src="{% static 'spelden/zilveren_ster_1200.png' %}" alt="Zilveren ster 1200"></td>
+                    <td class="center"><img class="sv-foto-speld" src="{% static 'spelden/ster_1200.png' %}" alt="Ster 1200"></td>
+                    <td class="center"><img class="sv-foto-speld" src="{% static 'spelden/zilveren_ster_1200.png' %}" alt="Zilveren ster 1200"></td>
                 </tr>
 
                 <tr>
                     <td class="center">1300</td>
-                    <td class="center"><img width="150" src="{% static 'spelden/ster_1300.png' %}" alt="Ster 1300"></td>
-                    <td class="center"><img width="150" src="{% static 'spelden/zilveren_ster_1300.png' %}" alt="Zilveren ster 1300"></td>
+                    <td class="center"><img class="sv-foto-speld" src="{% static 'spelden/ster_1300.png' %}" alt="Ster 1300"></td>
+                    <td class="center"><img class="sv-foto-speld" src="{% static 'spelden/zilveren_ster_1300.png' %}" alt="Zilveren ster 1300"></td>
                 </tr>
 
                 <tr>
                     <td class="center">1350</td>
-                    <td class="center"><img width="150" src="{% static 'spelden/ster_1350.png' %}" alt="Ster 1350"></td>
+                    <td class="center"><img class="sv-foto-speld" src="{% static 'spelden/ster_1350.png' %}" alt="Ster 1350"></td>
                     <td class="center">n.v.t.</td>
                 </tr>
 
                 <tr>
                     <td class="center">1400</td>
-                    <td class="center"><img width="150" src="{% static 'spelden/ster_1400.png' %}" alt="Ster 1400"></td>
+                    <td class="center"><img class="sv-foto-speld" src="{% static 'spelden/ster_1400.png' %}" alt="Ster 1400"></td>
                     <td class="center">n.v.t.</td>
                 </tr>
 
@@ -147,37 +147,37 @@
 
                 <tr>
                     <td class="center">1000</td>
-                    <td class="center"><img width="150" src="{% static 'spelden/ster_1000_compound.png' %}" alt="Ster 1000"></td>
-                    <td class="center"><img width="150" src="{% static 'spelden/zilveren_ster_1000_compound.png' %}" alt="Zilveren ster 1000"></td>
+                    <td class="center"><img class="sv-foto-speld" src="{% static 'spelden/ster_1000_compound.png' %}" alt="Ster 1000"></td>
+                    <td class="center"><img class="sv-foto-speld" src="{% static 'spelden/zilveren_ster_1000_compound.png' %}" alt="Zilveren ster 1000"></td>
                 </tr>
 
                 <tr>
                     <td class="center">1100</td>
-                    <td class="center"><img width="150" src="{% static 'spelden/ster_1100_compound.png' %}" alt="Ster 1100"></td>
-                    <td class="center"><img width="150" src="{% static 'spelden/zilveren_ster_1100_compound.png' %}" alt="Zilveren ster 1100"></td>
+                    <td class="center"><img class="sv-foto-speld" src="{% static 'spelden/ster_1100_compound.png' %}" alt="Ster 1100"></td>
+                    <td class="center"><img class="sv-foto-speld" src="{% static 'spelden/zilveren_ster_1100_compound.png' %}" alt="Zilveren ster 1100"></td>
                 </tr>
 
                 <tr>
                     <td class="center">1200</td>
-                    <td class="center"><img width="150" src="{% static 'spelden/ster_1200_compound.png' %}" alt="Ster 1200"></td>
-                    <td class="center"><img width="150" src="{% static 'spelden/zilveren_ster_1200_compound.png' %}" alt="Zilveren ster 1200"></td>
+                    <td class="center"><img class="sv-foto-speld" src="{% static 'spelden/ster_1200_compound.png' %}" alt="Ster 1200"></td>
+                    <td class="center"><img class="sv-foto-speld" src="{% static 'spelden/zilveren_ster_1200_compound.png' %}" alt="Zilveren ster 1200"></td>
                 </tr>
 
                 <tr>
                     <td class="center">1300</td>
-                    <td class="center"><img width="150" src="{% static 'spelden/ster_1300_compound.png' %}" alt="Ster 1300"></td>
-                    <td class="center"><img width="150" src="{% static 'spelden/zilveren_ster_1300_compound.png' %}" alt="Zilveren ster 1300"></td>
+                    <td class="center"><img class="sv-foto-speld" src="{% static 'spelden/ster_1300_compound.png' %}" alt="Ster 1300"></td>
+                    <td class="center"><img class="sv-foto-speld" src="{% static 'spelden/zilveren_ster_1300_compound.png' %}" alt="Zilveren ster 1300"></td>
                 </tr>
 
                 <tr>
                     <td class="center">1350</td>
-                    <td class="center"><img width="150" src="{% static 'spelden/ster_1350_compound.png' %}" alt="Ster 1350"></td>
+                    <td class="center"><img class="sv-foto-speld" src="{% static 'spelden/ster_1350_compound.png' %}" alt="Ster 1350"></td>
                     <td class="center">n.v.t.</td>
                 </tr>
 
                 <tr>
                     <td class="center">1400</td>
-                    <td class="center"><img width="150" src="{% static 'spelden/ster_1400_compound.png' %}" alt="Ster 1400"></td>
+                    <td class="center"><img class="sv-foto-speld" src="{% static 'spelden/ster_1400_compound.png' %}" alt="Ster 1400"></td>
                     <td class="center">n.v.t.</td>
                 </tr>
 

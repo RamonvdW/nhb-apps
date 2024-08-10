@@ -15,8 +15,8 @@ from BasisTypen.definities import (COMPETITIE_BLAZOENEN, BLAZOEN_DT, BLAZOEN_60C
                                    BLAZOEN2STR, BLAZOEN2STR_COMPACT)
 from Competitie.definities import (DAGDELEN, DAGDEEL_AFKORTINGEN, DAGDEEL2LABEL,
                                    INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3)
-from Competitie.models_competitie import Competitie, CompetitieMatch
-from Competitie.models_laag_regio import Regiocompetitie, RegiocompetitieRonde, RegiocompetitieSporterBoog
+from Competitie.models import (Competitie, CompetitieMatch,
+                               Regiocompetitie, RegiocompetitieRonde, RegiocompetitieSporterBoog)
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige
 from Geo.models import Rayon, Regio

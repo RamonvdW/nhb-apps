@@ -11,7 +11,7 @@
 from django.conf import settings
 from django.utils import timezone
 from django.core.management.base import BaseCommand
-from django.db.utils import DataError, OperationalError, IntegrityError
+from django.db.utils import OperationalError, IntegrityError
 from django.db.models import Count
 from django.db import transaction
 from Bestel.definities import (BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_BETALING_ACTIEF,
@@ -33,7 +33,7 @@ from Bestel.plugins.webwinkel import (webwinkel_plugin_reserveren, webwinkel_plu
                                       webwinkel_plugin_bepaal_verzendkosten_bestelling)
 from Betaal.models import BetaalInstellingenVereniging, BetaalTransactie
 from Functie.models import Functie
-from Mailer.operations import mailer_queue_email, render_email_template
+from Mailer.operations import mailer_queue_email, render_email_template, mailer_notify_internal_error
 from Overig.background_sync import BackgroundSync
 from Vereniging.models import Vereniging
 from Wedstrijden.definities import (INSCHRIJVING_STATUS_RESERVERING_BESTELD, INSCHRIJVING_STATUS_DEFINITIEF,
@@ -252,7 +252,6 @@ class Command(BaseCommand):
         parser.add_argument('--stop_exactly', type=int, default=None, choices=range(60),
                             help="Stop op deze minuut")
         parser.add_argument('--quick', action='store_true')             # for testing
-        parser.add_argument('--fake-hoogste', action='store_true')      # for testing
 
     def _get_mandje(self, mutatie):
         account = mutatie.account
@@ -1112,7 +1111,7 @@ class Command(BaseCommand):
         # als hierna een extra mutatie aangemaakt wordt dan verwerken we een record
         # misschien dubbel, maar daar kunnen we tegen
 
-        if self._hoogste_mutatie_pk:
+        if self._hoogste_mutatie_pk is not None:
             # gebruik deze informatie om te filteren
             self.stdout.write('[INFO] vorige hoogste BestelMutatie pk is %s' % self._hoogste_mutatie_pk)
             qset = (BestelMutatie
@@ -1204,13 +1203,15 @@ class Command(BaseCommand):
 
         # test moet snel stoppen dus interpreteer duration in seconden
         if options['quick']:        # pragma: no branch
+            if options['duration'] == 60:
+                # speciale testcase
+                self._hoogste_mutatie_pk = 0
+                duration = 2
+
             self.stop_at = (datetime.datetime.now()
                             + datetime.timedelta(seconds=duration))
 
         self.stdout.write('[INFO] Taak loopt tot %s' % str(self.stop_at))
-
-        if options['fake_hoogste']:
-            self._hoogste_mutatie_pk = -1
 
     def handle(self, *args, **options):
 
@@ -1220,14 +1221,37 @@ class Command(BaseCommand):
         try:
             self._mandjes_opschonen()
             self._monitor_nieuwe_mutaties()
-        except (DataError, OperationalError, IntegrityError) as exc:  # pragma: no cover
+        except (OperationalError, IntegrityError) as exc:  # pragma: no cover
+            # OperationalError treed op bij system shutdown, als database gesloten wordt
             _, _, tb = sys.exc_info()
             lst = traceback.format_tb(tb)
             self.stderr.write('[ERROR] Onverwachte database fout: %s' % str(exc))
             self.stderr.write('Traceback:')
             self.stderr.write(''.join(lst))
+
         except KeyboardInterrupt:                       # pragma: no cover
             pass
+
+        except Exception as exc:
+            # schrijf in de output
+            tups = sys.exc_info()
+            lst = traceback.format_tb(tups[2])
+            tb = traceback.format_exception(*tups)
+
+            tb_msg_start = 'Onverwachte fout tijdens bestel_mutaties\n'
+            tb_msg_start += '\n'
+
+            self.stderr.write('[ERROR] Onverwachte fout tijdens bestel_mutaties: ' + str(exc))
+            self.stderr.write('Traceback:')
+            self.stderr.write(''.join(lst))
+
+            # stuur een mail naar de ontwikkelaars
+            # reduceer tot de nuttige regels
+            tb = [line for line in tb if '/site-packages/' not in line]
+            tb_msg = tb_msg_start + '\n'.join(tb)
+
+            # deze functie stuurt maximaal 1 mail per dag over hetzelfde probleem
+            mailer_notify_internal_error(tb_msg)
 
         self.stdout.write('[DEBUG] Aantal pings ontvangen: %s' % self._count_ping)
 

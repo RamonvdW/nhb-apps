@@ -257,7 +257,7 @@ BACKGROUND_SYNC__SCHEIDS_MUTATIES = BACKGROUND_SYNC_POORT + 5
 
 # our own test runner that executes the tests ordered by application hierarchy indicators to ensure that
 # low-level errors are reported before applications depending that (broken) functionality report failures
-TEST_RUNNER = 'SiteMain.utils.app-hierarchy-testrunner.HierarchyRunner'
+TEST_RUNNER = 'TestHelpers.app_hierarchy_testrunner.HierarchyRunner'
 
 # applicatie specifieke settings
 MINIMUM_LEEFTIJD_LID = 5
@@ -582,6 +582,9 @@ WEDSTRIJDEN_KIES_UITVOERENDE_VERENIGING = (1368,)
 # SECURITY WARNING: don't run with debug turned on in production!
 # let op: zonder DEBUG=True geen static files in dev omgeving!
 DEBUG = False
+
+# minify html en javascript
+ENABLE_MINIFY = True
 
 # HTML validation using v.Nu (see TestHelpers/e2ehelpers.py)        # noqa
 TEST_VALIDATE_HTML = False

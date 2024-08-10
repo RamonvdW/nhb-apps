@@ -12,10 +12,9 @@ from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
 from Competitie.definities import DEEL_RK, DEEL_BK, MUTATIE_KAMP_CUT, DEELNAME_NEE
-from Competitie.models_competitie import CompetitieIndivKlasse, CompetitieTeamKlasse, CompetitieMatch
-from Competitie.models_laag_kamp import (Kampioenschap, KampioenschapSporterBoog, KampioenschapTeam,
-                                         KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet)
-from Competitie.models_mutatie import CompetitieMutatie
+from Competitie.models import (CompetitieIndivKlasse, CompetitieTeamKlasse, CompetitieMatch, CompetitieMutatie,
+                               Kampioenschap, KampioenschapSporterBoog, KampioenschapTeam,
+                               KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet)
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
 from Locatie.models import Locatie
@@ -112,7 +111,7 @@ class PlanningView(UserPassesTestMixin, TemplateView):
                 team_klasse2count[obj.team_klasse.pk] = 4
         # for
 
-        # TODO: standaard begrenzing aantal teams: ERE=12, rest=8
+        # FUTURE: standaard begrenzing aantal teams: ERE=12, rest=8
 
         for cut in (KampioenschapTeamKlasseLimiet
                     .objects

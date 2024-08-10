@@ -6,7 +6,7 @@
 
 from django.test import TestCase
 from Competitie.definities import MUTATIE_INITIEEL
-from Competitie.models_mutatie import CompetitieMutatie
+from Competitie.models import CompetitieMutatie
 from Mailer.models import MailQueue
 from TestHelpers.e2ehelpers import E2EHelpers
 import datetime

@@ -9,12 +9,12 @@
 
 
 <!-- hoofd site -->
-{% static 'plein/logo_khsn_192x192.png' as img_src %}
+{% static 'plein/logo_khsn_192x192.webp' as img_src %}
 {% include 'plein/card_logo.dtl' with title="Handboogsport NL" text="Hoofdwebsite van de KHSN met informatie, publicaties en nieuws." img_src=img_src img_height=75 img_width=75 url="https://www.handboogsport.nl" extern_open=True %}
 
 
 <!-- Lowlands Archery Series -->
-{% static 'plein/logo_lowlands_109x65.png' as img_src %}
+{% static 'plein/logo_lowlands_109x65.webp' as img_src %}
 {% include 'plein/card_logo.dtl' with title="Lowlands Series" text="Wedstrijden volgens internationaal format,<br>met finales en prijzengeld." img_src=img_src img_height=65 img_width=109 img_style="margin:5px" url="https://www.handboogsport.nl/lowlands-shootout/" extern_open=True %}
 
 

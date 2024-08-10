@@ -16,7 +16,7 @@ from django.db.utils import DataError, OperationalError, IntegrityError
 from django.core.management.base import BaseCommand
 from Account.models import Account
 from BasisTypen.definities import SCHEIDS_NIET, SCHEIDS_VERENIGING
-from Competitie.models_competitie import CompetitieMatch
+from Competitie.models import CompetitieMatch
 from Functie.models import Functie
 from Locatie.models import Reistijd, Locatie
 from Locatie.operations import ReistijdBepalen

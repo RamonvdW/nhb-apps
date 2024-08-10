@@ -7,8 +7,7 @@
 from django.test import TestCase
 from django.utils import timezone
 from Score.models import Score
-from Competitie.models_competitie import CompetitieIndivKlasse, CompetitieMatch
-from Competitie.models_laag_regio import RegiocompetitieRonde
+from Competitie.models import CompetitieIndivKlasse, CompetitieMatch, RegiocompetitieRonde
 from Score.models import Uitslag
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata

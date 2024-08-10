@@ -7,9 +7,7 @@
 from django.test import TestCase
 from BasisTypen.models import BoogType
 from Competitie.definities import DEEL_RK, DEEL_BK, INSCHRIJF_METHODE_1
-from Competitie.models_competitie import Competitie, CompetitieMatch
-from Competitie.models_laag_regio import Regiocompetitie, RegiocompetitieRonde
-from Competitie.models_laag_kamp import Kampioenschap
+from Competitie.models import Competitie, CompetitieMatch, Regiocompetitie, RegiocompetitieRonde, Kampioenschap
 from Competitie.operations import competities_aanmaken
 from Competitie.test_utils.tijdlijn import zet_competitie_fase_regio_inschrijven
 from Functie.tests.helpers import maak_functie
@@ -319,16 +317,12 @@ class TestCompInschrijvenMethode1(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_behoefte1 % (self.comp_18.pk, self.regio_101.pk))
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
+        html = self.assert_html_ok(resp)
         self.assert_template_used(resp, ('compinschrijven/inschrijfmethode1-behoefte.dtl', 'plein/site_layout.dtl'))
         # 0 keer de eerste keuze
-        self.assertContains(
-            resp,
-            '<td>maandag 15 juli 2019 om 19:00</td><td>[1000] Grote Club</td><td class="center">0</td>')
+        self.assertIn('<td>maandag 15 juli 2019 om 19:00</td><td>[1000] Grote Club</td><td class="center">0</td>', html)
         # 10 keer de tweede (en overige) keuzes
-        self.assertContains(
-            resp,
-            '<td>donderdag 15 augustus 2019 om 19:00</td><td>[1000] Grote Club</td><td class="center">10</td>')
+        self.assertIn('<td>donderdag 15 augustus 2019 om 19:00</td><td>[1000] Grote Club</td><td class="center">10</td>', html)
 
         with self.assert_max_queries(44):       # TODO: probeer omlaag te krijgen
             resp = self.client.get(self.url_behoefte1_bestand % (self.comp_18.pk, self.regio_101.pk))

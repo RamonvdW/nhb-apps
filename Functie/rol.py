@@ -10,7 +10,7 @@ from django.contrib.sessions.backends.db import SessionStore
 from Account.operations.otp import otp_is_controle_gelukt
 from Account.models import AccountSessions, get_account
 from Competitie.definities import DEEL_RK, DEEL_BK
-from Competitie.models_laag_kamp import Kampioenschap
+from Competitie.models import Kampioenschap
 from Functie.definities import Rollen, rol2url, url2rol
 from Functie.models import Functie
 from Functie.operations import account_needs_vhpg, account_needs_otp

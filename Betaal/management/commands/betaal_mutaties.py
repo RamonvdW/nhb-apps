@@ -11,7 +11,7 @@
 from django.conf import settings
 from django.urls import reverse
 from django.utils import timezone
-from django.db.utils import DataError, OperationalError, IntegrityError
+from django.db.utils import OperationalError, IntegrityError
 from django.core.management.base import BaseCommand
 from Bestel.operations.mutaties import bestel_mutatieverzoek_betaling_afgerond, bestel_betaling_is_gestart
 from Betaal.definities import (BETAAL_MUTATIE_START_ONTVANGST, BETAAL_MUTATIE_START_RESTITUTIE,
@@ -19,6 +19,7 @@ from Betaal.definities import (BETAAL_MUTATIE_START_ONTVANGST, BETAAL_MUTATIE_ST
                                BETAAL_PAYMENT_ID_MAXLENGTH, BETAAL_BESCHRIJVING_MAXLENGTH,
                                BETAAL_KLANT_NAAM_MAXLENGTH, BETAAL_KLANT_ACCOUNT_MAXLENGTH)
 from Betaal.models import BetaalMutatie, BetaalActief, BetaalInstellingenVereniging, BetaalTransactie
+from Mailer.operations import mailer_notify_internal_error
 from Overig.background_sync import BackgroundSync
 from mollie.api.client import Client, RequestSetupError, RequestError
 from mollie.api.error import ResponseError, ResponseHandlingError
@@ -28,6 +29,9 @@ import traceback
 import datetime
 import json
 import sys
+
+# maximum aantal pogingen om een mutatie te verwerken
+MAX_POGINGEN = 5
 
 
 class Command(BaseCommand):
@@ -153,7 +157,7 @@ class Command(BaseCommand):
                         bestel_betaling_is_gestart(bestelling, actief)
 
     def _verwerk_mutatie_start_restitutie(self, mutatie):
-        # TODO: implementeer restitutie
+        # FUTURE: implementeer restitutie
         pass
 
     def _maak_transactie(self, obj, payment_id):
@@ -345,13 +349,13 @@ class Command(BaseCommand):
 
         try:
             mutatie_latest = BetaalMutatie.objects.latest('pk')
-        except BetaalMutatie.DoesNotExist:
+        except BetaalMutatie.DoesNotExist:      # pragma: no cover
             # alle mutatie records zijn verwijderd
             return
         # als hierna een extra mutatie aangemaakt wordt dan verwerken we een record
         # misschien dubbel, maar daar kunnen we tegen
 
-        if self._hoogste_mutatie_pk:
+        if self._hoogste_mutatie_pk is not None:
             # gebruik deze informatie om te filteren
             self.stdout.write('[INFO] vorige hoogste BetaalMutatie pk is %s' % self._hoogste_mutatie_pk)
             qset = (BetaalMutatie
@@ -360,13 +364,14 @@ class Command(BaseCommand):
         else:
             qset = (BetaalMutatie
                     .objects
-                    .all())         # deferred
+                    .filter(is_verwerkt=False,
+                            pogingen__lt=MAX_POGINGEN))
 
         mutatie_pks = qset.values_list('pk', flat=True)     # deferred
 
         self._hoogste_mutatie_pk = mutatie_latest.pk
 
-        did_useful_work = False
+        work_count = 0
         for pk in mutatie_pks:
             # we halen de records hier 1 voor 1 op
             # zodat we verse informatie hebben inclusief de vorige mutatie
@@ -376,18 +381,22 @@ class Command(BaseCommand):
                        .select_related('ontvanger')
                        .get(pk=pk))
 
-            if not mutatie.is_verwerkt:
+            if not mutatie.is_verwerkt and mutatie.pogingen < MAX_POGINGEN:
+                mutatie.pogingen += 1
+                mutatie.save(update_fields=['pogingen'])
+
                 self._verwerk_mutatie(mutatie)
+
                 mutatie.is_verwerkt = True
                 mutatie.save(update_fields=['is_verwerkt'])
-                did_useful_work = True
+                work_count += 1
         # for
 
-        if did_useful_work:
+        if work_count:
             self.stdout.write('[INFO] nieuwe hoogste BetaalMutatie pk is %s' % self._hoogste_mutatie_pk)
 
             klaar = datetime.datetime.now()
-            self.stdout.write('[INFO] Mutaties verwerkt in %s seconden' % (klaar - begin))
+            self.stdout.write('[INFO] %s BetaalMutaties verwerkt in %s seconden' % (work_count, klaar - begin))
 
     def _monitor_nieuwe_mutaties(self):
         # monitor voor nieuwe mutaties
@@ -436,8 +445,12 @@ class Command(BaseCommand):
                     # run duration passes the requested stop minute
                     self.stop_at = stop_at_exact
 
-        # test moet snel stoppen dus interpreteer duration in seconden
         if options['quick']:        # pragma: no branch
+            # test moet snel stoppen dus interpreteer duration in seconden
+            if options['duration'] == 60:
+                # speciale testcase
+                self._hoogste_mutatie_pk = 0
+                duration = 2
             self.stop_at = (datetime.datetime.now()
                             + datetime.timedelta(seconds=duration))
 
@@ -450,14 +463,37 @@ class Command(BaseCommand):
         # vang generieke fouten af
         try:
             self._monitor_nieuwe_mutaties()
-        except (DataError, OperationalError, IntegrityError) as exc:  # pragma: no cover
+        except (OperationalError, IntegrityError) as exc:  # pragma: no cover
+            # OperationalError treed op bij system shutdown, als database gesloten wordt
             _, _, tb = sys.exc_info()
             lst = traceback.format_tb(tb)
-            self.stderr.write('[ERROR] Onverwachte database fout: %s' % str(exc))
+            self.stderr.write('[ERROR] Onverwachte database fout in betaal_mutaties: %s' % str(exc))
             self.stderr.write('Traceback:')
             self.stderr.write(''.join(lst))
+
         except KeyboardInterrupt:                       # pragma: no cover
             pass
+
+        except Exception as exc:
+            # schrijf in de output
+            tups = sys.exc_info()
+            lst = traceback.format_tb(tups[2])
+            tb = traceback.format_exception(*tups)
+
+            tb_msg_start = 'Onverwachte fout tijdens betaal_mutaties\n'
+            tb_msg_start += '\n'
+
+            self.stderr.write('[ERROR] Onverwachte fout tijdens betaal_mutaties: ' + str(exc))
+            self.stderr.write('Traceback:')
+            self.stderr.write(''.join(lst))
+
+            # stuur een mail naar de ontwikkelaars
+            # reduceer tot de nuttige regels
+            tb = [line for line in tb if '/site-packages/' not in line]
+            tb_msg = tb_msg_start + '\n'.join(tb)
+
+            # deze functie stuurt maximaal 1 mail per dag over hetzelfde probleem
+            mailer_notify_internal_error(tb_msg)
 
         self.stdout.write('[DEBUG] Aantal pings ontvangen: %s' % self._count_ping)
 

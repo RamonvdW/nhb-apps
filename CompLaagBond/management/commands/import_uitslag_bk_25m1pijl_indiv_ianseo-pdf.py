@@ -6,7 +6,7 @@
 
 from django.core.management.base import BaseCommand
 from Competitie.definities import DEEL_BK
-from Competitie.models_laag_kamp import KampioenschapSporterBoog
+from Competitie.models import KampioenschapSporterBoog
 import pypdf
 
 
@@ -74,9 +74,9 @@ class LeesPdf(object):
 
                 pos1 = score1.find('/')
                 pos2 = score2.find('/')
-                if pos1 > 0:
+                if pos1 > 0:                    # pragma: no branch
                     score1 = score1[:pos1]
-                if pos2 > 0:
+                if pos2 > 0:                    # komt voor bij nul-score (gestopte sporter)
                     score2 = score2[:pos2]
                 score1 = int(score1)
                 score2 = int(score2)
@@ -138,7 +138,7 @@ class Command(BaseCommand):
                     self.deelnemers[key] = [deelnemer]
             # for
 
-            if key3 not in (key1, key2):
+            if key3 not in (key1, key2):            # pragma: no branch
                 try:
                     self.deelnemers[key3].append(deelnemer)
                 except KeyError:
@@ -180,7 +180,7 @@ class Command(BaseCommand):
         top_klasse = None
         hoogste = 0
         for pk, count in klasse2count.items():
-            if count > hoogste:
+            if count > hoogste:                     # pragma: no branch
                 hoogste = count
                 top_klasse = pk2klasse[pk]
         # for
@@ -201,7 +201,10 @@ class Command(BaseCommand):
             key3 = naam.upper().split()
             key3.sort()
             key3 = " ".join(key3)
-            deelnemers = self.deelnemers[key3]
+            try:
+                deelnemers = self.deelnemers[key3]
+            except KeyError:
+                deelnemers = []
 
         deelnemers = [deelnemer
                       for deelnemer in deelnemers
@@ -350,7 +353,7 @@ class Command(BaseCommand):
         try:
             regels = lees.extract_from_pdf(fpath)
         except FileNotFoundError:
-            self.stderr.write('[ERROR] Kan bestand niet vinden')
+            self.stderr.write('[ERROR] Kan het bestand niet vinden')
             return
         del lees
 

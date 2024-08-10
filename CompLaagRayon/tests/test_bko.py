@@ -5,8 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from Competitie.models_laag_kamp import KampioenschapSporterBoog
-from Competitie.models_mutatie import CompetitieMutatie
+from Competitie.models import KampioenschapSporterBoog, CompetitieMutatie
 from Competitie.test_utils.tijdlijn import (zet_competitie_fase_rk_prep, zet_competitie_fase_regio_afsluiten,
                                             zet_competitie_fase_rk_wedstrijden)
 from TestHelpers.e2ehelpers import E2EHelpers

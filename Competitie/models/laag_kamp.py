@@ -8,15 +8,12 @@ from django.db import models
 from BasisTypen.models import TeamType
 from Competitie.definities import (DEEL_BK, DEEL_RK,
                                    DEELNAME_CHOICES, DEELNAME_ONBEKEND)
-from Competitie.models_competitie import Competitie, CompetitieMatch, CompetitieIndivKlasse, CompetitieTeamKlasse
-from Competitie.models_laag_regio import RegiocompetitieSporterBoog
+from Competitie.models.competitie import Competitie, CompetitieMatch, CompetitieIndivKlasse, CompetitieTeamKlasse
+from Competitie.models.laag_regio import RegiocompetitieSporterBoog
 from Functie.models import Functie
 from Geo.models import Rayon
 from Sporter.models import SporterBoog
 from Vereniging.models import Vereniging
-
-__all__ = ['Kampioenschap', 'KampioenschapIndivKlasseLimiet', 'KampioenschapTeamKlasseLimiet',
-           'KampioenschapSporterBoog', 'KampioenschapTeam']
 
 
 class Kampioenschap(models.Model):

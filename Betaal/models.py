@@ -149,6 +149,11 @@ class BetaalMutatie(models.Model):
     # wat is de wijziging (zie BETALINGEN_MUTATIE_*)
     code = models.PositiveSmallIntegerField(default=0)
 
+    # houdt bij hoeveel pogingen er gedaan zijn
+    # de achtergrondtaak verhoogt deze teller elke keer de taak opgepakt wordt
+    # alleen mutaties met minder dan N pogingen worden opgepakt
+    pogingen = models.PositiveSmallIntegerField(default=0)
+
     # is deze mutatie al verwerkt?
     is_verwerkt = models.BooleanField(default=False)
 
@@ -157,7 +162,7 @@ class BetaalMutatie(models.Model):
 
     # beschrijving voor op het afschrift van de klant
     # hierin staat normaal het bestelnummer
-    beschrijving = models.CharField(max_length=BETAAL_BESCHRIJVING_MAXLENGTH)
+    beschrijving = models.CharField(max_length=BETAAL_BESCHRIJVING_MAXLENGTH, blank=True)
 
     # referentie naar de instellingen voor de vereniging waar de betaling heen moet
     ontvanger = models.ForeignKey(BetaalInstellingenVereniging, on_delete=models.PROTECT, blank=True, null=True)
@@ -166,7 +171,7 @@ class BetaalMutatie(models.Model):
     bedrag_euro = models.DecimalField(max_digits=7, decimal_places=2, default=0.0)         # max 99999,99
 
     # waar naartoe (bij ons) als de betaling gedaan is?
-    url_betaling_gedaan = models.CharField(max_length=100, default='')
+    url_betaling_gedaan = models.CharField(max_length=100, default='', blank=True)
 
     # waar naartoe om de betaling te doen (bij de CPSP)
     url_checkout = models.CharField(max_length=400, default='', blank=True)

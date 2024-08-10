@@ -11,6 +11,7 @@ from Mailer.models import MailQueue
 from TestHelpers.template_status import consistent_email_templates, included_templates, validated_templates
 from TestHelpers.validate_html import validate_html
 from TestHelpers.validate_js import validate_javascript
+from SiteMain.core.minify_dtl import minify_scripts, minify_html
 from bs4 import BeautifulSoup
 import json
 
@@ -281,6 +282,9 @@ class MyTestAsserts(TestCase):
                     # for
                     self.fail(msg=msg)
 
+            if not settings.ENABLE_MINIFY:          # pragma: no branch
+                script = minify_scripts(script)
+
             pos = script.find('console.log')
             if pos >= 0:                    # pragma: no cover
                 self.fail(msg='Detected console.log usage in script from template %s' % template_name)
@@ -442,10 +446,9 @@ class MyTestAsserts(TestCase):
         pos = html.find('##BUG')
         if pos >= 0:                        # pragma: no cover
             msg = html[pos:]
-            context = html[pos-30:]
-            pos = msg.find('##', 3)
-            msg = msg[:pos+2]
-            context = context[:pos+30]
+            end_pos = msg.find('##', 3)     # find terminating ##
+            msg = msg[:end_pos+2]
+            context = html[pos-80:pos+80]
             self.fail(msg='Bug in template %s: %s\nContext: %s' % (repr(dtl), msg, context))
 
     def html_assert_form_csrf(self, html, dtl):
@@ -638,6 +641,9 @@ class MyTestAsserts(TestCase):
         html = response.content.decode('utf-8')
         html = self.remove_debug_toolbar(html)
 
+        if not settings.ENABLE_MINIFY:          # pragma: no branch
+            html = minify_html(html)
+
         dtl = self.get_useful_template_name(response)
         # print('useful template name:', dtl)
         if dtl not in validated_templates:
@@ -674,6 +680,8 @@ class MyTestAsserts(TestCase):
                     msg += "    %s\n" % issue
                 # for
                 self.fail(msg=msg)
+
+        return html
 
     @staticmethod
     def get_templates_not_used(resp, template_names):
@@ -802,13 +810,13 @@ class MyTestAsserts(TestCase):
                     if " FOR UPDATE" in sql:                # pragma: no cover
                         cmd += '.. FOR UPDATE'
 
-                elif sql.startswith('INSERT INTO '):
+                elif sql.startswith('INSERT INTO '):        # pragma: no branch
                     cmd = 'INSERT INTO'
                     pos1 = sql.find(' "')
                     pos2 = sql.find('"', pos1 + 2)
                     table_name = sql[pos1 + 2:pos2]
 
-                elif sql.startswith('UPDATE '):             # pragma: no branch
+                elif sql.startswith('UPDATE '):             # pragma: no cover
                     cmd = 'UPDATE'
                     pos1 = sql.find(' "')
                     pos2 = sql.find('"', pos1 + 2)
@@ -1009,7 +1017,7 @@ class MyTestAsserts(TestCase):
         pos = html.find('<a href="mailto:')
         while pos > 0:
             pos2 = html.find('"><code>', pos)
-            if pos2 > 0:
+            if pos2 > 0:                                        # pragma: no cover
                 pos3 = html.find('</code></a>', pos2)
                 html = html[:pos3] + html[pos3+11:]
                 html = html[:pos] + html[pos2+8:]

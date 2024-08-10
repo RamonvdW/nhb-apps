@@ -10,7 +10,7 @@ from BasisTypen.models import TeamType
 from Competitie.definities import (INSCHRIJF_METHODES, INSCHRIJF_METHODE_2,
                                    TEAM_PUNTEN, TEAM_PUNTEN_MODEL_TWEE,
                                    DAGDELEN)
-from Competitie.models_competitie import Competitie, CompetitieMatch, CompetitieIndivKlasse, CompetitieTeamKlasse
+from Competitie.models.competitie import Competitie, CompetitieMatch, CompetitieIndivKlasse, CompetitieTeamKlasse
 from Functie.models import Functie
 from Geo.models import Regio, Cluster
 from Score.models import Score, ScoreHist
@@ -194,6 +194,9 @@ class RegiocompetitieSporterBoog(models.Model):
 
     # aangemeld door
     aangemeld_door = models.ForeignKey(Account, on_delete=models.SET_NULL, null=True, blank=True)
+
+    # historie over belangrijke acties
+    logboekje = models.TextField(default='', blank=True)
 
     def __str__(self):
         """ geef een tekstuele afkorting van dit object, voor in de admin interface """

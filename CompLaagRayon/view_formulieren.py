@@ -11,8 +11,8 @@ from django.utils import timezone
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Competitie.definities import DEEL_RK, DEELNAME_NEE, DEELNAME2STR
-from Competitie.models_competitie import CompetitieIndivKlasse, CompetitieTeamKlasse, CompetitieMatch
-from Competitie.models_laag_kamp import KampioenschapIndivKlasseLimiet, KampioenschapSporterBoog, KampioenschapTeam
+from Competitie.models import (CompetitieIndivKlasse, CompetitieTeamKlasse, CompetitieMatch,
+                               KampioenschapIndivKlasseLimiet, KampioenschapSporterBoog, KampioenschapTeam)
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
 from Scheidsrechter.models import MatchScheidsrechters
@@ -28,7 +28,7 @@ import os
 
 TEMPLATE_DOWNLOAD_RK_FORMULIER = 'complaagrayon/hwl-download-rk-formulier.dtl'
 
-CONTENT_TYPE_XLSX = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+CONTENT_TYPE_XLSX = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'     # noqa
 
 
 class DownloadRkFormulierView(UserPassesTestMixin, TemplateView):
@@ -351,7 +351,9 @@ class FormulierIndivAlsBestandView(UserPassesTestMixin, TemplateView):
         # maak wijzigingen in het RK programma
         ws = prg[ws_name]
 
-        ws['C2'] = 'Rayonkampioenschappen %s, Rayon %s, %s' % (comp.beschrijving, deelkamp.rayon.rayon_nr, klasse.beschrijving)
+        ws['C2'] = 'Rayonkampioenschappen %s, Rayon %s, %s' % (comp.beschrijving,
+                                                               deelkamp.rayon.rayon_nr,
+                                                               klasse.beschrijving)
 
         ws['D3'] = match.vereniging.naam     # organisatie
         ws['J3'] = "Datum: " + match.datum_wanneer.strftime('%Y-%m-%d')
@@ -464,7 +466,7 @@ class FormulierIndivAlsBestandView(UserPassesTestMixin, TemplateView):
         # geef het aangepaste RK programma aan de client
         response = HttpResponse(content_type=CONTENT_TYPE_XLSX)
         response['Content-Disposition'] = 'attachment; filename="%s"' % fname
-        prg.save(response)
+        prg.save(response)      # noqa
 
         return response
 
@@ -787,7 +789,7 @@ class FormulierTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
         # geef het aangepaste RK programma aan de client
         response = HttpResponse(content_type=CONTENT_TYPE_XLSX)
         response['Content-Disposition'] = 'attachment; filename="%s"' % fname
-        prg.save(response)
+        prg.save(response)      # noqa
 
         return response
 

@@ -5,10 +5,11 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.core.management.base import BaseCommand
-from Competitie.models_laag_regio import Regiocompetitie, RegiocompetitieSporterBoog
+from Competitie.models import Regiocompetitie, RegiocompetitieSporterBoog
 
 
 class Command(BaseCommand):
+
     help = "Zoek teamschutters zonder AG"
 
     def __init__(self):

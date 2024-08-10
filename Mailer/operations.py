@@ -6,9 +6,11 @@
 
 from django.conf import settings
 from django.utils import timezone
+from django.db.transaction import TransactionManagementError
 from django.template.loader import render_to_string
 from django.templatetags.static import static
 from Mailer.models import MailQueue
+from SiteMain.core.minify_dtl import minify_scripts, minify_css, remove_html_comments
 from html import unescape
 import datetime
 import re
@@ -114,21 +116,28 @@ def mailer_notify_internal_error(tb):
     # kijk of hetzelfde rapport de afgelopen 24 uur al verstuurd is
     now = timezone.now()    # in utc
     recent = now - datetime.timedelta(days=1)
-    count = (MailQueue
-             .objects
-             .filter(toegevoegd_op__gt=recent,
-                     mail_to=settings.EMAIL_DEVELOPER_TO,
-                     mail_subj=settings.EMAIL_DEVELOPER_SUBJ,
-                     mail_text=tb)
-             .count())
 
-    if count == 0:
-        # nog niet gerapporteerd in de afgelopen 24 uur
-        mailer_queue_email(
-                settings.EMAIL_DEVELOPER_TO,
-                settings.EMAIL_DEVELOPER_SUBJ,
-                tb,
-                enforce_whitelist=False)
+    try:
+        count = (MailQueue
+                 .objects
+                 .filter(toegevoegd_op__gt=recent,
+                         mail_to=settings.EMAIL_DEVELOPER_TO,
+                         mail_subj=settings.EMAIL_DEVELOPER_SUBJ,
+                         mail_text=tb)
+                 .count())
+
+        if count == 0:
+            # nog niet gerapporteerd in de afgelopen 24 uur
+            mailer_queue_email(
+                    settings.EMAIL_DEVELOPER_TO,
+                    settings.EMAIL_DEVELOPER_SUBJ,
+                    tb,
+                    enforce_whitelist=False)
+
+    except TransactionManagementError:
+        # hier komen we alleen tijdens een autotest, welke automatisch in een atomic transaction uitgevoerd wordt
+        # als er een database fout opgetreden is, dan kunnen we geen nieuwe queries meer doen om een mail op te slaan.
+        pass
 
 
 def inline_styles(html):
@@ -154,10 +163,16 @@ def inline_styles(html):
                 }
             </style>
     """
+
     # convert the style definitions into a table
     pos1 = html.find('<style>')
     pos2 = html.find('</style>')
     styles = html[pos1+7:pos2]
+
+    if not settings.ENABLE_MINIFY:          # pragma: no branch
+        # late minification
+        styles = minify_css(styles)
+
     html = html[:pos1] + html[pos2+8:]
     while len(styles) > 0:
         pos1 = styles.find('{')
@@ -198,6 +213,25 @@ def inline_styles(html):
     return html
 
 
+def _minify_html(contents):
+
+    clean = remove_html_comments(contents)
+
+    clean = minify_scripts(clean)
+
+    # remove /* css block comments */
+    clean = re.sub(r'/\*(.*?)\*/', '', clean)
+
+    # remove whitespace between html tags
+    clean = re.sub(r'>\s+<', '><', clean)
+
+    # remove newlines at the end
+    while clean[-1] == '\n':
+        clean = clean[:-1]
+        
+    return clean
+
+
 def render_email_template(context, email_template_name):
     """
         Verwerk een django email template tot een mail body.
@@ -219,6 +253,9 @@ def render_email_template(context, email_template_name):
     text_content = rendered_content[:pos]
     html_content = rendered_content[pos:]
 
+    if not settings.ENABLE_MINIFY:              # pragma: no branch
+        text_content = remove_html_comments(text_content)
+
     # control where the newlines are: pipeline character indicates start of new line
     text_content = re.sub(r'\s+\|', '|', text_content)          # verwijder whitespace voor elke pipeline
     text_content = text_content.replace('\n', '')
@@ -227,6 +264,8 @@ def render_email_template(context, email_template_name):
     text_content = unescape(text_content)
 
     html_content = inline_styles(html_content)
+    if not settings.ENABLE_MINIFY:              # pragma: no branch
+        html_content = _minify_html(html_content)
 
     return text_content, html_content, email_template_name
 

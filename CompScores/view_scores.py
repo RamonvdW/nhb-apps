@@ -14,10 +14,9 @@ from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
 from Competitie.operations.wedstrijdcapaciteit import bepaal_waarschijnlijke_deelnemers
-from Competitie.models_competitie import CompetitieMatch
-from Competitie.models_laag_regio import (Regiocompetitie, RegiocompetitieRonde, RegiocompetitieSporterBoog,
-                                          RegiocompetitieTeam, RegiocompetitieRondeTeam, RegiocompetitieTeamPoule)
-from Competitie.models_mutatie import update_uitslag_teamcompetitie
+from Competitie.models import (CompetitieMatch, update_uitslag_teamcompetitie,
+                               Regiocompetitie, RegiocompetitieRonde, RegiocompetitieSporterBoog,
+                               RegiocompetitieTeam, RegiocompetitieRondeTeam, RegiocompetitieTeamPoule)
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige, rol_get_huidige_functie
 from Score.definities import SCORE_WAARDE_VERWIJDERD, SCORE_TYPE_SCORE, SCORE_TYPE_GEEN

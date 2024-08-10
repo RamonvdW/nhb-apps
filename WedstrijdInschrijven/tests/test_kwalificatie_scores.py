@@ -8,7 +8,7 @@ from django.test import TestCase
 from django.utils import timezone
 from BasisTypen.definities import ORGANISATIE_KHSN
 from BasisTypen.models import KalenderWedstrijdklasse
-from Competitie.models_laag_regio import Regiocompetitie, RegiocompetitieSporterBoog
+from Competitie.models import Regiocompetitie, RegiocompetitieSporterBoog
 from Competitie.tests.test_helpers import maak_competities_en_zet_fase_c
 from Functie.models import Functie
 from Geo.models import Regio

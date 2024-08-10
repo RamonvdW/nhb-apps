@@ -18,9 +18,8 @@ from Opleidingen.models import OpleidingDiploma
 from Records.models import IndivRecord
 from Score.operations import score_indiv_ag_opslaan
 from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren
-from Vereniging.models2 import Secretaris
 from TestHelpers.e2ehelpers import E2EHelpers
-from Vereniging.models import Vereniging
+from Vereniging.models import Vereniging, Secretaris
 import datetime
 import io
 
@@ -29,7 +28,7 @@ IMPORT_COMMAND = 'import_crm_json'
 OPTION_DRY_RUN = '--dryrun'
 OPTION_SIM = '--sim_now=2020-07-01'
 
-TESTFILES_PATH = './ImportCRM/tests/testfiles/'
+TESTFILES_PATH = './ImportCRM/test-files/'
 
 TESTFILE_NOT_EXISTING = TESTFILES_PATH + 'notexisting.json'
 TESTFILE_01_EMPTY = TESTFILES_PATH + 'testfile_01.json'

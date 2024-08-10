@@ -11,9 +11,9 @@ from Functie.models import Functie
 from Functie.tests.helpers import maak_functie
 from Geo.models import Regio
 from Competitie.definities import DEEL_RK, INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3
-from Competitie.models_competitie import Competitie, CompetitieIndivKlasse, CompetitieMatch
-from Competitie.models_laag_regio import Regiocompetitie, RegiocompetitieSporterBoog, RegiocompetitieRonde
-from Competitie.models_laag_kamp import Kampioenschap
+from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieMatch,
+                               Regiocompetitie, RegiocompetitieSporterBoog, RegiocompetitieRonde,
+                               Kampioenschap)
 from Competitie.operations import competities_aanmaken
 from Competitie.test_utils.tijdlijn import zet_competitie_fases, zet_competitie_fase_regio_inschrijven
 from HistComp.definities import HISTCOMP_TYPE_18, HIST_BOGEN_DEFAULT

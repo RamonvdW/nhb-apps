@@ -7,8 +7,7 @@
 from django.test import TestCase
 from Functie.tests.helpers import maak_functie
 from Geo.models import Regio
-from Competitie.models_competitie import Competitie, CompetitieIndivKlasse
-from Competitie.models_laag_regio import Regiocompetitie
+from Competitie.models import Competitie, CompetitieIndivKlasse, Regiocompetitie
 from Competitie.operations import competities_aanmaken
 from HistComp.definities import HISTCOMP_TYPE_18, HIST_BOGEN_DEFAULT
 from HistComp.models import HistCompSeizoen, HistCompRegioIndiv

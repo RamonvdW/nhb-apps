@@ -9,9 +9,8 @@ from django.http import Http404
 from django.views.generic import TemplateView
 from django.utils.safestring import mark_safe
 from Competitie.definities import TEAM_PUNTEN_MODEL_TWEE, TEAM_PUNTEN_MODEL_SOM_SCORES
-from Competitie.models_competitie import Competitie
-from Competitie.models_laag_regio import (Regiocompetitie, RegiocompetitieTeamPoule, RegiocompetitieTeam,
-                                          RegiocompetitieRondeTeam, RegiocompetitieSporterBoog)
+from Competitie.models import (Competitie, Regiocompetitie, RegiocompetitieSporterBoog, RegiocompetitieTeam,
+                               RegiocompetitieRondeTeam, RegiocompetitieTeamPoule)
 from Competitie.seizoenen import get_comp_pk
 from Competitie.operations.poules import maak_poule_schema
 from Geo.models import Regio

@@ -12,7 +12,10 @@ from Functie.view_vhpg import account_vhpg_is_geaccepteerd
 from TestHelpers.test_asserts import MyTestAsserts
 from TestHelpers.query_tracer import MyQueryTracer
 from TestHelpers.mgmt_cmds_helper import MyMgmtCommandHelper
+from TestHelpers.app_hierarchy_testrunner import get_test_cases_count
 from contextlib import contextmanager
+import webbrowser
+import tempfile
 import pyotp
 
 
@@ -33,6 +36,14 @@ class E2EHelpers(MyTestAsserts, MyMgmtCommandHelper, TestCase):
     WACHTWOORD = TEST_WACHTWOORD
 
     client: Client                  # for code completion / code inspection
+
+    @staticmethod
+    def is_small_test_run():
+        app_count, fpath_count, testcase_count = get_test_cases_count()
+        if app_count == 1 and fpath_count == 1:              # pragma: no cover
+            print('[INFO] This is a small test run (1 app, 1 file, %s cases)' % testcase_count)
+            return True
+        return False
 
     def e2e_logout(self):
         # in case the test client behaves different from the real website, we can compensate here
@@ -290,5 +301,23 @@ class E2EHelpers(MyTestAsserts, MyMgmtCommandHelper, TestCase):
             if report:                      # pragma: no cover
                 print(report)
 
+    @staticmethod
+    def e2e_open_in_browser(resp, show=True):
+        if show and resp.status_code == 200:            # pragma: no cover
+            msg = resp.content.decode('utf-8')
+
+            msg = msg.replace('/static/', '/tmp/tmp_html/static/')
+
+            f = tempfile.NamedTemporaryFile(mode='wb', delete=False, suffix='.html', dir='/tmp/tmp_html/')
+            f.write(msg.encode('utf-8'))
+            f.close()
+            fname = f.name
+
+            try:
+                # will hang here for a few seconds, unless browser already open
+                webbrowser.open_new_tab(fname)
+            except KeyboardInterrupt:
+                # capture user interrupt due to long wait
+                pass
 
 # end of file

@@ -36,6 +36,9 @@
         <div class="col s12">
             <h3 class="page-banner">Mijn pagina</h3>
             <p>Op deze pagina verzamelen we informatie die voor jou interessant is.</p>
+            {% if case_nr is not None %}
+                <p style="color:red">Case nr: {{ case_nr }}<br>{{ case_tekst }}</p>
+            {% endif %}
         </div>
     </div>
 
@@ -60,6 +63,27 @@
         </div>
 
     {% endif %}     <!-- moet boog kiezen -->
+
+
+    {% if url_bondspas %}
+
+        <!-- witruimte -->
+        <div class="row center">
+            <div class="col s12">
+                <h4>Bondspas</h4>
+                <p>De digitale bondspas is je bewijs van lidmaatschap. Op wedstrijden kan gevraagd worden om deze te tonen.</p>
+            </div>
+        </div>
+
+        <!-- blauwe balk met kaartjes -->
+        <div class="row-sv-blauw">
+            <div class="col s12">
+                <!-- bondspas -->
+                {% include 'plein/card_icon.dtl' with title="Bondspas" text="Bekijk je digitale bondspas." icon="card_membership" url=url_bondspas %}
+            </div>
+        </div>
+
+    {% endif %}
 
 
     {% if toon_bondscompetities %}
@@ -238,27 +262,6 @@
     {% endif %}         <!-- toon_bondscompetities -->
 
 
-    {% if url_bondspas %}
-
-        <!-- witruimte -->
-        <div class="row center">
-            <div class="col s12">
-                <h4>Bondspas</h4>
-                <p>De digitale bondspas is je bewijs van lidmaatschap. Op wedstrijden kan gevraagd worden om deze te tonen.</p>
-            </div>
-        </div>
-
-        <!-- blauwe balk met kaartjes -->
-        <div class="row-sv-blauw">
-            <div class="col s12">
-                <!-- bondspas -->
-                {% include 'plein/card_icon.dtl' with title="Bondspas" text="Bekijk je digitale bondspas." icon="card_membership" url=url_bondspas %}
-            </div>
-        </div>
-
-    {% endif %}
-
-
     {% if toon_bestellingen %}
 
         <!-- witruimte -->
@@ -296,19 +299,19 @@
                 <table class="sv-kader">
                     <thead>
                         <tr>
-                            <th>Wanneer</th>
-                            <th>Beschrijving</th>
-                            <th>Locatie</th>
+                            <th class="center">Wanneer</th>
+                            <th class="center">Beschrijving</th>
+                            <th class="center">Locatie</th>
                             <th><!-- kolom voor knoppen --></th>
                         </tr>
                     </thead>
 
                     {% for obj in wedstrijden %}
                         <tr>
-                            <td>{{ obj.datum_str }}</td>
-                            <td>{{ obj.wedstrijd.titel }}{% if obj.status_str %}<br><span class="sv-rood-text">Let op: {{ obj.status_str }}</span>{% endif %}</td>
-                            <td>{{ obj.plaats_str }}</td>
-                            <td>
+                            <td class="center">{{ obj.datum_str }}</td>
+                            <td class="center">{{ obj.wedstrijd.titel }}{% if obj.status_str %}<br><span class="sv-rood-text">Let op: {{ obj.status_str }}</span>{% endif %}</td>
+                            <td class="center">{{ obj.plaats_str }}</td>
+                            <td class="center">
                                 <a class="btn-sv-blauw" href="{{ obj.url_details }}">Details</a>
                                 {% if obj.url_kwalificatie_scores %}
                                     <br>
@@ -378,12 +381,12 @@
                 <table class="sv-kader">
                     <thead>
                         <tr>
-                            <th>Datum</th>
-                            <th>Soort record</th>
-                            <th>Boog type</th>
-                            <th>Score</th>
+                            <th class="center">Datum</th>
+                            <th class="center">Soort record</th>
+                            <th class="center">Boog type</th>
+                            <th class="center">Score</th>
                             {% if show_loc %}
-                                <th>Plaats</th>
+                                <th class="center">Plaats</th>
                             {% endif %}
                             <th><!-- kolom voor knop --></th>
                         </tr>
@@ -391,14 +394,14 @@
 
                     {% for obj in records %}
                         <tr>
-                            <td>{{ obj.datum }}</td>
-                            <td>{{ obj.soort_record }}</td>
-                            <td>{{ obj.boog_str }}</td>
-                            <td>{{ obj.score_str }}</td>
+                            <td class="center">{{ obj.datum }}</td>
+                            <td class="center">{{ obj.soort_record }}</td>
+                            <td class="center">{{ obj.boog_str }}</td>
+                            <td class="center">{{ obj.score_str }}</td>
                             {% if show_loc %}
-                                <td>{{ obj.loc_str }}</td>
+                                <td class="center">{{ obj.loc_str }}</td>
                             {% endif %}
-                            <td><a class="btn-sv-rood" href="{{ obj.url }}">Details</a></td>
+                            <td class="center"><a class="btn-sv-rood" href="{{ obj.url }}">Details</a></td>
                         </tr>
                     {% endfor %}
                 </table>
@@ -481,27 +484,17 @@
 
                         <tr>
                             <th class="center">Competitie</th>
-                            <th class="center">Seizoen</th>
-                            <th class="center">Boog</th>
+                            <th class="center"><span class="hide-on-small-only">Seizoen</span></th>
+                            <th class="center"><span class="hide-on-small-only">Boog</span></th>
                             <th class="center">Scores</th>
                             <th class="center">Gemiddelde pijl</th>
                         </tr>
 
-                        {% comment %}
-                        <tr class="sv-table-hide-row">
-                            <td>18m Indoor</td>
-                            <td>8888/8888</td>
-                            <td>Instinctive Bow</td>
-                            <td>888, 888, 888, 888, 888, 888, 888</td>
-                            <td class="center">8,888</td>
-                        </tr>
-                        {% endcomment %}
-
                         {% for deelnemer in regiocomp_scores %}
                             <tr>
-                                <td class="center">{{ deelnemer.competitie_str }}</td>
-                                <td class="center">{{ deelnemer.seizoen_str }}</td>
-                                <td class="center">{{ deelnemer.boog_str }}</td>
+                                <td class="center">{{ deelnemer.competitie_str }} <span class="hide-on-med-and-up"><br>{{ deelnemer.seizoen_str|wbr_seizoen }}<br>{{ deelnemer.boog_str }}</span></td>
+                                <td class="center"><span class="hide-on-small-only">{{ deelnemer.seizoen_str }}</span></td>
+                                <td class="center"><span class="hide-on-small-only">{{ deelnemer.boog_str }}</span></td>
                                 <td class="center">{{ deelnemer.scores_str }}</td>
                                 <td class="center smal">{{ deelnemer.gemiddelde }}</td>
                             </tr>
@@ -524,27 +517,17 @@
 
                     <tr>
                         <th class="center">Competitie</th>
-                        <th class="center">Seizoen</th>
-                        <th class="center">Boog</th>
+                        <th class="center"><span class="hide-on-small-only">Seizoen</span></th>
+                        <th class="center"><span class="hide-on-small-only">Boog</span></th>
                         <th class="center">Scores</th>
                         <th class="center">Gemiddelde pijl</th>
                     </tr>
 
-                    {% comment %}
-                    <tr class="sv-table-hide-row">
-                        <td>18m Indoor</td>
-                        <td>8888/8888</td>
-                        <td>Traditional</td>
-                        <td>888, 888, 888, 888, 888, 888, 888</td>
-                        <td class="center">8,888</td>
-                    </tr>
-                    {% endcomment %}
-
                     {% for obj in histcomp %}
                         <tr>
-                            <td class="center">{{ obj.competitie_str }}</td>
-                            <td class="center">{{ obj.seizoen_str }}</td>
-                            <td class="center">{{ obj.beschrijving }}</td>     <!-- boog -->
+                            <td class="center">{{ obj.competitie_str }} <span class="hide-on-med-and-up"><br>{{ obj.seizoen_str|wbr_seizoen }}<br>{{ obj.beschrijving }}</span></td>
+                            <td class="center"><span class="hide-on-small-only">{{ obj.seizoen_str }}</span></td>
+                            <td class="center"><span class="hide-on-small-only">{{ obj.beschrijving }}</span></td>     <!-- boog -->
                             <td class="center">{{ obj.scores_str }}</td>
                             <td class="center">{{ obj.gemiddelde }}</td>
                         </tr>
@@ -637,98 +620,100 @@
 
     {% endif %}
 
-    <!-- witruimte -->
-    <div class="row center">
-        <div class="col s12">
-            <h4>Basics</h4>
-            <p>Deze informatie is over jou bekend</p>
+    {% if not geen_basic %}
+        <!-- witruimte -->
+        <div class="row center">
+            <div class="col s12">
+                <h4>Basics</h4>
+                <p>Deze informatie is over jou bekend</p>
+            </div>
         </div>
-    </div>
-
-    <!-- blauwe balk met informatie -->
-    <div class="row-sv-blauw">
-        <div class="col s12 m10 offset-m1 l8 offset-l2">
-            <table class="sv-kader">
-                {% if sporter.is_gast %}
-                    <tr>
-                        <th>Gast-account aangemaakt op</th>
-                        <td>{{ gast.aangemaakt|date }}</td>
-                    </tr>
-                    <tr>
-                        <th>Tijdelijke bondsnummer</th>
-                        <td>{{ sporter.lid_nr }}</td>
-                    </tr>
-                    <tr>
-                        <th>Tijdelijke vereniging</th>
-                        <td>{{ sporter.bij_vereniging.ver_nr_en_naam }}</td>
-                    </tr>
-                {% else %}
-                    <tr>
-                        <th>Jouw bondsnummer</th>
-                        <td>{{ sporter.lid_nr }}</td>
-                    </tr>
-                    <tr>
-                        <th>Lid sinds</th>
-                        <td>{{ sporter.sinds_datum }}</td>
-                    </tr>
-                    <tr>
-                        <th>Lid bij vereniging</th>
-                        <td>
-                            {% if sporter.bij_vereniging %}
-                                <span>[{{ sporter.bij_vereniging.ver_nr }}] {{ sporter.bij_vereniging.naam }}</span>
-                            {% else %}
-                                <i>Geen</i>
-                            {% endif %}
-                        </td>
-                    </tr>
-                {% endif %}
-
-                {% if sporter.bij_vereniging %}
-                    {% if sporter.bij_vereniging.plaats %}
-                        <tr>
-                            <th>In plaats</th>
-                            <td>
-                                {{ sporter.bij_vereniging.plaats }}</td>
-                        </tr>
-                    {% endif %}
-
+    
+        <!-- blauwe balk met informatie -->
+        <div class="row-sv-blauw">
+            <div class="col s12 m10 offset-m1 l8 offset-l2">
+                <table class="sv-kader">
                     {% if sporter.is_gast %}
                         <tr>
-                            <th>Nationale federatie</th>
-                            <td>{{ gast.eigen_sportbond_naam }}</td>
+                            <th>Gast-account aangemaakt op</th>
+                            <td>{{ gast.aangemaakt|date }}</td>
                         </tr>
                         <tr>
-                            <th>Land</th>
-                            <td>{{ gast.land }}</td>
+                            <th>Tijdelijke bondsnummer</th>
+                            <td>{{ sporter.lid_nr }}</td>
                         </tr>
                         <tr>
-                            <th>Lidnummer</th>
-                            <td>{{ gast.eigen_lid_nummer }}</td>
-                        </tr>
-                        <tr>
-                            <th>Vereniging</th>
-                            <td>{{ gast.club }} te {{ gast.club_plaats }}</td>
+                            <th>Tijdelijke vereniging</th>
+                            <td>{{ sporter.bij_vereniging.ver_nr_en_naam }}</td>
                         </tr>
                     {% else %}
                         <tr>
-                            <th>In regio</th>
-                            <td>{{ sporter.bij_vereniging.regio }}</td>
+                            <th>Jouw bondsnummer</th>
+                            <td>{{ sporter.lid_nr }}</td>
                         </tr>
                         <tr>
-                            <th>In rayon</th>
-                            <td>{{ sporter.bij_vereniging.regio.rayon }}</td>
+                            <th>Lid sinds</th>
+                            <td>{{ sporter.sinds_datum }}</td>
+                        </tr>
+                        <tr>
+                            <th>Lid bij vereniging</th>
+                            <td>
+                                {% if sporter.bij_vereniging %}
+                                    <span>[{{ sporter.bij_vereniging.ver_nr }}] {{ sporter.bij_vereniging.naam }}</span>
+                                {% else %}
+                                    <i>Geen</i>
+                                {% endif %}
+                            </td>
                         </tr>
                     {% endif %}
-                {% endif %}
-                {% if sporter.para_classificatie %}
-                    <tr>
-                        <th>Para classificatie</th>
-                        <td>{{ sporter.para_classificatie }}</td>
-                    </tr>
-                {% endif %}
-            </table>
+    
+                    {% if sporter.bij_vereniging %}
+                        {% if sporter.bij_vereniging.plaats %}
+                            <tr>
+                                <th>In plaats</th>
+                                <td>
+                                    {{ sporter.bij_vereniging.plaats }}</td>
+                            </tr>
+                        {% endif %}
+    
+                        {% if sporter.is_gast %}
+                            <tr>
+                                <th>Nationale federatie</th>
+                                <td>{{ gast.eigen_sportbond_naam }}</td>
+                            </tr>
+                            <tr>
+                                <th>Land</th>
+                                <td>{{ gast.land }}</td>
+                            </tr>
+                            <tr>
+                                <th>Lidnummer</th>
+                                <td>{{ gast.eigen_lid_nummer }}</td>
+                            </tr>
+                            <tr>
+                                <th>Vereniging</th>
+                                <td>{{ gast.club }} te {{ gast.club_plaats }}</td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <th>In regio</th>
+                                <td>{{ sporter.bij_vereniging.regio }}</td>
+                            </tr>
+                            <tr>
+                                <th>In rayon</th>
+                                <td>{{ sporter.bij_vereniging.regio.rayon }}</td>
+                            </tr>
+                        {% endif %}
+                    {% endif %}
+                    {% if sporter.para_classificatie %}
+                        <tr>
+                            <th>Para classificatie</th>
+                            <td>{{ sporter.para_classificatie }}</td>
+                        </tr>
+                    {% endif %}
+                </table>
+            </div>
         </div>
-    </div>
+    {% endif %}
 
     <!-- witruimte -->
     <div class="row center">
@@ -743,82 +728,74 @@
         <div class="col s12">
             <table class="sv-kader">
 
-                {% if toon_bondscompetities %}
+                {% if rcl18_email or rcl25_email %}
                     <thead>
                         <tr>
-                            <th>Functie</th>
+                            <th class="center">Functie</th>
                             <th colspan="3">Contactgegevens</th>
                         </tr>
                     </thead>
 
                     <!-- RCL Indoor -->
-                    <tr>
-                        <td rowspan="2">Regio<wbr>competitie<wbr>leider Indoor</td>
+                    {% if rcl18_email  %}
+                        <tr>
+                            <td rowspan="2" class="center">Regio<wbr>competitie<wbr>leider Indoor</td>
 
-                        <td><span class="hide-on-small-only">{% if rcl18_namen|length > 1 %}Namen:{% else %}Naam:{% endif %}</span></td>
+                            <td><span class="hide-on-small-only">{% if rcl18_namen|length > 1 %}Namen:{% else %}Naam:{% endif %}</span></td>
 
-                        <td colspan="2">
-                            {% for naam in rcl18_namen %}
-                                {% if not forloop.first %}<br>{% endif %}
-                                <span>{{ naam }}</span>
-                            {% empty %}
-                                <i>Onbekend</i>
-                            {% endfor %}
-                        </td>
-                    </tr>
+                            <td colspan="2">
+                                {% for naam in rcl18_namen %}
+                                    {% if not forloop.first %}<br>{% endif %}
+                                    <span>{{ naam }}</span>
+                                {% empty %}
+                                    <i>Onbekend</i>
+                                {% endfor %}
+                            </td>
+                        </tr>
 
-                    <tr>
-                        <td><span class="hide-on-small-only">E-mail:</span></td>
+                        <tr>
+                            <td><span class="hide-on-small-only">E-mail:</span></td>
 
-                        <td>
-                            {% if rcl18_email %}
+                            <td>
                                 <code>{{ rcl18_email|wbr_email }}</code>
-                            {% else %}
-                                <i>Onbekend</i>
-                            {% endif %}
-                        </td>
+                            </td>
 
-                        <td>
-                            {% if rcl18_email %}
+                            <td>
                                 <a class="btn-sv-rood" href="mailto:{{ rcl18_email }}">
                                     <i class="notranslate material-icons-round">mail</i></a>
-                            {% endif %}
-                        </td>
-                    </tr>
+                            </td>
+                        </tr>
+                    {% endif %}
 
                     <!-- RCL 25m1pijl -->
-                    <tr>
-                        <td rowspan="2">Regio<wbr>competitie<wbr>leider 25m1pijl</td>
+                    {% if rcl25_email %}
+                        <tr>
+                            <td rowspan="2" class="center">Regio<wbr>competitie<wbr>leider 25m1pijl</td>
 
-                        <td><span class="hide-on-small-only">{% if rcl25_namen|length > 1 %}Namen:{% else %}Naam:{% endif %}</span></td>
+                            <td><span class="hide-on-small-only">{% if rcl25_namen|length > 1 %}Namen:{% else %}Naam:{% endif %}</span></td>
 
-                        <td colspan="2">
-                            {% for naam in rcl25_namen %}
-                                {% if not forloop.first %}<br>{% endif %}
-                                <span>{{ naam }}</span>
-                            {% empty %}
-                                <i>Onbekend</i>
-                            {% endfor %}
-                        </td>
-                    </tr>
+                            <td colspan="2">
+                                {% for naam in rcl25_namen %}
+                                    {% if not forloop.first %}<br>{% endif %}
+                                    <span>{{ naam }}</span>
+                                {% empty %}
+                                    <i>Onbekend</i>
+                                {% endfor %}
+                            </td>
+                        </tr>
 
-                    <tr>
-                        <td><span class="hide-on-small-only">E-mail:</span></td>
-                        <td>
-                            {% if rcl25_email %}
+                        <tr>
+                            <td><span class="hide-on-small-only">E-mail:</span></td>
+                            <td>
                                 <code>{{ rcl25_email|wbr_email }}</code>
-                            {% else %}
-                                <i>Onbekend</i>
-                            {% endif %}
-                        </td>
+                            </td>
 
-                        <td>
-                            {% if rcl25_email %}
+                            <td>
                                 <a class="btn-sv-rood" href="mailto:{{ rcl25_email }}">
                                     <i class="notranslate material-icons-round">mail</i></a>
-                            {% endif %}
-                        </td>
-                    </tr>
+                            </td>
+                        </tr>
+                    {% endif %}
 
                     <tr>
                         <td colspan="4" class="center">De regiocompetitieleiders (RCL) regelen alles rond de competities en kan je benaderen als er problemen zijn met de uitslagen.</td>
@@ -834,13 +811,13 @@
                 {% if not sporter.is_gast %}
 
                     <tr>
-                        <th>Functie</th>
+                        <th class="center">Functie</th>
                         <th colspan="3">Contactgegevens</th>
                     </tr>
 
                     <!-- HWL -->
                     <tr>
-                        <td rowspan="2">Wedstrijd<wbr>leiding</td>
+                        <td rowspan="2" class="center">Wedstrijd<wbr>leiding</td>
 
                         <td><span class="hide-on-small-only">{% if hwl_namen|length > 1 %}Namen:{% else %}Naam:{% endif %}</span></td>
 
@@ -881,14 +858,14 @@
                     </tr>
 
                     <tr>
-                        <th>Functie</th>
+                        <th class="center">Functie</th>
                         <th colspan="3">Contactgegevens</th>
                     </tr>
 
 
                     <!-- SEC -->
                     <tr>
-                        <td rowspan="2">Secretaris vereniging</td>
+                        <td rowspan="2" class="center">Secretaris vereniging</td>
 
                         <td><span class="hide-on-small-only">{% if sec_namen|length > 1 %}Namen:{% else %}Naam:{% endif %}</span></td>
 
@@ -928,37 +905,43 @@
                         <td colspan="4"></td>
                     </tr>
 
-                {% endif %}
+                {% endif %}     <!-- not gast -->
 
                 <!-- bondsbureau -->
-                <tr>
-                    <th>Functie</th>
-                    <th colspan="3">Contactgegevens</th>
-                </tr>
+                {% if bb_email or url_vcp_contact %}
+                    <tr>
+                        <th class="center">Functie</th>
+                        <th colspan="3">Contactgegevens</th>
+                    </tr>
 
-                <tr>
-                    <td>Bondsbureau</td>
-                    <td><span class="hide-on-small-only">E-mail:</span></td>
-                    <td><code>{{ bb_email|wbr_email }}</code></td>
-                    <td>
-                        <a class="btn-sv-rood" href="mailto:{{ bb_email }}">
-                                <i class="notranslate material-icons-round">mail</i></a>
-                    </td>
-                </tr>
+                    {% if bb_email %}
+                        <tr>
+                            <td class="center">Bondsbureau</td>
+                            <td><span class="hide-on-small-only">E-mail:</span></td>
+                            <td><code>{{ bb_email|wbr_email }}</code></td>
+                            <td>
+                                <a class="btn-sv-rood" href="mailto:{{ bb_email }}">
+                                        <i class="notranslate material-icons-round">mail</i></a>
+                            </td>
+                        </tr>
+                    {% endif %}
 
-                <tr>
-                    <td>Vertrouwens<wbr>contact<wbr>persoon</td>
-                    <td><span class="hide-on-small-only">Website:</span></td>
-                    <td><code>{{ url_vcp_contact|wbr_www }}</code></td>
-                    <td>
-                        <a class="btn-sv-rood" href="{{ url_vcp_contact }}" target="_blank" rel="noopener noreferrer">
-                                <i class="notranslate material-icons-round">open_in_new</i></a>
-                    </td>
-                </tr>
+                    {% if url_vcp_contact %}
+                        <tr>
+                            <td class="center">Vertrouwens<wbr>contact<wbr>persoon</td>
+                            <td><span class="hide-on-small-only">Website:</span></td>
+                            <td><code>{{ url_vcp_contact|wbr_www }}</code></td>
+                            <td>
+                                <a class="btn-sv-rood" href="{{ url_vcp_contact }}" target="_blank" rel="noopener noreferrer">
+                                        <i class="notranslate material-icons-round">open_in_new</i></a>
+                            </td>
+                        </tr>
+                    {% endif %}
 
-                <tr>
-                    <td colspan="4" class="center">Voor alle overige vragen kan je contact opnemen met het bondsbureau</td>
-                </tr>
+                    <tr>
+                        <td colspan="4" class="center">Voor alle overige vragen kan je contact opnemen met het bondsbureau</td>
+                    </tr>
+                {% endif %}
 
             </table>
         </div>

@@ -6,9 +6,8 @@
 
 from django.test import TestCase
 from Competitie.definities import MUTATIE_INITIEEL
-from Competitie.models_competitie import CompetitieMatch, CompetitieIndivKlasse, CompetitieTeamKlasse
-from Competitie.models_laag_kamp import KampioenschapIndivKlasseLimiet, KampioenschapSporterBoog, KampioenschapTeam
-from Competitie.models_mutatie import CompetitieMutatie
+from Competitie.models import (CompetitieMatch, CompetitieIndivKlasse, CompetitieTeamKlasse, CompetitieMutatie,
+                               KampioenschapIndivKlasseLimiet, KampioenschapSporterBoog, KampioenschapTeam)
 from Competitie.test_utils.tijdlijn import zet_competitie_fase_rk_prep
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata

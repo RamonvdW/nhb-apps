@@ -10,9 +10,7 @@ from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.templatetags.static import static
 from Competitie.definities import DEEL_RK, INSCHRIJF_METHODE_1
-from Competitie.models_competitie import Competitie
-from Competitie.models_laag_regio import Regiocompetitie, RegiocompetitieRonde
-from Competitie.models_laag_kamp import Kampioenschap
+from Competitie.models import Competitie, Regiocompetitie, RegiocompetitieRonde, Kampioenschap
 from Competitie.tijdlijn import maak_comp_fase_beschrijvingen, is_open_voor_inschrijven_rk_teams
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving

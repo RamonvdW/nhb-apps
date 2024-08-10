@@ -9,9 +9,8 @@ from django.views.generic import TemplateView
 from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Competitie.definities import DEEL_BK, DEEL_RK, DEELNAME_NEE
-from Competitie.models_competitie import Competitie
-from Competitie.models_laag_regio import Regiocompetitie, RegiocompetitieSporterBoog, RegiocompetitieTeam
-from Competitie.models_laag_kamp import KampioenschapSporterBoog, KampioenschapTeam
+from Competitie.models import (Competitie, Regiocompetitie, RegiocompetitieSporterBoog, RegiocompetitieTeam,
+                               KampioenschapSporterBoog, KampioenschapTeam)
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige
 from Sporter.models import Sporter

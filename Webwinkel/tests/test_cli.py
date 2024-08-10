@@ -232,4 +232,18 @@ class TestWebwinkelCli(E2EHelpers, TestCase):
             self.assertFalse("[INFO] Foto 'test_1.jpg' was al gekoppeld aan product" in f2.getvalue())
             self.assertTrue("[INFO] De volgende foto's worden losgekoppeld: [" in f2.getvalue())
 
+    def test_maak_kleding(self):
+        f1, f2 = self.run_management_command('maak_kleding', 'bestand', report_exit_code=False)
+        self.assertTrue("[ERROR] Kan bestand 'bestand' niet laden:" in f1.getvalue())
+
+        fname = 'Webwinkel/test-files/test-maak-kleding.txt'
+        f1, f2 = self.run_management_command('maak_kleding', fname, report_exit_code=False)
+        # print('f1: %s' % f1.getvalue())
+        # print('f2: %s' % f2.getvalue())
+        self.assertTrue('[INFO] Maak product 1: Test-shirt (YXS)' in f2.getvalue())
+        self.assertTrue('[INFO] Maak product 2: Test-shirt (XXS)' in f2.getvalue())
+        self.assertTrue('[INFO] Maak product 3: Test-shirt (XS)' in f2.getvalue())
+        self.assertTrue('[ERROR] Kan foto niet vinden:' in f2.getvalue())
+        self.assertTrue("[ERROR] Onbekend keyword='Onbekend'" in f2.getvalue())
+
 # end of file

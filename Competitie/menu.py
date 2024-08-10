@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import reverse
-from Competitie.models_competitie import Competitie
+from Competitie.models import Competitie
 
 
 def get_url_voor_competitie(functie_nu):

@@ -13,9 +13,7 @@ from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
 from Competitie.definities import DEEL_BK, MUTATIE_KLEINE_KLASSE_INDIV
-from Competitie.models_competitie import CompetitieIndivKlasse
-from Competitie.models_laag_kamp import Kampioenschap, KampioenschapSporterBoog
-from Competitie.models_mutatie import CompetitieMutatie
+from Competitie.models import CompetitieIndivKlasse, Kampioenschap, KampioenschapSporterBoog, CompetitieMutatie
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
 from Logboek.models import schrijf_in_logboek

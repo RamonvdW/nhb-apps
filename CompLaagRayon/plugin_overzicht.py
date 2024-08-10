@@ -6,7 +6,7 @@
 
 from django.urls import reverse
 from Competitie.definities import DEEL_RK
-from Competitie.models_laag_kamp import Kampioenschap
+from Competitie.models import Kampioenschap
 from Functie.definities import Rollen
 from types import SimpleNamespace
 

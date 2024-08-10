@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2021-2023 Ramon van der Winkel.
+                Copyright (c) 2021-2024 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -76,10 +76,10 @@
     <!-- blauw balk met kaartjes -->
     <div class="row-sv-blauw">
         <div class="col s12">
-            {% static 'plein/logo_chrome_256x256.png' as img_src %}
+            {% static 'plein/logo_chrome_256x256.webp' as img_src %}
             {% include 'plein/card_logo.dtl' with title="Chrome extensie" text="Authenticator extensie voor de Chrome browser." img_src=img_src img_height=75 img_width=75 url="https://chrome.google.com/webstore/detail/authenticator/bhghoamapcdpbohphigoooaddinpkbai?hl=nl-nl" extern_open=True %}
 
-            {% static 'plein/logo_firefox_256x256.png' as img_src %}
+            {% static 'plein/logo_firefox_256x256.webp' as img_src %}
             {% include 'plein/card_logo.dtl' with title="FireFox extensie" text="Authenticator extensie voor de FireFox browser." img_src=img_src img_height=75 img_width=75 url="https://addons.mozilla.org/en-GB/firefox/addon/auth-helper/" extern_open=True %}
         </div>
     </div>

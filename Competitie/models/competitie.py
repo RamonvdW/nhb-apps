@@ -274,7 +274,7 @@ class CompetitieIndivKlasse(models.Model):
     krijgt_scheids_rk = models.BooleanField(default=False)
     krijgt_scheids_bk = models.BooleanField(default=False)
 
-    # TODO: standaard limiet toevoegen voor elke klasse: 24
+    # FUTURE: standaard limiet toevoegen voor elke klasse: 24
 
     def __str__(self):
         """ geef een tekstuele afkorting van dit object, voor in de admin interface """
@@ -348,7 +348,7 @@ class CompetitieTeamKlasse(models.Model):
     krijgt_scheids_rk = models.BooleanField(default=False)
     krijgt_scheids_bk = models.BooleanField(default=False)
 
-    # TODO: standaard limiet toevoegen voor elke klasse: ERE=12, rest=8
+    # FUTURE: standaard limiet toevoegen voor elke klasse: ERE=12, rest=8
 
     def __str__(self):
         """ geef een tekstuele afkorting van dit object, voor in de admin interface """

@@ -9,7 +9,7 @@ from django.http import Http404
 from django.views.generic import TemplateView
 from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.models_competitie import Competitie
+from Competitie.models import Competitie
 from Competitie.tijdlijn import is_open_voor_inschrijven_rk_teams
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige

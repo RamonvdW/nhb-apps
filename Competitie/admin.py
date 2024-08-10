@@ -10,12 +10,11 @@ from django.contrib.admin.widgets import FilteredSelectMultiple
 from BasisTypen.definities import SCHEIDS_NIET
 from BasisTypen.models import TeamType
 from Competitie.definities import DEEL_BK, DEEL_RK
-from Competitie.models_competitie import Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse, CompetitieMatch
-from Competitie.models_laag_regio import (Regiocompetitie, RegiocompetitieRonde, RegiocompetitieSporterBoog,
-                                          RegiocompetitieTeam, RegiocompetitieTeamPoule, RegiocompetitieRondeTeam)
-from Competitie.models_laag_kamp import (KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet,
-                                         KampioenschapSporterBoog, KampioenschapTeam, Kampioenschap)
-from Competitie.models_mutatie import CompetitieMutatie
+from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse, CompetitieMatch,
+                               Regiocompetitie, RegiocompetitieRonde, RegiocompetitieSporterBoog, RegiocompetitieTeam,
+                               RegiocompetitieTeamPoule, RegiocompetitieRondeTeam,
+                               KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet, KampioenschapSporterBoog,
+                               KampioenschapTeam, Kampioenschap, CompetitieMutatie)
 from Sporter.models import Sporter
 
 
@@ -183,8 +182,7 @@ class RegiocompetitieSporterBoogAdmin(CreateOnlyAdmin):
              }),
         ('Individueel',
             {'fields': (('ag_voor_indiv',),
-                        'indiv_klasse',
-                        'inschrijf_voorkeur_rk_bk'),
+                        'indiv_klasse'),
              }),
         ('Team',
             {'fields': ('inschrijf_voorkeur_team',
@@ -197,7 +195,9 @@ class RegiocompetitieSporterBoogAdmin(CreateOnlyAdmin):
                         'inschrijf_voorkeur_dagdeel',
                         'inschrijf_notitie',
                         'aangemeld_door',
-                        'wanneer_aangemeld'),
+                        'wanneer_aangemeld',
+                        'inschrijf_voorkeur_rk_bk',
+                        'logboekje'),
              }),
         ('Uitslag',
             {'fields': ('score1', 'score2', 'score3', 'score4', 'score5', 'score6', 'score7',

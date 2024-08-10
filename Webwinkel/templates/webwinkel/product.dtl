@@ -30,7 +30,7 @@
             -->
 
             {% for foto in fotos %}
-                <img id="img_{{ foto.volgorde }}" class="sv-foto" src="{{ foto.img_src }}" hidden loading="lazy" alt="product foto {{ foto.volgorde }}">
+                <img id="img_{{ foto.volgorde }}" class="sv-foto-groot" src="{{ foto.img_src }}" hidden loading="lazy" alt="product foto {{ foto.volgorde }}">
             {% endfor %}
 
             <!-- thumbnails onder de grote foto's -->
@@ -67,11 +67,11 @@
 
                 if (volgorde === nr) {
                     // el_thumb1.classList.add("sv-foto-thumb-selected")
-                    el_thumb2.classList.add("sv-foto-thumb-selected")
+                    el_thumb2.classList.add("sv-foto-thumb-selected");
                     el_img.hidden = false;
                 } else {
                     // el_thumb1.classList.remove("sv-foto-thumb-selected")
-                    el_thumb2.classList.remove("sv-foto-thumb-selected")
+                    el_thumb2.classList.remove("sv-foto-thumb-selected");
                     el_img.hidden = true;
                 }
 

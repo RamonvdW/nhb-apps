@@ -7,8 +7,8 @@
 from django.test import TestCase, RequestFactory
 from BasisTypen.models import TeamType
 from Competitie import admin
-from Competitie.models_laag_regio import RegiocompetitieSporterBoog, RegiocompetitieTeam, RegiocompetitieRondeTeam
-from Competitie.models_laag_kamp import KampioenschapTeam, KampioenschapIndivKlasseLimiet
+from Competitie.models import (RegiocompetitieSporterBoog, RegiocompetitieTeam, RegiocompetitieRondeTeam,
+                               KampioenschapTeam, KampioenschapIndivKlasseLimiet)
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 

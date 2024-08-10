@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from Competitie.models_laag_regio import RegiocompetitieSporterBoog
+from Competitie.models import RegiocompetitieSporterBoog
 from CompLaagRegio.view_medailles import bepaal_medailles
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata

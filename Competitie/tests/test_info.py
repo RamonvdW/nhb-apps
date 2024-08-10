@@ -6,8 +6,7 @@
 
 from django.test import TestCase
 from BasisTypen.models import TeamType
-from Competitie.models_competitie import Competitie
-from Competitie.models_laag_regio import Regiocompetitie, RegiocompetitieTeam
+from Competitie.models import Competitie, Regiocompetitie, RegiocompetitieTeam
 from Functie.definities import Rollen
 from Functie.tests.helpers import maak_functie
 from Geo.models import Regio

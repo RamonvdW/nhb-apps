@@ -9,8 +9,7 @@ from django.urls import reverse
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Competitie.definities import INSCHRIJF_METHODE_1
-from Competitie.models_competitie import CompetitieMatch
-from Competitie.models_laag_regio import Regiocompetitie, RegiocompetitieSporterBoog
+from Competitie.models import CompetitieMatch, Regiocompetitie, RegiocompetitieSporterBoog
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
 

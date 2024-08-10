@@ -7,12 +7,10 @@
 from django.db import models
 from Competitie.definities import (MUTATIE_TO_STR, MUTATIE_KAMP_AANMELDEN_INDIV, MUTATIE_KAMP_AFMELDEN_INDIV,
                                    MUTATIE_KAMP_CUT)
-from Competitie.models_competitie import Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse
-from Competitie.models_laag_regio import Regiocompetitie
-from Competitie.models_laag_kamp import Kampioenschap, KampioenschapSporterBoog
+from Competitie.models.competitie import Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse
+from Competitie.models.laag_regio import Regiocompetitie
+from Competitie.models.laag_kamp import Kampioenschap, KampioenschapSporterBoog
 from Score.models import ScoreHist
-
-__all__ = ['CompetitieMutatie', 'CompetitieTaken', 'update_uitslag_teamcompetitie']
 
 
 class CompetitieMutatie(models.Model):

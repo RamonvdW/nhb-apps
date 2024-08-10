@@ -6,7 +6,7 @@
 
 from django.db.models import F
 from Competitie.definities import DEEL_RK
-from Competitie.models_laag_kamp import KampioenschapSporterBoog
+from Competitie.models import KampioenschapSporterBoog
 
 """ Functionaliteit om de overstap van een sporter naar een andere vereniging af te handelen voor de bondscompetities
 """

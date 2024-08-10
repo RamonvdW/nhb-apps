@@ -8,8 +8,7 @@ from django.test import TestCase
 from django.utils import timezone
 from BasisTypen.models import BoogType
 from Bestel.models import BestelProduct
-from Competitie.models_competitie import Competitie, CompetitieIndivKlasse
-from Competitie.models_laag_regio import Regiocompetitie, RegiocompetitieSporterBoog
+from Competitie.models import Competitie, CompetitieIndivKlasse, Regiocompetitie, RegiocompetitieSporterBoog
 from Functie.tests.helpers import maak_functie
 from Geo.models import Regio
 from Locatie.models import Locatie
@@ -165,7 +164,7 @@ class TestWedstrijdenAanmeldingen(E2EHelpers, TestCase):
         # schrijf de twee sporters in
         self.e2e_login_and_pass_otp(self.account)
         # self.e2e_wisselnaarrol_sporter()
-        url = self.url_inschrijven_groepje % self.wedstrijd.pk
+        # url = self.url_inschrijven_groepje % self.wedstrijd.pk
 
         # zorg dat de wedstrijd als 'gesloten' gezien wordt
         begin = self.wedstrijd.datum_begin
@@ -282,7 +281,7 @@ class TestWedstrijdenAanmeldingen(E2EHelpers, TestCase):
         self.e2e_wisselnaarrol_bb()
 
         with self.assert_max_queries(20):
-            resp = self.client.get(url)
+            self.client.get(url)
 
         self.e2e_assert_other_http_commands_not_supported(url)
 

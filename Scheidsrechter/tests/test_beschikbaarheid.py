@@ -11,7 +11,7 @@ from BasisTypen.models import KalenderWedstrijdklasse
 from Functie.models import Functie
 from Geo.models import Regio
 from Locatie.models import Locatie, Reistijd
-from Scheidsrechter.definities import BESCHIKBAAR_LEEG
+from Scheidsrechter.definities import BESCHIKBAAR_LEEG, BESCHIKBAAR_JA
 from Scheidsrechter.models import ScheidsBeschikbaarheid, WedstrijdDagScheidsrechters, ScheidsMutatie
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
@@ -32,6 +32,7 @@ class TestScheidsrechterBeschikbaarheid(E2EHelpers, TestCase):
     url_beschikbaarheid_opvragen = '/scheidsrechter/beschikbaarheid-opvragen/'
     url_beschikbaarheid_wijzigen = '/scheidsrechter/beschikbaarheid-wijzigen/'
     url_beschikbaarheid_inzien = '/scheidsrechter/beschikbaarheid-inzien/'
+    url_beschikbaarheid_stats = '/scheidsrechter/beschikbaarheid-inzien/statistiek/'
 
     testdata = None
     sr3_met_account = None
@@ -151,6 +152,9 @@ class TestScheidsrechterBeschikbaarheid(E2EHelpers, TestCase):
 
         resp = self.client.get(self.url_beschikbaarheid_inzien)
         self.assert_is_redirect_login(resp, self.url_beschikbaarheid_inzien)
+
+        resp = self.client.get(self.url_beschikbaarheid_stats)
+        self.assert_is_redirect_login(resp, self.url_beschikbaarheid_stats)
 
     def test_sr3(self):
         self.e2e_login(self.sr3_met_account.account)
@@ -405,6 +409,44 @@ class TestScheidsrechterBeschikbaarheid(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('scheidsrechter/beschikbaarheid-inzien-cs.dtl', 'plein/site_layout.dtl'))
+
+    def test_stats(self):
+        self.e2e_login_and_pass_otp(self.testdata.account_bb)
+        self.e2e_wissel_naar_functie(self.functie_cs)
+        self.e2e_check_rol('CS')
+
+        # beschikbaarheid inzien voor een wedstrijd (geen wedstrijden)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_beschikbaarheid_stats)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('scheidsrechter/beschikbaarheid-stats-cs.dtl', 'plein/site_layout.dtl'))
+
+        sb = ScheidsBeschikbaarheid(scheids=self.sr3_met_account,
+                                    datum='2024-01-01',
+                                    wedstrijd=self.wedstrijd,
+                                    opgaaf=BESCHIKBAAR_JA)
+        sb.save()
+
+        sb = ScheidsBeschikbaarheid(scheids=self.sr3_met_account,
+                                    datum='2024-01-02',
+                                    wedstrijd=self.wedstrijd,
+                                    opgaaf=BESCHIKBAAR_JA)
+        sb.save()
+
+        sb = ScheidsBeschikbaarheid(scheids=self.sr4_met_account,
+                                    datum='2024-01-01',
+                                    wedstrijd=self.wedstrijd,
+                                    opgaaf=BESCHIKBAAR_JA,
+                                    opmerking='test')
+        sb.save()
+
+        # beschikbaarheid inzien voor een wedstrijd (geen wedstrijden)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_beschikbaarheid_stats)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('scheidsrechter/beschikbaarheid-stats-cs.dtl', 'plein/site_layout.dtl'))
 
 
 # end of file

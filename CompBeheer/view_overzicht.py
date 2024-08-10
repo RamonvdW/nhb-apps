@@ -9,9 +9,7 @@ from django.http import Http404
 from django.views.generic import TemplateView
 from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.models_competitie import Competitie
-from Competitie.models_laag_regio import Regiocompetitie
-from Competitie.models_laag_kamp import Kampioenschap
+from Competitie.models import Competitie, Regiocompetitie, Kampioenschap
 from Competitie.tijdlijn import maak_comp_fase_beschrijvingen
 from CompBeheer.plugin_overzicht import get_kaartjes_beheer
 from CompLaagRegio.plugin_overzicht import get_kaartjes_regio

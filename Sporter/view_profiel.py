@@ -12,12 +12,11 @@ from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.db.models import Q
 from Account.models import get_account
+from BasisTypen.definities import ORGANISATIE_WA
 from BasisTypen.models import BoogType
 from Bestel.models import Bestelling
 from Competitie.definities import DEEL_RK, INSCHRIJF_METHODE_1, DEELNAME_NEE
-from Competitie.models_competitie import Competitie
-from Competitie.models_laag_regio import Regiocompetitie, RegiocompetitieSporterBoog
-from Competitie.models_laag_kamp import KampioenschapSporterBoog
+from Competitie.models import Competitie, Regiocompetitie, RegiocompetitieSporterBoog, KampioenschapSporterBoog
 from Functie.definities import Rollen
 from Functie.models import Functie
 from Functie.rol import rol_get_huidige
@@ -60,7 +59,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
         self.sporter = None
         self.ver = None
         self.voorkeuren = None
-        self.alle_bogen = BoogType.objects.all()
+        self.alle_bogen = BoogType.objects.filter(organisatie=ORGANISATIE_WA)
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
@@ -360,8 +359,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
 
         return objs, heeft_ags
 
-    def _get_contact_gegevens(self, context):
-
+    def _find_contactgegevens(self, context):
         context['sec_namen'] = list()
         context['hwl_namen'] = list()
         context['rcl18_namen'] = list()
@@ -562,7 +560,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
         if Bestelling.objects.filter(account=self.account).count() > 0:
             context['toon_bestellingen'] = True
 
-        self._get_contact_gegevens(context)
+        self._find_contactgegevens(context)
 
         context['kruimels'] = (
             (None, 'Mijn pagina'),

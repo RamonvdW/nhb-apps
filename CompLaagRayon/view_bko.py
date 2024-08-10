@@ -14,10 +14,9 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
 from BasisTypen.definities import GESLACHT_ALLE
 from Competitie.definities import MUTATIE_EXTRA_RK_DEELNEMER, DEEL_RK, DEELNAME_JA, DEELNAME_NEE, KAMP_RANK_BLANCO
-from Competitie.models_competitie import Competitie
-from Competitie.models_laag_regio import RegiocompetitieSporterBoog
-from Competitie.models_laag_kamp import Kampioenschap, KampioenschapSporterBoog
-from Competitie.models_mutatie import CompetitieMutatie
+from Competitie.models import (Competitie, CompetitieMutatie,
+                               RegiocompetitieSporterBoog,
+                               Kampioenschap, KampioenschapSporterBoog)
 from Competitie.operations import KlasseBepaler
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie

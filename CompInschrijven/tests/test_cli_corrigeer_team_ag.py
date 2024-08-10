@@ -6,8 +6,8 @@
 
 from django.test import TestCase
 from BasisTypen.models import BoogType, TeamType, ORGANISATIE_WA
-from Competitie.models_competitie import Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse
-from Competitie.models_laag_regio import Regiocompetitie, RegiocompetitieSporterBoog, RegiocompetitieTeam
+from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse, Regiocompetitie,
+                               RegiocompetitieSporterBoog, RegiocompetitieTeam)
 from Competitie.operations import competities_aanmaken
 from Geo.models import Regio
 from Sporter.models import Sporter, SporterBoog

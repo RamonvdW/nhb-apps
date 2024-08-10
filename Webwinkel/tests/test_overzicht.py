@@ -135,6 +135,9 @@ class TestWebwinkelOverzicht(E2EHelpers, TestCase):
         self.assertTrue(str(self.foto2) != '')
         self.assertTrue(str(self.product3) != '')
 
+        self.product3.kleding_maat = 'M'
+        self.assertTrue(str(self.product3) != '')
+
     def test_sporter(self):
         self.e2e_login_and_pass_otp(self.account_normaal)
         self.e2e_wisselnaarrol_sporter()
