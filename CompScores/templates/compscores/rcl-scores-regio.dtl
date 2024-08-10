@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2023 Ramon van der Winkel.
+                Copyright (c) 2020-2024 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -34,17 +34,6 @@
         </div>
     </div>
 
-
-    {% comment %}
-
-    {% if url_team_scores %}
-        <p>
-            <a class="btn-sv-blauw" href="{{ url_team_scores }}"><i class="notranslate material-icons-round left">gavel</i>Team scores selecteren</a>
-        </p>
-        <p>&nbsp;</p>
-    {% endif %}
-
-    {% endcomment %}
 
     <!-- witruimte -->
     <div class="row center">
