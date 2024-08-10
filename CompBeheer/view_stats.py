@@ -17,7 +17,7 @@ from Sporter.models import Sporter
 from decimal import Decimal
 
 
-TEMPLATE_COMPETITIE_STATISTIEK = 'compbeheer/bb-statistiek.dtl'
+TEMPLATE_COMPETITIE_STATISTIEK = 'compbeheer/statistiek.dtl'
 
 
 class CompetitieStatistiekView(UserPassesTestMixin, TemplateView):
