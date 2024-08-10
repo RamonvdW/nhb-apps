@@ -94,6 +94,43 @@
                     </table>
                 </div>
             </div>
+
+        {% elif teams_niet_in_poule %}
+
+            <!-- witruimte -->
+            <div class="row center">
+                <div class="col s12">
+                    <h4>Teams nog niet in poule</h4>
+                    <p>De volgende teams zijn nog niet in een poule geplaatst.</p>
+                    <p class="sv-rood-text">Dit moet eerst opgelost worden. Gebruik het kaartje Team Poules.</p>
+                </div>
+            </div>
+
+            <!-- blauwe balk met informatie in een tabel -->
+            <div class="row-sv-blauw">
+                <div class="col s12">
+                    <table class="sv-kader">
+                        <thead>
+                            <tr>
+                                <th>Vereniging</th>
+                                <th>Wedstrijdklasse</th>
+                                <th>Poule</th>
+                                <th>Team naam</th>
+                            </tr>
+                        </thead>
+
+                        {% for team in teams_niet_in_poule %}
+                            <tr>
+                                <td>{{ team.vereniging }}</td>
+                                <td>{{ team.team_klasse.beschrijving }}</td>
+                                <td>{% if team.poule %}{{ team.poule }}{% else %}<span class="sv-rood-text">Geen</span>{% endif %}</td>
+                                <td>{{ team.team_naam }}</td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+            </div>
+
         {% else %}
             <p class="center">De teamcompetitie wacht totdat jij de eerste ronde opent</p>
         {% endif %}
