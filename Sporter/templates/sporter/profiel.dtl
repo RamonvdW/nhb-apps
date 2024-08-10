@@ -1070,18 +1070,12 @@
                             <td><span class="hide-on-small-only">E-mail:</span></td>
 
                             <td>
-                                {% if rcl18_email %}
-                                    <code>{{ rcl18_email|wbr_email }}</code>
-                                {% else %}
-                                    <i>Onbekend</i>
-                                {% endif %}
+                                <code>{{ rcl18_email|wbr_email }}</code>
                             </td>
 
                             <td>
-                                {% if rcl18_email %}
-                                    <a class="btn-sv-rood" href="mailto:{{ rcl18_email }}">
-                                        <i class="notranslate material-icons-round">mail</i></a>
-                                {% endif %}
+                                <a class="btn-sv-rood" href="mailto:{{ rcl18_email }}">
+                                    <i class="notranslate material-icons-round">mail</i></a>
                             </td>
                         </tr>
                     {% endif %}
@@ -1106,18 +1100,12 @@
                         <tr>
                             <td><span class="hide-on-small-only">E-mail:</span></td>
                             <td>
-                                {% if rcl25_email %}
-                                    <code>{{ rcl25_email|wbr_email }}</code>
-                                {% else %}
-                                    <i>Onbekend</i>
-                                {% endif %}
+                                <code>{{ rcl25_email|wbr_email }}</code>
                             </td>
 
                             <td>
-                                {% if rcl25_email %}
-                                    <a class="btn-sv-rood" href="mailto:{{ rcl25_email }}">
-                                        <i class="notranslate material-icons-round">mail</i></a>
-                                {% endif %}
+                                <a class="btn-sv-rood" href="mailto:{{ rcl25_email }}">
+                                    <i class="notranslate material-icons-round">mail</i></a>
                             </td>
                         {% endif %}
                     </tr>

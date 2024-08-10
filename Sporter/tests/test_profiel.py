@@ -10,15 +10,19 @@ from django.utils.dateparse import parse_date
 from BasisTypen.definities import ORGANISATIE_KHSN
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse
 from Bestel.models import Bestelling
+from Functie.models import Functie
 from Functie.tests.helpers import maak_functie
 from Geo.models import Regio, Rayon
 from HistComp.definities import HISTCOMP_TYPE_18
 from HistComp.models import HistCompSeizoen, HistCompRegioIndiv
 from Locatie.definities import BAAN_TYPE_EXTERN
 from Locatie.models import Locatie
+from Opleidingen.models import OpleidingDiploma
 from Records.models import IndivRecord
+from Registreer.definities import REGISTRATIE_FASE_COMPLEET
 from Registreer.models import GastRegistratie
-from Sporter.models import Sporter, SporterBoog
+from Score.models import Aanvangsgemiddelde, AanvangsgemiddeldeHist
+from Sporter.models import Sporter, SporterBoog, Speelsterkte
 from Sporter.operations import get_sporterboog
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers.testdata import TestData
@@ -63,7 +67,8 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         ver = Vereniging(
                     naam="Grote Club",
                     ver_nr=1000,
-                    regio=self.regio)
+                    regio=self.regio,
+                    plaats="Boogstad")
         ver.save()
         self.ver = ver
 
@@ -77,7 +82,8 @@ class TestSporterProfiel(E2EHelpers, TestCase):
                         sinds_datum=datetime.date(year=2010, month=11, day=12),
                         bij_vereniging=ver,
                         account=self.account_normaal,
-                        email=self.account_normaal.email)
+                        email=self.account_normaal.email,
+                        para_classificatie='Test para')
         sporter.save()
         self.sporter1 = sporter
         self.sporterboog = None
@@ -180,6 +186,22 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         indiv.save()
 
         self.boog_R = BoogType.objects.get(afkorting='R')
+
+        diploma = OpleidingDiploma(sporter=sporter,
+                                   code='T42',
+                                   beschrijving="Test opleiding",
+                                   datum_begin='2020-01-01')
+        diploma.save()
+
+        speld = Speelsterkte(
+                    sporter=self.sporter1,
+                    datum='2020-02-02',
+                    beschrijving='Test speld',
+                    discipline='Test disc',
+                    category='Test cat',
+                    pas_code='TST',
+                    volgorde=42)
+        speld.save()
 
     def _prep_voorkeuren(self, sporter):
         get_sporterboog(sporter, mag_database_wijzigen=True)
@@ -392,15 +414,17 @@ class TestSporterProfiel(E2EHelpers, TestCase):
 
     def test_gast(self):
         self.e2e_login(self.account_normaal)
+
         self.account_normaal.is_gast = True
         self.account_normaal.save(update_fields=['is_gast'])
 
-        GastRegistratie(
-                email='',
-                account=self.account_normaal,
-                sporter=None,
-                voornaam='',
-                achternaam='').save()
+        gast = GastRegistratie(
+                    email='',
+                    account=self.account_normaal,
+                    sporter=None,
+                    voornaam='',
+                    achternaam='')
+        gast.save()
 
         resp = self.client.get(self.url_profiel)
         self.assert_is_redirect_not_plein(resp)
@@ -408,5 +432,77 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         resp = self.client.get(self.url_profiel_test % "gast", data={"tekst": "gast"})
         self.assert404(resp, 'Geen toegang')
 
+        # registratie is compleet
+        self.sporter1.is_gast = True
+        self.sporter1.save(update_fields=['is_gast'])
+
+        gast.fase = REGISTRATIE_FASE_COMPLEET
+        gast.sporter = self.sporter1
+        gast.save(update_fields=['fase', 'sporter'])
+
+        with self.assert_max_queries(24):
+            resp = self.client.get(self.url_profiel)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('sporter/profiel.dtl', 'plein/site_layout.dtl'))
+
+        self.assertContains(resp, 'Gast-account aangemaakt op')
+
+    def test_contactgegevens(self):
+        self.e2e_login(self.account_normaal)
+
+        functie_rcl18 = Functie.objects.get(rol='RCL', regio=self.regio, comp_type='18')
+        functie_rcl25 = Functie.objects.get(rol='RCL', regio=self.regio, comp_type='25')
+
+        # RCL met email, zonder namen
+        functie_rcl18.bevestigde_email = 'test18@mh.not'
+        functie_rcl18.save(update_fields=['bevestigde_email'])
+        functie_rcl25.bevestigde_email = 'test25@mh.not'
+        functie_rcl25.save(update_fields=['bevestigde_email'])
+
+        with self.assert_max_queries(22):
+            resp = self.client.get(self.url_profiel)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('sporter/profiel.dtl', 'plein/site_layout.dtl'))
+
+        self.assertContains(resp, 'test18@mh.not')
+        self.assertContains(resp, 'test25@mh.not')
+
+        # met namen
+        functie_rcl18.accounts.add(self.account_normaal)
+        functie_rcl25.accounts.add(self.account_normaal)
+
+        with self.assert_max_queries(22):
+            resp = self.client.get(self.url_profiel)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('sporter/profiel.dtl', 'plein/site_layout.dtl'))
+
+    def test_ag(self):
+        self.e2e_login(self.account_normaal)
+        self._prep_voorkeuren(self.sporter1)        # zet self.sporterboog
+
+        ag = Aanvangsgemiddelde(
+                    sporterboog=self.sporterboog,
+                    boogtype=self.boog_R,
+                    waarde='4.2',
+                    afstand_meter=42)
+        ag.save()
+        ag_hist = AanvangsgemiddeldeHist(
+                    ag=ag,
+                    oude_waarde=0,
+                    nieuwe_waarde=ag.waarde,
+                    notitie='AG test')
+        ag_hist.save()
+
+        with self.assert_max_queries(23):
+            resp = self.client.get(self.url_profiel)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('sporter/profiel.dtl', 'plein/site_layout.dtl'))
+
+        self.assertContains(resp, 'AG test')
+        self.assertContains(resp, '4,2')
 
 # end of file
