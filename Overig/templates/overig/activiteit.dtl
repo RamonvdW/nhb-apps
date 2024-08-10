@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2023 Ramon van der Winkel.
+                Copyright (c) 2020-2024 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -142,9 +142,9 @@
             <a class="btn-sv-rood btn-small margin-5" href="#nieuwe">Nieuwe accounts</a>
             <a class="btn-sv-rood btn-small margin-5" href="#recent">Recente activiteit</a>
             <a class="btn-sv-rood btn-small margin-5" href="#poging">Mislukte inlog pogingen</a>
-            {% if accses %}
+            {% comment %}
                 <a class="btn-sv-rood btn-small margin-5" href="#sessies">Sessies (experimenteel)</a>
-            {% endif %}
+            {% endcomment %}
             {% if age_groups %}
                 <a class="btn-sv-rood btn-small margin-5" href="#leeftijdsgroepen">Leeftijd gebruikers</a>
             {% endif %}
@@ -345,7 +345,7 @@
     </div>
 
 
-    {% if accses %}
+    {% comment %}
         <!-- witruimte -->
         <div class="row center">
             <div class="col s12">
@@ -380,7 +380,7 @@
                 <td colspan="5" class="sv-table-onderrand"></td>
             </tr>
         </table>
-    {% endif %}
+    {% endcomment %}
 
     {% if age_groups %}
         <div class="row center">

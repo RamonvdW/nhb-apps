@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#  Copyright (c) 2019-2023 Ramon van der Winkel.
+#  Copyright (c) 2019-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -31,8 +31,8 @@ then
 fi
 
 echo "[INFO] Refreshing static files"
-rm -rf "$STATIC_DIR"*
-COLLECT=$(./manage.py collectstatic -l)
+rm -rf "$STATIC_DIR"*     # keeps top directory
+COLLECT=$(./manage.py collectstatic --link)
 RES=$?
 if [ $RES -ne 0 ]
 then

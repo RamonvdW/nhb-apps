@@ -17,6 +17,8 @@ def init_taken(apps, _):
 
 class Migration(migrations.Migration):
 
+    """ Migratie class voor dit deel van de applicatie """
+
     replaces = [('Competitie', 'm0108_squashed'),
                 ('Competitie', 'm0109_match_scheids'),
                 ('Competitie', 'm0110_scheids_rk_bk'),

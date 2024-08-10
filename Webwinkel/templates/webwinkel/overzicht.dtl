@@ -36,7 +36,7 @@
 
                             <div class="sv-card-image-webwinkel">
                                 <!-- achtergrondplaatje -->
-                                <img src="{{ img_spelden }}" alt="product">
+                                <img src="{{ img_spelden }}" alt="spelden">
                             </div>
 
                             <div class="sv-card-webwinkel-titel">Prestatiespelden</div>

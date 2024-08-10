@@ -37,7 +37,7 @@ class BestelProduct(models.Model):
 
     # FUTURE: gedeeltelijke terugstorting bijhouden
 
-    # TODO: traceer gestuurde e-mails (voor sturen herinnering)
+    # FUTURE: traceer gestuurde e-mails (voor sturen herinnering)
 
     def __str__(self):
         """ beschrijving voor de admin interface """

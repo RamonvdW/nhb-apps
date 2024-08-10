@@ -21,9 +21,9 @@
   font-weight: 500;
   font-display: block;  /* liever later tonen dan verspringende layout */
 {% if font_use_subset_files %}
-  src: url({% static 'fonts/firasans-medium-subset-mh-v3.ttf' %}) format('truetype');
+  src: url("{% static 'fonts/firasans-medium-subset-mh-v3.ttf' %}") format('truetype');
 {% else %}
-  src: url({% static 'fonts/FiraSans-Medium-v17.ttf' %}) format('truetype');
+  src: url("{% static 'fonts/FiraSans-Medium-v17.ttf' %}") format('truetype');
 {% endif %}
 }
 @font-face {
@@ -32,7 +32,7 @@
   font-weight: 400;
   font-stretch: normal;
   font-display: block;  /* liever later tonen dan verspringende layout */
-  src: url({% static 'fonts/OpenSans-Regular-v40.ttf' %}) format('truetype');
+  src: url("{% static 'fonts/OpenSans-Regular-v40.ttf' %}") format('truetype');
 }
 @font-face {
   font-family: 'Material Icons Round';
@@ -40,9 +40,9 @@
   font-weight: 400;
   font-display: block;  /* liever later tonen dan verspringende layout */
 {% if font_use_subset_files %}
-  src: url({% static 'fonts/material-icons-subset-mh-v18.otf' %}) format('opentype');
+  src: url("{% static 'fonts/material-icons-subset-mh-v18.otf' %}") format('opentype');
 {% else %}
-  src: url({% static 'fonts/Material-Icons-Round-v108.otf' %}) format('opentype');
+  src: url("{% static 'fonts/Material-Icons-Round-v108.otf' %}") format('opentype');
 {% endif %}
 }
 </style>

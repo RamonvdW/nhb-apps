@@ -133,7 +133,7 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
                         ontvanger2product_pks[ver_nr] = [product.pk]
 
                 elif product.webwinkel_keuze:
-                    # TODO: kortingen
+                    # FUTURE: kortingen
                     pass
 
                 else:

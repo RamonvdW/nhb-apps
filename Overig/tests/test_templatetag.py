@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from Overig.templatetags.overig_filters import filter_highlight, filter_wbr_email, filter_wbr_dagdeel, filter_wbr_www
+from Overig.templatetags.overig_filters import (filter_highlight, filter_wbr_email, filter_wbr_dagdeel, filter_wbr_www,
+                                                filter_wbr_seizoen)
 
 
 class TestOverigTemplatetags(TestCase):
@@ -60,8 +61,8 @@ class TestOverigTemplatetags(TestCase):
         self.assertEqual(filter_wbr_www('handboogsport.nl/grensoverschreidend-gedrag'),
                          'handboog<wbr>sport.<wbr>nl/<wbr>grens<wbr>over<wbr>schreidend-gedrag')
 
-        self.assertEqual(filter_wbr_www('grensoverschreiden.nl/handboogsport'),
-                         'grens<wbr>over<wbr>schreiden.<wbr>nl/<wbr>handboog<wbr>sport')
+        self.assertEqual(filter_wbr_www('grensoverschreidend.nl/handboogsport'),
+                         'grens<wbr>over<wbr>schreidend.<wbr>nl/<wbr>handboog<wbr>sport')
 
     def test_filter_wbr_dagdeel(self):
         self.assertEqual(filter_wbr_dagdeel("WO"),
@@ -73,5 +74,9 @@ class TestOverigTemplatetags(TestCase):
                          '<span class="hide-on-small-only">Zaterdag<wbr>ochtend</span>')
 
         self.assertEqual(filter_wbr_dagdeel("Huh??"), "Huh??")
+
+    def test_filter_wbr_seizoen(self):
+        self.assertEqual(filter_wbr_seizoen("Testje"), '<wbr>Testje')
+        self.assertEqual(filter_wbr_seizoen("2022/2023"), '2022/<wbr>2023')
 
 # end of file

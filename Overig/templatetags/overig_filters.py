@@ -173,11 +173,22 @@ def filter_wbr_dagdeel(text):
     return mark_safe(new_text)
 
 
+def filter_wbr_seizoen(text):
+    """  wbr_seizoen filter voegt een <wbr> toe aan de string "1111/2222"
+    """
+
+    pos = text.find('/')
+    new_text = text[:pos+1] + '<wbr>' + text[pos+1:]
+
+    return mark_safe(new_text)
+
+
 # register the filters
 register = template.Library()
 register.filter('highlight', filter_highlight)
 register.filter('wbr_email', filter_wbr_email)
 register.filter('wbr_www', filter_wbr_www)
 register.filter('wbr_dagdeel', filter_wbr_dagdeel)
+register.filter('wbr_seizoen', filter_wbr_seizoen)
 
 # end of file

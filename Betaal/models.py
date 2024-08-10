@@ -40,7 +40,7 @@ class BetaalInstellingenVereniging(models.Model):
     def moet_handmatig(self):
         # als deze vereniging een eigen Mollie sleutel ingesteld heeft
         # of akkoord heeft om via de bond betalingen te ontvangen
-        # dan hoeft het niet online
+        # dan hoeft het niet handmatig
         kan_online = self.mollie_api_key or self.akkoord_via_bond
         return not kan_online
 
@@ -197,8 +197,8 @@ class BetaalMutatie(models.Model):
         return msg
 
 
-# TODO: boekhouding: betaald bedrag, ingehouden transactiekosten door CPSP, ontvangen bedrag, uitbetaalde bedragen,
-#                   opsplitsing btw/transactiekosten
+# FUTURE: boekhouding: betaald bedrag, ingehouden transactiekosten door CPSP, ontvangen bedrag, uitbetaalde bedragen,
+#                      opsplitsing btw/transactiekosten
 
 
 # end of file

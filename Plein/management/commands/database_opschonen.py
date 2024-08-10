@@ -35,6 +35,7 @@ class Command(BaseCommand):
         taken_opschonen(self.stdout)
         tijdelijke_url_opschonen(self.stdout)
         registreer_opschonen(self.stdout)
+        # TODO: scheidsrechters
 
         self.stdout.write('Klaar')
 

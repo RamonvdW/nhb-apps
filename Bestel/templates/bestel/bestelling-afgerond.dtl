@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2022-2023 Ramon van der Winkel.
+                Copyright (c) 2022-2024 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -165,7 +165,6 @@
             window.addEventListener("load", function()
             {
                 // doe de eerste status check over 500ms
-                // TODO: dit geeft mensen niet echt een kans om de tekst te lezen
                 setTimeout(check_status_bestelling, 500);
             })
         </script>

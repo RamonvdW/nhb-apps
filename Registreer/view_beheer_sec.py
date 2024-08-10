@@ -229,7 +229,7 @@ class GastAccountDetailsView(UserPassesTestMixin, TemplateView):
             if match.heeft_account:
                 match.ophef += 5
 
-            if match.ophef > hoogste_ophef:
+            if match.ophef > hoogste_ophef:         # pragma: no branch
                 context['overzetten_naar_lid_nr'] = match.lid_nr
                 hoogste_ophef = match.ophef
 

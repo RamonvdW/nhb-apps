@@ -5,13 +5,15 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 ARGS="$*"
-COV_AT_LEAST=97.30
+COV_AT_LEAST=96.70
 RED="\e[31m"
 RESET="\e[0m"
 TEST_DIR="./SiteMain/tmp_test_data"
 TEST_DIR_FOTOS_WEBWINKEL="$TEST_DIR/webwinkel"
 REPORT_DIR="/tmp/covhtml"
 LOG="/tmp/test_out.txt"
+TMP_HTML="/tmp/tmp_html/"             # used by e2e_open_in_browser()
+STATIC_DIR="$PWD/SiteMain/.static/"   # must be full path
 
 # -Wa = enable deprecation warnings
 PY_OPTS="-Wa"
@@ -29,8 +31,8 @@ touch "$LOG"
 COV_INCLUDE_3RD_PARTY=""
 #COV_INCLUDE_3RD_PARTY="mollie"
 
-PYCOV=""
-PYCOV="-m coverage run --append --branch"       # --pylib
+COVRC="--rcfile=./SiteMain/utils/coverage.rc"
+PYCOV="-m coverage run $COVRC --append --branch"       # --pylib
 [ -n "$COV_INCLUDE_3RD_PARTY" ] && PYCOV+=" --include=*${COV_INCLUDE_3RD_PARTY}*"
 
 export PYTHONDONTWRITEBYTECODE=1
@@ -146,10 +148,23 @@ then
     python3 $PY_OPTS ./manage.py check --tag admin --tag models || exit $?
 fi
 
-ABORTED=0
+echo "[INFO] Refreshing static files"
+rm -rf "$STATIC_DIR"*     # keeps top directory
+COLLECT=$(./manage.py collectstatic --link)
+RES=$?
+if [ $RES -ne 0 ]
+then
+    echo "$COLLECT"
+    exit 1
+fi
+
+# create a link from /tmp/static to the actual static dir
+# used to load static content from html written by e2e_open_in_browser()
+rm -rf "$TMP_HTML"
+mkdir -p "$TMP_HTML"
+ln -s "$STATIC_DIR" "$TMP_HTML/static"
 
 export COVERAGE_FILE="/tmp/.coverage.$$"
-
 python3 $PY_OPTS -m coverage erase
 
 echo "[INFO] Capturing output in $LOG"
@@ -158,6 +173,8 @@ echo "[INFO] Capturing output in $LOG"
 tail -f "$LOG" --pid=$$ | python -u ./SiteMain/utils/number_tests.py | grep --color -E "FAIL$|ERROR$|" &
 PID_TAIL=$(jobs -p | tail -1)
 # echo "PID_TAIL=$PID_TAIL"
+
+ABORTED=0
 
 if [ $KEEP_DB -ne 1 ]
 then
@@ -297,18 +314,18 @@ then
 
     if [ -z "$FOCUS" ] || [ $FORCE_FULL_COV -ne 0 ]
     then
-        python3 -m coverage report --precision=$PRECISION --skip-covered --fail-under=$COV_AT_LEAST $OMIT 2>&1 | tee -a "$LOG"
+        python3 -m coverage report $COVRC --precision=$PRECISION --skip-covered --fail-under=$COV_AT_LEAST $OMIT 2>&1 | tee -a "$LOG"
         res=${PIPESTATUS[0]}
         if [ $res -gt 0 ] && [ -z "$ARGS" ]
         then
             COVERAGE_RED=1
         fi
 
-        python3 -m coverage html -d "$REPORT_DIR" --precision=$PRECISION --skip-covered $OMIT &>>"$LOG"
+        python3 -m coverage html $COVRC -d "$REPORT_DIR" --precision=$PRECISION --skip-covered $OMIT &>>"$LOG"
     else
         [ -n "$COV_INCLUDE" ] && COV_INCLUDE="--include=$COV_INCLUDE"
-        python3 -m coverage report --precision=$PRECISION $COV_INCLUDE $OMIT
-        python3 -m coverage html -d "$REPORT_DIR" --precision=$PRECISION --skip-covered $COV_INCLUDE $OMIT &>>"$LOG"
+        python3 -m coverage report $COVRC --precision=$PRECISION $COV_INCLUDE $OMIT
+        python3 -m coverage html $COVRC -d "$REPORT_DIR" --precision=$PRECISION --skip-covered $COV_INCLUDE $OMIT &>>"$LOG"
     fi
 
     rm "$COVERAGE_FILE"

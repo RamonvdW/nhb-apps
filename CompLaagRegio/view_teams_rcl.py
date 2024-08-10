@@ -704,8 +704,9 @@ class StartVolgendeTeamRondeView(UserPassesTestMixin, TemplateView):
         # TODO: check competitie fase
 
         probleem_met_teams = False
+
         if deelcomp.huidige_team_ronde == 0:
-            # check dat alle teams geplaatst in een wedstrijdklasse (dus genoeg sporters gekoppeld hebben)
+            # check dat alle teams in een wedstrijdklasse staan (dus genoeg sporters gekoppeld hebben)
             # en dat alle teams in een poule zitten
 
             team_pk2poule = dict()
@@ -727,6 +728,8 @@ class StartVolgendeTeamRondeView(UserPassesTestMixin, TemplateView):
                                     '-aanvangsgemiddelde',
                                     'vereniging__ver_nr'))
 
+            geen_poule_teams = list()
+
             for team in regioteams:
                 team.aantal_sporters = team.leden.count()
 
@@ -739,10 +742,15 @@ class StartVolgendeTeamRondeView(UserPassesTestMixin, TemplateView):
                 except KeyError:
                     team.poule = None
                     team.is_niet_af = True
+                    geen_poule_teams.append(team)
             # for
 
             if probleem_met_teams:
                 context['teams_niet_af'] = regioteams
+
+            if len(geen_poule_teams) > 0:
+                probleem_met_teams = True
+                context['teams_niet_in_poule'] = geen_poule_teams
 
         if not probleem_met_teams:
             if 1 <= deelcomp.huidige_team_ronde <= 7:
