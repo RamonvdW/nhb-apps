@@ -157,7 +157,7 @@ class Command(BaseCommand):
                         bestel_betaling_is_gestart(bestelling, actief)
 
     def _verwerk_mutatie_start_restitutie(self, mutatie):
-        # TODO: implementeer restitutie
+        # FUTURE: implementeer restitutie
         pass
 
     def _maak_transactie(self, obj, payment_id):

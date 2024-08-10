@@ -114,7 +114,7 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
                 team_klasse2count[obj.team_klasse.pk] = 4
         # for
 
-        # TODO: standaard begrenzing aantal teams: ERE=12, rest=8
+        # FUTURE: standaard begrenzing aantal teams: ERE=12, rest=8
 
         for cut in (KampioenschapTeamKlasseLimiet
                     .objects

@@ -204,7 +204,7 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
                         context['dagdelen'].append(dagdeel)
                 # for
 
-        # TODO: eigen blazoen is ook mogelijk voor 25m (4-spot)
+        # FUTURE: eigen blazoen is ook mogelijk voor 25m (4-spot)
         if comp.is_indoor():
             if sporterboog.boogtype.afkorting in ('R', 'BB'):
                 context['eigen_blazoen'] = True

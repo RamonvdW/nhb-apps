@@ -500,7 +500,7 @@ class MyHandler(BaseHTTPRequestHandler):
         # out_debug("POST request,\nPath: %s\nHeaders:\n%s" % (str(self.path), str(self.headers)))
         out_debug('POST %s' % repr(self.path))
 
-        # TODO: validate api key
+        # FUTURE: validate api key
         # foute api key: stuur json met "status": 401, "title": "Unauthorized request"
 
         if self.path.startswith('/v2/payments'):
