@@ -776,7 +776,7 @@ class ScoresRegioTeamsView(UserPassesTestMixin, TemplateView):
         return rol_nu == Rollen.ROL_RCL
 
     @staticmethod
-    def _bepaal_teams_en_scores(deelcomp):
+    def _bepaal_teams_en_scores(deelcomp, mag_database_wijzigen=False):
         alle_regels = list()
         aantal_keuzes_nodig = 0
 
@@ -1095,7 +1095,7 @@ class ScoresRegioTeamsView(UserPassesTestMixin, TemplateView):
         if not deelcomp.regio_organiseert_teamcompetitie:
             raise Http404('Geen teamcompetitie in deze regio')
 
-        alle_regels, _, _ = self._bepaal_teams_en_scores(deelcomp)
+        alle_regels, _, _ = self._bepaal_teams_en_scores(deelcomp, mag_database_wijzigen=True)
 
         # for k, v in request.POST.items():
         #     print('%s=%s' % (k, repr(v)))

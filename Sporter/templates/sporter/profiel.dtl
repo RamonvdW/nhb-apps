@@ -1027,7 +1027,7 @@
             </div>
         </div>
     {% endif %}
-    
+
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
@@ -1107,8 +1107,8 @@
                                 <a class="btn-sv-rood" href="mailto:{{ rcl25_email }}">
                                     <i class="notranslate material-icons-round">mail</i></a>
                             </td>
-                        {% endif %}
-                    </tr>
+                        </tr>
+                    {% endif %}
 
                     <tr>
                         <td colspan="4" class="center">De regiocompetitieleiders (RCL) regelen alles rond de competities en kan je benaderen als er problemen zijn met de uitslagen.</td>

@@ -4,7 +4,7 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from .model_vereniging import Vereniging
-from .model_secretaris import Secretaris
+from .vereniging import Vereniging
+from .secretaris import Secretaris
 
 # end of file

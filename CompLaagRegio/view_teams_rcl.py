@@ -755,22 +755,22 @@ class StartVolgendeTeamRondeView(UserPassesTestMixin, TemplateView):
             if 1 <= deelcomp.huidige_team_ronde <= 7:
                 context['alle_regels'], context['is_redelijk'] = self._bepaal_wedstrijdpunten(deelcomp)
 
-            if deelcomp.regio_team_punten_model == TEAM_PUNTEN_MODEL_FORMULE1:
-                context['toon_f1'] = True
-                context['wp_model_str'] = 'Formule 1'
-            elif deelcomp.regio_team_punten_model == TEAM_PUNTEN_MODEL_TWEE:
-                context['toon_h2h'] = True
-                context['wp_model_str'] = '2 punten, directe tegenstanders'
-            else:
-                context['toon_som'] = True
-                context['wp_model_str'] = 'Som van de scores'
-
             if deelcomp.huidige_team_ronde <= 7:
                 context['url_team_scores'] = reverse('CompScores:selecteer-team-scores',
                                                      kwargs={'deelcomp_pk': deelcomp.pk})
 
                 context['url_volgende_ronde'] = reverse('CompLaagRegio:start-volgende-team-ronde',
                                                         kwargs={'deelcomp_pk': deelcomp.pk})
+
+        if deelcomp.regio_team_punten_model == TEAM_PUNTEN_MODEL_FORMULE1:
+            context['toon_f1'] = True
+            context['wp_model_str'] = 'Formule 1'
+        elif deelcomp.regio_team_punten_model == TEAM_PUNTEN_MODEL_TWEE:
+            context['toon_h2h'] = True
+            context['wp_model_str'] = '2 punten, directe tegenstanders'
+        else:
+            context['toon_som'] = True
+            context['wp_model_str'] = 'Som van de scores'
 
         comp = deelcomp.competitie
         context['kruimels'] = (
