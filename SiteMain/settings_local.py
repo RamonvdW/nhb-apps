@@ -19,11 +19,11 @@ ENABLE_DEBUG_TOOLBAR = False
 # the secret below ensures an adversary cannot fake aspects like a session-id
 # just make sure it is unique per installation and keep it private
 # details: https://docs.djangoproject.com/en/4.2/ref/settings/#secret-key
-SECRET_KEY = '1234-replace-with-your-own-secret-key-56789abcdefg'
+SECRET_KEY = '1234-replace-with-your-own-secret-key-56789abcdefg'       # noqa
 
 BASE_URL = "yourdomain.com"
 
-# SITE_URL wordt gebruikt door TijdelijkeCodes, maar ook voor alle urls in e-mails
+# SITE_URL wordt gebruikt door Overige:tijdelijke urls
 #SITE_URL = "https://" + BASE_URL
 SITE_URL = "http://localhost:8000"
 
@@ -50,22 +50,22 @@ DATABASES = {
 CONN_MAX_AGE = None
 
 # the issuer name that is sent to the OTP application in the QR code
-OTP_ISSUER_NAME = "yourdomain.com"
+OTP_ISSUER_NAME = "Your Site"
 
 NAAM_SITE = "YourSite (dev)"
 
 # aparte namen voor gebruik in e-mailafschrift bestelling
-AFSCHRIFT_SITE_NAAM = "YourSite"
+AFSCHRIFT_SITE_NAAM = "Your Site"
 AFSCHRIFT_SITE_URL = "yourdomain.com"
 
-# contactgegevens 1e en 2e lijns support
+# contactgegevens eerste- en tweedelijns support
 EMAIL_BONDSBUREAU = "info@yourdomain.com"
 EMAIL_SUPPORT = EMAIL_BONDSBUREAU
 
-URL_PDF_HANDLEIDING_LEDEN = 'https://yourstite/static/manual_members.pdf'
+URL_PDF_HANDLEIDING_LEDEN = 'https://yoursite/static/manual_members.pdf'
 URL_PDF_HANDLEIDING_BEHEERDERS = 'https://yoursite/static/manual_managers.pdf'
-URL_PDF_HANDLEIDING_VERENIGINGEN = 'https://yoursitestatic/manual_clubs.pdf'
-URL_PDF_HANDLEIDING_SCHEIDSRECHTERS = 'https://yoursitestatic/manual_judges.pdf'
+URL_PDF_HANDLEIDING_VERENIGINGEN = 'https://yoursite/static/manual_clubs.pdf'
+URL_PDF_HANDLEIDING_SCHEIDSRECHTERS = 'https://yoursite/static/manual_judges.pdf'
 
 # sending e-mail via Postmark
 #POSTMARK_URL = 'https://api.postmarkapp.com/email'
@@ -91,7 +91,7 @@ VERKOOPVOORWAARDEN_WEDSTRIJDEN_URL = 'https://docs.google.com/document/d/another
 VERKOOPVOORWAARDEN_WEBWINKEL_URL = 'https://docs.google.com/document/d/yet another random google document number/pub'
 
 # google doc id van het gsheet document
-RECORDS_GSHEET_FILE_ID = 'random google document number'
+RECORDS_GSHEET_FILE_ID = 'random gsheet doc id'
 
 # door de naam van een sheet te gebruiken as 'Range' krijg je alle cellen uit de sheet
 RECORDS_GSHEET_SHEET_NAMES = [
@@ -116,14 +116,14 @@ TOON_OPLEIDINGEN = False
 
 # bekende BIC codes, voor controle rekeninggegevens tijdens import uit CRM
 BEKENDE_BIC_CODES = (
-    'ABNANL2A',     # ABN AMRO bank
-    'ASNBNL21',     # Volksbank / ASN bank
-    'INGBNL2A',     # ING bank
-    'KNABNL2H',     # Knab (Aegon) --> ASR
-    'RABONL2U',     # Rabobank
-    'RBRBNL21',     # Volksbank / Regiobank
-    'SNSBNL2A',     # SNS bank
-    'TRIONL2U',     # Triodos bank
+    'ABNANL2A',     # ABN AMRO bank                 # noqa
+    'ASNBNL21',     # Volksbank / ASN bank          # noqa
+    'INGBNL2A',     # ING bank                      # noqa
+    'KNABNL2H',     # Knab (Aegon) --> ASR          # noqa
+    'RABONL2U',     # Rabobank                      # noqa
+    'RBRBNL21',     # Volksbank / Regiobank         # noqa
+    'SNSBNL2A',     # SNS bank                      # noqa
+    'TRIONL2U',     # Triodos bank                  # noqa
 )
 
 # na hoeveel dagen moet een product in het mandje automatisch vervallen?
@@ -134,9 +134,9 @@ MANDJE_VERVAL_NA_DAGEN = 3
 URL_VCP_CONTACTGEGEVENS = 'https://yourfrontend/grensoverschrijdend-gedrag/'
 
 # locatie op disk waar de foto's staan (bron)
-# deze worden door collectstatic naar deployment gezet
+# deze worden door collectstatic naar deployment gezet  # noqa
 # het veld WebwinkelProduct.locatie is onder dit punt
-WEBWINKEL_FOTOS_DIR = '/directory/on/server/webwinkel_fotos'
+WEBWINKEL_FOTOS_DIR = '/directory/on/server/webwinkel_fotos'    # noqa
 
 # welke vereniging is de verkoper
 WEBWINKEL_VERKOPER_VER_NR = 1368
@@ -152,6 +152,9 @@ WEBWINKEL_TRANSPORT_OPHALEN_MAG = True
 # BTW percentage voor alle producten in de webwinkel, inclusief transportkosten
 WEBWINKEL_BTW_PERCENTAGE = 21.0
 
+# Prestatiespelden tonen in de webwinkel?
+WEBWINKEL_TOON_PRESTATIESPELDEN = False
+
 # Mollie endpoint URL override
 # (None = use library provided default)
 BETAAL_API_URL = None
@@ -164,12 +167,16 @@ GMAPS_KEY = 'AIzaDummy'
 # voor sommige adressen werkt de geocode API niet...
 # hier geven we het handmatige antwoord.
 GEOCODE_FALLBACK = {
-    "HEIDSEWEG 72A 5812AB HEIDE": (51.50199, 5.94793),
-    "HEIDSEWEG 72A 5812 AB HEIDE": (51.50199, 5.94793),
-    "HTTPS://GOO.GL/MAPS/5UHRTFEC4W7UAP2R7": (52.99786, 6.59954),
+    "HEIDSEWEG 72A 5812AB HEIDE": (51.50199, 5.94793),              # noqa
+    "HEIDSEWEG 72A 5812 AB HEIDE": (51.50199, 5.94793),             # noqa
+    "HTTPS://GOO.GL/MAPS/5UHRTFEC4W7UAP2R7": (52.99786, 6.59954),   # noqa
 }
 
 # lidnummers van de scheidsrechters die geen mailtjes met beschikbaarheidsverzoeken willen ontvangen
 LID_NRS_GEEN_SCHEIDS_BESCHIKBAARHEID_OPVRAGEN = ()
+
+# Ledenvoordeel
+WALIBI_URL_ALGEMEEN = 'https://www.walibi.nl/'
+WALIBI_URL_KORTING = 'https://bit.ly/yourcode'
 
 # end of file
