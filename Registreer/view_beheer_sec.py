@@ -224,6 +224,8 @@ class GastAccountDetailsView(UserPassesTestMixin, TemplateView):
                 match.ophef += 1
             if match.is_match_vereniging:
                 match.ophef += 1
+            else:
+                match.ophef = 0
             if match.is_match_plaats:
                 match.ophef += 1
             if match.heeft_account:

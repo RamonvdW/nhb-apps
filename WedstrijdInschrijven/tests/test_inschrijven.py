@@ -108,7 +108,7 @@ class TestWedstrijdInschrijven(E2EHelpers, TestCase):
                     adres_code='1234AB56',
                     bij_vereniging=self.ver1)
         sporter2.save()
-        get_sporter_voorkeuren(sporter2)        # TODO: ontbreek hier 'mag_database_wijzigen=True' ?
+        get_sporter_voorkeuren(sporter2, mag_database_wijzigen=True)
 
         self.sporterboog2 = SporterBoog(
                                 sporter=sporter2,

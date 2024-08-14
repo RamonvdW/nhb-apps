@@ -61,6 +61,8 @@ class TestTakenViews(E2EHelpers, TestCase):
         self.functie_wl.laatste_email_over_taken = None
         self.functie_wl.save(update_fields=['bevestigde_email', 'laatste_email_over_taken'])
 
+        self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.com', 'Normaal')
+
         # maak een taak aan
         taak = Taak(toegekend_aan_functie=self.functie_sup,
                     deadline='2020-01-01',
@@ -68,13 +70,21 @@ class TestTakenViews(E2EHelpers, TestCase):
         taak.save()
         self.taak1 = taak
 
+        # maak nog een taak aan
+        taak = Taak(toegekend_aan_functie=self.functie_mwz,
+                    deadline='2020-01-01',
+                    aangemaakt_door=self.account_normaal,
+                    beschrijving='Testje taak2')
+        taak.save()
+        self.taak2 = taak
+
         # maak een afgeronde taak aan
         taak = Taak(is_afgerond=True,
                     toegekend_aan_functie=self.functie_mwz,
                     deadline='2020-01-01',
-                    beschrijving='Afgerond testje taak2')
+                    beschrijving='Afgerond testje taak3')
         taak.save()
-        self.taak2 = taak
+        self.taak3 = taak
 
     def test_anon(self):
         # do een get van het takenoverzicht zonder ingelogd te zijn
@@ -103,9 +113,20 @@ class TestTakenViews(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('taken/overzicht.dtl', 'plein/site_layout.dtl'))
 
         self.assertContains(resp, 'Testje taak1')
-        self.assertContains(resp, 'testje taak2')
+        self.assertContains(resp, 'Testje taak2')
+        self.assertContains(resp, 'testje taak3')
 
-        url = self.url_details % self.taak1.pk
+        # al afgesloten taak bekijken
+        url = self.url_details % self.taak3.pk
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('taken/details.dtl', 'plein/site_layout.dtl'))
+
+        # nog niet afgesloten taak bekijken
+        # deze heeft "aangemaakt door"
+        url = self.url_details % self.taak2.pk
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
@@ -113,12 +134,13 @@ class TestTakenViews(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('taken/details.dtl', 'plein/site_layout.dtl'))
 
         # doe de post om de taak af te ronden
+        url = self.url_details % self.taak1.pk
         with self.assert_max_queries(20):
             resp = self.client.post(url)
         self.assert_is_redirect(resp, self.url_overzicht)
 
         # nogmaals, voor uitbreiding logboek
-        self.taak1 = Taak.objects.get(pk=self.taak1.pk)     # refresh from database
+        self.taak1.refresh_from_db()
         self.taak1.is_afgerond = False
         self.taak1.save()
         with self.assert_max_queries(20):
@@ -146,7 +168,7 @@ class TestTakenViews(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('taken/overzicht.dtl', 'plein/site_layout.dtl'))
 
         self.assertTrue(str(self.taak1) != '')
-        self.assertTrue(str(self.taak2) != '')
+        self.assertTrue(str(self.taak3) != '')
 
         # corner-case
         request = resp.wsgi_request
@@ -169,7 +191,7 @@ class TestTakenViews(E2EHelpers, TestCase):
         self.assert404(resp, 'Geen valide taak')
 
         # taak van een ander
-        url = self.url_details % self.taak2.pk
+        url = self.url_details % self.taak3.pk
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assert403(resp)
@@ -184,6 +206,13 @@ class TestTakenViews(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.testdata.account_admin)
         self.e2e_wisselnaarrol_bb()
         self.e2e_wissel_naar_functie(self.functie_wl)
+
+        # geen open taken
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_overzicht)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('taken/overzicht.dtl', 'plein/site_layout.dtl'))
 
         # huidige functie WL is niet toegekend, maar we laten wel de taken van die functie zien
 

@@ -1169,8 +1169,10 @@ class TestData(object):
             deelnemers = deelnemers_per_boog[afkorting][:4]
             deelnemers_per_boog[afkorting] = deelnemers_per_boog[afkorting][len(deelnemers):]
 
-            # bereken de teamsterkte
-            team.aanvangsgemiddelde = sum([deelnemer.ag_voor_team for deelnemer in deelnemers])     # TODO: top 3
+            # bereken de teamsterkte (som van top 3)
+            ags = [deelnemer.ag_voor_team for deelnemer in deelnemers]
+            ags.sort(reverse=True)
+            team.aanvangsgemiddelde = sum(ags[:3])
             team.save(update_fields=['aanvangsgemiddelde'])
 
             team.leden.set(deelnemers)

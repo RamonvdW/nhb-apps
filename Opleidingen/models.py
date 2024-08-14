@@ -52,7 +52,7 @@ class OpleidingDeelnemer(models.Model):
     sporter = models.ForeignKey(Sporter, on_delete=models.PROTECT)
 
     # wanneer is deze aanmelding gedaan?
-    wanneer_aangemeld = models.DateTimeField(auto_now=True)     # TODO: verander in auto_now_add ?
+    wanneer_aangemeld = models.DateTimeField(auto_now_add=True)
 
     # wie was de koper?
     koper = models.ForeignKey(Account, on_delete=models.PROTECT, null=True, blank=True)
@@ -90,7 +90,7 @@ class OpleidingMoment(models.Model):
 
     # naam en contactgegevens van de opleider
     opleider_naam = models.CharField(max_length=150, default='')
-    opleider_email = models.CharField(max_length=150)       # TODO: verander in EmailField?
+    opleider_email = models.EmailField(default='', blank=True)
     opleider_telefoon = models.CharField(max_length=25, default='', blank=True)
 
     class Meta:

@@ -11,7 +11,7 @@ from django.utils import timezone
 from Account.models import get_account
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from BasisTypen.definities import SCHEIDS_BOND, SCHEIDS_INTERNATIONAAL
+from BasisTypen.definities import SCHEIDS_BOND, SCHEIDS_INTERNATIONAAL, SCHEIDS_NIET
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige
 from Functie.scheids import gebruiker_is_scheids
@@ -21,7 +21,7 @@ from Scheidsrechter.definities import (BESCHIKBAAR_LEEG, BESCHIKBAAR_JA, BESCHIK
 from Scheidsrechter.models import WedstrijdDagScheidsrechters, ScheidsBeschikbaarheid
 from Scheidsrechter.mutaties import (scheids_mutatieverzoek_beschikbaarheid_opvragen,
                                      scheids_mutatieverzoek_competitie_beschikbaarheid_opvragen)
-from Sporter.models import get_sporter
+from Sporter.models import get_sporter, Sporter
 from Wedstrijden.definities import WEDSTRIJD_STATUS_GEACCEPTEERD
 from Wedstrijden.models import Wedstrijd
 from collections import OrderedDict
@@ -441,8 +441,6 @@ class BeschikbaarheidStatsCSView(UserPassesTestMixin, TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        context['counts'] = counts = OrderedDict()
-
         opgaaf2str = {
             BESCHIKBAAR_JA: 'ja',
             BESCHIKBAAR_DENK: 'denk',
@@ -450,27 +448,33 @@ class BeschikbaarheidStatsCSView(UserPassesTestMixin, TemplateView):
             BESCHIKBAAR_LEEG: 'leeg',
         }
 
+        context['counts'] = counts = OrderedDict()
+
+        for obj in Sporter.objects.exclude(scheids=SCHEIDS_NIET).order_by('lid_nr'):
+            sr_counts = {'opmerking': 0,
+                         'naam': obj.volledige_naam(),
+                         'level_str': SCHEIDS2LEVEL[obj.scheids]}
+            for opgaaf in opgaaf2str.values():
+                sr_counts[opgaaf] = 0
+            # for
+            counts[obj.lid_nr] = sr_counts
+        # for
+
         for obj in (ScheidsBeschikbaarheid
                     .objects
-                    .select_related('scheids')
-                    .order_by('scheids')):
+                    .select_related('scheids')):
 
             lid_nr = obj.scheids.lid_nr
-            if lid_nr not in counts:
-                counts[lid_nr] = {'opmerking': 0,
-                                  'naam': obj.scheids.volledige_naam(),
-                                  'level_str': SCHEIDS2LEVEL[obj.scheids.scheids]}
-                for opgaaf in opgaaf2str.values():
-                    counts[lid_nr][opgaaf] = 0
-                # for
-
-            counts[lid_nr][opgaaf2str[obj.opgaaf]] += 1
-            if obj.opmerking:
-                counts[lid_nr]['opmerking'] += 1
+            if lid_nr in counts:
+                counts[lid_nr][opgaaf2str[obj.opgaaf]] += 1
+                if obj.opmerking:
+                    counts[lid_nr]['opmerking'] += 1
         # for
 
         for count in counts.values():
             count['totaal'] = totaal = count['ja'] + count['denk'] + count['nee']
+            if totaal == 0:
+                totaal = 0.00001
             count['ja_perc'] = '%.0f%%' % ((count['ja'] * 100) / totaal)
             count['denk_perc'] = '%.0f%%' % ((count['denk'] * 100) / totaal)
             count['nee_perc'] = '%.0f%%' % ((count['nee'] * 100) / totaal)
