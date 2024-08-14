@@ -48,25 +48,19 @@ class Command(BaseCommand):
         omslag_titel = options['omslag_titel'][0]
         self.stdout.write('[INFO] Zoek product met omslag_titel %s' % repr(omslag_titel))
 
-        qset = (WebwinkelProduct
-                .objects
-                .select_related('omslag_foto')
-                .prefetch_related('fotos')
-                .filter(omslag_titel__icontains=omslag_titel))
+        product = (WebwinkelProduct
+                   .objects
+                   .select_related('omslag_foto')
+                   .prefetch_related('fotos')
+                   .filter(omslag_titel__icontains=omslag_titel)
+                   .order_by('volgorde')
+                   .first())
 
-        if qset.count() == 0:
-            self.stderr.write('[ERROR] Product niet gevonden')
+        if not product:
+            self.stderr.write('[ERROR] Product met titel %s niet gevonden' % repr(omslag_titel))
             sys.exit(2)
 
-        if qset.count() > 1:
-            self.stderr.write('[ERROR] Meerdere producten gevonden:')
-            for product in qset:
-                self.stderr.write(product.omslag_titel)
-            # for
-            sys.exit(2)
-
-        product = qset[0]
-        self.stdout.write('[INFO] Gevonden product: %s' % repr(product.omslag_titel))
+        self.stdout.write('[INFO] Gevonden product: %s' % str(product))
 
         # zoek voor elk van de foto's het bestaande WebwinkelFoto objects op
         volgorde = 0

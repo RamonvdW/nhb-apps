@@ -50,7 +50,7 @@ class SporterAdmin(admin.ModelAdmin):
     search_fields = ('unaccented_naam', 'lid_nr', 'email')
 
     # filter mogelijkheid
-    list_filter = ('geslacht', 'scheids', 'is_actief_lid', 'is_erelid', 'is_overleden',
+    list_filter = ('geslacht', 'scheids', 'is_actief_lid', 'is_gast', 'is_erelid', 'is_overleden',
                    HeeftWaIdListFilter, HeeftAccountFilter,
                    'para_classificatie', 'bij_vereniging')
 
