@@ -52,6 +52,10 @@
             {% url 'Kalender:landing-page' as card_url %}
             {% include 'plein/card_icon.dtl' with title="Wedstrijdkalender" text="Bekijk welke wedstrijden georganiseerd worden en schrijf je in." icon="event_note" url=card_url %}
 
+            <!-- evenementen -->
+            {% url 'Evenement:landing-page' as card_url %}
+            {% include 'plein/card_icon.dtl' with title="Evenementen" text="Bekijk welke evenementen georganiseerd worden en meld je aan." icon="groups" url=card_url %}
+
             <!-- scheids -->
             {% if url_scheids %}
                 {% include 'plein/card_icon.dtl' with title="Scheidsrechters" text="Voor leden van het scheidsrechterskorps" icon="sports" url=url_scheids %}
@@ -73,7 +77,7 @@
 
             <!-- ledenvoordeel -->
             {% if url_voordeel %}
-                {% include 'plein/card_icon.dtl' with title="Ledenvoordeel" text="Bekijk de aanbiedingen voor KHSN leden!" icon="redeem" url=url_voordeel %}
+                {% include 'plein/card_icon.dtl' with title="Ledenvoordeel" text="Bekijk de aanbiedingen voor KHSN leden." icon="redeem" url=url_voordeel %}
             {% endif %}
         </div>
     </div>

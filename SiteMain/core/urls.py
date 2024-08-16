@@ -36,6 +36,7 @@ urlpatterns = [
     path('bondscompetities/uitslagen/',     include('CompUitslagen.urls')),
     path('bondscompetities/hist/',          include('HistComp.urls')),
     path('bondscompetities/',               include('Competitie.urls')),
+    path('evenement/',                      include('Evenement.urls')),
     path('functie/',                        include('Functie.urls')),
     path('feedback/',                       include('Feedback.urls')),
     path('kalender/',                       include('Kalender.urls')),

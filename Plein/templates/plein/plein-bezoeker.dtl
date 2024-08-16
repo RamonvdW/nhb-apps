@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2021-2023 Ramon van der Winkel.
+                Copyright (c) 2021-2024 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -55,7 +55,11 @@
 
             <!-- wedstrijdkalender -->
             {% url 'Kalender:landing-page' as card_url %}
-            {% include 'plein/card_icon.dtl' with title="Wedstrijdkalender" text="Bekijk welke wedstrijden georganiseerd worden en schrijf je in." icon="event_note" url=card_url %}
+            {% include 'plein/card_icon.dtl' with title="Wedstrijdkalender" text="Bekijk welke wedstrijden georganiseerd worden." icon="event_note" url=card_url %}
+
+            <!-- evenementen -->
+            {% url 'Evenement:landing-page' as card_url %}
+            {% include 'plein/card_icon.dtl' with title="Evenementen" text="Bekijk welke evenementen georganiseerd worden." icon="groups" url=card_url %}
 
             <!-- opleidingen -->
             {% if toon_opleidingen %}
