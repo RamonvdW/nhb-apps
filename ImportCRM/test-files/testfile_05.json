@@ -41,6 +41,7 @@
       "date_of_death": null,
       "birthplace": null,
       "member_from": "2000-01-01",
+      "member_until": "9999-12-31",
       "para_code": null,
       "address": null,
       "postal_code": null,
