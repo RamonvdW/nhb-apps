@@ -49,7 +49,7 @@ class WedstrijdAdmin(admin.ModelAdmin):                 # pragma: no cover
         """
         if db_field.name == 'locatie' and self.obj:
             ver = self.obj.organiserende_vereniging
-            kwargs['queryset'] = ver.locatie_set.all()
+            kwargs['queryset'] = ver.wedstrijdlocatie_set.all()
 
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 

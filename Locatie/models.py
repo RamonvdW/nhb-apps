@@ -130,10 +130,6 @@ class EvenementLocatie(models.Model):
     # plaats van deze locatie, om eenvoudig weer te kunnen geven op de kalender
     plaats = models.CharField(max_length=50, blank=True, default='')
 
-    # coördinaten voor het adres
-    adres_lat = models.CharField(max_length=10, blank=True, default='')       # 51.5037503
-    adres_lon = models.CharField(max_length=10, blank=True, default='')       # 5.3670660
-
     # vrije notitiegegevens voor zaken als "verbouwing tot", etc.
     notities = models.TextField(max_length=1024, blank=True)
 

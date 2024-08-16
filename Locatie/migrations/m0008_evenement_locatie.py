@@ -27,8 +27,6 @@ class Migration(migrations.Migration):
                 ('zichtbaar', models.BooleanField(default=True)),
                 ('adres', models.TextField(blank=True, max_length=256)),
                 ('plaats', models.CharField(blank=True, default='', max_length=50)),
-                ('adres_lat', models.CharField(blank=True, default='', max_length=10)),
-                ('adres_lon', models.CharField(blank=True, default='', max_length=10)),
                 ('notities', models.TextField(blank=True, max_length=1024)),
                 ('vereniging', models.ForeignKey(on_delete=models.deletion.CASCADE, to='Vereniging.vereniging')),
             ],

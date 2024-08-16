@@ -174,7 +174,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
         else:
             ver = wedstrijd.organiserende_vereniging
         locaties = (ver
-                    .locatie_set
+                    .wedstrijdlocatie_set
                     .exclude(zichtbaar=False)
                     .order_by('pk'))
         try:
@@ -598,7 +598,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
                 else:
                     ver = wedstrijd.organiserende_vereniging
                 for locatie in (ver
-                                .locatie_set
+                                .wedstrijdlocatie_set
                                 .exclude(zichtbaar=False)):
                     sel = 'loc_%s' % locatie.pk
                     if sel == data:

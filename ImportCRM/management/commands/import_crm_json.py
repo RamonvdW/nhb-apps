@@ -124,7 +124,7 @@ class Command(BaseCommand):
                     .objects
                     .exclude(ver_nr__in=SKIP_VER_NR)
                     .select_related('regio')
-                    .prefetch_related('locatie_set')
+                    .prefetch_related('wedstrijdlocatie_set')
                     .all()):
             self._cache_ver[ver.ver_nr] = ver
         # for
@@ -1137,7 +1137,7 @@ class Command(BaseCommand):
                 pass
             else:
                 if lid_blocked:
-                    # geen edus importeren voor oud-leden
+                    # geen ?? dus importeren voor oud-leden
                     is_administratief_aanwezig = True
                 else:
                     for edu in edus:
@@ -1512,7 +1512,7 @@ class Command(BaseCommand):
                     Speelsterkte.objects.bulk_create(nieuwe_lijst)
             else:
                 # sporter is geen actief lid meer
-                # we behouden zijn behaalde speelsterktes in de administratie
+                # drop zijn speelsterktes
                 huidige_lijst = list()
 
             # verwijder oude speelsterktes
@@ -1661,8 +1661,8 @@ class Command(BaseCommand):
             if not adres:
                 # vereniging heeft geen adres meer
                 # verwijder de koppeling met locatie uit crm
-                for obj in ver.locatie_set.filter(adres_uit_crm=True):
-                    ver.locatie_set.remove(obj)
+                for obj in ver.wedstrijdlocatie_set.filter(adres_uit_crm=True):
+                    ver.wedstrijdlocatie_set.remove(obj)
                     self.stdout.write('[INFO] Locatie %s ontkoppeld voor vereniging %s' % (repr(obj.adres), ver_nr))
                     self._count_wijzigingen += 1
                 continue
@@ -1698,10 +1698,10 @@ class Command(BaseCommand):
             # adres van locatie mag niet wijzigen
             # dus als vereniging een ander adres heeft, ontkoppel dan de oude locatie
             for obj in (ver
-                        .locatie_set
+                        .wedstrijdlocatie_set
                         .exclude(adres_uit_crm=False)           # niet extern/buitenbaan
                         .exclude(pk=locatie.pk)):
-                ver.locatie_set.remove(obj)
+                ver.wedstrijdlocatie_set.remove(obj)
                 self.stdout.write('[INFO] Vereniging %s ontkoppeld van locatie met adres %s' % (ver, repr(obj.adres)))
                 self._count_wijzigingen += 1
             # for
@@ -1715,10 +1715,10 @@ class Command(BaseCommand):
             # zoek ook de buitenbaan van de vereniging erbij
             try:
                 buiten_locatie = (ver
-                                  .locatie_set
+                                  .wedstrijdlocatie_set
                                   .get(baan_type=BAAN_TYPE_BUITEN,
                                        zichtbaar=True))
-            except Locatie.DoesNotExist:
+            except WedstrijdLocatie.DoesNotExist:
                 # vereniging heeft geen buitenlocatie
                 pass
             else:

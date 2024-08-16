@@ -238,7 +238,7 @@ class TestImportCRMImport(E2EHelpers, TestCase):
         self.assertTrue("[WARNING] Vereniging 1002 KvK nummer 'X15' moet 8 cijfers bevatten" in f2.getvalue())
         self.assertTrue("[WARNING] Vereniging 1042 KvK nummer '1234' moet 8 cijfers bevatten" in f2.getvalue())
 
-        locatie1 = ver.locatie_set.exclude(baan_type=BAAN_TYPE_BUITEN).get(plaats='Stadia')
+        locatie1 = ver.wedstrijdlocatie_set.exclude(baan_type=BAAN_TYPE_BUITEN).get(plaats='Stadia')
         locatie1.plaats = 'Ja maar'
         locatie1.save(update_fields=['plaats'])
 

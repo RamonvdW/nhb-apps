@@ -68,7 +68,7 @@ class VerenigingAccommodatieDetailsView(UserPassesTestMixin, TemplateView):
         binnen_locatie = None
         buiten_locatie = None
         externe_locaties = list()
-        for loc in ver.locatie_set.all():
+        for loc in ver.wedstrijdlocatie_set.all():
             if loc.baan_type == BAAN_TYPE_EXTERN:
                 if loc.zichtbaar:
                     externe_locaties.append(loc)

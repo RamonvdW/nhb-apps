@@ -64,7 +64,7 @@ class ExterneLocatiesView(UserPassesTestMixin, TemplateView):
             context['url_toevoegen'] = reverse('Locatie:externe-locaties',
                                                kwargs={'ver_nr': ver.ver_nr})
 
-        locaties = ver.locatie_set.filter(zichtbaar=True,
+        locaties = ver.wedstrijdlocatie_set.filter(zichtbaar=True,
                                           baan_type='E')
         context['locaties'] = locaties
 

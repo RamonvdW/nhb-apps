@@ -13,12 +13,11 @@ class Migration(migrations.Migration):
 
     # volgorde afdwingen
     dependencies = [
-        ('Evenement', 'm0001_initial'),
-        ('Vereniging', 'm0007_squashed'),
-        ('Opleidingen', 'm0006_correcties'),
-        ('Wedstrijden', 'm0053_verstop'),
         ('Competitie', 'm0114_logboekje'),
         ('Locatie', 'm0006_squashed'),
+        ('Opleidingen', 'm0006_correcties'),
+        ('Vereniging', 'm0007_squashed'),
+        ('Wedstrijden', 'm0053_verstop'),
     ]
 
     # migratie functies

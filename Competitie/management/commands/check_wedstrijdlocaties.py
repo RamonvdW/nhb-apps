@@ -45,9 +45,9 @@ class Command(BaseCommand):
 
         ver2locs = dict()   # [ver_nr] = (loc, loc, ..)
 
-        for ver in Vereniging.objects.prefetch_related('locatie_set').all():
+        for ver in Vereniging.objects.prefetch_related('wedstrijdlocatie_set').all():
             ver2locs[ver.ver_nr] = locs = list()
-            for loc in ver.locatie_set.exclude(zichtbaar=False):
+            for loc in ver.wedstrijdlocatie_set.exclude(zichtbaar=False):
                 locs.append(loc)
             # for
         # for

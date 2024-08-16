@@ -183,7 +183,7 @@ class TestLocatieAccommodatie(E2EHelpers, TestCase):
         loc1.zichtbaar = False
         loc1.save(update_fields=['zichtbaar'])
 
-        loc2 = self.ver1.locatie_set.filter(baan_type=BAAN_TYPE_BUITEN).first()
+        loc2 = self.ver1.wedstrijdlocatie_set.filter(baan_type=BAAN_TYPE_BUITEN).first()
         self.assertEqual(loc2.naam, '')
         self.assertTrue(loc2.zichtbaar)
         self.assertFalse(loc2.adres_uit_crm)        # vrijheid om te wijzigen
