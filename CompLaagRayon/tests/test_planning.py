@@ -342,9 +342,9 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
                                             sel_indiv_1: "on",
                                             sel_indiv_2: "on",
                                             sel_indiv_3: "on",
-                                            '"wkl_indiv_': "on",         # bad
-                                            '"wkl_indiv_bad': "on",      # bad
-                                            '"snel': 1})
+                                            'wkl_indiv_': "on",         # bad
+                                            'wkl_indiv_bad': "on",      # bad
+                                            'snel': 1})
         self.assert_is_redirect_not_plein(resp)  # check for success
 
         # wissel naar BKO en haal de planning op
