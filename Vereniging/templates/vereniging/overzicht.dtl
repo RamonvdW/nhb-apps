@@ -97,10 +97,8 @@
             <div class="col s12">
 
                 <!-- competitiewedstrijden -->
-                {% if toon_competities %}
-                    {% url 'Taken:overzicht' as card_url %}
-                    {% include 'plein/card_icon.dtl' with title="Taken" text=taken_text icon="event" url=card_url %}
-                {% endif %}
+                {% url 'Taken:overzicht' as card_url %}
+                {% include 'plein/card_icon.dtl' with title="Taken" text=taken_text icon="event" url=card_url %}
             </div>
         </div>
 
