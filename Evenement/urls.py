@@ -9,13 +9,18 @@ from Evenement import views
 
 app_name = 'Evenement'
 
-# basis = /evenement/
+# basis = /kalender/evenement/
 
 urlpatterns = [
+    # evenement details
+    path('details/<evenement_pk>/',
+         views.DetailsView.as_view(),
+         name='details'),
 
-    path('',
-         views.LandingPageView.as_view(),
-         name='landing-page'),
+    # afmelden
+    path('afmelden/<inschrijving_pk>/',
+         views.AfmeldenView.as_view(),
+         name='afmelden'),
 ]
 
 # end of file

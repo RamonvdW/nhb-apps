@@ -10,7 +10,6 @@ from django.urls import path
 from django.conf import settings
 from django.contrib import admin
 from django.conf.urls import include
-# from django.shortcuts import redirect
 from Plein.views import site_root_view
 from Plein.views_fout import (site_handler403_permission_denied,
                               site_handler404_page_not_found,
@@ -36,10 +35,10 @@ urlpatterns = [
     path('bondscompetities/uitslagen/',     include('CompUitslagen.urls')),
     path('bondscompetities/hist/',          include('HistComp.urls')),
     path('bondscompetities/',               include('Competitie.urls')),
-    path('evenement/',                      include('Evenement.urls')),
     path('functie/',                        include('Functie.urls')),
     path('feedback/',                       include('Feedback.urls')),
     path('kalender/',                       include('Kalender.urls')),
+    path('kalender/evenement/',             include('Evenement.urls')),
     path('ledenvoordeel/',                  include('Ledenvoordeel.urls')),
     path('logboek/',                        include('Logboek.urls')),
     path('opleidingen/',                    include('Opleidingen.urls')),

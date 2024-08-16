@@ -59,10 +59,7 @@ class Evenement(models.Model):
 
     def bepaal_prijs_voor_sporter(self, sporter):
         leeftijd = sporter.bereken_wedstrijdleeftijd(self.datum, ORGANISATIE_KHSN)
-        if leeftijd < 18:
-            prijs = self.prijs_euro_onder18
-        else:
-            prijs = self.prijs_euro_normaal
+        prijs = self.prijs_euro_onder18 if leeftijd < 18 else self.prijs_euro_normaal
         return prijs
 
     def __str__(self):

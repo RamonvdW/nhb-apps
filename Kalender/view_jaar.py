@@ -11,6 +11,8 @@ from django.utils import timezone
 from django.shortcuts import render
 from django.views.generic import TemplateView
 from Bestel.operations.mandje import eval_mandje_inhoud
+from Evenement.definities import EVENEMENT_STATUS_GEACCEPTEERD, EVENEMENT_STATUS_GEANNULEERD
+from Evenement.models import Evenement
 from Kalender.definities import MAANDEN, MAAND2URL
 from Kalender.view_maand import maak_soort_filter, maak_bogen_filter, maak_compacte_wanneer_str
 from Wedstrijden.definities import (WEDSTRIJD_STATUS_GEACCEPTEERD, WEDSTRIJD_STATUS_GEANNULEERD,
@@ -92,7 +94,7 @@ class KalenderJaarView(TemplateView):
 
         if zoekterm:
             # url voor het resetten van de filter keuzes en zoekterm
-            context['url_toon_alles'] = reverse('Kalender:jaar',
+            context['unfiltered_url'] = reverse('Kalender:jaar',
                                                 kwargs={'jaar': jaar,
                                                         'maand': maand,
                                                         'soort': 'alle',
@@ -115,14 +117,22 @@ class KalenderJaarView(TemplateView):
                        .filter(datum_begin__gte=datum_vanaf,
                                datum_begin__lt=datum_voor,
                                status__in=(WEDSTRIJD_STATUS_GEACCEPTEERD,
-                                           WEDSTRIJD_STATUS_GEANNULEERD))
-                       .order_by('datum_begin'))
+                                           WEDSTRIJD_STATUS_GEANNULEERD)))
+
+        evenementen = (Evenement
+                       .objects
+                       .select_related('locatie')
+                       .filter(datum__gte=datum_vanaf,
+                               datum__lt=datum_voor,
+                               status__in=(EVENEMENT_STATUS_GEACCEPTEERD,
+                                           EVENEMENT_STATUS_GEANNULEERD)))
 
         context['zoekterm'] = zoekterm
         if zoekterm:
             wedstrijden = wedstrijden.filter(Q(titel__icontains=zoekterm) | Q(locatie__plaats__icontains=zoekterm))
+            evenementen = evenementen.filter(Q(titel__icontains=zoekterm) | Q(locatie__plaats__icontains=zoekterm))
 
-        # filter op soort wedstrijd
+        # filter wedstrijden op organisatie ("soort wedstrijd")
         if gekozen_soort == 'ifaa':
             wedstrijden = wedstrijden.filter(organisatie=ORGANISATIE_IFAA)
 
@@ -137,13 +147,17 @@ class KalenderJaarView(TemplateView):
         elif gekozen_soort == 'khsn':
             wedstrijden = wedstrijden.filter(organisatie=ORGANISATIE_KHSN)
 
-        # filter op bogen
+        # filter wedstrijden op bogen
         if gekozen_bogen != 'alle':
             boog_pks = context['boog_pks']      # ingevuld in maak_bogen_filter en gegarandeerd niet leeg
             # distinct is nodig om verdubbeling te voorkomen
             wedstrijden = wedstrijden.filter(boogtypen__pk__in=boog_pks).distinct('datum_begin', 'pk')
 
         now_date = timezone.now().date()
+
+        context['regels'] = regels = list()
+        aantal_wedstrijden = 0
+        aantal_evenementen = 0
 
         for wed in wedstrijden:
             if wed.status == WEDSTRIJD_STATUS_GEANNULEERD:
@@ -157,10 +171,43 @@ class KalenderJaarView(TemplateView):
             wed.inschrijven_dagen = (wed.inschrijven_voor - now_date).days
             wed.inschrijven_let_op = (wed.inschrijven_dagen <= 7)
             wed.is_voor_sluitingsdatum = (now_date < wed.inschrijven_voor)
+
+            tup = (wed.datum_begin, wed.pk, wed)
+            regels.append(tup)
+            aantal_wedstrijden += 1
         # for
 
-        context['wedstrijden'] = wedstrijden
-        context['aantal_wedstrijden'] = len(wedstrijden)
+        for evenement in evenementen:
+            if evenement.status == WEDSTRIJD_STATUS_GEANNULEERD:
+                evenement.titel = '[GEANNULEERD] ' + evenement.titel
+            else:
+                evenement.url_details = reverse('Evenement:details',
+                                                kwargs={'evenement_pk': evenement.pk})
+
+            evenement.wanneer_str = maak_compacte_wanneer_str(evenement.datum, evenement.datum)
+            evenement.inschrijven_voor = evenement.datum - timedelta(days=evenement.inschrijven_tot)
+            evenement.inschrijven_dagen = (evenement.inschrijven_voor - now_date).days
+            evenement.inschrijven_let_op = (evenement.inschrijven_dagen <= 7)
+            evenement.is_voor_sluitingsdatum = (now_date < evenement.inschrijven_voor)
+
+            tup = (evenement.datum, evenement.pk, evenement)
+            regels.append(tup)
+            aantal_evenementen += 1
+        # for
+
+        regels.sort()
+        context['regels'] = [regel[-1] for regel in regels]
+
+        aantallen = '%s wedstrijd' % aantal_wedstrijden
+        if aantal_wedstrijden != 1:
+            aantallen += 'en'
+        if aantal_evenementen > 0:
+            aantallen += ' en %s evenement' % aantal_evenementen
+            if aantal_evenementen != 1:
+                aantallen += 'en'
+        aantallen += ' gevonden'
+        context['aantallen'] = aantallen
+
         context['kan_aanmelden'] = self.request.user.is_authenticated
         context['canonical'] = reverse('Kalender:landing-page')
 
@@ -170,7 +217,7 @@ class KalenderJaarView(TemplateView):
             eval_mandje_inhoud(self.request)
 
         context['kruimels'] = (
-            (None, 'Wedstrijdkalender'),
+            (None, 'Kalender'),
         )
 
         return context

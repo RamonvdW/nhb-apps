@@ -48,13 +48,9 @@
             {% url 'Competitie:kies' as card_url %}
             {% include 'plein/card_icon.dtl' with title="Bondscompetities" text="Informatie over de bonds-competities, inclusief alle uitslagen." icon="my_location" url=card_url %}
 
-            <!-- wedstrijdkalender -->
+            <!-- kalender -->
             {% url 'Kalender:landing-page' as card_url %}
-            {% include 'plein/card_icon.dtl' with title="Wedstrijdkalender" text="Bekijk welke wedstrijden georganiseerd worden en schrijf je in." icon="event_note" url=card_url %}
-
-            <!-- evenementen -->
-            {% url 'Evenement:landing-page' as card_url %}
-            {% include 'plein/card_icon.dtl' with title="Evenementen" text="Bekijk welke evenementen georganiseerd worden en meld je aan." icon="groups" url=card_url %}
+            {% include 'plein/card_icon.dtl' with title="Kalender" text="Bekijk welke wedstrijden en evenementen georganiseerd worden en schrijf je in." icon="event_note" url=card_url %}
 
             <!-- scheids -->
             {% if url_scheids %}
