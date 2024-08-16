@@ -16,7 +16,7 @@ from Geo.models import Regio, Rayon
 from HistComp.definities import HISTCOMP_TYPE_18
 from HistComp.models import HistCompSeizoen, HistCompRegioIndiv
 from Locatie.definities import BAAN_TYPE_EXTERN
-from Locatie.models import Locatie
+from Locatie.models import WedstrijdLocatie
 from Opleidingen.models import OpleidingDiploma
 from Records.models import IndivRecord
 from Registreer.definities import REGISTRATIE_FASE_COMPLEET
@@ -337,7 +337,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         boogtype = sporterboog.boogtype
         klasse = KalenderWedstrijdklasse.objects.filter(boogtype=sporterboog.boogtype).first()
 
-        locatie = Locatie(
+        locatie = WedstrijdLocatie(
                         naam='Test locatie',
                         baan_type=BAAN_TYPE_EXTERN,
                         discipline_indoor=True,

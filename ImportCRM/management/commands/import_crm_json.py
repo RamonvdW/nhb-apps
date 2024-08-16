@@ -19,7 +19,7 @@ from Functie.operations import maak_account_vereniging_secretaris
 from Functie.tests.helpers import maak_functie
 from Geo.models import Rayon, Regio
 from Locatie.definities import BAAN_TYPE_BUITEN, BAAN_TYPE_EXTERN
-from Locatie.models import Locatie
+from Locatie.models import WedstrijdLocatie
 from Logboek.models import schrijf_in_logboek
 from Mailer.operations import mailer_email_is_valide, mailer_notify_internal_error
 from Opleidingen.definities import CODE_SR_VER, CODE_SR_BOND, CODE_SR_INTERNATIONAAL, CODE2SCHEIDS
@@ -1669,18 +1669,18 @@ class Command(BaseCommand):
 
             # zoek de locatie bij dit adres
             try:
-                locatie = (Locatie
+                locatie = (WedstrijdLocatie
                            .objects
                            .exclude(baan_type__in=(BAAN_TYPE_BUITEN, BAAN_TYPE_EXTERN))
                            .get(adres=adres))
-            except Locatie.MultipleObjectsReturned:            # pragma: no cover
+            except WedstrijdLocatie.MultipleObjectsReturned:            # pragma: no cover
                 # er is een ongelukje gebeurt
                 self.stderr.write('[ERROR] Onverwacht meer dan 1 locatie voor vereniging %s' % ver)
                 self._count_errors += 1
                 continue
-            except Locatie.DoesNotExist:
+            except WedstrijdLocatie.DoesNotExist:
                 # nieuw aanmaken
-                locatie = Locatie(
+                locatie = WedstrijdLocatie(
                                 adres=adres,
                                 plaats=plaats,
                                 adres_uit_crm=True)

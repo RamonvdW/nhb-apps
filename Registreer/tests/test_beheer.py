@@ -11,7 +11,7 @@ from BasisTypen.models import BoogType, KalenderWedstrijdklasse
 from Bestel.models import Bestelling, BestelProduct, WebwinkelKeuze
 from Functie.tests.helpers import maak_functie
 from Geo.models import Regio
-from Locatie.models import Locatie
+from Locatie.models import WedstrijdLocatie
 from Mailer.models import MailQueue
 from Registreer.definities import REGISTRATIE_FASE_COMPLEET, REGISTRATIE_FASE_AFGEWEZEN, REGISTRATIE_FASE_BEGIN
 from Registreer.models import GastRegistratie
@@ -190,7 +190,7 @@ class TestRegistreerBeheer(E2EHelpers, TestCase):
         Bestelling(bestel_nr=1, account=self.account_800001).save()
 
         # maak een inschrijving op een wedstrijd aan
-        locatie = Locatie(
+        locatie = WedstrijdLocatie(
                         naam='locatie',
                         adres='',
                         notities='')
@@ -422,7 +422,7 @@ class TestRegistreerBeheer(E2EHelpers, TestCase):
         bestelling.save()
 
         # maak een inschrijving op een wedstrijd aan
-        locatie = Locatie(
+        locatie = WedstrijdLocatie(
                         naam='locatie',
                         adres='',
                         notities='')

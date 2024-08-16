@@ -22,7 +22,7 @@ from Competitie.models import Competitie, CompetitieMatch
 from Functie.models import Functie
 from Functie.view_koppel_beheerder import functie_wijziging_stuur_email_notificatie, functie_vraag_email_bevestiging
 from Geo.models import Regio
-from Locatie.models import Locatie
+from Locatie.models import WedstrijdLocatie
 from Mailer.models import MailQueue
 from Mailer.operations import mailer_email_is_valide
 from Scheidsrechter.management.commands.scheids_mutaties import (stuur_email_naar_sr_beschikbaarheid_opgeven,
@@ -142,7 +142,7 @@ class Command(BaseCommand):
         now = timezone.now()
         wedstrijd_datum = now.date() + timezone.timedelta(days=30)
 
-        locatie = Locatie(
+        locatie = WedstrijdLocatie(
                         naam=self.test_locatie_naam,
                         adres=ver.adres_regel1 + '\n' + ver.adres_regel2,
                         plaats=ver.plaats)
@@ -323,8 +323,8 @@ class Command(BaseCommand):
                 wedstrijd.delete()
 
             try:
-                locatie = Locatie.objects.get(naam=self.test_locatie_naam)
-            except Locatie.DoesNotExist:      # pragma: no cover
+                locatie = WedstrijdLocatie.objects.get(naam=self.test_locatie_naam)
+            except WedstrijdLocatie.DoesNotExist:      # pragma: no cover
                 pass
             else:
                 locatie.delete()

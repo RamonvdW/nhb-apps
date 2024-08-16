@@ -10,7 +10,7 @@ from Competitie.definities import DEEL_RK, DEEL_BK
 from Competitie.models import Competitie, CompetitieMatch, CompetitieIndivKlasse, CompetitieTeamKlasse, Kampioenschap
 from Competitie.operations import competities_aanmaken
 from Geo.models import Regio, Rayon
-from Locatie.models import Locatie
+from Locatie.models import WedstrijdLocatie
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
 import io
@@ -48,7 +48,7 @@ class TestCompetitieCliCheckWedstrijdlocaties(E2EHelpers, TestCase):
                     regio=regio_114)
         ver.save()
 
-        loc = Locatie(
+        loc = WedstrijdLocatie(
                 naam='loc1',
                 discipline_indoor=True,
                 banen_18m=10,
@@ -72,7 +72,7 @@ class TestCompetitieCliCheckWedstrijdlocaties(E2EHelpers, TestCase):
         wed1.indiv_klassen.add(indiv1)
         wed1.team_klassen.add(team1)
 
-        loc = Locatie(
+        loc = WedstrijdLocatie(
                 naam='loc2',
                 discipline_outdoor=True,
                 banen_18m=0,

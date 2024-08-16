@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2023 Ramon van der Winkel.
+#  Copyright (c) 2020-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -9,11 +9,11 @@ from Locatie.definities import BAAN_TYPE_ONBEKEND, BAAN_TYPE, BAANTYPE2STR
 from Vereniging.models import Vereniging
 
 
-class Locatie(models.Model):
-    """ Een locatie waarop een wedstrijd of cursus gehouden kan worden.
+class WedstrijdLocatie(models.Model):
+    """ Een locatie waarop een wedstrijd gehouden kan worden.
 
         Naast de accommodatie van de vereniging (binnen / buiten) ook externe locaties
-        waar de vereniging een wedstrijd/cursus kan organiseren.
+        waar de vereniging een wedstrijd kan organiseren.
     """
 
     # naam waaronder deze locatie getoond wordt
@@ -107,7 +107,7 @@ class Locatie(models.Model):
 
     class Meta:
         """ meta data voor de admin interface """
-        verbose_name = "Locatie"
+        verbose_name = "Wedstrijd locatie"
 
 
 class Reistijd(models.Model):

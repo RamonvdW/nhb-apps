@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2023 Ramon van der Winkel.
+#  Copyright (c) 2021-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -8,7 +8,7 @@ from django.test import TestCase, override_settings
 from BasisTypen.models import KalenderWedstrijdklasse
 from Functie.tests.helpers import maak_functie
 from Geo.models import Regio
-from Locatie.models import Locatie
+from Locatie.models import WedstrijdLocatie
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
@@ -77,7 +77,7 @@ class TestWedstrijdenWijzigWedstrijd(E2EHelpers, TestCase):
     @staticmethod
     def _maak_externe_locatie(ver):
         # voeg een locatie toe
-        locatie = Locatie(
+        locatie = WedstrijdLocatie(
                         baan_type='E',      # externe locatie
                         naam='Test locatie')
         locatie.save()
@@ -88,7 +88,7 @@ class TestWedstrijdenWijzigWedstrijd(E2EHelpers, TestCase):
     @staticmethod
     def _maak_accommodatie_binnen(ver):
         # voeg een locatie toe
-        binnen_locatie = Locatie(
+        binnen_locatie = WedstrijdLocatie(
                                 baan_type='X',      # onbekend
                                 adres='Verweg 1, Om de hoek',
                                 adres_uit_crm=True)
@@ -99,7 +99,7 @@ class TestWedstrijdenWijzigWedstrijd(E2EHelpers, TestCase):
     @staticmethod
     def _maak_accommodatie_buiten(ver):
         # voeg een locatie toe
-        buiten_locatie = Locatie(
+        buiten_locatie = WedstrijdLocatie(
                                 baan_type='B',      # buiten
                                 adres_uit_crm=False,
                                 discipline_outdoor=True,

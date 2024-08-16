@@ -10,7 +10,7 @@ from Competitie.definities import DEEL_RK, DEEL_BK
 from Competitie.models import (CompetitieIndivKlasse, CompetitieTeamKlasse, CompetitieMatch, Regiocompetitie,
                                Kampioenschap, KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet)
 from Functie.tests.helpers import maak_functie
-from Locatie.models import Locatie
+from Locatie.models import WedstrijdLocatie
 from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
@@ -83,9 +83,9 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         ver_nr = self.testdata.regio_ver_nrs[101][0]
         self.ver_101 = ver = self.testdata.vereniging[ver_nr]
 
-        loc = Locatie(banen_18m=1,
-                      banen_25m=1,
-                      adres='De Spanning 1, Houtdorp')
+        loc = WedstrijdLocatie(banen_18m=1,
+                               banen_25m=1,
+                               adres='De Spanning 1, Houtdorp')
         loc.save()
         loc.verenigingen.add(ver)
         self.loc = loc

@@ -12,7 +12,7 @@ from Functie.models import Functie
 from Functie.tests.helpers import maak_functie
 from Geo.models import Regio
 from Locatie.definities import BAAN_TYPE_EXTERN
-from Locatie.models import Locatie
+from Locatie.models import WedstrijdLocatie
 from Sporter.models import Sporter, SporterBoog
 from Sporter.operations import get_sporterboog
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -117,7 +117,7 @@ class TestWedstrijdenKwalificatieScores(E2EHelpers, TestCase):
         boogtype = self.sporterboog1_r.boogtype
         klasse = KalenderWedstrijdklasse.objects.filter(boogtype=boogtype).first()
 
-        locatie = Locatie(
+        locatie = WedstrijdLocatie(
                         naam='Test locatie',
                         baan_type=BAAN_TYPE_EXTERN,
                         discipline_indoor=True,

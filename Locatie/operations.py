@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023 Ramon van der Winkel.
+#  Copyright (c) 2023-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -9,7 +9,7 @@
 from django.conf import settings
 from django.utils import timezone
 from BasisTypen.definities import SCHEIDS_NIET
-from Locatie.models import Locatie, Reistijd
+from Locatie.models import WedstrijdLocatie, Reistijd
 from Sporter.models import Sporter
 import googlemaps
 import datetime
@@ -123,7 +123,7 @@ class ReistijdBepalen(object):
 
     def _update_locaties(self):
         # adressen van de locaties aanvullen met lat/lon
-        for locatie in (Locatie
+        for locatie in (WedstrijdLocatie
                         .objects
                         .filter(adres_lat='')
                         .exclude(zichtbaar=False)):
@@ -192,7 +192,7 @@ class ReistijdBepalen(object):
 
     def _update_locaties_fallback(self):
         # kijk of er een handmatige fallback is
-        for locatie in (Locatie
+        for locatie in (WedstrijdLocatie
                         .objects
                         .filter(adres_lat='?')
                         .exclude(zichtbaar=False)):

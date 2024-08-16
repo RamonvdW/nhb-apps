@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2023 Ramon van der Winkel.
+#  Copyright (c) 2019-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -13,7 +13,7 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
-from Locatie.models import Locatie
+from Locatie.models import WedstrijdLocatie
 from Logboek.models import schrijf_in_logboek
 from Vereniging.models import Vereniging
 
@@ -99,7 +99,7 @@ class ExterneLocatiesView(UserPassesTestMixin, TemplateView):
         if not self.functie_nu or self.functie_nu.rol != 'HWL' or self.functie_nu.vereniging != ver:
             raise PermissionDenied('Alleen HWL mag een locatie toevoegen')
 
-        locatie = Locatie(baan_type='E')      # externe locatie
+        locatie = WedstrijdLocatie(baan_type='E')      # externe locatie
         locatie.save()
         locatie.verenigingen.add(ver)
 
@@ -126,10 +126,10 @@ class ExterneLocatieDetailsView(TemplateView):
         """
         try:
             location_pk = int(self.kwargs['locatie_pk'][:6])        # afkappen voor de veiligheid
-            locatie = Locatie.objects.get(pk=location_pk,
-                                          zichtbaar=True,
-                                          baan_type='E')   # voorkomt wijzigen accommodatie
-        except (ValueError, Locatie.DoesNotExist):
+            locatie = WedstrijdLocatie.objects.get(pk=location_pk,
+                                                   zichtbaar=True,
+                                                   baan_type='E')   # voorkomt wijzigen accommodatie
+        except (ValueError, WedstrijdLocatie.DoesNotExist):
             raise Http404('Locatie bestaat niet')
 
         return locatie

@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2023 Ramon van der Winkel.
+#  Copyright (c) 2020-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from Locatie.models import Locatie
+from Locatie.models import WedstrijdLocatie
 from TestHelpers.e2ehelpers import E2EHelpers
 
 
@@ -20,7 +20,7 @@ class TestWedstrijdenLocatie(E2EHelpers, TestCase):
         pass
 
     def test_locatie(self):
-        locatie = Locatie(
+        locatie = WedstrijdLocatie(
                     adres='Hallo\ndaar')
         self.assertTrue(str(locatie) != '')
 

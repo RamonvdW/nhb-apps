@@ -9,7 +9,7 @@ from Functie.models import Functie
 from Functie.tests.helpers import maak_functie
 from Geo.models import Rayon, Regio
 from Locatie.definities import BAAN_TYPE_EXTERN
-from Locatie.models import Locatie
+from Locatie.models import WedstrijdLocatie
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
@@ -61,7 +61,7 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         self.ver1 = ver
 
         # maak een locatie aan
-        loc = Locatie(
+        loc = WedstrijdLocatie(
                     adres='Grote baan')
         loc.save()
         loc.verenigingen.add(ver)
@@ -111,7 +111,7 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         self.functie_wl.save()
 
         # maak een locatie aan
-        loc = Locatie(
+        loc = WedstrijdLocatie(
                     adres='Kleine baan')
         loc.save()
         loc.verenigingen.add(ver)
@@ -200,12 +200,12 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         self.assertEqual(urls, [url])
 
         # voeg een locatie toe
-        self.assertEqual(2, Locatie.objects.count())
+        self.assertEqual(2, WedstrijdLocatie.objects.count())
         with self.assert_max_queries(20):
             resp = self.client.post(url)
         self.assert_is_redirect_not_plein(resp)
-        self.assertEqual(3, Locatie.objects.count())
-        locatie = Locatie.objects.get(baan_type=BAAN_TYPE_EXTERN)
+        self.assertEqual(3, WedstrijdLocatie.objects.count())
+        locatie = WedstrijdLocatie.objects.get(baan_type=BAAN_TYPE_EXTERN)
         self.assertEqual(locatie.naam, '')
 
         # haal de niet-lege lijst met locaties op
@@ -243,7 +243,7 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
             resp = self.client.post(url)
         self.assert_is_redirect_not_plein(resp)
 
-        locatie = Locatie.objects.get(baan_type=BAAN_TYPE_EXTERN)
+        locatie = WedstrijdLocatie.objects.get(baan_type=BAAN_TYPE_EXTERN)
         url = self.url_externe_locatie_details % (self.ver2.ver_nr, locatie.pk)
 
         # haal de locatie details op
@@ -276,7 +276,7 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
                                           'notities': 'hoi\ntest\r\nmeer testen'})
         self.assert_is_redirect_not_plein(resp)
 
-        locatie = Locatie.objects.get(pk=locatie.pk)
+        locatie = WedstrijdLocatie.objects.get(pk=locatie.pk)
         self.assertEqual(locatie.naam, 'test naam')
         self.assertFalse(locatie.discipline_outdoor)
         self.assertFalse(locatie.discipline_indoor)
@@ -302,7 +302,7 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
                                           'buiten_banen': 0})
         self.assert_is_redirect_not_plein(resp)
 
-        locatie = Locatie.objects.get(pk=locatie.pk)
+        locatie = WedstrijdLocatie.objects.get(pk=locatie.pk)
         self.assertTrue(locatie.discipline_outdoor)
         self.assertFalse(locatie.discipline_indoor)
         self.assertFalse(locatie.discipline_clout)
@@ -341,7 +341,7 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
                                           'banen_25m': 24})
         self.assert_is_redirect_not_plein(resp)
 
-        locatie = Locatie.objects.get(pk=locatie.pk)
+        locatie = WedstrijdLocatie.objects.get(pk=locatie.pk)
         self.assertFalse(locatie.discipline_outdoor)
         self.assertTrue(locatie.discipline_indoor)
         self.assertEqual(locatie.banen_18m, 17)
@@ -438,7 +438,7 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
             resp = self.client.post(url)
         self.assert_is_redirect_not_plein(resp)
 
-        locatie = Locatie.objects.get(baan_type=BAAN_TYPE_EXTERN)
+        locatie = WedstrijdLocatie.objects.get(baan_type=BAAN_TYPE_EXTERN)
         self.assertTrue(locatie.zichtbaar)
 
         # verwijder de externe locatie

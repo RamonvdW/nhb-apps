@@ -14,7 +14,7 @@ from Bestel.operations.mutaties import (bestel_mutatieverzoek_inschrijven_wedstr
                                         bestel_mutatieverzoek_maak_bestellingen)
 from Betaal.models import BetaalInstellingenVereniging
 from Geo.models import Regio
-from Locatie.models import Locatie
+from Locatie.models import WedstrijdLocatie
 from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
@@ -87,7 +87,7 @@ class TestBestelKortingen(E2EHelpers, TestCase):
         now = timezone.now()
         datum = datetime.date(now.year, now.month, now.day) + datetime.timedelta(days=5)
 
-        locatie = Locatie(
+        locatie = WedstrijdLocatie(
                         naam='Test locatie',
                         discipline_outdoor=True,
                         buiten_banen=10,

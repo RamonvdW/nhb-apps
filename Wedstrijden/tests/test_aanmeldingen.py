@@ -11,7 +11,7 @@ from Bestel.models import BestelProduct
 from Competitie.models import Competitie, CompetitieIndivKlasse, Regiocompetitie, RegiocompetitieSporterBoog
 from Functie.tests.helpers import maak_functie
 from Geo.models import Regio
-from Locatie.models import Locatie
+from Locatie.models import WedstrijdLocatie
 from Sporter.models import Sporter, SporterBoog
 from Sporter.operations import get_sporter_voorkeuren
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -119,7 +119,7 @@ class TestWedstrijdenAanmeldingen(E2EHelpers, TestCase):
         self.sporterboog2c = sporterboog
 
         # voeg een locatie toe
-        locatie = Locatie(
+        locatie = WedstrijdLocatie(
                         baan_type='E',      # externe locatie
                         naam='Test locatie')
         locatie.save()

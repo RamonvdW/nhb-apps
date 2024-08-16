@@ -14,7 +14,7 @@ from Bestel.operations.mutaties import (bestel_mutatieverzoek_inschrijven_wedstr
 from Betaal.models import BetaalInstellingenVereniging
 from Functie.models import Functie
 from Geo.models import Regio
-from Locatie.models import Locatie
+from Locatie.models import WedstrijdLocatie
 from Mailer.models import MailQueue
 from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -93,7 +93,7 @@ class TestBestelHerinnering(E2EHelpers, TestCase):
         now = timezone.now()
         datum = now.date()      # pas op met testen ronde 23:59
 
-        locatie = Locatie(
+        locatie = WedstrijdLocatie(
                         naam='Test locatie',
                         discipline_outdoor=True,
                         buiten_banen=10,

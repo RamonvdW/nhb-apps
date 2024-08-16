@@ -10,7 +10,7 @@ from BasisTypen.models import BoogType, Leeftijdsklasse, TeamType
 from Competitie.definities import AFSTANDEN, AFSTAND2URL
 from Competitie.tijdlijn import bepaal_fase_indiv, bepaal_fase_teams
 from Functie.definities import Rollen
-from Locatie.models import Locatie
+from Locatie.models import WedstrijdLocatie
 from Score.models import Uitslag
 from Vereniging.models import Vereniging
 import logging
@@ -414,7 +414,7 @@ class CompetitieMatch(models.Model):
                                    blank=True, null=True)   # mag later ingevuld worden
 
     # waar
-    locatie = models.ForeignKey(Locatie, on_delete=models.PROTECT,
+    locatie = models.ForeignKey(WedstrijdLocatie, on_delete=models.PROTECT,
                                 blank=True, null=True)      # mag later ingevuld worden
 
     # datum en tijdstippen

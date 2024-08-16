@@ -11,7 +11,7 @@ from Competitie.operations import competities_aanmaken
 from Functie.tests.helpers import maak_functie
 from Geo.models import Rayon, Regio, Cluster
 from Locatie.definities import BAAN_TYPE_BUITEN, BAAN_TYPE_EXTERN, BAAN_TYPE_ONBEKEND
-from Locatie.models import Locatie
+from Locatie.models import WedstrijdLocatie
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
@@ -132,16 +132,16 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
         self.ver2 = ver
 
         # geef een verenigingen alle mogelijke externe locaties
-        loc = Locatie(baan_type=BAAN_TYPE_BUITEN)
+        loc = WedstrijdLocatie(baan_type=BAAN_TYPE_BUITEN)
         loc.save()
         loc.verenigingen.add(self.ver1)
         self.loc_buiten = loc
 
-        loc = Locatie(baan_type=BAAN_TYPE_EXTERN)
+        loc = WedstrijdLocatie(baan_type=BAAN_TYPE_EXTERN)
         loc.save()
         loc.verenigingen.add(self.ver1)
 
-        loc = Locatie(baan_type=BAAN_TYPE_ONBEKEND)
+        loc = WedstrijdLocatie(baan_type=BAAN_TYPE_ONBEKEND)
         loc.save()
         loc.verenigingen.add(self.ver1)
         self.loc_binnen = loc

@@ -20,7 +20,7 @@ from Competitie.models import (CompetitieIndivKlasse, CompetitieTeamKlasse, Comp
                                KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet)
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
-from Locatie.models import Locatie
+from Locatie.models import WedstrijdLocatie
 from Logboek.models import schrijf_in_logboek
 from Overig.background_sync import BackgroundSync
 from Scheidsrechter.mutaties import scheids_mutatieverzoek_bepaal_reistijd_naar_alle_wedstrijdlocaties
@@ -591,7 +591,7 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
             if loc_pk:
                 try:
                     loc = ver.locatie_set.get(pk=loc_pk)
-                except Locatie.DoesNotExist:
+                except WedstrijdLocatie.DoesNotExist:
                     raise Http404('Locatie niet gevonden')
             else:
                 # formulier stuurt niets als er niet gekozen hoeft te worden, of als er geen locatie is

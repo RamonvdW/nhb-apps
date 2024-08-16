@@ -7,7 +7,7 @@
 from django.test import TestCase
 from Functie.tests.helpers import maak_functie
 from Geo.models import Regio
-from Locatie.models import Locatie
+from Locatie.models import WedstrijdLocatie
 from Mailer.models import MailQueue
 from Taken.models import Taak
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -41,7 +41,7 @@ class TestWedstrijdenManager(E2EHelpers, TestCase):
         self.ver1.save()
 
         # geef de vereniging een locatie
-        locatie = Locatie(
+        locatie = WedstrijdLocatie(
                         baan_type='E',      # externe locatie
                         naam='Test locatie')
         locatie.save()
@@ -65,7 +65,7 @@ class TestWedstrijdenManager(E2EHelpers, TestCase):
     @staticmethod
     def _maak_externe_locatie(ver):
         # voeg een locatie toe
-        locatie = Locatie(
+        locatie = WedstrijdLocatie(
                         baan_type='E',      # externe locatie
                         naam='Test locatie')
         locatie.save()

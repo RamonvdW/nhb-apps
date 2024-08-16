@@ -25,7 +25,7 @@ from Competitie.operations import competities_aanmaken
 from Competitie.test_utils.tijdlijn import zet_competitie_fase_regio_inschrijven
 from Functie.models import Functie, VerklaringHanterenPersoonsgegevens
 from Geo.models import Rayon, Regio, Cluster
-from Locatie.models import Locatie
+from Locatie.models import WedstrijdLocatie
 from Score.definities import AG_DOEL_INDIV
 from Score.models import Aanvangsgemiddelde, AanvangsgemiddeldeHist
 from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren
@@ -1603,7 +1603,7 @@ class TestData(object):
         # for
 
     def maak_wedstrijd_locatie(self, ver_nr):
-        locatie = Locatie(
+        locatie = WedstrijdLocatie(
                         naam='locatie %s' % ver_nr,
                         discipline_25m1pijl=True,
                         discipline_outdoor=True,

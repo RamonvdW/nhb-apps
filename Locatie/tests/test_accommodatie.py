@@ -10,7 +10,7 @@ from Functie.tests.helpers import maak_functie
 from Geo.models import Regio, Cluster
 from Locatie.definities import (BAAN_TYPE_ONBEKEND, BAAN_TYPE_BINNEN_VOLLEDIG_OVERDEKT, BAAN_TYPE_BINNEN_BUITEN,
                                 BAAN_TYPE_BUITEN, BAAN_TYPE_EXTERN)
-from Locatie.models import Locatie
+from Locatie.models import WedstrijdLocatie
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
@@ -62,7 +62,7 @@ class TestLocatieAccommodatie(E2EHelpers, TestCase):
     @staticmethod
     def _maak_accommodatie(ver, baan_type=BAAN_TYPE_BINNEN_VOLLEDIG_OVERDEKT):
         # maak een locatie aan
-        loc = Locatie(adres='Grote baan', baan_type=baan_type)
+        loc = WedstrijdLocatie(adres='Grote baan', baan_type=baan_type)
         loc.save()
         loc.verenigingen.add(ver)
         return loc
@@ -193,7 +193,7 @@ class TestLocatieAccommodatie(E2EHelpers, TestCase):
             resp = self.client.post(url, {'verwijder_buitenbaan': 'graag'})
         self.assert_is_redirect(resp, url)
 
-        loc2 = Locatie.objects.get(pk=loc2.pk)
+        loc2 = WedstrijdLocatie.objects.get(pk=loc2.pk)
         self.assertFalse(loc2.zichtbaar)
         loc2.discipline_25m1pijl = True     # voor de str
         self.assertTrue(str(loc2) != '')
@@ -210,14 +210,14 @@ class TestLocatieAccommodatie(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'maak_buiten_locatie': 'graag'})
         self.assert_is_redirect(resp, url)
-        loc2 = Locatie.objects.get(pk=loc2.pk)
+        loc2 = WedstrijdLocatie.objects.get(pk=loc2.pk)
         self.assertTrue(loc2.zichtbaar)
 
         # nog een keer (geen effect)
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'maak_buiten_locatie': 'graag'})
         self.assert_is_redirect(resp, url)
-        loc2 = Locatie.objects.get(pk=loc2.pk)
+        loc2 = WedstrijdLocatie.objects.get(pk=loc2.pk)
         self.assertTrue(loc2.zichtbaar)
 
         self.e2e_assert_other_http_commands_not_supported(url, post=False)
@@ -382,7 +382,7 @@ class TestLocatieAccommodatie(E2EHelpers, TestCase):
                                           'notities': 'dit is een test'})
         self.assert_is_redirect(resp, self.url_ver_overzicht)
 
-        loc1 = Locatie.objects.get(pk=loc1.pk)
+        loc1 = WedstrijdLocatie.objects.get(pk=loc1.pk)
         self.assertEqual(loc1.baan_type, 'O')
         self.assertEqual(loc1.banen_18m, 5)
         self.assertEqual(loc1.banen_25m, 6)
@@ -424,7 +424,7 @@ class TestLocatieAccommodatie(E2EHelpers, TestCase):
                                           'notities': self.lange_tekst})
         self.assert_is_redirect(resp, self.url_ver_overzicht)
 
-        loc1 = Locatie.objects.get(pk=loc1.pk)
+        loc1 = WedstrijdLocatie.objects.get(pk=loc1.pk)
         self.assertEqual(loc1.baan_type, BAAN_TYPE_BINNEN_BUITEN)
         self.assertTrue(str(loc1) != '')
 
@@ -439,7 +439,7 @@ class TestLocatieAccommodatie(E2EHelpers, TestCase):
                                           'notities': self.lange_tekst + " en nog wat meer"})
         self.assert_is_redirect(resp, self.url_ver_overzicht)
 
-        loc1 = Locatie.objects.get(pk=loc1.pk)
+        loc1 = WedstrijdLocatie.objects.get(pk=loc1.pk)
         self.assertEqual(loc1.baan_type, BAAN_TYPE_ONBEKEND)
 
         # probeer met illegale waarden
@@ -482,7 +482,7 @@ class TestLocatieAccommodatie(E2EHelpers, TestCase):
                                           'buiten_notities': 'dit is een buiten test'})
         self.assert_is_redirect(resp, self.url_ver_overzicht)
 
-        loc2 = Locatie.objects.get(pk=loc2.pk)
+        loc2 = WedstrijdLocatie.objects.get(pk=loc2.pk)
         self.assertTrue(loc2.zichtbaar)
         self.assertEqual(loc2.buiten_banen, 50)
         self.assertEqual(loc2.buiten_max_afstand, 90)
@@ -507,7 +507,7 @@ class TestLocatieAccommodatie(E2EHelpers, TestCase):
                                           'buiten_notities': 'dit is een buiten test'})
         self.assert_is_redirect(resp, self.url_ver_overzicht)
 
-        loc2 = Locatie.objects.get(pk=loc2.pk)
+        loc2 = WedstrijdLocatie.objects.get(pk=loc2.pk)
         self.assertTrue(loc2.discipline_25m1pijl)
         self.assertFalse(loc2.discipline_outdoor)
         self.assertFalse(loc2.discipline_indoor)

@@ -22,7 +22,7 @@ from Competitie.operations import maak_regiocompetitie_ronde, competitie_week_nr
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige, rol_get_huidige_functie
 from Geo.models import Cluster
-from Locatie.models import Locatie
+from Locatie.models import WedstrijdLocatie
 from Logboek.models import schrijf_in_logboek
 from Taken.operations import maak_taak
 from Vereniging.models import Vereniging
@@ -1156,7 +1156,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
         if loc_pk:
             try:
                 loc = ver.locatie_set.get(pk=loc_pk)
-            except Locatie.DoesNotExist:
+            except WedstrijdLocatie.DoesNotExist:
                 raise Http404('Geen valide verzoek')
         else:
             # formulier stuurt niets als er niet gekozen hoeft te worden

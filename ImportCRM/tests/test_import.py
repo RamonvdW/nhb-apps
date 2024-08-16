@@ -12,7 +12,7 @@ from BasisTypen.models import BoogType
 from Functie.models import Functie
 from Geo.models import Regio
 from Locatie.definities import BAAN_TYPE_BUITEN
-from Locatie.models import Locatie
+from Locatie.models import WedstrijdLocatie
 from Mailer.models import MailQueue
 from Opleidingen.models import OpleidingDiploma
 from Records.models import IndivRecord
@@ -206,7 +206,7 @@ class TestImportCRMImport(E2EHelpers, TestCase):
 
         ver = Vereniging.objects.get(ver_nr=1000)
 
-        locatie = Locatie(
+        locatie = WedstrijdLocatie(
                         naam="Ergens buiten",
                         baan_type=BAAN_TYPE_BUITEN)
         locatie.save()
@@ -250,7 +250,7 @@ class TestImportCRMImport(E2EHelpers, TestCase):
         # print("f2: %s" % f2.getvalue())
         self.assertTrue("[INFO] Vereniging 1000: Aanpassing locatie plaats 'Ja maar' --> 'Stadia'" in f2.getvalue())
 
-        locatie1 = Locatie.objects.get(pk=locatie1.pk)
+        locatie1 = WedstrijdLocatie.objects.get(pk=locatie1.pk)
         self.assertEqual(locatie1.plaats, 'Stadia')
 
     def test_lid_mutaties(self):

@@ -20,7 +20,7 @@ from BasisTypen.operations import get_organisatie_boogtypen, get_organisatie_kla
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
 from Locatie.definities import BAAN_TYPE_BUITEN, BAAN_TYPE_EXTERN
-from Locatie.models import Locatie
+from Locatie.models import WedstrijdLocatie
 from Sporter.models import get_sporter
 from Vereniging.models import Vereniging
 from Wedstrijden.definities import (ORGANISATIE_WEDSTRIJD_DISCIPLINE_STRS, WEDSTRIJD_STATUS_TO_STR,
@@ -179,7 +179,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
                     .order_by('pk'))
         try:
             binnen_locatie = locaties.get(adres_uit_crm=True)
-        except Locatie.DoesNotExist:
+        except WedstrijdLocatie.DoesNotExist:
             binnen_locatie = None
 
         max_banen = 1
