@@ -20,7 +20,7 @@ from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 from Vereniging.models import Vereniging
 from Webwinkel.models import WebwinkelProduct
-from Wedstrijden.definities import INSCHRIJVING_STATUS_DEFINITIEF
+from Wedstrijden.definities import WEDSTRIJDINSCHRIJVING_STATUS_DEFINITIEF
 from Wedstrijden.models import WedstrijdInschrijving, Wedstrijd, WedstrijdSessie
 import datetime
 
@@ -269,7 +269,7 @@ class TestRegistreerBeheer(E2EHelpers, TestCase):
         self.assertIn(self.url_opheffen, urls)
 
         # pas de wedstrijdinschrijving aan
-        inschrijving.status = INSCHRIJVING_STATUS_DEFINITIEF
+        inschrijving.status = WEDSTRIJDINSCHRIJVING_STATUS_DEFINITIEF
         inschrijving.save(update_fields=['status'])
 
         self.gast_800001.wa_id = wa_id

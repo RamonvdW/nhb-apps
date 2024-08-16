@@ -35,7 +35,7 @@ from Sporter.models import Sporter, SporterBoog
 from Taken.operations import stuur_email_nieuwe_taak, stuur_email_taak_herinnering
 from TestHelpers.e2ehelpers import TEST_WACHTWOORD
 from Vereniging.models import Vereniging
-from Wedstrijden.definities import WEDSTRIJD_STATUS_GEACCEPTEERD, INSCHRIJVING_STATUS_RESERVERING_BESTELD
+from Wedstrijden.definities import WEDSTRIJD_STATUS_GEACCEPTEERD, WEDSTRIJDINSCHRIJVING_STATUS_RESERVERING_BESTELD
 from Wedstrijden.models import Wedstrijd, WedstrijdSessie, WedstrijdInschrijving
 from datetime import datetime
 from decimal import Decimal
@@ -173,7 +173,7 @@ class Command(BaseCommand):
 
         inschrijving_r = WedstrijdInschrijving(
                             wanneer=timezone.now(),
-                            status=INSCHRIJVING_STATUS_RESERVERING_BESTELD,
+                            status=WEDSTRIJDINSCHRIJVING_STATUS_RESERVERING_BESTELD,
                             wedstrijd=wedstrijd,
                             sessie=sessie,
                             wedstrijdklasse=wkls_r[0],
@@ -184,7 +184,7 @@ class Command(BaseCommand):
 
         inschrijving_c = WedstrijdInschrijving(
                             wanneer=timezone.now(),
-                            status=INSCHRIJVING_STATUS_RESERVERING_BESTELD,
+                            status=WEDSTRIJDINSCHRIJVING_STATUS_RESERVERING_BESTELD,
                             wedstrijd=wedstrijd,
                             sessie=sessie,
                             wedstrijdklasse=wkls_c[0],

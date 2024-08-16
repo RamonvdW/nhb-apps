@@ -36,7 +36,7 @@ from Functie.models import Functie
 from Mailer.operations import mailer_queue_email, render_email_template, mailer_notify_internal_error
 from Overig.background_sync import BackgroundSync
 from Vereniging.models import Vereniging
-from Wedstrijden.definities import (INSCHRIJVING_STATUS_RESERVERING_BESTELD, INSCHRIJVING_STATUS_DEFINITIEF,
+from Wedstrijden.definities import (WEDSTRIJDINSCHRIJVING_STATUS_RESERVERING_BESTELD, WEDSTRIJDINSCHRIJVING_STATUS_DEFINITIEF,
                                     WEDSTRIJD_KORTING_COMBI)
 from mollie.api.client import Client, RequestSetupError
 from types import SimpleNamespace
@@ -486,7 +486,7 @@ class Command(BaseCommand):
             prijs_euro = wedstrijden_plugin_inschrijven(mutatie.wedstrijd_inschrijving)
 
             # handmatige inschrijving heeft meteen status definitief en hoeft dus niet betaald te worden
-            if mutatie.wedstrijd_inschrijving.status != INSCHRIJVING_STATUS_DEFINITIEF:
+            if mutatie.wedstrijd_inschrijving.status != WEDSTRIJDINSCHRIJVING_STATUS_DEFINITIEF:
                 # maak een product regel aan voor de bestelling
                 product = BestelProduct(
                                 wedstrijd_inschrijving=mutatie.wedstrijd_inschrijving,
@@ -738,7 +738,7 @@ class Command(BaseCommand):
                 for product in producten:
                     if product.wedstrijd_inschrijving:
                         inschrijving = product.wedstrijd_inschrijving
-                        inschrijving.status = INSCHRIJVING_STATUS_RESERVERING_BESTELD
+                        inschrijving.status = WEDSTRIJDINSCHRIJVING_STATUS_RESERVERING_BESTELD
                         inschrijving.save(update_fields=['status'])
                 # for
 
@@ -781,9 +781,9 @@ class Command(BaseCommand):
         inschrijving = mutatie.wedstrijd_inschrijving
         oude_status = inschrijving.status
 
-        # INSCHRIJVING_STATUS_AFGEMELD --> doe niets
-        # INSCHRIJVING_STATUS_RESERVERING_MANDJE gaat via BESTEL_MUTATIE_VERWIJDER
-        if oude_status == INSCHRIJVING_STATUS_RESERVERING_BESTELD:
+        # WEDSTRIJDINSCHRIJVING_STATUS_AFGEMELD --> doe niets
+        # WEDSTRIJDINSCHRIJVING_STATUS_RESERVERING_MANDJE gaat via BESTEL_MUTATIE_VERWIJDER
+        if oude_status == WEDSTRIJDINSCHRIJVING_STATUS_RESERVERING_BESTELD:
             # in een bestelling; nog niet (volledig) betaald
             self.stdout.write('[INFO] Inschrijving pk=%s met status="besteld" afmelden voor wedstrijd' %
                               inschrijving.pk)
@@ -793,7 +793,7 @@ class Command(BaseCommand):
             # FUTURE: betaling afbreken
             # FUTURE: automatische restitutie als de betaling binnen is
 
-        elif oude_status == INSCHRIJVING_STATUS_DEFINITIEF:
+        elif oude_status == WEDSTRIJDINSCHRIJVING_STATUS_DEFINITIEF:
             # in een bestelling en betaald
             self.stdout.write('[INFO] Inschrijving pk=%s met status="definitief" afmelden voor wedstrijd' %
                               inschrijving.pk)

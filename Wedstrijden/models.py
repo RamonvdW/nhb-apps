@@ -18,8 +18,8 @@ from Wedstrijden.definities import (WEDSTRIJD_STATUS_CHOICES, WEDSTRIJD_STATUS_O
                                     WEDSTRIJD_WA_STATUS, WEDSTRIJD_WA_STATUS_B,
                                     WEDSTRIJD_KORTING_SOORT_CHOICES, WEDSTRIJD_KORTING_VERENIGING,
                                     WEDSTRIJD_KORTING_SOORT_TO_STR,
-                                    INSCHRIJVING_STATUS_CHOICES, INSCHRIJVING_STATUS_RESERVERING_MANDJE,
-                                    INSCHRIJVING_STATUS_TO_STR, AANTAL_SCHEIDS_GEEN_KEUZE,
+                                    WEDSTRIJDINSCHRIJVING_STATUS_CHOICES, WEDSTRIJDINSCHRIJVING_STATUS_RESERVERING_MANDJE,
+                                    WEDSTRIJDINSCHRIJVING_STATUS_TO_STR, AANTAL_SCHEIDS_GEEN_KEUZE,
                                     KWALIFICATIE_CHECK_CHOICES, KWALIFICATIE_CHECK_NOG_DOEN)
 from decimal import Decimal
 
@@ -255,8 +255,8 @@ class WedstrijdInschrijving(models.Model):
     wanneer = models.DateTimeField()
 
     # status
-    status = models.CharField(max_length=2, choices=INSCHRIJVING_STATUS_CHOICES,
-                              default=INSCHRIJVING_STATUS_RESERVERING_MANDJE)
+    status = models.CharField(max_length=2, choices=WEDSTRIJDINSCHRIJVING_STATUS_CHOICES,
+                              default=WEDSTRIJDINSCHRIJVING_STATUS_RESERVERING_MANDJE)
 
     # voor welke wedstrijd is dit?
     wedstrijd = models.ForeignKey(Wedstrijd, on_delete=models.PROTECT)
@@ -289,7 +289,7 @@ class WedstrijdInschrijving(models.Model):
     def __str__(self):
         """ beschrijving voor de admin interface """
         return "Inschrijving voor %s: [%s]" % (self.sporterboog.sporter.lid_nr_en_volledige_naam(),
-                                               INSCHRIJVING_STATUS_TO_STR[self.status])
+                                               WEDSTRIJDINSCHRIJVING_STATUS_TO_STR[self.status])
 
     def korte_beschrijving(self):
         """ geef een one-liner terug met een korte beschrijving van deze inschrijving """

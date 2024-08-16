@@ -19,7 +19,7 @@ from Locatie.models import Locatie
 from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
-from Wedstrijden.definities import WEDSTRIJD_STATUS_GEACCEPTEERD, INSCHRIJVING_STATUS_DEFINITIEF
+from Wedstrijden.definities import WEDSTRIJD_STATUS_GEACCEPTEERD, WEDSTRIJDINSCHRIJVING_STATUS_DEFINITIEF
 from Wedstrijden.models import Wedstrijd, WedstrijdSessie, WedstrijdInschrijving
 from decimal import Decimal
 import re
@@ -241,7 +241,7 @@ class TestBestelBetaling(E2EHelpers, TestCase):
 
         # controleer dat de inschrijving nu op 'definitief' staat
         inschrijving = WedstrijdInschrijving.objects.get(pk=self.inschrijving.pk)
-        self.assertEqual(inschrijving.status, INSCHRIJVING_STATUS_DEFINITIEF)
+        self.assertEqual(inschrijving.status, WEDSTRIJDINSCHRIJVING_STATUS_DEFINITIEF)
         self.assertEqual(inschrijving.ontvangen_euro, Decimal('10'))
         self.assertEqual(inschrijving.retour_euro, Decimal('0'))
 

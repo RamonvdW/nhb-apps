@@ -20,7 +20,7 @@ from Sporter.operations import get_sporterboog
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
 from Wedstrijden.definities import (WEDSTRIJD_STATUS_GEACCEPTEERD, WEDSTRIJD_DISCIPLINE_INDOOR,
-                                    INSCHRIJVING_STATUS_RESERVERING_MANDJE, INSCHRIJVING_STATUS_DEFINITIEF,
+                                    WEDSTRIJDINSCHRIJVING_STATUS_RESERVERING_MANDJE, WEDSTRIJDINSCHRIJVING_STATUS_DEFINITIEF,
                                     KWALIFICATIE_CHECK_GOED, KWALIFICATIE_CHECK_NOG_DOEN)
 from Wedstrijden.models import Wedstrijd, WedstrijdSessie, WedstrijdInschrijving, Kwalificatiescore
 import datetime
@@ -153,7 +153,7 @@ class TestWedstrijdInschrijvenKwalificatieScores(E2EHelpers, TestCase):
 
         inschrijving1 = WedstrijdInschrijving(
                             wanneer=now,
-                            status=INSCHRIJVING_STATUS_RESERVERING_MANDJE,
+                            status=WEDSTRIJDINSCHRIJVING_STATUS_RESERVERING_MANDJE,
                             wedstrijd=wedstrijd,
                             sessie=sessie,
                             sporterboog=self.sporterboog1_r,
@@ -165,7 +165,7 @@ class TestWedstrijdInschrijvenKwalificatieScores(E2EHelpers, TestCase):
 
         inschrijving2 = WedstrijdInschrijving(
                             wanneer=now,
-                            status=INSCHRIJVING_STATUS_DEFINITIEF,
+                            status=WEDSTRIJDINSCHRIJVING_STATUS_DEFINITIEF,
                             wedstrijd=wedstrijd,
                             sessie=sessie,
                             sporterboog=self.sporterboog2_r,
@@ -248,7 +248,7 @@ class TestWedstrijdInschrijvenKwalificatieScores(E2EHelpers, TestCase):
         self.assertIn('Check status automatisch terug gezet', score.log)
         self.assertEqual(score.check_status, KWALIFICATIE_CHECK_NOG_DOEN)
 
-        self.inschrijving1.status = INSCHRIJVING_STATUS_DEFINITIEF
+        self.inschrijving1.status = WEDSTRIJDINSCHRIJVING_STATUS_DEFINITIEF
         self.inschrijving1.save(update_fields=['status'])
 
         self.assertTrue(str(self.inschrijving1) != '')
