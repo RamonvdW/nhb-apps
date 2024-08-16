@@ -29,7 +29,7 @@ def filter_highlight(text, search_for):
             new_text += escape(text[:pos])
             text = text[pos:]
 
-            new_text += '<b>'           # highlighter prefix
+            new_text += '<b class="sv-rood-text">'           # highlighter prefix
 
             # take over the found part, in the original case + perform escaping
             new_text += escape(text[:search_len])

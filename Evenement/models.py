@@ -8,8 +8,9 @@ from django.db import models
 from Account.models import Account
 from BasisTypen.definities import ORGANISATIE_KHSN
 from Evenement.definities import (EVENEMENT_STATUS_CHOICES, EVENEMENT_STATUS_ONTWERP, EVENEMENT_STATUS_TO_STR,
-                                  EVENEMENTINSCHRIJVING_STATUS_CHOICES, EVENEMENTINSCHRIJVING_STATUS_RESERVERING_MANDJE,
-                                  EVENEMENTINSCHRIJVING_STATUS_TO_STR)
+                                  EVENEMENT_INSCHRIJVING_STATUS_CHOICES, EVENEMENT_INSCHRIJVING_STATUS_TO_STR,
+                                  EVENEMENT_INSCHRIJVING_STATUS_RESERVERING_MANDJE,
+                                  EVENEMENT_AFMELDING_STATUS_CHOICES, EVENEMENT_AFMELDING_STATUS_TO_STR)
 from Locatie.models import EvenementLocatie
 from Sporter.models import Sporter
 from Vereniging.models import Vereniging
@@ -50,8 +51,8 @@ class Evenement(models.Model):
     contact_telefoon = models.CharField(max_length=50, default='', blank=True)
 
     # eventuele opmerkingen vanuit de organisatie
-    bijzonderheden = models.TextField(max_length=1000, default='',
-                                      blank=True)      # mag leeg zijn
+    beschrijving = models.TextField(max_length=1000, default='',
+                                    blank=True)      # mag leeg zijn
 
     # kosten (voor alle sessies van de hele wedstrijd)
     prijs_euro_normaal = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal(0))     # max 999,99
@@ -84,8 +85,8 @@ class EvenementInschrijving(models.Model):
     wanneer = models.DateTimeField()
 
     # status
-    status = models.CharField(max_length=2, choices=EVENEMENTINSCHRIJVING_STATUS_CHOICES,
-                              default=EVENEMENTINSCHRIJVING_STATUS_RESERVERING_MANDJE)
+    status = models.CharField(max_length=2, choices=EVENEMENT_INSCHRIJVING_STATUS_CHOICES,
+                              default=EVENEMENT_INSCHRIJVING_STATUS_RESERVERING_MANDJE)
 
     # voor welke evenement is dit?
     evenement = models.ForeignKey(Evenement, on_delete=models.PROTECT)
@@ -109,7 +110,7 @@ class EvenementInschrijving(models.Model):
     def __str__(self):
         """ beschrijving voor de admin interface """
         return "Inschrijving voor %s: [%s]" % (self.sporter.lid_nr_en_volledige_naam(),
-                                               EVENEMENTINSCHRIJVING_STATUS_TO_STR[self.status])
+                                               EVENEMENT_INSCHRIJVING_STATUS_TO_STR[self.status])
 
     def korte_beschrijving(self):
         """ geef een one-liner terug met een korte beschrijving van deze inschrijving """
@@ -129,6 +130,58 @@ class EvenementInschrijving(models.Model):
             models.UniqueConstraint(fields=('evenement', 'sporter'),
                                     name='Geen dubbele evenement inschrijving'),
         ]
+
+    objects = models.Manager()      # for the editor only
+
+
+class EvenementAfgemeld(models.Model):
+
+    """ Een afgemelde inschrijving voor een evenement, inclusief koper en betaal details """
+
+    # wanneer was de originele inschrijving?
+    wanneer_inschrijving = models.DateTimeField()
+
+    # wanneer was de afmelding
+    wanneer_afgemeld = models.DateTimeField()
+
+    # status van deze afmelding
+    status = models.CharField(max_length=2, choices=EVENEMENT_AFMELDING_STATUS_CHOICES)
+
+    # voor welke evenement was dit?
+    evenement = models.ForeignKey(Evenement, on_delete=models.PROTECT)
+
+    # voor welk lid was deze inschrijving
+    sporter = models.ForeignKey(Sporter, on_delete=models.PROTECT)
+
+    # wie was de koper?
+    koper = models.ForeignKey(Account, on_delete=models.PROTECT)
+
+    # bedragen ontvangen en terugbetaald
+    ontvangen_euro = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal(0))
+    retour_euro = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal(0))
+
+    # log van bestelling, betalingen
+    log = models.TextField(blank=True)
+
+    # TODO: traceer de gestuurde emails
+
+    def __str__(self):
+        """ beschrijving voor de admin interface """
+        return "Afmelding voor %s: [%s]" % (self.sporter.lid_nr_en_volledige_naam(),
+                                            EVENEMENT_AFMELDING_STATUS_TO_STR[self.status])
+
+    def korte_beschrijving(self):
+        """ geef een one-liner terug met een korte beschrijving van deze inschrijving """
+
+        titel = self.evenement.titel
+        if len(titel) > 60:
+            titel = titel[:58] + '..'
+
+        return "%s - %s" % (self.sporter.lid_nr, titel)
+
+    class Meta:
+        verbose_name = "Evenement afmelding"
+        verbose_name_plural = "Evenement afmeldingen"
 
     objects = models.Manager()      # for the editor only
 

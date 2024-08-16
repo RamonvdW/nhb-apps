@@ -48,7 +48,7 @@
         document.addEventListener("DOMContentLoaded", function() {
             document.getElementById('id_zoekterm').addEventListener("keyup", event => {
                 // console.log(event);
-                if (event.code === 'Enter') {
+                if (event.key === 'Enter') {
                     stuur_keuzes('{{ url_keuzes }}');
                 }
             })

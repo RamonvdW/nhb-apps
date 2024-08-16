@@ -135,8 +135,8 @@ WEDSTRIJD_ORGANISATIE_TO_STR = {
 WEDSTRIJDINSCHRIJVING_STATUS_RESERVERING_MANDJE = 'R'        # moet nog omgezet worden in een bestelling
 WEDSTRIJDINSCHRIJVING_STATUS_RESERVERING_BESTELD = 'B'       # moet nog betaald worden
 WEDSTRIJDINSCHRIJVING_STATUS_DEFINITIEF = 'D'                # is betaald
-WEDSTRIJDINSCHRIJVING_STATUS_AFGEMELD = 'A'
-WEDSTRIJDINSCHRIJVING_STATUS_VERWIJDERD = 'V'                # handmatig of automatisch uit mandje verwijderd
+WEDSTRIJDINSCHRIJVING_STATUS_AFGEMELD = 'A'                  # op verzoek afgemeld, was voorheen definitief
+WEDSTRIJDINSCHRIJVING_STATUS_VERWIJDERD = 'V'                # uit mandje verwijderd, was nooit definitief
 
 WEDSTRIJDINSCHRIJVING_STATUS_CHOICES = (
     (WEDSTRIJDINSCHRIJVING_STATUS_RESERVERING_MANDJE, "Reservering"),

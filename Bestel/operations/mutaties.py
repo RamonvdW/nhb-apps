@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2023 Ramon van der Winkel.
+#  Copyright (c) 2021-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -10,7 +10,7 @@ from Bestel.definities import (BESTEL_MUTATIE_WEDSTRIJD_INSCHRIJVEN, BESTEL_MUTA
                                BESTEL_MUTATIE_MAAK_BESTELLINGEN, BESTEL_MUTATIE_VERWIJDER,
                                BESTEL_MUTATIE_WEDSTRIJD_AFMELDEN, BESTEL_MUTATIE_BETALING_AFGEROND,
                                BESTEL_MUTATIE_OVERBOEKING_ONTVANGEN, BESTEL_MUTATIE_ANNULEER, BESTEL_MUTATIE_TRANSPORT,
-                               BESTELLING_STATUS_BETALING_ACTIEF)
+                               BESTEL_MUTATIE_EVENEMENT_INSCHRIJVEN, BESTELLING_STATUS_BETALING_ACTIEF)
 from Bestel.models import BestelMutatie, Bestelling
 from Overig.background_sync import BackgroundSync
 import time
@@ -47,6 +47,23 @@ def bestel_mutatieverzoek_inschrijven_wedstrijd(account, inschrijving, snel):
                                     code=BESTEL_MUTATIE_WEDSTRIJD_INSCHRIJVEN,
                                     account=account,
                                     wedstrijd_inschrijving=inschrijving,
+                                    is_verwerkt=False)
+
+    if is_created:
+        mutatie.save()
+
+        # wacht kort op de achtergrondtaak
+        _bestel_ping_achtergrondtaak(mutatie, snel)
+
+
+def bestel_mutatieverzoek_inschrijven_evenement(account, inschrijving, snel):
+
+    # zet dit verzoek door naar het mutaties process
+    # voorkom duplicates (niet 100%)
+    mutatie, is_created = BestelMutatie.objects.get_or_create(
+                                    code=BESTEL_MUTATIE_EVENEMENT_INSCHRIJVEN,
+                                    account=account,
+                                    evenement_inschrijving=inschrijving,
                                     is_verwerkt=False)
 
     if is_created:

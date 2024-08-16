@@ -1,25 +1,25 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2021-2023 Ramon van der Winkel.
+                Copyright (c) 2024 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
 
-{% block title %}Wedstrijd details{% endblock %}
+{% block title %}Evenement details{% endblock %}
 
 {% block pagina %}
 
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Wedstrijd details</h3>
+            <h3 class="page-banner">Evenement details</h3>
 
             {% if toon_inschrijven %}
                 <a class="btn-sv-rood" href="#inschrijven">
                     <i class="material-icons-round left notranslate">arrow_downward</i>Inschrijven</a>
             {% else %}
-                <p>Het is niet mogelijk om in te schrijven op deze wedstrijd.</p>
+                <p>Het is niet mogelijk om in te schrijven op dit evenement.</p>
             {% endif %}
         </div>
     </div>
@@ -37,38 +37,31 @@
 
                 <tr>
                     <th>Titel</th>
-                    <td>{{ wed.titel }}</td>
+                    <td>{{ evenement.titel }}</td>
                 </tr>
 
                 <tr>
                     <th>Organiserende vereniging</th>
-                    <td>{{ wed.organiserende_vereniging }}</td>
+                    <td>{{ evenement.organiserende_vereniging }}</td>
                 </tr>
 
-                {% if wed.datum_begin == wed.datum_einde %}
-                    <tr>
-                        <th>Datum wedstrijd</th>
-                        <td>{{ wed.datum_begin }}</td>
-                    </tr>
-                {% else %}
-                    <tr>
-                        <th>Datums wedstrijd</th>
-                        <td>{{ wed.datum_begin }} - {{ wed.datum_einde }}</td>
-                    </tr>
-                {% endif %}
+                <tr>
+                    <th>Datum wedstrijd</th>
+                    <td>{{ evenement.datum }}</td>
+                </tr>
 
                 {% if not wed.is_ter_info %}
                     <tr>
                         <th>Inschrijving moet v&oacute;&oacute;r</th>
                         <td>
-                            <span>{{ wed.inschrijven_voor }}</span>
+                            <span>{{ evenement.inschrijven_voor }}</span>
                             {% if not is_voor_sluitingsdatum %}
                                 <span class="sv-rood-text"> (inschrijving is gesloten)</span>
                             {% else %}
                                 {% if wed.inschrijven_let_op %}
-                                    <span class="sv-rood-text"> (nog maar {{ wed.inschrijven_dagen }} dagen)</span>
+                                    <span class="sv-rood-text"> (nog maar {{ evenement.inschrijven_dagen }} dagen)</span>
                                 {% else %}
-                                    <span> (nog {{ wed.inschrijven_dagen }} dagen)</span>
+                                    <span> (nog {{ evenement.inschrijven_dagen }} dagen)</span>
                                 {% endif %}
                             {% endif %}
                         </td>
@@ -76,28 +69,9 @@
                 {% endif %}
 
                 <tr>
-                    <th>Volgens regels van</th>
-                    <td>{{ wed.organisatie_str }}</td>
-                </tr>
-
-                {% if toon_wa_status %}
-                    <tr>
-                        <th>WA-status</th>
-                        <td>{{ wed.wa_status_str }}</td>
-                    </tr>
-                {% endif %}
-
-                {% if wed.eis_kwalificatie_scores %}
-                    <tr>
-                        <th>Kwalificatie scores</th>
-                        <td>Voor deze wedstrijd vragen we je om kwalificatie-scores door te geven.<br>Hogere scores plaatst je hoger op de deelnemerslijst.<br>Na inschrijving kan je deze doorgeven.</td>
-                    </tr>
-                {% endif %}
-
-                <tr>
-                    <th>Wedstrijd locatie</th>
+                    <th>Locatie</th>
                     <td>
-                        <span>{{ wed.locatie.adres|linebreaksbr }}</span>
+                        <span>{{ evenement.locatie.adres|linebreaksbr }}</span>
                         {% if url_map %}
                             <br><br>
                             <a class="btn-sv-blauw" href="{{ url_map }}" target="_blank" rel="noopener noreferrer">
@@ -108,28 +82,13 @@
 
                 <tr>
                     <th>Doelgroep</th>
-                    <td>{{ wed.begrenzing_str }}</td>
+                    <td>{{ evenement.begrenzing_str }}</td>
                 </tr>
 
                 <tr>
-                    <th>Bijzonder<wbr>heden</th>
-                    <td>{{ wed.bijzonderheden|linebreaksbr }}</td>
+                    <th>Beschrijving</th>
+                    <td>{{ evenement.beschrijving|linebreaksbr }}</td>
                 </tr>
-
-                <tr>                         <!-- F = IFAA -->
-                    <th>{% if wed.organisatie == 'F' %}Toegestane schietstijlen{% else %}Toegestane bogen{% endif %}</th>
-                    <td>
-                        {% for boog in wed.boogtypen.all %}
-                            <span>{{ boog.beschrijving }}</span><br>
-                        {% endfor %}
-                    </td>
-                </tr>
-
-                <tr>
-                    <th>Aanwezig melden</th>
-                    <td>{{ wed.minuten_voor_begin_sessie_aanwezig_zijn }} minuten van te voren</td>
-                </tr>
-
 
                 <tr>
                     <td colspan="2" class="center sv-blauw-text">
@@ -139,17 +98,17 @@
 
                 <tr>
                     <th>Naam</th>
-                    <td>{{ wed.contact_naam }}</td>
+                    <td>{{ evenement.contact_naam }}</td>
                 </tr>
 
                 <tr>
                     <th>Telefoon<wbr>nummer</th>
-                    <td>{{ wed.contact_telefoon }}</td>
+                    <td>{{ evenement.contact_telefoon }}</td>
                 </tr>
 
                 <tr>
                     <th>E-mailadres</th>
-                    <td>{{ wed.contact_email }}</td>
+                    <td>{{ evenement.contact_email }}</td>
                 </tr>
 
                 {% if wed.extern_beheerd %}
@@ -157,9 +116,9 @@
                         <tr>
                             <th>Website voor inschrijven</th>
                             <td>
-                                <a href="{{ wed.contact_website }}" target="_blank" rel="noopener noreferrer">
+                                <a href="{{ evenement.contact_website }}" target="_blank" rel="noopener noreferrer">
                                     <i class="notranslate material-icons-round left sv-blauw-text">open_in_new</i>
-                                    <code>{{ wed.contact_website }}</code>
+                                    <code>{{ evenement.contact_website }}</code>
                                 </a>
                             </td>
                         </tr>
@@ -174,12 +133,12 @@
                 </tr>
                 <tr>
                     <th>Standaard</th>
-                    <td>&euro;&nbsp;{{ wed.prijs_euro_normaal }}</td>
+                    <td>&euro;&nbsp;{{ evenement.prijs_euro_normaal }}</td>
                 </tr>
 
                 <tr>
                     <th>Tot 18 jaar</th>
-                    <td>&euro;&nbsp;{{ wed.prijs_euro_onder18 }}</td>
+                    <td>&euro;&nbsp;{{ evenement.prijs_euro_onder18 }}</td>
                 </tr>
 
             </table>
@@ -275,26 +234,6 @@
 
     {% endif %}
 
-
-    <!-- witruimte -->
-    <div class="row center">
-        <div class="col s12">
-            <h4>Informatie</h4>
-        </div>
-    </div>
-
-    <!-- blauwe balk met kaartjes -->
-    <div class="row-sv-blauw">
-        <div class="col s12">
-
-            <!-- informatie over leeftijden -->
-            <!-- let op: kopie van dit kaartje op Competitie / kies -->
-            {% url 'Sporter:leeftijdsgroepen' as card_url %}
-            {% include 'plein/card_icon.dtl' with title="Leeftijdsgroepen" text="Algemene informatie over de groepering op leeftijd, voor wedstrijden en de competities." icon="star" url=card_url %}
-
-        </div>
-    </div>
-
-    {% include 'feedback/sidebar.dtl' with op_pagina="wedstrijden-wedstrijd-details" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="evenement-details" %}
 
 {% endblock %}
