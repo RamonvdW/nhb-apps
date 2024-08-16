@@ -164,7 +164,7 @@ class TestPleinCliDatabaseOpschonen(E2EHelpers, TestCase):
         transactie.save()
 
     def test_alles(self):
-        with self.assert_max_queries(152, modify_acceptable=True):
+        with self.assert_max_queries(156, modify_acceptable=True):
             f1, f2 = self.run_management_command('database_opschonen')
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())

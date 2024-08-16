@@ -340,7 +340,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
             context['opt_uitvoerende_vers'] = (Vereniging
                                                .objects
                                                .exclude(geen_wedstrijden=True)
-                                               .annotate(aantal=Count('locatie'))
+                                               .annotate(aantal=Count('wedstrijdlocatie'))
                                                .filter(aantal__gte=1)
                                                .order_by('ver_nr'))
             for ver in context['opt_uitvoerende_vers']:
@@ -582,7 +582,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
                     for ver in (Vereniging
                                 .objects
                                 .exclude(geen_wedstrijden=True)
-                                .annotate(aantal=Count('locatie'))
+                                .annotate(aantal=Count('wedstrijdlocatie'))
                                 .filter(aantal__gte=1)):
                         sel = 'ver_%s' % ver.ver_nr
                         if data == sel:
