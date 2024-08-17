@@ -479,7 +479,7 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
                 if keep:
                     all_locs.append(loc)
                     loc.ver_pk = ver.pk
-                    keuze = loc.adres.replace('\n', ', ')
+                    keuze = loc.adres_oneliner()
                     if loc.notities:
                         keuze += ' (%s)' % loc.notities
                     if not keuze:

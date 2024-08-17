@@ -200,7 +200,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
             locatie.sel = "loc_%s" % locatie.pk
             locatie.selected = (wedstrijd.locatie == locatie)
             locatie.keuze_str += ' [disciplines: %s]\n' % locatie.disciplines_str()
-            locatie.keuze_str += locatie.adres.replace('\n', ', ')
+            locatie.keuze_str += locatie.adres_oneliner()
             opt_locatie.append(locatie)
 
             max_banen = max(locatie.banen_18m, locatie.banen_25m, locatie.buiten_banen, max_banen)

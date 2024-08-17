@@ -24,8 +24,8 @@ from Bestel.definities import (BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_BET
                                BESTEL_MUTATIE_ANNULEER, BESTEL_MUTATIE_TRANSPORT, BESTEL_MUTATIE_EVENEMENT_INSCHRIJVEN,
                                BESTEL_TRANSPORT_OPHALEN, BESTEL_TRANSPORT2STR)
 from Bestel.models import BestelProduct, BestelMandje, Bestelling, BestelHoogsteBestelNr, BestelMutatie
-from Bestel.plugins.evenement import evenement_plugin_inschrijven
-from Bestel.plugins.evenement import evenement_plugin_verwijder_reservering
+from Bestel.plugins.evenement import (evenement_plugin_inschrijven, evenement_plugin_verwijder_reservering,
+                                      evenement_plugin_inschrijving_is_betaald)
 from Bestel.plugins.product_info import beschrijf_product, beschrijf_korting
 from Bestel.plugins.wedstrijden import (wedstrijden_plugin_automatische_kortingen_toepassen,
                                         wedstrijden_plugin_inschrijven, wedstrijden_plugin_verwijder_reservering,
@@ -539,6 +539,10 @@ class Command(BaseCommand):
     def _verwerk_mutatie_evenement_inschrijven(self, mutatie):
         mandje = self._get_mandje(mutatie)
         if mandje:                                  # pragma: no branch
+            inschrijving = mutatie.evenement_inschrijving
+            inschrijving.nummer = inschrijving.pk
+            inschrijving.save(update_fields=['nummer'])
+
             prijs_euro = evenement_plugin_inschrijven(mutatie.evenement_inschrijving)
 
             # handmatige inschrijving heeft meteen status definitief en hoeft dus niet betaald te worden
@@ -847,6 +851,8 @@ class Command(BaseCommand):
                     for product in bestelling.producten.all():
                         if product.wedstrijd_inschrijving:
                             wedstrijden_plugin_inschrijving_is_betaald(self.stdout, product)
+                        elif product.evenement_inschrijving:
+                            evenement_plugin_inschrijving_is_betaald(self.stdout, product)
                     # for
 
                     bestelling.status = BESTELLING_STATUS_AFGEROND
@@ -955,6 +961,8 @@ class Command(BaseCommand):
                 for product in bestelling.producten.all():
                     if product.wedstrijd_inschrijving:
                         wedstrijden_plugin_inschrijving_is_betaald(self.stdout, product)
+                    elif product.evenement_inschrijving:
+                        evenement_plugin_inschrijving_is_betaald(self.stdout, product)
                     elif product.webwinkel_keuze:
                         bevat_webwinkel = True
                 # for
@@ -1048,6 +1056,8 @@ class Command(BaseCommand):
             for product in bestelling.producten.all():
                 if product.wedstrijd_inschrijving:
                     wedstrijden_plugin_inschrijving_is_betaald(self.stdout, product)
+                elif product.evenement_inschrijving:
+                    evenement_plugin_inschrijving_is_betaald(self.stdout, product)
                 elif product.webwinkel_keuze:
                     bevat_webwinkel = True
             # for
@@ -1071,8 +1081,8 @@ class Command(BaseCommand):
         status = bestelling.status
         if status not in (BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_BETALING_ACTIEF):
             self.stdout.write('[WARNING] Kan bestelling %s (pk=%s) niet annuleren, want status = %s' % (
-                                bestelling.mh_bestel_nr(), bestelling.pk,
-                                BESTELLING_STATUS2STR[bestelling.status]))
+                bestelling.mh_bestel_nr(), bestelling.pk,
+                BESTELLING_STATUS2STR[bestelling.status]))
             return
 
         self.stdout.write('[INFO] Bestelling %s (pk=%s) wordt nu geannuleerd' % (bestelling.bestel_nr, bestelling.pk))
@@ -1091,17 +1101,17 @@ class Command(BaseCommand):
 
         # wedstrijden
         for product in (bestelling
-                        .producten
-                        .exclude(wedstrijd_inschrijving=None)
-                        .select_related('wedstrijd_inschrijving',
-                                        'wedstrijd_inschrijving__koper',
-                                        'wedstrijd_inschrijving__sessie')
-                        .all()):
+                .producten
+                .exclude(wedstrijd_inschrijving=None)
+                .select_related('wedstrijd_inschrijving',
+                                'wedstrijd_inschrijving__koper',
+                                'wedstrijd_inschrijving__sessie')
+                .all()):
 
             inschrijving = product.wedstrijd_inschrijving
 
             self.stdout.write('[INFO] Annuleer bestelling: BestelProduct pk=%s inschrijving (%s) besteld door %s' % (
-                                product.pk, inschrijving, inschrijving.koper))
+                product.pk, inschrijving, inschrijving.koper))
 
             wedstrijden_plugin_verwijder_reservering(self.stdout, inschrijving)
         # for
@@ -1117,9 +1127,14 @@ class Command(BaseCommand):
             inschrijving = product.evenement_inschrijving
 
             self.stdout.write('[INFO] Annuleer bestelling: BestelProduct pk=%s inschrijving (%s) besteld door %s' % (
-                                product.pk, inschrijving, inschrijving.koper))
+                                    product.pk, inschrijving, inschrijving.koper))
 
-            evenement_plugin_verwijder_reservering(self.stdout, inschrijving)
+            product.evenement_inschrijving = None
+
+            afmelding = evenement_plugin_verwijder_reservering(self.stdout, inschrijving)
+            product.evenement_afgemeld = afmelding
+
+            product.save(update_fields=['evenement_inschrijving', 'evenement_afgemeld'])
         # for
 
         # webwinkel
@@ -1132,7 +1147,7 @@ class Command(BaseCommand):
             keuze = product.webwinkel_keuze
 
             self.stdout.write('[INFO] Annuleer: BestelProduct pk=%s webwinkel (%s) in mandje van %s' % (
-                                product.pk, keuze.product, keuze.koper))
+                product.pk, keuze.product, keuze.koper))
 
             webwinkel_plugin_verwijder_reservering(self.stdout, keuze)
         # for

@@ -85,7 +85,7 @@ class EvenementSessie(models.Model):
     evenement = models.ForeignKey(Evenement, on_delete=models.PROTECT)
 
     # titel van de sessie
-    titel = models.CharField(max_length=50, default='')
+    titel = models.CharField(max_length=70, default='')
 
     # wie is/zijn de presentator(en)
     presentator = models.CharField(max_length=50, default='')
@@ -122,6 +122,9 @@ class EvenementInschrijving(models.Model):
 
     # wanneer is deze inschrijving aangemaakt?
     wanneer = models.DateTimeField()
+
+    # het reserveringsnummer
+    nummer = models.BigIntegerField(default=0)
 
     # status
     status = models.CharField(max_length=2, choices=EVENEMENT_INSCHRIJVING_STATUS_CHOICES,
@@ -182,6 +185,9 @@ class EvenementAfgemeld(models.Model):
 
     # wanneer was de originele inschrijving?
     wanneer_inschrijving = models.DateTimeField()
+
+    # het originele reserveringsnummer
+    nummer = models.BigIntegerField()
 
     # wanneer was de afmelding
     wanneer_afgemeld = models.DateTimeField()

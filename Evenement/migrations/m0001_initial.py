@@ -29,7 +29,7 @@ class Migration(migrations.Migration):
             name='Evenement',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('titel', models.CharField(default='', max_length=50)),
+                ('titel', models.CharField(max_length=50, default='')),
                 ('status', models.CharField(choices=[('O', 'Ontwerp'), ('W', 'Wacht op goedkeuring'),
                                                      ('A', 'Geaccepteerd'), ('X', 'Geannuleerd')],
                                             default='O', max_length=1)),
@@ -54,12 +54,29 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.CreateModel(
+            name='EvenementSessie',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('titel', models.CharField(default='', max_length=70)),
+                ('presentator', models.CharField(default='', max_length=50)),
+                ('begin_tijd', models.TimeField(default='11:00')),
+                ('duur_min', models.PositiveSmallIntegerField(default=60)),
+                ('evenement', models.ForeignKey(on_delete=models.deletion.PROTECT, to='Evenement.evenement')),
+                ('beschrijving', models.TextField(blank=True, default='', max_length=1000)),
+                ('aantal_inschrijvingen', models.SmallIntegerField(default=0)),
+                ('max_deelnemers', models.PositiveSmallIntegerField(default=1)),
+            ],
+            options={
+                'verbose_name': 'Evenement sessie',
+            },
+        ),
+        migrations.CreateModel(
             name='EvenementInschrijving',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('nummer', models.BigIntegerField(default=0)),
                 ('wanneer', models.DateTimeField()),
-                ('status', models.CharField(choices=[('R', 'Reservering'), ('B', 'Besteld'), ('D', 'Definitief'),
-                                                     ('A', 'Afgemeld'), ('V', 'Verwijderd')],
+                ('status', models.CharField(choices=[('R', 'Reservering'), ('B', 'Besteld'), ('D', 'Definitief')],
                                             default='R', max_length=2)),
                 ('ontvangen_euro', models.DecimalField(decimal_places=2, default=Decimal('0'), max_digits=5)),
                 ('retour_euro', models.DecimalField(decimal_places=2, default=Decimal('0'), max_digits=5)),
@@ -67,6 +84,7 @@ class Migration(migrations.Migration):
                 ('evenement', models.ForeignKey(on_delete=models.deletion.PROTECT, to='Evenement.evenement')),
                 ('koper', models.ForeignKey(on_delete=models.deletion.PROTECT, to='Account.account')),
                 ('sporter', models.ForeignKey(on_delete=models.deletion.PROTECT, to='Sporter.sporter')),
+                ('gekozen_sessies', models.ManyToManyField(to='Evenement.evenementsessie')),
             ],
             options={
                 'verbose_name': 'Evenement inschrijving',
@@ -77,6 +95,26 @@ class Migration(migrations.Migration):
             model_name='evenementinschrijving',
             constraint=models.UniqueConstraint(fields=('evenement', 'sporter'),
                                                name='Geen dubbele evenement inschrijving'),
+        ),
+        migrations.CreateModel(
+            name='EvenementAfgemeld',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('wanneer_inschrijving', models.DateTimeField()),
+                ('wanneer_afgemeld', models.DateTimeField()),
+                ('nummer', models.BigIntegerField()),
+                ('status', models.CharField(choices=[('C', 'Geannuleerd'), ('A', 'Afgemeld')], max_length=2)),
+                ('ontvangen_euro', models.DecimalField(decimal_places=2, default=Decimal('0'), max_digits=5)),
+                ('retour_euro', models.DecimalField(decimal_places=2, default=Decimal('0'), max_digits=5)),
+                ('log', models.TextField(blank=True)),
+                ('evenement', models.ForeignKey(on_delete=models.deletion.PROTECT, to='Evenement.evenement')),
+                ('koper', models.ForeignKey(on_delete=models.deletion.PROTECT, to='Account.account')),
+                ('sporter', models.ForeignKey(on_delete=models.deletion.PROTECT, to='Sporter.sporter')),
+            ],
+            options={
+                'verbose_name': 'Evenement afmelding',
+                'verbose_name_plural': 'Evenement afmeldingen',
+            },
         ),
     ]
 

@@ -57,9 +57,9 @@
                 {% url 'Plein:plein' as card_url %}
                 {% include 'plein/card_icon.dtl' with title="Het Plein" text="Naar de beginpagina." icon="hub" url=card_url %}
 
-                <!-- wedstrijdkalender -->
+                <!-- kalender -->
                 {% url 'Kalender:landing-page' as card_url %}
-            {% include 'plein/card_icon.dtl' with title="Kalender" text="Bekijk welke wedstrijden en evenementen georganiseerd worden en schrijf je in." icon="event_note" url=card_url %}
+                {% include 'plein/card_icon.dtl' with title="Kalender" text="Bekijk welke wedstrijden en evenementen georganiseerd worden en schrijf je in." icon="event_note" url=card_url %}
 
                 <!-- FUTURE: toon opleidingen -->
 
@@ -67,6 +67,9 @@
                 {% url 'Webwinkel:overzicht' as card_url %}
                 {% include 'plein/card_icon.dtl' with title="Webwinkel" text="Bekijk onze webwinkel." icon="local_mall" url=card_url %}
 
+                <!-- eerdere bestellingen -->
+                {% url 'Bestel:toon-bestellingen' as card_url %}
+                {% include 'plein/card_icon.dtl' with title="Bestellingen" text="Toon jouw bestellingen." icon="receipt_long" url=card_url %}
             </div>
         </div>
 

@@ -461,7 +461,7 @@ def wedstrijden_plugin_inschrijving_is_betaald(stdout, product: BestelProduct):
                 'koper_volledige_naam': koper_account.volledige_naam(),
                 'reserveringsnummer': settings.TICKET_NUMMER_START__WEDSTRIJD + inschrijving.pk,
                 'wed_titel': inschrijving.wedstrijd.titel,
-                'wed_adres': inschrijving.wedstrijd.locatie.adres.replace('\n', ', '),
+                'wed_adres': inschrijving.wedstrijd.locatie.adres_oneliner(),
                 'wed_datum': inschrijving.sessie.datum,
                 'wed_klasse': inschrijving.wedstrijdklasse.beschrijving,
                 'wed_org_ver': inschrijving.wedstrijd.organiserende_vereniging,
@@ -546,7 +546,7 @@ def wedstrijden_plugin_beschrijf_product(inschrijving):
         tup = ('Wedstrijdklasse', '%s' % inschrijving.wedstrijdklasse.beschrijving)
     beschrijving.append(tup)
 
-    tup = ('Locatie', inschrijving.wedstrijd.locatie.adres.replace('\n', ', '))
+    tup = ('Locatie', inschrijving.wedstrijd.locatie.adres_oneliner())
     beschrijving.append(tup)
 
     tup = ('E-mail organisatie', inschrijving.wedstrijd.contact_email)

@@ -17,9 +17,9 @@ from Vereniging.models import Vereniging, Secretaris
 import datetime
 
 
-class TestVerenigingAccommodatie(E2EHelpers, TestCase):
+class TestLocatieExterneLocatie(E2EHelpers, TestCase):
 
-    """ tests voor de Vereniging applicatie, functie Accommodaties """
+    """ tests voor de Locatie applicatie, functie Externe Locatie """
 
     test_after = ('BasisTypen', 'ImportCRM', 'Functie')
 

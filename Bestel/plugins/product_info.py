@@ -26,6 +26,9 @@ def beschrijf_product(product: BestelProduct):
     if product.evenement_inschrijving:
         return evenement_plugin_beschrijf_product(product.evenement_inschrijving)
 
+    if product.evenement_afgemeld:
+        return evenement_plugin_beschrijf_product(product.evenement_afgemeld)
+
     if product.webwinkel_keuze:
         return webwinkel_plugin_beschrijf_product(product.webwinkel_keuze)
 

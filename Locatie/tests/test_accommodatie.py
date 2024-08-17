@@ -20,7 +20,7 @@ import datetime
 
 class TestLocatieAccommodatie(E2EHelpers, TestCase):
 
-    """ tests voor de Vereniging applicatie, functie Accommodaties """
+    """ tests voor de Locatie applicatie, functie Accommodaties """
 
     test_after = ('BasisTypen', 'ImportCRM', 'Functie')
 
@@ -154,10 +154,12 @@ class TestLocatieAccommodatie(E2EHelpers, TestCase):
 
         # maak de accommodatie aan
         loc1 = self._maak_accommodatie(self.ver1)
-        loc1.adres = 'Adres 123'
+        loc1.adres = 'Adres 123\r\n1234XX Plaats'
         loc1.plaats = 'Grote plas'
         loc1.adres_uit_crm = True
         loc1.save(update_fields=['adres', 'plaats', 'adres_uit_crm'])
+
+        self.assertEqual(loc1.adres_oneliner(), 'Adres 123, 1234XX Plaats')
 
         with self.assert_max_queries(20):
             resp = self.client.get(url)

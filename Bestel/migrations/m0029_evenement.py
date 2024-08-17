@@ -13,8 +13,8 @@ class Migration(migrations.Migration):
 
     # volgorde afdwingen
     dependencies = [
-        ('Evenement', 'm0002_afgemeld'),
         ('Bestel', 'm0028_squashed'),
+        ('Evenement', 'm0001_initial'),
     ]
 
     # migratie functies

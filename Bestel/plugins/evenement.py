@@ -10,11 +10,11 @@ from django.conf import settings
 from django.utils import timezone
 from Bestel.models import BestelProduct
 from Evenement.definities import (EVENEMENT_INSCHRIJVING_STATUS_DEFINITIEF,
-                                  EVENEMENT_AFMELDING_STATUS_AFGEMELD, EVENEMENT_AFMELDING_STATUS_VERWIJDERD,
+                                  EVENEMENT_INSCHRIJVING_STATUS_RESERVERING_MANDJE,
+                                  EVENEMENT_AFMELDING_STATUS_GEANNULEERD, EVENEMENT_AFMELDING_STATUS_AFGEMELD,
                                   EVENEMENT_INSCHRIJVING_STATUS_TO_STR, EVENEMENT_AFMELDING_STATUS_TO_STR)
 from Evenement.models import EvenementInschrijving, EvenementAfgemeld
 from Mailer.operations import mailer_queue_email, mailer_email_is_valide, render_email_template
-import datetime
 
 EMAIL_TEMPLATE_INFO_INSCHRIJVING_EVENEMENT = 'email_bestel/info-inschrijving-evenement.dtl'
 
@@ -63,37 +63,42 @@ def evenement_plugin_afmelden(inschrijving: EvenementInschrijving):
 
 def evenement_plugin_verwijder_reservering(stdout, inschrijving: EvenementInschrijving):
 
+    afmelding = None
+
     now = timezone.now()
     stamp_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
     msg = "[%s] Afgemeld voor dit evenement\n" % stamp_str
 
-    # zet de inschrijving om in een afmelding
-    afmelding = EvenementAfgemeld(
-                    wanneer_inschrijving=inschrijving.wanneer,
-                    wanneer_afgemeld=now,
-                    status=EVENEMENT_AFMELDING_STATUS_AFGEMELD,
-                    evenement=inschrijving.evenement,
-                    sporter=inschrijving.sporter,
-                    koper=inschrijving.koper,
-                    ontvangen_euro=inschrijving.ontvangen_euro,
-                    retour_euro=inschrijving.retour_euro,
-                    log=inschrijving.log + msg)
-
-    if inschrijving.status == EVENEMENT_INSCHRIJVING_STATUS_DEFINITIEF:
-        # was al betaald
-        pass
+    if inschrijving.status == EVENEMENT_INSCHRIJVING_STATUS_RESERVERING_MANDJE:
+        # verwijdering uit mandje
+        stdout.write('[INFO] Inschrijving evenement pk=%s status %s --> verwijderd uit mandje' % (
+            inschrijving.pk,
+            EVENEMENT_INSCHRIJVING_STATUS_TO_STR[inschrijving.status]))
     else:
-        # nog niet betaald
-        # verwijdering uit mandje af annulering van bestelling
-        afmelding.status = EVENEMENT_AFMELDING_STATUS_VERWIJDERD
+        # zet de inschrijving om in een afmelding
+        afmelding = EvenementAfgemeld(
+                        wanneer_inschrijving=inschrijving.wanneer,
+                        nummer=inschrijving.nummer,
+                        wanneer_afgemeld=now,
+                        status=EVENEMENT_AFMELDING_STATUS_AFGEMELD,
+                        evenement=inschrijving.evenement,
+                        sporter=inschrijving.sporter,
+                        koper=inschrijving.koper,
+                        ontvangen_euro=inschrijving.ontvangen_euro,
+                        retour_euro=inschrijving.retour_euro,
+                        log=inschrijving.log + msg)
 
-    afmelding.save()
+        if inschrijving.status != EVENEMENT_INSCHRIJVING_STATUS_DEFINITIEF:
+            # nog niet betaald
+            afmelding.status = EVENEMENT_AFMELDING_STATUS_GEANNULEERD
 
-    stdout.write('[INFO] Inschrijving pk=%s status %s --> afgemeld pk=%s status %s' % (
-        inschrijving.pk,
-        EVENEMENT_INSCHRIJVING_STATUS_TO_STR[inschrijving.status],
-        afmelding.pk,
-        EVENEMENT_AFMELDING_STATUS_TO_STR[afmelding.status]))
+        afmelding.save()
+
+        stdout.write('[INFO] Inschrijving evenement pk=%s status %s --> afgemeld pk=%s status %s' % (
+            inschrijving.pk,
+            EVENEMENT_INSCHRIJVING_STATUS_TO_STR[inschrijving.status],
+            afmelding.pk,
+            EVENEMENT_AFMELDING_STATUS_TO_STR[afmelding.status]))
 
     # verwijder de gekozen sessies
     for sessie in inschrijving.gekozen_sessies.all():
@@ -105,14 +110,16 @@ def evenement_plugin_verwijder_reservering(stdout, inschrijving: EvenementInschr
     # verwijder de inschrijving
     inschrijving.delete()
 
+    return afmelding
 
-def wedstrijden_plugin_inschrijving_is_betaald(stdout, product: BestelProduct):
+
+def evenement_plugin_inschrijving_is_betaald(stdout, product: BestelProduct):
     """ Deze functie wordt aangeroepen vanuit de achtergrondtaak als een bestelling betaald is,
         of als een bestelling niet betaald hoeft te worden (totaal bedrag nul)
     """
-    inschrijving = product.wedstrijd_inschrijving
+    inschrijving = product.evenement_inschrijving
     inschrijving.ontvangen_euro = product.prijs_euro - product.korting_euro
-    inschrijving.status = WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF
+    inschrijving.status = EVENEMENT_INSCHRIJVING_STATUS_DEFINITIEF
 
     stamp_str = timezone.localtime(timezone.now()).strftime('%Y-%m-%d om %H:%M')
     msg = "[%s] Betaling ontvangen (euro %s); status is nu definitief\n" % (stamp_str, inschrijving.ontvangen_euro)
@@ -120,8 +127,10 @@ def wedstrijden_plugin_inschrijving_is_betaald(stdout, product: BestelProduct):
     inschrijving.log += msg
     inschrijving.save(update_fields=['ontvangen_euro', 'status', 'log'])
 
+    evenement = inschrijving.evenement
+
     # stuur een e-mail naar de sporter, als dit niet de koper is
-    sporter = inschrijving.sporterboog.sporter
+    sporter = inschrijving.sporter
     sporter_account = sporter.account
     koper_account = inschrijving.koper
     if sporter_account != koper_account:
@@ -135,32 +144,25 @@ def wedstrijden_plugin_inschrijving_is_betaald(stdout, product: BestelProduct):
         if email:
             # maak de e-mail en stuur deze naar sporter.
 
-            aanwezig = datetime.datetime.combine(inschrijving.sessie.datum, inschrijving.sessie.tijd_begin)
-            aanwezig -= datetime.timedelta(minutes=inschrijving.wedstrijd.minuten_voor_begin_sessie_aanwezig_zijn)
-
             context = {
                 'voornaam': sporter.voornaam,
                 'koper_volledige_naam': koper_account.volledige_naam(),
-                'reserveringsnummer': settings.TICKET_NUMMER_START__WEDSTRIJD + inschrijving.pk,
-                'wed_titel': inschrijving.wedstrijd.titel,
-                'wed_adres': inschrijving.wedstrijd.locatie.adres.replace('\n', ', '),
-                'wed_datum': inschrijving.sessie.datum,
-                'wed_klasse': inschrijving.wedstrijdklasse.beschrijving,
-                'wed_org_ver': inschrijving.wedstrijd.organiserende_vereniging,
-                'aanwezig_tijd': aanwezig.strftime('%H:%M'),
-                'contact_email': inschrijving.wedstrijd.contact_email,
-                'contact_tel': inschrijving.wedstrijd.contact_telefoon,
+                'reserveringsnummer': settings.TICKET_NUMMER_START__EVENEMENT + inschrijving.nummer,
+                'evenement_titel': evenement.titel,
+                'evenement_adres': evenement.locatie.adres_oneliner(),
+                'evenement_datum': evenement.datum,
+                'evenement_org_ver': evenement.organiserende_vereniging,
+                'begin_tijd': evenement.aanvang.strftime('%H:%M'),
+                'contact_email': evenement.contact_email,
+                'contact_tel': evenement.contact_telefoon,
                 'geen_account': sporter.account is None,
                 'naam_site': settings.NAAM_SITE,
             }
 
-            if inschrijving.wedstrijd.organisatie == ORGANISATIE_IFAA:
-                context['wed_klasse'] += ' [%s]' % inschrijving.wedstrijdklasse.afkorting
-
-            mail_body = render_email_template(context, EMAIL_TEMPLATE_INFO_INSCHRIJVING_WEDSTRIJD)
+            mail_body = render_email_template(context, EMAIL_TEMPLATE_INFO_INSCHRIJVING_EVENEMENT)
 
             mailer_queue_email(email,
-                               'Inschrijving op wedstrijd',
+                               'Inschrijving voor evenement',
                                mail_body)
 
             stamp_str = timezone.localtime(timezone.now()).strftime('%Y-%m-%d om %H:%M')
@@ -179,16 +181,18 @@ def wedstrijden_plugin_inschrijving_is_betaald(stdout, product: BestelProduct):
                          sporter.lid_nr)
 
 
-def evenement_plugin_beschrijf_product(inschrijving: EvenementInschrijving):
+def evenement_plugin_beschrijf_product(inschrijving_of_afgemeld: EvenementInschrijving | EvenementAfgemeld):
     """
         Geef een lijst van tuples terug waarin aspecten van het product beschreven staan.
     """
 
-    evenement = inschrijving.evenement
+    evenement = inschrijving_of_afgemeld.evenement
+    sporter = inschrijving_of_afgemeld.sporter
+    nummer = inschrijving_of_afgemeld.nummer
 
     beschrijving = list()
 
-    tup = ('Reserveringsnummer', settings.TICKET_NUMMER_START__WEDSTRIJD + inschrijving.pk)
+    tup = ('Reserveringsnummer', settings.TICKET_NUMMER_START__EVENEMENT + nummer)
     beschrijving.append(tup)
 
     tup = ('Evenement', evenement.titel)
@@ -200,7 +204,6 @@ def evenement_plugin_beschrijf_product(inschrijving: EvenementInschrijving):
     tup = ('Aanvang', evenement.aanvang.strftime('%H:%M'))
     beschrijving.append(tup)
 
-    sporter = inschrijving.sporter
     tup = ('Sporter', sporter.lid_nr_en_volledige_naam())
     beschrijving.append(tup)
 
@@ -212,7 +215,7 @@ def evenement_plugin_beschrijf_product(inschrijving: EvenementInschrijving):
     tup = ('Lid bij vereniging', ver_naam)
     beschrijving.append(tup)
 
-    tup = ('Locatie', evenement.locatie.adres.replace('\n', ', '))
+    tup = ('Locatie', evenement.locatie.adres_oneliner())
     beschrijving.append(tup)
 
     tup = ('E-mail organisatie', evenement.contact_email)
@@ -223,25 +226,5 @@ def evenement_plugin_beschrijf_product(inschrijving: EvenementInschrijving):
 
     return beschrijving
 
-
-def wedstrijden_beschrijf_korting(inschrijving):
-
-    korting_str = None
-    korting_redenen = list()
-
-    if inschrijving.korting:
-        korting = inschrijving.korting
-
-        if korting.soort == WEDSTRIJD_KORTING_SPORTER:
-            korting_str = "Persoonlijke korting: %d%%" % korting.percentage
-
-        elif korting.soort == WEDSTRIJD_KORTING_VERENIGING:
-            korting_str = "Verenigingskorting: %d%%" % korting.percentage
-
-        elif korting.soort == WEDSTRIJD_KORTING_COMBI:              # pragma: no branch
-            korting_str = "Combinatiekorting: %d%%" % korting.percentage
-            korting_redenen = [wedstrijd.titel for wedstrijd in korting.voor_wedstrijden.all()]
-
-    return korting_str, korting_redenen
 
 # end of file

@@ -87,6 +87,10 @@ class WedstrijdLocatie(models.Model):
             disc.append('3d')
         return ", ".join(disc)
 
+    def adres_oneliner(self):
+        # bij invoer via admin interface kan er een \r\n in de tekst komen
+        return self.adres.replace('\r\n', '\n').replace('\n', ', ')
+
     def __str__(self):
         if not self.zichtbaar:
             msg = "(hidden) "
@@ -95,7 +99,7 @@ class WedstrijdLocatie(models.Model):
 
         msg += "[baantype: %s] " % BAANTYPE2STR[self.baan_type]
 
-        msg += self.adres.replace('\n', ', ')
+        msg += self.adres_oneliner()
         # kost te veel database toegangen in admin interface
         # msg += " (%s verenigingen)" % self.verenigingen.count()
 
@@ -132,6 +136,10 @@ class EvenementLocatie(models.Model):
 
     # vrije notitiegegevens voor zaken als "verbouwing tot", etc.
     notities = models.TextField(max_length=1024, blank=True)
+
+    def adres_oneliner(self):
+        # bij invoer via admin interface kan er een \r\n in de tekst komen
+        return self.adres.replace('\r\n', '\n').replace('\n', ', ')
 
     def __str__(self):
         if not self.zichtbaar:
