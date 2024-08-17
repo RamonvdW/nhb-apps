@@ -27,7 +27,7 @@ from Sporter.operations import get_sporterboog
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers.testdata import TestData
 from Vereniging.models import Vereniging, Secretaris
-from Wedstrijden.definities import (WEDSTRIJDINSCHRIJVING_STATUS_DEFINITIEF, WEDSTRIJD_STATUS_GEACCEPTEERD,
+from Wedstrijden.definities import (WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF, WEDSTRIJD_STATUS_GEACCEPTEERD,
                                     WEDSTRIJD_DISCIPLINE_INDOOR)
 from Wedstrijden.models import Wedstrijd, WedstrijdSessie, WedstrijdInschrijving
 import datetime
@@ -375,7 +375,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
 
         inschrijving = WedstrijdInschrijving(
                             wanneer=now,
-                            status=WEDSTRIJDINSCHRIJVING_STATUS_DEFINITIEF,
+                            status=WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF,
                             wedstrijd=wedstrijd,
                             sessie=sessie,
                             sporterboog=sporterboog,

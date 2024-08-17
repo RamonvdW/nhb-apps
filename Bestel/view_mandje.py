@@ -102,6 +102,11 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
                                          'wedstrijd_inschrijving__sporterboog__boogtype',
                                          'wedstrijd_inschrijving__sporterboog__sporter',
                                          'wedstrijd_inschrijving__sporterboog__sporter__bij_vereniging',
+                                         'evenement_inschrijving',
+                                         'evenement_inschrijving__evenement__organiserende_vereniging',
+                                         'evenement_inschrijving__koper',
+                                         'evenement_inschrijving__sporter',
+                                         'evenement_inschrijving__sporter__bij_vereniging',
                                          'webwinkel_keuze',
                                          'webwinkel_keuze__product')
                          .order_by('pk'))       # volgorde waarop ze in het mandje gelegd zijn
@@ -131,6 +136,9 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
                         ontvanger2product_pks[ver_nr].append(product.pk)
                     except KeyError:
                         ontvanger2product_pks[ver_nr] = [product.pk]
+
+                elif product.evenement_inschrijving:
+                    pass
 
                 elif product.webwinkel_keuze:
                     # FUTURE: kortingen

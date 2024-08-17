@@ -16,7 +16,8 @@ from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige
 from Kalender.view_maand import MAAND2URL
 from Wedstrijden.definities import (KWALIFICATIE_CHECK_NOG_DOEN, KWALIFICATIE_CHECK2STR,
-                                    WEDSTRIJDINSCHRIJVING_STATUS_RESERVERING_MANDJE, WEDSTRIJDINSCHRIJVING_STATUS_RESERVERING_BESTELD)
+                                    WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_MANDJE,
+                                    WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_BESTELD)
 from Wedstrijden.models import WedstrijdInschrijving, Kwalificatiescore
 import datetime
 
@@ -107,8 +108,8 @@ class KwalificatieScoresOpgevenView(UserPassesTestMixin, TemplateView):
                                    .filter(inschrijving=inschrijving)
                                    .order_by('datum'))
 
-        context['eerste_keer'] = inschrijving.status in (WEDSTRIJDINSCHRIJVING_STATUS_RESERVERING_MANDJE,
-                                                         WEDSTRIJDINSCHRIJVING_STATUS_RESERVERING_BESTELD)
+        context['eerste_keer'] = inschrijving.status in (WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_MANDJE,
+                                                         WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_BESTELD)
         if len(kwalificatie_scores) > 0:
             context['eerste_keer'] = False
 
@@ -199,8 +200,8 @@ class KwalificatieScoresOpgevenView(UserPassesTestMixin, TemplateView):
         if not mag_aanpassen:
             raise Http404('Mag niet meer aanpassen')
 
-        eerste_keer = inschrijving.status in (WEDSTRIJDINSCHRIJVING_STATUS_RESERVERING_MANDJE,
-                                              WEDSTRIJDINSCHRIJVING_STATUS_RESERVERING_BESTELD)
+        eerste_keer = inschrijving.status in (WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_MANDJE,
+                                              WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_BESTELD)
         qset = (Kwalificatiescore
                 .objects
                 .filter(inschrijving=inschrijving)

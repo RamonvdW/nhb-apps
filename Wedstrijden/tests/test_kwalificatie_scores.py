@@ -17,7 +17,7 @@ from Sporter.models import Sporter, SporterBoog
 from Sporter.operations import get_sporterboog
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
-from Wedstrijden.definities import (WEDSTRIJDINSCHRIJVING_STATUS_DEFINITIEF, WEDSTRIJD_STATUS_GEACCEPTEERD,
+from Wedstrijden.definities import (WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF, WEDSTRIJD_STATUS_GEACCEPTEERD,
                                     WEDSTRIJD_DISCIPLINE_INDOOR,
                                     KWALIFICATIE_CHECK_GOED, KWALIFICATIE_CHECK_NOG_DOEN, KWALIFICATIE_CHECK_AFGEKEURD)
 from Wedstrijden.models import Wedstrijd, WedstrijdSessie, WedstrijdInschrijving, Kwalificatiescore
@@ -157,7 +157,7 @@ class TestWedstrijdenKwalificatieScores(E2EHelpers, TestCase):
 
         inschrijving1 = WedstrijdInschrijving(
                             wanneer=now,
-                            status=WEDSTRIJDINSCHRIJVING_STATUS_DEFINITIEF,
+                            status=WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF,
                             wedstrijd=wedstrijd,
                             sessie=sessie,
                             sporterboog=self.sporterboog1_r,
@@ -169,7 +169,7 @@ class TestWedstrijdenKwalificatieScores(E2EHelpers, TestCase):
 
         inschrijving2 = WedstrijdInschrijving(
                             wanneer=now,
-                            status=WEDSTRIJDINSCHRIJVING_STATUS_DEFINITIEF,
+                            status=WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF,
                             wedstrijd=wedstrijd,
                             sessie=sessie,
                             sporterboog=self.sporterboog2_r,

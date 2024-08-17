@@ -5,12 +5,17 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.contrib import admin
-from Evenement.models import Evenement, EvenementInschrijving, EvenementAfgemeld
+from Evenement.models import Evenement, EvenementSessie, EvenementInschrijving, EvenementAfgemeld
 
 
 class EvenementAdmin(admin.ModelAdmin):
 
     list_filter = ('status', 'organiserende_vereniging')
+
+
+class EvenementSessieAdmin(admin.ModelAdmin):
+
+    list_filter = ('evenement', 'begin_tijd')
 
 
 class EvenementInschrijvingAdmin(admin.ModelAdmin):
@@ -30,6 +35,7 @@ class EvenementAfgemeldAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Evenement, EvenementAdmin)
+admin.site.register(EvenementSessie, EvenementSessieAdmin)
 admin.site.register(EvenementInschrijving, EvenementInschrijvingAdmin)
 admin.site.register(EvenementAfgemeld, EvenementAfgemeldAdmin)
 

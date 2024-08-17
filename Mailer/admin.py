@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2022 Ramon van der Winkel.
+#  Copyright (c) 2020-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -9,7 +9,7 @@ from Mailer.models import MailQueue
 
 
 class MailQueueAdmin(admin.ModelAdmin):
-    search_fields = ('mail_to',)
+    search_fields = ('mail_to', 'mail_subj', 'mail_text')
 
     list_filter = ('is_verstuurd', 'is_blocked')
 

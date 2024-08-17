@@ -112,7 +112,7 @@ class BestelMutatieAdmin(admin.ModelAdmin):
 
     readonly_fields = ('when', 'account', 'code_plus')
 
-    auto_complete = ('wedstrijd_inschrijving', 'product', 'bestelling')
+    auto_complete = ('wedstrijd_inschrijving', 'evenement_inschrijving', 'product', 'bestelling')
 
     list_filter = ('is_verwerkt', 'code')
 

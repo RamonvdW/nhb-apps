@@ -22,7 +22,7 @@ from Overig.helpers import get_safe_from_ip
 from Registreer.definities import REGISTRATIE_FASE_AFGEWEZEN
 from Registreer.models import GastRegistratie
 from Sporter.models import Sporter
-from Wedstrijden.definities import WEDSTRIJDINSCHRIJVING_STATUS_DEFINITIEF, WEDSTRIJDINSCHRIJVING_STATUS_TO_STR
+from Wedstrijden.definities import WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF, WEDSTRIJDINSCHRIJVING_STATUS_TO_STR
 from Wedstrijden.models import WedstrijdInschrijving
 import logging
 
@@ -270,7 +270,7 @@ class GastAccountDetailsView(UserPassesTestMixin, TemplateView):
 
         for inschrijving in context['gast_wedstrijden']:
             inschrijving.status_str = WEDSTRIJDINSCHRIJVING_STATUS_TO_STR[inschrijving.status]
-            if inschrijving.status == WEDSTRIJDINSCHRIJVING_STATUS_DEFINITIEF:
+            if inschrijving.status == WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF:
                 gast.ophef = -100
         # for
 

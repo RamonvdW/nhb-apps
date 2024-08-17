@@ -14,7 +14,7 @@ from Locatie.models import WedstrijdLocatie
 from Sporter.models import Sporter, SporterBoog
 from Sporter.operations import get_sporter_voorkeuren
 from Vereniging.models import Vereniging
-from Wedstrijden.definities import (WEDSTRIJDINSCHRIJVING_STATUS_AFGEMELD, WEDSTRIJD_BEGRENZING_VERENIGING,
+from Wedstrijden.definities import (WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD, WEDSTRIJD_BEGRENZING_VERENIGING,
                                     WEDSTRIJD_BEGRENZING_REGIO, WEDSTRIJD_BEGRENZING_RAYON)
 from Wedstrijden.models import Wedstrijd, WedstrijdSessie, WedstrijdInschrijving
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -506,7 +506,7 @@ class TestWedstrijdInschrijven(E2EHelpers, TestCase):
         self.assertEqual(inschrijving.wedstrijd.pk, self.wedstrijd.pk)
         self.assertEqual(inschrijving.sessie.pk, self.sessie_r.pk)
         self.assertEqual(inschrijving.sporterboog.pk, self.sporterboog.pk)
-        inschrijving.status = WEDSTRIJDINSCHRIJVING_STATUS_AFGEMELD
+        inschrijving.status = WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD
         inschrijving.save(update_fields=['status'])
 
         # opnieuw aanmelden

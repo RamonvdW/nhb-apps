@@ -65,14 +65,53 @@ class Evenement(models.Model):
 
     def __str__(self):
         """ geef een beschrijving terug voor de admin interface """
-        msg = str(self.datum)
-        msg += ' [%s]' % self.organiserende_vereniging.ver_nr
-        msg += ' %s %s' % (EVENEMENT_STATUS_TO_STR[self.status], self.titel)
-        return msg
+        return "%s [%s] %s [%s]" % (self.datum,
+                                    self.organiserende_vereniging.ver_nr,
+                                    self.titel,
+                                    EVENEMENT_STATUS_TO_STR[self.status])
 
     class Meta:
         verbose_name = "Evenement"
         verbose_name_plural = "Evenementen"
+
+    objects = models.Manager()      # for the editor only
+
+
+class EvenementSessie(models.Model):
+
+    """ Een evenement voor op de kalender """
+
+    # voor welke evenement was dit?
+    evenement = models.ForeignKey(Evenement, on_delete=models.PROTECT)
+
+    # titel van de sessie
+    titel = models.CharField(max_length=50, default='')
+
+    # wie is/zijn de presentator(en)
+    presentator = models.CharField(max_length=50, default='')
+
+    # op welke tijdstip begint deze sessie?
+    begin_tijd = models.TimeField(default='11:00')
+
+    # hoe lang duurt deze sessie
+    duur_min = models.PositiveSmallIntegerField(default=60)
+
+    # maximum aantal deelnemers
+    max_deelnemers = models.PositiveSmallIntegerField(default=1)
+
+    # aantal plekken gebruikt
+    aantal_inschrijvingen = models.SmallIntegerField(default=0)
+
+    # eventuele opmerkingen vanuit de organisatie
+    beschrijving = models.TextField(max_length=1000, default='',
+                                    blank=True)      # mag leeg zijn
+
+    def __str__(self):
+        """ geef een beschrijving terug voor de admin interface """
+        return "%s - %s" % (self.begin_tijd, self.titel)
+
+    class Meta:
+        verbose_name = "Evenement sessie"
 
     objects = models.Manager()      # for the editor only
 
@@ -107,10 +146,13 @@ class EvenementInschrijving(models.Model):
 
     # TODO: traceer de gestuurde emails
 
+    # gekozen sessies
+    gekozen_sessies = models.ManyToManyField(EvenementSessie)
+
     def __str__(self):
         """ beschrijving voor de admin interface """
-        return "Inschrijving voor %s: [%s]" % (self.sporter.lid_nr_en_volledige_naam(),
-                                               EVENEMENT_INSCHRIJVING_STATUS_TO_STR[self.status])
+        return "Evenement inschrijving voor %s: [%s]" % (self.sporter.lid_nr_en_volledige_naam(),
+                                                         EVENEMENT_INSCHRIJVING_STATUS_TO_STR[self.status])
 
     def korte_beschrijving(self):
         """ geef een one-liner terug met een korte beschrijving van deze inschrijving """

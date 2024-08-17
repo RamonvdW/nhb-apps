@@ -10,7 +10,7 @@ from Account.models import Account
 from Bestel.definities import (BESTELLING_STATUS_CHOICES, BESTELLING_STATUS_NIEUW, BESTELLING_STATUS2STR,
                                BESTEL_MUTATIE_TO_STR, BESTEL_TRANSPORT_NVT, BESTEL_TRANSPORT_OPTIES)
 from Betaal.models import BetaalActief, BetaalTransactie, BetaalMutatie, BetaalInstellingenVereniging
-from Evenement.models import EvenementInschrijving
+from Evenement.models import EvenementInschrijving, EvenementAfgemeld
 from Webwinkel.models import WebwinkelKeuze
 from Wedstrijden.models import WedstrijdInschrijving
 from decimal import Decimal
@@ -27,6 +27,7 @@ class BestelProduct(models.Model):
 
     # inschrijving voor een evenement
     evenement_inschrijving = models.ForeignKey(EvenementInschrijving, on_delete=models.SET_NULL, null=True, blank=True)
+    evenement_afgemeld = models.ForeignKey(EvenementAfgemeld, on_delete=models.SET_NULL, null=True, blank=True)
 
     # keuze in de webwinkel
     webwinkel_keuze = models.ForeignKey(WebwinkelKeuze, on_delete=models.SET_NULL, null=True, blank=True)
@@ -51,6 +52,8 @@ class BestelProduct(models.Model):
             msg += str(self.wedstrijd_inschrijving)
         elif self.evenement_inschrijving:
             msg += str(self.evenement_inschrijving)
+        elif self.evenement_afgemeld:
+            msg += str(self.evenement_afgemeld)
         elif self.webwinkel_keuze:
             msg += str(self.webwinkel_keuze)
         else:
@@ -68,6 +71,8 @@ class BestelProduct(models.Model):
             return self.wedstrijd_inschrijving.korte_beschrijving()
         if self.evenement_inschrijving:
             return self.evenement_inschrijving.korte_beschrijving()
+        if self.evenement_afgemeld:
+            return self.evenement_afgemeld.korte_beschrijving()
         if self.webwinkel_keuze:
             return self.webwinkel_keuze.korte_beschrijving()
         return "?"

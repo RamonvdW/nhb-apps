@@ -21,9 +21,11 @@ from Bestel.definities import (BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_BET
                                BESTEL_MUTATIE_WEDSTRIJD_AFMELDEN, BESTEL_MUTATIE_VERWIJDER,
                                BESTEL_MUTATIE_MAAK_BESTELLINGEN, BESTEL_MUTATIE_BETALING_AFGEROND,
                                BESTEL_MUTATIE_OVERBOEKING_ONTVANGEN, BESTEL_MUTATIE_RESTITUTIE_UITBETAALD,
-                               BESTEL_MUTATIE_ANNULEER, BESTEL_MUTATIE_TRANSPORT,
+                               BESTEL_MUTATIE_ANNULEER, BESTEL_MUTATIE_TRANSPORT, BESTEL_MUTATIE_EVENEMENT_INSCHRIJVEN,
                                BESTEL_TRANSPORT_OPHALEN, BESTEL_TRANSPORT2STR)
 from Bestel.models import BestelProduct, BestelMandje, Bestelling, BestelHoogsteBestelNr, BestelMutatie
+from Bestel.plugins.evenement import evenement_plugin_inschrijven
+from Bestel.plugins.evenement import evenement_plugin_verwijder_reservering
 from Bestel.plugins.product_info import beschrijf_product, beschrijf_korting
 from Bestel.plugins.wedstrijden import (wedstrijden_plugin_automatische_kortingen_toepassen,
                                         wedstrijden_plugin_inschrijven, wedstrijden_plugin_verwijder_reservering,
@@ -32,11 +34,14 @@ from Bestel.plugins.webwinkel import (webwinkel_plugin_reserveren, webwinkel_plu
                                       webwinkel_plugin_bepaal_kortingen, webwinkel_plugin_bepaal_verzendkosten_mandje,
                                       webwinkel_plugin_bepaal_verzendkosten_bestelling)
 from Betaal.models import BetaalInstellingenVereniging, BetaalTransactie
+from Evenement.definities import (EVENEMENT_INSCHRIJVING_STATUS_DEFINITIEF,
+                                  EVENEMENT_INSCHRIJVING_STATUS_RESERVERING_BESTELD)
 from Functie.models import Functie
 from Mailer.operations import mailer_queue_email, render_email_template, mailer_notify_internal_error
 from Overig.background_sync import BackgroundSync
 from Vereniging.models import Vereniging
-from Wedstrijden.definities import (WEDSTRIJDINSCHRIJVING_STATUS_RESERVERING_BESTELD, WEDSTRIJDINSCHRIJVING_STATUS_DEFINITIEF,
+from Wedstrijden.definities import (WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_BESTELD,
+                                    WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF,
                                     WEDSTRIJD_KORTING_COMBI)
 from mollie.api.client import Client, RequestSetupError
 from types import SimpleNamespace
@@ -301,6 +306,32 @@ class Command(BaseCommand):
             product.delete()
         # for
 
+        # evenementen
+        for product in (BestelProduct
+                        .objects
+                        .annotate(mandje_count=Count('bestelmandje'))
+                        .exclude(evenement_inschrijving=None)
+                        .select_related('evenement_inschrijving',
+                                        'evenement_inschrijving__koper')
+                        .filter(mandje_count=1,         # product ligt nog in een mandje
+                                evenement_inschrijving__wanneer__lt=verval_datum)):
+
+            inschrijving = product.evenement_inschrijving
+
+            self.stdout.write('[INFO] Vervallen: BestelProduct pk=%s inschrijving (%s) in mandje van %s' % (
+                                product.pk, inschrijving, inschrijving.koper))
+
+            evenement_plugin_verwijder_reservering(self.stdout, inschrijving)
+
+            mandje = product.bestelmandje_set.first()
+            if mandje.pk not in mandje_pks:
+                mandje_pks.append(mandje.pk)
+
+            # verwijder het product, dan verdwijnt deze ook uit het mandje
+            self.stdout.write('[INFO] BestelProduct met pk=%s wordt verwijderd' % product.pk)
+            product.delete()
+        # for
+
         # webwinkel
         for product in (BestelProduct
                         .objects
@@ -486,7 +517,7 @@ class Command(BaseCommand):
             prijs_euro = wedstrijden_plugin_inschrijven(mutatie.wedstrijd_inschrijving)
 
             # handmatige inschrijving heeft meteen status definitief en hoeft dus niet betaald te worden
-            if mutatie.wedstrijd_inschrijving.status != WEDSTRIJDINSCHRIJVING_STATUS_DEFINITIEF:
+            if mutatie.wedstrijd_inschrijving.status != WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF:
                 # maak een product regel aan voor de bestelling
                 product = BestelProduct(
                                 wedstrijd_inschrijving=mutatie.wedstrijd_inschrijving,
@@ -498,6 +529,28 @@ class Command(BaseCommand):
 
                 # kijk of er automatische kortingen zijn die toegepast kunnen worden
                 wedstrijden_plugin_automatische_kortingen_toepassen(self.stdout, mandje)
+
+                # bereken het totaal opnieuw
+                self._mandje_bepaal_btw(mandje)
+                mandje.bepaal_totaalprijs_opnieuw()
+        else:
+            self.stdout.write('[WARNING] Kan mandje niet vinden voor mutatie pk=%s' % mutatie.pk)
+
+    def _verwerk_mutatie_evenement_inschrijven(self, mutatie):
+        mandje = self._get_mandje(mutatie)
+        if mandje:                                  # pragma: no branch
+            prijs_euro = evenement_plugin_inschrijven(mutatie.evenement_inschrijving)
+
+            # handmatige inschrijving heeft meteen status definitief en hoeft dus niet betaald te worden
+            if mutatie.evenement_inschrijving.status != EVENEMENT_INSCHRIJVING_STATUS_DEFINITIEF:
+                # maak een product regel aan voor de bestelling
+                product = BestelProduct(
+                                evenement_inschrijving=mutatie.evenement_inschrijving,
+                                prijs_euro=prijs_euro)
+                product.save()
+
+                # leg het product in het mandje
+                mandje.producten.add(product)
 
                 # bereken het totaal opnieuw
                 self._mandje_bepaal_btw(mandje)
@@ -575,6 +628,22 @@ class Command(BaseCommand):
 
                     handled = True
 
+                elif product.evenement_inschrijving:
+                    mandje.producten.remove(product)
+
+                    inschrijving = product.evenement_inschrijving
+
+                    mutatie.evenement_inschrijving = None
+                    mutatie.product = None
+                    mutatie.save()
+
+                    evenement_plugin_verwijder_reservering(self.stdout, inschrijving)
+
+                    # verwijder het product, dan verdwijnt deze ook uit het mandje
+                    product.delete()
+
+                    handled = True
+
                 elif product.webwinkel_keuze:
 
                     transport_oud = mandje.transport
@@ -632,6 +701,9 @@ class Command(BaseCommand):
                             .select_related('wedstrijd_inschrijving',
                                             'wedstrijd_inschrijving__wedstrijd',
                                             'wedstrijd_inschrijving__wedstrijd__organiserende_vereniging',
+                                            'evenement_inschrijving',
+                                            'evenement_inschrijving__evenement',
+                                            'evenement_inschrijving__evenement__organiserende_vereniging',
                                             'webwinkel_keuze')
                             .order_by('wedstrijd_inschrijving__pk',
                                       'webwinkel_keuze__pk')):
@@ -641,6 +713,18 @@ class Command(BaseCommand):
                     instellingen = self._get_instellingen(product
                                                           .wedstrijd_inschrijving
                                                           .wedstrijd
+                                                          .organiserende_vereniging)
+                    ontvanger_ver_nr = instellingen.vereniging.ver_nr       # kan nu ook "via KHSN" zijn
+                    try:
+                        ontvanger2producten[ontvanger_ver_nr].append(product)
+                    except KeyError:
+                        ontvanger2producten[ontvanger_ver_nr] = [product]
+
+                elif product.evenement_inschrijving:
+                    # evenement van de kalender
+                    instellingen = self._get_instellingen(product
+                                                          .evenement_inschrijving
+                                                          .evenement
                                                           .organiserende_vereniging)
                     ontvanger_ver_nr = instellingen.vereniging.ver_nr       # kan nu ook "via KHSN" zijn
                     try:
@@ -734,11 +818,15 @@ class Command(BaseCommand):
                 # haal deze producten uit het mandje
                 mandje.producten.remove(*producten)
 
-                # pas de status aan van wedstrijd inschrijvingen
+                # pas de status aan van inschrijvingen voor wedstrijden en evemenenten
                 for product in producten:
                     if product.wedstrijd_inschrijving:
                         inschrijving = product.wedstrijd_inschrijving
-                        inschrijving.status = WEDSTRIJDINSCHRIJVING_STATUS_RESERVERING_BESTELD
+                        inschrijving.status = WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_BESTELD
+                        inschrijving.save(update_fields=['status'])
+                    if product.evenement_inschrijving:
+                        inschrijving = product.evenement_inschrijving
+                        inschrijving.status = EVENEMENT_INSCHRIJVING_STATUS_RESERVERING_BESTELD
                         inschrijving.save(update_fields=['status'])
                 # for
 
@@ -783,7 +871,7 @@ class Command(BaseCommand):
 
         # WEDSTRIJDINSCHRIJVING_STATUS_AFGEMELD --> doe niets
         # WEDSTRIJDINSCHRIJVING_STATUS_RESERVERING_MANDJE gaat via BESTEL_MUTATIE_VERWIJDER
-        if oude_status == WEDSTRIJDINSCHRIJVING_STATUS_RESERVERING_BESTELD:
+        if oude_status == WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_BESTELD:
             # in een bestelling; nog niet (volledig) betaald
             self.stdout.write('[INFO] Inschrijving pk=%s met status="besteld" afmelden voor wedstrijd' %
                               inschrijving.pk)
@@ -793,7 +881,7 @@ class Command(BaseCommand):
             # FUTURE: betaling afbreken
             # FUTURE: automatische restitutie als de betaling binnen is
 
-        elif oude_status == WEDSTRIJDINSCHRIJVING_STATUS_DEFINITIEF:
+        elif oude_status == WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF:
             # in een bestelling en betaald
             self.stdout.write('[INFO] Inschrijving pk=%s met status="definitief" afmelden voor wedstrijd' %
                               inschrijving.pk)
@@ -1012,10 +1100,26 @@ class Command(BaseCommand):
 
             inschrijving = product.wedstrijd_inschrijving
 
-            self.stdout.write('[INFO] Annuleer: BestelProduct pk=%s inschrijving (%s) in mandje van %s' % (
+            self.stdout.write('[INFO] Annuleer bestelling: BestelProduct pk=%s inschrijving (%s) besteld door %s' % (
                                 product.pk, inschrijving, inschrijving.koper))
 
             wedstrijden_plugin_verwijder_reservering(self.stdout, inschrijving)
+        # for
+
+        # evenement
+        for product in (bestelling
+                        .producten
+                        .exclude(evenement_inschrijving=None)
+                        .select_related('evenement_inschrijving',
+                                        'evenement_inschrijving__koper')
+                        .all()):
+
+            inschrijving = product.evenement_inschrijving
+
+            self.stdout.write('[INFO] Annuleer bestelling: BestelProduct pk=%s inschrijving (%s) besteld door %s' % (
+                                product.pk, inschrijving, inschrijving.koper))
+
+            evenement_plugin_verwijder_reservering(self.stdout, inschrijving)
         # for
 
         # webwinkel
@@ -1064,6 +1168,10 @@ class Command(BaseCommand):
             self.stdout.write('[INFO] Verwerk mutatie %s: inschrijven op wedstrijd' % mutatie.pk)
             self._verwerk_mutatie_wedstrijd_inschrijven(mutatie)
 
+        elif code == BESTEL_MUTATIE_EVENEMENT_INSCHRIJVEN:
+            self.stdout.write('[INFO] Verwerk mutatie %s: inschrijven op evenement' % mutatie.pk)
+            self._verwerk_mutatie_evenement_inschrijven(mutatie)
+
         elif code == BESTEL_MUTATIE_WEBWINKEL_KEUZE:
             self.stdout.write('[INFO] Verwerk mutatie %s: webwinkel keuze' % mutatie.pk)
             self._verwerk_mutatie_webwinkel_keuze(mutatie)
@@ -1079,6 +1187,8 @@ class Command(BaseCommand):
         elif code == BESTEL_MUTATIE_WEDSTRIJD_AFMELDEN:
             self.stdout.write('[INFO] Verwerk mutatie %s: afmelden voor wedstrijd' % mutatie.pk)
             self._verwerk_mutatie_wedstrijd_afmelden(mutatie)
+
+        # FUTURE: EVENEMENT_AFMELDEN
 
         elif code == BESTEL_MUTATIE_BETALING_AFGEROND:
             self.stdout.write('[INFO] Verwerk mutatie %s: betaling afgerond' % mutatie.pk)

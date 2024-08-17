@@ -1,0 +1,54 @@
+{% extends 'email_mailer/email_basis.dtl' %}
+{% comment %}
+                Copyright (c) 2024 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% block inhoud_text %}
+    |Hallo {{ voornaam }}!
+    |
+    |Je bent ingeschreven op een evenement door {{ koper_volledige_naam }}.
+    |
+    |Evenement: {{ evenement_titel }}
+    |Locatie: {{ evenement_adres }}
+    |Wanneer: {{ evenement_datum }}
+    |Begint om: {{ begin_tijd }}
+    |
+    |Reserveringsnummer: {{ reserveringsnummer }}
+    |
+    |Het evenement wordt georganiseerd door {{ evenement_org_ver }}.
+    |Telefoon: {{ contact_tel }}
+    |E-mail: {{ contact_email }}
+    |
+    |Je kan meer details over deze inschrijving terugvinden op MijnHandboogsport onder Mijn pagina.
+    {% if geen_account %}
+    |(nadat je een account aangemaakt hebt).
+    {% endif %}
+    |
+    |Veel plezier op dit evenement!
+{% endblock %}
+
+{% block inhoud_html %}
+    <div>Hallo {{ voornaam }}!</div>
+    <br>
+    <div>Je bent ingeschreven op een evenement door {{ koper_volledige_naam }}.</div>
+    <br>
+    <table>
+        <tr><th>Evenement:</th><td>{{ evenement_titel }}</td></tr>
+        <tr><th>Locatie:</th><td>{{ evenement_adres }}</td></tr>
+        <tr><th>Wanneer:</th><td>{{ evenement_datum }}</td></tr>
+        <tr><th>Begint om:</th><td>{{ begin_tijd }}</td></tr>
+    </table>
+    <br>
+    <table>
+        <tr><th>Reserveringsnummer:</th><td>{{ reserveringsnummer }}</td></tr>
+    </table>
+    <br>
+    <div>Het evenement wordt georganiseerd door {{ evenement_org_ver }}.</div>
+    <div>Telefoon: {{ contact_tel }}</div>
+    <div>E-mail: <a href="mailto:{{ contact_email }}"><code>{{ contact_email }}</code></a></div>
+    <br>
+    <div>Je kan meer details over deze inschrijving terugvinden op MijnHandboogsport onder Mijn pagina.{% if geen_account %}<br>(nadat je een account aangemaakt hebt).{% endif %}</div>
+    <br>
+    <div>Veel plezier op dit evenement!</div>
+{% endblock %}

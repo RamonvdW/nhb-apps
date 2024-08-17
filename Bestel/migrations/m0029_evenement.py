@@ -26,6 +26,12 @@ class Migration(migrations.Migration):
                                     on_delete=models.deletion.SET_NULL, to='Evenement.evenementinschrijving'),
         ),
         migrations.AddField(
+            model_name='bestelproduct',
+            name='evenement_afgemeld',
+            field=models.ForeignKey(blank=True, null=True, on_delete=models.deletion.SET_NULL,
+                                    to='Evenement.evenementafgemeld'),
+        ),
+        migrations.AddField(
             model_name='bestelmutatie',
             name='evenement_inschrijving',
             field=models.ForeignKey(blank=True, null=True, on_delete=models.deletion.SET_NULL,
