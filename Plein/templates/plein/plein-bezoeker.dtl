@@ -55,7 +55,7 @@
 
             <!-- kalender -->
             {% url 'Kalender:landing-page' as card_url %}
-            {% include 'plein/card_icon.dtl' with title="Kalender" text="Bekijk welke wedstrijden en evenementen georganiseerd worden en schrijf je in." icon="event_note" url=card_url %}
+            {% include 'plein/card_icon.dtl' with title="Kalender" text="Bekijk welke wedstrijden en evenementen georganiseerd worden." icon="event_note" url=card_url %}
 
             <!-- opleidingen -->
             {% if toon_opleidingen %}
