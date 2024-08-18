@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2023 Ramon van der Winkel.
+#  Copyright (c) 2021-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -25,7 +25,7 @@ urlpatterns = [
          name='afmelden'),
 
 
-    # vereniging
+    # wedstrijden
     path('vereniging/lijst/',
          view_vereniging.VerenigingWedstrijdenView.as_view(),
          name='vereniging'),
@@ -98,7 +98,7 @@ urlpatterns = [
          name='wijzig-sessie'),
 
     path('<wedstrijd_pk>/aanmeldingen/',
-         view_aanmeldingen.KalenderAanmeldingenView.as_view(),
+         view_aanmeldingen.WedstrijdAanmeldingenView.as_view(),
          name='aanmeldingen'),
 
     path('<wedstrijd_pk>/aanmeldingen/download/tsv/',
@@ -110,7 +110,7 @@ urlpatterns = [
          name='download-aanmeldingen-csv'),
 
     path('details-aanmelding/<inschrijving_pk>/',
-         view_aanmeldingen.KalenderDetailsAanmeldingView.as_view(),
+         view_aanmeldingen.WedstrijdAanmeldingDetailsView.as_view(),
          name='details-aanmelding'),
 ]
 

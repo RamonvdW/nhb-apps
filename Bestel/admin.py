@@ -11,7 +11,7 @@ from Bestel.models import BestelProduct, BestelMandje, Bestelling, BestelMutatie
 
 class BestelProductAdmin(admin.ModelAdmin):
 
-    readonly_fields = ('wedstrijd_inschrijving',)
+    readonly_fields = ('wedstrijd_inschrijving', 'evenement_inschrijving', 'evenement_afgemeld')
 
 
 class MandjeLeegFilter(admin.SimpleListFilter):
@@ -110,9 +110,8 @@ class BestellingAdmin(admin.ModelAdmin):
 
 class BestelMutatieAdmin(admin.ModelAdmin):
 
-    readonly_fields = ('when', 'account', 'code_plus')
-
-    auto_complete = ('wedstrijd_inschrijving', 'evenement_inschrijving', 'product', 'bestelling')
+    readonly_fields = ('when', 'account', 'code_plus', 'product', 'bestelling',
+                       'wedstrijd_inschrijving', 'evenement_inschrijving')
 
     list_filter = ('is_verwerkt', 'code')
 
@@ -120,7 +119,8 @@ class BestelMutatieAdmin(admin.ModelAdmin):
         ('BestelMutatie',
          {'fields': ('when', 'code_plus', 'is_verwerkt',
                      'account',
-                     'wedstrijd_inschrijving', 'product', 'korting', 'bestelling', 'betaling_is_gelukt', 'bedrag_euro')
+                     'wedstrijd_inschrijving', 'evenement_inschrijving',
+                     'product', 'korting', 'bestelling', 'betaling_is_gelukt', 'bedrag_euro')
           }),
     )
 

@@ -122,7 +122,7 @@ def get_kwalificatie_scores(inschrijving):
     return [score for _, _, score in unsorted]
 
 
-class KalenderAanmeldingenView(UserPassesTestMixin, TemplateView):
+class WedstrijdAanmeldingenView(UserPassesTestMixin, TemplateView):
 
     """ Via deze view kunnen beheerders de inschrijvingen voor een wedstrijd inzien """
 
@@ -546,7 +546,7 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
         return response
 
 
-class KalenderDetailsAanmeldingView(UserPassesTestMixin, TemplateView):
+class WedstrijdAanmeldingDetailsView(UserPassesTestMixin, TemplateView):
 
     """ Via deze view kunnen beheerders de details van een inschrijving voor een wedstrijd inzien """
 

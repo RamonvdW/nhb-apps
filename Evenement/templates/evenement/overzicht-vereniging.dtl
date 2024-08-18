@@ -1,0 +1,114 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2024 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Evenementen Vereniging{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Evenementen</h3>
+            <p>Evenementen bij vereniging <b>{{ ver }}</b></p>
+            <p>Je huidige rol is: <b>{{ huidige_rol }}</b></p>
+        </div>
+    </div>
+
+    {% if not geen_locatie %}
+
+        <!-- blauwe balk met informatie in een tabel -->
+        <div class="row-sv-blauw">
+            <div class="col s12">
+                <table class="sv-kader" id="tabel1">
+                    <thead>
+                        <tr>        <!-- filter veld -->
+                            <td colspan="2"></td>
+                            <td class="table-filter">
+                                <input class="table-filter" oninput="myTableFilter(this, 'tabel1')" placeholder="Zoeken"/>
+                            </td>
+                            <td><!-- kolom voor knoppen --></td>
+                        </tr>
+                        <tr>
+                            <th>Wanneer</th>
+                            <th>Status</th>
+                            <th data-filter="on">Titel</th>
+                            <th><!-- kolom voor knoppen --></th>
+                        </tr>
+                    </thead>
+
+                    {% for evenement in evenementen %}
+                        <tr>
+                            <td>{{ evenement.datum }}</td>
+                            <td>{{ evenement.status_str }}</td>
+                            <td>{{ evenement.titel }}</td>
+                            <td>
+                                <div style="white-space:nowrap">     <!-- keeps buttons side by side -->
+                                    <a class="btn-sv-rood" href="{{ evenement.url_details }}" style="padding:0; width:35px; margin-right:5px">
+                                        <i class="notranslate material-icons-round">schedule</i></a>
+                                    <a class="btn-sv-rood" href="{{ evenement.url_aanmeldingen }}" style="padding:0; width:35px; margin-right:5px">
+                                        <i class="notranslate material-icons-round">people_alt</i>
+                                    </a>
+                                    {% if evenement.url_check_kwalificatie_scores %}
+                                        <a class="btn-sv-blauw" href="{{ evenement.url_check_kwalificatie_scores }}" style="padding:0; width:35px; margin-right:5px">
+                                            <i class="notranslate material-icons-round">verified</i></a>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr data-tablefilter="stop">
+                            <td colspan="5"><i>Er zijn nog geen evenementen</i></td>
+                        </tr>
+                    {% endfor %}
+
+                </table>
+            </div>
+        </div>
+
+
+        <!-- witruimte -->
+        <div class="row center">
+            <div class="col s12">
+                <h4>Financieel</h4>
+            </div>
+        </div>
+
+        <!-- blauwe balk met kaartjes -->
+        <div class="row-sv-blauw">
+            <div class="col s12">
+
+                <!-- instellingen -->
+                {% include 'plein/card_icon.dtl' with title="Instellingen" text="Instellingen om inschrijfgelden te kunnen ontvangen via overschrijving of Mollie." icon="settings" url=url_mollie %}
+
+                <!-- betalingen doorgeven -->
+                {% include 'plein/card_icon.dtl' with title="Overboekingen" text="Geef de ontvangen wedstrijd-gelden door, zodat de reservering voor een sporter definitief kan worden." icon="euro_symbol" url=url_overboeking_ontvangen %}
+
+            </div>
+        </div>
+
+
+        <!-- witruimte -->
+        <div class="row center">
+            <div class="col s12">
+                <h4>Voorwaarden</h4>
+                <p>Onderstaand document beschrijft de verkoopvoorwaarden voor bestelling via deze site.</p>
+            </div>
+        </div>
+
+        <!-- blauwe balk met kaartjes -->
+        <div class="row-sv-blauw">
+            <div class="col s12">
+                {% include 'plein/card_icon.dtl' with title="Voorwaarden" text="De verkoopvoorwaarden staan beschreven in een apart document." icon="article" extern_open=True url=url_voorwaarden %}
+            </div>
+        </div>
+
+    {% endif %}
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="evenementen-overzicht-vereniging" %}
+
+{% endblock %}

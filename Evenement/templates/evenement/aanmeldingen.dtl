@@ -1,0 +1,157 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2024 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Aanmeldingen{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Aanmeldingen</h3>
+        </div>
+    </div>
+
+    <!-- blauwe balk met informatie label : info -->
+    <div class="row-sv-blauw">
+        <div class="col s12 m10 offset-m1 l8 offset-l2">
+            <table class="sv-kader">
+                <tr>
+                    <th>Titel</th>
+                    <td>{{ evenement.titel }}</td>
+                </tr>
+                <tr>
+                    <th>Vereniging</th>
+                    <td>{{ evenement.organiserende_vereniging }}</td>
+                </tr>
+                <tr>
+                    <th>Datum:</th>
+                    <td>{{ evenement.datum }}</td>
+                </tr>
+                <tr>
+                    <th>Aantal aanmeldingen</th>
+                    <td>{{ aantal_aanmeldingen }}</td>
+                </tr>
+                <tr>
+                    <th>Financieel</th>
+                    <td>&euro;&nbsp;{{ totaal_ontvangen_euro }} ontvangen<br>&euro;&nbsp;{{ totaal_retour_euro }} retour</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>Ingeschreven</h4>
+            <p>Onderstaande lijst toont de status van alle aanmeldingen</p>
+            <p>Download voor:
+                <a class="btn-sv-rood" href="{{ url_download_csv }}" style="margin-left:20px">
+                    <i class="notranslate material-icons-round left">download</i>Spreadsheet</a>
+            </p>
+        </div>
+    </div>
+
+
+    <!-- blauwe balk met informatie in een tabel -->
+    <div class="row-sv-blauw">
+        <div class="col s12">
+            <table class="sv-kader">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th class="hide-on-small-only">Reserverings<wbr>nummer</th>
+                        <th class="hide-on-small-only">Aangemeld op</th>
+                        <th>Sporter</th>
+                        <th>Status</th>
+                        <th><!-- kolom voor knoppen --></th>
+                    </tr>
+                </thead>
+
+                {% for inschrijving in inschrijvingen %}
+                    {% if not inschrijving.is_afgemeld  %}
+                        <tr{% if not inschrijving.is_definitief %} class="sv-blauw-text"{% endif %}>
+                            <td>{{ inschrijving.volg_nr }}</td>
+                            <td class="hide-on-small-only">{{ inschrijving.reserveringsnummer }}</td>
+                            <td class="hide-on-small-only">{{ inschrijving.wanneer }}</td>
+                            <td>{{ inschrijving.sporter_str }}</td>
+                            <td>{{ inschrijving.status_str }}</td>
+                            <td>
+                                {% if inschrijving.url_details %}
+                                    <a class="btn-sv-rood" href="{{ inschrijving.url_details }}">
+                                        <i class="notranslate material-icons-round">play_arrow</i></a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endif %}
+                {% endfor %}
+
+                {% if aantal_aanmeldingen == 0 %}
+                    <tr>
+                        <td colspan="8" class="center"><i>Er zijn nog geen aanmeldingen</i></td>
+                    </tr>
+                {% endif %}
+
+            </table>
+        </div>
+    </div>
+
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>Afgemeld</h4>
+            <p>Onderstaande lijst bevat alle afmeldingen</p>
+        </div>
+    </div>
+
+
+    <!-- blauwe balk met informatie in een tabel -->
+    <div class="row-sv-blauw">
+        <div class="col s12">
+            <table class="sv-kader">
+                <thead>
+                    <tr>
+                        <th class="hide-on-small-only">Aangemeld op</th>
+                        <th>Sporter</th>
+                        <th>Boog</th>
+                        <th>Status</th>
+                        <th><!-- kolom voor knoppen --></th>
+                    </tr>
+                </thead>
+
+                {% for aanmelding in aanmeldingen %}
+                    {% if aanmelding.is_afgemeld  %}
+                        <tr>
+                            <td class="hide-on-small-only">{{ aanmelding.wanneer }}</td>
+                            <td>{{ aanmelding.sporter_str }}</td>
+                            <td>{{ aanmelding.boog_str }}</td>
+                            <td>{{ aanmelding.status_str }}</td>
+                            <td>
+                                {% if aanmelding.url_details %}
+                                    <a class="btn-sv-rood" href="{{ aanmelding.url_details }}">
+                                        <i class="notranslate material-icons-round">play_arrow</i></a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endif %}
+                {% endfor %}
+
+                {% if aantal_afmeldingen == 0 %}
+                    <tr>
+                        <td colspan="6" class="center"><i>Er zijn nog geen afmeldingen</i></td>
+                    </tr>
+                {% endif %}
+
+            </table>
+        </div>
+    </div>
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="evenement-aanmeldingen" %}
+
+{% endblock %}

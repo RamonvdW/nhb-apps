@@ -142,47 +142,40 @@
                 </tr>
 
             </table>
-
-            {% if toon_sessies %}
-
-                                        <!-- not: popout !! -->
-                <ul id="sessies" class="collapsible z-depth-0 white" style="margin-top:50px; margin-bottom:0">
-                    <li>
-                        <div class="collapsible-header white center" style="display:block; cursor:inherit">
-                            <h6 class="sv-blauw-text">Sessies</h6>
-                            {% if wed.organisatie == 'N' %}
-                                <p>Klassen zonder man/vrouw benoeming zijn genderneutraal</p>
-                            {% endif %}
-                        </div>
-                    </li>
-
-                    {% for sessie in sessies %}
-                        <li>
-                            <div class="collapsible-header white center" style="display:block">
-                                {% if sessie.beschrijving %}<span>{{ sessie.beschrijving }}</span><br>{% endif %}
-                                <b>{{ sessie.datum }}, {{ sessie.tijd_begin }} - {{ sessie.tijd_einde }}</b>
-                                <br>
-                                {% if is_voor_sluitingsdatum %}
-                                    <span>{{ sessie.aantal_beschikbaar }} plaatsen beschikbaar (van de {{ sessie.max_sporters }})</span><br>
-                                {% endif %}
-                                <span>{{ sessie.klassen|length }} wedstrijdklassen</span>
-                                <i class="material-icons-round notranslate sv-rood-text secondary-content"><!-- wordt gezet in in/uitklappen_klaar() in Plein/js/site_layout.js --></i>
-                            </div>
-                            <div class="collapsible-body white center">
-                                <span>
-                                    {% for klasse in sessie.klassen %}
-                                        <span>{{ klasse.beschrijving }}</span><br>
-                                    {% endfor %}
-                                </span>
-                            </div>
-                        </li>
-                    {% endfor %}
-                </ul>
-
-            {% endif %}
-
         </div>
     </div>
+
+
+    {% if toon_sessies %}
+
+        <!-- witruimte -->
+        <div class="row center">
+            <div class="col s12">
+                <h4>Programma</h4>
+                <p>Iedereen die aangemeld is kan 3 sessies kiezen</p>
+            </div>
+        </div>
+
+        <!-- blauwe balk met informatie in tabel-vorm:  label - info -->
+        <div class="row-sv-blauw">
+            <div class="col s12">
+                <table class="sv-kader">
+                    {% for sessie in sessies %}
+                        <tr>
+                            <td>{{ sessie.aantal_inschrijvingen }}&nbsp;/&nbsp;{{ sessie.max_deelnemers }}</td>
+                            <td>
+                                <h6>{{ sessie.titel }}</h6>
+                                <span>Begin {{ sessie.begin_tijd }}, {{ sessie.duur_min }} minuten, {{ sessie.presentator }}</span>
+                                <p>{{ sessie.beschrijving|linebreaksbr }}</p>
+                            </td>
+                        </tr>
+
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
+
+    {% endif %}
 
 
     {% if toon_inschrijven %}

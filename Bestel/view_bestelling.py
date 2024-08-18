@@ -67,12 +67,16 @@ class ToonBestellingenView(UserPassesTestMixin, TemplateView):
                             .producten
                             .select_related('wedstrijd_inschrijving',
                                             'wedstrijd_inschrijving__wedstrijd',
-                                            'wedstrijd_inschrijving__sporterboog__sporter')):
+                                            'wedstrijd_inschrijving__sporterboog__sporter',
+                                            'evenement_inschrijving',
+                                            'evenement_afgemeld')):
 
                 if product.wedstrijd_inschrijving:
                     beschrijving.append(product.wedstrijd_inschrijving.korte_beschrijving())
                 elif product.evenement_inschrijving:
                     beschrijving.append(product.evenement_inschrijving.korte_beschrijving())
+                elif product.evenement_afgemeld:
+                    beschrijving.append(product.evenement_afgemeld.korte_beschrijving())
                 elif product.webwinkel_keuze:
                     beschrijving.append(product.webwinkel_keuze.product.omslag_titel)
                 else:

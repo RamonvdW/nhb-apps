@@ -84,7 +84,7 @@ class Command(BaseCommand):
         self.stdout.write('[INFO] Maak sessie 4')
         sessie = EvenementSessie(
                     evenement=evenement,
-                    titel='MijHandboogsport - demo wedstrijdkalender',
+                    titel='MijnHandboogsport - demo wedstrijdkalender',
                     presentator='Ramon',
                     begin_tijd='13:00',
                     duur_min=60,
@@ -96,7 +96,7 @@ class Command(BaseCommand):
         sessie = EvenementSessie(
                     evenement=evenement,
                     titel='Workshop barebow',
-                    presentator='Ramon',
+                    presentator='Klaas Hout',
                     begin_tijd='14:00',
                     duur_min=60,
                     max_deelnemers=50,

@@ -5,6 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import reverse
+from django.conf import settings
 from django.utils.formats import localize
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
@@ -51,10 +52,11 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
 
         context['toon_gast_accounts'] = ver.is_extern and self.rol_nu == Rollen.ROL_SEC
 
-        if ver.is_extern:
-            context['toon_wedstrijden'] = False
-        else:
+        if not ver.is_extern:
             context['toon_wedstrijden'] = self.rol_nu != Rollen.ROL_SEC
+
+            if ver.ver_nr in settings.EVENEMENTEN_VERKOPER_VER_NRS:
+                context['toon_evenementen'] = True
 
         if ver.wedstrijdlocatie_set.exclude(baan_type=BAAN_TYPE_EXTERN).filter(zichtbaar=True).count() > 0:
             context['accommodatie_details_url'] = reverse('Locatie:accommodatie-details',

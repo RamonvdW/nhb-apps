@@ -5,14 +5,14 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from Evenement import view_afmelden, view_details, view_inschrijven
+from Evenement import view_aanmeldingen, view_afmelden, view_details, view_inschrijven, view_vereniging
 
 app_name = 'Evenement'
 
 # basis = /kalender/evenement/
 
 urlpatterns = [
-    # evenement details
+    # evenement details (met knoppen om in te schrijven)
     path('details/<evenement_pk>/',
          view_details.DetailsView.as_view(),
          name='details'),
@@ -27,34 +27,40 @@ urlpatterns = [
          view_inschrijven.InschrijvenSporter.as_view(),
          name='inschrijven-sporter'),
 
-    path('inschrijven/<evenement_pk>/groep/<lid_nr>/',
-         view_inschrijven.InschrijvenGroepje.as_view(),
-         name='inschrijven-groepje-lid'),
-
     path('inschrijven/<evenement_pk>/groep/',
          view_inschrijven.InschrijvenGroepje.as_view(),
          name='inschrijven-groepje'),
 
     path('inschrijven/<evenement_pk>/familie/<lid_nr>/',
          view_inschrijven.InschrijvenFamilie.as_view(),
-         name='inschrijven-familie-lid-boog'),
+         name='inschrijven-familie-lid'),
 
     path('inschrijven/<evenement_pk>/familie/',
          view_inschrijven.InschrijvenFamilie.as_view(),
          name='inschrijven-familie'),
 
-    # path('inschrijven/<evenement_pk>/handmatig/<lid_nr>/<boog_afk>/',
-    #      view_inschrijven.InschrijvenHandmatig.as_view(),
-    #      name='inschrijven-handmatig-lid-boog'),
-
-    # path('inschrijven/<evenement_pk>/handmatig/',
-    #      view_inschrijven.InschrijvenHandmatig.as_view(),
-    #      name='inschrijven-handmatig'),
-
     # toevoegen aan winkelwagentje
     path('inschrijven/toevoegen-mandje/',
          view_inschrijven.ToevoegenAanMandjeView.as_view(),
          name='inschrijven-toevoegen-aan-mandje'),
+
+    path('vereniging/lijst/',
+         view_vereniging.VerenigingEvenementenView.as_view(),
+         name='vereniging'),
+
+    path('aanmeldingen/<evenement_pk>/',
+         view_aanmeldingen.EvenementAanmeldingenView.as_view(),
+         name='aanmeldingen'),
+
+    path('details-aanmelding/<inschrijving_pk>/',
+         view_aanmeldingen.EvenementDetailsAanmeldingView.as_view(),
+         name='details-aanmelding'),
+
+    path('aanmeldingen/<evenement_pk>/download/csv/',
+         view_aanmeldingen.DownloadAanmeldingenBestandCSV.as_view(),
+         name='download-aanmeldingen-csv'),
+
+
 ]
 
 # end of file

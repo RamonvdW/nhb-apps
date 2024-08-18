@@ -161,10 +161,10 @@ class EvenementInschrijving(models.Model):
         """ geef een one-liner terug met een korte beschrijving van deze inschrijving """
 
         titel = self.evenement.titel
-        if len(titel) > 60:
-            titel = titel[:58] + '..'
+        if len(titel) > 40:
+            titel = titel[:40] + '..'
 
-        return "%s - %s" % (self.sporter.lid_nr, titel)
+        return "%s, voor %s" % (titel, self.sporter.lid_nr)
 
     class Meta:
         verbose_name = "Evenement inschrijving"
@@ -222,10 +222,10 @@ class EvenementAfgemeld(models.Model):
         """ geef een one-liner terug met een korte beschrijving van deze inschrijving """
 
         titel = self.evenement.titel
-        if len(titel) > 60:
-            titel = titel[:58] + '..'
+        if len(titel) > 40:
+            titel = titel[:40] + '..'
 
-        return "%s - %s" % (self.sporter.lid_nr, titel)
+        return "%s, voor %s" % (titel, self.sporter.lid_nr)
 
     class Meta:
         verbose_name = "Evenement afmelding"

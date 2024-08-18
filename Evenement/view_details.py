@@ -10,7 +10,8 @@ from django.utils import timezone
 from django.utils.http import urlencode
 from django.views.generic import TemplateView
 from Account.models import get_account
-from Evenement.models import Evenement
+from Evenement.models import Evenement, EvenementSessie
+from Functie.rol import rol_get_huidige_functie, Rollen
 from Kalender.view_maand import MAAND2URL
 from datetime import timedelta
 
@@ -58,6 +59,15 @@ class DetailsView(TemplateView):
         # om aan te melden is een account nodig
         # en je moet lid zijn van de KHSN (dus: geen gast-account)
         evenement.begrenzing_str = "KHSN leden"
+
+        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
+        if rol_nu == Rollen.ROL_HWL and functie_nu.vereniging == evenement.organiserende_vereniging:
+            context['sessies'] = (EvenementSessie
+                                  .objects
+                                  .filter(evenement=evenement)
+                                  .order_by('begin_tijd',
+                                            'pk'))
+            context['toon_sessies'] = True
 
         account = get_account(self.request)
         context['kan_aanmelden'] = account.is_authenticated and not account.is_gast

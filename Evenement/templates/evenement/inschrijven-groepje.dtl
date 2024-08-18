@@ -1,0 +1,185 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2024 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Inschrijven{% endblock %}
+
+{% block pagina %}
+
+    <script>
+        function toevoegen(id)
+        {
+            const el = document.getElementById(id)
+
+            // voer een POST uit om toe te voegen
+            let form = document.createElement('form');
+            form.setAttribute('method', 'post');
+            form.setAttribute('action', '{{ url_toevoegen }}');
+
+            let inp = document.createElement('input');
+            inp.type = "hidden";
+            inp.name = "csrfmiddlewaretoken";
+            inp.value = getCookie('mh_csrf_token');
+            form.appendChild(inp);
+
+            inp = document.createElement('input');
+            inp.type = "hidden";
+            inp.name = 'evenement';
+            inp.value = el.dataset.evenement;
+            form.appendChild(inp);
+
+            inp = document.createElement('input');
+            inp.type = "hidden";
+            inp.name = 'sporter';
+            inp.value = el.dataset.sporter;
+            form.appendChild(inp);
+
+            inp = document.createElement('input');
+            inp.type = "hidden";
+            inp.name = 'goto';
+            inp.value = 'G';
+            form.appendChild(inp);
+
+            form.style.display = 'hidden';
+            document.body.appendChild(form);
+            form.submit();
+        }
+    </script>
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Inschrijven</h3>
+        </div>
+    </div>
+
+    <!-- blauwe balk met dialoog venster -->
+    <div class="row-sv-blauw">
+        <div class="col s12 l10 offset-l1 xl8 offset-xl2">
+            <table class="sv-kader">
+                <tr>
+                    <th>Titel</th>
+                    <td>{{ evenement.titel }}</td>
+                </tr>
+
+                <tr>
+                    <th>Organiserende vereniging</th>
+                    <td>{{ evenement.organiserende_vereniging }}</td>
+                </tr>
+
+                <tr>
+                    <th>Wedstrijd locatie</th>
+                    <td>{{ evenement.locatie.adres|linebreaksbr }}</td>
+                </tr>
+
+                {% if evenement.begrenzing_str %}
+                    <tr>
+                        <th>Doelgroep</th>
+                        <td>{{ evenement.begrenzing_str }}</td>
+                    </tr>
+                {% endif %}
+
+                <tr>
+                    <th>beschrijving</th>
+                    <td>{{ evenement.beschrijving|linebreaksbr }}</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>Zoeken</h4>
+
+            <p>Hieronder kan je een sporter zoeken op bondsnummer.</p>
+            <p>Deze sporter kan je inschrijven door deze toe te voegen aan jouw winkelmandje en daarna de bestelling te voltooien.</p>
+            <p>Let op: dit werkt alleen als de sporter een account.</p>
+            {% if not sporter %}
+                {% if gezocht_niet_gevonden %}
+                    <p class="center sv-rood-text">Sporter {{ gezocht_niet_gevonden }} niet gevonden.</p>
+                {% endif %}
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- blauwe balk met dialoog venster -->
+    <div class="row-sv-blauw">
+        <div class="col s10 offset-s1 m8 offset-m2 l6 offset-l3 xl4 offset-xl4">
+
+            <!-- dialoog venster -->
+            <div class="sv-kader left-align z-depth-3">
+                <div class="form-padding">
+                    <form action="{{ url_zoek }}" method="get" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
+
+                        <div class="input-field">
+                            <label for="id_bondsnr">Bondsnummer</label>
+                            <input type="number" min="100000" max="999999" name="bondsnummer" id="id_bondsnr" autofocus>
+                        </div>
+
+                        <p class="center">
+                            <button class="btn-sv-rood" id="submit_knop" type="submit">
+                                <i class="notranslate material-icons-round left">search</i>Zoek</button>
+                        </p>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    {% if sporter %}
+
+        <!-- witruimte -->
+        <div class="row center">
+            <div class="col s12">
+                <h4>Gevonden sporter</h4>
+            </div>
+        </div>
+
+        <!-- blauwe balk met informatie -->
+        <div class="row-sv-blauw">
+            <div class="col s12 m10 offset-m1 l8 offset-l2 xl6 offset-xl3">
+                <table class="sv-kader">
+                    <tr>
+                        <th>Sporter</th>
+                        <td>{{ sporter.lid_nr_en_volledige_naam }}</td>
+                    </tr>
+
+                    <tr>
+                        <th>Lid bij vereniging</th>
+                        <td>{% if sporter.bij_vereniging %}<span>{{ sporter.bij_vereniging }}</span>{% else %}<i class="sv-rood-text">Geen</i>{% endif %}</td>
+                    </tr>
+
+                    <tr>
+                        <th>Prijs</th>
+                        <td>&euro;&nbsp;{{ prijs_euro_sporter }}</td>
+                    </tr>
+
+                    <tr>
+                        <th>Inschrijven</th>
+                        <td>
+                            {% if sporter.al_ingeschreven %}
+                                <span>Al ingeschreven</span>
+                            {% else %}
+                                <button class="btn-sv-rood" id="id_toevoegen" onclick="toevoegen('id_toevoegen')" data-evenement="{{ evenement.pk }}" data-sporter="{{ sporter.pk }}">
+                                    <i class="notranslate material-icons-round left">add</i>Kies</button>
+                            {% endif %}
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+    {% endif %}
+
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="evenement-inschrijven-groepje" %}
+
+{% endblock %}

@@ -11,7 +11,7 @@ from Bestel.definities import BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_BETALIN
 from Bestel.models import Bestelling, BestelProduct
 from Betaal.models import BetaalInstellingenVereniging
 from Evenement.definities import EVENEMENT_STATUS_GEACCEPTEERD
-from Evenement.models import Evenement, EvenementSessie
+from Evenement.models import Evenement, EvenementSessie, EvenementInschrijving
 from Geo.models import Regio
 from Locatie.models import EvenementLocatie
 from Sporter.models import Sporter
@@ -165,8 +165,38 @@ class TestEvenementInschrijven(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
         self.assert_template_used(resp, ('evenement/inschrijven-sporter.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
+
+        self.assertEqual(EvenementInschrijving.objects.count(), 0)
+
+        # echte inschrijving
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_toevoegen_mandje, {'evenement': self.evenement.pk,
+                                                                'sporter': self.sporter.pk,
+                                                                'goto': 'S',
+                                                                'snel': '1'})
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('evenement/inschrijven-toegevoegd-aan-mandje.dtl', 'plein/site_layout.dtl'))
+
+        self.assertEqual(EvenementInschrijving.objects.count(), 1)
+
+        #f1, f2 = self.verwerk_bestel_mutaties()
+        # print('f1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
+        #self.assertTrue(": inschrijven op evenement" in f2.getvalue())
+
+        self.assertEqual(EvenementInschrijving.objects.count(), 1)
+        inschrijving = EvenementInschrijving.objects.first()
+        self.assertEqual(inschrijving.evenement, self.evenement)
+        self.assertEqual(inschrijving.sporter, self.sporter)
+
+        # al ingeschreven
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_template_used(resp, ('evenement/inschrijven-sporter.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
 
         # uitzonderingen
         self.account_100000.username = 'normaal'
@@ -184,6 +214,58 @@ class TestEvenementInschrijven(E2EHelpers, TestCase):
 
         resp = self.client.get(url)
         self.assert404(resp, "Inschrijving is gesloten")
+
+    def test_toevoegen_aan_mandje(self):
+        # inlog vereist
+        self.e2e_login(self.account_100000)
+
+        # inschrijven
+        resp = self.client.post(self.url_toevoegen_mandje)
+        self.assert404(resp, "Slecht verzoek")
+
+        resp = self.client.post(self.url_toevoegen_mandje, {'evenement': 9999999,
+                                                            'sporter': 'xx'})
+        self.assert404(resp, "Slecht verzoek")
+
+        resp = self.client.post(self.url_toevoegen_mandje, {'evenement': 9999999,
+                                                            'sporter': 9999999})
+        self.assert404(resp, "Onderdeel van verzoek niet gevonden")
+
+        resp = self.client.post(self.url_toevoegen_mandje, {'evenement': self.evenement.pk,
+                                                            'sporter': 9999999})
+        self.assert404(resp, "Onderdeel van verzoek niet gevonden")
+
+        # evenement is in het verleden
+        self.evenement.datum -= datetime.timedelta(days=500)
+        self.evenement.save(update_fields=['datum'])
+
+        resp = self.client.post(self.url_toevoegen_mandje, {'evenement': self.evenement.pk,
+                                                            'sporter': self.sporter.pk})
+        self.assert404(resp, "Inschrijving is gesloten")
+
+        self.evenement.datum += datetime.timedelta(days=500)
+        self.evenement.save(update_fields=['datum'])
+
+        # sporter is geen actief lid
+        self.sporter.is_actief_lid = False
+        self.sporter.save(update_fields=['is_actief_lid'])
+
+        resp = self.client.post(self.url_toevoegen_mandje, {'evenement': self.evenement.pk,
+                                                            'sporter': self.sporter.pk})
+        self.assert404(resp, "Niet actief lid")
+
+        self.sporter.is_actief_lid = True
+        self.sporter.save(update_fields=['is_actief_lid'])
+
+        # echte inschrijving
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_toevoegen_mandje, {'evenement': self.evenement.pk,
+                                                                'sporter': self.sporter.pk,
+                                                                'goto': 'F',
+                                                                'snel': '1'})
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_template_used(resp, ('evenement/inschrijven-toegevoegd-aan-mandje.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
 
 
 # end of file
