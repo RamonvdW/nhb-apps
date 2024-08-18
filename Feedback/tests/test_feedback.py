@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2023 Ramon van der Winkel.
+#  Copyright (c) 2019-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -18,6 +18,7 @@ class TestFeedback(E2EHelpers, TestCase):
     """ tests voor de Feedback applicatie """
 
     url_plein = '/plein/'
+    url_privacy = '/plein/privacy/'
     url_feedback = '/feedback/%s/%s/%s/'  # min/nul/plus, op_pagina, volledige_url
     url_feedback_min_plein = '/feedback/min/plein-bezoeker/plein/'
     url_feedback_nul_plein = '/feedback/nul/plein-bezoeker/plein/'
@@ -91,6 +92,14 @@ class TestFeedback(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
 
         self.e2e_assert_other_http_commands_not_supported(self.url_feedback_nul_plein, post=False)
+
+    def test_geen_feedback(self):
+        # geen inlog, dan geen feedback
+        self.client.logout()
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_privacy)
+        self.assertNotContains(resp, 'Wat vind je van deze pagina?')
 
     def test_bedankt(self):
         with self.assert_max_queries(20):
@@ -212,7 +221,19 @@ class TestFeedback(E2EHelpers, TestCase):
         self.client.get(self.url_feedback_nul_plein)
         resp = self.client.post(self.url_feedback_formulier,
                                 {'bevinding': '4',
-                                 'feedback': 'Just testing'})
+                                 'feedback': 'Just testing 4'})
+        self.assert_is_redirect(resp, self.url_feedback_bedankt)
+
+        self.client.get(self.url_feedback_nul_plein)
+        resp = self.client.post(self.url_feedback_formulier,
+                                {'bevinding': '6',
+                                 'feedback': 'Just testing 6'})
+        self.assert_is_redirect(resp, self.url_feedback_bedankt)
+
+        self.client.get(self.url_feedback_nul_plein)
+        resp = self.client.post(self.url_feedback_formulier,
+                                {'bevinding': '8',
+                                 'feedback': 'Just testing 8'})
         self.assert_is_redirect(resp, self.url_feedback_bedankt)
 
         with self.assert_max_queries(20):
@@ -223,7 +244,7 @@ class TestFeedback(E2EHelpers, TestCase):
 
         urls = self.extract_all_urls(resp, skip_menu=True)
         urls = [url for url in urls if url.startswith('/beheer/Feedback/feedback/')]
-        self.assertEqual(len(urls), 1)
+        self.assertEqual(len(urls), 3)
 
     def test_taak(self):
         # controleer aanmaken van een taak
