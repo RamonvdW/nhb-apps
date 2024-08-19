@@ -8,6 +8,9 @@ from django.http import HttpResponseRedirect, Http404
 from django.urls import reverse
 from django.views.generic import View
 from django.contrib.auth.mixins import UserPassesTestMixin
+from Bestel.operations.mutaties import (bestel_mutatieverzoek_afmelden_evenement,
+                                        bestel_mutatieverzoek_verwijder_product_uit_mandje)
+from Evenement.definities import EVENEMENT_INSCHRIJVING_STATUS_RESERVERING_MANDJE
 from Evenement.models import EvenementInschrijving
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
@@ -15,7 +18,7 @@ from Functie.rol import rol_get_huidige_functie
 
 class AfmeldenView(UserPassesTestMixin, View):
 
-    """ Via deze view kunnen beheerders een sporter afmelden voor een wedstrijd """
+    """ Via deze view kunnen beheerders een sporter afmelden voor een evenement """
 
     raise_exception = True          # genereer PermissionDenied als test_func False terug geeft
     permission_denied_message = 'Geen toegang'
@@ -27,7 +30,7 @@ class AfmeldenView(UserPassesTestMixin, View):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL, Rollen.ROL_MWZ, Rollen.ROL_BB)
+        return self.rol_nu == Rollen.ROL_HWL
 
     def post(self, request, *args, **kwargs):
         """ wordt aangeroepen om de POST af te handelen"""
@@ -41,20 +44,19 @@ class AfmeldenView(UserPassesTestMixin, View):
 
         if self.rol_nu not in (Rollen.ROL_BB, Rollen.ROL_MWZ):
             # controleer dat dit een inschrijving is op een wedstrijd van de vereniging
-            ver = self.functie_nu.vereniging
-            if inschrijving.wedstrijd.organiserende_vereniging != ver:
+            if inschrijving.evenement.organiserende_vereniging != self.functie_nu.vereniging:
                 raise Http404('Verkeerde vereniging')
 
         snel = str(request.POST.get('snel', ''))[:1]
 
-        if inschrijving.status == WEDSTRIJDINSCHRIJVING_STATUS_RESERVERING_MANDJE:
+        if inschrijving.status == EVENEMENT_INSCHRIJVING_STATUS_RESERVERING_MANDJE:
             if inschrijving.bestelproduct_set.count() > 0:
                 product = inschrijving.bestelproduct_set.first()
                 bestel_mutatieverzoek_verwijder_product_uit_mandje(inschrijving.koper, product, snel == '1')
         else:
-            bestel_mutatieverzoek_afmelden_wedstrijd(inschrijving, snel == '1')
+            bestel_mutatieverzoek_afmelden_evenement(inschrijving, snel == '1')
 
-        url = reverse('Wedstrijden:details-aanmelding', kwargs={'inschrijving_pk': inschrijving.pk})
+        url = reverse('Evenement:details-aanmelding', kwargs={'inschrijving_pk': inschrijving.pk})
 
         return HttpResponseRedirect(url)
 

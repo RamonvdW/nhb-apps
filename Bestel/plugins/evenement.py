@@ -28,46 +28,13 @@ def evenement_plugin_inschrijven(inschrijving: EvenementInschrijving):
     return prijs
 
 
-def evenement_plugin_afmelden(inschrijving: EvenementInschrijving):
-    """ verwerk een afmelding voor een evenement """
-
-    # (nog) geen aantallen om bij te werken
-
-    now = timezone.now()
-    stamp_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
-    msg = "[%s] Afgemeld voor dit evenement\n" % stamp_str
-
-    # zet de inschrijving om in een afmelding
-    afmelding = EvenementAfgemeld(
-                    wanneer_inschrijving=inschrijving.wanneer,
-                    wanneer_afgemeld=now,
-                    status=EVENEMENT_AFMELDING_STATUS_AFGEMELD,
-                    evenement=inschrijving.evenement,
-                    sporter=inschrijving.sporter,
-                    koper=inschrijving.koper,
-                    ontvangen_euro=inschrijving.ontvangen_euro,
-                    retour_euro=inschrijving.retour_euro,
-                    log=inschrijving.log + msg)
-    afmelding.save()
-
-    # verwijder de gekozen sessies
-    for sessie in inschrijving.gekozen_sessies.all():
-        sessie.aantal_inschrijvingen = max(0, sessie.aantal_inschrijvingen - 1)
-        sessie.save(update_fields=['aantal_inschrijvingen'])
-    # for
-    inschrijving.gekozen_sessies.clear()
-
-    # verwijder de inschrijving
-    inschrijving.delete()
-
-
 def evenement_plugin_verwijder_reservering(stdout, inschrijving: EvenementInschrijving):
 
     afmelding = None
 
     now = timezone.now()
     stamp_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
-    msg = "[%s] Afgemeld voor dit evenement\n" % stamp_str
+    msg = "[%s] Verwijder reservering voor dit evenement\n" % stamp_str
 
     if inschrijving.status == EVENEMENT_INSCHRIJVING_STATUS_RESERVERING_MANDJE:
         # verwijdering uit mandje
@@ -111,6 +78,41 @@ def evenement_plugin_verwijder_reservering(stdout, inschrijving: EvenementInschr
     inschrijving.delete()
 
     return afmelding
+
+
+def evenement_plugin_afmelden(inschrijving: EvenementInschrijving):
+    """ verwerk een afmelding voor een evenement """
+
+    # (nog) geen aantallen om bij te werken
+    # TODO: uitschrijven voor de sessies
+
+    now = timezone.now()
+    stamp_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
+    msg = "[%s] Afgemeld voor dit evenement\n" % stamp_str
+
+    # zet de inschrijving om in een afmelding
+    afmelding = EvenementAfgemeld(
+                    wanneer_inschrijving=inschrijving.wanneer,
+                    wanneer_afgemeld=now,
+                    nummer=inschrijving.nummer,
+                    status=EVENEMENT_AFMELDING_STATUS_AFGEMELD,
+                    evenement=inschrijving.evenement,
+                    sporter=inschrijving.sporter,
+                    koper=inschrijving.koper,
+                    ontvangen_euro=inschrijving.ontvangen_euro,
+                    retour_euro=inschrijving.retour_euro,
+                    log=inschrijving.log + msg)
+    afmelding.save()
+
+    # verwijder de gekozen sessies
+    for sessie in inschrijving.gekozen_sessies.all():
+        sessie.aantal_inschrijvingen = max(0, sessie.aantal_inschrijvingen - 1)
+        sessie.save(update_fields=['aantal_inschrijvingen'])
+    # for
+    inschrijving.gekozen_sessies.clear()
+
+    # verwijder de inschrijving
+    inschrijving.delete()
 
 
 def evenement_plugin_inschrijving_is_betaald(stdout, product: BestelProduct):

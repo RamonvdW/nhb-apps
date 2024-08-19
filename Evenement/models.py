@@ -54,7 +54,7 @@ class Evenement(models.Model):
     beschrijving = models.TextField(max_length=1000, default='',
                                     blank=True)      # mag leeg zijn
 
-    # kosten (voor alle sessies van de hele wedstrijd)
+    # kosten
     prijs_euro_normaal = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal(0))     # max 999,99
     prijs_euro_onder18 = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal(0))     # max 999,99
 

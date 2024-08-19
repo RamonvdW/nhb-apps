@@ -10,9 +10,12 @@ from Bestel.definities import (BESTEL_MUTATIE_WEDSTRIJD_INSCHRIJVEN, BESTEL_MUTA
                                BESTEL_MUTATIE_MAAK_BESTELLINGEN, BESTEL_MUTATIE_VERWIJDER,
                                BESTEL_MUTATIE_WEDSTRIJD_AFMELDEN, BESTEL_MUTATIE_BETALING_AFGEROND,
                                BESTEL_MUTATIE_OVERBOEKING_ONTVANGEN, BESTEL_MUTATIE_ANNULEER, BESTEL_MUTATIE_TRANSPORT,
-                               BESTEL_MUTATIE_EVENEMENT_INSCHRIJVEN, BESTELLING_STATUS_BETALING_ACTIEF)
+                               BESTEL_MUTATIE_EVENEMENT_INSCHRIJVEN, BESTEL_MUTATIE_EVENEMENT_AFMELDEN,
+                               BESTELLING_STATUS_BETALING_ACTIEF)
 from Bestel.models import BestelMutatie, Bestelling
+from Evenement.models import EvenementInschrijving
 from Overig.background_sync import BackgroundSync
+from Wedstrijden.models import WedstrijdInschrijving
 import time
 
 
@@ -22,7 +25,7 @@ import time
 bestel_mutaties_ping = BackgroundSync(settings.BACKGROUND_SYNC__BESTEL_MUTATIES)
 
 
-def _bestel_ping_achtergrondtaak(mutatie, snel):
+def _bestel_ping_achtergrondtaak(mutatie: BestelMutatie, snel):
 
     # ping het achtergrond process
     bestel_mutaties_ping.ping()
@@ -39,7 +42,7 @@ def _bestel_ping_achtergrondtaak(mutatie, snel):
         # while
 
 
-def bestel_mutatieverzoek_inschrijven_wedstrijd(account, inschrijving, snel):
+def bestel_mutatieverzoek_inschrijven_wedstrijd(account, inschrijving: WedstrijdInschrijving, snel):
 
     # zet dit verzoek door naar het mutaties process
     # voorkom duplicates (niet 100%)
@@ -56,7 +59,7 @@ def bestel_mutatieverzoek_inschrijven_wedstrijd(account, inschrijving, snel):
         _bestel_ping_achtergrondtaak(mutatie, snel)
 
 
-def bestel_mutatieverzoek_inschrijven_evenement(account, inschrijving, snel):
+def bestel_mutatieverzoek_inschrijven_evenement(account, inschrijving: EvenementInschrijving, snel):
 
     # zet dit verzoek door naar het mutaties process
     # voorkom duplicates (niet 100%)
@@ -135,7 +138,7 @@ def bestel_mutatieverzoek_maak_bestellingen(account, snel=False):
         _bestel_ping_achtergrondtaak(mutatie, snel)
 
 
-def bestel_mutatieverzoek_afmelden_wedstrijd(inschrijving, snel=False):
+def bestel_mutatieverzoek_afmelden_wedstrijd(inschrijving: WedstrijdInschrijving, snel=False):
     """
         Verwijder een inschrijving op een wedstrijd.
     """
@@ -145,6 +148,25 @@ def bestel_mutatieverzoek_afmelden_wedstrijd(inschrijving, snel=False):
     mutatie, is_created = BestelMutatie.objects.get_or_create(
                                     code=BESTEL_MUTATIE_WEDSTRIJD_AFMELDEN,
                                     wedstrijd_inschrijving=inschrijving,
+                                    is_verwerkt=False)
+
+    if is_created:
+        mutatie.save()
+
+        # wacht kort op de achtergrondtaak
+        _bestel_ping_achtergrondtaak(mutatie, snel)
+
+
+def bestel_mutatieverzoek_afmelden_evenement(inschrijving: EvenementInschrijving, snel=False):
+    """
+        Verwijder een afmelding voor een evenement.
+    """
+
+    # zet dit verzoek door naar het mutaties process
+    # voorkom duplicates (niet 100%)
+    mutatie, is_created = BestelMutatie.objects.get_or_create(
+                                    code=BESTEL_MUTATIE_EVENEMENT_AFMELDEN,
+                                    evenement_inschrijving=inschrijving,
                                     is_verwerkt=False)
 
     if is_created:
@@ -180,7 +202,7 @@ def bestel_mutatieverzoek_betaling_afgerond(betaalactief, gelukt, snel=False):
             _bestel_ping_achtergrondtaak(mutatie, snel)
 
 
-def bestel_mutatieverzoek_annuleer(bestelling, snel=False):
+def bestel_mutatieverzoek_annuleer(bestelling: Bestelling, snel=False):
     """
         Verzoek om een bestelling te annuleren.
     """
@@ -220,7 +242,7 @@ def bestel_mutatieverzoek_transport(account, transport, snel=False):
         _bestel_ping_achtergrondtaak(mutatie, snel)
 
 
-def bestel_betaling_is_gestart(bestelling, actief):
+def bestel_betaling_is_gestart(bestelling: Bestelling, actief):
     """ Deze functie wordt aangeroepen vanuit de Betaal daemon om door te geven dat de betaling opgestart
         is en de checkout_url beschikbaar is in dit betaal_actief record
     """
@@ -235,7 +257,7 @@ def bestel_betaling_is_gestart(bestelling, actief):
     bestelling.save(update_fields=['betaal_actief', 'status', 'log'])
 
 
-def bestel_overboeking_ontvangen(bestelling, bedrag, snel=False):
+def bestel_overboeking_ontvangen(bestelling: Bestelling, bedrag, snel=False):
     """
         Een actieve betaling is afgerond.
     """

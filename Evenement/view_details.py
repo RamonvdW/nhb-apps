@@ -60,6 +60,10 @@ class DetailsView(TemplateView):
         # en je moet lid zijn van de KHSN (dus: geen gast-account)
         evenement.begrenzing_str = "KHSN leden"
 
+        account = get_account(self.request)
+        context['kan_aanmelden'] = account.is_authenticated and not account.is_gast
+        context['hint_inloggen'] = not account.is_authenticated
+
         rol_nu, functie_nu = rol_get_huidige_functie(self.request)
         if rol_nu == Rollen.ROL_HWL and functie_nu.vereniging == evenement.organiserende_vereniging:
             context['sessies'] = (EvenementSessie
@@ -68,10 +72,8 @@ class DetailsView(TemplateView):
                                   .order_by('begin_tijd',
                                             'pk'))
             context['toon_sessies'] = True
-
-        account = get_account(self.request)
-        context['kan_aanmelden'] = account.is_authenticated and not account.is_gast
-        context['hint_inloggen'] = not account.is_authenticated
+            context['kan_aanmelden'] = False
+            context['is_organiserende_hwl'] = True
 
         if context['kan_aanmelden']:
             context['menu_toon_mandje'] = True
@@ -84,7 +86,7 @@ class DetailsView(TemplateView):
                 context['url_inschrijven_familie'] = reverse('Evenement:inschrijven-familie',
                                                              kwargs={'evenement_pk': evenement.pk})
 
-            # inschrijf sectie (kaartjes) tonen voor deze wedstrijd?
+            # inschrijf sectie (kaartjes) tonen voor dit evenement?
             context['toon_inschrijven'] = context['is_voor_sluitingsdatum']
 
         url_terug = reverse('Kalender:maand',

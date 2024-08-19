@@ -22,10 +22,10 @@ from Bestel.definities import (BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_BET
                                BESTEL_MUTATIE_MAAK_BESTELLINGEN, BESTEL_MUTATIE_BETALING_AFGEROND,
                                BESTEL_MUTATIE_OVERBOEKING_ONTVANGEN, BESTEL_MUTATIE_RESTITUTIE_UITBETAALD,
                                BESTEL_MUTATIE_ANNULEER, BESTEL_MUTATIE_TRANSPORT, BESTEL_MUTATIE_EVENEMENT_INSCHRIJVEN,
-                               BESTEL_TRANSPORT_OPHALEN, BESTEL_TRANSPORT2STR)
+                               BESTEL_MUTATIE_EVENEMENT_AFMELDEN, BESTEL_TRANSPORT_OPHALEN, BESTEL_TRANSPORT2STR)
 from Bestel.models import BestelProduct, BestelMandje, Bestelling, BestelHoogsteBestelNr, BestelMutatie
 from Bestel.plugins.evenement import (evenement_plugin_inschrijven, evenement_plugin_verwijder_reservering,
-                                      evenement_plugin_inschrijving_is_betaald)
+                                      evenement_plugin_inschrijving_is_betaald, evenement_plugin_afmelden)
 from Bestel.plugins.product_info import beschrijf_product, beschrijf_korting
 from Bestel.plugins.wedstrijden import (wedstrijden_plugin_automatische_kortingen_toepassen,
                                         wedstrijden_plugin_inschrijven, wedstrijden_plugin_verwijder_reservering,
@@ -34,7 +34,7 @@ from Bestel.plugins.webwinkel import (webwinkel_plugin_reserveren, webwinkel_plu
                                       webwinkel_plugin_bepaal_kortingen, webwinkel_plugin_bepaal_verzendkosten_mandje,
                                       webwinkel_plugin_bepaal_verzendkosten_bestelling)
 from Betaal.models import BetaalInstellingenVereniging, BetaalTransactie
-from Evenement.definities import (EVENEMENT_INSCHRIJVING_STATUS_DEFINITIEF,
+from Evenement.definities import (EVENEMENT_INSCHRIJVING_STATUS_DEFINITIEF, EVENEMENT_STATUS_TO_STR,
                                   EVENEMENT_INSCHRIJVING_STATUS_RESERVERING_BESTELD)
 from Functie.models import Functie
 from Mailer.operations import mailer_queue_email, render_email_template, mailer_notify_internal_error
@@ -42,7 +42,7 @@ from Overig.background_sync import BackgroundSync
 from Vereniging.models import Vereniging
 from Wedstrijden.definities import (WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_BESTELD,
                                     WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF,
-                                    WEDSTRIJD_KORTING_COMBI)
+                                    WEDSTRIJD_KORTING_COMBI, WEDSTRIJD_STATUS_TO_STR)
 from mollie.api.client import Client, RequestSetupError
 from types import SimpleNamespace
 from decimal import Decimal
@@ -874,16 +874,17 @@ class Command(BaseCommand):
     def _verwerk_mutatie_wedstrijd_afmelden(self, mutatie):
         inschrijving = mutatie.wedstrijd_inschrijving
         oude_status = inschrijving.status
+        if not inschrijving:
+            return
 
-        # WEDSTRIJDINSCHRIJVING_STATUS_AFGEMELD --> doe niets
-        # WEDSTRIJDINSCHRIJVING_STATUS_RESERVERING_MANDJE gaat via BESTEL_MUTATIE_VERWIJDER
+        # WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD --> doe niets
+        # WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_MANDJE gaat via BESTEL_MUTATIE_VERWIJDER
         if oude_status == WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_BESTELD:
             # in een bestelling; nog niet (volledig) betaald
             self.stdout.write('[INFO] Inschrijving pk=%s met status="besteld" afmelden voor wedstrijd' %
                               inschrijving.pk)
 
-            if inschrijving:
-                wedstrijden_plugin_verwijder_reservering(self.stdout, inschrijving)
+            wedstrijden_plugin_verwijder_reservering(self.stdout, inschrijving)
             # FUTURE: betaling afbreken
             # FUTURE: automatische restitutie als de betaling binnen is
 
@@ -892,9 +893,44 @@ class Command(BaseCommand):
             self.stdout.write('[INFO] Inschrijving pk=%s met status="definitief" afmelden voor wedstrijd' %
                               inschrijving.pk)
 
-            if inschrijving:
-                wedstrijden_plugin_afmelden(inschrijving)
+            wedstrijden_plugin_afmelden(inschrijving)
             # FUTURE: automatisch een restitutie beginnen
+        else:
+            self.stdout.write('[WARNING] Niet ondersteund: Inschrijving pk=%s met status=%s afmelden voor wedstrijd' % (
+                        inschrijving.pk, WEDSTRIJD_STATUS_TO_STR[inschrijving.status]))
+
+    def _verwerk_mutatie_evenement_afmelden(self, mutatie):
+        inschrijving = mutatie.evenement_inschrijving
+        if not inschrijving:
+            return
+
+        # EVENEMENT_INSCHRIJVING_STATUS_RESERVERING_MANDJE gaat via BESTEL_MUTATIE_VERWIJDER
+        if inschrijving.status == EVENEMENT_INSCHRIJVING_STATUS_RESERVERING_BESTELD:
+            # in een bestelling; nog niet (volledig) betaald
+            self.stdout.write('[INFO] Inschrijving pk=%s met status="besteld" afmelden voor evenement' %
+                              inschrijving.pk)
+
+            mutatie.evenement_inschrijving = None
+            mutatie.save(update_fields=['evenement_inschrijving'])
+
+            evenement_plugin_verwijder_reservering(self.stdout, inschrijving)
+            # FUTURE: betaling afbreken
+            # FUTURE: automatische restitutie als de betaling binnen is
+
+        elif inschrijving.status == EVENEMENT_INSCHRIJVING_STATUS_DEFINITIEF:
+            # in een bestelling en betaald
+            self.stdout.write('[INFO] Inschrijving pk=%s met status="definitief" afmelden voor evenement' %
+                              inschrijving.pk)
+
+            mutatie.evenement_inschrijving = None
+            mutatie.save(update_fields=['evenement_inschrijving'])
+
+            evenement_plugin_afmelden(inschrijving)
+            # FUTURE: automatisch een restitutie beginnen
+
+        else:
+            self.stdout.write('[WARNING] Niet ondersteund: Inschrijving pk=%s met status=%s afmelden voor evenement' % (
+                        inschrijving.pk, EVENEMENT_STATUS_TO_STR[inschrijving.status]))
 
     def _verwerk_mutatie_betaling_afgerond(self, mutatie):
         now = timezone.now()
@@ -1203,7 +1239,9 @@ class Command(BaseCommand):
             self.stdout.write('[INFO] Verwerk mutatie %s: afmelden voor wedstrijd' % mutatie.pk)
             self._verwerk_mutatie_wedstrijd_afmelden(mutatie)
 
-        # FUTURE: EVENEMENT_AFMELDEN
+        elif code == BESTEL_MUTATIE_EVENEMENT_AFMELDEN:
+            self.stdout.write('[INFO] Verwerk mutatie %s: afmelden voor evenement' % mutatie.pk)
+            self._verwerk_mutatie_evenement_afmelden(mutatie)
 
         elif code == BESTEL_MUTATIE_BETALING_AFGEROND:
             self.stdout.write('[INFO] Verwerk mutatie %s: betaling afgerond' % mutatie.pk)

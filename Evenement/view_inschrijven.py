@@ -45,7 +45,7 @@ def inschrijving_open_of_404(evenement):
         raise Http404('Inschrijving is gesloten')
 
 
-class InschrijvenSporter(UserPassesTestMixin, TemplateView):
+class InschrijvenSporterView(UserPassesTestMixin, TemplateView):
 
     """ Via deze view kan een sporter zichzelf inschrijven voor een evenement """
 
@@ -138,7 +138,7 @@ class InschrijvenSporter(UserPassesTestMixin, TemplateView):
         return context
 
 
-class InschrijvenGroepje(UserPassesTestMixin, TemplateView):
+class InschrijvenGroepjeView(UserPassesTestMixin, TemplateView):
 
     """ Via deze view kan een sporter een groepje inschrijven voor een evenement"""
 
@@ -246,7 +246,7 @@ class InschrijvenGroepje(UserPassesTestMixin, TemplateView):
         return context
 
 
-class InschrijvenFamilie(UserPassesTestMixin, TemplateView):
+class InschrijvenFamilieView(UserPassesTestMixin, TemplateView):
 
     """ Via deze view kan een sporter familie (op hetzelfde adres) inschrijven voor een evenement"""
 

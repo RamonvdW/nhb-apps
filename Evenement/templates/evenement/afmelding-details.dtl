@@ -13,7 +13,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Details aanmelding</h3>
+            <h3 class="page-banner">Details afmelding</h3>
         </div>
     </div>
 
@@ -23,7 +23,7 @@
             <table class="sv-kader">
                 <tr>
                     <th>Reserveringsnummer</th>
-                    <td>{{ inschrijving.reserveringsnummer }}</td>
+                    <td>{{ afmelding.reserveringsnummer }}</td>
                 </tr>
                 <tr>
                     <th>Sporter</th>
@@ -33,68 +33,66 @@
                     <th>Van vereniging</th>
                     <td>{% if ver %}{{ ver.ver_nr_en_naam }}<br>uit {{ ver.plaats }} (regio {{ ver.regio }}; {{ ver.regio.rayon }}){% else %}<i>Onbekend</i>{% endif %}</td>
                 </tr>
-
-                {% if toon_contactgegevens %}
-                    <tr>
-                        <th>E-mail sporter</th>
-                        <td><code>{{ sporter.email }}</code></td>
-                    </tr>
-                {% endif %}
-
+                <tr>
+                    <th>E-mail sporter</th>
+                    <td><code>{{ sporter.email }}</code></td>
+                </tr>
                 <tr>
                     <th>Evenement</th>
-                    <td>{{ inschrijving.evenement.titel }}<br>bij {{ inschrijving.evenement.organiserende_vereniging }}</td>
+                    <td>{{ afmelding.evenement.titel }}<br>bij {{ afmelding.evenement.organiserende_vereniging }}</td>
                 </tr>
                 <tr>
                     <th>Ingeschreven</th>
-                    <td>op {{ inschrijving.wanneer }}<br>door {{ inschrijving.koper }}</td>
+                    <td>op {{ afmelding.wanneer_inschrijving }}<br>door {{ afmelding.koper }}</td>
+                </tr>
+                <tr>
+                    <th>Afgemeld</th>
+                    <td>op {{ afmelding.wanneer_afgemeld }}</td>
                 </tr>
 
                 <tr>
                     <th>Status</th>
-                    <td>{% if inschrijving.status == 'R' %}
-                            <span>In mandje</span><span class="grey-text"> | Besteld | Definitief | Geannuleerd | Afgemeld</span>
-                        {% elif inschrijving.status == 'B' %}
-                            <span class="grey-text">In mandje | </span><span>Besteld</span><span class="grey-text"> | Definitief | Geannuleerd | Afgemeld</span>
-                        {% elif inschrijving.status == 'D' %}
-                            <span class="grey-text">In mandje | Besteld | </span><span>Definitief</span><span class="grey-text"> | Geannuleerd | Afgemeld</span>
+                    <td>{% if afmelding.status == 'A' %}
+                            <span class="grey-text">In mandje | Besteld | Definitief | Geannuleerd | </span><span>Afgemeld</span>
+                        {% elif afmelding.status == 'C' %}
+                            <span class="grey-text">In mandje | Besteld | Definitief | </span><span>Geannuleerd</span><span class="grey-text"> | Afgemeld</span>
                         {% else %}
                             <span class="sv-rood-text"><i>Onbekend!</i></span>
                         {% endif %}
                     </td>
                 </tr>
-                {% if inschrijving.bestelnummer_str %}
+                {% if afmelding.bestelnummer_str %}
                     <tr>
                         <th>Bestelnummer</th>
-                        <td>{{ inschrijving.bestelnummer_str }}</td>
+                        <td>{{ afmelding.bestelnummer_str }}</td>
                     </tr>
                 {% endif %}
                 <tr>
                     <th>Prijs</th>
-                    <td>{% if inschrijving.bestelproduct %}&euro;&nbsp;{{ inschrijving.bestelproduct.prijs_euro }}{% else %}<i>Geen</i> (handmatige inschrijving){% endif %}</td>
+                    <td>{% if afmelding.bestelproduct %}&euro;&nbsp;{{ afmelding.bestelproduct.prijs_euro }}{% else %}<i>Geen</i> (handmatige inschrijving){% endif %}</td>
                 </tr>
                 <tr>
                     <th>Inschrijfgeld ontvangen</th>
-                    <td>&euro;&nbsp;{{ inschrijving.ontvangen_euro }}</td>
+                    <td>&euro;&nbsp;{{ afmelding.ontvangen_euro }}</td>
                 </tr>
 
-                {% if inschrijving.retour_euro %}
+                {% if afmelding.retour_euro %}
                     <tr>
                         <th>Inschrijfgeld retour</th>
-                        <td>&euro;&nbsp;{{ inschrijving.retour_euro }}</td>
+                        <td>&euro;&nbsp;{{ afmelding.retour_euro }}</td>
                     </tr>
                 {% endif %}
 
                 <tr>
                     <th>Logboekje</th>
-                    <td>{{ inschrijving.log|linebreaksbr }}</td>
+                    <td>{{ afmelding.log|linebreaksbr }}</td>
                 </tr>
 
-                {% if inschrijving.url_afmelden %}
+                {% if afmelding.url_afmelden %}
                     <tr>
                         <th>Afmelden</th>
                         <td>
-                            <a class="btn-sv-rood modal-trigger" href="#bevestig_afmelden_{{ inschrijving.pk }}">
+                            <a class="btn-sv-rood modal-trigger" href="#bevestig_afmelden_{{ afmelding.pk }}">
                                 <i class="notranslate material-icons-round">delete</i></a>
                         </td>
                     </tr>
@@ -104,13 +102,13 @@
     </div>
 
 
-    {% if inschrijving.url_afmelden %}
-        <div class="modal" id="bevestig_afmelden_{{ inschrijving.pk }}">
+    {% if afmelding.url_afmelden %}
+        <div class="modal" id="bevestig_afmelden_{{ afmelding.pk }}">
             <div class="modal-content center">
                 <h5>Verwijder aanmelding?</h5>
-                <p>Wil je de aanmelding van <b>{{ sporter.volledige_naam }}</b><br>voor het evenement <b>{{ inschrijving.evenement.titel }}</b><br>verwijderen uit het systeem?</p>
+                <p>Wil je de aanmelding van <b>{{ sporter.volledige_naam }}</b><br>voor het evenement <b>{{ afmelding.evenement.titel }}</b><br>verwijderen uit het systeem?</p>
 
-                <form action="{{ inschrijving.url_afmelden }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
+                <form action="{{ afmelding.url_afmelden }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
                     {% csrf_token %}
                     <input type="hidden" name="verwijder" value="1">
 

@@ -13,13 +13,15 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Evenement details</h3>
+            <h3 class="page-banner">Evenement</h3>
 
             {% if toon_inschrijven %}
                 <a class="btn-sv-rood" href="#inschrijven">
                     <i class="material-icons-round left notranslate">arrow_downward</i>Inschrijven</a>
             {% else %}
-                <p>Het is niet mogelijk om in te schrijven op dit evenement.</p>
+                {% if not is_organiserende_hwl %}   <!-- voorkom verwarring -->
+                    <p>Het is niet mogelijk om in te schrijven op dit evenement.</p>
+                {% endif %}
             {% endif %}
         </div>
     </div>
@@ -46,7 +48,7 @@
                 </tr>
 
                 <tr>
-                    <th>Datum wedstrijd</th>
+                    <th>Datum</th>
                     <td>{{ evenement.datum }}</td>
                 </tr>
 
@@ -188,7 +190,7 @@
                 {% if hint_inloggen %}
                     <div style="padding:10px">
                         <div class="col s12 m10 offset-m1 l8 offset-l2 xl6 offset-xl3 sv-rood white-text z-depth-3 center">
-                            <p>Om in te schrijven op deze wedstrijd moet je een account aanmaken en inloggen</p>
+                            <p>Om in te schrijven op dit evenement moet je een account aanmaken en inloggen</p>
                         </div>
                     </div>
                 {% endif %}

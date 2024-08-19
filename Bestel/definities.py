@@ -40,6 +40,7 @@ BESTEL_MUTATIE_WEBWINKEL_KEUZE = 8              # keuze uit webwinkel
 BESTEL_MUTATIE_ANNULEER = 9                     # annuleer een bestelling
 BESTEL_MUTATIE_TRANSPORT = 10                   # wijzig transport keuze
 BESTEL_MUTATIE_EVENEMENT_INSCHRIJVEN = 11       # inschrijven op evenement
+BESTEL_MUTATIE_EVENEMENT_AFMELDEN = 12          # afmelden (na betaling)
 
 BESTEL_MUTATIE_TO_STR = {
     BESTEL_MUTATIE_WEDSTRIJD_INSCHRIJVEN: "Inschrijven op wedstrijd",
@@ -53,6 +54,7 @@ BESTEL_MUTATIE_TO_STR = {
     BESTEL_MUTATIE_ANNULEER: "Annuleer bestelling",
     BESTEL_MUTATIE_TRANSPORT: "Wijzig transport keuze",
     BESTEL_MUTATIE_EVENEMENT_INSCHRIJVEN: "Inschrijven op evenement",
+    BESTEL_MUTATIE_EVENEMENT_AFMELDEN: "Afmelding voor evenement",
 }
 
 

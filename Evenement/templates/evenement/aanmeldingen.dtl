@@ -119,27 +119,23 @@
                     <tr>
                         <th class="hide-on-small-only">Aangemeld op</th>
                         <th>Sporter</th>
-                        <th>Boog</th>
                         <th>Status</th>
                         <th><!-- kolom voor knoppen --></th>
                     </tr>
                 </thead>
 
-                {% for aanmelding in aanmeldingen %}
-                    {% if aanmelding.is_afgemeld  %}
-                        <tr>
-                            <td class="hide-on-small-only">{{ aanmelding.wanneer }}</td>
-                            <td>{{ aanmelding.sporter_str }}</td>
-                            <td>{{ aanmelding.boog_str }}</td>
-                            <td>{{ aanmelding.status_str }}</td>
-                            <td>
-                                {% if aanmelding.url_details %}
-                                    <a class="btn-sv-rood" href="{{ aanmelding.url_details }}">
-                                        <i class="notranslate material-icons-round">play_arrow</i></a>
-                                {% endif %}
-                            </td>
-                        </tr>
-                    {% endif %}
+                {% for afmelding in afmeldingen %}
+                    <tr>
+                        <td class="hide-on-small-only">{{ afmelding.wanneer_inschrijving }}</td>
+                        <td>{{ afmelding.sporter_str }}</td>
+                        <td>{{ afmelding.status_str }}</td>
+                        <td>
+                            {% if afmelding.url_details %}
+                                <a class="btn-sv-rood" href="{{ afmelding.url_details }}">
+                                    <i class="notranslate material-icons-round">play_arrow</i></a>
+                            {% endif %}
+                        </td>
+                    </tr>
                 {% endfor %}
 
                 {% if aantal_afmeldingen == 0 %}

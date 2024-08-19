@@ -72,19 +72,17 @@
                 </tr>
 
                 <tr>
-                    <th>Wedstrijd locatie</th>
+                    <th>Locatie</th>
                     <td>{{ evenement.locatie.adres|linebreaksbr }}</td>
                 </tr>
 
-                {% if evenement.begrenzing_str %}
-                    <tr>
-                        <th>Doelgroep</th>
-                        <td>{{ evenement.begrenzing_str }}</td>
-                    </tr>
-                {% endif %}
+                <tr>
+                    <th>Doelgroep</th>
+                    <td>{{ evenement.begrenzing_str }}</td>
+                </tr>
 
                 <tr>
-                    <th>beschrijving</th>
+                    <th>Beschrijving</th>
                     <td>{{ evenement.beschrijving|linebreaksbr }}</td>
                 </tr>
             </table>

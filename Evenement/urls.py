@@ -24,19 +24,19 @@ urlpatterns = [
 
     # inschrijven
     path('inschrijven/<evenement_pk>/sporter/',
-         view_inschrijven.InschrijvenSporter.as_view(),
+         view_inschrijven.InschrijvenSporterView.as_view(),
          name='inschrijven-sporter'),
 
     path('inschrijven/<evenement_pk>/groep/',
-         view_inschrijven.InschrijvenGroepje.as_view(),
+         view_inschrijven.InschrijvenGroepjeView.as_view(),
          name='inschrijven-groepje'),
 
     path('inschrijven/<evenement_pk>/familie/<lid_nr>/',
-         view_inschrijven.InschrijvenFamilie.as_view(),
+         view_inschrijven.InschrijvenFamilieView.as_view(),
          name='inschrijven-familie-lid'),
 
     path('inschrijven/<evenement_pk>/familie/',
-         view_inschrijven.InschrijvenFamilie.as_view(),
+         view_inschrijven.InschrijvenFamilieView.as_view(),
          name='inschrijven-familie'),
 
     # toevoegen aan winkelwagentje
@@ -60,7 +60,9 @@ urlpatterns = [
          view_aanmeldingen.DownloadAanmeldingenBestandCSV.as_view(),
          name='download-aanmeldingen-csv'),
 
-
+    path('details-afmelding/<afmelding_pk>/',
+         view_aanmeldingen.EvenementDetailsAfmeldingView.as_view(),
+         name='details-afmelding'),
 ]
 
 # end of file

@@ -11,17 +11,10 @@ from django.utils import timezone
 from django.shortcuts import render
 from django.views.generic import View
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Account.models import get_account
-from BasisTypen.definities import (GESLACHT_ALLE,
-                                   ORGANISATIE_WA, ORGANISATIE_IFAA, ORGANISATIE_KHSN, ORGANISATIES2SHORT_STR)
-from BasisTypen.operations import get_organisatie_boogtypen, get_organisatie_klassen
 from Evenement.definities import EVENEMENT_STATUS_TO_STR
 from Evenement.models import Evenement
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving
-from Wedstrijden.definities import (WEDSTRIJD_DISCIPLINE_3D, ORGANISATIE_WEDSTRIJD_DISCIPLINE_STRS,
-                                    WEDSTRIJD_STATUS_TO_STR)
-from Wedstrijden.models import Wedstrijd
 import datetime
 
 
