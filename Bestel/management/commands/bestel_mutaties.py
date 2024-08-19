@@ -42,7 +42,7 @@ from Overig.background_sync import BackgroundSync
 from Vereniging.models import Vereniging
 from Wedstrijden.definities import (WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_BESTELD,
                                     WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF,
-                                    WEDSTRIJD_KORTING_COMBI, WEDSTRIJD_STATUS_TO_STR)
+                                    WEDSTRIJD_KORTING_COMBI, WEDSTRIJD_INSCHRIJVING_STATUS_TO_STR)
 from mollie.api.client import Client, RequestSetupError
 from types import SimpleNamespace
 from decimal import Decimal
@@ -897,7 +897,7 @@ class Command(BaseCommand):
             # FUTURE: automatisch een restitutie beginnen
         else:
             self.stdout.write('[WARNING] Niet ondersteund: Inschrijving pk=%s met status=%s afmelden voor wedstrijd' % (
-                        inschrijving.pk, WEDSTRIJD_STATUS_TO_STR[inschrijving.status]))
+                inschrijving.pk, WEDSTRIJD_INSCHRIJVING_STATUS_TO_STR[inschrijving.status]))
 
     def _verwerk_mutatie_evenement_afmelden(self, mutatie):
         inschrijving = mutatie.evenement_inschrijving

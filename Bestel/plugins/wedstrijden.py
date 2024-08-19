@@ -13,7 +13,7 @@ from Bestel.models import BestelProduct
 from Mailer.operations import mailer_queue_email, mailer_email_is_valide, render_email_template
 from Wedstrijden.definities import (WEDSTRIJD_KORTING_COMBI, WEDSTRIJD_KORTING_SPORTER, WEDSTRIJD_KORTING_VERENIGING,
                                     WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF, WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD,
-                                    WEDSTRIJD_INSCHRIJVING_STATUS_VERWIJDERD, WEDSTRIJDINSCHRIJVING_STATUS_TO_STR)
+                                    WEDSTRIJD_INSCHRIJVING_STATUS_VERWIJDERD, WEDSTRIJD_INSCHRIJVING_STATUS_TO_STR)
 from Wedstrijden.models import WedstrijdKorting, WedstrijdInschrijving
 from decimal import Decimal
 import datetime
@@ -419,9 +419,9 @@ def wedstrijden_plugin_verwijder_reservering(stdout, inschrijving):
         sessie.save(update_fields=['aantal_inschrijvingen'])
 
     stdout.write('[INFO] Inschrijving pk=%s status %s --> %s' % (
-                    inschrijving.pk,
-                    WEDSTRIJDINSCHRIJVING_STATUS_TO_STR[oude_status],
-                    WEDSTRIJDINSCHRIJVING_STATUS_TO_STR[inschrijving.status]))
+        inschrijving.pk,
+        WEDSTRIJD_INSCHRIJVING_STATUS_TO_STR[oude_status],
+        WEDSTRIJD_INSCHRIJVING_STATUS_TO_STR[inschrijving.status]))
 
 
 def wedstrijden_plugin_inschrijving_is_betaald(stdout, product: BestelProduct):

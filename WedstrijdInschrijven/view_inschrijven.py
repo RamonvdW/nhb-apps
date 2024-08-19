@@ -22,7 +22,7 @@ from Kalender.view_maand import MAAND2URL
 from Sporter.models import Sporter, SporterBoog, get_sporter
 from Sporter.operations import get_sporter_voorkeuren
 from Wedstrijden.definities import (WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD, WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF,
-                                    WEDSTRIJD_INSCHRIJVING_STATUS_VERWIJDERD, WEDSTRIJDINSCHRIJVING_STATUS_TO_STR,
+                                    WEDSTRIJD_INSCHRIJVING_STATUS_VERWIJDERD, WEDSTRIJD_INSCHRIJVING_STATUS_TO_STR,
                                     WEDSTRIJD_BEGRENZING_TO_STR,
                                     WEDSTRIJD_BEGRENZING_VERENIGING, WEDSTRIJD_BEGRENZING_REGIO,
                                     WEDSTRIJD_BEGRENZING_RAYON, WEDSTRIJD_BEGRENZING_WERELD)
@@ -504,7 +504,7 @@ class WedstrijdInschrijvenGroepje(UserPassesTestMixin, TemplateView):
                         # sporter is ingeschreven
                         al_ingeschreven = True
                         context['inschrijving'] = inschrijving
-                        inschrijving.status_str = WEDSTRIJDINSCHRIJVING_STATUS_TO_STR[inschrijving.status]
+                        inschrijving.status_str = WEDSTRIJD_INSCHRIJVING_STATUS_TO_STR[inschrijving.status]
                 # for
                 context['al_ingeschreven'] = al_ingeschreven
 
@@ -683,7 +683,7 @@ class WedstrijdInschrijvenFamilie(UserPassesTestMixin, TemplateView):
                         # sporter is ingeschreven
                         al_ingeschreven = True
                         context['inschrijving'] = inschrijving
-                        inschrijving.status_str = WEDSTRIJDINSCHRIJVING_STATUS_TO_STR[inschrijving.status]
+                        inschrijving.status_str = WEDSTRIJD_INSCHRIJVING_STATUS_TO_STR[inschrijving.status]
                 # for
 
                 context['al_ingeschreven'] = al_ingeschreven
@@ -1032,7 +1032,7 @@ class WedstrijdInschrijvenHandmatig(UserPassesTestMixin, TemplateView):
                     # sporter is ingeschreven
                     al_ingeschreven = True
                     context['inschrijving'] = inschrijving
-                    inschrijving.status_str = WEDSTRIJDINSCHRIJVING_STATUS_TO_STR[inschrijving.status]
+                    inschrijving.status_str = WEDSTRIJD_INSCHRIJVING_STATUS_TO_STR[inschrijving.status]
             # for
             context['kan_aanmelden'] = kan_aanmelden
             context['al_ingeschreven'] = al_ingeschreven

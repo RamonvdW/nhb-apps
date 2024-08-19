@@ -19,7 +19,7 @@ from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige, rol_get_huidige_functie
 from Sporter.models import SporterVoorkeuren, get_sporter
 from Sporter.operations import get_sporter_voorkeuren
-from Wedstrijden.definities import (WEDSTRIJDINSCHRIJVING_STATUS_TO_SHORT_STR, WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD,
+from Wedstrijden.definities import (WEDSTRIJD_INSCHRIJVING_STATUS_TO_SHORT_STR, WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD,
                                     WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_MANDJE, WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF,
                                     WEDSTRIJD_INSCHRIJVING_STATUS_VERWIJDERD,
                                     KWALIFICATIE_CHECK2STR, KWALIFICATIE_CHECK_AFGEKEURD)
@@ -186,7 +186,7 @@ class WedstrijdAanmeldingenView(UserPassesTestMixin, TemplateView):
                 aantal_afmeldingen += 1
                 aanmelding.is_afgemeld = True
 
-            aanmelding.status_str = WEDSTRIJDINSCHRIJVING_STATUS_TO_SHORT_STR[aanmelding.status]
+            aanmelding.status_str = WEDSTRIJD_INSCHRIJVING_STATUS_TO_SHORT_STR[aanmelding.status]
 
             aanmelding.sporter_str = sporter.lid_nr_en_volledige_naam()
             aanmelding.boog_str = sporterboog.boogtype.beschrijving
@@ -481,7 +481,7 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
                 row = [
                     str(reserveringsnummer),
                     timezone.localtime(aanmelding.wanneer).strftime('%Y-%m-%d %H:%M'),
-                    WEDSTRIJDINSCHRIJVING_STATUS_TO_SHORT_STR[aanmelding.status],
+                    WEDSTRIJD_INSCHRIJVING_STATUS_TO_SHORT_STR[aanmelding.status],
                     bestelnummer_str,
                     prijs_str,
                     korting_str,
@@ -511,7 +511,7 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
                 row = [
                     str(reserveringsnummer),
                     timezone.localtime(aanmelding.wanneer).strftime('%Y-%m-%d %H:%M'),
-                    WEDSTRIJDINSCHRIJVING_STATUS_TO_SHORT_STR[aanmelding.status],
+                    WEDSTRIJD_INSCHRIJVING_STATUS_TO_SHORT_STR[aanmelding.status],
                     bestelnummer_str,
                     prijs_str,
                     korting_str,
@@ -612,7 +612,7 @@ class WedstrijdAanmeldingDetailsView(UserPassesTestMixin, TemplateView):
 
         inschrijving.reserveringsnummer = inschrijving.pk + settings.TICKET_NUMMER_START__WEDSTRIJD
 
-        inschrijving.status_str = WEDSTRIJDINSCHRIJVING_STATUS_TO_SHORT_STR[inschrijving.status]
+        inschrijving.status_str = WEDSTRIJD_INSCHRIJVING_STATUS_TO_SHORT_STR[inschrijving.status]
 
         inschrijving.bestelnummer_str = get_inschrijving_mh_bestel_nr(inschrijving)
 
