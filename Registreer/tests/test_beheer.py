@@ -13,7 +13,8 @@ from Functie.tests.helpers import maak_functie
 from Geo.models import Regio
 from Locatie.models import WedstrijdLocatie
 from Mailer.models import MailQueue
-from Registreer.definities import REGISTRATIE_FASE_COMPLEET, REGISTRATIE_FASE_AFGEWEZEN, REGISTRATIE_FASE_BEGIN
+from Registreer.definities import (REGISTRATIE_FASE_COMPLEET, REGISTRATIE_FASE_AFGEWEZEN, REGISTRATIE_FASE_BEGIN,
+                                   REGISTRATIE_FASE_EMAIL)
 from Registreer.models import GastRegistratie
 from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -125,6 +126,17 @@ class TestRegistreerBeheer(E2EHelpers, TestCase):
         self.boog_r = BoogType.objects.get(afkorting='R')
         self.sporterboog_800001 = SporterBoog(sporter=sporter, boogtype=self.boog_r)
         self.sporterboog_800001.save()
+
+        # gast-registratie die nog niet af is
+        gast = GastRegistratie(
+                    lid_nr=0,
+                    fase=REGISTRATIE_FASE_EMAIL,
+                    email="een@gasten.not",
+                    email_is_bevestigd=False,
+                    voornaam="Een",
+                    achternaam="van de Gasten",
+                    logboek="")
+        gast.save()
 
     def test_anon(self):
         self.client.logout()
