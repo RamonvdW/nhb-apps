@@ -93,6 +93,7 @@ class InschrijvenSporterView(UserPassesTestMixin, TemplateView):
         sporter = (Sporter
                    .objects
                    .exclude(is_overleden=True)
+                   .exclude(is_gast=True)         # alleen KHSN leden
                    .filter(lid_nr=lid_nr,
                            is_actief_lid=True)    # moet actief lid zijn
                    .select_related('bij_vereniging')
@@ -119,9 +120,8 @@ class InschrijvenSporterView(UserPassesTestMixin, TemplateView):
 
             context['prijs_euro_sporter'] = evenement.bepaal_prijs_voor_sporter(sporter)
 
-        context['menu_toon_mandje'] = True
-
         context['url_toevoegen'] = reverse('Evenement:inschrijven-toevoegen-aan-mandje')
+        context['menu_toon_mandje'] = True
 
         url_terug = reverse('Kalender:maand',
                             kwargs={'jaar': evenement.datum.year,
@@ -190,8 +190,9 @@ class InschrijvenGroepjeView(UserPassesTestMixin, TemplateView):
                        .objects
                        .exclude(is_overleden=True)
                        .exclude(bij_vereniging__geen_wedstrijden=True)
+                       .exclude(is_gast=True)           # alleen KHSN leden
                        .filter(lid_nr=zoek_lid_nr,
-                               is_actief_lid=True)
+                               is_actief_lid=True)      # moet actief lid zijn
                        .select_related('bij_vereniging')
                        .first())
 
@@ -223,10 +224,8 @@ class InschrijvenGroepjeView(UserPassesTestMixin, TemplateView):
             context['prijs_euro_sporter'] = evenement.bepaal_prijs_voor_sporter(sporter)
 
         context['kan_aanmelden'] = kan_aanmelden
-
-        context['menu_toon_mandje'] = True
-
         context['url_toevoegen'] = reverse('Evenement:inschrijven-toevoegen-aan-mandje')
+        context['menu_toon_mandje'] = True
 
         context['url_zoek'] = reverse('Evenement:inschrijven-groepje',
                                       kwargs={'evenement_pk': evenement.pk})
@@ -302,23 +301,23 @@ class InschrijvenFamilieView(UserPassesTestMixin, TemplateView):
                                   .objects
                                   .exclude(is_overleden=True)
                                   .exclude(bij_vereniging__geen_wedstrijden=True)
+                                  .exclude(is_gast=True)            # alleen KHSN leden
                                   .filter(adres_code=adres_code,
-                                          is_actief_lid=True)
+                                          is_actief_lid=True)       # moet actief lid zijn
                                   .select_related('bij_vereniging')
                                   .order_by('sinds_datum',
                                             'lid_nr')[:50])
 
-        sporter_pks = list()
+        context['niets_gevonden'] = True
         geselecteerd = None
         for sporter in context['familie']:
+            context['niets_gevonden'] = False
+
             sporter.is_geselecteerd = False
 
             sporter.url_selecteer = reverse('Evenement:inschrijven-familie-lid',
                                             kwargs={'evenement_pk': evenement.pk,
                                                     'lid_nr': sporter.lid_nr})
-
-            if sporter.pk not in sporter_pks:
-                sporter_pks.append(sporter.pk)
 
             if sporter.lid_nr == lid_nr:
                 geselecteerd = sporter
@@ -341,7 +340,6 @@ class InschrijvenFamilieView(UserPassesTestMixin, TemplateView):
             geselecteerd.prijs_euro = evenement.bepaal_prijs_voor_sporter(geselecteerd)
 
         context['menu_toon_mandje'] = True
-
         context['url_toevoegen'] = reverse('Evenement:inschrijven-toevoegen-aan-mandje')
 
         url_terug = reverse('Kalender:maand',
@@ -387,6 +385,8 @@ class ToevoegenAanMandjeView(UserPassesTestMixin, View):
             evenement = Evenement.objects.get(pk=evenement_pk)
             sporter = (Sporter
                        .objects
+                       .exclude(bij_vereniging__geen_wedstrijden=True)
+                       .exclude(is_gast=True)           # alleen KHSN leden
                        .select_related('bij_vereniging')
                        .get(pk=sporter_pk))
         except ObjectDoesNotExist:
@@ -442,15 +442,15 @@ class ToevoegenAanMandjeView(UserPassesTestMixin, View):
         if goto_str == 'S':
             inschrijven_str += ' Sporter'
 
-        elif goto_str == 'G':
-            inschrijven_str += ' Groepje'
-
         elif goto_str == 'F':
             inschrijven_str += ' Familie'
             # ga terug naar de familie pagina met dezelfde sporter geselecteerd
             url = reverse('Evenement:inschrijven-familie-lid',
                           kwargs={'evenement_pk': evenement.pk,
                                   'lid_nr': sporter.lid_nr})
+
+        else:  # if goto_str == 'G':
+            inschrijven_str += ' Groepje'
 
         context['url_verder'] = url
         context['url_mandje'] = reverse('Bestel:toon-inhoud-mandje')

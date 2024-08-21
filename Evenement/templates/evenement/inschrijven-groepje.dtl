@@ -97,7 +97,6 @@
 
             <p>Hieronder kan je een sporter zoeken op bondsnummer.</p>
             <p>Deze sporter kan je inschrijven door deze toe te voegen aan jouw winkelmandje en daarna de bestelling te voltooien.</p>
-            <p>Let op: dit werkt alleen als de sporter een account.</p>
             {% if not sporter %}
                 {% if gezocht_niet_gevonden %}
                     <p class="center sv-rood-text">Sporter {{ gezocht_niet_gevonden }} niet gevonden.</p>
