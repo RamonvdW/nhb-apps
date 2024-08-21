@@ -148,38 +148,6 @@
     </div>
 
 
-    {% if toon_sessies %}
-
-        <!-- witruimte -->
-        <div class="row center">
-            <div class="col s12">
-                <h4>Programma</h4>
-                <p>Iedereen die aangemeld is kan 3 sessies kiezen</p>
-            </div>
-        </div>
-
-        <!-- blauwe balk met informatie in tabel-vorm:  label - info -->
-        <div class="row-sv-blauw">
-            <div class="col s12">
-                <table class="sv-kader">
-                    {% for sessie in sessies %}
-                        <tr>
-                            <td>{{ sessie.aantal_inschrijvingen }}&nbsp;/&nbsp;{{ sessie.max_deelnemers }}</td>
-                            <td>
-                                <h6>{{ sessie.titel }}</h6>
-                                <span>Begin {{ sessie.begin_tijd }}, {{ sessie.duur_min }} minuten, {{ sessie.presentator }}</span>
-                                <p>{{ sessie.beschrijving|linebreaksbr }}</p>
-                            </td>
-                        </tr>
-
-                    {% endfor %}
-                </table>
-            </div>
-        </div>
-
-    {% endif %}
-
-
     {% if toon_inschrijven %}
 
         <!-- witruimte -->

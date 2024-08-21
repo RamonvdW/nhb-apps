@@ -54,23 +54,6 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.CreateModel(
-            name='EvenementSessie',
-            fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('titel', models.CharField(default='', max_length=70)),
-                ('presentator', models.CharField(default='', max_length=50)),
-                ('begin_tijd', models.TimeField(default='11:00')),
-                ('duur_min', models.PositiveSmallIntegerField(default=60)),
-                ('evenement', models.ForeignKey(on_delete=models.deletion.PROTECT, to='Evenement.evenement')),
-                ('beschrijving', models.TextField(blank=True, default='', max_length=1000)),
-                ('aantal_inschrijvingen', models.SmallIntegerField(default=0)),
-                ('max_deelnemers', models.PositiveSmallIntegerField(default=1)),
-            ],
-            options={
-                'verbose_name': 'Evenement sessie',
-            },
-        ),
-        migrations.CreateModel(
             name='EvenementInschrijving',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
@@ -84,7 +67,6 @@ class Migration(migrations.Migration):
                 ('evenement', models.ForeignKey(on_delete=models.deletion.PROTECT, to='Evenement.evenement')),
                 ('koper', models.ForeignKey(on_delete=models.deletion.PROTECT, to='Account.account')),
                 ('sporter', models.ForeignKey(on_delete=models.deletion.PROTECT, to='Sporter.sporter')),
-                ('gekozen_sessies', models.ManyToManyField(to='Evenement.evenementsessie')),
             ],
             options={
                 'verbose_name': 'Evenement inschrijving',

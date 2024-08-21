@@ -7,11 +7,9 @@
 from django.test import TestCase
 from django.conf import settings
 from django.utils import timezone
-from Bestel.definities import BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_BETALING_ACTIEF
-from Bestel.models import Bestelling, BestelProduct
 from Betaal.models import BetaalInstellingenVereniging
 from Evenement.definities import EVENEMENT_STATUS_GEACCEPTEERD
-from Evenement.models import Evenement, EvenementSessie, EvenementInschrijving
+from Evenement.models import Evenement, EvenementInschrijving
 from Geo.models import Regio
 from Locatie.models import EvenementLocatie
 from Sporter.models import Sporter
@@ -182,9 +180,9 @@ class TestEvenementInschrijven(E2EHelpers, TestCase):
 
         self.assertEqual(EvenementInschrijving.objects.count(), 1)
 
-        #f1, f2 = self.verwerk_bestel_mutaties()
+        # f1, f2 = self.verwerk_bestel_mutaties()
         # print('f1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
-        #self.assertTrue(": inschrijven op evenement" in f2.getvalue())
+        # self.assertTrue(": inschrijven op evenement" in f2.getvalue())
 
         self.assertEqual(EvenementInschrijving.objects.count(), 1)
         inschrijving = EvenementInschrijving.objects.first()
@@ -207,6 +205,7 @@ class TestEvenementInschrijven(E2EHelpers, TestCase):
         self.account_100000.username = '999999'
         self.account_100000.save(update_fields=['username'])
         resp = self.client.get(url)
+        # TODO: check resp
 
         # zet datum in het verleden
         self.evenement.datum = timezone.now().date()       # 1 dag ervoor

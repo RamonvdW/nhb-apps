@@ -77,45 +77,6 @@ class Evenement(models.Model):
     objects = models.Manager()      # for the editor only
 
 
-class EvenementSessie(models.Model):
-
-    """ Een evenement voor op de kalender """
-
-    # voor welke evenement was dit?
-    evenement = models.ForeignKey(Evenement, on_delete=models.PROTECT)
-
-    # titel van de sessie
-    titel = models.CharField(max_length=70, default='')
-
-    # wie is/zijn de presentator(en)
-    presentator = models.CharField(max_length=50, default='')
-
-    # op welke tijdstip begint deze sessie?
-    begin_tijd = models.TimeField(default='11:00')
-
-    # hoe lang duurt deze sessie
-    duur_min = models.PositiveSmallIntegerField(default=60)
-
-    # maximum aantal deelnemers
-    max_deelnemers = models.PositiveSmallIntegerField(default=1)
-
-    # aantal plekken gebruikt
-    aantal_inschrijvingen = models.SmallIntegerField(default=0)
-
-    # eventuele opmerkingen vanuit de organisatie
-    beschrijving = models.TextField(max_length=1000, default='',
-                                    blank=True)      # mag leeg zijn
-
-    def __str__(self):
-        """ geef een beschrijving terug voor de admin interface """
-        return "%s - %s" % (self.begin_tijd, self.titel)
-
-    class Meta:
-        verbose_name = "Evenement sessie"
-
-    objects = models.Manager()      # for the editor only
-
-
 class EvenementInschrijving(models.Model):
 
     """ Een inschrijving op een evenement, inclusief koper en betaal-status """
@@ -146,11 +107,6 @@ class EvenementInschrijving(models.Model):
 
     # log van bestelling, betalingen en eventuele wijzigingen van klasse en sessie
     log = models.TextField(blank=True)
-
-    # TODO: traceer de gestuurde emails
-
-    # gekozen sessies
-    gekozen_sessies = models.ManyToManyField(EvenementSessie)
 
     def __str__(self):
         """ beschrijving voor de admin interface """
@@ -210,8 +166,6 @@ class EvenementAfgemeld(models.Model):
 
     # log van bestelling, betalingen
     log = models.TextField(blank=True)
-
-    # TODO: traceer de gestuurde emails
 
     def __str__(self):
         """ beschrijving voor de admin interface """
