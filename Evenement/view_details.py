@@ -80,8 +80,8 @@ class DetailsView(TemplateView):
                 context['url_inschrijven_familie'] = reverse('Evenement:inschrijven-familie',
                                                              kwargs={'evenement_pk': evenement.pk})
 
-            # inschrijf sectie (kaartjes) tonen voor dit evenement?
-            context['toon_inschrijven'] = context['is_voor_sluitingsdatum']
+        # inschrijf sectie (kaartjes) tonen voor dit evenement?
+        context['toon_inschrijven'] = context['is_voor_sluitingsdatum']
 
         url_terug = reverse('Kalender:maand',
                             kwargs={'jaar': evenement.datum.year,
