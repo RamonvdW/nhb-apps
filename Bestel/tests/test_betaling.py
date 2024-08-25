@@ -201,7 +201,7 @@ class TestBestelBetaling(E2EHelpers, TestCase):
         count = BetaalTransactie.objects.count()
         f1, f2 = self.verwerk_betaal_mutaties()
         # print('\nf1:', f1.getvalue(), '\nf2:', f2.getvalue())
-        self.assertTrue('status aangepast: open --> paid' in f2.getvalue())
+        self.assertTrue("status aangepast: 'open' --> 'paid'" in f2.getvalue())
 
         betaal_actief = BetaalActief.objects.get(pk=bestelling.betaal_actief.pk)
         self.assertEqual(betaal_actief.payment_status, 'paid')
