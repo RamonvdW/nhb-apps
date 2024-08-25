@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2019-2023 Ramon van der Winkel.
+                Copyright (c) 2019-2024 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -45,7 +45,7 @@
 
                     <div class="input-field">
                         <label>
-                            <input type="checkbox" class="filled-in" name="aangemeld_blijven">
+                            <input type="checkbox" class="filled-in" name="aangemeld_blijven" checked>
                             <span class="black-text">Aangemeld blijven</span>
                         </label>
                     </div>
