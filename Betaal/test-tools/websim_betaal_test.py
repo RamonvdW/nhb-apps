@@ -168,7 +168,7 @@ class MyServer(BaseHTTPRequestHandler):
 
                     if test_code in ("425", "426"):
                         details = resp['details']
-                        details['consumerName'] = details['cardHolder'] = ''
+                        details['consumerName'] = details['cardHolder'] = ''   # zorg dat de velden bestaan
                         del details['consumerName']
                         del details['cardHolder']
                     elif test_code == "427":

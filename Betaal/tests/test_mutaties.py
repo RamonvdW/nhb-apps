@@ -203,7 +203,7 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
                         in f1.getvalue())
         self.assertTrue("[ERROR] Onverwachte status 'bogus' in create payment response" in f1.getvalue())
 
-        mutatie = betaal_mutatieverzoek_start_ontvangst(
+        _ = betaal_mutatieverzoek_start_ontvangst(
                         bestelling,
                         "Test betaling 48",  # 48 triggert te lange checkout URL
                         bestelling.totaal_euro,
@@ -496,25 +496,25 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
         self._prep_mollie_websim(39)        # hergebruik standaard websim payment_id
         betaal_mutatieverzoek_payment_status_changed(payment_id)
         f1, f2 = self._run_achtergrondtaak()
-        self.assertTrue('[INFO] Payment tr_1234AbcdEFGH status aangepast:  --> failed' in f2.getvalue())
+        self.assertTrue("[INFO] Payment tr_1234AbcdEFGH status aangepast: '' --> 'failed'" in f2.getvalue())
 
         # een status=pending payment
         self._prep_mollie_websim(40)        # hergebruik standaard websim payment_id
         betaal_mutatieverzoek_payment_status_changed(payment_id)
         f1, f2 = self._run_achtergrondtaak()
-        self.assertTrue('[INFO] Payment tr_1234AbcdEFGH status aangepast: failed --> pending' in f2.getvalue())
+        self.assertTrue("[INFO] Payment tr_1234AbcdEFGH status aangepast: 'failed' --> 'pending'" in f2.getvalue())
 
         # een status=open payment
         self._prep_mollie_websim(41)        # hergebruik standaard websim payment_id
         betaal_mutatieverzoek_payment_status_changed(payment_id)
         f1, f2 = self._run_achtergrondtaak()
-        self.assertTrue('[INFO] Payment tr_1234AbcdEFGH status aangepast: pending --> open' in f2.getvalue())
+        self.assertTrue("[INFO] Payment tr_1234AbcdEFGH status aangepast: 'pending' --> 'open'" in f2.getvalue())
 
         # een status=canceled payment
         self._prep_mollie_websim(43)        # hergebruik standaard websim payment_id
         betaal_mutatieverzoek_payment_status_changed(payment_id)
         f1, f2 = self._run_achtergrondtaak()
-        self.assertTrue('[INFO] Payment tr_1234AbcdEFGH status aangepast: open --> canceled' in f2.getvalue())
+        self.assertTrue("[INFO] Payment tr_1234AbcdEFGH status aangepast: 'open' --> 'canceled'" in f2.getvalue())
         actief = BetaalActief.objects.get(pk=actief.pk)
         self.assertTrue('Betaling is mislukt' in actief.log)
 
@@ -522,36 +522,35 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
         self._prep_mollie_websim(425)       # hergebruik standaard websim payment_id
         betaal_mutatieverzoek_payment_status_changed(payment_id)
         f1, f2 = self._run_achtergrondtaak()
-        self.assertTrue('[INFO] Payment tr_1234AbcdEFGH status aangepast: canceled --> paid' in f2.getvalue())
-        self.assertTrue('[ERROR] {maak_transactie} Incomplete details voor card: ' in f1.getvalue())
+        self.assertTrue('[ERROR] {payment_opslaan} Incomplete details voor card: ' in f1.getvalue())
+        self.assertTrue('[WARNING] Payment tr_1234AbcdEFGH bevat een probleem' in f2.getvalue())
 
         # een status=paid, with issue
         self._prep_mollie_websim(426)       # hergebruik standaard websim payment_id
         betaal_mutatieverzoek_payment_status_changed(payment_id)
         f1, f2 = self._run_achtergrondtaak()
-        self.assertTrue('[INFO] Payment tr_1234AbcdEFGH status aangepast: paid --> paid' in f2.getvalue())
-        self.assertTrue('[ERROR] {maak_transactie} Incomplete details over consumer: ' in f1.getvalue())
+        self.assertTrue('[ERROR] {payment_opslaan} Incomplete details over consumer: ' in f1.getvalue())
+        self.assertTrue('[WARNING] Payment tr_1234AbcdEFGH bevat een probleem' in f2.getvalue())
 
         # een status=paid, with issue
         self._prep_mollie_websim(427)       # hergebruik standaard websim payment_id
         betaal_mutatieverzoek_payment_status_changed(payment_id)
         f1, f2 = self._run_achtergrondtaak()
-        self.assertTrue('[INFO] Payment tr_1234AbcdEFGH status aangepast: paid --> paid' in f2.getvalue())
-        self.assertTrue('[ERROR] {maak_transactie} Probleem met de bedragen' in f1.getvalue())
+        self.assertTrue('[ERROR] {payment_opslaan} Probleem met value in' in f1.getvalue())
+        self.assertTrue('[WARNING] Payment tr_1234AbcdEFGH bevat een probleem' in f2.getvalue())
 
         # een status=paid, with issue
         self._prep_mollie_websim(428)       # hergebruik standaard websim payment_id
         betaal_mutatieverzoek_payment_status_changed(payment_id)
         f1, f2 = self._run_achtergrondtaak()
-        self.assertTrue('[INFO] Payment tr_1234AbcdEFGH status aangepast: paid --> paid' in f2.getvalue())
-        self.assertTrue('[ERROR] {maak_transactie} Currency not in EUR' in f1.getvalue())
+        self.assertTrue('[ERROR] {payment_opslaan} Currency not in EUR' in f1.getvalue())
+        self.assertTrue('[WARNING] Payment tr_1234AbcdEFGH bevat een probleem' in f2.getvalue())
 
-        # een status=paid, with issue
+        # een status=paid, with issue (geen settlement amount)
         self._prep_mollie_websim(429)       # hergebruik standaard websim payment_id
         betaal_mutatieverzoek_payment_status_changed(payment_id)
-        f1, f2 = self._run_achtergrondtaak()
-        self.assertTrue('[INFO] Payment tr_1234AbcdEFGH status aangepast: paid --> paid' in f2.getvalue())
-        self.assertTrue('[ERROR] {maak_transactie} Missing field: ' in f1.getvalue())
+        f1, f2 = self._run_achtergrondtaak(debug=True)
+        self.assertFalse('[ERROR] {payment_opslaan} Missing field: ' in f1.getvalue())
 
     def test_paid_ideal(self):
         bestelling = Bestelling(
@@ -573,7 +572,7 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
         bestelling.betaal_actief = actief
         bestelling.save(update_fields=['betaal_actief'])
         betaal_mutatieverzoek_payment_status_changed(payment_id)
-        f1, f2 = self._run_achtergrondtaak()
+        self._run_achtergrondtaak()
         # print('\nf1:', f1.getvalue(), '\nf2:', f2.getvalue())
         actief = BetaalActief.objects.get(pk=actief.pk)
         self.assertTrue('Betaling is voldaan' in actief.log)
@@ -597,7 +596,7 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
             log='testje')
         actief.save()
         betaal_mutatieverzoek_payment_status_changed(payment_id)
-        f1, f2 = self._run_achtergrondtaak()
+        self._run_achtergrondtaak()
         actief = BetaalActief.objects.get(pk=actief.pk)
         self.assertTrue('Betaling is voldaan' in actief.log)
 
@@ -612,12 +611,12 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
         # maak de payment met status=paid en method=paypal
         payment_id = self._prep_mollie_websim(423)
         actief = BetaalActief(
-            payment_id=payment_id,
-            ontvanger=self.instellingen,
-            log='testje')
+                        payment_id=payment_id,
+                        ontvanger=self.instellingen,
+                        log='testje')
         actief.save()
         betaal_mutatieverzoek_payment_status_changed(payment_id)
-        f1, f2 = self._run_achtergrondtaak()
+        self._run_achtergrondtaak()
         # print('\nf1:', f1.getvalue(), '\nf2:', f2.getvalue())
         actief = BetaalActief.objects.get(pk=actief.pk)
         self.assertTrue('Betaling is voldaan' in actief.log)
@@ -642,7 +641,7 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
             log='testje')
         actief.save()
         betaal_mutatieverzoek_payment_status_changed(payment_id)
-        f1, f2 = self._run_achtergrondtaak()
+        self._run_achtergrondtaak()
         # print('\nf1:', f1.getvalue(), '\nf2:', f2.getvalue())
         actief = BetaalActief.objects.get(pk=actief.pk)
         self.assertTrue('Betaling is voldaan' in actief.log)
@@ -723,14 +722,14 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
             # while
 
         # trigger the current minute
-        f1, f2 = self.run_management_command('betaal_mutaties', '1', '--quick',
-                                             '--stop_exactly=%s' % now.minute)
+        self.run_management_command('betaal_mutaties', '1', '--quick',
+                                    '--stop_exactly=%s' % now.minute)
         # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
 
         # trigger the negative case
         prev_min = (now.minute - 1) % 60
-        f1, f2 = self.run_management_command('betaal_mutaties', '1', '--quick',
-                                             '--stop_exactly=%s' % prev_min)
+        self.run_management_command('betaal_mutaties', '1', '--quick',
+                                    '--stop_exactly=%s' % prev_min)
         # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
 
         # now = datetime.datetime.now()
@@ -743,8 +742,8 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
 
         # trigger the positive case
         next_min = (now.minute + 1) % 60
-        f1, f2 = self.run_management_command('betaal_mutaties', '1', '--quick',
-                                             '--stop_exactly=%s' % next_min)
+        self.run_management_command('betaal_mutaties', '1', '--quick',
+                                    '--stop_exactly=%s' % next_min)
         # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
 
 

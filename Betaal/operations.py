@@ -12,11 +12,13 @@ from Betaal.models import BetaalActief, BetaalTransactie, BetaalMutatie
 def betaal_opschonen(stdout):
     """ Database opschonen """
 
-    if True:
-        # alles ouder dan 6 maanden mag weg
-        now = timezone.now()
-        max_age = now - timedelta(days=182)
+    now = timezone.now()
 
+    # alles ouder dan 18 maanden kan weg
+    # want refunds zijn soms na 365 dagen nog mogelijk
+    max_age = now - timedelta(days=365 + 183)
+
+    if True:
         objs = (BetaalMutatie
                 .objects
                 .filter(when__lt=max_age))
@@ -27,10 +29,6 @@ def betaal_opschonen(stdout):
             objs.delete()
 
     if True:
-        # alles ouder dan 6 maanden mag weg
-        now = timezone.now()
-        max_age = now - timedelta(days=182)
-
         objs = (BetaalActief
                 .objects
                 .filter(when__lt=max_age))
@@ -41,10 +39,6 @@ def betaal_opschonen(stdout):
             objs.delete()
 
     if True:
-        # alles ouder dan 18 maanden kan weg
-        now = timezone.now()
-        max_age = now - timedelta(days=365 + 183)
-
         objs = (BetaalTransactie
                 .objects
                 .filter(when__lt=max_age))
