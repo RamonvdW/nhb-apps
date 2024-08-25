@@ -5,13 +5,13 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.http import Http404
-from django.db.models.query_utils import Q
 from django.urls import reverse
 from django.http import HttpRequest
 from django.utils import timezone
 from django.shortcuts import render
 from django.utils.formats import localize
 from django.views.generic import TemplateView
+from django.db.models.query_utils import Q
 from Account.models import get_account
 from Bestel.operations.mandje import eval_mandje_inhoud
 from Evenement.definities import EVENEMENT_STATUS_GEACCEPTEERD, EVENEMENT_STATUS_GEANNULEERD

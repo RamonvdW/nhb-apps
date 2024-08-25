@@ -11,8 +11,8 @@
 
 {% block extraheader %}
     <!-- extra headers voor SEO -->
-    <meta name="keywords" content="Handboogsport, handboog, kalender, wedstrijden, wedstrijdkalender, evenement, evenementen">
-    <meta name="description" content="Kalender handboogsport">
+    <meta name="keywords" content="Handboogsport, handboog, kalender, wedstrijden, wedstrijdkalender, evenement, evenementen, opleiding, opleidingen">
+    <meta name="description" content="Kalender handboogsport. Schrijf je in op wedstrijden, evenementen en opleidingen.">
 {% endblock %}
 
 {% block pagina %}

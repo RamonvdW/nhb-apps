@@ -11,7 +11,7 @@
 {% block extraheader %}
     <!-- extra headers voor SEO -->
     <meta name="keywords" content="MijnHandboogsport, Mijn handboogsport">
-    <meta name="description" content="Informatie over de handboogsport">
+    <meta name="description" content="Voor alle sporters met een boog: informatie, uitslagen, records, webwinkel, wedstrijden.">
 {% endblock %}
 
 <!-- geen broodkruimels op de voorpagina -->

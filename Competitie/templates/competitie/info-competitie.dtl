@@ -8,6 +8,12 @@
 
 {% block title %}Info Bondscompetities{% endblock %}
 
+{% block extraheader %}
+    <!-- extra headers voor SEO -->
+    <meta name="keywords" content="MijnHandboogsport, bondscompetities, competities, individueel">
+    <meta name="description" content="Informatie over de individuele competities.">
+{% endblock %}
+
 {% block pagina %}
 
     <!-- banner -->
