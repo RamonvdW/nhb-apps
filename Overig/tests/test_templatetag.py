@@ -22,9 +22,9 @@ class TestOverigTemplatetags(TestCase):
         self.assertEqual(filter_highlight("ramon", None), "ramon")
         self.assertEqual(filter_highlight("ramon", ""), "ramon")
         self.assertEqual(filter_highlight("ramon", "jaja"), "ramon")
-        self.assertEqual(filter_highlight("ramon", "ra"), "<b>ra</b>mon")
-        self.assertEqual(filter_highlight("ramon", "mo"), "ra<b>mo</b>n")
-        self.assertEqual(filter_highlight("ramon", "on"), "ram<b>on</b>")
+        self.assertEqual(filter_highlight("ramon", "ra"), '<b class="sv-rood-text">ra</b>mon')
+        self.assertEqual(filter_highlight("ramon", "mo"), 'ra<b class="sv-rood-text">mo</b>n')
+        self.assertEqual(filter_highlight("ramon", "on"), 'ram<b class="sv-rood-text">on</b>')
 
     def test_filter_wbr_email(self):
         self.assertEqual(filter_wbr_email("ramon@gmail.not"),
