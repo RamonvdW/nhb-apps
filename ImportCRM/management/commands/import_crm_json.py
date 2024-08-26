@@ -84,6 +84,7 @@ class Command(BaseCommand):
         self._count_lid_no_email = 0
         self._count_sec_no_account = 0
         self._count_uitgeschreven = 0
+        self._count_lang_ex_lid = 0
 
         self._nieuwe_clubs = list()
         self._recordhouder_lid_nrs = list()
@@ -896,7 +897,8 @@ class Command(BaseCommand):
              'email',
              'gender':              'M' or 'V'
              'member_from':         string YYYY-MM-DD
-             'date_of_death':       string YYYY-MM-DD
+             'member_until':        string YYYY-MM-DD
+             'date_of_death':       string YYYY-MM-DD or null
              'para_code': None of string
              'address':             string with newlines
              'postal_code',
@@ -1063,6 +1065,30 @@ class Command(BaseCommand):
                     self.stdout.write('[INFO] Lidmaatschap voor %s gaat pas in op datum: %s' % (
                                             lid_nr, repr(member['member_from'])))
 
+            if member['member_until']:
+                tot_str = str(member['member_until'])
+                if not tot_str.startswith('9999-'):
+                    try:
+                        lid_tot = datetime.datetime.strptime(tot_str, "%Y-%m-%d").date()  # YYYY-MM-DD
+                    except (ValueError, TypeError):
+                        self.stderr.write('[ERROR] Lid %s heeft geen valide datum einde lidmaatschap: %s' % (
+                                                lid_nr, repr(member['member_until'])))
+                        self._count_errors += 1
+                    else:
+                        # bereken hoe lang deze persoon al lid-af is
+                        dagen_geen_lid = (date_now - lid_tot).days
+
+                        # indien 2 jaar geen lid meer, dan verwijderen uit de administratie
+                        if dagen_geen_lid > 2 * 365:
+                            self._count_lang_ex_lid += 1
+                            if lid_ver:
+                                self.stderr.write(
+                                    '[ERROR] Lid %s is al %s dagen geen lid maar, maar heeft vereniging %s' % (
+                                        lid_nr, dagen_geen_lid, lid_ver))
+                                self._count_errors += 1
+                            else:
+                                is_valid = False        # niet importeren
+
             lid_email = member['email']
             if not lid_email:
                 lid_email = ""  # converts potential None to string
@@ -1137,7 +1163,7 @@ class Command(BaseCommand):
                 pass
             else:
                 if lid_blocked:
-                    # geen edus importeren voor oud-leden
+                    # geen ?? dus importeren voor oud-leden
                     is_administratief_aanwezig = True
                 else:
                     for edu in edus:
@@ -1423,7 +1449,10 @@ class Command(BaseCommand):
                             lid_tot_einde_jaar=self.lidmaatschap_jaar,
                             adres_code=lid_adres_code,
                             is_overleden=lid_is_overleden,
-                            scheids=lid_scheids)
+                            scheids=lid_scheids,
+                            postadres_1=lid_postadres[0],
+                            postadres_2=lid_postadres[1],
+                            postadres_3=lid_postadres[2])
                 if not lid_ver:
                     obj.lid_tot_einde_jaar -= 1
                     obj.is_actief_lid = False
@@ -1512,7 +1541,7 @@ class Command(BaseCommand):
                     Speelsterkte.objects.bulk_create(nieuwe_lijst)
             else:
                 # sporter is geen actief lid meer
-                # we behouden zijn behaalde speelsterktes in de administratie
+                # drop zijn speelsterktes
                 huidige_lijst = list()
 
             # verwijder oude speelsterktes
@@ -1780,8 +1809,8 @@ class Command(BaseCommand):
 
         # rapporteer de samenvatting en schrijf deze ook in het logboek
         samenvatting = "Samenvatting: %s fouten; %s waarschuwingen; %s nieuw; %s wijzigingen; %s verwijderingen; "\
-                       "%s leden, %s inactief, %s uitgeschreven; %s administratief aanwezig, %s verenigingen; "\
-                       "%s speelsterktes, %s opleiding diploma's, %s secretarissen zonder account; "\
+                       "%s leden, %s recent ex-lid, %s langer ex-lid, %s uitgeschreven, %s administratief aanwezig; "\
+                       "%s verenigingen, %s speelsterktes, %s opleiding diploma's, %s secretarissen zonder account; "\
                        "%s regios; %s rayons; %s actieve leden zonder e-mail" % (
                             self._count_errors,
                             self._count_warnings,
@@ -1790,8 +1819,9 @@ class Command(BaseCommand):
                             self._count_verwijderingen,
                             self._count_members - self._count_blocked - self._count_admin,
                             self._count_blocked,
-                            self._count_admin,
+                            self._count_lang_ex_lid,
                             self._count_uitgeschreven,
+                            self._count_admin,
                             self._count_clubs,
                             count_sterkte,
                             count_diploma,
