@@ -58,7 +58,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2024-08-14'
+SITE_VERSIE = '2024-08-25'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -566,6 +566,7 @@ CRM_IMPORT_BEHOUD_CLUB = (1999,                # voor demo
 # begin waarden voor unieke ticket nummers
 # boekingsnummers: vanaf 1000000
 TICKET_NUMMER_START__OPLEIDING = 3000000
+TICKET_NUMMER_START__EVENEMENT = 6000000
 TICKET_NUMMER_START__WEDSTRIJD = 7000000
 
 

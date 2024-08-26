@@ -15,6 +15,8 @@ class BetaalTransactieAdmin(admin.ModelAdmin):
 
 class BetaalActiefAdmin(admin.ModelAdmin):
 
+    list_filter = ('payment_status', 'ontvanger')
+
     search_fields = ('payment_id',)
 
 

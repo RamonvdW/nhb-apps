@@ -67,7 +67,7 @@ class BetaalActief(models.Model):
     # TODO: bij akkoord_via_bond is dit niet de vereniging waar het heen moet!
     ontvanger = models.ForeignKey(BetaalInstellingenVereniging, on_delete=models.PROTECT)
 
-    # het nummer dat ooit teruggegeven is toen de transactie aangemaakt werd
+    # het nummer dat door de CPSP toegekend is toen de transactie werd aangemaakt
     payment_id = models.CharField(max_length=BETAAL_PAYMENT_ID_MAXLENGTH)
 
     # de laatste ontvangen status
@@ -104,12 +104,37 @@ class BetaalTransactie(models.Model):
     # - payment_id = koppeling aan hun systeem
     # - beschrijving = ontvangen informatie
 
-    # het nummer dat door de CPSP toegekend is
+    # referentie naar een betaling bij de CPSP
     payment_id = models.CharField(max_length=BETAAL_PAYMENT_ID_MAXLENGTH)
 
     # beschrijving voor op het afschrift van de klant
     # hierin staat normaal het bestelnummer
     beschrijving = models.CharField(max_length=BETAAL_BESCHRIJVING_MAXLENGTH)
+
+    # de laatste ontvangen status
+    payment_status = models.CharField(max_length=BETAAL_PAYMENT_STATUS_MAXLENGTH, default='')
+
+    # nieuwste bedragen die CPSP doorgegeven heeft over deze transactie
+
+    # hoeveel willen we ontvangen
+    bedrag_te_ontvangen = models.DecimalField(max_digits=7, decimal_places=2, default=0.0)
+
+    # hoeveel heeft de klant teruggevorderd via zijn kaart/bank
+    bedrag_teruggevorderd = models.DecimalField(max_digits=7, decimal_places=2, default=0.0)
+
+    # hoeveel hebben we terug betaald
+    bedrag_terugbetaald = models.DecimalField(max_digits=7, decimal_places=2, default=0.0)
+
+    # hoeveel is er binnen gekomen / nog over
+    bedrag_beschikbaar = models.DecimalField(max_digits=7, decimal_places=2, default=0.0)
+
+    # naam wat bij het rekeningnummer van de klant hoort
+    klant_naam = models.CharField(max_length=BETAAL_KLANT_NAAM_MAXLENGTH)
+
+    # informatie over de rekening waarmee betaald is
+    klant_account = models.CharField(max_length=BETAAL_KLANT_ACCOUNT_MAXLENGTH)
+
+    # TODO: Oude velden hieronder zijn deltas
 
     # is dit een restitutie of ontvangst?
     is_restitutie = models.BooleanField(default=False)
@@ -121,12 +146,6 @@ class BetaalTransactie(models.Model):
     # betaling: het bedrag wat ontvangen is (dus transfer kosten al ingehouden door de CPSP)
     # refund: het bedrag wat uitbetaald is  (dus inclusief transfer kosten van de CPSP)
     bedrag_euro_boeking = models.DecimalField(max_digits=7, decimal_places=2, default=0.0)      # max 99999,99
-
-    # naam wat bij het rekeningnummer van de klant hoort
-    klant_naam = models.CharField(max_length=BETAAL_KLANT_NAAM_MAXLENGTH)
-
-    # informatie over de rekening waarmee betaald is
-    klant_account = models.CharField(max_length=BETAAL_KLANT_ACCOUNT_MAXLENGTH)
 
     def __str__(self):
         """ Lever een tekstuele beschrijving voor de admin interface """
