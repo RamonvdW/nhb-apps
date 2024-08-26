@@ -122,7 +122,7 @@ class KalenderJaarView(TemplateView):
         if zoekterm:
             wedstrijden = wedstrijden.filter(Q(titel__icontains=zoekterm) | Q(locatie__plaats__icontains=zoekterm))
 
-        # filter op soort wedstrijd
+        # filter wedstrijden op organisatie ("soort wedstrijd")
         if gekozen_soort == 'ifaa':
             wedstrijden = wedstrijden.filter(organisatie=ORGANISATIE_IFAA)
 
@@ -137,7 +137,7 @@ class KalenderJaarView(TemplateView):
         elif gekozen_soort == 'khsn':
             wedstrijden = wedstrijden.filter(organisatie=ORGANISATIE_KHSN)
 
-        # filter op bogen
+        # filter wedstrijden op bogen
         if gekozen_bogen != 'alle':
             boog_pks = context['boog_pks']      # ingevuld in maak_bogen_filter en gegarandeerd niet leeg
             # distinct is nodig om verdubbeling te voorkomen

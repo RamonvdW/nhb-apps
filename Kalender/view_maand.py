@@ -5,13 +5,13 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.http import Http404
-from django.db.models.query_utils import Q
 from django.urls import reverse
 from django.http import HttpRequest
 from django.utils import timezone
 from django.shortcuts import render
 from django.utils.formats import localize
 from django.views.generic import TemplateView
+from django.db.models.query_utils import Q
 from Account.models import get_account
 from Bestel.operations.mandje import eval_mandje_inhoud
 from Kalender.definities import MAANDEN, MAAND2URL
@@ -268,7 +268,7 @@ class KalenderMaandView(TemplateView):
         if zoekterm:
             wedstrijden = wedstrijden.filter(Q(titel__icontains=zoekterm) | Q(locatie__plaats__icontains=zoekterm))
 
-        # filter op soort wedstrijd
+        # filter wedstrijden op organisatie ("soort wedstrijd")
         if gekozen_soort == 'ifaa':
             wedstrijden = wedstrijden.filter(organisatie=ORGANISATIE_IFAA)
 
@@ -283,7 +283,7 @@ class KalenderMaandView(TemplateView):
         elif gekozen_soort == 'khsn':
             wedstrijden = wedstrijden.filter(organisatie=ORGANISATIE_KHSN)
 
-        # filter op bogen
+        # filter wedstrijden op bogen
         if gekozen_bogen != 'alle':
             boog_pks = context['boog_pks']      # ingevuld in maak_bogen_filter en gegarandeerd niet leeg
             # distinct is nodig om verdubbeling te voorkomen

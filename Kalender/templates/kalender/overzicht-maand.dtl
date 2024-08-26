@@ -1,17 +1,18 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2021-2023 Ramon van der Winkel.
+                Copyright (c) 2021-2024 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
+{% load overig_filters %}   <!-- highlight filter -->
 
 {% block title %}Wedstrijdkalender{% endblock %}
 
 {% block extraheader %}
     <!-- extra headers voor SEO -->
-    <meta name="keywords" content="Handboogsport, handboog, kalender, wedstrijden, wedstrijdkalender">
-    <meta name="description" content="Wedstrijdkalender handboogsport">
+    <meta name="keywords" content="Handboogsport, handboog, kalender, wedstrijden, wedstrijdkalender, evenement, evenementen, opleiding, opleidingen">
+    <meta name="description" content="Kalender handboogsport. Schrijf je in op wedstrijden, evenementen en opleidingen.">
 {% endblock %}
 
 {% block pagina %}
@@ -47,7 +48,7 @@
         document.addEventListener("DOMContentLoaded", function() {
             document.getElementById('id_zoekterm').addEventListener("keyup", event => {
                 // console.log(event);
-                if (event.code === 'Enter') {
+                if (event.key === 'Enter') {
                     stuur_keuzes('{{ url_keuzes }}');
                 }
             })
@@ -60,7 +61,7 @@
         <div class="col s12">
             <h3 class="page-banner">Wedstrijdkalender</h3>
             {% if not kan_aanmelden %}
-                <p>Om aan te melden voor een wedstrijd moet je een account aanmaken en inloggen</p>
+                <p>Om in te schrijven moet je een account aanmaken en inloggen</p>
             {% endif %}
 
             {% if url_toon_alles %}
@@ -211,7 +212,7 @@
                 {% empty %}
                     <tr>
                         <td colspan="5" class="center">
-                            <i>Geen wedstrijden gevonden</i>
+                            <i>Niets gevonden</i>
                         </td>
                     </tr>
                 {% endfor %}
