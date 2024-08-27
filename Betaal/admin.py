@@ -10,12 +10,33 @@ from Betaal.models import BetaalInstellingenVereniging, BetaalActief, BetaalTran
 
 class BetaalTransactieAdmin(admin.ModelAdmin):
 
-    search_fields = ('payment_id', 'beschrijving')
+    list_filter = ('is_restitutie',)
+
+    search_fields = ('payment_id', 'refund_id', 'beschrijving')
+
+
+class OntvangerFilter(admin.SimpleListFilter):
+
+    title = 'Ontvanger'
+
+    parameter_name = 'ontvanger'
+
+    def lookups(self, request, model_admin):
+        lijst = [
+            (actief.ontvanger.vereniging.ver_nr, actief.ontvanger.vereniging.ver_nr_en_naam())
+            for actief in BetaalActief.objects.distinct('ontvanger').select_related('ontvanger__vereniging')
+        ]
+        return lijst
+
+    def queryset(self, request, queryset):
+        ver_nr = self.value()
+        queryset = queryset.filter(ontvanger__vereniging__ver_nr=ver_nr)
+        return queryset
 
 
 class BetaalActiefAdmin(admin.ModelAdmin):
 
-    list_filter = ('payment_status', 'ontvanger')
+    list_filter = ('payment_status', OntvangerFilter)
 
     search_fields = ('payment_id',)
 

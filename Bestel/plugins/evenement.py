@@ -84,7 +84,6 @@ def evenement_plugin_afmelden(inschrijving: EvenementInschrijving):
     """ verwerk een afmelding voor een evenement """
 
     # (nog) geen aantallen om bij te werken
-    # TODO: uitschrijven voor de sessies
 
     now = timezone.now()
     stamp_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
@@ -103,13 +102,6 @@ def evenement_plugin_afmelden(inschrijving: EvenementInschrijving):
                     retour_euro=inschrijving.retour_euro,
                     log=inschrijving.log + msg)
     afmelding.save()
-
-    # verwijder de gekozen sessies
-    for sessie in inschrijving.gekozen_sessies.all():
-        sessie.aantal_inschrijvingen = max(0, sessie.aantal_inschrijvingen - 1)
-        sessie.save(update_fields=['aantal_inschrijvingen'])
-    # for
-    inschrijving.gekozen_sessies.clear()
 
     # verwijder de inschrijving
     inschrijving.delete()

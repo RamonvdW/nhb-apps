@@ -1,7 +1,7 @@
 # constraints for pip packages for the NHB apps
 
-# stick to django 4.2 for now
-django>=4.2,<4.3
+# stick to django 4.x for now
+django>=4.2,<5.0
 
 # stick to v2 for now
 mollie-api-python<3.0

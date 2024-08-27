@@ -51,15 +51,23 @@ class BestelMandjeAdmin(admin.ModelAdmin):
                           for product in obj.producten.select_related('wedstrijd_inschrijving').all()])
 
 
+class BestellingTransactions(admin.TabularInline):
+    from Betaal.models import BetaalTransactie
+    model = BetaalTransactie
+
+
 class BestellingAdmin(admin.ModelAdmin):
 
-    readonly_fields = ('account', 'bestel_nr', 'aangemaakt', 'producten', 'transacties', 'ontvanger')
+    readonly_fields = ('account', 'bestel_nr', 'aangemaakt', 'producten', 'ontvanger',
+                       'betaal_mutatie', 'betaal_actief')
 
-    search_fields = ('bestel_nr', 'account__username', 'account__unaccented_naam')
+    filter_vertical = ('transacties',)
+
+    search_fields = ('bestel_nr', 'account__username', 'account__unaccented_naam', 'betaal_mutatie__payment_id')
 
     ordering = ('-aangemaakt',)     # nieuwste bovenaan
 
-    auto_complete = ('account', 'ontvanger', 'betaal_mutatie', 'betaal_actief')
+    auto_complete = ('account', 'ontvanger')
 
     # filter_horizontal = ('producten', 'transacties')
 

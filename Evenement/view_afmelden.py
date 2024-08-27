@@ -56,7 +56,7 @@ class AfmeldenView(UserPassesTestMixin, View):
         else:
             bestel_mutatieverzoek_afmelden_evenement(inschrijving, snel == '1')
 
-        url = reverse('Evenement:details-aanmelding', kwargs={'inschrijving_pk': inschrijving.pk})
+        url = reverse('Evenement:aanmeldingen', kwargs={'evenement_pk': inschrijving.evenement.pk})
 
         return HttpResponseRedirect(url)
 

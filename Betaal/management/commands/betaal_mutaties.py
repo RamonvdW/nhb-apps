@@ -16,7 +16,7 @@ from django.core.management.base import BaseCommand
 from Bestel.operations.mutaties import bestel_mutatieverzoek_betaling_afgerond, bestel_betaling_is_gestart
 from Betaal.definities import (BETAAL_MUTATIE_START_ONTVANGST, BETAAL_MUTATIE_START_RESTITUTIE,
                                BETAAL_MUTATIE_PAYMENT_STATUS_CHANGED, BETAAL_PAYMENT_STATUS_MAXLENGTH,
-                               BETAAL_PAYMENT_ID_MAXLENGTH, BETAAL_BESCHRIJVING_MAXLENGTH,
+                               BETAAL_PAYMENT_ID_MAXLENGTH, BETAAL_REFUND_ID_MAXLENGTH, BETAAL_BESCHRIJVING_MAXLENGTH,
                                BETAAL_KLANT_NAAM_MAXLENGTH, BETAAL_KLANT_ACCOUNT_MAXLENGTH)
 from Betaal.models import BetaalMutatie, BetaalActief, BetaalInstellingenVereniging, BetaalTransactie
 from Mailer.operations import mailer_notify_internal_error
@@ -160,9 +160,10 @@ class Command(BaseCommand):
         # FUTURE: implementeer restitutie
         pass
 
-    def _payment_opslaan(self, obj: Payment):
+    def _payment_opslaan(self, obj: Payment) -> None | BetaalTransactie:
         """
-            Maak een BetaalTransactie aan uit het Mollie Payment object.
+            Maak een BetaalTransactie aan uit het Mollie Payment object en geeft deze terug.
+            Geeft None terug als er een probleem was.
         """
         # transactie geschiedenis aanmaken
         transactie = BetaalTransactie(
@@ -170,7 +171,8 @@ class Command(BaseCommand):
                         is_handmatig=False,
                         payment_id=obj.id[:BETAAL_PAYMENT_ID_MAXLENGTH],
                         beschrijving=str(obj.description)[:BETAAL_BESCHRIJVING_MAXLENGTH],
-                        is_restitutie=False)
+                        is_restitutie=False,
+                        payment_status=obj.status)
 
         if obj.amount:
             obj.amount['field'] = 'amount / te_ontvangen'
@@ -195,14 +197,14 @@ class Command(BaseCommand):
                 try:
                     if amount['currency'] != 'EUR':
                         self.stderr.write('[ERROR] {payment_opslaan} Currency not in EUR in %s' % repr(amount))
-                        return False
+                        return None
 
                     amount['bedrag'] = Decimal(amount['value'])
 
                 except (KeyError, DecimalException) as exc:
                     self.stderr.write('[ERROR] {payment_opslaan} Probleem met value in %s (%s)' % (repr(amount),
                                                                                                    str(exc)))
-                    return False
+                    return None
 
         transactie.bedrag_te_ontvangen = te_ontvangen['bedrag']
         if terugbetaald:
@@ -236,7 +238,7 @@ class Command(BaseCommand):
                     klant_account = klant_account[:BETAAL_KLANT_ACCOUNT_MAXLENGTH]
                 except KeyError:
                     self.stderr.write('[ERROR] {payment_opslaan} Incomplete details over consumer: %s' % repr(details))
-                    return False
+                    return None
 
             elif methode == 'creditcard':
                 # methode 2: credit cards (inclusief apple pay)
@@ -246,7 +248,7 @@ class Command(BaseCommand):
                                                   details['cardNumber'])
                 except KeyError:
                     self.stderr.write('[ERROR] {payment_opslaan} Incomplete details voor card: %s' % repr(details))
-                    return False
+                    return None
 
             elif methode == 'paypal':
                 # methode 3: paypal
@@ -256,21 +258,78 @@ class Command(BaseCommand):
                                                   details['paypalReference'], details['paypalPayerId'])
                 except KeyError:
                     self.stderr.write('[ERROR] {payment_opslaan} Incomplete details voor paypal: %s' % repr(details))
-                    return False
+                    return None
 
             if klant_naam is None or klant_account is None:
                 self.stderr.write('[ERROR] {payment_opslaan} Incomplete informatie over betaler: %s, %s' % (
                                     repr(klant_naam), repr(klant_account)))
-                return False
+                return None
 
             transactie.klant_naam = klant_naam
             transactie.klant_account = klant_account
 
         transactie.save()
 
-        # bestel_mutaties vind de transacties die bij een bestelling horen d.m.v. het payment_id
+        # bestel_mutaties vindt de transacties die bij een bestelling horen d.m.v. het payment_id
         # en legt de koppeling aan Bestelling.transacties
-        return True
+        return transactie
+
+    def _get_payment_refunds(self, payment_id):
+        """ Haal bij Mollie de details op van de refunds voor de opgegeven payment_id
+            Let op: Mollie API key moet al gezet zijn.
+        """
+        # vraag Mollie om de status van de betaling
+        try:
+            refunds = self._mollie_client.payment_refunds.with_parent_id(payment_id).list()
+        except (RequestError, RequestSetupError, ResponseError, ResponseHandlingError) as exc:
+            self.stderr.write(
+                '[ERROR] {get_payment_refunds} Onverwachte fout van Mollie payment_refunds.list: %s' % str(exc))
+        else:
+            self.stdout.write('[INFO] {get_payment_refunds} Payment refunds ontvangen met count=%s' % refunds.count)
+
+            for refund in refunds:
+                self.stdout.write('[DEBUG] {get_payment_refunds} Refund: %s' % repr(refund))
+
+                status = refund.status
+                refund_id = refund.id       # re_Xxx
+                amount = refund.settlement_amount
+                beschrijving = refund.description
+                try:
+                    created_at = datetime.datetime.strptime(refund.created_at, '%Y-%m-%dT%H:%M:%S%z')
+                except ValueError:
+                    created_at = timezone.now()
+                    self.stderr.write(
+                        '[ERROR] {get_payment_refunds} Conversie createdAt %s failed' % repr(refund.created_at))
+
+                # controleer eenheid (euro) en converteer bedrag naar Decimal
+                bedrag = 0.0
+                if amount:
+                    try:
+                        if amount['currency'] != 'EUR':
+                            self.stderr.write('[ERROR] {get_payment_refunds} Currency not in EUR in %s' % repr(amount))
+                        else:
+                            bedrag = Decimal(amount['value'])
+
+                    except (KeyError, DecimalException) as exc:
+                        self.stderr.write('[ERROR] {get_payment_refunds} Probleem met value in %s (%s)' % (
+                                            repr(amount), str(exc)))
+
+                self.stdout.write(
+                    '[DEBUG] {get_payment_refunds} refund_id=%s, status=%s, amount=%.2f, beschrijving=%s' % (
+                                        repr(refund_id), repr(status), bedrag, repr(beschrijving)))
+
+                # als deze al bestaat, dan niet opnieuw aanmaken
+                _ = BetaalTransactie.objects.get_or_create(
+                                    when=created_at,
+                                    payment_id=payment_id,
+                                    is_restitutie=True,
+                                    beschrijving=beschrijving[:BETAAL_BESCHRIJVING_MAXLENGTH],
+                                    klant_naam='',
+                                    klant_account='',
+                                    refund_id=refund_id[:BETAAL_REFUND_ID_MAXLENGTH],
+                                    refund_status=status[:BETAAL_PAYMENT_STATUS_MAXLENGTH],
+                                    bedrag_refund=bedrag)
+            # for
 
     def _verwerk_mutatie_payment_status_changed(self, mutatie):
         """ Een voor ons bekende transactie is van status gewijzigd
@@ -303,7 +362,7 @@ class Command(BaseCommand):
                 except (RequestError, RequestSetupError, ResponseError, ResponseHandlingError) as exc:
                     self.stderr.write('[ERROR] Unexpected exception from Mollie payments.get: %s' % str(exc))
 
-                    actief.log += "[%s]: Mollie exception\n" % timezone.localtime(timezone.now())
+                    actief.log += "[%s] Mollie exception\n" % timezone.localtime(timezone.now())
                     actief.save(update_fields=['log'])
                 else:
                     self.stdout.write('[DEBUG] Get payment response: %s' % repr(payment))
@@ -334,12 +393,19 @@ class Command(BaseCommand):
                         # (_payment_opslaan maakt wijzigingen)
                         payment_dump = json.dumps(payment, indent=4)
 
-                        if not self._payment_opslaan(obj):
+                        transactie = self._payment_opslaan(obj)
+
+                        if transactie is None:
                             # probleem
                             self.stdout.write('[WARNING] Payment %s bevat een probleem' % actief.payment_id)
 
                         else:
                             # success
+
+                            # haal eventuele restitutie transacties op
+                            if transactie.bedrag_terugbetaald > 0.00:
+                                self._get_payment_refunds(actief.payment_id)
+
                             self.stdout.write('[INFO] Payment %s status aangepast: %s --> %s' % (
                                 actief.payment_id, repr(actief.payment_status), repr(status)))
 
@@ -353,6 +419,8 @@ class Command(BaseCommand):
 
                             if obj.is_paid():
                                 # print('is_paid() is True')
+                                # TODO: na een refund blijft deze op 'paid' staan
+                                # TODO: indien bedrag_terugbetaald > 0 dat refunds ophalen via Refunds API
                                 actief.log += 'Betaling is voldaan\n\n'
                                 actief.save(update_fields=['log'])
 

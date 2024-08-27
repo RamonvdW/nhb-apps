@@ -94,7 +94,7 @@
 
                 {% if aantal_aanmeldingen == 0 %}
                     <tr>
-                        <td colspan="8" class="center"><i>Er zijn nog geen aanmeldingen</i></td>
+                        <td colspan="8" class="center"><i>Er zijn geen aanmeldingen</i></td>
                     </tr>
                 {% endif %}
 
@@ -136,13 +136,11 @@
                             {% endif %}
                         </td>
                     </tr>
-                {% endfor %}
-
-                {% if aantal_afmeldingen == 0 %}
+                {% empty %}
                     <tr>
-                        <td colspan="6" class="center"><i>Er zijn nog geen afmeldingen</i></td>
+                        <td colspan="6" class="center"><i>Er zijn geen afmeldingen</i></td>
                     </tr>
-                {% endif %}
+                {% endfor %}
 
             </table>
         </div>
