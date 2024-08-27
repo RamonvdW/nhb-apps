@@ -67,13 +67,6 @@ def evenement_plugin_verwijder_reservering(stdout, inschrijving: EvenementInschr
             afmelding.pk,
             EVENEMENT_AFMELDING_STATUS_TO_STR[afmelding.status]))
 
-    # verwijder de gekozen sessies
-    for sessie in inschrijving.gekozen_sessies.all():
-        sessie.aantal_inschrijvingen = max(0, sessie.aantal_inschrijvingen - 1)
-        sessie.save(update_fields=['aantal_inschrijvingen'])
-    # for
-    inschrijving.gekozen_sessies.clear()
-
     # verwijder de inschrijving
     inschrijving.delete()
 
