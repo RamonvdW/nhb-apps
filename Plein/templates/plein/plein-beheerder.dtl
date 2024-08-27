@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2021-2023 Ramon van der Winkel.
+                Copyright (c) 2021-2024 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -36,9 +36,6 @@
                 {% if rol_is_bb or rol_is_mwz %}
                     {% url 'Wedstrijden:manager-status' status='wacht' as card_url %}
                     {% include 'plein/card_icon.dtl' with title="Wedstrijdkalender" text="Beheer de wedstrijdkalender." icon="event_note" url=card_url %}
-                {% elif rol_is_hwl %}
-                    {% url 'Wedstrijden:vereniging' as card_url %}
-                    {% include 'plein/card_icon.dtl' with title="Wedstrijdkalender" text="Beheer de wedstrijden die jullie vereniging organiseert." icon="event_note" url=card_url %}
                 {% endif %}
 
                 <!-- webwinkel -->

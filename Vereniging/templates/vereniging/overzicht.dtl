@@ -133,13 +133,13 @@
                 <!-- wedstrijdkalender (alleen voor de HWL) -->
                 {% if toon_wedstrijdkalender %}
                     {% url 'Wedstrijden:vereniging' as card_url %}
-                    {% include 'plein/card_icon.dtl' with title="Wedstrijdkalender" text="Beheer de wedstrijden die door deze vereniging georganiseerd worden." icon="event_note" url=card_url %}
+                    {% include 'plein/card_icon.dtl' with title="Wedstrijdkalender" text="Beheer de wedstrijden die door jullie vereniging georganiseerd worden." icon="event_note" url=card_url %}
                 {% endif %}
 
                 {% if toon_evenementen %}
                     <!-- evenementen (alleen voor de HWL) -->
                     {% url 'Evenement:vereniging' as card_url %}
-                    {% include 'plein/card_icon.dtl' with title="Evenementen" text="Beheer de evenementen die door deze vereniging georganiseerd worden." icon="event_note" url=card_url %}
+                    {% include 'plein/card_icon.dtl' with title="Evenementen" text="Beheer de evenementen die door jullie vereniging georganiseerd worden." icon="event_note" url=card_url %}
                 {% endif %}
             </div>
         </div>
