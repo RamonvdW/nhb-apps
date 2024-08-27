@@ -48,21 +48,24 @@ class EvenementAanmeldingenView(UserPassesTestMixin, TemplateView):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.rol_nu = None
+        self.rol_nu, self.functie_nu = None, None
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        self.rol_nu = rol_get_huidige(self.request)
-        return self.rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL, Rollen.ROL_MWZ, Rollen.ROL_BB)
+        self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
+        return self.rol_nu in (Rollen.ROL_HWL, Rollen.ROL_SEC)
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
+        ver = self.functie_nu.vereniging
+
         try:
             evenement_pk = str(kwargs['evenement_pk'])[:6]     # afkappen voor de veiligheid
             evenement = (Evenement
                          .objects
+                         .filter(organiserende_vereniging=ver)
                          .select_related('organiserende_vereniging')
                          .get(pk=evenement_pk))
         except (ValueError, TypeError, Evenement.DoesNotExist):
@@ -160,20 +163,21 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu == Rollen.ROL_HWL
+        return self.rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL)
 
     def get(self, request, *args, **kwargs):
+
+        ver = self.functie_nu.vereniging
+
         try:
             evenement_pk = str(kwargs['evenement_pk'])[:6]     # afkappen voor de veiligheid
             evenement = (Evenement
                          .objects
+                         .filter(organiserende_vereniging=ver)
                          .select_related('organiserende_vereniging')
                          .get(pk=evenement_pk))
         except (ValueError, TypeError, Evenement.DoesNotExist):
             raise Http404('Evenement niet gevonden')
-
-        if evenement.organiserende_vereniging.ver_nr != self.functie_nu.vereniging.ver_nr:
-            raise Http404('Evenement is niet bij jullie vereniging')
 
         aanmeldingen = (EvenementInschrijving
                         .objects
@@ -195,8 +199,7 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
 
         output = list()
         for aanmelding in aanmeldingen:
-            sporterboog = aanmelding.sporterboog
-            sporter = sporterboog.sporter
+            sporter = aanmelding.sporter
             reserveringsnummer = aanmelding.pk + settings.TICKET_NUMMER_START__EVENEMENT
 
             bestelnummer_str = get_inschrijving_mh_bestel_nr(aanmelding)
