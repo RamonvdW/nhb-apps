@@ -42,15 +42,14 @@ class AfmeldenView(UserPassesTestMixin, View):
         except (TypeError, ValueError, EvenementInschrijving.DoesNotExist):
             raise Http404('Inschrijving niet gevonden')
 
-        if self.rol_nu not in (Rollen.ROL_BB, Rollen.ROL_MWZ):
-            # controleer dat dit een inschrijving is op een wedstrijd van de vereniging
-            if inschrijving.evenement.organiserende_vereniging != self.functie_nu.vereniging:
-                raise Http404('Verkeerde vereniging')
+        # controleer dat dit een inschrijving is op een wedstrijd van de vereniging
+        if inschrijving.evenement.organiserende_vereniging != self.functie_nu.vereniging:
+            raise Http404('Verkeerde vereniging')
 
         snel = str(request.POST.get('snel', ''))[:1]
 
         if inschrijving.status == EVENEMENT_INSCHRIJVING_STATUS_RESERVERING_MANDJE:
-            if inschrijving.bestelproduct_set.count() > 0:
+            if inschrijving.bestelproduct_set.count() > 0:          # pragma: no branch
                 product = inschrijving.bestelproduct_set.first()
                 bestel_mutatieverzoek_verwijder_product_uit_mandje(inschrijving.koper, product, snel == '1')
         else:

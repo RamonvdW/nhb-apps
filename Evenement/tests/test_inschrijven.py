@@ -22,9 +22,8 @@ class TestEvenementInschrijven(E2EHelpers, TestCase):
 
     """ tests voor de Evenement applicatie, module Inschrijven """
 
-    test_after = ('Bestel.tests.test_mandje',)
+    test_after = ('Bestel.tests.test_mandje', 'Evenement.tests.test_details')
 
-    url_details = '/kalender/evenement/details/%s/'                                 # evenement_pk
     url_inschrijven_sporter = '/kalender/evenement/inschrijven/%s/sporter/'         # evenement_pk
     url_inschrijven_groepje = '/kalender/evenement/inschrijven/%s/groep/'           # evenement_pk
     url_inschrijven_familie = '/kalender/evenement/inschrijven/%s/familie/'         # evenement_pk
@@ -142,14 +141,6 @@ class TestEvenementInschrijven(E2EHelpers, TestCase):
         self.sporter_100023 = sporter
 
     def test_anon(self):
-        resp = self.client.get(self.url_details % self.evenement.pk)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('evenement/details.dtl', 'plein/site_layout.dtl'))
-
-        resp = self.client.get(self.url_details % 999999)
-        self.assert404(resp, "Evenement niet gevonden")
-
         resp = self.client.get(self.url_inschrijven_sporter % 99999)
         self.assert403(resp, "Geen toegang")
 
@@ -158,30 +149,6 @@ class TestEvenementInschrijven(E2EHelpers, TestCase):
 
         resp = self.client.post(self.url_toevoegen_mandje)
         self.assert403(resp, "Geen toegang")
-
-    def test_details(self):
-        self.e2e_login(self.account_100000)
-
-        url = self.url_details % self.evenement.pk
-
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('evenement/details.dtl', 'plein/site_layout.dtl'))
-
-        # zet datum in het verleden
-        self.evenement.datum = timezone.now().date()       # 1 dag ervoor
-        self.evenement.save(update_fields=['datum'])
-
-        self.assertTrue(str(self.evenement) != '')
-
-        # kan niet meer inschrijven
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('evenement/details.dtl', 'plein/site_layout.dtl'))
 
     def test_sporter(self):
         # inlog vereist
@@ -220,6 +187,12 @@ class TestEvenementInschrijven(E2EHelpers, TestCase):
         inschrijving = EvenementInschrijving.objects.first()
         self.assertEqual(inschrijving.evenement, self.evenement)
         self.assertEqual(inschrijving.sporter, self.sporter_100000)
+
+        # coverage
+        self.assertTrue(str(inschrijving) != '')
+        self.assertEqual(inschrijving.korte_beschrijving(), 'Test evenement, voor 100000')
+        inschrijving.evenement.titel = 'Dit is een hele lange titel die afgekapt gaat worden'
+        self.assertTrue('.., voor 100000' in inschrijving.korte_beschrijving())
 
         # al ingeschreven
         with self.assert_max_queries(20):

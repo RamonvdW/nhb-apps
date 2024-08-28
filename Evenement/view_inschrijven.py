@@ -10,19 +10,16 @@ from django.utils import timezone
 from django.db import IntegrityError, transaction
 from django.db.models import ObjectDoesNotExist
 from django.shortcuts import render
-from django.core.exceptions import PermissionDenied
 from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
 from Bestel.operations.mandje import mandje_tel_inhoud
 from Bestel.operations.mutaties import bestel_mutatieverzoek_inschrijven_evenement
-from Evenement.definities import EVENEMENT_INSCHRIJVING_STATUS_DEFINITIEF, EVENEMENT_INSCHRIJVING_STATUS_TO_STR
 from Evenement.models import Evenement, EvenementInschrijving
 from Functie.definities import Rollen
-from Functie.rol import rol_get_huidige, rol_get_huidige_functie
+from Functie.rol import rol_get_huidige
 from Kalender.view_maand import MAAND2URL
 from Sporter.models import Sporter, get_sporter
-from Sporter.operations import get_sporter_voorkeuren
 from datetime import timedelta
 
 
