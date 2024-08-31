@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2023 Ramon van der Winkel.
+#  Copyright (c) 2022-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -14,13 +14,13 @@ from Betaal.mutaties import betaal_mutatieverzoek_payment_status_changed
 def simple_view_mollie_webhook(request):
     """ Deze functie wordt aangeroepen om de POST request af te handelen.
         Dit wordt gebruikt als webhook om status changes van Mollie te ontvangen.
-
-        Noteer dat geen csrf-token gebruikt wordt.
     """
+
+    # reageer binnen 15 seconden met status 200, dan stoppen de callbacks
 
     data = request.POST.get('id', '')[:BETAAL_PAYMENT_ID_MAXLENGTH]     # afkappen voor de veiligheid
 
-    # filter rare tekens eruit
+    # filter eventuele rare tekens eruit
     payment_id = ''
     for char in data:
         if char.isalnum() or char == '_':
@@ -31,18 +31,11 @@ def simple_view_mollie_webhook(request):
 
     # herkennen we deze betaling?
     if BetaalActief.objects.filter(payment_id=payment_id).count() > 0:
+        # zet door naar de achtergrond taak, die haal alle gegevens op bij Mollie
         betaal_mutatieverzoek_payment_status_changed(payment_id)
 
-        # geef een status 200 terug (binnen 15 seconden) dan stoppen de callbacks
-        status = 200
-    else:
-        # 404 or 403 geeft een uitgebreide pagina met foutmelding
-        # 400 is een simpele en lege reactie
-        # 200 voorkomt dat er niets geleerd kan worden (ook advies Mollie)
-        status = 200
-
-    # geef een status 200 terug (binnen 15 seconden) dan stoppen de callbacks
-    return HttpResponse(status=status)
+    # geef altijd status 200 terug, zodat er niets geleerd kan worden (ook advies Mollie)
+    return HttpResponse(status=200)
 
 
 # end of file
