@@ -22,6 +22,7 @@ urlpatterns = [
          view_afmelden.AfmeldenView.as_view(),
          name='afmelden'),
 
+
     # inschrijven
     path('inschrijven/<evenement_pk>/sporter/',
          view_inschrijven.InschrijvenSporterView.as_view(),
@@ -39,6 +40,7 @@ urlpatterns = [
          view_inschrijven.InschrijvenFamilieView.as_view(),
          name='inschrijven-familie'),
 
+
     # toevoegen aan winkelwagentje
     path('inschrijven/toevoegen-mandje/',
          view_inschrijven.ToevoegenAanMandjeView.as_view(),
@@ -51,6 +53,7 @@ urlpatterns = [
          name='vereniging'),
 
 
+    # aanmeldingen
     path('aanmeldingen/<evenement_pk>/',
          view_aanmeldingen.EvenementAanmeldingenView.as_view(),
          name='aanmeldingen'),

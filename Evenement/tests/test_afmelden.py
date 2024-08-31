@@ -26,15 +26,12 @@ class TestEvenementAfmelden(E2EHelpers, TestCase):
     test_after = ('Evenement.tests.test_inschrijven',)
 
     url_afmelden = '/kalender/evenement/afmelden/%s/'           # inschrijving_pk
+
     url_aanmeldingen = '/kalender/evenement/aanmeldingen/%s/'   # evenement_pk
     url_toevoegen_mandje = '/kalender/evenement/inschrijven/toevoegen-mandje/'      # POST
 
     def setUp(self):
         """ initialisatie van de test case """
-
-        # self.account_admin = account = self.e2e_create_account_admin()
-        # self.account_admin.is_BB = True
-        # self.account_admin.save(update_fields=['is_BB'])
 
         self.account_100000 = self.e2e_create_account('100000', 'normaal@test.not', 'Tester', accepteer_vhpg=True)
         self.account_100022 = self.e2e_create_account('100022', 'pijl@test.not', 'Pijl')

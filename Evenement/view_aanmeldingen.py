@@ -14,7 +14,7 @@ from Evenement.definities import (EVENEMENT_INSCHRIJVING_STATUS_TO_SHORT_STR, EV
                                   EVENEMENT_INSCHRIJVING_STATUS_DEFINITIEF)
 from Evenement.models import Evenement, EvenementInschrijving, EvenementAfgemeld
 from Functie.definities import Rollen
-from Functie.rol import rol_get_huidige, rol_get_huidige_functie
+from Functie.rol import rol_get_huidige_functie
 from decimal import Decimal
 from codecs import BOM_UTF8
 import csv
@@ -101,8 +101,7 @@ class EvenementAanmeldingenView(UserPassesTestMixin, TemplateView):
             inschrijving.url_details = reverse('Evenement:details-aanmelding',
                                              kwargs={'inschrijving_pk': inschrijving.pk})
 
-            totaal_ontvangen_euro += inschrijving.ontvangen_euro
-            totaal_retour_euro += inschrijving.retour_euro
+            totaal_ontvangen_euro += inschrijving.bedrag_ontvangen
         # for
 
         afmeldingen = (EvenementAfgemeld
@@ -127,8 +126,8 @@ class EvenementAanmeldingenView(UserPassesTestMixin, TemplateView):
             afmelding.url_details = reverse('Evenement:details-afmelding',
                                              kwargs={'afmelding_pk': afmelding.pk})
 
-            totaal_ontvangen_euro += afmelding.ontvangen_euro
-            totaal_retour_euro += afmelding.retour_euro
+            totaal_ontvangen_euro += afmelding.bedrag_ontvangen
+            totaal_retour_euro += afmelding.bedrag_retour
         # for
 
         # context['totaal_euro'] = totaal_ontvangen_euro - totaal_retour_euro
@@ -165,42 +164,22 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
         return self.rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL)
 
-    def get(self, request, *args, **kwargs):
-
-        ver = self.functie_nu.vereniging
-
-        try:
-            evenement_pk = str(kwargs['evenement_pk'])[:6]     # afkappen voor de veiligheid
-            evenement = (Evenement
-                         .objects
-                         .filter(organiserende_vereniging=ver)
-                         .select_related('organiserende_vereniging')
-                         .get(pk=evenement_pk))
-        except (ValueError, TypeError, Evenement.DoesNotExist):
-            raise Http404('Evenement niet gevonden')
-
+    @staticmethod
+    def _output_aanmeldingen(writer, evenement):
         aanmeldingen = (EvenementInschrijving
                         .objects
                         .filter(evenement=evenement)
-                        .select_related('sporter')
-                        .order_by('sporter',
-                                  'wanneer',
-                                  'status'))
-
-        response = HttpResponse(content_type=CONTENT_TYPE_CSV)
-        response['Content-Disposition'] = 'attachment; filename="aanmeldingen.csv"'
-
-        response.write(BOM_UTF8)
-        writer = csv.writer(response, delimiter=";")      # ; is good for dutch regional settings
+                        .select_related('sporter',
+                                        'sporter__bij_vereniging')
+                        .order_by('nummer'))
 
         writer.writerow(['Reserveringsnummer', 'Aangemeld op', 'Status',
-                         'Bestelnummer', 'Prijs', 'Ontvangen', 'Retour',
+                         'Bestelnummer', 'Prijs', 'Ontvangen',
                          'Lid nr', 'Sporter', 'E-mailadres', 'Ver nr', 'Vereniging'])
 
-        output = list()
         for aanmelding in aanmeldingen:
             sporter = aanmelding.sporter
-            reserveringsnummer = aanmelding.pk + settings.TICKET_NUMMER_START__EVENEMENT
+            reserveringsnummer = aanmelding.nummer + settings.TICKET_NUMMER_START__EVENEMENT
 
             bestelnummer_str = get_inschrijving_mh_bestel_nr(aanmelding)
 
@@ -224,24 +203,91 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
                 EVENEMENT_INSCHRIJVING_STATUS_TO_SHORT_STR[aanmelding.status],
                 bestelnummer_str,
                 prijs_str,
-                '€ %s' % aanmelding.ontvangen_euro,
-                '€ %s' % aanmelding.retour_euro,
+                '€ %s' % aanmelding.bedrag_ontvangen,
                 str(sporter.lid_nr),
                 sporter.volledige_naam(),
                 sporter.email,
                 str(ver_nr),
                 ver_str]
 
-            tup = (aanmelding.nummer, row)
-
-            output.append(tup)
-        # for
-
-        output.sort()
-        for tup in output:
-            row = tup[-1]
             writer.writerow(row)
         # for
+
+    @staticmethod
+    def _output_afmeldingen(writer, evenement):
+        afmeldingen = (EvenementAfgemeld
+                        .objects
+                        .filter(evenement=evenement)
+                        .select_related('sporter',
+                                        'sporter__bij_vereniging')
+                        .order_by('nummer'))
+
+        writer.writerow(['Reserveringsnummer', 'Aangemeld op', 'Afgemeld op', 'Status',
+                         'Bestelnummer', 'Prijs', 'Ontvangen', 'Retour'
+                         'Lid nr', 'Sporter', 'E-mailadres', 'Ver nr', 'Vereniging'])
+
+        output = list()
+        for afgemeld in afmeldingen:
+            sporter = afgemeld.sporter
+            reserveringsnummer = afgemeld.nummer + settings.TICKET_NUMMER_START__EVENEMENT
+
+            bestelnummer_str = get_inschrijving_mh_bestel_nr(afgemeld)
+
+            if sporter.bij_vereniging:
+                ver_nr = sporter.bij_vereniging.ver_nr
+                ver_str = sporter.bij_vereniging.naam
+            else:
+                ver_nr = 0
+                ver_str = 'geen'
+
+            qset = afgemeld.bestelproduct_set.all()
+            if qset.count() > 0:
+                bestelproduct = qset[0]
+                prijs_str = '€ %s' % bestelproduct.prijs_euro
+            else:
+                prijs_str = 'Geen (handmatige inschrijving)'
+
+            row = [
+                str(reserveringsnummer),
+                timezone.localtime(afgemeld.wanneer_inschrijving).strftime('%Y-%m-%d %H:%M'),
+                timezone.localtime(afgemeld.wanneer_afgemeld).strftime('%Y-%m-%d %H:%M'),
+                EVENEMENT_AFMELDING_STATUS_TO_SHORT_STR[afgemeld.status],
+                bestelnummer_str,
+                prijs_str,
+                '€ %s' % afgemeld.bedrag_ontvangen,
+                '€ %s' % afgemeld.bedrag_retour,
+                str(sporter.lid_nr),
+                sporter.volledige_naam(),
+                sporter.email,
+                str(ver_nr),
+                ver_str]
+
+            writer.writerow(row)
+        # for
+
+    def get(self, request, *args, **kwargs):
+
+        ver = self.functie_nu.vereniging
+
+        try:
+            evenement_pk = str(kwargs['evenement_pk'])[:6]     # afkappen voor de veiligheid
+            evenement = (Evenement
+                         .objects
+                         .filter(organiserende_vereniging=ver)
+                         .select_related('organiserende_vereniging')
+                         .get(pk=evenement_pk))
+        except (ValueError, TypeError, Evenement.DoesNotExist):
+            raise Http404('Evenement niet gevonden')
+
+        response = HttpResponse(content_type=CONTENT_TYPE_CSV)
+        response['Content-Disposition'] = 'attachment; filename="aanmeldingen.csv"'
+
+        response.write(BOM_UTF8)
+        writer = csv.writer(response, delimiter=";")      # ; is good for dutch regional settings
+
+        self._output_aanmeldingen(writer, evenement)
+        writer.writerow([])
+        self._output_afmeldingen(writer, evenement)
 
         return response
 
@@ -280,13 +326,11 @@ class EvenementDetailsAanmeldingView(UserPassesTestMixin, TemplateView):
                             .select_related('evenement',
                                             'evenement__organiserende_vereniging',
                                             'sporter')
-                            .get(pk=inschrijving_pk))
+                            .get(pk=inschrijving_pk,
+                                 # alleen van de eigen vereniging laten zien
+                                 evenement__organiserende_vereniging=self.functie_nu.vereniging))
         except EvenementInschrijving.DoesNotExist:
             raise Http404('Aanmelding niet gevonden')
-
-        # alleen van de eigen vereniging laten zien
-        if inschrijving.evenement.organiserende_vereniging != self.functie_nu.vereniging:
-            raise Http404('Verkeerde vereniging')
 
         context['inschrijving'] = inschrijving
 
@@ -357,13 +401,11 @@ class EvenementDetailsAfmeldingView(UserPassesTestMixin, TemplateView):
                          .select_related('evenement',
                                          'evenement__organiserende_vereniging',
                                          'sporter')
-                         .get(pk=afmelding_pk))
+                         .get(pk=afmelding_pk,
+                              # alleen van de eigen vereniging laten zien
+                              evenement__organiserende_vereniging=self.functie_nu.vereniging))
         except EvenementAfgemeld.DoesNotExist:
             raise Http404('Afmelding niet gevonden')
-
-        # alleen van de eigen vereniging laten zien
-        if afmelding.evenement.organiserende_vereniging != self.functie_nu.vereniging:
-            raise Http404('Verkeerde vereniging')
 
         context['afmelding'] = afmelding
 

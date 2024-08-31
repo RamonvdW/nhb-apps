@@ -73,13 +73,13 @@
                 </tr>
                 <tr>
                     <th>Inschrijfgeld ontvangen</th>
-                    <td>&euro;&nbsp;{{ afmelding.ontvangen_euro }}</td>
+                    <td>&euro;&nbsp;{{ afmelding.bedrag_ontvangen }}</td>
                 </tr>
 
                 {% if afmelding.retour_euro %}
                     <tr>
                         <th>Inschrijfgeld retour</th>
-                        <td>&euro;&nbsp;{{ afmelding.retour_euro }}</td>
+                        <td>&euro;&nbsp;{{ afmelding.bedrag_retour }}</td>
                     </tr>
                 {% endif %}
 

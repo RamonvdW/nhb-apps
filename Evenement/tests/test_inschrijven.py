@@ -35,10 +35,6 @@ class TestEvenementInschrijven(E2EHelpers, TestCase):
     def setUp(self):
         """ initialisatie van de test case """
 
-        # self.account_admin = account = self.e2e_create_account_admin()
-        # self.account_admin.is_BB = True
-        # self.account_admin.save(update_fields=['is_BB'])
-
         self.account_100000 = self.e2e_create_account('100000', 'normaal@test.not', 'Tester')
         self.account_100022 = self.e2e_create_account('100022', 'pijl@test.not', 'Pijl')
 
