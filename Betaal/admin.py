@@ -8,14 +8,94 @@ from django.contrib import admin
 from Betaal.models import BetaalInstellingenVereniging, BetaalActief, BetaalTransactie, BetaalMutatie
 
 
+class HeeftRestitutie(admin.SimpleListFilter):
+    title = 'Heeft restitutie'
+    parameter_name = 'heeft_restitutie'
+
+    def lookups(self, request, model_admin):
+        return [('ja', 'Ja')]
+
+    def queryset(self, request, queryset):
+        if self.value() == 'ja':
+            queryset = queryset.filter(bedrag_terugbetaald__gt=0.0)
+        return queryset
+
+
+class HeeftTerugvordering(admin.SimpleListFilter):
+    title = 'Heeft terugvordering'
+    parameter_name = 'heeft_terugvordering'
+
+    def lookups(self, request, model_admin):
+        return [('ja', 'Ja')]
+
+    def queryset(self, request, queryset):
+        if self.value() == 'ja':
+            queryset = queryset.filter(bedrag_teruggevorderd__gt=0.0)
+        return queryset
+
+
 class BetaalTransactieAdmin(admin.ModelAdmin):
 
-    search_fields = ('payment_id', 'beschrijving')
+    ordering = ('-when',)
+
+    list_filter = ('is_restitutie', 'is_handmatig', 'payment_status', HeeftRestitutie, HeeftTerugvordering)
+
+    search_fields = ('payment_id', 'refund_id', 'beschrijving')
+
+    fieldsets = (
+        ('Basics',
+            {'fields': ('when',
+                        'beschrijving',
+                        'bedrag_euro_klant')
+             }),
+        ('Handmatig',
+            {'fields': (('is_handmatig',),
+                        'bedrag_euro_boeking'),
+             }),
+        ('Mollie',
+            {'fields': ('payment_id',
+                        'payment_status',
+                        'bedrag_te_ontvangen',
+                        'klant_naam',
+                        'klant_account',
+                        'bedrag_terugbetaald',
+                        'bedrag_teruggevorderd',
+                        'bedrag_beschikbaar')
+             }),
+        ('Mollie restitutie',
+            {'fields': ('is_restitutie',
+                        'refund_id',
+                        'refund_status',
+                        'bedrag_refund'),
+             }),
+    )
+
+
+class OntvangerFilter(admin.SimpleListFilter):
+
+    title = 'Ontvanger'
+
+    parameter_name = 'ontvanger'
+
+    def lookups(self, request, model_admin):
+        lijst = [
+            (actief.ontvanger.vereniging.ver_nr, actief.ontvanger.vereniging.ver_nr_en_naam())
+            for actief in BetaalActief.objects.distinct('ontvanger').select_related('ontvanger__vereniging')
+        ]
+        return lijst
+
+    def queryset(self, request, queryset):
+        ver_nr = self.value()
+        if ver_nr:
+            queryset = queryset.filter(ontvanger__vereniging__ver_nr=ver_nr)
+        return queryset
 
 
 class BetaalActiefAdmin(admin.ModelAdmin):
 
-    list_filter = ('payment_status', 'ontvanger')
+    ordering = ('-when',)
+
+    list_filter = ('payment_status', OntvangerFilter)
 
     search_fields = ('payment_id',)
 
@@ -53,6 +133,8 @@ class BetaalInstellingenVerenigingAdmin(admin.ModelAdmin):
 
 
 class BetaalMutatieAdmin(admin.ModelAdmin):
+
+    ordering = ('-when',)
 
     search_fields = ('payment_id', 'beschrijving')
 

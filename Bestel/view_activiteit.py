@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2023 Ramon van der Winkel.
+#  Copyright (c) 2022-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -82,6 +82,7 @@ class BestelActiviteitView(UserPassesTestMixin, TemplateView):
                                 .select_related('account',
                                                 'ontvanger',
                                                 'ontvanger__vereniging')
+                                .prefetch_related('transacties')
                                 .filter(Q(bestel_nr=nr) |
                                         Q(account__username=nr) |
                                         Q(ontvanger__vereniging__ver_nr=nr) |
@@ -94,6 +95,7 @@ class BestelActiviteitView(UserPassesTestMixin, TemplateView):
                                     .select_related('account',
                                                     'ontvanger',
                                                     'ontvanger__vereniging')
+                                    .prefetch_related('transacties')
                                     .filter(status__in=(BESTELLING_STATUS_NIEUW,
                                                         BESTELLING_STATUS_BETALING_ACTIEF,
                                                         BESTELLING_STATUS_MISLUKT))
@@ -105,10 +107,12 @@ class BestelActiviteitView(UserPassesTestMixin, TemplateView):
                                     .select_related('account',
                                                     'ontvanger',
                                                     'ontvanger__vereniging')
+                                    .prefetch_related('transacties')
                                     .filter(Q(account__unaccented_naam__icontains=zoekterm) |
                                             Q(ontvanger__vereniging__naam__icontains=zoekterm) |
                                             Q(producten__wedstrijd_inschrijving__sporterboog__sporter__unaccented_naam__icontains=zoekterm) |
-                                            Q(producten__webwinkel_keuze__product__omslag_titel__icontains=zoekterm))
+                                            Q(producten__webwinkel_keuze__product__omslag_titel__icontains=zoekterm) |
+                                            Q(transacties__payment_id=zoekterm))
                                     .order_by('-bestel_nr'))            # nieuwste eerst
         else:
             # toon de nieuwste bestellingen

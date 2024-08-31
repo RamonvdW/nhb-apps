@@ -308,8 +308,19 @@ class MyHandler(BaseHTTPRequestHandler):
             return
 
         page = '<!DOCTYPE html><html lang="nl">'
-        page += '<head><title>Betalen</title></head>'
-        page += '<body><div style="text-align:center; margin-top:100px">'
+        page += '<head><title>Betalen</title>'
+        page += """<style>
+button {
+font-size: 20px;
+padding: 10px;
+border-radius: 5px;
+box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.12), 0 1px 5px 0 rgba(0, 0, 0, 0.2);
+}
+</style></head>"""
+        page += '<body style="background:lightgrey">'
+        page += '<div  style="text-align:center; margin-top:10%; width:250px; background:white; margin-left:auto; margin-right:auto; padding:25px; border-radius:20px; color:black; font-size:20px; box-shadow: 0 5px 5px 0 rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.12), 0 1px 5px 0 rgba(0, 0, 0, 0.2);">'
+
+        page += '<p style="color:red">Dit is slechts een simulatie</p>'
 
         page += '<p>%s</p>' % resp['description']
 
@@ -318,20 +329,25 @@ class MyHandler(BaseHTTPRequestHandler):
 
         if status == 'open':
             page += """
-                <form method="post" action="{{url}}">
-                    <input type="hidden" name="status" value="pay">
-                    <button style="margin:50px">Pay</button>
-                </form>
-                <form method="post" action="{{url}}">
-                    <input type="hidden" name="status" value="cancel">
-                    <button style="margin:50px">Cancel</button>
-                </form>
-                <form method="post" action="{{url}}">
-                    <input type="hidden" name="status" value="expire">
-                    <button style="margin:50px">Expire</button>
-                </form>
+<form method="post" action="{{url}}">
+    <input type="hidden" name="status" value="pay">
+    <button style="margin:20px">Volledig betalen</button>
+</form>
+<form method="post" action="{{url}}">
+    <input type="hidden" name="status" value="pay10">
+    <button style="margin:20px">Tientje betalen</button>
+</form>
+<form method="post" action="{{url}}">
+    <input type="hidden" name="status" value="cancel">
+    <button style="margin:20px">Afbreken</button>
+</form>
+<form method="post" action="{{url}}">
+    <input type="hidden" name="status" value="expire">
+    <button style="margin:20px">Timeout</button>
+</form>               
             """
 
+        page += '<p style="color:red">Dit is slechts een simulatie</p>'
         page += '</div></body></html>'
 
         payment_id_zonder_prefix = payment_id[3:]
@@ -425,13 +441,25 @@ class MyHandler(BaseHTTPRequestHandler):
         payment_id = payment['id']
         out_debug('Payment %s status %s --> %s' % (repr(payment_id), repr(payment['status']), repr(gekozen_status)))
 
-        if payment['status'] == 'open' and gekozen_status == 'pay':
-            payment['status'] = 'paid'
+        if payment['status'] == 'open' and gekozen_status in ('pay', 'pay10'):
+            value_to_pay = float(payment['amount']['value'])
+            if gekozen_status == 'pay10':
+                try:
+                    value_settled = float(payment['settlementAmount']['value'])
+                except KeyError:
+                    value_settled = 0.0
+                value_settled += 10.0
+                value_settled = min(value_to_pay, value_settled)
+            else:
+                value_settled = value_to_pay
+                payment['status'] = 'paid'
+                del payment['isCancelable']
+                del payment['_links']['checkout']
             payment['paidAt'] = self._get_timestamp()
             payment['amountRefunded'] = refund = dict()
             refund['currency'] = payment['amount']['currency']
             refund['value'] = '0.00'
-            payment['amountRemaining'] = remaining = dict()
+            payment['amountRemaining'] = remaining = dict()             # for refund
             remaining['currency'] = payment['amount']['currency']
             remaining['value'] = payment['amount']['value']
             payment['locale'] = 'en_NL'
@@ -441,11 +469,8 @@ class MyHandler(BaseHTTPRequestHandler):
                 details['consumerName'] = 'T. TEST'
                 details['consumerAccount'] = 'NL72RABO0110438885'       # noqa
                 details['consumerBic'] = 'RABONL2U'                     # noqa
-            value = float(payment['amount']['value']) - 0.26
             payment['settlementAmount'] = {'currency': payment['amount']['currency'],
-                                           'value': '%.2f' % value}
-            del payment['isCancelable']
-            del payment['_links']['checkout']
+                                           'value': '%.2f' % value_settled}
 
         elif payment['status'] == 'open' and gekozen_status == 'cancel':
             payment['status'] = 'canceled'
@@ -477,6 +502,8 @@ class MyHandler(BaseHTTPRequestHandler):
         # doe de update
         if body == b'status=pay':
             self._change_payment_status(resp, 'pay')
+        elif body == b'status=pay10':
+            self._change_payment_status(resp, 'pay10')
         elif body == b'status=cancel':
             self._change_payment_status(resp, 'cancel')
         elif body == b'status=expire':

@@ -8,7 +8,7 @@ from django.db import models
 from django.utils.timezone import localtime
 from Account.models import Account
 from Betaal.definities import (MOLLIE_API_KEY_MAXLENGTH, BETAAL_PAYMENT_ID_MAXLENGTH, BETAAL_PAYMENT_STATUS_MAXLENGTH,
-                               BETAAL_BESCHRIJVING_MAXLENGTH, BETAAL_KLANT_NAAM_MAXLENGTH,
+                               BETAAL_BESCHRIJVING_MAXLENGTH, BETAAL_KLANT_NAAM_MAXLENGTH, BETAAL_REFUND_ID_MAXLENGTH,
                                BETAAL_KLANT_ACCOUNT_MAXLENGTH, BETAAL_MUTATIE_TO_STR)
 from Vereniging.models import Vereniging
 
@@ -107,11 +107,22 @@ class BetaalTransactie(models.Model):
     # referentie naar een betaling bij de CPSP
     payment_id = models.CharField(max_length=BETAAL_PAYMENT_ID_MAXLENGTH)
 
+    # is dit een restitutie of ontvangst?
+    is_restitutie = models.BooleanField(default=False)
+
+    # status update van de betaling:
+    #   is_restitutie = False
+    #   payment_status
+    #   beschrijving
+    #   bedrag_* (behalve bedrag_refunded)
+    #   klant_naam, klant_account
+
     # beschrijving voor op het afschrift van de klant
     # hierin staat normaal het bestelnummer
     beschrijving = models.CharField(max_length=BETAAL_BESCHRIJVING_MAXLENGTH)
 
     # de laatste ontvangen status
+    # kan zijn: open, canceled, pending, authorized, expired, failed, paid
     payment_status = models.CharField(max_length=BETAAL_PAYMENT_STATUS_MAXLENGTH, default='')
 
     # nieuwste bedragen die CPSP doorgegeven heeft over deze transactie
@@ -119,13 +130,13 @@ class BetaalTransactie(models.Model):
     # hoeveel willen we ontvangen
     bedrag_te_ontvangen = models.DecimalField(max_digits=7, decimal_places=2, default=0.0)
 
-    # hoeveel heeft de klant teruggevorderd via zijn kaart/bank
+    # hoeveel heeft de klant (totaal) teruggevorderd via zijn kaart/bank
     bedrag_teruggevorderd = models.DecimalField(max_digits=7, decimal_places=2, default=0.0)
 
-    # hoeveel hebben we terug betaald
+    # hoeveel hebben we (totaal) terug betaald
     bedrag_terugbetaald = models.DecimalField(max_digits=7, decimal_places=2, default=0.0)
 
-    # hoeveel is er binnen gekomen / nog over
+    # hoeveel is er binnen gekomen / nog over voor restitutie
     bedrag_beschikbaar = models.DecimalField(max_digits=7, decimal_places=2, default=0.0)
 
     # naam wat bij het rekeningnummer van de klant hoort
@@ -134,28 +145,53 @@ class BetaalTransactie(models.Model):
     # informatie over de rekening waarmee betaald is
     klant_account = models.CharField(max_length=BETAAL_KLANT_ACCOUNT_MAXLENGTH)
 
+    # refund:
+    #   is_restitutie = True
+    #   refund_id
+    #   beschrijving
+    #   bedrag_refund
+
+    # CPSP specifieke refund transactie id
+    refund_id = models.CharField(max_length=BETAAL_REFUND_ID_MAXLENGTH, default='')
+
+    # de laatste ontvangen status van de refund
+    # kan zijn: queued, pending, processing, refunded, failed, canceled
+    refund_status = models.CharField(max_length=BETAAL_PAYMENT_STATUS_MAXLENGTH, default='')
+
+    # hoeveel hebben we (totaal) terug betaald
+    bedrag_refund = models.DecimalField(max_digits=7, decimal_places=2, default=0.0)
+
     # TODO: Oude velden hieronder zijn deltas
 
-    # is dit een restitutie of ontvangst?
-    is_restitutie = models.BooleanField(default=False)
-
-    # het bedrag wat de klant ziet (betaling / refund)
+    # het bedrag wat de klant ziet (betaling / refund) (bron: amount)
     bedrag_euro_klant = models.DecimalField(max_digits=7, decimal_places=2, default=0.0)        # max 99999,99
 
-    # het bedrag wat wij krijgen/uitgeven
+    # het bedrag wat wij krijgen/uitgeven (bron: settlementAmount)
     # betaling: het bedrag wat ontvangen is (dus transfer kosten al ingehouden door de CPSP)
     # refund: het bedrag wat uitbetaald is  (dus inclusief transfer kosten van de CPSP)
     bedrag_euro_boeking = models.DecimalField(max_digits=7, decimal_places=2, default=0.0)      # max 99999,99
 
     def __str__(self):
         """ Lever een tekstuele beschrijving voor de admin interface """
-        return "[%s] %s - %s - %s euro %s" % (self.pk, self.payment_id,
-                                              localtime(self.when).strftime('%Y-%m-%d %H:%M:%S'), self.beschrijving,
-                                              self.bedrag_euro_klant)
+        if self.is_restitutie:
+            return "%s: %s, € %s" % (self.refund_id, self.beschrijving, self.bedrag_refund)
+        if self.is_handmatig:
+            return "%s: € %s" % (self.beschrijving, self.bedrag_euro_boeking)
+        msg = "%s: %s, € %s" % (self.payment_id, self.beschrijving, self.bedrag_te_ontvangen)
+        if self.bedrag_terugbetaald:
+            msg += '; Terug betaald: € %s' % self.bedrag_terugbetaald
+        if self.bedrag_teruggevorderd:
+            msg += '; Terug gevorderd: € %s' % self.bedrag_teruggevorderd
+        msg += '; Beschikbaar: Euro %s' % self.bedrag_beschikbaar
+        return msg
 
     class Meta:
         verbose_name = "Betaal transactie"
         verbose_name_plural = "Betaal transacties"
+
+        indexes = [
+            models.Index(fields=['payment_id']),
+        ]
 
 
 class BetaalMutatie(models.Model):
