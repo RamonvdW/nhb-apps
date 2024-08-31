@@ -44,9 +44,12 @@ urlpatterns = [
          view_inschrijven.ToevoegenAanMandjeView.as_view(),
          name='inschrijven-toevoegen-aan-mandje'),
 
+
+    # vereniging
     path('vereniging/lijst/',
          view_vereniging.VerenigingEvenementenView.as_view(),
          name='vereniging'),
+
 
     path('aanmeldingen/<evenement_pk>/',
          view_aanmeldingen.EvenementAanmeldingenView.as_view(),
