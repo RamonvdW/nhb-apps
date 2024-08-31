@@ -7,6 +7,15 @@
 from django.db import migrations, models
 
 
+def bedragen_over_nemen(apps, _):
+    # beetje onnodig, want er zijn geen restituties geregistreerd
+    transactie_klas = apps.get_model('Betaal', 'BetaalTransactie')
+    for transactie in transactie_klas.objects.filter(is_restitutie=True):
+        transactie.bedrag_refund = transactie.bedrag_euro_boeking
+        transactie.save(update_fields=['bedrag_refund'])
+    # for
+
+
 class Migration(migrations.Migration):
 
     """ Migratie class voor dit deel van de applicatie """
@@ -33,6 +42,7 @@ class Migration(migrations.Migration):
             name='refund_status',
             field=models.CharField(default='', max_length=15),
         ),
+        migrations.RunPython(bedragen_over_nemen, reverse_code=migrations.RunPython.noop)
     ]
 
 # end of file
