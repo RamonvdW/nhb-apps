@@ -19,7 +19,7 @@ from Bestel.operations.mutaties import (bestel_mutatieverzoek_inschrijven_wedstr
 from Betaal.models import BetaalInstellingenVereniging, BetaalActief, BetaalTransactie, BetaalMutatie
 from Functie.models import Functie
 from Geo.models import Regio
-from Locatie.models import Locatie
+from Locatie.models import WedstrijdLocatie
 from Mailer.models import MailQueue
 from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -28,9 +28,9 @@ from Webwinkel.definities import VERZENDKOSTEN_BRIEFPOST
 from Webwinkel.models import WebwinkelProduct, WebwinkelKeuze
 from Wedstrijden.definities import (WEDSTRIJD_STATUS_GEACCEPTEERD, WEDSTRIJD_KORTING_VERENIGING,
                                     WEDSTRIJD_KORTING_SPORTER,
-                                    INSCHRIJVING_STATUS_RESERVERING_MANDJE, INSCHRIJVING_STATUS_RESERVERING_BESTELD,
-                                    INSCHRIJVING_STATUS_DEFINITIEF, INSCHRIJVING_STATUS_AFGEMELD,
-                                    INSCHRIJVING_STATUS_VERWIJDERD)
+                                    WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_MANDJE, WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_BESTELD,
+                                    WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF, WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD,
+                                    WEDSTRIJD_INSCHRIJVING_STATUS_VERWIJDERD)
 from Wedstrijden.models import Wedstrijd, WedstrijdSessie, WedstrijdInschrijving, WedstrijdKorting
 from decimal import Decimal
 import datetime
@@ -115,7 +115,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         now = timezone.now()
         datum = now.date()      # pas op met testen ronde 23:59
 
-        locatie = Locatie(
+        locatie = WedstrijdLocatie(
                         naam='Test locatie',
                         discipline_outdoor=True,
                         buiten_banen=10,
@@ -1031,7 +1031,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
 
         inschrijving = WedstrijdInschrijving.objects.get(pk=self.inschrijving.pk)
         self.assertEqual(inschrijving.koper, self.account_admin)
-        self.assertEqual(inschrijving.status, INSCHRIJVING_STATUS_RESERVERING_MANDJE)
+        self.assertEqual(inschrijving.status, WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_MANDJE)
         self.assertEqual(inschrijving.ontvangen_euro, Decimal('0'))
         self.assertEqual(inschrijving.retour_euro, Decimal('0'))
 
@@ -1044,7 +1044,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         self.assertEqual(bestelling.status, BESTELLING_STATUS_NIEUW)
 
         inschrijving = WedstrijdInschrijving.objects.get(pk=self.inschrijving.pk)
-        self.assertEqual(inschrijving.status, INSCHRIJVING_STATUS_RESERVERING_BESTELD)
+        self.assertEqual(inschrijving.status, WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_BESTELD)
         self.assertEqual(inschrijving.ontvangen_euro, inschrijving.retour_euro)     # nog steeds 0
 
         # afmelden voor de wedstrijd
@@ -1054,7 +1054,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         self.assertTrue(' met status="besteld" afmelden voor wedstrijd' in f2.getvalue())
         self.assertTrue('status Gereserveerd, wacht op betaling --> Verwijderd' in f2.getvalue())
         inschrijving = WedstrijdInschrijving.objects.get(pk=self.inschrijving.pk)
-        self.assertEqual(inschrijving.status, INSCHRIJVING_STATUS_VERWIJDERD)
+        self.assertEqual(inschrijving.status, WEDSTRIJD_INSCHRIJVING_STATUS_VERWIJDERD)
 
         # nog een keer afmelden
         bestel_mutatieverzoek_afmelden_wedstrijd(inschrijving, snel=True)
@@ -1073,7 +1073,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
 
         inschrijving = WedstrijdInschrijving.objects.get(pk=self.inschrijving.pk)
         self.assertEqual(inschrijving.koper, self.account_admin)
-        self.assertEqual(inschrijving.status, INSCHRIJVING_STATUS_RESERVERING_MANDJE)
+        self.assertEqual(inschrijving.status, WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_MANDJE)
 
         # zet het mandje om in een bestelling
         resp = self.client.post(self.url_mandje_bestellen, {'snel': 1})
@@ -1084,7 +1084,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         self.assertEqual(bestelling.status, BESTELLING_STATUS_NIEUW)
 
         inschrijving = WedstrijdInschrijving.objects.get(pk=self.inschrijving.pk)
-        self.assertEqual(inschrijving.status, INSCHRIJVING_STATUS_RESERVERING_BESTELD)
+        self.assertEqual(inschrijving.status, WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_BESTELD)
         self.assertEqual(inschrijving.ontvangen_euro, inschrijving.retour_euro)     # nog steeds 0
 
         # betaling verwerken
@@ -1116,7 +1116,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
 
         inschrijving = WedstrijdInschrijving.objects.get(pk=self.inschrijving.pk)
         self.assertEqual(inschrijving.koper, self.account_admin)
-        self.assertEqual(inschrijving.status, INSCHRIJVING_STATUS_RESERVERING_BESTELD)
+        self.assertEqual(inschrijving.status, WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_BESTELD)
         self.assertEqual(inschrijving.ontvangen_euro, Decimal('0'))     # TODO: verwachting = 5
         self.assertEqual(inschrijving.retour_euro, Decimal('0'))
 
@@ -1124,7 +1124,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         bestel_mutatieverzoek_afmelden_wedstrijd(inschrijving, snel=True)
         self.verwerk_bestel_mutaties()
         inschrijving = WedstrijdInschrijving.objects.get(pk=self.inschrijving.pk)
-        self.assertEqual(inschrijving.status, INSCHRIJVING_STATUS_VERWIJDERD)
+        self.assertEqual(inschrijving.status, WEDSTRIJD_INSCHRIJVING_STATUS_VERWIJDERD)
 
     def test_afmelden_na_betalen(self):
         # inschrijven, bestellen, betalen, afmelden
@@ -1137,7 +1137,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
 
         inschrijving = WedstrijdInschrijving.objects.get(pk=self.inschrijving.pk)
         self.assertEqual(inschrijving.koper, self.account_admin)
-        self.assertEqual(inschrijving.status, INSCHRIJVING_STATUS_RESERVERING_MANDJE)
+        self.assertEqual(inschrijving.status, WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_MANDJE)
 
         # zet het mandje om in een bestelling
         resp = self.client.post(self.url_mandje_bestellen, {'snel': 1})
@@ -1148,7 +1148,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         self.assertEqual(bestelling.status, BESTELLING_STATUS_NIEUW)
 
         inschrijving = WedstrijdInschrijving.objects.get(pk=self.inschrijving.pk)
-        self.assertEqual(inschrijving.status, INSCHRIJVING_STATUS_RESERVERING_BESTELD)
+        self.assertEqual(inschrijving.status, WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_BESTELD)
         self.assertEqual(inschrijving.ontvangen_euro, inschrijving.retour_euro)     # nog steeds 0
 
         # simuleer een betaling
@@ -1181,7 +1181,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
 
         inschrijving = WedstrijdInschrijving.objects.get(pk=self.inschrijving.pk)
         self.assertEqual(inschrijving.koper, self.account_admin)
-        self.assertEqual(inschrijving.status, INSCHRIJVING_STATUS_DEFINITIEF)
+        self.assertEqual(inschrijving.status, WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF)
         self.assertEqual(inschrijving.ontvangen_euro, Decimal('5.80'))      # prijs minus korting
         self.assertEqual(inschrijving.retour_euro, Decimal('0'))
 
@@ -1191,7 +1191,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         bestel_mutatieverzoek_afmelden_wedstrijd(inschrijving, snel=True)
         self.verwerk_bestel_mutaties()
         inschrijving = WedstrijdInschrijving.objects.get(pk=self.inschrijving.pk)
-        self.assertEqual(inschrijving.status, INSCHRIJVING_STATUS_AFGEMELD)
+        self.assertEqual(inschrijving.status, WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD)
 
     def test_afgerond(self):
         # inschrijven, bestellen, betalen, afmelden
@@ -1206,7 +1206,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
 
         inschrijving = WedstrijdInschrijving.objects.get(pk=self.inschrijving.pk)
         self.assertEqual(inschrijving.koper, self.account_admin)
-        self.assertEqual(inschrijving.status, INSCHRIJVING_STATUS_RESERVERING_MANDJE)
+        self.assertEqual(inschrijving.status, WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_MANDJE)
 
         # activeer bericht over "moet handmatig betalen"
         self.instellingen.akkoord_via_bond = False

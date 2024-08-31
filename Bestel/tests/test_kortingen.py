@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2023 Ramon van der Winkel.
+#  Copyright (c) 2022-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -14,11 +14,11 @@ from Bestel.operations.mutaties import (bestel_mutatieverzoek_inschrijven_wedstr
                                         bestel_mutatieverzoek_maak_bestellingen)
 from Betaal.models import BetaalInstellingenVereniging
 from Geo.models import Regio
-from Locatie.models import Locatie
+from Locatie.models import WedstrijdLocatie
 from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
-from Wedstrijden.definities import (WEDSTRIJD_STATUS_GEACCEPTEERD, INSCHRIJVING_STATUS_VERWIJDERD,
+from Wedstrijden.definities import (WEDSTRIJD_STATUS_GEACCEPTEERD, WEDSTRIJD_INSCHRIJVING_STATUS_VERWIJDERD,
                                     WEDSTRIJD_KORTING_VERENIGING, WEDSTRIJD_KORTING_SPORTER,
                                     WEDSTRIJD_KORTING_COMBI)
 from Wedstrijden.models import Wedstrijd, WedstrijdSessie, WedstrijdInschrijving, WedstrijdKorting
@@ -87,7 +87,7 @@ class TestBestelKortingen(E2EHelpers, TestCase):
         now = timezone.now()
         datum = datetime.date(now.year, now.month, now.day) + datetime.timedelta(days=5)
 
-        locatie = Locatie(
+        locatie = WedstrijdLocatie(
                         naam='Test locatie',
                         discipline_outdoor=True,
                         buiten_banen=10,
@@ -392,7 +392,7 @@ class TestBestelKortingen(E2EHelpers, TestCase):
         self.verwerk_bestel_mutaties()
 
         inschrijving1 = WedstrijdInschrijving.objects.get(pk=inschrijving1_sporter1.pk)
-        self.assertEqual(inschrijving1.status, INSCHRIJVING_STATUS_VERWIJDERD)
+        self.assertEqual(inschrijving1.status, WEDSTRIJD_INSCHRIJVING_STATUS_VERWIJDERD)
         self.assertIsNone(inschrijving1.korting)
 
         inschrijving2 = WedstrijdInschrijving.objects.get(pk=inschrijving2_sporter1.pk)

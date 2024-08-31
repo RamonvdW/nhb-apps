@@ -13,7 +13,7 @@ from Bestel.models import BestelProduct, Bestelling, BestelMutatie, BestelMandje
 from Betaal.models import BetaalInstellingenVereniging
 from Functie.models import Functie
 from Geo.models import Regio
-from Locatie.models import Locatie
+from Locatie.models import WedstrijdLocatie
 from Registreer.definities import REGISTRATIE_FASE_COMPLEET
 from Registreer.models import GastRegistratie
 from Sporter.models import Sporter, SporterBoog
@@ -95,7 +95,7 @@ class TestBestelMandje(E2EHelpers, TestCase):
         now = timezone.now()
         datum = now.date()      # pas op met testen ronde 23:59
 
-        locatie = Locatie(
+        locatie = WedstrijdLocatie(
                         naam='Test locatie',
                         discipline_outdoor=True,
                         buiten_banen=10,

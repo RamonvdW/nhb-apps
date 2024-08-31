@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2023 Ramon van der Winkel.
+#  Copyright (c) 2021-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -21,8 +21,8 @@ from Functie.rol import rol_get_huidige, rol_get_huidige_functie
 from Kalender.view_maand import MAAND2URL
 from Sporter.models import Sporter, SporterBoog, get_sporter
 from Sporter.operations import get_sporter_voorkeuren
-from Wedstrijden.definities import (INSCHRIJVING_STATUS_AFGEMELD, INSCHRIJVING_STATUS_DEFINITIEF,
-                                    INSCHRIJVING_STATUS_VERWIJDERD, INSCHRIJVING_STATUS_TO_STR,
+from Wedstrijden.definities import (WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD, WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF,
+                                    WEDSTRIJD_INSCHRIJVING_STATUS_VERWIJDERD, WEDSTRIJD_INSCHRIJVING_STATUS_TO_STR,
                                     WEDSTRIJD_BEGRENZING_TO_STR,
                                     WEDSTRIJD_BEGRENZING_VERENIGING, WEDSTRIJD_BEGRENZING_REGIO,
                                     WEDSTRIJD_BEGRENZING_RAYON, WEDSTRIJD_BEGRENZING_WERELD)
@@ -92,7 +92,8 @@ def get_sessies(wedstrijd, sporter, voorkeuren, wedstrijdboog_pk):
                                          'sporterboog__boogtype')
                          .filter(sessie__pk__in=sessie_pks,
                                  sporterboog__sporter=sporter)
-                         .exclude(status__in=(INSCHRIJVING_STATUS_AFGEMELD, INSCHRIJVING_STATUS_VERWIJDERD))):
+                         .exclude(status__in=(WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD,
+                                              WEDSTRIJD_INSCHRIJVING_STATUS_VERWIJDERD))):
 
         sessie_pk = inschrijving.sessie.pk
         try:
@@ -484,7 +485,7 @@ class WedstrijdInschrijvenGroepje(UserPassesTestMixin, TemplateView):
                                      .objects
                                      .filter(wedstrijd=wedstrijd,
                                              sporterboog__sporter=geselecteerd.sporter)
-                                     .exclude(status=INSCHRIJVING_STATUS_AFGEMELD)
+                                     .exclude(status=WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD)
                                      .select_related('sessie',
                                                      'sporterboog',
                                                      'sporterboog__sporter')):
@@ -503,7 +504,7 @@ class WedstrijdInschrijvenGroepje(UserPassesTestMixin, TemplateView):
                         # sporter is ingeschreven
                         al_ingeschreven = True
                         context['inschrijving'] = inschrijving
-                        inschrijving.status_str = INSCHRIJVING_STATUS_TO_STR[inschrijving.status]
+                        inschrijving.status_str = WEDSTRIJD_INSCHRIJVING_STATUS_TO_STR[inschrijving.status]
                 # for
                 context['al_ingeschreven'] = al_ingeschreven
 
@@ -662,7 +663,7 @@ class WedstrijdInschrijvenFamilie(UserPassesTestMixin, TemplateView):
                                      .objects
                                      .filter(wedstrijd=wedstrijd,
                                              sporterboog__sporter=geselecteerd.sporter)
-                                     .exclude(status=INSCHRIJVING_STATUS_AFGEMELD)
+                                     .exclude(status=WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD)
                                      .select_related('sessie',
                                                      'sporterboog',
                                                      'sporterboog__sporter')):
@@ -682,7 +683,7 @@ class WedstrijdInschrijvenFamilie(UserPassesTestMixin, TemplateView):
                         # sporter is ingeschreven
                         al_ingeschreven = True
                         context['inschrijving'] = inschrijving
-                        inschrijving.status_str = INSCHRIJVING_STATUS_TO_STR[inschrijving.status]
+                        inschrijving.status_str = WEDSTRIJD_INSCHRIJVING_STATUS_TO_STR[inschrijving.status]
                 # for
 
                 context['al_ingeschreven'] = al_ingeschreven
@@ -798,7 +799,7 @@ class ToevoegenAanMandjeView(UserPassesTestMixin, View):
                 .objects
                 .filter(wedstrijd=wedstrijd,
                         sporterboog=sporterboog,
-                        status__in=(INSCHRIJVING_STATUS_AFGEMELD, INSCHRIJVING_STATUS_VERWIJDERD)))
+                        status__in=(WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD, WEDSTRIJD_INSCHRIJVING_STATUS_VERWIJDERD)))
         if qset.count() > 0:
             qset.delete()
 
@@ -1011,7 +1012,7 @@ class WedstrijdInschrijvenHandmatig(UserPassesTestMixin, TemplateView):
                                  .objects
                                  .filter(wedstrijd=wedstrijd,
                                          sporterboog__sporter=geselecteerd.sporter)
-                                 .exclude(status=INSCHRIJVING_STATUS_AFGEMELD)
+                                 .exclude(status=WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD)
                                  .select_related('sessie',
                                                  'sporterboog',
                                                  'sporterboog__sporter')):
@@ -1031,7 +1032,7 @@ class WedstrijdInschrijvenHandmatig(UserPassesTestMixin, TemplateView):
                     # sporter is ingeschreven
                     al_ingeschreven = True
                     context['inschrijving'] = inschrijving
-                    inschrijving.status_str = INSCHRIJVING_STATUS_TO_STR[inschrijving.status]
+                    inschrijving.status_str = WEDSTRIJD_INSCHRIJVING_STATUS_TO_STR[inschrijving.status]
             # for
             context['kan_aanmelden'] = kan_aanmelden
             context['al_ingeschreven'] = al_ingeschreven
@@ -1115,7 +1116,7 @@ class WedstrijdInschrijvenHandmatig(UserPassesTestMixin, TemplateView):
                 .objects
                 .filter(wedstrijd=wedstrijd,
                         sporterboog=sporterboog,
-                        status=INSCHRIJVING_STATUS_AFGEMELD))
+                        status=WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD))
         if qset.count() > 0:
             qset.delete()
 
@@ -1130,7 +1131,7 @@ class WedstrijdInschrijvenHandmatig(UserPassesTestMixin, TemplateView):
                             wedstrijdklasse=klasse,
                             sporterboog=sporterboog,
                             koper=account_koper,
-                            status=INSCHRIJVING_STATUS_DEFINITIEF,
+                            status=WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF,
                             log=msg)
 
         try:

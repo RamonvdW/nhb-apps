@@ -98,7 +98,7 @@ urlpatterns = [
          name='wijzig-sessie'),
 
     path('<wedstrijd_pk>/aanmeldingen/',
-         view_aanmeldingen.KalenderAanmeldingenView.as_view(),
+         view_aanmeldingen.WedstrijdAanmeldingenView.as_view(),
          name='aanmeldingen'),
 
     path('<wedstrijd_pk>/aanmeldingen/download/tsv/',
@@ -110,7 +110,7 @@ urlpatterns = [
          name='download-aanmeldingen-csv'),
 
     path('details-aanmelding/<inschrijving_pk>/',
-         view_aanmeldingen.KalenderDetailsAanmeldingView.as_view(),
+         view_aanmeldingen.WedstrijdAanmeldingDetailsView.as_view(),
          name='details-aanmelding'),
 ]
 

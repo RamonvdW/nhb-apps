@@ -19,9 +19,9 @@ from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige, rol_get_huidige_functie
 from Sporter.models import SporterVoorkeuren, get_sporter
 from Sporter.operations import get_sporter_voorkeuren
-from Wedstrijden.definities import (INSCHRIJVING_STATUS_TO_SHORT_STR, INSCHRIJVING_STATUS_AFGEMELD,
-                                    INSCHRIJVING_STATUS_RESERVERING_MANDJE, INSCHRIJVING_STATUS_DEFINITIEF,
-                                    INSCHRIJVING_STATUS_VERWIJDERD,
+from Wedstrijden.definities import (WEDSTRIJD_INSCHRIJVING_STATUS_TO_SHORT_STR, WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD,
+                                    WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_MANDJE, WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF,
+                                    WEDSTRIJD_INSCHRIJVING_STATUS_VERWIJDERD,
                                     KWALIFICATIE_CHECK2STR, KWALIFICATIE_CHECK_AFGEKEURD)
 from Wedstrijden.models import Wedstrijd, WedstrijdInschrijving, Kwalificatiescore
 from decimal import Decimal
@@ -122,7 +122,7 @@ def get_kwalificatie_scores(inschrijving):
     return [score for _, _, score in unsorted]
 
 
-class KalenderAanmeldingenView(UserPassesTestMixin, TemplateView):
+class WedstrijdAanmeldingenView(UserPassesTestMixin, TemplateView):
 
     """ Via deze view kunnen beheerders de inschrijvingen voor een wedstrijd inzien """
 
@@ -177,16 +177,16 @@ class KalenderAanmeldingenView(UserPassesTestMixin, TemplateView):
             sporterboog = aanmelding.sporterboog
             sporter = sporterboog.sporter
 
-            if aanmelding.status not in (INSCHRIJVING_STATUS_AFGEMELD, INSCHRIJVING_STATUS_VERWIJDERD):
+            if aanmelding.status not in (WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD, WEDSTRIJD_INSCHRIJVING_STATUS_VERWIJDERD):
                 aantal_aanmeldingen += 1
                 aanmelding.volg_nr = aantal_aanmeldingen
                 aanmelding.reserveringsnummer = aanmelding.pk + settings.TICKET_NUMMER_START__WEDSTRIJD
-                aanmelding.is_definitief = (aanmelding.status == INSCHRIJVING_STATUS_DEFINITIEF)
+                aanmelding.is_definitief = (aanmelding.status == WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF)
             else:
                 aantal_afmeldingen += 1
                 aanmelding.is_afgemeld = True
 
-            aanmelding.status_str = INSCHRIJVING_STATUS_TO_SHORT_STR[aanmelding.status]
+            aanmelding.status_str = WEDSTRIJD_INSCHRIJVING_STATUS_TO_SHORT_STR[aanmelding.status]
 
             aanmelding.sporter_str = sporter.lid_nr_en_volledige_naam()
             aanmelding.boog_str = sporterboog.boogtype.beschrijving
@@ -279,7 +279,7 @@ class DownloadAanmeldingenBestandTSV(UserPassesTestMixin, View):
         aanmeldingen = (WedstrijdInschrijving
                         .objects
                         .filter(wedstrijd=wedstrijd)
-                        .exclude(status__in=(INSCHRIJVING_STATUS_AFGEMELD, INSCHRIJVING_STATUS_VERWIJDERD))
+                        .exclude(status__in=(WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD, WEDSTRIJD_INSCHRIJVING_STATUS_VERWIJDERD))
                         .select_related('sessie',
                                         'wedstrijdklasse',
                                         'sporterboog',
@@ -387,7 +387,7 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
         aanmeldingen = (WedstrijdInschrijving
                         .objects
                         .filter(wedstrijd=wedstrijd)
-                        .exclude(status__in=(INSCHRIJVING_STATUS_AFGEMELD, INSCHRIJVING_STATUS_VERWIJDERD))
+                        .exclude(status__in=(WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD, WEDSTRIJD_INSCHRIJVING_STATUS_VERWIJDERD))
                         .select_related('sessie',
                                         'wedstrijdklasse',
                                         'sporterboog',
@@ -481,7 +481,7 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
                 row = [
                     str(reserveringsnummer),
                     timezone.localtime(aanmelding.wanneer).strftime('%Y-%m-%d %H:%M'),
-                    INSCHRIJVING_STATUS_TO_SHORT_STR[aanmelding.status],
+                    WEDSTRIJD_INSCHRIJVING_STATUS_TO_SHORT_STR[aanmelding.status],
                     bestelnummer_str,
                     prijs_str,
                     korting_str,
@@ -511,7 +511,7 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
                 row = [
                     str(reserveringsnummer),
                     timezone.localtime(aanmelding.wanneer).strftime('%Y-%m-%d %H:%M'),
-                    INSCHRIJVING_STATUS_TO_SHORT_STR[aanmelding.status],
+                    WEDSTRIJD_INSCHRIJVING_STATUS_TO_SHORT_STR[aanmelding.status],
                     bestelnummer_str,
                     prijs_str,
                     korting_str,
@@ -546,7 +546,7 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
         return response
 
 
-class KalenderDetailsAanmeldingView(UserPassesTestMixin, TemplateView):
+class WedstrijdAanmeldingDetailsView(UserPassesTestMixin, TemplateView):
 
     """ Via deze view kunnen beheerders de details van een inschrijving voor een wedstrijd inzien """
 
@@ -612,11 +612,11 @@ class KalenderDetailsAanmeldingView(UserPassesTestMixin, TemplateView):
 
         inschrijving.reserveringsnummer = inschrijving.pk + settings.TICKET_NUMMER_START__WEDSTRIJD
 
-        inschrijving.status_str = INSCHRIJVING_STATUS_TO_SHORT_STR[inschrijving.status]
+        inschrijving.status_str = WEDSTRIJD_INSCHRIJVING_STATUS_TO_SHORT_STR[inschrijving.status]
 
         inschrijving.bestelnummer_str = get_inschrijving_mh_bestel_nr(inschrijving)
 
-        if inschrijving.status not in (INSCHRIJVING_STATUS_AFGEMELD, INSCHRIJVING_STATUS_VERWIJDERD):
+        if inschrijving.status not in (WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD, WEDSTRIJD_INSCHRIJVING_STATUS_VERWIJDERD):
             inschrijving.url_afmelden = reverse('Wedstrijden:afmelden',
                                                 kwargs={'inschrijving_pk': inschrijving.pk})
 
@@ -695,7 +695,7 @@ class AfmeldenView(UserPassesTestMixin, View):
 
         snel = str(request.POST.get('snel', ''))[:1]
 
-        if inschrijving.status == INSCHRIJVING_STATUS_RESERVERING_MANDJE:
+        if inschrijving.status == WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_MANDJE:
             if inschrijving.bestelproduct_set.count() > 0:
                 product = inschrijving.bestelproduct_set.first()
                 bestel_mutatieverzoek_verwijder_product_uit_mandje(inschrijving.koper, product, snel == '1')

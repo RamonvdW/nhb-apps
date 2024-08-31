@@ -12,8 +12,8 @@ from BasisTypen.definities import ORGANISATIE_IFAA
 from Bestel.models import BestelProduct
 from Mailer.operations import mailer_queue_email, mailer_email_is_valide, render_email_template
 from Wedstrijden.definities import (WEDSTRIJD_KORTING_COMBI, WEDSTRIJD_KORTING_SPORTER, WEDSTRIJD_KORTING_VERENIGING,
-                                    INSCHRIJVING_STATUS_DEFINITIEF, INSCHRIJVING_STATUS_AFGEMELD,
-                                    INSCHRIJVING_STATUS_VERWIJDERD, INSCHRIJVING_STATUS_TO_STR)
+                                    WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF, WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD,
+                                    WEDSTRIJD_INSCHRIJVING_STATUS_VERWIJDERD, WEDSTRIJD_INSCHRIJVING_STATUS_TO_STR)
 from Wedstrijden.models import WedstrijdKorting, WedstrijdInschrijving
 from decimal import Decimal
 import datetime
@@ -92,7 +92,7 @@ class BepaalAutomatischeKorting(object):
                        .objects
                        .filter(sporterboog__sporter__lid_nr=lid_nr)
                        .filter(korting=None)                            # niet stapelen
-                       .exclude(status__in=(INSCHRIJVING_STATUS_AFGEMELD, INSCHRIJVING_STATUS_VERWIJDERD))
+                       .exclude(status__in=(WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD, WEDSTRIJD_INSCHRIJVING_STATUS_VERWIJDERD))
                        .exclude(wedstrijd__pk__in=nieuwe_pks)
                        .values_list('wedstrijd__pk', flat=True))
             self._lid_nr2wedstrijd_pks_eerder[lid_nr] = pks
@@ -354,7 +354,7 @@ def wedstrijden_plugin_automatische_kortingen_toepassen(stdout, mandje):
     BepaalAutomatischeKorting(stdout).kies_kortingen_voor_mandje(mandje)
 
 
-def wedstrijden_plugin_inschrijven(inschrijving):
+def wedstrijden_plugin_inschrijven(inschrijving: WedstrijdInschrijving):
     """ verwerk een nieuwe inschrijving op een wedstrijdsessie """
     # verhoog het aantal inschrijvingen op deze sessie
     # hiermee geven we een garantie op een plekje
@@ -387,7 +387,7 @@ def wedstrijden_plugin_afmelden(inschrijving):
     msg = "[%s] Afgemeld voor de wedstrijd\n" % stamp_str
 
     # inschrijving.sessie en inschrijving.klasse kunnen niet op None gezet worden
-    inschrijving.status = INSCHRIJVING_STATUS_AFGEMELD
+    inschrijving.status = WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD
     inschrijving.log += msg
     inschrijving.save(update_fields=['status', 'log'])
 
@@ -400,12 +400,12 @@ def wedstrijden_plugin_verwijder_reservering(stdout, inschrijving):
 
     stamp_str = timezone.localtime(timezone.now()).strftime('%Y-%m-%d om %H:%M')
 
-    if inschrijving.status == INSCHRIJVING_STATUS_DEFINITIEF:
+    if inschrijving.status == WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF:
         msg = "[%s] Afgemeld voor de wedstrijd en reservering verwijderd\n" % stamp_str
-        inschrijving.status = INSCHRIJVING_STATUS_AFGEMELD
+        inschrijving.status = WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD
     else:
         msg = "[%s] Reservering voor wedstrijd verwijderd\n" % stamp_str
-        inschrijving.status = INSCHRIJVING_STATUS_VERWIJDERD
+        inschrijving.status = WEDSTRIJD_INSCHRIJVING_STATUS_VERWIJDERD
 
     inschrijving.korting = None
     inschrijving.log += msg
@@ -419,9 +419,9 @@ def wedstrijden_plugin_verwijder_reservering(stdout, inschrijving):
         sessie.save(update_fields=['aantal_inschrijvingen'])
 
     stdout.write('[INFO] Inschrijving pk=%s status %s --> %s' % (
-                    inschrijving.pk,
-                    INSCHRIJVING_STATUS_TO_STR[oude_status],
-                    INSCHRIJVING_STATUS_TO_STR[inschrijving.status]))
+        inschrijving.pk,
+        WEDSTRIJD_INSCHRIJVING_STATUS_TO_STR[oude_status],
+        WEDSTRIJD_INSCHRIJVING_STATUS_TO_STR[inschrijving.status]))
 
 
 def wedstrijden_plugin_inschrijving_is_betaald(stdout, product: BestelProduct):
@@ -430,7 +430,7 @@ def wedstrijden_plugin_inschrijving_is_betaald(stdout, product: BestelProduct):
     """
     inschrijving = product.wedstrijd_inschrijving
     inschrijving.ontvangen_euro = product.prijs_euro - product.korting_euro
-    inschrijving.status = INSCHRIJVING_STATUS_DEFINITIEF
+    inschrijving.status = WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF
 
     stamp_str = timezone.localtime(timezone.now()).strftime('%Y-%m-%d om %H:%M')
     msg = "[%s] Betaling ontvangen (euro %s); status is nu definitief\n" % (stamp_str, inschrijving.ontvangen_euro)
@@ -461,7 +461,7 @@ def wedstrijden_plugin_inschrijving_is_betaald(stdout, product: BestelProduct):
                 'koper_volledige_naam': koper_account.volledige_naam(),
                 'reserveringsnummer': settings.TICKET_NUMMER_START__WEDSTRIJD + inschrijving.pk,
                 'wed_titel': inschrijving.wedstrijd.titel,
-                'wed_adres': inschrijving.wedstrijd.locatie.adres.replace('\n', ', '),
+                'wed_adres': inschrijving.wedstrijd.locatie.adres_oneliner(),
                 'wed_datum': inschrijving.sessie.datum,
                 'wed_klasse': inschrijving.wedstrijdklasse.beschrijving,
                 'wed_org_ver': inschrijving.wedstrijd.organiserende_vereniging,
@@ -546,7 +546,7 @@ def wedstrijden_plugin_beschrijf_product(inschrijving):
         tup = ('Wedstrijdklasse', '%s' % inschrijving.wedstrijdklasse.beschrijving)
     beschrijving.append(tup)
 
-    tup = ('Locatie', inschrijving.wedstrijd.locatie.adres.replace('\n', ', '))
+    tup = ('Locatie', inschrijving.wedstrijd.locatie.adres_oneliner())
     beschrijving.append(tup)
 
     tup = ('E-mail organisatie', inschrijving.wedstrijd.contact_email)

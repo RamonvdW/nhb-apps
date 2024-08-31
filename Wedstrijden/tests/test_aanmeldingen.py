@@ -16,7 +16,7 @@ from Sporter.models import Sporter, SporterBoog
 from Sporter.operations import get_sporter_voorkeuren
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
-from Wedstrijden.definities import INSCHRIJVING_STATUS_AFGEMELD, WEDSTRIJD_KORTING_VERENIGING
+from Wedstrijden.definities import WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD, WEDSTRIJD_KORTING_VERENIGING
 from Wedstrijden.models import Wedstrijd, WedstrijdSessie, WedstrijdInschrijving, WedstrijdKorting, Kwalificatiescore
 from datetime import timedelta
 
@@ -242,7 +242,7 @@ class TestWedstrijdenAanmeldingen(E2EHelpers, TestCase):
         self.inschrijving1r.korting = korting
         self.inschrijving1r.save(update_fields=['korting'])
 
-        self.inschrijving2.status = INSCHRIJVING_STATUS_AFGEMELD
+        self.inschrijving2.status = WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD
         self.inschrijving2.korting = korting
         self.inschrijving2.save(update_fields=['status', 'korting'])
 
@@ -352,7 +352,7 @@ class TestWedstrijdenAanmeldingen(E2EHelpers, TestCase):
         self.assert404(resp, 'Aanmelding niet gevonden')
 
         # maak 1 inschrijving afgemeld
-        self.inschrijving1c.status = INSCHRIJVING_STATUS_AFGEMELD
+        self.inschrijving1c.status = WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD
         self.inschrijving1c.save(update_fields=['status'])
 
         # verkeerde vereniging

@@ -15,11 +15,11 @@ from Betaal.models import BetaalInstellingenVereniging, BetaalActief, BetaalMuta
 from Betaal.mutaties import betaal_mutatieverzoek_start_ontvangst
 from Geo.models import Regio
 from Mailer.models import MailQueue
-from Locatie.models import Locatie
+from Locatie.models import WedstrijdLocatie
 from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
-from Wedstrijden.definities import WEDSTRIJD_STATUS_GEACCEPTEERD, INSCHRIJVING_STATUS_DEFINITIEF
+from Wedstrijden.definities import WEDSTRIJD_STATUS_GEACCEPTEERD, WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF
 from Wedstrijden.models import Wedstrijd, WedstrijdSessie, WedstrijdInschrijving
 from decimal import Decimal
 import re
@@ -95,7 +95,7 @@ class TestBestelBetaling(E2EHelpers, TestCase):
         now = timezone.now()
         datum = now.date()      # pas op met testen ronde 23:59
 
-        locatie = Locatie(
+        locatie = WedstrijdLocatie(
                         naam='Test locatie',
                         discipline_outdoor=True,
                         buiten_banen=10,
@@ -201,7 +201,7 @@ class TestBestelBetaling(E2EHelpers, TestCase):
         count = BetaalTransactie.objects.count()
         f1, f2 = self.verwerk_betaal_mutaties()
         # print('\nf1:', f1.getvalue(), '\nf2:', f2.getvalue())
-        self.assertTrue('status aangepast: open --> paid' in f2.getvalue())
+        self.assertTrue("status aangepast: 'open' --> 'paid'" in f2.getvalue())
 
         betaal_actief = BetaalActief.objects.get(pk=bestelling.betaal_actief.pk)
         self.assertEqual(betaal_actief.payment_status, 'paid')
@@ -241,7 +241,7 @@ class TestBestelBetaling(E2EHelpers, TestCase):
 
         # controleer dat de inschrijving nu op 'definitief' staat
         inschrijving = WedstrijdInschrijving.objects.get(pk=self.inschrijving.pk)
-        self.assertEqual(inschrijving.status, INSCHRIJVING_STATUS_DEFINITIEF)
+        self.assertEqual(inschrijving.status, WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF)
         self.assertEqual(inschrijving.ontvangen_euro, Decimal('10'))
         self.assertEqual(inschrijving.retour_euro, Decimal('0'))
 

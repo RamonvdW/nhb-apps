@@ -30,9 +30,9 @@ from Score.definities import AG_DOEL_TEAM, AG_DOEL_INDIV
 from Score.models import Aanvangsgemiddelde, AanvangsgemiddeldeHist
 from Sporter.models import SporterBoog, Speelsterkte
 from Sporter.operations import get_sporter_gekozen_bogen, get_sporter_voorkeuren
-from Wedstrijden.definities import (INSCHRIJVING_STATUS_RESERVERING_MANDJE, INSCHRIJVING_STATUS_RESERVERING_BESTELD,
-                                    INSCHRIJVING_STATUS_DEFINITIEF, INSCHRIJVING_STATUS_AFGEMELD,
-                                    INSCHRIJVING_STATUS_VERWIJDERD)
+from Wedstrijden.definities import (WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_MANDJE, WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_BESTELD,
+                                    WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF, WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD,
+                                    WEDSTRIJD_INSCHRIJVING_STATUS_VERWIJDERD)
 from Wedstrijden.models import WedstrijdInschrijving
 import datetime
 import logging
@@ -476,16 +476,16 @@ class ProfielView(UserPassesTestMixin, TemplateView):
 
             inschrijving.plaats_str = wedstrijd.locatie.plaats
 
-            if inschrijving.status in (INSCHRIJVING_STATUS_RESERVERING_MANDJE, INSCHRIJVING_STATUS_RESERVERING_BESTELD):
+            if inschrijving.status in (WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_MANDJE, WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_BESTELD):
                 inschrijving.status_str = "Reservering; bestelling is nog niet voltooid"
 
-            elif inschrijving.status == INSCHRIJVING_STATUS_VERWIJDERD:
+            elif inschrijving.status == WEDSTRIJD_INSCHRIJVING_STATUS_VERWIJDERD:
                 inschrijving.status_str = "Deze reservering is verwijderd"
 
-            elif inschrijving.status == INSCHRIJVING_STATUS_AFGEMELD:
+            elif inschrijving.status == WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD:
                 inschrijving.status_str = "Je bent afgemeld"
 
-            if inschrijving.status == INSCHRIJVING_STATUS_DEFINITIEF and wedstrijd.eis_kwalificatie_scores:
+            if inschrijving.status == WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF and wedstrijd.eis_kwalificatie_scores:
                 inschrijven_voor = wedstrijd.datum_begin - datetime.timedelta(days=wedstrijd.inschrijven_tot + 1)
                 inschrijving.mag_kwalificatiescores_aanpassen = timezone.now().date() < inschrijven_voor
 

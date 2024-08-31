@@ -15,7 +15,7 @@ from Betaal.models import BetaalInstellingenVereniging
 from Functie.models import Functie
 from Functie.tests.helpers import maak_functie
 from Geo.models import Regio
-from Locatie.models import Locatie
+from Locatie.models import WedstrijdLocatie
 from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
@@ -85,7 +85,7 @@ class TestBestelOverboeking(E2EHelpers, TestCase):
         now = timezone.now()
         datum = now.date()      # pas op met testen ronde 23:59
 
-        locatie = Locatie(
+        locatie = WedstrijdLocatie(
                         naam='Test locatie',
                         discipline_outdoor=True,
                         buiten_banen=10,
