@@ -91,6 +91,9 @@ class WebwinkelProduct(models.Model):
     # (programmeerbaar)
     bestel_begrenzing = models.CharField(max_length=100, default='1', help_text='1-10,20,25,30,50', blank=True)
 
+    # gewicht, voor keuze juiste verzendkosten pakket
+    gewicht_gram = models.SmallIntegerField(default=0)
+
     # verzendkosten
     type_verzendkosten = models.CharField(max_length=5, default=VERZENDKOSTEN_PAKKETPOST, choices=VERZENDKOSTEN_CHOICES)
 
