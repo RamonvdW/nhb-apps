@@ -137,7 +137,7 @@ def minify_scripts(contents):
             contents = contents[pos2 + 9:]
         else:  # pragma: no cover
             # unexpected: start-tag but no end-tag
-            print("[WARNING] minify_scripts: missing script end-tag")
+            # print("[WARNING] minify_scripts: missing script end-tag")
             clean += contents
             contents = ""
         pos = contents.find('<script')
@@ -159,7 +159,7 @@ def remove_html_comments(contents):
         if endpos >= 0:
             contents = contents[endpos + 3:]
         else:  # pragma: no cover
-            print("[WARNING] remove_html_comments: missing comment end-tag")
+            # print("[WARNING] remove_html_comments: missing comment end-tag")
             clean += contents
             contents = ""
         pos = contents.find('<!--')
