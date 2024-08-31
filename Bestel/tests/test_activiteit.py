@@ -297,7 +297,7 @@ class TestBestelActiviteit(E2EHelpers, TestCase):
 
         # checkboxes "toon webwinkel" en "toon wedstrijden"
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_activiteit + '?zoekterm=&webwinkel=on&wedstrijden=on')
+            resp = self.client.get(self.url_activiteit + '?zoekterm=&webwinkel=on&wedstrijden=on&gratis=ja')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('bestel/activiteit.dtl', 'plein/site_layout.dtl'))

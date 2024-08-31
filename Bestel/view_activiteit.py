@@ -52,7 +52,7 @@ class BestelActiviteitView(UserPassesTestMixin, TemplateView):
         context['zoek_url'] = reverse('Bestel:activiteit')
         if len(self.request.GET.keys()) == 0:
             # no query parameters
-            form = ZoekBestellingForm(initial={'webwinkel': True, 'wedstrijden': True})
+            form = ZoekBestellingForm(initial={'webwinkel': True, 'wedstrijden': True, 'gratis': True})
         else:
             form = ZoekBestellingForm(self.request.GET)
             form.full_clean()   # vult form.cleaned_data
@@ -135,6 +135,10 @@ class BestelActiviteitView(UserPassesTestMixin, TemplateView):
                 # vinkje is niet gezet, dus wedstrijd bestellingen zijn niet gewenst --> behoud waar deze None is
                 bestellingen = bestellingen.filter(producten__wedstrijd_inschrijving=None)
 
+            if not form.cleaned_data['gratis']:
+                # vinkje is niet gezet, dus gratis bestellingen zijn niet gewenst
+                bestellingen = bestellingen.exclude(totaal_euro__lt=0.001)
+
         # bepaal het aantal bestellingen sinds het begin van de maand
         now = timezone.now()
         context['begin_maand'] = datetime.date(day=1, month=now.month, year=now.year)
@@ -204,7 +208,6 @@ class BestelActiviteitView(UserPassesTestMixin, TemplateView):
             bestelling.trans_list = list(bestelling
                                          .transacties
                                          .all())
-            # print(bestelling.trans_list)
 
             # for transactie in bestelling.trans_list:
             #     pass
