@@ -58,8 +58,6 @@
                             <span class="grey-text">In mandje | </span><span>Besteld</span><span class="grey-text"> | Definitief | Geannuleerd | Afgemeld</span>
                         {% elif inschrijving.status == 'D' %}
                             <span class="grey-text">In mandje | Besteld | </span><span>Definitief</span><span class="grey-text"> | Geannuleerd | Afgemeld</span>
-                        {% else %}
-                            <span class="sv-rood-text"><i>Onbekend!</i></span>
                         {% endif %}
                     </td>
                 </tr>
@@ -75,15 +73,8 @@
                 </tr>
                 <tr>
                     <th>Inschrijfgeld ontvangen</th>
-                    <td>&euro;&nbsp;{{ inschrijving.ontvangen_euro }}</td>
+                    <td>&euro;&nbsp;{{ inschrijving.bedrag_ontvangen }}</td>
                 </tr>
-
-                {% if inschrijving.retour_euro %}
-                    <tr>
-                        <th>Inschrijfgeld retour</th>
-                        <td>&euro;&nbsp;{{ inschrijving.retour_euro }}</td>
-                    </tr>
-                {% endif %}
 
                 <tr>
                     <th>Logboekje</th>

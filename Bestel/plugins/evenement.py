@@ -51,8 +51,7 @@ def evenement_plugin_verwijder_reservering(stdout, inschrijving: EvenementInschr
                         evenement=inschrijving.evenement,
                         sporter=inschrijving.sporter,
                         koper=inschrijving.koper,
-                        ontvangen_euro=inschrijving.ontvangen_euro,
-                        retour_euro=inschrijving.retour_euro,
+                        bedrag_ontvangen=inschrijving.bedrag_ontvangen,
                         log=inschrijving.log + msg)
 
         if inschrijving.status != EVENEMENT_INSCHRIJVING_STATUS_DEFINITIEF:
@@ -91,8 +90,7 @@ def evenement_plugin_afmelden(inschrijving: EvenementInschrijving):
                     evenement=inschrijving.evenement,
                     sporter=inschrijving.sporter,
                     koper=inschrijving.koper,
-                    ontvangen_euro=inschrijving.ontvangen_euro,
-                    retour_euro=inschrijving.retour_euro,
+                    bedrag_ontvangen=inschrijving.bedrag_ontvangen,
                     log=inschrijving.log + msg)
     afmelding.save()
 
@@ -105,11 +103,11 @@ def evenement_plugin_inschrijving_is_betaald(stdout, product: BestelProduct):
         of als een bestelling niet betaald hoeft te worden (totaal bedrag nul)
     """
     inschrijving = product.evenement_inschrijving
-    inschrijving.ontvangen_euro = product.prijs_euro - product.korting_euro
+    inschrijving.bedrag_ontvangen = product.prijs_euro - product.korting_euro
     inschrijving.status = EVENEMENT_INSCHRIJVING_STATUS_DEFINITIEF
 
     stamp_str = timezone.localtime(timezone.now()).strftime('%Y-%m-%d om %H:%M')
-    msg = "[%s] Betaling ontvangen (euro %s); status is nu definitief\n" % (stamp_str, inschrijving.ontvangen_euro)
+    msg = "[%s] Betaling ontvangen (euro %s); status is nu definitief\n" % (stamp_str, inschrijving.bedrag_ontvangen)
 
     inschrijving.log += msg
     inschrijving.save(update_fields=['ontvangen_euro', 'status', 'log'])

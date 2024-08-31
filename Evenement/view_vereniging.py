@@ -5,7 +5,6 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.conf import settings
-from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.utils import timezone
 from django.shortcuts import render

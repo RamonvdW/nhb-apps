@@ -1,16 +1,14 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2024 Ramon van der Winkel.
+#  Copyright (c) 2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
 from django.conf import settings
 from django.utils import timezone
-from Bestel.operations.mutaties import bestel_mutatieverzoek_maak_bestellingen
 from Betaal.models import BetaalInstellingenVereniging
-from Evenement.definities import (EVENEMENT_STATUS_GEACCEPTEERD, EVENEMENT_INSCHRIJVING_STATUS_DEFINITIEF,
-                                  EVENEMENT_INSCHRIJVING_STATUS_RESERVERING_MANDJE)
+from Evenement.definities import EVENEMENT_STATUS_GEACCEPTEERD, EVENEMENT_INSCHRIJVING_STATUS_DEFINITIEF
 from Evenement.models import Evenement, EvenementInschrijving
 from Functie.tests.helpers import maak_functie
 from Geo.models import Regio
@@ -28,15 +26,12 @@ class TestEvenementAfmelden(E2EHelpers, TestCase):
     test_after = ('Evenement.tests.test_inschrijven',)
 
     url_afmelden = '/kalender/evenement/afmelden/%s/'           # inschrijving_pk
+
     url_aanmeldingen = '/kalender/evenement/aanmeldingen/%s/'   # evenement_pk
     url_toevoegen_mandje = '/kalender/evenement/inschrijven/toevoegen-mandje/'      # POST
 
     def setUp(self):
         """ initialisatie van de test case """
-
-        # self.account_admin = account = self.e2e_create_account_admin()
-        # self.account_admin.is_BB = True
-        # self.account_admin.save(update_fields=['is_BB'])
 
         self.account_100000 = self.e2e_create_account('100000', 'normaal@test.not', 'Tester', accepteer_vhpg=True)
         self.account_100022 = self.e2e_create_account('100022', 'pijl@test.not', 'Pijl')

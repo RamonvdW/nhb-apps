@@ -102,8 +102,7 @@ class EvenementInschrijving(models.Model):
     koper = models.ForeignKey(Account, on_delete=models.PROTECT)
 
     # bedragen ontvangen en terugbetaald
-    ontvangen_euro = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal(0))
-    retour_euro = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal(0))
+    bedrag_ontvangen = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal(0))
 
     # log van bestelling, betalingen en eventuele wijzigingen van klasse en sessie
     log = models.TextField(blank=True)
@@ -161,8 +160,8 @@ class EvenementAfgemeld(models.Model):
     koper = models.ForeignKey(Account, on_delete=models.PROTECT)
 
     # bedragen ontvangen en terugbetaald
-    ontvangen_euro = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal(0))
-    retour_euro = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal(0))
+    bedrag_ontvangen = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal(0))
+    bedrag_retour = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal(0))
 
     # log van bestelling, betalingen
     log = models.TextField(blank=True)

@@ -222,7 +222,7 @@ class ToonBestellingDetailsView(UserPassesTestMixin, TemplateView):
             else:
                 if transactie.klant_naam:
                     regels.append('Ontvangen van %s' % transactie.klant_naam)
-                transacties_euro += transactie.bedrag_euro_klant
+                transacties_euro += transactie.bedrag_euro_klant        # TODO: Dit is het verwachte bedrag, niet het ontvangen bedrag!!!
         # for
 
         return transacties, transacties_euro
