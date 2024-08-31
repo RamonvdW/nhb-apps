@@ -10,6 +10,7 @@ from Account.models import Account
 from Bestel.definities import (BESTELLING_STATUS_CHOICES, BESTELLING_STATUS_NIEUW, BESTELLING_STATUS2STR,
                                BESTEL_MUTATIE_TO_STR, BESTEL_TRANSPORT_NVT, BESTEL_TRANSPORT_OPTIES)
 from Betaal.models import BetaalActief, BetaalTransactie, BetaalMutatie, BetaalInstellingenVereniging
+from Evenement.models import EvenementInschrijving, EvenementAfgemeld
 from Webwinkel.models import WebwinkelKeuze
 from Wedstrijden.models import WedstrijdInschrijving
 from decimal import Decimal
@@ -23,6 +24,10 @@ class BestelProduct(models.Model):
 
     # inschrijving voor een wedstrijd
     wedstrijd_inschrijving = models.ForeignKey(WedstrijdInschrijving, on_delete=models.SET_NULL, null=True, blank=True)
+
+    # inschrijving voor een evenement
+    evenement_inschrijving = models.ForeignKey(EvenementInschrijving, on_delete=models.SET_NULL, null=True, blank=True)
+    evenement_afgemeld = models.ForeignKey(EvenementAfgemeld, on_delete=models.SET_NULL, null=True, blank=True)
 
     # keuze in de webwinkel
     webwinkel_keuze = models.ForeignKey(WebwinkelKeuze, on_delete=models.SET_NULL, null=True, blank=True)
@@ -45,6 +50,10 @@ class BestelProduct(models.Model):
 
         if self.wedstrijd_inschrijving:
             msg += str(self.wedstrijd_inschrijving)
+        elif self.evenement_inschrijving:
+            msg += str(self.evenement_inschrijving)
+        elif self.evenement_afgemeld:
+            msg += str(self.evenement_afgemeld)
         elif self.webwinkel_keuze:
             msg += str(self.webwinkel_keuze)
         else:
@@ -60,6 +69,10 @@ class BestelProduct(models.Model):
     def korte_beschrijving(self):
         if self.wedstrijd_inschrijving:
             return self.wedstrijd_inschrijving.korte_beschrijving()
+        if self.evenement_inschrijving:
+            return self.evenement_inschrijving.korte_beschrijving()
+        if self.evenement_afgemeld:
+            return self.evenement_afgemeld.korte_beschrijving()
         if self.webwinkel_keuze:
             return self.webwinkel_keuze.korte_beschrijving()
         return "?"
@@ -170,7 +183,7 @@ class Bestelling(models.Model):
     # de bestelde producten met prijs en korting
     producten = models.ManyToManyField(BestelProduct)
 
-    # afleveradres: automatisch voor leden, handmatig voor gastaccounts (kan ook buitenlands adres zijn)
+    # afleveradres: automatisch voor leden, handmatig voor gastaccounts (wkan ook buitenlands adres zijn)
     # (gebaseerd op info van https://docs.superoffice.com/nl/company/learn/address-formats.html)
     afleveradres_regel_1 = models.CharField(max_length=100, default='', blank=True)
     afleveradres_regel_2 = models.CharField(max_length=100, default='', blank=True)
@@ -259,12 +272,17 @@ class BestelMutatie(models.Model):
     # BESTEL_MUTATIE_OVERBOEKING_ONTVANGEN:     bestelling, bedrag_euro
     # BESTEL_MUTATIE_RESTITUTIE_UITBETAALD:
     # BESTEL_MUTATIE_ANNULEER:                  bestelling
+    # BESTEL_MUTATIE_TRANSPORT:
+    # BESTEL_MUTATIE_EVENEMENT_INSCHRIJVEN:     evenement_inschrijving
 
     # mandje van dit account
     account = models.ForeignKey(Account, on_delete=models.SET_NULL, null=True, blank=True)
 
     # de wedstrijd inschrijving
     wedstrijd_inschrijving = models.ForeignKey(WedstrijdInschrijving, on_delete=models.SET_NULL, null=True, blank=True)
+
+    # inschrijving voor een evenement
+    evenement_inschrijving = models.ForeignKey(EvenementInschrijving, on_delete=models.SET_NULL, null=True, blank=True)
 
     # de webwinkel keuze
     webwinkel_keuze = models.ForeignKey(WebwinkelKeuze, on_delete=models.SET_NULL, null=True, blank=True)

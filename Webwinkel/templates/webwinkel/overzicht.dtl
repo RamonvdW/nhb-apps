@@ -8,6 +8,12 @@
 
 {% block title %}Webwinkel{% endblock %}
 
+{% block extraheader %}
+    <!-- extra headers voor SEO -->
+    <meta name="keywords" content="MijnHandboogsport webwinkel, Mijn handboogsport webwinkel, KHSN webwinkel">
+    <meta name="description" content="Webwinkel van de Handboogsport.">
+{% endblock %}
+
 {% block pagina %}
 
     <!-- banner -->

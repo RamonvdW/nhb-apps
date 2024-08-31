@@ -11,7 +11,7 @@ from Bestel.models import BestelProduct, BestelMandje, Bestelling, BestelMutatie
 
 class BestelProductAdmin(admin.ModelAdmin):
 
-    readonly_fields = ('wedstrijd_inschrijving',)
+    readonly_fields = ('wedstrijd_inschrijving', 'evenement_inschrijving', 'evenement_afgemeld')
 
 
 class MandjeLeegFilter(admin.SimpleListFilter):
@@ -51,15 +51,23 @@ class BestelMandjeAdmin(admin.ModelAdmin):
                           for product in obj.producten.select_related('wedstrijd_inschrijving').all()])
 
 
+class BestellingTransactions(admin.TabularInline):
+    from Betaal.models import BetaalTransactie
+    model = BetaalTransactie
+
+
 class BestellingAdmin(admin.ModelAdmin):
 
-    readonly_fields = ('account', 'bestel_nr', 'aangemaakt', 'producten', 'transacties', 'ontvanger')
+    readonly_fields = ('account', 'bestel_nr', 'aangemaakt', 'producten', 'ontvanger',
+                       'betaal_mutatie', 'betaal_actief')
 
-    search_fields = ('bestel_nr', 'account__username', 'account__unaccented_naam')
+    filter_vertical = ('transacties',)
+
+    search_fields = ('bestel_nr', 'account__username', 'account__unaccented_naam', 'betaal_mutatie__payment_id')
 
     ordering = ('-aangemaakt',)     # nieuwste bovenaan
 
-    auto_complete = ('account', 'ontvanger', 'betaal_mutatie', 'betaal_actief')
+    auto_complete = ('account', 'ontvanger')
 
     # filter_horizontal = ('producten', 'transacties')
 
@@ -110,9 +118,8 @@ class BestellingAdmin(admin.ModelAdmin):
 
 class BestelMutatieAdmin(admin.ModelAdmin):
 
-    readonly_fields = ('when', 'account', 'code_plus')
-
-    auto_complete = ('wedstrijd_inschrijving', 'product', 'bestelling')
+    readonly_fields = ('when', 'account', 'code_plus', 'product', 'bestelling',
+                       'wedstrijd_inschrijving', 'evenement_inschrijving')
 
     list_filter = ('is_verwerkt', 'code')
 
@@ -120,7 +127,8 @@ class BestelMutatieAdmin(admin.ModelAdmin):
         ('BestelMutatie',
          {'fields': ('when', 'code_plus', 'is_verwerkt',
                      'account',
-                     'wedstrijd_inschrijving', 'product', 'korting', 'bestelling', 'betaling_is_gelukt', 'bedrag_euro')
+                     'wedstrijd_inschrijving', 'evenement_inschrijving',
+                     'product', 'korting', 'bestelling', 'betaling_is_gelukt', 'bedrag_euro')
           }),
     )
 

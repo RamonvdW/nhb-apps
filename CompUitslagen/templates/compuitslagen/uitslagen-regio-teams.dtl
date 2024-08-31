@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2021-2023 Ramon van der Winkel.
+                Copyright (c) 2021-2024 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -14,11 +14,22 @@
         function keuze_gemaakt(groep) {
 
             const selector = "input[type='radio'][name=" + groep + "]:checked";
-            const el = document.querySelector(selector);
-            const url = el.dataset.url;
+            const el_groep = document.querySelector(selector);
+            let url = el_groep.dataset.url;
 
             // de radiobutton die bij het geladen geselecteerd werd heeft geen url
-            if (url.length > 0) window.location.href = url;
+            if (url.length > 0) {
+                // vervang ~1 in de url met het gekozen team type
+                if (url.includes('~1')) {
+                    let el = document.querySelector("input[name='filter_1']:checked");
+                    if (!el) {
+                        // find the backup, typically <input type="hidden" ..>
+                        el = document.querySelector("input[name='filter_1']");
+                    }
+                    url = url.replace('~1', el.dataset.url);
+                }
+            }
+            window.location.href = url;
         }
     </script>
 

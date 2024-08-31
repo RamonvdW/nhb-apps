@@ -278,6 +278,20 @@ class TestCompScoresScores(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)       # 200 = OK
         self.assertEqual(resp['Content-Type'], 'application/json')
 
+        # match die niet in een regiocompetitie ronde zit
+        match = CompetitieMatch(
+                    competitie=self.testdata.comp25,
+                    datum_wanneer='2020-01-01',
+                    tijd_begin_wedstrijd='12:34')
+        match.save()
+        json_data = {'wedstrijd_pk': match.pk,
+                     'lid_nr': lid_nr}
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_deelnemer_zoeken,
+                                    json.dumps(json_data),
+                                    content_type='application/json')
+        self.assert404(resp, 'Geen competitie wedstrijd')
+
     def test_rcl_bad_zoeken(self):
         self.e2e_login_and_pass_otp(self.testdata.comp18_account_rcl[101])
         self.e2e_wissel_naar_functie(self.testdata.comp18_functie_rcl[101])
@@ -597,7 +611,10 @@ class TestCompScoresScores(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.testdata.comp18_account_rcl[101])
         self.e2e_wissel_naar_functie(self.testdata.comp18_functie_rcl[101])
 
-        url = self.url_scores_regio % self.testdata.deelcomp18_regio[101].pk
+        deelcomp = self.testdata.deelcomp18_regio[101]
+        self.assertTrue(deelcomp.regio_organiseert_teamcompetitie)
+        url = self.url_scores_regio % deelcomp.pk
+
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
@@ -614,7 +631,7 @@ class TestCompScoresScores(E2EHelpers, TestCase):
         uitslag.save()
         uitslag.scores.add(score)
 
-        ronde = RegiocompetitieRonde.objects.filter(regiocompetitie=self.testdata.deelcomp18_regio[101])[0]
+        ronde = RegiocompetitieRonde.objects.filter(regiocompetitie=deelcomp).first()
         match = ronde.matches.first()
         match.uitslag = uitslag
         match.save()
@@ -624,7 +641,6 @@ class TestCompScoresScores(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
 
-        url = self.url_scores_regio % self.testdata.deelcomp18_regio[101].pk
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
@@ -679,7 +695,7 @@ class TestCompScoresScores(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
 
         # do een post
-        with self.assert_max_queries(65):
+        with self.assert_max_queries(66):
             resp = self.client.post(self.url_regio_teams % deelcomp.pk)
         self.assert_is_redirect_not_plein(resp)
 
@@ -698,6 +714,22 @@ class TestCompScoresScores(E2EHelpers, TestCase):
         deelcomp.save(update_fields=['huidige_team_ronde'])
 
         with self.assert_max_queries(20):
+            resp = self.client.get(self.url_regio_teams % deelcomp.pk)
+        self.assertEqual(resp.status_code, 200)       # 200 = OK
+        self.assert_template_used(resp, ('compscores/rcl-scores-regio-teams.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
+
+        # zet ronde = 1
+        deelcomp.huidige_team_ronde = 1
+        deelcomp.save(update_fields=['huidige_team_ronde'])
+
+        # voeg scores toe
+        self._maak_uitslag(self.match18_pk)
+
+        self.e2e_login_and_pass_otp(self.testdata.comp18_account_rcl[101])
+        self.e2e_wissel_naar_functie(self.testdata.comp18_functie_rcl[101])
+
+        with self.assert_max_queries(49):
             resp = self.client.get(self.url_regio_teams % deelcomp.pk)
         self.assertEqual(resp.status_code, 200)       # 200 = OK
         self.assert_template_used(resp, ('compscores/rcl-scores-regio-teams.dtl', 'plein/site_layout.dtl'))

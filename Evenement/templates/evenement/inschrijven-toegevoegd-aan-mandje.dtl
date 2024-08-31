@@ -1,0 +1,61 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2024 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Reservering{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Reservering is gemaakt</h3>
+            <p>En toegevoegd aan je winkelmandje</p>
+        </div>
+    </div>
+
+    <!-- blauwe balk met informatie -->
+    <div class="row-sv-blauw">
+        <div class="col s12 l10 offset-l1 xl8 offset-xl2">
+            <div class="sv-kader" style="padding:10px">
+                <p>We hebben een plekje voor je <b>gereserveerd</b> voor het gekozen evenement.</p>
+                <p>Je inschrijving is pas definitief na het <b>afronden</b> van je bestelling en eventuele <b>betaling</b>.</p>
+                <br>
+                <p class="sv-rood-text">Let op: na 3 dagen verwijderen we deze reservering automatisch</p>
+                <br>
+                <p>Rechts bovenin vind je de knop voor je <b>winkelmandje</b>.</p>
+                <p>Je kan meerdere producten toevoegen aan je mandje en daarna in &eacute;&eacute;n keer de bestellen afronden en afrekenen.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>Wat wil je doen?</h4>
+        </div>
+    </div>
+
+
+    <!-- blauwe balk met kaartjes -->
+    <div class="row-sv-blauw">
+        <div class="col s12">
+
+            <!-- verder winkelen -->
+            {% include 'plein/card_icon.dtl' with title="Verder winkelen" text="Terug naar het evenement waar je mee bezig was." icon="event_note" url=url_verder %}
+
+            <!-- mandje -->
+            {% url 'Bestel:toon-inhoud-mandje' as card_url %}
+            {% include 'plein/card_icon.dtl' with title="Naar mijn mandje" text="Mandje bekijken, bestelling afronden en betalen." icon="shopping_cart" url=card_url %}
+
+        </div>
+    </div>
+
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="evenement-inschrijven-toegevoegd-aan-mandje" %}
+
+{% endblock %}

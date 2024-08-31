@@ -77,6 +77,7 @@ INSTALLED_APPS = [
     'CompBeheer.apps.CompBeheerConfig',
     'CompScores.apps.CompScoresConfig',
     'CompUitslagen.apps.CompUitslagenConfig',
+    'Evenement.apps.EvenementConfig',
     'Feedback.apps.FeedbackConfig',
     'Functie.apps.FunctieConfig',
     'Geo.apps.GeoConfig',

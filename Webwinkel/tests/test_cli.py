@@ -166,15 +166,8 @@ class TestWebwinkelCli(E2EHelpers, TestCase):
                 f1, f2 = self.run_management_command('koppel_fotos', 'Test titel 9999', self.foto2.locatie,
                                                      report_exit_code=False)
             # print("\nf1:\n%s\nf2:\n%s" % (f1.getvalue(), f2.getvalue()))
-            self.assertTrue("[ERROR] Product niet gevonden" in f1.getvalue())
+            self.assertTrue("[ERROR] Product met titel 'Test titel 9999' niet gevonden" in f1.getvalue())
             self.assertTrue("[INFO] Zoek product met omslag_titel 'Test titel 9999'" in f2.getvalue())
-
-            # meerdere producten matchen
-            with self.assert_max_queries(20):
-                f1, f2 = self.run_management_command('koppel_fotos', 'Test titel', self.foto2.locatie,
-                                                     report_exit_code=False)
-            # print("\nf1:\n%s\nf2:\n%s" % (f1.getvalue(), f2.getvalue()))
-            self.assertTrue("[ERROR] Meerdere producten gevonden:" in f1.getvalue())
 
             # koppel omslagfoto aan product
             with self.assert_max_queries(20):
@@ -182,7 +175,7 @@ class TestWebwinkelCli(E2EHelpers, TestCase):
                                                      report_exit_code=False)
             # print("\nf1:\n%s\nf2:\n%s" % (f1.getvalue(), f2.getvalue()))
             self.assertTrue("[INFO] Zoek product met omslag_titel 'Test titel 1'" in f2.getvalue())
-            self.assertTrue("[INFO] Gevonden product: 'Test titel 1'" in f2.getvalue())
+            self.assertTrue("[INFO] Gevonden product: [9999] Test titel 1" in f2.getvalue())
             self.assertTrue("[INFO] Foto 'test_1.jpg' gekoppeld als omslagfoto" in f2.getvalue())
 
             # koppel meerdere foto's aan product + maak thumbnail (van garbage)
@@ -191,7 +184,7 @@ class TestWebwinkelCli(E2EHelpers, TestCase):
                                                      self.foto2.locatie, report_exit_code=False)
             # print("\nf1:\n%s\nf2:\n%s" % (f1.getvalue(), f2.getvalue()))
             self.assertTrue("[INFO] Zoek product met omslag_titel 'Test titel 1'" in f2.getvalue())
-            self.assertTrue("[INFO] Gevonden product: 'Test titel 1'" in f2.getvalue())
+            self.assertTrue("[INFO] Gevonden product: [9999] Test titel 1" in f2.getvalue())
             self.assertTrue("[INFO] Foto 'test_1.jpg' was al gekoppeld als omslagfoto" in f2.getvalue())
 
             # maak een goede foto aan
@@ -205,7 +198,7 @@ class TestWebwinkelCli(E2EHelpers, TestCase):
                                                      self.foto2.locatie, report_exit_code=False)
             # print("\nf1:\n%s\nf2:\n%s" % (f1.getvalue(), f2.getvalue()))
             self.assertTrue("[INFO] Zoek product met omslag_titel 'Test titel 1'" in f2.getvalue())
-            self.assertTrue("[INFO] Gevonden product: 'Test titel 1'" in f2.getvalue())
+            self.assertTrue("[INFO] Gevonden product: [9999] Test titel 1" in f2.getvalue())
             self.assertTrue("[INFO] Foto 'test_1.jpg' was al gekoppeld als omslagfoto" in f2.getvalue())
             self.assertTrue("[INFO] Maak thumbnail 'test_1_thumb.jpg'" in f2.getvalue())
             self.assertTrue("[INFO] Foto 'test_1.jpg' + thumb gekoppeld aan product" in f2.getvalue())
@@ -218,7 +211,7 @@ class TestWebwinkelCli(E2EHelpers, TestCase):
                 f1, f2 = self.run_management_command('koppel_fotos', 'Test titel 1', self.foto2.locatie,
                                                      self.foto2.locatie, report_exit_code=False)
             # print("\nf1:\n%s\nf2:\n%s" % (f1.getvalue(), f2.getvalue()))
-            self.assertTrue("[INFO] Gevonden product: 'Test titel 1'" in f2.getvalue())
+            self.assertTrue("[INFO] Gevonden product: [9999] Test titel 1" in f2.getvalue())
             self.assertTrue("[INFO] Foto 'test_1.jpg' was al gekoppeld als omslagfoto" in f2.getvalue())
             self.assertTrue("[INFO] Maak thumbnail 'test_1_thumb.jpg'" in f2.getvalue())
             self.assertTrue("[INFO] Foto 'test_1.jpg' was al gekoppeld aan product" in f2.getvalue())

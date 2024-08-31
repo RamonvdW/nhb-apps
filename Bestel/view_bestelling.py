@@ -67,10 +67,16 @@ class ToonBestellingenView(UserPassesTestMixin, TemplateView):
                             .producten
                             .select_related('wedstrijd_inschrijving',
                                             'wedstrijd_inschrijving__wedstrijd',
-                                            'wedstrijd_inschrijving__sporterboog__sporter')):
+                                            'wedstrijd_inschrijving__sporterboog__sporter',
+                                            'evenement_inschrijving',
+                                            'evenement_afgemeld')):
 
                 if product.wedstrijd_inschrijving:
                     beschrijving.append(product.wedstrijd_inschrijving.korte_beschrijving())
+                elif product.evenement_inschrijving:
+                    beschrijving.append(product.evenement_inschrijving.korte_beschrijving())
+                elif product.evenement_afgemeld:
+                    beschrijving.append(product.evenement_afgemeld.korte_beschrijving())
                 elif product.webwinkel_keuze:
                     beschrijving.append(product.webwinkel_keuze.product.omslag_titel)
                 else:
@@ -129,7 +135,7 @@ class ToonBestellingDetailsView(UserPassesTestMixin, TemplateView):
         return self.rol_nu != Rollen.ROL_NONE
 
     @staticmethod
-    def _beschrijf_inhoud_bestelling(bestelling):
+    def _beschrijf_inhoud_bestelling(bestelling: Bestelling):
         """ beschrijf de inhoud van een bestelling """
 
         bevat_fout = False
@@ -148,6 +154,11 @@ class ToonBestellingDetailsView(UserPassesTestMixin, TemplateView):
                                      'wedstrijd_inschrijving__sporterboog__boogtype',
                                      'wedstrijd_inschrijving__sporterboog__sporter',
                                      'wedstrijd_inschrijving__sporterboog__sporter__bij_vereniging',
+                                     'evenement_inschrijving',
+                                     'evenement_inschrijving__evenement__organiserende_vereniging',
+                                     'evenement_inschrijving__koper',
+                                     'evenement_inschrijving__sporter',
+                                     'evenement_inschrijving__sporter__bij_vereniging',
                                      'webwinkel_keuze',
                                      'webwinkel_keuze__product')
                      .order_by('pk'))       # geen schoonheidsprijs, maar wel vaste volgorde
@@ -160,6 +171,9 @@ class ToonBestellingDetailsView(UserPassesTestMixin, TemplateView):
             product.is_combi_korting = len(product.combi_reden) > 0
 
             if product.wedstrijd_inschrijving:
+                pass
+
+            elif product.evenement_inschrijving:
                 pass
 
             elif product.webwinkel_keuze:

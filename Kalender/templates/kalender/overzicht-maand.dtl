@@ -7,7 +7,7 @@
 {% load static %}
 {% load overig_filters %}   <!-- highlight filter -->
 
-{% block title %}Wedstrijdkalender{% endblock %}
+{% block title %}Kalender{% endblock %}
 
 {% block extraheader %}
     <!-- extra headers voor SEO -->
@@ -59,7 +59,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Wedstrijdkalender</h3>
+            <h3 class="page-banner">Kalender</h3>
             {% if not kan_aanmelden %}
                 <p>Om in te schrijven moet je een account aanmaken en inloggen</p>
             {% endif %}
@@ -90,6 +90,9 @@
                 <p class="center">
                     <button class="btn-sv-rood" onclick="stuur_keuzes('{{ url_keuzes }}')">
                         <i class="notranslate material-icons-round left">search</i>Zoek</button>
+                    {% if unfiltered_url %}
+                        <span>&nbsp;&nbsp;</span><a class="btn-sv-rood" href="{{ unfiltered_url }}"><i class="notranslate material-icons-round left">backspace</i>Toon alles</a>
+                    {% endif %}                 
                 </p>
             </div>
         </div>
@@ -158,7 +161,7 @@
         <!-- FUTURE: drop-down maken om direct naar een jaar/maand te springen -->
     </table>
 
-    <p class="center">{{ aantal_wedstrijden }} wedstrijden gevonden</p>
+    <p class="center">{{ aantallen }}</p>
 
     <!-- blauwe balk met informatie in een tabel -->
     <div class="row-sv-blauw">
@@ -174,28 +177,17 @@
                     </tr>
                 </thead>
 
-                {% comment %}
-                <!-- forceer de breedte van de kolommen in alle maanden met een niet getoonde regel -->
-                <tr class="sv-table-hide-row">
-                    <td>88 september 8888</td>
-                    <td>Dit is de titel van een best wel lange wedstrijd</td>
-                    <td class="hide-on-med-and-down">Brede plaatnaam ergens</td>
-                    <td class="hide-on-small-only">88 september 8888</td>
-                    <td class="center"><a class="btn-sv-rood" href="#">Details</a></td>
-                </tr>
-                {% endcomment %}
-
-                {% for wed in wedstrijden %}
+                {% for regel in regels %}
                     <tr>
-                        <td>{{ wed.wanneer_str }}</td>
-                        <td>{{ wed.titel }}</td>
-                        <td class="hide-on-med-and-down">{{ wed.locatie.plaats }}</td>
+                        <td>{{ regel.wanneer_str }}</td>
+                        <td>{{ regel.titel|highlight:zoekterm }}</td>
+                        <td class="hide-on-med-and-down">{{ regel.locatie.plaats|highlight:zoekterm }}</td>
                         <td class="hide-on-small-only">
-                            {% if not wed.is_ter_info %}
-                                <span>{{ wed.inschrijven_voor }}</span>
-                                {% if wed.is_voor_sluitingsdatum %}
-                                    {% if wed.inschrijven_let_op %}
-                                        <br><span class="sv-rood-text">(nog maar {{ wed.inschrijven_dagen }} dagen)</span>
+                            {% if not regel.is_ter_info %}
+                                <span>{{ regel.inschrijven_voor }}</span>
+                                {% if regel.is_voor_sluitingsdatum %}
+                                    {% if regel.inschrijven_let_op %}
+                                        <br><span class="sv-rood-text">(nog maar {{ regel.inschrijven_dagen }} dagen)</span>
                                     {% endif %}
                                 {% else %}
                                     <br><span class="sv-blauw-text">(gesloten)</span>
@@ -203,8 +195,8 @@
                             {% endif %}
                         </td>
                         <td class="center">
-                            {% if wed.url_details %}
-                                <a class="{% if wed.is_voor_sluitingsdatum %}btn-sv-rood{% else %}btn-sv-blauw{% endif %}" href="{{ wed.url_details }}">
+                            {% if regel.url_details %}
+                                <a class="{% if regel.is_voor_sluitingsdatum %}btn-sv-rood{% else %}btn-sv-blauw{% endif %}" href="{{ regel.url_details }}">
                                     <!--<i class="notranslate material-icons-round">play_arrow</i>-->Details</a>
                             {% endif %}
                         </td>

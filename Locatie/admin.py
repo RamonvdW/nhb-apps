@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.contrib import admin
-from Locatie.models import WedstrijdLocatie, Reistijd
+from Locatie.models import WedstrijdLocatie, EvenementLocatie, Reistijd
 
 
 class WedstrijdLocatieAdmin(admin.ModelAdmin):
@@ -26,6 +26,14 @@ class WedstrijdLocatieAdmin(admin.ModelAdmin):
                 .objects
                 .prefetch_related('verenigingen')
                 .all())
+
+
+class EvenementLocatieAdmin(admin.ModelAdmin):
+    """ Admin configuratie voor Locatie """
+
+    list_filter = ('zichtbaar', 'vereniging')
+
+    search_fields = ('adres',)
 
 
 class GeenReistijdFilter(admin.SimpleListFilter):
@@ -50,6 +58,7 @@ class ReistijdAdmin(admin.ModelAdmin):
 
 
 admin.site.register(WedstrijdLocatie, WedstrijdLocatieAdmin)
+admin.site.register(EvenementLocatie, EvenementLocatieAdmin)
 admin.site.register(Reistijd, ReistijdAdmin)
 
 # end of file

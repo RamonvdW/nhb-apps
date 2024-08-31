@@ -1,0 +1,181 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2024 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Evenement details{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Evenement</h3>
+
+            {% if toon_inschrijven %}
+                <a class="btn-sv-rood" href="#inschrijven">
+                    <i class="material-icons-round left notranslate">arrow_downward</i>Inschrijven</a>
+            {% else %}
+                {% if not is_organiserende_hwl %}   <!-- voorkom verwarring -->
+                    <p>Het is niet mogelijk om in te schrijven op dit evenement.</p>
+                {% endif %}
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- blauwe balk met informatie tabel -->
+    <div class="row-sv-blauw">
+        <div class="col s12 l10 offset-l1 xl8 offset-xl2">
+            <table class="sv-kader">
+
+                <tr>
+                    <td colspan="2" class="center sv-blauw-text">
+                        <h6>Informatie</h6>
+                    </td>
+                </tr>
+
+                <tr>
+                    <th>Titel</th>
+                    <td>{{ evenement.titel }}</td>
+                </tr>
+
+                <tr>
+                    <th>Organiserende vereniging</th>
+                    <td>{{ evenement.organiserende_vereniging }}</td>
+                </tr>
+
+                <tr>
+                    <th>Datum</th>
+                    <td>{{ evenement.datum }}</td>
+                </tr>
+
+                <tr>
+                    <th>Inschrijving moet v&oacute;&oacute;r</th>
+                    <td>
+                        <span>{{ evenement.inschrijven_voor }}</span>
+                        {% if not is_voor_sluitingsdatum %}
+                            <span class="sv-rood-text"> (inschrijving is gesloten)</span>
+                        {% else %}
+                            {% if evenement.inschrijven_let_op %}
+                                <span class="sv-rood-text"> (nog maar {{ evenement.inschrijven_dagen }} dagen)</span>
+                            {% else %}
+                                <span> (nog {{ evenement.inschrijven_dagen }} dagen)</span>
+                            {% endif %}
+                        {% endif %}
+                    </td>
+                </tr>
+
+                <tr>
+                    <th>Locatie</th>
+                    <td>
+                        <span>{{ evenement.locatie.adres|linebreaksbr }}</span>
+                        {% if url_map %}
+                            <br><br>
+                            <a class="btn-sv-blauw" href="{{ url_map }}" target="_blank" rel="noopener noreferrer">
+                                <i class="notranslate material-icons-round left">open_in_new</i>Toon op de kaart</a>
+                        {% endif %}
+                    </td>
+                </tr>
+
+                <tr>
+                    <th>Doelgroep</th>
+                    <td>{{ evenement.begrenzing_str }}</td>
+                </tr>
+
+                <tr>
+                    <th>Beschrijving</th>
+                    <td>{{ evenement.beschrijving|linebreaksbr }}</td>
+                </tr>
+
+                <tr>
+                    <td colspan="2" class="center sv-blauw-text">
+                        <h6>Contactgegevens organisatie</h6>
+                    </td>
+                </tr>
+
+                <tr>
+                    <th>Naam</th>
+                    <td>{{ evenement.contact_naam }}</td>
+                </tr>
+
+                <tr>
+                    <th>Telefoon<wbr>nummer</th>
+                    <td>{{ evenement.contact_telefoon }}</td>
+                </tr>
+
+                <tr>
+                    <th>E-mailadres</th>
+                    <td>{{ evenement.contact_email }}</td>
+                </tr>
+
+                <tr>
+                    <td colspan="2" class="center sv-blauw-text">
+                        <h6>Inschrijfgeld</h6>
+                    </td>
+                </tr>
+                <tr>
+                    <th>Standaard</th>
+                    <td>&euro;&nbsp;{{ evenement.prijs_euro_normaal }}</td>
+                </tr>
+
+                <tr>
+                    <th>Tot 18 jaar</th>
+                    <td>&euro;&nbsp;{{ evenement.prijs_euro_onder18 }}</td>
+                </tr>
+
+            </table>
+        </div>
+    </div>
+
+
+    {% if toon_inschrijven %}
+
+        <!-- witruimte -->
+        <div class="row center">
+            <div class="col s12">
+                <h4 id="inschrijven">Inschrijven</h4>
+
+                {% if hint_inloggen %}
+                    <div style="padding:10px">
+                        <div class="col s12 m10 offset-m1 l8 offset-l2 xl6 offset-xl3 sv-rood white-text z-depth-3 center">
+                            <p>Om in te schrijven op dit evenement moet je een account aanmaken en inloggen</p>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- blauwe balk met kaartjes -->
+        <div class="row-sv-blauw">
+            <div class="col s12">
+
+                {% if kan_aanmelden %}
+
+                    <!-- inschrijven sporter -->
+                    {% include 'plein/card_icon.dtl' with title="Sporter" text="Aanmelden en betalen voor jezelf." icon="person" url=url_inschrijven_sporter %}
+
+                    <!-- inschrijven groepje -->
+                    {% include 'plein/card_icon.dtl' with title="Groep" text="Aanmelden en betalen voor een groepje leden zoals team, vrienden of collega's." icon="group" url=url_inschrijven_groepje %}
+
+                    <!-- inschrijven familie -->
+                    {% include 'plein/card_icon.dtl' with title="Familie" text="Aanmelden en betalen voor jonge leden, door ouders." icon="family_restroom" url=url_inschrijven_familie %}
+
+                {% endif %}
+
+                {% if hint_inloggen %}
+                    {% include 'plein/card_niet-beschikbaar.dtl' with waarom="Eerst inloggen" title="Sporter" text="Aanmelden en betalen voor jezelf." icon="person" %}
+                    {% include 'plein/card_niet-beschikbaar.dtl' with waarom="Eerst inloggen" title="Groep" text="Aanmelden en betalen voor een groepje leden zoals team, vrienden of collega's." icon="group" %}
+                    {% include 'plein/card_niet-beschikbaar.dtl' with waarom="Eerst inloggen" title="Familie" text="Aanmelden en betalen voor jonge leden, door ouders." icon="family_restroom" %}
+                {% endif %}
+
+            </div>
+        </div>
+
+    {% endif %}
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="evenement-details" %}
+
+{% endblock %}

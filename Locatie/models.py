@@ -114,6 +114,51 @@ class WedstrijdLocatie(models.Model):
         verbose_name = "Wedstrijd locatie"
 
 
+class EvenementLocatie(models.Model):
+    """ Een locatie waarop een evenement of cursus gehouden kan worden.
+    """
+
+    # naam waaronder deze locatie getoond wordt
+    naam = models.CharField(max_length=50, blank=True)
+
+    # zichtbaar maakt het mogelijk een baan uit het systeem te halen
+    # zonder deze helemaal te verwijderen
+    zichtbaar = models.BooleanField(default=True)
+
+    # vereniging die deze locatie aangemaakt heeft
+    vereniging = models.ForeignKey(Vereniging, on_delete=models.CASCADE)
+
+    # adresgegevens van de locatie
+    adres = models.TextField(max_length=256, blank=True)
+
+    # plaats van deze locatie, om eenvoudig weer te kunnen geven op de kalender
+    plaats = models.CharField(max_length=50, blank=True, default='')
+
+    # vrije notitiegegevens voor zaken als "verbouwing tot", etc.
+    notities = models.TextField(max_length=1024, blank=True)
+
+    def adres_oneliner(self):
+        # bij invoer via admin interface kan er een \r\n in de tekst komen
+        return self.adres.replace('\r\n', '\n').replace('\n', ', ')
+
+    def __str__(self):
+        if not self.zichtbaar:
+            msg = "(hidden) "
+        else:
+            msg = ""
+
+        msg += self.adres.replace('\n', ', ')
+
+        # kost te veel database toegangen in admin interface?
+        msg += " [%s]" % self.vereniging.ver_nr
+
+        return msg
+
+    class Meta:
+        """ meta data voor de admin interface """
+        verbose_name = "Evenement locatie"
+
+
 class Reistijd(models.Model):
 
     """ Reistijd met de auto/motor, tussen twee postcodes.

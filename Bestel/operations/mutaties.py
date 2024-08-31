@@ -10,8 +10,10 @@ from Bestel.definities import (BESTEL_MUTATIE_WEDSTRIJD_INSCHRIJVEN, BESTEL_MUTA
                                BESTEL_MUTATIE_MAAK_BESTELLINGEN, BESTEL_MUTATIE_VERWIJDER,
                                BESTEL_MUTATIE_WEDSTRIJD_AFMELDEN, BESTEL_MUTATIE_BETALING_AFGEROND,
                                BESTEL_MUTATIE_OVERBOEKING_ONTVANGEN, BESTEL_MUTATIE_ANNULEER, BESTEL_MUTATIE_TRANSPORT,
+                               BESTEL_MUTATIE_EVENEMENT_INSCHRIJVEN, BESTEL_MUTATIE_EVENEMENT_AFMELDEN,
                                BESTELLING_STATUS_BETALING_ACTIEF)
 from Bestel.models import BestelMutatie, Bestelling
+from Evenement.models import EvenementInschrijving
 from Overig.background_sync import BackgroundSync
 from Wedstrijden.models import WedstrijdInschrijving
 import time
@@ -48,6 +50,23 @@ def bestel_mutatieverzoek_inschrijven_wedstrijd(account, inschrijving: Wedstrijd
                                     code=BESTEL_MUTATIE_WEDSTRIJD_INSCHRIJVEN,
                                     account=account,
                                     wedstrijd_inschrijving=inschrijving,
+                                    is_verwerkt=False)
+
+    if is_created:
+        mutatie.save()
+
+        # wacht kort op de achtergrondtaak
+        _bestel_ping_achtergrondtaak(mutatie, snel)
+
+
+def bestel_mutatieverzoek_inschrijven_evenement(account, inschrijving: EvenementInschrijving, snel):
+
+    # zet dit verzoek door naar het mutaties process
+    # voorkom duplicates (niet 100%)
+    mutatie, is_created = BestelMutatie.objects.get_or_create(
+                                    code=BESTEL_MUTATIE_EVENEMENT_INSCHRIJVEN,
+                                    account=account,
+                                    evenement_inschrijving=inschrijving,
                                     is_verwerkt=False)
 
     if is_created:
@@ -129,6 +148,25 @@ def bestel_mutatieverzoek_afmelden_wedstrijd(inschrijving: WedstrijdInschrijving
     mutatie, is_created = BestelMutatie.objects.get_or_create(
                                     code=BESTEL_MUTATIE_WEDSTRIJD_AFMELDEN,
                                     wedstrijd_inschrijving=inschrijving,
+                                    is_verwerkt=False)
+
+    if is_created:
+        mutatie.save()
+
+        # wacht kort op de achtergrondtaak
+        _bestel_ping_achtergrondtaak(mutatie, snel)
+
+
+def bestel_mutatieverzoek_afmelden_evenement(inschrijving: EvenementInschrijving, snel=False):
+    """
+        Verwijder een afmelding voor een evenement.
+    """
+
+    # zet dit verzoek door naar het mutaties process
+    # voorkom duplicates (niet 100%)
+    mutatie, is_created = BestelMutatie.objects.get_or_create(
+                                    code=BESTEL_MUTATIE_EVENEMENT_AFMELDEN,
+                                    evenement_inschrijving=inschrijving,
                                     is_verwerkt=False)
 
     if is_created:

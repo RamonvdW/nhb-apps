@@ -53,23 +53,34 @@
         <!-- blauwe balk met kaartjes -->
         <div class="row-sv-blauw">
             <div class="col s12">
-
                 {% url 'Plein:plein' as card_url %}
                 {% include 'plein/card_icon.dtl' with title="Het Plein" text="Naar de beginpagina." icon="hub" url=card_url %}
 
-                <!-- wedstrijdkalender -->
+                <!-- kalender -->
                 {% url 'Kalender:landing-page' as card_url %}
-                {% include 'plein/card_icon.dtl' with title="Wedstrijdkalender" text="Bekijk welke wedstrijden georganiseerd worden en schrijf je in." icon="event_note" url=card_url %}
-
-                <!-- FUTURE: toon opleidingen -->
+                {% include 'plein/card_icon.dtl' with title="Kalender" text="Bekijk welke wedstrijden en evenementen georganiseerd worden en schrijf je in." icon="event_note" url=card_url %}
 
                 <!-- webwinkel -->
                 {% url 'Webwinkel:overzicht' as card_url %}
                 {% include 'plein/card_icon.dtl' with title="Webwinkel" text="Bekijk onze webwinkel." icon="local_mall" url=card_url %}
-
             </div>
         </div>
 
+        <!-- witruimte -->
+        <div class="row center">
+            <div class="col s12">
+                <h4>Bestellingen</h4>
+                <p>Bekijk alle details van eerder gemaakte bestellingen en regel betaling.</p>
+            </div>
+        </div>
+
+        <!-- blauwe balk met kaartjes -->
+        <div class="row-sv-blauw">
+            <div class="col s12">
+                {% url 'Bestel:toon-bestellingen' as card_url %}
+                {% include 'plein/card_icon.dtl' with title="Bestellingen" text="Alle details van je bestellingen." icon="receipt_long" url=card_url %}
+            </div>
+        </div>
 
     {% else %}
 
@@ -274,24 +285,24 @@
 
         {% endif %}
 
-        <!-- witruimte -->
-        <div class="row center">
-            <div class="col s12">
-                <h4>Voorwaarden</h4>
-                <p>Onderstaande documenten beschrijven de verkoopvoorwaarden voor bestellingen via deze site.</p>
-            </div>
-        </div>
-
-        <!-- blauwe balk met kaartjes -->
-        <div class="row-sv-blauw">
-            <div class="col s12">
-                {% include 'plein/card_icon.dtl' with title="Evenementen" text="De verkoopvoorwaarden voor wedstrijden en evenementen staan beschreven in dit document." icon="article" extern_open=True url=url_voorwaarden_wedstrijden %}
-
-                {% include 'plein/card_icon.dtl' with title="Webwinkel" text="De verkoopvoorwaarden voor de webwinkel staan beschreven in dit document." icon="article" extern_open=True url=url_voorwaarden_webwinkel %}
-            </div>
-        </div>
-
     {% endif %}     <!-- mandje niet leeg -->
+
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>Voorwaarden</h4>
+            <p>Onderstaande documenten beschrijven de verkoopvoorwaarden voor bestellingen via deze site.</p>
+        </div>
+    </div>
+
+    <!-- blauwe balk met kaartjes -->
+    <div class="row-sv-blauw">
+        <div class="col s12">
+            {% include 'plein/card_icon.dtl' with title="Evenementen" text="De verkoopvoorwaarden voor wedstrijden en evenementen staan beschreven in dit document." icon="article" extern_open=True url=url_voorwaarden_wedstrijden %}
+
+            {% include 'plein/card_icon.dtl' with title="Webwinkel" text="De verkoopvoorwaarden voor de webwinkel staan beschreven in dit document." icon="article" extern_open=True url=url_voorwaarden_webwinkel %}
+        </div>
+    </div>
 
     {% include 'feedback/sidebar.dtl' with op_pagina="bestel-toon-mandje" %}
 

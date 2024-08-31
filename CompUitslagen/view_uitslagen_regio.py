@@ -84,7 +84,7 @@ class UitslagenRegioIndivView(TemplateView):
                 ver.sel = 'ver_%s' % ver.ver_nr
                 ver.zoom_url = reverse('CompUitslagen:uitslagen-vereniging-indiv-n',
                                        kwargs={'comp_pk_of_seizoen': comp.maak_seizoen_url(),
-                                               'comp_boog': comp_boog,
+                                               'comp_boog': '~1',       # volg boogtype filter
                                                'ver_nr': ver.ver_nr})
             # for
 
@@ -302,7 +302,7 @@ class UitslagenRegioTeamsView(TemplateView):
                     ver.sel = 'ver_%s' % ver.ver_nr
                     ver.zoom_url = reverse('CompUitslagen:uitslagen-vereniging-teams-n',
                                            kwargs={'comp_pk_of_seizoen': comp.maak_seizoen_url(),
-                                                   'team_type': context['teamtype'].afkorting.lower(),
+                                                   'team_type': '~1',       # gebruik team type filter
                                                    'ver_nr': ver.ver_nr})
                 # for
 

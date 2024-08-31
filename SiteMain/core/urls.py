@@ -38,6 +38,7 @@ urlpatterns = [
     path('functie/',                        include('Functie.urls')),
     path('feedback/',                       include('Feedback.urls')),
     path('kalender/',                       include('Kalender.urls')),
+    path('kalender/evenement/',             include('Evenement.urls')),
     path('ledenvoordeel/',                  include('Ledenvoordeel.urls')),
     path('logboek/',                        include('Logboek.urls')),
     path('opleidingen/',                    include('Opleidingen.urls')),
