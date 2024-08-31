@@ -1043,6 +1043,7 @@ class Command(BaseCommand):
 
         # koppel een transactie aan de bestelling
         # bestaande_pks = list(bestelling.transacties.all().values_list('pk', flat=True))
+        # TODO: dit hoort thuis in Betaal ipv Bestel
         transactie = BetaalTransactie(
                             when=timezone.now(),
                             is_handmatig=True,

@@ -549,7 +549,7 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
         # een status=paid, with issue (geen settlement amount)
         self._prep_mollie_websim(429)       # hergebruik standaard websim payment_id
         betaal_mutatieverzoek_payment_status_changed(payment_id)
-        f1, f2 = self._run_achtergrondtaak(debug=True)
+        f1, f2 = self._run_achtergrondtaak()
         self.assertFalse('[ERROR] {payment_opslaan} Missing field: ' in f1.getvalue())
 
     def test_paid_ideal(self):

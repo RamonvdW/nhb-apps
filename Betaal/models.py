@@ -163,10 +163,10 @@ class BetaalTransactie(models.Model):
 
     # TODO: Oude velden hieronder zijn deltas
 
-    # het bedrag wat de klant ziet (betaling / refund)
+    # het bedrag wat de klant ziet (betaling / refund) (bron: amount)
     bedrag_euro_klant = models.DecimalField(max_digits=7, decimal_places=2, default=0.0)        # max 99999,99
 
-    # het bedrag wat wij krijgen/uitgeven
+    # het bedrag wat wij krijgen/uitgeven (bron: settlementAmount)
     # betaling: het bedrag wat ontvangen is (dus transfer kosten al ingehouden door de CPSP)
     # refund: het bedrag wat uitbetaald is  (dus inclusief transfer kosten van de CPSP)
     bedrag_euro_boeking = models.DecimalField(max_digits=7, decimal_places=2, default=0.0)      # max 99999,99
@@ -175,6 +175,8 @@ class BetaalTransactie(models.Model):
         """ Lever een tekstuele beschrijving voor de admin interface """
         if self.is_restitutie:
             return "%s: %s, € %s" % (self.refund_id, self.beschrijving, self.bedrag_refund)
+        if self.is_handmatig:
+            return "%s: € %s" % (self.beschrijving, self.bedrag_euro_boeking)
         msg = "%s: %s, € %s" % (self.payment_id, self.beschrijving, self.bedrag_te_ontvangen)
         if self.bedrag_terugbetaald:
             msg += '; Terug betaald: € %s' % self.bedrag_terugbetaald

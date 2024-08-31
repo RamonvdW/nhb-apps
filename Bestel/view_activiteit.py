@@ -204,7 +204,7 @@ class BestelActiviteitView(UserPassesTestMixin, TemplateView):
             bestelling.trans_list = list(bestelling
                                          .transacties
                                          .all())
-            print(bestelling.trans_list)
+            # print(bestelling.trans_list)
 
             # for transactie in bestelling.trans_list:
             #     pass
