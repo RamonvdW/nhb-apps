@@ -17,7 +17,7 @@ from Competitie.test_utils.tijdlijn import (zet_competitie_fase_rk_wedstrijden, 
                                             zet_competitie_fase_regio_afsluiten)
 from Functie.tests.helpers import maak_functie
 from Geo.models import Rayon, Regio, Cluster
-from Locatie.models import Locatie
+from Locatie.models import WedstrijdLocatie
 from Sporter.models import Sporter, SporterBoog
 from Taken.models import Taak
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -97,9 +97,9 @@ class TestCompLaagRegioTeams(E2EHelpers, TestCase):
         ver.save()
         self.ver_101 = ver
 
-        loc = Locatie(banen_18m=1,
-                      banen_25m=1,
-                      adres='De Spanning 1, Houtdorp')
+        loc = WedstrijdLocatie(banen_18m=1,
+                               banen_25m=1,
+                               adres='De Spanning 1, Houtdorp')
         loc.save()
         loc.verenigingen.add(ver)
         self.loc = loc

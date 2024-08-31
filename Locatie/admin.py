@@ -5,10 +5,10 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.contrib import admin
-from Locatie.models import Locatie, Reistijd
+from Locatie.models import WedstrijdLocatie, Reistijd
 
 
-class LocatieAdmin(admin.ModelAdmin):
+class WedstrijdLocatieAdmin(admin.ModelAdmin):
     """ Admin configuratie voor Locatie """
 
     list_filter = ('baan_type',
@@ -22,7 +22,7 @@ class LocatieAdmin(admin.ModelAdmin):
             want helaas bestaat list_prefetch_related niet
         """
         # qs = super().get_queryset(request)
-        return (Locatie
+        return (WedstrijdLocatie
                 .objects
                 .prefetch_related('verenigingen')
                 .all())
@@ -49,7 +49,7 @@ class ReistijdAdmin(admin.ModelAdmin):
     list_filter = (GeenReistijdFilter,)
 
 
-admin.site.register(Locatie, LocatieAdmin)
+admin.site.register(WedstrijdLocatie, WedstrijdLocatieAdmin)
 admin.site.register(Reistijd, ReistijdAdmin)
 
 # end of file

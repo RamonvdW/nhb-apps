@@ -18,7 +18,7 @@ from Account.models import Account
 from BasisTypen.definities import SCHEIDS_NIET, SCHEIDS_VERENIGING
 from Competitie.models import CompetitieMatch
 from Functie.models import Functie
-from Locatie.models import Reistijd, Locatie
+from Locatie.models import Reistijd, WedstrijdLocatie
 from Locatie.operations import ReistijdBepalen
 from Mailer.operations import mailer_queue_email, render_email_template
 from Overig.background_sync import BackgroundSync
@@ -238,12 +238,12 @@ class Command(BaseCommand):
         ver_nr = settings.WEDSTRIJDEN_KIES_UITVOERENDE_VERENIGING[0]
         self.ver_bondsbureau = Vereniging.objects.get(ver_nr=ver_nr)
 
-        loc, is_created = Locatie.objects.get_or_create(naam='Placeholder RK/BK voor SR',
-                                                        zichtbaar=False,
-                                                        discipline_indoor=True,
-                                                        adres='(diverse)',
-                                                        plaats='(diverse)',
-                                                        notities='Automatisch aangemaakt voor opvragen SR naar RK/BK')
+        loc, is_created = WedstrijdLocatie.objects.get_or_create(naam='Placeholder RK/BK voor SR',
+                                                                 zichtbaar=False,
+                                                                 discipline_indoor=True,
+                                                                 adres='(diverse)',
+                                                                 plaats='(diverse)',
+                                                                 notities='Automatisch aangemaakt voor opvragen SR naar RK/BK')
         if is_created:
             loc.verenigingen.add(self.ver_bondsbureau)
         self.locatie_placeholder = loc

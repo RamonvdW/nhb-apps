@@ -6,7 +6,7 @@
 
 from django.db import models
 from Account.models import Account
-from Locatie.models import Locatie
+from Locatie.models import WedstrijdLocatie
 from Opleidingen.definities import OPLEIDING_STATUS_CHOICES, OPLEIDING_STATUS_VOORBEREID
 from Sporter.models import Sporter
 from decimal import Decimal
@@ -86,7 +86,8 @@ class OpleidingMoment(models.Model):
     duur_minuten = models.PositiveIntegerField(default=1)
 
     # waar moeten de deelnemers heen
-    locatie = models.ForeignKey(Locatie, on_delete=models.PROTECT, blank=True, null=True)
+    # TODO: wijzig naar EvenementLocatie
+    locatie = models.ForeignKey(WedstrijdLocatie, on_delete=models.PROTECT, blank=True, null=True)
 
     # naam en contactgegevens van de opleider
     opleider_naam = models.CharField(max_length=150, default='')

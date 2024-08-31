@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2023 Ramon van der Winkel.
+#  Copyright (c) 2020-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -9,11 +9,11 @@ from Locatie.definities import BAAN_TYPE_ONBEKEND, BAAN_TYPE, BAANTYPE2STR
 from Vereniging.models import Vereniging
 
 
-class Locatie(models.Model):
-    """ Een locatie waarop een wedstrijd of cursus gehouden kan worden.
+class WedstrijdLocatie(models.Model):
+    """ Een locatie waarop een wedstrijd gehouden kan worden.
 
         Naast de accommodatie van de vereniging (binnen / buiten) ook externe locaties
-        waar de vereniging een wedstrijd/cursus kan organiseren.
+        waar de vereniging een wedstrijd kan organiseren.
     """
 
     # naam waaronder deze locatie getoond wordt
@@ -87,6 +87,10 @@ class Locatie(models.Model):
             disc.append('3d')
         return ", ".join(disc)
 
+    def adres_oneliner(self):
+        # bij invoer via admin interface kan er een \r\n in de tekst komen
+        return self.adres.replace('\r\n', '\n').replace('\n', ', ')
+
     def __str__(self):
         if not self.zichtbaar:
             msg = "(hidden) "
@@ -95,7 +99,7 @@ class Locatie(models.Model):
 
         msg += "[baantype: %s] " % BAANTYPE2STR[self.baan_type]
 
-        msg += self.adres.replace('\n', ', ')
+        msg += self.adres_oneliner()
         # kost te veel database toegangen in admin interface
         # msg += " (%s verenigingen)" % self.verenigingen.count()
 
@@ -107,7 +111,7 @@ class Locatie(models.Model):
 
     class Meta:
         """ meta data voor de admin interface """
-        verbose_name = "Locatie"
+        verbose_name = "Wedstrijd locatie"
 
 
 class Reistijd(models.Model):

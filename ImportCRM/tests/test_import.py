@@ -12,7 +12,7 @@ from BasisTypen.models import BoogType
 from Functie.models import Functie
 from Geo.models import Regio
 from Locatie.definities import BAAN_TYPE_BUITEN
-from Locatie.models import Locatie
+from Locatie.models import WedstrijdLocatie
 from Mailer.models import MailQueue
 from Opleidingen.models import OpleidingDiploma
 from Records.models import IndivRecord
@@ -30,7 +30,7 @@ OPTION_SIM = '--sim_now=2020-07-01'
 
 TESTFILES_PATH = './ImportCRM/test-files/'
 
-TESTFILE_NOT_EXISTING = TESTFILES_PATH + 'notexisting.json'
+TESTFILE_NOT_EXISTING = TESTFILES_PATH + 'notexisting.json'             # noqa
 TESTFILE_01_EMPTY = TESTFILES_PATH + 'testfile_01.json'
 TESTFILE_02_INCOMPLETE = TESTFILES_PATH + 'testfile_02.json'
 TESTFILE_03_BASE_DATA = TESTFILES_PATH + 'testfile_03.json'
@@ -206,7 +206,7 @@ class TestImportCRMImport(E2EHelpers, TestCase):
 
         ver = Vereniging.objects.get(ver_nr=1000)
 
-        locatie = Locatie(
+        locatie = WedstrijdLocatie(
                         naam="Ergens buiten",
                         baan_type=BAAN_TYPE_BUITEN)
         locatie.save()
@@ -238,7 +238,7 @@ class TestImportCRMImport(E2EHelpers, TestCase):
         self.assertTrue("[WARNING] Vereniging 1002 KvK nummer 'X15' moet 8 cijfers bevatten" in f2.getvalue())
         self.assertTrue("[WARNING] Vereniging 1042 KvK nummer '1234' moet 8 cijfers bevatten" in f2.getvalue())
 
-        locatie1 = ver.locatie_set.exclude(baan_type=BAAN_TYPE_BUITEN).get(plaats='Stadia')
+        locatie1 = ver.wedstrijdlocatie_set.exclude(baan_type=BAAN_TYPE_BUITEN).get(plaats='Stadia')
         locatie1.plaats = 'Ja maar'
         locatie1.save(update_fields=['plaats'])
 
@@ -250,7 +250,7 @@ class TestImportCRMImport(E2EHelpers, TestCase):
         # print("f2: %s" % f2.getvalue())
         self.assertTrue("[INFO] Vereniging 1000: Aanpassing locatie plaats 'Ja maar' --> 'Stadia'" in f2.getvalue())
 
-        locatie1 = Locatie.objects.get(pk=locatie1.pk)
+        locatie1 = WedstrijdLocatie.objects.get(pk=locatie1.pk)
         self.assertEqual(locatie1.plaats, 'Stadia')
 
     def test_lid_mutaties(self):

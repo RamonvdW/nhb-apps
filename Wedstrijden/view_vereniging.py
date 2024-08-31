@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2023 Ramon van der Winkel.
+#  Copyright (c) 2021-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -83,7 +83,7 @@ class VerenigingWedstrijdenView(UserPassesTestMixin, View):
         context['wedstrijden'] = wedstrijden
 
         # vereniging kan alleen een wedstrijd beginnen als er een locatie is
-        if ver.locatie_set.exclude(zichtbaar=False).count() > 0:
+        if ver.wedstrijdlocatie_set.exclude(zichtbaar=False).count() > 0:
             context['url_nieuwe_wedstrijd'] = reverse('Wedstrijden:nieuwe-wedstrijd-kies-type')
         else:
             context['geen_locatie'] = True
@@ -157,7 +157,7 @@ class NieuweWedstrijdKiesType(UserPassesTestMixin, View):
 
         account = get_account(request)
         ver = self.functie_nu.vereniging
-        locaties = ver.locatie_set.exclude(zichtbaar=False)
+        locaties = ver.wedstrijdlocatie_set.exclude(zichtbaar=False)
         aantal = locaties.count()
         if aantal > 0:
             # vereniging heeft een locatie

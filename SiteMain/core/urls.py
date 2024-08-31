@@ -10,7 +10,6 @@ from django.urls import path
 from django.conf import settings
 from django.contrib import admin
 from django.conf.urls import include
-# from django.shortcuts import redirect
 from Plein.views import site_root_view
 from Plein.views_fout import (site_handler403_permission_denied,
                               site_handler404_page_not_found,

@@ -164,6 +164,7 @@ class E2EHelpers(MyTestAsserts, MyMgmtCommandHelper, TestCase):
         if link in self.SAFE_LINKS or link.startswith('/feedback/') or link.startswith('#'):
             return
 
+        # HEAD haalt (helaas) de hele pagina op
         resp = self.client.head(link)
 
         if resp.status_code == 302:                                                 # pragma: no cover

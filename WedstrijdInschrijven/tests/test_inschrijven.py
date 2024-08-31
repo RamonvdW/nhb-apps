@@ -10,7 +10,7 @@ from BasisTypen.definities import GESLACHT_ANDERS, GESLACHT_ALLE
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse
 from Functie.tests.helpers import maak_functie
 from Geo.models import Regio
-from Locatie.models import Locatie
+from Locatie.models import WedstrijdLocatie
 from Sporter.models import Sporter, SporterBoog
 from Sporter.operations import get_sporter_voorkeuren
 from Vereniging.models import Vereniging
@@ -117,7 +117,7 @@ class TestWedstrijdInschrijven(E2EHelpers, TestCase):
         self.sporterboog2.save()
 
         # voeg een locatie toe
-        locatie = Locatie(
+        locatie = WedstrijdLocatie(
                         baan_type='E',      # externe locatie
                         naam='Test locatie')
         locatie.save()

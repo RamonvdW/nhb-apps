@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023 Ramon van der Winkel.
+#  Copyright (c) 2023-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase, override_settings
 from BasisTypen.definities import SCHEIDS_BOND
-from Locatie.models import Locatie, Reistijd
+from Locatie.models import WedstrijdLocatie, Reistijd
 from Locatie.operations import ReistijdBepalen
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -71,7 +71,7 @@ class TestLocatieCliReistijd(E2EHelpers, TestCase):
 
     def test_geocode_crm(self):
         # normaal
-        locatie = Locatie(
+        locatie = WedstrijdLocatie(
                         naam='Test1',
                         adres='Peeslaan 42, 1234AB Boogdorp',
                         plaats='Boogdorp',
@@ -88,7 +88,7 @@ class TestLocatieCliReistijd(E2EHelpers, TestCase):
         self.assertTrue('5.123' in locatie.adres_lon)
 
         # trigger foutmelding van de server
-        locatie = Locatie(
+        locatie = WedstrijdLocatie(
                         naam='Test2',
                         adres='Peeslaan 42, 123ERR Boogdorp',       # 123ERR = geef foutmelding
                         plaats='Boogdorp',
@@ -106,7 +106,7 @@ class TestLocatieCliReistijd(E2EHelpers, TestCase):
         self.assertEqual(locatie.adres_lon, '')
 
         # geen resultaat
-        locatie = Locatie(
+        locatie = WedstrijdLocatie(
                         naam='Test2',
                         adres='Peeslaan 42, 0000XX Boogdorp',       # 0000XX = leeg resultaat
                         plaats='Boogdorp',
@@ -124,7 +124,7 @@ class TestLocatieCliReistijd(E2EHelpers, TestCase):
         self.assertEqual(locatie.adres_lon, '?')
 
         # incompleet resultaat
-        locatie = Locatie(
+        locatie = WedstrijdLocatie(
                         naam='Test2',
                         adres='Peeslaan 42, 42GEEN Boogdorp',       # 42GEEN = geen resultaat geven
                         plaats='Boogdorp',
@@ -143,7 +143,7 @@ class TestLocatieCliReistijd(E2EHelpers, TestCase):
 
     def test_geocode_overig(self):
         # normaal resultaat
-        locatie = Locatie(
+        locatie = WedstrijdLocatie(
                         naam='Test2',
                         adres='Peeslaan 42, 1234AB Boogdorp',
                         plaats='Boogdorp',
@@ -161,7 +161,7 @@ class TestLocatieCliReistijd(E2EHelpers, TestCase):
         self.assertTrue('5.123' in locatie.adres_lon)
 
         # incompleet resultaat
-        locatie = Locatie(
+        locatie = WedstrijdLocatie(
                         naam='Test2',
                         adres='Peeslaan 42, 42GEEN Boogdorp',       # 42GEEN = geen resultaat geven
                         plaats='Boogdorp',
@@ -179,7 +179,7 @@ class TestLocatieCliReistijd(E2EHelpers, TestCase):
         self.assertEqual(locatie.adres_lon, '')
 
         # adres "diverse"
-        locatie = Locatie(
+        locatie = WedstrijdLocatie(
                         naam='Test3',
                         adres='(diverse)',     # speciale betekenis
                         plaats='(diverse)',
@@ -255,7 +255,7 @@ class TestLocatieCliReistijd(E2EHelpers, TestCase):
 
     def test_geocode_fallback(self):
         # incompleet resultaat
-        locatie = Locatie(
+        locatie = WedstrijdLocatie(
                         naam='Test2',
                         adres='Peeslaan 41, 0000XX Boogdorp',
                         plaats='Boogdorp',

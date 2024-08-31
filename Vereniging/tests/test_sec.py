@@ -12,7 +12,7 @@ from Competitie.test_utils.tijdlijn import zet_competitie_fase_regio_inschrijven
 from Competitie.operations import competities_aanmaken
 from HistComp.definities import HISTCOMP_TYPE_18, HIST_BOGEN_DEFAULT
 from HistComp.models import HistCompSeizoen, HistCompRegioIndiv
-from Locatie.models import Locatie
+from Locatie.models import WedstrijdLocatie
 from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
@@ -326,7 +326,7 @@ class TestVerenigingSEC(E2EHelpers, TestCase):
 
     def test_locatie(self):
         # maak een locatie en koppel aan de vereniging
-        loc = Locatie()
+        loc = WedstrijdLocatie()
         # loc.adres = "Dubbelbaan 16\n1234AB Schietbuurt"
         loc.save()
         loc.verenigingen.add(self.ver1)

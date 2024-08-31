@@ -96,7 +96,7 @@
         <div class="row-sv-blauw">
             <div class="col s12">
 
-                <!-- competitiewedstrijden -->
+                <!-- taken -->
                 {% url 'Taken:overzicht' as card_url %}
                 {% include 'plein/card_icon.dtl' with title="Taken" text=taken_text icon="event" url=card_url %}
             </div>
@@ -140,6 +140,7 @@
         </div>
 
     {% endif %}
+
 
     <!-- competities -->
     {% for kaartje in kaartjes %}

@@ -10,7 +10,7 @@ from BasisTypen.definities import SCHEIDS_BOND, SCHEIDS_VERENIGING
 from BasisTypen.models import KalenderWedstrijdklasse
 from Functie.models import Functie
 from Geo.models import Regio
-from Locatie.models import Locatie, Reistijd
+from Locatie.models import WedstrijdLocatie, Reistijd
 from Scheidsrechter.definities import BESCHIKBAAR_LEEG, BESCHIKBAAR_JA
 from Scheidsrechter.models import ScheidsBeschikbaarheid, WedstrijdDagScheidsrechters, ScheidsMutatie
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -79,7 +79,7 @@ class TestScheidsrechterBeschikbaarheid(E2EHelpers, TestCase):
         now = timezone.now()
         datum = now.date()      # pas op met testen ronde 23:59
 
-        locatie = Locatie(
+        locatie = WedstrijdLocatie(
                         naam='Test locatie',
                         discipline_outdoor=True,
                         buiten_banen=10,

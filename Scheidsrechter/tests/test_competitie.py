@@ -9,7 +9,7 @@ from django.utils import timezone
 from BasisTypen.definities import SCHEIDS_BOND, SCHEIDS_VERENIGING
 from Competitie.models import CompetitieMatch, CompetitieIndivKlasse, CompetitieTeamKlasse
 from Functie.models import Functie
-from Locatie.models import Locatie
+from Locatie.models import WedstrijdLocatie
 from Mailer.models import MailQueue
 from Scheidsrechter.definities import BESCHIKBAAR_JA, BESCHIKBAAR_NEE, BESCHIKBAAR_DENK
 from Scheidsrechter.models import MatchScheidsrechters, ScheidsBeschikbaarheid, ScheidsMutatie
@@ -92,7 +92,7 @@ class TestScheidsrechterCompetitie(E2EHelpers, TestCase):
         self.functie_hwl1, _ = Functie.objects.get_or_create(rol='HWL', vereniging=self.ver1)
         self.functie_hwl2, _ = Functie.objects.get_or_create(rol='HWL', vereniging=self.ver2)
 
-        locatie1 = Locatie(
+        locatie1 = WedstrijdLocatie(
                         naam='Test locatie 1',
                         discipline_indoor=True,
                         buiten_banen=10,
@@ -106,7 +106,7 @@ class TestScheidsrechterCompetitie(E2EHelpers, TestCase):
         locatie1.verenigingen.add(self.ver1)
         self.locatie1 = locatie1
 
-        locatie2 = Locatie(
+        locatie2 = WedstrijdLocatie(
                         naam='Test locatie 2',
                         discipline_indoor=True,
                         buiten_banen=10,

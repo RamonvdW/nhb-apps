@@ -10,7 +10,7 @@ from django.utils import timezone
 from BasisTypen.definities import SCHEIDS_BOND, SCHEIDS_VERENIGING
 from BasisTypen.models import KalenderWedstrijdklasse
 from Functie.models import Functie
-from Locatie.models import Locatie, Reistijd
+from Locatie.models import WedstrijdLocatie, Reistijd
 from Mailer.models import MailQueue
 from Scheidsrechter.definities import BESCHIKBAAR_JA, BESCHIKBAAR_NEE, BESCHIKBAAR_DENK
 from Scheidsrechter.models import WedstrijdDagScheidsrechters, ScheidsBeschikbaarheid, ScheidsMutatie
@@ -93,7 +93,7 @@ class TestScheidsrechterWedstrijden(E2EHelpers, TestCase):
 
         self.functie_hwl, _ = Functie.objects.get_or_create(rol='HWL', vereniging=self.ver)
 
-        locatie = Locatie(
+        locatie = WedstrijdLocatie(
                         naam='Test locatie',
                         discipline_outdoor=True,
                         buiten_banen=10,

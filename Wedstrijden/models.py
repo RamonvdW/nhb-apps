@@ -8,7 +8,7 @@ from django.db import models
 from Account.models import Account
 from BasisTypen.definities import ORGANISATIES, ORGANISATIE_WA
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse
-from Locatie.models import Locatie
+from Locatie.models import WedstrijdLocatie
 from Score.models import Score, Uitslag
 from Sporter.models import Sporter, SporterBoog
 from Vereniging.models import Vereniging
@@ -104,14 +104,15 @@ class Wedstrijd(models.Model):
     # hoeveel dagen van tevoren de online-inschrijving dicht doen?
     inschrijven_tot = models.PositiveSmallIntegerField(default=7)
 
-    # waar wordt de wedstrijd gehouden
+    # wie beheert deze wedstrijd?
+    # wordt ook gebruikt voor betalingen
     organiserende_vereniging = models.ForeignKey(Vereniging, on_delete=models.PROTECT)
 
     # bondsbureau kan wedstrijd verleggen bij gekozen vereniging
     uitvoerende_vereniging = models.ForeignKey(Vereniging, on_delete=models.PROTECT,
                                                related_name='uitvoerend',
                                                blank=True, null=True)
-    locatie = models.ForeignKey(Locatie, on_delete=models.PROTECT)
+    locatie = models.ForeignKey(WedstrijdLocatie, on_delete=models.PROTECT)
 
     # begrenzing
     begrenzing = models.CharField(max_length=1, default=WEDSTRIJD_BEGRENZING_WERELD, choices=WEDSTRIJD_BEGRENZING)
@@ -188,10 +189,7 @@ class Wedstrijd(models.Model):
 
     def bepaal_prijs_voor_sporter(self, sporter):
         leeftijd = sporter.bereken_wedstrijdleeftijd(self.datum_begin, self.organisatie)
-        if leeftijd < 18:
-            prijs = self.prijs_euro_onder18
-        else:
-            prijs = self.prijs_euro_normaal
+        prijs = self.prijs_euro_onder18 if leeftijd < 18 else self.prijs_euro_normaal
         return prijs
 
     def __str__(self):
