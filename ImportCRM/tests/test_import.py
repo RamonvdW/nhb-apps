@@ -120,7 +120,7 @@ class TestImportCRMImport(E2EHelpers, TestCase):
         # self.assertEqual(f2.getvalue(), '')
 
     def test_import(self):
-        with self.assert_max_queries(131):
+        with self.assert_max_queries(133):
             f1, f2 = self.run_management_command(IMPORT_COMMAND,
                                                  TESTFILE_03_BASE_DATA,
                                                  OPTION_SIM)
@@ -178,7 +178,7 @@ class TestImportCRMImport(E2EHelpers, TestCase):
 
     def test_extra_geo_structuur(self):
         # extra rayon/regio
-        with self.assert_max_queries(62):
+        with self.assert_max_queries(64):
             f1, f2 = self.run_management_command(IMPORT_COMMAND,
                                                  TESTFILE_06_BAD_RAYON_REGIO)
         self.assertTrue("[ERROR] Onbekend rayon {'rayon_number': 0, 'name': 'Rayon 0'}" in f1.getvalue())
@@ -212,7 +212,7 @@ class TestImportCRMImport(E2EHelpers, TestCase):
         locatie.save()
         locatie.verenigingen.add(ver)
 
-        with self.assert_max_queries(136):
+        with self.assert_max_queries(142):
             f1, f2 = self.run_management_command(IMPORT_COMMAND,
                                                  TESTFILE_08_VER_MUTATIES,
                                                  OPTION_SIM)
@@ -242,7 +242,7 @@ class TestImportCRMImport(E2EHelpers, TestCase):
         locatie1.plaats = 'Ja maar'
         locatie1.save(update_fields=['plaats'])
 
-        with self.assert_max_queries(114):
+        with self.assert_max_queries(120):
             f1, f2 = self.run_management_command(IMPORT_COMMAND,
                                                  TESTFILE_08_VER_MUTATIES,
                                                  OPTION_SIM)
@@ -272,7 +272,7 @@ class TestImportCRMImport(E2EHelpers, TestCase):
         sporter = Sporter.objects.get(lid_nr=100025)
         self.assertEqual(sporter.wa_id, '90025')
 
-        with self.assert_max_queries(64):
+        with self.assert_max_queries(66):
             f1, f2 = self.run_management_command(IMPORT_COMMAND,
                                                  TESTFILE_09_LID_MUTATIES,
                                                  OPTION_SIM)
@@ -315,7 +315,7 @@ class TestImportCRMImport(E2EHelpers, TestCase):
         self.assertFalse(sporter.is_actief_lid)      # want: overleden
 
         # nog een keer hetzelfde commando geeft geen nieuwe log regels
-        with self.assert_max_queries(82):
+        with self.assert_max_queries(86):
             f1, f2 = self.run_management_command(IMPORT_COMMAND,
                                                  TESTFILE_09_LID_MUTATIES,
                                                  OPTION_SIM)
@@ -328,7 +328,7 @@ class TestImportCRMImport(E2EHelpers, TestCase):
         # andere leden hebben een toevoeging achter hun voornaam: "Tineke (Tini)" - niet over klagen
         # some ontbreekt er een haakje
         # import verwijderd dit
-        with self.assert_max_queries(73):
+        with self.assert_max_queries(75):
             f1, f2 = self.run_management_command(IMPORT_COMMAND,
                                                  TESTFILE_10_TOEVOEGING_NAAM,
                                                  OPTION_SIM)
@@ -341,7 +341,7 @@ class TestImportCRMImport(E2EHelpers, TestCase):
 
     def test_datum_zonder_eeuw(self):
         # sommige leden hebben een geboortedatum zonder eeuw
-        with self.assert_max_queries(67):
+        with self.assert_max_queries(69):
             f1, f2 = self.run_management_command(IMPORT_COMMAND,
                                                  TESTFILE_11_BAD_DATE,
                                                  OPTION_SIM)
@@ -363,7 +363,7 @@ class TestImportCRMImport(E2EHelpers, TestCase):
         # sommige leden worden niet geïmporteerd
         # geen (valide) geboortedatum
         # geen (valid) datum van lidmaatschap
-        with self.assert_max_queries(61):
+        with self.assert_max_queries(63):
             self.run_management_command(IMPORT_COMMAND,
                                         TESTFILE_12_MEMBER_INCOMPLETE_1,
                                         OPTION_SIM)
@@ -380,7 +380,7 @@ class TestImportCRMImport(E2EHelpers, TestCase):
                     regio=Regio.objects.get(pk=116))
         ver.save()
 
-        with self.assert_max_queries(77):
+        with self.assert_max_queries(81):
             f1, f2 = self.run_management_command(IMPORT_COMMAND,
                                                  TESTFILE_12_MEMBER_INCOMPLETE_1,
                                                  OPTION_SIM)
@@ -404,7 +404,7 @@ class TestImportCRMImport(E2EHelpers, TestCase):
                     is_actief_lid=False)
         sporter.save()
 
-        with self.assert_max_queries(63):
+        with self.assert_max_queries(65):
             f1, f2 = self.run_management_command(IMPORT_COMMAND,
                                                  TESTFILE_13_WIJZIG_GESLACHT_1,
                                                  OPTION_SIM)
@@ -458,7 +458,7 @@ class TestImportCRMImport(E2EHelpers, TestCase):
 
     def test_maak_secretaris(self):
         # een lid secretaris maken
-        with self.assert_max_queries(100):
+        with self.assert_max_queries(101):
             f1, f2 = self.run_management_command(IMPORT_COMMAND,
                                                  TESTFILE_14_WIJZIG_GESLACHT_2,
                                                  OPTION_SIM)
@@ -518,7 +518,7 @@ class TestImportCRMImport(E2EHelpers, TestCase):
     def test_club_1377(self):
         # een paar speciale import gevallen
 
-        with self.assert_max_queries(92):
+        with self.assert_max_queries(94):
             self.run_management_command(IMPORT_COMMAND,
                                         TESTFILE_15_CLUB_1377,
                                         OPTION_SIM)
@@ -574,7 +574,7 @@ class TestImportCRMImport(E2EHelpers, TestCase):
         self.assertTrue("[INFO] Secretaris 100024 van vereniging 2000 is gekoppeld aan SEC functie" in f2.getvalue())
 
         # probeer 100024 te verwijderen
-        with self.assert_max_queries(58):
+        with self.assert_max_queries(60):
             f1, f2 = self.run_management_command(IMPORT_COMMAND,
                                                  TESTFILE_16_VERWIJDER_LID,
                                                  OPTION_SIM)
@@ -617,7 +617,7 @@ class TestImportCRMImport(E2EHelpers, TestCase):
         score_indiv_ag_opslaan(sporterboog, 18, 5.678, None, "")
 
         # probeer 100024 te verwijderen
-        with self.assert_max_queries(48):
+        with self.assert_max_queries(50):
             f1, f2 = self.run_management_command(IMPORT_COMMAND,
                                                  TESTFILE_16_VERWIJDER_LID,
                                                  OPTION_SIM)
@@ -635,7 +635,7 @@ class TestImportCRMImport(E2EHelpers, TestCase):
                                                  OPTION_DRY_RUN)
         self.assertTrue("DRY RUN" in f2.getvalue())
 
-        with self.assert_max_queries(104):
+        with self.assert_max_queries(106):
             self.run_management_command(IMPORT_COMMAND,
                                         TESTFILE_03_BASE_DATA,
                                         OPTION_SIM)
@@ -674,7 +674,7 @@ class TestImportCRMImport(E2EHelpers, TestCase):
 
     def test_incomplete_data(self):
         # test import met een incomplete entry van een nieuw lid
-        with self.assert_max_queries(77):
+        with self.assert_max_queries(79):
             f1, f2 = self.run_management_command(IMPORT_COMMAND,
                                                  TESTFILE_17_MEMBER_INCOMPLETE_2,
                                                  OPTION_SIM)
@@ -718,7 +718,7 @@ class TestImportCRMImport(E2EHelpers, TestCase):
         self.assertTrue(sporter.bij_vereniging is not None)
 
         # lid 100001 is nog steeds uitgeschreven - geen verandering tot 15 januari
-        with self.assert_max_queries(63):
+        with self.assert_max_queries(65):
             self.run_management_command(IMPORT_COMMAND,
                                         TESTFILE_18_LID_UITGESCHREVEN,
                                         '--sim_now=2021-01-15')

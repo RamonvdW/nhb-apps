@@ -53,7 +53,7 @@ EXPECTED_CLUB_KEYS = ('region_number', 'club_number', 'name', 'prefix', 'email',
                       'iso_abbr', 'latitude', 'longitude', 'secretaris', 'iban', 'bic')
 OPTIONAL_CLUB_KEYS = ('smoke_free_status',)
 EXPECTED_MEMBER_KEYS = ('club_number', 'member_number', 'name', 'prefix', 'first_name',
-                        'initials', 'birthday', 'birthplace', 'email', 'gender', 'member_from',
+                        'initials', 'birthday', 'birthplace', 'email', 'gender', 'member_from', 'member_until',
                         'para_code', 'address', 'postal_code', 'location_name',
                         'phone_business', 'phone_mobile', 'phone_private',
                         'iso_abbr', 'latitude', 'longitude', 'blocked', 'wa_id', 'date_of_death')
