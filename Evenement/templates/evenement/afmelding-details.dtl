@@ -56,8 +56,6 @@
                             <span class="grey-text">In mandje | Besteld | Definitief | Geannuleerd | </span><span>Afgemeld</span>
                         {% elif afmelding.status == 'C' %}
                             <span class="grey-text">In mandje | Besteld | Definitief | </span><span>Geannuleerd</span><span class="grey-text"> | Afgemeld</span>
-                        {% else %}
-                            <span class="sv-rood-text"><i>Onbekend!</i></span>
                         {% endif %}
                     </td>
                 </tr>
@@ -76,7 +74,7 @@
                     <td>&euro;&nbsp;{{ afmelding.bedrag_ontvangen }}</td>
                 </tr>
 
-                {% if afmelding.retour_euro %}
+                {% if afmelding.bedrag_retour %}
                     <tr>
                         <th>Inschrijfgeld retour</th>
                         <td>&euro;&nbsp;{{ afmelding.bedrag_retour }}</td>
@@ -88,43 +86,10 @@
                     <td>{{ afmelding.log|linebreaksbr }}</td>
                 </tr>
 
-                {% if afmelding.url_afmelden %}
-                    <tr>
-                        <th>Afmelden</th>
-                        <td>
-                            <a class="btn-sv-rood modal-trigger" href="#bevestig_afmelden_{{ afmelding.pk }}">
-                                <i class="notranslate material-icons-round">delete</i></a>
-                        </td>
-                    </tr>
-                {% endif %}
             </table>
         </div>
     </div>
 
-
-    {% if afmelding.url_afmelden %}
-        <div class="modal" id="bevestig_afmelden_{{ afmelding.pk }}">
-            <div class="modal-content center">
-                <h5>Verwijder aanmelding?</h5>
-                <p>Wil je de aanmelding van <b>{{ sporter.volledige_naam }}</b><br>voor het evenement <b>{{ afmelding.evenement.titel }}</b><br>verwijderen uit het systeem?</p>
-
-                <form action="{{ afmelding.url_afmelden }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
-                    {% csrf_token %}
-                    <input type="hidden" name="verwijder" value="1">
-
-                    <div class="modal-footer" style="text-align:center; display:block">
-                        <div style="display:inline-block; width:50%">
-                            <button class="btn-sv-rood" id="submit_knop" type="submit">Ja</button>
-                        </div>
-                        <div style="display:inline-block; width:50%">
-                            <a href="#" class="btn-sv-blauw modal-close">Nee</a>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
-    {% endif %}
-
-    {% include 'feedback/sidebar.dtl' with op_pagina="evenement-aanmelding-details" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="evenement-afmelding-details" %}
 
 {% endblock %}
