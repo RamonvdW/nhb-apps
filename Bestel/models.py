@@ -146,7 +146,7 @@ class BestelMandje(models.Model):
         verbose_name_plural = "Mandjes"
 
 
-class Bestelling(models.Model):
+class Bestelling2(models.Model):
 
     """ een volledige bestelling die afgerekend kan worden / afgerekend is """
 
@@ -294,7 +294,7 @@ class BestelMutatie(models.Model):
     korting = models.CharField(max_length=20, default='', blank=True)
 
     # de bestelling waar deze mutatie betrekking op heeft
-    bestelling = models.ForeignKey(Bestelling, on_delete=models.SET_NULL, null=True, blank=True)
+    bestelling = models.ForeignKey(Bestelling2, on_delete=models.SET_NULL, null=True, blank=True)
 
     # status van de betaling: gelukt, of niet?
     betaling_is_gelukt = models.BooleanField(default=False)
