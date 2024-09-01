@@ -14,9 +14,9 @@ from Account.operations.otp import otp_stuur_email_losgekoppeld
 from Account.view_wachtwoord import account_stuur_email_wachtwoord_vergeten
 from Account.operations.email import account_stuur_email_bevestig_nieuwe_email
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse
-from Bestel.management.commands.bestel_mutaties import stuur_email_naar_koper_betaalbevestiging
-from Bestel.definities import BESTELLING_STATUS_NIEUW
-from Bestel.models import Bestelling, BestelProduct
+from Bestelling.management.commands.bestel_mutaties import stuur_email_naar_koper_betaalbevestiging
+from Bestelling.definities import BESTELLING_STATUS_NIEUW
+from Bestelling.models import Bestelling, BestellingProduct
 from Betaal.models import BetaalInstellingenVereniging, BetaalTransactie
 from Competitie.models import Competitie, CompetitieMatch
 from Functie.models import Functie
@@ -193,13 +193,13 @@ class Command(BaseCommand):
                             ontvangen_euro=Decimal('22.41'))
         inschrijving_c.save()
 
-        product_r = BestelProduct(
+        product_r = BestellingProduct(
                         wedstrijd_inschrijving=inschrijving_r,
                         prijs_euro=Decimal('42.40'),
                         korting_euro=Decimal('0.00'))
         product_r.save()
 
-        product_c = BestelProduct(
+        product_c = BestellingProduct(
                         wedstrijd_inschrijving=inschrijving_c,
                         prijs_euro=Decimal('42.41'),
                         korting_euro=Decimal('20.00'))

@@ -10,7 +10,7 @@ from Account.models import get_account
 from Account.operations.otp import otp_is_controle_gelukt
 from Functie.definities import Rollen
 from Functie.rol import rol_mag_wisselen, rol_get_huidige
-from Bestel.operations.mandje import cached_aantal_in_mandje_get
+from Bestelling.operations.mandje import cached_aantal_in_mandje_get
 from Taken.operations import aantal_open_taken
 
 

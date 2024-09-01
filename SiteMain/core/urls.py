@@ -24,7 +24,7 @@ urlpatterns = [
     path('account/',                        include('Account.urls')),
     path('account/registreer/',             include('Registreer.urls')),
     path('beheer/',                         admin.site.urls),
-    path('bestel/',                         include('Bestel.urls')),
+    path('bestel/',                         include('Bestelling.urls')),
     path('bestel/betaal/',                  include('Betaal.urls')),
     path('bondscompetities/beheer/',        include('CompBeheer.urls')),
     path('bondscompetities/regio/',         include('CompLaagRegio.urls')),

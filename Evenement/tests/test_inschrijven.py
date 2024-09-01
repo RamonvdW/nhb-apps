@@ -22,7 +22,7 @@ class TestEvenementInschrijven(E2EHelpers, TestCase):
 
     """ tests voor de Evenement applicatie, module Inschrijven """
 
-    test_after = ('Bestel.tests.test_mandje', 'Evenement.tests.test_details')
+    test_after = ('Bestelling.tests.test_mandje', 'Evenement.tests.test_details')
 
     url_inschrijven_sporter = '/kalender/evenement/inschrijven/%s/sporter/'         # evenement_pk
     url_inschrijven_groepje = '/kalender/evenement/inschrijven/%s/groep/'           # evenement_pk

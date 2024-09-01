@@ -5,8 +5,8 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from Bestel.definities import BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_AFGEROND
-from Bestel.models import Bestelling
+from Bestelling.definities import BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_AFGEROND
+from Bestelling.models import Bestelling
 from Functie.models import Functie
 from Geo.models import Regio
 from Mailer.models import MailQueue
@@ -333,7 +333,7 @@ class TestWebwinkelOverzicht(E2EHelpers, TestCase):
                                      'actie': 'registreer', 'snel': '1'})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('bestel/overboeking-ontvangen.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('bestelling/overboeking-ontvangen.dtl', 'plein/site_layout.dtl'))
         self.verwerk_bestel_mutaties()
 
         bestelling = Bestelling.objects.first()

@@ -7,7 +7,7 @@
 from django.test import TestCase
 from django.conf import settings
 from django.utils import timezone
-from Bestel.models import Bestelling, BestelProduct
+from Bestelling.models import Bestelling, BestellingProduct
 from Betaal.models import BetaalInstellingenVereniging
 from Evenement.definities import (EVENEMENT_STATUS_GEACCEPTEERD, EVENEMENT_INSCHRIJVING_STATUS_RESERVERING_MANDJE,
                                   EVENEMENT_INSCHRIJVING_STATUS_RESERVERING_BESTELD,
@@ -178,7 +178,7 @@ class TestEvenementAfmelden(E2EHelpers, TestCase):
         inschrijving.save()
         self.inschrijving = inschrijving
 
-        bestel = BestelProduct(
+        bestel = BestellingProduct(
                         evenement_inschrijving=inschrijving,
                         prijs_euro=10.0)
         bestel.save()
@@ -217,7 +217,7 @@ class TestEvenementAfmelden(E2EHelpers, TestCase):
         afgemeld.save()
         self.afgemeld = afgemeld
 
-        bestel = BestelProduct(
+        bestel = BestellingProduct(
                     evenement_afgemeld=self.afgemeld,
                     prijs_euro=10.0)
         bestel.save()

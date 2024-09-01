@@ -13,7 +13,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.db.utils import OperationalError, IntegrityError
 from django.core.management.base import BaseCommand
-from Bestel.operations.mutaties import bestel_mutatieverzoek_betaling_afgerond, bestel_betaling_is_gestart
+from Bestelling.operations.mutaties import bestel_mutatieverzoek_betaling_afgerond, bestel_betaling_is_gestart
 from Betaal.definities import (BETAAL_MUTATIE_START_ONTVANGST, BETAAL_MUTATIE_START_RESTITUTIE,
                                BETAAL_MUTATIE_PAYMENT_STATUS_CHANGED, BETAAL_PAYMENT_STATUS_MAXLENGTH,
                                BETAAL_PAYMENT_ID_MAXLENGTH, BETAAL_REFUND_ID_MAXLENGTH, BETAAL_BESCHRIJVING_MAXLENGTH,

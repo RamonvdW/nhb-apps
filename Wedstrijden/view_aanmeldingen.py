@@ -12,8 +12,8 @@ from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
 from BasisTypen.definities import GESLACHT2STR
-from Bestel.operations.mutaties import (bestel_mutatieverzoek_afmelden_wedstrijd,
-                                        bestel_mutatieverzoek_verwijder_product_uit_mandje)
+from Bestelling.operations.mutaties import (bestel_mutatieverzoek_afmelden_wedstrijd,
+                                            bestel_mutatieverzoek_verwijder_product_uit_mandje)
 from Competitie.models import RegiocompetitieSporterBoog
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige, rol_get_huidige_functie
@@ -41,7 +41,7 @@ CONTENT_TYPE_CSV = 'text/csv; charset=UTF-8'
 def get_inschrijving_mh_bestel_nr(inschrijving):
     bestel_product = inschrijving.bestelproduct_set.first()
     if bestel_product:
-        bestelling = bestel_product.bestelling_set.first()
+        bestelling = bestel_product.bestelling2_set.first()
         if bestelling:
             return bestelling.mh_bestel_nr()
 

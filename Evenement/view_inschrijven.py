@@ -13,8 +13,8 @@ from django.shortcuts import render
 from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
-from Bestel.operations.mandje import mandje_tel_inhoud
-from Bestel.operations.mutaties import bestel_mutatieverzoek_inschrijven_evenement
+from Bestelling.operations.mandje import mandje_tel_inhoud
+from Bestelling.operations.mutaties import bestel_mutatieverzoek_inschrijven_evenement
 from Evenement.models import Evenement, EvenementInschrijving
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige

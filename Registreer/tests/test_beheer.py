@@ -8,7 +8,7 @@ from django.conf import settings
 from django.test import TestCase
 from django.utils import timezone
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse
-from Bestel.models import Bestelling, BestelProduct, WebwinkelKeuze
+from Bestelling.models import Bestelling, BestellingProduct, WebwinkelKeuze
 from Functie.tests.helpers import maak_functie
 from Geo.models import Regio
 from Locatie.models import WedstrijdLocatie
@@ -469,7 +469,7 @@ class TestRegistreerBeheer(E2EHelpers, TestCase):
                     product=webwinkel_product)
         keuze.save()
 
-        prod = BestelProduct(
+        prod = BestellingProduct(
                     wedstrijd_inschrijving=inschrijving,
                     webwinkel_keuze=keuze)
         prod.save()

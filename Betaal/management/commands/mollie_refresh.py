@@ -11,7 +11,7 @@ from django.conf import settings
 from django.utils import timezone
 from django.db.utils import OperationalError, IntegrityError
 from django.core.management.base import BaseCommand
-from Bestel.models import Bestelling
+from Bestelling.models import Bestelling
 from Betaal.definities import (BETAAL_REFUND_ID_MAXLENGTH, BETAAL_PAYMENT_STATUS_MAXLENGTH,
                                BETAAL_BESCHRIJVING_MAXLENGTH, BETAAL_PAYMENT_ID_MAXLENGTH,
                                BETAAL_KLANT_ACCOUNT_MAXLENGTH, BETAAL_KLANT_NAAM_MAXLENGTH)

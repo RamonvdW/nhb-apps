@@ -66,7 +66,8 @@ INSTALLED_APPS = [
     'Beheer.apps.BeheerAdminConfig',    # uitbreiding op admin interface
     'Account.apps.AccountConfig',
     'BasisTypen.apps.BasisTypenConfig',
-    'Bestel.apps.BestelConfig',
+    'Bestel.apps.BestelConfig',         # TODO: obsolete and remove
+    'Bestelling.apps.BestellingConfig',
     'Betaal.apps.BetaalConfig',
     'Bondspas.apps.BondspasConfig',
     'Competitie.apps.CompetitieConfig',

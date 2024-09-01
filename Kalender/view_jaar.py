@@ -10,7 +10,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.shortcuts import render
 from django.views.generic import TemplateView
-from Bestel.operations.mandje import eval_mandje_inhoud
+from Bestelling.operations.mandje import eval_mandje_inhoud
 from Evenement.definities import EVENEMENT_STATUS_GEACCEPTEERD, EVENEMENT_STATUS_GEANNULEERD
 from Evenement.models import Evenement
 from Kalender.definities import MAANDEN, MAAND2URL

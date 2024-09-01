@@ -13,7 +13,7 @@ from django.db.models import Q
 from Account.models import get_account
 from BasisTypen.definities import ORGANISATIE_WA
 from BasisTypen.models import BoogType
-from Bestel.models import Bestelling
+from Bestelling.models import Bestelling
 from Competitie.models import RegiocompetitieSporterBoog
 from Competitie.plugin_sporter import get_sporter_competities
 from Functie.definities import Rollen
