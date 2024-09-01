@@ -7,7 +7,7 @@
 from django.test import TestCase
 from django.conf import settings
 from django.utils import timezone
-from Bestelling.models import Bestelling, BestelProduct
+from Bestel.models import Bestelling, BestelProduct
 from Betaal.models import BetaalInstellingenVereniging
 from Evenement.definities import (EVENEMENT_STATUS_GEACCEPTEERD, EVENEMENT_INSCHRIJVING_STATUS_RESERVERING_MANDJE,
                                   EVENEMENT_INSCHRIJVING_STATUS_RESERVERING_BESTELD,
