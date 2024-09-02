@@ -89,7 +89,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
 
         with override_settings(WEBWINKEL_TRANSPORT_OPHALEN_MAG=True):
             # geen mandje
-            # BestelMandje.objects.filter(account=self.account_admin).delete()
+            # BestellingMandje.objects.filter(account=self.account_admin).delete()
             with self.assert_max_queries(20):
                 resp = self.client.get(self.url_kies_transport)
             self.assert404(resp, 'Mandje is leeg')

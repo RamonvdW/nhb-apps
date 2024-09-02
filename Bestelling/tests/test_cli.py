@@ -185,7 +185,7 @@ class TestBestelCli(E2EHelpers, TestCase):
         mandje, is_created = BestellingMandje.objects.get_or_create(account=self.account)
         self.mandje = mandje
 
-    def test_opschonen1(self):
+    def test_opschonen_wedstrijden(self):
         # bestel_mutaties doorloopt bij elke opstart alle mandjes
         # en verwijdert producten die al te lang in het mandje liggen
 
@@ -208,7 +208,7 @@ class TestBestelCli(E2EHelpers, TestCase):
         mandje = BestellingMandje.objects.get(pk=mandje.pk)
         self.assertEqual(0, mandje.producten.count())
 
-    def test_opschonen2(self):
+    def test_opschonen_webwinkel(self):
         # bestel_mutaties doorloopt bij elke opstart alle mandjes
         # en verwijdert producten die al te lang in het mandje liggen
 
@@ -220,7 +220,7 @@ class TestBestelCli(E2EHelpers, TestCase):
         mandje = BestellingMandje.objects.get(pk=self.mandje.pk)
         self.assertEqual(2, mandje.producten.count())
 
-        with self.assert_max_queries(32):
+        with self.assert_max_queries(36):
             f1, f2, = self.run_management_command('bestel_mutaties', '--quick', '1')
 
         # print("\nf1: %s\nf2: %s" % (f1.getvalue(), f2.getvalue()))

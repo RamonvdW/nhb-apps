@@ -293,7 +293,7 @@ class TestEvenementAfmelden(E2EHelpers, TestCase):
         self.sporter_100022.bij_vereniging = None
         self.sporter_100022.save(update_fields=['bij_vereniging'])
 
-        # haal het BestelProduct uit de Bestelling
+        # haal het product uit de bestelling
         self.bestelling.producten.clear()
 
         with self.assert_max_queries(20):

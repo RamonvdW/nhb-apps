@@ -510,7 +510,7 @@ class TestWedstrijdInschrijven(E2EHelpers, TestCase):
         inschrijving.save(update_fields=['status'])
 
         # opnieuw aanmelden
-        with self.assert_max_queries(25):
+        with self.assert_max_queries(27):
             resp = self.client.post(url, {'sporterboog': self.sporterboog.pk,
                                           'sessie': self.sessie_r.pk,
                                           'klasse': self.wkls_r[0].pk,

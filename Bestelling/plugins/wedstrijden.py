@@ -31,7 +31,7 @@ class BepaalAutomatischeKorting(object):
         self._lid_nr2wedstrijd_pks = dict()                       # [lid_nr] = [wedstrijd.pk, ...]
         self._lid_nr2wedstrijd_pks_eerder = dict()                # [lid_nr] = [wedstrijd.pk, ...]
         self._lid_nr_wedstrijd_pk2inschrijving = dict()           # [(lid_nr, wedstrijd_pk)] = inschrijving
-        self._inschrijving_pk2product = dict()                    # [inschrijving.pk] = BestelProduct
+        self._inschrijving_pk2product = dict()                    # [inschrijving.pk] = BestellingProduct
         self._alle_combi_kortingen = list()
         self._max_korting_euro = None
         self._max_korting_pks = None

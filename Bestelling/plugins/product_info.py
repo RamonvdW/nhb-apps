@@ -4,7 +4,7 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-""" Deze module levert een beschrijving van een BestelProduct,
+""" Deze module levert een beschrijving van een BestellingProduct,
     zodat deze consequent beschreven kunnen worden op het scherm, in e-mails en mogelijk in een pdf.
 """
 

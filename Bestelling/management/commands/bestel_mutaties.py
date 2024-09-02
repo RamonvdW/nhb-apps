@@ -300,7 +300,7 @@ class Command(BaseCommand):
 
             wedstrijden_plugin_verwijder_reservering(self.stdout, inschrijving)
 
-            mandje = product.bestelmandje_set.first()
+            mandje = product.bestellingmandje_set.first()
             if mandje.pk not in mandje_pks:
                 mandje_pks.append(mandje.pk)
 
@@ -326,7 +326,7 @@ class Command(BaseCommand):
 
             evenement_plugin_verwijder_reservering(self.stdout, inschrijving)
 
-            mandje = product.bestelmandje_set.first()
+            mandje = product.bestellingmandje_set.first()
             if mandje.pk not in mandje_pks:
                 mandje_pks.append(mandje.pk)
 
@@ -352,7 +352,7 @@ class Command(BaseCommand):
             # geef de reservering op de producten weer vrij
             webwinkel_plugin_verwijder_reservering(self.stdout, keuze)
 
-            mandje = product.bestelmandje_set.first()
+            mandje = product.bestellingmandje_set.first()
             if mandje.pk not in mandje_pks:
                 mandje_pks.append(mandje.pk)
 
@@ -665,7 +665,7 @@ class Command(BaseCommand):
                     mutatie.product = None
                     mutatie.save()
 
-                    # verwijder het BestelProduct, dan verdwijnt deze ook uit het mandje
+                    # verwijder het product, dan verdwijnt deze ook uit het mandje
                     product.delete()
 
                     webwinkel_plugin_bepaal_kortingen(self.stdout, mandje)

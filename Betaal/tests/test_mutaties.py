@@ -97,7 +97,7 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
         bestelling.save()
 
         # de bestelde producten met prijs en korting
-        # producten = models.ManyToManyField(BestelProduct)
+        # producten = models.ManyToManyField(BestellingProduct)
 
         url_betaling_gedaan = settings.SITE_URL + '/plein/'
 
@@ -303,7 +303,7 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
         bestelling.save()
 
         # de bestelde producten met prijs en korting
-        # producten = models.ManyToManyField(BestelProduct)
+        # producten = models.ManyToManyField(BestellingProduct)
 
         url_betaling_gedaan = settings.SITE_URL + '/plein/'
 
@@ -344,7 +344,7 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
         bestelling.save()
 
         # de bestelde producten met prijs en korting
-        # producten = models.ManyToManyField(BestelProduct)
+        # producten = models.ManyToManyField(BestellingProduct)
 
         url_betaling_gedaan = settings.SITE_URL + '/plein/'
 
@@ -385,7 +385,7 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
         bestelling.save()
 
         # de bestelde producten met prijs en korting
-        # producten = models.ManyToManyField(BestelProduct)
+        # producten = models.ManyToManyField(BestellingProduct)
 
         url_betaling_gedaan = settings.SITE_URL + '/plein/'
 

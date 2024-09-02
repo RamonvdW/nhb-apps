@@ -26,7 +26,7 @@ from Webwinkel.models import WebwinkelProduct, WebwinkelKeuze
 from decimal import Decimal
 
 
-class TestBestelMandje(E2EHelpers, TestCase):
+class TestBestellingMandje(E2EHelpers, TestCase):
 
     """ tests voor de Bestel applicatie, module mandje """
 
