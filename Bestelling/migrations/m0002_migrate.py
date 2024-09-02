@@ -198,6 +198,7 @@ class Migration(migrations.Migration):
     # volgorde afdwingen
     dependencies = [
         ('Bestelling', 'm0001_initial'),
+        ('Bestel', 'm0030_rename'),
     ]
 
     # migratie functies
