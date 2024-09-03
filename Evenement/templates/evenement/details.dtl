@@ -112,6 +112,16 @@
                 </tr>
 
                 <tr>
+                    <th>Website</th>
+                    <td>                                
+                        <a href="{{ evenement.contact_website }}" target="_blank" rel="noopener noreferrer">
+                            <i class="notranslate material-icons-round left sv-blauw-text">open_in_new</i>
+                            <code>{{ evenement.contact_website }}</code>
+                        </a>
+                    </td>
+                </tr>
+            
+                <tr>
                     <td colspan="2" class="center sv-blauw-text">
                         <h6>Inschrijfgeld</h6>
                     </td>
