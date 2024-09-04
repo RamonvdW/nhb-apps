@@ -110,7 +110,7 @@ def evenement_plugin_inschrijving_is_betaald(stdout, product: BestelProduct):
     msg = "[%s] Betaling ontvangen (euro %s); status is nu definitief\n" % (stamp_str, inschrijving.bedrag_ontvangen)
 
     inschrijving.log += msg
-    inschrijving.save(update_fields=['ontvangen_euro', 'status', 'log'])
+    inschrijving.save(update_fields=['bedrag_ontvangen', 'status', 'log'])
 
     evenement = inschrijving.evenement
 
