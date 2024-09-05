@@ -210,7 +210,7 @@ class Command(BaseCommand):
         if terugbetaald:
             transactie.bedrag_terugbetaald = terugbetaald['bedrag']
         if beschikbaar:
-            transactie.bedrag_teruggevorderd = beschikbaar['bedrag']
+            transactie.bedrag_beschikbaar = beschikbaar['bedrag']
         if teruggevorderd:
             transactie.teruggevorderd = teruggevorderd['bedrag']
 
