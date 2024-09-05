@@ -310,7 +310,7 @@ class BestellingMutatie(models.Model):
 
     def __str__(self):
         """ Lever een tekstuele beschrijving voor de admin interface """
-        msg = "[%s]" % self.when
+        msg = "[%s]" % timezone.localtime(self.when).strftime('%Y-%m-%d %H:%M:%S')
         if not self.is_verwerkt:
             msg += " (nog niet verwerkt)"
         try:

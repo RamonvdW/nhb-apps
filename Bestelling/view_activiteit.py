@@ -52,7 +52,10 @@ class BestelActiviteitView(UserPassesTestMixin, TemplateView):
         context['zoek_url'] = reverse('Bestel:activiteit')
         if len(self.request.GET.keys()) == 0:
             # no query parameters
-            form = ZoekBestellingForm(initial={'webwinkel': True, 'wedstrijden': True, 'gratis': True})
+            form = ZoekBestellingForm(initial={'webwinkel': True,
+                                               'wedstrijden': True,
+                                               'evenementen': True,
+                                               'gratis': True})
         else:
             form = ZoekBestellingForm(self.request.GET)
             form.full_clean()   # vult form.cleaned_data
@@ -135,6 +138,11 @@ class BestelActiviteitView(UserPassesTestMixin, TemplateView):
                 # vinkje is niet gezet, dus wedstrijd bestellingen zijn niet gewenst --> behoud waar deze None is
                 bestellingen = bestellingen.filter(producten__wedstrijd_inschrijving=None)
 
+            if not form.cleaned_data['evenementen']:
+                # vinkje is niet gezet, dus evenement bestellingen zijn niet gewenst --> behoud waar deze None is
+                bestellingen = bestellingen.filter(producten__evenement_inschrijving=None,
+                                                   producten__evenement_afgemeld=None)
+
             if not form.cleaned_data['gratis']:
                 # vinkje is niet gezet, dus gratis bestellingen zijn niet gewenst
                 bestellingen = bestellingen.exclude(totaal_euro__lt=0.001)
@@ -169,12 +177,20 @@ class BestelActiviteitView(UserPassesTestMixin, TemplateView):
                                                          'wedstrijd_inschrijving__sporterboog__boogtype',
                                                          'webwinkel_keuze',
                                                          'webwinkel_keuze__product',
-                                                         'webwinkel_keuze__koper')
+                                                         'webwinkel_keuze__koper',
+                                                         'evenement_inschrijving__evenement',
+                                                         'evenement_inschrijving__evenement__organiserende_vereniging',
+                                                         'evenement_inschrijving__sporter',
+                                                         'evenement_afgemeld__evenement',
+                                                         'evenement_afgemeld__evenement__organiserende_vereniging',
+                                                         'evenement_afgemeld__sporter')
                                          .all())
 
             aantal_wedstrijd = 0
             aantal_webwinkel = 0
+            aantal_evenement = 0
             laatste_wedstrijd_beschrijving = ''
+            laatste_evenement_beschrijving = ''
 
             for product in bestelling.prods_list:
 
@@ -186,12 +202,33 @@ class BestelActiviteitView(UserPassesTestMixin, TemplateView):
                         inschrijving.sporterboog.sporter.lid_nr_en_volledige_naam(),
                         inschrijving.sporterboog.boogtype.beschrijving)
                     product.beschrijving_str3 = inschrijving.wedstrijd.titel
-                    laatste_wedstrijd_beschrijving = product.beschrijving_str1
+
+                    laatste_wedstrijd_beschrijving = product.beschrijving_str3
 
                 elif product.webwinkel_keuze:
                     aantal_webwinkel += 1
                     keuze = product.webwinkel_keuze
                     product.beschrijving_str2 = keuze.product.omslag_titel
+
+                elif product.evenement_inschrijving:
+                    aantal_evenement += 1
+
+                    inschrijving = product.evenement_inschrijving
+                    product.beschrijving_str1 = 'Evenement bij %s' % inschrijving.evenement.organiserende_vereniging.ver_nr_en_naam()
+                    product.beschrijving_str2 = 'voor %s' % inschrijving.sporter.lid_nr_en_volledige_naam()
+                    product.beschrijving_str3 = inschrijving.evenement.titel
+
+                    laatste_evenement_beschrijving = product.beschrijving_str3
+
+                elif product.evenement_afgemeld:
+                    aantal_evenement += 1
+
+                    inschrijving = product.evenement_afgemeld
+                    product.beschrijving_str1 = 'Evenement bij %s' % inschrijving.evenement.organiserende_vereniging.ver_nr_en_naam()
+                    product.beschrijving_str2 = 'voor %s' % inschrijving.sporter.lid_nr_en_volledige_naam()
+                    product.beschrijving_str3 = inschrijving.evenement.titel
+
+                    laatste_evenement_beschrijving = product.beschrijving_str3
 
                 else:
                     product.geen_beschrijving = True
@@ -202,6 +239,8 @@ class BestelActiviteitView(UserPassesTestMixin, TemplateView):
                 beschrijvingen.append('%sx webwinkel' % aantal_webwinkel)
             if aantal_wedstrijd:
                 beschrijvingen.append('%sx %s' % (aantal_wedstrijd, laatste_wedstrijd_beschrijving))
+            if aantal_evenement:
+                beschrijvingen.append('%sx %s' % (aantal_evenement, laatste_evenement_beschrijving))
 
             bestelling.beschrijving_kort = " + ".join(beschrijvingen) if len(beschrijvingen) else "?"
 

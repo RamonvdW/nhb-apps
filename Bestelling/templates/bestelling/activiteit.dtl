@@ -79,6 +79,13 @@
 
                     <p>
                         <label>
+                            <input type="checkbox" class="filled-in" name="evenementen"{% if zoekform.evenementen.value %} checked{% endif %}>
+                            <span class="black-text">{{ zoekform.evenementen.label }}</span>
+                        </label>
+                    </p>
+
+                    <p>
+                        <label>
                             <input type="checkbox" class="filled-in" name="gratis"{% if zoekform.gratis.value %} checked{% endif %}>
                             <span class="black-text">{{ zoekform.gratis.label }}</span>
                         </label>
