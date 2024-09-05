@@ -52,7 +52,10 @@ class BestelActiviteitView(UserPassesTestMixin, TemplateView):
         context['zoek_url'] = reverse('Bestel:activiteit')
         if len(self.request.GET.keys()) == 0:
             # no query parameters
-            form = ZoekBestellingForm(initial={'webwinkel': True, 'wedstrijden': True, 'gratis': True})
+            form = ZoekBestellingForm(initial={'webwinkel': True,
+                                               'wedstrijden': True,
+                                               'evenementen': True,
+                                               'gratis': True})
         else:
             form = ZoekBestellingForm(self.request.GET)
             form.full_clean()   # vult form.cleaned_data
@@ -134,6 +137,11 @@ class BestelActiviteitView(UserPassesTestMixin, TemplateView):
             if not form.cleaned_data['wedstrijden']:
                 # vinkje is niet gezet, dus wedstrijd bestellingen zijn niet gewenst --> behoud waar deze None is
                 bestellingen = bestellingen.filter(producten__wedstrijd_inschrijving=None)
+
+            if not form.cleaned_data['evenementen']:
+                # vinkje is niet gezet, dus evenement bestellingen zijn niet gewenst --> behoud waar deze None is
+                bestellingen = bestellingen.filter(producten__evenement_inschrijving=None,
+                                                   producten__evenement_afgemeld=None)
 
             if not form.cleaned_data['gratis']:
                 # vinkje is niet gezet, dus gratis bestellingen zijn niet gewenst

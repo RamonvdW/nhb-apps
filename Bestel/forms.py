@@ -27,6 +27,10 @@ class ZoekBestellingForm(forms.Form):
                         label='Toon wedstrijden',
                         required=False)     # allow absence
 
+    evenementen = forms.BooleanField(
+                        label='Toon evenementen',
+                        required=False)     # allow absence
+
     gratis = forms.BooleanField(
                         label='Toon gratis producten',
                         required=False)     # allow absence
