@@ -65,9 +65,10 @@ class DetailsView(TemplateView):
         context['hint_inloggen'] = not account.is_authenticated
 
         rol_nu, functie_nu = rol_get_huidige_functie(self.request)
-        if rol_nu == Rollen.ROL_HWL and functie_nu.vereniging == evenement.organiserende_vereniging:
+        is_organiserende_hwl = (rol_nu == Rollen.ROL_HWL and functie_nu.vereniging == evenement.organiserende_vereniging)
+        context['is_organiserende_hwl'] = is_organiserende_hwl
+        if is_organiserende_hwl:
             context['kan_aanmelden'] = False
-            context['is_organiserende_hwl'] = True
 
         if context['kan_aanmelden']:
             context['menu_toon_mandje'] = True
@@ -81,7 +82,7 @@ class DetailsView(TemplateView):
                                                              kwargs={'evenement_pk': evenement.pk})
 
         # inschrijf sectie (kaartjes) tonen voor dit evenement?
-        context['toon_inschrijven'] = context['is_voor_sluitingsdatum']
+        context['toon_inschrijven'] = context['is_voor_sluitingsdatum'] and not is_organiserende_hwl
 
         url_terug = reverse('Kalender:maand',
                             kwargs={'jaar': evenement.datum.year,
