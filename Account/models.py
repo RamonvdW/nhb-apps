@@ -110,7 +110,7 @@ class Account(AbstractUser):
         """ geef een korte beschrijving van dit account
             wordt gebruikt in de drop-down lijsten en autocomplete_fields van de admin interface
         """
-        return self.get_account_full_name()
+        return "%s %s" % (self.username, self.volledige_naam())
 
 
 class AccountSessions(models.Model):

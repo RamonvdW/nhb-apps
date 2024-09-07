@@ -502,10 +502,11 @@ class BestellingAfgerondView(UserPassesTestMixin, TemplateView):
 
         context['bestelling'] = bestelling
 
+        # TODO: onderstaande moeten we herzien. Er is 1 record van de betaling met alle totalen (in/uit).
         transacties_euro = Decimal(0)
         for transactie in bestelling.transacties.all():
             if transactie.is_restitutie:
-                transacties_euro -= transactie.bedrag_euro_klant
+                transacties_euro -= transactie.bedrag_terugbetaald
             else:
                 transacties_euro += transactie.bedrag_euro_klant
         # for

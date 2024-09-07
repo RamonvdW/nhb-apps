@@ -7,7 +7,9 @@
 from django.contrib import auth
 from django.test import TestCase, Client
 from django.db import connection
+from Account.models import Account
 from Account.operations.aanmaken import account_create
+from Functie.models import Functie
 from Functie.view_vhpg import account_vhpg_is_geaccepteerd
 from TestHelpers.test_asserts import MyTestAsserts
 from TestHelpers.query_tracer import MyQueryTracer
@@ -53,7 +55,7 @@ class E2EHelpers(MyTestAsserts, MyMgmtCommandHelper, TestCase):
     def e2e_account_accepteert_vhpg(account):
         account_vhpg_is_geaccepteerd(account)
 
-    def e2e_create_account(self, username, email, voornaam, accepteer_vhpg=False):
+    def e2e_create_account(self, username, email, voornaam, accepteer_vhpg=False) -> Account:
         """ Maak een Account aan in de database van de website """
         account = account_create(username, voornaam, '', TEST_WACHTWOORD, email, True)
 
@@ -66,7 +68,7 @@ class E2EHelpers(MyTestAsserts, MyMgmtCommandHelper, TestCase):
             self.e2e_account_accepteert_vhpg(account)
         return account
 
-    def e2e_create_account_admin(self, accepteer_vhpg=True):
+    def e2e_create_account_admin(self, accepteer_vhpg=True) -> Account:
         account = self.e2e_create_account('424242', 'admin@test.com', 'Admin', accepteer_vhpg)
         # zet de benodigde vlaggen om admin te worden
         account.is_staff = True         # toegang tot de admin site
@@ -74,7 +76,7 @@ class E2EHelpers(MyTestAsserts, MyMgmtCommandHelper, TestCase):
         account.save()
         return account
 
-    def e2e_login_no_check(self, account, wachtwoord=None, follow=False):
+    def e2e_login_no_check(self, account: Account, wachtwoord=None, follow=False):
         """ log in op de website via de voordeur, zodat alle rechten geëvalueerd worden """
         if not wachtwoord:
             wachtwoord = TEST_WACHTWOORD
@@ -83,7 +85,7 @@ class E2EHelpers(MyTestAsserts, MyMgmtCommandHelper, TestCase):
                                 follow=follow)
         return resp
 
-    def e2e_login(self, account, wachtwoord=None):
+    def e2e_login(self, account: Account, wachtwoord=None):
         """ log in op de website via de voordeur, zodat alle rechten geëvalueerd worden """
         resp = self.e2e_login_no_check(account, wachtwoord)
         if resp.status_code != 302:         # pragma: no cover
@@ -92,7 +94,7 @@ class E2EHelpers(MyTestAsserts, MyMgmtCommandHelper, TestCase):
         user = auth.get_user(self.client)
         self.assertTrue(user.is_authenticated)
 
-    def e2e_login_and_pass_otp(self, account, wachtwoord=None):
+    def e2e_login_and_pass_otp(self, account: Account, wachtwoord=None):
         self.e2e_login(account, wachtwoord)
         # door de login is een cookie opgeslagen met het csrf token
         resp = self.client.post('/account/otp-controle/', {'otp_code': pyotp.TOTP(account.otp_code).now()})
@@ -125,7 +127,7 @@ class E2EHelpers(MyTestAsserts, MyMgmtCommandHelper, TestCase):
         'CS': '/scheidsrechter/'
     }
 
-    def e2e_wissel_naar_functie(self, functie):
+    def e2e_wissel_naar_functie(self, functie: Functie):
         resp = self.client.post('/functie/activeer-functie/%s/' % functie.pk)
 
         try:

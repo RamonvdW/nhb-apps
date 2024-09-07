@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.contrib.auth import login
-from Account.operations.otp import otp_zet_control_niet_gelukt
+from Account.operations.otp import otp_zet_controle_niet_gelukt
 from Functie.rol import rol_bepaal_beschikbare_rollen
 from Logboek.models import schrijf_in_logboek
 from Overig.helpers import get_safe_from_ip
@@ -26,7 +26,7 @@ def auto_login_gast_account(request, account):
 
     # we slaan de typische plug-ins over omdat we geen pagina of redirect kunnen doorgeven
 
-    otp_zet_control_niet_gelukt(request)
+    otp_zet_controle_niet_gelukt(request)
 
     # gebruiker mag NIET aangemeld blijven
     # zorg dat de session-cookie snel verloopt

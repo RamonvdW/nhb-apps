@@ -14,7 +14,7 @@ from django.db.models import Q
 from django.core.exceptions import PermissionDenied
 from Account.forms import ZoekAccountForm, KiesAccountForm
 from Account.models import Account, get_account
-from Account.operations.otp import otp_zet_controle_gelukt, otp_zet_control_niet_gelukt
+from Account.operations.otp import otp_zet_controle_gelukt, otp_zet_controle_niet_gelukt
 from Account.view_login import account_plugins_login_gate
 from Functie.rol import rol_bepaal_beschikbare_rollen
 from Logboek.models import schrijf_in_logboek
@@ -67,7 +67,7 @@ def receiver_account_wissel(request, account):
         # fake de OTP passage
         otp_zet_controle_gelukt(request)
     else:
-        otp_zet_control_niet_gelukt(request)
+        otp_zet_controle_niet_gelukt(request)
 
     # herstel de last_login van de echte gebruiker
     account.last_login = old_last_login

@@ -13,7 +13,7 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse
 from Account.models import Account, get_account
 from Account.operations.wachtwoord import account_test_wachtwoord_sterkte
-from Account.operations.otp import otp_zet_control_niet_gelukt
+from Account.operations.otp import otp_zet_controle_niet_gelukt
 from Account.plugin_manager import account_plugins_login_gate, account_plugins_ww_vergeten
 from Functie.rol import rol_bepaal_beschikbare_rollen
 from Logboek.models import schrijf_in_logboek
@@ -155,7 +155,7 @@ def receive_wachtwoord_vergeten(request, account):
                 # and has generated/rendered an HttpResponse that we cannot handle here
                 return httpresp
 
-    otp_zet_control_niet_gelukt(request)
+    otp_zet_controle_niet_gelukt(request)
 
     # gebruiker mag NIET aangemeld blijven
     # zorg dat de session-cookie snel verloopt

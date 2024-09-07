@@ -5,6 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db import models
+from django.utils import timezone
 from Competitie.definities import (MUTATIE_TO_STR, MUTATIE_KAMP_AANMELDEN_INDIV, MUTATIE_KAMP_AFMELDEN_INDIV,
                                    MUTATIE_KAMP_CUT)
 from Competitie.models.competitie import Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse
@@ -69,7 +70,7 @@ class CompetitieMutatie(models.Model):
 
     def __str__(self):
         """ geef een tekstuele afkorting van dit object, voor in de admin interface """
-        msg = "[%s]" % self.when
+        msg = "[%s]" % timezone.localtime(self.when).strftime('%Y-%m-%d %H:%M:%S')
         if not self.is_verwerkt:
             msg += " (nog niet verwerkt)"
         try:

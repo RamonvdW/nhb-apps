@@ -175,7 +175,7 @@ class TestPleinCliDatabaseOpschonen(E2EHelpers, TestCase):
         self.assertTrue("[INFO] Verwijder 1 oude betaal mutatie records" in f2.getvalue())
         self.assertTrue("[INFO] Verwijder 1 oude betaal-actief records" in f2.getvalue())
         self.assertTrue("[INFO] Verwijder 1 oude betaal-transactie records" in f2.getvalue())
-        self.assertTrue("[INFO] Verwijder onvoltooid account Voornaam Achternaam (test)" in f2.getvalue())
+        self.assertTrue("[INFO] Verwijder onvoltooid account test Voornaam Achternaam" in f2.getvalue())
         self.assertTrue("[INFO] Verwijder 1 oude logboek regels" in f2.getvalue())
         self.assertTrue("[INFO] Verwijder 1 oude emails" in f2.getvalue())
         self.assertTrue("[INFO] Verwijder ongebruikte tijdelijke url" in f2.getvalue())
