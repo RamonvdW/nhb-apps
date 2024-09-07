@@ -85,7 +85,7 @@ BEHEER_PAGINAS = (
     '/beheer/Score/scorehist/',
     '/beheer/Score/uitslag/',
     '/beheer/Spelden/speld/',
-    # '/beheer/Spelden/speldaanvraag/',
+    '/beheer/Spelden/speldaanvraag/',
     '/beheer/Spelden/speldbijlage/',
     '/beheer/Spelden/speldscore/',
     '/beheer/Sporter/speelsterkte/',
@@ -200,8 +200,8 @@ class TestBeheer(E2EHelpers, TestCase):
 
                 with self.assert_max_queries(20):
                     self.client.get(url + '1/change/')
-            except AttributeError:
-                print('\n[ERROR] AttributeError on url %s' % repr(url))
+            except AttributeError:      # pragma: no cover
+                self.fail('AttributeError on url %s' % repr(url))
         # for
 
         settings.DEBUG = False

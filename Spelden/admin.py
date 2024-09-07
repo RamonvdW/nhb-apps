@@ -18,9 +18,14 @@ class SpeldScoreAdmin(admin.ModelAdmin):
     list_filter = ('wedstrijd_soort', 'leeftijdsklasse__wedstrijd_geslacht', 'afstand', 'speld', 'boog_type')
 
 
+class SpeldAanvraagAdmin(admin.ModelAdmin):
+
+    autocomplete_fields = ('door_account', 'voor_sporter', 'wedstrijd')
+
+
 admin.site.register(Speld, SpeldAdmin)
 admin.site.register(SpeldScore, SpeldScoreAdmin)
-admin.site.register(SpeldAanvraag)
+admin.site.register(SpeldAanvraag, SpeldAanvraagAdmin)
 admin.site.register(SpeldBijlage)
 
 # end of file

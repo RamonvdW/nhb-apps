@@ -5,6 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db import models
+from django.utils import timezone
 from Account.models import Account
 from BasisTypen.models import BoogType, Leeftijdsklasse
 from Spelden.definities import (SPELD_CATEGORIE_CHOICES, SPELD_CATEGORIE_WA_STER,
@@ -90,7 +91,7 @@ class SpeldAanvraag(models.Model):
     door_account = models.ForeignKey(Account, on_delete=models.PROTECT)
 
     # laatste keer dat we een reminder gemaild hebben aan de aanvrager?
-    last_email_reminder = models.DateTimeField(default='2000-01-01 00:00 +0000')
+    last_email_reminder = models.DateTimeField(auto_now_add=True)       # zet op 'vandaag" bij aanmaken record
 
     # voor welke sporter wordt de aanvraag gedaan?
     voor_sporter = models.ForeignKey(Sporter, on_delete=models.CASCADE)
