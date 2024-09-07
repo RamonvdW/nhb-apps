@@ -152,13 +152,14 @@ class BetaalTransactie(models.Model):
     #   bedrag_refund
 
     # CPSP specifieke refund transactie id
-    refund_id = models.CharField(max_length=BETAAL_REFUND_ID_MAXLENGTH, default='')
+    refund_id = models.CharField(max_length=BETAAL_REFUND_ID_MAXLENGTH, default='', blank=True)
 
     # de laatste ontvangen status van de refund
     # kan zijn: queued, pending, processing, refunded, failed, canceled
-    refund_status = models.CharField(max_length=BETAAL_PAYMENT_STATUS_MAXLENGTH, default='')
+    refund_status = models.CharField(max_length=BETAAL_PAYMENT_STATUS_MAXLENGTH, default='', blank=True)
 
     # hoeveel hebben we (totaal) terug betaald
+    # let op: dit is een negatief bedrag!
     bedrag_refund = models.DecimalField(max_digits=7, decimal_places=2, default=0.0)
 
     # TODO: Oude velden hieronder zijn deltas
