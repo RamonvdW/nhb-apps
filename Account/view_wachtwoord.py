@@ -163,6 +163,10 @@ def receive_wachtwoord_vergeten(request, account):
 
     request.session['moet_oude_ww_weten'] = False
 
+    # track het session_id in de log zodat we deze kunnen koppelen aan de webserver logs
+    session_id = request.session.session_key
+    my_logger.info('Account %s has SESSION %s' % (repr(account.username), repr(session_id)))
+
     # schrijf in het logboek
     schrijf_in_logboek(account=None,
                        gebruikte_functie="Inloggen (code)",
