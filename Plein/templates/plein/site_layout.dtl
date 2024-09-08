@@ -187,7 +187,7 @@
         </div>
 
         <script src="{% static 'js/materialize-new-16_min.js' %}"></script>
-        <script src="{% static 'js/site_layout-18_min.js' %}"></script>
+        <script src="{% static 'js/site_layout-20_min.js' %}"></script>
 
         <script>
             document.addEventListener("DOMContentLoaded", sitelayout_loaded);

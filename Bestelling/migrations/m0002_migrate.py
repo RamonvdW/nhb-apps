@@ -38,7 +38,7 @@ def migrate_from_bestel(apps, _):
     # (verwachting: 4000 records)
     print('P', end='')
     bestelproduct_pk2bestellingproduct = dict()     # [BestelProduct.pk] = BestellingProduct
-    for product in (product_oud
+    for product in (product_oud                     # pragma: no cover
                     .objects
                     .select_related('wedstrijd_inschrijving',
                                     'evenement_inschrijving',
@@ -59,7 +59,10 @@ def migrate_from_bestel(apps, _):
     # mandje overzetten
     # (verwachting: enkele)
     print('M', end='')
-    for mandje in mandje_oud.objects.order_by('pk').prefetch_related('producten').select_related('account'):
+    for mandje in (mandje_oud.objects               # pragma: no cover
+                   .order_by('pk')
+                   .prefetch_related('producten')
+                   .select_related('account')):
         product_pks = list(mandje.producten.values_list('pk', flat=True))
         producten = [bestelproduct_pk2bestellingproduct[pk]
                      for pk in product_pks]
@@ -89,7 +92,7 @@ def migrate_from_bestel(apps, _):
     # (verwachting: 3000 records)
     print('B', end='')
     bestelling2_pk2bestelling = dict()      # [Bestelling2.pk] = Bestelling
-    for bestelling in (bestelling_oud
+    for bestelling in (bestelling_oud       # pragma: no cover
                        .objects
                        .prefetch_related('producten',
                                          'transacties')
@@ -148,7 +151,7 @@ def migrate_from_bestel(apps, _):
     # (schatting: 10000 records)
     print('U', end='')
     bulk = list()
-    for mutatie in (mutatie_oud
+    for mutatie in (mutatie_oud     # pragma: no cover
                     .objects
                     .select_related('product',
                                     'bestelling',
