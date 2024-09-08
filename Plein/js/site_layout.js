@@ -1,5 +1,5 @@
 /*!
- * Copyright (c) 2020-2023 Ramon van der Winkel.
+ * Copyright (c) 2020-2024 Ramon van der Winkel.
  * All rights reserved.
  * Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
  */
@@ -267,7 +267,7 @@ function set_collapsible_icon(li_el, new_icon) {
     // first child element = the div with the header
     const header_el = li_el.childNodes[0];
     // search within the header for the element with the icon class
-    const icons = header_el.getElementsByClassName('material-icons-round');
+    const icons = header_el.getElementsByClassName('material-icons-round secondary-content');
     if (icons.length > 0) {
         const icon = icons[0];
         icon.innerText = new_icon;
@@ -294,7 +294,7 @@ function sitelayout_loaded() {
                                 onCloseEnd: inklappen_klaar,
                                 });
 
-    elems = document.querySelectorAll(".collapsible-header .material-icons-round");
+    elems = document.querySelectorAll(".collapsible-header .secondary-content");
     // console.log('header icons:', elems)
     elems.forEach(icon => {icon.innerText = 'add';});    // gelijk houden aan inklappen_klaar
 

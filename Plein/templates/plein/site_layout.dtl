@@ -28,7 +28,7 @@
 
         {% include 'plein/site_layout_fonts.dtl' %}
 
-        <link rel="stylesheet" href="{% static 'css/materialize-new-253.css' %}">
+        <link rel="stylesheet" href="{% static 'css/materialize-new-265.css' %}">
 
         {% include 'plein/site_layout_favicons.dtl' %}
 
@@ -187,7 +187,7 @@
         </div>
 
         <script src="{% static 'js/materialize-new-16_min.js' %}"></script>
-        <script src="{% static 'js/site_layout-18_min.js' %}"></script>
+        <script src="{% static 'js/site_layout-20_min.js' %}"></script>
 
         <script>
             document.addEventListener("DOMContentLoaded", sitelayout_loaded);

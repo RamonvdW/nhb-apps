@@ -908,6 +908,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
             wkl.short_str = wkl.beschrijving
             wkl.sel_str = "wkl_indiv_%s" % wkl.pk
             wkl.geselecteerd = (wkl.pk in wedstrijd_indiv_pks)
+            wkl.group_code = 'I' + wkl.boogtype.afkorting
         # for
 
         # wedstrijdklassen teams
@@ -929,6 +930,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
                         .objects
                         .filter(competitie=deelcomp.competitie,
                                 is_voor_teams_rk_bk=False)
+                        .select_related('team_type')
                         .order_by('volgorde')
                         .all())
             for wkl in wkl_team:
