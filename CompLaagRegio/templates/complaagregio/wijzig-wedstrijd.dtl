@@ -130,7 +130,7 @@
         }
 
         function toggle_groep(el_chk) {
-            const group_code = el_chk.dataset['group']
+            const group_code = el_chk.dataset['group'];
             const new_value = el_chk.checked;
             const sel = "input[data-group='" + group_code + "']";
             const els = document.querySelectorAll(sel);
