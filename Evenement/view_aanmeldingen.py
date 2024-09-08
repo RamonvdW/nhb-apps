@@ -223,7 +223,7 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
                         .order_by('nummer'))
 
         writer.writerow(['Reserveringsnummer', 'Aangemeld op', 'Afgemeld op', 'Status',
-                         'Bestelnummer', 'Prijs', 'Ontvangen', 'Retour'
+                         'Bestelnummer', 'Prijs', 'Ontvangen', 'Retour',
                          'Lid nr', 'Sporter', 'E-mailadres', 'Ver nr', 'Vereniging'])
 
         output = list()
