@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2023 Ramon van der Winkel.
+                Copyright (c) 2020-2024 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -128,6 +128,17 @@
             el1.value = el2.M_Datepicker.toString('yyyy-mm-dd');
             gewijzigd();
         }
+
+        function toggle_groep(el_chk) {
+            const group_code = el_chk.dataset['group']
+            const new_value = el_chk.checked;
+            const sel = "input[data-group='" + group_code + "']";
+            const els = document.querySelectorAll(sel);
+            els.forEach(el => {
+                el.checked = new_value;
+            });
+            gewijzigd();
+        }
     </script>
 
 
@@ -208,7 +219,12 @@
                                     <td>
                                         <table class="striped">
                                             <tr>
-                                                <th><!-- checkbox column --></th>
+                                                <th>
+                                                    <label>
+                                                        <input type="checkbox" class="group-selector" data-group="team" name="all_team" onchange="toggle_groep(this)">
+                                                        <span></span>
+                                                    </label>
+                                                </th>
                                                 <th>Klasse</th>
                                                 <th>Aantal teams</th>
                                             </tr>
@@ -216,8 +232,8 @@
                                                 <tr>
                                                     <td>
                                                         <label>
-                                                            <input type="checkbox" class="filled-in" name="{{ obj.sel_str }}"{% if obj.geselecteerd %} checked{% endif %} onchange="gewijzigd()">
-                                                            <span>&nbsp;</span>
+                                                            <input type="checkbox" class="filled-in" data-group="team" name="{{ obj.sel_str }}"{% if obj.geselecteerd %} checked{% endif %} onchange="gewijzigd()">
+                                                            <span></span>
                                                         </label>
                                                     </td>
                                                     <td>{{ obj.short_str }}</td>
@@ -238,7 +254,12 @@
                                             {% for obj in wkl_indiv %}
                                                 {% if obj.break_before %}
                                                     <tr>
-                                                        <th><!-- checkbox column --></th>
+                                                        <th>
+                                                            <label>
+                                                                <input type="checkbox" class="group-selector" data-group="{{ obj.group_code }}" name="all_{{ obj.group_code }}" onchange="toggle_groep(this)">
+                                                                <span></span>
+                                                            </label>
+                                                        </th>
                                                         <th>Klasse</th>
                                                         <th>Aantal sporters</th>
                                                     </tr>
@@ -246,8 +267,8 @@
                                                 <tr>
                                                     <td>
                                                         <label>
-                                                            <input type="checkbox" class="filled-in" name="{{ obj.sel_str }}"{% if obj.geselecteerd %} checked{% endif %} onchange="gewijzigd()">
-                                                            <span>&nbsp;</span>
+                                                            <input type="checkbox" class="filled-in" data-group="{{ obj.group_code }}" name="{{ obj.sel_str }}"{% if obj.geselecteerd %} checked{% endif %} onchange="gewijzigd()">
+                                                            <span></span>
                                                         </label>
                                                     </td>
                                                     <td>{{ obj.short_str }}</td>
@@ -261,11 +282,18 @@
 
                         </table>
 
-                        <br>
-                        <p class="center">
+                        <div class="fixed-action-btn" style="display: none">
                             <button class="btn-sv-rood" id="submit_knop1" type="submit" disabled>
                                 <i class="notranslate material-icons-round left">check</i>Opslaan</button>
+                        </div>
+
+                        {% comment %}
+                        <br>
+                        <p class="center">
+                            <button class="btn-sv-rood btn-floating" id="submit_knop1" type="submit" disabled>
+                                <i class="notranslate material-icons-round left">check</i>Opslaan</button>
                         </p>
+                        {% endcomment %}
 
                     </form>
 
