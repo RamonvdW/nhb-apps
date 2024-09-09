@@ -21,9 +21,9 @@ from Webwinkel.models import WebwinkelProduct, WebwinkelKeuze
 from decimal import Decimal
 
 
-class TestBestelGast(E2EHelpers, TestCase):
+class TestBestellingGast(E2EHelpers, TestCase):
 
-    """ tests voor de Bestel-applicatie, module bestellingen door gast account """
+    """ tests voor de Bestelling  applicatie, module bestellingen door gast account """
 
     test_after = ('Bestelling.tests.test_mandje', 'Bestelling.tests.test_bestelling', 'Registreer.tests.test_gast')
 

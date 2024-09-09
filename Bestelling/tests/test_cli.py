@@ -21,8 +21,9 @@ from decimal import Decimal
 import datetime
 
 
-class TestBestelCli(E2EHelpers, TestCase):
-    """ unittests voor de Bestel applicatie, management command bestel_mutaties """
+class TestBestellingCli(E2EHelpers, TestCase):
+
+    """ unittests voor de Bestelling applicatie, management command bestel_mutaties """
 
     def _leg_webwinkel_in_mandje(self, verleden):
 

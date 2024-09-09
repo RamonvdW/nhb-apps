@@ -28,7 +28,7 @@ from decimal import Decimal
 
 class TestBestellingMandje(E2EHelpers, TestCase):
 
-    """ tests voor de Bestel applicatie, module mandje """
+    """ tests voor de Bestelling applicatie, module mandje """
 
     url_mandje_toon = '/bestel/mandje/'
     url_mandje_verwijder = '/bestel/mandje/verwijderen/%s/'        # inhoud_pk

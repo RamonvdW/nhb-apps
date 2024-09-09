@@ -24,9 +24,9 @@ from decimal import Decimal
 import datetime
 
 
-class TestBestelActiviteit(E2EHelpers, TestCase):
+class TestBestellingActiviteit(E2EHelpers, TestCase):
 
-    """ tests voor de Bestel applicatie, module Activiteit """
+    """ tests voor de Bestelling applicatie, module Activiteit """
 
     test_after = ('Bestelling.tests.test_mandje',)
 

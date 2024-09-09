@@ -25,9 +25,9 @@ from decimal import Decimal
 import re
 
 
-class TestBestelBetaling(E2EHelpers, TestCase):
+class TestBestellingBetaling(E2EHelpers, TestCase):
 
-    """ tests voor de applicatie Bestel, samenwerking met applicatie Betaal """
+    """ tests voor de applicatie Bestelling, samenwerking met applicatie Betaal """
 
     test_after = ('Bestelling.tests.test_bestelling',)
 

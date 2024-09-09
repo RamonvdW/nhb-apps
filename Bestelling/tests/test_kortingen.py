@@ -25,9 +25,9 @@ from Wedstrijden.models import Wedstrijd, WedstrijdSessie, WedstrijdInschrijving
 import datetime
 
 
-class TestBestelKortingen(E2EHelpers, TestCase):
+class TestBestellingKortingen(E2EHelpers, TestCase):
 
-    """ tests voor de Bestel-applicatie, kortingen """
+    """ tests voor de Bestelling applicatie, kortingen """
 
     test_after = ('Bestelling.tests.test_mandje',)
 

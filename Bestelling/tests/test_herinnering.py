@@ -25,9 +25,9 @@ from Wedstrijden.models import Wedstrijd, WedstrijdSessie, WedstrijdInschrijving
 from decimal import Decimal
 
 
-class TestBestelHerinnering(E2EHelpers, TestCase):
+class TestBestellingHerinnering(E2EHelpers, TestCase):
 
-    """ tests voor de Bestel-applicatie, module herinnering """
+    """ tests voor de Bestelling applicatie, module herinnering """
 
     test_after = ('Bestelling.tests.test_mandje',)
 

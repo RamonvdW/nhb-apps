@@ -25,9 +25,9 @@ from Webwinkel.models import WebwinkelProduct, WebwinkelKeuze
 from decimal import Decimal
 
 
-class TestBestelOverboeking(E2EHelpers, TestCase):
+class TestBestellingOverboeking(E2EHelpers, TestCase):
 
-    """ tests voor de applicatie Bestel, module Overboeking """
+    """ tests voor de applicatie Bestelling, module Overboeking """
 
     url_overboeking_ontvangen = '/bestel/vereniging/overboeking-ontvangen/'
 

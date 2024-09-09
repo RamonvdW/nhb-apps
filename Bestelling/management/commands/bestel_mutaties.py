@@ -1304,6 +1304,8 @@ class Command(BaseCommand):
                        .objects
                        .select_related('account',
                                        'wedstrijd_inschrijving',
+                                       'evenement_inschrijving',
+                                       'webwinkel_keuze',
                                        'product',
                                        'bestelling')
                        .get(pk=pk))
