@@ -20,8 +20,10 @@ from Bestelling.operations.mutaties import (bestel_mutatieverzoek_inschrijven_we
                                             bestel_mutatieverzoek_betaling_afgerond,
                                             bestel_mutatieverzoek_afmelden_wedstrijd)
 from Betaal.models import BetaalInstellingenVereniging, BetaalActief, BetaalTransactie, BetaalMutatie
-from Evenement.definities import (EVENEMENT_STATUS_GEACCEPTEERD, EVENEMENT_INSCHRIJVING_STATUS_RESERVERING_MANDJE,
-                                  EVENEMENT_INSCHRIJVING_STATUS_RESERVERING_BESTELD)
+from Evenement.definities import (EVENEMENT_STATUS_GEACCEPTEERD,
+                                  EVENEMENT_INSCHRIJVING_STATUS_RESERVERING_MANDJE,
+                                  EVENEMENT_INSCHRIJVING_STATUS_RESERVERING_BESTELD,
+                                  EVENEMENT_INSCHRIJVING_STATUS_DEFINITIEF)
 from Evenement.models import Evenement, EvenementInschrijving, EvenementAfgemeld
 from Functie.models import Functie
 from Geo.models import Regio
@@ -1189,11 +1191,17 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
 
         # bestel wedstrijddeelname
         bestel_mutatieverzoek_inschrijven_wedstrijd(self.account_admin, self.inschrijving, snel=True)
+        bestel_mutatieverzoek_inschrijven_evenement(self.account_admin, self.evenement_inschrijving, snel=True)
+        # coverage: 2e verzoek voor dezelfde mutatie
+        bestel_mutatieverzoek_inschrijven_evenement(self.account_admin, self.evenement_inschrijving, snel=True)
         self.verwerk_bestel_mutaties()
 
         inschrijving = WedstrijdInschrijving.objects.get(pk=self.inschrijving.pk)
         self.assertEqual(inschrijving.koper, self.account_admin)
         self.assertEqual(inschrijving.status, WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_MANDJE)
+
+        self.evenement_inschrijving.refresh_from_db()
+        self.assertEqual(self.evenement_inschrijving.status, EVENEMENT_INSCHRIJVING_STATUS_RESERVERING_MANDJE)
 
         # zet het mandje om in een bestelling
         resp = self.client.post(self.url_mandje_bestellen, {'snel': 1})
@@ -1206,6 +1214,9 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
         inschrijving = WedstrijdInschrijving.objects.get(pk=self.inschrijving.pk)
         self.assertEqual(inschrijving.status, WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_BESTELD)
         self.assertEqual(inschrijving.ontvangen_euro, inschrijving.retour_euro)     # nog steeds 0
+
+        self.evenement_inschrijving.refresh_from_db()
+        self.assertEqual(self.evenement_inschrijving.status, EVENEMENT_INSCHRIJVING_STATUS_RESERVERING_BESTELD)
 
         # simuleer een betaling
         betaalactief = BetaalActief(
@@ -1223,12 +1234,12 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
                 when=betaalactief.when,
                 beschrijving="Test beschrijving",
                 is_restitutie=False,
-                bedrag_euro_klant=Decimal('10'),
-                bedrag_euro_boeking=Decimal('9.75'),
+                bedrag_euro_klant=Decimal('20.80'),
+                bedrag_euro_boeking=Decimal('20.64'),
                 klant_naam="Pietje Pijlsnel",
                 klant_account="IBAN1234567801234").save()
         bestel_mutatieverzoek_betaling_afgerond(betaalactief, gelukt=True, snel=True)
-        self.assertEqual(3, BestellingMutatie.objects.count())
+        self.assertEqual(4, BestellingMutatie.objects.count())
         f1, f2 = self.verwerk_bestel_mutaties()
         # print('\nf1:', f1.getvalue(), '\nf2:', f2.getvalue())
         self.assertTrue('[INFO] Betaling is gelukt voor bestelling' in f2.getvalue())
@@ -1241,10 +1252,15 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
         self.assertEqual(inschrijving.ontvangen_euro, Decimal('5.80'))      # prijs minus korting
         self.assertEqual(inschrijving.retour_euro, Decimal('0'))
 
+        self.evenement_inschrijving.refresh_from_db()
+        self.assertEqual(self.evenement_inschrijving.status, EVENEMENT_INSCHRIJVING_STATUS_DEFINITIEF)
+
         # afmelden voor de wedstrijd
         bestel_mutatieverzoek_afmelden_wedstrijd(inschrijving, snel=True)
+        bestel_mutatieverzoek_afmelden_evenement(self.evenement_inschrijving, snel=True)
         # coverage: 2e verzoek voor dezelfde mutatie
         bestel_mutatieverzoek_afmelden_wedstrijd(inschrijving, snel=True)
+        bestel_mutatieverzoek_afmelden_evenement(self.evenement_inschrijving, snel=True)
         self.verwerk_bestel_mutaties()
         inschrijving = WedstrijdInschrijving.objects.get(pk=self.inschrijving.pk)
         self.assertEqual(inschrijving.status, WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD)
@@ -1639,6 +1655,155 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
         f1, f2 = self.run_management_command('bestel_mutaties', '1', '--quick',
                                              '--stop_exactly=%s' % (now.minute + 1))
         # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
+
+    def test_evenement_ander(self):
+        # koop evenement deelname voor iemand anders
+        self.sporter.email = 'sporter%s@test.not' % self.sporter.lid_nr
+        sporter_account = self.e2e_create_account(str(self.sporter.lid_nr), self.sporter.email, self.sporter.voornaam)
+        self.sporter.account = sporter_account
+        self.sporter.save(update_fields=['account', 'email'])
+
+        self.e2e_login(sporter_account)
+
+        bestel_mutatieverzoek_inschrijven_evenement(sporter_account, self.evenement_inschrijving, snel=True)
+        self.verwerk_bestel_mutaties()
+
+        # zet het mandje om in een bestelling
+        resp = self.client.post(self.url_mandje_bestellen, {'snel': 1})
+        self.assert_is_redirect(resp, self.url_bestellingen_overzicht)
+        self.verwerk_bestel_mutaties()
+        self.assertEqual(1, Bestelling.objects.count())
+        bestelling = Bestelling.objects.first()
+        self.assertEqual(bestelling.status, BESTELLING_STATUS_NIEUW)
+
+        # simuleer een betaling
+        betaalactief = BetaalActief(
+            ontvanger=self.instellingen,
+            payment_id='testje',
+            payment_status='paid',
+            log='test')
+        betaalactief.save()
+        bestelling.betaal_actief = betaalactief
+        bestelling.status = BESTELLING_STATUS_BETALING_ACTIEF
+        bestelling.save(update_fields=['betaal_actief', 'status'])
+
+        BetaalTransactie(
+            payment_id='testje',
+            when=betaalactief.when,
+            beschrijving="Test beschrijving",
+            is_restitutie=False,
+            bedrag_euro_klant=Decimal('20.80'),
+            bedrag_euro_boeking=Decimal('20.64'),
+            klant_naam="Pietje Pijlsnel",
+            klant_account="IBAN1234567801234").save()
+        bestel_mutatieverzoek_betaling_afgerond(betaalactief, gelukt=True, snel=True)
+        self.assertEqual(3, BestellingMutatie.objects.count())
+        f1, f2 = self.verwerk_bestel_mutaties()
+        # print('\nf1:', f1.getvalue(), '\nf2:', f2.getvalue())
+        self.assertTrue('[INFO] Betaling is gelukt voor bestelling' in f2.getvalue())
+        bestelling = Bestelling.objects.get(pk=bestelling.pk)
+        self.assertEqual(bestelling.status, BESTELLING_STATUS_AFGEROND)
+
+    def test_evenement_ander_no_email_1(self):
+        # koop evenement deelname voor iemand anders die geen bevestigde email heeft
+        self.sporter.email = 'sporter%s@test.not' % self.sporter.lid_nr
+        sporter_account = self.e2e_create_account(str(self.sporter.lid_nr), self.sporter.email, self.sporter.voornaam)
+        self.sporter.account = sporter_account
+        self.sporter.save(update_fields=['account', 'email'])
+
+        self.e2e_login(sporter_account)
+
+        # wel een account maar email is niet bevestigd
+        # achtergrondtaak kies dan email van Sporter
+        sporter_account.email_is_bevestigd = False
+        sporter_account.save(update_fields=['email_is_bevestigd'])
+
+        bestel_mutatieverzoek_inschrijven_evenement(sporter_account, self.evenement_inschrijving, snel=True)
+        self.verwerk_bestel_mutaties()
+
+        # zet het mandje om in een bestelling
+        resp = self.client.post(self.url_mandje_bestellen, {'snel': 1})
+        self.assert_is_redirect(resp, self.url_bestellingen_overzicht)
+        self.verwerk_bestel_mutaties()
+        self.assertEqual(1, Bestelling.objects.count())
+        bestelling = Bestelling.objects.first()
+        self.assertEqual(bestelling.status, BESTELLING_STATUS_NIEUW)
+
+        # simuleer een betaling
+        betaalactief = BetaalActief(
+            ontvanger=self.instellingen,
+            payment_id='testje',
+            payment_status='paid',
+            log='test')
+        betaalactief.save()
+        bestelling.betaal_actief = betaalactief
+        bestelling.status = BESTELLING_STATUS_BETALING_ACTIEF
+        bestelling.save(update_fields=['betaal_actief', 'status'])
+
+        BetaalTransactie(
+            payment_id='testje',
+            when=betaalactief.when,
+            beschrijving="Test beschrijving",
+            is_restitutie=False,
+            bedrag_euro_klant=Decimal('20.80'),
+            bedrag_euro_boeking=Decimal('20.64'),
+            klant_naam="Pietje Pijlsnel",
+            klant_account="IBAN1234567801234").save()
+        bestel_mutatieverzoek_betaling_afgerond(betaalactief, gelukt=True, snel=True)
+        self.assertEqual(3, BestellingMutatie.objects.count())
+        f1, f2 = self.verwerk_bestel_mutaties()
+        # print('\nf1:', f1.getvalue(), '\nf2:', f2.getvalue())
+        self.assertTrue('[INFO] Betaling is gelukt voor bestelling' in f2.getvalue())
+        bestelling = Bestelling.objects.get(pk=bestelling.pk)
+        self.assertEqual(bestelling.status, BESTELLING_STATUS_AFGEROND)
+
+    def test_evenement_ander_no_email_2(self):
+        # koop evenement deelname voor iemand anders die geen email heeft
+        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_check_rol('sporter')
+
+        self.sporter.email = ''
+        self.sporter.account = None
+        self.sporter.save(update_fields=['account', 'email'])
+
+        bestel_mutatieverzoek_inschrijven_evenement(self.account_admin, self.evenement_inschrijving, snel=True)
+        self.verwerk_bestel_mutaties()
+
+        # zet het mandje om in een bestelling
+        resp = self.client.post(self.url_mandje_bestellen, {'snel': 1})
+        self.assert_is_redirect(resp, self.url_bestellingen_overzicht)
+        self.verwerk_bestel_mutaties()
+        self.assertEqual(1, Bestelling.objects.count())
+        bestelling = Bestelling.objects.first()
+        self.assertEqual(bestelling.status, BESTELLING_STATUS_NIEUW)
+
+        # simuleer een betaling
+        betaalactief = BetaalActief(
+            ontvanger=self.instellingen,
+            payment_id='testje',
+            payment_status='paid',
+            log='test')
+        betaalactief.save()
+        bestelling.betaal_actief = betaalactief
+        bestelling.status = BESTELLING_STATUS_BETALING_ACTIEF
+        bestelling.save(update_fields=['betaal_actief', 'status'])
+
+        BetaalTransactie(
+            payment_id='testje',
+            when=betaalactief.when,
+            beschrijving="Test beschrijving",
+            is_restitutie=False,
+            bedrag_euro_klant=Decimal('20.80'),
+            bedrag_euro_boeking=Decimal('20.64'),
+            klant_naam="Pietje Pijlsnel",
+            klant_account="IBAN1234567801234").save()
+        bestel_mutatieverzoek_betaling_afgerond(betaalactief, gelukt=True, snel=True)
+        self.assertEqual(3, BestellingMutatie.objects.count())
+        f1, f2 = self.verwerk_bestel_mutaties()
+        # print('\nf1:', f1.getvalue(), '\nf2:', f2.getvalue())
+        self.assertTrue('[INFO] Betaling is gelukt voor bestelling' in f2.getvalue())
+        bestelling = Bestelling.objects.get(pk=bestelling.pk)
+        self.assertEqual(bestelling.status, BESTELLING_STATUS_AFGEROND)
 
 
 # end of file
