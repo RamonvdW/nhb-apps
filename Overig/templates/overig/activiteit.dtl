@@ -439,10 +439,10 @@
                                 <input type="hidden" name="inlog_naam" value="{{ obj.inlog_naam_str }}">
 
                                 <div class="modal-footer" style="text-align:center; display:block">
-                                    <div style="display:inline-block; width:50%">
+                                    <div style="display:inline-block; width:49%">
                                         <button class="btn-sv-rood" id="submit_knop{{ obj.pk }}" type="submit">Ja</button>
                                     </div>
-                                    <div style="display:inline-block; width:50%">
+                                    <div style="display:inline-block; width:49%">
                                         <a href="#" class="btn-sv-blauw modal-close">Nee</a>
                                     </div>
                                 </div>

@@ -158,9 +158,10 @@
             </div>
 
 
-            <!-- competitie waar op ingeschreven is -->
+            <!-- competitie(s) waar op ingeschreven is -->
             {% if comp_is_ingeschreven %}
 
+                <!-- apart kader per inschrijving -->
                 {% for deelnemer in comp_inschrijvingen_sb %}
 
                     <div class="col s12 l10 offset-l1 xl8 offset-xl2" style="margin-top:10px">
@@ -229,10 +230,10 @@
                                                     <b>{{ deelnemer.competitie.beschrijving }}</b>?</p>
 
                                                 <div class="modal-footer" style="text-align:center; display:block">
-                                                    <div style="display:inline-block; width:50%">
+                                                    <div style="display:inline-block; width:49%">
                                                         <button class="btn-sv-rood" onclick="do_uitschrijven(this)" data-url="{{ deelnemer.url_afmelden }}">Ja</button>
                                                     </div>
-                                                    <div style="display:inline-block; width:50%">
+                                                    <div style="display:inline-block; width:49%">
                                                         <a href="#" class="btn-sv-blauw modal-close">Nee</a>
                                                     </div>
                                                 </div>
@@ -292,16 +293,19 @@
                                 <!-- knoppen -->
                                 <td class="right-align" style="padding:5px 5px">
                                     {% if deelnemer.is_fase_rk %}
+
                                         {% if deelnemer.rk_inschrijving %}
+                                            <!-- is doorgestroomd naar het RK -->
+
                                             {% if deelnemer.url_rk_deelnemers %}
                                                 <a class="multi-btn-sv-blauw" href="{{ deelnemer.url_rk_deelnemers }}">RK lijsten</a>
                                                 <br>
                                             {% endif %}
 
-                                            <!-- is al doorgestroomd naar het RK -->
-
                                             {% if deelnemer.rk_inschrijving.deelname == '?' %}
                                                 <!-- deelname onbekend -->
+
+                                                <!-- vraag om bevestiging deelname -->
                                                 <a class="multi-btn-sv-rood modal-trigger" href="#{{ deelnemer.id_deelname_rk }}">
                                                     <span class="hide-on-small-only">Geef door</span>
                                                     <i class="hide-on-med-and-up material-icons-round notranslate">question_mark</i>
@@ -315,10 +319,10 @@
                                                         <p>Kan je meedoen?</p>
 
                                                         <div class="modal-footer" style="text-align:center; display:block">
-                                                            <div style="display:inline-block; width:50%">
+                                                            <div style="display:inline-block; width:49%">
                                                                 <button class="btn-sv-rood" onclick="keuze_doorgeven(this)" data-keuze="J" data-deelnemer="{{ deelnemer.rk_inschrijving.pk }}" data-url="{{ deelnemer.url_status_rk_deelname }}">Ja</button>
                                                             </div>
-                                                            <div style="display:inline-block; width:50%">
+                                                            <div style="display:inline-block; width:49%">
                                                                 <button class="btn-sv-blauw" onclick="keuze_doorgeven(this)" data-keuze="N" data-deelnemer="{{ deelnemer.rk_inschrijving.pk }}" data-url="{{ deelnemer.url_status_rk_deelname }}">Nee</button>
                                                             </div>
                                                         </div>
@@ -327,6 +331,8 @@
 
                                             {% elif deelnemer.rk_inschrijving.deelname == 'N' %}
                                                 <!-- afgemeld voor RK -->
+
+                                                <!-- geef mogelijkheid om weer deelnemer te worden -->
                                                 <a class="multi-btn-sv-rood modal-trigger" href="#{{ deelnemer.id_deelname_rk }}">
                                                     <span class="hide-on-small-only">Aanpassen</span>
                                                     <i class="hide-on-med-and-up material-icons-round notranslate">add</i>
@@ -340,10 +346,10 @@
                                                         <p>Wil je toch meedoen?</p>
 
                                                         <div class="modal-footer" style="text-align:center; display:block">
-                                                            <div style="display:inline-block; width:50%">
+                                                            <div style="display:inline-block; width:49%">
                                                                 <button class="btn-sv-rood" onclick="keuze_doorgeven(this)" data-keuze="J" data-deelnemer="{{ deelnemer.rk_inschrijving.pk }}" data-url="{{ deelnemer.url_status_rk_deelname }}">Ja</button>
                                                             </div>
-                                                            <div style="display:inline-block; width:50%">
+                                                            <div style="display:inline-block; width:49%">
                                                                 <button class="btn-sv-blauw modal-close">Nee</button>
                                                             </div>
                                                         </div>
@@ -353,7 +359,9 @@
                                                 </div>
 
                                             {% else %}
-                                                <!-- aangemeld voor RK -->
+                                                <!-- is deelnemer of reserve voor het RK -->
+
+                                                <!-- geef mogelijkheid tot afmelden -->
                                                 <a class="multi-btn-sv-blauw modal-trigger" href="#{{ deelnemer.id_deelname_rk }}">
                                                     <span class="hide-on-small-only">Afmelden</span>
                                                     <i class="hide-on-med-and-up material-icons-round notranslate">remove</i>
@@ -368,23 +376,22 @@
                                                         <p>Wil je je afmelden?</p>
 
                                                         <div class="modal-footer" style="text-align:center; display:block">
-                                                            <div style="display:inline-block; width:50%">
+                                                            <div style="display:inline-block; width:49%">
                                                                 <button class="btn-sv-rood" onclick="keuze_doorgeven(this)" data-keuze="N" data-deelnemer="{{ deelnemer.rk_inschrijving.pk }}" data-url="{{ deelnemer.url_status_rk_deelname }}">Ja</button>
                                                             </div>
-                                                            <div style="display:inline-block; width:50%">
+                                                            <div style="display:inline-block; width:49%">
                                                                 <button class="btn-sv-blauw modal-close">Nee</button>
                                                             </div>
                                                         </div>
                                                     </div>
                                                 </div>
+
                                             {% endif %}
 
-                                            {% if url_status_rk_deelname %}
-                                                <!-- bevestigd-->
-                                            {% endif %}
                                         {% endif %}
 
-                                    {% elif deelnemer.url_voorkeur_rk%}
+                                    {% elif deelnemer.url_voorkeur_rk %}
+                                        <!-- nog niet in RK fase -->
 
                                         {% if deelnemer.is_afgemeld_voor_rk %}
                                             <!-- alvast afgemeld voor het RK -->
@@ -403,10 +410,10 @@
                                                     <p>Wil je toch meedoen?</p>
 
                                                     <div class="modal-footer" style="text-align:center; display:block">
-                                                        <div style="display:inline-block; width:50%">
+                                                        <div style="display:inline-block; width:49%">
                                                             <button class="btn-sv-rood" onclick="keuze_doorgeven(this)" data-keuze="J" data-deelnemer="{{ deelnemer.pk }}" data-url="{{ deelnemer.url_voorkeur_rk }}">Ja</button>
                                                         </div>
-                                                        <div style="display:inline-block; width:50%">
+                                                        <div style="display:inline-block; width:49%">
                                                             <button class="btn-sv-blauw modal-close">Nee</button>
                                                         </div>
                                                     </div>
@@ -414,6 +421,7 @@
                                             </div>
 
                                         {% else %}
+
                                             <!-- geef mogelijkheid om alvast af te melden voor RK  -->
                                             <a class="multi-btn-sv-rood modal-trigger" href="#id_voorkeur_rk_{{ deelnemer.pk }}">
                                                 <span class="hide-on-small-only">Voorkeur</span>
@@ -428,15 +436,16 @@
                                                     <p>Wil je je afmelden voor het RK?</p>
 
                                                     <div class="modal-footer" style="text-align:center; display:block">
-                                                        <div style="display:inline-block; width:50%">
+                                                        <div style="display:inline-block; width:49%">
                                                             <button class="btn-sv-rood" onclick="keuze_doorgeven(this)" data-keuze="N" data-deelnemer="{{ deelnemer.pk }}" data-url="{{ deelnemer.url_voorkeur_rk }}">Ja</button>
                                                         </div>
-                                                        <div style="display:inline-block; width:50%">
+                                                        <div style="display:inline-block; width:49%">
                                                             <button class="btn-sv-blauw modal-close">Nee</button>
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
+
                                         {% endif %}
 
                                     {% endif %}
