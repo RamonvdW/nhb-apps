@@ -83,10 +83,10 @@
                                     <p>Invoer is geaccepteerd. Wil je deze ontvangen overboeking registreren?</p>
 
                                     <div class="modal-footer" style="text-align:center; display:block">
-                                        <div style="display:inline-block; width:50%">
+                                        <div style="display:inline-block; width:49%">
                                             <button class="btn-sv-rood" id="submit_knop2" type="submit">Ja</button>
                                         </div>
-                                        <div style="display:inline-block; width:50%">
+                                        <div style="display:inline-block; width:49%">
                                             <a href="#" class="btn-sv-blauw modal-close" onclick="document.getElementById('id_actie').value='check'">Nee</a>
                                         </div>
                                     </div>

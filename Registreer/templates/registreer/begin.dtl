@@ -71,10 +71,10 @@
                 <p>Heb je al een 6-cijferig bondsnummer van de KHSN?</p>
 
                 <div class="modal-footer" style="text-align:center; display:block">
-                    <div style="display:inline-block; width:50%">
+                    <div style="display:inline-block; width:49%">
                         <a class="btn-sv-blauw" href="{{ url_registreer_khsn }}">Ja</a>
                     </div>
-                    <div style="display:inline-block; width:50%">
+                    <div style="display:inline-block; width:49%">
                         <a class="btn-sv-rood" href="{{ url_registreer_gast }}">Nee</a>
                     </div>
                 </div>
