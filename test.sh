@@ -250,6 +250,14 @@ RES=$?
 echo >>"$LOG"
 echo "[INFO] Finished main test run" >>"$LOG"
 
+
+# launch a browser with all the stored web pages
+find "$TMP_HTML" -type f | grep -q html
+RES=$?
+echo "[DEBUG] Found HTML files in $TMP_HTML"
+firefox "$TMP_HTML"/*html &
+
+
 # stop showing the additions to the logfile, because the rest is less interesting
 # use bash construct to prevent the Terminated message on the console
 sleep 0.1
