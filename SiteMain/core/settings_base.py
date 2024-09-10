@@ -58,7 +58,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2024-09-09'
+SITE_VERSIE = '2024-09-10'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -66,7 +66,6 @@ INSTALLED_APPS = [
     'Beheer.apps.BeheerAdminConfig',    # uitbreiding op admin interface
     'Account.apps.AccountConfig',
     'BasisTypen.apps.BasisTypenConfig',
-    'Bestel.apps.BestelConfig',         # TODO: obsolete and remove
     'Bestelling.apps.BestellingConfig',
     'Betaal.apps.BetaalConfig',
     'Bondspas.apps.BondspasConfig',
