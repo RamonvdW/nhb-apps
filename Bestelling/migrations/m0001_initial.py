@@ -9,7 +9,6 @@ from Bestelling.definities import BESTELLING_HOOGSTE_BESTEL_NR_FIXED_PK
 from decimal import Decimal
 
 
-# TODO: weer gaan gebruiken na squash migrations
 def init_hoogste_bestel_nr(apps, _):
     """ maak het enige record aan in deze tabel """
 
@@ -183,7 +182,7 @@ class Migration(migrations.Migration):
             name='transacties',
             field=models.ManyToManyField(blank=True, to='Betaal.betaaltransactie'),
         ),
-        # migrations.RunPython(init_hoogste_bestel_nr),
+        migrations.RunPython(init_hoogste_bestel_nr),
     ]
 
 # end of file
