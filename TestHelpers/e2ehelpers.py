@@ -16,7 +16,6 @@ from TestHelpers.query_tracer import MyQueryTracer
 from TestHelpers.mgmt_cmds_helper import MyMgmtCommandHelper
 from TestHelpers.app_hierarchy_testrunner import get_test_cases_count
 from contextlib import contextmanager
-import webbrowser
 import tempfile
 import pyotp
 
@@ -314,13 +313,7 @@ class E2EHelpers(MyTestAsserts, MyMgmtCommandHelper, TestCase):
             f = tempfile.NamedTemporaryFile(mode='wb', delete=False, suffix='.html', dir='/tmp/tmp_html/')
             f.write(msg.encode('utf-8'))
             f.close()
-            fname = f.name
 
-            try:
-                # will hang here for a few seconds, unless browser already open
-                webbrowser.open_new_tab(fname)
-            except KeyboardInterrupt:
-                # capture user interrupt due to long wait
-                pass
+            # browser is started by test.sh
 
 # end of file
