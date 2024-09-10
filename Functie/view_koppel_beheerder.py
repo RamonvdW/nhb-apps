@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2023 Ramon van der Winkel.
+#  Copyright (c) 2020-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -447,8 +447,9 @@ class WijzigBeheerdersView(UserPassesTestMixin, ListView):
                 sporter = account.sporter_set.first()
                 if sporter.bij_vereniging:
                     regio = sporter.bij_vereniging.regio
+                    account.geo_beschrijving = "Regio %s" % regio.regio_nr
                     if not regio.is_administratief:
-                        account.geo_beschrijving = "regio %s / rayon %s" % (regio.regio_nr, regio.rayon_nr)
+                        account.geo_beschrijving += " / rayon %s" % regio.rayon_nr
                 if not sporter.bij_vereniging:
                     # deze melding komt na 15 januari
                     account.let_op = 'LET OP: geen lid meer bij een vereniging'
@@ -495,8 +496,9 @@ class WijzigBeheerdersView(UserPassesTestMixin, ListView):
                     account.vereniging_naam = str(sporter.bij_vereniging)    # [1234] Naam
                 else:
                     regio = sporter.bij_vereniging.regio
+                    account.geo_beschrijving = "Regio %s" % regio.regio_nr
                     if not regio.is_administratief:
-                        account.geo_beschrijving = "regio %s / rayon %s" % (regio.regio_nr, regio.rayon_nr)
+                        account.geo_beschrijving += " / rayon %s" % regio.rayon_nr
 
                 objs.append(account)
             # for
