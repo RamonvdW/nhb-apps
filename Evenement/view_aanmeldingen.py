@@ -28,7 +28,7 @@ CONTENT_TYPE_CSV = 'text/csv; charset=UTF-8'
 
 
 def get_inschrijving_mh_bestel_nr(inschrijving):
-    bestel_product = inschrijving.bestelproduct_set.first()
+    bestel_product = inschrijving.bestellingproduct_set.first()
     if bestel_product:
         bestelling = bestel_product.bestelling_set.first()
         if bestelling:
@@ -190,7 +190,7 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
                 ver_nr = 0
                 ver_str = 'geen'
 
-            qset = aanmelding.bestelproduct_set.all()
+            qset = aanmelding.bestellingproduct_set.all()
             if qset.count() > 0:
                 bestelproduct = qset[0]
                 prijs_str = '€ %s' % bestelproduct.prijs_euro
@@ -240,7 +240,7 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
                 ver_nr = 0
                 ver_str = 'geen'
 
-            qset = afgemeld.bestelproduct_set.all()
+            qset = afgemeld.bestellingproduct_set.all()
             if qset.count() > 0:
                 bestelproduct = qset[0]
                 prijs_str = '€ %s' % bestelproduct.prijs_euro
@@ -348,7 +348,7 @@ class EvenementDetailsAanmeldingView(UserPassesTestMixin, TemplateView):
         inschrijving.url_afmelden = reverse('Evenement:afmelden',
                                             kwargs={'inschrijving_pk': inschrijving.pk})
 
-        qset = inschrijving.bestelproduct_set.all()
+        qset = inschrijving.bestellingproduct_set.all()
         if qset.count() > 0:
             inschrijving.bestelproduct = qset[0]
         else:

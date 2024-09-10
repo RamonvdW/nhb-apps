@@ -148,6 +148,6 @@ class TestCompInschrijvenCliMeldRcl(E2EHelpers, TestCase):
 
             taak2 = Taak.objects.exclude(pk=taak.pk).first()
             # print(taak2.beschrijving)
-            self.assertTrue(' aangemeld door: Beheerdertje (100002)' in taak2.beschrijving)
+            self.assertTrue(' aangemeld door: 100002 Beheerdertje' in taak2.beschrijving)
 
 # end of file

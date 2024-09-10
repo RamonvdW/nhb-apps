@@ -13,8 +13,8 @@ from django.shortcuts import render
 from django.templatetags.static import static
 from django.views.generic import TemplateView
 from Account.models import get_account
-from Bestel.operations.mandje import mandje_tel_inhoud
-from Bestel.operations.mutaties import bestel_mutatieverzoek_webwinkel_keuze
+from Bestelling.operations.mandje import mandje_tel_inhoud
+from Bestelling.operations.mutaties import bestel_mutatieverzoek_webwinkel_keuze
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige
 from Webwinkel.models import WebwinkelProduct, WebwinkelKeuze

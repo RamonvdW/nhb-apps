@@ -120,7 +120,7 @@ class WebwinkelKeuze(models.Model):
                               default=KEUZE_STATUS_RESERVERING_MANDJE)
 
     # wie is de koper?
-    # (BestelProduct verwijst naar dit record)
+    # (BestellingProduct verwijst naar dit record)
     koper = models.ForeignKey(Account, on_delete=models.PROTECT)   # TODO: Bestelling heeft koper, dus waarom hier ook?
 
     # om welk product gaat het

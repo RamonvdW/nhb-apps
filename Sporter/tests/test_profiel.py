@@ -9,7 +9,7 @@ from django.utils import timezone
 from django.utils.dateparse import parse_date
 from BasisTypen.definities import ORGANISATIE_KHSN
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse
-from Bestel.models import Bestelling
+from Bestelling.models import Bestelling
 from Functie.models import Functie
 from Functie.tests.helpers import maak_functie
 from Geo.models import Regio, Rayon

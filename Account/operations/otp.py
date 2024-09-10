@@ -20,7 +20,7 @@ EMAIL_TEMPLATE_OTP_IS_LOSGEKOPPELD = 'email_account/otp-is-losgekoppeld.dtl'
 my_logger = logging.getLogger('MH.Account')
 
 
-def otp_zet_control_niet_gelukt(request):
+def otp_zet_controle_niet_gelukt(request):
     """ Deze functie wordt aangeroepen vanuit de LoginAsView en WachtenVergetenView
         om een sessie variabele te zetten die onthoudt dat de gebruiker geen OTP controle
         gedaan heeft.
@@ -31,7 +31,7 @@ def otp_zet_control_niet_gelukt(request):
     request.session[SESSIONVAR_ACCOUNT_OTP_CONTROL_IS_GELUKT] = False
 
     # zorg dat nieuwe sessies al aangemaakt zijn
-    if not request.session.session_key:
+    if not request.session.session_key:     # pragma: no cover
         request.session.save()
 
     # koppel de (eventuele nieuwe) sessie aan het account
@@ -149,7 +149,7 @@ def otp_loskoppelen(request, account):
     """
 
     # control dat gebruiker genoeg rechten heeft moet door aanroeper gedaan zijn
-    if not request.user.is_authenticated:           # pragma: no cover
+    if not request.user.is_authenticated:
         return False
 
     if not account.otp_is_actief:

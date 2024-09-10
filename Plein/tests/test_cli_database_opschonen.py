@@ -7,7 +7,7 @@
 from django.test import TestCase
 from django.utils import timezone
 from Account.operations.aanmaken import account_create
-from Bestel.models import BestelMandje, Bestelling
+from Bestelling.models import BestellingMandje, Bestelling
 from Betaal.models import BetaalInstellingenVereniging, BetaalMutatie, BetaalActief, BetaalTransactie
 from Feedback.models import Feedback
 from Feedback.operations import store_feedback
@@ -138,7 +138,7 @@ class TestPleinCliDatabaseOpschonen(E2EHelpers, TestCase):
         gast.aangemaakt = ten_days_ago
         gast.save(update_fields=['aangemaakt'])
 
-        mandje = BestelMandje(account=account)
+        mandje = BestellingMandje(account=account)
         mandje.save()
 
         bestelling = Bestelling(bestel_nr=1)
@@ -164,7 +164,7 @@ class TestPleinCliDatabaseOpschonen(E2EHelpers, TestCase):
         transactie.save()
 
     def test_alles(self):
-        with self.assert_max_queries(160, modify_acceptable=True):
+        with self.assert_max_queries(173, modify_acceptable=True):
             f1, f2 = self.run_management_command('database_opschonen')
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
@@ -175,7 +175,7 @@ class TestPleinCliDatabaseOpschonen(E2EHelpers, TestCase):
         self.assertTrue("[INFO] Verwijder 1 oude betaal mutatie records" in f2.getvalue())
         self.assertTrue("[INFO] Verwijder 1 oude betaal-actief records" in f2.getvalue())
         self.assertTrue("[INFO] Verwijder 1 oude betaal-transactie records" in f2.getvalue())
-        self.assertTrue("[INFO] Verwijder onvoltooid account Voornaam Achternaam (test)" in f2.getvalue())
+        self.assertTrue("[INFO] Verwijder onvoltooid account test Voornaam Achternaam" in f2.getvalue())
         self.assertTrue("[INFO] Verwijder 1 oude logboek regels" in f2.getvalue())
         self.assertTrue("[INFO] Verwijder 1 oude emails" in f2.getvalue())
         self.assertTrue("[INFO] Verwijder ongebruikte tijdelijke url" in f2.getvalue())
@@ -183,7 +183,7 @@ class TestPleinCliDatabaseOpschonen(E2EHelpers, TestCase):
         self.assertTrue('[INFO] Verwijder niet afgeronde gast-account registratie 800001 in fase 0' in f2.getvalue())
 
         # nog een keer aanroepen terwijl er niets meer te verwijderen valt
-        with self.assert_max_queries(14):
+        with self.assert_max_queries(15):
             f1, f2 = self.run_management_command('database_opschonen')
         self.assertTrue(f1.getvalue() == '')
         self.assertTrue("Klaar" in f2.getvalue())

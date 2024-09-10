@@ -14,8 +14,8 @@ from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
 from BasisTypen.definities import GESLACHT2STR
-from Bestel.definities import BESTELLING_STATUS2STR
-from Bestel.models import BestelMandje, Bestelling
+from Bestelling.definities import BESTELLING_STATUS2STR
+from Bestelling.models import BestellingMandje, Bestelling
 from Functie.rol import rol_get_huidige_functie
 from Mailer.operations import render_email_template, mailer_queue_email
 from Overig.helpers import get_safe_from_ip
@@ -249,7 +249,7 @@ class GastAccountDetailsView(UserPassesTestMixin, TemplateView):
         # zoek naar gebruik van het gast-account
 
         # zoek bestellingen / aankopen
-        context['gast_mandje'] = BestelMandje.objects.filter(account=gast.account).first()
+        context['gast_mandje'] = BestellingMandje.objects.filter(account=gast.account).first()
         context['gast_bestellingen'] = (Bestelling
                                         .objects
                                         .filter(account=gast.account)

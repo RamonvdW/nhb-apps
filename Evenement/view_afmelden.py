@@ -8,8 +8,8 @@ from django.http import HttpResponseRedirect, Http404
 from django.urls import reverse
 from django.views.generic import View
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Bestel.operations.mutaties import (bestel_mutatieverzoek_afmelden_evenement,
-                                        bestel_mutatieverzoek_verwijder_product_uit_mandje)
+from Bestelling.operations.mutaties import (bestel_mutatieverzoek_afmelden_evenement,
+                                            bestel_mutatieverzoek_verwijder_product_uit_mandje)
 from Evenement.definities import EVENEMENT_INSCHRIJVING_STATUS_RESERVERING_MANDJE
 from Evenement.models import EvenementInschrijving
 from Functie.definities import Rollen
@@ -49,8 +49,8 @@ class AfmeldenView(UserPassesTestMixin, View):
         snel = str(request.POST.get('snel', ''))[:1]
 
         if inschrijving.status == EVENEMENT_INSCHRIJVING_STATUS_RESERVERING_MANDJE:
-            if inschrijving.bestelproduct_set.count() > 0:          # pragma: no branch
-                product = inschrijving.bestelproduct_set.first()
+            if inschrijving.bestellingproduct_set.count() > 0:          # pragma: no branch
+                product = inschrijving.bestellingproduct_set.first()
                 bestel_mutatieverzoek_verwijder_product_uit_mandje(inschrijving.koper, product, snel == '1')
         else:
             bestel_mutatieverzoek_afmelden_evenement(inschrijving, snel == '1')

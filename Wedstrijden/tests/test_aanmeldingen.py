@@ -7,7 +7,7 @@
 from django.test import TestCase
 from django.utils import timezone
 from BasisTypen.models import BoogType
-from Bestel.models import BestelProduct
+from Bestelling.models import BestellingProduct
 from Competitie.models import Competitie, CompetitieIndivKlasse, Regiocompetitie, RegiocompetitieSporterBoog
 from Functie.tests.helpers import maak_functie
 from Geo.models import Regio
@@ -417,7 +417,7 @@ class TestWedstrijdenAanmeldingen(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_admin)
         self.e2e_wissel_naar_functie(self.functie_hwl)
 
-        BestelProduct(wedstrijd_inschrijving=self.inschrijving1r).save()
+        BestellingProduct(wedstrijd_inschrijving=self.inschrijving1r).save()
 
         url = self.url_aanmeldingen_afmelden % self.inschrijving1r.pk
         with self.assert_max_queries(20):

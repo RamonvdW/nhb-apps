@@ -5,9 +5,10 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
+from django.contrib.auth.models import AnonymousUser
 from Account.models import Account
 from Account.operations.otp import (otp_prepare_koppelen, otp_controleer_code, otp_koppel_met_code,
-                                    otp_is_controle_gelukt)
+                                    otp_is_controle_gelukt, otp_loskoppelen, otp_stuur_email_losgekoppeld)
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 from types import SimpleNamespace
@@ -135,5 +136,23 @@ class TestAccountOTP(E2EHelpers, TestCase):
 
         res = otp_koppel_met_code(request, account, 0)
         self.assertEqual(res, False)
+
+    def test_loskoppelen(self):
+        # niet ingelogd
+        request = SimpleNamespace()
+        request.user = AnonymousUser()
+        request.session = self.client.session
+        self.assertFalse(otp_loskoppelen(request, self.account_normaal))
+
+        # wel ingelogd, geen OTP
+        request = SimpleNamespace()
+        request.user = self.testdata.account_admin
+        request.session = self.client.session
+        self.assertFalse(otp_loskoppelen(request, self.account_normaal))
+
+        # normaal
+        self.assertTrue(otp_loskoppelen(request, self.account_otp))
+        otp_stuur_email_losgekoppeld(self.account_otp)
+
 
 # end of file

@@ -159,6 +159,7 @@ class BetaalTransactie(models.Model):
     refund_status = models.CharField(max_length=BETAAL_PAYMENT_STATUS_MAXLENGTH, default='', blank=True)
 
     # hoeveel hebben we (totaal) terug betaald
+    # let op: dit is een negatief bedrag!
     bedrag_refund = models.DecimalField(max_digits=7, decimal_places=2, default=0.0)
 
     # TODO: Oude velden hieronder zijn deltas

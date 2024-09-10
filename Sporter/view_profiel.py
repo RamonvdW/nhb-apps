@@ -14,7 +14,7 @@ from django.db.models import Q
 from Account.models import get_account
 from BasisTypen.definities import ORGANISATIE_WA
 from BasisTypen.models import BoogType
-from Bestel.models import Bestelling
+from Bestelling.models import Bestelling
 from Competitie.definities import DEEL_RK, INSCHRIJF_METHODE_1, DEELNAME_NEE
 from Competitie.models import Competitie, Regiocompetitie, RegiocompetitieSporterBoog, KampioenschapSporterBoog
 from Functie.definities import Rollen

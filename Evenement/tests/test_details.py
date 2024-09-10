@@ -21,7 +21,7 @@ class TestEvenementDetails(E2EHelpers, TestCase):
 
     """ tests voor de Evenement applicatie, module Details """
 
-    test_after = ('Bestel.tests.test_mandje',)
+    test_after = ('Bestelling.tests.test_mandje',)
 
     url_details = '/kalender/evenement/details/%s/'                                 # evenement_pk
     volgende_bestel_nr = 1234567

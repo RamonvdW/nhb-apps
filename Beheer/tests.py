@@ -21,10 +21,10 @@ BEHEER_PAGINAS = (
     '/beheer/BasisTypen/teamtype/',
     '/beheer/BasisTypen/templatecompetitieindivklasse/',
     '/beheer/BasisTypen/templatecompetitieteamklasse/',
-    '/beheer/Bestel/bestelling/',
-    '/beheer/Bestel/bestelmandje/',
-    '/beheer/Bestel/bestelmutatie/',
-    '/beheer/Bestel/bestelproduct/',
+    '/beheer/Bestelling/bestelling/',
+    '/beheer/Bestelling/bestellingmandje/',
+    '/beheer/Bestelling/bestellingmutatie/',
+    '/beheer/Bestelling/bestellingproduct/',
     '/beheer/Betaal/betaalactief/',
     '/beheer/Betaal/betaalinstellingenvereniging/',
     '/beheer/Betaal/betaalmutatie/',
@@ -45,6 +45,9 @@ BEHEER_PAGINAS = (
     '/beheer/Competitie/regiocompetitiesporterboog/',
     '/beheer/Competitie/regiocompetitieteam/',
     '/beheer/Competitie/regiocompetitieteampoule/',
+    '/beheer/Evenement/evenement/',
+    '/beheer/Evenement/evenementafgemeld/',
+    '/beheer/Evenement/evenementinschrijving/',
     '/beheer/Feedback/feedback/',
     '/beheer/Functie/functie/',
     '/beheer/Functie/verklaringhanterenpersoonsgegevens/',
@@ -54,10 +57,12 @@ BEHEER_PAGINAS = (
     '/beheer/HistComp/histcompregioindiv/',
     '/beheer/HistComp/histcompregioteam/',
     '/beheer/HistComp/histcompseizoen/',
-    '/beheer/HistComp/histkampindiv/',
     '/beheer/HistComp/histkampindivbk/',
+    '/beheer/HistComp/histkampindivrk/',
     '/beheer/HistComp/histkampteam/',
-    '/beheer/Locatie/locatie/',
+    '/beheer/Locatie/evenementlocatie/',
+    '/beheer/Locatie/reistijd/',
+    '/beheer/Locatie/wedstrijdlocatie/',
     '/beheer/Logboek/logboekregel/',
     '/beheer/Mailer/mailqueue/',
     '/beheer/Opleidingen/opleiding/',
@@ -70,13 +75,19 @@ BEHEER_PAGINAS = (
     '/beheer/Registreer/gastlidnummer/',
     '/beheer/Registreer/gastregistratie/',
     '/beheer/Registreer/gastregistratieratetracker/',
+    '/beheer/Scheidsrechter/matchscheidsrechters/',
     '/beheer/Scheidsrechter/scheidsbeschikbaarheid/',
+    '/beheer/Scheidsrechter/scheidsmutatie/',
     '/beheer/Scheidsrechter/wedstrijddagscheidsrechters/',
     '/beheer/Score/aanvangsgemiddelde/',
     '/beheer/Score/aanvangsgemiddeldehist/',
     '/beheer/Score/score/',
     '/beheer/Score/scorehist/',
     '/beheer/Score/uitslag/',
+    '/beheer/Spelden/speld/',
+    '/beheer/Spelden/speldaanvraag/',
+    '/beheer/Spelden/speldbijlage/',
+    '/beheer/Spelden/speldscore/',
     '/beheer/Sporter/speelsterkte/',
     '/beheer/Sporter/sporter/',
     '/beheer/Sporter/sporterboog/',
@@ -180,15 +191,17 @@ class TestBeheer(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_admin)
 
         for url in BEHEER_PAGINAS:
-            # print(url)
-            with self.assert_max_queries(20):
-                self.client.get(url)
+            try:
+                with self.assert_max_queries(20):
+                    self.client.get(url)
 
-            with self.assert_max_queries(20):
-                self.client.get(url + 'add/')
+                with self.assert_max_queries(20):
+                    self.client.get(url + 'add/')
 
-            with self.assert_max_queries(20):
-                self.client.get(url + '1/change/')
+                with self.assert_max_queries(20):
+                    self.client.get(url + '1/change/')
+            except AttributeError:      # pragma: no cover
+                self.fail('AttributeError on url %s' % repr(url))
         # for
 
         settings.DEBUG = False

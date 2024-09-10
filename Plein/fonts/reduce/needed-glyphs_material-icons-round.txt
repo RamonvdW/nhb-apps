@@ -21,6 +21,7 @@ category
 check
 chevron_left
 chevron_right
+clear
 close
 content_copy
 create
@@ -63,6 +64,7 @@ help
 hiking
 history
 home
+hourglass_empty
 how_to_reg
 https
 hub

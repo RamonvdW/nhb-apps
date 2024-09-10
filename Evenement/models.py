@@ -98,7 +98,7 @@ class EvenementInschrijving(models.Model):
     sporter = models.ForeignKey(Sporter, on_delete=models.PROTECT)
 
     # wie is de koper?
-    # (BestelProduct verwijst naar deze inschrijving)
+    # (BestellingProduct verwijst naar deze inschrijving)
     koper = models.ForeignKey(Account, on_delete=models.PROTECT)
 
     # bedragen ontvangen en terugbetaald

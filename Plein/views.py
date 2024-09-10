@@ -10,7 +10,7 @@ from django.shortcuts import redirect, render, reverse
 from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
-from Bestel.operations.mandje import eval_mandje_inhoud
+from Bestelling.operations.mandje import eval_mandje_inhoud
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige, rol_get_beschrijving, rol_mag_wisselen
 from Functie.scheids import gebruiker_is_scheids

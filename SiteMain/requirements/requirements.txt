@@ -6,23 +6,23 @@
 #
 asgiref==3.8.1
     # via django
-cachetools==5.4.0
+cachetools==5.5.0
     # via google-auth
-certifi==2024.7.4
+certifi==2024.8.30
     # via requests
 charset-normalizer==3.3.2
     # via requests
-django==4.2.15
+django==4.2.16
     # via
     #   -c constraints.in
     #   -r requirements.in
 et-xmlfile==1.1.0
     # via openpyxl
-google-api-core==2.19.1
+google-api-core==2.19.2
     # via google-api-python-client
-google-api-python-client==2.139.0
+google-api-python-client==2.144.0
     # via -r requirements.in
-google-auth==2.32.0
+google-auth==2.34.0
     # via
     #   -r requirements.in
     #   google-api-core
@@ -30,7 +30,7 @@ google-auth==2.32.0
     #   google-auth-httplib2
 google-auth-httplib2==0.2.0
     # via google-api-python-client
-googleapis-common-protos==1.63.2
+googleapis-common-protos==1.65.0
     # via google-api-core
 googlemaps==4.10.0
     # via -r requirements.in
@@ -38,7 +38,7 @@ httplib2==0.22.0
     # via
     #   google-api-python-client
     #   google-auth-httplib2
-idna==3.7
+idna==3.8
     # via requests
 mollie-api-python==2.13.0
     # via
@@ -52,7 +52,7 @@ pillow==10.4.0
     # via -r requirements.in
 proto-plus==1.24.0
     # via google-api-core
-protobuf==5.27.3
+protobuf==5.28.0
     # via
     #   google-api-core
     #   googleapis-common-protos
@@ -67,7 +67,7 @@ pyasn1-modules==0.4.0
     # via google-auth
 pyotp==2.9.0
     # via -r requirements.in
-pyparsing==3.1.2
+pyparsing==3.1.4
     # via httplib2
 pypdf==4.3.1
     # via -r requirements.in

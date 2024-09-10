@@ -8,7 +8,7 @@ from django.conf import settings
 from django.test import TestCase, override_settings
 from Betaal.models import BetaalMutatie, BetaalActief, BetaalTransactie, BetaalInstellingenVereniging
 from Betaal.mutaties import betaal_mutatieverzoek_start_ontvangst, betaal_mutatieverzoek_payment_status_changed
-from Bestel.models import Bestelling, BestelMutatie
+from Bestelling.models import Bestelling, BestellingMutatie
 from Functie.tests.helpers import maak_functie
 from Geo.models import Regio
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -97,7 +97,7 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
         bestelling.save()
 
         # de bestelde producten met prijs en korting
-        # producten = models.ManyToManyField(BestelProduct)
+        # producten = models.ManyToManyField(BestellingProduct)
 
         url_betaling_gedaan = settings.SITE_URL + '/plein/'
 
@@ -303,7 +303,7 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
         bestelling.save()
 
         # de bestelde producten met prijs en korting
-        # producten = models.ManyToManyField(BestelProduct)
+        # producten = models.ManyToManyField(BestellingProduct)
 
         url_betaling_gedaan = settings.SITE_URL + '/plein/'
 
@@ -344,7 +344,7 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
         bestelling.save()
 
         # de bestelde producten met prijs en korting
-        # producten = models.ManyToManyField(BestelProduct)
+        # producten = models.ManyToManyField(BestellingProduct)
 
         url_betaling_gedaan = settings.SITE_URL + '/plein/'
 
@@ -385,7 +385,7 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
         bestelling.save()
 
         # de bestelde producten met prijs en korting
-        # producten = models.ManyToManyField(BestelProduct)
+        # producten = models.ManyToManyField(BestellingProduct)
 
         url_betaling_gedaan = settings.SITE_URL + '/plein/'
 
@@ -560,7 +560,7 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
                             totaal_euro=Decimal('99.01'))
         bestelling.save()
 
-        self.assertEqual(0, BestelMutatie.objects.count())
+        self.assertEqual(0, BestellingMutatie.objects.count())
 
         # maak de payment met status=paid en method=ideal
         payment_id = self._prep_mollie_websim(421)
@@ -577,8 +577,8 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
         actief = BetaalActief.objects.get(pk=actief.pk)
         self.assertTrue('Betaling is voldaan' in actief.log)
 
-        # controleer dat een BestelMutatie aangemaakt is
-        self.assertEqual(1, BestelMutatie.objects.count())
+        # controleer dat een BestellingMutatie aangemaakt is
+        self.assertEqual(1, BestellingMutatie.objects.count())
 
     def test_paid_creditcard(self):
         bestelling = Bestelling(

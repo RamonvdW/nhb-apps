@@ -12,8 +12,8 @@ from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
 from BasisTypen.definities import GESLACHT2STR
-from Bestel.operations.mutaties import (bestel_mutatieverzoek_afmelden_wedstrijd,
-                                        bestel_mutatieverzoek_verwijder_product_uit_mandje)
+from Bestelling.operations.mutaties import (bestel_mutatieverzoek_afmelden_wedstrijd,
+                                            bestel_mutatieverzoek_verwijder_product_uit_mandje)
 from Competitie.models import RegiocompetitieSporterBoog
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige, rol_get_huidige_functie
@@ -39,9 +39,9 @@ CONTENT_TYPE_CSV = 'text/csv; charset=UTF-8'
 
 
 def get_inschrijving_mh_bestel_nr(inschrijving):
-    bestel_product = inschrijving.bestelproduct_set.first()
+    bestel_product = inschrijving.bestellingproduct_set.first()
     if bestel_product:
-        bestelling = bestel_product.bestelling_set.first()
+        bestelling = bestel_product.bestelling2_set.first()
         if bestelling:
             return bestelling.mh_bestel_nr()
 
@@ -449,7 +449,7 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
                 if voorkeuren.wedstrijd_geslacht_gekozen:
                     wedstrijd_geslacht = voorkeuren.wedstrijd_geslacht
 
-            qset = aanmelding.bestelproduct_set.all()
+            qset = aanmelding.bestellingproduct_set.all()
             if qset.count() > 0:
                 bestelproduct = qset[0]
                 prijs_str = '€ %s' % bestelproduct.prijs_euro
@@ -625,7 +625,7 @@ class WedstrijdAanmeldingDetailsView(UserPassesTestMixin, TemplateView):
         else:
             inschrijving.korting_str = None
 
-        qset = inschrijving.bestelproduct_set.all()
+        qset = inschrijving.bestellingproduct_set.all()
         if qset.count() > 0:
             inschrijving.bestelproduct = qset[0]
         else:
@@ -696,8 +696,8 @@ class AfmeldenView(UserPassesTestMixin, View):
         snel = str(request.POST.get('snel', ''))[:1]
 
         if inschrijving.status == WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_MANDJE:
-            if inschrijving.bestelproduct_set.count() > 0:
-                product = inschrijving.bestelproduct_set.first()
+            if inschrijving.bestellingproduct_set.count() > 0:
+                product = inschrijving.bestellingproduct_set.first()
                 bestel_mutatieverzoek_verwijder_product_uit_mandje(inschrijving.koper, product, snel == '1')
         else:
             bestel_mutatieverzoek_afmelden_wedstrijd(inschrijving, snel == '1')

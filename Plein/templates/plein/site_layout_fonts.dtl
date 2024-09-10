@@ -40,7 +40,7 @@
   font-weight: 400;
   font-display: block;  /* liever later tonen dan verspringende layout */
 {% if font_use_subset_files %}
-  src: url("{% static 'fonts/material-icons-subset-mh-v18.otf' %}") format('opentype');
+  src: url("{% static 'fonts/material-icons-subset-mh-v19.otf' %}") format('opentype');
 {% else %}
   src: url("{% static 'fonts/Material-Icons-Round-v108.otf' %}") format('opentype');
 {% endif %}
