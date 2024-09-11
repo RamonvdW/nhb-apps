@@ -179,7 +179,7 @@ class TestBestellingActiviteit(E2EHelpers, TestCase):
         product2.save()
         self.product2 = product2
 
-        bestelling2 = Bestelling(
+        bestelling = Bestelling(
                         bestel_nr=1235,
                         account=self.account_admin,
                         ontvanger=self.instellingen_bond,
@@ -195,9 +195,9 @@ class TestBestellingActiviteit(E2EHelpers, TestCase):
                         totaal_euro='1.23',
                         status=BESTELLING_STATUS_BETALING_ACTIEF,
                         log='Een beginnetje\n')
-        bestelling2.save()
-        bestelling2.producten.add(product2)
-        self.bestelling2 = bestelling2
+        bestelling.save()
+        bestelling.producten.add(product2)
+        self.bestelling = bestelling
 
     def _maak_bestellingen(self):
         bestel = Bestelling(
