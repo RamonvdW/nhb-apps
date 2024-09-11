@@ -41,7 +41,7 @@ CONTENT_TYPE_CSV = 'text/csv; charset=UTF-8'
 def get_inschrijving_mh_bestel_nr(inschrijving):
     bestel_product = inschrijving.bestellingproduct_set.first()
     if bestel_product:
-        bestelling = bestel_product.bestelling2_set.first()
+        bestelling = bestel_product.bestelling_set.first()
         if bestelling:
             return bestelling.mh_bestel_nr()
 
