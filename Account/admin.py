@@ -1,13 +1,15 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2023 Ramon van der Winkel.
+#  Copyright (c) 2019-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.utils.translation import gettext_lazy as _
+from django.contrib.sessions.models import Session
 from Account.models import Account, AccountVerzoekenTeller
+import pprint
 
 
 class AccountAdmin(UserAdmin):
@@ -54,6 +56,25 @@ class AccountVerzoekenTellerAdmin(admin.ModelAdmin):
     search_fields = ('account__username', 'account__unaccented_naam')
 
 
+class SessionAdmin(admin.ModelAdmin):
+
+    @staticmethod
+    def username(obj):
+        session_user = obj.get_decoded().get('_auth_user_id')
+        user = Account.objects.get(pk=session_user)
+        return user.username
+
+    @staticmethod
+    def _session_data(obj):
+        return pprint.pformat(obj.get_decoded())
+
+    # _session_data.allow_tags = True
+    list_display = ['session_key', 'username', 'expire_date']   # '_session_data'
+    readonly_fields = ['session_key', 'expire_date', '_session_data', 'session_data']
+    search_fields = ('session_key',)
+
+
+admin.site.register(Session, SessionAdmin)
 admin.site.register(Account, AccountAdmin)
 admin.site.register(AccountVerzoekenTeller, AccountVerzoekenTellerAdmin)
 
