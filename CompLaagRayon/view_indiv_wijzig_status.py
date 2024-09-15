@@ -12,7 +12,7 @@ from django.core.exceptions import PermissionDenied
 from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
-from Competitie.definities import MUTATIE_KAMP_AFMELDEN_INDIV, MUTATIE_KAMP_AANMELDEN_INDIV
+from Competitie.definities import DEEL_RK, MUTATIE_KAMP_AFMELDEN_INDIV, MUTATIE_KAMP_AANMELDEN_INDIV
 from Competitie.models import KampioenschapSporterBoog, CompetitieMutatie
 from Functie.definities import Rollen, rol2url
 from Functie.rol import rol_get_huidige_functie, rol_get_huidige
@@ -56,7 +56,8 @@ class WijzigStatusRkDeelnemerView(UserPassesTestMixin, TemplateView):
                                          'kampioenschap__rayon',
                                          'sporterboog__sporter',
                                          'bij_vereniging')
-                         .get(pk=deelnemer_pk))
+                         .get(pk=deelnemer_pk,
+                              kampioenschap__deel=DEEL_RK))
         except (ValueError, KampioenschapSporterBoog.DoesNotExist):
             raise Http404('Deelnemer niet gevonden')
 
@@ -200,7 +201,8 @@ class SporterWijzigStatusRkDeelnameView(UserPassesTestMixin, TemplateView):
                          .select_related('kampioenschap',
                                          'kampioenschap__competitie')
                          .get(pk=pk,
-                              sporterboog__sporter=sporter))
+                              sporterboog__sporter=sporter,
+                              kampioenschap__deel=DEEL_RK))
         except (ValueError, TypeError, KampioenschapSporterBoog.DoesNotExist):
             raise Http404('Deelnemer niet gevonden')
 
@@ -218,7 +220,7 @@ class SporterWijzigStatusRkDeelnameView(UserPassesTestMixin, TemplateView):
         if bevestig == "1":
             if not deelnemer.bij_vereniging:
                 # kan niet bevestigen zonder verenigingslid te zijn
-                raise Http404('Sporter moet lid zijn bij een vereniging')
+                raise Http404('Je moet lid zijn bij een vereniging')
             mutatie = CompetitieMutatie(mutatie=MUTATIE_KAMP_AANMELDEN_INDIV,
                                         deelnemer=deelnemer,
                                         door=door_str)
@@ -244,13 +246,7 @@ class SporterWijzigStatusRkDeelnameView(UserPassesTestMixin, TemplateView):
                     mutatie = CompetitieMutatie.objects.get(pk=mutatie.pk)
                 # while
 
-        if self.rol_nu == Rollen.ROL_RKO:
-            url = reverse('CompLaagRayon:lijst-rk',
-                          kwargs={'deelkamp_pk': deelnemer.kampioenschap.pk})
-        else:
-            url = reverse('CompLaagRayon:lijst-rk-ver',
-                          kwargs={'deelkamp_pk': deelnemer.kampioenschap.pk})
-
+        url = reverse('Sporter:profiel')
         return HttpResponseRedirect(url)
 
 

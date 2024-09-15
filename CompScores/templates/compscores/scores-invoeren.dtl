@@ -698,14 +698,14 @@
 
                     <table>
                         <tr>
-                            <th>Sporter</th>
+                            <th>Bondsnummer</th>
                             <td id="id_bondsnummer" style="color:gray">
                                  <span>Bondsnummer</span>
                             </td>
                         </tr>
 
                         <tr>
-                            <th>Sporter</th>
+                            <th>Naam</th>
                             <td id="id_naam" style="color:gray">
                                  <span>Naam</span>
                             </td>

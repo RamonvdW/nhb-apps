@@ -42,43 +42,35 @@ def get_sporter_competities(sporter: Sporter,
         wedstrijdbogen: lijst van afkortingen van de bogen waarmee deze sporter wil schieten
         boog_afk2sporterboog: de SporterBoog van dit lid voor elk relevant boogtype
 
-        returns:
-            lijst_competities:
-                lijst van actieve competitie
-                basis: Competitie
-                heeft:
-                    fase: een van de FASE_* (zie hierboven)
-                    fase_str: Zie hierboven
-                    status_str: Beschrijving van de status, specifiek voor de fase
+        returns: lijst_competities, lijst_kan_inschrijven, lijst_inschrijvingen
 
-            lijst_kan_inschrijven:
-                    lijst van regiocompetitie waar de sporter op in kan schrijven
-                    basis: Regiocompetitie()
-                    heeft:
-                        boog_beschrijving = Tekstuele beschrijving van de boog, zoals "Recurve"
-                        url_aanmelden = URL om aan te melden - gebruik POST
+        lijst_competities: lijst van actieve competities (basis: Competitie)
+        .fase: een van de FASE_*
+        .fase_str: Korte tekstuele beschrijving van de fase (zie FASE2STR)
+        .status_str: Beschrijving van de status, specifiek voor de fase
 
-            lijst_inschrijvingen:
-                    lijst van competities waar de sporter op ingeschreven is
-                    basis: RegiocompetitieSporterBoog()
-                    heeft:
-                        competitie = Competitie
-                        competitie.fase
-                        competitie.fase_str
-                        is_fase_rk = True als de competitie in de RK fase is
-                        is_fase_bk = True als de competitie in de BK fase is
-                        boog_niet_meer: True = boog niet meer gekozen
-                        boog_beschrijving = Tekstuele beschrijving van de boog, zoals "Recurve"
-                        url_afmelden = POST URL om af te melden van de regiocompetitie
-                        id_afmelden = unieke identificatie string voor gebruik als html "id"
-                        is_afgemeld_voor_rk = True als sporter alvast afgemeld is voor RK
-                        url_voorkeur_rk = POST URL om voorkeur RK in te stellen tijdens regio fase
-                        url_schietmomenten = URL om 7 schietmomenten te kiezen (inschrijfmethode 1)
-                        rk_inschrijving: KampioenschapSporterBoog voor RK waar sporter voor gekwalificeerd is
-                        url_rk_deelnemers = URL naar pagina met hele RK deelnemers lijst
-                        url_status_rk_deelname = URL om deelname RK aan te passen (gebruik POST)
-                        id_deelname_rk = unieke identificatie string voor gebruik als html "id"
-                        bk_inschrijving: KampioenschapSporterBoog voor BK waar sporter individueel voor gekwalificeerd is
+        lijst_kan_inschrijven: lijst van competities waar sporter op in kan schrijven (basis: Regiocompetitie)
+        .boog_beschrijving: Tekstuele beschrijving van de boog, zoals "Recurve"
+        .url_aanmelden: POST URL om aan te melden
+
+        lijst_inschrijvingen: lijst van inschrijvingen van sporter (basis: RegiocompetitieSporterBoog)
+        .competitie: Competitie
+        .competitie.fase
+        .competitie.fase_str
+        .is_fase_rk: True als de competitie in de RK fase is
+        .is_fase_bk: True als de competitie in de BK fase is
+        .boog_niet_meer: True: boog niet meer gekozen
+        .boog_beschrijving: Tekstuele beschrijving van de boog, zoals "Recurve"
+        .url_afmelden: POST URL om af te melden van de regiocompetitie
+        .id_afmelden: unieke identificatie string voor gebruik als html "id"
+        .is_afgemeld_voor_rk: True als sporter alvast afgemeld is voor RK
+        .url_voorkeur_rk: POST URL om voorkeur RK in te stellen tijdens regio fase
+        .url_schietmomenten: URL om 7 schietmomenten te kiezen (inschrijfmethode 1)
+        .rk_inschrijving: KampioenschapSporterBoog voor RK waar sporter voor gekwalificeerd is
+        .url_rk_deelnemers: URL naar pagina met hele RK deelnemers lijst
+        .url_status_rk_deelname: URL om deelname RK aan te passen (gebruik POST)
+        .id_deelname_rk: unieke identificatie string voor gebruik als html "id"
+        .bk_inschrijving: KampioenschapSporterBoog voor BK waar sporter individueel voor gekwalificeerd is
     """
 
     now = timezone.now().date()
@@ -283,7 +275,16 @@ def get_sporter_competities(sporter: Sporter,
                 # BK
                 inschrijving.bk_inschrijving = deelnemer
 
-                # TODO: knop aanmelden/afmelden BK
+                if deelnemer.deelname != DEELNAME_NEE:
+                    boog_afk = deelnemer.sporterboog.boogtype.afkorting
+                    inschrijving.url_bk_deelnemers = reverse('CompUitslagen:uitslagen-bk-indiv',
+                                                             kwargs={
+                                                                 'comp_pk_of_seizoen': comp.maak_seizoen_url(),
+                                                                 'comp_boog': boog_afk.lower()})
+
+                inschrijving.url_status_bk_deelname = reverse('CompLaagBond:wijzig-status-bk-deelname')
+                inschrijving.id_deelname_bk = 'deelname_bk_%s' % deelnemer.pk
+
                 # TODO: team
     # for
 
