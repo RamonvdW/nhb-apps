@@ -306,10 +306,7 @@
                                                 <!-- deelname onbekend -->
 
                                                 <!-- vraag om bevestiging deelname -->
-                                                <a class="multi-btn-sv-rood modal-trigger" href="#{{ deelnemer.id_deelname_rk }}">
-                                                    <span class="hide-on-small-only">Geef door</span>
-                                                    <i class="hide-on-med-and-up material-icons-round notranslate">question_mark</i>
-                                                </a>
+                                                <a class="multi-btn-sv-rood modal-trigger" href="#{{ deelnemer.id_deelname_rk }}">Geef door</a>
 
                                                 <!-- modal dialog voor deze specifieke competitie -->
                                                 <div class="modal" id="{{ deelnemer.id_deelname_rk }}">
@@ -333,16 +330,13 @@
                                                 <!-- afgemeld voor RK -->
 
                                                 <!-- geef mogelijkheid om weer deelnemer te worden -->
-                                                <a class="multi-btn-sv-rood modal-trigger" href="#{{ deelnemer.id_deelname_rk }}">
-                                                    <span class="hide-on-small-only">Aanpassen</span>
-                                                    <i class="hide-on-med-and-up material-icons-round notranslate">add</i>
-                                                </a>
+                                                <a class="multi-btn-sv-rood modal-trigger" href="#{{ deelnemer.id_deelname_rk }}">Aanpassen</a>
 
                                                 <!-- modal dialog voor deze specifieke competitie -->
                                                 <div class="modal" id="{{ deelnemer.id_deelname_rk }}">
                                                     <div class="modal-content center">
                                                         <h5>Toch meedoen met het RK?</h5>
-                                                        <p>Je hebt je gekwalificeerd voor de Rayonkampioenschappen van de <b>{{ deelnemer.regiocompetitie.competitie.beschrijving }}</b>, maar je bent afgemeld.</p>
+                                                        <p>Je hebt je gekwalificeerd voor de Rayonkampioenschappen van de <b>{{ deelnemer.rk_inschrijving.kampioenschap.competitie.beschrijving }}</b>, maar je bent afgemeld.</p>
                                                         <p>Wil je toch meedoen?</p>
 
                                                         <div class="modal-footer" style="text-align:center; display:block">
@@ -362,10 +356,7 @@
                                                 <!-- is deelnemer of reserve voor het RK -->
 
                                                 <!-- geef mogelijkheid tot afmelden -->
-                                                <a class="multi-btn-sv-blauw modal-trigger" href="#{{ deelnemer.id_deelname_rk }}">
-                                                    <span class="hide-on-small-only">Afmelden</span>
-                                                    <i class="hide-on-med-and-up material-icons-round notranslate">remove</i>
-                                                </a>
+                                                <a class="multi-btn-sv-rood modal-trigger" href="#{{ deelnemer.id_deelname_rk }}">Afmelden</a>
 
                                                 <!-- modal dialog voor deze specifieke competitie -->
                                                 <div class="modal" id="{{ deelnemer.id_deelname_rk }}">
@@ -472,6 +463,7 @@
                                 <!-- status -->
                                 <td class="center">
                                     {% if deelnemer.is_fase_bk %}
+
                                         {% if deelnemer.bk_inschrijving %}
                                             <!-- is doorgestroomd naar het BK -->
                                             <span>Je hebt je gekwalificeerd voor het BK</span>
@@ -498,7 +490,95 @@
 
                                 <!-- knoppen -->
                                 <td class="right-align" style="padding:5px 5px">
+                                    {% if deelnemer.is_fase_bk %}
 
+                                        {% if deelnemer.bk_inschrijving %}
+                                            <!-- is doorgestroomd naar het BK -->
+
+                                            {% if deelnemer.url_bk_deelnemers %}
+                                                <a class="multi-btn-sv-blauw" href="{{ deelnemer.url_bk_deelnemers }}">BK lijsten</a>
+                                                <br>
+                                            {% endif %}
+
+                                            {% if deelnemer.bk_inschrijving.deelname == '?' %}
+                                                <!-- deelname onbekend -->
+
+                                                <!-- vraag om bevestiging deelname -->
+                                                <a class="multi-btn-sv-rood modal-trigger" href="#{{ deelnemer.id_deelname_bk }}">Geef door</a>
+
+                                                <!-- modal dialog voor deze specifieke competitie -->
+                                                <div class="modal" id="{{ deelnemer.id_deelname_bk }}">
+                                                    <div class="modal-content center">
+                                                        <h5>Meedoen met het BK?</h5>
+                                                        <p>We willen graag weten of je mee kan doen met de Bondskampioenschappen van de <b>{{ deelnemer.bk_inschrijving.kampioenschap.competitie.beschrijving }}</b>.</p>
+                                                        <p>Kan je meedoen?</p>
+
+                                                        <div class="modal-footer" style="text-align:center; display:block">
+                                                            <div style="display:inline-block; width:49%">
+                                                                <button class="btn-sv-rood" onclick="keuze_doorgeven(this)" data-keuze="J" data-deelnemer="{{ deelnemer.bk_inschrijving.pk }}" data-url="{{ deelnemer.url_status_bk_deelname }}">Ja</button>
+                                                            </div>
+                                                            <div style="display:inline-block; width:49%">
+                                                                <button class="btn-sv-blauw" onclick="keuze_doorgeven(this)" data-keuze="N" data-deelnemer="{{ deelnemer.bk_inschrijving.pk }}" data-url="{{ deelnemer.url_status_bk_deelname }}">Nee</button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                            {% elif deelnemer.bk_inschrijving.deelname == 'N' %}
+                                                <!-- afgemeld voor BK -->
+
+                                                <!-- geef mogelijkheid om weer deelnemer te worden -->
+                                                <a class="multi-btn-sv-rood modal-trigger" href="#{{ deelnemer.id_deelname_bk }}">Aanpassen</a>
+
+                                                <!-- modal dialog voor deze specifieke competitie -->
+                                                <div class="modal" id="{{ deelnemer.id_deelname_bk }}">
+                                                    <div class="modal-content center">
+                                                        <h5>Toch meedoen met het BK?</h5>
+                                                        <p>Je hebt je gekwalificeerd voor de Bondskampioenschappen van de <b>{{ deelnemer.bk_inschrijving.kampioenschap.competitie.beschrijving }}</b>, maar je bent afgemeld.</p>
+                                                        <p>Wil je toch meedoen?</p>
+
+                                                        <div class="modal-footer" style="text-align:center; display:block">
+                                                            <div style="display:inline-block; width:49%">
+                                                                <button class="btn-sv-rood" onclick="keuze_doorgeven(this)" data-keuze="J" data-deelnemer="{{ deelnemer.bk_inschrijving.pk }}" data-url="{{ deelnemer.url_status_bk_deelname }}">Ja</button>
+                                                            </div>
+                                                            <div style="display:inline-block; width:49%">
+                                                                <button class="btn-sv-blauw modal-close">Nee</button>
+                                                            </div>
+                                                        </div>
+
+                                                        <p>Let op: als de deelnemerslijst vol is, dan kom je eerst op de reserve lijst.</p>
+                                                    </div>
+                                                </div>
+
+                                            {% else %}
+                                                <!-- is deelnemer of reserve voor het BK -->
+
+                                                <!-- geef mogelijkheid tot afmelden -->
+                                                <a class="multi-btn-sv-rood modal-trigger" href="#{{ deelnemer.id_deelname_bk }}">Afmelden</a>
+
+                                                <!-- modal dialog voor deze specifieke competitie -->
+                                                <div class="modal" id="{{ deelnemer.id_deelname_bk }}">
+                                                    <div class="modal-content center">
+                                                        <h5>Afmelden voor het BK?</h5>
+                                                        <p>Je hebt je gekwalificeerd voor de Bondskampioenschappen van de <b>{{ deelnemer.bk_inschrijving.kampioenschap.competitie.beschrijving }}</b> en staat op de deelnemerslijst.</p>
+                                                        <p>Als je niet deel kan nemen, meld je dan af. Daarmee geef je ruimte aan een andere sporters om deel te nemen.</p>
+                                                        <p>Wil je je afmelden?</p>
+
+                                                        <div class="modal-footer" style="text-align:center; display:block">
+                                                            <div style="display:inline-block; width:49%">
+                                                                <button class="btn-sv-rood" onclick="keuze_doorgeven(this)" data-keuze="N" data-deelnemer="{{ deelnemer.bk_inschrijving.pk }}" data-url="{{ deelnemer.url_status_bk_deelname }}">Ja</button>
+                                                            </div>
+                                                            <div style="display:inline-block; width:49%">
+                                                                <button class="btn-sv-blauw modal-close">Nee</button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                            {% endif %}
+
+                                        {% endif %}
+                                    {% endif %}
                                 </td>
                             </tr>
 

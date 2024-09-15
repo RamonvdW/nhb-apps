@@ -275,7 +275,16 @@ def get_sporter_competities(sporter: Sporter,
                 # BK
                 inschrijving.bk_inschrijving = deelnemer
 
-                # TODO: knop aanmelden/afmelden BK
+                if deelnemer.deelname != DEELNAME_NEE:
+                    boog_afk = deelnemer.sporterboog.boogtype.afkorting
+                    inschrijving.url_bk_deelnemers = reverse('CompUitslagen:uitslagen-bk-indiv',
+                                                             kwargs={
+                                                                 'comp_pk_of_seizoen': comp.maak_seizoen_url(),
+                                                                 'comp_boog': boog_afk.lower()})
+
+                inschrijving.url_status_bk_deelname = reverse('CompLaagBond:wijzig-status-bk-deelname')
+                inschrijving.id_deelname_bk = 'deelname_bk_%s' % deelnemer.pk
+
                 # TODO: team
     # for
 

@@ -254,8 +254,13 @@ echo "[INFO] Finished main test run" >>"$LOG"
 # launch a browser with all the stored web pages
 find "$TMP_HTML" -type f | grep -q html
 RES=$?
-echo "[DEBUG] Found HTML files in $TMP_HTML"
-firefox "$TMP_HTML"/*html &
+# echo "[DEBUG] RES=$RES"
+if [ $RES -eq 0 ]
+then
+    # echo "[DEBUG] Found HTML files in $TMP_HTML"
+    HTML_FILES=$(ls -1tr "$TMP_HTML"/*html)   # sorted by creation time
+    firefox $HTML_FILES &
+fi
 
 
 # stop showing the additions to the logfile, because the rest is less interesting
