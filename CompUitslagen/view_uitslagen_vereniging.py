@@ -266,6 +266,7 @@ class UitslagenVerenigingTeamsView(TemplateView):
                  .filter(regiocompetitie=deelcomp,
                          team_type=context['teamtype'],
                          vereniging=ver)
+                 .prefetch_related('leden')
                  .order_by('team_klasse__volgorde'))
 
         pk2team = dict()
@@ -280,104 +281,112 @@ class UitslagenVerenigingTeamsView(TemplateView):
             team.leden_lijst = dict()     # [deelnemer.pk] = [ronde status, ..]
         # for
 
-        ronde_teams = (RegiocompetitieRondeTeam
-                       .objects
-                       .filter(team__in=teams)
-                       .prefetch_related('deelnemers_geselecteerd',
-                                         'deelnemers_feitelijk',
-                                         'scorehist_feitelijk')
-                       .order_by('ronde_nr'))
-        for ronde_team in ronde_teams:
-            team = pk2team[ronde_team.team.pk]
-            team.rondes.append(ronde_team)
-            team.ronde_scores.append(ronde_team.team_score)
+        if deelcomp.huidige_team_ronde >= 1:
+            ronde_teams = (RegiocompetitieRondeTeam
+                           .objects
+                           .filter(team__in=teams)
+                           .prefetch_related('deelnemers_geselecteerd',
+                                             'deelnemers_feitelijk',
+                                             'scorehist_feitelijk')
+                           .order_by('ronde_nr'))
+            for ronde_team in ronde_teams:
+                team = pk2team[ronde_team.team.pk]
+                team.rondes.append(ronde_team)
+                team.ronde_scores.append(ronde_team.team_score)
 
-            if ronde_team.ronde_nr < deelcomp.huidige_team_ronde:
-                team.ronde_punten.append(ronde_team.team_punten)
-            else:
-                team.ronde_punten.append(-1)
-
-            team.totaal_score += ronde_team.team_score
-            team.totaal_punten += ronde_team.team_punten
-
-            # haal de bevroren scores op
-            sb2score = dict()               # [sporterboog.pk] = score_waarde
-            for scorehist in (ronde_team
-                              .scorehist_feitelijk
-                              .select_related('score',
-                                              'score__sporterboog')
-                              .all()):
-                sb2score[scorehist.score.sporterboog.pk] = scorehist.nieuwe_waarde
-            # for
-
-            geselecteerd_pks = list()
-            for deelnemer in ronde_team.deelnemers_geselecteerd.all():
-                geselecteerd_pks.append(deelnemer.pk)
-
-                if deelnemer.pk not in team.leden_lijst:
-                    team.leden_lijst[deelnemer.pk] = voorgaand = list()
-                    while len(voorgaand) < ronde_team.ronde_nr:
-                        inzet = SimpleNamespace(tekst='-', score=-1)
-                        voorgaand.append(inzet)
-                    # while
-            # for
-
-            for deelnemer in ronde_team.deelnemers_feitelijk.all():
-                try:
-                    voorgaand = team.leden_lijst[deelnemer.pk]
-                except KeyError:
-                    team.leden_lijst[deelnemer.pk] = voorgaand = list()
-                    while len(voorgaand) < ronde_team.ronde_nr:
-                        inzet = SimpleNamespace(tekst='-', score=-1)
-                        voorgaand.append(inzet)
-                    # while
-
-                try:
-                    score = sb2score[deelnemer.sporterboog.pk]
-                except KeyError:
-                    # geen score van deze sporter
-                    score = 0
-
-                score_str = str(score)
-                if deelnemer.pk not in geselecteerd_pks:
-                    score_str = '* ' + score_str
+                if ronde_team.ronde_nr < deelcomp.huidige_team_ronde:
+                    team.ronde_punten.append(ronde_team.team_punten)
                 else:
-                    geselecteerd_pks.remove(deelnemer.pk)
+                    team.ronde_punten.append(-1)
 
-                inzet = SimpleNamespace(
-                            tekst=score_str,
-                            score=score)
+                team.totaal_score += ronde_team.team_score
+                team.totaal_punten += ronde_team.team_punten
 
-                voorgaand.append(inzet)
-            # for
+                # haal de bevroren scores op
+                sb2score = dict()               # [sporterboog.pk] = score_waarde
+                for scorehist in (ronde_team
+                                  .scorehist_feitelijk
+                                  .select_related('score',
+                                                  'score__sporterboog')
+                                  .all()):
+                    sb2score[scorehist.score.sporterboog.pk] = scorehist.nieuwe_waarde
+                # for
 
-            # samenvatting van deze ronde maken
-            laagste_inzet = None
-            laagste_score = 9999
-            aantal_scores = 0
-            for deelnemer_pk, voorgaand in team.leden_lijst.items():
-                # iedereen die voorheen in het team zaten door laten groeien
-                if len(voorgaand) <= ronde_team.ronde_nr:
-                    if deelnemer_pk in geselecteerd_pks:
-                        # was geselecteerd voor deze ronde, dus uitvaller
-                        inzet = SimpleNamespace(tekst='-', score=-1)
+                geselecteerd_pks = list()
+                for deelnemer in ronde_team.deelnemers_geselecteerd.all():
+                    geselecteerd_pks.append(deelnemer.pk)
+
+                    if deelnemer.pk not in team.leden_lijst:
+                        team.leden_lijst[deelnemer.pk] = voorgaand = list()
+                        while len(voorgaand) < ronde_team.ronde_nr:
+                            inzet = SimpleNamespace(tekst='-', score=-1)
+                            voorgaand.append(inzet)
+                        # while
+                # for
+
+                for deelnemer in ronde_team.deelnemers_feitelijk.all():
+                    try:
+                        voorgaand = team.leden_lijst[deelnemer.pk]
+                    except KeyError:
+                        team.leden_lijst[deelnemer.pk] = voorgaand = list()
+                        while len(voorgaand) < ronde_team.ronde_nr:
+                            inzet = SimpleNamespace(tekst='-', score=-1)
+                            voorgaand.append(inzet)
+                        # while
+
+                    try:
+                        score = sb2score[deelnemer.sporterboog.pk]
+                    except KeyError:
+                        # geen score van deze sporter
+                        score = 0
+
+                    score_str = str(score)
+                    if deelnemer.pk not in geselecteerd_pks:
+                        score_str = '* ' + score_str
                     else:
-                        # niet geselecteerd voor deze ronde
-                        inzet = SimpleNamespace(tekst='', score=-1)
-                    voorgaand.append(inzet)
+                        geselecteerd_pks.remove(deelnemer.pk)
 
-                # track het aantal scores en de laagste score
-                inzet = voorgaand[-1]
-                if inzet.score >= 0:
-                    aantal_scores += 1
-                    if inzet.score < laagste_score:
-                        laagste_score = inzet.score
-                        laagste_inzet = inzet
+                    inzet = SimpleNamespace(
+                                tekst=score_str,
+                                score=score)
+
+                    voorgaand.append(inzet)
+                # for
+
+                # samenvatting van deze ronde maken
+                laagste_inzet = None
+                laagste_score = 9999
+                aantal_scores = 0
+                for deelnemer_pk, voorgaand in team.leden_lijst.items():
+                    # iedereen die voorheen in het team zaten door laten groeien
+                    if len(voorgaand) <= ronde_team.ronde_nr:
+                        if deelnemer_pk in geselecteerd_pks:
+                            # was geselecteerd voor deze ronde, dus uitvaller
+                            inzet = SimpleNamespace(tekst='-', score=-1)
+                        else:
+                            # niet geselecteerd voor deze ronde
+                            inzet = SimpleNamespace(tekst='', score=-1)
+                        voorgaand.append(inzet)
+
+                    # track het aantal scores en de laagste score
+                    inzet = voorgaand[-1]
+                    if inzet.score >= 0:
+                        aantal_scores += 1
+                        if inzet.score < laagste_score:
+                            laagste_score = inzet.score
+                            laagste_inzet = inzet
+                # for
+                if aantal_scores > 3 and laagste_inzet:
+                    # de score die buiten de top-3 valt wegstrepen
+                    laagste_inzet.is_laagste = True
             # for
-            if aantal_scores > 3 and laagste_inzet:
-                # de score die buiten de top-3 valt wegstrepen
-                laagste_inzet.is_laagste = True
-        # for
+        else:
+            # eerste ronde is nog niet gestart
+            for team in teams:
+                for deelnemer in team.leden.all():
+                    team.leden_lijst[deelnemer.pk] = list()
+                # for
+            # for
 
         # converteer de team leden
         pks = list()
