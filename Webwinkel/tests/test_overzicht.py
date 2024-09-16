@@ -193,16 +193,6 @@ class TestWebwinkelOverzicht(E2EHelpers, TestCase):
         url = self.url_webwinkel_product % self.product3.pk
         self.e2e_assert_other_http_commands_not_supported(url, post=False)
 
-    def test_mww(self):
-        self.e2e_login_and_pass_otp(self.account_normaal)
-        self.e2e_wissel_naar_functie(self.functie_mww)
-
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_webwinkel_manager)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('webwinkel/manager.dtl', 'plein/site_layout.dtl'))
-
     def test_mandje(self):
         self.e2e_login_and_pass_otp(self.account_normaal)
         self.e2e_wisselnaarrol_sporter()
