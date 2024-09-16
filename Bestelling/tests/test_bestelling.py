@@ -297,7 +297,7 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
 
         self.assertEqual(1, MailQueue.objects.count())
         mail = MailQueue.objects.first()
-        self.assert_email_html_ok(mail)
+        self.assert_email_html_ok(mail, 'email_bestelling/bevestig-bestelling.dtl')
         self.assert_consistent_email_html_text(mail, ignore=('>Bedrag:', '>Korting:'))
         self.assertTrue('Verzendkosten' in mail.mail_text)
 
@@ -379,7 +379,7 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
 
         self.assertEqual(1, MailQueue.objects.count())
         mail = MailQueue.objects.first()
-        self.assert_email_html_ok(mail)
+        self.assert_email_html_ok(mail, 'email_bestelling/bevestig-bestelling.dtl')
         self.assert_consistent_email_html_text(mail, ignore=('>Bedrag:', '>Korting:'))
         self.assertTrue('Verzendkosten' in mail.mail_text)
 
@@ -459,6 +459,7 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
 
         # bestel wedstrijddeelname met korting
         bestel_mutatieverzoek_inschrijven_wedstrijd(self.account_admin, self.inschrijving, snel=True)
+        bestel_mutatieverzoek_inschrijven_evenement(self.account_admin, self.evenement_inschrijving, snel=True)
         # korting moet automatisch toegepast worden
         self.verwerk_bestel_mutaties()
 
@@ -491,15 +492,15 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
                 when=betaalactief.when,
                 beschrijving="Test beschrijving",
                 is_restitutie=False,
-                bedrag_euro_klant=Decimal('10'),
-                bedrag_euro_boeking=Decimal('9.75'),
+                bedrag_euro_klant=Decimal('20.80'),
+                bedrag_euro_boeking=Decimal('20.55'),
                 klant_naam="Pietje Pijlsnel",
                 klant_account="1234.5678.9012.3456").save()
 
         # zonder BetaalActief gekoppeld aan de Bestelling werkt het niet (mutatie verzoek wordt niet eens verstuurd)
-        self.assertEqual(2, BestellingMutatie.objects.count())
+        self.assertEqual(3, BestellingMutatie.objects.count())
         bestel_mutatieverzoek_betaling_afgerond(betaalactief, gelukt=True, snel=True)
-        self.assertEqual(2, BestellingMutatie.objects.count())
+        self.assertEqual(3, BestellingMutatie.objects.count())
         self.assertEqual(MailQueue.objects.count(), 1)      # bevestiging van de bestelling
         MailQueue.objects.all().delete()
 
@@ -510,7 +511,7 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
 
         # betaling mislukt
         bestel_mutatieverzoek_betaling_afgerond(betaalactief, gelukt=False, snel=True)
-        self.assertEqual(3, BestellingMutatie.objects.count())
+        self.assertEqual(4, BestellingMutatie.objects.count())
         f1, f2 = self.verwerk_bestel_mutaties()
         self.assertTrue('Betaling niet gelukt voor bestelling' in f2.getvalue())
         self.assertEqual(MailQueue.objects.count(), 0)
@@ -532,9 +533,9 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
 
         # dubbel verzoek heeft geen effect
         bestel_mutatieverzoek_betaling_afgerond(betaalactief, gelukt=True, snel=True)
-        self.assertEqual(4, BestellingMutatie.objects.count())
+        self.assertEqual(5, BestellingMutatie.objects.count())
         bestel_mutatieverzoek_betaling_afgerond(betaalactief, gelukt=True, snel=True)
-        self.assertEqual(4, BestellingMutatie.objects.count())
+        self.assertEqual(5, BestellingMutatie.objects.count())
         f1, f2 = self.verwerk_bestel_mutaties()
         # print('\nf1:', f1.getvalue(), '\nf2:', f2.getvalue())
         self.assertTrue('[INFO] Betaling is gelukt voor bestelling' in f2.getvalue())
@@ -542,7 +543,7 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
         # er moet nu een mail in de MailQueue staan
         self.assertEqual(MailQueue.objects.count(), 1)
         mail = MailQueue.objects.first()
-        self.assert_email_html_ok(mail)
+        self.assert_email_html_ok(mail, 'email_bestelling/bevestig-betaling.dtl')
         self.assert_consistent_email_html_text(mail, ignore=('>Bedrag:', '>Korting:'))
 
         bestelling = Bestelling.objects.get(pk=bestelling.pk)
@@ -889,16 +890,16 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
 
         self.assertEqual(2, MailQueue.objects.count())
         mail = MailQueue.objects.get(mail_to=account_koper.bevestigde_email)
+        self.assert_email_html_ok(mail, 'email_bestelling/bevestig-bestelling.dtl')
         self.assert_consistent_email_html_text(mail)
-        self.assert_email_html_ok(mail)
 
         mail = MailQueue.objects.get(mail_to=self.sporter.account.bevestigde_email)
         # print('\nmail_text = %s' % mail.mail_text)
         # print('mail_html = %s' % mail.mail_html)
         self.assertTrue(self.wedstrijd.locatie.plaats in mail.mail_text)
+        self.assert_email_html_ok(mail, 'email_bestelling/info-inschrijving-wedstrijd.dtl')
         self.assertTrue('09:18' in mail.mail_text)        # 10:00 - 42min
         self.assert_consistent_email_html_text(mail)
-        self.assert_email_html_ok(mail)
 
     def test_nul_bedrag_geen_email(self):
         # inschrijving door iemand anders
@@ -1413,7 +1414,7 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
 
         self.assertEqual(1, MailQueue.objects.count())
         mail = MailQueue.objects.first()
-        self.assert_email_html_ok(mail)
+        self.assert_email_html_ok(mail, 'email_bestelling/bevestig-bestelling.dtl')
         self.assert_consistent_email_html_text(mail, ignore=('>Bedrag:', '>Korting:'))
 
         # bekijk de lijst van bestellingen, met de geannuleerde bestelling
@@ -1687,6 +1688,7 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
         bestelling.status = BESTELLING_STATUS_BETALING_ACTIEF
         bestelling.save(update_fields=['betaal_actief', 'status'])
 
+        self.assertEqual(1, MailQueue.objects.count())
         BetaalTransactie(
             payment_id='testje',
             when=betaalactief.when,
@@ -1703,6 +1705,13 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
         self.assertTrue('[INFO] Betaling is gelukt voor bestelling' in f2.getvalue())
         bestelling = Bestelling.objects.get(pk=bestelling.pk)
         self.assertEqual(bestelling.status, BESTELLING_STATUS_AFGEROND)
+
+        self.assertEqual(3, MailQueue.objects.count())
+        mail = MailQueue.objects.filter(mail_subj='Inschrijving voor evenement').first()
+        # print('\nmail_text = %s' % mail.mail_text)
+        # print('mail_html = %s' % mail.mail_html)
+        self.assert_email_html_ok(mail, 'email_bestelling/info-inschrijving-evenement.dtl')
+        self.assert_consistent_email_html_text(mail)
 
     def test_evenement_ander_no_email_1(self):
         # koop evenement deelname voor iemand anders die geen bevestigde email heeft

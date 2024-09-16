@@ -329,7 +329,7 @@ class TestRegistreerBeheer(E2EHelpers, TestCase):
 
         self.assertEqual(1, MailQueue.objects.count())
         mail = MailQueue.objects.first()
-        self.assert_email_html_ok(mail)
+        self.assert_email_html_ok(mail, 'email_registreer/gast-afgewezen.dtl')
         self.assert_consistent_email_html_text(mail)
 
         # nog een keer (al afgewezen)
@@ -358,7 +358,7 @@ class TestRegistreerBeheer(E2EHelpers, TestCase):
 
         self.assertEqual(1, MailQueue.objects.count())
         mail = MailQueue.objects.first()
-        self.assert_email_html_ok(mail)
+        self.assert_email_html_ok(mail, 'email_registreer/gast-afgewezen.dtl')
         self.assert_consistent_email_html_text(mail)
 
         gast = GastRegistratie.objects.get(lid_nr=self.gast_800001.lid_nr)

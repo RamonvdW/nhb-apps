@@ -271,7 +271,7 @@ class TestWedstrijdenManager(E2EHelpers, TestCase):
         self.assertEqual(2, Taak.objects.count())       # 1 voor de HWL, 1 voor CS
 
         mail = MailQueue.objects.filter(mail_to=self.functie_cs.bevestigde_email).first()
-        self.assert_email_html_ok(mail)
+        self.assert_email_html_ok(mail, 'email_taken/nieuwe_taak.dtl')
         self.assert_consistent_email_html_text(mail)
 
 # end of file

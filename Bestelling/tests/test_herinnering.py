@@ -196,7 +196,7 @@ class TestBestellingHerinnering(E2EHelpers, TestCase):
 
         self.assertEqual(MailQueue.objects.count(), 1)
         mail = MailQueue.objects.first()
-        self.assert_email_html_ok(mail)
+        self.assert_email_html_ok(mail, 'email_bestelling/herinnering-mandje.dtl')
         self.assert_consistent_email_html_text(mail)
         self.assertTrue('1 product ' in mail.mail_text)
         mail.delete()
@@ -212,7 +212,7 @@ class TestBestellingHerinnering(E2EHelpers, TestCase):
 
         self.assertEqual(MailQueue.objects.count(), 1)
         mail = MailQueue.objects.first()
-        self.assert_email_html_ok(mail)
+        self.assert_email_html_ok(mail, 'email_bestelling/herinnering-mandje.dtl')
         self.assert_consistent_email_html_text(mail)
         self.assertTrue('2 producten ' in mail.mail_text)
         mail.delete()

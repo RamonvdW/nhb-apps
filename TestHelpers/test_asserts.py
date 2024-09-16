@@ -959,9 +959,11 @@ class MyTestAsserts(TestCase):
     # def assert200_is_bestand_xlsm(self, resp):
     #     self._assert_bestand(resp, 'application/vnd.ms-excel.sheet.macroEnabled.12')
 
-    def assert_email_html_ok(self, mail: MailQueue):
+    def assert_email_html_ok(self, mail: MailQueue, expected_template_name: str):
         html = mail.mail_html
         template_name = mail.template_used
+
+        self.assertEqual(template_name, expected_template_name)
 
         if template_name not in validated_templates:          # pragma: no branch
             validated_templates.append(template_name)

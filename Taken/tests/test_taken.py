@@ -49,7 +49,7 @@ class TestTakenTaken(E2EHelpers, TestCase):
         self.assertEqual(1, MailQueue.objects.count())
 
         mail = MailQueue.objects.first()
-        self.assert_email_html_ok(mail)
+        self.assert_email_html_ok(mail, 'email_taken/herinnering.dtl')
         self.assert_consistent_email_html_text(mail)
 
         stuur_email_taak_herinnering(self.emailadres, 5)     # 5 taken
@@ -61,7 +61,7 @@ class TestTakenTaken(E2EHelpers, TestCase):
         self.assertEqual(1, MailQueue.objects.count())
 
         mail = MailQueue.objects.first()
-        self.assert_email_html_ok(mail)
+        self.assert_email_html_ok(mail, 'email_taken/nieuwe_taak.dtl')
         self.assert_consistent_email_html_text(mail)
 
         stuur_email_nieuwe_taak(self.emailadres, 'test', 2)         # 2 taken

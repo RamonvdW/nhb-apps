@@ -137,13 +137,13 @@ class TestBestelBetaling(E2EHelpers, TestCase):
 
         # controleer de betalingsbevestiging
         mail = MailQueue.objects.filter(mail_to=self.account_email)[0]
-        self.assert_email_html_ok(mail)
+        self.assert_email_html_ok(mail, 'email_bestelling/bevestig-betaling.dtl')
         self.assert_consistent_email_html_text(mail)
 
         mail = MailQueue.objects.exclude(pk=mail.pk)[0]
         # print(mail.mail_text)
         # print(mail.mail_html.replace('<', '\n<'))
-        self.assert_email_html_ok(mail)
+        self.assert_email_html_ok(mail, 'email_bestelling/backoffice-versturen.dtl')
         self.assert_consistent_email_html_text(mail)
         self.assertEqual(mail.mail_to, self.functie_mww.bevestigde_email)
 

@@ -230,7 +230,7 @@ class TestBestellingBetaling(E2EHelpers, TestCase):
         # controleer dat een e-mailbevestiging van de betaling aangemaakt is
         self.assertEqual(1, MailQueue.objects.count())
         mail = MailQueue.objects.first()
-        self.assert_email_html_ok(mail)
+        self.assert_email_html_ok(mail, 'email_bestelling/bevestig-betaling.dtl')
         self.assert_consistent_email_html_text(mail, ignore=('>Prijs:', '>Korting:'))
 
         bestelling = Bestelling.objects.get(pk=bestelling.pk)

@@ -248,7 +248,7 @@ class TestScheidsrechterWedstrijden(E2EHelpers, TestCase):
         self.assertEqual(1, WedstrijdDagScheidsrechters.objects.count())
 
         mail = MailQueue.objects.first()
-        self.assert_email_html_ok(mail)
+        self.assert_email_html_ok(mail, 'email_scheidsrechter/beschikbaarheid-opgeven.dtl')
         self.assert_consistent_email_html_text(mail)
 
         # wedstrijd details (beschikbaarheid opgevraagd)
@@ -426,7 +426,7 @@ class TestScheidsrechterWedstrijden(E2EHelpers, TestCase):
 
         self.assertEqual(2, MailQueue.objects.count())
         mail = MailQueue.objects.first()
-        self.assert_email_html_ok(mail)
+        self.assert_email_html_ok(mail, 'email_scheidsrechter/voor-wedstrijddag-gekozen.dtl')
         self.assert_consistent_email_html_text(mail)
 
         self.assertEqual(1, Taak.objects.count())
@@ -491,13 +491,14 @@ class TestScheidsrechterWedstrijden(E2EHelpers, TestCase):
 
         self.verwerk_scheids_mutaties()
 
-        # controleer dat 3 scheidsrechters een mailtje krijgen
+        # controleer dat 2 scheidsrechters een mailtje krijgen
         dag.refresh_from_db()
         self.assertEqual(0, dag.notified_srs.count())
 
         self.assertEqual(2, MailQueue.objects.count())
+        # TODO: niet gesorteerd, dus risico verkeerde mail
         mail = MailQueue.objects.first()
-        self.assert_email_html_ok(mail)
+        self.assert_email_html_ok(mail, 'email_scheidsrechter/voor-wedstrijddag-niet-meer-nodig.dtl')
         self.assert_consistent_email_html_text(mail)
 
         # corner cases
