@@ -109,6 +109,7 @@ BEHEER_PAGINAS = (
     '/beheer/login/',
     '/beheer/logout/',
     '/beheer/password_change/',
+    '/beheer/sessions/session/',
 )
 
 
