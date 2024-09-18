@@ -42,7 +42,7 @@
             |    {{ onderwerp }}{% if tekst %}: {{ tekst }}{% endif %}
         {% endfor %}
 
-        {% if product.korting_euro > 0.001 %}
+        {% if product.gebruikte_korting_str %}
             |    Verkregen korting: {{ product.gebruikte_korting_str }}
             {% if product.combi_reden %}
                 |    (combinatie korting voor {{ product.combi_reden }}
@@ -158,7 +158,7 @@
                 <tr>
                     <td></td>
                     <td>Verkregen korting:<br>
-                        {% if product.korting %}
+                        {% if product.gebruikte_korting_str %}
                             <span>{{ product.gebruikte_korting_str }}</span><br>
                         {% endif %}
                         {% if product.combi_reden %}
@@ -213,7 +213,7 @@
                     <td style="vertical-align:top">Restitutie:</td>
                     <td>
                         <span>op {{ transactie.when_str }}</span><br>
-                        <span>{{ transactie.beschrijving }}</span>
+                        <span>Beschrijving: {{ transactie.beschrijving }}</span>
                     </td>
                 {% else %}
                     <td style="vertical-align:top">Ontvangen:</td>

@@ -183,7 +183,7 @@
                     <td style="vertical-align:top">Restitutie:</td>
                     <td>
                         <span>op {{ transactie.when_str }}</span><br>
-                        <span>{{ transactie.beschrijving }}</span>
+                        <span>Beschrijving: {{ transactie.beschrijving }}</span>
                     </td>
                 {% else %}
                     <td style="vertical-align:top">Ontvangen:</td>
