@@ -359,12 +359,12 @@ class ProfielView(UserPassesTestMixin, TemplateView):
         boog_afk2sporterboog, wedstrijdbogen = get_sporter_gekozen_bogen(self.sporter, self.alle_competitie_bogen)
         context['moet_bogen_kiezen'] = len(wedstrijdbogen) == 0
 
+        context['histcomp'] = self._find_histcomp_scores()
+
         context['toon_bondscompetities'] = False
         if self.ver and not self.ver.geen_wedstrijden and not (is_extern or is_administratief):
 
             context['toon_bondscompetities'] = True
-
-            context['histcomp'] = self._find_histcomp_scores()
 
             lijst_comps, lijst_kan_inschrijven, lijst_inschrijvingen = get_sporter_competities(self.sporter,
                                                                                                wedstrijdbogen,
@@ -376,6 +376,16 @@ class ProfielView(UserPassesTestMixin, TemplateView):
 
             context['comp_is_ingeschreven'] = len(lijst_inschrijvingen) > 0
             context['comp_inschrijvingen_sb'] = lijst_inschrijvingen
+
+            context['hint_voorkeuren'] = False
+            # als de competitie open is voor inschrijven
+            # en de sporter is nog niet aangemeld
+            # en de sporter heeft geen bogen ingeschreven
+            if not context['comp_kan_inschrijven']:
+                for comp in lijst_comps:
+                    if comp.is_open_voor_inschrijven():
+                        context['hint_voorkeuren'] = True
+                # for
 
             context['regiocomp_scores'] = self._find_scores()
 

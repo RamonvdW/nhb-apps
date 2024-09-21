@@ -4,7 +4,8 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.http import Http404
+from django.http import Http404, HttpResponse
+from django.conf import settings
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
@@ -43,6 +44,10 @@ class ProfielTestView(UserPassesTestMixin, TemplateView):
 
     def dispatch(self, request, *args, **kwargs):
         """ wegsturen als het we geen vragen meer hebben + bij oneigenlijk gebruik """
+
+        if not settings.IS_TEST_SERVER:
+            return HttpResponse(status=410)
+
         if request.user.is_authenticated:
             self.account = get_account(request)
 
@@ -95,8 +100,18 @@ class ProfielTestView(UserPassesTestMixin, TemplateView):
             context['comp_is_ingeschreven'] = len(lijst_inschrijvingen) > 0
             context['comp_inschrijvingen_sb'] = lijst_inschrijvingen
 
+            context['hint_voorkeuren'] = False
+            # als de competitie open is voor inschrijven
+            # en de sporter is nog niet aangemeld
+            # en de sporter heeft geen bogen ingeschreven
+            if not context['comp_kan_inschrijven']:
+                for comp in lijst_comps:
+                    if comp.is_open_voor_inschrijven():
+                        context['hint_voorkeuren'] = True
+                # for
+
             if not self.voorkeuren.voorkeur_meedoen_competitie:
-                if len(lijst_inschrijvingen) == 0:
+                if len(lijst_inschrijvingen) == 0:      # pragma: no branch
                     # niet ingeschreven en geen interesse
                     context['toon_bondscompetities'] = False
 
