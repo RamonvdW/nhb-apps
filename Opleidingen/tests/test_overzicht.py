@@ -43,6 +43,7 @@ class TestFunctieOverzicht(E2EHelpers, TestCase):
         self.assertTrue(str(deelnemer) != '')
 
     def test_admin(self):
+        # FUTURE: migreer naar Beheer/tests
         # GastRegistratieFaseFilter
         worker = (admin.HeeftAccountFilter(None,
                                            {'heeft_account': 'Nee'},

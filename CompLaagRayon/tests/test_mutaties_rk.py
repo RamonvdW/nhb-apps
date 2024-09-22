@@ -1039,20 +1039,5 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
             resp = self.client.get(self.url_wijzig_stat % andere_deelnemer_pk)
         self.assert403(resp, 'Geen sporter van jouw vereniging')
 
-    def test_admin(self):
-        # admin filter with actual records
-        account = self.testdata.account_admin
-        account.is_superuser = True      # toegang tot admin interface
-        account.save(update_fields=['is_superuser'])
-        self.e2e_login_and_pass_otp(account)
-
-        # without filter selection
-        resp = self.client.get('/beheer/Competitie/kampioenschapsporterboog/')
-        self.assertEqual(resp.status_code, 200)  # 200 = OK
-
-        # with filter selection
-        resp = self.client.get('/beheer/Competitie/kampioenschapsporterboog/?indiv_klasse_rk_bk=1100')
-        self.assertEqual(resp.status_code, 200)  # 200 = OK
-
 
 # end of file

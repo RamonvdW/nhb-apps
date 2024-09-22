@@ -173,29 +173,5 @@ class TestCompLaagRayonTeams(E2EHelpers, TestCase):
         resp = self.client.get(url)
         self.assert403(resp)
 
-    def test_admin(self):
-        # admin filter with actual records
-        account = self.testdata.account_admin
-        account.is_superuser = True      # toegang tot admin interface
-        account.save(update_fields=['is_superuser'])
-        self.e2e_login_and_pass_otp(account)
-
-        # without filter selection
-        resp = self.client.get('/beheer/Competitie/kampioenschapteam/')
-        self.assertEqual(resp.status_code, 200)  # 200 = OK
-
-        # with filter selection
-        resp = self.client.get('/beheer/Competitie/kampioenschapteam/?rk_bk_type=RK')
-        self.assertEqual(resp.status_code, 200)  # 200 = OK
-
-        resp = self.client.get('/beheer/Competitie/kampioenschapteam/?rk_bk_type=BK')
-        self.assertEqual(resp.status_code, 200)  # 200 = OK
-
-        resp = self.client.get('/beheer/Competitie/kampioenschapteam/?incompleet=incompleet')
-        self.assertEqual(resp.status_code, 200)  # 200 = OK
-
-        resp = self.client.get('/beheer/Competitie/kampioenschapteam/?incompleet=compleet')
-        self.assertEqual(resp.status_code, 200)  # 200 = OK
-
 
 # end of file

@@ -68,6 +68,7 @@ class TestBasisTypen(TestCase):
         self.assertIsNotNone(str(obj))
 
     def test_admin(self):
+        # FUTURE: migreer naar Beheer/tests
         adm = BasisTypenTemplateCompetitieIndivKlasseAdmin(TemplateCompetitieIndivKlasse, None)
         obj = TemplateCompetitieIndivKlasse.objects.get(volgorde=1100)
         html = adm._leeftijdsklassen(obj)
