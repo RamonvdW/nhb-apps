@@ -511,5 +511,24 @@ class TestBestellingMandje(E2EHelpers, TestCase):
         urls = self.extract_all_urls(resp, skip_menu=True)
         self.assertFalse(self.url_kies_transport in urls)
 
+    def test_admin(self):
+        self.account_admin.is_superuser = True      # toegang tot admin interface
+        self.account_admin.save(update_fields=['is_superuser'])
+        self.e2e_login_and_pass_otp(self.account_admin)
+
+        # without filter selection
+        resp = self.client.get('/beheer/Bestelling/bestellingmandje/')
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_template_used(resp, ('admin/base.html', 'admin/filter.html'))
+
+        # with filter selection
+        resp = self.client.get('/beheer/Bestelling/bestellingmandje/?is_leeg=0')
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_template_used(resp, ('admin/base.html', 'admin/filter.html'))
+
+        resp = self.client.get('/beheer/Bestelling/bestellingmandje/?is_leeg=1')
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_template_used(resp, ('admin/base.html', 'admin/filter.html'))
+
 
 # end of file
