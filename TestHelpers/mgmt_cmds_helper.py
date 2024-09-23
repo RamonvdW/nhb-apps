@@ -39,7 +39,7 @@ class MyMgmtCommandHelper(TestCase):
         management.call_command('regiocomp_mutaties', '1', '--quick', stderr=f1, stdout=f2)
 
         err_msg = f1.getvalue()
-        if '[ERROR]' in err_msg:                        # pragma: no cover
+        if '[ERROR]' in err_msg or 'Traceback:' in err_msg:  # pragma: no cover
             self.fail(msg='Onverwachte fout van regiocomp_mutaties:\n' + err_msg)
 
         if show_all:                                                            # pragma: no cover
@@ -67,7 +67,7 @@ class MyMgmtCommandHelper(TestCase):
 
         if fail_on_error:
             err_msg = f1.getvalue()
-            if '[ERROR]' in err_msg:                        # pragma: no cover
+            if '[ERROR]' in err_msg or 'Traceback:' in err_msg:                 # pragma: no cover
                 self.fail(msg='Onverwachte fout van bestel_mutaties:\n' + err_msg)
 
         if show_all:                                                            # pragma: no cover

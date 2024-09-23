@@ -9,7 +9,7 @@ from django.utils.timezone import localtime
 from Account.models import Account
 from Betaal.definities import (MOLLIE_API_KEY_MAXLENGTH, BETAAL_PAYMENT_ID_MAXLENGTH, BETAAL_PAYMENT_STATUS_MAXLENGTH,
                                BETAAL_BESCHRIJVING_MAXLENGTH, BETAAL_KLANT_NAAM_MAXLENGTH, BETAAL_REFUND_ID_MAXLENGTH,
-                               BETAAL_KLANT_ACCOUNT_MAXLENGTH, BETAAL_MUTATIE_TO_STR)
+                               BETAAL_KLANT_ACCOUNT_MAXLENGTH, BETAAL_MUTATIE_TO_STR, BETAAL_CHECKOUT_URL_MAXLENGTH)
 from Vereniging.models import Vereniging
 
 
@@ -110,6 +110,7 @@ class BetaalTransactie(models.Model):
     # is dit een restitutie of ontvangst?
     is_restitutie = models.BooleanField(default=False)
 
+    # ==============================
     # status update van de betaling:
     #   is_restitutie = False
     #   payment_status
@@ -145,6 +146,7 @@ class BetaalTransactie(models.Model):
     # informatie over de rekening waarmee betaald is
     klant_account = models.CharField(max_length=BETAAL_KLANT_ACCOUNT_MAXLENGTH)
 
+    # ==============================
     # refund:
     #   is_restitutie = True
     #   refund_id
@@ -230,7 +232,7 @@ class BetaalMutatie(models.Model):
     url_betaling_gedaan = models.CharField(max_length=100, default='', blank=True)
 
     # waar naartoe om de betaling te doen (bij de CPSP)
-    url_checkout = models.CharField(max_length=400, default='', blank=True)
+    url_checkout = models.CharField(max_length=BETAAL_CHECKOUT_URL_MAXLENGTH, default='', blank=True)
 
     # BETAAL_MUTATIE_START_RESTITUTIE:
     # BETAAL_MUTATIE_PAYMENT_STATUS_CHANGED:

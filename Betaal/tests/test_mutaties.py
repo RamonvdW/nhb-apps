@@ -55,7 +55,11 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
         if debug:           # pragma: no cover
             print('f1: %s' % f1.getvalue())
             print('f2: %s' % f2.getvalue())
-
+        # controleer op onverwachte fouten
+        # let op: [ERROR] komt voor in normaal gebruik
+        err_msg = f1.getvalue()
+        if 'Traceback:' in err_msg:         # pragma: no cover
+            self.fail(msg='Onverwachte fout van betaal_mutaties:\n' + err_msg)
         return f1, f2
 
     @staticmethod
@@ -212,10 +216,7 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
 
         f1, f2 = self._run_achtergrondtaak()
         # print('\nf1:', f1.getvalue(), '\nf2:', f2.getvalue())
-        self.assertTrue('[ERROR] Onverwachte fout tijdens betaal_mutaties:' in f1.getvalue())
-        self.assertTrue('value too long for type character varying' in f1.getvalue())
-
-        # het is niet meer mogelijk om database transacties te doen totdat deze testcase eindigt
+        self.assertTrue('[ERROR] Checkout URL is te lang en wordt afgekapt op 400 tekens' in f1.getvalue())
 
     def test_max_pogingen(self):
         bestelling = Bestelling(

@@ -17,7 +17,8 @@ from Bestelling.operations.mutaties import bestel_mutatieverzoek_betaling_afgero
 from Betaal.definities import (BETAAL_MUTATIE_START_ONTVANGST, BETAAL_MUTATIE_START_RESTITUTIE,
                                BETAAL_MUTATIE_PAYMENT_STATUS_CHANGED, BETAAL_PAYMENT_STATUS_MAXLENGTH,
                                BETAAL_PAYMENT_ID_MAXLENGTH, BETAAL_REFUND_ID_MAXLENGTH, BETAAL_BESCHRIJVING_MAXLENGTH,
-                               BETAAL_KLANT_NAAM_MAXLENGTH, BETAAL_KLANT_ACCOUNT_MAXLENGTH)
+                               BETAAL_KLANT_NAAM_MAXLENGTH, BETAAL_KLANT_ACCOUNT_MAXLENGTH,
+                               BETAAL_CHECKOUT_URL_MAXLENGTH)
 from Betaal.models import BetaalMutatie, BetaalActief, BetaalInstellingenVereniging, BetaalTransactie
 from Mailer.operations import mailer_notify_internal_error
 from Overig.background_sync import BackgroundSync
@@ -78,7 +79,7 @@ class Command(BaseCommand):
                             help="Stop op deze minuut")
         parser.add_argument('--quick', action='store_true')     # for testing
 
-    def _verwerk_mutatie_start_ontvangst(self, mutatie):
+    def _verwerk_mutatie_start_ontvangst(self, mutatie: BetaalMutatie):
         instellingen = mutatie.ontvanger
         if instellingen.akkoord_via_bond and self._instellingen_bond:
             instellingen = self._instellingen_bond
@@ -121,6 +122,11 @@ class Command(BaseCommand):
                 elif not obj.is_open():
                     self.stderr.write('[ERROR] Onverwachte status %s in create payment response' % repr(status))
                 else:
+                    if len(obj.checkout_url) > BETAAL_CHECKOUT_URL_MAXLENGTH:
+                        self.stderr.write('[ERROR] Checkout URL is te lang en wordt afgekapt op %s tekens' %
+                                          BETAAL_CHECKOUT_URL_MAXLENGTH)
+                        url_checkout = url_checkout[:BETAAL_CHECKOUT_URL_MAXLENGTH]
+
                     # het is gelukt om de betaling op te starten
                     mutatie.payment_id = payment_id
                     mutatie.url_checkout = url_checkout
@@ -156,7 +162,7 @@ class Command(BaseCommand):
                     else:
                         bestel_betaling_is_gestart(bestelling, actief)
 
-    def _verwerk_mutatie_start_restitutie(self, mutatie):
+    def _verwerk_mutatie_start_restitutie(self, mutatie: BetaalMutatie):
         # FUTURE: implementeer restitutie
         pass
 
@@ -174,22 +180,25 @@ class Command(BaseCommand):
                         is_restitutie=False,
                         payment_status=obj.status)
 
-        if obj.amount:
-            obj.amount['field'] = 'amount / te_ontvangen'
-        if obj.amount_refunded:
-            obj.amount_refunded['field'] = 'amount_refunded / terugbetaald'
-        if obj.amount_remaining:
-            obj.amount_remaining['field'] = 'amount_remaining / beschikbaar'
-        if obj.amount_chargedback:
-            obj.amount_chargedback['field'] = 'amount_chargedback / teruggevorderd'     # noqa
-        if obj.settlement_amount:
-            obj.settlement_amount['field'] = 'settlement_amount / euro_boeking'
-
         te_ontvangen = obj.amount
+        if te_ontvangen:
+            te_ontvangen['field'] = 'amount / te_ontvangen'
+
         terugbetaald = obj.amount_refunded
+        if terugbetaald:
+            terugbetaald['field'] = 'amount_refunded / terugbetaald'
+
         beschikbaar = obj.amount_remaining
+        if beschikbaar:
+            beschikbaar['field'] = 'amount_remaining / beschikbaar'
+
         teruggevorderd = obj.amount_chargedback
+        if teruggevorderd:
+            teruggevorderd['field'] = 'amount_chargedback / teruggevorderd'
+
         verrekening = obj.settlement_amount
+        if verrekening:
+            verrekening['field'] = 'settlement_amount / verrekening'
 
         # controleer eenheid (euro) en converteer bedrag naar Decimal
         for amount in (te_ontvangen, terugbetaald, beschikbaar, teruggevorderd, verrekening):
@@ -331,7 +340,7 @@ class Command(BaseCommand):
                                     bedrag_refund=bedrag)
             # for
 
-    def _verwerk_mutatie_payment_status_changed(self, mutatie):
+    def _verwerk_mutatie_payment_status_changed(self, mutatie: BetaalMutatie):
         """ Een voor ons bekende transactie is van status gewijzigd
             Haal de laatste stand van zaken op bij Mollie.
         """
@@ -448,7 +457,7 @@ class Command(BaseCommand):
                                 actief.log += 'Betaling is mislukt\n\n'
                                 actief.save(update_fields=['log'])
 
-    def _verwerk_mutatie(self, mutatie):
+    def _verwerk_mutatie(self, mutatie: BetaalMutatie):
         code = mutatie.code
 
         if code == BETAAL_MUTATIE_START_ONTVANGST:

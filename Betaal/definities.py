@@ -21,6 +21,6 @@ BETAAL_BESCHRIJVING_MAXLENGTH = 100     # aantal taken voor beschrijving op afsc
 MOLLIE_API_KEY_MAXLENGTH = 50           # geen limiet gevonden in docs
 BETAAL_KLANT_NAAM_MAXLENGTH = 100
 BETAAL_KLANT_ACCOUNT_MAXLENGTH = 100    # standaard: 11 (BIC) + 18 (IBAN), maar flexibel genoeg voor varianten
-
+BETAAL_CHECKOUT_URL_MAXLENGTH = 400
 
 # end of file

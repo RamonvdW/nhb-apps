@@ -424,7 +424,7 @@ class DynamicBestellingCheckStatus(UserPassesTestMixin, View):
             rest_euro = bestelling.totaal_euro
             for transactie in bestelling.transacties.all():
                 if transactie.is_restitutie:
-                    rest_euro += transactie.bedrag_euro_klant
+                    rest_euro += transactie.bedrag_euro_klant       # TODO: verouderd
                 else:
                     rest_euro -= transactie.bedrag_euro_klant
             # for
