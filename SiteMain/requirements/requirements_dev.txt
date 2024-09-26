@@ -43,15 +43,15 @@ et-xmlfile==1.1.0
     # via
     #   -r requirements.txt
     #   openpyxl
-fonttools==4.53.1
+fonttools==4.54.1
     # via -r requirements_dev.in
-google-api-core==2.19.2
+google-api-core==2.20.0
     # via
     #   -r requirements.txt
     #   google-api-python-client
-google-api-python-client==2.144.0
+google-api-python-client==2.147.0
     # via -r requirements.txt
-google-auth==2.34.0
+google-auth==2.35.0
     # via
     #   -r requirements.txt
     #   google-api-core
@@ -74,7 +74,7 @@ httplib2==0.22.0
     #   -r requirements.txt
     #   google-api-python-client
     #   google-auth-httplib2
-idna==3.8
+idna==3.10
     # via
     #   -r requirements.txt
     #   requests
@@ -100,20 +100,20 @@ proto-plus==1.24.0
     # via
     #   -r requirements.txt
     #   google-api-core
-protobuf==5.28.0
+protobuf==5.28.2
     # via
     #   -r requirements.txt
     #   google-api-core
     #   googleapis-common-protos
     #   proto-plus
-psycopg==3.2.1
+psycopg==3.2.2
     # via -r requirements.txt
-pyasn1==0.6.0
+pyasn1==0.6.1
     # via
     #   -r requirements.txt
     #   pyasn1-modules
     #   rsa
-pyasn1-modules==0.4.0
+pyasn1-modules==0.4.1
     # via
     #   -r requirements.txt
     #   google-auth
@@ -123,7 +123,7 @@ pyparsing==3.1.4
     # via
     #   -r requirements.txt
     #   httplib2
-pypdf==4.3.1
+pypdf==5.0.0
     # via -r requirements.txt
 pypng==0.20220715.0
     # via
@@ -166,7 +166,7 @@ uritemplate==4.1.1
     # via
     #   -r requirements.txt
     #   google-api-python-client
-urllib3==2.2.2
+urllib3==2.2.3
     # via
     #   -r requirements.txt
     #   mollie-api-python
