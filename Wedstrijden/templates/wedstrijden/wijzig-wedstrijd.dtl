@@ -531,6 +531,26 @@
                                 </td>
                             </tr>
 
+
+                            <tr>
+                                <td colspan="2" class="center">
+                                    <h6 class="sv-blauw-text">Uitslag</h6>
+                                    <p></p>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th>Gepubliceerde uitslag<br>(verwijzing naar html of pdf)</th>
+                                <td>
+                                    {% if block_edits %}
+                                        <span>{{ wed.url_uitslag }}</span>
+                                    {% else %}
+                                        <input type="url" name="url_uitslag" value="{{ wed.url_uitslag }}" inputmode="url" oninput="gewijzigd()">
+                                    {% endif %}
+                                </td>
+                            </tr>
+
+
                             <tr>
                                 <td colspan="2" class="center">
                                     <h6 class="sv-blauw-text">Wedstrijdklassen</h6>

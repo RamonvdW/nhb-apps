@@ -9,7 +9,7 @@ from Account.models import Account
 from BasisTypen.definities import ORGANISATIES, ORGANISATIE_WA
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse
 from Locatie.models import WedstrijdLocatie
-from Score.models import Score, Uitslag
+from Score.models import Score
 from Sporter.models import Sporter, SporterBoog
 from Vereniging.models import Vereniging
 from Wedstrijden.definities import (WEDSTRIJD_STATUS_CHOICES, WEDSTRIJD_STATUS_ONTWERP, WEDSTRIJD_STATUS_TO_STR,
@@ -18,7 +18,8 @@ from Wedstrijden.definities import (WEDSTRIJD_STATUS_CHOICES, WEDSTRIJD_STATUS_O
                                     WEDSTRIJD_WA_STATUS, WEDSTRIJD_WA_STATUS_B,
                                     WEDSTRIJD_KORTING_SOORT_CHOICES, WEDSTRIJD_KORTING_VERENIGING,
                                     WEDSTRIJD_KORTING_SOORT_TO_STR,
-                                    WEDSTRIJD_INSCHRIJVING_STATUS_CHOICES, WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_MANDJE,
+                                    WEDSTRIJD_INSCHRIJVING_STATUS_CHOICES,
+                                    WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_MANDJE,
                                     WEDSTRIJD_INSCHRIJVING_STATUS_TO_STR, AANTAL_SCHEIDS_GEEN_KEUZE,
                                     KWALIFICATIE_CHECK_CHOICES, KWALIFICATIE_CHECK_NOG_DOEN)
 from decimal import Decimal
@@ -182,6 +183,9 @@ class Wedstrijd(models.Model):
 
     # moeten kwalificatie-scores opgegeven worden voor deze wedstrijd?
     eis_kwalificatie_scores = models.BooleanField(default=False)
+
+    # link naar de uitslag
+    url_uitslag = models.CharField(max_length=128, default='')
 
     # de losse uitslagen van deze wedstrijd
     # deeluitslagen = models.ManyToManyField(WedstrijdDeeluitslag,

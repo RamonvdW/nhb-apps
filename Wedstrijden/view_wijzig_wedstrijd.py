@@ -31,6 +31,7 @@ from Wedstrijden.definities import (ORGANISATIE_WEDSTRIJD_DISCIPLINE_STRS, WEDST
                                     AANTAL_SCHEIDS_GEEN_KEUZE, AANTAL_SCHEIDS_EIGEN)
 from Wedstrijden.models import Wedstrijd
 from types import SimpleNamespace
+from urllib.parse import urlparse
 import datetime
 
 TEMPLATE_WEDSTRIJDEN_WIJZIG_WEDSTRIJD = 'wedstrijden/wijzig-wedstrijd.dtl'
@@ -662,11 +663,14 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
                     if 0 <= aantal_scheids <= 9 or aantal_scheids == AANTAL_SCHEIDS_EIGEN:
                         wedstrijd.aantal_scheids = aantal_scheids
 
-            if not limit_edits:
                 wedstrijd.eis_kwalificatie_scores = False
                 eis = request.POST.get('kwalificatie_scores', '')
                 if eis:
                     wedstrijd.eis_kwalificatie_scores = True
+
+            if not block_edits:
+                url = request.POST.get('url_uitslag', '')
+                wedstrijd.url_uitslag = url[:128]       # voorkom problemen bij opslaan
 
             wedstrijd.save()
 

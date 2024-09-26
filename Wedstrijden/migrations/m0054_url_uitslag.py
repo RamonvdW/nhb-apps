@@ -13,15 +13,15 @@ class Migration(migrations.Migration):
 
     # volgorde afdwingen
     dependencies = [
-        ('Wedstrijden', 'm0053_squashed'),
+        ('Wedstrijden', 'm0053_verstop'),
     ]
 
     # migratie functies
     operations = [
         migrations.AddField(
             model_name='wedstrijd',
-            name='verstop_voor_mwz',
-            field=models.BooleanField(default=False),
+            name='url_uitslag',
+            field=models.CharField(default='', max_length=128),
         ),
     ]
 
