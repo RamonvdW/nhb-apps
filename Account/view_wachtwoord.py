@@ -76,6 +76,9 @@ class WachtwoordVergetenView(TemplateView):
 
     def post(self, request, *args, **kwargs):
 
+        # FUTURE: is er iets af te leiden uit de timing? (e-mail bekend / niet bekend)?
+        # FUTURE: rate limiter (op IP) - zie view_registreer_gast
+
         from_ip = get_safe_from_ip(request)
         context = super().get_context_data(**kwargs)
         context['foutmelding'] = ''
@@ -121,11 +124,12 @@ class WachtwoordVergetenView(TemplateView):
                                                     wachtwoord='vergeten',
                                                     email=email)        # kan bevestigde of nieuwe email zijn
 
-            httpresp = render(request, TEMPLATE_WW_VERGETEN_EMAIL, context)
+            http_resp = render(request, TEMPLATE_WW_VERGETEN_EMAIL, context)
         else:
-            httpresp = render(request, self.template_name, context)
+            # toon foutmelding
+            http_resp = render(request, self.template_name, context)
 
-        return httpresp
+        return http_resp
 
 
 def receive_wachtwoord_vergeten(request, account):
