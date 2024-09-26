@@ -626,8 +626,8 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
         self.assertTrue(voorkeuren.scheids_opt_in_ver_email)
         self.assertTrue(voorkeuren.scheids_opt_in_ver_tel_nr)
 
-        resp = self.client.post(self.url_voorkeuren, {'sr_korps_email': True,
-                                                      'sr_korps_tel': True})
+        self.client.post(self.url_voorkeuren, {'sr_korps_email': True,
+                                               'sr_korps_tel': True})
 
         voorkeuren.refresh_from_db()
         self.assertTrue(voorkeuren.scheids_opt_in_korps_email)
