@@ -10,6 +10,7 @@ from BasisTypen.definities import ORGANISATIE_WA
 from BasisTypen.models import BoogType
 from Geo.models import Regio
 from Functie.tests.helpers import maak_functie
+from Scheidsrechter.definities import SCHEIDS_BOND
 from Score.models import Aanvangsgemiddelde
 from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren
 from Sporter.operations import get_sporter_voorkeuren, get_sporter_voorkeuren_wedstrijdbogen, get_sporterboog
@@ -136,6 +137,7 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
             resp = self.client.get(self.url_voorkeuren)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertEqual(SporterBoog.objects.count(), 17)
+        self.assertNotContains(resp, 'Voorkeuren voor scheidsrechters')
 
         obj = SporterBoog.objects.get(sporter=self.sporter_100001, boogtype=self.boog_R)
         self.assertTrue(obj.heeft_interesse)
@@ -242,6 +244,7 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_hwl)
         self.e2e_check_rol('HWL')
 
+        # voorkom veel queries tijdens eigenlijke test
         get_sporterboog(self.sporter_100001, mag_database_wijzigen=True)
 
         # haal als HWL de voorkeuren pagina op van een lid
@@ -595,5 +598,61 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
         objs = get_sporterboog(self.sporter_100001, mag_database_wijzigen=True, geen_wedstrijden=True)
         self.assertEqual(len(objs), 0)
         self.assertEqual(SporterBoog.objects.filter(sporter=self.sporter_100001).count(), 0)
+
+    def test_sr(self):
+        self.account_normaal.scheids = SCHEIDS_BOND
+        self.account_normaal.save(update_fields=['scheids'])
+        self.sporter_100001.scheids = SCHEIDS_BOND
+        self.sporter_100001.save(update_fields=['scheids'])
+        self.e2e_login(self.account_normaal)
+
+        # voorkom veel queries tijdens eigenlijke test
+        # get_sporterboog(self.sporter_100001, mag_database_wijzigen=True)
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_voorkeuren)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('sporter/voorkeuren.dtl', 'plein/site_layout.dtl'))
+        self.assertContains(resp, 'Voorkeuren voor scheidsrechters')
+
+        with self.assert_max_queries(32):
+            resp = self.client.post(self.url_voorkeuren, {'sr_wed_email': True,
+                                                          'sr_wed_tel': True})
+
+        voorkeuren = get_sporter_voorkeuren(self.sporter_100001)
+        self.assertFalse(voorkeuren.scheids_opt_in_korps_email)
+        self.assertFalse(voorkeuren.scheids_opt_in_korps_tel_nr)
+        self.assertTrue(voorkeuren.scheids_opt_in_ver_email)
+        self.assertTrue(voorkeuren.scheids_opt_in_ver_tel_nr)
+
+        resp = self.client.post(self.url_voorkeuren, {'sr_korps_email': True,
+                                                      'sr_korps_tel': True})
+
+        voorkeuren.refresh_from_db()
+        self.assertTrue(voorkeuren.scheids_opt_in_korps_email)
+        self.assertTrue(voorkeuren.scheids_opt_in_korps_tel_nr)
+        self.assertFalse(voorkeuren.scheids_opt_in_ver_email)
+        self.assertFalse(voorkeuren.scheids_opt_in_ver_tel_nr)
+
+    def test_hwl_sr(self):
+        # controleer dat de HWL niet de voorkeuren voor delen contactgegevens van een scheidsrechters-lid aan kan passen
+        self.account_normaal.scheids = SCHEIDS_BOND
+        self.account_normaal.save(update_fields=['scheids'])
+        self.sporter_100001.scheids = SCHEIDS_BOND
+        self.sporter_100001.save(update_fields=['scheids'])
+
+        # login as HWL
+        self.e2e_login_and_pass_otp(self.account_hwl)
+        self.e2e_wissel_naar_functie(self.functie_hwl)
+        self.e2e_check_rol('HWL')
+
+        # haal als HWL de voorkeuren pagina op van een lid
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_voorkeuren + '100001/')
+        self.assertEqual(resp.status_code, 200)
+        self.assert_template_used(resp, ('sporter/voorkeuren.dtl', 'plein/site_layout.dtl'))
+        self.assertNotContains(resp, 'Voorkeuren voor scheidsrechters')
+
 
 # end of file
