@@ -11,11 +11,11 @@ from Competitie.models import (CompetitieIndivKlasse, CompetitieTeamKlasse, Comp
                                Kampioenschap, KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet)
 from Functie.tests.helpers import maak_functie
 from Locatie.models import WedstrijdLocatie
+from Score.models import Uitslag
 from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 from Vereniging.models import Vereniging
-from Wedstrijden.models import Uitslag
 import datetime
 
 
