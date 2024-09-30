@@ -18,7 +18,8 @@ from Betaal.definities import (BETAAL_MUTATIE_START_ONTVANGST, BETAAL_MUTATIE_ST
                                BETAAL_MUTATIE_PAYMENT_STATUS_CHANGED, BETAAL_PAYMENT_STATUS_MAXLENGTH,
                                BETAAL_PAYMENT_ID_MAXLENGTH, BETAAL_REFUND_ID_MAXLENGTH, BETAAL_BESCHRIJVING_MAXLENGTH,
                                BETAAL_KLANT_NAAM_MAXLENGTH, BETAAL_KLANT_ACCOUNT_MAXLENGTH,
-                               BETAAL_CHECKOUT_URL_MAXLENGTH)
+                               BETAAL_CHECKOUT_URL_MAXLENGTH,
+                               TRANSACTIE_TYPE_MOLLIE_PAYMENT)
 from Betaal.models import BetaalMutatie, BetaalActief, BetaalInstellingenVereniging, BetaalTransactie
 from Mailer.operations import mailer_notify_internal_error
 from Overig.background_sync import BackgroundSync
@@ -174,10 +175,9 @@ class Command(BaseCommand):
         # transactie geschiedenis aanmaken
         transactie = BetaalTransactie(
                         when=timezone.now(),
-                        is_handmatig=False,
+                        transactie_type=TRANSACTIE_TYPE_MOLLIE_PAYMENT,
                         payment_id=obj.id[:BETAAL_PAYMENT_ID_MAXLENGTH],
                         beschrijving=str(obj.description)[:BETAAL_BESCHRIJVING_MAXLENGTH],
-                        is_restitutie=False,
                         payment_status=obj.status)
 
         te_ontvangen = obj.amount
@@ -196,12 +196,8 @@ class Command(BaseCommand):
         if teruggevorderd:
             teruggevorderd['field'] = 'amount_chargedback / teruggevorderd'
 
-        verrekening = obj.settlement_amount
-        if verrekening:
-            verrekening['field'] = 'settlement_amount / verrekening'
-
         # controleer eenheid (euro) en converteer bedrag naar Decimal
-        for amount in (te_ontvangen, terugbetaald, beschikbaar, teruggevorderd, verrekening):
+        for amount in (te_ontvangen, terugbetaald, beschikbaar, teruggevorderd):
             if amount:
                 try:
                     if amount['currency'] != 'EUR':
@@ -222,10 +218,6 @@ class Command(BaseCommand):
             transactie.bedrag_beschikbaar = beschikbaar['bedrag']
         if teruggevorderd:
             transactie.teruggevorderd = teruggevorderd['bedrag']
-
-        transactie.bedrag_euro_klant = te_ontvangen['bedrag']      # TODO: oud. Verwijderen?
-        if verrekening:
-            transactie.bedrag_euro_boeking = verrekening['bedrag']     # TODO: oud. Verwijderen?
 
         if obj.method and obj.details:
             methode = obj.method

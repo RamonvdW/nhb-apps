@@ -9,7 +9,8 @@ from django.utils.timezone import localtime
 from Account.models import Account
 from Betaal.definities import (MOLLIE_API_KEY_MAXLENGTH, BETAAL_PAYMENT_ID_MAXLENGTH, BETAAL_PAYMENT_STATUS_MAXLENGTH,
                                BETAAL_BESCHRIJVING_MAXLENGTH, BETAAL_KLANT_NAAM_MAXLENGTH, BETAAL_REFUND_ID_MAXLENGTH,
-                               BETAAL_KLANT_ACCOUNT_MAXLENGTH, BETAAL_MUTATIE_TO_STR, BETAAL_CHECKOUT_URL_MAXLENGTH)
+                               BETAAL_KLANT_ACCOUNT_MAXLENGTH, BETAAL_MUTATIE_TO_STR, BETAAL_CHECKOUT_URL_MAXLENGTH,
+                               TRANSACTIE_TYPE_CHOICES, TRANSACTIE_TYPE_HANDMATIG, TRANSACTIE_TYPE_MOLLIE_RESTITUTIE)
 from Vereniging.models import Vereniging
 
 
@@ -86,37 +87,37 @@ class BetaalActief(models.Model):
 
 
 class BetaalTransactie(models.Model):
-    """ Afgeronde transacties: ontvangst en restitutie
+    """ Transactie beschrijft een (deel)betaling
+        Transacties zijn gekoppeld aan een Bestelling
     """
 
     # datum/tijdstip van aanmaak
     when = models.DateTimeField()
 
-    # is dit een handmatig ingevoerde informatie van een overboeking?
-    is_handmatig = models.BooleanField(default=False)
+    # wat voor type record is dit
+    # (bepaalt welke velden relevant zijn)
+    transactie_type = models.CharField(max_length=2, default=TRANSACTIE_TYPE_HANDMATIG)
 
-    # handmatige overboeking:
-    # - bedrag_euro_klant == bedrag_euro_boeking
-    # - optioneel: klant_naam, klant_account
-    # - payment_id: leeg, wordt niet gebruikt
+    # ==============================
+    # Handmatige overboeking:
+    #  transactie_type = HANDMATIG
+    #  bedrag_handmatig
+    #  optioneel: klant_naam, klant_account
 
-    # Mollie:
-    # - payment_id = koppeling aan hun systeem
-    # - beschrijving = ontvangen informatie
+    # het bedrag wat de klant ziet (betaling / refund) (bron: amount)
+    bedrag_handmatig = models.DecimalField(max_digits=7, decimal_places=2, default=0.0)        # max 99999,99
+
+    # ==============================
+    # Mollie betaling1
+    #   transactie_type = MOLLIE_PAYMENT
+    #   payment_id = koppeling aan hun systeem
+    #   payment_status
+    #   beschrijving = ontvangen informatie
+    #   bedrag_* (behalve bedrag_refunded)
+    #   klant_naam, klant_account
 
     # referentie naar een betaling bij de CPSP
     payment_id = models.CharField(max_length=BETAAL_PAYMENT_ID_MAXLENGTH)
-
-    # is dit een restitutie of ontvangst?
-    is_restitutie = models.BooleanField(default=False)
-
-    # ==============================
-    # status update van de betaling:
-    #   is_restitutie = False
-    #   payment_status
-    #   beschrijving
-    #   bedrag_* (behalve bedrag_refunded)
-    #   klant_naam, klant_account
 
     # beschrijving voor op het afschrift van de klant
     # hierin staat normaal het bestelnummer
@@ -147,11 +148,13 @@ class BetaalTransactie(models.Model):
     klant_account = models.CharField(max_length=BETAAL_KLANT_ACCOUNT_MAXLENGTH)
 
     # ==============================
-    # refund:
-    #   is_restitutie = True
+    # Mollie refund:
+    #   transactie_type = MOLLIE_REFUND
     #   refund_id
-    #   beschrijving
+    #   payment_id
+    #   refund_status
     #   bedrag_refund
+    #   beschrijving
 
     # CPSP specifieke refund transactie id
     refund_id = models.CharField(max_length=BETAAL_REFUND_ID_MAXLENGTH, default='', blank=True)
@@ -161,25 +164,22 @@ class BetaalTransactie(models.Model):
     refund_status = models.CharField(max_length=BETAAL_PAYMENT_STATUS_MAXLENGTH, default='', blank=True)
 
     # hoeveel hebben we (totaal) terug betaald
-    # let op: dit is een negatief bedrag!
     bedrag_refund = models.DecimalField(max_digits=7, decimal_places=2, default=0.0)
 
-    # TODO: Oude velden hieronder zijn deltas
+    def bedrag_str(self):
+        if self.transactie_type == TRANSACTIE_TYPE_HANDMATIG:
+            return "€ %s" % self.bedrag_handmatig
 
-    # het bedrag wat de klant ziet (betaling / refund) (bron: amount)
-    bedrag_euro_klant = models.DecimalField(max_digits=7, decimal_places=2, default=0.0)        # max 99999,99
-
-    # het bedrag wat wij krijgen/uitgeven (bron: settlementAmount)
-    # betaling: het bedrag wat ontvangen is (dus transfer kosten al ingehouden door de CPSP)
-    # refund: het bedrag wat uitbetaald is  (dus inclusief transfer kosten van de CPSP)
-    bedrag_euro_boeking = models.DecimalField(max_digits=7, decimal_places=2, default=0.0)      # max 99999,99
+        if self.transactie_type == TRANSACTIE_TYPE_MOLLIE_RESTITUTIE:
+            return "€ %s" % self.bedrag_refund
 
     def __str__(self):
         """ Lever een tekstuele beschrijving voor de admin interface """
-        if self.is_restitutie:
+        if self.transactie_type == TRANSACTIE_TYPE_MOLLIE_RESTITUTIE:
             return "%s: %s, € %s" % (self.refund_id, self.beschrijving, self.bedrag_refund)
-        if self.is_handmatig:
-            return "%s: € %s" % (self.beschrijving, self.bedrag_euro_boeking)
+        if self.transactie_type == TRANSACTIE_TYPE_HANDMATIG:
+            return "%s: € %s" % (self.beschrijving, self.bedrag_handmatig)
+        # mollie payment is meer complex
         msg = "%s: %s, € %s" % (self.payment_id, self.beschrijving, self.bedrag_te_ontvangen)
         if self.bedrag_terugbetaald:
             msg += '; Terug betaald: € %s' % self.bedrag_terugbetaald

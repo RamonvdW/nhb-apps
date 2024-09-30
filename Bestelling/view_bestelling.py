@@ -18,6 +18,8 @@ from Bestelling.definities import (BESTELLING_STATUS2STR, BESTELLING_STATUS_BETA
 from Bestelling.models import Bestelling
 from Bestelling.plugins.product_info import beschrijf_product, beschrijf_korting
 from Bestelling.operations.mutaties import bestel_mutatieverzoek_annuleer
+from Betaal.definities import (TRANSACTIE_TYPE_MOLLIE_PAYMENT, TRANSACTIE_TYPE_MOLLIE_RESTITUTIE,
+                               TRANSACTIE_TYPE_HANDMATIG)
 from Betaal.mutaties import betaal_mutatieverzoek_start_ontvangst
 from Functie.definities import Rollen
 from Functie.models import Functie
@@ -202,7 +204,7 @@ class ToonBestellingDetailsView(UserPassesTestMixin, TemplateView):
     @staticmethod
     def _beschrijf_transacties(bestelling):
 
-        transacties_euro = Decimal(0)
+        totaal_euro = Decimal(0)
 
         transacties = (bestelling
                        .transacties
@@ -211,21 +213,28 @@ class ToonBestellingDetailsView(UserPassesTestMixin, TemplateView):
         for transactie in transacties:
             transactie.regels = regels = list()
 
-            regel = localtime(transactie.when).strftime('%Y-%m-%d %H:%M')
-            regels.append(regel)
+            stamp_str = localtime(transactie.when).strftime('%Y-%m-%d %H:%M')
+            regels.append(stamp_str)
 
             regels.append(transactie.beschrijving)
 
-            if transactie.is_restitutie:
+            # TODO: hier kan het een beetje dubbel op worden met restitutie. Overweeg verwijderen
+            if transactie.transactie_type == TRANSACTIE_TYPE_MOLLIE_RESTITUTIE:
                 regels.append('Restitutie')
-                transacties_euro -= transactie.bedrag_euro_klant
+                totaal_euro -= transactie.bedrag_refund
             else:
                 if transactie.klant_naam:
                     regels.append('Ontvangen van %s' % transactie.klant_naam)
-                transacties_euro += transactie.bedrag_euro_klant        # TODO: Dit is het verwachte bedrag, niet het ontvangen bedrag!!!
+                # Mollie Payment is een snapshot van de laatste stand van zaken
+                # we willen laten zien hoeveel er ooit ontvangen is
+                transactie.toon_euro = (transactie.bedrag_beschikbaar +
+                                        transactie.bedrag_terugbetaald +
+                                        transactie.bedrag_teruggevorderd)
+
+            totaal_euro += transactie.toon_euro
         # for
 
-        return transacties, transacties_euro
+        return transacties, totaal_euro
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -420,16 +429,9 @@ class DynamicBestellingCheckStatus(UserPassesTestMixin, View):
             #         dus MijnHandboogsport bestelling MH-1234567 verliest de laatste 4 cijfers
             beschrijving = "%s %s" % (bestelling.mh_bestel_nr(), settings.AFSCHRIFT_SITE_NAAM)
 
-            # TODO: is het realistisch dat status NIEUW al transacties heeft?
-            rest_euro = bestelling.totaal_euro
-            for transactie in bestelling.transacties.all():
-                if transactie.is_restitutie:
-                    rest_euro += transactie.bedrag_euro_klant       # TODO: verouderd
-                else:
-                    rest_euro -= transactie.bedrag_euro_klant
-            # for
+            te_betalen_euro = bestelling.totaal_euro
 
-            url_betaling_gedaan = settings.SITE_URL + reverse('Bestel:na-de-betaling',
+            url_na_de_betaling = settings.SITE_URL + reverse('Bestel:na-de-betaling',
                                                               kwargs={'bestel_nr': bestelling.bestel_nr})
 
             # start de bestelling via de achtergrond taak
@@ -437,8 +439,8 @@ class DynamicBestellingCheckStatus(UserPassesTestMixin, View):
             betaal_mutatieverzoek_start_ontvangst(
                         bestelling,
                         beschrijving,
-                        rest_euro,
-                        url_betaling_gedaan,
+                        te_betalen_euro,
+                        url_na_de_betaling,
                         # snel == '1',
                         snel=True)          # niet wachten op reactie
 
@@ -504,11 +506,11 @@ class BestellingAfgerondView(UserPassesTestMixin, TemplateView):
 
         # TODO: onderstaande moeten we herzien. Er is 1 record van de betaling met alle totalen (in/uit).
         transacties_euro = Decimal(0)
-        for transactie in bestelling.transacties.all():
-            if transactie.is_restitutie:
-                transacties_euro -= transactie.bedrag_terugbetaald
+        for transactie in bestelling.transacties.exclude(transactie_type=TRANSACTIE_TYPE_MOLLIE_RESTITUTIE):
+            if transactie.transactie_type == TRANSACTIE_TYPE_HANDMATIG:
+                transacties_euro += transactie.bedrag_handmatig
             else:
-                transacties_euro += transactie.bedrag_euro_klant
+                transacties_euro += transactie.bedrag_beschikbaar
         # for
 
         context['ontvangen'] = transacties_euro

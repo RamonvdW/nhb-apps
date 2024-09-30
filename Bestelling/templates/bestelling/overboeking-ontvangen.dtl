@@ -154,6 +154,6 @@
     {% endif %}
 
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="bestel-overboeking-ontvangen" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="bestelling-overboeking-ontvangen" %}
 
 {% endblock %}

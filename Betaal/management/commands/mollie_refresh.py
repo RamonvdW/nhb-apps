@@ -14,7 +14,8 @@ from django.core.management.base import BaseCommand
 from Bestelling.models import Bestelling
 from Betaal.definities import (BETAAL_REFUND_ID_MAXLENGTH, BETAAL_PAYMENT_STATUS_MAXLENGTH,
                                BETAAL_BESCHRIJVING_MAXLENGTH, BETAAL_PAYMENT_ID_MAXLENGTH,
-                               BETAAL_KLANT_ACCOUNT_MAXLENGTH, BETAAL_KLANT_NAAM_MAXLENGTH)
+                               BETAAL_KLANT_ACCOUNT_MAXLENGTH, BETAAL_KLANT_NAAM_MAXLENGTH,
+                               TRANSACTIE_TYPE_MOLLIE_PAYMENT)
 from Betaal.models import BetaalInstellingenVereniging, BetaalTransactie, BetaalActief
 from mollie.api.client import Client, RequestSetupError, RequestError
 from mollie.api.error import ResponseError, ResponseHandlingError
@@ -77,7 +78,7 @@ class Command(BaseCommand):
                 # mollie.api.objects.refund.Refund
                 status = refund.status
                 refund_id = refund.id       # re_Xxx
-                amount = refund.settlement_amount
+                amount = refund.amount
                 beschrijving = refund.description
                 payment_id = refund.payment_id
 
@@ -126,10 +127,9 @@ class Command(BaseCommand):
         # transactie geschiedenis aanmaken
         transactie = BetaalTransactie(
                             when=timezone.now(),
-                            is_handmatig=False,
+                            transactie_type=TRANSACTIE_TYPE_MOLLIE_PAYMENT,
                             payment_id=obj.id[:BETAAL_PAYMENT_ID_MAXLENGTH],
                             beschrijving=str(obj.description)[:BETAAL_BESCHRIJVING_MAXLENGTH],
-                            is_restitutie=False,
                             payment_status=obj.status)
 
         if obj.amount:
@@ -140,17 +140,14 @@ class Command(BaseCommand):
             obj.amount_remaining['field'] = 'amount_remaining / beschikbaar'
         if obj.amount_chargedback:
             obj.amount_chargedback['field'] = 'amount_chargedback / teruggevorderd'  # noqa
-        if obj.settlement_amount:
-            obj.settlement_amount['field'] = 'settlement_amount / euro_boeking'
 
         te_ontvangen = obj.amount
         terugbetaald = obj.amount_refunded
         beschikbaar = obj.amount_remaining
         teruggevorderd = obj.amount_chargedback
-        verrekening = obj.settlement_amount
 
         # controleer eenheid (euro) en converteer bedrag naar Decimal
-        for amount in (te_ontvangen, terugbetaald, beschikbaar, teruggevorderd, verrekening):
+        for amount in (te_ontvangen, terugbetaald, beschikbaar, teruggevorderd):
             if amount:
                 try:
                     if amount['currency'] != 'EUR':
@@ -171,10 +168,6 @@ class Command(BaseCommand):
             transactie.bedrag_beschikbaar = beschikbaar['bedrag']
         if teruggevorderd:
             transactie.teruggevorderd = teruggevorderd['bedrag']
-
-        transactie.bedrag_euro_klant = te_ontvangen['bedrag']  # TODO: oud. Verwijderen?
-        if verrekening:
-            transactie.bedrag_euro_boeking = verrekening['bedrag']  # TODO: oud. Verwijderen?
 
         if obj.method and obj.details:
             methode = obj.method

@@ -200,7 +200,6 @@ class TestBestellingBetaling(E2EHelpers, TestCase):
         # laat de mutatie verwerken die door de callback aangemaakt is
         count = BetaalTransactie.objects.count()
         f1, f2 = self.verwerk_betaal_mutaties()
-        # print('\nf1:', f1.getvalue(), '\nf2:', f2.getvalue())
         self.assertTrue("status aangepast: 'open' --> 'paid'" in f2.getvalue())
 
         betaal_actief = BetaalActief.objects.get(pk=bestelling.betaal_actief.pk)
@@ -218,7 +217,6 @@ class TestBestellingBetaling(E2EHelpers, TestCase):
 
         # laat mutatie verwerken die betaal daemon richting bestel daemon heeft gestuurd
         f1, f2 = self.verwerk_bestel_mutaties()
-        # print('\nf1:', f1.getvalue(), '\nf2:', f2.getvalue())
         msg = f2.getvalue()
         msg = re.sub(r'pk=[0-9]+', 'pk=X', msg)
         self.assertTrue('[INFO] Betaling is gelukt voor bestelling MH-1002001 (pk=X)' in msg)

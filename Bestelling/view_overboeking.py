@@ -11,6 +11,7 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from Bestelling.definities import BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_GEANNULEERD
 from Bestelling.models import Bestelling
 from Bestelling.operations.mutaties import bestel_overboeking_ontvangen
+from Betaal.definities import TRANSACTIE_TYPE_HANDMATIG
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
 from decimal import Decimal, InvalidOperation
@@ -45,7 +46,7 @@ class OverboekingOntvangenView(UserPassesTestMixin, TemplateView):
                            .order_by('-aangemaakt'))[:250]:         # nieuwste eerst
 
             # handmatige overboekingen zoeken
-            for transactie in bestelling.transacties.filter(is_handmatig=True):
+            for transactie in bestelling.transacties.filter(transactie_type=TRANSACTIE_TYPE_HANDMATIG):
                 transactie.bestelling = bestelling
                 overboekingen.append(transactie)
             # for

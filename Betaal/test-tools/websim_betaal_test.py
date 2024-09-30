@@ -172,9 +172,9 @@ class MyServer(BaseHTTPRequestHandler):
                         del details['consumerName']
                         del details['cardHolder']
                     elif test_code == "427":
-                        resp['settlementAmount']['value'] = '1&2'
+                        resp['amountRemaining']['value'] = '1&2'
                     elif test_code == "428":
-                        resp['settlementAmount']['currency'] = 'DKK'
+                        resp['amountRemaining']['currency'] = 'DKK'
 
             self._write_response(200, resp)
             return

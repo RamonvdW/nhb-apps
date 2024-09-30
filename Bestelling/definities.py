@@ -6,11 +6,11 @@
 
 BESTELLING_HOOGSTE_BESTEL_NR_FIXED_PK = 1
 
-BESTELLING_STATUS_NIEUW = 'N'
-BESTELLING_STATUS_BETALING_ACTIEF = 'B'
-BESTELLING_STATUS_AFGEROND = 'A'
-BESTELLING_STATUS_MISLUKT = 'F'
-BESTELLING_STATUS_GEANNULEERD = 'G'
+BESTELLING_STATUS_NIEUW = 'N'               # producten gereserveerd; betaling nog niet gestart
+BESTELLING_STATUS_BETALING_ACTIEF = 'B'     # Mollie opgestart
+BESTELLING_STATUS_AFGEROND = 'A'            # 100% betaald; reservering nu definitief
+BESTELLING_STATUS_MISLUKT = 'F'             # <100% betaald; wacht op meer
+BESTELLING_STATUS_GEANNULEERD = 'G'         # gebruiker wil niet meer; reservering of definitieve plekken vrijgegeven
 
 BESTELLING_STATUS_CHOICES = (
     (BESTELLING_STATUS_NIEUW, 'Nieuw'),
@@ -23,7 +23,7 @@ BESTELLING_STATUS_CHOICES = (
 BESTELLING_STATUS2STR = {
     BESTELLING_STATUS_NIEUW: 'Nieuw',
     BESTELLING_STATUS_BETALING_ACTIEF: 'Betaling actief',
-    BESTELLING_STATUS_AFGEROND: 'Voltooid',     # 'Afgerond' vertaalt naar 'rounded'
+    BESTELLING_STATUS_AFGEROND: 'Voltooid',     # browser vertaalt 'Afgerond' naar 'rounded'
     BESTELLING_STATUS_MISLUKT: 'Mislukt',
     BESTELLING_STATUS_GEANNULEERD: 'Geannuleerd',
 }

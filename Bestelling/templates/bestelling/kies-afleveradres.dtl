@@ -50,6 +50,6 @@
         </div>
     </div>
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="bestel-kies-afleveradres" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="bestelling-kies-afleveradres" %}
 
 {% endblock %}

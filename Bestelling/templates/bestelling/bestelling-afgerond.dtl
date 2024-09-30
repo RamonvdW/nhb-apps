@@ -170,6 +170,6 @@
         </script>
     {% endif %}
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="bestel-bestelling-afgerond" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="bestelling-bestelling-afgerond" %}
 
 {% endblock %}

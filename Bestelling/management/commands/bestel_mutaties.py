@@ -36,7 +36,10 @@ from Bestelling.plugins.webwinkel import (webwinkel_plugin_reserveren, webwinkel
                                           webwinkel_plugin_bepaal_kortingen,
                                           webwinkel_plugin_bepaal_verzendkosten_mandje,
                                           webwinkel_plugin_bepaal_verzendkosten_bestelling)
+from Betaal.definities import (TRANSACTIE_TYPE_MOLLIE_RESTITUTIE, TRANSACTIE_TYPE_HANDMATIG,
+                               TRANSACTIE_TYPE_MOLLIE_PAYMENT)
 from Betaal.models import BetaalInstellingenVereniging, BetaalTransactie
+from Betaal.operations import maak_transactie_handmatige_overboeking
 from Evenement.definities import (EVENEMENT_INSCHRIJVING_STATUS_DEFINITIEF, EVENEMENT_STATUS_TO_STR,
                                   EVENEMENT_INSCHRIJVING_STATUS_RESERVERING_BESTELD)
 from Functie.models import Functie
@@ -121,7 +124,18 @@ def _beschrijf_bestelling(bestelling):
     return producten
 
 
-def _beschrijf_transacties(bestelling):
+def bereken_som_betalingen(bestelling: Bestelling) -> Decimal:
+    ontvangen_euro = Decimal('0')
+    for transactie in bestelling.transacties.exclude(transactie_type=TRANSACTIE_TYPE_MOLLIE_RESTITUTIE):
+        if transactie.transactie_type == TRANSACTIE_TYPE_HANDMATIG:
+            ontvangen_euro += transactie.bedrag_handmatig
+        else:
+            ontvangen_euro += transactie.bedrag_beschikbaar     # restant na aftrek restitutie en terug geclaimd
+    # for
+    return ontvangen_euro
+
+
+def _beschrijf_transacties(bestelling: Bestelling):
     transacties = (bestelling
                    .transacties
                    .all()
@@ -965,13 +979,7 @@ class Command(BaseCommand):
             bestelling.transacties.add(*transacties_new)
 
             # controleer of we voldoende ontvangen hebben
-            ontvangen_euro = Decimal('0')
-            for transactie in bestelling.transacties.all():
-                if transactie.is_restitutie:
-                    ontvangen_euro -= transactie.bedrag_euro_klant
-                else:
-                    ontvangen_euro += transactie.bedrag_euro_klant
-            # for
+            ontvangen_euro = bereken_som_betalingen(bestelling)
 
             ontvangen_euro_str = "€ %.2f" % ontvangen_euro
             ontvangen_euro_str = ontvangen_euro_str.replace('.', ',')  # nederlandse komma
@@ -1045,19 +1053,7 @@ class Command(BaseCommand):
                             bestelling.mh_bestel_nr(), bestelling.pk))
 
         # koppel een transactie aan de bestelling
-        # bestaande_pks = list(bestelling.transacties.all().values_list('pk', flat=True))
-        # TODO: dit hoort thuis in Betaal ipv Bestel
-        transactie = BetaalTransactie(
-                            when=timezone.now(),
-                            is_handmatig=True,
-                            beschrijving='Overboeking ontvangen',
-                            is_restitutie=False,
-                            bedrag_euro_klant=bedrag_euro,
-                            bedrag_euro_boeking=bedrag_euro,
-                            payment_id='',
-                            klant_naam='',
-                            klant_account='')
-        transactie.save()
+        transactie = maak_transactie_handmatige_overboeking(bedrag_euro)
         bestelling.transacties.add(transactie)
 
         msg = "\n[%s] Bestelling heeft een overboeking van %s euro ontvangen" % (
@@ -1065,13 +1061,7 @@ class Command(BaseCommand):
         bestelling.log += msg
 
         # controleer of we voldoende ontvangen hebben
-        ontvangen_euro = Decimal('0')
-        for transactie in bestelling.transacties.all():
-            if transactie.is_restitutie:
-                ontvangen_euro -= transactie.bedrag_euro_klant
-            else:
-                ontvangen_euro += transactie.bedrag_euro_klant
-        # for
+        ontvangen_euro = bereken_som_betalingen(bestelling)
 
         self.stdout.write('[INFO] Bestelling %s (pk=%s) heeft %s van de %s euro ontvangen' % (
                             bestelling.mh_bestel_nr(), bestelling.pk, ontvangen_euro, bestelling.totaal_euro))

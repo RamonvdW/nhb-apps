@@ -38,19 +38,16 @@ class BetaalTransactieAdmin(admin.ModelAdmin):
 
     ordering = ('-when',)
 
-    list_filter = ('is_restitutie', 'is_handmatig', 'payment_status', HeeftRestitutie, HeeftTerugvordering)
+    list_filter = ('transactie_type', 'payment_status', HeeftRestitutie, HeeftTerugvordering)
 
     search_fields = ('payment_id', 'refund_id', 'beschrijving')
 
     fieldsets = (
         ('Basics',
             {'fields': ('when',
+                        'transactie_type',
                         'beschrijving',
-                        'bedrag_euro_klant')
-             }),
-        ('Handmatig',
-            {'fields': (('is_handmatig',),
-                        'bedrag_euro_boeking'),
+                        'bedrag_handmatig'),
              }),
         ('Mollie',
             {'fields': ('payment_id',
@@ -63,8 +60,7 @@ class BetaalTransactieAdmin(admin.ModelAdmin):
                         'bedrag_beschikbaar')
              }),
         ('Mollie restitutie',
-            {'fields': ('is_restitutie',
-                        'refund_id',
+            {'fields': ('refund_id',
                         'refund_status',
                         'bedrag_refund'),
              }),
