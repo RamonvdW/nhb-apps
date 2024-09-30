@@ -1,10 +1,11 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2021-2023 Ramon van der Winkel.
+                Copyright (c) 2021-2024 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
+{% load overig_filters %}   <!-- wbr_email en wbr_www filters -->
 
 {% block title %}Wedstrijd details{% endblock %}
 
@@ -149,7 +150,9 @@
 
                 <tr>
                     <th>E-mailadres</th>
-                    <td>{{ wed.contact_email }}</td>
+                    <td>
+                        <code>{{ wed.contact_email|wbr_email }}</code>
+                    </td>
                 </tr>
 
                 {% if wed.extern_beheerd %}
@@ -159,7 +162,7 @@
                             <td>
                                 <a href="{{ wed.contact_website }}" target="_blank" rel="noopener noreferrer">
                                     <i class="notranslate material-icons-round left sv-blauw-text">open_in_new</i>
-                                    <code>{{ wed.contact_website }}</code>
+                                    <code>{{ wed.contact_website|wbr_www }}</code>
                                 </a>
                             </td>
                         </tr>
@@ -182,6 +185,23 @@
                     <td>&euro;&nbsp;{{ wed.prijs_euro_onder18 }}</td>
                 </tr>
 
+                {% if wed.url_uitslag %}
+                    <tr>
+                        <td colspan="2" class="center sv-blauw-text">
+                            <h6>Uitslag</h6>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Gepubliceerde uitslag</th>
+                        <td>
+                            <a href="{{ wed.url_uitslag }}" target="_blank" rel="noopener noreferrer">
+                                <i class="notranslate material-icons-round left sv-blauw-text">open_in_new</i>
+                                <code>{{ wed.url_uitslag|wbr_www }}</code>
+                            </a>
+                        </td>
+                    </tr>
+                {% endif %}
+
             </table>
 
             {% if toon_sessies %}
@@ -192,7 +212,7 @@
                         <div class="collapsible-header white center" style="display:block; cursor:inherit">
                             <h6 class="sv-blauw-text">Sessies</h6>
                             {% if wed.organisatie == 'N' %}
-                                <p>Klassen zonder man/vrouw benoeming zijn genderneutraal</p>
+                                <p>Eventuele klassen zonder man/vrouw benoeming zijn genderneutraal</p>
                             {% endif %}
                         </div>
                     </li>

@@ -114,7 +114,7 @@ class TestWedstrijdenWijzigWedstrijd(E2EHelpers, TestCase):
         # wissel naar HWL en maak een wedstrijd aan
         self._maak_externe_locatie(self.ver1)            # locatie is noodzakelijk
         self.e2e_wissel_naar_functie(self.functie_hwl)
-        resp = self.client.post(self.url_wedstrijden_maak_nieuw, {'keuze': 'khsn'})
+        resp = self.client.post(self.url_wedstrijden_maak_nieuw, {'keuze': 'wa'})
         self.assert_is_redirect_not_plein(resp)
 
         self.assertEqual(1, Wedstrijd.objects.count())
@@ -166,7 +166,7 @@ class TestWedstrijdenWijzigWedstrijd(E2EHelpers, TestCase):
                                           'begrenzing': 'begrenzing_L',
                                           'extern': 'ja',
                                           'sluit': 'sluit_5',
-                                          'kwalificatie_scores': 'X'})
+                                          'kwalificatie_scores': 'X'})      # HWL mag niet wijzigen
         self.assert_is_redirect(resp, self.url_wedstrijden_vereniging)
 
         wedstrijd = Wedstrijd.objects.get(pk=wedstrijd.pk)
@@ -184,7 +184,7 @@ class TestWedstrijdenWijzigWedstrijd(E2EHelpers, TestCase):
         self.assertEqual(wedstrijd.begrenzing, 'L')
         self.assertEqual(wedstrijd.inschrijven_tot, 5)
         self.assertTrue(wedstrijd.extern_beheerd)
-        self.assertTrue(wedstrijd.eis_kwalificatie_scores)
+        self.assertFalse(wedstrijd.eis_kwalificatie_scores)     # HWL mag niet wijzigen
 
         datum = '%s-1-1' % (wedstrijd.datum_begin.year + 1)
         with self.assert_max_queries(20):
@@ -202,8 +202,12 @@ class TestWedstrijdenWijzigWedstrijd(E2EHelpers, TestCase):
             resp = self.client.post(url, {'wa_status': 'wa_A',
                                           'akkoord_a_status': 'ja'})
         self.assert_is_redirect(resp, self.url_wedstrijden_vereniging)
-        wedstrijd = Wedstrijd.objects.get(pk=wedstrijd.pk)
+        wedstrijd.refresh_from_db()
         self.assertEqual(wedstrijd.wa_status, 'A')
+
+        # extra coverage
+        wedstrijd.eis_kwalificatie_scores = True
+        wedstrijd.save(update_fields=['eis_kwalificatie_scores'])
 
         # akkoord verkoopvoorwaarden
         with self.assert_max_queries(20):
@@ -751,8 +755,8 @@ class TestWedstrijdenWijzigWedstrijd(E2EHelpers, TestCase):
                 resp = self.client.post(url, {'uitvoerend': ''})
             self.assert_is_redirect_not_plein(resp)
 
-    def test_ter_info(self):
-        # alleen de BB en MWZ mogen de ter-info vlag zetten
+    def test_manager_edits(self):
+        # alleen de BB en MWZ mogen de ter-info en eis-kwalificatie-scores vlaggen zetten
 
         self.e2e_login_and_pass_otp(self.account_admin)
 
@@ -768,37 +772,42 @@ class TestWedstrijdenWijzigWedstrijd(E2EHelpers, TestCase):
         wedstrijd = Wedstrijd.objects.first()
         url = self.url_wedstrijden_wijzig_wedstrijd % wedstrijd.pk
         self.assert_is_redirect(resp, url)
+
         self.assertFalse(wedstrijd.is_ter_info)
+        self.assertFalse(wedstrijd.eis_kwalificatie_scores)
 
-        url = self.url_wedstrijden_wijzig_wedstrijd % wedstrijd.pk
-
-        # probeer de 'ter info' vlag te zetten
+        # probeer de 'ter info' vlag te zetten als HWL
         with self.assert_max_queries(20):
-            resp = self.client.post(url, {'ter_info': 1})
+            resp = self.client.post(url, {'ter_info': 1,
+                                          'kwalificatie_scores': 'X'})
             self.assert_is_redirect_not_plein(resp)
 
-        wedstrijd = Wedstrijd.objects.get(pk=wedstrijd.pk)
+        wedstrijd.refresh_from_db()
         self.assertFalse(wedstrijd.is_ter_info)
+        self.assertFalse(wedstrijd.eis_kwalificatie_scores)
 
         # probeer het nog een keer, als BB
         self.e2e_wisselnaarrol_bb()
         self.e2e_check_rol('BB')
 
-        # probeer de 'ter info' vlag te zetten
         with self.assert_max_queries(20):
-            resp = self.client.post(url, {'ter_info': 1})
-            self.assert_is_redirect_not_plein(resp)
+            resp = self.client.post(url, {'ter_info': 1,
+                                          'kwalificatie_scores': 'Y'})
+        self.assert_is_redirect_not_plein(resp)
 
-        wedstrijd = Wedstrijd.objects.get(pk=wedstrijd.pk)
+        wedstrijd.refresh_from_db()
         self.assertTrue(wedstrijd.is_ter_info)
+        self.assertTrue(wedstrijd.eis_kwalificatie_scores)
 
-        # probeer de 'ter info' vlag te resetten
+        # probeer de vlaggen te resetten
         with self.assert_max_queries(20):
-            resp = self.client.post(url, {'ter_info': ''})
-            self.assert_is_redirect_not_plein(resp)
+            resp = self.client.post(url, {'ter_info': '',
+                                          'kwalificatie_scores': ''})
+        self.assert_is_redirect_not_plein(resp)
 
-        wedstrijd = Wedstrijd.objects.get(pk=wedstrijd.pk)
+        wedstrijd.refresh_from_db()
         self.assertFalse(wedstrijd.is_ter_info)
+        self.assertFalse(wedstrijd.eis_kwalificatie_scores)
 
         # haal als HWL het overzicht op met een 'ter info' wedstrijd
         wedstrijd.is_ter_info = True
