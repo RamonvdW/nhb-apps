@@ -105,6 +105,6 @@
 
     {% endif %}
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="evenementen-overzicht-vereniging" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="evenement-overzicht-vereniging" %}
 
 {% endblock %}

@@ -97,9 +97,7 @@ class InschrijvenSporterView(UserPassesTestMixin, TemplateView):
                    .first())
 
         if sporter:
-            sporter.block_ver = sporter.bij_vereniging.geen_wedstrijden
-            context['kan_aanmelden'] = not sporter.block_ver
-
+            context['kan_aanmelden'] = True
             context['sporter'] = sporter
 
             # kijk of de sporter al ingeschreven is
@@ -186,7 +184,6 @@ class InschrijvenGroepjeView(UserPassesTestMixin, TemplateView):
             sporter = (Sporter
                        .objects
                        .exclude(is_overleden=True)
-                       .exclude(bij_vereniging__geen_wedstrijden=True)
                        .exclude(is_gast=True)           # alleen KHSN leden
                        .filter(lid_nr=zoek_lid_nr,
                                is_actief_lid=True)      # moet actief lid zijn
@@ -297,7 +294,6 @@ class InschrijvenFamilieView(UserPassesTestMixin, TemplateView):
         context['familie'] = list(Sporter
                                   .objects
                                   .exclude(is_overleden=True)
-                                  .exclude(bij_vereniging__geen_wedstrijden=True)
                                   .exclude(is_gast=True)            # alleen KHSN leden
                                   .filter(adres_code=adres_code,
                                           is_actief_lid=True)       # moet actief lid zijn
@@ -382,7 +378,6 @@ class ToevoegenAanMandjeView(UserPassesTestMixin, View):
             evenement = Evenement.objects.get(pk=evenement_pk)
             sporter = (Sporter
                        .objects
-                       .exclude(bij_vereniging__geen_wedstrijden=True)
                        .exclude(is_gast=True)           # alleen KHSN leden
                        .select_related('bij_vereniging')
                        .get(pk=sporter_pk))
