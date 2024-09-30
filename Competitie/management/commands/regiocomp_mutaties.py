@@ -759,8 +759,8 @@ class Command(BaseCommand):
                           .filter(regiocompetitie=deelcomp,
                                   inschrijf_voorkeur_team=True)):
 
-            # bij vaste teams altijd het AG gebruiken (anders kan invaller op een gegeven moment niet meer invallen)
-            if deelnemer.aantal_scores == 0 or deelcomp.regio_heeft_vaste_teams or ronde_nr == 1:
+            # let op: geen verschil vaste/vsg-teams meer sinds reglementswijzing 2021-06-28
+            if deelnemer.aantal_scores == 0 or ronde_nr == 1:
                 vsg = deelnemer.ag_voor_team
             else:
                 vsg = deelnemer.gemiddelde  # individuele voortschrijdend gemiddelde
