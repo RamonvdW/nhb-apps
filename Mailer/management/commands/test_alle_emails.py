@@ -17,6 +17,7 @@ from BasisTypen.models import BoogType, KalenderWedstrijdklasse
 from Bestelling.management.commands.bestel_mutaties import stuur_email_naar_koper_betaalbevestiging
 from Bestelling.definities import BESTELLING_STATUS_NIEUW
 from Bestelling.models import Bestelling, BestellingProduct
+from Betaal.definities import TRANSACTIE_TYPE_MOLLIE_PAYMENT, TRANSACTIE_TYPE_MOLLIE_RESTITUTIE
 from Betaal.models import BetaalInstellingenVereniging, BetaalTransactie
 from Competitie.models import Competitie, CompetitieMatch
 from Functie.models import Functie
@@ -227,12 +228,14 @@ class Command(BaseCommand):
         bestelling.producten.add(product_c)
         self.bestelling = bestelling
 
+        bedrag_euro = Decimal("142.42")
         transactie = BetaalTransactie(
                             when=now - timezone.timedelta(hours=1),
+                            transactie_type=TRANSACTIE_TYPE_MOLLIE_PAYMENT,
                             payment_id='test_pay_1',
-                            is_handmatig=False,
                             beschrijving='Bestelling %s' % self.test_bestel_nr,
-                            bedrag_euro_klant=Decimal("142.42"),
+                            bedrag_beschikbaar=bedrag_euro,
+                            bedrag_te_ontvangen=bedrag_euro,
                             klant_naam='Pietje Schiet',
                             klant_account='RekNr van Pietje')
         transactie.save()
@@ -240,11 +243,10 @@ class Command(BaseCommand):
 
         transactie = BetaalTransactie(
                             when=now - timezone.timedelta(minutes=30),
+                            transactie_type=TRANSACTIE_TYPE_MOLLIE_RESTITUTIE,
                             payment_id='test_pay_1',
-                            is_handmatig=False,
                             beschrijving='Terugbetaling teveel betaald',
-                            is_restitutie=True,
-                            bedrag_euro_klant=Decimal("5.00"),
+                            bedrag_refund=Decimal("5.00"),
                             klant_naam='Pietje Schiet',
                             klant_account='RekNr van Pietje')
         transactie.save()
