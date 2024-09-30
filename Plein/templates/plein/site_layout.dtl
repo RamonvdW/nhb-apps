@@ -48,8 +48,8 @@
 
                     <!-- logo links;         brand-logo voorkomt button wrap -->
                     <a href="/plein/" class="brand-logo left">
-                                                                   <!-- aspect ratio: 400x92 -> 270x62 -->
-                        <img src="{% static 'plein/logo_with_text_khsn.png' %}" width="270" height="62" alt="KHSN logo">
+                                                           <!-- aspect ratio: 400x92 -> 270x62 -->
+                        <img src="{% static 'plein/logo_with_text_khsn.webp' %}" width="270" height="62" alt="KHSN logo">
                     </a>
 
                     <!-- login/quick access knop aan de rechter kant -->

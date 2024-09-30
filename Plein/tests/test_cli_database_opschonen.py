@@ -194,7 +194,7 @@ class TestPleinCliDatabaseOpschonen(E2EHelpers, TestCase):
         self.assertEqual(3, MailQueue.objects.count())
         for mail in MailQueue.objects.all():
             self.assertIn(mail.mail_to, (self.gast_email_een, self.gast_email_twee, self.gast_email_vier))
-            self.assert_email_html_ok(mail)
+            self.assert_email_html_ok(mail, 'email_registreer/gast-verwijder.dtl')
             self.assert_consistent_email_html_text(mail)
         # for
 
