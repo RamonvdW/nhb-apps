@@ -253,9 +253,9 @@ echo "[INFO] Finished main test run" >>"$LOG"
 
 # launch a browser with all the stored web pages
 find "$TMP_HTML" -type f | grep -q html
-RES=$?
+RES2=$?
 # echo "[DEBUG] RES=$RES"
-if [ $RES -eq 0 ]
+if [ $RES2 -eq 0 ]
 then
     # echo "[DEBUG] Found HTML files in $TMP_HTML"
     HTML_FILES=$(ls -1tr "$TMP_HTML"/*html)   # sorted by creation time

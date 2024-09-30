@@ -39,7 +39,7 @@ class MyMgmtCommandHelper(TestCase):
         management.call_command('regiocomp_mutaties', '1', '--quick', stderr=f1, stdout=f2)
 
         err_msg = f1.getvalue()
-        if '[ERROR]' in err_msg:                        # pragma: no cover
+        if '[ERROR]' in err_msg or 'Traceback:' in err_msg:  # pragma: no cover
             self.fail(msg='Onverwachte fout van regiocomp_mutaties:\n' + err_msg)
 
         if show_all:                                                            # pragma: no cover
@@ -67,7 +67,7 @@ class MyMgmtCommandHelper(TestCase):
 
         if fail_on_error:
             err_msg = f1.getvalue()
-            if '[ERROR]' in err_msg:                        # pragma: no cover
+            if '[ERROR]' in err_msg or 'Traceback:' in err_msg:                 # pragma: no cover
                 self.fail(msg='Onverwachte fout van bestel_mutaties:\n' + err_msg)
 
         if show_all:                                                            # pragma: no cover
@@ -84,19 +84,31 @@ class MyMgmtCommandHelper(TestCase):
         return f1, f2
 
     @staticmethod
-    def verwerk_betaal_mutaties(seconden=1):
+    def verwerk_betaal_mutaties(seconden=1, show_all=False):
         # vraag de achtergrondtaak om de mutaties te verwerken
         f1 = io.StringIO()
         f2 = io.StringIO()
+
         management.call_command('betaal_mutaties', str(0 + seconden), '--quick', stderr=f1, stdout=f2)
+
+        if show_all:                                                            # pragma: no cover
+            print(f1.getvalue())
+            print(f2.getvalue())
+
         return f1, f2
 
     @staticmethod
-    def verwerk_scheids_mutaties(seconden=1):
+    def verwerk_scheids_mutaties(seconden=1, show_all=False):
         # vraag de achtergrondtaak om de mutaties te verwerken
         f1 = io.StringIO()
         f2 = io.StringIO()
+
         management.call_command('scheids_mutaties', str(0 + seconden), '--quick', stderr=f1, stdout=f2)
+
+        if show_all:                                                            # pragma: no cover
+            print(f1.getvalue())
+            print(f2.getvalue())
+
         return f1, f2
 
 # end of file

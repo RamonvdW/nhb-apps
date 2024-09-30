@@ -254,7 +254,7 @@ class TestRegistreerLid(E2EHelpers, TestCase):
         self.assertContains(resp, 'l@test.com')     # iets van n####l@test.com
 
         mail = MailQueue.objects.first()
-        self.assert_email_html_ok(mail)
+        self.assert_email_html_ok(mail, 'email_registreer/lid-bevestig-toegang-email.dtl')
         self.assert_consistent_email_html_text(mail)
 
         # controleer dat de volledige naam meteen al overgenomen is

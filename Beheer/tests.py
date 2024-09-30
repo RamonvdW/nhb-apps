@@ -109,6 +109,7 @@ BEHEER_PAGINAS = (
     '/beheer/login/',
     '/beheer/logout/',
     '/beheer/password_change/',
+    '/beheer/sessions/session/',
 )
 
 
@@ -209,66 +210,50 @@ class TestBeheer(E2EHelpers, TestCase):
     def test_admin_specials(self):
         self.e2e_login_and_pass_otp(self.account_admin)
 
-        # Betaal
-        resp = self.client.get('/beheer/Betaal/betaalinstellingenvereniging/?Mollie=0')
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        urls = (
+            # Betaal
+            '/beheer/Betaal/betaalinstellingenvereniging/?Mollie=0',
+            '/beheer/Betaal/betaalinstellingenvereniging/?Mollie=1',
 
-        resp = self.client.get('/beheer/Betaal/betaalinstellingenvereniging/?Mollie=1')
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
+            # Bestelling
+            '/beheer/Bestelling/bestellingmandje/?is_leeg=0',
+            '/beheer/Bestelling/bestellingmandje/?is_leeg=1',
 
-        # Bestel
-        resp = self.client.get('/beheer/Bestel/bestelmandje/?is_leeg=0')
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
+            # Feedback
+            '/beheer/Feedback/feedback/?is_afgehandeld=0',
+            '/beheer/Feedback/feedback/?is_afgehandeld=1',
+            '/beheer/Feedback/feedback/?is_afgehandeld=-1',
 
-        resp = self.client.get('/beheer/Bestel/bestelmandje/?is_leeg=1')
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
+            # Sporter
+            '/beheer/Sporter/sporter/?heeft_wa_id=Ja',
+            '/beheer/Sporter/sporter/?heeft_account=Ja',
 
-        # Feedback
-        resp = self.client.get('/beheer/Feedback/feedback/?is_afgehandeld=0')
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
+            # Opleiding
+            '/beheer/Opleidingen/opleidingdiploma/?heeft_account=Ja',
 
-        resp = self.client.get('/beheer/Feedback/feedback/?is_afgehandeld=1')
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
+            # Reistijden
+            '/beheer/Locatie/reistijd/?reistijd_vastgesteld=nul',
+            '/beheer/Locatie/reistijd/?reistijd_vastgesteld=1',
 
-        resp = self.client.get('/beheer/Feedback/feedback/?is_afgehandeld=-1')
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
+            # Competitie
+            '/beheer/Competitie/regiocompetitiesporterboog/?Zelfstandig=HWL',
+            '/beheer/Competitie/regiocompetitiesporterboog/?Zelfstandig=Zelf',
+            '/beheer/Competitie/regiocompetitiesporterboog/?TeamAG=Ontbreekt',
+            '/beheer/Competitie/regiocompetitieteam/?TeamType=R2',
+            '/beheer/Competitie/regiocompetitierondeteam/?RondeTeamType=R2',
+            '/beheer/Competitie/regiocompetitierondeteam/?RondeTeamVer=1350',
+            '/beheer/Competitie/kampioenschapteam/?rk_bk_type=RK',
+            '/beheer/Competitie/kampioenschapteam/?rk_bk_type=BK',
+            '/beheer/Competitie/kampioenschapteam/?incompleet=incompleet',
+            '/beheer/Competitie/kampioenschapteam/?incompleet=compleet',
+            '/beheer/Competitie/kampioenschapsporterboog/',
+            '/beheer/Competitie/kampioenschapsporterboog/?indiv_klasse_rk_bk=1100',
+        )
 
-        # Sporter
-        resp = self.client.get('/beheer/Sporter/sporter/?heeft_wa_id=Ja')
-        self.assertEqual(resp.status_code, 200)  # 200 = OK
-
-        resp = self.client.get('/beheer/Sporter/sporter/?heeft_account=Ja')
-        self.assertEqual(resp.status_code, 200)  # 200 = OK
-
-        # Opleiding
-        resp = self.client.get('/beheer/Opleidingen/opleidingdiploma/?heeft_account=Ja')
-        self.assertEqual(resp.status_code, 200)  # 200 = OK
-
-        # Reistijden
-        resp = self.client.get('/beheer/Locatie/reistijd/?reistijd_vastgesteld=nul')
-        self.assertEqual(resp.status_code, 200)  # 200 = OK
-
-        resp = self.client.get('/beheer/Locatie/reistijd/?reistijd_vastgesteld=1')
-        self.assertEqual(resp.status_code, 200)  # 200 = OK
-
-        # Competitie
-        resp = self.client.get('/beheer/Competitie/regiocompetitiesporterboog/?Zelfstandig=HWL')
-        self.assertEqual(resp.status_code, 200)  # 200 = OK
-
-        resp = self.client.get('/beheer/Competitie/regiocompetitiesporterboog/?Zelfstandig=Zelf')
-        self.assertEqual(resp.status_code, 200)  # 200 = OK
-
-        resp = self.client.get('/beheer/Competitie/regiocompetitiesporterboog/?TeamAG=Ontbreekt')
-        self.assertEqual(resp.status_code, 200)  # 200 = OK
-
-        resp = self.client.get('/beheer/Competitie/regiocompetitieteam/?TeamType=R2')
-        self.assertEqual(resp.status_code, 200)  # 200 = OK
-
-        resp = self.client.get('/beheer/Competitie/regiocompetitierondeteam/?RondeTeamType=R2')
-        self.assertEqual(resp.status_code, 200)  # 200 = OK
-
-        resp = self.client.get('/beheer/Competitie/regiocompetitierondeteam/?RondeTeamVer=1350')
-        self.assertEqual(resp.status_code, 200)  # 200 = OK
-
-
+        for url in urls:
+            resp = self.client.get(url)
+            self.assertEqual(resp.status_code, 200)     # 200 = OK
+            self.assert_template_used(resp, ('admin/base.html', 'admin/filter.html'))
+        # for
+        
 # end of file

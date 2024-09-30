@@ -40,7 +40,7 @@ class HierarchyRunner(DiscoverRunner):
         assert isinstance(suite, TestSuite)
         return self.rebuild_suite_hierarchical(suite)
 
-    def rebuild_suite_hierarchical(self, suite):
+    def rebuild_suite_hierarchical(self, suite: TestSuite):
         """ create a new test suite with the tests ordered by test_after dependencies
 
             a testcase is added to the new testsuite when all tests mentioned in 'test_after' have been added already.
@@ -56,6 +56,12 @@ class HierarchyRunner(DiscoverRunner):
         # gather all the test cases, for checking the test_after references
         known_tests = list()
         for test in suite:
+
+            # if the suite consists of other suites, this is probably the parallel running
+            if isinstance(test, TestSuite):
+                # we skip rebuilding the suite
+                return suite
+
             test_name = test.id()           # includes the test function name
 
             spl = test_name.split('.')

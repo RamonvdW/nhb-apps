@@ -68,7 +68,7 @@ class TestFunctieRol(E2EHelpers, TestCase):
 
         self.assertEqual(MailQueue.objects.count(), 1)
         mail = MailQueue.objects.first()
-        self.assert_email_html_ok(mail)
+        self.assert_email_html_ok(mail, 'email_functie/rollen-gewijzigd.dtl')
         self.assert_consistent_email_html_text(mail)
 
         # dubbel koppelen wordt voorkomen

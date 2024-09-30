@@ -50,6 +50,6 @@
         </div>
     </div>
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="scheidsrechter-beschikbaarheid-wijzigen" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="scheidsrechter-beschikbaarheid-stats-cs" %}
 
 {% endblock %}

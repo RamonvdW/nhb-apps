@@ -279,7 +279,7 @@ class TestScheidsrechterCompetitie(E2EHelpers, TestCase):
         self.assertEqual(4, MatchScheidsrechters.objects.count())
 
         mail = MailQueue.objects.first()
-        self.assert_email_html_ok(mail)
+        self.assert_email_html_ok(mail, 'email_scheidsrechter/beschikbaarheid-opgeven.dtl')
         self.assert_consistent_email_html_text(mail)
 
         # competitiematches; beschikbaarheid is al opgevraagd

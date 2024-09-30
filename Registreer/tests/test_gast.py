@@ -83,7 +83,7 @@ class TestRegistreerGast(E2EHelpers, TestCase):
         self.assertEqual(1, TijdelijkeCode.objects.count())
 
         mail = MailQueue.objects.first()
-        self.assert_email_html_ok(mail)
+        self.assert_email_html_ok(mail, 'email_registreer/gast-bevestig-toegang-email.dtl')
         self.assert_consistent_email_html_text(mail)
 
         # admin beschrijving
@@ -115,7 +115,7 @@ class TestRegistreerGast(E2EHelpers, TestCase):
         self.assertEqual(2, MailQueue.objects.count())
 
         mail = MailQueue.objects.exclude(pk=mail.pk).first()
-        self.assert_email_html_ok(mail)
+        self.assert_email_html_ok(mail, 'email_registreer/gast-tijdelijk-bondsnummer.dtl')
         self.assert_consistent_email_html_text(mail)
 
         # herhaal het verzoek --> deze wordt afgewezen

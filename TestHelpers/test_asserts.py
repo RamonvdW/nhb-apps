@@ -959,9 +959,11 @@ class MyTestAsserts(TestCase):
     # def assert200_is_bestand_xlsm(self, resp):
     #     self._assert_bestand(resp, 'application/vnd.ms-excel.sheet.macroEnabled.12')
 
-    def assert_email_html_ok(self, mail: MailQueue):
+    def assert_email_html_ok(self, mail: MailQueue, expected_template_name: str):
         html = mail.mail_html
         template_name = mail.template_used
+
+        self.assertEqual(template_name, expected_template_name)
 
         if template_name not in validated_templates:          # pragma: no branch
             validated_templates.append(template_name)
@@ -1058,6 +1060,8 @@ class MyTestAsserts(TestCase):
                 if zoek1 in ignore:
                     continue
 
+                # print('check zoek1=%s, zoek2=%s' % (repr(zoek1), repr(zoek2)))
+
                 pos = html.find(zoek1)
                 if pos > 0:
                     # verwijder de tekst maar behoud de >
@@ -1066,25 +1070,36 @@ class MyTestAsserts(TestCase):
                     # misschien is het een table header zonder dubbele punt
                     zoek1b = zoek1[:-1]     # verwijder :
                     zoek_th = '<th' + zoek1b + '</th>'
+                    # print('zoek_th=%s' % repr(zoek_th))
                     pos = html.find(zoek_th)
                     if pos > 0:                                                 # pragma: no branch
                         # verwijder de header en de tag
                         html = html[:pos] + html[pos + len(zoek_th):]
                         th_matched.append(zoek_th)
-                    elif zoek1b not in th_matched:                              # pragma: no cover
-                        issues.append('Kan tekst %s niet vinden in html e-mail' % repr(zoek1))
+                    elif zoek_th not in th_matched:                              # pragma: no cover
+                        zoek_td = '<td' + zoek1b + '</td>'
+                        pos = html.find(zoek_td)
+                        if pos > 0:  # pragma: no branch
+                            # verwijder de header en de tag
+                            html = html[:pos] + html[pos + len(zoek_td):]
+                            th_matched.append(zoek_td)
+                        elif zoek_td not in th_matched:                         # pragma: no cover
+                            issues.append('{zoek1} Kan tekst %s niet vinden in html e-mail' % repr(zoek1))
+
+                if zoek2 in ignore:
+                    continue
 
                 pos = html.find(zoek2)
                 if pos > 0:                                                     # pragma: no branch
                     # verwijder de tekst maar behoud de <
                     html = html[:pos] + html[pos + len(zoek2) - 1:]
                 else:                                                           # pragma: no cover
-                    issues.append('Kan tekst %s niet vinden in html e-mail' % repr(zoek2))
+                    issues.append('{zoek2} Kan tekst %s niet vinden in html e-mail' % repr(zoek2))
 
                 continue        # pragma: no cover
 
             if line[-1] == ':':
-                # probeer een zonder de dubbele punt
+                # probeer zonder de dubbele punt
                 zoek = '>' + line[:-1] + '<'
                 pos = html.find(zoek)
                 if pos > 0:                                                     # pragma: no branch
@@ -1109,6 +1124,8 @@ class MyTestAsserts(TestCase):
                     html = html[:pos] + html[pos + len(zoek):]
                     continue
 
+            if line in ignore:
+                continue
             issues.append('Kan regel %s niet vinden in html e-mail' % repr(line))       # pragma: no cover
         # for
 
@@ -1119,8 +1136,10 @@ class MyTestAsserts(TestCase):
             tekst = html[pos+4:pos2]
             html = html[:pos] + html[pos2+5:]       # verwijder deze cell
 
-            tekst = tekst.replace('<span></span>', '')
             tekst = tekst.replace('<br>', '')
+            tekst = tekst.replace('<span></span>', '')
+            tekst = tekst.replace('</span>', '')
+            tekst = tekst.replace('<span>', '')
             if len(tekst) > 3:      # skip korten teksten zoals nummering
                 # print('tekst: %s' % repr(tekst))
                 if tekst not in email.mail_text:                                        # pragma: no cover

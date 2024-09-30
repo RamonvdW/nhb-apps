@@ -250,7 +250,7 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
         # er moet nu een mail in de MailQueue staan met een single-use url
         self.assertEqual(MailQueue.objects.count(), 1)
         mail = MailQueue.objects.first()
-        self.assert_email_html_ok(mail)
+        self.assert_email_html_ok(mail, 'email_functie/rollen-gewijzigd.dtl')
         self.assertTrue(settings.URL_PDF_HANDLEIDING_BEHEERDERS in mail.mail_html)
         self.assert_consistent_email_html_text(mail)
 

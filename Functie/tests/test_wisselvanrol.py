@@ -118,7 +118,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         urls = self.extract_all_urls(resp)
         return [url for url in urls if url.startswith('/functie/activeer') or url == self.url_accountwissel]
 
-    def test_admin(self):
+    def test_links(self):
         # controleer dat de link naar het wisselen van rol op de pagina staat
         self.account_admin.otp_is_actief = False
         self.account_admin.save()

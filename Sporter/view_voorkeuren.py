@@ -97,7 +97,7 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
                 obj.save(update_fields=['heeft_interesse', 'voor_wedstrijd'])
         # for
 
-    def _update_voorkeuren(self):
+    def _update_voorkeuren(self, is_beheerder):
         voorkeuren = get_sporter_voorkeuren(self.sporter, mag_database_wijzigen=True)
 
         keuze = self.request.POST.get('voorkeur_eigen_blazoen', None) is not None
@@ -146,17 +146,19 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
             voorkeuren.wedstrijd_geslacht_gekozen = gekozen
             voorkeuren.wedstrijd_geslacht = keuze
 
-        keuze = self.request.POST.get('sr_korps_email', None) is not None
-        voorkeuren.scheids_opt_in_korps_email = keuze
+        if not is_beheerder:
+            # alleen de sporter zelf mag dit bepalen
+            keuze = self.request.POST.get('sr_korps_email', None) is not None
+            voorkeuren.scheids_opt_in_korps_email = keuze
 
-        keuze = self.request.POST.get('sr_korps_tel', None) is not None
-        voorkeuren.scheids_opt_in_korps_tel_nr = keuze
+            keuze = self.request.POST.get('sr_korps_tel', None) is not None
+            voorkeuren.scheids_opt_in_korps_tel_nr = keuze
 
-        keuze = self.request.POST.get('sr_wed_email', None) is not None
-        voorkeuren.scheids_opt_in_ver_email = keuze
+            keuze = self.request.POST.get('sr_wed_email', None) is not None
+            voorkeuren.scheids_opt_in_ver_email = keuze
 
-        keuze = self.request.POST.get('sr_wed_tel', None) is not None
-        voorkeuren.scheids_opt_in_ver_tel_nr = keuze
+            keuze = self.request.POST.get('sr_wed_tel', None) is not None
+            voorkeuren.scheids_opt_in_ver_tel_nr = keuze
 
         voorkeuren.save()
 
@@ -165,13 +167,16 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
 
         self._get_sporter_or_404(request.POST.get('sporter_pk', None))
 
-        self._update_sporterboog()
-        self._update_voorkeuren()
+        is_beheerder = self.rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL)
 
-        if self.rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL):
+        self._update_sporterboog()
+        self._update_voorkeuren(is_beheerder)
+
+        if is_beheerder:
             # stuur de beheerder terug naar zijn ledenlijst
             return HttpResponseRedirect(reverse('Vereniging:leden-voorkeuren'))
 
+        # sporter
         if rol_mag_wisselen(self.request):
             account = get_account(request)
             updated = list()
@@ -257,6 +262,7 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
         if self.rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL):
             context['sporter_pk'] = self.sporter.pk
             context['is_hwl'] = True
+            context['toon_contact_sr'] = False      # delen contactgegevens is aan de sporter, niet de HWL
         else:
             # niet de HWL, dus de sporter zelf
             if rol_mag_wisselen(self.request):
