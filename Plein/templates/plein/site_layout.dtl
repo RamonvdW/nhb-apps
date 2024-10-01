@@ -33,7 +33,8 @@
         {% include 'plein/site_layout_favicons.dtl' %}
 
         {% if canonical %}
-            <link rel="canonical" href="{{ canonical }}" />
+            <!-- advies van Google is om absolute URLs te gebruiken ipv relatieve, ook al werkt het -->
+            <link rel="canonical" href="{{ site_url }}{{ canonical }}">
         {% endif %}
 
         {% block extraheader %}{% endblock %}

@@ -24,6 +24,9 @@ def site_layout(request):
     # test server banner tonen?
     context['is_test_server'] = settings.IS_TEST_SERVER
 
+    # om absolute canonical links te maken
+    context['site_url'] = settings.SITE_URL
+
     # zet context variabelen om aan te geven welke optionele delen van het menu getoond moeten worden
     if request.user.is_authenticated:
         # gebruiker is ingelogd
