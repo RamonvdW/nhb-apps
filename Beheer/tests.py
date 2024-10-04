@@ -14,8 +14,8 @@ from Vereniging.models import Vereniging
 
 
 # updaten met dit commando:
-#  for x in `./manage.py show_urls --settings=SiteMain.settings_dev | rev | cut -d'/' -f2- | rev | grep '/beheer/'`; do echo "'$x/',"; done | grep -vE ':object_id>/|/add/|/autocomplete/|<app_label>|<id>|bondscompetities/beheer/'
-BEHEER_PAGINAS = (
+# noqa: for x in `./manage.py show_urls --settings=SiteMain.settings_dev | rev | cut -d'/' -f2- | rev | grep '/beheer/'`; do echo "'$x/',"; done | grep -vE ':object_id>/|/add/|/autocomplete/|<app_label>|<id>|bondscompetities/beheer/'
+BEHEER_URLS = (
     '/beheer/Account/account/',
     '/beheer/Account/accountverzoekenteller/',
     '/beheer/BasisTypen/boogtype/',
@@ -194,7 +194,7 @@ class TestBeheer(E2EHelpers, TestCase):
         settings.DEBUG = True
         self.e2e_login_and_pass_otp(self.account_admin)
 
-        for url in BEHEER_PAGINAS:
+        for url in BEHEER_URLS:
             try:
                 with self.assert_max_queries(20):
                     self.client.get(url)
@@ -239,8 +239,8 @@ class TestBeheer(E2EHelpers, TestCase):
             '/beheer/Betaal/betaalactief/?ontvanger=1234',
 
             # Bestelling
-            '/beheer/Bestelling/bestellingmandje/?is_leeg=0',
-            '/beheer/Bestelling/bestellingmandje/?is_leeg=1',
+            '/beheer/Bestelling/bestellingmandje/?is_leeg=0',       # noqa
+            '/beheer/Bestelling/bestellingmandje/?is_leeg=1',       # noqa
 
             # Feedback
             '/beheer/Feedback/feedback/?is_afgehandeld=0',
