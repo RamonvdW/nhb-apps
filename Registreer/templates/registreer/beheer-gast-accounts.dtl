@@ -27,7 +27,7 @@
             <table class="sv-kader" id="table2">
                 <thead>
                     <tr>        <!-- filter veld -->
-                        <td colspan="2" class="table-filter">
+                        <td colspan="3" class="table-filter">
                             <input class="table-filter" oninput="myTableFilter(this, 'table2')" placeholder="Zoeken"/>
                         </td>
                         <td colspan="2"></td>

@@ -197,7 +197,11 @@ class GastAccountDetailsView(UserPassesTestMixin, TemplateView):
 
             if match.bij_vereniging:
                 match.vereniging_str = match.bij_vereniging.ver_nr_en_naam()
-                match.is_match_vereniging = gast.club.upper() in match.vereniging_str.upper()
+                match.is_match_vereniging = False
+                for woord in gast.club.upper().split():
+                    if woord in match.vereniging_str.upper():
+                        match.is_match_vereniging = True
+                # for
 
                 match.plaats_str = match.bij_vereniging.plaats
                 match.is_match_plaats = (gast.club_plaats.upper().replace('-', ' ') in
@@ -225,7 +229,7 @@ class GastAccountDetailsView(UserPassesTestMixin, TemplateView):
             if match.is_match_vereniging:
                 match.ophef += 1
             else:
-                match.ophef = 0
+                match.ophef = 0             # TODO: waarom?!
             if match.is_match_plaats:
                 match.ophef += 1
             if match.heeft_account:
