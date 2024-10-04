@@ -10,7 +10,7 @@ from django.db import migrations, models
 def bedragen_over_nemen(apps, _):
     # beetje onnodig, want er zijn geen restituties geregistreerd
     transactie_klas = apps.get_model('Betaal', 'BetaalTransactie')
-    for transactie in transactie_klas.objects.filter(is_restitutie=True):
+    for transactie in transactie_klas.objects.filter(is_restitutie=True):       # pragma: no cover
         transactie.bedrag_refund = transactie.bedrag_euro_boeking
         transactie.save(update_fields=['bedrag_refund'])
     # for

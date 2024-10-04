@@ -168,10 +168,12 @@ class BetaalTransactie(models.Model):
 
     def bedrag_str(self):
         if self.transactie_type == TRANSACTIE_TYPE_HANDMATIG:
-            return "€ %s" % self.bedrag_handmatig
-
-        if self.transactie_type == TRANSACTIE_TYPE_MOLLIE_RESTITUTIE:
-            return "€ %s" % self.bedrag_refund
+            bedrag = self.bedrag_handmatig
+        elif self.transactie_type == TRANSACTIE_TYPE_MOLLIE_RESTITUTIE:
+            bedrag = self.bedrag_refund
+        else:
+            bedrag = self.bedrag_te_ontvangen
+        return "€ %s" % bedrag
 
     def __str__(self):
         """ Lever een tekstuele beschrijving voor de admin interface """

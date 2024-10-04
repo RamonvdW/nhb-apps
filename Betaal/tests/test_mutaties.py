@@ -6,6 +6,7 @@
 
 from django.conf import settings
 from django.test import TestCase, override_settings
+from Betaal.definities import TRANSACTIE_TYPE_MOLLIE_RESTITUTIE, TRANSACTIE_TYPE_MOLLIE_PAYMENT
 from Betaal.models import BetaalMutatie, BetaalActief, BetaalTransactie, BetaalInstellingenVereniging
 from Betaal.mutaties import betaal_mutatieverzoek_start_ontvangst, betaal_mutatieverzoek_payment_status_changed
 from Bestelling.models import Bestelling, BestellingMutatie
@@ -437,6 +438,19 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
         self.assertTrue(str(betaal) != '')
 
         transactie = BetaalTransactie(payment_id="test", beschrijving="hoi", when=betaal.when)
+        self.assertTrue(str(transactie) != '')
+        self.assertTrue(transactie.bedrag_str() != '')
+
+        transactie.transactie_type = TRANSACTIE_TYPE_MOLLIE_RESTITUTIE
+        self.assertTrue(str(transactie) != '')
+        self.assertTrue(transactie.bedrag_str() != '')
+
+        transactie.transactie_type = TRANSACTIE_TYPE_MOLLIE_PAYMENT
+        self.assertTrue(str(transactie) != '')
+        self.assertTrue(transactie.bedrag_str() != '')
+
+        transactie.bedrag_terugbetaald = 1.0
+        transactie.bedrag_teruggevorderd = 1.0
         self.assertTrue(str(transactie) != '')
 
         instellingen = self.instellingen

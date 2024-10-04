@@ -7,7 +7,10 @@
 from django.conf import settings
 from django.test import TestCase
 from django.urls import reverse
+from Geo.models import Regio
+from Betaal.models import BetaalActief, BetaalInstellingenVereniging
 from TestHelpers.e2ehelpers import E2EHelpers
+from Vereniging.models import Vereniging
 
 
 # updaten met dit commando:
@@ -210,10 +213,30 @@ class TestBeheer(E2EHelpers, TestCase):
     def test_admin_specials(self):
         self.e2e_login_and_pass_otp(self.account_admin)
 
+        regio = Regio.objects.get(regio_nr=111)
+
+        ver = Vereniging(ver_nr=1234, naam='Test', regio=regio)
+        ver.save()
+
+        ontvanger = BetaalInstellingenVereniging(
+                        vereniging=ver,
+                        mollie_api_key='',
+                        akkoord_via_bond=True)
+        ontvanger.save()
+
+        actief = BetaalActief(
+                    ontvanger=ontvanger,
+                    payment_id='12345')
+        actief.save()
+
         urls = (
             # Betaal
             '/beheer/Betaal/betaalinstellingenvereniging/?Mollie=0',
             '/beheer/Betaal/betaalinstellingenvereniging/?Mollie=1',
+            '/beheer/Betaal/betaaltransactie/?heeft_restitutie=ja',
+            '/beheer/Betaal/betaaltransactie/?heeft_restitutie=ja&heeft_terugvordering=ja',
+            '/beheer/Betaal/betaalactief/?ontvanger=',
+            '/beheer/Betaal/betaalactief/?ontvanger=1234',
 
             # Bestelling
             '/beheer/Bestelling/bestellingmandje/?is_leeg=0',
