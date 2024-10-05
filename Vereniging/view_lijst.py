@@ -219,7 +219,7 @@ class DetailsView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu = rol_get_huidige(self.request)
-        return self.rol_nu in (Rollen.ROL_BB,
+        return self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_MWZ,
                                Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL,
                                Rollen.ROL_HWL, Rollen.ROL_WL, Rollen.ROL_SEC)
 
