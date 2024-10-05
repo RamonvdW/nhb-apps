@@ -173,7 +173,9 @@ class BetaalTransactie(models.Model):
             bedrag = self.bedrag_refund
         else:
             bedrag = self.bedrag_te_ontvangen
-        return "€ %s" % bedrag
+        msg = "€ %s" % bedrag
+        msg = msg.replace('.', ',')       # Dutch decimal separator
+        return msg
 
     def __str__(self):
         """ Lever een tekstuele beschrijving voor de admin interface """

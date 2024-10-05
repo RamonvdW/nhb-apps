@@ -19,7 +19,7 @@ EMAIL_TEMPLATE_HERINNERING_MANDJE = 'email_bestelling/herinnering-mandje.dtl'
 
 class Command(BaseCommand):
 
-    help = "Betaal mutaties verwerken"
+    help = "Stuur herinnering producten in mandje"
 
     def __init__(self, stdout=None, stderr=None, no_color=False, force_color=False):
         super().__init__(stdout, stderr, no_color, force_color)

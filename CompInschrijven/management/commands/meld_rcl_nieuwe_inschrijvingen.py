@@ -13,6 +13,7 @@ from datetime import timedelta
 
 
 class Command(BaseCommand):
+
     help = "Meld inschrijvingen van gisteren via een taak aan de RCL"
 
     def handle(self, *args, **options):

@@ -26,7 +26,7 @@ from Functie.models import Functie
 from Functie.rol import rol_get_huidige
 from Kalender.view_maand import maak_compacte_wanneer_str
 from decimal import Decimal
-
+from time import sleep
 
 TEMPLATE_TOON_BESTELLINGEN = 'bestelling/toon-bestellingen.dtl'
 TEMPLATE_BESTELLING_DETAILS = 'bestelling/toon-bestelling-details.dtl'
@@ -221,7 +221,7 @@ class ToonBestellingDetailsView(UserPassesTestMixin, TemplateView):
             # TODO: hier kan het een beetje dubbel op worden met restitutie. Overweeg verwijderen
             if transactie.transactie_type == TRANSACTIE_TYPE_MOLLIE_RESTITUTIE:
                 regels.append('Restitutie')
-                totaal_euro -= transactie.bedrag_refund
+                transactie.toon_euro = 0 - transactie.bedrag_refund
             else:
                 if transactie.klant_naam:
                     regels.append('Ontvangen van %s' % transactie.klant_naam)
@@ -501,6 +501,14 @@ class BestellingAfgerondView(UserPassesTestMixin, TemplateView):
             bestelling = Bestelling.objects.prefetch_related('transacties').get(bestel_nr=bestel_nr, account=account)
         except (KeyError, TypeError, ValueError, Bestelling.DoesNotExist):
             raise Http404('Niet gevonden')
+
+        # geef de achtergrondtaak een kans om een callback van de CPSP te verwerken
+        max_loops = 3
+        while max_loops > 0 and bestelling.status != BESTELLING_STATUS_AFGEROND:
+            max_loops -= 1
+            sleep(1)
+            bestelling = Bestelling.objects.prefetch_related('transacties').get(pk=bestelling.pk)
+        # while
 
         context['bestelling'] = bestelling
 

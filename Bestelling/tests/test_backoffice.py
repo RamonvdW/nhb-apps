@@ -9,6 +9,7 @@ from django.utils import timezone
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse
 from Bestelling.definities import BESTELLING_STATUS_BETALING_ACTIEF, BESTELLING_STATUS_AFGEROND
 from Bestelling.models import BestellingProduct, Bestelling, BestellingMutatie
+from Betaal.definities import TRANSACTIE_TYPE_MOLLIE_PAYMENT, TRANSACTIE_TYPE_MOLLIE_RESTITUTIE
 from Betaal.models import BetaalInstellingenVereniging, BetaalTransactie
 from Functie.models import Functie
 from Geo.models import Regio
@@ -190,7 +191,7 @@ class TestBestelBetaling(E2EHelpers, TestCase):
         transactie = BetaalTransactie(
                         when=timezone.now(),
                         payment_id='mollie42',
-                        is_restitutie=True,
+                        transactie_type=TRANSACTIE_TYPE_MOLLIE_RESTITUTIE,
                         beschrijving='Tikkie terug',
                         bedrag_terugbetaald=Decimal(1.0),
                         klant_naam='Test naam',
@@ -205,7 +206,7 @@ class TestBestelBetaling(E2EHelpers, TestCase):
         transactie = BetaalTransactie(
                         when=timezone.now(),
                         payment_id='mollie42',
-                        is_restitutie=False,
+                        transactie_type=TRANSACTIE_TYPE_MOLLIE_PAYMENT,
                         beschrijving='Ontvangen',
                         bedrag_beschikbaar=Decimal(1.0),
                         klant_naam='Test naam',

@@ -10,6 +10,7 @@ from Betaal.models import BetaalActief, BetaalTransactie, BetaalMutatie
 from datetime import timedelta
 from decimal import Decimal
 
+
 def betaal_opschonen(stdout):
     """ Database opschonen """
 

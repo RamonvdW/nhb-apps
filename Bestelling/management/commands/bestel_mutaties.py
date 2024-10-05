@@ -143,6 +143,7 @@ def _beschrijf_transacties(bestelling: Bestelling):
 
     for transactie in transacties:
         transactie.when_str = timezone.localtime(transactie.when).strftime('%Y-%m-%d om %H:%M')
+        transactie.is_restitutie = (transactie.transactie_type == TRANSACTIE_TYPE_MOLLIE_RESTITUTIE)
     # for
 
     return transacties
