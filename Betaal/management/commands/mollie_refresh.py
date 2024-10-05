@@ -15,7 +15,7 @@ from Bestelling.models import Bestelling
 from Betaal.definities import (BETAAL_REFUND_ID_MAXLENGTH, BETAAL_PAYMENT_STATUS_MAXLENGTH,
                                BETAAL_BESCHRIJVING_MAXLENGTH, BETAAL_PAYMENT_ID_MAXLENGTH,
                                BETAAL_KLANT_ACCOUNT_MAXLENGTH, BETAAL_KLANT_NAAM_MAXLENGTH,
-                               TRANSACTIE_TYPE_MOLLIE_PAYMENT)
+                               TRANSACTIE_TYPE_MOLLIE_PAYMENT, TRANSACTIE_TYPE_MOLLIE_RESTITUTIE)
 from Betaal.models import BetaalInstellingenVereniging, BetaalTransactie, BetaalActief
 from mollie.api.client import Client, RequestSetupError, RequestError
 from mollie.api.error import ResponseError, ResponseHandlingError
@@ -109,8 +109,8 @@ class Command(BaseCommand):
                 # als deze al bestaat, dan niet opnieuw aanmaken
                 _ = BetaalTransactie.objects.get_or_create(
                                     when=created_at,
+                                    transactie_type=TRANSACTIE_TYPE_MOLLIE_RESTITUTIE,
                                     payment_id=payment_id,
-                                    is_restitutie=True,
                                     beschrijving=beschrijving[:BETAAL_BESCHRIJVING_MAXLENGTH],
                                     klant_naam='',
                                     klant_account='',

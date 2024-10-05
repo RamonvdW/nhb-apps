@@ -323,7 +323,7 @@ class Command(BaseCommand):
                 _ = BetaalTransactie.objects.get_or_create(
                                     when=created_at,
                                     payment_id=payment_id,
-                                    is_restitutie=True,
+                                    transactie_type=TRANSACTIE_TYPE_MOLLIE_PAYMENT,
                                     beschrijving=beschrijving[:BETAAL_BESCHRIJVING_MAXLENGTH],
                                     klant_naam='',
                                     klant_account='',

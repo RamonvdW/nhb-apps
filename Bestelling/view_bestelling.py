@@ -503,10 +503,12 @@ class BestellingAfgerondView(UserPassesTestMixin, TemplateView):
             raise Http404('Niet gevonden')
 
         # geef de achtergrondtaak een kans om een callback van de CPSP te verwerken
-        max_loops = 3
+        max_loops = 6
+        if self.request.GET.get('snel', None):      # pragma: no branch
+            max_loops = 1
         while max_loops > 0 and bestelling.status != BESTELLING_STATUS_AFGEROND:
             max_loops -= 1
-            sleep(1)
+            sleep(0.5)
             bestelling = Bestelling.objects.prefetch_related('transacties').get(pk=bestelling.pk)
         # while
 

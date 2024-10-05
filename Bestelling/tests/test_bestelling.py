@@ -1289,7 +1289,7 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
 
         # wacht op betaling
         with self.assert_max_queries(20):
-            resp = self.client.get(url)
+            resp = self.client.get(url, {'snel': 1})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('bestelling/bestelling-afgerond.dtl', 'plein/site_layout.dtl'))
@@ -1316,7 +1316,7 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
 
         # nu is er genoeg ontvangen
         with self.assert_max_queries(20):
-            resp = self.client.get(url)
+            resp = self.client.get(url, {'snel': 1})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('bestelling/bestelling-afgerond.dtl', 'plein/site_layout.dtl'))
@@ -1334,7 +1334,7 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
         bestelling.transacties.add(transactie)
 
         with self.assert_max_queries(20):
-            resp = self.client.get(url)
+            resp = self.client.get(url, {'snel': 1})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('bestelling/bestelling-afgerond.dtl', 'plein/site_layout.dtl'))
@@ -1343,7 +1343,7 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
         bestelling.status = BESTELLING_STATUS_AFGEROND
         bestelling.save(update_fields=['status'])
         with self.assert_max_queries(20):
-            resp = self.client.get(url)
+            resp = self.client.get(url, {'snel': 1})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('bestelling/bestelling-afgerond.dtl', 'plein/site_layout.dtl'))
