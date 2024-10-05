@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2023 Ramon van der Winkel.
+                Copyright (c) 2020-2024 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -110,7 +110,7 @@
 
                                         <th><span class="show-on-small hide-on-med-and-up">Blazoen</span><span class="hide-on-small-only">Voorkeur<br>blazoen</span></th>
 
-                                        <th class="hide-on-small-only">Opmerking</th>
+                                        <th class="hide-on-small-only" style="width:40%">Opmerking</th>
                                     </tr>
                                 </thead>
 
