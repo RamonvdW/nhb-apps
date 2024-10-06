@@ -57,7 +57,8 @@ class Command(BaseCommand):
         for bestelling in Bestelling.objects.exclude(betaal_mutatie=None).select_related('betaal_mutatie'):
             payment_id = bestelling.betaal_mutatie.payment_id
             transacties = BetaalTransactie.objects.filter(payment_id=payment_id)
-            bestelling.transacties.set(transacties)
+            # belangrijk dat we add gebruiken ipv set(), om handmatige records niet te verliezen!
+            bestelling.transacties.add(*transacties)        # django filters out duplicates
         # for
 
     def _get_all_refunds(self):
