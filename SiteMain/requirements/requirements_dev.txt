@@ -106,7 +106,7 @@ protobuf==5.28.2
     #   google-api-core
     #   googleapis-common-protos
     #   proto-plus
-psycopg==3.2.2
+psycopg==3.2.3
     # via -r requirements.txt
 pyasn1==0.6.1
     # via
@@ -123,15 +123,11 @@ pyparsing==3.1.4
     # via
     #   -r requirements.txt
     #   httplib2
-pypdf==5.0.0
+pypdf==5.0.1
     # via -r requirements.txt
-pypng==0.20220715.0
-    # via
-    #   -r requirements.txt
-    #   qrcode
 pyyaml==6.0.2
     # via html5validator
-qrcode==7.4.2
+qrcode==8.0
     # via -r requirements.txt
 requests==2.32.3
     # via
@@ -155,13 +151,12 @@ sqlparse==0.5.1
     #   -r requirements.txt
     #   django
     #   django-debug-toolbar
-tomli==2.0.1
+tomli==2.0.2
     # via pip-licenses
 typing-extensions==4.12.2
     # via
     #   -r requirements.txt
     #   psycopg
-    #   qrcode
 uritemplate==4.1.1
     # via
     #   -r requirements.txt
