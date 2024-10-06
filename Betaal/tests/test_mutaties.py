@@ -47,15 +47,12 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
 
         instellingen = BetaalInstellingenVereniging(
                                 vereniging=ver,
-                                mollie_api_key='test_1234')
+                                mollie_api_key='test_fixed')
         instellingen.save()
         self.instellingen = instellingen
 
     def _run_achtergrondtaak(self, debug=False, seconden=1):
-        f1, f2 = self.verwerk_betaal_mutaties(seconden)
-        if debug:           # pragma: no cover
-            print('f1: %s' % f1.getvalue())
-            print('f2: %s' % f2.getvalue())
+        f1, f2 = self.verwerk_betaal_mutaties(seconden, show_all=debug)
         # controleer op onverwachte fouten
         # let op: [ERROR] komt voor in normaal gebruik
         err_msg = f1.getvalue()
@@ -63,13 +60,12 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
             self.fail(msg='Onverwachte fout van betaal_mutaties:\n' + err_msg)
         return f1, f2
 
-    @staticmethod
-    def _prep_mollie_websim(test_code):
+    def _prep_mollie_websim(self, test_code):
         beschrijving = 'Test betaling %s' % test_code
         bedrag_euro_str = '42.99'
 
         mollie_client = Client(api_endpoint=settings.BETAAL_API_URL)
-        mollie_client.set_api_key('test_1234prep')
+        mollie_client.set_api_key(self.instellingen.mollie_api_key)
         mollie_webhook_url = url_betaling_gedaan = settings.SITE_URL + '/plein/'
 
         data = {

@@ -312,7 +312,7 @@ class Command(BaseCommand):
         try:
             instellingen = (BetaalInstellingenVereniging.objects.get(vereniging__ver_nr=ver_nr))
         except BetaalInstellingenVereniging.DoesNotExist:
-            self.stderr.write('[ERROR] Kan BetaalInstellingenVereniging voor vereniging %s niet vinden')
+            self.stderr.write('[ERROR] Kan BetaalInstellingenVereniging voor vereniging %s niet vinden' % ver_nr)
             return
 
         try:
@@ -326,7 +326,8 @@ class Command(BaseCommand):
             self._get_all_refunds()
             self._refresh_payments(ver_nr)
             self._koppel_bestel_transacties()
-        except (OperationalError, IntegrityError) as exc:  # pragma: no cover
+
+        except (OperationalError, IntegrityError) as exc:       # pragma: no cover
             # OperationalError treed op bij system shutdown, als database gesloten wordt
             _, _, tb = sys.exc_info()
             lst = traceback.format_tb(tb)
@@ -334,14 +335,13 @@ class Command(BaseCommand):
             self.stderr.write('Traceback:')
             self.stderr.write(''.join(lst))
 
-        except KeyboardInterrupt:                       # pragma: no cover
+        except KeyboardInterrupt:                               # pragma: no cover
             pass
 
-        except Exception as exc:
+        except Exception as exc:                                # pragma: no cover
             # schrijf in de output
             tups = sys.exc_info()
             lst = traceback.format_tb(tups[2])
-
             self.stderr.write('[ERROR] Onverwachte fout tijdens mollie_refunds_ophalen: ' + str(exc))
             self.stderr.write('Traceback:')
             self.stderr.write(''.join(lst))
