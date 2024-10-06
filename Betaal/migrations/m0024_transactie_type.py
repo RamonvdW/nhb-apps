@@ -17,6 +17,9 @@ def set_transactie_type(apps, _):
     transactie_klas.objects.filter(is_restitutie=True).update(transactie_type=TRANSACTIE_TYPE_MOLLIE_RESTITUTIE)
     transactie_klas.objects.filter(is_restitutie=False, is_handmatig=False).update(transactie_type=TRANSACTIE_TYPE_MOLLIE_PAYMENT)
 
+    # oud gebruik van veld bedrag_euro_klant wissen
+    transactie_klas.objects.exclude(is_handmatig=True).update(bedrag_handmatig=0.0)
+
 
 class Migration(migrations.Migration):
 
@@ -34,12 +37,12 @@ class Migration(migrations.Migration):
             name='transactie_type',
             field=models.CharField(default='HA', max_length=2),
         ),
-        migrations.RunPython(set_transactie_type),
         migrations.RenameField(
             model_name='betaaltransactie',
             old_name='bedrag_euro_klant',
             new_name='bedrag_handmatig',
         ),
+        migrations.RunPython(set_transactie_type),
         migrations.RemoveField(
             model_name='betaaltransactie',
             name='is_handmatig',
