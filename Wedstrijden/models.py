@@ -25,23 +25,6 @@ from Wedstrijden.definities import (WEDSTRIJD_STATUS_CHOICES, WEDSTRIJD_STATUS_O
 from decimal import Decimal
 
 
-# class WedstrijdDeeluitslag(models.Model):
-#     """ Deel van de uitslag van een wedstrijd """
-#
-#     # na verwijderen wordt deze vlag gezet, voor opruimen door achtergrondtaak
-#     buiten_gebruik = models.BooleanField(default=False)
-#
-#     # naam van het uitslag-bestand (zonder pad)
-#     bestandsnaam = models.CharField(max_length=100, default='', blank=True)
-#
-#     # wanneer toegevoegd?
-#     toegevoegd_op = models.DateTimeField(auto_now_add=True)
-#
-#     class Meta:
-#         verbose_name = "Wedstrijd deeluitslag"
-#         verbose_name_plural = "Wedstrijd deeluitslagen"
-
-
 class WedstrijdSessie(models.Model):
     """ Een sessie van een wedstrijd """
 
@@ -184,12 +167,11 @@ class Wedstrijd(models.Model):
     # moeten kwalificatie-scores opgegeven worden voor deze wedstrijd?
     eis_kwalificatie_scores = models.BooleanField(default=False)
 
-    # link naar de uitslag
-    url_uitslag = models.CharField(max_length=128, default='')
-
-    # de losse uitslagen van deze wedstrijd
-    # deeluitslagen = models.ManyToManyField(WedstrijdDeeluitslag,
-    #                                        blank=True)        # mag leeg zijn
+    # links naar de uitslagen
+    url_uitslag_1 = models.CharField(max_length=128, default='')
+    url_uitslag_2 = models.CharField(max_length=128, default='')
+    url_uitslag_3 = models.CharField(max_length=128, default='')
+    url_uitslag_4 = models.CharField(max_length=128, default='')
 
     def bepaal_prijs_voor_sporter(self, sporter):
         leeftijd = sporter.bereken_wedstrijdleeftijd(self.datum_begin, self.organisatie)

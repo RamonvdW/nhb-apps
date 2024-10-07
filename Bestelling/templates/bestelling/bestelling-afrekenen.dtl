@@ -161,6 +161,6 @@
         });
     </script>
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="bestel-bestelling-afrekenen" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="bestelling-bestelling-afrekenen" %}
 
 {% endblock %}

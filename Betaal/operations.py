@@ -5,8 +5,10 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.utils import timezone
-from datetime import timedelta
+from Betaal.definities import TRANSACTIE_TYPE_HANDMATIG
 from Betaal.models import BetaalActief, BetaalTransactie, BetaalMutatie
+from datetime import timedelta
+from decimal import Decimal
 
 
 def betaal_opschonen(stdout):
@@ -47,6 +49,19 @@ def betaal_opschonen(stdout):
         if count > 0:
             stdout.write('[INFO] Verwijder %s oude betaal-transactie records' % count)
             objs.delete()
+
+
+def maak_transactie_handmatige_overboeking(bedrag_euro: Decimal):
+    now = timezone.now()
+
+    transactie = BetaalTransactie(
+                    when=now,
+                    transactie_type=TRANSACTIE_TYPE_HANDMATIG,
+                    beschrijving='Overboeking ontvangen',
+                    bedrag_handmatig=bedrag_euro)
+    transactie.save()
+
+    return transactie
 
 
 # end of file

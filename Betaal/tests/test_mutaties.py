@@ -6,6 +6,7 @@
 
 from django.conf import settings
 from django.test import TestCase, override_settings
+from Betaal.definities import TRANSACTIE_TYPE_MOLLIE_RESTITUTIE, TRANSACTIE_TYPE_MOLLIE_PAYMENT
 from Betaal.models import BetaalMutatie, BetaalActief, BetaalTransactie, BetaalInstellingenVereniging
 from Betaal.mutaties import betaal_mutatieverzoek_start_ontvangst, betaal_mutatieverzoek_payment_status_changed
 from Bestelling.models import Bestelling, BestellingMutatie
@@ -46,25 +47,25 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
 
         instellingen = BetaalInstellingenVereniging(
                                 vereniging=ver,
-                                mollie_api_key='test_1234')
+                                mollie_api_key='test_fixed')
         instellingen.save()
         self.instellingen = instellingen
 
     def _run_achtergrondtaak(self, debug=False, seconden=1):
-        f1, f2 = self.verwerk_betaal_mutaties(seconden)
-        if debug:           # pragma: no cover
-            print('f1: %s' % f1.getvalue())
-            print('f2: %s' % f2.getvalue())
-
+        f1, f2 = self.verwerk_betaal_mutaties(seconden, show_all=debug)
+        # controleer op onverwachte fouten
+        # let op: [ERROR] komt voor in normaal gebruik
+        err_msg = f1.getvalue()
+        if 'Traceback:' in err_msg:         # pragma: no cover
+            self.fail(msg='Onverwachte fout van betaal_mutaties:\n' + err_msg)
         return f1, f2
 
-    @staticmethod
-    def _prep_mollie_websim(test_code):
+    def _prep_mollie_websim(self, test_code):
         beschrijving = 'Test betaling %s' % test_code
         bedrag_euro_str = '42.99'
 
         mollie_client = Client(api_endpoint=settings.BETAAL_API_URL)
-        mollie_client.set_api_key('test_1234prep')
+        mollie_client.set_api_key(self.instellingen.mollie_api_key)
         mollie_webhook_url = url_betaling_gedaan = settings.SITE_URL + '/plein/'
 
         data = {
@@ -212,10 +213,7 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
 
         f1, f2 = self._run_achtergrondtaak()
         # print('\nf1:', f1.getvalue(), '\nf2:', f2.getvalue())
-        self.assertTrue('[ERROR] Onverwachte fout tijdens betaal_mutaties:' in f1.getvalue())
-        self.assertTrue('value too long for type character varying' in f1.getvalue())
-
-        # het is niet meer mogelijk om database transacties te doen totdat deze testcase eindigt
+        self.assertTrue('[ERROR] Checkout URL is te lang en wordt afgekapt op 400 tekens' in f1.getvalue())
 
     def test_max_pogingen(self):
         bestelling = Bestelling(
@@ -436,6 +434,19 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
         self.assertTrue(str(betaal) != '')
 
         transactie = BetaalTransactie(payment_id="test", beschrijving="hoi", when=betaal.when)
+        self.assertTrue(str(transactie) != '')
+        self.assertTrue(transactie.bedrag_str() != '')
+
+        transactie.transactie_type = TRANSACTIE_TYPE_MOLLIE_RESTITUTIE
+        self.assertTrue(str(transactie) != '')
+        self.assertTrue(transactie.bedrag_str() != '')
+
+        transactie.transactie_type = TRANSACTIE_TYPE_MOLLIE_PAYMENT
+        self.assertTrue(str(transactie) != '')
+        self.assertTrue(transactie.bedrag_str() != '')
+
+        transactie.bedrag_terugbetaald = 1.0
+        transactie.bedrag_teruggevorderd = 1.0
         self.assertTrue(str(transactie) != '')
 
         instellingen = self.instellingen

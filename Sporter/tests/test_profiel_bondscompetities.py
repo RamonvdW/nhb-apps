@@ -4,7 +4,7 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from BasisTypen.models import BoogType
 from Competitie.definities import DEELNAME_JA, DEELNAME_NEE, DEELNAME_ONBEKEND, INSCHRIJF_METHODE_1, DEEL_BK
 from Competitie.models import (Regiocompetitie, RegiocompetitieSporterBoog, Kampioenschap, KampioenschapSporterBoog,
@@ -200,8 +200,8 @@ class TestSporterProfielBondscompetities(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('sporter/profiel.dtl', 'plein/site_layout.dtl'))
         self.assertNotContains(resp, 'De volgende competities worden georganiseerd')
 
-    def test_case_02(self):
-        case_nr = 2
+    def test_case_02a(self):
+        case_nr = "2a"
         case_tekst = 'niet ingeschreven, kan inschrijven op beide competities met recurve boog'
 
         self.e2e_login(self.account_normaal)
@@ -220,6 +220,29 @@ class TestSporterProfielBondscompetities(E2EHelpers, TestCase):
         # print('urls:', urls)
         urls = [url for url in urls if '/bondscompetities/deelnemen/aanmelden/' in url]
         self.assertEqual(len(urls), 2)
+
+    def test_case_02b(self):
+        case_nr = "2b"
+        case_tekst = 'niet ingeschreven, geen boog ingesteld'
+
+        self.e2e_login(self.account_normaal)
+        self._prep_voorkeuren(self.sporter1)
+        self.sporterboog.voor_wedstrijd = False
+        self.sporterboog.save(update_fields=['voor_wedstrijd'])
+        self._competitie_aanmaken()                 # zet fase C, dus openbaar en klaar voor inschrijving
+
+        resp = self.client.get(self.url_profiel_test % case_nr, data={"tekst": case_tekst})
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.e2e_open_in_browser(resp, self.show_in_browser)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('sporter/profiel.dtl', 'plein/site_layout.dtl'))
+        self.assertContains(resp, 'De volgende competities worden georganiseerd')
+        self.assertContains(resp, 'De inschrijving is open tot ')
+        self.assertContains(resp, 'Pas je persoonlijke voorkeuren aan')
+        urls = self.extract_all_urls(resp, skip_menu=True)
+        # print('urls:', urls)
+        urls = [url for url in urls if '/bondscompetities/deelnemen/aanmelden/' in url]
+        self.assertEqual(len(urls), 0)
 
     def _regio_inschrijven(self, do_18=True, do_25=True, wil_rk_18=True, wil_rk_25=True):
         if do_18:
@@ -293,7 +316,8 @@ class TestSporterProfielBondscompetities(E2EHelpers, TestCase):
 
         return kamp_rk
 
-    def _stroom_door_naar_bk(self, kamp_rk: KampioenschapSporterBoog) -> KampioenschapSporterBoog:
+    @staticmethod
+    def _stroom_door_naar_bk(kamp_rk: KampioenschapSporterBoog) -> KampioenschapSporterBoog:
 
         kampioenschap_bk = Kampioenschap.objects.get(competitie=kamp_rk.kampioenschap.competitie,
                                                      deel=DEEL_BK)
@@ -632,9 +656,9 @@ class TestSporterProfielBondscompetities(E2EHelpers, TestCase):
         self.assertContains(resp, 'Je hebt je gekwalificeerd voor het BK')
         self.assertContains(resp, 'Laat weten of je mee kan doen')
         urls = self.extract_all_urls(resp, skip_menu=True)
-        print('urls:', urls)
-        urls2 = [url for url in urls if '/bondscompetities/rk/wijzig-status-bk-deelname/' in url]
-        #self.assertEqual(len(urls2), 2)
+        # print('urls:', urls)
+        urls2 = [url for url in urls if '/bondscompetities/bk/wijzig-status-bk-deelname/' in url]
+        self.assertEqual(len(urls2), 2)     # TODO: waarom 2?
 
     def test_case_11b(self):
         case_nr = "11b"
@@ -659,9 +683,9 @@ class TestSporterProfielBondscompetities(E2EHelpers, TestCase):
         self.assertContains(resp, 'Je hebt je gekwalificeerd voor het BK')
         self.assertContains(resp, 'Je bent afgemeld')
         urls = self.extract_all_urls(resp, skip_menu=True)
-        print('urls:', urls)
-        urls2 = [url for url in urls if '/bondscompetities/rk/wijzig-status-bk-deelname/' in url]
-        # self.assertEqual(len(urls2), 1)
+        # print('urls:', urls)
+        urls2 = [url for url in urls if '/bondscompetities/bk/wijzig-status-bk-deelname/' in url]
+        self.assertEqual(len(urls2), 1)
 
     def test_case_11c(self):
         case_nr = "11c"
@@ -689,9 +713,15 @@ class TestSporterProfielBondscompetities(E2EHelpers, TestCase):
         self.assertContains(resp, 'Je hebt je gekwalificeerd voor het BK')
         self.assertContains(resp, 'Op de BK lijst sta je op plaats 12')
         urls = self.extract_all_urls(resp, skip_menu=True)
-        print('urls:', urls)
-        urls2 = [url for url in urls if '/bondscompetities/rk/wijzig-status-rk-deelname/' in url]
-        # self.assertEqual(len(urls2), 1)
+        # print('urls:', urls)
+        urls2 = [url for url in urls if '/bondscompetities/bk/wijzig-status-bk-deelname/' in url]
+        self.assertEqual(len(urls2), 1)
 
+    def test_testserver(self):
+        with override_settings(IS_TEST_SERVER=False):
+            case_nr = 0
+            case_tekst = 'test server'
+            resp = self.client.get(self.url_profiel_test % case_nr, data={"tekst": case_tekst})
+            self.assertEqual(resp.status_code, 410)
 
 # end of file

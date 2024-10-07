@@ -47,13 +47,13 @@ class TestSporterProfiel(E2EHelpers, TestCase):
     url_profiel_test = '/sporter/profiel-test/%s/'                                 # test case nummer
 
     testdata = None
-    show_in_browser = False
+    _show_in_browser = False
 
     @classmethod
     def setUpTestData(cls):
         cls.testdata = TestData()
         cls.testdata.maak_accounts_admin_en_bb()
-        cls.show_in_browser = cls.is_small_test_run()
+        cls._show_in_browser = cls.is_small_test_run()
 
     def setUp(self):
         """ initialisatie van de test case """

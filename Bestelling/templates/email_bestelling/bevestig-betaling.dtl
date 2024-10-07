@@ -59,9 +59,9 @@
         |Betaling:
 
         {% if transactie.is_restitutie %}
-            |    Restitutie: € {{ transactie.bedrag_euro_klant }}
+            |    Restitutie: {{ transactie.bedrag_str }}
         {% else %}
-            |    Ontvangen: € {{ transactie.bedrag_euro_klant }}
+            |    Ontvangen: {{ transactie.bedrag_str }}
             {% if transactie.klant_naam %}
                 <!-- geen klant naam bij overschrijving -->
                 |    van {{ transactie.klant_naam }}
@@ -183,7 +183,7 @@
                     <td style="vertical-align:top">Restitutie:</td>
                     <td>
                         <span>op {{ transactie.when_str }}</span><br>
-                        <span>{{ transactie.beschrijving }}</span>
+                        <span>Beschrijving: {{ transactie.beschrijving }}</span>
                     </td>
                 {% else %}
                     <td style="vertical-align:top">Ontvangen:</td>
@@ -196,7 +196,7 @@
                         <span>Beschrijving: {{ transactie.beschrijving }}</span>
                     </td>
                 {% endif %}
-                <td style="text-align:right; vertical-align:top">&euro;&nbsp;{{ transactie.bedrag_euro_klant }}</td>
+                <td style="text-align:right; vertical-align:top">{{ transactie.bedrag_str }}</td>
             </tr>
         {% endfor %}
     </table>

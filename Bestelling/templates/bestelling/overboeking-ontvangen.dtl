@@ -107,6 +107,44 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
+            <h4>Nog niet betaalde bestellingen</h4>
+            <p>(afgelopen 3 tot 90 dagen)</p>
+            <p>Controleer jullie bankrekening voor handmatige overschrijvingen</p>
+        </div>
+    </div>
+
+
+    <!-- blauwe balk met informatie in een tabel -->
+    <div class="row-sv-blauw">
+        <div class="col s12">
+            <table class="sv-kader">
+                <thead>
+                    <tr>
+                        <th>Besteldatum</th>
+                        <th>Bestelnummer</th>
+                        <th>Bedrag</th>
+                    </tr>
+                </thead>
+
+                {% for bestelling in verwacht %}
+                    <tr>
+                        <td>{{ bestelling.aangemaakt }}</td>
+                        <td>{{ bestelling.mh_bestel_nr }}</td>
+                        <td>&euro;&nbsp;{{ bestelling.totaal_euro }}</td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="3" class="center"><i>Niets gevonden</i></td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+
+
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
             <h4>Geregistreerde overboekingen</h4>
         </div>
     </div>
@@ -124,11 +162,11 @@
                     </tr>
                 </thead>
 
-                {% for obj in overboekingen %}
+                {% for transactie in overboekingen %}
                     <tr>
-                        <td>{{ obj.when }}</td>
-                        <td>{{ obj.bestelling.mh_bestel_nr }}</td>
-                        <td>&euro; &nbsp;{{ obj.bedrag_euro_klant }}</td>
+                        <td>{{ transactie.when }}</td>
+                        <td>{{ transactie.bestelling.mh_bestel_nr }}</td>
+                        <td>{{ transactie.bedrag_str }}</td>
                     </tr>
                 {% empty %}
                     <tr>
@@ -154,6 +192,6 @@
     {% endif %}
 
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="bestel-overboeking-ontvangen" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="bestelling-overboeking-ontvangen" %}
 
 {% endblock %}

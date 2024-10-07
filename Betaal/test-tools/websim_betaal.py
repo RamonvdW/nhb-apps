@@ -423,7 +423,10 @@ box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.12),
 
         resp['createAt'] = self._get_timestamp()
         resp['expiresAt'] = self._get_timestamp(minutes=15)
-        resp['amount'] = {'value': value, 'currency': currency}
+        resp['amount'] = {
+                'value': value,
+                'currency': currency,
+        }
         resp['description'] = description
         resp['method'] = 'ideal'
         resp['metadata'] = None
@@ -434,7 +437,6 @@ box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.12),
 
         payments.save()
 
-        resp['method'] = 'ideal'
         self._write_response(200, resp)
 
     def _change_payment_status(self, payment, gekozen_status):
@@ -456,21 +458,26 @@ box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.12),
                 del payment['isCancelable']
                 del payment['_links']['checkout']
             payment['paidAt'] = self._get_timestamp()
-            payment['amountRefunded'] = refund = dict()
-            refund['currency'] = payment['amount']['currency']
-            refund['value'] = '0.00'
-            payment['amountRemaining'] = remaining = dict()             # for refund
-            remaining['currency'] = payment['amount']['currency']
-            remaining['value'] = payment['amount']['value']
+            payment['amountRefunded'] = {
+                'currency': payment['amount']['currency'],
+                'value': '0.00',
+            }
+            payment['amountRemaining'] = {
+                'currency': payment['amount']['currency'],
+                'value': payment['amount']['value'],
+            }
             payment['locale'] = 'en_NL'
             payment['countryCode'] = 'NL'
-            payment['details'] = details = dict()
             if payment['method'] == 'ideal':
-                details['consumerName'] = 'T. TEST'
-                details['consumerAccount'] = 'NL72RABO0110438885'       # noqa
-                details['consumerBic'] = 'RABONL2U'                     # noqa
-            payment['settlementAmount'] = {'currency': payment['amount']['currency'],
-                                           'value': '%.2f' % value_settled}
+                payment['details'] = {
+                    'consumerName': 'T. TEST',
+                    'consumerAccount': 'NL72RABO0110438885',      # noqa
+                    'consumerBic': 'RABONL2U',                    # noqa
+                }
+            payment['settlementAmount'] = {
+                'currency': payment['amount']['currency'],
+                'value': '%.2f' % value_settled,
+            }
 
         elif payment['status'] == 'open' and gekozen_status == 'cancel':
             payment['status'] = 'canceled'
@@ -590,6 +597,7 @@ class MyServerThread(threading.Thread):
 
     @staticmethod
     def dummy():
+        # this method is used as function for service_bind and server_close for the HTTP daemon
         return None
 
     def run(self):

@@ -57,7 +57,7 @@ protobuf==5.28.2
     #   google-api-core
     #   googleapis-common-protos
     #   proto-plus
-psycopg==3.2.2
+psycopg==3.2.3
     # via -r requirements.in
 pyasn1==0.6.1
     # via
@@ -69,11 +69,9 @@ pyotp==2.9.0
     # via -r requirements.in
 pyparsing==3.1.4
     # via httplib2
-pypdf==5.0.0
+pypdf==5.0.1
     # via -r requirements.in
-pypng==0.20220715.0
-    # via qrcode
-qrcode==7.4.2
+qrcode==8.0
     # via -r requirements.in
 requests==2.32.3
     # via
@@ -88,9 +86,7 @@ rsa==4.9
 sqlparse==0.5.1
     # via django
 typing-extensions==4.12.2
-    # via
-    #   psycopg
-    #   qrcode
+    # via psycopg
 uritemplate==4.1.1
     # via google-api-python-client
 urllib3==2.2.3

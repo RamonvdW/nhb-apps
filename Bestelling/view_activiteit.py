@@ -246,7 +246,7 @@ class BestelActiviteitView(UserPassesTestMixin, TemplateView):
 
             bestelling.trans_list = list(bestelling
                                          .transacties
-                                         .all())
+                                         .order_by('when'))     # oudste eerst
 
             # for transactie in bestelling.trans_list:
             #     pass

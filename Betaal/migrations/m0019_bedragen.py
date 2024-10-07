@@ -9,7 +9,7 @@ from django.db import migrations, models
 
 def bedragen_over_nemen(apps, _):
     transactie_klas = apps.get_model('Betaal', 'BetaalTransactie')
-    for transactie in transactie_klas.objects.exclude(is_restitutie=True):
+    for transactie in transactie_klas.objects.exclude(is_restitutie=True):      # pragma: no cover
         transactie.bedrag_te_ontvangen = transactie.bedrag_euro_klant
         transactie.save(update_fields=['bedrag_te_ontvangen'])
     # for

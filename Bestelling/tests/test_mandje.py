@@ -511,5 +511,4 @@ class TestBestellingMandje(E2EHelpers, TestCase):
         urls = self.extract_all_urls(resp, skip_menu=True)
         self.assertFalse(self.url_kies_transport in urls)
 
-
 # end of file

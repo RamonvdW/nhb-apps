@@ -58,7 +58,7 @@
                         </tr>
                     {% empty %}
                         <tr data-tablefilter="stop">
-                            <td colspan="5"><i>Er zijn nog geen evenementen</i></td>
+                            <td colspan="4"><i>Er zijn nog geen evenementen</i></td>
                         </tr>
                     {% endfor %}
 

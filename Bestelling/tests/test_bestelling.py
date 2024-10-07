@@ -19,6 +19,7 @@ from Bestelling.operations.mutaties import (bestel_mutatieverzoek_inschrijven_we
                                             bestel_mutatieverzoek_afmelden_evenement,
                                             bestel_mutatieverzoek_betaling_afgerond,
                                             bestel_mutatieverzoek_afmelden_wedstrijd)
+from Betaal.definities import TRANSACTIE_TYPE_MOLLIE_PAYMENT, TRANSACTIE_TYPE_MOLLIE_RESTITUTIE
 from Betaal.models import BetaalInstellingenVereniging, BetaalActief, BetaalTransactie, BetaalMutatie
 from Evenement.definities import (EVENEMENT_STATUS_GEACCEPTEERD,
                                   EVENEMENT_INSCHRIJVING_STATUS_RESERVERING_MANDJE,
@@ -297,7 +298,7 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
 
         self.assertEqual(1, MailQueue.objects.count())
         mail = MailQueue.objects.first()
-        self.assert_email_html_ok(mail)
+        self.assert_email_html_ok(mail, 'email_bestelling/bevestig-bestelling.dtl')
         self.assert_consistent_email_html_text(mail, ignore=('>Bedrag:', '>Korting:'))
         self.assertTrue('Verzendkosten' in mail.mail_text)
 
@@ -379,7 +380,7 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
 
         self.assertEqual(1, MailQueue.objects.count())
         mail = MailQueue.objects.first()
-        self.assert_email_html_ok(mail)
+        self.assert_email_html_ok(mail, 'email_bestelling/bevestig-bestelling.dtl')
         self.assert_consistent_email_html_text(mail, ignore=('>Bedrag:', '>Korting:'))
         self.assertTrue('Verzendkosten' in mail.mail_text)
 
@@ -459,6 +460,7 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
 
         # bestel wedstrijddeelname met korting
         bestel_mutatieverzoek_inschrijven_wedstrijd(self.account_admin, self.inschrijving, snel=True)
+        bestel_mutatieverzoek_inschrijven_evenement(self.account_admin, self.evenement_inschrijving, snel=True)
         # korting moet automatisch toegepast worden
         self.verwerk_bestel_mutaties()
 
@@ -487,19 +489,18 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
         betaalactief.save()
 
         BetaalTransactie(
+                transactie_type=TRANSACTIE_TYPE_MOLLIE_PAYMENT,
                 payment_id='testje',
                 when=betaalactief.when,
                 beschrijving="Test beschrijving",
-                is_restitutie=False,
-                bedrag_euro_klant=Decimal('10'),
-                bedrag_euro_boeking=Decimal('9.75'),
+                bedrag_beschikbaar=Decimal('20.80'),
                 klant_naam="Pietje Pijlsnel",
                 klant_account="1234.5678.9012.3456").save()
 
         # zonder BetaalActief gekoppeld aan de Bestelling werkt het niet (mutatie verzoek wordt niet eens verstuurd)
-        self.assertEqual(2, BestellingMutatie.objects.count())
+        self.assertEqual(3, BestellingMutatie.objects.count())
         bestel_mutatieverzoek_betaling_afgerond(betaalactief, gelukt=True, snel=True)
-        self.assertEqual(2, BestellingMutatie.objects.count())
+        self.assertEqual(3, BestellingMutatie.objects.count())
         self.assertEqual(MailQueue.objects.count(), 1)      # bevestiging van de bestelling
         MailQueue.objects.all().delete()
 
@@ -510,7 +511,7 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
 
         # betaling mislukt
         bestel_mutatieverzoek_betaling_afgerond(betaalactief, gelukt=False, snel=True)
-        self.assertEqual(3, BestellingMutatie.objects.count())
+        self.assertEqual(4, BestellingMutatie.objects.count())
         f1, f2 = self.verwerk_bestel_mutaties()
         self.assertTrue('Betaling niet gelukt voor bestelling' in f2.getvalue())
         self.assertEqual(MailQueue.objects.count(), 0)
@@ -532,9 +533,9 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
 
         # dubbel verzoek heeft geen effect
         bestel_mutatieverzoek_betaling_afgerond(betaalactief, gelukt=True, snel=True)
-        self.assertEqual(4, BestellingMutatie.objects.count())
+        self.assertEqual(5, BestellingMutatie.objects.count())
         bestel_mutatieverzoek_betaling_afgerond(betaalactief, gelukt=True, snel=True)
-        self.assertEqual(4, BestellingMutatie.objects.count())
+        self.assertEqual(5, BestellingMutatie.objects.count())
         f1, f2 = self.verwerk_bestel_mutaties()
         # print('\nf1:', f1.getvalue(), '\nf2:', f2.getvalue())
         self.assertTrue('[INFO] Betaling is gelukt voor bestelling' in f2.getvalue())
@@ -542,7 +543,7 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
         # er moet nu een mail in de MailQueue staan
         self.assertEqual(MailQueue.objects.count(), 1)
         mail = MailQueue.objects.first()
-        self.assert_email_html_ok(mail)
+        self.assert_email_html_ok(mail, 'email_bestelling/bevestig-betaling.dtl')
         self.assert_consistent_email_html_text(mail, ignore=('>Bedrag:', '>Korting:'))
 
         bestelling = Bestelling.objects.get(pk=bestelling.pk)
@@ -658,12 +659,11 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
         betaalactief.save()
 
         BetaalTransactie(
+                transactie_type=TRANSACTIE_TYPE_MOLLIE_PAYMENT,
                 payment_id='testje',
                 when=betaalactief.when,
                 beschrijving="Test beschrijving",
-                is_restitutie=False,
-                bedrag_euro_klant=Decimal('10'),
-                bedrag_euro_boeking=Decimal('9.75'),
+                bedrag_beschikbaar=Decimal('10'),
                 klant_naam="Pietje Pijlsnel",
                 klant_account="1234.5678.9012.3456").save()
 
@@ -739,12 +739,11 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
 
         # deze betaling is 1 cent te weinig
         BetaalTransactie(
+                transactie_type=TRANSACTIE_TYPE_MOLLIE_PAYMENT,
                 payment_id='testje',
                 when=betaalactief.when,
                 beschrijving="Test beschrijving",
-                is_restitutie=False,
-                bedrag_euro_klant=Decimal('9.99'),
-                bedrag_euro_boeking=Decimal('9.75'),
+                bedrag_beschikbaar=Decimal('9.99'),
                 klant_naam="Pietje Pijlsnel",
                 klant_account="1234.5678.9012.3456").save()
 
@@ -795,32 +794,29 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
 
         # maak een transactie geschiedenis aan met een restitutie, maar toch genoeg betaald
         BetaalTransactie(
+                transactie_type=TRANSACTIE_TYPE_MOLLIE_PAYMENT,
                 payment_id='testje',
                 when=betaalactief.when,
                 beschrijving="Test beschrijving 1",
-                is_restitutie=False,
-                bedrag_euro_klant=Decimal('5'),
-                bedrag_euro_boeking=Decimal('4.75'),
+                bedrag_beschikbaar=Decimal('5'),
                 klant_naam="Pietje Pijlsnel",
                 klant_account="1234.5678.9012.3456").save()
 
         BetaalTransactie(
+                transactie_type=TRANSACTIE_TYPE_MOLLIE_RESTITUTIE,
                 payment_id='testje',
                 when=betaalactief.when,
                 beschrijving="Test beschrijving 2",
-                is_restitutie=True,
-                bedrag_euro_klant=Decimal('5'),
-                bedrag_euro_boeking=Decimal('5.25'),
+                bedrag_refund=Decimal('5'),
                 klant_naam="Pietje Pijlsnel",
                 klant_account="1234.5678.9012.3456").save()
 
         BetaalTransactie(
+                transactie_type=TRANSACTIE_TYPE_MOLLIE_PAYMENT,
                 payment_id='testje',
                 when=betaalactief.when,
                 beschrijving="Test beschrijving 3",
-                is_restitutie=False,
-                bedrag_euro_klant=Decimal('10'),
-                bedrag_euro_boeking=Decimal('9.75'),
+                bedrag_beschikbaar=Decimal('10'),
                 klant_naam="Pietje Pijlsnel",
                 klant_account="1234.5678.9012.3456").save()
 
@@ -889,16 +885,16 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
 
         self.assertEqual(2, MailQueue.objects.count())
         mail = MailQueue.objects.get(mail_to=account_koper.bevestigde_email)
+        self.assert_email_html_ok(mail, 'email_bestelling/bevestig-bestelling.dtl')
         self.assert_consistent_email_html_text(mail)
-        self.assert_email_html_ok(mail)
 
         mail = MailQueue.objects.get(mail_to=self.sporter.account.bevestigde_email)
         # print('\nmail_text = %s' % mail.mail_text)
         # print('mail_html = %s' % mail.mail_html)
         self.assertTrue(self.wedstrijd.locatie.plaats in mail.mail_text)
+        self.assert_email_html_ok(mail, 'email_bestelling/info-inschrijving-wedstrijd.dtl')
         self.assertTrue('09:18' in mail.mail_text)        # 10:00 - 42min
         self.assert_consistent_email_html_text(mail)
-        self.assert_email_html_ok(mail)
 
     def test_nul_bedrag_geen_email(self):
         # inschrijving door iemand anders
@@ -1156,12 +1152,11 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
         bestelling.betaal_actief = betaalactief
         bestelling.save(update_fields=['betaal_actief', 'status'])
         BetaalTransactie(
+                transactie_type=TRANSACTIE_TYPE_MOLLIE_PAYMENT,
                 payment_id='testje',
                 when=betaalactief.when,
                 beschrijving="Test beschrijving",
-                is_restitutie=False,
-                bedrag_euro_klant=Decimal('5'),
-                bedrag_euro_boeking=Decimal('4.75'),
+                bedrag_beschikbaar=Decimal('5'),
                 klant_naam="Pietje Pijlsnel",
                 klant_account="IBAN1234567801234").save()
         bestel_mutatieverzoek_betaling_afgerond(betaalactief, gelukt=True, snel=True)
@@ -1230,18 +1225,16 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
         bestelling.save(update_fields=['betaal_actief', 'status'])
 
         BetaalTransactie(
-                payment_id='testje',
                 when=betaalactief.when,
+                transactie_type=TRANSACTIE_TYPE_MOLLIE_PAYMENT,
+                payment_id='testje',
                 beschrijving="Test beschrijving",
-                is_restitutie=False,
-                bedrag_euro_klant=Decimal('20.80'),
-                bedrag_euro_boeking=Decimal('20.64'),
+                bedrag_beschikbaar=Decimal('20.80'),
                 klant_naam="Pietje Pijlsnel",
                 klant_account="IBAN1234567801234").save()
         bestel_mutatieverzoek_betaling_afgerond(betaalactief, gelukt=True, snel=True)
         self.assertEqual(4, BestellingMutatie.objects.count())
         f1, f2 = self.verwerk_bestel_mutaties()
-        # print('\nf1:', f1.getvalue(), '\nf2:', f2.getvalue())
         self.assertTrue('[INFO] Betaling is gelukt voor bestelling' in f2.getvalue())
         bestelling = Bestelling.objects.get(pk=bestelling.pk)
         self.assertEqual(bestelling.status, BESTELLING_STATUS_AFGEROND)
@@ -1296,19 +1289,19 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
 
         # wacht op betaling
         with self.assert_max_queries(20):
-            resp = self.client.get(url)
+            resp = self.client.get(url, {'snel': 1})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('bestelling/bestelling-afgerond.dtl', 'plein/site_layout.dtl'))
 
         # transacties ontvangen en restitutie
         transactie = BetaalTransactie(
-                            payment_id='testje',
                             when=timezone.now(),
+                            transactie_type=TRANSACTIE_TYPE_MOLLIE_PAYMENT,
+                            payment_id='testje',
                             beschrijving="Test beschrijving",
-                            is_restitutie=False,
-                            bedrag_euro_klant=Decimal('10'),
-                            bedrag_euro_boeking=Decimal('9.75'),
+                            bedrag_te_ontvangen=Decimal('10'),
+                            bedrag_beschikbaar=Decimal('10'),
                             klant_naam="",            # sommige diensten geven de naam niet door
                             klant_account="1234.5678.9012.3456")
         transactie.save()
@@ -1323,26 +1316,25 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
 
         # nu is er genoeg ontvangen
         with self.assert_max_queries(20):
-            resp = self.client.get(url)
+            resp = self.client.get(url, {'snel': 1})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('bestelling/bestelling-afgerond.dtl', 'plein/site_layout.dtl'))
 
         # restitutie toevoegen voor de coverage
         transactie = BetaalTransactie(
-                            payment_id='testje',
                             when=timezone.now(),
+                            transactie_type=TRANSACTIE_TYPE_MOLLIE_RESTITUTIE,
+                            payment_id='testje',
                             beschrijving="Test beschrijving",
-                            is_restitutie=True,
-                            bedrag_euro_klant=Decimal('5'),
-                            bedrag_euro_boeking=Decimal('5.25'),
+                            bedrag_refund=Decimal('5'),
                             klant_naam="Pietje Pijlsnel",
                             klant_account="1234.5678.9012.3456")
         transactie.save()
         bestelling.transacties.add(transactie)
 
         with self.assert_max_queries(20):
-            resp = self.client.get(url)
+            resp = self.client.get(url, {'snel': 1})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('bestelling/bestelling-afgerond.dtl', 'plein/site_layout.dtl'))
@@ -1351,7 +1343,7 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
         bestelling.status = BESTELLING_STATUS_AFGEROND
         bestelling.save(update_fields=['status'])
         with self.assert_max_queries(20):
-            resp = self.client.get(url)
+            resp = self.client.get(url, {'snel': 1})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('bestelling/bestelling-afgerond.dtl', 'plein/site_layout.dtl'))
@@ -1413,7 +1405,7 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
 
         self.assertEqual(1, MailQueue.objects.count())
         mail = MailQueue.objects.first()
-        self.assert_email_html_ok(mail)
+        self.assert_email_html_ok(mail, 'email_bestelling/bevestig-bestelling.dtl')
         self.assert_consistent_email_html_text(mail, ignore=('>Bedrag:', '>Korting:'))
 
         # bekijk de lijst van bestellingen, met de geannuleerde bestelling
@@ -1571,12 +1563,11 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
         bestelling.status = BESTELLING_STATUS_NIEUW
         bestelling.save(update_fields=['status'])
         transactie = BetaalTransactie(
+                            transactie_type=TRANSACTIE_TYPE_MOLLIE_PAYMENT,
                             payment_id='testje1',
                             when=timezone.now(),
                             beschrijving="Test beschrijving 1",
-                            is_restitutie=False,
-                            bedrag_euro_klant=Decimal('10'),
-                            bedrag_euro_boeking=Decimal('9.75'),
+                            bedrag_beschikbaar=Decimal('10'),
                             klant_naam="Pietje Pijlsnel",
                             klant_account="1234.5678.9012.3456")
         transactie.save()
@@ -1584,12 +1575,11 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
 
         # restitutie
         transactie = BetaalTransactie(
+                            transactie_type=TRANSACTIE_TYPE_MOLLIE_RESTITUTIE,
                             payment_id='testje2',
                             when=timezone.now(),
                             beschrijving="Test beschrijving 2",
-                            is_restitutie=True,
-                            bedrag_euro_klant=Decimal('10'),
-                            bedrag_euro_boeking=Decimal('9.75'),
+                            bedrag_beschikbaar=Decimal('10'),
                             klant_naam="Pietje Pijlsnel",
                             klant_account="1234.5678.9012.3456")
         transactie.save()
@@ -1678,22 +1668,22 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
 
         # simuleer een betaling
         betaalactief = BetaalActief(
-            ontvanger=self.instellingen,
-            payment_id='testje',
-            payment_status='paid',
-            log='test')
+                            ontvanger=self.instellingen,
+                            payment_id='testje',
+                            payment_status='paid',
+                            log='test')
         betaalactief.save()
         bestelling.betaal_actief = betaalactief
         bestelling.status = BESTELLING_STATUS_BETALING_ACTIEF
         bestelling.save(update_fields=['betaal_actief', 'status'])
 
+        self.assertEqual(1, MailQueue.objects.count())
         BetaalTransactie(
+            transactie_type=TRANSACTIE_TYPE_MOLLIE_PAYMENT,
             payment_id='testje',
             when=betaalactief.when,
             beschrijving="Test beschrijving",
-            is_restitutie=False,
-            bedrag_euro_klant=Decimal('20.80'),
-            bedrag_euro_boeking=Decimal('20.64'),
+            bedrag_beschikbaar=Decimal('20.80'),
             klant_naam="Pietje Pijlsnel",
             klant_account="IBAN1234567801234").save()
         bestel_mutatieverzoek_betaling_afgerond(betaalactief, gelukt=True, snel=True)
@@ -1703,6 +1693,13 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
         self.assertTrue('[INFO] Betaling is gelukt voor bestelling' in f2.getvalue())
         bestelling = Bestelling.objects.get(pk=bestelling.pk)
         self.assertEqual(bestelling.status, BESTELLING_STATUS_AFGEROND)
+
+        self.assertEqual(3, MailQueue.objects.count())
+        mail = MailQueue.objects.filter(mail_subj='Inschrijving voor evenement').first()
+        # print('\nmail_text = %s' % mail.mail_text)
+        # print('mail_html = %s' % mail.mail_html)
+        self.assert_email_html_ok(mail, 'email_bestelling/info-inschrijving-evenement.dtl')
+        self.assert_consistent_email_html_text(mail)
 
     def test_evenement_ander_no_email_1(self):
         # koop evenement deelname voor iemand anders die geen bevestigde email heeft
@@ -1731,22 +1728,21 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
 
         # simuleer een betaling
         betaalactief = BetaalActief(
-            ontvanger=self.instellingen,
-            payment_id='testje',
-            payment_status='paid',
-            log='test')
+                            ontvanger=self.instellingen,
+                            payment_id='testje',
+                            payment_status='paid',
+                            log='test')
         betaalactief.save()
         bestelling.betaal_actief = betaalactief
         bestelling.status = BESTELLING_STATUS_BETALING_ACTIEF
         bestelling.save(update_fields=['betaal_actief', 'status'])
 
         BetaalTransactie(
+            transactie_type=TRANSACTIE_TYPE_MOLLIE_PAYMENT,
             payment_id='testje',
             when=betaalactief.when,
             beschrijving="Test beschrijving",
-            is_restitutie=False,
-            bedrag_euro_klant=Decimal('20.80'),
-            bedrag_euro_boeking=Decimal('20.64'),
+            bedrag_beschikbaar=Decimal('20.80'),
             klant_naam="Pietje Pijlsnel",
             klant_account="IBAN1234567801234").save()
         bestel_mutatieverzoek_betaling_afgerond(betaalactief, gelukt=True, snel=True)
@@ -1779,22 +1775,21 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
 
         # simuleer een betaling
         betaalactief = BetaalActief(
-            ontvanger=self.instellingen,
-            payment_id='testje',
-            payment_status='paid',
-            log='test')
+                            ontvanger=self.instellingen,
+                            payment_id='testje',
+                            payment_status='paid',
+                            log='test')
         betaalactief.save()
         bestelling.betaal_actief = betaalactief
         bestelling.status = BESTELLING_STATUS_BETALING_ACTIEF
         bestelling.save(update_fields=['betaal_actief', 'status'])
 
         BetaalTransactie(
+            transactie_type=TRANSACTIE_TYPE_MOLLIE_PAYMENT,
             payment_id='testje',
             when=betaalactief.when,
             beschrijving="Test beschrijving",
-            is_restitutie=False,
-            bedrag_euro_klant=Decimal('20.80'),
-            bedrag_euro_boeking=Decimal('20.64'),
+            bedrag_beschikbaar=Decimal('20.80'),
             klant_naam="Pietje Pijlsnel",
             klant_account="IBAN1234567801234").save()
         bestel_mutatieverzoek_betaling_afgerond(betaalactief, gelukt=True, snel=True)

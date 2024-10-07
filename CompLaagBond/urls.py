@@ -5,7 +5,8 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from CompLaagBond import view_planning, view_indiv, view_teams, view_formulieren, view_kleine_klassen
+from CompLaagBond import (view_planning, view_indiv, view_teams, view_formulieren, view_kleine_klassen,
+                          view_indiv_wijzig_status)
 
 app_name = 'CompLaagBond'
 
@@ -40,10 +41,6 @@ urlpatterns = [
          view_indiv.LijstBkSelectieAlsBestandView.as_view(),
          name='bk-selectie-als-bestand'),
 
-    path('selectie/wijzig-status-bk-deelnemer/<deelnemer_pk>/',
-         view_indiv.WijzigStatusBkDeelnemerView.as_view(),
-         name='wijzig-status-bk-deelnemer'),
-
     path('kleine-klassen-samenvoegen/<deelkamp_pk>/indiv/',
          view_kleine_klassen.KleineKlassenIndivView.as_view(),
          name='kleine-klassen-samenvoegen-indiv'),
@@ -51,6 +48,17 @@ urlpatterns = [
     path('verplaats-deelnemer/',
          view_kleine_klassen.VerplaatsDeelnemerView.as_view(),
          name='verplaats-deelnemer'),
+
+    # BKO
+    path('selectie/wijzig-status-bk-deelnemer/<deelnemer_pk>/',
+         view_indiv_wijzig_status.WijzigStatusBkDeelnemerView.as_view(),
+         name='wijzig-status-bk-deelnemer'),
+
+    # Sporter: deelname bevestigen
+    path('wijzig-status-bk-deelname/',
+         view_indiv_wijzig_status.SporterWijzigStatusBkDeelnameView.as_view(),
+         name='wijzig-status-bk-deelname'),
+
 
     # BKO: teams
     path('teams/wijzig-status-bk-team/',

@@ -304,6 +304,6 @@
         </div>
     </div>
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="bestel-toon-mandje" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="bestelling-toon-mandje" %}
 
 {% endblock %}

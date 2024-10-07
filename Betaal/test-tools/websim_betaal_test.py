@@ -26,6 +26,7 @@ MY_URL_CHECKOUT = MY_URL_BASE + '/checkout/select-issuer/ideal/%s'            # 
 MY_URL_DASHBOARD = MY_URL_BASE + '/dashboard/org_12345677/payments/tr_%s'     # payment_id
 
 payments = dict()       # [payment_id] = dict()
+next_payment_id = 0
 
 
 class MyServer(BaseHTTPRequestHandler):
@@ -33,6 +34,12 @@ class MyServer(BaseHTTPRequestHandler):
     def log_message(self, fmt, *args):
         # no logging please
         pass
+
+    @staticmethod
+    def _get_next_payment_id():
+        global next_payment_id
+        next_payment_id += 1
+        return next_payment_id
 
     @staticmethod
     def _get_timestamp(minutes=0):
@@ -68,16 +75,248 @@ class MyServer(BaseHTTPRequestHandler):
         if enc_data_len > 0:
             self.wfile.write(enc_data)
 
+    def _handle_get_v2_payments(self, resp):
+
+        if 'status' in resp and resp['status'] == 'open':
+            # transition to another state
+            description = resp['description']
+            if description.startswith('Test betaling '):
+                test_code = description[14:]
+
+                if test_code == '39':
+                    resp['status'] = 'failed'
+
+                elif test_code == '40':
+                    resp['status'] = 'pending'
+
+                elif test_code == '41':
+                    # keep status=open
+                    pass
+
+                elif test_code.startswith('42') or test_code == '49':
+                    # transition to 'paid'
+                    resp['status'] = 'paid'
+                    resp['paidAt'] = self._get_timestamp()
+                    resp['amountRefunded'] = refund = dict()
+                    refund['currency'] = resp['amount']['currency']
+                    refund['value'] = '0.00'
+                    resp['amountRemaining'] = remaining = dict()
+                    remaining['currency'] = resp['amount']['currency']
+                    remaining['value'] = resp['amount']['value']
+                    resp['locale'] = 'en_NL'
+                    resp['countryCode'] = 'NL'
+                    resp['details'] = details = dict()
+                    if resp['method'] == 'ideal':
+                        details['consumerName'] = 'T. TEST'
+                        details['consumerAccount'] = 'NL72RABO0110438885'  # noqa
+                        details['consumerBic'] = 'RABONL2U'  # noqa
+
+                    elif resp['method'] == 'creditcard':
+                        details['cardHolder'] = 'T. TEST'
+                        details['cardNumber'] = '12345678901234'
+                        details['cardLabel'] = 'Dankort'  # noqa
+                        details['cardCountryCode'] = 'DK'
+
+                    elif resp['method'] == 'paypal':
+                        details['consumerName'] = 'T. TEST'
+                        details['consumerAccount'] = 'paypaluser@somewhere.nz'
+                        details['paypalReference'] = '9AL35361CF606152E'
+                        details['paypalPayerId'] = 'WDJJHEBZ4X2LY'  # noqa
+                        details['paypalFee'] = {
+                            'currency': resp['amount']['currency'],
+                            'value': '2.50'}
+
+                    elif resp['method'] == 'bancontact':
+                        details['consumerName'] = None
+                        details['consumerAccount'] = 'BE72RABO0110438885'  # noqa
+                        details['consumerBic'] = 'AXABBE22'  # noqa
+
+                    elif resp['method'] == 'banktransfer':
+                        details['bankName'] = 'Test bank'
+                        details['bankAccount'] = 'BE72RABO0110438885'  # noqa
+                        details['bankBic'] = 'AXABBE22'  # noqa
+                        details['transferReference'] = 'Whatever'
+
+                    value = float(resp['amount']['value']) - 0.26
+                    if test_code != '429':
+                        resp['settlementAmount'] = {'currency': resp['amount']['currency'],
+                                                    'value': '%.2f' % value}
+                    del resp['isCancelable']
+                    del resp['_links']['checkout']
+                    # '_links': {'changePaymentState': {
+                    #            'href': 'https://www.mollie.com/checkout/test-mode?method=ideal&token=3.210mge',
+                    #            'type': 'text/html'},
+
+                elif test_code == "43":
+                    # transition to 'canceled'
+                    resp['status'] = 'canceled'
+                    resp['canceledAt'] = self._get_timestamp()
+                    resp['locale'] = 'en_NL'
+                    resp['countryCode'] = 'NL'
+                    del resp['isCancelable']
+                    del resp['expiresAt']
+                    del resp['_links']['checkout']
+
+                elif test_code in ("44", "45"):
+                    # transition to 'expired'
+                    resp['status'] = 'expired'
+                    del resp['expiresAt']
+                    resp['expiredAt'] = self._get_timestamp()
+                    resp['locale'] = 'en_NL'
+                    resp['countryCode'] = 'NL'
+                    del resp['_links']['checkout']
+                    del resp['_links']['dashboard']
+
+                if test_code in ("425", "426"):
+                    details = resp['details']
+                    details['consumerName'] = details['cardHolder'] = ''  # zorg dat de velden bestaan
+                    del details['consumerName']
+                    del details['cardHolder']
+                elif test_code == "427":
+                    resp['amountRemaining']['value'] = '1&2'
+                elif test_code == "428":
+                    resp['amountRemaining']['currency'] = 'DKK'
+
+        self._write_response(200, resp)
+
+    def _handle_get_v2_refunds_list_all(self):
+        refunds = list()
+
+        refund = {
+            'resource': 'refund',
+            'id': 're_PX7Jurz8XA',
+            'amount': {
+                'value': '30.40',
+                'currency': 'EUR'
+            },
+            'status': 'refunded',
+            'createdAt': '2024-09-02T09:54:46+00:00',
+            'description': 'Terugbetaling Oranje fanshirt',
+            'metadata': None,
+            'paymentId': 'tr_M4VKcjTjqT',
+            'settlementAmount': {
+                'value': '-30.40',
+                'currency': 'EUR'
+            },
+            '_links': {
+                'self': {
+                    'href': MY_URL_BASE + '/v2/payments/tr_M4VKcjTjqT/refunds/re_PX7Jurz8XA',
+                    'type': 'application/hal+json',
+                },
+                'payment': {
+                    'href': MY_URL_BASE + '/v2/payments/tr_M4VKcjTjqT',
+                    'type': 'application/hal+json',
+                }
+            }
+        }
+        refunds.append(refund)
+
+        # one with errors
+        refund = {
+            'resource': 'refund',
+            'id': 're_PX7Jurz8XA',
+            'amount': {
+                'value': '30.40',
+                'currency': 'DKK'                           # wrong currency
+            },
+            'status': 'refunded',
+            'createdAt': '02-09-2024T09:54:46+00:00',       # wrong format
+            'description': 'Terugbetaling bad createdAt',
+            'metadata': None,
+            'paymentId': 'tr_M4VKcjTjqT',
+            'settlementAmount': {
+                'value': '-30.40',
+                'currency': 'EUR'
+            },
+            '_links': {
+                'self': {
+                    'href': MY_URL_BASE + '/v2/payments/tr_M4VKcjTjqT/refunds/re_PX7Jurz8XA',
+                    'type': 'application/hal+json',
+                },
+                'payment': {
+                    'href': MY_URL_BASE + '/v2/payments/tr_M4VKcjTjqT',
+                    'type': 'application/hal+json',
+                }
+            }
+        }
+        refunds.append(refund)
+
+        # one with errors
+        refund = {
+            'resource': 'refund',
+            'id': 're_PX7Jurz8XA',
+            'amount': None,                 # bad amount
+            'status': 'refunded',
+            'createdAt': '2024-09-02T09:54:46+00:00',
+            'description': 'Terugbetaling bad createdAt',
+            'metadata': None,
+            'paymentId': 'tr_M4VKcjTjqT',
+            '_links': {
+                'self': {
+                    'href': MY_URL_BASE + '/v2/payments/tr_M4VKcjTjqT/refunds/re_PX7Jurz8XA',
+                    'type': 'application/hal+json',
+                },
+                'payment': {
+                    'href': MY_URL_BASE + '/v2/payments/tr_M4VKcjTjqT',
+                    'type': 'application/hal+json',
+                }
+            }
+        }
+        refunds.append(refund)
+
+        # one with errors
+        refund = {
+            'resource': 'refund',
+            'id': 're_PX7Jurz8XA',
+            'amount': {
+                'value': '30.##',           # bad number
+                'currency': 'EUR'
+            },
+            'status': 'refunded',
+            'createdAt': '2024-09-02T09:54:46+00:00',
+            'description': 'Terugbetaling Oranje fanshirt',
+            'metadata': None,
+            'paymentId': 'tr_M4VKcjTjqT',
+            'settlementAmount': {
+                'value': '-30.40',
+                'currency': 'EUR'
+            },
+            '_links': {
+                'self': {
+                    'href': MY_URL_BASE + '/v2/payments/tr_M4VKcjTjqT/refunds/re_PX7Jurz8XA',
+                    'type': 'application/hal+json',
+                },
+                'payment': {
+                    'href': MY_URL_BASE + '/v2/payments/tr_M4VKcjTjqT',
+                    'type': 'application/hal+json',
+                }
+            }
+        }
+        refunds.append(refund)
+
+        resp = {
+            '_embedded': {
+                'refunds': refunds,
+            },
+            'count': len(refunds),
+        }
+
+        self._write_response(200, resp)
+
     # noinspection PyTypeChecker
     def do_GET(self):   # noqa
         # print("[DEBUG] {websim_betaal_test} GET request,\nPath: %s\nHeaders:\n%s" % (str(self.path),
         #                                                                              str(self.headers)))
 
-        if self.path.startswith('/v2/payments/'):
-            # payment_id = self.path[13:13+30]
-            # print('[DEBUG] {websim_betaal_test} GET payment_id: %s' % repr(payment_id))
+        auth = self.headers.get('authorization')
+        if auth and auth.startswith('Bearer '):
+            api_key = auth[7:]
+        else:
+            api_key = None
 
-            payment_id = '1234AbcdEFGH'     # the only one we support
+        if self.path.startswith('/v2/payments/'):
+            payment_id = self.path[13:13+30]
+            # print('[DEBUG] {websim_betaal_test} GET payment_id: %s' % repr(payment_id))
 
             try:
                 resp = payments[payment_id]
@@ -85,99 +324,21 @@ class MyServer(BaseHTTPRequestHandler):
                 # onbekende payment_id
                 self.send_response(404)
                 self.end_headers()
+            else:
+                self._handle_get_v2_payments(resp)
+            return
+
+        if api_key != 'test_bad':
+            if self.path.startswith('/v2/refunds'):
+                # pos = self.path.find('?limit=')
+                # if pos > 0:
+                #     limit = int(self.path[pos+7:])
+                # else:
+                #     limit = 250
+                self._handle_get_v2_refunds_list_all()
                 return
 
-            if 'status' in resp and resp['status'] == 'open':
-                # transition to another state
-                description = resp['description']
-                if description.startswith('Test betaling '):
-                    test_code = description[14:]
-
-                    if test_code == '39':
-                        resp['status'] = 'failed'
-
-                    elif test_code == '40':
-                        resp['status'] = 'pending'
-
-                    elif test_code == '41':
-                        # keep status=open
-                        pass
-
-                    elif test_code.startswith('42'):        # 42*
-                        # transition to 'paid'
-                        resp['status'] = 'paid'
-                        resp['paidAt'] = self._get_timestamp()
-                        resp['amountRefunded'] = refund = dict()
-                        refund['currency'] = resp['amount']['currency']
-                        refund['value'] = '0.00'
-                        resp['amountRemaining'] = remaining = dict()
-                        remaining['currency'] = resp['amount']['currency']
-                        remaining['value'] = resp['amount']['value']
-                        resp['locale'] = 'en_NL'
-                        resp['countryCode'] = 'NL'
-                        resp['details'] = details = dict()
-                        if resp['method'] == 'ideal':
-                            details['consumerName'] = 'T. TEST'
-                            details['consumerAccount'] = 'NL72RABO0110438885'       # noqa
-                            details['consumerBic'] = 'RABONL2U'                     # noqa
-                        elif resp['method'] == 'creditcard':
-                            details['cardHolder'] = 'T. TEST'
-                            details['cardNumber'] = '12345678901234'
-                            details['cardLabel'] = 'Dankort'                        # noqa
-                            details['cardCountryCode'] = 'DK'
-                        elif resp['method'] == 'paypal':
-                            details['consumerName'] = 'T. TEST'
-                            details['consumerAccount'] = 'paypaluser@somewhere.nz'
-                            details['paypalReference'] = '9AL35361CF606152E'
-                            details['paypalPayerId'] = 'WDJJHEBZ4X2LY'              # noqa
-                            details['paypalFee'] = {'currency': resp['amount']['currency'],
-                                                    'value': '2.50'}
-                        elif resp['method'] == 'bancontact':
-                            details['consumerName'] = None
-                            details['consumerAccount'] = 'BE72RABO0110438885'       # noqa
-                            details['consumerBic'] = 'AXABBE22'                     # noqa
-                        value = float(resp['amount']['value']) - 0.26
-                        if test_code != '429':
-                            resp['settlementAmount'] = {'currency': resp['amount']['currency'],
-                                                        'value': '%.2f' % value}
-                        del resp['isCancelable']
-                        del resp['_links']['checkout']
-                        # '_links': {'changePaymentState': {
-                        #            'href': 'https://www.mollie.com/checkout/test-mode?method=ideal&token=3.210mge',
-                        #            'type': 'text/html'},
-
-                    elif test_code == "43":
-                        # transition to 'canceled'
-                        resp['status'] = 'canceled'
-                        resp['canceledAt'] = self._get_timestamp()
-                        resp['locale'] = 'en_NL'
-                        resp['countryCode'] = 'NL'
-                        del resp['isCancelable']
-                        del resp['expiresAt']
-                        del resp['_links']['checkout']
-
-                    elif test_code in ("44", "45"):
-                        # transition to 'expired'
-                        resp['status'] = 'expired'
-                        del resp['expiresAt']
-                        resp['expiredAt'] = self._get_timestamp()
-                        resp['locale'] = 'en_NL'
-                        resp['countryCode'] = 'NL'
-                        del resp['_links']['checkout']
-                        del resp['_links']['dashboard']
-
-                    if test_code in ("425", "426"):
-                        details = resp['details']
-                        details['consumerName'] = details['cardHolder'] = ''   # zorg dat de velden bestaan
-                        del details['consumerName']
-                        del details['cardHolder']
-                    elif test_code == "427":
-                        resp['settlementAmount']['value'] = '1&2'
-                    elif test_code == "428":
-                        resp['settlementAmount']['currency'] = 'DKK'
-
-            self._write_response(200, resp)
-            return
+            print('{websim_betaal_test} Unsupported: %s' % repr(self.path))
 
         # internal server error
         self.send_response(500)
@@ -193,7 +354,10 @@ class MyServer(BaseHTTPRequestHandler):
         else:
             api_key = None
 
-        payment_id = '1234AbcdEFGH'
+        if api_key == 'test_fixed':
+            payment_id = 'tr_1234AbcdEFGH'
+        else:
+            payment_id = 'tr_1234AbcdEF%02d' % self._get_next_payment_id()
 
         if not self.path.startswith('/v2/payments'):
             # internal server error
@@ -225,12 +389,17 @@ class MyServer(BaseHTTPRequestHandler):
 
         payments[payment_id] = resp = dict()
         resp['resource'] = 'payment'
-        resp['id'] = 'tr_%s' % payment_id
+        resp['id'] = payment_id
         resp['mode'] = 'test'
         resp['createAt'] = self._get_timestamp()
         resp['expiresAt'] = self._get_timestamp(minutes=15)
         resp['amount'] = {'value': value, 'currency': currency}
+        resp['amountRefunded'] = {'value': '0.00', 'currency': currency}
+        resp['amountRemaining'] = {'value': value, 'currency': currency}
         resp['description'] = description
+        # Possible values for 'method' (2024-10-06):
+        #   alma applepay bacs bancomatpay bancontact banktransfer belfius blik creditcard directdebit eps      # noqa
+        #   giftcard ideal kbc mybank paypal paysafecard przelewy24 satispay trustly twint                      # noqa
         resp['method'] = 'ideal'
         resp['metadata'] = None
         resp['status'] = 'open'
@@ -240,9 +409,9 @@ class MyServer(BaseHTTPRequestHandler):
         resp['redirectUrl'] = redirect_url
         resp['webhookUrl'] = webhook_url
         resp['_links'] = links = dict()
-        links['self'] = {'href': MY_URL_SELF % payment_id, 'type': 'application/hal+json'}
-        links['checkout'] = {'href': MY_URL_CHECKOUT % payment_id, 'type': 'text/html'}
-        links['dashboard'] = {'href': MY_URL_DASHBOARD % payment_id, 'type': 'text/html'}
+        links['self'] = {'href': MY_URL_SELF % payment_id[3:], 'type': 'application/hal+json'}
+        links['checkout'] = {'href': MY_URL_CHECKOUT % payment_id[3:], 'type': 'text/html'}
+        links['dashboard'] = {'href': MY_URL_DASHBOARD % payment_id[3:], 'type': 'text/html'}
         # links['documentation'] =
 
         if description.startswith('Test betaling '):
@@ -252,7 +421,8 @@ class MyServer(BaseHTTPRequestHandler):
                 if webhook_url:
                     do_post_payment_change = True
 
-            if test_code in ('421', '426', '427', '428', '429'):
+            # print('POST: test_code=%s' % test_code)
+            if test_code in ('421', '426', '427', '428', '429', '49'):
                 resp['method'] = 'ideal'
             elif test_code in ('422', '425'):
                 resp['method'] = 'creditcard'
@@ -260,6 +430,8 @@ class MyServer(BaseHTTPRequestHandler):
                 resp['method'] = 'paypal'
             elif test_code == '424':
                 resp['method'] = 'bancontact'
+            elif test_code == '4291':
+                resp['method'] = 'banktransfer'
 
             if test_code == '45':
                 # bijna leeg antwoord
@@ -275,8 +447,13 @@ class MyServer(BaseHTTPRequestHandler):
                 resp['id_original'] = resp['id']
                 resp['id'] = 'tr_FoutjeBedankt'
 
-            if test_code == "48":
+            if test_code == '48':
                 links['checkout']['href'] = 'http://way.too.long/' + "1234567890" * 50
+
+            if test_code == '49':
+                value = float(value)
+                resp['amountRefunded']['value'] = round(value * 0.75, 2)
+                resp['amountRemaining']['value'] = round(value * 0.25, 2)
 
             # 39 = failed
             # 40 = pending
@@ -288,9 +465,10 @@ class MyServer(BaseHTTPRequestHandler):
             # 46 = foute status
             # 47 = foute id
             # 48 = te lange checkout URL
+            # 49 = partly refunded
             if test_code in ("39", "40", "41", "42",
-                             "421", "422", "423", "424", "425", "426", "427", "428", "429",
-                             "43", "44", "45", "46", "47", "48"):
+                             "421", "422", "423", "424", "425", "426", "427", "428", "429", "4291",
+                             "43", "44", "45", "46", "47", "48", "49"):
                 self._write_response(200, resp)
         else:
             # geen corner-case
@@ -305,6 +483,9 @@ def main():
         httpd.serve_forever()
     except KeyboardInterrupt:
         print("")
+    except Exception as exc:
+        print('[ERROR] {websim_betaal_test} Unhandled exception:')
+        print(exc)
 
     # print('[INFO] {websim_betaal_test} Stopping test payment http server')
     httpd.server_close()

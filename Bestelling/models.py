@@ -183,7 +183,7 @@ class Bestelling(models.Model):
     # de bestelde producten met prijs en korting
     producten = models.ManyToManyField(BestellingProduct)
 
-    # afleveradres: automatisch voor leden, handmatig voor gastaccounts (wkan ook buitenlands adres zijn)
+    # afleveradres: automatisch voor leden, handmatig voor gastaccounts (kan ook buitenlands adres zijn)
     # (gebaseerd op info van https://docs.superoffice.com/nl/company/learn/address-formats.html)
     afleveradres_regel_1 = models.CharField(max_length=100, default='', blank=True)
     afleveradres_regel_2 = models.CharField(max_length=100, default='', blank=True)

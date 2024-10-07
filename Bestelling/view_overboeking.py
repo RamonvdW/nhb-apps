@@ -5,15 +5,18 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import reverse
+from django.utils import timezone
 from django.shortcuts import render
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Bestelling.definities import BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_GEANNULEERD
 from Bestelling.models import Bestelling
 from Bestelling.operations.mutaties import bestel_overboeking_ontvangen
+from Betaal.definities import TRANSACTIE_TYPE_HANDMATIG
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
 from decimal import Decimal, InvalidOperation
+import datetime
 
 TEMPLATE_OVERBOEKING_ONTVANGEN = 'bestelling/overboeking-ontvangen.dtl'
 
@@ -37,15 +40,20 @@ class OverboekingOntvangenView(UserPassesTestMixin, TemplateView):
         return self.functie_nu and self.rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL, Rollen.ROL_MWW)
 
     def _zoek_overboekingen(self):
+        """ retourneer een lijst met registreerde handmatige overschrijvingen """
+
+        lang_geleden = timezone.now() - datetime.timedelta(days=90)
+
         overboekingen = list()
         for bestelling in (Bestelling
                            .objects
-                           .filter(ontvanger__vereniging__ver_nr=self.functie_nu.vereniging.ver_nr)
+                           .filter(ontvanger__vereniging__ver_nr=self.functie_nu.vereniging.ver_nr,
+                                   aangemaakt__gt=lang_geleden)
                            .prefetch_related('transacties')
                            .order_by('-aangemaakt'))[:250]:         # nieuwste eerst
 
             # handmatige overboekingen zoeken
-            for transactie in bestelling.transacties.filter(is_handmatig=True):
+            for transactie in bestelling.transacties.filter(transactie_type=TRANSACTIE_TYPE_HANDMATIG):
                 transactie.bestelling = bestelling
                 overboekingen.append(transactie)
             # for
@@ -56,6 +64,24 @@ class OverboekingOntvangenView(UserPassesTestMixin, TemplateView):
 
         return overboekingen
 
+    def _zoek_verwacht(self):
+        """ retourneer een lijst met nog niet betaalde bestellingen van minimaal 2 dagen oud """
+
+        kort_geleden = timezone.now() - datetime.timedelta(days=3)      # mandje verloopt na 3 dagen
+        lang_geleden = kort_geleden - datetime.timedelta(days=90-3)
+
+        qset = (Bestelling
+                .objects
+                .filter(ontvanger__vereniging__ver_nr=self.functie_nu.vereniging.ver_nr,
+                        aangemaakt__lt=kort_geleden,
+                        aangemaakt__gt=lang_geleden)
+                .exclude(status=BESTELLING_STATUS_GEANNULEERD)
+                .exclude(status=BESTELLING_STATUS_AFGEROND)
+                .prefetch_related('transacties')
+                .order_by('-aangemaakt'))       # nieuwste eerst
+
+        return list(qset[:100])
+
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
@@ -63,6 +89,8 @@ class OverboekingOntvangenView(UserPassesTestMixin, TemplateView):
         context['ver'] = self.functie_nu.vereniging
 
         context['overboekingen'] = self._zoek_overboekingen()
+        context['verwacht'] = self._zoek_verwacht()
+
         context['kenmerk'] = context['bedrag'] = ''
 
         context['url_opslaan'] = reverse('Bestel:overboeking-ontvangen')
@@ -147,6 +175,7 @@ class OverboekingOntvangenView(UserPassesTestMixin, TemplateView):
                         context['fout_bedrag'] = ('Verwacht bedrag: € %.2f' % bestelling.totaal_euro).replace('.', ',')
 
         context['overboekingen'] = self._zoek_overboekingen()
+        context['verwacht'] = self._zoek_verwacht()
 
         if self.rol_nu == Rollen.ROL_MWW:
             context['kruimels'] = (

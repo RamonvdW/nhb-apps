@@ -27,11 +27,13 @@ def simple_view_mollie_webhook(request):
             payment_id += char
     # for
 
+    # TODO: voorkom oneindig aankloppen met hetzelfde payment_id
+
     # print('[DEBUG] webhook: payment_id=%s' % repr(payment_id))
 
     # herkennen we deze betaling?
     if BetaalActief.objects.filter(payment_id=payment_id).count() > 0:
-        # zet door naar de achtergrond taak, die haal alle gegevens op bij Mollie
+        # zet door naar de achtergrond taak, die haalt alle gegevens op bij Mollie
         betaal_mutatieverzoek_payment_status_changed(payment_id)
 
     # geef altijd status 200 terug, zodat er niets geleerd kan worden (ook advies Mollie)

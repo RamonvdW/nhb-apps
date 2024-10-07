@@ -88,7 +88,7 @@
                         <td class="hide-on-small-only" style="padding-left:20px">Transactie</td>
                         <td>{% for regel in transactie.regels %}{{ regel }}<br>{% endfor %}</td>
                         <!-- let op: we tonen een minteken bij betaling, dus "not restitutie" -->
-                        <td class="right-align" style="padding-right:20px">{% if not transactie.is_restitutie %}&minus;&nbsp;{% endif %}&euro;&nbsp;{{ transactie.bedrag_euro_klant }}</td>
+                        <td class="right-align" style="padding-right:20px">{{ transactie.bedrag_str }}</td>
                     </tr>
                 {% endfor %}
 
@@ -137,7 +137,7 @@
                         {% if url_afrekenen or moet_handmatig%}
                             <tr>
                                 <td colspan="3">
-                                    <p class="center">Betaling is {% if moet_handmatig %}alleen{% else %}ook{% endif %} mogelijk door overboeking van het verschuldigde bedrag naar onderstaande rekening onder vermelding van "Bestelnummer {{ bestelling.mh_bestel_nr }}"</p>
+                                    <p class="center">Betaling is {% if moet_handmatig %}alleen{% else %}ook{% endif %} mogelijk door overboeking van het verschuldigde bedrag naar onderstaande rekening <br class="hide-on-med-and-down">onder vermelding van "Bestelnummer {{ bestelling.mh_bestel_nr }}"</p>
                                 </td>
                             </tr>
                         {% endif %}
@@ -188,7 +188,7 @@
         <div class="modal" id="bevestig_annuleer">
             <div class="modal-content center black-text">
                 <h5>Bestelling annuleren?</h5>
-                <p>Weet je zeker dat je deze bestelling niet door wil laten gaan?</p>
+                <p>Weet je zeker dat je deze bestelling niet door wilt laten gaan?</p>
                 <p>Gemaakte reserveringen voor wedstrijden / evenementen / producten vervallen.</p>
                 <p>Doet dit alleen als je nog geen betaling gedaan hebt.</p>
 
@@ -269,6 +269,6 @@
     </div>
 
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="bestel-toon-bestelling-details" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="bestelling-toon-bestelling-details" %}
 
 {% endblock %}

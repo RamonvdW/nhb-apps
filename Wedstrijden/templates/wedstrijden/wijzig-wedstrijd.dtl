@@ -540,12 +540,39 @@
                             </tr>
 
                             <tr>
-                                <th>Gepubliceerde uitslag<br>(verwijzing naar html of pdf)</th>
+                                <th rowspan="4">Gepubliceerde uitslag<br>(verwijzing naar html of pdf, maximaal 4 delen)</th>
                                 <td>
                                     {% if block_edits %}
-                                        <span>{{ wed.url_uitslag }}</span>
+                                        <span>{{ wed.url_uitslag_1 }}</span>
                                     {% else %}
-                                        <input type="url" name="url_uitslag" value="{{ wed.url_uitslag }}" inputmode="url" oninput="gewijzigd()">
+                                        <input type="url" name="url_uitslag1" value="{{ wed.url_uitslag_1 }}" inputmode="url" placeholder="https://een-site.nl/uitslagen/uitslag.pdf" oninput="gewijzigd()">
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                   <td>
+                                    {% if block_edits %}
+                                        <span>{{ wed.url_uitslag_2 }}</span>
+                                    {% else %}
+                                        <input type="url" name="url_uitslag2" value="{{ wed.url_uitslag_2 }}" inputmode="url" oninput="gewijzigd()">
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    {% if block_edits %}
+                                        <span>{{ wed.url_uitslag_3 }}</span>
+                                    {% else %}
+                                        <input type="url" name="url_uitslag3" value="{{ wed.url_uitslag_3 }}" inputmode="url" oninput="gewijzigd()">
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    {% if block_edits %}
+                                        <span>{{ wed.url_uitslag_4 }}</span>
+                                    {% else %}
+                                        <input type="url" name="url_uitslag4" value="{{ wed.url_uitslag_4 }}" inputmode="url" oninput="gewijzigd()">
                                     {% endif %}
                                 </td>
                             </tr>
