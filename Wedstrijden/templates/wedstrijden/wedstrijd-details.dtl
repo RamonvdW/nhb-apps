@@ -185,21 +185,25 @@
                     <td>&euro;&nbsp;{{ wed.prijs_euro_onder18 }}</td>
                 </tr>
 
-                {% if wed.url_uitslag %}
+                {% if wed.url_uitslag_1 %}
                     <tr>
                         <td colspan="2" class="center sv-blauw-text">
-                            <h6>Uitslag</h6>
+                            <h6>Gepubliceerde uitslag</h6>
                         </td>
                     </tr>
-                    <tr>
-                        <th>Gepubliceerde uitslag</th>
-                        <td>
-                            <a href="{{ wed.url_uitslag }}" target="_blank" rel="noopener noreferrer">
-                                <i class="notranslate material-icons-round left sv-blauw-text">open_in_new</i>
-                                <code>{{ wed.url_uitslag|wbr_www }}</code>
-                            </a>
-                        </td>
-                    </tr>
+                    {% for url in wed.uitslag_urls %}
+                        {% if url %}
+                            <tr>
+                                <th></th>
+                                <td>
+                                    <a href="{{ url }}" target="_blank" rel="noopener noreferrer">
+                                        <i class="notranslate material-icons-round left sv-blauw-text">open_in_new</i>
+                                        <code>{{ url|wbr_www }}</code>
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endif %}
+                    {% endfor %}
                 {% endif %}
 
             </table>

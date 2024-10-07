@@ -46,6 +46,9 @@ class WedstrijdDetailsView(TemplateView):
 
         context['wed'] = wedstrijd
 
+        wedstrijd.uitslag_urls = (wedstrijd.url_uitslag_1, wedstrijd.url_uitslag_2,
+                                  wedstrijd.url_uitslag_3, wedstrijd.url_uitslag_4)
+
         now_date = timezone.now().date()
 
         wedstrijd.organisatie_str = WEDSTRIJD_ORGANISATIE_TO_STR[wedstrijd.organisatie]

@@ -517,6 +517,40 @@ class TestWedstrijdenWijzigWedstrijd(E2EHelpers, TestCase):
         self.assertEqual(wedstrijd.datum_begin, datum)
         self.assertEqual(sessie.datum, datum)
 
+    def test_wijzig_urls_uitslag(self):
+        # wordt HWL
+        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_wissel_naar_functie(self.functie_hwl)
+
+        # maak een wedstrijd en sessie aan
+        self._maak_externe_locatie(self.ver1)
+        resp = self.client.post(self.url_wedstrijden_maak_nieuw, {'keuze': 'khsn'})
+        self.assert_is_redirect_not_plein(resp)
+        self.assertEqual(1, Wedstrijd.objects.count())
+        wedstrijd = Wedstrijd.objects.first()
+        url = self.url_wedstrijden_wijzig_wedstrijd % wedstrijd.pk
+        self.assert_is_redirect(resp, url)
+
+        url = self.url_wedstrijden_sessies % wedstrijd.pk
+        resp = self.client.post(url, {'nieuwe_sessie': 'graag'})
+        self.assert_is_redirect(resp, url)
+        self.assertEqual(1, WedstrijdSessie.objects.count())
+        sessie = WedstrijdSessie.objects.first()
+        self.assertTrue(str(sessie) != '')
+
+        url = self.url_wedstrijden_wijzig_wedstrijd % wedstrijd.pk
+        resp = self.client.post(url, {'url_uitslag1': 'deel1',
+                                      'url_uitslag2': '',
+                                      'url_uitslag3': 'deel2',
+                                      'url_uitslag4': 'deel3'})
+        self.assert_is_redirect_not_plein(resp)
+
+        wedstrijd.refresh_from_db()
+        self.assertEqual(wedstrijd.url_uitslag_1, 'deel1')
+        self.assertEqual(wedstrijd.url_uitslag_2, 'deel2')
+        self.assertEqual(wedstrijd.url_uitslag_3, 'deel3')
+        self.assertEqual(wedstrijd.url_uitslag_4, '')
+
     def test_vastpinnen(self):
         # controleer dat sessies en boogtypen niet aangepast kunnen worden als ze in gebruik zijn
         # wordt HWL

@@ -669,8 +669,20 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
                     wedstrijd.eis_kwalificatie_scores = True
 
             if not block_edits:
-                url = request.POST.get('url_uitslag', '')
-                wedstrijd.url_uitslag = url[:128]       # voorkom problemen bij opslaan
+                urls = list()
+                for nr in range(4):
+                    url = request.POST.get('url_uitslag%d' % (nr + 1), '')
+                    url = url[:128]     # voorkom fout tijdens save()
+                    if len(url) > 4 and url not in urls:
+                        urls.append(url)
+                # for
+                while len(urls) < 4:
+                    urls.append('')
+                # while
+                wedstrijd.url_uitslag_1 = urls[0]
+                wedstrijd.url_uitslag_2 = urls[1]
+                wedstrijd.url_uitslag_3 = urls[2]
+                wedstrijd.url_uitslag_4 = urls[3]
 
             wedstrijd.save()
 

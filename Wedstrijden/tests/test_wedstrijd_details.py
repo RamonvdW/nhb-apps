@@ -171,4 +171,36 @@ class TestWedstrijdenWedstrijdDetails(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('wedstrijden/wedstrijd-details.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
 
+    def test_uitslag(self):
+        self.wedstrijd.url_uitslag_1 = 'http://uitslag.test.not/part_a.pdf'
+        self.wedstrijd.url_uitslag_2 = 'http://uitslag.test.not/part_b.pdf'
+        self.wedstrijd.url_uitslag_3 = 'http://uitslag.test.not/part_c.pdf'
+        self.wedstrijd.url_uitslag_4 = 'http://uitslag.test.not/part_d.pdf'
+        self.wedstrijd.eis_kwalificatie_scores = True       # extra coverage
+        self.wedstrijd.save()
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_wedstrijden_wedstrijd_details % self.wedstrijd.pk)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_template_used(resp, ('wedstrijden/wedstrijd-details.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
+
+        urls = self.extract_all_urls(resp, skip_menu=True)
+        self.assertTrue('http://uitslag.test.not/part_a.pdf' in urls)
+        self.assertTrue('http://uitslag.test.not/part_b.pdf' in urls)
+        self.assertTrue('http://uitslag.test.not/part_c.pdf' in urls)
+        self.assertTrue('http://uitslag.test.not/part_d.pdf' in urls)
+
+    def test_extern_beheerd(self):
+        self.wedstrijd.extern_beheerd = True
+        self.wedstrijd.contact_website = 'https://extern.test.not/inschrijven/'
+        self.wedstrijd.datum_einde = self.wedstrijd.datum_begin + datetime.timedelta(days=1)    # extra coverage
+        self.wedstrijd.save()
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_wedstrijden_wedstrijd_details % self.wedstrijd.pk)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_template_used(resp, ('wedstrijden/wedstrijd-details.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
+
 # end of file
