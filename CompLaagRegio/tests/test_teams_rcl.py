@@ -26,7 +26,7 @@ from Vereniging.models import Vereniging
 import datetime
 
 
-class TestCompLaagRegioTeams(E2EHelpers, TestCase):
+class TestCompLaagRegioTeamsRCL(E2EHelpers, TestCase):
 
     """ tests voor de CompLaagRegio applicatie, Teams functies voor de RCL """
 
@@ -223,7 +223,7 @@ class TestCompLaagRegioTeams(E2EHelpers, TestCase):
         team2 = RegiocompetitieTeam(
                     regiocompetitie=deelcomp,
                     vereniging=self.ver_112,
-                    volg_nr=1,
+                    volg_nr=2,
                     team_type=teamtype_r,
                     team_naam='Test team 2',
                     aanvangsgemiddelde=21.123,
@@ -233,7 +233,7 @@ class TestCompLaagRegioTeams(E2EHelpers, TestCase):
         team3 = RegiocompetitieTeam(
                     regiocompetitie=deelcomp,
                     vereniging=self.ver_112,
-                    volg_nr=1,
+                    volg_nr=3,
                     team_type=teamtype_r,
                     team_naam='Test team 3',
                     aanvangsgemiddelde=18.042,
@@ -248,6 +248,8 @@ class TestCompLaagRegioTeams(E2EHelpers, TestCase):
         poule.teams.add(team2)
         poule.teams.add(team3)
         # 3 teams zorgt voor een wedstrijd met een Bye
+
+        return team1, poule
 
     def test_regio_teams(self):
         # RCL ziet teams
@@ -528,7 +530,21 @@ class TestCompLaagRegioTeams(E2EHelpers, TestCase):
         self.assertTrue(url in urls)
 
         # maak een paar teams aan
-        self._maak_teams(self.deelcomp_regio112_18)
+        team1, poule = self._maak_teams(self.deelcomp_regio112_18)
+
+        # maak 1 team niet af
+        team1.team_klasse = None
+        team1.save(update_fields=['team_klasse'])
+        # TODO: voorkom opstarten ronde1 zonder de team_klasse ingevuld
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('complaagregio/rcl-team-ronde.dtl', 'plein/site_layout.dtl'))
+        urls = self.extract_all_urls(resp, skip_menu=True)
+        # print('urls: %s' % repr(urls))
+        self.assertTrue(len(urls) == 0)
 
         # start de eerste ronde op
         with self.assert_max_queries(20):
@@ -607,7 +623,20 @@ class TestCompLaagRegioTeams(E2EHelpers, TestCase):
         zet_competitie_fase_regio_inschrijven(self.comp_18)
 
         # maak een paar teams aan
-        self._maak_teams(self.deelcomp_regio112_18)
+        team1, poule = self._maak_teams(self.deelcomp_regio112_18)
+
+        # verwijder 1 team uit de poule
+        poule.teams.remove(team1)
+
+        url = self.url_team_ronde % self.deelcomp_regio112_18.pk
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('complaagregio/rcl-team-ronde.dtl', 'plein/site_layout.dtl'))
+
+        # herstel de poule
+        poule.teams.add(team1)
 
         url = self.url_team_ronde % self.deelcomp_regio112_18.pk
         with self.assert_max_queries(20):
@@ -629,6 +658,13 @@ class TestCompLaagRegioTeams(E2EHelpers, TestCase):
 
         self.deelcomp_regio112_18 = Regiocompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
         self.assertEqual(self.deelcomp_regio112_18.huidige_team_ronde, 1)
+
+        url = self.url_team_ronde % self.deelcomp_regio112_18.pk
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('complaagregio/rcl-team-ronde.dtl', 'plein/site_layout.dtl'))
 
         # doorzetten zonder scores werkt niet
         with self.assert_max_queries(20):
@@ -696,6 +732,13 @@ class TestCompLaagRegioTeams(E2EHelpers, TestCase):
         self.deelcomp_regio112_18 = Regiocompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
         self.assertEqual(self.deelcomp_regio112_18.huidige_team_ronde, 1)
 
+        url = self.url_team_ronde % self.deelcomp_regio112_18.pk
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('complaagregio/rcl-team-ronde.dtl', 'plein/site_layout.dtl'))
+
         # doorzetten zonder scores werkt niet
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'snel': 1})
@@ -755,7 +798,8 @@ class TestCompLaagRegioTeams(E2EHelpers, TestCase):
 
         # forceer ronde 7
         self.deelcomp_regio112_18.huidige_team_ronde = 7
-        self.deelcomp_regio112_18.save(update_fields=['huidige_team_ronde'])
+        self.deelcomp_regio112_18.regio_heeft_vaste_teams = False
+        self.deelcomp_regio112_18.save(update_fields=['huidige_team_ronde', 'regio_heeft_vaste_teams'])
 
         # voor een paar scores in
         for ronde_team in RegiocompetitieRondeTeam.objects.all():
@@ -763,6 +807,13 @@ class TestCompLaagRegioTeams(E2EHelpers, TestCase):
             ronde_team.ronde_nr = 7
             ronde_team.save(update_fields=['team_score', 'ronde_nr'])
         # for
+
+        url = self.url_team_ronde % self.deelcomp_regio112_18.pk
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('complaagregio/rcl-team-ronde.dtl', 'plein/site_layout.dtl'))
 
         # zet fase G waarin we geen taken meer aanmaken
         zet_competitie_fase_regio_afsluiten(self.comp_18)
@@ -780,6 +831,13 @@ class TestCompLaagRegioTeams(E2EHelpers, TestCase):
 
         self.deelcomp_regio112_18 = Regiocompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
         self.assertEqual(self.deelcomp_regio112_18.huidige_team_ronde, 99)
+
+        url = self.url_team_ronde % self.deelcomp_regio112_18.pk
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('complaagregio/rcl-team-ronde.dtl', 'plein/site_layout.dtl'))
 
         # nog een keer doorzetten doet niets
         with self.assert_max_queries(20):
