@@ -179,17 +179,29 @@ class BetaalTransactie(models.Model):
 
     def __str__(self):
         """ Lever een tekstuele beschrijving voor de admin interface """
+        stamp = localtime(self.when).strftime('%Y-%m-%d om %H:%M')
+
         if self.transactie_type == TRANSACTIE_TYPE_MOLLIE_RESTITUTIE:
-            return "%s: %s, € %s" % (self.refund_id, self.beschrijving, self.bedrag_refund)
+            return "[%s] %s: %s, € %s" % (stamp, self.refund_id, self.beschrijving,
+                                          str(self.bedrag_refund).replace('.', ','))
+
         if self.transactie_type == TRANSACTIE_TYPE_HANDMATIG:
-            return "%s: € %s" % (self.beschrijving, self.bedrag_handmatig)
+            return "[%s] %s: € %s" % (stamp, self.beschrijving,
+                                      str(self.bedrag_handmatig).replace('.', ','))
+
         # mollie payment is meer complex
-        msg = "%s: %s, € %s" % (self.payment_id, self.beschrijving, self.bedrag_te_ontvangen)
+        msg = "[%s] %s" % (stamp, self.payment_id)
+        if self.payment_status:
+            msg += ' = %s' % self.payment_status
+
         if self.bedrag_terugbetaald:
-            msg += '; Terug betaald: € %s' % self.bedrag_terugbetaald
+            msg += '; Terug betaald: € %s' % str(self.bedrag_terugbetaald).replace('.', ',')
+
         if self.bedrag_teruggevorderd:
             msg += '; Terug gevorderd: € %s' % self.bedrag_teruggevorderd
-        msg += '; Beschikbaar: Euro %s' % self.bedrag_beschikbaar
+
+        msg += '; Beschikbaar: € %s' % str(self.bedrag_beschikbaar).replace('.', ',')
+
         return msg
 
     class Meta:

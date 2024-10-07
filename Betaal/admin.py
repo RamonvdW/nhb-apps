@@ -5,10 +5,12 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.contrib import admin
+from Bestelling.models import Bestelling
+from Betaal.definities import TRANSACTIE_TYPE_CHOICES
 from Betaal.models import BetaalInstellingenVereniging, BetaalActief, BetaalTransactie, BetaalMutatie
 
 
-class HeeftRestitutie(admin.SimpleListFilter):
+class HeeftRestitutieFilter(admin.SimpleListFilter):
     title = 'Heeft restitutie'
     parameter_name = 'heeft_restitutie'
 
@@ -21,7 +23,7 @@ class HeeftRestitutie(admin.SimpleListFilter):
         return queryset
 
 
-class HeeftTerugvordering(admin.SimpleListFilter):
+class HeeftTerugvorderingFilter(admin.SimpleListFilter):
     title = 'Heeft terugvordering'
     parameter_name = 'heeft_terugvordering'
 
@@ -34,11 +36,26 @@ class HeeftTerugvordering(admin.SimpleListFilter):
         return queryset
 
 
+class TransactieTypeFilter(admin.SimpleListFilter):
+    title = 'Transactie type'
+    parameter_name = 'transactietype'
+
+    def lookups(self, request, model_admin):
+        return TRANSACTIE_TYPE_CHOICES
+
+    def queryset(self, request, queryset):
+        value = self.value()
+        print('value: %s' % repr(value))
+        if value:
+            queryset = queryset.filter(transactie_type=self.value())
+        return queryset
+
+
 class BetaalTransactieAdmin(admin.ModelAdmin):
 
     ordering = ('-when',)
 
-    list_filter = ('transactie_type', 'payment_status', HeeftRestitutie, HeeftTerugvordering)
+    list_filter = (TransactieTypeFilter, 'payment_status', HeeftRestitutieFilter, HeeftTerugvorderingFilter)
 
     search_fields = ('payment_id', 'refund_id', 'beschrijving')
 

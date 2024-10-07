@@ -41,10 +41,14 @@ class OverboekingOntvangenView(UserPassesTestMixin, TemplateView):
 
     def _zoek_overboekingen(self):
         """ retourneer een lijst met registreerde handmatige overschrijvingen """
+
+        lang_geleden = timezone.now() - datetime.timedelta(days=90)
+
         overboekingen = list()
         for bestelling in (Bestelling
                            .objects
-                           .filter(ontvanger__vereniging__ver_nr=self.functie_nu.vereniging.ver_nr)
+                           .filter(ontvanger__vereniging__ver_nr=self.functie_nu.vereniging.ver_nr,
+                                   aangemaakt__gt=lang_geleden)
                            .prefetch_related('transacties')
                            .order_by('-aangemaakt'))[:250]:         # nieuwste eerst
 
@@ -63,13 +67,14 @@ class OverboekingOntvangenView(UserPassesTestMixin, TemplateView):
     def _zoek_verwacht(self):
         """ retourneer een lijst met nog niet betaalde bestellingen van minimaal 2 dagen oud """
 
-        kort_geleden = timezone.now() - datetime.timedelta(days=2)
-        lang_geleden = kort_geleden - datetime.timedelta(days=90)
+        kort_geleden = timezone.now() - datetime.timedelta(days=3)      # mandje verloopt na 3 dagen
+        lang_geleden = kort_geleden - datetime.timedelta(days=90-3)
 
         qset = (Bestelling
                 .objects
                 .filter(ontvanger__vereniging__ver_nr=self.functie_nu.vereniging.ver_nr,
-                        aangemaakt__lt=kort_geleden)
+                        aangemaakt__lt=kort_geleden,
+                        aangemaakt__gt=lang_geleden)
                 .exclude(status=BESTELLING_STATUS_GEANNULEERD)
                 .exclude(status=BESTELLING_STATUS_AFGEROND)
                 .prefetch_related('transacties')
