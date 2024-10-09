@@ -95,6 +95,7 @@ INSTALLED_APPS = [
     'Registreer.apps.RegistreerConfig',
     'Score.apps.ScoreConfig',
     'Scheidsrechter.apps.ScheidsrechterConfig',
+    'SiteMap.apps.SiteMapConfig',
     'Spelden.apps.SpeldenConfig',
     'Sporter.apps.SporterConfig',
     'Taken.apps.TakenConfig',
