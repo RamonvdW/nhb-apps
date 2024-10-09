@@ -31,7 +31,7 @@ def generate_urls():
         # reken om in weken, zodat we niet elke dag een verandering in de sitemap hebben
         age = now - evenement.datum       # negative = future
         weeks = int(age.days / 7)
-        print(weeks, evenement.datum, evenement.titel)
+        # print(weeks, evenement.datum, evenement.titel)
 
         if weeks > 2:
             # meer dan 2 weken geleden
