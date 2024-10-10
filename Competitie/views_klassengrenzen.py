@@ -10,6 +10,7 @@ from django.views.generic import View
 from django.utils.safestring import mark_safe
 from BasisTypen.definities import BLAZOEN2STR
 from Competitie.models import Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse
+from Competitie.seizoenen import get_comp_pk
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige
 from Score.definities import AG_NUL
@@ -84,7 +85,7 @@ class KlassengrenzenTonenView(View):
         context = dict()
 
         try:
-            comp_pk = int(kwargs['comp_pk'][:6])      # afkappen voor de veiligheid
+            comp_pk = get_comp_pk(kwargs['comp_pk_of_seizoen'])
             comp = (Competitie
                     .objects
                     .get(pk=comp_pk))

@@ -65,7 +65,7 @@ def get_kaartjes_beheer(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_in
 
     # Toon klassengrenzen (is een openbaar kaartje)
     if comp.klassengrenzen_vastgesteld:
-        url = reverse('Competitie:klassengrenzen-tonen', kwargs={'comp_pk': comp.pk})
+        url = reverse('Competitie:klassengrenzen-tonen', kwargs={'comp_pk_of_seizoen': comp.maak_seizoen_url()})
         kaartje = SimpleNamespace(
                     prio=9,
                     titel="Wedstrijdklassen",

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2023 Ramon van der Winkel.
+#  Copyright (c) 2019-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -26,7 +26,7 @@ urlpatterns = [
          views_info.redirect_leeftijden,  # oud; redirects naar nieuw
          name='info-leeftijden'),
 
-    path('<comp_pk>/klassengrenzen-tonen/',
+    path('<comp_pk_of_seizoen>/klassengrenzen-tonen/',
          views_klassengrenzen.KlassengrenzenTonenView.as_view(),
          name='klassengrenzen-tonen'),
 

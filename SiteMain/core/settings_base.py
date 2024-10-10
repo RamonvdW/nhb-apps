@@ -58,7 +58,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2024-10-07'
+SITE_VERSIE = '2024-10-10'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -95,6 +95,7 @@ INSTALLED_APPS = [
     'Registreer.apps.RegistreerConfig',
     'Score.apps.ScoreConfig',
     'Scheidsrechter.apps.ScheidsrechterConfig',
+    'SiteMap.apps.SiteMapConfig',
     'Spelden.apps.SpeldenConfig',
     'Sporter.apps.SporterConfig',
     'Taken.apps.TakenConfig',

@@ -18,7 +18,6 @@ from Bestelling.operations.mutaties import bestel_mutatieverzoek_webwinkel_keuze
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige
 from Webwinkel.models import WebwinkelProduct, WebwinkelKeuze
-from types import SimpleNamespace
 
 
 TEMPLATE_WEBWINKEL_OVERZICHT = 'webwinkel/overzicht.dtl'
