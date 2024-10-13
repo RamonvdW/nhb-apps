@@ -476,7 +476,7 @@ class TestSporterLeeftijdsklassen(E2EHelpers, TestCase):
 
     def test_leeftijdsklassen_bondscompetities(self):
         # Onder 12
-        tup = bereken_leeftijdsklassen_bondscompetitie(2022 - 9, GESLACHT_MAN, 2022, 7)
+        tup = bereken_leeftijdsklassen_bondscompetitie(2022 - 8, GESLACHT_MAN, 2022, 7)     # maand 7 = nieuwe seizoen
         self.assertEqual(tup,
                          (9,
                           [{'seizoen': '2021/2022', 'tekst': 'Onder 12 Jongens'},
@@ -485,7 +485,7 @@ class TestSporterLeeftijdsklassen(E2EHelpers, TestCase):
                            {'seizoen': '2024/2025', 'tekst': 'Onder 12 Jongens'},
                            {'seizoen': '2025/2026', 'tekst': 'Onder 14 Jongens'}]))
 
-        tup = bereken_leeftijdsklassen_bondscompetitie(2022 - 10, GESLACHT_VROUW, 2022, 1)
+        tup = bereken_leeftijdsklassen_bondscompetitie(2022 - 9, GESLACHT_VROUW, 2022, 1)   # maand 1 = vorige seizoen
         self.assertEqual(tup,
                          (9,
                           [{'seizoen': '2020/2021', 'tekst': 'Onder 12 Meisjes'},
@@ -494,7 +494,7 @@ class TestSporterLeeftijdsklassen(E2EHelpers, TestCase):
                            {'seizoen': '2023/2024', 'tekst': 'Onder 12 Meisjes'},
                            {'seizoen': '2024/2025', 'tekst': 'Onder 14 Meisjes'}]))
 
-        tup = bereken_leeftijdsklassen_bondscompetitie(2022 - 9, GESLACHT_ANDERS, 2022, 7)
+        tup = bereken_leeftijdsklassen_bondscompetitie(2022 - 8, GESLACHT_ANDERS, 2022, 7)
         self.assertEqual(tup,
                          (9,
                           [{'seizoen': '2021/2022', 'tekst': 'Onder 12 Jongens'},
@@ -504,7 +504,7 @@ class TestSporterLeeftijdsklassen(E2EHelpers, TestCase):
                            {'seizoen': '2025/2026', 'tekst': 'Onder 14 Jongens'}]))
 
         # Onder 14
-        tup = bereken_leeftijdsklassen_bondscompetitie(2022 - 12, GESLACHT_MAN, 2022, 8)
+        tup = bereken_leeftijdsklassen_bondscompetitie(2022 - 11, GESLACHT_MAN, 2022, 8)
         self.assertEqual(tup,
                          (12,
                           [{'seizoen': '2021/2022', 'tekst': 'Onder 12 Jongens'},
@@ -513,7 +513,7 @@ class TestSporterLeeftijdsklassen(E2EHelpers, TestCase):
                            {'seizoen': '2024/2025', 'tekst': 'Onder 18'},
                            {'seizoen': '2025/2026', 'tekst': 'Onder 18'}]))
 
-        tup = bereken_leeftijdsklassen_bondscompetitie(2022 - 12, GESLACHT_VROUW, 2022, 9)
+        tup = bereken_leeftijdsklassen_bondscompetitie(2022 - 11, GESLACHT_VROUW, 2022, 9)
         self.assertEqual(tup,
                          (12,
                           [{'seizoen': '2021/2022', 'tekst': 'Onder 12 Meisjes'},
@@ -522,7 +522,7 @@ class TestSporterLeeftijdsklassen(E2EHelpers, TestCase):
                            {'seizoen': '2024/2025', 'tekst': 'Onder 18'},
                            {'seizoen': '2025/2026', 'tekst': 'Onder 18'}]))
 
-        tup = bereken_leeftijdsklassen_bondscompetitie(2022 - 12, GESLACHT_ANDERS, 2022, 1)
+        tup = bereken_leeftijdsklassen_bondscompetitie(2022 - 11, GESLACHT_ANDERS, 2022, 1)  # maand 1 = vorige seizoen
         self.assertEqual(tup,
                          (11,
                           [{'seizoen': '2020/2021', 'tekst': 'Onder 12 Jongens'},
@@ -532,7 +532,7 @@ class TestSporterLeeftijdsklassen(E2EHelpers, TestCase):
                            {'seizoen': '2024/2025', 'tekst': 'Onder 18'}]))
 
         # 21+
-        tup = bereken_leeftijdsklassen_bondscompetitie(2022 - 21, GESLACHT_MAN, 2022, 7)
+        tup = bereken_leeftijdsklassen_bondscompetitie(2022 - 20, GESLACHT_MAN, 2022, 7)
         self.assertEqual(tup,
                          (21,
                           [{'seizoen': '2021/2022', 'tekst': 'Onder 21'},
@@ -541,7 +541,7 @@ class TestSporterLeeftijdsklassen(E2EHelpers, TestCase):
                            {'seizoen': '2024/2025', 'tekst': 'Gemengd'},
                            {'seizoen': '2025/2026', 'tekst': 'Gemengd'}]))
 
-        tup = bereken_leeftijdsklassen_bondscompetitie(2022 - 50, GESLACHT_VROUW, 2022, 5)
+        tup = bereken_leeftijdsklassen_bondscompetitie(2022 - 49, GESLACHT_VROUW, 2022, 5)
         self.assertEqual(tup,
                          (49,
                           [{'seizoen': '2020/2021', 'tekst': 'Gemengd'},
@@ -550,7 +550,7 @@ class TestSporterLeeftijdsklassen(E2EHelpers, TestCase):
                            {'seizoen': '2023/2024', 'tekst': 'Gemengd'},
                            {'seizoen': '2024/2025', 'tekst': 'Gemengd'}]))
 
-        tup = bereken_leeftijdsklassen_bondscompetitie(2022 - 100, GESLACHT_VROUW, 2022, 8)
+        tup = bereken_leeftijdsklassen_bondscompetitie(2022 - 99, GESLACHT_VROUW, 2022, 8)
         self.assertEqual(tup,
                          (100,
                           [{'seizoen': '2021/2022', 'tekst': 'Gemengd'},
