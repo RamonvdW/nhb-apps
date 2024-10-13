@@ -45,7 +45,7 @@ class TransactieTypeFilter(admin.SimpleListFilter):
 
     def queryset(self, request, queryset):
         value = self.value()
-        print('value: %s' % repr(value))
+        # print('value: %s' % repr(value))
         if value:
             queryset = queryset.filter(transactie_type=self.value())
         return queryset
