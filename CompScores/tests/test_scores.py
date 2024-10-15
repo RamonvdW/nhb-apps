@@ -7,6 +7,7 @@
 from django.test import TestCase
 from django.utils import timezone
 from Score.models import Score
+from Competitie.definities import INSCHRIJF_METHODE_1
 from Competitie.models import CompetitieIndivKlasse, CompetitieMatch, RegiocompetitieRonde
 from Score.models import Uitslag
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -86,7 +87,7 @@ class TestCompScoresScores(E2EHelpers, TestCase):
             self.client.post(self.url_planning_regio % self.testdata.deelcomp18_regio[101].pk)
         with self.assert_max_queries(20):
             self.client.post(self.url_planning_regio % self.testdata.deelcomp25_regio[101].pk)
-        ronde18 = RegiocompetitieRonde.objects.first()
+        self.ronde18 = RegiocompetitieRonde.objects.first()
         ronde25 = RegiocompetitieRonde.objects.all()[1]
 
         # maak een cluster planning aan
@@ -97,11 +98,12 @@ class TestCompScoresScores(E2EHelpers, TestCase):
         # maak een wedstrijd aan in elke competitie
         indiv_klassen = CompetitieIndivKlasse.objects.values_list('pk', flat=True)
 
-        self.client.post(self.url_planning_regio_ronde % ronde18.pk, {})
+        self.client.post(self.url_planning_regio_ronde % self.ronde18.pk, {})
         match = CompetitieMatch.objects.first()
         match.vereniging = self.testdata.functie_hwl[self.ver_nr].vereniging
         match.save()
         match.indiv_klassen.set(indiv_klassen)
+        self.match18 = match
         self.match18_pk = match.pk
 
         self.client.post(self.url_planning_regio_ronde % ronde25.pk, {})
@@ -582,6 +584,81 @@ class TestCompScoresScores(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
+
+    def test_match_zonder_vereniging(self):
+        # vereniging is nog niet ingesteld
+        self.match18.vereniging = None
+        self.match18.save(update_fields=['vereniging'])
+
+        self.e2e_login_and_pass_otp(self.testdata.comp18_account_rcl[101])
+        self.e2e_wissel_naar_functie(self.testdata.comp18_functie_rcl[101])
+
+        # haal waarschijnlijke deelnemers op
+        json_data = {'deelcomp_pk': self.testdata.deelcomp18_regio[101].pk,
+                     'wedstrijd_pk': self.match18_pk}
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_deelnemers_ophalen,
+                                    json.dumps(json_data),
+                                    content_type='application/json')
+        self.assertEqual(resp.status_code, 200)       # 200 = OK
+        self.assertEqual(resp['Content-Type'], 'application/json')
+        json_data = resp.json()
+        self.assertTrue('deelnemers' in json_data.keys())
+        self.assertEqual(len(json_data['deelnemers']), 60)
+
+        deelcomp = self.ronde18.regiocompetitie
+        deelcomp.regio_organiseert_teamcompetitie = False
+        deelcomp.save(update_fields=['regio_organiseert_teamcompetitie'])
+
+        # haal waarschijnlijke deelnemers op
+        json_data = {'deelcomp_pk': self.testdata.deelcomp18_regio[101].pk,
+                     'wedstrijd_pk': self.match18_pk}
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_deelnemers_ophalen,
+                                    json.dumps(json_data),
+                                    content_type='application/json')
+        self.assertEqual(resp.status_code, 200)       # 200 = OK
+        self.assertEqual(resp['Content-Type'], 'application/json')
+        json_data = resp.json()
+        self.assertTrue('deelnemers' in json_data.keys())
+        self.assertEqual(len(json_data['deelnemers']), 60)
+
+    def test_inschrijfmethode_1(self):
+        self.e2e_login_and_pass_otp(self.testdata.comp18_account_rcl[101])
+        self.e2e_wissel_naar_functie(self.testdata.comp18_functie_rcl[101])
+
+        deelcomp = self.ronde18.regiocompetitie
+        deelcomp.inschrijf_methode = INSCHRIJF_METHODE_1
+        deelcomp.save(update_fields=['inschrijf_methode'])
+
+        # haal waarschijnlijke deelnemers op
+        json_data = {'deelcomp_pk': self.testdata.deelcomp18_regio[101].pk,
+                     'wedstrijd_pk': self.match18_pk}
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_deelnemers_ophalen,
+                                    json.dumps(json_data),
+                                    content_type='application/json')
+        self.assertEqual(resp.status_code, 200)       # 200 = OK
+        self.assertEqual(resp['Content-Type'], 'application/json')
+        json_data = resp.json()
+        self.assertTrue('deelnemers' in json_data.keys())
+        self.assertEqual(len(json_data['deelnemers']), 0)
+
+        deelcomp.regio_organiseert_teamcompetitie = False
+        deelcomp.save(update_fields=['regio_organiseert_teamcompetitie'])
+
+        # haal waarschijnlijke deelnemers op
+        json_data = {'deelcomp_pk': self.testdata.deelcomp18_regio[101].pk,
+                     'wedstrijd_pk': self.match18_pk}
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_deelnemers_ophalen,
+                                    json.dumps(json_data),
+                                    content_type='application/json')
+        self.assertEqual(resp.status_code, 200)       # 200 = OK
+        self.assertEqual(resp['Content-Type'], 'application/json')
+        json_data = resp.json()
+        self.assertTrue('deelnemers' in json_data.keys())
+        self.assertEqual(len(json_data['deelnemers']), 0)
 
     def _maak_uitslag(self, match_pk):
         # log in als RCL om de wedstrijduitslag in te voeren
