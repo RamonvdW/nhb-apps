@@ -21,7 +21,7 @@ class TestCompScoresScores(E2EHelpers, TestCase):
     test_after = ('Competitie.tests.test_overzicht', 'CompLaagRegio.tests.test_planning',)
 
     url_planning_regio = '/bondscompetities/regio/planning/%s/'                     # deelcomp_pk
-    url_planning_cluster = '/bondscompetities/regio/planning/%s/cluster/%s/'        # deelcomp_pk, cluster_pk
+    # url_planning_cluster = '/bondscompetities/regio/planning/%s/cluster/%s/'        # deelcomp_pk, cluster_pk
     url_planning_regio_ronde = '/bondscompetities/regio/planning/ronde/%s/'         # ronde_pk
 
     url_uitslag_invoeren = '/bondscompetities/scores/uitslag-invoeren/%s/'          # match_pk
@@ -81,7 +81,7 @@ class TestCompScoresScores(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.testdata.comp18_account_rcl[101])
         self.e2e_wissel_naar_functie(self.testdata.comp18_functie_rcl[101])
 
-        # maak een regioplanning aan
+        # maak een regioplanning aan in regio 101, waar we clusters hebben
         with self.assert_max_queries(20):
             self.client.post(self.url_planning_regio % self.testdata.deelcomp18_regio[101].pk)
         with self.assert_max_queries(20):
@@ -109,7 +109,7 @@ class TestCompScoresScores(E2EHelpers, TestCase):
         match.vereniging = self.testdata.functie_hwl[self.ver_nr].vereniging
         match.save()
         match.indiv_klassen.set(indiv_klassen)
-        self.wedstrijd25_pk = match.pk
+        self.match25_pk = match.pk
 
     def test_anon(self):
         self.client.logout()
@@ -492,8 +492,8 @@ class TestCompScoresScores(E2EHelpers, TestCase):
 
         # post met wedstrijd_pk waar deze RCL geen toegang toe heeft
         with self.assert_max_queries(20):
-            self.client.get(self.url_uitslag_invoeren % self.wedstrijd25_pk)
-        json_data = {'wedstrijd_pk': self.wedstrijd25_pk}
+            self.client.get(self.url_uitslag_invoeren % self.match25_pk)
+        json_data = {'wedstrijd_pk': self.match25_pk}
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_uitslag_opslaan,
                                     json.dumps(json_data),
@@ -529,8 +529,8 @@ class TestCompScoresScores(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.testdata.functie_hwl[self.ver_nr])
         self.e2e_check_rol('HWL')
 
-        url = self.url_uitslag_invoeren % self.wedstrijd25_pk
-        ack_url = self.url_uitslag_accorderen % self.wedstrijd25_pk
+        url = self.url_uitslag_invoeren % self.match25_pk
+        ack_url = self.url_uitslag_accorderen % self.match25_pk
 
         # doe eerst een get zodat de wedstrijd.uitslag gegarandeerd is
         with self.assert_max_queries(20):
@@ -539,7 +539,7 @@ class TestCompScoresScores(E2EHelpers, TestCase):
         # TODO: check template, anders detecteren we geen situatie 403/404
 
         # scores aanmaken
-        json_data = {'wedstrijd_pk': self.wedstrijd25_pk}
+        json_data = {'wedstrijd_pk': self.match25_pk}
         waarde = 123
         for deelnemer in self.testdata.comp25_deelnemers[:7]:
             json_data[deelnemer.sporterboog.pk] = waarde
@@ -554,7 +554,7 @@ class TestCompScoresScores(E2EHelpers, TestCase):
         self.assertEqual(json_data['done'], 1)
 
         # controleer dat de uitslag nog niet geaccordeerd is
-        wed = CompetitieMatch.objects.select_related('uitslag').get(pk=self.wedstrijd25_pk)
+        wed = CompetitieMatch.objects.select_related('uitslag').get(pk=self.match25_pk)
         self.assertFalse(wed.uitslag.is_bevroren)
 
         # haal de uitslag op en controleer afwezigheid 'accorderen' knop
@@ -570,8 +570,8 @@ class TestCompScoresScores(E2EHelpers, TestCase):
 
         with self.assert_max_queries(20):
             resp = self.client.post(ack_url)
-        self.assert_is_redirect(resp, self.url_uitslag_controleren % self.wedstrijd25_pk)
-        wed = CompetitieMatch.objects.select_related('uitslag').get(pk=self.wedstrijd25_pk)
+        self.assert_is_redirect(resp, self.url_uitslag_controleren % self.match25_pk)
+        wed = CompetitieMatch.objects.select_related('uitslag').get(pk=self.match25_pk)
         self.assertTrue(wed.uitslag.is_bevroren)
 
         # terug naar HWL rol
