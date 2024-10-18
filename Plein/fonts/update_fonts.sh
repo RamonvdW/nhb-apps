@@ -92,10 +92,10 @@ mkdir "$WORK_DIR"
 update_fonts "$URL_ICONS" "$FNAME_ICONS" "$EXT_ICONS" "https://www.apache.org/licenses/LICENSE-2.0.html"
 
 # Open Sans is the main font
-update_fonts "$URL_OPEN_SANS" "$FNAME_OPEN_SANS" "$EXT_OPEN_SANS"
+update_fonts "$URL_OPEN_SANS" "$FNAME_OPEN_SANS" "$EXT_OPEN_SANS" "https://fonts.google.com/specimen/Open+Sans/license"
 
 # Fira Sans is for the headings
-update_fonts "$URL_FIRA_SANS" "$FNAME_FIRA_SANS" "$EXT_FIRA_SANS"
+update_fonts "$URL_FIRA_SANS" "$FNAME_FIRA_SANS" "$EXT_FIRA_SANS" "https://fonts.google.com/specimen/Fira+Sans/license"
 
 if [ $KEEP_DOWNLOAD_DIR -ne 0 ]
 then

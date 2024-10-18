@@ -220,11 +220,13 @@ class HistRegioIndivView(TemplateView):
 
         context['heeft_deelnemers'] = len(uitslag) > 0
 
-        context['canonical'] = reverse('HistComp:uitslagen-regio-indiv-n',
+        context['canonical'] = reverse('HistComp:uitslagen-regio-indiv-n',      # TODO: keep?
                                        kwargs={'seizoen': seizoen_url,
                                                'histcomp_type': histcomp_type_url,
                                                'boog_type': boog_type_url,
                                                'regio_nr': regio_nr})
+
+        context['robots'] = 'nofollow'   # prevent crawling filter result pages
 
         url_top = reverse('HistComp:seizoen-top', kwargs={'seizoen': seizoen_url, 'histcomp_type': histcomp_type_url})
 
@@ -374,11 +376,13 @@ class HistRegioTeamsView(TemplateView):
 
         context['heeft_teams'] = len(uitslag) > 0
 
-        context['canonical'] = reverse('HistComp:uitslagen-regio-teams-n',
+        context['canonical'] = reverse('HistComp:uitslagen-regio-teams-n',      # TODO: keep?
                                        kwargs={'seizoen': seizoen_url,
                                                'histcomp_type': histcomp_type_url,
                                                'team_type': team_type_url,
                                                'regio_nr': regio_nr})
+
+        context['robots'] = 'nofollow'   # prevent crawling filter result pages
 
         url_top = reverse('HistComp:seizoen-top', kwargs={'seizoen': seizoen_url, 'histcomp_type': histcomp_type_url})
 
