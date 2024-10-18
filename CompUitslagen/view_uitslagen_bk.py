@@ -209,9 +209,11 @@ class UitslagenBKIndivView(TemplateView):
             context['deelnemers'] = deelnemers
             context['heeft_deelnemers'] = (len(deelnemers) > 0)
 
-        context['canonical'] = reverse('CompUitslagen:uitslagen-bk-indiv',
+        context['canonical'] = reverse('CompUitslagen:uitslagen-bk-indiv',      # TODO: keep?
                                        kwargs={'comp_pk_of_seizoen': comp.maak_seizoen_url(),
                                                'comp_boog': comp_boog})
+
+        context['robots'] = 'nofollow'   # prevent crawling filter result pages
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
@@ -540,9 +542,11 @@ class UitslagenBKTeamsView(TemplateView):
 
         context['geen_teams'] = len(totaal_lijst) == 0
 
-        context['canonical'] = reverse('CompUitslagen:uitslagen-bk-teams',
+        context['canonical'] = reverse('CompUitslagen:uitslagen-bk-teams',      # TODO: keep?
                                        kwargs={'comp_pk_of_seizoen': comp.maak_seizoen_url(),
                                                'team_type': teamtype_afkorting})
+
+        context['robots'] = 'nofollow'   # prevent crawling filter result pages
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),

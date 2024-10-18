@@ -113,7 +113,7 @@ class Command(BaseCommand):
             except ImportError:
                 pass
             else:
-                self.stdout.write('[DEBUG] app %s has sitemap plugin' % repr(app.name))
+                # self.stdout.write('[DEBUG] app %s has sitemap plugin' % repr(app.name))
 
                 tups = [tup for tup in plugin.generate_urls()]
                 urls = [tup[-1] for tup in tups]

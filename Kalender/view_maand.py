@@ -361,6 +361,8 @@ class KalenderMaandView(TemplateView):
             context['menu_toon_mandje'] = True
             eval_mandje_inhoud(self.request)
 
+        context['robots'] = 'nofollow'   # prevent crawling linked pages (we provide a sitemap for events+matches)
+
         context['kruimels'] = (
             (None, 'Kalender'),
         )

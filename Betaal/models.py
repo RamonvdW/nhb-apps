@@ -172,7 +172,7 @@ class BetaalTransactie(models.Model):
         elif self.transactie_type == TRANSACTIE_TYPE_MOLLIE_RESTITUTIE:
             bedrag = self.bedrag_refund
         else:
-            bedrag = self.bedrag_te_ontvangen
+            bedrag = self.bedrag_beschikbaar
         msg = "€ %s" % bedrag
         msg = msg.replace('.', ',')       # Dutch decimal separator
         return msg

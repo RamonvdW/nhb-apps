@@ -227,6 +227,8 @@ class RecordsVerbeterbaarInDiscipline(TemplateView):
         context['url_spelden_procedures'] = settings.URL_SPELDEN_PROCEDURES
         context['url_record_formulier'] = settings.URL_RECORD_AANVRAAGFORMULIER
 
+        context['robots'] = 'nofollow'   # prevent crawling filter result pages
+
         context['kruimels'] = (
             (reverse('Records:overzicht'), 'Records'),
             (reverse('Records:indiv-verbeterbaar'), 'Verbeterbaar'),

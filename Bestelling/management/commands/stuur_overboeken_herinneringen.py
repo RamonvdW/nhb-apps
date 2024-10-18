@@ -60,8 +60,7 @@ class Command(BaseCommand):
         functie = self._functie_hwl[ver.ver_nr]
 
         # voorkom dubbele meldingen (ook als deze al afgehandeld is)
-        if not check_taak_bestaat(skip_afgerond=False,
-                                  toegekend_aan_functie=functie,
+        if not check_taak_bestaat(toegekend_aan_functie=functie,
                                   beschrijving=beschrijving):
 
             maak_taak(toegekend_aan_functie=functie,
@@ -120,15 +119,13 @@ class Command(BaseCommand):
             # for
         # for
 
-        soort = list()
-        if count_wedstrijd:
-            soort.append('wedstrijden')
-        if count_evenement:
-            soort.append('evenementen')
-        if count_webwinkel:
-            soort.append('webwinkel producten')
-        if count_opleiding:
-            soort.append('opleidingen')
+        soort = [beschrijving
+                 for count, beschrijving in (
+                     (count_wedstrijd, 'wedstrijden'),
+                     (count_evenement, 'evenementen'),
+                     (count_webwinkel, 'webwinkel producten'),
+                     (count_opleiding, 'opleidingen'))
+                 if count > 0]
         producten = ' / '.join(soort)
 
         return ver, aantal, producten

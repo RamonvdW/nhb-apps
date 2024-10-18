@@ -37,6 +37,12 @@
             <link rel="canonical" href="{{ site_url }}{{ canonical }}">
         {% endif %}
 
+        {% if robots %}
+            <!-- adds flags like nofollow, noindex -->
+            <!-- spec: https://developers.google.com/search/docs/crawling-indexing/robots-meta-tag -->
+            <meta name="robots" content="{{ robots }}">
+        {% endif %}
+
         {% block extraheader %}{% endblock %}
     </head>
 

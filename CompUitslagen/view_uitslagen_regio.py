@@ -218,9 +218,11 @@ class UitslagenRegioIndivView(TemplateView):
 
         context['deelnemers'] = objs
         context['heeft_deelnemers'] = (len(objs) > 0)
-        context['canonical'] = reverse('CompUitslagen:uitslagen-regio-indiv',
+        context['canonical'] = reverse('CompUitslagen:uitslagen-regio-indiv',       # TODO: keep?
                                        kwargs={'comp_pk_of_seizoen': comp.maak_seizoen_url(),
                                                'comp_boog': comp_boog})
+
+        context['robots'] = 'nofollow'   # prevent crawling filter result pages
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
@@ -506,9 +508,11 @@ class UitslagenRegioTeamsView(TemplateView):
                             schema=prev_poule.schema)
             teams.append(afsluiter)
 
-        context['canonical'] = reverse('CompUitslagen:uitslagen-regio-teams',
+        context['canonical'] = reverse('CompUitslagen:uitslagen-regio-teams',       # TODO: keep?
                                        kwargs={'comp_pk_of_seizoen': comp.maak_seizoen_url(),
                                                'team_type': teamtype_afkorting})
+
+        context['robots'] = 'nofollow'   # prevent crawling filter result pages
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),

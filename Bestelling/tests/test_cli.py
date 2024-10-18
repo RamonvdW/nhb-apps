@@ -8,10 +8,14 @@ from django.test import TestCase
 from django.conf import settings
 from django.utils import timezone
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse
-from Bestelling.models import BestellingMandje, BestellingProduct
+from Bestelling.models import BestellingMandje, BestellingProduct, Bestelling
+from Betaal.models import BetaalInstellingenVereniging
+from Evenement.models import Evenement, EvenementInschrijving
+from Functie.models import Functie
 from Geo.models import Regio
-from Locatie.models import WedstrijdLocatie
+from Locatie.models import WedstrijdLocatie, EvenementLocatie
 from Sporter.models import Sporter, SporterBoog
+from Taken.models import Taak
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
 from Webwinkel.models import WebwinkelProduct, WebwinkelKeuze
@@ -46,6 +50,7 @@ class TestBestellingCli(E2EHelpers, TestCase):
                         webwinkel_keuze=keuze,
                         prijs_euro=Decimal('1.23'))
         product.save()
+        self.product1 = product
         self.mandje.producten.add(product)
 
         # tweede webwinkel product
@@ -61,22 +66,11 @@ class TestBestellingCli(E2EHelpers, TestCase):
                         webwinkel_keuze=keuze,
                         prijs_euro=Decimal('1.23'))
         product.save()
+        self.product2 = product
         self.mandje.producten.add(product)
 
     def _leg_wedstrijd_in_mandje(self, now, verleden):
         datum = now.date()      # pas op met testen ronde 23:59
-
-        ver = Vereniging(
-                    ver_nr=1000,
-                    naam="Grote Club",
-                    regio=Regio.objects.get(regio_nr=112),
-                    bank_iban='IBAN123456789',
-                    bank_bic='BIC2BIC',
-                    kvk_nummer='KvK1234',
-                    website='www.bb.not',
-                    contact_email='info@bb.not',
-                    telefoonnummer='12345678')
-        ver.save()
 
         sporter1 = Sporter(
                         lid_nr=100001,
@@ -85,7 +79,7 @@ class TestBestellingCli(E2EHelpers, TestCase):
                         geboorte_datum='1966-06-06',
                         sinds_datum='2020-02-02',
                         account=self.mandje.account,
-                        bij_vereniging=ver)
+                        bij_vereniging=self.ver)
         sporter1.save()
 
         sporter2 = Sporter(
@@ -95,8 +89,9 @@ class TestBestellingCli(E2EHelpers, TestCase):
                         geboorte_datum='1966-06-07',
                         sinds_datum='2020-02-02',
                         account=self.mandje.account,
-                        bij_vereniging=ver)
+                        bij_vereniging=self.ver)
         sporter2.save()
+        self.sporter = sporter2
 
         boog_r = BoogType.objects.get(afkorting='R')
 
@@ -120,7 +115,7 @@ class TestBestellingCli(E2EHelpers, TestCase):
                         adres='Schietweg 1, Boogdorp',
                         plaats='Boogdrop')
         locatie.save()
-        locatie.verenigingen.add(ver)
+        locatie.verenigingen.add(self.ver)
 
         # maak een kalenderwedstrijd aan, met sessie
         sessie = WedstrijdSessie(
@@ -136,7 +131,7 @@ class TestBestellingCli(E2EHelpers, TestCase):
                         datum_begin=datum,
                         datum_einde=datum,
                         locatie=locatie,
-                        organiserende_vereniging=ver,
+                        organiserende_vereniging=self.ver,
                         contact_email='organisatie@ver.not',
                         contact_telefoon='0600000001',
                         contact_naam='Organ is a Tie',
@@ -161,6 +156,7 @@ class TestBestellingCli(E2EHelpers, TestCase):
                         wedstrijd_inschrijving=inschrijving,
                         prijs_euro=Decimal('10.00'))
         product.save()
+        self.product3 = product
         self.mandje.producten.add(product)
 
         inschrijving = WedstrijdInschrijving(
@@ -185,6 +181,32 @@ class TestBestellingCli(E2EHelpers, TestCase):
 
         mandje, is_created = BestellingMandje.objects.get_or_create(account=self.account)
         self.mandje = mandje
+
+        ver = Vereniging(
+                    ver_nr=1000,
+                    naam="Grote Club",
+                    regio=Regio.objects.get(regio_nr=112),
+                    bank_iban='IBAN123456789',
+                    bank_bic='BIC2BIC',
+                    kvk_nummer='KvK1234',
+                    website='www.bb.not',
+                    contact_email='info@bb.not',
+                    telefoonnummer='12345678')
+        ver.save()
+        self.ver = ver
+
+        instelling = BetaalInstellingenVereniging(
+                        vereniging=ver,
+                        mollie_api_key='Test')
+        instelling.save()
+        self.instelling = instelling
+
+        hwl = Functie(
+                beschrijving='HWL 1000',
+                rol='HWL',
+                bevestigde_email='hwl@ver1000.not',
+                vereniging=self.ver)
+        hwl.save()
 
     def test_opschonen_wedstrijden(self):
         # bestel_mutaties doorloopt bij elke opstart alle mandjes
@@ -231,5 +253,60 @@ class TestBestellingCli(E2EHelpers, TestCase):
         # controleer de inhoud van het mandje
         mandje = BestellingMandje.objects.get(pk=mandje.pk)
         self.assertEqual(0, mandje.producten.count())
+
+    def test_stuur_overboeken_herinneringen(self):
+        now = timezone.now()
+        verleden = now - datetime.timedelta(days=1 + settings.MANDJE_VERVAL_NA_DAGEN)
+        self._leg_webwinkel_in_mandje(verleden)
+        self._leg_wedstrijd_in_mandje(now, verleden)
+
+        bestelling = Bestelling(
+            bestel_nr=42,
+            account=self.account,
+            ontvanger=self.instelling)
+        bestelling.save()
+        bestelling.aangemaakt -= datetime.timedelta(days=5)
+        bestelling.save(update_fields=['aangemaakt'])
+        bestelling.producten.add(self.product1)
+        bestelling.producten.add(self.product2)
+        bestelling.producten.add(self.product3)
+
+        locatie = EvenementLocatie(
+                        naam='Test',
+                        vereniging=self.ver,
+                        adres='Test')
+        locatie.save()
+
+        evenement = Evenement(
+                        titel='Test',
+                        organiserende_vereniging=self.ver,
+                        datum='2000-01-01',
+                        locatie=locatie)
+        evenement.save()
+
+        inschrijving = EvenementInschrijving(
+                            wanneer=verleden,
+                            evenement=evenement,
+                            sporter=self.sporter,
+                            koper=self.account)
+        inschrijving.save()
+
+        product = BestellingProduct(
+                        evenement_inschrijving=inschrijving,
+                        prijs_euro=Decimal('1.23'))
+        product.save()
+        bestelling.producten.add(product)
+
+        self.assertEqual(0, Taak.objects.count())
+        with self.assert_max_queries(20):
+            f1, f2, = self.run_management_command('stuur_overboeken_herinneringen')
+        # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
+        self.assertTrue(' 1 onbetaalde bestellingen voor vereniging [1000] Grote Club' in f2.getvalue())
+        self.assertEqual(1, Taak.objects.count())
+
+        # nog een keer; controleer dat geen nieuwe taak aangemaakt wordt
+        f1, f2, = self.run_management_command('stuur_overboeken_herinneringen')
+        self.assertTrue(' 1 onbetaalde bestellingen voor vereniging [1000] Grote Club' in f2.getvalue())
+        self.assertEqual(1, Taak.objects.count())
 
 # end of file

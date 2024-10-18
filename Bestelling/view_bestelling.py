@@ -208,7 +208,7 @@ class ToonBestellingDetailsView(UserPassesTestMixin, TemplateView):
 
         transacties = (bestelling
                        .transacties
-                       .all())
+                       .order_by('when'))       # oudste eerst, nieuwste onderaan
 
         for transactie in transacties:
             transactie.regels = regels = list()
@@ -216,7 +216,10 @@ class ToonBestellingDetailsView(UserPassesTestMixin, TemplateView):
             stamp_str = localtime(transactie.when).strftime('%Y-%m-%d %H:%M')
             regels.append(stamp_str)
 
-            regels.append(transactie.beschrijving)
+            if transactie.payment_status in ('canceled', 'cancelled', 'expired', 'failed'):
+                regels.append('Niet gelukt')
+            else:
+                regels.append(transactie.beschrijving)
 
             # TODO: hier kan het een beetje dubbel op worden met restitutie. Overweeg verwijderen
             if transactie.transactie_type == TRANSACTIE_TYPE_MOLLIE_RESTITUTIE:
