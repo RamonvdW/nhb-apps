@@ -192,6 +192,7 @@ def bereken_leeftijdsklassen_bondscompetitie(geboorte_jaar, wedstrijdgeslacht_kh
         pass
 
     wedstrijdleeftijd = eerste_jaar - geboorte_jaar
+    wedstrijdleeftijd += 1      # neem 2e jaar van de competitie
 
     # bereken de wedstrijdklassen en competitieklassen
     lkl_lst = list()
