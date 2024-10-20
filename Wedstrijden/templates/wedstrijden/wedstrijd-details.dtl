@@ -114,7 +114,7 @@
 
                 {% if wed.url_flyer %}
                     <tr>
-                        <th>Flyer</th>
+                        <th>Nieuwsbericht of brochure</th>
                         <td>
                             <a href="{{ wed.url_flyer }}" target="_blank" rel="noopener noreferrer">
                                 <i class="notranslate material-icons-round left sv-blauw-text">open_in_new</i>
