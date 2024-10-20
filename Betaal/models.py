@@ -96,7 +96,7 @@ class BetaalTransactie(models.Model):
 
     # wat voor type record is dit
     # (bepaalt welke velden relevant zijn)
-    transactie_type = models.CharField(max_length=2, default=TRANSACTIE_TYPE_HANDMATIG)
+    transactie_type = models.CharField(max_length=2, default=TRANSACTIE_TYPE_HANDMATIG, choices=TRANSACTIE_TYPE_CHOICES)
 
     # ==============================
     # Handmatige overboeking:
@@ -104,16 +104,16 @@ class BetaalTransactie(models.Model):
     #  bedrag_handmatig
     #  optioneel: klant_naam, klant_account
 
-    # het bedrag wat de klant ziet (betaling / refund) (bron: amount)
+    # het handmatig ingevoerde bedrag
     bedrag_handmatig = models.DecimalField(max_digits=7, decimal_places=2, default=0.0)        # max 99999,99
 
     # ==============================
-    # Mollie betaling1
+    # Mollie betaling
     #   transactie_type = MOLLIE_PAYMENT
     #   payment_id = koppeling aan hun systeem
     #   payment_status
     #   beschrijving = ontvangen informatie
-    #   bedrag_* (behalve bedrag_refunded)
+    #   bedrag_* (behalve bedrag_refund)
     #   klant_naam, klant_account
 
     # referentie naar een betaling bij de CPSP
@@ -163,7 +163,7 @@ class BetaalTransactie(models.Model):
     # kan zijn: queued, pending, processing, refunded, failed, canceled
     refund_status = models.CharField(max_length=BETAAL_PAYMENT_STATUS_MAXLENGTH, default='', blank=True)
 
-    # hoeveel hebben we (totaal) terug betaald
+    # hoeveel hebben we terug betaald (een negatief bedrag)
     bedrag_refund = models.DecimalField(max_digits=7, decimal_places=2, default=0.0)
 
     def bedrag_str(self):

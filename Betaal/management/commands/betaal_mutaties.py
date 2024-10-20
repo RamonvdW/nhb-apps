@@ -421,7 +421,6 @@ class Command(BaseCommand):
                             if obj.is_paid():
                                 # print('is_paid() is True')
                                 # TODO: na een refund blijft deze op 'paid' staan
-                                # TODO: indien bedrag_terugbetaald > 0 dat refunds ophalen via Refunds API
                                 actief.log += 'Betaling is voldaan\n\n'
                                 actief.save(update_fields=['log'])
 
