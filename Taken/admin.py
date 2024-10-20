@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2023 Ramon van der Winkel.
+#  Copyright (c) 2020-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -11,7 +11,7 @@ from Taken.models import Taak
 
 class ToegekendAanFunctieListFilter(admin.SimpleListFilter):
 
-    title = 'Toegekend aan functie'
+    title = 'toegekend aan functie'
 
     parameter_name = 'ToegekendAanFunctie'
 
@@ -27,7 +27,11 @@ class ToegekendAanFunctieListFilter(admin.SimpleListFilter):
         for functie in (Functie
                         .objects
                         .filter(pk__in=gevonden)
-                        .order_by('pk')):                   # pragma: no cover
+                        .order_by('rol',
+                                  'vereniging__ver_nr',
+                                  'comp_type',
+                                  'rayon__rayon_nr',
+                                  'regio__regio_nr')):     # pragma: no cover
             tup = (functie.pk, functie.beschrijving)
             lijstje.append(tup)
         # for
