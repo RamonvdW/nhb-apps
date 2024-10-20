@@ -8,6 +8,7 @@ from django.contrib import admin
 from django.db.models import Count
 from Bestelling.definities import BESTELLING_MUTATIE_TO_STR
 from Bestelling.models import BestellingProduct, BestellingMandje, Bestelling, BestellingMutatie
+from Vereniging.models import Vereniging
 
 
 class BestellingProductAdmin(admin.ModelAdmin):
@@ -57,6 +58,27 @@ class BestellingTransactions(admin.TabularInline):
     model = BetaalTransactie
 
 
+class OntvangerFilter(admin.SimpleListFilter):
+    title = 'Ontvanger'
+    parameter_name = 'ontvanger'
+
+    def lookups(self, request, model_admin):
+        actieve_ver_nrs = (Bestelling
+                           .objects
+                           .distinct('ontvanger')
+                           .values_list('ontvanger__vereniging__ver_nr', flat=True))
+        # print('actieve ontvangers: %s' % actieve_ver_nrs)
+        return [(ver.ver_nr, ver.ver_nr_en_naam())
+                for ver in Vereniging.objects.filter(ver_nr__in=actieve_ver_nrs).order_by('ver_nr')]
+
+    def queryset(self, request, queryset):
+        ver_nr = self.value()
+        # print('ver_nr: %s' % repr(ver_nr))
+        if ver_nr:
+            queryset = queryset.filter(ontvanger__vereniging__ver_nr=ver_nr)
+        return queryset
+
+
 class BestellingAdmin(admin.ModelAdmin):
 
     readonly_fields = ('account', 'bestel_nr', 'aangemaakt', 'producten', 'ontvanger',
@@ -72,7 +94,7 @@ class BestellingAdmin(admin.ModelAdmin):
 
     # filter_horizontal = ('producten', 'transacties')
 
-    list_filter = ('status',)
+    list_filter = ('status', OntvangerFilter)
 
     fieldsets = (
         ('Inhoud',

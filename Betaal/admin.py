@@ -5,13 +5,14 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.contrib import admin
-from Bestelling.models import Bestelling
+from django.db.models import Count
+from Bestelling.models import BetaalInstellingenVereniging, Bestelling
 from Betaal.definities import TRANSACTIE_TYPE_CHOICES
 from Betaal.models import BetaalInstellingenVereniging, BetaalActief, BetaalTransactie, BetaalMutatie
 
 
 class HeeftRestitutieFilter(admin.SimpleListFilter):
-    title = 'Heeft restitutie'
+    title = 'heeft restitutie'
     parameter_name = 'heeft_restitutie'
 
     def lookups(self, request, model_admin):
@@ -24,7 +25,7 @@ class HeeftRestitutieFilter(admin.SimpleListFilter):
 
 
 class HeeftTerugvorderingFilter(admin.SimpleListFilter):
-    title = 'Heeft terugvordering'
+    title = 'heeft terugvordering'
     parameter_name = 'heeft_terugvordering'
 
     def lookups(self, request, model_admin):
@@ -37,7 +38,7 @@ class HeeftTerugvorderingFilter(admin.SimpleListFilter):
 
 
 class TransactieTypeFilter(admin.SimpleListFilter):
-    title = 'Transactie type'
+    title = 'transactie type'
     parameter_name = 'transactietype'
 
     def lookups(self, request, model_admin):
@@ -47,7 +48,59 @@ class TransactieTypeFilter(admin.SimpleListFilter):
         value = self.value()
         # print('value: %s' % repr(value))
         if value:
-            queryset = queryset.filter(transactie_type=self.value())
+            queryset = queryset.filter(transactie_type=value)
+        return queryset
+
+
+class OntvangerFilter(admin.SimpleListFilter):
+    title = 'ontvanger'
+    parameter_name = 'ontvanger'
+
+    def lookups(self, request, model_admin):
+        actieve_ontvangers = (Bestelling
+                              .objects
+                              .exclude(totaal_euro__lt=0.00)
+                              .distinct('ontvanger')
+                              .values_list('ontvanger__vereniging__ver_nr', flat=True))
+        # print('actieve_ontvangers: %s' % actieve_ontvangers)
+        return [(ver.vereniging.ver_nr, ver.vereniging.ver_nr_en_naam())
+                for ver in (BetaalInstellingenVereniging
+                            .objects
+                            .select_related('vereniging')
+                            .filter(vereniging__ver_nr__in=actieve_ontvangers)
+                            .order_by('vereniging__ver_nr'))]
+
+    def queryset(self, request, queryset):
+        ver_nr = self.value()
+        # print('ver_nr: %s' % repr(ver_nr))
+        if ver_nr:
+            queryset = queryset.filter(bestelling__ontvanger__vereniging__ver_nr=ver_nr)
+        return queryset
+
+
+class AantalBestellingenFilter(admin.SimpleListFilter):
+    title = 'aantal bestellingen'
+    parameter_name = 'aantal_bestellingen'
+
+    def lookups(self, request, model_admin):
+        aantallen = dict()
+        for transactie in BetaalTransactie.objects.annotate(aantal=Count('bestelling')):
+            try:
+                aantallen[transactie.aantal] += 1
+            except KeyError:
+                aantallen[transactie.aantal] = 1
+        # for
+        # print('aantallen: %s' % aantallen)
+
+        lst = [(aantal, aantal) for aantal in aantallen]
+        lst.sort()
+        return lst
+
+    def queryset(self, request, queryset):
+        aantal = self.value()
+        print('aantal: %s' % repr(aantal))
+        if aantal:
+            queryset = queryset.annotate(aantal=Count('bestelling')).filter(aantal=aantal)
         return queryset
 
 
@@ -55,7 +108,8 @@ class BetaalTransactieAdmin(admin.ModelAdmin):
 
     ordering = ('-when',)
 
-    list_filter = (TransactieTypeFilter, 'payment_status', HeeftRestitutieFilter, HeeftTerugvorderingFilter)
+    list_filter = (TransactieTypeFilter, 'payment_status', HeeftRestitutieFilter, HeeftTerugvorderingFilter,
+                   AantalBestellingenFilter, OntvangerFilter)
 
     search_fields = ('payment_id', 'refund_id', 'beschrijving')
 
