@@ -210,6 +210,17 @@
                                 </tr>
                             {% endif %}
 
+                           <tr>
+                                <th>Flyer met informatie over de wedstrijd (pdf of www)</th>
+                                <td>
+                                    {% if block_edits %}
+                                        <span>{{ wed.url_flyer }}</span>
+                                    {% else %}
+                                        <input type="url" name="url_flyer" value="{{ wed.url_flyer }}" inputmode="url" placeholder="https://een-site.nl/flyer.pdf" oninput="gewijzigd()">
+                                    {% endif %}
+                                </td>
+                            </tr>
+
                             <tr>
                                 <th>Bijzonder<wbr>heden</th>
                                 <td>

@@ -173,6 +173,9 @@ class Wedstrijd(models.Model):
     url_uitslag_3 = models.CharField(max_length=128, default='')
     url_uitslag_4 = models.CharField(max_length=128, default='')
 
+    # link naar een webpagina of pdf met informatie over de wedstrijd
+    url_flyer = models.CharField(max_length=128, default='')
+
     def bepaal_prijs_voor_sporter(self, sporter):
         leeftijd = sporter.bereken_wedstrijdleeftijd(self.datum_begin, self.organisatie)
         prijs = self.prijs_euro_onder18 if leeftijd < 18 else self.prijs_euro_normaal
