@@ -125,6 +125,7 @@ def _beschrijf_bestelling(bestelling):
 
 
 def bereken_som_betalingen(bestelling: Bestelling) -> Decimal:
+    # TODO: dit gaat helemaal mis als een transactie meerdere keer in de database staat!!
     ontvangen_euro = Decimal('0')
     for transactie in bestelling.transacties.exclude(transactie_type=TRANSACTIE_TYPE_MOLLIE_RESTITUTIE):
         if transactie.transactie_type == TRANSACTIE_TYPE_HANDMATIG:
@@ -193,7 +194,6 @@ def stuur_email_naar_koper_betaalbevestiging(bestelling):
     account = bestelling.account
 
     producten = _beschrijf_bestelling(bestelling)
-
     transacties = _beschrijf_transacties(bestelling)
 
     totaal_euro_str = "%.2f" % bestelling.totaal_euro
