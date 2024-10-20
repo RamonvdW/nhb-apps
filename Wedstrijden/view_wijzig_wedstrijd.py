@@ -684,6 +684,11 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
                 wedstrijd.url_uitslag_3 = urls[2]
                 wedstrijd.url_uitslag_4 = urls[3]
 
+            if not block_edits:
+                url = request.POST.get('url_flyer', '')
+                url = url[:128]     # voorkom fout tijdens save()
+                wedstrijd.url_flyer = url
+
             wedstrijd.save()
 
             boog_pks = list(wedstrijd.boogtypen.values_list('pk', flat=True))

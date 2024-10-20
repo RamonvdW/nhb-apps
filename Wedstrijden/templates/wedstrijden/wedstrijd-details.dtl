@@ -112,6 +112,18 @@
                     <td>{{ wed.begrenzing_str }}</td>
                 </tr>
 
+                {% if wed.url_flyer %}
+                    <tr>
+                        <th>Flyer</th>
+                        <td>
+                            <a href="{{ wed.url_flyer }}" target="_blank" rel="noopener noreferrer">
+                                <i class="notranslate material-icons-round left sv-blauw-text">open_in_new</i>
+                                <code>{{ wed.url_flyer|wbr_www }}</code>
+                            </a>
+                        </td>
+                    </tr>
+                {% endif %}
+            
                 <tr>
                     <th>Bijzonder<wbr>heden</th>
                     <td>{{ wed.bijzonderheden|linebreaksbr }}</td>
