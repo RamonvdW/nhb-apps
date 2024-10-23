@@ -211,7 +211,7 @@
                             {% endif %}
 
                            <tr>
-                                <th>Flyer met informatie over de wedstrijd (pdf of www)</th>
+                                <th>Nieuwsbericht of brochure</th>
                                 <td>
                                     {% if block_edits %}
                                         <span>{{ wed.url_flyer }}</span>

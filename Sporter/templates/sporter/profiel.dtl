@@ -415,7 +415,7 @@
 
                                             <!-- geef mogelijkheid om alvast af te melden voor RK  -->
                                             <a class="multi-btn-sv-rood modal-trigger" href="#id_voorkeur_rk_{{ deelnemer.pk }}">
-                                                <span class="hide-on-small-only">Voorkeur</span>
+                                                <span class="hide-on-small-only">Afmelden</span>
                                                 <i class="hide-on-med-and-up material-icons-round notranslate">edit</i>
                                             </a>
 
