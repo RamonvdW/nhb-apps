@@ -7,10 +7,15 @@
 from django.conf import settings
 from django.test import TestCase
 from django.urls import reverse
+from django.utils import timezone
+from django.contrib.admin.models import LogEntry
+from Beheer.views import beheer_opschonen
 from Geo.models import Regio
 from Betaal.models import BetaalActief, BetaalInstellingenVereniging
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
+import datetime
+import io
 
 
 # updaten met dit commando:
@@ -273,5 +278,21 @@ class TestBeheer(E2EHelpers, TestCase):
             self.assertEqual(resp.status_code, 200)     # 200 = OK
             self.assert_template_used(resp, ('admin/base.html', 'admin/filter.html'))
         # for
-        
+
+    def test_opschonen(self):
+
+        lang_geleden = timezone.now() - datetime.timedelta(days=365)
+
+        LogEntry(
+            action_time=lang_geleden,
+            user=self.account_admin,
+            object_repr='test',
+            action_flag=1).save()
+
+        stdout = io.StringIO()
+        beheer_opschonen(stdout)
+
+        # geen records meer om op te schonen
+        beheer_opschonen(stdout)
+
 # end of file
