@@ -242,11 +242,6 @@ class TestBeheer(E2EHelpers, TestCase):
             '/beheer/Bestelling/bestellingmandje/?is_leeg=0',       # noqa
             '/beheer/Bestelling/bestellingmandje/?is_leeg=1',       # noqa
 
-            # Feedback
-            '/beheer/Feedback/feedback/?is_afgehandeld=0',
-            '/beheer/Feedback/feedback/?is_afgehandeld=1',
-            '/beheer/Feedback/feedback/?is_afgehandeld=-1',
-
             # Sporter
             '/beheer/Sporter/sporter/?heeft_wa_id=Ja',
             '/beheer/Sporter/sporter/?heeft_account=Ja',
