@@ -1034,6 +1034,27 @@ class MyTestAsserts(TestCase):
             pos = html.find('<a href="mailto:')
         # while
 
+        # check distance between euro signs
+        if True:
+            pos = 0
+            prev_pos = 0
+            while 0 <= pos < len(html):
+                pos = html.find('€', pos+1)
+                if pos > prev_pos and pos - prev_pos <= 5:
+                    issues.append('Euro signs close to each other in html: ' + html[prev_pos-10:pos+10])
+                prev_pos = pos
+            # while
+
+            text = email.mail_text
+            pos = 0
+            prev_pos = 0
+            while 0 <= pos < len(text):
+                pos = text.find('€', pos+1)
+                if pos > prev_pos and pos - prev_pos <= 5:
+                    issues.append('Euro signs close to each other in text: ' + text[prev_pos-10:pos+10].replace('\n', '\\n'))
+                prev_pos = pos
+            # while
+
         th_matched = list()
 
         for line in email.mail_text.split('\n'):

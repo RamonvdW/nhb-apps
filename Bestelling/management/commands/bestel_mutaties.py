@@ -36,8 +36,8 @@ from Bestelling.plugins.webwinkel import (webwinkel_plugin_reserveren, webwinkel
                                           webwinkel_plugin_bepaal_kortingen,
                                           webwinkel_plugin_bepaal_verzendkosten_mandje,
                                           webwinkel_plugin_bepaal_verzendkosten_bestelling)
-from Betaal.definities import (TRANSACTIE_TYPE_MOLLIE_RESTITUTIE, TRANSACTIE_TYPE_HANDMATIG,
-                               TRANSACTIE_TYPE_MOLLIE_PAYMENT)
+from Betaal.definities import TRANSACTIE_TYPE_MOLLIE_RESTITUTIE, TRANSACTIE_TYPE_HANDMATIG
+from Betaal.format import format_bedrag_euro
 from Betaal.models import BetaalInstellingenVereniging, BetaalTransactie
 from Betaal.operations import maak_transactie_handmatige_overboeking
 from Evenement.definities import (EVENEMENT_INSCHRIJVING_STATUS_DEFINITIEF, EVENEMENT_STATUS_TO_STR,
@@ -84,6 +84,8 @@ def _beschrijf_bestelling(bestelling):
         regel_nr += 1
         product.regel_nr = regel_nr
         product.beschrijving = beschrijf_product(product)
+        product.prijs_euro_str = format_bedrag_euro(product.prijs_euro)
+        product.korting_euro_str = format_bedrag_euro(product.korting_euro)     # positief bedrag
 
         if product.wedstrijd_inschrijving:
             korting = product.wedstrijd_inschrijving.korting
@@ -101,8 +103,7 @@ def _beschrijf_bestelling(bestelling):
         # nieuwe regel op de bestelling
         regel_nr += 1
 
-        verzendkosten_euro_str = "%.2f" % bestelling.verzendkosten_euro
-        verzendkosten_euro_str = verzendkosten_euro_str.replace('.', ',')       # nederlandse komma
+        verzendkosten_euro_str = format_bedrag_euro(bestelling.verzendkosten_euro)
 
         product = SimpleNamespace(
                         regel_nr=regel_nr,
@@ -115,10 +116,12 @@ def _beschrijf_bestelling(bestelling):
         # nieuwe regel op de bestelling
         regel_nr += 1
 
+        verzendkosten_euro_str = format_bedrag_euro(Decimal(0))
+
         product = SimpleNamespace(
                         regel_nr=regel_nr,
                         beschrijving=[("Ophalen op het bondsbureau", "")],
-                        prijs_euro="0,00")
+                        prijs_euro=verzendkosten_euro_str)
         producten.append(product)
 
     return producten
@@ -156,8 +159,7 @@ def stuur_email_naar_koper_bestelling_details(bestelling):
 
     producten = _beschrijf_bestelling(bestelling)
 
-    totaal_euro_str = "%.2f" % bestelling.totaal_euro
-    totaal_euro_str = totaal_euro_str.replace('.', ',')       # nederlandse komma
+    totaal_euro_str = format_bedrag_euro(bestelling.totaal_euro)
 
     heeft_afleveradres = False
     for nr in (1, 2, 3, 4, 5):
@@ -193,11 +195,8 @@ def stuur_email_naar_koper_betaalbevestiging(bestelling):
     account = bestelling.account
 
     producten = _beschrijf_bestelling(bestelling)
-
     transacties = _beschrijf_transacties(bestelling)
-
-    totaal_euro_str = "%.2f" % bestelling.totaal_euro
-    totaal_euro_str = totaal_euro_str.replace('.', ',')       # nederlandse komma
+    totaal_euro_str = format_bedrag_euro(bestelling.totaal_euro)
 
     context = {
         'voornaam': account.get_first_name(),
@@ -225,8 +224,10 @@ def stuur_email_webwinkel_backoffice(bestelling, email_backoffice):
     producten = _beschrijf_bestelling(bestelling)
     transacties = _beschrijf_transacties(bestelling)
 
-    totaal_euro_str = "%.2f" % bestelling.totaal_euro
-    totaal_euro_str = totaal_euro_str.replace('.', ',')       # nederlandse komma
+    totaal_euro_str = format_bedrag_euro(bestelling.totaal_euro)
+    bestelling.btw_euro_cat1_str = format_bedrag_euro(bestelling.btw_euro_cat1)
+    bestelling.btw_euro_cat2_str = format_bedrag_euro(bestelling.btw_euro_cat2)
+    bestelling.btw_euro_cat3_str = format_bedrag_euro(bestelling.btw_euro_cat3)
 
     context = {
         'koper_sporter': sporter,       # bevat postadres
@@ -825,8 +826,7 @@ class Command(BaseCommand):
                 bestelling.totaal_euro = totaal_euro
                 bestelling.save(update_fields=['totaal_euro', 'verkoper_btw_nr'])
 
-                totaal_euro_str = "€ %.2f" % totaal_euro
-                totaal_euro_str = totaal_euro_str.replace('.', ',')     # nederlandse komma
+                totaal_euro_str = format_bedrag_euro(totaal_euro)
 
                 when_str = timezone.localtime(bestelling.aangemaakt).strftime('%Y-%m-%d om %H:%M')
 
@@ -852,8 +852,7 @@ class Command(BaseCommand):
                         inschrijving.save(update_fields=['status'])
                 # for
 
-                totaal_euro_str = "€ %.2f" % totaal_euro
-                totaal_euro_str = totaal_euro_str.replace('.', ',')     # nederlandse komma
+                totaal_euro_str = format_bedrag_euro(totaal_euro)
 
                 self.stdout.write(
                     "[INFO] %s producten voor totaal %s uit mandje account pk=%s (%s) omgezet in bestelling pk=%s" % (
@@ -982,11 +981,8 @@ class Command(BaseCommand):
             # controleer of we voldoende ontvangen hebben
             ontvangen_euro = bereken_som_betalingen(bestelling)
 
-            ontvangen_euro_str = "€ %.2f" % ontvangen_euro
-            ontvangen_euro_str = ontvangen_euro_str.replace('.', ',')  # nederlandse komma
-
-            totaal_euro_str = "€ %.2f" % bestelling.totaal_euro
-            totaal_euro_str = totaal_euro_str.replace('.', ',')  # nederlandse komma
+            ontvangen_euro_str = format_bedrag_euro(ontvangen_euro)
+            totaal_euro_str = format_bedrag_euro(bestelling.totaal_euro)
 
             self.stdout.write('[INFO] Bestelling %s (pk=%s) heeft %s van de %s ontvangen' % (
                                 bestelling.mh_bestel_nr(), bestelling.pk, ontvangen_euro_str, totaal_euro_str))

@@ -8,13 +8,13 @@ from django.http import Http404
 from django.urls import reverse
 from django.conf import settings
 from django.utils import timezone
-from django.utils.formats import localize
 from django.shortcuts import render
 from django.templatetags.static import static
 from django.views.generic import TemplateView
 from Account.models import get_account
 from Bestelling.operations.mandje import mandje_tel_inhoud
 from Bestelling.operations.mutaties import bestel_mutatieverzoek_webwinkel_keuze
+from Betaal.format import format_bedrag_euro
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige
 from Webwinkel.models import WebwinkelProduct, WebwinkelKeuze
@@ -178,9 +178,9 @@ class ProductView(TemplateView):
                     prijs = product.prijs_euro * aantal
 
                     if aantal == 1:
-                        msg = '1 %s (€ %s)' % (aantal_enkel, localize(prijs))
+                        msg = '1 %s (%s)' % (aantal_enkel, format_bedrag_euro(prijs))
                     else:
-                        msg = '%s %s (€ %s)' % (aantal, aantal_meer, localize(prijs))
+                        msg = '%s %s (%s)' % (aantal, aantal_meer, format_bedrag_euro(prijs))
                     sel_opts.append((aantal, msg))
             # for
         # for

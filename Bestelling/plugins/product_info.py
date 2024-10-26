@@ -35,11 +35,11 @@ def beschrijf_product(product: BestellingProduct):
     return []
 
 
-def beschrijf_korting(product):
+def beschrijf_korting(product) -> (str | None, []):
     """
         Geef de beschrijving van de korting terug:
-            korting_str: een tekst string, bijvoorbeeld "Persoonlijke korting"
-            korting_redenen: een lijst van redenen (bedoeld om op opeenvolgende regels te tonen)
+            kort_str: een tekst string, bijvoorbeeld "Persoonlijke korting 10%"
+            redenen: een lijst van redenen (bedoeld om op opeenvolgende regels te tonen)
     """
 
     if product.wedstrijd_inschrijving:

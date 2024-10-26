@@ -7,8 +7,8 @@
 """ Deze module levert functionaliteit voor de Bestel-applicatie, met kennis van de Webwinkel, zoals kortingen. """
 
 from django.conf import settings
-from django.utils.formats import localize
 from Bestelling.definities import BESTELLING_TRANSPORT_NVT, BESTELLING_TRANSPORT_VERZEND
+from Betaal.format import format_bedrag_euro
 from Webwinkel.definities import KEUZE_STATUS_GEANNULEERD, VERZENDKOSTEN_BRIEFPOST, VERZENDKOSTEN_PAKKETPOST
 from decimal import Decimal
 
@@ -143,7 +143,7 @@ def webwinkel_plugin_beschrijf_product(keuze):
     tup = ('Titel', msg)
     beschrijving.append(tup)
 
-    tup = ('Prijs per stuk', '€ ' + localize(product.prijs_euro))
+    tup = ('Prijs per stuk', format_bedrag_euro(product.prijs_euro))
     beschrijving.append(tup)
 
     if product.eenheid:

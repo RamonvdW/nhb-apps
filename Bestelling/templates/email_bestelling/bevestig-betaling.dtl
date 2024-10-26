@@ -30,27 +30,27 @@
             {% endif %}
         {% endif %}
 
-        |    Bedrag: € {{ product.prijs_euro }}
+        |    Bedrag: {{ product.prijs_euro_str }}
         {% if product.korting_euro > 0.001 %}
-            |    Korting: -€ {{ product.korting_euro }}
+            |    Korting: - {{ product.korting_euro_str }}
         {% endif %}
 
     {% endfor %}
 
     |
-    |TOTAAL: € {{ totaal_euro_str }}
+    |TOTAAL: {{ totaal_euro_str }}
 
     <!-- BTW toevoegen -->
     {% if bestelling.btw_percentage_cat1 or bestelling.btw_percentage_cat2 or bestelling.btw_percentage_cat3 %}
         |
         {% if bestelling.btw_percentage_cat1 %}
-            |Inclusief BTW {{ bestelling.btw_percentage_cat1 }}%: € {{ bestelling.btw_euro_cat1 }}
+            |Inclusief BTW {{ bestelling.btw_percentage_cat1 }}%: {{ bestelling.btw_euro_cat1_str }}
         {% endif %}
         {% if bestelling.btw_percentage_cat2 %}
-            |Inclusief BTW {{ bestelling.btw_percentage_cat2 }}%: € {{ bestelling.btw_euro_cat2 }}
+            |Inclusief BTW {{ bestelling.btw_percentage_cat2 }}%: {{ bestelling.btw_euro_cat2_str }}
         {% endif %}
         {% if bestelling.btw_percentage_cat3 %}
-            |Inclusief BTW {{ bestelling.btw_percentage_cat3 }}%: € {{ bestelling.btw_euro_cat3 }}
+            |Inclusief BTW {{ bestelling.btw_percentage_cat3 }}%: {{ bestelling.btw_euro_cat3_str }}
         {% endif %}
     {% endif %}
 
@@ -124,7 +124,7 @@
                         <span>{{ onderwerp }}{% if tekst %}: {{ tekst }}{% endif %}</span><br>
                     {% endfor %}
                 </td>
-                <td style="text-align:right;vertical-align:top">&euro;&nbsp;{{ product.prijs_euro }}</td>
+                <td style="text-align:right;vertical-align:top">{{ product.prijs_euro_str }}</td>
             </tr>
 
             {% if product.korting_euro > 0.001 %}
@@ -137,7 +137,7 @@
                         {% endif %}
                     </td>
 
-                    <td style="text-align:right; vertical-align:top">-&euro;&nbsp;{{ product.korting_euro }}</td>
+                    <td style="text-align:right; vertical-align:top">-&nbsp;{{ product.korting_euro_str }}</td>
                 </tr>
             {% endif %}
 
@@ -147,7 +147,7 @@
         <tr>
             <td></td>
             <td style="text-align:right">TOTAAL:</td>
-            <td style="text-align:right">&euro;&nbsp;{{ totaal_euro_str }}</td>
+            <td style="text-align:right">{{ totaal_euro_str }}</td>
         </tr>
 
         <!-- BTW toevoegen -->
@@ -155,21 +155,21 @@
             <tr>
                 <td></td>
                 <td>Inclusief BTW {{ bestelling.btw_percentage_cat1 }}%:</td>
-                <td style="text-align:right;vertical-align:top">&euro;&nbsp;{{ bestelling.btw_euro_cat1 }}</td>
+                <td style="text-align:right;vertical-align:top">{{ bestelling.btw_euro_cat1_str }}</td>
             </tr>
         {% endif %}
         {% if bestelling.btw_percentage_cat2 %}
             <tr>
                 <td></td>
                 <td>Inclusief BTW {{ bestelling.btw_percentage_cat2 }}%:</td>
-                <td style="text-align:right;vertical-align:top">&euro;&nbsp;{{ bestelling.btw_euro_cat2 }}</td>
+                <td style="text-align:right;vertical-align:top">{{ bestelling.btw_euro_cat2_str }}</td>
             </tr>
         {% endif %}
         {% if bestelling.btw_percentage_cat3 %}
             <tr>
                 <td></td>
                 <td>Inclusief BTW {{ bestelling.btw_percentage_cat3 }}%:</td>
-                <td style="text-align:right;vertical-align:top">&euro;&nbsp;{{ bestelling.btw_euro_cat3 }}</td>
+                <td style="text-align:right;vertical-align:top">{{ bestelling.btw_euro_cat3_str }}</td>
             </tr>
         {% endif %}
     </table>

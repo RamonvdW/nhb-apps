@@ -11,6 +11,7 @@ from Betaal.definities import (MOLLIE_API_KEY_MAXLENGTH, BETAAL_PAYMENT_ID_MAXLE
                                BETAAL_BESCHRIJVING_MAXLENGTH, BETAAL_KLANT_NAAM_MAXLENGTH, BETAAL_REFUND_ID_MAXLENGTH,
                                BETAAL_KLANT_ACCOUNT_MAXLENGTH, BETAAL_MUTATIE_TO_STR, BETAAL_CHECKOUT_URL_MAXLENGTH,
                                TRANSACTIE_TYPE_CHOICES, TRANSACTIE_TYPE_HANDMATIG, TRANSACTIE_TYPE_MOLLIE_RESTITUTIE)
+from Betaal.format import format_bedrag_euro
 from Vereniging.models import Vereniging
 
 
@@ -173,21 +174,20 @@ class BetaalTransactie(models.Model):
             bedrag = self.bedrag_refund
         else:
             bedrag = self.bedrag_beschikbaar
-        msg = "€ %s" % bedrag
-        msg = msg.replace('.', ',')       # Dutch decimal separator
-        return msg
+        return format_bedrag_euro(bedrag)
 
     def __str__(self):
         """ Lever een tekstuele beschrijving voor de admin interface """
         stamp = localtime(self.when).strftime('%Y-%m-%d om %H:%M')
 
         if self.transactie_type == TRANSACTIE_TYPE_MOLLIE_RESTITUTIE:
-            return "[%s] %s: %s, € %s" % (stamp, self.refund_id, self.beschrijving,
-                                          str(self.bedrag_refund).replace('.', ','))
+            return "[%s] %s: %s, %s" % (stamp, self.refund_id,
+                                        format_bedrag_euro(self.bedrag_refund),
+                                        self.beschrijving)
 
         if self.transactie_type == TRANSACTIE_TYPE_HANDMATIG:
-            return "[%s] %s: € %s" % (stamp, self.beschrijving,
-                                      str(self.bedrag_handmatig).replace('.', ','))
+            return "[%s] %s: %s" % (stamp, self.beschrijving,
+                                    format_bedrag_euro(self.bedrag_handmatig))
 
         # mollie payment is meer complex
         msg = "[%s] %s" % (stamp, self.payment_id)
@@ -195,12 +195,12 @@ class BetaalTransactie(models.Model):
             msg += ' = %s' % self.payment_status
 
         if self.bedrag_terugbetaald:
-            msg += '; Terug betaald: € %s' % str(self.bedrag_terugbetaald).replace('.', ',')
+            msg += '; Terug betaald: %s' % format_bedrag_euro(self.bedrag_terugbetaald)
 
         if self.bedrag_teruggevorderd:
-            msg += '; Terug gevorderd: € %s' % self.bedrag_teruggevorderd
+            msg += '; Terug gevorderd: %s' % format_bedrag_euro(self.bedrag_teruggevorderd)
 
-        msg += '; Beschikbaar: € %s' % str(self.bedrag_beschikbaar).replace('.', ',')
+        msg += '; Beschikbaar: %s' % format_bedrag_euro(self.bedrag_beschikbaar)
 
         return msg
 

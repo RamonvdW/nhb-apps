@@ -14,6 +14,7 @@ from Account.models import get_account
 from BasisTypen.definities import GESLACHT2STR
 from Bestelling.operations.mutaties import (bestel_mutatieverzoek_afmelden_wedstrijd,
                                             bestel_mutatieverzoek_verwijder_product_uit_mandje)
+from Betaal.format import format_bedrag_euro
 from Competitie.models import RegiocompetitieSporterBoog
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige, rol_get_huidige_functie
@@ -452,7 +453,7 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
             qset = aanmelding.bestellingproduct_set.all()
             if qset.count() > 0:
                 bestelproduct = qset[0]
-                prijs_str = '€ %s' % bestelproduct.prijs_euro
+                prijs_str = format_bedrag_euro(bestelproduct.prijs_euro)
             else:
                 prijs_str = 'Geen (handmatige inschrijving)'
 
@@ -485,8 +486,8 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
                     bestelnummer_str,
                     prijs_str,
                     korting_str,
-                    '€ %s' % aanmelding.ontvangen_euro,
-                    '€ %s' % aanmelding.retour_euro,
+                    format_bedrag_euro(aanmelding.ontvangen_euro),
+                    format_bedrag_euro(aanmelding.retour_euro),
                     aanmelding.sessie.beschrijving,
                     aanmelding.wedstrijdklasse.afkorting,
                     aanmelding.wedstrijdklasse.beschrijving,
@@ -515,8 +516,8 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
                     bestelnummer_str,
                     prijs_str,
                     korting_str,
-                    '€ %s' % aanmelding.ontvangen_euro,
-                    '€ %s' % aanmelding.retour_euro,
+                    format_bedrag_euro(aanmelding.ontvangen_euro),
+                    format_bedrag_euro(aanmelding.retour_euro),
                     aanmelding.sessie.beschrijving,
                     aanmelding.wedstrijdklasse.afkorting,
                     aanmelding.wedstrijdklasse.beschrijving,

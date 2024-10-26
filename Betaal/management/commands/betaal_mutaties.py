@@ -291,9 +291,10 @@ class Command(BaseCommand):
             for refund in refunds:
                 self.stdout.write('[DEBUG] {get_payment_refunds} Refund: %s' % repr(refund))
 
-                status = refund.status
+                status = refund.status      # kan zijn: 'processing' of 'refunded'
                 refund_id = refund.id       # re_Xxx
-                amount = refund.settlement_amount
+                amount = refund.amount                  # let op: positief bedrag
+                amount = refund.settlement_amount       # let op: negatief bedrag
                 beschrijving = refund.description
                 try:
                     created_at = datetime.datetime.strptime(refund.created_at, '%Y-%m-%dT%H:%M:%S%z')

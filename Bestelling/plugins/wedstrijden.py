@@ -558,24 +558,25 @@ def wedstrijden_plugin_beschrijf_product(inschrijving):
     return beschrijving
 
 
-def wedstrijden_beschrijf_korting(inschrijving):
+def wedstrijden_beschrijf_korting(inschrijving) -> (str | None, []):
 
-    korting_str = None
-    korting_redenen = list()
+    kort_str = None
+    redenen = list()
 
     if inschrijving.korting:
         korting = inschrijving.korting
 
         if korting.soort == WEDSTRIJD_KORTING_SPORTER:
-            korting_str = "Persoonlijke korting: %d%%" % korting.percentage
+            kort_str = "Persoonlijke korting: %d%%" % korting.percentage
 
         elif korting.soort == WEDSTRIJD_KORTING_VERENIGING:
-            korting_str = "Verenigingskorting: %d%%" % korting.percentage
+            kort_str = "Verenigingskorting: %d%%" % korting.percentage
 
         elif korting.soort == WEDSTRIJD_KORTING_COMBI:              # pragma: no branch
-            korting_str = "Combinatiekorting: %d%%" % korting.percentage
-            korting_redenen = [wedstrijd.titel for wedstrijd in korting.voor_wedstrijden.all()]
+            kort_str = "Combinatiekorting: %d%%" % korting.percentage
+            redenen = [wedstrijd.titel for wedstrijd in korting.voor_wedstrijden.all()]
 
-    return korting_str, korting_redenen
+    return kort_str, redenen
+
 
 # end of file
