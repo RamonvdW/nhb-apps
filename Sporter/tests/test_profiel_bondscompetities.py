@@ -337,7 +337,7 @@ class TestSporterProfielBondscompetities(E2EHelpers, TestCase):
 
         return deelnemer18, deelnemer25
 
-    def _stroom_door_naar_rk(self, deelnemer: RegiocompetitieSporterBoog) -> KampioenschapSporterBoog:
+    def _stroom_door_naar_rk(self, deelnemer: RegiocompetitieSporterBoog, set_rank=False) -> KampioenschapSporterBoog:
 
         kampioenschap = Kampioenschap.objects.get(competitie=deelnemer.regiocompetitie.competitie,
                                                   rayon=self.rayon)
@@ -348,6 +348,10 @@ class TestSporterProfielBondscompetities(E2EHelpers, TestCase):
                         indiv_klasse=deelnemer.indiv_klasse,
                         # deelname=DEELNAME_ONBEKEND
                         bij_vereniging=self.ver)
+
+        if set_rank:
+            kamp_rk.rank = 5
+
         kamp_rk.save()
 
         return kamp_rk
@@ -579,8 +583,9 @@ class TestSporterProfielBondscompetities(E2EHelpers, TestCase):
         self._prep_voorkeuren(self.sporter1)  # zet R als wedstrijdboog
         self._competitie_aanmaken()  # zet fase C, dus openbaar en klaar voor inschrijving
         deelnemer18, _ = self._regio_inschrijven(do_25=False)
-        kamp_rk18 = self._stroom_door_naar_rk(deelnemer18)
+        kamp_rk18 = self._stroom_door_naar_rk(deelnemer18, set_rank=True)
         self.assertEqual(kamp_rk18.deelname, DEELNAME_ONBEKEND)
+        self._maak_kampioenschap_match(kamp_rk18)
         zet_competitie_fase_rk_prep(self.comp_25)
         zet_competitie_fase_rk_prep(self.comp_18)
 
@@ -607,6 +612,7 @@ class TestSporterProfielBondscompetities(E2EHelpers, TestCase):
         kamp_rk18 = self._stroom_door_naar_rk(deelnemer18)
         kamp_rk18.deelname = DEELNAME_NEE
         kamp_rk18.save(update_fields=['deelname'])
+        self._maak_kampioenschap_match(kamp_rk18)
         zet_competitie_fase_rk_prep(self.comp_25)
         zet_competitie_fase_rk_prep(self.comp_18)
 
@@ -654,7 +660,28 @@ class TestSporterProfielBondscompetities(E2EHelpers, TestCase):
 
     def test_case_09d(self):
         case_nr = "9d"
-        case_tekst = 'RK prep, 1x doorgestroomd naar RK, deelname = JA, kan nog wijzigen, geen wedstrijdlocatie'
+        case_tekst = 'RK prep, 1x doorgestroomd naar RK, deelname nog niet doorgegeven, nog geen locatie'
+
+        self.e2e_login(self.account_normaal)
+        self._prep_voorkeuren(self.sporter1)  # zet R als wedstrijdboog
+        self._competitie_aanmaken()  # zet fase C, dus openbaar en klaar voor inschrijving
+        deelnemer18, _ = self._regio_inschrijven(do_25=False)
+        kamp_rk18 = self._stroom_door_naar_rk(deelnemer18, set_rank=True)
+        self.assertEqual(kamp_rk18.deelname, DEELNAME_ONBEKEND)
+        zet_competitie_fase_rk_prep(self.comp_25)
+        zet_competitie_fase_rk_prep(self.comp_18)
+
+        resp = self.client.get(self.url_profiel_test % case_nr, data={"tekst": case_tekst})
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.e2e_open_in_browser(resp, self.show_in_browser)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('sporter/profiel.dtl', 'plein/site_layout.dtl'))
+        self.assertContains(resp, 'Laat weten of je mee kan doen')
+        self.assertContains(resp, 'volgt binnenkort')
+
+    def test_case_09e(self):
+        case_nr = "9e"
+        case_tekst = 'RK prep, 1x doorgestroomd naar RK, deelname = JA, kan nog wijzigen, nog geen locatie'
 
         self.e2e_login(self.account_normaal)
         self._prep_voorkeuren(self.sporter1)  # zet R als wedstrijdboog

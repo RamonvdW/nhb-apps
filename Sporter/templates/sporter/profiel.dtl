@@ -270,6 +270,17 @@
                                             {% if deelnemer.rk_inschrijving.rank > 0 %}
                                                 <br>
                                                 <span>Op de RK lijst sta je op plaats {{ deelnemer.rk_inschrijving.rank }}</span>
+                                            {% endif %}
+
+                                            {% if deelnemer.rk_inschrijving.deelname == 'N' %}
+                                                <br>
+                                                <span>Je bent afgemeld</span>
+                                            {% elif deelnemer.rk_inschrijving.deelname == '?' %}
+                                                <br>
+                                                <span class="sv-rood-text">Laat weten of je mee kan doen</span>
+                                            {% endif %}
+
+                                         {% if deelnemer.rk_inschrijving.rank > 0 %}
                                                 <br>
                                                 <br>
                                                 <span>Wedstrijd: {{ deelnemer.rk_inschrijving.indiv_klasse.beschrijving }}</span>
@@ -281,14 +292,6 @@
                                                 {% else %}
                                                     <span><i>Locatie volgt binnenkort</i></span>
                                                 {% endif %}
-                                            {% endif %}
-
-                                            {% if deelnemer.rk_inschrijving.deelname == 'N' %}
-                                                <br>
-                                                <span>Je bent afgemeld</span>
-                                            {% elif deelnemer.rk_inschrijving.deelname == '?' %}
-                                                <br>
-                                                <span class="sv-rood-text">Laat weten of je mee kan doen</span>
                                             {% endif %}
                                         {% else %}
                                             <span>Je bent geen deelnemer in het RK</span>
@@ -483,6 +486,17 @@
                                             {% if deelnemer.bk_inschrijving.rank > 0 %}
                                                 <br>
                                                 <span>Op de BK lijst sta je op plaats {{ deelnemer.bk_inschrijving.rank }}</span>
+                                            {% endif %}
+
+                                            {% if deelnemer.bk_inschrijving.deelname == 'N' %}
+                                                <br>
+                                                <span>Je bent afgemeld</span>
+                                            {% elif deelnemer.bk_inschrijving.deelname == '?' %}
+                                                <br>
+                                                <span class="sv-rood-text">Laat weten of je mee kan doen</span>
+                                            {% endif %}
+
+                                            {% if deelnemer.bk_inschrijving.rank > 0 %}
                                                 <br>
                                                 <br>
                                                 <span>Wedstrijd: {{ deelnemer.bk_inschrijving.indiv_klasse.beschrijving }}</span>
@@ -496,13 +510,6 @@
                                                 {% endif %}
                                             {% endif %}
 
-                                            {% if deelnemer.bk_inschrijving.deelname == 'N' %}
-                                                <br>
-                                                <span>Je bent afgemeld</span>
-                                            {% elif deelnemer.bk_inschrijving.deelname == '?' %}
-                                                <br>
-                                                <span class="sv-rood-text">Laat weten of je mee kan doen</span>
-                                            {% endif %}
                                         {% else %}
                                             <span>Je bent geen deelnemer in het BK</span>
                                         {% endif %}
