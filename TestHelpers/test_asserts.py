@@ -787,10 +787,10 @@ class MyTestAsserts(TestCase):
 
         do_report = False
         if found_delete or found_insert or found_update:        # pragma: no branch
-            if not tracer.modify_acceptable:
+            if not tracer.modify_acceptable:                    # pragma: no cover
                 do_report = True
 
-        if do_report:
+        if do_report:           # pragma: no cover
             explain = list()
             explain.append('concurrency check (modify_acceptable: %s):' % tracer.modify_acceptable)
             explain.append('from: ' + tracer.found_code)
@@ -807,28 +807,28 @@ class MyTestAsserts(TestCase):
                     pos2 = sql.find('"', pos1 + 2)
                     table_name = sql[pos1 + 2:pos2]
                     cmd = "SELECT"
-                    if " FOR UPDATE" in sql:                # pragma: no cover
+                    if " FOR UPDATE" in sql:
                         cmd += '.. FOR UPDATE'
 
-                elif sql.startswith('INSERT INTO '):        # pragma: no branch
+                elif sql.startswith('INSERT INTO '):
                     cmd = 'INSERT INTO'
                     pos1 = sql.find(' "')
                     pos2 = sql.find('"', pos1 + 2)
                     table_name = sql[pos1 + 2:pos2]
 
-                elif sql.startswith('UPDATE '):             # pragma: no cover
+                elif sql.startswith('UPDATE '):
                     cmd = 'UPDATE'
                     pos1 = sql.find(' "')
                     pos2 = sql.find('"', pos1 + 2)
                     table_name = sql[pos1 + 2:pos2]
 
-                elif sql.startswith('DELETE FROM '):        # pragma: no cover
+                elif sql.startswith('DELETE FROM '):
                     cmd = 'DELETE FROM'
                     pos1 = sql.find(' "')
                     pos2 = sql.find('"', pos1 + 2)
                     table_name = sql[pos1 + 2:pos2]
 
-                elif sql.startswith('SAVEPOINT'):           # pragma: no cover
+                elif sql.startswith('SAVEPOINT'):
                     try:
                         cmd = renames[sql]
                     except KeyError:
@@ -836,16 +836,16 @@ class MyTestAsserts(TestCase):
                         cmd = renames[sql] = '#' + str(savepoint_nr)
                     cmd += ' savepoint'
 
-                elif sql.startswith('RELEASE SAVEPOINT'):   # pragma: no cover
+                elif sql.startswith('RELEASE SAVEPOINT'):
                     cmd = renames[sql[8:]] + ' release'
 
                 else:
-                    cmd = '?? unknown sql: %s' % repr(sql)  # pragma: no cover
+                    cmd = '?? unknown sql: %s' % repr(sql)
 
                 explain.append(cmd + ' ' + table_name)
             # for
 
-            if FAIL_UNSAFE_DATABASE_MODIFICATION:           # pragma: no cover
+            if FAIL_UNSAFE_DATABASE_MODIFICATION:
                 self.fail(msg='Found database modification outside POST or background task:' +
                               '\n   ' +
                               '\n   '.join(explain))
@@ -1040,7 +1040,7 @@ class MyTestAsserts(TestCase):
             prev_pos = 0
             while 0 <= pos < len(html):
                 pos = html.find('€', pos+1)
-                if pos > prev_pos and pos - prev_pos <= 5:
+                if pos > prev_pos and pos - prev_pos <= 5:      # pragma: no cover
                     issues.append('Euro signs close to each other in html: ' + html[prev_pos-10:pos+10])
                 prev_pos = pos
             # while
@@ -1050,7 +1050,7 @@ class MyTestAsserts(TestCase):
             prev_pos = 0
             while 0 <= pos < len(text):
                 pos = text.find('€', pos+1)
-                if pos > prev_pos and pos - prev_pos <= 5:
+                if pos > prev_pos and pos - prev_pos <= 5:      # pragma: no cover
                     issues.append('Euro signs close to each other in text: ' + text[prev_pos-10:pos+10].replace('\n', '\\n'))
                 prev_pos = pos
             # while
@@ -1107,7 +1107,7 @@ class MyTestAsserts(TestCase):
                         elif zoek_td not in th_matched:                         # pragma: no cover
                             issues.append('{zoek1} Kan tekst %s niet vinden in html e-mail' % repr(zoek1))
 
-                if zoek2 in ignore:
+                if zoek2 in ignore:     # pragma: no cover
                     continue
 
                 pos = html.find(zoek2)
@@ -1141,7 +1141,7 @@ class MyTestAsserts(TestCase):
             if line.startswith('http://') or line.startswith('https://'):       # pragma: no branch
                 zoek = ' href="%s"' % line
                 pos = html.find(zoek)
-                if pos > 0:
+                if pos > 0:                                                     # pragma: no branch
                     html = html[:pos] + html[pos + len(zoek):]
                     continue
 

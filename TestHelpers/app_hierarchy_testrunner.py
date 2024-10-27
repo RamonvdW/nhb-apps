@@ -58,7 +58,7 @@ class HierarchyRunner(DiscoverRunner):
         for test in suite:
 
             # if the suite consists of other suites, this is probably the parallel running
-            if isinstance(test, TestSuite):
+            if isinstance(test, TestSuite):     # pragma: no cover
                 # we skip rebuilding the suite
                 return suite
 

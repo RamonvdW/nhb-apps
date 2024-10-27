@@ -134,9 +134,10 @@ def mailer_notify_internal_error(tb):
                     tb,
                     enforce_whitelist=False)
 
-    except TransactionManagementError:
-        # hier komen we alleen tijdens een autotest, welke automatisch in een atomic transaction uitgevoerd wordt
-        # als er een database fout opgetreden is, dan kunnen we geen nieuwe queries meer doen om een mail op te slaan.
+    except TransactionManagementError:      # pragma: no cover
+        # hier kunnen we alleen komen tijdens een autotest, welke automatisch in een atomic transaction uitgevoerd
+        # wordt nadat er een database fout opgetreden is.
+        # dan kunnen we geen nieuwe queries meer doen om een mail op te slaan.
         pass
 
 
