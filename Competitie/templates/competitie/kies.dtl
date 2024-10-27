@@ -56,6 +56,11 @@
         <div class="col s12">
             <!-- de beschikbare competities -->
             {% for obj in competities %}
+                {% if obj.break_row %}
+                    </div>
+                    <div class="col s12">
+                {% endif %}
+
                 {% if obj.is_volgend_seizoen %}
                     {% include 'plein/card_logo.dtl' with title=obj.titel text=obj.text img_src=obj.img_src img_height=63 url=obj.card_url img_style="filter: grayscale(100%)" %}
                 {% else %}
