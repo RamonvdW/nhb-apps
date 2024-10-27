@@ -181,9 +181,14 @@ class BetaalTransactie(models.Model):
         stamp = localtime(self.when).strftime('%Y-%m-%d om %H:%M')
 
         if self.transactie_type == TRANSACTIE_TYPE_MOLLIE_RESTITUTIE:
-            return "[%s] %s: %s, %s" % (stamp, self.refund_id,
-                                        format_bedrag_euro(self.bedrag_refund),
-                                        self.beschrijving)
+            msg = "[%s] %s" % (stamp, self.refund_id)
+            if self.refund_status:
+                msg += ' = %s' % self.refund_status
+
+            msg += ": %s, %s" % (format_bedrag_euro(self.bedrag_refund),
+                                 self.beschrijving)
+
+            return msg
 
         if self.transactie_type == TRANSACTIE_TYPE_HANDMATIG:
             return "[%s] %s: %s" % (stamp, self.beschrijving,
@@ -195,10 +200,10 @@ class BetaalTransactie(models.Model):
             msg += ' = %s' % self.payment_status
 
         if self.bedrag_terugbetaald:
-            msg += '; Terug betaald: %s' % format_bedrag_euro(self.bedrag_terugbetaald)
+            msg += '; Terugbetaald: %s' % format_bedrag_euro(self.bedrag_terugbetaald)
 
         if self.bedrag_teruggevorderd:
-            msg += '; Terug gevorderd: %s' % format_bedrag_euro(self.bedrag_teruggevorderd)
+            msg += '; Teruggevorderd: %s' % format_bedrag_euro(self.bedrag_teruggevorderd)
 
         msg += '; Beschikbaar: %s' % format_bedrag_euro(self.bedrag_beschikbaar)
 

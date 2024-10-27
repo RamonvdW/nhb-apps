@@ -108,8 +108,8 @@ class BetaalTransactieAdmin(admin.ModelAdmin):
 
     ordering = ('-when',)
 
-    list_filter = (TransactieTypeFilter, 'payment_status', HeeftRestitutieFilter, HeeftTerugvorderingFilter,
-                   AantalBestellingenFilter, OntvangerFilter)
+    list_filter = (TransactieTypeFilter, 'payment_status', 'refund_status', HeeftRestitutieFilter,
+                   HeeftTerugvorderingFilter, AantalBestellingenFilter, OntvangerFilter)
 
     search_fields = ('payment_id', 'refund_id', 'beschrijving')
 

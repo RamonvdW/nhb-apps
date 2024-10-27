@@ -8,9 +8,13 @@ from django.test import TestCase
 from django.conf import settings
 from django.utils import timezone
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse
-from Bestelling.definities import BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_BETALING_ACTIEF
+from Bestelling.definities import (BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_BETALING_ACTIEF,
+                                   BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_MISLUKT, BESTELLING_STATUS_GEANNULEERD)
 from Bestelling.models import Bestelling, BestellingProduct
-from Betaal.models import BetaalInstellingenVereniging
+from Betaal.definities import TRANSACTIE_TYPE_MOLLIE_PAYMENT
+from Betaal.models import BetaalInstellingenVereniging, BetaalTransactie
+from Evenement.definities import EVENEMENT_AFMELDING_STATUS_AFGEMELD
+from Evenement.models import Evenement, EvenementLocatie, EvenementInschrijving, EvenementAfgemeld
 from Functie.models import Functie
 from Geo.models import Regio
 from Locatie.models import WedstrijdLocatie
@@ -199,6 +203,34 @@ class TestBestellingActiviteit(E2EHelpers, TestCase):
         bestelling.producten.add(product2)
         self.bestelling = bestelling
 
+        locatie = EvenementLocatie(
+                        naam='Test',
+                        vereniging=ver,
+                        adres='Test')
+        locatie.save()
+
+        evenement = Evenement(
+                        titel='Test',
+                        organiserende_vereniging=ver,
+                        datum='2000-01-01',
+                        locatie=locatie)
+        evenement.save()
+
+        inschrijving = EvenementInschrijving(
+                            wanneer=now,
+                            evenement=evenement,
+                            sporter=self.sporter,
+                            koper=self.account_admin)
+        inschrijving.save()
+        self.inschrijving2 = inschrijving
+
+        product = BestellingProduct(
+                        evenement_inschrijving=inschrijving,
+                        prijs_euro=Decimal('1.23'))
+        product.save()
+        self.product3 = product
+        bestelling.producten.add(product)
+
     def _maak_bestellingen(self):
         bestel = Bestelling(
                     bestel_nr=self.volgende_bestel_nr,
@@ -218,6 +250,7 @@ class TestBestellingActiviteit(E2EHelpers, TestCase):
                     log='Aangemaakt')
         bestel.save()
         self.bestel1 = bestel
+        self.volgende_bestel_nr += 1
 
         product = BestellingProduct(
                         wedstrijd_inschrijving=self.inschrijving,
@@ -230,17 +263,6 @@ class TestBestellingActiviteit(E2EHelpers, TestCase):
         product = BestellingProduct()
         product.save()
         bestel.producten.add(product)
-
-        # de opgestarte betaling/restitutie wordt hier bijgehouden
-        # de BetaalMutatie wordt opgeslagen zodat deze is aangemaakt. Daarin zet de achtergrond taak een payment_id.
-        # daarmee kunnen we het BetaalActief record vinden met de status van de betaling en de log
-        #betaal_mutatie = models.ForeignKey(BetaalMutatie, on_delete=models.SET_NULL, null=True, blank=True)
-        #betaal_actief = models.ForeignKey(BetaalActief, on_delete=models.SET_NULL, null=True, blank=True)
-
-        # de afgeronde betalingen: ontvangst en restitutie
-        #transacties = models.ManyToManyField(BetaalTransactie, blank=True)
-
-        self.volgende_bestel_nr += 1
 
     def test_activiteit(self):
         # inlog vereist
@@ -261,6 +283,51 @@ class TestBestellingActiviteit(E2EHelpers, TestCase):
         # slechte zoekterm (veel te lang)
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_activiteit + '?zoekterm=' + 'haha' * 100)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('bestelling/activiteit.dtl', 'plein/site_layout.dtl'))
+
+        # lege zoekterm, gratis filter
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_activiteit + '?zoekterm=&gratis=on')
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('bestelling/activiteit.dtl', 'plein/site_layout.dtl'))
+
+        afgemeld = EvenementAfgemeld(
+                        wanneer_inschrijving=self.inschrijving2.wanneer,
+                        nummer=42,
+                        wanneer_afgemeld=timezone.now(),
+                        status=EVENEMENT_AFMELDING_STATUS_AFGEMELD,
+                        evenement=self.inschrijving2.evenement,
+                        sporter=self.inschrijving2.sporter,
+                        koper=self.inschrijving2.koper,
+                        bedrag_ontvangen=10,
+                        bedrag_retour=7.50,
+                        log='test\ntest\n')
+        afgemeld.save()
+
+        self.product3.evenement_afgemeld = afgemeld
+        self.product3.evenement_inschrijving = None
+        self.product3.save()
+
+        # lege zoekterm, evenementen filter
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_activiteit + '?zoekterm=&evenementen=on')
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('bestelling/activiteit.dtl', 'plein/site_layout.dtl'))
+
+        # lege zoekterm, webwinkel filter
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_activiteit + '?zoekterm=&webwinkel=on')
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('bestelling/activiteit.dtl', 'plein/site_layout.dtl'))
+
+        # lege zoekterm, wedstrijden filter
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_activiteit + '?zoekterm=&wedstrijden=on')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('bestelling/activiteit.dtl', 'plein/site_layout.dtl'))
@@ -295,6 +362,52 @@ class TestBestellingActiviteit(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('bestelling/activiteit.dtl', 'plein/site_layout.dtl'))
 
+        bestel = Bestelling(
+                    bestel_nr=self.volgende_bestel_nr,
+                    # account=       # van wie is deze bestelling
+                    ontvanger=self.instellingen,
+                    verkoper_naam='Test',
+                    verkoper_adres1='Adres1',
+                    verkoper_adres2='Adres2',
+                    verkoper_kvk='Kvk',
+                    verkoper_email='test@test.not',
+                    verkoper_telefoon='tel nr',
+                    verkoper_iban='IBAN',
+                    verkoper_bic='BIC123',
+                    verkoper_heeft_mollie=True,
+                    totaal_euro=Decimal('12.34'),
+                    status=BESTELLING_STATUS_AFGEROND,
+                    log='Aangemaakt')
+        bestel.save()
+
+        bestel.pk = None
+        bestel.bestel_nr += 1
+        bestel.status = BESTELLING_STATUS_MISLUKT
+        bestel.save()
+
+        bestel.pk = None
+        bestel.bestel_nr += 1
+        bestel.status = BESTELLING_STATUS_GEANNULEERD
+        bestel.save()
+
+        transactie = BetaalTransactie(
+                            when=timezone.now(),
+                            bedrag_handmatig=10)
+        transactie.save()
+        bestel.transacties.add(transactie)
+
+        transactie = BetaalTransactie(
+                            when=timezone.now(),
+                            transactie_type=TRANSACTIE_TYPE_MOLLIE_PAYMENT,
+                            payment_id='test',
+                            payment_status='test',
+                            bedrag_te_ontvangen=10,
+                            bedrag_terugbetaald=5,
+                            bedrag_teruggevorderd=4)
+        transactie.save()
+        bestel.transacties.add(transactie)
+
+        self.volgende_bestel_nr += 1
         # checkboxes "toon webwinkel" en "toon wedstrijden"
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_activiteit + '?zoekterm=&webwinkel=on&wedstrijden=on&gratis=ja')

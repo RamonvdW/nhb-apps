@@ -185,8 +185,6 @@
                                             {% elif bestelling.status == 'G' %}
                                                 <span class="grey-text">Nieuw | Te betalen | Afgerond | Mislukt | </span>
                                                 <span>Geannuleerd</span>
-                                            {% else %}
-                                                <i class="sv-rood-text">Onverwacht ({{ bestelling.status }})</i>
                                             {% endif %}
                                         </td>
                                     </tr>

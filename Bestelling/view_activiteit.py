@@ -14,6 +14,7 @@ from Bestelling.definities import (BESTELLING_STATUS2STR, BESTELLING_STATUS_NIEU
                                    BESTELLING_STATUS_MISLUKT)
 from Bestelling.forms import ZoekBestellingForm
 from Bestelling.models import Bestelling
+from Betaal.definities import TRANSACTIE_TYPE_MOLLIE_PAYMENT
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige
 import datetime
@@ -244,14 +245,20 @@ class BestelActiviteitView(UserPassesTestMixin, TemplateView):
 
             bestelling.beschrijving_kort = " + ".join(beschrijvingen) if len(beschrijvingen) else "?"
 
-            bestelling.trans_list = list(bestelling
-                                         .transacties
-                                         .order_by('when'))     # oudste eerst
+            bestelling.trans_list = list()
 
-            # for transactie in bestelling.trans_list:
-            #     pass
-            # # for
+            transactie_mollie = None
+            for transactie in bestelling.transacties.order_by('when'):     # oudste eerst
 
+                if transactie.transactie_type == TRANSACTIE_TYPE_MOLLIE_PAYMENT:
+                    # alleen de laatste tonen
+                    transactie_mollie = transactie
+                else:
+                    bestelling.trans_list.append(transactie)
+            # for
+
+            if transactie_mollie:
+                bestelling.trans_list.append(transactie_mollie)
         # for
 
         if self.is_staff:
