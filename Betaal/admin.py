@@ -98,9 +98,27 @@ class AantalBestellingenFilter(admin.SimpleListFilter):
 
     def queryset(self, request, queryset):
         aantal = self.value()
-        print('aantal: %s' % repr(aantal))
         if aantal:
             queryset = queryset.annotate(aantal=Count('bestelling')).filter(aantal=aantal)
+        return queryset
+
+
+class PaymentStatusFilter(admin.SimpleListFilter):
+    title = 'payment status'
+    parameter_name = 'payment_status2'
+
+    def lookups(self, request, model_admin):
+        options = list()
+        for obj in BetaalTransactie.objects.distinct('payment_status').order_by('payment_status'):
+            options.append((obj.payment_status, obj.payment_status))
+        # for
+        options.append(('', '(leeg)'))
+        return options
+
+    def queryset(self, request, queryset):
+        status = self.value()
+        if status is not None:
+            queryset = queryset.filter(payment_status=status)
         return queryset
 
 
@@ -108,8 +126,8 @@ class BetaalTransactieAdmin(admin.ModelAdmin):
 
     ordering = ('-when',)
 
-    list_filter = (TransactieTypeFilter, 'payment_status', HeeftRestitutieFilter, HeeftTerugvorderingFilter,
-                   AantalBestellingenFilter, OntvangerFilter)
+    list_filter = (TransactieTypeFilter, PaymentStatusFilter, 'refund_status', HeeftRestitutieFilter,
+                   HeeftTerugvorderingFilter, AantalBestellingenFilter, OntvangerFilter)
 
     search_fields = ('payment_id', 'refund_id', 'beschrijving')
 
