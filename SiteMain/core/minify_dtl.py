@@ -227,7 +227,7 @@ def minify_template(contents):
     # optimize inside <style>
     new_contents = ''
     pos = contents.find('<style>')
-    if pos > 0:
+    if pos > 0:                                 # pragma: no branch
         pos2 = contents.find('</style>')
         new_contents += contents[:pos+7]        # <style>
         new_contents += minify_css(contents[pos+7:pos2])

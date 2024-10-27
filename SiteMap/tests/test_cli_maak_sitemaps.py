@@ -13,6 +13,7 @@ from Geo.models import Regio
 from Locatie.models import EvenementLocatie, WedstrijdLocatie
 from Records.models import IndivRecord
 from Vereniging.models import Vereniging
+from Webwinkel.models import WebwinkelProduct
 from Wedstrijden.definities import WEDSTRIJD_STATUS_GEACCEPTEERD
 from Wedstrijden.models import Wedstrijd
 from SiteMap.models import SiteMapLastMod
@@ -171,6 +172,22 @@ class TestSiteMapCliMaakSitemaps(E2EHelpers, TestCase):
             datum_einde=back_6_weeks,
             organiserende_vereniging=ver,
             locatie=loc).save()
+
+        WebwinkelProduct(
+            omslag_titel='Test titel 1',
+            onbeperkte_voorraad=True,
+            bestel_begrenzing='').save()
+
+        WebwinkelProduct(
+            omslag_titel='Test titel 1',   # zelfde titel als vorige product
+            onbeperkte_voorraad=True,
+            bestel_begrenzing='').save()
+
+        WebwinkelProduct(
+            omslag_titel='Test titel 2',
+            beschrijving='https://extern.site',         # link naar externe webshop
+            onbeperkte_voorraad=True,
+            bestel_begrenzing='').save()
 
         with tempfile.TemporaryDirectory() as output_dir:
             with self.assert_max_queries(20):

@@ -1608,17 +1608,17 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
 
     def test_stop_exactly(self):
         now = datetime.datetime.now()
-        if now.minute == 0:                             # pragma: no cover
-            print('Waiting until clock is past xx:00')
-            while now.minute == 0:
+        if now.second > 55:                             # pragma: no cover
+            print('Waiting until clock is past xx:xx:59')
+            while now.second > 55:
                 time.sleep(5)
                 now = datetime.datetime.now()
             # while
 
         now = datetime.datetime.now()
-        if now.second > 55:                             # pragma: no cover
-            print('Waiting until clock is past xx:xx:59')
-            while now.second > 55:
+        if now.minute == 0:                             # pragma: no cover
+            print('Waiting until clock is past xx:00')
+            while now.minute == 0:
                 time.sleep(5)
                 now = datetime.datetime.now()
             # while

@@ -96,7 +96,7 @@ class CompetitieBeheerView(UserPassesTestMixin, TemplateView):
         get_kaartjes_rayon(self.rol_nu, self.functie_nu, comp, kaartjes_algemeen, kaartjes_indiv, kaartjes_teams)
         get_kaartjes_bond(self.rol_nu, self.functie_nu, comp, kaartjes_algemeen, kaartjes_indiv, kaartjes_teams)
 
-        if len(kaartjes_algemeen):
+        if len(kaartjes_algemeen):      # pragma: no branch
             kaartjes_algemeen.sort(key=lambda kaartje: kaartje.prio)
             context['kaartjes_algemeen'] = kaartjes_algemeen
 

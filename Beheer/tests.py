@@ -11,7 +11,7 @@ from django.utils import timezone
 from django.contrib.admin.models import LogEntry
 from Beheer.views import beheer_opschonen
 from Geo.models import Regio
-from Betaal.models import BetaalActief, BetaalInstellingenVereniging
+from Betaal.models import BetaalActief, BetaalInstellingenVereniging, BetaalTransactie
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
 import datetime
@@ -234,18 +234,28 @@ class TestBeheer(E2EHelpers, TestCase):
                     payment_id='12345')
         actief.save()
 
+        transactie = BetaalTransactie(when=timezone.now())
+        transactie.save()
+
         urls = (
             # Betaal
             '/beheer/Betaal/betaalinstellingenvereniging/?Mollie=0',
             '/beheer/Betaal/betaalinstellingenvereniging/?Mollie=1',
             '/beheer/Betaal/betaaltransactie/?heeft_restitutie=ja',
             '/beheer/Betaal/betaaltransactie/?heeft_restitutie=ja&heeft_terugvordering=ja',
+            '/beheer/Betaal/betaaltransactie/?transactietype=HA',
+            '/beheer/Betaal/betaaltransactie/?ontvanger=',
+            '/beheer/Betaal/betaaltransactie/?ontvanger=1234',
+            '/beheer/Betaal/betaaltransactie/?aantal_bestellingen=0',
+            '/beheer/Betaal/betaaltransactie/?payment_status=paid',
             '/beheer/Betaal/betaalactief/?ontvanger=',
             '/beheer/Betaal/betaalactief/?ontvanger=1234',
 
             # Bestelling
             '/beheer/Bestelling/bestellingmandje/?is_leeg=0',       # noqa
             '/beheer/Bestelling/bestellingmandje/?is_leeg=1',       # noqa
+            '/beheer/Bestelling/bestelling/?ontvanger=',
+            '/beheer/Bestelling/bestelling/?ontvanger=1',
 
             # Sporter
             '/beheer/Sporter/sporter/?heeft_wa_id=Ja',
@@ -271,6 +281,11 @@ class TestBeheer(E2EHelpers, TestCase):
             '/beheer/Competitie/kampioenschapteam/?incompleet=compleet',
             '/beheer/Competitie/kampioenschapsporterboog/',
             '/beheer/Competitie/kampioenschapsporterboog/?indiv_klasse_rk_bk=1100',
+            '/beheer/Competitie/kampioenschapsporterboog/?mismatch=Geen',
+            '/beheer/Competitie/kampioenschapsporterboog/?mismatch=Ja',
+
+            # Scheidsrechter
+            '/beheer/Scheidsrechter/scheidsbeschikbaarheid/?opgaaf__exact=J',
         )
 
         for url in urls:

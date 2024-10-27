@@ -165,14 +165,6 @@ class TestScheidsrechterBeschikbaarheid(E2EHelpers, TestCase):
 
     def test_stop_exactly(self):
         now = datetime.datetime.now()
-        if now.minute == 0:                             # pragma: no cover
-            print('Waiting until clock is past xx:00')
-            while now.minute == 0:
-                time.sleep(5)
-                now = datetime.datetime.now()
-            # while
-
-        now = datetime.datetime.now()
         if now.second > 55:                             # pragma: no cover
             print('Waiting until clock is past xx:xx:59')
             while now.second > 55:
@@ -180,12 +172,22 @@ class TestScheidsrechterBeschikbaarheid(E2EHelpers, TestCase):
                 now = datetime.datetime.now()
             # while
 
+        now = datetime.datetime.now()
+        if now.minute == 0:                             # pragma: no cover
+            print('Waiting until clock is past xx:00')
+            while now.minute == 0:
+                time.sleep(5)
+                now = datetime.datetime.now()
+            # while
+
         # trigger the current minute
-        f1, f2 = self.run_management_command('scheids_mutaties', '1', '--quick', '--stop_exactly=%s' % now.minute)
+        f1, f2 = self.run_management_command('scheids_mutaties', '1', '--quick',
+                                             '--stop_exactly=%s' % now.minute)
         # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
 
         # trigger the negative case
-        f1, f2 = self.run_management_command('scheids_mutaties', '1', '--quick', '--stop_exactly=%s' % (now.minute - 1))
+        f1, f2 = self.run_management_command('scheids_mutaties', '1', '--quick',
+                                             '--stop_exactly=%s' % (now.minute - 1))
         # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
 
         now = datetime.datetime.now()
@@ -197,7 +199,8 @@ class TestScheidsrechterBeschikbaarheid(E2EHelpers, TestCase):
             # while
 
         # trigger the positive case
-        f1, f2 = self.run_management_command('scheids_mutaties', '1', '--quick', '--stop_exactly=%s' % (now.minute + 1))
+        f1, f2 = self.run_management_command('scheids_mutaties', '1', '--quick',
+                                             '--stop_exactly=%s' % (now.minute + 1))
         # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
 
 

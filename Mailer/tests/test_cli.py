@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2023 Ramon van der Winkel.
+#  Copyright (c) 2020-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -179,11 +179,13 @@ class TestMailerCliGoedBase(E2EHelpers, TestCase):
             # while
 
         # trigger the current minute
-        f1, f2 = self.run_management_command('stuur_mails', '1', '--quick', '--stop_exactly=%s' % now.minute)
+        f1, f2 = self.run_management_command('stuur_mails', '1', '--quick',
+                                             '--stop_exactly=%s' % now.minute)
         # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
 
         # trigger the negative case
-        f1, f2 = self.run_management_command('stuur_mails', '1', '--quick', '--stop_exactly=%s' % (now.minute - 1))
+        f1, f2 = self.run_management_command('stuur_mails', '1', '--quick',
+                                             '--stop_exactly=%s' % (now.minute - 1))
         # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
 
         now = datetime.datetime.now()
@@ -195,7 +197,8 @@ class TestMailerCliGoedBase(E2EHelpers, TestCase):
             # while
 
         # trigger the positive case
-        f1, f2 = self.run_management_command('stuur_mails', '1', '--quick', '--stop_exactly=%s' % (now.minute + 1))
+        f1, f2 = self.run_management_command('stuur_mails', '1', '--quick',
+                                             '--stop_exactly=%s' % (now.minute + 1))
         # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
 
 
