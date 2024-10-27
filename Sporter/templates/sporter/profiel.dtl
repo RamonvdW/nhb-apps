@@ -145,7 +145,9 @@
                         {% for comp in competities %}
                             <tr>
                                 <td class="center">{{ comp.beschrijving }}</td>
-                                <td class="center">{{ comp.fase_str }}</td>
+                                <td class="center">
+                                    <span class="hide-on-med-and-up">{{ comp.fase_str_kort }}</span>
+                                    <span class="hide-on-small-only">{{ comp.fase_str_lang }}</span></td>
                                 <td class="center">{{ comp.status_str }}</td>
                             </tr>
                         {% endfor %}
@@ -268,6 +270,17 @@
                                             {% if deelnemer.rk_inschrijving.rank > 0 %}
                                                 <br>
                                                 <span>Op de RK lijst sta je op plaats {{ deelnemer.rk_inschrijving.rank }}</span>
+                                                <br>
+                                                <br>
+                                                <span>Wedstrijd: {{ deelnemer.rk_inschrijving.indiv_klasse.beschrijving }}</span>
+                                                <br>
+                                                {% if deelnemer.rk_locatie %}
+                                                    <span>Bij vereniging {{ deelnemer.rk_locatie.vereniging.ver_nr_en_naam }}</span>
+                                                    <br>
+                                                    <span>{{ deelnemer.rk_locatie.adres|linebreaksbr }}</span>
+                                                {% else %}
+                                                    <span><i>Locatie volgt binnenkort</i></span>
+                                                {% endif %}
                                             {% endif %}
 
                                             {% if deelnemer.rk_inschrijving.deelname == 'N' %}
@@ -470,6 +483,17 @@
                                             {% if deelnemer.bk_inschrijving.rank > 0 %}
                                                 <br>
                                                 <span>Op de BK lijst sta je op plaats {{ deelnemer.bk_inschrijving.rank }}</span>
+                                                <br>
+                                                <br>
+                                                <span>Wedstrijd: {{ deelnemer.bk_inschrijving.indiv_klasse.beschrijving }}</span>
+                                                <br>
+                                                {% if deelnemer.bk_locatie %}
+                                                    <span>Bij vereniging {{ deelnemer.bk_locatie.vereniging.ver_nr_en_naam }}</span>
+                                                    <br>
+                                                    <span>{{ deelnemer.bk_locatie.adres|linebreaksbr }}</span>
+                                                {% else %}
+                                                    <span><i>Locatie volgt binnenkort</i></span>
+                                                {% endif %}
                                             {% endif %}
 
                                             {% if deelnemer.bk_inschrijving.deelname == 'N' %}

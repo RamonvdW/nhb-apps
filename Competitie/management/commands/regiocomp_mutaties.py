@@ -1231,6 +1231,10 @@ class Command(BaseCommand):
         # bepaal nu voor elke klasse de volgorde van de deelnemers
         self._verwerk_mutatie_initieel_deelkamp(deelkamp_bk)
 
+        # TODO: zet iedereen boven de cut op deelname = JA
+
+        # TODO: verstuur uitnodigingen per e-mail
+
         # behoud maximaal 48 sporters in elke klasse: 24 deelnemers en 24 reserves
         qset = KampioenschapSporterBoog.objects.filter(kampioenschap=deelkamp_bk, volgorde__gt=48)
         qset.delete()

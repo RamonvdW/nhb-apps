@@ -26,12 +26,20 @@ FASE_REGIOWEDSTRIJDEN = 2
 FASE_RK = 4
 FASE_BK = 5
 
-FASE2STR = {
+FASE2STR_LANG = {
     FASE_PREP: "Prep",
     FASE_INSCHRIJVEN: "Inschrijven",
     FASE_REGIOWEDSTRIJDEN: "Regiocompetitie",
     FASE_RK: "Rayonkampioenschappen",
     FASE_BK: "Bondskampioenschappen",
+}
+
+FASE2STR_KORT = {
+    FASE_PREP: "Prep",
+    FASE_INSCHRIJVEN: "Inschrijven",
+    FASE_REGIOWEDSTRIJDEN: "Regio",
+    FASE_RK: "RK",
+    FASE_BK: "BK",
 }
 
 
@@ -46,7 +54,8 @@ def get_sporter_competities(sporter: Sporter,
 
         lijst_competities: lijst van actieve competities (basis: Competitie)
         .fase: een van de FASE_*
-        .fase_str: Korte tekstuele beschrijving van de fase (zie FASE2STR)
+        .fase_str_lang: Normale tekstuele beschrijving van de fase (zie FASE2STR_LANG)
+        .fase_str_kort: Korte tekstuele beschrijving van de fase (zie FASE2STR_KORT)
         .status_str: Beschrijving van de status, specifiek voor de fase
 
         lijst_kan_inschrijven: lijst van competities waar sporter op in kan schrijven (basis: Regiocompetitie)
@@ -56,7 +65,7 @@ def get_sporter_competities(sporter: Sporter,
         lijst_inschrijvingen: lijst van inschrijvingen van sporter (basis: RegiocompetitieSporterBoog)
         .competitie: Competitie
         .competitie.fase
-        .competitie.fase_str
+        .competitie.fase_str_lang, kort
         .is_fase_rk: True als de competitie in de RK fase is
         .is_fase_bk: True als de competitie in de BK fase is
         .boog_niet_meer: True: boog niet meer gekozen
@@ -67,10 +76,14 @@ def get_sporter_competities(sporter: Sporter,
         .url_voorkeur_rk: POST URL om voorkeur RK in te stellen tijdens regio fase
         .url_schietmomenten: URL om 7 schietmomenten te kiezen (inschrijfmethode 1)
         .rk_inschrijving: KampioenschapSporterBoog voor RK waar sporter voor gekwalificeerd is
+        .rk_inschrijving.indiv_klasse: sporter wedstrijdklasse voor het RK (kan samengevoegd zijn)
+        .rk_locatie: locatie waar de RK wedstrijd gehouden wordt
         .url_rk_deelnemers: URL naar pagina met hele RK deelnemers lijst
         .url_status_rk_deelname: URL om deelname RK aan te passen (gebruik POST)
         .id_deelname_rk: unieke identificatie string voor gebruik als html "id"
         .bk_inschrijving: KampioenschapSporterBoog voor BK waar sporter individueel voor gekwalificeerd is
+        .bk_inschrijving.indiv_klasse: sporter wedstrijdklasse voor het BK (kan samengevoegd zijn)
+        .bk_locatie: locatie waar de BK wedstrijd gehouden wordt
     """
 
     now = timezone.now().date()
@@ -119,7 +132,8 @@ def get_sporter_competities(sporter: Sporter,
                     if now <= comp.einde_fase_F:
                         comp.status_str = 'Aanmelden kan nog tot %s' % localize(comp.einde_fase_F)
 
-            comp.fase_str = FASE2STR[comp.fase]
+            comp.fase_str_lang = FASE2STR_LANG[comp.fase]
+            comp.fase_str_kort = FASE2STR_KORT[comp.fase]
 
             # maak een lijst van boog afkortingen om verderop te matches tegen een SporterBoog
             comp.boog_afkortingen = [boogtype.afkorting for boogtype in comp.boogtypen.all()]
@@ -166,7 +180,7 @@ def get_sporter_competities(sporter: Sporter,
                 obj = copy.copy(deelcomp)
 
                 obj.boog_afkorting = afk
-                obj.boog_beschrijving = boog_dict[afk].beschrijving     # TODO: nodig?
+                obj.boog_beschrijving = boog_dict[afk].beschrijving
                 obj.boog_niet_meer = False
 
                 # zoek uit of de sporter al ingeschreven is
@@ -239,7 +253,8 @@ def get_sporter_competities(sporter: Sporter,
                       .select_related('kampioenschap',
                                       'kampioenschap__competitie',
                                       'kampioenschap__rayon',
-                                      'sporterboog')
+                                      'sporterboog',
+                                      'indiv_klasse')
                       .filter(sporterboog__sporter=sporter,
                               kampioenschap__competitie__in=lijst_competities)
                       .order_by('kampioenschap__competitie__afstand',
@@ -257,6 +272,7 @@ def get_sporter_competities(sporter: Sporter,
             if kamp.deel == DEEL_RK:
                 # RK
                 inschrijving.rk_inschrijving = deelnemer
+                inschrijving.rk_locatie = None
 
                 if deelnemer.deelname != DEELNAME_NEE:
                     boog_afk = deelnemer.sporterboog.boogtype.afkorting
@@ -266,6 +282,17 @@ def get_sporter_competities(sporter: Sporter,
                                                                  'comp_boog': boog_afk.lower(),
                                                                  'rayon_nr': kamp.rayon.rayon_nr})
 
+                    # zoek de match en locatie gegevens erbij
+                    for match in kamp.rk_bk_matches.all():
+                        if match.indiv_klassen.filter(pk=deelnemer.indiv_klasse.pk).count() > 0:
+                            # found "the" match
+                            inschrijving.rk_locatie = match.locatie
+                            inschrijving.rk_locatie.vereniging = match.locatie.verenigingen.filter(plaats=match.locatie.plaats).first()
+                            if inschrijving.rk_locatie.vereniging is None:
+                                inschrijving.rk_locatie.vereniging = match.locatie.verenigingen.first()
+                            break
+                    # for
+
                 inschrijving.url_status_rk_deelname = reverse('CompLaagRayon:wijzig-status-rk-deelname')
                 inschrijving.id_deelname_rk = 'deelname_rk_%s' % deelnemer.pk
 
@@ -274,6 +301,7 @@ def get_sporter_competities(sporter: Sporter,
             else:
                 # BK
                 inschrijving.bk_inschrijving = deelnemer
+                inschrijving.bk_locatie = None
 
                 if deelnemer.deelname != DEELNAME_NEE:
                     boog_afk = deelnemer.sporterboog.boogtype.afkorting
@@ -281,6 +309,17 @@ def get_sporter_competities(sporter: Sporter,
                                                              kwargs={
                                                                  'comp_pk_of_seizoen': comp.maak_seizoen_url(),
                                                                  'comp_boog': boog_afk.lower()})
+
+                    # zoek de match en locatie gegevens erbij
+                    for match in kamp.rk_bk_matches.all():
+                        if match.indiv_klassen.filter(pk=deelnemer.indiv_klasse.pk).count() > 0:
+                            # found "the" match
+                            inschrijving.bk_locatie = match.locatie
+                            inschrijving.bk_locatie.vereniging = match.locatie.verenigingen.filter(plaats=match.locatie.plaats).first()
+                            if inschrijving.bk_locatie.vereniging is None:
+                                inschrijving.bk_locatie.vereniging = match.locatie.verenigingen.first()
+                            break
+                    # for
 
                 inschrijving.url_status_bk_deelname = reverse('CompLaagBond:wijzig-status-bk-deelname')
                 inschrijving.id_deelname_bk = 'deelname_bk_%s' % deelnemer.pk
