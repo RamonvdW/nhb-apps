@@ -22,6 +22,7 @@ class TestCompLaagBondIndiv(E2EHelpers, TestCase):
     url_bk_selectie = '/bondscompetities/bk/selectie/%s/'                               # deelkamp_pk
     url_bk_selectie_download = '/bondscompetities/bk/selectie/%s/bestand/'              # deelkamp_pk
     url_wijzig_status = '/bondscompetities/bk/selectie/wijzig-status-bk-deelnemer/%s/'  # deelnemer_pk
+    url_wijzig_status_sporter = '/bondscompetities/bk/wijzig-status-bk-deelname/'
 
     testdata = None
     deelnemers_no_ver = list()
@@ -60,6 +61,10 @@ class TestCompLaagBondIndiv(E2EHelpers, TestCase):
         # zet de competities in fase P
         zet_competitie_fase_bk_wedstrijden(data.comp18)
 
+        kamp = KampioenschapSporterBoog.objects.filter(kampioenschap=data.deelkamp18_bk).exclude(sporterboog__sporter__account=None).first()
+        cls.kampioen = kamp
+        cls.account_sporter = kamp.sporterboog.sporter.account
+
         s2 = timezone.now()
         d = s2 - s1
         print('%s: populating testdata took %.1f seconds' % (cls.__name__, d.total_seconds()))
@@ -91,6 +96,12 @@ class TestCompLaagBondIndiv(E2EHelpers, TestCase):
         self.assert_is_redirect_login(resp)
 
         resp = self.client.get(self.url_wijzig_status % 999999)
+        self.assert_is_redirect_login(resp)
+
+        resp = self.client.get(self.url_wijzig_status_sporter)
+        self.assert_is_redirect_login(resp)
+
+        resp = self.client.post(self.url_wijzig_status_sporter)
         self.assert_is_redirect_login(resp)
 
     def test_selectie(self):
@@ -213,5 +224,50 @@ class TestCompLaagBondIndiv(E2EHelpers, TestCase):
         self.assert403(resp, 'Niet de beheerder')
 
         self.e2e_assert_other_http_commands_not_supported(self.url_wijzig_status % 999999, post=False)
+
+    def test_sporter(self):
+        # log in als sporter
+        self.e2e_login(self.account_sporter)
+
+        resp = self.client.get(self.url_wijzig_status_sporter)
+        self.assert404(resp, 'Niet mogelijk')
+
+        resp = self.client.post(self.url_wijzig_status_sporter)
+        self.assert404(resp, 'Deelnemer niet gevonden')
+
+        resp = self.client.post(self.url_wijzig_status_sporter, data={'deelnemer': self.kampioen.pk})
+        self.assert_is_redirect(resp, '/sporter/')
+        self.assertEqual(CompetitieMutatie.objects.count(), 0)
+
+        resp = self.client.post(self.url_wijzig_status_sporter, data={'deelnemer': self.kampioen.pk,
+                                                                      'snel': 1,
+                                                                      'keuze': 'J'})
+        self.assert_is_redirect(resp, '/sporter/')
+        self.assertEqual(CompetitieMutatie.objects.count(), 1)
+
+        resp = self.client.post(self.url_wijzig_status_sporter, data={'deelnemer': self.kampioen.pk,
+                                                                      'snel': 1,
+                                                                      'keuze': 'N'})
+        self.assert_is_redirect(resp, '/sporter/')
+        self.assertEqual(CompetitieMutatie.objects.count(), 2)
+
+        # maak de sporter niet meer lid bij een vereniging
+        self.kampioen.refresh_from_db()
+        self.kampioen.bij_vereniging = None
+        self.kampioen.save(update_fields=['bij_vereniging'])
+
+        resp = self.client.post(self.url_wijzig_status_sporter, data={'deelnemer': self.kampioen.pk,
+                                                                      'snel': 1,
+                                                                      'keuze': 'J'})
+        self.assert404(resp, 'Je moet lid zijn bij een vereniging')
+        self.assertEqual(CompetitieMutatie.objects.count(), 2)
+
+        # zet de competitie door, zodat aanmelden/afmelden niet meer mag
+        comp = self.kampioen.kampioenschap.competitie
+        zet_competitie_fase_rk_wedstrijden(comp)
+
+        resp = self.client.post(self.url_wijzig_status_sporter, data={'deelnemer': self.kampioen.pk})
+        self.assert404(resp, 'Mag niet wijzigen')
+
 
 # end of file

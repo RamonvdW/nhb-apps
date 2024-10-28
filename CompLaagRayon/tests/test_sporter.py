@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2024 Ramon van der Winkel.
+#  Copyright (c) 2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
 from Competitie.models import KampioenschapSporterBoog, CompetitieMutatie
-from Competitie.test_utils.tijdlijn import (zet_competitie_fase_rk_prep, zet_competitie_fase_regio_afsluiten,
-                                            zet_competitie_fase_rk_wedstrijden)
+from Competitie.test_utils.tijdlijn import zet_competitie_fase_rk_prep, zet_competitie_fase_rk_wedstrijden
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 
@@ -18,7 +17,7 @@ class TestCompLaagRayonBko(E2EHelpers, TestCase):
 
     test_after = ('Competitie.tests.test_overzicht', 'Competitie.tests.test_tijdlijn')
 
-    url_wijzig_status = '/bondscompetities/rk/wijzig-status-rk-deelname/'
+    url_wijzig_status_sporter = '/bondscompetities/rk/wijzig-status-rk-deelname/'
 
     testdata = None
     rayon_nr = 1
@@ -65,31 +64,31 @@ class TestCompLaagRayonBko(E2EHelpers, TestCase):
     def test_wijzig_status(self):
         # anon
         self.client.logout()
-        resp = self.client.get(self.url_wijzig_status)
+        resp = self.client.get(self.url_wijzig_status_sporter)
         self.assert403(resp, "Geen toegang")
 
         # log in als sporter
         self.e2e_login(self.account_sporter)
 
-        resp = self.client.get(self.url_wijzig_status)
+        resp = self.client.get(self.url_wijzig_status_sporter)
         self.assert404(resp, 'Niet mogelijk')
 
-        resp = self.client.post(self.url_wijzig_status)
+        resp = self.client.post(self.url_wijzig_status_sporter)
         self.assert404(resp, 'Deelnemer niet gevonden')
 
-        resp = self.client.post(self.url_wijzig_status, data={'deelnemer': self.kampioen.pk})
+        resp = self.client.post(self.url_wijzig_status_sporter, data={'deelnemer': self.kampioen.pk})
         self.assert_is_redirect(resp, '/sporter/')
         self.assertEqual(CompetitieMutatie.objects.count(), 0)
 
-        resp = self.client.post(self.url_wijzig_status, data={'deelnemer': self.kampioen.pk,
-                                                              'snel': 1,
-                                                              'keuze': 'J'})
+        resp = self.client.post(self.url_wijzig_status_sporter, data={'deelnemer': self.kampioen.pk,
+                                                                      'snel': 1,
+                                                                      'keuze': 'J'})
         self.assert_is_redirect(resp, '/sporter/')
         self.assertEqual(CompetitieMutatie.objects.count(), 1)
 
-        resp = self.client.post(self.url_wijzig_status, data={'deelnemer': self.kampioen.pk,
-                                                              'snel': 1,
-                                                              'keuze': 'N'})
+        resp = self.client.post(self.url_wijzig_status_sporter, data={'deelnemer': self.kampioen.pk,
+                                                                      'snel': 1,
+                                                                      'keuze': 'N'})
         self.assert_is_redirect(resp, '/sporter/')
         self.assertEqual(CompetitieMutatie.objects.count(), 2)
 
@@ -98,9 +97,9 @@ class TestCompLaagRayonBko(E2EHelpers, TestCase):
         self.kampioen.bij_vereniging = None
         self.kampioen.save(update_fields=['bij_vereniging'])
 
-        resp = self.client.post(self.url_wijzig_status, data={'deelnemer': self.kampioen.pk,
-                                                              'snel': 1,
-                                                              'keuze': 'J'})
+        resp = self.client.post(self.url_wijzig_status_sporter, data={'deelnemer': self.kampioen.pk,
+                                                                      'snel': 1,
+                                                                      'keuze': 'J'})
         self.assert404(resp, 'Je moet lid zijn bij een vereniging')
         self.assertEqual(CompetitieMutatie.objects.count(), 2)
 
@@ -108,7 +107,7 @@ class TestCompLaagRayonBko(E2EHelpers, TestCase):
         comp = self.kampioen.kampioenschap.competitie
         zet_competitie_fase_rk_wedstrijden(comp)
 
-        resp = self.client.post(self.url_wijzig_status, data={'deelnemer': self.kampioen.pk})
+        resp = self.client.post(self.url_wijzig_status_sporter, data={'deelnemer': self.kampioen.pk})
         self.assert404(resp, 'Mag niet wijzigen')
 
 

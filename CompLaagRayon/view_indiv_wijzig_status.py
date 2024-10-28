@@ -186,7 +186,8 @@ class SporterWijzigStatusRkDeelnameView(UserPassesTestMixin, TemplateView):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         return rol_get_huidige(self.request) == Rollen.ROL_SPORTER
 
-    def get(self, request, *args, **kwargs):
+    @staticmethod
+    def get(request, *args, **kwargs):
         raise Http404('Niet mogelijk')
 
     @staticmethod

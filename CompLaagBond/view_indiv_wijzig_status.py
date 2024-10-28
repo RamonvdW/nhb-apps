@@ -174,6 +174,10 @@ class SporterWijzigStatusBkDeelnameView(UserPassesTestMixin, TemplateView):
         return rol_get_huidige(self.request) == Rollen.ROL_SPORTER
 
     @staticmethod
+    def get(request, *args, **kwargs):
+        raise Http404('Niet mogelijk')
+
+    @staticmethod
     def post(request, *args, **kwargs):
         """ wordt aangeroepen als de sporter op de knop drukt om een wijziging te maken """
 
