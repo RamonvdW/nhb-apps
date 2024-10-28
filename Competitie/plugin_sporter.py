@@ -136,7 +136,7 @@ def get_sporter_competities(sporter: Sporter,
             comp.fase_str_kort = FASE2STR_KORT[comp.fase]
 
             # maak een lijst van boog afkortingen om verderop te matches tegen een SporterBoog
-            comp.boog_afkortingen = [boogtype.afkorting for boogtype in comp.boogtypen.order_by('volgorde')]
+            comp.boog_afkortingen = [boogtype.afkorting for boogtype in comp.boogtypen.all()]
 
         # als de competitie nog in de prep fase is, dan nog niet tonen
         if comp.fase != FASE_PREP:

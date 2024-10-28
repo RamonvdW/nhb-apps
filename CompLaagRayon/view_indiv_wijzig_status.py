@@ -6,7 +6,7 @@
 
 from django.conf import settings
 from django.urls import reverse
-from django.http import HttpResponseRedirect, Http404
+from django.http import HttpResponseRedirect, HttpResponseNotAllowed, Http404
 from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
 from django.utils.safestring import mark_safe
@@ -106,7 +106,7 @@ class WijzigStatusRkDeelnemerView(UserPassesTestMixin, TemplateView):
         return context
 
     def post(self, request, *args, **kwargs):
-        """ wordt aangeroepen als de gebruiker op de knop drukt om een wijziging door te voeren """
+        """ wordt aangeroepen als de beheerder op de knop drukt om een wijziging door te voeren """
         try:
             deelnemer_pk = int(kwargs['deelnemer_pk'][:6])  # afkappen voor de veiligheid
             deelnemer = (KampioenschapSporterBoog
@@ -186,8 +186,12 @@ class SporterWijzigStatusRkDeelnameView(UserPassesTestMixin, TemplateView):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         return rol_get_huidige(self.request) == Rollen.ROL_SPORTER
 
-    def post(self, request, *args, **kwargs):
-        """ wordt aangeroepen als de gebruiker op de knop drukt om een wijziging te maken """
+    def get(self, request, *args, **kwargs):
+        raise Http404('Niet mogelijk')
+
+    @staticmethod
+    def post(request, *args, **kwargs):
+        """ wordt aangeroepen als de sporter op de knop drukt om een wijziging te maken """
 
         account = get_account(request)
         sporter = get_sporter(account)
@@ -211,20 +215,19 @@ class SporterWijzigStatusRkDeelnameView(UserPassesTestMixin, TemplateView):
         if comp.fase_indiv not in ('J', 'K'):       # TODO: toestaan in de laatste 2 weken voor de wedstrijd (=fase L)?
             raise Http404('Mag niet wijzigen')
 
-        bevestig = str(request.POST.get('bevestig', ''))[:2]
-        afmelden = str(request.POST.get('afmelden', ''))[:2]
+        keuze = str(request.POST.get('keuze', ''))[:2]
         snel = str(request.POST.get('snel', ''))[:1]
 
         door_str = account.get_account_full_name()
 
-        if bevestig == "1":
+        if keuze == "J":
             if not deelnemer.bij_vereniging:
                 # kan niet bevestigen zonder verenigingslid te zijn
                 raise Http404('Je moet lid zijn bij een vereniging')
             mutatie = CompetitieMutatie(mutatie=MUTATIE_KAMP_AANMELDEN_INDIV,
                                         deelnemer=deelnemer,
                                         door=door_str)
-        elif afmelden == "1":
+        elif keuze == "N":
             mutatie = CompetitieMutatie(mutatie=MUTATIE_KAMP_AFMELDEN_INDIV,
                                         deelnemer=deelnemer,
                                         door=door_str)
