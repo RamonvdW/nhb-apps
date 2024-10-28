@@ -185,7 +185,7 @@ class TestSporterProfielBondscompetities(E2EHelpers, TestCase):
             resp = self.client.post(url)
         self.assert_is_redirect(resp, self.url_profiel)
 
-        with self.assert_max_queries(26):
+        with self.assert_max_queries(28):
             resp = self.client.get(self.url_profiel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)

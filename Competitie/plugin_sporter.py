@@ -136,7 +136,7 @@ def get_sporter_competities(sporter: Sporter,
             comp.fase_str_kort = FASE2STR_KORT[comp.fase]
 
             # maak een lijst van boog afkortingen om verderop te matches tegen een SporterBoog
-            comp.boog_afkortingen = [boogtype.afkorting for boogtype in comp.boogtypen.all()]
+            comp.boog_afkortingen = [boogtype.afkorting for boogtype in comp.boogtypen.order_by('volgorde')]
 
         # als de competitie nog in de prep fase is, dan nog niet tonen
         if comp.fase != FASE_PREP:
@@ -154,10 +154,11 @@ def get_sporter_competities(sporter: Sporter,
     inschrijvingen = list(RegiocompetitieSporterBoog
                           .objects
                           .select_related('regiocompetitie',
-                                          'sporterboog')
+                                          'sporterboog',
+                                          'sporterboog__boogtype')
                           .filter(sporterboog__sporter=sporter,
                                   regiocompetitie__competitie__in=lijst_competities)
-                          .order_by('regiocompetitie__competitie__afstand'))
+                          .order_by('sporterboog__boogtype__volgorde'))
 
     lijst_kan_inschrijven = list()
     lijst_inschrijvingen = list()
@@ -170,7 +171,8 @@ def get_sporter_competities(sporter: Sporter,
                      .select_related('competitie')
                      .filter(competitie__in=lijst_competities,
                              regio=regio)
-                     .order_by('competitie__afstand')):
+                     .order_by('competitie__begin_jaar',        # op seizoen groeperen
+                               'competitie__afstand')):         # consistente volgorde
 
         comp = pk2comp[deelcomp.competitie.pk]
 
