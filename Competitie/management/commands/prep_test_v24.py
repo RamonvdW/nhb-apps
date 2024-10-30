@@ -4,10 +4,12 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
+from django.core import management
 from django.core.management.base import BaseCommand
-from Competitie.definities import MUTATIE_DOORZETTEN_REGIO_NAAR_RK
+from Competitie.definities import MUTATIE_DOORZETTEN_REGIO_NAAR_RK, MUTATIE_KAMP_INDIV_DOORZETTEN_NAAR_BK
 from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieMutatie,
-                               Regiocompetitie, RegiocompetitieSporterBoog)
+                               Regiocompetitie, RegiocompetitieSporterBoog,
+                               KampioenschapSporterBoog)
 from Competitie.operations import competities_aanmaken, competitie_klassengrenzen_vaststellen
 from Sporter.models import SporterBoog
 
@@ -105,9 +107,32 @@ class Command(BaseCommand):
         Regiocompetitie.objects.filter(competitie=comp, is_afgesloten=False).update(is_afgesloten=True)
 
         self.stdout.write('Doorzetten naar RK')
+        comp.refresh_from_db()
+        comp.rk_indiv_afgesloten = False
+        comp.save()
+
         CompetitieMutatie(mutatie=MUTATIE_DOORZETTEN_REGIO_NAAR_RK,
                           door='prep_test_v24',
                           competitie=comp).save()
+        management.call_command('regiocomp_mutaties', '1', '--quick', stderr=self.stderr, stdout=self.stdout)
+
+        # RK scores invoeren
+        KampioenschapSporterBoog.objects.update(result_score_1=299,
+                                                result_score_2=298,
+                                                result_rank=1)
+
+        comp.refresh_from_db()
+        print('comp.rk_indiv_afgesloten: %s' % comp.rk_indiv_afgesloten)
+
+        self.stdout.write('Doorzetten naar BK')
+        CompetitieMutatie(mutatie=MUTATIE_KAMP_INDIV_DOORZETTEN_NAAR_BK,
+                          door='prep_test_v24',
+                          competitie=comp).save()
+        management.call_command('regiocomp_mutaties', '1', '--quick', stderr=self.stderr, stdout=self.stdout)
+
+        comp.refresh_from_db()
+        print('comp.rk_indiv_afgesloten: %s' % comp.rk_indiv_afgesloten)
+        # lot op: rk_teams_afgesloten moet ook gezet worden!
 
         self.stdout.write('Competitie 2025 aanmaken')
         Competitie.objects.filter(begin_jaar=2025).delete()

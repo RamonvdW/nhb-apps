@@ -39,7 +39,7 @@
                     <td>{{ deze_maand_count_gast }}</td>
                 </tr>
                 <tr>
-                    <th>Aantal actieve gebruikers</th>
+                    <th>Aantal actieve gebruikers (afgelopen 30 dagen)</th>
                     <td>{{ aantal_actieve_gebruikers }}</td>
                 </tr>
             </table>
