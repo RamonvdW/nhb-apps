@@ -128,6 +128,7 @@ def _beschrijf_bestelling(bestelling):
 
 
 def bereken_som_betalingen(bestelling: Bestelling) -> Decimal:
+    # TODO: dit gaat helemaal mis als een transactie meerdere keer in de database staat!!
     ontvangen_euro = Decimal('0')
     for transactie in bestelling.transacties.exclude(transactie_type=TRANSACTIE_TYPE_MOLLIE_RESTITUTIE):
         if transactie.transactie_type == TRANSACTIE_TYPE_HANDMATIG:
