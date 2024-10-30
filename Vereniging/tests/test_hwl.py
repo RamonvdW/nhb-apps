@@ -106,7 +106,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
                     geboorte_datum=datetime.date(year=jaar-10, month=3, day=4),
                     sinds_datum=datetime.date(year=jaar-3, month=11, day=12),
                     bij_vereniging=ver)
-        account = self.e2e_create_account(sporter.lid_nr, sporter.email, sporter.voornaam)  # heeft last_login=None
+        sporter.account = self.e2e_create_account(sporter.lid_nr, sporter.email, sporter.voornaam)  # heeft last_login=None
         sporter.save()
         self.sporter_100002 = sporter
 

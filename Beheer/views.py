@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2023 Ramon van der Winkel.
+#  Copyright (c) 2020-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -114,7 +114,7 @@ def beheer_opschonen(stdout):
     objs = LogEntry.objects.filter(action_time__lt=max_age)
 
     count = objs.count()
-    if count > 0:               # pragma: no cover
+    if count > 0:
         stdout.write('[INFO] Verwijder %s oude django admin log regels' % count)
         objs.delete()
 

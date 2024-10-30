@@ -71,7 +71,7 @@ class OntvangerFilter(admin.SimpleListFilter):
         return [(ver.ver_nr, ver.ver_nr_en_naam())
                 for ver in Vereniging.objects.filter(ver_nr__in=actieve_ver_nrs).order_by('ver_nr')]
 
-    def queryset(self, request, queryset):
+    def queryset(self, request, queryset):          # pragma: no cover
         ver_nr = self.value()
         # print('ver_nr: %s' % repr(ver_nr))
         if ver_nr:

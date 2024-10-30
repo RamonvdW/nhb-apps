@@ -6,12 +6,14 @@
 
 from django.conf import settings
 from django.test import TestCase
+from django.utils import timezone
 from Logboek.apps import post_migration_callback
 from Sporter.models import Sporter
-from Logboek.models import LogboekRegel, schrijf_in_logboek
+from Logboek.models import LogboekRegel, schrijf_in_logboek, logboek_opschonen
 from Logboek.views import RESULTS_PER_PAGE
 from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
+import io
 
 
 class TestLogboek(E2EHelpers, TestCase):
@@ -86,6 +88,7 @@ class TestLogboek(E2EHelpers, TestCase):
         # alles
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_logboek)
+        self.assert_template_used(resp, ('logboek/rest.dtl', 'plein/site_layout.dtl'))
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
 
@@ -260,6 +263,109 @@ class TestLogboek(E2EHelpers, TestCase):
             resp = self.client.get(self.url_logboek + '?zoekterm=Ramon%20de%20Tester')
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
+
+    def test_leeg(self):
+        LogboekRegel.objects.all().delete()
+
+        self.e2e_login_and_pass_otp(self.account_admin)
+        self.assertTrue(self.account_admin.is_staff)
+        self.e2e_wisselnaarrol_bb()
+        self.e2e_check_rol('BB')
+
+        # alles
+        resp = self.client.get(self.url_logboek)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_template_used(resp, ('logboek/rest.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
+        self.assertContains(resp, 'Niets gevonden')
+
+        # rest
+        resp = self.client.get(self.url_logboek + 'rest/')
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_template_used(resp, ('logboek/rest.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
+        self.assertContains(resp, 'Niets gevonden')
+
+        # records import
+        resp = self.client.get(self.url_logboek + 'records/')
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_template_used(resp, ('logboek/records.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
+        self.assertContains(resp, 'Niets gevonden')
+
+        # accounts
+        resp = self.client.get(self.url_logboek + 'accounts/')
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_template_used(resp, ('logboek/accounts.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
+        self.assertContains(resp, 'Niets gevonden')
+
+        # rollen
+        resp = self.client.get(self.url_logboek + 'rollen/')
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_template_used(resp, ('logboek/rollen.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
+
+        # crm import
+        resp = self.client.get(self.url_logboek + 'crm-import/')
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_template_used(resp, ('logboek/crm-import.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
+        self.assertContains(resp, 'Niets gevonden')
+
+        # competitie
+        resp = self.client.get(self.url_logboek + 'competitie/')
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_template_used(resp, ('logboek/competitie.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
+        self.assertContains(resp, 'Niets gevonden')
+
+        # accommodaties
+        resp = self.client.get(self.url_logboek + 'accommodaties/')
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_template_used(resp, ('logboek/accommodaties.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
+        self.assertContains(resp, 'Niets gevonden')
+
+        # clusters
+        resp = self.client.get(self.url_logboek + 'clusters/')
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_template_used(resp, ('logboek/clusters.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
+        self.assertContains(resp, 'Niets gevonden')
+
+        # betalingen
+        resp = self.client.get(self.url_logboek + 'betalingen/')
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_template_used(resp, ('logboek/betalingen.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
+        self.assertContains(resp, 'Niets gevonden')
+
+        # uitrol
+        resp = self.client.get(self.url_logboek + 'uitrol/')
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_template_used(resp, ('logboek/uitrol.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
+        self.assertContains(resp, 'Niets gevonden')
+
+    def test_te_lang(self):
+        # het feit dat er geen exceptie optreed is genoeg
+        schrijf_in_logboek(None, 'Te lang', 'Veel te lange regel text' * 50)    # meer dan 500
+
+        regel = LogboekRegel.objects.get(gebruikte_functie='Te lang')
+        self.assertEqual(regel.activiteit[-2:], '..')      # indicatie van afgekapte tekst
+
+    def test_opschonen(self):
+        # maak een regel aan die opgeschoond gaat worden
+        regel = LogboekRegel.objects.first()
+        regel.toegevoegd_op -= datetime.timedelta(days=2*365)       # cleanup gebeurt na 1.5 jaar
+        regel.save(update_fields=['toegevoegd_op'])
+
+        stdout = io.StringIO()
+        logboek_opschonen(stdout)
+
+        # geen records meer om op te schonen
+        logboek_opschonen(stdout)
 
 
 # end of file

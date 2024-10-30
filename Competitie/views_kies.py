@@ -40,19 +40,26 @@ class CompetitieKiesView(TemplateView):
         begin_jaar = bepaal_startjaar_nieuwe_competitie()
         eerdere_comp = dict()
         seizoen_afsluiten = 0
+        vorig_jaar = None
 
         for comp in (Competitie
                      .objects
                      .exclude(is_afgesloten=True)
-                     .order_by('afstand',
-                               'begin_jaar')):
+                     .order_by('begin_jaar',
+                               'afstand')):
 
             comp.bepaal_fase()
             if comp.fase_indiv == comp.fase_teams == 'Q':
                 seizoen_afsluiten += 1
 
             if comp.begin_jaar == begin_jaar:
-                begin_jaar = None
+                begin_jaar = None           # geen nieuwe competitie nodig
+
+            comp.break_row = False
+            if comp.begin_jaar != vorig_jaar:
+                if vorig_jaar is not None:
+                    comp.break_row = True
+                vorig_jaar = comp.begin_jaar
 
             comp.bepaal_openbaar(rol_nu)
 

@@ -112,7 +112,7 @@
         <div class="row">
             <div style="padding:10px">
                 <div class="col s12 m8 offset-m2 sv-rood white-text z-depth-3 center">
-                    <p>Aanmelden of afmelden voor de RK wedstrijd kan bij je eigen vereniging tot en met <b>{{ bevestig_tot_datum }}</b></p>
+                    <p>Aanmelden of afmelden voor de RK wedstrijd kan via Mijn pagina of bij je eigen vereniging tot en met <b>{{ bevestig_tot_datum }}</b></p>
                 </div>
             </div>
         </div>

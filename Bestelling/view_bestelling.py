@@ -20,6 +20,7 @@ from Bestelling.plugins.product_info import beschrijf_product, beschrijf_korting
 from Bestelling.operations.mutaties import bestel_mutatieverzoek_annuleer
 from Betaal.definities import (TRANSACTIE_TYPE_MOLLIE_PAYMENT, TRANSACTIE_TYPE_MOLLIE_RESTITUTIE,
                                TRANSACTIE_TYPE_HANDMATIG)
+from Betaal.format import format_bedrag_euro
 from Betaal.mutaties import betaal_mutatieverzoek_start_ontvangst
 from Functie.definities import Rollen
 from Functie.models import Functie
@@ -202,40 +203,58 @@ class ToonBestellingDetailsView(UserPassesTestMixin, TemplateView):
         return producten, bevat_fout
 
     @staticmethod
-    def _beschrijf_transacties(bestelling):
-
+    def _beschrijf_transacties(bestelling) -> (list, Decimal):
+        transacties = list()
         totaal_euro = Decimal(0)
 
-        transacties = (bestelling
-                       .transacties
-                       .order_by('when'))       # oudste eerst, nieuwste onderaan
+        transactie_mollie = None
+        for transactie in bestelling.transacties.order_by('when'):  # oudste eerst
+            transactie.stamp_str = localtime(transactie.when).strftime('%Y-%m-%d %H:%M')
 
-        for transactie in transacties:
-            transactie.regels = regels = list()
+            if transactie.transactie_type == TRANSACTIE_TYPE_HANDMATIG:
+                transactie.type_str = 'Overboeking'
+                transacties.append(transactie)
+                transactie.regels = regels = list()
+                tup = ('Ontvangen', format_bedrag_euro(transactie.bedrag_handmatig))
+                transactie.regels.append(tup)
+                totaal_euro += transactie.bedrag_handmatig
 
-            stamp_str = localtime(transactie.when).strftime('%Y-%m-%d %H:%M')
-            regels.append(stamp_str)
-
-            if transactie.payment_status in ('canceled', 'cancelled', 'expired', 'failed'):
-                regels.append('Niet gelukt')
-            else:
-                regels.append(transactie.beschrijving)
-
-            # TODO: hier kan het een beetje dubbel op worden met restitutie. Overweeg verwijderen
-            if transactie.transactie_type == TRANSACTIE_TYPE_MOLLIE_RESTITUTIE:
-                regels.append('Restitutie')
-                transactie.toon_euro = 0 - transactie.bedrag_refund
-            else:
-                if transactie.klant_naam:
-                    regels.append('Ontvangen van %s' % transactie.klant_naam)
-                # Mollie Payment is een snapshot van de laatste stand van zaken
-                # we willen laten zien hoeveel er ooit ontvangen is
-                transactie.toon_euro = (transactie.bedrag_beschikbaar +
-                                        transactie.bedrag_terugbetaald +
-                                        transactie.bedrag_teruggevorderd)
-
-            totaal_euro += transactie.toon_euro
+            if transactie.transactie_type == TRANSACTIE_TYPE_MOLLIE_PAYMENT:
+                # onthoudt de nieuwste - output is verderop
+                transactie_mollie = transactie
         # for
+
+        # voeg stand van zaken van Mollie Payment toe
+        if transactie_mollie:
+            transactie_mollie.type_str = 'Mollie'
+            transactie_mollie.regels = regels = list()
+
+            if transactie_mollie.payment_status in ('canceled', 'cancelled', 'expired', 'failed'):
+                tup = ('Niet gelukt', None)
+                regels.append(tup)
+            else:
+                tup = (transactie_mollie.beschrijving, None)    # voorbeeld: MH-1001111 MijnHandboogsport
+                regels.append(tup)
+
+                if transactie_mollie.klant_naam:
+                    tup = ('Ontvangen van %s' % transactie_mollie.klant_naam, None)
+                    regels.append(tup)
+
+                if transactie_mollie.bedrag_terugbetaald:
+                    tup = ('Terugbetaald', format_bedrag_euro(transactie_mollie.bedrag_terugbetaald))
+                    regels.append(tup)
+                    totaal_euro -= transactie_mollie.bedrag_terugbetaald
+
+                if transactie_mollie.bedrag_teruggevorderd:
+                    tup = ('Teruggevorderd',  format_bedrag_euro(transactie_mollie.bedrag_teruggevorderd))
+                    regels.append(tup)
+                    totaal_euro -= transactie_mollie.bedrag_teruggevorderd
+
+                tup = ('Beschikbaar', format_bedrag_euro(transactie_mollie.bedrag_beschikbaar))
+                regels.append(tup)
+                totaal_euro += transactie_mollie.bedrag_beschikbaar
+
+            transacties.append(transactie_mollie)
 
         return transacties, totaal_euro
 
@@ -260,24 +279,28 @@ class ToonBestellingDetailsView(UserPassesTestMixin, TemplateView):
         else:
             context['transport_ophalen'] = (bestelling.transport == BESTELLING_TRANSPORT_OPHALEN)
 
-            rest_euro = bestelling.totaal_euro - transacties_euro
-            if rest_euro > 0:
-                context['rest_euro'] = rest_euro
+            if bestelling.status == BESTELLING_STATUS_AFGEROND:
+                # geen betaling meer nodig
+                pass
+            else:
+                rest_euro = bestelling.totaal_euro - transacties_euro
+                if rest_euro > 0:
+                    context['rest_euro'] = rest_euro
 
-            if rest_euro >= Decimal('0.01'):
-                # betaling is vereist
+                if rest_euro >= Decimal('0.01'):
+                    # betaling is vereist
 
-                if bestelling.ontvanger.moet_handmatig():
-                    # betaling moet handmatig
-                    context['moet_handmatig'] = True
-                else:
-                    # betaling gaat via Mollie
-                    context['url_afrekenen'] = reverse('Bestel:bestelling-afrekenen',
+                    if bestelling.ontvanger.moet_handmatig():
+                        # betaling moet handmatig
+                        context['moet_handmatig'] = True
+                    else:
+                        # betaling gaat via Mollie
+                        context['url_afrekenen'] = reverse('Bestel:bestelling-afrekenen',
+                                                           kwargs={'bestel_nr': bestelling.bestel_nr})
+
+                if bestelling.status in (BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_BETALING_ACTIEF):
+                    context['url_annuleren'] = reverse('Bestel:annuleer-bestelling',
                                                        kwargs={'bestel_nr': bestelling.bestel_nr})
-
-            if bestelling.status in (BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_BETALING_ACTIEF):
-                context['url_annuleren'] = reverse('Bestel:annuleer-bestelling',
-                                                   kwargs={'bestel_nr': bestelling.bestel_nr})
 
         kwalificatie_scores = list()
         for product in (bestelling

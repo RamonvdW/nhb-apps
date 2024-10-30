@@ -589,7 +589,7 @@ class RkBkIndivKlasseFilter(admin.SimpleListFilter):
                                                                       .distinct('volgorde')
                                                                       .order_by('volgorde'))]
 
-    def queryset(self, request, queryset):
+    def queryset(self, request, queryset):                      # pragma: no cover
         selection = self.value()
         if selection:
             queryset = queryset.filter(indiv_klasse__volgorde=selection)

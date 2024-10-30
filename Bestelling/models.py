@@ -9,6 +9,7 @@ from django.utils import timezone
 from Account.models import Account
 from Bestelling.definities import (BESTELLING_STATUS_CHOICES, BESTELLING_STATUS_NIEUW, BESTELLING_STATUS2STR,
                                    BESTELLING_MUTATIE_TO_STR, BESTELLING_TRANSPORT_NVT, BESTELLING_TRANSPORT_OPTIES)
+from Betaal.format import format_bedrag_euro
 from Betaal.models import BetaalActief, BetaalTransactie, BetaalMutatie, BetaalInstellingenVereniging
 from Evenement.models import EvenementInschrijving, EvenementAfgemeld
 from Webwinkel.models import WebwinkelKeuze
@@ -228,9 +229,7 @@ class Bestelling(models.Model):
         msg += " %s" % BESTELLING_STATUS2STR[self.status]
         msg += " [%s]" % timezone.localtime(self.aangemaakt).strftime('%Y-%m-%d %H:%M:%S')
         msg += " koper=%s" % self.account.username
-
-        bedrag = " € %s" % self.totaal_euro
-        msg += bedrag.replace('.', ',')
+        msg += " " + format_bedrag_euro(self.totaal_euro)
 
         return msg
 

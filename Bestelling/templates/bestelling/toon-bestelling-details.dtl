@@ -85,10 +85,12 @@
                 <!-- transacties -->
                 {% for transactie in transacties %}
                     <tr>
-                        <td class="hide-on-small-only" style="padding-left:20px">Transactie</td>
-                        <td>{% for regel in transactie.regels %}{{ regel }}<br>{% endfor %}</td>
+                        <td class="hide-on-small-only" style="padding-left:20px">{{ transactie.type_str }}</td>
+                        <td>{% for regel, _ in transactie.regels %}{{ regel }}<br>{% endfor %}</td>
                         <!-- let op: we tonen een minteken bij betaling, dus "not restitutie" -->
-                        <td class="right-align" style="padding-right:20px">{{ transactie.bedrag_str }}</td>
+                        <td class="right-align" style="padding-right:20px">
+                            {% for _, bedrag_str in transactie.regels %}{% if bedrag_str %}{{ bedrag_str }}{% endif %}<br>{% endfor %}
+                        </td>
                     </tr>
                 {% endfor %}
 

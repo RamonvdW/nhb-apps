@@ -125,7 +125,7 @@ class ScheidsFilter(admin.SimpleListFilter):
         qset = Sporter.objects.exclude(scheids=SCHEIDS_NIET).order_by('scheids', 'lid_nr')
         return [(sporter.lid_nr, sporter.lid_nr_en_volledige_naam()) for sporter in qset]
 
-    def queryset(self, request, qs):
+    def queryset(self, request, qs):        # pragma: no cover
         if self.value():
             qs = qs.filter(scheids__lid_nr=self.value())
         return qs

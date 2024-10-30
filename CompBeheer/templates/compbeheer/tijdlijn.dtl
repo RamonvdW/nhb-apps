@@ -120,7 +120,7 @@
 
                 <tr>
                     <td class="center{% if comp.fase_indiv == 'J' %} sv-rood white-text{% endif %}">J</td>
-                    <td>Bevestig deelname RK individueel (HWL / RKO)</td>
+                    <td>Bevestig deelname RK individueel (sporter / HWL / RKO)</td>
                     <td>
                         {% if comp.fase_indiv > 'J' %}
                             <span class="green-text">Afgerond</span>

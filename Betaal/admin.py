@@ -70,7 +70,7 @@ class OntvangerFilter(admin.SimpleListFilter):
                             .filter(vereniging__ver_nr__in=actieve_ontvangers)
                             .order_by('vereniging__ver_nr'))]
 
-    def queryset(self, request, queryset):
+    def queryset(self, request, queryset):      # pragma: no cover
         ver_nr = self.value()
         # print('ver_nr: %s' % repr(ver_nr))
         if ver_nr:

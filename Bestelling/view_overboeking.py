@@ -13,6 +13,7 @@ from Bestelling.definities import BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_
 from Bestelling.models import Bestelling
 from Bestelling.operations.mutaties import bestel_overboeking_ontvangen
 from Betaal.definities import TRANSACTIE_TYPE_HANDMATIG
+from Betaal.format import format_bedrag_euro
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
 from decimal import Decimal, InvalidOperation
@@ -139,7 +140,7 @@ class OverboekingOntvangenView(UserPassesTestMixin, TemplateView):
         except InvalidOperation:
             context['bedrag'] = ''
             if bestelling:
-                context['fout_bedrag'] = ('Verwacht bedrag: € %.2f' % bestelling.totaal_euro).replace('.', ',')
+                context['fout_bedrag'] = ('Verwacht bedrag: ' + format_bedrag_euro(bestelling.totaal_euro))
             else:
                 context['fout_bedrag'] = 'Voer het ontvangen bedrag in'
         else:
@@ -172,7 +173,7 @@ class OverboekingOntvangenView(UserPassesTestMixin, TemplateView):
                             context['akkoord_afwijking'] = mag_afwijken
 
                     else:
-                        context['fout_bedrag'] = ('Verwacht bedrag: € %.2f' % bestelling.totaal_euro).replace('.', ',')
+                        context['fout_bedrag'] = ('Verwacht bedrag: ' + format_bedrag_euro(bestelling.totaal_euro))
 
         context['overboekingen'] = self._zoek_overboekingen()
         context['verwacht'] = self._zoek_verwacht()

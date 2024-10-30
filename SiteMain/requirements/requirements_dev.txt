@@ -18,11 +18,11 @@ certifi==2024.8.30
     # via
     #   -r requirements.txt
     #   requests
-charset-normalizer==3.3.2
+charset-normalizer==3.4.0
     # via
     #   -r requirements.txt
     #   requests
-coverage==7.6.1
+coverage==7.6.4
     # via
     #   -r requirements_dev.in
     #   django-coverage-plugin
@@ -39,17 +39,17 @@ django-extensions==3.2.3
     # via -r requirements_dev.in
 esprima==4.0.1
     # via -r requirements_dev.in
-et-xmlfile==1.1.0
+et-xmlfile==2.0.0
     # via
     #   -r requirements.txt
     #   openpyxl
 fonttools==4.54.1
     # via -r requirements_dev.in
-google-api-core==2.20.0
+google-api-core==2.21.0
     # via
     #   -r requirements.txt
     #   google-api-python-client
-google-api-python-client==2.147.0
+google-api-python-client==2.149.0
     # via -r requirements.txt
 google-auth==2.35.0
     # via
@@ -88,7 +88,7 @@ openpyxl==3.1.5
     # via -r requirements.txt
 packaging==24.1
     # via pip-review
-pillow==10.4.0
+pillow==11.0.0
     # via -r requirements.txt
 pip-licenses==5.0.0
     # via -r requirements_dev.in
@@ -96,11 +96,11 @@ pip-review==1.3.0
     # via -r requirements_dev.in
 prettytable==3.11.0
     # via pip-licenses
-proto-plus==1.24.0
+proto-plus==1.25.0
     # via
     #   -r requirements.txt
     #   google-api-core
-protobuf==5.28.2
+protobuf==5.28.3
     # via
     #   -r requirements.txt
     #   google-api-core
@@ -119,7 +119,7 @@ pyasn1-modules==0.4.1
     #   google-auth
 pyotp==2.9.0
     # via -r requirements.txt
-pyparsing==3.1.4
+pyparsing==3.2.0
     # via
     #   -r requirements.txt
     #   httplib2

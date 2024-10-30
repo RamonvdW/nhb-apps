@@ -10,6 +10,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
+from Betaal.format import format_bedrag_euro
 from Evenement.definities import (EVENEMENT_INSCHRIJVING_STATUS_TO_SHORT_STR, EVENEMENT_AFMELDING_STATUS_TO_SHORT_STR,
                                   EVENEMENT_INSCHRIJVING_STATUS_DEFINITIEF)
 from Evenement.models import Evenement, EvenementInschrijving, EvenementAfgemeld
@@ -193,7 +194,7 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
             qset = aanmelding.bestellingproduct_set.all()
             if qset.count() > 0:
                 bestelproduct = qset[0]
-                prijs_str = '€ %s' % bestelproduct.prijs_euro
+                prijs_str = format_bedrag_euro(bestelproduct.prijs_euro)
             else:
                 prijs_str = 'Geen (handmatige inschrijving)'
 
@@ -203,7 +204,7 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
                 EVENEMENT_INSCHRIJVING_STATUS_TO_SHORT_STR[aanmelding.status],
                 bestelnummer_str,
                 prijs_str,
-                '€ %s' % aanmelding.bedrag_ontvangen,
+                format_bedrag_euro(aanmelding.bedrag_ontvangen),
                 str(sporter.lid_nr),
                 sporter.volledige_naam(),
                 sporter.email,
@@ -243,7 +244,7 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
             qset = afgemeld.bestellingproduct_set.all()
             if qset.count() > 0:
                 bestelproduct = qset[0]
-                prijs_str = '€ %s' % bestelproduct.prijs_euro
+                prijs_str = format_bedrag_euro(bestelproduct.prijs_euro)
             else:
                 prijs_str = 'Geen (handmatige inschrijving)'
 
@@ -254,8 +255,8 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
                 EVENEMENT_AFMELDING_STATUS_TO_SHORT_STR[afgemeld.status],
                 bestelnummer_str,
                 prijs_str,
-                '€ %s' % afgemeld.bedrag_ontvangen,
-                '€ %s' % afgemeld.bedrag_retour,
+                format_bedrag_euro(afgemeld.bedrag_ontvangen),
+                format_bedrag_euro(afgemeld.bedrag_retour),
                 str(sporter.lid_nr),
                 sporter.volledige_naam(),
                 sporter.email,
