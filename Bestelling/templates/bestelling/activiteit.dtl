@@ -202,9 +202,9 @@
                                         </tr>
                                     {% endfor %}
 
-                                    {% for transactie in bestelling.trans_list %}
+                                    {% for header, transactie in bestelling.trans_list %}
                                         <tr>
-                                            <th>Transactie:</th>
+                                            <th>{{ header }}:</th>
                                             <td>{{ transactie }}</td>
                                         </tr>
                                     {% empty %}
