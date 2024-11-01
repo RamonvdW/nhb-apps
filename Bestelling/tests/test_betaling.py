@@ -185,7 +185,7 @@ class TestBestellingBetaling(E2EHelpers, TestCase):
 
         # haal de betaal status pagina op
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_na_de_betaling % bestelling.bestel_nr)
+            resp = self.client.get(self.url_na_de_betaling % bestelling.bestel_nr, {'snel': 1})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('bestelling/bestelling-afgerond.dtl', 'plein/site_layout.dtl'))

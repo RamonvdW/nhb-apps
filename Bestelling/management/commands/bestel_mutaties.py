@@ -1051,7 +1051,7 @@ class Command(BaseCommand):
                             bestelling.mh_bestel_nr(), bestelling.pk))
 
         # koppel een transactie aan de bestelling
-        transactie = maak_transactie_handmatige_overboeking(bedrag_euro)
+        transactie = maak_transactie_handmatige_overboeking(bestelling.mh_bestel_nr(), bedrag_euro)
         bestelling.transacties.add(transactie)
 
         msg = "\n[%s] Bestelling heeft een overboeking van %s euro ontvangen" % (

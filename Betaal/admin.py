@@ -156,10 +156,8 @@ class BetaalTransactieAdmin(admin.ModelAdmin):
     )
 
 
-class OntvangerFilter(admin.SimpleListFilter):
-
+class OntvangerFilter2(admin.SimpleListFilter):
     title = 'Ontvanger'
-
     parameter_name = 'ontvanger'
 
     def lookups(self, request, model_admin):
@@ -180,7 +178,7 @@ class BetaalActiefAdmin(admin.ModelAdmin):
 
     ordering = ('-when',)
 
-    list_filter = ('payment_status', OntvangerFilter)
+    list_filter = ('payment_status', OntvangerFilter2)
 
     search_fields = ('payment_id',)
 
