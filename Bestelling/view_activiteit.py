@@ -246,7 +246,6 @@ class BestelActiviteitView(UserPassesTestMixin, TemplateView):
             bestelling.beschrijving_kort = " + ".join(beschrijvingen) if len(beschrijvingen) else "?"
 
             bestelling.trans_list = list()
-
             transactie_mollie = None
             for transactie in bestelling.transacties.order_by('when'):     # oudste eerst
 
@@ -254,11 +253,11 @@ class BestelActiviteitView(UserPassesTestMixin, TemplateView):
                     # alleen de laatste tonen
                     transactie_mollie = transactie
                 else:
-                    bestelling.trans_list.append(transactie)
+                    bestelling.trans_list.append(('Transactie', transactie))
             # for
 
             if transactie_mollie:
-                bestelling.trans_list.append(transactie_mollie)
+                bestelling.trans_list.append(('Mollie status', transactie_mollie))
         # for
 
         if self.is_staff:
