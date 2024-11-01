@@ -240,14 +240,18 @@ class ToonBestellingDetailsView(UserPassesTestMixin, TemplateView):
                     tup = ('Ontvangen van %s' % transactie_mollie.klant_naam, None)
                     regels.append(tup)
 
-                tup = ('Ontvangen', format_bedrag_euro(transactie_mollie.bedrag_beschikbaar))
-                regels.append(tup)
-                totaal_euro += transactie_mollie.bedrag_beschikbaar
-
                 if transactie_mollie.bedrag_terugbetaald:
+                    tup = ('Betaald (resterend)', format_bedrag_euro(transactie_mollie.bedrag_beschikbaar))
+                    regels.append(tup)
+                    totaal_euro += transactie_mollie.bedrag_beschikbaar
+
                     tup = ('Terugbetaald', format_bedrag_euro(transactie_mollie.bedrag_terugbetaald))
                     regels.append(tup)
                     totaal_euro -= transactie_mollie.bedrag_terugbetaald
+                else:
+                    tup = ('Betaald', format_bedrag_euro(transactie_mollie.bedrag_beschikbaar))
+                    regels.append(tup)
+                    totaal_euro += transactie_mollie.bedrag_beschikbaar
 
                 # if transactie_mollie.bedrag_teruggevorderd:
                 #     tup = ('Teruggevorderd',  format_bedrag_euro(transactie_mollie.bedrag_teruggevorderd))
