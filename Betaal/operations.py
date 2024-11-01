@@ -51,13 +51,16 @@ def betaal_opschonen(stdout):
             objs.delete()
 
 
-def maak_transactie_handmatige_overboeking(bedrag_euro: Decimal):
+def maak_transactie_handmatige_overboeking(mh_bestel_nr: str, bedrag_euro: Decimal):
+    """
+        mh_bestel_nr = "MH-1234567"
+        bedrag_euro = ontvangen bedrag in euros
+    """
     now = timezone.now()
-
     transactie = BetaalTransactie(
                     when=now,
                     transactie_type=TRANSACTIE_TYPE_HANDMATIG,
-                    beschrijving='Overboeking ontvangen',
+                    beschrijving='Overboeking ontvangen voor ' + mh_bestel_nr,
                     bedrag_handmatig=bedrag_euro)
     transactie.save()
 
