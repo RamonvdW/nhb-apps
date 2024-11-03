@@ -11,6 +11,10 @@ class Migration(migrations.Migration):
 
     """ Migratie class voor dit deel van de applicatie """
 
+    replaces = [('Locatie', 'm0006_squashed'),
+                ('Locatie', 'm0007_rename'),
+                ('Locatie', 'm0008_evenement_locatie')]
+
     # dit is de eerste
     initial = True
 
@@ -38,7 +42,7 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.CreateModel(
-            name='Locatie',
+            name='WedstrijdLocatie',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('naam', models.CharField(blank=True, max_length=50)),
@@ -69,7 +73,22 @@ class Migration(migrations.Migration):
                 ('adres_lon', models.CharField(blank=True, default='', max_length=10)),
             ],
             options={
-                'verbose_name': 'Locatie',
+                'verbose_name': 'Wedstrijd locatie',
+            },
+        ),
+        migrations.CreateModel(
+            name='EvenementLocatie',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('naam', models.CharField(blank=True, max_length=50)),
+                ('zichtbaar', models.BooleanField(default=True)),
+                ('adres', models.TextField(blank=True, max_length=256)),
+                ('plaats', models.CharField(blank=True, default='', max_length=50)),
+                ('notities', models.TextField(blank=True, max_length=1024)),
+                ('vereniging', models.ForeignKey(on_delete=models.deletion.CASCADE, to='Vereniging.vereniging')),
+            ],
+            options={
+                'verbose_name': 'Evenement locatie',
             },
         ),
     ]

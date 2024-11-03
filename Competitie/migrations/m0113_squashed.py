@@ -152,7 +152,7 @@ class Migration(migrations.Migration):
                 ('tijd_begin_wedstrijd', models.TimeField()),
                 ('indiv_klassen', models.ManyToManyField(blank=True, to='Competitie.competitieindivklasse')),
                 ('locatie', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.PROTECT,
-                                              to='Locatie.locatie')),
+                                              to='Locatie.wedstrijdlocatie')),
                 ('team_klassen', models.ManyToManyField(blank=True, to='Competitie.competitieteamklasse')),
                 ('uitslag', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.PROTECT,
                                               to='Score.uitslag')),
