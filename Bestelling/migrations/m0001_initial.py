@@ -33,7 +33,7 @@ class Migration(migrations.Migration):
         ('Account', 'm0032_squashed'),
         ('Betaal', 'm0021_index'),
         ('Evenement', 'm0002_bedragen'),
-        ('Webwinkel', 'm0008_gewicht'),
+        ('Webwinkel', 'm0009_squashed'),
         ('Wedstrijden', 'm0057_squashed'),
     ]
 

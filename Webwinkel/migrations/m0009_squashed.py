@@ -24,14 +24,19 @@ class Migration(migrations.Migration):
 
     """ Migratie class voor dit deel van de applicatie """
 
+    replaces = [('Webwinkel', 'm0005_squashed'),
+                ('Webwinkel', 'm0006_subtitel'),
+                ('Webwinkel', 'm0007_kleding_maat'),
+                ('Webwinkel', 'm0008_gewicht')]
+
     # dit is de eerste
     initial = True
 
     # volgorde afdwingen
     dependencies = [
-        ('Account', 'm0032_squashed'),
         ('Functie', 'm0025_squashed'),
         ('Vereniging', 'm0007_squashed'),
+        ('Account', 'm0032_squashed'),
     ]
 
     # migratie functies
@@ -71,6 +76,9 @@ class Migration(migrations.Migration):
                                                   related_name='omslagfoto', to='Webwinkel.webwinkelfoto')),
                 ('type_verzendkosten', models.CharField(choices=[('pak', 'Pakketpost'), ('brief', 'Briefpost')],
                                                         default='pak', max_length=5)),
+                ('sectie_subtitel', models.CharField(blank=True, default='', max_length=250)),
+                ('kleding_maat', models.CharField(blank=True, default='', max_length=10)),
+                ('gewicht_gram', models.SmallIntegerField(default=0)),
             ],
             options={
                 'verbose_name': 'Webwinkel product',
@@ -83,8 +91,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('wanneer', models.DateTimeField()),
                 ('status', models.CharField(choices=[('M', 'Reservering'), ('B', 'Besteld'), ('BO', 'Betaald'),
-                                                     ('A', 'Geannuleerd')],
-                                            default='M', max_length=2)),
+                                                     ('A', 'Geannuleerd')], default='M', max_length=2)),
                 ('aantal', models.PositiveSmallIntegerField(default=1)),
                 ('totaal_euro', models.DecimalField(decimal_places=2, default=Decimal('0'), max_digits=6)),
                 ('ontvangen_euro', models.DecimalField(decimal_places=2, default=Decimal('0'), max_digits=6)),
@@ -93,7 +100,7 @@ class Migration(migrations.Migration):
                 ('product', models.ForeignKey(on_delete=models.deletion.PROTECT, to='Webwinkel.webwinkelproduct')),
             ],
         ),
-        migrations.RunPython(maak_functie_mww, reverse_code=migrations.RunPython.noop)
+        migrations.RunPython(maak_functie_mww, reverse_code=migrations.RunPython.noop),
     ]
 
 # end of file

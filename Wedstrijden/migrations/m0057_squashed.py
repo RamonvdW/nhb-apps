@@ -39,6 +39,7 @@ class Migration(migrations.Migration):
         ('Vereniging', 'm0007_squashed'),
     ]
 
+    # migratie functies
     operations = [
         migrations.CreateModel(
             name='WedstrijdSessie',
