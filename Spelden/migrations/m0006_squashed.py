@@ -5,8 +5,348 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db import migrations, models
-from django.db.models.deletion import PROTECT
-from BasisTypen.definities import ORGANISATIE_KHSN, ORGANISATIE_WA
+from BasisTypen.definities import ORGANISATIE_WA
+from Spelden.definities import (SPELD_CATEGORIE_WA_STER, SPELD_CATEGORIE_WA_STER_ZILVER,
+                                SPELD_CATEGORIE_WA_TARGET_AWARD, SPELD_CATEGORIE_WA_TARGET_AWARD_ZILVER,
+                                SPELD_CATEGORIE_WA_ARROWHEAD, SPELD_CATEGORIE_NL_GRAADSPELD_INDOOR,
+                                SPELD_CATEGORIE_NL_GRAADSPELD_OUTDOOR, SPELD_CATEGORIE_NL_GRAADSPELD_VELD,
+                                SPELD_CATEGORIE_NL_GRAADSPELD_SHORT_METRIC, SPELD_CATEGORIE_NL_GRAADSPELD_ALGEMEEN,
+                                SPELD_CATEGORIE_NL_TUSSENSPELD)
+from decimal import Decimal
+
+
+def maak_spelden_wa_ster(apps, _):
+    # haal de klassen op die van toepassing zijn op het moment van migratie
+    speld_klas = apps.get_model('Spelden', 'Speld')
+    boog_klas = apps.get_model('BasisTypen', 'BoogType')
+
+    boog_r = boog_klas.objects.get(afkorting='R')
+    boog_c = boog_klas.objects.get(afkorting='C')
+
+    bulk = [
+        # WA ster, Recurve
+        speld_klas(
+            volgorde=1001,
+            categorie=SPELD_CATEGORIE_WA_STER,
+            beschrijving="1000",
+            boog_type=boog_r),
+        speld_klas(
+            volgorde=1002,
+            categorie=SPELD_CATEGORIE_WA_STER,
+            beschrijving="1100",
+            boog_type=boog_r),
+        speld_klas(
+            volgorde=1003,
+            categorie=SPELD_CATEGORIE_WA_STER,
+            beschrijving="1200",
+            boog_type=boog_r),
+        speld_klas(
+            volgorde=1004,
+            categorie=SPELD_CATEGORIE_WA_STER,
+            beschrijving="1300",
+            boog_type=boog_r),
+        speld_klas(
+            volgorde=1005,
+            categorie=SPELD_CATEGORIE_WA_STER,
+            beschrijving="1350",
+            boog_type=boog_r),
+        speld_klas(
+            volgorde=1006,
+            categorie=SPELD_CATEGORIE_WA_STER,
+            beschrijving="1400",
+            boog_type=boog_r),
+
+        # WA ster, Compound
+        speld_klas(
+            volgorde=1011,
+            categorie=SPELD_CATEGORIE_WA_STER,
+            beschrijving="1000",
+            boog_type=boog_c),
+        speld_klas(
+            volgorde=1012,
+            categorie=SPELD_CATEGORIE_WA_STER,
+            beschrijving="1100",
+            boog_type=boog_c),
+        speld_klas(
+            volgorde=1013,
+            categorie=SPELD_CATEGORIE_WA_STER,
+            beschrijving="1200",
+            boog_type=boog_c),
+        speld_klas(
+            volgorde=1014,
+            categorie=SPELD_CATEGORIE_WA_STER,
+            beschrijving="1300",
+            boog_type=boog_c),
+        speld_klas(
+            volgorde=1015,
+            categorie=SPELD_CATEGORIE_WA_STER,
+            beschrijving="1350",
+            boog_type=boog_c),
+        speld_klas(
+            volgorde=1016,
+            categorie=SPELD_CATEGORIE_WA_STER,
+            beschrijving="1400",
+            boog_type=boog_c),
+
+        # WA zilveren ster, Recurve
+        speld_klas(
+            volgorde=1201,
+            categorie=SPELD_CATEGORIE_WA_STER_ZILVER,
+            beschrijving="1000",
+            boog_type=boog_r),
+        speld_klas(
+            volgorde=1202,
+            categorie=SPELD_CATEGORIE_WA_STER_ZILVER,
+            beschrijving="1100",
+            boog_type=boog_r),
+        speld_klas(
+            volgorde=1203,
+            categorie=SPELD_CATEGORIE_WA_STER_ZILVER,
+            beschrijving="1200",
+            boog_type=boog_r),
+        speld_klas(
+            volgorde=1204,
+            categorie=SPELD_CATEGORIE_WA_STER_ZILVER,
+            beschrijving="1300",
+            boog_type=boog_r),
+
+        # WA zilveren ster, Compound
+        speld_klas(
+            volgorde=1211,
+            categorie=SPELD_CATEGORIE_WA_STER_ZILVER,
+            beschrijving="1000",
+            boog_type=boog_c),
+        speld_klas(
+            volgorde=1212,
+            categorie=SPELD_CATEGORIE_WA_STER_ZILVER,
+            beschrijving="1100",
+            boog_type=boog_c),
+        speld_klas(
+            volgorde=1213,
+            categorie=SPELD_CATEGORIE_WA_STER_ZILVER,
+            beschrijving="1200",
+            boog_type=boog_c),
+        speld_klas(
+            volgorde=1214,
+            categorie=SPELD_CATEGORIE_WA_STER_ZILVER,
+            beschrijving="1300",
+            boog_type=boog_c),
+    ]
+
+    speld_klas.objects.bulk_create(bulk)
+
+
+def maak_spelden_wa_arrowhead(apps, _):
+    # haal de klassen op die van toepassing zijn op het moment van migratie
+    speld_klas = apps.get_model('Spelden', 'Speld')
+
+    bulk = [
+        # WA target awards
+        speld_klas(
+            volgorde=2001,
+            categorie=SPELD_CATEGORIE_WA_ARROWHEAD,
+            beschrijving="Groen"),
+        speld_klas(
+            volgorde=2002,
+            categorie=SPELD_CATEGORIE_WA_ARROWHEAD,
+            beschrijving="Grijs"),
+        speld_klas(
+            volgorde=2003,
+            categorie=SPELD_CATEGORIE_WA_ARROWHEAD,
+            beschrijving="Wit"),
+        speld_klas(
+            volgorde=2004,
+            categorie=SPELD_CATEGORIE_WA_ARROWHEAD,
+            beschrijving="Zwart"),
+        speld_klas(
+            volgorde=2005,
+            categorie=SPELD_CATEGORIE_WA_ARROWHEAD,
+            beschrijving="Goud"),
+    ]
+    speld_klas.objects.bulk_create(bulk)
+
+
+def maak_spelden_wa_target_awards(apps, _):
+    # haal de klassen op die van toepassing zijn op het moment van migratie
+    speld_klas = apps.get_model('Spelden', 'Speld')
+
+    bulk = [
+        # WA target award
+        speld_klas(
+            volgorde=3001,
+            categorie=SPELD_CATEGORIE_WA_TARGET_AWARD,
+            beschrijving="Wit"),
+        speld_klas(
+            volgorde=3002,
+            categorie=SPELD_CATEGORIE_WA_TARGET_AWARD,
+            beschrijving="Zwart"),
+        speld_klas(
+            volgorde=3003,
+            categorie=SPELD_CATEGORIE_WA_TARGET_AWARD,
+            beschrijving="Blauw"),
+        speld_klas(
+            volgorde=3004,
+            categorie=SPELD_CATEGORIE_WA_TARGET_AWARD,
+            beschrijving="Rood"),
+        speld_klas(
+            volgorde=3005,
+            categorie=SPELD_CATEGORIE_WA_TARGET_AWARD,
+            beschrijving="Goud"),
+        speld_klas(
+            volgorde=3006,
+            categorie=SPELD_CATEGORIE_WA_TARGET_AWARD,
+            beschrijving="Purper"),
+
+        # WA zilveren target award
+        speld_klas(
+            volgorde=3101,
+            categorie=SPELD_CATEGORIE_WA_TARGET_AWARD_ZILVER,
+            beschrijving="Wit"),
+        speld_klas(
+            volgorde=3102,
+            categorie=SPELD_CATEGORIE_WA_TARGET_AWARD_ZILVER,
+            beschrijving="Zwart"),
+        speld_klas(
+            volgorde=3103,
+            categorie=SPELD_CATEGORIE_WA_TARGET_AWARD_ZILVER,
+            beschrijving="Blauw"),
+        speld_klas(
+            volgorde=3104,
+            categorie=SPELD_CATEGORIE_WA_TARGET_AWARD_ZILVER,
+            beschrijving="Rood"),
+        speld_klas(
+            volgorde=3105,
+            categorie=SPELD_CATEGORIE_WA_TARGET_AWARD_ZILVER,
+            beschrijving="Goud"),
+        speld_klas(
+            volgorde=3106,
+            categorie=SPELD_CATEGORIE_WA_TARGET_AWARD_ZILVER,
+            beschrijving="Purper"),
+    ]
+    speld_klas.objects.bulk_create(bulk)
+
+
+def maak_spelden_nl_tussenspelden(apps, _):
+    # haal de klassen op die van toepassing zijn op het moment van migratie
+    speld_klas = apps.get_model('Spelden', 'Speld')
+
+    bulk = [
+        # NL tussenspelden
+        speld_klas(
+            volgorde=4001,
+            categorie=SPELD_CATEGORIE_NL_TUSSENSPELD,
+            beschrijving="Wit",
+            prijs_euro=5),
+        speld_klas(
+            volgorde=4002,
+            categorie=SPELD_CATEGORIE_NL_TUSSENSPELD,
+            beschrijving="Grijs",
+            prijs_euro=5),
+        speld_klas(
+            volgorde=4003,
+            categorie=SPELD_CATEGORIE_NL_TUSSENSPELD,
+            beschrijving="Zwart",
+            prijs_euro=5),
+        speld_klas(
+            volgorde=4004,
+            categorie=SPELD_CATEGORIE_NL_TUSSENSPELD,
+            beschrijving="Blauw",
+            prijs_euro=0),      # TODO: is deze gratis, of geldt "hoogste is gratis, lagere 5,-" per bestelling?
+    ]
+    speld_klas.objects.bulk_create(bulk)
+
+
+def maak_spelden_nl_graadspelden(apps, _):
+    # haal de klassen op die van toepassing zijn op het moment van migratie
+    speld_klas = apps.get_model('Spelden', 'Speld')
+
+    bulk = [
+        # Indoor
+        speld_klas(
+            volgorde=5001,
+            categorie=SPELD_CATEGORIE_NL_GRAADSPELD_INDOOR,
+            beschrijving="1e graad Indoor",
+            prijs_euro=5),
+        speld_klas(
+            volgorde=5002,
+            categorie=SPELD_CATEGORIE_NL_GRAADSPELD_INDOOR,
+            beschrijving="2e graad Indoor",
+            prijs_euro=5),
+        speld_klas(
+            volgorde=5003,
+            categorie=SPELD_CATEGORIE_NL_GRAADSPELD_INDOOR,
+            beschrijving="3e graad Indoor",
+            prijs_euro=5),
+
+        # Outdoor
+        speld_klas(
+            volgorde=5101,
+            categorie=SPELD_CATEGORIE_NL_GRAADSPELD_OUTDOOR,
+            beschrijving="1e graad Outdoor",
+            prijs_euro=5),
+        speld_klas(
+            volgorde=5102,
+            categorie=SPELD_CATEGORIE_NL_GRAADSPELD_OUTDOOR,
+            beschrijving="2e graad Outdoor",
+            prijs_euro=5),
+        speld_klas(
+            volgorde=5103,
+            categorie=SPELD_CATEGORIE_NL_GRAADSPELD_OUTDOOR,
+            beschrijving="3e graad Outdoor",
+            prijs_euro=5),
+
+        # Veld
+        speld_klas(
+            volgorde=5201,
+            categorie=SPELD_CATEGORIE_NL_GRAADSPELD_VELD,
+            beschrijving="1e graad Veld",
+            prijs_euro=5),
+        speld_klas(
+            volgorde=5202,
+            categorie=SPELD_CATEGORIE_NL_GRAADSPELD_VELD,
+            beschrijving="2e graad Veld",
+            prijs_euro=5),
+        speld_klas(
+            volgorde=5203,
+            categorie=SPELD_CATEGORIE_NL_GRAADSPELD_VELD,
+            beschrijving="3e graad Veld",
+            prijs_euro=5),
+
+        # Short Metric
+        speld_klas(
+            volgorde=5301,
+            categorie=SPELD_CATEGORIE_NL_GRAADSPELD_SHORT_METRIC,
+            beschrijving="1e graad Short Metric",
+            prijs_euro=5),
+        speld_klas(
+            volgorde=5302,
+            categorie=SPELD_CATEGORIE_NL_GRAADSPELD_SHORT_METRIC,
+            beschrijving="2e graad Short Metric",
+            prijs_euro=5),
+        speld_klas(
+            volgorde=5303,
+            categorie=SPELD_CATEGORIE_NL_GRAADSPELD_SHORT_METRIC,
+            beschrijving="3e graad Short Metric",
+            prijs_euro=5),
+
+        # Algemeen
+        speld_klas(
+            volgorde=5401,
+            categorie=SPELD_CATEGORIE_NL_GRAADSPELD_ALGEMEEN,
+            beschrijving="Grootmeesterschutter",        # 1e graad (3 van de 4)
+            prijs_euro=5),
+        speld_klas(
+            volgorde=5402,
+            categorie=SPELD_CATEGORIE_NL_GRAADSPELD_ALGEMEEN,
+            beschrijving="Meesterschutter",             # 2e graad (3 van de 4)
+            prijs_euro=5),
+        speld_klas(
+            volgorde=5403,
+            categorie=SPELD_CATEGORIE_NL_GRAADSPELD_ALGEMEEN,
+            beschrijving="Allroundschutter",            # 3e graad (4 van de 4)
+            prijs_euro=5),
+    ]
+    speld_klas.objects.bulk_create(bulk)
 
 
 def maak_speldscores_wa_ster_recurve(apps, _):
@@ -14,7 +354,7 @@ def maak_speldscores_wa_ster_recurve(apps, _):
     speld_klas = apps.get_model('Spelden', 'Speld')
     score_klas = apps.get_model('Spelden', 'SpeldScore')
     boog_klas = apps.get_model('BasisTypen', 'BoogType')
-    lkl_klas = apps.get_model('BasisTypen', 'LeeftijdsKlasse')
+    lkl_klas = apps.get_model('BasisTypen', 'Leeftijdsklasse')
 
     boog_r = boog_klas.objects.get(afkorting='R')
 
@@ -114,7 +454,7 @@ def maak_speldscores_wa_ster_compound(apps, _):
     speld_klas = apps.get_model('Spelden', 'Speld')
     score_klas = apps.get_model('Spelden', 'SpeldScore')
     boog_klas = apps.get_model('BasisTypen', 'BoogType')
-    lkl_klas = apps.get_model('BasisTypen', 'LeeftijdsKlasse')
+    lkl_klas = apps.get_model('BasisTypen', 'Leeftijdsklasse')
 
     boog_c = boog_klas.objects.get(afkorting='C')
 
@@ -213,7 +553,7 @@ def maak_speldscores_wa_target_awards(apps, _):
     speld_klas = apps.get_model('Spelden', 'Speld')
     score_klas = apps.get_model('Spelden', 'SpeldScore')
     boog_klas = apps.get_model('BasisTypen', 'BoogType')
-    lkl_klas = apps.get_model('BasisTypen', 'LeeftijdsKlasse')
+    lkl_klas = apps.get_model('BasisTypen', 'Leeftijdsklasse')
 
     boog_r = boog_klas.objects.get(afkorting='R')
     boog_c = boog_klas.objects.get(afkorting='C')
@@ -687,7 +1027,7 @@ def maak_speldscores_wa_arrowhead(apps, _):
     speld_klas = apps.get_model('Spelden', 'Speld')
     score_klas = apps.get_model('Spelden', 'SpeldScore')
     boog_klas = apps.get_model('BasisTypen', 'BoogType')
-    lkl_klas = apps.get_model('BasisTypen', 'LeeftijdsKlasse')
+    lkl_klas = apps.get_model('BasisTypen', 'Leeftijdsklasse')
 
     boog_r = boog_klas.objects.get(afkorting='R')
     boog_c = boog_klas.objects.get(afkorting='C')
@@ -976,7 +1316,7 @@ def maak_speldscores_nl_graadspelden(apps, _):
     # haal de klassen op die van toepassing zijn op het moment van migratie
     speld_klas = apps.get_model('Spelden', 'Speld')
     score_klas = apps.get_model('Spelden', 'SpeldScore')
-    lkl_klas = apps.get_model('BasisTypen', 'LeeftijdsKlasse')
+    lkl_klas = apps.get_model('BasisTypen', 'Leeftijdsklasse')
 
     spelden = dict()
     for speld in speld_klas.objects.filter(volgorde__in=(5001, 5002, 5003,
@@ -1130,32 +1470,133 @@ class Migration(migrations.Migration):
 
     """ Migratie class voor dit deel van de applicatie """
 
+    replaces = [('Spelden', 'm0001_initial'),
+                ('Spelden', 'm0002_spelden'),
+                ('Spelden', 'm0003_speldscore'),
+                ('Spelden', 'm0004_defaults'),
+                ('Spelden', 'm0005_defaults')]
+
+    # dit is de eerste
+    initial = True
+
     # volgorde afdwingen
     dependencies = [
+        ('Account', 'm0032_squashed'),
+        ('Wedstrijden', 'm0053_squashed'),
         ('BasisTypen', 'm0058_scheids_rk_bk'),
-        ('Spelden', 'm0002_spelden'),
+        ('Sporter', 'm0031_squashed'),
     ]
 
     # migratie functies
     operations = [
         migrations.CreateModel(
+            name='SpeldAanvraag',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('aangemaakt_op', models.DateField(auto_now_add=True)),
+                ('last_email_reminder', models.DateTimeField(auto_now_add=True)),
+                ('soort_speld', models.CharField(choices=[('Ws', 'WA ster'),
+                                                          ('Wsz', 'WA zilveren ster'),
+                                                          ('Wt', 'WA target award'),
+                                                          ('Wtz', 'WA zilveren target award'),
+                                                          ('Wa', 'WA arrowhead speld'),
+                                                          ('Ngi', 'NL graadspeld indoor'),
+                                                          ('Ngo', 'NL graadspeld outdoor'),
+                                                          ('Ngv', 'NL graadspeld veld'),
+                                                          ('Ngs', 'NL graadspeld short metric'),
+                                                          ('Nga', 'NL graadspeld algemeen'),
+                                                          ('Nt', 'NL tussenspeld')],
+                                                 default='Ws', max_length=3)),
+                ('datum_wedstrijd', models.DateField()),
+                ('discipline', models.CharField(choices=[('OD', 'Outdoor'),
+                                                         ('IN', 'Indoor'),
+                                                         ('VE', 'Veld')],
+                                                default='OD', max_length=2)),
+                ('log', models.TextField(blank=True, default='')),
+                ('boog_type', models.ForeignKey(on_delete=models.deletion.PROTECT, to='BasisTypen.boogtype')),
+                ('door_account', models.ForeignKey(on_delete=models.deletion.PROTECT, to='Account.account')),
+                ('leeftijdsklasse', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.PROTECT,
+                                                      to='BasisTypen.leeftijdsklasse')),
+                ('voor_sporter', models.ForeignKey(on_delete=models.deletion.CASCADE, to='Sporter.sporter')),
+                ('wedstrijd', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.PROTECT,
+                                                to='Wedstrijden.wedstrijd')),
+            ],
+            options={
+                'verbose_name': 'Speld aanvraag',
+                'verbose_name_plural': 'Speld aanvragen',
+            },
+        ),
+        migrations.CreateModel(
+            name='SpeldBijlage',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('soort_bijlage', models.CharField(choices=[('s', 'Scorebriefje'),
+                                                            ('u', 'Uitslag')],
+                                                   default='s', max_length=1)),
+                ('bestandstype', models.CharField(choices=[('f', 'Foto'),
+                                                           ('p', 'PDF'),
+                                                           ('?', '?')],
+                                                  default='f', max_length=1)),
+                ('log', models.TextField(blank=True, default='')),
+                ('aanvraag', models.ForeignKey(on_delete=models.deletion.CASCADE, to='Spelden.speldaanvraag')),
+            ],
+            options={
+                'verbose_name': 'Speld bijlage',
+                'verbose_name_plural': 'Speld bijlagen',
+            },
+        ),
+        migrations.CreateModel(
+            name='Speld',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('volgorde', models.PositiveSmallIntegerField()),
+                ('beschrijving', models.CharField(max_length=30)),
+                ('categorie', models.CharField(choices=[('Ws', 'WA ster'),
+                                                        ('Wsz', 'WA zilveren ster'),
+                                                        ('Wt', 'WA target award'),
+                                                        ('Wtz', 'WA zilveren target award'),
+                                                        ('Wa', 'WA arrowhead speld'),
+                                                        ('Ngi', 'NL graadspeld indoor'),
+                                                        ('Ngo', 'NL graadspeld outdoor'),
+                                                        ('Ngv', 'NL graadspeld veld'),
+                                                        ('Ngs', 'NL graadspeld short metric'),
+                                                        ('Nga', 'NL graadspeld algemeen'),
+                                                        ('Nt', 'NL tussenspeld')],
+                                               max_length=3)),
+                ('boog_type', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.PROTECT,
+                                                to='BasisTypen.boogtype')),
+                ('prijs_euro', models.DecimalField(decimal_places=2, default=Decimal('0'), max_digits=6)),
+            ],
+            options={
+                'verbose_name': 'Speld',
+                'verbose_name_plural': 'Spelden',
+            },
+        ),
+        migrations.CreateModel(
             name='SpeldScore',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('wedstrijd_soort', models.CharField(max_length=20)),
-                ('speld', models.ForeignKey(on_delete=PROTECT, to='Spelden.speld')),
+                ('speld', models.ForeignKey(on_delete=models.deletion.PROTECT, to='Spelden.speld')),
                 ('benodigde_score', models.PositiveSmallIntegerField()),
                 ('afstand', models.PositiveSmallIntegerField(default=0)),
                 ('aantal_doelen', models.PositiveSmallIntegerField(default=0)),
-                ('boog_type', models.ForeignKey(blank=True, null=True, on_delete=PROTECT, to='BasisTypen.boogtype')),
-                ('leeftijdsklasse', models.ForeignKey(on_delete=PROTECT, to='BasisTypen.leeftijdsklasse',
-                                                      null=True, blank=True)),
+                ('boog_type', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.PROTECT,
+                                                to='BasisTypen.boogtype')),
+                ('leeftijdsklasse', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.PROTECT,
+                                                      to='BasisTypen.leeftijdsklasse')),
             ],
             options={
                 'verbose_name': 'Speld score',
                 'verbose_name_plural': 'Speld scores',
             },
         ),
+        migrations.RunPython(maak_spelden_wa_ster, reverse_code=migrations.RunPython.noop),
+        migrations.RunPython(maak_spelden_wa_arrowhead, reverse_code=migrations.RunPython.noop),
+        migrations.RunPython(maak_spelden_wa_target_awards, reverse_code=migrations.RunPython.noop),
+        migrations.RunPython(maak_spelden_nl_graadspelden, reverse_code=migrations.RunPython.noop),
+        migrations.RunPython(maak_spelden_nl_tussenspelden, reverse_code=migrations.RunPython.noop),
+
         migrations.RunPython(maak_speldscores_wa_ster_recurve, reverse_code=migrations.RunPython.noop),
         migrations.RunPython(maak_speldscores_wa_ster_compound, reverse_code=migrations.RunPython.noop),
         migrations.RunPython(maak_speldscores_wa_target_awards, reverse_code=migrations.RunPython.noop),
@@ -1163,6 +1604,5 @@ class Migration(migrations.Migration):
         migrations.RunPython(maak_speldscores_nl_tussenspelden, reverse_code=migrations.RunPython.noop),
         migrations.RunPython(maak_speldscores_nl_graadspelden, reverse_code=migrations.RunPython.noop),
     ]
-
 
 # end of file
