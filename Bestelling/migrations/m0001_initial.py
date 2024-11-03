@@ -34,7 +34,7 @@ class Migration(migrations.Migration):
         ('Betaal', 'm0021_index'),
         ('Evenement', 'm0002_bedragen'),
         ('Webwinkel', 'm0008_gewicht'),
-        ('Wedstrijden', 'm0053_verstop'),
+        ('Wedstrijden', 'm0057_squashed'),
     ]
 
     # migratie functies

@@ -19,10 +19,16 @@ class Migration(migrations.Migration):
 
     """ Migratie class voor dit deel van de applicatie """
 
+    replaces = [('Wedstrijden', 'm0053_squashed'),
+                ('Wedstrijden', 'm0053_verstop'),
+                ('Wedstrijden', 'm0054_url_uitslag'),
+                ('Wedstrijden', 'm0055_url_uitslagen'),
+                ('Wedstrijden', 'm0056_url_flyer')]
+
     # dit is de eerste
     initial = True
 
-    # volgorde afdwingen
+    # migratie functies
     dependencies = [
         ('Account', 'm0032_squashed'),
         ('BasisTypen', 'm0057_squashed'),
@@ -33,7 +39,6 @@ class Migration(migrations.Migration):
         ('Vereniging', 'm0007_squashed'),
     ]
 
-    # migratie functies
     operations = [
         migrations.CreateModel(
             name='WedstrijdSessie',
@@ -99,11 +104,16 @@ class Migration(migrations.Migration):
                 ('verkoopvoorwaarden_status_when', models.DateTimeField(auto_now_add=True)),
                 ('verkoopvoorwaarden_status_who', models.CharField(blank=True, default='', max_length=100)),
                 ('uitvoerende_vereniging', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.PROTECT,
-                                                             related_name='uitvoerend',
-                                                             to='Vereniging.vereniging')),
+                                                             related_name='uitvoerend', to='Vereniging.vereniging')),
                 ('is_ter_info', models.BooleanField(default=False)),
                 ('eis_kwalificatie_scores', models.BooleanField(default=False)),
                 ('aantal_scheids', models.IntegerField(default=-1)),
+                ('verstop_voor_mwz', models.BooleanField(default=False)),
+                ('url_uitslag_1', models.CharField(default='', max_length=128)),
+                ('url_uitslag_2', models.CharField(default='', max_length=128)),
+                ('url_uitslag_3', models.CharField(default='', max_length=128)),
+                ('url_uitslag_4', models.CharField(default='', max_length=128)),
+                ('url_flyer', models.CharField(default='', max_length=128)),
             ],
             options={
                 'verbose_name': 'Wedstrijd',

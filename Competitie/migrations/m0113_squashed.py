@@ -31,7 +31,7 @@ class Migration(migrations.Migration):
         ('Score', 'm0019_squashed'),
         ('Sporter', 'm0031_squashed'),
         ('Vereniging', 'm0007_squashed'),
-        ('Wedstrijden', 'm0053_squashed'),
+        ('Wedstrijden', 'm0057_squashed'),
     ]
 
     # migratie functies

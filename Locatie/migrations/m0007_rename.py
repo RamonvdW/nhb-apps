@@ -17,7 +17,7 @@ class Migration(migrations.Migration):
         ('Locatie', 'm0006_squashed'),
         ('Opleidingen', 'm0006_correcties'),
         ('Vereniging', 'm0007_squashed'),
-        ('Wedstrijden', 'm0053_verstop'),
+        ('Wedstrijden', 'm0057_squashed'),
     ]
 
     # migratie functies
