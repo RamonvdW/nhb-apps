@@ -782,6 +782,14 @@ class Command(BaseCommand):
 
         taak_ver = list()
 
+        # verwijder eventuele oude team ronde records (veroorzaakt door het terugzetten van een ronde)
+        qset = RegiocompetitieRondeTeam.objects.filter(team__regiocompetitie=deelcomp, ronde_nr=ronde_nr)
+        count = qset.count()
+        if count > 0:
+            self.stdout.write('[INFO] Verwijder %s oude records voor team ronde %s in regio %s' % (
+                        count, ronde_nr, deelcomp))
+            qset.delete()
+
         # maak voor elk team een 'ronde instantie' aan waarin de invallers en score bijgehouden worden
         # verdeel ook de sporters volgens VSG
         for team_type_pk in self._team_volgorde:
