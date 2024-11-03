@@ -19,6 +19,9 @@ class Migration(migrations.Migration):
 
     """ Migratie class voor dit deel van de applicatie """
 
+    replaces = [('Competitie', 'm0113_squashed'),
+                ('Competitie', 'm0114_logboekje')]
+
     # dit is de eerste
     initial = True
 
@@ -256,6 +259,7 @@ class Migration(migrations.Migration):
                 ('indiv_klasse', models.ForeignKey(on_delete=models.deletion.CASCADE,
                                                    to='Competitie.competitieindivklasse')),
                 ('wanneer_aangemeld', models.DateField(auto_now_add=True)),
+                ('logboekje', models.TextField(blank=True, default='')),
             ],
             options={
                 'verbose_name': 'Regiocompetitie sporterboog',
