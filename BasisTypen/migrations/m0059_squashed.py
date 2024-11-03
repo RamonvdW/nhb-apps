@@ -345,6 +345,26 @@ KALENDERWEDSTRIJDENKLASSEN = (
     (662, 'LB', 'AV1', 'LO12D', 'Longbow Onder 12 Meisjes'),
 )
 
+INDIV_COMP_KRIJGT_SCHEIDS_RK = (1100, 1110, 1120,       # R
+                                1200, 1210, 1220,       # C
+                                1300, 1310)             # BB
+
+INDIV_COMP_KRIJGT_SCHEIDS_BK = (1100, 1101, 1102, 1103, 1104, 1105, 1110, 1111, 1120, 1121,     # R
+                                1200, 1201, 1210, 1211, 1220, 1221,                             # C
+                                1300, 1301, 1310,                                               # BB
+                                1400, 1401, 1410,                                               # TR
+                                1500, 1501, 1510)                                               # LB
+
+TEAM_COMP_KRIJGT_SCHEIDS_RK = (15,      # R
+                               20,      # C
+                               31)      # BB
+
+TEAM_COMP_KRIJGT_SCHEIDS_BK = (15, 16, 17, 18, 19,      # R
+                               20, 21,                  # C
+                               31,                      # BB
+                               41,                      # TR
+                               50)                      # LB
+
 
 def init_boogtypen(apps, _):
     """ Maak de boog typen aan """
@@ -386,7 +406,7 @@ def init_leeftijdsklassen(apps, _):
     #       competitieleeftijd = wedstrijdleeftijd + 1
 
     # haal de klassen op die van toepassing zijn tijdens deze migratie
-    leeftijdsklasse_klas = apps.get_model('BasisTypen', 'LeeftijdsKlasse')
+    leeftijdsklasse_klas = apps.get_model('BasisTypen', 'Leeftijdsklasse')
 
     bulk = list()
     for volgorde, afkorting, geslacht, leeftijd_min, leeftijd_max, kort, beschrijving, organisatie in LEEFTIJDSKLASSEN:
@@ -455,7 +475,7 @@ def init_wedstrijdklassen_individueel(apps, _):
 
     # haal de klassen op die van toepassing zijn tijdens deze migratie
     indiv_comp_klasse_klas = apps.get_model('BasisTypen', 'TemplateCompetitieIndivKlasse')
-    leeftijdsklasse_klas = apps.get_model('BasisTypen', 'LeeftijdsKlasse')
+    leeftijdsklasse_klas = apps.get_model('BasisTypen', 'Leeftijdsklasse')
     boogtype_klas = apps.get_model('BasisTypen', 'BoogType')
 
     # maak een look-up table voor de boog afkortingen
@@ -589,7 +609,7 @@ def init_kalenderwedstrijdklassen(apps, _):
 
     # haal de klassen op die van toepassing zijn tijdens deze migratie
     kalenderwedstrijdklasse_klas = apps.get_model('BasisTypen', 'KalenderWedstrijdklasse')
-    leeftijdsklasse_klas = apps.get_model('BasisTypen', 'LeeftijdsKlasse')
+    leeftijdsklasse_klas = apps.get_model('BasisTypen', 'Leeftijdsklasse')
     boogtype_klas = apps.get_model('BasisTypen', 'BoogType')
 
     afk2boog = dict()       # [afkorting] = BoogType
@@ -597,7 +617,7 @@ def init_kalenderwedstrijdklassen(apps, _):
         afk2boog[boog.afkorting] = boog
     # for
 
-    afk2lkl = dict()        # [afkorting] = LeeftijdsKlasse
+    afk2lkl = dict()        # [afkorting] = Leeftijdsklasse
     for lkl in leeftijdsklasse_klas.objects.all():
         afk2lkl[lkl.afkorting] = lkl
     # for
@@ -656,7 +676,7 @@ def init_kalenderwedstrijdklassen_ifaa(apps, _):
 
     # haal de klassen op die van toepassing zijn tijdens deze migratie
     kalenderwedstrijdklasse_klas = apps.get_model('BasisTypen', 'KalenderWedstrijdklasse')
-    leeftijdsklasse_klas = apps.get_model('BasisTypen', 'LeeftijdsKlasse')
+    leeftijdsklasse_klas = apps.get_model('BasisTypen', 'Leeftijdsklasse')
     boogtype_klas = apps.get_model('BasisTypen', 'BoogType')
     ifaa = 'F'  # International Field Archery Association
 
@@ -691,9 +711,26 @@ def init_kalenderwedstrijdklassen_ifaa(apps, _):
     kalenderwedstrijdklasse_klas.objects.bulk_create(bulk)
 
 
+def zet_scheids_rk_bk(apps, _):
+    """ Zet de velden "krijgt_scheids_rk" en "krijgt_scheids_bk" voor de template competitie klassen """
+
+    # haal de klassen op die van toepassing zijn tijdens deze migratie
+    indiv_klas = apps.get_model('BasisTypen', 'TemplateCompetitieIndivKlasse')
+    team_klas = apps.get_model('BasisTypen', 'TemplateCompetitieTeamKlasse')
+
+    indiv_klas.objects.filter(volgorde__in=INDIV_COMP_KRIJGT_SCHEIDS_RK).update(krijgt_scheids_rk=True)
+    team_klas.objects.filter(volgorde__in=TEAM_COMP_KRIJGT_SCHEIDS_RK).update(krijgt_scheids_rk=True)
+
+    indiv_klas.objects.filter(volgorde__in=INDIV_COMP_KRIJGT_SCHEIDS_BK).update(krijgt_scheids_bk=True)
+    team_klas.objects.filter(volgorde__in=TEAM_COMP_KRIJGT_SCHEIDS_BK).update(krijgt_scheids_bk=True)
+
+
 class Migration(migrations.Migration):
 
     """ Migratie class voor dit deel van de applicatie """
+
+    replaces = [('BasisTypen', 'm0057_squashed'),
+                ('BasisTypen', 'm0058_scheids_rk_bk')]
 
     # dit is de eerste
     initial = True
@@ -721,7 +758,7 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.CreateModel(
-            name='LeeftijdsKlasse',
+            name='Leeftijdsklasse',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('afkorting', models.CharField(max_length=5)),
@@ -761,6 +798,27 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.CreateModel(
+            name='KalenderWedstrijdklasse',
+            fields=[
+                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('buiten_gebruik', models.BooleanField(default=False)),
+                ('beschrijving', models.CharField(max_length=80)),
+                ('volgorde', models.PositiveIntegerField()),
+                ('boogtype', models.ForeignKey(on_delete=models.deletion.PROTECT, to='BasisTypen.boogtype')),
+                ('leeftijdsklasse',
+                 models.ForeignKey(on_delete=models.deletion.PROTECT, to='BasisTypen.leeftijdsklasse')),
+                ('organisatie', models.CharField(choices=[('W', 'World Archery'), ('N', 'KHSN'), ('F', 'IFAA')],
+                                                 default='W', max_length=1)),
+                ('afkorting', models.CharField(default='?', max_length=10)),
+            ],
+            options={
+                'verbose_name': 'Kalender Wedstrijdklasse',
+                'verbose_name_plural': 'Kalender Wedstrijdklassen',
+                'ordering': ['volgorde'],
+                'indexes': [models.Index(fields=['volgorde'], name='BasisTypen__volgord_246cec_idx')],  # noqa
+            },
+        ),
+        migrations.CreateModel(
             name='TemplateCompetitieIndivKlasse',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
@@ -772,15 +830,23 @@ class Migration(migrations.Migration):
                 ('is_onbekend', models.BooleanField(default=False)),
                 ('boogtype', models.ForeignKey(on_delete=models.deletion.PROTECT, to='BasisTypen.boogtype')),
                 ('leeftijdsklassen', models.ManyToManyField(to='BasisTypen.leeftijdsklasse')),
-                ('blazoen1_18m_regio', models.CharField(choices=[('40', '40cm'), ('60', '60cm'), ('4S', '60cm 4-spot'), ('DT', 'Dutch Target')], default='40', max_length=2)),
-                ('blazoen1_25m_regio', models.CharField(choices=[('40', '40cm'), ('60', '60cm'), ('4S', '60cm 4-spot'), ('DT', 'Dutch Target')], default='60', max_length=2)),
-                ('blazoen2_18m_regio', models.CharField(choices=[('40', '40cm'), ('60', '60cm'), ('4S', '60cm 4-spot'), ('DT', 'Dutch Target')], default='40', max_length=2)),
-                ('blazoen2_25m_regio', models.CharField(choices=[('40', '40cm'), ('60', '60cm'), ('4S', '60cm 4-spot'), ('DT', 'Dutch Target')], default='60', max_length=2)),
-                ('blazoen_18m_rk_bk', models.CharField(choices=[('40', '40cm'), ('60', '60cm'), ('4S', '60cm 4-spot'), ('DT', 'Dutch Target')], default='40', max_length=2)),
-                ('blazoen_25m_rk_bk', models.CharField(choices=[('40', '40cm'), ('60', '60cm'), ('4S', '60cm 4-spot'), ('DT', 'Dutch Target')], default='60', max_length=2)),
+                ('blazoen1_18m_regio', models.CharField(choices=[('40', '40cm'), ('60', '60cm'), ('4S', '60cm 4-spot'),
+                                                                 ('DT', 'Dutch Target')], default='40', max_length=2)),
+                ('blazoen1_25m_regio', models.CharField(choices=[('40', '40cm'), ('60', '60cm'), ('4S', '60cm 4-spot'),
+                                                                 ('DT', 'Dutch Target')], default='60', max_length=2)),
+                ('blazoen2_18m_regio', models.CharField(choices=[('40', '40cm'), ('60', '60cm'), ('4S', '60cm 4-spot'),
+                                                                 ('DT', 'Dutch Target')], default='40', max_length=2)),
+                ('blazoen2_25m_regio', models.CharField(choices=[('40', '40cm'), ('60', '60cm'), ('4S', '60cm 4-spot'),
+                                                                 ('DT', 'Dutch Target')], default='60', max_length=2)),
+                ('blazoen_18m_rk_bk', models.CharField(choices=[('40', '40cm'), ('60', '60cm'), ('4S', '60cm 4-spot'),
+                                                                ('DT', 'Dutch Target')], default='40', max_length=2)),
+                ('blazoen_25m_rk_bk', models.CharField(choices=[('40', '40cm'), ('60', '60cm'), ('4S', '60cm 4-spot'),
+                                                                ('DT', 'Dutch Target')], default='60', max_length=2)),
                 ('is_aspirant_klasse', models.BooleanField(default=False)),
                 ('titel_bk_18m', models.CharField(default='Bondskampioen', max_length=30)),
                 ('titel_bk_25m', models.CharField(default='Bondskampioen', max_length=30)),
+                ('krijgt_scheids_rk', models.BooleanField(default=False)),
+                ('krijgt_scheids_bk', models.BooleanField(default=False)),
             ],
             options={
                 'verbose_name': 'Template Competitie Indiv Klasse',
@@ -798,40 +864,28 @@ class Migration(migrations.Migration):
                 ('beschrijving', models.CharField(max_length=80)),
                 ('volgorde', models.PositiveIntegerField()),
                 ('team_type', models.ForeignKey(null=True, on_delete=models.deletion.PROTECT, to='BasisTypen.teamtype')),
-                ('blazoen1_25m_regio', models.CharField(choices=[('40', '40cm'), ('60', '60cm'), ('4S', '60cm 4-spot'), ('DT', 'Dutch Target')], default='60', max_length=2)),
-                ('blazoen2_25m_regio', models.CharField(choices=[('40', '40cm'), ('60', '60cm'), ('4S', '60cm 4-spot'), ('DT', 'Dutch Target')], default='60', max_length=2)),
-                ('blazoen1_18m_regio', models.CharField(choices=[('40', '40cm'), ('60', '60cm'), ('4S', '60cm 4-spot'), ('DT', 'Dutch Target')], default='40', max_length=2)),
-                ('blazoen2_18m_regio', models.CharField(choices=[('40', '40cm'), ('60', '60cm'), ('4S', '60cm 4-spot'), ('DT', 'Dutch Target')], default='40', max_length=2)),
-                ('blazoen_18m_rk_bk', models.CharField(choices=[('40', '40cm'), ('60', '60cm'), ('4S', '60cm 4-spot'), ('DT', 'Dutch Target')], default='40', max_length=2)),
-                ('blazoen_25m_rk_bk', models.CharField(choices=[('40', '40cm'), ('60', '60cm'), ('4S', '60cm 4-spot'), ('DT', 'Dutch Target')], default='60', max_length=2)),
+                ('blazoen1_25m_regio', models.CharField(choices=[('40', '40cm'), ('60', '60cm'), ('4S', '60cm 4-spot'),
+                                                                 ('DT', 'Dutch Target')], default='60', max_length=2)),
+                ('blazoen2_25m_regio', models.CharField(choices=[('40', '40cm'), ('60', '60cm'), ('4S', '60cm 4-spot'),
+                                                                 ('DT', 'Dutch Target')], default='60', max_length=2)),
+                ('blazoen1_18m_regio', models.CharField(choices=[('40', '40cm'), ('60', '60cm'), ('4S', '60cm 4-spot'),
+                                                                 ('DT', 'Dutch Target')], default='40', max_length=2)),
+                ('blazoen2_18m_regio', models.CharField(choices=[('40', '40cm'), ('60', '60cm'), ('4S', '60cm 4-spot'),
+                                                                 ('DT', 'Dutch Target')], default='40', max_length=2)),
+                ('blazoen_18m_rk_bk', models.CharField(choices=[('40', '40cm'), ('60', '60cm'), ('4S', '60cm 4-spot'),
+                                                                ('DT', 'Dutch Target')], default='40', max_length=2)),
+                ('blazoen_25m_rk_bk', models.CharField(choices=[('40', '40cm'), ('60', '60cm'), ('4S', '60cm 4-spot'),
+                                                                ('DT', 'Dutch Target')], default='60', max_length=2)),
                 ('titel_bk_18m', models.CharField(default='Bondskampioen', max_length=30)),
                 ('titel_bk_25m', models.CharField(default='Bondskampioen', max_length=30)),
+                ('krijgt_scheids_rk', models.BooleanField(default=False)),
+                ('krijgt_scheids_bk', models.BooleanField(default=False)),
             ],
             options={
                 'verbose_name': 'Template Competitie Team Klasse',
                 'verbose_name_plural': 'Template Competitie Team Klassen',
                 'ordering': ['volgorde'],
                 'indexes': [models.Index(fields=['volgorde'], name='BasisTypen__volgord_4d62f0_idx')],  # noqa
-            },
-        ),
-        migrations.CreateModel(
-            name='KalenderWedstrijdklasse',
-            fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('buiten_gebruik', models.BooleanField(default=False)),
-                ('beschrijving', models.CharField(max_length=80)),
-                ('volgorde', models.PositiveIntegerField()),
-                ('boogtype', models.ForeignKey(on_delete=models.deletion.PROTECT, to='BasisTypen.boogtype')),
-                ('leeftijdsklasse', models.ForeignKey(on_delete=models.deletion.PROTECT, to='BasisTypen.leeftijdsklasse')),
-                ('organisatie', models.CharField(choices=[('W', 'World Archery'), ('N', 'KHSN'), ('F', 'IFAA')],
-                                                 default='W', max_length=1)),
-                ('afkorting', models.CharField(default='?', max_length=10)),
-            ],
-            options={
-                'verbose_name': 'Kalender Wedstrijdklasse',
-                'verbose_name_plural': 'Kalender Wedstrijdklassen',
-                'ordering': ['volgorde'],
-                'indexes': [models.Index(fields=['volgorde'], name='BasisTypen__volgord_246cec_idx')],  # noqa
             },
         ),
         migrations.RunPython(init_leeftijdsklassen),
@@ -841,6 +895,7 @@ class Migration(migrations.Migration):
         migrations.RunPython(init_wedstrijdklassen_team),
         migrations.RunPython(init_kalenderwedstrijdklassen),
         migrations.RunPython(init_kalenderwedstrijdklassen_ifaa),
+        migrations.RunPython(zet_scheids_rk_bk),
     ]
 
 # end of file

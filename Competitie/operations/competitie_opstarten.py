@@ -188,7 +188,7 @@ def _maak_competitieklassen(comp):
     is_18m = comp.is_indoor()
 
     if True:
-        volgorde2lkl_pks = dict()     # [volgorde] = [LeeftijdsKlasse.pk, ...]
+        volgorde2lkl_pks = dict()     # [volgorde] = [Leeftijdsklasse.pk, ...]
         bulk = list()
 
         for template in (TemplateCompetitieIndivKlasse

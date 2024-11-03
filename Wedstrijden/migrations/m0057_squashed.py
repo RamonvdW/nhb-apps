@@ -31,7 +31,7 @@ class Migration(migrations.Migration):
     # migratie functies
     dependencies = [
         ('Account', 'm0032_squashed'),
-        ('BasisTypen', 'm0057_squashed'),
+        ('BasisTypen', 'm0059_squashed'),
         ('Functie', 'm0025_squashed'),
         ('Locatie', 'm0009_squashed'),
         ('Score', 'm0019_squashed'),
