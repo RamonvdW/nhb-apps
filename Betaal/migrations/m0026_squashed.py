@@ -11,6 +11,17 @@ class Migration(migrations.Migration):
 
     """ Migratie class voor dit deel van de applicatie """
 
+    replaces = [('Betaal', 'm0016_squashed'),
+                ('Betaal', 'm0017_langere_url'),
+                ('Betaal', 'm0018_pogingen'),
+                ('Betaal', 'm0019_bedragen'),
+                ('Betaal', 'm0020_refunds'),
+                ('Betaal', 'm0021_index'),
+                ('Betaal', 'm0022_optional'),
+                ('Betaal', 'm0023_remove_oud_1'),
+                ('Betaal', 'm0024_transactie_type'),
+                ('Betaal', 'm0025_transactie_type_choices')]
+
     # dit is de eerste
     initial = True
 
@@ -57,13 +68,14 @@ class Migration(migrations.Migration):
                 ('when', models.DateTimeField(auto_now_add=True)),
                 ('code', models.PositiveSmallIntegerField(default=0)),
                 ('is_verwerkt', models.BooleanField(default=False)),
-                ('beschrijving', models.CharField(max_length=100)),
+                ('beschrijving', models.CharField(blank=True, max_length=100)),
                 ('bedrag_euro', models.DecimalField(decimal_places=2, default=0.0, max_digits=7)),
                 ('payment_id', models.CharField(blank=True, max_length=64)),
                 ('ontvanger', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.PROTECT,
                                                 to='Betaal.betaalinstellingenvereniging')),
-                ('url_betaling_gedaan', models.CharField(default='', max_length=100)),
-                ('url_checkout', models.CharField(blank=True, default='', max_length=200)),
+                ('url_betaling_gedaan', models.CharField(blank=True, default='', max_length=100)),
+                ('url_checkout', models.CharField(blank=True, default='', max_length=400)),
+                ('pogingen', models.PositiveSmallIntegerField(default=0)),
             ],
             options={
                 'verbose_name': 'Betaal mutatie',
@@ -76,16 +88,25 @@ class Migration(migrations.Migration):
                 ('payment_id', models.CharField(max_length=64)),
                 ('when', models.DateTimeField()),
                 ('beschrijving', models.CharField(max_length=100)),
-                ('is_restitutie', models.BooleanField(default=False)),
-                ('bedrag_euro_boeking', models.DecimalField(decimal_places=2, default=0.0, max_digits=7)),
                 ('klant_naam', models.CharField(max_length=100)),
                 ('klant_account', models.CharField(max_length=100)),
-                ('bedrag_euro_klant', models.DecimalField(decimal_places=2, default=0.0, max_digits=7)),
-                ('is_handmatig', models.BooleanField(default=False)),
+                ('bedrag_handmatig', models.DecimalField(decimal_places=2, default=0.0, max_digits=7)),
+                ('bedrag_beschikbaar', models.DecimalField(decimal_places=2, default=0.0, max_digits=7)),
+                ('bedrag_te_ontvangen', models.DecimalField(decimal_places=2, default=0.0, max_digits=7)),
+                ('bedrag_terugbetaald', models.DecimalField(decimal_places=2, default=0.0, max_digits=7)),
+                ('bedrag_teruggevorderd', models.DecimalField(decimal_places=2, default=0.0, max_digits=7)),
+                ('payment_status', models.CharField(default='', max_length=15)),
+                ('bedrag_refund', models.DecimalField(decimal_places=2, default=0.0, max_digits=7)),
+                ('refund_id', models.CharField(blank=True, default='', max_length=64)),
+                ('refund_status', models.CharField(blank=True, default='', max_length=15)),
+                ('transactie_type', models.CharField(choices=[('HA', 'Handmatig'), ('MP', 'Mollie Payment'),
+                                                              ('MR', 'Mollie Restitutie')],
+                                                     default='HA', max_length=2)),
             ],
             options={
                 'verbose_name': 'Betaal transactie',
                 'verbose_name_plural': 'Betaal transacties',
+                'indexes': [models.Index(fields=['payment_id'], name='Betaal_beta_payment_683df1_idx')],
             },
         ),
     ]
