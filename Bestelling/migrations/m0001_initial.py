@@ -30,7 +30,7 @@ class Migration(migrations.Migration):
 
     # volgorde afdwingen
     dependencies = [
-        ('Account', 'm0030_squashed'),
+        ('Account', 'm0032_squashed'),
         ('Betaal', 'm0021_index'),
         ('Evenement', 'm0002_bedragen'),
         ('Webwinkel', 'm0008_gewicht'),

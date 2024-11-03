@@ -13,8 +13,8 @@ class Migration(migrations.Migration):
 
     # volgorde afdwingen
     dependencies = [
-        ('Vereniging', 'm0007_squashed'),
         ('Locatie', 'm0007_rename'),
+        ('Vereniging', 'm0007_squashed'),
     ]
 
     # migratie functies

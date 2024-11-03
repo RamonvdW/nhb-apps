@@ -19,18 +19,12 @@ class Migration(migrations.Migration):
 
     """ Migratie class voor dit deel van de applicatie """
 
-    replaces = [('Competitie', 'm0108_squashed'),
-                ('Competitie', 'm0109_match_scheids'),
-                ('Competitie', 'm0110_scheids_rk_bk'),
-                ('Competitie', 'm0111_logboekjes'),
-                ('Competitie', 'm0112_team_result_counts')]
-
     # dit is de eerste
     initial = True
 
     # volgorde afdwingen
     dependencies = [
-        ('Account', 'm0030_squashed'),
+        ('Account', 'm0032_squashed'),
         ('BasisTypen', 'm0058_scheids_rk_bk'),
         ('Functie', 'm0025_squashed'),
         ('Geo', 'm0002_squashed'),
