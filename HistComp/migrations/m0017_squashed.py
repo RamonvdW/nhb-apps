@@ -11,6 +11,9 @@ class Migration(migrations.Migration):
 
     """ Migratie class voor dit deel van de applicatie """
 
+    replaces = [('HistComp', 'm0015_squashed'),
+                ('HistComp', 'm0016_counts')]
+
     # dit is de eerste
     initial = True
 
@@ -78,7 +81,7 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.CreateModel(
-            name='HistKampIndiv',
+            name='HistKampIndivRK',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('seizoen', models.ForeignKey(on_delete=models.deletion.CASCADE, to='HistComp.histcompseizoen')),
@@ -106,41 +109,6 @@ class Migration(migrations.Migration):
             options={
                 'verbose_name': 'Hist indiv RK',
                 'verbose_name_plural': 'Hist indiv RK',
-            },
-        ),
-        migrations.CreateModel(
-            name='HistKampTeam',
-            fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('seizoen', models.ForeignKey(on_delete=models.deletion.CASCADE, to='HistComp.histcompseizoen')),
-                ('rk_of_bk', models.CharField(choices=[('R', 'RK'), ('B', 'BK')], default='R', max_length=1)),
-                ('rayon_nr', models.PositiveSmallIntegerField(default=0)),
-                ('teams_klasse', models.CharField(max_length=30)),
-                ('team_type', models.CharField(max_length=5)),
-                ('vereniging_nr', models.PositiveSmallIntegerField()),
-                ('vereniging_naam', models.CharField(max_length=50)),
-                ('vereniging_plaats', models.CharField(default='', max_length=35)),
-                ('team_nr', models.PositiveSmallIntegerField()),
-                ('team_score', models.PositiveSmallIntegerField()),
-                ('rank', models.PositiveSmallIntegerField()),
-                ('score_lid_1', models.PositiveSmallIntegerField(default=0)),
-                ('score_lid_2', models.PositiveSmallIntegerField(default=0)),
-                ('score_lid_3', models.PositiveSmallIntegerField(default=0)),
-                ('score_lid_4', models.PositiveSmallIntegerField(default=0)),
-                ('lid_1', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.CASCADE,
-                                            related_name='team_lid_1', to='HistComp.histkampindiv')),
-                ('lid_2', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.CASCADE,
-                                            related_name='team_lid_2', to='HistComp.histkampindiv')),
-                ('lid_3', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.CASCADE,
-                                            related_name='team_lid_3', to='HistComp.histkampindiv')),
-                ('lid_4', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.CASCADE,
-                                            related_name='team_lid_4', to='HistComp.histkampindiv')),
-                ('titel_code', models.CharField(choices=[(' ', 'None'), ('R', 'RK'), ('B', 'BK'), ('N', 'NK')],
-                                                default=' ', max_length=1)),
-            ],
-            options={
-                'verbose_name': 'Hist rk/bk teams',
-                'verbose_name_plural': 'Hist rk/bk teams',
             },
         ),
         migrations.CreateModel(
@@ -197,6 +165,42 @@ class Migration(migrations.Migration):
             options={
                 'verbose_name': 'Hist indiv BK',
                 'verbose_name_plural': 'Hist indiv BK',
+            },
+        ),
+        migrations.CreateModel(
+            name='HistKampTeam',
+            fields=[
+                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('seizoen', models.ForeignKey(on_delete=models.deletion.CASCADE, to='HistComp.histcompseizoen')),
+                ('rk_of_bk', models.CharField(choices=[('R', 'RK'), ('B', 'BK')], default='R', max_length=1)),
+                ('rayon_nr', models.PositiveSmallIntegerField(default=0)),
+                ('teams_klasse', models.CharField(max_length=30)),
+                ('team_type', models.CharField(max_length=5)),
+                ('vereniging_nr', models.PositiveSmallIntegerField()),
+                ('vereniging_naam', models.CharField(max_length=50)),
+                ('vereniging_plaats', models.CharField(default='', max_length=35)),
+                ('team_nr', models.PositiveSmallIntegerField()),
+                ('team_score', models.PositiveSmallIntegerField()),
+                ('rank', models.PositiveSmallIntegerField()),
+                ('score_lid_1', models.PositiveSmallIntegerField(default=0)),
+                ('score_lid_2', models.PositiveSmallIntegerField(default=0)),
+                ('score_lid_3', models.PositiveSmallIntegerField(default=0)),
+                ('score_lid_4', models.PositiveSmallIntegerField(default=0)),
+                ('lid_1', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.CASCADE,
+                                            related_name='team_lid_1', to='HistComp.histkampindivrk')),
+                ('lid_2', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.CASCADE,
+                                            related_name='team_lid_2', to='HistComp.histkampindivrk')),
+                ('lid_3', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.CASCADE,
+                                            related_name='team_lid_3', to='HistComp.histkampindivrk')),
+                ('lid_4', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.CASCADE,
+                                            related_name='team_lid_4', to='HistComp.histkampindivrk')),
+                ('titel_code', models.CharField(choices=[(' ', 'None'), ('R', 'RK'), ('B', 'BK'), ('N', 'NK')],
+                                                default=' ', max_length=1)),
+                ('team_score_counts', models.CharField(blank=True, default='', max_length=20)),
+            ],
+            options={
+                'verbose_name': 'Hist RK/BK teams',
+                'verbose_name_plural': 'Hist RK/BK teams',
             },
         ),
     ]
