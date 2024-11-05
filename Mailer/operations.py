@@ -10,7 +10,7 @@ from django.db.transaction import TransactionManagementError
 from django.template.loader import render_to_string
 from django.templatetags.static import static
 from Mailer.models import MailQueue
-from SiteMain.core.minify_dtl import minify_scripts, minify_css, remove_html_comments
+from Site.core.minify_dtl import minify_scripts, minify_css, remove_html_comments
 from html import unescape
 import datetime
 import re

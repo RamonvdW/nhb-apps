@@ -1,13 +1,13 @@
 #!/bin/bash
 
-#  Copyright (c) 2020-2023 Ramon van der Winkel.
+#  Copyright (c) 2020-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 # helper to check the uniqueness of the "op_pagina" for the feedback form
 
 DTL_INCLUDES=$(echo "/menu.dtl /andere-sites.dtl /site_layout.dtl /site_layout_minimaal.dtl /site_layout_favicons /site_layout_fonts /fout_403.dtl /fout_404.dtl /fout_500.dtl /card_icon.dtl /card_logo.dtl /card_icon_beschikbaar-vanaf /card_logo_beschikbaar-vanaf /ga-naar-live-server.dtl /card_product.dtl /card_niet-beschikbaar /tijdlijn.dtl /vhpg-tekst.dtl" | tr ' ' '|')
-DTL_BEWUST_NIET=$(echo "/templates/email SiteMain/templates/snippets.dtl /plein-bezoeker.dtl /niet-ondersteund.dtl /feedback/ tijdelijkecodes/code- /Logboek/ /records_specifiek.dtl /registreer-gast.dtl /registreer-normaal.dtl" | tr ' ' '|')
+DTL_BEWUST_NIET=$(echo "/templates/email Site/templates/snippets.dtl /plein-bezoeker.dtl /niet-ondersteund.dtl /feedback/ tijdelijkecodes/code- /Logboek/ /records_specifiek.dtl /registreer-gast.dtl /registreer-normaal.dtl" | tr ' ' '|')
 
 DTL_FILES=$(find . -name \*.dtl | grep -vE "$DTL_BEWUST_NIET" | grep -vE "$DTL_INCLUDES")
 

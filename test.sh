@@ -8,12 +8,17 @@ ARGS="$*"
 COV_AT_LEAST=96.70
 RED="\e[31m"
 RESET="\e[0m"
-TEST_DIR="./SiteMain/tmp_test_data"
+TEST_DIR="./Site/tmp_test_data"
 TEST_DIR_FOTOS_WEBWINKEL="$TEST_DIR/webwinkel"
 REPORT_DIR="/tmp/covhtml"
 LOG="/tmp/test_out.txt"
 TMP_HTML="/tmp/tmp_html/"             # used by e2e_open_in_browser()
-STATIC_DIR="$PWD/SiteMain/.static/"   # must be full path
+STATIC_DIR="$PWD/Site/.static/"   # must be full path
+SETTINGS_AUTOTEST="Site.settings_autotest"
+SETTINGS_AUTOTEST_NODEBUG="Site.settings_autotest_nodebug"
+COVERAGE_RC="./Site/utils/coverage.rc"
+COVERAGE_FILE="/tmp/.coverage.$$"
+DATABASE="test_data3"
 
 # -Wa = enable deprecation warnings
 PY_OPTS="-Wa"
@@ -31,7 +36,7 @@ touch "$LOG"
 COV_INCLUDE_3RD_PARTY=""
 #COV_INCLUDE_3RD_PARTY="mollie"
 
-COVRC="--rcfile=./SiteMain/utils/coverage.rc"
+COVRC="--rcfile=$COVERAGE_RC"
 PYCOV="-m coverage run $COVRC --append --branch"       # --pylib
 [ -n "$COV_INCLUDE_3RD_PARTY" ] && PYCOV+=" --include=*${COV_INCLUDE_3RD_PARTY}*"
 
@@ -164,13 +169,13 @@ rm -rf "$TMP_HTML"
 mkdir -p "$TMP_HTML"
 ln -s "$STATIC_DIR" "$TMP_HTML/static"
 
-export COVERAGE_FILE="/tmp/.coverage.$$"
+export COVERAGE_FILE        # where to write coverage data to
 python3 $PY_OPTS -m coverage erase
 
 echo "[INFO] Capturing output in $LOG"
 # --pid=$$ means: stop when parent stops
 # -u = unbuffered stdin/stdout
-tail -f "$LOG" --pid=$$ | python -u ./SiteMain/utils/number_tests.py | grep --color -E "FAIL$|ERROR$|" &
+tail -f "$LOG" --pid=$$ | python -u ./Site/utils/number_tests.py | grep --color -E "FAIL$|ERROR$|" &
 PID_TAIL=$(jobs -p | tail -1)
 # echo "PID_TAIL=$PID_TAIL"
 
@@ -181,14 +186,16 @@ then
     echo "[INFO] Deleting test database"
     old_pwd="$PWD"
     cd /tmp
-    sudo -u postgres dropdb --if-exists test_data3 || exit 1
-    sudo -u postgres createdb -E UTF8 test_data3 || exit 1
-    sudo -u postgres psql -d test_data3 -q -c 'GRANT CREATE ON SCHEMA public TO django' || exit 1
-    echo "[INFO] Creating clean database; running migrations and performing run with nodebug"
+    sudo -u postgres dropdb --if-exists $DATABASE || exit 1
+
+    echo "[INFO] Creating clean database"
+    sudo -u postgres createdb -E UTF8 $DATABASE || exit 1
+    sudo -u postgres psql -d $DATABASE -q -c 'GRANT CREATE ON SCHEMA public TO django' || exit 1
     cd "$old_pwd"
 
-    # add coverage with no-debug
-    python3 $PY_OPTS -u $PYCOV ./manage.py test --keepdb --noinput --settings=SiteMain.settings_autotest_nodebug -v 2 Plein.tests.tests.TestPlein.test_quick &>>"$LOG"
+    echo "[INFO] Running migrations and performing run with nodebug"
+    # ..and add coverage with no-debug
+    python3 $PY_OPTS -u $PYCOV ./manage.py test --keepdb --noinput --settings=$SETTINGS_AUTOTEST_NODEBUG -v 2 Plein.tests.tests.TestPlein.test_quick &>>"$LOG"
     RES=$?
     #echo "[DEBUG] Debug run result: $RES --> ABORTED=$ABORTED"
     [ $RES -eq 3 ] && ABORTED=1
@@ -242,7 +249,7 @@ powerprofilesctl set performance
 # -v = verbose
 # note: double quotes not supported around $*
 echo "[INFO] Starting main test run" >>"$LOG"
-python3 $PY_OPTS -u $PYCOV ./manage.py test --keepdb --settings=SiteMain.settings_autotest -v 2 $ARGS &>>"$LOG"
+python3 $PY_OPTS -u $PYCOV ./manage.py test --keepdb --settings=$SETTINGS_AUTOTEST -v 2 $ARGS &>>"$LOG"
 RES=$?
 #echo "[DEBUG] Run result: $RES --> ABORTED=$ABORTED"
 [ $RES -eq 3 ] && ABORTED=1

@@ -11,7 +11,7 @@ from Mailer.models import MailQueue
 from TestHelpers.template_status import consistent_email_templates, included_templates, validated_templates
 from TestHelpers.validate_html import validate_html
 from TestHelpers.validate_js import validate_javascript
-from SiteMain.core.minify_dtl import minify_scripts, minify_html
+from Site.core.minify_dtl import minify_scripts, minify_html
 from bs4 import BeautifulSoup
 import json
 
@@ -1051,7 +1051,8 @@ class MyTestAsserts(TestCase):
             while 0 <= pos < len(text):
                 pos = text.find('€', pos+1)
                 if pos > prev_pos and pos - prev_pos <= 5:      # pragma: no cover
-                    issues.append('Euro signs close to each other in text: ' + text[prev_pos-10:pos+10].replace('\n', '\\n'))
+                    issues.append('Euro signs close to each other in text: ' +
+                                  text[prev_pos-10:pos+10].replace('\n', '\\n'))
                 prev_pos = pos
             # while
 

@@ -16,22 +16,22 @@
     this file is included by django.conf.settings
 
     Normal:       (wsgi.py or ./manage.py cmd)
-      SiteMain/settings.py
-          includes SiteMain/core/settings_base.py
-              includes SiteMain/settings_local.py for site specific settings  <-- replaced on real deployment
+      Site/settings.py
+          includes Site/core/settings_base.py
+              includes Site/settings_local.py for site specific settings  <-- replaced on real deployment
           provides additional items that are part of the release
 
-    Autotest via test.sh  (uses ./manage.py cmd --settings=SiteMain.settings_autotest)
-      SiteMain/settings_autotest[_nodebug].py
-          includes SiteMain/core/settings_base.py
-              includes SiteMain/settings_local.py for site specific settings
+    Autotest via test.sh  (uses ./manage.py cmd --settings=Site.settings_autotest)
+      Site/settings_autotest[_nodebug].py
+          includes Site/core/settings_base.py
+              includes Site/settings_local.py for site specific settings
           provides additional items that are part of the release
       provides changes to to settings for autotest
 
-    Dev server via run.sh  (uses ./manage.py cmd --settings=SiteMain.settings_dev)
-      SiteMain/settings_dev.py
-          includes SiteMain/core/settings_base.py
-              includes SiteMain/settings_local.py for site specific settings
+    Dev server via run.sh  (uses ./manage.py cmd --settings=Site.settings_dev)
+      Site/settings_dev.py
+          includes Site/core/settings_base.py
+              includes Site/settings_local.py for site specific settings
           provides additional items that are part of the release
       provides changes to to settings for autotest
 """
@@ -49,7 +49,7 @@ GMAPS_API_URL = None
 
 # import install-specific settings from a separate file
 # that is easy to replace as part of the deployment process
-from SiteMain.settings_local import *       # noqa
+from Site.settings_local import *       # noqa
 
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -168,7 +168,7 @@ TEMPLATES = [
                 'Plein.context_processors.site_layout',                 # voor het menu en fonts
             ],
             'loaders': [
-                ('django.template.loaders.cached.Loader', ['SiteMain.core.minify_dtl.Loader']),
+                ('django.template.loaders.cached.Loader', ['Site.core.minify_dtl.Loader']),
             ],
         },
     },
@@ -179,7 +179,7 @@ SESSION_COOKIE_NAME = 'mh_session_id'
 CSRF_COOKIE_NAME = 'mh_csrf_token'
 
 # point out location of WSGI application for django runserver command
-WSGI_APPLICATION = 'SiteMain.core.wsgi.application'
+WSGI_APPLICATION = 'Site.core.wsgi.application'
 
 # let browsers remember to connect with https
 # security analysis recommends at least 180 days
@@ -217,13 +217,13 @@ USE_TZ = True
 
 
 # top-level URL-verdeling naar apps
-ROOT_URLCONF = 'SiteMain.core.urls'
+ROOT_URLCONF = 'Site.core.urls'
 
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 STATIC_URL = '/static/'             # url
-STATIC_ROOT = 'SiteMain/.static'    # relative to project top-dir
+STATIC_ROOT = 'Site/.static'    # relative to project top-dir
 STATICFILES_DIRS = [
     ("webwinkel_fotos", WEBWINKEL_FOTOS_DIR),       # noqa
 ]
