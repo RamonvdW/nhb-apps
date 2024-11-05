@@ -210,7 +210,9 @@ def _maak_competitieklassen(comp):
                             is_ook_voor_rk_bk=not template.niet_voor_rk_bk,
                             is_onbekend=template.is_onbekend,
                             is_aspirant_klasse=template.is_aspirant_klasse,
-                            min_ag=AG_NUL)
+                            min_ag=AG_NUL,
+                            krijgt_scheids_rk=template.krijgt_scheids_rk,
+                            krijgt_scheids_bk=template.krijgt_scheids_bk)
 
             if is_18m:
                 klasse.blazoen1_regio = template.blazoen1_18m_regio
@@ -224,6 +226,10 @@ def _maak_competitieklassen(comp):
                 klasse.blazoen_rk_bk = template.blazoen_25m_rk_bk
                 if klasse.is_ook_voor_rk_bk:
                     klasse.titel_bk = template.titel_bk_25m
+
+                # 25m1pijl krijgt nooit SR op RK/BK
+                klasse.krijgt_scheids_rk = False
+                klasse.krijgt_scheids_bk = False
 
             bulk.append(klasse)
 
@@ -278,7 +284,7 @@ def _maak_competitieklassen(comp):
 
             bulk.append(klasse)
 
-            # voor de rayonkampioenschappen teams
+            # voor de RK en BK teams
             klasse = CompetitieTeamKlasse(
                         competitie=comp,
                         volgorde=template.volgorde + 100,
@@ -286,7 +292,9 @@ def _maak_competitieklassen(comp):
                         team_afkorting=template.team_type.afkorting,
                         team_type=template.team_type,
                         min_ag=AG_NUL,
-                        is_voor_teams_rk_bk=True)
+                        is_voor_teams_rk_bk=True,
+                        krijgt_scheids_rk=template.krijgt_scheids_rk,
+                        krijgt_scheids_bk=template.krijgt_scheids_bk)
 
             if is_18m:
                 klasse.blazoen1_regio = template.blazoen1_18m_regio
@@ -298,6 +306,10 @@ def _maak_competitieklassen(comp):
                 klasse.blazoen2_regio = template.blazoen2_25m_regio
                 klasse.blazoen_rk_bk = template.blazoen_25m_rk_bk
                 klasse.titel_bk = template.titel_bk_25m
+
+                # 25m1pijl krijgt nooit SR op RK/BK
+                klasse.krijgt_scheids_rk = False
+                klasse.krijgt_scheids_bk = False
 
             bulk.append(klasse)
         # for

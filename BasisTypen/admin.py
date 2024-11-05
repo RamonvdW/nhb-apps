@@ -47,7 +47,8 @@ class BasisTypenTemplateCompetitieIndivKlasseAdmin(BasisTypenReadonlyMetVolgorde
     """ filter voor TemplateCompetitieIndivKlasse """
 
     # lijstweergave
-    list_filter = ('gebruik_18m', 'gebruik_25m', 'boogtype', 'is_aspirant_klasse')
+    list_filter = ('gebruik_18m', 'gebruik_25m', 'boogtype', 'is_aspirant_klasse',
+                   'krijgt_scheids_rk', 'krijgt_scheids_bk')
 
     list_select_related = ('boogtype',)
 
@@ -78,7 +79,8 @@ class BasisTypenTemplateCompetitieTeamKlasseAdmin(BasisTypenReadonlyMetVolgordeA
     """ filter voor TemplateCompetitieTeamKlasse """
 
     # lijstweergave
-    list_filter = ('gebruik_18m', 'gebruik_25m')
+    list_filter = ('gebruik_18m', 'gebruik_25m',
+                   'krijgt_scheids_rk', 'krijgt_scheids_bk')
 
     list_select_related = ('team_type',)
 
