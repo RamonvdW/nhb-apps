@@ -18,26 +18,24 @@
 {% block pagina %}
 
     <script>
-        function stuur_keuzes(url) {
+        function stuur_keuzes(url_part1, url_part2) {
             // construeer een url en navigeer daar naartoe
 
-            let el_zoek = document.getElementById('id_zoekterm')
-            // console.log('el_zoek:', el_zoek)
-            const zoekterm = el_zoek.value
-
             // vervang de ~1 in de url met het soort filter
-            let el_soort = document.querySelector("input[name='filter_soort']:checked");
-            // console.log('el_soort:', el_soort)
-            url = url.replace('~1', el_soort.dataset.url);
+            const el_soort = document.querySelector("input[name='filter_soort']:checked");
+            url_part2 = url_part2.replace('~1', el_soort.dataset.url);
 
             // vervang de ~2 in de url met het bogen filter
-            let el_bogen = document.querySelector("input[name='filter_bogen']:checked");
-            // console.log('el_bogen:', el_bogen)
-            url = url.replace('~2', el_bogen.dataset.url);
+            const el_bogen = document.querySelector("input[name='filter_bogen']:checked");
+            url_part2 = url_part2.replace('~2', el_bogen.dataset.url);
+
+            let url = url_part1 + url_part2;
 
             // voeg de zoekterm toe als query parameter
+            const el_zoek = document.getElementById('id_zoekterm');
+            const zoekterm = el_zoek.value;
             if (zoekterm !== "") {
-                url = url + '?zoek=' + zoekterm
+                url += '?zoek=' + zoekterm
             }
 
             // navigate to the final url
@@ -49,7 +47,7 @@
             document.getElementById('id_zoekterm').addEventListener("keyup", event => {
                 // console.log(event);
                 if (event.key === 'Enter') {
-                    stuur_keuzes('{{ url_keuzes }}');
+                    stuur_keuzes('{{ url_keuzes.0 }}', '{{ url_keuzes.1 }}');
                 }
             })
         });
@@ -63,13 +61,6 @@
             {% if not kan_aanmelden %}
                 <p>Om in te schrijven moet je een account aanmaken en inloggen</p>
             {% endif %}
-
-            {% if url_toon_alles %}
-                <p>
-                    <a class="btn-sv-rood" href="{{ url_toon_alles }}"><i class="notranslate material-icons-round left">backspace</i>Toon alles</a>
-                </p>
-            {% endif %}
-
         </div>
     </div>
 
@@ -88,11 +79,11 @@
                 </div>
 
                 <p class="center">
-                    <button class="btn-sv-rood" onclick="stuur_keuzes('{{ url_keuzes }}')">
+                    <button class="btn-sv-rood" onclick="stuur_keuzes('{{ url_keuzes.0 }}', '{{ url_keuzes.1 }}')">
                         <i class="notranslate material-icons-round left">search</i>Zoek</button>
                     {% if unfiltered_url %}
                         <span>&nbsp;&nbsp;</span><a class="btn-sv-rood" href="{{ unfiltered_url }}"><i class="notranslate material-icons-round left">backspace</i>Toon alles</a>
-                    {% endif %}                 
+                    {% endif %}
                 </p>
             </div>
         </div>
@@ -112,7 +103,7 @@
                     {% endfor %}
                 </ul>
                 <p style="margin-left:35px">
-                    <button class="btn-sv-rood" onclick="stuur_keuzes('{{ url_keuzes }}')">Activeer</button>
+                    <button class="btn-sv-rood" onclick="stuur_keuzes('{{ url_keuzes.0 }}', '{{ url_keuzes.1 }}')">Activeer</button>
                 </p>
             </div>
         </div>
@@ -132,7 +123,7 @@
                     {% endfor %}
                 </ul>
                 <p style="margin-left:35px">
-                    <button class="btn-sv-rood" onclick="stuur_keuzes('{{ url_keuzes }}')">Activeer</button>
+                    <button class="btn-sv-rood" onclick="stuur_keuzes('{{ url_keuzes.0 }}', '{{ url_keuzes.1 }}')">Activeer</button>
                 </p>
             </div>
         </div>
@@ -144,7 +135,7 @@
         <tr style="border-bottom:none">
             <!-- knop -->
             <td class="right-align">
-                <button class="btn-sv-rood" onclick="stuur_keuzes('{{ url_prev }}')">
+                <button class="btn-sv-rood" onclick="stuur_keuzes('{{ url_prev.0 }}', '{{ url_prev.1 }}')">
                     <i class="notranslate material-icons-round">chevron_left</i></button>
             </td>
 
@@ -154,7 +145,7 @@
 
             <!-- knop -->
             <td class="left-align">
-                <button class="btn-sv-rood" onclick="stuur_keuzes('{{ url_next }}')">
+                <button class="btn-sv-rood" onclick="stuur_keuzes('{{ url_next.0 }}', '{{ url_next.1 }}')">
                     <i class="notranslate material-icons-round">chevron_right</i></button>
             </td>
         </tr>

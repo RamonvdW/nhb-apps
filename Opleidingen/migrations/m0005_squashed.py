@@ -25,9 +25,9 @@ class Migration(migrations.Migration):
 
     # volgorde afdwingen
     dependencies = [
-        ('Account', 'm0030_squashed'),
+        ('Account', 'm0032_squashed'),
         ('Sporter', 'm0031_squashed'),
-        ('Wedstrijden', 'm0053_squashed'),
+        ('Wedstrijden', 'm0057_squashed'),
     ]
 
     # migratie functies
@@ -43,7 +43,7 @@ class Migration(migrations.Migration):
                 ('opleider_email', models.CharField(max_length=150)),
                 ('opleider_telefoon', models.CharField(blank=True, default='', max_length=25)),
                 ('locatie', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.PROTECT,
-                                              to='Locatie.locatie')),
+                                              to='Locatie.wedstrijdlocatie')),
             ],
             options={
                 'verbose_name': 'Opleiding moment',

@@ -47,25 +47,6 @@
                         </a>
                     </div>
                 </div>
-                {% comment %}
-                <div style="display: flex; justify-content: center">
-                    <div style="width: 40px; height: 40px">
-                        <a href="{% url 'Feedback:bevinding' bevinding='plus' op_pagina=op_pagina volledige_url=volledige_url %}" target="_blank" rel="noopener noreferrer">
-                            <img src="{% static 'feedback/smiley5_plus_nul_min.png' %}" width=40 height=40 style="object-fit: cover; object-position:0 0" alt="min">
-                        </a>
-                    </div>
-                    <div style="width: 40px; height: 40px; margin: 0 15px 0 15px">
-                        <a href="{% url 'Feedback:bevinding' bevinding='nul'  op_pagina=op_pagina volledige_url=volledige_url %}" target="_blank" rel="noopener noreferrer">
-                            <img src="{% static 'feedback/smiley5_plus_nul_min.png' %}" width=40 height=40 style="object-fit: cover; object-position:-40px 0" alt="nul">
-                        </a>
-                    </div>
-                    <div style="width: 40px; height: 40px">
-                        <a href="{% url 'Feedback:bevinding' bevinding='min'  op_pagina=op_pagina volledige_url=volledige_url %}" target="_blank" rel="noopener noreferrer">
-                            <img src="{% static 'feedback/smiley5_plus_nul_min.png' %}" width=40 height=40 style="object-fit: cover; object-position:-80px 0" alt="plus">
-                        </a>
-                    </div>
-                </div>
-                {% endcomment %}
             </div>
         </div>
     {% endwith %}

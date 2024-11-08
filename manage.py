@@ -58,7 +58,7 @@ def main():
         #         stars = "*" * 30
         #         print("\n%s START OF RUN %s\n" % (stars, stars))
 
-        os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'SiteMain.settings')
+        os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'Site.settings')
         execute_from_command_line(sys.argv)
 
         end_of_run()

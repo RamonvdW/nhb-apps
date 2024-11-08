@@ -14,7 +14,7 @@ from django.views.defaults import ERROR_PAGE_TEMPLATE
 from django.core.exceptions import PermissionDenied
 from Functie.rol import rol_get_huidige_functie
 from Mailer.operations import mailer_notify_internal_error
-from SiteMain.core import urls
+from Site.core import urls
 import traceback
 import logging
 import sys

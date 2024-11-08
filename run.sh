@@ -4,9 +4,9 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-STATIC_DIR="SiteMain/.static/"
-SETTINGS_DEV="SiteMain.settings_dev"
-SETTINGS_NORMAL="SiteMain.settings"
+STATIC_DIR="Site/.static/"
+SETTINGS_DEV="Site.settings_dev"
+SETTINGS_NORMAL="Site.settings"
 BG_DURATION=60   # minutes (60 is max voor de meeste commando's)
 
 export PYTHONDONTWRITEBYTECODE=1

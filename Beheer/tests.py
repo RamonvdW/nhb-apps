@@ -19,7 +19,7 @@ import io
 
 
 # updaten met dit commando:
-# noqa: for x in `./manage.py show_urls --settings=SiteMain.settings_dev | rev | cut -d'/' -f2- | rev | grep '/beheer/'`; do echo "'$x/',"; done | grep -vE ':object_id>/|/add/|/autocomplete/|<app_label>|<id>|bondscompetities/beheer/'
+# noqa: for x in `./manage.py show_urls --settings=Site.settings_dev | rev | cut -d'/' -f2- | rev | grep '/beheer/'`; do echo "'$x/',"; done | grep -vE ':object_id>/|/add/|/autocomplete/|<app_label>|<id>|bondscompetities/beheer/'
 BEHEER_URLS = (
     '/beheer/Account/account/',
     '/beheer/Account/accountverzoekenteller/',

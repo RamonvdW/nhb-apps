@@ -166,6 +166,19 @@ def maak_bogen_filter(request: HttpRequest, context, gekozen_bogen):
     return gekozen_bogen
 
 
+def split_zoek_urls(context: dict):
+    """ split context entries waarvan de key begint met url_ en de value ~1 bevat
+    """
+    for key in context.keys():
+        if key.startswith('url_'):
+            value = context[key]
+            pos = value.find('~1')
+            if pos > 0:
+                tup = (value[:pos], value[pos:])
+                context[key] = tup
+    # for
+
+
 class KalenderMaandView(TemplateView):
 
     """ Via deze view krijgen gebruikers en sporters de wedstrijdkalender te zien """
@@ -352,6 +365,9 @@ class KalenderMaandView(TemplateView):
                 aantallen += 'en'
         aantallen += ' gevonden'
         context['aantallen'] = aantallen
+
+        # avoid google indexing (and complaining about) urls with ~1 and ~2 in them
+        split_zoek_urls(context)
 
         context['kan_aanmelden'] = self.request.user.is_authenticated
         context['canonical'] = reverse('Kalender:landing-page')

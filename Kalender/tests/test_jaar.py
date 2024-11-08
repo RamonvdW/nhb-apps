@@ -24,6 +24,7 @@ class TestKalenderMaand(E2EHelpers, TestCase):
 
     url_landing_page = '/kalender/'
     url_kalender_jaar = '/kalender/jaar/%s-%s/%s/%s/'                       # maand, jaar, soort, bogen
+    url_jaar_simpel = '/kalender/jaar/%s-%s/'                               # maand, jaar
     url_kalender_pagina = '/kalender/pagina-%s-%s/'                         # jaar, maand
     url_wedstrijden_vereniging = '/wedstrijden/vereniging/'
     url_wedstrijden_maak_nieuw = '/wedstrijden/vereniging/kies-type/'
@@ -270,6 +271,12 @@ class TestKalenderMaand(E2EHelpers, TestCase):
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_kalender_jaar % ('maart', 2020, 'x', 'mijn'))
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_template_used(resp, ('kalender/overzicht-jaar.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_jaar_simpel % ('maart', 2020))
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('kalender/overzicht-jaar.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)

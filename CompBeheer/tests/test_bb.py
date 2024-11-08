@@ -416,7 +416,6 @@ class TestCompBeheerBB(E2EHelpers, TestCase):
         deelcomp.save()
 
         # maak opnieuw een competitie aan
-        # maak een competitie aan
         competities_aanmaken(jaar=2020)
 
         # controleer dat de settings overgenomen zijn
@@ -440,6 +439,70 @@ class TestCompBeheerBB(E2EHelpers, TestCase):
             else:
                 self.assertEqual(deelcomp.toegestane_dagdelen, dagdelen_105_25)
         # for
+
+    def test_check_krijgt_scheids(self):
+        # maak een competitie aan
+        competities_aanmaken(jaar=2020)
+        comp_18 = Competitie.objects.filter(afstand=18).first()
+        comp_25 = Competitie.objects.filter(afstand=25).first()
+
+        # Indoor krijgt scheidsrechter op RK voor de 1e klasse R, C, BB
+        for volgorde in (1100,   # R kl 1
+                         1110,   # R O21 kl 1
+                         1200,   # C kl 1
+                         1300):  # BB kl 1
+            klasse = CompetitieIndivKlasse.objects.get(competitie=comp_18, volgorde=volgorde)
+            self.assertTrue(klasse.krijgt_scheids_rk, msg=str(klasse))
+        # for
+
+        # Indoor individueel krijgt geen scheidsrechter op RK voor de >1e klasse en voor TR, LB kl 1
+        for volgorde in (1101,   # R kl 2
+                         1105,   # R kl 6
+                         1111,   # R O21 kl 2
+                         1201,   # C kl 2
+                         1301,   # BB kl 2
+                         1400,   # TR kl 1
+                         1401,   # TR kl 2
+                         1500):  # LB kl 1
+            klasse = CompetitieIndivKlasse.objects.get(competitie=comp_18, volgorde=volgorde)
+            self.assertFalse(klasse.krijgt_scheids_rk, msg=str(klasse))
+        # for
+
+        # Indoor teams krijgt scheidsrechter op RK voor ERE klasse R, C, BB
+        # (100 + is voor RK/BK-specifieke klassen)
+        for volgorde in (100 + 15,   # R kl ERE
+                         100 + 20,   # C kl ERE
+                         100 + 31):  # BB kl ERE
+            klasse = CompetitieTeamKlasse.objects.get(competitie=comp_18, volgorde=volgorde)
+            self.assertTrue(klasse.krijgt_scheids_rk, msg=str(klasse))
+        # for
+
+        # Indoor teams krijgt geen scheidsrechter op RK voor TR, LB en voor alle lagere klassen dan ERE
+        # (100 + is voor RK/BK-specifieke klassen)
+        for volgorde in (100 + 41,   # TR kl ERE
+                         100 + 50,   # LB kl ERE
+                         100 + 21,   # C kl A
+                         100 + 19):  # R kl D
+            klasse = CompetitieTeamKlasse.objects.get(competitie=comp_18, volgorde=volgorde)
+            self.assertFalse(klasse.krijgt_scheids_rk, msg=str(klasse))
+        # for
+
+        # Indoor individueel krijgt scheidsrechter op BK voor alle klassen en boogtypen
+        count = CompetitieIndivKlasse.objects.filter(competitie=comp_18, krijgt_scheids_bk=True).count()
+        self.assertEqual(count, 25)
+
+        # 25m1pijl krijgt nergens een scheids op het RK of BK
+        count = CompetitieIndivKlasse.objects.filter(competitie=comp_25, krijgt_scheids_rk=True).count()
+        self.assertEqual(count, 0)
+
+        count = CompetitieIndivKlasse.objects.filter(competitie=comp_25, krijgt_scheids_bk=True).count()
+        self.assertEqual(count, 0)
+
+        count = CompetitieTeamKlasse.objects.filter(competitie=comp_25, krijgt_scheids_rk=True).count()
+        self.assertEqual(count, 0)
+
+        count = CompetitieTeamKlasse.objects.filter(competitie=comp_25, krijgt_scheids_bk=True).count()
+        self.assertEqual(count, 0)
 
     def test_ag_vaststellen(self):
         self.e2e_login_and_pass_otp(self.testdata.account_bb)

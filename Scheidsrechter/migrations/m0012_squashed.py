@@ -17,19 +17,14 @@ class Migration(migrations.Migration):
 
     """ Migratie class voor dit deel van de applicatie """
 
-    replaces = [('Scheidsrechter', 'm0008_squashed'),
-                ('Scheidsrechter', 'm0009_wedstrijd_optional'),
-                ('Scheidsrechter', 'm0010_scheidsmutatie_match'),
-                ('Scheidsrechter', 'm0011_matchscheidsrechters')]
-
     # dit is de eerste
     initial = True
 
     # volgorde afdwingen
     dependencies = [
-        ('Competitie', 'm0113_squashed'),
+        ('Competitie', 'm0115_squashed'),
         ('Sporter', 'm0031_squashed'),
-        ('Wedstrijden', 'm0053_verstop'),
+        ('Wedstrijden', 'm0057_squashed'),
     ]
 
     # migratie functies

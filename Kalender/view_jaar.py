@@ -14,7 +14,7 @@ from Bestelling.operations.mandje import eval_mandje_inhoud
 from Evenement.definities import EVENEMENT_STATUS_GEACCEPTEERD, EVENEMENT_STATUS_GEANNULEERD
 from Evenement.models import Evenement
 from Kalender.definities import MAANDEN, MAAND2URL
-from Kalender.view_maand import maak_soort_filter, maak_bogen_filter, maak_compacte_wanneer_str
+from Kalender.view_maand import maak_soort_filter, maak_bogen_filter, maak_compacte_wanneer_str, split_zoek_urls
 from Wedstrijden.definities import (WEDSTRIJD_STATUS_GEACCEPTEERD, WEDSTRIJD_STATUS_GEANNULEERD,
                                     ORGANISATIE_IFAA, ORGANISATIE_WA, ORGANISATIE_KHSN,
                                     WEDSTRIJD_WA_STATUS_A, WEDSTRIJD_WA_STATUS_B)
@@ -208,6 +208,9 @@ class KalenderJaarView(TemplateView):
         aantallen += ' gevonden'
         context['aantallen'] = aantallen
 
+        # avoid google indexing (and complaining about) urls with ~1 and ~2 in them
+        split_zoek_urls(context)
+
         context['kan_aanmelden'] = self.request.user.is_authenticated
         context['canonical'] = reverse('Kalender:landing-page')
 
@@ -232,12 +235,18 @@ class KalenderJaarView(TemplateView):
         maand = self._maand_to_nr(kwargs['maand'])      # str
         self._validate_jaar_maand(jaar, maand)
 
-        gekozen_soort = kwargs['soort']
-        gekozen_soort = gekozen_soort[:6]       # afkappen voor de veiligheid
+        if 'soort' in kwargs:
+            gekozen_soort = kwargs['soort']
+            gekozen_soort = gekozen_soort[:6]       # afkappen voor de veiligheid
+        else:
+            gekozen_soort = 'alle'
         gekozen_soort = maak_soort_filter(context, gekozen_soort)
 
-        gekozen_bogen = kwargs['bogen']
-        gekozen_bogen = gekozen_bogen[:6]       # afkappen voor de veiligheid
+        if 'bogen' in kwargs:
+            gekozen_bogen = kwargs['bogen']
+            gekozen_bogen = gekozen_bogen[:6]       # afkappen voor de veiligheid
+        else:
+            gekozen_bogen = 'auto'
         gekozen_bogen = maak_bogen_filter(self.request, context, gekozen_bogen)
 
         zoekterm = self.request.GET.get('zoek', '')
