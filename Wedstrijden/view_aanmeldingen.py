@@ -70,7 +70,7 @@ def get_kwalificatie_scores(inschrijving):
         score.naam = '?' if score.naam == '' else score.naam
         score.waar = '?' if score.waar == '' else score.waar
         score.check_str = KWALIFICATIE_CHECK2STR[score.check_status]
-        tup = (score.resultaat, score.datum, score)
+        tup = (score.resultaat, score.datum, score.pk, score)
         unsorted.append(tup)
     # for
 
@@ -102,7 +102,7 @@ def get_kwalificatie_scores(inschrijving):
                     resultaat=scores[0] + scores[1])
         if score.resultaat > 0:
             score.check_str = 'Automatisch'
-            tup = (score.resultaat, score.datum, score)
+            tup = (score.resultaat, score.datum, 1000000000 + inschrijving.pk, score)
             unsorted.append(tup)
 
         # tweede 60 pijlen score uit de bondscompetitie
@@ -114,13 +114,13 @@ def get_kwalificatie_scores(inschrijving):
                     resultaat=scores[2] + scores[3])
         if score.resultaat > 0:
             score.check_str = 'Automatisch'
-            tup = (score.resultaat, score.datum, score)
+            tup = (score.resultaat, score.datum, 1000000001 + inschrijving.pk, score)
             unsorted.append(tup)
 
     # sorteer de samengevoegde lijst van opgegeven wedstrijdresultaten en automatische data van de bondscompetities
     unsorted.sort(reverse=True)     # hoogste resultaat eerst
 
-    return [score for _, _, score in unsorted]
+    return [score for _, _, _, score in unsorted]
 
 
 class WedstrijdAanmeldingenView(UserPassesTestMixin, TemplateView):
