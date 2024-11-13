@@ -66,6 +66,7 @@ class TestTakenViews(E2EHelpers, TestCase):
         # maak een taak aan
         taak = Taak(toegekend_aan_functie=self.functie_sup,
                     deadline='2020-01-01',
+                    onderwerp='Testje taak1',
                     beschrijving='Testje taak1 met meerdere\nregels\ntest')
         taak.save()
         self.taak1 = taak
@@ -74,6 +75,7 @@ class TestTakenViews(E2EHelpers, TestCase):
         taak = Taak(toegekend_aan_functie=self.functie_mwz,
                     deadline='2020-01-01',
                     aangemaakt_door=self.account_normaal,
+                    onderwerp='Testje taak2',
                     beschrijving='Testje taak2')
         taak.save()
         self.taak2 = taak
@@ -82,6 +84,7 @@ class TestTakenViews(E2EHelpers, TestCase):
         taak = Taak(is_afgerond=True,
                     toegekend_aan_functie=self.functie_mwz,
                     deadline='2020-01-01',
+                    onderwerp='Testje taak3',
                     beschrijving='Afgerond testje taak3')
         taak.save()
         self.taak3 = taak
@@ -114,7 +117,7 @@ class TestTakenViews(E2EHelpers, TestCase):
 
         self.assertContains(resp, 'Testje taak1')
         self.assertContains(resp, 'Testje taak2')
-        self.assertContains(resp, 'testje taak3')
+        self.assertContains(resp, 'Testje taak3')
 
         # al afgesloten taak bekijken
         url = self.url_details % self.taak3.pk
@@ -219,7 +222,8 @@ class TestTakenViews(E2EHelpers, TestCase):
         # maak een taak aan
         taak = Taak(toegekend_aan_functie=self.functie_wl,
                     deadline='2020-01-01',
-                    beschrijving='Testje taak voor WL')
+                    onderwerp='Testje taak voor WL',
+                    beschrijving='Hallo dit is een test')
         taak.save()
 
         with self.assert_max_queries(20):
