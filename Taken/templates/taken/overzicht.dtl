@@ -19,53 +19,59 @@
         </div>
     </div>
 
-    {% if heeft_open_taken %}
 
-        <!-- witruimte -->
-        <div class="row center">
-            <div class="col s12">
-                <h4>Open taken</h4>
-            </div>
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>Open taken</h4>
         </div>
+    </div>
 
-        <!-- blauwe balk -->
-        <div class="row-sv-blauw">
-            <div class="col s12">
+    <!-- blauwe balk -->
+    <div class="row-sv-blauw">
+        <div class="col s12">
 
-                <table class="sv-kader">
-                    <thead>
+            <table class="sv-kader">
+                <thead>
+                    <tr>
+                        <th class="center hide-on-small-and-down">Taak</th>
+                        <th class="center">Functie</th>
+                        <th class="center">Deadline</th>
+                        <th>Beschrijving</th>
+                        <th><!-- kolom voor knop --></th>
+                    </tr>
+                </thead>
+
+                {% for taak in taken %}
+                    {% if not taak.is_afgerond %}
                         <tr>
-                            <th class="center hide-on-small-and-down">Nummer</th>
-                            <th class="center">Functie</th>
-                            <th class="center">Deadline</th>
-                            <th>Beschrijving</th>
-                            <th><!-- kolom voor knop --></th>
+                            <td class="center hide-on-small-and-down">{{ taak.pk }}</td>
+                            <td class="center{% if taak.is_huidige_rol %} sv-blauw-text{% endif %}">
+                                <span class="hide-on-small-and-down">{{ taak.toegekend_aan_functie.beschrijving }}</span>
+                                <span class="hide-on-med-and-up">{{ taak.toegekend_aan_functie.rol }}</span>
+                            </td>
+                            <td class="center">{{ taak.deadline|date:"Y-m-d" }}</td>
+                            <td>{{ taak.onderwerp }}</td>
+                            <td>
+                                <a class="btn-sv-rood" href="{{ taak.url }}">
+                                    <img src="{% static 'plein/zoom_in.svg' %}" height="36" alt="Toon">
+                                </a>
+                            </td>
                         </tr>
-                    </thead>
+                    {% endif %}
+                {% endfor %}
 
-                    {% for taak in taken %}
-                        {% if not taak.is_afgerond %}
-                            <tr>
-                                <td class="center hide-on-small-and-down">{{ taak.pk }}</td>
-                                <td class="center{% if taak.is_huidige_rol %} sv-blauw-text{% endif %}">
-                                    <span class="hide-on-small-and-down">{{ taak.toegekend_aan_functie.beschrijving }}</span>
-                                    <span class="hide-on-med-and-up">{{ taak.toegekend_aan_functie.rol }}</span>
-                                </td>
-                                <td class="center">{{ taak.deadline|date:"Y-m-d" }}</td>
-                                <td>{{ taak.titel }}</td>
-                                <td>
-                                    <a class="btn-sv-rood" href="{{ taak.url }}">
-                                        <img src="{% static 'plein/zoom_in.svg' %}" height="36" alt="Toon">
-                                    </a>
-                                </td>
-                            </tr>
-                        {% endif %}
-                    {% endfor %}
-                </table>
+                {% if not heeft_open_taken %}
+                    <tr>
+                        <td colspan="5" class="center">
+                            <i>Geen open taken gevonden</i>
+                        </td>
+                    </tr>
+                {% endif %}
+            </table>
 
-            </div>
         </div>
-    {% endif %}
+    </div>
 
 
     {% if heeft_afgeronde_taken %}
@@ -84,7 +90,7 @@
                 <table class="sv-kader">
                     <thead>
                         <tr>
-                            <th class="hide-on-small-and-down center">Nummer</th>
+                            <th class="hide-on-small-and-down center">Taak</th>
                             <th class="center">Functie</th>
                             <th class="center">Deadline</th>
                             <th>Beschrijving</th>
@@ -101,7 +107,7 @@
                                     <span class="hide-on-med-and-up">{{ taak.toegekend_aan_functie.rol }}</span>
                                 </td>
                                 <td class="center">{{ taak.deadline|date:"Y-m-d" }}</td>
-                                <td>{{ taak.titel }}</td>
+                                <td>{{ taak.onderwerp }}</td>
                                 <td>
                                     <a class="btn-sv-rood" href="{{ taak.url }}">
                                         <img src="{% static 'plein/zoom_in.svg' %}" height="36" alt="Toon">

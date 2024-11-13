@@ -190,8 +190,15 @@ class ZetStatusWedstrijdView(UserPassesTestMixin, View):
         stamp_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
         taak_deadline = now + datetime.timedelta(days=3)
         taak_log = "[%s] Taak aangemaakt" % stamp_str
-        taak_tekst = "Wedstrijd %s is op de kalender gezet en heeft scheidsrechter(s) nodig." % repr(wedstrijd.titel)
-        taak_tekst += '\n\nGa naar de Scheidsrechters, Wedstrijdkalender om deze wedstrijd te behandelen.'
+        taak_tekst = "Wedstrijd %s is op de kalender gezet en heeft scheidsrechter(s) nodig.\n" % repr(wedstrijd.titel)
+        taak_tekst += "Datum: %s" % wedstrijd.datum_begin
+        if wedstrijd.datum_einde != wedstrijd.datum_begin:
+            taak_tekst += "..%s" % wedstrijd.datum_einde
+        taak_tekst += '\n'
+        if wedstrijd.locatie:
+            taak_tekst += "Locatie: %s" % wedstrijd.locatie.plaats
+        taak_tekst += '\n\nGa naar Scheidsrechters, Wedstrijdkalender om deze wedstrijd te behandelen.'
+        taak_tekst += '\n\n(wedstrijd nummer: %s)\n' % wedstrijd.pk
         taak_onderwerp = "Nieuwe wedstrijd op de kalender"
 
         # maak een taak aan voor de CS
