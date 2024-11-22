@@ -45,7 +45,12 @@ class LeesPdf(object):
 
             self.huidige_regel = list()
         else:
-            self.huidige_regel.append(text.strip())
+            text = text.strip()
+            if not text:
+                # skip lege regel
+                return
+
+            self.huidige_regel.append(text)
 
     def extract_from_pdf(self, fpath):
         self.found_start = False
@@ -435,7 +440,7 @@ class Command(BaseCommand):
         prev_klasse = None
         for regels in tabs:
             team_klasse = self._bepaal_klasse(regels)
-            if team_klasse == prev_klasse:
+            if team_klasse and team_klasse == prev_klasse:
                 # merge!
                 self.stdout.write(
                     "[INFO] Uitslag voor klasse %s stond verdeeld over 2 pagina's" % team_klasse.beschrijving)

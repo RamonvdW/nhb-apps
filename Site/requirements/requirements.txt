@@ -18,11 +18,11 @@ django==4.2.16
     #   -r requirements.in
 et-xmlfile==2.0.0
     # via openpyxl
-google-api-core==2.21.0
+google-api-core==2.23.0
     # via google-api-python-client
-google-api-python-client==2.149.0
+google-api-python-client==2.154.0
     # via -r requirements.in
-google-auth==2.35.0
+google-auth==2.36.0
     # via
     #   -r requirements.in
     #   google-api-core
@@ -30,7 +30,7 @@ google-auth==2.35.0
     #   google-auth-httplib2
 google-auth-httplib2==0.2.0
     # via google-api-python-client
-googleapis-common-protos==1.65.0
+googleapis-common-protos==1.66.0
     # via google-api-core
 googlemaps==4.10.0
     # via -r requirements.in
@@ -69,7 +69,7 @@ pyotp==2.9.0
     # via -r requirements.in
 pyparsing==3.2.0
     # via httplib2
-pypdf==5.0.1
+pypdf==5.1.0
     # via -r requirements.in
 qrcode==8.0
     # via -r requirements.in
@@ -83,7 +83,7 @@ requests-oauthlib==2.0.0
     # via mollie-api-python
 rsa==4.9
     # via google-auth
-sqlparse==0.5.1
+sqlparse==0.5.2
     # via django
 typing-extensions==4.12.2
     # via psycopg
