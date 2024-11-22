@@ -232,7 +232,7 @@ class Command(BaseCommand):
                 pass
         return None
 
-    def _vind_sporter(self, lid_nr):
+    def _vind_sporter(self, lid_nr) -> None | Sporter:
         try:
             lid_nr = int(lid_nr)
         except ValueError:
