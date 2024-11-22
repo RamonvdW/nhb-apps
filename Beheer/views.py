@@ -58,14 +58,19 @@ class BeheerAdminSite(AdminSite):
         # send the user to the login page only when required
         # send the 2FA page otherwise
         account = get_account(request)
-        if account.is_active and account.is_staff and account.is_authenticated:
+        if account.is_active and account.is_authenticated:
             # well, login is not needed
+
+            if not account.is_staff:
+                # no access
+                return HttpResponseRedirect(reverse('Plein:plein'))
+
             if otp_is_controle_gelukt(request):
                 # what are we doing here?
                 if next_url:
                     return HttpResponseRedirect(next_url)
 
-                # reason for login unknown (no 'next') so send to main page
+                # logged in, OTP passed but no 'next', so send to main page
                 return HttpResponseRedirect(reverse('Plein:plein'))
 
             # send to 2FA page
