@@ -97,10 +97,16 @@ class SporterVoorkeurenAdmin(admin.ModelAdmin):
             {'fields': ('para_voorwerpen',
                         'opmerking_para_sporter',)
              }),
-        ('Overig',
-            {'fields': ('voorkeur_eigen_blazoen',
-                        'voorkeur_meedoen_competitie')
+        ('Scheidsrechter',
+            {'fields': ('scheids_opt_in_korps_tel_nr',
+                        'scheids_opt_in_korps_email',
+                        'scheids_opt_in_ver_tel_nr',
+                        'scheids_opt_in_ver_email')
              }),
+        ('Overig',
+             {'fields': ('voorkeur_eigen_blazoen',
+                         'voorkeur_meedoen_competitie')
+              }),
     )
 
 
