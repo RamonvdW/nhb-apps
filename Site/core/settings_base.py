@@ -58,7 +58,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2024-11-13'
+SITE_VERSIE = '2024-11-22'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -472,8 +472,8 @@ OPLEIDING_CODES = (
     ('040', 'SR3', 'Verenigingsscheidsrechter', ('041', '042')),
     ('041', 'SR4', 'Bondsscheidsrechter', ('042',)),
     ('042', 'SR5', 'Scheidsrechter internationaal', ()),
-
     ('043', '', 'Basisblok', ()),
+    ('044', '', 'Scheidsrechter allround', ()),
 
     ('060', '', 'Autisme in de sport', ()),
     ('061', '', 'Preventie seksuele intimidatie', ()),
@@ -485,6 +485,7 @@ OPLEIDING_CODES = (
     ('066a', '', 'Bewijs deelname Basisschot (geen cert)', ()),
     ('067', 'TTR', 'Certif. aantekening Traditioneel (HBT3)', ()),      # noqa
     ('068', '', 'Ianseo scoreverwerking', ()),
+    ('069', '', 'Certificaat Basisschot', ()),      # pilot
 
     ('074', '', 'Sportief coachen', ()),
 
@@ -585,6 +586,10 @@ WEDSTRIJDEN_KIES_UITVOERENDE_VERENIGING = (1368,)
 # SECURITY WARNING: don't run with debug turned on in production!
 # let op: zonder DEBUG=True geen static files in dev omgeving!
 DEBUG = False
+
+# extensions are by default disabled
+ENABLE_DEBUG_TOOLBAR = False
+ENABLE_DJANGO_EXTENSIONS = False
 
 # minify html en javascript
 ENABLE_MINIFY = True
