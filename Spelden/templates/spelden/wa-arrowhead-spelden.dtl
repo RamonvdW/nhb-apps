@@ -32,22 +32,22 @@
 
                 <tr>
                     <td class="center">Groen</td>
-                    <td class="center"><img class="sv-foto-speld" src="{% static 'spelden/arrowhead_groen.png' %}" alt="speld"></td>
+                    <td class="center"><img class="sv-foto-speld" src="{% static 'spelden/arrowhead_groen.webp' %}" alt="speld"></td>
                 </tr>
 
                 <tr>
                     <td class="center">Grijs</td>
-                    <td class="center"><img class="sv-foto-speld" src="{% static 'spelden/arrowhead_grijs.png' %}" alt="speld"></td>
+                    <td class="center"><img class="sv-foto-speld" src="{% static 'spelden/arrowhead_grijs.webp' %}" alt="speld"></td>
                 </tr>
 
                 <tr>
                     <td class="center">Wit</td>
-                    <td class="center"><img class="sv-foto-speld" src="{% static 'spelden/arrowhead_wit.png' %}" alt="speld"></td>
+                    <td class="center"><img class="sv-foto-speld" src="{% static 'spelden/arrowhead_wit.webp' %}" alt="speld"></td>
                 </tr>
 
                 <tr>
                     <td class="center">Zwart</td>
-                    <td class="center"><img class="sv-foto-speld" src="{% static 'spelden/arrowhead_zwart.png' %}" alt="speld"></td>
+                    <td class="center"><img class="sv-foto-speld" src="{% static 'spelden/arrowhead_zwart.webp' %}" alt="speld"></td>
                 </tr>
 
                 <tr>
