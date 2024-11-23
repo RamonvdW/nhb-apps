@@ -314,6 +314,10 @@ function sitelayout_loaded() {
     elems = document.querySelectorAll(".modal");
     M.Modal.init(elems, {'endingTop': '35%'});
 
+    // materialboxed = media zoom
+    elems = document.querySelectorAll('.materialboxed');
+    M.Materialbox.init(elems, {});
+
     // console.log('history.length:', history.length)
     if (history.length < 2) {
         // nothing to go back to
