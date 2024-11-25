@@ -71,6 +71,7 @@ class ApiView(View):
                     'plaats': wedstrijd.locatie.plaats,
                     'titel': wedstrijd.titel,
                     'link': url,
+                    'geannuleerd': wedstrijd.status == WEDSTRIJD_STATUS_GEANNULEERD,
                 })
             # for
 
@@ -94,6 +95,7 @@ class ApiView(View):
                     'plaats': evenement.locatie.plaats,
                     'titel': evenement.titel,
                     'link': url,
+                    'geannuleerd': evenement.status == EVENEMENT_STATUS_GEANNULEERD,
                 })
             # for
 
