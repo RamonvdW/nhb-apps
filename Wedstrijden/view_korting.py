@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2023 Ramon van der Winkel.
+#  Copyright (c) 2021-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -232,7 +232,7 @@ class WijzigKortingView(UserPassesTestMixin, View):
         context['now'] = now = timezone.now()
         context['begin_jaar'] = min(now.year, korting.geldig_tot_en_met.year)
         context['min_date'] = min(now.date(), korting.geldig_tot_en_met)
-        context['max_date'] = datetime.date(now.year + 1, 12, 31)
+        context['max_date'] = datetime.date(now.year + 2, 12, 31)
 
         context['url_opslaan'] = reverse('Wedstrijden:vereniging-korting-wijzig', kwargs={'korting_pk': korting.pk})
 
@@ -290,7 +290,7 @@ class WijzigKortingView(UserPassesTestMixin, View):
                 datum = datetime.date(datum.year, datum.month, datum.day)
                 now = timezone.now()
                 min_date = datetime.date(now.year, now.month, now.day)
-                max_date = datetime.date(now.year + 1, 12, 31)
+                max_date = datetime.date(now.year + 2, 12, 31)
                 if min_date <= datum <= max_date:
                     korting.geldig_tot_en_met = datum
                 else:

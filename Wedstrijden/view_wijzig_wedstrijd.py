@@ -83,7 +83,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
         context['begin_jaar'] = min(now.year, wedstrijd.datum_begin.year)
 
         context['min_date'] = min(datetime.date(now.year, now.month, now.day), wedstrijd.datum_begin)
-        context['max_date'] = datetime.date(now.year + 1, 12, 31)
+        context['max_date'] = datetime.date(now.year + 2, 12, 31)
 
         context['opt_status'] = opt_status = list()
         for code, status_str in WEDSTRIJD_STATUS_TO_STR.items():
@@ -486,7 +486,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
                     datum = datetime.date(datum.year, datum.month, datum.day)
                     now = timezone.now()
                     min_date = min(datetime.date(now.year, now.month, now.day), wedstrijd.datum_begin)
-                    max_date = datetime.date(now.year + 1, 12, 31)
+                    max_date = datetime.date(now.year + 2, 12, 31)
                     if min_date <= datum <= max_date:
                         wedstrijd.datum_begin = datum
 

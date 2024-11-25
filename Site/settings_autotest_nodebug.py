@@ -33,8 +33,6 @@
 from Site.settings_autotest import *         # noqa
 
 DEBUG = False
-ENABLE_DEBUG_TOOLBAR = False
-ENABLE_DJANGO_EXTENSIONS = False
 ENABLE_MINIFY = True                    # impacts minify_dtl.py
 USE_SUBSET_FONT_FILES = False           # impacts site_layout_fonts.dtl
 

@@ -147,7 +147,7 @@
                                     setDefaultDate: true,
                                     format: "dddd d mmmm yyyy",
                                     minDate: minDate, maxDate: maxDate,
-                                    yearRange: [{{ begin_jaar }}, {{ now.year }} + 1]};
+                                    yearRange: [{{ begin_jaar }}, {{ now.year }} + 2]};
 
                     M.Datepicker.init(el, options);
 

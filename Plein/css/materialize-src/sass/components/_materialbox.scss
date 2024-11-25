@@ -1,11 +1,11 @@
 .materialboxed {
-  &:hover {
-    &:not(.active) {
-      opacity: .8;
-    }
-  }
+  //&:hover {
+  //  &:not(.active) {
+  //    opacity: .8;
+  //  }
+  //}
 
-  display: block;
+  //display: block;
   cursor: zoom-in;
   position: relative;
   transition: opacity .4s;

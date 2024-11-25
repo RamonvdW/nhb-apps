@@ -33,8 +33,6 @@
 from Site.core.settings_base import *         # noqa
 
 DEBUG = True
-ENABLE_DEBUG_TOOLBAR = False
-ENABLE_DJANGO_EXTENSIONS = False
 
 # ask the template engine to insert a special pattern in the output in case of template problems
 TEMPLATES[0]['OPTIONS']['string_if_invalid'] = '##BUG %s ##'

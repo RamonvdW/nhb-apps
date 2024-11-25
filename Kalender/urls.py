@@ -19,6 +19,7 @@ urlpatterns = [
          view_landing_page.KalenderLandingPageView.as_view(),
          name='landing-page'),
 
+    # TODO: verwijderen. 2024-11: wordt nog best veel gebruikt, niet alleen door zoekmachines
     path('pagina-<int:jaar>-<maand>/',                  # backwards compatibility
          view_maand.KalenderMaandView.as_view(),
          name='legacy'),
