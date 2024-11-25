@@ -260,7 +260,7 @@ class TestWedstrijdenKorting(E2EHelpers, TestCase):
         resp = self.client.post(self.url_korting_wijzig % korting_sporter.pk, {'geldig_tm': datum_str})
         self.assert_is_redirect_not_plein(resp)
 
-        datum_str = datetime.date(timezone.now().year + 2, 1, 1).strftime('%Y-%m-%d')
+        datum_str = datetime.date(timezone.now().year + 3, 1, 1).strftime('%Y-%m-%d')
         resp = self.client.post(self.url_korting_wijzig % korting_sporter.pk, {'geldig_tm': datum_str})
         self.assert404(resp, 'Geen valide datum')
 
