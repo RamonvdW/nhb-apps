@@ -41,6 +41,7 @@ urlpatterns = [
     path('kalender/evenement/',             include('Evenement.urls')),
     path('ledenvoordeel/',                  include('Ledenvoordeel.urls')),
     path('logboek/',                        include('Logboek.urls')),
+    path('opleidingen/instaptoets/',        include('Instaptoets.urls')),
     path('opleidingen/',                    include('Opleidingen.urls')),
     path('overig/',                         include('Overig.urls')),
     path('plein/',                          include('Plein.urls')),

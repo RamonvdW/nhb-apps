@@ -1,0 +1,76 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2024 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Instaptoets{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Instaptoets</h3>
+        </div>
+    </div>
+
+
+    <!-- blauw balk met wit informatie veld -->
+    <div class="row-sv-blauw">
+        <div class="col s12 l10 offset-l1 xl8 offset-xl2">
+            <div class="sv-kader" style="padding:10px">
+                <p>Dit is vraag {{ toets.vraag_nr }} van de {{ toets.aantal_vragen }}</p>
+
+                <form action="{{ url_starten }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
+                    {% csrf_token %}
+
+                    <div class="sv-kader left-align" style="padding:10px">
+                        <p>{{ vraag.vraag_tekst }}</p>
+
+                        <ul>
+                            <li>
+                                <label class="black-text" for="id_a">
+                                    <input class="with-gap" type="radio" name="keuze" value="A" required id="id_a">
+                                    <span>A) {{ vraag.antwoord_a }}</span>
+                                </label>
+                            </li>
+                            <li>
+                                <label class="black-text" for="id_b">
+                                    <input class="with-gap" type="radio" name="keuze" value="B" required id="id_b">
+                                    <span>B) {{ vraag.antwoord_b }}</span>
+                                </label>
+                            </li>
+                            <li>
+                                <label class="black-text" for="id_c">
+                                    <input class="with-gap" type="radio" name="keuze" value="C" required id="id_c">
+                                    <span>C) {{ vraag.antwoord_c }}</span>
+                                </label>
+                            </li>
+                            {% if vraag.toon_d %}
+                                <li>
+                                    <label class="black-text" for="id_d">
+                                        <input class="with-gap" type="radio" name="keuze" value="D" required id="id_d">
+                                        <span>D. {{ vraag.antwoord_d }}</span>
+                                    </label>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </div>
+
+                    <!-- button -->
+                    <p class="center">
+                        <button class="btn-sv-rood" id="submit_knop" type="submit">Opslaan</button>
+                    </p>
+
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="instaptoets/begin-toets" %}
+
+{% endblock %}

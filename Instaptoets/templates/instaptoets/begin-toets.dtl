@@ -1,0 +1,53 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2024 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Instaptoets{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Instaptoets</h3>
+        </div>
+    </div>
+
+
+    <!-- blauw balk met wit informatie veld -->
+    <div class="row-sv-blauw">
+        <div class="col s12">
+            <div class="sv-kader" style="padding:10px">
+                <p>De instaptoets is een drempeltje waar je overheen moet om een hele reeks opleidingen te kunnen starten.</p>
+                <p>Als je de toets gehaald hebt, dan is deze 12 maanden geldig.</p>
+
+                {% if url_starten %}
+                    <!-- knop om toets op te starten met een POST -->
+                    <form action="{{ url_starten }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
+                        {% csrf_token %}
+                        <p class="center">
+                            <button class="btn-sv-rood" id="submit_knop" type="submit">Start de toets</button>
+                        </p>
+                    </form>
+                {% else %}
+                    {% if url_vervolg %}
+                        <!-- toets: nog niet af -->
+                        <p>Je hebt {{ toets.aantal_antwoorden }} van de {{ toets.aantal_vragen }} vragen ingevuld.</p>
+                        <a class="btn-sv-rood" href="{{ url_vervolg }}">Volgende vraag</a>
+                    {% else %}
+                        <!-- toets is nog geldig -->
+                        <p>Je hebt de toets afgerond op {{ toets.afgerond }} en kan deze nog {{ toets.geldig_dagen }} dagen gebruiken.</p>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="instaptoets/begin-toets" %}
+
+{% endblock %}

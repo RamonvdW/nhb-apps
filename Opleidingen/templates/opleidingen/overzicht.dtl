@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2022-2023 Ramon van der Winkel.
+                Copyright (c) 2022-2024 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -16,6 +16,20 @@
             <h3 class="page-banner">Opleidingen</h3>
         </div>
     </div>
+
+
+    {% if toon_instaptoets %}
+        <!-- blauwe balk met kaartjes -->
+        <div class="row-sv-blauw">
+            <div class="col s12">
+
+                <!-- vereniging menu -->
+                {% url 'Instaptoets:begin' as card_url %}
+                {% include 'plein/card_icon.dtl' with title="Instaptoets" text="Maak de on-line instaptoets." icon="login" url=card_url %}
+
+            </div>
+        </div>
+    {% endif %}
 
 
     <!-- blauwe balk met informatie in een tabel -->
@@ -64,6 +78,37 @@
             </table>
         </div>
     </div>
+
+
+    {% if diplomas %}
+        <!-- witruimte -->
+        <div class="row center">
+            <div class="col s12">
+                <h4>Jouw diploma's</h4>
+                <p>Deze staan geregistreerd bij de KHSN en zijn niet verlopen</p>
+            </div>
+        </div>
+
+        <!-- blauwe balk met informatie in tabel-vorm:  label - info -->
+        <div class="row-sv-blauw">
+            <div class="col s12 m10 offset-m1 l8 offset-l2">
+                <table class="sv-kader">
+                    <head>
+                        <tr>
+                            <th class="center">Sinds</th>
+                            <th>Beschrijving</th>
+                        </tr>
+                    </head>
+                    {% for diploma in diplomas %}
+                        <tr>
+                            <td class="center">{{ diploma.datum_begin }}</td>
+                            <td>{{ diploma.beschrijving }}</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
+    {% endif %}
 
     {% include 'feedback/sidebar.dtl' with op_pagina="opleidingen-overzicht" %}
 

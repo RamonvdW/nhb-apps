@@ -83,6 +83,7 @@ INSTALLED_APPS = [
     'Geo.apps.GeoConfig',
     'HistComp.apps.HistCompConfig',
     'ImportCRM.apps.ImportCRMConfig',
+    'Instaptoets.apps.InstaptoetsConfig',
     'Kalender.apps.KalenderConfig',
     'Locatie.apps.LocatieConfig',
     'Ledenvoordeel.apps.LedenvoordeelConfig',
