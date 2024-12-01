@@ -203,7 +203,7 @@ class NieuwWachtwoordView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         # gebruiker moet ingelogd zijn
-        if  self.request.user.is_authenticated:
+        if self.request.user.is_authenticated:
             self.account = get_account(self.request)
             return True
         return False

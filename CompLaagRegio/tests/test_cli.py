@@ -487,5 +487,37 @@ class TestCompLaagRegioCli(E2EHelpers, TestCase):
 
         self.run_management_command('check_ag')
 
+    def test_score_interval(self):
+        score = Score(
+                    type=SCORE_TYPE_SCORE,
+                    sporterboog=self.sporterboog_tr,        # TR = huidige inschrijving
+                    waarde=42,
+                    afstand_meter=18)
+        score.save()
+        self.deelnemer_tr.scores.add(score)
+        hist = ScoreHist(
+                    score=score,
+                    oude_waarde=0,
+                    nieuwe_waarde=42,
+                    door_account=None,
+                    notitie='Test')
+        hist.save()
+        score = Score(
+                    type=SCORE_TYPE_SCORE,
+                    sporterboog=self.sporterboog_tr,        # TR = huidige inschrijving
+                    waarde=43,
+                    afstand_meter=18)
+        score.save()
+        self.deelnemer_tr.scores.add(score)
+        hist = ScoreHist(
+                    score=score,
+                    oude_waarde=0,
+                    nieuwe_waarde=43,
+                    door_account=None,
+                    notitie='Test')
+        hist.save()
+
+        self.run_management_command('report_score_interval', '18', '111')
+
 
 # end of file
