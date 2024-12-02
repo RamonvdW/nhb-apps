@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2024 Ramon van der Winkel.
+#  Copyright (c) 2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -28,14 +28,14 @@ class Command(BaseCommand):
                     .prefetch_related('scores')
                     .order_by('sporterboog__sporter__lid_nr')):
             score_pks = obj.scores.values_list('pk', flat=True)
-            self.stdout.write('\n', obj)
+            self.stdout.write('\n' + str(obj))
             prev_when = None
             for hist in ScoreHist.objects.filter(score__pk__in=score_pks).order_by('when'):
                 if prev_when is not None:
                     interval = hist.when - prev_when
-                    self.stdout.write('   [+%s]' % interval.days, hist)
+                    self.stdout.write('   [+%s] %s' % (interval.days, hist))
                 else:
-                    self.stdout.write('        ', hist)
+                    self.stdout.write('        %s' % hist)
                 prev_when = hist.when
         # for
 

@@ -78,6 +78,7 @@ leaderboard
 local_mall
 local_shipping
 lock
+login
 logout
 looks_3
 looks_one
