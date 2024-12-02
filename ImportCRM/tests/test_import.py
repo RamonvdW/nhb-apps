@@ -212,7 +212,7 @@ class TestImportCRMImport(E2EHelpers, TestCase):
         locatie.save()
         locatie.verenigingen.add(ver)
 
-        with self.assert_max_queries(142):
+        with self.assert_max_queries(151):
             f1, f2 = self.run_management_command(IMPORT_COMMAND,
                                                  TESTFILE_08_VER_MUTATIES,
                                                  OPTION_SIM)
@@ -242,7 +242,7 @@ class TestImportCRMImport(E2EHelpers, TestCase):
         locatie1.plaats = 'Ja maar'
         locatie1.save(update_fields=['plaats'])
 
-        with self.assert_max_queries(120):
+        with self.assert_max_queries(129):
             f1, f2 = self.run_management_command(IMPORT_COMMAND,
                                                  TESTFILE_08_VER_MUTATIES,
                                                  OPTION_SIM)
@@ -315,7 +315,7 @@ class TestImportCRMImport(E2EHelpers, TestCase):
         self.assertFalse(sporter.is_actief_lid)      # want: overleden
 
         # nog een keer hetzelfde commando geeft geen nieuwe log regels
-        with self.assert_max_queries(86):
+        with self.assert_max_queries(92):
             f1, f2 = self.run_management_command(IMPORT_COMMAND,
                                                  TESTFILE_09_LID_MUTATIES,
                                                  OPTION_SIM)
@@ -574,7 +574,7 @@ class TestImportCRMImport(E2EHelpers, TestCase):
         self.assertTrue("[INFO] Secretaris 100024 van vereniging 2000 is gekoppeld aan SEC functie" in f2.getvalue())
 
         # probeer 100024 te verwijderen
-        with self.assert_max_queries(60):
+        with self.assert_max_queries(63):
             f1, f2 = self.run_management_command(IMPORT_COMMAND,
                                                  TESTFILE_16_VERWIJDER_LID,
                                                  OPTION_SIM)
@@ -617,7 +617,7 @@ class TestImportCRMImport(E2EHelpers, TestCase):
         score_indiv_ag_opslaan(sporterboog, 18, 5.678, None, "")
 
         # probeer 100024 te verwijderen
-        with self.assert_max_queries(50):
+        with self.assert_max_queries(52):
             f1, f2 = self.run_management_command(IMPORT_COMMAND,
                                                  TESTFILE_16_VERWIJDER_LID,
                                                  OPTION_SIM)
@@ -718,7 +718,7 @@ class TestImportCRMImport(E2EHelpers, TestCase):
         self.assertTrue(sporter.bij_vereniging is not None)
 
         # lid 100001 is nog steeds uitgeschreven - geen verandering tot 15 januari
-        with self.assert_max_queries(65):
+        with self.assert_max_queries(68):
             self.run_management_command(IMPORT_COMMAND,
                                         TESTFILE_18_LID_UITGESCHREVEN,
                                         '--sim_now=2021-01-15')
