@@ -28,14 +28,14 @@ class Command(BaseCommand):
                     .prefetch_related('scores')
                     .order_by('sporterboog__sporter__lid_nr')):
             score_pks = obj.scores.values_list('pk', flat=True)
-            print('\n', obj)
+            self.stdout.write('\n', obj)
             prev_when = None
             for hist in ScoreHist.objects.filter(score__pk__in=score_pks).order_by('when'):
                 if prev_when is not None:
                     interval = hist.when - prev_when
-                    print('   [+%s]' % interval.days, hist)
+                    self.stdout.write('   [+%s]' % interval.days, hist)
                 else:
-                    print('        ', hist)
+                    self.stdout.write('        ', hist)
                 prev_when = hist.when
         # for
 
