@@ -259,7 +259,7 @@ class Command(BaseCommand):
 
         return gem, totaal
 
-    def _update_regiocompetitieschuttersboog(self):
+    def _update_regiocompetitiesportersboog(self):
         count = 0
         for deelcomp in (Regiocompetitie
                          .objects
@@ -432,7 +432,7 @@ class Command(BaseCommand):
         self._vind_scores()
 
         # stap 2: overige velden bijwerken van aangepaste RegioCompetitieSporterBoog
-        self._update_regiocompetitieschuttersboog()
+        self._update_regiocompetitiesportersboog()
 
         # stap 3: teams scores bijwerken
         self._update_team_scores()

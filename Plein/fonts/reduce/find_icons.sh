@@ -12,7 +12,7 @@ cd "$SCRIPT_DIR"
 cd ../../..
 
 OUT_TMP="/tmp/find_icons.txt"
-OUT="$SCRIPT_DIR/needed-glyphs_material-icons-round.txt"
+OUT="Plein/fonts/reduce/needed-glyphs_material-icons-round.txt"
 HANDLED='@@@'   # dummy, to allow concatenation
 
 echo "[INFO] Searching for icons in templates and sources"
