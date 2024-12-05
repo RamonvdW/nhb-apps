@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2023 Ramon van der Winkel.
+                Copyright (c) 2020-2024 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -56,7 +56,13 @@
             <div class="col s12">
 
                 {% for kaartje in kaartjes_indiv %}
-                    {% include 'plein/card_icon.dtl' with title=kaartje.titel text=kaartje.tekst icon=kaartje.icoon url=kaartje.url %}
+                    {% if kaartje.beschikbaar_vanaf %}
+                        {% include 'plein/card_icon_beschikbaar-vanaf.dtl' with title=kaartje.titel text=kaartje.tekst icon=kaartje.icoon vanaf=kaartje.beschikbaar_vanaf %}
+                    {% elif kaartje.beschikbaar_binnenkort %}
+                        {% include 'plein/card_icon_beschikbaar-vanaf.dtl' with title=kaartje.titel text=kaartje.tekst icon=kaartje.icoon %}
+                    {% else %}
+                        {% include 'plein/card_icon.dtl' with title=kaartje.titel text=kaartje.tekst icon=kaartje.icoon url=kaartje.url %}
+                    {% endif %}
                 {% endfor %}
 
             </div>
