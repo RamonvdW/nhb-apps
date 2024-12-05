@@ -147,11 +147,11 @@ def get_kaartjes_regio(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_ind
 
                     if not regiocomp.is_afgesloten:
                         # toon het medailles kaartje met een "beschikbaar vanaf"
-                        heeft_kaartje = False
+                        toon_binnenkort = True
                         datum_vanaf = comp.einde_fase_F + datetime.timedelta(days=1)
                         if datum_vanaf > timezone.now().date():
+                            toon_binnenkort = False
                             verschil = (datum_vanaf - timezone.now().date())
-                            print('verschil: %s' % verschil)
                             if verschil.days < 30:
                                 kaartje = SimpleNamespace(
                                             prio=5,
@@ -160,9 +160,8 @@ def get_kaartjes_regio(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_ind
                                             tekst="Toon de toegekende medailles voor elke klasse (zodra de regiocompetitie afgesloten is).",
                                             beschikbaar_vanaf=datum_vanaf)
                                 kaartjes_indiv.append(kaartje)
-                                heeft_kaartje = True
 
-                        if not heeft_kaartje:
+                        if toon_binnenkort:
                             # al voorbij de datum dus het is wachten op het afsluiten van de competitie
                             kaartje = SimpleNamespace(
                                 prio=10,
