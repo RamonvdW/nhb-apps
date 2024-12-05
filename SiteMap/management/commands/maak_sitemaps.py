@@ -30,7 +30,7 @@ class Command(BaseCommand):
         Spec: https://www.sitemaps.org/protocol.html
         
         We hebben een sitemap index en aparte sitemaps voor:
-            - Plein             (bevat ook login en registreer)
+            - Plein             (bevat ook login, registreer en handleidingen)
             - Records
             - Webwinkel
             - Kalender
