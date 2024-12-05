@@ -5,11 +5,13 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.formats import localize
 from Competitie.models import Regiocompetitie
 from Functie.definities import Rollen
 from Score.operations import wanneer_ag_vastgesteld
 from types import SimpleNamespace
+import datetime
 
 
 def get_kaartjes_regio(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_indiv, kaartjes_teams):
@@ -143,6 +145,33 @@ def get_kaartjes_regio(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_ind
                                 url=url)
                     kaartjes_indiv.append(kaartje)
 
+                    if not regiocomp.is_afgesloten:
+                        # toon het medailles kaartje met een "beschikbaar vanaf"
+                        heeft_kaartje = False
+                        datum_vanaf = comp.einde_fase_F + datetime.timedelta(days=1)
+                        if datum_vanaf > timezone.now().date():
+                            verschil = (datum_vanaf - timezone.now().date())
+                            print('verschil: %s' % verschil)
+                            if verschil.days < 30:
+                                kaartje = SimpleNamespace(
+                                            prio=5,
+                                            titel="Medailles",
+                                            icoon="military_tech",
+                                            tekst="Toon de toegekende medailles voor elke klasse (zodra de regiocompetitie afgesloten is).",
+                                            beschikbaar_vanaf=datum_vanaf)
+                                kaartjes_indiv.append(kaartje)
+                                heeft_kaartje = True
+
+                        if not heeft_kaartje:
+                            # al voorbij de datum dus het is wachten op het afsluiten van de competitie
+                            kaartje = SimpleNamespace(
+                                prio=10,
+                                titel="Medailles",
+                                icoon="military_tech",
+                                tekst="Toon de toegekende medailles voor elke klasse (zodra de regiocompetitie afgesloten is).",
+                                beschikbaar_binnenkort=True)
+                            kaartjes_indiv.append(kaartje)
+
                 if comp.fase_teams >= 'C' and regiocomp.regio_organiseert_teamcompetitie:
 
                     # AG controle
@@ -203,7 +232,7 @@ def get_kaartjes_regio(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_ind
                                     url=url)
                     kaartjes_indiv.append(kaartje)
 
-                # Afsluiten regiocompetitie
+                # afsluiten regiocompetitie
                 if comp.fase_indiv == 'G':
                     url = reverse('CompLaagRegio:afsluiten-regiocomp', kwargs={'deelcomp_pk': regiocomp.pk})
                     kaartje = SimpleNamespace(
