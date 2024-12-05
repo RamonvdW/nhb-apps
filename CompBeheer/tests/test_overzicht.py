@@ -5,11 +5,13 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
+from django.utils import timezone
 from BasisTypen.models import BoogType
 from Competitie.definities import DEEL_RK, DEEL_BK
 from Competitie.models import Competitie, Regiocompetitie, RegiocompetitieSporterBoog, Kampioenschap
 from Competitie.operations import competities_aanmaken
-from Competitie.test_utils.tijdlijn import zet_competitie_fase_regio_inschrijven
+from Competitie.test_utils.tijdlijn import (zet_competitie_fase_regio_inschrijven, zet_competitie_fase_regio_wedstrijden,
+                                            zet_competitie_fase_rk_prep)
 from Functie.tests.helpers import maak_functie
 from Geo.models import Rayon, Regio
 from Sporter.models import Sporter
@@ -299,6 +301,39 @@ class TestCompBeheerOverzicht(E2EHelpers, TestCase):
         functie_rcl = deelcomp.functie
         self.e2e_login_and_pass_otp(self.account_rcl)
         self.e2e_wissel_naar_functie(functie_rcl)
+
+        zet_competitie_fase_regio_wedstrijden(comp18)
+        comp18.einde_fase_F = timezone.now().date() - datetime.timedelta(days=1)
+        comp18.save(update_fields=['einde_fase_F'])
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_overzicht_beheer % comp18.pk)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('compbeheer/overzicht.dtl', 'plein/site_layout.dtl'))
+
+        zet_competitie_fase_regio_wedstrijden(comp18)
+        comp18.einde_fase_F = timezone.now().date() + datetime.timedelta(days=1)
+        comp18.save(update_fields=['einde_fase_F'])
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_overzicht_beheer % comp18.pk)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('compbeheer/overzicht.dtl', 'plein/site_layout.dtl'))
+
+        zet_competitie_fase_regio_wedstrijden(comp18)
+        comp18.einde_fase_F = timezone.now().date() + datetime.timedelta(days=31)
+        comp18.save(update_fields=['einde_fase_F'])
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_overzicht_beheer % comp18.pk)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('compbeheer/overzicht.dtl', 'plein/site_layout.dtl'))
+
+        deelcomp.is_afgesloten = True
+        deelcomp.save(update_fields=['is_afgesloten'])
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_overzicht_beheer % comp18.pk)

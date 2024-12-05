@@ -145,31 +145,30 @@ def get_kaartjes_regio(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_ind
                                 url=url)
                     kaartjes_indiv.append(kaartje)
 
-                    if not regiocomp.is_afgesloten:
-                        # toon het medailles kaartje met een "beschikbaar vanaf"
-                        toon_binnenkort = True
-                        datum_vanaf = comp.einde_fase_F + datetime.timedelta(days=1)
-                        if datum_vanaf > timezone.now().date():
-                            toon_binnenkort = False
-                            verschil = (datum_vanaf - timezone.now().date())
-                            if verschil.days < 30:
-                                kaartje = SimpleNamespace(
-                                            prio=5,
-                                            titel="Medailles",
-                                            icoon="military_tech",
-                                            tekst="Toon de toegekende medailles voor elke klasse (zodra de regiocompetitie afgesloten is).",
-                                            beschikbaar_vanaf=datum_vanaf)
-                                kaartjes_indiv.append(kaartje)
-
-                        if toon_binnenkort:
-                            # al voorbij de datum dus het is wachten op het afsluiten van de competitie
+                    # toon het medailles kaartje met een "beschikbaar vanaf"
+                    toon_binnenkort = True
+                    datum_vanaf = comp.einde_fase_F + datetime.timedelta(days=1)
+                    if datum_vanaf > timezone.now().date():
+                        toon_binnenkort = False
+                        verschil = (datum_vanaf - timezone.now().date())
+                        if verschil.days < 30:
                             kaartje = SimpleNamespace(
-                                prio=10,
-                                titel="Medailles",
-                                icoon="military_tech",
-                                tekst="Toon de toegekende medailles voor elke klasse (zodra de regiocompetitie afgesloten is).",
-                                beschikbaar_binnenkort=True)
+                                        prio=5,
+                                        titel="Medailles",
+                                        icoon="military_tech",
+                                        tekst="Toon de toegekende medailles voor elke klasse (zodra de regiocompetitie afgesloten is).",
+                                        beschikbaar_vanaf=datum_vanaf)
                             kaartjes_indiv.append(kaartje)
+
+                    if toon_binnenkort:
+                        # al voorbij de datum dus het is wachten op het afsluiten van de competitie
+                        kaartje = SimpleNamespace(
+                            prio=10,
+                            titel="Medailles",
+                            icoon="military_tech",
+                            tekst="Toon de toegekende medailles voor elke klasse (zodra de regiocompetitie afgesloten is).",
+                            beschikbaar_binnenkort=True)
+                        kaartjes_indiv.append(kaartje)
 
                 if comp.fase_teams >= 'C' and regiocomp.regio_organiseert_teamcompetitie:
 
