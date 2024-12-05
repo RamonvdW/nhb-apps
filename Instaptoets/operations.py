@@ -11,10 +11,9 @@ import random
 
 
 def selecteer_toets_vragen(toets: Instaptoets):
-    todo = 30 - toets.aantal_vragen
+    todo = 15 - toets.aantal_vragen
 
-    gekozen_pks = toets.vraag_antwoord.all().values_list('vraag__pk', flat=True)
-    print('gekozen_pks: %s' % repr(gekozen_pks))
+    gekozen_pks = list(toets.vraag_antwoord.all().values_list('vraag__pk', flat=True))
 
     mogelijke_pks = list()
     pk2vraag = dict()   # [pk] = Vraag()
@@ -22,10 +21,10 @@ def selecteer_toets_vragen(toets: Instaptoets):
         pk2vraag[vraag.pk] = vraag
         mogelijke_pks.append(vraag.pk)
     # for
-    print('mogelijke_pks: %s' % repr(mogelijke_pks))
 
     nieuw = list()
     while todo > 0 and len(mogelijke_pks) > 0:
+        todo -= 1
         pk = random.choice(mogelijke_pks)
         mogelijke_pks.remove(pk)
 
@@ -34,7 +33,6 @@ def selecteer_toets_vragen(toets: Instaptoets):
         nieuw.append(antwoord)
     # while
 
-    print('%s vragen gekozen' % len(nieuw))
     ToetsAntwoord.objects.bulk_create(nieuw)
     toets.vraag_antwoord.set(nieuw)
 
@@ -42,15 +40,20 @@ def selecteer_toets_vragen(toets: Instaptoets):
     toets.save()
 
 
-def selecteer_huidige_vraag(toets: Instaptoets):
-    if toets.huidige_vraag:
+def selecteer_huidige_vraag(toets: Instaptoets, forceer=False):
+    if toets.is_afgerond:
+        return
+
+    if toets.huidige_vraag and not forceer:
         if toets.huidige_vraag.antwoord == '?':
             return
 
     qset = toets.vraag_antwoord.filter(antwoord='?')
-    keuze = random.choice(qset)
-    toets.huidige_vraag = keuze
-    toets.save(update_fields=['huidige_vraag'])
+
+    if qset.count() > 0:
+        keuze = random.choice(qset)
+        toets.huidige_vraag = keuze
+        toets.save(update_fields=['huidige_vraag'])
 
 
 def toets_geldig(toets: Instaptoets):
@@ -71,6 +74,11 @@ def toets_geldig(toets: Instaptoets):
             return True, dagen
 
     return False, 0
+
+
+def controleer_toets(toets: Instaptoets):
+    # TODO: implement
+    krak
 
 
 # end of file

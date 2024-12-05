@@ -24,13 +24,14 @@ class Vraag(models.Model):
     vraag_tekst = models.TextField(blank=True)
 
     # de vier mogelijke antwoorden
-    antwoord_a = models.CharField(default='', max_length=200, blank=True)
-    antwoord_b = models.CharField(default='', max_length=200, blank=True)
-    antwoord_c = models.CharField(default='', max_length=200, blank=True)
-    antwoord_d = models.CharField(default='', max_length=200, blank=True)
+    antwoord_a = models.TextField(blank=True)
+    antwoord_b = models.TextField(blank=True)
+    antwoord_c = models.TextField(blank=True)
+    antwoord_d = models.TextField(blank=True)
 
     # welk van de antwoorden is de juiste?
-    juiste_antwoord = models.CharField(default='a', max_length=1)
+    juiste_antwoord = models.CharField(default='A', max_length=1,
+                                       choices=(('A', 'A'), ('B', 'B'), ('C', 'C'), ('D', 'D')))
 
     # geschiedenis
     logboek = models.TextField(blank=True)
@@ -73,9 +74,12 @@ class ToetsAntwoord(models.Model):
 
 class Instaptoets(models.Model):
 
-    # wanneer opgestart
+    # wanneer opgestart en afgerond
     opgestart = models.DateTimeField(auto_now_add=True)
     afgerond = models.DateTimeField(default=datetime.datetime(year=9999, month=12, day=31).replace(tzinfo=datetime.timezone.utc))
+
+    # is de toets afgerond?
+    is_afgerond = models.BooleanField(default=False)
 
     # wie maakt deze toets?
     sporter = models.ForeignKey(Sporter, on_delete=models.CASCADE)
@@ -179,13 +183,14 @@ class VoorstelVraag(models.Model):
     vraag_tekst = models.TextField(blank=True)
 
     # de vier mogelijke antwoorden
-    antwoord_a = models.CharField(default='', max_length=200)
-    antwoord_b = models.CharField(default='', max_length=200)
-    antwoord_c = models.CharField(default='', max_length=200)
-    antwoord_d = models.CharField(default='', max_length=200)
+    antwoord_a = models.TextField(blank=True)
+    antwoord_b = models.TextField(blank=True)
+    antwoord_c = models.TextField(blank=True)
+    antwoord_d = models.TextField(blank=True)
 
     # welk van de antwoorden is de juiste?
-    juiste_antwoord = models.CharField(default='a', max_length=1)
+    juiste_antwoord = models.CharField(default='A', max_length=1,
+                                       choices=(('A', 'A'), ('B', 'B'), ('C', 'C'), ('D', 'D')))
 
     # geschiedenis
     logboek = models.TextField(blank=True)

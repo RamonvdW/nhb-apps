@@ -20,6 +20,10 @@ urlpatterns = [
     path('volgende-vraag/',
          view_toets.VolgendeVraagView.as_view(),
          name='volgende-vraag'),
+
+    path('vraag-antwoord/',
+         view_toets.OntvangAntwoordView.as_view(),
+         name='antwoord'),
 ]
 
 # end of file

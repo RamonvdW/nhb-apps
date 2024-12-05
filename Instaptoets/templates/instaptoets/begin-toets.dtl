@@ -29,7 +29,7 @@
                     <!-- knop om toets op te starten met een POST -->
                     <form action="{{ url_starten }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
                         {% csrf_token %}
-                        <p class="center">
+                        <p class="center" style="margin-top:15px">
                             <button class="btn-sv-rood" id="submit_knop" type="submit">Start de toets</button>
                         </p>
                     </form>
@@ -37,10 +37,11 @@
                     {% if url_vervolg %}
                         <!-- toets: nog niet af -->
                         <p>Je hebt {{ toets.aantal_antwoorden }} van de {{ toets.aantal_vragen }} vragen ingevuld.</p>
-                        <a class="btn-sv-rood" href="{{ url_vervolg }}">Volgende vraag</a>
+                        <a class="btn-sv-rood" style="margin:20px" href="{{ url_vervolg }}">Volgende vraag</a>
                     {% else %}
                         <!-- toets is nog geldig -->
-                        <p>Je hebt de toets afgerond op {{ toets.afgerond }} en kan deze nog {{ toets.geldig_dagen }} dagen gebruiken.</p>
+                        <p>Je hebt de toets afgerond op {{ toets.afgerond|date:"j F Y" }} om {{ toets.afgerond|date:"H:i" }} en kan deze nog {{ toets.geldig_dagen }} dagen gebruiken.</p>
+
                     {% endif %}
                 {% endif %}
             </div>
