@@ -1,0 +1,58 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2024 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Basiscursus{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Basiscursus</h3>
+            <p>..beginnetje van..</p>
+        </div>
+    </div>
+
+    {% if toets_is_geldig %}
+        <!-- witruimte -->
+        <div class="row center">
+            <div class="col s12">
+                <h4>Instaptoets</h4>
+                <p>Voorwaarde voor inschrijven op de basiscursus is het slagen voor de online instaptoets.</p>
+                <p>Volgens onze administratie heb je deze gehaald op {{ toets.afgerond|date:"j F Y" }}.</p>
+            </div>
+        </div>
+    {% endif %}
+
+    {% if url_instaptoets %}
+        <!-- witruimte -->
+        <div class="row center">
+            <div class="col s12">
+                <h4>Instaptoets</h4>
+                <p>Voorwaarde voor inschrijven op de basiscursus is het slagen voor de online instaptoets.</p>
+                <p>Volgens onze administratie heb je deze nog niet gehaald.</p>
+            </div>
+        </div>
+
+        <!-- blauwe balk met kaartjes -->
+        <div class="row-sv-blauw">
+            <div class="col s12">
+
+                {% if url_instaptoets %}
+                    {% include 'plein/card_icon.dtl' with title="Instaptoets" text="Maak de online instaptoets." icon="login" url=url_instaptoets %}
+                {% else %}
+                    {% include 'plein/card_icon_beschikbaar-vanaf.dtl' with title="Instaptoets" text="Maak de online instaptoets." icon="login" %}
+                {% endif %}
+            </div>
+        </div>
+    {% endif %}
+
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="opleidingen-basiscursus" %}
+
+{% endblock %}

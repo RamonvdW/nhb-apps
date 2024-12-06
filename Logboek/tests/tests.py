@@ -6,7 +6,6 @@
 
 from django.conf import settings
 from django.test import TestCase
-from django.utils import timezone
 from Logboek.apps import post_migration_callback
 from Sporter.models import Sporter
 from Logboek.models import LogboekRegel, schrijf_in_logboek, logboek_opschonen
@@ -56,6 +55,7 @@ class TestLogboek(E2EHelpers, TestCase):
         schrijf_in_logboek(self.account_same, 'Competitie', 'Klassengrenzen vastgesteld')
         schrijf_in_logboek(self.account_same, 'Accommodaties', 'Weer een clubhuis')
         schrijf_in_logboek(self.account_same, 'Clusters', 'Groepeer ze maar')
+        schrijf_in_logboek(self.account_same, 'Instaptoets', 'Geslaagd')
         schrijf_in_logboek(None, 'Iets anders', 'Valt onder Rest')
 
     def test_anon(self):
@@ -172,6 +172,14 @@ class TestLogboek(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('logboek/uitrol.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
         self.assertContains(resp, 'Rollen met die hap')
+
+        # opleidingen
+        with self.assert_max_queries(4):
+            resp = self.client.get(self.url_logboek + 'opleidingen/')
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_template_used(resp, ('logboek/opleidingen.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
+        self.assertContains(resp, 'Geslaagd')
 
     def test_pagination(self):
         self.e2e_login_and_pass_otp(self.account_admin)

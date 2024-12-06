@@ -78,9 +78,6 @@ class Instaptoets(models.Model):
     opgestart = models.DateTimeField(auto_now_add=True)
     afgerond = models.DateTimeField(default=datetime.datetime(year=9999, month=12, day=31).replace(tzinfo=datetime.timezone.utc))
 
-    # is de toets afgerond?
-    is_afgerond = models.BooleanField(default=False)
-
     # wie maakt deze toets?
     sporter = models.ForeignKey(Sporter, on_delete=models.CASCADE)
 
@@ -96,6 +93,11 @@ class Instaptoets(models.Model):
 
     # actieve vraag
     huidige_vraag = models.ForeignKey(ToetsAntwoord, null=True, on_delete=models.SET_NULL, related_name='toets_huidige')
+
+    # eindresultaat
+    is_afgerond = models.BooleanField(default=False)
+    aantal_goed = models.PositiveSmallIntegerField(default=0)
+    geslaagd = models.BooleanField(default=False)
 
     def __str__(self):
         """ Lever een tekstuele beschrijving van een database record, voor de admin interface """

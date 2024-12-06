@@ -22,8 +22,7 @@
     <div class="row-sv-blauw">
         <div class="col s12">
             <div class="sv-kader" style="padding:10px">
-                <p>De instaptoets is een drempeltje waar je overheen moet om een hele reeks opleidingen te kunnen starten.</p>
-                <p>Als je de toets gehaald hebt, dan is deze 12 maanden geldig.</p>
+                <p>De instaptoets is een online test van 30 meerkeuze vragen.<br>Als je deze haalt, dan kan je je inschrijven voor de basiscursus.</p>
 
                 {% if url_starten %}
                     <!-- knop om toets op te starten met een POST -->
@@ -40,8 +39,10 @@
                         <a class="btn-sv-rood" style="margin:20px" href="{{ url_vervolg }}">Volgende vraag</a>
                     {% else %}
                         <!-- toets is nog geldig -->
-                        <p>Je hebt de toets afgerond op {{ toets.afgerond|date:"j F Y" }} om {{ toets.afgerond|date:"H:i" }} en kan deze nog {{ toets.geldig_dagen }} dagen gebruiken.</p>
-
+                        <p>Je bent geslaagd voor de toets op {{ toets.afgerond|date:"j F Y" }} om {{ toets.afgerond|date:"H:i" }} en kan deze nog {{ toets.geldig_dagen }} dagen gebruiken<br>om je in te schrijven voor de basiscursus.</p>
+                        <p>
+                            <a class="btn-sv-rood" href="{{ url_basiscursus }}">Toon de basiscursus</a>
+                        </p>
                     {% endif %}
                 {% endif %}
             </div>

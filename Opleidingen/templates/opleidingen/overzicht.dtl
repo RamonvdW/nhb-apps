@@ -18,18 +18,22 @@
     </div>
 
 
-    {% if toon_instaptoets %}
-        <!-- blauwe balk met kaartjes -->
-        <div class="row-sv-blauw">
-            <div class="col s12">
+    <!-- blauwe balk met kaartjes -->
+    <div class="row-sv-blauw">
+        <div class="col s12">
 
-                <!-- vereniging menu -->
-                {% url 'Instaptoets:begin' as card_url %}
-                {% include 'plein/card_icon.dtl' with title="Instaptoets" text="Maak de on-line instaptoets." icon="login" url=card_url %}
+            {% if url_instaptoets %}
+                {% include 'plein/card_icon.dtl' with title="Instaptoets" text="Maak de on-line instaptoets." icon="login" url=url_instaptoets %}
+            {% else %}
+                {% include 'plein/card_icon_beschikbaar-vanaf.dtl' with title="Instaptoets" text="Maak de on-line instaptoets." icon="login" %}
+            {% endif %}
 
-            </div>
+            {% if url_basiscursus %}
+                {% include 'plein/card_icon.dtl' with title="Basiscursus" text="Informatie over de basiscursus." icon="school" url=url_basiscursus %}
+            {% endif %}
+
         </div>
-    {% endif %}
+    </div>
 
 
     <!-- blauwe balk met informatie in een tabel -->

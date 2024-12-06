@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2023 Ramon van der Winkel.
+#  Copyright (c) 2019-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -53,9 +53,8 @@ class LogboekRegel(models.Model):
     objects = models.Manager()      # for the editor only
 
 
-def schrijf_in_logboek(account, gebruikte_functie, activiteit):
-    """ Deze functie wordt aangeroepen vanuit de view waarin de feedback van de gebruiker
-        verzameld is. Deze functie slaat de feedback op in een database tabel.
+def schrijf_in_logboek(account: Account | None, gebruikte_functie: str, activiteit: str):
+    """ Deze functie wordt gebruikt om een regel toe te voegen aan een sectie van het logboek.
     """
     obj = LogboekRegel()
     obj.toegevoegd_op = timezone.now()

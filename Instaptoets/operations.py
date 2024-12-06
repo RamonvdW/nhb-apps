@@ -4,10 +4,16 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from Instaptoets.models import Instaptoets, Vraag, ToetsAntwoord
 from django.utils import timezone
+from Instaptoets.models import Instaptoets, Vraag, ToetsAntwoord
+from Logboek.models import schrijf_in_logboek
+from Sporter.models import Sporter
 import datetime
 import random
+
+
+def instaptoets_is_beschikbaar():
+    return Vraag.objects.count() > 0
 
 
 def selecteer_toets_vragen(toets: Instaptoets):
@@ -65,7 +71,7 @@ def toets_geldig(toets: Instaptoets):
             geldig: True/False
             dagen:  aantal dagen dat de toets nog geldig is
     """
-    if toets.aantal_antwoorden >= toets.aantal_vragen:
+    if toets.geslaagd:
         verloopt = datetime.date(toets.afgerond.year + 1, toets.afgerond.month, toets.afgerond.day)
         vandaag = timezone.now().date()
         if verloopt > vandaag:
@@ -76,9 +82,35 @@ def toets_geldig(toets: Instaptoets):
     return False, 0
 
 
+def vind_toets(sporter: Sporter):
+    toets = (Instaptoets
+             .objects
+             .filter(sporter=sporter)
+             .select_related('huidige_vraag')
+             .order_by('opgestart')  # nieuwste eerst
+             .first())
+
+    return toets
+
 def controleer_toets(toets: Instaptoets):
-    # TODO: implement
-    krak
+    toets.aantal_goed = 0
+    for antwoord in toets.vraag_antwoord.select_related('vraag').all():
+        vraag = antwoord.vraag
+        if antwoord.antwoord == vraag.juiste_antwoord:
+            toets.aantal_goed += 1
+    # for
+
+    # je moet 70% goed hebben
+    aantal_nodig = int(toets.aantal_vragen * 0.7)
+    toets.geslaagd = toets.aantal_goed >= aantal_nodig
+    toets.save(update_fields=['geslaagd', 'aantal_goed'])
+
+    if toets.geslaagd:
+        msg = '%s is geslaagd voor de instaptoets' % toets.sporter.lid_nr_en_volledige_naam()
+        perc = int((toets.aantal_goed * 100) / toets.aantal_vragen)
+        msg += ' (%s van de %s vragen goed = %d%%)' % (toets.aantal_goed, toets.aantal_vragen, perc)
+
+        schrijf_in_logboek(toets.sporter.account, 'Instaptoets', msg)
 
 
 # end of file

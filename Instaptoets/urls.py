@@ -17,6 +17,10 @@ urlpatterns = [
          view_toets.BeginToetsView.as_view(),
          name='begin'),
 
+    path('uitslag/',
+         view_toets.ToonUitslagView.as_view(),
+         name='toon-uitslag'),
+
     path('volgende-vraag/',
          view_toets.VolgendeVraagView.as_view(),
          name='volgende-vraag'),
