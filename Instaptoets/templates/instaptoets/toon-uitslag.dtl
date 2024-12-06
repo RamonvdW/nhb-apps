@@ -27,7 +27,7 @@
                     <h5 class="sv-rood-text">Gefeliciteerd!</h5>
                     <p>Je bent geslaagd voor de instaptoets.</p>
                     <p>Je had {{ toets.aantal_goed }} van de {{ toets.aantal_vragen }} vragen goed.</p>
-                    <p>Met dit mooie resultaat kan je je inschrijven de basiscursus.</p>
+                    <p>Met dit mooie resultaat kan je je inschrijven voor de basiscursus.</p>
                     <p>
                         <a class="btn-sv-rood" href="{{ url_basiscursus }}">Toon de basiscursus</a>
                     </p>
