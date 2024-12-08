@@ -33,8 +33,6 @@ class TestFeedback(E2EHelpers, TestCase):
         self.account_admin = self.e2e_create_account_admin()
         self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.com', 'Normaal')
 
-        self.e2e_login(self.account_normaal)
-
     def test_anon(self):
         # niet ingelogd --> gebruik smileys niet toegestaan
         self.client.logout()
@@ -102,6 +100,8 @@ class TestFeedback(E2EHelpers, TestCase):
         self.assertNotContains(resp, 'Wat vind je van deze pagina?')
 
     def test_bedankt(self):
+        self.e2e_login(self.account_normaal)
+
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_feedback_bedankt)
         self.assertEqual(resp.status_code, 200)
@@ -111,6 +111,8 @@ class TestFeedback(E2EHelpers, TestCase):
         self.e2e_assert_other_http_commands_not_supported(self.url_feedback_bedankt)
 
     def test_form(self):
+        self.e2e_login(self.account_normaal)
+
         with self.assert_max_queries(20):
             # zet sessie variabelen: op_pagina en gebruiker
             self.client.get(self.url_feedback_nul_plein)
@@ -135,6 +137,8 @@ class TestFeedback(E2EHelpers, TestCase):
         self.assertEqual(Feedback.objects.count(), 1)
 
     def test_form_bad(self):
+        self.e2e_login(self.account_normaal)
+
         with self.assert_max_queries(20):
             # zet sessie variabelen: op_pagina en gebruiker
             resp = self.client.get(self.url_feedback_nul_plein)
@@ -156,11 +160,15 @@ class TestFeedback(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
 
     def test_form_get(self):
+        self.e2e_login(self.account_normaal)
+
         # de formulier-url is bedoeld voor een POST, maar staat ook een GET toe
         resp = self.client.get(self.url_feedback_formulier)
         self.assert404(resp, 'Pagina bestaat niet')
 
     def test_post_without_get(self):
+        self.e2e_login(self.account_normaal)
+
         # probeer een post van het formulier zonder de get
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_feedback_formulier,
@@ -169,6 +177,8 @@ class TestFeedback(E2EHelpers, TestCase):
         self.assert404(resp, 'Verkeerd gebruik')
 
     def test_afgehandeld(self):
+        self.e2e_login(self.account_normaal)
+
         with self.assert_max_queries(20):
             # zet sessie variabelen: op_pagina en gebruiker
             resp = self.client.get(self.url_feedback_nul_plein)
@@ -197,7 +207,7 @@ class TestFeedback(E2EHelpers, TestCase):
     def test_inzicht_bb(self):
         # do een get van alle feedback als BB
         self.account_normaal.is_BB = True
-        self.account_normaal.save()
+        self.account_normaal.save(update_fields=['is_BB'])
         self.e2e_account_accepteert_vhpg(self.account_normaal)
         self.e2e_login_and_pass_otp(self.account_normaal)
         self.e2e_wisselnaarrol_bb()

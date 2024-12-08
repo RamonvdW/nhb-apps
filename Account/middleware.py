@@ -54,20 +54,18 @@ class HerhaalLoginOTP:
                     return HttpResponseRedirect(reverse('Plein:plein'))
 
             if not skip_checks:
-                if account.otp_is_actief:
+                if not account.otp_controle_gelukt_op or not account.otp_is_actief:
+                    # in de sessie zeggen we dat de OTP controle nog niet gelukt is
+                    otp_zet_controle_niet_gelukt(request)
+                else:
                     # gebruiker is een beheerder
-                    if not account.otp_controle_gelukt_op:
-                        # rare situatie
-                        # in de sessie zeggen we dat de OTP controle nog niet gelukt is
+                    herhaal_na = account.otp_controle_gelukt_op + datetime.timedelta(days=settings.HERHAAL_INTERVAL_OTP)
+                    if now > herhaal_na:
+                        my_logger.info('Account %s forceer nieuwe OTP controle' % repr(account.username))
+                        # we zetten een sessie-variabele die automatisch gebruikt wordt
                         otp_zet_controle_niet_gelukt(request)
-                    else:
-                        herhaal_na = account.otp_controle_gelukt_op + datetime.timedelta(days=settings.HERHAAL_INTERVAL_OTP)
-                        if now > herhaal_na:
-                            my_logger.info('Account %s forceer nieuwe OTP controle' % repr(account.username))
-                            # we zetten een sessie-variabele die automatisch gebruikt wordt
-                            otp_zet_controle_niet_gelukt(request)
 
-            if not skip_checks:
+            if account.last_login and not skip_checks:
                 herhaal_na = account.last_login + datetime.timedelta(days=settings.HERHAAL_INTERVAL_LOGIN)
                 if now > herhaal_na:
                     # inlog moet herhaald worden
