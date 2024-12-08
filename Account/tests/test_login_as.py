@@ -7,6 +7,7 @@
 from django.utils import timezone
 from django.test import TestCase
 from django.http import HttpResponseRedirect
+from Account.middleware import SESSIONVAR_ACCOUNT_LOGIN_AS_DATE
 from Account.plugin_manager import account_add_plugin_login_gate
 from TijdelijkeCodes.models import TijdelijkeCode
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -20,6 +21,7 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
 
     test_after = ('Account.tests.test_login.',)
 
+    url_plein = '/plein/'
     url_wissel = '/account/account-wissel/'
     url_code_prefix = '/tijdelijke-codes/'
 
@@ -115,52 +117,6 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(post_url)
         self.assert_is_redirect(resp, '/plein/')
-
-    def test_wissel_met_otp(self):
-        # login als admin
-        self.e2e_login_and_pass_otp(self.testdata.account_admin)
-
-        # activeer een rol + vhpg voor de beheerder
-        self.account_normaal.is_BB = True
-        self.account_normaal.save()
-        self.e2e_account_accepteert_vhpg(self.account_normaal)
-
-        self.e2e_assert_other_http_commands_not_supported(self.url_wissel, post=False)
-
-        # selecteer de andere schutter
-        with self.assert_max_queries(20):
-            resp = self.client.post(self.url_wissel, {'selecteer': self.account_normaal.pk})
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('account/login-as-go.dtl', 'plein/site_layout.dtl'))
-
-        # pik de tijdelijke URL op
-        urls = [url for url in self.extract_all_urls(resp) if self.url_code_prefix in url]
-        # hak het https deel eraf
-        tijdelijke_url = urls[0][urls[0].find(self.url_code_prefix):]
-
-        # volg de tijdelijke url om ingelogd te raken
-        with self.assert_max_queries(20):
-            resp = self.client.get(tijdelijke_url)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        urls = self.extract_all_urls(resp, skip_menu=True, skip_smileys=True)
-        post_url = urls[0]
-        with self.assert_max_queries(39):
-            resp = self.client.post(post_url, follow=True)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('plein/plein-bezoeker.dtl', 'plein/site_layout.dtl'))
-        self.assertContains(resp, 'Wissel van rol')
-
-        # controleer dat OTP controle niet nodig is
-        # FUTURE: ongewenste dependency op Functie --> verplaats deze check naar Functie
-        with self.assert_max_queries(23):
-            resp = self.client.get('/functie/wissel-van-rol/')
-        self.assertEqual(resp.status_code, 200)
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('functie/wissel-van-rol.dtl', 'plein/site_layout.dtl'))
-        self.assertContains(resp, 'Gebruiker')
-        self.assertContains(resp, 'Manager MH')
 
     def test_wissel_geblokkeerd(self):
         # login als admin
@@ -263,5 +219,21 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
             resp = self.client.get(tijdelijke_url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('tijdelijkecodes/code-fout.dtl', 'plein/site_layout.dtl'))
+
+    def test_login_as_verloopt(self):
+        # login als admin
+        self.e2e_login_and_pass_otp(self.testdata.account_admin)
+
+        # een sessie variabele onthoudt op welke datum de login-as geldig is (maximaal 1 dag)
+        # zet deze op op gisteren
+        yesterday = timezone.now() - datetime.timedelta(days=1)
+        date_str = yesterday.strftime('%Y-%m-%d')
+        sessie = self.client.session
+        sessie[SESSIONVAR_ACCOUNT_LOGIN_AS_DATE] = date_str
+        sessie.save()
+
+        resp = self.client.get(self.url_wissel)
+        self.assert_is_redirect(resp, self.url_plein)   # na logout volgt redirect naar plein
+
 
 # end of file

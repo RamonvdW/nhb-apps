@@ -22,6 +22,7 @@ class TestAccountLogin(E2EHelpers, TestCase):
     """ tests voor de Account applicatie; module Login """
 
     url_login = '/account/login/'
+    url_plein = '/plein/'
 
     testdata = None
 
@@ -327,7 +328,7 @@ class TestAccountLogin(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
 
         # test een login met een 'next' parameter die na de login gevolgd wordt
-        with self.assert_max_queries(22):
+        with self.assert_max_queries(23):
             resp = self.client.post(self.url_login, {'login_naam': 'metmail@test.com',
                                                      'wachtwoord': E2EHelpers.WACHTWOORD,
                                                      'next_url': '/account/logout'}, follow=True)
@@ -364,6 +365,19 @@ class TestAccountLogin(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         # redirect is naar het plein
         self.assert_template_used(resp, ('account/uitloggen.dtl', 'plein/site_layout.dtl'))
+
+    def test_login_herhaal(self):
+        # login moet herhaald worden na settings.HERHAAL_INTERVAL_LOGIN dagen
+        self.e2e_login(self.testdata.account_admin)
+
+        account = self.testdata.account_admin
+        account.refresh_from_db()
+        account.last_login = timezone.now() - datetime.timedelta(days=100)      # should be enough
+        account.save(update_fields=['last_login'])
+
+        # middleware doet logout + redirect naar login pagina (met next url gezet)
+        resp = self.client.get(self.url_plein)
+        self.assert_is_redirect(resp, self.url_login + '?next=%s' % self.url_plein)
 
 
 # end of file

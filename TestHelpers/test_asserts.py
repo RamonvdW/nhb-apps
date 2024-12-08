@@ -778,8 +778,7 @@ class MyTestAsserts(TestCase):
                 pos1 = sql.find(' "')
                 pos2 = sql.find('"', pos1 + 2)
                 table_name = sql[pos1 + 2:pos2]
-                if table_name != 'django_session':
-                    found_update = True
+                found_update = True
 
             elif sql.startswith('DELETE FROM '):
                 found_delete = True

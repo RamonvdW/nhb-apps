@@ -58,7 +58,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2024-12-06'
+SITE_VERSIE = '2024-12-08'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -129,6 +129,7 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',                    # security (cross-site request forgery)
     'django.contrib.messages.middleware.MessageMiddleware',         # mandatory for admin
     'django.middleware.clickjacking.XFrameOptionsMiddleware',       # security: ask browser to deny (i)frame embedding
+    'Account.middleware.HerhaalLoginOTP',                           # forceer nieuwe login en otp controles
 ]
 
 
@@ -205,6 +206,10 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
+# herhaal intervallen voorkomen lang misbruik van een gekopieerde cookie
+HERHAAL_INTERVAL_LOGIN = 14     # elke 14 dagen opnieuw inloggen
+HERHAAL_INTERVAL_OTP = 7        # elke 7 dagen opnieuw OTP controle
+
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 LANGUAGE_CODE = 'nl-NL'     # provides wanted date/time output format
@@ -240,7 +245,6 @@ STATICFILES_FINDER = [
 # wordt gebruikt door de permission_required decorator en UserPassesTextMixin
 # om de gebruiker door te sturen als een view geen toegang verleend
 LOGIN_URL = '/account/login/'
-
 
 # for debug_toolbar
 INTERNAL_IPS = [

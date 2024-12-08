@@ -7,6 +7,7 @@
 from django.conf import settings
 from django.utils import timezone
 from Account.models import Account, AccountSessions, get_account
+from Account.operations.session_vars import zet_sessionvar_if_changed
 from Logboek.models import schrijf_in_logboek
 from Overig.helpers import get_safe_from_ip
 from Mailer.operations import mailer_queue_email, render_email_template
@@ -28,7 +29,7 @@ def otp_zet_controle_niet_gelukt(request):
 
     account = get_account(request)
 
-    request.session[SESSIONVAR_ACCOUNT_OTP_CONTROL_IS_GELUKT] = False
+    zet_sessionvar_if_changed(request, SESSIONVAR_ACCOUNT_OTP_CONTROL_IS_GELUKT, False)
 
     # zorg dat nieuwe sessies al aangemaakt zijn
     if not request.session.session_key:     # pragma: no cover
@@ -47,7 +48,7 @@ def otp_zet_controle_gelukt(request):
     account.otp_controle_gelukt_op = timezone.now()
     account.save(update_fields=['otp_controle_gelukt_op'])
 
-    request.session[SESSIONVAR_ACCOUNT_OTP_CONTROL_IS_GELUKT] = True
+    zet_sessionvar_if_changed(request, SESSIONVAR_ACCOUNT_OTP_CONTROL_IS_GELUKT, True)
 
 
 def otp_is_controle_gelukt(request):

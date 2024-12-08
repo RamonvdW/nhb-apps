@@ -7,6 +7,7 @@
 from django.shortcuts import render
 from django.urls import reverse
 from django.http import Http404
+from django.utils import timezone
 from django.contrib.auth import login, logout
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.views.generic import ListView
@@ -15,7 +16,9 @@ from django.core.exceptions import PermissionDenied
 from Account.forms import ZoekAccountForm, KiesAccountForm
 from Account.models import Account, get_account
 from Account.operations.otp import otp_zet_controle_gelukt, otp_zet_controle_niet_gelukt
+from Account.operations.session_vars import zet_sessionvar_if_changed
 from Account.view_login import account_plugins_login_gate
+from Account.middleware import SESSIONVAR_ACCOUNT_LOGIN_AS_DATE
 from Functie.rol import rol_bepaal_beschikbare_rollen
 from Logboek.models import schrijf_in_logboek
 from Overig.helpers import get_safe_from_ip
@@ -37,9 +40,10 @@ def receiver_account_wissel(request, account):
         of een HttpResponse object.
     """
     old_last_login = account.last_login
+    old_otp_controle = account.otp_controle_gelukt_op
 
     # integratie met de authenticatie laag van Django
-    logout(request)             # einde oude sessie
+    logout(request)             # einde oude sessie (if any)
     login(request, account)     # maakt nieuwe sessie
 
     from_ip = get_safe_from_ip(request)
@@ -71,9 +75,14 @@ def receiver_account_wissel(request, account):
 
     # herstel de last_login van de echte gebruiker
     account.last_login = old_last_login
-    account.save(update_fields=['last_login'])
+    account.otp_controle_gelukt_op = old_otp_controle
+    account.save(update_fields=['last_login', 'otp_controle_gelukt_op'])
+
+    date_str = timezone.now().strftime('%Y-%m-%d')
+    zet_sessionvar_if_changed(request, SESSIONVAR_ACCOUNT_LOGIN_AS_DATE, date_str)
 
     # zorg dat de session-cookie snel verloopt --> nergens voor nodig
+    # login-as sessie is maar 1 dag bruikbaar
     # request.session.set_expiry(0)
 
     # schrijf in het logboek
