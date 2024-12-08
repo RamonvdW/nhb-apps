@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2023 Ramon van der Winkel.
+#  Copyright (c) 2020-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.utils import timezone
 from django.conf import settings
 from Account.models import get_account
+from Account.operations.session_vars import zet_sessionvar_if_changed
 from Functie.rol import rol_get_huidige_functie
 from Mailer.operations import mailer_queue_email, render_email_template
 from Taken.models import Taak
@@ -64,7 +65,7 @@ def eval_open_taken(request, forceer=False):
     # en zet het volgende evaluatie moment
     next_eval = timezone.now() + timedelta(seconds=60*TAAK_EVAL_INTERVAL_MINUTES)
     eval_after = str(next_eval.timestamp())
-    request.session[SESSIONVAR_TAAK_EVAL_AFTER] = eval_after
+    zet_sessionvar_if_changed(request, SESSIONVAR_TAAK_EVAL_AFTER, eval_after)
 
     functie_pks, _ = get_taak_functie_pks(request)
 
@@ -74,7 +75,7 @@ def eval_open_taken(request, forceer=False):
                    .filter(toegekend_aan_functie__pk__in=functie_pks)
                    .count())
 
-    request.session[SESSIONVAR_TAAK_AANTAL_OPEN] = aantal_open
+    zet_sessionvar_if_changed(request, SESSIONVAR_TAAK_AANTAL_OPEN, aantal_open)
 
 
 def stuur_email_taak_herinnering(emailadres, aantal_open):

@@ -9,7 +9,6 @@ from Functie.definities import Rollen
 from Functie.operations import maak_account_vereniging_secretaris
 from Functie.tests.helpers import maak_functie
 from Functie.rol import (SESSIONVAR_ROL_HUIDIGE, SESSIONVAR_ROL_MAG_WISSELEN,
-                         SESSIONVAR_ROL_PALLET_FUNCTIES, SESSIONVAR_ROL_PALLET_VAST,
                          SESSIONVAR_ROL_BESCHRIJVING, SESSIONVAR_ROL_HUIDIGE_FUNCTIE_PK,
                          rol_mag_wisselen, rol_enum_pallet, rol_get_beschrijving,
                          rol_activeer_rol, rol_activeer_functie,
@@ -110,29 +109,28 @@ class TestFunctieRol(E2EHelpers, TestCase):
 
         resp = self.client.get('/plein/')
         request = resp.wsgi_request
-
-        self.assertTrue(SESSIONVAR_ROL_MAG_WISSELEN not in request.session.keys())
-        res = rol_mag_wisselen(request)
-        self.assertFalse(res)
-
-        self.assertTrue(SESSIONVAR_ROL_HUIDIGE not in request.session.keys())
-        rol_activeer_rol(request, 'bestaat niet')
-        self.assertTrue(SESSIONVAR_ROL_HUIDIGE not in request.session.keys())
-
-        rol_activeer_functie(request, 'geen getal')
-        self.assertTrue(SESSIONVAR_ROL_PALLET_FUNCTIES not in request.session.keys())
-        rol_activeer_functie(request, 0)
-
-        self.assertTrue(SESSIONVAR_ROL_PALLET_VAST not in request.session.keys())
-        pallet = [tup for tup in rol_enum_pallet(request)]
-        self.assertEqual(len(pallet), 0)
-        rol_activeer_rol(request, 'geen')
+        account = request.user
 
         self.assertTrue(SESSIONVAR_ROL_BESCHRIJVING not in request.session.keys())
         self.assertEqual(rol_get_beschrijving(request), "?")
 
         self.assertTrue(SESSIONVAR_SCHEIDS not in request.session.keys())
         self.assertFalse(gebruiker_is_scheids(request))
+
+        self.assertTrue(SESSIONVAR_ROL_MAG_WISSELEN not in request.session.keys())
+        res = rol_mag_wisselen(request)
+        self.assertFalse(res)
+
+        self.assertTrue(SESSIONVAR_ROL_HUIDIGE not in request.session.keys())
+        rol_activeer_rol(account, request, 'bestaat niet')
+        self.assertTrue(SESSIONVAR_ROL_HUIDIGE not in request.session.keys())
+
+        rol_activeer_functie(account, request, 'geen getal')
+        rol_activeer_functie(account, request, 0)
+
+        pallet = [tup for tup in rol_enum_pallet(account, request)]
+        self.assertEqual(len(pallet), 0)
+        rol_activeer_rol(account, request, 'geen')
 
     def test_anon(self):
         # zorg dan request.user.is_authenticated op False staat

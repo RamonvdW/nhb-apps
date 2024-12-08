@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2023 Ramon van der Winkel.
+#  Copyright (c) 2020-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -109,7 +109,7 @@ class WisselVanRolView(UserPassesTestMixin, TemplateView):
         pks = list()
 
         hierarchy2 = dict()      # [parent_tup] = list of child_tup
-        for child_tup, parent_tup in rol_enum_pallet(self.request):
+        for child_tup, parent_tup in rol_enum_pallet(self.account, self.request):
             rol, functie_pk = child_tup
 
             # rollen die je altijd aan moet kunnen nemen als je ze hebt
@@ -366,7 +366,7 @@ class WisselVanRolView(UserPassesTestMixin, TemplateView):
         else:
             context['meta_functie'] = ""
 
-        eval_open_taken(self.request, forceer=True)
+        eval_open_taken(self.request)
 
         context['kruimels'] = (
             (None, 'Wissel van rol'),

@@ -7,6 +7,7 @@
 from django.utils import timezone
 from datetime import timedelta
 from Account.models import get_account
+from Account.operations.session_vars import zet_sessionvar_if_changed
 from Bestelling.models import BestellingMandje
 
 
@@ -44,11 +45,11 @@ def mandje_tel_inhoud(request):
     else:
         aantal = mandje.producten.count()
 
-    request.session[SESSIONVAR_MANDJE_INHOUD_AANTAL] = aantal
+    zet_sessionvar_if_changed(request, SESSIONVAR_MANDJE_INHOUD_AANTAL, aantal)
 
     next_eval = timezone.now() + timedelta(seconds=60 * MANDJE_EVAL_INTERVAL_MINUTES)
     eval_after = str(next_eval.timestamp())     # number of seconds since 1-1-1970
-    request.session[SESSIONVAR_MANDJE_EVAL_AFTER] = eval_after
+    zet_sessionvar_if_changed(request, SESSIONVAR_MANDJE_EVAL_AFTER, eval_after)
 
 
 def eval_mandje_inhoud(request):

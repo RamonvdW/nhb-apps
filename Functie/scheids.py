@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023 Ramon van der Winkel.
+#  Copyright (c) 2023-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 """ Ondersteuning voor de extra rechten van sporters die niet vereisen om van rol te wisselen. """
 
+from Account.operations.session_vars import zet_sessionvar_if_changed
 from BasisTypen.definities import SCHEIDS_NIET
 
 SESSIONVAR_SCHEIDS = 'gebruiker_is_scheids'
@@ -20,7 +21,7 @@ def zet_sessionvar_is_scheids(account, request):
     else:                               # pragma: no cover
         is_scheids = False
 
-    request.session[SESSIONVAR_SCHEIDS] = is_scheids
+    zet_sessionvar_if_changed(request, SESSIONVAR_SCHEIDS, is_scheids)
 
 
 def gebruiker_is_scheids(request):

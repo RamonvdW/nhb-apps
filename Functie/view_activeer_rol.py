@@ -49,7 +49,7 @@ class ActiveerRolView(UserPassesTestMixin, View):
                                 account.username,
                                 repr(kwargs['rol'])))
 
-            rol_activeer_rol(request, kwargs['rol'])
+            rol_activeer_rol(account, request, kwargs['rol'])
 
         elif 'functie_pk' in kwargs:
             # activeer functie
@@ -66,7 +66,7 @@ class ActiveerRolView(UserPassesTestMixin, View):
                             functie.pk,
                             functie))
 
-            rol_activeer_functie(request, functie)
+            rol_activeer_functie(account, request, functie)
 
         else:
             ver_nr = request.POST.get('ver_nr', '')[:4]     # afkappen voor de veiligheid
@@ -85,7 +85,7 @@ class ActiveerRolView(UserPassesTestMixin, View):
                             functie.pk,
                             functie))
 
-            rol_activeer_functie(request, functie)
+            rol_activeer_functie(account, request, functie)
 
         rol_beschrijving = rol_get_beschrijving(request)
         my_logger.info('%s ROL account %s is nu %s' % (from_ip, account.username, rol_beschrijving))
