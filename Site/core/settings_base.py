@@ -58,7 +58,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2024-12-08'
+SITE_VERSIE = '2024-12-09'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -207,7 +207,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 
 # herhaal intervallen voorkomen lang misbruik van een gekopieerde cookie
-HERHAAL_INTERVAL_LOGIN = 14     # elke 14 dagen opnieuw inloggen
+HERHAAL_INTERVAL_LOGIN = 21     # elke 21 dagen opnieuw inloggen
 HERHAAL_INTERVAL_OTP = 7        # elke 7 dagen opnieuw OTP controle
 
 # Internationalization
