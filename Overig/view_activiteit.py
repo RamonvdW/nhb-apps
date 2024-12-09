@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2023 Ramon van der Winkel.
+#  Copyright (c) 2019-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -138,7 +138,7 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
             for functie in account.functie_set.all():
                 try:
                     level = self.sort_level[functie.rol]
-                except KeyError:
+                except KeyError:        # pragma: no cover
                     level = 999999
                 tup = (level, functie.rol)
                 functies.append(tup)
@@ -319,7 +319,7 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
             total += 1
         # for
 
-        if total > 0:
+        if total > 0:       # pragma: no branch
             age_groups = [((age * 10), (age * 10)+9, count, int((count * 100) / total))
                           for age, count in age_group_counts.items()]
             age_groups.sort()
