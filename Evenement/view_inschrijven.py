@@ -4,7 +4,7 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.http import Http404, HttpResponseRedirect
+from django.http import Http404
 from django.urls import reverse
 from django.utils import timezone
 from django.db import IntegrityError, transaction

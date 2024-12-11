@@ -6,7 +6,7 @@
 
 from django.db import models
 from django.http import HttpRequest
-from django.contrib.auth.models import AbstractUser, AnonymousUser
+from django.contrib.auth.models import AbstractUser
 from django.contrib.sessions.models import Session
 from django.utils import timezone
 from BasisTypen.definities import SCHEIDS_NIET, SCHEIDS_CHOICES

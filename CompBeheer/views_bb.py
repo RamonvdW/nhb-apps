@@ -52,7 +52,7 @@ class InstellingenVolgendeCompetitieView(UserPassesTestMixin, TemplateView):
         return rol_nu == Rollen.ROL_BB
 
     @staticmethod
-    def _get_queryset_indivklassen():
+    def _get_queryset_indiv_klassen():
         objs = (TemplateCompetitieIndivKlasse
                 .objects
                 .select_related('boogtype')
@@ -89,7 +89,7 @@ class InstellingenVolgendeCompetitieView(UserPassesTestMixin, TemplateView):
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
-        context['indivklassen'] = self._get_queryset_indivklassen()
+        context['indiv_klassen'] = self._get_queryset_indiv_klassen()
         context['teamklassen'] = self._get_queryset_teamklassen()
 
         context['kruimels'] = (

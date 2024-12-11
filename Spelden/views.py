@@ -15,7 +15,6 @@ from Spelden.definities import (SPELD_CATEGORIE_NL_GRAADSPELD_INDOOR, SPELD_CATE
                                 SPELD_CATEGORIE_WA_ARROWHEAD)
 from Spelden.models import SpeldScore
 from Spelden.operations import get_hall_of_fame, tel_hall_of_fame
-from Sporter.models import Speelsterkte
 
 
 TEMPLATE_PRESTATIESPELDEN_BEGIN = 'spelden/begin.dtl'

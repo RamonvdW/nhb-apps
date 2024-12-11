@@ -6,20 +6,18 @@
 
 from django.conf import settings
 from django.urls import reverse
-from django.http import HttpResponseRedirect, HttpResponse, Http404
+from django.http import HttpResponseRedirect, Http404
 from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
 from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
 from Competitie.definities import (DEEL_BK,
-                                   DEELNAME_JA, DEELNAME_NEE,
                                    MUTATIE_KAMP_AFMELDEN_INDIV, MUTATIE_KAMP_AANMELDEN_INDIV)
-from Competitie.models import Kampioenschap, KampioenschapSporterBoog, CompetitieMutatie
+from Competitie.models import KampioenschapSporterBoog, CompetitieMutatie
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie, rol_get_huidige
 from Overig.background_sync import BackgroundSync
-from Sporter.models import SporterVoorkeuren
 from Sporter.operations import get_sporter
 import time
 

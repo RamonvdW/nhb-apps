@@ -7,7 +7,7 @@
 from django.urls import reverse
 from Records.definities import disc2url
 from Records.models import IndivRecord
-from SiteMap.definities import CHECK_LOW, CHECK_MED, CHECK_HIGH
+from SiteMap.definities import CHECK_LOW, CHECK_MED   # CHECK_HIGH
 
 
 def generate_urls():

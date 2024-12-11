@@ -5,7 +5,6 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import reverse
-from django.http import HttpResponseRedirect
 from django.utils import timezone
 from django.views.generic import TemplateView
 from django.utils.safestring import mark_safe

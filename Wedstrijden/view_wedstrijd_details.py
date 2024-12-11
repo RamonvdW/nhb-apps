@@ -8,7 +8,7 @@ from django.http import Http404
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.http import urlencode
-from django.views.generic import TemplateView, View
+from django.views.generic import TemplateView
 from BasisTypen.definities import ORGANISATIE_WA, ORGANISATIE_IFAA
 from Kalender.view_maand import MAAND2URL
 from Wedstrijden.definities import (WEDSTRIJD_ORGANISATIE_TO_STR, WEDSTRIJD_BEGRENZING_TO_STR,

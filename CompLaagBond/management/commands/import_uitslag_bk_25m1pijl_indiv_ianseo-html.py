@@ -86,7 +86,6 @@ class Command(BaseCommand):
                     matches = list()
                     up_naam = naam.upper()
                     for deelnemer in self.ver2deelnemers[ver_nr]:
-                        match = 0
                         sporter = deelnemer.sporterboog.sporter
                         if sporter.voornaam.upper() in up_naam:
                             # warm

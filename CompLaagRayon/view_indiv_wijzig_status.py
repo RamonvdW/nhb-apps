@@ -6,7 +6,7 @@
 
 from django.conf import settings
 from django.urls import reverse
-from django.http import HttpResponseRedirect, HttpResponseNotAllowed, Http404
+from django.http import HttpResponseRedirect, Http404
 from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
 from django.utils.safestring import mark_safe

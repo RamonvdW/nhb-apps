@@ -31,7 +31,6 @@ from Wedstrijden.definities import (ORGANISATIE_WEDSTRIJD_DISCIPLINE_STRS, WEDST
                                     AANTAL_SCHEIDS_GEEN_KEUZE, AANTAL_SCHEIDS_EIGEN)
 from Wedstrijden.models import Wedstrijd
 from types import SimpleNamespace
-from urllib.parse import urlparse
 import datetime
 
 TEMPLATE_WEDSTRIJDEN_WIJZIG_WEDSTRIJD = 'wedstrijden/wijzig-wedstrijd.dtl'

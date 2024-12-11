@@ -189,7 +189,7 @@ class LoginAsZoekView(UserPassesTestMixin, ListView):
         context = {'account': account}
 
         # schrijf de intentie in het logboek
-        schrijf_in_logboek(account=self.request.user,
+        schrijf_in_logboek(account=get_account(self.request),
                            gebruikte_functie="Inloggen",
                            activiteit="Wissel naar account %s" % repr(account.username))
 

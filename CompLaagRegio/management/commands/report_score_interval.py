@@ -6,7 +6,7 @@
 
 from django.core.management.base import BaseCommand
 from Competitie.models import RegiocompetitieSporterBoog, Regiocompetitie
-from Score.models import Score, ScoreHist
+from Score.models import ScoreHist
 
 
 class Command(BaseCommand):
