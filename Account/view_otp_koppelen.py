@@ -15,10 +15,8 @@ from Account.forms import OTPControleForm
 from Account.models import get_account
 from Account.operations.maak_qrcode import qrcode_get
 from Account.operations.otp import otp_prepare_koppelen, otp_koppel_met_code
-from Functie.rol import (rol_bepaal_beschikbare_rollen, rol_mag_wisselen_bepaal_opnieuw,
-                         rol_get_huidige_functie, rol_mag_wisselen)
+from Functie.rol import rol_mag_wisselen
 
-TEMPLATE_OTP_KOPPELEN = 'account/otp-koppelen-stap2-scan-qr-code.dtl'
 TEMPLATE_OTP_KOPPELEN_STAP1 = 'account/otp-koppelen-stap1-uitleg.dtl'
 TEMPLATE_OTP_KOPPELEN_STAP2 = 'account/otp-koppelen-stap2-scan-qr-code.dtl'
 TEMPLATE_OTP_KOPPELEN_STAP3 = 'account/otp-koppelen-stap3-code-invoeren.dtl'
@@ -32,18 +30,15 @@ class OTPKoppelenStapView(UserPassesTestMixin, TemplateView):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.rol_nu, self.functie_nu = None, None
+        #self.rol_nu, self.functie_nu = None, None
         self.account = None
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
 
-        # evalueer opnieuw welke rechten de gebruiker heeft
-        rol_mag_wisselen_bepaal_opnieuw(self.request)
-
-        self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-
-        return self.request.user.is_authenticated and rol_mag_wisselen(self.request)
+        # dispatch garandeert self.request.user.is_authenticated == True
+        #self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
+        return rol_mag_wisselen(self.request)
 
     def dispatch(self, request, *args, **kwargs):
         """ wegsturen als de tweede factor niet meer gekoppeld hoeft te worden """
@@ -128,10 +123,6 @@ class OTPKoppelenStap3View(OTPKoppelenStapView):
             otp_code = form.cleaned_data.get('otp_code')
             if otp_koppel_met_code(request, self.account, otp_code):
                 # gelukt
-
-                # propageer het succes zodat de gebruiker meteen aan de slag kan
-                rol_bepaal_beschikbare_rollen(request, self.account)
-
                 # geef de succes pagina
                 return render(request, TEMPLATE_OTP_GEKOPPELD)
 

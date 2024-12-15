@@ -13,10 +13,10 @@ from django.templatetags.static import static
 from Competitie.definities import DEEL_RK, INSCHRIJF_METHODE_1
 from Competitie.models import Competitie, Regiocompetitie, RegiocompetitieRonde, Kampioenschap
 from Competitie.tijdlijn import maak_comp_fase_beschrijvingen, is_open_voor_inschrijven_rk_teams
-from Functie.definities import Rollen
+from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving
 from Locatie.definities import BAAN_TYPE_EXTERN
-from Taken.operations import eval_open_taken, aantal_open_taken
+from Taken.operations import eval_open_taken, cached_aantal_open_taken
 from types import SimpleNamespace
 
 
@@ -39,7 +39,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.functie_nu and self.rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL, Rollen.ROL_WL)
+        return self.functie_nu and self.rol_nu in (Rol.ROL_SEC, Rol.ROL_HWL, Rol.ROL_WL)
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -50,10 +50,10 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
 
         context['clusters'] = ver.clusters.all()
 
-        context['toon_gast_accounts'] = ver.is_extern and self.rol_nu == Rollen.ROL_SEC
+        context['toon_gast_accounts'] = ver.is_extern and self.rol_nu == Rol.ROL_SEC
 
         if not ver.is_extern:
-            context['toon_wedstrijden'] = self.rol_nu != Rollen.ROL_SEC
+            context['toon_wedstrijden'] = self.rol_nu != Rol.ROL_SEC
 
             if ver.ver_nr in settings.EVENEMENTEN_VERKOPER_VER_NRS:
                 context['toon_evenementen'] = True
@@ -70,12 +70,12 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
         deelcomps = list()
         deelkamps_rk = list()
 
-        if self.rol_nu == Rollen.ROL_SEC:
+        if self.rol_nu == Rol.ROL_SEC:
             # SEC
             pass
         else:
             # HWL of WL
-            if self.rol_nu == Rollen.ROL_HWL:
+            if self.rol_nu == Rol.ROL_HWL:
                 context['toon_wedstrijdkalender'] = True
 
             if not ver.regio.is_administratief:
@@ -153,7 +153,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
             kaartjes.append(kaartje)
 
             # 1 - leden aanmelden voor de competitie (niet voor de WL)
-            if comp.fase_indiv <= 'F' and self.rol_nu != Rollen.ROL_WL:
+            if comp.fase_indiv <= 'F' and self.rol_nu != Rol.ROL_WL:
                 kaartje = SimpleNamespace()
                 kaartje.titel = "Aanmelden"
                 kaartje.tekst = 'Leden aanmelden voor de %s.' % comp.beschrijving
@@ -199,7 +199,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
             for deelkamp_rk in deelkamps_rk:
                 if deelkamp_rk.competitie == comp:
                     if deelkamp_rk.heeft_deelnemerslijst:
-                        if self.rol_nu != Rollen.ROL_WL:
+                        if self.rol_nu != Rol.ROL_WL:
                             if 'J' <= comp.fase_indiv <= 'K':
                                 # RK voorbereidende fase
                                 kaartje = SimpleNamespace()
@@ -210,7 +210,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                                 kaartje.icon = 'rule'
                                 kaartjes.append(kaartje)
 
-                    if self.rol_nu != Rollen.ROL_WL:
+                    if self.rol_nu != Rol.ROL_WL:
                         is_open, vanaf_datum = is_open_voor_inschrijven_rk_teams(comp)
                         if is_open or vanaf_datum:
                             kaartje = SimpleNamespace()
@@ -288,7 +288,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
             kaartjes.append(kaartje)
 
         eval_open_taken(self.request)
-        aantal = aantal_open_taken(self.request)
+        aantal = cached_aantal_open_taken(self.request)
         if aantal > 0:
             context['taken_text'] = "Er zijn %s taken die op jouw aandacht wachten." % aantal
 

@@ -18,7 +18,7 @@ from Competitie.models import (CompetitieIndivKlasse, CompetitieTeamKlasse, Comp
                                Regiocompetitie, RegiocompetitieRonde,
                                Kampioenschap, KampioenschapSporterBoog, KampioenschapTeam,
                                KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet)
-from Functie.definities import Rollen
+from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
 from Locatie.models import WedstrijdLocatie
 from Logboek.models import schrijf_in_logboek
@@ -55,7 +55,7 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO)
+        return self.rol_nu in (Rol.ROL_BB, Rol.ROL_BKO, Rol.ROL_RKO)
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -197,7 +197,7 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
         if len(context['wkl_niet_gebruikt']) == 0:
             del context['wkl_niet_gebruikt']
 
-        if self.rol_nu == Rollen.ROL_RKO and self.functie_nu.rayon == deelkamp.rayon:
+        if self.rol_nu == Rol.ROL_RKO and self.functie_nu.rayon == deelkamp.rayon:
             context['url_nieuwe_wedstrijd'] = reverse('CompLaagRayon:planning',
                                                       kwargs={'deelkamp_pk': deelkamp.pk})
 
@@ -243,7 +243,7 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
             in de RK planning, om een nieuwe wedstrijd toe te voegen.
         """
         # alleen de RKO mag de planning uitbreiden
-        if self.rol_nu != Rollen.ROL_RKO:
+        if self.rol_nu != Rol.ROL_RKO:
             raise PermissionDenied('Niet de beheerder')
 
         try:
@@ -287,7 +287,7 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu == Rollen.ROL_RKO
+        return self.rol_nu == Rol.ROL_RKO
 
     @staticmethod
     def _get_wedstrijdklassen(deelkamp, match):
@@ -699,7 +699,7 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu == Rollen.ROL_RKO
+        return self.rol_nu == Rol.ROL_RKO
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -973,7 +973,7 @@ class VerwijderWedstrijdView(UserPassesTestMixin, View):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu == Rollen.ROL_RKO
+        return self.rol_nu == Rol.ROL_RKO
 
     def post(self, request, *args, **kwargs):
         """ Deze functie wordt aangeroepen als de knop 'Verwijder' gebruikt wordt

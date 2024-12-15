@@ -14,7 +14,7 @@ from Betaal.format import format_bedrag_euro
 from Evenement.definities import (EVENEMENT_INSCHRIJVING_STATUS_TO_SHORT_STR, EVENEMENT_AFMELDING_STATUS_TO_SHORT_STR,
                                   EVENEMENT_INSCHRIJVING_STATUS_DEFINITIEF)
 from Evenement.models import Evenement, EvenementInschrijving, EvenementAfgemeld
-from Functie.definities import Rollen
+from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
 from decimal import Decimal
 from codecs import BOM_UTF8
@@ -54,7 +54,7 @@ class EvenementAanmeldingenView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu in (Rollen.ROL_HWL, Rollen.ROL_SEC)
+        return self.rol_nu in (Rol.ROL_HWL, Rol.ROL_SEC)
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -163,7 +163,7 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL)
+        return self.rol_nu in (Rol.ROL_SEC, Rol.ROL_HWL)
 
     @staticmethod
     def _output_aanmeldingen(writer, evenement):
@@ -309,7 +309,7 @@ class EvenementDetailsAanmeldingView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu == Rollen.ROL_HWL
+        return self.rol_nu == Rol.ROL_HWL
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -384,7 +384,7 @@ class EvenementDetailsAfmeldingView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu == Rollen.ROL_HWL
+        return self.rol_nu == Rol.ROL_HWL
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """

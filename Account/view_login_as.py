@@ -19,7 +19,7 @@ from Account.operations.otp import otp_zet_controle_gelukt, otp_zet_controle_nie
 from Account.operations.session_vars import zet_sessionvar_if_changed
 from Account.view_login import account_plugins_login_gate
 from Account.middleware import SESSIONVAR_ACCOUNT_LOGIN_AS_DATE
-from Functie.rol import rol_bepaal_beschikbare_rollen
+from Functie.rol import rol_eval_rechten_simpel
 from Logboek.models import schrijf_in_logboek
 from Overig.helpers import get_safe_from_ip
 from TijdelijkeCodes.definities import RECEIVER_ACCOUNT_WISSEL
@@ -34,6 +34,7 @@ my_logger = logging.getLogger('MH.Account')
 
 
 def receiver_account_wissel(request, account):
+    # TODO: wordt deze vanuit een POST context aangeroepen?
     """ Met deze functie kan een geautoriseerd persoon inloggen op de site als een andere gebruiker.
             obj is een Account object.
         We moeten een url teruggeven waar een http-redirect naar gedaan kan worden
@@ -91,8 +92,8 @@ def receiver_account_wissel(request, account):
                        activiteit="Automatische inlog als gebruiker %s vanaf IP %s" % (repr(account.username),
                                                                                        repr(from_ip)))
 
-    # zorg dat de rollen meteen beschikbaar zijn
-    rol_bepaal_beschikbare_rollen(request, account)
+    # controleer of deze gebruiker rollen heeft en dus van rol mag wisselen
+    rol_eval_rechten_simpel(request, account)
 
     return reverse('Plein:plein')
 

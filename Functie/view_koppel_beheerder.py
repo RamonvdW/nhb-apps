@@ -14,12 +14,12 @@ from django.core.exceptions import PermissionDenied
 from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import Account, get_account
-from Functie.definities import Rollen
+from Functie.definities import Rol
 from Functie.forms import ZoekBeheerdersForm, WijzigBeheerdersForm, WijzigEmailForm
 from Functie.models import Functie
 from Functie.operations import functie_vraag_email_bevestiging, functie_wijziging_stuur_email_notificatie
 from Functie.rol import (rol_get_huidige, rol_get_huidige_functie, rol_get_beschrijving,
-                         rol_activeer_wissel_van_rol_menu_voor_account)
+                         rol_zet_mag_wisselen_voor_account)
 from Logboek.models import schrijf_in_logboek
 from Overig.helpers import get_safe_from_ip
 from Sporter.models import Sporter
@@ -46,13 +46,13 @@ def mag_beheerder_wijzigen_of_403(request, functie):
 
     rol_nu, functie_nu = rol_get_huidige_functie(request)
 
-    if rol_nu == Rollen.ROL_BB:
+    if rol_nu == Rol.ROL_BB:
         # BB mag BKO koppelen
         if functie.rol not in ('BKO', 'CS', 'MWW', 'MO', 'MWZ'):
             raise PermissionDenied('Niet de beheerder')
         return
 
-    if rol_nu == Rollen.ROL_SEC:
+    if rol_nu == Rol.ROL_SEC:
         if functie.vereniging != functie_nu.vereniging:
             # verkeerde vereniging
             raise PermissionDenied('Verkeerde vereniging')
@@ -64,7 +64,7 @@ def mag_beheerder_wijzigen_of_403(request, functie):
         # SEC
         return
 
-    if rol_nu == Rollen.ROL_HWL:
+    if rol_nu == Rol.ROL_HWL:
         if functie.vereniging != functie_nu.vereniging:
             # verkeerde vereniging
             raise PermissionDenied('Verkeerde vereniging')
@@ -77,7 +77,7 @@ def mag_beheerder_wijzigen_of_403(request, functie):
         return
 
     # RCL mag HWL en WL koppelen van vereniging binnen regio RCL
-    if rol_nu == Rollen.ROL_RCL and functie.rol in ('HWL', 'WL'):
+    if rol_nu == Rol.ROL_RCL and functie.rol in ('HWL', 'WL'):
         if functie_nu.regio != functie.vereniging.regio:
             raise PermissionDenied('Verkeerde regio')
         return
@@ -90,12 +90,12 @@ def mag_beheerder_wijzigen_of_403(request, functie):
         # SEC/HWL/WL verdwijnt hier ook
         raise PermissionDenied('Verkeerde competitie')
 
-    if rol_nu == Rollen.ROL_BKO:
+    if rol_nu == Rol.ROL_BKO:
         if functie.rol != 'RKO':
             raise PermissionDenied('Niet de beheerder')
         return
 
-    elif rol_nu == Rollen.ROL_RKO:
+    elif rol_nu == Rol.ROL_RKO:
         if functie.rol != 'RCL':
             raise PermissionDenied('Niet de beheerder')
 
@@ -125,7 +125,7 @@ def mag_email_wijzigen_of_403(request, functie):
     #   RKO (comp_type) --> alle RCL (comp_type) in zijn rayon
 
     # special voor BB, want dat is geen functie
-    if rol_nu == Rollen.ROL_BB:
+    if rol_nu == Rol.ROL_BB:
         # BB mag BKO email aanpassen
         if functie.rol not in ('BKO', 'CS', 'MWW', 'MO', 'MWZ'):
             raise PermissionDenied('Niet de beheerder')
@@ -136,7 +136,7 @@ def mag_email_wijzigen_of_403(request, functie):
         raise PermissionDenied('Niet de beheerder')     # pragma: no cover
 
     # SEC, HWL en WL mogen email van HWL en WL aanpassen
-    if rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL, Rollen.ROL_WL):
+    if rol_nu in (Rol.ROL_SEC, Rol.ROL_HWL, Rol.ROL_WL):
         # alleen binnen eigen vereniging
         if functie_nu.vereniging != functie.vereniging:
             raise PermissionDenied('Verkeerde vereniging')
@@ -146,7 +146,7 @@ def mag_email_wijzigen_of_403(request, functie):
             # secretaris email is alleen aan te passen via Onze Relaties
             raise PermissionDenied('Niet de beheerder')
 
-        if rol_nu == Rollen.ROL_WL and functie.rol != 'WL':
+        if rol_nu == Rol.ROL_WL and functie.rol != 'WL':
             # WL mag alleen zijn eigen e-mailadres aanpassen
             raise PermissionDenied('Niet de beheerder')
 
@@ -157,7 +157,7 @@ def mag_email_wijzigen_of_403(request, functie):
         return
 
     # RCL mag email van HWL en WL aanpassen van vereniging binnen regio RCL
-    if rol_nu == Rollen.ROL_RCL and functie.rol in ('HWL', 'WL'):
+    if rol_nu == Rol.ROL_RCL and functie.rol in ('HWL', 'WL'):
         if functie_nu.regio != functie.vereniging.regio:
             raise PermissionDenied('Verkeerde regio')
         return
@@ -169,12 +169,12 @@ def mag_email_wijzigen_of_403(request, functie):
     if functie_nu.comp_type != functie.comp_type:
         raise PermissionDenied('Verkeerde competitie')
 
-    if rol_nu == Rollen.ROL_BKO:
+    if rol_nu == Rol.ROL_BKO:
         if functie.rol != 'RKO':
             raise PermissionDenied('Niet de beheerder')
         return
 
-    elif rol_nu == Rollen.ROL_RKO:
+    elif rol_nu == Rol.ROL_RKO:
         if functie.rol != 'RCL':
             raise PermissionDenied('Niet de beheerder')
 
@@ -188,7 +188,7 @@ def mag_email_wijzigen_of_403(request, functie):
 
 
 def receive_bevestiging_functie_email(request, functie):
-    """ deze functie wordt aangeroepen als een tijdelijke url gevolgd wordt
+    """ deze functie wordt vanuit een POST context aangeroepen als een tijdelijke url gevolgd wordt
         om een nieuw email adres te bevestigen voor een functie.
 
         We moeten een url teruggeven waar een http-redirect naar gedaan kan worden
@@ -235,9 +235,9 @@ class WijzigEmailView(UserPassesTestMixin, View):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu = rol_get_huidige(self.request)
-        return self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_MO, Rollen.ROL_MWZ, Rollen.ROL_SUP,
-                               Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL,
-                               Rollen.ROL_SEC, Rollen.ROL_HWL, Rollen.ROL_WL)
+        return self.rol_nu in (Rol.ROL_BB, Rol.ROL_MO, Rol.ROL_MWZ, Rol.ROL_SUP,
+                               Rol.ROL_BKO, Rol.ROL_RKO, Rol.ROL_RCL,
+                               Rol.ROL_SEC, Rol.ROL_HWL, Rol.ROL_WL)
 
     def _get_functie_or_404(self):
         functie_pk = self.kwargs['functie_pk']
@@ -252,7 +252,7 @@ class WijzigEmailView(UserPassesTestMixin, View):
         context = dict()
         context['functie'] = functie
 
-        if self.rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL, Rollen.ROL_WL):
+        if self.rol_nu in (Rol.ROL_SEC, Rol.ROL_HWL, Rol.ROL_WL):
             # komt van Beheer Vereniging
             context['terug_url'] = reverse('Functie:overzicht-vereniging')
             context['kruimels'] = (
@@ -260,7 +260,7 @@ class WijzigEmailView(UserPassesTestMixin, View):
                 (reverse('Functie:overzicht-vereniging'), 'Beheerders'),
                 (None, 'Wijzig e-mail')
             )
-        elif self.rol_nu in (Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL):
+        elif self.rol_nu in (Rol.ROL_BKO, Rol.ROL_RKO, Rol.ROL_RCL):
             # komt van Bondscompetities
             context['terug_url'] = reverse('Functie:overzicht')
             context['kruimels'] = (
@@ -323,7 +323,7 @@ class WijzigEmailView(UserPassesTestMixin, View):
         context['functie'] = functie
 
         # stuur terug naar het overzicht
-        if self.rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL, Rollen.ROL_WL):
+        if self.rol_nu in (Rol.ROL_SEC, Rol.ROL_HWL, Rol.ROL_WL):
             context['terug_url'] = reverse('Functie:overzicht-vereniging')
         else:
             context['terug_url'] = reverse('Functie:overzicht')
@@ -374,7 +374,7 @@ class OntvangBeheerderWijzigingenView(View):
 
         if add:
             rol_nu, functie_nu = rol_get_huidige_functie(request)
-            if rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL):
+            if rol_nu in (Rol.ROL_SEC, Rol.ROL_HWL):
                 # stel zeker dat sporter lid is bij de vereniging van functie
                 if not sporter or sporter.bij_vereniging != functie.vereniging:
                     raise PermissionDenied('Geen lid van jouw vereniging')
@@ -388,7 +388,7 @@ class OntvangBeheerderWijzigingenView(View):
             functie_wijziging_stuur_email_notificatie(account, wie, functie.beschrijving, add=True)
 
             if account.functie_set.count() == 1:
-                rol_activeer_wissel_van_rol_menu_voor_account(account)
+                rol_zet_mag_wisselen_voor_account(account)
         else:
             functie.accounts.remove(account)
             schrijf_in_logboek(door_account, 'Rollen',
@@ -419,9 +419,9 @@ class WijzigBeheerdersView(UserPassesTestMixin, ListView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu = rol_get_huidige(self.request)
-        return self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_MO, Rollen.ROL_MWZ, Rollen.ROL_SUP,
-                               Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL,
-                               Rollen.ROL_SEC, Rollen.ROL_HWL)
+        return self.rol_nu in (Rol.ROL_BB, Rol.ROL_MO, Rol.ROL_MWZ, Rol.ROL_SUP,
+                               Rol.ROL_BKO, Rol.ROL_RKO, Rol.ROL_RCL,
+                               Rol.ROL_SEC, Rol.ROL_HWL)
 
     def get_queryset(self):
         """ called by the template system to get the queryset or list of objects for the template """
@@ -519,7 +519,7 @@ class WijzigBeheerdersView(UserPassesTestMixin, ListView):
         context['zoekterm'] = self._zoekterm
         context['form'] = self._form
 
-        if self.rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL):
+        if self.rol_nu in (Rol.ROL_SEC, Rol.ROL_HWL):
             # komt van Beheer Vereniging
             context['is_vereniging_rol'] = True
 
@@ -532,7 +532,7 @@ class WijzigBeheerdersView(UserPassesTestMixin, ListView):
                 (reverse('Functie:overzicht-vereniging'), 'Beheerders'),
                 (None, 'Wijzig beheerder')
             )
-        elif self.rol_nu in (Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL):
+        elif self.rol_nu in (Rol.ROL_BKO, Rol.ROL_RKO, Rol.ROL_RCL):
             # komt van Bondscompetities
             context['kruimels'] = (
                 (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),

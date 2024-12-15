@@ -10,7 +10,7 @@ from django.db.models import Count
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
-from Functie.definities import Rollen
+from Functie.definities import Rol
 from Functie.rol import rol_get_huidige, rol_get_huidige_functie, rol_get_beschrijving
 from Functie.models import Functie
 from Locatie.definities import BAAN_TYPE_BUITEN, BAAN_TYPE_EXTERN, BAANTYPE2STR
@@ -43,13 +43,13 @@ class LijstView(UserPassesTestMixin, TemplateView):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
 
-        if self.rol_nu == Rollen.ROL_BB:
+        if self.rol_nu == Rol.ROL_BB:
             account = get_account(self.request)
             self.is_staff = account.is_staff
 
-        return self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_MWZ, Rollen.ROL_MO, Rollen.ROL_CS,
-                               Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL,
-                               Rollen.ROL_HWL, Rollen.ROL_SEC)
+        return self.rol_nu in (Rol.ROL_BB, Rol.ROL_MWZ, Rol.ROL_MO, Rol.ROL_CS,
+                               Rol.ROL_BKO, Rol.ROL_RKO, Rol.ROL_RCL,
+                               Rol.ROL_HWL, Rol.ROL_SEC)
 
     def _get_verenigingen(self):
 
@@ -67,7 +67,7 @@ class LijstView(UserPassesTestMixin, TemplateView):
             functie2count[functie.pk] = functie.accounts_count
         # for
 
-        if self.rol_nu == Rollen.ROL_RKO:
+        if self.rol_nu == Rol.ROL_RKO:
             # toon de lijst van verenigingen in het rayon van de RKO
             # het rayonnummer is verkrijgbaar via de regiocompetitie van de functie
             return (Vereniging
@@ -81,7 +81,7 @@ class LijstView(UserPassesTestMixin, TemplateView):
                     .order_by('regio__regio_nr',
                               'ver_nr'))
 
-        if self.rol_nu == Rollen.ROL_BB and self.is_staff:
+        if self.rol_nu == Rol.ROL_BB and self.is_staff:
             # landelijke lijst + telling aantal leden
             objs = (Vereniging
                     .objects
@@ -103,7 +103,7 @@ class LijstView(UserPassesTestMixin, TemplateView):
             # for
             return objs
 
-        if self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_MWZ, Rollen.ROL_MO, Rollen.ROL_CS):
+        if self.rol_nu in (Rol.ROL_BB, Rol.ROL_BKO, Rol.ROL_MWZ, Rol.ROL_MO, Rol.ROL_CS):
             # toon de landelijke lijst)
             return (Vereniging
                     .objects
@@ -115,7 +115,7 @@ class LijstView(UserPassesTestMixin, TemplateView):
                               'ver_nr'))
 
         # toon de lijst van verenigingen in de regio
-        if self.rol_nu == Rollen.ROL_RCL:
+        if self.rol_nu == Rol.ROL_RCL:
             # het regionummer is verkrijgbaar via de regiocompetitie van de functie
             objs = (Vereniging
                     .objects
@@ -149,15 +149,15 @@ class LijstView(UserPassesTestMixin, TemplateView):
 
         context['huidige_rol'] = rol_get_beschrijving(self.request)
 
-        context['landelijk'] = self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO)
+        context['landelijk'] = self.rol_nu in (Rol.ROL_BB, Rol.ROL_BKO)
 
-        if self.rol_nu == Rollen.ROL_BB:
+        if self.rol_nu == Rol.ROL_BB:
             context['contact_geen_beheerders'] = reverse('Vereniging:contact-geen-beheerders')
 
-        if self.rol_nu == Rollen.ROL_RKO:
+        if self.rol_nu == Rol.ROL_RKO:
             context['toon_rayon'] = False
 
-        if self.rol_nu in (Rollen.ROL_RCL, Rollen.ROL_HWL, Rollen.ROL_SEC):
+        if self.rol_nu in (Rol.ROL_RCL, Rol.ROL_HWL, Rol.ROL_SEC):
             context['toon_rayon'] = False
             context['toon_regio'] = False
 
@@ -193,7 +193,7 @@ class LijstView(UserPassesTestMixin, TemplateView):
                     ver.cluster_letters = str(ver.regio.regio_nr) + ver.cluster_letters
         # for
 
-        if self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_MWZ, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL):
+        if self.rol_nu in (Rol.ROL_BB, Rol.ROL_MWZ, Rol.ROL_BKO, Rol.ROL_RKO, Rol.ROL_RCL):
             context['url_sec_hwl'] = reverse('Functie:emails-sec-hwl')
 
         context['kruimels'] = (
@@ -219,9 +219,9 @@ class DetailsView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu = rol_get_huidige(self.request)
-        return self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_MWZ,
-                               Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL,
-                               Rollen.ROL_HWL, Rollen.ROL_WL, Rollen.ROL_SEC)
+        return self.rol_nu in (Rol.ROL_BB, Rol.ROL_MWZ,
+                               Rol.ROL_BKO, Rol.ROL_RKO, Rol.ROL_RCL,
+                               Rol.ROL_HWL, Rol.ROL_WL, Rol.ROL_SEC)
 
     @staticmethod
     def _get_vereniging_locaties_or_404(**kwargs):
@@ -358,7 +358,7 @@ class GeenBeheerdersView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
-        return rol_nu == Rollen.ROL_BB
+        return rol_nu == Rol.ROL_BB
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """

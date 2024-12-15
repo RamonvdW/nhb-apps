@@ -14,7 +14,7 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.models import TeamType
 from Competitie.definities import DEEL_RK
 from Competitie.models import RegiocompetitieSporterBoog, Kampioenschap, KampioenschapSporterBoog, KampioenschapTeam
-from Functie.definities import Rollen
+from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
 from Score.definities import AG_NUL
 import datetime
@@ -86,7 +86,7 @@ class TeamsRkView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu == Rollen.ROL_HWL
+        return self.rol_nu == Rol.ROL_HWL
 
     def _get_deelkamp_rk(self, deelkamp_pk) -> Kampioenschap:
         # haal de gevraagde kampioenschap op
@@ -212,7 +212,7 @@ class WijzigRKTeamsView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.functie_nu and self.rol_nu == Rollen.ROL_HWL
+        return self.functie_nu and self.rol_nu == Rol.ROL_HWL
 
     def _get_deelkamp_rk(self, deelkamp_pk) -> Kampioenschap:
         # haal de gevraagde kampioenschap op
@@ -413,7 +413,7 @@ class RKTeamsKoppelLedenView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu in (Rollen.ROL_HWL, Rollen.ROL_RKO)
+        return self.rol_nu in (Rol.ROL_HWL, Rol.ROL_RKO)
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -432,7 +432,7 @@ class RKTeamsKoppelLedenView(UserPassesTestMixin, TemplateView):
         except (ValueError, KampioenschapTeam.DoesNotExist):
             raise Http404('Team niet gevonden')
 
-        if self.rol_nu == Rollen.ROL_HWL:
+        if self.rol_nu == Rol.ROL_HWL:
             ver = self.functie_nu.vereniging
             if rk_team.vereniging != ver:
                 raise Http404('Team is niet van jouw vereniging')
@@ -551,7 +551,7 @@ class RKTeamsKoppelLedenView(UserPassesTestMixin, TemplateView):
         url_overzicht = reverse('Vereniging:overzicht')
         anker = '#competitie_%s' % comp.pk
 
-        if self.rol_nu == Rollen.ROL_HWL:
+        if self.rol_nu == Rol.ROL_HWL:
             context['kruimels'] = (
                 (url_overzicht, 'Beheer Vereniging'),
                 (url_overzicht + anker, comp.beschrijving.replace(' competitie', '')),
@@ -581,7 +581,7 @@ class RKTeamsKoppelLedenView(UserPassesTestMixin, TemplateView):
         except (ValueError, KampioenschapTeam.DoesNotExist):
             raise Http404('Team niet gevonden')
 
-        if self.rol_nu == Rollen.ROL_HWL:
+        if self.rol_nu == Rol.ROL_HWL:
             ver = self.functie_nu.vereniging
             if rk_team.vereniging != ver:
                 raise Http404('Team is niet van jouw vereniging')
@@ -654,7 +654,7 @@ class RKTeamsKoppelLedenView(UserPassesTestMixin, TemplateView):
 
         bepaal_rk_team_tijdelijke_sterkte_en_klasse(rk_team, open_inschrijving)
 
-        if self.rol_nu == Rollen.ROL_HWL:
+        if self.rol_nu == Rol.ROL_HWL:
             url = reverse('CompLaagRayon:teams-rk', kwargs={'deelkamp_pk': deelkamp.pk})
         else:
             url = reverse('CompLaagRayon:rayon-teams', kwargs={'deelkamp_pk': deelkamp.pk})

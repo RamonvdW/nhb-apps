@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2023 Ramon van der Winkel.
+#  Copyright (c) 2019-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -9,7 +9,7 @@ from django.conf import settings
 from django.http import HttpResponse, Http404
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Functie.definities import Rollen
+from Functie.definities import Rol
 from Functie.rol import rol_get_huidige
 from HistComp.definities import HISTCOMP_TYPE_25, HIST_INTERLAND_BOGEN, HIST_BOOG2STR
 from HistComp.models import HistCompSeizoen, HistCompRegioIndiv
@@ -42,7 +42,7 @@ class InterlandView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
-        return rol_nu == Rollen.ROL_BB
+        return rol_nu == Rol.ROL_BB
 
     @staticmethod
     def maak_data(context):

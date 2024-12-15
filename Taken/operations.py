@@ -38,12 +38,12 @@ def get_taak_functie_pks(request):
     return functie_pks, huidige_functie_pk
 
 
-def aantal_open_taken(request):
+def cached_aantal_open_taken(request):
     """ geef terug hoeveel taken er open stonden bij de laatste evaluatie """
     try:
         aantal_open = request.session[SESSIONVAR_TAAK_AANTAL_OPEN]
     except KeyError:
-        aantal_open = None
+        aantal_open = 0
     return aantal_open
 
 

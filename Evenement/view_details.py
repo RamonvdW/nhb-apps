@@ -11,7 +11,8 @@ from django.utils.http import urlencode
 from django.views.generic import TemplateView
 from Account.models import get_account
 from Evenement.models import Evenement
-from Functie.rol import rol_get_huidige_functie, Rollen
+from Functie.definities import Rol
+from Functie.rol import rol_get_huidige_functie
 from Kalender.view_maand import MAAND2URL
 from datetime import timedelta
 
@@ -65,7 +66,7 @@ class DetailsView(TemplateView):
         context['hint_inloggen'] = not account.is_authenticated
 
         rol_nu, functie_nu = rol_get_huidige_functie(self.request)
-        is_organiserende_hwl = (rol_nu == Rollen.ROL_HWL and functie_nu.vereniging == evenement.organiserende_vereniging)
+        is_organiserende_hwl = (rol_nu == Rol.ROL_HWL and functie_nu.vereniging == evenement.organiserende_vereniging)
         context['is_organiserende_hwl'] = is_organiserende_hwl
         if is_organiserende_hwl:
             context['kan_aanmelden'] = False

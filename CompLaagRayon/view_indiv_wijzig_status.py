@@ -14,7 +14,7 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
 from Competitie.definities import DEEL_RK, MUTATIE_KAMP_AFMELDEN_INDIV, MUTATIE_KAMP_AANMELDEN_INDIV
 from Competitie.models import KampioenschapSporterBoog, CompetitieMutatie
-from Functie.definities import Rollen, rol2url
+from Functie.definities import Rol, rol2url
 from Functie.rol import rol_get_huidige_functie, rol_get_huidige
 from Overig.background_sync import BackgroundSync
 from Sporter.operations import get_sporter
@@ -42,7 +42,7 @@ class WijzigStatusRkDeelnemerView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu in (Rollen.ROL_RKO, Rollen.ROL_HWL)
+        return self.rol_nu in (Rol.ROL_RKO, Rol.ROL_HWL)
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -61,10 +61,10 @@ class WijzigStatusRkDeelnemerView(UserPassesTestMixin, TemplateView):
         except (ValueError, KampioenschapSporterBoog.DoesNotExist):
             raise Http404('Deelnemer niet gevonden')
 
-        if self.rol_nu == Rollen.ROL_HWL and deelnemer.bij_vereniging != self.functie_nu.vereniging:
+        if self.rol_nu == Rol.ROL_HWL and deelnemer.bij_vereniging != self.functie_nu.vereniging:
             raise PermissionDenied('Geen sporter van jouw vereniging')
 
-        if self.rol_nu == Rollen.ROL_RKO and self.functie_nu != deelnemer.kampioenschap.functie:
+        if self.rol_nu == Rol.ROL_RKO and self.functie_nu != deelnemer.kampioenschap.functie:
             raise PermissionDenied('Geen toegang tot deze competitie')
 
         comp = deelnemer.kampioenschap.competitie
@@ -85,7 +85,7 @@ class WijzigStatusRkDeelnemerView(UserPassesTestMixin, TemplateView):
         context['url_wijzig'] = reverse('CompLaagRayon:wijzig-status-rk-deelnemer',
                                         kwargs={'deelnemer_pk': deelnemer.pk})
 
-        if self.rol_nu == Rollen.ROL_RKO:
+        if self.rol_nu == Rol.ROL_RKO:
             context['kruimels'] = (
                 (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
                 (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
@@ -126,10 +126,10 @@ class WijzigStatusRkDeelnemerView(UserPassesTestMixin, TemplateView):
         afmelden = str(request.POST.get('afmelden', ''))[:2]
         snel = str(request.POST.get('snel', ''))[:1]
 
-        if self.rol_nu == Rollen.ROL_HWL and deelnemer.bij_vereniging != self.functie_nu.vereniging:
+        if self.rol_nu == Rol.ROL_HWL and deelnemer.bij_vereniging != self.functie_nu.vereniging:
             raise PermissionDenied('Geen sporter van jouw vereniging')
 
-        if self.rol_nu == Rollen.ROL_RKO and self.functie_nu != deelnemer.kampioenschap.functie:
+        if self.rol_nu == Rol.ROL_RKO and self.functie_nu != deelnemer.kampioenschap.functie:
             raise PermissionDenied('Geen toegang tot deze competitie')
 
         account = get_account(request)
@@ -164,7 +164,7 @@ class WijzigStatusRkDeelnemerView(UserPassesTestMixin, TemplateView):
                     mutatie = CompetitieMutatie.objects.get(pk=mutatie.pk)
                 # while
 
-        if self.rol_nu == Rollen.ROL_RKO:
+        if self.rol_nu == Rol.ROL_RKO:
             url = reverse('CompLaagRayon:lijst-rk',
                           kwargs={'deelkamp_pk': deelnemer.kampioenschap.pk})
         else:
@@ -184,7 +184,7 @@ class SporterWijzigStatusRkDeelnameView(UserPassesTestMixin, TemplateView):
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        return rol_get_huidige(self.request) == Rollen.ROL_SPORTER
+        return rol_get_huidige(self.request) == Rol.ROL_SPORTER
 
     @staticmethod
     def get(request, *args, **kwargs):

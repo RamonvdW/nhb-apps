@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import reverse
-from Functie.definities import Rollen
+from Functie.definities import Rol
 from types import SimpleNamespace
 
 
@@ -26,9 +26,9 @@ def get_kaartjes_beheer(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_in
 
     # Verenigingen
     url = reverse('Vereniging:lijst')
-    if rol_nu == Rollen.ROL_RCL:
+    if rol_nu == Rol.ROL_RCL:
         tekst = "Overzicht van de verenigingen in jouw regio"
-    elif rol_nu == Rollen.ROL_RKO:
+    elif rol_nu == Rol.ROL_RKO:
         tekst = "Overzicht van de verenigingen, accommodaties en indeling in clusters in jouw rayon."
     else:
         tekst = "Landelijk overzicht van de verenigingen, accommodaties en indeling in clusters."
@@ -52,7 +52,7 @@ def get_kaartjes_beheer(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_in
     kaartjes_algemeen.append(kaartje)
 
     # Clusters beheren
-    if rol_nu == Rollen.ROL_RCL:
+    if rol_nu == Rol.ROL_RCL:
         if comp.afstand == functie_nu.comp_type:
             url = reverse('CompLaagRegio:clusters')
             kaartje = SimpleNamespace(
@@ -85,7 +85,7 @@ def get_kaartjes_beheer(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_in
                     url=url)
         kaartjes_algemeen.append(kaartje)
 
-    if rol_nu == Rollen.ROL_BB:
+    if rol_nu == Rol.ROL_BB:
         # Wijzig datums
         url = reverse('CompBeheer:wijzig-datums', kwargs={'comp_pk': comp.pk})
         kaartje = SimpleNamespace(
@@ -99,7 +99,7 @@ def get_kaartjes_beheer(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_in
         # TODO: Competitie afsluiten
 
     # samenvoegen kleine klassen
-    if rol_nu == Rollen.ROL_BKO:
+    if rol_nu == Rol.ROL_BKO:
         if comp.fase_indiv == 'N':
             url = reverse('CompBeheer:bko-bk-indiv-kleine-klassen', kwargs={'comp_pk': comp.pk})
             kaartje = SimpleNamespace(

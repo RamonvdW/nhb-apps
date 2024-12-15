@@ -11,7 +11,7 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from Competitie.definities import DEEL_BK, DEEL_RK, DEELNAME_NEE
 from Competitie.models import (Competitie, Regiocompetitie, RegiocompetitieSporterBoog, RegiocompetitieTeam,
                                KampioenschapSporterBoog, KampioenschapTeam)
-from Functie.definities import Rollen
+from Functie.definities import Rol
 from Functie.rol import rol_get_huidige
 from Sporter.models import Sporter
 from decimal import Decimal
@@ -35,7 +35,7 @@ class CompetitieStatistiekView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu = rol_get_huidige(self.request)
-        return self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL)
+        return self.rol_nu in (Rol.ROL_BB, Rol.ROL_BKO, Rol.ROL_RKO, Rol.ROL_RCL)
 
     @staticmethod
     def _tel_aantallen(context, actuele_comps):

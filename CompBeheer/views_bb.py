@@ -19,7 +19,7 @@ from Competitie.definities import (MUTATIE_COMPETITIE_OPSTARTEN,
 from Competitie.models import Competitie, CompetitieMutatie
 from Competitie.operations import (bepaal_startjaar_nieuwe_competitie, bepaal_klassengrenzen_indiv,
                                    bepaal_klassengrenzen_teams, competitie_klassengrenzen_vaststellen)
-from Functie.definities import Rollen
+from Functie.definities import Rol
 from Functie.rol import rol_get_huidige
 from HistComp.models import HistCompSeizoen
 from Logboek.models import schrijf_in_logboek
@@ -49,7 +49,7 @@ class InstellingenVolgendeCompetitieView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
-        return rol_nu == Rollen.ROL_BB
+        return rol_nu == Rol.ROL_BB
 
     @staticmethod
     def _get_queryset_indiv_klassen():
@@ -112,7 +112,7 @@ class CompetitieAanmakenView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
-        return rol_nu == Rollen.ROL_BB
+        return rol_nu == Rol.ROL_BB
 
     @staticmethod
     def post(request, *args, **kwargs):
@@ -182,7 +182,7 @@ class AGVaststellenView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
-        return rol_nu == Rollen.ROL_BB
+        return rol_nu == Rol.ROL_BB
 
     def get(self, request, *args, **kwargs):
         """ deze functie wordt aangeroepen als een GET request ontvangen is
@@ -285,7 +285,7 @@ class KlassengrenzenVaststellenView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
-        return rol_nu == Rollen.ROL_BB
+        return rol_nu == Rol.ROL_BB
 
     def get(self, request, *args, **kwargs):
         """ deze functie wordt aangeroepen als een GET request ontvangen is
@@ -357,7 +357,7 @@ class SeizoenAfsluitenView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
-        return rol_nu == Rollen.ROL_BB
+        return rol_nu == Rol.ROL_BB
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """

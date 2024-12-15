@@ -114,6 +114,17 @@
         </div>
     </div>
 
+    {% if url_ping %}
+        <script>
+            window.addEventListener("load", function() {
+                // alles is opgehaald en ingeladen
+                let xhr = new XMLHttpRequest();
+                xhr.open("POST", "{{ url_ping }}", true);         // true = async
+                xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+                xhr.send();
+            });
+        </script>
+    {% endif %}
 
     {% include 'feedback/sidebar.dtl' with op_pagina="plein-sporter" %}
 

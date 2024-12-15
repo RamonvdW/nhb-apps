@@ -11,7 +11,7 @@ from django.utils.safestring import mark_safe
 from Account.models import get_account
 from Competitie.models import Competitie, get_competitie_boog_typen
 from Competitie.seizoenen import get_comp_pk
-from Functie.definities import Rollen
+from Functie.definities import Rol
 from Functie.rol import rol_get_huidige
 from Sporter.models import SporterBoog
 
@@ -125,7 +125,7 @@ class CompetitieOverzichtView(TemplateView):
         context['comp'] = self.comp
 
         self.comp.bepaal_fase()                     # zet comp.fase
-        self.comp.bepaal_openbaar(Rollen.ROL_NONE)  # zet comp.is_openbaar
+        self.comp.bepaal_openbaar(Rol.ROL_NONE)  # zet comp.is_openbaar
 
         if self.comp.fase_indiv >= 'C':
             context['toon_uitslagen'] = True
@@ -135,7 +135,7 @@ class CompetitieOverzichtView(TemplateView):
             self.comp.url_inschrijvingen = reverse('CompInschrijven:lijst-regiocomp-alles',
                                                    kwargs={'comp_pk': self.comp.pk})
 
-        if rol_get_huidige(self.request) in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL):
+        if rol_get_huidige(self.request) in (Rol.ROL_BB, Rol.ROL_BKO, Rol.ROL_RKO, Rol.ROL_RCL):
             context['url_beheer'] = reverse('CompBeheer:overzicht', kwargs={'comp_pk': self.comp.pk})
 
         # verwijs de url met comp.pk naar de url met het seizoen

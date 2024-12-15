@@ -17,7 +17,7 @@ from Bestelling.operations.mutaties import (bestel_mutatieverzoek_maak_bestellin
                                             bestel_mutatieverzoek_verwijder_product_uit_mandje)
 from Bestelling.plugins.product_info import beschrijf_product, beschrijf_korting
 from Betaal.models import BetaalInstellingenVereniging
-from Functie.definities import Rollen
+from Functie.definities import Rol
 from Functie.rol import rol_get_huidige
 from Registreer.definities import REGISTRATIE_FASE_COMPLEET
 from Sporter.models import get_sporter
@@ -44,7 +44,7 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu = rol_get_huidige(self.request)
-        return self.rol_nu != Rollen.ROL_NONE
+        return self.rol_nu != Rol.ROL_NONE
 
     def dispatch(self, request, *args, **kwargs):
         """ wegsturen als het we geen vragen meer hebben + bij oneigenlijk gebruik """
@@ -307,7 +307,7 @@ class VerwijderProductUitMandje(UserPassesTestMixin, View):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu = rol_get_huidige(self.request)
-        return self.rol_nu != Rollen.ROL_NONE
+        return self.rol_nu != Rol.ROL_NONE
 
     def post(self, request, *args, **kwargs):
 

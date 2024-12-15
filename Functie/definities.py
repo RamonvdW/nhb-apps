@@ -4,40 +4,65 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from Functie.rol import Rollen
+import enum
+
+
+class Rol(enum.IntEnum):
+    # rollen staan in prio volgorde
+    ROL_BB = 2          # Manager MH
+    ROL_BKO = 3         # BK organisator, specifieke competitie
+    ROL_RKO = 4         # RK organisator, specifieke competitie en rayon
+    ROL_RCL = 5         # Regiocompetitieleider, specifieke competitie en regio
+    ROL_HWL = 6         # Hoofdwedstrijdleider van een vereniging, alle competities
+    ROL_WL = 7          # Wedstrijdleider van een vereniging, alle competities
+    ROL_SEC = 10        # Secretaris van een vereniging
+    ROL_SPORTER = 20    # Individuele sporter en (gast-)lid
+    ROL_MWZ = 30        # Manager Wedstrijdzaken
+    ROL_MO = 40         # Manager Opleidingen
+    ROL_MWW = 50        # Manager Webwinkel
+    ROL_CS = 60         # Commissie Scheidsrechters
+    ROL_SUP = 90        # Support
+    ROL_NONE = 99       # geen rol (gebruik: niet ingelogd)
+
+    """ LET OP!
+        rol nummers worden opgeslagen in de sessie
+            verwijderen = probleem voor terugkerende gebruiker
+            hergebruiken = gevaarlijk: gebruiker 'springt' naar nieuwe rol! 
+        indien nodig alle sessies verwijderen
+    """
 
 
 url2rol = {
-    'BB': Rollen.ROL_BB,
-    'BKO': Rollen.ROL_BKO,
-    'RKO': Rollen.ROL_RKO,
-    'RCL': Rollen.ROL_RCL,
-    'HWL': Rollen.ROL_HWL,
-    'WL': Rollen.ROL_WL,
-    'SEC': Rollen.ROL_SEC,
-    'MO': Rollen.ROL_MO,
-    'MWZ': Rollen.ROL_MWZ,
-    'MWW': Rollen.ROL_MWW,
-    'CS': Rollen.ROL_CS,
-    'support': Rollen.ROL_SUP,
-    'sporter': Rollen.ROL_SPORTER,
-    'geen': Rollen.ROL_NONE
+    'BB': Rol.ROL_BB,
+    'BKO': Rol.ROL_BKO,
+    'RKO': Rol.ROL_RKO,
+    'RCL': Rol.ROL_RCL,
+    'HWL': Rol.ROL_HWL,
+    'WL': Rol.ROL_WL,
+    'SEC': Rol.ROL_SEC,
+    'MO': Rol.ROL_MO,
+    'MWZ': Rol.ROL_MWZ,
+    'MWW': Rol.ROL_MWW,
+    'CS': Rol.ROL_CS,
+    'support': Rol.ROL_SUP,
+    'sporter': Rol.ROL_SPORTER,
+    'geen': Rol.ROL_NONE
 }
 
 rol2url = {value: key for key, value in url2rol.items()}
 
 functie_rol_str2rol = {
-    "BKO": Rollen.ROL_BKO,
-    "RKO": Rollen.ROL_RKO,
-    "RCL": Rollen.ROL_RCL,
-    "HWL": Rollen.ROL_HWL,
-    "WL": Rollen.ROL_WL,
-    "SEC": Rollen.ROL_SEC,
-    "MO": Rollen.ROL_MO,
-    "MWZ": Rollen.ROL_MWZ,
-    "MWW": Rollen.ROL_MWW,
-    "SUP": Rollen.ROL_SUP,
-    "CS": Rollen.ROL_CS,
+    "BKO": Rol.ROL_BKO,
+    "RKO": Rol.ROL_RKO,
+    "RCL": Rol.ROL_RCL,
+    "HWL": Rol.ROL_HWL,
+    "WL": Rol.ROL_WL,
+    "SEC": Rol.ROL_SEC,
+    "MO": Rol.ROL_MO,
+    "MWZ": Rol.ROL_MWZ,
+    "MWW": Rol.ROL_MWW,
+    "SUP": Rol.ROL_SUP,
+    "CS": Rol.ROL_CS,
 }
 
 

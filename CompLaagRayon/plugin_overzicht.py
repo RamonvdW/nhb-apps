@@ -7,7 +7,7 @@
 from django.urls import reverse
 from Competitie.definities import DEEL_RK
 from Competitie.models import Kampioenschap
-from Functie.definities import Rollen
+from Functie.definities import Rol
 from types import SimpleNamespace
 
 
@@ -18,7 +18,7 @@ def get_kaartjes_rayon(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_ind
         De rayonkampioenschappen lopen van fase J tot en met L.
     """
 
-    if rol_nu == Rollen.ROL_BKO:
+    if rol_nu == Rol.ROL_BKO:
 
         # Klassengrenzen vaststellen voor RK/BK teams
         if not comp.klassengrenzen_vastgesteld_rk_bk and comp.fase_teams == 'J':
@@ -87,7 +87,7 @@ def get_kaartjes_rayon(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_ind
                         url=url)
             kaartjes_indiv.append(kaartje)
 
-    elif rol_nu == Rollen.ROL_RKO:
+    elif rol_nu == Rol.ROL_RKO:
 
         # zoek het RK kampioenschap erbij
         try:

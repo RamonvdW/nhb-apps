@@ -16,7 +16,7 @@ from BasisTypen.models import BoogType
 from Bestelling.models import Bestelling
 from Competitie.models import RegiocompetitieSporterBoog
 from Competitie.plugin_sporter import get_sporter_competities
-from Functie.definities import Rollen
+from Functie.definities import Rol
 from Functie.models import Functie
 from Functie.rol import rol_get_huidige
 from HistComp.definities import HISTCOMP_TYPE2STR
@@ -63,7 +63,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         # gebruiker moet ingelogd zijn en rol Sporter gekozen hebben
         self.rol_nu = rol_get_huidige(self.request)
-        return self.rol_nu == Rollen.ROL_SPORTER
+        return self.rol_nu == Rol.ROL_SPORTER
 
     def dispatch(self, request, *args, **kwargs):
         """ wegsturen als het we geen vragen meer hebben + bij oneigenlijk gebruik """

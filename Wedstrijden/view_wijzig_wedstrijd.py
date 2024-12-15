@@ -17,7 +17,7 @@ from Account.models import get_account
 from BasisTypen.definities import GESLACHT_ALLE, ORGANISATIES2LONG_STR, ORGANISATIE_WA, ORGANISATIE_IFAA
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse
 from BasisTypen.operations import get_organisatie_boogtypen, get_organisatie_klassen
-from Functie.definities import Rollen
+from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
 from Locatie.definities import BAAN_TYPE_BUITEN, BAAN_TYPE_EXTERN
 from Locatie.models import WedstrijdLocatie
@@ -52,7 +52,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_MWZ, Rollen.ROL_HWL)
+        return self.rol_nu in (Rol.ROL_BB, Rol.ROL_MWZ, Rol.ROL_HWL)
 
     def get(self, request, *args, **kwargs):
         """ deze functie wordt aangeroepen om de GET request af te handelen """
@@ -72,7 +72,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
         except Wedstrijd.DoesNotExist:
             raise Http404('Wedstrijd niet gevonden')
 
-        if self.rol_nu == Rollen.ROL_HWL and wedstrijd.organiserende_vereniging != self.functie_nu.vereniging:
+        if self.rol_nu == Rol.ROL_HWL and wedstrijd.organiserende_vereniging != self.functie_nu.vereniging:
             raise PermissionDenied('Wedstrijd niet van jouw vereniging')
 
         context['wed'] = wedstrijd
@@ -92,7 +92,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
             opt_status.append(opt)
         # for
 
-        if self.rol_nu == Rollen.ROL_HWL:
+        if self.rol_nu == Rol.ROL_HWL:
             if wedstrijd.status == WEDSTRIJD_STATUS_ONTWERP:
                 if not wedstrijd.is_ter_info:
                     wedstrijd.wacht_op_sessies = wedstrijd.sessies.count() == 0
@@ -104,7 +104,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
             else:
                 context['limit_edits'] = True
 
-        if self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_MWZ):
+        if self.rol_nu in (Rol.ROL_BB, Rol.ROL_MWZ):
 
             context['wijzig_kwalificatie_scores'] = True
 
@@ -349,7 +349,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
                 ver.keuze_str = ver.ver_nr_en_naam()
             # for
 
-        if self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_MWZ):
+        if self.rol_nu in (Rol.ROL_BB, Rol.ROL_MWZ):
             context['toon_ter_info'] = True
 
             context['keuze_aantal_scheids'] = [
@@ -387,7 +387,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
         if wedstrijd.status == WEDSTRIJD_STATUS_ONTWERP:
             context['url_verwijder'] = context['url_opslaan']
 
-        if self.rol_nu == Rollen.ROL_HWL:
+        if self.rol_nu == Rol.ROL_HWL:
             context['kruimels'] = (
                 (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
                 (reverse('Wedstrijden:vereniging'), 'Wedstrijdkalender'),
@@ -432,12 +432,12 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
         except Wedstrijd.DoesNotExist:
             raise Http404('Wedstrijd niet gevonden')
 
-        if self.rol_nu == Rollen.ROL_HWL and wedstrijd.organiserende_vereniging != self.functie_nu.vereniging:
+        if self.rol_nu == Rol.ROL_HWL and wedstrijd.organiserende_vereniging != self.functie_nu.vereniging:
             raise PermissionDenied('Wedstrijd niet van jouw vereniging')
 
         limit_edits = False
         block_edits = False
-        if self.rol_nu == Rollen.ROL_HWL and wedstrijd.status != WEDSTRIJD_STATUS_ONTWERP:
+        if self.rol_nu == Rol.ROL_HWL and wedstrijd.status != WEDSTRIJD_STATUS_ONTWERP:
             limit_edits = True
 
         if wedstrijd.status == WEDSTRIJD_STATUS_GEANNULEERD:
@@ -646,7 +646,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
 
                 wedstrijd.prijs_euro_onder18 = prijs
 
-            if self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_MWZ):
+            if self.rol_nu in (Rol.ROL_BB, Rol.ROL_MWZ):
                 ter_info = request.POST.get('ter_info', '')
                 if ter_info:
                     wedstrijd.is_ter_info = True
@@ -710,7 +710,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
 
             self._verplaats_sessies(wedstrijd, oude_datum_begin)
 
-        if self.rol_nu == Rollen.ROL_HWL:
+        if self.rol_nu == Rol.ROL_HWL:
             url = reverse('Wedstrijden:vereniging')
         else:
             url = reverse('Wedstrijden:manager-status', kwargs={'status': WEDSTRIJD_STATUS2URL[wedstrijd.status]})

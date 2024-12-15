@@ -12,7 +12,7 @@ from Account.models import get_account
 from BasisTypen.definities import ORGANISATIE_WA
 from BasisTypen.models import BoogType
 from Competitie.plugin_sporter import get_sporter_competities
-from Functie.definities import Rollen
+from Functie.definities import Rol
 from Functie.rol import rol_get_huidige
 from Sporter.operations import get_sporter_gekozen_bogen, get_sporter_voorkeuren
 
@@ -40,7 +40,7 @@ class ProfielTestView(UserPassesTestMixin, TemplateView):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         # gebruiker moet ingelogd zijn en rol Sporter gekozen hebben
         self.rol_nu = rol_get_huidige(self.request)
-        return self.rol_nu == Rollen.ROL_SPORTER
+        return self.rol_nu == Rol.ROL_SPORTER
 
     def dispatch(self, request, *args, **kwargs):
         """ wegsturen als het we geen vragen meer hebben + bij oneigenlijk gebruik """

@@ -9,7 +9,7 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from django.db.models import Q, Value
 from django.db.models.functions import Concat
 from django.urls import reverse
-from Functie.definities import Rollen
+from Functie.definities import Rol
 from Functie.rol import rol_get_huidige
 from Logboek.models import LogboekRegel
 from urllib.parse import quote_plus
@@ -59,7 +59,7 @@ class LogboekBasisView(UserPassesTestMixin, ListView):
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        return rol_get_huidige(self.request) == Rollen.ROL_BB
+        return rol_get_huidige(self.request) == Rol.ROL_BB
 
     def _make_link_urls(self, context):
         # voorbereidingen voor een regel met volgende/vorige links

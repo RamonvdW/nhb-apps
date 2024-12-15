@@ -8,10 +8,10 @@ from django.conf import settings
 from django.shortcuts import reverse
 from Account.models import get_account
 from Account.operations.otp import otp_is_controle_gelukt
-from Functie.definities import Rollen
+from Functie.definities import Rol
 from Functie.rol import rol_mag_wisselen, rol_get_huidige
 from Bestelling.operations.mandje import cached_aantal_in_mandje_get
-from Taken.operations import aantal_open_taken
+from Taken.operations import cached_aantal_open_taken
 
 
 def site_layout(request):
@@ -54,12 +54,12 @@ def site_layout(request):
 
             rol = rol_get_huidige(request)
 
-            if rol == Rollen.ROL_SPORTER:
+            if rol == Rol.ROL_SPORTER:
                 context['menu_url_profiel'] = reverse('Sporter:profiel')
                 context['menu_url_bondspas'] = reverse('Bondspas:toon-bondspas')
             else:
                 # taken
-                context['menu_aantal_open_taken'] = aantal_open_taken(request)
+                context['menu_aantal_open_taken'] = cached_aantal_open_taken(request)
                 context['menu_url_taken'] = reverse('Taken:overzicht')
         else:
             context['menu_url_profiel'] = reverse('Sporter:profiel')

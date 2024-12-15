@@ -19,7 +19,7 @@ from Competitie.models import (Competitie, CompetitieTeamKlasse, CompetitieMutat
                                Regiocompetitie, RegiocompetitieSporterBoog,
                                RegiocompetitieTeam, RegiocompetitieTeamPoule, RegiocompetitieRondeTeam)
 from Competitie.operations.poules import maak_poule_schema
-from Functie.definities import Rollen
+from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving
 from Geo.models import Rayon
 from Logboek.models import schrijf_in_logboek
@@ -75,9 +75,9 @@ class RegioTeamsTemplateView(TemplateView):
 
             subset = kwargs['subset'][:10]      # afkappen voor de veiligheid
             if subset == 'auto':
-                if self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO):
+                if self.rol_nu in (Rol.ROL_BB, Rol.ROL_BKO):
                     subset = 'alle'
-                elif self.rol_nu == Rollen.ROL_RKO:
+                elif self.rol_nu == Rol.ROL_RKO:
                     subset = str(self.functie_nu.rayon.rayon_nr)
                 else:
                     raise Http404('Selectie wordt niet ondersteund')
@@ -210,7 +210,7 @@ class RegioTeamsTemplateView(TemplateView):
             poule = team.regiocompetitieteampoule_set.first()
             team.in_poule = (poule is not None)
 
-            if comp.fase_teams <= 'D' and self.rol_nu == Rollen.ROL_RCL:
+            if comp.fase_teams <= 'D' and self.rol_nu == Rol.ROL_RCL:
                 team.url_aanpassen = reverse('CompLaagRegio:teams-regio-koppelen',
                                              kwargs={'team_pk': team.pk})
             totaal_teams += 1
@@ -243,7 +243,7 @@ class RegioTeamsTemplateView(TemplateView):
             ag_str = "%05.1f" % (team.aanvangsgemiddelde * aantal_pijlen)
             team.ag_str = ag_str.replace('.', ',')
 
-            if comp.fase_teams <= 'D' and self.rol_nu == Rollen.ROL_RCL:
+            if comp.fase_teams <= 'D' and self.rol_nu == Rol.ROL_RCL:
                 team.url_aanpassen = reverse('CompLaagRegio:teams-regio-koppelen',
                                              kwargs={'team_pk': team.pk})
 
@@ -286,7 +286,7 @@ class RegioTeamsRCLView(UserPassesTestMixin, RegioTeamsTemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu == Rollen.ROL_RCL
+        return self.rol_nu == Rol.ROL_RCL
 
 
 class RegioTeamsAlleView(UserPassesTestMixin, RegioTeamsTemplateView):
@@ -301,7 +301,7 @@ class RegioTeamsAlleView(UserPassesTestMixin, RegioTeamsTemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL)
+        return self.rol_nu in (Rol.ROL_BB, Rol.ROL_BKO, Rol.ROL_RKO, Rol.ROL_RCL)
 
 
 class RegioTeamsAlsBestand(UserPassesTestMixin, View):
@@ -319,7 +319,7 @@ class RegioTeamsAlsBestand(UserPassesTestMixin, View):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return rol_nu == Rollen.ROL_RCL
+        return rol_nu == Rol.ROL_RCL
 
     def get(self, request, *args, **kwargs):
 
@@ -437,7 +437,7 @@ class AGControleView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu == Rollen.ROL_RCL
+        return self.rol_nu == Rol.ROL_RCL
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -528,7 +528,7 @@ class StartVolgendeTeamRondeView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu == Rollen.ROL_RCL
+        return self.rol_nu == Rol.ROL_RCL
 
     @staticmethod
     def _bepaal_wedstrijdpunten(deelcomp):

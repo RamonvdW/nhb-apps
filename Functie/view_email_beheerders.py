@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2023 Ramon van der Winkel.
+#  Copyright (c) 2020-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -8,7 +8,7 @@ from django.urls import reverse
 from django.views.generic import TemplateView
 from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Functie.definities import Rollen
+from Functie.definities import Rol
 from Functie.models import Functie
 from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving
 
@@ -35,13 +35,13 @@ class OverzichtEmailsSecHwlView(UserPassesTestMixin, TemplateView):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         # alle competitie beheerders + HWL
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_MWZ, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL)
+        return self.rol_nu in (Rol.ROL_BB, Rol.ROL_MWZ, Rol.ROL_BKO, Rol.ROL_RKO, Rol.ROL_RCL)
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        if self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO):
+        if self.rol_nu in (Rol.ROL_BB, Rol.ROL_BKO):
             context['geo_str'] = ''
             emails = (Functie
                       .objects
@@ -56,7 +56,7 @@ class OverzichtEmailsSecHwlView(UserPassesTestMixin, TemplateView):
                     .order_by('vereniging__ver_nr',
                               'rol'))
 
-        elif self.rol_nu == Rollen.ROL_RKO:
+        elif self.rol_nu == Rol.ROL_RKO:
             rayon_nr = self.functie_nu.rayon.rayon_nr
             context['geo_str'] = ' in Rayon %s' % rayon_nr
             emails = (Functie
@@ -123,7 +123,7 @@ class OverzichtEmailsCompetitieBeheerdersView(UserPassesTestMixin, TemplateView)
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         # alle competitie beheerders + HWL
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_MWZ, Rollen.ROL_BKO, Rollen.ROL_RKO)
+        return self.rol_nu in (Rol.ROL_BB, Rol.ROL_MWZ, Rol.ROL_BKO, Rol.ROL_RKO)
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -131,7 +131,7 @@ class OverzichtEmailsCompetitieBeheerdersView(UserPassesTestMixin, TemplateView)
 
         context['huidige_rol'] = rol_get_beschrijving(self.request)
 
-        if self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_MWZ):
+        if self.rol_nu in (Rol.ROL_BB, Rol.ROL_MWZ):
             # geef alle e-mailadressen
             context['geo_str'] = "van de BKO's, RKO's en RCL's Indoor en 25m1pijl"
             emails = (Functie
@@ -149,7 +149,7 @@ class OverzichtEmailsCompetitieBeheerdersView(UserPassesTestMixin, TemplateView)
                               'rayon__rayon_nr',
                               'regio__regio_nr'))
 
-        elif self.rol_nu == Rollen.ROL_BKO:
+        elif self.rol_nu == Rol.ROL_BKO:
             # geef e-mailadressen RKO + RCL voor specifieke competitie
             context['geo_str'] = "van de RKO's en RCL's"
             if self.functie_nu.is_indoor():

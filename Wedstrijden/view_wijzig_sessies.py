@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2023 Ramon van der Winkel.
+#  Copyright (c) 2021-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -12,7 +12,7 @@ from django.core.exceptions import PermissionDenied
 from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.definities import ORGANISATIE_IFAA
-from Functie.definities import Rollen
+from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
 from Wedstrijden.definities import WEDSTRIJD_DUUR_MAX_DAGEN, WEDSTRIJD_DUUR_MAX_UREN, WEDSTRIJD_STATUS_GEANNULEERD
 from Wedstrijden.models import Wedstrijd, WedstrijdSessie
@@ -39,7 +39,7 @@ class WedstrijdSessiesView(UserPassesTestMixin, View):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_MWZ, Rollen.ROL_HWL)
+        return self.rol_nu in (Rol.ROL_BB, Rol.ROL_MWZ, Rol.ROL_HWL)
 
     def get(self, request, *args, **kwargs):
         """ deze functie wordt aangeroepen om de GET request af te handelen """
@@ -53,7 +53,7 @@ class WedstrijdSessiesView(UserPassesTestMixin, View):
         except Wedstrijd.DoesNotExist:
             raise Http404('Wedstrijd niet gevonden')
 
-        if self.rol_nu == Rollen.ROL_HWL and wedstrijd.organiserende_vereniging != self.functie_nu.vereniging:
+        if self.rol_nu == Rol.ROL_HWL and wedstrijd.organiserende_vereniging != self.functie_nu.vereniging:
             raise PermissionDenied('Wedstrijd niet van jouw vereniging')
 
         context['wed'] = wedstrijd
@@ -81,7 +81,7 @@ class WedstrijdSessiesView(UserPassesTestMixin, View):
             context['url_nieuwe_sessie'] = reverse('Wedstrijden:wijzig-sessies',
                                                    kwargs={'wedstrijd_pk': wedstrijd.pk})
 
-        if self.rol_nu == Rollen.ROL_HWL:
+        if self.rol_nu == Rol.ROL_HWL:
             context['kruimels'] = (
                 (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
                 (reverse('Wedstrijden:vereniging'), 'Wedstrijdkalender'),
@@ -105,7 +105,7 @@ class WedstrijdSessiesView(UserPassesTestMixin, View):
         except Wedstrijd.DoesNotExist:
             raise Http404('Wedstrijd niet gevonden')
 
-        if self.rol_nu == Rollen.ROL_HWL and wedstrijd.organiserende_vereniging != self.functie_nu.vereniging:
+        if self.rol_nu == Rol.ROL_HWL and wedstrijd.organiserende_vereniging != self.functie_nu.vereniging:
             raise PermissionDenied('Wedstrijd niet van jouw vereniging')
 
         if wedstrijd.status != WEDSTRIJD_STATUS_GEANNULEERD and request.POST.get('nieuwe_sessie', ''):
@@ -146,7 +146,7 @@ class WijzigWedstrijdSessieView(UserPassesTestMixin, View):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_MWZ, Rollen.ROL_HWL)
+        return self.rol_nu in (Rol.ROL_BB, Rol.ROL_MWZ, Rol.ROL_HWL)
 
     @staticmethod
     def _maak_opt_datums(wedstrijd, sessie):
@@ -231,7 +231,7 @@ class WijzigWedstrijdSessieView(UserPassesTestMixin, View):
         except Wedstrijd.DoesNotExist:
             raise Http404('Wedstrijd niet gevonden')
 
-        if self.rol_nu == Rollen.ROL_HWL and wedstrijd.organiserende_vereniging != self.functie_nu.vereniging:
+        if self.rol_nu == Rol.ROL_HWL and wedstrijd.organiserende_vereniging != self.functie_nu.vereniging:
             raise PermissionDenied('Wedstrijd niet van jouw vereniging')
 
         context['wedstrijd'] = wedstrijd
@@ -267,7 +267,7 @@ class WijzigWedstrijdSessieView(UserPassesTestMixin, View):
         else:
             context['url_verwijder'] = context['url_opslaan']
 
-        if self.rol_nu == Rollen.ROL_HWL:
+        if self.rol_nu == Rol.ROL_HWL:
             url_top = reverse('Wedstrijden:vereniging')
         else:
             url_top = reverse('Wedstrijden:manager')
@@ -294,7 +294,7 @@ class WijzigWedstrijdSessieView(UserPassesTestMixin, View):
         except Wedstrijd.DoesNotExist:
             raise Http404('Wedstrijd niet gevonden')
 
-        if self.rol_nu == Rollen.ROL_HWL and wedstrijd.organiserende_vereniging != self.functie_nu.vereniging:
+        if self.rol_nu == Rol.ROL_HWL and wedstrijd.organiserende_vereniging != self.functie_nu.vereniging:
             raise PermissionDenied('Wedstrijd niet van jouw vereniging')
 
         try:

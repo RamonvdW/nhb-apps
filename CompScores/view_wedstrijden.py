@@ -9,7 +9,7 @@ from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Competitie.definities import DEEL_RK, DEEL_BK
 from Competitie.models import CompetitieMatch, RegiocompetitieRonde, Kampioenschap
-from Functie.definities import Rollen
+from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving
 
 TEMPLATE_WEDSTRIJDEN = 'compscores/wedstrijden.dtl'
@@ -35,7 +35,7 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.functie_nu and self.rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL, Rollen.ROL_WL)
+        return self.functie_nu and self.rol_nu in (Rol.ROL_SEC, Rol.ROL_HWL, Rol.ROL_WL)
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -120,7 +120,7 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
                 match.toon_nvt = False
                 heeft_uitslag = (match.uitslag and match.uitslag.scores.count() > 0)
                 mag_wijzigen = self.uitslag_invoeren and not (match.uitslag and match.uitslag.is_bevroren)
-                if self.rol_nu in (Rollen.ROL_HWL, Rollen.ROL_WL) and mag_wijzigen:
+                if self.rol_nu in (Rol.ROL_HWL, Rol.ROL_WL) and mag_wijzigen:
                     # mag uitslag wijzigen
                     url = reverse('CompScores:uitslag-invoeren',
                                   kwargs={'match_pk': match.pk})
@@ -136,7 +136,7 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
                         match.toon_geen_uitslag = False
 
             # link naar de waarschijnlijke deelnemerslijst
-            if self.rol_nu in (Rollen.ROL_HWL, Rollen.ROL_WL) and not (match.uitslag and match.uitslag.is_bevroren):
+            if self.rol_nu in (Rol.ROL_HWL, Rol.ROL_WL) and not (match.uitslag and match.uitslag.is_bevroren):
                 if match.is_rk:
                     match.url_lijst = reverse('CompLaagRayon:download-formulier',
                                               kwargs={'match_pk': match.pk})

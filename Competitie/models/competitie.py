@@ -9,7 +9,6 @@ from BasisTypen.definities import BLAZOEN_CHOICES, BLAZOEN_40CM
 from BasisTypen.models import BoogType, Leeftijdsklasse, TeamType
 from Competitie.definities import AFSTANDEN, AFSTAND2URL
 from Competitie.tijdlijn import bepaal_fase_indiv, bepaal_fase_teams
-from Functie.definities import Rollen
 from Locatie.models import WedstrijdLocatie
 from Score.models import Uitslag
 from Vereniging.models import Vereniging
@@ -180,34 +179,19 @@ class Competitie(models.Model):
         # print('competitie: afstand=%s, fase_indiv=%s, fase_teams=%s' % (
         #           self.afstand, self.fase_indiv, self.fase_teams))
 
+    def is_openbaar_voor_publiek(self):
+        if not hasattr(self, 'fase_indiv'):
+            self.fase_indiv = bepaal_fase_indiv(self)
+
+        # openbaar voor het publiek vanaf inschrijving tot einde
+        return self.fase_indiv >= 'C'
+
     def is_open_voor_inschrijven(self):
         if not hasattr(self, 'fase_indiv'):
             self.fase_indiv = bepaal_fase_indiv(self)
 
         # inschrijven mag het hele seizoen, ook tijdens de wedstrijden
         return 'C' <= self.fase_indiv <= 'F'
-
-    def bepaal_openbaar(self, rol_nu):
-        """ deze functie bepaalt of de competitie openbaar is voor de huidige rol
-            en zet de is_openbaar variabele op het object.
-        """
-        self.is_openbaar = False
-
-        if rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO):
-            # BB en BKO zien alles
-            self.is_openbaar = True
-
-        elif rol_nu in (Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL):
-            # beheerders die de competitie opzetten zien competities die opgestart zijn
-            self.is_openbaar = True
-
-        else:
-            if not hasattr(self, 'fase_indiv'):
-                self.fase_indiv = bepaal_fase_indiv(self)
-
-            if self.fase_indiv >= 'C':
-                # modale gebruiker ziet alleen competities vanaf open-voor-inschrijving
-                self.is_openbaar = True
 
     def maak_seizoen_str(self):
         return "%s/%s" % (self.begin_jaar, self.begin_jaar + 1)

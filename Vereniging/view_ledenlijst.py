@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2023 Ramon van der Winkel.
+#  Copyright (c) 2019-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -10,7 +10,7 @@ from django.views.generic import ListView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.definities import MAXIMALE_LEEFTIJD_JEUGD, ORGANISATIE_KHSN
 from BasisTypen.models import Leeftijdsklasse
-from Functie.definities import Rollen
+from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
 from Sporter.models import Sporter, SporterBoog
 
@@ -37,7 +37,7 @@ class LedenLijstView(UserPassesTestMixin, ListView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        self.mag_wijzigen = self.rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL)
+        self.mag_wijzigen = self.rol_nu in (Rol.ROL_SEC, Rol.ROL_HWL)
         return self.functie_nu and self.functie_nu.rol in ('SEC', 'HWL', 'WL')
 
     def get_queryset(self):
@@ -188,7 +188,7 @@ class LedenLijstView(UserPassesTestMixin, ListView):
         context['leden_senior'] = senior
         context['leden_inactief'] = inactief
         context['wedstrijdklasse_jaar'] = self.huidige_jaar
-        context['toon_wijzig_kolom'] = self.rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL)
+        context['toon_wijzig_kolom'] = self.rol_nu in (Rol.ROL_SEC, Rol.ROL_HWL)
 
         context['kruimels'] = (
             (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),

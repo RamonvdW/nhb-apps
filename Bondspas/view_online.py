@@ -10,7 +10,7 @@ from django.views.generic import View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
 from Bondspas.operations import bepaal_jaar_bondspas_en_wedstrijden, maak_bondspas_regels, maak_bondspas_jpeg_en_pdf
-from Functie.definities import Rollen
+from Functie.definities import Rol
 from Functie.rol import rol_get_huidige
 from Sporter.models import Sporter, get_sporter
 import base64
@@ -33,7 +33,7 @@ class ToonBondspasView(UserPassesTestMixin, View):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         # gebruiker moet ingelogd zijn. Rol is niet belangrijk.
-        return rol_get_huidige(self.request) != Rollen.ROL_NONE
+        return rol_get_huidige(self.request) != Rol.ROL_NONE
 
     def get(self, request, *args, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -65,7 +65,7 @@ class DynamicBondspasOphalenView(UserPassesTestMixin, View):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         # gebruiker moet ingelogd zijn. Rol is niet belangrijk.
-        return rol_get_huidige(self.request) != Rollen.ROL_NONE
+        return rol_get_huidige(self.request) != Rol.ROL_NONE
 
     @staticmethod
     def post(request, *args, **kwargs):
@@ -100,7 +100,7 @@ class DynamicBondspasDownloadView(UserPassesTestMixin, View):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         # gebruiker moet ingelogd zijn. Rol is niet belangrijk.
-        return rol_get_huidige(self.request) != Rollen.ROL_NONE
+        return rol_get_huidige(self.request) != Rol.ROL_NONE
 
     @staticmethod
     def post(request, *args, **kwargs):
@@ -134,7 +134,7 @@ class ToonBondspasBeheerderView(UserPassesTestMixin, View):
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        return rol_get_huidige(self.request) == Rollen.ROL_BB
+        return rol_get_huidige(self.request) == Rol.ROL_BB
 
     def get(self, request, *args, **kwargs):
         """ called by the template system to get the context data for the template """

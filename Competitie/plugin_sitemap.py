@@ -19,8 +19,7 @@ def generate_urls():
     yield CHECK_LOW, reverse('Sporter:leeftijdsgroepen')
 
     for comp in Competitie.objects.order_by('pk'):
-        comp.bepaal_openbaar(None)
-        if comp.is_openbaar:
+        if comp.is_openbaar_voor_publiek():
             yield CHECK_MED, reverse('Competitie:overzicht',
                                      kwargs={'comp_pk_of_seizoen': comp.maak_seizoen_url()})
 

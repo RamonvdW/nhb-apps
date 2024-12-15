@@ -12,13 +12,12 @@ from Competitie.models import KampioenschapSporterBoog
 from Functie.models import Functie
 from Sporter.models import Sporter
 from Registreer.models import GastRegistratie
-from TijdelijkeCodes.operations import set_tijdelijke_code_saver
 from Wedstrijden.models import Wedstrijd
 import datetime
 
 
 class TijdelijkeCode(models.Model):
-    """ Database tabel waarin de URLs staan die we naar buiten toe beschikbaar maken """
+    """ Database tabel waarin de tijdelijke codes staan die we naar buiten toe beschikbaar maken """
 
     # de code die in de url gebruikt kan worden
     # om deze uniek te maken is het een hash over een aantal keywords die specifiek voor een gebruik zijn
@@ -101,9 +100,6 @@ def save_tijdelijke_code(url_code, dispatch_to,
     obj.save()
 
     return obj
-
-
-set_tijdelijke_code_saver(save_tijdelijke_code)
 
 
 def tijdelijke_url_opschonen(stdout):

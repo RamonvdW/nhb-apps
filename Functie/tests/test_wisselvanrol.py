@@ -7,7 +7,7 @@
 from django.test import TestCase
 from Competitie.definities import DEEL_RK, DEEL_BK
 from Competitie.models import Competitie, CompetitieMatch, Kampioenschap
-from Functie.definities import Rollen
+from Functie.definities import Rol
 from Functie.models import Functie
 from Functie.operations import account_needs_vhpg
 from Functie.tests.helpers import maak_functie
@@ -724,7 +724,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         request = resp.wsgi_request
 
         rol, functie = rol_get_huidige_functie(request)
-        self.assertEqual(rol, Rollen.ROL_BKO)
+        self.assertEqual(rol, Rol.ROL_BKO)
         self.assertEqual(functie, self.functie_bko)
 
         self.functie_bko.rol = 'RCL'
@@ -732,7 +732,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_bko)
 
         rol, functie = rol_get_huidige_functie(request)
-        self.assertEqual(rol, Rollen.ROL_BKO)
+        self.assertEqual(rol, Rol.ROL_BKO)
         self.assertEqual(functie, self.functie_bko)
 
     def test_vhpg(self):

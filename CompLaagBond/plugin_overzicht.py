@@ -7,7 +7,7 @@
 from django.urls import reverse
 from Competitie.definities import DEEL_BK
 from Competitie.models import Kampioenschap
-from Functie.definities import Rollen
+from Functie.definities import Rol
 from types import SimpleNamespace
 
 
@@ -18,7 +18,7 @@ def get_kaartjes_bond(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_indi
         De bondskampioenschappen lopen van fase N tot en met P
     """
 
-    if rol_nu == Rollen.ROL_BKO:
+    if rol_nu == Rol.ROL_BKO:
 
         # BK erbij pakken
         deelkamp_bk = Kampioenschap.objects.select_related('competitie').get(competitie=comp, deel=DEEL_BK)

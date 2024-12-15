@@ -16,7 +16,7 @@ from Bestelling.operations.mutaties import (bestel_mutatieverzoek_afmelden_wedst
                                             bestel_mutatieverzoek_verwijder_product_uit_mandje)
 from Betaal.format import format_bedrag_euro
 from Competitie.models import RegiocompetitieSporterBoog
-from Functie.definities import Rollen
+from Functie.definities import Rol
 from Functie.rol import rol_get_huidige, rol_get_huidige_functie
 from Sporter.models import SporterVoorkeuren, get_sporter
 from Sporter.operations import get_sporter_voorkeuren
@@ -139,7 +139,7 @@ class WedstrijdAanmeldingenView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu = rol_get_huidige(self.request)
-        return self.rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL, Rollen.ROL_MWZ, Rollen.ROL_BB)
+        return self.rol_nu in (Rol.ROL_SEC, Rol.ROL_HWL, Rol.ROL_MWZ, Rol.ROL_BB)
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -209,17 +209,17 @@ class WedstrijdAanmeldingenView(UserPassesTestMixin, TemplateView):
         context['aantal_aanmeldingen'] = aantal_aanmeldingen
         context['aantal_afmeldingen'] = aantal_afmeldingen
 
-        if self.rol_nu in (Rollen.ROL_HWL, Rollen.ROL_MWZ, Rollen.ROL_BB):
+        if self.rol_nu in (Rol.ROL_HWL, Rol.ROL_MWZ, Rol.ROL_BB):
             context['url_download_tsv'] = reverse('Wedstrijden:download-aanmeldingen-tsv',
                                                   kwargs={'wedstrijd_pk': wedstrijd.pk})
             context['url_download_csv'] = reverse('Wedstrijden:download-aanmeldingen-csv',
                                                   kwargs={'wedstrijd_pk': wedstrijd.pk})
 
-        if self.rol_nu == Rollen.ROL_HWL:
+        if self.rol_nu == Rol.ROL_HWL:
             context['url_toevoegen'] = reverse('WedstrijdInschrijven:inschrijven-handmatig',
                                                kwargs={'wedstrijd_pk': wedstrijd.pk})
 
-        if self.rol_nu in (Rollen.ROL_HWL, Rollen.ROL_SEC):
+        if self.rol_nu in (Rol.ROL_HWL, Rol.ROL_SEC):
             context['kruimels'] = (
                 (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
                 (reverse('Wedstrijden:vereniging'), 'Wedstrijdkalender'),
@@ -252,7 +252,7 @@ class DownloadAanmeldingenBestandTSV(UserPassesTestMixin, View):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu in (Rollen.ROL_HWL, Rollen.ROL_MWZ, Rollen.ROL_BB)
+        return self.rol_nu in (Rol.ROL_HWL, Rol.ROL_MWZ, Rol.ROL_BB)
 
     def get(self, request, *args, **kwargs):
         try:
@@ -265,7 +265,7 @@ class DownloadAanmeldingenBestandTSV(UserPassesTestMixin, View):
         except (ValueError, TypeError, Wedstrijd.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
-        if self.rol_nu == Rollen.ROL_HWL:
+        if self.rol_nu == Rol.ROL_HWL:
             if wedstrijd.organiserende_vereniging.ver_nr != self.functie_nu.vereniging.ver_nr:
                 raise Http404('Wedstrijd is niet bij jullie vereniging')
 
@@ -362,7 +362,7 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu in (Rollen.ROL_HWL, Rollen.ROL_MWZ, Rollen.ROL_BB)
+        return self.rol_nu in (Rol.ROL_HWL, Rol.ROL_MWZ, Rol.ROL_BB)
 
     def get(self, request, *args, **kwargs):
         try:
@@ -374,7 +374,7 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
         except (ValueError, TypeError, Wedstrijd.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
-        if self.rol_nu == Rollen.ROL_HWL:
+        if self.rol_nu == Rol.ROL_HWL:
             if wedstrijd.organiserende_vereniging.ver_nr != self.functie_nu.vereniging.ver_nr:
                 raise Http404('Wedstrijd is niet bij jullie vereniging')
 
@@ -563,7 +563,7 @@ class WedstrijdAanmeldingDetailsView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL, Rollen.ROL_MWZ, Rollen.ROL_BB, Rollen.ROL_SPORTER)
+        return self.rol_nu in (Rol.ROL_SEC, Rol.ROL_HWL, Rol.ROL_MWZ, Rol.ROL_BB, Rol.ROL_SPORTER)
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -589,12 +589,12 @@ class WedstrijdAanmeldingDetailsView(UserPassesTestMixin, TemplateView):
         except WedstrijdInschrijving.DoesNotExist:
             raise Http404('Aanmelding niet gevonden')
 
-        if self.rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL):
+        if self.rol_nu in (Rol.ROL_SEC, Rol.ROL_HWL):
             # alleen van de eigen vereniging laten zien
             if inschrijving.wedstrijd.organiserende_vereniging != self.functie_nu.vereniging:
                 raise Http404('Verkeerde vereniging')
 
-        if self.rol_nu == Rollen.ROL_SPORTER:
+        if self.rol_nu == Rol.ROL_SPORTER:
             # alleen eigen inschrijvingen laten zien
             account = get_account(self.request)
             sporter = get_sporter(account)
@@ -605,7 +605,7 @@ class WedstrijdAanmeldingDetailsView(UserPassesTestMixin, TemplateView):
         context['sporter'] = sporter = inschrijving.sporterboog.sporter
         context['ver'] = sporter.bij_vereniging
 
-        if self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_MWZ, Rollen.ROL_HWL):
+        if self.rol_nu in (Rol.ROL_BB, Rol.ROL_MWZ, Rol.ROL_HWL):
             context['toon_contactgegevens'] = True
 
         context['voorkeuren'] = voorkeuren = get_sporter_voorkeuren(sporter)
@@ -641,7 +641,7 @@ class WedstrijdAanmeldingDetailsView(UserPassesTestMixin, TemplateView):
         url_aanmeldingen = reverse('Wedstrijden:aanmeldingen',
                                    kwargs={'wedstrijd_pk': inschrijving.wedstrijd.pk})
 
-        if self.rol_nu in (Rollen.ROL_MWZ, Rollen.ROL_BB):
+        if self.rol_nu in (Rol.ROL_MWZ, Rol.ROL_BB):
             context['kruimels'] = (
                 (reverse('Wedstrijden:manager'), 'Wedstrijdkalender'),
                 (url_aanmeldingen, 'Aanmeldingen'),
@@ -676,7 +676,7 @@ class AfmeldenView(UserPassesTestMixin, View):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL, Rollen.ROL_MWZ, Rollen.ROL_BB)
+        return self.rol_nu in (Rol.ROL_SEC, Rol.ROL_HWL, Rol.ROL_MWZ, Rol.ROL_BB)
 
     def post(self, request, *args, **kwargs):
         """ wordt aangeroepen om de POST af te handelen"""
@@ -688,7 +688,7 @@ class AfmeldenView(UserPassesTestMixin, View):
         except (TypeError, ValueError, WedstrijdInschrijving.DoesNotExist):
             raise Http404('Inschrijving niet gevonden')
 
-        if self.rol_nu not in (Rollen.ROL_BB, Rollen.ROL_MWZ):
+        if self.rol_nu not in (Rol.ROL_BB, Rol.ROL_MWZ):
             # controleer dat dit een inschrijving is op een wedstrijd van de vereniging
             ver = self.functie_nu.vereniging
             if inschrijving.wedstrijd.organiserende_vereniging != ver:

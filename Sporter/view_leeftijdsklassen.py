@@ -11,7 +11,7 @@ from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
 from BasisTypen.definities import GESLACHT_MAN, GESLACHT_ANDERS
-from Functie.definities import Rollen
+from Functie.definities import Rol
 from Functie.rol import rol_get_huidige
 from Sporter.leeftijdsklassen import (bereken_leeftijdsklassen_wa,
                                       bereken_leeftijdsklassen_khsn,
@@ -41,7 +41,7 @@ class WedstrijdLeeftijdenPersoonlijkView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu = rol_get_huidige(self.request)
-        return self.rol_nu != Rollen.ROL_NONE       # NONE is gebruiker die niet ingelogd is
+        return self.rol_nu != Rol.ROL_NONE       # NONE is gebruiker die niet ingelogd is
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -140,7 +140,7 @@ class InfoLeeftijdenView(TemplateView):
         context['persoonlijke_leeftijdsklassen'] = self.request.user.is_authenticated
 
         rol = rol_get_huidige(self.request)
-        if rol == Rollen.ROL_SPORTER:
+        if rol == Rol.ROL_SPORTER:
             context['kruimels'] = (
                 (reverse('Sporter:profiel'), 'Mijn pagina'),
                 (None, 'Leeftijdsgroepen')

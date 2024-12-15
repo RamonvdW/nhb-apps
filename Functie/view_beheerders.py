@@ -10,7 +10,7 @@ from django.views.generic import ListView
 from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import Account
-from Functie.definities import Rollen
+from Functie.definities import Rol
 from Functie.models import Functie
 from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving
 
@@ -38,10 +38,10 @@ class LijstBeheerdersView(UserPassesTestMixin, ListView):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         # alle competitie beheerders + HWL
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_MO, Rollen.ROL_MWZ, Rollen.ROL_MWW, Rollen.ROL_SUP,
-                               Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL,
-                               Rollen.ROL_SEC, Rollen.ROL_HWL, Rollen.ROL_WL,
-                               Rollen.ROL_CS)
+        return self.rol_nu in (Rol.ROL_BB, Rol.ROL_MO, Rol.ROL_MWZ, Rol.ROL_MWW, Rol.ROL_SUP,
+                               Rol.ROL_BKO, Rol.ROL_RKO, Rol.ROL_RCL,
+                               Rol.ROL_SEC, Rol.ROL_HWL, Rol.ROL_WL,
+                               Rol.ROL_CS)
 
     @staticmethod
     def _sorteer_functies(objs):
@@ -79,15 +79,15 @@ class LijstBeheerdersView(UserPassesTestMixin, ListView):
         wijzigbare_functie_rollen = ()
         wijzigbare_email_rollen = ()
 
-        if self.rol_nu == Rollen.ROL_BB:
+        if self.rol_nu == Rol.ROL_BB:
             wijzigbare_functie_rollen = ('BKO', 'CS', 'MWW', 'MO', 'MWZ')
             wijzigbare_email_rollen = ('BKO', 'CS', 'MWW', 'MO', 'MWZ')
 
-        elif self.rol_nu == Rollen.ROL_BKO:
+        elif self.rol_nu == Rol.ROL_BKO:
             wijzigbare_functie_rollen = ('RKO',)
             wijzigbare_email_rollen = ('RKO',)
 
-        elif self.rol_nu == Rollen.ROL_RKO:
+        elif self.rol_nu == Rol.ROL_RKO:
             wijzigbare_functie_rollen = ('RCL',)
             wijzigbare_email_rollen = ('RCL',)
             rko_rayon_nr = self.functie_nu.rayon.rayon_nr
@@ -100,24 +100,24 @@ class LijstBeheerdersView(UserPassesTestMixin, ListView):
                 obj.wijzig_url = reverse('Functie:wijzig-beheerders', kwargs={'functie_pk': obj.pk})
 
                 # competitie beheerders: alleen van hun eigen competitie type (Indoor / 25m1pijl)
-                if self.rol_nu in (Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL):
+                if self.rol_nu in (Rol.ROL_BKO, Rol.ROL_RKO, Rol.ROL_RCL):
                     if obj.comp_type != self.functie_nu.comp_type:
                         obj.wijzig_url = None
 
                 # verdere begrenzing RKO: alleen 'zijn' Regio's
-                if self.rol_nu == Rollen.ROL_RKO and obj.rol == "RCL" and obj.regio.rayon.rayon_nr != rko_rayon_nr:
+                if self.rol_nu == Rol.ROL_RKO and obj.rol == "RCL" and obj.regio.rayon.rayon_nr != rko_rayon_nr:
                     obj.wijzig_url = None
 
             if obj == wijzigbare_functie or obj.rol in wijzigbare_email_rollen:
                 obj.email_url = reverse('Functie:wijzig-email', kwargs={'functie_pk': obj.pk})
 
                 # competitie beheerders: alleen van hun eigen competitie type (Indoor / 25m1pijl)
-                if self.rol_nu in (Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL):
+                if self.rol_nu in (Rol.ROL_BKO, Rol.ROL_RKO, Rol.ROL_RCL):
                     if obj.comp_type != self.functie_nu.comp_type:
                         obj.email_url = None
 
                 # verdere begrenzing RKO: alleen 'zijn' Regio's
-                if self.rol_nu == Rollen.ROL_RKO and obj.rol == "RCL" and obj.regio.rayon.rayon_nr != rko_rayon_nr:
+                if self.rol_nu == Rol.ROL_RKO and obj.rol == "RCL" and obj.regio.rayon.rayon_nr != rko_rayon_nr:
                     obj.email_url = None
         # for
 
@@ -135,7 +135,7 @@ class LijstBeheerdersView(UserPassesTestMixin, ListView):
         """ called by the template system to get the queryset or list of objects for the template """
 
         # maak een lijst van de functies
-        if self.rol_nu == Rollen.ROL_HWL:
+        if self.rol_nu == Rol.ROL_HWL:
             # toon alleen de hierarchy vanuit deze vereniging omhoog
             functie_hwl = self.functie_nu
             objs = (Functie.objects
@@ -167,10 +167,10 @@ class LijstBeheerdersView(UserPassesTestMixin, ListView):
 
         context['huidige_rol'] = rol_get_beschrijving(self.request)
 
-        if self.rol_nu == Rollen.ROL_HWL:
+        if self.rol_nu == Rol.ROL_HWL:
             context['rol_is_hwl'] = True
 
-        if self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_SUP):
+        if self.rol_nu in (Rol.ROL_BB, Rol.ROL_SUP):
             context['accounts_it'] = (Account
                                       .objects
                                       .filter(is_staff=True)
@@ -181,7 +181,7 @@ class LijstBeheerdersView(UserPassesTestMixin, ListView):
                                       .filter(is_BB=True)
                                       .order_by('username'))
 
-        if self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_MWZ, Rollen.ROL_BKO, Rollen.ROL_RKO):
+        if self.rol_nu in (Rol.ROL_BB, Rol.ROL_MWZ, Rol.ROL_BKO, Rol.ROL_RKO):
             context['url_rcl'] = reverse('Functie:emails-beheerders')
 
         context['kruimels'] = (

@@ -8,7 +8,7 @@ from django.test import TestCase
 from django.utils import timezone
 from Functie.models import Functie
 from Mailer.models import MailQueue
-from Taken.operations import (aantal_open_taken, stuur_email_taak_herinnering, stuur_email_nieuwe_taak,
+from Taken.operations import (cached_aantal_open_taken, stuur_email_taak_herinnering, stuur_email_nieuwe_taak,
                               check_taak_bestaat, maak_taak, herinner_aan_taken)
 from Taken.models import Taak
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -40,7 +40,7 @@ class TestTakenTaken(E2EHelpers, TestCase):
     def test_aantal_open_taken(self):
         # standaard sessie heeft nog geen opgeslagen aantal taken
         request = self.client
-        aantal = aantal_open_taken(request)
+        aantal = cached_aantal_open_taken(request)
         self.assertIsNone(aantal)
 
     def test_stuur_email_taak_herinnering(self):

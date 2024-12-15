@@ -17,7 +17,7 @@ from Competitie.operations.wedstrijdcapaciteit import bepaal_waarschijnlijke_dee
 from Competitie.models import (CompetitieMatch, update_uitslag_teamcompetitie,
                                Regiocompetitie, RegiocompetitieRonde, RegiocompetitieSporterBoog,
                                RegiocompetitieTeam, RegiocompetitieRondeTeam, RegiocompetitieTeamPoule)
-from Functie.definities import Rollen
+from Functie.definities import Rol
 from Functie.rol import rol_get_huidige, rol_get_huidige_functie
 from Score.definities import SCORE_WAARDE_VERWIJDERD, SCORE_TYPE_SCORE, SCORE_TYPE_GEEN
 from Score.models import Score, ScoreHist, Uitslag
@@ -45,7 +45,7 @@ class ScoresRegioView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
-        return rol_nu == Rollen.ROL_RCL
+        return rol_nu == Rol.ROL_RCL
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -207,7 +207,7 @@ class WedstrijdUitslagInvoerenView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu in (Rollen.ROL_RCL, Rollen.ROL_HWL, Rollen.ROL_WL)
+        return self.rol_nu in (Rol.ROL_RCL, Rol.ROL_HWL, Rol.ROL_WL)
 
     @staticmethod
     def _team_naam_toevoegen(scores, deelcomp):
@@ -309,7 +309,7 @@ class WedstrijdUitslagInvoerenView(UserPassesTestMixin, TemplateView):
         # plan = wedstrijd.competitiewedstrijdenplan_set.first()
         # ronde = DeelcompetitieRonde.objects.get(plan=plan)
 
-        if self.rol_nu == Rollen.ROL_RCL:
+        if self.rol_nu == Rol.ROL_RCL:
             context['url_terug'] = reverse('CompScores:scores-rcl',
                                            kwargs={'deelcomp_pk': deelcomp.pk})
 
@@ -371,7 +371,7 @@ class DynamicDeelnemersOphalenView(UserPassesTestMixin, View):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
-        return rol_nu in (Rollen.ROL_RCL, Rollen.ROL_HWL, Rollen.ROL_WL)
+        return rol_nu in (Rol.ROL_RCL, Rol.ROL_HWL, Rol.ROL_WL)
 
     @staticmethod
     def post(request, *args, **kwargs):
@@ -431,7 +431,7 @@ class DynamicZoekOpBondsnummerView(UserPassesTestMixin, View):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
-        return rol_nu in (Rollen.ROL_RCL, Rollen.ROL_HWL, Rollen.ROL_WL)
+        return rol_nu in (Rol.ROL_RCL, Rol.ROL_HWL, Rol.ROL_WL)
 
     @staticmethod
     def post(request, *args, **kwargs):
@@ -538,7 +538,7 @@ class DynamicScoresOpslaanView(UserPassesTestMixin, View):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
-        return rol_nu in (Rollen.ROL_RCL, Rollen.ROL_HWL, Rollen.ROL_WL)
+        return rol_nu in (Rol.ROL_RCL, Rol.ROL_HWL, Rol.ROL_WL)
 
     @staticmethod
     def nieuwe_score(bulk, uitslag, sporterboog_pk, waarde, when, door_account):
@@ -666,7 +666,7 @@ class DynamicScoresOpslaanView(UserPassesTestMixin, View):
             raise PermissionDenied('Geen toegang')
 
         # voorkom wijzigingen bevroren wedstrijduitslag
-        if rol_nu in (Rollen.ROL_HWL, Rollen.ROL_WL) and uitslag.is_bevroren:
+        if rol_nu in (Rol.ROL_HWL, Rol.ROL_WL) and uitslag.is_bevroren:
             raise Http404('Uitslag mag niet meer gewijzigd worden')
 
         door_account = get_account(request)
@@ -691,7 +691,7 @@ class WedstrijdUitslagBekijkenView(UserPassesTestMixin, TemplateView):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         # pagina is alleen bereikbaar vanuit Beheer Vereniging
         rol_nu = rol_get_huidige(self.request)
-        return rol_nu in (Rollen.ROL_HWL, Rollen.ROL_WL)
+        return rol_nu in (Rol.ROL_HWL, Rol.ROL_WL)
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -769,7 +769,7 @@ class ScoresRegioTeamsView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
-        return rol_nu == Rollen.ROL_RCL
+        return rol_nu == Rol.ROL_RCL
 
     @staticmethod
     def _bepaal_teams_en_scores(deelcomp, mag_database_wijzigen=False):

@@ -9,7 +9,7 @@ from django.test import TestCase
 from Competitie.models import Competitie
 from Competitie.test_utils.tijdlijn import zet_competitie_fases
 from Competitie.tests.test_helpers import maak_competities_en_zet_fase_c
-from Functie.definities import Rollen
+from Functie.definities import Rol
 from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
 
@@ -32,37 +32,37 @@ class TestCompetitieOverzicht(E2EHelpers, TestCase):
         zet_competitie_fases(comp, 'A', 'A')
 
         # altijd openbaar voor BB en BKO
-        comp.bepaal_openbaar(Rollen.ROL_BB)
+        comp.bepaal_openbaar(Rol.ROL_BB)
         self.assertTrue(comp.is_openbaar)
 
-        comp.bepaal_openbaar(Rollen.ROL_BKO)
+        comp.bepaal_openbaar(Rol.ROL_BKO)
         self.assertTrue(comp.is_openbaar)
 
         # altijd openbaar voor RKO/RCL/HWL
-        comp.bepaal_openbaar(Rollen.ROL_RKO)
+        comp.bepaal_openbaar(Rol.ROL_RKO)
         self.assertTrue(comp.is_openbaar)
 
-        comp.bepaal_openbaar(Rollen.ROL_RCL)
+        comp.bepaal_openbaar(Rol.ROL_RCL)
         self.assertTrue(comp.is_openbaar)
 
-        comp.bepaal_openbaar(Rollen.ROL_HWL)
+        comp.bepaal_openbaar(Rol.ROL_HWL)
         self.assertTrue(comp.is_openbaar)
 
-        comp.bepaal_openbaar(Rollen.ROL_WL)
+        comp.bepaal_openbaar(Rol.ROL_WL)
         self.assertFalse(comp.is_openbaar)
 
-        comp.bepaal_openbaar(Rollen.ROL_SEC)
+        comp.bepaal_openbaar(Rol.ROL_SEC)
         self.assertFalse(comp.is_openbaar)
 
-        comp.bepaal_openbaar(Rollen.ROL_MO)
+        comp.bepaal_openbaar(Rol.ROL_MO)
         self.assertFalse(comp.is_openbaar)
 
-        comp.bepaal_openbaar(Rollen.ROL_SPORTER)
+        comp.bepaal_openbaar(Rol.ROL_SPORTER)
         self.assertFalse(comp.is_openbaar)
 
         # vanaf fase B altijd openbaar
         comp.fase_indiv = 'C'
-        comp.bepaal_openbaar(Rollen.ROL_SPORTER)
+        comp.bepaal_openbaar(Rol.ROL_SPORTER)
         self.assertTrue(comp.is_openbaar)
 
     def test_top(self):

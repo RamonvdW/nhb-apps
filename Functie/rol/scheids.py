@@ -6,20 +6,18 @@
 
 """ Ondersteuning voor de extra rechten van sporters die niet vereisen om van rol te wisselen. """
 
+from Account.models import Account
 from Account.operations.session_vars import zet_sessionvar_if_changed
 from BasisTypen.definities import SCHEIDS_NIET
 
 SESSIONVAR_SCHEIDS = 'gebruiker_is_scheids'
 
 
-def zet_sessionvar_is_scheids(account, request):
+def rol_zet_is_scheids(request, account: Account):
     """ zet een session variabele die onthoudt of de sporter ook scheidsrechter is
     """
 
-    if account.is_authenticated:        # pragma: no branch
-        is_scheids = account.scheids != SCHEIDS_NIET
-    else:                               # pragma: no cover
-        is_scheids = False
+    is_scheids = account.scheids != SCHEIDS_NIET
 
     zet_sessionvar_if_changed(request, SESSIONVAR_SCHEIDS, is_scheids)
 

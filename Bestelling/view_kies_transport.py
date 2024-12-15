@@ -14,7 +14,7 @@ from Account.models import get_account
 from Bestelling.definities import BESTELLING_TRANSPORT_NVT, BESTELLING_TRANSPORT_VERZEND, BESTELLING_TRANSPORT_OPHALEN
 from Bestelling.models import BestellingMandje
 from Bestelling.operations.mutaties import bestel_mutatieverzoek_transport
-from Functie.definities import Rollen
+from Functie.definities import Rol
 from Functie.rol import rol_get_huidige
 from Vereniging.models import Vereniging
 
@@ -38,7 +38,7 @@ class KiesTransportView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu = rol_get_huidige(self.request)
-        return self.rol_nu != Rollen.ROL_NONE
+        return self.rol_nu != Rol.ROL_NONE
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

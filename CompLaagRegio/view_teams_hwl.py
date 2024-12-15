@@ -17,7 +17,7 @@ from BasisTypen.models import TeamType
 from Competitie.models import (CompetitieTeamKlasse, Regiocompetitie, RegiocompetitieSporterBoog,
                                RegiocompetitieTeam, RegiocompetitieRondeTeam,
                                update_uitslag_teamcompetitie)
-from Functie.definities import Rollen
+from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
 from Score.definities import AG_NUL, AG_DOEL_TEAM
 from Score.models import AanvangsgemiddeldeHist
@@ -86,7 +86,7 @@ class TeamsRegioView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.functie_nu and self.rol_nu in (Rollen.ROL_HWL, Rollen.ROL_WL)
+        return self.functie_nu and self.rol_nu in (Rol.ROL_HWL, Rol.ROL_WL)
 
     def _get_deelcomp(self, deelcomp_pk) -> Regiocompetitie:
 
@@ -111,7 +111,7 @@ class TeamsRegioView(UserPassesTestMixin, TemplateView):
 
         self.readonly = comp.fase_teams > 'C'
 
-        if self.rol_nu == Rollen.ROL_WL:
+        if self.rol_nu == Rol.ROL_WL:
             self.readonly = True
 
         return deelcomp
@@ -219,7 +219,7 @@ class TeamsRegioView(UserPassesTestMixin, TemplateView):
         """ maak een nieuw team aan """
         _ = self._get_deelcomp(kwargs['deelcomp_pk'])
 
-        if self.rol_nu != Rollen.ROL_HWL:
+        if self.rol_nu != Rol.ROL_HWL:
             raise PermissionDenied('Geen toegang met deze rol')
 
         ver = self.functie_nu.vereniging
@@ -294,12 +294,12 @@ class WijzigRegioTeamsView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.functie_nu and self.rol_nu in (Rollen.ROL_RCL, Rollen.ROL_HWL)
+        return self.functie_nu and self.rol_nu in (Rol.ROL_RCL, Rol.ROL_HWL)
 
     def _get_deelcomp(self, deelcomp_pk) -> Regiocompetitie:
         # haal de gevraagde regiocompetitie op
 
-        if self.rol_nu == Rollen.ROL_HWL:
+        if self.rol_nu == Rol.ROL_HWL:
             regio = self.functie_nu.vereniging.regio
         else:
             # RCL
@@ -330,7 +330,7 @@ class WijzigRegioTeamsView(UserPassesTestMixin, TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        if self.rol_nu == Rollen.ROL_RCL:
+        if self.rol_nu == Rol.ROL_RCL:
             raise Http404('Verkeerde rol')
 
         # zoek de regiocompetitie waar de regio teams voor in kunnen stellen
@@ -375,7 +375,7 @@ class WijzigRegioTeamsView(UserPassesTestMixin, TemplateView):
             context['readonly'] = True
 
         comp = deelcomp.competitie
-        if self.rol_nu == Rollen.ROL_HWL:
+        if self.rol_nu == Rol.ROL_HWL:
             context['kruimels'] = (
                 (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
                 (reverse('CompLaagRegio:teams-regio', kwargs={'deelcomp_pk': deelcomp.pk}),
@@ -410,7 +410,7 @@ class WijzigRegioTeamsView(UserPassesTestMixin, TemplateView):
         except RegiocompetitieTeam.DoesNotExist:
             raise Http404('Team niet gevonden')
 
-        if self.rol_nu == Rollen.ROL_HWL:
+        if self.rol_nu == Rol.ROL_HWL:
             ver = self.functie_nu.vereniging
 
             now = timezone.now()
@@ -428,7 +428,7 @@ class WijzigRegioTeamsView(UserPassesTestMixin, TemplateView):
             # RCL
             ver = None      # wordt later ingevuld
 
-        if self.rol_nu == Rollen.ROL_HWL:
+        if self.rol_nu == Rol.ROL_HWL:
             if team.vereniging != self.functie_nu.vereniging:
                 raise Http404('Team is niet van jouw vereniging')
 
@@ -464,7 +464,7 @@ class WijzigRegioTeamsView(UserPassesTestMixin, TemplateView):
         else:
             team.delete()
 
-        if self.rol_nu == Rollen.ROL_HWL:
+        if self.rol_nu == Rol.ROL_HWL:
             url = reverse('CompLaagRegio:teams-regio', kwargs={'deelcomp_pk': deelcomp.pk})
         else:
             url = reverse('CompLaagRegio:regio-teams', kwargs={'deelcomp_pk': deelcomp.pk})
@@ -487,11 +487,11 @@ class WijzigTeamAGView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu in (Rollen.ROL_RCL, Rollen.ROL_HWL)
+        return self.rol_nu in (Rol.ROL_RCL, Rol.ROL_HWL)
 
     def _mag_wijzigen_of_404(self, deelnemer):
         ver = deelnemer.bij_vereniging
-        if self.rol_nu == Rollen.ROL_HWL:
+        if self.rol_nu == Rol.ROL_HWL:
             # HWL
             if ver != self.functie_nu.vereniging:
                 raise PermissionDenied('Niet lid van jouw vereniging')
@@ -550,7 +550,7 @@ class WijzigTeamAGView(UserPassesTestMixin, TemplateView):
             context['url_opslaan'] = reverse('CompLaagRegio:wijzig-ag',
                                              kwargs={'deelnemer_pk': deelnemer.pk})
 
-        if self.rol_nu == Rollen.ROL_HWL:
+        if self.rol_nu == Rol.ROL_HWL:
             context['kruimels'] = (
                 (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
                 (reverse('CompLaagRegio:teams-regio', kwargs={'deelcomp_pk': deelnemer.regiocompetitie.pk}),
@@ -622,7 +622,7 @@ class WijzigTeamAGView(UserPassesTestMixin, TemplateView):
             else:
                 bepaal_team_sterkte_en_klasse(team)
 
-        if self.rol_nu == Rollen.ROL_HWL:
+        if self.rol_nu == Rol.ROL_HWL:
             url = reverse('CompLaagRegio:teams-regio',
                           kwargs={'deelcomp_pk': deelnemer.regiocompetitie.pk})
         else:
@@ -649,7 +649,7 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu in (Rollen.ROL_HWL, Rollen.ROL_RCL)
+        return self.rol_nu in (Rol.ROL_HWL, Rol.ROL_RCL)
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -667,7 +667,7 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
         except (ValueError, RegiocompetitieTeam.DoesNotExist):
             raise Http404('Team niet gevonden')
 
-        if self.rol_nu == Rollen.ROL_HWL:
+        if self.rol_nu == Rol.ROL_HWL:
             ver = self.functie_nu.vereniging
             if team.vereniging != ver:
                 raise Http404('Team is niet van jouw vereniging')
@@ -682,7 +682,7 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
         comp = deelcomp.competitie
         comp.bepaal_fase()
 
-        if self.rol_nu == Rollen.ROL_HWL:
+        if self.rol_nu == Rol.ROL_HWL:
             context['readonly'] = readonly = (comp.fase_teams > 'D')
             now = timezone.now()
             einde = datetime.datetime(year=deelcomp.begin_fase_D.year,
@@ -779,7 +779,7 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
         except (ValueError, RegiocompetitieTeam.DoesNotExist):
             raise Http404('Team niet gevonden')
 
-        if self.rol_nu == Rollen.ROL_HWL:
+        if self.rol_nu == Rol.ROL_HWL:
             ver = self.functie_nu.vereniging
             if team.vereniging != ver:
                 raise Http404('Team is niet van jouw vereniging')
@@ -791,7 +791,7 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
         comp = deelcomp.competitie
         comp.bepaal_fase()
 
-        if self.rol_nu == Rollen.ROL_HWL:
+        if self.rol_nu == Rol.ROL_HWL:
             readonly = (comp.fase_teams > 'D')
             now = timezone.now()
             einde = datetime.datetime(year=deelcomp.begin_fase_D.year,
@@ -848,7 +848,7 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
 
         bepaal_team_sterkte_en_klasse(team)
 
-        if self.rol_nu == Rollen.ROL_HWL:
+        if self.rol_nu == Rol.ROL_HWL:
             url = reverse('CompLaagRegio:teams-regio', kwargs={'deelcomp_pk': deelcomp.pk})
         else:
             url = reverse('CompLaagRegio:regio-teams', kwargs={'deelcomp_pk': deelcomp.pk})
@@ -873,7 +873,7 @@ class TeamsRegioInvallersView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu in (Rollen.ROL_HWL, Rollen.ROL_WL)
+        return self.rol_nu in (Rol.ROL_HWL, Rol.ROL_WL)
 
     def _get_deelcomp(self, deelcomp_pk) -> Regiocompetitie:
 
@@ -895,7 +895,7 @@ class TeamsRegioInvallersView(UserPassesTestMixin, TemplateView):
         if comp.fase_teams != 'F':
             raise Http404('Competitie is niet in de juiste fase')
 
-        if self.rol_nu == Rollen.ROL_WL:
+        if self.rol_nu == Rol.ROL_WL:
             self.readonly = True
 
         return deelcomp
@@ -1011,7 +1011,7 @@ class TeamsRegioInvallersKoppelLedenView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu == Rollen.ROL_HWL
+        return self.rol_nu == Rol.ROL_HWL
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """

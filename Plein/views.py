@@ -5,15 +5,17 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.conf import settings
-from django.http import Http404
+from django.http import Http404, JsonResponse
+from django.utils import timezone
 from django.shortcuts import redirect, render, reverse
 from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
+from Account.operations.session_vars import zet_sessionvar_if_changed
 from Bestelling.operations.mandje import eval_mandje_inhoud
-from Functie.definities import Rollen
-from Functie.rol import rol_get_huidige, rol_get_beschrijving, rol_mag_wisselen
-from Functie.scheids import gebruiker_is_scheids
+from Functie.definities import Rol
+from Functie.rol import (rol_get_huidige, rol_get_beschrijving, rol_mag_wisselen, rol_eval_rechten_simpel,
+                         gebruiker_is_scheids)
 from Registreer.definities import REGISTRATIE_FASE_COMPLEET
 from Taken.operations import eval_open_taken
 
@@ -24,6 +26,8 @@ TEMPLATE_PLEIN_BEHEERDER = 'plein/plein-beheerder.dtl'   # beheerder (ROL_BB/BKO
 TEMPLATE_PLEIN_HANDLEIDINGEN = 'plein/handleidingen.dtl'
 TEMPLATE_NIET_ONDERSTEUND = 'plein/niet-ondersteund.dtl'
 TEMPLATE_PRIVACY = 'plein/privacy.dtl'
+
+SESSIONVAR_VORIGE_POST = 'plein_vorige_post'
 
 
 def is_browser_supported(request):
@@ -54,6 +58,14 @@ def is_browser_supported(request):
     return is_supported
 
 
+def plein_datetime_stamp_str():
+    """ geeft een string terug die de huidige datum en tijd bevat tot uren en minuten
+        wordt gebruikt om een nieuwe minuut te ontdekken
+    """
+    now = timezone.now()
+    return now.strftime('%Y-%m-%d %H:%M')
+
+
 def site_root_view(request):
     """ simpele Django view functie om vanaf de top-level site naar het Plein te gaan """
 
@@ -70,8 +82,13 @@ class PleinView(View):
     # (geen)
 
     def dispatch(self, request, *args, **kwargs):
-        """ wegsturen als het we geen vragen meer hebben + bij oneigenlijk gebruik """
+        """ checks + gebruiker doorsturen naar andere pagina's """
 
+        # controleer of de browser niet ondersteund is
+        if not is_browser_supported(request):
+            return redirect('Plein:niet-ondersteund')
+
+        # onvolledig gast-account registratie doorsturen naar de volgende vraag
         if request.user.is_authenticated:
             account = get_account(request)
             if account.is_gast:
@@ -86,14 +103,13 @@ class PleinView(View):
     def get(self, request, *args, **kwargs):
         """ called by the template system to get the context data for the template """
 
-        if not is_browser_supported(request):
-            return redirect('Plein:niet-ondersteund')
-
         # zet alles goed voor bezoekers / geen rol
         template = TEMPLATE_PLEIN_BEZOEKER
         context = dict()
 
-        # ga naar live server banner tonen?
+        context['naam_site'] = settings.NAAM_SITE
+
+        # bannen "ga naar live server" tonen?
         context['ga_naar_live_server'] = settings.IS_TEST_SERVER
 
         # site-specifieke default voor deze kaartjes
@@ -102,13 +118,12 @@ class PleinView(View):
         if request.user.is_authenticated:
             rol_nu = rol_get_huidige(request)
 
-            if rol_nu == Rollen.ROL_SPORTER:
+            if rol_nu == Rol.ROL_SPORTER:
+                # ingelogd en huidige rol is sporter
                 template = TEMPLATE_PLEIN_SPORTER
+
                 context['url_profiel'] = reverse('Sporter:profiel')
                 context['url_handleiding_leden'] = settings.URL_PDF_HANDLEIDING_LEDEN
-
-                # kijk of we iets in het mandje zit, zodat we het knopje kunnen tonen
-                eval_mandje_inhoud(request)
 
                 if gebruiker_is_scheids(self.request):
                     context['url_scheids'] = reverse('Scheidsrechter:overzicht')
@@ -117,67 +132,102 @@ class PleinView(View):
                 if not account.is_gast:
                     context['url_voordeel'] = reverse('Ledenvoordeel:overzicht')
 
-            elif rol_nu == Rollen.ROL_NONE or rol_nu is None:
+            elif rol_nu == Rol.ROL_NONE or rol_nu is None:
                 # gebruik de bezoeker pagina
                 pass
 
             else:
-                # beheerder
+                # een van de vele beheerder rollen
                 template = TEMPLATE_PLEIN_BEHEERDER
 
-                if rol_nu == Rollen.ROL_BB:
+                context['huidige_rol'] = rol_get_beschrijving(request)
+
+                if rol_nu == Rol.ROL_BB:
                     context['rol_is_bb'] = True
                     context['url_scheids'] = reverse('Scheidsrechter:overzicht')
 
-                elif rol_nu == Rollen.ROL_MO:
+                elif rol_nu == Rol.ROL_MO:
                     context['rol_is_mo'] = True
-                elif rol_nu == Rollen.ROL_MWZ:
+                elif rol_nu == Rol.ROL_MWZ:
                     context['rol_is_mwz'] = True
-                elif rol_nu == Rollen.ROL_MWW:
+                elif rol_nu == Rol.ROL_MWW:
                     context['rol_is_mww'] = True
-                elif rol_nu == Rollen.ROL_BKO:
+                elif rol_nu == Rol.ROL_BKO:
                     context['rol_is_bko'] = True
-                elif rol_nu == Rollen.ROL_RKO:
+                elif rol_nu == Rol.ROL_RKO:
                     context['rol_is_rko'] = True
-                elif rol_nu == Rollen.ROL_RCL:
+                elif rol_nu == Rol.ROL_RCL:
                     context['rol_is_rcl'] = True
-                elif rol_nu == Rollen.ROL_HWL:
+                elif rol_nu == Rol.ROL_HWL:
                     context['rol_is_hwl'] = True
-                elif rol_nu == Rollen.ROL_WL:
+                elif rol_nu == Rol.ROL_WL:
                     context['rol_is_wl'] = True
-                elif rol_nu == Rollen.ROL_SEC:
+                elif rol_nu == Rol.ROL_SEC:
                     context['rol_is_sec'] = True
-                elif rol_nu == Rollen.ROL_SUP:
+                elif rol_nu == Rol.ROL_SUP:
                     context['rol_is_sup'] = True
-                elif rol_nu == Rollen.ROL_CS:
+                elif rol_nu == Rol.ROL_CS:
                     context['rol_is_cs'] = True
                 else:                               # pragma: no cover
                     # vangnet voor nieuwe rollen
                     raise Http404("Onbekende rol %s (interne fout)" % rol_nu)
 
-                if rol_nu in (Rollen.ROL_BB, Rollen.ROL_MWZ, Rollen.ROL_MO, Rollen.ROL_SUP):
+                if rol_nu in (Rol.ROL_BB, Rol.ROL_MWZ, Rol.ROL_MO, Rol.ROL_SUP):
+                    # feedback, logboek, activiteit, etc.
                     context['toon_manager_sectie'] = True
 
-                if rol_nu in (Rollen.ROL_BB,
-                              Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL,
-                              Rollen.ROL_HWL, Rollen.ROL_WL):
+                if rol_nu in (Rol.ROL_BB,
+                              Rol.ROL_BKO, Rol.ROL_RKO, Rol.ROL_RCL,
+                              Rol.ROL_HWL, Rol.ROL_WL):
                     context['toon_bondscompetities'] = True
 
-                context['huidige_rol'] = rol_get_beschrijving(request)
-
-                # kijk hoeveel taken er open staan
-                eval_open_taken(request)
-
-                # kijk of we iets in het mandje zit, zodat we het knopje kunnen tonen
-                eval_mandje_inhoud(request)
-
-        context['naam_site'] = settings.NAAM_SITE
         context['email_support'] = settings.EMAIL_SUPPORT
         context['url_email_support'] = 'mailto:' + settings.EMAIL_SUPPORT
 
         context['canonical'] = reverse('Plein:plein')
 
+        # laat een POST doen naar onszelf, maar maximaal 1x per minuut
+        # (stamp bevat geen seconden)
+        if request.session.get(SESSIONVAR_VORIGE_POST, '') != plein_datetime_stamp_str():
+            # geen opvallende url
+            context['url_ping'] = reverse('Plein:plein')
+
         return render(request, template, context)
+
+    @staticmethod
+    def post(request, *args, **kwargs):
+        """ Deze method wordt aangeroepen als de javascript van de plein pagina een POST doet.
+            Hier kunnen we zaken checken mogen we een database wijziging doen (GET mag geen wijzigingen doen).
+
+            We doen een nieuwe evaluatie doen van de rechten van de gebruiker en het aantal open taken.
+            Als deze van geen-rechten naar wel-rechten gaat, dan komt Wissel van Rol beschikbaar (en OTP, VHPG, etc.)
+        """
+
+        # CSRF token is al gecontroleerd
+
+        if request.user.is_authenticated:
+            account = get_account(request)
+
+            # evalueer opnieuw of deze gebruiker van rol mag wisselen
+            # dit wordt in de sessie opgeslagen en gebruikt om het Wissel van Rol menu te tonen
+            rol_eval_rechten_simpel(request, account)
+
+            # kijk hoeveel taken er open staan
+            eval_open_taken(request)
+
+            # kijk of we iets in het mandje zit, zodat we het knopje kunnen tonen
+            eval_mandje_inhoud(request)
+
+            # onthoud wanneer deze post was
+            # wordt gebruikt om de frequentie te beperken
+            stamp = plein_datetime_stamp_str()
+            zet_sessionvar_if_changed(request, SESSIONVAR_VORIGE_POST, stamp)
+
+            out = {'ok': 'j'}
+        else:
+            out = {'ok': 'n'}
+
+        return JsonResponse(out)
 
 
 class PrivacyView(TemplateView):

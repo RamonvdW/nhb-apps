@@ -11,7 +11,7 @@ from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Competitie.models import Competitie
 from Competitie.tijdlijn import is_open_voor_inschrijven_rk_teams
-from Functie.definities import Rollen
+from Functie.definities import Rol
 from Functie.rol import rol_get_huidige
 
 
@@ -32,9 +32,9 @@ class CompetitieTijdlijnView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu = rol_get_huidige(self.request)
-        return self.rol_nu in (Rollen.ROL_BB,
-                               Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL,
-                               Rollen.ROL_HWL, Rollen.ROL_WL)
+        return self.rol_nu in (Rol.ROL_BB,
+                               Rol.ROL_BKO, Rol.ROL_RKO, Rol.ROL_RCL,
+                               Rol.ROL_HWL, Rol.ROL_WL)
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -49,18 +49,17 @@ class CompetitieTijdlijnView(UserPassesTestMixin, TemplateView):
             raise Http404('Competitie niet gevonden')
 
         comp.bepaal_fase()                  # zet comp.fase
-        comp.bepaal_openbaar(self.rol_nu)   # zet comp.is_openbaar
 
         comp.rk_teams_is_open, comp.rk_teams_vanaf_datum = is_open_voor_inschrijven_rk_teams(comp)
 
         context['comp'] = comp
 
-        if self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL):
+        if self.rol_nu in (Rol.ROL_BB, Rol.ROL_BKO, Rol.ROL_RKO, Rol.ROL_RCL):
             comp_url = reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk})
         else:
             comp_url = reverse('Competitie:overzicht', kwargs={'comp_pk_of_seizoen': comp.maak_seizoen_url()})
 
-        if self.rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL, Rollen.ROL_HWL):
+        if self.rol_nu in (Rol.ROL_SEC, Rol.ROL_HWL, Rol.ROL_HWL):
             context['kruimels'] = (
                 (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
                 (None, 'Tijdlijn')

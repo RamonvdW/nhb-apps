@@ -12,7 +12,7 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
 from BasisTypen.definities import (GESLACHT_MAN, GESLACHT_VROUW, GESLACHT_ANDERS, GESLACHT_MV_MEERVOUD,
                                    ORGANISATIE_IFAA, SCHEIDS_NIET)
-from Functie.definities import Rollen
+from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie, rol_mag_wisselen
 from Sporter.models import Sporter, get_sporter
 from Sporter.operations import get_sporter_voorkeuren, get_sporterboog
@@ -45,13 +45,13 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         # gebruiker moet ingelogd zijn en de rol Sporter gekozen hebben
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu in (Rollen.ROL_SPORTER, Rollen.ROL_SEC, Rollen.ROL_HWL)
+        return self.rol_nu in (Rol.ROL_SPORTER, Rol.ROL_SEC, Rol.ROL_HWL)
 
     def _get_sporter_or_404(self, sporter_pk):
         """ Geeft het Sporter record terug van de sporter zelf,
             of in geval van de HWL de gekozen sporter """
 
-        if self.rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL):
+        if self.rol_nu in (Rol.ROL_SEC, Rol.ROL_HWL):
             try:
                 # conversie naar integer geef input-controle
                 sporter_pk = int(sporter_pk)
@@ -167,7 +167,7 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
 
         self._get_sporter_or_404(request.POST.get('sporter_pk', None))
 
-        is_beheerder = self.rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL)
+        is_beheerder = self.rol_nu in (Rol.ROL_SEC, Rol.ROL_HWL)
 
         self._update_sporterboog()
         self._update_voorkeuren(is_beheerder)
@@ -259,7 +259,7 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
                 opts.append(opt)
             # for
 
-        if self.rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL):
+        if self.rol_nu in (Rol.ROL_SEC, Rol.ROL_HWL):
             context['sporter_pk'] = self.sporter.pk
             context['is_hwl'] = True
             context['toon_contact_sr'] = False      # delen contactgegevens is aan de sporter, niet de HWL
@@ -274,7 +274,7 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
         context['toon_bondscompetities'] = not self.sporter.is_gast
         context['opslaan_url'] = reverse('Sporter:voorkeuren')
 
-        if self.rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL):
+        if self.rol_nu in (Rol.ROL_SEC, Rol.ROL_HWL):
             context['kruimels'] = (
                 (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
                 (reverse('Vereniging:leden-voorkeuren'), 'Voorkeuren leden'),

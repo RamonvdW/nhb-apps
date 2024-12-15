@@ -1,15 +1,20 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2023 Ramon van der Winkel.
+#  Copyright (c) 2019-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import reverse
 from django.conf import settings
+from Account.models import Account
+from Competitie.models import KampioenschapSporterBoog
+from Functie.models import Functie
+from Registreer.models import GastRegistratie
 from TijdelijkeCodes.definities import (RECEIVER_BEVESTIG_EMAIL_ACCOUNT, RECEIVER_BEVESTIG_EMAIL_FUNCTIE,
                                         RECEIVER_BEVESTIG_EMAIL_REG_GAST, RECEIVER_BEVESTIG_EMAIL_REG_LID,
                                         RECEIVER_ACCOUNT_WISSEL, RECEIVER_WACHTWOORD_VERGETEN,
                                         RECEIVER_DEELNAME_KAMPIOENSCHAP)
+from TijdelijkeCodes.models import TijdelijkeCode
 from uuid import uuid5, NAMESPACE_URL
 
 
@@ -73,7 +78,7 @@ def _maak_unieke_code(**kwargs):
     return uuid5(uuid_namespace, repr(kwargs)).hex
 
 
-def maak_tijdelijke_code_bevestig_email_account(account, **kwargs):
+def maak_tijdelijke_code_bevestig_email_account(account: Account, **kwargs):
     """ Maak een tijdelijke URL aan die gebruikt kan worden om
         toegang tot de (nieuwe) e-mail van een account te bevestigen.
         Een SiteTijdelijkeUrl record wordt in de database gezet met de
@@ -86,7 +91,7 @@ def maak_tijdelijke_code_bevestig_email_account(account, **kwargs):
     return settings.SITE_URL + reverse('TijdelijkeCodes:tijdelijke-url', args=[url_code])
 
 
-def maak_tijdelijke_code_bevestig_email_registreer_lid(account, **kwargs):
+def maak_tijdelijke_code_bevestig_email_registreer_lid(account: Account, **kwargs):
     """ Maak een tijdelijke URL aan die gebruikt kan worden om
         toegang tot de e-mail en het aanmaken van een account te bevestigen.
         Een SiteTijdelijkeUrl record wordt in de database gezet met de
@@ -99,7 +104,7 @@ def maak_tijdelijke_code_bevestig_email_registreer_lid(account, **kwargs):
     return settings.SITE_URL + reverse('TijdelijkeCodes:tijdelijke-url', args=[url_code])
 
 
-def maak_tijdelijke_code_bevestig_email_registreer_gast(gast, **kwargs):
+def maak_tijdelijke_code_bevestig_email_registreer_gast(gast: GastRegistratie, **kwargs):
     """ Maak een tijdelijke URL aan die gebruikt kan worden om
         toegang tot de e-mail en het aanmaken van een gast-account te bevestigden.
         Een SiteTijdelijkeUrl record wordt in de database gezet met de
@@ -112,7 +117,7 @@ def maak_tijdelijke_code_bevestig_email_registreer_gast(gast, **kwargs):
     return settings.SITE_URL + reverse('TijdelijkeCodes:tijdelijke-url', args=[url_code])
 
 
-def maak_tijdelijke_code_bevestig_email_functie(functie):
+def maak_tijdelijke_code_bevestig_email_functie(functie: Functie):
     """ Maak een tijdelijke URL aan die gebruikt kan worden om een
         toegang tot de (nieuwe) e-mail te bevestigen voor gebruik voor een functie.
     """
@@ -122,7 +127,7 @@ def maak_tijdelijke_code_bevestig_email_functie(functie):
     return settings.SITE_URL + reverse('TijdelijkeCodes:tijdelijke-url', args=[url_code])
 
 
-def maak_tijdelijke_code_accountwissel(account, **kwargs):
+def maak_tijdelijke_code_accountwissel(account: Account, **kwargs):
     """ Maak een tijdelijke URL aan die gebruikt kan worden om eenmalig
         in te loggen als het gekozen account.
     """
@@ -132,7 +137,7 @@ def maak_tijdelijke_code_accountwissel(account, **kwargs):
     return settings.SITE_URL + reverse('TijdelijkeCodes:tijdelijke-url', args=[url_code])
 
 
-def maak_tijdelijke_code_wachtwoord_vergeten(account, **kwargs):
+def maak_tijdelijke_code_wachtwoord_vergeten(account: Account, **kwargs):
     """ Maak een tijdelijke URL aan die gebruikt kan worden als het
         account wachtwoord vergeten is.
     """
@@ -142,7 +147,7 @@ def maak_tijdelijke_code_wachtwoord_vergeten(account, **kwargs):
     return settings.SITE_URL + reverse('TijdelijkeCodes:tijdelijke-url', args=[url_code])
 
 
-def maak_tijdelijke_code_deelname_kampioenschap(kampioen, **kwargs):
+def maak_tijdelijke_code_deelname_kampioenschap(kampioen: KampioenschapSporterBoog, **kwargs):
     """ Maak een tijdelijke URL aan die gebruikt kan worden om deelname aan een kampioenschap
         door een specifieke KampioenschapSporterBoog te bevestigen of af te melden.
     """
@@ -152,10 +157,9 @@ def maak_tijdelijke_code_deelname_kampioenschap(kampioen, **kwargs):
     return settings.SITE_URL + reverse('TijdelijkeCodes:tijdelijke-url', args=[url_code])
 
 
-def do_dispatch(request, obj):
-    """ Deze functie wordt aangeroepen vanuit de view die de ontvangen url_code
-        opgezocht heeft in de database.
-            obj is een SiteTijdelijkeUrl
+def do_dispatch(request, obj: TijdelijkeCode):
+    """ Deze functie wordt aangeroepen vanuit de POST handler die de ontvangen url_code opgezocht heeft in de database.
+            obj is een TijdelijkeCode
         Deze functie zoekt de callback van de juiste ontvanger op en roept deze aan.
     """
     redirect = None

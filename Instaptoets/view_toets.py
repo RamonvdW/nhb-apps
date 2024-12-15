@@ -10,7 +10,8 @@ from django.utils import timezone
 from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
-from Functie.rol import rol_get_huidige, Rollen
+from Functie.definities import Rol
+from Functie.rol import rol_get_huidige
 from Instaptoets.models import Instaptoets
 from Instaptoets.operations import (selecteer_toets_vragen, selecteer_huidige_vraag, toets_geldig, controleer_toets,
                                     vind_toets)
@@ -38,7 +39,7 @@ class BeginToetsView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         # gebruiker moet ingelogd zijn, geen gast zijn en rol Sporter gekozen hebben
-        if rol_get_huidige(self.request) == Rollen.ROL_SPORTER:
+        if rol_get_huidige(self.request) == Rol.ROL_SPORTER:
             account = get_account(self.request)
             if not account.is_gast:
                 self.sporter = get_sporter(account)
@@ -99,7 +100,7 @@ class ToonUitslagView(UserPassesTestMixin, TemplateView):
 
     def dispatch(self, request, *args, **kwargs):
         # gebruiker moet ingelogd zijn, geen gast zijn en rol Sporter gekozen hebben
-        if rol_get_huidige(self.request) == Rollen.ROL_SPORTER:
+        if rol_get_huidige(self.request) == Rol.ROL_SPORTER:
             account = get_account(self.request)
             if not account.is_gast:
                 self.sporter = get_sporter(account)
@@ -159,7 +160,7 @@ class VolgendeVraagView(UserPassesTestMixin, TemplateView):
 
     def dispatch(self, request, *args, **kwargs):
         # gebruiker moet ingelogd zijn, geen gast zijn en rol Sporter gekozen hebben
-        if rol_get_huidige(self.request) == Rollen.ROL_SPORTER:
+        if rol_get_huidige(self.request) == Rol.ROL_SPORTER:
             account = get_account(self.request)
             if not account.is_gast:
                 self.sporter = get_sporter(account)
@@ -227,7 +228,7 @@ class OntvangAntwoordView(UserPassesTestMixin, View):
 
     def dispatch(self, request, *args, **kwargs):
         # gebruiker moet ingelogd zijn, geen gast zijn en rol Sporter gekozen hebben
-        if rol_get_huidige(self.request) == Rollen.ROL_SPORTER:
+        if rol_get_huidige(self.request) == Rol.ROL_SPORTER:
             account = get_account(self.request)
             if not account.is_gast:
                 self.sporter = get_sporter(account)

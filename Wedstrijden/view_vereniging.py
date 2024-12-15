@@ -15,7 +15,7 @@ from Account.models import get_account
 from BasisTypen.definities import (GESLACHT_ALLE,
                                    ORGANISATIE_WA, ORGANISATIE_IFAA, ORGANISATIE_KHSN, ORGANISATIES2SHORT_STR)
 from BasisTypen.operations import get_organisatie_boogtypen, get_organisatie_klassen
-from Functie.definities import Rollen
+from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving
 from Wedstrijden.definities import (WEDSTRIJD_DISCIPLINE_3D, ORGANISATIE_WEDSTRIJD_DISCIPLINE_STRS,
                                     WEDSTRIJD_STATUS_TO_STR)
@@ -45,7 +45,7 @@ class VerenigingWedstrijdenView(UserPassesTestMixin, View):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu in (Rollen.ROL_HWL, Rollen.ROL_SEC)
+        return self.rol_nu in (Rol.ROL_HWL, Rol.ROL_SEC)
 
     def get(self, request, *args, **kwargs):
         """ deze functie wordt aangeroepen om de GET request af te handelen """
@@ -132,7 +132,7 @@ class NieuweWedstrijdKiesType(UserPassesTestMixin, View):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu == Rollen.ROL_HWL
+        return self.rol_nu == Rol.ROL_HWL
 
     def get(self, request, *args, **kwargs):
         """ deze functie wordt aangeroepen om de GET request af te handelen """

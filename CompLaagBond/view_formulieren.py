@@ -15,7 +15,7 @@ from Competitie.definities import DEEL_BK, DEEL_RK, DEELNAME_NEE, DEELNAME2STR
 from Competitie.models import (CompetitieMatch, CompetitieIndivKlasse, CompetitieTeamKlasse,
                                Kampioenschap, KampioenschapSporterBoog, KampioenschapTeam,
                                KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet)
-from Functie.definities import Rollen
+from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
 from Scheidsrechter.models import MatchScheidsrechters
 from Sporter.models import SporterVoorkeuren
@@ -122,7 +122,7 @@ class DownloadBkIndivFormulierenView(UserPassesTestMixin, DownloadBkFormulierenV
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.functie_nu and rol_nu == Rollen.ROL_BKO
+        return self.functie_nu and rol_nu == Rol.ROL_BKO
 
 
 class DownloadBkTeamsFormulierenView(UserPassesTestMixin, DownloadBkFormulierenView):
@@ -134,7 +134,7 @@ class DownloadBkTeamsFormulierenView(UserPassesTestMixin, DownloadBkFormulierenV
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.functie_nu and rol_nu == Rollen.ROL_BKO
+        return self.functie_nu and rol_nu == Rol.ROL_BKO
 
 
 class FormulierBkIndivAlsBestandView(UserPassesTestMixin, TemplateView):
@@ -148,7 +148,7 @@ class FormulierBkIndivAlsBestandView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu, functie_nu = rol_get_huidige_functie(self.request)
-        return functie_nu and rol_nu == Rollen.ROL_BKO
+        return functie_nu and rol_nu == Rol.ROL_BKO
 
     def get(self, request, *args, **kwargs):
         """ Afhandelen van de GET request waarmee we een bestand terug geven. """
@@ -373,7 +373,7 @@ class FormulierBkTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu, functie_nu = rol_get_huidige_functie(self.request)
-        return functie_nu and rol_nu == Rollen.ROL_BKO
+        return functie_nu and rol_nu == Rol.ROL_BKO
 
     def get(self, request, *args, **kwargs):
         """ Afhandelen van de GET request waarmee we een bestand terug geven. """
@@ -720,7 +720,7 @@ class InformatieHWLView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.functie_nu and rol_nu == Rollen.ROL_HWL
+        return self.functie_nu and rol_nu == Rol.ROL_HWL
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """

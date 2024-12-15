@@ -5,11 +5,12 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import reverse
-from django.utils import timezone
+#from django.utils import timezone
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
-from Functie.rol import rol_get_huidige, Rollen
+from Functie.definities import Rol
+from Functie.rol import rol_get_huidige
 from Instaptoets.operations import instaptoets_is_beschikbaar, vind_toets, toets_geldig
 from Opleidingen.models import OpleidingDiploma
 from Sporter.models import get_sporter
@@ -33,7 +34,7 @@ class OpleidingenOverzichtView(TemplateView):
 
             # pak de diploma's erbij
             sporter = get_sporter(account)
-            now = timezone.now()
+            #now = timezone.now()
 
             diplomas = (OpleidingDiploma
                         .objects
@@ -70,7 +71,7 @@ class BasiscursusView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         # gebruiker moet ingelogd zijn, geen gast zijn en rol Sporter gekozen hebben
-        if rol_get_huidige(self.request) == Rollen.ROL_SPORTER:
+        if rol_get_huidige(self.request) == Rol.ROL_SPORTER:
             account = get_account(self.request)
             if not account.is_gast:
                 self.sporter = get_sporter(account)

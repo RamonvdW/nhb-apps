@@ -12,7 +12,7 @@ from django.views.generic import View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Evenement.definities import EVENEMENT_STATUS_TO_STR
 from Evenement.models import Evenement
-from Functie.definities import Rollen
+from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving
 import datetime
 
@@ -36,7 +36,7 @@ class VerenigingEvenementenView(UserPassesTestMixin, View):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu in (Rollen.ROL_HWL, Rollen.ROL_SEC)
+        return self.rol_nu in (Rol.ROL_HWL, Rol.ROL_SEC)
 
     def get(self, request, *args, **kwargs):
         """ deze functie wordt aangeroepen om de GET request af te handelen """

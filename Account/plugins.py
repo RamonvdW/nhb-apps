@@ -73,7 +73,7 @@ account_add_plugin_login_gate(40, account_check_email_is_bevestigd, True)
 
 
 def receive_bevestiging_account_email(request, account):
-    """ deze functie wordt aangeroepen als een tijdelijke url gevolgd wordt
+    """ deze functie wordt vanuit een POST context aangeroepen als een tijdelijke url gevolgd wordt
         om een email adres te bevestigen, zowel de eerste keer als wijziging van email.
             account is een Account object.
         We moeten een url teruggeven waar een http-redirect naar gedaan kan worden

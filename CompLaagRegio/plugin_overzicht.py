@@ -8,7 +8,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.formats import localize
 from Competitie.models import Regiocompetitie
-from Functie.definities import Rollen
+from Functie.definities import Rol
 from Score.operations import wanneer_ag_vastgesteld
 from types import SimpleNamespace
 import datetime
@@ -21,7 +21,7 @@ def get_kaartjes_regio(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_ind
         Regiocompetitie loopt vanaf fase A t/m G.
     """
 
-    if rol_nu == Rollen.ROL_BB:
+    if rol_nu == Rol.ROL_BB:
 
         if not comp.klassengrenzen_vastgesteld:
             # AG vaststellen
@@ -52,7 +52,7 @@ def get_kaartjes_regio(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_ind
                         url=url)
             kaartjes_algemeen.append(kaartje)
 
-    if rol_nu == Rollen.ROL_BKO:
+    if rol_nu == Rol.ROL_BKO:
 
         # Doorzetten regiocompetitie naar RK
         if comp.fase_indiv == 'G':
@@ -65,7 +65,7 @@ def get_kaartjes_regio(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_ind
                 url=url)
             kaartjes_algemeen.append(kaartje)
 
-    if rol_nu in (Rollen.ROL_BKO, Rollen.ROL_RKO):
+    if rol_nu in (Rol.ROL_BKO, Rol.ROL_RKO):
 
         # laat de regio instellingen zien voor alle relevante regios
         url = reverse('CompLaagRegio:regio-instellingen-globaal', kwargs={'comp_pk': comp.pk})
@@ -89,7 +89,7 @@ def get_kaartjes_regio(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_ind
                         url=url)
             kaartjes_teams.append(kaartje)
 
-    if rol_nu == Rollen.ROL_RCL:
+    if rol_nu == Rol.ROL_RCL:
 
         # pak de regiocompetitie erbij
         try:

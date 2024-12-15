@@ -17,7 +17,7 @@ from Competitie.definities import (MUTATIE_DOORZETTEN_REGIO_NAAR_RK,
                                    MUTATIE_KAMP_INDIV_DOORZETTEN_NAAR_BK, MUTATIE_KAMP_TEAMS_DOORZETTEN_NAAR_BK,
                                    MUTATIE_KAMP_INDIV_AFSLUITEN, MUTATIE_KAMP_TEAMS_AFSLUITEN)
 from Competitie.models import Competitie, CompetitieTeamKlasse, Regiocompetitie, KampioenschapTeam, CompetitieMutatie
-from Functie.definities import Rollen
+from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
 from Overig.background_sync import BackgroundSync
 
@@ -49,7 +49,7 @@ class DoorzettenRegioNaarRKView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu == Rollen.ROL_BKO
+        return self.rol_nu == Rol.ROL_BKO
 
     @staticmethod
     def _get_regio_status(competitie):
@@ -169,7 +169,7 @@ class KlassengrenzenVaststellenRkBkTeamsView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu == Rollen.ROL_BKO
+        return self.rol_nu == Rol.ROL_BKO
 
     @staticmethod
     def _tel_rk_teams(comp):
@@ -431,7 +431,7 @@ class DoorzettenBasisView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return rol_nu == Rollen.ROL_BKO
+        return rol_nu == Rol.ROL_BKO
 
     def _check_competitie_fase(self, comp_pk_str):
         try:

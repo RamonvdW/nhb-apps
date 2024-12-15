@@ -13,7 +13,7 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from Competitie.definities import DEEL_RK, DEELNAME_NEE, DEELNAME2STR
 from Competitie.models import (CompetitieIndivKlasse, CompetitieTeamKlasse, CompetitieMatch,
                                KampioenschapIndivKlasseLimiet, KampioenschapSporterBoog, KampioenschapTeam)
-from Functie.definities import Rollen
+from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
 from Scheidsrechter.models import MatchScheidsrechters
 from Sporter.models import SporterVoorkeuren
@@ -48,7 +48,7 @@ class DownloadRkFormulierView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.functie_nu and self.rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL, Rollen.ROL_WL)
+        return self.functie_nu and self.rol_nu in (Rol.ROL_SEC, Rol.ROL_HWL, Rol.ROL_WL)
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -265,7 +265,7 @@ class FormulierIndivAlsBestandView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.functie_nu and self.rol_nu in (Rollen.ROL_HWL, Rollen.ROL_WL)
+        return self.functie_nu and self.rol_nu in (Rol.ROL_HWL, Rol.ROL_WL)
 
     def get(self, request, *args, **kwargs):
         """ Afhandelen van de GET request waarmee we een bestand terug geven. """
@@ -486,7 +486,7 @@ class FormulierTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.functie_nu and self.rol_nu in (Rollen.ROL_HWL, Rollen.ROL_WL)
+        return self.functie_nu and self.rol_nu in (Rol.ROL_HWL, Rol.ROL_WL)
 
     def get(self, request, *args, **kwargs):
         """ Afhandelen van de GET request waarmee we een bestand terug geven. """

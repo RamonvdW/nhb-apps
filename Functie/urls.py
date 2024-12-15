@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2023 Ramon van der Winkel.
+#  Copyright (c) 2020-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -44,6 +44,7 @@ urlpatterns = [
          view_email_beheerders.OverzichtEmailsCompetitieBeheerdersView.as_view(),
          name='emails-beheerders'),
 
+
     path('activeer-functie/<str:functie_pk>/',
          view_activeer_rol.ActiveerRolView.as_view(),
          name='activeer-functie'),
@@ -55,6 +56,7 @@ urlpatterns = [
     path('activeer-rol/<str:rol>/',
          view_activeer_rol.ActiveerRolView.as_view(),
          name='activeer-rol'),
+
 
     path('wissel-van-rol/',
          view_wisselvanrol.WisselVanRolView.as_view(),

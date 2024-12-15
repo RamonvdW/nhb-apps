@@ -13,7 +13,7 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from Competitie.definities import DEEL_RK, DEELNAME_JA, DEELNAME_NEE
 from Competitie.models import (Regiocompetitie,
                                Kampioenschap, KampioenschapSporterBoog, KampioenschapIndivKlasseLimiet)
-from Functie.definities import Rollen
+from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
 from Sporter.models import SporterVoorkeuren
 from codecs import BOM_UTF8
@@ -44,7 +44,7 @@ class LijstRkSelectieView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu == Rollen.ROL_RKO
+        return self.rol_nu == Rol.ROL_RKO
 
     @staticmethod
     def _get_regio_status(competitie):
@@ -91,7 +91,7 @@ class LijstRkSelectieView(UserPassesTestMixin, TemplateView):
             raise Http404('Kampioenschap niet gevonden')
 
         # controleer dat de juiste RKO aan de knoppen zit
-        if self.rol_nu == Rollen.ROL_RKO and self.functie_nu != deelkamp.functie:
+        if self.rol_nu == Rol.ROL_RKO and self.functie_nu != deelkamp.functie:
             raise PermissionDenied('Niet de beheerder')     # niet de juiste RKO
 
         alles_afgesloten, regio_status = self._get_regio_status(deelkamp.competitie)
@@ -244,7 +244,7 @@ class LijstRkSelectieAlsBestandView(LijstRkSelectieView):
             raise Http404('Geen deelnemerslijst')
 
         # laat alleen de juiste RKO de lijst ophalen
-        if self.rol_nu == Rollen.ROL_RKO and self.functie_nu != deelkamp.functie:
+        if self.rol_nu == Rol.ROL_RKO and self.functie_nu != deelkamp.functie:
             raise PermissionDenied('Niet de beheerder')     # niet de juiste RKO
 
         deelnemers = (KampioenschapSporterBoog

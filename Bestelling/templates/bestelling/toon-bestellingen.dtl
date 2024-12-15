@@ -45,6 +45,12 @@
                                 <i class="notranslate material-icons-round">play_arrow</i></a>
                         </td>
                     </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="6" class="center">
+                            <i>Geen bestellingen gevonden</i>
+                        </td>
+                    </tr>
                 {% endfor %}
             </table>
         </div>

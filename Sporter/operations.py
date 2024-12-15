@@ -9,7 +9,7 @@ from django.db.models import ProtectedError
 from Account.models import get_account
 from BasisTypen.definities import GESLACHT_ANDERS
 from BasisTypen.models import BoogType
-from Functie.definities import Rollen
+from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
 from Geo.models import Regio
 from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren, get_sporter
@@ -41,7 +41,7 @@ def get_request_regio_nr(request, allow_admin_regio=True):
                      .order_by('regio_nr'))[0]
             regio_nr = regio.regio_nr
 
-    elif rol_nu == Rollen.ROL_SPORTER:
+    elif rol_nu == Rol.ROL_SPORTER:
         # sporter
         account = get_account(request)
         sporter = get_sporter(account)
@@ -73,7 +73,7 @@ def get_request_rayon_nr(request):
             # RKO
             rayon_nr = functie_nu.rayon.rayon_nr
 
-    elif rol_nu == Rollen.ROL_SPORTER:
+    elif rol_nu == Rol.ROL_SPORTER:
         if request.user.is_authenticated:                                    # pragma: no branch
             account = get_account(request)
             sporter = get_sporter(account)

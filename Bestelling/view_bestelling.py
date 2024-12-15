@@ -22,7 +22,7 @@ from Betaal.definities import (TRANSACTIE_TYPE_MOLLIE_PAYMENT, TRANSACTIE_TYPE_M
                                TRANSACTIE_TYPE_HANDMATIG)
 from Betaal.format import format_bedrag_euro
 from Betaal.mutaties import betaal_mutatieverzoek_start_ontvangst
-from Functie.definities import Rollen
+from Functie.definities import Rol
 from Functie.models import Functie
 from Functie.rol import rol_get_huidige
 from Kalender.view_maand import maak_compacte_wanneer_str
@@ -51,7 +51,7 @@ class ToonBestellingenView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu = rol_get_huidige(self.request)
-        return self.rol_nu != Rollen.ROL_NONE
+        return self.rol_nu != Rol.ROL_NONE
 
     @staticmethod
     def _get_bestellingen(account, context):
@@ -135,7 +135,7 @@ class ToonBestellingDetailsView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu = rol_get_huidige(self.request)
-        return self.rol_nu != Rollen.ROL_NONE
+        return self.rol_nu != Rol.ROL_NONE
 
     @staticmethod
     def _beschrijf_inhoud_bestelling(bestelling: Bestelling):
@@ -360,7 +360,7 @@ class BestellingAfrekenenView(UserPassesTestMixin, TemplateView):
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        return self.rol_nu not in (Rollen.ROL_NONE, None)
+        return self.rol_nu not in (Rol.ROL_NONE, None)
 
     def dispatch(self, request, *args, **kwargs):
         """ deze functie wordt aangeroepen voor get_queryset/get_context_data
@@ -370,7 +370,7 @@ class BestellingAfrekenenView(UserPassesTestMixin, TemplateView):
         """
         self.rol_nu = rol_get_huidige(self.request)
 
-        if self.rol_nu != Rollen.ROL_NONE:
+        if self.rol_nu != Rol.ROL_NONE:
 
             account = get_account(self.request)
 
@@ -429,7 +429,7 @@ class DynamicBestellingCheckStatus(UserPassesTestMixin, View):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
-        return rol_nu != Rollen.ROL_NONE
+        return rol_nu != Rol.ROL_NONE
 
     @staticmethod
     def post(request, *args, **kwargs):
@@ -518,7 +518,7 @@ class BestellingAfgerondView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu = rol_get_huidige(self.request)
-        return self.rol_nu != Rollen.ROL_NONE
+        return self.rol_nu != Rol.ROL_NONE
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -591,7 +591,7 @@ class AnnuleerBestellingView(UserPassesTestMixin, View):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
-        return rol_nu != Rollen.ROL_NONE            # inlog vereist
+        return rol_nu != Rol.ROL_NONE            # inlog vereist
 
     @staticmethod
     def post(request, *args, **kwargs):

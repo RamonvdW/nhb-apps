@@ -12,9 +12,8 @@ from Account.models import get_account
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.definities import SCHEIDS_BOND, SCHEIDS_INTERNATIONAAL, SCHEIDS_NIET
-from Functie.definities import Rollen
-from Functie.rol import rol_get_huidige
-from Functie.scheids import gebruiker_is_scheids
+from Functie.definities import Rol
+from Functie.rol import rol_get_huidige, gebruiker_is_scheids
 from Locatie.models import Reistijd
 from Scheidsrechter.definities import (BESCHIKBAAR_LEEG, BESCHIKBAAR_JA, BESCHIKBAAR_DENK, BESCHIKBAAR_NEE,
                                        BESCHIKBAAR2STR, SCHEIDS2LEVEL)
@@ -45,7 +44,7 @@ class BeschikbaarheidOpvragenView(UserPassesTestMixin, View):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
-        return rol_nu == Rollen.ROL_CS
+        return rol_nu == Rol.ROL_CS
 
     @staticmethod
     def post(request, *args, **kwargs):
@@ -89,7 +88,7 @@ class BeschikbaarheidCompetitieOpvragenView(UserPassesTestMixin, View):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
-        return rol_nu == Rollen.ROL_CS
+        return rol_nu == Rol.ROL_CS
 
     @staticmethod
     def post(request, *args, **kwargs):
@@ -127,7 +126,7 @@ class WijzigBeschikbaarheidView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu = rol_get_huidige(self.request)
-        if self.rol_nu == Rollen.ROL_SPORTER and gebruiker_is_scheids(self.request):
+        if self.rol_nu == Rol.ROL_SPORTER and gebruiker_is_scheids(self.request):
             self.account = get_account(self.request)
             self.sporter = get_sporter(self.account)
             self.is_sr4_of_hoger = self.sporter.scheids in (SCHEIDS_INTERNATIONAAL, SCHEIDS_BOND)
@@ -327,7 +326,7 @@ class BeschikbaarheidInzienCSView(UserPassesTestMixin, TemplateView):
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        return rol_get_huidige(self.request) == Rollen.ROL_CS
+        return rol_get_huidige(self.request) == Rol.ROL_CS
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -435,7 +434,7 @@ class BeschikbaarheidStatsCSView(UserPassesTestMixin, TemplateView):
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        return rol_get_huidige(self.request) == Rollen.ROL_CS
+        return rol_get_huidige(self.request) == Rol.ROL_CS
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """

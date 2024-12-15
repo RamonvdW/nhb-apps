@@ -18,7 +18,7 @@ from Competitie.models import (Competitie, CompetitieMutatie,
                                RegiocompetitieSporterBoog,
                                Kampioenschap, KampioenschapSporterBoog)
 from Competitie.operations import KlasseBepaler
-from Functie.definities import Rollen
+from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
 from Logboek.models import schrijf_in_logboek
 from Overig.background_sync import BackgroundSync
@@ -49,7 +49,7 @@ class ExtraDeelnemerView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu == Rollen.ROL_BKO
+        return self.rol_nu == Rol.ROL_BKO
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -262,7 +262,7 @@ class GeefBlancoResultaatView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu == Rollen.ROL_BKO
+        return self.rol_nu == Rol.ROL_BKO
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """

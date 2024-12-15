@@ -15,7 +15,7 @@ from Account.models import Account, get_account
 from Account.operations.wachtwoord import account_test_wachtwoord_sterkte
 from Account.operations.otp import otp_zet_controle_niet_gelukt
 from Account.plugin_manager import account_plugins_login_gate, account_plugins_ww_vergeten
-from Functie.rol import rol_bepaal_beschikbare_rollen
+from Functie.rol import rol_eval_rechten_simpel
 from Logboek.models import schrijf_in_logboek
 from Mailer.operations import render_email_template, mailer_queue_email, mailer_email_is_valide
 from Overig.helpers import get_safe_from_ip
@@ -132,7 +132,7 @@ class WachtwoordVergetenView(TemplateView):
 
 
 def receive_wachtwoord_vergeten(request, account):
-    """ deze functie wordt aangeroepen als een tijdelijke url gevolgd wordt
+    """ deze functie wordt vanuit een POST context aangeroepen als een tijdelijke url gevolgd wordt
         voor een vergeten wachtwoord.
             account is een Account object.
         We moeten een url teruggeven waar een http-redirect naar gedaan kan worden
@@ -176,8 +176,8 @@ def receive_wachtwoord_vergeten(request, account):
                        activiteit="Automatische inlog op account %s vanaf IP %s" % (
                                         repr(account.get_account_full_name()), from_ip))
 
-    # zorg dat de rollen goed ingesteld staan
-    rol_bepaal_beschikbare_rollen(request, account)
+    # controleer of deze gebruiker rollen heeft en dus van rol mag wisselen
+    rol_eval_rechten_simpel(request, account)
 
     return reverse('Account:nieuw-wachtwoord')
 

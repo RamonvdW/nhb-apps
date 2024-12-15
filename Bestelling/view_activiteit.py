@@ -15,7 +15,7 @@ from Bestelling.definities import (BESTELLING_STATUS2STR, BESTELLING_STATUS_NIEU
 from Bestelling.forms import ZoekBestellingForm
 from Bestelling.models import Bestelling
 from Betaal.definities import TRANSACTIE_TYPE_MOLLIE_PAYMENT
-from Functie.definities import Rollen
+from Functie.definities import Rol
 from Functie.rol import rol_get_huidige
 import datetime
 
@@ -40,10 +40,10 @@ class BestelActiviteitView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu = rol_get_huidige(self.request)
-        if self.rol_nu == Rollen.ROL_BB:
+        if self.rol_nu == Rol.ROL_BB:
             account = get_account(self.request)
             self.is_staff = account.is_staff
-        return self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_MWW)
+        return self.rol_nu in (Rol.ROL_BB, Rol.ROL_MWW)
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -263,7 +263,7 @@ class BestelActiviteitView(UserPassesTestMixin, TemplateView):
         if self.is_staff:
             context['url_omzet'] = reverse('Bestel:omzet')
 
-        if self.rol_nu == Rollen.ROL_MWW:
+        if self.rol_nu == Rol.ROL_MWW:
             context['kruimels'] = (
                 (reverse('Webwinkel:manager'), 'Webwinkel'),
                 (None, 'Bestellingen en Betalingen'),
@@ -288,7 +288,7 @@ class BestelOmzetView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
-        if rol_nu == Rollen.ROL_BB:
+        if rol_nu == Rol.ROL_BB:
             account = get_account(self.request)
             return account.is_staff
         return False

@@ -17,7 +17,6 @@ from Account.operations.wachtwoord import account_test_wachtwoord_sterkte
 from Account.operations.login import auto_login_gast_account
 from BasisTypen.definities import GESLACHT2STR
 from Functie.models import Functie
-from Functie.rol import rol_bepaal_beschikbare_rollen
 from Logboek.models import schrijf_in_logboek
 from Mailer.operations import mailer_queue_email, render_email_template
 from Overig.helpers import get_safe_from_ip, maak_unaccented
@@ -212,7 +211,7 @@ class RegistreerGastView(TemplateView):
 
 
 def receive_bevestiging_gast_email(request, gast):
-    """ deze functie wordt aangeroepen als een tijdelijke url gevolgd wordt
+    """ deze functie wordt vanuit een POST context aangeroepen als een tijdelijke url gevolgd wordt
         om het email adres van een nieuw gast-account te bevestigen.
             gast is een GastRegistratie object.
         We moeten een url teruggeven waar een http-redirect naar gedaan kan worden
@@ -692,9 +691,6 @@ class RegistreerGastVolgendeVraagView(View):
 
                 # informeer de secretaris over de nieuwe registratie
                 self._informeer_sec(gast)
-
-                # doe de evaluatie opnieuw, nu met het Sporter record
-                rol_bepaal_beschikbare_rollen(self.request, self.account)
 
                 # stuur de sporter door naar Mijn Pagina, om de voorkeuren aan te passen
                 return HttpResponseRedirect(reverse('Sporter:profiel'))

@@ -15,7 +15,7 @@ from CompBeheer.plugin_overzicht import get_kaartjes_beheer
 from CompLaagRegio.plugin_overzicht import get_kaartjes_regio
 from CompLaagRayon.plugin_overzicht import get_kaartjes_rayon
 from CompLaagBond.plugin_overzicht import get_kaartjes_bond
-from Functie.definities import Rollen
+from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving
 from Taken.operations import eval_open_taken
 
@@ -38,7 +38,7 @@ class CompetitieBeheerView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL)
+        return self.rol_nu in (Rol.ROL_BB, Rol.ROL_BKO, Rol.ROL_RKO, Rol.ROL_RCL)
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """

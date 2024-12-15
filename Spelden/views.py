@@ -8,7 +8,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.views.generic import TemplateView
 from BasisTypen.definities import GESLACHT_VROUW
-from Functie.definities import Rollen
+from Functie.definities import Rol
 from Functie.rol import rol_get_huidige
 from Spelden.definities import (SPELD_CATEGORIE_NL_GRAADSPELD_INDOOR, SPELD_CATEGORIE_NL_GRAADSPELD_OUTDOOR,
                                 SPELD_CATEGORIE_NL_GRAADSPELD_VELD, SPELD_CATEGORIE_NL_GRAADSPELD_SHORT_METRIC,
@@ -38,7 +38,7 @@ class BeginView(TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        if rol_get_huidige(self.request) == Rollen.ROL_SPORTER:
+        if rol_get_huidige(self.request) == Rol.ROL_SPORTER:
             context['menu_toon_mandje'] = True
 
         context['kruimels'] = (
@@ -78,7 +78,7 @@ class MeesterspeldenView(TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        if rol_get_huidige(self.request) == Rollen.ROL_SPORTER:
+        if rol_get_huidige(self.request) == Rol.ROL_SPORTER:
             context['menu_toon_mandje'] = True
 
         context['aantal_gm'], context['aantal_ms'], context['aantal_as'] = tel_hall_of_fame()
@@ -103,7 +103,7 @@ class GraadspeldenView(TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        if rol_get_huidige(self.request) == Rollen.ROL_SPORTER:
+        if rol_get_huidige(self.request) == Rol.ROL_SPORTER:
             context['menu_toon_mandje'] = True
 
         qset = (SpeldScore
@@ -161,7 +161,7 @@ class TussenspeldenView(TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        if rol_get_huidige(self.request) == Rollen.ROL_SPORTER:
+        if rol_get_huidige(self.request) == Rol.ROL_SPORTER:
             context['menu_toon_mandje'] = True
 
         now = timezone.now()
@@ -190,7 +190,7 @@ class TargetAwardsView(TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        if rol_get_huidige(self.request) == Rollen.ROL_SPORTER:
+        if rol_get_huidige(self.request) == Rol.ROL_SPORTER:
             context['menu_toon_mandje'] = True
 
         context['kruimels'] = (
@@ -211,7 +211,7 @@ class SterspeldenView(TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        if rol_get_huidige(self.request) == Rollen.ROL_SPORTER:
+        if rol_get_huidige(self.request) == Rol.ROL_SPORTER:
             context['menu_toon_mandje'] = True
 
         context['kruimels'] = (
@@ -232,7 +232,7 @@ class ArrowheadView(TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        if rol_get_huidige(self.request) == Rollen.ROL_SPORTER:
+        if rol_get_huidige(self.request) == Rol.ROL_SPORTER:
             context['menu_toon_mandje'] = True
 
         qset = (SpeldScore

@@ -12,7 +12,7 @@ from django.http import Http404
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
 from Account.operations.session_vars import zet_sessionvar_if_changed
-from Functie.definities import Rollen
+from Functie.definities import Rol
 from Functie.rol import rol_get_huidige, rol_get_beschrijving
 from Feedback.forms import FeedbackForm
 from Feedback.models import Feedback
@@ -144,7 +144,7 @@ class InzichtView(UserPassesTestMixin, ListView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
-        return rol_nu in (Rollen.ROL_BB, Rollen.ROL_SUP)
+        return rol_nu in (Rol.ROL_BB, Rol.ROL_SUP)
 
     def get_queryset(self):
         """ called by the template system to get the queryset or list of objects for the template """

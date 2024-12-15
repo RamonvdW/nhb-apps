@@ -13,7 +13,7 @@ from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.definities import ORGANISATIES2SHORT_STR
 from Betaal.models import BetaalInstellingenVereniging
-from Functie.definities import Rollen
+from Functie.definities import Rol
 from Functie.models import Functie
 from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving
 from Taken.operations import maak_taak
@@ -43,7 +43,7 @@ class KalenderManagerView(UserPassesTestMixin, View):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_MWZ)
+        return self.rol_nu in (Rol.ROL_BB, Rol.ROL_MWZ)
 
     @staticmethod
     def _maak_filter_knoppen(context, gekozen_status):
@@ -142,7 +142,7 @@ class ZetStatusWedstrijdView(UserPassesTestMixin, View):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_MWZ, Rollen.ROL_HWL)
+        return self.rol_nu in (Rol.ROL_BB, Rol.ROL_MWZ, Rol.ROL_HWL)
 
     @staticmethod
     def _maak_taak_voor_bb(wedstrijd):
@@ -235,7 +235,7 @@ class ZetStatusWedstrijdView(UserPassesTestMixin, View):
 
         # FUTURE: zet wijzigingen in het logboek, of begin een logboekje per wedstrijd
 
-        if self.rol_nu == Rollen.ROL_HWL:
+        if self.rol_nu == Rol.ROL_HWL:
             if wedstrijd.organiserende_vereniging != self.functie_nu.vereniging:
                 raise PermissionDenied('Wedstrijd niet van jouw vereniging')
 

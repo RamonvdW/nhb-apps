@@ -10,7 +10,7 @@ from django.views.generic import View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
 from Competitie.menu import get_url_voor_competitie
-from Functie.definities import Rollen, url2rol
+from Functie.definities import Rol, url2rol
 from Functie.models import Functie
 from Functie.rol import (rol_mag_wisselen, rol_get_huidige_functie, rol_get_beschrijving,
                          rol_activeer_rol, rol_activeer_functie)
@@ -53,7 +53,7 @@ class ActiveerRolView(UserPassesTestMixin, View):
                                 account.username,
                                 repr(rol_str)))
 
-            rol_activeer_rol(account, request, nwe_rol)
+            rol_activeer_rol(request, account, nwe_rol)
 
         elif 'functie_pk' in kwargs:
             # activeer functie
@@ -70,7 +70,7 @@ class ActiveerRolView(UserPassesTestMixin, View):
                             functie.pk,
                             functie))
 
-            rol_activeer_functie(account, request, functie)
+            rol_activeer_functie(request, account, functie)
 
         else:
             ver_nr = request.POST.get('ver_nr', '')[:4]     # afkappen voor de veiligheid
@@ -102,30 +102,30 @@ class ActiveerRolView(UserPassesTestMixin, View):
         # de rest blijft in Wissel van Rol
         rol_nu, functie_nu = rol_get_huidige_functie(request)
 
-        if rol_nu == Rollen.ROL_SPORTER:
+        if rol_nu == Rol.ROL_SPORTER:
             return redirect('Plein:plein')
 
-        if rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL, Rollen.ROL_WL):
+        if rol_nu in (Rol.ROL_SEC, Rol.ROL_HWL, Rol.ROL_WL):
             return redirect('Vereniging:overzicht')
 
-        if rol_nu in (Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL):
+        if rol_nu in (Rol.ROL_BKO, Rol.ROL_RKO, Rol.ROL_RCL):
             url = get_url_voor_competitie(functie_nu)
             return redirect(url)
 
-        if rol_nu == Rollen.ROL_SUP:
+        if rol_nu == Rol.ROL_SUP:
             return redirect('Feedback:inzicht')
 
-        if rol_nu == Rollen.ROL_MO:
+        if rol_nu == Rol.ROL_MO:
             return redirect('Opleidingen:manager')
 
-        if rol_nu == Rollen.ROL_MWW:
+        if rol_nu == Rol.ROL_MWW:
             return redirect('Webwinkel:manager')
 
-        if rol_nu == Rollen.ROL_MWZ:
+        if rol_nu == Rol.ROL_MWZ:
             url = reverse('Wedstrijden:manager-status', kwargs={'status': WEDSTRIJD_STATUS_URL_WACHT_OP_GOEDKEURING})
             return redirect(url)
 
-        if rol_nu == Rollen.ROL_CS:
+        if rol_nu == Rol.ROL_CS:
             url = reverse('Scheidsrechter:overzicht')
             return redirect(url)
 

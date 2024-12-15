@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from Functie.definities import Rollen
+from Functie.definities import Rol
 from Functie.operations import maak_account_vereniging_secretaris
 from Functie.tests.helpers import maak_functie
 from Functie.rol import (SESSIONVAR_ROL_HUIDIGE, SESSIONVAR_ROL_MAG_WISSELEN,
@@ -13,7 +13,7 @@ from Functie.rol import (SESSIONVAR_ROL_HUIDIGE, SESSIONVAR_ROL_MAG_WISSELEN,
                          rol_mag_wisselen, rol_enum_pallet, rol_get_beschrijving,
                          rol_activeer_rol, rol_activeer_functie,
                          rol_get_huidige, rol_get_huidige_functie)
-from Functie.scheids import gebruiker_is_scheids, SESSIONVAR_SCHEIDS
+from scheids import gebruiker_is_scheids, SESSIONVAR_SCHEIDS
 from Geo.models import Regio
 from Mailer.models import MailQueue
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -83,7 +83,7 @@ class TestFunctieRol(E2EHelpers, TestCase):
 
         del request.session[SESSIONVAR_ROL_HUIDIGE]
         rol = rol_get_huidige(request)
-        self.assertEqual(rol, Rollen.ROL_NONE)
+        self.assertEqual(rol, Rol.ROL_NONE)
 
         session = request.session
         session[SESSIONVAR_ROL_HUIDIGE_FUNCTIE_PK] = 'Test1!'
@@ -94,7 +94,7 @@ class TestFunctieRol(E2EHelpers, TestCase):
 
         del request.session[SESSIONVAR_ROL_HUIDIGE_FUNCTIE_PK]
         rol, functie = rol_get_huidige_functie(request)
-        self.assertEqual(rol, Rollen.ROL_NONE)
+        self.assertEqual(rol, Rol.ROL_NONE)
         self.assertIsNone(functie)
 
         self.assertTrue(SESSIONVAR_SCHEIDS in request.session.keys())
