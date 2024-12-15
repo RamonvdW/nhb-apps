@@ -5,12 +5,6 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from BasisTypen.models import BoogType
-from Competitie.models import Competitie, CompetitieMatch, Kampioenschap
-from Competitie.tests.test_helpers import maak_competities_en_zet_fase_c
-from Score.definities import SCORE_TYPE_GEEN
-from Score.models import Score, ScoreHist
-from Sporter.models import SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
 
 

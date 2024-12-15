@@ -5,20 +5,12 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.conf import settings
-from django.test import TestCase, override_settings
-from Betaal.definities import TRANSACTIE_TYPE_MOLLIE_RESTITUTIE, TRANSACTIE_TYPE_MOLLIE_PAYMENT
-from Betaal.models import BetaalMutatie, BetaalActief, BetaalTransactie, BetaalInstellingenVereniging
-from Betaal.mutaties import betaal_mutatieverzoek_start_ontvangst, betaal_mutatieverzoek_payment_status_changed
-from Bestelling.models import Bestelling, BestellingMutatie
-from Functie.tests.helpers import maak_functie
+from django.test import TestCase
+from Betaal.models import BetaalActief, BetaalInstellingenVereniging
 from Geo.models import Regio
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
-from decimal import Decimal
 from mollie.api.client import Client
-from mollie.api.objects.payment import Payment
-import datetime
-import time
 
 
 class TestBetaalRefresh(E2EHelpers, TestCase):

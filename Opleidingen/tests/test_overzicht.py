@@ -4,7 +4,7 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.test import TestCase, RequestFactory
+from django.test import TestCase
 from Functie.models import Functie
 from Opleidingen import admin
 from Opleidingen.models import OpleidingDiploma

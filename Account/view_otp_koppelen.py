@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2023 Ramon van der Winkel.
+#  Copyright (c) 2020-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -15,7 +15,7 @@ from Account.forms import OTPControleForm
 from Account.models import get_account
 from Account.operations.maak_qrcode import qrcode_get
 from Account.operations.otp import otp_prepare_koppelen, otp_koppel_met_code
-from Functie.rol import (rol_bepaal_beschikbare_rollen, rol_bepaal_beschikbare_rollen_opnieuw,
+from Functie.rol import (rol_bepaal_beschikbare_rollen, rol_mag_wisselen_bepaal_opnieuw,
                          rol_get_huidige_functie, rol_mag_wisselen)
 
 TEMPLATE_OTP_KOPPELEN = 'account/otp-koppelen-stap2-scan-qr-code.dtl'
@@ -39,7 +39,7 @@ class OTPKoppelenStapView(UserPassesTestMixin, TemplateView):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
 
         # evalueer opnieuw welke rechten de gebruiker heeft
-        rol_bepaal_beschikbare_rollen_opnieuw(self.request)
+        rol_mag_wisselen_bepaal_opnieuw(self.request)
 
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
 

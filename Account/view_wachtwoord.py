@@ -57,7 +57,6 @@ class WachtwoordVergetenView(TemplateView):
     """
         Deze view geeft de pagina waarmee de gebruiker een e-mailadres op
         kan geven waar een wachtwoord-reset url heen gestuurd wordt.
-
     """
 
     # class variables shared by all instances

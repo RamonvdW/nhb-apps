@@ -10,7 +10,7 @@ from django.views.generic import View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
 from Competitie.menu import get_url_voor_competitie
-from Functie.definities import Rollen
+from Functie.definities import Rollen, url2rol
 from Functie.models import Functie
 from Functie.rol import (rol_mag_wisselen, rol_get_huidige_functie, rol_get_beschrijving,
                          rol_activeer_rol, rol_activeer_functie)
@@ -19,9 +19,6 @@ from Taken.operations import eval_open_taken
 from Wedstrijden.definities import WEDSTRIJD_STATUS_URL_WACHT_OP_GOEDKEURING
 import logging
 
-
-TEMPLATE_WISSEL_VAN_ROL = 'functie/wissel-van-rol.dtl'
-TEMPLATE_WISSEL_NAAR_SEC = 'functie/wissel-naar-sec.dtl'
 
 my_logger = logging.getLogger('MH.Functie')
 
@@ -44,12 +41,19 @@ class ActiveerRolView(UserPassesTestMixin, View):
 
         if 'rol' in kwargs:
             # activeer rol
+            rol_str = kwargs['rol']
+            try:
+                nwe_rol = url2rol[rol_str]
+            except KeyError:
+                # onbekende rol
+                raise Http404('Slechte parameter')
+
             my_logger.info('%s ROL account %s wissel naar rol %s' % (
                                 from_ip,
                                 account.username,
-                                repr(kwargs['rol'])))
+                                repr(rol_str)))
 
-            rol_activeer_rol(account, request, kwargs['rol'])
+            rol_activeer_rol(account, request, nwe_rol)
 
         elif 'functie_pk' in kwargs:
             # activeer functie
@@ -58,7 +62,7 @@ class ActiveerRolView(UserPassesTestMixin, View):
                 functie_pk = int(functie_pk)
                 functie = Functie.objects.get(pk=functie_pk)
             except (ValueError, TypeError, Functie.DoesNotExist):
-                raise Http404('Foute parameter (functie)')
+                raise Http404('Slechte parameter (functie)')
 
             my_logger.info('%s ROL account %s wissel naar functie %s (%s)' % (
                             from_ip,
@@ -76,7 +80,7 @@ class ActiveerRolView(UserPassesTestMixin, View):
                                               vereniging__ver_nr=ver_nr)
             except (ValueError, TypeError, Functie.DoesNotExist):
                 # in plaats van een foutmelding, stuur door naar Wissel van Rol pagina
-                # raise Http404('Foute parameter (vereniging)')
+                # raise Http404('Slechte parameter (vereniging)')
                 return redirect('Functie:wissel-van-rol')
 
             my_logger.info('%s ROL account %s wissel naar functie %s (%s)' % (

@@ -7,7 +7,6 @@
 from django.urls import reverse
 from django.http import HttpResponseRedirect, Http404
 from django.utils import timezone
-from django.contrib.sessions.backends.db import SessionStore
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.utils.timezone import make_aware, get_default_timezone
 from django.views.generic import TemplateView, View
@@ -15,9 +14,9 @@ from django.utils.formats import date_format
 from django.db.models import F, Count
 from Account.models import Account, AccountSessions, get_account
 from Account.operations.otp import otp_loskoppelen, otp_stuur_email_losgekoppeld
-from Functie.definities import Rollen, rol2url
+from Functie.definities import Rollen
 from Functie.models import Functie, VerklaringHanterenPersoonsgegevens
-from Functie.rol import SESSIONVAR_ROL_HUIDIGE, SESSIONVAR_ROL_MAG_WISSELEN, rol_get_huidige
+from Functie.rol import rol_get_huidige
 from Overig.forms import ZoekAccountForm
 from Sporter.models import Sporter
 import datetime
@@ -276,28 +275,6 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
         # for
 
         context['url_reset_tweede_factor'] = reverse('Overig:otp-loskoppelen')
-
-        # toon sessies
-        if not context:     # aka "never without complains"     # pragma: no cover
-            accses = (AccountSessions
-                      .objects
-                      .select_related('account', 'session')
-                      .order_by('account', 'session__expire_date'))
-            for obj in accses:
-                # niet goed: onderstaande zorgt voor losse database hits voor elke sessie
-                session = SessionStore(session_key=obj.session.session_key)
-
-                try:
-                    obj.mag_wisselen_str = session[SESSIONVAR_ROL_MAG_WISSELEN]
-                except KeyError:        # pragma: no cover
-                    obj.mag_wisselen_str = '?'
-
-                try:
-                    obj.laatste_rol_str = rol2url[session[SESSIONVAR_ROL_HUIDIGE]]
-                except KeyError:        # pragma: no cover
-                    obj.laatste_rol_str = '?'
-            # for
-            context['accses'] = accses
 
         age_group_counts = dict()       # [groep] = aantal
         for group in (1, 10, 20, 30, 40, 50, 60, 70, 80):
