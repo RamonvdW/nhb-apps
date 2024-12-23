@@ -1036,7 +1036,7 @@ class Command(BaseCommand):
 
             lid_geslacht = member['gender']
             if lid_geslacht not in ('M', 'F', 'V', 'X'):
-                self.stderr.write('[ERROR] Lid %s heeft onbekend geslacht: %s (moet zijn: M of F)' % (
+                self.stderr.write('[ERROR] Lid %s heeft onbekend geslacht: %s (moet zijn: M, F, V of X)' % (
                                         lid_nr, lid_geslacht))
                 self._count_errors += 1
                 lid_geslacht = 'M'  # forceer naar iets valide
