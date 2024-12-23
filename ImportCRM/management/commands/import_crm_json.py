@@ -895,7 +895,7 @@ class Command(BaseCommand):
              'initials',
              'birthday':            string YYYY-MM-DD
              'email',
-             'gender':              'M' or 'V'
+             'gender':              'M' or 'V'/'F'
              'member_from':         string YYYY-MM-DD
              'member_until':        string YYYY-MM-DD
              'date_of_death':       string YYYY-MM-DD or null
@@ -1035,7 +1035,7 @@ class Command(BaseCommand):
                     lid_is_overleden = True
 
             lid_geslacht = member['gender']
-            if lid_geslacht not in ('M', 'F', 'X'):
+            if lid_geslacht not in ('M', 'F', 'V', 'X'):
                 self.stderr.write('[ERROR] Lid %s heeft onbekend geslacht: %s (moet zijn: M of F)' % (
                                         lid_nr, lid_geslacht))
                 self._count_errors += 1
