@@ -9,6 +9,7 @@ from django.http import HttpResponseRedirect
 from django.views.generic import TemplateView
 from django.utils.safestring import mark_safe
 from Account.models import get_account
+from CompBeheer.operations import is_competitie_openbaar_voor_rol
 from Competitie.models import Competitie, get_competitie_boog_typen
 from Competitie.seizoenen import get_comp_pk
 from Functie.definities import Rol
@@ -125,7 +126,7 @@ class CompetitieOverzichtView(TemplateView):
         context['comp'] = self.comp
 
         self.comp.bepaal_fase()                     # zet comp.fase
-        self.comp.bepaal_openbaar(Rol.ROL_NONE)  # zet comp.is_openbaar
+        self.comp.is_openbaar = is_competitie_openbaar_voor_rol(self.comp, Rol.ROL_NONE)
 
         if self.comp.fase_indiv >= 'C':
             context['toon_uitslagen'] = True

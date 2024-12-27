@@ -7,7 +7,7 @@
 {% load static %}
 {% load overig_filters %}   <!-- highlight filter -->
 
-{% block title %}Kalender{% endblock %}
+{% block title %}Kalender {{ datum|date:'F Y' }}{% endblock %}
 
 {% block extraheader %}
     <!-- extra headers voor SEO -->
@@ -28,6 +28,9 @@
             // vervang de ~2 in de url met het bogen filter
             const el_bogen = document.querySelector("input[name='filter_bogen']:checked");
             url_part2 = url_part2.replace('~2', el_bogen.dataset.url);
+
+            const el_discipline = document.querySelector("input[name='filter_discipline']:checked");
+            url_part2 = url_part2.replace('~3', el_discipline.dataset.url);
 
             let url = url_part1 + url_part2;
 

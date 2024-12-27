@@ -9,6 +9,7 @@ from django.http import Http404
 from django.views.generic import TemplateView
 from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
+from CompBeheer.operations import is_competitie_openbaar_voor_rol
 from Competitie.models import Competitie, Regiocompetitie, Kampioenschap
 from Competitie.tijdlijn import maak_comp_fase_beschrijvingen
 from CompBeheer.plugin_overzicht import get_kaartjes_beheer
@@ -57,7 +58,7 @@ class CompetitieBeheerView(UserPassesTestMixin, TemplateView):
         context['comp'] = comp
 
         comp.bepaal_fase()                     # zet comp.fase
-        comp.bepaal_openbaar(self.rol_nu)      # zet comp.is_openbaar
+        comp.is_openbaar = is_competitie_openbaar_voor_rol(comp, self.rol_nu)
 
         comp.fase_indiv_str, comp.fase_teams_str = maak_comp_fase_beschrijvingen(comp)
 

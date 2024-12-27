@@ -14,7 +14,7 @@ from django.views.generic import View, TemplateView
 from Account.models import get_account
 from Account.operations.aanmaken import AccountCreateError, account_create
 from Account.operations.wachtwoord import account_test_wachtwoord_sterkte
-from Account.operations.login import auto_login_gast_account
+from Account.operations.auto_login import auto_login_gast_account
 from BasisTypen.definities import GESLACHT2STR
 from Functie.models import Functie
 from Logboek.models import schrijf_in_logboek

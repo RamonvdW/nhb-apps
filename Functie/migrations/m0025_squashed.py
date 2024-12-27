@@ -80,7 +80,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ('Account', 'm0032_squashed'),
         ('Geo', 'm0002_squashed'),
-        ('Vereniging', 'm0007_squashed'),
+        ('Vereniging', 'm0006_squashed1'),
     ]
 
     # migratie functies

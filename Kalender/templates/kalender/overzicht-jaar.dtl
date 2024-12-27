@@ -7,7 +7,7 @@
 {% load static %}
 {% load overig_filters %}   <!-- highlight filter -->
 
-{% block title %}Kalender{% endblock %}
+{% block title %}Kalender {{ datum_vanaf|date:'F Y' }} tot {{ datum_tot|date:'F Y' }}{% endblock %}
 
 {% block extraheader %}
     <!-- extra headers voor SEO -->

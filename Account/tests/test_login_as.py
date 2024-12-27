@@ -79,6 +79,44 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
             resp = self.client.get(self.url_wissel + '?zoekterm=%s' % '1234567890' * 6)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
 
+    def test_wissel_met_otp(self):
+        # login als admin
+        self.e2e_login_and_pass_otp(self.testdata.account_admin)
+
+        self.assertTrue(self.account_normaal.otp_is_actief)
+
+        # koppel de sporter aan een functie (anders wordt OTP niet overwogen)
+        self.account_normaal.is_BB = True
+        self.account_normaal.save(update_fields=['is_BB'])
+
+        self.assertEqual(self._login_plugin_mode, 0)
+
+        # selecteer de andere schutter
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_wissel, {'selecteer': self.account_normaal.pk})
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('account/login-as-go.dtl', 'plein/site_layout.dtl'))
+
+        # pik de tijdelijke URL op
+        urls = [url for url in self.extract_all_urls(resp) if self.url_code_prefix in url]
+        # hak het https deel eraf
+        tijdelijke_url = urls[0][urls[0].find(self.url_code_prefix):]
+
+        # volg de tijdelijke url om ingelogd te raken
+        self.e2e_logout()
+        with self.assert_max_queries(20):
+            resp = self.client.get(tijdelijke_url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        urls = self.extract_all_urls(resp, skip_menu=True, skip_smileys=True)
+        post_url = urls[0]
+        with self.assert_max_queries(20):
+            resp = self.client.post(post_url, follow=True)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('plein/plein-sporter.dtl', 'plein/site_layout.dtl'))
+        self.assertContains(resp, 'Wissel van rol')
+
     def test_wissel_geen_otp(self):
         # login als admin
         self.e2e_login_and_pass_otp(self.testdata.account_admin)
@@ -109,8 +147,8 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
             resp = self.client.post(post_url, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('plein/plein-bezoeker.dtl', 'plein/site_layout.dtl'))
-        self.assertNotContains(resp, 'Wissel van Rol')
+        self.assert_template_used(resp, ('plein/plein-sporter.dtl', 'plein/site_layout.dtl'))
+        self.assertNotContains(resp, 'Wissel van rol')
 
         # controleer dat tijdelijke URL maar 1x gebruikt kan worden
         self.e2e_logout()
@@ -125,7 +163,7 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
         # activeer de login-as blokkade
         self._login_plugin_mode = 1
 
-        # selecteer de andere schutter
+        # selecteer de andere sporter
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_wissel, {'selecteer': self.account_normaal.pk})
         self.assertEqual(resp.status_code, 200)     # 200 = OK

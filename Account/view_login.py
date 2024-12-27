@@ -15,7 +15,6 @@ from Account.forms import LoginForm
 from Account.models import Account
 from Account.operations.otp import otp_zet_controle_niet_gelukt
 from Account.plugin_manager import account_plugins_login_gate, account_plugins_post_login
-from Functie.rol import rol_eval_rechten_simpel
 from Logboek.models import schrijf_in_logboek
 from Overig.helpers import get_safe_from_ip
 from datetime import timedelta
@@ -171,9 +170,6 @@ class LoginView(TemplateView):
 
         # de OTP controle is nog niet uitgevoerd
         otp_zet_controle_niet_gelukt(self.request)
-
-        # controleer of deze gebruiker rollen heeft en dus van rol mag wisselen
-        rol_eval_rechten_simpel(self.request, account)
 
         return True, None
 

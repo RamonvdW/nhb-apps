@@ -27,18 +27,19 @@ def rol_activeer_rol(request, account: Account, rol: Rol):
 
     akkoord = False
 
-    if rol in (Rol.ROL_NONE, Rol.ROL_SPORTER):
-        akkoord = True
-
-    elif rol == Rol.ROL_BB:
-        if account.is_staff or account.is_BB:
+    if account.is_authenticated:
+        if rol in (Rol.ROL_NONE, Rol.ROL_SPORTER):
             akkoord = True
 
-    else:
-        # volledige analyse vereist
-        rol_bepaler = RolBepaler(account)
-        if rol_bepaler.mag_rol(rol):
-            akkoord = True
+        elif rol == Rol.ROL_BB:
+            if account.is_staff or account.is_BB:
+                akkoord = True
+
+        else:
+            # volledige analyse vereist
+            rol_bepaler = RolBepaler(account)
+            if rol_bepaler.mag_rol(rol):
+                akkoord = True
 
     if akkoord:
         rol_zet_huidige_rol(request, rol)
@@ -53,14 +54,15 @@ def rol_activeer_functie(request, account: Account, functie: Functie):
         Geen foutmelding of exceptions als het niet mag.
     """
 
-    rol_bepaler = RolBepaler(account)
+    if account.is_authenticated:
+        rol_bepaler = RolBepaler(account)
 
-    akkoord, rol = rol_bepaler.mag_functie(functie.pk)
+        akkoord, rol = rol_bepaler.mag_functie(request, functie.pk)
 
-    if akkoord:
-        rol_zet_huidige_rol(request, rol)
-        rol_zet_huidige_functie_pk(request, functie.pk)
-        rol_zet_beschrijving(request, rol, functie=functie)
+        if akkoord:
+            rol_zet_huidige_rol(request, rol)
+            rol_zet_huidige_functie_pk(request, functie.pk)
+            rol_zet_beschrijving(request, rol, functie=functie)
 
     # else: silently ignore
 

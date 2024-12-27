@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2021-2023 Ramon van der Winkel.
+                Copyright (c) 2021-2024 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -41,10 +41,13 @@
                     <td>[{{ obj.ver_nr }}] {{ obj.naam }}</td>
 
                     <td>
-                        <form action="{{ obj.url_wordt_sec }}" method="post" onsubmit="document.getElementById('submit_knop{{ obj.pk }}').disabled=true; return true;">
-                            {% csrf_token %}
-                            <button class="btn-sv-rood" id="submit_knop{{ obj.pk }}" type="submit">SEC {{ obj.ver_nr }}</button>
-                        </form>
+                        {% if obj.url_wordt_sec %}
+                            <!-- TODO: deze pagina krijgt honderden formulieren -> vervang door kleine javascript functie -->
+                            <form action="{{ obj.url_wordt_sec }}" method="post" onsubmit="document.getElementById('submit_knop{{ obj.pk }}').disabled=true; return true;">
+                                {% csrf_token %}
+                                <button class="btn-sv-rood" id="submit_knop{{ obj.pk }}" type="submit">SEC {{ obj.ver_nr }}</button>
+                            </form>
+                        {% endif %}
                     </td>
                 </tr>
             {% endfor %}

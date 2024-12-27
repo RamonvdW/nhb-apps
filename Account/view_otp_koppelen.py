@@ -30,14 +30,12 @@ class OTPKoppelenStapView(UserPassesTestMixin, TemplateView):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        #self.rol_nu, self.functie_nu = None, None
         self.account = None
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
 
         # dispatch garandeert self.request.user.is_authenticated == True
-        #self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
         return rol_mag_wisselen(self.request)
 
     def dispatch(self, request, *args, **kwargs):

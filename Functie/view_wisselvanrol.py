@@ -168,9 +168,11 @@ class WisselVanRolView(UserPassesTestMixin, TemplateView):
         objs = list()
 
         if not self.functie_nu:
-            return objs
+            functie_nu_pk = None
+        else:
+            functie_nu_pk = self.functie_nu.pk
 
-        for rol, functie in self.rol_bepaler.iter_indirecte_rollen(self.functie_nu.pk):
+        for rol, functie in self.rol_bepaler.iter_indirecte_rollen(functie_nu_pk):
 
             url = reverse('Functie:activeer-functie', kwargs={'functie_pk': functie.pk})
 
@@ -223,7 +225,7 @@ class WisselVanRolView(UserPassesTestMixin, TemplateView):
         else:
             selected_ver_nr = -1
 
-        for rol, functie in self.rol_bepaler.iter_indirecte_rollen():
+        for rol, functie in self.rol_bepaler.iter_indirecte_rollen(self.functie_nu.pk):
             if rol == Rol.ROL_HWL:
 
                 if rol == Rol.ROL_SEC:               # pragma: no cover
@@ -389,6 +391,7 @@ class WisselNaarSecretarisView(UserPassesTestMixin, TemplateView):
                 ver.url_wordt_sec = reverse('Functie:activeer-functie',
                                             kwargs={'functie_pk': functie_sec.pk})
         # for
+
         context['verenigingen'] = vers
 
         context['kruimels'] = (

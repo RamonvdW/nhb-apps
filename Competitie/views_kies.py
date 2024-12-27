@@ -7,6 +7,7 @@
 from django.urls import reverse
 from django.views.generic import TemplateView
 from django.templatetags.static import static
+from CompBeheer.operations import is_competitie_openbaar_voor_rol
 from Competitie.models import Competitie
 from Competitie.operations import bepaal_startjaar_nieuwe_competitie
 from Functie.definities import Rol
@@ -61,7 +62,7 @@ class CompetitieKiesView(TemplateView):
                     comp.break_row = True
                 vorig_jaar = comp.begin_jaar
 
-            comp.bepaal_openbaar(rol_nu)
+            comp.is_openbaar = is_competitie_openbaar_voor_rol(comp, rol_nu)
 
             if comp.is_openbaar:
                 comps.append(comp)

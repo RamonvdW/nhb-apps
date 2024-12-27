@@ -87,7 +87,7 @@ class TestFunctieVHPG(E2EHelpers, TestCase):
         self.assertEqual(VerklaringHanterenPersoonsgegevens.objects.count(), 0)
 
         # voer de post uit met checkbox wel gezet (waarde maakt niet uit)
-        with self.assert_max_queries(29):
+        with self.assert_max_queries(20):
             resp = self.client.post(self.url_acceptatie, {'accepteert': 'whatever'}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)

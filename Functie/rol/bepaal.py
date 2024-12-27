@@ -14,11 +14,8 @@ from Functie.models import Functie
 from Functie.rol.beschrijving import rol_get_beschrijving, rol_zet_beschrijving
 from Functie.rol.mag_wisselen import rol_zet_mag_wisselen
 from Functie.rol.scheids import rol_zet_is_scheids
-from Functie.rol.huidige import rol_get_huidige_functie
-from Vereniging.models import Vereniging
-from types import SimpleNamespace
+from Functie.rol.huidige import rol_get_huidige_functie, rol_zet_huidige_rol, rol_zet_huidige_functie_pk
 from typing import Generator, Tuple
-import logging
 import typing
 
 
@@ -61,11 +58,11 @@ class ShortFunc:
         self.functie = Functie()
         self.rol_str = ""
         self.rol = Rol.ROL_NONE
-        self.comp_type = 18
-        self.rcl_regio_nr = 100
-        self.rcl_rayon_nr = 1
-        self.rko_rayon_nr = 1
-        self.ver_nr = 1000          # alleen voor SEC, HWL en WL
+        self.comp_type = 0
+        self.rcl_regio_nr = 0
+        self.rcl_rayon_nr = 0
+        self.rko_rayon_nr = 0
+        self.ver_nr = 0          # alleen voor SEC, HWL en WL
 
 
 class RolBepaler:
@@ -95,11 +92,14 @@ class RolBepaler:
         func.functie_pk = obj.pk
         func.functie = obj
         func.rol_str = obj.rol
-        func.rol = functie_rol_str2rol[obj.rol]
+        try:
+            func.rol = functie_rol_str2rol[obj.rol]
+        except KeyError:
+            func.rol = Rol.ROL_SPORTER
         func.comp_type = obj.comp_type
 
         if obj.rayon_id:
-            obj.rko_rayon_nr = obj.rayon.rayon_nr
+            func.rko_rayon_nr = obj.rayon.rayon_nr
 
         if obj.regio_id:
             func.rcl_regio_nr = obj.regio.regio_nr
@@ -294,19 +294,30 @@ class RolBepaler:
         # for
         return False
 
-    def mag_functie(self, functie_pk: int) -> (bool, Rol):
+    def mag_functie(self, request, functie_pk: int) -> (bool, Rol):
         """ Controleer of de gebruiker de gevraagde functie aan mag nemen
         """
-        for mag_rol, mag_functie in self.iter_indirecte_rollen(functie_pk):
-            if mag_functie.pk == functie_pk:
+
+        # IT en BB mogen direct wisselen naar elke andere rol
+        if self._has_bb:
+            for func in self._alle.values():
+                if func.functie_pk == functie_pk:
+                    return True, func.rol
+            # for
+
+        # is dit een van de eigen rollen?
+        for mag_rol, mag_functie in self.iter_directe_rollen():
+            if mag_functie and mag_functie.pk == functie_pk:
                 func = self._alle[functie_pk]
                 return True, func.rol
         # for
 
-        # IT en BB mogen wisselen naar elke SEC
-        if self._has_bb:
-            for func in self._alle.values():
-                if func.rol == Rol.ROL_SEC:
+        rol_nu, functie_nu = rol_get_huidige_functie(request)
+        if functie_nu:
+            # is de gevraagde functie een afgeleide rol van de huidige rol?
+            for mag_rol, mag_functie in self.iter_indirecte_rollen(functie_nu.pk):
+                if mag_functie.pk == functie_pk:
+                    func = self._alle[functie_pk]
                     return True, func.rol
             # for
 

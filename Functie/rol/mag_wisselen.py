@@ -10,19 +10,19 @@ from django.contrib.sessions.backends.db import SessionStore
 from Account.operations.session_vars import zet_sessionvar_if_changed
 from Account.models import AccountSessions
 
-SESSIONVAR_ROL_MAG_WISSELEN = 'gebruiker_rol_mag_wisselen'
+SESSIONVAR_ROL_MAG_WISSELEN_BOOL = 'gebruiker_rol_mag_wisselen_bool'
 
 
-def rol_zet_mag_wisselen(request, mag_wisselen):
+def rol_zet_mag_wisselen(request, mag_wisselen: bool):
     """ Sla op of de gebruiker toegang heeft tot wissel-van-rol """
 
-    zet_sessionvar_if_changed(request, SESSIONVAR_ROL_MAG_WISSELEN, mag_wisselen)
+    zet_sessionvar_if_changed(request, SESSIONVAR_ROL_MAG_WISSELEN_BOOL, mag_wisselen)
 
 
 def rol_mag_wisselen(request):
     """ Geeft True terug als deze gebruiker de wissel-van-rol getoond moet worden """
     try:
-        check = request.session[SESSIONVAR_ROL_MAG_WISSELEN]
+        check = request.session[SESSIONVAR_ROL_MAG_WISSELEN_BOOL]
     except KeyError:
         check = False
 
@@ -42,14 +42,14 @@ def rol_zet_mag_wisselen_voor_account(account):
                 .filter(account=account)):
         session = SessionStore(obj.session.session_key)
         try:
-            mag_wisselen = session[SESSIONVAR_ROL_MAG_WISSELEN]
+            mag_wisselen = session[SESSIONVAR_ROL_MAG_WISSELEN_BOOL]
         except KeyError:
             # expired sessions do not have keys
             pass
         else:
             if not mag_wisselen:
                 # wijziging
-                session[SESSIONVAR_ROL_MAG_WISSELEN] = True
+                session[SESSIONVAR_ROL_MAG_WISSELEN_BOOL] = True
                 session.save()
     # for
 

@@ -202,11 +202,11 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.e2e_check_rol('RCL')
 
         resp = self.client.post(self.url_activeer_functie % 999999)
-        self.assert404(resp, 'Foute parameter (functie)')
+        self.assert404(resp, 'Slechte parameter (functie)')
         self.e2e_check_rol('RCL')
 
         resp = self.client.post(self.url_activeer_functie % 'getal')
-        self.assert404(resp, 'Foute parameter (functie)')
+        self.assert404(resp, 'Slechte parameter (functie)')
         self.e2e_check_rol('RCL')
 
         # probeer te wisselen naar secretaris
@@ -241,8 +241,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         # controleer dat een niet valide rol wissel geen effect heeft
         # dit raakt een exception in Account.rol:rol_activeer
         resp = self.client.post(self.url_activeer_rol % 'huh', follow=True)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assertContains(resp, "Manager MH")
+        self.assert404(resp, 'Slechte parameter')
 
         # controleer dat een rol wissel die met een functie moet geen effect heeft
         resp = self.client.post(self.url_activeer_rol % 'BKO', follow=True)
@@ -266,7 +265,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('functie/wissel-van-rol.dtl', 'plein/site_layout.dtl'))
-        self.assertContains(resp, "Gebruiker")
+        self.assertContains(resp, "Sporter")
         urls = self._get_wissel_urls(resp)
         self.assertNotIn(self.url_accountwissel, urls)              # Account wissel
         self.assertIn(self.url_activeer_rol % 'BB', urls)           # Manager MH
@@ -497,7 +496,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.e2e_account_accepteert_vhpg(self.account_normaal)
         self.e2e_login_and_pass_otp(self.account_normaal)
 
-        with self.assert_max_queries(24):
+        with self.assert_max_queries(20):
             resp = self.client.get(self.url_wissel_van_rol)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -712,7 +711,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.e2e_wisselnaarrol_bb()
 
         resp = self.client.post(self.url_activeer_functie % 999999)
-        self.assert404(resp, 'Foute parameter (functie)')
+        self.assert404(resp, 'Slechte parameter (functie)')
 
     def test_inconsistent(self):
         # corner case: BB naar niet-bestaande functie

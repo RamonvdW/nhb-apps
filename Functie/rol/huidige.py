@@ -37,7 +37,7 @@ def rol_get_huidige(request):
         try:
             rol = request.session[SESSIONVAR_ROL_HUIDIGE]
         except KeyError:
-            rol = Rol.ROL_SPORTER
+            rol = Rol.ROL_NONE
 
     return rol
 

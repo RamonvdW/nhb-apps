@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2019-2023 Ramon van der Winkel.
+                Copyright (c) 2019-2024 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -100,7 +100,7 @@
             <div class="row-sv-blauw">
 
                 <!-- witte rechthoek voor radiobuttons -->
-                <div class="col s12 m8 offset-m2 l6">
+                <div class="col s12 m8 offset-m2{% if heeft_alle_rollen %} l6{% endif %}">
                     <div class="sv-kader left-align" style="padding:10px; margin-bottom:20px">  <!-- margin-bottom voor als kaart onder filter komt -->
                         <ul>
                         {% for obj in eigen_rollen %}
@@ -165,6 +165,7 @@
         {% endif %}     <!-- show_eigen_rollen -->
 
 
+        <!-- snelmenu voor de bondscompetitie rollen -->
         {% if heeft_alle_rollen %}
 
             <!-- blauwe balk -->

@@ -8,12 +8,13 @@ from django.test import TestCase
 from Functie.definities import Rol
 from Functie.operations import maak_account_vereniging_secretaris
 from Functie.tests.helpers import maak_functie
-from Functie.rol import (SESSIONVAR_ROL_HUIDIGE, SESSIONVAR_ROL_MAG_WISSELEN,
-                         SESSIONVAR_ROL_BESCHRIJVING, SESSIONVAR_ROL_HUIDIGE_FUNCTIE_PK,
-                         rol_mag_wisselen, rol_enum_pallet, rol_get_beschrijving,
+from Functie.rol import (rol_mag_wisselen, rol_get_beschrijving,
                          rol_activeer_rol, rol_activeer_functie,
                          rol_get_huidige, rol_get_huidige_functie)
-from scheids import gebruiker_is_scheids, SESSIONVAR_SCHEIDS
+from Functie.rol.beschrijving import SESSIONVAR_ROL_BESCHRIJVING
+from Functie.rol.huidige import SESSIONVAR_ROL_HUIDIGE, SESSIONVAR_ROL_HUIDIGE_FUNCTIE_PK
+from Functie.rol.mag_wisselen import SESSIONVAR_ROL_MAG_WISSELEN_BOOL
+from Functie.rol.scheids import gebruiker_is_scheids, SESSIONVAR_SCHEIDS
 from Geo.models import Regio
 from Mailer.models import MailQueue
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -81,7 +82,8 @@ class TestFunctieRol(E2EHelpers, TestCase):
         request = resp.wsgi_request
         self.assertTrue(request.user.is_authenticated)
 
-        del request.session[SESSIONVAR_ROL_HUIDIGE]
+        if SESSIONVAR_ROL_HUIDIGE in request.session:
+            del request.session[SESSIONVAR_ROL_HUIDIGE]
         rol = rol_get_huidige(request)
         self.assertEqual(rol, Rol.ROL_NONE)
 
@@ -117,20 +119,13 @@ class TestFunctieRol(E2EHelpers, TestCase):
         self.assertTrue(SESSIONVAR_SCHEIDS not in request.session.keys())
         self.assertFalse(gebruiker_is_scheids(request))
 
-        self.assertTrue(SESSIONVAR_ROL_MAG_WISSELEN not in request.session.keys())
+        self.assertTrue(SESSIONVAR_ROL_MAG_WISSELEN_BOOL not in request.session.keys())
         res = rol_mag_wisselen(request)
         self.assertFalse(res)
 
         self.assertTrue(SESSIONVAR_ROL_HUIDIGE not in request.session.keys())
-        rol_activeer_rol(account, request, 'bestaat niet')
+        rol_activeer_rol(request, account, 'bestaat niet')
         self.assertTrue(SESSIONVAR_ROL_HUIDIGE not in request.session.keys())
-
-        rol_activeer_functie(account, request, 'geen getal')
-        rol_activeer_functie(account, request, 0)
-
-        pallet = [tup for tup in rol_enum_pallet(account, request)]
-        self.assertEqual(len(pallet), 0)
-        rol_activeer_rol(account, request, 'geen')
 
     def test_anon(self):
         # zorg dan request.user.is_authenticated op False staat

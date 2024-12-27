@@ -89,7 +89,7 @@ class ActiveerRolView(UserPassesTestMixin, View):
                             functie.pk,
                             functie))
 
-            rol_activeer_functie(account, request, functie)
+            rol_activeer_functie(request, account, functie)
 
         rol_beschrijving = rol_get_beschrijving(request)
         my_logger.info('%s ROL account %s is nu %s' % (from_ip, account.username, rol_beschrijving))

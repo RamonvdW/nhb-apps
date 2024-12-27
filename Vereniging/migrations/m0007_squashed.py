@@ -5,6 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db import migrations, models
+from Vereniging.definities import VER_NR_BONDSBUREAU
 
 
 class Migration(migrations.Migration):
@@ -13,8 +14,8 @@ class Migration(migrations.Migration):
 
     # volgorde afdwingen
     dependencies = [
-        ('Vereniging', 'm0006_squashed1'),
         ('Sporter', 'm0031_squashed'),
+        ('Vereniging', 'm0006_squashed1'),
     ]
 
     # migratie functies
