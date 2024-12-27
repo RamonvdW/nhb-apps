@@ -10,7 +10,7 @@ from Geo.models import Regio
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
-from Webwinkel.models import WebwinkelProduct, WebwinkelFoto, WebwinkelKeuze
+from Webwinkel.models import WebwinkelProduct, WebwinkelFoto
 
 
 class TestWebwinkelOverzicht(E2EHelpers, TestCase):

@@ -22,11 +22,11 @@ charset-normalizer==3.4.0
     # via
     #   -r requirements.txt
     #   requests
-coverage==7.6.7
+coverage==7.6.9
     # via
     #   -r requirements_dev.in
     #   django-coverage-plugin
-django==4.2.16
+django==4.2.17
     # via
     #   -r requirements.txt
     #   django-debug-toolbar
@@ -43,7 +43,7 @@ et-xmlfile==2.0.0
     # via
     #   -r requirements.txt
     #   openpyxl
-fonttools==4.55.0
+fonttools==4.55.2
     # via -r requirements_dev.in
 google-api-core==2.23.0
     # via
@@ -100,7 +100,7 @@ proto-plus==1.25.0
     # via
     #   -r requirements.txt
     #   google-api-core
-protobuf==5.28.3
+protobuf==5.29.1
     # via
     #   -r requirements.txt
     #   google-api-core
@@ -151,7 +151,7 @@ sqlparse==0.5.2
     #   -r requirements.txt
     #   django
     #   django-debug-toolbar
-tomli==2.1.0
+tomli==2.2.1
     # via pip-licenses
 typing-extensions==4.12.2
     # via

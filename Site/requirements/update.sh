@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#  Copyright (c) 2019-2023 Ramon van der Winkel.
+#  Copyright (c) 2019-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -16,6 +16,7 @@ do
     echo "[INFO] Creating $OUT"
     [ -f "$OUT" ] && rm "$OUT"
     pip-compile --resolver=backtracking --strip-extras -q "$IN"
+    sed -i -- "s#$SCRIPT_DIR/##g" "$OUT"
 done
 
 # end of file

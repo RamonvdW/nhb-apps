@@ -58,7 +58,7 @@
                         <td>{{ obj.datum_wanneer }}</td>
                         <td>{% if obj.locatie %}{{ obj.locatie.plaats }}{% else %}<i>Onbekend</i>{% endif %}</td>
                         <td class="hide-on-small-only center">{{ obj.aantal_str }}</td>
-                        <td>{{ obj.beschrijving }}</td>
+                        <td>{{ obj.beschrijving }}<br>({{ obj.indiv_team_str }})</td>
                         <td>
                             {% if obj.nog_opvragen %}
                                 <a class="btn-sv-blauw" href="{{ obj.url_details }}">

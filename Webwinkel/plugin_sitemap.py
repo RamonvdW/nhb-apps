@@ -6,7 +6,7 @@
 
 from django.urls import reverse
 from Webwinkel.models import WebwinkelProduct
-from SiteMap.definities import CHECK_LOW, CHECK_MED, CHECK_HIGH
+from SiteMap.definities import CHECK_LOW, CHECK_MED   # CHECK_HIGH
 
 
 def generate_urls():

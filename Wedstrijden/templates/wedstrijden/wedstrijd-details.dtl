@@ -7,7 +7,7 @@
 {% load static %}
 {% load overig_filters %}   <!-- wbr_email en wbr_www filters -->
 
-{% block title %}Wedstrijd details{% endblock %}
+{% block title %}Wedstrijd: {{ wed.titel }}{% endblock %}
 
 {% block pagina %}
 

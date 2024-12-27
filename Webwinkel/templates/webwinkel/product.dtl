@@ -6,7 +6,7 @@
 {% endcomment %}
 {% load static %}
 
-{% block title %}Webwinkel Product{% endblock %}
+{% block title %}Webwinkel: {{ product.omslag_titel }}{% endblock %}
 
 {% block pagina %}
 
