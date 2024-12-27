@@ -144,7 +144,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('functie/wissel-van-rol.dtl', 'plein/site_layout.dtl'))
         self.assertNotContains(resp, 'Manager MH')
-        self.assertContains(resp, 'Gebruiker')
+        self.assertContains(resp, 'Sporter')
         self.assertContains(resp, 'Maak afspraken over het omgaan met persoonsgegevens.')
 
         # accepteer VHPG en login met OTP controle
@@ -160,7 +160,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.assertContains(resp, 'Admin site')
         self.assertContains(resp, 'Account wissel')
         self.assertContains(resp, 'Manager MH')
-        self.assertContains(resp, 'Gebruiker')
+        self.assertContains(resp, 'Sporter')
 
         self.assert_template_used(resp, ('functie/wissel-van-rol.dtl', 'plein/site_layout.dtl'))
         self.e2e_assert_other_http_commands_not_supported(self.url_wissel_van_rol)
@@ -224,7 +224,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('functie/wissel-van-rol.dtl', 'plein/site_layout.dtl'))
-        self.assertContains(resp, "Gebruiker")
+        self.assertContains(resp, "Sporter")        # ondanks geen koppeling met Sporter
         urls = self._get_wissel_urls(resp)
         self.assertIn(self.url_activeer_rol % 'BB', urls)          # Manager MH
         self.assertIn(self.url_accountwissel, urls)
@@ -250,7 +250,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
 
         resp = self.client.post(self.url_activeer_rol % 'geen', follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assertContains(resp, "Gebruiker")
+        self.assertContains(resp, "Sporter")        # ondanks geen koppeling met Sporter
         urls = self._get_wissel_urls(resp)
         self.assertIn(self.url_accountwissel, urls)
 
@@ -265,11 +265,10 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('functie/wissel-van-rol.dtl', 'plein/site_layout.dtl'))
-        self.assertContains(resp, "Sporter")
+        self.assertContains(resp, "Sporter")        # ondanks geen koppeling met Sporter
         urls = self._get_wissel_urls(resp)
         self.assertNotIn(self.url_accountwissel, urls)              # Account wissel
         self.assertIn(self.url_activeer_rol % 'BB', urls)           # Manager MH
-        # self.assertIn(self.url_activeer_rol % 'geen', urls)         # Gebruiker
 
         with self.assertRaises(ValueError):
             self.e2e_check_rol('deze-rol-is-het-niet')
@@ -508,7 +507,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.e2e_logout()
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_wissel_van_rol)
-        self.assert403(resp)
+        self.assert_is_redirect(resp, '/plein/')
 
         # probeer van rol te wisselen
         with self.assert_max_queries(20):

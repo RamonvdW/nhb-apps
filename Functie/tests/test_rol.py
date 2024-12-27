@@ -82,8 +82,8 @@ class TestFunctieRol(E2EHelpers, TestCase):
         request = resp.wsgi_request
         self.assertTrue(request.user.is_authenticated)
 
-        if SESSIONVAR_ROL_HUIDIGE in request.session:
-            del request.session[SESSIONVAR_ROL_HUIDIGE]
+        # if SESSIONVAR_ROL_HUIDIGE in request.session:
+        del request.session[SESSIONVAR_ROL_HUIDIGE]
         rol = rol_get_huidige(request)
         self.assertEqual(rol, Rol.ROL_NONE)
 

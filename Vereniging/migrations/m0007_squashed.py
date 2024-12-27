@@ -5,7 +5,6 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db import migrations, models
-from Vereniging.definities import VER_NR_BONDSBUREAU
 
 
 class Migration(migrations.Migration):

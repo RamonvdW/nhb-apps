@@ -116,7 +116,7 @@ class TestAccountLogin(E2EHelpers, TestCase):
                                                      'wachtwoord':  E2EHelpers.WACHTWOORD}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         # redirect is naar het plein
-        self.assert_template_used(resp, ('plein/plein-bezoeker.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('plein/plein-sporter.dtl', 'plein/site_layout.dtl'))
 
     def test_inlog_wordt_geblokkeerd(self):
         # te vaak een verkeerd wachtwoord

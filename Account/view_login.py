@@ -48,13 +48,13 @@ class LoginView(TemplateView):
 
         account = None
         try:
-            account = Account.objects.get(username=login_naam)
+            account = Account.objects.prefetch_related('sporter_set').get(username=login_naam)
         except Account.DoesNotExist:
             # account met deze username bestaat niet
             # sta ook toe dat met het e-mailadres ingelogd wordt
             try:
                 # iexact = case insensitive volledige match
-                account = Account.objects.get(bevestigde_email__iexact=login_naam)
+                account = Account.objects.prefetch_related('sporter_set').get(bevestigde_email__iexact=login_naam)
             except Account.DoesNotExist:
                 # email is ook niet bekend
                 # LET OP! dit kan heel snel heel veel data worden! - voorkom storage overflow!!
@@ -99,8 +99,7 @@ class LoginView(TemplateView):
         # controleer het wachtwoord
         # hiervoor moeten we volledige credentials aanleveren (username + password)
         # in geval van inlog met e-mailadres gebruiken we hier de username
-        account2 = authenticate(username=account.username, password=wachtwoord)
-        if not account2:
+        if not authenticate(username=account.username, password=wachtwoord):
             # authenticatie is niet gelukt
             # reden kan zijn: verkeerd wachtwoord
             #  (of: is_active=False, maar: gebruiken we niet)
@@ -134,7 +133,6 @@ class LoginView(TemplateView):
             return False, None
 
         # wachtwoord is goed
-        account = account2
 
         # kijk of er een reden is om gebruik van het account te weren
         for _, func, _ in account_plugins_login_gate:

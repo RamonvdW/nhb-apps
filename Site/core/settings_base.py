@@ -58,7 +58,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2024-12-26'
+SITE_VERSIE = '2024-12-27'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -245,6 +245,7 @@ STATICFILES_FINDER = [
 # wordt gebruikt door de permission_required decorator en UserPassesTextMixin
 # om de gebruiker door te sturen als een view geen toegang verleend
 LOGIN_URL = '/account/login/'
+
 
 # for debug_toolbar
 INTERNAL_IPS = [

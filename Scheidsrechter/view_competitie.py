@@ -7,6 +7,7 @@
 from django.urls import reverse
 from django.http import HttpResponseRedirect, Http404
 from django.utils import timezone
+from django.db.models import Count
 from django.utils.http import urlencode
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
@@ -147,12 +148,21 @@ class CompetitieMatchesView(UserPassesTestMixin, TemplateView):
                       .filter(datum_wanneer__gte=vorige_week,
                               competitie__afstand=18,       # Indoor
                               aantal_scheids__gte=1)
+                      .annotate(aantal_klassen_team=Count('team_klassen'),
+                                aantal_klassen_indiv=Count('indiv_klassen'))
                       .order_by('datum_wanneer',       # oudste bovenaan
                                 'beschrijving')):      # ivm veel dezelfde datum
 
             match.aantal_str = str(match.aantal_scheids)
 
             match.mag_wijzigen = self.is_cs and match.datum_wanneer >= vandaag
+
+            indiv_team = []
+            if match.aantal_klassen_indiv > 0:
+                indiv_team.append('Individueel')
+            if match.aantal_klassen_team > 0:
+                indiv_team.append('Team')
+            match.indiv_team_str = " en ".join(indiv_team)
 
             if self.is_cs:
                 match.url_details = reverse('Scheidsrechter:match-kies-scheidsrechter',
