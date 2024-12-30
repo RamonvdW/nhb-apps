@@ -120,8 +120,9 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
         self.account_rcl101_18 = self._prep_beheerder_lid('RCL101')
         self.account_rcl101_25 = self._prep_beheerder_lid('RCL101-25')
         self.account_rcl112_18 = self._prep_beheerder_lid('RCL112')
-        self.account_schutter = self._prep_beheerder_lid('Schutter')
-        self.lid_sporter = Sporter.objects.get(lid_nr=self.account_schutter.username)
+        self.account_sporter = self._prep_beheerder_lid('Sporter')
+        self.account_hwl = self._prep_beheerder_lid('HWL')
+        self.lid_sporter = Sporter.objects.get(lid_nr=self.account_sporter.username)
         self.lid_sporter2 = Sporter.objects.get(lid_nr=self.account_rcl101_18.username)
 
         self.boog_r = BoogType.objects.get(afkorting='R')
@@ -177,6 +178,7 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
         self.functie_rcl101_18.accounts.add(self.account_rcl101_18)
         self.functie_rcl101_25.accounts.add(self.account_rcl101_25)
         self.functie_rcl112_18.accounts.add(self.account_rcl112_18)
+        self.functie_hwl.accounts.add(self.account_hwl)
 
         self.klasse_r = CompetitieIndivKlasse.objects.filter(competitie=self.comp_18,
                                                              is_onbekend=False,
@@ -764,7 +766,7 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assertContains(resp, "100007")
-        self.assertContains(resp, "Schutter Test")
+        self.assertContains(resp, "Sporter Test")
         self.assertContains(resp, "[1000] Grote Club")
         self.assertContains(resp, "(deelname onzeker)")
         self.assertContains(resp, "Recurve klasse 1")
@@ -897,7 +899,7 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
 
     def test_wijzig_status_hwl(self):
         # HWL
-        self.e2e_login_and_pass_otp(self.account_bko_18)
+        self.e2e_login_and_pass_otp(self.account_hwl)
         self.e2e_wissel_naar_functie(self.functie_hwl)
 
         zet_competitie_fase_rk_prep(self.comp_18)

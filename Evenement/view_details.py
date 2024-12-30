@@ -89,7 +89,8 @@ class DetailsView(TemplateView):
                             kwargs={'jaar': evenement.datum.year,
                                     'maand': MAAND2URL[evenement.datum.month],
                                     'soort': 'alle',
-                                    'bogen': 'auto'})
+                                    'bogen': 'auto',
+                                    'discipline': 'alle'})
         context['kruimels'] = (
             (url_terug, 'Kalender'),
             (None, 'Details evenement'),

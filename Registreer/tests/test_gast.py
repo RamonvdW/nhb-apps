@@ -673,7 +673,7 @@ class TestRegistreerGast(E2EHelpers, TestCase):
         gast.save(update_fields=['fase'])
 
         # POST een positief goed antwoord
-        with self.assert_max_queries(21):
+        with self.assert_max_queries(20):
             resp = self.client.post(self.url_volgende_vraag, {'bevestigd': 'Ja'})
         self.assert_is_redirect(resp, self.url_sporter_profiel)
         gast = GastRegistratie.objects.first()

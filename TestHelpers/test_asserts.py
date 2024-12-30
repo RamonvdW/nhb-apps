@@ -14,6 +14,7 @@ from TestHelpers.validate_js import validate_javascript
 from Site.core.minify_dtl import minify_scripts, minify_html
 from bs4 import BeautifulSoup
 import json
+import re
 
 
 # debug optie: toon waar in de code de queries vandaan komen
@@ -115,6 +116,22 @@ class MyTestAsserts(TestCase):
 
         soup = BeautifulSoup(content, features="html.parser")
         long_msg.append(soup.prettify())
+
+        # remove empty line indicators
+        long_msg = [part.replace('\\n', '\n').rstrip()
+                    for part in long_msg]
+
+        # remove single-line <!-- html comments -->
+        long_msg = [re.sub(r'<!--.*-->', '', part)
+                    for part in long_msg]
+
+        # remove empty lines
+        long_msg = [re.sub(r'\n\s+\n', '\n', part)
+                    for part in long_msg]
+
+        # remove empty lines
+        long_msg = [re.sub(r'\n\n', '\n', part)
+                    for part in long_msg]
 
         return "?? (long msg follows):\n" + "\n".join(long_msg), long_msg
 

@@ -41,7 +41,7 @@ class TestTakenTaken(E2EHelpers, TestCase):
         # standaard sessie heeft nog geen opgeslagen aantal taken
         request = self.client
         aantal = cached_aantal_open_taken(request)
-        self.assertIsNone(aantal)
+        self.assertEqual(aantal, 0)
 
     def test_stuur_email_taak_herinnering(self):
         self.assertEqual(0, MailQueue.objects.count())

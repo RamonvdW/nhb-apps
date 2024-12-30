@@ -110,7 +110,7 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         urls = self.extract_all_urls(resp, skip_menu=True, skip_smileys=True)
         post_url = urls[0]
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(21):
             resp = self.client.post(post_url, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)

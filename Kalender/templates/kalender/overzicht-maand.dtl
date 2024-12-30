@@ -92,7 +92,7 @@
         </div>
 
         <!-- filter: bogen -->
-        <div class="col s12 m6 l3" style="margin-bottom:15px">
+        <div class="col s12 m4" style="margin-bottom:15px">
             <div class="sv-kader left-align" style="padding:10px">
                 <p><b>Bogen:</b></p>
                 <ul>
@@ -112,7 +112,7 @@
         </div>
 
         <!-- filter: soort wedstrijd -->
-        <div class="col s12 m6 l3">
+        <div class="col s12 m4">
             <div class="sv-kader left-align" style="padding:10px">
                 <p><b>Soort wedstrijd:</b></p>
                 <ul>
@@ -120,6 +120,26 @@
                         <li>
                             <label class="black-text" for="id_{{ filter.sel }}">
                                 <input class="with-gap" type="radio" name="filter_soort" value="{{ filter.sel }}" id="id_{{ filter.sel }}"{% if filter.selected %} checked{% endif %} data-url="{{ filter.url_part }}">
+                                <span>{{ filter.opt_text }}</span>
+                            </label>
+                        </li>
+                    {% endfor %}
+                </ul>
+                <p style="margin-left:35px">
+                    <button class="btn-sv-rood" onclick="stuur_keuzes('{{ url_keuzes.0 }}', '{{ url_keuzes.1 }}')">Activeer</button>
+                </p>
+            </div>
+        </div>
+
+        <!-- filter: discipline -->
+        <div class="col s12 m4">
+            <div class="sv-kader left-align" style="padding:10px">
+                <p><b>Discipline:</b></p>
+                <ul>
+                    {% for filter in soort_discipline %}
+                        <li>
+                            <label class="black-text" for="id_{{ filter.sel }}">
+                                <input class="with-gap" type="radio" name="filter_discipline" value="{{ filter.sel }}" id="id_{{ filter.sel }}"{% if filter.selected %} checked{% endif %} data-url="{{ filter.url_part }}">
                                 <span>{{ filter.opt_text }}</span>
                             </label>
                         </li>

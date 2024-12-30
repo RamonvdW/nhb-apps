@@ -73,6 +73,8 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
         self.hwl_ver_nr = self.ver_nrs[1]
         self.functie_hwl = self.testdata.functie_hwl[self.hwl_ver_nr]
 
+        self.functie_rcl = self.testdata.comp18_functie_rcl[self.functie_hwl.vereniging.regio.regio_nr]
+
         self.comp = self.testdata.comp18
         self.deelkamp_rk = self.testdata.deelkamp18_rk[self.rayon_nr]
         self.url_lijst_rko = self.url_lijst_rk_rko % self.deelkamp_rk.pk
@@ -167,6 +169,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
 
         # 4 regio's met 6 sporters waarvan 1 met te weinig scores
         self.e2e_login_and_pass_otp(self.account_bko)
+        self.e2e_wissel_naar_functie(self.functie_bko)
         self.e2e_wissel_naar_functie(self.functie_rko)
 
         self.assertTrue(KampioenschapSporterBoog.objects.count() > 0)
@@ -193,6 +196,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
         # daarbij wordt rekening gehouden met sporters die afgemeld zijn
 
         self.e2e_login_and_pass_otp(self.account_bko)
+        self.e2e_wissel_naar_functie(self.functie_bko)
         self.e2e_wissel_naar_functie(self.functie_rko)
         self.assertTrue(KampioenschapSporterBoog.objects.count() > 0)
         # self._dump_deelnemers()
@@ -241,6 +245,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
     def test_rko_bevestigen(self):
         # bevestig deelname door een sporter en een reserve
         self.e2e_login_and_pass_otp(self.account_bko)
+        self.e2e_wissel_naar_functie(self.functie_bko)
         self.e2e_wissel_naar_functie(self.functie_rko)
         self.assertTrue(KampioenschapSporterBoog.objects.count() > 0)
 
@@ -264,6 +269,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
         # een reserve-sporter meldt zich af
         # dit heeft geen invloed op de deelnemers-lijst
         self.e2e_login_and_pass_otp(self.account_bko)
+        self.e2e_wissel_naar_functie(self.functie_bko)
         self.e2e_wissel_naar_functie(self.functie_rko)
         self.assertTrue(KampioenschapSporterBoog.objects.count() > 0)
 
@@ -288,6 +294,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
         # sporter boven de cut meldt zich af
         # reserve-sporter wordt opgeroepen
         self.e2e_login_and_pass_otp(self.account_bko)
+        self.e2e_wissel_naar_functie(self.functie_bko)
         self.e2e_wissel_naar_functie(self.functie_rko)
         self.assertTrue(KampioenschapSporterBoog.objects.count() > 0)
         # self._dump_deelnemers()
@@ -324,6 +331,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
         # er zijn geen reserve sporters
 
         self.e2e_login_and_pass_otp(self.account_bko)
+        self.e2e_wissel_naar_functie(self.functie_bko)
         self.e2e_wissel_naar_functie(self.functie_rko)
         self.assertTrue(KampioenschapSporterBoog.objects.count() > 0)
 
@@ -381,6 +389,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
         # een reserve-sporter meld zich af en weer aan
         # dit heeft geen invloed op de deelnemers-lijst
         self.e2e_login_and_pass_otp(self.account_bko)
+        self.e2e_wissel_naar_functie(self.functie_bko)
         self.e2e_wissel_naar_functie(self.functie_rko)
         self.assertTrue(KampioenschapSporterBoog.objects.count() > 0)
 
@@ -419,6 +428,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
     def test_rko_opnieuw_aanmelden_einde_lijst(self):
         # opnieuw aangemelde sporter komt helemaal aan het einde van de reserve-lijst
         self.e2e_login_and_pass_otp(self.account_bko)
+        self.e2e_wissel_naar_functie(self.functie_bko)
         self.e2e_wissel_naar_functie(self.functie_rko)
         self.assertTrue(KampioenschapSporterBoog.objects.count() > 0)
 
@@ -442,6 +452,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
         # sporter meldt zichzelf daarna weer aan en komt in de lijst met reserve-sporters
         # gesorteerd op gemiddelde
         self.e2e_login_and_pass_otp(self.account_bko)
+        self.e2e_wissel_naar_functie(self.functie_bko)
         self.e2e_wissel_naar_functie(self.functie_rko)
         self.assertTrue(KampioenschapSporterBoog.objects.count() > 0)
         # self._dump_deelnemers()
@@ -496,6 +507,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
         # na afmelden van een deelnemer wordt de eerste reserve opgeroepen
         # de lijst met deelnemers wordt gesorteerd op gemiddelde
         self.e2e_login_and_pass_otp(self.account_bko)
+        self.e2e_wissel_naar_functie(self.functie_bko)
         self.e2e_wissel_naar_functie(self.functie_rko)
         self.assertTrue(KampioenschapSporterBoog.objects.count() > 0)
 
@@ -540,6 +552,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
         # regiokampioen meldt zich af en daarna weer aan
         # komt in de lijst met reserve-sporters
         self.e2e_login_and_pass_otp(self.account_bko)
+        self.e2e_wissel_naar_functie(self.functie_bko)
         self.e2e_wissel_naar_functie(self.functie_rko)
         self.assertTrue(KampioenschapSporterBoog.objects.count() > 0)
 
@@ -568,6 +581,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
 
     def test_rko_drie_regiokampioenen_opnieuw_aanmelden(self):
         self.e2e_login_and_pass_otp(self.account_bko)
+        self.e2e_wissel_naar_functie(self.functie_bko)
         self.e2e_wissel_naar_functie(self.functie_rko)
         self.assertTrue(KampioenschapSporterBoog.objects.count() > 0)
 
@@ -631,6 +645,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
 
     def test_rko_cut24_drie_kampioenen_opnieuw_aanmelden(self):
         self.e2e_login_and_pass_otp(self.account_bko)
+        self.e2e_wissel_naar_functie(self.functie_bko)
         self.e2e_wissel_naar_functie(self.functie_rko)
         self.assertTrue(KampioenschapSporterBoog.objects.count() > 0)
         # self._dump_deelnemers()
@@ -728,6 +743,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
     def test_verlaag_cut(self):
         # verplaats de cut en controleer de inhoud na de update
         self.e2e_login_and_pass_otp(self.account_bko)
+        self.e2e_wissel_naar_functie(self.functie_bko)
         self.e2e_wissel_naar_functie(self.functie_rko)
         self.assertTrue(KampioenschapSporterBoog.objects.count() > 0)
 
@@ -777,6 +793,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
     def test_verhoog_cut(self):
         # verplaats de cut en controleer de inhoud na de update
         self.e2e_login_and_pass_otp(self.account_bko)
+        self.e2e_wissel_naar_functie(self.functie_bko)
         self.e2e_wissel_naar_functie(self.functie_rko)
         self.assertTrue(KampioenschapSporterBoog.objects.count() > 0)
 
@@ -831,6 +848,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
 
     def test_dubbel(self):
         self.e2e_login_and_pass_otp(self.account_bko)
+        self.e2e_wissel_naar_functie(self.functie_bko)
         self.e2e_wissel_naar_functie(self.functie_rko)
         self.assertTrue(KampioenschapSporterBoog.objects.count() > 0)
 
@@ -857,6 +875,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
 
     def test_bad(self):
         self.e2e_login_and_pass_otp(self.account_bko)
+        self.e2e_wissel_naar_functie(self.functie_bko)
         self.e2e_wissel_naar_functie(self.functie_rko)
         self.assertTrue(KampioenschapSporterBoog.objects.count() > 0)
 
@@ -944,6 +963,9 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
                          .values_list('pk', flat=True))
 
         self.e2e_login_and_pass_otp(self.account_bko)
+        self.e2e_wissel_naar_functie(self.functie_bko)
+        self.e2e_wissel_naar_functie(self.functie_rko)
+        self.e2e_wissel_naar_functie(self.functie_rcl)
         self.e2e_wissel_naar_functie(self.functie_hwl)
 
         with self.assert_max_queries(20):

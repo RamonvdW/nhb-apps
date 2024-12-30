@@ -131,7 +131,8 @@ class KwalificatieScoresOpgevenView(UserPassesTestMixin, TemplateView):
                                kwargs={'jaar': wedstrijd.datum_begin.year,
                                        'maand': MAAND2URL[wedstrijd.datum_begin.month],
                                        'soort': 'alle',
-                                       'bogen': 'auto'})
+                                       'bogen': 'auto',
+                                       'discipline': 'alle'})
 
         context['kruimels'] = (
             (url_kalender, 'Wedstrijdkalender'),
@@ -153,7 +154,8 @@ class KwalificatieScoresOpgevenView(UserPassesTestMixin, TemplateView):
                             kwargs={'jaar': wedstrijd.datum_begin.year,
                                     'maand': MAAND2URL[wedstrijd.datum_begin.month],
                                     'soort': 'alle',
-                                    'bogen': 'auto'})
+                                    'bogen': 'auto',
+                                    'discipline': 'alle'})
 
         url = reverse('Wedstrijden:wedstrijd-details', kwargs={'wedstrijd_pk': wedstrijd.pk})
 

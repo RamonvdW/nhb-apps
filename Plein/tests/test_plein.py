@@ -129,7 +129,7 @@ class TestPlein(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertNotContains(resp, '/admin/')
         self.assertNotContains(resp, 'Wissel van rol')
-        self.assert_template_used(resp, ('plein/plein-bezoeker.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('plein/plein-sporter.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
 
         # check dat de het scheidsrechters kaartje er niet bij zit

@@ -48,7 +48,7 @@ class TestAccountLogin(E2EHelpers, TestCase):
         # test inlog via het inlog formulier
         self.account_normaal.verkeerd_wachtwoord_teller = 3
         self.account_normaal.save(update_fields=['verkeerd_wachtwoord_teller'])
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(22):
             resp = self.client.post(self.url_login, {'login_naam': 'normaal',
                                                      'wachtwoord':  E2EHelpers.WACHTWOORD}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
@@ -111,7 +111,7 @@ class TestAccountLogin(E2EHelpers, TestCase):
     def test_inlog_was_geblokkeerd(self):
         self.account_normaal.is_geblokkeerd_tot = timezone.now() + datetime.timedelta(hours=-1)
         self.account_normaal.save(update_fields=['is_geblokkeerd_tot'])
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(21):
             resp = self.client.post(self.url_login, {'login_naam': 'normaal',
                                                      'wachtwoord':  E2EHelpers.WACHTWOORD}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
@@ -315,7 +315,7 @@ class TestAccountLogin(E2EHelpers, TestCase):
         self.account_metmail.save(update_fields=['nieuwe_email'])
 
         # test inlog via het inlog formulier, met een email adres
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(22):
             resp = self.client.post(self.url_login, {'login_naam': 'metmail@test.com',
                                                      'wachtwoord': E2EHelpers.WACHTWOORD}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK

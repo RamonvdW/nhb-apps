@@ -169,7 +169,8 @@ class TussenspeldenView(TemplateView):
                                                    kwargs={'maand': now.month,
                                                            'jaar': now.year,
                                                            'soort': 'khsn',
-                                                           'bogen': 'alle'})
+                                                           'bogen': 'alle',
+                                                           'discipline': 'alle'})
         context['url_wedstrijdkalender'] += '?zoek=Outdoor'
 
         context['kruimels'] = (

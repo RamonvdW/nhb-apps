@@ -122,7 +122,8 @@ class InschrijvenSporterView(UserPassesTestMixin, TemplateView):
                             kwargs={'jaar': evenement.datum.year,
                                     'maand': MAAND2URL[evenement.datum.month],
                                     'soort': 'alle',
-                                    'bogen': 'auto'})
+                                    'bogen': 'auto',
+                                    'discipline': 'alle'})
 
         context['kruimels'] = (
             (url_terug, 'Kalender'),
@@ -228,7 +229,8 @@ class InschrijvenGroepjeView(UserPassesTestMixin, TemplateView):
                             kwargs={'jaar': evenement.datum.year,
                                     'maand': MAAND2URL[evenement.datum.month],
                                     'soort': 'alle',
-                                    'bogen': 'auto'})
+                                    'bogen': 'auto',
+                                    'discipline': 'alle'})
 
         context['kruimels'] = (
             (url_terug, 'Kalender'),
@@ -339,7 +341,8 @@ class InschrijvenFamilieView(UserPassesTestMixin, TemplateView):
                             kwargs={'jaar': evenement.datum.year,
                                     'maand': MAAND2URL[evenement.datum.month],
                                     'soort': 'alle',
-                                    'bogen': 'auto'})
+                                    'bogen': 'auto',
+                                    'discipline': 'alle'})
 
         context['kruimels'] = (
             (url_terug, 'Kalender'),
@@ -416,7 +419,7 @@ class ToevoegenAanMandjeView(UserPassesTestMixin, View):
             snel = str(request.POST.get('snel', ''))[:1]
             bestel_mutatieverzoek_inschrijven_evenement(account_koper, inschrijving, snel == '1')
 
-            mandje_tel_inhoud(self.request)
+            mandje_tel_inhoud(self.request, account_koper)
 
         # render de pagina "toegevoegd aan mandje"
 
@@ -426,7 +429,8 @@ class ToevoegenAanMandjeView(UserPassesTestMixin, View):
                             kwargs={'jaar': evenement.datum.year,
                                     'maand': MAAND2URL[evenement.datum.month],
                                     'soort': 'alle',
-                                    'bogen': 'auto'})
+                                    'bogen': 'auto',
+                                    'discipline': 'alle'})
 
         inschrijven_str = 'Inschrijven'
         url = reverse('Evenement:details', kwargs={'evenement_pk': evenement.pk})

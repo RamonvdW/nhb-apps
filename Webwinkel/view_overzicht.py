@@ -295,7 +295,7 @@ class ProductView(TemplateView):
         snel = str(request.POST.get('snel', ''))[:1]
         bestel_mutatieverzoek_webwinkel_keuze(account_koper, keuze, snel == '1')
 
-        mandje_tel_inhoud(self.request)
+        mandje_tel_inhoud(self.request, account_koper)
 
         # geeft de gebruiker een pagina om naar het mandje te gaan of verder te winkelen
         context = dict()

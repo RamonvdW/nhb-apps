@@ -133,6 +133,7 @@ class LoginView(TemplateView):
             return False, None
 
         # wachtwoord is goed
+        self.request.user = account
 
         # kijk of er een reden is om gebruik van het account te weren
         for _, func, _ in account_plugins_login_gate:

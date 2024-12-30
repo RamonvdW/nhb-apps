@@ -12,9 +12,6 @@ app_name = 'Kalender'
 # basis = /kalender/
 
 urlpatterns = [
-
-    # base: /kalender/
-
     path('',
          view_landing_page.KalenderLandingPageView.as_view(),
          name='landing-page'),
@@ -26,6 +23,10 @@ urlpatterns = [
 
     path('maand/<maand>-<int:jaar>/<soort>/<bogen>/',
          view_maand.KalenderMaandView.as_view(),
+         name='maand-pre-discipline'),
+
+    path('maand/<maand>-<int:jaar>/<soort>/<bogen>/<discipline>/',
+         view_maand.KalenderMaandView.as_view(),
          name='maand'),
 
     path('maand/<maand>-<int:jaar>/',
@@ -34,13 +35,17 @@ urlpatterns = [
 
     path('jaar/<maand>-<int:jaar>/<soort>/<bogen>/',
          view_jaar.KalenderJaarView.as_view(),
+         name='jaar-pre-discipline'),
+
+    path('jaar/<maand>-<int:jaar>/<soort>/<bogen>/<discipline>/',
+         view_jaar.KalenderJaarView.as_view(),
          name='jaar'),
 
     path('jaar/<maand>-<int:jaar>/',
          view_jaar.KalenderJaarView.as_view(),
          name='jaar-simpel'),
 
-    path('api/lijst/<int:aantal_dagen_vooruit>/',
+    path('api/lijst/<int:aantal_dagen_terug>/<int:aantal_dagen_vooruit>/',
          view_api.ApiView.as_view(),
          name='api-lijst'),
 ]

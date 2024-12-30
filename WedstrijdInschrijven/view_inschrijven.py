@@ -329,7 +329,8 @@ class WedstrijdInschrijvenSporter(UserPassesTestMixin, TemplateView):
                             kwargs={'jaar': wedstrijd.datum_begin.year,
                                     'maand': MAAND2URL[wedstrijd.datum_begin.month],
                                     'soort': 'alle',
-                                    'bogen': 'auto'})
+                                    'bogen': 'auto',
+                                    'discipline': 'alle'})
 
         context['kruimels'] = (
             (url_terug, 'Wedstrijdkalender'),
@@ -529,7 +530,8 @@ class WedstrijdInschrijvenGroepje(UserPassesTestMixin, TemplateView):
                             kwargs={'jaar': wedstrijd.datum_begin.year,
                                     'maand': MAAND2URL[wedstrijd.datum_begin.month],
                                     'soort': 'alle',
-                                    'bogen': 'auto'})
+                                    'bogen': 'auto',
+                                    'discipline': 'alle'})
 
         context['kruimels'] = (
             (url_terug, 'Wedstrijdkalender'),
@@ -727,7 +729,8 @@ class WedstrijdInschrijvenFamilie(UserPassesTestMixin, TemplateView):
                             kwargs={'jaar': wedstrijd.datum_begin.year,
                                     'maand': MAAND2URL[wedstrijd.datum_begin.month],
                                     'soort': 'alle',
-                                    'bogen': 'auto'})
+                                    'bogen': 'auto',
+                                    'discipline': 'alle'})
 
         context['kruimels'] = (
             (url_terug, 'Wedstrijdkalender'),
@@ -829,7 +832,7 @@ class ToevoegenAanMandjeView(UserPassesTestMixin, View):
             snel = str(request.POST.get('snel', ''))[:1]
             bestel_mutatieverzoek_inschrijven_wedstrijd(account_koper, inschrijving, snel == '1')
 
-            mandje_tel_inhoud(self.request)
+            mandje_tel_inhoud(self.request, account_koper)
 
             if wedstrijd.eis_kwalificatie_scores:
                 url = reverse('WedstrijdInschrijven:inschrijven-kwalificatie-scores', kwargs={'inschrijving_pk': inschrijving.pk})
@@ -846,7 +849,8 @@ class ToevoegenAanMandjeView(UserPassesTestMixin, View):
                             kwargs={'jaar': wedstrijd.datum_begin.year,
                                     'maand': MAAND2URL[wedstrijd.datum_begin.month],
                                     'soort': 'alle',
-                                    'bogen': 'auto'})
+                                    'bogen': 'auto',
+                                    'discipline': 'alle'})
 
         inschrijven_str = 'Inschrijven'
         url = reverse('Wedstrijden:wedstrijd-details', kwargs={'wedstrijd_pk': wedstrijd.pk})

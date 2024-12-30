@@ -183,7 +183,7 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
 
         # omdat het heel raar is als het tellertje op het mandje niet overeenkomt
         # met de inhoud van het mandje, forceren we de telling hier nog een keer
-        mandje_tel_inhoud(self.request)
+        mandje_tel_inhoud(self.request, account)
         # eval_mandje_inhoud(self.request)
 
         # force dat het mandje icoon getoond wordt
@@ -287,7 +287,7 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
         # achtergrondtaak zet het mandje om in bestellingen
 
         # zorg dat de knop het juiste aantal toont
-        mandje_tel_inhoud(request)
+        mandje_tel_inhoud(request, account)
 
         # ga naar de pagina met alle bestellingen, zodat de betaling gestart kan worden
         url = reverse('Bestel:toon-bestellingen')
@@ -334,7 +334,7 @@ class VerwijderProductUitMandje(UserPassesTestMixin, View):
                 bestel_mutatieverzoek_verwijder_product_uit_mandje(account, product, snel == '1')
                 # achtergrondtaak geeft dit door aan de kalender/opleiding
 
-                mandje_tel_inhoud(self.request)
+                mandje_tel_inhoud(self.request, account)
             else:
                 raise Http404('Niet gevonden in jouw mandje')
 

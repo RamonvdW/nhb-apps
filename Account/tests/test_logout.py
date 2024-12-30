@@ -35,7 +35,7 @@ class TestAccountLogout(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, '/plein/')
 
         # log in
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(21):
             resp = self.client.post(self.url_login, {'login_naam': 'normaal',
                                                      'wachtwoord': E2EHelpers.WACHTWOORD}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK

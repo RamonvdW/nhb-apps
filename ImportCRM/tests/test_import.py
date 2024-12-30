@@ -281,7 +281,7 @@ class TestImportCRMImport(E2EHelpers, TestCase):
         self.assertTrue("[ERROR] Lid 100001 heeft geen valide geboortedatum" in f1.getvalue())
         self.assertTrue("[ERROR] Lid 100099 heeft geen valide geboortedatum" in f1.getvalue())
         self.assertTrue("[ERROR] Lid 100100 heeft geen valide e-mail (bad_email)" in f1.getvalue())
-        self.assertTrue("[ERROR] Lid 100001 heeft onbekend geslacht: Y (moet zijn: M of F)" in f1.getvalue())
+        self.assertTrue("[ERROR] Lid 100001 heeft onbekend geslacht: Y (moet zijn: M, F, V of X)" in f1.getvalue())
         self.assertTrue("[ERROR] Lid 100009 heeft geen voornaam of initials" in f1.getvalue())
         self.assertTrue("[ERROR] Lid 100099 heeft geen valide datum van overlijden: 'bad-stuff" in f1.getvalue())
         self.assertTrue("[INFO] Lid 100024: is_actief_lid nee --> ja" in f2.getvalue())

@@ -6,10 +6,8 @@
 
 from django.utils import timezone
 from django.test import TestCase
-from Competitie.models import Competitie
 from Competitie.test_utils.tijdlijn import zet_competitie_fases
 from Competitie.tests.test_helpers import maak_competities_en_zet_fase_c
-from Functie.definities import Rol
 from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
 
@@ -22,53 +20,10 @@ class TestCompetitieOverzicht(E2EHelpers, TestCase):
 
     url_overzicht = '/bondscompetities/%s/'
 
-    def test_openbaar(self):
-        einde_jaar = datetime.date(year=2000, month=12, day=31)
-        comp = Competitie(
-                    begin_jaar=2000)
-        comp.save()
-        comp = Competitie.objects.get(pk=comp.pk)
-
-        zet_competitie_fases(comp, 'A', 'A')
-
-        # altijd openbaar voor BB en BKO
-        comp.bepaal_openbaar(Rol.ROL_BB)
-        self.assertTrue(comp.is_openbaar)
-
-        comp.bepaal_openbaar(Rol.ROL_BKO)
-        self.assertTrue(comp.is_openbaar)
-
-        # altijd openbaar voor RKO/RCL/HWL
-        comp.bepaal_openbaar(Rol.ROL_RKO)
-        self.assertTrue(comp.is_openbaar)
-
-        comp.bepaal_openbaar(Rol.ROL_RCL)
-        self.assertTrue(comp.is_openbaar)
-
-        comp.bepaal_openbaar(Rol.ROL_HWL)
-        self.assertTrue(comp.is_openbaar)
-
-        comp.bepaal_openbaar(Rol.ROL_WL)
-        self.assertFalse(comp.is_openbaar)
-
-        comp.bepaal_openbaar(Rol.ROL_SEC)
-        self.assertFalse(comp.is_openbaar)
-
-        comp.bepaal_openbaar(Rol.ROL_MO)
-        self.assertFalse(comp.is_openbaar)
-
-        comp.bepaal_openbaar(Rol.ROL_SPORTER)
-        self.assertFalse(comp.is_openbaar)
-
-        # vanaf fase B altijd openbaar
-        comp.fase_indiv = 'C'
-        comp.bepaal_openbaar(Rol.ROL_SPORTER)
-        self.assertTrue(comp.is_openbaar)
-
     def test_top(self):
-        now = timezone.now()
-        now = datetime.date(year=now.year, month=now.month, day=now.day)
-        way_before = datetime.date(year=2018, month=1, day=1)   # must be before timezone.now()
+        # now = timezone.now()
+        # now = datetime.date(year=now.year, month=now.month, day=now.day)
+        # way_before = datetime.date(year=2018, month=1, day=1)   # must be before timezone.now()
 
         comp_18, comp_25 = maak_competities_en_zet_fase_c(startjaar=2020)
 

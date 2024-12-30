@@ -14,7 +14,8 @@ from Bestelling.operations.mandje import eval_mandje_inhoud
 from Evenement.definities import EVENEMENT_STATUS_GEACCEPTEERD, EVENEMENT_STATUS_GEANNULEERD
 from Evenement.models import Evenement
 from Kalender.definities import MAANDEN, MAAND2URL
-from Kalender.view_maand import maak_soort_filter, maak_bogen_filter, maak_compacte_wanneer_str, split_zoek_urls
+from Kalender.view_helpers import (maak_soort_filter, maak_bogen_filter, maak_discipline_filter,
+                                   maak_compacte_wanneer_str, split_zoek_urls)
 from Wedstrijden.definities import (WEDSTRIJD_STATUS_GEACCEPTEERD, WEDSTRIJD_STATUS_GEANNULEERD,
                                     ORGANISATIE_IFAA, ORGANISATIE_WA, ORGANISATIE_KHSN,
                                     WEDSTRIJD_WA_STATUS_A, WEDSTRIJD_WA_STATUS_B)
@@ -65,7 +66,8 @@ class KalenderJaarView(TemplateView):
                                       kwargs={'jaar': prev_jaar,
                                               'maand': MAAND2URL[prev_maand],
                                               'soort': '~1',
-                                              'bogen': '~2'})
+                                              'bogen': '~2',
+                                              'discipline': '~3'})
 
         next_jaar = jaar
         next_maand = maand + 1
@@ -76,21 +78,24 @@ class KalenderJaarView(TemplateView):
                                       kwargs={'jaar': next_jaar,
                                               'maand': MAAND2URL[next_maand],
                                               'soort': '~1',
-                                              'bogen': '~2'})
+                                              'bogen': '~2',
+                                              'discipline': '~3'})
 
-    def _maak_pagina(self, context, jaar, maand, gekozen_soort, gekozen_bogen, zoekterm):
+    def _maak_pagina(self, context, jaar, maand, gekozen_soort, gekozen_bogen, gekozen_discipline, zoekterm):
         # url voor het insturen van de filter keuzes met een POST
         context['url_keuzes'] = reverse('Kalender:jaar',
                                         kwargs={'jaar': jaar,
                                                 'maand': MAAND2URL[maand],
                                                 'soort': '~1',
-                                                'bogen': '~2'})
+                                                'bogen': '~2',
+                                                'discipline': '~3'})
 
         context['url_toon_maand'] = reverse('Kalender:maand',
                                             kwargs={'jaar': jaar,
                                                     'maand': MAAND2URL[maand],
                                                     'soort': gekozen_soort,
-                                                    'bogen': gekozen_bogen})
+                                                    'bogen': gekozen_bogen,
+                                                    'discipline': gekozen_discipline})
 
         if zoekterm:
             # url voor het resetten van de filter keuzes en zoekterm
@@ -98,7 +103,8 @@ class KalenderJaarView(TemplateView):
                                                 kwargs={'jaar': jaar,
                                                         'maand': maand,
                                                         'soort': 'alle',
-                                                        'bogen': 'alle'})
+                                                        'bogen': 'alle',
+                                                        'discipline': 'alle'})
 
         self._maak_prev_next(context, jaar, maand)
 
@@ -249,9 +255,16 @@ class KalenderJaarView(TemplateView):
             gekozen_bogen = 'auto'
         gekozen_bogen = maak_bogen_filter(self.request, context, gekozen_bogen)
 
+        if 'discipline' in kwargs:
+            gekozen_discipline = kwargs['discipline']
+            gekozen_discipline = gekozen_discipline[:11]    # afkappen voor de veiligheid
+        else:
+            gekozen_discipline = 'alle'
+        gekozen_discipline = maak_discipline_filter(context, gekozen_discipline)
+
         zoekterm = self.request.GET.get('zoek', '')
         zoekterm = str(zoekterm)[:50]   # afkappen voor de veiligheid
-        self._maak_pagina(context, jaar, maand, gekozen_soort, gekozen_bogen, zoekterm)
+        self._maak_pagina(context, jaar, maand, gekozen_soort, gekozen_bogen, gekozen_discipline, zoekterm)
 
         return context
 
@@ -270,11 +283,18 @@ class KalenderJaarView(TemplateView):
         gekozen_bogen = gekozen_bogen[:6]           # afkappen voor de veiligheid
         gekozen_bogen = maak_bogen_filter(request, context, gekozen_bogen)
 
+        if 'discipline' in kwargs:
+            gekozen_discipline = kwargs['discipline']
+            gekozen_discipline = gekozen_discipline[:11]    # afkappen voor de veiligheid
+        else:
+            gekozen_discipline = 'alle'
+        gekozen_discipline = maak_discipline_filter(context, gekozen_discipline)
+
         zoekterm = request.POST.get('zoekterm', '')
         zoekterm = zoekterm[:50]    # afkappen voor de veiligheid
         context['zoekterm'] = zoekterm
 
-        self._maak_pagina(context, jaar, maand, gekozen_soort, gekozen_bogen, zoekterm)
+        self._maak_pagina(context, jaar, maand, gekozen_soort, gekozen_bogen, gekozen_discipline, zoekterm)
 
         return render(request, self.template_name, context)
 
