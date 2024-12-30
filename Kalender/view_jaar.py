@@ -5,11 +5,11 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.http import Http404
-from django.db.models.query_utils import Q
 from django.urls import reverse
 from django.utils import timezone
 from django.shortcuts import render
 from django.views.generic import TemplateView
+from django.db.models.query_utils import Q
 from Bestelling.operations.mandje import eval_mandje_inhoud
 from Evenement.definities import EVENEMENT_STATUS_GEACCEPTEERD, EVENEMENT_STATUS_GEANNULEERD
 from Evenement.models import Evenement
@@ -18,7 +18,8 @@ from Kalender.view_helpers import (maak_soort_filter, maak_bogen_filter, maak_di
                                    maak_compacte_wanneer_str, split_zoek_urls)
 from Wedstrijden.definities import (WEDSTRIJD_STATUS_GEACCEPTEERD, WEDSTRIJD_STATUS_GEANNULEERD,
                                     ORGANISATIE_IFAA, ORGANISATIE_WA, ORGANISATIE_KHSN,
-                                    WEDSTRIJD_WA_STATUS_A, WEDSTRIJD_WA_STATUS_B)
+                                    WEDSTRIJD_WA_STATUS_A, WEDSTRIJD_WA_STATUS_B,
+                                    url2discipline)
 from Wedstrijden.models import Wedstrijd
 from datetime import date, timedelta
 
@@ -159,6 +160,11 @@ class KalenderJaarView(TemplateView):
             # distinct is nodig om verdubbeling te voorkomen
             wedstrijden = wedstrijden.filter(boogtypen__pk__in=boog_pks).distinct('datum_begin', 'pk')
 
+        if gekozen_discipline != 'alle':
+            discipline = url2discipline[gekozen_discipline]
+            wedstrijden = wedstrijden.filter(discipline=discipline)
+            evenementen = list()
+
         now_date = timezone.now().date()
 
         context['regels'] = regels = list()
@@ -178,6 +184,9 @@ class KalenderJaarView(TemplateView):
             wed.inschrijven_let_op = (wed.inschrijven_dagen <= 7)
             wed.is_voor_sluitingsdatum = (now_date < wed.inschrijven_voor)
 
+            if wed.inschrijven_dagen < -30:
+                wed.is_ter_info = True
+
             tup = (wed.datum_begin, wed.pk, wed)
             regels.append(tup)
             aantal_wedstrijden += 1
@@ -195,6 +204,9 @@ class KalenderJaarView(TemplateView):
             evenement.inschrijven_dagen = (evenement.inschrijven_voor - now_date).days
             evenement.inschrijven_let_op = (evenement.inschrijven_dagen <= 7)
             evenement.is_voor_sluitingsdatum = (now_date < evenement.inschrijven_voor)
+
+            if evenement.inschrijven_dagen < -30:
+                evenement.is_ter_info = True
 
             tup = (evenement.datum, evenement.pk, evenement)
             regels.append(tup)
@@ -257,13 +269,15 @@ class KalenderJaarView(TemplateView):
 
         if 'discipline' in kwargs:
             gekozen_discipline = kwargs['discipline']
-            gekozen_discipline = gekozen_discipline[:11]    # afkappen voor de veiligheid
+            # langste: 'run-archery'
+            gekozen_discipline = gekozen_discipline[:11]        # afkappen voor de veiligheid
         else:
             gekozen_discipline = 'alle'
         gekozen_discipline = maak_discipline_filter(context, gekozen_discipline)
 
         zoekterm = self.request.GET.get('zoek', '')
         zoekterm = str(zoekterm)[:50]   # afkappen voor de veiligheid
+
         self._maak_pagina(context, jaar, maand, gekozen_soort, gekozen_bogen, gekozen_discipline, zoekterm)
 
         return context

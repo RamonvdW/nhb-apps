@@ -29,6 +29,9 @@
             const el_bogen = document.querySelector("input[name='filter_bogen']:checked");
             url_part2 = url_part2.replace('~2', el_bogen.dataset.url);
 
+            const el_discipline = document.querySelector("input[name='filter_discipline']:checked");
+            url_part2 = url_part2.replace('~3', el_discipline.dataset.url);
+
             let url = url_part1 + url_part2;
 
             // voeg de zoekterm toe als query parameter
@@ -68,7 +71,7 @@
     <div class="row-sv-blauw">
 
         <!-- zoek tekst -->
-        <div class="col s12 m12 l6" style="margin-bottom:15px">
+        <div class="col s12 m12" style="margin-bottom:15px">
             <div class="sv-kader z-depth-3 left-align" style="padding:10px">
 
                 <p><b>Zoek naar:</b></p>
@@ -89,7 +92,7 @@
         </div>
 
         <!-- filter: bogen -->
-        <div class="col s12 m6 l3" style="margin-bottom:15px">
+        <div class="col s12 m4" style="margin-bottom:15px">
             <div class="sv-kader left-align" style="padding:10px">
                 <p><b>Bogen:</b></p>
                 <ul>
@@ -109,7 +112,7 @@
         </div>
 
         <!-- filter: soort wedstrijd -->
-        <div class="col s12 m6 l3">
+        <div class="col s12 m4" style="margin-bottom:15px">
             <div class="sv-kader left-align" style="padding:10px">
                 <p><b>Soort wedstrijd:</b></p>
                 <ul>
@@ -129,14 +132,14 @@
         </div>
 
         <!-- filter: discipline -->
-        <div class="col s12 m6 l3">
+        <div class="col s12 m4">
             <div class="sv-kader left-align" style="padding:10px">
                 <p><b>Discipline:</b></p>
                 <ul>
                     {% for filter in soort_discipline %}
                         <li>
                             <label class="black-text" for="id_{{ filter.sel }}">
-                                <input class="with-gap" type="radio" name="filter_soort" value="{{ filter.sel }}" id="id_{{ filter.sel }}"{% if filter.selected %} checked{% endif %} data-url="{{ filter.url_part }}">
+                                <input class="with-gap" type="radio" name="filter_discipline" value="{{ filter.sel }}" id="id_{{ filter.sel }}"{% if filter.selected %} checked{% endif %} data-url="{{ filter.url_part }}">
                                 <span>{{ filter.opt_text }}</span>
                             </label>
                         </li>
@@ -147,6 +150,7 @@
                 </p>
             </div>
         </div>
+
     </div>
 
     <!-- jaar titel met knoppen prev/next -->
@@ -193,7 +197,9 @@
                         <td>{{ regel.titel|highlight:zoekterm }}</td>
                         <td class="hide-on-med-and-down">{{ regel.locatie.plaats|highlight:zoekterm }}</td>
                         <td class="hide-on-small-only">
-                            {% if not regel.is_ter_info %}
+                            {% if regel.is_ter_info %}
+                                <span>n.v.t.</span>
+                            {% else %}
                                 <span>{{ regel.inschrijven_voor }}</span>
                                 {% if regel.is_voor_sluitingsdatum %}
                                     {% if regel.inschrijven_let_op %}

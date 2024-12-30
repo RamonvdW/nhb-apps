@@ -52,21 +52,23 @@
                     <td>{{ evenement.datum }}</td>
                 </tr>
 
-                <tr>
-                    <th>Inschrijving moet v&oacute;&oacute;r</th>
-                    <td>
-                        <span>{{ evenement.inschrijven_voor }}</span>
-                        {% if not is_voor_sluitingsdatum %}
-                            <span class="sv-rood-text"> (inschrijving is gesloten)</span>
-                        {% else %}
-                            {% if evenement.inschrijven_let_op %}
-                                <span class="sv-rood-text"> (nog maar {{ evenement.inschrijven_dagen }} dagen)</span>
+                {% if not evenement.is_ter_info %}
+                    <tr>
+                        <th>Inschrijving moet v&oacute;&oacute;r</th>
+                        <td>
+                            <span>{{ evenement.inschrijven_voor }}</span>
+                            {% if not is_voor_sluitingsdatum %}
+                                <span class="sv-rood-text"> (inschrijving is gesloten)</span>
                             {% else %}
-                                <span> (nog {{ evenement.inschrijven_dagen }} dagen)</span>
+                                {% if evenement.inschrijven_let_op %}
+                                    <span class="sv-rood-text"> (nog maar {{ evenement.inschrijven_dagen }} dagen)</span>
+                                {% else %}
+                                    <span> (nog {{ evenement.inschrijven_dagen }} dagen)</span>
+                                {% endif %}
                             {% endif %}
-                        {% endif %}
-                    </td>
-                </tr>
+                        </td>
+                    </tr>
+                {% endif %}
 
                 <tr>
                     <th>Locatie</th>

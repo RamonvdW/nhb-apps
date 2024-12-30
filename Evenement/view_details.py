@@ -50,6 +50,9 @@ class DetailsView(TemplateView):
         evenement.inschrijven_dagen = (evenement.inschrijven_voor - now_date).days
         evenement.inschrijven_let_op = (evenement.inschrijven_dagen <= 7)
 
+        if evenement.inschrijven_dagen < -30:
+            evenement.is_ter_info = True
+
         zoekterm = evenement.locatie.adres
         zoekterm = zoekterm.replace('\n', ' ').replace('\r', '').replace('  ', ' ')
         context['url_map'] = 'https://google.nl/maps?' + urlencode({'q': zoekterm})

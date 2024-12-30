@@ -59,6 +59,10 @@ class WedstrijdDetailsView(TemplateView):
         wedstrijd.inschrijven_dagen = (wedstrijd.inschrijven_voor - now_date).days
         wedstrijd.inschrijven_let_op = (wedstrijd.inschrijven_dagen <= 7)
 
+        # bij lang geleden niet meer "inschrijven voor" tonen
+        if wedstrijd.inschrijven_dagen < -30:
+            wedstrijd.is_ter_info = True
+
         if wedstrijd.organisatie == ORGANISATIE_WA:
             context['toon_wa_status'] = True
             wedstrijd.wa_status_str = WEDSTRIJD_WA_STATUS_TO_STR[wedstrijd.wa_status]

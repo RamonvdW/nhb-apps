@@ -11,7 +11,7 @@ from django.utils.formats import localize
 from Account.models import get_account
 from Kalender.definities import MAAND2URL
 from Sporter.models import SporterBoog, get_sporter
-from Wedstrijden.definities import WEDSTRIJD_STATUS_GEACCEPTEERD, WEDSTRIJD_DISCIPLINES, discipline2url
+from Wedstrijden.definities import WEDSTRIJD_STATUS_GEACCEPTEERD, WEDSTRIJD_DISCIPLINES, discipline2url, url2discipline
 from Wedstrijden.models import Wedstrijd
 from types import SimpleNamespace
 from datetime import timedelta
@@ -158,43 +158,14 @@ def maak_discipline_filter(context, gekozen_discipline):
     """ gekozen_discipline is de URL parameter en kan een van de discipline2url zijn, 'auto' zijn of totale garbage.
         geeft de opgeschoonde gekozen_discipline terug die gebruikt kan worden in reverse() operaties.
     """
-    # WEDSTRIJD_DISCIPLINES = (
-    #     (WEDSTRIJD_DISCIPLINE_OUTDOOR, 'Outdoor'),
-    #     (WEDSTRIJD_DISCIPLINE_INDOOR, 'Indoor'),  # Indoor = 18m/25m 3pijl
-    #     (WEDSTRIJD_DISCIPLINE_25M1P, '25m 1pijl'),
-    #     (WEDSTRIJD_DISCIPLINE_CLOUT, 'Clout'),
-    #     (WEDSTRIJD_DISCIPLINE_VELD, 'Veld'),
-    #     (WEDSTRIJD_DISCIPLINE_RUN, 'Run Archery'),
-    #     (WEDSTRIJD_DISCIPLINE_3D, '3D')
-    # )
-    #
-    # discipline2url = {
-    #     WEDSTRIJD_DISCIPLINE_3D: '3d',
-    #     WEDSTRIJD_DISCIPLINE_RUN: 'run-archery',
-    #     WEDSTRIJD_DISCIPLINE_VELD: 'veld',
-    #     WEDSTRIJD_DISCIPLINE_25M1P: '25m1pijl',
-    #     WEDSTRIJD_DISCIPLINE_CLOUT: 'clout',
-    #     WEDSTRIJD_DISCIPLINE_INDOOR: 'indoor',
-    #     WEDSTRIJD_DISCIPLINE_OUTDOOR: 'outdoor',
-    # }
-    #
-    # url2discipline = {
-    #     'run-archery': WEDSTRIJD_DISCIPLINE_RUN,
-    #     '25m1pijl': WEDSTRIJD_DISCIPLINE_25M1P,
-    #     'outdoor': WEDSTRIJD_DISCIPLINE_OUTDOOR,
-    #     'indoor': WEDSTRIJD_DISCIPLINE_INDOOR,
-    #     'clout': WEDSTRIJD_DISCIPLINE_CLOUT,
-    #     'veld': WEDSTRIJD_DISCIPLINE_VELD,
-    #     '3d': WEDSTRIJD_DISCIPLINE_3D,
-    # }
 
-    if gekozen_discipline not in discipline2url.keys():
+    if gekozen_discipline not in url2discipline.keys():
         gekozen_discipline = 'alle'
 
     context['soort_discipline'] = [
         SimpleNamespace(
             opt_text='Alle',
-            sel='s_alle',
+            sel='d_alle',
             selected=(gekozen_discipline == 'alle'),
             url_part='alle'),
     ]
