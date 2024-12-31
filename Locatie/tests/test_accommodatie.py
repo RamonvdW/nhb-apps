@@ -338,7 +338,7 @@ class TestLocatieAccommodatie(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, self.url_login)
 
         self.e2e_login(self.account_wl)
-        self.e2e_check_rol("geen")
+        self.e2e_check_rol("sporter")
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assert403(resp, "Geen toegang")
