@@ -45,7 +45,7 @@ urlpatterns = [
          view_jaar.KalenderJaarView.as_view(),
          name='jaar-simpel'),
 
-    path('api/lijst/<int:aantal_dagen_terug>/<int:aantal_dagen_vooruit>/',
+    path('api/lijst/<int:aantal_dagen_vooruit>/',
          view_api.ApiView.as_view(),
          name='api-lijst'),
 ]

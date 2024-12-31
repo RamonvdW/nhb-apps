@@ -122,7 +122,7 @@ class ApiView(View):
     def get(self, request, *args, **kwargs):
         """ Geeft een lijst met evenementen/wedstrijden/opleidingen terug
 
-            aantal_dagen_terug: 1..1000 dagen
+            # aantal_dagen_terug: 1..1000 dagen
             aantal_dagen_vooruit: 1..36 dagen
 
             verplichte parameter: token
@@ -134,20 +134,14 @@ class ApiView(View):
 
         try:
             dagen_plus = int(kwargs['aantal_dagen_vooruit'])
-            dagen_min = int(kwargs['aantal_dagen_terug'])
         except (KeyError, ValueError, TypeError):
             dagen_plus = 0
-            dagen_min = 0
 
         dagen_plus = max(0, dagen_plus)           # at least 0
         dagen_plus = min(5*365, dagen_plus)       # at most 5 years
 
-        dagen_min = max(0, dagen_min)           # at least 0
-        dagen_min = min(5*365, dagen_min)       # at most 5 years
-
         datum_vanaf = timezone.now().date()
         datum_voor = datum_vanaf + datetime.timedelta(days=dagen_plus)
-        datum_vanaf -= datetime.timedelta(days=dagen_min)
         # print('range: %s .. %s' % (datum_vanaf, datum_voor))
 
         out = dict()
