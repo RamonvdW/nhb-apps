@@ -79,6 +79,9 @@ class BeginToetsView(UserPassesTestMixin, TemplateView):
 
         selecteer_toets_vragen(toets)
 
+        # kies de volgende vraag die we gaan tonen
+        selecteer_huidige_vraag(toets)
+
         url = reverse('Instaptoets:volgende-vraag')
         return HttpResponseRedirect(url)
 
@@ -174,7 +177,7 @@ class VolgendeVraagView(UserPassesTestMixin, TemplateView):
                 url = reverse('Instaptoets:begin')
                 return HttpResponseRedirect(url)
 
-            # controleer of de toets is afgerond
+            # toon de uitslag van de al afgeronde toets
             if self.toets.is_afgerond:
                 url = reverse('Instaptoets:toon-uitslag')
                 return HttpResponseRedirect(url)
@@ -194,8 +197,6 @@ class VolgendeVraagView(UserPassesTestMixin, TemplateView):
 
         self.toets.vraag_nr = self.toets.aantal_antwoorden + 1
 
-        # kies de huidige vraag, indien deze nog niet gekozen is
-        selecteer_huidige_vraag(self.toets)
         if self.toets.huidige_vraag is None:
             raise Http404('Toets is niet beschikbaar')
 
@@ -242,6 +243,11 @@ class OntvangAntwoordView(UserPassesTestMixin, View):
                 url = reverse('Instaptoets:begin')
                 return HttpResponseRedirect(url)
 
+            # toon de uitslag van de al afgeronde toets
+            if self.toets.is_afgerond:
+                url = reverse('Instaptoets:toon-uitslag')
+                return HttpResponseRedirect(url)
+
         return super().dispatch(request, *args, **kwargs)
 
     def test_func(self):
@@ -278,7 +284,6 @@ class OntvangAntwoordView(UserPassesTestMixin, View):
             antwoord.save(update_fields=['antwoord'])
 
             if self.toets.is_afgerond:
-                print('controleer')
                 controleer_toets(self.toets)
                 url = reverse('Instaptoets:toon-uitslag')
             else:

@@ -76,12 +76,12 @@
                 </form>
 
                 {% if url_overslaan %}
-                    <form action="{{ url_overslaan }}" method="post" onsubmit="document.getElementById('submit_knop1').disabled=true; document.getElementById('submit_knop2').disabled=true; return true;">
+                    <form action="{{ url_overslaan }}" method="post" onsubmit="document.getElementById('submit_knop2').disabled=true; document.getElementById('submit_knop2').disabled=true; return true;">
                         {% csrf_token %}
                         <input type="hidden" name="keuze" value="overslaan">
 
                         <p class="right-align">
-                            <button class="btn-sv-blauw" id="submit_knop2">Overslaan</button>
+                            <button class="btn-sv-blauw" id="submit_knop2" type="submit">Overslaan</button>
                         </p>
                     </form>
                 {% endif %}

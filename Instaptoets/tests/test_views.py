@@ -5,22 +5,37 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from django.conf import settings
 from django.utils import timezone
-from Bestelling.models import Bestelling, BestellingProduct
-from Betaal.models import BetaalInstellingenVereniging
-from Evenement.definities import (EVENEMENT_STATUS_GEACCEPTEERD, EVENEMENT_INSCHRIJVING_STATUS_RESERVERING_MANDJE,
-                                  EVENEMENT_INSCHRIJVING_STATUS_RESERVERING_BESTELD,
-                                  EVENEMENT_INSCHRIJVING_STATUS_DEFINITIEF,
-                                  EVENEMENT_AFMELDING_STATUS_AFGEMELD, EVENEMENT_AFMELDING_STATUS_GEANNULEERD)
-from Evenement.models import Evenement, EvenementInschrijving, EvenementAfgemeld
-from Functie.tests.helpers import maak_functie
 from Geo.models import Regio
-from Locatie.models import EvenementLocatie
+from Instaptoets.models import Instaptoets, Vraag
+from Instaptoets.operations import selecteer_huidige_vraag
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
 import datetime
+
+
+def toets_zet_afgerond_niet_geslaagd(toets):
+    toets.aantal_antwoorden = toets.aantal_vragen
+    toets.is_afgerond = True
+    toets.geslaagd = False
+    toets.save(update_fields=['is_afgerond', 'aantal_antwoorden', 'geslaagd'])
+
+
+def toets_zet_geslaagd_nog_geldig(toets):
+    toets.aantal_antwoorden = toets.aantal_vragen
+    toets.is_afgerond = True
+    toets.geslaagd = True
+    toets.afgerond = timezone.now()
+    toets.save(update_fields=['is_afgerond', 'aantal_antwoorden', 'geslaagd', 'afgerond'])
+
+
+def toets_zet_geslaagd_niet_meer_geldig(toets):
+    toets.aantal_antwoorden = toets.aantal_vragen
+    toets.is_afgerond = True
+    toets.geslaagd = True
+    toets.afgerond = timezone.now() - datetime.timedelta(days=400)
+    toets.save(update_fields=['is_afgerond', 'aantal_antwoorden', 'geslaagd', 'afgerond'])
 
 
 class TestInstaptoetsViews(E2EHelpers, TestCase):
@@ -30,32 +45,14 @@ class TestInstaptoetsViews(E2EHelpers, TestCase):
     test_after = ('Sporter.tests.test_login',)
 
     url_begin = '/opleidingen/instaptoets/'
-    url_uitslag = '/opleidingen/instaptoets/uitslag/'
-    url_volgende_vraag = '/opleidingen/instaptoets/volgende-vraag/'
-    url_ontvang_antwoord = '/opleidingen/instaptoets/vraag-antwoord/'
+    url_uitslag = url_begin + 'uitslag/'
+    url_volgende_vraag = url_begin + 'volgende-vraag/'
+    url_ontvang_antwoord = url_begin + 'vraag-antwoord/'
 
     def setUp(self):
         """ initialisatie van de test case """
 
-        self.account_100000 = self.e2e_create_account('100000', 'normaal@test.not', 'Tester', accepteer_vhpg=True)
-        self.account_100022 = self.e2e_create_account('100022', 'pijl@test.not', 'Pijl')
-        self.account_100023 = self.e2e_create_account('100023', 'veer@test.not', 'Veer')
-
-        ver_bond = Vereniging(
-                    ver_nr=settings.BETAAL_VIA_BOND_VER_NR,
-                    naam='Bondsbureau',
-                    plaats='Schietstad',
-                    regio=Regio.objects.get(regio_nr=100))
-        ver_bond.save()
-        self.ver_bond = ver_bond
-
-        instellingen = BetaalInstellingenVereniging(
-                            vereniging=ver_bond,
-                            mollie_api_key='test_1234')
-        instellingen.save()
-        self.instellingen_bond = instellingen
-
-        self.assertEqual(settings.BETAAL_VIA_BOND_VER_NR, settings.WEBWINKEL_VERKOPER_VER_NR)
+        self.account_100000 = self.e2e_create_account('100000', 'normaal@test.not', 'Normaal')
 
         ver = Vereniging(
                     ver_nr=1000,
@@ -69,299 +66,330 @@ class TestInstaptoetsViews(E2EHelpers, TestCase):
                     telefoonnummer='12345678')
         ver.save()
 
-        self.functie_hwl = maak_functie("HWL test", "HWL")
-        self.functie_hwl.vereniging = ver
-        self.functie_hwl.save()
-        self.functie_hwl.accounts.add(self.account_100000)
-
-        self.functie_sec = maak_functie("SEC test", "SEC")
-        self.functie_sec.vereniging = ver
-        self.functie_sec.save()
-        self.functie_sec.accounts.add(self.account_100000)
-
-        instellingen = BetaalInstellingenVereniging(
-                            vereniging=ver,
-                            akkoord_via_bond=True)
-        instellingen.save()
-        self.instellingen = instellingen
-
         sporter = Sporter(
                         lid_nr=100000,
-                        voornaam='Ad',
-                        achternaam='de Admin',
-                        geboorte_datum='1966-06-06',
-                        sinds_datum='2020-02-02',
+                        voornaam='Jan',
+                        achternaam='van de Toets',
+                        geboorte_datum='1977-07-07',
+                        sinds_datum='2024-02-02',
                         account=self.account_100000,
                         bij_vereniging=ver,
                         adres_code='1234XX')
         sporter.save()
         self.sporter_100000 = sporter
 
-        locatie = EvenementLocatie(
-                    naam='Arnhemhal',
-                    vereniging=ver,
-                    adres='Papendallaan 9\n6816VD Arnhem',
-                    plaats='Arnhem')
-        locatie.save()
+        self._maak_vragen()
 
-        now_date = timezone.now().date()
-        soon_date = now_date + datetime.timedelta(days=60)
+    @staticmethod
+    def _maak_vragen():
+        Vraag(
+            vraag_tekst='Vraag nummer 1',
+            antwoord_a='Morgen',
+            antwoord_b='Overmorgen',
+            antwoord_c='Gisteren',
+            antwoord_d='Volgende week',
+            juiste_antwoord='A').save()
 
-        evenement = Evenement(
-                        titel='Test evenement',
-                        status=EVENEMENT_STATUS_GEACCEPTEERD,
-                        organiserende_vereniging=ver,
-                        datum=soon_date,
-                        aanvang='09:30',
-                        inschrijven_tot=1,
-                        locatie=locatie,
-                        contact_naam='Dhr. Organisator',
-                        contact_email='info@test.not',
-                        contact_website='www.test.not',
-                        contact_telefoon='023-1234567',
-                        beschrijving='Test beschrijving',
-                        prijs_euro_normaal="15",
-                        prijs_euro_onder18="15")
-        evenement.save()
-        self.evenement = evenement
+        Vraag(
+            vraag_tekst='Vraag nummer 2',
+            antwoord_a='Geel',
+            antwoord_b='Rood',
+            antwoord_c='Blauw',
+            antwoord_d='Wit',
+            juiste_antwoord='B').save()
 
-        # nog een sporter met account
-        sporter = Sporter(
-                        lid_nr=100022,
-                        voornaam='Pijl',
-                        achternaam='de Boog',
-                        geboorte_datum='1966-06-06',
-                        sinds_datum='2020-02-02',
-                        account=self.account_100022,
-                        bij_vereniging=ver,
-                        adres_code='5678YY')
-        sporter.save()
-        self.sporter_100022 = sporter
+        Vraag(
+            is_actief=False,        # mag niet getoond worden
+            gebruik_voor_toets=True,
+            gebruik_voor_quiz=True,
+            vraag_tekst='Inactief mag niet getoond worden',
+            antwoord_a='Ja',
+            antwoord_b='Nee',
+            antwoord_c='Nja',
+            antwoord_d='',
+            juiste_antwoord='B').save()
 
-        # een sporter zonder vereniging
-        sporter = Sporter(
-                        lid_nr=100022,
-                        voornaam='Veer',
-                        achternaam='van de Pijl}',
-                        geboorte_datum='1966-06-06',
-                        sinds_datum='2020-02-02',
-                        account=None,
-                        bij_vereniging=ver,
-                        adres_code='5678YY')
-        sporter.save()
-        self.sporter_100023 = sporter
-
-        # nog een sporter, zonder account
-        sporter = Sporter(
-                        lid_nr=100023,
-                        voornaam='Pees',
-                        achternaam='de Boog',
-                        geboorte_datum='1966-05-05',
-                        sinds_datum='2020-02-02',
-                        bij_vereniging=ver)
-        sporter.save()
-        self.sporter_100023 = sporter
-
-        # maak een inschrijving op het evenement
-        inschrijving = EvenementInschrijving(
-                                wanneer=timezone.now(),
-                                nummer=1,
-                                status=EVENEMENT_INSCHRIJVING_STATUS_RESERVERING_BESTELD,
-                                evenement=evenement,
-                                sporter=self.sporter_100022,
-                                koper=self.account_100022)
-        inschrijving.save()
-        self.inschrijving = inschrijving
-
-        bestel = BestellingProduct(
-                        evenement_inschrijving=inschrijving,
-                        prijs_euro=10.0)
-        bestel.save()
-
-        bestelling = Bestelling(
-                        bestel_nr=self.volgende_bestel_nr,
-                        account=self.account_100022,
-                        log='Test')
-        bestelling.save()
-        bestelling.producten.add(bestel)
-        self.bestelling = bestelling
-
-        # handmatige inschrijving
-        inschrijving = EvenementInschrijving(
-                                wanneer=timezone.now(),
-                                nummer=3,
-                                status=EVENEMENT_INSCHRIJVING_STATUS_DEFINITIEF,
-                                evenement=evenement,
-                                sporter=self.sporter_100023,
-                                koper=self.account_100022)
-        inschrijving.save()
-        self.inschrijving2 = inschrijving
-
-        # afmelding gekoppeld aan een bestelling
-        afgemeld = EvenementAfgemeld(
-                            wanneer_inschrijving=timezone.now() - datetime.timedelta(hours=4),
-                            nummer=2,
-                            wanneer_afgemeld=timezone.now() - datetime.timedelta(hours=3),
-                            status=EVENEMENT_AFMELDING_STATUS_AFGEMELD,
-                            evenement=self.evenement,
-                            sporter=self.sporter_100022,
-                            koper=self.account_100022,
-                            bedrag_ontvangen=10.0,
-                            bedrag_retour=9.0,
-                            log='test')
-        afgemeld.save()
-        self.afgemeld = afgemeld
-
-        bestel = BestellingProduct(
-                    evenement_afgemeld=self.afgemeld,
-                    prijs_euro=10.0)
-        bestel.save()
-        self.bestelling.producten.add(bestel)
-
-        # handmatig inschrijving die afgemeld is
-        afgemeld = EvenementAfgemeld(
-                            wanneer_inschrijving=timezone.now() - datetime.timedelta(hours=4),
-                            nummer=2,
-                            wanneer_afgemeld=timezone.now() - datetime.timedelta(hours=3),
-                            status=EVENEMENT_AFMELDING_STATUS_AFGEMELD,
-                            evenement=self.evenement,
-                            sporter=self.sporter_100022,
-                            koper=self.account_100000,
-                            bedrag_ontvangen=0.0,
-                            bedrag_retour=0.0,
-                            log='test handmatig')
-        afgemeld.save()
+        bulk = [Vraag(
+                    vraag_tekst='Vraag nummer %s' % (3 + nr),
+                    antwoord_a='Geel',
+                    antwoord_b='Rood',
+                    antwoord_c='Blauw',
+                    antwoord_d='Wit',
+                    juiste_antwoord='A')
+                for nr in range(20)]
+        Vraag.objects.bulk_create(bulk)
 
     def test_anon(self):
-        resp = self.client.get(self.url_aanmeldingen % 99999)
+        resp = self.client.get(self.url_begin)
         self.assert403(resp, "Geen toegang")
 
-        resp = self.client.get(self.url_download % 99999)
+        resp = self.client.get(self.url_uitslag)
         self.assert403(resp, "Geen toegang")
 
-        resp = self.client.get(self.url_details_aanmelding % 99999)
+        resp = self.client.get(self.url_volgende_vraag)
         self.assert403(resp, "Geen toegang")
 
-        resp = self.client.get(self.url_details_afmelding % 99999)
+        resp = self.client.get(self.url_ontvang_antwoord)
         self.assert403(resp, "Geen toegang")
 
-    def test_aanmeldingen(self):
-        self.e2e_login_and_pass_otp(self.account_100000)
-        self.e2e_wissel_naar_functie(self.functie_hwl)
+    def test_gast(self):
+        self.account_100000.is_gast = True
+        self.account_100000.save(update_fields=['is_gast'])
+        self.e2e_login(self.account_100000)
 
-        resp = self.client.get(self.url_aanmeldingen % 999999)
-        self.assert404(resp, 'Evenement niet gevonden')
+        resp = self.client.get(self.url_begin)
+        self.assert403(resp, "Geen toegang")
 
+        resp = self.client.get(self.url_uitslag)
+        self.assert403(resp, "Geen toegang")
+
+        resp = self.client.get(self.url_volgende_vraag)
+        self.assert403(resp, "Geen toegang")
+
+        resp = self.client.get(self.url_ontvang_antwoord)
+        self.assert403(resp, "Geen toegang")
+
+    def test_begin(self):
+        self.e2e_login(self.account_100000)
+
+        # toets is nog niet opgestart
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_aanmeldingen % self.evenement.pk)
+            resp = self.client.get(self.url_begin)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('evenement/aanmeldingen.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('instaptoets/begin-toets.dtl', 'plein/site_layout.dtl'))
 
-        # geen aanmeldingen
-        EvenementInschrijving.objects.all().delete()
-        EvenementAfgemeld.objects.all().delete()
-
+        # start de toets op
+        self.assertEqual(Instaptoets.objects.count(), 0)
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_aanmeldingen % self.evenement.pk)
+            resp = self.client.post(self.url_begin)
+        self.assert_is_redirect(resp, self.url_volgende_vraag)
+        self.assertEqual(Instaptoets.objects.count(), 1)
+
+        # nog een keer start geen nieuwe toets op
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_begin)
+        self.assert_is_redirect(resp, self.url_volgende_vraag)
+        self.assertEqual(Instaptoets.objects.count(), 1)
+
+        toets = Instaptoets.objects.first()
+        self.assertEqual(str(toets.afgerond)[:10], '9999-12-31')
+        self.assertEqual(toets.sporter, self.sporter_100000)
+        self.assertEqual(toets.aantal_vragen, 20)
+        self.assertEqual(toets.aantal_antwoorden, 0)
+        self.assertEqual(toets.is_afgerond, False)
+        self.assertEqual(toets.aantal_goed, 0)
+        self.assertEqual(toets.geslaagd, False)
+        self.assertEqual(toets.vraag_antwoord.count(), 20)
+        self.assertTrue(str(toets) != '')
+
+        # controleer dat geen inactieve vraag geselecteerd is
+        for vraag_antwoord in toets.vraag_antwoord.all():
+            vraag = vraag_antwoord.vraag
+            self.assertTrue(vraag.is_actief)
+            self.assertTrue(vraag.gebruik_voor_toets)
+            self.assertTrue(str(vraag) != '')
+        # for
+
+        # get terwijl er al een toets gestart is
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_begin)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('evenement/aanmeldingen.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('instaptoets/begin-toets.dtl', 'plein/site_layout.dtl'))
 
-        self.e2e_assert_other_http_commands_not_supported(self.url_aanmeldingen % self.evenement.pk)
-
-    def test_download(self):
-        self.e2e_login_and_pass_otp(self.account_100000)
-        self.e2e_wissel_naar_functie(self.functie_hwl)
-
-        resp = self.client.get(self.url_download % 999999)
-        self.assert404(resp, 'Evenement niet gevonden')
-
+        # get terwijl er al een afgeronde toets is, maar de sporter niet geslaagd is
+        toets_zet_afgerond_niet_geslaagd(toets)
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_download % self.evenement.pk)
-        self.assert200_is_bestand_csv(resp)
-
-        # uitzondering: sporter zonder vereniging
-        self.sporter_100023.bij_vereniging = None
-        self.sporter_100023.save(update_fields=['bij_vereniging'])
-
-        self.sporter_100022.bij_vereniging = None
-        self.sporter_100022.save(update_fields=['bij_vereniging'])
-
-        # haal het product uit de bestelling
-        self.bestelling.producten.clear()
-
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_download % self.evenement.pk)
-        self.assert200_is_bestand_csv(resp)
-
-        self.e2e_assert_other_http_commands_not_supported(self.url_download % self.evenement.pk)
-
-    def test_details_aanmelding(self):
-        self.e2e_login_and_pass_otp(self.account_100000)
-        self.e2e_wissel_naar_functie(self.functie_hwl)
-
-        resp = self.client.get(self.url_details_aanmelding % 'xxx')
-        self.assert404(resp, 'Geen valide parameter')
-
-        resp = self.client.get(self.url_details_aanmelding % 999999)
-        self.assert404(resp, 'Aanmelding niet gevonden')
-
-        # inschrijving via bestelling
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_details_aanmelding % self.inschrijving.pk)
+            resp = self.client.get(self.url_begin)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('evenement/aanmelding-details.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('instaptoets/begin-toets.dtl', 'plein/site_layout.dtl'))
 
-        # handmatige inschrijving
+        # get terwijl er al een afgeronde maar nog wel geldige toets is
+        toets_zet_geslaagd_nog_geldig(toets)
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_details_aanmelding % self.inschrijving2.pk)
+            resp = self.client.get(self.url_begin)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('evenement/aanmelding-details.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('instaptoets/begin-toets.dtl', 'plein/site_layout.dtl'))
 
-        # in mandje
-        self.inschrijving.status = EVENEMENT_INSCHRIJVING_STATUS_RESERVERING_MANDJE
-        self.inschrijving.save(update_fields=['status'])
+        # get terwijl er al een afgeronde maar niet meer geldige toets is
+        toets_zet_geslaagd_niet_meer_geldig(toets)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_begin)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('instaptoets/begin-toets.dtl', 'plein/site_layout.dtl'))
+
+    def test_uitslag(self):
+        self.e2e_login(self.account_100000)
+
+        # get terwijl er geen toets gestart is
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_uitslag)
+        self.assert_is_redirect(resp, self.url_begin)
+
+        # start de toets op
+        self.assertEqual(Instaptoets.objects.count(), 0)
+        resp = self.client.post(self.url_begin)
+        self.assert_is_redirect(resp, self.url_volgende_vraag)
+        self.assertEqual(Instaptoets.objects.count(), 1)
+        toets = Instaptoets.objects.first()
+
+        # get terwijl de toets nog niet afgerond is
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_uitslag)
+        self.assert_is_redirect(resp, self.url_begin)
+
+        # get van een afgeronde toets
+        toets_zet_afgerond_niet_geslaagd(toets)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_uitslag)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('instaptoets/toon-uitslag.dtl', 'plein/site_layout.dtl'))
+
+    def test_volgende_vraag(self):
+        self.e2e_login(self.account_100000)
+
+        # get terwijl er geen toets gestart is
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_volgende_vraag)
+        self.assert_is_redirect(resp, self.url_begin)
+
+        # start de toets op
+        self.assertEqual(Instaptoets.objects.count(), 0)
+        resp = self.client.post(self.url_begin)
+        self.assert_is_redirect(resp, self.url_volgende_vraag)
+        self.assertEqual(Instaptoets.objects.count(), 1)
+        toets = Instaptoets.objects.first()
+
+        # get the volgende vraag
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_volgende_vraag)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('instaptoets/volgende-vraag.dtl', 'plein/site_layout.dtl'))
+
+        # laatste vraag --> geen overslaan knop
+        toets.aantal_antwoorden = toets.aantal_vragen - 1
+        toets.save(update_fields=['aantal_antwoorden'])
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_volgende_vraag)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('instaptoets/volgende-vraag.dtl', 'plein/site_layout.dtl'))
+
+        # geen valide vraag
+        self.assertTrue(str(toets.vraag_antwoord.first()) != '')
+        toets.vraag_antwoord.clear()
+        toets.huidige_vraag = None
+        toets.save(update_fields=['huidige_vraag'])
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_volgende_vraag)
+        self.assert404(resp, 'Toets is niet beschikbaar')
+
+        # get terwijl er de toets al afgerond is
+        toets_zet_afgerond_niet_geslaagd(toets)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_volgende_vraag)
+        self.assert_is_redirect(resp, self.url_uitslag)
+
+    def test_ontvang_antwoord(self):
+        self.e2e_login(self.account_100000)
+
+        # get terwijl er geen toets gestart is
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_ontvang_antwoord)
+        self.assert_is_redirect(resp, self.url_begin)
+
+        # start de toets op
+        self.assertEqual(Instaptoets.objects.count(), 0)
+        resp = self.client.post(self.url_begin)
+        self.assert_is_redirect(resp, self.url_volgende_vraag)
+        self.assertEqual(Instaptoets.objects.count(), 1)
+        toets = Instaptoets.objects.first()
+
+        # get terwijl er een toets gestart is --> get wordt niet ondersteund
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_ontvang_antwoord)
+        self.assertEqual(resp.status_code, 405)
+
+        # post het antwoord, zonder keuze
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_ontvang_antwoord)
+        self.assert404(resp, 'Foutieve parameter')
+
+        resp = self.client.post(self.url_ontvang_antwoord, {'keuze': 'E'})
+        self.assert404(resp, 'Foutieve parameter')
+
+        # post het antwoord: verzoek tot overslaan
+        self.assertEqual(toets.aantal_antwoorden, 0)
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_ontvang_antwoord, {'keuze': 'overslaan'})
+        self.assert_is_redirect(resp, self.url_volgende_vraag)
+        toets.refresh_from_db()
+        self.assertEqual(toets.aantal_antwoorden, 0)
 
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_details_aanmelding % self.inschrijving.pk)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('evenement/aanmelding-details.dtl', 'plein/site_layout.dtl'))
-        self.assert_html_ok(resp)
+            resp = self.client.post(self.url_ontvang_antwoord, {'keuze': 'D'})
+        self.assert_is_redirect(resp, self.url_volgende_vraag)
+        toets.refresh_from_db()
+        self.assertEqual(toets.aantal_antwoorden, 1)
 
-    def test_details_afmelding(self):
-        self.e2e_login_and_pass_otp(self.account_100000)
-        self.e2e_wissel_naar_functie(self.functie_hwl)
+        # wijzig een antwoord (dit kan in de praktijk niet voorkomen)
+        toets.huidige_vraag.antwoord = 'B'
+        toets.huidige_vraag.save(update_fields=['antwoord'])
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_ontvang_antwoord, {'keuze': 'A'})
+        self.assert_is_redirect(resp, self.url_volgende_vraag)
 
-        resp = self.client.get(self.url_details_afmelding % 'xxx')
-        self.assert404(resp, 'Geen valide parameter')
+        toets.aantal_antwoorden = toets.aantal_vragen - 1
+        toets.save(update_fields=['aantal_antwoorden'])
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_ontvang_antwoord, {'keuze': 'A'})
+        self.assert_is_redirect(resp, self.url_uitslag)
 
-        resp = self.client.get(self.url_details_afmelding % 999999)
-        self.assert404(resp, 'Afmelding niet gevonden')
+        # get terwijl er de toets al afgerond is
+        toets_zet_afgerond_niet_geslaagd(toets)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_ontvang_antwoord)
+        self.assert_is_redirect(resp, self.url_uitslag)
 
-        self.assertTrue(str(self.afgemeld) != '')
+    def test_geslaagd(self):
+        self.e2e_login(self.account_100000)
 
-        self.assertEqual(self.afgemeld.korte_beschrijving(), 'Test evenement, voor 100022')
-        self.afgemeld.evenement.titel = 'Dit is een hele lange titel die afgekapt gaat worden'
-        self.assertTrue('.., voor 100022' in self.afgemeld.korte_beschrijving())
+        # start de toets op
+        resp = self.client.post(self.url_begin)
+        self.assert_is_redirect(resp, self.url_volgende_vraag)
+
+        for lp in range(20):
+            resp = self.client.post(self.url_ontvang_antwoord, {'keuze': 'A'})
+        # for
+        self.assert_is_redirect(resp, self.url_uitslag)
 
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_details_afmelding % self.afgemeld.pk)
+            resp = self.client.get(self.url_uitslag)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('evenement/afmelding-details.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('instaptoets/toon-uitslag.dtl', 'plein/site_layout.dtl'))
 
-        # geannuleerd
-        self.afgemeld.status = EVENEMENT_AFMELDING_STATUS_GEANNULEERD
-        self.afgemeld.save(update_fields=['status'])
+    def test_operations(self):
+        # corner cases
+        self.e2e_login(self.account_100000)
 
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_details_afmelding % self.afgemeld.pk)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('evenement/afmelding-details.dtl', 'plein/site_layout.dtl'))
-        self.assert_html_ok(resp)
+        # start de toets op
+        self.assertEqual(Instaptoets.objects.count(), 0)
+        resp = self.client.post(self.url_begin)
+        self.assert_is_redirect(resp, self.url_volgende_vraag)
+        self.assertEqual(Instaptoets.objects.count(), 1)
+        toets = Instaptoets.objects.first()
 
+        toets.vraag_antwoord.clear()
+        selecteer_huidige_vraag(toets, forceer=True)
+
+        toets.is_afgerond = True
+        selecteer_huidige_vraag(toets)
 
 # end of file

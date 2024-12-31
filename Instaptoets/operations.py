@@ -11,13 +11,15 @@ from Sporter.models import Sporter
 import datetime
 import random
 
+AANTAL_TOETS_VRAGEN = 20
+
 
 def instaptoets_is_beschikbaar():
     return Vraag.objects.count() > 0
 
 
 def selecteer_toets_vragen(toets: Instaptoets):
-    todo = 15 - toets.aantal_vragen
+    todo = AANTAL_TOETS_VRAGEN - toets.aantal_vragen
 
     gekozen_pks = list(toets.vraag_antwoord.all().values_list('vraag__pk', flat=True))
 
@@ -40,13 +42,15 @@ def selecteer_toets_vragen(toets: Instaptoets):
     # while
 
     ToetsAntwoord.objects.bulk_create(nieuw)
-    toets.vraag_antwoord.set(nieuw)
+    toets.vraag_antwoord.add(*nieuw)
 
     toets.aantal_vragen += len(nieuw)
     toets.save()
 
 
 def selecteer_huidige_vraag(toets: Instaptoets, forceer=False):
+    """ selecteer willekeurig een nog niet beantwoorde vraag
+    """
     if toets.is_afgerond:
         return
 
@@ -55,6 +59,8 @@ def selecteer_huidige_vraag(toets: Instaptoets, forceer=False):
             return
 
     qset = toets.vraag_antwoord.filter(antwoord='?')
+    if toets.huidige_vraag:
+        qset = qset.exclude(pk=toets.huidige_vraag.pk)
 
     if qset.count() > 0:
         keuze = random.choice(qset)
@@ -91,6 +97,7 @@ def vind_toets(sporter: Sporter):
              .first())
 
     return toets
+
 
 def controleer_toets(toets: Instaptoets):
     toets.aantal_goed = 0
