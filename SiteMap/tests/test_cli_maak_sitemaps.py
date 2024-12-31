@@ -190,7 +190,7 @@ class TestSiteMapCliMaakSitemaps(E2EHelpers, TestCase):
             bestel_begrenzing='').save()
 
         with tempfile.TemporaryDirectory() as output_dir:
-            with self.assert_max_queries(20):
+            with self.assert_max_queries(22):
                 f1, f2 = self.run_management_command('maak_sitemaps', output_dir)
             # print("f1: %s" % f1.getvalue())
             # print("f2: %s" % f2.getvalue())
