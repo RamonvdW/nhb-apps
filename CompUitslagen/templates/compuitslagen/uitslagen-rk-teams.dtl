@@ -1,12 +1,12 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2023 Ramon van der Winkel.
+                Copyright (c) 2020-2024 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
 
-{% block title %}Uitslag RK teams{% endblock %}
+{% block title %}{% if deelkamp.is_klaar_teams %}Eindstand van{% else %}Deelnemerslijst voor{% endif %} de {{ deelkamp.competitie.beschrijving }} {{ teamtype.beschrijving }}s rayonkampioenschappen {{ deelkamp.rayon }}{% endblock %}
 
 {% block pagina %}
 

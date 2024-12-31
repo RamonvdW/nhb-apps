@@ -6,7 +6,7 @@
 {% endcomment %}
 {% load static %}
 
-{% block title %}Uitslag BK individueel{% endblock %}
+{% block title %}{% if deelkamp_bk.is_klaar_indiv %}Eindstand van{% else %}Deelnemerslijst voor{% endif %} de {{ comp.beschrijving }} {{ comp_boog.beschrijving }} bondskampioenschappen individueel{% endblock %}
 
 {% block pagina %}
 
