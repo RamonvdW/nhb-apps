@@ -12,10 +12,6 @@
     having to edit the settings.py file.
 """
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
-ENABLE_DEBUG_TOOLBAR = False
-
 # the secret below ensures an adversary cannot fake aspects like a session-id
 # just make sure it is unique per installation and keep it private
 # details: https://docs.djangoproject.com/en/4.2/ref/settings/#secret-key
@@ -23,7 +19,7 @@ SECRET_KEY = '1234-replace-with-your-own-secret-key-56789abcdefg'       # noqa
 
 BASE_URL = "yourdomain.com"
 
-# SITE_URL wordt gebruikt door Overige:tijdelijke urls
+# SITE_URL wordt gebruikt door TijdelijkeCodes, maar ook voor alle urls in e-mails
 #SITE_URL = "https://" + BASE_URL
 SITE_URL = "http://localhost:8000"
 
@@ -130,21 +126,27 @@ BEKENDE_BIC_CODES = (
 # hierdoor komt een eventuele reservering weer beschikbaar voor iemand anders
 MANDJE_VERVAL_NA_DAGEN = 3
 
-# pagina over grensoverschrijdend gedrag en contactgegevens VCP's
+# pagina over grensoverschrijdend gedrag en contactgegevens vertrouwenscontactpersonen
 URL_VCP_CONTACTGEGEVENS = 'https://yourfrontend/grensoverschrijdend-gedrag/'
+
+# pagina met instructies en aanvraagformulier prestatiespelden
+URL_SPELDEN_PROCEDURES = 'https://www.handboogsport.nl/de-khsn/#procedures'     # noqa
+
+# online aanvraagformulier voor nieuwe records
+URL_RECORD_AANVRAAGFORMULIER = 'https://docs.google.com/spreadsheets/1234_your_doc_7890'
 
 # locatie op disk waar de foto's staan (bron)
 # deze worden door collectstatic naar deployment gezet  # noqa
 # het veld WebwinkelProduct.locatie is onder dit punt
-WEBWINKEL_FOTOS_DIR = '/directory/on/server/webwinkel_fotos'    # noqa
+WEBWINKEL_FOTOS_DIR = '/directory/on/server/webwinkel_fotos'
 
 # welke vereniging is de verkoper
 WEBWINKEL_VERKOPER_VER_NR = 1368
 WEBWINKEL_VERKOPER_BTW_NR = "012345678B99"
 
 # verzendkosten webwinkel
-WEBWINKEL_PAKKET_GROOT_VERZENDKOSTEN_EURO = 6.95
 WEBWINKEL_BRIEF_VERZENDKOSTEN_EURO = 4.25
+WEBWINKEL_PAKKET_GROOT_VERZENDKOSTEN_EURO = 6.95
 
 # ophalen op bondsbureau aan/uit zetten
 WEBWINKEL_TRANSPORT_OPHALEN_MAG = True
@@ -154,6 +156,9 @@ WEBWINKEL_BTW_PERCENTAGE = 21.0
 
 # Prestatiespelden tonen in de webwinkel?
 WEBWINKEL_TOON_PRESTATIESPELDEN = False
+
+# welke vereniging(en) mogen evenementen op de kalender zetten?
+EVENEMENTEN_VERKOPER_VER_NRS = (1368,)
 
 # Mollie endpoint URL override
 # (None = use library provided default)
@@ -178,5 +183,8 @@ LID_NRS_GEEN_SCHEIDS_BESCHIKBAARHEID_OPVRAGEN = ()
 # Ledenvoordeel
 WALIBI_URL_ALGEMEEN = 'https://www.walibi.nl/'
 WALIBI_URL_KORTING = 'https://bit.ly/yourcode'
+
+# toegestane tokens voor /kalender/api/lijst/30/?token=xxxx
+KALENDER_API_TOKENS = ()
 
 # end of file
