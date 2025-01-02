@@ -6,7 +6,7 @@
 {% endcomment %}
 {% load static %}
 
-{% block title %}Uitslag RK teams{% endblock %}
+{% block title %}{% if deelkamp.is_klaar_teams %}Eindstand van{% else %}Deelnemerslijst voor{% endif %} de {{ deelkamp.competitie.beschrijving }} {{ teamtype.beschrijving }}s rayonkampioenschappen {{ deelkamp.rayon }}{% endblock %}
 
 {% block pagina %}
 

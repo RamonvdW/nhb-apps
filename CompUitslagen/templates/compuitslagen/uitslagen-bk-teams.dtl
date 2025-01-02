@@ -6,7 +6,7 @@
 {% endcomment %}
 {% load static %}
 
-{% block title %}Uitslag BK teams{% endblock %}
+{% block title %}{% if deelkamp_bk.is_klaar_teams %}Eindstand van{% else %}Deelnemerslijst voor{% endif %} de {{ comp.beschrijving }} {{ teamtype.beschrijving }}s bondskampioenschappen{% endblock %}
 
 {% block pagina %}
 

@@ -6,7 +6,7 @@
 {% endcomment %}
 {% load static %}
 
-{% block title %}Uitslagen regiocompetitie{% endblock %}
+{% block title %}{% if comp.regiocompetitie_is_afgesloten %}Eindstand{% else %}Tussenstand{% endif %} {{ deelcomp.competitie.beschrijving }} {{ comp_boog.beschrijving }} individueel in {{ regio }}{% endblock %}
 
 {% block pagina %}
 
