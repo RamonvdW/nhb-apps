@@ -70,8 +70,13 @@ class PleinView(View):
     # (geen)
 
     def dispatch(self, request, *args, **kwargs):
-        """ wegsturen als het we geen vragen meer hebben + bij oneigenlijk gebruik """
+        """ checks + gebruiker doorsturen naar andere pagina's """
 
+        # controleer of de browser niet ondersteund is
+        if not is_browser_supported(request):
+            return redirect('Plein:niet-ondersteund')
+
+        # onvolledig gast-account registratie doorsturen naar de volgende vraag
         if request.user.is_authenticated:
             account = get_account(request)
             if account.is_gast:
@@ -86,14 +91,13 @@ class PleinView(View):
     def get(self, request, *args, **kwargs):
         """ called by the template system to get the context data for the template """
 
-        if not is_browser_supported(request):
-            return redirect('Plein:niet-ondersteund')
-
         # zet alles goed voor bezoekers / geen rol
         template = TEMPLATE_PLEIN_BEZOEKER
         context = dict()
 
-        # ga naar live server banner tonen?
+        context['naam_site'] = settings.NAAM_SITE
+
+        # banner "ga naar live server" tonen?
         context['ga_naar_live_server'] = settings.IS_TEST_SERVER
 
         # site-specifieke default voor deze kaartjes
@@ -104,6 +108,7 @@ class PleinView(View):
 
             if rol_nu == Rollen.ROL_SPORTER:
                 template = TEMPLATE_PLEIN_SPORTER
+
                 context['url_profiel'] = reverse('Sporter:profiel')
                 context['url_handleiding_leden'] = settings.URL_PDF_HANDLEIDING_LEDEN
 
@@ -122,7 +127,7 @@ class PleinView(View):
                 pass
 
             else:
-                # beheerder
+                # een van de vele beheerder rollen
                 template = TEMPLATE_PLEIN_BEHEERDER
 
                 if rol_nu == Rollen.ROL_BB:
@@ -156,6 +161,7 @@ class PleinView(View):
                     raise Http404("Onbekende rol %s (interne fout)" % rol_nu)
 
                 if rol_nu in (Rollen.ROL_BB, Rollen.ROL_MWZ, Rollen.ROL_MO, Rollen.ROL_SUP):
+                    # feedback, logboek, activiteit, etc.
                     context['toon_manager_sectie'] = True
 
                 if rol_nu in (Rollen.ROL_BB,

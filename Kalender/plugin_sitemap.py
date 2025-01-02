@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import reverse
-from SiteMap.definities import CHECK_LOW, CHECK_MED, CHECK_HIGH
+from SiteMap.definities import CHECK_LOW   # CHECK_MED, CHECK_HIGH
 
 
 def generate_urls():

@@ -52,6 +52,10 @@ USE_SUBSET_FONT_FILES = False
 # ask the template engine to insert a special pattern in the output in case of template problems
 TEMPLATES[0]['OPTIONS']['string_if_invalid'] = '##BUG %s ##'
 
+# significant speed up by reducing calculation time for secure password handling
+# (use during debugging of autotesters)
+# PASSWORD_HASHERS = ['django.contrib.auth.hashers.MD5PasswordHasher']
+
 
 if ENABLE_DJANGO_EXTENSIONS:                        # pragma: no cover
     INSTALLED_APPS.append('django_extensions')

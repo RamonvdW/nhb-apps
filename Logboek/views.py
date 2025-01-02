@@ -24,6 +24,7 @@ TEMPLATE_LOGBOEK_CLUSTERS = 'logboek/clusters.dtl'
 TEMPLATE_LOGBOEK_BETALINGEN = 'logboek/betalingen.dtl'
 TEMPLATE_LOGBOEK_COMPETITIE = 'logboek/competitie.dtl'
 TEMPLATE_LOGBOEK_CRM_IMPORT = 'logboek/crm-import.dtl'
+TEMPLATE_LOGBOEK_OPLEIDINGEN = 'logboek/opleidingen.dtl'
 TEMPLATE_LOGBOEK_ACCOMMODATIES = 'logboek/accommodaties.dtl'
 
 RESULTS_PER_PAGE = 50
@@ -40,7 +41,8 @@ DELEN = (
     ('clusters', 'Clusters'),
     ('competitie', 'Bondscompetities'),
     ('betalingen', 'Betalingen'),
-    ('uitrol', 'Uitrol')
+    ('uitrol', 'Uitrol'),
+    ('opleidingen', 'Opleidingen')
 )
 
 
@@ -83,8 +85,8 @@ class LogboekBasisView(UserPassesTestMixin, ListView):
             range_start = 1
         if range_end > num_pages:
             range_end = num_pages
-        for pgnr in range(range_start, range_end+1):
-            tup = ('%s' % pgnr, self.base_url + '?page=%s' % pgnr)
+        for pg_nr in range(range_start, range_end+1):
+            tup = ('%s' % pg_nr, self.base_url + '?page=%s' % pg_nr)
             links.append(tup)
         # for
 
@@ -183,11 +185,13 @@ class LogboekRestView(LogboekBasisView):
                          Q(gebruikte_functie='Registreer met bondsnummer') |    # Registreer
                          Q(gebruikte_functie='Registreer gast-account') |       # Registreer
                          Q(gebruikte_functie='Rollen') |            # Functie
-                         Q(gebruikte_functie='CRM-import') |        # NhbStructuur
+                         Q(gebruikte_functie='CRM-import') |        # ImportCRM
                          Q(gebruikte_functie='Competitie') |        # Competitie
                          Q(gebruikte_functie='Accommodaties') |     # Locatie
                          Q(gebruikte_functie='Clusters') |
-                         Q(gebruikte_functie='Uitrol'))
+                         Q(gebruikte_functie='Uitrol') |
+                         Q(gebruikte_functie='Opleidingen') |       # Opleidingen
+                         Q(gebruikte_functie='Instaptoets'))        # Opleidingen
                 .order_by('-toegevoegd_op'))
 
 
@@ -366,6 +370,26 @@ class LogboekUitrolView(LogboekBasisView):
                 .select_related('actie_door_account')
                 .filter(gebruikte_functie='Uitrol')
                 .order_by('-toegevoegd_op'))
+
+
+class LogboekOpleidingenView(LogboekBasisView):
+    """ Deze view toont de logboek regels die met de opleidingen te maken hebben """
+
+    template_name = TEMPLATE_LOGBOEK_OPLEIDINGEN
+    filter = 'opleiding'
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.base_url = reverse('Logboek:opleidingen')
+
+    def get_focused_queryset(self):
+        """ retourneer de data voor de template view """
+        return (LogboekRegel
+                .objects
+                .select_related('actie_door_account')
+                .filter(Q(gebruikte_functie='Opleidingen') |
+                        Q(gebruikte_functie='Instaptoets'))
+        .order_by('-toegevoegd_op'))
 
 
 # end of file

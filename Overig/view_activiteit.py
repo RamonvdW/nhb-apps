@@ -138,7 +138,7 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
             for functie in account.functie_set.all():
                 try:
                     level = self.sort_level[functie.rol]
-                except KeyError:
+                except KeyError:        # pragma: no cover
                     level = 999999
                 tup = (level, functie.rol)
                 functies.append(tup)
