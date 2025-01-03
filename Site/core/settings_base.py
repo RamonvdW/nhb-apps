@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -58,7 +58,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2024-12-31'
+SITE_VERSIE = '2025-01-03'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -586,6 +586,9 @@ BETAAL_VIA_BOND_VER_NR = 1368
 # welke vereniging(en) mogen een uitvoerende vereniging aanwijzen (en daar een locatie van kiezen)?
 WEDSTRIJDEN_KIES_UITVOERENDE_VERENIGING = (1368,)
 
+# aantal vragen van de instaptoets
+INSTAPTOETS_AANTAL_VRAGEN = 20
+INSTAPTOETS_AANTAL_GOED_EIS = 70        # procent
 
 # defaults for 'dev' and 'test' options
 

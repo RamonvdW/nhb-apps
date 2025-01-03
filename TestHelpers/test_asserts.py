@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -571,7 +571,9 @@ class MyTestAsserts(TestCase):
 
             if button_count > 0:
                 if pos1 < 0 or pos2 < 0:                # pragma: no cover
-                    self.fail('Form without dubbelklik bescherming in button template %s' % repr(dtl))
+                    msg = 'Form without dubbelklik bescherming in button template %s\n'% repr(dtl)
+                    msg += 'button_count=%s, pos1=%s, pos2=%s' % (button_count, pos1, pos2)
+                    self.fail(msg)
 
             html = html[form_end+7:]
             pos_form = html.find('<form')
