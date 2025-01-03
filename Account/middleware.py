@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2024 Ramon van der Winkel.
+#  Copyright (c) 2024-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -52,6 +52,9 @@ class HerhaalLoginOTP:
 
                     # redirect naar het plein
                     return HttpResponseRedirect(reverse('Plein:plein'))
+
+            if not skip_checks:
+                skip_checks = (settings.HERHAALINTERVAL_OTP is None) and (settings.HERHAAL_INTERVAL_LOGIN is None)
 
             if not skip_checks:
                 if not account.otp_controle_gelukt_op or not account.otp_is_actief:
