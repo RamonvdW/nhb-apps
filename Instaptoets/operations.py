@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2024 Ramon van der Winkel.
+#  Copyright (c) 2024-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
+from django.conf import settings
 from django.utils import timezone
 from Instaptoets.models import Instaptoets, Vraag, ToetsAntwoord
 from Logboek.models import schrijf_in_logboek
@@ -11,15 +12,13 @@ from Sporter.models import Sporter
 import datetime
 import random
 
-AANTAL_TOETS_VRAGEN = 20
-
 
 def instaptoets_is_beschikbaar():
     return Vraag.objects.count() > 0
 
 
 def selecteer_toets_vragen(toets: Instaptoets):
-    todo = AANTAL_TOETS_VRAGEN - toets.aantal_vragen
+    todo = settings.AANTAL_TOETS_VRAGEN - toets.aantal_vragen
 
     gekozen_pks = list(toets.vraag_antwoord.all().values_list('vraag__pk', flat=True))
 
@@ -108,7 +107,7 @@ def controleer_toets(toets: Instaptoets):
     # for
 
     # je moet 70% goed hebben
-    aantal_nodig = int(toets.aantal_vragen * 0.7)
+    aantal_nodig = int(toets.aantal_vragen * (settings.INSTAPTOETS_AANTAL_GOED_EIS / 100.0))
     toets.geslaagd = toets.aantal_goed >= aantal_nodig
     toets.save(update_fields=['geslaagd', 'aantal_goed'])
 

@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2024 Ramon van der Winkel.
+                Copyright (c) 2024-2025 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -20,9 +20,9 @@
 
     <!-- blauw balk met wit informatie veld -->
     <div class="row-sv-blauw">
-        <div class="col s12">
+        <div class="col s12 m8 offset-m2 l6 offset-l3">
             <div class="sv-kader" style="padding:10px">
-                <p>De instaptoets is een online test van 30 meerkeuze vragen.<br>Als je deze haalt, dan kan je je inschrijven voor de basiscursus.</p>
+                <p>De instaptoets is een online test van {{ aantal_vragen }} meerkeuze vragen.<br>De eis is {{ eis_percentage }}% goed beantwoord.</p>
 
                 {% if url_starten %}
                     <!-- knop om toets op te starten met een POST -->

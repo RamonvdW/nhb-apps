@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2024 Ramon van der Winkel.
+                Copyright (c) 2024-2025 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -14,31 +14,38 @@
     <div class="row center">
         <div class="col s12">
             <h3 class="page-banner">Basiscursus</h3>
-            <p>..beginnetje van..</p>
+            <p>de eerste stap op weg naar je diploma wedstrijdleider of scheidsrechter!</p>
         </div>
     </div>
 
-    {% if toets_is_geldig %}
-        <!-- witruimte -->
-        <div class="row center">
-            <div class="col s12">
-                <h4>Instaptoets</h4>
-                <p>Voorwaarde voor inschrijven op de basiscursus is het slagen voor de online instaptoets.</p>
-                <p>Volgens onze administratie heb je deze gehaald op {{ toets.afgerond|date:"j F Y" }}.</p>
+    <!-- blauw balk met wit informatie veld -->
+    <div class="row-sv-blauw">
+        <div class="col s12">
+            <div class="sv-kader" style="padding:10px">
+                <p>Goede wedstrijdleiders en scheidsrechters zijn onmisbaar in de handboogsport. Ze zorgen ervoor dat wedstrijden georganiseerd worden en dat daarbij de juiste spelregels en procedures toegepast worden. Mede dankzij hen kunnen sporters en publiek praktisch ieder weekend genieten van mooie wedstrijden en competities, in alle disciplines.</p>
+                <p>Wil jij ons team van wedstrijdleiders en scheidsrechters komen versterken en daarmee een bijdrage leveren aan het succes van onze sport? Dan ben je hier op de juiste plek!</p>
+                <p>De basiscursus is namelijk stap 1 op weg naar een carrière als wedstrijdleider en/ of scheidsrechter. Het is een theorie-opleiding waarin je veel leert over actuele reglementen en procedures. Nadat je de basiscursus hebt afgerond kan je jezelf verder specialiseren als wedstrijdleider en/of scheidsrechter. Op een niveau dat past bij je persoonlijke ambitie.</p>
+                <br>
+                <p>Om deel te kunnen nemen aan de basiscursus doe je eerst de online instaptoets.<br>Deze is er 1) omdat het leuk is om je reglementenkennis te testen en<br>2) omdat je daarmee aantoont dat je over de enige basiskennis ten aanzien van de handboogsport beschikt.<p>
+                <p>Wanneer je deze toets met een minimaal {{ eis_percentage }}% goed-score doorlopen hebt, kan je jezelf vervolgens direct inschrijven voor één van de geplande basiscursussen.</p>
             </div>
         </div>
-    {% endif %}
+    </div>
+
+
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>Instaptoets</h4>
+                {% if toets_is_geldig %}
+                    <p>Volgens onze administratie heb je deze gehaald op {{ toets.afgerond|date:"j F Y" }}.</p>
+                {% else %}
+                    <p>Volgens onze administratie heb je deze nog niet gehaald.</p>
+                {% endif %}
+        </div>
+    </div>
 
     {% if url_instaptoets %}
-        <!-- witruimte -->
-        <div class="row center">
-            <div class="col s12">
-                <h4>Instaptoets</h4>
-                <p>Voorwaarde voor inschrijven op de basiscursus is het slagen voor de online instaptoets.</p>
-                <p>Volgens onze administratie heb je deze nog niet gehaald.</p>
-            </div>
-        </div>
-
         <!-- blauwe balk met kaartjes -->
         <div class="row-sv-blauw">
             <div class="col s12">

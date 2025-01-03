@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2024 Ramon van der Winkel.
+#  Copyright (c) 2024-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import reverse
+from django.conf import settings
 from django.http import HttpResponseRedirect, Http404
 from django.utils import timezone
 from django.views.generic import TemplateView, View
@@ -51,6 +52,8 @@ class BeginToetsView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         context['toets'] = toets = vind_toets(self.sporter)
+        context['aantal_vragen'] = settings.INSTAPTOETS_AANTAL_VRAGEN
+        context['eis_percentage'] = settings.INSTAPTOETS_AANTAL_GOED_EIS
 
         if not toets:
             context['laat_starten'] = True

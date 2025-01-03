@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2024 Ramon van der Winkel.
+#  Copyright (c) 2022-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import reverse
-#from django.utils import timezone
+from django.conf import settings
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
@@ -86,6 +86,7 @@ class BasiscursusView(UserPassesTestMixin, TemplateView):
         # instaptoets alleen aan leden tonen
         if instaptoets_is_beschikbaar():
             context['url_instaptoets'] = reverse('Instaptoets:begin')
+            context['eis_percentage'] = settings.INSTAPTOETS_AANTAL_GOED_EIS
 
             toets = vind_toets(self.sporter)
             if toets:
