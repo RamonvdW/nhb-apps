@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2024 Ramon van der Winkel.
+#  Copyright (c) 2020-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -18,10 +18,10 @@ class Aanvangsgemiddelde(models.Model):
     """ Bijhouden van een specifiek aanvangsgemiddelde """
 
     # bij wie hoort dit aanvangsgemiddelde
-    sporterboog = models.ForeignKey(SporterBoog, on_delete=models.PROTECT)      # TODO: verander in CASCADE?
+    sporterboog = models.ForeignKey(SporterBoog, on_delete=models.CASCADE)
 
     # kopie toevoegen van het boogtype van de sporterboog, om eenvoudiger op te kunnen filteren
-    boogtype = models.ForeignKey(BoogType, on_delete=models.PROTECT)            # TODO: verander in CASCADE?
+    boogtype = models.ForeignKey(BoogType, on_delete=models.CASCADE)
 
     # AG voor individueel of team gebruik?
     doel = models.CharField(max_length=1, choices=AG_DOEL_CHOICES, default=AG_DOEL_INDIV)
@@ -52,8 +52,7 @@ class AanvangsgemiddeldeHist(models.Model):
     when = models.DateTimeField(auto_now_add=True)      # automatisch invullen
 
     # waar gaat dit over?
-    ag = models.ForeignKey(Aanvangsgemiddelde, on_delete=models.CASCADE, null=True,     # TODO: null=True kan weg?
-                           related_name='ag_hist')
+    ag = models.ForeignKey(Aanvangsgemiddelde, on_delete=models.CASCADE, related_name='ag_hist')
 
     # oude en nieuwe waarde
     oude_waarde = models.DecimalField(max_digits=6, decimal_places=3)     # max = 10,000
@@ -91,7 +90,7 @@ class Score(models.Model):
     type = models.CharField(max_length=1, choices=SCORE_CHOICES, default=SCORE_TYPE_SCORE)   # TODO: kan Boolean worden
 
     # bij wie hoort deze score
-    sporterboog = models.ForeignKey(SporterBoog, on_delete=models.PROTECT, null=True)  # TODO: null=True kan weg?
+    sporterboog = models.ForeignKey(SporterBoog, on_delete=models.CASCADE)
 
     # TODO: kopie toevoegen van het boogtype van de sporterboog, om eenvoudiger op te kunnen filteren
 
@@ -118,12 +117,7 @@ class Score(models.Model):
         ]
 
     def __str__(self):
-        if self.sporterboog:
-            msg = "[%s]" % self.sporterboog
-        else:
-            msg = "[]"
-
-        msg += " %sm" % self.afstand_meter
+        msg = "[%s] %sm" % (self.sporterboog, self.afstand_meter)
 
         if self.type == SCORE_TYPE_GEEN:
             msg += ' (geen score)'

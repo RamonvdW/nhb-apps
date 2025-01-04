@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2024 Ramon van der Winkel.
+#  Copyright (c) 2020-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -207,7 +207,6 @@ class TestScoreGeschiedenis(E2EHelpers, TestCase):
         self.assertTrue(str(score) != '')
 
         score.type = SCORE_TYPE_GEEN
-        score.sporterboog = None
         self.assertTrue('(geen score)' in str(score))
 
         hist = ScoreHist.objects.first()
