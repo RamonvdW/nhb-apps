@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2024 Ramon van der Winkel.
+#  Copyright (c) 2022-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -93,6 +93,13 @@ class OpleidingMoment(models.Model):
     opleider_email = models.EmailField(default='', blank=True)
     opleider_telefoon = models.CharField(max_length=25, default='', blank=True)
 
+    def __str__(self):
+        msg = "%s %s (%s min)" % (self.datum, str(self.begin_tijd)[:5], self.duur_minuten)
+        if self.locatie:
+            msg += " [%s]" % self.locatie.plaats
+        msg += " " + self.opleider_naam
+        return msg
+
     class Meta:
         """ meta data voor de admin interface """
         verbose_name = "Opleiding moment"
@@ -122,13 +129,16 @@ class Opleiding(models.Model):
     aantal_uren = models.PositiveIntegerField(default=1)
 
     # uitgebreide beschrijving
-    beschrijving = models.TextField(default='')
+    beschrijving = models.TextField(default='', blank=True)
 
     # de status van deze opleiding
     status = models.CharField(max_length=1, choices=OPLEIDING_STATUS_CHOICES, default=OPLEIDING_STATUS_VOORBEREID)
 
+    # is de instaptoets een vereiste?
+    eis_instaptoets = models.BooleanField(default=False, blank=True)
+
     # beschrijving van de ingangseisen om mee te mogen doen
-    ingangseisen = models.TextField()
+    ingangseisen = models.TextField(default='', blank=True)
 
     # begrenzing van de leeftijd voor deze opleiding
     # ondergrens met leeftijd_min, bovengrens met leeftijd_max
@@ -141,6 +151,12 @@ class Opleiding(models.Model):
 
     # lijst van de deelnemers
     deelnemers = models.ManyToManyField(OpleidingDeelnemer, blank=True)
+
+    def periode_str(self):
+        return "%s-Q%s" % (self.periode_jaartal, self.periode_kwartaal)
+
+    def __str__(self):
+        return "%s %s" % (self.periode_str(), self.titel)
 
     class Meta:
         """ meta data voor de admin interface """

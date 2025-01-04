@@ -14,7 +14,7 @@
     <div class="row center">
         <div class="col s12">
             <h3 class="page-banner">Basiscursus</h3>
-            <p>de eerste stap op weg naar je diploma wedstrijdleider of scheidsrechter!</p>
+            <p>De eerste stap op weg naar je diploma wedstrijdleider of scheidsrechter</p>
         </div>
     </div>
 
@@ -22,12 +22,34 @@
     <div class="row-sv-blauw">
         <div class="col s12">
             <div class="sv-kader" style="padding:10px">
-                <p>Goede wedstrijdleiders en scheidsrechters zijn onmisbaar in de handboogsport. Ze zorgen ervoor dat wedstrijden georganiseerd worden en dat daarbij de juiste spelregels en procedures toegepast worden. Mede dankzij hen kunnen sporters en publiek praktisch ieder weekend genieten van mooie wedstrijden en competities, in alle disciplines.</p>
-                <p>Wil jij ons team van wedstrijdleiders en scheidsrechters komen versterken en daarmee een bijdrage leveren aan het succes van onze sport? Dan ben je hier op de juiste plek!</p>
-                <p>De basiscursus is namelijk stap 1 op weg naar een carrière als wedstrijdleider en/ of scheidsrechter. Het is een theorie-opleiding waarin je veel leert over actuele reglementen en procedures. Nadat je de basiscursus hebt afgerond kan je jezelf verder specialiseren als wedstrijdleider en/of scheidsrechter. Op een niveau dat past bij je persoonlijke ambitie.</p>
-                <br>
-                <p>Om deel te kunnen nemen aan de basiscursus doe je eerst de online instaptoets.<br>Deze is er 1) omdat het leuk is om je reglementenkennis te testen en<br>2) omdat je daarmee aantoont dat je over de enige basiskennis ten aanzien van de handboogsport beschikt.</p>
-                <p>Wanneer je deze toets met een minimaal {{ eis_percentage }}% goed-score doorlopen hebt, kan je jezelf vervolgens direct inschrijven voor één van de geplande basiscursussen.</p>
+
+                <h4 class="sv-middel-blauw-text">Waarom?</h4>
+                <p>Goede wedstrijdleiders en scheidsrechters zijn onmisbaar in de handboogsport.<br>
+                    <span>Ze zorgen ervoor dat wedstrijden georganiseerd worden en dat daarbij de juiste spelregels en procedures toegepast worden.</span><br>
+                    <span>Mede dankzij hen kunnen sporters en publiek praktisch ieder weekend genieten van mooie wedstrijden en competities, in alle disciplines.</span>
+                </p>
+
+                <h4 class="sv-middel-blauw-text">Voor wie?</h4>
+                <p>Wil jij ons team van wedstrijdleiders en scheidsrechters komen versterken en daarmee een bijdrage leveren aan het succes van onze sport?<br>
+                    <span>Dan ben je hier op de juiste plek! De basiscursus is namelijk stap 1 op weg naar een carrière als <b>wedstrijdleider</b> en/of <b>scheidsrechter</b>.</span>
+                </p>
+
+                <h4 class="sv-middel-blauw-text">Wat leer ik?</h4>
+                <p>De basiscursus is een <b>theoretische opleiding</b> waarin je veel leert over actuele <b>reglementen en procedures</b>.</p>
+
+                <h4 class="sv-middel-blauw-text">Ingangseisen</h4>
+                <p>Om deel te kunnen nemen aan de basiscursus doe je eerst de <b>online instaptoets</b> (zie verderop).<br>
+                    <span>Deze is er 1) omdat het leuk is om je reglementenkennis te testen en</span><br>
+                    <span>2) omdat je daarmee aantoont dat je over de enige basiskennis beschikt over de handboogsport.</span>
+                </p>
+                <p>Wanneer je deze toets met een minimaal {{ eis_percentage }}% goed-score doorlopen hebt, kan je je inschrijven voor één van de geplande basiscursussen.</p>
+
+                <h4 class="sv-middel-blauw-text">Vervolg</h4>
+                <p>Nadat je de basiscursus hebt afgerond kan je jezelf verder specialiseren als wedstrijdleider en/of scheidsrechter.<br>
+                    <span>Op een niveau dat past bij je persoonlijke ambitie.</span>
+                </p>
+
+
             </div>
         </div>
     </div>

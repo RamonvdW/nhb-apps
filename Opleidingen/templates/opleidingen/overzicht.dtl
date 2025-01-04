@@ -44,31 +44,19 @@
             <table class="sv-kader">
                 <thead>
                     <tr>
-                        <th>Periode</th>
-                        <th>Beschrijving</th>
-                        <th>?</th>
+                        <th class="center-align">Periode</th>
+                        <th>Titel</th>
                         <th><!-- kolom voor de knoppen --></th>
                     </tr>
                 </thead>
 
-                {% comment %}
-                <!-- forceer de breedte van de kolommen in alle maanden met een niet getoonde regel -->
-                <tr class="sv-table-hide-row">
-                    <td>Q1 2021</td>
-                    <td>Dit is de titel van een best wel lange opleiding</td>
-                    <td>??</td>
-                    <td><a class="btn-sv-rood" href="#">Details</a></td>
-                </tr>
-                {% endcomment %}
-
                 {% for opleiding in opleidingen %}
                     <tr>
-                        <td>{{ wed.datum_begin }}</td>
-                        <td>{{ wed.titel }}</td>
-                        <td>{{ wed.locatie.plaats }}</td>
-                        <td>
-                            {% if wed.url_details %}
-                                <a class="btn-sv-rood" href="{{ wed.url_details }}">
+                        <td class="center-align">{{ opleiding.periode_str }}</td>
+                        <td>{{ opleiding.titel }}</td>
+                        <td class="center-align">
+                            {% if opleiding.url_details %}
+                                <a class="btn-sv-rood" href="{{ opleiding.url_details }}">
                                     <i class="notranslate material-icons-round">play_arrow</i></a>
                             {% endif %}
                         </td>

@@ -22,6 +22,9 @@ urlpatterns = [
          view_basiscursus.BasiscursusView.as_view(),
          name='basiscursus'),
 
+    path('details/<opleiding_pk>/',
+         view_overzicht.OpleidingDetailsView.as_view(),
+         name='details'),
 
     # TODO: implement
     path('manager/',
