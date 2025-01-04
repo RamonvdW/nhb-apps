@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2024 Ramon van der Winkel.
+                Copyright (c) 2024-2025 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -34,20 +34,20 @@
                             <li style="margin-bottom:20px">
                                 <label class="black-text" for="id_a">
                                     <input class="with-gap" type="radio" name="keuze" value="A" required id="id_a">
-                                    <span>A:<br>{{ vraag.antwoord_a }}</span>
+                                    <span>{{ vraag.antwoord_a }}</span>
                                 </label>
                             </li>
                             <li style="margin-bottom:20px">
                                 <label class="black-text" for="id_b">
                                     <input class="with-gap" type="radio" name="keuze" value="B" required id="id_b">
-                                    <span>B:<br>{{ vraag.antwoord_b }}</span>
+                                    <span>{{ vraag.antwoord_b }}</span>
                                 </label>
                             </li>
                             {% if vraag.toon_c %}
                                 <li style="margin-bottom:20px">
                                     <label class="black-text" for="id_c">
                                         <input class="with-gap" type="radio" name="keuze" value="C" required id="id_c">
-                                        <span>C:<br>{{ vraag.antwoord_c }}</span>
+                                        <span>{{ vraag.antwoord_c }}</span>
                                     </label>
                                 </li>
                             {% endif %}
@@ -55,7 +55,7 @@
                                 <li style="margin-bottom:20px">
                                     <label class="black-text" for="id_d">
                                         <input class="with-gap" type="radio" name="keuze" value="D" required id="id_d">
-                                        <span>D:<br>{{ vraag.antwoord_d }}</span>
+                                        <span>{{ vraag.antwoord_d }}</span>
                                     </label>
                                 </li>
                             {% endif %}
@@ -63,33 +63,29 @@
                     </div>
 
                     <!-- button -->
-                    {% if url_overslaan %}
-                        <!-- floating left, waardoor op dezelfde regel als de overslaan knop -->
-                        <p class="left" style="margin-left:10px">
-                            <button class="btn-sv-rood" id="submit_knop1" type="submit">Opslaan</button>
-                        </p>
-                    {% else %}
-                        <p class="left-align" style="margin-left:10px">
-                            <button class="btn-sv-rood" id="submit_knop1" type="submit">Opslaan</button>
-                        </p>
-                    {% endif %}
+                    <p>
+                        <button class="btn-sv-rood" id="submit_knop1" type="submit">Opslaan</button>
+                    </p>
                 </form>
 
+                {% comment %}
                 {% if url_overslaan %}
                     <form action="{{ url_overslaan }}" method="post" onsubmit="document.getElementById('submit_knop2').disabled=true; document.getElementById('submit_knop2').disabled=true; return true;">
                         {% csrf_token %}
                         <input type="hidden" name="keuze" value="overslaan">
 
+                        <!-- floating right -->
                         <p class="right-align">
                             <button class="btn-sv-blauw" id="submit_knop2" type="submit">Overslaan</button>
                         </p>
                     </form>
                 {% endif %}
+                {% endcomment %}
             </div>
         </div>
     </div>
 
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="instaptoets/begin-toets" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina=op_pagina %}
 
 {% endblock %}

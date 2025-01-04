@@ -18,7 +18,7 @@ def instaptoets_is_beschikbaar():
 
 
 def selecteer_toets_vragen(toets: Instaptoets):
-    todo = settings.AANTAL_TOETS_VRAGEN - toets.aantal_vragen
+    todo = settings.INSTAPTOETS_AANTAL_VRAGEN - toets.aantal_vragen
 
     gekozen_pks = list(toets.vraag_antwoord.all().values_list('vraag__pk', flat=True))
 

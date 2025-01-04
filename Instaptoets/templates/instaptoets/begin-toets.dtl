@@ -24,7 +24,7 @@
             <div class="sv-kader" style="padding:10px">
                 <p>De instaptoets is een online test van {{ aantal_vragen }} meerkeuze vragen.<br>De eis is {{ eis_percentage }}% goed beantwoord.</p>
 
-                {% if url_starten %}
+                {% if laat_starten %}
                     <!-- knop om toets op te starten met een POST -->
                     <form action="{{ url_starten }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
                         {% csrf_token %}

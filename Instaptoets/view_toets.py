@@ -8,6 +8,7 @@ from django.urls import reverse
 from django.conf import settings
 from django.http import HttpResponseRedirect, Http404
 from django.utils import timezone
+from django.shortcuts import redirect
 from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
@@ -15,7 +16,7 @@ from Functie.definities import Rol
 from Functie.rol import rol_get_huidige
 from Instaptoets.models import Instaptoets
 from Instaptoets.operations import (selecteer_toets_vragen, selecteer_huidige_vraag, toets_geldig, controleer_toets,
-                                    vind_toets)
+                                    vind_toets, instaptoets_is_beschikbaar)
 from Sporter.models import get_sporter
 
 TEMPLATE_BEGIN_TOETS = 'instaptoets/begin-toets.dtl'
@@ -37,6 +38,13 @@ class BeginToetsView(UserPassesTestMixin, TemplateView):
         super().__init__(**kwargs)
         self.sporter = None
 
+    def dispatch(self, request, *args, **kwargs):
+        if not instaptoets_is_beschikbaar():
+            # geen toets --> terug naar landing page opleidingen
+            return redirect('Opleidingen:overzicht')
+
+        return super().dispatch(request, *args, **kwargs)
+
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         # gebruiker moet ingelogd zijn, geen gast zijn en rol Sporter gekozen hebben
@@ -54,6 +62,7 @@ class BeginToetsView(UserPassesTestMixin, TemplateView):
         context['toets'] = toets = vind_toets(self.sporter)
         context['aantal_vragen'] = settings.INSTAPTOETS_AANTAL_VRAGEN
         context['eis_percentage'] = settings.INSTAPTOETS_AANTAL_GOED_EIS
+        context['laat_starten'] = False
 
         if not toets:
             context['laat_starten'] = True
@@ -63,11 +72,11 @@ class BeginToetsView(UserPassesTestMixin, TemplateView):
                 context['url_vervolg'] = reverse('Instaptoets:volgende-vraag')
             else:
                 geldig, toets.geldig_dagen = toets_geldig(toets)
-                if not geldig:
+                if geldig:
+                    context['url_basiscursus'] = reverse('Opleidingen:basiscursus')
+                else:
                     context['laat_starten'] = True
                     context['url_starten'] = reverse('Instaptoets:begin')
-                else:
-                    context['url_basiscursus'] = reverse('Opleidingen:basiscursus')
 
         context['kruimels'] = (
             (reverse('Opleidingen:overzicht'), 'Opleidingen'),
@@ -209,6 +218,7 @@ class VolgendeVraagView(UserPassesTestMixin, TemplateView):
         context['vraag'] = vraag
 
         context['url_opslaan'] = reverse('Instaptoets:antwoord')
+        context['op_pagina'] = 'instaptoets/volgende-vraag-%s-%s' % (self.toets.pk, vraag.pk)
 
         if self.toets.aantal_antwoorden + 1 < self.toets.aantal_vragen:
             context['url_overslaan'] = context['url_opslaan']
