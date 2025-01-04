@@ -54,7 +54,7 @@ class HerhaalLoginOTP:
                     return HttpResponseRedirect(reverse('Plein:plein'))
 
             if not skip_checks:
-                skip_checks = (settings.HERHAALINTERVAL_OTP is None) and (settings.HERHAAL_INTERVAL_LOGIN is None)
+                skip_checks = (settings.HERHAAL_INTERVAL_OTP is None) and (settings.HERHAAL_INTERVAL_LOGIN is None)
 
             if not skip_checks:
                 if not account.otp_controle_gelukt_op or not account.otp_is_actief:
