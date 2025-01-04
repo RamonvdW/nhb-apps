@@ -26,7 +26,7 @@
                 <p>Wil jij ons team van wedstrijdleiders en scheidsrechters komen versterken en daarmee een bijdrage leveren aan het succes van onze sport? Dan ben je hier op de juiste plek!</p>
                 <p>De basiscursus is namelijk stap 1 op weg naar een carrière als wedstrijdleider en/ of scheidsrechter. Het is een theorie-opleiding waarin je veel leert over actuele reglementen en procedures. Nadat je de basiscursus hebt afgerond kan je jezelf verder specialiseren als wedstrijdleider en/of scheidsrechter. Op een niveau dat past bij je persoonlijke ambitie.</p>
                 <br>
-                <p>Om deel te kunnen nemen aan de basiscursus doe je eerst de online instaptoets.<br>Deze is er 1) omdat het leuk is om je reglementenkennis te testen en<br>2) omdat je daarmee aantoont dat je over de enige basiskennis ten aanzien van de handboogsport beschikt.<p>
+                <p>Om deel te kunnen nemen aan de basiscursus doe je eerst de online instaptoets.<br>Deze is er 1) omdat het leuk is om je reglementenkennis te testen en<br>2) omdat je daarmee aantoont dat je over de enige basiskennis ten aanzien van de handboogsport beschikt.</p>
                 <p>Wanneer je deze toets met een minimaal {{ eis_percentage }}% goed-score doorlopen hebt, kan je jezelf vervolgens direct inschrijven voor één van de geplande basiscursussen.</p>
             </div>
         </div>
@@ -45,19 +45,17 @@
         </div>
     </div>
 
-    {% if url_instaptoets %}
-        <!-- blauwe balk met kaartjes -->
-        <div class="row-sv-blauw">
-            <div class="col s12">
+    <!-- blauwe balk met kaartjes -->
+    <div class="row-sv-blauw">
+        <div class="col s12">
 
-                {% if url_instaptoets %}
-                    {% include 'plein/card_icon.dtl' with title="Instaptoets" text="Maak de online instaptoets." icon="login" url=url_instaptoets %}
-                {% else %}
-                    {% include 'plein/card_icon_beschikbaar-vanaf.dtl' with title="Instaptoets" text="Maak de online instaptoets." icon="login" %}
-                {% endif %}
-            </div>
+            {% if url_instaptoets %}
+                {% include 'plein/card_icon.dtl' with title="Instaptoets" text="Maak de online instaptoets." icon="login" url=url_instaptoets %}
+            {% else %}
+                {% include 'plein/card_icon_beschikbaar-vanaf.dtl' with title="Instaptoets" text="Maak de online instaptoets." icon="login" %}
+            {% endif %}
         </div>
-    {% endif %}
+    </div>
 
 
     {% include 'feedback/sidebar.dtl' with op_pagina="opleidingen-basiscursus" %}

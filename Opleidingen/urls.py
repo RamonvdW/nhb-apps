@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2024 Ramon van der Winkel.
+#  Copyright (c) 2022-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from Opleidingen import view_overzicht
+from Opleidingen import view_overzicht, view_basiscursus
 
 app_name = 'Opleidingen'
 
@@ -19,9 +19,11 @@ urlpatterns = [
          name='overzicht'),
 
     path('basiscursus/',
-         view_overzicht.BasiscursusView.as_view(),
+         view_basiscursus.BasiscursusView.as_view(),
          name='basiscursus'),
 
+
+    # TODO: implement
     path('manager/',
          view_overzicht.OpleidingenOverzichtView.as_view(),
          name='manager'),
