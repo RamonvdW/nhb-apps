@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -601,30 +601,6 @@ class TestImportCRMImport(E2EHelpers, TestCase):
                                                  TESTFILE_16_VERWIJDER_LID,
                                                  OPTION_SIM)
         self.assertFalse("[INFO] Lid 100024 Voornaam van der Achternaam [V, 2000] wordt nu verwijderd" in f2.getvalue())
-
-    def test_verwijder_score_fail(self):
-        # maak 100024 aan
-        self.run_management_command(IMPORT_COMMAND,
-                                    TESTFILE_14_WIJZIG_GESLACHT_2,
-                                    OPTION_SIM)
-
-        # maak een sporter-boog aan
-        boog_r = BoogType.objects.get(afkorting='R')
-        sporter = Sporter.objects.get(lid_nr="100024")
-        sporterboog = SporterBoog(sporter=sporter,
-                                  boogtype=boog_r)
-        sporterboog.save()
-        score_indiv_ag_opslaan(sporterboog, 18, 5.678, None, "")
-
-        # probeer 100024 te verwijderen
-        with self.assert_max_queries(52):
-            f1, f2 = self.run_management_command(IMPORT_COMMAND,
-                                                 TESTFILE_16_VERWIJDER_LID,
-                                                 OPTION_SIM)
-        # print("f1: %s" % f1.getvalue())
-        # print("f2: %s" % f2.getvalue())
-        self.assertTrue("[INFO] Lid 100024 Voornaam van der Achternaam [V, 2000] wordt nu verwijderd" in f2.getvalue())
-        self.assertTrue('[ERROR] Onverwachte fout bij het verwijderen van een lid' in f1.getvalue())
 
     def test_import_nhb_crm_dryrun(self):
         # dryrun

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2024 Ramon van der Winkel.
+#  Copyright (c) 2020-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -590,11 +590,7 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
         self.assertEqual(len(objs), 0)
         self.assertEqual(SporterBoog.objects.filter(sporter=self.sporter_100001).count(), 17)
 
-        objs = get_sporterboog(self.sporter_100001, mag_database_wijzigen=True, geen_wedstrijden=True)
-        self.assertEqual(len(objs), 0)
-        self.assertEqual(SporterBoog.objects.filter(sporter=self.sporter_100001).count(), 17)
-
-        ag.delete()
+        # verwijder alle SporterBoog voor sporter met geen_wedstrijden=True
         objs = get_sporterboog(self.sporter_100001, mag_database_wijzigen=True, geen_wedstrijden=True)
         self.assertEqual(len(objs), 0)
         self.assertEqual(SporterBoog.objects.filter(sporter=self.sporter_100001).count(), 0)

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -1083,7 +1083,7 @@ class Command(BaseCommand):
                             self._count_lang_ex_lid += 1
                             if lid_ver:
                                 self.stderr.write(
-                                    '[ERROR] Lid %s is al %s dagen geen lid maar, maar heeft vereniging %s' % (
+                                    '[ERROR] Lid %s is al %s dagen geen lid meer, maar heeft vereniging %s' % (
                                         lid_nr, dagen_geen_lid, lid_ver))
                                 self._count_errors += 1
                             else:
