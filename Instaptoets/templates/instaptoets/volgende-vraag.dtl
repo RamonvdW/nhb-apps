@@ -64,7 +64,7 @@
 
                     <!-- button -->
                     <p>
-                        <button class="btn-sv-rood" id="submit_knop1" type="submit">Opslaan</button>
+                        <button class="btn-sv-blauw" id="submit_knop1" type="submit">Volgende vraag</button>
                     </p>
                 </form>
 
