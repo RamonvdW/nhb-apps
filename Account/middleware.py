@@ -42,6 +42,9 @@ class HerhaalLoginOTP:
                 date_str = now.strftime('%Y-%m-%d')
                 if date_str == login_as_date:
                     skip_checks = True
+                elif settings.DEBUG:
+                    # dev environment
+                    skip_checks = True
                 else:
                     # sessie mag niet meer gebruikt worden
                     my_logger.info('Account %s forceer einde login-as sessie' % repr(account.username))
