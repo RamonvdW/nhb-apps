@@ -1,0 +1,35 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2025 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Bestaat niet{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Bonds<wbr>competities</h3>
+        </div>
+    </div>
+
+    <!-- rood bordje -->
+    <div class="row">
+        <div style="padding:10px">
+            <div class="col s12 m8 offset-m2 sv-rood white-text z-depth-3 center">
+                <p>De opgevraagde pagina bestaat niet (meer).</p>
+            </div>
+        </div>
+    </div>
+
+    <p class="center-align" style="margin-top:50px">
+        <a class="btn-sv-blauw" href="{% url 'Competitie:kies' %}">Toon de bondscompetities</a>
+    </p>
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="competitie-bestaat-niet" %}
+
+{% endblock %}

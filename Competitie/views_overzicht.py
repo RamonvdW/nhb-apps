@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import reverse
-from django.http import HttpResponseRedirect
 from django.views.generic import TemplateView
 from django.utils.safestring import mark_safe
 from Account.models import get_account
@@ -18,6 +17,7 @@ from Sporter.models import SporterBoog
 
 
 TEMPLATE_COMPETITIE_OVERZICHT = 'competitie/overzicht.dtl'
+TEMPLATE_COMPETITIE_BESTAAT_NIET = 'competitie/bestaat-niet.dtl'
 
 
 class CompetitieOverzichtView(TemplateView):
@@ -29,20 +29,6 @@ class CompetitieOverzichtView(TemplateView):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.comp = None
-
-    def dispatch(self, request, *args, **kwargs):
-        """ handel het competitie-argument af """
-        try:
-            comp_pk = get_comp_pk(kwargs['comp_pk_of_seizoen'])
-            self.comp = (Competitie
-                         .objects
-                         .get(pk=comp_pk))
-        except (ValueError, Competitie.DoesNotExist):
-            # externe links naar een oude competitie komen hier --> stuur ze door naar de kies pagina
-            return HttpResponseRedirect(reverse('Competitie:kies'))
-            # raise Http404('Competitie niet gevonden')
-
-        return super().dispatch(request, *args, **kwargs)
 
     def _get_uitslagen(self, context):
 
@@ -123,30 +109,40 @@ class CompetitieOverzichtView(TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        context['comp'] = self.comp
+        try:
+            comp_pk = get_comp_pk(kwargs['comp_pk_of_seizoen'])
+            self.comp = (Competitie
+                         .objects
+                         .get(pk=comp_pk))
+        except (ValueError, Competitie.DoesNotExist):
+            # externe links naar een oude competitie komen hier --> geef ze een noindex foutmelding pagina
+            self.template_name = TEMPLATE_COMPETITIE_BESTAAT_NIET
+            context['robots'] = 'noindex'   # prevent indexing this outdated page
+        else:
+            context['comp'] = self.comp
 
-        self.comp.bepaal_fase()                     # zet comp.fase
-        self.comp.is_openbaar = is_competitie_openbaar_voor_rol(self.comp, Rol.ROL_NONE)
+            self.comp.bepaal_fase()                     # zet comp.fase
+            self.comp.is_openbaar = is_competitie_openbaar_voor_rol(self.comp, Rol.ROL_NONE)
 
-        if self.comp.fase_indiv >= 'C':
-            context['toon_uitslagen'] = True
-            self._get_uitslagen(context)
+            if self.comp.fase_indiv >= 'C':
+                context['toon_uitslagen'] = True
+                self._get_uitslagen(context)
 
-        if self.comp.is_open_voor_inschrijven():
-            self.comp.url_inschrijvingen = reverse('CompInschrijven:lijst-regiocomp-alles',
-                                                   kwargs={'comp_pk': self.comp.pk})
+            if self.comp.is_open_voor_inschrijven():
+                self.comp.url_inschrijvingen = reverse('CompInschrijven:lijst-regiocomp-alles',
+                                                       kwargs={'comp_pk': self.comp.pk})
 
-        if rol_get_huidige(self.request) in (Rol.ROL_BB, Rol.ROL_BKO, Rol.ROL_RKO, Rol.ROL_RCL):
-            context['url_beheer'] = reverse('CompBeheer:overzicht', kwargs={'comp_pk': self.comp.pk})
+            if rol_get_huidige(self.request) in (Rol.ROL_BB, Rol.ROL_BKO, Rol.ROL_RKO, Rol.ROL_RCL):
+                context['url_beheer'] = reverse('CompBeheer:overzicht', kwargs={'comp_pk': self.comp.pk})
 
-        # verwijs de url met comp.pk naar de url met het seizoen
-        context['canonical'] = reverse('Competitie:overzicht',
-                                       kwargs={'comp_pk_of_seizoen': self.comp.maak_seizoen_url()})
+            # verwijs de url met comp.pk naar de url met het seizoen
+            context['canonical'] = reverse('Competitie:overzicht',
+                                           kwargs={'comp_pk_of_seizoen': self.comp.maak_seizoen_url()})
 
-        context['kruimels'] = (
-            (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
-            (None, self.comp.beschrijving.replace(' competitie', ''))
-        )
+            context['kruimels'] = (
+                (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
+                (None, self.comp.beschrijving.replace(' competitie', ''))
+            )
 
         return context
 
