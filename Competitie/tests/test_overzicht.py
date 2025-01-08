@@ -112,9 +112,12 @@ class TestCompetitieOverzicht(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/overzicht.dtl', 'plein/site_layout.dtl'))
 
-        # niet bestaande comp_pk
+    def test_bestaat_niet(self):
+        # niet bestaande comp_pk / seizoen
         resp = self.client.get(self.url_overzicht % 999999)
-        self.assert_is_redirect_not_plein(resp)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/bestaat-niet.dtl', 'plein/site_layout.dtl'))
 
 
 # end of file

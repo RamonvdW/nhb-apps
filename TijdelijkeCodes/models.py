@@ -12,7 +12,6 @@ from Competitie.models import KampioenschapSporterBoog
 from Functie.models import Functie
 from Sporter.models import Sporter
 from Registreer.models import GastRegistratie
-from TijdelijkeCodes.operations import set_tijdelijke_code_saver
 from Wedstrijden.models import Wedstrijd
 import datetime
 
@@ -101,9 +100,6 @@ def save_tijdelijke_code(url_code, dispatch_to,
     obj.save()
 
     return obj
-
-
-set_tijdelijke_code_saver(save_tijdelijke_code)
 
 
 def tijdelijke_url_opschonen(stdout):

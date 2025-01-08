@@ -117,6 +117,7 @@ class CompetitieOverzichtView(TemplateView):
             # externe links naar een oude competitie komen hier --> geef ze een noindex foutmelding pagina
             self.template_name = TEMPLATE_COMPETITIE_BESTAAT_NIET
             context['robots'] = 'noindex'   # prevent indexing this outdated page
+            context['bad_seizoen'] = kwargs['comp_pk_of_seizoen']
         else:
             context['comp'] = self.comp
 
