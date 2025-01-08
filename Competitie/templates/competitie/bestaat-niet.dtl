@@ -6,7 +6,7 @@
 {% endcomment %}
 {% load static %}
 
-{% block title %}Bestaat niet{% endblock %}
+{% block title %}Seizoen {{ bad_seizoen }} bestaat niet{% endblock %}
 
 {% block pagina %}
 
