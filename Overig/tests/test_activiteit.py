@@ -344,33 +344,6 @@ class TestOverigActiviteit(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('overig/activiteit.dtl', 'plein/site_layout.dtl'))
 
-    def test_no_age_groups(self):
-        self.e2e_login_and_pass_otp(self.testdata.account_admin)
-        self.e2e_wisselnaarrol_bb()
-        self.e2e_check_rol('BB')
-
-        # zet alle logins minstens een maand in het verleden
-        lang_geleden = timezone.now() - datetime.timedelta(days=40)
-        for account in Account.objects.all():
-            account.last_login = lang_geleden
-            account.save(update_fields=['last_login'])
-        # for
-
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_activiteit)
-        self.assertEqual(resp.status_code, 200)  # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('overig/activiteit.dtl', 'plein/site_layout.dtl'))
-
-        # nu helemaal zonder sporters
-        Sporter.objects.all().delete()
-
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_activiteit)
-        self.assertEqual(resp.status_code, 200)  # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('overig/activiteit.dtl', 'plein/site_layout.dtl'))
-
     def test_loskoppelen(self):
         self.testdata.account_admin.otp_is_actief = True
         self.testdata.account_admin.otp_code = "ABCDEFGHIJKLMNOP"       # noqa

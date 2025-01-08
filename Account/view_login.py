@@ -49,13 +49,13 @@ class LoginView(TemplateView):
 
         account = None
         try:
-            account = Account.objects.get(username=login_naam)
+            account = Account.objects.prefetch_related('sporter_set').get(username=login_naam)
         except Account.DoesNotExist:
             # account met deze username bestaat niet
             # sta ook toe dat met het e-mailadres ingelogd wordt
             try:
                 # iexact = case insensitive volledige match
-                account = Account.objects.get(bevestigde_email__iexact=login_naam)
+                account = Account.objects.prefetch_related('sporter_set').get(bevestigde_email__iexact=login_naam)
             except Account.DoesNotExist:
                 # email is ook niet bekend
                 # LET OP! dit kan heel snel heel veel data worden! - voorkom storage overflow!!

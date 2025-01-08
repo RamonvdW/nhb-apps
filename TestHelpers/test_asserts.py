@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -14,6 +14,7 @@ from TestHelpers.validate_js import validate_javascript
 from Site.core.minify_dtl import minify_scripts, minify_html
 from bs4 import BeautifulSoup
 import json
+import re
 
 
 # debug optie: toon waar in de code de queries vandaan komen
@@ -115,6 +116,22 @@ class MyTestAsserts(TestCase):
 
         soup = BeautifulSoup(content, features="html.parser")
         long_msg.append(soup.prettify())
+
+        # remove empty line indicators
+        long_msg = [part.replace('\\n', '\n').rstrip()
+                    for part in long_msg]
+
+        # remove single-line <!-- html comments -->
+        long_msg = [re.sub(r'<!--.*-->', '', part)
+                    for part in long_msg]
+
+        # remove empty lines
+        long_msg = [re.sub(r'\n\s+\n', '\n', part)
+                    for part in long_msg]
+
+        # remove empty lines
+        long_msg = [re.sub(r'\n\n', '\n', part)
+                    for part in long_msg]
 
         return "?? (long msg follows):\n" + "\n".join(long_msg), long_msg
 
@@ -554,7 +571,9 @@ class MyTestAsserts(TestCase):
 
             if button_count > 0:
                 if pos1 < 0 or pos2 < 0:                # pragma: no cover
-                    self.fail('Form without dubbelklik bescherming in button template %s' % repr(dtl))
+                    msg = 'Form without dubbelklik bescherming in button template %s\n'% repr(dtl)
+                    msg += 'button_count=%s, pos1=%s, pos2=%s' % (button_count, pos1, pos2)
+                    self.fail(msg)
 
             html = html[form_end+7:]
             pos_form = html.find('<form')
@@ -778,8 +797,7 @@ class MyTestAsserts(TestCase):
                 pos1 = sql.find(' "')
                 pos2 = sql.find('"', pos1 + 2)
                 table_name = sql[pos1 + 2:pos2]
-                if table_name != 'django_session':
-                    found_update = True
+                found_update = True
 
             elif sql.startswith('DELETE FROM '):
                 found_delete = True

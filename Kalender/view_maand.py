@@ -330,6 +330,9 @@ class KalenderMaandView(TemplateView):
             wed.inschrijven_let_op = (wed.inschrijven_dagen <= 7)
             wed.is_voor_sluitingsdatum = (now_date < wed.inschrijven_voor)
 
+            if wed.inschrijven_dagen < -30:
+                wed.is_ter_info = True
+
             tup = (wed.datum_begin, wed.pk, wed)
             regels.append(tup)
             aantal_wedstrijden += 1
@@ -347,6 +350,9 @@ class KalenderMaandView(TemplateView):
             evenement.inschrijven_dagen = (evenement.inschrijven_voor - now_date).days
             evenement.inschrijven_let_op = (evenement.inschrijven_dagen <= 7)
             evenement.is_voor_sluitingsdatum = (now_date < evenement.inschrijven_voor)
+
+            if evenement.inschrijven_dagen < -30:
+                evenement.is_ter_info = True
 
             tup = (evenement.datum, evenement.pk, evenement)
             regels.append(tup)

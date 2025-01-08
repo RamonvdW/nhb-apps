@@ -16,7 +16,7 @@ from Scheidsrechter.models import ScheidsBeschikbaarheid, WedstrijdDagScheidsrec
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 from Vereniging.models import Vereniging
-from Wedstrijden.definities import WEDSTRIJD_STATUS_GEACCEPTEERD, ORGANISATIE_IFAA
+from Wedstrijden.definities import WEDSTRIJD_STATUS_GEACCEPTEERD
 from Wedstrijden.models import WedstrijdSessie, Wedstrijd
 import datetime
 

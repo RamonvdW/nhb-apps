@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2023 Ramon van der Winkel.
+#  Copyright (c) 2019-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -86,7 +86,7 @@ class MyQueryTracer(object):
             elif base == 'call_command':        # standaard Django functie om management command uit te voeren
                 self.modify_acceptable = True
         # for
-        # print('call stack:\n  ', "\n  ".join([str(tup) for tup in stack))
+        # print('call stack:\n  ', "\n  ".join([str(tup) for tup in stack]))
 
         if REPORT_QUERY_ORIGINS:                        # pragma: no cover
             msg = ''

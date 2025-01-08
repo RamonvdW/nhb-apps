@@ -58,7 +58,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2025-01-04'
+SITE_VERSIE = '2025-01-08'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -203,6 +203,10 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+
+# herhaal intervallen voorkomen lang misbruik van een gekopieerde cookie
+HERHAAL_INTERVAL_LOGIN = 21     # elke 21 dagen opnieuw inloggen
+HERHAAL_INTERVAL_OTP = 7        # elke 7 dagen opnieuw OTP controle
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
@@ -580,6 +584,9 @@ BETAAL_VIA_BOND_VER_NR = 1368
 # welke vereniging(en) mogen een uitvoerende vereniging aanwijzen (en daar een locatie van kiezen)?
 WEDSTRIJDEN_KIES_UITVOERENDE_VERENIGING = (1368,)
 
+# aantal vragen van de instaptoets
+INSTAPTOETS_AANTAL_VRAGEN = 20
+INSTAPTOETS_AANTAL_GOED_EIS = 70        # procent
 
 # defaults for 'dev' and 'test' options
 

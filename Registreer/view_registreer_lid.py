@@ -31,7 +31,7 @@ my_logger = logging.getLogger('MH.Registreer')
 
 
 def registreer_receive_bevestiging_aanmaken_account(request, account):
-    """ deze functie wordt aangeroepen als een tijdelijke url gevolgd wordt
+    """ deze functie wordt vanuit een POST context aangeroepen als een tijdelijke url gevolgd wordt
         om toegang tot een e-mailadres te bevestigen bij het aanmaken van een account.
             account is een Account object
         We moeten een url teruggeven waar een http-redirect naar gedaan kan worden

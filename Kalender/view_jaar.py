@@ -5,11 +5,11 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.http import Http404
-from django.db.models.query_utils import Q
 from django.urls import reverse
 from django.utils import timezone
 from django.shortcuts import render
 from django.views.generic import TemplateView
+from django.db.models.query_utils import Q
 from Bestelling.operations.mandje import eval_mandje_inhoud
 from Evenement.definities import EVENEMENT_STATUS_GEACCEPTEERD, EVENEMENT_STATUS_GEANNULEERD
 from Evenement.models import Evenement
@@ -172,6 +172,9 @@ class KalenderJaarView(TemplateView):
             wed.inschrijven_let_op = (wed.inschrijven_dagen <= 7)
             wed.is_voor_sluitingsdatum = (now_date < wed.inschrijven_voor)
 
+            if wed.inschrijven_dagen < -30:
+                wed.is_ter_info = True
+
             tup = (wed.datum_begin, wed.pk, wed)
             regels.append(tup)
             aantal_wedstrijden += 1
@@ -189,6 +192,9 @@ class KalenderJaarView(TemplateView):
             evenement.inschrijven_dagen = (evenement.inschrijven_voor - now_date).days
             evenement.inschrijven_let_op = (evenement.inschrijven_dagen <= 7)
             evenement.is_voor_sluitingsdatum = (now_date < evenement.inschrijven_voor)
+
+            if evenement.inschrijven_dagen < -30:
+                evenement.is_ter_info = True
 
             tup = (evenement.datum, evenement.pk, evenement)
             regels.append(tup)

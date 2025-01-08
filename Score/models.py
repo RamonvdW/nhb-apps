@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2024 Ramon van der Winkel.
+#  Copyright (c) 2020-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -117,12 +117,7 @@ class Score(models.Model):
         ]
 
     def __str__(self):
-        if self.sporterboog:
-            msg = "[%s]" % self.sporterboog
-        else:
-            msg = "[]"
-
-        msg += " %sm" % self.afstand_meter
+        msg = "[%s] %sm" % (self.sporterboog, self.afstand_meter)
 
         if self.type == SCORE_TYPE_GEEN:
             msg += ' (geen score)'

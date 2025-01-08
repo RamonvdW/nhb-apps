@@ -44,12 +44,12 @@
   &.offset-#{$size}#{$i} {
     margin-left: $perc;
   }
-  &.pull-#{$size}#{$i} {
-    right: $perc;
-  }
-  &.push-#{$size}#{$i} {
-    left: $perc;
-  }
+  //&.pull-#{$size}#{$i} {
+  //  right: $perc;
+  //}
+  //&.push-#{$size}#{$i} {
+  //  left: $perc;
+  //}
 }
 
 

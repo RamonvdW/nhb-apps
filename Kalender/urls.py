@@ -5,16 +5,13 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from Kalender import view_landing_page, view_maand, view_jaar
+from Kalender import view_landing_page, view_maand, view_jaar, view_api
 
 app_name = 'Kalender'
 
 # basis = /kalender/
 
 urlpatterns = [
-
-    # base: /kalender/
-
     path('',
          view_landing_page.KalenderLandingPageView.as_view(),
          name='landing-page'),
@@ -39,6 +36,10 @@ urlpatterns = [
     path('jaar/<maand>-<int:jaar>/',
          view_jaar.KalenderJaarView.as_view(),
          name='jaar-simpel'),
+
+    path('api/lijst/<int:aantal_dagen_vooruit>/',
+         view_api.ApiView.as_view(),
+         name='api-lijst'),
 ]
 
 # end of file

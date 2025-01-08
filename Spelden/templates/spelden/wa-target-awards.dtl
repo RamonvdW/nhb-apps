@@ -108,25 +108,25 @@
 
                 <tr>
                     <td class="center">Wit</td>
-                    <td class="center"><img class="sv-foto-speld" src="{% static 'spelden/target_award_wit.png' %}" alt="Target award wit"></td>
+                    <td class="center"><img class="sv-foto-speld" src="{% static 'spelden/target_award_wit.webp' %}" alt="Target award wit"></td>
                     <td class="center"><img class="sv-foto-speld" src="{% static 'spelden/zilveren_target_award_wit.png' %}" alt="Zilveren target award wit"></td>
                 </tr>
 
                 <tr>
                     <td class="center">Zwart</td>
-                    <td class="center"><img class="sv-foto-speld" src="{% static 'spelden/target_award_zwart.png' %}" alt="Target award zwart"></td>
+                    <td class="center"><img class="sv-foto-speld" src="{% static 'spelden/target_award_zwart.webp' %}" alt="Target award zwart"></td>
                     <td class="center"><img class="sv-foto-speld" src="{% static 'spelden/zilveren_target_award_zwart.png' %}" alt="Zilveren target award zwart"></td>
                 </tr>
 
                 <tr>
                     <td class="center">Blauw</td>
-                    <td class="center"><img class="sv-foto-speld" src="{% static 'spelden/target_award_blauw.png' %}" alt="Target award blauw"></td>
+                    <td class="center"><img class="sv-foto-speld" src="{% static 'spelden/target_award_blauw.webp' %}" alt="Target award blauw"></td>
                     <td class="center"><img class="sv-foto-speld" src="{% static 'spelden/zilveren_target_award_blauw.png' %}" alt="Zilveren target award blauw"></td>
                 </tr>
 
                 <tr>
                     <td class="center">Rood</td>
-                    <td class="center"><img class="sv-foto-speld" src="{% static 'spelden/target_award_rood.png' %}" alt="Target award rood"></td>
+                    <td class="center"><img class="sv-foto-speld" src="{% static 'spelden/target_award_rood.webp' %}" alt="Target award rood"></td>
                     <td class="center"><img class="sv-foto-speld" src="{% static 'spelden/zilveren_target_award_rood.png' %}" alt="Zilveren target award rood"></td>
                 </tr>
 

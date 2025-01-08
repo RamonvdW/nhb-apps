@@ -5,11 +5,11 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from Functie.tests.helpers import maak_functie
-from Geo.models import Regio
 from Competitie.models import Competitie, CompetitieIndivKlasse, RegiocompetitieSporterBoog
 from Competitie.test_utils.tijdlijn import zet_competitie_fase_regio_inschrijven
 from Competitie.operations import competities_aanmaken
+from Functie.tests.helpers import maak_functie
+from Geo.models import Regio
 from HistComp.definities import HISTCOMP_TYPE_18, HIST_BOGEN_DEFAULT
 from HistComp.models import HistCompSeizoen, HistCompRegioIndiv
 from Locatie.models import WedstrijdLocatie

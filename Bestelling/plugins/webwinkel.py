@@ -4,7 +4,7 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-""" Deze module levert functionaliteit voor de Bestel-applicatie, met kennis van de Webwinkel, zoals kortingen. """
+""" Deze module levert functionaliteit voor de Bestel-applicatie, met kennis van de Webwinkel """
 
 from django.conf import settings
 from Bestelling.definities import BESTELLING_TRANSPORT_NVT, BESTELLING_TRANSPORT_VERZEND

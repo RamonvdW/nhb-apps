@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2023 Ramon van der Winkel.
+#  Copyright (c) 2022-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -29,11 +29,11 @@ class Command(BaseCommand):
                 self.alle_wa_boog_pks.append(boogtype.pk)
 
             org_str = ORGANISATIES2SHORT_STR[boogtype.organisatie]
-            self.boog_pk2beschrijving[boogtype.pk] = "%s-%s" % (org_str, boogtype.beschrijving)
+            self.boog_pk2beschrijving[boogtype.pk] = org_str + "-" + boogtype.beschrijving
         # for
 
     @staticmethod
-    def _tel_eerste(sporter2bogen, aantal):
+    def _tel_eerste(sporter2bogen):
         eerste = list(sporter2bogen.values())[0]
         post_del = list()
         for lid_nr, bogen in sporter2bogen.items():
@@ -72,7 +72,7 @@ class Command(BaseCommand):
         # rapporteer de aantallen
         lines = list()
         while len(sporter2bogen) > 0:
-            aantal_gevonden, bogen = self._tel_eerste(sporter2bogen, aantal)
+            aantal_gevonden, bogen = self._tel_eerste(sporter2bogen)
 
             descr = list()
             for boog_pk in bogen:

@@ -345,43 +345,6 @@
     </div>
 
 
-    {% comment %}
-        <!-- witruimte -->
-        <div class="row center">
-            <div class="col s12">
-                <h4 id="sessies">Sessies (experimenteel)</h4>
-                <p>Alle {{ accses|length }} nog niet verlopen sessies (ook van bezoekers)</p>
-            </div>
-        </div>
-
-        <!-- scherm-brede tabel met dunne blauw rand -->
-        <table class="sv-kader">
-            <thead>
-                <tr class="sv-table-header">
-                    <th>Gebruiker</th>
-                    <th>Verloopt op</th>
-                    <th>Cookie naam</th>
-                    <th>Mag wisselen</th>
-                    <th>Laatste rol</th>
-                </tr>
-            </thead>
-
-            {% for obj in accses %}
-                <tr>
-                    <td>{{ obj.account.volledige_naam }}</td>
-                    <td>{{ obj.session.expire_date }}</td>
-                    <td>{{ obj.session.session_key }}</td>
-                    <td>{{ obj.mag_wisselen_str }}</td>
-                    <td>{{ obj.laatste_rol_str }}</td>
-                </tr>
-            {% endfor %}
-
-            <tr class="sv-table-onderrand">
-                <td colspan="5" class="sv-table-onderrand"></td>
-            </tr>
-        </table>
-    {% endcomment %}
-
     {% if age_groups %}
         <div class="row center">
             <div class="col s12">

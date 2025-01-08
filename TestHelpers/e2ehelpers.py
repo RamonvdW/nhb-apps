@@ -265,12 +265,8 @@ class E2EHelpers(MyTestAsserts, MyMgmtCommandHelper, TestCase):
             with connection.execute_wrapper(tracer):
                 yield
         finally:
-            if not tracer.found_500:
-                if check_duration:
-                    duration_seconds = tracer.get_elapsed_seconds()
-                else:
-                    duration_seconds = 0.0
-
+            if not tracer.found_500:        # 500 = internal server error
+                duration_seconds = tracer.get_elapsed_seconds() if check_duration else 0.0
                 count = len(tracer.trace)
 
                 if num == -1:                         # pragma: no cover

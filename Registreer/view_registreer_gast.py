@@ -212,7 +212,7 @@ class RegistreerGastView(TemplateView):
 
 
 def receive_bevestiging_gast_email(request, gast):
-    """ deze functie wordt aangeroepen als een tijdelijke url gevolgd wordt
+    """ deze functie wordt vanuit een POST context aangeroepen als een tijdelijke url gevolgd wordt
         om het email adres van een nieuw gast-account te bevestigen.
             gast is een GastRegistratie object.
         We moeten een url teruggeven waar een http-redirect naar gedaan kan worden
@@ -507,6 +507,7 @@ class RegistreerGastVolgendeVraagView(View):
 
             # houd de gebruiker ingelogd in deze sessie
             update_session_auth_hash(request, self.account)
+            # bovenstaande maakt een nieuwe sessie aan, waardoor de eerstvolgende GET de sessie aanpast en schrijft
 
             gast.logboek += '[%s] Wachtwoord is gezet\n' % stamp_str
             gast.fase = REGISTRATIE_FASE_CLUB

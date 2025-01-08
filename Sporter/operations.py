@@ -83,7 +83,7 @@ def get_request_rayon_nr(request):
     return rayon_nr
 
 
-def get_sporter_gekozen_bogen(sporter, alle_bogen) -> (dict[str: SporterBoog], list[str]):
+def get_sporter_gekozen_bogen(sporter: Sporter, alle_bogen) -> (dict[str: SporterBoog], list[str]):
     """ geeft een dictionary terug met een mapping van boog afkorting naar SporterBoog
         geeft een lijst terug met boog afkortingen waarmee wedstrijden geschoten willen worden
     """
@@ -110,7 +110,7 @@ def get_sporter_gekozen_bogen(sporter, alle_bogen) -> (dict[str: SporterBoog], l
     return boogafk2sporterboog, boog_afkorting_wedstrijd
 
 
-def get_sporter_voorkeuren(sporter, mag_database_wijzigen=False):
+def get_sporter_voorkeuren(sporter: Sporter, mag_database_wijzigen=False):
     """ zoek het SporterVoorkeuren object erbij, of maak een nieuwe aan
     """
 

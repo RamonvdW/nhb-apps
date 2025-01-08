@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2024 Ramon van der Winkel.
+#  Copyright (c) 2024-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import reverse
-from SiteMap.definities import CHECK_LOW   # CHECK_MED, CHECK_HIGH
+from django.utils import timezone
+from Kalender.definities import MAAND2URL
+from SiteMap.definities import CHECK_LOW, CHECK_MED, CHECK_HIGH
 
 
 def generate_urls():
@@ -18,5 +20,26 @@ def generate_urls():
 
     # alle wedstrijden, evenementen, etc. worden door andere plugins aangeleverd
 
+    # jaaroverzichten en elk maandoverzicht
+    now = timezone.now()
+    jaar = now.year
+    maand = now.month
+
+    for lp in range(24):
+        # jaar/<maand>-<jaar>/
+        yield CHECK_MED, reverse('Kalender:jaar-simpel',
+                                 kwargs={'maand': MAAND2URL[maand],
+                                         'jaar': now.year})
+
+        # maand/<maand>-<jaar>/
+        yield CHECK_MED, reverse('Kalender:maand-simpel',
+                                 kwargs={'maand': MAAND2URL[maand],
+                                         'jaar': now.year})
+
+        maand += 1
+        if maand == 13:
+            maand = 1
+            jaar += 1
+    # for
 
 # end of file

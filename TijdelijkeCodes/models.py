@@ -18,7 +18,7 @@ import datetime
 
 
 class TijdelijkeCode(models.Model):
-    """ Database tabel waarin de URLs staan die we naar buiten toe beschikbaar maken """
+    """ Database tabel waarin de tijdelijke codes staan die we naar buiten toe beschikbaar maken """
 
     # de code die in de url gebruikt kan worden
     # om deze uniek te maken is het een hash over een aantal keywords die specifiek voor een gebruik zijn

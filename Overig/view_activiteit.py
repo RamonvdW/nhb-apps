@@ -277,28 +277,6 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
 
         context['url_reset_tweede_factor'] = reverse('Overig:otp-loskoppelen')
 
-        # toon sessies
-        if not context:     # aka "never without complains"     # pragma: no cover
-            accses = (AccountSessions
-                      .objects
-                      .select_related('account', 'session')
-                      .order_by('account', 'session__expire_date'))
-            for obj in accses:
-                # niet goed: onderstaande zorgt voor losse database hits voor elke sessie
-                session = SessionStore(session_key=obj.session.session_key)
-
-                try:
-                    obj.mag_wisselen_str = session[SESSIONVAR_ROL_MAG_WISSELEN]
-                except KeyError:        # pragma: no cover
-                    obj.mag_wisselen_str = '?'
-
-                try:
-                    obj.laatste_rol_str = rol2url[session[SESSIONVAR_ROL_HUIDIGE]]
-                except KeyError:        # pragma: no cover
-                    obj.laatste_rol_str = '?'
-            # for
-            context['accses'] = accses
-
         age_group_counts = dict()       # [groep] = aantal
         for group in (1, 10, 20, 30, 40, 50, 60, 70, 80):
             age_group_counts[int(group/10)] = 0
@@ -319,7 +297,7 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
             total += 1
         # for
 
-        if total > 0:
+        if total > 0:       # pragma: no branch
             age_groups = [((age * 10), (age * 10)+9, count, int((count * 100) / total))
                           for age, count in age_group_counts.items()]
             age_groups.sort()

@@ -5,7 +5,6 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import reverse
-from django.http import HttpResponseRedirect
 from django.utils import timezone
 from django.views.generic import TemplateView
 from django.utils.safestring import mark_safe
@@ -72,23 +71,32 @@ class WedstrijdLeeftijdenPersoonlijkView(UserPassesTestMixin, TemplateView):
 
         geboorte_jaar = sporter.geboorte_datum.year
 
-        huidige_jaar, leeftijd, lkl_dit_jaar, lkl_list = bereken_leeftijdsklassen_wa(geboorte_jaar, wedstrijdgeslacht, now.year)
+        huidige_jaar, leeftijd, lkl_dit_jaar, lkl_list = bereken_leeftijdsklassen_wa(geboorte_jaar,
+                                                                                     wedstrijdgeslacht,
+                                                                                     now.year)
         context['huidige_jaar'] = huidige_jaar
         context['leeftijd'] = leeftijd
         context['lkl_wa'] = lkl_list
         context['lkl_wa_dit_jaar'] = lkl_dit_jaar
 
-        huidige_jaar, leeftijd, lkl_dit_jaar, lkl_lst = bereken_leeftijdsklassen_khsn(geboorte_jaar, wedstrijdgeslacht_khsn, now.year)
+        huidige_jaar, leeftijd, lkl_dit_jaar, lkl_lst = bereken_leeftijdsklassen_khsn(geboorte_jaar,
+                                                                                      wedstrijdgeslacht_khsn,
+                                                                                      now.year)
         context['lkl_khsn'] = lkl_lst
         spl = lkl_dit_jaar.split(' of ')
         context['lkl_khsn_dit_jaar_1'] = spl[0]
         if len(spl) > 1:
             context['lkl_khsn_dit_jaar_2'] = spl[1]
 
-        _, lkl_lst = bereken_leeftijdsklassen_bondscompetitie(geboorte_jaar, wedstrijdgeslacht_khsn, now.year, now.month)
+        _, lkl_lst = bereken_leeftijdsklassen_bondscompetitie(geboorte_jaar,
+                                                              wedstrijdgeslacht_khsn,
+                                                              now.year,
+                                                              now.month)
         context['lkl_comp'] = lkl_lst
 
-        context['wlst_ifaa'] = bereken_leeftijdsklassen_ifaa(geboorte_jaar, wedstrijdgeslacht, now.year)
+        context['wlst_ifaa'] = bereken_leeftijdsklassen_ifaa(geboorte_jaar,
+                                                             wedstrijdgeslacht,
+                                                             now.year)
 
         context['kruimels'] = (
             (reverse('Sporter:profiel'), 'Mijn pagina'),

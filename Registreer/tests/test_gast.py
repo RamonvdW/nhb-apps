@@ -473,8 +473,9 @@ class TestRegistreerGast(E2EHelpers, TestCase):
         gast = GastRegistratie.objects.first()
         self.assertEqual(gast.fase, REGISTRATIE_FASE_CLUB)
 
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_volgende_vraag)
+        # bovenstaande maakt een nieuwe sessie aan, waardoor de eerstvolgende GET de sessie aanpast en schrijft
+        # with self.assert_max_queries(20):     # geeft concurrency melding door aanmaken sessie tijdens GET
+        resp = self.client.get(self.url_volgende_vraag)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('registreer/registreer-gast-05-club.dtl', 'plein/site_layout.dtl'))
