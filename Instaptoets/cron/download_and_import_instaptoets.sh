@@ -86,7 +86,7 @@ then
 
         # import the instaptoets
         echo "[INFO] Instaptoets wordt ingeladen" >> "$LOG"
-        ./manage.py laad_instaptoets "$SPOOL_FILE" &>> "$LOG"
+        ./manage.py import_instaptoets "$SPOOL_FILE" &>> "$LOG"
     else
         echo "[INFO] Instaptoets is ongewijzigd" >> "$LOG"
     fi
