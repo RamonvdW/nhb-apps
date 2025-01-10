@@ -12,6 +12,12 @@ TMP_DIR="/tmp/downloader"
 JSON="/tmp/downloader/instaptoets.json"      # note: download_gsheet.py contains the same path
 USER_WWW="$1"
 
+if [ $# -ne 1 ]
+then
+    echo "Provide one argument: user name (for example www-data)"
+    exit 1
+fi
+
 ID=$(id -u)
 ID_WWW=$(id -u "$USER_WWW")
 if [ "$ID" -ne "$ID_WWW" ]
