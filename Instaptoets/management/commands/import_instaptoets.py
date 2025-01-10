@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2024 Ramon van der Winkel.
+#  Copyright (c) 2024-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-""" Instaptoets vragen inladen uit een CSV file (export van Google Sheets) """
+""" Instaptoets vragen inladen uit een JSON file (download van Google Sheets) """
 
 from django.core.management.base import BaseCommand
 from Instaptoets.models import Vraag, Categorie
@@ -106,6 +106,8 @@ class Command(BaseCommand):
             vraag.antwoord_c = c
             vraag.antwoord_d = d
             vraag.juiste_antwoord = j
+            vraag.gebruik_voor_toets = t.upper() in ('J', 'JA')
+            vraag.gebruik_voor_quiz = q.upper() in ('J', 'JA')
             vraag.save()  # wijzigingen of nieuw
         # for
 
