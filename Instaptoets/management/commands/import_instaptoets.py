@@ -123,35 +123,6 @@ class Command(BaseCommand):
                     break
             # for
         # for
-        return
-        skip_header = True
-        for row in csv.reader(csvfile):
-            if not skip_header:
-                # self.stdout.write('regel: %s' % repr(row))
-                v, a, b, c, d, j = row
-                if d == '-':
-                    d = ''
-                if c == '-':
-                    c = ''
-
-                vraag = self._vind_of_maak_vraag(v, a, b, c, d)
-
-                if not vraag:
-                    # maak een nieuwe vraag aan:
-                    vraag = Vraag()
-
-                vraag.vraag_tekst = v
-                vraag.antwoord_a = a
-                vraag.antwoord_b = b
-                vraag.antwoord_c = c
-                vraag.antwoord_d = d
-                vraag.juiste_antwoord = j
-                vraag.save()        # wijzigingen of nieuw
-
-                if vraag.pk in vraag_pks:
-                    vraag_pks.remove(vraag.pk)
-            skip_header = False
-        # for
 
     def handle(self, *args, **options):
         self.dryrun = options['dryrun']
@@ -175,8 +146,12 @@ class Command(BaseCommand):
 
         if self.vraag_pks:
             self.stdout.write('[INFO] Verouderde vragen: pks=%s' % repr(self.vraag_pks))
+            self.stdout.write('[WARNING] Deze vragen worden buiten gebruik genomen')
+            Vraag.objects.filter(pk__in=self.vraag_pks).update(gebruik_voor_quiz=False, gebruik_voor_toets=False)
 
         self.stdout.write('[INFO] Aantal vragen is nu %s' % Vraag.objects.count())
+        self.stdout.write('[INFO] %s voor de toets' % Vraag.objects.filter(gebruik_voor_toets=True).count())
+        self.stdout.write('[INFO] %s voor de quiz' % Vraag.objects.filter(gebruik_voor_quiz=True).count())
 
         self.stdout.write('Done')
 
