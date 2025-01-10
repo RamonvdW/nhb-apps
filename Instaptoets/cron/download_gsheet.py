@@ -32,7 +32,7 @@ try:
         request = gsheets_api.get(spreadsheetId=settings_local.INSTAPTOETS_GSHEET_FILE_ID,
                                   includeGridData=False)        # not the actual data, just the structure
         result = request.execute()
-        print('[DEBUG] result: %s' % repr(result))
+        # print('[DEBUG] result: %s' % repr(result))
         for sheet in result['sheets']:
             sheet_names.append(sheet['properties']['title'])
         # for

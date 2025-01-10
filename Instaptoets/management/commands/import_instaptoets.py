@@ -99,7 +99,7 @@ class Command(BaseCommand):
                     self.stdout.write('[WARNING] Vraag pk %s is al eerder gebruikt' % vraag.pk)
                     self.stdout.write('[DEBUG] Regel: %s' % repr(regel))
 
-            vraag.category = cat
+            vraag.categorie = cat
             vraag.vraag_tekst = v
             vraag.antwoord_a = a
             vraag.antwoord_b = b
