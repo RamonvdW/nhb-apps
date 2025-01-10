@@ -29,8 +29,8 @@ try:
     try:
         # haal alle sheet names op
         sheet_names = list()
-        request = gsheets_api.spreadsheets().get(spreadsheetId=settings_local.INSTAPTOETS_GSHEET_FILE_ID,
-                                                 includeGridData=True)
+        request = gsheets_api.get(spreadsheetId=settings_local.INSTAPTOETS_GSHEET_FILE_ID,
+                                  includeGridData=True)
         result = request.execute()
         print('[DEBUG] result: %s' % repr(result))
         for sheet in result['sheets']:
