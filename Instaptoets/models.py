@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2024 Ramon van der Winkel.
+#  Copyright (c) 2024-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -8,6 +8,24 @@ from django.db import models
 from django.utils.timezone import localtime
 from Sporter.models import Sporter
 import datetime
+
+
+class Categorie(models.Model):
+    """ categorie van een vraag """
+
+    # categorie van de vraag
+    beschrijving = models.CharField(max_length=100, default='', blank=True)
+
+    def __str__(self):
+        """ Lever een tekstuele beschrijving van een database record, voor de admin interface """
+        return "[%s] %s.." % (self.pk, self.beschrijving[:60])
+
+    class Meta:
+        """ meta data voor de admin interface """
+        verbose_name = "Categorie"
+        verbose_name_plural = "Categorieën"
+
+    objects = models.Manager()      # for the editor only
 
 
 class Vraag(models.Model):
@@ -19,6 +37,9 @@ class Vraag(models.Model):
     # selectief gebruik van de vragen
     gebruik_voor_toets = models.BooleanField(default=True)
     gebruik_voor_quiz = models.BooleanField(default=False)
+
+    # categorie van de vraag
+    categorie = models.ForeignKey(Categorie, on_delete=models.SET_NULL, null=True, blank=True)
 
     # de tekst van de vraag
     vraag_tekst = models.TextField(blank=True)
