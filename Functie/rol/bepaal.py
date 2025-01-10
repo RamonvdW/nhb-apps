@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -179,15 +179,17 @@ class RolBepaler:
 
         yield Rol.ROL_SPORTER, None
 
-    def iter_indirecte_rollen(self, huidige_functie_pk: int) -> Generator[Tuple[Rol, Functie | None], None, None]:
-        """                                                               yields,                     send, returns
+    def iter_indirecte_rollen(self, rol: Rol, huidige_functie_pk: int) -> \
+            Generator[Tuple[Rol, Functie | None], None, None]:
+        #             yields,                     send, returns
+        """
             yields (Rollen, Functie) voor elke indirecte rol
 
             Welke rollen beschikbaar zijn is afhankelijk van de huidige functie
         """
 
-        # IT en BB mogen altijd wisselen naar alle management rollen
-        if self._has_bb:
+        # BB mag wisselen naar alle management rollen
+        if rol == Rol.ROL_BB:
             for func in self._management:
                 yield func.rol, func.functie
             # for

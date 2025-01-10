@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2024 Ramon van der Winkel.
+#  Copyright (c) 2020-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -172,7 +172,7 @@ class WisselVanRolView(UserPassesTestMixin, TemplateView):
         else:
             functie_nu_pk = self.functie_nu.pk
 
-        for rol, functie in self.rol_bepaler.iter_indirecte_rollen(functie_nu_pk):
+        for rol, functie in self.rol_bepaler.iter_indirecte_rollen(self.rol_nu, functie_nu_pk):
 
             url = reverse('Functie:activeer-functie', kwargs={'functie_pk': functie.pk})
 
@@ -225,7 +225,7 @@ class WisselVanRolView(UserPassesTestMixin, TemplateView):
         else:
             selected_ver_nr = -1
 
-        for rol, functie in self.rol_bepaler.iter_indirecte_rollen(self.functie_nu.pk):
+        for rol, functie in self.rol_bepaler.iter_indirecte_rollen(self.rol_nu, self.functie_nu.pk):
             if rol == Rol.ROL_HWL:
 
                 if rol == Rol.ROL_SEC:               # pragma: no cover
