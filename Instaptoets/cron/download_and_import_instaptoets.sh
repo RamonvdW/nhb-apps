@@ -55,7 +55,8 @@ fi
 
 # download the records
 echo "[INFO] Starting download" >> "$LOG"
-python ./download_gsheet.py &>> "$LOG"
+# -u = unbuffered --> needed to maintain the order of stdout and stderr lines
+python3 -u ./download_gsheet.py &>> "$LOG"
 
 # import or barf
 if [ -e "$JSON" ]

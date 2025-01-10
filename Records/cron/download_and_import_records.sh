@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#  Copyright (c) 2019-2023 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -55,7 +55,8 @@ fi
 
 # download the records
 echo "[INFO] Starting download" >> "$LOG"
-python ./download_gsheet.py &>> "$LOG"
+# -u = unbuffered --> needed to maintain the order of stdout and stderr lines
+python3 -u ./download_gsheet.py &>> "$LOG"
 
 # import or barf
 if [ -e "$RECORDS" ]
