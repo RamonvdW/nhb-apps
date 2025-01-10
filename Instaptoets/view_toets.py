@@ -218,7 +218,7 @@ class VolgendeVraagView(UserPassesTestMixin, TemplateView):
         context['vraag'] = vraag
 
         context['url_opslaan'] = reverse('Instaptoets:antwoord')
-        context['op_pagina'] = 'instaptoets/volgende-vraag-%s-%s' % (self.toets.pk, vraag.pk)
+        context['op_pagina'] = 'instaptoets-vraag-%s' % self.toets.huidige_vraag.pk
 
         if self.toets.aantal_antwoorden + 1 < self.toets.aantal_vragen:
             context['url_overslaan'] = context['url_opslaan']

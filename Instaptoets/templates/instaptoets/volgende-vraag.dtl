@@ -14,6 +14,7 @@
     <div class="row center">
         <div class="col s12">
             <h3 class="page-banner">Instaptoets</h3>
+            <h6>Vraag {{ toets.vraag_nr }} van de {{ toets.aantal_vragen }}</h6>
         </div>
     </div>
 
@@ -22,8 +23,6 @@
     <div class="row-sv-blauw">
         <div class="col s12 l10 offset-l1 xl8 offset-xl2">
             <div class="sv-kader" style="padding:10px">
-                <p>Dit is vraag {{ toets.vraag_nr }} van de {{ toets.aantal_vragen }}</p>
-
                 <form action="{{ url_opslaan }}" method="post" onsubmit="document.getElementById('submit_knop1').disabled=true; document.getElementById('submit_knop2').disabled=true; return true;">
                     {% csrf_token %}
 
@@ -64,7 +63,7 @@
 
                     <!-- button -->
                     <p>
-                        <button class="btn-sv-blauw" id="submit_knop1" type="submit">Volgende vraag</button>
+                        <button class="btn-sv-rood" id="submit_knop1" type="submit">Volgende vraag</button>
                     </p>
                 </form>
 
