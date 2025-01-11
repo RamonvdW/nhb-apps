@@ -586,6 +586,9 @@ BETAAL_VIA_BOND_VER_NR = 1368
 # welke vereniging(en) mogen een uitvoerende vereniging aanwijzen (en daar een locatie van kiezen)?
 WEDSTRIJDEN_KIES_UITVOERENDE_VERENIGING = (1368,)
 
+# toon het kaartje Ledenvoordeel?
+TOON_LEDENVOORDEEL = True
+
 # aantal vragen van de instaptoets
 INSTAPTOETS_AANTAL_VRAGEN = 20
 INSTAPTOETS_AANTAL_GOED_EIS = 70        # procent
