@@ -27,15 +27,23 @@ class OpleidingenOverzichtView(TemplateView):
 
         context = super().get_context_data(**kwargs)
 
-        opleidingen = Opleiding.objects.exclude(status=OPLEIDING_STATUS_VOORBEREID)
+        opleidingen = (Opleiding
+                       .objects
+                       .exclude(status=OPLEIDING_STATUS_VOORBEREID)
+                       .order_by('periode_jaartal', 'periode_kwartaal'))     # recent bovenaan
+        context['opleidingen'] = opleidingen
 
+        enable_basiscursus = False
         for opleiding in opleidingen:
             if opleiding.status == OPLEIDING_STATUS_GEANNULEERD:
                 opleiding.titel = '[GEANNULEERD] ' + opleiding.titel
             else:
-                opleiding.url_details = reverse('Opleidingen:details', kwargs={'opleiding_pk': opleiding.pk})
-
-        context['opleidingen'] = opleidingen
+                if opleiding.is_basiscursus:
+                    enable_basiscursus = True
+                    opleiding.url_details = reverse('Opleidingen:inschrijven-basiscursus')
+                else:
+                    opleiding.url_details = reverse('Opleidingen:details', kwargs={'opleiding_pk': opleiding.pk})
+        # for
 
         account = get_account(self.request)
         if account.is_authenticated and not account.is_gast:
@@ -52,7 +60,8 @@ class OpleidingenOverzichtView(TemplateView):
 
             context['diplomas'] = diplomas
 
-            context['url_basiscursus'] = reverse('Opleidingen:basiscursus')
+            if enable_basiscursus:
+                context['url_basiscursus'] = reverse('Opleidingen:basiscursus')
 
         context['kruimels'] = (
             (None, 'Opleidingen'),

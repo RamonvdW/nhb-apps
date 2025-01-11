@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from Opleidingen import view_overzicht, view_basiscursus
+from Opleidingen import view_overzicht, view_basiscursus, view_inschrijven
 
 app_name = 'Opleidingen'
 
@@ -21,6 +21,10 @@ urlpatterns = [
     path('basiscursus/',
          view_basiscursus.BasiscursusView.as_view(),
          name='basiscursus'),
+
+    path('basiscursus/inschrijven/',
+         view_inschrijven.InschrijvenBasiscursusView.as_view(),
+         name='inschrijven-basiscursus'),
 
     path('details/<opleiding_pk>/',
          view_overzicht.OpleidingDetailsView.as_view(),

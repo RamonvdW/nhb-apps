@@ -55,8 +55,11 @@ class BasiscursusView(UserPassesTestMixin, TemplateView):
 
                 is_geldig, dagen = toets_geldig(toets)
                 context['toets_is_geldig'] = is_geldig
+                context['toets_geldig_dagen'] = dagen
+
                 if is_geldig:
                     context['url_instaptoets'] = None
+                    context['url_inschrijven'] = reverse('Opleidingen:inschrijven-basiscursus')
 
         context['kruimels'] = (
             (reverse('Opleidingen:overzicht'), 'Opleidingen'),

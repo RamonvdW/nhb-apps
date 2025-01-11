@@ -15,6 +15,11 @@
         <div class="col s12">
             <h3 class="page-banner">Basiscursus</h3>
             <p>De eerste stap op weg naar je diploma wedstrijdleider of scheidsrechter</p>
+            
+            {% if toets_is_geldig %}
+                <a class="btn-sv-rood" href="#inschrijven">
+                    <i class="material-icons-round left notranslate">arrow_downward</i>Inschrijven</a>
+            {% endif %}
         </div>
     </div>
 
@@ -40,7 +45,7 @@
                 <h4 class="sv-middel-blauw-text">Ingangseisen</h4>
                 <p>Om deel te kunnen nemen aan de basiscursus doe je eerst de <b>online instaptoets</b> (zie verderop).<br>
                     <span>Deze is er 1) omdat het leuk is om je reglementenkennis te testen en</span><br>
-                    <span>2) omdat je daarmee aantoont dat je over de enige basiskennis beschikt over de handboogsport.</span>
+                    <span>2) omdat je daarmee aantoont dat je over enige basiskennis beschikt over de handboogsport.</span>
                 </p>
                 <p>Wanneer je deze toets met een minimaal {{ eis_percentage }}% goed-score doorlopen hebt, kan je je inschrijven voor één van de geplande basiscursussen.</p>
 
@@ -49,42 +54,18 @@
                     <span>Op een niveau dat past bij je persoonlijke ambitie.</span>
                 </p>
 
-
             </div>
         </div>
     </div>
 
 
-    <!-- witruimte -->
-    <div class="row center">
-        <div class="col s12">
-            <h4>Instaptoets</h4>
-                {% if toets_is_geldig %}
-                    <p>Volgens onze administratie heb je deze gehaald op {{ toets.afgerond|date:"j F Y" }}.</p>
-                {% else %}
-                    <p>Volgens onze administratie heb je deze nog niet gehaald.</p>
-                {% endif %}
-        </div>
-    </div>
-
-    <!-- blauwe balk met kaartjes -->
-    <div class="row-sv-blauw">
-        <div class="col s12">
-
-            {% if url_instaptoets %}
-                {% include 'plein/card_icon.dtl' with title="Instaptoets" text="Maak de online instaptoets." icon="login" url=url_instaptoets %}
-            {% else %}
-                {% include 'plein/card_icon_beschikbaar-vanaf.dtl' with title="Instaptoets" text="Maak de online instaptoets." icon="login" %}
-            {% endif %}
-        </div>
-    </div>
-
-
     {% if toets_is_geldig %}
+        
         <!-- witruimte -->
         <div class="row center">
             <div class="col s12">
-                <h4>Inschrijven</h4>
+                <h4 id="inschrijven">Inschrijven</h4>
+                <p>Volgens onze administratie heb je de instaptoets gehaald op {{ toets.afgerond|date:"j F Y" }}<br>Deze blijft nog {{ toets_geldig_dagen }} dagen geldig</p>
             </div>
         </div>
 
@@ -94,6 +75,29 @@
                 {% include 'plein/card_icon.dtl' with title="Inschrijven" text="Schrijf je in voor de basiscursus." icon="person" url=url_inschrijven %}
             </div>
         </div>
+
+    {% else %}
+
+        <!-- witruimte -->
+        <div class="row center">
+            <div class="col s12">
+                <h4>Instaptoets</h4>
+                    <p>Volgens onze administratie heb je deze nog niet gehaald.</p>
+            </div>
+        </div>
+
+        <!-- blauwe balk met kaartjes -->
+        <div class="row-sv-blauw">
+            <div class="col s12">
+
+                {% if url_instaptoets %}
+                    {% include 'plein/card_icon.dtl' with title="Instaptoets" text="Maak de online instaptoets." icon="login" url=url_instaptoets %}
+                {% else %}
+                    {% include 'plein/card_icon_beschikbaar-vanaf.dtl' with title="Instaptoets" text="Maak de online instaptoets." icon="login" %}
+                {% endif %}
+            </div>
+        </div>
+
     {% endif %}
 
 

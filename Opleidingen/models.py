@@ -114,6 +114,9 @@ class Opleiding(models.Model):
     # een korte titel van de opleiding
     titel = models.CharField(max_length=75, default='')
 
+    # is dit een basiscursus?
+    is_basiscursus = models.BooleanField(default=False)
+
     # periode waarin de opleiding gehouden gaat worden
     # kwartaal = 1/2/3/4
     periode_jaartal = models.PositiveSmallIntegerField(default=0)

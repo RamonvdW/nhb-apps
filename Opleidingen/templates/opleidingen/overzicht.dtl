@@ -18,25 +18,20 @@
     </div>
 
 
-    <!-- blauwe balk met kaartjes -->
-    <div class="row-sv-blauw">
-        <div class="col s12">
+    {% if url_basiscursus %}
 
-            {% comment %}
-            {% if url_instaptoets %}
-                {% include 'plein/card_icon.dtl' with title="Instaptoets" text="Maak de on-line instaptoets." icon="login" url=url_instaptoets %}
-            {% else %}
-                {% include 'plein/card_icon_beschikbaar-vanaf.dtl' with title="Instaptoets" text="Maak de on-line instaptoets." icon="login" %}
-            {% endif %}
-            {% endcomment %}
+        <!-- blauwe balk met kaartjes -->
+        <div class="row-sv-blauw">
+            <div class="col s12">
 
-            {% if url_basiscursus %}
-                {% include 'plein/card_icon.dtl' with title="Basiscursus" text="Informatie over de basiscursus." icon="school" url=url_basiscursus %}
-            {% endif %}
+                {% if url_basiscursus %}
+                    {% include 'plein/card_icon.dtl' with title="Basiscursus" text="Informatie over de basiscursus." icon="school" url=url_basiscursus %}
+                {% endif %}
 
+            </div>
         </div>
-    </div>
 
+    {% endif %}
 
     <!-- blauwe balk met informatie in een tabel -->
     <div class="row-sv-blauw">
