@@ -39,9 +39,9 @@
                         <a class="btn-sv-rood" style="margin:20px" href="{{ url_vervolg }}">Volgende vraag</a>
                     {% else %}
                         <!-- toets is nog geldig -->
-                        <p>Je bent geslaagd voor de toets op {{ toets.afgerond|date:"j F Y" }} om {{ toets.afgerond|date:"H:i" }} en kan deze nog {{ toets.geldig_dagen }} dagen gebruiken<br>om je in te schrijven voor de basiscursus.</p>
+                        <p>Je bent al geslaagd voor de toets.</p>
                         <p>
-                            <a class="btn-sv-rood" href="{{ url_basiscursus }}">Toon de basiscursus</a>
+                            <a class="btn-sv-rood" href="{% url 'Opleidingen:overzicht' %}">Naar de opleidingen</a>
                         </p>
                     {% endif %}
                 {% endif %}

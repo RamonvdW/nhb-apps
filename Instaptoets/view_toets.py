@@ -72,9 +72,7 @@ class BeginToetsView(UserPassesTestMixin, TemplateView):
                 context['url_vervolg'] = reverse('Instaptoets:volgende-vraag')
             else:
                 geldig, toets.geldig_dagen = toets_geldig(toets)
-                if geldig:
-                    context['url_basiscursus'] = reverse('Opleidingen:basiscursus')
-                else:
+                if not geldig:
                     context['laat_starten'] = True
                     context['url_starten'] = reverse('Instaptoets:begin')
 

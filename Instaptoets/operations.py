@@ -22,22 +22,44 @@ def selecteer_toets_vragen(toets: Instaptoets):
 
     gekozen_pks = list(toets.vraag_antwoord.all().values_list('vraag__pk', flat=True))
 
-    mogelijke_pks = list()
+    mogelijke_pks = dict()      # [categorie.pk] = [vraag.pk, ...]
     pk2vraag = dict()   # [pk] = Vraag()
-    for vraag in (Vraag.objects.filter(is_actief=True, gebruik_voor_toets=True).exclude(pk__in=gekozen_pks)):
+    for vraag in (Vraag
+                  .objects
+                  .filter(is_actief=True,
+                          gebruik_voor_toets=True)
+                  .exclude(pk__in=gekozen_pks)
+                  .select_related('categorie')):
         pk2vraag[vraag.pk] = vraag
-        mogelijke_pks.append(vraag.pk)
+        if vraag.categorie:
+            cat_pk = vraag.categorie.pk
+        else:
+            cat_pk = -1
+        try:
+            mogelijke_pks[cat_pk].append(vraag.pk)
+        except KeyError:
+            mogelijke_pks[cat_pk] = [vraag.pk]
     # for
 
     nieuw = list()
-    while todo > 0 and len(mogelijke_pks) > 0:
-        todo -= 1
-        pk = random.choice(mogelijke_pks)
-        mogelijke_pks.remove(pk)
-
-        vraag = pk2vraag[pk]
-        antwoord = ToetsAntwoord(vraag=vraag, antwoord='?')
-        nieuw.append(antwoord)
+    cat_pk_done = list()
+    while todo > 0:
+        prev_todo = todo
+        for cat_pk, vraag_pks in mogelijke_pks.items():
+            if cat_pk not in cat_pk_done:
+                cat_pk_done.append(cat_pk)
+                if len(vraag_pks) > 0:
+                    todo -= 1
+                    pk = random.choice(vraag_pks)
+                    vraag_pks.remove(pk)
+                    vraag = pk2vraag[pk]
+                    antwoord = ToetsAntwoord(vraag=vraag, antwoord='?')
+                    nieuw.append(antwoord)
+        # for
+        if todo == prev_todo:
+            # geen nieuwe vraag meer gevonden
+            # laat alle categorieën weer toe
+            cat_pk_done = list()
     # while
 
     ToetsAntwoord.objects.bulk_create(nieuw)
