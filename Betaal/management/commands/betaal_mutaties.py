@@ -105,9 +105,6 @@ class Command(BaseCommand):
                 'redirectUrl': mutatie.url_betaling_gedaan,
             }
 
-            if settings.MOLLIE_TEST_MODE:
-                data['testmode'] = True
-
             try:
                 payment = self._mollie_client.payments.create(data)
             except (RequestError, RequestSetupError, ResponseError, ResponseHandlingError) as exc:

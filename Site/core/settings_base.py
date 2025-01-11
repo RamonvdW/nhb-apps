@@ -583,9 +583,6 @@ TICKET_NUMMER_START__WEDSTRIJD = 7000000
 # wordt gebruikt als verenigingen via de bond betalingen mogen ontvangen
 BETAAL_VIA_BOND_VER_NR = 1368
 
-# Mollie real mode for real payments
-MOLLIE_TEST_MODE = False
-
 # welke vereniging(en) mogen een uitvoerende vereniging aanwijzen (en daar een locatie van kiezen)?
 WEDSTRIJDEN_KIES_UITVOERENDE_VERENIGING = (1368,)
 
