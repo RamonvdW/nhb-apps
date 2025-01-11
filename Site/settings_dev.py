@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2024 Ramon van der Winkel.
+#  Copyright (c) 2021-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -27,7 +27,7 @@
           includes Site/core/settings_base.py
               includes Site/settings_local.py for site specific settings
           provides additional items that are part of the release
-      provides changes to to settings for autotest
+      provides changes to to settings for dev
 """
 
 from Site.core.settings_base import *         # noqa

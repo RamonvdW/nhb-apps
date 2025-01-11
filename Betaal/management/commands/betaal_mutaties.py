@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2024 Ramon van der Winkel.
+#  Copyright (c) 2022-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -104,6 +104,9 @@ class Command(BaseCommand):
                 'webhookUrl': self._mollie_webhook_url,
                 'redirectUrl': mutatie.url_betaling_gedaan,
             }
+
+            if settings.MOLLIE_TEST_MODE:
+                data['testmode'] = True
 
             try:
                 payment = self._mollie_client.payments.create(data)
