@@ -46,6 +46,9 @@ BETAAL_API_URL = None
 # None = use built-in default
 GMAPS_API_URL = None
 
+# toon het kaartje Ledenvoordeel?
+TOON_LEDENVOORDEEL = True
+
 
 # import install-specific settings from a separate file
 # that is easy to replace as part of the deployment process
@@ -583,9 +586,6 @@ BETAAL_VIA_BOND_VER_NR = 1368
 
 # welke vereniging(en) mogen een uitvoerende vereniging aanwijzen (en daar een locatie van kiezen)?
 WEDSTRIJDEN_KIES_UITVOERENDE_VERENIGING = (1368,)
-
-# toon het kaartje Ledenvoordeel?
-TOON_LEDENVOORDEEL = True
 
 # aantal vragen van de instaptoets
 INSTAPTOETS_AANTAL_VRAGEN = 20
