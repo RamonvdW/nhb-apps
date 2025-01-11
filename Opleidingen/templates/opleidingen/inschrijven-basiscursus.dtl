@@ -1,0 +1,173 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2025 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Inschrijven basiscursus{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Inschrijven basiscursus</h3>
+        </div>
+    </div>
+
+    <!-- blauwe balk met dialoog venster -->
+    <div class="row-sv-blauw">
+        <div class="col s12 l10 offset-l1 xl8 offset-xl2">
+            <table class="sv-kader">
+                <tr>
+                    <th>Titel</th>
+                    <td>Basiscursus</td>
+                </tr>
+
+                <tr>
+                    <th>Organisatie</th>
+                    <td>KHSN</td>
+                </tr>
+
+                <tr>
+                    <th>Locatie</th>
+                    <td>Vier locaties door het land.<br>Je wordt in overleg ingedeeld.</td>
+                </tr>
+
+                <tr>
+                    <th>Wanneer</th>
+                    <td>Twee keer per jaar: maart/april en september/oktober</td>
+                </tr>
+
+                <tr>
+                    <th>Aantal bijeenkomsten</th>
+                    <td>1</td>
+                </tr>
+
+                <tr>
+                    <th>Totale duur</th>
+                    <td>1x {{ opleiding.aantal_uren }} uur</td>
+                </tr>
+
+                <tr>
+                    <th>Groepsgrootte</th>
+                    <td>Maximaal 15 deelnemers</td>
+                </tr>
+
+                <tr>
+                    <th>Soort opleiding</th>
+                    <td>Theoretisch: actuele reglementen en procedures</td>
+                </tr>
+
+                <tr>
+                    <th>Voorwaarden</th>
+                    <td>Online instaptoets moet gehaald zijn.{% if not voldoet_aan_voorwaarden %}<br><span class="sv-rood-text">Volgens onze administratie heb je deze nog niet gehaald{% endif %}</td>
+                </tr>
+
+                <tr>
+                    <th>Kosten</th>
+                    <td>{{ opleiding.kosten_str }}</td>
+                </tr>
+
+                <tr>
+                    <th>Vervolg</th>
+                    <td>Het diploma Basiscursus is vereist om deze opleiding te beginnen:<br>&bullet; Wedstrijdleider<br>&bullet; Scheidsrechter</td>
+                </tr>
+
+            </table>
+        </div>
+    </div>
+
+    {% if voldoet_aan_voorwaarden %}
+
+        <!-- witruimte -->
+        <div class="row center">
+            <div class="col s12">
+                <h4>Correctie persoonsgegevens</h4>
+                <p>Controleer jouw gegevens hieronder en geef eventuele correcties door</p>
+            </div>
+        </div>
+
+        <!-- blauwe balk met dialoog venster -->
+        <div class="row-sv-blauw">
+            <div class="col s12 l10 offset-l1 xl8 offset-xl2">
+
+                <!-- dialoog venster -->
+                <div class="sv-kader left-align z-depth-3">
+                    <div class="form-padding">
+                        <form>
+                            {% csrf_token %}
+
+                            <table>
+                                <tr>
+                                    <th>Naam</th>
+                                    <td>{{ sporter.volledige_naam }}</td>
+                                </tr>
+
+                                <tr>
+                                    <th>Telefoonnummer</th>
+                                    <td>
+                                        <input type="tel" id="input_telefoon" value="{{ deelnemer.aanpassing_telefoon }}">
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <th>E-mailadres</th>
+                                    <td>
+                                        <input type="email" id="input_email" value="{{ deelnemer.aanpassing_email }}">
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <th>Geboorteplaats (voor op diploma)</th>
+                                    <td>
+                                        <input type="text" id="input_plaats" maxlength="100" value="{{ deelnemer.aanpassing_geboorteplaats }}">
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <div class="center" style="margin-top:10px">
+                                <button class="btn-sv-rood" id="id_doorgeven_knop">Wijzigingen doorgeven</button>
+                            </div>
+
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <script>
+            function wijzigingen_doorgeven(event) {
+
+                const el1 = document.getElementById("input_telefoon");
+                const el2 = document.getElementById("input_email");
+                const el3 = document.getElementById("input_plaats");
+
+                let xhr = new XMLHttpRequest();
+                xhr.open("POST", "{{ url_wijzig }}", true);         // true = async
+                xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+                xhr.setRequestHeader("Content-Type", "application/json");
+                const data = JSON.stringify({
+                    "telefoon": el1.value,
+                    "email": el2.value,
+                    "plaats": el3.value
+                });
+                xhr.send(data);
+
+                // voorkom dat de button click navigatie veroorzaakt
+                event.preventDefault();
+            }
+
+            // geef gebruik van de knop "wijzigingen doorgeven" door aan de server
+            document.getElementById('id_doorgeven_knop').addEventListener("click", wijzigingen_doorgeven);
+        </script>
+
+
+    {% endif %}
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="opleidingen-inschrijven-basiscursus" %}
+
+{% endblock %}
