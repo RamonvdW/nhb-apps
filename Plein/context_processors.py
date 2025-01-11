@@ -44,7 +44,7 @@ def site_layout(request):
             # zodat views deze ook op True kunnen zetten (ook al is het mandje leeg)
             context['menu_toon_mandje'] = True
 
-            # wissel van rol toegestaan?
+        # wissel van rol toegestaan?
         if rol_mag_wisselen(request):
             context['menu_url_wissel_van_rol'] = reverse('Functie:wissel-van-rol')
 

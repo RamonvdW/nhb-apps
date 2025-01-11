@@ -33,12 +33,12 @@
           includes Site/core/settings_base.py
               includes Site/settings_local.py for site specific settings
           provides additional items that are part of the release
-      provides changes to to settings for autotest
+      provides changes to to settings for dev
 """
 
 import os
 
-# implementation uses this instead of built-in default, to allow override during testing
+# implementation uses this instead of built-in default, to allow override during autotest/dev
 # None = use built-in default
 BETAAL_API_URL = None
 
@@ -58,7 +58,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2025-01-08'
+SITE_VERSIE = '2025-01-11'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -583,6 +583,9 @@ BETAAL_VIA_BOND_VER_NR = 1368
 
 # welke vereniging(en) mogen een uitvoerende vereniging aanwijzen (en daar een locatie van kiezen)?
 WEDSTRIJDEN_KIES_UITVOERENDE_VERENIGING = (1368,)
+
+# toon het kaartje Ledenvoordeel?
+TOON_LEDENVOORDEEL = True
 
 # aantal vragen van de instaptoets
 INSTAPTOETS_AANTAL_VRAGEN = 20

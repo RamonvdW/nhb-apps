@@ -1,14 +1,14 @@
 #!/bin/bash
 
-#  Copyright (c) 2019-2023 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 # script for daily (or faster) execution by a cron job
 
-LOGDIR="/var/log/www"
-SPOOLDIR="/var/spool/crm"
-CONFIGFILE="download_crm_config.txt"
+LOG_DIR="/var/log/www"
+SPOOL_DIR="/var/spool/crm"
+CONFIG_FILE="download_crm_config.txt"
 USER_WWW="$1"
 
 ID=$(id -u)
@@ -29,24 +29,24 @@ cd "$SCRIPT_DIR"
 # avoid this by writing to a logfile
 
 STAMP=$(date +"%Y%m%d_%H%M%S")
-SHORTSTAMP=$(date +"%Y%m%d")       # elke dag een nieuwe logfile
-LOG="$LOGDIR/${SHORTSTAMP}_download_and_import_crm.log"
+SHORT_STAMP=$(date +"%Y%m%d")       # elke dag een nieuwe logfile
+LOG="$LOG_DIR/${SHORT_STAMP}_download_and_import_crm.log"
 #echo "Logging to: $LOG"
 echo "[INFO] Started at $STAMP" >> "$LOG"
 
-if [ ! -d "$SPOOLDIR" ]
+if [ ! -d "$SPOOL_DIR" ]
 then
     # cannot create, so report error
-    echo "[ERROR] Missing $SPOOLDIR"
+    echo "[ERROR] Missing $SPOOL_DIR"
     exit 1
 fi
 
 # alles ouder dan 60 dagen mag wag
 echo "[INFO] Removing old files" >> "$LOG"
-find "$SPOOLDIR" -type f -mtime +60 -exec rm {} + &>> "$LOG"
+find "$SPOOL_DIR" -type f -mtime +60 -exec rm {} + &>> "$LOG"
 
-URL=$(head -1 "$CONFIGFILE")
-SECRET=$(tail -1 "$CONFIGFILE")
+URL=$(head -1 "$CONFIG_FILE")
+SECRET=$(tail -1 "$CONFIG_FILE")
 
 DOWNLOAD=0
 echo "[INFO] retrieving headers" >> "$LOG"
@@ -77,11 +77,11 @@ fi
 
 if [ $DOWNLOAD -eq 1 ]
 then
-    SPOOLFILE="$SPOOLDIR/crm_${STAMP}.json"
-    echo "[INFO] Downloading complete crm data set to $SPOOLFILE" >> "$LOG"
+    SPOOL_FILE="$SPOOL_DIR/crm_${STAMP}.json"
+    echo "[INFO] Downloading complete crm data set to $SPOOL_FILE" >> "$LOG"
 
     # download
-    curl -sS -H "secret: $SECRET" "$URL" > "$SPOOLFILE" 2>>"$LOG"
+    curl -sS -H "secret: $SECRET" "$URL" > "$SPOOL_FILE" 2>>"$LOG"
     RES=$?
     if [ $RES -ne 0 ]
     then
@@ -93,7 +93,7 @@ then
         cd ../..
 
         # -u = unbuffered --> needed to maintain the order of stdout and stderr lines
-        python3 -u ./manage.py import_crm_json "$SPOOLFILE" &>> "$LOG"
+        python3 -u ./manage.py import_crm_json "$SPOOL_FILE" &>> "$LOG"
     fi
 
     echo "[INFO] Import finished" >> "$LOG"

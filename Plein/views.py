@@ -54,6 +54,14 @@ def is_browser_supported(request):
     return is_supported
 
 
+def plein_datetime_stamp_str():
+    """ geeft een string terug die de huidige datum en tijd bevat tot uren en minuten
+        wordt gebruikt om een nieuwe minuut te ontdekken
+    """
+    now = timezone.now()
+    return now.strftime('%Y-%m-%d %H:%M')
+
+
 def site_root_view(request):
     """ simpele Django view functie om vanaf de top-level site naar het Plein te gaan """
 
@@ -118,9 +126,10 @@ class PleinView(View):
                 if gebruiker_is_scheids(self.request):
                     context['url_scheids'] = reverse('Scheidsrechter:overzicht')
 
-                account = get_account(request)
-                if not account.is_gast:
-                    context['url_voordeel'] = reverse('Ledenvoordeel:overzicht')
+                if settings.TOON_LEDENVOORDEEL:
+                    account = get_account(request)
+                    if not account.is_gast:
+                        context['url_voordeel'] = reverse('Ledenvoordeel:overzicht')
 
             elif rol_nu == Rollen.ROL_NONE or rol_nu is None:
                 # gebruik de bezoeker pagina
