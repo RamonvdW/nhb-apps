@@ -14,11 +14,11 @@ from datetime import timedelta
 
 class TestOpleidingenBasiscursus(E2EHelpers, TestCase):
 
-    """ tests voor de Opleidingen applicatie, functionaliteit Basiscursus """
+    """ tests voor de Opleiding applicatie, functionaliteit Basiscursus """
 
     test_after = ('Account', 'Functie')
 
-    url_basiscursus = '/opleidingen/basiscursus/'
+    url_basiscursus = '/opleiding/basiscursus/'
 
     def setUp(self):
         """ initialisatie van de test case """

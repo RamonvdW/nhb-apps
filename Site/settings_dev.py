@@ -56,6 +56,8 @@ TEMPLATES[0]['OPTIONS']['string_if_invalid'] = '##BUG %s ##'
 # (use during debugging of autotesters)
 # PASSWORD_HASHERS = ['django.contrib.auth.hashers.MD5PasswordHasher']
 
+# Mollie endpoint URL override
+BETAAL_API_URL = 'http://localhost:8125'        # gebruik de simulator
 
 if ENABLE_DJANGO_EXTENSIONS:                        # pragma: no cover
     INSTALLED_APPS.append('django_extensions')

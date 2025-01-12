@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2024 Ramon van der Winkel.
+#  Copyright (c) 2020-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -116,7 +116,7 @@ class ActiveerRolView(UserPassesTestMixin, View):
             return redirect('Feedback:inzicht')
 
         if rol_nu == Rol.ROL_MO:
-            return redirect('Opleidingen:manager')
+            return redirect('Opleiding:manager')
 
         if rol_nu == Rol.ROL_MWW:
             return redirect('Webwinkel:manager')

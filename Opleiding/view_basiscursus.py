@@ -59,10 +59,10 @@ class BasiscursusView(UserPassesTestMixin, TemplateView):
 
                 if is_geldig:
                     context['url_instaptoets'] = None
-                    context['url_inschrijven'] = reverse('Opleidingen:inschrijven-basiscursus')
+                    context['url_inschrijven'] = reverse('Opleiding:inschrijven-basiscursus')
 
         context['kruimels'] = (
-            (reverse('Opleidingen:overzicht'), 'Opleidingen'),
+            (reverse('Opleiding:overzicht'), 'Opleidingen'),
             (None, 'Basiscursus')
         )
 

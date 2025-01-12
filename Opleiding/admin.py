@@ -6,7 +6,7 @@
 
 from django.contrib import admin
 from django.utils import timezone
-from Opleidingen.models import Opleiding, OpleidingMoment, OpleidingDeelnemer, OpleidingDiploma
+from Opleiding.models import Opleiding, OpleidingMoment, OpleidingDeelnemer, OpleidingDiploma
 
 
 class CreateOnlyAdmin(admin.ModelAdmin):
@@ -148,4 +148,3 @@ admin.site.register(OpleidingDeelnemer, OpleidingDeelnemerAdmin)
 admin.site.register(OpleidingDiploma, OpleidingDiplomaAdmin)
 
 # end of file
-

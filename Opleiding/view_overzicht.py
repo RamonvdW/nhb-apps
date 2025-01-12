@@ -9,8 +9,8 @@ from django.http import Http404
 from django.views.generic import TemplateView
 from Account.models import get_account
 from Betaal.format import format_bedrag_euro
-from Opleidingen.definities import OPLEIDING_STATUS_GEANNULEERD, OPLEIDING_STATUS_VOORBEREID
-from Opleidingen.models import Opleiding, OpleidingDiploma
+from Opleiding.definities import OPLEIDING_STATUS_GEANNULEERD, OPLEIDING_STATUS_VOORBEREID
+from Opleiding.models import Opleiding, OpleidingDiploma
 from Sporter.models import get_sporter
 
 TEMPLATE_OPLEIDINGEN_OVERZICHT = 'opleidingen/overzicht.dtl'
@@ -40,9 +40,9 @@ class OpleidingenOverzichtView(TemplateView):
             else:
                 if opleiding.is_basiscursus:
                     enable_basiscursus = True
-                    opleiding.url_details = reverse('Opleidingen:inschrijven-basiscursus')
+                    opleiding.url_details = reverse('Opleiding:inschrijven-basiscursus')
                 else:
-                    opleiding.url_details = reverse('Opleidingen:details', kwargs={'opleiding_pk': opleiding.pk})
+                    opleiding.url_details = reverse('Opleiding:details', kwargs={'opleiding_pk': opleiding.pk})
         # for
 
         account = get_account(self.request)
@@ -61,7 +61,7 @@ class OpleidingenOverzichtView(TemplateView):
             context['diplomas'] = diplomas
 
             if enable_basiscursus:
-                context['url_basiscursus'] = reverse('Opleidingen:basiscursus')
+                context['url_basiscursus'] = reverse('Opleiding:basiscursus')
 
         context['kruimels'] = (
             (None, 'Opleidingen'),
@@ -105,7 +105,7 @@ class OpleidingDetailsView(TemplateView):
             context['hint_inloggen'] = True
 
         context['kruimels'] = (
-            (reverse('Opleidingen:overzicht'), 'Opleidingen'),
+            (reverse('Opleiding:overzicht'), 'Opleidingen'),
             (None, opleiding.titel),
         )
 

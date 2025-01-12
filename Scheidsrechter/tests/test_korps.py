@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023 Ramon van der Winkel.
+#  Copyright (c) 2023-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
 from BasisTypen.definities import SCHEIDS_NIET, SCHEIDS_BOND, SCHEIDS_INTERNATIONAAL
 from Functie.models import Functie
-from Opleidingen.definities import CODE_SR_BOND
-from Opleidingen.models import OpleidingDiploma
+from Opleiding.definities import CODE_SR_BOND
+from Opleiding.models import OpleidingDiploma
 from Sporter.models import Sporter, SporterVoorkeuren
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata

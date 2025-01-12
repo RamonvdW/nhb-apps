@@ -317,7 +317,7 @@ class RolBepaler:
         rol_nu, functie_nu = rol_get_huidige_functie(request)
         if functie_nu:
             # is de gevraagde functie een afgeleide rol van de huidige rol?
-            for mag_rol, mag_functie in self.iter_indirecte_rollen(functie_nu.pk):
+            for mag_rol, mag_functie in self.iter_indirecte_rollen(rol_nu, functie_nu.pk):
                 if mag_functie.pk == functie_pk:
                     func = self._alle[functie_pk]
                     return True, func.rol

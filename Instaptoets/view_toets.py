@@ -41,7 +41,7 @@ class BeginToetsView(UserPassesTestMixin, TemplateView):
     def dispatch(self, request, *args, **kwargs):
         if not instaptoets_is_beschikbaar():
             # geen toets --> terug naar landing page opleidingen
-            return redirect('Opleidingen:overzicht')
+            return redirect('Opleiding:overzicht')
 
         return super().dispatch(request, *args, **kwargs)
 
@@ -77,7 +77,7 @@ class BeginToetsView(UserPassesTestMixin, TemplateView):
                     context['url_starten'] = reverse('Instaptoets:begin')
 
         context['kruimels'] = (
-            (reverse('Opleidingen:overzicht'), 'Opleidingen'),
+            (reverse('Opleiding:overzicht'), 'Opleidingen'),
             (None, 'Instaptoets'),
         )
 
@@ -145,11 +145,11 @@ class ToonUitslagView(UserPassesTestMixin, TemplateView):
 
         context['toets'] = self.toets
 
-        context['url_basiscursus'] = reverse('Opleidingen:basiscursus')
+        context['url_basiscursus'] = reverse('Opleiding:basiscursus')
         context['url_sluiten'] = reverse('Plein:plein')
 
         context['kruimels'] = (
-            (reverse('Opleidingen:overzicht'), 'Opleidingen'),
+            (reverse('Opleiding:overzicht'), 'Opleidingen'),
             (None, 'Resultaat instaptoets'),
         )
 

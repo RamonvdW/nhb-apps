@@ -5,11 +5,11 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from Opleidingen import view_overzicht, view_basiscursus, view_inschrijven
+from Opleiding import view_inschrijven, view_overzicht, view_basiscursus
 
-app_name = 'Opleidingen'
+app_name = 'Opleiding'
 
-# basis = /opleidingen/
+# basis = /opleiding/
 
 urlpatterns = [
 
@@ -22,9 +22,14 @@ urlpatterns = [
          view_basiscursus.BasiscursusView.as_view(),
          name='basiscursus'),
 
-    path('basiscursus/inschrijven/',
+    path('inschrijven/basiscursus/',
          view_inschrijven.InschrijvenBasiscursusView.as_view(),
          name='inschrijven-basiscursus'),
+
+    # toevoegen aan winkelwagentje (POST only)
+    path('inschrijven/toevoegen-mandje/',
+         view_inschrijven.ToevoegenAanMandjeView.as_view(),
+         name='inschrijven-toevoegen-aan-mandje'),
 
     path('details/<opleiding_pk>/',
          view_overzicht.OpleidingDetailsView.as_view(),

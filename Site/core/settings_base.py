@@ -46,6 +46,9 @@ BETAAL_API_URL = None
 # None = use built-in default
 GMAPS_API_URL = None
 
+# toon het kaartje Ledenvoordeel?
+TOON_LEDENVOORDEEL = True
+
 
 # import install-specific settings from a separate file
 # that is easy to replace as part of the deployment process
@@ -58,7 +61,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2025-01-11'
+SITE_VERSIE = '2025-01-12'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -89,7 +92,8 @@ INSTALLED_APPS = [
     'Ledenvoordeel.apps.LedenvoordeelConfig',
     'Logboek.apps.LogboekConfig',
     'Mailer.apps.MailerConfig',
-    'Opleidingen.apps.OpleidingenConfig',
+    'Opleiding.apps.OpleidingConfig',
+    'Opleidingen.apps.OpleidingenConfig',       # TODO: remove
     'Overig.apps.OverigConfig',
     'Plein.apps.PleinConfig',
     'Records.apps.RecordsConfig',
@@ -585,9 +589,6 @@ BETAAL_VIA_BOND_VER_NR = 1368
 
 # welke vereniging(en) mogen een uitvoerende vereniging aanwijzen (en daar een locatie van kiezen)?
 WEDSTRIJDEN_KIES_UITVOERENDE_VERENIGING = (1368,)
-
-# toon het kaartje Ledenvoordeel?
-TOON_LEDENVOORDEEL = True
 
 # aantal vragen van de instaptoets
 INSTAPTOETS_AANTAL_VRAGEN = 20

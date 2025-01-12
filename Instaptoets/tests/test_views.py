@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2024 Ramon van der Winkel.
+#  Copyright (c) 2024-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -44,7 +44,7 @@ class TestInstaptoetsViews(E2EHelpers, TestCase):
 
     test_after = ('Sporter.tests.test_login',)
 
-    url_begin = '/opleidingen/instaptoets/'
+    url_begin = '/opleiding/instaptoets/'
     url_uitslag = url_begin + 'uitslag/'
     url_volgende_vraag = url_begin + 'volgende-vraag/'
     url_ontvang_antwoord = url_begin + 'vraag-antwoord/'

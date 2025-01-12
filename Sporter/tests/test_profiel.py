@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2024 Ramon van der Winkel.
+#  Copyright (c) 2020-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -17,7 +17,7 @@ from HistComp.definities import HISTCOMP_TYPE_18
 from HistComp.models import HistCompSeizoen, HistCompRegioIndiv
 from Locatie.definities import BAAN_TYPE_EXTERN
 from Locatie.models import WedstrijdLocatie
-from Opleidingen.models import OpleidingDiploma
+from Opleiding.models import OpleidingDiploma
 from Records.models import IndivRecord
 from Registreer.definities import REGISTRATIE_FASE_COMPLEET
 from Registreer.models import GastRegistratie

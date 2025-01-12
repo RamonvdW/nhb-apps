@@ -41,7 +41,7 @@
                         <!-- toets is nog geldig -->
                         <p>Je bent al geslaagd voor de toets.</p>
                         <p>
-                            <a class="btn-sv-rood" href="{% url 'Opleidingen:overzicht' %}">Naar de opleidingen</a>
+                            <a class="btn-sv-rood" href="{% url 'Opleiding:overzicht' %}">Naar de opleidingen</a>
                         </p>
                     {% endif %}
                 {% endif %}

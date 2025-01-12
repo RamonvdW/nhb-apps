@@ -14,7 +14,7 @@ from Geo.models import Regio
 from Locatie.definities import BAAN_TYPE_BUITEN
 from Locatie.models import WedstrijdLocatie
 from Mailer.models import MailQueue
-from Opleidingen.models import OpleidingDiploma
+from Opleiding.models import OpleidingDiploma
 from Records.models import IndivRecord
 from Score.operations import score_indiv_ag_opslaan
 from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren

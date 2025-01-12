@@ -15,7 +15,7 @@ from decimal import Decimal
 class OpleidingDiploma(models.Model):
 
     # welke sporter heeft deze opleiding behaald?
-    sporter = models.ForeignKey(Sporter, on_delete=models.CASCADE, related_name='old1')
+    sporter = models.ForeignKey(Sporter, on_delete=models.CASCADE)
 
     # unieke code voor koppeling met CRM data
     # voorbeeld: 084 of 084a
@@ -46,33 +46,6 @@ class OpleidingDiploma(models.Model):
     objects = models.Manager()  # for the editor only
 
 
-class OpleidingDeelnemer(models.Model):
-    """ Deze klasse representeert een deelnemer aan een opleiding """
-
-    sporter = models.ForeignKey(Sporter, on_delete=models.PROTECT, related_name='old2')
-
-    # wanneer is deze aanmelding gedaan?
-    wanneer_aangemeld = models.DateTimeField(auto_now_add=True)
-
-    # wie was de koper?
-    koper = models.ForeignKey(Account, on_delete=models.PROTECT, null=True, blank=True, related_name='old3')
-
-    # bedragen ontvangen en terugbetaald
-    ontvangen_euro = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal(0))
-    retour_euro = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal(0))
-
-    # aanpassingen van de informatie die al/nog niet bekend is
-    aanpassing_email = models.EmailField(blank=True)
-    aanpassing_telefoon = models.CharField(max_length=25, default='', blank=True)
-    aanpassing_geboorteplaats = models.CharField(max_length=100, default='', blank=True)
-
-    class Meta:
-        """ meta data voor de admin interface """
-        verbose_name = "Opleiding deelnemer"
-
-    objects = models.Manager()  # for the editor only
-
-
 class OpleidingMoment(models.Model):
     """ details van een bijeenkomst van een opleiding """
 
@@ -86,7 +59,7 @@ class OpleidingMoment(models.Model):
     duur_minuten = models.PositiveIntegerField(default=1)
 
     # waar moeten de deelnemers heen
-    locatie = models.ForeignKey(EvenementLocatie, on_delete=models.PROTECT, blank=True, null=True, related_name='old4')
+    locatie = models.ForeignKey(EvenementLocatie, on_delete=models.PROTECT, blank=True, null=True)
 
     # naam en contactgegevens van de opleider
     opleider_naam = models.CharField(max_length=150, default='')
@@ -126,7 +99,7 @@ class Opleiding(models.Model):
     aantal_momenten = models.PositiveIntegerField(default=1)
 
     # leest van specifieke bijeenkomsten
-    momenten = models.ManyToManyField(OpleidingMoment, blank=True, related_name='old5')
+    momenten = models.ManyToManyField(OpleidingMoment, blank=True)
 
     # aantal uren dat de opleiding vereist van de deelnemer
     aantal_uren = models.PositiveIntegerField(default=1)
@@ -152,9 +125,6 @@ class Opleiding(models.Model):
     # de kosten voor de hele opleiding, in euros
     kosten_euro = models.DecimalField(max_digits=7, decimal_places=2, default=Decimal(0))        # max 99999,99
 
-    # lijst van de deelnemers
-    deelnemers = models.ManyToManyField(OpleidingDeelnemer, blank=True, related_name='old6')
-
     def periode_str(self):
         return "%s-Q%s" % (self.periode_jaartal, self.periode_kwartaal)
 
@@ -165,6 +135,43 @@ class Opleiding(models.Model):
         """ meta data voor de admin interface """
         verbose_name = "Opleiding"
         verbose_name_plural = "Opleidingen"
+
+    objects = models.Manager()  # for the editor only
+
+
+class OpleidingDeelnemer(models.Model):
+    """ Deze klasse representeert een deelnemer aan een opleiding """
+
+    # welke opleiding gaat dit om?
+    opleiding = models.ForeignKey(Opleiding, on_delete=models.PROTECT)
+
+    # wie is de deelnemer?
+    sporter = models.ForeignKey(Sporter, on_delete=models.PROTECT)
+
+    # wanneer is deze aanmelding gedaan?
+    wanneer_aangemeld = models.DateTimeField(auto_now_add=True)
+
+    # wie was de koper?
+    koper = models.ForeignKey(Account, on_delete=models.PROTECT, null=True, blank=True)
+
+    # bedragen ontvangen en terugbetaald
+    ontvangen_euro = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal(0))
+    retour_euro = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal(0))
+
+    # aanpassingen van de informatie die al/nog niet bekend is
+    aanpassing_email = models.EmailField(blank=True)
+    aanpassing_telefoon = models.CharField(max_length=25, default='', blank=True)
+    aanpassing_geboorteplaats = models.CharField(max_length=100, default='', blank=True)
+
+    def korte_beschrijving(self):
+        return "[%s] %s %s" % (self.pk, self.sporter.lid_nr_en_volledige_naam(), self.opleiding)
+
+    def __str__(self):
+        return self.korte_beschrijving()
+
+    class Meta:
+        """ meta data voor de admin interface """
+        verbose_name = "Opleiding deelnemer"
 
     objects = models.Manager()  # for the editor only
 

@@ -1,12 +1,12 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2022-2025 Ramon van der Winkel.
+                Copyright (c) 2025 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
 
-{% block title %}Reservering{% endblock %}
+{% block title %}Reservering opleiding{% endblock %}
 
 {% block pagina %}
 
@@ -22,8 +22,8 @@
     <div class="row-sv-blauw">
         <div class="col s12 l10 offset-l1 xl8 offset-xl2">
             <div class="sv-kader" style="padding:10px">
-                <p>We hebben een plekje voor je <b>gereserveerd</b> voor de gekozen wedstrijd.</p>
-                <p>Je inschrijving voor de wedstrijd is pas definitief na het <b>afronden</b> van je bestelling en eventuele <b>betaling</b>.</p>
+                <p>We hebben een plekje voor je <b>gereserveerd</b> voor de gekozen opleiding.</p>
+                <p>Je inschrijving is pas definitief na het <b>afronden</b> van je bestelling en eventuele <b>betaling</b>.</p>
                 <br>
                 <p class="sv-rood-text">Let op: na 3 dagen verwijderen we deze reservering automatisch</p>
                 <br>
@@ -46,7 +46,7 @@
         <div class="col s12">
 
             <!-- verder winkelen -->
-            {% include 'plein/card_icon.dtl' with title="Verder winkelen" text="Terug naar de wedstrijd waar je mee bezig was." icon="event_note" url=url_verder %}
+            {% include 'plein/card_icon.dtl' with title="Verder winkelen" text="Terug naar het evenement waar je mee bezig was." icon="event_note" url=url_verder %}
 
             <!-- mandje -->
             {% url 'Bestel:toon-inhoud-mandje' as card_url %}
@@ -56,6 +56,6 @@
     </div>
 
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="wedstrijdinschrijven-toegevoegd-aan-mandje" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="opleidingen-inschrijven-toegevoegd-aan-mandje" %}
 
 {% endblock %}

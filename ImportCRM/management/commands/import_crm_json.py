@@ -22,8 +22,8 @@ from Locatie.definities import BAAN_TYPE_BUITEN, BAAN_TYPE_EXTERN
 from Locatie.models import WedstrijdLocatie
 from Logboek.models import schrijf_in_logboek
 from Mailer.operations import mailer_email_is_valide, mailer_notify_internal_error
-from Opleidingen.definities import CODE_SR_VER, CODE_SR_BOND, CODE_SR_INTERNATIONAAL, CODE2SCHEIDS
-from Opleidingen.models import OpleidingDiploma
+from Opleiding.definities import CODE_SR_VER, CODE_SR_BOND, CODE_SR_INTERNATIONAAL, CODE2SCHEIDS
+from Opleiding.models import OpleidingDiploma
 from Overig.helpers import maak_unaccented
 from Records.models import IndivRecord
 from Sporter.models import Sporter, Speelsterkte

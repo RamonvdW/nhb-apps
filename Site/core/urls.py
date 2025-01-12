@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -41,8 +41,8 @@ urlpatterns = [
     path('kalender/evenement/',             include('Evenement.urls')),
     path('ledenvoordeel/',                  include('Ledenvoordeel.urls')),
     path('logboek/',                        include('Logboek.urls')),
-    path('opleidingen/instaptoets/',        include('Instaptoets.urls')),
-    path('opleidingen/',                    include('Opleidingen.urls')),
+    path('opleiding/',                      include('Opleiding.urls')),
+    path('opleiding/instaptoets/',          include('Instaptoets.urls')),
     path('overig/',                         include('Overig.urls')),
     path('plein/',                          include('Plein.urls')),
     path('records/',                        include('Records.urls')),

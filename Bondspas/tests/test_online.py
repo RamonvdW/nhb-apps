@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2023 Ramon van der Winkel.
+#  Copyright (c) 2021-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase, override_settings
 from BasisTypen.definities import GESLACHT_ANDERS
 from Geo.models import Regio
-from Opleidingen.models import OpleidingDiploma
+from Opleiding.models import OpleidingDiploma
 from Sporter.models import Sporter, SporterVoorkeuren, Speelsterkte
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging

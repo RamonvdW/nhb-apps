@@ -52,7 +52,7 @@
 
                 <!-- opleidingen -->
                 {% if rol_is_mo %}
-                    {% url 'Opleidingen:overzicht' as card_url %}
+                    {% url 'Opleiding:overzicht' as card_url %}
                     {% include 'plein/card_icon.dtl' with title="Opleidingen" text="Beheer de opleidingen en deelnemers." icon="school" url=card_url %}
                 {% endif %}
 

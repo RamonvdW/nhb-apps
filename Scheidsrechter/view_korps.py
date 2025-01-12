@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023-2024 Ramon van der Winkel.
+#  Copyright (c) 2023-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -10,8 +10,8 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.definities import SCHEIDS_NIET
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige, gebruiker_is_scheids
-from Opleidingen.definities import CODE2SCHEIDS
-from Opleidingen.models import OpleidingDiploma
+from Opleiding.definities import CODE2SCHEIDS
+from Opleiding.models import OpleidingDiploma
 from Scheidsrechter.definities import SCHEIDS2LEVEL
 from Sporter.models import SporterVoorkeuren, Sporter
 

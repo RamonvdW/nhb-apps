@@ -6,19 +6,19 @@
 
 from django.test import TestCase
 from Functie.models import Functie
-from Opleidingen import admin
-from Opleidingen.models import OpleidingDiploma
+from Opleiding import admin
+from Opleiding.models import OpleidingDiploma
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
 
 
 class TestOpleidingenOverzicht(E2EHelpers, TestCase):
 
-    """ tests voor de Opleidingen applicatie, functionaliteit Overzicht """
+    """ tests voor de Opleiding applicatie, functionaliteit Overzicht """
 
     test_after = ('Account', 'Functie')
 
-    url_overzicht = '/opleidingen/'
+    url_overzicht = '/opleiding/'
 
     def setUp(self):
         """ initialisatie van de test case """

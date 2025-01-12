@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2024 Ramon van der Winkel.
+#  Copyright (c) 2021-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -14,6 +14,7 @@ from Bestelling.definities import (BESTELLING_MUTATIE_WEDSTRIJD_INSCHRIJVEN, BES
                                    BESTELLING_MUTATIE_EVENEMENT_AFMELDEN, BESTELLING_STATUS_BETALING_ACTIEF)
 from Bestelling.models import BestellingMutatie, Bestelling
 from Evenement.models import EvenementInschrijving
+from Opleiding.models import OpleidingDeelnemer
 from Overig.background_sync import BackgroundSync
 from Wedstrijden.models import WedstrijdInschrijving
 import time
@@ -60,6 +61,23 @@ def bestel_mutatieverzoek_inschrijven_wedstrijd(account, inschrijving: Wedstrijd
 
 
 def bestel_mutatieverzoek_inschrijven_evenement(account, inschrijving: EvenementInschrijving, snel):
+
+    # zet dit verzoek door naar het mutaties process
+    # voorkom duplicates (niet 100%)
+    mutatie, is_created = BestellingMutatie.objects.get_or_create(
+                                    code=BESTELLING_MUTATIE_EVENEMENT_INSCHRIJVEN,
+                                    account=account,
+                                    evenement_inschrijving=inschrijving,
+                                    is_verwerkt=False)
+
+    if is_created:
+        mutatie.save()
+
+        # wacht kort op de achtergrondtaak
+        _bestel_ping_achtergrondtaak(mutatie, snel)
+
+
+def bestel_mutatieverzoek_inschrijven_opleiding(account, deelnemer: OpleidingDeelnemer, snel):
 
     # zet dit verzoek door naar het mutaties process
     # voorkom duplicates (niet 100%)
