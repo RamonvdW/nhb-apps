@@ -55,6 +55,9 @@ def selecteer_toets_vragen(toets: Instaptoets):
                     vraag = pk2vraag[pk]
                     antwoord = ToetsAntwoord(vraag=vraag, antwoord='?')
                     nieuw.append(antwoord)
+
+            if todo == 0:
+                break       # from the for
         # for
         if todo == prev_todo:
             # geen nieuwe vraag meer gevonden

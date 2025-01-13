@@ -15,7 +15,9 @@
         <div class="col s12">
             <h3 class="page-banner">Instaptoets</h3>
             <h6>Vraag {{ toets.vraag_nr }} van de {{ toets.aantal_vragen }}</h6>
-            <p>Categorie: {{ vraag.categorie.beschrijving }}</p>
+            {% if vraag.categorie %}
+                <p>Categorie: {{ vraag.categorie.beschrijving }}</p>
+            {% endif %}
         </div>
     </div>
 
