@@ -62,6 +62,7 @@ class HerhaalLoginOTP:
             if not skip_checks:
                 if not account.otp_controle_gelukt_op or not account.otp_is_actief:
                     # in de sessie zeggen we dat de OTP controle nog niet gelukt is
+                    # let op: dit is een database wijziging die in een GET handler kan optreden
                     otp_zet_controle_niet_gelukt(request)
                 else:
                     # gebruiker is een beheerder
@@ -69,6 +70,7 @@ class HerhaalLoginOTP:
                     if now > herhaal_na:
                         my_logger.info('Account %s forceer nieuwe OTP controle' % repr(account.username))
                         # we zetten een sessie-variabele die automatisch gebruikt wordt
+                        # let op: dit is een database wijziging die in een GET handler kan optreden
                         otp_zet_controle_niet_gelukt(request)
 
             if account.last_login and not skip_checks:

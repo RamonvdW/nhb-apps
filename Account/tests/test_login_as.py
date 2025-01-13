@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -13,6 +13,7 @@ from TijdelijkeCodes.models import TijdelijkeCode
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 import datetime
+import time
 
 
 class TestAccountLoginAs(E2EHelpers, TestCase):
@@ -91,7 +92,16 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
 
         self.assertEqual(self._login_plugin_mode, 0)
 
-        # selecteer de andere schutter
+        # deze test faalt als de datum verandert
+        now = datetime.datetime.now()
+        if now.hour == 23 and now.minute == 59 and now.second > 55:    # pragma: no cover
+            print('Waiting until clock is past 23:59:59')
+            while now.second > 55:
+                time.sleep(1)
+                now = datetime.datetime.now()
+            # while
+
+        # selecteer de andere sporter
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_wissel, {'selecteer': self.account_normaal.pk})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
@@ -116,6 +126,26 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('plein/plein-sporter.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, 'Wissel van rol')
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_plein)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('plein/plein-sporter.dtl', 'plein/site_layout.dtl'))
+
+        # controleer dat de sporter uitgelogd wordt als de login-as datum verandert
+        sessie = self.client.session
+        sessie[SESSIONVAR_ACCOUNT_LOGIN_AS_DATE] = 'whatever'
+        sessie.save()
+
+        # bij uitzondering accepteren we de database operatie (op de sessie) tijdens een GET
+        with self.assert_max_queries(20):
+            with self.settings(DEBUG=True):
+                # in de dev omgeving wordt de login-as-date niet geforceerd
+                resp = self.client.get(self.url_plein)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('plein/plein-sporter.dtl', 'plein/site_layout.dtl'))
 
     def test_wissel_geen_otp(self):
         # login als admin

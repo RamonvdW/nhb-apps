@@ -32,7 +32,9 @@
 
 from Site.settings_autotest import *         # noqa
 
+# useless because Django forces DEBUG=False anyway
 DEBUG = False
+
 ENABLE_MINIFY = True                    # impacts minify_dtl.py
 USE_SUBSET_FONT_FILES = False           # impacts site_layout_fonts.dtl
 TOON_LEDENVOORDEEL = False

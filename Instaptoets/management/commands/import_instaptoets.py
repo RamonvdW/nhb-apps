@@ -116,12 +116,16 @@ class Command(BaseCommand):
         for sheet_name, sheet_data in data.items():
             self.stdout.write('[INFO] Found sheet %s' % repr(sheet_name))
             regels = sheet_data['valueRanges'][0]['values']
+            found = False
             for regel_nr in range(len(regels)):
                 regel = regels[regel_nr]
                 if regel[0:8] == ['Vraagtekst', 'Antwoord A', 'Antwoord B', 'Antwoord C', 'Antwoord D', 'Juiste antwoord', 'Toets', 'Quiz']:
                     self._import_categorie(sheet_name, regels[regel_nr+1:])
+                    found = True
                     break
             # for
+            if not found:
+                self.stderr.write('[ERROR] Kan correcte header niet vinden. Geen vragen ingelezen voor deze categorie.')
         # for
 
     def handle(self, *args, **options):

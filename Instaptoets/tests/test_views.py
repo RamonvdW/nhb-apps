@@ -7,7 +7,7 @@
 from django.test import TestCase
 from django.utils import timezone
 from Geo.models import Regio
-from Instaptoets.models import Instaptoets, Vraag
+from Instaptoets.models import Categorie, Instaptoets, Vraag
 from Instaptoets.operations import selecteer_huidige_vraag
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -48,6 +48,7 @@ class TestInstaptoetsViews(E2EHelpers, TestCase):
     url_uitslag = url_begin + 'uitslag/'
     url_volgende_vraag = url_begin + 'volgende-vraag/'
     url_ontvang_antwoord = url_begin + 'vraag-antwoord/'
+    url_opleiding_overzicht = '/opleiding/'
 
     def setUp(self):
         """ initialisatie van de test case """
@@ -82,7 +83,11 @@ class TestInstaptoetsViews(E2EHelpers, TestCase):
 
     @staticmethod
     def _maak_vragen():
+        cat = Categorie(beschrijving="Test categorie")
+        cat.save()
+
         Vraag(
+            categorie=cat,
             vraag_tekst='Vraag nummer 1',
             antwoord_a='Morgen',
             antwoord_b='Overmorgen',
@@ -91,6 +96,7 @@ class TestInstaptoetsViews(E2EHelpers, TestCase):
             juiste_antwoord='A').save()
 
         Vraag(
+            # categorie=cat,            # bewust niet gezet voor meer coverage
             vraag_tekst='Vraag nummer 2',
             antwoord_a='Geel',
             antwoord_b='Rood',
@@ -99,6 +105,7 @@ class TestInstaptoetsViews(E2EHelpers, TestCase):
             juiste_antwoord='B').save()
 
         Vraag(
+            categorie=cat,
             is_actief=False,        # mag niet getoond worden
             gebruik_voor_toets=True,
             gebruik_voor_quiz=True,
@@ -110,6 +117,7 @@ class TestInstaptoetsViews(E2EHelpers, TestCase):
             juiste_antwoord='B').save()
 
         bulk = [Vraag(
+                    categorie=cat,
                     vraag_tekst='Vraag nummer %s' % (3 + nr),
                     antwoord_a='Geel',
                     antwoord_b='Rood',
@@ -189,6 +197,7 @@ class TestInstaptoetsViews(E2EHelpers, TestCase):
             self.assertTrue(vraag.is_actief)
             self.assertTrue(vraag.gebruik_voor_toets)
             self.assertTrue(str(vraag) != '')
+            self.assertTrue(str(vraag.categorie) != '')
         # for
 
         # get terwijl er al een toets gestart is
@@ -391,5 +400,17 @@ class TestInstaptoetsViews(E2EHelpers, TestCase):
 
         toets.is_afgerond = True
         selecteer_huidige_vraag(toets)
+
+    def test_geen_toets(self):
+        # maak de toets "niet beschikbaar"
+        Vraag.objects.all().delete()
+
+        self.e2e_login(self.account_100000)
+
+        # get terwijl er geen instaptoets is
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_begin)
+        self.assert_is_redirect(resp, self.url_opleiding_overzicht)
+
 
 # end of file
