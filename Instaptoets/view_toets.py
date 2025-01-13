@@ -145,7 +145,7 @@ class ToonUitslagView(UserPassesTestMixin, TemplateView):
 
         context['toets'] = self.toets
 
-        context['url_basiscursus'] = reverse('Opleiding:basiscursus')
+        context['url_basiscursus'] = reverse('Opleiding:inschrijven-basiscursus')
         context['url_sluiten'] = reverse('Plein:plein')
 
         context['kruimels'] = (

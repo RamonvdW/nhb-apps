@@ -48,15 +48,15 @@ class InschrijvenBasiscursusView(TemplateView):
         """ zoek de OpleidingDeelnemer voor de sporter
             tijdens POST maken we deze aan
         """
-        deelnemer = OpleidingDeelnemer.objects.filter(sporter=self.sporter).first()
+        deelnemer = OpleidingDeelnemer.objects.filter(sporter=self.sporter, opleiding=self.opleiding).first()
 
         if not deelnemer:
             deelnemer = OpleidingDeelnemer(
-                            sporter=self.sporter)
+                            sporter=self.sporter,
+                            opleiding=self.opleiding)
 
             if mag_database_wijzigen:
                 deelnemer.save()
-                self.opleiding.deelnemers.add(deelnemer)
 
         return deelnemer
 
@@ -203,18 +203,10 @@ class ToevoegenAanMandjeView(UserPassesTestMixin, View):
         msg = "[%s] Toegevoegd aan het mandje van %s\n" % (stamp_str, account_koper.get_account_full_name())
 
         # zoek of maak de deelnemer
-        deelnemer = opleiding.deelnemers.filter(sporter=self.sporter).first()
-        if not deelnemer:
-            # TODO: concurrency risk. Add transaction.atomic() ?
-            deelnemer = OpleidingDeelnemer(
-                            sporter=self.sporter,
-                            koper=account_koper)
-            deelnemer.save()
-            opleiding.deelnemers.add(deelnemer)
-        else:
-            deelnemer.wanneer_aangemeld = now       # overschrijf moment wijzigen persoonsgegevens
-            deelnemer.koper = account_koper
-            deelnemer.save()
+        deelnemer, _ = OpleidingDeelnemer.objects.get_or_create(sporter=self.sporter, opleiding=opleiding)
+        deelnemer.wanneer_aangemeld = now       # overschrijf eventueel moment wijzigen persoonsgegevens
+        deelnemer.koper = account_koper
+        deelnemer.save()
 
         # zet dit verzoek door naar de achtergrondtaak
         snel = str(request.POST.get('snel', ''))[:1]

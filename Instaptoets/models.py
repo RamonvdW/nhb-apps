@@ -71,6 +71,8 @@ class Vraag(models.Model):
 
 class ToetsAntwoord(models.Model):
 
+    # TODO: cleanup toevoegen, want bij verwijderen quiz/toets blijven deze records achter
+
     """ vraag en bijbehorend antwoord
         wordt gebruikt voor Instaptoets en Quiz
     """
@@ -97,7 +99,9 @@ class Instaptoets(models.Model):
 
     # wanneer opgestart en afgerond
     opgestart = models.DateTimeField(auto_now_add=True)
-    afgerond = models.DateTimeField(default=datetime.datetime(year=9999, month=12, day=31).replace(tzinfo=datetime.timezone.utc))
+    afgerond = models.DateTimeField(default=datetime.datetime(year=9999,
+                                                              month=12,
+                                                              day=31).replace(tzinfo=datetime.timezone.utc))
 
     # wie maakt deze toets?
     sporter = models.ForeignKey(Sporter, on_delete=models.CASCADE)
