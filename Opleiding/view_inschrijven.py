@@ -26,28 +26,15 @@ TEMPLATE_OPLEIDINGEN_INSCHRIJVEN_BASISCURSUS = 'opleidingen/inschrijven-basiscur
 TEMPLATE_OPLEIDINGEN_TOEGEVOEGD_AAN_MANDJE = 'opleidingen/inschrijven-toegevoegd-aan-mandje.dtl'
 
 
-class InschrijvenBasiscursusView(UserPassesTestMixin, TemplateView):
+class InschrijvenBasiscursusView(TemplateView):
 
     # class variables shared by all instances
     template_name = TEMPLATE_OPLEIDINGEN_INSCHRIJVEN_BASISCURSUS
-    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
-    permission_denied_message = 'Geen toegang'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.sporter = None
         self.opleiding = None
-
-    def test_func(self):
-        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        # instaptoets alleen aan leden tonen
-        # gebruiker moet ingelogd zijn, geen gast zijn en rol Sporter gekozen hebben
-        if rol_get_huidige(self.request) == Rol.ROL_SPORTER:
-            account = get_account(self.request)
-            if not account.is_gast:
-                self.sporter = get_sporter(account)
-                return True
-        return False
 
     def _zoek_opleiding_basiscursus(self):
         self.opleiding = (Opleiding
@@ -61,7 +48,7 @@ class InschrijvenBasiscursusView(UserPassesTestMixin, TemplateView):
         """ zoek de OpleidingDeelnemer voor de sporter
             tijdens POST maken we deze aan
         """
-        deelnemer = self.opleiding.deelnemers.filter(sporter=self.sporter).first()
+        deelnemer = OpleidingDeelnemer.objects.filter(sporter=self.sporter).first()
 
         if not deelnemer:
             deelnemer = OpleidingDeelnemer(
@@ -77,13 +64,22 @@ class InschrijvenBasiscursusView(UserPassesTestMixin, TemplateView):
         """ called by the template system to get the context data for the template """
 
         context = super().get_context_data(**kwargs)
-        context['sporter'] = self.sporter
-        context['voldoet_aan_voorwaarden'] = False
 
-        toets = vind_toets(self.sporter)
-        if toets:
-            is_geldig, _ = toets_geldig(toets)
-            context['voldoet_aan_voorwaarden'] = is_geldig
+        # instaptoets alleen aan leden tonen
+        # gebruiker moet ingelogd zijn, geen gast zijn en rol Sporter gekozen hebben
+        if rol_get_huidige(self.request) == Rol.ROL_SPORTER:
+            account = get_account(self.request)
+            if not account.is_gast:
+                self.sporter = get_sporter(account)
+
+        if self.sporter:
+            context['sporter'] = self.sporter
+            context['voldoet_aan_voorwaarden'] = False
+
+            toets = vind_toets(self.sporter)
+            if toets:
+                is_geldig, _ = toets_geldig(toets)
+                context['voldoet_aan_voorwaarden'] = is_geldig
 
         self._zoek_opleiding_basiscursus()
 
@@ -93,22 +89,22 @@ class InschrijvenBasiscursusView(UserPassesTestMixin, TemplateView):
         context['opleiding'] = self.opleiding
         self.opleiding.kosten_str = format_bedrag_euro(self.opleiding.kosten_euro)
 
-        deelnemer = self._zoek_deelnemer()
+        if self.sporter:
+            deelnemer = self._zoek_deelnemer()
 
-        if deelnemer.aanpassing_email == '':
-            deelnemer.aanpassing_email = self.sporter.email
-        if deelnemer.aanpassing_telefoon == '':
-            deelnemer.aanpassing_telefoon = self.sporter.telefoon
-        if deelnemer.aanpassing_geboorteplaats == '':
-            deelnemer.aanpassing_geboorteplaats = self.sporter.geboorteplaats
-        context['deelnemer'] = deelnemer
+            if deelnemer.aanpassing_email == '':
+                deelnemer.aanpassing_email = self.sporter.email
+            if deelnemer.aanpassing_telefoon == '':
+                deelnemer.aanpassing_telefoon = self.sporter.telefoon
+            if deelnemer.aanpassing_geboorteplaats == '':
+                deelnemer.aanpassing_geboorteplaats = self.sporter.geboorteplaats
+            context['deelnemer'] = deelnemer
 
-        context['url_wijzig'] = reverse('Opleiding:inschrijven-basiscursus')
-        context['url_toevoegen'] = reverse('Opleiding:inschrijven-toevoegen-aan-mandje')
+            context['url_wijzig'] = reverse('Opleiding:inschrijven-basiscursus')
+            context['url_toevoegen'] = reverse('Opleiding:inschrijven-toevoegen-aan-mandje')
 
         context['kruimels'] = (
             (reverse('Opleiding:overzicht'), 'Opleidingen'),
-            (reverse('Opleiding:basiscursus'), 'Basiscursus'),
             (None, 'Inschrijven')
         )
 
@@ -119,6 +115,16 @@ class InschrijvenBasiscursusView(UserPassesTestMixin, TemplateView):
         """ Sporter heeft telefoonnummer/email/plaats aangepast en op Wijzigingen Doorgeven knop gedrukt
             We slaan de nieuwe gegevens op in het OpleidingDeelnemer record
         """
+
+        # instaptoets alleen aan leden tonen
+        # gebruiker moet ingelogd zijn, geen gast zijn en rol Sporter gekozen hebben
+        if rol_get_huidige(self.request) == Rol.ROL_SPORTER:
+            account = get_account(self.request)
+            if not account.is_gast:
+                self.sporter = get_sporter(account)
+
+        if not self.sporter:
+            raise Http404('Inlog nodig')
 
         try:
             data = json.loads(request.body)
