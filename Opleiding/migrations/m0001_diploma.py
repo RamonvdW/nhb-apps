@@ -58,8 +58,7 @@ class Migration(migrations.Migration):
                 ('toon_op_pas', models.BooleanField(default=False)),
                 ('datum_begin', models.DateField(default='1990-01-01')),
                 ('datum_einde', models.DateField(default='9999-12-31')),
-                ('sporter', models.ForeignKey(on_delete=models.deletion.CASCADE,
-                                              to='Sporter.sporter', related_name='diploma')),
+                ('sporter', models.ForeignKey(on_delete=models.deletion.CASCADE, to='Sporter.sporter')),
             ],
             options={
                 'verbose_name': 'Opleiding diploma',
