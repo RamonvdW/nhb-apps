@@ -80,6 +80,7 @@ class WisselVanRolView(UserPassesTestMixin, TemplateView):
             zo niet, stuur dan naar een andere view
         """
         if not request.user.is_authenticated:
+            # stuur naar het plein waar de knop Inloggen te vinden is (in plaats van direct naar de inlog pagina)
             url = reverse('Plein:plein')
             return HttpResponseRedirect(url)
 
