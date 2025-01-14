@@ -91,8 +91,8 @@ class BestelActiviteitView(UserPassesTestMixin, TemplateView):
                                         Q(account__username=nr) |
                                         Q(ontvanger__vereniging__ver_nr=nr) |
                                         Q(producten__wedstrijd_inschrijving__sporterboog__sporter__lid_nr=nr))
-                                .order_by('-aangemaakt'))             # nieuwste eerst (werkt beter op test server)
                                 # .order_by('-bestel_nr'))            # nieuwste eerst
+                                .order_by('-aangemaakt'))             # nieuwste eerst (werkt beter op test server)
             except ValueError:
                 if zoekterm == "**":
                     bestellingen = (Bestelling
