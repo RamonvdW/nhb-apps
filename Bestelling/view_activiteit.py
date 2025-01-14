@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2024 Ramon van der Winkel.
+#  Copyright (c) 2022-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -91,7 +91,8 @@ class BestelActiviteitView(UserPassesTestMixin, TemplateView):
                                         Q(account__username=nr) |
                                         Q(ontvanger__vereniging__ver_nr=nr) |
                                         Q(producten__wedstrijd_inschrijving__sporterboog__sporter__lid_nr=nr))
-                                .order_by('-bestel_nr'))            # nieuwste eerst
+                                .order_by('-aangemaakt'))             # nieuwste eerst (werkt beter op test server)
+                                # .order_by('-bestel_nr'))            # nieuwste eerst
             except ValueError:
                 if zoekterm == "**":
                     bestellingen = (Bestelling
