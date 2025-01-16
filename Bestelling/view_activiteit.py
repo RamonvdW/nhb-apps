@@ -129,7 +129,8 @@ class BestelActiviteitView(UserPassesTestMixin, TemplateView):
                                             'ontvanger__vereniging')
                             .order_by('-bestel_nr'))     # nieuwste eerst
 
-        bestellingen = bestellingen.distinct('bestel_nr')       # verwijder dupes
+        # TODO: uitgezet ivm niet alle qset heeft order_by('bestel_nr'). Waarom zouden er dubbelen zijn?
+        # bestellingen = bestellingen.distinct('bestel_nr')       # verwijder dupes
 
         if form.is_bound:
             if not form.cleaned_data['webwinkel']:
