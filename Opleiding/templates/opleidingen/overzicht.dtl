@@ -24,6 +24,10 @@
         <div class="row-sv-blauw">
             <div class="col s12">
 
+                {% if url_vervolg_instaptoets %}
+                    {% include 'plein/card_icon.dtl' with title="Instaptoets" text="Ga verder met de online instaptoets." icon="login" url=url_vervolg_instaptoets %}
+                {% endif %}
+
                 {% if url_basiscursus %}
                     {% include 'plein/card_icon.dtl' with title="Basiscursus" text="Informatie over de basiscursus." icon="school" url=url_basiscursus %}
                 {% endif %}

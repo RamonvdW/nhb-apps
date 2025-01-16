@@ -61,6 +61,7 @@ class BeginToetsView(UserPassesTestMixin, TemplateView):
 
         context['toets'] = toets = vind_toets(self.sporter)
         context['aantal_vragen'] = settings.INSTAPTOETS_AANTAL_VRAGEN
+        context['aantal_minuten'] = settings.INSTAPTOETS_AANTAL_MINUTEN
         context['eis_percentage'] = settings.INSTAPTOETS_AANTAL_GOED_EIS
         context['laat_starten'] = False
 
@@ -85,9 +86,15 @@ class BeginToetsView(UserPassesTestMixin, TemplateView):
 
     def post(self, request, *args, **kwargs):
         """ Sporter heeft op de knop gedrukt om de toets op te starten """
-        toets, _ = Instaptoets.objects.get_or_create(sporter=self.sporter)
 
-        selecteer_toets_vragen(toets)
+        toets = vind_toets(self.sporter)
+        if not toets:
+            # toets nog nooit opgestart, of voorgaande toetsen allemaal afgerond
+            # begin een nieuwe toets
+            toets = Instaptoets(sporter=self.sporter)
+            toets.save()
+
+            selecteer_toets_vragen(toets)
 
         # kies de volgende vraag die we gaan tonen
         selecteer_huidige_vraag(toets)
@@ -300,7 +307,9 @@ class OntvangAntwoordView(UserPassesTestMixin, View):
             else:
                 selecteer_huidige_vraag(self.toets)
         else:
-            raise Http404('Foutieve parameter')
+            # helemaal geen keuze of een foute keuze opgegeven
+            # selecteer gewoon een andere vraag en ga door
+            selecteer_huidige_vraag(self.toets, forceer=True)
 
         return HttpResponseRedirect(url)
 

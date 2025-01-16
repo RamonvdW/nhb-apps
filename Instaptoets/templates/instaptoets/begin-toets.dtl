@@ -22,26 +22,28 @@
     <div class="row-sv-blauw">
         <div class="col s12 m8 offset-m2 l6 offset-l3">
             <div class="sv-kader" style="padding:10px">
-                <p>De instaptoets is een online test van {{ aantal_vragen }} meerkeuze vragen.<br>De eis is {{ eis_percentage }}% goed beantwoord.</p>
+                <p>De instaptoets is een online test van {{ aantal_vragen }} meerkeuze vragen en duurt ongeveer {{ aantal_minuten }} minuten om te maken. De eis is {{ eis_percentage }}% goed beantwoord.</p>
 
                 {% if laat_starten %}
                     <!-- knop om toets op te starten met een POST -->
                     <form action="{{ url_starten }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
                         {% csrf_token %}
-                        <p class="center" style="margin-top:15px">
+                        <p class="center" style="margin:30px">
                             <button class="btn-sv-rood" id="submit_knop" type="submit">Start de toets</button>
                         </p>
                     </form>
+                    <p>Er is geen tijdslimiet: je kan de toets op elk moment onderbreken en later weer oppakken.</p>
                 {% else %}
                     {% if url_vervolg %}
                         <!-- toets: nog niet af -->
                         <p>Je hebt {{ toets.aantal_antwoorden }} van de {{ toets.aantal_vragen }} vragen ingevuld.</p>
-                        <a class="btn-sv-rood" style="margin:20px" href="{{ url_vervolg }}">Volgende vraag</a>
+                        <a class="btn-sv-rood" style="margin:30px" href="{{ url_vervolg }}">Volgende vraag</a>
+                        <p>Er is geen tijdslimiet: je kan de toets op elk moment onderbreken en later weer oppakken.</p>
                     {% else %}
                         <!-- toets is nog geldig -->
                         <p>Je bent al geslaagd voor de toets.</p>
                         <p>
-                            <a class="btn-sv-rood" href="{% url 'Opleiding:overzicht' %}">Naar de opleidingen</a>
+                            <a class="btn-sv-rood" style="margin:30px" href="{% url 'Opleiding:overzicht' %}">Naar de opleidingen</a>
                         </p>
                     {% endif %}
                 {% endif %}

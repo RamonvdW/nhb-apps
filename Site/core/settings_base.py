@@ -593,6 +593,7 @@ WEDSTRIJDEN_KIES_UITVOERENDE_VERENIGING = (1368,)
 # aantal vragen van de instaptoets
 INSTAPTOETS_AANTAL_VRAGEN = 20
 INSTAPTOETS_AANTAL_GOED_EIS = 70        # procent
+INSTAPTOETS_AANTAL_MINUTEN = 30
 
 # defaults for 'dev' and 'test' options
 

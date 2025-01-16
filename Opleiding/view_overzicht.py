@@ -9,6 +9,7 @@ from django.http import Http404
 from django.views.generic import TemplateView
 from Account.models import get_account
 from Betaal.format import format_bedrag_euro
+from Instaptoets.operations import vind_toets
 from Opleiding.definities import OPLEIDING_STATUS_GEANNULEERD, OPLEIDING_STATUS_VOORBEREID
 from Opleiding.models import Opleiding, OpleidingDiploma
 from Sporter.models import get_sporter
@@ -50,6 +51,12 @@ class OpleidingenOverzichtView(TemplateView):
 
             # pak de diploma's erbij
             sporter = get_sporter(account)
+
+            # kijk of sporter bezig is met een instaptoets
+            # zodat we meteen een kaartje aan kunnen bieden om hiermee verder te gaan
+            toets = vind_toets(sporter)
+            if toets:
+                context['url_vervolg_instaptoets'] = reverse('Instaptoets:volgende-vraag')
 
             #now = timezone.now()
             diplomas = (OpleidingDiploma

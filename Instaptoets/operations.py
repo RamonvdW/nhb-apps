@@ -115,9 +115,10 @@ def toets_geldig(toets: Instaptoets):
 def vind_toets(sporter: Sporter):
     toets = (Instaptoets
              .objects
-             .filter(sporter=sporter)
+             .filter(sporter=sporter,
+                     is_afgerond=False)
              .select_related('huidige_vraag')
-             .order_by('opgestart')  # nieuwste eerst
+             .order_by('opgestart')                 # nieuwste eerst
              .first())
 
     return toets

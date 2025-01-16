@@ -35,20 +35,20 @@
                         <ul>
                             <li style="margin-bottom:20px">
                                 <label class="black-text" for="id_a">
-                                    <input class="with-gap" type="radio" name="keuze" value="A" required id="id_a">
+                                    <input class="with-gap" type="radio" name="keuze" value="A" id="id_a">
                                     <span>{{ vraag.antwoord_a }}</span>
                                 </label>
                             </li>
                             <li style="margin-bottom:20px">
                                 <label class="black-text" for="id_b">
-                                    <input class="with-gap" type="radio" name="keuze" value="B" required id="id_b">
+                                    <input class="with-gap" type="radio" name="keuze" value="B" id="id_b">
                                     <span>{{ vraag.antwoord_b }}</span>
                                 </label>
                             </li>
                             {% if vraag.toon_c %}
                                 <li style="margin-bottom:20px">
                                     <label class="black-text" for="id_c">
-                                        <input class="with-gap" type="radio" name="keuze" value="C" required id="id_c">
+                                        <input class="with-gap" type="radio" name="keuze" value="C" id="id_c">
                                         <span>{{ vraag.antwoord_c }}</span>
                                     </label>
                                 </li>
@@ -56,7 +56,7 @@
                             {% if vraag.toon_d %}
                                 <li style="margin-bottom:20px">
                                     <label class="black-text" for="id_d">
-                                        <input class="with-gap" type="radio" name="keuze" value="D" required id="id_d">
+                                        <input class="with-gap" type="radio" name="keuze" value="D" id="id_d">
                                         <span>{{ vraag.antwoord_d }}</span>
                                     </label>
                                 </li>
