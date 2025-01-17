@@ -32,6 +32,7 @@
 
 from Site.core.settings_base import *         # noqa
 
+# setting DEBUG=True is useless because Django will force it to False anyway
 DEBUG = True
 
 # ask the template engine to insert a special pattern in the output in case of template problems

@@ -12,7 +12,7 @@ certifi==2024.12.14
     # via requests
 charset-normalizer==3.4.1
     # via requests
-django==4.2.17
+django==4.2.18
     # via
     #   -c constraints.in
     #   -r requirements.in
@@ -20,7 +20,7 @@ et-xmlfile==2.0.0
     # via openpyxl
 google-api-core==2.24.0
     # via google-api-python-client
-google-api-python-client==2.157.0
+google-api-python-client==2.159.0
     # via -r requirements.in
 google-auth==2.37.0
     # via
@@ -52,12 +52,12 @@ pillow==11.1.0
     # via -r requirements.in
 proto-plus==1.25.0
     # via google-api-core
-protobuf==5.29.2
+protobuf==5.29.3
     # via
     #   google-api-core
     #   googleapis-common-protos
     #   proto-plus
-psycopg==3.2.3
+psycopg==3.2.4
     # via -r requirements.in
 pyasn1==0.6.1
     # via
