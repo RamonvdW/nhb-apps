@@ -81,6 +81,10 @@ class Command(BaseCommand):
         cat, _ = Categorie.objects.get_or_create(beschrijving=categorie)
 
         for regel in regels:
+            if len(regel) != 8:
+                self.stdout.write('[WARNING] Incomplete vraag wordt overgeslagen: %s' % repr(regel))
+                continue
+                
             v, a, b, c, d, j, t, q = regel[:8]
             if d == '-':
                 d = ''

@@ -58,11 +58,11 @@ class OpleidingenOverzichtView(TemplateView):
             if toets:
                 context['url_vervolg_instaptoets'] = reverse('Instaptoets:volgende-vraag')
 
-            #now = timezone.now()
+            # now = timezone.now()
             diplomas = (OpleidingDiploma
                         .objects
                         .filter(sporter=sporter)
-                        #.exclude(datum_einde__lt=now)
+                        # .exclude(datum_einde__lt=now)
                         .order_by('-datum_begin'))      # nieuwste bovenaan
 
             context['diplomas'] = diplomas
