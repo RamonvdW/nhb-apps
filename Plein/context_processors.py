@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -63,6 +63,7 @@ def site_layout(request):
                 context['menu_url_taken'] = reverse('Taken:overzicht')
         else:
             context['menu_url_profiel'] = reverse('Sporter:profiel')
+            context['menu_url_bondspas'] = reverse('Bondspas:toon-bondspas')
 
     else:
         context['menu_url_inloggen'] = reverse('Account:login')
