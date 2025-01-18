@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -190,9 +190,7 @@ class TestFeedback(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, self.url_feedback_bedankt)
 
         obj = Feedback.objects.first()
-        self.assertFalse(obj.is_afgehandeld)
-        obj.is_afgehandeld = True
-        obj.save()
+        self.assertTrue(obj.is_afgehandeld)     # want: kleine feedback
         descr = str(obj)
         self.assertTrue("(afgehandeld) " in descr)
 
@@ -231,19 +229,19 @@ class TestFeedback(E2EHelpers, TestCase):
         self.client.get(self.url_feedback_nul_plein)
         resp = self.client.post(self.url_feedback_formulier,
                                 {'bevinding': '4',
-                                 'feedback': 'Just testing 4'})
+                                 'feedback': 'Just testing 4 long enough'})
         self.assert_is_redirect(resp, self.url_feedback_bedankt)
 
         self.client.get(self.url_feedback_nul_plein)
         resp = self.client.post(self.url_feedback_formulier,
                                 {'bevinding': '6',
-                                 'feedback': 'Just testing 6'})
+                                 'feedback': 'Just testing 6 long enough'})
         self.assert_is_redirect(resp, self.url_feedback_bedankt)
 
         self.client.get(self.url_feedback_nul_plein)
         resp = self.client.post(self.url_feedback_formulier,
                                 {'bevinding': '8',
-                                 'feedback': 'Just testing 8'})
+                                 'feedback': 'Just testing 8 long enough'})
         self.assert_is_redirect(resp, self.url_feedback_bedankt)
 
         with self.assert_max_queries(20):
@@ -269,7 +267,7 @@ class TestFeedback(E2EHelpers, TestCase):
         self.client.get(self.url_feedback_nul_plein)
         resp = self.client.post(self.url_feedback_formulier,
                                 {'bevinding': '4',
-                                 'feedback': 'Just testing'})
+                                 'feedback': 'Just testing long enough'})
         self.assert_is_redirect(resp, self.url_feedback_bedankt)
 
         self.assertEqual(Taak.objects.count(), 1)

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -58,6 +58,8 @@ class KrijgFeedbackView(UserPassesTestMixin, View):
         gebruiker_str = account.get_account_full_name()
 
         # bewaar twee parameters in de sessie - deze blijven server-side
+        # dit voorkomt ook lelijke URLs
+        # TODO: sessie variabelen zetten tijdens een GET?!
         zet_sessionvar_if_changed(request, SESSIONVAR_FEEDBACK_OP_PAGINA, kwargs['op_pagina'])
         zet_sessionvar_if_changed(request, SESSIONVAR_FEEDBACK_VOLLEDIGE_URL, '/%s/' % kwargs['volledige_url'])
         zet_sessionvar_if_changed(request, SESSIONVAR_FEEDBACK_GEBRUIKER, gebruiker_str)
