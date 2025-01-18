@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2024 Ramon van der Winkel.
+#  Copyright (c) 2020-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -152,7 +152,7 @@ class Command(BaseCommand):
         """
         # TODO: implementeren
 
-    def _verwerk_mutatie_initieel_klasse_indiv(self, deelkamp, indiv_klasse):
+    def _verwerk_mutatie_initieel_klasse_indiv(self, deelkamp, indiv_klasse, zet_boven_cut_op_ja=False):
         # Bepaal de top-X deelnemers voor een klasse van een kampioenschap
         # De kampioenen aangevuld met de sporters met hoogste gemiddelde
         # gesorteerde op gemiddelde
@@ -211,11 +211,14 @@ class Command(BaseCommand):
             else:
                 rank += 1
                 obj.rank = rank
-            obj.save(update_fields=['rank', 'volgorde'])
+                if zet_boven_cut_op_ja:
+                    obj.deelname = DEELNAME_JA
+
+            obj.save(update_fields=['rank', 'volgorde', 'deelname'])
             pks.append(obj.pk)
         # for
 
-        # geef nu alle andere sporters een nieuw volgnummer
+        # geef nu alle andere sporters (onder de cut) een nieuw volgnummer
         # dit voorkomt dubbele volgnummers als de cut omlaag gezet is
         for obj in objs:
             if obj.pk not in pks:
@@ -230,7 +233,7 @@ class Command(BaseCommand):
                 obj.save(update_fields=['rank', 'volgorde'])
         # for
 
-    def _verwerk_mutatie_initieel_deelkamp(self, deelkamp):
+    def _verwerk_mutatie_initieel_deelkamp(self, deelkamp, zet_boven_cut_op_ja=False):
         # bepaal alle wedstrijdklassen aan de hand van de ingeschreven sporters
         for deelnemer in (KampioenschapSporterBoog
                           .objects
@@ -238,7 +241,7 @@ class Command(BaseCommand):
                           .distinct('indiv_klasse')):
 
             # sorteer de lijst op gemiddelde en bepaalde volgorde
-            self._verwerk_mutatie_initieel_klasse_indiv(deelkamp, deelnemer.indiv_klasse)
+            self._verwerk_mutatie_initieel_klasse_indiv(deelkamp, deelnemer.indiv_klasse, zet_boven_cut_op_ja)
         # for
 
     def _verwerk_mutatie_initieel(self, competitie, deel):
@@ -1237,9 +1240,8 @@ class Command(BaseCommand):
         deelkamp_bk.save(update_fields=['heeft_deelnemerslijst'])
 
         # bepaal nu voor elke klasse de volgorde van de deelnemers
-        self._verwerk_mutatie_initieel_deelkamp(deelkamp_bk)
-
-        # TODO: zet iedereen boven de cut op deelname = JA
+        # en zit iedereen boven de cut op deelname=jas
+        self._verwerk_mutatie_initieel_deelkamp(deelkamp_bk, zet_boven_cut_op_ja=True)
 
         # TODO: verstuur uitnodigingen per e-mail
 
