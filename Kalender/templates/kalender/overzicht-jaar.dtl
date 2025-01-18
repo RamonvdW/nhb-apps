@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2021-2024 Ramon van der Winkel.
+                Copyright (c) 2021-2025 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -16,46 +16,6 @@
 {% endblock %}
 
 {% block pagina %}
-
-    <script>
-        function stuur_keuzes(url_part1, url_part2) {
-            // construeer een url en navigeer daar naartoe
-
-            // vervang de ~1 in de url met het soort filter
-            const el_soort = document.querySelector("input[name='filter_soort']:checked");
-            url_part2 = url_part2.replace('~1', el_soort.dataset.url);
-
-            // vervang de ~2 in de url met het bogen filter
-            const el_bogen = document.querySelector("input[name='filter_bogen']:checked");
-            url_part2 = url_part2.replace('~2', el_bogen.dataset.url);
-
-            const el_discipline = document.querySelector("input[name='filter_discipline']:checked");
-            url_part2 = url_part2.replace('~3', el_discipline.dataset.url);
-
-            let url = url_part1 + url_part2;
-
-            // voeg de zoekterm toe als query parameter
-            const el_zoek = document.getElementById('id_zoekterm');
-            const zoekterm = el_zoek.value;
-            if (zoekterm !== "") {
-                url += '?zoek=' + zoekterm
-            }
-
-            // navigate to the final url
-            window.location.href = url;
-        }
-
-        // enter toets in de zoekterm invoer moet keuzes insturen
-        document.addEventListener("DOMContentLoaded", function() {
-            document.getElementById('id_zoekterm').addEventListener("keyup", event => {
-                // console.log(event);
-                if (event.key === 'Enter') {
-                    stuur_keuzes('{{ url_keuzes.0 }}', '{{ url_keuzes.1 }}');
-                }
-            })
-        });
-    </script>
-
 
     <!-- banner -->
     <div class="row center">
@@ -87,12 +47,16 @@
                     {% if unfiltered_url %}
                         <span>&nbsp;&nbsp;</span><a class="btn-sv-rood" href="{{ unfiltered_url }}"><i class="notranslate material-icons-round left">backspace</i>Toon alles</a>
                     {% endif %}
+
+                    <a class="btn-sv-blauw" id="id_filter_knop" style="float:right">
+                        <i class="material-icons-round">filter_alt</i>
+                    </a>
                 </p>
             </div>
         </div>
 
         <!-- filter: bogen -->
-        <div class="col s12 m4" style="margin-bottom:15px">
+        <div class="col s12 m4 collapsible_filter" style="margin-bottom:15px; display:none">
             <div class="sv-kader left-align" style="padding:10px">
                 <p><b>Bogen:</b></p>
                 <ul>
@@ -112,7 +76,7 @@
         </div>
 
         <!-- filter: soort wedstrijd -->
-        <div class="col s12 m4" style="margin-bottom:15px">
+        <div class="col s12 m4 collapsible_filter" style="margin-bottom:15px; display:none">
             <div class="sv-kader left-align" style="padding:10px">
                 <p><b>Soort wedstrijd:</b></p>
                 <ul>
@@ -132,7 +96,7 @@
         </div>
 
         <!-- filter: discipline -->
-        <div class="col s12 m4">
+        <div class="col s12 m4 collapsible_filter" style="display:none">
             <div class="sv-kader left-align" style="padding:10px">
                 <p><b>Discipline:</b></p>
                 <ul>
@@ -229,6 +193,54 @@
         </div>
     </div>
 
+    <script>
+        function stuur_keuzes(url_part1, url_part2) {
+            // construeer een url en navigeer daar naartoe
+
+            // vervang de ~1 in de url met het soort filter
+            const el_soort = document.querySelector("input[name='filter_soort']:checked");
+            url_part2 = url_part2.replace('~1', el_soort.dataset.url);
+
+            // vervang de ~2 in de url met het bogen filter
+            const el_bogen = document.querySelector("input[name='filter_bogen']:checked");
+            url_part2 = url_part2.replace('~2', el_bogen.dataset.url);
+
+            const el_discipline = document.querySelector("input[name='filter_discipline']:checked");
+            url_part2 = url_part2.replace('~3', el_discipline.dataset.url);
+
+            let url = url_part1 + url_part2;
+
+            // voeg de zoekterm toe als query parameter
+            const el_zoek = document.getElementById('id_zoekterm');
+            const zoekterm = el_zoek.value;
+            if (zoekterm !== "") {
+                url += '?zoek=' + zoekterm
+            }
+
+            // navigate to the final url
+            window.location.href = url;
+        }
+
+        // enter toets in de zoekterm invoer moet keuzes insturen
+        document.getElementById('id_zoekterm').addEventListener("keyup", event => {
+            // console.log(event);
+            if (event.key === 'Enter') {
+                stuur_keuzes('{{ url_keuzes.0 }}', '{{ url_keuzes.1 }}');
+            }
+        });
+
+        // filter uitklappen knop
+        document.getElementById('id_filter_knop').addEventListener("click", function(event) {
+            const els = document.getElementsByClassName('collapsible_filter');
+            Array.prototype.forEach.call(els, function(el) {
+                if (el.style.display === "none") {
+                    el.style.display = "block";
+                } else {
+                    el.style.display = "none";
+                }
+            });
+        });
+    </script>
 
     <!-- naar maandoverzicht -->
     <div class="row center">
