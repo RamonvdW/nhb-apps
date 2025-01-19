@@ -23,6 +23,7 @@ class TestInstaptoetsCli(E2EHelpers, TestCase):
     file_toets_3v_wijzig = 'Instaptoets/test-files/toets_3v_wijzig.json'    # kleine wijziging vraag tekst
     file_toets_3w_wijzig = 'Instaptoets/test-files/toets_3w_wijzig.json'    # grote wijziging vraag tekst
     file_toets_4_dubbel = 'Instaptoets/test-files/toets_4_dubbel.json'      # dubbele vraag
+    file_toets_5_deel = 'Instaptoets/test-files/toets_5_deel.json'          # deel van antwoorden ontbreekt
 
     def setUp(self):
         """ initialisatie van de test case """
@@ -98,11 +99,15 @@ class TestInstaptoetsCli(E2EHelpers, TestCase):
         self.assertTrue("[INFO] Aantal vragen is nu 3" in f2.getvalue())
 
         f1, f2 = self.run_management_command('import_instaptoets', self.file_toets_4_dubbel)
-        # print("f1: %s" % f1.getvalue())
-        # print("f2: %s" % f2.getvalue())
         self.assertTrue(f1.getvalue() == '')
         self.assertTrue("[INFO] Verouderde vragen: pks=" in f2.getvalue())
         self.assertTrue("[INFO] Aantal vragen is nu 3" in f2.getvalue())
+
+        f1, f2 = self.run_management_command('import_instaptoets', self.file_toets_5_deel)
+        # print("f1: %s" % f1.getvalue())
+        # print("f2: %s" % f2.getvalue())
+        self.assertTrue(f1.getvalue() == '')
+        self.assertTrue('[WARNING] Incomplete vraag wordt overgeslagen' in f2.getvalue())
 
 
 # end of file

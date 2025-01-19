@@ -4,7 +4,7 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.utils import timezone
 from Geo.models import Regio
 from Instaptoets.models import Categorie, Instaptoets, Vraag
@@ -207,7 +207,7 @@ class TestInstaptoetsViews(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('instaptoets/begin-toets.dtl', 'plein/site_layout.dtl'))
 
-        # get terwijl er al een afgeronde toets is, maar de sporter niet geslaagd is
+        # GET terwijl er al een afgeronde toets is, maar de sporter niet geslaagd is
         toets_zet_afgerond_niet_geslaagd(toets)
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_begin)
@@ -215,7 +215,7 @@ class TestInstaptoetsViews(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('instaptoets/begin-toets.dtl', 'plein/site_layout.dtl'))
 
-        # get terwijl er al een afgeronde maar nog wel geldige toets is
+        # GET terwijl er al een afgeronde maar nog wel geldige toets is
         toets_zet_geslaagd_nog_geldig(toets)
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_begin)
@@ -223,7 +223,7 @@ class TestInstaptoetsViews(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('instaptoets/begin-toets.dtl', 'plein/site_layout.dtl'))
 
-        # get terwijl er al een afgeronde maar niet meer geldige toets is
+        # GET terwijl er al een afgeronde maar niet meer geldige toets is
         toets_zet_geslaagd_niet_meer_geldig(toets)
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_begin)
@@ -234,7 +234,7 @@ class TestInstaptoetsViews(E2EHelpers, TestCase):
     def test_uitslag(self):
         self.e2e_login(self.account_100000)
 
-        # get terwijl er geen toets gestart is
+        # GET terwijl er geen toets gestart is
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_uitslag)
         self.assert_is_redirect(resp, self.url_begin)
@@ -246,12 +246,12 @@ class TestInstaptoetsViews(E2EHelpers, TestCase):
         self.assertEqual(Instaptoets.objects.count(), 1)
         toets = Instaptoets.objects.first()
 
-        # get terwijl de toets nog niet afgerond is
+        # GET terwijl de toets nog niet afgerond is
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_uitslag)
         self.assert_is_redirect(resp, self.url_begin)
 
-        # get van een afgeronde toets
+        # GET van een afgeronde toets
         toets_zet_afgerond_niet_geslaagd(toets)
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_uitslag)
@@ -325,13 +325,14 @@ class TestInstaptoetsViews(E2EHelpers, TestCase):
             resp = self.client.get(self.url_ontvang_antwoord)
         self.assertEqual(resp.status_code, 405)
 
-        # post het antwoord, zonder keuze
+        # vraag overslaan (post zonder keuze)
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_ontvang_antwoord)
-        self.assert404(resp, 'Foutieve parameter')
+        self.assert_is_redirect(resp, self.url_volgende_vraag)
 
+        # niet ondersteund antwoord is ook "volgende vraag"
         resp = self.client.post(self.url_ontvang_antwoord, {'keuze': 'E'})
-        self.assert404(resp, 'Foutieve parameter')
+        self.assert_is_redirect(resp, self.url_volgende_vraag)
 
         # post het antwoord: verzoek tot overslaan
         self.assertEqual(toets.aantal_antwoorden, 0)
@@ -373,6 +374,7 @@ class TestInstaptoetsViews(E2EHelpers, TestCase):
         resp = self.client.post(self.url_begin)
         self.assert_is_redirect(resp, self.url_volgende_vraag)
 
+        # antwoord A is bijna altijd de juiste
         for lp in range(20):
             resp = self.client.post(self.url_ontvang_antwoord, {'keuze': 'A'})
         # for
@@ -383,6 +385,7 @@ class TestInstaptoetsViews(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('instaptoets/toon-uitslag.dtl', 'plein/site_layout.dtl'))
+        self.assertContains(resp, 'Gefeliciteerd')
 
     def test_operations(self):
         # corner cases
@@ -411,6 +414,74 @@ class TestInstaptoetsViews(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_begin)
         self.assert_is_redirect(resp, self.url_opleiding_overzicht)
+
+    def test_opnieuw_na_gezakt(self):
+        self.e2e_login(self.account_100000)
+
+        # start de toets op
+        self.assertEqual(Instaptoets.objects.count(), 0)
+        resp = self.client.post(self.url_begin)
+        self.assert_is_redirect(resp, self.url_volgende_vraag)
+        self.assertEqual(Instaptoets.objects.count(), 1)
+        toets = Instaptoets.objects.first()
+
+        toets_zet_afgerond_niet_geslaagd(toets)
+
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_begin)
+        self.assert_is_redirect(resp, self.url_volgende_vraag)
+        self.assertEqual(Instaptoets.objects.count(), 2)
+
+    def test_opnieuw_forced_restart(self):
+        # op de test server kan de toets opnieuw gestart worden als deze al gehaald is
+        self.e2e_login(self.account_100000)
+
+        # start de toets op
+        self.assertEqual(Instaptoets.objects.count(), 0)
+        resp = self.client.post(self.url_begin)
+        self.assert_is_redirect(resp, self.url_volgende_vraag)
+        self.assertEqual(Instaptoets.objects.count(), 1)
+        toets = Instaptoets.objects.first()
+
+        # expliciet restart verzoek werkt niet, want niet op test server
+        toets_zet_geslaagd_nog_geldig(toets)
+        with override_settings(IS_TEST_SERVER=False):
+            resp = self.client.post(self.url_begin, {'restart': 'J'})
+        self.assert_is_redirect(resp, self.url_volgende_vraag)
+        self.assertEqual(Instaptoets.objects.count(), 1)
+
+        # expliciet restart verzoek op de test server
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_begin, {'restart': 'J'})
+        self.assert_is_redirect(resp, self.url_volgende_vraag)
+        self.assertEqual(Instaptoets.objects.count(), 2)
+
+        Instaptoets.objects.exclude(pk=toets.pk).delete()
+        self.assertEqual(Instaptoets.objects.count(), 1)
+        toets_zet_afgerond_niet_geslaagd(toets)
+
+    def test_opnieuw_verlopen(self):
+        # op de test server kan de toets opnieuw gestart worden als deze al gehaald is
+        self.e2e_login(self.account_100000)
+
+        # start de toets op
+        self.assertEqual(Instaptoets.objects.count(), 0)
+        resp = self.client.post(self.url_begin)
+        self.assert_is_redirect(resp, self.url_volgende_vraag)
+        self.assertEqual(Instaptoets.objects.count(), 1)
+        toets = Instaptoets.objects.first()
+
+        toets_zet_geslaagd_nog_geldig(toets)
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_begin)
+        self.assert_is_redirect(resp, self.url_volgende_vraag)
+        self.assertEqual(Instaptoets.objects.count(), 1)
+
+        toets_zet_geslaagd_niet_meer_geldig(toets)
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_begin)
+        self.assert_is_redirect(resp, self.url_volgende_vraag)
+        self.assertEqual(Instaptoets.objects.count(), 2)
 
 
 # end of file

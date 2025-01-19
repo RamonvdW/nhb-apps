@@ -9,6 +9,8 @@ from django.http import Http404
 from django.views.generic import TemplateView
 from Account.models import get_account
 from Betaal.format import format_bedrag_euro
+from Functie.definities import Rol
+from Functie.rol import rol_get_huidige
 from Instaptoets.operations import vind_toets
 from Opleiding.definities import OPLEIDING_STATUS_GEANNULEERD, OPLEIDING_STATUS_VOORBEREID
 from Opleiding.models import Opleiding, OpleidingDiploma
@@ -49,26 +51,28 @@ class OpleidingenOverzichtView(TemplateView):
         account = get_account(self.request)
         if account.is_authenticated and not account.is_gast:
 
-            # pak de diploma's erbij
-            sporter = get_sporter(account)
+            rol_nu = rol_get_huidige(self.request)
+            if rol_nu == Rol.ROL_SPORTER:
+                # pak de diploma's erbij
+                sporter = get_sporter(account)
 
-            # kijk of sporter bezig is met een instaptoets
-            # zodat we meteen een kaartje aan kunnen bieden om hiermee verder te gaan
-            toets = vind_toets(sporter)
-            if toets and not toets.is_afgerond:
-                context['url_vervolg_instaptoets'] = reverse('Instaptoets:volgende-vraag')
+                # kijk of sporter bezig is met een instaptoets
+                # zodat we meteen een kaartje aan kunnen bieden om hiermee verder te gaan
+                toets = vind_toets(sporter)
+                if toets and not toets.is_afgerond:
+                    context['url_vervolg_instaptoets'] = reverse('Instaptoets:volgende-vraag')
 
-            # now = timezone.now()
-            diplomas = (OpleidingDiploma
-                        .objects
-                        .filter(sporter=sporter)
-                        # .exclude(datum_einde__lt=now)
-                        .order_by('-datum_begin'))      # nieuwste bovenaan
+                # now = timezone.now()
+                diplomas = (OpleidingDiploma
+                            .objects
+                            .filter(sporter=sporter)
+                            # .exclude(datum_einde__lt=now)
+                            .order_by('-datum_begin'))      # nieuwste bovenaan
 
-            context['diplomas'] = diplomas
+                context['diplomas'] = diplomas
 
-            if enable_basiscursus:
-                context['url_basiscursus'] = reverse('Opleiding:basiscursus')
+                if enable_basiscursus:
+                    context['url_basiscursus'] = reverse('Opleiding:basiscursus')
 
         context['kruimels'] = (
             (None, 'Opleidingen'),

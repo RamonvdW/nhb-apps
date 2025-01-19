@@ -90,7 +90,22 @@ class BeginToetsView(UserPassesTestMixin, TemplateView):
         opnieuw = str(request.POST.get('restart', 'N'))[:1]      # afkappen voor de veiligheid
 
         toets = vind_toets(self.sporter)
-        if not toets or opnieuw == 'J':
+        if toets:
+            if toets.is_afgerond:
+                if not toets.geslaagd:
+                    # gezakt --> laat nieuwe toets starten
+                    toets = None
+                elif opnieuw == 'J' and settings.IS_TEST_SERVER:
+                    # alleen op de test server: op verzoek de toets opnieuw maken
+                    toets = None
+                else:
+                    # controleer de geldigheid
+                    geldig, toets.geldig_dagen = toets_geldig(toets)
+                    if not geldig:
+                        # niet meer geldig --> laat nieuwe toets starten
+                        toets = None
+
+        if not toets:
             # toets nog nooit opgestart, of voorgaande toetsen allemaal afgerond
             # begin een nieuwe toets
             toets = Instaptoets(sporter=self.sporter)

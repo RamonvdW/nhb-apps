@@ -4,7 +4,7 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.utils import timezone
 from Instaptoets.models import Vraag, Instaptoets
 from Sporter.models import Sporter
@@ -78,11 +78,23 @@ class TestOpleidingenBasiscursus(E2EHelpers, TestCase):
                     geslaagd=True)
         toets.save()
 
+        # inschrijven is mogelijk
+        # toets opnieuw doen is ook mogelijk (alleen op de test server)
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_basiscursus)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('opleidingen/basiscursus.dtl', 'plein/site_layout.dtl'))
+        self.assertContains(resp, 'kan alleen op de test server')
+
+        # inschrijven is mogelijk
+        # toets opnieuw doen is niet mogelijk (op de live server)
+        with override_settings(IS_TEST_SERVER=False):
+            resp = self.client.get(self.url_basiscursus)
+            self.assertEqual(resp.status_code, 200)  # 200 = OK
+            self.assert_html_ok(resp)
+            self.assert_template_used(resp, ('opleidingen/basiscursus.dtl', 'plein/site_layout.dtl'))
+            self.assertNotContains(resp, 'kan alleen op de test server')
 
         # instaptoets verlopen
         toets.afgerond = timezone.now() - timedelta(days=400)
