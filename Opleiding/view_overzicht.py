@@ -55,7 +55,7 @@ class OpleidingenOverzichtView(TemplateView):
             # kijk of sporter bezig is met een instaptoets
             # zodat we meteen een kaartje aan kunnen bieden om hiermee verder te gaan
             toets = vind_toets(sporter)
-            if toets:
+            if toets and not toets.is_afgerond:
                 context['url_vervolg_instaptoets'] = reverse('Instaptoets:volgende-vraag')
 
             # now = timezone.now()

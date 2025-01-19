@@ -86,7 +86,8 @@
         <div class="row center">
             <div class="col s12">
                 <h4>Correctie persoonsgegevens</h4>
-                <p>Controleer jouw gegevens hieronder en geef eventuele correcties door</p>
+                <p>Controleer jouw gegevens hieronder en geef eventuele correcties door.</p>
+                <p>Naam, telefoonnummer en e-mailadres worden gedeeld met de docent.<br>Geboorteplaats komt op je diploma.</p>
             </div>
         </div>
 
@@ -121,7 +122,7 @@
                                 </tr>
 
                                 <tr>
-                                    <th>Geboorteplaats (voor op diploma)</th>
+                                    <th>Geboorteplaats</th>
                                     <td>
                                         <input type="text" id="input_plaats" maxlength="100" value="{{ deelnemer.aanpassing_geboorteplaats }}" oninput="enable_knop()">
                                     </td>

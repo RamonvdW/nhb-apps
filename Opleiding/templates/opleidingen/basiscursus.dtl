@@ -101,6 +101,18 @@
     {% endif %}
 
 
+    {% if url_instaptoets_opnieuw %}
+        <!-- knop om toets op te starten met een POST -->
+        <form action="{{ url_instaptoets_opnieuw }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
+            {% csrf_token %}
+            <input type="hidden" name="opnieuw" value="J">
+            <p class="center" style="margin:30px">
+                <button class="btn-sv-blauw" id="submit_knop" type="submit">Instaptoets opnieuw maken</button>
+                <br>(kan alleen op de test server)
+            </p>
+        </form>
+    {% endif %}
+    
     {% include 'feedback/sidebar.dtl' with op_pagina="opleidingen-basiscursus" %}
 
 {% endblock %}

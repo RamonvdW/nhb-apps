@@ -112,13 +112,13 @@ def toets_geldig(toets: Instaptoets):
     return False, 0
 
 
-def vind_toets(sporter: Sporter):
+def vind_toets(sporter: Sporter) -> Instaptoets | None:
+    """ retourneer de meest recente instaptoets van deze sporter """
     toets = (Instaptoets
              .objects
-             .filter(sporter=sporter,
-                     is_afgerond=False)
+             .filter(sporter=sporter)
              .select_related('huidige_vraag')
-             .order_by('opgestart')                 # nieuwste eerst
+             .order_by('-opgestart')            # meest recente toets eerst
              .first())
 
     return toets

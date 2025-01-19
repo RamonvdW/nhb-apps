@@ -84,7 +84,7 @@ class Command(BaseCommand):
             if len(regel) != 8:
                 self.stdout.write('[WARNING] Incomplete vraag wordt overgeslagen: %s' % repr(regel))
                 continue
-                
+
             v, a, b, c, d, j, t, q = regel[:8]
             if d == '-':
                 d = ''

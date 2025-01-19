@@ -61,6 +61,9 @@ class BasiscursusView(UserPassesTestMixin, TemplateView):
                     context['url_instaptoets'] = None
                     context['url_inschrijven'] = reverse('Opleiding:inschrijven-basiscursus')
 
+                    if settings.IS_TEST_SERVER:
+                        context['url_instaptoets_opnieuw'] = reverse('Instaptoets:begin')
+
         context['kruimels'] = (
             (reverse('Opleiding:overzicht'), 'Opleidingen'),
             (None, 'Basiscursus')

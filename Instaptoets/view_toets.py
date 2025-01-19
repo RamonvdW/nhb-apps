@@ -87,8 +87,10 @@ class BeginToetsView(UserPassesTestMixin, TemplateView):
     def post(self, request, *args, **kwargs):
         """ Sporter heeft op de knop gedrukt om de toets op te starten """
 
+        opnieuw = str(request.POST.get('restart', 'N'))[:1]      # afkappen voor de veiligheid
+
         toets = vind_toets(self.sporter)
-        if not toets:
+        if not toets or opnieuw == 'J':
             # toets nog nooit opgestart, of voorgaande toetsen allemaal afgerond
             # begin een nieuwe toets
             toets = Instaptoets(sporter=self.sporter)
@@ -290,6 +292,9 @@ class OntvangAntwoordView(UserPassesTestMixin, View):
 
         elif keuze in ('A', 'B', 'C', 'D'):
             if antwoord.antwoord == '?':
+                antwoord.antwoord = keuze
+                antwoord.save(update_fields=['antwoord'])
+
                 self.toets.aantal_antwoorden += 1
                 self.toets.save(update_fields=['aantal_antwoorden'])
 
@@ -297,9 +302,6 @@ class OntvangAntwoordView(UserPassesTestMixin, View):
                     self.toets.afgerond = timezone.now()
                     self.toets.is_afgerond = True
                     self.toets.save(update_fields=['afgerond', 'is_afgerond'])
-
-            antwoord.antwoord = keuze
-            antwoord.save(update_fields=['antwoord'])
 
             if self.toets.is_afgerond:
                 controleer_toets(self.toets)
