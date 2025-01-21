@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2024 Ramon van der Winkel.
+#  Copyright (c) 2021-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -18,9 +18,9 @@ from Vereniging.models import Vereniging
 import datetime
 
 
-class TestKalenderMaand(E2EHelpers, TestCase):
+class TestKalenderJaar(E2EHelpers, TestCase):
 
-    """ tests voor de Kalender applicatie """
+    """ tests voor de Kalender applicatie, module jaaroverzicht """
 
     url_landing_page = '/kalender/'
     url_kalender_jaar = '/kalender/jaar/%s-%s/%s/%s/'                       # maand, jaar, soort, bogen

@@ -30,14 +30,14 @@
     <!-- blauwe balk met dialoog venster -->
     <div class="row-sv-blauw">
 
-        <!-- zoek tekst -->
-        <div class="col s12 m12" style="margin-bottom:15px">
+        <!-- zoek tekst -->         <!-- margin is to separate filters -->
+        <div class="col s12 m12" style="margin-bottom:20px">
             <div class="sv-kader z-depth-3 left-align" style="padding:10px">
 
                 <p><b>Zoek naar:</b></p>
                 <div class="input-text">
                     <label>
-                        <input type="text" id="id_zoekterm" value="{{ zoekterm }}" placeholder="beschrijving">
+                        <input type="text" id="id_zoekterm" value="{{ zoekterm }}" placeholder="beschrijving of locatie">
                     </label>
                 </div>
 
@@ -48,9 +48,9 @@
                         <span>&nbsp;&nbsp;</span><a class="btn-sv-rood" href="{{ unfiltered_url }}"><i class="notranslate material-icons-round left">backspace</i>Toon alles</a>
                     {% endif %}
 
-                    <a class="btn-sv-blauw" id="id_filter_knop" style="float:right">
-                        <i class="material-icons-round">filter_alt</i>
-                    </a>
+                    <button class="btn-sv-blauw" id="id_filter_knop" style="float:right">
+                        <i class="material-icons-round notranslate">filter_alt</i>
+                    </button>
                 </p>
             </div>
         </div>

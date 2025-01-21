@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2024 Ramon van der Winkel.
+#  Copyright (c) 2021-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -45,7 +45,7 @@ urlpatterns = [
          view_jaar.KalenderJaarView.as_view(),
          name='jaar-simpel'),
 
-    path('api/lijst/<int:aantal_dagen_vooruit>/',
+    path('api/lijst/<aantal_dagen_vooruit>/',
          view_api.ApiView.as_view(),
          name='api-lijst'),
 ]

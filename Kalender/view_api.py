@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2024 Ramon van der Winkel.
+#  Copyright (c) 2024-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -62,9 +62,9 @@ class ApiView(View):
         for evenement in evenementen:
             url = reverse('Evenement:details', kwargs={'evenement_pk': evenement.pk})
             url = settings.SITE_URL + url
-            datums_str = maak_compacte_wanneer_str(evenement.datum_begin, evenement.datum_einde)
+            datums_str = maak_compacte_wanneer_str(evenement.datum, evenement.datum)
             lijst.append({
-                'sort': evenement.datum_begin.strftime('%Y%m%d') + 'E' + evenement.locatie.plaats + evenement.titel,
+                'sort': evenement.datum.strftime('%Y%m%d') + 'E' + evenement.locatie.plaats + evenement.titel,
                 'datum': datums_str,
                 'plaats': evenement.locatie.plaats,
                 'titel': evenement.titel,
