@@ -12,7 +12,7 @@ from Bestelling.definities import (BESTELLING_STATUS_CHOICES, BESTELLING_STATUS_
 from Betaal.format import format_bedrag_euro
 from Betaal.models import BetaalActief, BetaalTransactie, BetaalMutatie, BetaalInstellingenVereniging
 from Evenement.models import EvenementInschrijving, EvenementAfgemeld
-from Opleiding.models import OpleidingDeelnemer
+from Opleiding.models import OpleidingInschrijving
 from Webwinkel.models import WebwinkelKeuze
 from Wedstrijden.models import WedstrijdInschrijving
 from decimal import Decimal
@@ -35,7 +35,7 @@ class BestellingProduct(models.Model):
     webwinkel_keuze = models.ForeignKey(WebwinkelKeuze, on_delete=models.SET_NULL, null=True, blank=True)
 
     # inschrijving voor een opleiding
-    opleiding_deelnemer = models.ForeignKey(OpleidingDeelnemer, on_delete=models.SET_NULL, null=True, blank=True)
+    opleiding_inschrijving = models.ForeignKey(OpleidingInschrijving, on_delete=models.SET_NULL, null=True, blank=True)
 
     # prijs van deze regel (een positief bedrag)
     prijs_euro = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal(0))       # max 999,99
@@ -59,8 +59,8 @@ class BestellingProduct(models.Model):
             msg += str(self.evenement_afgemeld)
         elif self.webwinkel_keuze:
             msg += str(self.webwinkel_keuze)
-        elif self.opleiding_deelnemer:
-            msg += str(self.opleiding_deelnemer)
+        elif self.opleiding_inschrijving:
+            msg += str(self.opleiding_inschrijving)
         else:
             # FUTURE: andere producten
             msg += '?'
@@ -288,7 +288,7 @@ class BestellingMutatie(models.Model):
     evenement_inschrijving = models.ForeignKey(EvenementInschrijving, on_delete=models.SET_NULL, null=True, blank=True)
 
     # inschrijving voor een opleiding
-    opleiding_deelnemer = models.ForeignKey(OpleidingDeelnemer, on_delete=models.SET_NULL, null=True, blank=True)
+    opleiding_inschrijving = models.ForeignKey(OpleidingInschrijving, on_delete=models.SET_NULL, null=True, blank=True)
 
     # de webwinkel keuze
     webwinkel_keuze = models.ForeignKey(WebwinkelKeuze, on_delete=models.SET_NULL, null=True, blank=True)

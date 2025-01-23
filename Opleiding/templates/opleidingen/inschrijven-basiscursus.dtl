@@ -110,21 +110,21 @@
                                 <tr>
                                     <th>Telefoonnummer</th>
                                     <td>
-                                        <input type="tel" id="input_telefoon" value="{{ deelnemer.aanpassing_telefoon }}" oninput="enable_knop()">
+                                        <input type="tel" id="input_telefoon" value="{{ inschrijving.aanpassing_telefoon }}" oninput="enable_knop()">
                                     </td>
                                 </tr>
 
                                 <tr>
                                     <th>E-mailadres</th>
                                     <td>
-                                        <input type="email" id="input_email" value="{{ deelnemer.aanpassing_email }}" oninput="enable_knop()">
+                                        <input type="email" id="input_email" value="{{ inschrijving.aanpassing_email }}" oninput="enable_knop()">
                                     </td>
                                 </tr>
 
                                 <tr>
                                     <th>Geboorteplaats</th>
                                     <td>
-                                        <input type="text" id="input_plaats" maxlength="100" value="{{ deelnemer.aanpassing_geboorteplaats }}" oninput="enable_knop()">
+                                        <input type="text" id="input_plaats" maxlength="100" value="{{ inschrijving.aanpassing_geboorteplaats }}" oninput="enable_knop()">
                                     </td>
                                 </tr>
                             </table>

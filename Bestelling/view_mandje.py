@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2024 Ramon van der Winkel.
+#  Copyright (c) 2021-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -107,6 +107,8 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
                                          'evenement_inschrijving__koper',
                                          'evenement_inschrijving__sporter',
                                          'evenement_inschrijving__sporter__bij_vereniging',
+                                         'opleiding_inschrijving',
+                                         'opleiding_inschrijving__opleiding',
                                          'webwinkel_keuze',
                                          'webwinkel_keuze__product')
                          .order_by('pk'))       # volgorde waarop ze in het mandje gelegd zijn
@@ -138,6 +140,9 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
                         ontvanger2product_pks[ver_nr] = [product.pk]
 
                 elif product.evenement_inschrijving:
+                    pass
+
+                elif product.opleiding_inschrijving:
                     pass
 
                 elif product.webwinkel_keuze:

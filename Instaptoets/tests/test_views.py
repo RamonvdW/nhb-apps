@@ -446,13 +446,13 @@ class TestInstaptoetsViews(E2EHelpers, TestCase):
         # expliciet restart verzoek werkt niet, want niet op test server
         toets_zet_geslaagd_nog_geldig(toets)
         with override_settings(IS_TEST_SERVER=False):
-            resp = self.client.post(self.url_begin, {'restart': 'J'})
+            resp = self.client.post(self.url_begin, {'opnieuw': 'J'})
         self.assert_is_redirect(resp, self.url_volgende_vraag)
         self.assertEqual(Instaptoets.objects.count(), 1)
 
         # expliciet restart verzoek op de test server
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_begin, {'restart': 'J'})
+            resp = self.client.post(self.url_begin, {'opnieuw': 'J'})
         self.assert_is_redirect(resp, self.url_volgende_vraag)
         self.assertEqual(Instaptoets.objects.count(), 2)
 

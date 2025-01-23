@@ -87,7 +87,7 @@ class BeginToetsView(UserPassesTestMixin, TemplateView):
     def post(self, request, *args, **kwargs):
         """ Sporter heeft op de knop gedrukt om de toets op te starten """
 
-        opnieuw = str(request.POST.get('restart', 'N'))[:1]      # afkappen voor de veiligheid
+        opnieuw = str(request.POST.get('opnieuw', 'N'))[:1]      # afkappen voor de veiligheid
 
         toets = vind_toets(self.sporter)
         if toets:

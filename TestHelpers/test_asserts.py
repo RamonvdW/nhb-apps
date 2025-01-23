@@ -117,21 +117,27 @@ class MyTestAsserts(TestCase):
         soup = BeautifulSoup(content, features="html.parser")
         long_msg.append(soup.prettify())
 
-        # remove empty line indicators
-        long_msg = [part.replace('\\n', '\n').rstrip()
-                    for part in long_msg]
+        all_parts = long_msg[:]
+        long_msg = list()
+        for part in all_parts:
+            # remove empty line indicators
+            part.replace('\\n', '\n').rstrip()
 
-        # remove single-line <!-- html comments -->
-        long_msg = [re.sub(r'<!--.*-->', '', part)
-                    for part in long_msg]
+            # remove single-line <!-- html comments -->
+            pos = part.find('<!--')
+            if pos >= 0:
+                end_pos = part.find('-->', start=pos)
+                if end_pos >= 0:
+                    part = part[:pos] + part[end_pos+3:]
 
-        # remove empty lines
-        long_msg = [re.sub(r'\n\s+\n', '\n', part)
-                    for part in long_msg]
+            # remove empty lines
+            part = re.sub(r'\n\s+\n', '\n', part)
 
-        # remove empty lines
-        long_msg = [re.sub(r'\n\n', '\n', part)
-                    for part in long_msg]
+            # remove empty lines
+            part = re.sub(r'\n\n', '\n', part)
+
+            long_msg.append(part)
+        # for
 
         return "?? (long msg follows):\n" + "\n".join(long_msg), long_msg
 

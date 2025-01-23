@@ -8,7 +8,6 @@ from django.conf import settings
 from django.test import TestCase, override_settings
 from django.core.management import call_command
 from django.core.exceptions import ObjectDoesNotExist
-from BasisTypen.models import BoogType
 from Functie.models import Functie
 from Geo.models import Regio
 from Locatie.definities import BAAN_TYPE_BUITEN
@@ -16,8 +15,7 @@ from Locatie.models import WedstrijdLocatie
 from Mailer.models import MailQueue
 from Opleiding.models import OpleidingDiploma
 from Records.models import IndivRecord
-from Score.operations import score_indiv_ag_opslaan
-from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren
+from Sporter.models import Sporter, SporterVoorkeuren
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging, Secretaris
 import datetime
@@ -242,7 +240,7 @@ class TestImportCRMImport(E2EHelpers, TestCase):
         locatie1.plaats = 'Ja maar'
         locatie1.save(update_fields=['plaats'])
 
-        with self.assert_max_queries(129):
+        with self.assert_max_queries(131):
             f1, f2 = self.run_management_command(IMPORT_COMMAND,
                                                  TESTFILE_08_VER_MUTATIES,
                                                  OPTION_SIM)

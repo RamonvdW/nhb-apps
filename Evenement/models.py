@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2024 Ramon van der Winkel.
+#  Copyright (c) 2024-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -172,7 +172,7 @@ class EvenementAfgemeld(models.Model):
                                             EVENEMENT_AFMELDING_STATUS_TO_STR[self.status])
 
     def korte_beschrijving(self):
-        """ geef een one-liner terug met een korte beschrijving van deze inschrijving """
+        """ geef een one-liner terug met een korte beschrijving van deze afmelding """
 
         titel = self.evenement.titel
         if len(titel) > 40:

@@ -5,7 +5,6 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db import migrations, models
-from decimal import Decimal
 
 
 def migrate_diplomas(apps, _):
@@ -43,8 +42,8 @@ class Migration(migrations.Migration):
 
     # volgorde afdwingen
     dependencies = [
-        ('Sporter', 'm0031_squashed'),
         ('Opleidingen', 'm0010_prep_migrate'),
+        ('Sporter', 'm0031_squashed'),
     ]
 
     # migratie functies

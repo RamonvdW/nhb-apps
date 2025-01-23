@@ -6,7 +6,7 @@
 
 from django.contrib import admin
 from django.utils import timezone
-from Opleiding.models import Opleiding, OpleidingMoment, OpleidingDeelnemer, OpleidingDiploma
+from Opleiding.models import OpleidingDiploma, Opleiding, OpleidingMoment, OpleidingInschrijving, OpleidingAfgemeld
 
 
 class CreateOnlyAdmin(admin.ModelAdmin):
@@ -87,43 +87,16 @@ class OpleidingMomentAdmin(admin.ModelAdmin):
     pass
 
 
-class OpleidingDeelnemerAdmin(admin.ModelAdmin):
-    """ Admin configuratie voor OpleidingDeelnemer klasse """
-
-    # search_fields = ('sporter__lid_nr', 'sporter__unaccented_naam')
-
-    # list_select_related = True
+class OpleidingInschrijvingAdmin(admin.ModelAdmin):
+    """ Admin configuratie voor OpleidingInschrijving klasse """
 
     readonly_fields = ('sporter', 'koper')
 
-    # fieldsets = (
-    #     ('Wie',
-    #         {'fields': ('sporter',)
-    #          }),
-    #     ('Disciplines',
-    #         {'fields': ('voorkeur_discipline_25m1pijl',
-    #                     'voorkeur_discipline_outdoor',
-    #                     'voorkeur_discipline_indoor',
-    #                     'voorkeur_discipline_clout',
-    #                     'voorkeur_discipline_veld',
-    #                     'voorkeur_discipline_run',
-    #                     'voorkeur_discipline_3d'),
-    #          }),
-    #     ('Wedstrijdgeslacht',
-    #         {'fields': ('wedstrijd_geslacht_gekozen',
-    #                     'wedstrijd_geslacht'),
-    #          }),
-    #     ('Para',
-    #         {'fields': ('para_voorwerpen',
-    #                     'opmerking_para_sporter',)
-    #          }),
-    #     ('Overig',
-    #         {'fields': ('voorkeur_eigen_blazoen',
-    #                     'voorkeur_meedoen_competitie')
-    #          }),
-    # )
 
-    pass
+class OpleidingAfgemeldAdmin(admin.ModelAdmin):
+    """ Admin configuratie voor OpleidingAfgemeld klasse """
+
+    readonly_fields = ('sporter', 'koper')
 
 
 class OpleidingDiplomaAdmin(CreateOnlyAdmin):
@@ -144,7 +117,8 @@ class OpleidingDiplomaAdmin(CreateOnlyAdmin):
 
 admin.site.register(Opleiding, OpleidingAdmin)
 admin.site.register(OpleidingMoment, OpleidingMomentAdmin)
-admin.site.register(OpleidingDeelnemer, OpleidingDeelnemerAdmin)
+admin.site.register(OpleidingInschrijving, OpleidingInschrijvingAdmin)
+admin.site.register(OpleidingAfgemeld, OpleidingAfgemeldAdmin)
 admin.site.register(OpleidingDiploma, OpleidingDiplomaAdmin)
 
 # end of file

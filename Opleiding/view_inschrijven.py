@@ -13,12 +13,13 @@ from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
 from Bestelling.operations.mandje import mandje_tel_inhoud
+from Bestelling.operations.mutaties import bestel_mutatieverzoek_inschrijven_opleiding
 from Betaal.format import format_bedrag_euro
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige
 from Instaptoets.operations import vind_toets, toets_geldig
 from Opleiding.definities import OPLEIDING_STATUS_INSCHRIJVEN
-from Opleiding.models import Opleiding, OpleidingDeelnemer
+from Opleiding.models import Opleiding, OpleidingInschrijving
 from Sporter.models import get_sporter
 import json
 
@@ -44,21 +45,21 @@ class InschrijvenBasiscursusView(TemplateView):
                           .order_by('periode_jaartal', 'periode_kwartaal')       # meest recente cursus eerst
                           .first())
 
-    def _zoek_deelnemer(self, mag_database_wijzigen=False):
+    def _zoek_inschrijving(self, mag_database_wijzigen=False):
         """ zoek de OpleidingDeelnemer voor de sporter
             tijdens POST maken we deze aan
         """
-        deelnemer = OpleidingDeelnemer.objects.filter(sporter=self.sporter, opleiding=self.opleiding).first()
+        inschrijving = OpleidingInschrijving.objects.filter(sporter=self.sporter, opleiding=self.opleiding).first()
 
-        if not deelnemer:
-            deelnemer = OpleidingDeelnemer(
+        if not inschrijving:
+            inschrijving = OpleidingInschrijving(
                             sporter=self.sporter,
                             opleiding=self.opleiding)
 
             if mag_database_wijzigen:
-                deelnemer.save()
+                inschrijving.save()
 
-        return deelnemer
+        return inschrijving
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -90,15 +91,15 @@ class InschrijvenBasiscursusView(TemplateView):
         self.opleiding.kosten_str = format_bedrag_euro(self.opleiding.kosten_euro)
 
         if self.sporter:
-            deelnemer = self._zoek_deelnemer()
+            inschrijving = self._zoek_inschrijving()
 
-            if deelnemer.aanpassing_email == '':
-                deelnemer.aanpassing_email = self.sporter.email
-            if deelnemer.aanpassing_telefoon == '':
-                deelnemer.aanpassing_telefoon = self.sporter.telefoon
-            if deelnemer.aanpassing_geboorteplaats == '':
-                deelnemer.aanpassing_geboorteplaats = self.sporter.geboorteplaats
-            context['deelnemer'] = deelnemer
+            if inschrijving.aanpassing_email == '':
+                inschrijving.aanpassing_email = self.sporter.email
+            if inschrijving.aanpassing_telefoon == '':
+                inschrijving.aanpassing_telefoon = self.sporter.telefoon
+            if inschrijving.aanpassing_geboorteplaats == '':
+                inschrijving.aanpassing_geboorteplaats = self.sporter.geboorteplaats
+            context['inschrijving'] = inschrijving
 
             context['url_wijzig'] = reverse('Opleiding:inschrijven-basiscursus')
             context['url_toevoegen'] = reverse('Opleiding:inschrijven-toevoegen-aan-mandje')
@@ -150,10 +151,22 @@ class InschrijvenBasiscursusView(TemplateView):
             self._zoek_opleiding_basiscursus()
             if self.opleiding:
 
-                deelnemer = self._zoek_deelnemer(True)
-                deelnemer.aanpassing_telefoon = telefoon
-                deelnemer.aanpassing_email = email
-                deelnemer.aanpassing_geboorteplaats = plaats
+                deelnemer = self._zoek_inschrijving(True)
+
+                stamp_str = timezone.localtime(timezone.now()).strftime('%Y-%m-%d om %H:%M')
+
+                if deelnemer.aanpassing_telefoon != telefoon:
+                    deelnemer.log += "[%s] Telefoon aangepast naar %s\n" % (stamp_str, telefoon)
+                    deelnemer.aanpassing_telefoon = telefoon
+
+                if deelnemer.aanpassing_email != email:
+                    deelnemer.log += "[%s] E-mail aangepast naar %s\n" % (stamp_str, email)
+                    deelnemer.aanpassing_email = email
+
+                if deelnemer.aanpassing_geboorteplaats != plaats:
+                    deelnemer.log += "[%s] Geboorteplaats aangepast naar %s\n" % (stamp_str, plaats)
+                    deelnemer.aanpassing_geboorteplaats = plaats
+
                 deelnemer.save(update_fields=['aanpassing_telefoon', 'aanpassing_email', 'aanpassing_geboorteplaats'])
 
         out = dict()
@@ -203,14 +216,15 @@ class ToevoegenAanMandjeView(UserPassesTestMixin, View):
         msg = "[%s] Toegevoegd aan het mandje van %s\n" % (stamp_str, account_koper.get_account_full_name())
 
         # zoek of maak de deelnemer
-        deelnemer, _ = OpleidingDeelnemer.objects.get_or_create(sporter=self.sporter, opleiding=opleiding)
-        deelnemer.wanneer_aangemeld = now       # overschrijf eventueel moment wijzigen persoonsgegevens
-        deelnemer.koper = account_koper
-        deelnemer.save()
+        inschrijving, _ = OpleidingInschrijving.objects.get_or_create(sporter=self.sporter, opleiding=opleiding)
+        inschrijving.wanneer_aangemeld = now       # overschrijf eventueel moment wijzigen persoonsgegevens
+        inschrijving.koper = account_koper
+        inschrijving.log += msg
+        inschrijving.save()
 
         # zet dit verzoek door naar de achtergrondtaak
         snel = str(request.POST.get('snel', ''))[:1]
-        #bestel_mutatieverzoek_inschrijven_opleiding(account_koper, deelnemer, snel == '1')
+        bestel_mutatieverzoek_inschrijven_opleiding(account_koper, inschrijving, snel == '1')
 
         mandje_tel_inhoud(self.request, account_koper)
 

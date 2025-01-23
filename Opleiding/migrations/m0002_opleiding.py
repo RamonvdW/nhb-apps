@@ -20,16 +20,13 @@ class Migration(migrations.Migration):
 
     """ Migratie class voor dit deel van de applicatie """
 
-    # dit is de eerste
-    initial = True
-
     # volgorde afdwingen
     dependencies = [
         ('Account', 'm0032_squashed'),
         ('Locatie', 'm0009_squashed'),
-        ('Sporter', 'm0031_squashed'),
         ('Opleiding', 'm0001_diploma'),
         ('Opleidingen', 'm0011_remove'),
+        ('Sporter', 'm0031_squashed'),
     ]
 
     # migratie functies

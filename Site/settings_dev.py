@@ -85,4 +85,6 @@ if ENABLE_DEBUG_TOOLBAR:                            # pragma: no cover
         }
     )
 
+INSTAPTOETS_AANTAL_VRAGEN = 2
+
 # end of file

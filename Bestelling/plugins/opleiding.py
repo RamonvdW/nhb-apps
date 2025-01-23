@@ -1,71 +1,72 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2024-2025 Ramon van der Winkel.
+#  Copyright (c) 2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-""" Deze module levert functionaliteit voor de Bestel-applicatie, met kennis van de evenementen """
+""" Deze module levert functionaliteit voor de Bestel-applicatie, met kennis van de opleidingen """
 
 from django.conf import settings
 from django.utils import timezone
 from Bestelling.models import BestellingProduct
-from Evenement.definities import (EVENEMENT_INSCHRIJVING_STATUS_DEFINITIEF,
-                                  EVENEMENT_INSCHRIJVING_STATUS_RESERVERING_MANDJE,
-                                  EVENEMENT_AFMELDING_STATUS_GEANNULEERD, EVENEMENT_AFMELDING_STATUS_AFGEMELD,
-                                  EVENEMENT_INSCHRIJVING_STATUS_TO_STR, EVENEMENT_AFMELDING_STATUS_TO_STR)
-from Evenement.models import EvenementInschrijving, EvenementAfgemeld
+from Functie.definities import Rol
+from Functie.models import Functie
+from Opleiding.definities import (OPLEIDING_INSCHRIJVING_STATUS_RESERVERING_MANDJE, OPLEIDING_AFMELDING_STATUS_AFGEMELD,
+                                  OPLEIDING_INSCHRIJVING_STATUS_DEFINITIEF, OPLEIDING_AFMELDING_STATUS_GEANNULEERD,
+                                  OPLEIDING_INSCHRIJVING_STATUS_TO_STR, OPLEIDING_AFMELDING_STATUS_TO_STR)
+from Opleiding.models import OpleidingInschrijving, OpleidingAfgemeld
 from Mailer.operations import mailer_queue_email, mailer_email_is_valide, render_email_template
 from decimal import Decimal
 
-EMAIL_TEMPLATE_INFO_INSCHRIJVING_EVENEMENT = 'email_bestelling/info-inschrijving-evenement.dtl'
+EMAIL_TEMPLATE_INFO_INSCHRIJVING_OPLEIDING = 'email_bestelling/info-inschrijving-opleiding.dtl'
 
 
-def evenement_plugin_inschrijven(inschrijving: EvenementInschrijving) -> Decimal:
-    """ verwerk een nieuwe inschrijving op een evenement """
+def opleiding_plugin_inschrijven(inschrijving: OpleidingInschrijving) -> Decimal:
+    """ verwerk een nieuwe inschrijving op een opleiding """
 
     # (nog) geen aantallen om bij te werken
 
-    prijs = inschrijving.evenement.bepaal_prijs_voor_sporter(inschrijving.sporter)
+    prijs = inschrijving.opleiding.kosten_euro
     return prijs
 
 
-def evenement_plugin_verwijder_reservering(stdout, inschrijving: EvenementInschrijving) -> EvenementAfgemeld | None:
+def opleiding_plugin_verwijder_reservering(stdout, inschrijving: OpleidingInschrijving) -> OpleidingAfgemeld:
 
     afmelding = None
 
     now = timezone.now()
     stamp_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
-    msg = "[%s] Verwijder reservering voor dit evenement\n" % stamp_str
+    msg = "[%s] Verwijder inschrijving voor deze opleiding\n" % stamp_str
 
-    if inschrijving.status == EVENEMENT_INSCHRIJVING_STATUS_RESERVERING_MANDJE:
+    if inschrijving.status == OPLEIDING_INSCHRIJVING_STATUS_RESERVERING_MANDJE:
         # verwijdering uit mandje
-        stdout.write('[INFO] Inschrijving evenement pk=%s status %s --> verwijderd uit mandje' % (
+        stdout.write('[INFO] Inschrijving opleiding pk=%s status %s --> verwijderd uit mandje' % (
             inschrijving.pk,
-            EVENEMENT_INSCHRIJVING_STATUS_TO_STR[inschrijving.status]))
+            OPLEIDING_INSCHRIJVING_STATUS_TO_STR[inschrijving.status]))
     else:
         # zet de inschrijving om in een afmelding
-        afmelding = EvenementAfgemeld(
-                        wanneer_inschrijving=inschrijving.wanneer,
+        afmelding = OpleidingAfgemeld(
+                        wanneer_inschrijving=inschrijving.wanneer_aangemeld,
                         nummer=inschrijving.nummer,
                         wanneer_afgemeld=now,
-                        status=EVENEMENT_AFMELDING_STATUS_AFGEMELD,
-                        evenement=inschrijving.evenement,
+                        status=OPLEIDING_AFMELDING_STATUS_AFGEMELD,
+                        opleiding=inschrijving.opleiding,
                         sporter=inschrijving.sporter,
                         koper=inschrijving.koper,
                         bedrag_ontvangen=inschrijving.bedrag_ontvangen,
                         log=inschrijving.log + msg)
 
-        if inschrijving.status != EVENEMENT_INSCHRIJVING_STATUS_DEFINITIEF:
+        if inschrijving.status != OPLEIDING_INSCHRIJVING_STATUS_DEFINITIEF:
             # nog niet betaald
-            afmelding.status = EVENEMENT_AFMELDING_STATUS_GEANNULEERD
+            afmelding.status = OPLEIDING_AFMELDING_STATUS_GEANNULEERD
 
         afmelding.save()
 
-        stdout.write('[INFO] Inschrijving evenement pk=%s status %s --> afgemeld pk=%s status %s' % (
+        stdout.write('[INFO] Opleiding deelnemer pk=%s status %s --> afgemeld pk=%s status %s' % (
             inschrijving.pk,
-            EVENEMENT_INSCHRIJVING_STATUS_TO_STR[inschrijving.status],
+            OPLEIDING_INSCHRIJVING_STATUS_TO_STR[inschrijving.status],
             afmelding.pk,
-            EVENEMENT_AFMELDING_STATUS_TO_STR[afmelding.status]))
+            OPLEIDING_AFMELDING_STATUS_TO_STR[afmelding.status]))
 
     # verwijder de inschrijving
     inschrijving.delete()
@@ -73,22 +74,22 @@ def evenement_plugin_verwijder_reservering(stdout, inschrijving: EvenementInschr
     return afmelding
 
 
-def evenement_plugin_afmelden(inschrijving: EvenementInschrijving):
-    """ verwerk een afmelding voor een evenement """
+def opleiding_plugin_afmelden(inschrijving: OpleidingInschrijving):
+    """ verwerk een afmelding voor een opleiding """
 
     # (nog) geen aantallen om bij te werken
 
     now = timezone.now()
     stamp_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
-    msg = "[%s] Afgemeld voor dit evenement\n" % stamp_str
+    msg = "[%s] Afgemeld voor deze opleiding\n" % stamp_str
 
     # zet de inschrijving om in een afmelding
-    afmelding = EvenementAfgemeld(
-                    wanneer_inschrijving=inschrijving.wanneer,
+    afmelding = OpleidingAfgemeld(
+                    wanneer_inschrijving=inschrijving.wanneer_aangemeld,
                     wanneer_afgemeld=now,
                     nummer=inschrijving.nummer,
-                    status=EVENEMENT_AFMELDING_STATUS_AFGEMELD,
-                    evenement=inschrijving.evenement,
+                    status=OPLEIDING_AFMELDING_STATUS_AFGEMELD,
+                    opleiding=inschrijving.opleiding,
                     sporter=inschrijving.sporter,
                     koper=inschrijving.koper,
                     bedrag_ontvangen=inschrijving.bedrag_ontvangen,
@@ -99,13 +100,13 @@ def evenement_plugin_afmelden(inschrijving: EvenementInschrijving):
     inschrijving.delete()
 
 
-def evenement_plugin_inschrijving_is_betaald(stdout, product: BestellingProduct):
+def opleiding_plugin_inschrijving_is_betaald(stdout, product: BestellingProduct):
     """ Deze functie wordt aangeroepen vanuit de achtergrondtaak als een bestelling betaald is,
         of als een bestelling niet betaald hoeft te worden (totaal bedrag nul)
     """
-    inschrijving = product.evenement_inschrijving
+    inschrijving = product.opleiding_inschrijving
     inschrijving.bedrag_ontvangen = product.prijs_euro - product.korting_euro
-    inschrijving.status = EVENEMENT_INSCHRIJVING_STATUS_DEFINITIEF
+    inschrijving.status = OPLEIDING_INSCHRIJVING_STATUS_DEFINITIEF
 
     stamp_str = timezone.localtime(timezone.now()).strftime('%Y-%m-%d om %H:%M')
     msg = "[%s] Betaling ontvangen (euro %s); status is nu definitief\n" % (stamp_str, inschrijving.bedrag_ontvangen)
@@ -113,7 +114,7 @@ def evenement_plugin_inschrijving_is_betaald(stdout, product: BestellingProduct)
     inschrijving.log += msg
     inschrijving.save(update_fields=['bedrag_ontvangen', 'status', 'log'])
 
-    evenement = inschrijving.evenement
+    opleiding = inschrijving.opleiding
 
     # stuur een e-mail naar de sporter, als dit niet de koper is
     sporter = inschrijving.sporter
@@ -130,25 +131,26 @@ def evenement_plugin_inschrijving_is_betaald(stdout, product: BestellingProduct)
         if email:
             # maak de e-mail en stuur deze naar sporter.
 
+            functie_mo = Functie.objects.filter(rol="MO").first()
+            if functie_mo and functie_mo.bevestigde_email:
+                email = functie_mo.bevestigde_email
+            else:
+                email = settings.EMAIL_BONDSBUREAU
+
             context = {
                 'voornaam': sporter.voornaam,
                 'koper_volledige_naam': koper_account.volledige_naam(),
-                'reserveringsnummer': settings.TICKET_NUMMER_START__EVENEMENT + inschrijving.nummer,
-                'evenement_titel': evenement.titel,
-                'evenement_adres': evenement.locatie.adres_oneliner(),
-                'evenement_datum': evenement.datum,
-                'evenement_org_ver': evenement.organiserende_vereniging,
-                'begin_tijd': evenement.aanvang.strftime('%H:%M'),
-                'contact_email': evenement.contact_email,
-                'contact_tel': evenement.contact_telefoon,
+                'reserveringsnummer': settings.TICKET_NUMMER_START__OPLEIDING + inschrijving.nummer,
+                'opleiding_beschrijving': opleiding.beschrijving,
+                'contact_email': email,
                 'geen_account': sporter.account is None,
                 'naam_site': settings.NAAM_SITE,
             }
 
-            mail_body = render_email_template(context, EMAIL_TEMPLATE_INFO_INSCHRIJVING_EVENEMENT)
+            mail_body = render_email_template(context, EMAIL_TEMPLATE_INFO_INSCHRIJVING_OPLEIDING)
 
             mailer_queue_email(email,
-                               'Inschrijving voor evenement',
+                               'Inschrijving voor opleiding',
                                mail_body)
 
             stamp_str = timezone.localtime(timezone.now()).strftime('%Y-%m-%d om %H:%M')
@@ -167,27 +169,24 @@ def evenement_plugin_inschrijving_is_betaald(stdout, product: BestellingProduct)
                          sporter.lid_nr)
 
 
-def evenement_plugin_beschrijf_product(inschrijving_of_afgemeld: EvenementInschrijving | EvenementAfgemeld) -> list:
+def opleiding_plugin_beschrijf_product(inschrijving: OpleidingInschrijving):
     """
         Geef een lijst van tuples terug waarin aspecten van het product beschreven staan.
     """
 
-    evenement = inschrijving_of_afgemeld.evenement
-    sporter = inschrijving_of_afgemeld.sporter
-    nummer = inschrijving_of_afgemeld.nummer
+    opleiding = inschrijving.opleiding
+    sporter = inschrijving.sporter
+    nummer = inschrijving.nummer
 
     beschrijving = list()
 
-    tup = ('Reserveringsnummer', settings.TICKET_NUMMER_START__EVENEMENT + nummer)
+    tup = ('Reserveringsnummer', settings.TICKET_NUMMER_START__OPLEIDING + nummer)
     beschrijving.append(tup)
 
-    tup = ('Evenement', evenement.titel)
+    tup = ('Opleiding', opleiding.titel)
     beschrijving.append(tup)
 
-    tup = ('Datum', evenement.datum.strftime('%Y-%m-%d'))
-    beschrijving.append(tup)
-
-    tup = ('Aanvang', evenement.aanvang.strftime('%H:%M'))
+    tup = ('Periode', opleiding.periode_str())
     beschrijving.append(tup)
 
     tup = ('Sporter', sporter.lid_nr_en_volledige_naam())
@@ -201,14 +200,17 @@ def evenement_plugin_beschrijf_product(inschrijving_of_afgemeld: EvenementInschr
     tup = ('Lid bij vereniging', ver_naam)
     beschrijving.append(tup)
 
-    tup = ('Locatie', evenement.locatie.adres_oneliner())
+    functie_mo = Functie.objects.filter(rol="MO").first()
+    if functie_mo and functie_mo.bevestigde_email:
+        email = functie_mo.bevestigde_email
+    else:
+        email = settings.EMAIL_BONDSBUREAU
+
+    tup = ('E-mail organisatie', email)
     beschrijving.append(tup)
 
-    tup = ('E-mail organisatie', evenement.contact_email)
-    beschrijving.append(tup)
-
-    tup = ('Telefoon organisatie', evenement.contact_telefoon)
-    beschrijving.append(tup)
+    # tup = ('Telefoon organisatie', opleiding.contact_telefoon)
+    # beschrijving.append(tup)
 
     return beschrijving
 

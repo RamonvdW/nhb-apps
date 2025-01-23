@@ -6,16 +6,20 @@
 
 from django.conf import settings
 from django.utils import timezone
+from Account.models import Account
 from Bestelling.definities import (BESTELLING_MUTATIE_WEDSTRIJD_INSCHRIJVEN, BESTELLING_MUTATIE_WEBWINKEL_KEUZE,
                                    BESTELLING_MUTATIE_MAAK_BESTELLINGEN, BESTELLING_MUTATIE_VERWIJDER,
                                    BESTELLING_MUTATIE_WEDSTRIJD_AFMELDEN, BESTELLING_MUTATIE_BETALING_AFGEROND,
                                    BESTELLING_MUTATIE_OVERBOEKING_ONTVANGEN, BESTELLING_MUTATIE_ANNULEER,
-                                   BESTELLING_MUTATIE_TRANSPORT, BESTELLING_MUTATIE_EVENEMENT_INSCHRIJVEN,
-                                   BESTELLING_MUTATIE_EVENEMENT_AFMELDEN, BESTELLING_STATUS_BETALING_ACTIEF)
-from Bestelling.models import BestellingMutatie, Bestelling
+                                   BESTELLING_MUTATIE_TRANSPORT, BESTELLING_STATUS_BETALING_ACTIEF,
+                                   BESTELLING_MUTATIE_EVENEMENT_INSCHRIJVEN, BESTELLING_MUTATIE_EVENEMENT_AFMELDEN,
+                                   BESTELLING_MUTATIE_OPLEIDING_INSCHRIJVEN)
+from Bestelling.models import BestellingMutatie, Bestelling, BestellingProduct
+from Betaal.models import BetaalActief
 from Evenement.models import EvenementInschrijving
-from Opleiding.models import OpleidingDeelnemer
+from Opleiding.models import OpleidingInschrijving
 from Overig.background_sync import BackgroundSync
+from Webwinkel.models import WebwinkelKeuze
 from Wedstrijden.models import WedstrijdInschrijving
 import time
 
@@ -26,7 +30,7 @@ import time
 bestel_mutaties_ping = BackgroundSync(settings.BACKGROUND_SYNC__BESTEL_MUTATIES)
 
 
-def _bestel_ping_achtergrondtaak(mutatie: BestellingMutatie, snel):
+def _bestel_ping_achtergrondtaak(mutatie: BestellingMutatie, snel: bool):
 
     # ping het achtergrond process
     bestel_mutaties_ping.ping()
@@ -34,16 +38,16 @@ def _bestel_ping_achtergrondtaak(mutatie: BestellingMutatie, snel):
     if not snel:  # pragma: no cover
         # wacht maximaal 3 seconden tot de mutatie uitgevoerd is
         interval = 0.2  # om steeds te verdubbelen
-        total = 0.0  # om een limiet te stellen
+        total = 0.0     # om een limiet te stellen
         while not mutatie.is_verwerkt and total + interval <= 3.0:
             time.sleep(interval)
-            total += interval  # 0.0 --> 0.2, 0.6, 1.4, 3.0
-            interval *= 2  # 0.2 --> 0.4, 0.8, 1.6, 3.2
+            total += interval   # 0.0 --> 0.2, 0.6, 1.4, 3.0
+            interval *= 2       # 0.2 --> 0.4, 0.8, 1.6, 3.2
             mutatie = BestellingMutatie.objects.get(pk=mutatie.pk)
         # while
 
 
-def bestel_mutatieverzoek_inschrijven_wedstrijd(account, inschrijving: WedstrijdInschrijving, snel):
+def bestel_mutatieverzoek_inschrijven_wedstrijd(account: Account, inschrijving: WedstrijdInschrijving, snel: bool):
 
     # zet dit verzoek door naar het mutaties process
     # voorkom duplicates (niet 100%)
@@ -60,7 +64,7 @@ def bestel_mutatieverzoek_inschrijven_wedstrijd(account, inschrijving: Wedstrijd
         _bestel_ping_achtergrondtaak(mutatie, snel)
 
 
-def bestel_mutatieverzoek_inschrijven_evenement(account, inschrijving: EvenementInschrijving, snel):
+def bestel_mutatieverzoek_inschrijven_evenement(account: Account, inschrijving: EvenementInschrijving, snel: bool):
 
     # zet dit verzoek door naar het mutaties process
     # voorkom duplicates (niet 100%)
@@ -77,14 +81,14 @@ def bestel_mutatieverzoek_inschrijven_evenement(account, inschrijving: Evenement
         _bestel_ping_achtergrondtaak(mutatie, snel)
 
 
-def bestel_mutatieverzoek_inschrijven_opleiding(account, deelnemer: OpleidingDeelnemer, snel):
+def bestel_mutatieverzoek_inschrijven_opleiding(account: Account, inschrijving: OpleidingInschrijving, snel: bool):
 
     # zet dit verzoek door naar het mutaties process
     # voorkom duplicates (niet 100%)
     mutatie, is_created = BestellingMutatie.objects.get_or_create(
-                                    code=BESTELLING_MUTATIE_EVENEMENT_INSCHRIJVEN,
+                                    code=BESTELLING_MUTATIE_OPLEIDING_INSCHRIJVEN,
                                     account=account,
-                                    evenement_inschrijving=inschrijving,
+                                    opleiding_inschrijving=inschrijving,
                                     is_verwerkt=False)
 
     if is_created:
@@ -94,7 +98,7 @@ def bestel_mutatieverzoek_inschrijven_opleiding(account, deelnemer: OpleidingDee
         _bestel_ping_achtergrondtaak(mutatie, snel)
 
 
-def bestel_mutatieverzoek_webwinkel_keuze(account, keuze, snel):
+def bestel_mutatieverzoek_webwinkel_keuze(account: Account, keuze: WebwinkelKeuze, snel: bool):
 
     # zet dit verzoek door naar het mutaties process
     # voorkom duplicates (niet 100%)
@@ -111,7 +115,7 @@ def bestel_mutatieverzoek_webwinkel_keuze(account, keuze, snel):
         _bestel_ping_achtergrondtaak(mutatie, snel)
 
 
-def bestel_mutatieverzoek_verwijder_product_uit_mandje(account, product, snel):
+def bestel_mutatieverzoek_verwijder_product_uit_mandje(account: Account, product: BestellingProduct, snel: bool):
     """
         Verwijder een product uit het mandje
 
@@ -134,7 +138,7 @@ def bestel_mutatieverzoek_verwijder_product_uit_mandje(account, product, snel):
         _bestel_ping_achtergrondtaak(mutatie, snel)
 
 
-def bestel_mutatieverzoek_maak_bestellingen(account, snel=False):
+def bestel_mutatieverzoek_maak_bestellingen(account: Account, snel=False):
     """
         Zet het mandje om in een bestelling (of meerdere)
 
@@ -194,7 +198,7 @@ def bestel_mutatieverzoek_afmelden_evenement(inschrijving: EvenementInschrijving
         _bestel_ping_achtergrondtaak(mutatie, snel)
 
 
-def bestel_mutatieverzoek_betaling_afgerond(betaalactief, gelukt, snel=False):
+def bestel_mutatieverzoek_betaling_afgerond(betaalactief: BetaalActief, gelukt: bool, snel=False):
     """
         Een actieve betaling is afgerond.
     """
@@ -238,7 +242,7 @@ def bestel_mutatieverzoek_annuleer(bestelling: Bestelling, snel=False):
         _bestel_ping_achtergrondtaak(mutatie, snel)
 
 
-def bestel_mutatieverzoek_transport(account, transport, snel=False):
+def bestel_mutatieverzoek_transport(account: Account, transport, snel=False):
     """
         Pad de transport keuze aan
 

@@ -7,7 +7,10 @@
 from django.db import models
 from Account.models import Account
 from Locatie.models import EvenementLocatie
-from Opleiding.definities import OPLEIDING_STATUS_CHOICES, OPLEIDING_STATUS_VOORBEREID
+from Opleiding.definities import (OPLEIDING_STATUS_CHOICES, OPLEIDING_STATUS_VOORBEREID,
+                                  OPLEIDING_INSCHRIJVING_STATUS_CHOICES,
+                                  OPLEIDING_INSCHRIJVING_STATUS_RESERVERING_MANDJE,
+                                  OPLEIDING_AFMELDING_STATUS_CHOICES, OPLEIDING_AFMELDING_STATUS_TO_STR)
 from Sporter.models import Sporter
 from decimal import Decimal
 
@@ -139,8 +142,8 @@ class Opleiding(models.Model):
     objects = models.Manager()  # for the editor only
 
 
-class OpleidingDeelnemer(models.Model):
-    """ Deze klasse representeert een deelnemer aan een opleiding """
+class OpleidingInschrijving(models.Model):
+    """ Deze klasse representeert een inschrijving voor een opleiding """
 
     # welke opleiding gaat dit om?
     opleiding = models.ForeignKey(Opleiding, on_delete=models.PROTECT)
@@ -151,29 +154,95 @@ class OpleidingDeelnemer(models.Model):
     # wanneer is deze aanmelding gedaan?
     wanneer_aangemeld = models.DateTimeField(auto_now_add=True)
 
+    # het reserveringsnummer
+    nummer = models.BigIntegerField(default=0)
+
+    # status
+    status = models.CharField(max_length=2, choices=OPLEIDING_INSCHRIJVING_STATUS_CHOICES,
+                              default=OPLEIDING_INSCHRIJVING_STATUS_RESERVERING_MANDJE)
+
     # wie was de koper?
     koper = models.ForeignKey(Account, on_delete=models.PROTECT, null=True, blank=True)
 
     # bedragen ontvangen en terugbetaald
-    ontvangen_euro = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal(0))
-    retour_euro = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal(0))
+    bedrag_ontvangen = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal(0))
 
     # aanpassingen van de informatie die al/nog niet bekend is
     aanpassing_email = models.EmailField(blank=True)
     aanpassing_telefoon = models.CharField(max_length=25, default='', blank=True)
     aanpassing_geboorteplaats = models.CharField(max_length=100, default='', blank=True)
 
+    # log van bestelling, betalingen en eventuele wijzigingen
+    log = models.TextField(blank=True)
+
     def korte_beschrijving(self):
-        return "[%s] %s %s" % (self.pk, self.sporter.lid_nr_en_volledige_naam(), self.opleiding)
+        return self.opleiding.titel
 
     def __str__(self):
-        return self.korte_beschrijving()
+        return "[%s] %s %s" % (self.pk, self.sporter.lid_nr_en_volledige_naam(), self.opleiding)
 
     class Meta:
         """ meta data voor de admin interface """
-        verbose_name = "Opleiding deelnemer"
+        verbose_name = "Opleiding inschrijving"
+        verbose_name_plural = "Opleiding inschrijvingen"
 
     objects = models.Manager()  # for the editor only
 
+
+class OpleidingAfgemeld(models.Model):
+    """ Deze klasse representeert een deelnemer die afgemeld is voor een opleiding """
+
+    # wanneer is deze afmelding gedaan?
+    wanneer_afgemeld = models.DateTimeField(auto_now_add=True)
+
+    # status van deze afmelding
+    status = models.CharField(max_length=2, choices=OPLEIDING_AFMELDING_STATUS_CHOICES)
+
+    # welke opleiding ging het?
+    opleiding = models.ForeignKey(Opleiding, on_delete=models.PROTECT)
+
+    # wie was de deelnemer?
+    sporter = models.ForeignKey(Sporter, on_delete=models.PROTECT)
+
+    # wanneer was de aanmelding gedaan?
+    wanneer_aangemeld = models.DateTimeField(auto_now_add=True)
+
+    # het originele reserveringsnummer
+    nummer = models.BigIntegerField(default=0)
+
+    # wie was de koper?
+    koper = models.ForeignKey(Account, on_delete=models.PROTECT, null=True, blank=True)
+
+    # bedragen ontvangen en terugbetaald
+    bedrag_ontvangen = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal(0))
+    bedrag_retour = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal(0))
+
+    # aanpassingen van de informatie die al/nog niet bekend is
+    aanpassing_email = models.EmailField(blank=True)
+    aanpassing_telefoon = models.CharField(max_length=25, default='', blank=True)
+    aanpassing_geboorteplaats = models.CharField(max_length=100, default='', blank=True)
+
+    # log van bestelling, betalingen en eventuele wijzigingen
+    log = models.TextField(blank=True)
+
+    def __str__(self):
+        """ beschrijving voor de admin interface """
+        return "Afmelding voor %s: [%s]" % (self.sporter.lid_nr_en_volledige_naam(),
+                                            OPLEIDING_AFMELDING_STATUS_TO_STR[self.status])
+
+    def korte_beschrijving(self):
+        """ geef een one-liner terug met een korte beschrijving van deze afmelding """
+
+        titel = self.opleiding.beschrijving
+        if len(titel) > 40:
+            titel = titel[:40] + '..'
+
+        return "%s, voor %s" % (titel, self.sporter.lid_nr)
+
+    class Meta:
+        verbose_name = "Opleiding afmelding"
+        verbose_name_plural = "Opleiding afmeldingen"
+
+    objects = models.Manager()      # for the editor only
 
 # end of file

@@ -138,7 +138,7 @@ class Command(BaseCommand):
             self._cache_sec[sec.vereniging.ver_nr] = sec
         # for
 
-        for sporter in Sporter.objects.all():
+        for sporter in Sporter.objects.select_related('bij_vereniging').all():
             self._cache_sporter[sporter.lid_nr] = sporter
         # for
 

@@ -43,11 +43,16 @@ def selecteer_toets_vragen(toets: Instaptoets):
 
     nieuw = list()
     cat_pk_done = list()
+    skip_count = random.randint(10, 20)     # nodig om niet steeds met de eerste categorie te beginnen
     while todo > 0:
         prev_todo = todo
         for cat_pk, vraag_pks in mogelijke_pks.items():
             if cat_pk not in cat_pk_done:
                 cat_pk_done.append(cat_pk)
+                if skip_count > 0:
+                    skip_count -= 1
+                    continue
+
                 if len(vraag_pks) > 0:
                     todo -= 1
                     pk = random.choice(vraag_pks)
@@ -133,8 +138,9 @@ def controleer_toets(toets: Instaptoets):
     # for
 
     # je moet 70% goed hebben
-    aantal_nodig = int(toets.aantal_vragen * (settings.INSTAPTOETS_AANTAL_GOED_EIS / 100.0))
-    toets.geslaagd = toets.aantal_goed >= aantal_nodig
+    # corner case: 1/2 = 50% < 70%
+    perc_goed = (toets.aantal_goed * 100.0) / toets.aantal_vragen
+    toets.geslaagd = perc_goed >= settings.INSTAPTOETS_AANTAL_GOED_EIS
     toets.save(update_fields=['geslaagd', 'aantal_goed'])
 
     if toets.geslaagd:

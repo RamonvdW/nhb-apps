@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2024 Ramon van der Winkel.
+#  Copyright (c) 2022-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -41,6 +41,7 @@ BESTELLING_MUTATIE_ANNULEER = 9                     # annuleer een bestelling
 BESTELLING_MUTATIE_TRANSPORT = 10                   # wijzig transport keuze
 BESTELLING_MUTATIE_EVENEMENT_INSCHRIJVEN = 11       # inschrijven op evenement
 BESTELLING_MUTATIE_EVENEMENT_AFMELDEN = 12          # afmelden (na betaling)
+BESTELLING_MUTATIE_OPLEIDING_INSCHRIJVEN = 13       # inschrijven op opleiding
 
 BESTELLING_MUTATIE_TO_STR = {
     BESTELLING_MUTATIE_WEDSTRIJD_INSCHRIJVEN: "Inschrijven op wedstrijd",
@@ -55,6 +56,7 @@ BESTELLING_MUTATIE_TO_STR = {
     BESTELLING_MUTATIE_TRANSPORT: "Wijzig transport keuze",
     BESTELLING_MUTATIE_EVENEMENT_INSCHRIJVEN: "Inschrijven op evenement",
     BESTELLING_MUTATIE_EVENEMENT_AFMELDEN: "Afmelding voor evenement",
+    BESTELLING_MUTATIE_OPLEIDING_INSCHRIJVEN: "Inschrijven op opleiding",
 }
 
 
