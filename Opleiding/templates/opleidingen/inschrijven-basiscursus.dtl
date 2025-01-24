@@ -99,8 +99,6 @@
                 <div class="sv-kader left-align z-depth-3">
                     <div class="form-padding">
                         <form>
-                            {% csrf_token %}
-
                             <table>
                                 <tr>
                                     <th>Naam</th>
