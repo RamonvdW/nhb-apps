@@ -622,13 +622,18 @@ class Command(BaseCommand):
     def _verwerk_mutatie_opleiding_inschrijven(self, mutatie: BestellingMutatie):
         mandje = self._get_mandje(mutatie)
         if mandje:                                  # pragma: no branch
-            prijs_euro = opleiding_plugin_inschrijven(mutatie.opleiding_inschrijving)
+            inschrijving = mutatie.opleiding_inschrijving
+
+            inschrijving.nummer = inschrijving.pk
+            inschrijving.save(update_fields=['nummer'])
+
+            prijs_euro = opleiding_plugin_inschrijven(inschrijving)
 
             # handmatige inschrijving heeft meteen status definitief en hoeft dus niet betaald te worden
-            if mutatie.opleiding_inschrijving.status != OPLEIDING_INSCHRIJVING_STATUS_DEFINITIEF:
+            if inschrijving.status != OPLEIDING_INSCHRIJVING_STATUS_DEFINITIEF:
                 # maak een product regel aan voor de bestelling
                 product = BestellingProduct(
-                                opleiding_inschrijving=mutatie.opleiding_inschrijving,
+                                opleiding_inschrijving=inschrijving,
                                 prijs_euro=prijs_euro)
                 product.save()
 

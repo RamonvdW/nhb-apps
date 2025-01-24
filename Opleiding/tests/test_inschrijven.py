@@ -15,9 +15,9 @@ from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
 
 
-class TestOpleidingOverzicht(E2EHelpers, TestCase):
+class TestOpleidingInschrijven(E2EHelpers, TestCase):
 
-    """ tests voor de Opleiding applicatie, functionaliteit Overzicht """
+    """ tests voor de Opleiding applicatie, functionaliteit Inschrijven """
 
     test_after = ('Account', 'Functie')
 

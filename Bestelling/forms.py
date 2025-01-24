@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2024 Ramon van der Winkel.
+#  Copyright (c) 2022-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -29,6 +29,10 @@ class ZoekBestellingForm(forms.Form):
 
     evenementen = forms.BooleanField(
                         label='Toon evenementen',
+                        required=False)     # allow absence
+
+    opleidingen = forms.BooleanField(
+                        label='Toon opleidingen',
                         required=False)     # allow absence
 
     gratis = forms.BooleanField(

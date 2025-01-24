@@ -72,6 +72,10 @@ class Migration(migrations.Migration):
             old_name='OpleidingDeelnemer',
             new_name='OpleidingInschrijving',
         ),
+        migrations.AlterModelOptions(
+            name='opleidinginschrijving',
+            options={'verbose_name': 'Opleiding inschrijving', 'verbose_name_plural': 'Opleiding inschrijvingen'},
+        ),
     ]
 
 # end of file

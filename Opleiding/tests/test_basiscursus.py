@@ -12,7 +12,7 @@ from TestHelpers.e2ehelpers import E2EHelpers
 from datetime import timedelta
 
 
-class TestOpleidingenBasiscursus(E2EHelpers, TestCase):
+class TestOpleidingBasiscursus(E2EHelpers, TestCase):
 
     """ tests voor de Opleiding applicatie, functionaliteit Basiscursus """
 

@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2022-2024 Ramon van der Winkel.
+                Copyright (c) 2022-2025 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -81,6 +81,13 @@
                         <label>
                             <input type="checkbox" class="filled-in" name="evenementen"{% if zoekform.evenementen.value %} checked{% endif %}>
                             <span class="black-text">{{ zoekform.evenementen.label }}</span>
+                        </label>
+                    </p>
+
+                    <p>
+                        <label>
+                            <input type="checkbox" class="filled-in" name="opleidingen"{% if zoekform.opleidingen.value %} checked{% endif %}>
+                            <span class="black-text">{{ zoekform.opleidingen.label }}</span>
                         </label>
                     </p>
 
