@@ -701,13 +701,13 @@ class Command(BaseCommand):
 
                 elif product.opleiding_inschrijving:
                     mandje.producten.remove(product)
-                    deelnemer = product.opleiding_inschrijving
+                    inschrijving = product.opleiding_inschrijving
 
-                    mutatie.evenement_inschrijving = None
+                    mutatie.opleiding_inschrijving = None
                     mutatie.product = None
                     mutatie.save()
 
-                    opleiding_plugin_verwijder_reservering(self.stdout, deelnemer)
+                    opleiding_plugin_verwijder_reservering(self.stdout, inschrijving)
 
                     # verwijder het product, dan verdwijnt deze ook uit het mandje
                     product.delete()
