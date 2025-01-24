@@ -117,21 +117,27 @@ class MyTestAsserts(TestCase):
         soup = BeautifulSoup(content, features="html.parser")
         long_msg.append(soup.prettify())
 
-        # remove empty line indicators
-        long_msg = [part.replace('\\n', '\n').rstrip()
-                    for part in long_msg]
+        all_parts = long_msg[:]
+        long_msg = list()
+        for part in all_parts:
+            # remove empty line indicators
+            part.replace('\\n', '\n').rstrip()
 
-        # remove single-line <!-- html comments -->
-        long_msg = [re.sub(r'<!--.*-->', '', part)
-                    for part in long_msg]
+            # remove single-line <!-- html comments -->
+            pos = part.find('<!--')
+            if pos >= 0:
+                end_pos = part.find('-->', pos)
+                if end_pos >= 0:
+                    part = part[:pos] + part[end_pos+3:]
 
-        # remove empty lines
-        long_msg = [re.sub(r'\n\s+\n', '\n', part)
-                    for part in long_msg]
+            # remove empty lines
+            part = re.sub(r'\n\s+\n', '\n', part)
 
-        # remove empty lines
-        long_msg = [re.sub(r'\n\n', '\n', part)
-                    for part in long_msg]
+            # remove empty lines
+            part = re.sub(r'\n\n', '\n', part)
+
+            long_msg.append(part)
+        # for
 
         return "?? (long msg follows):\n" + "\n".join(long_msg), long_msg
 
@@ -532,48 +538,51 @@ class MyTestAsserts(TestCase):
 
             form = html[:form_end]
 
-            # varianten:
-            #  onsubmit="document.getElementById('submit_knop').disabled=true; return true;"
-            #  onsubmit="document.getElementById('submit_knop1').disabled=true; return true;"
-            #  onsubmit="submit_knop1.disabled=true; submit_knop2.disabled=true; return true;"
-            #  onsubmit="document.getElementById('submit_knop').disabled=true; return true;"
-            pos1 = form.find(' onsubmit="')
-            if pos1 < 0:                                # pragma: no cover
-                submit = 'form heeft geen onsubmit=".."'
-            else:
-                pos2 = form.find('"', pos1+11)
-                submit = form[pos1+11:pos2]
-                if '.disabled=true;' not in submit or 'return true;' not in submit:             # pragma: no cover
-                    self.fail('Form onsubmit zonder met dubbelklik bescherming in template %s\n%s' % (repr(dtl),
-                                                                                                      repr(submit)))
+            # sommige forms zijn containers en worden met javascript afgehandeld
+            # deze hebben geen action url
+            if "action=" in form:
+                # varianten:
+                #  onsubmit="document.getElementById('submit_knop').disabled=true; return true;"
+                #  onsubmit="document.getElementById('submit_knop1').disabled=true; return true;"
+                #  onsubmit="submit_knop1.disabled=true; submit_knop2.disabled=true; return true;"
+                #  onsubmit="document.getElementById('submit_knop').disabled=true; return true;"
+                pos1 = form.find(' onsubmit="')
+                if pos1 < 0:                                # pragma: no cover
+                    submit = 'form heeft geen onsubmit=".."'
+                else:
+                    pos2 = form.find('"', pos1+11)
+                    submit = form[pos1+11:pos2]
+                    if '.disabled=true;' not in submit or 'return true;' not in submit:             # pragma: no cover
+                        self.fail('Form onsubmit zonder met dubbelklik bescherming in template %s\n%s' % (repr(dtl),
+                                                                                                          repr(submit)))
 
-                if 'document.getElementById(' not in submit:                                    # pragma: no cover
-                    self.fail('Form onsubmit met slechte dubbelklik bescherming in template %s\n%s' % (repr(dtl),
-                                                                                                       repr(submit)))
+                    if 'document.getElementById(' not in submit:                                    # pragma: no cover
+                        self.fail('Form onsubmit met slechte dubbelklik bescherming in template %s\n%s' % (repr(dtl),
+                                                                                                           repr(submit)))
 
-            pos_button = form.find('<button')
-            button_count = 0
-            pos1 = pos2 = -1
-            while pos_button >= 0:
-                form = form[pos_button:]
-                button_end = form.find('</button>')
-                button = form[:button_end]
-                button_count += 1
-
-                pos1 = button.find(' id="submit_knop')
-                pos2 = button.find(' type="submit"')
-                if pos1 > 0 and pos2 > 0:
-                    break   # from the while
-
-                form = form[button_end + 9:]
                 pos_button = form.find('<button')
-            # while
+                button_count = 0
+                pos1 = pos2 = -1
+                while pos_button >= 0:
+                    form = form[pos_button:]
+                    button_end = form.find('</button>')
+                    button = form[:button_end]
+                    button_count += 1
 
-            if button_count > 0:
-                if pos1 < 0 or pos2 < 0:                # pragma: no cover
-                    msg = 'Form without dubbelklik bescherming in button template %s\n'% repr(dtl)
-                    msg += 'button_count=%s, pos1=%s, pos2=%s' % (button_count, pos1, pos2)
-                    self.fail(msg)
+                    pos1 = button.find(' id="submit_knop')
+                    pos2 = button.find(' type="submit"')
+                    if pos1 > 0 and pos2 > 0:
+                        break   # from the while
+
+                    form = form[button_end + 9:]
+                    pos_button = form.find('<button')
+                # while
+
+                if button_count > 0:
+                    if pos1 < 0 or pos2 < 0:                # pragma: no cover
+                        msg = 'Form without dubbelklik bescherming in button template %s\n'% repr(dtl)
+                        msg += 'button_count=%s, pos1=%s, pos2=%s' % (button_count, pos1, pos2)
+                        self.fail(msg)
 
             html = html[form_end+7:]
             pos_form = html.find('<form')

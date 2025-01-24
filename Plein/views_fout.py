@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -71,6 +71,8 @@ def site_handler403_permission_denied(request, exception=None):
     if len(info):
         context['info'] = info
 
+    context['robots'] = 'noindex'   # prevent indexing this error message page
+
     context['email_support'] = settings.EMAIL_SUPPORT
     return render(request, TEMPLATE_HANDLER_403, context)
 
@@ -120,6 +122,8 @@ def site_handler404_page_not_found(request, exception=None):
     if len(info):
         context['info'] = info
 
+    context['robots'] = 'noindex'   # prevent indexing this error message page
+
     context['email_support'] = settings.EMAIL_SUPPORT
     return render(request, TEMPLATE_HANDLER_404, context)
 
@@ -165,6 +169,7 @@ def site_handler500_internal_server_error(request, exception=None):
 
     context = dict()
     context['email_support'] = settings.EMAIL_SUPPORT
+    context['robots'] = 'noindex'   # prevent indexing this error message page
 
     return render(request, TEMPLATE_HANDLER_500, context)
 

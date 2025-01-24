@@ -46,6 +46,8 @@ PASSWORD_HASHERS = ['django.contrib.auth.hashers.MD5PasswordHasher']
 
 WEBWINKEL_FOTOS_DIR = 'Webwinkel/test-files/'
 
+KALENDER_API_TOKENS = ('autotest',)
+
 # Mollie endpoint URL override
 BETAAL_API_URL = 'http://localhost:8125'        # gebruik de simulator
 

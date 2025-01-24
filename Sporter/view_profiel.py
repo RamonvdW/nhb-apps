@@ -58,6 +58,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
         self.ver = None
         self.voorkeuren = None
         self.alle_competitie_bogen = BoogType.objects.filter(organisatie=ORGANISATIE_WA)
+        self.alle_wedstrijd_bogen = BoogType.objects.all()
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
@@ -356,7 +357,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
         if not self.sporter.is_gast:
             context['url_bondspas'] = reverse('Bondspas:toon-bondspas')
 
-        boog_afk2sporterboog, wedstrijdbogen = get_sporter_gekozen_bogen(self.sporter, self.alle_competitie_bogen)
+        boog_afk2sporterboog, wedstrijdbogen = get_sporter_gekozen_bogen(self.sporter, self.alle_wedstrijd_bogen)
         context['moet_bogen_kiezen'] = len(wedstrijdbogen) == 0
 
         context['histcomp'] = self._find_histcomp_scores()

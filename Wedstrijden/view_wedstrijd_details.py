@@ -8,7 +8,7 @@ from django.http import Http404
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.http import urlencode
-from django.views.generic import TemplateView, View
+from django.views.generic import TemplateView
 from BasisTypen.definities import ORGANISATIE_WA, ORGANISATIE_IFAA
 from Kalender.view_maand import MAAND2URL
 from Wedstrijden.definities import (WEDSTRIJD_ORGANISATIE_TO_STR, WEDSTRIJD_BEGRENZING_TO_STR,
@@ -58,6 +58,10 @@ class WedstrijdDetailsView(TemplateView):
         wedstrijd.inschrijven_voor = wedstrijd.datum_begin - timedelta(days=wedstrijd.inschrijven_tot)
         wedstrijd.inschrijven_dagen = (wedstrijd.inschrijven_voor - now_date).days
         wedstrijd.inschrijven_let_op = (wedstrijd.inschrijven_dagen <= 7)
+
+        # bij lang geleden niet meer "inschrijven voor" tonen
+        if wedstrijd.inschrijven_dagen < -30:
+            wedstrijd.is_ter_info = True
 
         if wedstrijd.organisatie == ORGANISATIE_WA:
             context['toon_wa_status'] = True

@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2022-2023 Ramon van der Winkel.
+                Copyright (c) 2022-2025 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -28,7 +28,7 @@
                 <p class="sv-rood-text">Let op: na 3 dagen verwijderen we deze reservering automatisch</p>
                 <br>
                 <p>Rechts bovenin vind je de knop voor je <b>winkelmandje</b>.</p>
-                <p>Je kan meerdere producten toevoegen aan je mandje en daarna in &eacute;&eacute;n keer de bestellen afronden en afrekenen.</p>
+                <p>Je kan meerdere producten toevoegen aan je mandje en daarna in &eacute;&eacute;n keer de bestelling afronden en afrekenen.</p>
             </div>
         </div>
     </div>
