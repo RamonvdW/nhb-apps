@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -55,8 +55,8 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
         if not ver.is_extern:
             context['toon_wedstrijden'] = self.rol_nu != Rol.ROL_SEC
 
-            if ver.ver_nr in settings.EVENEMENTEN_VERKOPER_VER_NRS:
-                context['toon_evenementen'] = True
+        context['toon_evenementen'] = ver.ver_nr in settings.EVENEMENTEN_VERKOPER_VER_NRS
+        context['toon_opleidingen'] = ver.ver_nr in settings.OPLEIDINGEN_VERKOPER_VER_NRS
 
         if ver.wedstrijdlocatie_set.exclude(baan_type=BAAN_TYPE_EXTERN).filter(zichtbaar=True).count() > 0:
             context['accommodatie_details_url'] = reverse('Locatie:accommodatie-details',
