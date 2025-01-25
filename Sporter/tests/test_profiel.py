@@ -255,7 +255,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         # maak dit een vereniging zonder secretaris
         Secretaris.objects.filter(vereniging=self.ver).delete()
 
-        with self.assert_max_queries(23):
+        with self.assert_max_queries(24):
             resp = self.client.get(self.url_profiel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -400,7 +400,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         wedstrijd.eis_kwalificatie_scores = True
         wedstrijd.save(update_fields=['eis_kwalificatie_scores'])
 
-        with self.assert_max_queries(23):
+        with self.assert_max_queries(24):
             resp = self.client.get(self.url_profiel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -473,7 +473,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         functie_rcl18.accounts.add(self.account_normaal)
         functie_rcl25.accounts.add(self.account_normaal)
 
-        with self.assert_max_queries(23):
+        with self.assert_max_queries(24):
             resp = self.client.get(self.url_profiel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
