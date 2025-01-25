@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2024 Ramon van der Winkel.
+#  Copyright (c) 2024-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -35,6 +35,7 @@ class ProfielTestView(UserPassesTestMixin, TemplateView):
         self.ver = None
         self.voorkeuren = None
         self.alle_competitie_bogen = BoogType.objects.filter(organisatie=ORGANISATIE_WA)
+        self.alle_wedstrijd_bogen = BoogType.objects.all()
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
@@ -75,7 +76,7 @@ class ProfielTestView(UserPassesTestMixin, TemplateView):
         context['sporter'] = self.sporter
         self.voorkeuren = get_sporter_voorkeuren(self.sporter)
 
-        boog_afk2sporterboog, wedstrijdbogen = get_sporter_gekozen_bogen(self.sporter, self.alle_competitie_bogen)
+        boog_afk2sporterboog, wedstrijdbogen = get_sporter_gekozen_bogen(self.sporter, self.alle_wedstrijd_bogen)
         context['moet_bogen_kiezen'] = len(wedstrijdbogen) == 0
 
         context['toon_bondscompetities'] = False

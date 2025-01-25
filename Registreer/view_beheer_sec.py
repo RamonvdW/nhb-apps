@@ -203,7 +203,7 @@ class GastAccountDetailsView(UserPassesTestMixin, TemplateView):
                 match.vereniging_str = match.bij_vereniging.ver_nr_en_naam()
                 match.is_match_vereniging = False
                 for woord in gast.club.upper().split():
-                    if woord in match.vereniging_str.upper():
+                    if woord in match.vereniging_str.upper():   # pragma: no branch
                         match.is_match_vereniging = True
                 # for
 
@@ -280,8 +280,11 @@ class GastAccountDetailsView(UserPassesTestMixin, TemplateView):
         for inschrijving in context['gast_wedstrijden']:
             inschrijving.status_str = WEDSTRIJD_INSCHRIJVING_STATUS_TO_STR[inschrijving.status]
             if inschrijving.status == WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF:
+                # definitieve inschrijving op wedstrijd
                 gast.ophef = -100
             else:
+                # gereserveerd in mandje
+                # of nog niet betaalde bestelling
                 gast.ophef = -1
         # for
 
