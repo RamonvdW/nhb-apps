@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2024 Ramon van der Winkel.
+#  Copyright (c) 2024-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -45,15 +45,19 @@ class VerenigingEvenementenView(UserPassesTestMixin, View):
 
         context['huidige_rol'] = rol_get_beschrijving(request)
 
-        datum = timezone.now().date()
-        datum -= datetime.timedelta(days=30)
+        now = timezone.now().date()
+        jaar_geleden = now - datetime.timedelta(days=365)
+        maand_geleden = now - datetime.timedelta(days=30)
 
         evenementen = (Evenement
                        .objects
-                       .filter(organiserende_vereniging=ver,
-                               datum__gt=datum)
+                       .filter(organiserende_vereniging=ver)
+                       .exclude(datum__lt=jaar_geleden)
                        .order_by('datum',
                                  'pk'))
+
+        context['evenementen_actueel'] = evenementen_actueel = list()
+        context['evenementen_eerder'] = evenementen_eerder = list()
 
         for evenement in evenementen:
             evenement.status_str = EVENEMENT_STATUS_TO_STR[evenement.status]
@@ -61,9 +65,12 @@ class VerenigingEvenementenView(UserPassesTestMixin, View):
                                             kwargs={'evenement_pk': evenement.pk})
             evenement.url_aanmeldingen = reverse('Evenement:aanmeldingen',
                                                  kwargs={'evenement_pk': evenement.pk})
-        # for
 
-        context['evenementen'] = evenementen
+            if evenement.datum < maand_geleden:
+                evenementen_eerder.append(evenement)
+            else:
+                evenementen_actueel.append(evenement)
+        # for
 
         context['url_mollie'] = reverse('Betaal:vereniging-instellingen')
         context['url_overboeking_ontvangen'] = reverse('Bestel:overboeking-ontvangen')

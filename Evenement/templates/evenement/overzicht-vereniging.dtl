@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2024 Ramon van der Winkel.
+                Copyright (c) 2024-2025 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -41,16 +41,16 @@
                         </tr>
                     </thead>
 
-                    {% for evenement in evenementen %}
+                    {% for evenement in evenementen_actueel %}
                         <tr>
                             <td>{{ evenement.datum }}</td>
                             <td>{{ evenement.status_str }}</td>
                             <td>{{ evenement.titel }}</td>
                             <td>
                                 <div style="white-space:nowrap">     <!-- keeps buttons side by side -->
-                                    <a class="btn-sv-rood" href="{{ evenement.url_details }}" style="padding:0; width:35px; margin-right:5px">
+                                    <a class="{% if evenement.is_in_verleden %}btn-sv-blauw{% else %}btn-sv-rood{% endif %}" href="{{ evenement.url_details }}" style="padding:0; width:35px; margin-right:5px">
                                         <i class="notranslate material-icons-round">schedule</i></a>
-                                    <a class="btn-sv-rood" href="{{ evenement.url_aanmeldingen }}" style="padding:0; width:35px; margin-right:5px">
+                                    <a class="{% if evenement.is_in_verleden %}btn-sv-blauw{% else %}btn-sv-rood{% endif %}" href="{{ evenement.url_aanmeldingen }}" style="padding:0; width:35px; margin-right:5px">
                                         <i class="notranslate material-icons-round">people_alt</i>
                                     </a>
                                 </div>
@@ -58,7 +58,7 @@
                         </tr>
                     {% empty %}
                         <tr data-tablefilter="stop">
-                            <td colspan="4"><i>Er zijn nog geen evenementen</i></td>
+                            <td class="center" colspan="4"><i>Er zijn nog geen evenementen</i></td>
                         </tr>
                     {% endfor %}
 
@@ -66,6 +66,57 @@
             </div>
         </div>
 
+        <!-- witruimte -->
+        <div class="row center">
+            <div class="col s12">
+                <h4>Eerdere evenementen</h4>
+            </div>
+        </div>
+
+        <!-- blauwe balk met informatie in een tabel -->
+        <div class="row-sv-blauw">
+            <div class="col s12">
+                <table class="sv-kader" id="tabel1">
+                    <thead>
+                        <tr>        <!-- filter veld -->
+                            <td colspan="2"></td>
+                            <td class="table-filter">
+                                <input class="table-filter" oninput="myTableFilter(this, 'tabel1')" placeholder="Zoeken"/>
+                            </td>
+                            <td><!-- kolom voor knoppen --></td>
+                        </tr>
+                        <tr>
+                            <th>Wanneer</th>
+                            <th>Status</th>
+                            <th data-filter="on">Titel</th>
+                            <th><!-- kolom voor knoppen --></th>
+                        </tr>
+                    </thead>
+
+                    {% for evenement in evenementen_eerder %}
+                        <tr>
+                            <td>{{ evenement.datum }}</td>
+                            <td>{{ evenement.status_str }}</td>
+                            <td>{{ evenement.titel }}</td>
+                            <td>
+                                <div style="white-space:nowrap">     <!-- keeps buttons side by side -->
+                                    <a class="btn-sv-blauw" href="{{ evenement.url_details }}" style="padding:0; width:35px; margin-right:5px">
+                                        <i class="notranslate material-icons-round">schedule</i></a>
+                                    <a class="btn-sv-blauw" href="{{ evenement.url_aanmeldingen }}" style="padding:0; width:35px; margin-right:5px">
+                                        <i class="notranslate material-icons-round">people_alt</i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr data-tablefilter="stop">
+                            <td class="center" colspan="4"><i>Geen evenementen</i></td>
+                        </tr>
+                    {% endfor %}
+
+                </table>
+            </div>
+        </div>
 
         <!-- witruimte -->
         <div class="row center">
