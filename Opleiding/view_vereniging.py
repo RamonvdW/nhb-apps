@@ -44,8 +44,8 @@ class VerenigingOpleidingenView(UserPassesTestMixin, View):
 
         opleidingen = (Opleiding
                        .objects
-                       .order_by('periode_jaartal',
-                                 'periode_kwartaal',
+                       .order_by('periode_begin',
+                                 'periode_einde',
                                  'pk'))
 
         for opleiding in opleidingen:

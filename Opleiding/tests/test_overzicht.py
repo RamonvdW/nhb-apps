@@ -7,12 +7,14 @@
 from django.test import TestCase
 from django.utils import timezone
 from Functie.models import Functie
+from Geo.models import Regio
 from Instaptoets.models import Vraag, Instaptoets
 from Opleiding import admin
 from Opleiding.definities import OPLEIDING_STATUS_INSCHRIJVEN, OPLEIDING_STATUS_GEANNULEERD
 from Opleiding.models import OpleidingDiploma, Opleiding
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
+from Vereniging.models import Vereniging
 
 
 class TestOpleidingOverzicht(E2EHelpers, TestCase):
@@ -32,6 +34,29 @@ class TestOpleidingOverzicht(E2EHelpers, TestCase):
 
         self.functie_mo = Functie.objects.get(rol='MO')
         self.functie_mo.accounts.add(self.account_normaal)
+
+        # maak een test vereniging
+        self.ver = Vereniging(
+                        ver_nr=1000,
+                        naam="Grote Club",
+                        regio=Regio.objects.get(regio_nr=112))
+        self.ver.save()
+
+        self.functie_hwl = Functie(
+                                beschrijving='HWL ver 1000',
+                                rol='HWL',
+                                bevestigde_email='hwl@khsn.not',
+                                vereniging=self.ver)
+        self.functie_hwl.save()
+        self.functie_hwl.accounts.add(self.account_normaal)
+
+        self.functie_sec = Functie(
+                                beschrijving='SEC ver 1000',
+                                rol='SEC',
+                                bevestigde_email='sec@khsn.not',
+                                vereniging=self.ver)
+        self.functie_sec.save()
+        self.functie_sec.accounts.add(self.account_normaal)
 
         now = timezone.now()
         sporter = Sporter(
@@ -141,8 +166,11 @@ class TestOpleidingOverzicht(E2EHelpers, TestCase):
         resp = self.client.get(self.url_details % 999999)
         self.assert404(resp, 'Slechte parameter')
 
-    def test_mo(self):
+    def test_beheerders(self):
         self.e2e_login_and_pass_otp(self.account_normaal)
+        url = self.url_details % self.opleiding_geannuleerd.pk
+
+        # MO
         self.e2e_wissel_naar_functie(self.functie_mo)
 
         with self.assert_max_queries(20):
@@ -150,6 +178,42 @@ class TestOpleidingOverzicht(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('opleiding/overzicht.dtl', 'plein/site_layout.dtl'))
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('opleiding/details.dtl', 'plein/site_layout.dtl'))
+
+        # SEC
+        self.e2e_wissel_naar_functie(self.functie_sec)
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_overzicht)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('opleiding/overzicht.dtl', 'plein/site_layout.dtl'))
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('opleiding/details.dtl', 'plein/site_layout.dtl'))
+
+        # HWL
+        self.e2e_wissel_naar_functie(self.functie_hwl)
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_overzicht)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('opleiding/overzicht.dtl', 'plein/site_layout.dtl'))
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('opleiding/details.dtl', 'plein/site_layout.dtl'))
 
     def test_admin(self):
         # FUTURE: migreer naar Beheer/tests
