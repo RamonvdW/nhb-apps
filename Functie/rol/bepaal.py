@@ -95,7 +95,7 @@ class RolBepaler:
         try:
             func.rol = functie_rol_str2rol[obj.rol]
         except KeyError:
-            func.rol = Rol.ROL_SPORTER
+            func.rol = Rol.ROL_NONE
         func.comp_type = obj.comp_type
 
         if obj.rayon_id:
