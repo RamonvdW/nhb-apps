@@ -256,12 +256,7 @@ class OpleidingAfgemeld(models.Model):
 
     def korte_beschrijving(self):
         """ geef een one-liner terug met een korte beschrijving van deze afmelding """
-
-        titel = self.opleiding.beschrijving
-        if len(titel) > 40:
-            titel = titel[:40] + '..'
-
-        return "%s, voor %s" % (titel, self.sporter.lid_nr)
+        return self.opleiding.titel
 
     class Meta:
         verbose_name = "Opleiding afmelding"
