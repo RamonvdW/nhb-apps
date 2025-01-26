@@ -242,21 +242,30 @@ $switch-radius: 15px !default;
 // - variables.css: media query ranges
 // -------------
 
-// Media Query Ranges
-$small-screen: 720px !default;      // up to this size = small
-$small-screen-up: 721px !default;   // more than small
-$medium-screen: 1020px !default;
-$medium-screen-up: 1021px !default;
-$large-screen: 1350px !default;     // up to this size
-$large-screen-up: 1351px !default;  // more than large
+/*
+    min-width: at least   >
+    max-width: less than  <
 
-$medium-and-up: "only screen and (min-width : #{$small-screen-up})" !default;
-$large-and-up: "only screen and (min-width : #{$medium-screen-up})" !default;
-$extra-large-and-up: "only screen and (min-width : #{$large-screen-up})" !default;
-$small-and-down: "only screen and (max-width : #{$small-screen})" !default;
-$medium-and-down: "only screen and (max-width : #{$medium-screen})" !default;
+    to avoid 1px gap, do  > px - 0.001
+ */
+
+// Media Query Ranges
+$small-screen: 720.5px !default;      // up to this size = small
+$small-screen-up: 720.5px !default;   // more than small
+$medium-screen: 1020.5px !default;
+$medium-screen-up: 1020.5px !default;
+$large-screen: 1350.5px !default;     // up to this size
+$large-screen-up: 1350.5px !default;  // more than large
+
+$medium-and-up: "only screen and (min-width : #{$small-screen-up})" !default;       // > 721
+$large-and-up: "only screen and (min-width : #{$medium-screen-up})" !default;       // > 1021
+$extra-large-and-up: "only screen and (min-width : #{$large-screen-up})" !default;  // > 1351
+
+$small-and-down: "only screen and (max-width : #{$small-screen})" !default;         // < 720
+$medium-and-down: "only screen and (max-width : #{$medium-screen})" !default;       // < 1020
+$large-and-down: "only screen and (max-width : #{$large-screen})" !default;         // < 1350
+
 $medium-only: "only screen and (min-width : #{$small-screen-up}) and (max-width : #{$medium-screen})" !default;
-$large-and-down: "only screen and (max-width : #{$large-screen})" !default;
 
 
 // 12. Grid
