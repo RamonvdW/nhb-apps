@@ -12,7 +12,8 @@ from Betaal.format import format_bedrag_euro
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige
 from Instaptoets.operations import vind_toets
-from Opleiding.definities import OPLEIDING_STATUS_GEANNULEERD, OPLEIDING_STATUS_VOORBEREID
+from Opleiding.definities import (OPLEIDING_STATUS_GEANNULEERD, OPLEIDING_STATUS_VOORBEREID,
+                                  OPLEIDING_STATUS_INSCHRIJVEN, OPLEIDING_STATUS_TO_STR)
 from Opleiding.models import Opleiding, OpleidingDiploma
 from Sporter.models import get_sporter
 
@@ -33,14 +34,14 @@ class OpleidingenOverzichtView(TemplateView):
         opleidingen = (Opleiding
                        .objects
                        .exclude(status=OPLEIDING_STATUS_VOORBEREID)
-                       .order_by('periode_jaartal', 'periode_kwartaal'))     # recent bovenaan
+                       .order_by('periode_begin', 'periode_einde'))     # recent bovenaan
         context['opleidingen'] = opleidingen
 
         enable_basiscursus = False
         for opleiding in opleidingen:
-            if opleiding.status == OPLEIDING_STATUS_GEANNULEERD:
-                opleiding.titel = '[GEANNULEERD] ' + opleiding.titel
-            else:
+            opleiding.status_str = OPLEIDING_STATUS_TO_STR[opleiding.status]
+
+            if opleiding.status != OPLEIDING_STATUS_GEANNULEERD:
                 if opleiding.is_basiscursus:
                     enable_basiscursus = True
                     opleiding.url_details = reverse('Opleiding:inschrijven-basiscursus')
@@ -104,7 +105,7 @@ class OpleidingDetailsView(TemplateView):
         context['opleiding'] = opleiding
 
         # TODO: is er een deadline voor inschrijven?
-        context['toon_inschrijven'] = True
+        context['toon_inschrijven'] = (opleiding.status == OPLEIDING_STATUS_INSCHRIJVEN)
 
         # om aan te melden is een account nodig
         # extern beheerder wedstrijden kan je niet voor aanmelden

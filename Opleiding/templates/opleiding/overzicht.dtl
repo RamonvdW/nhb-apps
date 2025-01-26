@@ -45,6 +45,7 @@
                     <tr>
                         <th class="center-align">Periode</th>
                         <th>Titel</th>
+                        <th>Status</th>
                         <th><!-- kolom voor de knoppen --></th>
                     </tr>
                 </thead>
@@ -53,6 +54,7 @@
                     <tr>
                         <td class="center-align">{{ opleiding.periode_str }}</td>
                         <td>{{ opleiding.titel }}</td>
+                        <td>{{ opleiding.status_str }}</td>
                         <td class="center-align">
                             {% if opleiding.url_details %}
                                 <a class="btn-sv-rood" href="{{ opleiding.url_details }}">

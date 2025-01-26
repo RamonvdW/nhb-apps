@@ -5,6 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db import models
+from django.utils.formats import localize
 from Account.models import Account
 from Locatie.models import EvenementLocatie
 from Opleiding.definities import (OPLEIDING_STATUS_CHOICES, OPLEIDING_STATUS_VOORBEREID,
@@ -90,22 +91,28 @@ class Opleiding(models.Model):
     # een korte titel van de opleiding
     titel = models.CharField(max_length=75, default='')
 
+    # deze nog tonen op de lijst met opleidingen?
+    laten_zien = models.BooleanField(default=True)
+
     # is dit een basiscursus?
     is_basiscursus = models.BooleanField(default=False)
 
     # periode waarin de opleiding gehouden gaat worden
     # kwartaal = 1/2/3/4
-    periode_jaartal = models.PositiveSmallIntegerField(default=0)
-    periode_kwartaal = models.PositiveIntegerField(default=1)
+    periode_begin = models.DateField(default='2024-01-01')
+    periode_einde = models.DateField(default='2024-01-01')
 
     # aantal bijeenkomsten (gepland)
     aantal_momenten = models.PositiveIntegerField(default=1)
 
-    # leest van specifieke bijeenkomsten
+    # lijst van specifieke bijeenkomsten
     momenten = models.ManyToManyField(OpleidingMoment, blank=True)
 
+    # duur van de opleiding in dagen
+    aantal_dagen = models.PositiveSmallIntegerField(default=1)
+
     # aantal uren dat de opleiding vereist van de deelnemer
-    aantal_uren = models.PositiveIntegerField(default=1)
+    aantal_uren = models.PositiveSmallIntegerField(default=1)
 
     # uitgebreide beschrijving
     beschrijving = models.TextField(default='', blank=True)
@@ -129,10 +136,27 @@ class Opleiding(models.Model):
     kosten_euro = models.DecimalField(max_digits=7, decimal_places=2, default=Decimal(0))        # max 99999,99
 
     def periode_str(self):
-        return "%s-Q%s" % (self.periode_jaartal, self.periode_kwartaal)
+        # localize() geeft "1 januari 2024"
+        wanneer_str = localize(self.periode_begin)
+        # verwijder de dag
+        wanneer_str = wanneer_str.replace(str(self.periode_begin.day), '').strip()
+
+        if self.periode_begin != self.periode_einde:
+            # localize() geeft "1 januari 2024"
+            einde_str = localize(self.periode_einde)
+            # verwijder de dag
+            einde_str = einde_str.replace(str(self.periode_einde.day), '').strip()
+
+            if self.periode_begin.year == self.periode_einde.year:
+                # verwijder het jaartal
+                wanneer_str = wanneer_str.replace(str(self.periode_begin.year), '').strip()
+
+            wanneer_str += " tot " + einde_str
+
+        return wanneer_str
 
     def __str__(self):
-        return "%s %s" % (self.periode_str(), self.titel)
+        return "%s [%s]" % (self.titel, self.periode_str())
 
     class Meta:
         """ meta data voor de admin interface """

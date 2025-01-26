@@ -48,7 +48,7 @@
 
                 <tr>
                     <th>Totale duur</th>
-                    <td>1x {{ opleiding.aantal_uren }} uur</td>
+                    <td>2 dagen (zaterdag + zondag)</td>
                 </tr>
 
                 <tr>
@@ -63,9 +63,12 @@
 
                 <tr>
                     <th>Voorwaarden</th>
-                    <td>Online instaptoets moet gehaald zijn.{% if sporter and not voldoet_aan_voorwaarden %}<br>
-                                                                    <span class="sv-rood-text">Volgens onze administratie heb je deze nog niet gehaald</span>
-                                                             {% endif %}
+                    <td>
+                        <span>De online instaptoets moet gehaald zijn</span>
+                        {% if sporter and not voldoet_aan_voorwaarden %}
+                            <br>
+                            <span class="sv-rood-text">Volgens onze administratie heb je deze nog niet gehaald</span>
+                        {% endif %}
                     </td>
                 </tr>
 
@@ -150,7 +153,7 @@
 
         <!-- blauwe balk met wit informatie veld -->
         <div class="row-sv-blauw">
-            <div class="col s12 l10 offset-l1 xl8 offset-xl2">
+            <div class="col s12 m10 offset-m1 xl8 offset-xl2">
                 <div class="sv-kader" style="padding:10px">
 
                     <p>Je kan deze opleiding nu in je mandje leggen.</p>

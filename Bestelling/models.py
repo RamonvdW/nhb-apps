@@ -62,6 +62,8 @@ class BestellingProduct(models.Model):
             msg += str(self.webwinkel_keuze)
         elif self.opleiding_inschrijving:
             msg += str(self.opleiding_inschrijving)
+        elif self.opleiding_afgemeld:
+            msg += str(self.opleiding_afgemeld)
         else:
             # FUTURE: andere producten
             msg += '?'
@@ -79,6 +81,10 @@ class BestellingProduct(models.Model):
             return self.evenement_inschrijving.korte_beschrijving()
         if self.evenement_afgemeld:
             return self.evenement_afgemeld.korte_beschrijving()
+        if self.opleiding_inschrijving:
+            return self.opleiding_inschrijving.korte_beschrijving()
+        if self.opleiding_afgemeld:
+            return self.opleiding_afgemeld.korte_beschrijving()
         if self.webwinkel_keuze:
             return self.webwinkel_keuze.korte_beschrijving()
         return "?"

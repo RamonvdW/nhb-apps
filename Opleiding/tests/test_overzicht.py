@@ -51,13 +51,14 @@ class TestOpleidingOverzicht(E2EHelpers, TestCase):
         opleiding = Opleiding(
                         titel="Test",
                         is_basiscursus=True,
-                        periode_jaartal=2024,
-                        periode_kwartaal=4,
+                        periode_begin="2024-11-01",
+                        periode_einde="2024-12-01",
                         beschrijving="Test",
                         status=OPLEIDING_STATUS_INSCHRIJVEN,
                         eis_instaptoets=True)
         opleiding.save()
         self.opleiding = opleiding
+        self.opleiding.refresh_from_db()
 
         diploma = OpleidingDiploma(
                         sporter=sporter,
@@ -70,8 +71,8 @@ class TestOpleidingOverzicht(E2EHelpers, TestCase):
         opleiding = Opleiding(
                         titel="Test 2",
                         is_basiscursus=False,
-                        periode_jaartal=2024,
-                        periode_kwartaal=3,
+                        periode_begin="2024-02-01",
+                        periode_einde="2024-03-01",
                         beschrijving="Test niet meer",
                         status=OPLEIDING_STATUS_GEANNULEERD)
         opleiding.save()
@@ -81,8 +82,8 @@ class TestOpleidingOverzicht(E2EHelpers, TestCase):
         Opleiding(
                 titel="Test 3",
                 is_basiscursus=False,
-                periode_jaartal=2024,
-                periode_kwartaal=3,
+                periode_begin="2024-02-01",
+                periode_einde="2024-03-01",
                 beschrijving="Test nog steeds",
                 status=OPLEIDING_STATUS_INSCHRIJVEN).save()
 

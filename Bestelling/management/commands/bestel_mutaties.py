@@ -48,7 +48,8 @@ from Evenement.definities import (EVENEMENT_INSCHRIJVING_STATUS_DEFINITIEF, EVEN
 from Functie.models import Functie
 from Mailer.operations import mailer_queue_email, render_email_template, mailer_notify_internal_error
 from Opleiding.definities import (OPLEIDING_INSCHRIJVING_STATUS_DEFINITIEF,
-                                  OPLEIDING_INSCHRIJVING_STATUS_RESERVERING_BESTELD, OPLEIDING_STATUS_TO_STR)
+                                  OPLEIDING_INSCHRIJVING_STATUS_RESERVERING_BESTELD,
+                                  OPLEIDING_STATUS_TO_STR, OPLEIDING_INSCHRIJVING_STATUS_TO_STR)
 from Overig.background_sync import BackgroundSync
 from Vereniging.models import Vereniging
 from Wedstrijden.definities import (WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_BESTELD,
@@ -630,6 +631,9 @@ class Command(BaseCommand):
 
             prijs_euro = opleiding_plugin_inschrijven(inschrijving)
 
+            self.stdout.write('[DEBUG] Opleiding inschrijving status = %s (%s)' % (
+                                inschrijving.status, OPLEIDING_INSCHRIJVING_STATUS_TO_STR[inschrijving.status]))
+
             # handmatige inschrijving heeft meteen status definitief en hoeft dus niet betaald te worden
             if inschrijving.status != OPLEIDING_INSCHRIJVING_STATUS_DEFINITIEF:
                 # maak een product regel aan voor de bestelling
@@ -640,6 +644,11 @@ class Command(BaseCommand):
 
                 # leg het product in het mandje
                 mandje.producten.add(product)
+
+                stamp_str = timezone.localtime(timezone.now()).strftime('%Y-%m-%d om %H:%M')
+                msg = "[%s] Toegevoegd aan het mandje van %s\n" % (stamp_str, mandje.account.get_account_full_name())
+                inschrijving.log += msg
+                inschrijving.save(update_fields=['log'])
 
                 # bereken het totaal opnieuw
                 self._mandje_bepaal_btw(mandje)
@@ -1108,6 +1117,8 @@ class Command(BaseCommand):
                         wedstrijden_plugin_inschrijving_is_betaald(self.stdout, product)
                     elif product.evenement_inschrijving:
                         evenement_plugin_inschrijving_is_betaald(self.stdout, product)
+                    elif product.opleiding_inschrijving:
+                        opleiding_plugin_inschrijving_is_betaald(self.stdout, product)
                     elif product.webwinkel_keuze:
                         bevat_webwinkel = True
                 # for
@@ -1290,9 +1301,13 @@ class Command(BaseCommand):
             deelnemer = product.opleiding_inschrijving
 
             self.stdout.write('[INFO] Annuleer: BestelProduct pk=%s opleiding (%s) in mandje van %s' % (
-                product.pk, deelnemer.opleiding, deelnemer.koper))
+                                product.pk, deelnemer.opleiding, deelnemer.koper))
 
-            opleiding_plugin_verwijder_reservering(self.stdout, deelnemer)
+            afmelding = opleiding_plugin_verwijder_reservering(self.stdout, deelnemer)
+
+            product.opleiding_inschrijving = None
+            product.opleiding_afgemeld = afmelding
+            product.save(update_fields=['opleiding_inschrijving', 'opleiding_afgemeld'])
         # for
 
     def _verwerk_mutatie_transport(self, mutatie: BestellingMutatie):

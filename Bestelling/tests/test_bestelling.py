@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2024 Ramon van der Winkel.
+#  Copyright (c) 2022-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -66,6 +66,8 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
         self.account_admin = account = self.e2e_create_account_admin()
         self.account_admin.is_BB = True
         self.account_admin.save()
+
+        self.functie_mo = Functie.objects.get(rol='MO')
 
         ver_bond = Vereniging(
                         ver_nr=settings.BETAAL_VIA_BOND_VER_NR,
@@ -301,6 +303,10 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
         self.assert_email_html_ok(mail, 'email_bestelling/bevestig-bestelling.dtl')
         self.assert_consistent_email_html_text(mail, ignore=('>Bedrag:', '>Korting:'))
         self.assertTrue('Verzendkosten' in mail.mail_text)
+
+        # corner case: e-mail opleidingen
+        self.functie_mo.bevestigde_email = 'mo@khsn.not'
+        self.functie_mo.save(update_fields=['bevestigde_email'])
 
         # bekijk de bestellingen
         with self.assert_max_queries(20):

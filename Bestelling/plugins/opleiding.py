@@ -36,7 +36,7 @@ def opleiding_plugin_verwijder_reservering(stdout, inschrijving: OpleidingInschr
 
     now = timezone.now()
     stamp_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
-    msg = "[%s] Verwijder inschrijving voor deze opleiding\n" % stamp_str
+    msg = "[%s] Annuleer inschrijving voor deze opleiding\n" % stamp_str
 
     if inschrijving.status == OPLEIDING_INSCHRIJVING_STATUS_RESERVERING_MANDJE:
         # verwijdering uit mandje

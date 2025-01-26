@@ -64,7 +64,36 @@ class GeldigheidFilter(admin.SimpleListFilter):
 class OpleidingAdmin(admin.ModelAdmin):
     """ Admin configuratie voor Opleiding klasse """
 
-    # ordering = ('lid_nr',)
+    fieldsets = (
+        ('Basics',
+            {'fields': ('titel',
+                        'laten_zien',
+                        'status',
+                        'kosten_euro',
+                        'is_basiscursus')
+             }),
+        ('Periode',
+            {'fields': ('periode_begin',
+                        'periode_einde',
+                        'aantal_dagen')
+             }),
+        ('Momenten',
+            {'fields': ('aantal_uren',
+                        'aantal_momenten',
+                        'momenten')
+             }),
+        ('Ingangseisen',
+            {'fields': ('leeftijd_min',
+                        'leeftijd_max',
+                        'eis_instaptoets',
+                        'ingangseisen')
+             }),
+        ('Beschrijving',
+            {'fields': ('beschrijving',)
+             }),
+    )
+
+    #ordering = ('lid_nr',)
 
     # search_fields = ('unaccented_naam', 'lid_nr')
 

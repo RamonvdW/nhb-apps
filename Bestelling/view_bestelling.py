@@ -94,8 +94,12 @@ class ToonBestellingenView(UserPassesTestMixin, TemplateView):
                 # toon daarom als "te betalen"
                 status = BESTELLING_STATUS_BETALING_ACTIEF
 
-            bestelling.status_str = BESTELLING_STATUS2STR[status]
-            bestelling.status_aandacht = (status == BESTELLING_STATUS_BETALING_ACTIEF)
+            if status == BESTELLING_STATUS_BETALING_ACTIEF:
+                bestelling.status_str = 'Te betalen'
+            else:
+                bestelling.status_str = BESTELLING_STATUS2STR[status]
+
+            bestelling.status_aandacht = status in (BESTELLING_STATUS_BETALING_ACTIEF, BESTELLING_STATUS_MISLUKT)
 
             bestelling.url_details = reverse('Bestel:toon-bestelling-details',
                                              kwargs={'bestel_nr': bestelling.bestel_nr})
@@ -111,6 +115,10 @@ class ToonBestellingenView(UserPassesTestMixin, TemplateView):
         # contactgegevens voor hulpvragen
         functie = Functie.objects.filter(rol='MWW')[0]
         context['email_webshop'] = functie.bevestigde_email
+
+        functie = Functie.objects.filter(rol='MO')[0]
+        context['email_opleidingen'] = functie.bevestigde_email
+
         context['email_support'] = settings.EMAIL_SUPPORT
 
         context['kruimels'] = (

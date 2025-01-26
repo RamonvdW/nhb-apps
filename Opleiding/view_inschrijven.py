@@ -42,7 +42,7 @@ class InschrijvenBasiscursusView(TemplateView):
                           .objects
                           .filter(is_basiscursus=True,
                                   status=OPLEIDING_STATUS_INSCHRIJVEN)
-                          .order_by('periode_jaartal', 'periode_kwartaal')       # meest recente cursus eerst
+                          .order_by('periode_begin', 'periode_einde')       # meest recente cursus eerst
                           .first())
 
     def _zoek_inschrijving(self, mag_database_wijzigen=False):
@@ -212,8 +212,8 @@ class ToevoegenAanMandjeView(UserPassesTestMixin, View):
         account_koper = get_account(request)
 
         now = timezone.now()
-        stamp_str = timezone.localtime(timezone.now()).strftime('%Y-%m-%d om %H:%M')
-        msg = "[%s] Toegevoegd aan het mandje van %s\n" % (stamp_str, account_koper.get_account_full_name())
+        stamp_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
+        msg = "[%s] Inschrijving ontvangen; koper=%s\n" % (stamp_str, account_koper.get_account_full_name())
 
         # zoek of maak de deelnemer
         inschrijving, _ = OpleidingInschrijving.objects.get_or_create(sporter=self.sporter, opleiding=opleiding)
