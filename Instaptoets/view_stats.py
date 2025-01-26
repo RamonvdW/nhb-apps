@@ -142,7 +142,7 @@ class StatsInstaptoetsView(UserPassesTestMixin, TemplateView):
         context['vragen'] = [tup[-1] for tup in lst]
 
         context['kruimels'] = (
-            (reverse('Opleiding:overzicht'), 'Opleidingen'),
+            (reverse('Opleiding:manager'), 'Opleidingen'),
             (None, 'Statistiek antwoorden instaptoets')
         )
 
