@@ -52,6 +52,6 @@
     </div>
 
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="instaptoets/begin-toets" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="instaptoets-begin-toets" %}
 
 {% endblock %}

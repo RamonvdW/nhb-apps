@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from Instaptoets import view_toets
+from Instaptoets import view_toets, view_stats
 
 app_name = 'Instaptoets'
 
@@ -28,6 +28,10 @@ urlpatterns = [
     path('vraag-antwoord/',
          view_toets.OntvangAntwoordView.as_view(),
          name='antwoord'),
+
+    path('stats/',
+         view_stats.StatsInstaptoetsView.as_view(),
+         name='stats'),
 ]
 
 # end of file

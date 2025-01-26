@@ -1,0 +1,87 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2022-2025 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Opleidingen{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Opleidingen</h3>
+            <p>Je huidige rol is: <b>{{ huidige_rol }}</b></p>
+        </div>
+    </div>
+
+    <!-- blauwe balk met informatie in een tabel -->
+    <div class="row-sv-blauw">
+        <div class="col s12">
+            <table class="sv-kader" id="tabel1">
+                <thead>
+                    <tr>        <!-- filter veld -->
+                        <td colspan="2"></td>
+                        <td class="table-filter">
+                            <input class="table-filter" oninput="myTableFilter(this, 'tabel1')" placeholder="Zoeken"/>
+                        </td>
+                        <td><!-- kolom voor knoppen --></td>
+                    </tr>
+                    <tr>
+                        <th>Periode</th>
+                        <th>Status</th>
+                        <th data-filter="on">Titel</th>
+                        <th><!-- kolom voor knoppen --></th>
+                    </tr>
+                </thead>
+
+                {% for opleiding in opleidingen %}
+                    <tr>
+                        <td>{{ opleiding.periode_str }}</td>
+                        <td>{{ opleiding.status_str }}</td>
+                        <td>{{ opleiding.titel }}</td>
+                        <td>
+                            <div style="white-space:nowrap">     <!-- keeps buttons side by side -->
+                                <a class="btn-sv-rood" href="{{ opleiding.url_details }}" style="padding:0; width:35px; margin-right:5px">
+                                    <i class="notranslate material-icons-round">schedule</i></a>
+                                <a class="btn-sv-rood" href="{{ opleiding.url_aanmeldingen }}" style="padding:0; width:35px; margin-right:5px">
+                                    <i class="notranslate material-icons-round">people_alt</i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr data-tablefilter="stop">
+                        <td class="center" colspan="4"><i>Er zijn nog geen opleidingen</i></td>
+                    </tr>
+                {% endfor %}
+
+            </table>
+        </div>
+    </div>
+
+
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>Statistiek</h4>
+        </div>
+    </div>
+
+    <!-- blauwe balk met kaartjes -->
+    <div class="row-sv-blauw">
+        <div class="col s12">
+
+            {% if url_stats_instaptoets %}
+                {% include 'plein/card_icon.dtl' with title="Instaptoets" text="Welke vragen van de instaptoets doen het slecht?" icon="insights" url=url_stats_instaptoets %}
+            {% endif %}
+
+        </div>
+    </div>
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="opleidingen-overzicht-manager" %}
+
+{% endblock %}

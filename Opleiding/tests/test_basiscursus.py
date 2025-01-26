@@ -55,7 +55,7 @@ class TestOpleidingBasiscursus(E2EHelpers, TestCase):
             resp = self.client.get(self.url_basiscursus)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('opleidingen/basiscursus.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('opleiding/basiscursus.dtl', 'plein/site_layout.dtl'))
 
         # maak de instaptoets beschikbaar
         Vraag().save()
@@ -64,7 +64,7 @@ class TestOpleidingBasiscursus(E2EHelpers, TestCase):
             resp = self.client.get(self.url_basiscursus)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('opleidingen/basiscursus.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('opleiding/basiscursus.dtl', 'plein/site_layout.dtl'))
 
         # instaptoets gehaald
         now = timezone.now()
@@ -84,7 +84,7 @@ class TestOpleidingBasiscursus(E2EHelpers, TestCase):
             resp = self.client.get(self.url_basiscursus)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('opleidingen/basiscursus.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('opleiding/basiscursus.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, 'kan alleen op de test server')
 
         # inschrijven is mogelijk
@@ -93,7 +93,7 @@ class TestOpleidingBasiscursus(E2EHelpers, TestCase):
             resp = self.client.get(self.url_basiscursus)
             self.assertEqual(resp.status_code, 200)  # 200 = OK
             self.assert_html_ok(resp)
-            self.assert_template_used(resp, ('opleidingen/basiscursus.dtl', 'plein/site_layout.dtl'))
+            self.assert_template_used(resp, ('opleiding/basiscursus.dtl', 'plein/site_layout.dtl'))
             self.assertNotContains(resp, 'kan alleen op de test server')
 
         # instaptoets verlopen
@@ -104,6 +104,6 @@ class TestOpleidingBasiscursus(E2EHelpers, TestCase):
             resp = self.client.get(self.url_basiscursus)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('opleidingen/basiscursus.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('opleiding/basiscursus.dtl', 'plein/site_layout.dtl'))
 
 # end of file

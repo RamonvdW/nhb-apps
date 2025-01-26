@@ -43,6 +43,6 @@
     </div>
 
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="instaptoets/toon-resultaat" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="instaptoets-toon-uitslag" %}
 
 {% endblock %}

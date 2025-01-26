@@ -76,12 +76,12 @@
         <!-- blauwe balk met informatie in een tabel -->
         <div class="row-sv-blauw">
             <div class="col s12">
-                <table class="sv-kader" id="tabel1">
+                <table class="sv-kader" id="tabel2">
                     <thead>
                         <tr>        <!-- filter veld -->
                             <td colspan="2"></td>
                             <td class="table-filter">
-                                <input class="table-filter" oninput="myTableFilter(this, 'tabel1')" placeholder="Zoeken"/>
+                                <input class="table-filter" oninput="myTableFilter(this, 'tabel2')" placeholder="Zoeken"/>
                             </td>
                             <td><!-- kolom voor knoppen --></td>
                         </tr>
@@ -133,7 +133,7 @@
                 {% include 'plein/card_icon.dtl' with title="Instellingen" text="Instellingen om inschrijfgelden te kunnen ontvangen via overschrijving of Mollie." icon="settings" url=url_mollie %}
 
                 <!-- betalingen doorgeven -->
-                {% include 'plein/card_icon.dtl' with title="Overboekingen" text="Geef de ontvangen wedstrijd-gelden door, zodat de reservering voor een sporter definitief kan worden." icon="euro_symbol" url=url_overboeking_ontvangen %}
+                {% include 'plein/card_icon.dtl' with title="Overboekingen" text="Geef de handmatige betalingen door, zodat de reservering voor een sporter definitief kan worden." icon="euro_symbol" url=url_overboeking_ontvangen %}
 
             </div>
         </div>

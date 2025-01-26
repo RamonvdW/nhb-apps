@@ -1,29 +1,30 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2024-2025 Ramon van der Winkel.
+#  Copyright (c) 2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.conf import settings
-from django.http import HttpResponse, Http404
 from django.urls import reverse
+from django.http import HttpResponse, Http404
 from django.utils import timezone
-from django.views.generic import TemplateView, View
+from django.views.generic import View, TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Betaal.format import format_bedrag_euro
-from Evenement.definities import (EVENEMENT_INSCHRIJVING_STATUS_TO_SHORT_STR, EVENEMENT_AFMELDING_STATUS_TO_SHORT_STR,
-                                  EVENEMENT_INSCHRIJVING_STATUS_DEFINITIEF)
-from Evenement.models import Evenement, EvenementInschrijving, EvenementAfgemeld
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
+from Opleiding.definities import (OPLEIDING_INSCHRIJVING_STATUS_DEFINITIEF, OPLEIDING_INSCHRIJVING_STATUS_TO_SHORT_STR,
+                                  OPLEIDING_AFMELDING_STATUS_TO_SHORT_STR)
+from Opleiding.models import Opleiding, OpleidingInschrijving, OpleidingAfgemeld
+from Sporter.models import Sporter
 from decimal import Decimal
 from codecs import BOM_UTF8
 import csv
 
 
-TEMPLATE_EVENEMENT_AANMELDINGEN = 'evenement/aanmeldingen.dtl'
-TEMPLATE_EVENEMENT_AFMELDING_DETAILS = 'evenement/afmelding-details.dtl'
-TEMPLATE_EVENEMENT_AANMELDING_DETAILS = 'evenement/aanmelding-details.dtl'
+TEMPLATE_OPLEIDING_AANMELDINGEN = 'opleiding/aanmeldingen.dtl'
+TEMPLATE_OPLEIDING_AFMELDING_DETAILS = 'opleiding/afmelding-details.dtl'
+TEMPLATE_OPLEIDING_AANMELDING_DETAILS = 'opleiding/aanmelding-details.dtl'
 
 CONTENT_TYPE_CSV = 'text/csv; charset=UTF-8'
 
@@ -35,15 +36,32 @@ def get_inschrijving_mh_bestel_nr(inschrijving):
         if bestelling:
             return bestelling.mh_bestel_nr()
 
-    return ""
+    return "?"
 
 
-class EvenementAanmeldingenView(UserPassesTestMixin, TemplateView):
+def get_email_telefoon(deelnemer: OpleidingInschrijving | OpleidingAfgemeld, sporter: Sporter) -> (str, str):
+    if deelnemer.aanpassing_email:
+        email = deelnemer.aanpassing_email
+    else:
+        email = sporter.email
 
-    """ Via deze view kunnen beheerders de inschrijvingen voor een evenement inzien """
+    if deelnemer.aanpassing_telefoon:
+        telefoon = deelnemer.aanpassing_telefoon
+    else:
+        telefoon = sporter.telefoon
+
+    if telefoon == '':
+        telefoon = '?'
+
+    return email, telefoon
+
+
+class OpleidingAanmeldingenView(UserPassesTestMixin, TemplateView):
+
+    """ Via deze view kunnen beheerders de inschrijvingen voor een opleiding inzien """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_EVENEMENT_AANMELDINGEN
+    template_name = TEMPLATE_OPLEIDING_AANMELDINGEN
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
     permission_denied_message = 'Geen toegang'
 
@@ -54,29 +72,30 @@ class EvenementAanmeldingenView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu in (Rol.ROL_HWL, Rol.ROL_SEC)
+        if self.rol_nu not in (Rol.ROL_MO, Rol.ROL_HWL, Rol.ROL_SEC):
+            return False
+        if self.rol_nu in (Rol.ROL_HWL, Rol.ROL_SEC):
+            if self.functie_nu.vereniging.ver_nr not in settings.OPLEIDINGEN_VERKOPER_VER_NRS:
+                return False
+        return True
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        ver = self.functie_nu.vereniging
-
         try:
-            evenement_pk = str(kwargs['evenement_pk'])[:6]     # afkappen voor de veiligheid
-            evenement = (Evenement
+            opleiding_pk = str(kwargs['opleiding_pk'])[:6]     # afkappen voor de veiligheid
+            opleiding = (Opleiding
                          .objects
-                         .filter(organiserende_vereniging=ver)
-                         .select_related('organiserende_vereniging')
-                         .get(pk=evenement_pk))
-        except (ValueError, TypeError, Evenement.DoesNotExist):
-            raise Http404('Evenement niet gevonden')
+                         .get(pk=opleiding_pk))
+        except (ValueError, TypeError, Opleiding.DoesNotExist):
+            raise Http404('Opleiding niet gevonden')
 
-        context['evenement'] = evenement
+        context['opleiding'] = opleiding
 
-        inschrijvingen = (EvenementInschrijving
+        inschrijvingen = (OpleidingInschrijving
                           .objects
-                          .filter(evenement=evenement)
+                          .filter(opleiding=opleiding)
                           .select_related('sporter')
                           .order_by('nummer'))
 
@@ -92,22 +111,22 @@ class EvenementAanmeldingenView(UserPassesTestMixin, TemplateView):
 
             aantal_aanmeldingen += 1
             inschrijving.volg_nr = aantal_aanmeldingen
-            inschrijving.reserveringsnummer = inschrijving.nummer + settings.TICKET_NUMMER_START__EVENEMENT
-            inschrijving.is_definitief = (inschrijving.status == EVENEMENT_INSCHRIJVING_STATUS_DEFINITIEF)
+            inschrijving.reserveringsnummer = inschrijving.nummer + settings.TICKET_NUMMER_START__OPLEIDING
+            inschrijving.is_definitief = (inschrijving.status == OPLEIDING_INSCHRIJVING_STATUS_DEFINITIEF)
 
-            inschrijving.status_str = EVENEMENT_INSCHRIJVING_STATUS_TO_SHORT_STR[inschrijving.status]
+            inschrijving.status_str = OPLEIDING_INSCHRIJVING_STATUS_TO_SHORT_STR[inschrijving.status]
 
             inschrijving.sporter_str = sporter.lid_nr_en_volledige_naam()
 
-            inschrijving.url_details = reverse('Evenement:details-aanmelding',
+            inschrijving.url_details = reverse('Opleiding:details-aanmelding',
                                                kwargs={'inschrijving_pk': inschrijving.pk})
 
             totaal_ontvangen_euro += inschrijving.bedrag_ontvangen
         # for
 
-        afmeldingen = (EvenementAfgemeld
+        afmeldingen = (OpleidingAfgemeld
                        .objects
-                       .filter(evenement=evenement)
+                       .filter(opleiding=opleiding)
                        .select_related('sporter')
                        .order_by('nummer'))
 
@@ -118,13 +137,13 @@ class EvenementAanmeldingenView(UserPassesTestMixin, TemplateView):
 
             aantal_aanmeldingen += 1
             afmelding.volg_nr = aantal_aanmeldingen
-            afmelding.reserveringsnummer = afmelding.nummer + settings.TICKET_NUMMER_START__EVENEMENT
+            afmelding.reserveringsnummer = afmelding.nummer + settings.TICKET_NUMMER_START__OPLEIDING
 
-            afmelding.status_str = EVENEMENT_AFMELDING_STATUS_TO_SHORT_STR[afmelding.status]
+            afmelding.status_str = OPLEIDING_AFMELDING_STATUS_TO_SHORT_STR[afmelding.status]
 
             afmelding.sporter_str = sporter.lid_nr_en_volledige_naam()
 
-            afmelding.url_details = reverse('Evenement:details-afmelding',
+            afmelding.url_details = reverse('Opleiding:details-afmelding',
                                             kwargs={'afmelding_pk': afmelding.pk})
 
             totaal_ontvangen_euro += afmelding.bedrag_ontvangen
@@ -136,14 +155,21 @@ class EvenementAanmeldingenView(UserPassesTestMixin, TemplateView):
         context['totaal_retour_euro'] = totaal_retour_euro
         context['aantal_aanmeldingen'] = aantal_aanmeldingen
 
-        context['url_download_csv'] = reverse('Evenement:download-aanmeldingen-csv',
-                                              kwargs={'evenement_pk': evenement.pk})
+        if self.rol_nu != Rol.ROL_SEC:
+            context['url_download_csv'] = reverse('Opleiding:download-aanmeldingen-csv',
+                                                  kwargs={'opleiding_pk': opleiding.pk})
 
-        context['kruimels'] = (
-            (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
-            (reverse('Evenement:vereniging'), 'Evenementen'),
-            (None, 'Aanmeldingen'),
-        )
+        if self.rol_nu == Rol.ROL_MO:
+            context['kruimels'] = (
+                (reverse('Opleiding:manager'), 'Opleidingen'),
+                (None, 'Aanmeldingen'),
+            )
+        else:
+            context['kruimels'] = (
+                (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
+                (reverse('Opleiding:vereniging'), 'Opleidingen'),
+                (None, 'Aanmeldingen'),
+            )
 
         return context
 
@@ -163,24 +189,29 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu in (Rol.ROL_SEC, Rol.ROL_HWL)
+        if self.rol_nu not in (Rol.ROL_MO, Rol.ROL_HWL):
+            return False
+        if self.rol_nu == Rol.ROL_HWL:
+            if self.functie_nu.vereniging.ver_nr not in settings.OPLEIDINGEN_VERKOPER_VER_NRS:
+                return False
+        return True
 
     @staticmethod
-    def _output_aanmeldingen(writer, evenement):
-        aanmeldingen = (EvenementInschrijving
+    def _output_aanmeldingen(writer, opleiding):
+        aanmeldingen = (OpleidingInschrijving
                         .objects
-                        .filter(evenement=evenement)
+                        .filter(opleiding=opleiding)
                         .select_related('sporter',
                                         'sporter__bij_vereniging')
                         .order_by('nummer'))
 
-        writer.writerow(['Reserveringsnummer', 'Aangemeld op', 'Status',
-                         'Bestelnummer', 'Prijs', 'Ontvangen',
-                         'Lid nr', 'Sporter', 'E-mailadres', 'Ver nr', 'Vereniging'])
+        writer.writerow(['Reserveringsnummer', 'Aangemeld op', 'Afgemeld op', 'Status',
+                         'Bestelnummer', 'Prijs', 'Ontvangen', 'Retour',
+                         'Lid nr', 'Sporter', 'E-mailadres', 'Telefoon', 'Ver nr', 'Vereniging'])
 
         for aanmelding in aanmeldingen:
             sporter = aanmelding.sporter
-            reserveringsnummer = aanmelding.nummer + settings.TICKET_NUMMER_START__EVENEMENT
+            reserveringsnummer = aanmelding.nummer + settings.TICKET_NUMMER_START__OPLEIDING
 
             bestelnummer_str = get_inschrijving_mh_bestel_nr(aanmelding)
 
@@ -198,16 +229,21 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
             else:
                 prijs_str = 'Geen (handmatige inschrijving)'
 
+            email, telefoon = get_email_telefoon(aanmelding, sporter)
+
             row = [
                 str(reserveringsnummer),
-                timezone.localtime(aanmelding.wanneer).strftime('%Y-%m-%d %H:%M'),
-                EVENEMENT_INSCHRIJVING_STATUS_TO_SHORT_STR[aanmelding.status],
+                timezone.localtime(aanmelding.wanneer_aangemeld).strftime('%Y-%m-%d %H:%M'),
+                '',     # wanneer afgemeld
+                OPLEIDING_INSCHRIJVING_STATUS_TO_SHORT_STR[aanmelding.status],
                 bestelnummer_str,
                 prijs_str,
                 format_bedrag_euro(aanmelding.bedrag_ontvangen),
+                '',     # bedrag retour
                 str(sporter.lid_nr),
                 sporter.volledige_naam(),
-                sporter.email,
+                email,
+                telefoon,
                 str(ver_nr),
                 ver_str]
 
@@ -215,23 +251,23 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
         # for
 
     @staticmethod
-    def _output_afmeldingen(writer, evenement):
-        afmeldingen = (EvenementAfgemeld
+    def _output_afmeldingen(writer, opleiding):
+        afmeldingen = (OpleidingAfgemeld
                        .objects
-                       .filter(evenement=evenement)
+                       .filter(opleiding=opleiding)
                        .select_related('sporter',
                                        'sporter__bij_vereniging')
                        .order_by('nummer'))
 
         writer.writerow(['Reserveringsnummer', 'Aangemeld op', 'Afgemeld op', 'Status',
                          'Bestelnummer', 'Prijs', 'Ontvangen', 'Retour',
-                         'Lid nr', 'Sporter', 'E-mailadres', 'Ver nr', 'Vereniging'])
+                         'Lid nr', 'Sporter', 'E-mailadres', 'Telefoon', 'Ver nr', 'Vereniging'])
 
-        for afgemeld in afmeldingen:
-            sporter = afgemeld.sporter
-            reserveringsnummer = afgemeld.nummer + settings.TICKET_NUMMER_START__EVENEMENT
+        for afmelding in afmeldingen:
+            sporter = afmelding.sporter
+            reserveringsnummer = afmelding.nummer + settings.TICKET_NUMMER_START__OPLEIDING
 
-            bestelnummer_str = get_inschrijving_mh_bestel_nr(afgemeld)
+            bestelnummer_str = get_inschrijving_mh_bestel_nr(afmelding)
 
             if sporter.bij_vereniging:
                 ver_nr = sporter.bij_vereniging.ver_nr
@@ -240,25 +276,28 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
                 ver_nr = 0
                 ver_str = 'geen'
 
-            qset = afgemeld.bestellingproduct_set.all()
+            qset = afmelding.bestellingproduct_set.all()
             if qset.count() > 0:
                 bestelproduct = qset[0]
                 prijs_str = format_bedrag_euro(bestelproduct.prijs_euro)
             else:
                 prijs_str = 'Geen (handmatige inschrijving)'
 
+            email, telefoon = get_email_telefoon(afmelding, sporter)
+
             row = [
                 str(reserveringsnummer),
-                timezone.localtime(afgemeld.wanneer_inschrijving).strftime('%Y-%m-%d %H:%M'),
-                timezone.localtime(afgemeld.wanneer_afgemeld).strftime('%Y-%m-%d %H:%M'),
-                EVENEMENT_AFMELDING_STATUS_TO_SHORT_STR[afgemeld.status],
+                timezone.localtime(afmelding.wanneer_aangemeld).strftime('%Y-%m-%d %H:%M'),
+                timezone.localtime(afmelding.wanneer_afgemeld).strftime('%Y-%m-%d %H:%M'),
+                OPLEIDING_AFMELDING_STATUS_TO_SHORT_STR[afmelding.status],
                 bestelnummer_str,
                 prijs_str,
-                format_bedrag_euro(afgemeld.bedrag_ontvangen),
-                format_bedrag_euro(afgemeld.bedrag_retour),
+                format_bedrag_euro(afmelding.bedrag_ontvangen),
+                format_bedrag_euro(afmelding.bedrag_retour),
                 str(sporter.lid_nr),
                 sporter.volledige_naam(),
-                sporter.email,
+                email,
+                telefoon,
                 str(ver_nr),
                 ver_str]
 
@@ -267,17 +306,13 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
 
     def get(self, request, *args, **kwargs):
 
-        ver = self.functie_nu.vereniging
-
         try:
-            evenement_pk = str(kwargs['evenement_pk'])[:6]     # afkappen voor de veiligheid
-            evenement = (Evenement
+            opleiding_pk = str(kwargs['opleiding_pk'])[:6]     # afkappen voor de veiligheid
+            opleiding = (Opleiding
                          .objects
-                         .filter(organiserende_vereniging=ver)
-                         .select_related('organiserende_vereniging')
-                         .get(pk=evenement_pk))
-        except (ValueError, TypeError, Evenement.DoesNotExist):
-            raise Http404('Evenement niet gevonden')
+                         .get(pk=opleiding_pk))
+        except (ValueError, TypeError, Opleiding.DoesNotExist):
+            raise Http404('Opleiding niet gevonden')
 
         response = HttpResponse(content_type=CONTENT_TYPE_CSV)
         response['Content-Disposition'] = 'attachment; filename="aanmeldingen.csv"'
@@ -285,19 +320,19 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
         response.write(BOM_UTF8)
         writer = csv.writer(response, delimiter=";")      # ; is good for dutch regional settings
 
-        self._output_aanmeldingen(writer, evenement)
+        self._output_aanmeldingen(writer, opleiding)
         writer.writerow([])
-        self._output_afmeldingen(writer, evenement)
+        self._output_afmeldingen(writer, opleiding)
 
         return response
 
 
-class EvenementDetailsAanmeldingView(UserPassesTestMixin, TemplateView):
+class OpleidingDetailsAanmeldingView(UserPassesTestMixin, TemplateView):
 
     """ Via deze view kunnen beheerders de details van een inschrijving voor een wedstrijd inzien """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_EVENEMENT_AANMELDING_DETAILS
+    template_name = TEMPLATE_OPLEIDING_AANMELDING_DETAILS
     raise_exception = True          # genereer PermissionDenied als test_func False terug geeft
     permission_denied_message = 'Geen toegang'
 
@@ -308,7 +343,12 @@ class EvenementDetailsAanmeldingView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu == Rol.ROL_HWL
+        if self.rol_nu not in (Rol.ROL_MO, Rol.ROL_HWL, Rol.ROL_SEC):
+            return False
+        if self.rol_nu in (Rol.ROL_HWL, Rol.ROL_SEC):
+            if self.functie_nu.vereniging.ver_nr not in settings.OPLEIDINGEN_VERKOPER_VER_NRS:
+                return False
+        return True
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -321,15 +361,12 @@ class EvenementDetailsAanmeldingView(UserPassesTestMixin, TemplateView):
             raise Http404('Geen valide parameter')
 
         try:
-            inschrijving = (EvenementInschrijving
+            inschrijving = (OpleidingInschrijving
                             .objects
-                            .select_related('evenement',
-                                            'evenement__organiserende_vereniging',
+                            .select_related('opleiding',
                                             'sporter')
-                            .get(pk=inschrijving_pk,
-                                 # alleen van de eigen vereniging laten zien
-                                 evenement__organiserende_vereniging=self.functie_nu.vereniging))
-        except EvenementInschrijving.DoesNotExist:
+                            .get(pk=inschrijving_pk))
+        except OpleidingInschrijving.DoesNotExist:
             raise Http404('Aanmelding niet gevonden')
 
         context['inschrijving'] = inschrijving
@@ -339,14 +376,17 @@ class EvenementDetailsAanmeldingView(UserPassesTestMixin, TemplateView):
 
         context['toon_contactgegevens'] = True
 
-        inschrijving.reserveringsnummer = inschrijving.pk + settings.TICKET_NUMMER_START__EVENEMENT
+        inschrijving.email, inschrijving.telefoon = get_email_telefoon(inschrijving, sporter)
 
-        inschrijving.status_str = EVENEMENT_INSCHRIJVING_STATUS_TO_SHORT_STR[inschrijving.status]
+        inschrijving.reserveringsnummer = inschrijving.pk + settings.TICKET_NUMMER_START__OPLEIDING
+
+        inschrijving.status_str = OPLEIDING_INSCHRIJVING_STATUS_TO_SHORT_STR[inschrijving.status]
 
         inschrijving.bestelnummer_str = get_inschrijving_mh_bestel_nr(inschrijving)
 
-        inschrijving.url_afmelden = reverse('Evenement:afmelden',
-                                            kwargs={'inschrijving_pk': inschrijving.pk})
+        if self.rol_nu != Rol.ROL_SEC:
+            inschrijving.url_afmelden = reverse('Opleiding:afmelden',
+                                                kwargs={'inschrijving_pk': inschrijving.pk})
 
         qset = inschrijving.bestellingproduct_set.all()
         if qset.count() > 0:
@@ -354,25 +394,32 @@ class EvenementDetailsAanmeldingView(UserPassesTestMixin, TemplateView):
         else:
             inschrijving.bestelproduct = None
 
-        url_aanmeldingen = reverse('Evenement:aanmeldingen',
-                                   kwargs={'evenement_pk': inschrijving.evenement.pk})
+        url_aanmeldingen = reverse('Opleiding:aanmeldingen',
+                                   kwargs={'opleiding_pk': inschrijving.opleiding.pk})
 
-        context['kruimels'] = (
-            (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
-            (reverse('Evenement:vereniging'), 'Evenementen'),
-            (url_aanmeldingen, 'Aanmeldingen'),
-            (None, 'Details aanmelding')
-        )
+        if self.rol_nu == Rol.ROL_MO:
+            context['kruimels'] = (
+                (reverse('Opleiding:manager'), 'Opleidingen'),
+                (url_aanmeldingen, 'Aanmeldingen'),
+                (None, 'Details aanmelding')
+            )
+        else:
+            context['kruimels'] = (
+                (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
+                (reverse('Opleiding:vereniging'), 'Opleidingen'),
+                (url_aanmeldingen, 'Aanmeldingen'),
+                (None, 'Details aanmelding')
+            )
 
         return context
 
 
-class EvenementDetailsAfmeldingView(UserPassesTestMixin, TemplateView):
+class OpleidingDetailsAfmeldingView(UserPassesTestMixin, TemplateView):
 
-    """ Via deze view kunnen beheerders de details van een afmelding voor een evenement inzien """
+    """ Via deze view kunnen beheerders de details van een afmelding voor een opleiding inzien """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_EVENEMENT_AFMELDING_DETAILS
+    template_name = TEMPLATE_OPLEIDING_AFMELDING_DETAILS
     raise_exception = True          # genereer PermissionDenied als test_func False terug geeft
     permission_denied_message = 'Geen toegang'
 
@@ -383,7 +430,12 @@ class EvenementDetailsAfmeldingView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu == Rol.ROL_HWL
+        if self.rol_nu not in (Rol.ROL_MO, Rol.ROL_HWL, Rol.ROL_SEC):
+            return False
+        if self.rol_nu in (Rol.ROL_HWL, Rol.ROL_SEC):
+            if self.functie_nu.vereniging.ver_nr not in settings.OPLEIDINGEN_VERKOPER_VER_NRS:
+                return False
+        return True
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -396,15 +448,12 @@ class EvenementDetailsAfmeldingView(UserPassesTestMixin, TemplateView):
             raise Http404('Geen valide parameter')
 
         try:
-            afmelding = (EvenementAfgemeld
+            afmelding = (OpleidingAfgemeld
                          .objects
-                         .select_related('evenement',
-                                         'evenement__organiserende_vereniging',
+                         .select_related('opleiding',
                                          'sporter')
-                         .get(pk=afmelding_pk,
-                              # alleen van de eigen vereniging laten zien
-                              evenement__organiserende_vereniging=self.functie_nu.vereniging))
-        except EvenementAfgemeld.DoesNotExist:
+                         .get(pk=afmelding_pk))
+        except OpleidingAfgemeld.DoesNotExist:
             raise Http404('Afmelding niet gevonden')
 
         context['afmelding'] = afmelding
@@ -414,23 +463,31 @@ class EvenementDetailsAfmeldingView(UserPassesTestMixin, TemplateView):
 
         context['toon_contactgegevens'] = True
 
-        afmelding.reserveringsnummer = afmelding.pk + settings.TICKET_NUMMER_START__EVENEMENT
+        afmelding.email, afmelding.telefoon = get_email_telefoon(afmelding, sporter)
 
-        afmelding.status_str = EVENEMENT_AFMELDING_STATUS_TO_SHORT_STR[afmelding.status]
+        afmelding.reserveringsnummer = afmelding.pk + settings.TICKET_NUMMER_START__OPLEIDING
+
+        afmelding.status_str = OPLEIDING_AFMELDING_STATUS_TO_SHORT_STR[afmelding.status]
 
         afmelding.bestelnummer_str = get_inschrijving_mh_bestel_nr(afmelding)
 
-        url_aanmeldingen = reverse('Evenement:aanmeldingen',
-                                   kwargs={'evenement_pk': afmelding.evenement.pk})
+        url_aanmeldingen = reverse('Opleiding:aanmeldingen',
+                                   kwargs={'opleiding_pk': afmelding.opleiding.pk})
 
-        context['kruimels'] = (
-            (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
-            (reverse('Evenement:vereniging'), 'Evenementen'),
-            (url_aanmeldingen, 'Aanmeldingen'),
-            (None, 'Details afmelding')
-        )
+        if self.rol_nu == Rol.ROL_MO:
+            context['kruimels'] = (
+                (reverse('Opleiding:manager'), 'Opleidingen'),
+                (url_aanmeldingen, 'Aanmeldingen'),
+                (None, 'Details afmelding')
+            )
+        else:
+            context['kruimels'] = (
+                (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
+                (reverse('Opleiding:vereniging'), 'Opleidingen'),
+                (url_aanmeldingen, 'Aanmeldingen'),
+                (None, 'Details afmelding')
+            )
 
         return context
-
 
 # end of file

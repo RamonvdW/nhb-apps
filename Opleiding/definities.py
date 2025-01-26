@@ -19,6 +19,13 @@ OPLEIDING_STATUS_CHOICES = (
     (OPLEIDING_STATUS_GEANNULEERD, 'Geannuleerd'),
 )
 
+OPLEIDING_STATUS_TO_STR = {
+    OPLEIDING_STATUS_VOORBEREID: 'Voorbereiden',
+    OPLEIDING_STATUS_INSCHRIJVEN: 'Inschrijven',
+    OPLEIDING_STATUS_GESLOTEN: 'Inschrijving gesloten',
+    OPLEIDING_STATUS_GEANNULEERD: 'Geannuleerd',
+}
+
 # opleidingscodes voor scheidsrechters
 CODE_SR_VER = '040'
 CODE_SR_BOND = '041'

@@ -63,7 +63,10 @@
 
                 <tr>
                     <th>Voorwaarden</th>
-                    <td>Online instaptoets moet gehaald zijn.{% if sporter and not voldoet_aan_voorwaarden %}<br><span class="sv-rood-text">Volgens onze administratie heb je deze nog niet gehaald{% endif %}</td>
+                    <td>Online instaptoets moet gehaald zijn.{% if sporter and not voldoet_aan_voorwaarden %}<br>
+                                                                    <span class="sv-rood-text">Volgens onze administratie heb je deze nog niet gehaald</span>
+                                                             {% endif %}
+                    </td>
                 </tr>
 
                 <tr>

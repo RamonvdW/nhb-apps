@@ -23,8 +23,8 @@ from Opleiding.models import Opleiding, OpleidingInschrijving
 from Sporter.models import get_sporter
 import json
 
-TEMPLATE_OPLEIDINGEN_INSCHRIJVEN_BASISCURSUS = 'opleidingen/inschrijven-basiscursus.dtl'
-TEMPLATE_OPLEIDINGEN_TOEGEVOEGD_AAN_MANDJE = 'opleidingen/inschrijven-toegevoegd-aan-mandje.dtl'
+TEMPLATE_OPLEIDINGEN_INSCHRIJVEN_BASISCURSUS = 'opleiding/inschrijven-basiscursus.dtl'
+TEMPLATE_OPLEIDINGEN_TOEGEVOEGD_AAN_MANDJE = 'opleiding/inschrijven-toegevoegd-aan-mandje.dtl'
 
 
 class InschrijvenBasiscursusView(TemplateView):

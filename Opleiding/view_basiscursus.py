@@ -14,7 +14,7 @@ from Functie.rol import rol_get_huidige
 from Instaptoets.operations import instaptoets_is_beschikbaar, vind_toets, toets_geldig
 from Sporter.models import get_sporter
 
-TEMPLATE_OPLEIDINGEN_BASISCURSUS = 'opleidingen/basiscursus.dtl'
+TEMPLATE_OPLEIDINGEN_BASISCURSUS = 'opleiding/basiscursus.dtl'
 
 
 class BasiscursusView(UserPassesTestMixin, TemplateView):

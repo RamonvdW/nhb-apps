@@ -16,8 +16,8 @@ from Opleiding.definities import OPLEIDING_STATUS_GEANNULEERD, OPLEIDING_STATUS_
 from Opleiding.models import Opleiding, OpleidingDiploma
 from Sporter.models import get_sporter
 
-TEMPLATE_OPLEIDINGEN_OVERZICHT = 'opleidingen/overzicht.dtl'
-TEMPLATE_OPLEIDINGEN_DETAILS = 'opleidingen/details.dtl'
+TEMPLATE_OPLEIDINGEN_OVERZICHT = 'opleiding/overzicht.dtl'
+TEMPLATE_OPLEIDINGEN_DETAILS = 'opleiding/details.dtl'
 
 
 class OpleidingenOverzichtView(TemplateView):
@@ -110,15 +110,33 @@ class OpleidingDetailsView(TemplateView):
         # extern beheerder wedstrijden kan je niet voor aanmelden
         # een wedstrijd zonder sessie is een placeholder op de agenda
         if self.request.user.is_authenticated:
-            context['kan_aanmelden'] = True
-            context['url_inschrijven_sporter'] = reverse('Plein:plein')
+            rol_nu = rol_get_huidige(self.request)
+            if rol_nu == Rol.ROL_SPORTER:
+                context['kan_aanmelden'] = True
+                context['url_inschrijven_sporter'] = reverse('Plein:plein')
+            else:
+                # beheerders (HWL 1368) niet het kaartje inschrijven tonen
+                context['toon_inschrijven'] = False
         else:
+            rol_nu = Rol.ROL_SPORTER
             context['hint_inloggen'] = True
 
-        context['kruimels'] = (
-            (reverse('Opleiding:overzicht'), 'Opleidingen'),
-            (None, opleiding.titel),
-        )
+        if rol_nu in (Rol.ROL_SEC, Rol.ROL_HWL):
+            context['kruimels'] = (
+                (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
+                (reverse('Opleiding:vereniging'), 'Opleidingen'),
+                (None, opleiding.titel),
+            )
+        elif rol_nu == Rol.ROL_MO:
+            context['kruimels'] = (
+                (reverse('Opleiding:manager'), 'Opleidingen'),
+                (None, opleiding.titel),
+            )
+        else:
+            context['kruimels'] = (
+                (reverse('Opleiding:overzicht'), 'Opleidingen'),
+                (None, opleiding.titel),
+            )
 
         return context
 

@@ -1,0 +1,105 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2025 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Opleidingen van de vereniging{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Opleidingen</h3>
+            <p>Opleidingen bij vereniging <b>{{ ver }}</b></p>
+            <p>Je huidige rol is: <b>{{ huidige_rol }}</b></p>
+        </div>
+    </div>
+
+    <!-- blauwe balk met informatie in een tabel -->
+    <div class="row-sv-blauw">
+        <div class="col s12">
+            <table class="sv-kader" id="tabel1">
+                <thead>
+                    <tr>        <!-- filter veld -->
+                        <td colspan="2"></td>
+                        <td class="table-filter">
+                            <input class="table-filter" oninput="myTableFilter(this, 'tabel1')" placeholder="Zoeken"/>
+                        </td>
+                        <td><!-- kolom voor knoppen --></td>
+                    </tr>
+                    <tr>
+                        <th>Periode</th>
+                        <th>Status</th>
+                        <th data-filter="on">Titel</th>
+                        <th><!-- kolom voor knoppen --></th>
+                    </tr>
+                </thead>
+
+                {% for opleiding in opleidingen %}
+                    <tr>
+                        <td>{{ opleiding.periode_str }}</td>
+                        <td>{{ opleiding.status_str }}</td>
+                        <td>{{ opleiding.titel }}</td>
+                        <td>
+                            <div style="white-space:nowrap">     <!-- keeps buttons side by side -->
+                                <a class="btn-sv-rood" href="{{ opleiding.url_details }}" style="padding:0; width:35px; margin-right:5px">
+                                    <i class="notranslate material-icons-round">schedule</i></a>
+                                <a class="btn-sv-rood" href="{{ opleiding.url_aanmeldingen }}" style="padding:0; width:35px; margin-right:5px">
+                                    <i class="notranslate material-icons-round">people_alt</i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr data-tablefilter="stop">
+                        <td class="center" colspan="4"><i>Er zijn nog geen opleidingen</i></td>
+                    </tr>
+                {% endfor %}
+
+            </table>
+        </div>
+    </div>
+
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>Financieel</h4>
+        </div>
+    </div>
+
+    <!-- blauwe balk met kaartjes -->
+    <div class="row-sv-blauw">
+        <div class="col s12">
+
+            <!-- instellingen -->
+            {% include 'plein/card_icon.dtl' with title="Instellingen" text="Instellingen om inschrijfgelden te kunnen ontvangen via overschrijving of Mollie." icon="settings" url=url_mollie %}
+
+            <!-- betalingen doorgeven -->
+            {% include 'plein/card_icon.dtl' with title="Overboekingen" text="Geef de handmatige betalingen door, zodat de reservering voor een sporter definitief kan worden." icon="euro_symbol" url=url_overboeking_ontvangen %}
+
+        </div>
+    </div>
+
+
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>Verkoopvoorwaarden</h4>
+            <p>Onderstaand document beschrijft de verkoopvoorwaarden voor opleidingen besteld via MijnHandboogsport.</p>
+        </div>
+    </div>
+
+    <!-- blauwe balk met kaartjes -->
+    <div class="row-sv-blauw">
+        <div class="col s12">
+            {% include 'plein/card_icon.dtl' with title="Voorwaarden" text="De verkoopvoorwaarden voor opleidingen staan beschreven in een apart document." icon="article" extern_open=True url=url_voorwaarden %}
+        </div>
+    </div>
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="opleiding-overzicht-vereniging" %}
+
+{% endblock %}

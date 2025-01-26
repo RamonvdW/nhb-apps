@@ -121,14 +121,17 @@ class MyTestAsserts(TestCase):
         long_msg = list()
         for part in all_parts:
             # remove empty line indicators
-            part.replace('\\n', '\n').rstrip()
+            part = part.replace('\\n', '\n').rstrip()
 
             # remove single-line <!-- html comments -->
             pos = part.find('<!--')
-            if pos >= 0:
+            while pos >= 0:
                 end_pos = part.find('-->', pos)
-                if end_pos >= 0:
-                    part = part[:pos] + part[end_pos+3:]
+                if end_pos < 0:
+                    pos = len(part)
+                part = part[:pos] + part[end_pos+3:]
+                pos = part.find('<!--')
+            # while
 
             # remove empty lines
             part = re.sub(r'\n\s+\n', '\n', part)
