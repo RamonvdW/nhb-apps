@@ -46,7 +46,7 @@ def opleiding_plugin_verwijder_reservering(stdout, inschrijving: OpleidingInschr
     else:
         # zet de inschrijving om in een afmelding
         afmelding = OpleidingAfgemeld(
-                        wanneer_inschrijving=inschrijving.wanneer_aangemeld,
+                        wanneer_aangemeld=inschrijving.wanneer_aangemeld,
                         nummer=inschrijving.nummer,
                         wanneer_afgemeld=now,
                         status=OPLEIDING_AFMELDING_STATUS_AFGEMELD,
@@ -85,7 +85,7 @@ def opleiding_plugin_afmelden(inschrijving: OpleidingInschrijving):
 
     # zet de inschrijving om in een afmelding
     afmelding = OpleidingAfgemeld(
-                    wanneer_inschrijving=inschrijving.wanneer_aangemeld,
+                    wanneer_aangemeld=inschrijving.wanneer_aangemeld,
                     wanneer_afgemeld=now,
                     nummer=inschrijving.nummer,
                     status=OPLEIDING_AFMELDING_STATUS_AFGEMELD,

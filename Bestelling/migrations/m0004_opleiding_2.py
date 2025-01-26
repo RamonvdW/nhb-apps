@@ -14,22 +14,28 @@ class Migration(migrations.Migration):
     # volgorde afdwingen
     dependencies = [
         ('Bestelling', 'm0003_squashed'),
-        ('Opleiding', 'm0002_opleiding'),
+        ('Opleiding', 'm0003_log'),
     ]
 
     # migratie functies
     operations = [
         migrations.AddField(
             model_name='bestellingmutatie',
-            name='opleiding_deelnemer',
+            name='opleiding_inschrijving',
             field=models.ForeignKey(blank=True, null=True, on_delete=models.deletion.SET_NULL,
-                                    to='Opleiding.opleidingdeelnemer'),
+                                    to='Opleiding.opleidinginschrijving'),
         ),
         migrations.AddField(
             model_name='bestellingproduct',
-            name='opleiding_deelnemer',
+            name='opleiding_afgemeld',
             field=models.ForeignKey(blank=True, null=True, on_delete=models.deletion.SET_NULL,
-                                    to='Opleiding.opleidingdeelnemer'),
+                                    to='Opleiding.opleidingafgemeld'),
+        ),
+        migrations.AddField(
+            model_name='bestellingproduct',
+            name='opleiding_inschrijving',
+            field=models.ForeignKey(blank=True, null=True, on_delete=models.deletion.SET_NULL,
+                                    to='Opleiding.opleidinginschrijving'),
         ),
     ]
 

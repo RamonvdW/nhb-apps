@@ -13,7 +13,7 @@ from Bestelling.definities import (BESTELLING_MUTATIE_WEDSTRIJD_INSCHRIJVEN, BES
                                    BESTELLING_MUTATIE_OVERBOEKING_ONTVANGEN, BESTELLING_MUTATIE_ANNULEER,
                                    BESTELLING_MUTATIE_TRANSPORT, BESTELLING_STATUS_BETALING_ACTIEF,
                                    BESTELLING_MUTATIE_EVENEMENT_INSCHRIJVEN, BESTELLING_MUTATIE_EVENEMENT_AFMELDEN,
-                                   BESTELLING_MUTATIE_OPLEIDING_INSCHRIJVEN)
+                                   BESTELLING_MUTATIE_OPLEIDING_INSCHRIJVEN, BESTELLING_MUTATIE_OPLEIDING_AFMELDEN)
 from Bestelling.models import BestellingMutatie, Bestelling, BestellingProduct
 from Betaal.models import BetaalActief
 from Evenement.models import EvenementInschrijving
@@ -189,6 +189,25 @@ def bestel_mutatieverzoek_afmelden_evenement(inschrijving: EvenementInschrijving
     mutatie, is_created = BestellingMutatie.objects.get_or_create(
                                     code=BESTELLING_MUTATIE_EVENEMENT_AFMELDEN,
                                     evenement_inschrijving=inschrijving,
+                                    is_verwerkt=False)
+
+    if is_created:
+        mutatie.save()
+
+        # wacht kort op de achtergrondtaak
+        _bestel_ping_achtergrondtaak(mutatie, snel)
+
+
+def bestel_mutatieverzoek_afmelden_opleiding(inschrijving: OpleidingInschrijving, snel=False):
+    """
+        Verwijder een afmelding voor een opleiding.
+    """
+
+    # zet dit verzoek door naar het mutaties process
+    # voorkom duplicates (niet 100%)
+    mutatie, is_created = BestellingMutatie.objects.get_or_create(
+                                    code=BESTELLING_MUTATIE_OPLEIDING_AFMELDEN,
+                                    opleiding_inschrijving=inschrijving,
                                     is_verwerkt=False)
 
     if is_created:

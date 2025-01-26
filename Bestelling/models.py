@@ -12,7 +12,7 @@ from Bestelling.definities import (BESTELLING_STATUS_CHOICES, BESTELLING_STATUS_
 from Betaal.format import format_bedrag_euro
 from Betaal.models import BetaalActief, BetaalTransactie, BetaalMutatie, BetaalInstellingenVereniging
 from Evenement.models import EvenementInschrijving, EvenementAfgemeld
-from Opleiding.models import OpleidingInschrijving
+from Opleiding.models import OpleidingInschrijving, OpleidingAfgemeld
 from Webwinkel.models import WebwinkelKeuze
 from Wedstrijden.models import WedstrijdInschrijving
 from decimal import Decimal
@@ -36,6 +36,7 @@ class BestellingProduct(models.Model):
 
     # inschrijving voor een opleiding
     opleiding_inschrijving = models.ForeignKey(OpleidingInschrijving, on_delete=models.SET_NULL, null=True, blank=True)
+    opleiding_afgemeld = models.ForeignKey(OpleidingAfgemeld, on_delete=models.SET_NULL, null=True, blank=True)
 
     # prijs van deze regel (een positief bedrag)
     prijs_euro = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal(0))       # max 999,99

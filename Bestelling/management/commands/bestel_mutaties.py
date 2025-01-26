@@ -23,14 +23,14 @@ from Bestelling.definities import (BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS
                                    BESTELLING_MUTATIE_OVERBOEKING_ONTVANGEN, BESTELLING_MUTATIE_RESTITUTIE_UITBETAALD,
                                    BESTELLING_MUTATIE_ANNULEER, BESTELLING_MUTATIE_TRANSPORT,
                                    BESTELLING_MUTATIE_EVENEMENT_INSCHRIJVEN, BESTELLING_MUTATIE_EVENEMENT_AFMELDEN,
-                                   BESTELLING_MUTATIE_OPLEIDING_INSCHRIJVEN,
+                                   BESTELLING_MUTATIE_OPLEIDING_INSCHRIJVEN, BESTELLING_MUTATIE_OPLEIDING_AFMELDEN,
                                    BESTELLING_TRANSPORT_OPHALEN, BESTELLING_TRANSPORT2STR)
 from Bestelling.models import (BestellingProduct, BestellingMandje, Bestelling, BestellingHoogsteBestelNr, 
                                BestellingMutatie)
 from Bestelling.plugins.evenement import (evenement_plugin_inschrijven, evenement_plugin_verwijder_reservering,
                                           evenement_plugin_inschrijving_is_betaald, evenement_plugin_afmelden)
 from Bestelling.plugins.opleiding import (opleiding_plugin_inschrijven, opleiding_plugin_inschrijving_is_betaald,
-                                          opleiding_plugin_verwijder_reservering, opleiding_plugin_beschrijf_product)
+                                          opleiding_plugin_verwijder_reservering, opleiding_plugin_afmelden)
 from Bestelling.plugins.product_info import beschrijf_product, beschrijf_korting
 from Bestelling.plugins.wedstrijden import (wedstrijden_plugin_automatische_kortingen_toepassen,
                                             wedstrijden_plugin_inschrijven, wedstrijden_plugin_verwijder_reservering,
@@ -47,7 +47,8 @@ from Evenement.definities import (EVENEMENT_INSCHRIJVING_STATUS_DEFINITIEF, EVEN
                                   EVENEMENT_INSCHRIJVING_STATUS_RESERVERING_BESTELD)
 from Functie.models import Functie
 from Mailer.operations import mailer_queue_email, render_email_template, mailer_notify_internal_error
-from Opleiding.definities import OPLEIDING_INSCHRIJVING_STATUS_DEFINITIEF, OPLEIDING_INSCHRIJVING_STATUS_RESERVERING_BESTELD
+from Opleiding.definities import (OPLEIDING_INSCHRIJVING_STATUS_DEFINITIEF,
+                                  OPLEIDING_INSCHRIJVING_STATUS_RESERVERING_BESTELD, OPLEIDING_STATUS_TO_STR)
 from Overig.background_sync import BackgroundSync
 from Vereniging.models import Vereniging
 from Wedstrijden.definities import (WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_BESTELD,
@@ -1014,6 +1015,41 @@ class Command(BaseCommand):
             self.stdout.write('[WARNING] Niet ondersteund: Inschrijving pk=%s met status=%s afmelden voor evenement' % (
                         inschrijving.pk, EVENEMENT_STATUS_TO_STR[inschrijving.status]))
 
+    def _verwerk_mutatie_opleiding_afmelden(self, mutatie):
+        inschrijving = mutatie.opleiding_inschrijving
+        if not inschrijving:
+            return
+
+        # OPLEIDING_INSCHRIJVING_STATUS_RESERVERING_MANDJE gaat via BESTELLING_MUTATIE_VERWIJDER
+        if inschrijving.status == OPLEIDING_INSCHRIJVING_STATUS_RESERVERING_BESTELD:
+            # in een bestelling; nog niet (volledig) betaald
+            self.stdout.write('[INFO] Inschrijving pk=%s met status="besteld" afmelden voor opleiding' %
+                              inschrijving.pk)
+
+            # verwijder referentie vanuit mutatie, zodat inschrijving verwijderd kan worden
+            mutatie.opleiding_inschrijving = None
+            mutatie.save(update_fields=['opleiding_inschrijving'])
+
+            opleiding_plugin_verwijder_reservering(self.stdout, inschrijving)
+            # FUTURE: betaling afbreken
+            # FUTURE: automatische restitutie als de betaling binnen is
+
+        elif inschrijving.status == OPLEIDING_INSCHRIJVING_STATUS_DEFINITIEF:
+            # in een bestelling en betaald
+            self.stdout.write('[INFO] Inschrijving pk=%s met status="definitief" afmelden voor opleiding' %
+                              inschrijving.pk)
+
+            # verwijder referentie vanuit mutatie, zodat inschrijving verwijderd kan worden
+            mutatie.opleiding_inschrijving = None
+            mutatie.save(update_fields=['opleiding_inschrijving'])
+
+            opleiding_plugin_afmelden(inschrijving)
+            # FUTURE: automatisch een restitutie beginnen
+
+        else:
+            self.stdout.write('[WARNING] Niet ondersteund: Inschrijving pk=%s met status=%s afmelden voor opleiding' % (
+                        inschrijving.pk, OPLEIDING_STATUS_TO_STR[inschrijving.status]))
+
     def _verwerk_mutatie_betaling_afgerond(self, mutatie: BestellingMutatie):
         now = timezone.now()
         when_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
@@ -1221,11 +1257,10 @@ class Command(BaseCommand):
             self.stdout.write('[INFO] Annuleer bestelling: BestelProduct pk=%s inschrijving (%s) besteld door %s' % (
                                     product.pk, inschrijving, inschrijving.koper))
 
-            product.evenement_inschrijving = None
-
             afmelding = evenement_plugin_verwijder_reservering(self.stdout, inschrijving)
-            product.evenement_afgemeld = afmelding
 
+            product.evenement_inschrijving = None
+            product.evenement_afgemeld = afmelding
             product.save(update_fields=['evenement_inschrijving', 'evenement_afgemeld'])
         # for
 
@@ -1338,6 +1373,10 @@ class Command(BaseCommand):
         elif code == BESTELLING_MUTATIE_OPLEIDING_INSCHRIJVEN:
             self.stdout.write('[INFO] Verwerk mutatie %s: inschrijven op opleiding' % mutatie.pk)
             self._verwerk_mutatie_opleiding_inschrijven(mutatie)
+
+        elif code == BESTELLING_MUTATIE_OPLEIDING_AFMELDEN:
+            self.stdout.write('[INFO] Verwerk mutatie %s: afmelden voor opleiding' % mutatie.pk)
+            self._verwerk_mutatie_opleiding_afmelden(mutatie)
 
         else:
             self.stdout.write('[ERROR] Onbekende mutatie code %s (pk=%s)' % (code, mutatie.pk))
