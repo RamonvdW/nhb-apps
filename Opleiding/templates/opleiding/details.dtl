@@ -63,16 +63,22 @@
 
                 <tr>
                     <th>Beschrijving</th>
-                    <td>{{ opleiding.beschrijving }}</td>
+                    <td>{{ opleiding.beschrijving|linebreaksbr }}</td>
                 </tr>
 
                 <tr>
                     <th>Ingangseisen</th>
                     <td>
                         {% if opleiding.eis_instaptoets %}
-                            <span>Instaptoets gehaald, maximaal 1 jaar oud.</span><br>
+                            <span>Instaptoets gehaald, maximaal 1 jaar oud.</span>
+                            {% if opleiding.ingangseisen %}
+                                <br>
+                                <br>
+                                <span>{{ opleiding.ingangseisen|linebreaksbr }}</span>
+                            {% endif %}
+                        {% else %}
+                            <span>{{ opleiding.ingangseisen|linebreaksbr }}</span>
                         {% endif %}
-                        <span>{{ opleiding.ingangseisen }}</span>
                     </td>
                 </tr>
 
