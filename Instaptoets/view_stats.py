@@ -94,9 +94,7 @@ class StatsInstaptoetsView(UserPassesTestMixin, TemplateView):
                 vraag.count_c = count_c = count_antwoorden.get('C', 0)
                 vraag.count_d = count_d = count_antwoorden.get('D', 0)
                 count_sum = count_a + count_b + count_c + count_d
-                if count_sum == 0:
-                    count_sum = 1
-                count_sum = count_sum / 100
+                count_sum /= 100.0
                 vraag.perc_a = "%.0f" % (count_a / count_sum)
                 vraag.perc_b = "%.0f" % (count_b / count_sum)
                 vraag.perc_c = "%.0f" % (count_c / count_sum)
