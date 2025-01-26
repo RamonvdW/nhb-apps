@@ -169,14 +169,14 @@ def opleiding_plugin_inschrijving_is_betaald(stdout, product: BestellingProduct)
                          sporter.lid_nr)
 
 
-def opleiding_plugin_beschrijf_product(inschrijving: OpleidingInschrijving):
+def opleiding_plugin_beschrijf_product(obj: OpleidingInschrijving | OpleidingAfgemeld):
     """
         Geef een lijst van tuples terug waarin aspecten van het product beschreven staan.
     """
 
-    opleiding = inschrijving.opleiding
-    sporter = inschrijving.sporter
-    nummer = inschrijving.nummer
+    opleiding = obj.opleiding
+    sporter = obj.sporter
+    nummer = obj.nummer
 
     beschrijving = list()
 

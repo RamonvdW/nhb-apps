@@ -33,6 +33,9 @@ def beschrijf_product(product: BestellingProduct):
     if product.opleiding_inschrijving:
         return opleiding_plugin_beschrijf_product(product.opleiding_inschrijving)
 
+    if product.opleiding_afgemeld:
+        return opleiding_plugin_beschrijf_product(product.opleiding_afgemeld)
+
     if product.webwinkel_keuze:
         return webwinkel_plugin_beschrijf_product(product.webwinkel_keuze)
 
