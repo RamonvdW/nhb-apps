@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2024 Ramon van der Winkel.
+#  Copyright (c) 2021-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase, override_settings
 from BasisTypen.models import KalenderWedstrijdklasse
+from Functie.models import Functie
 from Functie.tests.helpers import maak_functie
 from Geo.models import Regio
 from Locatie.models import WedstrijdLocatie
@@ -37,6 +38,8 @@ class TestWedstrijdenWijzigWedstrijd(E2EHelpers, TestCase):
         self.account_admin = self.e2e_create_account_admin()
         self.account_admin.is_BB = True
         self.account_admin.save()
+
+        self.functie_mwz = Functie.objects.get(rol='MWZ')
 
         Sporter(
                 lid_nr=100000,
@@ -346,8 +349,8 @@ class TestWedstrijdenWijzigWedstrijd(E2EHelpers, TestCase):
         resp = self.client.post(self.url_wedstrijden_wijzig_wedstrijd % 999999)
         self.assert404(resp, 'Wedstrijd niet gevonden')
 
-        # nu als BB
-        self.e2e_wisselnaarrol_bb()
+        # nu als MWZ
+        self.e2e_wissel_naar_functie(self.functie_mwz)
 
         with self.assert_max_queries(20):
             resp = self.client.get(url)
@@ -855,9 +858,8 @@ class TestWedstrijdenWijzigWedstrijd(E2EHelpers, TestCase):
         self.assertFalse(wedstrijd.is_ter_info)
         self.assertFalse(wedstrijd.eis_kwalificatie_scores)
 
-        # probeer het nog een keer, als BB
-        self.e2e_wisselnaarrol_bb()
-        self.e2e_check_rol('BB')
+        # probeer het nog een keer, als MWZ
+        self.e2e_wissel_naar_functie(self.functie_mwz)
 
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'ter_info': 1,

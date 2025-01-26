@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2024 Ramon van der Winkel.
+#  Copyright (c) 2021-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -41,7 +41,7 @@ class CheckKwalificatieScoresView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu in (Rol.ROL_MWZ, Rol.ROL_BB, Rol.ROL_HWL)
+        return self.rol_nu in (Rol.ROL_MWZ, Rol.ROL_HWL)
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -146,7 +146,7 @@ class CheckKwalificatieScoresWedstrijdView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu in (Rol.ROL_MWZ, Rol.ROL_BB, Rol.ROL_HWL)
+        return self.rol_nu in (Rol.ROL_MWZ, Rol.ROL_HWL)
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """

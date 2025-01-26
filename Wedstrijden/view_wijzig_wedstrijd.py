@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2024 Ramon van der Winkel.
+#  Copyright (c) 2021-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -52,7 +52,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu in (Rol.ROL_BB, Rol.ROL_MWZ, Rol.ROL_HWL)
+        return self.rol_nu in (Rol.ROL_MWZ, Rol.ROL_HWL)
 
     def get(self, request, *args, **kwargs):
         """ deze functie wordt aangeroepen om de GET request af te handelen """
@@ -104,7 +104,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
             else:
                 context['limit_edits'] = True
 
-        if self.rol_nu in (Rol.ROL_BB, Rol.ROL_MWZ):
+        if self.rol_nu == Rol.ROL_MWZ:
 
             context['wijzig_kwalificatie_scores'] = True
 
@@ -349,7 +349,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
                 ver.keuze_str = ver.ver_nr_en_naam()
             # for
 
-        if self.rol_nu in (Rol.ROL_BB, Rol.ROL_MWZ):
+        if self.rol_nu == Rol.ROL_MWZ:
             context['toon_ter_info'] = True
 
             context['keuze_aantal_scheids'] = [
@@ -646,7 +646,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
 
                 wedstrijd.prijs_euro_onder18 = prijs
 
-            if self.rol_nu in (Rol.ROL_BB, Rol.ROL_MWZ):
+            if self.rol_nu == Rol.ROL_MWZ:
                 ter_info = request.POST.get('ter_info', '')
                 if ter_info:
                     wedstrijd.is_ter_info = True

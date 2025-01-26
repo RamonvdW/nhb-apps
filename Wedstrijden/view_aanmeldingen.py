@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2024 Ramon van der Winkel.
+#  Copyright (c) 2022-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -139,7 +139,7 @@ class WedstrijdAanmeldingenView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu = rol_get_huidige(self.request)
-        return self.rol_nu in (Rol.ROL_SEC, Rol.ROL_HWL, Rol.ROL_MWZ, Rol.ROL_BB)
+        return self.rol_nu in (Rol.ROL_SEC, Rol.ROL_HWL, Rol.ROL_MWZ)
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -209,7 +209,7 @@ class WedstrijdAanmeldingenView(UserPassesTestMixin, TemplateView):
         context['aantal_aanmeldingen'] = aantal_aanmeldingen
         context['aantal_afmeldingen'] = aantal_afmeldingen
 
-        if self.rol_nu in (Rol.ROL_HWL, Rol.ROL_MWZ, Rol.ROL_BB):
+        if self.rol_nu in (Rol.ROL_HWL, Rol.ROL_MWZ):
             context['url_download_tsv'] = reverse('Wedstrijden:download-aanmeldingen-tsv',
                                                   kwargs={'wedstrijd_pk': wedstrijd.pk})
             context['url_download_csv'] = reverse('Wedstrijden:download-aanmeldingen-csv',
@@ -252,7 +252,7 @@ class DownloadAanmeldingenBestandTSV(UserPassesTestMixin, View):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu in (Rol.ROL_HWL, Rol.ROL_MWZ, Rol.ROL_BB)
+        return self.rol_nu in (Rol.ROL_HWL, Rol.ROL_MWZ)
 
     def get(self, request, *args, **kwargs):
         try:
@@ -362,7 +362,7 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu in (Rol.ROL_HWL, Rol.ROL_MWZ, Rol.ROL_BB)
+        return self.rol_nu in (Rol.ROL_HWL, Rol.ROL_MWZ)
 
     def get(self, request, *args, **kwargs):
         try:
@@ -563,7 +563,7 @@ class WedstrijdAanmeldingDetailsView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu in (Rol.ROL_SEC, Rol.ROL_HWL, Rol.ROL_MWZ, Rol.ROL_BB, Rol.ROL_SPORTER)
+        return self.rol_nu in (Rol.ROL_SEC, Rol.ROL_HWL, Rol.ROL_MWZ, Rol.ROL_SPORTER)
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -605,7 +605,7 @@ class WedstrijdAanmeldingDetailsView(UserPassesTestMixin, TemplateView):
         context['sporter'] = sporter = inschrijving.sporterboog.sporter
         context['ver'] = sporter.bij_vereniging
 
-        if self.rol_nu in (Rol.ROL_BB, Rol.ROL_MWZ, Rol.ROL_HWL):
+        if self.rol_nu in (Rol.ROL_MWZ, Rol.ROL_HWL):
             context['toon_contactgegevens'] = True
 
         context['voorkeuren'] = voorkeuren = get_sporter_voorkeuren(sporter)
@@ -641,7 +641,7 @@ class WedstrijdAanmeldingDetailsView(UserPassesTestMixin, TemplateView):
         url_aanmeldingen = reverse('Wedstrijden:aanmeldingen',
                                    kwargs={'wedstrijd_pk': inschrijving.wedstrijd.pk})
 
-        if self.rol_nu in (Rol.ROL_MWZ, Rol.ROL_BB):
+        if self.rol_nu == Rol.ROL_MWZ:
             context['kruimels'] = (
                 (reverse('Wedstrijden:manager'), 'Wedstrijdkalender'),
                 (url_aanmeldingen, 'Aanmeldingen'),
@@ -676,7 +676,7 @@ class AfmeldenView(UserPassesTestMixin, View):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu in (Rol.ROL_SEC, Rol.ROL_HWL, Rol.ROL_MWZ, Rol.ROL_BB)
+        return self.rol_nu in (Rol.ROL_SEC, Rol.ROL_HWL, Rol.ROL_MWZ)
 
     def post(self, request, *args, **kwargs):
         """ wordt aangeroepen om de POST af te handelen"""
@@ -688,7 +688,7 @@ class AfmeldenView(UserPassesTestMixin, View):
         except (TypeError, ValueError, WedstrijdInschrijving.DoesNotExist):
             raise Http404('Inschrijving niet gevonden')
 
-        if self.rol_nu not in (Rol.ROL_BB, Rol.ROL_MWZ):
+        if self.rol_nu != Rol.ROL_MWZ:
             # controleer dat dit een inschrijving is op een wedstrijd van de vereniging
             ver = self.functie_nu.vereniging
             if inschrijving.wedstrijd.organiserende_vereniging != ver:
