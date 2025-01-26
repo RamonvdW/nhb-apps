@@ -82,6 +82,8 @@ class ToonBestellingenView(UserPassesTestMixin, TemplateView):
                     beschrijving.append(product.evenement_afgemeld.korte_beschrijving())
                 elif product.opleiding_inschrijving:
                     beschrijving.append(product.opleiding_inschrijving.korte_beschrijving())
+                elif product.opleiding_afgemeld:
+                    beschrijving.append(product.opleiding_afgemeld.korte_beschrijving())
                 elif product.webwinkel_keuze:
                     beschrijving.append(product.webwinkel_keuze.product.omslag_titel)
                 else:
@@ -192,6 +194,9 @@ class ToonBestellingDetailsView(UserPassesTestMixin, TemplateView):
                 pass
 
             elif product.opleiding_inschrijving:
+                pass
+
+            elif product.opleiding_afgemeld:
                 pass
 
             elif product.webwinkel_keuze:
