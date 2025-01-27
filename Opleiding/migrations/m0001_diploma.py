@@ -14,7 +14,7 @@ def migrate_diplomas(apps, _):
     new_klas = apps.get_model('Opleiding', 'OpleidingDiploma')
 
     bulk = list()
-    for obj in old_klas.objects.all():
+    for obj in old_klas.objects.all():              # pragma: no cover
         bulk.append(
             new_klas(
                 sporter=obj.sporter,
@@ -29,7 +29,7 @@ def migrate_diplomas(apps, _):
             bulk = list()
     # for
 
-    if len(bulk):
+    if len(bulk):                                   # pragma: no cover
         new_klas.objects.bulk_create(bulk)
 
 

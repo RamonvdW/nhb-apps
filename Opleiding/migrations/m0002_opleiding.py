@@ -92,6 +92,7 @@ class Migration(migrations.Migration):
                 'verbose_name': 'Opleiding deelnemer',
             },
         ),
+        # TODO: aanzetten bij opruimen app Opleidingen
         # migrations.RunPython(maak_functie_mo),
     ]
 

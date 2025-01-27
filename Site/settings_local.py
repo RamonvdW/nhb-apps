@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -85,6 +85,7 @@ VOORWAARDEN_A_STATUS_URL = 'https://docs.google.com/document/d/random google doc
 # url van de documenten met de verkoopvoorwaarden
 VERKOOPVOORWAARDEN_WEDSTRIJDEN_URL = 'https://docs.google.com/document/d/another random google document number/pub'
 VERKOOPVOORWAARDEN_WEBWINKEL_URL = 'https://docs.google.com/document/d/yet another random google document number/pub'
+VERKOOPVOORWAARDEN_OPLEIDINGEN_URL = 'https://docs.google.com/document/d/yet another random google document number/pub'
 
 # google doc id van het gsheet document
 RECORDS_GSHEET_FILE_ID = 'random gsheet doc id'
@@ -127,18 +128,18 @@ BEKENDE_BIC_CODES = (
 MANDJE_VERVAL_NA_DAGEN = 3
 
 # pagina over grensoverschrijdend gedrag en contactgegevens vertrouwenscontactpersonen
-URL_VCP_CONTACTGEGEVENS = 'https://yourfrontend/grensoverschrijdend-gedrag/'
+URL_VCP_CONTACTGEGEVENS = 'https://yourfrontend/contactgegevens-vcp/'   # noqa
 
 # pagina met instructies en aanvraagformulier prestatiespelden
 URL_SPELDEN_PROCEDURES = 'https://www.handboogsport.nl/de-khsn/#procedures'     # noqa
 
 # online aanvraagformulier voor nieuwe records
-URL_RECORD_AANVRAAGFORMULIER = 'https://docs.google.com/spreadsheets/1234_your_doc_7890'
+URL_RECORD_AANVRAAGFORMULIER = 'https://docs.google.com/spreadsheets/1234_your_doc_7890'   # noqa
 
 # locatie op disk waar de foto's staan (bron)
 # deze worden door collectstatic naar deployment gezet  # noqa
 # het veld WebwinkelProduct.locatie is onder dit punt
-WEBWINKEL_FOTOS_DIR = '/directory/on/server/webwinkel_fotos'
+WEBWINKEL_FOTOS_DIR = '/directory/on/server/webwinkel_fotos'    # noqa
 
 # welke vereniging is de verkoper
 WEBWINKEL_VERKOPER_VER_NR = 1368
@@ -158,11 +159,12 @@ WEBWINKEL_BTW_PERCENTAGE = 21.0
 WEBWINKEL_TOON_PRESTATIESPELDEN = False
 
 # welke vereniging(en) mogen evenementen op de kalender zetten?
+# deze krijgen het kaartje Evenementen op het verenigingen overzicht
 EVENEMENTEN_VERKOPER_VER_NRS = (1368,)
 
-# Mollie endpoint URL override
-# (None = use library provided default)
-BETAAL_API_URL = None
+# welke vereniging(en) mogen opleidingen op de kalender zetten?
+# deze krijgen het kaartje Opleidingen op het verenigingen overzicht
+OPLEIDINGEN_VERKOPER_VER_NRS = (1368,)
 
 # google maps URL (override) and API key
 # (None = use library provided default)
@@ -181,10 +183,14 @@ GEOCODE_FALLBACK = {
 LID_NRS_GEEN_SCHEIDS_BESCHIKBAARHEID_OPVRAGEN = ()
 
 # Ledenvoordeel
+TOON_LEDENVOORDEEL = True
 WALIBI_URL_ALGEMEEN = 'https://www.walibi.nl/'
 WALIBI_URL_KORTING = 'https://bit.ly/yourcode'
 
 # toegestane tokens voor /kalender/api/lijst/30/?token=xxxx
 KALENDER_API_TOKENS = ()
+
+# google doc id van het gsheet document
+INSTAPTOETS_GSHEET_FILE_ID = 'another.google.sheets.id'     # noqa
 
 # end of file
