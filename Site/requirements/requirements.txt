@@ -6,7 +6,7 @@
 #
 asgiref==3.8.1
     # via django
-cachetools==5.5.0
+cachetools==5.5.1
     # via google-auth
 certifi==2024.12.14
     # via requests
@@ -18,11 +18,11 @@ django==4.2.18
     #   -r requirements.in
 et-xmlfile==2.0.0
     # via openpyxl
-google-api-core==2.24.0
+google-api-core==2.24.1
     # via google-api-python-client
-google-api-python-client==2.159.0
+google-api-python-client==2.160.0
     # via -r requirements.in
-google-auth==2.37.0
+google-auth==2.38.0
     # via
     #   -r requirements.in
     #   google-api-core
@@ -50,7 +50,7 @@ openpyxl==3.1.5
     # via -r requirements.in
 pillow==11.1.0
     # via -r requirements.in
-proto-plus==1.25.0
+proto-plus==1.26.0
     # via google-api-core
 protobuf==5.29.3
     # via
@@ -69,7 +69,7 @@ pyotp==2.9.0
     # via -r requirements.in
 pyparsing==3.2.1
     # via httplib2
-pypdf==5.1.0
+pypdf==5.2.0
     # via -r requirements.in
 qrcode==8.0
     # via -r requirements.in
