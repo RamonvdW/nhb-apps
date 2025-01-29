@@ -6,7 +6,8 @@
 
 from django.urls import path
 from Opleiding import (view_inschrijven, view_overzicht, view_basiscursus,
-                       view_vereniging, view_aanmeldingen, view_afmelden, view_manager)
+                       view_vereniging, view_aanmeldingen, view_afmelden,
+                       view_manager, view_aanpassingen)
 
 app_name = 'Opleiding'
 
@@ -65,6 +66,10 @@ urlpatterns = [
     path('manager/',
          view_manager.ManagerOpleidingenView.as_view(),
          name='manager'),
+
+    path('manager/aanpassingen/',
+         view_aanpassingen.AanpassingenView.as_view(),
+         name='aanpassingen')
 ]
 
 # end of file
