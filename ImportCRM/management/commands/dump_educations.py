@@ -55,6 +55,9 @@ class Command(BaseCommand):
             self.stderr.write("[ERROR] Bestand heeft unicode problemen (%s)" % str(exc))
             return
 
+        if "members" not in data:
+            raise Exception('crash test')
+
         self._import_members(data['members'])
 
     def handle(self, *args, **options):
@@ -72,6 +75,8 @@ class Command(BaseCommand):
             self.stderr.write('[ERROR] Onverwachte fout tijdens import_crm_json: ' + str(exc))
             self.stderr.write('Traceback:')
             self.stderr.write(''.join(lst))
+
+            sys.exit(1)
 
 
 # end of file
