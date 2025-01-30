@@ -57,6 +57,7 @@ class ManagerOpleidingenView(UserPassesTestMixin, View):
         context['opleidingen'] = opleidingen
 
         context['url_stats_instaptoets'] = reverse('Instaptoets:stats')
+        context['url_aanpassingen'] = reverse('Opleiding:aanpassingen')
 
         context['kruimels'] = (
             (None, 'Opleidingen'),

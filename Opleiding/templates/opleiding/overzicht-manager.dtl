@@ -67,13 +67,17 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4>Statistiek</h4>
+            <h4>Voor de manager</h4>
         </div>
     </div>
 
     <!-- blauwe balk met kaartjes -->
     <div class="row-sv-blauw">
         <div class="col s12">
+
+            {% if url_aanpassingen %}
+                {% include 'plein/card_icon.dtl' with title="Aanpassingen" text="Persoonsgegevens van de deelnemers die overgenomen moeten worden in het CRM." icon="person_add" url=url_aanpassingen %}
+            {% endif %}
 
             {% if url_stats_instaptoets %}
                 {% include 'plein/card_icon.dtl' with title="Instaptoets" text="Welke vragen van de instaptoets doen het slecht?" icon="insights" url=url_stats_instaptoets %}
