@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2024 Ramon van der Winkel.
+#  Copyright (c) 2021-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -35,6 +35,7 @@ class Command(BaseCommand):
         taken_opschonen(self.stdout)
         tijdelijke_url_opschonen(self.stdout)
         registreer_opschonen(self.stdout)
+        # TODO: opleiding
         # TODO: scheidsrechters
 
         self.stdout.write('Klaar')
