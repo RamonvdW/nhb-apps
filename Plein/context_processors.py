@@ -37,12 +37,15 @@ def site_layout(request):
         account = get_account(request)
         context['menu_voornaam'] = account.get_first_name()
 
+        rol_nu = rol_get_huidige(request)
+
         # mandje tonen?
-        context['menu_mandje_aantal'] = cached_aantal_in_mandje_get(request)
-        if context['menu_mandje_aantal'] > 0:
-            # we zetten deze niet terug op False,
-            # zodat views deze ook op True kunnen zetten (ook al is het mandje leeg)
-            context['menu_toon_mandje'] = True
+        if rol_nu == Rol.ROL_SPORTER:
+            context['menu_mandje_aantal'] = cached_aantal_in_mandje_get(request)
+            if context['menu_mandje_aantal'] > 0:
+                # we zetten deze niet terug op False,
+                # zodat views deze ook op True kunnen zetten (ook al is het mandje leeg)
+                context['menu_toon_mandje'] = True
 
         # wissel van rol toegestaan?
         if rol_mag_wisselen(request):
