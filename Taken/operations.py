@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2024 Ramon van der Winkel.
+#  Copyright (c) 2020-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -133,16 +133,18 @@ def check_taak_bestaat(skip_afgerond=True, **kwargs):
 
             aangemaakt_door = <Account> (of None voor 'systeem')
 
-            beschrijving = "beschrijving van de taak - call for action of informatie"
+            onderwerp = <tekst>
+
+            beschrijving = <tekst>
     """
-    qset = Taak.objects.filter(**kwargs)
+    qset = Taak.objects.filter(**kwargs).order_by('-deadline')     # nieuwste eerst
 
     if skip_afgerond:
         qset = qset.exclude(is_afgerond=True)
 
-    aantal = qset.count()
+    # aantal = qset.count()
 
-    return aantal > 0
+    return qset.first()
 
 
 def maak_taak(**kwargs):

@@ -24,6 +24,7 @@ from Logboek.models import schrijf_in_logboek
 from Mailer.operations import mailer_email_is_valide, mailer_notify_internal_error
 from Opleiding.definities import CODE_SR_VER, CODE_SR_BOND, CODE_SR_INTERNATIONAAL, CODE2SCHEIDS
 from Opleiding.models import OpleidingDiploma
+from Opleiding.operations import opleiding_post_import_crm
 from Overig.helpers import maak_unaccented
 from Records.models import IndivRecord
 from Sporter.models import Sporter, Speelsterkte
@@ -1837,8 +1838,10 @@ class Command(BaseCommand):
                         None, 'CRM-import',
                         'Import van CRM data is uitgevoerd\n' +
                         samenvatting)
-            self.stdout.write("\n")
 
+        opleiding_post_import_crm(self.stdout)
+
+        self.stdout.write("\n")
         self.stdout.write(samenvatting)
 
         self.stdout.write('Done')

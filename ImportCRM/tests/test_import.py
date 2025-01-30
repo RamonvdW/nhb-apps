@@ -240,7 +240,7 @@ class TestImportCRMImport(E2EHelpers, TestCase):
         locatie1.plaats = 'Ja maar'
         locatie1.save(update_fields=['plaats'])
 
-        with self.assert_max_queries(131):
+        with self.assert_max_queries(132):
             f1, f2 = self.run_management_command(IMPORT_COMMAND,
                                                  TESTFILE_08_VER_MUTATIES,
                                                  OPTION_SIM)
