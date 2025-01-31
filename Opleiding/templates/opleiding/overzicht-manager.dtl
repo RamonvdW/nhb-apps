@@ -83,6 +83,9 @@
                 {% include 'plein/card_icon.dtl' with title="Instaptoets" text="Welke vragen van de instaptoets doen het slecht?" icon="insights" url=url_stats_instaptoets %}
             {% endif %}
 
+            {% if url_voorwaarden %}
+                {% include 'plein/card_icon.dtl' with title="Opleidingen" text="De verkoopvoorwaarden voor de opleidingen staan beschreven in dit document." icon="article" extern_open=True url=url_voorwaarden %}
+            {% endif %}
         </div>
     </div>
 

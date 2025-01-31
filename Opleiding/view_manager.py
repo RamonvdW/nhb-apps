@@ -4,6 +4,7 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
+from django.conf import settings
 from django.urls import reverse
 from django.shortcuts import render
 from django.views.generic import View
@@ -58,6 +59,8 @@ class ManagerOpleidingenView(UserPassesTestMixin, View):
 
         context['url_stats_instaptoets'] = reverse('Instaptoets:stats')
         context['url_aanpassingen'] = reverse('Opleiding:aanpassingen')
+
+        context['url_voorwaarden'] = settings.VERKOOPVOORWAARDEN_OPLEIDINGEN_URL
 
         context['kruimels'] = (
             (None, 'Opleidingen'),

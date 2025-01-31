@@ -5,6 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import reverse
+from django.conf import settings
 from django.http import Http404, UnreadablePostError, JsonResponse
 from django.utils import timezone
 from django.shortcuts import render
@@ -103,6 +104,8 @@ class InschrijvenBasiscursusView(TemplateView):
 
             context['url_wijzig'] = reverse('Opleiding:inschrijven-basiscursus')
             context['url_toevoegen'] = reverse('Opleiding:inschrijven-toevoegen-aan-mandje')
+
+        context['url_voorwaarden'] = settings.VERKOOPVOORWAARDEN_OPLEIDINGEN_URL
 
         context['kruimels'] = (
             (reverse('Opleiding:overzicht'), 'Opleidingen'),

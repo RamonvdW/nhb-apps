@@ -42,23 +42,18 @@
                 </tr>
 
                 <tr>
-                    <th>Aantal bijeenkomsten</th>
-                    <td>1</td>
-                </tr>
-
-                <tr>
                     <th>Totale duur</th>
                     <td>2 dagen (zaterdag + zondag)</td>
                 </tr>
 
                 <tr>
                     <th>Groepsgrootte</th>
-                    <td>Maximaal 15 deelnemers</td>
+                    <td>Circa 15 deelnemers</td>
                 </tr>
 
                 <tr>
                     <th>Soort opleiding</th>
-                    <td>Theoretisch: actuele reglementen en procedures</td>
+                    <td>Theoretisch: actuele reglementen en procedures.<br>Wordt afgesloten met een toets.</td>
                 </tr>
 
                 <tr>
@@ -78,7 +73,12 @@
                 </tr>
 
                 <tr>
-                    <th>Vervolg</th>
+                    <th>Na inschrijving</th>
+                    <td>Aanmeldingen worden verzameld door de organisatie.<br>Alle deelnemers worden per e-mail op de hoogte gesteld van cursus-data en locaties.</td>
+                </tr>
+
+                <tr>
+                    <th>Vervolg<wbr>opleidingen</th>
                     <td>Het diploma Basiscursus is vereist om deze opleiding te beginnen:<br>&bullet; Wedstrijdleider<br>&bullet; Scheidsrechter</td>
                 </tr>
 
@@ -153,7 +153,7 @@
 
         <!-- blauwe balk met wit informatie veld -->
         <div class="row-sv-blauw">
-            <div class="col s12 m10 offset-m1 xl8 offset-xl2">
+            <div class="col s12 m10 offset-m1 l6 offset-l3">
                 <div class="sv-kader" style="padding:10px">
 
                     <p>Je kan deze opleiding nu in je mandje leggen.</p>
@@ -169,6 +169,24 @@
                     </form>
 
                 </div>
+            </div>
+        </div>
+
+        <!-- witruimte -->
+        <div class="row center">
+            <div class="col s12">
+                <h4>Verkoopvoorwaarden</h4>
+            </div>
+        </div>
+
+        <!-- blauwe balk met wit informatie veld -->
+        <div class="row-sv-blauw">
+            <div class="col s12 m10 offset-m1 xl8 offset-xl2">
+
+                {% if url_voorwaarden %}
+                    {% include 'plein/card_icon.dtl' with title="Opleidingen" text="De verkoopvoorwaarden voor de opleidingen staan beschreven in dit document." icon="article" extern_open=True url=url_voorwaarden %}
+                {% endif %}
+
             </div>
         </div>
 
