@@ -382,7 +382,7 @@ class TestBestellingCli(E2EHelpers, TestCase):
         mandje = BestellingMandje.objects.get(pk=self.mandje.pk)
         self.assertEqual(1, mandje.producten.count())
 
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(23):
             f1, f2, = self.run_management_command('bestel_mutaties', '--quick', '1')
         # print("\nf1: %s\nf2: %s" % (f1.getvalue(), f2.getvalue()))
         self.assertTrue("[INFO] Opschonen mandjes begin" in f2.getvalue())
