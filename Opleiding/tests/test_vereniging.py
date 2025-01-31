@@ -10,8 +10,8 @@ from django.utils import timezone
 from Functie.models import Functie
 from Geo.models import Regio
 from Instaptoets.models import Vraag
-from Opleiding.definities import OPLEIDING_STATUS_INSCHRIJVEN
-from Opleiding.models import Opleiding, OpleidingInschrijving
+from Opleiding.definities import OPLEIDING_STATUS_INSCHRIJVEN, OPLEIDING_AFMELDING_STATUS_AFGEMELD
+from Opleiding.models import Opleiding, OpleidingInschrijving, OpleidingAfgemeld
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
@@ -102,6 +102,16 @@ class TestOpleidingVereniging(E2EHelpers, TestCase):
         inschrijving.save()
         self.inschrijving = inschrijving
 
+        afgemeld = OpleidingAfgemeld(
+                        wanneer_afgemeld=now,
+                        status=OPLEIDING_AFMELDING_STATUS_AFGEMELD,
+                        opleiding=self.opleiding,
+                        sporter=sporter,
+                        wanneer_aangemeld=now,
+                        koper=self.account_normaal,
+                        bedrag_ontvangen='1.00')
+        afgemeld.save()
+
     def test_anon(self):
         self.e2e_logout()
 
@@ -162,6 +172,16 @@ class TestOpleidingVereniging(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('opleiding/overzicht-vereniging.dtl', 'plein/site_layout.dtl'))
 
+        # lege lijst
+        OpleidingInschrijving.objects.all().delete()
+        OpleidingAfgemeld.objects.all().delete()
+        Opleiding.objects.all().delete()
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_ver_lijst)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('opleiding/overzicht-vereniging.dtl', 'plein/site_layout.dtl'))
+
     def test_aanmeldingen(self):
         self.e2e_login_and_pass_otp(self.account_normaal)
 
@@ -185,6 +205,15 @@ class TestOpleidingVereniging(E2EHelpers, TestCase):
 
         # MO
         self.e2e_wissel_naar_functie(self.functie_mo)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('opleiding/aanmeldingen.dtl', 'plein/site_layout.dtl'))
+
+        # lege lijst
+        OpleidingInschrijving.objects.all().delete()
+        OpleidingAfgemeld.objects.all().delete()
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK

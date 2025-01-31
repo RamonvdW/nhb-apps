@@ -10,7 +10,7 @@ from Account.models import Account
 from Locatie.models import EvenementLocatie
 from Opleiding.definities import (OPLEIDING_STATUS_CHOICES, OPLEIDING_STATUS_VOORBEREID,
                                   OPLEIDING_INSCHRIJVING_STATUS_CHOICES,
-                                  OPLEIDING_INSCHRIJVING_STATUS_RESERVERING_MANDJE,
+                                  OPLEIDING_INSCHRIJVING_STATUS_INSCHRIJVEN,
                                   OPLEIDING_AFMELDING_STATUS_CHOICES, OPLEIDING_AFMELDING_STATUS_TO_STR)
 from Sporter.models import Sporter
 from decimal import Decimal
@@ -183,7 +183,7 @@ class OpleidingInschrijving(models.Model):
 
     # status
     status = models.CharField(max_length=2, choices=OPLEIDING_INSCHRIJVING_STATUS_CHOICES,
-                              default=OPLEIDING_INSCHRIJVING_STATUS_RESERVERING_MANDJE)
+                              default=OPLEIDING_INSCHRIJVING_STATUS_INSCHRIJVEN)
 
     # wie was de koper?
     koper = models.ForeignKey(Account, on_delete=models.PROTECT, null=True, blank=True)

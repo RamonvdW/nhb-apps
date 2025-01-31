@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2024 Ramon van der Winkel.
+#  Copyright (c) 2024-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -56,7 +56,7 @@ def emailadres_is_geblokkeerd(email: str):
 
     beschrijving = '\n'.join(regels)
 
-    taak_onderwerp = "Problem met e-mailadres"
+    taak_onderwerp = "Probleem met e-mailadres"
 
     # maak een taak aan met alle details
     taak_log = "[%s] Taak aangemaakt" % stamp_str

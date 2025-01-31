@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2024 Ramon van der Winkel.
+#  Copyright (c) 2022-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -10,10 +10,13 @@ from django.utils import timezone
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse
 from Bestelling.models import BestellingMandje, BestellingProduct, Bestelling
 from Betaal.models import BetaalInstellingenVereniging
+from Evenement.definities import EVENEMENT_STATUS_GEACCEPTEERD
 from Evenement.models import Evenement, EvenementInschrijving
 from Functie.models import Functie
 from Geo.models import Regio
 from Locatie.models import WedstrijdLocatie, EvenementLocatie
+from Opleiding.definities import OPLEIDING_STATUS_INSCHRIJVEN
+from Opleiding.models import Opleiding, OpleidingInschrijving
 from Sporter.models import Sporter, SporterBoog
 from Taken.models import Taak
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -174,6 +177,102 @@ class TestBestellingCli(E2EHelpers, TestCase):
         product.save()
         self.mandje.producten.add(product)
 
+    def _leg_evenement_in_mandje(self, now, verleden):
+        locatie = EvenementLocatie(
+                    naam='Arnhemhal',
+                    vereniging=self.ver,
+                    adres='Papendallaan 9\n6816VD Arnhem',
+                    plaats='Arnhem')
+        locatie.save()
+
+        now_date = now.date()
+        soon_date = now_date + datetime.timedelta(days=60)
+
+        evenement = Evenement(
+                        titel='Test evenement',
+                        status=EVENEMENT_STATUS_GEACCEPTEERD,
+                        organiserende_vereniging=self.ver,
+                        datum=soon_date,
+                        aanvang='09:30',
+                        inschrijven_tot=1,
+                        locatie=locatie,
+                        contact_naam='Dhr. Organisator',
+                        contact_email='info@test.not',
+                        contact_website='www.test.not',
+                        contact_telefoon='023-1234567',
+                        beschrijving='Test beschrijving',
+                        prijs_euro_normaal="15",
+                        prijs_euro_onder18="15")
+        evenement.save()
+        self.evenement = evenement
+
+        sporter = Sporter(
+                        lid_nr=100001,
+                        voornaam='Ad',
+                        achternaam='de Admin',
+                        geboorte_datum='1966-06-06',
+                        sinds_datum='2020-02-02',
+                        account=self.mandje.account,
+                        bij_vereniging=self.ver)
+        sporter.save()
+
+        inschrijving = EvenementInschrijving(
+                            wanneer=verleden,
+                            evenement=evenement,
+                            sporter=sporter,
+                            koper=self.account)
+        inschrijving.save()
+
+        product = BestellingProduct(
+                        evenement_inschrijving=inschrijving,
+                        prijs_euro=Decimal('15.0'))
+        product.save()
+        self.mandje.producten.add(product)
+
+    def _leg_opleiding_in_mandje(self, now, verleden):
+        sporter = Sporter(
+                    lid_nr=100001,
+                    voornaam='Thea',
+                    achternaam='de Tester',
+                    unaccented_naam='Thea de Tester',
+                    email='normaal@test.nhb',
+                    geboorte_datum="1970-11-15",
+                    geboorteplaats='Pijlstad',
+                    geslacht='V',
+                    sinds_datum='2000-01-01',
+                    telefoon='+123456789',
+                    lid_tot_einde_jaar=now.year,
+                    account=self.account)
+        sporter.save()
+        self.sporter = sporter
+
+        # maak een basiscursus aan zodat het kaartje Basiscursus getoond wordt op het overzicht
+        opleiding = Opleiding(
+                        titel="Test",
+                        is_basiscursus=True,
+                        periode_begin="2024-11-01",
+                        periode_einde="2024-12-01",
+                        beschrijving="Test",
+                        status=OPLEIDING_STATUS_INSCHRIJVEN,
+                        eis_instaptoets=True,
+                        kosten_euro=10.00)
+        opleiding.save()
+
+        inschrijving = OpleidingInschrijving(
+                            opleiding=opleiding,
+                            sporter=sporter,
+                            koper=self.account,
+                            log='test')
+        inschrijving.save()
+        inschrijving.wanneer_aangemeld = verleden
+        inschrijving.save(update_fields=['wanneer_aangemeld'])
+
+        product = BestellingProduct(
+                        opleiding_inschrijving=inschrijving,
+                        prijs_euro=Decimal('15.0'))
+        product.save()
+        self.mandje.producten.add(product)
+
     def setUp(self):
         """ initialisatie van de test case """
 
@@ -220,11 +319,30 @@ class TestBestellingCli(E2EHelpers, TestCase):
         mandje = BestellingMandje.objects.get(pk=self.mandje.pk)
         self.assertEqual(2, mandje.producten.count())
 
+        with self.assert_max_queries(27):
+            f1, f2, = self.run_management_command('bestel_mutaties', '--quick', '1')
+        # print("\nf1: %s\nf2: %s" % (f1.getvalue(), f2.getvalue()))
+        self.assertTrue("[INFO] Opschonen mandjes begin" in f2.getvalue())
+
+        # controleer de inhoud van het mandje
+        mandje = BestellingMandje.objects.get(pk=mandje.pk)
+        self.assertEqual(0, mandje.producten.count())
+
+    def test_opschonen_evenement(self):
+        # bestel_mutaties doorloopt bij elke opstart alle mandjes
+        # en verwijdert producten die al te lang in het mandje liggen
+
+        now = timezone.now()
+        verleden = now - datetime.timedelta(days=1 + settings.MANDJE_VERVAL_NA_DAGEN)
+
+        self._leg_evenement_in_mandje(now, verleden)
+
+        mandje = BestellingMandje.objects.get(pk=self.mandje.pk)
+        self.assertEqual(1, mandje.producten.count())
+
         with self.assert_max_queries(26):
             f1, f2, = self.run_management_command('bestel_mutaties', '--quick', '1')
-
         # print("\nf1: %s\nf2: %s" % (f1.getvalue(), f2.getvalue()))
-
         self.assertTrue("[INFO] Opschonen mandjes begin" in f2.getvalue())
 
         # controleer de inhoud van het mandje
@@ -245,9 +363,28 @@ class TestBestellingCli(E2EHelpers, TestCase):
 
         with self.assert_max_queries(36):
             f1, f2, = self.run_management_command('bestel_mutaties', '--quick', '1')
-
         # print("\nf1: %s\nf2: %s" % (f1.getvalue(), f2.getvalue()))
+        self.assertTrue("[INFO] Opschonen mandjes begin" in f2.getvalue())
 
+        # controleer de inhoud van het mandje
+        mandje = BestellingMandje.objects.get(pk=mandje.pk)
+        self.assertEqual(0, mandje.producten.count())
+
+    def test_opschonen_opleiding(self):
+        # bestel_mutaties doorloopt bij elke opstart alle mandjes
+        # en verwijdert producten die al te lang in het mandje liggen
+
+        now = timezone.now()
+        verleden = now - datetime.timedelta(days=1 + settings.MANDJE_VERVAL_NA_DAGEN)
+
+        self._leg_opleiding_in_mandje(now, verleden)
+
+        mandje = BestellingMandje.objects.get(pk=self.mandje.pk)
+        self.assertEqual(1, mandje.producten.count())
+
+        with self.assert_max_queries(20):
+            f1, f2, = self.run_management_command('bestel_mutaties', '--quick', '1')
+        # print("\nf1: %s\nf2: %s" % (f1.getvalue(), f2.getvalue()))
         self.assertTrue("[INFO] Opschonen mandjes begin" in f2.getvalue())
 
         # controleer de inhoud van het mandje
@@ -261,9 +398,9 @@ class TestBestellingCli(E2EHelpers, TestCase):
         self._leg_wedstrijd_in_mandje(now, verleden)
 
         bestelling = Bestelling(
-            bestel_nr=42,
-            account=self.account,
-            ontvanger=self.instelling)
+                        bestel_nr=42,
+                        account=self.account,
+                        ontvanger=self.instelling)
         bestelling.save()
         bestelling.aangemaakt -= datetime.timedelta(days=5)
         bestelling.save(update_fields=['aangemaakt'])

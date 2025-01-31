@@ -49,6 +49,7 @@ from Functie.models import Functie
 from Mailer.operations import mailer_queue_email, render_email_template, mailer_notify_internal_error
 from Opleiding.definities import (OPLEIDING_INSCHRIJVING_STATUS_DEFINITIEF,
                                   OPLEIDING_INSCHRIJVING_STATUS_RESERVERING_BESTELD,
+                                  OPLEIDING_INSCHRIJVING_STATUS_RESERVERING_MANDJE,
                                   OPLEIDING_STATUS_TO_STR, OPLEIDING_INSCHRIJVING_STATUS_TO_STR)
 from Overig.background_sync import BackgroundSync
 from Vereniging.models import Vereniging
@@ -376,13 +377,37 @@ class Command(BaseCommand):
             webwinkel_plugin_verwijder_reservering(self.stdout, keuze)
 
             mandje = product.bestellingmandje_set.first()
-            if mandje.pk not in mandje_pks:
+            if mandje.pk not in mandje_pks:         # pragma: no branch
                 mandje_pks.append(mandje.pk)
 
             # verwijder de webwinkel keuze
             self.stdout.write('[INFO] WebwinkelKeuze met pk=%s wordt verwijderd' % keuze.pk)
             keuze.product = None
             keuze.delete()
+
+            # verwijder het bestel product
+            self.stdout.write('[INFO] BestelProduct met pk=%s wordt verwijderd' % product.pk)
+            product.delete()
+        # for
+
+        # opleidingen
+        for product in (BestellingProduct
+                        .objects
+                        .annotate(mandje_count=Count('bestellingmandje'))
+                        .exclude(opleiding_inschrijving=None)
+                        .select_related('opleiding_inschrijving')
+                        .filter(mandje_count=1,         # product ligt nog in een mandje
+                                opleiding_inschrijving__wanneer_aangemeld__lt=verval_datum)):
+
+            inschrijving = product.opleiding_inschrijving
+
+            # laat mutatie verwerken
+            # deze verwijdert ook het OpleidingInschrijving record
+            opleiding_plugin_verwijder_reservering(self.stdout, inschrijving)
+
+            mandje = product.bestellingmandje_set.first()
+            if mandje.pk not in mandje_pks:             # pragma: no branch
+                mandje_pks.append(mandje.pk)
 
             # verwijder het bestel product
             self.stdout.write('[INFO] BestelProduct met pk=%s wordt verwijderd' % product.pk)
@@ -648,7 +673,8 @@ class Command(BaseCommand):
                 stamp_str = timezone.localtime(timezone.now()).strftime('%Y-%m-%d om %H:%M')
                 msg = "[%s] Toegevoegd aan het mandje van %s\n" % (stamp_str, mandje.account.get_account_full_name())
                 inschrijving.log += msg
-                inschrijving.save(update_fields=['log'])
+                inschrijving.status = OPLEIDING_INSCHRIJVING_STATUS_RESERVERING_MANDJE
+                inschrijving.save(update_fields=['log', 'status'])
 
                 # bereken het totaal opnieuw
                 self._mandje_bepaal_btw(mandje)

@@ -71,6 +71,7 @@ class TestOpleidingOverzicht(E2EHelpers, TestCase):
                     lid_tot_einde_jaar=now.year,
                     account=self.account_normaal)
         sporter.save()
+        self.sporter = sporter
 
         # maak een basiscursus aan zodat het kaartje Basiscursus getoond wordt op het overzicht
         opleiding = Opleiding(
@@ -80,7 +81,8 @@ class TestOpleidingOverzicht(E2EHelpers, TestCase):
                         periode_einde="2024-12-01",
                         beschrijving="Test",
                         status=OPLEIDING_STATUS_INSCHRIJVEN,
-                        eis_instaptoets=True)
+                        eis_instaptoets=True,
+                        ingangseisen='test')
         opleiding.save()
         self.opleiding = opleiding
         self.opleiding.refresh_from_db()
@@ -156,12 +158,33 @@ class TestOpleidingOverzicht(E2EHelpers, TestCase):
 
         url = self.url_details % self.opleiding_geannuleerd.pk
 
+        # kan (nog) niet aanmelden
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('opleiding/details.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, 'deze opleiding is GEANNULEERD')
+
+        # instaptoets gehaald --> kan aanmelden
+        now = timezone.now()
+        toets = Instaptoets(
+                    sporter=self.sporter,
+                    afgerond=now,
+                    aantal_vragen=1,
+                    aantal_antwoorden=1,
+                    is_afgerond=True,
+                    aantal_goed=1,
+                    geslaagd=True)
+        toets.save()
+
+        url = self.url_details % self.opleiding.pk
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('opleiding/details.dtl', 'plein/site_layout.dtl'))
 
         resp = self.client.get(self.url_details % 999999)
         self.assert404(resp, 'Slechte parameter')

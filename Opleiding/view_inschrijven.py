@@ -19,7 +19,7 @@ from Betaal.format import format_bedrag_euro
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige
 from Instaptoets.operations import vind_toets, toets_geldig
-from Opleiding.definities import OPLEIDING_STATUS_INSCHRIJVEN
+from Opleiding.definities import OPLEIDING_STATUS_INSCHRIJVEN, OPLEIDING_INSCHRIJVING_STATUS_INSCHRIJVEN
 from Opleiding.models import Opleiding, OpleidingInschrijving
 from Sporter.models import get_sporter
 import json
@@ -50,7 +50,11 @@ class InschrijvenBasiscursusView(TemplateView):
         """ zoek de OpleidingDeelnemer voor de sporter
             tijdens POST maken we deze aan
         """
-        inschrijving = OpleidingInschrijving.objects.filter(sporter=self.sporter, opleiding=self.opleiding).first()
+        inschrijving = (OpleidingInschrijving
+                        .objects
+                        .filter(sporter=self.sporter,
+                                opleiding__is_basiscursus=True)             # dekt alle basiscursussen
+                        .first())
 
         if not inschrijving:
             inschrijving = OpleidingInschrijving(
@@ -92,18 +96,20 @@ class InschrijvenBasiscursusView(TemplateView):
         self.opleiding.kosten_str = format_bedrag_euro(self.opleiding.kosten_euro)
 
         if self.sporter:
-            inschrijving = self._zoek_inschrijving()
+            context['inschrijving'] = inschrijving = self._zoek_inschrijving()
 
-            if inschrijving.aanpassing_email == '':
-                inschrijving.aanpassing_email = self.sporter.email
-            if inschrijving.aanpassing_telefoon == '':
-                inschrijving.aanpassing_telefoon = self.sporter.telefoon
-            if inschrijving.aanpassing_geboorteplaats == '':
-                inschrijving.aanpassing_geboorteplaats = self.sporter.geboorteplaats
-            context['inschrijving'] = inschrijving
+            if inschrijving.status != OPLEIDING_INSCHRIJVING_STATUS_INSCHRIJVEN:
+                context['al_ingeschreven'] = True
+            else:
+                if inschrijving.aanpassing_email == '':
+                    inschrijving.aanpassing_email = self.sporter.email
+                if inschrijving.aanpassing_telefoon == '':
+                    inschrijving.aanpassing_telefoon = self.sporter.telefoon
+                if inschrijving.aanpassing_geboorteplaats == '':
+                    inschrijving.aanpassing_geboorteplaats = self.sporter.geboorteplaats
 
-            context['url_wijzig'] = reverse('Opleiding:inschrijven-basiscursus')
-            context['url_toevoegen'] = reverse('Opleiding:inschrijven-toevoegen-aan-mandje')
+                context['url_wijzig'] = reverse('Opleiding:inschrijven-basiscursus')
+                context['url_toevoegen'] = reverse('Opleiding:inschrijven-toevoegen-aan-mandje')
 
         context['url_voorwaarden'] = settings.VERKOOPVOORWAARDEN_OPLEIDINGEN_URL
 
@@ -217,6 +223,10 @@ class ToevoegenAanMandjeView(UserPassesTestMixin, View):
         now = timezone.now()
         stamp_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
         msg = "[%s] Inschrijving ontvangen; koper=%s\n" % (stamp_str, account_koper.get_account_full_name())
+
+        # kijk of de sporter al ingeschreven is
+        if OpleidingInschrijving.objects.filter(sporter=self.sporter, opleiding=opleiding).count() > 0:
+            raise Http404('Dubbel inschrijven niet mogelijk')
 
         # zoek of maak de deelnemer
         inschrijving, _ = OpleidingInschrijving.objects.get_or_create(sporter=self.sporter, opleiding=opleiding)

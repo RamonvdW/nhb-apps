@@ -44,7 +44,7 @@ class OpleidingenOverzichtView(TemplateView):
             if opleiding.status != OPLEIDING_STATUS_GEANNULEERD:
                 if opleiding.is_basiscursus:
                     enable_basiscursus = True
-                    opleiding.url_details = reverse('Opleiding:inschrijven-basiscursus')
+                    opleiding.url_details = reverse('Opleiding:basiscursus')
                 else:
                     opleiding.url_details = reverse('Opleiding:details', kwargs={'opleiding_pk': opleiding.pk})
         # for
