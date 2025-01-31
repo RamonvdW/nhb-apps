@@ -881,7 +881,8 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('account/login-as-go.dtl', 'plein/site_layout.dtl'))
 
         # pik de tijdelijke URL op
-        urls = [url for url in self.extract_all_urls(resp) if self.url_code_prefix in url]
+        urls = self.extract_all_urls(resp, skip_external=False)
+        urls = [url for url in urls if self.url_code_prefix in url]
         # hak het https deel eraf
         tijdelijke_url = urls[0][urls[0].find(self.url_code_prefix):]
         # volg de tijdelijke url om ingelogd te raken
