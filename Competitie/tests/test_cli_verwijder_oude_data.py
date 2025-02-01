@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2024 Ramon van der Winkel.
+#  Copyright (c) 2021-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -39,9 +39,9 @@ class TestCompetitieCliRegiocompVerwijderOudeData(E2EHelpers, TestCase):
 
         comp = Competitie.objects.first()
         CompetitieMatch(
-            competitie=comp,
-            datum_wanneer='2000-01-01',
-            tijd_begin_wedstrijd='00:00').save()
+                competitie=comp,
+                datum_wanneer='2000-01-01',
+                tijd_begin_wedstrijd='00:00').save()
 
         match = CompetitieMatch(
                         competitie=comp,
@@ -51,8 +51,7 @@ class TestCompetitieCliRegiocompVerwijderOudeData(E2EHelpers, TestCase):
         deelkamp = Kampioenschap.objects.first()
         deelkamp.rk_bk_matches.add(match)
 
-        Score(waarde=0, afstand_meter=18, type=SCORE_TYPE_GEEN).save()
-        Score(waarde=123, afstand_meter=18).save()                      # geen sporterboog
+        Score(waarde=0, afstand_meter=18, sporterboog=sb, type=SCORE_TYPE_GEEN).save()
         Score(waarde=123, afstand_meter=18, sporterboog=sb).save()      # 'dode' sporterboog
 
         # maak 501 scores aan

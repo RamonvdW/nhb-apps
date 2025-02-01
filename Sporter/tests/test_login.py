@@ -87,7 +87,9 @@ class TestSporterLogin(E2EHelpers, TestCase):
         self.e2e_login(self.account_normaal)
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_plein)
-        self.assert_template_used(resp, ('plein/plein-bezoeker.dtl',))
+        # self.assert_template_used(resp, ('plein/plein-bezoeker.dtl',))
+        # account is tegenwoordig altijd sporter
+        self.assert_template_used(resp, ('plein/plein-sporter.dtl',))
 
     def test_overdracht_naam(self):
         # controleer dat de naam van het lid door de login overgenomen wordt in het account

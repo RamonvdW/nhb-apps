@@ -17,7 +17,7 @@ from Competitie.definities import (DAGDELEN, DAGDEEL_AFKORTINGEN, DAGDEEL2LABEL,
                                    INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3)
 from Competitie.models import (Competitie, CompetitieMatch,
                                Regiocompetitie, RegiocompetitieRonde, RegiocompetitieSporterBoog)
-from Functie.definities import Rollen
+from Functie.definities import Rol
 from Functie.rol import rol_get_huidige
 from Geo.models import Rayon, Regio
 from Sporter.models import SporterVoorkeuren
@@ -131,7 +131,7 @@ class LijstAangemeldRegiocompAllesView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
-        return rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL)
+        return rol_nu in (Rol.ROL_BB, Rol.ROL_BKO, Rol.ROL_RKO, Rol.ROL_RCL)
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -189,7 +189,7 @@ class LijstAangemeldRegiocompRayonView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
-        return rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL)
+        return rol_nu in (Rol.ROL_BB, Rol.ROL_BKO, Rol.ROL_RKO, Rol.ROL_RCL)
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -255,7 +255,7 @@ class LijstAangemeldRegiocompRegioView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
-        return rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL)
+        return rol_nu in (Rol.ROL_BB, Rol.ROL_BKO, Rol.ROL_RKO, Rol.ROL_RCL)
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -411,7 +411,7 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
-        return rol_nu == Rollen.ROL_RCL
+        return rol_nu == Rol.ROL_RCL
 
     @staticmethod
     def _maak_data_dagdeel_behoefte(context, deelcomp, deelnemers, regio):
@@ -749,7 +749,7 @@ class Inschrijfmethode1BehoefteView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
-        return rol_nu == Rollen.ROL_RCL
+        return rol_nu == Rol.ROL_RCL
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """

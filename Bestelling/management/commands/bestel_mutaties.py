@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2024 Ramon van der Winkel.
+#  Copyright (c) 2022-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -23,11 +23,14 @@ from Bestelling.definities import (BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS
                                    BESTELLING_MUTATIE_OVERBOEKING_ONTVANGEN, BESTELLING_MUTATIE_RESTITUTIE_UITBETAALD,
                                    BESTELLING_MUTATIE_ANNULEER, BESTELLING_MUTATIE_TRANSPORT,
                                    BESTELLING_MUTATIE_EVENEMENT_INSCHRIJVEN, BESTELLING_MUTATIE_EVENEMENT_AFMELDEN,
+                                   BESTELLING_MUTATIE_OPLEIDING_INSCHRIJVEN, BESTELLING_MUTATIE_OPLEIDING_AFMELDEN,
                                    BESTELLING_TRANSPORT_OPHALEN, BESTELLING_TRANSPORT2STR)
 from Bestelling.models import (BestellingProduct, BestellingMandje, Bestelling, BestellingHoogsteBestelNr, 
                                BestellingMutatie)
 from Bestelling.plugins.evenement import (evenement_plugin_inschrijven, evenement_plugin_verwijder_reservering,
                                           evenement_plugin_inschrijving_is_betaald, evenement_plugin_afmelden)
+from Bestelling.plugins.opleiding import (opleiding_plugin_inschrijven, opleiding_plugin_inschrijving_is_betaald,
+                                          opleiding_plugin_verwijder_reservering, opleiding_plugin_afmelden)
 from Bestelling.plugins.product_info import beschrijf_product, beschrijf_korting
 from Bestelling.plugins.wedstrijden import (wedstrijden_plugin_automatische_kortingen_toepassen,
                                             wedstrijden_plugin_inschrijven, wedstrijden_plugin_verwijder_reservering,
@@ -44,6 +47,10 @@ from Evenement.definities import (EVENEMENT_INSCHRIJVING_STATUS_DEFINITIEF, EVEN
                                   EVENEMENT_INSCHRIJVING_STATUS_RESERVERING_BESTELD)
 from Functie.models import Functie
 from Mailer.operations import mailer_queue_email, render_email_template, mailer_notify_internal_error
+from Opleiding.definities import (OPLEIDING_INSCHRIJVING_STATUS_DEFINITIEF,
+                                  OPLEIDING_INSCHRIJVING_STATUS_RESERVERING_BESTELD,
+                                  OPLEIDING_INSCHRIJVING_STATUS_RESERVERING_MANDJE,
+                                  OPLEIDING_STATUS_TO_STR, OPLEIDING_INSCHRIJVING_STATUS_TO_STR)
 from Overig.background_sync import BackgroundSync
 from Vereniging.models import Vereniging
 from Wedstrijden.definities import (WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_BESTELD,
@@ -153,7 +160,7 @@ def _beschrijf_transacties(bestelling: Bestelling):
     return transacties
 
 
-def stuur_email_naar_koper_bestelling_details(bestelling):
+def stuur_email_naar_koper_bestelling_details(bestelling: Bestelling):
     """ Stuur een e-mail naar de koper met details van de bestelling en betaalinstructies """
 
     account = bestelling.account
@@ -190,7 +197,7 @@ def stuur_email_naar_koper_bestelling_details(bestelling):
                        mail_body)
 
 
-def stuur_email_naar_koper_betaalbevestiging(bestelling):
+def stuur_email_naar_koper_betaalbevestiging(bestelling: Bestelling):
     """ Stuur een e-mail om de betaalde bestelling te bevestigen """
 
     account = bestelling.account
@@ -216,7 +223,7 @@ def stuur_email_naar_koper_betaalbevestiging(bestelling):
                        mail_body)
 
 
-def stuur_email_webwinkel_backoffice(bestelling, email_backoffice):
+def stuur_email_webwinkel_backoffice(bestelling: Bestelling, email_backoffice):
     """ Stuur een e-mail om de betaalde bestelling te bevestigen """
 
     account = bestelling.account
@@ -370,13 +377,37 @@ class Command(BaseCommand):
             webwinkel_plugin_verwijder_reservering(self.stdout, keuze)
 
             mandje = product.bestellingmandje_set.first()
-            if mandje.pk not in mandje_pks:
+            if mandje.pk not in mandje_pks:         # pragma: no branch
                 mandje_pks.append(mandje.pk)
 
             # verwijder de webwinkel keuze
             self.stdout.write('[INFO] WebwinkelKeuze met pk=%s wordt verwijderd' % keuze.pk)
             keuze.product = None
             keuze.delete()
+
+            # verwijder het bestel product
+            self.stdout.write('[INFO] BestelProduct met pk=%s wordt verwijderd' % product.pk)
+            product.delete()
+        # for
+
+        # opleidingen
+        for product in (BestellingProduct
+                        .objects
+                        .annotate(mandje_count=Count('bestellingmandje'))
+                        .exclude(opleiding_inschrijving=None)
+                        .select_related('opleiding_inschrijving')
+                        .filter(mandje_count=1,         # product ligt nog in een mandje
+                                opleiding_inschrijving__wanneer_aangemeld__lt=verval_datum)):
+
+            inschrijving = product.opleiding_inschrijving
+
+            # laat mutatie verwerken
+            # deze verwijdert ook het OpleidingInschrijving record
+            opleiding_plugin_verwijder_reservering(self.stdout, inschrijving)
+
+            mandje = product.bestellingmandje_set.first()
+            if mandje.pk not in mandje_pks:             # pragma: no branch
+                mandje_pks.append(mandje.pk)
 
             # verwijder het bestel product
             self.stdout.write('[INFO] BestelProduct met pk=%s wordt verwijderd' % product.pk)
@@ -531,7 +562,7 @@ class Command(BaseCommand):
                                        'btw_percentage_cat2', 'btw_euro_cat2',
                                        'btw_percentage_cat3', 'btw_euro_cat3'])
 
-    def _verwerk_mutatie_wedstrijd_inschrijven(self, mutatie):
+    def _verwerk_mutatie_wedstrijd_inschrijven(self, mutatie: BestellingMutatie):
         mandje = self._get_mandje(mutatie)
         if mandje:                                  # pragma: no branch
             prijs_euro = wedstrijden_plugin_inschrijven(mutatie.wedstrijd_inschrijving)
@@ -556,7 +587,7 @@ class Command(BaseCommand):
         else:
             self.stdout.write('[WARNING] Kan mandje niet vinden voor mutatie pk=%s' % mutatie.pk)
 
-    def _verwerk_mutatie_evenement_inschrijven(self, mutatie):
+    def _verwerk_mutatie_evenement_inschrijven(self, mutatie: BestellingMutatie):
         mandje = self._get_mandje(mutatie)
         if mandje:                                  # pragma: no branch
             inschrijving = mutatie.evenement_inschrijving
@@ -582,7 +613,7 @@ class Command(BaseCommand):
         else:
             self.stdout.write('[WARNING] Kan mandje niet vinden voor mutatie pk=%s' % mutatie.pk)
 
-    def _verwerk_mutatie_webwinkel_keuze(self, mutatie):
+    def _verwerk_mutatie_webwinkel_keuze(self, mutatie: BestellingMutatie):
         mandje = self._get_mandje(mutatie)
         if mandje:                                  # pragma: no branch
             webwinkel_keuze = mutatie.webwinkel_keuze
@@ -615,7 +646,43 @@ class Command(BaseCommand):
         else:
             self.stdout.write('[WARNING] Kan mandje niet vinden voor mutatie pk=%s' % mutatie.pk)
 
-    def _verwerk_mutatie_verwijder_uit_mandje(self, mutatie):
+    def _verwerk_mutatie_opleiding_inschrijven(self, mutatie: BestellingMutatie):
+        mandje = self._get_mandje(mutatie)
+        if mandje:                                  # pragma: no branch
+            inschrijving = mutatie.opleiding_inschrijving
+
+            inschrijving.nummer = inschrijving.pk
+            inschrijving.save(update_fields=['nummer'])
+
+            prijs_euro = opleiding_plugin_inschrijven(inschrijving)
+
+            self.stdout.write('[DEBUG] Opleiding inschrijving status = %s (%s)' % (
+                                inschrijving.status, OPLEIDING_INSCHRIJVING_STATUS_TO_STR[inschrijving.status]))
+
+            # handmatige inschrijving heeft meteen status definitief en hoeft dus niet betaald te worden
+            if inschrijving.status != OPLEIDING_INSCHRIJVING_STATUS_DEFINITIEF:
+                # maak een product regel aan voor de bestelling
+                product = BestellingProduct(
+                                opleiding_inschrijving=inschrijving,
+                                prijs_euro=prijs_euro)
+                product.save()
+
+                # leg het product in het mandje
+                mandje.producten.add(product)
+
+                stamp_str = timezone.localtime(timezone.now()).strftime('%Y-%m-%d om %H:%M')
+                msg = "[%s] Toegevoegd aan het mandje van %s\n" % (stamp_str, mandje.account.get_account_full_name())
+                inschrijving.log += msg
+                inschrijving.status = OPLEIDING_INSCHRIJVING_STATUS_RESERVERING_MANDJE
+                inschrijving.save(update_fields=['log', 'status'])
+
+                # bereken het totaal opnieuw
+                self._mandje_bepaal_btw(mandje)
+                mandje.bepaal_totaalprijs_opnieuw()
+        else:
+            self.stdout.write('[WARNING] Kan mandje niet vinden voor mutatie pk=%s' % mutatie.pk)
+
+    def _verwerk_mutatie_verwijder_uit_mandje(self, mutatie: BestellingMutatie):
         """ een bestelling mag uit het mandje voordat de betaling gestart is """
 
         if not mutatie.product:
@@ -668,6 +735,21 @@ class Command(BaseCommand):
 
                     handled = True
 
+                elif product.opleiding_inschrijving:
+                    mandje.producten.remove(product)
+                    inschrijving = product.opleiding_inschrijving
+
+                    mutatie.opleiding_inschrijving = None
+                    mutatie.product = None
+                    mutatie.save()
+
+                    opleiding_plugin_verwijder_reservering(self.stdout, inschrijving)
+
+                    # verwijder het product, dan verdwijnt deze ook uit het mandje
+                    product.delete()
+
+                    handled = True
+
                 elif product.webwinkel_keuze:
 
                     transport_oud = mandje.transport
@@ -709,7 +791,7 @@ class Command(BaseCommand):
             if mutatie.product.wedstrijd_inschrijving:
                 wedstrijden_plugin_verwijder_reservering(self.stdout, mutatie.product.wedstrijd_inschrijving)
 
-    def _verwerk_mutatie_maak_bestellingen(self, mutatie):
+    def _verwerk_mutatie_maak_bestellingen(self, mutatie: BestellingMutatie):
         mandje = self._get_mandje(mutatie)
         if mandje:                                  # pragma: no branch
             # zorg dat we verse informatie ophalen (anders duur het 1 uur voordat een update door komt)
@@ -728,6 +810,9 @@ class Command(BaseCommand):
                                             'evenement_inschrijving',
                                             'evenement_inschrijving__evenement',
                                             'evenement_inschrijving__evenement__organiserende_vereniging',
+                                            'opleiding_inschrijving',
+                                            'opleiding_inschrijving__opleiding',
+                                            'opleiding_inschrijving__sporter',
                                             'webwinkel_keuze')
                             .order_by('wedstrijd_inschrijving__pk',
                                       'webwinkel_keuze__pk')):
@@ -758,6 +843,15 @@ class Command(BaseCommand):
 
                 elif product.webwinkel_keuze:
                     # keuze in de webwinkel
+                    ontvanger_ver_nr = self._instellingen_verkoper_webwinkel.vereniging.ver_nr
+                    try:
+                        ontvanger2producten[ontvanger_ver_nr].append(product)
+                    except KeyError:
+                        ontvanger2producten[ontvanger_ver_nr] = [product]
+
+                elif product.opleiding_inschrijving:
+                    # opleiding
+                    # TODO: organiserende_vereniging toevoegen aan elke opleiding
                     ontvanger_ver_nr = self._instellingen_verkoper_webwinkel.vereniging.ver_nr
                     try:
                         ontvanger2producten[ontvanger_ver_nr].append(product)
@@ -851,6 +945,10 @@ class Command(BaseCommand):
                         inschrijving = product.evenement_inschrijving
                         inschrijving.status = EVENEMENT_INSCHRIJVING_STATUS_RESERVERING_BESTELD
                         inschrijving.save(update_fields=['status'])
+                    if product.opleiding_inschrijving:
+                        inschrijving = product.opleiding_inschrijving
+                        inschrijving.status = OPLEIDING_INSCHRIJVING_STATUS_RESERVERING_BESTELD
+                        inschrijving.save(update_fields=['status'])
                 # for
 
                 totaal_euro_str = format_bedrag_euro(totaal_euro)
@@ -871,6 +969,8 @@ class Command(BaseCommand):
                             wedstrijden_plugin_inschrijving_is_betaald(self.stdout, product)
                         elif product.evenement_inschrijving:
                             evenement_plugin_inschrijving_is_betaald(self.stdout, product)
+                        elif product.opleiding_inschrijving:
+                            opleiding_plugin_inschrijving_is_betaald(self.stdout, product)
                     # for
 
                     bestelling.status = BESTELLING_STATUS_AFGEROND
@@ -889,7 +989,7 @@ class Command(BaseCommand):
             self._mandje_bepaal_btw(mandje)
             mandje.bepaal_totaalprijs_opnieuw()
 
-    def _verwerk_mutatie_wedstrijd_afmelden(self, mutatie):
+    def _verwerk_mutatie_wedstrijd_afmelden(self, mutatie: BestellingMutatie):
         inschrijving = mutatie.wedstrijd_inschrijving
         oude_status = inschrijving.status
         if not inschrijving:
@@ -950,7 +1050,42 @@ class Command(BaseCommand):
             self.stdout.write('[WARNING] Niet ondersteund: Inschrijving pk=%s met status=%s afmelden voor evenement' % (
                         inschrijving.pk, EVENEMENT_STATUS_TO_STR[inschrijving.status]))
 
-    def _verwerk_mutatie_betaling_afgerond(self, mutatie):
+    def _verwerk_mutatie_opleiding_afmelden(self, mutatie):
+        inschrijving = mutatie.opleiding_inschrijving
+        if not inschrijving:
+            return
+
+        # OPLEIDING_INSCHRIJVING_STATUS_RESERVERING_MANDJE gaat via BESTELLING_MUTATIE_VERWIJDER
+        if inschrijving.status == OPLEIDING_INSCHRIJVING_STATUS_RESERVERING_BESTELD:
+            # in een bestelling; nog niet (volledig) betaald
+            self.stdout.write('[INFO] Inschrijving pk=%s met status="besteld" afmelden voor opleiding' %
+                              inschrijving.pk)
+
+            # verwijder referentie vanuit mutatie, zodat inschrijving verwijderd kan worden
+            mutatie.opleiding_inschrijving = None
+            mutatie.save(update_fields=['opleiding_inschrijving'])
+
+            opleiding_plugin_verwijder_reservering(self.stdout, inschrijving)
+            # FUTURE: betaling afbreken
+            # FUTURE: automatische restitutie als de betaling binnen is
+
+        elif inschrijving.status == OPLEIDING_INSCHRIJVING_STATUS_DEFINITIEF:
+            # in een bestelling en betaald
+            self.stdout.write('[INFO] Inschrijving pk=%s met status="definitief" afmelden voor opleiding' %
+                              inschrijving.pk)
+
+            # verwijder referentie vanuit mutatie, zodat inschrijving verwijderd kan worden
+            mutatie.opleiding_inschrijving = None
+            mutatie.save(update_fields=['opleiding_inschrijving'])
+
+            opleiding_plugin_afmelden(inschrijving)
+            # FUTURE: automatisch een restitutie beginnen
+
+        else:
+            self.stdout.write('[WARNING] Niet ondersteund: Inschrijving pk=%s met status=%s afmelden voor opleiding' % (
+                        inschrijving.pk, OPLEIDING_STATUS_TO_STR[inschrijving.status]))
+
+    def _verwerk_mutatie_betaling_afgerond(self, mutatie: BestellingMutatie):
         now = timezone.now()
         when_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
 
@@ -1008,6 +1143,8 @@ class Command(BaseCommand):
                         wedstrijden_plugin_inschrijving_is_betaald(self.stdout, product)
                     elif product.evenement_inschrijving:
                         evenement_plugin_inschrijving_is_betaald(self.stdout, product)
+                    elif product.opleiding_inschrijving:
+                        opleiding_plugin_inschrijving_is_betaald(self.stdout, product)
                     elif product.webwinkel_keuze:
                         bevat_webwinkel = True
                 # for
@@ -1031,7 +1168,7 @@ class Command(BaseCommand):
         bestelling.betaal_actief = None
         bestelling.save(update_fields=['betaal_actief', 'status'])
 
-    def _verwerk_mutatie_overboeking_ontvangen(self, mutatie):
+    def _verwerk_mutatie_overboeking_ontvangen(self, mutatie: BestellingMutatie):
         now = timezone.now()
         when_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
 
@@ -1101,7 +1238,7 @@ class Command(BaseCommand):
             bestelling.status = BESTELLING_STATUS_BETALING_ACTIEF
             bestelling.save(update_fields=['status'])
 
-    def _verwerk_mutatie_annuleer_bestelling(self, mutatie):
+    def _verwerk_mutatie_annuleer_bestelling(self, mutatie: BestellingMutatie):
         """ Annulering van een bestelling + verwijderen van de reserveringen + bevestig via e-mail """
 
         bestelling = mutatie.bestelling
@@ -1157,11 +1294,10 @@ class Command(BaseCommand):
             self.stdout.write('[INFO] Annuleer bestelling: BestelProduct pk=%s inschrijving (%s) besteld door %s' % (
                                     product.pk, inschrijving, inschrijving.koper))
 
-            product.evenement_inschrijving = None
-
             afmelding = evenement_plugin_verwijder_reservering(self.stdout, inschrijving)
-            product.evenement_afgemeld = afmelding
 
+            product.evenement_inschrijving = None
+            product.evenement_afgemeld = afmelding
             product.save(update_fields=['evenement_inschrijving', 'evenement_afgemeld'])
         # for
 
@@ -1180,7 +1316,27 @@ class Command(BaseCommand):
             webwinkel_plugin_verwijder_reservering(self.stdout, keuze)
         # for
 
-    def _verwerk_mutatie_transport(self, mutatie):
+        # opleiding
+        for product in (bestelling
+                        .producten
+                        .exclude(opleiding_inschrijving=None)
+                        .select_related('opleiding_inschrijving',
+                                        'opleiding_inschrijving__opleiding')
+                        .all()):
+
+            deelnemer = product.opleiding_inschrijving
+
+            self.stdout.write('[INFO] Annuleer: BestelProduct pk=%s opleiding (%s) in mandje van %s' % (
+                                product.pk, deelnemer.opleiding, deelnemer.koper))
+
+            afmelding = opleiding_plugin_verwijder_reservering(self.stdout, deelnemer)
+
+            product.opleiding_inschrijving = None
+            product.opleiding_afgemeld = afmelding
+            product.save(update_fields=['opleiding_inschrijving', 'opleiding_afgemeld'])
+        # for
+
+    def _verwerk_mutatie_transport(self, mutatie: BestellingMutatie):
         """ Wijzig keuze voor transport tussen ophalen en verzender; alleen voor webwinkel aankopen """
 
         mandje = self._get_mandje(mutatie)
@@ -1254,6 +1410,14 @@ class Command(BaseCommand):
         elif code == BESTELLING_MUTATIE_TRANSPORT:
             self.stdout.write('[INFO] Verwerk mutatie %s: wijzig transport' % mutatie.pk)
             self._verwerk_mutatie_transport(mutatie)
+
+        elif code == BESTELLING_MUTATIE_OPLEIDING_INSCHRIJVEN:
+            self.stdout.write('[INFO] Verwerk mutatie %s: inschrijven op opleiding' % mutatie.pk)
+            self._verwerk_mutatie_opleiding_inschrijven(mutatie)
+
+        elif code == BESTELLING_MUTATIE_OPLEIDING_AFMELDEN:
+            self.stdout.write('[INFO] Verwerk mutatie %s: afmelden voor opleiding' % mutatie.pk)
+            self._verwerk_mutatie_opleiding_afmelden(mutatie)
 
         else:
             self.stdout.write('[ERROR] Onbekende mutatie code %s (pk=%s)' % (code, mutatie.pk))

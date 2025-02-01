@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2024 Ramon van der Winkel.
+#  Copyright (c) 2022-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -13,7 +13,9 @@ from Vereniging.models import Vereniging
 
 class BestellingProductAdmin(admin.ModelAdmin):
 
-    readonly_fields = ('wedstrijd_inschrijving', 'evenement_inschrijving', 'evenement_afgemeld')
+    readonly_fields = ('wedstrijd_inschrijving',
+                       'evenement_inschrijving', 'evenement_afgemeld',
+                       'opleiding_inschrijving', 'opleiding_afgemeld')
 
 
 class MandjeLeegFilter(admin.SimpleListFilter):
@@ -142,7 +144,7 @@ class BestellingAdmin(admin.ModelAdmin):
 class BestellingMutatieAdmin(admin.ModelAdmin):
 
     readonly_fields = ('when', 'account', 'code_plus', 'product', 'bestelling',
-                       'wedstrijd_inschrijving', 'evenement_inschrijving')
+                       'wedstrijd_inschrijving', 'evenement_inschrijving', 'opleiding_inschrijving')
 
     list_filter = ('is_verwerkt', 'code')
 
@@ -150,7 +152,7 @@ class BestellingMutatieAdmin(admin.ModelAdmin):
         ('BestellingMutatie',
          {'fields': ('when', 'code_plus', 'is_verwerkt',
                      'account',
-                     'wedstrijd_inschrijving', 'evenement_inschrijving',
+                     'wedstrijd_inschrijving', 'evenement_inschrijving', 'opleiding_inschrijving',
                      'product', 'korting', 'bestelling', 'betaling_is_gelukt', 'bedrag_euro')
           }),
     )

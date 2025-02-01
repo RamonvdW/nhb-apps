@@ -16,7 +16,7 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
 from Bestelling.operations.mandje import mandje_tel_inhoud
 from Bestelling.operations.mutaties import bestel_mutatieverzoek_inschrijven_wedstrijd
-from Functie.definities import Rollen
+from Functie.definities import Rol
 from Functie.rol import rol_get_huidige, rol_get_huidige_functie
 from Kalender.view_maand import MAAND2URL
 from Sporter.models import Sporter, SporterBoog, get_sporter
@@ -217,7 +217,7 @@ class WedstrijdInschrijvenSporter(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu = rol_get_huidige(self.request)
-        return self.rol_nu != Rollen.ROL_NONE
+        return self.rol_nu != Rol.ROL_NONE
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -329,7 +329,8 @@ class WedstrijdInschrijvenSporter(UserPassesTestMixin, TemplateView):
                             kwargs={'jaar': wedstrijd.datum_begin.year,
                                     'maand': MAAND2URL[wedstrijd.datum_begin.month],
                                     'soort': 'alle',
-                                    'bogen': 'auto'})
+                                    'bogen': 'auto',
+                                    'discipline': 'alle'})
 
         context['kruimels'] = (
             (url_terug, 'Wedstrijdkalender'),
@@ -356,7 +357,7 @@ class WedstrijdInschrijvenGroepje(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu = rol_get_huidige(self.request)
-        return self.rol_nu != Rollen.ROL_NONE
+        return self.rol_nu != Rol.ROL_NONE
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -529,7 +530,8 @@ class WedstrijdInschrijvenGroepje(UserPassesTestMixin, TemplateView):
                             kwargs={'jaar': wedstrijd.datum_begin.year,
                                     'maand': MAAND2URL[wedstrijd.datum_begin.month],
                                     'soort': 'alle',
-                                    'bogen': 'auto'})
+                                    'bogen': 'auto',
+                                    'discipline': 'alle'})
 
         context['kruimels'] = (
             (url_terug, 'Wedstrijdkalender'),
@@ -556,7 +558,7 @@ class WedstrijdInschrijvenFamilie(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu = rol_get_huidige(self.request)
-        return self.rol_nu != Rollen.ROL_NONE
+        return self.rol_nu != Rol.ROL_NONE
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -727,7 +729,8 @@ class WedstrijdInschrijvenFamilie(UserPassesTestMixin, TemplateView):
                             kwargs={'jaar': wedstrijd.datum_begin.year,
                                     'maand': MAAND2URL[wedstrijd.datum_begin.month],
                                     'soort': 'alle',
-                                    'bogen': 'auto'})
+                                    'bogen': 'auto',
+                                    'discipline': 'alle'})
 
         context['kruimels'] = (
             (url_terug, 'Wedstrijdkalender'),
@@ -753,7 +756,7 @@ class ToevoegenAanMandjeView(UserPassesTestMixin, View):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu = rol_get_huidige(self.request)
-        return self.rol_nu != Rollen.ROL_NONE
+        return self.rol_nu != Rol.ROL_NONE
 
     def post(self, request, *args, **kwargs):
         wedstrijd_str = request.POST.get('wedstrijd', '')[:6]       # afkappen voor de veiligheid
@@ -829,7 +832,7 @@ class ToevoegenAanMandjeView(UserPassesTestMixin, View):
             snel = str(request.POST.get('snel', ''))[:1]
             bestel_mutatieverzoek_inschrijven_wedstrijd(account_koper, inschrijving, snel == '1')
 
-            mandje_tel_inhoud(self.request)
+            mandje_tel_inhoud(self.request, account_koper)
 
             if wedstrijd.eis_kwalificatie_scores:
                 url = reverse('WedstrijdInschrijven:inschrijven-kwalificatie-scores', kwargs={'inschrijving_pk': inschrijving.pk})
@@ -846,7 +849,8 @@ class ToevoegenAanMandjeView(UserPassesTestMixin, View):
                             kwargs={'jaar': wedstrijd.datum_begin.year,
                                     'maand': MAAND2URL[wedstrijd.datum_begin.month],
                                     'soort': 'alle',
-                                    'bogen': 'auto'})
+                                    'bogen': 'auto',
+                                    'discipline': 'alle'})
 
         inschrijven_str = 'Inschrijven'
         url = reverse('Wedstrijden:wedstrijd-details', kwargs={'wedstrijd_pk': wedstrijd.pk})
@@ -894,7 +898,7 @@ class WedstrijdInschrijvenHandmatig(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu == Rollen.ROL_HWL
+        return self.rol_nu == Rol.ROL_HWL
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """

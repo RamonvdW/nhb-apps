@@ -15,7 +15,6 @@ from Account.forms import LoginForm
 from Account.models import Account
 from Account.operations.otp import otp_zet_controle_niet_gelukt
 from Account.plugin_manager import account_plugins_login_gate, account_plugins_post_login
-from Functie.rol import rol_bepaal_beschikbare_rollen
 from Logboek.models import schrijf_in_logboek
 from Overig.helpers import get_safe_from_ip
 from datetime import timedelta
@@ -100,8 +99,7 @@ class LoginView(TemplateView):
         # controleer het wachtwoord
         # hiervoor moeten we volledige credentials aanleveren (username + password)
         # in geval van inlog met e-mailadres gebruiken we hier de username
-        account2 = authenticate(username=account.username, password=wachtwoord)
-        if not account2:
+        if not authenticate(username=account.username, password=wachtwoord):
             # authenticatie is niet gelukt
             # reden kan zijn: verkeerd wachtwoord
             #  (of: is_active=False, maar: gebruiken we niet)
@@ -135,7 +133,7 @@ class LoginView(TemplateView):
             return False, None
 
         # wachtwoord is goed
-        account = account2
+        self.request.user = account
 
         # kijk of er een reden is om gebruik van het account te weren
         for _, func, _ in account_plugins_login_gate:
@@ -171,7 +169,6 @@ class LoginView(TemplateView):
 
         # de OTP controle is nog niet uitgevoerd
         otp_zet_controle_niet_gelukt(self.request)
-        rol_bepaal_beschikbare_rollen(self.request, account)
 
         return True, None
 

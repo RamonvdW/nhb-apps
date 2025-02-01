@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2024 Ramon van der Winkel.
+#  Copyright (c) 2022-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -31,7 +31,7 @@ class TestBestellingMandje(E2EHelpers, TestCase):
     """ tests voor de Bestelling applicatie, module mandje """
 
     url_mandje_toon = '/bestel/mandje/'
-    url_mandje_verwijder = '/bestel/mandje/verwijderen/%s/'        # inhoud_pk
+    url_mandje_verwijder = '/bestel/mandje/verwijderen/%s/'        # product_pk
     url_bestellingen_overzicht = '/bestel/overzicht/'
     url_kies_transport = '/bestel/mandje/transport/'
 

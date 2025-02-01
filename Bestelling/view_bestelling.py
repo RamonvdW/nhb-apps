@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2024 Ramon van der Winkel.
+#  Copyright (c) 2022-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -22,7 +22,7 @@ from Betaal.definities import (TRANSACTIE_TYPE_MOLLIE_PAYMENT, TRANSACTIE_TYPE_M
                                TRANSACTIE_TYPE_HANDMATIG)
 from Betaal.format import format_bedrag_euro
 from Betaal.mutaties import betaal_mutatieverzoek_start_ontvangst
-from Functie.definities import Rollen
+from Functie.definities import Rol
 from Functie.models import Functie
 from Functie.rol import rol_get_huidige
 from Kalender.view_maand import maak_compacte_wanneer_str
@@ -51,7 +51,7 @@ class ToonBestellingenView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu = rol_get_huidige(self.request)
-        return self.rol_nu != Rollen.ROL_NONE
+        return self.rol_nu != Rol.ROL_NONE
 
     @staticmethod
     def _get_bestellingen(account, context):
@@ -80,6 +80,10 @@ class ToonBestellingenView(UserPassesTestMixin, TemplateView):
                     beschrijving.append(product.evenement_inschrijving.korte_beschrijving())
                 elif product.evenement_afgemeld:
                     beschrijving.append(product.evenement_afgemeld.korte_beschrijving())
+                elif product.opleiding_inschrijving:
+                    beschrijving.append(product.opleiding_inschrijving.korte_beschrijving())
+                elif product.opleiding_afgemeld:
+                    beschrijving.append(product.opleiding_afgemeld.korte_beschrijving())
                 elif product.webwinkel_keuze:
                     beschrijving.append(product.webwinkel_keuze.product.omslag_titel)
                 else:
@@ -92,8 +96,12 @@ class ToonBestellingenView(UserPassesTestMixin, TemplateView):
                 # toon daarom als "te betalen"
                 status = BESTELLING_STATUS_BETALING_ACTIEF
 
-            bestelling.status_str = BESTELLING_STATUS2STR[status]
-            bestelling.status_aandacht = (status == BESTELLING_STATUS_BETALING_ACTIEF)
+            if status == BESTELLING_STATUS_BETALING_ACTIEF:
+                bestelling.status_str = 'Te betalen'
+            else:
+                bestelling.status_str = BESTELLING_STATUS2STR[status]
+
+            bestelling.status_aandacht = status in (BESTELLING_STATUS_BETALING_ACTIEF, BESTELLING_STATUS_MISLUKT)
 
             bestelling.url_details = reverse('Bestel:toon-bestelling-details',
                                              kwargs={'bestel_nr': bestelling.bestel_nr})
@@ -109,6 +117,10 @@ class ToonBestellingenView(UserPassesTestMixin, TemplateView):
         # contactgegevens voor hulpvragen
         functie = Functie.objects.filter(rol='MWW')[0]
         context['email_webshop'] = functie.bevestigde_email
+
+        functie = Functie.objects.filter(rol='MO')[0]
+        context['email_opleidingen'] = functie.bevestigde_email
+
         context['email_support'] = settings.EMAIL_SUPPORT
 
         context['kruimels'] = (
@@ -135,7 +147,7 @@ class ToonBestellingDetailsView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu = rol_get_huidige(self.request)
-        return self.rol_nu != Rollen.ROL_NONE
+        return self.rol_nu != Rol.ROL_NONE
 
     @staticmethod
     def _beschrijf_inhoud_bestelling(bestelling: Bestelling):
@@ -162,6 +174,8 @@ class ToonBestellingDetailsView(UserPassesTestMixin, TemplateView):
                                      'evenement_inschrijving__koper',
                                      'evenement_inschrijving__sporter',
                                      'evenement_inschrijving__sporter__bij_vereniging',
+                                     'opleiding_inschrijving',
+                                     'opleiding_inschrijving__opleiding',
                                      'webwinkel_keuze',
                                      'webwinkel_keuze__product')
                      .order_by('pk'))       # geen schoonheidsprijs, maar wel vaste volgorde
@@ -177,6 +191,12 @@ class ToonBestellingDetailsView(UserPassesTestMixin, TemplateView):
                 pass
 
             elif product.evenement_inschrijving:
+                pass
+
+            elif product.opleiding_inschrijving:
+                pass
+
+            elif product.opleiding_afgemeld:
                 pass
 
             elif product.webwinkel_keuze:
@@ -329,6 +349,7 @@ class ToonBestellingDetailsView(UserPassesTestMixin, TemplateView):
         context['kwalificatie_scores'] = kwalificatie_scores
 
         context['url_voorwaarden_wedstrijden'] = settings.VERKOOPVOORWAARDEN_WEDSTRIJDEN_URL
+        context['url_voorwaarden_opleidingen'] = settings.VERKOOPVOORWAARDEN_OPLEIDINGEN_URL
         context['url_voorwaarden_webwinkel'] = settings.VERKOOPVOORWAARDEN_WEBWINKEL_URL
 
         context['producten'], context['bevat_fout'] = self._beschrijf_inhoud_bestelling(bestelling)
@@ -360,7 +381,7 @@ class BestellingAfrekenenView(UserPassesTestMixin, TemplateView):
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        return self.rol_nu not in (Rollen.ROL_NONE, None)
+        return self.rol_nu not in (Rol.ROL_NONE, None)
 
     def dispatch(self, request, *args, **kwargs):
         """ deze functie wordt aangeroepen voor get_queryset/get_context_data
@@ -370,7 +391,7 @@ class BestellingAfrekenenView(UserPassesTestMixin, TemplateView):
         """
         self.rol_nu = rol_get_huidige(self.request)
 
-        if self.rol_nu != Rollen.ROL_NONE:
+        if self.rol_nu != Rol.ROL_NONE:
 
             account = get_account(self.request)
 
@@ -429,7 +450,7 @@ class DynamicBestellingCheckStatus(UserPassesTestMixin, View):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
-        return rol_nu != Rollen.ROL_NONE
+        return rol_nu != Rol.ROL_NONE
 
     @staticmethod
     def post(request, *args, **kwargs):
@@ -518,7 +539,7 @@ class BestellingAfgerondView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu = rol_get_huidige(self.request)
-        return self.rol_nu != Rollen.ROL_NONE
+        return self.rol_nu != Rol.ROL_NONE
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -591,7 +612,7 @@ class AnnuleerBestellingView(UserPassesTestMixin, View):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
-        return rol_nu != Rollen.ROL_NONE            # inlog vereist
+        return rol_nu != Rol.ROL_NONE            # inlog vereist
 
     @staticmethod
     def post(request, *args, **kwargs):

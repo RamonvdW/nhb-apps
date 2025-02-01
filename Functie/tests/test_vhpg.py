@@ -16,7 +16,7 @@ class TestFunctieVHPG(E2EHelpers, TestCase):
 
     """ tests voor de Functie applicatie; module VHPG """
 
-    test_after = ('Account.tests.test_otp_controle', 'Functie.tests.test_wisselvanrol')
+    test_after = ('Account.tests.test_otp_controle', 'Functie.tests.test_wissel_van_rol')
 
     url_acceptatie = '/functie/vhpg-acceptatie/'
     url_afspraken = '/functie/vhpg-afspraken/'
@@ -87,7 +87,7 @@ class TestFunctieVHPG(E2EHelpers, TestCase):
         self.assertEqual(VerklaringHanterenPersoonsgegevens.objects.count(), 0)
 
         # voer de post uit met checkbox wel gezet (waarde maakt niet uit)
-        with self.assert_max_queries(26):
+        with self.assert_max_queries(20):
             resp = self.client.post(self.url_acceptatie, {'accepteert': 'whatever'}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)

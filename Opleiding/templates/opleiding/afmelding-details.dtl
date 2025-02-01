@@ -1,0 +1,95 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2024 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Details aanmelding{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Details afmelding</h3>
+        </div>
+    </div>
+
+    <!-- blauwe balk met informatie label : info -->
+    <div class="row-sv-blauw">
+        <div class="col s12 m10 offset-m1">
+            <table class="sv-kader">
+                <tr>
+                    <th>Reserveringsnummer</th>
+                    <td>{{ afmelding.reserveringsnummer }}</td>
+                </tr>
+                <tr>
+                    <th>Sporter</th>
+                    <td>{{ sporter.lid_nr_en_volledige_naam }}</td>
+                </tr>
+                <tr>
+                    <th>Van vereniging</th>
+                    <td>{% if ver %}{{ ver.ver_nr_en_naam }}<br>uit {{ ver.plaats }} (regio {{ ver.regio }}; {{ ver.regio.rayon }}){% else %}<i>Onbekend</i>{% endif %}</td>
+                </tr>
+                <tr>
+                    <th>E-mail sporter</th>
+                    <td><code>{{ sporter.email }}</code></td>
+                </tr>
+                <tr>
+                    <th>Evenement</th>
+                    <td>{{ afmelding.evenement.titel }}<br>bij {{ afmelding.evenement.organiserende_vereniging }}</td>
+                </tr>
+                <tr>
+                    <th>Ingeschreven</th>
+                    <td>op {{ afmelding.wanneer_aangemeld }}<br>door {{ afmelding.koper }}</td>
+                </tr>
+                <tr>
+                    <th>Afgemeld</th>
+                    <td>op {{ afmelding.wanneer_afgemeld }}</td>
+                </tr>
+
+                <tr>
+                    <th>Status</th>
+                    <td>{% if afmelding.status == 'A' %}
+                            <span class="grey-text">In mandje | Besteld | Definitief | Geannuleerd | </span><span>Afgemeld</span>
+                        {% elif afmelding.status == 'C' %}
+                            <span class="grey-text">In mandje | Besteld | Definitief | </span><span>Geannuleerd</span><span class="grey-text"> | Afgemeld</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% if afmelding.bestelnummer_str %}
+                    <tr>
+                        <th>Bestelnummer</th>
+                        <td>{{ afmelding.bestelnummer_str }}</td>
+                    </tr>
+                {% endif %}
+                <tr>
+                    <th>Prijs</th>
+                    <td>{% if afmelding.bestelproduct %}&euro;&nbsp;{{ afmelding.bestelproduct.prijs_euro }}{% else %}<i>Geen</i> (handmatige inschrijving){% endif %}</td>
+                </tr>
+                <tr>
+                    <th>Inschrijfgeld ontvangen</th>
+                    <td>&euro;&nbsp;{{ afmelding.bedrag_ontvangen }}</td>
+                </tr>
+
+                {% if afmelding.bedrag_retour %}
+                    <tr>
+                        <th>Inschrijfgeld retour</th>
+                        <td>&euro;&nbsp;{{ afmelding.bedrag_retour }}</td>
+                    </tr>
+                {% endif %}
+
+                <tr>
+                    <th>Logboekje</th>
+                    <td>{{ afmelding.log|linebreaksbr }}</td>
+                </tr>
+
+            </table>
+        </div>
+    </div>
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="evenement-afmelding-details" %}
+
+{% endblock %}

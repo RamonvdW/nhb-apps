@@ -12,7 +12,7 @@ from Bestelling.operations.mutaties import (bestel_mutatieverzoek_afmelden_evene
                                             bestel_mutatieverzoek_verwijder_product_uit_mandje)
 from Evenement.definities import EVENEMENT_INSCHRIJVING_STATUS_RESERVERING_MANDJE
 from Evenement.models import EvenementInschrijving
-from Functie.definities import Rollen
+from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
 
 
@@ -30,7 +30,7 @@ class AfmeldenView(UserPassesTestMixin, View):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu == Rollen.ROL_HWL
+        return self.rol_nu == Rol.ROL_HWL
 
     def post(self, request, *args, **kwargs):
         """ wordt aangeroepen om de POST af te handelen"""

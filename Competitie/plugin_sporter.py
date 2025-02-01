@@ -14,7 +14,6 @@ from django.utils.formats import localize
 from BasisTypen.models import BoogType
 from Competitie.definities import INSCHRIJF_METHODE_1, DEEL_RK, DEELNAME_NEE
 from Competitie.models import Competitie, Regiocompetitie, RegiocompetitieSporterBoog, KampioenschapSporterBoog
-from Functie.definities import Rollen
 from Sporter.models import Sporter
 import copy
 
@@ -99,10 +98,9 @@ def get_sporter_competities(sporter: Sporter,
                            'afstand')):
 
         comp.bepaal_fase()
-        comp.bepaal_openbaar(Rollen.ROL_SPORTER)
         comp.fase = FASE_PREP
 
-        if comp.is_openbaar:
+        if comp.is_openbaar_voor_publiek():
             # fase B of later
 
             comp.status_str = 'tbd'

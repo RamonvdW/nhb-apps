@@ -9,13 +9,14 @@ from django.http import Http404
 from django.views.generic import TemplateView
 from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
+from CompBeheer.operations import is_competitie_openbaar_voor_rol
 from Competitie.models import Competitie, Regiocompetitie, Kampioenschap
 from Competitie.tijdlijn import maak_comp_fase_beschrijvingen
 from CompBeheer.plugin_overzicht import get_kaartjes_beheer
 from CompLaagRegio.plugin_overzicht import get_kaartjes_regio
 from CompLaagRayon.plugin_overzicht import get_kaartjes_rayon
 from CompLaagBond.plugin_overzicht import get_kaartjes_bond
-from Functie.definities import Rollen
+from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving
 from Taken.operations import eval_open_taken
 
@@ -38,7 +39,7 @@ class CompetitieBeheerView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL)
+        return self.rol_nu in (Rol.ROL_BB, Rol.ROL_BKO, Rol.ROL_RKO, Rol.ROL_RCL)
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -57,7 +58,7 @@ class CompetitieBeheerView(UserPassesTestMixin, TemplateView):
         context['comp'] = comp
 
         comp.bepaal_fase()                     # zet comp.fase
-        comp.bepaal_openbaar(self.rol_nu)      # zet comp.is_openbaar
+        comp.is_openbaar = is_competitie_openbaar_voor_rol(comp, self.rol_nu)
 
         comp.fase_indiv_str, comp.fase_teams_str = maak_comp_fase_beschrijvingen(comp)
 

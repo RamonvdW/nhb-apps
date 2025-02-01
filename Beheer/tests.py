@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2024 Ramon van der Winkel.
+#  Copyright (c) 2020-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -18,7 +18,7 @@ import datetime
 import io
 
 
-# updaten met dit commando:
+# updaten met dit commando (vereist ENABLE_DJANGO_EXTENSIONS = True in settings_dev.py):
 # noqa: for x in `./manage.py show_urls --settings=Site.settings_dev | rev | cut -d'/' -f2- | rev | grep '/beheer/'`; do echo "'$x/',"; done | grep -vE ':object_id>/|/add/|/autocomplete/|<app_label>|<id>|bondscompetities/beheer/'
 BEHEER_URLS = (
     '/beheer/Account/account/',
@@ -68,15 +68,22 @@ BEHEER_URLS = (
     '/beheer/HistComp/histkampindivbk/',
     '/beheer/HistComp/histkampindivrk/',
     '/beheer/HistComp/histkampteam/',
+    '/beheer/Instaptoets/categorie/',
+    '/beheer/Instaptoets/instaptoets/',
+    '/beheer/Instaptoets/quiz/',
+    '/beheer/Instaptoets/toetsantwoord/',
+    '/beheer/Instaptoets/uitdaging/',
+    '/beheer/Instaptoets/voorstelvraag/',
+    '/beheer/Instaptoets/vraag/',
     '/beheer/Locatie/evenementlocatie/',
     '/beheer/Locatie/reistijd/',
     '/beheer/Locatie/wedstrijdlocatie/',
     '/beheer/Logboek/logboekregel/',
     '/beheer/Mailer/mailqueue/',
-    '/beheer/Opleidingen/opleiding/',
-    '/beheer/Opleidingen/opleidingdeelnemer/',
-    '/beheer/Opleidingen/opleidingdiploma/',
-    '/beheer/Opleidingen/opleidingmoment/',
+    '/beheer/Opleiding/opleiding/',
+    '/beheer/Opleiding/opleidingdeelnemer/',
+    '/beheer/Opleiding/opleidingdiploma/',
+    '/beheer/Opleiding/opleidingmoment/',
     '/beheer/Records/anderrecord/',
     '/beheer/Records/besteindivrecords/',
     '/beheer/Records/indivrecord/',
@@ -92,6 +99,7 @@ BEHEER_URLS = (
     '/beheer/Score/score/',
     '/beheer/Score/scorehist/',
     '/beheer/Score/uitslag/',
+    '/beheer/SiteMap/sitemaplastmod/',
     '/beheer/Spelden/speld/',
     '/beheer/Spelden/speldaanvraag/',
     '/beheer/Spelden/speldbijlage/',
@@ -262,7 +270,7 @@ class TestBeheer(E2EHelpers, TestCase):
             '/beheer/Sporter/sporter/?heeft_account=Ja',
 
             # Opleiding
-            '/beheer/Opleidingen/opleidingdiploma/?heeft_account=Ja',
+            '/beheer/Opleiding/opleidingdiploma/?heeft_account=Ja',
 
             # Reistijden
             '/beheer/Locatie/reistijd/?reistijd_vastgesteld=nul',

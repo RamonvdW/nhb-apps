@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2024 Ramon van der Winkel.
+#  Copyright (c) 2020-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -372,7 +372,7 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
         self.assertTrue(voorkeuren.voorkeur_discipline_3d)
 
         # alle disciplines 'uit' zetten
-        with self.assert_max_queries(29):
+        with self.assert_max_queries(30):
             resp = self.client.post(self.url_voorkeuren, {})
         self.assert_is_redirect(resp, '/sporter/')     # naar profiel
         voorkeuren = SporterVoorkeuren.objects.get(pk=voorkeuren.pk)
@@ -457,7 +457,7 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('sporter/voorkeuren.dtl', 'plein/site_layout.dtl'))
 
         # wijzig zonder opt-out te doen
-        with self.assert_max_queries(33):
+        with self.assert_max_queries(34):
             resp = self.client.post(self.url_voorkeuren, {})
         self.assert_is_redirect(resp, '/sporter/')     # naar profiel
 
@@ -590,11 +590,7 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
         self.assertEqual(len(objs), 0)
         self.assertEqual(SporterBoog.objects.filter(sporter=self.sporter_100001).count(), 17)
 
-        objs = get_sporterboog(self.sporter_100001, mag_database_wijzigen=True, geen_wedstrijden=True)
-        self.assertEqual(len(objs), 0)
-        self.assertEqual(SporterBoog.objects.filter(sporter=self.sporter_100001).count(), 17)
-
-        ag.delete()
+        # verwijder alle SporterBoog voor sporter met geen_wedstrijden=True
         objs = get_sporterboog(self.sporter_100001, mag_database_wijzigen=True, geen_wedstrijden=True)
         self.assertEqual(len(objs), 0)
         self.assertEqual(SporterBoog.objects.filter(sporter=self.sporter_100001).count(), 0)
@@ -616,7 +612,7 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('sporter/voorkeuren.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, 'Voorkeuren voor scheidsrechters')
 
-        with self.assert_max_queries(32):
+        with self.assert_max_queries(33):
             resp = self.client.post(self.url_voorkeuren, {'sr_wed_email': True,
                                                           'sr_wed_tel': True})
 

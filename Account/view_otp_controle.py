@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2023 Ramon van der Winkel.
+#  Copyright (c) 2020-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -13,7 +13,6 @@ from django.views.generic import TemplateView
 from Account.forms import OTPControleForm
 from Account.models import get_account
 from Account.operations.otp import otp_controleer_code
-from Functie.rol import rol_bepaal_beschikbare_rollen
 
 TEMPLATE_OTP_CONTROLE = 'account/otp-controle.dtl'
 
@@ -76,9 +75,6 @@ class OTPControleView(TemplateView):
             otp_code = form.cleaned_data.get('otp_code')
             if otp_controleer_code(request, account, otp_code):
                 # controle is gelukt (is ook al gelogd)
-
-                # propageer het succes zodat de gebruiker meteen aan de slag kan
-                rol_bepaal_beschikbare_rollen(request, account)
 
                 # volg een eventuele pagina waar de gebruik al heen wilde
                 next_url = form.cleaned_data.get('next_url')

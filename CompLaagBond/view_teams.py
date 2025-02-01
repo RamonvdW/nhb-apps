@@ -16,7 +16,7 @@ from BasisTypen.definities import ORGANISATIE_WA
 from BasisTypen.models import BoogType
 from Competitie.definities import DEEL_BK, DEELNAME_JA, DEELNAME_NEE, MUTATIE_KAMP_TEAMS_NUMMEREN
 from Competitie.models import Kampioenschap, KampioenschapTeam, CompetitieMutatie
-from Functie.definities import Rollen, rol2url
+from Functie.definities import Rol, rol2url
 from Functie.rol import rol_get_huidige_functie
 from Overig.background_sync import BackgroundSync
 import time
@@ -43,7 +43,7 @@ class LijstBkTeamsView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu == Rollen.ROL_BKO
+        return self.rol_nu == Rol.ROL_BKO
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -168,7 +168,7 @@ class WijzigStatusBkTeamView(UserPassesTestMixin, View):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu == Rollen.ROL_BKO
+        return self.rol_nu == Rol.ROL_BKO
 
     def post(self, request, *args, **kwargs):
         """ wordt aangeroepen als de gebruiker op de knop OPSLAAN druk """

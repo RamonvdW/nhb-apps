@@ -11,7 +11,7 @@ from django.utils.safestring import mark_safe
 from BasisTypen.definities import BLAZOEN2STR
 from Competitie.models import Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse
 from Competitie.seizoenen import get_comp_pk
-from Functie.definities import Rollen
+from Functie.definities import Rol
 from Functie.rol import rol_get_huidige
 from Score.definities import AG_NUL
 
@@ -101,7 +101,7 @@ class KlassengrenzenTonenView(View):
                 aantal_pijlen = 25
 
             rol_nu = rol_get_huidige(request)
-            context['toon_aantal'] = toon_aantal = (rol_nu == Rollen.ROL_BB)
+            context['toon_aantal'] = toon_aantal = (rol_nu == Rol.ROL_BB)
 
             context['indiv_klassen'] = self._get_indiv_klassen(comp, toon_aantal)
             context['team_klassen'] = self._get_team_klassen(comp, aantal_pijlen)

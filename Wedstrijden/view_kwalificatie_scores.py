@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2023 Ramon van der Winkel.
+#  Copyright (c) 2021-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -11,7 +11,7 @@ from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
-from Functie.definities import Rollen
+from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
 from Wedstrijden.definities import (KWALIFICATIE_CHECK_GOED, KWALIFICATIE_CHECK_NOG_DOEN, KWALIFICATIE_CHECK_AFGEKEURD,
                                     WEDSTRIJD_STATUS_URL_WACHT_OP_GEACCEPTEERD)
@@ -41,7 +41,7 @@ class CheckKwalificatieScoresView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu in (Rollen.ROL_MWZ, Rollen.ROL_BB, Rollen.ROL_HWL)
+        return self.rol_nu in (Rol.ROL_MWZ, Rol.ROL_HWL)
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -54,7 +54,7 @@ class CheckKwalificatieScoresView(UserPassesTestMixin, TemplateView):
         except (ValueError, Wedstrijd.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
-        if self.rol_nu == Rollen.ROL_HWL:
+        if self.rol_nu == Rol.ROL_HWL:
             # controleer dat dit de HWL van de wedstrijd is
             if wedstrijd.organiserende_vereniging != self.functie_nu.vereniging:
                 raise PermissionDenied('Niet de organisator')
@@ -114,7 +114,7 @@ class CheckKwalificatieScoresView(UserPassesTestMixin, TemplateView):
             lijst.append(obj)
         # for
 
-        if self.rol_nu == Rollen.ROL_HWL:
+        if self.rol_nu == Rol.ROL_HWL:
             context['kruimels'] = (
                 (reverse('Vereniging:overzicht'), 'Beheer vereniging'),
                 (reverse('Wedstrijden:vereniging'), 'Wedstrijdkalender'),
@@ -146,7 +146,7 @@ class CheckKwalificatieScoresWedstrijdView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu in (Rollen.ROL_MWZ, Rollen.ROL_BB, Rollen.ROL_HWL)
+        return self.rol_nu in (Rol.ROL_MWZ, Rol.ROL_HWL)
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -162,7 +162,7 @@ class CheckKwalificatieScoresWedstrijdView(UserPassesTestMixin, TemplateView):
         context['ref_score'] = ref_score
         wedstrijd = ref_score.inschrijving.wedstrijd
 
-        if self.rol_nu == Rollen.ROL_HWL:
+        if self.rol_nu == Rol.ROL_HWL:
             # controleer dat dit de HWL van de wedstrijd is
             if wedstrijd.organiserende_vereniging != self.functie_nu.vereniging:
                 raise PermissionDenied('Niet de organisator')
@@ -196,7 +196,7 @@ class CheckKwalificatieScoresWedstrijdView(UserPassesTestMixin, TemplateView):
 
         context['scores'] = scores
 
-        if self.rol_nu == Rollen.ROL_HWL:
+        if self.rol_nu == Rol.ROL_HWL:
             context['kruimels'] = (
                 (reverse('Vereniging:overzicht'), 'Beheer vereniging'),
                 (reverse('Wedstrijden:vereniging'), 'Wedstrijdkalender'),

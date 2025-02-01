@@ -64,6 +64,7 @@ class Command(BaseCommand):
 
                 # overschrijven naar andere regiocompetitie
                 if obj.bij_vereniging.regio != sporter.bij_vereniging.regio:
+                    # TODO: bij overstap naar ver in regio 100 mislukt onderstaande!
                     obj.regiocompetitie = Regiocompetitie.objects.get(competitie=obj.regiocompetitie.competitie,
                                                                       regio=sporter.bij_vereniging.regio)
                 obj.bij_vereniging = sporter.bij_vereniging

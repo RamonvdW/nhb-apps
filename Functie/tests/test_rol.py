@@ -5,16 +5,16 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from Functie.definities import Rollen
+from Functie.definities import Rol
 from Functie.operations import maak_account_vereniging_secretaris
 from Functie.tests.helpers import maak_functie
-from Functie.rol import (SESSIONVAR_ROL_HUIDIGE, SESSIONVAR_ROL_MAG_WISSELEN,
-                         SESSIONVAR_ROL_PALLET_FUNCTIES, SESSIONVAR_ROL_PALLET_VAST,
-                         SESSIONVAR_ROL_BESCHRIJVING, SESSIONVAR_ROL_HUIDIGE_FUNCTIE_PK,
-                         rol_mag_wisselen, rol_enum_pallet, rol_get_beschrijving,
+from Functie.rol import (rol_mag_wisselen, rol_get_beschrijving,
                          rol_activeer_rol, rol_activeer_functie,
                          rol_get_huidige, rol_get_huidige_functie)
-from Functie.scheids import gebruiker_is_scheids, SESSIONVAR_SCHEIDS
+from Functie.rol.beschrijving import SESSIONVAR_ROL_BESCHRIJVING
+from Functie.rol.huidige import SESSIONVAR_ROL_HUIDIGE, SESSIONVAR_ROL_HUIDIGE_FUNCTIE_PK
+from Functie.rol.mag_wisselen import SESSIONVAR_ROL_MAG_WISSELEN_BOOL
+from Functie.rol.scheids import gebruiker_is_scheids, SESSIONVAR_SCHEIDS
 from Geo.models import Regio
 from Mailer.models import MailQueue
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -82,9 +82,10 @@ class TestFunctieRol(E2EHelpers, TestCase):
         request = resp.wsgi_request
         self.assertTrue(request.user.is_authenticated)
 
+        # if SESSIONVAR_ROL_HUIDIGE in request.session:
         del request.session[SESSIONVAR_ROL_HUIDIGE]
         rol = rol_get_huidige(request)
-        self.assertEqual(rol, Rollen.ROL_NONE)
+        self.assertEqual(rol, Rol.ROL_NONE)
 
         session = request.session
         session[SESSIONVAR_ROL_HUIDIGE_FUNCTIE_PK] = 'Test1!'
@@ -95,7 +96,7 @@ class TestFunctieRol(E2EHelpers, TestCase):
 
         del request.session[SESSIONVAR_ROL_HUIDIGE_FUNCTIE_PK]
         rol, functie = rol_get_huidige_functie(request)
-        self.assertEqual(rol, Rollen.ROL_NONE)
+        self.assertEqual(rol, Rol.ROL_NONE)
         self.assertIsNone(functie)
 
         self.assertTrue(SESSIONVAR_SCHEIDS in request.session.keys())
@@ -110,29 +111,21 @@ class TestFunctieRol(E2EHelpers, TestCase):
 
         resp = self.client.get('/plein/')
         request = resp.wsgi_request
-
-        self.assertTrue(SESSIONVAR_ROL_MAG_WISSELEN not in request.session.keys())
-        res = rol_mag_wisselen(request)
-        self.assertFalse(res)
-
-        self.assertTrue(SESSIONVAR_ROL_HUIDIGE not in request.session.keys())
-        rol_activeer_rol(request, 'bestaat niet')
-        self.assertTrue(SESSIONVAR_ROL_HUIDIGE not in request.session.keys())
-
-        rol_activeer_functie(request, 'geen getal')
-        self.assertTrue(SESSIONVAR_ROL_PALLET_FUNCTIES not in request.session.keys())
-        rol_activeer_functie(request, 0)
-
-        self.assertTrue(SESSIONVAR_ROL_PALLET_VAST not in request.session.keys())
-        pallet = [tup for tup in rol_enum_pallet(request)]
-        self.assertEqual(len(pallet), 0)
-        rol_activeer_rol(request, 'geen')
+        account = request.user
 
         self.assertTrue(SESSIONVAR_ROL_BESCHRIJVING not in request.session.keys())
         self.assertEqual(rol_get_beschrijving(request), "?")
 
         self.assertTrue(SESSIONVAR_SCHEIDS not in request.session.keys())
         self.assertFalse(gebruiker_is_scheids(request))
+
+        self.assertTrue(SESSIONVAR_ROL_MAG_WISSELEN_BOOL not in request.session.keys())
+        res = rol_mag_wisselen(request)
+        self.assertFalse(res)
+
+        self.assertTrue(SESSIONVAR_ROL_HUIDIGE not in request.session.keys())
+        rol_activeer_rol(request, account, 'bestaat niet')
+        self.assertTrue(SESSIONVAR_ROL_HUIDIGE not in request.session.keys())
 
     def test_anon(self):
         # zorg dan request.user.is_authenticated op False staat

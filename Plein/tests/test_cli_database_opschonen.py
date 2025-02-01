@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2024 Ramon van der Winkel.
+#  Copyright (c) 2021-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -14,7 +14,8 @@ from Feedback.operations import store_feedback
 from Logboek.models import LogboekRegel, schrijf_in_logboek
 from Mailer.models import MailQueue
 from Mailer.operations import mailer_queue_email
-from Registreer.definities import REGISTRATIE_FASE_CLUB, REGISTRATIE_FASE_CONFIRM, REGISTRATIE_FASE_COMPLEET
+from Registreer.definities import (REGISTRATIE_FASE_CLUB, REGISTRATIE_FASE_CONFIRM, REGISTRATIE_FASE_COMPLEET,
+                                   REGISTRATIE_FASE_AFGEWEZEN)
 from Registreer.models import GastRegistratie
 from Sporter.models import Sporter
 from Taken.models import Taak
@@ -32,11 +33,13 @@ class TestPleinCliDatabaseOpschonen(E2EHelpers, TestCase):
     gast_email_een = 'een@gasten.net'
     gast_email_twee = 'twee@gasten.net'
     gast_email_vier = 'vier@gasten.net'
+    gast_email_zes = 'zes@gasten.net'
 
     def setUp(self):
         """ initialisatie van de test case """
 
         ten_days_ago = timezone.now() - datetime.timedelta(days=10)
+        one_year_go = timezone.now() - datetime.timedelta(days=365)
         two_years_ago = timezone.now() - datetime.timedelta(days=365+365+1)
 
         # maak een onvoltooid account aan
@@ -120,8 +123,9 @@ class TestPleinCliDatabaseOpschonen(E2EHelpers, TestCase):
 
         sporter = Sporter(
                         lid_nr=800004,
-                        geboorte_datum='2000-01-01',
-                        sinds_datum='2023-07-01',
+                        geboorte_datum='2000-01-06',
+                        sinds_datum='2023-07-06',
+                        email=self.gast_email_vier,
                         account=account)
         sporter.save()
 
@@ -136,6 +140,38 @@ class TestPleinCliDatabaseOpschonen(E2EHelpers, TestCase):
         gast = GastRegistratie(lid_nr=800005, fase=REGISTRATIE_FASE_COMPLEET)
         gast.save()
         gast.aangemaakt = ten_days_ago
+        gast.save(update_fields=['aangemaakt'])
+
+        # afgewezen gast-account wordt na 6 maanden opgeruimd
+        # maak een onvoltooid account aan
+        account = account_create(
+                        '800006',
+                        'Zesde',
+                        'Gast',
+                        'maakt niet echt uit',      # password
+                        self.gast_email_zes,
+                        email_is_bevestigd=True)
+        account.date_joined -= datetime.timedelta(days=6)
+        account.save()
+
+        sporter = Sporter(
+                        lid_nr=800006,
+                        geboorte_datum='2000-01-01',
+                        sinds_datum='2023-07-01',
+                        email=self.gast_email_zes,
+                        account=account,
+                        is_gast=True)
+        sporter.save()
+
+        gast = GastRegistratie(lid_nr=800006, fase=REGISTRATIE_FASE_AFGEWEZEN, sporter=sporter, account=account)
+        gast.save()
+        gast.aangemaakt = one_year_go
+        gast.save(update_fields=['aangemaakt'])
+
+        # afgewezen registratie zonder sporter of account
+        gast = GastRegistratie(lid_nr=800007, fase=REGISTRATIE_FASE_AFGEWEZEN)
+        gast.save()
+        gast.aangemaakt = one_year_go
         gast.save(update_fields=['aangemaakt'])
 
         mandje = BestellingMandje(account=account)
@@ -164,7 +200,7 @@ class TestPleinCliDatabaseOpschonen(E2EHelpers, TestCase):
         transactie.save()
 
     def test_alles(self):
-        with self.assert_max_queries(173, modify_acceptable=True):
+        with self.assert_max_queries(233, modify_acceptable=True):
             f1, f2 = self.run_management_command('database_opschonen')
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
@@ -183,7 +219,7 @@ class TestPleinCliDatabaseOpschonen(E2EHelpers, TestCase):
         self.assertTrue('[INFO] Verwijder niet afgeronde gast-account registratie 800001 in fase 0' in f2.getvalue())
 
         # nog een keer aanroepen terwijl er niets meer te verwijderen valt
-        with self.assert_max_queries(15):
+        with self.assert_max_queries(16):
             f1, f2 = self.run_management_command('database_opschonen')
         self.assertTrue(f1.getvalue() == '')
         self.assertTrue("Klaar" in f2.getvalue())

@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2023 Ramon van der Winkel.
+#  Copyright (c) 2020-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import reverse
 from django.views.generic import ListView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Functie.definities import Rollen
+from Functie.definities import Rol
 from Functie.models import Functie
 from Functie.rol import rol_get_huidige, rol_get_huidige_functie, rol_get_beschrijving
 
@@ -27,7 +27,7 @@ class BeheerdersVerenigingView(UserPassesTestMixin, ListView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
-        return rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL, Rollen.ROL_WL)
+        return rol_nu in (Rol.ROL_SEC, Rol.ROL_HWL, Rol.ROL_WL)
 
     def get_queryset(self):
         """ called by the template system to get the queryset or list of objects for the template """
@@ -54,19 +54,19 @@ class BeheerdersVerenigingView(UserPassesTestMixin, ListView):
 
             mag_koppelen = False
             mag_email_wijzigen = False
-            if rol_nu == Rollen.ROL_SEC and obj.rol in ('SEC', 'HWL'):
+            if rol_nu == Rol.ROL_SEC and obj.rol in ('SEC', 'HWL'):
                 # SEC mag andere SEC and HWL koppelen
                 mag_koppelen = True
                 if obj.rol != 'SEC':
                     # email voor secretaris komt uit Onze Relaties
                     mag_email_wijzigen = True
 
-            elif rol_nu == Rollen.ROL_HWL and obj.rol in ('HWL', 'WL'):
+            elif rol_nu == Rol.ROL_HWL and obj.rol in ('HWL', 'WL'):
                 # HWL mag andere HWL en WL koppelen
                 mag_koppelen = True
                 mag_email_wijzigen = True
 
-            elif rol_nu == Rollen.ROL_WL and obj.rol == 'WL':
+            elif rol_nu == Rol.ROL_WL and obj.rol == 'WL':
                 mag_email_wijzigen = True
 
             if mag_koppelen:

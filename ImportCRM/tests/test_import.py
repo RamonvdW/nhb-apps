@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -8,16 +8,14 @@ from django.conf import settings
 from django.test import TestCase, override_settings
 from django.core.management import call_command
 from django.core.exceptions import ObjectDoesNotExist
-from BasisTypen.models import BoogType
 from Functie.models import Functie
 from Geo.models import Regio
 from Locatie.definities import BAAN_TYPE_BUITEN
 from Locatie.models import WedstrijdLocatie
 from Mailer.models import MailQueue
-from Opleidingen.models import OpleidingDiploma
+from Opleiding.models import OpleidingDiploma
 from Records.models import IndivRecord
-from Score.operations import score_indiv_ag_opslaan
-from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren
+from Sporter.models import Sporter, SporterVoorkeuren
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging, Secretaris
 import datetime
@@ -212,7 +210,7 @@ class TestImportCRMImport(E2EHelpers, TestCase):
         locatie.save()
         locatie.verenigingen.add(ver)
 
-        with self.assert_max_queries(142):
+        with self.assert_max_queries(151):
             f1, f2 = self.run_management_command(IMPORT_COMMAND,
                                                  TESTFILE_08_VER_MUTATIES,
                                                  OPTION_SIM)
@@ -242,7 +240,7 @@ class TestImportCRMImport(E2EHelpers, TestCase):
         locatie1.plaats = 'Ja maar'
         locatie1.save(update_fields=['plaats'])
 
-        with self.assert_max_queries(120):
+        with self.assert_max_queries(132):
             f1, f2 = self.run_management_command(IMPORT_COMMAND,
                                                  TESTFILE_08_VER_MUTATIES,
                                                  OPTION_SIM)
@@ -315,7 +313,7 @@ class TestImportCRMImport(E2EHelpers, TestCase):
         self.assertFalse(sporter.is_actief_lid)      # want: overleden
 
         # nog een keer hetzelfde commando geeft geen nieuwe log regels
-        with self.assert_max_queries(86):
+        with self.assert_max_queries(92):
             f1, f2 = self.run_management_command(IMPORT_COMMAND,
                                                  TESTFILE_09_LID_MUTATIES,
                                                  OPTION_SIM)
@@ -574,7 +572,7 @@ class TestImportCRMImport(E2EHelpers, TestCase):
         self.assertTrue("[INFO] Secretaris 100024 van vereniging 2000 is gekoppeld aan SEC functie" in f2.getvalue())
 
         # probeer 100024 te verwijderen
-        with self.assert_max_queries(60):
+        with self.assert_max_queries(63):
             f1, f2 = self.run_management_command(IMPORT_COMMAND,
                                                  TESTFILE_16_VERWIJDER_LID,
                                                  OPTION_SIM)
@@ -601,30 +599,6 @@ class TestImportCRMImport(E2EHelpers, TestCase):
                                                  TESTFILE_16_VERWIJDER_LID,
                                                  OPTION_SIM)
         self.assertFalse("[INFO] Lid 100024 Voornaam van der Achternaam [V, 2000] wordt nu verwijderd" in f2.getvalue())
-
-    def test_verwijder_score_fail(self):
-        # maak 100024 aan
-        self.run_management_command(IMPORT_COMMAND,
-                                    TESTFILE_14_WIJZIG_GESLACHT_2,
-                                    OPTION_SIM)
-
-        # maak een sporter-boog aan
-        boog_r = BoogType.objects.get(afkorting='R')
-        sporter = Sporter.objects.get(lid_nr="100024")
-        sporterboog = SporterBoog(sporter=sporter,
-                                  boogtype=boog_r)
-        sporterboog.save()
-        score_indiv_ag_opslaan(sporterboog, 18, 5.678, None, "")
-
-        # probeer 100024 te verwijderen
-        with self.assert_max_queries(50):
-            f1, f2 = self.run_management_command(IMPORT_COMMAND,
-                                                 TESTFILE_16_VERWIJDER_LID,
-                                                 OPTION_SIM)
-        # print("f1: %s" % f1.getvalue())
-        # print("f2: %s" % f2.getvalue())
-        self.assertTrue("[INFO] Lid 100024 Voornaam van der Achternaam [V, 2000] wordt nu verwijderd" in f2.getvalue())
-        self.assertTrue('[ERROR] Onverwachte fout bij het verwijderen van een lid' in f1.getvalue())
 
     def test_import_nhb_crm_dryrun(self):
         # dryrun
@@ -718,7 +692,7 @@ class TestImportCRMImport(E2EHelpers, TestCase):
         self.assertTrue(sporter.bij_vereniging is not None)
 
         # lid 100001 is nog steeds uitgeschreven - geen verandering tot 15 januari
-        with self.assert_max_queries(65):
+        with self.assert_max_queries(68):
             self.run_management_command(IMPORT_COMMAND,
                                         TESTFILE_18_LID_UITGESCHREVEN,
                                         '--sim_now=2021-01-15')

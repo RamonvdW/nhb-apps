@@ -18,7 +18,7 @@ from Competitie.models import (Competitie, CompetitieMatch, get_competitie_indiv
                                Regiocompetitie, RegiocompetitieRonde, RegiocompetitieSporterBoog)
 from Competitie.operations import KlasseBepaler
 from Competitie.operations import get_competitie_bogen
-from Functie.definities import Rollen
+from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
 from Score.definities import AG_NUL, AG_DOEL_INDIV, AG_DOEL_TEAM
 from Score.models import Aanvangsgemiddelde, AanvangsgemiddeldeHist
@@ -51,7 +51,7 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.functie_nu and self.rol_nu == Rollen.ROL_HWL
+        return self.functie_nu and self.rol_nu == Rol.ROL_HWL
 
     def get_queryset(self):
         """ called by the template system to get the queryset or list of objects for the template """
@@ -708,7 +708,7 @@ class LedenIngeschrevenView(UserPassesTestMixin, ListView):
 
         context['mag_afmelden'] = False
 
-        if self.rol_nu == Rollen.ROL_HWL:
+        if self.rol_nu == Rol.ROL_HWL:
             context['afmelden_url'] = reverse('CompInschrijven:leden-ingeschreven',
                                               kwargs={'deelcomp_pk': self.deelcomp.pk})
             comp = self.deelcomp.competitie
@@ -732,7 +732,7 @@ class LedenIngeschrevenView(UserPassesTestMixin, ListView):
 
     def post(self, request, *args, **kwargs):
 
-        if self.rol_nu != Rollen.ROL_HWL:
+        if self.rol_nu != Rol.ROL_HWL:
             raise PermissionDenied('Verkeerde rol')
 
         deelnemer_pk = request.POST.get('toggle_deelnemer_pk', '')

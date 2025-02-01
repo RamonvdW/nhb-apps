@@ -15,11 +15,11 @@ from BasisTypen.definities import MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT
 from Competitie.definities import INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3, DAGDELEN, DAGDEEL_AFKORTINGEN
 from Competitie.models import CompetitieMatch, Regiocompetitie, RegiocompetitieRonde, RegiocompetitieSporterBoog
 from Competitie.operations import KlasseBepaler
-from Functie.definities import Rollen
+from Functie.definities import Rol
 from Functie.rol import rol_get_huidige
 from Score.definities import AG_NUL, AG_DOEL_INDIV, AG_DOEL_TEAM
 from Score.models import AanvangsgemiddeldeHist, Aanvangsgemiddelde
-from Sporter.models import SporterVoorkeuren, Sporter, SporterBoog, get_sporter
+from Sporter.models import SporterVoorkeuren, SporterBoog, get_sporter
 from Sporter.operations import get_sporter_voorkeuren
 from decimal import Decimal
 
@@ -38,7 +38,7 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         # gebruiker moet ingelogd zijn en rol Sporter gekozen hebben
-        return rol_get_huidige(self.request) == Rollen.ROL_SPORTER
+        return rol_get_huidige(self.request) == Rol.ROL_SPORTER
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -231,7 +231,7 @@ class RegiocompetitieAanmeldenView(UserPassesTestMixin, View):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         # gebruiker moet ingelogd zijn en rol Sporter gekozen hebben
-        return rol_get_huidige(self.request) == Rollen.ROL_SPORTER
+        return rol_get_huidige(self.request) == Rol.ROL_SPORTER
 
     @staticmethod
     def post(request, *args, **kwargs):

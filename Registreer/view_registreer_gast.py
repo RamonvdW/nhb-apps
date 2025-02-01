@@ -14,10 +14,9 @@ from django.views.generic import View, TemplateView
 from Account.models import get_account
 from Account.operations.aanmaken import AccountCreateError, account_create
 from Account.operations.wachtwoord import account_test_wachtwoord_sterkte
-from Account.operations.login import auto_login_gast_account
+from Account.operations.auto_login import auto_login_gast_account
 from BasisTypen.definities import GESLACHT2STR
 from Functie.models import Functie
-from Functie.rol import rol_bepaal_beschikbare_rollen
 from Logboek.models import schrijf_in_logboek
 from Mailer.operations import mailer_queue_email, render_email_template
 from Overig.helpers import get_safe_from_ip, maak_unaccented
@@ -692,9 +691,6 @@ class RegistreerGastVolgendeVraagView(View):
 
                 # informeer de secretaris over de nieuwe registratie
                 self._informeer_sec(gast)
-
-                # doe de evaluatie opnieuw, nu met het Sporter record
-                rol_bepaal_beschikbare_rollen(self.request, self.account)
 
                 # stuur de sporter door naar Mijn Pagina, om de voorkeuren aan te passen
                 return HttpResponseRedirect(reverse('Sporter:profiel'))

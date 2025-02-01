@@ -12,7 +12,7 @@ from django.core.exceptions import PermissionDenied
 from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Competitie.models import Regiocompetitie, RegiocompetitieTeam, RegiocompetitieTeamPoule
-from Functie.definities import Rollen
+from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
 
 
@@ -43,7 +43,7 @@ class RegioPoulesView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu == Rollen.ROL_RCL
+        return self.rol_nu == Rol.ROL_RCL
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -181,7 +181,7 @@ class WijzigPouleView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu == Rollen.ROL_RCL
+        return self.rol_nu == Rol.ROL_RCL
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """

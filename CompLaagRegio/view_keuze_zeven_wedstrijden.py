@@ -10,7 +10,7 @@ from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
-from Functie.definities import Rollen
+from Functie.definities import Rol
 from Functie.rol import rol_get_huidige, rol_get_huidige_functie
 from Competitie.definities import INSCHRIJF_METHODE_1
 from Competitie.models import CompetitieMatch, RegiocompetitieRonde, RegiocompetitieSporterBoog
@@ -30,7 +30,7 @@ class KeuzeZevenWedstrijdenView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         # gebruiker moet ingelogd zijn en rol Sporter gekozen hebben
-        return rol_get_huidige(self.request) in (Rollen.ROL_SPORTER, Rollen.ROL_HWL)
+        return rol_get_huidige(self.request) in (Rol.ROL_SPORTER, Rol.ROL_HWL)
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -52,7 +52,7 @@ class KeuzeZevenWedstrijdenView(UserPassesTestMixin, TemplateView):
 
         rol_nu, functie_nu = rol_get_huidige_functie(self.request)
 
-        if rol_nu == Rollen.ROL_SPORTER:
+        if rol_nu == Rol.ROL_SPORTER:
             account = get_account(self.request)
             if account != deelnemer.sporterboog.sporter.account:
                 raise PermissionDenied()
@@ -125,7 +125,7 @@ class KeuzeZevenWedstrijdenView(UserPassesTestMixin, TemplateView):
         context['url_opslaan'] = reverse('CompLaagRegio:keuze-zeven-wedstrijden',
                                          kwargs={'deelnemer_pk': deelnemer.pk})
 
-        if rol_nu == Rollen.ROL_SPORTER:
+        if rol_nu == Rol.ROL_SPORTER:
             context['kruimels'] = (
                 (reverse('Sporter:profiel'), 'Mijn pagina'),
                 (None, 'Aanpassen ' + comp.beschrijving.replace(' competitie', ''))
@@ -163,7 +163,7 @@ class KeuzeZevenWedstrijdenView(UserPassesTestMixin, TemplateView):
         rol_nu, functie_nu = rol_get_huidige_functie(request)
 
         # controleer dat ingelogde gebruiker deze wijziging mag maken
-        if rol_nu == Rollen.ROL_SPORTER:
+        if rol_nu == Rol.ROL_SPORTER:
             account = get_account(request)
             if account != deelnemer.sporterboog.sporter.account:
                 raise PermissionDenied()
@@ -217,7 +217,7 @@ class KeuzeZevenWedstrijdenView(UserPassesTestMixin, TemplateView):
 
         deelnemer.inschrijf_gekozen_matches.add(*keuze_add)
 
-        if rol_nu == Rollen.ROL_SPORTER:
+        if rol_nu == Rol.ROL_SPORTER:
             url = reverse('Sporter:profiel')
         else:
             url = reverse('CompLaagRegio:wie-schiet-waar',

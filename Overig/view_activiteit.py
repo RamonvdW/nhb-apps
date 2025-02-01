@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2023 Ramon van der Winkel.
+#  Copyright (c) 2019-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import reverse
 from django.http import HttpResponseRedirect, Http404
 from django.utils import timezone
-from django.contrib.sessions.backends.db import SessionStore
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.utils.timezone import make_aware, get_default_timezone
 from django.views.generic import TemplateView, View
@@ -15,9 +14,9 @@ from django.utils.formats import date_format
 from django.db.models import F, Count
 from Account.models import Account, AccountSessions, get_account
 from Account.operations.otp import otp_loskoppelen, otp_stuur_email_losgekoppeld
-from Functie.definities import Rollen, rol2url
+from Functie.definities import Rol
 from Functie.models import Functie, VerklaringHanterenPersoonsgegevens
-from Functie.rol import SESSIONVAR_ROL_HUIDIGE, SESSIONVAR_ROL_MAG_WISSELEN, rol_get_huidige
+from Functie.rol import rol_get_huidige
 from Overig.forms import ZoekAccountForm
 from Sporter.models import Sporter
 import datetime
@@ -37,7 +36,7 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.rol_nu = Rollen.ROL_NONE
+        self.rol_nu = Rol.ROL_NONE
         self.sort_level = {'MO': 20000, 'CS': 20001, 'BKO': 10000, 'RKO': 500, 'RCL': 40, 'SEC': 3, 'HWL': 2, 'WL': 1}
 
     def test_func(self):
@@ -46,7 +45,7 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
         account = get_account(self.request)
         if account.is_authenticated:
             self.rol_nu = rol_get_huidige(self.request)
-            if self.rol_nu == Rollen.ROL_BB:
+            if self.rol_nu == Rol.ROL_BB:
                 return True
 
         return False
@@ -322,7 +321,7 @@ class OTPLoskoppelenView(UserPassesTestMixin, View):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
-        return rol_nu == Rollen.ROL_BB
+        return rol_nu == Rol.ROL_BB
 
     @staticmethod
     def post(request, *args, **kwargs):

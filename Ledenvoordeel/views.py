@@ -9,7 +9,8 @@ from django.urls import reverse
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
-from Functie.rol import rol_get_huidige, Rollen
+from Functie.definities import Rol
+from Functie.rol import rol_get_huidige
 
 TEMPLATE_VOORDEEL_OVERZICHT = 'ledenvoordeel/overzicht.dtl'
 TEMPLATE_VOORDEEL_WALIBI = 'ledenvoordeel/walibi.dtl'
@@ -31,7 +32,7 @@ class VoordeelOverzichtView(UserPassesTestMixin, TemplateView):
             if account.is_gast:
                 return False
 
-        return rol_get_huidige(self.request) == Rollen.ROL_SPORTER
+        return rol_get_huidige(self.request) == Rol.ROL_SPORTER
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -60,7 +61,7 @@ class VoordeelWalibiView(UserPassesTestMixin, TemplateView):
             if account.is_gast:
                 return False
 
-        return rol_get_huidige(self.request) == Rollen.ROL_SPORTER
+        return rol_get_huidige(self.request) == Rol.ROL_SPORTER
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """

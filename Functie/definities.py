@@ -7,11 +7,7 @@
 import enum
 
 
-class Rollen(enum.IntEnum):
-    """ definitie van de rollen met codes
-        vertaling naar beschrijvingen in Plein.views
-    """
-
+class Rol(enum.IntEnum):
     # rollen staan in prio volgorde
     ROL_BB = 2          # Manager MH
     ROL_BKO = 3         # BK organisator, specifieke competitie
@@ -37,23 +33,37 @@ class Rollen(enum.IntEnum):
 
 
 url2rol = {
-    'BB': Rollen.ROL_BB,
-    'BKO': Rollen.ROL_BKO,
-    'RKO': Rollen.ROL_RKO,
-    'RCL': Rollen.ROL_RCL,
-    'HWL': Rollen.ROL_HWL,
-    'WL': Rollen.ROL_WL,
-    'SEC': Rollen.ROL_SEC,
-    'MO': Rollen.ROL_MO,
-    'MWZ': Rollen.ROL_MWZ,
-    'MWW': Rollen.ROL_MWW,
-    'CS': Rollen.ROL_CS,
-    'support': Rollen.ROL_SUP,
-    'sporter': Rollen.ROL_SPORTER,
-    'geen': Rollen.ROL_NONE
+    'BB': Rol.ROL_BB,
+    'BKO': Rol.ROL_BKO,
+    'RKO': Rol.ROL_RKO,
+    'RCL': Rol.ROL_RCL,
+    'HWL': Rol.ROL_HWL,
+    'WL': Rol.ROL_WL,
+    'SEC': Rol.ROL_SEC,
+    'MO': Rol.ROL_MO,
+    'MWZ': Rol.ROL_MWZ,
+    'MWW': Rol.ROL_MWW,
+    'CS': Rol.ROL_CS,
+    'support': Rol.ROL_SUP,
+    'sporter': Rol.ROL_SPORTER,
+    'geen': Rol.ROL_NONE
 }
 
 rol2url = {value: key for key, value in url2rol.items()}
+
+functie_rol_str2rol = {
+    "BKO": Rol.ROL_BKO,
+    "RKO": Rol.ROL_RKO,
+    "RCL": Rol.ROL_RCL,
+    "HWL": Rol.ROL_HWL,
+    "WL": Rol.ROL_WL,
+    "SEC": Rol.ROL_SEC,
+    "MO": Rol.ROL_MO,
+    "MWZ": Rol.ROL_MWZ,
+    "MWW": Rol.ROL_MWW,
+    "SUP": Rol.ROL_SUP,
+    "CS": Rol.ROL_CS,
+}
 
 
 # end of file

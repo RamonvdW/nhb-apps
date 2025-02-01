@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2024 Ramon van der Winkel.
+#  Copyright (c) 2021-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -17,7 +17,7 @@ from Bestelling.operations.mutaties import (bestel_mutatieverzoek_maak_bestellin
                                             bestel_mutatieverzoek_verwijder_product_uit_mandje)
 from Bestelling.plugins.product_info import beschrijf_product, beschrijf_korting
 from Betaal.models import BetaalInstellingenVereniging
-from Functie.definities import Rollen
+from Functie.definities import Rol
 from Functie.rol import rol_get_huidige
 from Registreer.definities import REGISTRATIE_FASE_COMPLEET
 from Sporter.models import get_sporter
@@ -44,7 +44,7 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu = rol_get_huidige(self.request)
-        return self.rol_nu != Rollen.ROL_NONE
+        return self.rol_nu != Rol.ROL_NONE
 
     def dispatch(self, request, *args, **kwargs):
         """ wegsturen als het we geen vragen meer hebben + bij oneigenlijk gebruik """
@@ -107,6 +107,8 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
                                          'evenement_inschrijving__koper',
                                          'evenement_inschrijving__sporter',
                                          'evenement_inschrijving__sporter__bij_vereniging',
+                                         'opleiding_inschrijving',
+                                         'opleiding_inschrijving__opleiding',
                                          'webwinkel_keuze',
                                          'webwinkel_keuze__product')
                          .order_by('pk'))       # volgorde waarop ze in het mandje gelegd zijn
@@ -138,6 +140,9 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
                         ontvanger2product_pks[ver_nr] = [product.pk]
 
                 elif product.evenement_inschrijving:
+                    pass
+
+                elif product.opleiding_inschrijving:
                     pass
 
                 elif product.webwinkel_keuze:
@@ -183,7 +188,7 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
 
         # omdat het heel raar is als het tellertje op het mandje niet overeenkomt
         # met de inhoud van het mandje, forceren we de telling hier nog een keer
-        mandje_tel_inhoud(self.request)
+        mandje_tel_inhoud(self.request, account)
         # eval_mandje_inhoud(self.request)
 
         # force dat het mandje icoon getoond wordt
@@ -231,8 +236,9 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
         context['bevat_fout'] = bevat_fout
         context['aantal_betalingen'] = len(ontvanger2product_pks.keys())
         context['url_kies_transport'] = reverse('Bestel:kies-transport')
-        context['url_voorwaarden_wedstrijden'] = settings.VERKOOPVOORWAARDEN_WEDSTRIJDEN_URL
         context['url_voorwaarden_webwinkel'] = settings.VERKOOPVOORWAARDEN_WEBWINKEL_URL
+        context['url_voorwaarden_wedstrijden'] = settings.VERKOOPVOORWAARDEN_WEDSTRIJDEN_URL
+        context['url_voorwaarden_opleidingen'] = settings.VERKOOPVOORWAARDEN_OPLEIDINGEN_URL
 
         if not (bevat_fout or mandje_is_leeg or geen_afleveradres):
             context['url_bestellen'] = reverse('Bestel:toon-inhoud-mandje')
@@ -287,7 +293,7 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
         # achtergrondtaak zet het mandje om in bestellingen
 
         # zorg dat de knop het juiste aantal toont
-        mandje_tel_inhoud(request)
+        mandje_tel_inhoud(request, account)
 
         # ga naar de pagina met alle bestellingen, zodat de betaling gestart kan worden
         url = reverse('Bestel:toon-bestellingen')
@@ -307,7 +313,7 @@ class VerwijderProductUitMandje(UserPassesTestMixin, View):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu = rol_get_huidige(self.request)
-        return self.rol_nu != Rollen.ROL_NONE
+        return self.rol_nu != Rol.ROL_NONE
 
     def post(self, request, *args, **kwargs):
 
@@ -334,7 +340,7 @@ class VerwijderProductUitMandje(UserPassesTestMixin, View):
                 bestel_mutatieverzoek_verwijder_product_uit_mandje(account, product, snel == '1')
                 # achtergrondtaak geeft dit door aan de kalender/opleiding
 
-                mandje_tel_inhoud(self.request)
+                mandje_tel_inhoud(self.request, account)
             else:
                 raise Http404('Niet gevonden in jouw mandje')
 

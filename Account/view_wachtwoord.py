@@ -8,14 +8,13 @@ from django.conf import settings
 from django.shortcuts import render
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from django.contrib.auth import authenticate, login, update_session_auth_hash
+from django.contrib.auth import authenticate, update_session_auth_hash
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from Account.models import Account, get_account
+from Account.operations.auto_login import auto_login_lid_account_ww_vergeten
 from Account.operations.wachtwoord import account_test_wachtwoord_sterkte
-from Account.operations.otp import otp_zet_controle_niet_gelukt
-from Account.plugin_manager import account_plugins_login_gate, account_plugins_ww_vergeten
-from Functie.rol import rol_bepaal_beschikbare_rollen
+from Account.plugin_manager import account_plugins_ww_vergeten
 from Logboek.models import schrijf_in_logboek
 from Mailer.operations import render_email_template, mailer_queue_email, mailer_email_is_valide
 from Overig.helpers import get_safe_from_ip
@@ -57,7 +56,6 @@ class WachtwoordVergetenView(TemplateView):
     """
         Deze view geeft de pagina waarmee de gebruiker een e-mailadres op
         kan geven waar een wachtwoord-reset url heen gestuurd wordt.
-
     """
 
     # class variables shared by all instances
@@ -133,7 +131,7 @@ class WachtwoordVergetenView(TemplateView):
 
 
 def receive_wachtwoord_vergeten(request, account):
-    """ deze functie wordt aangeroepen als een tijdelijke url gevolgd wordt
+    """ deze functie wordt vanuit een POST context aangeroepen als een tijdelijke url gevolgd wordt
         voor een vergeten wachtwoord.
             account is een Account object.
         We moeten een url teruggeven waar een http-redirect naar gedaan kan worden
@@ -142,45 +140,12 @@ def receive_wachtwoord_vergeten(request, account):
         We loggen automatisch in op het account waar de link bij hoort
         en sturen dan door naar de wijzig-wachtwoord pagina
     """
-    # integratie met de authenticatie laag van Django
-    login(request, account)
 
-    from_ip = get_safe_from_ip(request)
-    my_logger.info('%s LOGIN automatische inlog voor wachtwoord-vergeten met account %s' % (
-                        from_ip, repr(account.username)))
+    url_or_response = auto_login_lid_account_ww_vergeten(request, account)
+    if not url_or_response:
+        url_or_response = reverse('Account:nieuw-wachtwoord')
 
-    # FUTURE: als WW vergeten via Account.nieuwe_email ging, dan kunnen we die als bevestigd markeren
-
-    for _, func, skip in account_plugins_login_gate:
-        if not skip:
-            httpresp = func(request, from_ip, account)
-            if httpresp:
-                # plugin has decided that the user may not login
-                # and has generated/rendered an HttpResponse that we cannot handle here
-                return httpresp
-
-    otp_zet_controle_niet_gelukt(request)
-
-    # gebruiker mag NIET aangemeld blijven
-    # zorg dat de session-cookie snel verloopt
-    request.session.set_expiry(0)
-
-    request.session['moet_oude_ww_weten'] = False
-
-    # track het session_id in de log zodat we deze kunnen koppelen aan de webserver logs
-    session_id = request.session.session_key
-    my_logger.info('Account %s has SESSION %s' % (repr(account.username), repr(session_id)))
-
-    # schrijf in het logboek
-    schrijf_in_logboek(account=None,
-                       gebruikte_functie="Inloggen (code)",
-                       activiteit="Automatische inlog op account %s vanaf IP %s" % (
-                                        repr(account.get_account_full_name()), from_ip))
-
-    # zorg dat de rollen goed ingesteld staan
-    rol_bepaal_beschikbare_rollen(request, account)
-
-    return reverse('Account:nieuw-wachtwoord')
+    return url_or_response
 
 
 set_tijdelijke_codes_receiver(RECEIVER_WACHTWOORD_VERGETEN, receive_wachtwoord_vergeten)

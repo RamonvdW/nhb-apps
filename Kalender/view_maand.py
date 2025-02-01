@@ -6,177 +6,24 @@
 
 from django.http import Http404
 from django.urls import reverse
-from django.http import HttpRequest
 from django.utils import timezone
 from django.shortcuts import render
-from django.utils.formats import localize
 from django.views.generic import TemplateView
 from django.db.models.query_utils import Q
-from Account.models import get_account
 from Bestelling.operations.mandje import eval_mandje_inhoud
 from Evenement.definities import EVENEMENT_STATUS_GEACCEPTEERD, EVENEMENT_STATUS_GEANNULEERD
 from Evenement.models import Evenement
 from Kalender.definities import MAANDEN, MAAND2URL
-from Sporter.models import SporterBoog, get_sporter
+from Kalender.view_helpers import (maak_soort_filter, maak_bogen_filter, maak_discipline_filter,
+                                   maak_compacte_wanneer_str, split_zoek_urls)
 from Wedstrijden.definities import (WEDSTRIJD_STATUS_GEACCEPTEERD, WEDSTRIJD_STATUS_GEANNULEERD,
                                     ORGANISATIE_IFAA, ORGANISATIE_WA, ORGANISATIE_KHSN,
-                                    WEDSTRIJD_WA_STATUS_A, WEDSTRIJD_WA_STATUS_B)
+                                    WEDSTRIJD_WA_STATUS_A, WEDSTRIJD_WA_STATUS_B,
+                                    url2discipline)
 from Wedstrijden.models import Wedstrijd
 from datetime import date, timedelta
-from types import SimpleNamespace
 
 TEMPLATE_KALENDER_MAAND = 'kalender/overzicht-maand.dtl'
-
-
-def get_url_eerstvolgende_maand_met_wedstrijd():
-    """ Geeft de URL terug voor de eerstvolgende maand met een wedstrijd """
-    now = timezone.now()
-
-    # default
-    jaar = now.year
-    maand = now.month
-
-    # we willen in de eerstvolgende maand komen met een wedstrijd
-    wedstrijden = (Wedstrijd
-                   .objects
-                   .exclude(toon_op_kalender=False)
-                   .filter(status=WEDSTRIJD_STATUS_GEACCEPTEERD,
-                           datum_begin__gte=now)
-                   .order_by('datum_begin'))
-
-    for wedstrijd in wedstrijden:       # pragma: no branch
-        deadline = wedstrijd.datum_begin - timedelta(days=wedstrijd.inschrijven_tot)
-        if now.date() <= deadline:
-            # hier kan nog op ingeschreven worden
-            jaar = wedstrijd.datum_begin.year
-            maand = wedstrijd.datum_begin.month
-            break
-    # for
-
-    url = reverse('Kalender:maand',
-                  kwargs={'jaar': jaar,
-                          'maand': MAAND2URL[maand],
-                          'soort': 'alle',
-                          'bogen': 'auto'})
-
-    return url
-
-
-def maak_compacte_wanneer_str(datum_begin, datum_einde):
-
-    if datum_begin == datum_einde:
-        # 5 mei 2022
-        wanneer_str = localize(datum_begin)
-
-    elif datum_begin.month == datum_einde.month:
-
-        if datum_einde.day == datum_begin.day + 1:
-            # 5 + 6 mei 2022
-            wanneer_str = "%s + " % datum_begin.day
-        else:
-            # 5 - 8 mei 2022
-            wanneer_str = "%s - " % datum_begin.day
-
-        wanneer_str += localize(datum_einde)
-
-    else:
-        # 30 mei - 2 juni 2022
-        wanneer_str = "%s - %s" % (localize(datum_begin),
-                                   localize(datum_einde))
-
-    return wanneer_str
-
-
-def maak_soort_filter(context, gekozen_soort):
-    if gekozen_soort not in ('alle', 'wa-a', 'wa-b', 'ifaa', 'khsn'):
-        gekozen_soort = 'alle'
-
-    context['gekozen_soort'] = gekozen_soort
-
-    context['soort_filter'] = [
-        SimpleNamespace(
-            opt_text='Alle',
-            sel='s_alle',
-            selected=(gekozen_soort == 'alle'),
-            url_part='alle'),
-        SimpleNamespace(
-            opt_text='IFAA',
-            sel='s_ifaa',
-            selected=(gekozen_soort == 'ifaa'),
-            url_part='ifaa'),
-        SimpleNamespace(
-            opt_text='WA A-status',
-            sel='s_wa_a',
-            selected=(gekozen_soort == 'wa-a'),
-            url_part='wa-a'),
-        SimpleNamespace(
-            opt_text='WA B-status',
-            sel='s_wa_b',
-            selected=(gekozen_soort == 'wa-b'),
-            url_part='wa-b'),
-        SimpleNamespace(
-            opt_text='KHSN',
-            sel='s_khsn',
-            selected=(gekozen_soort == 'khsn'),
-            url_part='khsn'),
-    ]
-
-    return gekozen_soort
-
-
-def maak_bogen_filter(request: HttpRequest, context, gekozen_bogen):
-    boog_pks = list()
-    if request.user.is_authenticated:                               # pragma: no branch
-        account = get_account(request)
-        sporter = get_sporter(account)
-        if sporter and sporter.is_actief_lid:
-            boog_pks = list(SporterBoog
-                            .objects
-                            .filter(sporter=sporter,
-                                    heeft_interesse=True)
-                            .values_list('boogtype__pk', flat=True))
-
-    context['boog_pks'] = boog_pks
-
-    if len(boog_pks) > 0:
-        # transitie van 'auto' naar 'mijn'
-        if gekozen_bogen == 'auto':
-            gekozen_bogen = 'mijn'
-    else:
-        # niet ingelogd / geen bogen, dus forceer 'alle'
-        gekozen_bogen = 'alle'
-
-    if gekozen_bogen not in ('alle', 'mijn'):
-        gekozen_bogen = 'alle'
-
-    context['bogen_filter'] = [
-        SimpleNamespace(
-            opt_text='Alle',
-            sel='b_alle',
-            selected=(gekozen_bogen == 'alle'),
-            url_part='alle'),
-        SimpleNamespace(
-            opt_text='Mijn voorkeuren',
-            sel='b_mijn',
-            selected=(gekozen_bogen == 'mijn'),
-            disabled=(len(boog_pks) == 0),
-            url_part='mijn'),
-    ]
-
-    return gekozen_bogen
-
-
-def split_zoek_urls(context: dict):
-    """ split context entries waarvan de key begint met url_ en de value ~1 bevat
-    """
-    for key in context.keys():
-        if key.startswith('url_'):
-            value = context[key]
-            pos = value.find('~1')
-            if pos > 0:
-                tup = (value[:pos], value[pos:])
-                context[key] = tup
-    # for
 
 
 class KalenderMaandView(TemplateView):
@@ -220,7 +67,8 @@ class KalenderMaandView(TemplateView):
                                       kwargs={'jaar': prev_jaar,
                                               'maand': MAAND2URL[prev_maand],
                                               'soort': '~1',
-                                              'bogen': '~2'})
+                                              'bogen': '~2',
+                                              'discipline': '~3'})
 
         next_jaar = jaar
         next_maand = maand + 1
@@ -231,21 +79,24 @@ class KalenderMaandView(TemplateView):
                                       kwargs={'jaar': next_jaar,
                                               'maand': MAAND2URL[next_maand],
                                               'soort': '~1',
-                                              'bogen': '~2'})
+                                              'bogen': '~2',
+                                              'discipline': '~3'})
 
-    def _maak_pagina(self, context, jaar, maand, gekozen_soort, gekozen_bogen, zoekterm):
+    def _maak_pagina(self, context, jaar, maand, gekozen_soort, gekozen_bogen, gekozen_discipline, zoekterm):
         # url voor het insturen van de filter keuzes met een POST
         context['url_keuzes'] = reverse('Kalender:maand',
                                         kwargs={'jaar': jaar,
                                                 'maand': MAAND2URL[maand],
                                                 'soort': '~1',
-                                                'bogen': '~2'})
+                                                'bogen': '~2',
+                                                'discipline': '~3'})
 
         context['url_toon_jaar'] = reverse('Kalender:jaar',
                                            kwargs={'jaar': jaar,
                                                    'maand': MAAND2URL[maand],
                                                    'soort': gekozen_soort,
-                                                   'bogen': gekozen_bogen})
+                                                   'bogen': gekozen_bogen,
+                                                   'discipline': gekozen_discipline})
 
         if zoekterm:
             # url voor het resetten van de filter keuzes en zoekterm
@@ -253,7 +104,8 @@ class KalenderMaandView(TemplateView):
                                                 kwargs={'jaar': jaar,
                                                         'maand': maand,
                                                         'soort': 'alle',
-                                                        'bogen': 'alle'})
+                                                        'bogen': 'alle',
+                                                        'discipline': 'alle'})
 
         self._maak_prev_next(context, jaar, maand)
 
@@ -310,6 +162,11 @@ class KalenderMaandView(TemplateView):
             boog_pks = context['boog_pks']      # ingevuld in maak_bogen_filter en gegarandeerd niet leeg
             # distinct is nodig om verdubbeling te voorkomen
             wedstrijden = wedstrijden.filter(boogtypen__pk__in=boog_pks).distinct('datum_begin', 'pk')
+
+        if gekozen_discipline != 'alle':
+            discipline = url2discipline[gekozen_discipline]
+            wedstrijden = wedstrijden.filter(discipline=discipline)
+            evenementen = list()
 
         now_date = timezone.now().date()
 
@@ -413,9 +270,18 @@ class KalenderMaandView(TemplateView):
             gekozen_bogen = 'auto'
         gekozen_bogen = maak_bogen_filter(self.request, context, gekozen_bogen)
 
+        if 'discipline' in kwargs:
+            gekozen_discipline = kwargs['discipline']
+            # langste: 'run-archery'
+            gekozen_discipline = gekozen_discipline[:11]        # afkappen voor de veiligheid
+        else:
+            gekozen_discipline = 'alle'
+        gekozen_discipline = maak_discipline_filter(context, gekozen_discipline)
+
         zoekterm = self.request.GET.get('zoek', '')
         zoekterm = str(zoekterm)[:50]   # afkappen voor de veiligheid
-        self._maak_pagina(context, jaar, maand, gekozen_soort, gekozen_bogen, zoekterm)
+
+        self._maak_pagina(context, jaar, maand, gekozen_soort, gekozen_bogen, gekozen_discipline, zoekterm)
 
         return context
 
@@ -434,11 +300,18 @@ class KalenderMaandView(TemplateView):
         gekozen_bogen = gekozen_bogen[:6]           # afkappen voor de veiligheid
         gekozen_bogen = maak_bogen_filter(request, context, gekozen_bogen)
 
+        if 'discipline' in kwargs:
+            gekozen_discipline = kwargs['discipline']
+            gekozen_discipline = gekozen_discipline[:11]    # afkappen voor de veiligheid
+        else:
+            gekozen_discipline = 'alle'
+        gekozen_discipline = maak_discipline_filter(context, gekozen_discipline)
+
         zoekterm = request.POST.get('zoekterm', '')
         zoekterm = zoekterm[:50]    # afkappen voor de veiligheid
         context['zoekterm'] = zoekterm
 
-        self._maak_pagina(context, jaar, maand, gekozen_soort, gekozen_bogen, zoekterm)
+        self._maak_pagina(context, jaar, maand, gekozen_soort, gekozen_bogen, gekozen_discipline, zoekterm)
 
         return render(request, self.template_name, context)
 

@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2024 Ramon van der Winkel.
+#  Copyright (c) 2024-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-""" Deze module levert functionaliteit voor de Bestel-applicatie, met kennis van de Evenementen """
+""" Deze module levert functionaliteit voor de Bestel-applicatie, met kennis van de evenementen """
 
 from django.conf import settings
 from django.utils import timezone
@@ -15,11 +15,12 @@ from Evenement.definities import (EVENEMENT_INSCHRIJVING_STATUS_DEFINITIEF,
                                   EVENEMENT_INSCHRIJVING_STATUS_TO_STR, EVENEMENT_AFMELDING_STATUS_TO_STR)
 from Evenement.models import EvenementInschrijving, EvenementAfgemeld
 from Mailer.operations import mailer_queue_email, mailer_email_is_valide, render_email_template
+from decimal import Decimal
 
 EMAIL_TEMPLATE_INFO_INSCHRIJVING_EVENEMENT = 'email_bestelling/info-inschrijving-evenement.dtl'
 
 
-def evenement_plugin_inschrijven(inschrijving: EvenementInschrijving):
+def evenement_plugin_inschrijven(inschrijving: EvenementInschrijving) -> Decimal:
     """ verwerk een nieuwe inschrijving op een evenement """
 
     # (nog) geen aantallen om bij te werken
@@ -28,7 +29,7 @@ def evenement_plugin_inschrijven(inschrijving: EvenementInschrijving):
     return prijs
 
 
-def evenement_plugin_verwijder_reservering(stdout, inschrijving: EvenementInschrijving):
+def evenement_plugin_verwijder_reservering(stdout, inschrijving: EvenementInschrijving) -> EvenementAfgemeld | None:
 
     afmelding = None
 
@@ -166,7 +167,7 @@ def evenement_plugin_inschrijving_is_betaald(stdout, product: BestellingProduct)
                          sporter.lid_nr)
 
 
-def evenement_plugin_beschrijf_product(inschrijving_of_afgemeld: EvenementInschrijving | EvenementAfgemeld):
+def evenement_plugin_beschrijf_product(inschrijving_of_afgemeld: EvenementInschrijving | EvenementAfgemeld) -> list:
     """
         Geef een lijst van tuples terug waarin aspecten van het product beschreven staan.
     """

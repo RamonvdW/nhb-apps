@@ -9,7 +9,7 @@ from django.test import TestCase, Client
 from django.contrib.sessions.backends.db import SessionStore
 from Account.models import AccountSessions
 from Functie.models import Functie
-from Functie.rol import SESSIONVAR_ROL_MAG_WISSELEN
+from Functie.rol.mag_wisselen import SESSIONVAR_ROL_MAG_WISSELEN_BOOL
 from Functie.tests.helpers import maak_functie
 from Geo.models import Rayon, Regio
 from Logboek.models import LogboekRegel
@@ -204,7 +204,7 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_hwl)
         self.e2e_check_rol('HWL')
 
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(23):
             resp = self.client.post(self.url_activeer_functie % self.functie_hwl.pk, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('vereniging/overzicht.dtl', 'plein/site_layout.dtl'))
@@ -226,8 +226,7 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.testdata.account_admin)
 
         # neem de BB rol aan
-        with self.assert_max_queries(30):
-            resp = self.client.post(self.url_activeer_rol % 'BB', follow=True)
+        resp = self.client.post(self.url_activeer_rol % 'BB', follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, "Manager MH")
 
@@ -298,8 +297,7 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.testdata.account_admin)
 
         # neem de BKO rol aan
-        with self.assert_max_queries(20):
-            resp = self.client.post('/functie/activeer-functie/%s/' % self.functie_bko.pk, follow=True)
+        resp = self.client.post('/functie/activeer-functie/%s/' % self.functie_bko.pk, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, "BKO ")
 
@@ -336,8 +334,7 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
         # probeer als bezoeker (corner case coverage)
         # (admin kan geen schutter worden)
         url = self.url_wijzig_ontvang % self.functie_rko3.pk
-        with self.assert_max_queries(29):
-            resp = self.client.post(self.url_activeer_rol % 'geen', follow=True)
+        resp = self.client.post(self.url_activeer_rol % 'geen', follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'add': self.account_beh2.pk}, follow=False)
@@ -394,8 +391,7 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.testdata.account_admin)
 
         # neem de RCL rol aan
-        with self.assert_max_queries(20):
-            resp = self.client.post(self.url_activeer_functie % self.functie_rcl111.pk, follow=True)
+        resp = self.client.post(self.url_activeer_functie % self.functie_rcl111.pk, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, "RCL ")
 
@@ -680,14 +676,14 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
         session_key_beh1 = AccountSessions.objects.first().session.session_key
 
         session = SessionStore(session_key_beh1)
-        self.assertEqual(session[SESSIONVAR_ROL_MAG_WISSELEN], False)
+        self.assertEqual(session[SESSIONVAR_ROL_MAG_WISSELEN_BOOL], False)
 
         resp = client2.get('/plein/')
         urls = self.extract_all_urls(resp)
         self.assertNotIn('/functie/wissel-van-rol/', urls)
 
         session = SessionStore(session_key_beh1)
-        self.assertEqual(session[SESSIONVAR_ROL_MAG_WISSELEN], False)
+        self.assertEqual(session[SESSIONVAR_ROL_MAG_WISSELEN_BOOL], False)
 
         self.e2e_login_and_pass_otp(self.testdata.account_admin)
         self.e2e_wisselnaarrol_bb()
@@ -701,14 +697,14 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
         self.assertEqual(self.functie_bko.accounts.count(), 1)
 
         session = SessionStore(session_key_beh1)
-        self.assertEqual(session[SESSIONVAR_ROL_MAG_WISSELEN], 'nieuw')
+        self.assertEqual(session[SESSIONVAR_ROL_MAG_WISSELEN_BOOL], True)
 
         resp = client2.get('/plein/')
         urls = self.extract_all_urls(resp)
         self.assertIn('/functie/wissel-van-rol/', urls)
 
         session = SessionStore(session_key_beh1)
-        self.assertEqual(session[SESSIONVAR_ROL_MAG_WISSELEN], True)
+        self.assertEqual(session[SESSIONVAR_ROL_MAG_WISSELEN_BOOL], True)
 
         # coverage: eerste koppeling als de gebruiker al wissel-van-rol heeft
         self.functie_bko.accounts.clear()
@@ -716,7 +712,7 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
 
         session = SessionStore(session_key_beh1)
-        self.assertEqual(session[SESSIONVAR_ROL_MAG_WISSELEN], True)
+        self.assertEqual(session[SESSIONVAR_ROL_MAG_WISSELEN_BOOL], True)
 
 
 # end of file

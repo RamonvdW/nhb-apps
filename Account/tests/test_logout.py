@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2023 Ramon van der Winkel.
+#  Copyright (c) 2019-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -35,11 +35,11 @@ class TestAccountLogout(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, '/plein/')
 
         # log in
-        with self.assert_max_queries(26):
+        with self.assert_max_queries(21):
             resp = self.client.post(self.url_login, {'login_naam': 'normaal',
                                                      'wachtwoord': E2EHelpers.WACHTWOORD}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('plein/plein-bezoeker.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('plein/plein-sporter.dtl', 'plein/site_layout.dtl'))
 
         # logout pagina ophalen
         with self.assert_max_queries(20):

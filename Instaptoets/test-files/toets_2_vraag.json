@@ -1,0 +1,47 @@
+{
+  "Categorie Een": {
+    "valueRanges": [
+      {
+        "range": "'Categorie Een'!A1:AB1001",
+        "majorDimension": "ROWS",
+        "values": [
+          [
+            "Bla bla toelichting"
+          ],
+          [
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "Gebruiken voor.."
+          ],
+          [
+            "Vraagtekst",
+            "Antwoord A",
+            "Antwoord B",
+            "Antwoord C",
+            "Antwoord D",
+            "Juiste antwoord",
+            "Toets",
+            "Quiz",
+            "Naam toevoeger",
+            "Commentaar"
+          ],
+          [
+            "Blabla vraag",
+            "Antwoord A",
+            "Mogelijkheid B",
+            "-",
+            "-",
+            "A",
+            "Ja",
+            "Nee",
+            "Slimme tester"
+          ]
+        ]
+      }
+    ]
+  }
+}

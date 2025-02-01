@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2023 Ramon van der Winkel.
+#  Copyright (c) 2020-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -11,10 +11,10 @@ from django.shortcuts import render
 from django.views.generic import ListView, TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
-from Functie.definities import Rollen
+from Functie.definities import Rol
 from Functie.models import VerklaringHanterenPersoonsgegevens
 from Functie.operations import account_needs_vhpg
-from Functie.rol import rol_get_huidige, rol_bepaal_beschikbare_rollen
+from Functie.rol import rol_get_huidige
 from Functie.forms import AccepteerVHPGForm
 from Logboek.models import schrijf_in_logboek
 
@@ -117,9 +117,6 @@ class VhpgAcceptatieView(TemplateView):
             account_vhpg_is_geaccepteerd(account)
             schrijf_in_logboek(account, 'Rollen', 'VHPG geaccepteerd')
 
-            # als de VHPG (weer) geaccepteerd is, dan komen de rechten beschikbaar
-            rol_bepaal_beschikbare_rollen(request, account)
-
             return HttpResponseRedirect(reverse('Functie:wissel-van-rol'))
 
         # checkbox is verplicht --> nog een keer
@@ -142,7 +139,7 @@ class VhpgOverzichtView(UserPassesTestMixin, ListView):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         if self.request.user.is_authenticated:
             rol_nu = rol_get_huidige(self.request)
-            return rol_nu == Rollen.ROL_BB
+            return rol_nu == Rol.ROL_BB
         return False
 
     def get_queryset(self):

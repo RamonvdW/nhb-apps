@@ -19,6 +19,7 @@ from Bestelling.models import BestellingMandje, Bestelling
 from Evenement.models import EvenementInschrijving, EvenementAfgemeld
 from Functie.rol import rol_get_huidige_functie
 from Mailer.operations import render_email_template, mailer_queue_email
+from Opleiding.models import OpleidingInschrijving, OpleidingAfgemeld
 from Overig.helpers import get_safe_from_ip
 from Registreer.definities import REGISTRATIE_FASE_AFGEWEZEN
 from Registreer.models import GastRegistratie
@@ -202,7 +203,7 @@ class GastAccountDetailsView(UserPassesTestMixin, TemplateView):
                 match.vereniging_str = match.bij_vereniging.ver_nr_en_naam()
                 match.is_match_vereniging = False
                 for woord in gast.club.upper().split():
-                    if woord in match.vereniging_str.upper():
+                    if woord in match.vereniging_str.upper():   # pragma: no branch
                         match.is_match_vereniging = True
                 # for
 
@@ -279,20 +280,23 @@ class GastAccountDetailsView(UserPassesTestMixin, TemplateView):
         for inschrijving in context['gast_wedstrijden']:
             inschrijving.status_str = WEDSTRIJD_INSCHRIJVING_STATUS_TO_STR[inschrijving.status]
             if inschrijving.status == WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF:
+                # definitieve inschrijving op wedstrijd
                 gast.ophef = -100
             else:
+                # gereserveerd in mandje
+                # of nog niet betaalde bestelling
                 gast.ophef = -1
         # for
 
         # zoek koper van wedstrijd/evenement/opleiding
         context['gast_koper_1a'] = EvenementAfgemeld.objects.filter(koper=gast.account)[:10]
         context['gast_koper_1b'] = EvenementAfgemeld.objects.filter(koper=gast.account)[:10]
-        #context['gast_koper_2a'] = OpleidingInschrijving.objects.filter(koper=gast.account)[:10]
-        #context['gast_koper_2b'] = OpleidingAfgemeld.objects.filter(koper=gast.account)[:10]
+        context['gast_koper_2a'] = OpleidingInschrijving.objects.filter(koper=gast.account)[:10]
+        context['gast_koper_2b'] = OpleidingAfgemeld.objects.filter(koper=gast.account)[:10]
         context['gast_koper_3a'] = WedstrijdInschrijving.objects.filter(koper=gast.account)[:10]
 
         koper_count = (len(context['gast_koper_1a']) + len(context['gast_koper_1b']) +
-                       #len(context['gast_koper_2a']) + len(context['gast_koper_2b']) +
+                       len(context['gast_koper_2a']) + len(context['gast_koper_2b']) +
                        len(context['gast_koper_3a']))
         if koper_count > 0:
             gast.ophef -= 100
@@ -493,8 +497,8 @@ class BestellingOverzettenView(UserPassesTestMixin, View):
         # koper van wedstrijd/evenement/opleiding overzetten
         EvenementAfgemeld.objects.filter(koper=self.account_old).update(koper=self.account_new)
         EvenementAfgemeld.objects.filter(koper=self.account_old).update(koper=self.account_new)
-        #OpleidingInschrijving.objects.filter(koper=self.account_old).update(koper=self.account_new)
-        #OpleidingAfgemeld.objects.filter(koper=self.account_old).update(koper=self.account_new)
+        OpleidingInschrijving.objects.filter(koper=self.account_old).update(koper=self.account_new)
+        OpleidingAfgemeld.objects.filter(koper=self.account_old).update(koper=self.account_new)
         WedstrijdInschrijving.objects.filter(koper=self.account_old).update(koper=self.account_new)
 
     def post(self, request, *args, **kwargs):

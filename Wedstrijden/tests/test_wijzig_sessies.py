@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2024 Ramon van der Winkel.
+#  Copyright (c) 2021-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
 from django.utils import timezone
 from BasisTypen.models import BoogType
+from Functie.models import Functie
 from Functie.tests.helpers import maak_functie
 from Geo.models import Regio
 from Locatie.models import WedstrijdLocatie
@@ -36,6 +37,8 @@ class TestWedstrijdenWijzigSessies(E2EHelpers, TestCase):
         self.account_admin = self.e2e_create_account_admin()
         self.account_admin.is_BB = True
         self.account_admin.save()
+
+        self.functie_mwz = Functie.objects.get(rol='MWZ')
 
         self.lid_nr = 123456
         self.account = self.e2e_create_account(str(self.lid_nr), 'test@test.not', 'Voornaam')
@@ -140,8 +143,9 @@ class TestWedstrijdenWijzigSessies(E2EHelpers, TestCase):
             resp = self.client.post(url, {'nieuwe_sessie': 'graag'})
         self.assert_is_redirect(resp, url)
 
-        # schakel naar BB rol
-        self.e2e_wisselnaarrol_bb()
+        # schakel naar MWZ rol
+        self.e2e_wissel_naar_functie(self.functie_mwz)
+
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -12,10 +12,6 @@
     having to edit the settings.py file.
 """
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
-ENABLE_DEBUG_TOOLBAR = False
-
 # the secret below ensures an adversary cannot fake aspects like a session-id
 # just make sure it is unique per installation and keep it private
 # details: https://docs.djangoproject.com/en/4.2/ref/settings/#secret-key
@@ -23,7 +19,7 @@ SECRET_KEY = '1234-replace-with-your-own-secret-key-56789abcdefg'       # noqa
 
 BASE_URL = "yourdomain.com"
 
-# SITE_URL wordt gebruikt door Overige:tijdelijke urls
+# SITE_URL wordt gebruikt door TijdelijkeCodes, maar ook voor alle urls in e-mails
 #SITE_URL = "https://" + BASE_URL
 SITE_URL = "http://localhost:8000"
 
@@ -89,6 +85,7 @@ VOORWAARDEN_A_STATUS_URL = 'https://docs.google.com/document/d/random google doc
 # url van de documenten met de verkoopvoorwaarden
 VERKOOPVOORWAARDEN_WEDSTRIJDEN_URL = 'https://docs.google.com/document/d/another random google document number/pub'
 VERKOOPVOORWAARDEN_WEBWINKEL_URL = 'https://docs.google.com/document/d/yet another random google document number/pub'
+VERKOOPVOORWAARDEN_OPLEIDINGEN_URL = 'https://docs.google.com/document/d/yet another random google document number/pub'
 
 # google doc id van het gsheet document
 RECORDS_GSHEET_FILE_ID = 'random gsheet doc id'
@@ -130,8 +127,14 @@ BEKENDE_BIC_CODES = (
 # hierdoor komt een eventuele reservering weer beschikbaar voor iemand anders
 MANDJE_VERVAL_NA_DAGEN = 3
 
-# pagina over grensoverschrijdend gedrag en contactgegevens VCP's
-URL_VCP_CONTACTGEGEVENS = 'https://yourfrontend/grensoverschrijdend-gedrag/'
+# pagina over grensoverschrijdend gedrag en contactgegevens vertrouwenscontactpersonen
+URL_VCP_CONTACTGEGEVENS = 'https://yourfrontend/contactgegevens-vcp/'   # noqa
+
+# pagina met instructies en aanvraagformulier prestatiespelden
+URL_SPELDEN_PROCEDURES = 'https://www.handboogsport.nl/de-khsn/#procedures'     # noqa
+
+# online aanvraagformulier voor nieuwe records
+URL_RECORD_AANVRAAGFORMULIER = 'https://docs.google.com/spreadsheets/1234_your_doc_7890'   # noqa
 
 # locatie op disk waar de foto's staan (bron)
 # deze worden door collectstatic naar deployment gezet  # noqa
@@ -143,8 +146,8 @@ WEBWINKEL_VERKOPER_VER_NR = 1368
 WEBWINKEL_VERKOPER_BTW_NR = "012345678B99"
 
 # verzendkosten webwinkel
-WEBWINKEL_PAKKET_GROOT_VERZENDKOSTEN_EURO = 6.95
 WEBWINKEL_BRIEF_VERZENDKOSTEN_EURO = 4.25
+WEBWINKEL_PAKKET_GROOT_VERZENDKOSTEN_EURO = 6.95
 
 # ophalen op bondsbureau aan/uit zetten
 WEBWINKEL_TRANSPORT_OPHALEN_MAG = True
@@ -155,9 +158,13 @@ WEBWINKEL_BTW_PERCENTAGE = 21.0
 # Prestatiespelden tonen in de webwinkel?
 WEBWINKEL_TOON_PRESTATIESPELDEN = False
 
-# Mollie endpoint URL override
-# (None = use library provided default)
-BETAAL_API_URL = None
+# welke vereniging(en) mogen evenementen op de kalender zetten?
+# deze krijgen het kaartje Evenementen op het verenigingen overzicht
+EVENEMENTEN_VERKOPER_VER_NRS = (1368,)
+
+# welke vereniging(en) mogen opleidingen op de kalender zetten?
+# deze krijgen het kaartje Opleidingen op het verenigingen overzicht
+OPLEIDINGEN_VERKOPER_VER_NRS = (1368,)
 
 # google maps URL (override) and API key
 # (None = use library provided default)
@@ -176,7 +183,14 @@ GEOCODE_FALLBACK = {
 LID_NRS_GEEN_SCHEIDS_BESCHIKBAARHEID_OPVRAGEN = ()
 
 # Ledenvoordeel
+TOON_LEDENVOORDEEL = True
 WALIBI_URL_ALGEMEEN = 'https://www.walibi.nl/'
 WALIBI_URL_KORTING = 'https://bit.ly/yourcode'
+
+# toegestane tokens voor /kalender/api/lijst/30/?token=xxxx
+KALENDER_API_TOKENS = ()
+
+# google doc id van het gsheet document
+INSTAPTOETS_GSHEET_FILE_ID = 'another.google.sheets.id'     # noqa
 
 # end of file

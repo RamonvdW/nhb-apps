@@ -146,7 +146,7 @@ def registreer_opschonen(stdout):
     """
 
     registreer_opschonen_incompleet(stdout)
-    #registreer_opschonen_afgewezen(stdout)
+    registreer_opschonen_afgewezen(stdout)
 
     # alle rate trackers opruimen
     GastRegistratieRateTracker.objects.all().delete()

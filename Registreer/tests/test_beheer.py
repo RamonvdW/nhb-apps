@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2024 Ramon van der Winkel.
+#  Copyright (c) 2020-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -233,24 +233,30 @@ class TestRegistreerBeheer(E2EHelpers, TestCase):
         inschrijving.save()
 
         # haal de details van een gast-account op
+        # deze heeft een bestelling, is inschrijven voor een wedstrijd en is de koper
+        # gast-account kan dus niet opgeheven worden
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_gast_details % self.gast_800001.lid_nr)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('registreer/beheer-gast-account-details.dtl', 'plein/site_layout.dtl'))
+        # self.e2e_open_in_browser(resp)
+        urls = self.extract_all_urls(resp, skip_menu=True)
+        self.assertEqual(urls, [])
 
         # lever twee mogelijke matches
         wa_id = "12345"
-        Sporter(
-            lid_nr=200001,
-            geslacht='M',
-            voornaam="Andere voornaam",
-            achternaam="Andere achternaam",
-            email="andere@test.not",
-            geboorte_datum=self.gast_800001.geboorte_datum,
-            wa_id=wa_id,
-            sinds_datum=datetime.date(year=2010, month=11, day=12),
-            bij_vereniging=self.ver1).save()
+        sporter_200001 = Sporter(
+                            lid_nr=200001,
+                            geslacht='M',
+                            voornaam="Andere voornaam",
+                            achternaam="Andere achternaam",
+                            email="andere@test.not",
+                            geboorte_datum=self.gast_800001.geboorte_datum,
+                            wa_id=wa_id,
+                            sinds_datum=datetime.date(year=2010, month=11, day=12),
+                            bij_vereniging=self.ver1)
+        sporter_200001.save()
 
         self.gast_800001.eigen_lid_nummer = "200001"
         self.gast_800001.club = self.ver1.naam
@@ -258,18 +264,82 @@ class TestRegistreerBeheer(E2EHelpers, TestCase):
         self.gast_800001.account = None     # geen account, dan tonen we hoeveel dagen geleden registratie is gestart
         self.gast_800001.save(update_fields=['eigen_lid_nummer', 'club', 'club_plaats', 'account'])
 
-        Sporter(
-            lid_nr=200002,
-            geslacht=self.gast_800001.geslacht,
-            voornaam=self.gast_800001.voornaam,
-            achternaam=self.gast_800001.achternaam,
-            email=self.gast_800001.email,
-            geboorte_datum=datetime.date(year=2000, month=1, day=1),
-            sinds_datum=datetime.date(year=2010, month=11, day=12),
-            account=self.account_800001,        # voor de coverage
-            bij_vereniging=None).save()
+        sporter_200002 = Sporter(
+                            lid_nr=200002,
+                            geslacht=self.gast_800001.geslacht,
+                            voornaam=self.gast_800001.voornaam,
+                            achternaam=self.gast_800001.achternaam,
+                            email=self.gast_800001.email,
+                            geboorte_datum=datetime.date(year=2000, month=1, day=1),
+                            sinds_datum=datetime.date(year=2010, month=11, day=12),
+                            account=self.account_800001,        # voor de coverage
+                            bij_vereniging=None)
+        sporter_200002.save()
+
+        # haal de details van een gast-account op --> zonder overzetten/opheffen knoppen
+        # sporter 200001 is de beste kandidaat, maar heeft geen account
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_gast_details % self.gast_800001.lid_nr)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('registreer/beheer-gast-account-details.dtl', 'plein/site_layout.dtl'))
+        # self.e2e_open_in_browser(resp)
+        urls = self.extract_all_urls(resp, skip_menu=True)
+        self.assertEqual(urls, [])
+
+        # zet het account over
+        sporter_200002.account = None
+        sporter_200002.save(update_fields=['account'])
+        sporter_200001.account = self.account_800001
+        sporter_200001.save(update_fields=['account'])
+
+        # haal de details van een gast-account op --> met overzetten knop
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_gast_details % self.gast_800001.lid_nr)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('registreer/beheer-gast-account-details.dtl', 'plein/site_layout.dtl'))
+        # self.e2e_open_in_browser(resp)
+        urls = self.extract_all_urls(resp, skip_menu=True)
+        # print('urls: %s' % repr(urls))
+        url = self.url_overzetten % (800001, 200001)
+        self.assertIn(url, urls)
 
         # haal de details van een gast-account op --> met opheffen knop
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_gast_details % self.gast_800001.lid_nr)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('registreer/beheer-gast-account-details.dtl', 'plein/site_layout.dtl'))
+        # self.e2e_open_in_browser(resp)
+
+        urls = self.extract_all_urls(resp, skip_menu=True)
+        # print('urls: %s' % repr(urls))
+        url = self.url_overzetten % (800001, 200001)
+        self.assertIn(url, urls)
+
+        # pas de wedstrijdinschrijving aan
+        inschrijving.status = WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF
+        inschrijving.save(update_fields=['status'])
+
+        self.gast_800001.wa_id = wa_id
+        self.gast_800001.save(update_fields=['wa_id'])
+
+        # haal de details van het gast-account op
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_gast_details % self.gast_800001.lid_nr)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('registreer/beheer-gast-account-details.dtl', 'plein/site_layout.dtl'))
+
+        urls = self.extract_all_urls(resp, skip_menu=True)
+        # print('urls: %s' % repr(urls))
+        url = self.url_overzetten % (800001, 200001)
+        self.assertIn(url, urls)
+
+        # verwijder de inschrijving, dan komt de opheffen knop
+        inschrijving.delete()
+
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_gast_details % self.gast_800001.lid_nr)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
@@ -279,20 +349,6 @@ class TestRegistreerBeheer(E2EHelpers, TestCase):
         urls = self.extract_all_urls(resp, skip_menu=True)
         # print('urls: %s' % repr(urls))
         self.assertIn(self.url_opheffen, urls)
-
-        # pas de wedstrijdinschrijving aan
-        inschrijving.status = WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF
-        inschrijving.save(update_fields=['status'])
-
-        self.gast_800001.wa_id = wa_id
-        self.gast_800001.save(update_fields=['wa_id'])
-
-        # haal de details van een gast-account op
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_gast_details % self.gast_800001.lid_nr)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('registreer/beheer-gast-account-details.dtl', 'plein/site_layout.dtl'))
 
         # corner-case: afgewezen
         self.gast_800001.fase = REGISTRATIE_FASE_AFGEWEZEN
@@ -391,7 +447,6 @@ class TestRegistreerBeheer(E2EHelpers, TestCase):
         self.assertEqual(gast2.fase, REGISTRATIE_FASE_AFGEWEZEN)
 
     def test_bestelling_overzetten(self):
-
         # maak een nieuwe sporter aan voor de overdracht
         sporter = Sporter(
                     lid_nr=100002,

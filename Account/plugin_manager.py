@@ -36,17 +36,18 @@ def account_add_plugin_login_gate(prio, func, skip_for_login_as):
     account_plugins_login_gate.sort(key=lambda x: x[0])
 
 
-def account_add_plugin_post_login_redirect(prio, func):
+def account_add_plugin_post_login(prio, func):
     """
-        redirect plugins zijn functies die helpen om de gebruiker na inlog
-        naar een nuttige pagina te sturen.
-        dit kan gebruikt worden door andere applicaties om mee te beslissen in het login process
+        post-login plugins worden aangeroepen na een gelukte login.
+        dit kan gebruikt worden door andere applicaties om mee te liften op het login process
         zonder dat er een dependencies ontstaat vanuit Account naar die applicatie
+
+        de plugin kan optioneel een URL terug geven naar een nuttige pagina om de gebruiker heen te sturen.
 
         declaratie van de redirect plugin functie:
 
            def plugin(request, account):
-               return None (geen redirect) of url om naartoe te navigeren
+               return url om naartoe te navigeren of None voor "geen redirect"
 
         de plugin wordt aangeroepen na inlog
         de functie reverse (uit django.urls) produceert url string

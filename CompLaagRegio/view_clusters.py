@@ -12,7 +12,7 @@ from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
 from Competitie.models import Regiocompetitie
-from Functie.definities import Rollen
+from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving
 from Geo.models import Cluster
 from Logboek.models import schrijf_in_logboek
@@ -40,7 +40,7 @@ class WijzigClustersView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu == Rollen.ROL_RCL
+        return self.rol_nu == Rol.ROL_RCL
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """

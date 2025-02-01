@@ -10,7 +10,7 @@ from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Competitie.definities import INSCHRIJF_METHODE_1
 from Competitie.models import CompetitieMatch, Regiocompetitie, RegiocompetitieSporterBoog
-from Functie.definities import Rollen
+from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
 
 
@@ -117,7 +117,7 @@ class WieSchietWaarView(UserPassesTestMixin, TemplateView):
 
             obj.boogtype_str = obj.sporterboog.boogtype.beschrijving
 
-            if self.rol_nu == Rollen.ROL_HWL:
+            if self.rol_nu == Rol.ROL_HWL:
                 obj.url_wijzig = reverse('CompLaagRegio:keuze-zeven-wedstrijden',
                                          kwargs={'deelnemer_pk': obj.pk})
 
@@ -130,7 +130,7 @@ class WieSchietWaarView(UserPassesTestMixin, TemplateView):
             # for
         # for
 
-        if self.rol_nu == Rollen.ROL_HWL:
+        if self.rol_nu == Rol.ROL_HWL:
             context['afmelden_url'] = reverse('CompInschrijven:leden-ingeschreven',
                                               kwargs={'deelcomp_pk': deelcomp.pk})
 

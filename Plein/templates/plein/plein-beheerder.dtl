@@ -33,7 +33,7 @@
                 {% endif %}
 
                 <!-- wedstrijdkalender -->
-                {% if rol_is_bb or rol_is_mwz %}
+                {% if rol_is_mwz %}
                     {% url 'Wedstrijden:manager-status' status='wacht' as card_url %}
                     {% include 'plein/card_icon.dtl' with title="Wedstrijdkalender" text="Beheer de wedstrijdkalender." icon="event_note" url=card_url %}
                 {% endif %}
@@ -52,7 +52,7 @@
 
                 <!-- opleidingen -->
                 {% if rol_is_mo %}
-                    {% url 'Opleidingen:overzicht' as card_url %}
+                    {% url 'Opleiding:manager' as card_url %}
                     {% include 'plein/card_icon.dtl' with title="Opleidingen" text="Beheer de opleidingen en deelnemers." icon="school" url=card_url %}
                 {% endif %}
 

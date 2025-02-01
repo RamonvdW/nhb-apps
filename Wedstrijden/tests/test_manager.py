@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2024 Ramon van der Winkel.
+#  Copyright (c) 2021-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
+from Functie.models import Functie
 from Functie.tests.helpers import maak_functie
 from Geo.models import Regio
 from Locatie.models import WedstrijdLocatie
@@ -32,6 +33,8 @@ class TestWedstrijdenManager(E2EHelpers, TestCase):
         self.account_admin = self.e2e_create_account_admin()
         self.account_admin.is_BB = True
         self.account_admin.save()
+
+        self.functie_mwz = Functie.objects.get(rol='MWZ')
 
         # maak een test vereniging
         self.ver1 = Vereniging(
@@ -80,7 +83,7 @@ class TestWedstrijdenManager(E2EHelpers, TestCase):
         self.assert_is_redirect_not_plein(resp)
 
         self.e2e_login_and_pass_otp(self.account_admin)
-        self.e2e_wisselnaarrol_bb()
+        self.e2e_wissel_naar_functie(self.functie_mwz)
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_wedstrijden_manager_geannuleerd)
@@ -93,8 +96,8 @@ class TestWedstrijdenManager(E2EHelpers, TestCase):
         resp = self.client.post(self.url_wedstrijden_maak_nieuw, {'keuze': 'khsn'})
         self.assert_is_redirect_not_plein(resp)
 
-        # wissel terug naar BB
-        self.e2e_wisselnaarrol_bb()
+        # wissel terug naar MWZ
+        self.e2e_wissel_naar_functie(self.functie_mwz)
 
         # haal het overzicht op
         with self.assert_max_queries(20):
@@ -162,8 +165,8 @@ class TestWedstrijdenManager(E2EHelpers, TestCase):
         wedstrijd.organiserende_vereniging = self.ver1
         wedstrijd.save()
 
-        # nu als BB
-        self.e2e_wisselnaarrol_bb()
+        # nu als MWZ
+        self.e2e_wissel_naar_functie(self.functie_mwz)
 
         with self.assert_max_queries(20):
             resp = self.client.post(url, {})
@@ -253,8 +256,8 @@ class TestWedstrijdenManager(E2EHelpers, TestCase):
         wedstrijd.refresh_from_db()
         self.assertEqual(wedstrijd.status, 'W')
 
-        # wissel naar BB/MWZ
-        self.e2e_wisselnaarrol_bb()
+        # wissel naar MWZ
+        self.e2e_wissel_naar_functie(self.functie_mwz)
 
         wedstrijd.aantal_scheids = 2
         wedstrijd.save(update_fields=['aantal_scheids'])

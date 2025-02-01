@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2024 Ramon van der Winkel.
+#  Copyright (c) 2022-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -9,6 +9,7 @@ from django.utils import timezone
 from BasisTypen.models import BoogType
 from Bestelling.models import BestellingProduct
 from Competitie.models import Competitie, CompetitieIndivKlasse, Regiocompetitie, RegiocompetitieSporterBoog
+from Functie.models import Functie
 from Functie.tests.helpers import maak_functie
 from Geo.models import Regio
 from Locatie.models import WedstrijdLocatie
@@ -56,6 +57,8 @@ class TestWedstrijdenAanmeldingen(E2EHelpers, TestCase):
                             naam="Grote Club",
                             regio=self.regio112)
         self.ver1.save()
+
+        self.functie_mwz = Functie.objects.get(rol='MWZ')
 
         self.functie_hwl = maak_functie('HWL Ver 1000', 'HWL')
         self.functie_hwl.vereniging = self.ver1
@@ -277,8 +280,8 @@ class TestWedstrijdenAanmeldingen(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('wedstrijden/aanmeldingen.dtl', 'plein/site_layout.dtl'))
 
-        # als BB (andere kruimels, verder niets)
-        self.e2e_wisselnaarrol_bb()
+        # als MWZ (andere kruimels, verder niets)
+        self.e2e_wissel_naar_functie(self.functie_mwz)
 
         with self.assert_max_queries(20):
             self.client.get(url)
@@ -324,8 +327,8 @@ class TestWedstrijdenAanmeldingen(E2EHelpers, TestCase):
 
         self.e2e_assert_other_http_commands_not_supported(url)
 
-        # als BB
-        self.e2e_wisselnaarrol_bb()
+        # als MWZ
+        self.e2e_wissel_naar_functie(self.functie_mwz)
 
         with self.assert_max_queries(20):
             resp = self.client.get(url)
@@ -395,8 +398,8 @@ class TestWedstrijdenAanmeldingen(E2EHelpers, TestCase):
             resp = self.client.post(url, {'snel': 1})
         self.assert404(resp, 'Verkeerde vereniging')
 
-        # nogmaals, als BB
-        self.e2e_wisselnaarrol_bb()
+        # nogmaals, als MWZ
+        self.e2e_wissel_naar_functie(self.functie_mwz)
 
         url = self.url_aanmeldingen_afmelden % self.inschrijving2.pk
         with self.assert_max_queries(20):
@@ -532,8 +535,8 @@ class TestWedstrijdenAanmeldingen(E2EHelpers, TestCase):
         resp = self.client.get(self.url_aanmeldingen_download_csv % self.wedstrijd.pk)
         self.assert404(resp, 'Wedstrijd is niet bij jullie vereniging')
 
-        # nu als BB
-        self.e2e_wisselnaarrol_bb()
+        # nu als MWZ
+        self.e2e_wissel_naar_functie(self.functie_mwz)
 
         # koppel een sporter los van een vereniging
         self.sporter1.bij_vereniging = None

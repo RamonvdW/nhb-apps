@@ -42,7 +42,7 @@ class TestCompBeheerTestWijzigDatum(E2EHelpers, TestCase):
     def setUpTestData(cls):
         cls.testdata = testdata.TestData()
         cls.testdata.maak_accounts_admin_en_bb()
-        cls.testdata.maak_clubs_en_sporters()
+        # cls.testdata.maak_clubs_en_sporters()
 
     def setUp(self):
         """ eenmalige setup voor alle tests
@@ -138,11 +138,11 @@ class TestCompBeheerTestWijzigDatum(E2EHelpers, TestCase):
 
         comp = Competitie.objects.first()
 
-        now = timezone.now()
-        if now.month == expected_month and now.day == expected_day:     # pragma: no cover
-            # avoid testcase from failing one day per year
-            expected_month, expected_day = 1, 1
-            expected_year += 1
+        # avoid testcase from failing one day per year --> blijkt toch niet nodig
+        # now = timezone.now()
+        # if now.month == expected_month and now.day == expected_day:
+        #     expected_month, expected_day = 1, 1
+        #     expected_year += 1
 
         self.assertEqual(datetime.date(year=expected_year, month=expected_month, day=expected_day), comp.begin_fase_C)
         self.assertEqual(datetime.date(year=expected_year, month=expected_month, day=expected_day), comp.begin_fase_F)

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2024 Ramon van der Winkel.
+#  Copyright (c) 2022-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -185,7 +185,7 @@ class TestWedstrijdenWedstrijdDetails(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('wedstrijden/wedstrijd-details.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
 
-        urls = self.extract_all_urls(resp, skip_menu=True)
+        urls = self.extract_all_urls(resp, skip_menu=True, skip_external=False)
         self.assertTrue('http://uitslag.test.not/part_a.pdf' in urls)
         self.assertTrue('http://uitslag.test.not/part_b.pdf' in urls)
         self.assertTrue('http://uitslag.test.not/part_c.pdf' in urls)
@@ -201,7 +201,7 @@ class TestWedstrijdenWedstrijdDetails(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('wedstrijden/wedstrijd-details.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
 
-        urls = self.extract_all_urls(resp, skip_menu=True)
+        urls = self.extract_all_urls(resp, skip_menu=True, skip_external=False)
         self.assertTrue('http://test.not/flyer.pdf' in urls)
 
     def test_extern_beheerd(self):

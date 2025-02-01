@@ -10,7 +10,7 @@ from django.utils import timezone
 from django.shortcuts import render
 from django.views.generic import View, TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Functie.definities import Rollen
+from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving
 from Sporter.models import Sporter
 from Wedstrijden.definities import WEDSTRIJD_KORTING_SPORTER, WEDSTRIJD_KORTING_VERENIGING, WEDSTRIJD_KORTING_COMBI
@@ -40,7 +40,7 @@ class KortingenView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu == Rollen.ROL_HWL
+        return self.rol_nu == Rol.ROL_HWL
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -111,7 +111,7 @@ class KiesNieuweKortingView(UserPassesTestMixin, View):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu == Rollen.ROL_HWL
+        return self.rol_nu == Rol.ROL_HWL
 
     def get(self, request, *args, **kwargs):
         """ deze functie wordt aangeroepen om de GET request af te handelen """
@@ -171,7 +171,7 @@ class WijzigKortingView(UserPassesTestMixin, View):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu == Rollen.ROL_HWL
+        return self.rol_nu == Rol.ROL_HWL
 
     def get(self, request, *args, **kwargs):
         """ deze functie wordt aangeroepen om de GET request af te handelen """

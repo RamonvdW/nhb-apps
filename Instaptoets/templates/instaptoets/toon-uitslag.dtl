@@ -1,0 +1,48 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2024-2025 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Uitslag instaptoets{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Uitslag instaptoets</h3>
+            <p>Je hebt de toets afgerond op {{ toets.afgerond|date:"j F Y" }} om {{ toets.afgerond|date:"H:i" }}.</p>
+        </div>
+    </div>
+
+
+    <!-- blauw balk met wit informatie veld -->
+    <div class="row-sv-blauw">
+        <div class="col s12 m8 offset-m2 l6 offset-l3">
+            <div class="sv-kader" style="padding:10px">
+                {% if toets.geslaagd %}
+                    <h5 class="sv-rood-text">Gefeliciteerd!</h5>
+                    <p>Je bent geslaagd voor de instaptoets.<br>Je had {{ toets.aantal_goed }} van de {{ toets.aantal_vragen }} vragen goed.</p>
+                    <p>Met dit mooie resultaat kan je je inschrijven voor de basiscursus.</p>
+                    <p>
+                        <a class="btn-sv-rood" href="{{ url_basiscursus }}">Toon de basiscursus</a>
+                    </p>
+                {% else %}
+                    <p><b>Helaas</b></p>
+                    <p>Je hebt te weinig vragen goed beantwoord.</p>
+                    <p>Je had {{ toets.aantal_goed }} van de {{ toets.aantal_vragen }} vragen goed.</p>
+                    <p>
+                        <a class="btn-sv-rood" href="{{ url_sluiten }}">Sluiten</a>
+                    </p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="instaptoets-toon-uitslag" %}
+
+{% endblock %}

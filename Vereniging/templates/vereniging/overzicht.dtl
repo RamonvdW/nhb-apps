@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2024 Ramon van der Winkel.
+                Copyright (c) 2020-2025 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -105,12 +105,12 @@
     {% endif %}
 
 
-    {% if toon_wedstrijden or toon_evenementen %}
+    {% if toon_wedstrijden or toon_evenementen or toon_opleidingen %}
 
         <!-- witruimte -->
         <div class="row center">
             <div class="col s12">
-                <h4>Wedstrijden{% if toon_evenementen %} en evenementen{% endif %}</h4>
+                <h4>Vereniging organiseert</h4>
             </div>
         </div>
 
@@ -134,6 +134,12 @@
                 {% if toon_wedstrijdkalender %}
                     {% url 'Wedstrijden:vereniging' as card_url %}
                     {% include 'plein/card_icon.dtl' with title="Wedstrijdkalender" text="Beheer de wedstrijden die door jullie vereniging georganiseerd worden." icon="event_note" url=card_url %}
+                {% endif %}
+
+                {% if toon_opleidingen %}
+                    <!-- opleidingen (alleen voor de HWL) -->
+                    {% url 'Opleiding:vereniging' as card_url %}
+                    {% include 'plein/card_icon.dtl' with title="Opleidingen" text="Beheer de opleidingen die door jullie vereniging georganiseerd worden." icon="school" url=card_url %}
                 {% endif %}
 
                 {% if toon_evenementen %}

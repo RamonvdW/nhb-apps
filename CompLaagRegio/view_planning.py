@@ -19,7 +19,7 @@ from Competitie.models import (CompetitieMatch, CompetitieIndivKlasse, Competiti
                                RegiocompetitieSporterBoog, RegiocompetitieTeam,
                                Kampioenschap)
 from Competitie.operations import maak_regiocompetitie_ronde, competitie_week_nr_to_date
-from Functie.definities import Rollen
+from Functie.definities import Rol
 from Functie.rol import rol_get_huidige, rol_get_huidige_functie
 from Geo.models import Cluster
 from Locatie.models import WedstrijdLocatie
@@ -93,7 +93,7 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL)
+        return self.rol_nu in (Rol.ROL_BB, Rol.ROL_BKO, Rol.ROL_RKO, Rol.ROL_RCL, Rol.ROL_HWL)
 
     def _get_methode_1(self, context, deelcomp, mag_database_wijzigen=False):
         self.template_name = self.template2
@@ -225,7 +225,7 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
         context['deelcomp'] = deelcomp
         context['regio'] = deelcomp.regio
 
-        mag_wijzigen = (self.rol_nu == Rollen.ROL_RCL and self.functie_nu.regio == deelcomp.regio)
+        mag_wijzigen = (self.rol_nu == Rol.ROL_RCL and self.functie_nu.regio == deelcomp.regio)
 
         if deelcomp.inschrijf_methode == INSCHRIJF_METHODE_1:
             self._get_methode_1(context, deelcomp)
@@ -238,7 +238,7 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
             else:
                 context['inschrijfmethode'] = '3 (sporter voorkeur dagdeel)'
 
-        if self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO):
+        if self.rol_nu in (Rol.ROL_BB, Rol.ROL_BKO, Rol.ROL_RKO):
             rayon = Kampioenschap.objects.get(competitie=deelcomp.competitie,
                                               deel=DEEL_RK,
                                               rayon=deelcomp.regio.rayon)
@@ -247,7 +247,7 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
 
         comp = deelcomp.competitie
 
-        if self.rol_nu == Rollen.ROL_HWL:
+        if self.rol_nu == Rol.ROL_HWL:
             # TODO: deze terug verwijzing klopt niet helemaal meer. Zou Beheer Vereniging kunnen zijn als we een nieuw kaartje maken om de planning in te zien
             comp_url = reverse('Competitie:overzicht', kwargs={'comp_pk_of_seizoen': comp.maak_seizoen_url()})
         else:
@@ -266,7 +266,7 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
             in de regioplanning, om een nieuwe ronde toe te voegen.
         """
         # alleen de RCL mag de planning uitbreiden
-        if self.rol_nu != Rollen.ROL_RCL:
+        if self.rol_nu != Rol.ROL_RCL:
             raise PermissionDenied('Niet de beheerder')
 
         try:
@@ -315,7 +315,7 @@ class RegioClusterPlanningView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu = rol_get_huidige(self.request)
-        return self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL)
+        return self.rol_nu in (Rol.ROL_BB, Rol.ROL_BKO, Rol.ROL_RKO, Rol.ROL_RCL, Rol.ROL_HWL)
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -355,14 +355,14 @@ class RegioClusterPlanningView(UserPassesTestMixin, TemplateView):
         # for
 
         # alleen de RCL mag de planning uitbreiden
-        if self.rol_nu == Rollen.ROL_RCL and len(context['rondes']) < 16:
+        if self.rol_nu == Rol.ROL_RCL and len(context['rondes']) < 16:
             context['url_nieuwe_week'] = reverse('CompLaagRegio:regio-cluster-planning',
                                                  kwargs={'deelcomp_pk': deelcomp.pk,
                                                          'cluster_pk': cluster.pk})
 
         comp = deelcomp.competitie
 
-        if self.rol_nu == Rollen.ROL_HWL:
+        if self.rol_nu == Rol.ROL_HWL:
             # TODO: deze terug verwijzing klopt niet helemaal meer. Zou Beheer Vereniging kunnen zijn als we een nieuw kaartje maken om de planning in te zien
             comp_url = reverse('Competitie:overzicht', kwargs={'comp_pk_of_seizoen': comp.maak_seizoen_url()})
         else:
@@ -382,7 +382,7 @@ class RegioClusterPlanningView(UserPassesTestMixin, TemplateView):
         """
 
         # alleen de RCL mag de planning uitbreiden
-        if self.rol_nu != Rollen.ROL_RCL:
+        if self.rol_nu != Rol.ROL_RCL:
             raise PermissionDenied('Niet de beheerder')
 
         try:
@@ -432,7 +432,7 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu = rol_get_huidige(self.request)
-        return self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL)
+        return self.rol_nu in (Rol.ROL_BB, Rol.ROL_BKO, Rol.ROL_RKO, Rol.ROL_RCL, Rol.ROL_HWL)
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -462,7 +462,7 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
                                             'tijd_begin_wedstrijd',
                                             'vereniging'))
 
-        if self.rol_nu == Rollen.ROL_RCL:
+        if self.rol_nu == Rol.ROL_RCL:
             context['url_nieuwe_wedstrijd'] = reverse('CompLaagRegio:regio-ronde-planning',
                                                       kwargs={'ronde_pk': ronde.pk})
 
@@ -589,10 +589,10 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
 
         comp = ronde.regiocompetitie.competitie
 
-        if self.rol_nu != Rollen.ROL_RCL:
+        if self.rol_nu != Rol.ROL_RCL:
             context['readonly'] = True
 
-        if self.rol_nu == Rollen.ROL_HWL:
+        if self.rol_nu == Rol.ROL_HWL:
             # TODO: deze terug verwijzing klopt niet helemaal meer. Zou Beheer Vereniging kunnen zijn als we een nieuw kaartje maken om de planning in te zien
             comp_url = reverse('Competitie:overzicht', kwargs={'comp_pk_of_seizoen': comp.maak_seizoen_url()})
         else:
@@ -628,7 +628,7 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
             raise Http404('Ronde niet gevonden')
 
         # alleen de RCL mag een wedstrijd toevoegen
-        if self.rol_nu != Rollen.ROL_RCL:
+        if self.rol_nu != Rol.ROL_RCL:
             raise PermissionDenied('Niet de beheerder')
 
         if request.POST.get('verwijder_ronde', None):
@@ -748,7 +748,7 @@ class RegioRondePlanningMethode1View(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu = rol_get_huidige(self.request)
-        return self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL)
+        return self.rol_nu in (Rol.ROL_BB, Rol.ROL_BKO, Rol.ROL_RKO, Rol.ROL_RCL, Rol.ROL_HWL)
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -779,7 +779,7 @@ class RegioRondePlanningMethode1View(UserPassesTestMixin, TemplateView):
         # for
 
         rol_nu = rol_get_huidige(self.request)
-        if rol_nu == Rollen.ROL_RCL:
+        if rol_nu == Rol.ROL_RCL:
             context['url_nieuwe_wedstrijd'] = reverse('CompLaagRegio:regio-methode1-planning',
                                                       kwargs={'ronde_pk': ronde.pk})
 
@@ -789,12 +789,12 @@ class RegioRondePlanningMethode1View(UserPassesTestMixin, TemplateView):
                                                kwargs={'match_pk': wedstrijd.pk})
             # for
 
-        if self.rol_nu != Rollen.ROL_RCL:
+        if self.rol_nu != Rol.ROL_RCL:
             context['readonly'] = True
 
         comp = ronde.regiocompetitie.competitie
 
-        if self.rol_nu == Rollen.ROL_HWL:
+        if self.rol_nu == Rol.ROL_HWL:
             # TODO: deze terug verwijzing klopt niet helemaal meer. Zou Beheer Vereniging kunnen zijn als we een nieuw kaartje maken om de planning in te zien
             comp_url = reverse('Competitie:overzicht', kwargs={'comp_pk_of_seizoen': comp.maak_seizoen_url()})
         else:
@@ -832,7 +832,7 @@ class RegioRondePlanningMethode1View(UserPassesTestMixin, TemplateView):
             raise Http404('Ronde niet gevonden')
 
         # alleen de RCL mag een wedstrijd toevoegen
-        if self.rol_nu != Rollen.ROL_RCL:
+        if self.rol_nu != Rol.ROL_RCL:
             raise PermissionDenied('Niet de beheerder')
 
         # voeg een wedstrijd toe
@@ -873,7 +873,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
-        return rol_nu == Rollen.ROL_RCL
+        return rol_nu == Rol.ROL_RCL
 
     @staticmethod
     def _get_wedstrijdklassen(deelcomp, match):
@@ -1302,7 +1302,7 @@ class VerwijderWedstrijdView(UserPassesTestMixin, View):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu == Rollen.ROL_RCL
+        return self.rol_nu == Rol.ROL_RCL
 
     def post(self, request, *args, **kwargs):
         """ Deze functie wordt aangeroepen als de knop 'Verwijder' gebruikt wordt
@@ -1362,7 +1362,7 @@ class AfsluitenRegiocompView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu == Rollen.ROL_RCL
+        return self.rol_nu == Rol.ROL_RCL
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """

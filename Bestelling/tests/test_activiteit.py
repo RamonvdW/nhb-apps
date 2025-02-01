@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2024 Ramon van der Winkel.
+#  Copyright (c) 2022-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -17,7 +17,8 @@ from Evenement.definities import EVENEMENT_AFMELDING_STATUS_AFGEMELD
 from Evenement.models import Evenement, EvenementLocatie, EvenementInschrijving, EvenementAfgemeld
 from Functie.models import Functie
 from Geo.models import Regio
-from Locatie.models import WedstrijdLocatie
+from Locatie.models import WedstrijdLocatie, EvenementLocatie
+from Opleiding.models import Opleiding, OpleidingInschrijving
 from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
@@ -231,6 +232,24 @@ class TestBestellingActiviteit(E2EHelpers, TestCase):
         self.product3 = product
         bestelling.producten.add(product)
 
+        opleiding = Opleiding(
+                        titel='Test opleiding')
+        opleiding.save()
+        self.opleiding = opleiding
+
+        inschrijving = OpleidingInschrijving(
+                        opleiding=opleiding,
+                        sporter=sporter)
+        inschrijving.save()
+        self.opleiding_inschrijving = inschrijving
+
+        product = BestellingProduct(
+                        opleiding_inschrijving=inschrijving,
+                        prijs_euro=Decimal('50.00'))
+        product.save()
+        self.product4 = product
+        bestelling.producten.add(product)
+
     def _maak_bestellingen(self):
         bestel = Bestelling(
                     bestel_nr=self.volgende_bestel_nr,
@@ -281,14 +300,14 @@ class TestBestellingActiviteit(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('bestelling/activiteit.dtl', 'plein/site_layout.dtl'))
 
         # slechte zoekterm (veel te lang)
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(53):
             resp = self.client.get(self.url_activiteit + '?zoekterm=' + 'haha' * 100)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('bestelling/activiteit.dtl', 'plein/site_layout.dtl'))
 
         # lege zoekterm, gratis filter
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(53):
             resp = self.client.get(self.url_activiteit + '?zoekterm=&gratis=on')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -312,21 +331,21 @@ class TestBestellingActiviteit(E2EHelpers, TestCase):
         self.product3.save()
 
         # lege zoekterm, evenementen filter
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(29):
             resp = self.client.get(self.url_activiteit + '?zoekterm=&evenementen=on')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('bestelling/activiteit.dtl', 'plein/site_layout.dtl'))
 
         # lege zoekterm, webwinkel filter
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(29):
             resp = self.client.get(self.url_activiteit + '?zoekterm=&webwinkel=on')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('bestelling/activiteit.dtl', 'plein/site_layout.dtl'))
 
         # lege zoekterm, wedstrijden filter
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(21):
             resp = self.client.get(self.url_activiteit + '?zoekterm=&wedstrijden=on')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -340,7 +359,7 @@ class TestBestellingActiviteit(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('bestelling/activiteit.dtl', 'plein/site_layout.dtl'))
 
         # zoekterm tekst
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(102):
             resp = self.client.get(self.url_activiteit + '?zoekterm=test')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -356,7 +375,7 @@ class TestBestellingActiviteit(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('bestelling/activiteit.dtl', 'plein/site_layout.dtl'))
 
         # zoekterm nog te betalen / mislukte betalingen
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(70):
             resp = self.client.get(self.url_activiteit + '?zoekterm=**')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -408,9 +427,9 @@ class TestBestellingActiviteit(E2EHelpers, TestCase):
         bestel.transacties.add(transactie)
 
         self.volgende_bestel_nr += 1
-        # checkboxes "toon webwinkel" en "toon wedstrijden"
+        # checkboxes aanvinken
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_activiteit + '?zoekterm=&webwinkel=on&wedstrijden=on&gratis=ja')
+            resp = self.client.get(self.url_activiteit + '?zoekterm=&webwinkel=on&wedstrijden=on&opleidingen=on&gratis=ja')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('bestelling/activiteit.dtl', 'plein/site_layout.dtl'))

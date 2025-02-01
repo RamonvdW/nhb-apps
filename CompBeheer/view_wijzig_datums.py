@@ -10,7 +10,7 @@ from django.views.generic import TemplateView
 from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Competitie.models import Competitie
-from Functie.definities import Rollen
+from Functie.definities import Rol
 from Functie.rol import rol_get_huidige
 import datetime
 
@@ -30,7 +30,7 @@ class WijzigDatumsView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
-        return rol_nu == Rollen.ROL_BB
+        return rol_nu == Rol.ROL_BB
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """

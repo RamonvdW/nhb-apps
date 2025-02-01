@@ -10,7 +10,7 @@ from django.core.exceptions import PermissionDenied
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
-from Functie.definities import Rollen
+from Functie.definities import Rol
 from Functie.models import Functie
 from Functie.rol import rol_get_huidige_functie
 from Locatie.definities import BAAN_TYPE_BUITEN, BAAN_TYPE_EXTERN, BAANTYPE2STR
@@ -39,11 +39,11 @@ class VerenigingAccommodatieDetailsView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.functie_nu and self.rol_nu in (Rollen.ROL_HWL, Rollen.ROL_WL, Rollen.ROL_SEC)
+        return self.functie_nu and self.rol_nu in (Rol.ROL_HWL, Rol.ROL_WL, Rol.ROL_SEC)
 
     def _mag_wijzigen(self, ver):
         """ Controleer of de huidige rol de instellingen van de accommodatie mag wijzigen """
-        if self.rol_nu in (Rollen.ROL_HWL, Rollen.ROL_SEC):
+        if self.rol_nu in (Rol.ROL_HWL, Rol.ROL_SEC):
             # HWL mag van zijn eigen vereniging wijzigen
             if self.functie_nu.vereniging == ver:
                 return True

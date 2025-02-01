@@ -11,7 +11,7 @@ from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
 from Competitie.models import RegiocompetitieSporterBoog
-from Functie.definities import Rollen
+from Functie.definities import Rol
 from Functie.rol import rol_get_huidige
 from Sporter.operations import get_sporter
 
@@ -26,7 +26,7 @@ class SporterVoorkeurRkView(UserPassesTestMixin, TemplateView):
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        return rol_get_huidige(self.request) == Rollen.ROL_SPORTER
+        return rol_get_huidige(self.request) == Rol.ROL_SPORTER
 
     @staticmethod
     def post(request, *args, **kwargs):

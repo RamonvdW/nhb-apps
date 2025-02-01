@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023 Ramon van der Winkel.
+#  Copyright (c) 2023-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -8,9 +8,8 @@ from django.urls import reverse
 from django.conf import settings
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Functie.definities import Rollen
-from Functie.rol import rol_get_huidige
-from Functie.scheids import gebruiker_is_scheids
+from Functie.definities import Rol
+from Functie.rol import rol_get_huidige, gebruiker_is_scheids
 
 TEMPLATE_OVERZICHT = 'scheidsrechter/overzicht.dtl'
 
@@ -31,9 +30,9 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu = rol_get_huidige(self.request)
-        if self.rol_nu == Rollen.ROL_CS:
+        if self.rol_nu == Rol.ROL_CS:
             return True
-        if self.rol_nu == Rollen.ROL_SPORTER and gebruiker_is_scheids(self.request):
+        if self.rol_nu == Rol.ROL_SPORTER and gebruiker_is_scheids(self.request):
             return True
         return False
 
@@ -41,7 +40,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        if self.rol_nu == Rollen.ROL_SPORTER:
+        if self.rol_nu == Rol.ROL_SPORTER:
             context['url_korps'] = reverse('Scheidsrechter:korps')
             context['tekst_korps'] = "Bekijk de lijst van de scheidsrechters."
 

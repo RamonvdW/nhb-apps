@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2024 Ramon van der Winkel.
+#  Copyright (c) 2021-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -18,7 +18,7 @@ import datetime
 
 class TestKalender(E2EHelpers, TestCase):
 
-    """ tests voor de Kalender applicatie. module Manager """
+    """ tests voor de Kalender applicatie, landing page """
 
     url_kalender = '/kalender/'
     url_kalender_manager = '/wedstrijden/manager/'

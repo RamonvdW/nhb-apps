@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2024 Ramon van der Winkel.
+#  Copyright (c) 2024-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -14,7 +14,7 @@ from Betaal.format import format_bedrag_euro
 from Evenement.definities import (EVENEMENT_INSCHRIJVING_STATUS_TO_SHORT_STR, EVENEMENT_AFMELDING_STATUS_TO_SHORT_STR,
                                   EVENEMENT_INSCHRIJVING_STATUS_DEFINITIEF)
 from Evenement.models import Evenement, EvenementInschrijving, EvenementAfgemeld
-from Functie.definities import Rollen
+from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
 from decimal import Decimal
 from codecs import BOM_UTF8
@@ -54,7 +54,7 @@ class EvenementAanmeldingenView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu in (Rollen.ROL_HWL, Rollen.ROL_SEC)
+        return self.rol_nu in (Rol.ROL_HWL, Rol.ROL_SEC)
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -100,7 +100,7 @@ class EvenementAanmeldingenView(UserPassesTestMixin, TemplateView):
             inschrijving.sporter_str = sporter.lid_nr_en_volledige_naam()
 
             inschrijving.url_details = reverse('Evenement:details-aanmelding',
-                                             kwargs={'inschrijving_pk': inschrijving.pk})
+                                               kwargs={'inschrijving_pk': inschrijving.pk})
 
             totaal_ontvangen_euro += inschrijving.bedrag_ontvangen
         # for
@@ -125,7 +125,7 @@ class EvenementAanmeldingenView(UserPassesTestMixin, TemplateView):
             afmelding.sporter_str = sporter.lid_nr_en_volledige_naam()
 
             afmelding.url_details = reverse('Evenement:details-afmelding',
-                                             kwargs={'afmelding_pk': afmelding.pk})
+                                            kwargs={'afmelding_pk': afmelding.pk})
 
             totaal_ontvangen_euro += afmelding.bedrag_ontvangen
             totaal_retour_euro += afmelding.bedrag_retour
@@ -163,7 +163,7 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL)
+        return self.rol_nu in (Rol.ROL_SEC, Rol.ROL_HWL)
 
     @staticmethod
     def _output_aanmeldingen(writer, evenement):
@@ -217,17 +217,16 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
     @staticmethod
     def _output_afmeldingen(writer, evenement):
         afmeldingen = (EvenementAfgemeld
-                        .objects
-                        .filter(evenement=evenement)
-                        .select_related('sporter',
-                                        'sporter__bij_vereniging')
-                        .order_by('nummer'))
+                       .objects
+                       .filter(evenement=evenement)
+                       .select_related('sporter',
+                                       'sporter__bij_vereniging')
+                       .order_by('nummer'))
 
         writer.writerow(['Reserveringsnummer', 'Aangemeld op', 'Afgemeld op', 'Status',
                          'Bestelnummer', 'Prijs', 'Ontvangen', 'Retour',
                          'Lid nr', 'Sporter', 'E-mailadres', 'Ver nr', 'Vereniging'])
 
-        output = list()
         for afgemeld in afmeldingen:
             sporter = afgemeld.sporter
             reserveringsnummer = afgemeld.nummer + settings.TICKET_NUMMER_START__EVENEMENT
@@ -309,7 +308,7 @@ class EvenementDetailsAanmeldingView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu == Rollen.ROL_HWL
+        return self.rol_nu == Rol.ROL_HWL
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -384,7 +383,7 @@ class EvenementDetailsAfmeldingView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu == Rollen.ROL_HWL
+        return self.rol_nu == Rol.ROL_HWL
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -428,7 +427,7 @@ class EvenementDetailsAfmeldingView(UserPassesTestMixin, TemplateView):
             (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
             (reverse('Evenement:vereniging'), 'Evenementen'),
             (url_aanmeldingen, 'Aanmeldingen'),
-            (None, 'Details aanmelding')
+            (None, 'Details afmelding')
         )
 
         return context

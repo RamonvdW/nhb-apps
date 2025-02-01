@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023 Ramon van der Winkel.
+#  Copyright (c) 2023-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -8,11 +8,10 @@ from django.urls import reverse
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.definities import SCHEIDS_NIET
-from Functie.definities import Rollen
-from Functie.rol import rol_get_huidige
-from Functie.scheids import gebruiker_is_scheids
-from Opleidingen.definities import CODE2SCHEIDS
-from Opleidingen.models import OpleidingDiploma
+from Functie.definities import Rol
+from Functie.rol import rol_get_huidige, gebruiker_is_scheids
+from Opleiding.definities import CODE2SCHEIDS
+from Opleiding.models import OpleidingDiploma
 from Scheidsrechter.definities import SCHEIDS2LEVEL
 from Sporter.models import SporterVoorkeuren, Sporter
 
@@ -33,9 +32,9 @@ class KorpsView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
-        if rol_nu == Rollen.ROL_CS:
+        if rol_nu == Rol.ROL_CS:
             return True
-        if rol_nu == Rollen.ROL_SPORTER and gebruiker_is_scheids(self.request):
+        if rol_nu == Rol.ROL_SPORTER and gebruiker_is_scheids(self.request):
             return True
         return False
 
@@ -99,7 +98,7 @@ class KorpsCSView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
-        if rol_nu == Rollen.ROL_CS:
+        if rol_nu == Rol.ROL_CS:
             return True
         return False
 
@@ -192,7 +191,7 @@ class KorpsCSAlleEmailsView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
-        if rol_nu == Rollen.ROL_CS:
+        if rol_nu == Rol.ROL_CS:
             return True
         return False
 

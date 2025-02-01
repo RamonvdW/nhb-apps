@@ -1,0 +1,141 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2025 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+{% load overig_filters %}   <!-- wbr_email en wbr_www filters -->
+
+{% block title %}Opleiding: {{ opleiding.titel }} in periode {{ opleiding.periode_str }}{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Opleiding details</h3>
+        </div>
+    </div>
+
+    {% if opleiding.is_geannuleerd %}
+        <!-- rood bordje -->
+        <div class="row">
+            <div style="padding:10px">
+                <div class="col s12 m8 offset-m2 sv-rood white-text z-depth-3 center">
+                    <p>Let op: deze opleiding is GEANNULEERD</p>
+                </div>
+            </div>
+        </div>
+        <p class="sv-rood-text">Let op: GEANNULEERD</p>
+    {% endif %}
+
+    <!-- blauwe balk met informatie tabel -->
+    <div class="row-sv-blauw">
+        <div class="col s12 l10 offset-l1 xl8 offset-xl2">
+            <table class="sv-kader">
+
+                <tr>
+                    <td colspan="2" class="center sv-blauw-text">
+                        <h6>Informatie</h6>
+                    </td>
+                </tr>
+
+                <tr>
+                    <th>Titel</th>
+                    <td>{{ opleiding.titel }}</td>
+                </tr>
+
+                <tr>
+                    <th>Periode</th>
+                    <td>{{ opleiding.periode_str }}</td>
+                </tr>
+
+                <tr>
+                    <th>Aantal bijeenkomsten</th>
+                    <td>{{ opleiding.aantal_momenten }}</td>
+                </tr>
+
+                <tr>
+                    <th>Aantal uren totaal</th>
+                    <td>{{ opleiding.aantal_uren }}</td>
+                </tr>
+
+                <tr>
+                    <th>Beschrijving</th>
+                    <td>{{ opleiding.beschrijving|linebreaksbr }}</td>
+                </tr>
+
+                <tr>
+                    <th>Ingangseisen</th>
+                    <td>
+                        {% if opleiding.eis_instaptoets %}
+                            <span>Instaptoets gehaald, maximaal 1 jaar oud.</span>
+                            {% if opleiding.ingangseisen %}
+                                <br>
+                                <br>
+                                <span>{{ opleiding.ingangseisen|linebreaksbr }}</span>
+                            {% endif %}
+                        {% else %}
+                            <span>{{ opleiding.ingangseisen|linebreaksbr }}</span>
+                        {% endif %}
+                    </td>
+                </tr>
+
+                <tr>
+                    <th>Leeftijdsgrens</th>
+                    <td>
+                        {% if opleiding.leeftijd_min > 0 %}<span>Minimaal {{ opleiding.leeftijd_min }} jaar oud</span>{% endif %}
+                        {% if opleiding.leeftijd_max > 0 %}<span>Maximaal {{ opleiding.leeftijd_max }} jaar oud</span>{% endif %}
+                    </td>
+                </tr>
+
+                <tr>
+                    <th>Kosten</th>
+                    <td>{{ opleiding.kosten_str }}</td>
+                </tr>
+
+            </table>
+
+        </div>
+    </div>
+
+
+    {% if toon_inschrijven %}
+
+        <!-- witruimte -->
+        <div class="row center">
+            <div class="col s12">
+                <h4 id="inschrijven">Inschrijven</h4>
+
+                {% if hint_inloggen %}
+                    <div style="padding:10px">
+                        <div class="col s12 m10 offset-m1 l8 offset-l2 xl6 offset-xl3 sv-rood white-text z-depth-3 center">
+                            <p>Om in te schrijven op deze opleiding moet je een account aanmaken en inloggen</p>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- blauwe balk met kaartjes -->
+        <div class="row-sv-blauw">
+            <div class="col s12">
+
+                {% if kan_aanmelden %}
+                    <!-- inschrijven sporter -->
+                    {% include 'plein/card_icon.dtl' with title="Sporter" text="Aanmelden en betalen voor jezelf." icon="person" url=url_inschrijven_sporter %}
+                {% endif %}
+
+                {% if hint_inloggen %}
+                    {% include 'plein/card_niet-beschikbaar.dtl' with waarom="Eerst inloggen" title="Sporter" text="Aanmelden en betalen voor jezelf." icon="person" %}
+                {% endif %}
+
+            </div>
+        </div>
+
+    {% endif %}
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="opleidingen-details" %}
+
+{% endblock %}

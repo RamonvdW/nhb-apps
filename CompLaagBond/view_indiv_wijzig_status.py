@@ -6,20 +6,18 @@
 
 from django.conf import settings
 from django.urls import reverse
-from django.http import HttpResponseRedirect, HttpResponse, Http404
+from django.http import HttpResponseRedirect, Http404
 from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
 from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
 from Competitie.definities import (DEEL_BK,
-                                   DEELNAME_JA, DEELNAME_NEE,
                                    MUTATIE_KAMP_AFMELDEN_INDIV, MUTATIE_KAMP_AANMELDEN_INDIV)
-from Competitie.models import Kampioenschap, KampioenschapSporterBoog, CompetitieMutatie
-from Functie.definities import Rollen
+from Competitie.models import KampioenschapSporterBoog, CompetitieMutatie
+from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie, rol_get_huidige
 from Overig.background_sync import BackgroundSync
-from Sporter.models import SporterVoorkeuren
 from Sporter.operations import get_sporter
 import time
 
@@ -45,7 +43,7 @@ class WijzigStatusBkDeelnemerView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu == Rollen.ROL_BKO
+        return self.rol_nu == Rol.ROL_BKO
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -171,7 +169,7 @@ class SporterWijzigStatusBkDeelnameView(UserPassesTestMixin, TemplateView):
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        return rol_get_huidige(self.request) == Rollen.ROL_SPORTER
+        return rol_get_huidige(self.request) == Rol.ROL_SPORTER
 
     @staticmethod
     def get(request, *args, **kwargs):

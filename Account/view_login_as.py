@@ -7,18 +7,14 @@
 from django.shortcuts import render
 from django.urls import reverse
 from django.http import Http404
-from django.contrib.auth import login, logout
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.views.generic import ListView
 from django.db.models import Q
 from django.core.exceptions import PermissionDenied
 from Account.forms import ZoekAccountForm, KiesAccountForm
 from Account.models import Account, get_account
-from Account.operations.otp import otp_zet_controle_gelukt, otp_zet_controle_niet_gelukt
-from Account.view_login import account_plugins_login_gate
-from Functie.rol import rol_bepaal_beschikbare_rollen
+from Account.operations.auto_login import auto_login_as
 from Logboek.models import schrijf_in_logboek
-from Overig.helpers import get_safe_from_ip
 from TijdelijkeCodes.definities import RECEIVER_ACCOUNT_WISSEL
 from TijdelijkeCodes.operations import set_tijdelijke_codes_receiver, maak_tijdelijke_code_accountwissel
 import logging
@@ -30,62 +26,19 @@ TEMPLATE_LOGIN_AS_GO = 'account/login-as-go.dtl'
 my_logger = logging.getLogger('MH.Account')
 
 
-def receiver_account_wissel(request, account):
-    """ Met deze functie kan een geautoriseerd persoon inloggen op de site als een andere gebruiker.
-            obj is een Account object.
+def receiver_account_wissel(request, account: Account):
+    """ Met deze functie wordt vanuit een POST context aangeroepen
+        en kan een geautoriseerd persoon inloggen op de site als een andere gebruiker.
+            account is een Account object.
         We moeten een url teruggeven waar een http-redirect naar gedaan kan worden
         of een HttpResponse object.
     """
-    old_last_login = account.last_login
 
-    # integratie met de authenticatie laag van Django
-    logout(request)             # einde oude sessie
-    login(request, account)     # maakt nieuwe sessie
+    url_or_response = auto_login_as(request, account)
+    if not url_or_response:
+        url_or_response = reverse('Plein:plein')
 
-    from_ip = get_safe_from_ip(request)
-    my_logger.info('%s LOGIN automatische inlog met account %s' % (from_ip, repr(account.username)))
-
-    for _, func, skip in account_plugins_login_gate:
-        if not skip:
-            http_resp = func(request, from_ip, account)
-            if http_resp:
-                # plugin has decided that the user may not login
-                # and has generated/rendered an HttpResponse that we cannot handle here
-
-                # integratie met de authenticatie laag van Django
-                # dit wist ook de session data gekoppeld aan het cookie van de gebruiker
-                logout(request)
-
-                return http_resp
-    # for
-
-    # track het session_id in de log zodat we deze kunnen koppelen aan de webserver logs
-    session_id = request.session.session_key
-    my_logger.info('Account %s has SESSION %s' % (repr(account.username), repr(session_id)))
-
-    if account.otp_is_actief:
-        # fake de OTP passage
-        otp_zet_controle_gelukt(request)
-    else:
-        otp_zet_controle_niet_gelukt(request)
-
-    # herstel de last_login van de echte gebruiker
-    account.last_login = old_last_login
-    account.save(update_fields=['last_login'])
-
-    # zorg dat de session-cookie snel verloopt --> nergens voor nodig
-    # request.session.set_expiry(0)
-
-    # schrijf in het logboek
-    schrijf_in_logboek(account=None,
-                       gebruikte_functie="Inloggen (code)",
-                       activiteit="Automatische inlog als gebruiker %s vanaf IP %s" % (repr(account.username),
-                                                                                       repr(from_ip)))
-
-    # zorg dat de rollen meteen beschikbaar zijn
-    rol_bepaal_beschikbare_rollen(request, account)
-
-    return reverse('Plein:plein')
+    return url_or_response
 
 
 set_tijdelijke_codes_receiver(RECEIVER_ACCOUNT_WISSEL, receiver_account_wissel)
@@ -180,7 +133,7 @@ class LoginAsZoekView(UserPassesTestMixin, ListView):
         context = {'account': account}
 
         # schrijf de intentie in het logboek
-        schrijf_in_logboek(account=self.request.user,
+        schrijf_in_logboek(account=get_account(self.request),
                            gebruikte_functie="Inloggen",
                            activiteit="Wissel naar account %s" % repr(account.username))
 

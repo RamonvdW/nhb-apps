@@ -6,7 +6,8 @@
 
 from django.utils import timezone
 from datetime import timedelta
-from Account.models import get_account
+from Account.models import get_account, Account
+from Account.operations.session_vars import zet_sessionvar_if_changed
 from Bestelling.models import BestellingMandje
 
 
@@ -29,10 +30,11 @@ def cached_aantal_in_mandje_get(request):
     return aantal
 
 
-def mandje_tel_inhoud(request):
+def mandje_tel_inhoud(request, account: Account | None):
     """ tel het aantal producten in het mandje en cache het resultaat in een sessie variabele """
 
-    account = get_account(request)
+    if not account:
+        account = get_account(request)
     try:
         mandje = (BestellingMandje
                   .objects
@@ -44,11 +46,11 @@ def mandje_tel_inhoud(request):
     else:
         aantal = mandje.producten.count()
 
-    request.session[SESSIONVAR_MANDJE_INHOUD_AANTAL] = aantal
+    zet_sessionvar_if_changed(request, SESSIONVAR_MANDJE_INHOUD_AANTAL, aantal)
 
     next_eval = timezone.now() + timedelta(seconds=60 * MANDJE_EVAL_INTERVAL_MINUTES)
     eval_after = str(next_eval.timestamp())     # number of seconds since 1-1-1970
-    request.session[SESSIONVAR_MANDJE_EVAL_AFTER] = eval_after
+    zet_sessionvar_if_changed(request, SESSIONVAR_MANDJE_EVAL_AFTER, eval_after)
 
 
 def eval_mandje_inhoud(request):
@@ -71,6 +73,6 @@ def eval_mandje_inhoud(request):
 
     # update het aantal open taken in de sessie
     # en zet het volgende evaluatie moment
-    mandje_tel_inhoud(request)
+    mandje_tel_inhoud(request, None)
 
 # end of file

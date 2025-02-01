@@ -135,7 +135,8 @@ class WedstrijdDetailsView(TemplateView):
                             kwargs={'jaar': wedstrijd.datum_begin.year,
                                     'maand': MAAND2URL[wedstrijd.datum_begin.month],
                                     'soort': 'alle',
-                                    'bogen': 'auto'})
+                                    'bogen': 'auto',
+                                    'discipline': 'alle'})
         context['kruimels'] = (
             (url_terug, 'Wedstrijdkalender'),
             (None, 'Wedstrijd details'),

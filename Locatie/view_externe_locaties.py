@@ -11,7 +11,7 @@ from django.core.exceptions import PermissionDenied
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
-from Functie.definities import Rollen
+from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
 from Locatie.models import WedstrijdLocatie
 from Logboek.models import schrijf_in_logboek
@@ -39,9 +39,9 @@ class ExterneLocatiesView(UserPassesTestMixin, TemplateView):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
         # TODO: BB, BKO, RKO hebben geen link naar deze pagina. RCL alleen naar accommodatie pagina.
-        return self.rol_nu in (Rollen.ROL_BB,
-                               Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL,
-                               Rollen.ROL_HWL, Rollen.ROL_WL, Rollen.ROL_SEC)
+        return self.rol_nu in (Rol.ROL_BB,
+                               Rol.ROL_BKO, Rol.ROL_RKO, Rol.ROL_RCL,
+                               Rol.ROL_HWL, Rol.ROL_WL, Rol.ROL_SEC)
 
     def get_vereniging(self):
         try:
@@ -78,7 +78,7 @@ class ExterneLocatiesView(UserPassesTestMixin, TemplateView):
                                                  'locatie_pk': locatie.pk})
         # for
 
-        if self.rol_nu in (Rollen.ROL_HWL, Rollen.ROL_WL, Rollen.ROL_SEC):
+        if self.rol_nu in (Rol.ROL_HWL, Rol.ROL_WL, Rol.ROL_SEC):
             context['kruimels'] = (
                 (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
                 (None, 'Locaties')

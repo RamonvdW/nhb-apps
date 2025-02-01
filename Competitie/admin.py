@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -181,7 +181,7 @@ class RegiocompetitieSporterBoogAdmin(CreateOnlyAdmin):
                         'competitieleeftijd')
              }),
         ('Individueel',
-            {'fields': (('ag_voor_indiv',),
+            {'fields': ('ag_voor_indiv',
                         'indiv_klasse'),
              }),
         ('Team',

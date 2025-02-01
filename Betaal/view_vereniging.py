@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2023 Ramon van der Winkel.
+#  Copyright (c) 2022-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -9,7 +9,7 @@ from django.http import Http404, HttpResponseRedirect
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Betaal.models import BetaalInstellingenVereniging, MOLLIE_API_KEY_MAXLENGTH
-from Functie.definities import Rollen
+from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving
 from mollie.api.client import RequestSetupError, Client
 
@@ -32,7 +32,7 @@ class BetalingInstellingenView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.functie_nu and self.rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL)
+        return self.functie_nu and self.rol_nu in (Rol.ROL_SEC, Rol.ROL_HWL)
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """

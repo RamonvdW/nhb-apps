@@ -1,0 +1,66 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2025 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Statistiek instaptoets{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Statistiek instaptoets</h3>
+            <p>Je huidige rol is: <b>{{ huidige_rol }}</b></p>
+            <p>Hieronder is te zien welke vragen slecht beantwoord worden - deze staat als eerste in de tabel.</p>
+            <p>(gebaseerd op <b>{{ antwoord_count }} antwoorden</b>)</p>
+        </div>
+    </div>
+
+
+    <!-- blauwe balk met informatie in een tabel -->
+    <div class="row-sv-blauw">
+        <div class="col s12">
+            <table class="sv-kader">
+                <thead>
+                    <tr>
+                        <th style="width:50%">Vraag</th>
+                        <th>Antwoord</th>
+                        <th class="center">Aantal</th>
+                    </tr>
+                </thead>
+
+                {% for vraag in vragen %}
+                    <tr>
+                        <td rowspan="{{ vraag.rows }}">{{ vraag.vraag_tekst }}<br><br>(categorie: {{ vraag.categorie.beschrijving }})</td>
+                        <td>{{ vraag.antwoord_a }}</td>
+                        <td class="center {{ vraag.kleur_a }}">{{ vraag.count_a }}{% if vraag.count_a > 0 %}&nbsp;({{ vraag.perc_a }}%){% endif %}</td>
+                    </tr>
+                    <tr>
+                        <td>{{ vraag.antwoord_b }}</td>
+                        <td class="center {{ vraag.kleur_b }}">{{ vraag.count_b }}{% if vraag.count_b > 0 %}&nbsp;({{ vraag.perc_b }}%){% endif %}</td>
+                    </tr>
+                    {% if vraag.toon_c %}
+                        <tr>
+                            <td>{{ vraag.antwoord_c }}</td>
+                        <td class="center {{ vraag.kleur_c }}">{{ vraag.count_c }}{% if vraag.count_c > 0 %}&nbsp;({{ vraag.perc_c }}%){% endif %}</td>
+                        </tr>
+                    {% endif %}
+                    {% if vraag.toon_d %}
+                        <tr>
+                            <td>{{ vraag.antwoord_d }}</td>
+                        <td class="center {{ vraag.kleur_d }}">{{ vraag.count_d }}{% if vraag.count_d > 0 %}&nbsp;({{ vraag.perc_d }}%){% endif %}</td>
+                        </tr>
+                    {% endif %}
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="instaptoets-stats-antwoorden" %}
+
+{% endblock %}

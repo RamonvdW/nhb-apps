@@ -7,7 +7,7 @@
 from django.test import TestCase
 from BasisTypen.models import TeamType
 from Competitie.models import Competitie, Regiocompetitie, RegiocompetitieTeam
-from Functie.definities import Rollen
+from Functie.definities import Rol
 from Functie.tests.helpers import maak_functie
 from Geo.models import Regio
 from Sporter.models import Sporter
@@ -60,7 +60,7 @@ class TestCompetitieInfo(E2EHelpers, TestCase):
                         begin_jaar=2000)
         competitie.save()
 
-        functie = maak_functie('maak niet uit', Rollen.ROL_BB)
+        functie = maak_functie('maak niet uit', Rol.ROL_BB)
 
         regiocompetitie = Regiocompetitie(
                             competitie=competitie,
@@ -87,7 +87,7 @@ class TestCompetitieInfo(E2EHelpers, TestCase):
                         begin_jaar=2000)
         competitie.save()
 
-        functie = maak_functie('maak niet uit', Rollen.ROL_BB)
+        functie = maak_functie('maak niet uit', Rol.ROL_BB)
 
         regiocompetitie = Regiocompetitie(
                             competitie=competitie,

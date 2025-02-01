@@ -1,0 +1,55 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2025 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Aanpassingen{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Gevraagd aanpassingen</h3>
+            <p>Hieronder staan de gevraagde aanpassingen van persoonsgegevens.</p>
+            <p>Deze zijn bij inschrijven voor een opleiding doorgegeven en moeten eenmalig overgenomen worden in het CRM.</p>
+            <p>Na gelijktrekken in het CRM verdwijnen de regels automatisch uit deze lijst.</p>
+        </div>
+    </div>
+
+    <!-- blauwe balk met informatie in een tabel -->
+    <div class="row-sv-blauw">
+        <div class="col s12">
+            <table class="sv-kader">
+                <thead>
+                    <tr>
+                        <th class="hide-on-small-only">Doorgegeven</th>
+                        <th>Lid</th>
+                        <th>Geboorteplaats in CRM</th>
+                        <th>Geboorteplaats opgegeven</th>
+                    </tr>
+                </thead>
+
+                {% for inschrijving in inschrijvingen %}
+                    <tr>
+                        <td class="hide-on-small-only">{{ inschrijving.wanneer_aangemeld }}</td>
+                        <td>{{ inschrijving.sporter.lid_nr_en_volledige_naam }}</td>
+                        <td>{% if inschrijving.sporter.geboorteplaats %}{{ inschrijving.sporter.geboorteplaats }}{% else %}?{% endif %}</td>
+                        <td>{{ inschrijving.aanpassing_geboorteplaats }}</td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="4" class="center"><i>Er zijn geen aanpassingen om te verwerken</i></td>
+                    </tr>
+                {% endfor %}
+
+            </table>
+        </div>
+    </div>
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="opleiding-aanpassingen" %}
+
+{% endblock %}

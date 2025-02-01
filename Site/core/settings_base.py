@@ -61,7 +61,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2025-01-24'
+SITE_VERSIE = '2025-02-01'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -86,12 +86,14 @@ INSTALLED_APPS = [
     'Geo.apps.GeoConfig',
     'HistComp.apps.HistCompConfig',
     'ImportCRM.apps.ImportCRMConfig',
+    'Instaptoets.apps.InstaptoetsConfig',
     'Kalender.apps.KalenderConfig',
     'Locatie.apps.LocatieConfig',
     'Ledenvoordeel.apps.LedenvoordeelConfig',
     'Logboek.apps.LogboekConfig',
     'Mailer.apps.MailerConfig',
-    'Opleidingen.apps.OpleidingenConfig',
+    'Opleiding.apps.OpleidingConfig',
+    'Opleidingen.apps.OpleidingenConfig',       # TODO: verwijderen na uitrol v25
     'Overig.apps.OverigConfig',
     'Plein.apps.PleinConfig',
     'Records.apps.RecordsConfig',
@@ -131,6 +133,7 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',                    # security (cross-site request forgery)
     'django.contrib.messages.middleware.MessageMiddleware',         # mandatory for admin
     'django.middleware.clickjacking.XFrameOptionsMiddleware',       # security: ask browser to deny (i)frame embedding
+    'Account.middleware.HerhaalLoginOTP',                           # forceer nieuwe login en otp controles
 ]
 
 

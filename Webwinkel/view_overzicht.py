@@ -15,7 +15,7 @@ from Account.models import get_account
 from Bestelling.operations.mandje import mandje_tel_inhoud
 from Bestelling.operations.mutaties import bestel_mutatieverzoek_webwinkel_keuze
 from Betaal.format import format_bedrag_euro
-from Functie.definities import Rollen
+from Functie.definities import Rol
 from Functie.rol import rol_get_huidige
 from Webwinkel.models import WebwinkelProduct, WebwinkelKeuze
 
@@ -90,7 +90,7 @@ class OverzichtView(TemplateView):
             context['url_spelden'] = reverse('Spelden:begin')
             context['img_spelden'] = static('spelden/grootmeester.png')
 
-        if rol_get_huidige(self.request) == Rollen.ROL_SPORTER:
+        if rol_get_huidige(self.request) == Rol.ROL_SPORTER:
             context['menu_toon_mandje'] = True
 
         context['kruimels'] = (
@@ -295,7 +295,7 @@ class ProductView(TemplateView):
         snel = str(request.POST.get('snel', ''))[:1]
         bestel_mutatieverzoek_webwinkel_keuze(account_koper, keuze, snel == '1')
 
-        mandje_tel_inhoud(self.request)
+        mandje_tel_inhoud(self.request, account_koper)
 
         # geeft de gebruiker een pagina om naar het mandje te gaan of verder te winkelen
         context = dict()

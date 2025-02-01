@@ -7,7 +7,7 @@
 from django.views.generic import TemplateView
 from django.urls import reverse
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Functie.definities import Rollen
+from Functie.definities import Rol
 from Functie.rol import rol_get_huidige
 from Webwinkel.models import WebwinkelProduct
 
@@ -28,7 +28,7 @@ class ManagerView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
-        return rol_nu == Rollen.ROL_MWW
+        return rol_nu == Rol.ROL_MWW
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -57,7 +57,7 @@ class WebwinkelVoorraadView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
-        return rol_nu == Rollen.ROL_MWW
+        return rol_nu == Rol.ROL_MWW
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """

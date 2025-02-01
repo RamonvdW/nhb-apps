@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2023 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -11,7 +11,8 @@ from django.urls import Resolver404, reverse
 from django.http import Http404
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
-from Functie.definities import Rollen
+from Account.operations.session_vars import zet_sessionvar_if_changed
+from Functie.definities import Rol
 from Functie.rol import rol_get_huidige, rol_get_beschrijving
 from Feedback.forms import FeedbackForm
 from Feedback.models import Feedback
@@ -20,6 +21,12 @@ from Feedback.operations import store_feedback
 TEMPLATE_FEEDBACK_FORMULIER = 'feedback/formulier.dtl'
 TEMPLATE_FEEDBACK_BEDANKT = 'feedback/bedankt.dtl'
 TEMPLATE_FEEDBACK_INZICHT = 'feedback/inzicht.dtl'
+
+
+SESSIONVAR_FEEDBACK_OP_PAGINA = 'feedback_op_pagina'
+SESSIONVAR_FEEDBACK_VOLLEDIGE_URL = 'feedback_volledige_url'
+SESSIONVAR_FEEDBACK_GEBRUIKER = 'feedback_gebruiker'
+SESSIONVAR_FEEDBACK_IN_ROL = 'feedback_in_rol'
 
 
 class KrijgFeedbackView(UserPassesTestMixin, View):
@@ -49,13 +56,14 @@ class KrijgFeedbackView(UserPassesTestMixin, View):
 
         account = get_account(request)
         gebruiker_str = account.get_account_full_name()
-        rol_str = rol_get_beschrijving(request)
 
         # bewaar twee parameters in de sessie - deze blijven server-side
-        request.session['feedback_op_pagina'] = kwargs['op_pagina']
-        request.session['feedback_volledige_url'] = '/' + kwargs['volledige_url'] + '/'
-        request.session['feedback_gebruiker'] = gebruiker_str
-        request.session['feedback_in_rol'] = rol_str
+        # dit voorkomt ook lelijke URLs
+        # TODO: sessie variabelen zetten tijdens een GET?!
+        zet_sessionvar_if_changed(request, SESSIONVAR_FEEDBACK_OP_PAGINA, kwargs['op_pagina'])
+        zet_sessionvar_if_changed(request, SESSIONVAR_FEEDBACK_VOLLEDIGE_URL, '/%s/' % kwargs['volledige_url'])
+        zet_sessionvar_if_changed(request, SESSIONVAR_FEEDBACK_GEBRUIKER, gebruiker_str)
+        zet_sessionvar_if_changed(request, SESSIONVAR_FEEDBACK_IN_ROL, rol_get_beschrijving(request))
 
         # geef het formulier aan de gebruiker om in te vullen
         form = FeedbackForm(initial={'bevinding': '6'})
@@ -80,10 +88,10 @@ class KrijgFeedbackView(UserPassesTestMixin, View):
         """
 
         try:
-            rol_str = request.session['feedback_in_rol']
-            op_pagina = request.session['feedback_op_pagina']
-            gebruiker_str = request.session['feedback_gebruiker']
-            volledige_url = request.session['feedback_volledige_url']
+            rol_str = request.session[SESSIONVAR_FEEDBACK_IN_ROL]
+            op_pagina = request.session[SESSIONVAR_FEEDBACK_OP_PAGINA]
+            gebruiker_str = request.session[SESSIONVAR_FEEDBACK_GEBRUIKER]
+            volledige_url = request.session[SESSIONVAR_FEEDBACK_VOLLEDIGE_URL]
         except KeyError:
             raise Http404('Verkeerd gebruik')
 
@@ -138,7 +146,7 @@ class InzichtView(UserPassesTestMixin, ListView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
-        return rol_nu in (Rollen.ROL_BB, Rollen.ROL_SUP)
+        return rol_nu in (Rol.ROL_BB, Rol.ROL_SUP)
 
     def get_queryset(self):
         """ called by the template system to get the queryset or list of objects for the template """

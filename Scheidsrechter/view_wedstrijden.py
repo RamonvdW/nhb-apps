@@ -13,9 +13,8 @@ from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
 from BasisTypen.definities import ORGANISATIE_IFAA
-from Functie.definities import Rollen
-from Functie.rol import rol_get_huidige, rol_get_huidige_functie
-from Functie.scheids import gebruiker_is_scheids
+from Functie.definities import Rol
+from Functie.rol import rol_get_huidige, rol_get_huidige_functie, gebruiker_is_scheids
 from Scheidsrechter.definities import (SCHEIDS_VERENIGING, SCHEIDS2LEVEL,
                                        BESCHIKBAAR_DENK, BESCHIKBAAR_NEE, BESCHIKBAAR_JA)
 from Scheidsrechter.models import WedstrijdDagScheidsrechters, ScheidsBeschikbaarheid
@@ -50,10 +49,10 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
-        if rol_nu == Rollen.ROL_CS:
+        if rol_nu == Rol.ROL_CS:
             self.is_cs = True
             return True
-        if rol_nu == Rollen.ROL_SPORTER and gebruiker_is_scheids(self.request):
+        if rol_nu == Rol.ROL_SPORTER and gebruiker_is_scheids(self.request):
             return True
         return False
 
@@ -136,7 +135,7 @@ class WedstrijdDetailsView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu = rol_get_huidige(self.request)
-        return self.rol_nu == Rollen.ROL_SPORTER and gebruiker_is_scheids(self.request)
+        return self.rol_nu == Rol.ROL_SPORTER and gebruiker_is_scheids(self.request)
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -263,7 +262,7 @@ class WedstrijdDetailsCSView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu = rol_get_huidige(self.request)
-        return self.rol_nu == Rollen.ROL_CS
+        return self.rol_nu == Rol.ROL_CS
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -622,7 +621,7 @@ class WedstrijdHWLContactView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu == Rollen.ROL_HWL
+        return self.rol_nu == Rol.ROL_HWL
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """

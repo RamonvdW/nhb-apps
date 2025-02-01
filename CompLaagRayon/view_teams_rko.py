@@ -13,7 +13,7 @@ from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Competitie.definities import DEEL_RK, DEELNAME_JA, DEELNAME_NEE
 from Competitie.models import Competitie, CompetitieTeamKlasse, KampioenschapTeam, Kampioenschap
-from Functie.definities import Rollen
+from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
 from Geo.models import Rayon
 from Score.definities import AG_NUL
@@ -237,7 +237,7 @@ class RayonTeamsTemplateView(TemplateView):
             ag_str = "%05.1f" % (team.aanvangsgemiddelde * aantal_pijlen)
             team.ag_str = ag_str.replace('.', ',')
 
-            if comp.fase_teams <= 'K' and self.rol_nu == Rollen.ROL_RKO:
+            if comp.fase_teams <= 'K' and self.rol_nu == Rol.ROL_RKO:
                 team.url_aanpassen = reverse('CompLaagRayon:teams-rk-koppelen',
                                              kwargs={'rk_team_pk': team.pk})
 
@@ -274,7 +274,7 @@ class RayonTeamsRKOView(UserPassesTestMixin, RayonTeamsTemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu == Rollen.ROL_RKO
+        return self.rol_nu == Rol.ROL_RKO
 
 
 class RayonTeamsAlleView(UserPassesTestMixin, RayonTeamsTemplateView):
@@ -289,7 +289,7 @@ class RayonTeamsAlleView(UserPassesTestMixin, RayonTeamsTemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO)
+        return self.rol_nu in (Rol.ROL_BB, Rol.ROL_BKO)
 
 
 # end of file

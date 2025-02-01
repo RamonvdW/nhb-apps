@@ -4,7 +4,7 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.http import Http404, UnreadablePostError, HttpResponseRedirect, JsonResponse
+from django.http import Http404, HttpResponseRedirect
 from django.urls import reverse
 from django.utils import timezone
 from django.shortcuts import render
@@ -12,7 +12,7 @@ from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
 from Competitie.models import RegiocompetitieSporterBoog
-from Functie.definities import Rollen
+from Functie.definities import Rol
 from Functie.rol import rol_get_huidige
 from Kalender.view_maand import MAAND2URL
 from Wedstrijden.definities import (KWALIFICATIE_CHECK_NOG_DOEN, KWALIFICATIE_CHECK2STR,
@@ -41,7 +41,7 @@ class KwalificatieScoresOpgevenView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu = rol_get_huidige(self.request)
-        return self.rol_nu != Rollen.ROL_NONE
+        return self.rol_nu != Rol.ROL_NONE
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -131,7 +131,8 @@ class KwalificatieScoresOpgevenView(UserPassesTestMixin, TemplateView):
                                kwargs={'jaar': wedstrijd.datum_begin.year,
                                        'maand': MAAND2URL[wedstrijd.datum_begin.month],
                                        'soort': 'alle',
-                                       'bogen': 'auto'})
+                                       'bogen': 'auto',
+                                       'discipline': 'alle'})
 
         context['kruimels'] = (
             (url_kalender, 'Wedstrijdkalender'),
@@ -153,7 +154,8 @@ class KwalificatieScoresOpgevenView(UserPassesTestMixin, TemplateView):
                             kwargs={'jaar': wedstrijd.datum_begin.year,
                                     'maand': MAAND2URL[wedstrijd.datum_begin.month],
                                     'soort': 'alle',
-                                    'bogen': 'auto'})
+                                    'bogen': 'auto',
+                                    'discipline': 'alle'})
 
         url = reverse('Wedstrijden:wedstrijd-details', kwargs={'wedstrijd_pk': wedstrijd.pk})
 

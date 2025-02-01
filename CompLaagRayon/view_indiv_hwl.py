@@ -10,7 +10,7 @@ from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Competitie.definities import DEEL_RK, DEELNAME_JA, DEELNAME_NEE
 from Competitie.models import Kampioenschap, KampioenschapSporterBoog
-from Functie.definities import Rollen
+from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
 
 
@@ -35,7 +35,7 @@ class LijstRkSelectieView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu == Rollen.ROL_HWL
+        return self.rol_nu == Rol.ROL_HWL
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """

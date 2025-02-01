@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -18,7 +18,7 @@ from Competitie.models import (Competitie, CompetitieMutatie,
                                RegiocompetitieSporterBoog,
                                Kampioenschap, KampioenschapSporterBoog)
 from Competitie.operations import KlasseBepaler
-from Functie.definities import Rollen
+from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
 from Logboek.models import schrijf_in_logboek
 from Overig.background_sync import BackgroundSync
@@ -49,7 +49,7 @@ class ExtraDeelnemerView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu == Rollen.ROL_BKO
+        return self.rol_nu == Rol.ROL_BKO
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -137,7 +137,8 @@ class ExtraDeelnemerView(UserPassesTestMixin, TemplateView):
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
-            (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (reverse('CompBeheer:overzicht',
+                     kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
             (None, 'Extra deelnemer')
         )
 
@@ -262,7 +263,7 @@ class GeefBlancoResultaatView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu == Rollen.ROL_BKO
+        return self.rol_nu == Rol.ROL_BKO
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -329,7 +330,8 @@ class GeefBlancoResultaatView(UserPassesTestMixin, TemplateView):
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
-            (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (reverse('CompBeheer:overzicht',
+                     kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
             (None, 'Extra deelnemer')
         )
 

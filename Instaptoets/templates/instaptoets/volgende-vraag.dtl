@@ -1,0 +1,93 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2024-2025 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Instaptoets{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Instaptoets</h3>
+            <h6>Vraag {{ toets.vraag_nr }} van de {{ toets.aantal_vragen }}</h6>
+            {% if vraag.categorie %}
+                <p>Categorie: {{ vraag.categorie.beschrijving }}</p>
+            {% endif %}
+        </div>
+    </div>
+
+
+    <!-- blauw balk met wit informatie veld -->
+    <div class="row-sv-blauw">
+        <div class="col s12 l10 offset-l1 xl8 offset-xl2">
+            <div class="sv-kader" style="padding:10px">
+                <form action="{{ url_opslaan }}" method="post" onsubmit="document.getElementById('submit_knop1').disabled=true; document.getElementById('submit_knop2').disabled=true; return true;">
+                    {% csrf_token %}
+
+                    <div class="sv-kader left-align" style="padding:10px">
+                        <p>{{ vraag.vraag_tekst }}</p>
+
+                        <ul>
+                            <li style="margin-bottom:20px">
+                                <label class="black-text" for="id_a">
+                                    <input class="with-gap" type="radio" name="keuze" value="A" id="id_a">
+                                    <span>{{ vraag.antwoord_a }}</span>
+                                </label>
+                            </li>
+                            <li style="margin-bottom:20px">
+                                <label class="black-text" for="id_b">
+                                    <input class="with-gap" type="radio" name="keuze" value="B" id="id_b">
+                                    <span>{{ vraag.antwoord_b }}</span>
+                                </label>
+                            </li>
+                            {% if vraag.toon_c %}
+                                <li style="margin-bottom:20px">
+                                    <label class="black-text" for="id_c">
+                                        <input class="with-gap" type="radio" name="keuze" value="C" id="id_c">
+                                        <span>{{ vraag.antwoord_c }}</span>
+                                    </label>
+                                </li>
+                            {% endif %}
+                            {% if vraag.toon_d %}
+                                <li style="margin-bottom:20px">
+                                    <label class="black-text" for="id_d">
+                                        <input class="with-gap" type="radio" name="keuze" value="D" id="id_d">
+                                        <span>{{ vraag.antwoord_d }}</span>
+                                    </label>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </div>
+
+                    <!-- button -->
+                    <p>
+                        <button class="btn-sv-rood" id="submit_knop1" type="submit">Volgende vraag</button>
+                    </p>
+                </form>
+
+                {% comment %}
+                {% if url_overslaan %}
+                    <form action="{{ url_overslaan }}" method="post" onsubmit="document.getElementById('submit_knop2').disabled=true; document.getElementById('submit_knop2').disabled=true; return true;">
+                        {% csrf_token %}
+                        <input type="hidden" name="keuze" value="overslaan">
+
+                        <!-- floating right -->
+                        <p class="right-align">
+                            <button class="btn-sv-blauw" id="submit_knop2" type="submit">Overslaan</button>
+                        </p>
+                    </form>
+                {% endif %}
+                {% endcomment %}
+            </div>
+        </div>
+    </div>
+
+
+    {% include 'feedback/sidebar.dtl' with op_pagina=op_pagina %}
+
+{% endblock %}

@@ -15,7 +15,7 @@ from Competitie.definities import DEEL_RK, DEEL_BK, MUTATIE_KAMP_CUT, DEELNAME_N
 from Competitie.models import (CompetitieIndivKlasse, CompetitieTeamKlasse, CompetitieMatch, CompetitieMutatie,
                                Kampioenschap, KampioenschapSporterBoog, KampioenschapTeam,
                                KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet)
-from Functie.definities import Rollen
+from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
 from Locatie.models import WedstrijdLocatie
 from Logboek.models import schrijf_in_logboek
@@ -50,7 +50,7 @@ class PlanningView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO)
+        return self.rol_nu in (Rol.ROL_BB, Rol.ROL_BKO)
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -66,7 +66,7 @@ class PlanningView(UserPassesTestMixin, TemplateView):
         except (KeyError, Kampioenschap.DoesNotExist):
             raise Http404('Kampioenschap niet gevonden')
 
-        if self.rol_nu == Rollen.ROL_BKO:
+        if self.rol_nu == Rol.ROL_BKO:
             if deelkamp.competitie.afstand != self.functie_nu.comp_type:
                 raise Http404('Niet de beheerder')
 
@@ -194,7 +194,7 @@ class PlanningView(UserPassesTestMixin, TemplateView):
         if len(context['wkl_niet_gebruikt']) == 0:
             del context['wkl_niet_gebruikt']
 
-        if self.rol_nu == Rollen.ROL_BKO:
+        if self.rol_nu == Rol.ROL_BKO:
             context['url_nieuwe_wedstrijd'] = reverse('CompLaagBond:planning',
                                                       kwargs={'deelkamp_pk': deelkamp.pk})
 
@@ -236,7 +236,7 @@ class PlanningView(UserPassesTestMixin, TemplateView):
             raise Http404('Kampioenschap niet gevonden')
 
         # alleen de BKO mag de planning uitbreiden
-        if self.rol_nu != Rollen.ROL_BKO or deelkamp.competitie.afstand != self.functie_nu.comp_type:
+        if self.rol_nu != Rol.ROL_BKO or deelkamp.competitie.afstand != self.functie_nu.comp_type:
             raise Http404('Niet de beheerder')
 
         match = CompetitieMatch(
@@ -268,7 +268,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu == Rollen.ROL_BKO
+        return self.rol_nu == Rol.ROL_BKO
 
     @staticmethod
     def _get_wedstrijdklassen(deelkamp, match):
@@ -710,7 +710,7 @@ class WijzigLimietenView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu == Rollen.ROL_BKO
+        return self.rol_nu == Rol.ROL_BKO
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -1000,7 +1000,7 @@ class VerwijderWedstrijdView(UserPassesTestMixin, View):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu == Rollen.ROL_BKO
+        return self.rol_nu == Rol.ROL_BKO
 
     def post(self, request, *args, **kwargs):
         """ Deze functie wordt aangeroepen als de knop 'Verwijder' gebruikt wordt

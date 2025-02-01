@@ -1,0 +1,110 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2022-2025 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Opleidingen{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Opleidingen</h3>
+        </div>
+    </div>
+
+
+    {% if url_basiscursus %}
+
+        <!-- blauwe balk met kaartjes -->
+        <div class="row-sv-blauw">
+            <div class="col s12">
+
+                {% if url_vervolg_instaptoets %}
+                    {% include 'plein/card_icon.dtl' with title="Instaptoets" text="Ga verder met de online instaptoets." icon="login" url=url_vervolg_instaptoets %}
+                {% endif %}
+
+                {% if url_basiscursus %}
+                    {% include 'plein/card_icon.dtl' with title="Basiscursus" text="Informatie over de basiscursus." icon="school" url=url_basiscursus %}
+                {% endif %}
+
+            </div>
+        </div>
+
+    {% endif %}
+
+    <!-- blauwe balk met informatie in een tabel -->
+    <div class="row-sv-blauw">
+        <div class="col s12">
+            <table class="sv-kader">
+                <thead>
+                    <tr>
+                        <th class="center-align">Periode</th>
+                        <th>Titel</th>
+                        <th>Status</th>
+                        <th><!-- kolom voor de knoppen --></th>
+                    </tr>
+                </thead>
+
+                {% for opleiding in opleidingen %}
+                    <tr>
+                        <td class="center-align">{{ opleiding.periode_str }}</td>
+                        <td>{{ opleiding.titel }}</td>
+                        <td>{{ opleiding.status_str }}</td>
+                        <td class="center-align">
+                            {% if opleiding.url_details %}
+                                <a class="btn-sv-rood" href="{{ opleiding.url_details }}">
+                                    <i class="notranslate material-icons-round">play_arrow</i></a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="4" class="center">
+                            <i>Geen opleidingen gevonden</i>
+                        </td>
+                    </tr>
+                {% endfor %}
+
+            </table>
+        </div>
+    </div>
+
+
+    {% if diplomas %}
+        <!-- witruimte -->
+        <div class="row center">
+            <div class="col s12">
+                <h4>Jouw diploma's</h4>
+                <p>Deze staan geregistreerd bij de KHSN en zijn niet verlopen</p>
+            </div>
+        </div>
+
+        <!-- blauwe balk met informatie in tabel-vorm:  label - info -->
+        <div class="row-sv-blauw">
+            <div class="col s12 m10 offset-m1 l8 offset-l2">
+                <table class="sv-kader">
+                    <thead>
+                        <tr>
+                            <th class="center">Sinds</th>
+                            <th>Beschrijving</th>
+                        </tr>
+                    </thead>
+                    {% for diploma in diplomas %}
+                        <tr>
+                            <td class="center">{{ diploma.datum_begin }}</td>
+                            <td>{{ diploma.beschrijving }}</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
+    {% endif %}
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="opleidingen-overzicht" %}
+
+{% endblock %}

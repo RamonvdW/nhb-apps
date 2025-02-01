@@ -14,7 +14,7 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from Competitie.definities import (INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_2, TEAM_PUNTEN,
                                    TEAM_PUNTEN_MODEL_FORMULE1, TEAM_PUNTEN_MODEL_TWEE, TEAM_PUNTEN_MODEL_SOM_SCORES)
 from Competitie.models import Competitie, Regiocompetitie
-from Functie.definities import Rollen
+from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
 from types import SimpleNamespace
 import datetime
@@ -40,7 +40,7 @@ class RegioInstellingenView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu == Rollen.ROL_RCL
+        return self.rol_nu == Rol.ROL_RCL
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -210,7 +210,7 @@ class RegioInstellingenGlobaalView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL)
+        return self.rol_nu in (Rol.ROL_BB, Rol.ROL_BKO, Rol.ROL_RKO, Rol.ROL_RCL)
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -278,7 +278,7 @@ class RegioInstellingenGlobaalView(UserPassesTestMixin, TemplateView):
                 deelcomp.short_puntenmodel_str = '-'
                 deelcomp.puntenmodel_str = '-'
 
-            if self.rol_nu == Rollen.ROL_RKO and deelcomp.regio.rayon != self.functie_nu.rayon:
+            if self.rol_nu == Rol.ROL_RKO and deelcomp.regio.rayon != self.functie_nu.rayon:
                 deelcomp.lowlight = True
         # for
 

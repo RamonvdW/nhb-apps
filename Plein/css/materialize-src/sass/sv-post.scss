@@ -1,5 +1,5 @@
 
-// Copyright (c) 2020-2024 Ramon van der Winkel.
+// Copyright (c) 2020-2025 Ramon van der Winkel.
 // All rights reserved.
 // Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -663,39 +663,48 @@ input.table-filter {
     }
 }
 
-/* small: <=720 */
-@media only screen and (min-width: 721px) {
+/*
+    min-width: at least   >
+    max-width: less than  <
+
+    to avoid 1px gap, do  > px - 0.001
+ */
+
+@media #{$medium-and-up} {
+    // medium or more: is not small
     .hide-unless-small {
         display: none;
     }
 }
 
-/* medium: 720-1020 */
-@media only screen and (max-width : 720px) {
+@media #{$small-and-down} {
+    // small or less: is not medium
     .hide-unless-medium {
         display: none;
     }
 }
-@media only screen and (min-width: 1021px) {
+@media #{$large-and-up} {
+    // large or more: is not medium
     .hide-unless-medium {
         display: none;
     }
 }
 
-/* large: 1021-1350 */
-@media only screen and (max-width: 1020px) {
+@media #{$medium-and-down} {
+    // medium or less: is not large
     .hide-unless-large {
         display: none;
     }
 }
-@media only screen and (min-width: 1351px) {
+@media #{$extra-large-and-up} {
+    // xlarge or more: is not large
     .hide-unless-large {
         display: none;
     }
 }
 
-/* xlarge: >1330 */
-@media only screen and (max-width : 1350px) {
+@media #{$large-and-down} {
+    // large or less: is not xlarge
     .hide-unless-xlarge {
         display: none;
     }
