@@ -89,8 +89,8 @@ class ToetsAntwoord(models.Model):
 
     class Meta:
         """ meta data voor de admin interface """
-        verbose_name = "Antwoord"
-        verbose_name_plural = "Antwoorden"
+        verbose_name = "Toets antwoord"
+        verbose_name_plural = "Toets antwoorden"
 
     objects = models.Manager()      # for the editor only
 
@@ -126,9 +126,14 @@ class Instaptoets(models.Model):
 
     def __str__(self):
         """ Lever een tekstuele beschrijving van een database record, voor de admin interface """
-        return "%s [%s] %s/%s" % (localtime(self.opgestart).strftime('%Y-%m-%d %H:%M:%S'),
-                                  self.sporter.pk,
-                                  self.aantal_antwoorden, self.aantal_vragen)
+        msg = "%s [%s]" % (localtime(self.opgestart).strftime('%Y-%m-%d %H:%M:%S'), self.sporter.pk)
+        if self.is_afgerond:
+            msg += " geslaagd: " if self.geslaagd else " gezakt: "
+            msg += str(self.aantal_goed)
+        else:
+            msg += " nog niet af: %s" % self.aantal_antwoorden
+        msg += '/%s' % self.aantal_vragen
+        return msg
 
     class Meta:
         """ meta data voor de admin interface """
@@ -193,45 +198,6 @@ class Uitdaging(models.Model):
         """ meta data voor de admin interface """
         verbose_name = "Uitdaging"
         verbose_name_plural = "Uitdagingen"
-
-    objects = models.Manager()      # for the editor only
-
-
-class VoorstelVraag(models.Model):
-    """ Ingediend voorstel voor een nieuwe vraag """
-
-    # wanneer is dit voorstel aangemaakt
-    aangemaakt = models.DateTimeField(auto_now_add=True)
-
-    # wie heeft de vraag ingediend?
-    ingediend_door = models.ForeignKey(Sporter, on_delete=models.CASCADE)
-
-    # de tekst van de vraag
-    vraag_tekst = models.TextField(blank=True)
-
-    # de vier mogelijke antwoorden
-    antwoord_a = models.TextField(blank=True)
-    antwoord_b = models.TextField(blank=True)
-    antwoord_c = models.TextField(blank=True)
-    antwoord_d = models.TextField(blank=True)
-
-    # welk van de antwoorden is de juiste?
-    juiste_antwoord = models.CharField(default='A', max_length=1,
-                                       choices=(('A', 'A'), ('B', 'B'), ('C', 'C'), ('D', 'D')))
-
-    # geschiedenis
-    logboek = models.TextField(blank=True)
-
-    # TODO: status afhandelen aanvraag
-
-    def __str__(self):
-        """ Lever een tekstuele beschrijving van een database record, voor de admin interface """
-        return "[%s] %s.." % (self.pk, self.vraag_tekst[:60])
-
-    class Meta:
-        """ meta data voor de admin interface """
-        verbose_name = "VoorstelVraag"
-        verbose_name_plural = "VoorstelVragen"
 
     objects = models.Manager()      # for the editor only
 
