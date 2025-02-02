@@ -1377,6 +1377,7 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
         bestel_mutatieverzoek_webwinkel_keuze(self.account_admin, self.keuze, snel=True)
         # coverage: 2e verzoek voor dezelfde mutatie
         bestel_mutatieverzoek_webwinkel_keuze(self.account_admin, self.keuze, snel=True)
+        bestel_mutatieverzoek_inschrijven_evenement(self.account_admin, self.evenement_inschrijving, snel=True)
         self.verwerk_bestel_mutaties()
 
         # zet het mandje om in een bestelling
@@ -1390,6 +1391,11 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
         self.assertEqual(bestelling.status, BESTELLING_STATUS_NIEUW)
 
         MailQueue.objects.all().delete()
+
+        # trigger de corner-case waarbij een evenement inschrijving al definitief is
+        self.evenement_inschrijving.refresh_from_db()
+        self.evenement_inschrijving.status = EVENEMENT_INSCHRIJVING_STATUS_DEFINITIEF
+        self.evenement_inschrijving.save(update_fields=['status'])
 
         # annuleer de bestelling
         url = self.url_annuleer_bestelling % bestelling.bestel_nr

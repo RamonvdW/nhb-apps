@@ -103,7 +103,7 @@ def auto_login_lid_account_ww_vergeten(request, account: Account):
     first_url = None
     for _, func in account_plugins_post_login:
         url = func(request, account)
-        if url:
+        if first_url is None:               # pragma: no branch
             first_url = url
     # for
 

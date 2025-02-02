@@ -19,12 +19,12 @@ SESSIONVAR_ROL_HUIDIGE_FUNCTIE_PK = 'gebruiker_rol_functie_pk'
 
 
 def rol_zet_huidige_rol(request, rol: Rol):
-    if request.user.is_authenticated:
+    if request.user.is_authenticated:           # pragma: no branch
         zet_sessionvar_if_changed(request, SESSIONVAR_ROL_HUIDIGE, rol.value)
 
 
 def rol_zet_huidige_functie_pk(request, functie_pk: int | None):
-    if request.user.is_authenticated:
+    if request.user.is_authenticated:           # pragma: no branch
         zet_sessionvar_if_changed(request, SESSIONVAR_ROL_HUIDIGE_FUNCTIE_PK, functie_pk)
 
 

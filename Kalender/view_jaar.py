@@ -193,7 +193,7 @@ class KalenderJaarView(TemplateView):
         # for
 
         for evenement in evenementen:
-            if evenement.status == WEDSTRIJD_STATUS_GEANNULEERD:
+            if evenement.status == EVENEMENT_STATUS_GEANNULEERD:
                 evenement.titel = '[GEANNULEERD] ' + evenement.titel
             else:
                 evenement.url_details = reverse('Evenement:details',
@@ -311,6 +311,5 @@ class KalenderJaarView(TemplateView):
         self._maak_pagina(context, jaar, maand, gekozen_soort, gekozen_bogen, gekozen_discipline, zoekterm)
 
         return render(request, self.template_name, context)
-
 
 # end of file
