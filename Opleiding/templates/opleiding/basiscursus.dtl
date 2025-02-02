@@ -8,6 +8,11 @@
 
 {% block title %}Basiscursus{% endblock %}
 
+{% block extraheader %}
+    <meta name="description" content="Wil jij ons team van wedstrijdleiders en scheidsrechters komen versterken en daarmee een bijdrage leveren aan het succes van onze sport? Dan ben je hier op de juiste plek! De basiscursus is namelijk stap 1 op weg naar een carrière als wedstrijdleider en/of scheidsrechter in de handboogsport.">
+    <meta name="keyword" content="basiscursus, opleiding, handboogsport">
+{% endblock %}
+
 {% block pagina %}
 
     <!-- banner -->
@@ -58,61 +63,73 @@
         </div>
     </div>
 
+    {% if not toon_inschrijven %}
 
-    {% if toets_is_geldig %}
-        
         <!-- witruimte -->
         <div class="row center">
             <div class="col s12">
                 <h4 id="inschrijven">Inschrijven</h4>
-                <p>Volgens onze administratie heb je de instaptoets gehaald op {{ toets.afgerond|date:"j F Y" }}<br>Deze blijft nog {{ toets_geldig_dagen }} dagen geldig</p>
-            </div>
-        </div>
-
-        <!-- blauwe balk met kaartjes -->
-        <div class="row-sv-blauw">
-            <div class="col s12">
-                {% include 'plein/card_icon.dtl' with title="Inschrijven" text="Schrijf je in voor de basiscursus." icon="person" url=url_inschrijven %}
+                <p>Om in te schrijven moet je KHSN lid zijn, een account aanmaken en inloggen.</p>
             </div>
         </div>
 
     {% else %}
+        {% if toets_is_geldig %}
 
-        <!-- witruimte -->
-        <div class="row center">
-            <div class="col s12">
-                <h4>Instaptoets</h4>
-                    <p>Volgens onze administratie heb je deze nog niet gehaald.</p>
+            <!-- witruimte -->
+            <div class="row center">
+                <div class="col s12">
+                    <h4 id="inschrijven">Inschrijven</h4>
+                    <p>Volgens onze administratie heb je de instaptoets gehaald op {{ toets.afgerond|date:"j F Y" }}<br>Deze blijft nog {{ toets_geldig_dagen }} dagen geldig</p>
+                </div>
             </div>
-        </div>
 
-        <!-- blauwe balk met kaartjes -->
-        <div class="row-sv-blauw">
-            <div class="col s12">
-
-                {% if url_instaptoets %}
-                    {% include 'plein/card_icon.dtl' with title="Instaptoets" text="Maak de online instaptoets." icon="login" url=url_instaptoets %}
-                {% else %}
-                    {% include 'plein/card_icon_beschikbaar-vanaf.dtl' with title="Instaptoets" text="Maak de online instaptoets." icon="login" %}
-                {% endif %}
+            <!-- blauwe balk met kaartjes -->
+            <div class="row-sv-blauw">
+                <div class="col s12">
+                    {% include 'plein/card_icon.dtl' with title="Inschrijven" text="Schrijf je in voor de basiscursus." icon="person" url=url_inschrijven %}
+                </div>
             </div>
-        </div>
+
+        {% else %}
+
+            <!-- witruimte -->
+            <div class="row center">
+                <div class="col s12">
+                    <h4>Instaptoets</h4>
+                        <p>Volgens onze administratie heb je deze nog niet gehaald.</p>
+                </div>
+            </div>
+
+            <!-- blauwe balk met kaartjes -->
+            <div class="row-sv-blauw">
+                <div class="col s12">
+
+                    {% if url_instaptoets %}
+                        {% include 'plein/card_icon.dtl' with title="Instaptoets" text="Maak de online instaptoets." icon="login" url=url_instaptoets %}
+                    {% else %}
+                        {% include 'plein/card_icon_beschikbaar-vanaf.dtl' with title="Instaptoets" text="Maak de online instaptoets." icon="login" %}
+                    {% endif %}
+                </div>
+            </div>
+
+        {% endif %}
+
+
+        {% if url_instaptoets_opnieuw %}
+            <!-- knop om toets op te starten met een POST -->
+            <form action="{{ url_instaptoets_opnieuw }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
+                {% csrf_token %}
+                <input type="hidden" name="opnieuw" value="J">
+                <p class="center" style="margin:30px">
+                    <button class="btn-sv-blauw" id="submit_knop" type="submit">Instaptoets opnieuw maken</button>
+                    <br>(kan alleen op de test server)
+                </p>
+            </form>
+        {% endif %}
 
     {% endif %}
 
-
-    {% if url_instaptoets_opnieuw %}
-        <!-- knop om toets op te starten met een POST -->
-        <form action="{{ url_instaptoets_opnieuw }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
-            {% csrf_token %}
-            <input type="hidden" name="opnieuw" value="J">
-            <p class="center" style="margin:30px">
-                <button class="btn-sv-blauw" id="submit_knop" type="submit">Instaptoets opnieuw maken</button>
-                <br>(kan alleen op de test server)
-            </p>
-        </form>
-    {% endif %}
-    
     {% include 'feedback/sidebar.dtl' with op_pagina="opleidingen-basiscursus" %}
 
 {% endblock %}

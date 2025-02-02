@@ -158,24 +158,10 @@ class TestOpleidingInschrijven(E2EHelpers, TestCase):
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_inschrijven_basiscursus)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('opleiding/inschrijven-basiscursus.dtl', 'plein/site_layout.dtl'))
-        urls = self.extract_all_urls(resp, skip_menu=True)
-        self.assertEqual(urls, [])
+        self.assert_is_redirect_login(resp)
 
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_inschrijven_basiscursus)
-        self.assert404(resp, 'Inlog nodig')
-
-        # geen toets
-        Opleiding.objects.all().delete()
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_inschrijven_basiscursus)
-        self.assert404(resp, 'Basiscursus niet gevonden')
-
-        with self.assert_max_queries(20):
-            resp = self.client.post(self.url_toevoegen_aan_mandje)
         self.assert_is_redirect_login(resp)
 
     def test_gast(self):
@@ -187,19 +173,11 @@ class TestOpleidingInschrijven(E2EHelpers, TestCase):
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_inschrijven_basiscursus)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('opleiding/inschrijven-basiscursus.dtl', 'plein/site_layout.dtl'))
-        urls = self.extract_all_urls(resp, skip_menu=True)
-        self.assertEqual(urls, [])
+        self.assert403(resp, 'Geen toegang')
 
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_inschrijven_basiscursus)
-        self.assert404(resp, 'Inlog nodig')
-
-        with self.assert_max_queries(20):
-            resp = self.client.post(self.url_toevoegen_aan_mandje)
-        self.assert403(resp)
+        self.assert403(resp, 'Geen toegang')
 
     def test_toets_niet_gestart(self):
         self.e2e_login(self.account_normaal)

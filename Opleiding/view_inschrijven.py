@@ -28,7 +28,7 @@ TEMPLATE_OPLEIDINGEN_INSCHRIJVEN_BASISCURSUS = 'opleiding/inschrijven-basiscursu
 TEMPLATE_OPLEIDINGEN_TOEGEVOEGD_AAN_MANDJE = 'opleiding/inschrijven-toegevoegd-aan-mandje.dtl'
 
 
-class InschrijvenBasiscursusView(TemplateView):
+class InschrijvenBasiscursusView(UserPassesTestMixin, TemplateView):
 
     # class variables shared by all instances
     template_name = TEMPLATE_OPLEIDINGEN_INSCHRIJVEN_BASISCURSUS
@@ -37,6 +37,19 @@ class InschrijvenBasiscursusView(TemplateView):
         super().__init__(**kwargs)
         self.sporter = None
         self.opleiding = None
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+
+        # inschrijven alleen aan leden tonen
+        # gebruiker moet ingelogd zijn, geen gast zijn en rol Sporter gekozen hebben
+        account = get_account(self.request)
+        if account.is_authenticated:
+            if not account.is_gast:
+                if rol_get_huidige(self.request) == Rol.ROL_SPORTER:
+                    self.sporter = get_sporter(account)
+                    return True
+        return False
 
     def _zoek_opleiding_basiscursus(self):
         self.opleiding = (Opleiding

@@ -17,27 +17,12 @@ from Sporter.models import get_sporter
 TEMPLATE_OPLEIDINGEN_BASISCURSUS = 'opleiding/basiscursus.dtl'
 
 
-class BasiscursusView(UserPassesTestMixin, TemplateView):
+class BasiscursusView(TemplateView):
 
     # class variables shared by all instances
     template_name = TEMPLATE_OPLEIDINGEN_BASISCURSUS
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
     permission_denied_message = 'Geen toegang'
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.sporter = None
-
-    def test_func(self):
-        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        # instaptoets alleen aan leden tonen
-        # gebruiker moet ingelogd zijn, geen gast zijn en rol Sporter gekozen hebben
-        if rol_get_huidige(self.request) == Rol.ROL_SPORTER:
-            account = get_account(self.request)
-            if not account.is_gast:
-                self.sporter = get_sporter(account)
-                return True
-        return False
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -46,23 +31,32 @@ class BasiscursusView(UserPassesTestMixin, TemplateView):
 
         context['eis_percentage'] = settings.INSTAPTOETS_AANTAL_GOED_EIS
 
-        if instaptoets_is_beschikbaar():
-            context['url_instaptoets'] = reverse('Instaptoets:begin')
+        account = get_account(self.request)
+        if account.is_authenticated:
+            context['is_ingelogd'] = True
 
-            toets = vind_toets(self.sporter)
-            if toets:
-                context['toets'] = toets
+            if not account.is_gast and rol_get_huidige(self.request) == Rol.ROL_SPORTER:
+                context['toon_inschrijven'] = True
 
-                is_geldig, dagen = toets_geldig(toets)
-                context['toets_is_geldig'] = is_geldig
-                context['toets_geldig_dagen'] = dagen
+                sporter = get_sporter(account)
 
-                if is_geldig:
-                    context['url_instaptoets'] = None
-                    context['url_inschrijven'] = reverse('Opleiding:inschrijven-basiscursus')
+                if sporter and instaptoets_is_beschikbaar():
+                    context['url_instaptoets'] = reverse('Instaptoets:begin')
 
-                    if settings.IS_TEST_SERVER:
-                        context['url_instaptoets_opnieuw'] = reverse('Instaptoets:begin')
+                    toets = vind_toets(sporter)
+                    if toets:
+                        context['toets'] = toets
+
+                        is_geldig, dagen = toets_geldig(toets)
+                        context['toets_is_geldig'] = is_geldig
+                        context['toets_geldig_dagen'] = dagen
+
+                        if is_geldig:
+                            context['url_instaptoets'] = None
+                            context['url_inschrijven'] = reverse('Opleiding:inschrijven-basiscursus')
+
+                            if settings.IS_TEST_SERVER:
+                                context['url_instaptoets_opnieuw'] = reverse('Instaptoets:begin')
 
         context['kruimels'] = (
             (reverse('Opleiding:overzicht'), 'Opleidingen'),

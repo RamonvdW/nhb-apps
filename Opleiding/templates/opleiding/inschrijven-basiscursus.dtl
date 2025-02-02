@@ -96,6 +96,7 @@
         </div>
 
     {% else %}
+
         {% if voldoet_aan_voorwaarden %}
 
             <!-- witruimte -->

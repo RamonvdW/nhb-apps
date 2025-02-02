@@ -19,6 +19,7 @@ class TestOpleidingBasiscursus(E2EHelpers, TestCase):
     test_after = ('Account', 'Functie')
 
     url_basiscursus = '/opleiding/basiscursus/'
+    url_inschrijven_basiscursus = '/opleiding/inschrijven/basiscursus/'
 
     def setUp(self):
         """ initialisatie van de test case """
@@ -35,8 +36,11 @@ class TestOpleidingBasiscursus(E2EHelpers, TestCase):
         self.sporter = sporter
 
     def test_anon(self):
-        resp = self.client.get(self.url_basiscursus)
-        self.assert_is_redirect(resp, '/account/login/')
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_basiscursus)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('opleiding/basiscursus.dtl', 'plein/site_layout.dtl'))
 
     def test_gast(self):
         self.account_normaal.is_gast = True
@@ -46,7 +50,12 @@ class TestOpleidingBasiscursus(E2EHelpers, TestCase):
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_basiscursus)
-        self.assert403(resp)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('opleiding/basiscursus.dtl', 'plein/site_layout.dtl'))
+
+        urls = self.extract_all_urls(resp)
+        self.assertTrue(self.url_inschrijven_basiscursus not in urls)
 
     def test_sporter(self):
         self.e2e_login(self.account_normaal)
