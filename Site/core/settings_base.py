@@ -93,7 +93,6 @@ INSTALLED_APPS = [
     'Logboek.apps.LogboekConfig',
     'Mailer.apps.MailerConfig',
     'Opleiding.apps.OpleidingConfig',
-    'Opleidingen.apps.OpleidingenConfig',       # TODO: verwijderen na uitrol v25
     'Overig.apps.OverigConfig',
     'Plein.apps.PleinConfig',
     'Records.apps.RecordsConfig',

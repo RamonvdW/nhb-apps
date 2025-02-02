@@ -7,30 +7,30 @@
 from django.db import migrations, models
 
 
-def migrate_diplomas(apps, _):
-
-    # haal de klassen op die van toepassing zijn op het moment van migratie
-    old_klas = apps.get_model('Opleidingen', 'OpleidingDiploma')
-    new_klas = apps.get_model('Opleiding', 'OpleidingDiploma')
-
-    bulk = list()
-    for obj in old_klas.objects.all():              # pragma: no cover
-        bulk.append(
-            new_klas(
-                sporter=obj.sporter,
-                code=obj.code,
-                beschrijving=obj.beschrijving,
-                toon_op_pas=obj.toon_op_pas,
-                datum_begin=obj.datum_begin,
-                datum_einde=obj.datum_einde))
-
-        if len(bulk) >= 500:
-            new_klas.objects.bulk_create(bulk)
-            bulk = list()
-    # for
-
-    if len(bulk):                                   # pragma: no cover
-        new_klas.objects.bulk_create(bulk)
+# def migrate_diplomas(apps, _):
+#
+#     # haal de klassen op die van toepassing zijn op het moment van migratie
+#     old_klas = apps.get_model('Opleidingen', 'OpleidingDiploma')
+#     new_klas = apps.get_model('Opleiding', 'OpleidingDiploma')
+#
+#     bulk = list()
+#     for obj in old_klas.objects.all():              # pragma: no cover
+#         bulk.append(
+#             new_klas(
+#                 sporter=obj.sporter,
+#                 code=obj.code,
+#                 beschrijving=obj.beschrijving,
+#                 toon_op_pas=obj.toon_op_pas,
+#                 datum_begin=obj.datum_begin,
+#                 datum_einde=obj.datum_einde))
+#
+#         if len(bulk) >= 500:
+#             new_klas.objects.bulk_create(bulk)
+#             bulk = list()
+#     # for
+#
+#     if len(bulk):                                   # pragma: no cover
+#         new_klas.objects.bulk_create(bulk)
 
 
 class Migration(migrations.Migration):
@@ -42,7 +42,7 @@ class Migration(migrations.Migration):
 
     # volgorde afdwingen
     dependencies = [
-        ('Opleidingen', 'm0010_prep_migrate'),
+        #('Opleidingen', 'm0010_prep_migrate'),
         ('Sporter', 'm0031_squashed'),
     ]
 
@@ -63,7 +63,7 @@ class Migration(migrations.Migration):
                 'verbose_name': 'Opleiding diploma',
             },
         ),
-        migrations.RunPython(migrate_diplomas),
+        #migrations.RunPython(migrate_diplomas),
     ]
 
 # end of file

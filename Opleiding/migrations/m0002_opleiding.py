@@ -23,9 +23,9 @@ class Migration(migrations.Migration):
     # volgorde afdwingen
     dependencies = [
         ('Account', 'm0032_squashed'),
+        ('Functie', 'm0025_squashed'),
         ('Locatie', 'm0009_squashed'),
         ('Opleiding', 'm0001_diploma'),
-        ('Opleidingen', 'm0011_remove'),
         ('Sporter', 'm0031_squashed'),
     ]
 
@@ -92,8 +92,7 @@ class Migration(migrations.Migration):
                 'verbose_name': 'Opleiding deelnemer',
             },
         ),
-        # TODO: aanzetten bij opruimen app Opleidingen
-        # migrations.RunPython(maak_functie_mo),
+        #migrations.RunPython(maak_functie_mo),
     ]
 
 # end of file
