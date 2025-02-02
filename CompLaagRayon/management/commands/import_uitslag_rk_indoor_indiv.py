@@ -298,11 +298,20 @@ class Command(BaseCommand):
         if self.verbose:
             self.stdout.write('[DEBUG] Aantal RK deelnemers: %s' % len(self.rk_deelnemers))
 
+        # bepaal het aantal finalisten
+        deelnemers_in_finale = 0
+        for deelnemer in self.rk_deelnemers:
+            if deelnemer.result_score_1 > 0 and deelnemer.result_score_2 > 0:
+                deelnemers_in_finale += 1
+        # for
+        if self.verbose:
+            self.stdout.write('[DEBUG] Aantal deelnemers in finale: %s' % deelnemers_in_finale)
+
         if goud == 0:
             self.stderr.write('[ERROR] Kan winnaar van gouden finale niet vaststellen')
             return
 
-        if brons == 0 and len(self.rk_deelnemers) > 2:
+        if brons == 0 and deelnemers_in_finale > 2:
             self.stderr.write('[ERROR] Kan winnaar van bronzen finale niet vaststellen')
             return
 
