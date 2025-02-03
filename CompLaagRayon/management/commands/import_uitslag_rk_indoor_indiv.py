@@ -517,14 +517,15 @@ class Command(BaseCommand):
             self.stderr.write('[ERROR] Kan blad %s niet vinden' % repr(self.blad_voorronde))
             return
 
-        ws_finale, max_finalisten = self._vind_finales_blad(prg)
-        if not ws_finale:
-            self.stderr.write('[ERROR] Kan finales blad niet vinden')
-            return
-
         self._deelnemers_ophalen()
         self._importeer_resultaten(ws_voorronde)
-        self._importeer_finales(ws_finale, max_finalisten)
+
+        ws_finale, max_finalisten = self._vind_finales_blad(prg)
+        if not ws_finale:
+            self.stdout.write('[WARNING] Kan finales blad niet vinden')
+        else:
+            self._importeer_finales(ws_finale, max_finalisten)
+
         self._report_no_shows()
 
         # toon het resultaat
