@@ -238,7 +238,13 @@ class ToevoegenAanMandjeView(UserPassesTestMixin, View):
         msg = "[%s] Inschrijving ontvangen; koper=%s\n" % (stamp_str, account_koper.get_account_full_name())
 
         # kijk of de sporter al ingeschreven is
-        if OpleidingInschrijving.objects.filter(sporter=self.sporter, opleiding=opleiding).count() > 0:
+        aantal = (OpleidingInschrijving
+                  .objects
+                  .filter(sporter=self.sporter,
+                          opleiding=opleiding)
+                  .exclude(status=OPLEIDING_INSCHRIJVING_STATUS_INSCHRIJVEN)    # aangepaste persoonsgegevens
+                  .count())
+        if aantal > 0:
             raise Http404('Dubbel inschrijven niet mogelijk')
 
         # zoek of maak de deelnemer
