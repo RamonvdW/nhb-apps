@@ -28,7 +28,7 @@ TEMPLATE_OPLEIDINGEN_INSCHRIJVEN_BASISCURSUS = 'opleiding/inschrijven-basiscursu
 TEMPLATE_OPLEIDINGEN_TOEGEVOEGD_AAN_MANDJE = 'opleiding/inschrijven-toegevoegd-aan-mandje.dtl'
 
 
-class InschrijvenBasiscursusView(TemplateView):
+class InschrijvenBasiscursusView(UserPassesTestMixin, TemplateView):
 
     # class variables shared by all instances
     template_name = TEMPLATE_OPLEIDINGEN_INSCHRIJVEN_BASISCURSUS
@@ -37,6 +37,19 @@ class InschrijvenBasiscursusView(TemplateView):
         super().__init__(**kwargs)
         self.sporter = None
         self.opleiding = None
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+
+        # inschrijven alleen aan leden tonen
+        # gebruiker moet ingelogd zijn, geen gast zijn en rol Sporter gekozen hebben
+        account = get_account(self.request)
+        if account.is_authenticated:
+            if not account.is_gast:
+                if rol_get_huidige(self.request) == Rol.ROL_SPORTER:
+                    self.sporter = get_sporter(account)
+                    return True
+        return False
 
     def _zoek_opleiding_basiscursus(self):
         self.opleiding = (Opleiding
@@ -71,21 +84,14 @@ class InschrijvenBasiscursusView(TemplateView):
 
         context = super().get_context_data(**kwargs)
 
-        # instaptoets alleen aan leden tonen
-        # gebruiker moet ingelogd zijn, geen gast zijn en rol Sporter gekozen hebben
-        if rol_get_huidige(self.request) == Rol.ROL_SPORTER:
-            account = get_account(self.request)
-            if not account.is_gast:
-                self.sporter = get_sporter(account)
+        # als we hier komen is self.sporter gezet en geen gast
+        context['sporter'] = self.sporter
+        context['voldoet_aan_voorwaarden'] = False
 
-        if self.sporter:
-            context['sporter'] = self.sporter
-            context['voldoet_aan_voorwaarden'] = False
-
-            toets = vind_toets(self.sporter)
-            if toets:
-                is_geldig, _ = toets_geldig(toets)
-                context['voldoet_aan_voorwaarden'] = is_geldig
+        toets = vind_toets(self.sporter)
+        if toets:
+            is_geldig, _ = toets_geldig(toets)
+            context['voldoet_aan_voorwaarden'] = is_geldig
 
         self._zoek_opleiding_basiscursus()
 
@@ -95,21 +101,20 @@ class InschrijvenBasiscursusView(TemplateView):
         context['opleiding'] = self.opleiding
         self.opleiding.kosten_str = format_bedrag_euro(self.opleiding.kosten_euro)
 
-        if self.sporter:
-            context['inschrijving'] = inschrijving = self._zoek_inschrijving()
+        context['inschrijving'] = inschrijving = self._zoek_inschrijving()
 
-            if inschrijving.status != OPLEIDING_INSCHRIJVING_STATUS_INSCHRIJVEN:
-                context['al_ingeschreven'] = True
-            else:
-                if inschrijving.aanpassing_email == '':
-                    inschrijving.aanpassing_email = self.sporter.email
-                if inschrijving.aanpassing_telefoon == '':
-                    inschrijving.aanpassing_telefoon = self.sporter.telefoon
-                if inschrijving.aanpassing_geboorteplaats == '':
-                    inschrijving.aanpassing_geboorteplaats = self.sporter.geboorteplaats
+        if inschrijving.status != OPLEIDING_INSCHRIJVING_STATUS_INSCHRIJVEN:
+            context['al_ingeschreven'] = True
+        else:
+            if inschrijving.aanpassing_email == '':
+                inschrijving.aanpassing_email = self.sporter.email
+            if inschrijving.aanpassing_telefoon == '':
+                inschrijving.aanpassing_telefoon = self.sporter.telefoon
+            if inschrijving.aanpassing_geboorteplaats == '':
+                inschrijving.aanpassing_geboorteplaats = self.sporter.geboorteplaats
 
-                context['url_wijzig'] = reverse('Opleiding:inschrijven-basiscursus')
-                context['url_toevoegen'] = reverse('Opleiding:inschrijven-toevoegen-aan-mandje')
+            context['url_wijzig'] = reverse('Opleiding:inschrijven-basiscursus')
+            context['url_toevoegen'] = reverse('Opleiding:inschrijven-toevoegen-aan-mandje')
 
         context['url_voorwaarden'] = settings.VERKOOPVOORWAARDEN_OPLEIDINGEN_URL
 
@@ -126,15 +131,7 @@ class InschrijvenBasiscursusView(TemplateView):
             We slaan de nieuwe gegevens op in het OpleidingDeelnemer record
         """
 
-        # instaptoets alleen aan leden tonen
-        # gebruiker moet ingelogd zijn, geen gast zijn en rol Sporter gekozen hebben
-        if rol_get_huidige(self.request) == Rol.ROL_SPORTER:
-            account = get_account(self.request)
-            if not account.is_gast:
-                self.sporter = get_sporter(account)
-
-        if not self.sporter:
-            raise Http404('Inlog nodig')
+        # als we hier komen is self.sporter gezet en geen gast
 
         try:
             data = json.loads(request.body)
@@ -225,7 +222,13 @@ class ToevoegenAanMandjeView(UserPassesTestMixin, View):
         msg = "[%s] Inschrijving ontvangen; koper=%s\n" % (stamp_str, account_koper.get_account_full_name())
 
         # kijk of de sporter al ingeschreven is
-        if OpleidingInschrijving.objects.filter(sporter=self.sporter, opleiding=opleiding).count() > 0:
+        aantal = (OpleidingInschrijving
+                  .objects
+                  .filter(sporter=self.sporter,
+                          opleiding=opleiding)
+                  .exclude(status=OPLEIDING_INSCHRIJVING_STATUS_INSCHRIJVEN)    # aangepaste persoonsgegevens
+                  .count())
+        if aantal > 0:
             raise Http404('Dubbel inschrijven niet mogelijk')
 
         # zoek of maak de deelnemer

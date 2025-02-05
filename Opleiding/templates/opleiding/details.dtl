@@ -63,7 +63,7 @@
 
                 <tr>
                     <th>Beschrijving</th>
-                    <td>{{ opleiding.beschrijving|linebreaksbr }}</td>
+                    <td style="width:70%">{{ opleiding.beschrijving|linebreaksbr }}</td>
                 </tr>
 
                 <tr>
@@ -122,10 +122,12 @@
         <div class="row-sv-blauw">
             <div class="col s12">
 
+                {% comment %}
                 {% if kan_aanmelden %}
                     <!-- inschrijven sporter -->
                     {% include 'plein/card_icon.dtl' with title="Sporter" text="Aanmelden en betalen voor jezelf." icon="person" url=url_inschrijven_sporter %}
                 {% endif %}
+                {% endcomment %}
 
                 {% if hint_inloggen %}
                     {% include 'plein/card_niet-beschikbaar.dtl' with waarom="Eerst inloggen" title="Sporter" text="Aanmelden en betalen voor jezelf." icon="person" %}

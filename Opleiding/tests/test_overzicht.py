@@ -15,6 +15,7 @@ from Opleiding.models import OpleidingDiploma, Opleiding
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
+import datetime
 
 
 class TestOpleidingOverzicht(E2EHelpers, TestCase):
@@ -146,6 +147,19 @@ class TestOpleidingOverzicht(E2EHelpers, TestCase):
         self.assertTrue(str(self.diploma) != '')
         self.assertTrue(str(self.opleiding) != '')
 
+        opleiding = self.opleiding
+        opleiding.periode_begin = datetime.date(year=2024, month=10, day=1)
+        opleiding.periode_einde = datetime.date(year=2024, month=10, day=1)
+        self.assertTrue(opleiding.periode_str() == 'oktober 2024')
+
+        opleiding.periode_begin = datetime.date(year=2024, month=10, day=1)
+        opleiding.periode_einde = datetime.date(year=2024, month=11, day=1)
+        self.assertTrue(opleiding.periode_str() == 'oktober tot november 2024')
+
+        opleiding.periode_begin = datetime.date(year=2024, month=11, day=1)
+        opleiding.periode_einde = datetime.date(year=2025, month=1, day=1)
+        self.assertTrue(opleiding.periode_str() == 'november 2024 tot januari 2025')
+
     def test_sporter(self):
         self.e2e_login_and_pass_otp(self.account_normaal)
         self.e2e_wisselnaarrol_sporter()
@@ -188,6 +202,27 @@ class TestOpleidingOverzicht(E2EHelpers, TestCase):
 
         resp = self.client.get(self.url_details % 999999)
         self.assert404(resp, 'Slechte parameter')
+
+    def test_gast(self):
+        self.account_normaal.is_gast = True
+        self.account_normaal.save(update_fields=['is_gast'])
+
+        self.e2e_login_and_pass_otp(self.account_normaal)
+        self.e2e_wisselnaarrol_sporter()
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_overzicht)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('opleiding/overzicht.dtl', 'plein/site_layout.dtl'))
+
+        url = self.url_details % self.opleiding.pk
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('opleiding/details.dtl', 'plein/site_layout.dtl'))
 
     def test_beheerders(self):
         self.e2e_login_and_pass_otp(self.account_normaal)

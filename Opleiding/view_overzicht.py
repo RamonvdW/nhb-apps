@@ -49,8 +49,13 @@ class OpleidingenOverzichtView(TemplateView):
                     opleiding.url_details = reverse('Opleiding:details', kwargs={'opleiding_pk': opleiding.pk})
         # for
 
+        if enable_basiscursus:
+            # toon het grote kaartje
+            context['url_basiscursus'] = reverse('Opleiding:basiscursus')
+
         account = get_account(self.request)
         if account.is_authenticated and not account.is_gast:
+            context['is_ingelogd'] = True
 
             rol_nu = rol_get_huidige(self.request)
             if rol_nu == Rol.ROL_SPORTER:
@@ -71,9 +76,6 @@ class OpleidingenOverzichtView(TemplateView):
                             .order_by('-datum_begin'))      # nieuwste bovenaan
 
                 context['diplomas'] = diplomas
-
-                if enable_basiscursus:
-                    context['url_basiscursus'] = reverse('Opleiding:basiscursus')
 
         context['kruimels'] = (
             (None, 'Opleidingen'),
@@ -107,28 +109,33 @@ class OpleidingDetailsView(TemplateView):
         # TODO: is er een deadline voor inschrijven?
         context['toon_inschrijven'] = (opleiding.status == OPLEIDING_STATUS_INSCHRIJVEN)
 
+        rol_kruimels = Rol.ROL_SPORTER    # voor de kruimels
+
         # om aan te melden is een account nodig
         # extern beheerder wedstrijden kan je niet voor aanmelden
         # een wedstrijd zonder sessie is een placeholder op de agenda
-        if self.request.user.is_authenticated:
-            rol_nu = rol_get_huidige(self.request)
-            if rol_nu == Rol.ROL_SPORTER:
-                context['kan_aanmelden'] = True
-                context['url_inschrijven_sporter'] = reverse('Plein:plein')
-            else:
-                # beheerders (HWL 1368) niet het kaartje inschrijven tonen
+        account = get_account(self.request)
+        if account.is_authenticated:
+            if account.is_gast:
                 context['toon_inschrijven'] = False
+            else:
+                rol_nu = rol_kruimels = rol_get_huidige(self.request)
+                if rol_nu == Rol.ROL_SPORTER:
+                    context['kan_aanmelden'] = True
+                    # TODO: context['url_inschrijven_sporter'] = reverse('Plein:plein')
+                else:
+                    # beheerders (HWL 1368) niet het kaartje inschrijven tonen
+                    context['toon_inschrijven'] = False
         else:
-            rol_nu = Rol.ROL_SPORTER
             context['hint_inloggen'] = True
 
-        if rol_nu in (Rol.ROL_SEC, Rol.ROL_HWL):
+        if rol_kruimels in (Rol.ROL_SEC, Rol.ROL_HWL):
             context['kruimels'] = (
                 (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
                 (reverse('Opleiding:vereniging'), 'Opleidingen'),
                 (None, opleiding.titel),
             )
-        elif rol_nu == Rol.ROL_MO:
+        elif rol_kruimels == Rol.ROL_MO:
             context['kruimels'] = (
                 (reverse('Opleiding:manager'), 'Opleidingen'),
                 (None, opleiding.titel),
@@ -140,6 +147,5 @@ class OpleidingDetailsView(TemplateView):
             )
 
         return context
-
 
 # end of file

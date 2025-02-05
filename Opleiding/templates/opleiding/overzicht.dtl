@@ -14,6 +14,10 @@
     <div class="row center">
         <div class="col s12">
             <h3 class="page-banner">Opleidingen</h3>
+            <p>Informatie over opleidingen voor KHSN leden.</p>
+            {% if not is_ingelogd %}
+                <p>Om in te schrijven moet je een account aanmaken en inloggen</p>
+            {% endif %}
         </div>
     </div>
 
