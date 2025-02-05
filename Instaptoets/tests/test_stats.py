@@ -7,7 +7,7 @@
 from django.test import TestCase
 from Functie.models import Functie
 from Geo.models import Regio
-from Instaptoets.models import Categorie, Vraag, ToetsAntwoord
+from Instaptoets.models import Categorie, Vraag, ToetsAntwoord, Instaptoets
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
@@ -63,6 +63,7 @@ class TestInstaptoetsStats(E2EHelpers, TestCase):
 
         Vraag(
             categorie=cat,
+            gebruik_voor_quiz=True,             # toets + quiz
             vraag_tekst='Vraag nummer 1',
             antwoord_a='Morgen',
             antwoord_b='Overmorgen',
@@ -71,7 +72,7 @@ class TestInstaptoetsStats(E2EHelpers, TestCase):
             juiste_antwoord='D').save()
 
         Vraag(
-            categorie=cat,            # bewust niet gezet voor meer coverage
+            categorie=cat,
             vraag_tekst='Vraag nummer 2',
             antwoord_a='Geel',
             antwoord_b='Rood',
@@ -115,6 +116,17 @@ class TestInstaptoetsStats(E2EHelpers, TestCase):
         bulk.pop(-1)
         ToetsAntwoord.objects.bulk_create(bulk)
 
+        Vraag(
+            categorie=cat,
+            gebruik_voor_toets=False,
+            gebruik_voor_quiz=True,
+            vraag_tekst='Vraag voor de quiz',
+            antwoord_a='Geel',
+            antwoord_b='Rood',
+            antwoord_c='',
+            antwoord_d='',
+            juiste_antwoord='B').save()
+
     def test_anon(self):
         resp = self.client.get(self.url_stats)
         self.assert403(resp, "Geen toegang")
@@ -134,5 +146,39 @@ class TestInstaptoetsStats(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('instaptoets/stats-antwoorden.dtl', 'plein/site_layout.dtl'))
+
+        # maak een paar toetsen aan
+        Instaptoets(
+            sporter=self.sporter_100000,
+            aantal_vragen=20,
+            aantal_antwoorden=20,
+            is_afgerond=False,
+        ).save()
+
+        Instaptoets(
+            sporter=self.sporter_100000,
+            aantal_vragen=20,
+            aantal_antwoorden=20,
+            is_afgerond=True,
+            aantal_goed=1,
+            geslaagd=False,
+        ).save()
+
+        Instaptoets(
+            sporter=self.sporter_100000,
+            aantal_vragen=20,
+            aantal_antwoorden=20,
+            is_afgerond=True,
+            aantal_goed=18,
+            geslaagd=False,
+        ).save()
+
+        # toets is nog niet opgestart
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_stats)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('instaptoets/stats-antwoorden.dtl', 'plein/site_layout.dtl'))
+
 
 # end of file
