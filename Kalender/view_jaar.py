@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023-2024 Ramon van der Winkel.
+#  Copyright (c) 2023-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -193,7 +193,7 @@ class KalenderJaarView(TemplateView):
         # for
 
         for evenement in evenementen:
-            if evenement.status == WEDSTRIJD_STATUS_GEANNULEERD:
+            if evenement.status == EVENEMENT_STATUS_GEANNULEERD:
                 evenement.titel = '[GEANNULEERD] ' + evenement.titel
             else:
                 evenement.url_details = reverse('Evenement:details',
@@ -311,6 +311,5 @@ class KalenderJaarView(TemplateView):
         self._maak_pagina(context, jaar, maand, gekozen_soort, gekozen_bogen, gekozen_discipline, zoekterm)
 
         return render(request, self.template_name, context)
-
 
 # end of file

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -685,7 +685,9 @@ class TestCompBeheerBB(E2EHelpers, TestCase):
         self.assert404(resp, 'Competitie niet gevonden')
 
         resp = self.client.get(self.url_klassengrenzen_tonen % 999999)
-        self.assert404(resp, 'Competitie niet gevonden')
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/bestaat-niet.dtl', 'plein/site_layout.dtl'))
 
     def test_klassengrenzen_tonen(self):
         # competitie opstarten

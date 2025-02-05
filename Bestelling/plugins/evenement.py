@@ -30,6 +30,9 @@ def evenement_plugin_inschrijven(inschrijving: EvenementInschrijving) -> Decimal
 
 
 def evenement_plugin_verwijder_reservering(stdout, inschrijving: EvenementInschrijving) -> EvenementAfgemeld | None:
+    # wordt gebruikt bij:
+    # - inschrijving uit het mandje
+    # - annuleren van een bestelling
 
     afmelding = None
 
