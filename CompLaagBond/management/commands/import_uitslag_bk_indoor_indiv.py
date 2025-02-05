@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023-2024 Ramon van der Winkel.
+#  Copyright (c) 2023-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -506,7 +506,7 @@ class Command(BaseCommand):
         try:
             prg = openpyxl.load_workbook(fname,
                                          data_only=True)  # do not evaluate formulas; use last calculated values
-        except (OSError, zipfile.BadZipFile, KeyError, InvalidFileException) as exc:
+        except (OSError, zipfile.BadZipFile, KeyError, ValueError, InvalidFileException) as exc:
             self.stderr.write('[ERROR] Kan het excel bestand niet openen (%s)' % str(exc))
             return
 
