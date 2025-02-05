@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -17,6 +17,7 @@ from Score.definities import AG_NUL
 
 
 TEMPLATE_COMPETITIE_KLASSENGRENZEN_TONEN = 'competitie/klassengrenzen-tonen.dtl'
+TEMPLATE_COMPETITIE_BESTAAT_NIET = 'competitie/bestaat-niet.dtl'
 
 
 class KlassengrenzenTonenView(View):
@@ -90,41 +91,44 @@ class KlassengrenzenTonenView(View):
                     .objects
                     .get(pk=comp_pk))
         except (ValueError, Competitie.DoesNotExist):
-            raise Http404('Competitie niet gevonden')
+            # externe links naar een oude competitie komen hier --> geef ze een noindex foutmelding pagina
+            self.template_name = TEMPLATE_COMPETITIE_BESTAAT_NIET
+            context['robots'] = 'noindex'  # prevent indexing this outdated page
+            context['bad_seizoen'] = kwargs['comp_pk_of_seizoen']
+        else:
+            context['comp'] = comp
 
-        context['comp'] = comp
+            if comp.klassengrenzen_vastgesteld:
+                if comp.is_indoor():
+                    aantal_pijlen = 30
+                else:
+                    aantal_pijlen = 25
 
-        if comp.klassengrenzen_vastgesteld:
-            if comp.is_indoor():
-                aantal_pijlen = 30
-            else:
-                aantal_pijlen = 25
+                rol_nu = rol_get_huidige(request)
+                context['toon_aantal'] = toon_aantal = (rol_nu == Rol.ROL_BB)
 
-            rol_nu = rol_get_huidige(request)
-            context['toon_aantal'] = toon_aantal = (rol_nu == Rol.ROL_BB)
+                context['indiv_klassen'] = self._get_indiv_klassen(comp, toon_aantal)
+                context['team_klassen'] = self._get_team_klassen(comp, aantal_pijlen)
+                context['aantal_pijlen'] = aantal_pijlen
+                context['rk_bk_klassen_vastgesteld'] = comp.klassengrenzen_vastgesteld_rk_bk
 
-            context['indiv_klassen'] = self._get_indiv_klassen(comp, toon_aantal)
-            context['team_klassen'] = self._get_team_klassen(comp, aantal_pijlen)
-            context['aantal_pijlen'] = aantal_pijlen
-            context['rk_bk_klassen_vastgesteld'] = comp.klassengrenzen_vastgesteld_rk_bk
+                context['aantal_indiv_regels'] = 2 + len(context['indiv_klassen'])
 
-            context['aantal_indiv_regels'] = 2 + len(context['indiv_klassen'])
+                context['aantal_team_rk_bk_regels'] = 2
 
-            context['aantal_team_rk_bk_regels'] = 2
+                for team in context['team_klassen']:
+                    if team.is_voor_teams_rk_bk:
+                        context['aantal_team_rk_bk_regels'] += 1
+                # for
 
-            for team in context['team_klassen']:
-                if team.is_voor_teams_rk_bk:
-                    context['aantal_team_rk_bk_regels'] += 1
-            # for
+                context['aantal_team_regels'] = 2 + len(context['team_klassen']) - (context['aantal_team_rk_bk_regels'] - 2)
 
-            context['aantal_team_regels'] = 2 + len(context['team_klassen']) - (context['aantal_team_rk_bk_regels'] - 2)
-
-        context['kruimels'] = (
-            (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
-            (reverse('Competitie:overzicht',
-                     kwargs={'comp_pk_of_seizoen': comp.maak_seizoen_url()}), comp.beschrijving.replace(' competitie', '')),
-            (None, 'Wedstrijdklassen')
-        )
+            context['kruimels'] = (
+                (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
+                (reverse('Competitie:overzicht',
+                         kwargs={'comp_pk_of_seizoen': comp.maak_seizoen_url()}), comp.beschrijving.replace(' competitie', '')),
+                (None, 'Wedstrijdklassen')
+            )
 
         return render(request, self.template_name, context)
 
