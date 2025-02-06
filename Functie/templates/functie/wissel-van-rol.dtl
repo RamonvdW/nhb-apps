@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2019-2024 Ramon van der Winkel.
+                Copyright (c) 2019-2025 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -216,7 +216,7 @@
         {% if show_help_rollen or url_wissel_naar_sec %}
 
             <!-- witruimte -->
-            <div class="row center">
+            <div class="row center" id="help-anderen">
                 <div class="col s12">
                     <h4>Help anderen</h4>
                     <p>Vanuit je <i>huidige</i> rol heb je de mogelijkheid om andere beheerders te helpen door naar <b>hun rol</b> te wisselen.<br>Na het wisselen zie je de website precies zoals zij hem zien. Je kan altijd weer terug.</p>

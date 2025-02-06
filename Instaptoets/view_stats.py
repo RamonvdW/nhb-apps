@@ -5,12 +5,13 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import reverse
+from django.db.models import Sum
 from django.shortcuts import redirect
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige, rol_get_beschrijving
-from Instaptoets.models import Vraag, ToetsAntwoord
+from Instaptoets.models import Vraag, ToetsAntwoord, Instaptoets
 from Instaptoets.operations import instaptoets_is_beschikbaar
 
 TEMPLATE_STATS_ANTWOORDEN = 'instaptoets/stats-antwoorden.dtl'
@@ -38,12 +39,7 @@ class StatsInstaptoetsView(UserPassesTestMixin, TemplateView):
         # gebruiker moet ingelogd zijn, geen gast zijn en rol Sporter gekozen hebben
         return rol_get_huidige(self.request) == Rol.ROL_MO
 
-    def get_context_data(self, **kwargs):
-        """ called by the template system to get the context data for the template """
-        context = super().get_context_data(**kwargs)
-
-        context['huidige_rol'] = rol_get_beschrijving(self.request)
-
+    def _get_stats_vragen(self):
         count_vraag_antwoord = dict()       # [vraag.pk][antwoord] = int
         antwoord_count = 0
 
@@ -60,11 +56,10 @@ class StatsInstaptoetsView(UserPassesTestMixin, TemplateView):
                 count_antwoorden[antwoord.antwoord] = 1
         # for
 
-        context['antwoord_count'] = antwoord_count
-
         vragen = (Vraag
                   .objects
                   .exclude(is_actief=False)
+                  .exclude(gebruik_voor_toets=False, gebruik_voor_quiz=False)   # niet voor de toets, noch voor de quiz
                   .select_related('categorie')
                   .order_by('categorie',
                             'pk'))
@@ -132,12 +127,51 @@ class StatsInstaptoetsView(UserPassesTestMixin, TemplateView):
 
             aantal_antwoorden = vraag.count_a + vraag.count_b + vraag.count_c + vraag.count_d
 
+            if vraag.gebruik_voor_toets:
+                vraag.gebruik = "toets"
+                if vraag.gebruik_voor_quiz:
+                    vraag.gebruik += " & quiz"
+            else:
+                vraag.gebruik = "quiz"
+
             tup = (fouten, aantal_antwoorden, vraag.pk, vraag)
             lst.append(tup)
         # for
 
         lst.sort(reverse=True)      # hoogste eerst
-        context['vragen'] = [tup[-1] for tup in lst]
+        vragen = [tup[-1] for tup in lst]
+
+        return antwoord_count, vragen
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        context['huidige_rol'] = rol_get_beschrijving(self.request)
+
+        context['antwoord_count'], context['vragen'] = self._get_stats_vragen()
+
+        context['toets_gestart'] = gestart = Instaptoets.objects.count()
+
+        context['toets_unieke_sporters'] = Instaptoets.objects.distinct('sporter').count()
+
+        context['toets_afgerond'] = afgerond = Instaptoets.objects.filter(is_afgerond=True).count()
+        if gestart > 0:
+            context['toets_afgerond_perc'] = "%.0f%%" % round((afgerond * 100.0) / gestart, 0)
+        else:
+            context['toets_afgerond_perc'] = "0%"
+
+        context['toets_geslaagd'] = geslaagd = Instaptoets.objects.filter(is_afgerond=True, geslaagd=True).count()
+        if afgerond > 0:
+            context['toets_geslaagd_perc'] = "%.0f%%" % round((geslaagd * 100.0) / afgerond, 0)
+        else:
+            context['toets_geslaagd_perc'] = "0%"
+
+        aantal_goed = Instaptoets.objects.filter(is_afgerond=True).aggregate(Sum('aantal_goed'))['aantal_goed__sum']
+        if afgerond > 0:
+            context['gemiddeld_goed'] = round(aantal_goed / afgerond, 0)
+        else:
+            context['gemiddeld_goed'] = '?'
 
         context['kruimels'] = (
             (reverse('Opleiding:manager'), 'Opleidingen'),

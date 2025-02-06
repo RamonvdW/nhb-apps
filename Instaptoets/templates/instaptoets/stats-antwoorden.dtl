@@ -15,11 +15,45 @@
         <div class="col s12">
             <h3 class="page-banner">Statistiek instaptoets</h3>
             <p>Je huidige rol is: <b>{{ huidige_rol }}</b></p>
-            <p>Hieronder is te zien welke vragen slecht beantwoord worden - deze staat als eerste in de tabel.</p>
-            <p>(gebaseerd op <b>{{ antwoord_count }} antwoorden</b>)</p>
         </div>
     </div>
 
+    <!-- blauwe balk met informatie in tabel-vorm:  label - info -->
+    <div class="row-sv-blauw">
+        <div class="col s12 m8 offset-m2 l6 offset-l3 xl4 offset-xl4">
+            <table class="sv-kader">
+                <tr>
+                    <th>Aantal unieke sporters</th>
+                    <td>{{ toets_unieke_sporters }}</td>
+                </tr>
+                <tr>
+                    <th>Instaptoetsen gestart</th>
+                    <td>{{ toets_gestart }}</td>
+                </tr>
+                <tr>
+                    <th>Instaptoetsen afgerond</th>
+                    <td>{{ toets_afgerond }} ({{ toets_afgerond_perc }})</td>
+                </tr>
+                <tr>
+                    <th>Instaptoetsen geslaagd</th>
+                    <td>{{ toets_geslaagd }} ({{ toets_geslaagd_perc }})</td>
+                </tr>
+                <tr>
+                    <th>Gemiddeld Saantal goed</th>
+                    <td>{{ gemiddeld_goed }}</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <!-- tussenkopje -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>De lastige vragen</h4>
+            <p>Hieronder is te zien welke vragen slecht beantwoord worden - deze staan als eerste in de tabel.</p>
+            <p>(gebaseerd op <b>{{ antwoord_count }} antwoorden</b>)</p>
+        </div>
+    </div>
 
     <!-- blauwe balk met informatie in een tabel -->
     <div class="row-sv-blauw">
@@ -35,7 +69,7 @@
 
                 {% for vraag in vragen %}
                     <tr>
-                        <td rowspan="{{ vraag.rows }}">{{ vraag.vraag_tekst }}<br><br>(categorie: {{ vraag.categorie.beschrijving }})</td>
+                        <td rowspan="{{ vraag.rows }}">{{ vraag.vraag_tekst }}<br><br>(categorie: {{ vraag.categorie.beschrijving }}; gebruik voor: {{ vraag.gebruik }})</td>
                         <td>{{ vraag.antwoord_a }}</td>
                         <td class="center {{ vraag.kleur_a }}">{{ vraag.count_a }}{% if vraag.count_a > 0 %}&nbsp;({{ vraag.perc_a }}%){% endif %}</td>
                     </tr>

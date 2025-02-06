@@ -8,14 +8,6 @@ from django.db import migrations, models
 from decimal import Decimal
 
 
-def maak_functie_mo(apps, _):
-
-    # haal de klassen op die van toepassing zijn op het moment van migratie
-    functie_klas = apps.get_model('Functie', 'Functie')
-
-    functie_klas(rol='MO', beschrijving='Manager Opleidingen').save()
-
-
 class Migration(migrations.Migration):
 
     """ Migratie class voor dit deel van de applicatie """
@@ -92,7 +84,6 @@ class Migration(migrations.Migration):
                 'verbose_name': 'Opleiding deelnemer',
             },
         ),
-        #migrations.RunPython(maak_functie_mo),
     ]
 
 # end of file

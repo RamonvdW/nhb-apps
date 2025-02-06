@@ -189,6 +189,9 @@ class TestInstaptoetsViews(E2EHelpers, TestCase):
         self.assertEqual(toets.aantal_goed, 0)
         self.assertEqual(toets.geslaagd, False)
         self.assertEqual(toets.vraag_antwoord.count(), 20)
+
+        self.assertTrue(str(toets) != '')
+        toets.is_afgerond = True
         self.assertTrue(str(toets) != '')
 
         # controleer dat geen inactieve vraag geselecteerd is

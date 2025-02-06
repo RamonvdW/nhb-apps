@@ -129,6 +129,11 @@ class ActiveerRolView(UserPassesTestMixin, View):
             url = reverse('Scheidsrechter:overzicht')
             return redirect(url)
 
+        if rol_nu == Rol.ROL_BB:
+            url = reverse('Functie:wissel-van-rol')
+            url += '#help-anderen'
+            return redirect(url)
+
         return redirect('Functie:wissel-van-rol')
 
 
