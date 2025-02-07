@@ -179,6 +179,23 @@ class TestOpleidingInschrijven(E2EHelpers, TestCase):
             resp = self.client.post(self.url_inschrijven_basiscursus)
         self.assert403(resp, 'Geen toegang')
 
+    def test_beheerder(self):
+        self.e2e_login(self.account_normaal)
+        self.e2e_wissel_naar_functie(self.functie_mo)
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_inschrijven_basiscursus)
+        self.assert403(resp, 'Geen toegang')
+
+    def test_geen_opleiding(self):
+        self.e2e_login(self.account_normaal)
+        self.e2e_check_rol('sporter')
+
+        Opleiding.objects.all().delete()
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_inschrijven_basiscursus)
+        self.assert404(resp, 'Basiscursus niet gevonden')
+
     def test_toets_niet_gestart(self):
         self.e2e_login(self.account_normaal)
         self.e2e_check_rol('sporter')
@@ -382,6 +399,20 @@ class TestOpleidingInschrijven(E2EHelpers, TestCase):
         self.assertEqual(OpleidingAfgemeld.objects.count(), 0)
         self.assertEqual(Bestelling.objects.count(), 0)
 
+        # geen rol=sporter
+        self.e2e_wissel_naar_functie(self.functie_mo)
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_toevoegen_aan_mandje)
+        self.assert403(resp, 'Geen toegang')
+
+        # corner case: gast-account
+        self.e2e_wisselnaarrol_sporter()
+        self.account_normaal.is_gast = True
+        self.account_normaal.save(update_fields=['is_gast'])
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_toevoegen_aan_mandje)
+        self.assert403(resp, 'Geen toegang')
+
     def test_bestelling_gratis(self):
         # bestel een gratis opleiding
         # deze wordt meteen definitief gemaakt bij omzetten mandje naar bestelling
@@ -514,6 +545,46 @@ class TestOpleidingInschrijven(E2EHelpers, TestCase):
         inschrijving.refresh_from_db()
         self.assertEqual(inschrijving.status, OPLEIDING_INSCHRIJVING_STATUS_DEFINITIEF)
         self.assertEqual(inschrijving.bedrag_ontvangen, Decimal('10'))
+
+    def test_inschrijven_met_wijzigingen(self):
+        # geef eerst wijzigingen door
+        # daarna inschrijven
+
+        self.e2e_login(self.account_normaal)
+        self.e2e_check_rol('sporter')
+
+        self._zet_instaptoets_gehaald()
+
+        # wijzigingen doorgeven
+        self.assertEqual(OpleidingInschrijving.objects.count(), 0)
+        data = {'email': 'voor.opleiding@khsn.not',
+                'plaats': 'Boogstad',
+                'telefoon': '12345'}
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_inschrijven_basiscursus,
+                                    json.dumps(data),
+                                    content_type='application/json')
+        self.assert200_json(resp)
+        self.assertEqual(OpleidingInschrijving.objects.count(), 1)
+
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_toevoegen_aan_mandje, {'opleiding': self.opleiding.pk,
+                                                                    'snel': 1})
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('opleiding/inschrijven-toegevoegd-aan-mandje.dtl', 'plein/site_layout.dtl'))
+        self.assertEqual(OpleidingInschrijving.objects.count(), 1)
+
+        # laat de achtergrond taak het toevoegen aan het mandje verwerken
+        self.verwerk_bestel_mutaties()
+
+        # omzetten in een bestelling
+        self.assertEqual(Bestelling.objects.count(), 0)
+        bestel_mutatieverzoek_maak_bestellingen(self.account_normaal, snel=True)
+        f1, f2 = self.verwerk_bestel_mutaties()
+        # print('\nf1: %s\nf2: %s\n' % (f1.getvalue(), f2.getvalue()))
+
+        self.assertEqual(Bestelling.objects.count(), 1)
 
     def test_al_ingeschreven(self):
         # controleer dat dubbel inschrijven niet mogelijk is

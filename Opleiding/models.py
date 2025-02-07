@@ -203,7 +203,7 @@ class OpleidingInschrijving(models.Model):
         return self.opleiding.titel
 
     def __str__(self):
-        return "[%s] %s %s" % (self.pk, self.sporter.lid_nr_en_volledige_naam(), self.opleiding)
+        return "[%s] %s : %s" % (self.pk, self.sporter.lid_nr_en_volledige_naam(), self.opleiding)
 
     class Meta:
         """ meta data voor de admin interface """

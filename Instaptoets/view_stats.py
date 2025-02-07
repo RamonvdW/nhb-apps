@@ -155,19 +155,21 @@ class StatsInstaptoetsView(UserPassesTestMixin, TemplateView):
 
         context['toets_unieke_sporters'] = Instaptoets.objects.distinct('sporter').count()
 
-        context['toets_afgerond'] = afgerond = Instaptoets.objects.filter(is_afgerond=True).count()
+        qset = Instaptoets.objects.exclude(aantal_goed=0).filter(is_afgerond=True)
+
+        context['toets_afgerond'] = afgerond = qset.count()
         if gestart > 0:
             context['toets_afgerond_perc'] = "%.0f%%" % round((afgerond * 100.0) / gestart, 0)
         else:
             context['toets_afgerond_perc'] = "0%"
 
-        context['toets_geslaagd'] = geslaagd = Instaptoets.objects.filter(is_afgerond=True, geslaagd=True).count()
+        context['toets_geslaagd'] = geslaagd = qset.filter(geslaagd=True).count()
         if afgerond > 0:
             context['toets_geslaagd_perc'] = "%.0f%%" % round((geslaagd * 100.0) / afgerond, 0)
         else:
             context['toets_geslaagd_perc'] = "0%"
 
-        aantal_goed = Instaptoets.objects.filter(is_afgerond=True).aggregate(Sum('aantal_goed'))['aantal_goed__sum']
+        aantal_goed = qset.aggregate(Sum('aantal_goed'))['aantal_goed__sum']
         if afgerond > 0:
             context['gemiddeld_goed'] = round(aantal_goed / afgerond, 0)
         else:
