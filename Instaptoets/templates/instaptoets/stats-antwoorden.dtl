@@ -39,7 +39,7 @@
                     <td>{{ toets_geslaagd }} ({{ toets_geslaagd_perc }})</td>
                 </tr>
                 <tr>
-                    <th>Gemiddeld Saantal goed</th>
+                    <th>Gemiddeld aantal goed</th>
                     <td>{{ gemiddeld_goed }}</td>
                 </tr>
             </table>
