@@ -53,6 +53,8 @@ class Command(BaseCommand):
         instaptoets.opgestart = self.datum
         instaptoets.save(update_fields=['opgestart'])
 
+        self.stdout.write('[INFO] Instaptoets afgerond + geslaagd voor %s' % self.sporter)
+
     def handle(self, *args, **options):
         self._get_sporter(options['bondsnummer'])
         self._get_datum(options['datum'])

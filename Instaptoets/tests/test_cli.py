@@ -144,8 +144,8 @@ class TestInstaptoetsCli(E2EHelpers, TestCase):
             f1, f2 = self.run_management_command('fake_instaptoets_gehaald', 'NaN', '2000-01-01')
 
         f1, f2 = self.run_management_command('fake_instaptoets_gehaald', 1234, '1234')
-        print("f1: %s" % f1.getvalue())
-        print("f2: %s" % f2.getvalue())
+        # print("f1: %s" % f1.getvalue())
+        # print("f2: %s" % f2.getvalue())
         self.assertTrue("[ERROR] '1234' is geen valide datum. Moet voldoen aan YYYY-MM-DD" in f1.getvalue())
         self.assertTrue("[ERROR] Sporter met bondsnummer 1234 niet gevonden" in f1.getvalue())
 
