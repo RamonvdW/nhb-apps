@@ -14,11 +14,13 @@ from Bestelling.definities import (BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS
                                    BESTELLING_MUTATIE_ANNULEER)
 from Bestelling.models import BestellingMandje, BestellingMutatie, Bestelling
 from Bestelling.operations.mutaties import (bestel_mutatieverzoek_inschrijven_wedstrijd,
-                                            bestel_mutatieverzoek_webwinkel_keuze,
                                             bestel_mutatieverzoek_inschrijven_evenement,
-                                            bestel_mutatieverzoek_afmelden_evenement,
+                                            bestel_mutatieverzoek_inschrijven_opleiding,
+                                            bestel_mutatieverzoek_webwinkel_keuze,
                                             bestel_mutatieverzoek_betaling_afgerond,
-                                            bestel_mutatieverzoek_afmelden_wedstrijd)
+                                            bestel_mutatieverzoek_afmelden_evenement,
+                                            bestel_mutatieverzoek_afmelden_wedstrijd,
+                                            bestel_mutatieverzoek_afmelden_opleiding)
 from Betaal.definities import TRANSACTIE_TYPE_MOLLIE_PAYMENT, TRANSACTIE_TYPE_MOLLIE_RESTITUTIE
 from Betaal.models import BetaalInstellingenVereniging, BetaalActief, BetaalTransactie, BetaalMutatie
 from Evenement.definities import (EVENEMENT_STATUS_GEACCEPTEERD,
@@ -30,6 +32,9 @@ from Functie.models import Functie
 from Geo.models import Regio
 from Locatie.models import WedstrijdLocatie, EvenementLocatie
 from Mailer.models import MailQueue
+from Opleiding.definities import (OPLEIDING_STATUS_INSCHRIJVEN, OPLEIDING_INSCHRIJVING_STATUS_RESERVERING_MANDJE,
+                                  OPLEIDING_INSCHRIJVING_STATUS_RESERVERING_BESTELD)
+from Opleiding.models import Opleiding, OpleidingInschrijving, OpleidingAfgemeld
 from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
@@ -174,7 +179,7 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
                             sporterboog=sporterboog,
                             koper=account)
         inschrijving.save()
-        self.inschrijving = inschrijving
+        self.wedstrijd_inschrijving = inschrijving
 
         korting = WedstrijdKorting(
                     geldig_tot_en_met=datum,
@@ -244,6 +249,20 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
         inschrijving.save()
         self.evenement_inschrijving = inschrijving
 
+        opleiding = Opleiding(
+                        titel='Test opleiding',
+                        status=OPLEIDING_STATUS_INSCHRIJVEN,
+                        kosten_euro=1)
+        opleiding.save()
+        self.opleiding = opleiding
+
+        inschrijving = OpleidingInschrijving(
+                            opleiding=opleiding,
+                            sporter=sporter,
+                            koper=self.account_admin)
+        inschrijving.save()
+        self.opleiding_inschrijving = inschrijving
+
     def test_anon(self):
         self.client.logout()
 
@@ -274,7 +293,7 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
         self.e2e_check_rol('sporter')
 
         # bestel wedstrijddeelname
-        bestel_mutatieverzoek_inschrijven_wedstrijd(self.account_admin, self.inschrijving, snel=True)
+        bestel_mutatieverzoek_inschrijven_wedstrijd(self.account_admin, self.wedstrijd_inschrijving, snel=True)
         bestel_mutatieverzoek_webwinkel_keuze(self.account_admin, self.keuze, snel=True)
         bestel_mutatieverzoek_inschrijven_evenement(self.account_admin, self.evenement_inschrijving, snel=True)
         self.verwerk_bestel_mutaties()
@@ -410,7 +429,7 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
         self.e2e_check_rol('sporter')
 
         # bestel wedstrijddeelname
-        bestel_mutatieverzoek_inschrijven_wedstrijd(self.account_admin, self.inschrijving, snel=True)
+        bestel_mutatieverzoek_inschrijven_wedstrijd(self.account_admin, self.wedstrijd_inschrijving, snel=True)
         self.verwerk_bestel_mutaties()
 
         # zet het mandje om in een bestelling
@@ -430,7 +449,7 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
         self.e2e_check_rol('sporter')
 
         # bestel wedstrijddeelname
-        bestel_mutatieverzoek_inschrijven_wedstrijd(self.account_admin, self.inschrijving, snel=True)
+        bestel_mutatieverzoek_inschrijven_wedstrijd(self.account_admin, self.wedstrijd_inschrijving, snel=True)
         self.verwerk_bestel_mutaties()
 
         # zet het mandje om in een bestelling
@@ -450,7 +469,7 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
         self.e2e_check_rol('sporter')
 
         # bestel wedstrijddeelname
-        bestel_mutatieverzoek_inschrijven_wedstrijd(self.account_admin, self.inschrijving, snel=True)
+        bestel_mutatieverzoek_inschrijven_wedstrijd(self.account_admin, self.wedstrijd_inschrijving, snel=True)
 
         mutatie = BestellingMutatie.objects.first()
         mutatie.account = None
@@ -465,7 +484,7 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
         self.e2e_check_rol('sporter')
 
         # bestel wedstrijddeelname met korting
-        bestel_mutatieverzoek_inschrijven_wedstrijd(self.account_admin, self.inschrijving, snel=True)
+        bestel_mutatieverzoek_inschrijven_wedstrijd(self.account_admin, self.wedstrijd_inschrijving, snel=True)
         bestel_mutatieverzoek_inschrijven_evenement(self.account_admin, self.evenement_inschrijving, snel=True)
         # korting moet automatisch toegepast worden
         self.verwerk_bestel_mutaties()
@@ -474,7 +493,9 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
         self.assertEqual(0, Bestelling.objects.count())
         resp = self.client.post(self.url_mandje_bestellen, {'snel': 1})
         self.assert_is_redirect(resp, self.url_bestellingen_overzicht)
+
         self.verwerk_bestel_mutaties()
+
         self.assertEqual(1, Bestelling.objects.count())
         bestelling = Bestelling.objects.first()
         self.assertEqual(bestelling.status, BESTELLING_STATUS_NIEUW)
@@ -605,7 +626,7 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
         self.wedstrijd.save(update_fields=['organisatie'])
 
         # bestel wedstrijddeelname met korting
-        bestel_mutatieverzoek_inschrijven_wedstrijd(self.account_admin, self.inschrijving, snel=True)
+        bestel_mutatieverzoek_inschrijven_wedstrijd(self.account_admin, self.wedstrijd_inschrijving, snel=True)
         # korting wordt automatisch toegepast
         self.verwerk_bestel_mutaties()
 
@@ -636,7 +657,7 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
         self.e2e_check_rol('sporter')
 
         # bestel wedstrijddeelname
-        bestel_mutatieverzoek_inschrijven_wedstrijd(self.account_admin, self.inschrijving, snel=True)
+        bestel_mutatieverzoek_inschrijven_wedstrijd(self.account_admin, self.wedstrijd_inschrijving, snel=True)
         self.verwerk_bestel_mutaties()
 
         # zet het mandje om in een bestelling
@@ -712,7 +733,7 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
         self.e2e_check_rol('sporter')
 
         # bestel wedstrijddeelname
-        bestel_mutatieverzoek_inschrijven_wedstrijd(self.account_admin, self.inschrijving, snel=True)
+        bestel_mutatieverzoek_inschrijven_wedstrijd(self.account_admin, self.wedstrijd_inschrijving, snel=True)
         self.verwerk_bestel_mutaties()
 
         # zet het mandje om in een bestelling
@@ -769,7 +790,7 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
         self.e2e_check_rol('sporter')
 
         # bestel wedstrijddeelname
-        bestel_mutatieverzoek_inschrijven_wedstrijd(self.account_admin, self.inschrijving, snel=True)
+        bestel_mutatieverzoek_inschrijven_wedstrijd(self.account_admin, self.wedstrijd_inschrijving, snel=True)
         self.verwerk_bestel_mutaties()
 
         # zet het mandje om in een bestelling
@@ -854,8 +875,8 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
     def test_nul_bedrag(self):
         # inschrijving door iemand anders
         account_koper = self.e2e_create_account('koper', 'koper@test.com', 'Koper')
-        self.inschrijving.koper = account_koper
-        self.inschrijving.save(update_fields=['koper'])
+        self.wedstrijd_inschrijving.koper = account_koper
+        self.wedstrijd_inschrijving.save(update_fields=['koper'])
 
         sporter_koper = Sporter(
                         lid_nr=102000,
@@ -874,7 +895,7 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
         self.wedstrijd.save(update_fields=['prijs_euro_normaal', 'prijs_euro_onder18'])
 
         # bestel wedstrijddeelname
-        bestel_mutatieverzoek_inschrijven_wedstrijd(account_koper, self.inschrijving, snel=True)
+        bestel_mutatieverzoek_inschrijven_wedstrijd(account_koper, self.wedstrijd_inschrijving, snel=True)
         self.verwerk_bestel_mutaties()
 
         # zet het mandje om in een bestelling
@@ -908,21 +929,21 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
         self.e2e_check_rol('sporter')
 
         account_koper = self.e2e_create_account('koper', 'koper@test.com', 'Koper')
-        self.inschrijving.koper = account_koper
-        self.inschrijving.save(update_fields=['koper'])
+        self.wedstrijd_inschrijving.koper = account_koper
+        self.wedstrijd_inschrijving.save(update_fields=['koper'])
 
         # maak de wedstrijd gratis
         self.wedstrijd.prijs_euro_normaal = Decimal('0')
         self.wedstrijd.prijs_euro_onder18 = Decimal('0')
         self.wedstrijd.save(update_fields=['prijs_euro_normaal', 'prijs_euro_onder18'])
 
-        sporter = self.inschrijving.sporterboog.sporter
+        sporter = self.wedstrijd_inschrijving.sporterboog.sporter
         sporter.account = None
         # sporter.email = ''        # is al leeg
         sporter.save(update_fields=['account'])
 
         # bestel wedstrijddeelname
-        bestel_mutatieverzoek_inschrijven_wedstrijd(self.account_admin, self.inschrijving, snel=True)
+        bestel_mutatieverzoek_inschrijven_wedstrijd(self.account_admin, self.wedstrijd_inschrijving, snel=True)
         self.verwerk_bestel_mutaties()
 
         # zet het mandje om in een bestelling
@@ -945,8 +966,8 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
         self.e2e_check_rol('sporter')
 
         account_koper = self.e2e_create_account('koper', 'koper@test.com', 'Koper')
-        self.inschrijving.koper = account_koper
-        self.inschrijving.save(update_fields=['koper'])
+        self.wedstrijd_inschrijving.koper = account_koper
+        self.wedstrijd_inschrijving.save(update_fields=['koper'])
 
         # maak de wedstrijd gratis
         self.wedstrijd.organisatie = ORGANISATIE_IFAA      # geeft schietstijl ipv boogtype
@@ -954,13 +975,13 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
         self.wedstrijd.prijs_euro_onder18 = Decimal('0')
         self.wedstrijd.save(update_fields=['prijs_euro_normaal', 'prijs_euro_onder18', 'organisatie'])
 
-        sporter = self.inschrijving.sporterboog.sporter
+        sporter = self.wedstrijd_inschrijving.sporterboog.sporter
         sporter.account = None
         sporter.email = 'sporter@test.not'
         sporter.save(update_fields=['account', 'email'])
 
         # bestel wedstrijddeelname
-        bestel_mutatieverzoek_inschrijven_wedstrijd(self.account_admin, self.inschrijving, snel=True)
+        bestel_mutatieverzoek_inschrijven_wedstrijd(self.account_admin, self.wedstrijd_inschrijving, snel=True)
         self.verwerk_bestel_mutaties()
 
         # zet het mandje om in een bestelling
@@ -991,7 +1012,7 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
         self.wedstrijd.save(update_fields=['eis_kwalificatie_scores'])
 
         # bestel wedstrijddeelname
-        bestel_mutatieverzoek_inschrijven_wedstrijd(self.account_admin, self.inschrijving, snel=True)
+        bestel_mutatieverzoek_inschrijven_wedstrijd(self.account_admin, self.wedstrijd_inschrijving, snel=True)
         self.verwerk_bestel_mutaties()
 
         # zet het mandje om in een bestelling
@@ -1028,7 +1049,7 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
         self.e2e_check_rol('sporter')
 
         # bestel wedstrijddeelname
-        bestel_mutatieverzoek_inschrijven_wedstrijd(self.account_admin, self.inschrijving, snel=True)
+        bestel_mutatieverzoek_inschrijven_wedstrijd(self.account_admin, self.wedstrijd_inschrijving, snel=True)
         f1, f2 = self.verwerk_bestel_mutaties()
         # print('\nf1:', f1.getvalue(), '\nf2:', f2.getvalue())
 
@@ -1043,7 +1064,7 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
 
     def test_mutatie(self):
         # een paar corner cases
-        bestel_mutatieverzoek_inschrijven_wedstrijd(self.account_admin, self.inschrijving, snel=True)
+        bestel_mutatieverzoek_inschrijven_wedstrijd(self.account_admin, self.wedstrijd_inschrijving, snel=True)
 
         # duration > 1
         # fake-hoogste
@@ -1069,20 +1090,34 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
         self.e2e_check_rol('sporter')
 
         # bestel wedstrijddeelname
-        bestel_mutatieverzoek_inschrijven_wedstrijd(self.account_admin, self.inschrijving, snel=True)
+        bestel_mutatieverzoek_inschrijven_wedstrijd(self.account_admin, self.wedstrijd_inschrijving, snel=True)
         bestel_mutatieverzoek_inschrijven_evenement(self.account_admin, self.evenement_inschrijving, snel=True)
+        bestel_mutatieverzoek_inschrijven_opleiding(self.account_admin, self.opleiding_inschrijving, snel=True)
+
+        # nog een keer inschrijven (wordt gestopt bij het aanmaken van de mutatie)
+        prev_count = BestellingMutatie.objects.count()
+        bestel_mutatieverzoek_inschrijven_wedstrijd(self.account_admin, self.wedstrijd_inschrijving, snel=True)
+        bestel_mutatieverzoek_inschrijven_evenement(self.account_admin, self.evenement_inschrijving, snel=True)
+        bestel_mutatieverzoek_inschrijven_opleiding(self.account_admin, self.opleiding_inschrijving, snel=True)
+        self.assertEqual(BestellingMutatie.objects.count(), prev_count)
+
         self.verwerk_bestel_mutaties()
 
-        self.inschrijving.refresh_from_db()
-        self.assertEqual(self.inschrijving.koper, self.account_admin)
-        self.assertEqual(self.inschrijving.status, WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_MANDJE)
-        self.assertEqual(self.inschrijving.ontvangen_euro, Decimal('0'))
-        self.assertEqual(self.inschrijving.retour_euro, Decimal('0'))
+        self.wedstrijd_inschrijving.refresh_from_db()
+        self.assertEqual(self.wedstrijd_inschrijving.koper, self.account_admin)
+        self.assertEqual(self.wedstrijd_inschrijving.status, WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_MANDJE)
+        self.assertEqual(self.wedstrijd_inschrijving.ontvangen_euro, Decimal('0'))
+        self.assertEqual(self.wedstrijd_inschrijving.retour_euro, Decimal('0'))
 
         self.evenement_inschrijving.refresh_from_db()
         self.assertEqual(self.evenement_inschrijving.status, EVENEMENT_INSCHRIJVING_STATUS_RESERVERING_MANDJE)
         self.assertEqual(self.evenement_inschrijving.koper, self.account_admin)
         self.assertEqual(self.evenement_inschrijving.bedrag_ontvangen, Decimal('0'))
+
+        self.opleiding_inschrijving.refresh_from_db()
+        self.assertEqual(self.opleiding_inschrijving.status, OPLEIDING_INSCHRIJVING_STATUS_RESERVERING_MANDJE)
+        self.assertEqual(self.opleiding_inschrijving.koper, self.account_admin)
+        self.assertEqual(self.opleiding_inschrijving.bedrag_ontvangen, Decimal('0'))
 
         # zet het mandje om in een bestelling
         resp = self.client.post(self.url_mandje_bestellen, {'snel': 1})
@@ -1092,32 +1127,48 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
         bestelling = Bestelling.objects.first()
         self.assertEqual(bestelling.status, BESTELLING_STATUS_NIEUW)
 
-        self.inschrijving.refresh_from_db()
-        self.assertEqual(self.inschrijving.status, WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_BESTELD)
-        self.assertEqual(self.inschrijving.ontvangen_euro, self.inschrijving.retour_euro)     # nog steeds 0
+        self.wedstrijd_inschrijving.refresh_from_db()
+        self.assertEqual(self.wedstrijd_inschrijving.status, WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_BESTELD)
+        self.assertEqual(self.wedstrijd_inschrijving.ontvangen_euro, self.wedstrijd_inschrijving.retour_euro)     # nog steeds 0
 
         self.evenement_inschrijving.refresh_from_db()
         self.assertEqual(self.evenement_inschrijving.status, EVENEMENT_INSCHRIJVING_STATUS_RESERVERING_BESTELD)
 
+        self.opleiding_inschrijving.refresh_from_db()
+        self.assertEqual(self.opleiding_inschrijving.status, OPLEIDING_INSCHRIJVING_STATUS_RESERVERING_BESTELD)
+
         # afmelden voor de wedstrijd
-        bestel_mutatieverzoek_afmelden_wedstrijd(self.inschrijving, snel=True)
+        bestel_mutatieverzoek_afmelden_wedstrijd(self.wedstrijd_inschrijving, snel=True)
         bestel_mutatieverzoek_afmelden_evenement(self.evenement_inschrijving, snel=True)
+        bestel_mutatieverzoek_afmelden_opleiding(self.opleiding_inschrijving, snel=True)
+
+        # nog een keer afmelden (wordt gestopt bij het aanmaken van de mutatie)
+        prev_count = BestellingMutatie.objects.count()
+        bestel_mutatieverzoek_afmelden_wedstrijd(self.wedstrijd_inschrijving, snel=True)
+        bestel_mutatieverzoek_afmelden_evenement(self.evenement_inschrijving, snel=True)
+        bestel_mutatieverzoek_afmelden_opleiding(self.opleiding_inschrijving, snel=True)
+        self.assertEqual(BestellingMutatie.objects.count(), prev_count)
 
         self.assertEqual(EvenementAfgemeld.objects.count(), 0)
+        self.assertEqual(OpleidingAfgemeld.objects.count(), 0)
+
         f1, f2 = self.verwerk_bestel_mutaties()
-        # print('\nf1:', f1.getvalue(), '\nf2:', f2.getvalue())
+        print('\nf1:', f1.getvalue(), '\nf2:', f2.getvalue())
         self.assertTrue(' met status="besteld" afmelden voor wedstrijd' in f2.getvalue())
         self.assertTrue(' met status="besteld" afmelden voor evenement' in f2.getvalue())
+        self.assertTrue(' met status="besteld" afmelden voor opleiding' in f2.getvalue())
         self.assertTrue('status Gereserveerd, wacht op betaling --> Verwijderd' in f2.getvalue())
         self.assertTrue('status Gereserveerd, wacht op betaling --> afgemeld pk=' in f2.getvalue())
-        self.assertEqual(EvenementAfgemeld.objects.count(), 1)
 
-        self.inschrijving.refresh_from_db()
-        self.assertEqual(self.inschrijving.status, WEDSTRIJD_INSCHRIJVING_STATUS_VERWIJDERD)
+        self.assertEqual(EvenementAfgemeld.objects.count(), 1)
+        self.assertEqual(OpleidingAfgemeld.objects.count(), 1)
+
+        self.wedstrijd_inschrijving.refresh_from_db()
+        self.assertEqual(self.wedstrijd_inschrijving.status, WEDSTRIJD_INSCHRIJVING_STATUS_VERWIJDERD)
         self.assertEqual(EvenementInschrijving.objects.filter(pk=self.evenement_inschrijving.pk).count(), 0)
 
         # nog een keer afmelden
-        bestel_mutatieverzoek_afmelden_wedstrijd(self.inschrijving, snel=True)
+        bestel_mutatieverzoek_afmelden_wedstrijd(self.wedstrijd_inschrijving, snel=True)
         f1, f2 = self.verwerk_bestel_mutaties()
         # print('\nf1:', f1.getvalue(), '\nf2:', f2.getvalue())
         self.assertFalse(' met status="besteld" afmelden voor wedstrijd' in f2.getvalue())
@@ -1128,10 +1179,10 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
         self.e2e_check_rol('sporter')
 
         # bestel wedstrijddeelname
-        bestel_mutatieverzoek_inschrijven_wedstrijd(self.account_admin, self.inschrijving, snel=True)
+        bestel_mutatieverzoek_inschrijven_wedstrijd(self.account_admin, self.wedstrijd_inschrijving, snel=True)
         self.verwerk_bestel_mutaties()
 
-        inschrijving = WedstrijdInschrijving.objects.get(pk=self.inschrijving.pk)
+        inschrijving = WedstrijdInschrijving.objects.get(pk=self.wedstrijd_inschrijving.pk)
         self.assertEqual(inschrijving.koper, self.account_admin)
         self.assertEqual(inschrijving.status, WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_MANDJE)
 
@@ -1143,7 +1194,7 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
         bestelling = Bestelling.objects.first()
         self.assertEqual(bestelling.status, BESTELLING_STATUS_NIEUW)
 
-        inschrijving = WedstrijdInschrijving.objects.get(pk=self.inschrijving.pk)
+        inschrijving = WedstrijdInschrijving.objects.get(pk=self.wedstrijd_inschrijving.pk)
         self.assertEqual(inschrijving.status, WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_BESTELD)
         self.assertEqual(inschrijving.ontvangen_euro, inschrijving.retour_euro)     # nog steeds 0
 
@@ -1173,7 +1224,7 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
         bestelling = Bestelling.objects.get(pk=bestelling.pk)
         self.assertEqual(bestelling.status, BESTELLING_STATUS_BETALING_ACTIEF)
 
-        inschrijving = WedstrijdInschrijving.objects.get(pk=self.inschrijving.pk)
+        inschrijving = WedstrijdInschrijving.objects.get(pk=self.wedstrijd_inschrijving.pk)
         self.assertEqual(inschrijving.koper, self.account_admin)
         self.assertEqual(inschrijving.status, WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_BESTELD)
         self.assertEqual(inschrijving.ontvangen_euro, Decimal('0'))     # TODO: verwachting = 5
@@ -1182,7 +1233,7 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
         # afmelden voor de wedstrijd
         bestel_mutatieverzoek_afmelden_wedstrijd(inschrijving, snel=True)
         self.verwerk_bestel_mutaties()
-        inschrijving = WedstrijdInschrijving.objects.get(pk=self.inschrijving.pk)
+        inschrijving = WedstrijdInschrijving.objects.get(pk=self.wedstrijd_inschrijving.pk)
         self.assertEqual(inschrijving.status, WEDSTRIJD_INSCHRIJVING_STATUS_VERWIJDERD)
 
     def test_afmelden_na_betalen(self):
@@ -1191,13 +1242,13 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
         self.e2e_check_rol('sporter')
 
         # bestel wedstrijddeelname
-        bestel_mutatieverzoek_inschrijven_wedstrijd(self.account_admin, self.inschrijving, snel=True)
+        bestel_mutatieverzoek_inschrijven_wedstrijd(self.account_admin, self.wedstrijd_inschrijving, snel=True)
         bestel_mutatieverzoek_inschrijven_evenement(self.account_admin, self.evenement_inschrijving, snel=True)
         # coverage: 2e verzoek voor dezelfde mutatie
         bestel_mutatieverzoek_inschrijven_evenement(self.account_admin, self.evenement_inschrijving, snel=True)
         self.verwerk_bestel_mutaties()
 
-        inschrijving = WedstrijdInschrijving.objects.get(pk=self.inschrijving.pk)
+        inschrijving = WedstrijdInschrijving.objects.get(pk=self.wedstrijd_inschrijving.pk)
         self.assertEqual(inschrijving.koper, self.account_admin)
         self.assertEqual(inschrijving.status, WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_MANDJE)
 
@@ -1212,7 +1263,7 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
         bestelling = Bestelling.objects.first()
         self.assertEqual(bestelling.status, BESTELLING_STATUS_NIEUW)
 
-        inschrijving = WedstrijdInschrijving.objects.get(pk=self.inschrijving.pk)
+        inschrijving = WedstrijdInschrijving.objects.get(pk=self.wedstrijd_inschrijving.pk)
         self.assertEqual(inschrijving.status, WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_BESTELD)
         self.assertEqual(inschrijving.ontvangen_euro, inschrijving.retour_euro)     # nog steeds 0
 
@@ -1245,7 +1296,7 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
         bestelling = Bestelling.objects.get(pk=bestelling.pk)
         self.assertEqual(bestelling.status, BESTELLING_STATUS_AFGEROND)
 
-        inschrijving = WedstrijdInschrijving.objects.get(pk=self.inschrijving.pk)
+        inschrijving = WedstrijdInschrijving.objects.get(pk=self.wedstrijd_inschrijving.pk)
         self.assertEqual(inschrijving.koper, self.account_admin)
         self.assertEqual(inschrijving.status, WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF)
         self.assertEqual(inschrijving.ontvangen_euro, Decimal('5.80'))      # prijs minus korting
@@ -1261,7 +1312,7 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
         bestel_mutatieverzoek_afmelden_wedstrijd(inschrijving, snel=True)
         bestel_mutatieverzoek_afmelden_evenement(self.evenement_inschrijving, snel=True)
         self.verwerk_bestel_mutaties()
-        inschrijving = WedstrijdInschrijving.objects.get(pk=self.inschrijving.pk)
+        inschrijving = WedstrijdInschrijving.objects.get(pk=self.wedstrijd_inschrijving.pk)
         self.assertEqual(inschrijving.status, WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD)
 
     def test_afgerond(self):
@@ -1270,12 +1321,12 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
         self.e2e_check_rol('sporter')
 
         # bestel wedstrijddeelname
-        bestel_mutatieverzoek_inschrijven_wedstrijd(self.account_admin, self.inschrijving, snel=True)
+        bestel_mutatieverzoek_inschrijven_wedstrijd(self.account_admin, self.wedstrijd_inschrijving, snel=True)
         # coverage: 2e verzoek voor dezelfde mutatie
-        bestel_mutatieverzoek_inschrijven_wedstrijd(self.account_admin, self.inschrijving, snel=True)
+        bestel_mutatieverzoek_inschrijven_wedstrijd(self.account_admin, self.wedstrijd_inschrijving, snel=True)
         self.verwerk_bestel_mutaties()
 
-        inschrijving = WedstrijdInschrijving.objects.get(pk=self.inschrijving.pk)
+        inschrijving = WedstrijdInschrijving.objects.get(pk=self.wedstrijd_inschrijving.pk)
         self.assertEqual(inschrijving.koper, self.account_admin)
         self.assertEqual(inschrijving.status, WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_MANDJE)
 
@@ -1373,7 +1424,7 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
         # leg producten in het mandje
         self.product.onbeperkte_voorraad = True
         self.product.save(update_fields=['onbeperkte_voorraad'])
-        bestel_mutatieverzoek_inschrijven_wedstrijd(self.account_admin, self.inschrijving, snel=True)
+        bestel_mutatieverzoek_inschrijven_wedstrijd(self.account_admin, self.wedstrijd_inschrijving, snel=True)
         bestel_mutatieverzoek_webwinkel_keuze(self.account_admin, self.keuze, snel=True)
         # coverage: 2e verzoek voor dezelfde mutatie
         bestel_mutatieverzoek_webwinkel_keuze(self.account_admin, self.keuze, snel=True)
@@ -1471,7 +1522,7 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
         self.e2e_check_rol('sporter')
 
         # leg producten in het mandje
-        bestel_mutatieverzoek_inschrijven_wedstrijd(self.account_admin, self.inschrijving, snel=True)
+        bestel_mutatieverzoek_inschrijven_wedstrijd(self.account_admin, self.wedstrijd_inschrijving, snel=True)
         bestel_mutatieverzoek_webwinkel_keuze(self.account_admin, self.keuze, snel=True)
         self.verwerk_bestel_mutaties()
 
