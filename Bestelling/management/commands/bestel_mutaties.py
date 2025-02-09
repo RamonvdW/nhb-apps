@@ -68,7 +68,7 @@ EMAIL_TEMPLATE_BEVESTIG_BESTELLING = 'email_bestelling/bevestig-bestelling.dtl'
 EMAIL_TEMPLATE_BEVESTIG_BETALING = 'email_bestelling/bevestig-betaling.dtl'
 
 
-def _beschrijf_bestelling(bestelling):
+def _beschrijf_bestelling(bestelling: Bestelling):
     producten = (bestelling
                  .producten
                  .select_related('wedstrijd_inschrijving',
@@ -115,7 +115,7 @@ def _beschrijf_bestelling(bestelling):
         product = SimpleNamespace(
                         regel_nr=regel_nr,
                         beschrijving=[("Verzendkosten", "")],       # TODO: specialiseren in pakket/briefpost
-                        prijs_euro=verzendkosten_euro_str)
+                        prijs_euro_str=verzendkosten_euro_str)
         producten.append(product)
 
     if bestelling.transport == BESTELLING_TRANSPORT_OPHALEN:
@@ -128,8 +128,12 @@ def _beschrijf_bestelling(bestelling):
         product = SimpleNamespace(
                         regel_nr=regel_nr,
                         beschrijving=[("Ophalen op het bondsbureau", "")],
-                        prijs_euro=verzendkosten_euro_str)
+                        prijs_euro_str=verzendkosten_euro_str)
         producten.append(product)
+
+    bestelling.btw_euro_cat1_str = format_bedrag_euro(bestelling.btw_euro_cat1)
+    bestelling.btw_euro_cat2_str = format_bedrag_euro(bestelling.btw_euro_cat2)
+    bestelling.btw_euro_cat3_str = format_bedrag_euro(bestelling.btw_euro_cat3)
 
     return producten
 
@@ -185,6 +189,7 @@ def stuur_email_naar_koper_bestelling_details(bestelling: Bestelling):
         'bestel_status': BESTELLING_STATUS2STR[bestelling.status],
         'kan_betalen': bestelling.status not in (BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_GEANNULEERD),
         'heeft_afleveradres': heeft_afleveradres,
+        'wil_ophalen': bestelling.transport == BESTELLING_TRANSPORT_OPHALEN,
     }
 
     if bestelling.status == BESTELLING_STATUS_NIEUW:
@@ -206,6 +211,13 @@ def stuur_email_naar_koper_betaalbevestiging(bestelling: Bestelling):
     transacties = _beschrijf_transacties(bestelling)
     totaal_euro_str = format_bedrag_euro(bestelling.totaal_euro)
 
+    heeft_afleveradres = False
+    for nr in (1, 2, 3, 4, 5):
+        regel = getattr(bestelling, 'afleveradres_regel_%s' % nr)
+        if regel:
+            heeft_afleveradres = True
+    # for
+
     context = {
         'voornaam': account.get_first_name(),
         'naam_site': settings.NAAM_SITE,
@@ -213,6 +225,7 @@ def stuur_email_naar_koper_betaalbevestiging(bestelling: Bestelling):
         'totaal_euro_str': totaal_euro_str,
         'producten': producten,
         'transacties': transacties,
+        'heeft_afleveradres': heeft_afleveradres,
         'wil_ophalen': bestelling.transport == BESTELLING_TRANSPORT_OPHALEN,
     }
 
@@ -233,9 +246,6 @@ def stuur_email_webwinkel_backoffice(bestelling: Bestelling, email_backoffice):
     transacties = _beschrijf_transacties(bestelling)
 
     totaal_euro_str = format_bedrag_euro(bestelling.totaal_euro)
-    bestelling.btw_euro_cat1_str = format_bedrag_euro(bestelling.btw_euro_cat1)
-    bestelling.btw_euro_cat2_str = format_bedrag_euro(bestelling.btw_euro_cat2)
-    bestelling.btw_euro_cat3_str = format_bedrag_euro(bestelling.btw_euro_cat3)
 
     context = {
         'koper_sporter': sporter,       # bevat postadres

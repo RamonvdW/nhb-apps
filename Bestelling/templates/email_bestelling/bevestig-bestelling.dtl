@@ -1,6 +1,6 @@
 {% extends 'email_mailer/email_basis.dtl' %}
 {% comment %}
-                Copyright (c) 2022-2024 Ramon van der Winkel.
+                Copyright (c) 2022-2025 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -73,22 +73,6 @@
         |  Kenmerk: Bestelnummer {{ bestelling.mh_bestel_nr }}
     {% endif %}
 
-    {% if heeft_afleveradres %}
-        |
-        | Het pakketje zal worden verstuurd naar het volgende adres:
-        |    {{ bestelling.afleveradres_regel_1 }}
-        |    {{ bestelling.afleveradres_regel_2 }}
-        {% if bestelling.afleveradres_regel_3 %}
-        |    {{ bestelling.afleveradres_regel_3 }}
-            {% if bestelling.afleveradres_regel_4 %}
-            |    {{ bestelling.afleveradres_regel_4 }}
-                {% if bestelling.afleveradres_regel_5 %}
-                |    {{ bestelling.afleveradres_regel_5 }}
-                {% endif %}
-            {% endif %}
-        {% endif %}
-    {% endif %}
-
     |
     |Verkoper:
     |    {{ bestelling.verkoper_naam }}
@@ -100,6 +84,29 @@
     {% endif %}
     |    E-mail: {{ bestelling.verkoper_email }}
     |    Telefoon: {{ bestelling.verkoper_telefoon }}
+
+    |
+    |Levering:
+    {% if wil_ophalen %}
+        |Je hebt gekozen op de producten op te halen op het bondsbureau.
+    {% else %}
+        | Het pakketje zal worden verstuurd naar het volgende adres:
+        {% if heeft_afleveradres %}
+            |    {{ bestelling.afleveradres_regel_1 }}
+            |    {{ bestelling.afleveradres_regel_2 }}
+            {% if bestelling.afleveradres_regel_3 %}
+            |    {{ bestelling.afleveradres_regel_3 }}
+                {% if bestelling.afleveradres_regel_4 %}
+                |    {{ bestelling.afleveradres_regel_4 }}
+                    {% if bestelling.afleveradres_regel_5 %}
+                    |    {{ bestelling.afleveradres_regel_5 }}
+                    {% endif %}
+                {% endif %}
+            {% endif %}
+        {% else %}
+            | Niet opgegeven!
+        {% endif %}
+    {% endif %}
 
     |
     |Bedankt voor je bestelling!
@@ -211,26 +218,6 @@
     {% endif %}
 
 
-    {% if heeft_afleveradres %}
-        <h1>Levering</h1>
-
-        <p>Het pakketje zal worden verstuurd naar het volgende adres:</p>
-        <p>
-            <span>{{ bestelling.afleveradres_regel_1 }}</span>
-            <br><span>{{ bestelling.afleveradres_regel_2 }}</span>
-            {% if bestelling.afleveradres_regel_3 %}
-                <br><span>{{ bestelling.afleveradres_regel_3 }}</span>
-                {% if bestelling.afleveradres_regel_4 %}
-                    <br><span>{{ bestelling.afleveradres_regel_4 }}</span>
-                    {% if bestelling.afleveradres_regel_5 %}
-                        <br><span>{{ bestelling.afleveradres_regel_5 }}</span>
-                    {% endif %}
-                {% endif %}
-            {% endif %}
-        </p>
-    {% endif %}
-
-
     <h1>Verkoper</h1>
 
     <table>
@@ -243,6 +230,32 @@
         <tr><th>E-mail:</th><td>{{ bestelling.verkoper_email }}</td></tr>
         <tr><th>Telefoon:</th><td>{{ bestelling.verkoper_telefoon }}</td></tr>
     </table>
+
+
+    <h1>Levering</h1>
+
+    {% if wil_ophalen %}
+        <p>Je hebt gekozen op de producten op te halen op het bondsbureau.</p>
+    {% else %}
+        <p>Het pakketje zal worden verstuurd naar het volgende adres:</p>
+        {% if heeft_afleveradres %}
+            <p>
+                <span>{{ bestelling.afleveradres_regel_1 }}</span>
+                <br><span>{{ bestelling.afleveradres_regel_2 }}</span>
+                {% if bestelling.afleveradres_regel_3 %}
+                    <br><span>{{ bestelling.afleveradres_regel_3 }}</span>
+                    {% if bestelling.afleveradres_regel_4 %}
+                        <br><span>{{ bestelling.afleveradres_regel_4 }}</span>
+                        {% if bestelling.afleveradres_regel_5 %}
+                            <br><span>{{ bestelling.afleveradres_regel_5 }}</span>
+                        {% endif %}
+                    {% endif %}
+                {% endif %}
+            </p>
+        {% else %}
+            <p>Niet opgegeven!</p>
+        {% endif %}
+    {% endif %}
 
     <br>
     <br>

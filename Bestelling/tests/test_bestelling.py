@@ -9,10 +9,14 @@ from django.conf import settings
 from django.utils import timezone
 from BasisTypen.definities import ORGANISATIE_IFAA
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse
-from Bestelling.definities import (BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_BETALING_ACTIEF,
-                                   BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_MISLUKT, BESTELLING_STATUS_GEANNULEERD,
-                                   BESTELLING_MUTATIE_ANNULEER)
-from Bestelling.models import BestellingMandje, BestellingMutatie, Bestelling
+from Bestelling.definities import (BESTELLING_STATUS_NIEUW,
+                                   BESTELLING_STATUS_MISLUKT,
+                                   BESTELLING_STATUS_BETALING_ACTIEF,
+                                   BESTELLING_STATUS_AFGEROND,
+                                   BESTELLING_STATUS_GEANNULEERD,
+                                   BESTELLING_MUTATIE_ANNULEER,
+                                   BESTELLING_TRANSPORT_OPHALEN)
+from Bestelling.models import BestellingMandje, BestellingMutatie, Bestelling, BestellingProduct
 from Bestelling.operations.mutaties import (bestel_mutatieverzoek_inschrijven_wedstrijd,
                                             bestel_mutatieverzoek_inschrijven_evenement,
                                             bestel_mutatieverzoek_inschrijven_opleiding,
@@ -32,7 +36,8 @@ from Functie.models import Functie
 from Geo.models import Regio
 from Locatie.models import WedstrijdLocatie, EvenementLocatie
 from Mailer.models import MailQueue
-from Opleiding.definities import (OPLEIDING_STATUS_INSCHRIJVEN, OPLEIDING_INSCHRIJVING_STATUS_RESERVERING_MANDJE,
+from Opleiding.definities import (OPLEIDING_STATUS_INSCHRIJVEN,
+                                  OPLEIDING_INSCHRIJVING_STATUS_RESERVERING_MANDJE,
                                   OPLEIDING_INSCHRIJVING_STATUS_RESERVERING_BESTELD)
 from Opleiding.models import Opleiding, OpleidingInschrijving, OpleidingAfgemeld
 from Sporter.models import Sporter, SporterBoog
@@ -42,8 +47,10 @@ from Webwinkel.definities import VERZENDKOSTEN_BRIEFPOST
 from Webwinkel.models import WebwinkelProduct, WebwinkelKeuze
 from Wedstrijden.definities import (WEDSTRIJD_STATUS_GEACCEPTEERD, WEDSTRIJD_KORTING_VERENIGING,
                                     WEDSTRIJD_KORTING_SPORTER,
-                                    WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_MANDJE, WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_BESTELD,
-                                    WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF, WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD,
+                                    WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_MANDJE,
+                                    WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_BESTELD,
+                                    WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF,
+                                    WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD,
                                     WEDSTRIJD_INSCHRIJVING_STATUS_VERWIJDERD)
 from Wedstrijden.models import Wedstrijd, WedstrijdSessie, WedstrijdInschrijving, WedstrijdKorting
 from decimal import Decimal
@@ -198,7 +205,7 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
         self.functie_mww.save(update_fields=['bevestigde_email'])
 
         product = WebwinkelProduct(
-                        omslag_titel='Test titel 1',
+                        omslag_titel='Test 1 webwinkel',
                         onbeperkte_voorraad=False,
                         aantal_op_voorraad=10,
                         eenheid='meervoud',
@@ -319,6 +326,7 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
 
         self.assertEqual(1, MailQueue.objects.count())
         mail = MailQueue.objects.first()
+        # self.e2e_show_email_in_browser(mail)
         self.assert_email_html_ok(mail, 'email_bestelling/bevestig-bestelling.dtl')
         self.assert_consistent_email_html_text(mail, ignore=('>Bedrag:', '>Korting:'))
         self.assertTrue('Verzendkosten' in mail.mail_text)
@@ -405,6 +413,7 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
 
         self.assertEqual(1, MailQueue.objects.count())
         mail = MailQueue.objects.first()
+        # self.e2e_show_email_in_browser(mail)
         self.assert_email_html_ok(mail, 'email_bestelling/bevestig-bestelling.dtl')
         self.assert_consistent_email_html_text(mail, ignore=('>Bedrag:', '>Korting:'))
         self.assertTrue('Verzendkosten' in mail.mail_text)
@@ -499,6 +508,9 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
         self.assertEqual(1, Bestelling.objects.count())
         bestelling = Bestelling.objects.first()
         self.assertEqual(bestelling.status, BESTELLING_STATUS_NIEUW)
+        bestelling.transport = BESTELLING_TRANSPORT_OPHALEN
+        bestelling.verkoper_btw_nr = 'BTW12345-01'
+        bestelling.save(update_fields=['transport', 'verkoper_btw_nr'])
 
         url = self.url_bestelling_afrekenen % bestelling.bestel_nr
         with self.assert_max_queries(20):
@@ -570,6 +582,7 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
         # er moet nu een mail in de MailQueue staan
         self.assertEqual(MailQueue.objects.count(), 1)
         mail = MailQueue.objects.first()
+        # self.e2e_show_email_in_browser(mail)
         self.assert_email_html_ok(mail, 'email_bestelling/bevestig-betaling.dtl')
         self.assert_consistent_email_html_text(mail, ignore=('>Bedrag:', '>Korting:'))
 
@@ -912,12 +925,12 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
 
         self.assertEqual(2, MailQueue.objects.count())
         mail = MailQueue.objects.get(mail_to=account_koper.bevestigde_email)
+        # self.e2e_show_email_in_browser(mail)
         self.assert_email_html_ok(mail, 'email_bestelling/bevestig-bestelling.dtl')
         self.assert_consistent_email_html_text(mail)
 
         mail = MailQueue.objects.get(mail_to=self.sporter.account.bevestigde_email)
-        # print('\nmail_text = %s' % mail.mail_text)
-        # print('mail_html = %s' % mail.mail_html)
+        # self.e2e_show_email_in_browser(mail)
         self.assertTrue(self.wedstrijd.locatie.plaats in mail.mail_text)
         self.assert_email_html_ok(mail, 'email_bestelling/info-inschrijving-wedstrijd.dtl')
         self.assertTrue('09:18' in mail.mail_text)        # 10:00 - 42min
@@ -1000,6 +1013,7 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
 
         self.assertEqual(2, MailQueue.objects.count())
         mail = MailQueue.objects.get(mail_to=sporter.email)
+        # self.e2e_show_email_in_browser(mail)
         self.assertTrue('Aanwezig zijn om:' in mail.mail_text)
         # self.assertTrue('Schietstijl:' in mail.mail_text)
 
@@ -1137,6 +1151,14 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
         self.opleiding_inschrijving.refresh_from_db()
         self.assertEqual(self.opleiding_inschrijving.status, OPLEIDING_INSCHRIJVING_STATUS_RESERVERING_BESTELD)
 
+        # coverage
+        product = BestellingProduct.objects.exclude(evenement_inschrijving=None).first()
+        self.assertTrue(str(product) != '')
+        self.assertTrue(product.korte_beschrijving() != '')
+        product = BestellingProduct.objects.exclude(opleiding_inschrijving=None).first()
+        self.assertTrue(str(product) != '')
+        self.assertTrue(product.korte_beschrijving() != '')
+
         # afmelden voor de wedstrijd
         bestel_mutatieverzoek_afmelden_wedstrijd(self.wedstrijd_inschrijving, snel=True)
         bestel_mutatieverzoek_afmelden_evenement(self.evenement_inschrijving, snel=True)
@@ -1153,7 +1175,7 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
         self.assertEqual(OpleidingAfgemeld.objects.count(), 0)
 
         f1, f2 = self.verwerk_bestel_mutaties()
-        print('\nf1:', f1.getvalue(), '\nf2:', f2.getvalue())
+        # print('\nf1:', f1.getvalue(), '\nf2:', f2.getvalue())
         self.assertTrue(' met status="besteld" afmelden voor wedstrijd' in f2.getvalue())
         self.assertTrue(' met status="besteld" afmelden voor evenement' in f2.getvalue())
         self.assertTrue(' met status="besteld" afmelden voor opleiding' in f2.getvalue())
@@ -1429,6 +1451,7 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
         # coverage: 2e verzoek voor dezelfde mutatie
         bestel_mutatieverzoek_webwinkel_keuze(self.account_admin, self.keuze, snel=True)
         bestel_mutatieverzoek_inschrijven_evenement(self.account_admin, self.evenement_inschrijving, snel=True)
+        bestel_mutatieverzoek_inschrijven_opleiding(self.account_admin, self.opleiding_inschrijving, snel=True)
         self.verwerk_bestel_mutaties()
 
         # zet het mandje om in een bestelling
@@ -1443,10 +1466,14 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
 
         MailQueue.objects.all().delete()
 
-        # trigger de corner-case waarbij een evenement inschrijving al definitief is
+        # trigger de case waarbij een evenement en opleiding inschrijvingen al definitief zijn
         self.evenement_inschrijving.refresh_from_db()
         self.evenement_inschrijving.status = EVENEMENT_INSCHRIJVING_STATUS_DEFINITIEF
         self.evenement_inschrijving.save(update_fields=['status'])
+
+        self.opleiding_inschrijving.refresh_from_db()
+        self.opleiding_inschrijving.status = OPLEIDING_INSCHRIJVING_STATUS_RESERVERING_BESTELD
+        self.opleiding_inschrijving.save(update_fields=['status'])
 
         # annuleer de bestelling
         url = self.url_annuleer_bestelling % bestelling.bestel_nr
@@ -1461,15 +1488,25 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
         bestelling = Bestelling.objects.get(pk=bestelling.pk)
         self.assertEqual(bestelling.status, BESTELLING_STATUS_NIEUW)
 
-        self.verwerk_bestel_mutaties()
+        f1, f2 = self.verwerk_bestel_mutaties()
+        print('\nf1:', f1.getvalue(), '\nf2:', f2.getvalue())
 
         bestelling = Bestelling.objects.get(pk=bestelling.pk)
         self.assertEqual(bestelling.status, BESTELLING_STATUS_GEANNULEERD)
 
         self.assertEqual(1, MailQueue.objects.count())
         mail = MailQueue.objects.first()
+        # self.e2e_show_email_in_browser(mail)
         self.assert_email_html_ok(mail, 'email_bestelling/bevestig-bestelling.dtl')
         self.assert_consistent_email_html_text(mail, ignore=('>Bedrag:', '>Korting:'))
+
+        # coverage
+        product = BestellingProduct.objects.exclude(evenement_afgemeld=None).first()
+        self.assertTrue(str(product) != '')
+        self.assertTrue(product.korte_beschrijving() != '')
+        product = BestellingProduct.objects.exclude(opleiding_afgemeld=None).first()
+        self.assertTrue(str(product) != '')
+        self.assertTrue(product.korte_beschrijving() != '')
 
         # bekijk de lijst van bestellingen, met de geannuleerde bestelling
         with self.assert_max_queries(20):
@@ -1759,8 +1796,7 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
 
         self.assertEqual(3, MailQueue.objects.count())
         mail = MailQueue.objects.filter(mail_subj='Inschrijving voor evenement').first()
-        # print('\nmail_text = %s' % mail.mail_text)
-        # print('mail_html = %s' % mail.mail_html)
+        # self.e2e_show_email_in_browser(mail)
         self.assert_email_html_ok(mail, 'email_bestelling/info-inschrijving-evenement.dtl')
         self.assert_consistent_email_html_text(mail)
 

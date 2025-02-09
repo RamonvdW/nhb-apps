@@ -120,7 +120,7 @@ class BestellingMandje(models.Model):
     verzendkosten_euro = models.DecimalField(max_digits=6, decimal_places=2, default=Decimal(0))    # max 9999,99
 
     # belasting in verschillende categorieën: leeg = niet gebruikt
-    btw_percentage_cat1 = models.CharField(max_length=5, default='', blank=True)        # 21,00
+    btw_percentage_cat1 = models.CharField(max_length=5, default='', blank=True)         # 21,00
     btw_percentage_cat2 = models.CharField(max_length=5, default='', blank=True)
     btw_percentage_cat3 = models.CharField(max_length=5, default='', blank=True)
 

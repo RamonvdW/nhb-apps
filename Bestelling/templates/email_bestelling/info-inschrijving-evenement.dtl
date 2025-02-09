@@ -1,6 +1,6 @@
 {% extends 'email_mailer/email_basis.dtl' %}
 {% comment %}
-                Copyright (c) 2024 Ramon van der Winkel.
+                Copyright (c) 2024-2025 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -13,7 +13,6 @@
     |Locatie: {{ evenement_adres }}
     |Wanneer: {{ evenement_datum }}
     |Begint om: {{ begin_tijd }}
-    |
     |Reserveringsnummer: {{ reserveringsnummer }}
     |
     |Het evenement wordt georganiseerd door {{ evenement_org_ver }}.
@@ -38,9 +37,6 @@
         <tr><th>Locatie:</th><td>{{ evenement_adres }}</td></tr>
         <tr><th>Wanneer:</th><td>{{ evenement_datum }}</td></tr>
         <tr><th>Begint om:</th><td>{{ begin_tijd }}</td></tr>
-    </table>
-    <br>
-    <table>
         <tr><th>Reserveringsnummer:</th><td>{{ reserveringsnummer }}</td></tr>
     </table>
     <br>
