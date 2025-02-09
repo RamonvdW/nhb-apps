@@ -20,12 +20,12 @@ class Command(BaseCommand):
         super().__init__(stdout, stderr, no_color, force_color)
         self.dryrun = True
         self.verbose = False
-        self.deelnemers = dict()            # [lid_nr] = [KampioenschapSporterBoog, ...]
-        self.teams_cache = list()           # [KampioenschapTeam, ...]
-        self.team_lid_nrs = dict()          # [team.pk] = [lid_nr, ...]
-        self.ver_lid_nrs = dict()           # [ver_nr] = [lid_nr, ...]
-        self.kamp_lid_nrs = list()          # [lid_nr, ...]     iedereen die geplaatst is voor de kampioenschappen
-        self.deelnemende_teams = dict()     # [team naam] = KampioenschapTeam
+        self.pk2deelnemer = dict()                  # [lid_nr] = [KampioenschapSporterBoog, ...]
+        self.teams_cache = list()                   # [KampioenschapTeam, ...]
+        self.team_gekoppelde_deelnemers = dict()    # [team.pk] = [(deelnemer.gemiddelde, deelnemer.pk), ...]
+        self.ver_kamp_pks = dict()                  # [ver_nr] = [KampioenschapSporterBoog.pk, ...]
+        self.kamp_lid_nrs = list()                  # [lid_nr, ...]   iedereen die geplaatst is voor de kampioenschappen
+        self.deelnemende_teams = dict()             # [team naam] = KampioenschapTeam
         self.team_klasse = None
         self.toegestane_bogen = list()
 
@@ -51,18 +51,15 @@ class Command(BaseCommand):
                                           'sporterboog__boogtype',
                                           'indiv_klasse')):
 
-            lid_nr = deelnemer.sporterboog.sporter.lid_nr
+            self.pk2deelnemer[deelnemer.pk] = deelnemer
+
+            lid_nr = deelnemer.lid_nr = deelnemer.sporterboog.sporter.lid_nr
             ver_nr = deelnemer.bij_vereniging.ver_nr
 
             try:
-                self.deelnemers[lid_nr].append(deelnemer)
+                self.ver_kamp_pks[ver_nr].append(deelnemer.pk)
             except KeyError:
-                self.deelnemers[lid_nr] = [deelnemer]
-
-            try:
-                self.ver_lid_nrs[ver_nr].append(lid_nr)
-            except KeyError:
-                self.ver_lid_nrs[ver_nr] = [lid_nr]
+                self.ver_kamp_pks[ver_nr] = [deelnemer.pk]
 
             self.kamp_lid_nrs.append(lid_nr)
         # for
@@ -81,8 +78,12 @@ class Command(BaseCommand):
                                        'feitelijke_leden')):
 
             self.teams_cache.append(team)
-            self.team_lid_nrs[team.pk] = [deelnemer.sporterboog.sporter.lid_nr
-                                          for deelnemer in team.gekoppelde_leden.all()]
+
+            deelnemers = [(deelnemer.gemiddelde, deelnemer.pk)
+                          for deelnemer in team.gekoppelde_leden.all()]
+            deelnemers.sort(reverse=True)       # hoogste eerst
+
+            self.team_gekoppelde_deelnemers[team.pk] = deelnemers
         # for
 
     def _sort_op_gemiddelde(self, lid_nrs):
@@ -103,20 +104,22 @@ class Command(BaseCommand):
         gem.sort(reverse=True)
         return gem
 
-    def _get_deelnemer(self, lid_nr, lid_ag):
-        deelnemer_all = self.deelnemers[lid_nr]
-        for deelnemer in deelnemer_all:
-            if abs(deelnemer.gemiddelde - lid_ag) < 0.0001:
+    def _get_deelnemer(self, ver_nr, lid_nr, lid_ag):
+        for pk in self.ver_kamp_pks[ver_nr]:
+            deelnemer = self.pk2deelnemer[pk]
+            if deelnemer.lid_nr == lid_nr and abs(deelnemer.gemiddelde - lid_ag) < 0.0001:
                 return deelnemer
         # for
 
-        self.stderr.write('[WARNING] TODO: bepaal juiste deelnemer met ag=%s uit\n%s' % (
-                            lid_ag,
-                            "\n".join(["%s / %s / %s" % (deelnemer,
-                                                         deelnemer.sporterboog.boogtype.afkorting,
-                                                         deelnemer.gemiddelde) for deelnemer in deelnemer_all])))
-        deelnemer = deelnemer_all[0]
-        return deelnemer
+        # niet gevonden
+
+        if lid_nr not in self.kamp_lid_nrs:
+            self.stderr.write('[ERROR] Lid %s is niet gekwalificeerd voor dit kampioenschap!' % lid_nr)
+            return None
+
+        # misschien van een andere vereniging?
+        self.stderr.write('[ERROR] Kan vereniging %s, lid %s met ag=%.3f niet vinden' % (ver_nr, lid_nr, lid_ag))
+        return None
 
     def _get_team(self, team_naam, ver_nr, row_nr):
         # if self.verbose:
@@ -157,6 +160,76 @@ class Command(BaseCommand):
                 repr(team_naam), ver_nr, row_nr))
 
         return kamp_team
+
+    def _bepaal_feitelijke_deelnemers(self, ver_nr: int, kamp_team: KampioenschapTeam, gevonden_deelnemers):
+
+        gekoppelde_deelnemers = self.team_gekoppelde_deelnemers[kamp_team.pk]
+        aantal_gekoppeld = len(gekoppelde_deelnemers)
+
+        feitelijke_deelnemers = list()
+
+        # haal
+        klopt = list()
+        for tup in gevonden_deelnemers:
+            if tup in gekoppelde_deelnemers:
+                klopt.append(tup)
+        # for
+        for tup in klopt:
+            gevonden_deelnemers.remove(tup)
+            gekoppelde_deelnemers.remove(tup)
+
+            _, pk = tup
+            deelnemer = self.pk2deelnemer[pk]
+            feitelijke_deelnemers.append(deelnemer)
+        # for
+
+        if len(gekoppelde_deelnemers) == len(gevonden_deelnemers) == 0:
+            # alles is verwerkt
+            self.stdout.write('[DEBUG]   Feitelijke deelnemers: %s' % repr([deelnemer.lid_nr
+                                                                            for deelnemer in feitelijke_deelnemers]))
+            return feitelijke_deelnemers
+
+        uitvallers = gekoppelde_deelnemers
+        invallers = gevonden_deelnemers
+
+        self.stdout.write('[DEBUG]   Feitelijke deelnemers: %s' % repr([deelnemer.lid_nr
+                                                                        for deelnemer in feitelijke_deelnemers]))
+        self.stdout.write('[DEBUG]   Uitvallers deelnemers: %s' % repr(uitvallers))
+        self.stdout.write('[DEBUG]   Invallers  deelnemers: %s' % repr(invallers))
+
+        if len(invallers) > len(uitvallers):
+            self.stderr.write('[ERROR] Te veel invallers voor team %s met max %s sporters (ver: %s)' % (
+                                repr(kamp_team.team_naam), aantal_gekoppeld, ver_nr))
+            feitelijke_deelnemers = list()
+            return feitelijke_deelnemers
+
+        while len(invallers) > 0:
+            gemiddelde_in, pk_in = invallers.pop(0)
+            gemiddelde_uit, pk_uit = uitvallers[0]
+            deelnemer_in = self.pk2deelnemer[pk_in]
+
+            if gemiddelde_in > gemiddelde_uit:
+                # mag niet invallen
+                self.stderr.write(
+                    '[ERROR] Te hoog gemiddelde %s voor invaller %s voor team %s van vereniging %s' % (
+                            gemiddelde_in, deelnemer_in.lid_nr, kamp_team.team_naam, ver_nr))
+                for gemiddelde, pk in uitvallers:
+                    deelnemer_uit = self.pk2deelnemer[pk]
+                    self.stderr.write('        Uitvaller %s heeft gemiddelde %s' % (deelnemer_uit.lid_nr, gemiddelde))
+            else:
+                # mag wel invallen en vervangt de hoogste uitvaller
+                feitelijke_deelnemers.append(deelnemer_in)
+                uitvallers.pop(0)
+        # while
+
+        self.stdout.write('[DEBUG]   Feitelijke deelnemers: %s' % repr([deelnemer.lid_nr
+                                                                        for deelnemer in feitelijke_deelnemers]))
+
+        if len(feitelijke_deelnemers) < 3:
+            self.stderr.write('[ERROR]   Maar %s deelnemers in team %s' % (len(feitelijke_deelnemers),
+                                                                           kamp_team.team_naam))
+
+        return feitelijke_deelnemers
 
     def _importeer_voorronde(self, ws):
         col_ver_naam = 'D'
@@ -213,13 +286,8 @@ class Command(BaseCommand):
 
             self.deelnemende_teams[team_naam] = kamp_team
 
-            ver_lid_nrs = self.ver_lid_nrs[ver_nr]
-            team_lid_nrs = self.team_lid_nrs[kamp_team.pk]
-            aantal_gekoppeld = len(team_lid_nrs)
-            feitelijke_deelnemers = list()
-
             # haal de teamleden op
-            gevonden_lid_nrs = list()
+            gevonden_deelnemers = list()  # [(deelnemer.gemiddelde, deelnemer.pk), ..]
             for lp in range(10):            # pragma: no branch
                 row_nr += 1
                 row = str(row_nr)
@@ -230,97 +298,56 @@ class Command(BaseCommand):
                 if str(lid_nr) == '-':
                     continue
 
-                if lid_nr not in self.kamp_lid_nrs:
-                    self.stderr.write('[ERROR] Lid %s is niet gekwalificeerd voor dit kampioenschap!' % lid_nr)
-                elif lid_nr not in ver_lid_nrs:
-                    self.stderr.write('[ERROR] Lid %s is niet van vereniging %s!' % (lid_nr, ver_nr))
+                try:
+                    lid_ag = round(Decimal(ws[col_lid_ag + row].value), 3)  # 3 cijfers achter de komma
+                    score1 = int(ws[col_score1 + row].value)
+                    score2 = int(ws[col_score2 + row].value)
+                except (ValueError, TypeError):
+                    self.stderr.write('[ERROR] Probleem met de scores op regel %s' % row_nr)
                 else:
-                    try:
-                        lid_ag = round(Decimal(ws[col_lid_ag + row].value), 3)  # 3 cijfers achter de komma
-                        score1 = int(ws[col_score1 + row].value)
-                        score2 = int(ws[col_score2 + row].value)
-                    except (ValueError, TypeError):
-                        self.stderr.write('[ERROR] Probleem met de scores op regel %s' % row_nr)
+                    if score1 + score2 == 0:
+                        # sporter heeft niet meegedaan
+                        self.stdout.write('[WARNING] Geen scores voor sporter %s op regel %s' % (lid_nr, row_nr))
                     else:
-                        if score1 + score2 == 0:
-                            # sporter heeft niet meegedaan
-                            self.stdout.write('[WARNING] Geen scores voor sporter %s op regel %s' % (lid_nr, row_nr))
-                        else:
-                            deelnemer = self._get_deelnemer(lid_nr, lid_ag)
+                        deelnemer = self._get_deelnemer(ver_nr, lid_nr, lid_ag)
+                        if deelnemer:
                             deelnemer.result_rk_teamscore_1 = score1
                             deelnemer.result_rk_teamscore_2 = score2
-                            feitelijke_deelnemers.append(deelnemer)
-                            gevonden_lid_nrs.append(lid_nr)
+                            tup = (deelnemer.gemiddelde, deelnemer.pk)
+                            gevonden_deelnemers.append(tup)
             # for
 
-            # haal de verwachte lid_nrs eruit
-            feitelijke_lid_nrs = [lid_nr for lid_nr in gevonden_lid_nrs if lid_nr in team_lid_nrs]
-            if self.verbose:
-                self.stdout.write('[DEBUG] feitelijke_lid_nrs van team [%s] %s: %s' % (
-                                        ver_nr, team_naam, repr(feitelijke_lid_nrs)))
+            # moeten nu de lijst van feitelijke deelnemers controleren tegen de aan het team gekoppelde deelnemers
+            gevonden_deelnemers.sort(reverse=True)        # hoogste eerst
 
-            if len(feitelijke_lid_nrs) == 0:
+            feitelijke_deelnemers = self._bepaal_feitelijke_deelnemers(ver_nr, kamp_team, gevonden_deelnemers)
+
+            if len(feitelijke_deelnemers) == 0:
                 self.stdout.write('[WARNING] Team %s van vereniging %s heeft niet meegedaan (geen scores)' % (
                                         ver_nr, team_naam))
                 del self.deelnemende_teams[team_naam]
             else:
-                for lid_nr in feitelijke_lid_nrs:
-                    gevonden_lid_nrs.remove(lid_nr)
-                    team_lid_nrs.remove(lid_nr)
-                # for
-
-                if len(gevonden_lid_nrs):
-                    uitvallers = self._sort_op_gemiddelde(team_lid_nrs)
-                    invallers = self._sort_op_gemiddelde(gevonden_lid_nrs)
-                    afgekeurd = list()
-
-                    if len(invallers) > len(uitvallers):
-                        self.stderr.write('[ERROR] Te veel invallers voor team %s met max %s sporters (ver: %s)' % (
-                                            repr(team_naam), aantal_gekoppeld, ver_nr))
-                        feitelijke_deelnemers = list()
-                    else:
-                        while len(invallers) > 0:
-                            gemiddelde_in, lid_nr_in = invallers.pop(0)
-                            gemiddelde_uit, lid_nr_uit = uitvallers[0]
-                            if gemiddelde_in > gemiddelde_uit:
-                                # mag niet invallen
-                                afgekeurd.append(lid_nr_in)
-                                self.stderr.write(
-                                    '[ERROR] Te hoog gemiddelde %s voor invaller %s voor team %s van vereniging %s' % (
-                                            gemiddelde_in, lid_nr_in, team_naam, ver_nr))
-                                for gemiddelde, lid_nr in uitvallers:
-                                    self.stderr.write('        Uitvaller %s heeft gemiddelde %s' % (lid_nr, gemiddelde))
-                            else:
-                                # mag wel invaller en vervangt de hoogste uitvaller
-                                uitvallers.pop(0)
-                        # while
-
-                        feitelijke_deelnemers = [deelnemer
-                                                 for deelnemer in feitelijke_deelnemers
-                                                 if deelnemer.sporterboog.sporter.lid_nr not in afgekeurd]
-
-                if len(feitelijke_deelnemers) < 3:
-                    self.stderr.write('[ERROR] Maar %s deelnemers in team %s' % (
-                                            len(feitelijke_deelnemers), kamp_team.team_naam))
-
-                if len(feitelijke_deelnemers) > 0:
-                    deelnemer_totalen = list()
-                    for deelnemer in feitelijke_deelnemers:
-                        if not self.dryrun:
-                            # uitgestelde save actie
-                            deelnemer.save(update_fields=['result_rk_teamscore_1', 'result_rk_teamscore_2'])
-                        deelnemer_totaal = deelnemer.result_rk_teamscore_1 + deelnemer.result_rk_teamscore_2
-                        deelnemer_totalen.append(deelnemer_totaal)
-                    # for
-
-                    deelnemer_totalen.sort(reverse=True)                        # hoogste eerst
-                    kamp_team.result_teamscore = sum(deelnemer_totalen[:3])     # de 3 hoogste gebruiken
+                if not self.dryrun:
                     kamp_team.feitelijke_leden.set(feitelijke_deelnemers)
 
-                    deelnemer_totalen.insert(0, kamp_team.pk)                   # backup voor sorteren
-                    deelnemer_totalen.insert(0, kamp_team.result_teamscore)     # resultaat vooraan
-                    deelnemer_totalen.append(kamp_team)                         # team record laatst
-                    kamp_teams.append(deelnemer_totalen)
+                # bereken de team score
+                deelnemer_totalen = list()
+                for deelnemer in feitelijke_deelnemers:
+                    if not self.dryrun:
+                        # uitgestelde save actie
+                        deelnemer.save(update_fields=['result_rk_teamscore_1', 'result_rk_teamscore_2'])
+
+                    deelnemer_totaal = deelnemer.result_rk_teamscore_1 + deelnemer.result_rk_teamscore_2
+                    deelnemer_totalen.append(deelnemer_totaal)
+                # for
+
+                deelnemer_totalen.sort(reverse=True)                        # hoogste eerst
+                kamp_team.result_teamscore = sum(deelnemer_totalen[:3])     # de 3 hoogste gebruiken
+
+                deelnemer_totalen.insert(0, kamp_team.pk)                   # backup voor sorteren
+                deelnemer_totalen.insert(0, kamp_team.result_teamscore)     # resultaat vooraan
+                deelnemer_totalen.append(kamp_team)                         # team record laatst
+                kamp_teams.append(deelnemer_totalen)
         # while
 
         kamp_teams.sort(reverse=True)               # hoogste eerste
@@ -464,7 +491,8 @@ class Command(BaseCommand):
             self.stdout.write('[WARNING] Geen deelnemende teams, dus geen kampioen')
         else:
             winnaar = None
-            if "ERE" in self.team_klasse.beschrijving:
+
+            if True:
                 blad = 'Finales 8 teams'
                 try:
                     ws = prg[blad]
