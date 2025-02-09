@@ -469,7 +469,7 @@ class Command(BaseCommand):
                 try:
                     ws = prg[blad]
                 except KeyError:        # pragma: no cover
-                    self.stdout.write('[ERROR] Kan blad %s niet vinden' % repr(blad))
+                    self.stdout.write('[WARNING] Kan blad %s niet vinden' % repr(blad))
                     # fallback to finales met 4 teams
                     # return
 
