@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2024 Ramon van der Winkel.
+#  Copyright (c) 2020-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -8,6 +8,7 @@ from django.db import models
 from Account.models import Account
 from BasisTypen.definities import ORGANISATIES, ORGANISATIE_WA
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse
+from Bestelling.models.regel import BestellingRegel       # TODO: drop .ext
 from Locatie.models import WedstrijdLocatie
 from Score.models import Score
 from Sporter.models import Sporter, SporterBoog
@@ -257,9 +258,13 @@ class WedstrijdInschrijving(models.Model):
     # in welke klasse komt deze sporterboog uit?
     wedstrijdklasse = models.ForeignKey(KalenderWedstrijdklasse, on_delete=models.PROTECT)
 
+    # koppeling aan de bestelling
+    bestelling = models.ForeignKey(BestellingRegel, on_delete=models.PROTECT, null=True)
+
     # wie is de koper?
-    # (BestellingProduct verwijst naar deze inschrijving)
-    koper = models.ForeignKey(Account, on_delete=models.PROTECT)
+
+    # (BestellingProduct verwijst naar deze inschrijving)           # TODO: klopt dit nog?
+    koper = models.ForeignKey(Account, on_delete=models.PROTECT)    # TODO: Bestelling heeft koper, dus waarom hier ook?
 
     # welke korting is gebruikt
     korting = models.ForeignKey(WedstrijdKorting, on_delete=models.SET_NULL, blank=True, null=True)
@@ -299,6 +304,9 @@ class WedstrijdInschrijving(models.Model):
         ]
 
     objects = models.Manager()      # for the editor only
+
+
+# TODO: WedstrijdAfgemeld toevoegen
 
 
 class Kwalificatiescore(models.Model):

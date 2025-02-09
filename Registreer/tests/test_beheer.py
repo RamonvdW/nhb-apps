@@ -8,7 +8,7 @@ from django.conf import settings
 from django.test import TestCase
 from django.utils import timezone
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse
-from Bestelling.models import Bestelling, BestellingProduct, WebwinkelKeuze
+from Bestelling.models import Bestelling, BestellingProduct
 from Functie.tests.helpers import maak_functie
 from Geo.models import Regio
 from Locatie.models import WedstrijdLocatie
@@ -20,7 +20,7 @@ from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 from Vereniging.models import Vereniging
-from Webwinkel.models import WebwinkelProduct
+from Webwinkel.models import WebwinkelProduct, WebwinkelKeuze
 from Wedstrijden.definities import WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF
 from Wedstrijden.models import WedstrijdInschrijving, Wedstrijd, WedstrijdSessie
 import datetime

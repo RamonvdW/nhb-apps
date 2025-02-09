@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2024 Ramon van der Winkel.
+#  Copyright (c) 2022-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.contrib import admin
 from django.db.models import Count
-from Bestelling.models import BetaalInstellingenVereniging, Bestelling
+from Bestelling.models import Bestelling
 from Betaal.definities import TRANSACTIE_TYPE_CHOICES
 from Betaal.models import BetaalInstellingenVereniging, BetaalActief, BetaalTransactie, BetaalMutatie
 

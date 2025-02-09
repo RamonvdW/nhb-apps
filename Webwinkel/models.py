@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2024 Ramon van der Winkel.
+#  Copyright (c) 2022-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db import models
 from Account.models import Account
+from Bestelling.models.regel import BestellingRegel       # TODO: drop .ext
 from Webwinkel.definities import (VERZENDKOSTEN_CHOICES, VERZENDKOSTEN_PAKKETPOST,
                                   KEUZE_STATUS_CHOICES, KEUZE_STATUS_RESERVERING_MANDJE)
 from decimal import Decimal
@@ -119,9 +120,12 @@ class WebwinkelKeuze(models.Model):
     status = models.CharField(max_length=2, choices=KEUZE_STATUS_CHOICES,
                               default=KEUZE_STATUS_RESERVERING_MANDJE)
 
+    # koppeling aan de bestelling
+    bestelling = models.ForeignKey(BestellingRegel, on_delete=models.PROTECT, null=True)
+
     # wie is de koper?
-    # (BestellingProduct verwijst naar dit record)
-    koper = models.ForeignKey(Account, on_delete=models.PROTECT)   # TODO: Bestelling heeft koper, dus waarom hier ook?
+    # (BestellingProduct verwijst naar dit record)                  # TODO: klopt dit nog?
+    koper = models.ForeignKey(Account, on_delete=models.PROTECT)    # TODO: Bestelling heeft koper, dus waarom hier ook?
 
     # om welk product gaat het
     product = models.ForeignKey(WebwinkelProduct, on_delete=models.PROTECT)

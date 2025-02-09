@@ -7,6 +7,7 @@
 from django.db import models
 from django.utils.formats import localize
 from Account.models import Account
+from Bestelling.models.regel import BestellingRegel       # TODO: drop .ext
 from Locatie.models import EvenementLocatie
 from Opleiding.definities import (OPLEIDING_STATUS_CHOICES, OPLEIDING_STATUS_VOORBEREID,
                                   OPLEIDING_INSCHRIJVING_STATUS_CHOICES,
@@ -185,6 +186,9 @@ class OpleidingInschrijving(models.Model):
     status = models.CharField(max_length=2, choices=OPLEIDING_INSCHRIJVING_STATUS_CHOICES,
                               default=OPLEIDING_INSCHRIJVING_STATUS_INSCHRIJVEN)
 
+    # koppeling aan de bestelling
+    bestelling = models.ForeignKey(BestellingRegel, on_delete=models.PROTECT, null=True)
+
     # wie was de koper?
     koper = models.ForeignKey(Account, on_delete=models.PROTECT, null=True, blank=True)
 
@@ -233,6 +237,9 @@ class OpleidingAfgemeld(models.Model):
 
     # het originele reserveringsnummer
     nummer = models.BigIntegerField(default=0)
+
+    # koppeling aan de bestelling
+    bestelling = models.ForeignKey(BestellingRegel, on_delete=models.PROTECT, null=True)
 
     # wie was de koper?
     koper = models.ForeignKey(Account, on_delete=models.PROTECT, null=True, blank=True)

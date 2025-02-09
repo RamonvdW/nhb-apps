@@ -7,6 +7,7 @@
 from django.db import models
 from Account.models import Account
 from BasisTypen.definities import ORGANISATIE_KHSN
+from Bestelling.models.regel import BestellingRegel       # TODO: drop .ext
 from Evenement.definities import (EVENEMENT_STATUS_CHOICES, EVENEMENT_STATUS_ONTWERP, EVENEMENT_STATUS_TO_STR,
                                   EVENEMENT_INSCHRIJVING_STATUS_CHOICES, EVENEMENT_INSCHRIJVING_STATUS_TO_STR,
                                   EVENEMENT_INSCHRIJVING_STATUS_RESERVERING_MANDJE,
@@ -97,6 +98,9 @@ class EvenementInschrijving(models.Model):
     # voor welk lid is deze inschrijving
     sporter = models.ForeignKey(Sporter, on_delete=models.PROTECT)
 
+    # koppeling aan de bestelling
+    bestelling = models.ForeignKey(BestellingRegel, on_delete=models.PROTECT, null=True)
+
     # wie is de koper?
     # (BestellingProduct verwijst naar deze inschrijving)
     koper = models.ForeignKey(Account, on_delete=models.PROTECT)
@@ -155,6 +159,9 @@ class EvenementAfgemeld(models.Model):
 
     # voor welk lid was deze inschrijving
     sporter = models.ForeignKey(Sporter, on_delete=models.PROTECT)
+
+    # koppeling aan de bestelling
+    bestelling = models.ForeignKey(BestellingRegel, on_delete=models.PROTECT, null=True)
 
     # wie was de koper?
     koper = models.ForeignKey(Account, on_delete=models.PROTECT)
