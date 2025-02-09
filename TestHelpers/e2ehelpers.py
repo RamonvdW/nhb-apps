@@ -11,12 +11,14 @@ from Account.models import Account
 from Account.operations.aanmaken import account_create
 from Functie.models import Functie
 from Functie.view_vhpg import account_vhpg_is_geaccepteerd
+from Mailer.models import MailQueue
 from TestHelpers.test_asserts import MyTestAsserts
 from TestHelpers.query_tracer import MyQueryTracer
 from TestHelpers.mgmt_cmds_helper import MyMgmtCommandHelper
 from TestHelpers.app_hierarchy_testrunner import get_test_cases_count
 from contextlib import contextmanager
 import tempfile
+import inspect
 import pyotp
 
 
@@ -306,10 +308,28 @@ class E2EHelpers(MyTestAsserts, MyMgmtCommandHelper, TestCase):
 
             msg = msg.replace('/static/', '/tmp/tmp_html/static/')
 
+            # add traceability at the bottom of the page that will be shown in the browser
+            caller = inspect.stack()[1]
+            msg += '\n<!-- %s:%s %s -->' % (caller.filename, caller.lineno, caller.function)
+
             f = tempfile.NamedTemporaryFile(mode='wb', delete=False, suffix='.html', dir='/tmp/tmp_html/')
             f.write(msg.encode('utf-8'))
             f.close()
 
             # browser is started by test.sh
+
+    @staticmethod
+    def e2e_show_email_in_browser(mail: MailQueue):
+        msg = mail.mail_html.replace('/static/', '/tmp/tmp_html/static/')
+
+        # add traceability at the bottom of the page that will be shown in the browser
+        caller = inspect.stack()[1]
+        msg += '\n<!-- %s:%s %s -->' % (caller.filename, caller.lineno, caller.function)
+
+        f = tempfile.NamedTemporaryFile(mode='wb', delete=False, suffix='.html', dir='/tmp/tmp_html/')
+        f.write(msg.encode('utf-8'))
+        f.close()
+
+        # browser is started by test.sh
 
 # end of file

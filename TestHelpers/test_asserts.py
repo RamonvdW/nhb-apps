@@ -1000,6 +1000,7 @@ class MyTestAsserts(TestCase):
             validated_templates.append(template_name)
 
         self.html_assert_basics(html, template_name)
+        self.html_assert_template_bug(html, template_name)
 
         self.assertNotIn('<script>', html, msg='Unexpected script in e-mail HTML (template: %s)' % template_name)
         self.assert_link_quality(html, template_name, is_email=True)

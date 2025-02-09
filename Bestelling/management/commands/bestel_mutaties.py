@@ -68,7 +68,7 @@ EMAIL_TEMPLATE_BEVESTIG_BESTELLING = 'email_bestelling/bevestig-bestelling.dtl'
 EMAIL_TEMPLATE_BEVESTIG_BETALING = 'email_bestelling/bevestig-betaling.dtl'
 
 
-def _beschrijf_bestelling(bestelling):
+def _beschrijf_bestelling(bestelling: Bestelling):
     producten = (bestelling
                  .producten
                  .select_related('wedstrijd_inschrijving',

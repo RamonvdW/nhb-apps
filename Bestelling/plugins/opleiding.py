@@ -9,7 +9,6 @@
 from django.conf import settings
 from django.utils import timezone
 from Bestelling.models import BestellingProduct
-from Functie.definities import Rol
 from Functie.models import Functie
 from Opleiding.definities import (OPLEIDING_INSCHRIJVING_STATUS_RESERVERING_MANDJE, OPLEIDING_AFMELDING_STATUS_AFGEMELD,
                                   OPLEIDING_INSCHRIJVING_STATUS_DEFINITIEF, OPLEIDING_AFMELDING_STATUS_GEANNULEERD,
