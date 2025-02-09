@@ -469,8 +469,9 @@ class Command(BaseCommand):
                 try:
                     ws = prg[blad]
                 except KeyError:        # pragma: no cover
-                    self.stderr.write('[ERROR] Kan blad %s niet vinden' % repr(blad))
-                    return
+                    self.stdout.write('[ERROR] Kan blad %s niet vinden' % repr(blad))
+                    # fallback to finales met 4 teams
+                    # return
 
                 winnaar = ws['Z19'].value
 
