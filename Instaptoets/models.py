@@ -117,7 +117,8 @@ class Instaptoets(models.Model):
     vraag_antwoord = models.ManyToManyField(ToetsAntwoord, blank=True)
 
     # actieve vraag
-    huidige_vraag = models.ForeignKey(ToetsAntwoord, null=True, on_delete=models.SET_NULL, related_name='toets_huidige')
+    huidige_vraag = models.ForeignKey(ToetsAntwoord, blank=True, null=True,
+                                      on_delete=models.SET_NULL, related_name='toets_huidige')
 
     # eindresultaat
     is_afgerond = models.BooleanField(default=False)

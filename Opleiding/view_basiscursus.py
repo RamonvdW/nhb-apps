@@ -7,11 +7,10 @@
 from django.urls import reverse
 from django.conf import settings
 from django.views.generic import TemplateView
-from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige
-from Instaptoets.operations import instaptoets_is_beschikbaar, vind_toets, toets_geldig
+from Instaptoets.operations import instaptoets_is_beschikbaar, vind_toets_prioriteer_geslaagd, toets_geldig
 from Sporter.models import get_sporter
 
 TEMPLATE_OPLEIDINGEN_BASISCURSUS = 'opleiding/basiscursus.dtl'
@@ -43,7 +42,7 @@ class BasiscursusView(TemplateView):
                 if sporter and instaptoets_is_beschikbaar():
                     context['url_instaptoets'] = reverse('Instaptoets:begin')
 
-                    toets = vind_toets(sporter)
+                    toets = vind_toets_prioriteer_geslaagd(sporter)
                     if toets:
                         context['toets'] = toets
 

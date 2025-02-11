@@ -18,7 +18,7 @@ from Bestelling.operations.mutaties import bestel_mutatieverzoek_inschrijven_opl
 from Betaal.format import format_bedrag_euro
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige
-from Instaptoets.operations import vind_toets, toets_geldig
+from Instaptoets.operations import vind_toets_prioriteer_geslaagd, toets_geldig
 from Opleiding.definities import OPLEIDING_STATUS_INSCHRIJVEN, OPLEIDING_INSCHRIJVING_STATUS_INSCHRIJVEN
 from Opleiding.models import Opleiding, OpleidingInschrijving
 from Sporter.models import get_sporter
@@ -88,7 +88,7 @@ class InschrijvenBasiscursusView(UserPassesTestMixin, TemplateView):
         context['sporter'] = self.sporter
         context['voldoet_aan_voorwaarden'] = False
 
-        toets = vind_toets(self.sporter)
+        toets = vind_toets_prioriteer_geslaagd(self.sporter)
         if toets:
             is_geldig, _ = toets_geldig(toets)
             context['voldoet_aan_voorwaarden'] = is_geldig

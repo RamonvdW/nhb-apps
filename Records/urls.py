@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2023 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -17,6 +17,8 @@ urlpatterns = [
     path('indiv/verbeterbaar/',
          views_verbeterbaar.RecordsVerbeterbaarKiesDisc.as_view(),
          name='indiv-verbeterbaar'),
+
+    # TODO: toevoegen (voor backwards compatibiliteit & nettere url): 'indiv/verbeterbaar/<disc>/'
 
     path('indiv/verbeterbaar/<disc>/<makl>/<lcat>/<gesl>/',
          views_verbeterbaar.RecordsVerbeterbaarInDiscipline.as_view(),
