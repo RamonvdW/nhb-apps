@@ -129,6 +129,24 @@ def vind_toets(sporter: Sporter) -> Instaptoets | None:
     return toets
 
 
+def vind_toets_prioriteer_geslaagd(sporter: Sporter) -> Instaptoets | None:
+    """ retourneer de instaptoets waarvoor de sporter geslaagd is
+        indien niet aanwezig, retourneer de nieuwste toets
+    """
+    toets = (Instaptoets
+             .objects
+             .filter(sporter=sporter,
+                     is_afgerond=True,
+                     geslaagd=True)
+             .order_by('-opgestart')            # meest recente toets eerst
+             .first())
+
+    if toets:
+        return toets
+
+    return vind_toets(sporter)
+
+
 def controleer_toets(toets: Instaptoets):
     toets.aantal_goed = 0
     for antwoord in toets.vraag_antwoord.select_related('vraag').all():

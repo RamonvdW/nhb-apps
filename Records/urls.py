@@ -18,6 +18,8 @@ urlpatterns = [
          views_verbeterbaar.RecordsVerbeterbaarKiesDisc.as_view(),
          name='indiv-verbeterbaar'),
 
+    # TODO: toevoegen (voor backwards compatibiliteit & nettere url): 'indiv/verbeterbaar/<disc>/'
+
     path('indiv/verbeterbaar/<disc>/<makl>/<lcat>/<gesl>/',
          views_verbeterbaar.RecordsVerbeterbaarInDiscipline.as_view(),
          name='indiv-verbeterbaar-disc'),
