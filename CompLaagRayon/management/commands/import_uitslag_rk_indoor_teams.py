@@ -493,6 +493,7 @@ class Command(BaseCommand):
             winnaar = None
 
             if True:
+                # TODO: finales met 8 teams kan er helemaal uit voor het RK
                 blad = 'Finales 8 teams'
                 try:
                     ws = prg[blad]

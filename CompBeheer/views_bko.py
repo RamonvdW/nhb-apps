@@ -394,18 +394,18 @@ class KlassengrenzenVaststellenRkBkTeamsView(UserPassesTestMixin, TemplateView):
                     for team_klasse in klassen:
                         if team.aanvangsgemiddelde >= team_klasse.min_ag:
                             team.team_klasse = team_klasse
+                            team.team_klasse_volgende_ronde = team_klasse
                             break       # from the for
                     # for
 
-            team.save(update_fields=['team_klasse'])
+            team.save(update_fields=['team_klasse', 'team_klasse_volgende_ronde'])
         # for
 
         # zet de competitie door naar fase K
         comp.klassengrenzen_vastgesteld_rk_bk = True
         comp.save(update_fields=['klassengrenzen_vastgesteld_rk_bk'])
 
-        url = reverse('CompBeheer:overzicht',
-                      kwargs={'comp_pk': comp.pk})
+        url = reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk})
 
         return HttpResponseRedirect(url)
 

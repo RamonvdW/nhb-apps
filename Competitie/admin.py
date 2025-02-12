@@ -465,6 +465,41 @@ class KampioenschapTypeFilter(admin.SimpleListFilter):
 
 class KampioenschapTeamAdmin(CreateOnlyAdmin):
 
+    fieldsets = (
+        ('Context',
+            {'fields': ('kampioenschap',
+                        'team_type')
+             }),
+        ('Team',
+            {'fields': ('team_naam',
+                        'vereniging',
+                        'volg_nr',
+                        'rk_kampioen_label',
+                        'aanvangsgemiddelde')
+             }),
+        ('Deelname',
+            {'fields': ('deelname',
+                        'is_reserve',
+                        'volgorde',
+                        'rank'),
+             }),
+        ('Klasse',
+            {'fields': ('team_klasse',
+                        'team_klasse_volgende_ronde'),
+             }),
+        ('Leden',
+            {'fields': ('tijdelijke_leden',
+                        'gekoppelde_leden',
+                        'feitelijke_leden'),
+             }),
+        ('Uitslag',
+            {'fields': ('result_rank',
+                        'result_volgorde',
+                        'result_teamscore',
+                        'result_counts')
+             }),
+    )
+
     filter_horizontal = ('tijdelijke_leden',
                          'gekoppelde_leden',
                          'feitelijke_leden')
@@ -625,7 +660,8 @@ class KampioenschapSporterBoogAdmin(CreateOnlyAdmin):
                         'bij_vereniging')
              }),
         ('Klasse',
-            {'fields': ('indiv_klasse',),
+            {'fields': ('indiv_klasse',
+                        'indiv_klasse_volgende_ronde'),
              }),
         ('Details',
             {'fields': ('gemiddelde',
