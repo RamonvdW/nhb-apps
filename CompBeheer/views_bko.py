@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -394,18 +394,18 @@ class KlassengrenzenVaststellenRkBkTeamsView(UserPassesTestMixin, TemplateView):
                     for team_klasse in klassen:
                         if team.aanvangsgemiddelde >= team_klasse.min_ag:
                             team.team_klasse = team_klasse
+                            team.team_klasse_volgende_ronde = team_klasse
                             break       # from the for
                     # for
 
-            team.save(update_fields=['team_klasse'])
+            team.save(update_fields=['team_klasse', 'team_klasse_volgende_ronde'])
         # for
 
         # zet de competitie door naar fase K
         comp.klassengrenzen_vastgesteld_rk_bk = True
         comp.save(update_fields=['klassengrenzen_vastgesteld_rk_bk'])
 
-        url = reverse('CompBeheer:overzicht',
-                      kwargs={'comp_pk': comp.pk})
+        url = reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk})
 
         return HttpResponseRedirect(url)
 

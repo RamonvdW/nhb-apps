@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -120,6 +120,14 @@ class KampioenschapSporterBoog(models.Model):
     # de individuele wedstrijdklasse (zelfde als voor de regio)
     indiv_klasse = models.ForeignKey(CompetitieIndivKlasse,
                                      on_delete=models.CASCADE)
+
+    # klasse die toegepast moet worden als de sporter doorstroomt naar de volgende ronde
+    # initieel gelijk aan indiv_klasse
+    # bij het samenvoegen van kleine klassen worden alleen indiv_klasse aangepast
+    indiv_klasse_volgende_ronde = models.ForeignKey(CompetitieIndivKlasse,
+                                                    on_delete=models.CASCADE,
+                                                    blank=True, null=True,      # alleen nodig voor migratie
+                                                    related_name='indiv_klasse_volgende_ronde')
 
     # vereniging wordt hier apart bijgehouden omdat leden over kunnen stappen
     # tijdens het seizoen.
@@ -269,6 +277,14 @@ class KampioenschapTeam(models.Model):
     team_klasse = models.ForeignKey(CompetitieTeamKlasse,
                                     on_delete=models.CASCADE,
                                     blank=True, null=True)
+
+    # klasse die toegepast moet worden als het team doorstroomt naar de volgende ronde
+    # initieel gelijk aan team_klasse
+    # bij het samenvoegen van kleine klassen worden alleen team_klasse aangepast
+    team_klasse_volgende_ronde = models.ForeignKey(CompetitieTeamKlasse,
+                                                   on_delete=models.CASCADE,
+                                                   blank=True, null=True,
+                                                   related_name='team_klasse_volgende_ronde')
 
     # preliminaire leden van het team (gekozen tijdens de regiocompetitie)
     tijdelijke_leden = models.ManyToManyField(RegiocompetitieSporterBoog,

@@ -989,6 +989,7 @@ class Command(BaseCommand):
                                     kampioenschap=deelkamp,
                                     sporterboog=deelnemer.sporterboog,
                                     indiv_klasse=deelnemer.indiv_klasse,
+                                    indiv_klasse_volgende_ronde=deelnemer.indiv_klasse,
                                     bij_vereniging=ver,             # bevries vereniging
                                     kampioen_label=deelnemer.kampioen_label,
                                     gemiddelde=deelnemer.gemiddelde,
@@ -1197,7 +1198,7 @@ class Command(BaseCommand):
                          .exclude(result_rank=0)
                          .select_related('kampioenschap',
                                          'kampioenschap__rayon',
-                                         'indiv_klasse',
+                                         'indiv_klasse_volgende_ronde',
                                          'bij_vereniging',
                                          'sporterboog')):
 
@@ -1214,7 +1215,8 @@ class Command(BaseCommand):
             nieuw = KampioenschapSporterBoog(
                         kampioenschap=deelkamp_bk,
                         sporterboog=kampioen.sporterboog,
-                        indiv_klasse=kampioen.indiv_klasse,
+                        indiv_klasse=kampioen.indiv_klasse_volgende_ronde,
+                        indiv_klasse_volgende_ronde=kampioen.indiv_klasse_volgende_ronde,
                         bij_vereniging=kampioen.bij_vereniging,
                         gemiddelde=gemiddelde,
                         gemiddelde_scores=gemiddelde_scores,
@@ -1415,7 +1417,7 @@ class Command(BaseCommand):
                             .objects
                             .filter(kampioenschap__deel=DEEL_RK,
                                     kampioenschap__competitie=comp,
-                                    team_klasse=klasse,
+                                    team_klasse_volgende_ronde=klasse,
                                     result_rank__gte=1)
                             .select_related('vereniging',
                                             'team_type')
@@ -1445,6 +1447,7 @@ class Command(BaseCommand):
                                     team_type=rk_team.team_type,
                                     team_naam=rk_team.team_naam,
                                     team_klasse=team_klasse,
+                                    team_klasse_volgende_ronde=team_klasse,
                                     aanvangsgemiddelde=ag)
 
                     if rk_team.result_rank == 1 and not is_verplaatst:
