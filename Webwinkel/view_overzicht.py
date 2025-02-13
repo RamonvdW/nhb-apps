@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2024 Ramon van der Winkel.
+#  Copyright (c) 2022-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -88,7 +88,7 @@ class OverzichtView(TemplateView):
         # begrenzing voor bestellen (alleen leden) volgt verderop
         if settings.WEBWINKEL_TOON_PRESTATIESPELDEN:
             context['url_spelden'] = reverse('Spelden:begin')
-            context['img_spelden'] = static('spelden/grootmeester.png')
+            context['img_spelden'] = static('spelden/ster_1200.webp')
 
         if rol_get_huidige(self.request) == Rol.ROL_SPORTER:
             context['menu_toon_mandje'] = True

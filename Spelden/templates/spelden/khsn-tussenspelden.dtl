@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2024 Ramon van der Winkel.
+                Copyright (c) 2024-2025 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -36,25 +36,25 @@
                 <tr>
                     <td class="center">Wit</td>
                     <td class="center">950</td>
-                    <td class="center"><img class="sv-foto-speld" src="{% static 'spelden/tussenspeld_wit.png' %}" alt="speld"></td>
+                    <td class="center"><img class="sv-foto-speld" src="{% static 'spelden/tussenspeld_wit.webp' %}" alt="speld"></td>
                 </tr>
 
                 <tr>
                     <td class="center">Grijs</td>
                     <td class="center">1050</td>
-                    <td class="center"><img class="sv-foto-speld" src="{% static 'spelden/tussenspeld_grijs.png' %}" alt="speld"></td>
+                    <td class="center"><img class="sv-foto-speld" src="{% static 'spelden/tussenspeld_grijs.webp' %}" alt="speld"></td>
                 </tr>
 
                 <tr>
                     <td class="center">Zwart</td>
                     <td class="center">1150</td>
-                    <td class="center"><img class="sv-foto-speld" src="{% static 'spelden/tussenspeld_zwart.png' %}" alt="speld"></td>
+                    <td class="center"><img class="sv-foto-speld" src="{% static 'spelden/tussenspeld_zwart.webp' %}" alt="speld"></td>
                 </tr>
 
                 <tr>
                     <td class="center">Blauw</td>
                     <td class="center">1250</td>
-                    <td class="center"><img class="sv-foto-speld" src="{% static 'spelden/tussenspeld_blauw.png' %}" alt="speld"></td>
+                    <td class="center"><img class="sv-foto-speld" src="{% static 'spelden/tussenspeld_blauw.webp' %}" alt="speld"></td>
                 </tr>
 
             </table>
