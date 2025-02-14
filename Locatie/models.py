@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2024 Ramon van der Winkel.
+#  Copyright (c) 2020-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -142,15 +142,16 @@ class EvenementLocatie(models.Model):
         return self.adres.replace('\r\n', '\n').replace('\n', ', ')
 
     def __str__(self):
-        if not self.zichtbaar:
-            msg = "(hidden) "
-        else:
-            msg = ""
-
-        msg += self.adres.replace('\n', ', ')
-
         # kost te veel database toegangen in admin interface?
-        msg += " [%s]" % self.vereniging.ver_nr
+        msg = "[%s] " % self.vereniging.ver_nr
+
+        if not self.zichtbaar:
+            msg += "(hidden) "
+
+        msg += self.naam
+
+        if self.plaats != self.naam:
+            msg += ' ' + self.plaats
 
         return msg
 

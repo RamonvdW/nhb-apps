@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2024 Ramon van der Winkel.
+#  Copyright (c) 2020-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -309,6 +309,7 @@ class TestCompBeheerBko(E2EHelpers, TestCase):
                                  sporterboog=self.sporterboog_1r,
                                  bij_vereniging=self.sporterboog_1r.sporter.bij_vereniging,
                                  indiv_klasse=self.comp25_klasse_r,
+                                 indiv_klasse_volgende_ronde=self.comp25_klasse_r,
                                  result_rank=1,                 # titel: BK
                                  deelname=DEELNAME_JA).save()
 
@@ -317,6 +318,7 @@ class TestCompBeheerBko(E2EHelpers, TestCase):
                                  sporterboog=self.sporterboog_1r,
                                  bij_vereniging=self.sporterboog_1r.sporter.bij_vereniging,
                                  indiv_klasse=self.comp25_klasse_r,
+                                 indiv_klasse_volgende_ronde=self.comp25_klasse_r,
                                  deelname=DEELNAME_NEE).save()
 
         # recurve, lid 2
@@ -324,6 +326,7 @@ class TestCompBeheerBko(E2EHelpers, TestCase):
                                  sporterboog=self.sporterboog_1r,
                                  bij_vereniging=self.sporterboog_1r.sporter.bij_vereniging,
                                  indiv_klasse=self.comp25_klasse_r,
+                                 indiv_klasse_volgende_ronde=self.comp25_klasse_r,
                                  result_rank=2).save()
 
         # compound, lid 1
@@ -331,6 +334,7 @@ class TestCompBeheerBko(E2EHelpers, TestCase):
                                  sporterboog=self.sporterboog_1c,
                                  bij_vereniging=self.sporterboog_1c.sporter.bij_vereniging,
                                  indiv_klasse=self.comp25_klasse_c,
+                                 indiv_klasse_volgende_ronde=self.comp25_klasse_c,
                                  result_rank=1).save()          # titel: NK
 
         # compound, lid 2
@@ -338,6 +342,7 @@ class TestCompBeheerBko(E2EHelpers, TestCase):
                                  sporterboog=self.sporterboog_2c,
                                  bij_vereniging=self.sporterboog_2c.sporter.bij_vereniging,
                                  indiv_klasse=self.comp25_klasse_c,
+                                 indiv_klasse_volgende_ronde=self.comp25_klasse_c,
                                  result_rank=KAMP_RANK_BLANCO).save()
 
         # compound, lid 2
@@ -345,6 +350,7 @@ class TestCompBeheerBko(E2EHelpers, TestCase):
                                  sporterboog=self.sporterboog_2c,
                                  bij_vereniging=self.sporterboog_2c.sporter.bij_vereniging,
                                  indiv_klasse=self.comp25_klasse_c,
+                                 indiv_klasse_volgende_ronde=self.comp25_klasse_c,
                                  result_rank=KAMP_RANK_NO_SHOW).save()         # komt niet in aanmerking
 
     def _maak_rk_teams(self, kampioenschap):
@@ -360,6 +366,7 @@ class TestCompBeheerBko(E2EHelpers, TestCase):
                     deelname=DEELNAME_JA,
                     aanvangsgemiddelde=3*8.0,
                     team_klasse=self.comp25_teamklasse_rk_ere_r,
+                    team_klasse_volgende_ronde=self.comp25_teamklasse_rk_ere_r,
                     result_rank=1,          # moet >= 1 zijn
                     result_volgorde=1,
                     result_teamscore=123)
