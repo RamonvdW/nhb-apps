@@ -594,7 +594,7 @@ class KampioenschapTeamAdmin(CreateOnlyAdmin):
                                   .order_by('competitie__pk',
                                             'rayon__rayon_nr'))
 
-        elif db_field.name == 'team_klasse':
+        elif db_field.name in ('team_klasse', 'team_klasse_volgende_ronde'):
             if self.competitie:
                 # alleen laten kiezen uit de team klassen van deze competitie
                 kwargs['queryset'] = (CompetitieTeamKlasse

@@ -36,6 +36,23 @@
                     <td>Vier locaties door het land.<br>Je wordt in overleg ingedeeld.</td>
                 </tr>
 
+                {% if momenten %}
+                    <tr>
+                        <th>Waarschijnlijke locaties</th>
+                        <td style="padding:0">
+                            <table style="width:auto">  <!-- disables center align -->
+                                {% for moment in momenten %}
+                                    <tr>
+                                        <td class="right-align">{{ moment.wanneer_compact }}</td>
+                                        <td style="width:10px"></td>
+                                        <td>{{ moment.omschrijving }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </table>
+                        </td>
+                    </tr>
+                {% endif %}
+
                 <tr>
                     <th>Wanneer</th>
                     <td>Twee keer per jaar: maart/april en september/oktober</td>

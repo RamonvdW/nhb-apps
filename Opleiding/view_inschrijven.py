@@ -56,6 +56,7 @@ class InschrijvenBasiscursusView(UserPassesTestMixin, TemplateView):
                           .objects
                           .filter(is_basiscursus=True,
                                   status=OPLEIDING_STATUS_INSCHRIJVEN)
+                          .prefetch_related('momenten')
                           .order_by('periode_begin', 'periode_einde')       # meest recente cursus eerst
                           .first())
 
@@ -100,6 +101,18 @@ class InschrijvenBasiscursusView(UserPassesTestMixin, TemplateView):
 
         context['opleiding'] = self.opleiding
         self.opleiding.kosten_str = format_bedrag_euro(self.opleiding.kosten_euro)
+
+        momenten = list()
+        for moment in self.opleiding.momenten.prefetch_related('locatie').order_by('datum'):
+            locatie = moment.locatie
+            if locatie:
+                moment.omschrijving = locatie.plaats
+                if not moment.omschrijving:
+                    moment.omschrijving = locatie.naam
+                momenten.append(moment)
+        # for
+        if len(momenten) > 0:
+            context['momenten'] = momenten
 
         context['inschrijving'] = inschrijving = self._zoek_inschrijving()
 
