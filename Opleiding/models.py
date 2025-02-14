@@ -14,6 +14,7 @@ from Opleiding.definities import (OPLEIDING_STATUS_CHOICES, OPLEIDING_STATUS_VOO
                                   OPLEIDING_AFMELDING_STATUS_CHOICES, OPLEIDING_AFMELDING_STATUS_TO_STR)
 from Sporter.models import Sporter
 from decimal import Decimal
+import datetime
 
 
 class OpleidingDiploma(models.Model):
@@ -56,6 +57,9 @@ class OpleidingMoment(models.Model):
     # wanneer is de bijeenkomst
     datum = models.DateField(default='2000-01-01')
 
+    # moment kan meerdere dagen aaneengesloten zijn
+    aantal_dagen = models.PositiveSmallIntegerField(default=1)
+
     # hoe laat moeten de deelnemers aanwezig zijn
     begin_tijd = models.TimeField(default='10:00')
 
@@ -66,14 +70,38 @@ class OpleidingMoment(models.Model):
     locatie = models.ForeignKey(EvenementLocatie, on_delete=models.PROTECT, blank=True, null=True)
 
     # naam en contactgegevens van de opleider
-    opleider_naam = models.CharField(max_length=150, default='')
+    opleider_naam = models.CharField(max_length=150, default='', blank=True)
     opleider_email = models.EmailField(default='', blank=True)
     opleider_telefoon = models.CharField(max_length=25, default='', blank=True)
 
+    def wanneer_compact(self):
+        if self.aantal_dagen == 1:
+            # 5 mei 2022
+            return localize(self.datum)
+
+        datum_einde = self.datum + datetime.timedelta(days=self.aantal_dagen - 1)
+
+        if self.datum.month == datum_einde.month:
+
+            if datum_einde.day == self.datum.day + 1:
+                # 5 + 6 mei 2022
+                wanneer_str = "%s + " % self.datum.day
+            else:
+                # 5 - 8 mei 2022
+                wanneer_str = "%s - " % self.datum.day
+
+            wanneer_str += localize(datum_einde)
+            return wanneer_str
+
+        # 30 mei - 2 juni 2022
+        wanneer_str = "%s - %s" % (localize(self.datum),
+                                   localize(datum_einde))
+        return wanneer_str
+
     def __str__(self):
-        msg = "%s %s (%s min)" % (self.datum, str(self.begin_tijd)[:5], self.duur_minuten)
+        msg = "%s %s (%s min)" % (self.wanneer_compact(), str(self.begin_tijd)[:5], self.duur_minuten)
         if self.locatie:
-            msg += " [%s]" % self.locatie.plaats
+            msg += " [%s]" % self.locatie.naam
         msg += " " + self.opleider_naam
         return msg
 
