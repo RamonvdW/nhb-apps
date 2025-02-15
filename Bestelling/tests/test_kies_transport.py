@@ -1,14 +1,20 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023-2024 Ramon van der Winkel.
+#  Copyright (c) 2023-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
+from django.conf import settings
 from django.test import TestCase, override_settings
 from django.utils import timezone
-from Bestelling.definities import BESTELLING_TRANSPORT_VERZEND, BESTELLING_TRANSPORT_OPHALEN, BESTELLING_TRANSPORT_NVT
-from Bestelling.models import BestellingMandje, BestellingProduct
+from Bestelling.definities import (BESTELLING_TRANSPORT_VERZEND, BESTELLING_TRANSPORT_OPHALEN, BESTELLING_TRANSPORT_NVT,
+                                   BESTELLING_STATUS_BETALING_ACTIEF)
+from Bestelling.models import BestellingMandje, BestellingProduct, Bestelling
+from Bestelling.operations.mutaties import bestel_mutatieverzoek_betaling_afgerond
+from Betaal.definities import TRANSACTIE_TYPE_MOLLIE_PAYMENT
+from Betaal.models import BetaalActief, BetaalTransactie, BetaalInstellingenVereniging
 from Geo.models import Regio
+from Mailer.models import MailQueue
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
@@ -140,7 +146,7 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
                 resp = self.client.post(self.url_kies_transport, {'snel': 1, 'keuze': 'ophalen'})
             self.assert_is_redirect(resp, self.url_mandje_toon)
             # coverage: 2e verzoek voor dezelfde mutatie
-            resp = self.client.post(self.url_kies_transport, {'snel': 1, 'keuze': 'ophalen'})
+            self.client.post(self.url_kies_transport, {'snel': 1, 'keuze': 'ophalen'})
 
             self.verwerk_bestel_mutaties()
 
@@ -156,6 +162,26 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
 
             mandje = BestellingMandje.objects.get(pk=mandje.pk)
             self.assertEqual(mandje.transport, BESTELLING_TRANSPORT_VERZEND)
+
+            # terug naar ophalen
+            self.client.post(self.url_kies_transport, {'snel': 1, 'keuze': 'ophalen'})
+            self.verwerk_bestel_mutaties()
+
+            # bestelling afronden
+            self.assertEqual(MailQueue.objects.count(), 0)
+            resp = self.client.post(self.url_mandje_bestellen, {'snel': 1})
+            self.assert_is_redirect(resp, self.url_bestellingen_overzicht)
+            self.verwerk_bestel_mutaties()
+
+            self.assertEqual(Bestelling.objects.count(), 1)
+            bestelling = Bestelling.objects.first()
+
+            # controleer wat er in de mail staat
+            self.assertEqual(MailQueue.objects.count(), 1)
+            mail = MailQueue.objects.first()
+            self.assert_email_html_ok(mail, 'email_bestelling/bevestig-bestelling.dtl')
+            self.assert_consistent_email_html_text(mail, ignore=('>Bedrag:', '>Korting:'))
+            self.assertFalse('Verzendkosten' in mail.mail_text)
 
         self.e2e_assert_other_http_commands_not_supported(self.url_kies_transport, post=False)
 

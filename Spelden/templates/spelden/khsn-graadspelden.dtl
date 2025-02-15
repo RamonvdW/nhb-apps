@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2024 Ramon van der Winkel.
+                Copyright (c) 2024-2025 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -108,6 +108,33 @@
                 {% endfor %}
 
             </table>
+        </div>
+    </div>
+
+
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>Spelden</h4>
+            <p>Voorbeelden van een aantal van de spelden</p>
+        </div>
+    </div>
+
+    <!-- blauwe balk met informatie in tabel-vorm:  label - info -->
+    <div class="row-sv-blauw">
+        <div class="col s12 m10 offset-m1 l8 offset-l2">
+            <div style="margin:10px; display:inline-block">
+                <img class="sv-foto-speld" src="{% static 'spelden/graadspelden_eerste_geel.webp' %}" alt="speld">
+            </div>
+            <div style="margin:10px; display:inline-block">
+                <img class="sv-foto-speld" src="{% static 'spelden/graadspelden_eerste_rood.webp' %}" alt="speld">
+            </div>
+            <div style="margin:10px; display:inline-block">
+                <img class="sv-foto-speld" src="{% static 'spelden/graadspelden_eerste_blauw.webp' %}" alt="speld">
+            </div>
+            <div style="margin:10px; display:inline-block">
+                <img class="sv-foto-speld" src="{% static 'spelden/graadspelden_derde_groen.webp' %}" alt="speld">
+            </div>
         </div>
     </div>
 
