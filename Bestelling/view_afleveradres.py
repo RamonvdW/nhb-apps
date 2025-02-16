@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2024 Ramon van der Winkel.
+#  Copyright (c) 2024-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -53,11 +53,11 @@ class WijzigAfleveradresView(UserPassesTestMixin, TemplateView):
             raise Http404('Niet van toepassing')
 
         context['mandje'] = mandje
-        context['url_opslaan'] = reverse('Bestel:wijzig-afleveradres')
+        context['url_opslaan'] = reverse('Bestelling:wijzig-afleveradres')
         context['menu_toon_mandje'] = True
 
         context['kruimels'] = (
-            (reverse('Bestel:toon-inhoud-mandje'), 'Mandje'),
+            (reverse('Bestelling:toon-inhoud-mandje'), 'Mandje'),
             (None, 'Wijzig afleveradres')
         )
 
@@ -96,7 +96,7 @@ class WijzigAfleveradresView(UserPassesTestMixin, TemplateView):
                                    'afleveradres_regel_4', 'afleveradres_regel_5'])
 
         # terug naar het mandje
-        url = reverse('Bestel:toon-inhoud-mandje')
+        url = reverse('Bestelling:toon-inhoud-mandje')
         return HttpResponseRedirect(url)
 
 

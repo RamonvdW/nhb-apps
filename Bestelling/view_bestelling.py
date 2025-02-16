@@ -103,7 +103,7 @@ class ToonBestellingenView(UserPassesTestMixin, TemplateView):
 
             bestelling.status_aandacht = status in (BESTELLING_STATUS_BETALING_ACTIEF, BESTELLING_STATUS_MISLUKT)
 
-            bestelling.url_details = reverse('Bestel:toon-bestelling-details',
+            bestelling.url_details = reverse('Bestelling:toon-bestelling-details',
                                              kwargs={'bestel_nr': bestelling.bestel_nr})
         # for
 
@@ -319,11 +319,11 @@ class ToonBestellingDetailsView(UserPassesTestMixin, TemplateView):
                         context['moet_handmatig'] = True
                     else:
                         # betaling gaat via Mollie
-                        context['url_afrekenen'] = reverse('Bestel:bestelling-afrekenen',
+                        context['url_afrekenen'] = reverse('Bestelling:bestelling-afrekenen',
                                                            kwargs={'bestel_nr': bestelling.bestel_nr})
 
                 if bestelling.status in (BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_BETALING_ACTIEF):
-                    context['url_annuleren'] = reverse('Bestel:annuleer-bestelling',
+                    context['url_annuleren'] = reverse('Bestelling:annuleer-bestelling',
                                                        kwargs={'bestel_nr': bestelling.bestel_nr})
 
         kwalificatie_scores = list()
@@ -356,7 +356,7 @@ class ToonBestellingDetailsView(UserPassesTestMixin, TemplateView):
 
         context['kruimels'] = (
             (reverse('Sporter:profiel'), 'Mijn pagina'),
-            (reverse('Bestel:toon-bestellingen'), 'Bestellingen'),
+            (reverse('Bestelling:toon-bestellingen'), 'Bestellingen'),
             (None, 'Bestelling'),
         )
 
@@ -404,7 +404,7 @@ class BestellingAfrekenenView(UserPassesTestMixin, TemplateView):
 
             if bestelling.status == BESTELLING_STATUS_AFGEROND:
                 # betaling is al klaar
-                url = reverse('Bestel:na-de-betaling', kwargs={'bestel_nr': bestelling.bestel_nr})
+                url = reverse('Bestelling:na-de-betaling', kwargs={'bestel_nr': bestelling.bestel_nr})
                 return HttpResponseRedirect(url)
 
             self.bestelling = bestelling
@@ -417,12 +417,12 @@ class BestellingAfrekenenView(UserPassesTestMixin, TemplateView):
         # de details worden via DynamicBestellingCheckStatus opgehaald
         context['bestelling'] = bestelling = self.bestelling
 
-        context['url_status_check'] = reverse('Bestel:dynamic-check-status', kwargs={'bestel_nr': bestelling.bestel_nr})
+        context['url_status_check'] = reverse('Bestelling:dynamic-check-status', kwargs={'bestel_nr': bestelling.bestel_nr})
 
         context['kruimels'] = (
             (reverse('Sporter:profiel'), 'Mijn pagina'),
-            (reverse('Bestel:toon-bestellingen'), 'Bestellingen'),
-            (reverse('Bestel:toon-bestelling-details', kwargs={'bestel_nr': bestelling.bestel_nr}), 'Bestelling'),
+            (reverse('Bestelling:toon-bestellingen'), 'Bestellingen'),
+            (reverse('Bestelling:toon-bestelling-details', kwargs={'bestel_nr': bestelling.bestel_nr}), 'Bestelling'),
             (None, 'Afrekenen')
         )
 
@@ -437,7 +437,7 @@ class BestellingAfrekenenView(UserPassesTestMixin, TemplateView):
             self.bestelling.save(update_fields=['status'])
 
         # doorsturen naar de GET
-        url = reverse('Bestel:bestelling-afrekenen',
+        url = reverse('Bestelling:bestelling-afrekenen',
                       kwargs={'bestel_nr': self.bestelling.bestel_nr})
         return HttpResponseRedirect(url)
 
@@ -482,7 +482,7 @@ class DynamicBestellingCheckStatus(UserPassesTestMixin, View):
 
             te_betalen_euro = bestelling.totaal_euro
 
-            url_na_de_betaling = settings.SITE_URL + reverse('Bestel:na-de-betaling',
+            url_na_de_betaling = settings.SITE_URL + reverse('Bestelling:na-de-betaling',
                                                               kwargs={'bestel_nr': bestelling.bestel_nr})
 
             # start de bestelling via de achtergrond taak
@@ -576,10 +576,10 @@ class BestellingAfgerondView(UserPassesTestMixin, TemplateView):
 
         context['ontvangen'] = transacties_euro
 
-        context['url_afschrift'] = reverse('Bestel:toon-bestelling-details',
+        context['url_afschrift'] = reverse('Bestelling:toon-bestelling-details',
                                            kwargs={'bestel_nr': bestelling.bestel_nr})
 
-        context['url_status_check'] = reverse('Bestel:dynamic-check-status',
+        context['url_status_check'] = reverse('Bestelling:dynamic-check-status',
                                               kwargs={'bestel_nr': bestelling.bestel_nr})
 
         if bestelling.status == BESTELLING_STATUS_AFGEROND:
@@ -593,8 +593,8 @@ class BestellingAfgerondView(UserPassesTestMixin, TemplateView):
 
         context['kruimels'] = (
             (reverse('Sporter:profiel'), 'Mijn pagina'),
-            (reverse('Bestel:toon-bestellingen'), 'Bestellingen'),
-            (reverse('Bestel:toon-bestelling-details', kwargs={'bestel_nr': bestelling.bestel_nr}), 'Bestelling'),
+            (reverse('Bestelling:toon-bestellingen'), 'Bestellingen'),
+            (reverse('Bestelling:toon-bestelling-details', kwargs={'bestel_nr': bestelling.bestel_nr}), 'Bestelling'),
             (None, 'Status betaling')
         )
 
@@ -635,7 +635,7 @@ class AnnuleerBestellingView(UserPassesTestMixin, View):
             bestel_mutatieverzoek_annuleer(bestelling, snel == '1')
 
         # redirect naar het bestellingen overzicht
-        url = reverse('Bestel:toon-bestellingen')
+        url = reverse('Bestelling:toon-bestellingen')
         return HttpResponseRedirect(url)
 
 

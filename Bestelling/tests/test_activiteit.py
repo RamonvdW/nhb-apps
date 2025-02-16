@@ -36,7 +36,8 @@ class TestBestellingActiviteit(E2EHelpers, TestCase):
     test_after = ('Bestelling.tests.test_mandje',)
 
     url_activiteit = '/bestel/activiteit/'
-    url_omzet = '/bestel/omzet/'
+    url_omzet_alles = '/bestel/omzet/alles/'
+    url_omzet_leden = '/bestel/omzet/exclusief-bondsbureau/'
 
     volgende_bestel_nr = 1234567
 
@@ -452,7 +453,9 @@ class TestBestellingActiviteit(E2EHelpers, TestCase):
     def test_omzet(self):
         # inlog vereist
         self.client.logout()
-        resp = self.client.get(self.url_omzet)
+        resp = self.client.get(self.url_omzet_alles)
+        self.assert403(resp)
+        resp = self.client.get(self.url_omzet_leden)
         self.assert403(resp)
 
         ver2 = Vereniging(
@@ -476,7 +479,13 @@ class TestBestellingActiviteit(E2EHelpers, TestCase):
         self.e2e_wisselnaarrol_bb()
 
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_omzet)
+            resp = self.client.get(self.url_omzet_alles)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('bestelling/omzet.dtl', 'plein/site_layout.dtl'))
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_omzet_leden)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('bestelling/omzet.dtl', 'plein/site_layout.dtl'))
@@ -500,7 +509,13 @@ class TestBestellingActiviteit(E2EHelpers, TestCase):
         self._maak_bestellingen()
 
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_omzet)
+            resp = self.client.get(self.url_omzet_alles)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('bestelling/omzet.dtl', 'plein/site_layout.dtl'))
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_omzet_leden)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('bestelling/omzet.dtl', 'plein/site_layout.dtl'))
@@ -509,7 +524,9 @@ class TestBestellingActiviteit(E2EHelpers, TestCase):
         self.account_admin.is_staff = False
         self.account_admin.save(update_fields=['is_staff'])
 
-        resp = self.client.get(self.url_omzet)
+        resp = self.client.get(self.url_omzet_alles)
+        self.assert403(resp)
+        resp = self.client.get(self.url_omzet_leden)
         self.assert403(resp)
 
 

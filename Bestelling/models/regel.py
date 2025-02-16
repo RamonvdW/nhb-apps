@@ -10,7 +10,7 @@ from decimal import Decimal
 
 class BestellingRegel(models.Model):
     """
-        Regel van ene bestelling
+        Regel van een bestelling
         Kan zijn: product of transportkosten
 
         Deze kan in het Mandje liggen of onderdeel zijn van een Bestelling
@@ -24,6 +24,7 @@ class BestellingRegel(models.Model):
     btw_percentage = models.CharField(max_length=5, default='', blank=True)         # 21,00
 
     # prijs van deze regel (een positief bedrag)
+    # de korting is hier nog niet vanaf
     prijs_euro = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal(0))       # max 999,99
 
     # de korting op deze regel (ook een positief bedrag!)
@@ -35,7 +36,6 @@ class BestellingRegel(models.Model):
 
     # code voor routing naar de juiste plugin
     # "wedstrijd"
-    # "opleiding"
     # "webwinkel"
     # "transport"
     # "evenement"
@@ -44,8 +44,8 @@ class BestellingRegel(models.Model):
 
     def __str__(self):
         """ beschrijving voor de admin interface """
-        msg = self.korte_beschrijving[:40]
-        if len(self.korte_beschrijving) > 40:
+        msg = self.korte_beschrijving[:60]
+        if len(self.korte_beschrijving) > 60:
             msg += '..'
         return "[%s] %s %s" % (self.pk, self.code, msg)
 

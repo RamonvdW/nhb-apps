@@ -286,7 +286,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ('Bestelling', 'm0005_regel'),
         ('Evenement', 'm0003_bestelling'),
-        ('Opleiding', 'm0007_bestelling'),
+        ('Opleiding', 'm0008_bestelling'),
         ('Webwinkel', 'm0010_bestelling'),
         ('Wedstrijden', 'm0059_bestelling')
     ]

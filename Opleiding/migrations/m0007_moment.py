@@ -13,7 +13,7 @@ class Migration(migrations.Migration):
 
     # volgorde afdwingen
     dependencies = [
-        ('Opleiding', 'm0007_bestelling'),
+        ('Opleiding', 'm0006_squashed'),
     ]
 
     # migratie functies

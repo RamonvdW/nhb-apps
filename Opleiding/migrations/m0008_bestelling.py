@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
     # volgorde afdwingen
     dependencies = [
         ('Bestelling', 'm0005_regel'),
-        ('Opleiding', 'm0006_squashed'),
+        ('Opleiding', 'm0007_moment'),
     ]
 
     operations = [

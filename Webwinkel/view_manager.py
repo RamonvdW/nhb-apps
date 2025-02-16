@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2024 Ramon van der Winkel.
+#  Copyright (c) 2022-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -34,8 +34,8 @@ class ManagerView(UserPassesTestMixin, TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        context['url_overboeking'] = reverse('Bestel:overboeking-ontvangen')
-        context['url_bestellingen'] = reverse('Bestel:activiteit') + '?webwinkel=on'
+        context['url_overboeking'] = reverse('Bestelling:overboeking-ontvangen')
+        context['url_bestellingen'] = reverse('Bestelling:activiteit') + '?webwinkel=on'
         context['url_voorraad'] = reverse('Webwinkel:voorraad')
 
         context['kruimels'] = (

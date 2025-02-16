@@ -59,7 +59,7 @@ class VerenigingOpleidingenView(UserPassesTestMixin, View):
         context['opleidingen'] = opleidingen
 
         context['url_mollie'] = reverse('Betaal:vereniging-instellingen')
-        context['url_overboeking_ontvangen'] = reverse('Bestel:overboeking-ontvangen')
+        context['url_overboeking_ontvangen'] = reverse('Bestelling:overboeking-ontvangen')
 
         context['url_voorwaarden'] = settings.VERKOOPVOORWAARDEN_OPLEIDINGEN_URL
 

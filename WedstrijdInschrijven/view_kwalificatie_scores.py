@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2024 Ramon van der Winkel.
+#  Copyright (c) 2021-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -160,7 +160,7 @@ class KwalificatieScoresOpgevenView(UserPassesTestMixin, TemplateView):
         url = reverse('Wedstrijden:wedstrijd-details', kwargs={'wedstrijd_pk': wedstrijd.pk})
 
         context['url_verder'] = url
-        context['url_mandje'] = reverse('Bestel:toon-inhoud-mandje')
+        context['url_mandje'] = reverse('Bestelling:toon-inhoud-mandje')
 
         context['kruimels'] = (
             (url_maand, 'Wedstrijdkalender'),

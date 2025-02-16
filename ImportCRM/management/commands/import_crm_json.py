@@ -12,7 +12,7 @@ from django.db.models import ProtectedError
 from django.core.management.base import BaseCommand
 from django.core.validators import URLValidator
 from django.core.exceptions import ValidationError
-from Account.models import Account
+from Account.models import Account, AccountSessions
 from BasisTypen.definities import SCHEIDS_NIET
 from Functie.models import Functie
 from Functie.operations import maak_account_vereniging_secretaris
@@ -1632,6 +1632,23 @@ class Command(BaseCommand):
 
                 self.stdout.write('[INFO] Lid %s wordt nu verwijderd' % str(obj))
                 if not self.dryrun:
+                    if obj.account:
+                        # blokkeer inlog
+                        obj.account.is_active = False
+                        obj.account.save(update_fields=['is_active'])
+
+                        # verwijder sessies zodat het account niet meer ingelogd is
+                        AccountSessions.objects.filter(account=obj.account).delete()
+
+                        # probeer het account te verwijderen
+                        # note: dit resulteert in heel veel queries voor om verwijzingen af te handelen (cascade, etc.)
+                        try:
+                            obj.account.delete()
+                        except ProtectedError:
+                            # dit kan gebeuren als er nog referenties aan het account zijn
+                            # bijvoorbeeld vanuit een bestelling
+                            pass
+
                     try:
                         del self._cache_sporter[obj.pk]
                         obj.delete()

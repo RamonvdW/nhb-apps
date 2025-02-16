@@ -7,7 +7,7 @@
 from django.db import models
 from django.utils.formats import localize
 from Account.models import Account
-from Bestelling.models.regel import BestellingRegel       # TODO: drop .ext
+from Bestelling.models.regel import BestellingRegel
 from Locatie.models import EvenementLocatie
 from Opleiding.definities import (OPLEIDING_STATUS_CHOICES, OPLEIDING_STATUS_VOORBEREID,
                                   OPLEIDING_INSCHRIJVING_STATUS_CHOICES,

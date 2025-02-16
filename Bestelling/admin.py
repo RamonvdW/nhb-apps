@@ -7,7 +7,7 @@
 from django.contrib import admin
 from django.db.models import Count
 from Bestelling.definities import BESTELLING_MUTATIE_TO_STR
-from Bestelling.models import BestellingProduct, BestellingMandje, Bestelling, BestellingMutatie
+from Bestelling.models import BestellingProduct, BestellingRegel, BestellingMandje, Bestelling, BestellingMutatie
 from Vereniging.models import Vereniging
 
 
@@ -16,6 +16,13 @@ class BestellingProductAdmin(admin.ModelAdmin):
     readonly_fields = ('wedstrijd_inschrijving',
                        'evenement_inschrijving', 'evenement_afgemeld',
                        'opleiding_inschrijving', 'opleiding_afgemeld')
+
+
+class BestellingRegelAdmin(admin.ModelAdmin):
+
+    list_filter = ('code', )
+
+    search_fields = ('korte_beschrijving', )
 
 
 class MandjeLeegFilter(admin.SimpleListFilter):
@@ -166,9 +173,10 @@ class BestellingMutatieAdmin(admin.ModelAdmin):
         return msg
 
 
-admin.site.register(BestellingProduct, BestellingProductAdmin)
 admin.site.register(BestellingMandje, BestellingMandjeAdmin)
 admin.site.register(Bestelling, BestellingAdmin)
+admin.site.register(BestellingProduct, BestellingProductAdmin)
+admin.site.register(BestellingRegel, BestellingRegelAdmin)
 admin.site.register(BestellingMutatie, BestellingMutatieAdmin)
 
 # end of file

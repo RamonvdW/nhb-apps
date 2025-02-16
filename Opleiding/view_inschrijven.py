@@ -262,7 +262,7 @@ class ToevoegenAanMandjeView(UserPassesTestMixin, View):
         context = dict()
 
         context['url_verder'] = reverse('Opleiding:inschrijven-basiscursus')
-        context['url_mandje'] = reverse('Bestel:toon-inhoud-mandje')
+        context['url_mandje'] = reverse('Bestelling:toon-inhoud-mandje')
         context['menu_toon_mandje'] = True
 
         context['kruimels'] = (

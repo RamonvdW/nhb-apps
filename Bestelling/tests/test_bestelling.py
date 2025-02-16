@@ -1489,7 +1489,7 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
         self.assertEqual(bestelling.status, BESTELLING_STATUS_NIEUW)
 
         f1, f2 = self.verwerk_bestel_mutaties()
-        print('\nf1:', f1.getvalue(), '\nf2:', f2.getvalue())
+        # print('\nf1:', f1.getvalue(), '\nf2:', f2.getvalue())
 
         bestelling = Bestelling.objects.get(pk=bestelling.pk)
         self.assertEqual(bestelling.status, BESTELLING_STATUS_GEANNULEERD)
