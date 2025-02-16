@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -8,9 +8,7 @@ from django.db import models
 from django.http import HttpRequest
 from django.contrib.auth.models import AbstractUser
 from django.contrib.sessions.models import Session
-from django.utils import timezone
 from BasisTypen.definities import SCHEIDS_NIET, SCHEIDS_CHOICES
-import datetime
 
 
 # see https://simpleisbetterthancomplex.com/tutorial/2016/07/22/how-to-extend-django-user-model.html#abstractuser
@@ -140,31 +138,6 @@ class AccountVerzoekenTeller(models.Model):
 
     # aantal getelde verzoeken
     teller = models.PositiveIntegerField(default=0)
-
-
-def accounts_opschonen(stdout):
-    """ deze functie wordt typisch 1x per dag aangeroepen om de database
-        tabellen van deze applicatie op te kunnen schonen.
-
-        We verwijderen nieuwe accounts die na 3 dagen nog niet voltooid zijn
-    """
-
-    now = timezone.now()
-    wat_ouder = now - datetime.timedelta(days=3)
-
-    # zoek gebruikers die een account aangemaakt hebben,
-    # maar de mail niet binnen 3 dagen bevestigen
-    # door deze te verwijderen kan de registratie opnieuw doorlopen worden
-    for obj in (Account
-                .objects
-                .filter(email_is_bevestigd=False,
-                        bevestigde_email='',
-                        last_login=None,
-                        date_joined__lt=wat_ouder)):
-
-        stdout.write('[INFO] Verwijder onvoltooid account %s' % obj)
-        obj.delete()
-    # for
 
 
 def get_account(request: HttpRequest) -> Account:

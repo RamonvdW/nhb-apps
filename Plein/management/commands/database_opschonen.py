@@ -8,7 +8,7 @@
 # deze taak wordt een keer per week gedraaid
 
 from django.core.management.base import BaseCommand
-from Account.models import accounts_opschonen
+from Account.operations.opschonen import accounts_opschonen
 from Beheer.views import beheer_opschonen
 from Bestelling.operations.opschonen import bestel_opschonen
 from Betaal.operations import betaal_opschonen
@@ -27,7 +27,6 @@ class Command(BaseCommand):
 
         bestel_opschonen(self.stdout)
         betaal_opschonen(self.stdout)
-        accounts_opschonen(self.stdout)
         beheer_opschonen(self.stdout)
         feedback_opschonen(self.stdout)
         logboek_opschonen(self.stdout)
@@ -35,6 +34,7 @@ class Command(BaseCommand):
         taken_opschonen(self.stdout)
         tijdelijke_url_opschonen(self.stdout)
         registreer_opschonen(self.stdout)
+        accounts_opschonen(self.stdout)
         # TODO: opleiding
         # TODO: scheidsrechters
 
