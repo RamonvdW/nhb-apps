@@ -1,20 +1,17 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 """ Ondersteuning voor de rollen binnen de applicatie """
 
-from Account.operations.session_vars import zet_sessionvar_if_changed
-from Account.operations.otp import otp_is_controle_gelukt
-from Account.models import Account, get_account
+from Account.models import Account
 from Functie.definities import Rol
 from Functie.models import Functie
 from Functie.rol.beschrijving import rol_zet_beschrijving
 from Functie.rol.bepaal import RolBepaler
 from Functie.rol.huidige import rol_zet_huidige_rol, rol_zet_huidige_functie_pk
-from Overig.helpers import get_safe_from_ip
 import logging
 
 my_logger = logging.getLogger('MH.Functie')

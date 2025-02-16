@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023-2024 Ramon van der Winkel.
+#  Copyright (c) 2023-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import reverse
-from Account.plugin_manager import account_add_plugin_post_login
+from Account.plugin_manager import account_add_plugin_post_login, account_registreer_notify_otp_reset
 from Functie.definities import Rol
 from Functie.rol.bepaal import rol_eval_rechten_simpel
+from Functie.rol.beschrijving import rol_zet_beschrijving
 from Functie.rol.huidige import rol_zet_huidige_rol, rol_zet_huidige_functie_pk
 
 
@@ -42,8 +43,18 @@ def functie_post_login_plugin(request, account):
     return None
 
 
+def functie_notify_otp_reset(request):
+    # deze functie wordt aangeroepen als de OTP herhaald moet worden
+    # hier resetten we de actieve rol, zodat de beheerder daar geen gebruik meer van mag maken
+
+    # let op: deze kan tijdens een GET handler aangeroepen worden
+    rol_zet_huidige_rol(request, Rol.ROL_SPORTER)
+    rol_zet_huidige_functie_pk(request, None)
+    rol_zet_beschrijving(request, Rol.ROL_SPORTER)
+
+
 # registreer de plugin
 account_add_plugin_post_login(20, functie_post_login_plugin)
-
+account_registreer_notify_otp_reset(functie_notify_otp_reset)
 
 # end of file
