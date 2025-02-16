@@ -66,7 +66,8 @@ def site_layout(request):
                 context['menu_url_taken'] = reverse('Taken:overzicht')
         else:
             context['menu_url_profiel'] = reverse('Sporter:profiel')
-            context['menu_url_bondspas'] = reverse('Bondspas:toon-bondspas')
+            if not account.is_gast:
+                context['menu_url_bondspas'] = reverse('Bondspas:toon-bondspas')
 
     else:
         context['menu_url_inloggen'] = reverse('Account:login')
