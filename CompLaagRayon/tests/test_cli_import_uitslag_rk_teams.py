@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2024 Ramon van der Winkel.
+#  Copyright (c) 2022-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -131,7 +131,7 @@ class TestCompLaagRayonImportUitslagRkTeams(E2EHelpers, TestCase):
         self.assertTrue("[ERROR] Kan team 'team-4122-' van vereniging 4122 op regel 33 niet kiezen uit"
                         in f1.getvalue())
         self.assertTrue("[ERROR] Kan team 'team-4122-' van vereniging 4122 op regel 33 niet vinden" in f1.getvalue())
-        self.assertTrue("[ERROR] Lid 301948 is niet van vereniging 4122" in f1.getvalue())
+        self.assertTrue("[ERROR] Kan vereniging 4122, lid 301948 met ag=9.447 niet vinden" in f1.getvalue())
         self.assertTrue("[ERROR] Lid 123456 is niet gekwalificeerd voor dit kampioenschap!" in f1.getvalue())
         self.assertTrue("[ERROR] Probleem met de scores op regel 16" in f1.getvalue())
         self.assertTrue("[INFO] Uitslag wordt van blad 'Finales 8 teams' gehaald" in f2.getvalue())
