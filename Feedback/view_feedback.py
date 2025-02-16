@@ -68,12 +68,15 @@ class KrijgFeedbackView(UserPassesTestMixin, View):
         # geef het formulier aan de gebruiker om in te vullen
         form = FeedbackForm(initial={'bevinding': '6'})
         bev = kwargs['bevinding']
-        context = {'form': form,
-                   'formulier_url': reverse('Feedback:formulier'),     # URL voor de POST
-                   'gebruiker_naam': gebruiker_str,
-                   'check_0': (bev == 'plus'),
-                   'check_1': (bev == 'nul'),
-                   'check_2': (bev == 'min')}
+        context = {
+            'form': form,
+            'formulier_url': reverse('Feedback:formulier'),     # URL voor de POST
+            'gebruiker_naam': gebruiker_str,
+            'check_0': (bev == 'plus'),
+            'check_1': (bev == 'nul'),
+            'check_2': (bev == 'min'),
+            'robots': 'noindex'         # prevent indexing this page
+        }
 
         # bewust geen broodkruimels (behalve de "vorige" knop)
         # context['kruimels'] = (
@@ -109,12 +112,15 @@ class KrijgFeedbackView(UserPassesTestMixin, View):
         # geef het formulier aan de gebruiker om in te vullen
         # alleen hebben we hier niet onthouden welke plaatje de gebruiker aangeklikt heeft
         form = FeedbackForm(initial={'bevinding': '6'})
-        context = {'form': form,
-                   'formulier_url': reverse('Feedback:formulier'),     # URL voor de POST
-                   'gebruiker_naam': gebruiker_str,
-                   'check_0': False,
-                   'check_1': True,
-                   'check_2': False}
+        context = {
+            'form': form,
+            'formulier_url': reverse('Feedback:formulier'),     # URL voor de POST
+            'gebruiker_naam': gebruiker_str,
+            'check_0': False,
+            'check_1': True,
+            'check_2': False,
+            'robots': 'noindex'         # prevent indexing this page
+        }
 
         # bewust geen broodkruimels (behalve de "vorige" knop)
 
@@ -132,6 +138,7 @@ class BedanktView(TemplateView):
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
+        context['robots'] = 'noindex'       # prevent indexing this page
         return context
 
 
