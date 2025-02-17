@@ -7,27 +7,15 @@
 from django.conf import settings
 from django.test import TestCase
 from django.utils import timezone
-from Bestelling.models import Bestelling, BestellingMandje
-from Bestelling.operations.mutaties import bestel_mutatieverzoek_maak_bestellingen
-from Betaal.models import BetaalMutatie, BetaalInstellingenVereniging
-from Betaal.mutaties import betaal_mutatieverzoek_start_ontvangst
 from Functie.models import Functie
 from Geo.models import Regio
 from Instaptoets.models import Vraag, Instaptoets
-from Mailer.models import MailQueue
-from Opleiding.definities import (OPLEIDING_STATUS_INSCHRIJVEN, OPLEIDING_STATUS_GEANNULEERD,
-                                  OPLEIDING_INSCHRIJVING_STATUS_INSCHRIJVEN,
-                                  OPLEIDING_INSCHRIJVING_STATUS_RESERVERING_MANDJE,
-                                  OPLEIDING_INSCHRIJVING_STATUS_RESERVERING_BESTELD,
-                                  OPLEIDING_INSCHRIJVING_STATUS_DEFINITIEF)
-from Opleiding.models import Opleiding, OpleidingInschrijving, OpleidingAfgemeld
+from Opleiding.definities import OPLEIDING_STATUS_INSCHRIJVEN
+from Opleiding.models import Opleiding, OpleidingInschrijving
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
-from decimal import Decimal
 import datetime
-import json
-import re
 
 
 class TestOpleidingAanpassingen(E2EHelpers, TestCase):
@@ -109,8 +97,9 @@ class TestOpleidingAanpassingen(E2EHelpers, TestCase):
         self.assert_is_redirect_login(resp)
 
     def test_beheerder(self):
-        self.e2e_login(self.account_normaal)
+        self.e2e_login_and_pass_otp(self.account_normaal)
         self.e2e_wissel_naar_functie(self.functie_mo)
+        self.e2e_check_rol('MO')
 
         # geen inschrijvingen
         with self.assert_max_queries(20):

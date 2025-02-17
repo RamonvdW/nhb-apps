@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -328,7 +328,7 @@ class OTPLoskoppelenView(UserPassesTestMixin, View):
         url = reverse('Overig:activiteit')
 
         if request.POST.get("reset_tweede_factor", None):
-            inlog_naam = request.POST.get("inlog_naam", '')[:6]     # afkappen voor de veiligheid
+            inlog_naam = request.POST.get("inlog_naam", '')[:10]     # afkappen voor de veiligheid
 
             try:
                 account = Account.objects.get(username=inlog_naam)
