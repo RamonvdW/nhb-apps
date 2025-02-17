@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -8,6 +8,7 @@ from django.conf import settings
 from django.utils import timezone
 from Account.models import Account, AccountSessions, get_account
 from Account.operations.session_vars import zet_sessionvar_if_changed
+from Account.plugin_manager import account_plugins_notify_otp_reset
 from Logboek.models import schrijf_in_logboek
 from Overig.helpers import get_safe_from_ip
 from Mailer.operations import mailer_queue_email, render_email_template
@@ -38,6 +39,11 @@ def otp_zet_controle_niet_gelukt(request):
     # koppel de (eventuele nieuwe) sessie aan het account
     AccountSessions.objects.get_or_create(account=account,
                                           session_id=request.session.session_key)   # session_id = primary key
+
+    # geef de OTP reset door
+    for notify in account_plugins_notify_otp_reset:
+        notify(request)
+    # for
 
 
 def otp_zet_controle_gelukt(request):

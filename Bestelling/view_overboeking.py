@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2024 Ramon van der Winkel.
+#  Copyright (c) 2022-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -94,7 +94,7 @@ class OverboekingOntvangenView(UserPassesTestMixin, TemplateView):
 
         context['kenmerk'] = context['bedrag'] = ''
 
-        context['url_opslaan'] = reverse('Bestel:overboeking-ontvangen')
+        context['url_opslaan'] = reverse('Bestelling:overboeking-ontvangen')
 
         if self.rol_nu == Rol.ROL_MWW:
             context['kruimels'] = (
@@ -116,7 +116,7 @@ class OverboekingOntvangenView(UserPassesTestMixin, TemplateView):
         context = dict()
 
         context['ver'] = self.functie_nu.vereniging
-        context['url_opslaan'] = reverse('Bestel:overboeking-ontvangen')
+        context['url_opslaan'] = reverse('Bestelling:overboeking-ontvangen')
 
         actie = request.POST.get('actie', '')[:5]
         bedrag = request.POST.get('bedrag', '')[:20].strip()

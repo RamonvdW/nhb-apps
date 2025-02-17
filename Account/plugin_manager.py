@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-account_plugins_login_gate = list()   # [tup, tup, ..] with tup = (prio, func, skip_for_login_as)
-account_plugins_post_login = list()   # [tup, tup, ..] with tup = (prio, func)
-account_plugins_ww_vergeten = list()   # [tup, tup, ..] with tup = (prio, func)
+account_plugins_login_gate = list()         # [tup, tup, ..] with tup = (prio, func, skip_for_login_as)
+account_plugins_post_login = list()         # [tup, tup, ..] with tup = (prio, func)
+account_plugins_ww_vergeten = list()        # [tup, tup, ..] with tup = (prio, func)
+account_plugins_notify_otp_reset = list()   # [func, ..]
 
 
 def account_add_plugin_login_gate(prio, func, skip_for_login_as):
@@ -80,6 +81,10 @@ def account_add_plugin_ww_vergeten(prio, func):
     tup = (prio, func)
     account_plugins_ww_vergeten.append(tup)
     account_plugins_ww_vergeten.sort(key=lambda x: x[0])
+
+
+def account_registreer_notify_otp_reset(func):
+    account_plugins_notify_otp_reset.append(func)
 
 
 # end of file

@@ -140,7 +140,7 @@ class TestOpleidingAfmelden(E2EHelpers, TestCase):
         MailQueue.objects.all().delete()
 
         # wissel naar de HWL van het bondsbureau
-        self.e2e_login(self.account_normaal)
+        self.e2e_login_and_pass_otp(self.account_normaal)
         self.e2e_wissel_naar_functie(self.functie_hwl)
 
         # annuleer de bestelling
@@ -156,7 +156,7 @@ class TestOpleidingAfmelden(E2EHelpers, TestCase):
 
     def test_annuleer_bestelling(self):
         # maak een bestelling
-        self.e2e_login(self.account_normaal)
+        self.e2e_login_and_pass_otp(self.account_normaal)
         self.e2e_check_rol('sporter')
 
         self.assertEqual(OpleidingInschrijving.objects.count(), 0)

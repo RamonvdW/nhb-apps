@@ -109,7 +109,7 @@ class TestOpleidingAanpassingen(E2EHelpers, TestCase):
         self.assert_is_redirect_login(resp)
 
     def test_beheerder(self):
-        self.e2e_login(self.account_normaal)
+        self.e2e_login_and_pass_otp(self.account_normaal)
         self.e2e_wissel_naar_functie(self.functie_mo)
 
         # geen inschrijvingen

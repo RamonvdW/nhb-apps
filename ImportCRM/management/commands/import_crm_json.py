@@ -1641,6 +1641,7 @@ class Command(BaseCommand):
                         AccountSessions.objects.filter(account=obj.account).delete()
 
                         # probeer het account te verwijderen
+                        # note: dit resulteert in heel veel queries voor om verwijzingen af te handelen (cascade, etc.)
                         try:
                             obj.account.delete()
                         except ProtectedError:

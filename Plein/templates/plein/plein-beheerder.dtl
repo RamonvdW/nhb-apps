@@ -140,7 +140,7 @@
 
                 {% if rol_is_bb or rol_is_mwz %}
                     <!-- betalingen -->
-                    {% url 'Bestel:activiteit' as card_url %}
+                    {% url 'Bestelling:activiteit' as card_url %}
                     {% include 'plein/card_icon.dtl' with title='Bestellingen' text="Toon de bestellingen en betalingen." icon="shopping_cart" url=card_url %}
                 {% endif %}
 

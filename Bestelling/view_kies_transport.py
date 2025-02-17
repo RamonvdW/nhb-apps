@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023-2024 Ramon van der Winkel.
+#  Copyright (c) 2023-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -64,13 +64,13 @@ class KiesTransportView(UserPassesTestMixin, TemplateView):
 
         context['ophalen_ver'] = Vereniging.objects.get(ver_nr=settings.WEBWINKEL_VERKOPER_VER_NR)
 
-        context['url_opslaan'] = reverse('Bestel:kies-transport')
+        context['url_opslaan'] = reverse('Bestelling:kies-transport')
 
         # force dat het mandje icoon getoond wordt
         context['menu_toon_mandje'] = True
 
         context['kruimels'] = (
-            (reverse('Bestel:toon-inhoud-mandje'), 'Mandje'),
+            (reverse('Bestelling:toon-inhoud-mandje'), 'Mandje'),
             (None, 'Keuze transport')
         )
 
@@ -97,7 +97,7 @@ class KiesTransportView(UserPassesTestMixin, TemplateView):
         # achtergrondtaak zet het mandje om in bestellingen
 
         # terug naar het mandje
-        url = reverse('Bestel:toon-inhoud-mandje')
+        url = reverse('Bestelling:toon-inhoud-mandje')
         return HttpResponseRedirect(url)
 
 

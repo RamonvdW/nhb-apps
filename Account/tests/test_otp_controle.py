@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -161,7 +161,7 @@ class TestAccountOtpControle(E2EHelpers, TestCase):
         account.otp_controle_gelukt_op = timezone.now() - datetime.timedelta(days=100)      # should be enough
         account.save(update_fields=['otp_controle_gelukt_op'])
 
-        # middleware reset sessie variabele over OTP controle
+        # middleware reset sessie variabele over OTP controle en reset de rol
         resp = self.client.get(self.url_beheer, follow=True)
         self.assertFalse(self.client.session.get(SESSIONVAR_ACCOUNT_OTP_CONTROL_IS_GELUKT))
         self.assertEqual(resp.status_code, 200)     # 200 = OK

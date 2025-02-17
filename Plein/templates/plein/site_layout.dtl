@@ -64,7 +64,7 @@
                         {% if menu_toon_mandje %}
                             <li>
                                 <!-- position:relative + z-index=2: knop boven op het logo -->
-                                <a href="{% url 'Bestel:toon-inhoud-mandje' %}" class="btn-sv-rood" style="position:relative; margin-top:14px" aria-label="Mandje">
+                                <a href="{% url 'Bestelling:toon-inhoud-mandje' %}" class="btn-sv-rood" style="position:relative; margin-top:14px" aria-label="Mandje">
                                     {% if menu_mandje_aantal %}
                                         <i class="notranslate material-icons-round left" style="line-height:36px">shopping_cart</i>
                                         <span>{{ menu_mandje_aantal }}</span>

@@ -36,7 +36,7 @@ class TestBestellingActiviteit(E2EHelpers, TestCase):
     test_after = ('Bestelling.tests.test_mandje',)
 
     url_activiteit = '/bestel/activiteit/'
-    url_omzet = '/bestel/omzet/'
+    url_omzet = '/bestel/omzet/alles/'
 
     volgende_bestel_nr = 1234567
 

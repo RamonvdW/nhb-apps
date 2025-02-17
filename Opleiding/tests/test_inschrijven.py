@@ -180,7 +180,7 @@ class TestOpleidingInschrijven(E2EHelpers, TestCase):
         self.assert403(resp, 'Geen toegang')
 
     def test_beheerder(self):
-        self.e2e_login(self.account_normaal)
+        self.e2e_login_and_pass_otp(self.account_normaal)
         self.e2e_wissel_naar_functie(self.functie_mo)
 
         with self.assert_max_queries(20):
@@ -338,7 +338,7 @@ class TestOpleidingInschrijven(E2EHelpers, TestCase):
 
     def test_mandje(self):
         # leg de inschrijving voor de opleiding in het mandje
-        self.e2e_login(self.account_normaal)
+        self.e2e_login_and_pass_otp(self.account_normaal)
         self.e2e_check_rol('sporter')
 
         self._zet_instaptoets_gehaald()

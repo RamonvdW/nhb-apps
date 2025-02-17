@@ -305,7 +305,7 @@ class ProductView(TemplateView):
 
         context['menu_toon_mandje'] = True
         context['url_verder'] = url_overzicht
-        context['url_mandje'] = reverse('Bestel:toon-inhoud-mandje')
+        context['url_mandje'] = reverse('Bestelling:toon-inhoud-mandje')
 
         context['kruimels'] = (
             (url_overzicht, 'Webwinkel'),

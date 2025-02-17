@@ -81,7 +81,7 @@
         <!-- blauwe balk met kaartjes -->
         <div class="row-sv-blauw">
             <div class="col s12">
-                {% url 'Bestel:toon-bestellingen' as card_url %}
+                {% url 'Bestelling:toon-bestellingen' as card_url %}
                 {% include 'plein/card_icon.dtl' with title="Bestellingen" text="Alle details van je bestellingen." icon="receipt_long" url=card_url %}
             </div>
         </div>

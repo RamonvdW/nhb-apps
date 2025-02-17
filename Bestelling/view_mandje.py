@@ -165,7 +165,7 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
                 controleer_euro -= product.korting_euro
 
                 # maak een knop om deze bestelling te verwijderen uit het mandje
-                product.url_verwijder = reverse('Bestel:mandje-verwijder-product',
+                product.url_verwijder = reverse('Bestelling:mandje-verwijder-product',
                                                 kwargs={'product_pk': product.pk})
 
                 mandje_is_leeg = False
@@ -212,7 +212,7 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
             if account.is_gast:
                 # geef gastaccounts mogelijkheid om afleveradres in te voeren
                 toon_transport = False
-                context['url_afleveradres'] = reverse('Bestel:wijzig-afleveradres')
+                context['url_afleveradres'] = reverse('Bestelling:wijzig-afleveradres')
             else:
                 # volwaardig lid: afleveradres automatisch invullen
                 sporter = get_sporter(account)
@@ -235,13 +235,13 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
         context['producten'] = producten
         context['bevat_fout'] = bevat_fout
         context['aantal_betalingen'] = len(ontvanger2product_pks.keys())
-        context['url_kies_transport'] = reverse('Bestel:kies-transport')
+        context['url_kies_transport'] = reverse('Bestelling:kies-transport')
         context['url_voorwaarden_webwinkel'] = settings.VERKOOPVOORWAARDEN_WEBWINKEL_URL
         context['url_voorwaarden_wedstrijden'] = settings.VERKOOPVOORWAARDEN_WEDSTRIJDEN_URL
         context['url_voorwaarden_opleidingen'] = settings.VERKOOPVOORWAARDEN_OPLEIDINGEN_URL
 
         if not (bevat_fout or mandje_is_leeg or geen_afleveradres):
-            context['url_bestellen'] = reverse('Bestel:toon-inhoud-mandje')
+            context['url_bestellen'] = reverse('Bestelling:toon-inhoud-mandje')
 
         context['kruimels'] = (
             (None, 'Mandje'),
@@ -296,7 +296,7 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
         mandje_tel_inhoud(request, account)
 
         # ga naar de pagina met alle bestellingen, zodat de betaling gestart kan worden
-        url = reverse('Bestel:toon-bestellingen')
+        url = reverse('Bestelling:toon-bestellingen')
         return HttpResponseRedirect(url)
 
 
@@ -344,7 +344,7 @@ class VerwijderProductUitMandje(UserPassesTestMixin, View):
             else:
                 raise Http404('Niet gevonden in jouw mandje')
 
-        url = reverse('Bestel:toon-inhoud-mandje')
+        url = reverse('Bestelling:toon-inhoud-mandje')
         return HttpResponseRedirect(url)
 
 

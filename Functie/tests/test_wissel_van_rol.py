@@ -4,12 +4,17 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
+from django.conf import settings
 from django.test import TestCase
+from django.utils import timezone
+from Account.operations.otp import SESSIONVAR_ACCOUNT_OTP_CONTROL_IS_GELUKT
 from Competitie.definities import DEEL_RK, DEEL_BK
 from Competitie.models import Competitie, CompetitieMatch, Kampioenschap
 from Functie.definities import Rol
 from Functie.models import Functie
 from Functie.operations import account_needs_vhpg
+from Functie.rol.huidige import SESSIONVAR_ROL_HUIDIGE, SESSIONVAR_ROL_HUIDIGE_FUNCTIE_PK
+from Functie.rol.beschrijving import SESSIONVAR_ROL_BESCHRIJVING
 from Functie.tests.helpers import maak_functie
 from Functie.rol import rol_get_huidige_functie
 from Geo.models import Rayon, Regio
@@ -904,6 +909,30 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('functie/wissel-van-rol.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, 'Sporter')
         self.assertContains(resp, 'Manager MH')
+
+    def test_herhaal(self):
+        # controleer dat de rol gereset wordt als de OTP controle herhaald moet worden
+        self.assertIsNotNone(settings.HERHAAL_INTERVAL_OTP)
+
+        self.e2e_account_accepteert_vhpg(self.account_admin)
+        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_wissel_naar_functie(self.functie_rcl)
+        self.e2e_check_rol('RCL')
+
+        self.account_admin.refresh_from_db()
+        self.account_admin.otp_controle_gelukt_op = timezone.now() - datetime.timedelta(days=100)  # should be enough
+        self.account_admin.save(update_fields=['otp_controle_gelukt_op'])
+
+        # forceer het herhalen van de OTP controle
+        resp = self.client.get(self.url_wissel_van_rol)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('functie/wissel-van-rol.dtl', 'plein/site_layout.dtl'))
+        # self.e2e_open_in_browser(resp)
+        self.assertFalse(self.client.session.get(SESSIONVAR_ACCOUNT_OTP_CONTROL_IS_GELUKT))
+        self.assertEqual(self.client.session.get(SESSIONVAR_ROL_HUIDIGE), Rol.ROL_SPORTER)
+        self.assertEqual(self.client.session.get(SESSIONVAR_ROL_HUIDIGE_FUNCTIE_PK), None)
+        self.assertEqual(self.client.session.get(SESSIONVAR_ROL_BESCHRIJVING), 'Sporter')
 
 # FUTURE: test maken met gebruiker in 2x rol met dezelfde 'volgorde' (gaf sorteerprobleem), zowel 2xBKO als 2xHWL
 

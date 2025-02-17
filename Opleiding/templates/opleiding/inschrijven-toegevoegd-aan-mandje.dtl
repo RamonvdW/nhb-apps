@@ -49,7 +49,7 @@
             {% include 'plein/card_icon.dtl' with title="Verder winkelen" text="Terug naar het evenement waar je mee bezig was." icon="event_note" url=url_verder %}
 
             <!-- mandje -->
-            {% url 'Bestel:toon-inhoud-mandje' as card_url %}
+            {% url 'Bestelling:toon-inhoud-mandje' as card_url %}
             {% include 'plein/card_icon.dtl' with title="Naar mijn mandje" text="Mandje bekijken, bestelling afronden en betalen." icon="shopping_cart" url=card_url %}
 
         </div>

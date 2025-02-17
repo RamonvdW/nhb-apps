@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2024 Ramon van der Winkel.
+#  Copyright (c) 2021-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -89,7 +89,7 @@ class VerenigingWedstrijdenView(UserPassesTestMixin, View):
             context['geen_locatie'] = True
 
         context['url_mollie'] = reverse('Betaal:vereniging-instellingen')
-        context['url_overboeking_ontvangen'] = reverse('Bestel:overboeking-ontvangen')
+        context['url_overboeking_ontvangen'] = reverse('Bestelling:overboeking-ontvangen')
 
         context['url_voorwaarden'] = settings.VERKOOPVOORWAARDEN_WEDSTRIJDEN_URL
 

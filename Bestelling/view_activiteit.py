@@ -4,6 +4,7 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
+from django.conf import settings
 from django.utils import timezone
 from django.db.models.query_utils import Q
 from django.contrib.auth.mixins import UserPassesTestMixin
@@ -50,7 +51,7 @@ class BestelActiviteitView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         # zoekformulier
-        context['zoek_url'] = reverse('Bestel:activiteit')
+        context['zoek_url'] = reverse('Bestelling:activiteit')
         if len(self.request.GET.keys()) == 0:
             # no query parameters
             form = ZoekBestellingForm(initial={'webwinkel': True,
@@ -285,7 +286,7 @@ class BestelActiviteitView(UserPassesTestMixin, TemplateView):
         # for
 
         if self.is_staff:
-            context['url_omzet'] = reverse('Bestel:omzet')
+            context['url_omzet'] = reverse('Bestelling:omzet')
 
         if self.rol_nu == Rol.ROL_MWW:
             context['kruimels'] = (
@@ -361,7 +362,7 @@ class BestelOmzetView(UserPassesTestMixin, TemplateView):
         context['totaal_vers'] = len(uniek_vers)
 
         context['kruimels'] = (
-            (reverse('Bestel:activiteit'), 'Bestellingen en Betalingen'),
+            (reverse('Bestelling:activiteit'), 'Bestellingen en Betalingen'),
             (None, 'Omzet')
         )
 

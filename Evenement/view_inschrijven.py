@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2024 Ramon van der Winkel.
+#  Copyright (c) 2024-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -449,7 +449,7 @@ class ToevoegenAanMandjeView(UserPassesTestMixin, View):
             inschrijven_str += ' Groepje'
 
         context['url_verder'] = url
-        context['url_mandje'] = reverse('Bestel:toon-inhoud-mandje')
+        context['url_mandje'] = reverse('Bestelling:toon-inhoud-mandje')
         context['menu_toon_mandje'] = True
 
         context['kruimels'] = (

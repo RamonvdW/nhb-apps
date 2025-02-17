@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2024 Ramon van der Winkel.
+#  Copyright (c) 2022-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -8,7 +8,7 @@ from django.urls import path
 from Bestelling import (view_mandje, view_bestelling, view_activiteit, view_overboeking,
                         view_kies_transport, view_afleveradres)
 
-app_name = 'Bestel'
+app_name = 'Bestelling'
 
 # basis = /bestel/
 
@@ -60,12 +60,13 @@ urlpatterns = [
          view=view_overboeking.OverboekingOntvangenView.as_view(),
          name='overboeking-ontvangen'),
 
+
     # manager view
     path('activiteit/',
          view_activiteit.BestelActiviteitView.as_view(),
          name='activiteit'),
 
-    path('omzet/',
+    path('omzet/alles/',
          view_activiteit.BestelOmzetView.as_view(),
          name='omzet'),
 ]
