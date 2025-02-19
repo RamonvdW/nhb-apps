@@ -99,7 +99,7 @@ class TestOpleidingAanpassingen(E2EHelpers, TestCase):
     def test_beheerder(self):
         self.e2e_login_and_pass_otp(self.account_normaal)
         self.e2e_wissel_naar_functie(self.functie_mo)
-        self.e2e_check_rol('mo')
+        self.e2e_check_rol('MO')
 
         # geen inschrijvingen
         with self.assert_max_queries(20):

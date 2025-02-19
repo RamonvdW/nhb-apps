@@ -137,7 +137,7 @@ class TestInstaptoetsStats(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, '/opleiding/')
 
     def test_stats(self):
-        self.e2e_login(self.account_100000)
+        self.e2e_login_and_pass_otp(self.account_100000)
         self.e2e_wissel_naar_functie(self.functie_mo)
 
         # toets is nog niet opgestart

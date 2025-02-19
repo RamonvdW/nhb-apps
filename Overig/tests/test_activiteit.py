@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2024 Ramon van der Winkel.
+#  Copyright (c) 2020-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -345,9 +345,12 @@ class TestOverigActiviteit(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('overig/activiteit.dtl', 'plein/site_layout.dtl'))
 
     def test_loskoppelen(self):
-        self.testdata.account_admin.otp_is_actief = True
-        self.testdata.account_admin.otp_code = "ABCDEFGHIJKLMNOP"       # noqa
-        self.testdata.account_admin.save()
+        self.account_normaal.otp_is_actief = True
+        self.account_normaal.otp_code = "ABCDEFGHIJKLMNOP"       # noqa
+        self.account_normaal.save()
+
+        self.e2e_login_and_pass_otp(self.account_normaal)
+        self.e2e_logout()
 
         self.e2e_login_and_pass_otp(self.testdata.account_admin)
         self.e2e_wisselnaarrol_bb()
@@ -379,11 +382,11 @@ class TestOverigActiviteit(E2EHelpers, TestCase):
 
         # echt loskoppelen
         resp = self.client.post(self.url_loskoppelen, {'reset_tweede_factor': 1,
-                                                       'inlog_naam': self.testdata.account_admin.username})
-        self.assert_is_redirect(resp, '/overig/activiteit/?zoekterm=%s' % self.testdata.account_admin.username)
+                                                       'inlog_naam': self.account_normaal.username})
+        self.assert_is_redirect(resp, '/overig/activiteit/?zoekterm=%s' % self.account_normaal.username)
 
         # controleer losgekoppeld
-        account = Account.objects.get(username=self.testdata.account_admin.username)
+        account = Account.objects.get(username=self.account_normaal.username)
         self.assertFalse(account.otp_is_actief)
 
         # er moet nu een mail in de MailQueue staan met een single-use url
@@ -392,9 +395,12 @@ class TestOverigActiviteit(E2EHelpers, TestCase):
         self.assert_email_html_ok(mail, 'email_account/otp-is-losgekoppeld.dtl')
         self.assert_consistent_email_html_text(mail)
 
+        # Account middleware forceert nieuwe OTP en reset de rol
+        # dus nieuwe post is niet meer mogelijk
+
         # al losgekoppeld
         resp = self.client.post(self.url_loskoppelen, {'reset_tweede_factor': 1,
-                                                       'inlog_naam': self.testdata.account_admin.username})
-        self.assert_is_redirect(resp, '/overig/activiteit/?zoekterm=%s' % self.testdata.account_admin.username)
+                                                       'inlog_naam': self.account_normaal.username})
+        self.assert_is_redirect(resp, '/overig/activiteit/?zoekterm=%s' % self.account_normaal.username)
 
 # end of file
