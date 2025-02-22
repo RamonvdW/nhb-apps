@@ -6,6 +6,7 @@
 
 from django.db import models
 from django.conf import settings
+from django.utils import timezone
 from django.core.exceptions import ValidationError
 from Account.models import Account
 from BasisTypen.definities import (GESLACHT_MVX, GESLACHT_MV, GESLACHT_MAN, ORGANISATIE_IFAA,
@@ -158,6 +159,22 @@ class Sporter(models.Model):
         # sinds_datum moet 5 jaar ná het geboortejaar liggen
         if self.sinds_datum.year - self.geboorte_datum.year < 5:
             raise ValidationError('datum van lidmaatschap moet minimaal 5 jaar na geboortejaar zijn')
+
+    def bereken_leeftijd(self):
+        """ bereken de leeftijd van de sporter op dit moment """
+        now = timezone.localtime(timezone.now())
+
+        # ga uit van de te bereiken leeftijd in dit jaar
+        leeftijd = now.year - self.geboorte_datum.year
+
+        # voor of na de verjaardag?
+        tup1 = (now.month, now.day)
+        tup2 = (self.geboorte_datum.month, self.geboorte_datum.day)
+        if tup1 < tup2:
+            # nog voor de verjaardag
+            leeftijd -= 1
+
+        return leeftijd
 
     def bereken_wedstrijdleeftijd_wa(self, jaar):
         """ Bereken de wedstrijdleeftijd voor dit lid volgens de WA regels

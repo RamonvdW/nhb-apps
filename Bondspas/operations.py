@@ -50,8 +50,8 @@ def maak_bondspas_regels(sporter, jaar_pas, jaar_wedstrijdklasse):
     if sporter.is_erelid:
         regels.append(("Speciale status", "Erelid"))
 
-    regels.append(("Naam", sporter.volledige_naam()))
-    regels.append(("Geboren", date_format(sporter.geboorte_datum, "j F Y")))
+    regels.append(("Naam", "%s (%s)" % (sporter.volledige_naam(), sporter.geslacht)))
+    regels.append(("Geboortedatum", date_format(sporter.geboorte_datum, "j F Y")))
 
     if sporter.bij_vereniging:
         regels.append(("Vereniging", sporter.bij_vereniging.ver_nr_en_naam()))
@@ -230,6 +230,7 @@ def plaatje_teken(regels):
     draw = ImageDraw.Draw(image)
     font = ImageFont.truetype(settings.BONDSPAS_FONT, size=40)
     font_bold = ImageFont.truetype(settings.BONDSPAS_FONT_BOLD, size=45)
+    font_bold_groter = ImageFont.truetype(settings.BONDSPAS_FONT_BOLD, size=55)
     color_black = (0, 0, 0)
     # color_grijs = (221, 217, 215)       # reverse engineered
 
@@ -286,8 +287,8 @@ def plaatje_teken(regels):
     bondsnr_width = draw.textlength("Bondsnummer: ", font=font)
     draw.text((bondsnr_x, bondsnr_y),
               "Bondsnummer: ", color_black, font=font, anchor="lb")
-    draw.text((bondsnr_x + bondsnr_width, bondsnr_y),
-              lid_nr, color_black, font=font_bold, anchor="lb")
+    draw.text((bondsnr_x + bondsnr_width, bondsnr_y+5),
+              lid_nr, color_black, font=font_bold_groter, anchor="lb")
 
     if len(wa_id):
         draw.text((wa_id_x, wa_id_y),

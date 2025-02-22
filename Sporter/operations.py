@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -45,7 +45,7 @@ def get_request_regio_nr(request, allow_admin_regio=True):
         # sporter
         account = get_account(request)
         sporter = get_sporter(account)
-        if sporter.is_actief_lid and sporter.bij_vereniging:
+        if sporter and sporter.is_actief_lid and sporter.bij_vereniging:
             regio_nr = sporter.bij_vereniging.regio.regio_nr
 
     if regio_nr == 100 and not allow_admin_regio:
@@ -77,7 +77,7 @@ def get_request_rayon_nr(request):
         if request.user.is_authenticated:                                    # pragma: no branch
             account = get_account(request)
             sporter = get_sporter(account)
-            if sporter.is_actief_lid and sporter.bij_vereniging:
+            if sporter and sporter.is_actief_lid and sporter.bij_vereniging:
                 rayon_nr = sporter.bij_vereniging.regio.rayon_nr
 
     return rayon_nr
