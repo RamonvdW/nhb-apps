@@ -54,6 +54,18 @@
                 </p>
                 <p>Wanneer je deze toets met een minimaal {{ eis_percentage }}% goed-score doorlopen hebt, kan je je inschrijven voor één van de geplande basiscursussen.</p>
 
+                <h4 class="sv-middel-blauw-text">Waar en wanneer?</h4>
+                {% if momenten %}
+                    <p>De basiscursus wordt op de volgende locaties in het land gehouden:</p>
+                    <p>
+                        {% for moment in momenten %}
+                            <span>{{ moment.omschrijving }} op {{ moment.wanneer_compact }}</span><br>
+                        {% endfor %}
+                    </p>
+                {% else %}
+                    <p>De locaties en datums voor de volgende basiscursus zijn nog niet bekend.</p>
+                {% endif %}
+
                 <h4 class="sv-middel-blauw-text">Vervolg</h4>
                 <p>Nadat je de basiscursus hebt afgerond kan je jezelf verder specialiseren als wedstrijdleider en/of scheidsrechter.<br>
                     <span>Op een niveau dat past bij je persoonlijke ambitie.</span>

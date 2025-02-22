@@ -60,7 +60,7 @@ class Evenement(models.Model):
     prijs_euro_onder18 = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal(0))     # max 999,99
 
     def bepaal_prijs_voor_sporter(self, sporter):
-        leeftijd = sporter.bereken_wedstrijdleeftijd(self.datum, ORGANISATIE_KHSN)
+        leeftijd = sporter.bereken_leeftijd()
         prijs = self.prijs_euro_onder18 if leeftijd < 18 else self.prijs_euro_normaal
         return prijs
 

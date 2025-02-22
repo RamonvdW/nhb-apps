@@ -15,7 +15,7 @@ from Instaptoets.models import Vraag, Instaptoets
 from Mailer.models import MailQueue
 from Opleiding.definities import (OPLEIDING_STATUS_INSCHRIJVEN,
                                   OPLEIDING_INSCHRIJVING_STATUS_RESERVERING_MANDJE,
-                                  OPLEIDING_INSCHRIJVING_STATUS_RESERVERING_BESTELD)
+                                  OPLEIDING_INSCHRIJVING_STATUS_BESTELD)
 from Opleiding.models import Opleiding, OpleidingInschrijving, OpleidingAfgemeld
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -182,7 +182,7 @@ class TestOpleidingAfmelden(E2EHelpers, TestCase):
         # bestelling = Bestelling.objects.first()
 
         inschrijving.refresh_from_db()
-        self.assertEqual(inschrijving.status, OPLEIDING_INSCHRIJVING_STATUS_RESERVERING_BESTELD)
+        self.assertEqual(inschrijving.status, OPLEIDING_INSCHRIJVING_STATUS_BESTELD)
 
         # verwijder de mail over de bestelling
         MailQueue.objects.all().delete()

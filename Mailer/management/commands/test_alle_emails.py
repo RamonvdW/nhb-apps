@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2024 Ramon van der Winkel.
+#  Copyright (c) 2022-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -36,7 +36,7 @@ from Sporter.models import Sporter, SporterBoog
 from Taken.operations import stuur_email_nieuwe_taak, stuur_email_taak_herinnering
 from TestHelpers.e2ehelpers import TEST_WACHTWOORD
 from Vereniging.models import Vereniging
-from Wedstrijden.definities import WEDSTRIJD_STATUS_GEACCEPTEERD, WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_BESTELD
+from Wedstrijden.definities import WEDSTRIJD_STATUS_GEACCEPTEERD, WEDSTRIJD_INSCHRIJVING_STATUS_BESTELD
 from Wedstrijden.models import Wedstrijd, WedstrijdSessie, WedstrijdInschrijving
 from datetime import datetime
 from decimal import Decimal
@@ -174,7 +174,7 @@ class Command(BaseCommand):
 
         inschrijving_r = WedstrijdInschrijving(
                             wanneer=timezone.now(),
-                            status=WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_BESTELD,
+                            status=WEDSTRIJD_INSCHRIJVING_STATUS_BESTELD,
                             wedstrijd=wedstrijd,
                             sessie=sessie,
                             wedstrijdklasse=wkls_r[0],
@@ -185,7 +185,7 @@ class Command(BaseCommand):
 
         inschrijving_c = WedstrijdInschrijving(
                             wanneer=timezone.now(),
-                            status=WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_BESTELD,
+                            status=WEDSTRIJD_INSCHRIJVING_STATUS_BESTELD,
                             wedstrijd=wedstrijd,
                             sessie=sessie,
                             wedstrijdklasse=wkls_c[0],

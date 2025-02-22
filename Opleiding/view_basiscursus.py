@@ -11,6 +11,8 @@ from Account.models import get_account
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige
 from Instaptoets.operations import instaptoets_is_beschikbaar, vind_toets_prioriteer_geslaagd, toets_geldig
+from Opleiding.definities import OPLEIDING_STATUS_INSCHRIJVEN
+from Opleiding.models import Opleiding
 from Sporter.models import get_sporter
 
 TEMPLATE_OPLEIDINGEN_BASISCURSUS = 'opleiding/basiscursus.dtl'
@@ -29,6 +31,26 @@ class BasiscursusView(TemplateView):
         context = super().get_context_data(**kwargs)
 
         context['eis_percentage'] = settings.INSTAPTOETS_AANTAL_GOED_EIS
+
+        opleiding = (Opleiding
+                     .objects
+                     .filter(is_basiscursus=True,
+                             status=OPLEIDING_STATUS_INSCHRIJVEN)
+                     .prefetch_related('momenten')
+                     .order_by('periode_begin', 'periode_einde')       # meest recente cursus eerst
+                     .first())
+
+        momenten = list()
+        for moment in opleiding.momenten.prefetch_related('locatie').order_by('datum'):
+            locatie = moment.locatie
+            if locatie:
+                moment.omschrijving = locatie.plaats
+                if not moment.omschrijving:
+                    moment.omschrijving = locatie.naam
+                momenten.append(moment)
+        # for
+        if len(momenten) > 0:
+            context['momenten'] = momenten
 
         account = get_account(self.request)
         if account.is_authenticated:

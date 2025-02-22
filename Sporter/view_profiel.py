@@ -29,7 +29,7 @@ from Score.definities import AG_DOEL_TEAM, AG_DOEL_INDIV
 from Score.models import Aanvangsgemiddelde, AanvangsgemiddeldeHist
 from Sporter.models import SporterBoog, Speelsterkte
 from Sporter.operations import get_sporter_gekozen_bogen, get_sporter_voorkeuren
-from Wedstrijden.definities import (WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_MANDJE, WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_BESTELD,
+from Wedstrijden.definities import (WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_MANDJE, WEDSTRIJD_INSCHRIJVING_STATUS_BESTELD,
                                     WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF, WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD,
                                     WEDSTRIJD_INSCHRIJVING_STATUS_VERWIJDERD)
 from Wedstrijden.models import WedstrijdInschrijving
@@ -314,7 +314,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
 
             inschrijving.plaats_str = wedstrijd.locatie.plaats
 
-            if inschrijving.status in (WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_MANDJE, WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_BESTELD):
+            if inschrijving.status in (WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_MANDJE, WEDSTRIJD_INSCHRIJVING_STATUS_BESTELD):
                 inschrijving.status_str = "Reservering; bestelling is nog niet voltooid"
 
             elif inschrijving.status == WEDSTRIJD_INSCHRIJVING_STATUS_VERWIJDERD:

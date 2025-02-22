@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2024 Ramon van der Winkel.
+#  Copyright (c) 2024-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -10,7 +10,7 @@ from django.utils import timezone
 from Bestelling.models import Bestelling, BestellingProduct
 from Betaal.models import BetaalInstellingenVereniging
 from Evenement.definities import (EVENEMENT_STATUS_GEACCEPTEERD, EVENEMENT_INSCHRIJVING_STATUS_RESERVERING_MANDJE,
-                                  EVENEMENT_INSCHRIJVING_STATUS_RESERVERING_BESTELD,
+                                  EVENEMENT_INSCHRIJVING_STATUS_BESTELD,
                                   EVENEMENT_INSCHRIJVING_STATUS_DEFINITIEF,
                                   EVENEMENT_AFMELDING_STATUS_AFGEMELD, EVENEMENT_AFMELDING_STATUS_GEANNULEERD)
 from Evenement.models import Evenement, EvenementInschrijving, EvenementAfgemeld
@@ -171,7 +171,7 @@ class TestEvenementAfmelden(E2EHelpers, TestCase):
         inschrijving = EvenementInschrijving(
                                 wanneer=timezone.now(),
                                 nummer=1,
-                                status=EVENEMENT_INSCHRIJVING_STATUS_RESERVERING_BESTELD,
+                                status=EVENEMENT_INSCHRIJVING_STATUS_BESTELD,
                                 evenement=evenement,
                                 sporter=self.sporter_100022,
                                 koper=self.account_100022)

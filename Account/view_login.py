@@ -189,7 +189,7 @@ class LoginView(TemplateView):
             for _, func in account_plugins_post_login:
                 _ = func(self.request, account)
             # for
-        return next_url
+            return next_url
 
         # roep de redirect plugins aan
         for _, func in account_plugins_post_login:

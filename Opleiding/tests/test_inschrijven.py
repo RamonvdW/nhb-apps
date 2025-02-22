@@ -18,7 +18,7 @@ from Mailer.models import MailQueue
 from Opleiding.definities import (OPLEIDING_STATUS_INSCHRIJVEN, OPLEIDING_STATUS_GEANNULEERD,
                                   OPLEIDING_INSCHRIJVING_STATUS_INSCHRIJVEN,
                                   OPLEIDING_INSCHRIJVING_STATUS_RESERVERING_MANDJE,
-                                  OPLEIDING_INSCHRIJVING_STATUS_RESERVERING_BESTELD,
+                                  OPLEIDING_INSCHRIJVING_STATUS_BESTELD,
                                   OPLEIDING_INSCHRIJVING_STATUS_DEFINITIEF)
 from Opleiding.models import Opleiding, OpleidingInschrijving, OpleidingAfgemeld
 from Sporter.models import Sporter
@@ -482,7 +482,7 @@ class TestOpleidingInschrijven(E2EHelpers, TestCase):
         bestelling = Bestelling.objects.first()
 
         inschrijving.refresh_from_db()
-        self.assertEqual(inschrijving.status, OPLEIDING_INSCHRIJVING_STATUS_RESERVERING_BESTELD)
+        self.assertEqual(inschrijving.status, OPLEIDING_INSCHRIJVING_STATUS_BESTELD)
 
         # check the mail die gemaakt is
         self.assertEqual(1, MailQueue.objects.count())
