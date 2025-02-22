@@ -222,6 +222,7 @@ class WijzigStatusBkTeamView(UserPassesTestMixin, View):
 
             mutatie = CompetitieMutatie(mutatie=MUTATIE_KAMP_TEAMS_NUMMEREN,
                                         door=door_str,
+                                        competitie=comp,
                                         kampioenschap=team.kampioenschap,
                                         team_klasse=team.team_klasse)
             mutatie.save()

@@ -257,7 +257,6 @@ class UitslagenBKTeamsView(TemplateView):
     @staticmethod
     def _finalize_klasse(deelkamp_bk, done, plan, afgemeld):
         if len(done) > 0:
-            teller = done[0]
             # er is uitslag, dus overige teams hebben niet meegedaan
             for plan_team in plan:
                 plan_team.rank = ''
@@ -269,6 +268,7 @@ class UitslagenBKTeamsView(TemplateView):
                 afgemeld_team.niet_deelgenomen = True
                 afgemeld_team.klasse_heeft_uitslag = True
             # for
+            teller = done[0]
 
         elif len(plan) > 0:
             # er is geen uitslag, maar misschien hebben teams vrijstelling
@@ -313,7 +313,7 @@ class UitslagenBKTeamsView(TemplateView):
         comp.bepaal_fase()
         context['comp'] = comp
 
-        teamtype_afkorting = kwargs['team_type'][:3]           # afkappen voor de veiligheid
+        teamtype_afkorting = kwargs['team_type'][:3]     # afkappen voor de veiligheid
 
         self._maak_filter_knoppen(context, comp, teamtype_afkorting)
 

@@ -1518,8 +1518,7 @@ class Command(BaseCommand):
                      .objects
                      .filter(kampioenschap=deelkamp,
                              team_klasse=team_klasse)
-                     .order_by('-aanvangsgemiddelde',       # hoogste boven
-                               'volgorde')):                # consistent in geval gelijke score / blanco score
+                     .order_by('volgorde')):           # originele volgorde aanhouden
 
             if team.deelname == DEELNAME_NEE:
                 team.rank = 0
