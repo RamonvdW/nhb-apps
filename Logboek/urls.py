@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -27,6 +27,10 @@ urlpatterns = [
     path('accounts/',
          views.LogboekAccountsView.as_view(),
          name='accounts'),
+
+    path('otp/',
+         views.LogboekOTPView.as_view(),
+         name='otp'),
 
     path('rollen/',
          views.LogboekRollenView.as_view(),

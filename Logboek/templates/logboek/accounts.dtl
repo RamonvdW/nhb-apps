@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2023 Ramon van der Winkel.
+                Copyright (c) 2020-2025 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -19,10 +19,10 @@
             <ul class="collection sv-kader left-align">
                 {% for obj in object_list %}
                     <li class="collection-item">
-                            <span>{{ obj.toegevoegd_op|date:"l j F Y" }} om {{ obj.toegevoegd_op|date:"H:i" }}</span><br>
-                            <span>{{ obj.activiteit|highlight:zoekterm|linebreaksbr }}</span><br>
-                            <span>Door account: {{ obj.door|highlight:zoekterm }}</span><br>
-                            <span>Functie: {{ obj.gebruikte_functie }}</span>
+                        <span>{{ obj.toegevoegd_op|date:"l j F Y" }} om {{ obj.toegevoegd_op|date:"H:i" }}</span><br>
+                        <span>{{ obj.activiteit|highlight:zoekterm|linebreaksbr }}</span><br>
+                        <span>Door account: {{ obj.door|highlight:zoekterm }}</span><br>
+                        <span>Functie: {{ obj.gebruikte_functie }}</span>
                     </li>
                 {% empty %}
                     <li class="collection-item center"><i>Niets gevonden</i></li>
