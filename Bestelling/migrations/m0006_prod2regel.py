@@ -5,6 +5,11 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db import migrations
+from django.conf import settings
+from django.db.models import Count
+from Bestelling.definities import BESTELLING_STATUS_AFGEROND
+from Webwinkel.definities import (KEUZE_STATUS_RESERVERING_MANDJE, KEUZE_STATUS_BESTELD, KEUZE_STATUS_BACKOFFICE,
+                                  KEUZE_STATUS_GEANNULEERD)
 from decimal import Decimal
 
 
@@ -55,6 +60,8 @@ def migrate_product2regel_evenement(apps, _):
     # haal de klassen op die van toepassing zijn op het moment van migratie
     bestelling_product_klas = apps.get_model('Bestelling', 'BestellingProduct')
     bestelling_regel_klas = apps.get_model('Bestelling', 'BestellingRegel')
+
+    print(' evenementen: ', end='')
 
     prod2regel = dict()
 
@@ -117,7 +124,7 @@ def migrate_product2regel_evenement(apps, _):
         afgemeld.save(update_fields=['bestelling'])
     # for
 
-    print(' %d evenementen' % len(prod2regel), end='')
+    print('%d' % len(prod2regel), end='')
 
     update_mandjes(apps, prod2regel)
     update_bestellingen(apps, prod2regel)
@@ -128,6 +135,8 @@ def migrate_product2regel_opleiding(apps, _):
     # haal de klassen op die van toepassing zijn op het moment van migratie
     bestelling_product_klas = apps.get_model('Bestelling', 'BestellingProduct')
     bestelling_regel_klas = apps.get_model('Bestelling', 'BestellingRegel')
+
+    print(', opleidingen: ', end='')
 
     prod2regel = dict()
 
@@ -190,7 +199,7 @@ def migrate_product2regel_opleiding(apps, _):
         afgemeld.save(update_fields=['bestelling'])
     # for
 
-    print(', %d opleidingen' % len(prod2regel), end='')
+    print('%d' % len(prod2regel), end='')
 
     update_mandjes(apps, prod2regel)
     update_bestellingen(apps, prod2regel)
@@ -202,24 +211,59 @@ def migrate_product2regel_webwinkel(apps, _):
     bestelling_product_klas = apps.get_model('Bestelling', 'BestellingProduct')
     bestelling_regel_klas = apps.get_model('Bestelling', 'BestellingRegel')
 
+    print(', webwinkel: ', end='')
+
     prod2regel = dict()
 
     for prod in (bestelling_product_klas
                  .objects
                  .exclude(webwinkel_keuze=None)
+                 .annotate(mandje_count=Count('bestellingmandje'))
+                 .annotate(bestelling_count=Count('bestelling'))
                  .select_related('webwinkel_keuze',
                                  'webwinkel_keuze__product')):
 
         keuze = prod.webwinkel_keuze
 
-        kort = "%s x %s" % (keuze.aantal, keuze.product.omslag_titel)
+        # WebwinkelKeuze.status correct zetten
+        if keuze.status == KEUZE_STATUS_RESERVERING_MANDJE:
+            if prod.mandje_count == 0:
+                if prod.bestelling_count == 0:
+                    keuze.status = KEUZE_STATUS_GEANNULEERD
+                elif prod.bestelling_count == 1:
+                    bestelling = prod.bestelling_set.first()
+                    keuze.status = KEUZE_STATUS_BESTELD
+                    if bestelling.status == BESTELLING_STATUS_AFGEROND:
+                        keuze.status = KEUZE_STATUS_BACKOFFICE
+                keuze.save(update_fields=['status'])
+
+        product = keuze.product
+        kort = "%s x %s" % (keuze.aantal, product.omslag_titel)
+        if product.kleding_maat:
+            kort += ' maat %s' % product.kleding_maat
+
+        prijs_euro = keuze.aantal * product.prijs_euro
+
+        btw_str = "%.2f" % settings.WEBWINKEL_BTW_PERCENTAGE
+        while btw_str[-1] == '0':
+            btw_str = btw_str[:-1]              # 21,10 --> 21,1 / 21,00 --> 21,
+        btw_str = btw_str.replace('.', ',')     # localize
+        if btw_str[-1] == ",":
+            btw_str = btw_str[:-1]              # drop the trailing dot/comma
+
+        # de prijs is inclusief BTW, dus 100% + BTW% (voorbeeld: 121%)
+        # reken uit hoeveel daarvan de BTW is (voorbeeld: 21 / 121)
+        btw_deel = Decimal(settings.WEBWINKEL_BTW_PERCENTAGE / (100 + settings.WEBWINKEL_BTW_PERCENTAGE))
+        btw_euro = prijs_euro * btw_deel
+        btw_euro = round(btw_euro, 2)             # afronden op 2 decimalen
 
         regel = bestelling_regel_klas(
                     korte_beschrijving=kort,
-                    btw_percentage='',                  # TODO: juiste percentage overnemen (uit de Bestelling)
-                    btw_euro=Decimal(0),                # TODO: juiste bedrag invullen (uit de Bestelling)
-                    prijs_euro=prod.prijs_euro,
-                    korting_euro=Decimal(0),
+                    prijs_euro=prijs_euro,
+                    # korting_euro=Decimal(0),
+                    btw_percentage=btw_str,
+                    btw_euro=btw_euro,
+                    gewicht_gram=product.gewicht_gram * keuze.aantal,
                     code="webwinkel")
         regel.save()
 
@@ -229,7 +273,7 @@ def migrate_product2regel_webwinkel(apps, _):
         keuze.save(update_fields=['bestelling'])
     # for
 
-    print(', %d webwinkel' % len(prod2regel), end='')
+    print('%d' % len(prod2regel), end='')
 
     update_mandjes(apps, prod2regel)
     update_bestellingen(apps, prod2regel)
@@ -240,6 +284,8 @@ def migrate_product2regel_wedstrijd(apps, _):
     # haal de klassen op die van toepassing zijn op het moment van migratie
     bestelling_product_klas = apps.get_model('Bestelling', 'BestellingProduct')
     bestelling_regel_klas = apps.get_model('Bestelling', 'BestellingRegel')
+
+    print(', wedstrijden: ', end='')
 
     prod2regel = dict()
 
@@ -272,7 +318,7 @@ def migrate_product2regel_wedstrijd(apps, _):
         inschrijving.save(update_fields=['bestelling'])
     # for
 
-    print(', %d wedstrijden..' % len(prod2regel), end='')
+    print('%d..' % len(prod2regel), end='')
 
     update_mandjes(apps, prod2regel)
     update_bestellingen(apps, prod2regel)

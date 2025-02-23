@@ -19,10 +19,6 @@ class BestellingRegel(models.Model):
     # korte beschrijving
     korte_beschrijving = models.CharField(max_length=250, default='?', blank=True)
 
-    # BTW percentage van toepassing op deze regel
-    # leeg = vrijgesteld van BTW
-    btw_percentage = models.CharField(max_length=5, default='', blank=True)         # 21,00
-
     # prijs van deze regel (een positief bedrag)
     # de korting is hier nog niet vanaf
     prijs_euro = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal(0))       # max 999,99
@@ -30,9 +26,16 @@ class BestellingRegel(models.Model):
     # de korting op deze regel (ook een positief bedrag!)
     korting_euro = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal(0))     # max 999,99
 
+    # BTW percentage van toepassing op deze regel
+    # leeg = vrijgesteld van BTW
+    btw_percentage = models.CharField(max_length=5, default='', blank=True)         # 21,1
+
     # het BTW bedrag voor deze regel
     # let op: is al inclusief in de prijs, dus niet optellen bij het totaal
     btw_euro = models.DecimalField(max_digits=6, decimal_places=2, default=Decimal(0))         # max 9999,99
+
+    # gewicht, voor keuze juiste verzendkosten pakket
+    gewicht_gram = models.SmallIntegerField(default=0)
 
     # code voor routing naar de juiste plugin
     # "wedstrijd"

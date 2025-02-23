@@ -7,11 +7,9 @@
 from Bestelling.models.bestelling import Bestelling
 from Bestelling.models.mandje import BestellingMandje
 from Bestelling.models.regel import BestellingRegel
-from Bestelling.models.product_obsolete import BestellingProduct
 from Bestelling.models.mutatie import BestellingMutatie, BestellingHoogsteBestelNr
 
 
-__all__ = ['Bestelling', 'BestellingMandje', 'BestellingMutatie', 'BestellingProduct', 'BestellingHoogsteBestelNr',
-           'BestellingRegel']
+__all__ = ['Bestelling', 'BestellingMandje', 'BestellingRegel', 'BestellingMutatie', 'BestellingHoogsteBestelNr']
 
 # end of file

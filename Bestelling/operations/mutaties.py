@@ -14,7 +14,8 @@ from Bestelling.definities import (BESTELLING_MUTATIE_WEDSTRIJD_INSCHRIJVEN, BES
                                    BESTELLING_MUTATIE_TRANSPORT, BESTELLING_STATUS_BETALING_ACTIEF,
                                    BESTELLING_MUTATIE_EVENEMENT_INSCHRIJVEN, BESTELLING_MUTATIE_EVENEMENT_AFMELDEN,
                                    BESTELLING_MUTATIE_OPLEIDING_INSCHRIJVEN, BESTELLING_MUTATIE_OPLEIDING_AFMELDEN)
-from Bestelling.models import BestellingMutatie, Bestelling, BestellingProduct
+from Bestelling.models import BestellingMutatie, Bestelling
+from Bestelling.models.product_obsolete import BestellingProduct
 from Betaal.models import BetaalActief
 from Evenement.models import EvenementInschrijving
 from Opleiding.models import OpleidingInschrijving
