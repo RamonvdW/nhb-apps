@@ -772,12 +772,21 @@ class CompetitieMutatieAdmin(CreateOnlyAdmin):
                                       .filter(competitie=self.obj.competitie)
                                       .order_by('regio__regio_nr'))
             elif db_field.name == 'kampioenschap':
+                # alleen laten kiezen uit de kampioenschappen van deze competitie
                 kwargs['queryset'] = (Kampioenschap
                                       .objects
                                       .select_related('rayon')
                                       .filter(competitie=self.obj.competitie)
                                       .order_by('deel',
                                                 'rayon__rayon_nr'))
+            elif db_field.name in ('team_klasse',):
+                # alleen laten kiezen uit de RK/BK team klassen van deze competitie
+                kwargs['queryset'] = (CompetitieTeamKlasse
+                                      .objects
+                                      .filter(competitie=self.obj.competitie,
+                                              is_voor_teams_rk_bk=True)
+                                      .order_by('volgorde'))
+
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 
