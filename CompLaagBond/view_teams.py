@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023-2024 Ramon van der Winkel.
+#  Copyright (c) 2023-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -222,6 +222,7 @@ class WijzigStatusBkTeamView(UserPassesTestMixin, View):
 
             mutatie = CompetitieMutatie(mutatie=MUTATIE_KAMP_TEAMS_NUMMEREN,
                                         door=door_str,
+                                        competitie=comp,
                                         kampioenschap=team.kampioenschap,
                                         team_klasse=team.team_klasse)
             mutatie.save()
