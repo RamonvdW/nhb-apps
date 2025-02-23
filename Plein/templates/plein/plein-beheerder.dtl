@@ -84,7 +84,7 @@
             {% endif %}
 
             <!-- toon en koppel beheerders -->
-            {% url 'Functie:overzicht' as card_url %}
+            {% url 'Functie:lijst-beheerders' as card_url %}
             {% include 'plein/card_icon.dtl' with title="Beheerders" text="Toon en koppel beheerders aan rollen en wijzig contactgegevens." icon="face" url=card_url %}
 
             <!-- verenigingen/accommodaties overzicht -->

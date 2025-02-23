@@ -250,8 +250,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
 
         # controleer dat een rol wissel die met een functie moet geen effect heeft
         resp = self.client.post(self.url_activeer_rol % 'BKO', follow=True)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assertContains(resp, "Manager MH")
+        self.assert404(resp, 'Slechte parameter (2)')
 
         resp = self.client.post(self.url_activeer_rol % 'geen', follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK

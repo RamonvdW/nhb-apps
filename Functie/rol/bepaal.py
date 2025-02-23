@@ -14,7 +14,7 @@ from Functie.models import Functie
 from Functie.rol.beschrijving import rol_get_beschrijving, rol_zet_beschrijving
 from Functie.rol.mag_wisselen import rol_zet_mag_wisselen
 from Functie.rol.scheids import rol_zet_is_scheids
-from Functie.rol.huidige import rol_get_huidige_functie, rol_zet_huidige_rol, rol_zet_huidige_functie_pk
+from Functie.rol.huidige import rol_get_huidige_functie
 from typing import Generator, Tuple
 import typing
 

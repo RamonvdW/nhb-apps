@@ -51,6 +51,9 @@ url2rol = {
     'geen': Rol.ROL_NONE
 }
 
+# wordt beperkt gebruikt:
+# - in activeer-rol, voor BB en Sporter
+# - in wissel-van-rol template, <meta property="nhb-apps:rol" content="xxx"> voor e2e_check_rol()
 rol2url = {value: key for key, value in url2rol.items()}
 
 functie_rol_str2rol = {

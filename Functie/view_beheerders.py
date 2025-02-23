@@ -14,7 +14,7 @@ from Functie.definities import Rol
 from Functie.models import Functie
 from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving
 
-TEMPLATE_OVERZICHT = 'functie/beheerders.dtl'
+TEMPLATE_LIJST_BEHEERDERS = 'functie/lijst-beheerders.dtl'
 
 
 class LijstBeheerdersView(UserPassesTestMixin, ListView):
@@ -26,7 +26,7 @@ class LijstBeheerdersView(UserPassesTestMixin, ListView):
     """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_OVERZICHT
+    template_name = TEMPLATE_LIJST_BEHEERDERS
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
     permission_denied_message = 'Geen toegang'
 

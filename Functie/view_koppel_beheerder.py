@@ -262,17 +262,17 @@ class WijzigEmailView(UserPassesTestMixin, View):
             )
         elif self.rol_nu in (Rol.ROL_BKO, Rol.ROL_RKO, Rol.ROL_RCL):
             # komt van Bondscompetities
-            context['terug_url'] = reverse('Functie:overzicht')
+            context['terug_url'] = reverse('Functie:lijst-beheerders')
             context['kruimels'] = (
                 (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
-                (reverse('Functie:overzicht'), 'Beheerders'),
+                (reverse('Functie:lijst-beheerders'), 'Beheerders'),
                 (None, 'Wijzig e-mail')
             )
         else:
             # komt van Het Plein
-            context['terug_url'] = reverse('Functie:overzicht')
+            context['terug_url'] = reverse('Functie:lijst-beheerders')
             context['kruimels'] = (
-                (reverse('Functie:overzicht'), 'Beheerders'),
+                (reverse('Functie:lijst-beheerders'), 'Beheerders'),
                 (None, 'Wijzig e-mail')
             )
 
@@ -326,7 +326,7 @@ class WijzigEmailView(UserPassesTestMixin, View):
         if self.rol_nu in (Rol.ROL_SEC, Rol.ROL_HWL, Rol.ROL_WL):
             context['terug_url'] = reverse('Functie:overzicht-vereniging')
         else:
-            context['terug_url'] = reverse('Functie:overzicht')
+            context['terug_url'] = reverse('Functie:lijst-beheerders')
 
         return render(request, TEMPLATE_BEVESTIG_EMAIL, context)
 
@@ -536,13 +536,13 @@ class WijzigBeheerdersView(UserPassesTestMixin, ListView):
             # komt van Bondscompetities
             context['kruimels'] = (
                 (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
-                (reverse('Functie:overzicht'), 'Beheerders'),
+                (reverse('Functie:lijst-beheerders'), 'Beheerders'),
                 (None, 'Wijzig beheerder')
             )
         else:
             # komt van Het Plein
             context['kruimels'] = (
-                (reverse('Functie:overzicht'), 'Beheerders'),
+                (reverse('Functie:lijst-beheerders'), 'Beheerders'),
                 (None, 'Wijzig beheerder')
             )
 

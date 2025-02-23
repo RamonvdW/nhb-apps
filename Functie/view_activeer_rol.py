@@ -48,6 +48,10 @@ class ActiveerRolView(UserPassesTestMixin, View):
                 # onbekende rol
                 raise Http404('Slechte parameter')
 
+            # alleen rollen toestaan die geen functie zijn
+            if nwe_rol not in (Rol.ROL_BB, Rol.ROL_SPORTER, Rol.ROL_NONE):
+                raise Http404('Slechte parameter (2)')
+
             my_logger.info('%s ROL account %s wissel naar rol %s' % (
                                 from_ip,
                                 account.username,

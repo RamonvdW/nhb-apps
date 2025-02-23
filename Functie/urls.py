@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2024 Ramon van der Winkel.
+#  Copyright (c) 2020-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -28,21 +28,21 @@ urlpatterns = [
          view_koppel_beheerder.WijzigEmailView.as_view(),
          name='wijzig-email'),
 
-    path('overzicht/vereniging/',
+    path('beheerders/vereniging/',
          view_beheerders_vereniging.BeheerdersVerenigingView.as_view(),
          name='overzicht-vereniging'),
 
-    path('overzicht/',
-         view_beheerders.LijstBeheerdersView.as_view(),
-         name='overzicht'),
-
-    path('overzicht/beheerders/sec-hwl/',
+    path('beheerders/email/sec-hwl/',
          view_email_beheerders.OverzichtEmailsSecHwlView.as_view(),
          name='emails-sec-hwl'),
 
-    path('overzicht/beheerders/competitie/',
+    path('beheerders/email/competitie/',
          view_email_beheerders.OverzichtEmailsCompetitieBeheerdersView.as_view(),
          name='emails-beheerders'),
+
+    path('beheerders/',
+         view_beheerders.LijstBeheerdersView.as_view(),
+         name='lijst-beheerders'),
 
 
     path('activeer-functie/<str:functie_pk>/',

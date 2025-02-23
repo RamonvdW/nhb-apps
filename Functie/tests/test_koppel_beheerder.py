@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -27,8 +27,8 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
 
     test_after = ('Account', 'Functie.tests.test_beheerders')
 
-    url_overzicht = '/functie/overzicht/'
-    url_overzicht_vereniging = '/functie/overzicht/vereniging/'
+    url_beheerders = '/functie/beheerders/'
+    url_beheerders_vereniging = '/functie/beheerders/vereniging/'
     url_wijzig = '/functie/wijzig/%s/'  # functie_pk
     url_wijzig_ontvang = '/functie/wijzig/%s/ontvang/'
     url_activeer_functie = '/functie/activeer-functie/%s/'
@@ -447,16 +447,16 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
 
         # haal het overzicht voor bestuurders op
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_overzicht)
+            resp = self.client.get(self.url_beheerders)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('functie/beheerders.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('functie/lijst-beheerders.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, 'relevante functies en de beheerders')    # reduced list for HWL
         # TODO: check urls
 
         # haal het overzicht van verenigingsbestuurders op
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_overzicht_vereniging)
+            resp = self.client.get(self.url_beheerders_vereniging)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('functie/overzicht-vereniging.dtl', 'plein/site_layout.dtl'))
@@ -471,7 +471,7 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
 
         # controleer dat de naam getoond wordt
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_overzicht_vereniging)
+            resp = self.client.get(self.url_beheerders_vereniging)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('functie/overzicht-vereniging.dtl', 'plein/site_layout.dtl'))
@@ -530,7 +530,7 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
 
         # haal het overzicht van verenigingsbestuurders op
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_overzicht_vereniging)
+            resp = self.client.get(self.url_beheerders_vereniging)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('functie/overzicht-vereniging.dtl', 'plein/site_layout.dtl'))
