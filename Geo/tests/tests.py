@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2023 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
+from Geo.admin import RayonAdmin, RegioAdmin
 from Geo.models import Rayon, Regio, Cluster
 from Vereniging.models import Vereniging
 
@@ -35,11 +36,18 @@ class TestGeo(TestCase):
         self.assertEqual(regio.naam, "Regio 111")
         self.assertIsNotNone(str(regio))
 
-    # def test_vereniging(self):
-    #     ver = Vereniging.objects.first()
-    #     self.assertIsNotNone(str(ver))
-    #     ver.clean_fields()      # run validators
-    #     ver.clean()             # run model validator
+    def test_admin(self):
+        request = self.client
+
+        admin = RayonAdmin(Rayon, None)
+        self.assertFalse(admin.has_change_permission(request))
+        self.assertFalse(admin.has_add_permission(request))
+        self.assertFalse(admin.has_delete_permission(request))
+
+        admin = RegioAdmin(Regio, None)
+        self.assertFalse(admin.has_change_permission(request))
+        self.assertFalse(admin.has_add_permission(request))
+        self.assertFalse(admin.has_delete_permission(request))
 
     def test_cluster(self):
         ver = self.ver1
