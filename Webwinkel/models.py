@@ -146,7 +146,10 @@ class WebwinkelKeuze(models.Model):
     log = models.TextField(blank=True)
 
     def korte_beschrijving(self):
-        return "%s x %s" % (self.aantal, self.product.omslag_titel)
+        kort = "%s x %s" % (self.aantal, self.product.omslag_titel)
+        if self.product.kleding_maat:
+            kort += ' maat %s' % self.product.kleding_maat
+        return kort
 
     def __str__(self):
         return self.korte_beschrijving()

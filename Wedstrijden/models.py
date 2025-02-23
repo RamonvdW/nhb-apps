@@ -8,7 +8,7 @@ from django.db import models
 from Account.models import Account
 from BasisTypen.definities import ORGANISATIES, ORGANISATIE_WA
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse
-from Bestelling.models.regel import BestellingRegel       # TODO: drop .ext
+from Bestelling.models.regel import BestellingRegel     # TODO: drop .regel
 from Locatie.models import WedstrijdLocatie
 from Score.models import Score
 from Sporter.models import Sporter, SporterBoog
@@ -258,7 +258,7 @@ class WedstrijdInschrijving(models.Model):
     # in welke klasse komt deze sporterboog uit?
     wedstrijdklasse = models.ForeignKey(KalenderWedstrijdklasse, on_delete=models.PROTECT)
 
-    # koppeling aan de bestelling
+    # koppeling aan het mandje / een bestelling
     bestelling = models.ForeignKey(BestellingRegel, on_delete=models.PROTECT, null=True)
 
     # wie is de koper?
