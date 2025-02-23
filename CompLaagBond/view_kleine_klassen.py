@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023-2024 Ramon van der Winkel.
+#  Copyright (c) 2023-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -17,7 +17,7 @@ from Competitie.models import CompetitieIndivKlasse, Kampioenschap, Kampioenscha
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
 from Logboek.models import schrijf_in_logboek
-from Overig.background_sync import BackgroundSync
+from Site.core.background_sync import BackgroundSync
 import json
 
 

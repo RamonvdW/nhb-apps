@@ -21,7 +21,7 @@ from Competitie.operations import KlasseBepaler
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
 from Logboek.models import schrijf_in_logboek
-from Overig.background_sync import BackgroundSync
+from Site.core.background_sync import BackgroundSync
 import time
 
 

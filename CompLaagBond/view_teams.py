@@ -18,7 +18,7 @@ from Competitie.definities import DEEL_BK, DEELNAME_JA, DEELNAME_NEE, MUTATIE_KA
 from Competitie.models import Kampioenschap, KampioenschapTeam, CompetitieMutatie
 from Functie.definities import Rol, rol2url
 from Functie.rol import rol_get_huidige_functie
-from Overig.background_sync import BackgroundSync
+from Site.core.background_sync import BackgroundSync
 import time
 
 TEMPLATE_COMPBOND_BK_TEAMS = 'complaagbond/bk-teams.dtl'

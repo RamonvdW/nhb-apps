@@ -51,7 +51,7 @@ from Opleiding.definities import (OPLEIDING_INSCHRIJVING_STATUS_DEFINITIEF,
                                   OPLEIDING_INSCHRIJVING_STATUS_RESERVERING_BESTELD,
                                   OPLEIDING_INSCHRIJVING_STATUS_RESERVERING_MANDJE,
                                   OPLEIDING_STATUS_TO_STR, OPLEIDING_INSCHRIJVING_STATUS_TO_STR)
-from Overig.background_sync import BackgroundSync
+from Site.core.background_sync import BackgroundSync
 from Vereniging.models import Vereniging
 from Wedstrijden.definities import (WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_BESTELD,
                                     WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF,

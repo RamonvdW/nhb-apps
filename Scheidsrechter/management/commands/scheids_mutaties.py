@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023-2024 Ramon van der Winkel.
+#  Copyright (c) 2023-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -21,7 +21,7 @@ from Functie.models import Functie
 from Locatie.models import Reistijd, WedstrijdLocatie
 from Locatie.operations import ReistijdBepalen
 from Mailer.operations import mailer_queue_email, render_email_template
-from Overig.background_sync import BackgroundSync
+from Site.core.background_sync import BackgroundSync
 from Scheidsrechter.definities import (SCHEIDS_MUTATIE_WEDSTRIJD_BESCHIKBAARHEID_OPVRAGEN,
                                        SCHEIDS_MUTATIE_STUUR_NOTIFICATIES_WEDSTRIJD,
                                        SCHEIDS_MUTATIE_STUUR_NOTIFICATIES_MATCH,

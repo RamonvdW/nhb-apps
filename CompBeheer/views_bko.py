@@ -19,7 +19,7 @@ from Competitie.definities import (MUTATIE_DOORZETTEN_REGIO_NAAR_RK,
 from Competitie.models import Competitie, CompetitieTeamKlasse, Regiocompetitie, KampioenschapTeam, CompetitieMutatie
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
-from Overig.background_sync import BackgroundSync
+from Site.core.background_sync import BackgroundSync
 
 mutatie_ping = BackgroundSync(settings.BACKGROUND_SYNC__REGIOCOMP_MUTATIES)
 

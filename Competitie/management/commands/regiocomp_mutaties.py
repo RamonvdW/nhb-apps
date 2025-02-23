@@ -40,7 +40,7 @@ from Competitie.operations import (competities_aanmaken, bepaal_startjaar_nieuwe
 from Functie.models import Functie
 from Logboek.models import schrijf_in_logboek
 from Mailer.operations import mailer_notify_internal_error
-from Overig.background_sync import BackgroundSync
+from Site.core.background_sync import BackgroundSync
 from Taken.operations import maak_taak
 import traceback
 import datetime
