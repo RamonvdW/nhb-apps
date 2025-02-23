@@ -137,7 +137,7 @@ class RolBepaler:
 
             # alle management rollen
             if self._has_bb:
-                if func.rol in (Rol.ROL_MO, Rol.ROL_MWZ, Rol.ROL_MWW,
+                if func.rol in (Rol.ROL_MO, Rol.ROL_MWZ, Rol.ROL_MWW, Rol.ROL_MLA,
                                 Rol.ROL_SUP, Rol.ROL_CS, Rol.ROL_BKO):
                     self._management.append(func)
             # for

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2024 Ramon van der Winkel.
+#  Copyright (c) 2020-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -48,7 +48,7 @@ def mag_beheerder_wijzigen_of_403(request, functie):
 
     if rol_nu == Rol.ROL_BB:
         # BB mag BKO koppelen
-        if functie.rol not in ('BKO', 'CS', 'MWW', 'MO', 'MWZ'):
+        if functie.rol not in ('BKO', 'CS', 'MWW', 'MO', 'MWZ', 'MLA'):
             raise PermissionDenied('Niet de beheerder')
         return
 
@@ -127,7 +127,7 @@ def mag_email_wijzigen_of_403(request, functie):
     # special voor BB, want dat is geen functie
     if rol_nu == Rol.ROL_BB:
         # BB mag BKO email aanpassen
-        if functie.rol not in ('BKO', 'CS', 'MWW', 'MO', 'MWZ'):
+        if functie.rol not in ('BKO', 'CS', 'MWW', 'MO', 'MWZ', 'MLA'):
             raise PermissionDenied('Niet de beheerder')
         return
 
@@ -235,7 +235,7 @@ class WijzigEmailView(UserPassesTestMixin, View):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu = rol_get_huidige(self.request)
-        return self.rol_nu in (Rol.ROL_BB, Rol.ROL_MO, Rol.ROL_MWZ, Rol.ROL_SUP,
+        return self.rol_nu in (Rol.ROL_BB, Rol.ROL_MO, Rol.ROL_MWZ, Rol.ROL_SUP, Rol.ROL_MLA,
                                Rol.ROL_BKO, Rol.ROL_RKO, Rol.ROL_RCL,
                                Rol.ROL_SEC, Rol.ROL_HWL, Rol.ROL_WL)
 

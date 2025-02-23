@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2024 Ramon van der Winkel.
+#  Copyright (c) 2020-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -38,7 +38,7 @@ class LijstBeheerdersView(UserPassesTestMixin, ListView):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         # alle competitie beheerders + HWL
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu in (Rol.ROL_BB, Rol.ROL_MO, Rol.ROL_MWZ, Rol.ROL_MWW, Rol.ROL_SUP,
+        return self.rol_nu in (Rol.ROL_BB, Rol.ROL_MO, Rol.ROL_MWZ, Rol.ROL_MWW, Rol.ROL_MLA, Rol.ROL_SUP,
                                Rol.ROL_BKO, Rol.ROL_RKO, Rol.ROL_RCL,
                                Rol.ROL_SEC, Rol.ROL_HWL, Rol.ROL_WL,
                                Rol.ROL_CS)
@@ -46,12 +46,12 @@ class LijstBeheerdersView(UserPassesTestMixin, ListView):
     @staticmethod
     def _sorteer_functies(objs):
         """ Sorteer de functies zodat:
-            MWZ < MO < MWW < SUP < rest
+            MWZ < MLA < MO < MWW  < CS < SUP < rest
             18 < 25
             BKO < RKO < RCL
             op volgorde van rayon- of regionummer (oplopend)
         """
-        sort_level = {'MWZ': 1, 'MO': 2, 'CS': 3, 'MWW': 4, 'SUP': 5, 'BKO': 6,  'RKO': 7, 'RCL': 8}
+        sort_level = {'MWZ': 1, 'MLA': 2, 'MO': 3, 'MWW': 4, 'CS': 5, 'SUP': 6, 'BKO': 7, 'RKO': 8, 'RCL': 9}
         tup2obj = dict()
         sort_me = list()
         for obj in objs:
@@ -80,8 +80,8 @@ class LijstBeheerdersView(UserPassesTestMixin, ListView):
         wijzigbare_email_rollen = ()
 
         if self.rol_nu == Rol.ROL_BB:
-            wijzigbare_functie_rollen = ('BKO', 'CS', 'MWW', 'MO', 'MWZ')
-            wijzigbare_email_rollen = ('BKO', 'CS', 'MWW', 'MO', 'MWZ')
+            wijzigbare_functie_rollen = ('BKO', 'CS', 'MWW', 'MO', 'MWZ', 'MLA', 'SUP')
+            wijzigbare_email_rollen = ('BKO', 'CS', 'MWW', 'MO', 'MWZ', 'MLA', 'SUP')
 
         elif self.rol_nu == Rol.ROL_BKO:
             wijzigbare_functie_rollen = ('RKO',)
@@ -148,7 +148,7 @@ class LijstBeheerdersView(UserPassesTestMixin, ListView):
                     .prefetch_related('accounts'))
         else:
             objs = (Functie.objects
-                    .filter(rol__in=('BKO', 'RKO', 'RCL', 'MWZ', 'MWW', 'SUP', 'MO', 'CS'))
+                    .filter(rol__in=('BKO', 'RKO', 'RCL', 'MWZ', 'MWW', 'MLA', 'SUP', 'MO', 'CS'))
                     .select_related('rayon',
                                     'regio',
                                     'regio__rayon')

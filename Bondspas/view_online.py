@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2024 Ramon van der Winkel.
+#  Copyright (c) 2021-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -134,7 +134,8 @@ class ToonBondspasBeheerderView(UserPassesTestMixin, View):
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        return rol_get_huidige(self.request) == Rol.ROL_BB
+        rol_nu = rol_get_huidige(self.request)
+        return rol_nu in (Rol.ROL_BB, Rol.ROL_MLA, Rol.ROL_SUP)
 
     def get(self, request, *args, **kwargs):
         """ called by the template system to get the context data for the template """

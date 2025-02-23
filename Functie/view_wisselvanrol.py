@@ -30,8 +30,10 @@ def functie_volgorde(functie: Functie) -> int:
         volgorde = 5
     elif functie.rol == "MWW":
         volgorde = 6
-    elif functie.rol == "CS":
+    elif functie.rol == "MLA":
         volgorde = 7
+    elif functie.rol == "CS":
+        volgorde = 8
     elif functie.rol == "BKO":
         volgorde = 10  # 10
     elif functie.rol == "RKO":

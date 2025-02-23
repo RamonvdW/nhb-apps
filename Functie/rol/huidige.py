@@ -80,6 +80,7 @@ def rol_get_huidige_functie(request) -> Tuple[Rol, Functie]:
                            (functie.rol == 'RCL' and rol != Rol.ROL_RCL) or
                            (functie.rol == 'MWZ' and rol != Rol.ROL_MWZ) or
                            (functie.rol == 'MWW' and rol != Rol.ROL_MWW) or
+                           (functie.rol == 'MLA' and rol != Rol.ROL_MLA) or
                            (functie.rol == 'WL' and rol != Rol.ROL_WL))
 
                     if bad:
