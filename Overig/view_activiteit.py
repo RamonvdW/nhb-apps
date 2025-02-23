@@ -45,22 +45,23 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
         account = get_account(self.request)
         if account.is_authenticated:
             self.rol_nu = rol_get_huidige(self.request)
-            if self.rol_nu == Rol.ROL_BB:
+            if self.rol_nu in (Rol.ROL_BB, Rol.ROL_MLA, Rol.ROL_SUP):
                 return True
 
         return False
 
     @staticmethod
-    def tel_actieve_gebruikers():
+    def _actieve_accounts():
         # tel alle gebruikers die de afgelopen maand ingelogd hebben
         een_maand_geleden = timezone.now() - datetime.timedelta(days=31)
-        user_list1 = Account.objects.filter(last_login__gt=een_maand_geleden).values_list('username', flat=True)
+        user_list1 = Account.objects.filter(last_login__gte=een_maand_geleden).values_list('username', flat=True)
 
-        # sessies worden verwijderd als deze verlopen is; standaard 14 dagen (SESSION_COOKIE_AGE)
+        # tel daar bij op iedereen die nog ingelogd is
+        # sessies verlopen standaard na 14 dagen (SESSION_COOKIE_AGE)
         user_list2 = AccountSessions.objects.distinct('account').values_list('account__username', flat=True)
 
         unique = set().union(user_list1, user_list2)
-        return len(unique)
+        return unique
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -92,7 +93,8 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
         context['totaal'] = Account.objects.count()
         context['totaal_gast'] = Account.objects.filter(is_gast=True).count()
 
-        context['aantal_actieve_gebruikers'] = self.tel_actieve_gebruikers()
+        actieve_accounts = self._actieve_accounts()
+        context['aantal_actieve_gebruikers'] = len(actieve_accounts)
 
         context['recente_activiteit'] = (Account
                                          .objects
@@ -277,20 +279,19 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
         context['url_reset_tweede_factor'] = reverse('Overig:otp-loskoppelen')
 
         age_group_counts = dict()       # [groep] = aantal
-        for group in (1, 10, 20, 30, 40, 50, 60, 70, 80):
-            age_group_counts[int(group/10)] = 0
+        for leeftijd in (1, 10, 20, 30, 40, 50, 60, 70, 80):
+            group = int(leeftijd / 10)
+            age_group_counts[group] = 0
         # for
 
-        afgelopen_maand = timezone.now() - datetime.timedelta(days=30)
         jaar = timezone.now().year
         total = 0
         for geboorte_datum in (Sporter
                                .objects
-                               .exclude(account=None)
-                               .filter(account__last_login__gte=afgelopen_maand)
+                               .filter(account__username__in=actieve_accounts)
                                .values_list('geboorte_datum', flat=True)):
             leeftijd = jaar - geboorte_datum.year
-            leeftijd = min(leeftijd, 89)
+            leeftijd = min(leeftijd, 89)        # groep "80 en ouder"
             group = int(leeftijd / 10)
             age_group_counts[group] += 1
             total += 1
@@ -301,6 +302,10 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
                           for age, count in age_group_counts.items()]
             age_groups.sort()
             context['age_groups'] = age_groups
+
+            # aantal apart doorgeven omdat deze af kan wijken van context['aantal_actieve_gebruikers']
+            # dit komt voor bij gast-accounts die nog niet afgerond zijn
+            context['age_groups_total'] = total
 
         context['kruimels'] = (
             (None, 'Account activiteit'),

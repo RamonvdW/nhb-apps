@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -16,7 +16,7 @@ def get_safe_from_ip(request):
     # filter out any character that is not part of a valid IPv4 or IPv6 IP address
     # (max length 15) IPv4:                     100.200.100.200
     # (max length 39) IPv6:                     0000:0000:0000:0000:0000:0000:0000:0000
-    # (max length 45) IPv6 mapped IPv4 address: 0000:0000:0000:0000:0000:ffff:100.200.100.200
+    # (max length 45) IPv6 mapped IPv4 address: 0000:0000:0000:0000:0000:ffff:100.200.100.200       # noqa
 
     safe_ip = ""
 

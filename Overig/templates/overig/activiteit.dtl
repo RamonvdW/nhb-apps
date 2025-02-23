@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2024 Ramon van der Winkel.
+                Copyright (c) 2020-2025 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -39,7 +39,7 @@
                     <td>{{ deze_maand_count_gast }}</td>
                 </tr>
                 <tr>
-                    <th>Aantal actieve gebruikers (afgelopen 30 dagen)</th>
+                    <th>Aantal actieve gebruikers (afgelopen 31 dagen)</th>
                     <td>{{ aantal_actieve_gebruikers }}</td>
                 </tr>
             </table>
@@ -172,7 +172,7 @@
                         <td></td>
                     </tr>
                     <tr>
-                        <th data-filter="on">Inlog</th>
+                        <th data-filter="on">Bondsnummer</th>
                         <th data-filter="on">Naam</th>
                         <th data-filter="on">Rollen</th>
                         <th>Laatste inlog</th>
@@ -223,7 +223,7 @@
                     </tr>
                     <tr>
                         <th>Aangemaakt</th>
-                        <th data-filter="on">Inlog</th>
+                        <th data-filter="on">Bondsnummer</th>
                         <th data-filter="on">Naam</th>
                         <th>Email is bevestigd</th>
                         <th>Laatste inlog</th>
@@ -235,12 +235,12 @@
                 <tbody>
                     {% for account in nieuwe_accounts %}
                         <tr>
-                            <td>{{ account.date_joined|date:"j b H:i" }}</td>
+                            <td>{{ account.date_joined|date:"j b Y H:i" }}</td>
                             <td>{{ account.username }}</td>
                             <td>{{ account.volledige_naam }}</td>
                             <td>{% if account.email_is_bevestigd %}Ja{% else %}Nee{% endif %}</td>
-                            <td>{{ account.last_login|date:"j b H:i" }}</td>
-                            <td>{{ account.laatste_inlog_poging|date:"j b H:i" }}</td>
+                            <td>{{ account.last_login|date:"j b Y H:i" }}</td>
+                            <td>{{ account.laatste_inlog_poging|date:"j b Y H:i" }}</td>
                             <td>{% if account.otp_is_actief %}Ja{% else %}Nee{% endif %}</td>
                         </tr>
                     {% endfor %}
@@ -272,7 +272,7 @@
                     </tr>
                     <tr>
                         <th>Laatste login</th>
-                        <th data-filter="on">Inlog</th>
+                        <th data-filter="on">Bondsnummer</th>
                         <th data-filter="on">Naam</th>
                         <th>Email is bevestigd</th>
                         <th>Tweede factor</th>
@@ -282,12 +282,12 @@
 
                 {% for account in recente_activiteit %}
                     <tr>
-                        <td>{{ account.last_login|date:"j b H:i" }}</td>
+                        <td>{{ account.last_login|date:"j b Y H:i" }}</td>
                         <td>{{ account.username }}</td>
                         <td>{{ account.volledige_naam }}</td>
                         <td>{% if account.email_is_bevestigd %}Ja{% else %}Nee{% endif %}</td>
                         <td>{% if account.otp_is_actief %}Ja{% else %}Nee{% endif %}</td>
-                        <td>{{ account.date_joined|date:"j b H:i" }}</td>
+                        <td>{{ account.date_joined|date:"j b Y H:i" }}</td>
                     </tr>
                 {% endfor %}
             </table>
@@ -319,7 +319,7 @@
                     <tr>
                         <th>Laatste poging</th>
                         <th>Laatste inlog</th>
-                        <th data-filter="on">Inlog</th>
+                        <th data-filter="on">Bondsnummer</th>
                         <th data-filter="on">Naam</th>
                         <th>Email is bevestigd</th>
                         <th>Tweede factor</th>
@@ -331,12 +331,12 @@
                     {% for account in inlog_pogingen %}
                         <tr>
                             <td>{{ account.laatste_inlog_poging|date:"j b Y H:i" }}</td>
-                            <td>{{ account.last_login|date:"j b H:i" }}</td>
+                            <td>{{ account.last_login|date:"j b Y H:i" }}</td>
                             <td>{{ account.username }}</td>
                             <td>{{ account.volledige_naam }}</td>
                             <td>{% if account.email_is_bevestigd %}Ja{% else %}Nee{% endif %}</td>
                             <td>{% if account.otp_is_actief %}Ja{% else %}Nee{% endif %}</td>
-                            <td>{{ account.date_joined|date:"j b H:i" }}</td>
+                            <td>{{ account.date_joined|date:"j b Y H:i" }}</td>
                         </tr>
                     {% endfor %}
                 </tbody>
@@ -349,7 +349,7 @@
         <div class="row center">
             <div class="col s12">
                 <h4 id="leeftijdsgroepen">Leeftijd van de gebruikers</h4>
-                <p>Leeftijd van de gebruikers (inlog de afgelopen 30 dagen), gegroepeerd per 10 jaar.</p>
+                <p>Leeftijd van de {{ age_groups_total }} actieve gebruikers, gegroepeerd per 10 jaar.</p>
             </div>
         </div>
 
