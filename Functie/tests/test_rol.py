@@ -11,6 +11,7 @@ from Functie.operations import maak_account_vereniging_secretaris
 from Functie.tests.helpers import maak_functie
 from Functie.rol import (rol_mag_wisselen, rol_get_beschrijving, rol_zet_beschrijving, rol_activeer_functie,
                          rol_activeer_rol, rol_get_huidige, rol_get_huidige_functie)
+from Functie.rol.bepaal import RolBepaler
 from Functie.rol.beschrijving import SESSIONVAR_ROL_BESCHRIJVING
 from Functie.rol.huidige import SESSIONVAR_ROL_HUIDIGE, SESSIONVAR_ROL_HUIDIGE_FUNCTIE_PK
 from Functie.rol.mag_wisselen import SESSIONVAR_ROL_MAG_WISSELEN_BOOL
@@ -201,6 +202,18 @@ class TestFunctieRol(E2EHelpers, TestCase):
 
         # speciale situatie
         rol_zet_beschrijving(request, Rol.ROL_SEC, self.functie_sec.pk, functie=None)
+
+    def test_bepaler(self):
+        # direct checks van een paar corner cases die via de views lastig te raken zijn
+        resp = self.client.get(self.url_plein)
+        request = resp.wsgi_request
+
+        bepaler = RolBepaler(self.account_admin)
+
+        # niet bestaande functie_pk
+        mag, rol = bepaler.mag_functie(request, 999999)
+        self.assertFalse(mag)
+        self.assertEqual(rol, Rol.ROL_NONE)
 
 
 # end of file

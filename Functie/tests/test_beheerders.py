@@ -43,6 +43,8 @@ class TestFunctieBeheerders(E2EHelpers, TestCase):
 
         self.functie_mwz = Functie.objects.get(rol='MWZ')
         self.functie_bko_18 = Functie.objects.get(comp_type='18', rol='BKO')
+        self.functie_bko_18.bevestigde_email = 'mail@khsn.not'
+        self.functie_bko_18.save(update_fields=['bevestigde_email'])
         self.functie_bko_25 = Functie.objects.get(comp_type='25', rol='BKO')
         self.functie_rko3_18 = Functie.objects.get(comp_type='18', rol='RKO', rayon=Rayon.objects.get(rayon_nr=3))
         self.functie_rko2_25 = Functie.objects.get(comp_type='25', rol='RKO', rayon=Rayon.objects.get(rayon_nr=2))
@@ -76,6 +78,7 @@ class TestFunctieBeheerders(E2EHelpers, TestCase):
 
         self.functie_hwl = maak_functie("HWL test", "HWL")
         self.functie_hwl.vereniging = ver
+        self.functie_hwl.bevestigde_email = 'hwl@khsn.not'
         self.functie_hwl.save()
 
         self.functie_wl = maak_functie("WL test", "WL")

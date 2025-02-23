@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2023 Ramon van der Winkel.
+#  Copyright (c) 2020-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -69,7 +69,7 @@ class Functie(models.Model):
     # telefoonnummer wat bij deze functie hoort (optioneel)
     telefoon = models.CharField(max_length=25, default='', blank=True)
 
-    # BKO/RKO/RCL: voor de 18 (Indoor) of 25 (25m 1pijl) competitie?
+    # BKO/RKO/RCL: voor de "18" (Indoor) of "25" (25m 1pijl) competitie
     # leeg voor functies op verenigingsniveau (SEC, HWL, WL)
     comp_type = models.CharField(max_length=2, default="", blank=True)
 

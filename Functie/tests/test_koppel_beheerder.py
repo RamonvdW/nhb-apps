@@ -101,6 +101,7 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
 
         self.functie_hwl = maak_functie("HWL test", "HWL")
         self.functie_hwl.vereniging = ver
+        self.functie_hwl.bevestigde_email = 'hwl@khsn.not'
         self.functie_hwl.save()
 
         self.functie_wl = maak_functie("WL test", "WL")
@@ -191,6 +192,14 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
 
         # controleer aanwezigheid van verwijder-knoppen
         self.assertContains(resp, '</i>Verwijder</a>', count=2)
+
+        # zoek maar niets gevonden
+        with self.assert_max_queries(20):
+            resp = self.client.get(url + '?zoekterm=xxxx')
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('functie/koppel-beheerders.dtl', 'plein/site_layout.dtl'))
+        self.assertContains(resp, 'Niemand gevonden')
 
         self.e2e_assert_other_http_commands_not_supported(url)
 
