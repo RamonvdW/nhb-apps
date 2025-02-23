@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#  Copyright (c) 2020-2024 Ramon van der Winkel.
+#  Copyright (c) 2020-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -28,7 +28,9 @@ do
   RES=$?
   if [ $RES -ne 0 ]
   then
-      echo "[WARNING] $verwacht niet gevonden in $dtl"
+      # instaptoets heeft een op_pagina die gezet wordt door de view, om de vraag te reflecteren
+      # voorkom dat we deze melden
+      grep -q "<!-- disable check op_pagina -->" "$dtl" || echo "[WARNING] $verwacht niet gevonden in $dtl"
   fi
 done
 

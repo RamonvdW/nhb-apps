@@ -89,6 +89,6 @@
         </div>
     </div>
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="opleidingen-overzicht-manager" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="opleiding-overzicht-manager" %}
 
 {% endblock %}

@@ -87,7 +87,7 @@
         </div>
     </div>
 
-
     {% include 'feedback/sidebar.dtl' with op_pagina=op_pagina %}
+    <!-- disable check op_pagina -->
 
 {% endblock %}
