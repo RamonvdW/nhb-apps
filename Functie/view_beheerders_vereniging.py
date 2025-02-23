@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2024 Ramon van der Winkel.
+#  Copyright (c) 2020-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -11,7 +11,7 @@ from Functie.definities import Rol
 from Functie.models import Functie
 from Functie.rol import rol_get_huidige, rol_get_huidige_functie, rol_get_beschrijving
 
-TEMPLATE_OVERZICHT_VERENIGING = 'functie/overzicht-vereniging.dtl'
+TEMPLATE_OVERZICHT_VERENIGING = 'functie/lijst-beheerders-vereniging.dtl'
 
 
 class BeheerdersVerenigingView(UserPassesTestMixin, ListView):

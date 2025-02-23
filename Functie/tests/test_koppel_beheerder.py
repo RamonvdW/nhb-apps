@@ -459,7 +459,7 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
             resp = self.client.get(self.url_beheerders_vereniging)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('functie/overzicht-vereniging.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('functie/lijst-beheerders-vereniging.dtl', 'plein/site_layout.dtl'))
 
         # HWL koppelt een lid uit de eigen gelederen
         url = self.url_wijzig_ontvang % self.functie_hwl.pk
@@ -474,7 +474,7 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
             resp = self.client.get(self.url_beheerders_vereniging)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('functie/overzicht-vereniging.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('functie/lijst-beheerders-vereniging.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, self.account_beh2.volledige_naam())
 
         # poog een lid te koppelen dat niet lid is van de vereniging
@@ -533,7 +533,7 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
             resp = self.client.get(self.url_beheerders_vereniging)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('functie/overzicht-vereniging.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('functie/lijst-beheerders-vereniging.dtl', 'plein/site_layout.dtl'))
         urls = self.extract_all_urls(resp, skip_menu=True)
         # verwachting: 2x koppelen beheerders, 1x wijzig email
         # print('SEC urls: %s' % repr(urls))

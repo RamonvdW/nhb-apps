@@ -143,6 +143,19 @@ class TestFunctieBeheerders(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assertContains(resp, "Manager MH")
 
+        # meerdere accounts met rol IT en BB, voor coverage in de template (for-loop over accounts)
+        self.account_beh1.is_BB = True
+        self.account_beh1.save(update_fields=['is_BB'])
+        self.account_beh2.is_staff = True
+        self.account_beh2.is_BB = True
+        self.account_beh2.save(update_fields=['is_staff', 'is_BB'])
+
+        self.functie_mwz.accounts.add(self.account_beh1)
+        self.functie_mwz.accounts.add(self.account_beh2)
+
+        self.functie_mwz.bevestigde_email = 'mwz@khsn.not'
+        self.functie_mwz.save(update_fields=['bevestigde_email'])
+
         # controleer de Wijzig knoppen op de functie-overzicht pagina
         with self.assert_max_queries(6):
             resp = self.client.get(self.url_beheerders)
@@ -224,7 +237,7 @@ class TestFunctieBeheerders(E2EHelpers, TestCase):
             resp = self.client.get(self.url_beheerders + 'vereniging/')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('functie/overzicht-vereniging.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('functie/lijst-beheerders-vereniging.dtl', 'plein/site_layout.dtl'))
 
         self.e2e_assert_other_http_commands_not_supported(self.url_beheerders + 'vereniging/')
 
@@ -248,7 +261,7 @@ class TestFunctieBeheerders(E2EHelpers, TestCase):
             resp = self.client.get(self.url_beheerders + 'vereniging/')
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('functie/overzicht-vereniging.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('functie/lijst-beheerders-vereniging.dtl', 'plein/site_layout.dtl'))
 
     def test_sec(self):
         # de SEC krijgt niet het hele overzicht te zien
@@ -270,7 +283,7 @@ class TestFunctieBeheerders(E2EHelpers, TestCase):
             resp = self.client.get(self.url_beheerders + 'vereniging/')
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('functie/overzicht-vereniging.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('functie/lijst-beheerders-vereniging.dtl', 'plein/site_layout.dtl'))
 
     def test_emails_sec_hwl(self):
         self.e2e_login_and_pass_otp(self.account_admin)

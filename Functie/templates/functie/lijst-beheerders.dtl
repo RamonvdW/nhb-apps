@@ -150,6 +150,6 @@
         </div>
     </div>
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="functie-overzicht" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="functie-lijst-beheerders" %}
 
 {% endblock %}
