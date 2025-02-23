@@ -141,6 +141,7 @@ class DoorzettenRegioNaarRKView(UserPassesTestMixin, TemplateView):
         # dit voorkomt ook race conditions / dubbel uitvoeren
         account = get_account(self.request)
         door_str = "BKO %s" % account.volledige_naam()
+        door_str = door_str[:149]
 
         CompetitieMutatie(mutatie=MUTATIE_DOORZETTEN_REGIO_NAAR_RK,
                           door=door_str,
@@ -482,6 +483,7 @@ class DoorzettenBasisView(UserPassesTestMixin, TemplateView):
         # vraag de achtergrond taak alle stappen van het afsluiten uit te voeren
         # dit voorkomt ook race conditions / dubbel uitvoeren
         door_str = "BKO %s" % door_account.volledige_naam()
+        door_str = door_str[:149]
 
         CompetitieMutatie(mutatie=self.mutatie_code,
                           door=door_str,

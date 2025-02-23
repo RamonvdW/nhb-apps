@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023-2024 Ramon van der Winkel.
+#  Copyright (c) 2023-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -679,6 +679,7 @@ class MatchDetailsCSView(UserPassesTestMixin, TemplateView):
         if do_notify:
             account = get_account(request)
             door_str = "CS %s" % account.volledige_naam()
+            door_str = door_str[:149]
 
             snel = str(request.POST.get('snel', ''))[:1]
 

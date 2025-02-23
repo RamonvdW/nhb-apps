@@ -930,6 +930,7 @@ class WijzigLimietenView(UserPassesTestMixin, TemplateView):
         # laat opnieuw de deelnemers boven de cut bepalen en sorteer op gemiddelde
         door_account = get_account(request)
         door_str = "BKO %s" % door_account.volledige_naam()
+        door_str = door_str[:149]
 
         mutatie = None
         for indiv_klasse, nieuwe_limiet, oude_limiet in wijzig_limiet_indiv:

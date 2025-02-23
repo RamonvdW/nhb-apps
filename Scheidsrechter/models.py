@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023-2024 Ramon van der Winkel.
+#  Copyright (c) 2023-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -155,7 +155,7 @@ class ScheidsMutatie(models.Model):
     # door wie is de mutatie geïnitieerd
     # als het een account is, dan volledige naam + rol
     # als er geen account is (sporter zonder account) dan lid details
-    door = models.CharField(max_length=50, default='')
+    door = models.CharField(max_length=150, default='')
 
     # voor welke wedstrijd is dit verzoek?
     wedstrijd = models.ForeignKey(Wedstrijd, on_delete=models.CASCADE, null=True, blank=True)

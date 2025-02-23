@@ -223,6 +223,7 @@ class VerplaatsDeelnemerView(UserPassesTestMixin, View):
 
         account = get_account(request)
         door_str = "BKO %s" % account.volledige_naam()
+        door_str = door_str[:149]
 
         msg = "Kleine klasse %s van %s: deelnemer %s verplaatsen van klasse %s naar klasse %s." % (
                     deelkamp, comp, deelnemer, deelnemer.indiv_klasse.beschrijving, klasse.beschrijving)

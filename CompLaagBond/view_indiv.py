@@ -402,6 +402,7 @@ class WijzigStatusBkDeelnemerView(UserPassesTestMixin, TemplateView):
 
         account = get_account(request)
         door_str = "BKO %s" % account.volledige_naam()
+        door_str = door_str[:149]
 
         if bevestig == "1":
             if not deelnemer.bij_vereniging:

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023-2024 Ramon van der Winkel.
+#  Copyright (c) 2023-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -68,6 +68,7 @@ class BeschikbaarheidOpvragenView(UserPassesTestMixin, View):
 
         account = get_account(request)
         door_str = "CS %s" % account.volledige_naam()
+        door_str = door_str[:149]
 
         scheids_mutatieverzoek_beschikbaarheid_opvragen(wedstrijd, door_str, snel == '1')
 
@@ -100,6 +101,7 @@ class BeschikbaarheidCompetitieOpvragenView(UserPassesTestMixin, View):
 
         account = get_account(request)
         door_str = "CS %s" % account.volledige_naam()
+        door_str = door_str[:149]
 
         scheids_mutatieverzoek_competitie_beschikbaarheid_opvragen(door_str, snel == '1')
 

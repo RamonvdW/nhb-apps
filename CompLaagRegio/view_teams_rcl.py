@@ -828,6 +828,8 @@ class StartVolgendeTeamRondeView(UserPassesTestMixin, TemplateView):
 
             # voor concurrency protection, laat de achtergrondtaak de ronde doorzetten
             door_str = "RCL %s" % account.volledige_naam()
+            door_str = door_str[:149]
+
             mutatie = CompetitieMutatie(mutatie=MUTATIE_REGIO_TEAM_RONDE,
                                         regiocompetitie=deelcomp,
                                         door=door_str)

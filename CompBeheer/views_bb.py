@@ -130,6 +130,7 @@ class CompetitieAanmakenView(UserPassesTestMixin, TemplateView):
 
             # voor concurrency protection, laat de achtergrondtaak de competitie aanmaken
             door_str = "BB %s" % account.volledige_naam()
+            door_str = door_str[:149]
             mutatie = CompetitieMutatie(mutatie=MUTATIE_COMPETITIE_OPSTARTEN,
                                         door=door_str)
             mutatie.save()
@@ -251,6 +252,7 @@ class AGVaststellenView(UserPassesTestMixin, TemplateView):
 
         # voor concurrency protection, laat de achtergrondtaak de competitie aanmaken
         door_str = "BB %s" % account.volledige_naam()
+        door_str = door_str[:149]
         mutatie = CompetitieMutatie(mutatie=mutatie,
                                     door=door_str)
         mutatie.save()

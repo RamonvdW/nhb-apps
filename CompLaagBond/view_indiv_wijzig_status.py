@@ -123,6 +123,7 @@ class WijzigStatusBkDeelnemerView(UserPassesTestMixin, TemplateView):
 
         account = get_account(request)
         door_str = "BKO %s" % account.volledige_naam()
+        door_str = door_str[:149]
 
         if bevestig == "1":
             if not deelnemer.bij_vereniging:
@@ -205,6 +206,7 @@ class SporterWijzigStatusBkDeelnameView(UserPassesTestMixin, TemplateView):
         snel = str(request.POST.get('snel', ''))[:1]
 
         door_str = account.get_account_full_name()
+        door_str = door_str[:149]
 
         if keuze == "J":
             if not deelnemer.bij_vereniging:

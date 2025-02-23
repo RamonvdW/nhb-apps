@@ -219,6 +219,7 @@ class WijzigStatusBkTeamView(UserPassesTestMixin, View):
         if opnieuw_nummeren:
             account = get_account(request)
             door_str = "%s %s" % (rol_get_beschrijving(request), account.volledige_naam())
+            door_str = door_str[:149]
 
             mutatie = CompetitieMutatie(mutatie=MUTATIE_KAMP_TEAMS_NUMMEREN,
                                         door=door_str,
