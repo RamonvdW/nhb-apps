@@ -259,6 +259,6 @@
         {% endif %}
     {% endif %}
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="opleidingen-inschrijven-basiscursus" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="opleiding-inschrijven-basiscursus" %}
 
 {% endblock %}

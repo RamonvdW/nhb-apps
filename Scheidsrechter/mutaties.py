@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2024 Ramon van der Winkel.
+#  Copyright (c) 2021-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -12,7 +12,7 @@ from Scheidsrechter.definities import (SCHEIDS_MUTATIE_WEDSTRIJD_BESCHIKBAARHEID
                                        SCHEIDS_MUTATIE_COMPETITIE_BESCHIKBAARHEID_OPVRAGEN,
                                        SCHEIDS_MUTATIE_REISTIJD_SR_BEPALEN)
 from Scheidsrechter.models import ScheidsMutatie
-from Overig.background_sync import BackgroundSync
+from Site.core.background_sync import BackgroundSync
 import datetime
 import time
 

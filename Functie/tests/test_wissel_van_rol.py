@@ -103,10 +103,17 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.functie_sec2.save()
 
         self.functie_bko = maak_functie("BKO test", "BKO")
+        self.functie_bko.comp_type = '18'
+        self.functie_bko.save()
 
         self.functie_rko = maak_functie("RKO test", "RKO")
-        self.functie_rko.rayon = Rayon.objects.get(rayon_nr=1)
+        self.functie_rko.rayon = Rayon.objects.get(rayon_nr=3)
+        self.functie_rko.comp_type = '18'
         self.functie_rko.save()
+
+        # twee RCL's "onder" bovenstaande RKO
+        self.functie_rcl111_18 = Functie.objects.get(comp_type='18', rol='RCL', regio=Regio.objects.get(regio_nr=111))
+        self.functie_rcl111_25 = Functie.objects.get(comp_type='25', rol='RCL', regio=Regio.objects.get(regio_nr=111))
 
         self.functie_mo = maak_functie("MO test", "MO")
         self.functie_mo.save()
@@ -250,8 +257,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
 
         # controleer dat een rol wissel die met een functie moet geen effect heeft
         resp = self.client.post(self.url_activeer_rol % 'BKO', follow=True)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assertContains(resp, "Manager MH")
+        self.assert404(resp, 'Slechte parameter (2)')
 
         resp = self.client.post(self.url_activeer_rol % 'geen', follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
@@ -313,6 +319,9 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.e2e_account_accepteert_vhpg(self.account_normaal)
         self.e2e_login_and_pass_otp(self.account_normaal)
 
+        self.e2e_wissel_naar_functie(self.functie_rko)
+        self.e2e_check_rol('RKO')
+
         resp = self.client.get(self.url_wissel_van_rol)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -328,13 +337,14 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.assert403(resp)
 
     def test_rcl(self):
-        self.functie_hwl.vereniging.plaats = ''
-        self.functie_hwl.vereniging.save(update_fields=['plaats'])
+        self.ver1000.plaats = ''
+        self.ver1000.save(update_fields=['plaats'])
 
         self.functie_rcl.accounts.add(self.account_normaal)
         self.e2e_account_accepteert_vhpg(self.account_normaal)
         self.e2e_login_and_pass_otp(self.account_normaal)
         self.e2e_wissel_naar_functie(self.functie_rcl)
+        self.e2e_check_rol('RCL')
 
         resp = self.client.get(self.url_wissel_van_rol)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
@@ -820,6 +830,15 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_bko)
         self.e2e_check_rol('BKO')
 
+        resp = self.client.get(self.url_wissel_van_rol)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('functie/wissel-van-rol.dtl', 'plein/site_layout.dtl'))
+        # self.e2e_open_in_browser(resp)
+        self.assertContains(resp, "HWL")
+        urls = self._get_wissel_urls(resp)
+        self.assertIn(self.url_activeer_functie % self.functie_hwl.pk, urls)
+
     def test_rko_to_hwl(self):
         comp = Competitie(
                     beschrijving='test',
@@ -847,6 +866,15 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_admin)
         self.e2e_wissel_naar_functie(self.functie_rko)
         self.e2e_check_rol('RKO')
+
+        resp = self.client.get(self.url_wissel_van_rol)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('functie/wissel-van-rol.dtl', 'plein/site_layout.dtl'))
+        # self.e2e_open_in_browser(resp)
+        self.assertContains(resp, "HWL")
+        urls = self._get_wissel_urls(resp)
+        self.assertIn(self.url_activeer_functie % self.functie_hwl.pk, urls)
 
     def test_hwl_nr_keuze(self):
         # IT en BB mogen naar een HWL naar keuze wisselen

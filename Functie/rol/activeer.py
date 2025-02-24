@@ -28,15 +28,17 @@ def rol_activeer_rol(request, account: Account, rol: Rol):
         if rol in (Rol.ROL_NONE, Rol.ROL_SPORTER):
             akkoord = True
 
-        elif rol == Rol.ROL_BB:
+        if rol == Rol.ROL_BB:
             if account.is_staff or account.is_BB:
                 akkoord = True
 
-        else:
-            # volledige analyse vereist
-            rol_bepaler = RolBepaler(account)
-            if rol_bepaler.mag_rol(rol):
-                akkoord = True
+        # alle andere rollen horen bij een functie
+        # (onmogelijk om hier te komen)
+        # else:
+        #     # volledige analyse vereist
+        #     rol_bepaler = RolBepaler(account)
+        #     if rol_bepaler.mag_rol(rol):
+        #         akkoord = True
 
     if akkoord:
         rol_zet_huidige_rol(request, rol)

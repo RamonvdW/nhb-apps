@@ -44,16 +44,16 @@ from Betaal.format import format_bedrag_euro
 from Betaal.models import BetaalInstellingenVereniging, BetaalTransactie
 from Betaal.operations import maak_transactie_handmatige_overboeking
 from Evenement.definities import (EVENEMENT_INSCHRIJVING_STATUS_DEFINITIEF, EVENEMENT_STATUS_TO_STR,
-                                  EVENEMENT_INSCHRIJVING_STATUS_RESERVERING_BESTELD)
+                                  EVENEMENT_INSCHRIJVING_STATUS_BESTELD)
 from Functie.models import Functie
 from Mailer.operations import mailer_queue_email, render_email_template, mailer_notify_internal_error
 from Opleiding.definities import (OPLEIDING_INSCHRIJVING_STATUS_DEFINITIEF,
-                                  OPLEIDING_INSCHRIJVING_STATUS_RESERVERING_BESTELD,
+                                  OPLEIDING_INSCHRIJVING_STATUS_BESTELD,
                                   OPLEIDING_INSCHRIJVING_STATUS_RESERVERING_MANDJE,
                                   OPLEIDING_STATUS_TO_STR, OPLEIDING_INSCHRIJVING_STATUS_TO_STR)
-from Overig.background_sync import BackgroundSync
+from Site.core.background_sync import BackgroundSync
 from Vereniging.models import Vereniging
-from Wedstrijden.definities import (WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_BESTELD,
+from Wedstrijden.definities import (WEDSTRIJD_INSCHRIJVING_STATUS_BESTELD,
                                     WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF,
                                     WEDSTRIJD_KORTING_COMBI, WEDSTRIJD_INSCHRIJVING_STATUS_TO_STR)
 from mollie.api.client import Client, RequestSetupError
@@ -949,15 +949,15 @@ class Command(BaseCommand):
                 for product in producten:
                     if product.wedstrijd_inschrijving:
                         inschrijving = product.wedstrijd_inschrijving
-                        inschrijving.status = WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_BESTELD
+                        inschrijving.status = WEDSTRIJD_INSCHRIJVING_STATUS_BESTELD
                         inschrijving.save(update_fields=['status'])
                     if product.evenement_inschrijving:
                         inschrijving = product.evenement_inschrijving
-                        inschrijving.status = EVENEMENT_INSCHRIJVING_STATUS_RESERVERING_BESTELD
+                        inschrijving.status = EVENEMENT_INSCHRIJVING_STATUS_BESTELD
                         inschrijving.save(update_fields=['status'])
                     if product.opleiding_inschrijving:
                         inschrijving = product.opleiding_inschrijving
-                        inschrijving.status = OPLEIDING_INSCHRIJVING_STATUS_RESERVERING_BESTELD
+                        inschrijving.status = OPLEIDING_INSCHRIJVING_STATUS_BESTELD
                         inschrijving.save(update_fields=['status'])
                 # for
 
@@ -1007,7 +1007,7 @@ class Command(BaseCommand):
 
         # WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD --> doe niets
         # WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_MANDJE gaat via BESTELLING_MUTATIE_VERWIJDER
-        if oude_status == WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_BESTELD:
+        if oude_status == WEDSTRIJD_INSCHRIJVING_STATUS_BESTELD:
             # in een bestelling; nog niet (volledig) betaald
             self.stdout.write('[INFO] Inschrijving pk=%s met status="besteld" afmelden voor wedstrijd' %
                               inschrijving.pk)
@@ -1033,7 +1033,7 @@ class Command(BaseCommand):
             return
 
         # EVENEMENT_INSCHRIJVING_STATUS_RESERVERING_MANDJE gaat via BESTELLING_MUTATIE_VERWIJDER
-        if inschrijving.status == EVENEMENT_INSCHRIJVING_STATUS_RESERVERING_BESTELD:
+        if inschrijving.status == EVENEMENT_INSCHRIJVING_STATUS_BESTELD:
             # in een bestelling; nog niet (volledig) betaald
             self.stdout.write('[INFO] Inschrijving pk=%s met status="besteld" afmelden voor evenement' %
                               inschrijving.pk)
@@ -1066,7 +1066,7 @@ class Command(BaseCommand):
             return
 
         # OPLEIDING_INSCHRIJVING_STATUS_RESERVERING_MANDJE gaat via BESTELLING_MUTATIE_VERWIJDER
-        if inschrijving.status == OPLEIDING_INSCHRIJVING_STATUS_RESERVERING_BESTELD:
+        if inschrijving.status == OPLEIDING_INSCHRIJVING_STATUS_BESTELD:
             # in een bestelling; nog niet (volledig) betaald
             self.stdout.write('[INFO] Inschrijving pk=%s met status="besteld" afmelden voor opleiding' %
                               inschrijving.pk)

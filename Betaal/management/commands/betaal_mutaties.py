@@ -22,7 +22,7 @@ from Betaal.definities import (BETAAL_MUTATIE_START_ONTVANGST, BETAAL_MUTATIE_ST
                                TRANSACTIE_TYPE_MOLLIE_PAYMENT)
 from Betaal.models import BetaalMutatie, BetaalActief, BetaalInstellingenVereniging, BetaalTransactie
 from Mailer.operations import mailer_notify_internal_error
-from Overig.background_sync import BackgroundSync
+from Site.core.background_sync import BackgroundSync
 from mollie.api.client import Client, RequestSetupError, RequestError
 from mollie.api.error import ResponseError, ResponseHandlingError
 from mollie.api.objects.payment import Payment

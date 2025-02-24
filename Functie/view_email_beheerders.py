@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2024 Ramon van der Winkel.
+#  Copyright (c) 2020-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -204,7 +204,7 @@ class OverzichtEmailsCompetitieBeheerdersView(UserPassesTestMixin, TemplateView)
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
-            (reverse('Functie:overzicht'), 'Beheerders'),
+            (reverse('Functie:lijst-beheerders'), 'Beheerders'),
             (None, 'E-mailadressen beheerders')
         )
 

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -23,7 +23,7 @@ from Functie.definities import Rol
 from Functie.rol import rol_get_huidige
 from HistComp.models import HistCompSeizoen
 from Logboek.models import schrijf_in_logboek
-from Overig.background_sync import BackgroundSync
+from Site.core.background_sync import BackgroundSync
 from Score.operations import wanneer_ag_vastgesteld
 import time
 
@@ -130,6 +130,7 @@ class CompetitieAanmakenView(UserPassesTestMixin, TemplateView):
 
             # voor concurrency protection, laat de achtergrondtaak de competitie aanmaken
             door_str = "BB %s" % account.volledige_naam()
+            door_str = door_str[:149]
             mutatie = CompetitieMutatie(mutatie=MUTATIE_COMPETITIE_OPSTARTEN,
                                         door=door_str)
             mutatie.save()
@@ -251,6 +252,7 @@ class AGVaststellenView(UserPassesTestMixin, TemplateView):
 
         # voor concurrency protection, laat de achtergrondtaak de competitie aanmaken
         door_str = "BB %s" % account.volledige_naam()
+        door_str = door_str[:149]
         mutatie = CompetitieMutatie(mutatie=mutatie,
                                     door=door_str)
         mutatie.save()

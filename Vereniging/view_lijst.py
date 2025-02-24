@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -24,8 +24,8 @@ TEMPLATE_CONTACT_GEEN_BEHEERDERS = 'vereniging/contact-geen-beheerders.dtl'
 
 class LijstView(UserPassesTestMixin, TemplateView):
 
-    """ Via deze view worden kan
-            de BB een lijst van alle verenigingen zien
+    """ Via deze view worden kunnen
+            managers een lijst van alle verenigingen zien
             een BKO, RKO of RCL de lijst van verenigingen zien, in zijn werkgebied
             de SEC, HWL of WL een lijst van verenigingen in hun regio zien
     """
@@ -47,7 +47,7 @@ class LijstView(UserPassesTestMixin, TemplateView):
             account = get_account(self.request)
             self.is_staff = account.is_staff
 
-        return self.rol_nu in (Rol.ROL_BB, Rol.ROL_MWZ, Rol.ROL_MO, Rol.ROL_CS,
+        return self.rol_nu in (Rol.ROL_BB, Rol.ROL_MWZ, Rol.ROL_MO, Rol.ROL_CS, Rol.ROL_MLA,
                                Rol.ROL_BKO, Rol.ROL_RKO, Rol.ROL_RCL,
                                Rol.ROL_HWL, Rol.ROL_SEC)
 
@@ -103,7 +103,7 @@ class LijstView(UserPassesTestMixin, TemplateView):
             # for
             return objs
 
-        if self.rol_nu in (Rol.ROL_BB, Rol.ROL_BKO, Rol.ROL_MWZ, Rol.ROL_MO, Rol.ROL_CS):
+        if self.rol_nu in (Rol.ROL_BB, Rol.ROL_BKO, Rol.ROL_MWZ, Rol.ROL_MO, Rol.ROL_CS, Rol.ROL_MLA):
             # toon de landelijke lijst)
             return (Vereniging
                     .objects
@@ -151,7 +151,7 @@ class LijstView(UserPassesTestMixin, TemplateView):
 
         context['landelijk'] = self.rol_nu in (Rol.ROL_BB, Rol.ROL_BKO)
 
-        if self.rol_nu == Rol.ROL_BB:
+        if self.rol_nu in (Rol.ROL_BB, Rol.ROL_MLA):
             context['contact_geen_beheerders'] = reverse('Vereniging:contact-geen-beheerders')
 
         if self.rol_nu == Rol.ROL_RKO:
@@ -219,7 +219,7 @@ class DetailsView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu = rol_get_huidige(self.request)
-        return self.rol_nu in (Rol.ROL_BB, Rol.ROL_MWZ,
+        return self.rol_nu in (Rol.ROL_BB, Rol.ROL_MWZ, Rol.ROL_CS, Rol.ROL_MLA,
                                Rol.ROL_BKO, Rol.ROL_RKO, Rol.ROL_RCL,
                                Rol.ROL_HWL, Rol.ROL_WL, Rol.ROL_SEC)
 
@@ -358,7 +358,7 @@ class GeenBeheerdersView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
-        return rol_nu == Rol.ROL_BB
+        return rol_nu in (Rol.ROL_BB, Rol.ROL_MLA)
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """

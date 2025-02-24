@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -41,7 +41,7 @@ def get_kaartjes_beheer(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_in
     kaartjes_algemeen.append(kaartje)
 
     # Beheerders
-    url = reverse('Functie:overzicht')
+    url = reverse('Functie:lijst-beheerders')
     kaartje = SimpleNamespace(
                     prio=7,
                     titel="Beheerders",

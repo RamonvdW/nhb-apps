@@ -30,8 +30,10 @@ def functie_volgorde(functie: Functie) -> int:
         volgorde = 5
     elif functie.rol == "MWW":
         volgorde = 6
-    elif functie.rol == "CS":
+    elif functie.rol == "MLA":
         volgorde = 7
+    elif functie.rol == "CS":
+        volgorde = 8
     elif functie.rol == "BKO":
         volgorde = 10  # 10
     elif functie.rol == "RKO":
@@ -192,12 +194,13 @@ class WisselVanRolView(UserPassesTestMixin, TemplateView):
                 ver = functie.vereniging
                 kort += ' %s' % ver.ver_nr
 
-                if ver.plaats == '':
-                    ver.plaats = 'onbekend'
+                plaats = ver.plaats
+                if not plaats:
+                    plaats = 'onbekend'
 
                 objs.append({'titel': functie.beschrijving,
                              'kort': kort,
-                             'ver_naam': '%s (%s)' % (ver.naam, ver.plaats),
+                             'ver_naam': '%s (%s)' % (ver.naam, plaats),
                              'url': url,
                              'volgorde': volgorde,
                              'pk': functie.pk})
@@ -228,22 +231,13 @@ class WisselVanRolView(UserPassesTestMixin, TemplateView):
 
         for rol, functie in self.rol_bepaler.iter_indirecte_rollen(self.rol_nu, self.functie_nu.pk):
             if rol == Rol.ROL_HWL:
-
-                if rol == Rol.ROL_SEC:               # pragma: no cover
-                    # nergens in de hiërarchie kan je vandaag wisselen naar de HWL rol
-                    kort = 'SEC'
-                elif rol == Rol.ROL_HWL:
-                    kort = 'HWL'
-                else:
-                    kort = 'WL'
-
                 ver = functie.vereniging
-                kort += ' %s' % ver.ver_nr
 
-                if ver.plaats == '':
-                    ver.plaats = 'onbekend'
+                plaats = ver.plaats
+                if not plaats:
+                    plaats = 'onbekend'
 
-                functie.beschrijving = 'HWL %s %s (%s)' % (ver.ver_nr, ver.naam, ver.plaats)
+                functie.beschrijving = 'HWL %s %s (%s)' % (ver.ver_nr, ver.naam, plaats)
                 functie.selected = (functie.vereniging.ver_nr == selected_ver_nr)
                 functie.url = reverse('Functie:activeer-functie', kwargs={'functie_pk': functie.pk})
 

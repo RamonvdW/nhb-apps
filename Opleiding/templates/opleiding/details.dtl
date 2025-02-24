@@ -138,6 +138,6 @@
 
     {% endif %}
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="opleidingen-details" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="opleiding-details" %}
 
 {% endblock %}

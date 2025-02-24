@@ -19,7 +19,7 @@ from Competitie.definities import (MUTATIE_DOORZETTEN_REGIO_NAAR_RK,
 from Competitie.models import Competitie, CompetitieTeamKlasse, Regiocompetitie, KampioenschapTeam, CompetitieMutatie
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
-from Overig.background_sync import BackgroundSync
+from Site.core.background_sync import BackgroundSync
 
 mutatie_ping = BackgroundSync(settings.BACKGROUND_SYNC__REGIOCOMP_MUTATIES)
 
@@ -141,6 +141,7 @@ class DoorzettenRegioNaarRKView(UserPassesTestMixin, TemplateView):
         # dit voorkomt ook race conditions / dubbel uitvoeren
         account = get_account(self.request)
         door_str = "BKO %s" % account.volledige_naam()
+        door_str = door_str[:149]
 
         CompetitieMutatie(mutatie=MUTATIE_DOORZETTEN_REGIO_NAAR_RK,
                           door=door_str,
@@ -482,6 +483,7 @@ class DoorzettenBasisView(UserPassesTestMixin, TemplateView):
         # vraag de achtergrond taak alle stappen van het afsluiten uit te voeren
         # dit voorkomt ook race conditions / dubbel uitvoeren
         door_str = "BKO %s" % door_account.volledige_naam()
+        door_str = door_str[:149]
 
         CompetitieMutatie(mutatie=self.mutatie_code,
                           door=door_str,

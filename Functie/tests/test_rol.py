@@ -1,16 +1,17 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
+from Account.models import get_account
 from Functie.definities import Rol
 from Functie.operations import maak_account_vereniging_secretaris
 from Functie.tests.helpers import maak_functie
-from Functie.rol import (rol_mag_wisselen, rol_get_beschrijving,
-                         rol_activeer_rol, rol_activeer_functie,
-                         rol_get_huidige, rol_get_huidige_functie)
+from Functie.rol import (rol_mag_wisselen, rol_get_beschrijving, rol_zet_beschrijving, rol_activeer_functie,
+                         rol_activeer_rol, rol_get_huidige, rol_get_huidige_functie)
+from Functie.rol.bepaal import RolBepaler
 from Functie.rol.beschrijving import SESSIONVAR_ROL_BESCHRIJVING
 from Functie.rol.huidige import SESSIONVAR_ROL_HUIDIGE, SESSIONVAR_ROL_HUIDIGE_FUNCTIE_PK
 from Functie.rol.mag_wisselen import SESSIONVAR_ROL_MAG_WISSELEN_BOOL
@@ -26,8 +27,11 @@ class TestFunctieRol(E2EHelpers, TestCase):
     """ tests voor de Functie applicatie, diverse corner-cases """
 
     url_wissel_naar_sec = '/functie/wissel-van-rol/secretaris/'
-    url_overzicht_sec_hwl = '/functie/overzicht/beheerders/sec-hwl/'
-    url_activeer_functie = '/functie/activeer-functie/%s/'          # functie_pk
+    url_email_sec_hwl = '/functie/beheerders/email/sec-hwl/'
+    url_activeer_rol = '/functie/activeer-rol/%s/'
+    url_vereniging = '/vereniging/'
+    url_login = '/account/login/'
+    url_plein = '/plein/'
 
     def setUp(self):
         """ initialisatie van de test case """
@@ -78,7 +82,7 @@ class TestFunctieRol(E2EHelpers, TestCase):
 
     def test_huidige(self):
         self.e2e_login_no_check(self.account_normaal)
-        resp = self.client.get('/plein/')
+        resp = self.client.get(self.url_plein)
         request = resp.wsgi_request
         self.assertTrue(request.user.is_authenticated)
 
@@ -140,12 +144,12 @@ class TestFunctieRol(E2EHelpers, TestCase):
         # roep een view aan die rol_get_huidige aanroept
         # (als onderdeel van de test_func van UserPassesTestMixin)
         resp = self.client.get(self.url_wissel_naar_sec)
-        self.assert_is_redirect(resp, '/account/login/')
+        self.assert_is_redirect(resp, self.url_login)
 
         # roep een view aan die rol_get_huidige_functie aanroept
         # (als onderdeel van de test_func van UserPassesTestMixin)
-        resp = self.client.get(self.url_overzicht_sec_hwl)
-        self.assert_is_redirect(resp, '/account/login/')
+        resp = self.client.get(self.url_email_sec_hwl)
+        self.assert_is_redirect(resp, self.url_login)
 
         # geen PK maar iets wat niet eens een getal is
         session = self.client.session
@@ -154,8 +158,8 @@ class TestFunctieRol(E2EHelpers, TestCase):
 
         # roep een view aan die rol_get_huidige_functie aanroept
         # (als onderdeel van de test_func van UserPassesTestMixin)
-        resp = self.client.get(self.url_overzicht_sec_hwl)
-        self.assert_is_redirect(resp, '/account/login/')
+        resp = self.client.get(self.url_email_sec_hwl)
+        self.assert_is_redirect(resp, self.url_login)
 
         # niet bestaande PK
         session = self.client.session
@@ -164,8 +168,52 @@ class TestFunctieRol(E2EHelpers, TestCase):
 
         # roep een view aan die rol_get_huidige_functie aanroept
         # (als onderdeel van de test_func van UserPassesTestMixin)
-        resp = self.client.get(self.url_overzicht_sec_hwl)
-        self.assert_is_redirect(resp, '/account/login/')
+        resp = self.client.get(self.url_email_sec_hwl)
+        self.assert_is_redirect(resp, self.url_login)
+
+        # corner case (niet mogelijk via de view)
+        request = resp.wsgi_request
+        account = get_account(request)      # geen AnonymousUser terug
+        rol = rol_get_huidige(request)
+        self.assertEqual(rol, Rol.ROL_NONE)
+        rol_activeer_functie(request, account, self.functie_sec)
+        rol = rol_get_huidige(request)
+        self.assertEqual(rol, Rol.ROL_NONE)
+
+    def test_activeer(self):
+        self.assertFalse(self.account_normaal.is_BB)
+        self.assertFalse(self.account_normaal.is_staff)
+        self.functie_sec.accounts.add(self.account_normaal)     # zorgt voor rol_mag_wisselen = True
+
+        self.e2e_login_and_pass_otp(self.account_normaal)
+
+        resp = self.client.get(self.url_plein)
+        request = resp.wsgi_request
+        self.assertTrue(request.user.is_authenticated)
+
+        rol = rol_get_huidige(request)
+        self.assertEqual(rol, Rol.ROL_SPORTER)
+
+        resp = self.client.post(self.url_activeer_rol % 'BB')
+        self.assert_is_redirect(resp, self.url_plein)
+
+        rol = rol_get_huidige(request)
+        self.assertEqual(rol, Rol.ROL_SPORTER)
+
+        # speciale situatie
+        rol_zet_beschrijving(request, Rol.ROL_SEC, self.functie_sec.pk, functie=None)
+
+    def test_bepaler(self):
+        # direct checks van een paar corner cases die via de views lastig te raken zijn
+        resp = self.client.get(self.url_plein)
+        request = resp.wsgi_request
+
+        bepaler = RolBepaler(self.account_admin)
+
+        # niet bestaande functie_pk
+        mag, rol = bepaler.mag_functie(request, 999999)
+        self.assertFalse(mag)
+        self.assertEqual(rol, Rol.ROL_NONE)
 
 
 # end of file

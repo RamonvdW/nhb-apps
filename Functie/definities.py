@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2024 Ramon van der Winkel.
+#  Copyright (c) 2020-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -20,6 +20,7 @@ class Rol(enum.IntEnum):
     ROL_MWZ = 30        # Manager Wedstrijdzaken
     ROL_MO = 40         # Manager Opleidingen
     ROL_MWW = 50        # Manager Webwinkel
+    ROL_MLA = 55        # Manager Ledenadministratie
     ROL_CS = 60         # Commissie Scheidsrechters
     ROL_SUP = 90        # Support
     ROL_NONE = 99       # geen rol (gebruik: niet ingelogd)
@@ -43,12 +44,16 @@ url2rol = {
     'MO': Rol.ROL_MO,
     'MWZ': Rol.ROL_MWZ,
     'MWW': Rol.ROL_MWW,
+    'MLA': Rol.ROL_MLA,
     'CS': Rol.ROL_CS,
     'support': Rol.ROL_SUP,
     'sporter': Rol.ROL_SPORTER,
     'geen': Rol.ROL_NONE
 }
 
+# wordt beperkt gebruikt:
+# - in activeer-rol, voor BB en Sporter
+# - in wissel-van-rol template, <meta property="nhb-apps:rol" content="xxx"> voor e2e_check_rol()
 rol2url = {value: key for key, value in url2rol.items()}
 
 functie_rol_str2rol = {
@@ -61,6 +66,7 @@ functie_rol_str2rol = {
     "MO": Rol.ROL_MO,
     "MWZ": Rol.ROL_MWZ,
     "MWW": Rol.ROL_MWW,
+    'MLA': Rol.ROL_MLA,
     "SUP": Rol.ROL_SUP,
     "CS": Rol.ROL_CS,
 }

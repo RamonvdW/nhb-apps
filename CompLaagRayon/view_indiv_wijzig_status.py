@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -14,9 +14,9 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
 from Competitie.definities import DEEL_RK, MUTATIE_KAMP_AFMELDEN_INDIV, MUTATIE_KAMP_AANMELDEN_INDIV
 from Competitie.models import KampioenschapSporterBoog, CompetitieMutatie
-from Functie.definities import Rol, rol2url
-from Functie.rol import rol_get_huidige_functie, rol_get_huidige
-from Overig.background_sync import BackgroundSync
+from Functie.definities import Rol
+from Functie.rol import rol_get_huidige_functie, rol_get_huidige, rol_get_beschrijving
+from Site.core.background_sync import BackgroundSync
 from Sporter.operations import get_sporter
 import time
 
@@ -133,7 +133,8 @@ class WijzigStatusRkDeelnemerView(UserPassesTestMixin, TemplateView):
             raise PermissionDenied('Geen toegang tot deze competitie')
 
         account = get_account(request)
-        door_str = "%s %s" % (rol2url[self.rol_nu], account.get_account_full_name())
+        door_str = "%s %s" % (rol_get_beschrijving(request), account.get_account_full_name())
+        door_str = door_str[:149]       # afkappen zodat het in het veld past
 
         if bevestig == "1":
             if not deelnemer.bij_vereniging:
@@ -220,6 +221,7 @@ class SporterWijzigStatusRkDeelnameView(UserPassesTestMixin, TemplateView):
         snel = str(request.POST.get('snel', ''))[:1]
 
         door_str = account.get_account_full_name()
+        door_str = door_str[:149]
 
         if keuze == "J":
             if not deelnemer.bij_vereniging:

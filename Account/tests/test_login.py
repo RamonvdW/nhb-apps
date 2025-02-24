@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -216,7 +216,7 @@ class TestAccountLogin(E2EHelpers, TestCase):
 
     def test_inlog_form_post_next_good(self):
         # controleer dat de next parameter gebruikt wordt
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(21):
             resp = self.client.post(self.url_login, {'login_naam': 'normaal',
                                                      'wachtwoord':  E2EHelpers.WACHTWOORD,
                                                      'next_url': '/account/logout/'}, follow=True)

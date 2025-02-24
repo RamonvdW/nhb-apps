@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -23,7 +23,7 @@ class TestFunctieWijzigEmail(E2EHelpers, TestCase):
 
     test_after = ('Account', 'Functie.tests.test_wissel_van_rol')
 
-    url_wijzig_email = '/functie/wijzig-email/%s/'  # % functie_pk
+    url_wijzig_email = '/functie/wijzig-email/%s/'      # functie_pk
     url_code_prefix = '/tijdelijke-codes/'
 
     def setUp(self):
@@ -350,6 +350,23 @@ class TestFunctieWijzigEmail(E2EHelpers, TestCase):
         functie = Functie.objects.get(pk=self.functie_rcl105.pk)
         self.assertEqual(functie.nieuwe_email, '')
         self.assertEqual(functie.bevestigde_email, 'nieuweemail2@test.com')
+
+    def test_nog_niet_bevestigd(self):
+        # log in en wissel naar HWL
+        self.functie_hwl.accounts.add(self.account_normaal)
+        self.e2e_login_and_pass_otp(self.account_normaal)
+        self.e2e_wissel_naar_functie(self.functie_hwl)
+
+        # zet een e-mailadres dat nog niet bevestigd is
+        self.functie_hwl.nieuwe_email = 'nieuw@khsn.not'
+        self.functie_hwl.save(update_fields=['nieuwe_email'])
+
+        url = self.url_wijzig_email % self.functie_hwl.pk
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('functie/email-wijzigen.dtl', 'plein/site_layout.dtl'))
 
     def test_bad(self):
         # log in en wissel naar RKO rol

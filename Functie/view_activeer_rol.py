@@ -48,6 +48,10 @@ class ActiveerRolView(UserPassesTestMixin, View):
                 # onbekende rol
                 raise Http404('Slechte parameter')
 
+            # alleen rollen toestaan die geen functie zijn
+            if nwe_rol not in (Rol.ROL_BB, Rol.ROL_SPORTER, Rol.ROL_NONE):
+                raise Http404('Slechte parameter (2)')
+
             my_logger.info('%s ROL account %s wissel naar rol %s' % (
                                 from_ip,
                                 account.username,
@@ -102,7 +106,7 @@ class ActiveerRolView(UserPassesTestMixin, View):
         # de rest blijft in Wissel van Rol
         rol_nu, functie_nu = rol_get_huidige_functie(request)
 
-        if rol_nu == Rol.ROL_SPORTER:
+        if rol_nu in (Rol.ROL_SPORTER, Rol.ROL_MLA):
             return redirect('Plein:plein')
 
         if rol_nu in (Rol.ROL_SEC, Rol.ROL_HWL, Rol.ROL_WL):

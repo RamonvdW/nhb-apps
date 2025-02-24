@@ -58,6 +58,7 @@ class ManagerOpleidingenView(UserPassesTestMixin, View):
         context['opleidingen'] = opleidingen
 
         context['url_stats_instaptoets'] = reverse('Instaptoets:stats')
+        context['url_gezakt'] = reverse('Instaptoets:gezakt')
         context['url_aanpassingen'] = reverse('Opleiding:aanpassingen')
 
         context['url_voorwaarden'] = settings.VERKOOPVOORWAARDEN_OPLEIDINGEN_URL

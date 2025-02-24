@@ -1,0 +1,47 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2025 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Gezakt voor de instaptoets{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Gezakt voor de instaptoets</h3>
+            <p>Je huidige rol is: <b>{{ huidige_rol }}</b></p>
+        </div>
+    </div>
+
+    <!-- blauwe balk met informatie in tabel-vorm:  label - info -->
+    <div class="row-sv-blauw">
+        <div class="col s12 l10 offset-l1">
+            <table class="sv-kader">
+                <thead>
+                    <tr>
+                        <th>Wie</th>
+                        <th class="center">Aantal goed/fout</th>
+                        <th class="center">Aantal keer gezakt</th>
+                        <th>Laatste poging</th>
+                    </tr>
+                </thead>
+                {% for data in sporters %}
+                    <tr>
+                        <td>{{ data.lid_nr_en_naam }}</td>
+                        <td class="center">{{ data.aantal_goed }} / {{ data.aantal_fout }}</td>
+                        <td class="center">{{ data.aantal_keer_gezakt }}</td>
+                        <td>{{ data.laatste_poging }}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="instaptoets-gezakt" %}
+
+{% endblock %}

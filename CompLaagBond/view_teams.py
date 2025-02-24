@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023-2024 Ramon van der Winkel.
+#  Copyright (c) 2023-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -16,9 +16,9 @@ from BasisTypen.definities import ORGANISATIE_WA
 from BasisTypen.models import BoogType
 from Competitie.definities import DEEL_BK, DEELNAME_JA, DEELNAME_NEE, MUTATIE_KAMP_TEAMS_NUMMEREN
 from Competitie.models import Kampioenschap, KampioenschapTeam, CompetitieMutatie
-from Functie.definities import Rol, rol2url
-from Functie.rol import rol_get_huidige_functie
-from Overig.background_sync import BackgroundSync
+from Functie.definities import Rol
+from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving
+from Site.core.background_sync import BackgroundSync
 import time
 
 TEMPLATE_COMPBOND_BK_TEAMS = 'complaagbond/bk-teams.dtl'
@@ -218,7 +218,8 @@ class WijzigStatusBkTeamView(UserPassesTestMixin, View):
 
         if opnieuw_nummeren:
             account = get_account(request)
-            door_str = "%s %s" % (rol2url[self.rol_nu], account.volledige_naam())
+            door_str = "%s %s" % (rol_get_beschrijving(request), account.volledige_naam())
+            door_str = door_str[:149]
 
             mutatie = CompetitieMutatie(mutatie=MUTATIE_KAMP_TEAMS_NUMMEREN,
                                         door=door_str,

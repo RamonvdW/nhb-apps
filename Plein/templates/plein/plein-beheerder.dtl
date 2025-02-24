@@ -84,11 +84,11 @@
             {% endif %}
 
             <!-- toon en koppel beheerders -->
-            {% url 'Functie:overzicht' as card_url %}
+            {% url 'Functie:lijst-beheerders' as card_url %}
             {% include 'plein/card_icon.dtl' with title="Beheerders" text="Toon en koppel beheerders aan rollen en wijzig contactgegevens." icon="face" url=card_url %}
 
-            <!-- verenigingen/accommodaties overzicht BB/BKO/MWZ -->
-            {% if rol_is_bb or rol_is_mwz or rol_is_mo or rol_is_cs %}
+            <!-- verenigingen/accommodaties overzicht -->
+            {% if rol_is_bb or rol_is_mwz or rol_is_mo or rol_is_cs or rol_is_mla %}
                 {% url 'Vereniging:lijst' as card_url %}
                 {% include 'plein/card_icon.dtl' with title="Verenigingen" text="Landelijk overzicht van de verenigingen, accommodaties en indeling in clusters." icon="share_location" url=card_url %}
             {% endif %}
@@ -126,7 +126,7 @@
         <!-- blauwe balk met kaartjes -->
         <div class="row-sv-blauw">
             <div class="col s12">
-                {% if rol_is_bb %}
+                {% if rol_is_bb or rol_is_mla or rol_is_sup %}
                     <!-- account activiteit -->
                     {% url 'Overig:activiteit' as card_url %}
                     {% include 'plein/card_icon.dtl' with title="Account activiteit" text="Toon overzicht van de recent gebruikte en aangemaakte accounts." icon="recent_actors" url=card_url %}
@@ -150,13 +150,13 @@
                     {% include 'plein/card_icon.dtl' with title="Logboek" text="Bekijk het logboek." icon="book" url=card_url %}
                 {% endif %}
 
-                {% if rol_is_bb or rol_is_mwz or rol_is_sup %}
+                {% if rol_is_bb or rol_is_mwz or rol_is_sup or rol_is_mla %}
                     <!-- overzicht VHPG acceptatie -->
                     {% url 'Functie:vhpg-overzicht' as card_url %}
                     {% include 'plein/card_icon.dtl' with title="VHPG status" text="Toon overzicht van beheerders die de verklaring geaccepteerd hebben." icon="verified_user" url=card_url %}
                 {% endif %}
 
-                {% if rol_is_bb %}
+                {% if rol_is_bb or rol_is_mwz %}
                     <!-- Interland lijst -->
                     {% url 'HistComp:interland' as card_url %}
                     {% include 'plein/card_icon.dtl' with title="Interland lijst" text="Toon de lijst met kandidaat deelnemers voor de Interland." icon="outlined_flag" url=card_url %}

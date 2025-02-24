@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -31,7 +31,7 @@ class CompetitieMutatie(models.Model):
     # door wie is de mutatie geïnitieerd
     # als het een account is, dan volledige naam + rol
     # als er geen account is (sporter zonder account) dan lid details
-    door = models.CharField(max_length=50, default='')
+    door = models.CharField(max_length=150, default='')
 
     # op welke competitie heeft deze mutatie betrekking?
     competitie = models.ForeignKey(Competitie,

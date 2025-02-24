@@ -91,7 +91,7 @@
 
     <p class="center">Noteer: het e-mailadres van de secretaris wordt overgenomen uit Onze Relaties en kan hier niet aangepast worden.</p>
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="functie-overzicht-vereniging" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="functie-lijst-beheerders-vereniging" %}
 
 {% endblock %}
 

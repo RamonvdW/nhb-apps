@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -15,6 +15,7 @@ from Logboek.models import LogboekRegel
 from urllib.parse import quote_plus
 
 
+TEMPLATE_LOGBOEK_OTP = 'logboek/otp.dtl'
 TEMPLATE_LOGBOEK_REST = 'logboek/rest.dtl'
 TEMPLATE_LOGBOEK_ROLLEN = 'logboek/rollen.dtl'
 TEMPLATE_LOGBOEK_UITROL = 'logboek/uitrol.dtl'
@@ -35,6 +36,7 @@ DELEN = (
     ('rest', 'Rest'),
     ('records', 'Records'),
     ('accounts', 'Accounts'),
+    ('otp', 'Tweede factor'),
     ('accommodaties', 'Accommodaties'),
     ('rollen', 'Rollen'),
     ('import', 'CRM import'),
@@ -54,12 +56,13 @@ class LogboekBasisView(UserPassesTestMixin, ListView):
     template_name = ""              # must override
     base_url = ""                   # must override
     paginate_by = RESULTS_PER_PAGE  # enable Paginator built into ListView
-    raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
+    raise_exception = True          # genereer PermissionDenied als test_func False terug geeft
     permission_denied_message = 'Geen toegang'
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        return rol_get_huidige(self.request) == Rol.ROL_BB
+        rol_nu = rol_get_huidige(self.request)
+        return rol_nu in (Rol.ROL_BB, Rol.ROL_MWZ, Rol.ROL_SUP)
 
     def _make_link_urls(self, context):
         # voorbereidingen voor een regel met volgende/vorige links
@@ -180,7 +183,8 @@ class LogboekRestView(LogboekBasisView):
                          Q(gebruikte_functie='Wachtwoord') |         # Accounts
                          Q(gebruikte_functie='Inloggen') |           # Accounts
                          Q(gebruikte_functie='Inlog geblokkeerd') |  # Accounts
-                         Q(gebruikte_functie='OTP controle') |       # Accounts
+                         Q(gebruikte_functie='OTP controle') |       # OTP
+                         Q(gebruikte_functie='OTP loskoppelen') |    # OTP
                          Q(gebruikte_functie='Bevestig e-mail') |               # Registreer
                          Q(gebruikte_functie='Registreer met bondsnummer') |    # Registreer
                          Q(gebruikte_functie='Registreer gast-account') |       # Registreer
@@ -231,11 +235,30 @@ class LogboekAccountsView(LogboekBasisView):
                 .filter(Q(gebruikte_functie='maak_beheerder') |
                         Q(gebruikte_functie='Inloggen') |
                         Q(gebruikte_functie='Inlog geblokkeerd') |
-                        Q(gebruikte_functie='OTP controle') |
                         Q(gebruikte_functie='Bevestig e-mail') |
                         Q(gebruikte_functie='Registreer met bondsnummer') |
                         Q(gebruikte_functie='Registreer gast-account') |
                         Q(gebruikte_functie='Wachtwoord'))
+                .order_by('-toegevoegd_op'))
+
+
+class LogboekOTPView(LogboekBasisView):
+    """ Deze view toont de logboek regels die met OTP te maken hebben: koppelen, loskoppelen, etc. """
+
+    template_name = TEMPLATE_LOGBOEK_OTP
+    filter = 'otp'
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.base_url = reverse('Logboek:otp')
+
+    def get_focused_queryset(self):
+        """ retourneer de data voor de template view """
+        return (LogboekRegel
+                .objects
+                .select_related('actie_door_account')
+                .filter(Q(gebruikte_functie='OTP controle') |
+                        Q(gebruikte_functie='OTP loskoppelen'))
                 .order_by('-toegevoegd_op'))
 
 

@@ -56,6 +56,6 @@
     </div>
 
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="opleidingen-inschrijven-toegevoegd-aan-mandje" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="opleiding-inschrijven-toegevoegd-aan-mandje" %}
 
 {% endblock %}

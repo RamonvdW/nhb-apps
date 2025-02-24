@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -23,7 +23,7 @@ from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving
 from Geo.models import Rayon
 from Logboek.models import schrijf_in_logboek
-from Overig.background_sync import BackgroundSync
+from Site.core.background_sync import BackgroundSync
 from Score.definities import AG_NUL
 from codecs import BOM_UTF8
 from types import SimpleNamespace
@@ -828,6 +828,8 @@ class StartVolgendeTeamRondeView(UserPassesTestMixin, TemplateView):
 
             # voor concurrency protection, laat de achtergrondtaak de ronde doorzetten
             door_str = "RCL %s" % account.volledige_naam()
+            door_str = door_str[:149]
+
             mutatie = CompetitieMutatie(mutatie=MUTATIE_REGIO_TEAM_RONDE,
                                         regiocompetitie=deelcomp,
                                         door=door_str)

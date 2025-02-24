@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -50,6 +50,7 @@ class TestLogboek(E2EHelpers, TestCase):
         schrijf_in_logboek(None, 'CRM-import', 'weer een nieuw lid')
         schrijf_in_logboek(None, 'Betalingen', 'Betalen maar')
         schrijf_in_logboek(None, 'Uitrol', 'Rollen met die hap')
+        schrijf_in_logboek(self.account_normaal, 'Wachtwoord', 'wachtwoord vergeten')
         schrijf_in_logboek(self.account_normaal, 'OTP controle', 'alweer verkeerd')
         schrijf_in_logboek(self.account_same, 'Testafdeling', 'Afdeling gesloten')
         schrijf_in_logboek(self.account_same, 'Competitie', 'Klassengrenzen vastgesteld')
@@ -114,6 +115,14 @@ class TestLogboek(E2EHelpers, TestCase):
             resp = self.client.get(self.url_logboek + 'accounts/')
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_template_used(resp, ('logboek/accounts.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
+        self.assertContains(resp, 'wachtwoord vergeten')
+
+        # otp
+        with self.assert_max_queries(4):
+            resp = self.client.get(self.url_logboek + 'otp/')
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_template_used(resp, ('logboek/otp.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
         self.assertContains(resp, 'alweer verkeerd')
 
@@ -308,6 +317,13 @@ class TestLogboek(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assertContains(resp, 'Niets gevonden')
 
+        # otp
+        resp = self.client.get(self.url_logboek + 'otp/')
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_template_used(resp, ('logboek/otp.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
+        self.assertContains(resp, 'Niets gevonden')
+
         # rollen
         resp = self.client.get(self.url_logboek + 'rollen/')
         self.assertEqual(resp.status_code, 200)  # 200 = OK
@@ -353,6 +369,13 @@ class TestLogboek(E2EHelpers, TestCase):
         resp = self.client.get(self.url_logboek + 'uitrol/')
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_template_used(resp, ('logboek/uitrol.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
+        self.assertContains(resp, 'Niets gevonden')
+
+        # opleidingen
+        resp = self.client.get(self.url_logboek + 'opleidingen/')
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_template_used(resp, ('logboek/opleidingen.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
         self.assertContains(resp, 'Niets gevonden')
 

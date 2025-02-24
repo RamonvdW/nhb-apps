@@ -14,7 +14,7 @@ from Functie.models import Functie
 from Functie.rol.beschrijving import rol_get_beschrijving, rol_zet_beschrijving
 from Functie.rol.mag_wisselen import rol_zet_mag_wisselen
 from Functie.rol.scheids import rol_zet_is_scheids
-from Functie.rol.huidige import rol_get_huidige_functie, rol_zet_huidige_rol, rol_zet_huidige_functie_pk
+from Functie.rol.huidige import rol_get_huidige_functie
 from typing import Generator, Tuple
 import typing
 
@@ -52,7 +52,9 @@ def rol_eval_rechten_simpel(request, account: Account):
 
 
 class ShortFunc:
-
+    """ proxy voor each Functie object
+        wordt gebruikt voor caching in RolBepaler
+    """
     def __init__(self):
         self.functie_pk = 0
         self.functie = Functie()
@@ -113,7 +115,6 @@ class RolBepaler:
     def _vul_cache(self):
         """ haal alle Functie records binnen """
 
-        # TODO: met values() kan deze query minder zwaar gemaakt worden
         for obj in (Functie
                     .objects
                     .select_related('rayon',
@@ -137,7 +138,7 @@ class RolBepaler:
 
             # alle management rollen
             if self._has_bb:
-                if func.rol in (Rol.ROL_MO, Rol.ROL_MWZ, Rol.ROL_MWW,
+                if func.rol in (Rol.ROL_MO, Rol.ROL_MWZ, Rol.ROL_MWW, Rol.ROL_MLA,
                                 Rol.ROL_SUP, Rol.ROL_CS, Rol.ROL_BKO):
                     self._management.append(func)
             # for
@@ -236,7 +237,7 @@ class RolBepaler:
         if func_nu.rol == Rol.ROL_RKO:
             # expandeer naar de RCL rollen binnen het rayon
             for func in self._rayon2rcl[func_nu.rko_rayon_nr]:
-                if func.comp_type == func.comp_type:
+                if func.comp_type == func_nu.comp_type:
                     yield Rol.ROL_RCL, func.functie        # sorteren (op regio_nr) is niet nodig
             # for
 
@@ -245,7 +246,7 @@ class RolBepaler:
                     .objects
                     .filter(competitie__afstand=func_nu.comp_type,
                             deel=DEEL_RK,
-                            rayon__rayon_nr=func.rko_rayon_nr)
+                            rayon__rayon_nr=func_nu.rko_rayon_nr)
                     .prefetch_related('rk_bk_matches'))
 
             ver_nrs = list()
@@ -287,36 +288,36 @@ class RolBepaler:
             # for
             return
 
-    def mag_rol(self, rol: Rol) -> bool:
-        """ Controleer of de gebruiker de gevraagde rol aan mag nemen
-        """
-        for mag_rol, _ in self.iter_directe_rollen():
-            if mag_rol == rol:
-                return True
-        # for
-        return False
+    # def mag_rol(self, rol: Rol) -> bool:
+    #     """ Controleer of de gebruiker de gevraagde rol aan mag nemen
+    #     """
+    #     for mag_rol, _ in self.iter_directe_rollen():
+    #         if mag_rol == rol:
+    #             return True
+    #     # for
+    #     return False
 
     def mag_functie(self, request, functie_pk: int) -> (bool, Rol):
         """ Controleer of de gebruiker de gevraagde functie aan mag nemen
         """
 
-        # IT en BB mogen direct wisselen naar elke andere rol
+        # IT en BB mogen direct wisselen naar elke andere functie
         if self._has_bb:
             for func in self._alle.values():
                 if func.functie_pk == functie_pk:
                     return True, func.rol
             # for
 
-        # is dit een van de eigen rollen?
+        # is dit een van de eigen functies?
         for mag_rol, mag_functie in self.iter_directe_rollen():
             if mag_functie and mag_functie.pk == functie_pk:
                 func = self._alle[functie_pk]
                 return True, func.rol
         # for
 
+        # is de gevraagde functie een afgeleide van de huidige functie?
         rol_nu, functie_nu = rol_get_huidige_functie(request)
         if functie_nu:
-            # is de gevraagde functie een afgeleide rol van de huidige rol?
             for mag_rol, mag_functie in self.iter_indirecte_rollen(rol_nu, functie_nu.pk):
                 if mag_functie.pk == functie_pk:
                     func = self._alle[functie_pk]
