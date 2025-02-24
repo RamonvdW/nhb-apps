@@ -18,6 +18,7 @@ from Wedstrijden.definities import (WEDSTRIJD_STATUS_CHOICES, WEDSTRIJD_STATUS_O
                                     WEDSTRIJD_DISCIPLINES, WEDSTRIJD_DISCIPLINE_OUTDOOR,
                                     WEDSTRIJD_WA_STATUS, WEDSTRIJD_WA_STATUS_B,
                                     WEDSTRIJD_KORTING_SOORT_CHOICES, WEDSTRIJD_KORTING_VERENIGING,
+                                    WEDSTRIJD_KORTING_SPORTER, WEDSTRIJD_KORTING_COMBI,
                                     WEDSTRIJD_KORTING_SOORT_TO_STR,
                                     WEDSTRIJD_INSCHRIJVING_STATUS_CHOICES,
                                     WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_MANDJE,
@@ -66,7 +67,7 @@ class Wedstrijd(models.Model):
     """ Een wedstrijd voor op de wedstrijdkalender """
 
     # titel van de wedstrijd
-    titel = models.CharField(max_length=50, default='')
+    titel = models.CharField(max_length=75, default='')
 
     # status van deze wedstrijd: ontwerp --> goedgekeurd --> geannuleerd
     status = models.CharField(max_length=1, choices=WEDSTRIJD_STATUS_CHOICES, default=WEDSTRIJD_STATUS_ONTWERP)
@@ -337,5 +338,21 @@ class Kwalificatiescore(models.Model):
 
     objects = models.Manager()      # for the editor only
 
+
+def beschrijf_korting(korting) -> (str, list):
+    kort_str = ''
+    redenen = list()
+
+    if korting.soort == WEDSTRIJD_KORTING_SPORTER:
+        kort_str = "Persoonlijke korting: %d%%" % korting.percentage
+
+    elif korting.soort == WEDSTRIJD_KORTING_VERENIGING:
+        kort_str = "Verenigingskorting: %d%%" % korting.percentage
+
+    elif korting.soort == WEDSTRIJD_KORTING_COMBI:  # pragma: no branch
+        kort_str = "Combinatiekorting: %d%%" % korting.percentage
+        redenen = [wedstrijd.titel for wedstrijd in korting.voor_wedstrijden.order_by('datum_begin')]
+
+    return kort_str, redenen
 
 # end of file

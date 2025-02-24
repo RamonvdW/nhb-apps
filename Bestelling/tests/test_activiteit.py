@@ -10,7 +10,8 @@ from django.utils import timezone
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse
 from Bestelling.definities import (BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_BETALING_ACTIEF,
                                    BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_MISLUKT, BESTELLING_STATUS_GEANNULEERD)
-from Bestelling.models import Bestelling, BestellingProduct
+from Bestelling.models import Bestelling
+from Bestelling.models.product_obsolete import BestellingProduct
 from Betaal.definities import TRANSACTIE_TYPE_MOLLIE_PAYMENT
 from Betaal.models import BetaalInstellingenVereniging, BetaalTransactie
 from Evenement.definities import EVENEMENT_AFMELDING_STATUS_AFGEMELD

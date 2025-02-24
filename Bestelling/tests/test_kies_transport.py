@@ -4,15 +4,11 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.conf import settings
 from django.test import TestCase, override_settings
 from django.utils import timezone
-from Bestelling.definities import (BESTELLING_TRANSPORT_VERZEND, BESTELLING_TRANSPORT_OPHALEN, BESTELLING_TRANSPORT_NVT,
-                                   BESTELLING_STATUS_BETALING_ACTIEF)
-from Bestelling.models import BestellingMandje, BestellingProduct, Bestelling
-from Bestelling.operations.mutaties import bestel_mutatieverzoek_betaling_afgerond
-from Betaal.definities import TRANSACTIE_TYPE_MOLLIE_PAYMENT
-from Betaal.models import BetaalActief, BetaalTransactie, BetaalInstellingenVereniging
+from Bestelling.definities import BESTELLING_TRANSPORT_VERZEND, BESTELLING_TRANSPORT_OPHALEN, BESTELLING_TRANSPORT_NVT
+from Bestelling.models import BestellingMandje, Bestelling
+from Bestelling.models.product_obsolete import BestellingProduct
 from Geo.models import Regio
 from Mailer.models import MailQueue
 from Sporter.models import Sporter

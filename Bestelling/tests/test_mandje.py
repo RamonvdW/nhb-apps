@@ -10,7 +10,8 @@ from django.utils import timezone
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse
 from Bestelling.definities import (BESTELLING_MUTATIE_VERWIJDER, BESTELLING_TRANSPORT_VERZEND,
                                    BESTELLING_TRANSPORT_OPHALEN)
-from Bestelling.models import BestellingProduct, Bestelling, BestellingMutatie, BestellingMandje
+from Bestelling.models import Bestelling, BestellingMutatie, BestellingMandje
+from Bestelling.models.product_obsolete import BestellingProduct
 from Betaal.models import BetaalInstellingenVereniging
 from Functie.models import Functie
 from Geo.models import Regio

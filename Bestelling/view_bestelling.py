@@ -16,7 +16,7 @@ from Bestelling.definities import (BESTELLING_STATUS2STR, BESTELLING_STATUS_BETA
                                    BESTELLING_STATUS_GEANNULEERD,
                                    BESTELLING_TRANSPORT_OPHALEN)
 from Bestelling.models import Bestelling
-from Bestelling.plugins.product_info import beschrijf_product, beschrijf_korting
+from Bestelling.plugins.product_info import beschrijf_product, beschrijf_regel
 from Bestelling.operations.mutaties import bestel_mutatieverzoek_annuleer
 from Betaal.definities import (TRANSACTIE_TYPE_MOLLIE_PAYMENT, TRANSACTIE_TYPE_MOLLIE_RESTITUTIE,
                                TRANSACTIE_TYPE_HANDMATIG)
@@ -59,36 +59,13 @@ class ToonBestellingenView(UserPassesTestMixin, TemplateView):
         context['bestellingen'] = bestellingen = (Bestelling
                                                   .objects
                                                   .filter(account=account)
-                                                  .prefetch_related('producten')
+                                                  .prefetch_related('regels')
                                                   .order_by('-aangemaakt'))     # nieuwste eerst
 
         for bestelling in bestellingen:
 
-            bestelling.beschrijving = beschrijving = list()
-
-            for product in (bestelling
-                            .producten
-                            .select_related('wedstrijd_inschrijving',
-                                            'wedstrijd_inschrijving__wedstrijd',
-                                            'wedstrijd_inschrijving__sporterboog__sporter',
-                                            'evenement_inschrijving',
-                                            'evenement_afgemeld')):
-
-                if product.wedstrijd_inschrijving:
-                    beschrijving.append(product.wedstrijd_inschrijving.korte_beschrijving())
-                elif product.evenement_inschrijving:
-                    beschrijving.append(product.evenement_inschrijving.korte_beschrijving())
-                elif product.evenement_afgemeld:
-                    beschrijving.append(product.evenement_afgemeld.korte_beschrijving())
-                elif product.opleiding_inschrijving:
-                    beschrijving.append(product.opleiding_inschrijving.korte_beschrijving())
-                elif product.opleiding_afgemeld:
-                    beschrijving.append(product.opleiding_afgemeld.korte_beschrijving())
-                elif product.webwinkel_keuze:
-                    beschrijving.append(product.webwinkel_keuze.product.omslag_titel)
-                else:
-                    beschrijving.append("??")
-            # for
+            bestelling.beschrijving = [regel.korte_beschrijving
+                                       for regel in bestelling.regels.all()]
 
             status = bestelling.status
             if status == BESTELLING_STATUS_NIEUW:
@@ -157,58 +134,14 @@ class ToonBestellingDetailsView(UserPassesTestMixin, TemplateView):
 
         controleer_euro = Decimal(0)
 
-        producten = (bestelling
-                     .producten
-                     .select_related('wedstrijd_inschrijving',
-                                     'wedstrijd_inschrijving__wedstrijd',
-                                     'wedstrijd_inschrijving__wedstrijd__locatie',
-                                     'wedstrijd_inschrijving__wedstrijd__organiserende_vereniging',
-                                     'wedstrijd_inschrijving__wedstrijdklasse',
-                                     'wedstrijd_inschrijving__sessie',
-                                     'wedstrijd_inschrijving__sporterboog',
-                                     'wedstrijd_inschrijving__sporterboog__boogtype',
-                                     'wedstrijd_inschrijving__sporterboog__sporter',
-                                     'wedstrijd_inschrijving__sporterboog__sporter__bij_vereniging',
-                                     'evenement_inschrijving',
-                                     'evenement_inschrijving__evenement__organiserende_vereniging',
-                                     'evenement_inschrijving__koper',
-                                     'evenement_inschrijving__sporter',
-                                     'evenement_inschrijving__sporter__bij_vereniging',
-                                     'opleiding_inschrijving',
-                                     'opleiding_inschrijving__opleiding',
-                                     'webwinkel_keuze',
-                                     'webwinkel_keuze__product')
-                     .order_by('pk'))       # geen schoonheidsprijs, maar wel vaste volgorde
+        regels = (bestelling
+                  .regels
+                  .order_by('pk'))       # geen schoonheidsprijs, maar wel vaste volgorde
 
-        for product in producten:
+        for regel in regels:
             # maak een beschrijving van deze regel
-            product.beschrijving = beschrijf_product(product)
-
-            product.gebruikte_korting_str, product.combi_reden = beschrijf_korting(product)
-            product.is_combi_korting = len(product.combi_reden) > 0
-
-            if product.wedstrijd_inschrijving:
-                pass
-
-            elif product.evenement_inschrijving:
-                pass
-
-            elif product.opleiding_inschrijving:
-                pass
-
-            elif product.opleiding_afgemeld:
-                pass
-
-            elif product.webwinkel_keuze:
-                pass
-
-            else:
-                tup = ('Fout', 'Onbekend product')
-                product.beschrijving.append(tup)
-                bevat_fout = True
-
-            controleer_euro += product.prijs_euro
-            controleer_euro -= product.korting_euro
+            regel.beschrijving = beschrijf_regel(regel)
+            controleer_euro += regel.prijs_euro
         # for
 
         # nooit een negatief totaalbedrag tonen want we geven geen geld weg
@@ -220,7 +153,7 @@ class ToonBestellingDetailsView(UserPassesTestMixin, TemplateView):
         if controleer_euro != bestelling.totaal_euro:
             bevat_fout = True
 
-        return producten, bevat_fout
+        return regels, bevat_fout
 
     @staticmethod
     def _beschrijf_transacties(bestelling) -> (list, Decimal):
@@ -296,6 +229,10 @@ class ToonBestellingDetailsView(UserPassesTestMixin, TemplateView):
 
         context['bestelling'] = bestelling
 
+        context['producten'], context['bevat_fout'] = self._beschrijf_inhoud_bestelling(bestelling)
+        for regel in context['producten']:
+            print(regel.beschrijving)
+
         context['transacties'], transacties_euro = self._beschrijf_transacties(bestelling)
 
         if bestelling.status == BESTELLING_STATUS_GEANNULEERD:
@@ -351,8 +288,6 @@ class ToonBestellingDetailsView(UserPassesTestMixin, TemplateView):
         context['url_voorwaarden_wedstrijden'] = settings.VERKOOPVOORWAARDEN_WEDSTRIJDEN_URL
         context['url_voorwaarden_opleidingen'] = settings.VERKOOPVOORWAARDEN_OPLEIDINGEN_URL
         context['url_voorwaarden_webwinkel'] = settings.VERKOOPVOORWAARDEN_WEBWINKEL_URL
-
-        context['producten'], context['bevat_fout'] = self._beschrijf_inhoud_bestelling(bestelling)
 
         context['kruimels'] = (
             (reverse('Sporter:profiel'), 'Mijn pagina'),

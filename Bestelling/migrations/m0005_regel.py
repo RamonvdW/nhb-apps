@@ -24,12 +24,12 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('korte_beschrijving', models.CharField(blank=True, default='?', max_length=250)),
-                ('prijs_euro', models.DecimalField(decimal_places=2, default=Decimal('0'), max_digits=5)),
-                ('korting_euro', models.DecimalField(decimal_places=2, default=Decimal('0'), max_digits=5)),
+                ('korting_redenen', models.CharField(blank=True, default='', max_length=500)),
+                ('bedrag_euro', models.DecimalField(decimal_places=2, default=Decimal('0'), max_digits=5)),
                 ('btw_percentage', models.CharField(blank=True, default='', max_length=5)),
                 ('btw_euro', models.DecimalField(decimal_places=2, default=Decimal('0'), max_digits=6)),
                 ('gewicht_gram', models.SmallIntegerField(default=0)),
-                ('code', models.CharField(blank=True, default='?', max_length=10)),
+                ('code', models.CharField(blank=True, default='?', max_length=25)),
             ],
             options={
                 'verbose_name': 'Bestelling regel',

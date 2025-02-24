@@ -16,7 +16,8 @@ from Bestelling.definities import (BESTELLING_STATUS_NIEUW,
                                    BESTELLING_STATUS_GEANNULEERD,
                                    BESTELLING_MUTATIE_ANNULEER,
                                    BESTELLING_TRANSPORT_OPHALEN)
-from Bestelling.models import BestellingMandje, BestellingMutatie, Bestelling, BestellingProduct
+from Bestelling.models import BestellingMandje, BestellingMutatie, Bestelling
+from Bestelling.models.product_obsolete import BestellingProduct
 from Bestelling.operations.mutaties import (bestel_mutatieverzoek_inschrijven_wedstrijd,
                                             bestel_mutatieverzoek_inschrijven_evenement,
                                             bestel_mutatieverzoek_inschrijven_opleiding,

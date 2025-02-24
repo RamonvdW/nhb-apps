@@ -8,7 +8,8 @@ from django.test import TestCase
 from django.utils import timezone
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse
 from Bestelling.definities import BESTELLING_STATUS_BETALING_ACTIEF, BESTELLING_STATUS_AFGEROND
-from Bestelling.models import BestellingProduct, Bestelling, BestellingMutatie
+from Bestelling.models import Bestelling, BestellingMutatie
+from Bestelling.models.product_obsolete import BestellingProduct
 from Betaal.definities import TRANSACTIE_TYPE_MOLLIE_PAYMENT, TRANSACTIE_TYPE_MOLLIE_RESTITUTIE
 from Betaal.models import BetaalInstellingenVereniging, BetaalTransactie
 from Functie.models import Functie

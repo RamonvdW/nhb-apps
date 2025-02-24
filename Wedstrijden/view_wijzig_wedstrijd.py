@@ -464,7 +464,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
 
             disc2str = ORGANISATIE_WEDSTRIJD_DISCIPLINE_STRS[wedstrijd.organisatie]
 
-            wedstrijd.titel = request.POST.get('titel', wedstrijd.titel)[:50]
+            wedstrijd.titel = request.POST.get('titel', wedstrijd.titel)[:75]
 
             if not limit_edits:
                 akkoord = request.POST.get('akkoord_verkoop', '')

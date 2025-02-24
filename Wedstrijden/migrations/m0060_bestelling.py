@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
     # migratie functies
     dependencies = [
         ('Bestelling', 'm0005_regel'),
-        ('Wedstrijden', 'm0058_allow_blank'),
+        ('Wedstrijden', 'm0059_langere_titel'),
     ]
 
     # migratie functies

@@ -42,8 +42,9 @@ class MandjeLeegFilter(admin.SimpleListFilter):
 
 class BestellingMandjeAdmin(admin.ModelAdmin):
 
-    readonly_fields = ('account', 'producten_in_mandje')
-    exclude = ('producten',)
+    # TODO: verwijder producten en producten_in_mandje
+    readonly_fields = ('account', 'producten_in_mandje', 'regels_in_mandje')
+    exclude = ('producten', 'regels')
 
     search_fields = ('account__username', 'account__unaccented_naam')
 
@@ -53,6 +54,10 @@ class BestellingMandjeAdmin(admin.ModelAdmin):
     def producten_in_mandje(obj):     # pragma: no cover
         return "\n".join(['(pk %s) %s' % (product.pk, product)
                           for product in obj.producten.select_related('wedstrijd_inschrijving').all()])
+
+    @staticmethod
+    def regels_in_mandje(obj):        # pragma: no cover
+        return "\n".join([str(regel) for regel in obj.regels.all()])
 
 
 class BestellingTransactions(admin.TabularInline):
@@ -83,8 +88,8 @@ class OntvangerFilter(admin.SimpleListFilter):
 
 class BestellingAdmin(admin.ModelAdmin):
 
-    readonly_fields = ('account', 'bestel_nr', 'aangemaakt', 'producten', 'ontvanger',
-                       'betaal_mutatie', 'betaal_actief')
+    readonly_fields = ('account', 'bestel_nr', 'aangemaakt', 'producten_in_mandje', 'regels_in_mandje',
+                       'ontvanger', 'betaal_mutatie', 'betaal_actief')
 
     filter_vertical = ('transacties',)
 
@@ -101,7 +106,8 @@ class BestellingAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Inhoud',
             {'fields': ('aangemaakt',
-                        'producten')
+                        'producten_in_mandje',      # TODO: remove
+                        'regels_in_mandje')
             }),
         ('Koper',
             {'fields': ('bestel_nr',
@@ -139,6 +145,15 @@ class BestellingAdmin(admin.ModelAdmin):
                         'log')
              }),
     )
+
+    @staticmethod
+    def producten_in_mandje(obj):     # pragma: no cover
+        return "\n".join(['(pk %s) %s' % (product.pk, product)
+                          for product in obj.producten.select_related('wedstrijd_inschrijving').all()])
+
+    @staticmethod
+    def regels_in_mandje(obj):        # pragma: no cover
+        return "\n".join([str(regel) for regel in obj.regels.all()])
 
 
 class BestellingMutatieAdmin(admin.ModelAdmin):

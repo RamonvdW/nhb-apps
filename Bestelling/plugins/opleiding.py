@@ -8,7 +8,7 @@
 
 from django.conf import settings
 from django.utils import timezone
-from Bestelling.models import BestellingProduct
+from Bestelling.models.product_obsolete import BestellingProduct
 from Functie.models import Functie
 from Opleiding.definities import (OPLEIDING_INSCHRIJVING_STATUS_RESERVERING_MANDJE, OPLEIDING_AFMELDING_STATUS_AFGEMELD,
                                   OPLEIDING_INSCHRIJVING_STATUS_DEFINITIEF, OPLEIDING_AFMELDING_STATUS_GEANNULEERD,
@@ -18,59 +18,6 @@ from Mailer.operations import mailer_queue_email, mailer_email_is_valide, render
 from decimal import Decimal
 
 EMAIL_TEMPLATE_INFO_INSCHRIJVING_OPLEIDING = 'email_bestelling/info-inschrijving-opleiding.dtl'
-
-
-def opleiding_plugin_inschrijven(inschrijving: OpleidingInschrijving) -> Decimal:
-    """ verwerk een nieuwe inschrijving op een opleiding """
-
-    # (nog) geen aantallen om bij te werken
-
-    prijs = inschrijving.opleiding.kosten_euro
-    return prijs
-
-
-def opleiding_plugin_verwijder_reservering(stdout, inschrijving: OpleidingInschrijving) -> OpleidingAfgemeld:
-
-    afmelding = None
-
-    now = timezone.now()
-    stamp_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
-    msg = "[%s] Annuleer inschrijving voor deze opleiding\n" % stamp_str
-
-    if inschrijving.status == OPLEIDING_INSCHRIJVING_STATUS_RESERVERING_MANDJE:
-        # verwijdering uit mandje
-        stdout.write('[INFO] Inschrijving opleiding pk=%s status %s --> verwijderd uit mandje' % (
-            inschrijving.pk,
-            OPLEIDING_INSCHRIJVING_STATUS_TO_STR[inschrijving.status]))
-    else:
-        # zet de inschrijving om in een afmelding
-        afmelding = OpleidingAfgemeld(
-                        wanneer_aangemeld=inschrijving.wanneer_aangemeld,
-                        nummer=inschrijving.nummer,
-                        wanneer_afgemeld=now,
-                        status=OPLEIDING_AFMELDING_STATUS_AFGEMELD,
-                        opleiding=inschrijving.opleiding,
-                        sporter=inschrijving.sporter,
-                        koper=inschrijving.koper,
-                        bedrag_ontvangen=inschrijving.bedrag_ontvangen,
-                        log=inschrijving.log + msg)
-
-        if inschrijving.status != OPLEIDING_INSCHRIJVING_STATUS_DEFINITIEF:
-            # nog niet betaald
-            afmelding.status = OPLEIDING_AFMELDING_STATUS_GEANNULEERD
-
-        afmelding.save()
-
-        stdout.write('[INFO] Opleiding deelnemer pk=%s status %s --> afgemeld pk=%s status %s' % (
-            inschrijving.pk,
-            OPLEIDING_INSCHRIJVING_STATUS_TO_STR[inschrijving.status],
-            afmelding.pk,
-            OPLEIDING_AFMELDING_STATUS_TO_STR[afmelding.status]))
-
-    # verwijder de inschrijving
-    inschrijving.delete()
-
-    return afmelding
 
 
 def opleiding_plugin_afmelden(inschrijving: OpleidingInschrijving):

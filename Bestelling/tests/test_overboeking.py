@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2024 Ramon van der Winkel.
+#  Copyright (c) 2022-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -10,7 +10,8 @@ from django.utils import timezone
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse
 from Bestelling.definities import (BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_BETALING_ACTIEF, BESTELLING_STATUS_AFGEROND,
                                    BESTELLING_STATUS_GEANNULEERD)
-from Bestelling.models import BestellingProduct, Bestelling, BestellingMutatie
+from Bestelling.models import Bestelling, BestellingMutatie
+from Bestelling.models.product_obsolete import BestellingProduct
 from Betaal.models import BetaalInstellingenVereniging
 from Functie.models import Functie
 from Functie.tests.helpers import maak_functie

@@ -8,7 +8,8 @@ from django.test import TestCase
 from django.conf import settings
 from django.utils import timezone
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse
-from Bestelling.models import BestellingMandje, BestellingProduct, Bestelling
+from Bestelling.models import BestellingMandje, Bestelling
+from Bestelling.models.product_obsolete import BestellingProduct
 from Betaal.models import BetaalInstellingenVereniging
 from Evenement.definities import EVENEMENT_STATUS_GEACCEPTEERD
 from Evenement.models import Evenement, EvenementInschrijving

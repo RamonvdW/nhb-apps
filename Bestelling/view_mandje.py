@@ -10,12 +10,12 @@ from django.shortcuts import redirect, reverse
 from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
+from Betaal.format import format_bedrag_euro
 from Bestelling.definities import BESTELLING_TRANSPORT_VERZEND, BESTELLING_TRANSPORT_OPHALEN
 from Bestelling.models import BestellingMandje
 from Bestelling.operations.mandje import mandje_tel_inhoud
 from Bestelling.operations.mutaties import (bestel_mutatieverzoek_maak_bestellingen,
                                             bestel_mutatieverzoek_verwijder_product_uit_mandje)
-from Bestelling.plugins.product_info import beschrijf_product, beschrijf_korting
 from Betaal.models import BetaalInstellingenVereniging
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige
@@ -62,7 +62,7 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
 
     @staticmethod
     def _beschrijf_inhoud_mandje(account):
-        """ gezamenlijk programma voor het tonen van de inhoud van het mandje en het afrekenen """
+        """ beschrijf de producten die in het mandje liggen """
 
         mandje_is_leeg = True
         bevat_fout = False
@@ -90,86 +90,106 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
         else:
             controleer_euro = Decimal(0)
 
-            producten = (mandje
-                         .producten
-                         .select_related('wedstrijd_inschrijving',
-                                         'wedstrijd_inschrijving__wedstrijd',
-                                         'wedstrijd_inschrijving__wedstrijd__locatie',
-                                         'wedstrijd_inschrijving__wedstrijd__organiserende_vereniging',
-                                         'wedstrijd_inschrijving__wedstrijdklasse',
-                                         'wedstrijd_inschrijving__sessie',
-                                         'wedstrijd_inschrijving__sporterboog',
-                                         'wedstrijd_inschrijving__sporterboog__boogtype',
-                                         'wedstrijd_inschrijving__sporterboog__sporter',
-                                         'wedstrijd_inschrijving__sporterboog__sporter__bij_vereniging',
-                                         'evenement_inschrijving',
-                                         'evenement_inschrijving__evenement__organiserende_vereniging',
-                                         'evenement_inschrijving__koper',
-                                         'evenement_inschrijving__sporter',
-                                         'evenement_inschrijving__sporter__bij_vereniging',
-                                         'opleiding_inschrijving',
-                                         'opleiding_inschrijving__opleiding',
-                                         'webwinkel_keuze',
-                                         'webwinkel_keuze__product')
-                         .order_by('pk'))       # volgorde waarop ze in het mandje gelegd zijn
+            regels = mandje.regels.order_by('pk')       # volgorde waarop ze in het mandje gelegd zijn
 
-            for product in producten:
-                # maak een beschrijving van deze regel
-                product.beschrijving = beschrijf_product(product)
+            # producten = (mandje
+            #              .producten
+            #              .select_related('wedstrijd_inschrijving',
+            #                              'wedstrijd_inschrijving__wedstrijd',
+            #                              'wedstrijd_inschrijving__wedstrijd__locatie',
+            #                              'wedstrijd_inschrijving__wedstrijd__organiserende_vereniging',
+            #                              'wedstrijd_inschrijving__wedstrijdklasse',
+            #                              'wedstrijd_inschrijving__sessie',
+            #                              'wedstrijd_inschrijving__sporterboog',
+            #                              'wedstrijd_inschrijving__sporterboog__boogtype',
+            #                              'wedstrijd_inschrijving__sporterboog__sporter',
+            #                              'wedstrijd_inschrijving__sporterboog__sporter__bij_vereniging',
+            #                              'evenement_inschrijving',
+            #                              'evenement_inschrijving__evenement__organiserende_vereniging',
+            #                              'evenement_inschrijving__koper',
+            #                              'evenement_inschrijving__sporter',
+            #                              'evenement_inschrijving__sporter__bij_vereniging',
+            #                              'opleiding_inschrijving',
+            #                              'opleiding_inschrijving__opleiding',
+            #                              'webwinkel_keuze',
+            #                              'webwinkel_keuze__product')
+            #              .order_by('pk'))       # volgorde waarop ze in het mandje gelegd zijn
 
-                product.gebruikte_korting_str, product.combi_reden = beschrijf_korting(product)
-                product.is_combi_korting = len(product.combi_reden) > 0
-                product.kan_afrekenen = True
+            for regel in regels:
+                mandje_is_leeg = False
 
-                if product.wedstrijd_inschrijving:
-                    ver_nr = product.wedstrijd_inschrijving.wedstrijd.organiserende_vereniging.ver_nr
-                    try:
-                        instellingen = ver_nr2instellingen[ver_nr]
-                    except KeyError:
-                        # geen instellingen, dus kan geen betaling ontvangen
-                        product.kan_afrekenen = False
-                    else:
-                        if instellingen.akkoord_via_bond:
-                            ver_nr = settings.BETAAL_VIA_BOND_VER_NR
-                            if instellingen_bond is None or instellingen_bond.mollie_api_key == '':
-                                product.kan_afrekenen = False
+                controleer_euro += regel.prijs_euro
+                controleer_euro -= regel.korting_euro
 
-                    try:
-                        ontvanger2product_pks[ver_nr].append(product.pk)
-                    except KeyError:
-                        ontvanger2product_pks[ver_nr] = [product.pk]
-
-                elif product.evenement_inschrijving:
-                    pass
-
-                elif product.opleiding_inschrijving:
-                    pass
-
-                elif product.webwinkel_keuze:
-                    # FUTURE: kortingen
-                    pass
-
-                else:
-                    tup = ('Fout', 'Onbekend product')
-                    product.beschrijving.append(tup)
-                    bevat_fout = True
-                    product.kan_afrekenen = False
-
-                if product.korting_euro and not product.gebruikte_korting_str:
-                    # print('Onverwacht: product %s (pk=%s) heeft korting %s' % (
-                    #           product, product.pk, product.korting_euro))
-                    product.gebruikte_korting_str = "Onbekende korting"
-                    bevat_fout = True
-
-                controleer_euro += product.prijs_euro
-                controleer_euro -= product.korting_euro
+                regel.prijs_euro_str = format_bedrag_euro(regel.prijs_euro)
+                regel.korting_euro_str = format_bedrag_euro(regel.korting_euro)
 
                 # maak een knop om deze bestelling te verwijderen uit het mandje
-                product.url_verwijder = reverse('Bestelling:mandje-verwijder-product',
-                                                kwargs={'product_pk': product.pk})
-
-                mandje_is_leeg = False
+                regel.url_verwijder = reverse('Bestelling:mandje-verwijder-product',
+                                              kwargs={'product_pk': regel.pk})
             # for
+
+            if False:
+                for product in producten:
+
+                    product.gebruikte_korting_str = None
+                    product.combi_reden = list()
+                    product.is_combi_korting = False
+                    product.kan_afrekenen = False
+
+                    if product.wedstrijd_inschrijving:
+                        product.gebruikte_korting_str, product.combi_reden = wedstrijd_beschrijf_korting(product)
+                        product.is_combi_korting = len(product.combi_reden) > 0
+                        product.kan_afrekenen = True
+
+                        ver_nr = product.wedstrijd_inschrijving.wedstrijd.organiserende_vereniging.ver_nr
+                        try:
+                            instellingen = ver_nr2instellingen[ver_nr]
+                        except KeyError:
+                            # geen instellingen, dus kan geen betaling ontvangen
+                            product.kan_afrekenen = False
+                        else:
+                            if instellingen.akkoord_via_bond:
+                                ver_nr = settings.BETAAL_VIA_BOND_VER_NR
+                                if instellingen_bond is None or instellingen_bond.mollie_api_key == '':
+                                    product.kan_afrekenen = False
+
+                        try:
+                            ontvanger2product_pks[ver_nr].append(product.pk)
+                        except KeyError:
+                            ontvanger2product_pks[ver_nr] = [product.pk]
+
+                    elif product.evenement_inschrijving:
+                        pass
+
+                    elif product.opleiding_inschrijving:
+                        pass
+
+                    elif product.webwinkel_keuze:
+                        # FUTURE: kortingen
+                        pass
+
+                    else:
+                        tup = ('Fout', 'Onbekend product')
+                        product.beschrijving.append(tup)
+                        bevat_fout = True
+                        product.kan_afrekenen = False
+
+                    if product.korting_euro and not product.gebruikte_korting_str:
+                        # print('Onverwacht: product %s (pk=%s) heeft korting %s' % (
+                        #           product, product.pk, product.korting_euro))
+                        product.gebruikte_korting_str = "Onbekende korting"
+                        bevat_fout = True
+
+                    controleer_euro += product.prijs_euro
+                    controleer_euro -= product.korting_euro
+
+                    # maak een knop om deze bestelling te verwijderen uit het mandje
+                    product.url_verwijder = reverse('Bestelling:mandje-verwijder-product',
+                                                    kwargs={'product_pk': product.pk})
+
+                    mandje_is_leeg = False
+                # for
 
             # nooit een negatief totaalbedrag tonen want we geven geen geld weg
             if controleer_euro < 0:
@@ -180,7 +200,7 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
             if controleer_euro != mandje.totaal_euro:
                 bevat_fout = True
 
-        return mandje, producten, ontvanger2product_pks, mandje_is_leeg, bevat_fout
+        return mandje, regels, ontvanger2product_pks, mandje_is_leeg, bevat_fout
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -194,7 +214,7 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
         # force dat het mandje icoon getoond wordt
         context['menu_toon_mandje'] = True
 
-        mandje, producten, ontvanger2product_pks, mandje_is_leeg, bevat_fout = self._beschrijf_inhoud_mandje(account)
+        mandje, regels, ontvanger2product_pks, mandje_is_leeg, bevat_fout = self._beschrijf_inhoud_mandje(account)
 
         toon_transport = False
         if mandje:
@@ -232,9 +252,10 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
         context['toon_transport'] = toon_transport
         context['mandje_is_leeg'] = mandje_is_leeg
         context['mandje'] = mandje
-        context['producten'] = producten
+        #context['producten'] = producten
+        context['regels'] = regels
         context['bevat_fout'] = bevat_fout
-        context['aantal_betalingen'] = len(ontvanger2product_pks.keys())
+        #context['aantal_betalingen'] = len(ontvanger2product_pks.keys())
         context['url_kies_transport'] = reverse('Bestelling:kies-transport')
         context['url_voorwaarden_webwinkel'] = settings.VERKOOPVOORWAARDEN_WEBWINKEL_URL
         context['url_voorwaarden_wedstrijden'] = settings.VERKOOPVOORWAARDEN_WEDSTRIJDEN_URL

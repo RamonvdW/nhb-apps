@@ -11,7 +11,7 @@ from decimal import Decimal
 class BestellingRegel(models.Model):
     """
         Regel van een bestelling
-        Kan zijn: product of transportkosten
+        Kan zijn: product, korting of transportkosten
 
         Deze kan in het Mandje liggen of onderdeel zijn van een Bestelling
     """
@@ -19,12 +19,13 @@ class BestellingRegel(models.Model):
     # korte beschrijving
     korte_beschrijving = models.CharField(max_length=250, default='?', blank=True)
 
-    # prijs van deze regel (een positief bedrag)
-    # de korting is hier nog niet vanaf
-    prijs_euro = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal(0))       # max 999,99
+    # alleen voor kortingen: alle redenen voor de korting, gescheiden door een dubbel pipeline teken
+    korting_redenen = models.CharField(max_length=500, default='', blank=True)
 
-    # de korting op deze regel (ook een positief bedrag!)
-    korting_euro = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal(0))     # max 999,99
+    # bedrag van deze regel
+    # product: positief bedrag
+    # korting: negatief bedrag
+    bedrag_euro = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal(0))       # max 999,99
 
     # BTW percentage van toepassing op deze regel
     # leeg = vrijgesteld van BTW
@@ -38,12 +39,7 @@ class BestellingRegel(models.Model):
     gewicht_gram = models.SmallIntegerField(default=0)
 
     # code voor routing naar de juiste plugin
-    # "wedstrijd"
-    # "webwinkel"
-    # "transport"
-    # "evenement"
-    # "opleiding"
-    code = models.CharField(max_length=10, default='?', blank=True)
+    code = models.CharField(max_length=25, default='?', blank=True)
 
     def __str__(self):
         """ beschrijving voor de admin interface """

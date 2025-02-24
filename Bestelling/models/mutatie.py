@@ -66,6 +66,7 @@ class BestellingMutatie(models.Model):
     webwinkel_keuze = models.ForeignKey(WebwinkelKeuze, on_delete=models.SET_NULL, null=True, blank=True)
 
     # het product waar deze mutatie betrekking op heeft
+    # TODO: verwijder of vervang door Regel
     product = models.ForeignKey(BestellingProduct, on_delete=models.SET_NULL, null=True, blank=True)
 
     # gevraagde korting om toe te passen

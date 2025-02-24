@@ -8,72 +8,12 @@
 
 from django.conf import settings
 from django.utils import timezone
-from Bestelling.models import BestellingProduct
-from Evenement.definities import (EVENEMENT_INSCHRIJVING_STATUS_DEFINITIEF,
-                                  EVENEMENT_INSCHRIJVING_STATUS_RESERVERING_MANDJE,
-                                  EVENEMENT_AFMELDING_STATUS_GEANNULEERD, EVENEMENT_AFMELDING_STATUS_AFGEMELD,
-                                  EVENEMENT_INSCHRIJVING_STATUS_TO_STR, EVENEMENT_AFMELDING_STATUS_TO_STR)
+from Bestelling.models.product_obsolete import BestellingProduct
+from Evenement.definities import (EVENEMENT_INSCHRIJVING_STATUS_DEFINITIEF, EVENEMENT_AFMELDING_STATUS_AFGEMELD)
 from Evenement.models import EvenementInschrijving, EvenementAfgemeld
 from Mailer.operations import mailer_queue_email, mailer_email_is_valide, render_email_template
-from decimal import Decimal
 
 EMAIL_TEMPLATE_INFO_INSCHRIJVING_EVENEMENT = 'email_bestelling/info-inschrijving-evenement.dtl'
-
-
-def evenement_plugin_inschrijven(inschrijving: EvenementInschrijving) -> Decimal:
-    """ verwerk een nieuwe inschrijving op een evenement """
-
-    # (nog) geen aantallen om bij te werken
-
-    prijs = inschrijving.evenement.bepaal_prijs_voor_sporter(inschrijving.sporter)
-    return prijs
-
-
-def evenement_plugin_verwijder_reservering(stdout, inschrijving: EvenementInschrijving) -> EvenementAfgemeld | None:
-    # wordt gebruikt bij:
-    # - inschrijving uit het mandje
-    # - annuleren van een bestelling
-
-    afmelding = None
-
-    now = timezone.now()
-    stamp_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
-    msg = "[%s] Verwijder reservering voor dit evenement\n" % stamp_str
-
-    if inschrijving.status == EVENEMENT_INSCHRIJVING_STATUS_RESERVERING_MANDJE:
-        # verwijdering uit mandje
-        stdout.write('[INFO] Inschrijving evenement pk=%s status %s --> verwijderd uit mandje' % (
-            inschrijving.pk,
-            EVENEMENT_INSCHRIJVING_STATUS_TO_STR[inschrijving.status]))
-    else:
-        # zet de inschrijving om in een afmelding
-        afmelding = EvenementAfgemeld(
-                        wanneer_inschrijving=inschrijving.wanneer,
-                        nummer=inschrijving.nummer,
-                        wanneer_afgemeld=now,
-                        status=EVENEMENT_AFMELDING_STATUS_AFGEMELD,
-                        evenement=inschrijving.evenement,
-                        sporter=inschrijving.sporter,
-                        koper=inschrijving.koper,
-                        bedrag_ontvangen=inschrijving.bedrag_ontvangen,
-                        log=inschrijving.log + msg)
-
-        if inschrijving.status != EVENEMENT_INSCHRIJVING_STATUS_DEFINITIEF:
-            # nog niet betaald
-            afmelding.status = EVENEMENT_AFMELDING_STATUS_GEANNULEERD
-
-        afmelding.save()
-
-        stdout.write('[INFO] Inschrijving evenement pk=%s status %s --> afgemeld pk=%s status %s' % (
-            inschrijving.pk,
-            EVENEMENT_INSCHRIJVING_STATUS_TO_STR[inschrijving.status],
-            afmelding.pk,
-            EVENEMENT_AFMELDING_STATUS_TO_STR[afmelding.status]))
-
-    # verwijder de inschrijving
-    inschrijving.delete()
-
-    return afmelding
 
 
 def evenement_plugin_afmelden(inschrijving: EvenementInschrijving):

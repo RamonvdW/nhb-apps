@@ -87,6 +87,7 @@
         </div>
 
     {% else %}
+        <!-- mandje bevat producten -->
 
         <!-- blauwe balk met dialoog venster -->
         <div class="row-sv-blauw">
@@ -98,26 +99,26 @@
 
                         <table>
 
-                            <tr><td colspan="4" class="center"><h6>Gekozen producten</h6></td></tr>
+                            <tr>
+                                <td colspan="4" class="center">
+                                    <h6>Gekozen producten</h6>
+                                </td>
+                            </tr>
 
-                            {% for product in producten %}
+                            {% for regel in regels %}
                                 <tr>
-                                    <td class="hide-on-small-only">{% for hdr, lijn in product.beschrijving %}{{ hdr }}<br>{% endfor %}{% if not product.kan_afrekenen %}<br>{% endif %}</td>
-                                    <td>{% for hdr, lijn in product.beschrijving %}{{ lijn }}<br>{% endfor %}
-                                        {% if not product.kan_afrekenen %}<i class="sv-rood-text">Kan nog niet besteld worden</i>{% endif %}
-                                    </td>
-                                    <td class="right-align">&euro;&nbsp;{{ product.prijs_euro }}</td>
+                                    <td>{{ regel.korte_beschrijving }}</td>
+                                    <td class="right-align">{{ regel.prijs_euro_str }}</td>
                                     <td class="right-align">
-                                        <button class="btn-sv-blauw" id="id_verwijder_{{ product.pk }}" onclick="verwijder('id_verwijder_{{ product.pk }}')" data-url="{{ product.url_verwijder }}">
+                                        <button class="btn-sv-blauw" id="id_verwijder_{{ regel.pk }}" onclick="verwijder('id_verwijder_{{ regel.pk }}')" data-url="{{ regel.url_verwijder }}">
                                             <i class="notranslate material-icons-round">delete</i></button>
                                     </td>
                                 </tr>
 
-                                {% if product.gebruikte_korting_str %}
+                                {% if regel.korting_euro %}
                                     <tr>
-                                        <td class="hide-on-small-only">Automatische korting</td>
-                                        <td>{{ product.gebruikte_korting_str }}{% if product.is_combi_korting %}{% for titel in product.combi_reden %}<br>{{ titel }}{% endfor %}{% endif %}</td>
-                                        <td class="right-align">{% if product.korting_euro > 0.0001 %}&minus;&nbsp;{% endif %}&euro;&nbsp;{{ product.korting_euro }}</td>
+                                        <td>Automatische korting</td>
+                                        <td class="right-align">{{ product.korting_euro_str }}</td>
                                         <td><!--knoppen--></td>
                                     </tr>
                                 {% endif %}
@@ -126,7 +127,6 @@
                             <!-- verzendkosten -->
                             {% if mandje.verzendkosten_euro > 0 %}
                                 <tr>
-                                    <td class="hide-on-small-only"></td>
                                     <td>Verzendkosten</td>
                                     <td class="right-align">&euro;&nbsp;{{ mandje.verzendkosten_euro }}</td>
                                     <td><!-- knoppen --></td>
@@ -142,7 +142,6 @@
 
                             <!-- totaal -->
                             <tr>
-                                <td class="hide-on-small-only"></td>
                                 <td class="right-align"><b>Totaal:</b></td>
                                 <td class="right-align"><b>&euro;&nbsp;{{ mandje.totaal_euro }}</b></td>
                                 <td><!--knoppen--></td>
