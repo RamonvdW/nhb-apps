@@ -131,6 +131,7 @@ supervisor_account
 switch_access_shortcut
 switch_account
 thumb_down
+thumb_down_off_alt
 thumbs_up_down
 thumb_up
 travel_explore

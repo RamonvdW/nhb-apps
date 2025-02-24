@@ -1,5 +1,5 @@
 {% comment %}
-                Copyright (c) 2020-2024 Ramon van der Winkel.
+                Copyright (c) 2020-2025 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -40,7 +40,7 @@
   font-weight: 400;
   font-display: block;  /* liever later tonen dan verspringende layout */
 {% if font_use_subset_files %}
-  src: url("{% static 'fonts/material-icons-subset-mh-v22.otf' %}") format('opentype');
+  src: url("{% static 'fonts/material-icons-subset-mh-v24.otf' %}") format('opentype');
 {% else %}
   src: url("{% static 'fonts/Material-Icons-Round-v108.otf' %}") format('opentype');
 {% endif %}

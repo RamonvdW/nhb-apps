@@ -29,7 +29,7 @@ from Betaal.definities import TRANSACTIE_TYPE_MOLLIE_PAYMENT, TRANSACTIE_TYPE_MO
 from Betaal.models import BetaalInstellingenVereniging, BetaalActief, BetaalTransactie, BetaalMutatie
 from Evenement.definities import (EVENEMENT_STATUS_GEACCEPTEERD,
                                   EVENEMENT_INSCHRIJVING_STATUS_RESERVERING_MANDJE,
-                                  EVENEMENT_INSCHRIJVING_STATUS_RESERVERING_BESTELD,
+                                  EVENEMENT_INSCHRIJVING_STATUS_BESTELD,
                                   EVENEMENT_INSCHRIJVING_STATUS_DEFINITIEF)
 from Evenement.models import Evenement, EvenementInschrijving, EvenementAfgemeld
 from Functie.models import Functie
@@ -38,7 +38,7 @@ from Locatie.models import WedstrijdLocatie, EvenementLocatie
 from Mailer.models import MailQueue
 from Opleiding.definities import (OPLEIDING_STATUS_INSCHRIJVEN,
                                   OPLEIDING_INSCHRIJVING_STATUS_RESERVERING_MANDJE,
-                                  OPLEIDING_INSCHRIJVING_STATUS_RESERVERING_BESTELD)
+                                  OPLEIDING_INSCHRIJVING_STATUS_BESTELD)
 from Opleiding.models import Opleiding, OpleidingInschrijving, OpleidingAfgemeld
 from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -48,7 +48,7 @@ from Webwinkel.models import WebwinkelProduct, WebwinkelKeuze
 from Wedstrijden.definities import (WEDSTRIJD_STATUS_GEACCEPTEERD, WEDSTRIJD_KORTING_VERENIGING,
                                     WEDSTRIJD_KORTING_SPORTER,
                                     WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_MANDJE,
-                                    WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_BESTELD,
+                                    WEDSTRIJD_INSCHRIJVING_STATUS_BESTELD,
                                     WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF,
                                     WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD,
                                     WEDSTRIJD_INSCHRIJVING_STATUS_VERWIJDERD)
@@ -1142,14 +1142,14 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
         self.assertEqual(bestelling.status, BESTELLING_STATUS_NIEUW)
 
         self.wedstrijd_inschrijving.refresh_from_db()
-        self.assertEqual(self.wedstrijd_inschrijving.status, WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_BESTELD)
+        self.assertEqual(self.wedstrijd_inschrijving.status, WEDSTRIJD_INSCHRIJVING_STATUS_BESTELD)
         self.assertEqual(self.wedstrijd_inschrijving.ontvangen_euro, self.wedstrijd_inschrijving.retour_euro)     # nog steeds 0
 
         self.evenement_inschrijving.refresh_from_db()
-        self.assertEqual(self.evenement_inschrijving.status, EVENEMENT_INSCHRIJVING_STATUS_RESERVERING_BESTELD)
+        self.assertEqual(self.evenement_inschrijving.status, EVENEMENT_INSCHRIJVING_STATUS_BESTELD)
 
         self.opleiding_inschrijving.refresh_from_db()
-        self.assertEqual(self.opleiding_inschrijving.status, OPLEIDING_INSCHRIJVING_STATUS_RESERVERING_BESTELD)
+        self.assertEqual(self.opleiding_inschrijving.status, OPLEIDING_INSCHRIJVING_STATUS_BESTELD)
 
         # coverage
         product = BestellingProduct.objects.exclude(evenement_inschrijving=None).first()
@@ -1217,7 +1217,7 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
         self.assertEqual(bestelling.status, BESTELLING_STATUS_NIEUW)
 
         inschrijving = WedstrijdInschrijving.objects.get(pk=self.wedstrijd_inschrijving.pk)
-        self.assertEqual(inschrijving.status, WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_BESTELD)
+        self.assertEqual(inschrijving.status, WEDSTRIJD_INSCHRIJVING_STATUS_BESTELD)
         self.assertEqual(inschrijving.ontvangen_euro, inschrijving.retour_euro)     # nog steeds 0
 
         # betaling verwerken
@@ -1248,7 +1248,7 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
 
         inschrijving = WedstrijdInschrijving.objects.get(pk=self.wedstrijd_inschrijving.pk)
         self.assertEqual(inschrijving.koper, self.account_admin)
-        self.assertEqual(inschrijving.status, WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_BESTELD)
+        self.assertEqual(inschrijving.status, WEDSTRIJD_INSCHRIJVING_STATUS_BESTELD)
         self.assertEqual(inschrijving.ontvangen_euro, Decimal('0'))     # TODO: verwachting = 5
         self.assertEqual(inschrijving.retour_euro, Decimal('0'))
 
@@ -1286,11 +1286,11 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
         self.assertEqual(bestelling.status, BESTELLING_STATUS_NIEUW)
 
         inschrijving = WedstrijdInschrijving.objects.get(pk=self.wedstrijd_inschrijving.pk)
-        self.assertEqual(inschrijving.status, WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_BESTELD)
+        self.assertEqual(inschrijving.status, WEDSTRIJD_INSCHRIJVING_STATUS_BESTELD)
         self.assertEqual(inschrijving.ontvangen_euro, inschrijving.retour_euro)     # nog steeds 0
 
         self.evenement_inschrijving.refresh_from_db()
-        self.assertEqual(self.evenement_inschrijving.status, EVENEMENT_INSCHRIJVING_STATUS_RESERVERING_BESTELD)
+        self.assertEqual(self.evenement_inschrijving.status, EVENEMENT_INSCHRIJVING_STATUS_BESTELD)
 
         # simuleer een betaling
         betaalactief = BetaalActief(
@@ -1472,7 +1472,7 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
         self.evenement_inschrijving.save(update_fields=['status'])
 
         self.opleiding_inschrijving.refresh_from_db()
-        self.opleiding_inschrijving.status = OPLEIDING_INSCHRIJVING_STATUS_RESERVERING_BESTELD
+        self.opleiding_inschrijving.status = OPLEIDING_INSCHRIJVING_STATUS_BESTELD
         self.opleiding_inschrijving.save(update_fields=['status'])
 
         # annuleer de bestelling

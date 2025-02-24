@@ -18,7 +18,7 @@ from Bestelling.models import BestellingMutatie, Bestelling, BestellingProduct
 from Betaal.models import BetaalActief
 from Evenement.models import EvenementInschrijving
 from Opleiding.models import OpleidingInschrijving
-from Overig.background_sync import BackgroundSync
+from Site.core.background_sync import BackgroundSync
 from Webwinkel.models import WebwinkelKeuze
 from Wedstrijden.models import WedstrijdInschrijving
 import time

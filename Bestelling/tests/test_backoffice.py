@@ -18,7 +18,7 @@ from Mailer.models import MailQueue
 from Sporter.models import Sporter, SporterBoog
 from Vereniging.models import Vereniging
 from Webwinkel.models import WebwinkelProduct, WebwinkelKeuze
-from Wedstrijden.definities import WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_BESTELD, WEDSTRIJD_KORTING_COMBI
+from Wedstrijden.definities import WEDSTRIJD_INSCHRIJVING_STATUS_BESTELD, WEDSTRIJD_KORTING_COMBI
 from Wedstrijden.models import Wedstrijd, WedstrijdSessie, WedstrijdInschrijving, WedstrijdKorting
 from TestHelpers.e2ehelpers import E2EHelpers
 from decimal import Decimal
@@ -131,7 +131,7 @@ class TestBestelBetaling(E2EHelpers, TestCase):
 
         inschrijving = WedstrijdInschrijving(
                             wanneer=now,
-                            status=WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_BESTELD,
+                            status=WEDSTRIJD_INSCHRIJVING_STATUS_BESTELD,
                             wedstrijd=wedstrijd,
                             sessie=sessie,
                             sporterboog=sporterboog,
