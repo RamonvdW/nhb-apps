@@ -13,8 +13,10 @@ from Functie.definities import Rol
 from Functie.rol import rol_get_huidige, rol_get_beschrijving
 from Instaptoets.models import Vraag, ToetsAntwoord, Instaptoets
 from Instaptoets.operations import instaptoets_is_beschikbaar
+from types import SimpleNamespace
 
 TEMPLATE_STATS_ANTWOORDEN = 'instaptoets/stats-antwoorden.dtl'
+TEMPLATE_GEZAKT = 'instaptoets/gezakt.dtl'
 
 
 class StatsInstaptoetsView(UserPassesTestMixin, TemplateView):
@@ -181,5 +183,83 @@ class StatsInstaptoetsView(UserPassesTestMixin, TemplateView):
         )
 
         return context
+
+
+class GezaktView(UserPassesTestMixin, TemplateView):
+    """
+        Deze view geeft informatie over wie de instaptoets gemaakt hebben maar hiervoor gezakt zijn
+    """
+
+    # class variables shared by all instances
+    template_name = TEMPLATE_GEZAKT
+    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
+
+    def dispatch(self, request, *args, **kwargs):
+        if not instaptoets_is_beschikbaar():
+            # geen toets --> terug naar landing page opleidingen
+            return redirect('Opleiding:overzicht')
+
+        return super().dispatch(request, *args, **kwargs)
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        # gebruiker moet ingelogd zijn, geen gast zijn en rol Sporter gekozen hebben
+        return rol_get_huidige(self.request) == Rol.ROL_MO
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        geslaagd = Instaptoets.objects.filter(geslaagd=True).distinct('sporter').values_list('sporter__lid_nr', flat=True)
+
+        sporters = dict()   # [lid_nr] = SimpleNamespace
+
+        for toets in (Instaptoets
+                      .objects
+                      .filter(is_afgerond=True,
+                              geslaagd=False)
+                      .select_related('sporter')):
+            lid_nr = toets.sporter.lid_nr
+            if lid_nr in geslaagd:
+                continue
+
+            try:
+                data = sporters[lid_nr]
+            except KeyError:
+                data = SimpleNamespace(
+                            lid_nr_en_naam=toets.sporter.lid_nr_en_volledige_naam(),
+                            aantal_goed=0,
+                            aantal_fout=0,
+                            aantal_keer_gezakt=0,
+                            laatste_poging=None)
+                sporters[lid_nr] = data
+
+            data.laatste_poging = toets.opgestart.date()
+
+            if toets.is_afgerond:
+                data.aantal_goed += toets.aantal_goed
+                data.aantal_fout += (toets.aantal_vragen - toets.aantal_goed)
+                data.aantal_keer_gezakt += 1
+        # for
+
+        lijst = list()
+        for lid_nr, data in sporters.items():
+            tup = (data.laatste_poging, data.lid_nr_en_naam, data)
+            lijst.append(tup)
+        # for
+        lijst.sort(reverse=True)        # nieuwste bovenaan
+
+        context['gezakt'] = [tup[-1] for tup in lijst]
+
+        context['huidige_rol'] = rol_get_beschrijving(self.request)
+
+        context['kruimels'] = (
+            (reverse('Opleiding:manager'), 'Opleidingen'),
+            (None, 'Gezakt voor de instaptoets')
+        )
+
+        return context
+
 
 # end of file

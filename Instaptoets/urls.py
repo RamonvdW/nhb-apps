@@ -32,6 +32,10 @@ urlpatterns = [
     path('stats/',
          view_stats.StatsInstaptoetsView.as_view(),
          name='stats'),
+
+    path('gezakt/',
+         view_stats.GezaktView.as_view(),
+         name='gezakt'),
 ]
 
 # end of file
