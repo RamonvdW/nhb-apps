@@ -14,8 +14,7 @@ from Bestelling.definities import (BESTELLING_MUTATIE_WEDSTRIJD_INSCHRIJVEN, BES
                                    BESTELLING_MUTATIE_TRANSPORT, BESTELLING_STATUS_BETALING_ACTIEF,
                                    BESTELLING_MUTATIE_EVENEMENT_INSCHRIJVEN, BESTELLING_MUTATIE_EVENEMENT_AFMELDEN,
                                    BESTELLING_MUTATIE_OPLEIDING_INSCHRIJVEN, BESTELLING_MUTATIE_OPLEIDING_AFMELDEN)
-from Bestelling.models import BestellingMutatie, Bestelling
-from Bestelling.models.product_obsolete import BestellingProduct
+from Bestelling.models import BestellingMutatie, Bestelling, BestellingRegel
 from Betaal.models import BetaalActief
 from Evenement.models import EvenementInschrijving
 from Opleiding.models import OpleidingInschrijving
@@ -116,12 +115,12 @@ def bestel_mutatieverzoek_webwinkel_keuze(account: Account, keuze: WebwinkelKeuz
         _bestel_ping_achtergrondtaak(mutatie, snel)
 
 
-def bestel_mutatieverzoek_verwijder_product_uit_mandje(account: Account, product: BestellingProduct, snel: bool):
+def bestel_mutatieverzoek_verwijder_regel_uit_mandje(account: Account, regel: BestellingRegel, snel: bool):
     """
         Verwijder een product uit het mandje
 
         account: In het mandje van welk account ligt het product nu?
-        product: Het product om te verwijderen (inclusief alle kortingen)
+        regel: Het product om te verwijderen (inclusief alle kortingen)
         snel = True: niet wachten op reactie achtergrond taak (voor testen)
     """
 
@@ -130,7 +129,7 @@ def bestel_mutatieverzoek_verwijder_product_uit_mandje(account: Account, product
     mutatie, is_created = BestellingMutatie.objects.get_or_create(
                                     code=BESTELLING_MUTATIE_VERWIJDER,
                                     account=account,
-                                    product=product,
+                                    regel=regel,
                                     is_verwerkt=False)
     if is_created:
         mutatie.save()

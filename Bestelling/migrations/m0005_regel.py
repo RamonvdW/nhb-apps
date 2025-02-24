@@ -45,6 +45,12 @@ class Migration(migrations.Migration):
             name='regels',
             field=models.ManyToManyField(to='Bestelling.bestellingregel'),
         ),
+        migrations.AddField(
+            model_name='bestellingmutatie',
+            name='regel',
+            field=models.ForeignKey(blank=True, null=True, on_delete=models.deletion.SET_NULL,
+                                    to='Bestelling.bestellingregel'),
+        ),
     ]
 
 # end of file

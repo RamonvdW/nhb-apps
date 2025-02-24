@@ -9,7 +9,7 @@ from django.utils import timezone
 from Account.models import Account
 from Bestelling.definities import BESTELLING_MUTATIE_TO_STR, BESTELLING_TRANSPORT_NVT, BESTELLING_TRANSPORT_OPTIES
 from Bestelling.models.product_obsolete import BestellingProduct
-from Bestelling.models.bestelling import Bestelling
+from Bestelling.models import Bestelling, BestellingRegel
 from Evenement.models import EvenementInschrijving
 from Opleiding.models import OpleidingInschrijving
 from Webwinkel.models import WebwinkelKeuze
@@ -66,8 +66,8 @@ class BestellingMutatie(models.Model):
     webwinkel_keuze = models.ForeignKey(WebwinkelKeuze, on_delete=models.SET_NULL, null=True, blank=True)
 
     # het product waar deze mutatie betrekking op heeft
-    # TODO: verwijder of vervang door Regel
     product = models.ForeignKey(BestellingProduct, on_delete=models.SET_NULL, null=True, blank=True)
+    regel = models.ForeignKey(BestellingRegel, on_delete=models.SET_NULL, null=True, blank=True)
 
     # gevraagde korting om toe te passen
     korting = models.CharField(max_length=20, default='', blank=True)

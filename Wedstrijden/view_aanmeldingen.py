@@ -13,7 +13,7 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
 from BasisTypen.definities import GESLACHT2STR
 from Bestelling.operations.mutaties import (bestel_mutatieverzoek_afmelden_wedstrijd,
-                                            bestel_mutatieverzoek_verwijder_product_uit_mandje)
+                                            bestel_mutatieverzoek_verwijder_regel_uit_mandje)
 from Betaal.format import format_bedrag_euro
 from Competitie.models import RegiocompetitieSporterBoog
 from Functie.definities import Rol
@@ -697,9 +697,8 @@ class AfmeldenView(UserPassesTestMixin, View):
         snel = str(request.POST.get('snel', ''))[:1]
 
         if inschrijving.status == WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_MANDJE:
-            if inschrijving.bestellingproduct_set.count() > 0:
-                product = inschrijving.bestellingproduct_set.first()
-                bestel_mutatieverzoek_verwijder_product_uit_mandje(inschrijving.koper, product, snel == '1')
+            regel = inschrijving.bestelling
+            bestel_mutatieverzoek_verwijder_regel_uit_mandje(inschrijving.koper, regel, snel == '1')
         else:
             bestel_mutatieverzoek_afmelden_wedstrijd(inschrijving, snel == '1')
 

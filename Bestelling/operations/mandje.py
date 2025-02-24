@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2024 Ramon van der Winkel.
+#  Copyright (c) 2022-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -38,13 +38,13 @@ def mandje_tel_inhoud(request, account: Account | None):
     try:
         mandje = (BestellingMandje
                   .objects
-                  .prefetch_related('producten')
+                  .prefetch_related('regels')
                   .get(account=account))
     except BestellingMandje.DoesNotExist:
         # geen mandje gevonden
         aantal = 0
     else:
-        aantal = mandje.producten.count()
+        aantal = mandje.regels.count()
 
     zet_sessionvar_if_changed(request, SESSIONVAR_MANDJE_INHOUD_AANTAL, aantal)
 

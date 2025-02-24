@@ -84,7 +84,7 @@ class Command(BaseCommand):
                        .get(pk=pk))
 
             if not mutatie.is_verwerkt:
-                verwerk_mutatie(mutatie)
+                verwerk_mutatie(self.stdout, mutatie)
                 mutatie.is_verwerkt = True
                 mutatie.save(update_fields=['is_verwerkt'])
                 did_useful_work = True

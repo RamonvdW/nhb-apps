@@ -4,7 +4,7 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-""" Deze module levert een beschrijving van een BestellingProduct,
+""" Deze module levert een beschrijving van een BestellingRegel,
     zodat deze consequent beschreven kunnen worden op het scherm, in e-mails en mogelijk in een pdf.
 """
 
@@ -14,14 +14,15 @@ from Bestelling.definities import (BESTELLING_REGEL_CODE_EVENEMENT_INSCHRIJVING,
                                    BESTELLING_REGEL_CODE_OPLEIDING_AFGEMELD,
                                    BESTELLING_REGEL_CODE_WEDSTRIJD_INSCHRIJVING,
                                    BESTELLING_REGEL_CODE_WEDSTRIJD_AFGEMELD,
+                                   BESTELLING_REGEL_CODE_WEDSTRIJD_KORTING,
                                    BESTELLING_REGEL_CODE_WEBWINKEL,
-                                   BESTELLING_REGEL_CODE_TRANSPORT,
-                                   BESTELLING_REGEL_CODE_WEDSTRIJD_KORTING)
+                                   BESTELLING_REGEL_CODE_TRANSPORT)
+from Bestelling.plugins.alle_bestel_plugins import bestel_plugins
 from Bestelling.models import BestellingRegel
 from Bestelling.models.product_obsolete import BestellingProduct
 from Bestelling.plugins.evenement import evenement_plugin_beschrijf_product
 from Bestelling.plugins.opleiding import opleiding_plugin_beschrijf_product
-from Bestelling.plugins.wedstrijden import wedstrijden_plugin_beschrijf_product, wedstrijden_plugin_beschrijf_korting
+from Bestelling.plugins.wedstrijden import wedstrijden_plugin_beschrijf_product
 from Bestelling.plugins.webwinkel import webwinkel_plugin_beschrijf_product
 
 
@@ -58,46 +59,42 @@ def beschrijf_regel(regel: BestellingRegel):
         [('Onderwerp', 'Beschrijving'), ...]
     """
 
+    obj = None
+
     if regel.code == BESTELLING_REGEL_CODE_WEDSTRIJD_INSCHRIJVING:
-        wedstrijd_inschrijving = regel.wedstrijdinschrijving_set.first()
-        return wedstrijden_plugin_beschrijf_product(wedstrijd_inschrijving)
+        obj = regel.wedstrijdinschrijving_set.first()
 
     if regel.code == BESTELLING_REGEL_CODE_WEDSTRIJD_AFGEMELD:
-        wedstrijd_inschrijving = regel.wedstrijdinschrijving_set.first()        # FUTURE: wedstrijdafgemeld
-        return wedstrijden_plugin_beschrijf_product(wedstrijd_inschrijving)
+        obj = regel.wedstrijdinschrijving_set.first()        # FUTURE: wedstrijd afgemeld
 
     if regel.code == BESTELLING_REGEL_CODE_WEDSTRIJD_KORTING:
-        # deze moet voor een wedstrijd inschrijving zijn
+        # verwijzing naar de korting staat in de wedstrijdinschrijving
         wedstrijd_inschrijving = regel.wedstrijdinschrijving_set.first()
-        # TODO als de aankoop geannuleerd is, dan hoeven we de korting niet meer te laten zien?
         if wedstrijd_inschrijving:
-            kort, redenen = wedstrijden_plugin_beschrijf_korting(wedstrijd_inschrijving.korting)
-            redenen.insert(0, kort)
-            return redenen
+            obj = wedstrijd_inschrijving.korting
 
     if regel.code == BESTELLING_REGEL_CODE_EVENEMENT_INSCHRIJVING:
-        evenement_inschrijving = regel.evenementinschrijving_set.first()
-        return evenement_plugin_beschrijf_product(evenement_inschrijving)
+        obj = regel.evenementinschrijving_set.first()
 
     if regel.code == BESTELLING_REGEL_CODE_EVENEMENT_AFGEMELD:
-        evenement_afgemeld = regel.evenementafgemeld_set.first()
-        return evenement_plugin_beschrijf_product(evenement_afgemeld)
+        obj = regel.evenementafgemeld_set.first()
 
     if regel.code == BESTELLING_REGEL_CODE_OPLEIDING_INSCHRIJVING:
-        opleiding_inschrijving = regel.opleidinginschrijving_set.first()
-        return opleiding_plugin_beschrijf_product(opleiding_inschrijving)
+        obj = regel.opleidinginschrijving_set.first()
 
     if regel.code == BESTELLING_REGEL_CODE_OPLEIDING_AFGEMELD:
-        opleiding_afgemeld = regel.opleidingafgemeld_set.first()
-        return opleiding_plugin_beschrijf_product(opleiding_afgemeld)
+        obj = regel.opleidingafgemeld_set.first()
 
     if regel.code == BESTELLING_REGEL_CODE_WEBWINKEL:
-        webwinkel_keuze = regel.webwinkelkeuze_set.first()
-        return webwinkel_plugin_beschrijf_product(webwinkel_keuze)
+        obj = regel.webwinkelkeuze_set.first()
 
     if regel.code == BESTELLING_REGEL_CODE_TRANSPORT:
         # TODO
         pass
+
+    if obj:
+        plugin = bestel_plugins[regel.code]
+        return plugin.beschrijf_product(obj)
 
     print('HUH? code=%s' % regel.code)
     return []

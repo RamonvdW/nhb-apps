@@ -93,7 +93,7 @@ def migrate_product2regel_evenement(apps, _):
 
         regel = bestelling_regel_klas(
                     korte_beschrijving=kort,
-                    prijs_euro=prod.prijs_euro,
+                    bedrag_euro=prod.prijs_euro,
                     code=BESTELLING_REGEL_CODE_EVENEMENT_INSCHRIJVING)
         regel.save()
         prod2regels[prod.pk] = [regel]
@@ -119,7 +119,7 @@ def migrate_product2regel_evenement(apps, _):
 
         regel = bestelling_regel_klas(
                     korte_beschrijving=kort,
-                    prijs_euro=prod.prijs_euro,
+                    bedrag_euro=prod.prijs_euro,
                     code=BESTELLING_REGEL_CODE_EVENEMENT_AFGEMELD)
         regel.save()
         prod2regels[prod.pk] = [regel]
@@ -161,7 +161,7 @@ def migrate_product2regel_opleiding(apps, _):
 
         regel = bestelling_regel_klas(
                     korte_beschrijving=kort,
-                    prijs_euro=prod.prijs_euro,
+                    bedrag_euro=prod.prijs_euro,
                     code=BESTELLING_REGEL_CODE_OPLEIDING_INSCHRIJVING)
         regel.save()
 
@@ -188,7 +188,7 @@ def migrate_product2regel_opleiding(apps, _):
 
         regel = bestelling_regel_klas(
                     korte_beschrijving=kort,
-                    prijs_euro=prod.prijs_euro,
+                    bedrag_euro=prod.prijs_euro,
                     code=BESTELLING_REGEL_CODE_OPLEIDING_AFGEMELD)
 
         regel.save()
@@ -259,7 +259,7 @@ def migrate_product2regel_webwinkel(apps, _):
 
         regel = bestelling_regel_klas(
                     korte_beschrijving=kort,
-                    prijs_euro=prijs_euro,
+                    bedrag_euro=prijs_euro,
                     btw_percentage=btw_str,
                     btw_euro=btw_euro,
                     gewicht_gram=product.gewicht_gram * keuze.aantal,
@@ -307,7 +307,7 @@ def migrate_product2regel_wedstrijd(apps, _):
 
         regel = bestelling_regel_klas(
                     korte_beschrijving=kort,
-                    prijs_euro=prod.prijs_euro,
+                    bedrag_euro=prod.prijs_euro,
                     code=BESTELLING_REGEL_CODE_WEDSTRIJD_INSCHRIJVING)
 
         if inschrijving.status == WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD:
@@ -325,7 +325,7 @@ def migrate_product2regel_wedstrijd(apps, _):
             kort, redenen = beschrijf_korting(korting)
             regel = bestelling_regel_klas(
                         korte_beschrijving=kort,
-                        prijs_euro=0 - prod.korting_euro,
+                        bedrag_euro=0 - prod.korting_euro,
                         code=BESTELLING_REGEL_CODE_WEDSTRIJD_KORTING)
             if len(redenen):
                 regel.korting_redenen = "||".join(redenen)

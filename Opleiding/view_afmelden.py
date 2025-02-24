@@ -9,7 +9,7 @@ from django.urls import reverse
 from django.views.generic import View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Bestelling.operations.mutaties import (bestel_mutatieverzoek_afmelden_opleiding,
-                                            bestel_mutatieverzoek_verwijder_product_uit_mandje)
+                                            bestel_mutatieverzoek_verwijder_regel_uit_mandje)
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
 from Opleiding.definities import OPLEIDING_INSCHRIJVING_STATUS_RESERVERING_MANDJE
@@ -46,9 +46,8 @@ class AfmeldenView(UserPassesTestMixin, View):
         snel = str(request.POST.get('snel', ''))[:1]
 
         if inschrijving.status == OPLEIDING_INSCHRIJVING_STATUS_RESERVERING_MANDJE:
-            if inschrijving.bestellingproduct_set.count() > 0:          # pragma: no branch
-                product = inschrijving.bestellingproduct_set.first()
-                bestel_mutatieverzoek_verwijder_product_uit_mandje(inschrijving.koper, product, snel == '1')
+            regel = inschrijving.bestelling
+            bestel_mutatieverzoek_verwijder_regel_uit_mandje(inschrijving.koper, regel, snel == '1')
         else:
             bestel_mutatieverzoek_afmelden_opleiding(inschrijving, snel == '1')
 

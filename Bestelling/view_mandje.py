@@ -15,7 +15,7 @@ from Bestelling.definities import BESTELLING_TRANSPORT_VERZEND, BESTELLING_TRANS
 from Bestelling.models import BestellingMandje
 from Bestelling.operations.mandje import mandje_tel_inhoud
 from Bestelling.operations.mutaties import (bestel_mutatieverzoek_maak_bestellingen,
-                                            bestel_mutatieverzoek_verwijder_product_uit_mandje)
+                                            bestel_mutatieverzoek_verwijder_regel_uit_mandje)
 from Betaal.models import BetaalInstellingenVereniging
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige
@@ -92,37 +92,11 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
 
             regels = mandje.regels.order_by('pk')       # volgorde waarop ze in het mandje gelegd zijn
 
-            # producten = (mandje
-            #              .producten
-            #              .select_related('wedstrijd_inschrijving',
-            #                              'wedstrijd_inschrijving__wedstrijd',
-            #                              'wedstrijd_inschrijving__wedstrijd__locatie',
-            #                              'wedstrijd_inschrijving__wedstrijd__organiserende_vereniging',
-            #                              'wedstrijd_inschrijving__wedstrijdklasse',
-            #                              'wedstrijd_inschrijving__sessie',
-            #                              'wedstrijd_inschrijving__sporterboog',
-            #                              'wedstrijd_inschrijving__sporterboog__boogtype',
-            #                              'wedstrijd_inschrijving__sporterboog__sporter',
-            #                              'wedstrijd_inschrijving__sporterboog__sporter__bij_vereniging',
-            #                              'evenement_inschrijving',
-            #                              'evenement_inschrijving__evenement__organiserende_vereniging',
-            #                              'evenement_inschrijving__koper',
-            #                              'evenement_inschrijving__sporter',
-            #                              'evenement_inschrijving__sporter__bij_vereniging',
-            #                              'opleiding_inschrijving',
-            #                              'opleiding_inschrijving__opleiding',
-            #                              'webwinkel_keuze',
-            #                              'webwinkel_keuze__product')
-            #              .order_by('pk'))       # volgorde waarop ze in het mandje gelegd zijn
-
             for regel in regels:
                 mandje_is_leeg = False
 
-                controleer_euro += regel.prijs_euro
-                controleer_euro -= regel.korting_euro
-
-                regel.prijs_euro_str = format_bedrag_euro(regel.prijs_euro)
-                regel.korting_euro_str = format_bedrag_euro(regel.korting_euro)
+                controleer_euro += regel.bedrag_euro
+                regel.bedrag_euro_str = format_bedrag_euro(regel.bedrag_euro)
 
                 # maak een knop om deze bestelling te verwijderen uit het mandje
                 regel.url_verwijder = reverse('Bestelling:mandje-verwijder-product',
@@ -130,65 +104,23 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
             # for
 
             if False:
-                for product in producten:
-
-                    product.gebruikte_korting_str = None
-                    product.combi_reden = list()
-                    product.is_combi_korting = False
-                    product.kan_afrekenen = False
-
-                    if product.wedstrijd_inschrijving:
-                        product.gebruikte_korting_str, product.combi_reden = wedstrijd_beschrijf_korting(product)
-                        product.is_combi_korting = len(product.combi_reden) > 0
-                        product.kan_afrekenen = True
-
-                        ver_nr = product.wedstrijd_inschrijving.wedstrijd.organiserende_vereniging.ver_nr
-                        try:
-                            instellingen = ver_nr2instellingen[ver_nr]
-                        except KeyError:
-                            # geen instellingen, dus kan geen betaling ontvangen
-                            product.kan_afrekenen = False
-                        else:
-                            if instellingen.akkoord_via_bond:
-                                ver_nr = settings.BETAAL_VIA_BOND_VER_NR
-                                if instellingen_bond is None or instellingen_bond.mollie_api_key == '':
-                                    product.kan_afrekenen = False
-
-                        try:
-                            ontvanger2product_pks[ver_nr].append(product.pk)
-                        except KeyError:
-                            ontvanger2product_pks[ver_nr] = [product.pk]
-
-                    elif product.evenement_inschrijving:
-                        pass
-
-                    elif product.opleiding_inschrijving:
-                        pass
-
-                    elif product.webwinkel_keuze:
-                        # FUTURE: kortingen
-                        pass
-
-                    else:
-                        tup = ('Fout', 'Onbekend product')
-                        product.beschrijving.append(tup)
-                        bevat_fout = True
+                if product.wedstrijd_inschrijving:
+                    ver_nr = product.wedstrijd_inschrijving.wedstrijd.organiserende_vereniging.ver_nr
+                    try:
+                        instellingen = ver_nr2instellingen[ver_nr]
+                    except KeyError:
+                        # geen instellingen, dus kan geen betaling ontvangen
                         product.kan_afrekenen = False
+                    else:
+                        if instellingen.akkoord_via_bond:
+                            ver_nr = settings.BETAAL_VIA_BOND_VER_NR
+                            if instellingen_bond is None or instellingen_bond.mollie_api_key == '':
+                                product.kan_afrekenen = False
 
-                    if product.korting_euro and not product.gebruikte_korting_str:
-                        # print('Onverwacht: product %s (pk=%s) heeft korting %s' % (
-                        #           product, product.pk, product.korting_euro))
-                        product.gebruikte_korting_str = "Onbekende korting"
-                        bevat_fout = True
-
-                    controleer_euro += product.prijs_euro
-                    controleer_euro -= product.korting_euro
-
-                    # maak een knop om deze bestelling te verwijderen uit het mandje
-                    product.url_verwijder = reverse('Bestelling:mandje-verwijder-product',
-                                                    kwargs={'product_pk': product.pk})
-
-                    mandje_is_leeg = False
+                    try:
+                        ontvanger2product_pks[ver_nr].append(product.pk)
+                    except KeyError:
+                        ontvanger2product_pks[ver_nr] = [product.pk]
                 # for
 
             # nooit een negatief totaalbedrag tonen want we geven geen geld weg
@@ -341,25 +273,24 @@ class VerwijderProductUitMandje(UserPassesTestMixin, View):
         snel = str(request.POST.get('snel', ''))[:1]
 
         try:
-            product_pk = str(kwargs['product_pk'])[:6]        # afkappen voor de veiligheid
-            product_pk = int(product_pk)
+            regel_pk = str(kwargs['product_pk'])[:6]        # afkappen voor de veiligheid
+            regel_pk = int(regel_pk)
         except (KeyError, ValueError, TypeError):
             raise Http404('Verkeerde parameter')
 
         # zoek de regel op in het mandje van de ingelogde gebruiker
         account = get_account(request)
         try:
-            mandje = BestellingMandje.objects.prefetch_related('producten').get(account=account)
+            mandje = BestellingMandje.objects.prefetch_related('regels').get(account=account)
         except BestellingMandje.DoesNotExist:
             raise Http404('Niet gevonden')
         else:
-            qset = mandje.producten.filter(pk=product_pk)
-            if qset.exists():
+            regel = mandje.regels.filter(pk=regel_pk).first()
+            if regel:
                 # product zit in het mandje
-                product = qset[0]
 
-                bestel_mutatieverzoek_verwijder_product_uit_mandje(account, product, snel == '1')
-                # achtergrondtaak geeft dit door aan de kalender/opleiding
+                bestel_mutatieverzoek_verwijder_regel_uit_mandje(account, regel, snel == '1')
+                # achtergrondtaak geeft dit door aan de achtergrondtaak
 
                 mandje_tel_inhoud(self.request, account)
             else:

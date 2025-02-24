@@ -291,7 +291,9 @@ class WedstrijdInschrijving(models.Model):
         if len(titel) > 60:
             titel = titel[:58] + '..'
 
-        return "%s - %s" % (self.sporterboog.sporter.lid_nr, titel)
+        return "%s - %s - %s" % (self.sporterboog.sporter.lid_nr,
+                                 self.sporterboog.boogtype.beschrijving,
+                                 titel)
 
     class Meta:
         verbose_name = "Wedstrijd inschrijving"

@@ -61,9 +61,8 @@ class BestellingMandje(models.Model):
             Let op: Roep deze aan met een select_for_update() lock
         """
         self.totaal_euro = Decimal(0)
-        for product in self.producten.all():
-            self.totaal_euro += product.prijs_euro
-            self.totaal_euro -= product.korting_euro
+        for regel in self.regels.all():
+            self.totaal_euro += regel.bedrag_euro
         # for
         self.totaal_euro += self.verzendkosten_euro
         self.save(update_fields=['totaal_euro'])

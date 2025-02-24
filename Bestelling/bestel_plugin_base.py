@@ -22,13 +22,22 @@ class BestelPluginBase:
     def mandje_opschonen(self, verval_datum):
         raise NotImplementedError()
 
-    def reserveer(self, inschrijving) -> BestellingRegel:
+    def reserveer(self, inschrijving, mandje_van_str: str) -> BestellingRegel:
         # inschrijving kan van verschillende typen zijn: Evenement, Opleiding, Webwinkel, Wedstrijd
         raise NotImplementedError()
 
-    def verwijder_reservering(self, regel: BestellingRegel):
+    def verwijder_reservering(self, regel: BestellingRegel) -> BestellingRegel | None:
+        """
+            Het product wordt uit het mandje gehaald
+            of de bestelling wordt geannuleerd (voordat deze betaald is)
+        """
         raise NotImplementedError()
 
+    def beschrijf_product(self, obj) -> list:
+        """
+            Geef een lijst van tuples terug waarin aspecten van het product beschreven staan.
+        """
+        raise NotImplementedError()
 
 
 # end of file

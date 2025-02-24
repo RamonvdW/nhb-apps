@@ -53,24 +53,6 @@ def webwinkel_plugin_beschrijf_product(keuze):
     return beschrijving
 
 
-def webwinkel_plugin_verwijder_reservering(stdout, webwinkel_keuze):
-    """
-        Deze functie wordt vanuit de achtergrondtaak aangeroepen om een product uit het mandje te halen.
-        De reservering wordt ongedaan gemaakt zodat de producten door iemand anders te kiezen zijn.
-    """
-
-    product = webwinkel_keuze.product
-    aantal = webwinkel_keuze.aantal
-
-    if not product.onbeperkte_voorraad:
-        # Noteer: geen concurrency risico want serialisatie via deze achtergrondtaak
-        product.aantal_op_voorraad += aantal
-        product.save(update_fields=['aantal_op_voorraad'])
-
-    webwinkel_keuze.status = KEUZE_STATUS_GEANNULEERD
-    webwinkel_keuze.save(update_fields=['status'])
-
-
 def webwinkel_plugin_bepaal_verzendkosten_mandje(stdout, mandje):
     """ bereken de verzendkosten voor fysieke producten in het mandje """
 

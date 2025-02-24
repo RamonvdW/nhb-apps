@@ -22,22 +22,14 @@ from Bestelling.definities import (BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS
                                    BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_MISLUKT, BESTELLING_STATUS_GEANNULEERD,
                                    BESTELLING_STATUS2STR, BESTELLING_HOOGSTE_BESTEL_NR_FIXED_PK,
                                    BESTELLING_TRANSPORT_OPHALEN, BESTELLING_TRANSPORT2STR)
-from Bestelling.definities import (BESTELLING_REGEL_CODE_EVENEMENT_INSCHRIJVING,
-                                   BESTELLING_REGEL_CODE_EVENEMENT_AFGEMELD,
-                                   BESTELLING_REGEL_CODE_OPLEIDING_INSCHRIJVING,
-                                   BESTELLING_REGEL_CODE_OPLEIDING_AFGEMELD,
-                                   BESTELLING_REGEL_CODE_WEDSTRIJD_INSCHRIJVING,
-                                   BESTELLING_REGEL_CODE_WEDSTRIJD_AFGEMELD,
-                                   BESTELLING_REGEL_CODE_WEBWINKEL,
-                                   BESTELLING_REGEL_CODE_TRANSPORT)
-from Bestelling.models import BestellingMandje, Bestelling, BestellingHoogsteBestelNr, BestellingMutatie
+from Bestelling.models import BestellingMandje, Bestelling, BestellingHoogsteBestelNr, BestellingMutatie, BestellingRegel
 from Bestelling.operations.bepaal_kortingen import BepaalAutomatischeKorting
+from Bestelling.plugins.alle_bestel_plugins import bestel_plugins
 from Bestelling.plugins.evenement import evenement_plugin_inschrijving_is_betaald, evenement_plugin_afmelden
 from Bestelling.plugins.opleiding import opleiding_plugin_inschrijving_is_betaald, opleiding_plugin_afmelden
 from Bestelling.plugins.product_info import beschrijf_product
 from Bestelling.plugins.wedstrijden import wedstrijden_plugin_afmelden, wedstrijden_plugin_inschrijving_is_betaald
-from Bestelling.plugins.webwinkel import (webwinkel_plugin_verwijder_reservering,
-                                          webwinkel_plugin_bepaal_verzendkosten_mandje,
+from Bestelling.plugins.webwinkel import (webwinkel_plugin_bepaal_verzendkosten_mandje,
                                           webwinkel_plugin_bepaal_verzendkosten_bestelling)
 from Betaal.definities import TRANSACTIE_TYPE_MOLLIE_RESTITUTIE, TRANSACTIE_TYPE_HANDMATIG
 from Betaal.format import format_bedrag_euro
@@ -62,22 +54,11 @@ import datetime
 from Evenement.plugin_bestelling import evenement_bestel_plugin
 from Opleiding.plugin_bestelling import opleiding_bestel_plugin
 from Webwinkel.plugin_bestelling import webwinkel_bestel_plugin
-from Wedstrijden.plugin_bestelling import wedstrijd_bestel_plugin
+from Wedstrijden.plugin_bestelling import wedstrijd_bestel_plugin, wedstrijd_korting_bestel_plugin
 
 EMAIL_TEMPLATE_BACKOFFICE_VERSTUREN = 'email_bestelling/backoffice-versturen.dtl'
 EMAIL_TEMPLATE_BEVESTIG_BESTELLING = 'email_bestelling/bevestig-bestelling.dtl'
 EMAIL_TEMPLATE_BEVESTIG_BETALING = 'email_bestelling/bevestig-betaling.dtl'
-
-bestel_plugins = {
-    BESTELLING_REGEL_CODE_EVENEMENT_INSCHRIJVING: evenement_bestel_plugin,
-    BESTELLING_REGEL_CODE_EVENEMENT_AFGEMELD: evenement_bestel_plugin,
-    BESTELLING_REGEL_CODE_OPLEIDING_INSCHRIJVING: opleiding_bestel_plugin,
-    BESTELLING_REGEL_CODE_OPLEIDING_AFGEMELD: opleiding_bestel_plugin,
-    BESTELLING_REGEL_CODE_WEDSTRIJD_INSCHRIJVING: wedstrijd_bestel_plugin,
-    BESTELLING_REGEL_CODE_WEDSTRIJD_AFGEMELD: wedstrijd_bestel_plugin,
-    BESTELLING_REGEL_CODE_WEBWINKEL: webwinkel_bestel_plugin,
-    BESTELLING_REGEL_CODE_TRANSPORT: None,
-}
 
 
 def zet_stdout(stdout):
@@ -313,7 +294,9 @@ def mandjes_opschonen(stdout):
     mandje_pks = list()
     for plugin in bestel_plugins.values():
         if plugin:
-            mandje_pks.extend(plugin.mandje_opschonen(verval_datum))
+            mandje_pks.extend(
+                plugin.mandje_opschonen(verval_datum)
+            )
     # for
 
     # mandjes bijwerken
@@ -486,18 +469,14 @@ def verwerk_mutatie_wedstrijd_inschrijven(stdout, mutatie: BestellingMutatie):
     mandje = _get_mandje(stdout, mutatie)
     if mandje:                                  # pragma: no branch
         inschrijving = mutatie.wedstrijd_inschrijving
-        prijs_euro = wedstrijden_plugin_inschrijven(inschrijving)
 
         # handmatige inschrijving heeft meteen status definitief en hoeft dus niet betaald te worden
         if inschrijving.status != WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF:
-            # maak een product regel aan voor de bestelling
-            product = BestellingProduct(
-                wedstrijd_inschrijving=inschrijving,
-                prijs_euro=prijs_euro)
-            product.save()
 
-            # leg het product in het mandje
-            mandje.producten.add(product)
+            regel = wedstrijd_bestel_plugin.reserveer(
+                            inschrijving,
+                            mandje.account.get_account_full_name())
+            mandje.regels.add(regel)
 
             # kijk of er automatische kortingen zijn die toegepast kunnen worden
             _automatische_kortingen_toepassen(stdout, mandje)
@@ -516,21 +495,16 @@ def verwerk_mutatie_evenement_inschrijven(stdout, mutatie: BestellingMutatie):
     mandje = _get_mandje(stdout, mutatie)
     if mandje:                                  # pragma: no branch
         inschrijving = mutatie.evenement_inschrijving
-        inschrijving.nummer = inschrijving.pk
-        inschrijving.save(update_fields=['nummer'])
-
-        prijs_euro = evenement_plugin_inschrijven(inschrijving)
 
         # handmatige inschrijving heeft meteen status definitief en hoeft dus niet betaald te worden
         if inschrijving.status != EVENEMENT_INSCHRIJVING_STATUS_DEFINITIEF:
-            # maak een product regel aan voor de bestelling
-            product = BestellingProduct(
-                            evenement_inschrijving=inschrijving,
-                            prijs_euro=prijs_euro)
-            product.save()
+            regel = evenement_bestel_plugin.reserveer(
+                            mutatie.evenement_inschrijving,
+                            mandje.account.get_account_full_name())
+            mandje.regels.add(regel)
 
-            # leg het product in het mandje
-            mandje.producten.add(product)
+            inschrijving.nummer = inschrijving.pk
+            inschrijving.save(update_fields=['nummer'])
 
             # bereken het totaal opnieuw
             _mandje_bepaal_btw(mandje)
@@ -546,7 +520,9 @@ def verwerk_mutatie_webwinkel_keuze(stdout, mutatie: BestellingMutatie):
     mandje = _get_mandje(stdout, mutatie)
     if mandje:                                  # pragma: no branch
 
-        regel = webwinkel_bestel_plugin.reserveer(mutatie.webwinkel_keuze)
+        regel = webwinkel_bestel_plugin.reserveer(
+                        mutatie.webwinkel_keuze,
+                        mandje.account.get_account_full_name())
         mandje.regels.add(regel)
 
         transport_oud = mandje.transport
@@ -571,35 +547,18 @@ def verwerk_mutatie_opleiding_inschrijven(stdout, mutatie: BestellingMutatie):
     mandje = _get_mandje(stdout, mutatie)
     if mandje:                                  # pragma: no branch
 
-        regel = opleiding_bestel_plugin.reserveer(mutatie.opleiding_inschrijving)
-        mandje.regels.add(regel)
-
         inschrijving = mutatie.opleiding_inschrijving
-
-        inschrijving.nummer = inschrijving.pk
-        inschrijving.save(update_fields=['nummer'])
-
-        prijs_euro = opleiding_plugin_inschrijven(inschrijving)
-
-        stdout.write('[DEBUG] Opleiding inschrijving status = %s (%s)' % (
-                     inschrijving.status, OPLEIDING_INSCHRIJVING_STATUS_TO_STR[inschrijving.status]))
 
         # handmatige inschrijving heeft meteen status definitief en hoeft dus niet betaald te worden
         if inschrijving.status != OPLEIDING_INSCHRIJVING_STATUS_DEFINITIEF:
-            # maak een product regel aan voor de bestelling
-            product = BestellingProduct(
-                            opleiding_inschrijving=inschrijving,
-                            prijs_euro=prijs_euro)
-            product.save()
 
-            # leg het product in het mandje
-            mandje.producten.add(product)
+            regel = opleiding_bestel_plugin.reserveer(
+                            mutatie.opleiding_inschrijving,
+                            mandje.account.get_account_full_name())
+            mandje.regels.add(regel)
 
-            stamp_str = timezone.localtime(timezone.now()).strftime('%Y-%m-%d om %H:%M')
-            msg = "[%s] Toegevoegd aan het mandje van %s\n" % (stamp_str, mandje.account.get_account_full_name())
-            inschrijving.log += msg
-            inschrijving.status = OPLEIDING_INSCHRIJVING_STATUS_RESERVERING_MANDJE
-            inschrijving.save(update_fields=['log', 'status'])
+            inschrijving.nummer = inschrijving.pk
+            inschrijving.save(update_fields=['nummer'])
 
             # bereken het totaal opnieuw
             _mandje_bepaal_btw(mandje)
@@ -611,111 +570,33 @@ def verwerk_mutatie_opleiding_inschrijven(stdout, mutatie: BestellingMutatie):
 def verwerk_mutatie_verwijder_uit_mandje(stdout, mutatie: BestellingMutatie):
     """ een bestelling mag uit het mandje voordat de betaling gestart is """
 
-    if not mutatie.product:
-        # mogelijke oorzaak: een dubbele mutatie
-        return
-
-    handled = False
     mandje = _get_mandje(stdout, mutatie)
     if mandje:                                  # pragma: no branch
-        qset = mandje.producten.filter(pk=mutatie.product.pk)
+        regel = mutatie.regel
+        qset = mandje.regels.filter(pk=regel.pk)
         if qset.exists():                       # pragma: no branch
             # product zit nog in het mandje (anders: ignore want waarschijnlijk een dubbel verzoek)
-            product = qset[0]
+            stdout.write('[INFO] Regel met pk=%s (code %s) wordt verwijderd uit het mandje van %s' % (
+                            regel.pk, regel.code, mandje.account.username))
 
-            if product.wedstrijd_inschrijving:
-                mandje.producten.remove(product)
+            plugin = bestel_plugins[regel.code]
+            nieuwe_regel = plugin.verwijder_reservering(regel)
 
-                inschrijving = product.wedstrijd_inschrijving
+            # verwijder uit het mandje
+            mandje.regels.remove(regel)
 
-                wedstrijden_plugin_verwijder_reservering(stdout, inschrijving)
+            if nieuwe_regel:
+                # vervangt een inschrijving door een afmelding
+                mandje.regels.add(nieuwe_regel)
 
-                mutatie.wedstrijd_inschrijving = None
-                mutatie.product = None
-                mutatie.save()
+            # kijk of er automatische kortingen zijn die niet meer toegepast mogen worden
+            _automatische_kortingen_toepassen(stdout, mandje)
 
-                # verwijder het product, dan verdwijnt deze ook uit het mandje
-                product.delete()
+            webwinkel_plugin_bepaal_verzendkosten_mandje(stdout, mandje)
 
-                # verwijder de hele inschrijving, want bewaren heeft geen waarde op dit punt
-                # inschrijving.delete()     # geeft db integratie error i.v.m. referenties die nog ergens bestaan
-
-                # kijk of er automatische kortingen zijn die niet meer toegepast mogen worden
-                _automatische_kortingen_toepassen(stdout, mandje)
-
-                handled = True
-
-            elif product.evenement_inschrijving:
-                mandje.producten.remove(product)
-
-                inschrijving = product.evenement_inschrijving
-
-                mutatie.evenement_inschrijving = None
-                mutatie.product = None
-                mutatie.save()
-
-                evenement_plugin_verwijder_reservering(stdout, inschrijving)
-
-                # verwijder het product, dan verdwijnt deze ook uit het mandje
-                product.delete()
-
-                handled = True
-
-            elif product.opleiding_inschrijving:
-                mandje.producten.remove(product)
-                inschrijving = product.opleiding_inschrijving
-
-                mutatie.opleiding_inschrijving = None
-                mutatie.product = None
-                mutatie.save()
-
-                opleiding_plugin_verwijder_reservering(stdout, inschrijving)
-
-                # verwijder het product, dan verdwijnt deze ook uit het mandje
-                product.delete()
-
-                handled = True
-
-            elif product.webwinkel_keuze:
-
-                transport_oud = mandje.transport
-
-                mandje.producten.remove(product)
-
-                webwinkel_keuze = product.webwinkel_keuze
-
-                webwinkel_plugin_verwijder_reservering(stdout, webwinkel_keuze)
-
-                mutatie.webwinkel_keuze = None
-                mutatie.product = None
-                mutatie.save()
-
-                # verwijder het product, dan verdwijnt deze ook uit het mandje
-                product.delete()
-
-                webwinkel_plugin_bepaal_kortingen(stdout, mandje)
-
-                webwinkel_plugin_bepaal_verzendkosten_mandje(stdout, mandje)
-
-                transport_nieuw = mandje.transport
-
-                stdout.write('[INFO] Transport: %s --> %s' % (BESTELLING_TRANSPORT2STR[transport_oud],
-                                                              BESTELLING_TRANSPORT2STR[transport_nieuw]))
-
-                handled = True
-            else:
-                stdout.write('[ERROR] Verwijder product pk=%s uit mandje pk=%s: Type niet ondersteund' % (
-                             product.pk, mandje.pk))
-
-        # bereken het totaal opnieuw
-        _mandje_bepaal_btw(mandje)
-        mandje.bepaal_totaalprijs_opnieuw()
-
-    if not handled:
-        # product ligt niet meer in het mandje?!
-        stdout.write('[WARNING] Product pk=%s niet meer in het mandje gevonden' % mutatie.product.pk)
-        if mutatie.product.wedstrijd_inschrijving:
-            wedstrijden_plugin_verwijder_reservering(stdout, mutatie.product.wedstrijd_inschrijving)
+            # bereken het totaal opnieuw
+            _mandje_bepaal_btw(mandje)
+            mandje.bepaal_totaalprijs_opnieuw()
 
 
 def verwerk_mutatie_maak_bestellingen(stdout, mutatie: BestellingMutatie):
@@ -1289,67 +1170,67 @@ def verwerk_mutatie_transport(stdout, mutatie: BestellingMutatie):
         stdout.write('[WARNING] Kan mandje niet vinden voor mutatie pk=%s' % mutatie.pk)
 
 
-def verwerk_mutatie(self, mutatie):
+def verwerk_mutatie(stdout, mutatie):
     code = mutatie.code
 
     if code == BESTELLING_MUTATIE_WEDSTRIJD_INSCHRIJVEN:
-        self.stdout.write('[INFO] Verwerk mutatie %s: inschrijven op wedstrijd' % mutatie.pk)
-        verwerk_mutatie_wedstrijd_inschrijven(self.stdout, mutatie)
+        stdout.write('[INFO] Verwerk mutatie %s: inschrijven op wedstrijd' % mutatie.pk)
+        verwerk_mutatie_wedstrijd_inschrijven(stdout, mutatie)
 
     elif code == BESTELLING_MUTATIE_EVENEMENT_INSCHRIJVEN:
-        self.stdout.write('[INFO] Verwerk mutatie %s: inschrijven op evenement' % mutatie.pk)
-        verwerk_mutatie_evenement_inschrijven(self.stdout, mutatie)
+        stdout.write('[INFO] Verwerk mutatie %s: inschrijven op evenement' % mutatie.pk)
+        verwerk_mutatie_evenement_inschrijven(stdout, mutatie)
 
     elif code == BESTELLING_MUTATIE_WEBWINKEL_KEUZE:
-        self.stdout.write('[INFO] Verwerk mutatie %s: webwinkel keuze' % mutatie.pk)
-        verwerk_mutatie_webwinkel_keuze(self.stdout, mutatie)
+        stdout.write('[INFO] Verwerk mutatie %s: webwinkel keuze' % mutatie.pk)
+        verwerk_mutatie_webwinkel_keuze(stdout, mutatie)
 
     elif code == BESTELLING_MUTATIE_VERWIJDER:
-        self.stdout.write('[INFO] Verwerk mutatie %s: verwijder product uit mandje' % mutatie.pk)
-        verwerk_mutatie_verwijder_uit_mandje(self.stdout, mutatie)
+        stdout.write('[INFO] Verwerk mutatie %s: verwijder product uit mandje' % mutatie.pk)
+        verwerk_mutatie_verwijder_uit_mandje(stdout, mutatie)
 
     elif code == BESTELLING_MUTATIE_MAAK_BESTELLINGEN:
-        self.stdout.write('[INFO] Verwerk mutatie %s: mandje omzetten in bestelling(en)' % mutatie.pk)
-        verwerk_mutatie_maak_bestellingen(self.stdout, mutatie)
+        stdout.write('[INFO] Verwerk mutatie %s: mandje omzetten in bestelling(en)' % mutatie.pk)
+        verwerk_mutatie_maak_bestellingen(stdout, mutatie)
 
     elif code == BESTELLING_MUTATIE_WEDSTRIJD_AFMELDEN:
-        self.stdout.write('[INFO] Verwerk mutatie %s: afmelden voor wedstrijd' % mutatie.pk)
-        verwerk_mutatie_wedstrijd_afmelden(self.stdout, mutatie)
+        stdout.write('[INFO] Verwerk mutatie %s: afmelden voor wedstrijd' % mutatie.pk)
+        verwerk_mutatie_wedstrijd_afmelden(stdout, mutatie)
 
     elif code == BESTELLING_MUTATIE_EVENEMENT_AFMELDEN:
-        self.stdout.write('[INFO] Verwerk mutatie %s: afmelden voor evenement' % mutatie.pk)
-        verwerk_mutatie_evenement_afmelden(self.stdout, mutatie)
+        stdout.write('[INFO] Verwerk mutatie %s: afmelden voor evenement' % mutatie.pk)
+        verwerk_mutatie_evenement_afmelden(stdout, mutatie)
 
     elif code == BESTELLING_MUTATIE_BETALING_AFGEROND:
-        self.stdout.write('[INFO] Verwerk mutatie %s: betaling afgerond' % mutatie.pk)
-        verwerk_mutatie_betaling_afgerond(self.stdout, mutatie)
+        stdout.write('[INFO] Verwerk mutatie %s: betaling afgerond' % mutatie.pk)
+        verwerk_mutatie_betaling_afgerond(stdout, mutatie)
 
     elif code == BESTELLING_MUTATIE_OVERBOEKING_ONTVANGEN:
-        self.stdout.write('[INFO] Verwerk mutatie %s: overboeking ontvangen' % mutatie.pk)
-        verwerk_mutatie_overboeking_ontvangen(self.stdout, mutatie)
+        stdout.write('[INFO] Verwerk mutatie %s: overboeking ontvangen' % mutatie.pk)
+        verwerk_mutatie_overboeking_ontvangen(stdout, mutatie)
 
     # elif code == BESTELLING_MUTATIE_RESTITUTIE_UITBETAALD:
-    #     self.stdout.write('[INFO] Verwerk mutatie %s: restitutie uitbetaald' % mutatie.pk)
-    #     verwerk_mutatie_restitutie_uitbetaald(self.stdout, mutatie)
+    #     stdout.write('[INFO] Verwerk mutatie %s: restitutie uitbetaald' % mutatie.pk)
+    #     verwerk_mutatie_restitutie_uitbetaald(stdout, mutatie)
 
     elif code == BESTELLING_MUTATIE_ANNULEER:
-        self.stdout.write('[INFO] Verwerk mutatie %s: annuleer bestelling' % mutatie.pk)
-        verwerk_mutatie_annuleer_bestelling(self.stdout, mutatie)
+        stdout.write('[INFO] Verwerk mutatie %s: annuleer bestelling' % mutatie.pk)
+        verwerk_mutatie_annuleer_bestelling(stdout, mutatie)
 
     elif code == BESTELLING_MUTATIE_TRANSPORT:
-        self.stdout.write('[INFO] Verwerk mutatie %s: wijzig transport' % mutatie.pk)
-        verwerk_mutatie_transport(self.stdout, mutatie)
+        stdout.write('[INFO] Verwerk mutatie %s: wijzig transport' % mutatie.pk)
+        verwerk_mutatie_transport(stdout, mutatie)
 
     elif code == BESTELLING_MUTATIE_OPLEIDING_INSCHRIJVEN:
-        self.stdout.write('[INFO] Verwerk mutatie %s: inschrijven op opleiding' % mutatie.pk)
-        verwerk_mutatie_opleiding_inschrijven(self.stdout, mutatie)
+        stdout.write('[INFO] Verwerk mutatie %s: inschrijven op opleiding' % mutatie.pk)
+        verwerk_mutatie_opleiding_inschrijven(stdout, mutatie)
 
     elif code == BESTELLING_MUTATIE_OPLEIDING_AFMELDEN:
-        self.stdout.write('[INFO] Verwerk mutatie %s: afmelden voor opleiding' % mutatie.pk)
-        verwerk_mutatie_opleiding_afmelden(self.stdout, mutatie)
+        stdout.write('[INFO] Verwerk mutatie %s: afmelden voor opleiding' % mutatie.pk)
+        verwerk_mutatie_opleiding_afmelden(stdout, mutatie)
 
     else:
-        self.stdout.write('[ERROR] Onbekende mutatie code %s (pk=%s)' % (code, mutatie.pk))
+        stdout.write('[ERROR] Onbekende mutatie code %s (pk=%s)' % (code, mutatie.pk))
 
 
 # end of file

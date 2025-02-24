@@ -131,7 +131,6 @@ class ToonBestellingDetailsView(UserPassesTestMixin, TemplateView):
         """ beschrijf de inhoud van een bestelling """
 
         bevat_fout = False
-
         controleer_euro = Decimal(0)
 
         regels = (bestelling
@@ -141,7 +140,7 @@ class ToonBestellingDetailsView(UserPassesTestMixin, TemplateView):
         for regel in regels:
             # maak een beschrijving van deze regel
             regel.beschrijving = beschrijf_regel(regel)
-            controleer_euro += regel.prijs_euro
+            controleer_euro += regel.bedrag_euro
         # for
 
         # nooit een negatief totaalbedrag tonen want we geven geen geld weg

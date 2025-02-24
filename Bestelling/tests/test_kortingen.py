@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2024 Ramon van der Winkel.
+#  Copyright (c) 2022-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -10,7 +10,7 @@ from django.utils import timezone
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse
 from Bestelling.models import BestellingMandje
 from Bestelling.operations.mutaties import (bestel_mutatieverzoek_inschrijven_wedstrijd,
-                                            bestel_mutatieverzoek_verwijder_product_uit_mandje,
+                                            bestel_mutatieverzoek_verwijder_regel_uit_mandje,
                                             bestel_mutatieverzoek_maak_bestellingen)
 from Betaal.models import BetaalInstellingenVereniging
 from Geo.models import Regio
@@ -387,8 +387,8 @@ class TestBestellingKortingen(E2EHelpers, TestCase):
 
         # verwijder de inschrijving voor de 1e wedstrijd
         # krijg ver korting i.p.v. combi-korting
-        product = inschrijving1.bestellingproduct_set.first()
-        bestel_mutatieverzoek_verwijder_product_uit_mandje(self.account_sporter1, product, snel=True)
+        product = inschrijving1.bestellingproduct_set.first()       # TODO: update
+        bestel_mutatieverzoek_verwijder_regel_uit_mandje(self.account_sporter1, product, snel=True)
         self.verwerk_bestel_mutaties()
 
         inschrijving1 = WedstrijdInschrijving.objects.get(pk=inschrijving1_sporter1.pk)

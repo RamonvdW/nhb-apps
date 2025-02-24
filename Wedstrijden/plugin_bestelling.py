@@ -5,14 +5,15 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.utils import timezone
+from Bestelling.definities import BESTELLING_REGEL_CODE_WEDSTRIJD_INSCHRIJVING
 from Bestelling.bestel_plugin_base import BestelPluginBase
 from Bestelling.models import BestellingRegel
 from Wedstrijden.definities import (WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_MANDJE,
                                     WEDSTRIJD_INSCHRIJVING_STATUS_TO_STR)
-from Wedstrijden.models import WedstrijdInschrijving
+from Wedstrijden.models import WedstrijdInschrijving, WedstrijdKorting, beschrijf_korting
 
 
-class BestelPlugin(BestelPluginBase):
+class WedstrijdBestelPlugin(BestelPluginBase):
 
     def __init__(self):
         super().__init__()
@@ -47,7 +48,7 @@ class BestelPlugin(BestelPluginBase):
 
         return mandje_pks
 
-    def reserveer(self, inschrijving: WedstrijdInschrijving) -> BestellingRegel:
+    def reserveer(self, inschrijving: WedstrijdInschrijving, mandje_van_str: str) -> BestellingRegel:
         """ Maak een reservering voor de wedstrijd sessie (zodat iemand anders deze niet kan reserveren)
             en geef een BestellingRegel terug.
         """
@@ -59,27 +60,47 @@ class BestelPlugin(BestelPluginBase):
         sessie.aantal_inschrijvingen += 1
         sessie.save(update_fields=['aantal_inschrijvingen'])
 
+        kort = inschrijving.korte_beschrijving()
         wedstrijd = inschrijving.wedstrijd
         sporter = inschrijving.sporterboog.sporter
-
         prijs_euro = wedstrijd.bepaal_prijs_voor_sporter(sporter)
-        korting_euro = self.bepaal_korting(inschrijving)
         # btw en gewicht zijn niet van toepassing
+        # kortingen niet hier bepaald
 
         regel = BestellingRegel(
                     korte_beschrijving=kort,
-                    prijs_euro=prijs_euro,
-                    korting_euro=korting_euro,
-                    code=BESTELLING_REGEL_CODE_WEBWINKEL)
+                    bedrag_euro=prijs_euro,
+                    code=BESTELLING_REGEL_CODE_WEDSTRIJD_INSCHRIJVING)
         regel.save()
 
         inschrijving.bestelling = regel
-        inschrijving.save(update_fields=['bestelling'])
+
+        stamp_str = timezone.localtime(timezone.now()).strftime('%Y-%m-%d om %H:%M')
+        msg = "[%s] Toegevoegd aan het mandje van %s\n" % (stamp_str, mandje_van_str)
+        inschrijving.log += msg
+
+        inschrijving.save(update_fields=['bestelling', 'log'])
 
         return regel
 
-    def verwijder_reservering(self, regel: BestellingRegel):
-        raise NotImplementedError()
+    def verwijder_reservering(self, regel: BestellingRegel) -> BestellingRegel | None:
+
+        nieuwe_regel = None
+
+        inschrijving = regel.wedstrijdinschrijving_set.first()
+
+        if inschrijving.status == WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_MANDJE:
+            # schrijf de sporter uit bij de sessie
+            # Noteer: geen concurrency risico want serialisatie via deze achtergrondtaak
+            sessie = inschrijving.sessie
+            if sessie.aantal_inschrijvingen > 0:  # voorkom ongelukken: kan negatief niet opslaan
+                sessie.aantal_inschrijvingen -= 1
+                sessie.save(update_fields=['aantal_inschrijvingen'])
+
+            self.stdout.write('[INFO] Wedstrijd inschrijving pk=%s reservering wordt verwijderd' % inschrijving.pk)
+            inschrijving.delete()
+
+        return nieuwe_regel
 
     def _verwijder_reservering(self, inschrijving: WedstrijdInschrijving): # -> WedstrijdAfmelding:
 
@@ -116,8 +137,38 @@ class BestelPlugin(BestelPluginBase):
         # inschrijving.save(update_fields=['status', 'log', 'korting'])
 
 
+class WedstrijdKortingBestelPlugin(BestelPluginBase):
 
-wedstrijd_bestel_plugin = BestelPlugin()
+    def __init__(self):
+        super().__init__()
+
+    def mandje_opschonen(self, verval_datum):
+        # nothing to do
+        return []
+
+    def beschrijf_product(self, obj: WedstrijdKorting) -> list:
+        """
+            Geef een lijst van tuples terug waarin aspecten van het product beschreven staan.
+        """
+        # TODO als de aankoop geannuleerd is, dan hoeven we de korting niet meer te laten zien?
+
+        kort, redenen = beschrijf_korting(obj)
+
+        beschrijving = list()
+
+        tup = ('Korting', kort)
+        beschrijving.append(tup)
+
+        # elke reden is een wedstrijd waarvoor de combi-korting gegeven is
+        if len(redenen) > 0:
+            tup = ('Combinatie', " en ".join(redenen))
+            beschrijving.append(tup)
+
+        return redenen
+
+
+wedstrijd_bestel_plugin = WedstrijdBestelPlugin()
+wedstrijd_korting_bestel_plugin = WedstrijdKortingBestelPlugin()
 
 # end of file
 

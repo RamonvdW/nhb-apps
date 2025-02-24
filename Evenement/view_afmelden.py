@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2024 Ramon van der Winkel.
+#  Copyright (c) 2024-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -9,7 +9,7 @@ from django.urls import reverse
 from django.views.generic import View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Bestelling.operations.mutaties import (bestel_mutatieverzoek_afmelden_evenement,
-                                            bestel_mutatieverzoek_verwijder_product_uit_mandje)
+                                            bestel_mutatieverzoek_verwijder_regel_uit_mandje)
 from Evenement.definities import EVENEMENT_INSCHRIJVING_STATUS_RESERVERING_MANDJE
 from Evenement.models import EvenementInschrijving
 from Functie.definities import Rol
@@ -49,9 +49,8 @@ class AfmeldenView(UserPassesTestMixin, View):
         snel = str(request.POST.get('snel', ''))[:1]
 
         if inschrijving.status == EVENEMENT_INSCHRIJVING_STATUS_RESERVERING_MANDJE:
-            if inschrijving.bestellingproduct_set.count() > 0:          # pragma: no branch
-                product = inschrijving.bestellingproduct_set.first()
-                bestel_mutatieverzoek_verwijder_product_uit_mandje(inschrijving.koper, product, snel == '1')
+            regel = inschrijving.bestelling
+            bestel_mutatieverzoek_verwijder_regel_uit_mandje(inschrijving.koper, regel, snel == '1')
         else:
             bestel_mutatieverzoek_afmelden_evenement(inschrijving, snel == '1')
 

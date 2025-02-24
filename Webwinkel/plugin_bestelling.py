@@ -5,15 +5,16 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.conf import settings
+from django.utils import timezone
 from Bestelling.bestel_plugin_base import BestelPluginBase
 from Bestelling.definities import BESTELLING_REGEL_CODE_WEBWINKEL
 from Bestelling.models import BestellingRegel
-from Webwinkel.definities import KEUZE_STATUS_RESERVERING_MANDJE
+from Webwinkel.definities import KEUZE_STATUS_RESERVERING_MANDJE, KEUZE_STATUS_GEANNULEERD
 from Webwinkel.models import WebwinkelKeuze
 from decimal import Decimal
 
 
-class BestelPlugin(BestelPluginBase):
+class WebwinkelBestelPlugin(BestelPluginBase):
 
     def __init__(self):
         super().__init__()
@@ -56,7 +57,7 @@ class BestelPlugin(BestelPluginBase):
 
         return mandje_pks
 
-    def reserveer(self, webwinkel_keuze: WebwinkelKeuze) -> BestellingRegel:
+    def reserveer(self, webwinkel_keuze: WebwinkelKeuze, mandje_van_str: str) -> BestellingRegel:
         """ Maak een reservering voor het webwinkel product (zodat iemand anders deze niet kan reserveren)
             en geef een BestellingRegel terug.
         """
@@ -87,25 +88,47 @@ class BestelPlugin(BestelPluginBase):
         # maak een product regel aan voor de bestelling
         regel = BestellingRegel(
                         korte_beschrijving=kort,
+                        bedrag_euro=prijs_euro,
                         btw_percentage=btw_str,
-                        prijs_euro=prijs_euro,
                         btw_euro=btw_euro,
                         code=BESTELLING_REGEL_CODE_WEBWINKEL)
         regel.save()
 
         webwinkel_keuze.bestelling = regel
-        webwinkel_keuze.save(update_fields=['bestelling'])
+
+        stamp_str = timezone.localtime(timezone.now()).strftime('%Y-%m-%d om %H:%M')
+        msg = "[%s] Toegevoegd aan het mandje van %s\n" % (stamp_str, mandje_van_str)
+        webwinkel_keuze.log += msg
+
+        webwinkel_keuze.save(update_fields=['bestelling', 'log'])
 
         return regel
 
-    def verwijder_reservering(self, regel: BestellingRegel):
-        """ Geef een eerder gemaakte reservering voor een webwinkel product weer vrij
+    def verwijder_reservering(self, regel: BestellingRegel) -> BestellingRegel | None:
         """
-        raise NotImplementedError()
+            Het product wordt uit het mandje gehaald
+            of de bestelling wordt geannuleerd (voordat deze betaald is)
+
+            Geef een eerder gemaakte reservering voor een webwinkel product weer vrij
+            zodat deze door iemand anders te kiezen zijn.
+        """
+        keuze = regel.webwinkelkeuze_set.first()
+        if keuze:
+            product = keuze.product
+            aantal = keuze.aantal
+
+            if not product.onbeperkte_voorraad:
+                # Noteer: geen concurrency risico want serialisatie via deze achtergrondtaak
+                product.aantal_op_voorraad += aantal
+                product.save(update_fields=['aantal_op_voorraad'])
+
+            keuze.status = KEUZE_STATUS_GEANNULEERD
+            keuze.save(update_fields=['status'])
+
+        return None
 
 
-webwinkel_bestel_plugin = BestelPlugin()
-
+webwinkel_bestel_plugin = WebwinkelBestelPlugin()
 
 # end of file
 

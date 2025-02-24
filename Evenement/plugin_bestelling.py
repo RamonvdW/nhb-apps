@@ -6,7 +6,7 @@
 
 from django.utils import timezone
 from Bestelling.bestel_plugin_base import BestelPluginBase
-from Bestelling.definities import BESTELLING_REGEL_CODE_EVENEMENT_INSCHRIJVING
+from Bestelling.definities import BESTELLING_REGEL_CODE_EVENEMENT_INSCHRIJVING, BESTELLING_REGEL_CODE_EVENEMENT_AFGEMELD
 from Bestelling.models import BestellingRegel
 from Evenement.definities import (EVENEMENT_INSCHRIJVING_STATUS_TO_STR, EVENEMENT_AFMELDING_STATUS_TO_STR,
                                   EVENEMENT_INSCHRIJVING_STATUS_DEFINITIEF,
@@ -16,7 +16,7 @@ from Evenement.definities import (EVENEMENT_INSCHRIJVING_STATUS_TO_STR, EVENEMEN
 from Evenement.models import EvenementInschrijving, EvenementAfgemeld
 
 
-class BestelPlugin(BestelPluginBase):
+class EvenementBestelPlugin(BestelPluginBase):
 
     def __init__(self):
         super().__init__()
@@ -49,7 +49,7 @@ class BestelPlugin(BestelPluginBase):
 
         return mandje_pks
 
-    def reserveer(self, inschrijving: EvenementInschrijving) -> BestellingRegel:
+    def reserveer(self, inschrijving: EvenementInschrijving, mandje_van_str: str) -> BestellingRegel:
         """ Maak een reservering voor het evenement (zodat iemand anders deze niet kan reserveren)
             en geef een BestellingRegel terug.
         """
@@ -64,17 +64,75 @@ class BestelPlugin(BestelPluginBase):
         # maak een product regel aan voor de bestelling
         regel = BestellingRegel(
                         korte_beschrijving=kort,
-                        prijs_euro=prijs_euro,
+                        bedrag_euro=prijs_euro,
                         code=BESTELLING_REGEL_CODE_EVENEMENT_INSCHRIJVING)
         regel.save()
 
         inschrijving.bestelling = regel
-        inschrijving.save(update_fields=['bestelling'])
+
+        inschrijving.status = EVENEMENT_INSCHRIJVING_STATUS_RESERVERING_MANDJE
+
+        stamp_str = timezone.localtime(timezone.now()).strftime('%Y-%m-%d om %H:%M')
+        msg = "[%s] Toegevoegd aan het mandje van %s\n" % (stamp_str, mandje_van_str)
+        inschrijving.log += msg
+
+        inschrijving.save(update_fields=['bestelling', 'status', 'log'])
 
         return regel
 
-    def verwijder_reservering(self, regel: BestellingRegel):
-        pass
+    def verwijder_reservering(self, regel: BestellingRegel) -> BestellingRegel | None:
+        """
+            Het product wordt uit het mandje gehaald
+            of de bestelling wordt geannuleerd (voordat deze betaald is)
+        """
+        nieuwe_regel = None
+
+        inschrijving = regel.evenementinschrijving_set.first()
+        if inschrijving:
+            if inschrijving.status == EVENEMENT_INSCHRIJVING_STATUS_RESERVERING_MANDJE:
+                # verwijdering uit mandje
+                self.stdout.write('[INFO] Evenement inschrijving pk=%s status %s --> verwijderd uit mandje' % (
+                                    inschrijving.pk,
+                                    EVENEMENT_INSCHRIJVING_STATUS_TO_STR[inschrijving.status]))
+            else:
+                # zet de inschrijving om in een afmelding
+                nieuwe_regel = BestellingRegel(
+                                    korte_beschrijving="[GEANNULEERD] " + regel.korte_beschrijving,
+                                    code=BESTELLING_REGEL_CODE_EVENEMENT_AFGEMELD)
+                nieuwe_regel.save()
+
+                now = timezone.now()
+                stamp_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
+                msg = "[%s] Annuleer inschrijving voor dit evenement\n" % stamp_str
+
+                afmelding = EvenementAfgemeld(
+                                    wanneer_inschrijving=inschrijving.wanneer,
+                                    nummer=inschrijving.nummer,
+                                    wanneer_afgemeld=now,
+                                    status=EVENEMENT_AFMELDING_STATUS_AFGEMELD,
+                                    bestelling=nieuwe_regel,
+                                    evenement=inschrijving.evenement,
+                                    sporter=inschrijving.sporter,
+                                    koper=inschrijving.koper,
+                                    bedrag_ontvangen=inschrijving.bedrag_ontvangen,
+                                    log=inschrijving.log + msg)
+
+                if inschrijving.status != EVENEMENT_INSCHRIJVING_STATUS_DEFINITIEF:
+                    # nog niet betaald
+                    afmelding.status = EVENEMENT_AFMELDING_STATUS_GEANNULEERD
+
+                afmelding.save()
+
+                self.stdout.write('[INFO] Evenement inschrijving pk=%s status %s --> afgemeld pk=%s status %s' % (
+                                    inschrijving.pk,
+                                    EVENEMENT_INSCHRIJVING_STATUS_TO_STR[inschrijving.status],
+                                    afmelding.pk,
+                                    EVENEMENT_AFMELDING_STATUS_TO_STR[afmelding.status]))
+
+            # verwijder de inschrijving
+            inschrijving.delete()
+
+        return nieuwe_regel
 
     def _verwijder_reservering(self, inschrijving: EvenementInschrijving) -> EvenementAfgemeld | None:
         # wordt gebruikt bij:
@@ -123,7 +181,7 @@ class BestelPlugin(BestelPluginBase):
         return afmelding
 
 
-evenement_bestel_plugin = BestelPlugin()
+evenement_bestel_plugin = EvenementBestelPlugin()
 
 # end of file
 
