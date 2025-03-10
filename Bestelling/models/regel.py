@@ -5,6 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db import models
+from Bestelling.definities import BESTELLING_REGEL_CODE_WEBWINKEL
 from decimal import Decimal
 
 
@@ -17,6 +18,7 @@ class BestellingRegel(models.Model):
     """
 
     # korte beschrijving
+    # als regel-break wordt BESTELLING_KORT_BREAK gebruikt
     korte_beschrijving = models.CharField(max_length=250, default='?', blank=True)
 
     # alleen voor kortingen: alle redenen voor de korting, gescheiden door een dubbel pipeline teken
@@ -40,6 +42,9 @@ class BestellingRegel(models.Model):
 
     # code voor routing naar de juiste plugin
     code = models.CharField(max_length=25, default='?', blank=True)
+
+    def is_webwinkel(self):
+        return self.code == BESTELLING_REGEL_CODE_WEBWINKEL
 
     def __str__(self):
         """ beschrijving voor de admin interface """

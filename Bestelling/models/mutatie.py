@@ -8,7 +8,6 @@ from django.db import models
 from django.utils import timezone
 from Account.models import Account
 from Bestelling.definities import BESTELLING_MUTATIE_TO_STR, BESTELLING_TRANSPORT_NVT, BESTELLING_TRANSPORT_OPTIES
-from Bestelling.models.product_obsolete import BestellingProduct
 from Bestelling.models import Bestelling, BestellingRegel
 from Evenement.models import EvenementInschrijving
 from Opleiding.models import OpleidingInschrijving
@@ -45,8 +44,8 @@ class BestellingMutatie(models.Model):
     # BESTEL_MUTATIE_WEDSTRIJD_AFMELDEN:        inschrijving
     # BESTEL_MUTATIE_BETALING_AFGEROND:         bestelling, betaling_is_gelukt
     # BESTEL_MUTATIE_OVERBOEKING_ONTVANGEN:     bestelling, bedrag_euro
-    # BESTEL_MUTATIE_RESTITUTIE_UITBETAALD:
     # BESTEL_MUTATIE_ANNULEER:                  bestelling
+    # BESTEL_MUTATIE_RESTITUTIE_UITBETAALD:
     # BESTEL_MUTATIE_TRANSPORT:
     # BESTEL_MUTATIE_EVENEMENT_INSCHRIJVEN:     evenement_inschrijving
 
@@ -66,7 +65,6 @@ class BestellingMutatie(models.Model):
     webwinkel_keuze = models.ForeignKey(WebwinkelKeuze, on_delete=models.SET_NULL, null=True, blank=True)
 
     # het product waar deze mutatie betrekking op heeft
-    product = models.ForeignKey(BestellingProduct, on_delete=models.SET_NULL, null=True, blank=True)
     regel = models.ForeignKey(BestellingRegel, on_delete=models.SET_NULL, null=True, blank=True)
 
     # gevraagde korting om toe te passen

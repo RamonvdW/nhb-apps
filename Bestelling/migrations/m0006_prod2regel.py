@@ -16,7 +16,8 @@ from Bestelling.definities import (BESTELLING_REGEL_CODE_EVENEMENT_INSCHRIJVING,
                                    BESTELLING_REGEL_CODE_WEDSTRIJD_AFGEMELD,
                                    BESTELLING_REGEL_CODE_WEBWINKEL,
                                    BESTELLING_REGEL_CODE_TRANSPORT,
-                                   BESTELLING_REGEL_CODE_WEDSTRIJD_KORTING)
+                                   BESTELLING_REGEL_CODE_WEDSTRIJD_KORTING,
+                                   BESTELLING_KORT_BREAK)
 from Webwinkel.definities import (KEUZE_STATUS_RESERVERING_MANDJE, KEUZE_STATUS_BESTELD, KEUZE_STATUS_BACKOFFICE,
                                   KEUZE_STATUS_GEANNULEERD)
 from Wedstrijden.definities import WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD
@@ -289,7 +290,6 @@ def migrate_product2regel_wedstrijd(apps, _):
     prod2regels = dict()        # [product.pk] = [regel, ..]
 
     # inschrijving
-    bulk = list()
     for prod in (bestelling_product_klas
                  .objects
                  .exclude(wedstrijd_inschrijving=None)
@@ -328,7 +328,7 @@ def migrate_product2regel_wedstrijd(apps, _):
                         bedrag_euro=0 - prod.korting_euro,
                         code=BESTELLING_REGEL_CODE_WEDSTRIJD_KORTING)
             if len(redenen):
-                regel.korting_redenen = "||".join(redenen)
+                regel.korting_redenen = BESTELLING_KORT_BREAK.join(redenen)
             regel.save()
             prod2regels[prod.pk].append(regel)
     # for

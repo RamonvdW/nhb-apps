@@ -9,7 +9,6 @@ from django.utils import timezone
 from Account.models import Account
 from Bestelling.definities import (BESTELLING_STATUS_CHOICES, BESTELLING_STATUS_NIEUW, BESTELLING_STATUS2STR,
                                    BESTELLING_TRANSPORT_NVT, BESTELLING_TRANSPORT_OPTIES)
-from Bestelling.models.product_obsolete import BestellingProduct
 from Bestelling.models.regel import BestellingRegel
 from Betaal.format import format_bedrag_euro
 from Betaal.models import BetaalActief, BetaalTransactie, BetaalMutatie, BetaalInstellingenVereniging
@@ -51,7 +50,6 @@ class Bestelling(models.Model):
     verkoper_heeft_mollie = models.BooleanField(default=False)
 
     # de bestelde producten met prijs en korting
-    producten = models.ManyToManyField(BestellingProduct)
     regels = models.ManyToManyField(BestellingRegel)
 
     # afleveradres: automatisch voor leden, handmatig voor gastaccounts (kan ook buitenlands adres zijn)

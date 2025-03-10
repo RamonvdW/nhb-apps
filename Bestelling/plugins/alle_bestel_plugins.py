@@ -19,21 +19,8 @@ from Bestelling.definities import (BESTELLING_REGEL_CODE_EVENEMENT_INSCHRIJVING,
                                    BESTELLING_REGEL_CODE_TRANSPORT)
 from Evenement.plugin_bestelling import evenement_bestel_plugin
 from Opleiding.plugin_bestelling import opleiding_bestel_plugin
-from Webwinkel.plugin_bestelling import webwinkel_bestel_plugin
+from Webwinkel.plugin_bestelling import webwinkel_bestel_plugin, transportkosten_bestel_plugin
 from Wedstrijden.plugin_bestelling import wedstrijd_bestel_plugin, wedstrijd_korting_bestel_plugin
-
-
-class TransportHandler(BestelPluginBase):
-
-    def mandje_opschonen(self, verval_datum):
-        # nothing to do
-        return []
-
-    def beschrijf_product(self, obj) -> list:
-        """
-            Geef een lijst van tuples terug waarin aspecten van het product beschreven staan.
-        """
-        raise NotImplementedError()
 
 
 bestel_plugins = {
@@ -45,7 +32,7 @@ bestel_plugins = {
     BESTELLING_REGEL_CODE_WEDSTRIJD_AFGEMELD: wedstrijd_bestel_plugin,
     BESTELLING_REGEL_CODE_WEDSTRIJD_KORTING: wedstrijd_korting_bestel_plugin,
     BESTELLING_REGEL_CODE_WEBWINKEL: webwinkel_bestel_plugin,
-    BESTELLING_REGEL_CODE_TRANSPORT: TransportHandler(),
+    BESTELLING_REGEL_CODE_TRANSPORT: transportkosten_bestel_plugin,
 }
 
 # end of file

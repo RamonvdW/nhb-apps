@@ -7,7 +7,6 @@
 from django.db import models
 from Account.models import Account
 from Bestelling.definities import BESTELLING_TRANSPORT_NVT, BESTELLING_TRANSPORT_OPTIES
-from Bestelling.models.product_obsolete import BestellingProduct
 from Bestelling.models.regel import BestellingRegel
 from decimal import Decimal
 
@@ -23,7 +22,6 @@ class BestellingMandje(models.Model):
     account = models.OneToOneField(Account, on_delete=models.CASCADE)
 
     # de gekozen producten met prijs en korting
-    producten = models.ManyToManyField(BestellingProduct)
     regels = models.ManyToManyField(BestellingRegel)
 
     # afleveradres: automatisch voor leden, handmatig voor gastaccounts (kan ook buitenlands adres zijn)

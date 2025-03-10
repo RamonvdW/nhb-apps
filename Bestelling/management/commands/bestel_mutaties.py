@@ -12,7 +12,7 @@ from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.db.utils import OperationalError, IntegrityError
 from Bestelling.models import BestellingMutatie
-from Bestelling.operations.verwerk_mutaties import verwerk_mutatie, mandjes_opschonen, zet_stdout
+from Bestelling.operations.verwerk_mutaties import VerwerkBestelMutaties
 from Mailer.operations import mailer_notify_internal_error
 from Site.core.background_sync import BackgroundSync
 import traceback
@@ -26,6 +26,8 @@ class Command(BaseCommand):
 
     def __init__(self, stdout=None, stderr=None, no_color=False, force_color=False):
         super().__init__(stdout, stderr, no_color, force_color)
+
+        self.verwerk_mutaties = VerwerkBestelMutaties(self.stdout)
 
         self.stop_at = datetime.datetime.now()
 
@@ -84,7 +86,7 @@ class Command(BaseCommand):
                        .get(pk=pk))
 
             if not mutatie.is_verwerkt:
-                verwerk_mutatie(self.stdout, mutatie)
+                self.verwerk_mutaties.verwerk(mutatie)
                 mutatie.is_verwerkt = True
                 mutatie.save(update_fields=['is_verwerkt'])
                 did_useful_work = True
@@ -157,12 +159,11 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
 
-        zet_stdout(self.stdout)
         self._set_stop_time(**options)
 
         # vang generieke fouten af
         try:
-            mandjes_opschonen(self.stdout)
+            self.verwerk_mutaties.mandjes_opschonen()
             self._monitor_nieuwe_mutaties()
         except (OperationalError, IntegrityError) as exc:  # pragma: no cover
             # OperationalError treed op bij system shutdown, als database gesloten wordt

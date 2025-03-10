@@ -8,8 +8,9 @@ from django.conf import settings
 from django.utils import timezone
 from Bestelling.bestel_plugin_base import BestelPluginBase
 from Bestelling.definities import BESTELLING_REGEL_CODE_WEBWINKEL
-from Bestelling.models import BestellingRegel
-from Webwinkel.definities import KEUZE_STATUS_RESERVERING_MANDJE, KEUZE_STATUS_GEANNULEERD
+from Bestelling.models import Bestelling, BestellingRegel, BestellingMandje
+from Webwinkel.definities import (KEUZE_STATUS_RESERVERING_MANDJE, KEUZE_STATUS_GEANNULEERD,
+                                  VERZENDKOSTEN_BRIEFPOST, VERZENDKOSTEN_PAKKETPOST)
 from Webwinkel.models import WebwinkelKeuze
 from decimal import Decimal
 
@@ -127,8 +128,90 @@ class WebwinkelBestelPlugin(BestelPluginBase):
 
         return None
 
+    def is_besteld(self, regel: BestellingRegel):
+        """
+            Het gereserveerde product in het mandje is nu omgezet in een bestelling.
+            Verander de status van het gevraagde product naar 'besteld maar nog niet betaald'
+        """
+        raise NotImplementedError()
+
+    def is_betaald(self, regel: BestellingRegel, bedrag_ontvangen: Decimal):
+        """
+            Het product is betaald, dus de reservering moet definitief gemaakt worden.
+            Wordt ook aangeroepen als een bestelling niet betaald hoeft te worden (totaal bedrag nul).
+        """
+        raise NotImplementedError()
+
+    def get_verkoper_ver_nr(self, regel: BestellingRegel) -> int:
+        """
+            Bepaal welke vereniging de verkopende partij is
+        """
+        # verkoper van de webwinkel producten is altijd het bondsbureau
+        return settings.WEBWINKEL_VERKOPER_VER_NR
+
+
+class TransportkostenBestelPlugin(BestelPluginBase):
+
+    def mandje_opschonen(self, verval_datum):
+        # nothing to do
+        return []
+
+    def beschrijf_product(self, obj) -> list:
+        """
+            Geef een lijst van tuples terug waarin aspecten van het product beschreven staan.
+        """
+        # TODO
+        raise NotImplementedError()
+
+    def bereken_verzendkosten(self, obj: BestellingMandje | Bestelling) -> Decimal:
+        """
+            Bereken de verzendkosten van toepassing op het mandje of de bestelling
+            0 = geen producten zijn die verstuurd hoeven te worden
+        """
+
+        # zoek de regels die over webwinkel producten gaan
+        regel_pks = list(obj.regels.filter(code=BESTELLING_REGEL_CODE_WEBWINKEL).values_list('pk', flat=True))
+        webwinkel_count = len(regel_pks)
+
+        verzendkosten_euro = Decimal(0)
+
+        if webwinkel_count > 0:
+            qset = WebwinkelKeuze.objects.filter(regel__pk__in=regel_pks)
+            webwinkel_briefpost = qset.filter(product__type_verzendkosten=VERZENDKOSTEN_BRIEFPOST).count()
+            webwinkel_pakketpost = qset.filter(product__type_verzendkosten=VERZENDKOSTEN_PAKKETPOST).count()
+
+            if webwinkel_briefpost > 0:
+                verzendkosten_euro = Decimal(settings.WEBWINKEL_BRIEF_VERZENDKOSTEN_EURO)
+
+            if webwinkel_pakketpost > 0:
+                verzendkosten_euro = Decimal(settings.WEBWINKEL_PAKKET_GROOT_VERZENDKOSTEN_EURO)
+
+        return verzendkosten_euro
+
+    def is_besteld(self, regel: BestellingRegel):
+        """
+            Het gereserveerde product in het mandje is nu omgezet in een bestelling.
+            Verander de status van het gevraagde product naar 'besteld maar nog niet betaald'
+        """
+        pass
+
+    def is_betaald(self, regel: BestellingRegel, bedrag_ontvangen: Decimal):
+        """
+            Het product is betaald, dus de reservering moet definitief gemaakt worden.
+            Wordt ook aangeroepen als een bestelling niet betaald hoeft te worden (totaal bedrag nul).
+        """
+        pass
+
+    def get_verkoper_ver_nr(self, regel: BestellingRegel) -> int:
+        """
+            Bepaal welke vereniging de verkopende partij is
+        """
+        # "verkoper" van de transportkosten is altijd het bondsbureau
+        return settings.WEBWINKEL_VERKOPER_VER_NR
+
 
 webwinkel_bestel_plugin = WebwinkelBestelPlugin()
+transportkosten_bestel_plugin = TransportkostenBestelPlugin()
 
 # end of file
 

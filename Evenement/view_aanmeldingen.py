@@ -11,8 +11,9 @@ from django.utils import timezone
 from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Betaal.format import format_bedrag_euro
-from Evenement.definities import (EVENEMENT_INSCHRIJVING_STATUS_TO_SHORT_STR, EVENEMENT_AFMELDING_STATUS_TO_SHORT_STR,
-                                  EVENEMENT_INSCHRIJVING_STATUS_DEFINITIEF)
+from Evenement.definities import (EVENEMENT_INSCHRIJVING_STATUS_TO_SHORT_STR,
+                                  EVENEMENT_INSCHRIJVING_STATUS_DEFINITIEF, EVENEMENT_INSCHRIJVING_STATUS_AFGEMELD,
+                                  EVENEMENT_AFMELDING_STATUS_TO_SHORT_STR,)
 from Evenement.models import Evenement, EvenementInschrijving, EvenementAfgemeld
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
@@ -77,6 +78,7 @@ class EvenementAanmeldingenView(UserPassesTestMixin, TemplateView):
         inschrijvingen = (EvenementInschrijving
                           .objects
                           .filter(evenement=evenement)
+                          .exclude(status=EVENEMENT_INSCHRIJVING_STATUS_AFGEMELD)
                           .select_related('sporter')
                           .order_by('nummer'))
 
@@ -170,6 +172,7 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
         aanmeldingen = (EvenementInschrijving
                         .objects
                         .filter(evenement=evenement)
+                        .exclude(status=EVENEMENT_INSCHRIJVING_STATUS_AFGEMELD)
                         .select_related('sporter',
                                         'sporter__bij_vereniging')
                         .order_by('nummer'))

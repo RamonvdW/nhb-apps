@@ -158,7 +158,7 @@ class BestellingAdmin(admin.ModelAdmin):
 
 class BestellingMutatieAdmin(admin.ModelAdmin):
 
-    readonly_fields = ('when', 'account', 'code_plus', 'product', 'bestelling',
+    readonly_fields = ('when', 'account', 'code_plus', 'regel', 'bestelling',
                        'wedstrijd_inschrijving', 'evenement_inschrijving', 'opleiding_inschrijving')
 
     list_filter = ('is_verwerkt', 'code')

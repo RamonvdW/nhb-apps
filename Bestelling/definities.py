@@ -78,16 +78,19 @@ BESTELLING_TRANSPORT2STR = {
     BESTELLING_TRANSPORT_OPHALEN: "Ophalen",
 }
 
-# max-length: 10
+# max-length: 25
 BESTELLING_REGEL_CODE_EVENEMENT_INSCHRIJVING = "evenement_inschrijving"     # length: 22
-BESTELLING_REGEL_CODE_EVENEMENT_AFGEMELD = "evenement_afgemeld"
+BESTELLING_REGEL_CODE_EVENEMENT_AFGEMELD     = "evenement_afgemeld"
 BESTELLING_REGEL_CODE_OPLEIDING_INSCHRIJVING = "opleiding_inschrijving"
-BESTELLING_REGEL_CODE_OPLEIDING_AFGEMELD = "opleiding_afgemeld"
+BESTELLING_REGEL_CODE_OPLEIDING_AFGEMELD     = "opleiding_afgemeld"
 BESTELLING_REGEL_CODE_WEDSTRIJD_INSCHRIJVING = "wedstrijd_inschrijving"
-BESTELLING_REGEL_CODE_WEDSTRIJD_AFGEMELD = "wedstrijd_afgemeld"
-BESTELLING_REGEL_CODE_WEDSTRIJD_KORTING = "wedstrijd_korting"
-BESTELLING_REGEL_CODE_WEBWINKEL = "webwinkel"
-BESTELLING_REGEL_CODE_TRANSPORT = "transport"
+BESTELLING_REGEL_CODE_WEDSTRIJD_AFGEMELD     = "wedstrijd_afgemeld"
+BESTELLING_REGEL_CODE_WEDSTRIJD_KORTING      = "wedstrijd_korting"
+BESTELLING_REGEL_CODE_WEBWINKEL              = "webwinkel"
+BESTELLING_REGEL_CODE_TRANSPORT              = "transport"
 
+
+# speciale tekens die BestellingRegel.korte_beschrijving opsplitsen in aparte regels
+BESTELLING_KORT_BREAK = '||'
 
 # end of file

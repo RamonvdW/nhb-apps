@@ -19,38 +19,6 @@ from Bestelling.definities import (BESTELLING_REGEL_CODE_EVENEMENT_INSCHRIJVING,
                                    BESTELLING_REGEL_CODE_TRANSPORT)
 from Bestelling.plugins.alle_bestel_plugins import bestel_plugins
 from Bestelling.models import BestellingRegel
-from Bestelling.models.product_obsolete import BestellingProduct
-from Bestelling.plugins.evenement import evenement_plugin_beschrijf_product
-from Bestelling.plugins.opleiding import opleiding_plugin_beschrijf_product
-from Bestelling.plugins.wedstrijden import wedstrijden_plugin_beschrijf_product
-from Bestelling.plugins.webwinkel import webwinkel_plugin_beschrijf_product
-
-
-def beschrijf_product(product: BestellingProduct):
-    """
-        Geef een lijst van tuples terug waarin aspecten van het product beschreven staan:
-        [('Onderwerp', 'Beschrijving'), ...]
-    """
-
-    if product.wedstrijd_inschrijving:
-        return wedstrijden_plugin_beschrijf_product(product.wedstrijd_inschrijving)
-
-    if product.evenement_inschrijving:
-        return evenement_plugin_beschrijf_product(product.evenement_inschrijving)
-
-    if product.evenement_afgemeld:
-        return evenement_plugin_beschrijf_product(product.evenement_afgemeld)
-
-    if product.opleiding_inschrijving:
-        return opleiding_plugin_beschrijf_product(product.opleiding_inschrijving)
-
-    if product.opleiding_afgemeld:
-        return opleiding_plugin_beschrijf_product(product.opleiding_afgemeld)
-
-    if product.webwinkel_keuze:
-        return webwinkel_plugin_beschrijf_product(product.webwinkel_keuze)
-
-    return []
 
 
 def beschrijf_regel(regel: BestellingRegel):
