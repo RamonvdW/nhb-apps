@@ -201,6 +201,8 @@ class Competitie(models.Model):
 
     class Meta:
         ordering = ['begin_jaar', 'afstand']
+        verbose_name = 'Competitie'
+        verbose_name_plural = 'Competities'
 
     objects = models.Manager()      # for the editor only
 
