@@ -46,7 +46,7 @@ class Kampioenschap(models.Model):
     def __str__(self):
         """ geef een tekstuele afkorting van dit object, voor in de admin interface """
         deel2str = {code: beschrijving for code, beschrijving in self.DEEL}
-        msg = deel2str[self.deel]
+        msg = '%s - %s' % (self.competitie, deel2str[self.deel])
         if self.rayon:
             msg += ' Rayon %s' % self.rayon.rayon_nr
         return msg
@@ -54,6 +54,7 @@ class Kampioenschap(models.Model):
     class Meta:
         verbose_name = "Kampioenschap"
         verbose_name_plural = "Kampioenschappen"
+        ordering = ['competitie__afstand', 'deel', 'rayon__rayon_nr']
 
     objects = models.Manager()      # for the editor only
 

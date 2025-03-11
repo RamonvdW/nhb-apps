@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -198,6 +198,9 @@ class Competitie(models.Model):
 
     def maak_seizoen_url(self):
         return '%s-%s-%s' % (AFSTAND2URL[self.afstand], self.begin_jaar, self.begin_jaar + 1)
+
+    class Meta:
+        ordering = ['begin_jaar', 'afstand']
 
     objects = models.Manager()      # for the editor only
 
