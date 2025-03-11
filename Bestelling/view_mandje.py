@@ -82,11 +82,11 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
             instellingen_bond = None
 
         try:
-            mandje = BestellingMandje.objects.prefetch_related('producten').get(account=account)
+            mandje = BestellingMandje.objects.prefetch_related('regels').get(account=account)
         except BestellingMandje.DoesNotExist:
             # geen mandje
             mandje = None
-            producten = None
+            regels = None
         else:
             controleer_euro = Decimal(0)
 
@@ -212,7 +212,7 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
         account = get_account(self.request)
 
         try:
-            mandje = BestellingMandje.objects.prefetch_related('producten').get(account=account)
+            mandje = BestellingMandje.objects.prefetch_related('regels').get(account=account)
         except BestellingMandje.DoesNotExist:
             # geen mandje
             raise Http404('Mandje niet gevonden')

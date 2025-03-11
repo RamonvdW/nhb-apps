@@ -616,7 +616,7 @@ class TestOpleidingInschrijven(E2EHelpers, TestCase):
         self.verwerk_bestel_mutaties()
 
         mandje = BestellingMandje.objects.first()
-        self.assertEqual(mandje.producten.count(), 1)
+        self.assertEqual(mandje.aantal_in_mandje(), 1)
 
         self.assertEqual(OpleidingInschrijving.objects.count(), 1)
         inschrijving = OpleidingInschrijving.objects.first()
@@ -638,7 +638,7 @@ class TestOpleidingInschrijven(E2EHelpers, TestCase):
         self.assert404(resp, 'Dubbel inschrijven niet mogelijk')
 
         self.verwerk_bestel_mutaties()
-        self.assertEqual(mandje.producten.count(), 1)
+        self.assertEqual(mandje.aantal_in_mandje(), 1)
 
         # omzetten in een bestelling
         self.assertEqual(Bestelling.objects.count(), 0)
@@ -650,7 +650,7 @@ class TestOpleidingInschrijven(E2EHelpers, TestCase):
         self.assertEqual(inschrijving.status, OPLEIDING_INSCHRIJVING_STATUS_DEFINITIEF)
 
         mandje = BestellingMandje.objects.first()
-        self.assertEqual(mandje.producten.count(), 0)
+        self.assertEqual(mandje.aantal_in_mandje(), 0)
 
         # probeer nog een keer in te schrijven (met een leeg mandje)
 
@@ -667,7 +667,7 @@ class TestOpleidingInschrijven(E2EHelpers, TestCase):
             resp = self.client.post(self.url_toevoegen_aan_mandje, {'opleiding': self.opleiding.pk,
                                                                     'snel': 1})
         self.assert404(resp, 'Dubbel inschrijven niet mogelijk')
-        self.assertEqual(mandje.producten.count(), 0)
+        self.assertEqual(mandje.aantal_in_mandje(), 0)
 
 
 # end of file

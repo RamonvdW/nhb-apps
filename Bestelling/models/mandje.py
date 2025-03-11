@@ -65,6 +65,9 @@ class BestellingMandje(models.Model):
         self.totaal_euro += self.verzendkosten_euro
         self.save(update_fields=['totaal_euro'])
 
+    def aantal_in_mandje(self) -> int:
+        return self.regels.count()
+
     def __str__(self):
         """ beschrijving voor de admin interface """
         return self.account.username

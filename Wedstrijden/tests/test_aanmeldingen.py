@@ -7,7 +7,6 @@
 from django.test import TestCase
 from django.utils import timezone
 from BasisTypen.models import BoogType
-from Bestelling.models.product_obsolete import BestellingProduct
 from Competitie.models import Competitie, CompetitieIndivKlasse, Regiocompetitie, RegiocompetitieSporterBoog
 from Functie.models import Functie
 from Functie.tests.helpers import maak_functie

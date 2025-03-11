@@ -11,7 +11,8 @@ from django.shortcuts import reverse
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
-from Bestelling.definities import BESTELLING_TRANSPORT_NVT, BESTELLING_TRANSPORT_VERZEND, BESTELLING_TRANSPORT_OPHALEN
+from Bestelling.definities import (BESTELLING_TRANSPORT_NVT, BESTELLING_TRANSPORT_VERZEND, BESTELLING_TRANSPORT_OPHALEN,
+                                   BESTELLING_REGEL_CODE_WEBWINKEL)
 from Bestelling.models import BestellingMandje
 from Bestelling.operations.mutaties import bestel_mutatieverzoek_transport
 from Functie.definities import Rol
@@ -46,7 +47,7 @@ class KiesTransportView(UserPassesTestMixin, TemplateView):
         account = get_account(self.request)
 
         try:
-            mandje = BestellingMandje.objects.prefetch_related('producten').get(account=account)
+            mandje = BestellingMandje.objects.get(account=account)
         except BestellingMandje.DoesNotExist:
             # geen mandje
             raise Http404('Mandje is leeg')
@@ -54,7 +55,7 @@ class KiesTransportView(UserPassesTestMixin, TemplateView):
         if mandje.transport == BESTELLING_TRANSPORT_NVT:
             raise Http404('Niet van toepassing')
 
-        aantal_webwinkel = mandje.producten.exclude(webwinkel_keuze=None).count()
+        aantal_webwinkel = mandje.regels.filter(code=BESTELLING_REGEL_CODE_WEBWINKEL).count()
         if aantal_webwinkel < 1:
             # transport had op NVT moeten staan
             raise Http404('Niet van toepassing')

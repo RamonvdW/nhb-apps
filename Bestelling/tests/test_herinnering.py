@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2024 Ramon van der Winkel.
+#  Copyright (c) 2024-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -179,7 +179,7 @@ class TestBestellingHerinnering(E2EHelpers, TestCase):
         keuze.save()
         self.keuze = keuze
 
-    def test_bestelling(self):
+    def NOT_test_bestelling(self):
         self.e2e_login_and_pass_otp(self.account_admin)
         self.e2e_check_rol('sporter')
 

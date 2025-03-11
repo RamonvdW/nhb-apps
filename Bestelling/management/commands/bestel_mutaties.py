@@ -81,7 +81,7 @@ class Command(BaseCommand):
                                        'evenement_inschrijving',
                                        'opleiding_inschrijving',
                                        'webwinkel_keuze',
-                                       'product',
+                                       'regel',
                                        'bestelling')
                        .get(pk=pk))
 

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -45,6 +45,7 @@ def get_kaartjes_bond(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_indi
                         url=url)
             kaartjes_indiv.append(kaartje)
 
+        # TODO: implementeer deze optie. Voorbeeld: maar 1 TR team in BK finale -> samenvoegen met BB
         # if comp.fase_teams == 'N':
         #     url = reverse('CompLaagBond:kleine-klassen-samenvoegen-teams', kwargs={'deelkamp_pk': deelkamp_bk.pk})
         #     kaartje = SimpleNamespace(
