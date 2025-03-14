@@ -7,12 +7,15 @@
 from django.test import TestCase
 from django.conf import settings
 from django.utils import timezone
-from Bestelling.models import Bestelling, BestellingProduct
+from Bestelling.definities import BESTELLING_REGEL_CODE_EVENEMENT_INSCHRIJVING
+from Bestelling.models import Bestelling, BestellingRegel
 from Betaal.models import BetaalInstellingenVereniging
-from Evenement.definities import (EVENEMENT_STATUS_GEACCEPTEERD, EVENEMENT_INSCHRIJVING_STATUS_RESERVERING_MANDJE,
+from Evenement.definities import (EVENEMENT_STATUS_GEACCEPTEERD,
+                                  EVENEMENT_INSCHRIJVING_STATUS_RESERVERING_MANDJE,
                                   EVENEMENT_INSCHRIJVING_STATUS_BESTELD,
                                   EVENEMENT_INSCHRIJVING_STATUS_DEFINITIEF,
-                                  EVENEMENT_AFMELDING_STATUS_AFGEMELD, EVENEMENT_AFMELDING_STATUS_GEANNULEERD)
+                                  EVENEMENT_AFMELDING_STATUS_AFGEMELD,
+                                  EVENEMENT_AFMELDING_STATUS_GEANNULEERD)
 from Evenement.models import Evenement, EvenementInschrijving, EvenementAfgemeld
 from Functie.tests.helpers import maak_functie
 from Geo.models import Regio
@@ -167,6 +170,12 @@ class TestEvenementAfmelden(E2EHelpers, TestCase):
         sporter.save()
         self.sporter_100023 = sporter
 
+        regel = BestellingRegel(
+                        korte_beschrijving='evenement',
+                        bedrag_euro=10.0,
+                        code=BESTELLING_REGEL_CODE_EVENEMENT_INSCHRIJVING)
+        regel.save()
+
         # maak een inschrijving op het evenement
         inschrijving = EvenementInschrijving(
                                 wanneer=timezone.now(),
@@ -174,21 +183,17 @@ class TestEvenementAfmelden(E2EHelpers, TestCase):
                                 status=EVENEMENT_INSCHRIJVING_STATUS_BESTELD,
                                 evenement=evenement,
                                 sporter=self.sporter_100022,
-                                koper=self.account_100022)
+                                koper=self.account_100022,
+                                bestelling=regel)
         inschrijving.save()
         self.inschrijving = inschrijving
-
-        bestel = BestellingProduct(
-                        evenement_inschrijving=inschrijving,
-                        prijs_euro=10.0)
-        bestel.save()
 
         bestelling = Bestelling(
                         bestel_nr=self.volgende_bestel_nr,
                         account=self.account_100022,
                         log='Test')
         bestelling.save()
-        bestelling.producten.add(bestel)
+        bestelling.regels.add(regel)
         self.bestelling = bestelling
 
         # handmatige inschrijving
@@ -202,6 +207,13 @@ class TestEvenementAfmelden(E2EHelpers, TestCase):
         inschrijving.save()
         self.inschrijving2 = inschrijving
 
+        regel = BestellingRegel(
+                    korte_beschrijving='evenement_afgemeld',
+                    bedrag_euro=10.0,
+                    code=BESTELLING_REGEL_CODE_EVENEMENT_INSCHRIJVING)
+        regel.save()
+        self.bestelling.regels.add(regel)
+
         # afmelding gekoppeld aan een bestelling
         afgemeld = EvenementAfgemeld(
                             wanneer_inschrijving=timezone.now() - datetime.timedelta(hours=4),
@@ -213,15 +225,10 @@ class TestEvenementAfmelden(E2EHelpers, TestCase):
                             koper=self.account_100022,
                             bedrag_ontvangen=10.0,
                             bedrag_retour=9.0,
+                            bestelling=regel,
                             log='test')
         afgemeld.save()
         self.afgemeld = afgemeld
-
-        bestel = BestellingProduct(
-                    evenement_afgemeld=self.afgemeld,
-                    prijs_euro=10.0)
-        bestel.save()
-        self.bestelling.producten.add(bestel)
 
         # handmatig inschrijving die afgemeld is
         afgemeld = EvenementAfgemeld(
@@ -234,6 +241,7 @@ class TestEvenementAfmelden(E2EHelpers, TestCase):
                             koper=self.account_100000,
                             bedrag_ontvangen=0.0,
                             bedrag_retour=0.0,
+                            # geen bestelling=
                             log='test handmatig')
         afgemeld.save()
 
@@ -294,7 +302,7 @@ class TestEvenementAfmelden(E2EHelpers, TestCase):
         self.sporter_100022.save(update_fields=['bij_vereniging'])
 
         # haal het product uit de bestelling
-        self.bestelling.producten.clear()
+        self.bestelling.regels.clear()
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_download % self.evenement.pk)

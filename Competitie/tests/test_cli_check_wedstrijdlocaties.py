@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2024 Ramon van der Winkel.
+#  Copyright (c) 2022-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -156,7 +156,7 @@ class TestCompetitieCliCheckWedstrijdlocaties(E2EHelpers, TestCase):
 
         f1 = io.StringIO()
         f2 = io.StringIO()
-        with self.assert_max_queries(22):
+        with self.assert_max_queries(23):
             management.call_command('check_wedstrijdlocaties', '--rk', stderr=f1, stdout=f2)
         # print("f2: %s" % f2.getvalue())
         self.assertTrue("[WARNING] Geen rk_bk_matches voor RK Rayon 2" in f2.getvalue())

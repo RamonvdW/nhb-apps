@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2024 Ramon van der Winkel.
+#  Copyright (c) 2024-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -32,11 +32,7 @@ class Command(BaseCommand):
             'voornaam': account.get_first_name(),
             'naam_site': settings.NAAM_SITE,
             'num_prod': num_prod,
-            'producten': 'producten',
         }
-
-        if num_prod == 1:
-            context['prod'] = 'product'
 
         mail_body = render_email_template(context, EMAIL_TEMPLATE_HERINNERING_MANDJE)
 
@@ -48,8 +44,8 @@ class Command(BaseCommand):
 
         for mandje in (BestellingMandje
                        .objects
-                       .annotate(num_producten=Count("producten"))
-                       .exclude(num_producten=0)):
+                       .annotate(num_regels=Count('regels'))
+                       .exclude(num_regels=0)):
 
             self.stdout.write('[INFO] Mandje met producten: %s' % mandje)
 

@@ -19,22 +19,11 @@
         |
         |[{{ product.regel_nr }}]
 
-        {% for onderwerp, tekst in product.beschrijving %}
-            |    {{ onderwerp }}{% if tekst %}: {{ tekst }}{% endif %}
+        {% for tekst in product.beschrijving %}
+            |    {{ tekst }}
         {% endfor %}
 
-        {% if product.korting_euro > 0.001 %}
-            |    Verkregen korting: {{ product.gebruikte_korting_str }}
-            {% if product.combi_reden %}
-                |    (combinatie korting voor {{ product.combi_reden }})
-            {% endif %}
-        {% endif %}
-
-        |    Bedrag: {{ product.prijs_euro_str }}
-        {% if product.korting_euro > 0.001 %}
-            |    Korting: - {{ product.korting_euro_str }}
-        {% endif %}
-
+        |    Bedrag: {{ product.bedrag_euro_str }}
     {% endfor %}
 
     |
@@ -138,27 +127,12 @@
             <tr>
                 <td style="vertical-align:top">{% if product.regel_nr > 0 %}{{ product.regel_nr }}.{% endif %}</td>
                 <td>
-                    {% for onderwerp, tekst in product.beschrijving %}
-                        <span>{{ onderwerp }}{% if tekst %}: {{ tekst }}{% endif %}</span><br>
+                    {% for tekst in product.beschrijving %}
+                        <span>{{ tekst }}</span><br>
                     {% endfor %}
                 </td>
-                <td style="text-align:right;vertical-align:top">{{ product.prijs_euro_str }}</td>
+                <td style="text-align:right;vertical-align:top">{{ product.bedrag_euro_str }}</td>
             </tr>
-
-            {% if product.korting_euro > 0.001 %}
-                <tr>
-                    <td></td>
-                    <td>Verkregen korting:<br>
-                        <span>{{ product.gebruikte_korting_str }}</span><br>
-                        {% if product.combi_reden %}
-                            <span>(combinatie korting voor {{ product.combi_reden }})</span><br>
-                        {% endif %}
-                    </td>
-
-                    <td style="text-align:right; vertical-align:top">-&nbsp;{{ product.korting_euro_str }}</td>
-                </tr>
-            {% endif %}
-
         {% endfor %}
 
         <!-- Totaal regel toevoegen -->

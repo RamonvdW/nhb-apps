@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2024 Ramon van der Winkel.
+#  Copyright (c) 2022-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -298,12 +298,10 @@ class TestWebwinkelOverzicht(E2EHelpers, TestCase):
         self.assertTrue("Deze e-mail is de bevestiging van je bestelling op MijnHandboogsport" in email.mail_text)
         self.assertTrue("Betaalstatus: Te betalen" in email.mail_text)
 
-        self.assertTrue('Test titel 1' in email.mail_text)
-        self.assertTrue('Aantal: 1 stuks' in email.mail_text)
+        self.assertTrue('1 x Test titel 1' in email.mail_text)
         self.assertTrue('€ 1,23' in email.mail_text)
 
-        self.assertTrue('Test titel 2' in email.mail_text)
-        self.assertTrue('Aantal: 2 dozen' in email.mail_text)
+        self.assertTrue('2 x Test titel 2' in email.mail_text)
         self.assertTrue('€ 84,00' in email.mail_text)
 
         self.assertTrue('Verzendkosten' in email.mail_text)

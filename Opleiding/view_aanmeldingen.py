@@ -30,9 +30,9 @@ CONTENT_TYPE_CSV = 'text/csv; charset=UTF-8'
 
 
 def get_inschrijving_mh_bestel_nr(inschrijving):
-    bestel_product = inschrijving.bestellingproduct_set.first()
-    if bestel_product:
-        bestelling = bestel_product.bestelling_set.first()
+    regel = inschrijving.bestelling
+    if regel:
+        bestelling = regel.bestelling_set.first()
         if bestelling:
             return bestelling.mh_bestel_nr()
 
@@ -222,10 +222,9 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
                 ver_nr = 0
                 ver_str = 'geen'
 
-            qset = aanmelding.bestellingproduct_set.all()
-            if qset.count() > 0:
-                bestelproduct = qset[0]
-                prijs_str = format_bedrag_euro(bestelproduct.prijs_euro)
+            regel = aanmelding.bestelling
+            if regel:
+                prijs_str = format_bedrag_euro(regel.bedrag_euro)
             else:
                 prijs_str = 'Geen (handmatige inschrijving)'
 
@@ -276,10 +275,9 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
                 ver_nr = 0
                 ver_str = 'geen'
 
-            qset = afmelding.bestellingproduct_set.all()
-            if qset.count() > 0:
-                bestelproduct = qset[0]
-                prijs_str = format_bedrag_euro(bestelproduct.prijs_euro)
+            regel = afmelding.bestelling
+            if regel:
+                prijs_str = format_bedrag_euro(regel.bedrag_euro)
             else:
                 prijs_str = 'Geen (handmatige inschrijving)'
 
@@ -388,11 +386,11 @@ class OpleidingDetailsAanmeldingView(UserPassesTestMixin, TemplateView):
             inschrijving.url_afmelden = reverse('Opleiding:afmelden',
                                                 kwargs={'inschrijving_pk': inschrijving.pk})
 
-        qset = inschrijving.bestellingproduct_set.all()
-        if qset.count() > 0:
-            inschrijving.bestelproduct = qset[0]
+        regel = inschrijving.bestelling
+        if regel:
+            inschrijving.bedrag_euro_str = format_bedrag_euro(regel.bedrag_euro)
         else:
-            inschrijving.bestelproduct = None
+            inschrijving.bedrag_euro_str = None
 
         url_aanmeldingen = reverse('Opleiding:aanmeldingen',
                                    kwargs={'opleiding_pk': inschrijving.opleiding.pk})
@@ -470,6 +468,12 @@ class OpleidingDetailsAfmeldingView(UserPassesTestMixin, TemplateView):
         afmelding.status_str = OPLEIDING_AFMELDING_STATUS_TO_SHORT_STR[afmelding.status]
 
         afmelding.bestelnummer_str = get_inschrijving_mh_bestel_nr(afmelding)
+
+        regel = afmelding.bestelling
+        if regel:
+            afmelding.bedrag_euro_str = format_bedrag_euro(regel.bedrag_euro)
+        else:
+            afmelding.bedrag_euro_str = None
 
         url_aanmeldingen = reverse('Opleiding:aanmeldingen',
                                    kwargs={'opleiding_pk': afmelding.opleiding.pk})

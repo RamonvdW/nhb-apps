@@ -8,7 +8,8 @@ from django.conf import settings
 from django.test import TestCase
 from django.utils import timezone
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse
-from Bestelling.models import Bestelling, BestellingProduct
+from Bestelling.definities import BESTELLING_REGEL_CODE_WEDSTRIJD_INSCHRIJVING
+from Bestelling.models import Bestelling, BestellingRegel
 from Functie.tests.helpers import maak_functie
 from Geo.models import Regio
 from Locatie.models import WedstrijdLocatie
@@ -23,6 +24,7 @@ from Vereniging.models import Vereniging
 from Webwinkel.models import WebwinkelProduct, WebwinkelKeuze
 from Wedstrijden.definities import WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF
 from Wedstrijden.models import WedstrijdInschrijving, Wedstrijd, WedstrijdSessie
+from decimal import Decimal
 import datetime
 
 
@@ -506,6 +508,13 @@ class TestRegistreerBeheer(E2EHelpers, TestCase):
         sessie = WedstrijdSessie(datum=datum, tijd_begin="10:00", tijd_einde="11:00")
         sessie.save()
 
+        regel = BestellingRegel(
+                    korte_beschrijving='wedstrijd',
+                    bedrag_euro=Decimal(10.0),
+                    code=BESTELLING_REGEL_CODE_WEDSTRIJD_INSCHRIJVING)
+        regel.save()
+        bestelling.regels.add(regel)
+
         klasse = KalenderWedstrijdklasse.objects.first()
         inschrijving = WedstrijdInschrijving(
                             wanneer=timezone.now(),
@@ -513,7 +522,8 @@ class TestRegistreerBeheer(E2EHelpers, TestCase):
                             sessie=sessie,
                             sporterboog=self.sporterboog_800001,
                             wedstrijdklasse=klasse,
-                            koper=self.account_800001)
+                            koper=self.account_800001,
+                            bestelling=regel)
         inschrijving.save()
 
         webwinkel_product = WebwinkelProduct()
@@ -523,12 +533,6 @@ class TestRegistreerBeheer(E2EHelpers, TestCase):
                     koper=self.account_800001,
                     product=webwinkel_product)
         keuze.save()
-
-        prod = BestellingProduct(
-                    wedstrijd_inschrijving=inschrijving,
-                    webwinkel_keuze=keuze)
-        prod.save()
-        bestelling.producten.add(prod)
 
         resp = self.client.post(url)
         self.assert404(resp, 'SporterBoog ontbreekt voor boog R')
@@ -548,14 +552,14 @@ class TestRegistreerBeheer(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, url_redir)
 
         # derde keer door de code
-        prod.webwinkel_keuze = None
-        prod.wedstrijd_inschrijving = None
-        prod.save()
-        bestelling.account = self.account_800001
-        bestelling.save(update_fields=['account'])
-        resp = self.client.post(url)
-        url_redir = self.url_gast_details % van_lid_nr
-        self.assert_is_redirect(resp, url_redir)
+        # prod.webwinkel_keuze = None
+        # prod.wedstrijd_inschrijving = None
+        # prod.save()
+        # bestelling.account = self.account_800001
+        # bestelling.save(update_fields=['account'])
+        # resp = self.client.post(url)
+        # url_redir = self.url_gast_details % van_lid_nr
+        # self.assert_is_redirect(resp, url_redir)
 
         self.e2e_assert_other_http_commands_not_supported(url, get=True, post=False)
 

@@ -9,8 +9,8 @@ from django.utils import timezone
 from Bestelling.bestel_plugin_base import BestelPluginBase
 from Bestelling.definities import BESTELLING_REGEL_CODE_WEBWINKEL
 from Bestelling.models import Bestelling, BestellingRegel, BestellingMandje
-from Webwinkel.definities import (KEUZE_STATUS_RESERVERING_MANDJE, KEUZE_STATUS_GEANNULEERD,
-                                  VERZENDKOSTEN_BRIEFPOST, VERZENDKOSTEN_PAKKETPOST)
+from Webwinkel.definities import (KEUZE_STATUS_RESERVERING_MANDJE, KEUZE_STATUS_BESTELD, KEUZE_STATUS_BACKOFFICE,
+                                  KEUZE_STATUS_GEANNULEERD, VERZENDKOSTEN_BRIEFPOST, VERZENDKOSTEN_PAKKETPOST)
 from Webwinkel.models import WebwinkelKeuze
 from decimal import Decimal
 
@@ -133,7 +133,13 @@ class WebwinkelBestelPlugin(BestelPluginBase):
             Het gereserveerde product in het mandje is nu omgezet in een bestelling.
             Verander de status van het gevraagde product naar 'besteld maar nog niet betaald'
         """
-        raise NotImplementedError()
+        keuze = WebwinkelKeuze.objects.filter(bestelling=regel.pk).first()
+        if keuze:
+            stamp_str = timezone.localtime(timezone.now()).strftime('%Y-%m-%d om %H:%M')
+            msg = "[%s] Reservering is omgezet in een bestelling\n" % stamp_str
+            keuze.log += msg
+            keuze.status = KEUZE_STATUS_BESTELD
+            keuze.save(update_fields=['status', 'log'])
 
     def is_betaald(self, regel: BestellingRegel, bedrag_ontvangen: Decimal):
         """
@@ -176,7 +182,7 @@ class TransportkostenBestelPlugin(BestelPluginBase):
         verzendkosten_euro = Decimal(0)
 
         if webwinkel_count > 0:
-            qset = WebwinkelKeuze.objects.filter(regel__pk__in=regel_pks)
+            qset = WebwinkelKeuze.objects.filter(bestelling__pk__in=regel_pks)
             webwinkel_briefpost = qset.filter(product__type_verzendkosten=VERZENDKOSTEN_BRIEFPOST).count()
             webwinkel_pakketpost = qset.filter(product__type_verzendkosten=VERZENDKOSTEN_PAKKETPOST).count()
 

@@ -29,7 +29,7 @@ class MandjeLeegFilter(admin.SimpleListFilter):
                 ('1', 'Niet leeg')]
 
     def queryset(self, request, qs):
-        qs = qs.annotate(num_prod=Count("producten"))
+        qs = qs.annotate(num_prod=Count("regels"))
         if self.value() == '0':
             # leeg
             qs = qs.filter(num_prod=0)
@@ -42,18 +42,12 @@ class MandjeLeegFilter(admin.SimpleListFilter):
 
 class BestellingMandjeAdmin(admin.ModelAdmin):
 
-    # TODO: verwijder producten en producten_in_mandje
-    readonly_fields = ('account', 'producten_in_mandje', 'regels_in_mandje')
-    exclude = ('producten', 'regels')
+    readonly_fields = ('account', 'regels_in_mandje')
+    exclude = ('regels',)
 
     search_fields = ('account__username', 'account__unaccented_naam')
 
     list_filter = (MandjeLeegFilter,)
-
-    @staticmethod
-    def producten_in_mandje(obj):     # pragma: no cover
-        return "\n".join(['(pk %s) %s' % (product.pk, product)
-                          for product in obj.producten.select_related('wedstrijd_inschrijving').all()])
 
     @staticmethod
     def regels_in_mandje(obj):        # pragma: no cover
@@ -88,7 +82,7 @@ class OntvangerFilter(admin.SimpleListFilter):
 
 class BestellingAdmin(admin.ModelAdmin):
 
-    readonly_fields = ('account', 'bestel_nr', 'aangemaakt', 'producten_in_mandje', 'regels_in_mandje',
+    readonly_fields = ('account', 'bestel_nr', 'aangemaakt', 'regels_in_mandje',
                        'ontvanger', 'betaal_mutatie', 'betaal_actief')
 
     filter_vertical = ('transacties',)
@@ -99,14 +93,11 @@ class BestellingAdmin(admin.ModelAdmin):
 
     auto_complete = ('account', 'ontvanger')
 
-    # filter_horizontal = ('producten', 'transacties')
-
     list_filter = ('status', OntvangerFilter)
 
     fieldsets = (
         ('Inhoud',
             {'fields': ('aangemaakt',
-                        'producten_in_mandje',      # TODO: remove
                         'regels_in_mandje')
             }),
         ('Koper',
@@ -147,11 +138,6 @@ class BestellingAdmin(admin.ModelAdmin):
     )
 
     @staticmethod
-    def producten_in_mandje(obj):     # pragma: no cover
-        return "\n".join(['(pk %s) %s' % (product.pk, product)
-                          for product in obj.producten.select_related('wedstrijd_inschrijving').all()])
-
-    @staticmethod
     def regels_in_mandje(obj):        # pragma: no cover
         return "\n".join([str(regel) for regel in obj.regels.all()])
 
@@ -168,7 +154,7 @@ class BestellingMutatieAdmin(admin.ModelAdmin):
          {'fields': ('when', 'code_plus', 'is_verwerkt',
                      'account',
                      'wedstrijd_inschrijving', 'evenement_inschrijving', 'opleiding_inschrijving',
-                     'product', 'korting', 'bestelling', 'betaling_is_gelukt', 'bedrag_euro')
+                     'regel', 'korting', 'bestelling', 'betaling_is_gelukt', 'bedrag_euro')
           }),
     )
 

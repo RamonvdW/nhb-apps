@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2022-2024 Ramon van der Winkel.
+                Copyright (c) 2022-2025 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -123,7 +123,7 @@
                 {% endif %}
                 <tr>
                     <th>Prijs</th>
-                    <td>{% if inschrijving.bestelproduct %}&euro;&nbsp;{{ inschrijving.bestelproduct.prijs_euro }}{% else %}<i>Geen</i> (handmatige inschrijving){% endif %}</td>
+                    <td>{% if inschrijving.bedrag_euro_str %}{{ inschrijving.bedrag_euro_str }}{% else %}<i>Geen</i> (handmatige inschrijving){% endif %}</td>
                     <!-- TODO: korting_euro -->
                 </tr>
                 <tr>

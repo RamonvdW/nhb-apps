@@ -24,6 +24,7 @@ from Overig.helpers import get_safe_from_ip
 from Registreer.definities import REGISTRATIE_FASE_AFGEWEZEN
 from Registreer.models import GastRegistratie
 from Sporter.models import Sporter
+from Webwinkel.models import WebwinkelKeuze
 from Wedstrijden.definities import WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF, WEDSTRIJD_INSCHRIJVING_STATUS_TO_STR
 from Wedstrijden.models import WedstrijdInschrijving
 import logging
@@ -438,41 +439,37 @@ class BestellingOverzettenView(UserPassesTestMixin, View):
         for bestelling in (Bestelling
                            .objects
                            .filter(account=self.account_old)
-                           .prefetch_related('producten')
+                           .prefetch_related('regels')
                            .select_related('account')):
 
             bestelling.account = self.account_new
+            regel_pks = list(bestelling.regels.values_list('pk', flat=True))
 
-            for product in (bestelling.
-                            producten.
-                            select_related('wedstrijd_inschrijving',
-                                           'wedstrijd_inschrijving__sporterboog__sporter',
-                                           'wedstrijd_inschrijving__sporterboog__boogtype',
-                                           'webwinkel_keuze')
-                            .all()):
+            for inschrijving in WedstrijdInschrijving.objects.filter(bestelling__pk__in=regel_pks):
 
-                inschrijving = product.wedstrijd_inschrijving
-                if inschrijving:
-                    if self.sporter_old == inschrijving.sporterboog.sporter:
-                        afk = inschrijving.sporterboog.boogtype.afkorting
-                        try:
-                            sb = self.afk2sb[afk]
-                        except KeyError:
-                            raise Http404('SporterBoog ontbreekt voor boog %s' % afk)
-                        else:
-                            inschrijving.sporterboog = sb
+                if self.sporter_old == inschrijving.sporterboog.sporter:
+                    afk = inschrijving.sporterboog.boogtype.afkorting
+                    try:
+                        sb = self.afk2sb[afk]
+                    except KeyError:
+                        raise Http404('SporterBoog ontbreekt voor boog %s' % afk)
+                    else:
+                        inschrijving.sporterboog = sb
 
-                    if inschrijving.koper == self.account_old:
-                        inschrijving.koper = self.account_new
+                if inschrijving.koper == self.account_old:
+                    inschrijving.koper = self.account_new
 
-                    inschrijving.save(update_fields=['koper', 'sporterboog'])
-
-                keuze = product.webwinkel_keuze
-                if keuze:
-                    if keuze.koper == self.account_old:
-                        keuze.koper = self.account_new
-                        keuze.save(update_fields=['koper'])
+                inschrijving.save(update_fields=['koper', 'sporterboog'])
             # for
+
+            for keuze in WebwinkelKeuze.objects.filter(bestelling__pk__in=regel_pks):
+                if keuze.koper == self.account_old:
+                    keuze.koper = self.account_new
+                    keuze.save(update_fields=['koper'])
+            # for
+
+            # TODO: nodig voor evenementen?
+            # niet nodig voor opleidingen
 
             bestelling.save(update_fields=['account'])
         # for

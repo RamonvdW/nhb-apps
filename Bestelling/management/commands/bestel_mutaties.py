@@ -27,7 +27,9 @@ class Command(BaseCommand):
     def __init__(self, stdout=None, stderr=None, no_color=False, force_color=False):
         super().__init__(stdout, stderr, no_color, force_color)
 
-        self.verwerk_mutaties = VerwerkBestelMutaties(self.stdout)
+        # stdout is hier niet beschikbaar in test omgeving
+        # (komt binnen via cmdline optie)
+        self.verwerk_mutaties = None  # VerwerkBestelMutaties(self.stdout)
 
         self.stop_at = datetime.datetime.now()
 
@@ -158,6 +160,8 @@ class Command(BaseCommand):
         self.stdout.write('[INFO] Taak loopt tot %s' % str(self.stop_at))
 
     def handle(self, *args, **options):
+
+        self.verwerk_mutaties = VerwerkBestelMutaties(self.stdout)
 
         self._set_stop_time(**options)
 

@@ -14,9 +14,9 @@ from Account.operations.otp import otp_stuur_email_losgekoppeld
 from Account.view_wachtwoord import account_stuur_email_wachtwoord_vergeten
 from Account.operations.email import account_stuur_email_bevestig_nieuwe_email
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse
-from Bestelling.management.commands.bestel_mutaties import stuur_email_naar_koper_betaalbevestiging
-from Bestelling.definities import BESTELLING_STATUS_NIEUW
-from Bestelling.models import Bestelling, BestellingProduct
+from Bestelling.definities import BESTELLING_STATUS_NIEUW, BESTELLING_REGEL_CODE_WEDSTRIJD_INSCHRIJVING
+from Bestelling.operations.verwerk_mutaties import stuur_email_naar_koper_betaalbevestiging
+from Bestelling.models import Bestelling, BestellingRegel
 from Betaal.definities import TRANSACTIE_TYPE_MOLLIE_PAYMENT, TRANSACTIE_TYPE_MOLLIE_RESTITUTIE
 from Betaal.models import BetaalInstellingenVereniging, BetaalTransactie
 from Competitie.models import Competitie, CompetitieMatch
@@ -172,6 +172,12 @@ class Command(BaseCommand):
         wkls_r = KalenderWedstrijdklasse.objects.filter(buiten_gebruik=False, boogtype=boog_r)
         wkls_c = KalenderWedstrijdklasse.objects.filter(buiten_gebruik=False, boogtype=boog_c)
 
+        regel_r = BestellingRegel(
+                        korte_beschrijving='wedstrijd_inschrijving_r',
+                        bedrag_euro=Decimal('42.40'),
+                        code=BESTELLING_REGEL_CODE_WEDSTRIJD_INSCHRIJVING)
+        regel_r.save()
+
         inschrijving_r = WedstrijdInschrijving(
                             wanneer=timezone.now(),
                             status=WEDSTRIJD_INSCHRIJVING_STATUS_BESTELD,
@@ -180,8 +186,15 @@ class Command(BaseCommand):
                             wedstrijdklasse=wkls_r[0],
                             sporterboog=sporterboog_r,
                             koper=self.account,
-                            ontvangen_euro=Decimal('42.40'))
+                            ontvangen_euro=Decimal('42.40'),
+                            bestelling=regel_r)
         inschrijving_r.save()
+
+        regel_c = BestellingRegel(
+                        korte_beschrijving='wedstrijd_inschrijving_c',
+                        bedrag_euro=Decimal('42.41'),
+                        code=BESTELLING_REGEL_CODE_WEDSTRIJD_INSCHRIJVING)
+        regel_c.save()
 
         inschrijving_c = WedstrijdInschrijving(
                             wanneer=timezone.now(),
@@ -191,20 +204,9 @@ class Command(BaseCommand):
                             wedstrijdklasse=wkls_c[0],
                             sporterboog=sporterboog_c,
                             koper=self.account,
-                            ontvangen_euro=Decimal('22.41'))
+                            ontvangen_euro=Decimal('22.41'),
+                            bestelling=regel_c)
         inschrijving_c.save()
-
-        product_r = BestellingProduct(
-                        wedstrijd_inschrijving=inschrijving_r,
-                        prijs_euro=Decimal('42.40'),
-                        korting_euro=Decimal('0.00'))
-        product_r.save()
-
-        product_c = BestellingProduct(
-                        wedstrijd_inschrijving=inschrijving_c,
-                        prijs_euro=Decimal('42.41'),
-                        korting_euro=Decimal('20.00'))
-        product_c.save()
 
         instellingen = BetaalInstellingenVereniging(
                             vereniging=ver,
@@ -224,8 +226,7 @@ class Command(BaseCommand):
                         totaal_euro=Decimal("142.42"),
                         status=BESTELLING_STATUS_NIEUW)
         bestelling.save()
-        bestelling.producten.add(product_r)
-        bestelling.producten.add(product_c)
+        bestelling.regels.add(regel_r, regel_c)
         self.bestelling = bestelling
 
         bedrag_euro = Decimal("142.42")
@@ -269,6 +270,7 @@ class Command(BaseCommand):
         self.match = match
 
     def _database_opschonen(self):
+        """ zorg dat er niets in de database staat dat deze test in de weg zit """
         try:
             ver = Vereniging.objects.get(ver_nr=self.test_ver_nr)
         except Vereniging.DoesNotExist:      # pragma: no cover
@@ -280,7 +282,6 @@ class Command(BaseCommand):
             except Bestelling.DoesNotExist:      # pragma: no cover
                 pass
             else:
-                bestelling.producten.all().delete()
                 bestelling.delete()
 
             try:

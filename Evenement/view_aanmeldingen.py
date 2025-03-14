@@ -30,9 +30,9 @@ CONTENT_TYPE_CSV = 'text/csv; charset=UTF-8'
 
 
 def get_inschrijving_mh_bestel_nr(inschrijving):
-    bestel_product = inschrijving.bestellingproduct_set.first()
-    if bestel_product:
-        bestelling = bestel_product.bestelling_set.first()
+    regel = inschrijving.bestelling
+    if regel:
+        bestelling = regel.bestelling_set.first()
         if bestelling:
             return bestelling.mh_bestel_nr()
 
@@ -194,10 +194,9 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
                 ver_nr = 0
                 ver_str = 'geen'
 
-            qset = aanmelding.bestellingproduct_set.all()
-            if qset.count() > 0:
-                bestelproduct = qset[0]
-                prijs_str = format_bedrag_euro(bestelproduct.prijs_euro)
+            regel = aanmelding.bestelling
+            if regel:
+                prijs_str = format_bedrag_euro(regel.bedrag_euro)
             else:
                 prijs_str = 'Geen (handmatige inschrijving)'
 
@@ -243,10 +242,9 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
                 ver_nr = 0
                 ver_str = 'geen'
 
-            qset = afgemeld.bestellingproduct_set.all()
-            if qset.count() > 0:
-                bestelproduct = qset[0]
-                prijs_str = format_bedrag_euro(bestelproduct.prijs_euro)
+            regel = afgemeld.bestelling
+            if regel:
+                prijs_str = format_bedrag_euro(regel.bedrag_euro)
             else:
                 prijs_str = 'Geen (handmatige inschrijving)'
 
@@ -351,11 +349,12 @@ class EvenementDetailsAanmeldingView(UserPassesTestMixin, TemplateView):
         inschrijving.url_afmelden = reverse('Evenement:afmelden',
                                             kwargs={'inschrijving_pk': inschrijving.pk})
 
-        qset = inschrijving.bestellingproduct_set.all()
-        if qset.count() > 0:
-            inschrijving.bestelproduct = qset[0]
+        # toon de prijs die geselecteerd was voor dit lid (jeugd/volwassenen)
+        regel = inschrijving.bestelling
+        if regel:
+            inschrijving.kosten_euro = format_bedrag_euro(regel.bedrag_euro)
         else:
-            inschrijving.bestelproduct = None
+            inschrijving.kosten_euro = None
 
         url_aanmeldingen = reverse('Evenement:aanmeldingen',
                                    kwargs={'evenement_pk': inschrijving.evenement.pk})
@@ -422,6 +421,13 @@ class EvenementDetailsAfmeldingView(UserPassesTestMixin, TemplateView):
         afmelding.status_str = EVENEMENT_AFMELDING_STATUS_TO_SHORT_STR[afmelding.status]
 
         afmelding.bestelnummer_str = get_inschrijving_mh_bestel_nr(afmelding)
+
+        # toon de prijs die geselecteerd was voor dit lid (jeugd/volwassenen)
+        regel = afmelding.bestelling
+        if regel:
+            afmelding.kosten_euro = format_bedrag_euro(regel.bedrag_euro)
+        else:
+            afmelding.kosten_euro = None
 
         url_aanmeldingen = reverse('Evenement:aanmeldingen',
                                    kwargs={'evenement_pk': afmelding.evenement.pk})

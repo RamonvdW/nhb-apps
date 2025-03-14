@@ -7,8 +7,10 @@
 from django.test import TestCase
 from django.utils import timezone
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse
-from Bestelling.definities import BESTELLING_STATUS_BETALING_ACTIEF, BESTELLING_STATUS_AFGEROND
-from Bestelling.models import Bestelling, BestellingMutatie
+from Bestelling.definities import (BESTELLING_STATUS_BETALING_ACTIEF, BESTELLING_STATUS_AFGEROND,
+                                   BESTELLING_REGEL_CODE_WEBWINKEL, BESTELLING_REGEL_CODE_WEDSTRIJD_INSCHRIJVING,
+                                   BESTELLING_REGEL_CODE_WEDSTRIJD_KORTING)
+from Bestelling.models import Bestelling, BestellingMutatie, BestellingRegel
 from Betaal.definities import TRANSACTIE_TYPE_MOLLIE_PAYMENT, TRANSACTIE_TYPE_MOLLIE_RESTITUTIE
 from Betaal.models import BetaalInstellingenVereniging, BetaalTransactie
 from Functie.models import Functie
@@ -83,19 +85,21 @@ class TestBestelBetaling(E2EHelpers, TestCase):
 
         now = timezone.now()
 
+        regel1 = BestellingRegel(
+                        korte_beschrijving='webwinkel',
+                        bedrag_euro=Decimal(10.0),
+                        code=BESTELLING_REGEL_CODE_WEBWINKEL)
+        regel1.save()
+
         keuze = WebwinkelKeuze(
                         wanneer=now,
                         koper=account,
                         product=product,
                         totaal_euro=Decimal(10.0),
+                        bestelling=regel1,
                         log='test\n')
         keuze.save()
         self.webwinkel_keuze = keuze
-
-        product1 = BestellingProduct(
-                        webwinkel_keuze=keuze,
-                        prijs_euro=Decimal(10.0))
-        product1.save()
 
         locatie = WedstrijdLocatie(naam='test')
         locatie.save()
@@ -129,6 +133,12 @@ class TestBestelBetaling(E2EHelpers, TestCase):
         korting.save()
         korting.voor_wedstrijden.add(wedstrijd)
 
+        regel2 = BestellingRegel(
+                        korte_beschrijving='wedstrijd',
+                        bedrag_euro=Decimal(2.5),
+                        code=BESTELLING_REGEL_CODE_WEDSTRIJD_INSCHRIJVING)
+        regel2.save()
+
         inschrijving = WedstrijdInschrijving(
                             wanneer=now,
                             status=WEDSTRIJD_INSCHRIJVING_STATUS_BESTELD,
@@ -137,14 +147,15 @@ class TestBestelBetaling(E2EHelpers, TestCase):
                             sporterboog=sporterboog,
                             wedstrijdklasse=klasse,
                             koper=self.account_admin,
-                            korting=korting)
+                            korting=korting,
+                            bestelling=regel2)
         inschrijving.save()
 
-        product2 = BestellingProduct(
-                        wedstrijd_inschrijving=inschrijving,
-                        prijs_euro=Decimal(2.5),
-                        korting_euro=Decimal(2.5))
-        product2.save()
+        regel3 = BestellingRegel(
+                    korte_beschrijving='korting',
+                    bedrag_euro=Decimal(-2.5),
+                    code=BESTELLING_REGEL_CODE_WEDSTRIJD_KORTING)
+        regel3.save()
 
         bestelling = Bestelling(
                         bestel_nr=self.bestel_nr,
@@ -174,9 +185,11 @@ class TestBestelBetaling(E2EHelpers, TestCase):
                         btw_percentage_cat3=3,
                         btw_euro_cat3=Decimal('0.30'))
         bestelling.save()
-        bestelling.producten.add(product1)
-        bestelling.producten.add(product2)
         self.bestelling = bestelling
+
+        bestelling.regels.add(regel1)
+        bestelling.regels.add(regel2)
+        bestelling.regels.add(regel3)
 
     def NOT_test_mail_backoffice(self):
         self.e2e_login_and_pass_otp(self.account_admin)

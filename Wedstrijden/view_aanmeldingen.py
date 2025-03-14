@@ -20,8 +20,10 @@ from Functie.definities import Rol
 from Functie.rol import rol_get_huidige, rol_get_huidige_functie
 from Sporter.models import SporterVoorkeuren, get_sporter
 from Sporter.operations import get_sporter_voorkeuren
-from Wedstrijden.definities import (WEDSTRIJD_INSCHRIJVING_STATUS_TO_SHORT_STR, WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD,
-                                    WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_MANDJE, WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF,
+from Wedstrijden.definities import (WEDSTRIJD_INSCHRIJVING_STATUS_TO_SHORT_STR,
+                                    WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD,
+                                    WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_MANDJE,
+                                    WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF,
                                     WEDSTRIJD_INSCHRIJVING_STATUS_VERWIJDERD,
                                     KWALIFICATIE_CHECK2STR, KWALIFICATIE_CHECK_AFGEKEURD)
 from Wedstrijden.models import Wedstrijd, WedstrijdInschrijving, Kwalificatiescore
@@ -39,10 +41,10 @@ CONTENT_TYPE_CSV = 'text/csv; charset=UTF-8'
 # TODO: HWL moet sporter kunnen verplaatsen naar een andere sessie
 
 
-def get_inschrijving_mh_bestel_nr(inschrijving):
-    bestel_product = inschrijving.bestellingproduct_set.first()
-    if bestel_product:
-        bestelling = bestel_product.bestelling_set.first()
+def get_inschrijving_mh_bestel_nr(inschrijving: WedstrijdInschrijving):
+    if inschrijving.bestelling:
+        regel = inschrijving.bestelling
+        bestelling = regel.bestelling_set.first()
         if bestelling:
             return bestelling.mh_bestel_nr()
 
@@ -388,7 +390,8 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
         aanmeldingen = (WedstrijdInschrijving
                         .objects
                         .filter(wedstrijd=wedstrijd)
-                        .exclude(status__in=(WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD, WEDSTRIJD_INSCHRIJVING_STATUS_VERWIJDERD))
+                        .exclude(status__in=(WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD,
+                                             WEDSTRIJD_INSCHRIJVING_STATUS_VERWIJDERD))
                         .select_related('sessie',
                                         'wedstrijdklasse',
                                         'sporterboog',
@@ -450,12 +453,11 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
                 if voorkeuren.wedstrijd_geslacht_gekozen:
                     wedstrijd_geslacht = voorkeuren.wedstrijd_geslacht
 
-            qset = aanmelding.bestellingproduct_set.all()
-            if qset.count() > 0:
-                bestelproduct = qset[0]
-                prijs_str = format_bedrag_euro(bestelproduct.prijs_euro)
+            regel = aanmelding.bestelling
+            if regel:
+                bedrag_euro_str = format_bedrag_euro(regel.bedrag_euro)
             else:
-                prijs_str = 'Geen (handmatige inschrijving)'
+                bedrag_euro_str = 'Geen (handmatige inschrijving)'
 
             if aanmelding.korting:
                 korting_str = '%s%%' % aanmelding.korting.percentage
@@ -484,7 +486,7 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
                     timezone.localtime(aanmelding.wanneer).strftime('%Y-%m-%d %H:%M'),
                     WEDSTRIJD_INSCHRIJVING_STATUS_TO_SHORT_STR[aanmelding.status],
                     bestelnummer_str,
-                    prijs_str,
+                    bedrag_euro_str,
                     korting_str,
                     format_bedrag_euro(aanmelding.ontvangen_euro),
                     format_bedrag_euro(aanmelding.retour_euro),
@@ -514,7 +516,7 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
                     timezone.localtime(aanmelding.wanneer).strftime('%Y-%m-%d %H:%M'),
                     WEDSTRIJD_INSCHRIJVING_STATUS_TO_SHORT_STR[aanmelding.status],
                     bestelnummer_str,
-                    prijs_str,
+                    bedrag_euro_str,
                     korting_str,
                     format_bedrag_euro(aanmelding.ontvangen_euro),
                     format_bedrag_euro(aanmelding.retour_euro),
@@ -626,11 +628,12 @@ class WedstrijdAanmeldingDetailsView(UserPassesTestMixin, TemplateView):
         else:
             inschrijving.korting_str = None
 
-        qset = inschrijving.bestellingproduct_set.all()
-        if qset.count() > 0:
-            inschrijving.bestelproduct = qset[0]
+        # TODO: vervang door inschrijving.regel
+        regel = inschrijving.bestelling
+        if regel:
+            inschrijving.bedrag_euro_str = format_bedrag_euro(regel.bedrag_euro)
         else:
-            inschrijving.bestelproduct = None
+            inschrijving.bedrag_euro_str = None
 
         wedstrijd = inschrijving.wedstrijd
         if wedstrijd.eis_kwalificatie_scores:

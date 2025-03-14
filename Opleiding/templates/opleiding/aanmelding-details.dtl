@@ -74,7 +74,7 @@
                 {% endif %}
                 <tr>
                     <th>Prijs</th>
-                    <td>{% if inschrijving.bestelproduct %}&euro;&nbsp;{{ inschrijving.bestelproduct.prijs_euro }}{% else %}<i>Geen</i> (handmatige inschrijving){% endif %}</td>
+                    <td>{% if inschrijving.bedrag_euro_str %}{{ inschrijving.bedrag_euro_str }}{% else %}<i>Geen</i> (handmatige inschrijving){% endif %}</td>
                 </tr>
                 <tr>
                     <th>Inschrijfgeld ontvangen</th>

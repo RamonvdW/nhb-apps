@@ -14,7 +14,8 @@ from Bestelling.definities import (BESTELLING_MUTATIE_WEDSTRIJD_INSCHRIJVEN, BES
                                    BESTELLING_MUTATIE_ANNULEER, BESTELLING_MUTATIE_TRANSPORT,
                                    BESTELLING_MUTATIE_EVENEMENT_INSCHRIJVEN, BESTELLING_MUTATIE_EVENEMENT_AFMELDEN,
                                    BESTELLING_MUTATIE_OPLEIDING_INSCHRIJVEN, BESTELLING_MUTATIE_OPLEIDING_AFMELDEN,
-                                   BESTELLING_TRANSPORT_NVT, BESTELLING_TRANSPORT_VERZEND)
+                                   BESTELLING_TRANSPORT_NVT, BESTELLING_TRANSPORT_VERZEND,
+                                   BESTELLING_KORT_BREAK)
 from Bestelling.definities import (BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_BETALING_ACTIEF,
                                    BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_MISLUKT, BESTELLING_STATUS_GEANNULEERD,
                                    BESTELLING_STATUS2STR, BESTELLING_HOOGSTE_BESTEL_NR_FIXED_PK,
@@ -80,14 +81,14 @@ class VerwerkBestelMutaties:
     def _clear_instellingen_cache(self):
         self._instellingen_cache = dict()
 
-        ver_nr_bond = settings.BETAAL_VIA_BOND_VER_NR
+        ver_bond = Vereniging.objects.get(ver_nr=settings.BETAAL_VIA_BOND_VER_NR)
 
         self._instellingen_via_bond, _ = (BetaalInstellingenVereniging
                                           .objects
                                           .select_related('vereniging')
-                                          .get_or_create(vereniging__ver_nr=ver_nr_bond))
+                                          .get_or_create(vereniging=ver_bond))
 
-        self._instellingen_cache[ver_nr_bond] = self._instellingen_via_bond
+        self._instellingen_cache[ver_bond.ver_nr] = self._instellingen_via_bond
 
     def _get_betaal_instellingen(self, ver_nr: int):
         try:
@@ -359,7 +360,7 @@ class VerwerkBestelMutaties:
             ontvanger2regels = dict()  # [ver_nr] = [BestellingRegel, ...]
             for regel in mandje.regels.all():
                 plugin = bestel_plugins[regel.code]
-                ver_nr = plugin.verkopende_vereniging(regel)
+                ver_nr = plugin.get_verkoper_ver_nr(regel)
 
                 instellingen = self._get_betaal_instellingen(ver_nr)
                 ontvanger_ver_nr = instellingen.vereniging.ver_nr  # kan nu ook "via KHSN" zijn
@@ -472,7 +473,7 @@ class VerwerkBestelMutaties:
                     pass
 
                 # stuur voor elke bestelling een bevestiging naar de koper met details van de bestelling
-                # en instructies voor betaling (niet nodig, handmatig, via Mollie)
+                # en instructies voor betaling (niet nodig / handmatig / via Mollie)
                 stuur_email_naar_koper_bestelling_details(bestelling)
             # for
 
@@ -564,7 +565,7 @@ def _btw_optellen(regels: list[BestellingRegel]) -> dict:
     return perc2btw
 
 
-def _beschrijf_bestelling(bestelling: Bestelling):
+def _beschrijf_bestelling(bestelling: Bestelling) -> list:
 
     regel_nr = 0
 
@@ -573,17 +574,8 @@ def _beschrijf_bestelling(bestelling: Bestelling):
         # nieuwe regel op de bestelling
         regel_nr += 1
         regel.regel_nr = regel_nr
-
-        # product.beschrijving = beschrijf_product(product)
-        # product.prijs_euro_str = format_bedrag_euro(product.prijs_euro)
-        # product.korting_euro_str = format_bedrag_euro(product.korting_euro)     # positief bedrag
-        #
-        # if product.wedstrijd_inschrijving:
-        #     korting = product.wedstrijd_inschrijving.korting
-        #     if korting:
-        #         product.gebruikte_korting_str, combi_redenen = beschrijf_korting(product)
-        #         if korting.soort == WEDSTRIJD_KORTING_COMBI:
-        #             product.combi_reden = " en ".join(combi_redenen)
+        regel.beschrijving = regel.korte_beschrijving.split(BESTELLING_KORT_BREAK)
+        regel.bedrag_euro_str = format_bedrag_euro(regel.bedrag_euro)
     # for
 
     # voeg de eventuele verzendkosten toe als aparte regel op de bestelling
@@ -595,9 +587,9 @@ def _beschrijf_bestelling(bestelling: Bestelling):
         regel_nr += 1
         regel = SimpleNamespace(
                         regel_nr=regel_nr,
-                        beschrijving=[("Verzendkosten", "")],       # TODO: specialiseren in pakket/briefpost
+                        beschrijving=["Verzendkosten"],       # TODO: specialiseren in pakket/briefpost
                         # geen btw op transport
-                        prijs_euro_str=verzendkosten_euro_str)
+                        bedrag_euro_str=verzendkosten_euro_str)
         regels.append(regel)
 
     if bestelling.transport == BESTELLING_TRANSPORT_OPHALEN:
@@ -608,8 +600,8 @@ def _beschrijf_bestelling(bestelling: Bestelling):
         regel_nr += 1
         regel = SimpleNamespace(
                         regel_nr=regel_nr,
-                        beschrijving=[("Ophalen op het bondsbureau", "")],
-                        prijs_euro_str=nul_euro_str)
+                        beschrijving=["Ophalen op het bondsbureau"],
+                        bedrag_euro_str=nul_euro_str)
         regels.append(regel)
 
     # formatteren van de BTW bedragen
