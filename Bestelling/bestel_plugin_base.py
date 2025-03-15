@@ -21,7 +21,7 @@ class BestelPluginBase:
         self.stdout = stdout
 
     def mandje_opschonen(self, verval_datum):
-        raise NotImplementedError()
+        raise NotImplementedError()             # pragma: no cover
 
     def reserveer(self, inschrijving, mandje_van_str: str) -> BestellingRegel:
         """
@@ -31,53 +31,53 @@ class BestelPluginBase:
 
             inschrijving kan van verschillende typen zijn: Evenement, Opleiding, Webwinkel, Wedstrijd
         """
-        raise NotImplementedError()
+        raise NotImplementedError()             # pragma: no cover
 
     def annuleer(self, regel: BestellingRegel):
         """
             Het product wordt uit het mandje gehaald of de bestelling wordt geannuleerd (voordat deze betaald is)
             Geef een eerder gemaakte reservering voor het product weer vrij.
         """
-        raise NotImplementedError()
+        raise NotImplementedError()             # pragma: no cover
 
     def is_besteld(self, regel: BestellingRegel):
         """
             Het gereserveerde product in het mandje is nu omgezet in een bestelling.
             Verander de status van het gevraagde product naar 'besteld maar nog niet betaald'
         """
-        raise NotImplementedError()
+        raise NotImplementedError()             # pragma: no cover
 
     def is_betaald(self, regel: BestellingRegel, bedrag_ontvangen: Decimal):
         """
             Het product is betaald, dus de reservering moet definitief gemaakt worden.
             Wordt ook aangeroepen als een bestelling niet betaald hoeft te worden (totaal bedrag nul).
         """
-        raise NotImplementedError()
+        raise NotImplementedError()             # pragma: no cover
 
     def beschrijf_product(self, obj) -> list:
         """
             Geef een lijst van tuples terug waarin aspecten van het product beschreven staan.
             obj is specifiek voor de plugin, bijvoorbeeld WedstrijdInschrijving
         """
-        raise NotImplementedError()
+        raise NotImplementedError()             # pragma: no cover
 
     def afmelden(self, obj):
         """
             Verwerk het verzoek tot afmelden voor een wedstrijd/evenement/opleiding.
         """
-        raise NotImplementedError()
+        raise NotImplementedError()             # pragma: no cover
 
     def bereken_verzendkosten(self, obj: BestellingMandje | Bestelling) -> Decimal:
         """
             Bereken de verzendkosten van toepassing op het mandje of de bestelling
         """
-        raise NotImplementedError()
+        raise NotImplementedError()             # pragma: no cover
 
     def get_verkoper_ver_nr(self, regel: BestellingRegel) -> int:
         """
             Bepaal welke vereniging de verkopende partij is
             Geeft het verenigingsnummer terug, of -1 als dit niet te bepalen was
         """
-        raise NotImplementedError()
+        raise NotImplementedError()             # pragma: no cover
 
 # end of file
