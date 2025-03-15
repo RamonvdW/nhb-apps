@@ -109,7 +109,8 @@ def toets_geldig(toets: Instaptoets):
     if toets.geslaagd:
         verloopt = datetime.date(toets.afgerond.year + 1, toets.afgerond.month, toets.afgerond.day)
         vandaag = timezone.now().date()
-        if verloopt > vandaag:
+        if verloopt >= vandaag:
+            # nog niet verlopen
             verschil = (verloopt - vandaag)
             dagen = verschil.days
             return True, dagen

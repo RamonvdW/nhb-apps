@@ -9,10 +9,12 @@ from django.utils import timezone
 from Bestelling.bestel_plugin_base import BestelPluginBase
 from Bestelling.definities import BESTELLING_REGEL_CODE_OPLEIDING_INSCHRIJVING, BESTELLING_REGEL_CODE_OPLEIDING_AFGEMELD
 from Bestelling.models import BestellingRegel
+from Betaal.format import format_bedrag_euro
 from Functie.models import Functie
 from Mailer.operations import mailer_queue_email, mailer_email_is_valide, render_email_template
 from Opleiding.definities import (OPLEIDING_INSCHRIJVING_STATUS_TO_STR, OPLEIDING_AFMELDING_STATUS_TO_STR,
                                   OPLEIDING_INSCHRIJVING_STATUS_RESERVERING_MANDJE,
+                                  OPLEIDING_INSCHRIJVING_STATUS_BESTELD,
                                   OPLEIDING_INSCHRIJVING_STATUS_DEFINITIEF,
                                   OPLEIDING_INSCHRIJVING_STATUS_AFGEMELD,
                                   OPLEIDING_AFMELDING_STATUS_AFGEMELD,
@@ -46,7 +48,7 @@ class OpleidingBestelPlugin(BestelPluginBase):
             mandje = regel.bestellingmandje_set.first()
             mandje_pks.append(mandje)
 
-            self._verwijder_reservering(inschrijving)
+            self.annuleer(regel)
 
             # verwijder het product, dan verdwijnt deze ook uit het mandje
             self.stdout.write('[INFO] BestellingRegel met pk=%s wordt verwijderd' % regel.pk)
@@ -87,81 +89,65 @@ class OpleidingBestelPlugin(BestelPluginBase):
 
         return regel
 
-    def verwijder_reservering(self, regel: BestellingRegel) -> BestellingRegel | None:
+    def afmelden(self, inschrijving: OpleidingInschrijving):
         """
-            Het product wordt uit het mandje gehaald
-            of de bestelling wordt geannuleerd (voordat deze betaald is)
+            Verwerk het verzoek tot afmelden voor een opleiding.
         """
-        nieuwe_regel = None
-
-        inschrijving = regel.opleidinginschrijving_set.first()
-        if inschrijving:
-            if inschrijving.status == OPLEIDING_INSCHRIJVING_STATUS_RESERVERING_MANDJE:
-                # verwijdering uit mandje
-                self.stdout.write('[INFO] Opleiding inschrijving pk=%s status %s --> verwijderd uit mandje' % (
-                                    inschrijving.pk,
-                                    OPLEIDING_INSCHRIJVING_STATUS_TO_STR[inschrijving.status]))
-            else:
-                # zet de inschrijving om in een afmelding
-                nieuwe_regel = BestellingRegel(
-                                    korte_beschrijving="[GEANNULEERD] " + regel.korte_beschrijving,
-                                    code=BESTELLING_REGEL_CODE_OPLEIDING_AFGEMELD)
-                nieuwe_regel.save()
-
-                now = timezone.now()
-                stamp_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
-                msg = "[%s] Annuleer inschrijving voor deze opleiding\n" % stamp_str
-
-                afmelding = OpleidingAfgemeld(
-                                wanneer_aangemeld=inschrijving.wanneer_aangemeld,
-                                nummer=inschrijving.nummer,
-                                wanneer_afgemeld=now,
-                                status=OPLEIDING_AFMELDING_STATUS_AFGEMELD,
-                                opleiding=inschrijving.opleiding,
-                                bestelling=nieuwe_regel,
-                                sporter=inschrijving.sporter,
-                                koper=inschrijving.koper,
-                                bedrag_ontvangen=inschrijving.bedrag_ontvangen,
-                                log=inschrijving.log + msg)
-
-                if inschrijving.status != OPLEIDING_INSCHRIJVING_STATUS_DEFINITIEF:
-                    # nog niet betaald
-                    afmelding.status = OPLEIDING_AFMELDING_STATUS_GEANNULEERD
-
-                afmelding.save()
-
-                self.stdout.write('[INFO] Opleiding inschrijving pk=%s status %s --> afgemeld pk=%s status %s' % (
-                                    inschrijving.pk,
-                                    OPLEIDING_INSCHRIJVING_STATUS_TO_STR[inschrijving.status],
-                                    afmelding.pk,
-                                    OPLEIDING_AFMELDING_STATUS_TO_STR[afmelding.status]))
-
-            # verwijder de inschrijving
-            inschrijving.delete()
-
-        return nieuwe_regel
-
-    def _verwijder_reservering(self, inschrijving: OpleidingInschrijving) -> OpleidingAfgemeld:
-
-        afmelding = None
-
         now = timezone.now()
         stamp_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
-        msg = "[%s] Annuleer inschrijving voor deze opleiding\n" % stamp_str
+        msg = "[%s] Afgemeld voor deze opleiding\n" % stamp_str
+
+        # (nog) geen aantallen om bij te werken
+
+        # zet de inschrijving om in een afmelding
+        afmelding = OpleidingAfgemeld(
+                        wanneer_aangemeld=inschrijving.wanneer_aangemeld,
+                        wanneer_afgemeld=now,
+                        nummer=inschrijving.nummer,
+                        status=OPLEIDING_AFMELDING_STATUS_AFGEMELD,
+                        opleiding=inschrijving.opleiding,
+                        sporter=inschrijving.sporter,
+                        koper=inschrijving.koper,
+                        bedrag_ontvangen=inschrijving.bedrag_ontvangen,
+                        log=inschrijving.log + msg)
+        afmelding.save()
+
+        # behoud de inschrijving, in verband met de verwijzing vanuit een bestelling
+        # zet de status op afgemeld
+        inschrijving.status = OPLEIDING_INSCHRIJVING_STATUS_AFGEMELD
+        inschrijving.log += msg
+        inschrijving.save(update_fields=['status', 'log'])
+
+    def annuleer(self, regel: BestellingRegel):
+        """
+            Het product wordt uit het mandje gehaald of de bestelling wordt geannuleerd (voordat deze betaald is)
+
+            Geef een eerder gemaakte reservering voor een opleiding weer vrij
+            zodat deze door iemand anders te kiezen zijn.
+        """
+        inschrijving = OpleidingInschrijving.objects.filter(bestelling=regel).first()
+        if not inschrijving:
+            self.stdout.write('[ERROR] Kan OpleidingInschrijving voor regel met pk=%s niet vinden' % regel.pk)
+            return
 
         if inschrijving.status == OPLEIDING_INSCHRIJVING_STATUS_RESERVERING_MANDJE:
             # verwijdering uit mandje
-            self.stdout.write('[INFO] Inschrijving opleiding pk=%s status %s --> verwijderd uit mandje' % (
-                              inschrijving.pk,
-                              OPLEIDING_INSCHRIJVING_STATUS_TO_STR[inschrijving.status]))
+            self.stdout.write('[INFO] Opleiding inschrijving pk=%s status %s --> verwijderd uit mandje' % (
+                                inschrijving.pk,
+                                OPLEIDING_INSCHRIJVING_STATUS_TO_STR[inschrijving.status]))
         else:
             # zet de inschrijving om in een afmelding
+            now = timezone.now()
+            stamp_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
+            msg = "[%s] Annuleer inschrijving voor deze opleiding\n" % stamp_str
+
             afmelding = OpleidingAfgemeld(
                             wanneer_aangemeld=inschrijving.wanneer_aangemeld,
                             nummer=inschrijving.nummer,
                             wanneer_afgemeld=now,
                             status=OPLEIDING_AFMELDING_STATUS_AFGEMELD,
                             opleiding=inschrijving.opleiding,
+                            bestelling=None,
                             sporter=inschrijving.sporter,
                             koper=inschrijving.koper,
                             bedrag_ontvangen=inschrijving.bedrag_ontvangen,
@@ -173,16 +159,33 @@ class OpleidingBestelPlugin(BestelPluginBase):
 
             afmelding.save()
 
-            self.stdout.write('[INFO] Opleiding deelnemer pk=%s status %s --> afgemeld pk=%s status %s' % (
-                              inschrijving.pk,
-                              OPLEIDING_INSCHRIJVING_STATUS_TO_STR[inschrijving.status],
-                              afmelding.pk,
-                              OPLEIDING_AFMELDING_STATUS_TO_STR[afmelding.status]))
+            self.stdout.write('[INFO] Opleiding inschrijving pk=%s status %s --> afgemeld pk=%s status %s' % (
+                                inschrijving.pk,
+                                OPLEIDING_INSCHRIJVING_STATUS_TO_STR[inschrijving.status],
+                                afmelding.pk,
+                                OPLEIDING_AFMELDING_STATUS_TO_STR[afmelding.status]))
 
         # verwijder de inschrijving
+        self.stdout.write('[INFO] OpleidingInschrijving pk=%s wordt verwijderd' % inschrijving.pk)
         inschrijving.delete()
 
-        return afmelding
+    def is_besteld(self, regel: BestellingRegel):
+        """
+            Het gereserveerde product in het mandje is nu omgezet in een bestelling.
+            Verander de status van het gevraagde product naar 'besteld maar nog niet betaald'
+        """
+        inschrijving = OpleidingInschrijving.objects.filter(bestelling=regel).first()
+        if not inschrijving:
+            self.stdout.write('[ERROR] Kan OpleidingInschrijving voor regel met pk=%s niet vinden' % regel.pk)
+            return
+
+        now = timezone.now()
+        stamp_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
+        msg = "[%s] Omgezet in een bestelling\n" % stamp_str
+
+        inschrijving.status = OPLEIDING_INSCHRIJVING_STATUS_BESTELD
+        inschrijving.log += msg
+        inschrijving.save(update_fields=['status', 'log'])
 
     def is_betaald(self, regel: BestellingRegel, bedrag_ontvangen: Decimal):
         """
@@ -190,7 +193,7 @@ class OpleidingBestelPlugin(BestelPluginBase):
             Wordt ook aangeroepen als een bestelling niet betaald hoeft te worden (totaal bedrag nul).
         """
 
-        inschrijving = OpleidingInschrijving.objects.filter(regel=regel).first()
+        inschrijving = OpleidingInschrijving.objects.filter(bestelling=regel).first()
         if not inschrijving:
             self.stdout.write('[ERROR] Kan OpleidingInschrijving voor regel met pk=%s niet vinden' % regel.pk)
             return
@@ -199,10 +202,10 @@ class OpleidingBestelPlugin(BestelPluginBase):
         inschrijving.status = OPLEIDING_INSCHRIJVING_STATUS_DEFINITIEF
 
         stamp_str = timezone.localtime(timezone.now()).strftime('%Y-%m-%d om %H:%M')
-        msg = "[%s] Betaling ontvangen (euro %s); status is nu definitief\n" % (
-        stamp_str, inschrijving.bedrag_ontvangen)
-
+        bedrag_str = format_bedrag_euro(bedrag_ontvangen)
+        msg = "[%s] Betaling ontvangen (%s); status is nu definitief\n" % (stamp_str, bedrag_str)
         inschrijving.log += msg
+
         inschrijving.save(update_fields=['bedrag_ontvangen', 'status', 'log'])
 
         opleiding = inschrijving.opleiding
@@ -302,35 +305,6 @@ class OpleidingBestelPlugin(BestelPluginBase):
         # beschrijving.append(tup)
 
         return beschrijving
-
-    def afmelden(self, inschrijving: OpleidingInschrijving):
-        """
-            Verwerk het verzoek tot afmelden voor een opleiding.
-        """
-        now = timezone.now()
-        stamp_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
-        msg = "[%s] Afgemeld voor deze opleiding\n" % stamp_str
-
-        # (nog) geen aantallen om bij te werken
-
-        # zet de inschrijving om in een afmelding
-        afmelding = OpleidingAfgemeld(
-                        wanneer_aangemeld=inschrijving.wanneer_aangemeld,
-                        wanneer_afgemeld=now,
-                        nummer=inschrijving.nummer,
-                        status=OPLEIDING_AFMELDING_STATUS_AFGEMELD,
-                        opleiding=inschrijving.opleiding,
-                        sporter=inschrijving.sporter,
-                        koper=inschrijving.koper,
-                        bedrag_ontvangen=inschrijving.bedrag_ontvangen,
-                        log=inschrijving.log + msg)
-        afmelding.save()
-
-        # behoud de inschrijving, in verband met de verwijzing vanuit een bestelling
-        # zet de status op afgemeld
-        inschrijving.status = OPLEIDING_INSCHRIJVING_STATUS_AFGEMELD
-        inschrijving.log += msg
-        inschrijving.save(update_fields=['status', 'log'])
 
     def get_verkoper_ver_nr(self, regel: BestellingRegel) -> int:
         """

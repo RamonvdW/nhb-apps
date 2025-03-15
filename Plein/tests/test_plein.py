@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
 from BasisTypen.definities import SCHEIDS_VERENIGING
-from Bestelling.models import BestellingMandje, BestellingProduct
+from Bestelling.definities import BESTELLING_REGEL_CODE_WEBWINKEL
+from Bestelling.models import BestellingMandje, BestellingRegel
 from Functie.tests.helpers import maak_functie
 from Geo.models import Rayon, Regio
 from Sporter.models import Sporter
@@ -139,9 +140,11 @@ class TestPlein(E2EHelpers, TestCase):
     def test_plein_sporter(self):
         # leg iets in het mandje
         mandje, _ = BestellingMandje.objects.get_or_create(account=self.account_100001)
-        prod = BestellingProduct()
-        prod.save()
-        mandje.producten.add(prod)
+        regel = BestellingRegel(
+                        korte_beschrijving='plein',
+                        code=BESTELLING_REGEL_CODE_WEBWINKEL)
+        regel.save()
+        mandje.regels.add(regel)
 
         self.e2e_login(self.account_100001)
 

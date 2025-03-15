@@ -15,7 +15,7 @@
 
     |
     |Producten
-    {% for product in producten %}
+    {% for product in regels %}
         |
         |[{{ product.regel_nr }}]
 
@@ -123,9 +123,9 @@
             </tr>
         </thead>
 
-        {% for product in producten %}
+        {% for product in regels %}
             <tr>
-                <td style="vertical-align:top">{% if product.regel_nr > 0 %}{{ product.regel_nr }}.{% endif %}</td>
+                <td style="vertical-align:top">{{ product.regel_nr }}.</td>
                 <td>
                     {% for tekst in product.beschrijving %}
                         <span>{{ tekst }}</span><br>

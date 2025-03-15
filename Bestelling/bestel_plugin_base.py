@@ -33,10 +33,10 @@ class BestelPluginBase:
         """
         raise NotImplementedError()
 
-    def verwijder_reservering(self, regel: BestellingRegel) -> BestellingRegel | None:
+    def annuleer(self, regel: BestellingRegel):
         """
-            Het product wordt uit het mandje gehaald
-            of de bestelling wordt geannuleerd (voordat deze betaald is)
+            Het product wordt uit het mandje gehaald of de bestelling wordt geannuleerd (voordat deze betaald is)
+            Geef een eerder gemaakte reservering voor het product weer vrij.
         """
         raise NotImplementedError()
 
@@ -57,6 +57,7 @@ class BestelPluginBase:
     def beschrijf_product(self, obj) -> list:
         """
             Geef een lijst van tuples terug waarin aspecten van het product beschreven staan.
+            obj is specifiek voor de plugin, bijvoorbeeld WedstrijdInschrijving
         """
         raise NotImplementedError()
 

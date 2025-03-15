@@ -14,7 +14,8 @@ from Account.models import get_account
 from Bestelling.definities import (BESTELLING_STATUS2STR, BESTELLING_STATUS_BETALING_ACTIEF,
                                    BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_MISLUKT,
                                    BESTELLING_STATUS_GEANNULEERD,
-                                   BESTELLING_TRANSPORT_OPHALEN)
+                                   BESTELLING_TRANSPORT_OPHALEN,
+                                   BESTELLING_REGEL_CODE_WEDSTRIJD_INSCHRIJVING)
 from Bestelling.models import Bestelling
 from Bestelling.plugins.product_info import beschrijf_regel
 from Bestelling.operations.mutaties import bestel_mutatieverzoek_annuleer
@@ -26,6 +27,7 @@ from Functie.definities import Rol
 from Functie.models import Functie
 from Functie.rol import rol_get_huidige
 from Kalender.view_maand import maak_compacte_wanneer_str
+from Wedstrijden.models import WedstrijdInschrijving
 from decimal import Decimal
 from time import sleep
 
@@ -229,8 +231,6 @@ class ToonBestellingDetailsView(UserPassesTestMixin, TemplateView):
         context['bestelling'] = bestelling
 
         context['producten'], context['bevat_fout'] = self._beschrijf_inhoud_bestelling(bestelling)
-        for regel in context['producten']:
-            print(regel.beschrijving)
 
         context['transacties'], transacties_euro = self._beschrijf_transacties(bestelling)
 
@@ -262,24 +262,26 @@ class ToonBestellingDetailsView(UserPassesTestMixin, TemplateView):
                     context['url_annuleren'] = reverse('Bestelling:annuleer-bestelling',
                                                        kwargs={'bestel_nr': bestelling.bestel_nr})
 
+        # zoek de kwalificatiescores erbij
         kwalificatie_scores = list()
-        for product in (bestelling
-                        .producten
-                        .exclude(wedstrijd_inschrijving=None)
-                        .select_related('wedstrijd_inschrijving',
-                                        'wedstrijd_inschrijving__wedstrijd',
-                                        'wedstrijd_inschrijving__wedstrijd__locatie',
-                                        'wedstrijd_inschrijving__sporterboog__sporter',)
-                        .all()):
-            inschrijving = product.wedstrijd_inschrijving
-            wedstrijd = inschrijving.wedstrijd
-            if wedstrijd.eis_kwalificatie_scores:       # TODO: einddatum voor wijzigingen
-                wedstrijd.url_kwalificatie_scores = reverse('WedstrijdInschrijven:inschrijven-kwalificatie-scores',
-                                                            kwargs={'inschrijving_pk': inschrijving.pk})
-                wedstrijd.datum_str = maak_compacte_wanneer_str(wedstrijd.datum_begin, wedstrijd.datum_einde)
-                wedstrijd.plaats_str = wedstrijd.locatie.plaats
-                wedstrijd.sporter_str = inschrijving.sporterboog.sporter.lid_nr_en_volledige_naam()
-                kwalificatie_scores.append(wedstrijd)
+        for regel in bestelling.regels.filter(code=BESTELLING_REGEL_CODE_WEDSTRIJD_INSCHRIJVING):
+            inschrijving = (WedstrijdInschrijving
+                            .objects
+                            .filter(bestelling=regel)
+                            .select_related('sporterboog',
+                                            'sporterboog__sporter',
+                                            'wedstrijd',
+                                            'wedstrijd__locatie')
+                            .first())
+            if inschrijving:
+                wedstrijd = inschrijving.wedstrijd
+                if wedstrijd.eis_kwalificatie_scores:       # TODO: einddatum voor wijzigingen
+                    wedstrijd.url_kwalificatie_scores = reverse('WedstrijdInschrijven:inschrijven-kwalificatie-scores',
+                                                                kwargs={'inschrijving_pk': inschrijving.pk})
+                    wedstrijd.datum_str = maak_compacte_wanneer_str(wedstrijd.datum_begin, wedstrijd.datum_einde)
+                    wedstrijd.plaats_str = wedstrijd.locatie.plaats
+                    wedstrijd.sporter_str = inschrijving.sporterboog.sporter.lid_nr_en_volledige_naam()
+                    kwalificatie_scores.append(wedstrijd)
         # for
         context['toon_kwalificatie_scores'] = len(kwalificatie_scores) > 0
         context['kwalificatie_scores'] = kwalificatie_scores

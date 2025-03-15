@@ -1,6 +1,6 @@
 {% extends 'email_mailer/email_basis.dtl' %}
 {% comment %}
-                Copyright (c) 2022-2024 Ramon van der Winkel.
+                Copyright (c) 2022-2025 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -34,25 +34,15 @@
 
     |
     |Producten
-    {% for product in producten %}
+    {% for product in regels %}
         |
         |[{{ product.regel_nr }}]
 
-        {% for onderwerp, tekst in product.beschrijving %}
-            |    {{ onderwerp }}{% if tekst %}: {{ tekst }}{% endif %}
+        {% for tekst in product.beschrijving %}
+            |    {{ tekst }}
         {% endfor %}
 
-        {% if product.gebruikte_korting_str %}
-            |    Verkregen korting: {{ product.gebruikte_korting_str }}
-            {% if product.combi_reden %}
-                |    (combinatie korting voor {{ product.combi_reden }}
-            {% endif %}
-        {% endif %}
-
-        |    Bedrag: {{ product.prijs_euro_str }}
-        {% if product.korting_euro > 0.001 %}
-            |    Korting: - {{ product.korting_euro_str }}
-        {% endif %}
+        |    Bedrag: {{ product.bedrag_euro_str }}
 
     {% endfor %}
 
@@ -143,32 +133,16 @@
             </tr>
         </thead>
 
-        {% for product in producten %}
+        {% for product in regels %}
             <tr>
-                <td style="vertical-align:top">{% if product.regel_nr > 0 %}{{ product.regel_nr }}.{% endif %}</td>
+                <td style="vertical-align:top">{{ product.regel_nr }}.</td>
                 <td>
-                    {% for onderwerp, tekst in product.beschrijving %}
-                        <span>{{ onderwerp }}{% if tekst %}: {{ tekst }}{% endif %}</span><br>
+                    {% for tekst in product.beschrijving %}
+                        <span>{{ tekst }}</span><br>
                     {% endfor %}
                 </td>
-                <td style="text-align:right;vertical-align:top">{{ product.prijs_euro_str }}</td>
+                <td style="text-align:right;vertical-align:top">{{ product.bedrag_euro_str }}</td>
             </tr>
-
-            {% if product.korting_euro > 0.001 %}
-                <tr>
-                    <td></td>
-                    <td>Verkregen korting:<br>
-                        {% if product.gebruikte_korting_str %}
-                            <span>{{ product.gebruikte_korting_str }}</span><br>
-                        {% endif %}
-                        {% if product.combi_reden %}
-                            <span>(combinatie korting voor {{ product.combi_reden }}</span><br>
-                        {% endif %}
-                    </td>
-
-                    <td style="text-align:right; vertical-align:top">-&nbsp;{{ product.korting_euro_str }}</td>
-                </tr>
-            {% endif %}
 
         {% endfor %}
 

@@ -7,6 +7,7 @@
 """ Deze module levert functionaliteit voor de Bestelling-applicatie, met kennis van alle kortingen. """
 
 from Betaal.format import format_bedrag_euro
+from Bestelling.definities import BESTELLING_REGEL_CODE_WEDSTRIJD_INSCHRIJVING
 from Wedstrijden.definities import (WEDSTRIJD_KORTING_COMBI, WEDSTRIJD_KORTING_SPORTER, WEDSTRIJD_KORTING_VERENIGING,
                                     WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD, WEDSTRIJD_INSCHRIJVING_STATUS_VERWIJDERD)
 from Wedstrijden.models import WedstrijdKorting, WedstrijdInschrijving
@@ -23,7 +24,7 @@ class BepaalAutomatischeKorting(object):
         self._lid_nr2wedstrijd_pks = dict()                       # [lid_nr] = [wedstrijd.pk, ...]
         self._lid_nr2wedstrijd_pks_eerder = dict()                # [lid_nr] = [wedstrijd.pk, ...]
         self._lid_nr_wedstrijd_pk2inschrijving = dict()           # [(lid_nr, wedstrijd_pk)] = inschrijving
-        self._inschrijving_pk2product = dict()                    # [inschrijving.pk] = BestellingProduct
+        self._inschrijving_pk2product = dict()                    # [inschrijving.pk] = BestellingRegel
         self._alle_combi_kortingen = list()
         self._max_korting_euro = None
         self._max_korting_pks = None
@@ -31,16 +32,20 @@ class BepaalAutomatischeKorting(object):
     def _laad_mandje(self, mandje):
         """ laad de inhoud van het mandje en reset all kortingen """
 
-        for product in (mandje
-                        .producten
-                        .exclude(wedstrijd_inschrijving=None)
-                        .select_related('wedstrijd_inschrijving',
-                                        'wedstrijd_inschrijving__korting',
-                                        'wedstrijd_inschrijving__sporterboog',
-                                        'wedstrijd_inschrijving__sporterboog__sporter',
-                                        'wedstrijd_inschrijving__sporterboog__sporter__bij_vereniging',
-                                        'wedstrijd_inschrijving__wedstrijd',
-                                        'wedstrijd_inschrijving__wedstrijd__organiserende_vereniging')):
+        regel_pks = (mandje
+                     .regels
+                     .filter(code=BESTELLING_REGEL_CODE_WEDSTRIJD_INSCHRIJVING)
+                     .values_list('pk', flat=True))
+
+        for inschrijving in (WedstrijdInschrijving
+                             .objects
+                             .filter(bestelling__pk__in=regel_pks)
+                             .select_related('korting',
+                                             'sporterboog',
+                                             'sporterboog__sporter',
+                                             'sporterboog__sporter__bij_vereniging',
+                                             'wedstrijd',
+                                             'wedstrijd__organiserende_vereniging')):
 
             inschrijving = product.wedstrijd_inschrijving
             self._inschrijving_pk2product[inschrijving.pk] = product
@@ -84,7 +89,8 @@ class BepaalAutomatischeKorting(object):
                        .objects
                        .filter(sporterboog__sporter__lid_nr=lid_nr)
                        .filter(korting=None)                            # niet stapelen
-                       .exclude(status__in=(WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD, WEDSTRIJD_INSCHRIJVING_STATUS_VERWIJDERD))
+                       .exclude(status__in=(WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD,
+                                            WEDSTRIJD_INSCHRIJVING_STATUS_VERWIJDERD))
                        .exclude(wedstrijd__pk__in=nieuwe_pks)
                        .values_list('wedstrijd__pk', flat=True))
             self._lid_nr2wedstrijd_pks_eerder[lid_nr] = pks
@@ -193,8 +199,8 @@ class BepaalAutomatischeKorting(object):
         for inschrijving in alle_inschrijvingen:
             if inschrijving.korting:
                 procent = inschrijving.korting.percentage / Decimal('100')
-                product = self._inschrijving_pk2product[inschrijving.pk]
-                totaal_korting_euro += (product.prijs_euro * procent)
+                regel = inschrijving.regel
+                totaal_korting_euro += (regel.bedrag_euro * procent)
         # for
 
         # print('  totaal_korting: %.2f' % totaal_korting_euro)
@@ -265,9 +271,9 @@ class BepaalAutomatischeKorting(object):
                     inschrijving.save(update_fields=['korting'])
 
                     procent = korting.percentage / Decimal(100)
-                    product = self._inschrijving_pk2product[inschrijving.pk]
+                    regel = inschrijving.bestelling
                     # self._stdout.write('   product: %s' % product)
-                    product.korting_euro = product.prijs_euro * procent
+                    product.korting_euro = regel.bedrag_euro * procent
                     product.save(update_fields=['korting_euro'])
                     # self._stdout.write('   korting_euro: %s' % product.korting_euro)
 
@@ -285,7 +291,7 @@ class BepaalAutomatischeKorting(object):
         for inschrijving in alle_inschrijvingen:
             if inschrijving.korting and inschrijving.korting.pk in combi_pks:
                 korting_euro = combi_korting_euro[inschrijving.korting.pk]
-                product = self._inschrijving_pk2product[inschrijving.pk]
+                regel = inschrijving.bestelling
                 if korting_euro:
                     # samenvoegen tot de totale korting
                     product.korting_euro = korting_euro
@@ -300,8 +306,8 @@ class BepaalAutomatischeKorting(object):
         # for
 
         for inschrijving in alle_inschrijvingen:
-            product = self._inschrijving_pk2product[inschrijving.pk]
-            self._stdout.write('product: %s' % product)
+            regel = inschrijving.bestelling
+            self._stdout.write('regel: %s' % regel)
             if inschrijving.korting:
                 self._stdout.write('korting: %s' % inschrijving.korting)
                 # self._stdout.write('korting_euro: %s' % product.korting_euro)

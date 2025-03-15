@@ -10,11 +10,13 @@ from BasisTypen.definities import ORGANISATIE_IFAA
 from Bestelling.definities import BESTELLING_REGEL_CODE_WEDSTRIJD_INSCHRIJVING, BESTELLING_KORT_BREAK
 from Bestelling.bestel_plugin_base import BestelPluginBase
 from Bestelling.models import BestellingRegel
+from Betaal.format import format_bedrag_euro
 from Mailer.operations import mailer_email_is_valide, mailer_queue_email, render_email_template
 from Wedstrijden.definities import (WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_MANDJE,
                                     WEDSTRIJD_INSCHRIJVING_STATUS_BESTELD,
                                     WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF,
-                                    WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD)
+                                    WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD,
+                                    WEDSTRIJD_INSCHRIJVING_STATUS_VERWIJDERD)
 from Wedstrijden.models import WedstrijdInschrijving, WedstrijdKorting, beschrijf_korting
 from decimal import Decimal
 import datetime
@@ -44,11 +46,11 @@ class WedstrijdBestelPlugin(BestelPluginBase):
             self.stdout.write('[INFO] Vervallen: BestellingRegel pk=%s inschrijving (%s) in mandje van %s' % (
                               regel.pk, inschrijving, inschrijving.koper))
 
-            self._verwijder_reservering(inschrijving)
-
             mandje = regel.bestellingmandje_set.first()
             if mandje.pk not in mandje_pks:
                 mandje_pks.append(mandje.pk)
+
+            self.annuleer(regel)
 
             # verwijder het product, dan verdwijnt deze ook uit het mandje
             self.stdout.write('[INFO] BestellingRegel met pk=%s wordt verwijderd' % regel.pk)
@@ -96,60 +98,75 @@ class WedstrijdBestelPlugin(BestelPluginBase):
 
         return regel
 
-    def verwijder_reservering(self, regel: BestellingRegel) -> BestellingRegel | None:
-        """ laat een eerder gemaakte reservering los
-            kan een inschrijving omzetten in een afmelding
+    def afmelden(self, inschrijving: WedstrijdInschrijving):
         """
-        nieuwe_regel = None
+            Verwerk het verzoek tot afmelden voor een wedstrijd.
+        """
+        if inschrijving.status not in (WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD,
+                                       WEDSTRIJD_INSCHRIJVING_STATUS_VERWIJDERD):
+            self.stdout.write('[INFO] WedstrijdInschrijving met pk=%s afmelden' % inschrijving.pk)
 
-        inschrijving = regel.wedstrijdinschrijving_set.first()
-
-        if inschrijving.status == WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_MANDJE:
-            # schrijf de sporter uit bij de sessie
-            # Noteer: geen concurrency risico want serialisatie via deze achtergrondtaak
+            # verlaag het aantal inschrijvingen op deze sessie
             sessie = inschrijving.sessie
-            if sessie.aantal_inschrijvingen > 0:  # voorkom ongelukken: kan negatief niet opslaan
-                sessie.aantal_inschrijvingen -= 1
-                sessie.save(update_fields=['aantal_inschrijvingen'])
+            sessie.aantal_inschrijvingen -= 1
+            sessie.save(update_fields=['aantal_inschrijvingen'])
 
-            self.stdout.write('[INFO] Wedstrijd inschrijving pk=%s reservering wordt verwijderd' % inschrijving.pk)
-            inschrijving.delete()
+            now = timezone.now()
+            stamp_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
+            msg = "[%s] Afgemeld voor de wedstrijd\n" % stamp_str
+            inschrijving.log += msg
 
-        return nieuwe_regel
+            inschrijving.status = WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD
 
-    def _verwijder_reservering(self, inschrijving: WedstrijdInschrijving): # -> WedstrijdAfmelding:
+            # inschrijving.sessie en inschrijving.klasse kunnen niet op None gezet worden
+            # inschrijving mag niet verwijderd worden, in verband met mogelijk verwijzing vanuit bestelling
 
-        if inschrijving.status == WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_MANDJE:
-            # schrijf de sporter uit bij de sessie
-            # Noteer: geen concurrency risico want serialisatie via deze achtergrondtaak
-            sessie = inschrijving.sessie
-            if sessie.aantal_inschrijvingen > 0:  # voorkom ongelukken: kan negatief niet opslaan
-                sessie.aantal_inschrijvingen -= 1
-                sessie.save(update_fields=['aantal_inschrijvingen'])
+            inschrijving.save(update_fields=['status', 'log'])
 
-            self.stdout.write('[INFO] WedstrijdInschrijving pk=%s reservering wordt verwijderd' % inschrijving.pk)
-            inschrijving.delete()
+    def annuleer(self, regel: BestellingRegel):
+        """
+            Het product wordt uit het mandje gehaald of de bestelling wordt geannuleerd (voordat deze betaald is)
+            Geef een eerder gemaakte reservering voor een wedstrijd weer vrij.
+        """
+        inschrijving = WedstrijdInschrijving.objects.filter(bestelling=regel).first()
+        if not inschrijving:
+            self.stdout.write('[ERROR] Kan WedstrijdInschrijving voor regel met pk=%s niet vinden' % regel.pk)
+            return
 
-        # # TODO: ombouwen naar WedstrijdAfmelding
+        self.afmelden(inschrijving)
+
+        # # zet de inschrijving om in een afmelding
+        # now = timezone.now()
+        # stamp_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
+        # msg = "[%s] Annuleer inschrijving voor deze opleiding\n" % stamp_str
         #
-        # # zet de inschrijving om in status=afgemeld of verwijderd
-        # # dit heeft de voorkeur over het echt verwijderen van inschrijvingen,
-        # # want als er wel een betaling volgt dan kunnen we die nergens aan koppelen
-        # oude_status = inschrijving.status
-        # if oude_status ==
+        # afmelding = WedstrijdAfgemeld(
+        #                 wanneer_aangemeld=inschrijving.wanneer_aangemeld,
+        #                 nummer=inschrijving.nummer,
+        #                 wanneer_afgemeld=now,
+        #                 status=OPLEIDING_AFMELDING_STATUS_AFGEMELD,
+        #                 opleiding=inschrijving.opleiding,
+        #                 bestelling=None,
+        #                 sporter=inschrijving.sporter,
+        #                 koper=inschrijving.koper,
+        #                 bedrag_ontvangen=inschrijving.bedrag_ontvangen,
+        #                 log=inschrijving.log + msg)
         #
-        # stamp_str = timezone.localtime(timezone.now()).strftime('%Y-%m-%d om %H:%M')
+        # if inschrijving.status != WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF:
+        #     # nog niet betaald
+        #     afmelding.status = WEDSTRIJD_AFMELDING_STATUS_GEANNULEERD
         #
-        # if inschrijving.status == WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF:
-        #     msg = "[%s] Afgemeld voor de wedstrijd en reservering verwijderd\n" % stamp_str
-        #     inschrijving.status = WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD
-        # else:
-        #     msg = "[%s] Reservering voor wedstrijd verwijderd\n" % stamp_str
-        #     inschrijving.status = WEDSTRIJD_INSCHRIJVING_STATUS_VERWIJDERD
+        # afmelding.save()
         #
-        # inschrijving.korting = None
-        # inschrijving.log += msg
-        # inschrijving.save(update_fields=['status', 'log', 'korting'])
+        # self.stdout.write('[INFO] Wedstrijd inschrijving pk=%s status %s --> afgemeld pk=%s status %s' % (
+        #                     inschrijving.pk,
+        #                     WEDSTRIJD_INSCHRIJVING_STATUS_TO_STR[inschrijving.status],
+        #                     afmelding.pk,
+        #                     WEDSTRIJD_AFMELDING_STATUS_TO_STR[afmelding.status]))
+
+        # verwijder de inschrijving
+        self.stdout.write('[INFO] WedstrijdInschrijving pk=%s wordt verwijderd' % inschrijving.pk)
+        inschrijving.delete()
 
     def is_besteld(self, regel: BestellingRegel):
         """
@@ -186,9 +203,10 @@ class WedstrijdBestelPlugin(BestelPluginBase):
 
         now = timezone.now()
         stamp_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
-        msg = "[%s] Betaling ontvangen (euro %s); status is nu definitief\n" % (stamp_str, inschrijving.ontvangen_euro)
-
+        bedrag_str = format_bedrag_euro(bedrag_ontvangen)
+        msg = "[%s] Betaling ontvangen (%s); status is nu definitief\n" % (stamp_str, bedrag_str)
         inschrijving.log += msg
+
         inschrijving.save(update_fields=['ontvangen_euro', 'status', 'log'])
 
         # stuur een e-mail naar de sporter, als dit niet de koper is
@@ -249,26 +267,6 @@ class WedstrijdBestelPlugin(BestelPluginBase):
                 self.stdout.write(
                     '[INFO] Kan geen informatieve e-mail sturen naar sporter %s (geen e-mail beschikbaar)' %
                     sporter.lid_nr)
-
-    def afmelden(self, inschrijving: WedstrijdInschrijving):
-        """
-            Verwerk het verzoek tot afmelden voor een wedstrijd.
-        """
-        now = timezone.now()
-        stamp_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
-        msg = "[%s] Afgemeld voor de wedstrijd\n" % stamp_str
-
-        # verlaag het aantal inschrijvingen op deze sessie
-        # Noteer: geen concurrency risico want serialisatie via deze achtergrondtaak
-        sessie = inschrijving.sessie
-        sessie.aantal_inschrijvingen -= 1
-        sessie.save(update_fields=['aantal_inschrijvingen'])
-
-        # inschrijving.sessie en inschrijving.klasse kunnen niet op None gezet worden
-        # inschrijving mag niet verwijderd worden, in verband met verwijzing vanuit bestellingen
-        inschrijving.status = WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD
-        inschrijving.log += msg
-        inschrijving.save(update_fields=['status', 'log'])
 
     def get_verkoper_ver_nr(self, regel: BestellingRegel) -> int:
         """

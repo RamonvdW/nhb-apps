@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2025 Ramon van der Winkel.
+#  Copyright (c) 2022-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -9,10 +9,13 @@ from django.utils import timezone
 from Bestelling.bestel_plugin_base import BestelPluginBase
 from Bestelling.definities import BESTELLING_REGEL_CODE_WEBWINKEL
 from Bestelling.models import Bestelling, BestellingRegel, BestellingMandje
+from Betaal.format import format_bedrag_euro
 from Webwinkel.definities import (KEUZE_STATUS_RESERVERING_MANDJE, KEUZE_STATUS_BESTELD, KEUZE_STATUS_BACKOFFICE,
                                   KEUZE_STATUS_GEANNULEERD, VERZENDKOSTEN_BRIEFPOST, VERZENDKOSTEN_PAKKETPOST)
 from Webwinkel.models import WebwinkelKeuze
 from decimal import Decimal
+
+EMAIL_TEMPLATE_BACKOFFICE_VERSTUREN = 'email_webwinkel/backoffice-versturen.dtl'
 
 
 class WebwinkelBestelPlugin(BestelPluginBase):
@@ -36,20 +39,10 @@ class WebwinkelBestelPlugin(BestelPluginBase):
 
             # onthoud in welk mandje deze lag
             mandje = regel.bestellingmandje_set.first()
-            mandje_pks.append(mandje)
+            if mandje.pk not in mandje_pks:
+                mandje_pks.append(mandje)
 
-            # geef de reservering op de producten weer vrij
-            product = keuze.product
-            aantal = keuze.aantal
-
-            if not product.onbeperkte_voorraad:
-                # Noteer: geen concurrency risico want serialisatie via deze achtergrondtaak
-                product.aantal_op_voorraad += aantal
-                product.save(update_fields=['aantal_op_voorraad'])
-
-            # verwijder de webwinkel keuze
-            self.stdout.write('[INFO] WebwinkelKeuze met pk=%s wordt verwijderd' % keuze.pk)
-            keuze.delete()
+            self.annuleer(regel)
 
             # verwijder het product, dan verdwijnt deze ook uit het mandje
             self.stdout.write('[INFO] BestellingRegel met pk=%s wordt verwijderd' % regel.pk)
@@ -105,28 +98,28 @@ class WebwinkelBestelPlugin(BestelPluginBase):
 
         return regel
 
-    def verwijder_reservering(self, regel: BestellingRegel) -> BestellingRegel | None:
+    def annuleer(self, regel: BestellingRegel):
         """
-            Het product wordt uit het mandje gehaald
-            of de bestelling wordt geannuleerd (voordat deze betaald is)
-
-            Geef een eerder gemaakte reservering voor een webwinkel product weer vrij
-            zodat deze door iemand anders te kiezen zijn.
+            Het product wordt uit het mandje gehaald of de bestelling wordt geannuleerd (voordat deze betaald is)
+            Geef een eerder gemaakte reservering voor het webwinkel product weer vrij.
         """
-        keuze = regel.webwinkelkeuze_set.first()
-        if keuze:
-            product = keuze.product
-            aantal = keuze.aantal
+        keuze = WebwinkelKeuze.objects.filter(bestelling=regel).select_related('product').first()
+        if not keuze:
+            self.stdout.write('[ERROR] Kan WebwinkelKeuze voor regel met pk=%s niet vinden' % regel.pk)
+            return
 
-            if not product.onbeperkte_voorraad:
-                # Noteer: geen concurrency risico want serialisatie via deze achtergrondtaak
-                product.aantal_op_voorraad += aantal
-                product.save(update_fields=['aantal_op_voorraad'])
+        product = keuze.product
+        if not product.onbeperkte_voorraad:
+            # Noteer: geen concurrency risico want serialisatie via deze achtergrondtaak
+            product.aantal_op_voorraad += keuze.aantal
+            product.save(update_fields=['aantal_op_voorraad'])
 
-            keuze.status = KEUZE_STATUS_GEANNULEERD
-            keuze.save(update_fields=['status'])
+        # keuze.status = KEUZE_STATUS_GEANNULEERD
+        # keuze.save(update_fields=['status'])
 
-        return None
+        # verwijder de keuze
+        self.stdout.write('[INFO] WebwinkelKeuze pk=%s wordt verwijderd' % keuze.pk)
+        keuze.delete()
 
     def is_besteld(self, regel: BestellingRegel):
         """
@@ -146,7 +139,20 @@ class WebwinkelBestelPlugin(BestelPluginBase):
             Het product is betaald, dus de reservering moet definitief gemaakt worden.
             Wordt ook aangeroepen als een bestelling niet betaald hoeft te worden (totaal bedrag nul).
         """
-        raise NotImplementedError()
+        keuze = WebwinkelKeuze.objects.filter(bestelling=regel.pk).first()
+        if not keuze:
+            self.stdout.write('[ERROR] Kan WebwinkelKeuze voor regel met pk=%s niet vinden' % regel.pk)
+            return
+
+        keuze.ontvangen_euro = bedrag_ontvangen
+
+        stamp_str = timezone.localtime(timezone.now()).strftime('%Y-%m-%d om %H:%M')
+        bedrag_str = format_bedrag_euro(bedrag_ontvangen)
+        msg = "[%s] Betaling is ontvangen (%s); overgedragen aan backoffice\n" % (stamp_str, bedrag_str)
+        keuze.log += msg
+
+        keuze.status = KEUZE_STATUS_BACKOFFICE
+        keuze.save(update_fields=['ontvangen_euro', 'status', 'log'])
 
     def get_verkoper_ver_nr(self, regel: BestellingRegel) -> int:
         """

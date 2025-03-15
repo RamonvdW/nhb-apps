@@ -63,7 +63,7 @@ def get_kaartjes_bond(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_indi
                         prio=5,
                         titel="BK selectie",
                         icoon="rule",
-                        tekst="Selectie van sporters voor de Bondskampioenschappen teams.",
+                        tekst="Selectie van sporters voor de Bondskampioenschappen.",
                         url=url)
             kaartjes_indiv.append(kaartje)
 

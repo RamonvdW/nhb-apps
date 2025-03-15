@@ -496,8 +496,8 @@ class TestOpleidingInschrijven(E2EHelpers, TestCase):
         betaal_mutatieverzoek_start_ontvangst(bestelling, description, self.opleiding.kosten_euro,
                                               url_betaling_gedaan, snel=True)
         f1, f2 = self.verwerk_betaal_mutaties()
-        # print('\nf1:', f1.getvalue())
-        # print('f2:', f2.getvalue())
+        print('\nf1:', f1.getvalue())
+        print('f2:', f2.getvalue())
 
         # haal de betaal status pagina op
         bestelling.refresh_from_db()
