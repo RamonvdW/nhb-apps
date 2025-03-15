@@ -88,6 +88,7 @@ BESTELLING_REGEL_CODE_WEDSTRIJD_AFGEMELD     = "wedstrijd_afgemeld"
 BESTELLING_REGEL_CODE_WEDSTRIJD_KORTING      = "wedstrijd_korting"
 BESTELLING_REGEL_CODE_WEBWINKEL              = "webwinkel"
 BESTELLING_REGEL_CODE_TRANSPORT              = "transport"
+BESTELLING_REGEL_CODE_VERZENDKOSTEN          = "verzendkosten"
 
 
 # speciale tekens die BestellingRegel.korte_beschrijving opsplitsen in aparte regels

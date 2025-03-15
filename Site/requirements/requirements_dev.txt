@@ -8,13 +8,13 @@ asgiref==3.8.1
     # via
     #   -r requirements.txt
     #   django
-beautifulsoup4==4.12.3
+beautifulsoup4==4.13.3
     # via -r requirements_dev.in
-cachetools==5.5.1
+cachetools==5.5.2
     # via
     #   -r requirements.txt
     #   google-auth
-certifi==2024.12.14
+certifi==2025.1.31
     # via
     #   -r requirements.txt
     #   requests
@@ -22,11 +22,11 @@ charset-normalizer==3.4.1
     # via
     #   -r requirements.txt
     #   requests
-coverage==7.6.10
+coverage==7.6.12
     # via
     #   -r requirements_dev.in
     #   django-coverage-plugin
-django==4.2.18
+django==4.2.20
     # via
     #   -r requirements.txt
     #   django-debug-toolbar
@@ -43,13 +43,13 @@ et-xmlfile==2.0.0
     # via
     #   -r requirements.txt
     #   openpyxl
-fonttools==4.55.7
+fonttools==4.56.0
     # via -r requirements_dev.in
-google-api-core==2.24.1
+google-api-core==2.24.2
     # via
     #   -r requirements.txt
     #   google-api-python-client
-google-api-python-client==2.160.0
+google-api-python-client==2.164.0
     # via -r requirements.txt
 google-auth==2.38.0
     # via
@@ -61,7 +61,7 @@ google-auth-httplib2==0.2.0
     # via
     #   -r requirements.txt
     #   google-api-python-client
-googleapis-common-protos==1.66.0
+googleapis-common-protos==1.69.1
     # via
     #   -r requirements.txt
     #   google-api-core
@@ -94,9 +94,9 @@ pip-licenses==5.0.0
     # via -r requirements_dev.in
 pip-review==1.3.0
     # via -r requirements_dev.in
-prettytable==3.13.0
+prettytable==3.15.1
     # via pip-licenses
-proto-plus==1.26.0
+proto-plus==1.26.1
     # via
     #   -r requirements.txt
     #   google-api-core
@@ -106,7 +106,7 @@ protobuf==5.29.3
     #   google-api-core
     #   googleapis-common-protos
     #   proto-plus
-psycopg==3.2.4
+psycopg==3.2.6
     # via -r requirements.txt
 pyasn1==0.6.1
     # via
@@ -123,7 +123,7 @@ pyparsing==3.2.1
     # via
     #   -r requirements.txt
     #   httplib2
-pypdf==5.2.0
+pypdf==5.3.1
     # via -r requirements.txt
 pyyaml==6.0.2
     # via html5validator
@@ -156,6 +156,7 @@ tomli==2.2.1
 typing-extensions==4.12.2
     # via
     #   -r requirements.txt
+    #   beautifulsoup4
     #   psycopg
 uritemplate==4.1.1
     # via

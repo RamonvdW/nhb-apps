@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023-2024 Ramon van der Winkel.
+#  Copyright (c) 2023-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -222,6 +222,10 @@ class ReistijdBepalen(object):
         today = timezone.localtime(timezone.now()).date()
 
         for reistijd in Reistijd.objects.filter(reistijd_min=0):
+
+            if not reistijd.is_compleet():
+                self.stdout.write('[WARNING] Reistijd met pk=%s is niet compleet; skippping' % reistijd.pk)
+                continue
 
             vanaf_lat_lon = "%s, %s" % (reistijd.vanaf_lat, reistijd.vanaf_lon)
             naar_lat_lon = "%s, %s" % (reistijd.naar_lat, reistijd.naar_lon)

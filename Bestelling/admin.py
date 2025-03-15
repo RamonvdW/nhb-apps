@@ -93,7 +93,7 @@ class BestellingAdmin(admin.ModelAdmin):
 
     auto_complete = ('account', 'ontvanger')
 
-    list_filter = ('status', OntvangerFilter)
+    list_filter = ('status', 'transport', OntvangerFilter)
 
     fieldsets = (
         ('Inhoud',

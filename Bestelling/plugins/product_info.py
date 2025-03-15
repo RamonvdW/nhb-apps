@@ -16,7 +16,7 @@ from Bestelling.definities import (BESTELLING_REGEL_CODE_EVENEMENT_INSCHRIJVING,
                                    BESTELLING_REGEL_CODE_WEDSTRIJD_AFGEMELD,
                                    BESTELLING_REGEL_CODE_WEDSTRIJD_KORTING,
                                    BESTELLING_REGEL_CODE_WEBWINKEL,
-                                   BESTELLING_REGEL_CODE_TRANSPORT)
+                                   BESTELLING_REGEL_CODE_VERZENDKOSTEN)
 from Bestelling.plugins.alle_bestel_plugins import bestel_plugins
 from Bestelling.models import BestellingRegel
 
@@ -56,7 +56,7 @@ def beschrijf_regel(regel: BestellingRegel):
     if regel.code == BESTELLING_REGEL_CODE_WEBWINKEL:
         obj = regel.webwinkelkeuze_set.first()
 
-    if regel.code == BESTELLING_REGEL_CODE_TRANSPORT:
+    if regel.code == BESTELLING_REGEL_CODE_VERZENDKOSTEN:
         # TODO
         pass
 

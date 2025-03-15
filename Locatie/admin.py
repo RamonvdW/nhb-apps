@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2024 Ramon van der Winkel.
+#  Copyright (c) 2020-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -8,10 +8,23 @@ from django.contrib import admin
 from Locatie.models import WedstrijdLocatie, EvenementLocatie, Reistijd
 
 
+class HeeftLatLonFilter(admin.SimpleListFilter):
+    title = 'heeft lat/lon'
+    parameter_name = 'heeft_lat_lon'
+
+    def lookups(self, request, model_admin):
+        return [('nee', 'Nee')]
+
+    def queryset(self, request, queryset):
+        if self.value() == 'nee':
+            queryset = queryset.filter(adres_lat='')
+        return queryset
+
+
 class WedstrijdLocatieAdmin(admin.ModelAdmin):
     """ Admin configuratie voor Locatie """
 
-    list_filter = ('baan_type',
+    list_filter = ('baan_type', HeeftLatLonFilter,
                    'discipline_outdoor', 'discipline_indoor', 'discipline_veld', 'discipline_25m1pijl',
                    'zichtbaar', 'adres_uit_crm')
 

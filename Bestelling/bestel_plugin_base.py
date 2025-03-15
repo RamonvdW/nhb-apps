@@ -52,14 +52,14 @@ class BestelPluginBase:
             Het product is betaald, dus de reservering moet definitief gemaakt worden.
             Wordt ook aangeroepen als een bestelling niet betaald hoeft te worden (totaal bedrag nul).
         """
-        raise NotImplementedError()             # pragma: no cover
+        raise NotImplementedError(regel)        # pragma: no cover
 
     def beschrijf_product(self, obj) -> list:
         """
             Geef een lijst van tuples terug waarin aspecten van het product beschreven staan.
             obj is specifiek voor de plugin, bijvoorbeeld WedstrijdInschrijving
         """
-        raise NotImplementedError()             # pragma: no cover
+        raise NotImplementedError(obj)          # pragma: no cover
 
     def afmelden(self, obj):
         """
@@ -71,13 +71,13 @@ class BestelPluginBase:
         """
             Bereken de verzendkosten van toepassing op het mandje of de bestelling
         """
-        raise NotImplementedError()             # pragma: no cover
+        raise NotImplementedError(obj)          # pragma: no cover
 
     def get_verkoper_ver_nr(self, regel: BestellingRegel) -> int:
         """
             Bepaal welke vereniging de verkopende partij is
             Geeft het verenigingsnummer terug, of -1 als dit niet te bepalen was
         """
-        raise NotImplementedError()             # pragma: no cover
+        raise NotImplementedError(regel)        # pragma: no cover
 
 # end of file

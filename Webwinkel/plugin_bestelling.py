@@ -162,7 +162,7 @@ class WebwinkelBestelPlugin(BestelPluginBase):
         return settings.WEBWINKEL_VERKOPER_VER_NR
 
 
-class TransportkostenBestelPlugin(BestelPluginBase):
+class VerzendkostenBestelPlugin(BestelPluginBase):
 
     def mandje_opschonen(self, verval_datum):
         # nothing to do
@@ -223,7 +223,7 @@ class TransportkostenBestelPlugin(BestelPluginBase):
 
 
 webwinkel_bestel_plugin = WebwinkelBestelPlugin()
-transportkosten_bestel_plugin = TransportkostenBestelPlugin()
+verzendkosten_bestel_plugin = VerzendkostenBestelPlugin()
 
 # end of file
 

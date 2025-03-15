@@ -132,7 +132,6 @@ class ToonBestellingDetailsView(UserPassesTestMixin, TemplateView):
     def _beschrijf_inhoud_bestelling(bestelling: Bestelling):
         """ beschrijf de inhoud van een bestelling """
 
-        bevat_fout = False
         controleer_euro = Decimal(0)
 
         regels = (bestelling
@@ -140,8 +139,7 @@ class ToonBestellingDetailsView(UserPassesTestMixin, TemplateView):
                   .order_by('pk'))       # geen schoonheidsprijs, maar wel vaste volgorde
 
         for regel in regels:
-            # maak een beschrijving van deze regel
-            regel.beschrijving = beschrijf_regel(regel)
+            regel.bedrag_euro_str = format_bedrag_euro(regel.bedrag_euro)
             controleer_euro += regel.bedrag_euro
         # for
 
@@ -149,10 +147,7 @@ class ToonBestellingDetailsView(UserPassesTestMixin, TemplateView):
         if controleer_euro < 0:
             controleer_euro = Decimal(0)
 
-        controleer_euro += bestelling.verzendkosten_euro
-
-        if controleer_euro != bestelling.totaal_euro:
-            bevat_fout = True
+        bevat_fout = controleer_euro != bestelling.totaal_euro
 
         return regels, bevat_fout
 
@@ -230,7 +225,7 @@ class ToonBestellingDetailsView(UserPassesTestMixin, TemplateView):
 
         context['bestelling'] = bestelling
 
-        context['producten'], context['bevat_fout'] = self._beschrijf_inhoud_bestelling(bestelling)
+        context['regels'], context['bevat_fout'] = self._beschrijf_inhoud_bestelling(bestelling)
 
         context['transacties'], transacties_euro = self._beschrijf_transacties(bestelling)
 

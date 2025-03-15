@@ -7,7 +7,6 @@
 from django.db import migrations
 from django.conf import settings
 from django.db.models import Count
-from Bestelling.definities import BESTELLING_STATUS_AFGEROND
 from Bestelling.definities import (BESTELLING_REGEL_CODE_EVENEMENT_INSCHRIJVING,
                                    BESTELLING_REGEL_CODE_EVENEMENT_AFGEMELD,
                                    BESTELLING_REGEL_CODE_OPLEIDING_INSCHRIJVING,
@@ -15,9 +14,10 @@ from Bestelling.definities import (BESTELLING_REGEL_CODE_EVENEMENT_INSCHRIJVING,
                                    BESTELLING_REGEL_CODE_WEDSTRIJD_INSCHRIJVING,
                                    BESTELLING_REGEL_CODE_WEDSTRIJD_AFGEMELD,
                                    BESTELLING_REGEL_CODE_WEBWINKEL,
-                                   BESTELLING_REGEL_CODE_TRANSPORT,
+                                   BESTELLING_REGEL_CODE_VERZENDKOSTEN,
                                    BESTELLING_REGEL_CODE_WEDSTRIJD_KORTING,
-                                   BESTELLING_KORT_BREAK)
+                                   BESTELLING_KORT_BREAK, BESTELLING_STATUS_AFGEROND,
+                                   BESTELLING_TRANSPORT_NVT, BESTELLING_TRANSPORT_OPHALEN)
 from Webwinkel.definities import (KEUZE_STATUS_RESERVERING_MANDJE, KEUZE_STATUS_BESTELD, KEUZE_STATUS_BACKOFFICE,
                                   KEUZE_STATUS_GEANNULEERD)
 from Wedstrijden.definities import WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD
@@ -333,10 +333,40 @@ def migrate_product2regel_wedstrijd(apps, _):
             prod2regels[prod.pk].append(regel)
     # for
 
-    print('%d..' % len(prod2regels), end='')
+    print('%d' % len(prod2regels), end='')
 
     update_mandjes(apps, prod2regels)
     update_bestellingen(apps, prod2regels)
+
+
+def migrate_product2regel_verzendkosten(apps, _):
+
+    # haal de klassen op die van toepassing zijn op het moment van migratie
+    bestelling_klas = apps.get_model('Bestelling', 'Bestelling')
+    bestelling_regel_klas = apps.get_model('Bestelling', 'BestellingRegel')
+
+    print(', verzendkosten: ', end='')
+
+    # verzendkosten
+    teller = 0
+    for bestelling in (bestelling_klas
+                       .objects
+                       .exclude(transport=BESTELLING_TRANSPORT_NVT)):
+
+        regel = bestelling_regel_klas(
+                        korte_beschrijving='Verzendkosten',
+                        bedrag_euro=bestelling.verzendkosten_euro,
+                        code=BESTELLING_REGEL_CODE_VERZENDKOSTEN)
+
+        if bestelling.transport == BESTELLING_TRANSPORT_OPHALEN:
+            regel.korte_beschrijving = 'Ophalen op bondsbureau'
+
+        regel.save()
+        bestelling.regels.add(regel)
+        teller += 1
+    # for
+
+    print('%d..' % teller, end='')
 
 
 class Migration(migrations.Migration):
@@ -358,6 +388,7 @@ class Migration(migrations.Migration):
         migrations.RunPython(migrate_product2regel_opleiding),
         migrations.RunPython(migrate_product2regel_webwinkel),
         migrations.RunPython(migrate_product2regel_wedstrijd),  # , migrations.RunPython.noop
+        migrations.RunPython(migrate_product2regel_verzendkosten),
     ]
 
 # end of file

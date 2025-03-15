@@ -28,20 +28,11 @@
                     </td>
                 </tr>
 
-                {% for product in producten %}
+                {% for regel in regels %}
                     <tr>
-                        <th class="hide-on-small-only" style="padding-left:20px">{% for hdr, lijn in product.beschrijving %}<span>{{ hdr }}</span><br>{% endfor %}</th>
-                        <td>{% for hdr, lijn in product.beschrijving %}<span class="notranslate">{{ lijn }}</span><br>{% endfor %}</td>
-                        <td class="right-align" style="padding-right:20px">&euro;&nbsp;{{ product.prijs_euro }}</td>
+                        <th class="hide-on-small-only" style="padding-left:20px">{{ regel.korte_beschrijving }}</th>
+                        <td class="right-align" style="padding-right:20px">{{ regel.bedrag_euro_str }}</td>
                     </tr>
-
-                    {% if product.gebruikte_korting_str %}
-                        <tr>
-                            <td class="hide-on-small-only" style="padding-left:20px">{% if product.is_combi_korting %}Automatische combi-korting{% else %}Korting{% endif %}</td>
-                            <td>{{ product.gebruikte_korting_str }}{% if product.is_combi_korting %}{% for titel in product.combi_reden %}<br>{{ titel }}{% endfor %}{% endif %}</td>
-                            <td class="right-align" style="padding-right:20px">{% if product.korting_euro > 0.0001 %}&minus;&nbsp;{% endif %}&euro;&nbsp;{{ product.korting_euro }}</td>
-                        </tr>
-                    {% endif %}
                 {% endfor %}
 
                 <!-- verzendkosten -->

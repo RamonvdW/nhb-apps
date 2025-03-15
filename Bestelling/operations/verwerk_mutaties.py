@@ -40,7 +40,7 @@ from Opleiding.definities import (OPLEIDING_INSCHRIJVING_STATUS_DEFINITIEF,
                                   OPLEIDING_STATUS_TO_STR)
 from Opleiding.plugin_bestelling import opleiding_bestel_plugin
 from Vereniging.models import Vereniging
-from Webwinkel.plugin_bestelling import webwinkel_bestel_plugin, transportkosten_bestel_plugin
+from Webwinkel.plugin_bestelling import webwinkel_bestel_plugin, verzendkosten_bestel_plugin
 from Wedstrijden.definities import (WEDSTRIJD_INSCHRIJVING_STATUS_BESTELD,
                                     WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF,
                                     WEDSTRIJD_INSCHRIJVING_STATUS_TO_STR)
@@ -162,7 +162,7 @@ class VerwerkBestelMutaties:
     def _bepaal_verzendkosten_mandje(mandje):
         """ bereken de verzendkosten voor fysieke producten in het mandje """
 
-        mandje.verzendkosten_euro = transportkosten_bestel_plugin.bereken_verzendkosten(mandje)
+        mandje.verzendkosten_euro = verzendkosten_bestel_plugin.bereken_verzendkosten(mandje)
 
         if mandje.verzendkosten_euro > 0.00:
             # wel fysieke producten
@@ -179,7 +179,7 @@ class VerwerkBestelMutaties:
             transport: de transport keuze gemaakt door de gebruiker: ophalen of verzenden
         """
 
-        bestelling.verzendkosten_euro = transportkosten_bestel_plugin.bereken_verzendkosten(bestelling)
+        bestelling.verzendkosten_euro = verzendkosten_bestel_plugin.bereken_verzendkosten(bestelling)
         bestelling.transport = transport
 
         if bestelling.verzendkosten_euro < Decimal(0.001):
@@ -708,7 +708,7 @@ class VerwerkBestelMutaties:
             mandje.transport = mutatie.transport
             mandje.save(update_fields=['transport'])
 
-            transportkosten_bestel_plugin.bereken_verzendkosten(mandje)
+            verzendkosten_bestel_plugin.bereken_verzendkosten(mandje)
 
             # bereken het totaal opnieuw
             _mandje_bepaal_btw(mandje)

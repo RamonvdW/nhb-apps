@@ -1180,7 +1180,7 @@ class MyTestAsserts(TestCase):
 
             if line in ignore:                                                  # pragma: no cover
                 continue
-                
+
             issues.append('Kan regel %s niet vinden in html e-mail' % repr(line))       # pragma: no cover
         # for
 
