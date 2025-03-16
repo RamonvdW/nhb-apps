@@ -249,23 +249,28 @@ class ReistijdBepalen(object):
 
         for reistijd in Reistijd.objects.filter(op_datum__lt=oud):
 
-            self.stdout.write('[INFO] Reistijd met pk=%s wordt vernieuwd' % reistijd.pk)
+            if not reistijd.is_compleet():
+                self.stdout.write('[WARNING] Reistijd met pk=%s is niet compleet; skipping' % reistijd.pk)
+                continue
 
             vanaf_lat_lon = "%s, %s" % (reistijd.vanaf_lat, reistijd.vanaf_lon)
             naar_lat_lon = "%s, %s" % (reistijd.naar_lat, reistijd.naar_lon)
 
             mins = self._reistijd_met_auto(vanaf_lat_lon, naar_lat_lon)
 
-            if mins != reistijd.reistijd_min:
-                self.stdout.write('[INFO] Reistijd pk=%s is aangepast van %s naar %s minuten' % (reistijd.pk,
-                                                                                                 reistijd.reistijd_min,
-                                                                                                 mins))
-                reistijd.reistijd_min = mins
+            if mins > 5 * 60:
+                self.stdout.write('[WARNING] Rare reistijd (%s minuten) wordt niet opgeslagen' % mins)
             else:
-                self.stdout.write('[INFO] Reistijd pk=%s is niet gewijzigd')
+                if mins != reistijd.reistijd_min:
+                    self.stdout.write('[INFO] Reistijd pk=%s is aangepast van %s naar %s minuten' % (reistijd.pk,
+                                                                                                     reistijd.reistijd_min,
+                                                                                                     mins))
+                    reistijd.reistijd_min = mins
+                else:
+                    self.stdout.write('[INFO] Reistijd pk=%s is niet gewijzigd' % reistijd.pk)
 
-            reistijd.op_datum = today
-            reistijd.save(update_fields=['reistijd_min', 'op_datum'])
+                reistijd.op_datum = today
+                reistijd.save(update_fields=['reistijd_min', 'op_datum'])
         # for
 
     def run(self):
