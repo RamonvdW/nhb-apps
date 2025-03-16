@@ -94,7 +94,7 @@ class ReistijdBepalen(object):
             results = self._gmaps.directions(
                                 origin=vanaf_lat_lon,
                                 destination=naar_lat_lon,
-                                mode="driving",
+                                # mode="driving",       # driving is the default
                                 units="metric",
                                 alternatives=False,
                                 arrival_time=self._future_saturday_0800)
