@@ -86,9 +86,8 @@ BESTELLING_REGEL_CODE_OPLEIDING_AFGEMELD     = "opleiding_afgemeld"
 BESTELLING_REGEL_CODE_WEDSTRIJD_INSCHRIJVING = "wedstrijd_inschrijving"
 BESTELLING_REGEL_CODE_WEDSTRIJD_AFGEMELD     = "wedstrijd_afgemeld"
 BESTELLING_REGEL_CODE_WEDSTRIJD_KORTING      = "wedstrijd_korting"
-BESTELLING_REGEL_CODE_WEBWINKEL              = "webwinkel"
-BESTELLING_REGEL_CODE_TRANSPORT              = "transport"
-BESTELLING_REGEL_CODE_VERZENDKOSTEN          = "verzendkosten"
+BESTELLING_REGEL_CODE_WEBWINKEL              = "Y_webwinkel"                # Y = sorteervolgorde
+BESTELLING_REGEL_CODE_VERZENDKOSTEN          = "Z_verzendkosten"            # Z = sorteervolgorde
 
 
 # speciale tekens die BestellingRegel.korte_beschrijving opsplitsen in aparte regels

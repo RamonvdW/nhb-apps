@@ -21,8 +21,10 @@ class BestellingRegel(models.Model):
     # als regel-break wordt BESTELLING_KORT_BREAK gebruikt
     korte_beschrijving = models.CharField(max_length=250, default='?', blank=True)
 
-    # alleen voor kortingen: alle redenen voor de korting, gescheiden door een dubbel pipeline teken
+    # alleen voor kortingen: alle redenen voor de korting
+    # als regel-break wordt BESTELLING_KORT_BREAK gebruikt
     korting_redenen = models.CharField(max_length=500, default='', blank=True)
+    korting_ver_nr = models.PositiveSmallIntegerField(default=0)
 
     # bedrag van deze regel
     # product: positief bedrag

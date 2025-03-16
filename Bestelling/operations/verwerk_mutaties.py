@@ -369,7 +369,7 @@ class VerwerkBestelMutaties:
         if not mandje:  # pragma: no branch
             return
 
-        # zorg dat we verse informatie ophalen (anders duur het 1 uur voordat een update door komt)
+        # zorg dat we verse informatie ophalen (anders duurt het 1 uur voordat een update door komt)
         self._clear_instellingen_cache()
 
         # maak een Mollie-client instantie aan
@@ -380,6 +380,9 @@ class VerwerkBestelMutaties:
         for regel in mandje.regels.all():
             plugin = bestel_plugins[regel.code]
             ver_nr = plugin.get_verkoper_ver_nr(regel)
+            if ver_nr <= 0:
+                # niet van toepassing
+                continue
 
             instellingen = self._get_betaal_instellingen(ver_nr)
             ontvanger_ver_nr = instellingen.vereniging.ver_nr  # kan nu ook "via KHSN" zijn
@@ -390,6 +393,7 @@ class VerwerkBestelMutaties:
                 ontvanger2regels[ontvanger_ver_nr] = [regel]
         # for
 
+        # maak per partij waarmee afgerekend moet worden een aparte bestelling
         nieuwe_bestellingen = list()
         for ver_nr, regels in ontvanger2regels.items():
 

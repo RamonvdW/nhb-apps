@@ -130,7 +130,8 @@ class WedstrijdBestelPlugin(BestelPluginBase):
         """
         inschrijving = WedstrijdInschrijving.objects.filter(bestelling=regel).first()
         if not inschrijving:
-            self.stdout.write('[ERROR] Kan WedstrijdInschrijving voor regel met pk=%s niet vinden' % regel.pk)
+            self.stdout.write(
+                '[ERROR] Kan WedstrijdInschrijving voor regel met pk=%s niet vinden {annuleer}' % regel.pk)
             return
 
         self.afmelden(inschrijving)
@@ -173,10 +174,10 @@ class WedstrijdBestelPlugin(BestelPluginBase):
             Het gereserveerde product in het mandje is nu omgezet in een bestelling.
             Verander de status van het gevraagde product naar 'besteld maar nog niet betaald'
         """
-        inschrijving = WedstrijdInschrijving.objects.filter(regel=regel).first()
+        inschrijving = WedstrijdInschrijving.objects.filter(bestelling=regel).first()
         if not inschrijving:
             self.stdout.write(
-                '[ERROR] Kan WedstrijdInschrijving voor regel met pk=%s niet vinden (is_besteld)' % regel.pk)
+                '[ERROR] Kan WedstrijdInschrijving voor regel met pk=%s niet vinden {is_besteld}' % regel.pk)
             return
 
         now = timezone.now()
@@ -193,9 +194,10 @@ class WedstrijdBestelPlugin(BestelPluginBase):
             Wordt ook aangeroepen als een bestelling niet betaald hoeft te worden (totaal bedrag nul).
         """
 
-        inschrijving = WedstrijdInschrijving.objects.filter(regel=regel).first()
+        inschrijving = WedstrijdInschrijving.objects.filter(bestelling=regel).first()
         if not inschrijving:
-            self.stdout.write('[ERROR] Kan WedstrijdInschrijving voor regel met pk=%s niet vinden' % regel.pk)
+            self.stdout.write(
+                '[ERROR] Kan WedstrijdInschrijving voor regel met pk=%s niet vinden {is_betaald}' % regel.pk)
             return
 
         inschrijving.ontvangen_euro = bedrag_ontvangen
@@ -274,12 +276,17 @@ class WedstrijdBestelPlugin(BestelPluginBase):
             Geeft het verenigingsnummer terug, of -1 als dit niet te bepalen was
         """
         ver_nr = -1
-        inschrijving = WedstrijdInschrijving.objects.filter(regel=regel).select_related('wedstrijd').first()
+        inschrijving = (WedstrijdInschrijving
+                        .objects
+                        .filter(bestelling=regel)
+                        .select_related('wedstrijd',
+                                        'wedstrijd__organiserende_vereniging')
+                        .first())
         if inschrijving:
             ver_nr = inschrijving.wedstrijd.organiserende_vereniging.ver_nr
         else:
             self.stdout.write(
-                '[ERROR] Kan WedstrijdInschrijving voor regel met pk=%s niet vinden (get_verkoper_ver_nr)' % regel.pk)
+                '[ERROR] Kan WedstrijdInschrijving voor regel met pk=%s niet vinden {get_verkoper_ver_nr}' % regel.pk)
         return ver_nr
 
 
@@ -311,6 +318,18 @@ class WedstrijdKortingBestelPlugin(BestelPluginBase):
             beschrijving.append(tup)
 
         return redenen
+
+    def annuleer(self, regel: BestellingRegel):
+        """ niets te doen """
+        pass
+
+    def is_besteld(self, regel: BestellingRegel):
+        """ niets te doen """
+        pass
+
+    def get_verkoper_ver_nr(self, regel: BestellingRegel) -> int:
+        """ korting hoort bij de wedstrijd waar deze voor is """
+        return regel.korting_ver_nr
 
 
 wedstrijd_bestel_plugin = WedstrijdBestelPlugin()

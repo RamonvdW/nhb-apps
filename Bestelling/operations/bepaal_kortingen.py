@@ -7,10 +7,13 @@
 """ Deze module levert functionaliteit voor de Bestelling-applicatie, met kennis van alle kortingen. """
 
 from Betaal.format import format_bedrag_euro
-from Bestelling.definities import BESTELLING_REGEL_CODE_WEDSTRIJD_INSCHRIJVING
+from Bestelling.definities import (BESTELLING_REGEL_CODE_WEDSTRIJD_INSCHRIJVING,
+                                   BESTELLING_REGEL_CODE_WEDSTRIJD_KORTING,
+                                   BESTELLING_KORT_BREAK)
+from Bestelling.models import BestellingMandje, BestellingRegel
 from Wedstrijden.definities import (WEDSTRIJD_KORTING_COMBI, WEDSTRIJD_KORTING_SPORTER, WEDSTRIJD_KORTING_VERENIGING,
                                     WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD, WEDSTRIJD_INSCHRIJVING_STATUS_VERWIJDERD)
-from Wedstrijden.models import WedstrijdKorting, WedstrijdInschrijving
+from Wedstrijden.models import WedstrijdKorting, WedstrijdInschrijving, beschrijf_korting
 from decimal import Decimal
 
 
@@ -24,13 +27,14 @@ class BepaalAutomatischeKorting(object):
         self._lid_nr2wedstrijd_pks = dict()                       # [lid_nr] = [wedstrijd.pk, ...]
         self._lid_nr2wedstrijd_pks_eerder = dict()                # [lid_nr] = [wedstrijd.pk, ...]
         self._lid_nr_wedstrijd_pk2inschrijving = dict()           # [(lid_nr, wedstrijd_pk)] = inschrijving
-        self._inschrijving_pk2product = dict()                    # [inschrijving.pk] = BestellingRegel
         self._alle_combi_kortingen = list()
         self._max_korting_euro = None
         self._max_korting_pks = None
 
-    def _laad_mandje(self, mandje):
+    def _laad_mandje_en_reset_kortingen(self, mandje: BestellingMandje):
         """ laad de inhoud van het mandje en reset all kortingen """
+
+        mandje.regels.filter(code=BESTELLING_REGEL_CODE_WEDSTRIJD_KORTING).delete()
 
         regel_pks = (mandje
                      .regels
@@ -47,16 +51,10 @@ class BepaalAutomatischeKorting(object):
                                              'wedstrijd',
                                              'wedstrijd__organiserende_vereniging')):
 
-            inschrijving = product.wedstrijd_inschrijving
-            self._inschrijving_pk2product[inschrijving.pk] = product
-
             # verwijder automatische kortingen
             if inschrijving.korting:
                 inschrijving.korting = None
                 inschrijving.save(update_fields=['korting'])
-
-            product.korting_euro = Decimal(0)
-            product.save(update_fields=['korting_euro'])
 
             inschrijving.mogelijke_kortingen = list()
             inschrijving.heeft_mogelijke_combi_korting = False
@@ -199,7 +197,7 @@ class BepaalAutomatischeKorting(object):
         for inschrijving in alle_inschrijvingen:
             if inschrijving.korting:
                 procent = inschrijving.korting.percentage / Decimal('100')
-                regel = inschrijving.regel
+                regel = inschrijving.bestelling
                 totaal_korting_euro += (regel.bedrag_euro * procent)
         # for
 
@@ -260,7 +258,7 @@ class BepaalAutomatischeKorting(object):
         # for
         self._analyseer_kortingen_recursief(alle_inschrijvingen, gebruikte_kortingen)
 
-    def _kortingen_toepassen(self, alle_inschrijvingen, geef_korting_pks):
+    def _kortingen_toepassen(self, mandje: BestellingMandje, alle_inschrijvingen, geef_korting_pks):
         combi_korting_euro = dict()     # [korting.pk] = Decimal
         for inschrijving in alle_inschrijvingen:
             for korting in inschrijving.mogelijke_kortingen:
@@ -271,11 +269,19 @@ class BepaalAutomatischeKorting(object):
                     inschrijving.save(update_fields=['korting'])
 
                     procent = korting.percentage / Decimal(100)
-                    regel = inschrijving.bestelling
-                    # self._stdout.write('   product: %s' % product)
-                    product.korting_euro = regel.bedrag_euro * procent
-                    product.save(update_fields=['korting_euro'])
-                    # self._stdout.write('   korting_euro: %s' % product.korting_euro)
+                    korting_euro = inschrijving.bestelling.bedrag_euro * procent
+                    korting_euro = 0 - korting_euro     # korting is een negatief bedrag
+                    # self._stdout.write('   korting_euro: %s' % korting_euro)
+
+                    kort_str, redenen_lst = beschrijf_korting(korting)
+                    regel = BestellingRegel(
+                                    korte_beschrijving=kort_str,
+                                    korting_redenen=BESTELLING_KORT_BREAK.join(redenen_lst),
+                                    korting_ver_nr=korting.uitgegeven_door.ver_nr,
+                                    bedrag_euro=korting_euro,
+                                    code=BESTELLING_REGEL_CODE_WEDSTRIJD_KORTING)
+                    regel.save()
+                    mandje.regels.add(regel)
 
                     if korting.soort == WEDSTRIJD_KORTING_COMBI:
                         try:
@@ -322,7 +328,7 @@ class BepaalAutomatischeKorting(object):
             als meerdere kortingen van toepassing zijn, dan we geven de hoogste korting
         """
 
-        self._laad_mandje(mandje)
+        self._laad_mandje_en_reset_kortingen(mandje)
         self._zoek_mogelijke_kortingen()
 
         alle_inschrijvingen = [inschrijving
@@ -333,9 +339,10 @@ class BepaalAutomatischeKorting(object):
         self._analyseer_kortingen_recursief_combi(alle_inschrijvingen)
 
         if self._max_korting_pks:
-            self._stdout.write('maximale korting is %s met korting pks=%s' % (format_bedrag_euro(self._max_korting_euro),
-                                                                            repr(self._max_korting_pks)))
-            self._kortingen_toepassen(alle_inschrijvingen, self._max_korting_pks)
+            korting_euro_str = format_bedrag_euro(self._max_korting_euro)
+            self._stdout.write('[INFO] Maximale korting is %s met korting pks=%s' % (korting_euro_str,
+                                                                                     repr(self._max_korting_pks)))
+            self._kortingen_toepassen(mandje, alle_inschrijvingen, self._max_korting_pks)
 
 
 # end of file

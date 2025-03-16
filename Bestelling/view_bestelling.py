@@ -67,7 +67,7 @@ class ToonBestellingenView(UserPassesTestMixin, TemplateView):
         for bestelling in bestellingen:
 
             bestelling.beschrijving = [regel.korte_beschrijving
-                                       for regel in bestelling.regels.all()]
+                                       for regel in bestelling.regels.order_by('code', 'pk')]
 
             status = bestelling.status
             if status == BESTELLING_STATUS_NIEUW:
@@ -136,7 +136,7 @@ class ToonBestellingDetailsView(UserPassesTestMixin, TemplateView):
 
         regels = (bestelling
                   .regels
-                  .order_by('pk'))       # geen schoonheidsprijs, maar wel vaste volgorde
+                  .order_by('code', 'pk'))       # geen schoonheidsprijs, maar wel vaste volgorde
 
         for regel in regels:
             regel.bedrag_euro_str = format_bedrag_euro(regel.bedrag_euro)

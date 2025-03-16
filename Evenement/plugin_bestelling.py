@@ -241,7 +241,7 @@ class EvenementBestelPlugin(BestelPluginBase):
             Wordt ook aangeroepen als een bestelling niet betaald hoeft te worden (totaal bedrag nul).
         """
 
-        inschrijving = EvenementInschrijving.objects.filter(regel=regel).first()
+        inschrijving = EvenementInschrijving.objects.filter(bestelling=regel).first()
         if not inschrijving:
             self.stdout.write('[ERROR] Kan EvenementInschrijving voor regel met pk=%s niet vinden' % regel.pk)
             return
@@ -316,7 +316,12 @@ class EvenementBestelPlugin(BestelPluginBase):
             Geeft het verenigingsnummer terug, of -1 als dit niet te bepalen was
         """
         ver_nr = -1
-        inschrijving = EvenementInschrijving.objects.filter(regel=regel).select_related('evenement').first()
+        inschrijving = (EvenementInschrijving
+                        .objects
+                        .filter(bestelling=regel)
+                        .select_related('evenement',
+                                        'evenement__organiserende_vereniging')
+                        .first())
         if inschrijving:
             ver_nr = inschrijving.evenement.organiserende_vereniging.ver_nr
         else:

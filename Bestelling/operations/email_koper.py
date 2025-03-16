@@ -26,7 +26,7 @@ def _beschrijf_bestelling(bestelling: Bestelling) -> list:
 
     regel_nr = 0
 
-    regels = list(bestelling.regels.order_by('pk'))
+    regels = list(bestelling.regels.order_by('code', 'pk'))
     for regel in regels:
         # nieuwe regel op de bestelling
         regel_nr += 1

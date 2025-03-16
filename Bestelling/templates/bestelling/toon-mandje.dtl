@@ -107,7 +107,7 @@
 
                             {% for regel in regels %}
                                 <tr>
-                                    <td>{{ regel.korte_beschrijving }}</td>
+                                    <td>{{ regel.korte_beschrijving|linebreaksbr }}</td>
                                     <td class="right-align">{{ regel.bedrag_euro_str }}</td>
                                     <td class="right-align">
                                         <button class="btn-sv-blauw" id="id_verwijder_{{ regel.pk }}" onclick="verwijder('id_verwijder_{{ regel.pk }}')" data-url="{{ regel.url_verwijder }}">

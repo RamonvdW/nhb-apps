@@ -11,7 +11,7 @@ from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
 from Betaal.format import format_bedrag_euro
-from Bestelling.definities import BESTELLING_TRANSPORT_VERZEND, BESTELLING_TRANSPORT_OPHALEN
+from Bestelling.definities import BESTELLING_TRANSPORT_VERZEND, BESTELLING_TRANSPORT_OPHALEN, BESTELLING_KORT_BREAK
 from Bestelling.models import BestellingMandje
 from Bestelling.operations.mandje import mandje_tel_inhoud
 from Bestelling.operations.mutaties import (bestel_mutatieverzoek_maak_bestellingen,
@@ -90,13 +90,15 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
         else:
             controleer_euro = Decimal(0)
 
-            regels = mandje.regels.order_by('pk')       # volgorde waarop ze in het mandje gelegd zijn
+            regels = mandje.regels.order_by('code', 'pk')       # consistente volgorde
 
             for regel in regels:
                 mandje_is_leeg = False
 
                 controleer_euro += regel.bedrag_euro
                 regel.bedrag_euro_str = format_bedrag_euro(regel.bedrag_euro)
+                regel.korte_beschrijving.replace(BESTELLING_KORT_BREAK, '\\n')
+                regel.korting_redenen = regel.korting_redenen.split(BESTELLING_KORT_BREAK)
 
                 # maak een knop om deze bestelling te verwijderen uit het mandje
                 regel.url_verwijder = reverse('Bestelling:mandje-verwijder-product',
