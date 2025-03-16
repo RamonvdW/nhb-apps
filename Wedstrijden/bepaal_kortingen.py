@@ -31,15 +31,8 @@ class BepaalAutomatischeKorting(object):
         self._max_korting_euro = None
         self._max_korting_pks = None
 
-    def _laad_mandje_en_reset_kortingen(self, mandje: BestellingMandje):
+    def _analyseer_inschrijvingen(self, regel_pks: list):
         """ laad de inhoud van het mandje en reset all kortingen """
-
-        mandje.regels.filter(code=BESTELLING_REGEL_CODE_WEDSTRIJD_KORTING).delete()
-
-        regel_pks = (mandje
-                     .regels
-                     .filter(code=BESTELLING_REGEL_CODE_WEDSTRIJD_INSCHRIJVING)
-                     .values_list('pk', flat=True))
 
         for inschrijving in (WedstrijdInschrijving
                              .objects
@@ -258,7 +251,8 @@ class BepaalAutomatischeKorting(object):
         # for
         self._analyseer_kortingen_recursief(alle_inschrijvingen, gebruikte_kortingen)
 
-    def _kortingen_toepassen(self, mandje: BestellingMandje, alle_inschrijvingen, geef_korting_pks):
+    def _kortingen_toepassen(self, alle_inschrijvingen, geef_korting_pks) -> list[BestellingRegel]:
+        nieuwe_regels = list()
         combi_korting_euro = dict()     # [korting.pk] = Decimal
         for inschrijving in alle_inschrijvingen:
             for korting in inschrijving.mogelijke_kortingen:
@@ -281,7 +275,7 @@ class BepaalAutomatischeKorting(object):
                                     bedrag_euro=korting_euro,
                                     code=BESTELLING_REGEL_CODE_WEDSTRIJD_KORTING)
                     regel.save()
-                    mandje.regels.add(regel)
+                    nieuwe_regels.append(regel)
 
                     if korting.soort == WEDSTRIJD_KORTING_COMBI:
                         try:
@@ -320,7 +314,9 @@ class BepaalAutomatischeKorting(object):
             else:
                 self._stdout.write('korting: geen')
 
-    def kies_kortingen_voor_mandje(self, mandje):
+        return nieuwe_regels
+
+    def kies_kortingen(self, regel_pks: list[int]) -> list[BestellingRegel]:
         """
             bepaal welke kortingen van toepassing zijn en koppel deze aan de producten in het mandje
 
@@ -328,7 +324,7 @@ class BepaalAutomatischeKorting(object):
             als meerdere kortingen van toepassing zijn, dan we geven de hoogste korting
         """
 
-        self._laad_mandje_en_reset_kortingen(mandje)
+        self._analyseer_inschrijvingen(regel_pks)
         self._zoek_mogelijke_kortingen()
 
         alle_inschrijvingen = [inschrijving
@@ -342,7 +338,11 @@ class BepaalAutomatischeKorting(object):
             korting_euro_str = format_bedrag_euro(self._max_korting_euro)
             self._stdout.write('[INFO] Maximale korting is %s met korting pks=%s' % (korting_euro_str,
                                                                                      repr(self._max_korting_pks)))
-            self._kortingen_toepassen(mandje, alle_inschrijvingen, self._max_korting_pks)
+            nieuwe_regels = self._kortingen_toepassen(alle_inschrijvingen, self._max_korting_pks)
+        else:
+            nieuwe_regels = list()
+
+        return nieuwe_regels
 
 
 # end of file

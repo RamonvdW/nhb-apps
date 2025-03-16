@@ -19,10 +19,11 @@ from Bestelling.definities import (BESTELLING_MUTATIE_WEDSTRIJD_INSCHRIJVEN, BES
 from Bestelling.definities import (BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_BETALING_ACTIEF,
                                    BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_MISLUKT, BESTELLING_STATUS_GEANNULEERD,
                                    BESTELLING_STATUS2STR, BESTELLING_HOOGSTE_BESTEL_NR_FIXED_PK,
-                                   BESTELLING_TRANSPORT2STR)
+                                   BESTELLING_TRANSPORT2STR,
+                                   BESTELLING_REGEL_CODE_WEDSTRIJD_INSCHRIJVING,
+                                   BESTELLING_REGEL_CODE_WEDSTRIJD_KORTING)
 from Bestelling.models import (Bestelling, BestellingRegel, BestellingMandje,
                                BestellingHoogsteBestelNr, BestellingMutatie)
-from Bestelling.operations.bepaal_kortingen import BepaalAutomatischeKorting
 from Bestelling.operations.email_backoffice import stuur_email_webwinkel_backoffice
 from Bestelling.operations.email_koper import (stuur_email_naar_koper_bestelling_details,
                                                stuur_email_naar_koper_betaalbevestiging)
@@ -31,19 +32,15 @@ from Betaal.definities import TRANSACTIE_TYPE_MOLLIE_RESTITUTIE, TRANSACTIE_TYPE
 from Betaal.format import format_bedrag_euro
 from Betaal.models import BetaalInstellingenVereniging, BetaalTransactie
 from Betaal.operations import maak_transactie_handmatige_overboeking
-from Evenement.definities import (EVENEMENT_INSCHRIJVING_STATUS_DEFINITIEF, EVENEMENT_STATUS_TO_STR,
-                                  EVENEMENT_INSCHRIJVING_STATUS_BESTELD)
+from Evenement.definities import (EVENEMENT_INSCHRIJVING_STATUS_DEFINITIEF)
 from Evenement.plugin_bestelling import evenement_bestel_plugin
 from Functie.models import Functie
-from Opleiding.definities import (OPLEIDING_INSCHRIJVING_STATUS_DEFINITIEF,
-                                  OPLEIDING_INSCHRIJVING_STATUS_BESTELD,
-                                  OPLEIDING_STATUS_TO_STR)
+from Opleiding.definities import (OPLEIDING_INSCHRIJVING_STATUS_DEFINITIEF)
 from Opleiding.plugin_bestelling import opleiding_bestel_plugin
 from Vereniging.models import Vereniging
 from Webwinkel.plugin_bestelling import webwinkel_bestel_plugin, verzendkosten_bestel_plugin
-from Wedstrijden.definities import (WEDSTRIJD_INSCHRIJVING_STATUS_BESTELD,
-                                    WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF,
-                                    WEDSTRIJD_INSCHRIJVING_STATUS_TO_STR)
+from Wedstrijden.bepaal_kortingen import BepaalAutomatischeKorting
+from Wedstrijden.definities import (WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF)
 from Wedstrijden.plugin_bestelling import wedstrijd_bestel_plugin
 from mollie.api.client import Client, RequestSetupError
 from decimal import Decimal
@@ -79,8 +76,6 @@ class VerwerkBestelMutaties:
         for plugin in bestel_plugins.values():
             plugin.zet_stdout(stdout)
         # for
-
-        self.bepaal_kortingen = BepaalAutomatischeKorting(stdout)
 
         self._instellingen_via_bond = None
         self._instellingen_cache = dict()  # [ver_nr] = BetaalInstellingenVereniging
@@ -132,7 +127,19 @@ class VerwerkBestelMutaties:
         return mandje
 
     def _automatische_kortingen_toepassen(self, mandje: BestellingMandje):
-        BepaalAutomatischeKorting(self.stdout).kies_kortingen_voor_mandje(mandje)
+
+        mandje.regels.filter(code=BESTELLING_REGEL_CODE_WEDSTRIJD_KORTING).delete()
+
+        regel_pks = (mandje
+                     .regels
+                     .filter(code=BESTELLING_REGEL_CODE_WEDSTRIJD_INSCHRIJVING)
+                     .values_list('pk', flat=True))
+
+        bepaler = BepaalAutomatischeKorting(self.stdout)
+        nieuwe_regels = bepaler.kies_kortingen(regel_pks)
+
+        if len(nieuwe_regels):
+            mandje.regels.add(*nieuwe_regels)
 
     def mandjes_opschonen(self):
         """ Verwijder uit de mandjes de producten die er te lang in liggen """

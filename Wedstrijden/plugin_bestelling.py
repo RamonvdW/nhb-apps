@@ -327,6 +327,10 @@ class WedstrijdKortingBestelPlugin(BestelPluginBase):
         """ niets te doen """
         pass
 
+    def is_betaald(self, regel: BestellingRegel, bedrag_ontvangen: Decimal):
+        """ niets te doen """
+        pass
+
     def get_verkoper_ver_nr(self, regel: BestellingRegel) -> int:
         """ korting hoort bij de wedstrijd waar deze voor is """
         return regel.korting_ver_nr
