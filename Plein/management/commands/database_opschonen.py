@@ -18,6 +18,7 @@ from Mailer.models import mailer_opschonen
 from Registreer.operations import registreer_opschonen
 from Taken.models import taken_opschonen
 from TijdelijkeCodes.models import tijdelijke_url_opschonen
+from Wedstrijden.operations.opschonen import wedstrijden_opschonen
 
 
 class Command(BaseCommand):
@@ -35,8 +36,10 @@ class Command(BaseCommand):
         tijdelijke_url_opschonen(self.stdout)
         registreer_opschonen(self.stdout)
         accounts_opschonen(self.stdout)
+        wedstrijden_opschonen(self.stdout)
+        # scheidsrechters: lijkt niet nodig, want allemaal gekoppeld aan een wedstrijd
         # TODO: opleiding
-        # TODO: scheidsrechters
+        # TODO: evenement
 
         self.stdout.write('Klaar')
 

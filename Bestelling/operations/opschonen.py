@@ -7,7 +7,54 @@
 from django.utils import timezone
 from django.db.models import Count
 from datetime import timedelta
-from Bestelling.models import BestellingMandje, Bestelling, BestellingMutatie
+from Bestelling.models import BestellingMandje, Bestelling, BestellingMutatie, BestellingRegel
+
+
+def _verwijder_oude_bestellingen(stdout, max_age):
+    objs = (Bestelling
+            .objects
+            .filter(aangemaakt__lt=max_age))
+
+    count = objs.count()
+    if count > 0:
+        stdout.write('[INFO] Verwijder %s oude bestellingen' % count)
+        objs.delete()
+
+
+def _verwijder_lege_mandjes(stdout, max_age):
+    objs = (BestellingMandje
+            .objects
+            .annotate(num_producten=Count("regels"))
+            .filter(num_producten=0))
+
+    count = objs.count()
+    if count > 0:
+        stdout.write('[INFO] Verwijder %s lege mandjes' % count)
+        objs.delete()
+
+
+def _verwijder_oude_mutaties(stdout, max_age):
+    objs = (BestellingMutatie
+            .objects
+            .filter(when__lt=max_age))
+
+    count = objs.count()
+    if count > 0:
+        stdout.write('[INFO] Verwijder %s oude bestellingen mutaties' % count)
+        objs.delete()
+
+
+def _verwijder_orphan_regels(stdout):
+    qset = (BestellingRegel
+            .objects
+            .annotate(num_mandje=Count("bestellingmandje"),
+                      num_bestelling=Count("bestelling"))
+            .filter(num_mandje=0, num_bestelling=0))        # niet in een mandje of bestelling
+
+    count = qset.count()
+    if count > 0:
+        stdout.write('[INFO] Verwijder %s orphan bestelling regels' % count)
+        qset.delete()
 
 
 def bestel_opschonen(stdout):
@@ -17,39 +64,14 @@ def bestel_opschonen(stdout):
         - verwijder adresgegevens van bestellingen gast-accounts
     """
 
-    # na 24 maanden verwijderen
+    # na 2 jaar verwijderen
     now = timezone.now()
-    max_age = now - timedelta(days=365 + 365)
+    max_age = now - timedelta(days=2*365)
 
-    if True:
-        objs = (Bestelling
-                .objects
-                .filter(aangemaakt__lt=max_age))
+    _verwijder_oude_bestellingen(stdout, max_age)
+    _verwijder_lege_mandjes(stdout, max_age)
+    _verwijder_oude_mutaties(stdout, max_age)
+    #_verwijder_orphan_regels(stdout)
 
-        count = objs.count()
-        if count > 0:
-            stdout.write('[INFO] Verwijder %s oude bestellingen' % count)
-            objs.delete()
-
-    if True:
-        objs = (BestellingMutatie
-                .objects
-                .filter(when__lt=max_age))
-
-        count = objs.count()
-        if count > 0:
-            stdout.write('[INFO] Verwijder %s oude bestellingen mutaties' % count)
-            objs.delete()
-
-    if True:
-        objs = (BestellingMandje
-                .objects
-                .annotate(num_producten=Count("regels"))
-                .filter(num_producten=0))
-
-        count = objs.count()
-        if count > 0:
-            stdout.write('[INFO] Verwijder %s lege mandjes' % count)
-            objs.delete()
 
 # end of file
