@@ -24,6 +24,7 @@ class ReistijdBepalen(object):
         self.stderr = stderr
 
         self._gmaps = None
+        self.verzoeken_teller = 0
 
         # aankomst op de wedstrijdlocatie zetten we standaard op een zaterdag in de toekomst om 08:00
         date = timezone.localtime(timezone.now())
@@ -101,6 +102,8 @@ class ReistijdBepalen(object):
             self.stderr.write('[ERROR] Fout van gmaps directions route van %s naar %s: error %s' % (
                                 repr(vanaf_lat_lon), repr(naar_lat_lon), str(exc)))
             return 16 * 60      # geef een gek getal terug wat om aandacht vraagt
+        else:
+            self.verzoeken_teller += 1
 
         try:
             # pp = pprint.PrettyPrinter()
@@ -224,7 +227,7 @@ class ReistijdBepalen(object):
         for reistijd in Reistijd.objects.filter(reistijd_min=0):
 
             if not reistijd.is_compleet():
-                self.stdout.write('[WARNING] Reistijd met pk=%s is niet compleet; skippping' % reistijd.pk)
+                self.stdout.write('[WARNING] Reistijd met pk=%s is niet compleet; skipping' % reistijd.pk)
                 continue
 
             vanaf_lat_lon = "%s, %s" % (reistijd.vanaf_lat, reistijd.vanaf_lon)
@@ -238,6 +241,33 @@ class ReistijdBepalen(object):
             reistijd.save(update_fields=['reistijd_min', 'op_datum'])
         # for
 
+    def _refresh_reistijd(self):
+        # na 6 maanden verversen we de reistijd
+
+        today = timezone.localtime(timezone.now()).date()
+        oud = today - datetime.timedelta(days=183)
+
+        for reistijd in Reistijd.objects.filter(op_datum__lt=oud):
+
+            self.stdout.write('[INFO] Reistijd met pk=%s wordt vernieuwd' % reistijd.pk)
+
+            vanaf_lat_lon = "%s, %s" % (reistijd.vanaf_lat, reistijd.vanaf_lon)
+            naar_lat_lon = "%s, %s" % (reistijd.naar_lat, reistijd.naar_lon)
+
+            mins = self._reistijd_met_auto(vanaf_lat_lon, naar_lat_lon)
+
+            if mins != reistijd.reistijd_min:
+                self.stdout.write('[INFO] Reistijd pk=%s is aangepast van %s naar %s minuten' % (reistijd.pk,
+                                                                                                 reistijd.reistijd_min,
+                                                                                                 mins))
+                reistijd.reistijd_min = mins
+            else:
+                self.stdout.write('[INFO] Reistijd pk=%s is niet gewijzigd')
+
+            reistijd.op_datum = today
+            reistijd.save(update_fields=['reistijd_min', 'op_datum'])
+        # for
+
     def run(self):
 
         if self._connect_gmaps():
@@ -246,6 +276,9 @@ class ReistijdBepalen(object):
             self._update_locaties()
             self._update_locaties_fallback()
             self._update_reistijd()
+            self._refresh_reistijd()
+
+        self.stdout.write('[INFO] Aantal verzoeken naar gmaps api: %s' % self.verzoeken_teller)
 
 
 # end of file
