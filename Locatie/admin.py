@@ -56,12 +56,15 @@ class GeenReistijdFilter(admin.SimpleListFilter):
 
     def lookups(self, request, model_admin):
         return [
-            ('nul', 'Reistijd nog niet vastgesteld'),
+            ('nul', 'Nog niet vastgesteld'),
+            ('fout', 'Meer dan 5 uur')
         ]
 
     def queryset(self, request, qset):
         if self.value() == 'nul':
             qset = qset.filter(reistijd_min=0)
+        if self.value() == 'fout':
+            qset = qset.filter(reistijd_min__gt=5*60)
         return qset
 
 
