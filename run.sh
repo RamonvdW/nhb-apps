@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -10,6 +10,15 @@ SETTINGS_NORMAL="Site.settings"
 BG_DURATION=60   # minutes (60 is max voor de meeste commando's)
 
 export PYTHONDONTWRITEBYTECODE=1
+
+# check the port is free
+ss -l | grep -q 8000
+RES=$?
+if [ $RES -eq 0 ]
+then
+    echo "[ERROR] Port 8000 must be free"
+    exit
+fi
 
 if [ "$1" = "--nodebug" ]
 then
