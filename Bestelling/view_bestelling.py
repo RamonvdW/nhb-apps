@@ -15,7 +15,9 @@ from Bestelling.definities import (BESTELLING_STATUS2STR, BESTELLING_STATUS_BETA
                                    BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_MISLUKT,
                                    BESTELLING_STATUS_GEANNULEERD,
                                    BESTELLING_TRANSPORT_OPHALEN,
-                                   BESTELLING_REGEL_CODE_WEDSTRIJD_INSCHRIJVING)
+                                   BESTELLING_REGEL_CODE_WEDSTRIJD_INSCHRIJVING,
+                                   BESTELLING_REGEL_CODE_WEDSTRIJD_KORTING,
+                                   BESTELLING_KORT_BREAK)
 from Bestelling.models import Bestelling
 from Bestelling.plugins.product_info import beschrijf_regel
 from Bestelling.operations.mutaties import bestel_mutatieverzoek_annuleer
@@ -66,8 +68,13 @@ class ToonBestellingenView(UserPassesTestMixin, TemplateView):
 
         for bestelling in bestellingen:
 
-            bestelling.beschrijving = [regel.korte_beschrijving
-                                       for regel in bestelling.regels.order_by('code', 'pk')]
+            regels = (bestelling
+                      .regels
+                      .exclude(code=BESTELLING_REGEL_CODE_WEDSTRIJD_KORTING)
+                      .order_by('code', 'pk'))
+
+            bestelling.beschrijving = [regel.korte_beschrijving.split(BESTELLING_KORT_BREAK)[0]
+                                       for regel in regels]
 
             status = bestelling.status
             if status == BESTELLING_STATUS_NIEUW:
@@ -138,7 +145,12 @@ class ToonBestellingDetailsView(UserPassesTestMixin, TemplateView):
                   .regels
                   .order_by('code', 'pk'))       # geen schoonheidsprijs, maar wel vaste volgorde
 
+        regel_nr = 0
         for regel in regels:
+            regel_nr += 1
+            regel.regel_nr = regel_nr
+            regel.korte_beschrijving = regel.korte_beschrijving.replace(BESTELLING_KORT_BREAK, '\n')
+            regel.korting_redenen = regel.korting_redenen.replace(BESTELLING_KORT_BREAK, '\n')
             regel.bedrag_euro_str = format_bedrag_euro(regel.bedrag_euro)
             controleer_euro += regel.bedrag_euro
         # for

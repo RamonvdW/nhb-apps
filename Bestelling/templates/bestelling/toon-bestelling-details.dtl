@@ -30,7 +30,8 @@
 
                 {% for regel in regels %}
                     <tr>
-                        <th class="hide-on-small-only" style="padding-left:20px">{{ regel.korte_beschrijving }}</th>
+                        <td class="hide-on-small-only" style="padding-left:20px">[{{ regel.regel_nr }}]</td>
+                        <td>{{ regel.korte_beschrijving|linebreaksbr }}</td>
                         <td class="right-align" style="padding-right:20px">{{ regel.bedrag_euro_str }}</td>
                     </tr>
                 {% endfor %}
