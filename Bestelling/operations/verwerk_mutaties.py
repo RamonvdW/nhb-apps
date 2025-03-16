@@ -39,8 +39,8 @@ from Opleiding.definities import (OPLEIDING_INSCHRIJVING_STATUS_DEFINITIEF)
 from Opleiding.plugin_bestelling import opleiding_bestel_plugin
 from Vereniging.models import Vereniging
 from Webwinkel.plugin_bestelling import webwinkel_bestel_plugin, verzendkosten_bestel_plugin
-from Wedstrijden.bepaal_kortingen import BepaalAutomatischeKorting
 from Wedstrijden.definities import (WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF)
+from Wedstrijden.operations.bepaal_kortingen import BepaalAutomatischeKorting
 from Wedstrijden.plugin_bestelling import wedstrijd_bestel_plugin
 from mollie.api.client import Client, RequestSetupError
 from decimal import Decimal
@@ -516,21 +516,24 @@ class VerwerkBestelMutaties:
         _mandje_bepaal_btw(mandje)
         mandje.bepaal_totaalprijs_opnieuw()
 
-    def _verwerk_mutatie_wedstrijd_afmelden(self, mutatie: BestellingMutatie):
+    @staticmethod
+    def _verwerk_mutatie_wedstrijd_afmelden(mutatie: BestellingMutatie):
         """ serialisatie van verzoek tot afmelden voor een wedstrijd, ingediend door de HWL
             product ligt niet meer in een mandje
             het kan een handmatige inschrijving zijn, zonder bestelling
         """
         wedstrijd_bestel_plugin.afmelden(mutatie.wedstrijd_inschrijving)
 
-    def _verwerk_mutatie_evenement_afmelden(self, mutatie: BestellingMutatie):
+    @staticmethod
+    def _verwerk_mutatie_evenement_afmelden(mutatie: BestellingMutatie):
         """ serialisatie van verzoek tot afmelden voor een wedstrijd, ingediend door de HWL
             product ligt niet meer in een mandje
             het kan een handmatige inschrijving zijn, zonder bestelling
         """
         evenement_bestel_plugin.afmelden(mutatie.evenement_inschrijving)
 
-    def _verwerk_mutatie_opleiding_afmelden(self, mutatie: BestellingMutatie):
+    @staticmethod
+    def _verwerk_mutatie_opleiding_afmelden(mutatie: BestellingMutatie):
         """ serialisatie van verzoek tot afmelden voor een wedstrijd, ingediend door de HWL
             product ligt niet meer in een mandje
             het kan een handmatige inschrijving zijn, zonder bestelling

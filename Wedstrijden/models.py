@@ -8,7 +8,7 @@ from django.db import models
 from Account.models import Account
 from BasisTypen.definities import ORGANISATIES, ORGANISATIE_WA
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse
-from Bestelling.models.regel import BestellingRegel     # TODO: drop .regel
+from Bestelling.models import BestellingRegel
 from Locatie.models import WedstrijdLocatie
 from Score.models import Score
 from Sporter.models import Sporter, SporterBoog

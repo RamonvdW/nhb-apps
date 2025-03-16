@@ -6,7 +6,7 @@
 
 from django.db import models
 from Account.models import Account
-from Bestelling.models.regel import BestellingRegel       # TODO: drop .ext
+from Bestelling.models import BestellingRegel
 from Webwinkel.definities import (VERZENDKOSTEN_CHOICES, VERZENDKOSTEN_PAKKETPOST,
                                   KEUZE_STATUS_CHOICES, KEUZE_STATUS_RESERVERING_MANDJE)
 from decimal import Decimal
