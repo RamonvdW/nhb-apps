@@ -49,7 +49,7 @@ class Command(BaseCommand):
 
             self.stdout.write('[INFO] Mandje met producten: %s' % mandje)
 
-            self._stuur_herinnering(mandje.account, mandje.num_producten)
+            self._stuur_herinnering(mandje.account, mandje.num_regels)
 
         # for
 

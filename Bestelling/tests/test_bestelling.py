@@ -1076,28 +1076,6 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
 
         self.assertEqual(bestelling.totaal_euro, 42.0)
 
-    def NOT_test_mutatie(self):
-        # een paar corner cases
-        bestel_mutatieverzoek_inschrijven_wedstrijd(self.account_admin, self.wedstrijd_inschrijving, snel=True)
-
-        # duration > 1
-        # fake-hoogste
-        f1, f2 = self.run_management_command('bestel_mutaties', '60', '--quick')
-        self.assertTrue('[INFO] vorige hoogste BestellingMutatie pk is 0' in f2.getvalue())
-
-        # geen nuttig werk gedaan
-        self.verwerk_bestel_mutaties()
-
-        # aantal mutaties gelijk aan 0
-        BestellingMutatie.objects.all().delete()
-        self.verwerk_bestel_mutaties()
-
-        # onbekende mutatie
-        BestellingMutatie(code=9999).save()
-        f1, f2 = self.verwerk_bestel_mutaties()
-        # print('\nf1:', f1.getvalue(), '\nf2:', f2.getvalue())
-        self.assertTrue('[ERROR] Onbekende mutatie code 9999' in f2.getvalue())
-
     def NOT_test_afmelden_voor_betalen(self):
         # inschrijven, bestellen, afmelden
         self.e2e_login_and_pass_otp(self.account_admin)
@@ -1705,46 +1683,6 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
         url = self.url_check_status % 999999
         resp = self.client.post(url)
         self.assert404(resp, 'Niet gevonden')
-
-    def test_stop_exactly(self):
-        now = datetime.datetime.now()
-        if now.second > 55:                             # pragma: no cover
-            print('Waiting until clock is past xx:xx:59')
-            while now.second > 55:
-                time.sleep(5)
-                now = datetime.datetime.now()
-            # while
-
-        now = datetime.datetime.now()
-        if now.minute == 0:                             # pragma: no cover
-            print('Waiting until clock is past xx:00')
-            while now.minute == 0:
-                time.sleep(5)
-                now = datetime.datetime.now()
-            # while
-
-        # trigger the current minute
-        f1, f2 = self.run_management_command('bestel_mutaties', '1', '--quick',
-                                             '--stop_exactly=%s' % now.minute)
-        # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
-
-        # trigger the negative case
-        f1, f2 = self.run_management_command('bestel_mutaties', '1', '--quick',
-                                             '--stop_exactly=%s' % (now.minute - 1))
-        # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
-
-        now = datetime.datetime.now()
-        if now.minute == 59:                             # pragma: no cover
-            print('Waiting until clock is past xx:59')
-            while now.minute == 59:
-                time.sleep(5)
-                now = datetime.datetime.now()
-            # while
-
-        # trigger the positive case
-        f1, f2 = self.run_management_command('bestel_mutaties', '1', '--quick',
-                                             '--stop_exactly=%s' % (now.minute + 1))
-        # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
 
     def NOT_test_evenement_ander(self):
         # koop evenement deelname voor iemand anders

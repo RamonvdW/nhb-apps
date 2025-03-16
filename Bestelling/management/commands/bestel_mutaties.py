@@ -83,15 +83,14 @@ class Command(BaseCommand):
                                        'evenement_inschrijving',
                                        'opleiding_inschrijving',
                                        'webwinkel_keuze',
-                                       'regel',
-                                       'bestelling')
+                                       'bestelling',
+                                       'regel')
                        .get(pk=pk))
 
-            if not mutatie.is_verwerkt:
-                self.verwerk_mutaties.verwerk(mutatie)
-                mutatie.is_verwerkt = True
-                mutatie.save(update_fields=['is_verwerkt'])
-                did_useful_work = True
+            self.verwerk_mutaties.verwerk(mutatie)
+            mutatie.is_verwerkt = True
+            mutatie.save(update_fields=['is_verwerkt'])
+            did_useful_work = True
         # for
 
         if did_useful_work:

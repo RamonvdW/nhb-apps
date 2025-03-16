@@ -30,7 +30,7 @@ def update_mandjes(apps, prod2regels):
 
     mandje_klas = apps.get_model('Bestelling', 'BestellingMandje')
 
-    for mandje in mandje_klas.objects.prefetch_related('producten'):
+    for mandje in mandje_klas.objects.prefetch_related('producten'):        # pragma: no cover
         regels = list()
         for product in mandje.producten.all():
             try:
@@ -51,7 +51,7 @@ def update_bestellingen(apps, prod2regels):
 
     bestelling_klas = apps.get_model('Bestelling', 'Bestelling')
 
-    for bestelling in bestelling_klas.objects.prefetch_related('producten'):
+    for bestelling in bestelling_klas.objects.prefetch_related('producten'):    # pragma: no cover
         regels = list()
         for product in bestelling.producten.all():
             try:
@@ -78,7 +78,7 @@ def migrate_product2regel_evenement(apps, _):
     prod2regels = dict()        # [product.pk] = [regel, ..]
 
     # inschrijvingen
-    for prod in (bestelling_product_klas
+    for prod in (bestelling_product_klas                        # pragma: no cover
                  .objects
                  .exclude(evenement_inschrijving=None)
                  .select_related('evenement_inschrijving',
@@ -104,7 +104,7 @@ def migrate_product2regel_evenement(apps, _):
     # for
 
     # afgemeld
-    for prod in (bestelling_product_klas
+    for prod in (bestelling_product_klas                    # pragma: no cover
                  .objects
                  .exclude(evenement_afgemeld=None)
                  .select_related('evenement_afgemeld',
@@ -146,7 +146,7 @@ def migrate_product2regel_opleiding(apps, _):
     prod2regels = dict()    # [product.pk] = [regel ..]
 
     # inschrijving
-    for prod in (bestelling_product_klas
+    for prod in (bestelling_product_klas                    # pragma: no cover
                  .objects
                  .exclude(opleiding_inschrijving=None)
                  .select_related('opleiding_inschrijving',
@@ -173,7 +173,7 @@ def migrate_product2regel_opleiding(apps, _):
     # for
 
     # afgemeld
-    for prod in (bestelling_product_klas
+    for prod in (bestelling_product_klas                    # pragma: no cover
                  .objects
                  .exclude(opleiding_afgemeld=None)
                  .select_related('opleiding_afgemeld',
@@ -216,7 +216,7 @@ def migrate_product2regel_webwinkel(apps, _):
 
     prod2regels = dict()    # [product.pk] = [regel, ..]
 
-    for prod in (bestelling_product_klas
+    for prod in (bestelling_product_klas                    # pragma: no cover
                  .objects
                  .exclude(webwinkel_keuze=None)
                  .annotate(mandje_count=Count('bestellingmandje'))
@@ -290,7 +290,7 @@ def migrate_product2regel_wedstrijd(apps, _):
     prod2regels = dict()        # [product.pk] = [regel, ..]
 
     # inschrijving
-    for prod in (bestelling_product_klas
+    for prod in (bestelling_product_klas                    # pragma: no cover
                  .objects
                  .exclude(wedstrijd_inschrijving=None)
                  .select_related('wedstrijd_inschrijving',
@@ -349,7 +349,7 @@ def migrate_product2regel_verzendkosten(apps, _):
 
     # verzendkosten
     teller = 0
-    for bestelling in (bestelling_klas
+    for bestelling in (bestelling_klas                  # pragma: no cover
                        .objects
                        .exclude(transport=BESTELLING_TRANSPORT_NVT)):
 

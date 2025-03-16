@@ -337,28 +337,30 @@ class VerwerkBestelMutaties:
         """ een bestelling mag uit het mandje voordat de betaling gestart is """
 
         mandje = self._get_mandje(mutatie)
-        if mandje:  # pragma: no branch
-            regel = mutatie.regel
-            qset = mandje.regels.filter(pk=regel.pk)
-            if qset.exists():  # pragma: no branch
-                # product zit nog in het mandje (anders: ignore want waarschijnlijk een dubbel verzoek)
-                self.stdout.write('[INFO] Regel met pk=%s (code %s) wordt verwijderd uit het mandje van %s' % (
-                                  regel.pk, regel.code, mandje.account.username))
+        if not mandje:
+            raise ValueError('Geen mandje')
 
-                plugin = bestel_plugins[regel.code]
-                plugin.annuleer(regel)
+        regel = mutatie.regel
+        qset = mandje.regels.filter(pk=regel.pk)
+        if qset.exists():  # pragma: no branch
+            # product zit nog in het mandje (anders: ignore want waarschijnlijk een dubbel verzoek)
+            self.stdout.write('[INFO] Regel met pk=%s (code %s) wordt verwijderd uit het mandje van %s' % (
+                              regel.pk, regel.code, mandje.account.username))
 
-                # verwijder uit het mandje
-                mandje.regels.remove(regel)
+            plugin = bestel_plugins[regel.code]
+            plugin.annuleer(regel)
 
-                # kijk of er automatische kortingen zijn die niet meer toegepast mogen worden
-                self._automatische_kortingen_toepassen(mandje)
+            # verwijder uit het mandje
+            mandje.regels.remove(regel)
 
-                self._bepaal_verzendkosten_mandje(mandje)
+            # kijk of er automatische kortingen zijn die niet meer toegepast mogen worden
+            self._automatische_kortingen_toepassen(mandje)
 
-                # bereken het totaal opnieuw
-                _mandje_bepaal_btw(mandje)
-                mandje.bepaal_totaalprijs_opnieuw()
+            self._bepaal_verzendkosten_mandje(mandje)
+
+            # bereken het totaal opnieuw
+            _mandje_bepaal_btw(mandje)
+            mandje.bepaal_totaalprijs_opnieuw()
 
     def _verwerk_mutatie_maak_bestellingen(self, mutatie: BestellingMutatie):
 

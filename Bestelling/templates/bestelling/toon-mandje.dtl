@@ -114,14 +114,6 @@
                                             <i class="notranslate material-icons-round">delete</i></button>
                                     </td>
                                 </tr>
-
-                                {% if regel.korting_euro %}
-                                    <tr>
-                                        <td>Automatische korting</td>
-                                        <td class="right-align">{{ product.korting_euro_str }}</td>
-                                        <td><!--knoppen--></td>
-                                    </tr>
-                                {% endif %}
                             {% endfor %}
 
                             <!-- verzendkosten -->

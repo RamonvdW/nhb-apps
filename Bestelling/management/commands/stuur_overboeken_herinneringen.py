@@ -1,17 +1,22 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2024 Ramon van der Winkel.
+#  Copyright (c) 2024-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-""" management commando dat 1x per week gedraaid wordt (crontab) om een e-mail te sturen als herinnering
-    aan bestellingen voor een wedstrijd/evenement bij de vereniging dat nog niet betaald is en misschien
-    via een bankoverschrijving betaald is. Deze moeten handmatig ingevoerd worden.
+"""
+    Management commando dat 1x per week gedraaid wordt (crontab) om een e-mail te sturen als herinnering
+    aan bestellingen voor een wedstrijd/evenement bij de vereniging die als status wacht-op-betaling hebben
+    en misschien via een bankoverschrijving betaald zijn. Deze moeten handmatig ingevoerd worden.
 """
 
 from django.utils import timezone
 from django.core.management.base import BaseCommand
-from Bestelling.definities import BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_GEANNULEERD
+from Bestelling.definities import (BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_GEANNULEERD,
+                                   BESTELLING_REGEL_CODE_WEBWINKEL,
+                                   BESTELLING_REGEL_CODE_WEDSTRIJD_INSCHRIJVING,
+                                   BESTELLING_REGEL_CODE_EVENEMENT_INSCHRIJVING,
+                                   BESTELLING_REGEL_CODE_OPLEIDING_INSCHRIJVING)
 from Bestelling.models import Bestelling
 from Functie.models import Functie
 from Taken.operations import check_taak_bestaat, maak_taak
@@ -25,11 +30,13 @@ class Command(BaseCommand):
 
     def __init__(self, stdout=None, stderr=None, no_color=False, force_color=False):
         super().__init__(stdout, stderr, no_color, force_color)
+
         now = timezone.now()
+        self._stamp_str = now.strftime('%Y-%m-%d om %H:%M')
+
         self._kort_geleden = now - datetime.timedelta(days=2)
         self._lang_geleden = now - datetime.timedelta(days=90)
         self._taak_deadline = now + datetime.timedelta(days=7)
-        self._stamp_str = now.strftime('%Y-%m-%d om %H:%M')
 
         self._functie_hwl = dict()      # [ver_nr] = Functie
         for functie in Functie.objects.filter(rol='HWL').select_related('vereniging'):
@@ -39,7 +46,7 @@ class Command(BaseCommand):
     def _maak_taak(self, ver: Vereniging, aantal: int, producten: str):
         regels = list()
 
-        regels.append('Dit is een wekelijkse herinnering '+
+        regels.append('Dit is een wekelijkse herinnering ' +
                       'om handmatige bankoverschrijvingen in te voeren in MijnHandboogsport.')
         regels.append('')
         regels.append('Er zijn %s onbetaalde bestellingen voor %s bij jullie vereniging.' % (aantal, producten))
@@ -93,7 +100,7 @@ class Command(BaseCommand):
                         aangemaakt__gt=self._lang_geleden)
                 .exclude(status=BESTELLING_STATUS_GEANNULEERD)
                 .exclude(status=BESTELLING_STATUS_AFGEROND)
-                .prefetch_related('producten')
+                .prefetch_related('regels')
                 .select_related('ontvanger__vereniging'))
 
         aantal = qset.count()
@@ -107,15 +114,15 @@ class Command(BaseCommand):
         count_opleiding = 0
 
         for bestelling in qset:
-            for product in bestelling.producten.all():
-                if product.wedstrijd_inschrijving:
+            for regel in bestelling.regels.all():
+                if regel.code == BESTELLING_REGEL_CODE_WEDSTRIJD_INSCHRIJVING:
                     count_wedstrijd += 1
-                if product.evenement_inschrijving:
+                elif regel.code == BESTELLING_REGEL_CODE_EVENEMENT_INSCHRIJVING:
                     count_evenement += 1
-                if product.webwinkel_keuze:
+                elif regel.code == BESTELLING_REGEL_CODE_WEBWINKEL:
                     count_webwinkel += 1
-                # if product.opleiding:
-                #     count_opleiding += 1
+                elif regel.code == BESTELLING_REGEL_CODE_OPLEIDING_INSCHRIJVING:
+                    count_opleiding += 1
             # for
         # for
 

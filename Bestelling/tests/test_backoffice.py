@@ -191,7 +191,7 @@ class TestBestelBetaling(E2EHelpers, TestCase):
         bestelling.regels.add(regel2)
         bestelling.regels.add(regel3)
 
-    def NOT_test_mail_backoffice(self):
+    def test_mail_backoffice(self):
         self.e2e_login_and_pass_otp(self.account_admin)
         self.e2e_wissel_naar_functie(self.functie_mww)
         self.e2e_check_rol('MWW')
