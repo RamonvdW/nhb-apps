@@ -53,7 +53,7 @@ def inschrijving_open_of_404(wedstrijd):
         raise Http404('Inschrijving is gesloten')
 
 
-def get_sessies(wedstrijd, sporter, voorkeuren, wedstrijdboog_pk):
+def get_sessies(wedstrijd, sporter, voorkeuren, wedstrijdboog_pk) -> (list, int, list, str, bool):
     """ geef de mogelijke sessies terug waarop de sporter zich in kan schrijven
 
         Input: wedstrijd:        de wedstrijd waar het om gaat (verplicht)
@@ -61,7 +61,7 @@ def get_sessies(wedstrijd, sporter, voorkeuren, wedstrijdboog_pk):
                voorkeuren:       de voorkeuren van de sporter (optioneel; mag None zijn)
                wedstrijdboog_pk  het boogtype waar het om gaat (optioneel; mag -1 zijn)
 
-        Output: sessies (qset), wedstrijdleeftijd, wedstrijdklassen (list), wedstrijd_geslacht
+        Output: sessies (qset), wedstrijdleeftijd, wedstrijdklassen (list), wedstrijd_geslacht, heeft_beschrijvingen
 
                 wedstrijdleeftijd is None als deze niet bepaald kon worden
                 wedstrijd_geslacht is '?' als deze niet bepaald kon worden
@@ -123,6 +123,7 @@ def get_sessies(wedstrijd, sporter, voorkeuren, wedstrijdboog_pk):
     if not compatible_doelgroep:
         wedstrijd.begrenzing_str = WEDSTRIJD_BEGRENZING_TO_STR[wedstrijd.begrenzing]
 
+    sessie_beschrijvingen = False
     unsorted_wedstrijdklassen = list()
     for sessie in sessies:
         sessie.aantal_beschikbaar = sessie.max_sporters - sessie.aantal_inschrijvingen
@@ -192,13 +193,16 @@ def get_sessies(wedstrijd, sporter, voorkeuren, wedstrijdboog_pk):
 
         if sessie.aantal_beschikbaar <= 0:
             sessie.kan_aanmelden = False
+
+        if len(sessie.beschrijving):
+            sessie_beschrijvingen = True
     # for
 
     # sorteer de wedstrijdklassen
     unsorted_wedstrijdklassen.sort(reverse=True)        # oudste leeftijdsklasse eerst
     wedstrijdklassen = [lkl for _, lkl in unsorted_wedstrijdklassen]
 
-    return sessies, wedstrijdleeftijd, wedstrijdklassen, wedstrijd_geslacht
+    return sessies, wedstrijdleeftijd, wedstrijdklassen, wedstrijd_geslacht, sessie_beschrijvingen
 
 
 class WedstrijdInschrijvenSporter(UserPassesTestMixin, TemplateView):
@@ -297,7 +301,11 @@ class WedstrijdInschrijvenSporter(UserPassesTestMixin, TemplateView):
             if not geselecteerd.block_ver:
                 voorkeuren = get_sporter_voorkeuren(geselecteerd.sporter)
                 tups = get_sessies(wedstrijd, geselecteerd.sporter, voorkeuren, geselecteerd.boogtype.pk)
-                context['sessies'], context['leeftijd'], context['leeftijdsklassen'], geslacht = tups
+                (context['sessies'],
+                 context['leeftijd'],
+                 context['leeftijdsklassen'],
+                 geslacht,
+                 context['toon_sessie_beschrijvingen']) = tups
 
                 ingeschreven_op_sessie = None
                 for sessie in context['sessies']:
@@ -478,7 +486,11 @@ class WedstrijdInschrijvenGroepje(UserPassesTestMixin, TemplateView):
             if not geselecteerd.block_ver:
                 voorkeuren = get_sporter_voorkeuren(geselecteerd.sporter)
                 tups = get_sessies(wedstrijd, geselecteerd.sporter, voorkeuren, geselecteerd.boogtype.pk)
-                context['sessies'], context['leeftijd'], context['leeftijdsklassen'], geslacht = tups
+                (context['sessies'],
+                 context['leeftijd'],
+                 context['leeftijdsklassen'],
+                 geslacht,
+                 context['toon_sessie_beschrijvingen']) = tups
 
                 # kijk of deze sporter al ingeschreven is
                 sessie_pk2inschrijving = dict()
@@ -657,7 +669,11 @@ class WedstrijdInschrijvenFamilie(UserPassesTestMixin, TemplateView):
             if not geselecteerd.block_ver:
                 voorkeuren = get_sporter_voorkeuren(geselecteerd.sporter)
                 tups = get_sessies(wedstrijd, geselecteerd.sporter, voorkeuren, geselecteerd.boogtype.pk)
-                context['sessies'], _, context['leeftijdsklassen'], geslacht = tups
+                (context['sessies'],
+                 _,
+                 context['leeftijdsklassen'],
+                 geslacht,
+                 context['toon_sessie_beschrijvingen']) = tups
 
                 # kijk of deze sporter al ingeschreven is, want maximaal aanmelden met 1 boog
                 sessie_pk2inschrijving = dict()
@@ -835,7 +851,8 @@ class ToevoegenAanMandjeView(UserPassesTestMixin, View):
             mandje_tel_inhoud(self.request, account_koper)
 
             if wedstrijd.eis_kwalificatie_scores:
-                url = reverse('WedstrijdInschrijven:inschrijven-kwalificatie-scores', kwargs={'inschrijving_pk': inschrijving.pk})
+                url = reverse('WedstrijdInschrijven:inschrijven-kwalificatie-scores',
+                              kwargs={'inschrijving_pk': inschrijving.pk})
                 return HttpResponseRedirect(url)
 
         # render de pagina "toegevoegd aan mandje"
@@ -1008,7 +1025,11 @@ class WedstrijdInschrijvenHandmatig(UserPassesTestMixin, TemplateView):
 
             voorkeuren = get_sporter_voorkeuren(geselecteerd.sporter)
             tups = get_sessies(wedstrijd, geselecteerd.sporter, voorkeuren, geselecteerd.boogtype.pk)
-            context['sessies'], context['leeftijd'], context['leeftijdsklassen'], geslacht = tups
+            (context['sessies'],
+             context['leeftijd'],
+             context['leeftijdsklassen'],
+             geslacht,
+             context['toon_sessie_beschrijvingen']) = tups
 
             # kijk of deze sporter al ingeschreven is
             sessie_pk2inschrijving = dict()

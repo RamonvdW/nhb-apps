@@ -67,6 +67,10 @@ urlpatterns = [
          view_manager.ManagerOpleidingenView.as_view(),
          name='manager'),
 
+    path('manager/niet-ingeschreven/',
+         view_manager.NietIngeschrevenView.as_view(),
+         name='niet-ingeschreven'),
+
     path('manager/aanpassingen/',
          view_aanpassingen.AanpassingenView.as_view(),
          name='aanpassingen')

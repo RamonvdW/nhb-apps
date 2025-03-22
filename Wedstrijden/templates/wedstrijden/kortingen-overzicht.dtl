@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2022-2023 Ramon van der Winkel.
+                Copyright (c) 2022-2025 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -96,18 +96,18 @@
                 <p>Er zijn drie soorten kortingen: persoonlijk, vereniging en combinatie-korting.</p>
 
                 <br>
-                <h5><i class="notranslate material-icons-round sv-blauw-text" style="vertical-align:middle; font-size:40px">account_circle</i> Persoonlijk</h5>
+                <h5><i class="notranslate material-icons-round sv-blauw-text" style="vertical-align:middle; font-size:40px; width:40px">account_circle</i> Persoonlijk</h5>
                 <p>Voor een specifieke sporter (bondsnummer).</p>
                 <p>Kan geldig zijn voor meerdere wedstrijden.</p>
                 <p>Voorbeelden: winnaar van vorig jaar, eventueel voor hele serie wedstrijden.</p>
 
                 <br>
-                <h5><i class="notranslate material-icons-round sv-blauw-text" style="vertical-align:middle; font-size:40px">home</i> Vereniging</h5>
+                <h5><i class="notranslate material-icons-round sv-blauw-text" style="vertical-align:middle; font-size:40px; width:40px">home</i> Vereniging</h5>
                 <p>Voor alle leden van jullie vereniging.</p>
                 <p>Voorbeelden: eigen leden motiveren om aan een wedstrijd mee te doen.</p>
 
                 <br>
-                <h5><i class="notranslate material-icons-round sv-blauw-text" style="vertical-align:middle; font-size:40px">join_full</i> Combinatie-korting</h5>
+                <h5><i class="notranslate material-icons-round sv-blauw-text" style="vertical-align:middle; font-size:40px; width:40px">join_full</i> Combinatie-korting</h5>
                 <p>Korting bij inschrijving op meerdere wedstrijden.</p>
                 <p>Voorbeeld: wedstrijd zaterdag + zondag; korting als je beide dagen mee doet.</p>
             </div>

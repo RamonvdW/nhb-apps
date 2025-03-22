@@ -102,6 +102,7 @@ priority_high
 public
 query_stats
 question_mark
+radar
 receipt
 receipt_long
 recent_actors

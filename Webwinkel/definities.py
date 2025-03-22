@@ -9,7 +9,7 @@ from Vereniging.definities import VER_NR_BONDSBUREAU
 THUMB_SIZE = (96, 96)
 
 KEUZE_STATUS_RESERVERING_MANDJE = 'M'        # in mandje; moet nog omgezet worden in een bestelling
-KEUZE_STATUS_BESTELD = 'B'       # besteld; moet nog betaald worden
+KEUZE_STATUS_BESTELD = 'B'                   # besteld; moet nog betaald worden
 KEUZE_STATUS_BACKOFFICE = 'BO'               # betaling voldaan; ligt bij backoffice voor afhandeling
 KEUZE_STATUS_GEANNULEERD = 'A'               # bestelling geannuleerd
 # FUTURE: KEUZE_STATUS_VERSTUURD        # afgehandeld door backoffice en verstuurd

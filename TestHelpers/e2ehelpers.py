@@ -319,7 +319,7 @@ class E2EHelpers(MyTestAsserts, MyMgmtCommandHelper, TestCase):
             # browser is started by test.sh
 
     @staticmethod
-    def e2e_show_email_in_browser(mail: MailQueue):
+    def e2e_show_email_in_browser(mail: MailQueue):         # pragma: no cover
         msg = mail.mail_html.replace('/static/', '/tmp/tmp_html/static/')
 
         # add traceability at the bottom of the page that will be shown in the browser

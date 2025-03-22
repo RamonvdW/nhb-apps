@@ -250,7 +250,7 @@ class GezaktView(UserPassesTestMixin, TemplateView):
         # for
         lijst.sort(reverse=True)        # nieuwste bovenaan
 
-        context['sporters'] = [tup[-1] for tup in lijst]
+        context['gezakt'] = [tup[-1] for tup in lijst]
 
         context['huidige_rol'] = rol_get_beschrijving(self.request)
 

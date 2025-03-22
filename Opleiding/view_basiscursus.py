@@ -40,17 +40,18 @@ class BasiscursusView(TemplateView):
                      .order_by('periode_begin', 'periode_einde')       # meest recente cursus eerst
                      .first())
 
-        momenten = list()
-        for moment in opleiding.momenten.prefetch_related('locatie').order_by('datum'):
-            locatie = moment.locatie
-            if locatie:
-                moment.omschrijving = locatie.plaats
-                if not moment.omschrijving:
-                    moment.omschrijving = locatie.naam
-                momenten.append(moment)
-        # for
-        if len(momenten) > 0:
-            context['momenten'] = momenten
+        if opleiding:
+            momenten = list()
+            for moment in opleiding.momenten.prefetch_related('locatie').order_by('datum'):
+                locatie = moment.locatie
+                if locatie:
+                    moment.omschrijving = locatie.plaats
+                    if not moment.omschrijving:
+                        moment.omschrijving = locatie.naam
+                    momenten.append(moment)
+            # for
+            if len(momenten) > 0:
+                context['momenten'] = momenten
 
         account = get_account(self.request)
         if account.is_authenticated:

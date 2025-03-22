@@ -189,6 +189,14 @@ class Reistijd(models.Model):
                                                      self.vanaf_lat, self.vanaf_lon,
                                                      self.naar_lat, self.naar_lon)
 
+    def is_compleet(self):
+        """ controleer dat alle input compleet is """
+        if self.vanaf_lat == '' or self.vanaf_lon == '':
+            return False
+        if self.naar_lat == '' or self.naar_lon == '':
+            return False
+        return True
+
     class Meta:
         """ meta data voor de admin interface """
         verbose_name = "Reistijd"

@@ -11,10 +11,12 @@ from django.views.generic import View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving
+from Instaptoets.models import Instaptoets
 from Opleiding.definities import OPLEIDING_STATUS_TO_STR
-from Opleiding.models import Opleiding
+from Opleiding.models import Opleiding, OpleidingInschrijving
 
 TEMPLATE_OPLEIDING_OVERZICHT_MANAGER = 'opleiding/overzicht-manager.dtl'
+TEMPLATE_OPLEIDING_NIET_INGESCHREVEN = 'opleiding/niet-ingeschreven.dtl'
 
 
 class ManagerOpleidingenView(UserPassesTestMixin, View):
@@ -59,12 +61,68 @@ class ManagerOpleidingenView(UserPassesTestMixin, View):
 
         context['url_stats_instaptoets'] = reverse('Instaptoets:stats')
         context['url_gezakt'] = reverse('Instaptoets:gezakt')
+        context['url_niet_ingeschreven'] = reverse('Opleiding:niet-ingeschreven')
         context['url_aanpassingen'] = reverse('Opleiding:aanpassingen')
 
         context['url_voorwaarden'] = settings.VERKOOPVOORWAARDEN_OPLEIDINGEN_URL
 
         context['kruimels'] = (
             (None, 'Opleidingen'),
+        )
+
+        return render(request, self.template_name, context)
+
+
+class NietIngeschrevenView(UserPassesTestMixin, View):
+
+    """ Via deze view kan de Manager Opleidingen zien wie wel de instaptoets gehaald hebben,
+        maar zich niet ingeschreven hebben voor de basiscursus.
+    """
+
+    # class variables shared by all instances
+    template_name = TEMPLATE_OPLEIDING_NIET_INGESCHREVEN
+    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.rol_nu, self.functie_nu = None, None
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
+        return self.rol_nu == Rol.ROL_MO
+
+    def get(self, request, *args, **kwargs):
+        """ deze functie wordt aangeroepen om de GET request af te handelen """
+        context = dict()
+
+        context['huidige_rol'] = rol_get_beschrijving(request)
+
+        ingeschreven_lid_nrs = (OpleidingInschrijving
+                                .objects
+                                .filter(opleiding__is_basiscursus=True)
+                                .distinct('sporter')
+                                .values_list('sporter__lid_nr', flat=True))
+
+        context['niet_ingeschreven'] = lijst = list()
+        for toets in (Instaptoets
+                      .objects
+                      .filter(is_afgerond=True,
+                              geslaagd=True)
+                      .select_related('sporter')
+                      .order_by('-afgerond')):      # nieuwste eerst
+
+            if toets.sporter.lid_nr not in ingeschreven_lid_nrs:
+                toets.basiscursus_str = 'Niet ingeschreven'
+                toets.lid_nr_en_naam = toets.sporter.lid_nr_en_volledige_naam()
+
+                lijst.append(toets)
+        # for
+
+        context['kruimels'] = (
+            (reverse('Opleiding:manager'), 'Opleidingen'),
+            (None, 'Niet ingeschreven'),
         )
 
         return render(request, self.template_name, context)

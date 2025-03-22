@@ -246,7 +246,7 @@
     <div class="row center">
         <div class="col s12">
             <div class="center">
-                <a class="btn-sv-rood" href="{{ url_toon_maand }}">Toon maandoverzicht</a>
+                <button class="btn-sv-rood" onclick="stuur_keuzes('{{ url_wissel.0 }}', '{{ url_wissel.1 }}')">Toon maandoverzicht</button>
             </div>
         </div>
     </div>

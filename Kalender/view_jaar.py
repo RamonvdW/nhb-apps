@@ -91,12 +91,12 @@ class KalenderJaarView(TemplateView):
                                                 'bogen': '~2',
                                                 'discipline': '~3'})
 
-        context['url_toon_maand'] = reverse('Kalender:maand',
-                                            kwargs={'jaar': jaar,
-                                                    'maand': MAAND2URL[maand],
-                                                    'soort': gekozen_soort,
-                                                    'bogen': gekozen_bogen,
-                                                    'discipline': gekozen_discipline})
+        context['url_wissel'] = reverse('Kalender:maand',
+                                        kwargs={'jaar': jaar,
+                                                'maand': MAAND2URL[maand],
+                                                'soort': '~1',
+                                                'bogen': '~2',
+                                                'discipline': '~3'})
 
         if zoekterm:
             # url voor het resetten van de filter keuzes en zoekterm

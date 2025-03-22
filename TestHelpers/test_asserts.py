@@ -1111,7 +1111,7 @@ class MyTestAsserts(TestCase):
                 zoek1 = zoek[:pos+1]            # begint met > en eindigt met :
                 zoek2 = zoek[pos+1:].strip()    # eindigt met <
 
-                if zoek1 in ignore:
+                if zoek1 in ignore:             # pragma: no branch
                     continue
 
                 # print('check zoek1=%s, zoek2=%s' % (repr(zoek1), repr(zoek2)))
@@ -1178,8 +1178,9 @@ class MyTestAsserts(TestCase):
                     html = html[:pos] + html[pos + len(zoek):]
                     continue
 
-            if line in ignore:
+            if line in ignore:                                                  # pragma: no cover
                 continue
+
             issues.append('Kan regel %s niet vinden in html e-mail' % repr(line))       # pragma: no cover
         # for
 

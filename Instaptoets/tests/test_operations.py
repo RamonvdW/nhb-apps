@@ -106,17 +106,19 @@ class TestInstaptoetsOperations(E2EHelpers, TestCase):
         self.assertFalse(operations.instaptoets_is_beschikbaar())
 
     def test_toets_geldig(self):
+        now = timezone.now().date()
+
         toets = Instaptoets(
-                    afgerond=timezone.now().date(),
+                    afgerond=now,
                     sporter=self.sporter_100000,
                     geslaagd=True)
         self.assertEqual(operations.toets_geldig(toets), (True, 365))
 
         toets = Instaptoets(
-                    afgerond=timezone.now().date() - datetime.timedelta(days=365),
+                    afgerond=datetime.date(now.year-1, now.month, now.day),
                     sporter=self.sporter_100000,
                     geslaagd=True)
-        self.assertEqual(operations.toets_geldig(toets), (True, 1))
+        self.assertEqual(operations.toets_geldig(toets), (True, 0))
 
         toets = Instaptoets(
                     afgerond=timezone.now().date() - datetime.timedelta(days=366),

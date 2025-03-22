@@ -83,6 +83,10 @@
                 {% include 'plein/card_icon.dtl' with title="Instaptoets" text="Welke vragen van de instaptoets doen het slecht?" icon="insights" url=url_stats_instaptoets %}
             {% endif %}
 
+            {% if url_niet_ingeschreven %}
+                {% include 'plein/card_icon.dtl' with title="Gehaald" text="Wie hebben de instaptoets gehaald, maar zijn niet ingeschreven voor de basiscursus?" icon="radar" url=url_niet_ingeschreven %}
+            {% endif %}
+
             {% if url_gezakt %}
                 {% include 'plein/card_icon.dtl' with title="Gezakt" text="Wie hebben de instaptoets gemaakt maar hebben die niet gehaald?" icon="thumb_down_off_alt" url=url_gezakt %}
             {% endif %}

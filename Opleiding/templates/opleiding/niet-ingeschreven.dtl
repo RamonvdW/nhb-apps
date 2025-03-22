@@ -6,15 +6,15 @@
 {% endcomment %}
 {% load static %}
 
-{% block title %}Gezakt voor de instaptoets{% endblock %}
+{% block title %}Niet ingeschreven{% endblock %}
 
 {% block pagina %}
 
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Gezakt voor de instaptoets</h3>
-            <p>Je huidige rol is: <b>{{ huidige_rol }}</b></p>
+            <h3 class="page-banner">Niet ingeschreven</h3>
+            <p>Wie zijn geslaagd voor de instaptoets, maar hebben zich niet ingeschreven voor de basiscursus?</p>
         </div>
     </div>
 
@@ -25,23 +25,21 @@
                 <thead>
                     <tr>
                         <th>Wie</th>
-                        <th class="center">Aantal goed/fout</th>
-                        <th class="center">Aantal keer gezakt</th>
-                        <th>Laatste poging</th>
+                        <th class="center">Instaptoets gehaald</th>
+                        <th>Basiscursus</th>
                     </tr>
                 </thead>
-                {% for data in gezakt %}
+                {% for data in niet_ingeschreven %}
                     <tr>
                         <td>{{ data.lid_nr_en_naam }}</td>
-                        <td class="center">{{ data.aantal_goed }} / {{ data.aantal_fout }}</td>
-                        <td class="center">{{ data.aantal_keer_gezakt }}</td>
-                        <td>{{ data.laatste_poging }}</td>
+                        <td class="center">{{ data.afgerond|date }}</td>
+                        <td>{{ data.basiscursus_str }}</td>
                     </tr>
                 {% endfor %}
             </table>
         </div>
     </div>
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="instaptoets-gezakt" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="opleiding-niet-ingeschreven" %}
 
 {% endblock %}
