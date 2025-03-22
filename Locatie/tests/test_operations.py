@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023-2024 Ramon van der Winkel.
+#  Copyright (c) 2023-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase, override_settings
+from django.core.management.base import OutputWrapper
 from BasisTypen.definities import SCHEIDS_BOND
 from Locatie.models import WedstrijdLocatie, Reistijd
 from Locatie.operations import ReistijdBepalen
@@ -16,6 +17,11 @@ import io
 class TestLocatieCliReistijd(E2EHelpers, TestCase):
 
     """ tests voor de Locatie applicatie, management commando's """
+
+    SR3_LAT = 1.0
+    SR3_LON = 1.1
+    ZELF_LAT = 2.0
+    ZELF_LON = 2.1
 
     def setUp(self):
         scheids = Sporter(
@@ -38,10 +44,10 @@ class TestLocatieCliReistijd(E2EHelpers, TestCase):
     @staticmethod
     def _reistijd_bijwerken():
         # gebruik een verse instantie met "schone" stdout/stderr
-        stdout = io.StringIO()
-        stderr = io.StringIO()
+        stdout = OutputWrapper(io.StringIO())
+        stderr = OutputWrapper(io.StringIO())
 
-        bepaler = ReistijdBepalen(stdout, stderr)
+        bepaler = ReistijdBepalen(stdout, stderr, 25)
         bepaler.run()
 
         return stderr, stdout
@@ -53,18 +59,19 @@ class TestLocatieCliReistijd(E2EHelpers, TestCase):
         self.assertEqual(f1.getvalue(), '')
 
         # trigger hergebruik gmaps instantie
-        stdout = io.StringIO()
-        stderr = io.StringIO()
-        bepaler = ReistijdBepalen(stdout, stderr)
+        stdout = OutputWrapper(io.StringIO())
+        stderr = OutputWrapper(io.StringIO())
+
+        bepaler = ReistijdBepalen(stdout, stderr, 25)
         bepaler.run()
         bepaler.run()  # triggers gmap connection already done
 
     def test_bad_key(self):
-        stdout = io.StringIO()
-        stderr = io.StringIO()
+        stdout = OutputWrapper(io.StringIO())
+        stderr = OutputWrapper(io.StringIO())
 
         with override_settings(GMAPS_KEY='garbage'):
-            bepaler = ReistijdBepalen(stdout, stderr)
+            bepaler = ReistijdBepalen(stdout, stderr, 25)
             bepaler.run()
         # print('\nf1: %s\nf2: %s' % (stdout.getvalue(), stderr.getvalue()))
         self.assertTrue('[ERROR] Fout tijdens gmaps init: Invalid API key provided' in stderr.getvalue())
@@ -284,10 +291,10 @@ class TestLocatieCliReistijd(E2EHelpers, TestCase):
         self.scheids.save()
 
         # maak een reistijd verzoek
-        reistijd = Reistijd(vanaf_lat='sr3_lat',
-                            vanaf_lon='sr3_lon',
-                            naar_lat='zelf_lat',
-                            naar_lon='zelf_lon',
+        reistijd = Reistijd(vanaf_lat=self.SR3_LAT,
+                            vanaf_lon=self.SR3_LON,
+                            naar_lat=self.ZELF_LAT,
+                            naar_lon=self.ZELF_LON,
                             reistijd_min=0)         # 0 = nog niet uitgerekend
         reistijd.save()
 
@@ -305,10 +312,10 @@ class TestLocatieCliReistijd(E2EHelpers, TestCase):
         self.assertTrue(str(reistijd) != '')
 
         # incompleet verzoek
-        reistijd = Reistijd(vanaf_lat='sr3_lat',
-                            vanaf_lon='sr3_lon',
+        reistijd = Reistijd(vanaf_lat=self.SR3_LAT,
+                            vanaf_lon=self.SR3_LON,
                             naar_lat='incompleet',
-                            naar_lon='zelf_lon',
+                            naar_lon=self.ZELF_LON,
                             reistijd_min=0)         # 0 = nog niet uitgerekend
         reistijd.save()
 
@@ -324,10 +331,10 @@ class TestLocatieCliReistijd(E2EHelpers, TestCase):
         self.assertEqual(reistijd.reistijd_min, 17 * 60)
 
         # fout
-        reistijd = Reistijd(vanaf_lat='sr3_lat',
-                            vanaf_lon='sr3_lon',
+        reistijd = Reistijd(vanaf_lat=self.SR3_LAT,
+                            vanaf_lon=self.SR3_LON,
                             naar_lat='geef fout',
-                            naar_lon='zelf_lon',
+                            naar_lon=self.ZELF_LON,
                             reistijd_min=0)         # 0 = nog niet uitgerekend
         reistijd.save()
 

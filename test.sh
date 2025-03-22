@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -204,15 +204,15 @@ fi
 echo "[INFO] Starting websim tasks"
 
 # start the mail transport service simulator
-python3 $PY_OPTS ./Mailer/test_tools/websim_mailer.py &
+python3 -u $PY_OPTS ./Mailer/test_tools/websim_mailer.py &
 PID_WEBSIM1=$!
 
 # start the payment service simulator
-python3 $PY_OPTS ./Betaal/test-tools/websim_betaal_test.py &
+python3 -u $PY_OPTS ./Betaal/test-tools/websim_betaal_test.py &
 PID_WEBSIM2=$!
 
 # start the payment service simulator
-python3 $PY_OPTS ./Locatie/test_tools/websim_gmaps.py &
+python3 -u $PY_OPTS ./Locatie/test_tools/websim_gmaps.py &
 PID_WEBSIM3=$!
 
 # check all websim programs have started properly
