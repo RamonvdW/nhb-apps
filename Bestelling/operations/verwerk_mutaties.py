@@ -20,7 +20,7 @@ from Bestelling.definities import (BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS
                                    BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_MISLUKT, BESTELLING_STATUS_GEANNULEERD,
                                    BESTELLING_STATUS2STR, BESTELLING_HOOGSTE_BESTEL_NR_FIXED_PK,
                                    BESTELLING_TRANSPORT2STR,
-                                   BESTELLING_REGEL_CODE_WEDSTRIJD_INSCHRIJVING,
+                                   BESTELLING_REGEL_CODE_WEDSTRIJD,
                                    BESTELLING_REGEL_CODE_WEDSTRIJD_KORTING)
 from Bestelling.models import (Bestelling, BestellingRegel, BestellingMandje,
                                BestellingHoogsteBestelNr, BestellingMutatie)
@@ -132,7 +132,7 @@ class VerwerkBestelMutaties:
 
         regel_pks = (mandje
                      .regels
-                     .filter(code=BESTELLING_REGEL_CODE_WEDSTRIJD_INSCHRIJVING)
+                     .filter(code=BESTELLING_REGEL_CODE_WEDSTRIJD)
                      .values_list('pk', flat=True))
 
         bepaler = BepaalAutomatischeKorting(self.stdout)

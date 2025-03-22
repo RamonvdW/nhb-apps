@@ -7,12 +7,9 @@
 from django.db import migrations
 from django.conf import settings
 from django.db.models import Count
-from Bestelling.definities import (BESTELLING_REGEL_CODE_EVENEMENT_INSCHRIJVING,
-                                   BESTELLING_REGEL_CODE_EVENEMENT_AFGEMELD,
-                                   BESTELLING_REGEL_CODE_OPLEIDING_INSCHRIJVING,
-                                   BESTELLING_REGEL_CODE_OPLEIDING_AFGEMELD,
-                                   BESTELLING_REGEL_CODE_WEDSTRIJD_INSCHRIJVING,
-                                   BESTELLING_REGEL_CODE_WEDSTRIJD_AFGEMELD,
+from Bestelling.definities import (BESTELLING_REGEL_CODE_EVENEMENT,
+                                   BESTELLING_REGEL_CODE_OPLEIDING,
+                                   BESTELLING_REGEL_CODE_WEDSTRIJD,
                                    BESTELLING_REGEL_CODE_WEBWINKEL,
                                    BESTELLING_REGEL_CODE_VERZENDKOSTEN,
                                    BESTELLING_REGEL_CODE_WEDSTRIJD_KORTING,
@@ -51,7 +48,7 @@ def update_bestellingen(apps, prod2regels):
 
     bestelling_klas = apps.get_model('Bestelling', 'Bestelling')
 
-    for bestelling in bestelling_klas.objects.prefetch_related('producten'):    # pragma: no cover
+    for bestelling in bestelling_klas.objects.prefetch_related('producten'):        # pragma: no cover
         regels = list()
         for product in bestelling.producten.all():
             try:
@@ -95,7 +92,7 @@ def migrate_product2regel_evenement(apps, _):
         regel = bestelling_regel_klas(
                     korte_beschrijving=kort,
                     bedrag_euro=prod.prijs_euro,
-                    code=BESTELLING_REGEL_CODE_EVENEMENT_INSCHRIJVING)
+                    code=BESTELLING_REGEL_CODE_EVENEMENT)
         regel.save()
         prod2regels[prod.pk] = [regel]
 
@@ -121,7 +118,7 @@ def migrate_product2regel_evenement(apps, _):
         regel = bestelling_regel_klas(
                     korte_beschrijving=kort,
                     bedrag_euro=prod.prijs_euro,
-                    code=BESTELLING_REGEL_CODE_EVENEMENT_AFGEMELD)
+                    code=BESTELLING_REGEL_CODE_EVENEMENT)
         regel.save()
         prod2regels[prod.pk] = [regel]
 
@@ -163,7 +160,7 @@ def migrate_product2regel_opleiding(apps, _):
         regel = bestelling_regel_klas(
                     korte_beschrijving=kort,
                     bedrag_euro=prod.prijs_euro,
-                    code=BESTELLING_REGEL_CODE_OPLEIDING_INSCHRIJVING)
+                    code=BESTELLING_REGEL_CODE_OPLEIDING)
         regel.save()
 
         prod2regels[prod.pk] = [regel]
@@ -190,7 +187,7 @@ def migrate_product2regel_opleiding(apps, _):
         regel = bestelling_regel_klas(
                     korte_beschrijving=kort,
                     bedrag_euro=prod.prijs_euro,
-                    code=BESTELLING_REGEL_CODE_OPLEIDING_AFGEMELD)
+                    code=BESTELLING_REGEL_CODE_OPLEIDING)
 
         regel.save()
 
@@ -308,10 +305,7 @@ def migrate_product2regel_wedstrijd(apps, _):
         regel = bestelling_regel_klas(
                     korte_beschrijving=kort,
                     bedrag_euro=prod.prijs_euro,
-                    code=BESTELLING_REGEL_CODE_WEDSTRIJD_INSCHRIJVING)
-
-        if inschrijving.status == WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD:
-            regel.code = BESTELLING_REGEL_CODE_WEDSTRIJD_AFGEMELD
+                    code=BESTELLING_REGEL_CODE_WEDSTRIJD)
 
         regel.save()
         prod2regels[prod.pk] = [regel]

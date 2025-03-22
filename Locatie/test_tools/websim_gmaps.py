@@ -194,17 +194,21 @@ class MyServer(BaseHTTPRequestHandler):
     def handle_compute_routes(self, body):
 
         data = json.loads(body)
-        print('{websim_gmaps} compute routes: body=%s' % repr(data))
+        # print('{websim_gmaps} compute routes: body=%s' % repr(data))
 
-        resp = {
-            'routes': [
-                {
-                    'distance_meters': '42',
-                    'duration': '42s',
-                    'static_duration': '43s',       # s = seconds
-                }
-            ]
-        }
+        if data['destination']['location']['latLng']['latitude'] == 420.0:
+            # geen antwoord geven
+            resp = {}
+        else:
+            resp = {
+                'routes': [
+                    {
+                        'distance_meters': '42000',
+                        'duration': '1020s',
+                        'static_duration': '1020s',     # 1020 seconds = 17 minutes
+                    }
+                ]
+            }
 
         data = json.dumps(resp)
         enc_data = data.encode()  # convert string to bytes

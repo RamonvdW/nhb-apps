@@ -180,7 +180,8 @@ class WedstrijdAanmeldingenView(UserPassesTestMixin, TemplateView):
             sporterboog = aanmelding.sporterboog
             sporter = sporterboog.sporter
 
-            if aanmelding.status not in (WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD, WEDSTRIJD_INSCHRIJVING_STATUS_VERWIJDERD):
+            if aanmelding.status not in (WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD,
+                                         WEDSTRIJD_INSCHRIJVING_STATUS_VERWIJDERD):
                 aantal_aanmeldingen += 1
                 aanmelding.volg_nr = aantal_aanmeldingen
                 aanmelding.reserveringsnummer = aanmelding.pk + settings.TICKET_NUMMER_START__WEDSTRIJD
@@ -282,7 +283,8 @@ class DownloadAanmeldingenBestandTSV(UserPassesTestMixin, View):
         aanmeldingen = (WedstrijdInschrijving
                         .objects
                         .filter(wedstrijd=wedstrijd)
-                        .exclude(status__in=(WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD, WEDSTRIJD_INSCHRIJVING_STATUS_VERWIJDERD))
+                        .exclude(status__in=(WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD,
+                                             WEDSTRIJD_INSCHRIJVING_STATUS_VERWIJDERD))
                         .select_related('sessie',
                                         'wedstrijdklasse',
                                         'sporterboog',
@@ -619,7 +621,8 @@ class WedstrijdAanmeldingDetailsView(UserPassesTestMixin, TemplateView):
 
         inschrijving.bestelnummer_str = get_inschrijving_mh_bestel_nr(inschrijving)
 
-        if inschrijving.status not in (WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD, WEDSTRIJD_INSCHRIJVING_STATUS_VERWIJDERD):
+        if inschrijving.status not in (WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD,
+                                       WEDSTRIJD_INSCHRIJVING_STATUS_VERWIJDERD):
             inschrijving.url_afmelden = reverse('Wedstrijden:afmelden',
                                                 kwargs={'inschrijving_pk': inschrijving.pk})
 

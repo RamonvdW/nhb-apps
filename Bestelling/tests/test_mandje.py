@@ -9,7 +9,7 @@ from django.conf import settings
 from django.utils import timezone
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse
 from Bestelling.definities import (BESTELLING_TRANSPORT_VERZEND, BESTELLING_TRANSPORT_OPHALEN,
-                                   BESTELLING_MUTATIE_VERWIJDER, BESTELLING_REGEL_CODE_WEDSTRIJD_INSCHRIJVING,
+                                   BESTELLING_MUTATIE_VERWIJDER, BESTELLING_REGEL_CODE_WEDSTRIJD,
                                    BESTELLING_REGEL_CODE_WEBWINKEL)
 from Bestelling.models import Bestelling, BestellingMutatie, BestellingMandje, BestellingRegel
 from Betaal.models import BetaalInstellingenVereniging
@@ -182,7 +182,7 @@ class TestBestellingMandje(E2EHelpers, TestCase):
         regel1 = BestellingRegel(
                     korte_beschrijving='wedstrijd',
                     bedrag_euro=Decimal(10.0),
-                    code=BESTELLING_REGEL_CODE_WEDSTRIJD_INSCHRIJVING)
+                    code=BESTELLING_REGEL_CODE_WEDSTRIJD)
         regel1.save()
         mandje.regels.add(regel1)
 

@@ -8,7 +8,7 @@ from django.conf import settings
 from django.test import TestCase
 from django.utils import timezone
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse
-from Bestelling.definities import BESTELLING_REGEL_CODE_WEDSTRIJD_INSCHRIJVING
+from Bestelling.definities import BESTELLING_REGEL_CODE_WEDSTRIJD
 from Bestelling.models import Bestelling, BestellingRegel
 from Functie.tests.helpers import maak_functie
 from Geo.models import Regio
@@ -511,7 +511,7 @@ class TestRegistreerBeheer(E2EHelpers, TestCase):
         regel = BestellingRegel(
                     korte_beschrijving='wedstrijd',
                     bedrag_euro=Decimal(10.0),
-                    code=BESTELLING_REGEL_CODE_WEDSTRIJD_INSCHRIJVING)
+                    code=BESTELLING_REGEL_CODE_WEDSTRIJD)
         regel.save()
         bestelling.regels.add(regel)
 

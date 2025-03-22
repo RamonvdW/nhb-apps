@@ -15,7 +15,7 @@ from Bestelling.definities import (BESTELLING_STATUS2STR, BESTELLING_STATUS_BETA
                                    BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_MISLUKT,
                                    BESTELLING_STATUS_GEANNULEERD,
                                    BESTELLING_TRANSPORT_OPHALEN,
-                                   BESTELLING_REGEL_CODE_WEDSTRIJD_INSCHRIJVING,
+                                   BESTELLING_REGEL_CODE_WEDSTRIJD,
                                    BESTELLING_REGEL_CODE_WEDSTRIJD_KORTING,
                                    BESTELLING_KORT_BREAK)
 from Bestelling.models import Bestelling
@@ -271,7 +271,7 @@ class ToonBestellingDetailsView(UserPassesTestMixin, TemplateView):
 
         # zoek de kwalificatiescores erbij
         kwalificatie_scores = list()
-        for regel in bestelling.regels.filter(code=BESTELLING_REGEL_CODE_WEDSTRIJD_INSCHRIJVING):
+        for regel in bestelling.regels.filter(code=BESTELLING_REGEL_CODE_WEDSTRIJD):
             inschrijving = (WedstrijdInschrijving
                             .objects
                             .filter(bestelling=regel)

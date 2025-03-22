@@ -7,8 +7,7 @@
 from django.conf import settings
 from django.utils import timezone
 from Bestelling.bestel_plugin_base import BestelPluginBase
-from Bestelling.definities import (BESTELLING_REGEL_CODE_EVENEMENT_INSCHRIJVING,
-                                   BESTELLING_REGEL_CODE_EVENEMENT_AFGEMELD,
+from Bestelling.definities import (BESTELLING_REGEL_CODE_EVENEMENT,
                                    BESTELLING_KORT_BREAK)
 from Bestelling.models import BestellingRegel
 from Betaal.format import format_bedrag_euro
@@ -124,7 +123,7 @@ class EvenementBestelPlugin(BestelPluginBase):
         regel = BestellingRegel(
                         korte_beschrijving=BESTELLING_KORT_BREAK.join(kort_lijst),
                         bedrag_euro=prijs_euro,
-                        code=BESTELLING_REGEL_CODE_EVENEMENT_INSCHRIJVING)
+                        code=BESTELLING_REGEL_CODE_EVENEMENT)
         regel.save()
 
         inschrijving.bestelling = regel

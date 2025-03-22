@@ -7,7 +7,7 @@
 from django.conf import settings
 from django.utils import timezone
 from BasisTypen.definities import ORGANISATIE_IFAA
-from Bestelling.definities import BESTELLING_REGEL_CODE_WEDSTRIJD_INSCHRIJVING, BESTELLING_KORT_BREAK
+from Bestelling.definities import BESTELLING_REGEL_CODE_WEDSTRIJD, BESTELLING_KORT_BREAK
 from Bestelling.bestel_plugin_base import BestelPluginBase
 from Bestelling.models import BestellingRegel
 from Betaal.format import format_bedrag_euro
@@ -85,7 +85,7 @@ class WedstrijdBestelPlugin(BestelPluginBase):
         regel = BestellingRegel(
                     korte_beschrijving=BESTELLING_KORT_BREAK.join(kort_lijst),
                     bedrag_euro=prijs_euro,
-                    code=BESTELLING_REGEL_CODE_WEDSTRIJD_INSCHRIJVING)
+                    code=BESTELLING_REGEL_CODE_WEDSTRIJD)
         regel.save()
 
         inschrijving.bestelling = regel

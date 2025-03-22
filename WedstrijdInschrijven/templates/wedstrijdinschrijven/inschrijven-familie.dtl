@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2022-2023 Ramon van der Winkel.
+                Copyright (c) 2022-2025 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -237,7 +237,10 @@
                         <tr>
                             <th class="center">Wanneer</th>
                             <th class="center">Nog beschikbaar</th>
-                            <th class="center">Wedstrijdklasse</th>
+                            {% if toon_sessie_beschrijvingen %}
+                                <th class="center hide-on-small-only">Sessie</th>
+                            {% endif %}
+                            <th class="center hide-on-small-only">Wedstrijdklasse</th>
                             <th class="center">Prijs</th>
                             <th><!-- kolom voor de knoppen --></th>
                         </tr>
@@ -248,7 +251,10 @@
                                     <tr{% if not sessie.kan_aanmelden %} class="grey-text"{% endif %}>
                                         <td class="center">{{ sessie.datum }}<br>{{ sessie.tijd_begin }} - {{ sessie.tijd_einde }}</td>
                                         <td class="center">{{ sessie.aantal_beschikbaar }} (van de {{ sessie.max_sporters }})</td>
-                                        <td class="center">{{ klasse.beschrijving }}</td>
+                                        {% if toon_sessie_beschrijvingen %}
+                                            <td class="center hide-on-small-only">{{ sessie.beschrijving }}</td>
+                                        {% endif %}
+                                        <td class="center hide-on-small-only">{{ klasse.beschrijving }}</td>
                                         <td class="center">{% if sessie.kan_aanmelden %}&euro;&nbsp;{{ prijs_euro_sporter }}{% else %}-{% endif %}</td>
                                         <td class="center">
                                             {% if sessie.kan_aanmelden %}

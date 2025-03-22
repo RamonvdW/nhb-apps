@@ -8,7 +8,7 @@ from django.test import TestCase
 from django.utils import timezone
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse
 from Bestelling.definities import (BESTELLING_STATUS_BETALING_ACTIEF, BESTELLING_STATUS_AFGEROND,
-                                   BESTELLING_REGEL_CODE_WEBWINKEL, BESTELLING_REGEL_CODE_WEDSTRIJD_INSCHRIJVING,
+                                   BESTELLING_REGEL_CODE_WEBWINKEL, BESTELLING_REGEL_CODE_WEDSTRIJD,
                                    BESTELLING_REGEL_CODE_WEDSTRIJD_KORTING)
 from Bestelling.models import Bestelling, BestellingMutatie, BestellingRegel
 from Betaal.definities import TRANSACTIE_TYPE_MOLLIE_PAYMENT, TRANSACTIE_TYPE_MOLLIE_RESTITUTIE
@@ -136,7 +136,7 @@ class TestBestelBetaling(E2EHelpers, TestCase):
         regel2 = BestellingRegel(
                         korte_beschrijving='wedstrijd',
                         bedrag_euro=Decimal(2.5),
-                        code=BESTELLING_REGEL_CODE_WEDSTRIJD_INSCHRIJVING)
+                        code=BESTELLING_REGEL_CODE_WEDSTRIJD)
         regel2.save()
 
         inschrijving = WedstrijdInschrijving(

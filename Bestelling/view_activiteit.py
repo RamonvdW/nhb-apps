@@ -11,8 +11,13 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from django.views.generic import TemplateView
 from django.urls import reverse
 from Account.models import get_account
-from Bestelling.definities import (BESTELLING_STATUS2STR, BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_BETALING_ACTIEF,
-                                   BESTELLING_STATUS_MISLUKT)
+from Bestelling.definities import (BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_BETALING_ACTIEF,
+                                   BESTELLING_STATUS_MISLUKT, BESTELLING_STATUS2STR,
+                                   BESTELLING_KORT_BREAK,
+                                   BESTELLING_REGEL_CODE_WEBWINKEL,
+                                   BESTELLING_REGEL_CODE_WEDSTRIJD,
+                                   BESTELLING_REGEL_CODE_OPLEIDING,
+                                   BESTELLING_REGEL_CODE_EVENEMENT)
 from Bestelling.forms import ZoekBestellingForm
 from Bestelling.models import Bestelling, BestellingRegel
 from Betaal.definities import TRANSACTIE_TYPE_MOLLIE_PAYMENT
@@ -88,14 +93,13 @@ class BestelActiviteitView(UserPassesTestMixin, TemplateView):
                                 .select_related('account',
                                                 'ontvanger',
                                                 'ontvanger__vereniging')
-                                .prefetch_related('transacties')
+                                .prefetch_related('transacties',
+                                                  'regels')
                                 .filter(Q(bestel_nr=nr) |
                                         Q(account__username=nr) |
                                         Q(ontvanger__vereniging__ver_nr=nr) |
-                                        Q(producten__wedstrijd_inschrijving__sporterboog__sporter__lid_nr=nr) |
-                                        Q(producten__opleiding_inschrijving__sporter__lid_nr=nr))
-                                # .order_by('-bestel_nr'))            # nieuwste eerst
-                                .order_by('-aangemaakt'))             # nieuwste eerst (werkt beter op test server)
+                                        Q(regels__korte_beschrijving__icontains=str(nr)))
+                                .order_by('-aangemaakt'))             # recent aangemaakt eerst
             except ValueError:
                 if zoekterm == "**":
                     bestellingen = (Bestelling
@@ -103,7 +107,8 @@ class BestelActiviteitView(UserPassesTestMixin, TemplateView):
                                     .select_related('account',
                                                     'ontvanger',
                                                     'ontvanger__vereniging')
-                                    .prefetch_related('transacties')
+                                    .prefetch_related('transacties',
+                                                      'regels')
                                     .filter(status__in=(BESTELLING_STATUS_NIEUW,
                                                         BESTELLING_STATUS_BETALING_ACTIEF,
                                                         BESTELLING_STATUS_MISLUKT))
@@ -115,12 +120,11 @@ class BestelActiviteitView(UserPassesTestMixin, TemplateView):
                                     .select_related('account',
                                                     'ontvanger',
                                                     'ontvanger__vereniging')
-                                    .prefetch_related('transacties')
+                                    .prefetch_related('transacties',
+                                                      'regels')
                                     .filter(Q(account__unaccented_naam__icontains=zoekterm) |
                                             Q(ontvanger__vereniging__naam__icontains=zoekterm) |
-                                            Q(producten__wedstrijd_inschrijving__sporterboog__sporter__unaccented_naam__icontains=zoekterm) |
-                                            Q(producten__webwinkel_keuze__product__omslag_titel__icontains=zoekterm) |
-                                            Q(producten__opleiding_inschrijving__opleiding__titel__icontains=zoekterm) |
+                                            Q(regels__korte_beschrijving__icontains=zoekterm) |
                                             Q(transacties__payment_id=zoekterm))
                                     .order_by('-bestel_nr'))            # nieuwste eerst
         else:
@@ -131,28 +135,25 @@ class BestelActiviteitView(UserPassesTestMixin, TemplateView):
                             .select_related('account',
                                             'ontvanger',
                                             'ontvanger__vereniging')
-                            .order_by('-bestel_nr'))     # nieuwste eerst
-
-        # TODO: uitgezet ivm niet alle qset heeft order_by('bestel_nr'). Waarom zouden er dubbelen zijn?
-        # bestellingen = bestellingen.distinct('bestel_nr')       # verwijder dupes
+                            .prefetch_related('regels')
+                            .order_by('-bestel_nr'))        # nieuwste eerst
 
         if form.is_bound:
             if not form.cleaned_data['webwinkel']:
                 # vinkje is niet gezet, dus webwinkel producten zijn niet gewenst --> behoud waar deze None is
-                bestellingen = bestellingen.filter(producten__webwinkel_keuze=None)
+                bestellingen = bestellingen.exclude(regels__code=BESTELLING_REGEL_CODE_WEBWINKEL)
 
             if not form.cleaned_data['wedstrijden']:
                 # vinkje is niet gezet, dus wedstrijd bestellingen zijn niet gewenst --> behoud waar deze None is
-                bestellingen = bestellingen.filter(producten__wedstrijd_inschrijving=None)
+                bestellingen = bestellingen.exclude(regels__code=BESTELLING_REGEL_CODE_WEDSTRIJD)
 
             if not form.cleaned_data['evenementen']:
                 # vinkje is niet gezet, dus evenement bestellingen zijn niet gewenst --> behoud waar deze None is
-                bestellingen = bestellingen.filter(producten__evenement_inschrijving=None,
-                                                   producten__evenement_afgemeld=None)
+                bestellingen = bestellingen.exclude(regels__code=BESTELLING_REGEL_CODE_EVENEMENT)
 
             if not form.cleaned_data['opleidingen']:
                 # vinkje is niet gezet, dus opleidingen bestellingen zijn niet gewenst --> behoud waar deze None is
-                bestellingen = bestellingen.filter(producten__opleiding_inschrijving=None)
+                bestellingen = bestellingen.exclude(regels__code=BESTELLING_REGEL_CODE_OPLEIDING)
 
             if not form.cleaned_data['gratis']:
                 # vinkje is niet gezet, dus gratis bestellingen zijn niet gewenst
@@ -179,26 +180,7 @@ class BestelActiviteitView(UserPassesTestMixin, TemplateView):
             bestelling.ver_naam = bestelling.ontvanger.vereniging.naam
             bestelling.status_str = BESTELLING_STATUS2STR[bestelling.status]
 
-            bestelling.prods_list = list(bestelling
-                                         .producten
-                                         .select_related('wedstrijd_inschrijving',
-                                                         'wedstrijd_inschrijving__wedstrijd',
-                                                         'wedstrijd_inschrijving__wedstrijd__organiserende_vereniging',
-                                                         'wedstrijd_inschrijving__sporterboog__sporter',
-                                                         'wedstrijd_inschrijving__sporterboog__boogtype',
-                                                         'webwinkel_keuze',
-                                                         'webwinkel_keuze__product',
-                                                         'webwinkel_keuze__koper',
-                                                         'evenement_inschrijving__evenement',
-                                                         'evenement_inschrijving__evenement__organiserende_vereniging',
-                                                         'evenement_inschrijving__sporter',
-                                                         'evenement_afgemeld__evenement',
-                                                         'evenement_afgemeld__evenement__organiserende_vereniging',
-                                                         'evenement_afgemeld__sporter',
-                                                         'opleiding_inschrijving',
-                                                         'opleiding_inschrijving__opleiding',
-                                                         'opleiding_inschrijving__sporter')
-                                         .all())
+            bestelling.regels_list = bestelling.regels.all()
 
             aantal_wedstrijd = 0
             aantal_webwinkel = 0
@@ -208,54 +190,27 @@ class BestelActiviteitView(UserPassesTestMixin, TemplateView):
             laatste_evenement_beschrijving = ''
             laatste_opleiding_beschrijving = ''
 
-            for product in bestelling.prods_list:
+            for regel in bestelling.regels_list:
 
-                if product.wedstrijd_inschrijving:
+                regel.korte_beschrijving_lst = regel.korte_beschrijving.split(BESTELLING_KORT_BREAK)
+
+                if regel.code == BESTELLING_REGEL_CODE_WEDSTRIJD:
                     aantal_wedstrijd += 1
-                    inschrijving = product.wedstrijd_inschrijving
-                    product.beschrijving_str1 = 'Wedstrijd bij %s' % inschrijving.wedstrijd.organiserende_vereniging.ver_nr_en_naam()
-                    product.beschrijving_str2 = 'voor %s (%s)' % (
-                        inschrijving.sporterboog.sporter.lid_nr_en_volledige_naam(),
-                        inschrijving.sporterboog.boogtype.beschrijving)
-                    product.beschrijving_str3 = inschrijving.wedstrijd.titel
+                    laatste_wedstrijd_beschrijving = regel.korte_beschrijving_lst[0]
 
-                    laatste_wedstrijd_beschrijving = product.beschrijving_str3
-
-                elif product.webwinkel_keuze:
+                elif regel.code == BESTELLING_REGEL_CODE_WEBWINKEL:
                     aantal_webwinkel += 1
-                    keuze = product.webwinkel_keuze
-                    product.beschrijving_str2 = keuze.product.omslag_titel
 
-                elif product.evenement_inschrijving:
+                elif regel.code == BESTELLING_REGEL_CODE_EVENEMENT:
                     aantal_evenement += 1
+                    laatste_evenement_beschrijving = regel.korte_beschrijving_lst[0]
 
-                    inschrijving = product.evenement_inschrijving
-                    product.beschrijving_str1 = 'Evenement bij %s' % inschrijving.evenement.organiserende_vereniging.ver_nr_en_naam()
-                    product.beschrijving_str2 = 'voor %s' % inschrijving.sporter.lid_nr_en_volledige_naam()
-                    product.beschrijving_str3 = inschrijving.evenement.titel
-
-                    laatste_evenement_beschrijving = product.beschrijving_str3
-
-                elif product.evenement_afgemeld:
-                    aantal_evenement += 1
-
-                    inschrijving = product.evenement_afgemeld
-                    product.beschrijving_str1 = 'Evenement bij %s' % inschrijving.evenement.organiserende_vereniging.ver_nr_en_naam()
-                    product.beschrijving_str2 = 'voor %s' % inschrijving.sporter.lid_nr_en_volledige_naam()
-                    product.beschrijving_str3 = inschrijving.evenement.titel
-
-                    laatste_evenement_beschrijving = product.beschrijving_str3
-
-                elif product.opleiding_inschrijving:
+                elif regel.code == BESTELLING_REGEL_CODE_OPLEIDING:
                     aantal_opleiding += 1
+                    laatste_opleiding_beschrijving = regel.korte_beschrijving_lst[0]
 
-                    inschrijving = product.opleiding_inschrijving
-                    product.beschrijving_str1 = 'Opleiding %s' % inschrijving.opleiding.titel
-                    product.beschrijving_str2 = 'voor %s' % inschrijving.sporter.lid_nr_en_volledige_naam()
-
-                    laatste_opleiding_beschrijving = product.beschrijving_str1
                 else:
-                    product.geen_beschrijving = True
+                    regel.geen_beschrijving = True
             # for
 
             beschrijvingen = list()

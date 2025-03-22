@@ -14,9 +14,9 @@ from django.utils import timezone
 from django.core.management.base import BaseCommand
 from Bestelling.definities import (BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_GEANNULEERD,
                                    BESTELLING_REGEL_CODE_WEBWINKEL,
-                                   BESTELLING_REGEL_CODE_WEDSTRIJD_INSCHRIJVING,
-                                   BESTELLING_REGEL_CODE_EVENEMENT_INSCHRIJVING,
-                                   BESTELLING_REGEL_CODE_OPLEIDING_INSCHRIJVING)
+                                   BESTELLING_REGEL_CODE_WEDSTRIJD,
+                                   BESTELLING_REGEL_CODE_EVENEMENT,
+                                   BESTELLING_REGEL_CODE_OPLEIDING)
 from Bestelling.models import Bestelling
 from Functie.models import Functie
 from Taken.operations import check_taak_bestaat, maak_taak
@@ -115,13 +115,13 @@ class Command(BaseCommand):
 
         for bestelling in qset:
             for regel in bestelling.regels.all():
-                if regel.code == BESTELLING_REGEL_CODE_WEDSTRIJD_INSCHRIJVING:
+                if regel.code == BESTELLING_REGEL_CODE_WEDSTRIJD:
                     count_wedstrijd += 1
-                elif regel.code == BESTELLING_REGEL_CODE_EVENEMENT_INSCHRIJVING:
+                elif regel.code == BESTELLING_REGEL_CODE_EVENEMENT:
                     count_evenement += 1
                 elif regel.code == BESTELLING_REGEL_CODE_WEBWINKEL:
                     count_webwinkel += 1
-                elif regel.code == BESTELLING_REGEL_CODE_OPLEIDING_INSCHRIJVING:
+                elif regel.code == BESTELLING_REGEL_CODE_OPLEIDING:
                     count_opleiding += 1
             # for
         # for

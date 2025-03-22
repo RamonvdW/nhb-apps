@@ -7,7 +7,7 @@
 from django.test import TestCase
 from django.conf import settings
 from django.utils import timezone
-from Bestelling.definities import BESTELLING_REGEL_CODE_EVENEMENT_INSCHRIJVING
+from Bestelling.definities import BESTELLING_REGEL_CODE_EVENEMENT
 from Bestelling.models import Bestelling, BestellingRegel
 from Betaal.models import BetaalInstellingenVereniging
 from Evenement.definities import (EVENEMENT_STATUS_GEACCEPTEERD,
@@ -173,7 +173,7 @@ class TestEvenementAfmelden(E2EHelpers, TestCase):
         regel = BestellingRegel(
                         korte_beschrijving='evenement',
                         bedrag_euro=10.0,
-                        code=BESTELLING_REGEL_CODE_EVENEMENT_INSCHRIJVING)
+                        code=BESTELLING_REGEL_CODE_EVENEMENT)
         regel.save()
 
         # maak een inschrijving op het evenement
@@ -210,7 +210,7 @@ class TestEvenementAfmelden(E2EHelpers, TestCase):
         regel = BestellingRegel(
                     korte_beschrijving='evenement_afgemeld',
                     bedrag_euro=10.0,
-                    code=BESTELLING_REGEL_CODE_EVENEMENT_INSCHRIJVING)
+                    code=BESTELLING_REGEL_CODE_EVENEMENT)
         regel.save()
         self.bestelling.regels.add(regel)
 

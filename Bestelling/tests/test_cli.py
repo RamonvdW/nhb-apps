@@ -8,9 +8,9 @@ from django.test import TestCase
 from django.conf import settings
 from django.utils import timezone
 from Bestelling.definities import (BESTELLING_REGEL_CODE_WEBWINKEL,
-                                   BESTELLING_REGEL_CODE_WEDSTRIJD_INSCHRIJVING,
-                                   BESTELLING_REGEL_CODE_EVENEMENT_INSCHRIJVING,
-                                   BESTELLING_REGEL_CODE_OPLEIDING_INSCHRIJVING,
+                                   BESTELLING_REGEL_CODE_WEDSTRIJD,
+                                   BESTELLING_REGEL_CODE_EVENEMENT,
+                                   BESTELLING_REGEL_CODE_OPLEIDING,
                                    BESTELLING_REGEL_CODE_VERZENDKOSTEN,
                                    BESTELLING_MUTATIE_VERWIJDER,
                                    BESTELLING_MUTATIE_TRANSPORT)
@@ -78,19 +78,19 @@ class TestBestellingCli(E2EHelpers, TestCase):
         regel2 = BestellingRegel(
                         korte_beschrijving='wedstrijd',
                         bedrag_euro=Decimal('10.00'),
-                        code=BESTELLING_REGEL_CODE_WEDSTRIJD_INSCHRIJVING)
+                        code=BESTELLING_REGEL_CODE_WEDSTRIJD)
         regel2.save()
 
         regel3 = BestellingRegel(
                         korte_beschrijving='evenement',
                         bedrag_euro=Decimal('15.00'),
-                        code=BESTELLING_REGEL_CODE_EVENEMENT_INSCHRIJVING)
+                        code=BESTELLING_REGEL_CODE_EVENEMENT)
         regel3.save()
 
         regel4 = BestellingRegel(
                         korte_beschrijving='opleiding',
                         bedrag_euro=Decimal('42.00'),
-                        code=BESTELLING_REGEL_CODE_OPLEIDING_INSCHRIJVING)
+                        code=BESTELLING_REGEL_CODE_OPLEIDING)
         regel4.save()
 
         regel5 = BestellingRegel(

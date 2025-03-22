@@ -301,7 +301,7 @@ class TestLocatieCliReistijd(E2EHelpers, TestCase):
         f1, f2 = self._reistijd_bijwerken()
         # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
         self.assertEqual(f1.getvalue(), '')
-        self.assertTrue("[INFO] Reistijd '17 mins' is 1030 seconden; is 17 minuten" in f2.getvalue())
+        self.assertTrue("[INFO] Aantal verzoeken naar Routes API: 1" in f2.getvalue())
 
         scheids = Sporter.objects.get(lid_nr=self.scheids.lid_nr)
         self.assertEqual(scheids.adres_lat, '42.000000')
@@ -311,36 +311,36 @@ class TestLocatieCliReistijd(E2EHelpers, TestCase):
         self.assertEqual(reistijd.reistijd_min, 17)
         self.assertTrue(str(reistijd) != '')
 
-        # incompleet verzoek
+        # input wordt niet geaccepteerd
+        Reistijd.objects.all().delete()
         reistijd = Reistijd(vanaf_lat=self.SR3_LAT,
                             vanaf_lon=self.SR3_LON,
-                            naar_lat='incompleet',
+                            naar_lat='BAD',
                             naar_lon=self.ZELF_LON,
                             reistijd_min=0)         # 0 = nog niet uitgerekend
         reistijd.save()
 
         f1, f2 = self._reistijd_bijwerken()
         # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
-        self.assertTrue("[ERROR] Onvolledig directions antwoord: " in f1.getvalue())
-
-        scheids = Sporter.objects.get(lid_nr=self.scheids.lid_nr)
-        self.assertEqual(scheids.adres_lat, '42.000000')
-        self.assertEqual(scheids.adres_lon, '5.123000')
+        self.assertTrue("[WARNING] Fout in lat/lon (geen float?) voor reistijd pk=" in f2.getvalue())
 
         reistijd.refresh_from_db()
-        self.assertEqual(reistijd.reistijd_min, 17 * 60)
+        self.assertEqual(reistijd.reistijd_min, 0)      # niet bijgewerkt
 
-        # fout
+        # speciaal verzoek: simulator geeft een leeg antwoord
+        Reistijd.objects.all().delete()
         reistijd = Reistijd(vanaf_lat=self.SR3_LAT,
                             vanaf_lon=self.SR3_LON,
-                            naar_lat='geef fout',
+                            naar_lat=420.0,
                             naar_lon=self.ZELF_LON,
                             reistijd_min=0)         # 0 = nog niet uitgerekend
         reistijd.save()
 
         f1, f2 = self._reistijd_bijwerken()
         # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
-        self.assertTrue("[ERROR] Fout van gmaps directions route van" in f1.getvalue())
+        self.assertTrue("[ERROR] Onvolledig routes antwoord:" in f1.getvalue())
 
+        reistijd.refresh_from_db()
+        self.assertGreater(reistijd.reistijd_min, 5 * 60)       # speciaal getal (16 of 17 uur)
 
 # end of file

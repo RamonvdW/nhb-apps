@@ -7,10 +7,8 @@
 """ Deze module levert functionaliteit voor de Bestelling-applicatie, met kennis van alle kortingen. """
 
 from Betaal.format import format_bedrag_euro
-from Bestelling.definities import (BESTELLING_REGEL_CODE_WEDSTRIJD_INSCHRIJVING,
-                                   BESTELLING_REGEL_CODE_WEDSTRIJD_KORTING,
-                                   BESTELLING_KORT_BREAK)
-from Bestelling.models import BestellingMandje, BestellingRegel
+from Bestelling.definities import BESTELLING_REGEL_CODE_WEDSTRIJD_KORTING, BESTELLING_KORT_BREAK
+from Bestelling.models import BestellingRegel
 from Wedstrijden.definities import (WEDSTRIJD_KORTING_COMBI, WEDSTRIJD_KORTING_SPORTER, WEDSTRIJD_KORTING_VERENIGING,
                                     WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD, WEDSTRIJD_INSCHRIJVING_STATUS_VERWIJDERD)
 from Wedstrijden.models import WedstrijdKorting, WedstrijdInschrijving, beschrijf_korting

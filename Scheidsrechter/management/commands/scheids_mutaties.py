@@ -19,7 +19,7 @@ from BasisTypen.definities import SCHEIDS_NIET, SCHEIDS_VERENIGING
 from Competitie.models import CompetitieMatch
 from Functie.models import Functie
 from Locatie.models import Reistijd, WedstrijdLocatie
-from Locatie.operations import ReistijdBepalen
+from Locatie.operations.reistijd_bepalen import ReistijdBepalen
 from Mailer.operations import mailer_queue_email, render_email_template
 from Site.core.background_sync import BackgroundSync
 from Scheidsrechter.definities import (SCHEIDS_MUTATIE_WEDSTRIJD_BESCHIKBAARHEID_OPVRAGEN,
@@ -238,12 +238,13 @@ class Command(BaseCommand):
         ver_nr = settings.WEDSTRIJDEN_KIES_UITVOERENDE_VERENIGING[0]
         self.ver_bondsbureau = Vereniging.objects.get(ver_nr=ver_nr)
 
-        loc, is_created = WedstrijdLocatie.objects.get_or_create(naam='Placeholder RK/BK voor SR',
-                                                                 zichtbaar=False,
-                                                                 discipline_indoor=True,
-                                                                 adres='(diverse)',
-                                                                 plaats='(diverse)',
-                                                                 notities='Automatisch aangemaakt voor opvragen SR naar RK/BK')
+        loc, is_created = WedstrijdLocatie.objects.get_or_create(
+                                    naam='Placeholder RK/BK voor SR',
+                                    zichtbaar=False,
+                                    discipline_indoor=True,
+                                    adres='(diverse)',
+                                    plaats='(diverse)',
+                                    notities='Automatisch aangemaakt voor opvragen SR naar RK/BK')
         if is_created:
             loc.verenigingen.add(self.ver_bondsbureau)
         self.locatie_placeholder = loc
@@ -318,7 +319,7 @@ class Command(BaseCommand):
         # for
 
         # verwerk de nieuwe verzoeken voor reistijd
-        bepaler = ReistijdBepalen(self.stdout, self.stderr)
+        bepaler = ReistijdBepalen(self.stdout, self.stderr, 75)
         bepaler.run()
 
     def _adjust_rk_bk_datum_reeks(self, wedstrijd, alle_datums):

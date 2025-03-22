@@ -10,10 +10,10 @@ from django.utils import timezone
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse
 from Bestelling.definities import (BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_BETALING_ACTIEF,
                                    BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_MISLUKT, BESTELLING_STATUS_GEANNULEERD,
-                                   BESTELLING_REGEL_CODE_WEDSTRIJD_INSCHRIJVING,
+                                   BESTELLING_REGEL_CODE_WEDSTRIJD,
                                    BESTELLING_REGEL_CODE_WEDSTRIJD_KORTING,
-                                   BESTELLING_REGEL_CODE_OPLEIDING_INSCHRIJVING,
-                                   BESTELLING_REGEL_CODE_EVENEMENT_INSCHRIJVING, BESTELLING_REGEL_CODE_WEBWINKEL)
+                                   BESTELLING_REGEL_CODE_OPLEIDING,
+                                   BESTELLING_REGEL_CODE_EVENEMENT, BESTELLING_REGEL_CODE_WEBWINKEL)
 from Bestelling.models import Bestelling, BestellingRegel
 from Betaal.definities import TRANSACTIE_TYPE_MOLLIE_PAYMENT
 from Betaal.models import BetaalInstellingenVereniging, BetaalTransactie
@@ -227,7 +227,7 @@ class TestBestellingActiviteit(E2EHelpers, TestCase):
         regel = BestellingRegel(
                         korte_beschrijving='evenement',
                         bedrag_euro=Decimal('1.23'),
-                        code=BESTELLING_REGEL_CODE_EVENEMENT_INSCHRIJVING)
+                        code=BESTELLING_REGEL_CODE_EVENEMENT)
         regel.save()
         self.regel3 = regel
 
@@ -250,7 +250,7 @@ class TestBestellingActiviteit(E2EHelpers, TestCase):
         regel = BestellingRegel(
                         korte_beschrijving='opleiding',
                         bedrag_euro=Decimal('50.00'),
-                        code=BESTELLING_REGEL_CODE_OPLEIDING_INSCHRIJVING)
+                        code=BESTELLING_REGEL_CODE_OPLEIDING)
         regel.save()
         self.regel4 = regel
 
@@ -287,7 +287,7 @@ class TestBestellingActiviteit(E2EHelpers, TestCase):
         regel = BestellingRegel(
                         korte_beschrijving='wedstrijd',
                         bedrag_euro=Decimal('14.34'),
-                        code=BESTELLING_REGEL_CODE_WEDSTRIJD_INSCHRIJVING)
+                        code=BESTELLING_REGEL_CODE_WEDSTRIJD)
         regel.save()
         bestel.regels.add(regel)
 

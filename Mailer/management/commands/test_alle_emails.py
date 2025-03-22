@@ -14,7 +14,7 @@ from Account.operations.otp import otp_stuur_email_losgekoppeld
 from Account.view_wachtwoord import account_stuur_email_wachtwoord_vergeten
 from Account.operations.email import account_stuur_email_bevestig_nieuwe_email
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse
-from Bestelling.definities import BESTELLING_STATUS_NIEUW, BESTELLING_REGEL_CODE_WEDSTRIJD_INSCHRIJVING
+from Bestelling.definities import BESTELLING_STATUS_NIEUW, BESTELLING_REGEL_CODE_WEDSTRIJD
 from Bestelling.operations.verwerk_mutaties import stuur_email_naar_koper_betaalbevestiging
 from Bestelling.models import Bestelling, BestellingRegel
 from Betaal.definities import TRANSACTIE_TYPE_MOLLIE_PAYMENT, TRANSACTIE_TYPE_MOLLIE_RESTITUTIE
@@ -175,7 +175,7 @@ class Command(BaseCommand):
         regel_r = BestellingRegel(
                         korte_beschrijving='wedstrijd_inschrijving_r',
                         bedrag_euro=Decimal('42.40'),
-                        code=BESTELLING_REGEL_CODE_WEDSTRIJD_INSCHRIJVING)
+                        code=BESTELLING_REGEL_CODE_WEDSTRIJD)
         regel_r.save()
 
         inschrijving_r = WedstrijdInschrijving(
@@ -193,7 +193,7 @@ class Command(BaseCommand):
         regel_c = BestellingRegel(
                         korte_beschrijving='wedstrijd_inschrijving_c',
                         bedrag_euro=Decimal('42.41'),
-                        code=BESTELLING_REGEL_CODE_WEDSTRIJD_INSCHRIJVING)
+                        code=BESTELLING_REGEL_CODE_WEDSTRIJD)
         regel_c.save()
 
         inschrijving_c = WedstrijdInschrijving(

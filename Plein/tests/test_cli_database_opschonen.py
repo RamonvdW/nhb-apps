@@ -200,7 +200,7 @@ class TestPleinCliDatabaseOpschonen(E2EHelpers, TestCase):
         transactie.save()
 
     def test_alles(self):
-        with self.assert_max_queries(234, modify_acceptable=True):
+        with self.assert_max_queries(235, modify_acceptable=True):
             f1, f2 = self.run_management_command('database_opschonen')
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
@@ -219,7 +219,7 @@ class TestPleinCliDatabaseOpschonen(E2EHelpers, TestCase):
         self.assertTrue('[INFO] Verwijder niet afgeronde gast-account registratie 800001 in fase 0' in f2.getvalue())
 
         # nog een keer aanroepen terwijl er niets meer te verwijderen valt
-        with self.assert_max_queries(17):
+        with self.assert_max_queries(20):
             f1, f2 = self.run_management_command('database_opschonen')
         self.assertTrue(f1.getvalue() == '')
         self.assertTrue("Klaar" in f2.getvalue())

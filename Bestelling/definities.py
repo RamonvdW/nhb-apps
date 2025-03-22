@@ -79,15 +79,12 @@ BESTELLING_TRANSPORT2STR = {
 }
 
 # max-length: 25
-BESTELLING_REGEL_CODE_EVENEMENT_INSCHRIJVING = "evenement_inschrijving"     # length: 22
-BESTELLING_REGEL_CODE_EVENEMENT_AFGEMELD     = "evenement_afgemeld"
-BESTELLING_REGEL_CODE_OPLEIDING_INSCHRIJVING = "opleiding_inschrijving"
-BESTELLING_REGEL_CODE_OPLEIDING_AFGEMELD     = "opleiding_afgemeld"
-BESTELLING_REGEL_CODE_WEDSTRIJD_INSCHRIJVING = "wedstrijd_inschrijving"
-BESTELLING_REGEL_CODE_WEDSTRIJD_AFGEMELD     = "wedstrijd_afgemeld"
-BESTELLING_REGEL_CODE_WEDSTRIJD_KORTING      = "wedstrijd_korting"
-BESTELLING_REGEL_CODE_WEBWINKEL              = "Y_webwinkel"                # Y = sorteervolgorde
-BESTELLING_REGEL_CODE_VERZENDKOSTEN          = "Z_verzendkosten"            # Z = sorteervolgorde
+BESTELLING_REGEL_CODE_WEDSTRIJD_KORTING = "wedstrijd_korting"  # length: 17
+BESTELLING_REGEL_CODE_EVENEMENT         = "evenement"
+BESTELLING_REGEL_CODE_OPLEIDING         = "opleiding"
+BESTELLING_REGEL_CODE_WEDSTRIJD         = "wedstrijd"
+BESTELLING_REGEL_CODE_WEBWINKEL         = "Y_webwinkel"        # Y = sorteervolgorde
+BESTELLING_REGEL_CODE_VERZENDKOSTEN     = "Z_verzendkosten"    # Z = sorteervolgorde
 
 
 # speciale tekens die BestellingRegel.korte_beschrijving opsplitsen in aparte regels

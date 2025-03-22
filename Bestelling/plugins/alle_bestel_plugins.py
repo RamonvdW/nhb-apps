@@ -8,12 +8,9 @@
 """
 
 from Bestelling.bestel_plugin_base import BestelPluginBase
-from Bestelling.definities import (BESTELLING_REGEL_CODE_EVENEMENT_INSCHRIJVING,
-                                   BESTELLING_REGEL_CODE_EVENEMENT_AFGEMELD,
-                                   BESTELLING_REGEL_CODE_OPLEIDING_INSCHRIJVING,
-                                   BESTELLING_REGEL_CODE_OPLEIDING_AFGEMELD,
-                                   BESTELLING_REGEL_CODE_WEDSTRIJD_INSCHRIJVING,
-                                   BESTELLING_REGEL_CODE_WEDSTRIJD_AFGEMELD,
+from Bestelling.definities import (BESTELLING_REGEL_CODE_EVENEMENT,
+                                   BESTELLING_REGEL_CODE_OPLEIDING,
+                                   BESTELLING_REGEL_CODE_WEDSTRIJD,
                                    BESTELLING_REGEL_CODE_WEDSTRIJD_KORTING,
                                    BESTELLING_REGEL_CODE_WEBWINKEL,
                                    BESTELLING_REGEL_CODE_VERZENDKOSTEN)
@@ -24,12 +21,9 @@ from Wedstrijden.plugin_bestelling import wedstrijd_bestel_plugin, wedstrijd_kor
 
 
 bestel_plugins = {
-    BESTELLING_REGEL_CODE_EVENEMENT_INSCHRIJVING: evenement_bestel_plugin,
-    BESTELLING_REGEL_CODE_EVENEMENT_AFGEMELD: evenement_bestel_plugin,
-    BESTELLING_REGEL_CODE_OPLEIDING_INSCHRIJVING: opleiding_bestel_plugin,
-    BESTELLING_REGEL_CODE_OPLEIDING_AFGEMELD: opleiding_bestel_plugin,
-    BESTELLING_REGEL_CODE_WEDSTRIJD_INSCHRIJVING: wedstrijd_bestel_plugin,
-    BESTELLING_REGEL_CODE_WEDSTRIJD_AFGEMELD: wedstrijd_bestel_plugin,
+    BESTELLING_REGEL_CODE_EVENEMENT: evenement_bestel_plugin,
+    BESTELLING_REGEL_CODE_OPLEIDING: opleiding_bestel_plugin,
+    BESTELLING_REGEL_CODE_WEDSTRIJD: wedstrijd_bestel_plugin,
     BESTELLING_REGEL_CODE_WEDSTRIJD_KORTING: wedstrijd_korting_bestel_plugin,
     BESTELLING_REGEL_CODE_WEBWINKEL: webwinkel_bestel_plugin,
     BESTELLING_REGEL_CODE_VERZENDKOSTEN: verzendkosten_bestel_plugin,

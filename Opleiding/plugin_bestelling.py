@@ -7,7 +7,7 @@
 from django.conf import settings
 from django.utils import timezone
 from Bestelling.bestel_plugin_base import BestelPluginBase
-from Bestelling.definities import BESTELLING_REGEL_CODE_OPLEIDING_INSCHRIJVING, BESTELLING_REGEL_CODE_OPLEIDING_AFGEMELD
+from Bestelling.definities import BESTELLING_REGEL_CODE_OPLEIDING
 from Bestelling.models import BestellingRegel
 from Betaal.format import format_bedrag_euro
 from Functie.models import Functie
@@ -71,7 +71,7 @@ class OpleidingBestelPlugin(BestelPluginBase):
         regel = BestellingRegel(
                         korte_beschrijving=kort,
                         bedrag_euro=opleiding.kosten_euro,
-                        code=BESTELLING_REGEL_CODE_OPLEIDING_INSCHRIJVING)
+                        code=BESTELLING_REGEL_CODE_OPLEIDING)
         regel.save()
 
         inschrijving.bestelling = regel
