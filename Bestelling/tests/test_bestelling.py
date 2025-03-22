@@ -1179,7 +1179,7 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
         self.assertTrue(' met status="besteld" afmelden voor wedstrijd' in f2.getvalue())
         self.assertTrue(' met status="besteld" afmelden voor evenement' in f2.getvalue())
         self.assertTrue(' met status="besteld" afmelden voor opleiding' in f2.getvalue())
-        self.assertTrue('status Gereserveerd, wacht op betaling --> Verwijderd' in f2.getvalue())
+        self.assertTrue('status Besteld, wacht op betaling --> Verwijderd' in f2.getvalue())
         self.assertTrue('status Gereserveerd, wacht op betaling --> afgemeld pk=' in f2.getvalue())
 
         self.assertEqual(EvenementAfgemeld.objects.count(), 1)

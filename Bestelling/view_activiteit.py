@@ -309,8 +309,6 @@ class BestelOmzetView(UserPassesTestMixin, TemplateView):
     template_name = TEMPLATE_BESTEL_OMZET
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
     permission_denied_message = 'Geen toegang'
-    exclude_ver_nr = ()
-    limited = False
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
@@ -326,20 +324,11 @@ class BestelOmzetView(UserPassesTestMixin, TemplateView):
 
         bestellingen = (Bestelling
                         .objects
-                        .prefetch_related('regels')
                         .select_related('ontvanger__vereniging'))
 
-        if len(self.exclude_ver_nr):
-            bestellingen = bestellingen.exclude(ontvanger__vereniging__in=self.exclude_ver_nr)
-
-        aantal = dict()         # [(jaar, maand)] = integer     (aantal verkopen)
-        omzet = dict()          # [(jaar, maand)] = Decimal
-        vers = dict()           # [(jaar, maand)] = [ver_nr, ..]
-        jaar_aantal = dict()    # [jaar] = integer (aantal verkopen)
-        jaar_omzet = dict()     # [jaar] = Decimal
-        jaar_vers = dict()      # [jaar] = [ver_nr, ..]
-        jaar_code = dict()      # [(jaar, code)] = integer
-
+        aantal = dict()     # [(jaar, maand)] = integer     (aantal verkopen)
+        omzet = dict()      # [(jaar, maand)] = Decimal
+        vers = dict()       # [(jaar, maand)] = [ver_nr, ..]
         for bestelling in bestellingen:
             tup = (bestelling.aangemaakt.year, bestelling.aangemaakt.month)
             ver_nr = bestelling.ontvanger.vereniging.ver_nr
@@ -354,49 +343,11 @@ class BestelOmzetView(UserPassesTestMixin, TemplateView):
                     aantal[tup] = 1
                     omzet[tup] = bestelling.totaal_euro
                     vers[tup] = [ver_nr]
-
-                jaar = bestelling.aangemaakt.year
-                try:
-                    jaar_aantal[jaar] += 1
-                    jaar_omzet[jaar] += bestelling.totaal_euro
-                    if ver_nr not in jaar_vers[jaar]:
-                        jaar_vers[jaar].append(ver_nr)
-                except KeyError:
-                    jaar_aantal[jaar] = 1
-                    jaar_omzet[jaar] = bestelling.totaal_euro
-                    jaar_vers[jaar] = [ver_nr]
-
-                for regel in bestelling.regels.all():
-                    tup = (jaar, regel.code)
-                    try:
-                        jaar_code[tup] += 1
-                    except KeyError:
-                        jaar_code[tup] = 1
-                # for
         # for
 
         lijst = [(datetime.date(tup[0], tup[1], 1), aantal[tup], omzet[tup], len(vers[tup])) for tup in aantal.keys()]
         lijst.sort(reverse=True)        # nieuwste bovenaan
         context['lijst'] = lijst
-
-        context['codes'] = codes = list(set([code for _, code in jaar_code.keys()]))
-        codes.sort()
-
-        jaren = set(list(jaar_aantal.keys()) + list(jaar_omzet.keys()))
-        context['per_jaar'] = per_jaar = list()
-        for jaar in jaren:
-            aantallen = list()
-            for code in codes:
-                try:
-                    code_aantal = jaar_code[(jaar, code)]
-                except KeyError:
-                    code_aantal = '-'
-                aantallen.append(code_aantal)
-            # for
-            tup = (jaar, jaar_aantal[jaar], jaar_omzet[jaar], len(jaar_vers[jaar]), aantallen)
-            per_jaar.append(tup)
-        # for
-        per_jaar.sort(reverse=True)        # nieuwste bovenaan
 
         context['totaal_aantal'] = sum(aantal.values())
         context['totaal_omzet'] = sum(omzet.values())
@@ -410,28 +361,12 @@ class BestelOmzetView(UserPassesTestMixin, TemplateView):
         # for
         context['totaal_vers'] = len(uniek_vers)
 
-        context['limited'] = self.limited
-        if self.limited:
-            context['url_limited'] = reverse('Bestelling:omzet')
-        else:
-            context['url_limited'] = reverse('Bestelling:omzet-leden')
-
         context['kruimels'] = (
             (reverse('Bestelling:activiteit'), 'Bestellingen en Betalingen'),
             (None, 'Omzet')
         )
 
         return context
-
-
-class BestelOmzetAllesView(BestelOmzetView):
-    exclude_ver_nr = ()
-    limited = False
-
-
-class BestelOmzetLedenView(BestelOmzetView):
-    exclude_ver_nr = (settings.WEBWINKEL_VERKOPER_VER_NR,)
-    limited = True
 
 
 # end of file

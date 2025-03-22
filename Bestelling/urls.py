@@ -60,19 +60,14 @@ urlpatterns = [
          view=view_overboeking.OverboekingOntvangenView.as_view(),
          name='overboeking-ontvangen'),
 
-
     # manager view
     path('activiteit/',
          view_activiteit.BestelActiviteitView.as_view(),
          name='activiteit'),
 
-    path('omzet/alles/',
-         view_activiteit.BestelOmzetAllesView.as_view(),
+    path('omzet/',
+         view_activiteit.BestelOmzetView.as_view(),
          name='omzet'),
-
-    path('omzet/exclusief-bondsbureau/',
-         view_activiteit.BestelOmzetLedenView.as_view(),
-         name='omzet-leden'),
 ]
 
 # end of file

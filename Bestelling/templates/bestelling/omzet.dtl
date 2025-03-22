@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2023-2025 Ramon van der Winkel.
+                Copyright (c) 2023-2024 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -14,74 +14,38 @@
     <div class="row center">
         <div class="col s12">
             <h3 class="page-banner">Bestellingen en omzet</h3>
-            {% if limited %}
-                <p>(<b>exclusief bondsbureau</b>, exclusief gratis producten)</p>
-                <a class="btn-sv-rood" href="{{ url_limited }}">Toon inclusief bondsbureau</a>
-            {% else %}
-                <p>(exclusief gratis producten)</p>
-                <a class="btn-sv-rood" href="{{ url_limited }}">Toon exclusief bondsbureau</a>
-            {% endif %}
+            <p>(exclusief gratis producten)</p>
         </div>
     </div>
 
     <!-- blauwe balk met informatie label : info -->
     <div class="row-sv-blauw">
-        <div class="col s12">
+        <div class="col s12 m10 offset-m1 l8 offset-l2">
             <div class="sv-kader" style="padding:0 15px 0 15px">
                 <table class="sv-kader">
                     <thead>
                         <tr>
-                            <th class="right-align">Jaar</th>
+                            <th>Periode</th>
                             <th class="right-align">Omzet</th>
-                            <th class="center">Verkopers</th>
-                            <th class="center">Verkopen</th>
-                            {% for code in codes %}
-                                <th class="center">{{ code|capfirst }}</th>
-                            {% endfor %}
-                        </tr>
-                    </thead>
-
-                    {% for jaar, aantal, omzet, aantal_vers, aantallen in per_jaar %}
-                        <tr>
-                            <td class="right-align">{{ jaar }}</td>
-                            <td class="right-align">&euro;&nbsp;{{ omzet }}</td>
-                            <td class="center">{{ aantal_vers }}</td>
-                            <td class="center">{{ aantal }}</td>
-                            {% for aantal in aantallen %}
-                                <td class="center">{{ aantal }}</td>
-                            {% endfor %}
-                        </tr>
-                    {% endfor %}
-                </table>
-            </div>
-        </div>
-
-        <div class="col s12 m10 offset-m1 l8 offset-l2" style="margin-top:30px">
-            <div class="sv-kader" style="padding:0 15px 0 15px">
-                <table class="sv-kader">
-                    <thead>
-                        <tr>
-                            <th class="right-align">Periode</th>
-                            <th class="right-align">Omzet</th>
-                            <th class="center">Aantal verkopers</th>
-                            <th class="center">Aantal verkopen</th>
+                            <th class="right-align">Aantal verkopen</th>
+                            <th class="right-align">Aantal verkopers</th>
                         </tr>
                     </thead>
 
                     {% for datum, aantal, omzet, vers in lijst %}
                         <tr>
-                            <td class="right-align">{{ datum|date:"F Y" }}</td>
+                            <td>{{ datum|date:"F Y" }}</td>
                             <td class="right-align">&euro;&nbsp;{{ omzet }}</td>
-                            <td class="center">{{ vers }}</td>
-                            <td class="center">{{ aantal }}</td>
+                            <td class="right-align">{{ aantal }}</td>
+                            <td class="right-align">{{ vers }}</td>
                         </tr>
                     {% endfor %}
 
                     <tr>
                         <th class="right-align">Totalen:</th>
                         <th class="right-align">&euro;&nbsp;{{ totaal_omzet }}</th>
-                        <th class="center">{{ totaal_aantal }}</th>
-                        <th class="center">{{ totaal_vers }}</th>
+                        <th class="right-align">{{ totaal_aantal }}</th>
+                        <th class="right-align">{{ totaal_vers }}</th>
                     </tr>
                 </table>
             </div>
