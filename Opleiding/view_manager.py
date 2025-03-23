@@ -99,6 +99,7 @@ class NietIngeschrevenView(UserPassesTestMixin, View):
 
         context['huidige_rol'] = rol_get_beschrijving(request)
 
+        # TODO: filteren op status, want niet elke OpleidingInschrijving is ook definitief
         ingeschreven_lid_nrs = (OpleidingInschrijving
                                 .objects
                                 .filter(opleiding__is_basiscursus=True)

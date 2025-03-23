@@ -173,7 +173,7 @@ class EvenementBestelPlugin(BestelPluginBase):
             Geef een eerder gemaakte reservering voor een evenement weer vrij.
         """
         inschrijving = regel.evenementinschrijving_set.first()
-        if not inschrijving:
+        if not inschrijving:            # pragma: no cover
             self.stdout.write('[ERROR] Kan EvenementInschrijving voor regel met pk=%s niet vinden' % regel.pk)
             return
 
@@ -222,7 +222,7 @@ class EvenementBestelPlugin(BestelPluginBase):
             Verander de status van het gevraagde product naar 'besteld maar nog niet betaald'
         """
         inschrijving = EvenementInschrijving.objects.filter(bestelling=regel).first()
-        if not inschrijving:
+        if not inschrijving:            # pragma: no cover
             self.stdout.write('[ERROR] Kan EvenementInschrijving voor regel met pk=%s niet vinden' % regel.pk)
             return
 
@@ -241,7 +241,7 @@ class EvenementBestelPlugin(BestelPluginBase):
         """
 
         inschrijving = EvenementInschrijving.objects.filter(bestelling=regel).first()
-        if not inschrijving:
+        if not inschrijving:            # pragma: no cover
             self.stdout.write('[ERROR] Kan EvenementInschrijving voor regel met pk=%s niet vinden' % regel.pk)
             return
 

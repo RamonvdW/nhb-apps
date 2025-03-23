@@ -32,9 +32,10 @@ class TestOpleidingAfmelden(E2EHelpers, TestCase):
     url_inschrijven_basiscursus = '/opleiding/inschrijven/basiscursus/'
     url_toevoegen_aan_mandje = '/opleiding/inschrijven/toevoegen-mandje/'
     url_mandje_verwijder = '/bestel/mandje/verwijderen/%s/'     # product_pk
-
-    url_afmelden = '/opleiding/afmelden/%s/'            # inschrijving_pk
-    url_aanmeldingen = '/opleiding/aanmeldingen/%s/'    # opleiding_pk
+    url_annuleer_bestelling = '/bestel/annuleer/%s/'            # bestel_nr
+    url_bestelling_overzicht = '/bestel/overzicht/'
+    url_afmelden = '/opleiding/afmelden/%s/'                    # inschrijving_pk
+    url_aanmeldingen = '/opleiding/aanmeldingen/%s/'            # opleiding_pk
 
     def setUp(self):
         """ initialisatie van de test case """
@@ -111,7 +112,7 @@ class TestOpleidingAfmelden(E2EHelpers, TestCase):
             resp = self.client.post(self.url_afmelden % 999999)
         self.assert_is_redirect_login(resp)
 
-    def test_verwijder_nog_in_mandje(self):
+    def test_verwijder_uit_mandje(self):
         # als HWL, verwijder een bestelling die nog in het mandje van een sporter ligt
 
         # maak een bestelling
@@ -170,12 +171,54 @@ class TestOpleidingAfmelden(E2EHelpers, TestCase):
         inschrijving = OpleidingInschrijving.objects.first()
 
         # laat de achtergrond taak het toevoegen aan het mandje verwerken
-        self.verwerk_bestel_mutaties()
+        f1, f2 = self.verwerk_bestel_mutaties()
+        # print('\nf1: %s\nf2: %s\n' % (f1.getvalue(), f2.getvalue()))
 
         # omzetten in een bestelling
         self.assertEqual(Bestelling.objects.count(), 0)
         bestel_mutatieverzoek_maak_bestellingen(self.account_normaal, snel=True)
-        self.verwerk_bestel_mutaties()
+        f1, f2, = self.verwerk_bestel_mutaties()
+        # print('\nf1: %s\nf2: %s\n' % (f1.getvalue(), f2.getvalue()))
+
+        self.assertEqual(Bestelling.objects.count(), 1)
+        bestelling = Bestelling.objects.first()
+
+        inschrijving.refresh_from_db()
+        self.assertEqual(inschrijving.status, OPLEIDING_INSCHRIJVING_STATUS_BESTELD)
+
+        # verwijder de mail over de bestelling
+        MailQueue.objects.all().delete()
+
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_annuleer_bestelling % bestelling.bestel_nr, {'snel': 1})
+        self.assert_is_redirect(resp, self.url_bestelling_overzicht)
+
+        f1, f2, = self.verwerk_bestel_mutaties()
+        # print('\nf1: %s\nf2: %s\n' % (f1.getvalue(), f2.getvalue()))
+
+    def test_afmelden_door_bondsbureau(self):
+        # maak een bestelling
+        self.e2e_login_and_pass_otp(self.account_normaal)
+        self.e2e_check_rol('sporter')
+
+        self.assertEqual(OpleidingInschrijving.objects.count(), 0)
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_toevoegen_aan_mandje, {'opleiding': self.opleiding.pk,
+                                                                    'snel': 1})
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('opleiding/inschrijven-toegevoegd-aan-mandje.dtl', 'plein/site_layout.dtl'))
+        self.assertEqual(OpleidingInschrijving.objects.count(), 1)
+        inschrijving = OpleidingInschrijving.objects.first()
+
+        # laat de achtergrond taak het toevoegen aan het mandje verwerken
+        f1, f2 = self.verwerk_bestel_mutaties()
+        # print('\nf1: %s\nf2: %s\n' % (f1.getvalue(), f2.getvalue()))
+
+        # omzetten in een bestelling
+        self.assertEqual(Bestelling.objects.count(), 0)
+        bestel_mutatieverzoek_maak_bestellingen(self.account_normaal, snel=True)
+        f1, f2, = self.verwerk_bestel_mutaties()
         # print('\nf1: %s\nf2: %s\n' % (f1.getvalue(), f2.getvalue()))
 
         self.assertEqual(Bestelling.objects.count(), 1)
@@ -195,7 +238,7 @@ class TestOpleidingAfmelden(E2EHelpers, TestCase):
         resp = self.client.post(self.url_afmelden % 999999)
         self.assert404(resp, 'Inschrijving niet gevonden')
 
-        # annuleer de bestelling (die nog in het mandje ligt)
+        # annuleer de bestelling (die nog niet betaald is)
         self.assertEqual(OpleidingAfgemeld.objects.count(), 0)
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_afmelden % inschrijving.pk, {'snel': 1})

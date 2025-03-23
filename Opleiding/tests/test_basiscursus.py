@@ -6,9 +6,14 @@
 
 from django.test import TestCase, override_settings
 from django.utils import timezone
+from Geo.models import Regio
+from Locatie.models import EvenementLocatie
 from Instaptoets.models import Vraag, Instaptoets
+from Opleiding.definities import OPLEIDING_STATUS_INSCHRIJVEN
+from Opleiding.models import Opleiding, OpleidingMoment
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
+from Vereniging.models import Vereniging
 from datetime import timedelta
 
 
@@ -25,6 +30,13 @@ class TestOpleidingBasiscursus(E2EHelpers, TestCase):
         """ initialisatie van de test case """
         self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.nhb', 'Normaal')
 
+        ver = Vereniging(
+                        ver_nr=1000,
+                        naam='Grote club',
+                        plaats='Schietstad',
+                        regio=Regio.objects.get(regio_nr=116))
+        ver.save()
+
         sporter = Sporter(
                     lid_nr=100000,
                     voornaam='Nor',
@@ -34,6 +46,51 @@ class TestOpleidingBasiscursus(E2EHelpers, TestCase):
                     account=self.account_normaal)
         sporter.save()
         self.sporter = sporter
+
+        # maak een basiscursus aan zodat het kaartje Basiscursus getoond wordt op het overzicht
+        opleiding = Opleiding(
+                        titel="Test",
+                        is_basiscursus=True,
+                        periode_begin="2024-11-01",
+                        periode_einde="2024-12-01",
+                        beschrijving="Test",
+                        status=OPLEIDING_STATUS_INSCHRIJVEN,
+                        eis_instaptoets=True,
+                        kosten_euro=10.00)
+        opleiding.save()
+
+        # moment zonder locatie
+        moment = OpleidingMoment(
+                        datum="2024-11-11",
+                        locatie=None)
+        moment.save()
+        opleiding.momenten.add(moment)
+
+        # moment met locatie met plaats
+        locatie = EvenementLocatie(
+                        naam='test',
+                        vereniging=ver,
+                        plaats='Boogstad')
+        locatie.save()
+
+        moment = OpleidingMoment(
+                        datum="2024-11-12",
+                        locatie=locatie)
+        moment.save()
+        opleiding.momenten.add(moment)
+
+        # moment met locatie zonder plaats
+        locatie = EvenementLocatie(
+                        naam='test locatie',
+                        vereniging=ver,
+                        plaats='')
+        locatie.save()
+
+        moment = OpleidingMoment(
+                        datum="2024-11-13",
+                        locatie=locatie)
+        moment.save()
+        opleiding.momenten.add(moment)
 
     def test_anon(self):
         with self.assert_max_queries(20):
@@ -47,6 +104,9 @@ class TestOpleidingBasiscursus(E2EHelpers, TestCase):
         self.account_normaal.save(update_fields=['is_gast'])
 
         self.e2e_login(self.account_normaal)
+
+        # corner case: geen opleidingen
+        Opleiding.objects.all().delete()
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_basiscursus)
@@ -108,6 +168,9 @@ class TestOpleidingBasiscursus(E2EHelpers, TestCase):
         # instaptoets verlopen
         toets.afgerond = timezone.now() - timedelta(days=400)
         toets.save(update_fields=['afgerond'])
+
+        # corner case: geen momenten
+        OpleidingMoment.objects.all().delete()
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_basiscursus)

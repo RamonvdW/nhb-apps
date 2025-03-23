@@ -54,13 +54,6 @@ class BestelPluginBase:
         """
         raise NotImplementedError(regel)        # pragma: no cover
 
-    def beschrijf_product(self, obj) -> list:
-        """
-            Geef een lijst van tuples terug waarin aspecten van het product beschreven staan.
-            obj is specifiek voor de plugin, bijvoorbeeld WedstrijdInschrijving
-        """
-        raise NotImplementedError(obj)          # pragma: no cover
-
     def afmelden(self, obj):
         """
             Verwerk het verzoek tot afmelden voor een wedstrijd/evenement/opleiding.

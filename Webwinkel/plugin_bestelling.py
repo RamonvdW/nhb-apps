@@ -15,8 +15,6 @@ from Webwinkel.definities import (KEUZE_STATUS_RESERVERING_MANDJE, KEUZE_STATUS_
 from Webwinkel.models import WebwinkelKeuze
 from decimal import Decimal
 
-EMAIL_TEMPLATE_BACKOFFICE_VERSTUREN = 'email_webwinkel/backoffice-versturen.dtl'
-
 
 class WebwinkelBestelPlugin(BestelPluginBase):
 

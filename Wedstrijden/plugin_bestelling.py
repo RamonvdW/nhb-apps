@@ -129,7 +129,7 @@ class WedstrijdBestelPlugin(BestelPluginBase):
             Geef een eerder gemaakte reservering voor een wedstrijd weer vrij.
         """
         inschrijving = WedstrijdInschrijving.objects.filter(bestelling=regel).first()
-        if not inschrijving:
+        if not inschrijving:                # pragma: no cover
             self.stdout.write(
                 '[ERROR] Kan WedstrijdInschrijving voor regel met pk=%s niet vinden {annuleer}' % regel.pk)
             return
@@ -175,7 +175,7 @@ class WedstrijdBestelPlugin(BestelPluginBase):
             Verander de status van het gevraagde product naar 'besteld maar nog niet betaald'
         """
         inschrijving = WedstrijdInschrijving.objects.filter(bestelling=regel).first()
-        if not inschrijving:
+        if not inschrijving:                # pragma: no cover
             self.stdout.write(
                 '[ERROR] Kan WedstrijdInschrijving voor regel met pk=%s niet vinden {is_besteld}' % regel.pk)
             return
@@ -193,9 +193,8 @@ class WedstrijdBestelPlugin(BestelPluginBase):
             Het product is betaald, dus de reservering moet definitief gemaakt worden.
             Wordt ook aangeroepen als een bestelling niet betaald hoeft te worden (totaal bedrag nul).
         """
-
         inschrijving = WedstrijdInschrijving.objects.filter(bestelling=regel).first()
-        if not inschrijving:
+        if not inschrijving:                # pragma: no cover
             self.stdout.write(
                 '[ERROR] Kan WedstrijdInschrijving voor regel met pk=%s niet vinden {is_betaald}' % regel.pk)
             return

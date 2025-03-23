@@ -11,7 +11,6 @@ from Bestelling.definities import BESTELLING_REGEL_CODE_OPLEIDING
 from Bestelling.models import BestellingRegel
 from Betaal.format import format_bedrag_euro
 from Functie.models import Functie
-from Mailer.operations import mailer_queue_email, mailer_email_is_valide, render_email_template
 from Opleiding.definities import (OPLEIDING_INSCHRIJVING_STATUS_TO_STR, OPLEIDING_AFMELDING_STATUS_TO_STR,
                                   OPLEIDING_INSCHRIJVING_STATUS_RESERVERING_MANDJE,
                                   OPLEIDING_INSCHRIJVING_STATUS_BESTELD,
@@ -20,9 +19,9 @@ from Opleiding.definities import (OPLEIDING_INSCHRIJVING_STATUS_TO_STR, OPLEIDIN
                                   OPLEIDING_AFMELDING_STATUS_AFGEMELD,
                                   OPLEIDING_AFMELDING_STATUS_GEANNULEERD)
 from Opleiding.models import OpleidingInschrijving, OpleidingAfgemeld
+from Taken.operations import maak_taak, check_taak_bestaat
 from decimal import Decimal
-
-EMAIL_TEMPLATE_INFO_INSCHRIJVING_OPLEIDING = 'email_bestelling/info-inschrijving-opleiding.dtl'
+import datetime
 
 
 class OpleidingBestelPlugin(BestelPluginBase):
@@ -126,7 +125,7 @@ class OpleidingBestelPlugin(BestelPluginBase):
             zodat deze door iemand anders te kiezen zijn.
         """
         inschrijving = OpleidingInschrijving.objects.filter(bestelling=regel).first()
-        if not inschrijving:
+        if not inschrijving:            # pragma: no cover
             self.stdout.write('[ERROR] Kan OpleidingInschrijving voor regel met pk=%s niet vinden' % regel.pk)
             return
 
@@ -175,7 +174,7 @@ class OpleidingBestelPlugin(BestelPluginBase):
             Verander de status van het gevraagde product naar 'besteld maar nog niet betaald'
         """
         inschrijving = OpleidingInschrijving.objects.filter(bestelling=regel).first()
-        if not inschrijving:
+        if not inschrijving:            # pragma: no cover
             self.stdout.write('[ERROR] Kan OpleidingInschrijving voor regel met pk=%s niet vinden' % regel.pk)
             return
 
@@ -192,9 +191,8 @@ class OpleidingBestelPlugin(BestelPluginBase):
             Het product is betaald, dus de reservering moet definitief gemaakt worden.
             Wordt ook aangeroepen als een bestelling niet betaald hoeft te worden (totaal bedrag nul).
         """
-
         inschrijving = OpleidingInschrijving.objects.filter(bestelling=regel).first()
-        if not inschrijving:
+        if not inschrijving:            # pragma: no cover
             self.stdout.write('[ERROR] Kan OpleidingInschrijving voor regel met pk=%s niet vinden' % regel.pk)
             return
 
@@ -208,103 +206,27 @@ class OpleidingBestelPlugin(BestelPluginBase):
 
         inschrijving.save(update_fields=['bedrag_ontvangen', 'status', 'log'])
 
+        # sporter is altijd de koper, dus de juiste mails zijn al gestuurd door de Bestellingen applicatie
+
+        # maak een taak voor het bondsbureau om ze te informeren over de nieuwe inschrijving
+        functie = Functie.objects.get(rol='MO')        # manager opleidingen
+
         opleiding = inschrijving.opleiding
 
-        # stuur een e-mail naar de sporter, als dit niet de koper is
-        sporter = inschrijving.sporter
-        sporter_account = sporter.account
-        koper_account = inschrijving.koper
-        if sporter_account != koper_account:
-            email = None
-            if sporter_account and sporter_account.email_is_bevestigd:
-                email = sporter_account.bevestigde_email
-            else:
-                if mailer_email_is_valide(sporter.email):
-                    email = sporter.email
+        # maak taken aan om door te geven dat er nieuwe feedback is
+        now = timezone.now()
+        stamp_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
+        taak_log = "[%s] Taak aangemaakt" % stamp_str
+        taak_deadline = now + datetime.timedelta(days=7)
+        taak_tekst = "Er is een nieuwe betaalde inschrijving voor de opleiding '%s'" % opleiding.beschrijving
 
-            if email:
-                # maak de e-mail en stuur deze naar sporter.
-
-                functie_mo = Functie.objects.filter(rol="MO").first()
-                if functie_mo and functie_mo.bevestigde_email:
-                    email = functie_mo.bevestigde_email
-                else:
-                    email = settings.EMAIL_BONDSBUREAU
-
-                context = {
-                    'voornaam': sporter.voornaam,
-                    'koper_volledige_naam': koper_account.volledige_naam(),
-                    'reserveringsnummer': settings.TICKET_NUMMER_START__OPLEIDING + inschrijving.nummer,
-                    'opleiding_beschrijving': opleiding.beschrijving,
-                    'contact_email': email,
-                    'geen_account': sporter.account is None,
-                    'naam_site': settings.NAAM_SITE,
-                }
-
-                mail_body = render_email_template(context, EMAIL_TEMPLATE_INFO_INSCHRIJVING_OPLEIDING)
-
-                mailer_queue_email(email,
-                                   'Inschrijving voor opleiding',
-                                   mail_body)
-
-                stamp_str = timezone.localtime(timezone.now()).strftime('%Y-%m-%d om %H:%M')
-                msg = "[%s] Informatieve e-mail is gestuurd naar sporter %s\n" % (stamp_str, sporter.lid_nr)
-                inschrijving.log += msg
-                inschrijving.save(update_fields=['log'])
-
-                self.stdout.write('[INFO] Informatieve e-mail is gestuurd naar sporter %s' % sporter.lid_nr)
-            else:
-                msg = "[%s] Kan geen informatieve e-mail sturen naar sporter %s (geen e-mail beschikbaar)\n" % (
-                    sporter.lid_nr, stamp_str)
-                inschrijving.log += msg
-                inschrijving.save(update_fields=['log'])
-
-                self.stdout.write(
-                    '[INFO] Kan geen informatieve e-mail sturen naar sporter %s (geen e-mail beschikbaar)' %
-                    sporter.lid_nr)
-
-    def beschrijf_product(self, obj: OpleidingInschrijving | OpleidingAfgemeld) -> list:
-        """
-            Geef een lijst van tuples terug waarin aspecten van het product beschreven staan.
-        """
-        beschrijving = list()
-
-        opleiding = obj.opleiding
-        sporter = obj.sporter
-
-        tup = ('Reserveringsnummer', settings.TICKET_NUMMER_START__OPLEIDING + obj.nummer)
-        beschrijving.append(tup)
-
-        tup = ('Opleiding', opleiding.titel)
-        beschrijving.append(tup)
-
-        tup = ('Periode', opleiding.periode_str())
-        beschrijving.append(tup)
-
-        tup = ('Sporter', sporter.lid_nr_en_volledige_naam())
-        beschrijving.append(tup)
-
-        sporter_ver = sporter.bij_vereniging
-        if sporter_ver:
-            ver_naam = sporter_ver.ver_nr_en_naam()
-        else:
-            ver_naam = 'Onbekend'
-        tup = ('Lid bij vereniging', ver_naam)
-        beschrijving.append(tup)
-
-        functie_mo = Functie.objects.filter(rol="MO").first()
-        if functie_mo and functie_mo.bevestigde_email:
-            email = functie_mo.bevestigde_email
-        else:
-            email = settings.EMAIL_BONDSBUREAU
-
-        tup = ('E-mail organisatie', email)
-        beschrijving.append(tup)
-
-        # tup = ('Telefoon organisatie', opleiding.contact_telefoon)
-        # beschrijving.append(tup)
-
-        return beschrijving
+        if not check_taak_bestaat(toegekend_aan_functie=functie, beschrijving=taak_tekst):
+            maak_taak(toegekend_aan_functie=functie,
+                      deadline=taak_deadline,
+                      aangemaakt_door=None,         # None = 'systeem'
+                      onderwerp='Nieuwe inschrijving voor opleiding',
+                      beschrijving=taak_tekst,
+                      log=taak_log)
 
     def get_verkoper_ver_nr(self, regel: BestellingRegel) -> int:
         """

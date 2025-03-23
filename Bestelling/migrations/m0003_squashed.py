@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2024 Ramon van der Winkel.
+#  Copyright (c) 2022-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -33,11 +33,11 @@ class Migration(migrations.Migration):
 
     # volgorde afdwingen
     dependencies = [
-        ('Evenement', 'm0002_bedragen'),
-        ('Wedstrijden', 'm0057_squashed'),
-        ('Betaal', 'm0026_squashed'),
-        ('Webwinkel', 'm0009_squashed'),
         ('Account', 'm0032_squashed'),
+        ('Betaal', 'm0026_squashed'),
+        ('Evenement', 'm0002_bedragen'),
+        ('Webwinkel', 'm0009_squashed'),
+        ('Wedstrijden', 'm0057_squashed'),
     ]
 
     # migratie functies
