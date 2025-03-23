@@ -19,7 +19,6 @@ from Bestelling.definities import (BESTELLING_STATUS2STR, BESTELLING_STATUS_BETA
                                    BESTELLING_REGEL_CODE_WEDSTRIJD_KORTING,
                                    BESTELLING_KORT_BREAK)
 from Bestelling.models import Bestelling
-from Bestelling.plugins.product_info import beschrijf_regel
 from Bestelling.operations.mutaties import bestel_mutatieverzoek_annuleer
 from Betaal.definities import (TRANSACTIE_TYPE_MOLLIE_PAYMENT, TRANSACTIE_TYPE_MOLLIE_RESTITUTIE,
                                TRANSACTIE_TYPE_HANDMATIG)

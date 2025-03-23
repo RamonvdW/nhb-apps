@@ -51,35 +51,8 @@ class BestelActiviteitView(UserPassesTestMixin, TemplateView):
             self.is_staff = account.is_staff
         return self.rol_nu in (Rol.ROL_BB, Rol.ROL_MWW)
 
-    def get_context_data(self, **kwargs):
-        """ called by the template system to get the context data for the template """
-        context = super().get_context_data(**kwargs)
-
-        # zoekformulier
-        context['zoek_url'] = reverse('Bestelling:activiteit')
-        if len(self.request.GET.keys()) == 0:
-            # no query parameters
-            form = ZoekBestellingForm(initial={'webwinkel': True,
-                                               'wedstrijden': True,
-                                               'evenementen': True,
-                                               'opleidingen': True,
-                                               'gratis': True})
-        else:
-            form = ZoekBestellingForm(self.request.GET)
-            form.full_clean()   # vult form.cleaned_data
-        context['zoekform'] = form
-
-        if form.is_bound:
-            try:
-                zoekterm = form.cleaned_data['zoekterm']
-            except KeyError:
-                # hier komen we als het form field niet valide was, bijvoorbeeld veel te lang
-                zoekterm = ""
-        else:
-            zoekterm = ""
-        context['zoekterm'] = zoekterm
-
-        bestellingen = list()
+    @staticmethod
+    def _selecteer_bestellingen(context, form, zoekterm):
         if len(zoekterm) >= 2:  # minimaal twee cijfers/tekens van de naam/nummer
             try:
                 # strip "MH-"
@@ -159,22 +132,11 @@ class BestelActiviteitView(UserPassesTestMixin, TemplateView):
                 # vinkje is niet gezet, dus gratis bestellingen zijn niet gewenst
                 bestellingen = bestellingen.exclude(totaal_euro__lt=0.001)
 
-        # bepaal het aantal bestellingen sinds het begin van de maand
-        now = timezone.now()
-        context['begin_maand'] = datetime.date(day=1, month=now.month, year=now.year)
-        begin_maand = datetime.datetime(day=1, month=now.month, year=now.year)
-        begin_maand = timezone.make_aware(begin_maand)
+        return bestellingen
 
-        qset = bestellingen.filter(aangemaakt__gte=begin_maand)
-        context['aantal_bestellingen'] = qset.count()
-
-        pks = qset.values_list('pk', flat=True)
-        verkopers = Bestelling.objects.filter(pk__in=pks).order_by('ontvanger').distinct('ontvanger')
-        context['aantal_verkopers'] = verkopers.count()
-
-        # details toevoegen voor de eerste 50 bestellingen deze maand
-        context['bestellingen'] = list(bestellingen[:50])
-        for bestelling in context['bestellingen']:
+    @staticmethod
+    def _bestellingen_aankleden(bestellingen):
+        for bestelling in bestellingen:
             bestelling.bestel_nr_str = bestelling.mh_bestel_nr()
             bestelling.ver_nr_str = str(bestelling.ontvanger.vereniging.ver_nr)
             bestelling.ver_naam = bestelling.ontvanger.vereniging.naam
@@ -239,6 +201,55 @@ class BestelActiviteitView(UserPassesTestMixin, TemplateView):
             if transactie_mollie:
                 bestelling.trans_list.append(('Mollie status', transactie_mollie))
         # for
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        # zoekformulier
+        context['zoek_url'] = reverse('Bestelling:activiteit')
+        if len(self.request.GET.keys()) == 0:
+            # no query parameters
+            form = ZoekBestellingForm(initial={'webwinkel': True,
+                                               'wedstrijden': True,
+                                               'evenementen': True,
+                                               'opleidingen': True,
+                                               'gratis': True})
+        else:
+            form = ZoekBestellingForm(self.request.GET)
+            form.full_clean()   # vult form.cleaned_data
+        context['zoekform'] = form
+
+        if form.is_bound:
+            try:
+                zoekterm = form.cleaned_data['zoekterm']
+            except KeyError:
+                # hier komen we als het form field niet valide was, bijvoorbeeld veel te lang
+                zoekterm = ""
+        else:
+            zoekterm = ""
+        context['zoekterm'] = zoekterm
+
+        bestellingen = self._selecteer_bestellingen(context, form, zoekterm)
+
+        # bepaal het aantal bestellingen sinds het begin van de maand
+        now = timezone.now()
+        context['begin_maand'] = datetime.date(day=1, month=now.month, year=now.year)
+        begin_maand = datetime.datetime(day=1, month=now.month, year=now.year)
+        begin_maand = timezone.make_aware(begin_maand)
+
+        qset = bestellingen.filter(aangemaakt__gte=begin_maand)
+        context['aantal_bestellingen'] = qset.count()
+
+        pks = qset.values_list('pk', flat=True)
+        verkopers = Bestelling.objects.filter(pk__in=pks).order_by('ontvanger').distinct('ontvanger')
+        context['aantal_verkopers'] = verkopers.count()
+
+        # details toevoegen voor de eerste 50 bestellingen deze maand
+        bestellingen = list(bestellingen[:50])
+        context['bestellingen'] = bestellingen
+
+        self._bestellingen_aankleden(bestellingen)
 
         if self.is_staff:
             context['url_omzet'] = reverse('Bestelling:omzet')

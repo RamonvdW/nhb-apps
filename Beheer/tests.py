@@ -32,7 +32,7 @@ BEHEER_URLS = (
     '/beheer/Bestelling/bestelling/',
     '/beheer/Bestelling/bestellingmandje/',
     '/beheer/Bestelling/bestellingmutatie/',
-    '/beheer/Bestelling/bestellingproduct/',
+    '/beheer/Bestelling/bestellingregel/',
     '/beheer/Betaal/betaalactief/',
     '/beheer/Betaal/betaalinstellingenvereniging/',
     '/beheer/Betaal/betaalmutatie/',
@@ -133,6 +133,12 @@ class TestBeheer(E2EHelpers, TestCase):
 
     """ tests voor de Beheer applicatie """
 
+    url_beheer = '/beheer/'
+    url_beheer_login = '/beheer/login/'
+    url_beheer_logout = '/beheer/logout/'
+    url_account_login = '/account/login/'
+    url_beheer_pw_chg = '/beheer/password_change/'
+
     def setUp(self):
         """ initialisatie van de test case """
         self.account_admin = self.e2e_create_account_admin()
@@ -140,16 +146,26 @@ class TestBeheer(E2EHelpers, TestCase):
     def test_login(self):
         # controleer dat de admin login vervangen is door een redirect naar onze eigen login
         url = reverse('admin:login')      # interne url
-        self.assertEqual(url, '/beheer/login/')
+        self.assertEqual(url, self.url_beheer_login)
 
         self.e2e_logout()
         with self.assert_max_queries(20):
-            resp = self.client.get('/beheer/login/', follow=True)
-        self.assertEqual(resp.redirect_chain[-1], ('/account/login/', 302))
+            resp = self.client.get(self.url_beheer_login, follow=True)
+        self.assertEqual(resp.redirect_chain[-1], (self.url_account_login, 302))
 
         with self.assert_max_queries(20):
-            resp = self.client.get('/beheer/login/?next=/records/', follow=True)
-        self.assertEqual(resp.redirect_chain[-1], ('/account/login/?next=/records/', 302))
+            resp = self.client.get(self.url_beheer_login + '?next=/records/', follow=True)
+        self.assertEqual(resp.redirect_chain[-1], (self.url_account_login + '?next=/records/', 302))
+
+        # probeer admin te gebruiken als niet-staff
+        self.account_admin.is_staff = False
+        self.account_admin.save(update_fields=['is_staff'])
+
+        self.e2e_login(self.account_admin)
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_beheer_login)
+        self.assert_is_redirect(resp, '/plein/')
 
     def test_index(self):
         # voordat 2FA verificatie gedaan is
@@ -157,40 +173,40 @@ class TestBeheer(E2EHelpers, TestCase):
 
         # redirect naar wissel-van-rol pagina
         with self.assert_max_queries(20):
-            resp = self.client.get('/beheer/', follow=True)
+            resp = self.client.get(self.url_beheer, follow=True)
         self.assertEqual(resp.redirect_chain[-1], ('/account/otp-controle/?next=/beheer/', 302))
 
         # na 2FA verificatie
         self.e2e_login_and_pass_otp(self.account_admin)
         with self.assert_max_queries(20):
-            resp = self.client.get('/beheer/', follow=True)
+            resp = self.client.get(self.url_beheer, follow=True)
         self.assertTrue(len(resp.redirect_chain) == 0)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, '<title>Admin Site</title>')
 
         # onnodig via beheer-login naar post-authenticatie pagina
         with self.assert_max_queries(20):
-            resp = self.client.get('/beheer/login/?next=/records/', follow=True)
+            resp = self.client.get(self.url_beheer_login + '?next=/records/', follow=True)
         self.assertEqual(resp.redirect_chain[-1], ('/records/', 302))
 
         # onnodig via beheer-login zonder post-authenticatie pagina
         with self.assert_max_queries(20):
-            resp = self.client.get('/beheer/login/', follow=True)
+            resp = self.client.get(self.url_beheer_login, follow=True)
         self.assertEqual(resp.redirect_chain[-1], ('/plein/', 302))
 
     def test_logout(self):
         # controleer dat de admin login vervangen is door een redirect naar onze eigen login
         url = reverse('admin:logout')      # interne url
-        self.assertEqual(url, '/beheer/logout/')
+        self.assertEqual(url, self.url_beheer_logout)
 
         self.e2e_login_and_pass_otp(self.account_admin)
         with self.assert_max_queries(20):
-            resp = self.client.get('/beheer/logout/', follow=True)
+            resp = self.client.get(self.url_beheer_logout, follow=True)
         self.assertEqual(resp.redirect_chain[-1], ('/account/logout/', 302))
 
     def test_pw_change(self):
         url = reverse('admin:password_change')
-        self.assertEqual(url, '/beheer/password_change/')
+        self.assertEqual(url, self.url_beheer_pw_chg)
 
         self.e2e_login_and_pass_otp(self.account_admin)
 
