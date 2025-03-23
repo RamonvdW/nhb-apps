@@ -156,10 +156,10 @@
                             {% endcomment %}
 
                             {% if not bevat_fout %}
-                                {% if aantal_betalingen > 1 %}
+                                {% if kan_gesplitst_worden %}
                                     <tr>
                                         <td class="hide-on-small-only"></td>
-                                        <td colspan="3" class="center">Let op: producten worden opgesplitst over {{ aantal_betalingen }} bestellingen.</td>
+                                        <td colspan="3" class="center">Mandje kan worden opgesplitst in meerdere bestellingen (één per verkopende partij).</td>
                                     </tr>
                                 {% endif %}
                             {% endif %}
@@ -167,7 +167,7 @@
                         </table>
 
                         {% if bevat_fout %}
-                            <p class="center sv-rood-text">Het is niet mogelijk om af te rekenen.<br>Neem contact op met de helpdesk.</p>
+                            <p class="center sv-rood-text">Het is niet mogelijk om af te rekenen.<br>Neem contact op met de helpdesk op {{ email_tech_support }}.</p>
                         {% endif %}
 
                         <div class="center" style="margin-top:30px">

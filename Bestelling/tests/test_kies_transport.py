@@ -5,7 +5,6 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase, override_settings
-from django.utils import timezone
 from Bestelling.definities import (BESTELLING_TRANSPORT_VERZEND, BESTELLING_TRANSPORT_OPHALEN, BESTELLING_TRANSPORT_NVT,
                                    BESTELLING_REGEL_CODE_WEBWINKEL)
 from Bestelling.models import BestellingMandje, Bestelling, BestellingRegel
@@ -14,7 +13,6 @@ from Mailer.models import MailQueue
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
-from Webwinkel.models import WebwinkelProduct, WebwinkelKeuze
 from decimal import Decimal
 
 
@@ -53,28 +51,6 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
         sporter.save()
         self.sporter = sporter
 
-        # now = timezone.now()
-        #
-        # product = WebwinkelProduct(
-        #                 omslag_titel='Test titel 1',
-        #                 onbeperkte_voorraad=False,
-        #                 aantal_op_voorraad=10,
-        #                 eenheid='meervoud',
-        #                 bestel_begrenzing='1-5',
-        #                 prijs_euro="1.23")
-        # product.save()
-        # self.product = product
-        #
-        # keuze = WebwinkelKeuze(
-        #                 wanneer=now,
-        #                 koper=self.account_admin,
-        #                 product=product,
-        #                 aantal=1,
-        #                 totaal_euro=Decimal('1.23'),
-        #                 log='test')
-        # keuze.save()
-        # self.keuze = keuze
-
     def test_anon(self):
         self.client.logout()
 
@@ -85,7 +61,7 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
         resp = self.client.post(self.url_kies_transport)
         self.assert403(resp)
 
-    def NOT_test_kies(self):
+    def test_kies(self):
         self.e2e_login_and_pass_otp(self.account_admin)
         self.e2e_check_rol('sporter')
 
@@ -171,7 +147,6 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
             self.verwerk_bestel_mutaties()
 
             self.assertEqual(Bestelling.objects.count(), 1)
-            bestelling = Bestelling.objects.first()
 
             # controleer wat er in de mail staat
             self.assertEqual(MailQueue.objects.count(), 1)

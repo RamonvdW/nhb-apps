@@ -177,6 +177,9 @@ class VerwerkBestelMutaties:
                 # bij toevoegen eerste product schakelen we over op verzenden
                 # gebruiker kan deze op "ophalen" zetten
                 mandje.transport = BESTELLING_TRANSPORT_VERZEND
+        else:
+            # geen fysieke producten (meer)
+            mandje.transport = BESTELLING_TRANSPORT_NVT
 
         mandje.save(update_fields=['verzendkosten_euro', 'transport'])
 
@@ -348,6 +351,12 @@ class VerwerkBestelMutaties:
             raise ValueError('Geen mandje')
 
         regel = mutatie.regel
+        if not regel:
+            raise ValueError('Geen regel')
+
+        if regel.code not in bestel_plugins:
+            raise ValueError('Regel pk=%s heeft niet ondersteunde code %s' % (regel.pk, repr(regel.code)))
+
         qset = mandje.regels.filter(pk=regel.pk)
         if qset.exists():  # pragma: no branch
             # product zit nog in het mandje (anders: ignore want waarschijnlijk een dubbel verzoek)

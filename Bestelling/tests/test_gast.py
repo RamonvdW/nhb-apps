@@ -100,7 +100,7 @@ class TestBestellingGast(E2EHelpers, TestCase):
         keuze.save()
         self.keuze = keuze
 
-    def NOT_test_afleveradres(self):
+    def test_afleveradres(self):
         # bestelling door gastaccount met opgaaf afleveradres
         self.e2e_login(self.account_gast)
 

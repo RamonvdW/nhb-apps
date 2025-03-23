@@ -67,26 +67,12 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
         mandje_is_leeg = True
         bevat_fout = False
 
-        ontvanger2product_pks = dict()      # [ver_nr] = [product.pk, ...]
-        ver_nr2instellingen = dict()        # [ver_nr] = BetaalInstellingenVereniging
-
-        for instellingen in BetaalInstellingenVereniging.objects.select_related('vereniging').all():
-            ver_nr = instellingen.vereniging.ver_nr
-            ver_nr2instellingen[ver_nr] = instellingen
-        # for
-
-        try:
-            instellingen_bond = ver_nr2instellingen[settings.BETAAL_VIA_BOND_VER_NR]
-        except KeyError:
-            # nog niet aangemaakt
-            instellingen_bond = None
-
         try:
             mandje = BestellingMandje.objects.prefetch_related('regels').get(account=account)
         except BestellingMandje.DoesNotExist:
             # geen mandje
             mandje = None
-            regels = None
+            regels = list()
         else:
             controleer_euro = Decimal(0)
 
@@ -105,26 +91,6 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
                                               kwargs={'product_pk': regel.pk})
             # for
 
-            if False:
-                if product.wedstrijd_inschrijving:
-                    ver_nr = product.wedstrijd_inschrijving.wedstrijd.organiserende_vereniging.ver_nr
-                    try:
-                        instellingen = ver_nr2instellingen[ver_nr]
-                    except KeyError:
-                        # geen instellingen, dus kan geen betaling ontvangen
-                        product.kan_afrekenen = False
-                    else:
-                        if instellingen.akkoord_via_bond:
-                            ver_nr = settings.BETAAL_VIA_BOND_VER_NR
-                            if instellingen_bond is None or instellingen_bond.mollie_api_key == '':
-                                product.kan_afrekenen = False
-
-                    try:
-                        ontvanger2product_pks[ver_nr].append(product.pk)
-                    except KeyError:
-                        ontvanger2product_pks[ver_nr] = [product.pk]
-                # for
-
             # nooit een negatief totaalbedrag tonen want we geven geen geld weg
             if controleer_euro < 0:
                 controleer_euro = Decimal(0)
@@ -134,7 +100,7 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
             if controleer_euro != mandje.totaal_euro:
                 bevat_fout = True
 
-        return mandje, regels, ontvanger2product_pks, mandje_is_leeg, bevat_fout
+        return mandje, regels, mandje_is_leeg, bevat_fout
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -148,7 +114,7 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
         # force dat het mandje icoon getoond wordt
         context['menu_toon_mandje'] = True
 
-        mandje, regels, ontvanger2product_pks, mandje_is_leeg, bevat_fout = self._beschrijf_inhoud_mandje(account)
+        mandje, regels, mandje_is_leeg, bevat_fout = self._beschrijf_inhoud_mandje(account)
 
         toon_transport = False
         if mandje:
@@ -182,14 +148,18 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
                     break       # from the for
             # for
 
+        context['mandje'] = mandje
+        context['mandje_is_leeg'] = mandje_is_leeg
+        context['regels'] = regels
+        context['kan_gesplitst_worden'] = len(regels) > 1
+
         context['geen_afleveradres'] = geen_afleveradres
         context['toon_transport'] = toon_transport
-        context['mandje_is_leeg'] = mandje_is_leeg
-        context['mandje'] = mandje
-        #context['producten'] = producten
-        context['regels'] = regels
+
         context['bevat_fout'] = bevat_fout
-        #context['aantal_betalingen'] = len(ontvanger2product_pks.keys())
+        if bevat_fout:
+            context['email_tech_support'] = settings.EMAIL_TECH_SUPPORT
+
         context['url_kies_transport'] = reverse('Bestelling:kies-transport')
         context['url_voorwaarden_webwinkel'] = settings.VERKOOPVOORWAARDEN_WEBWINKEL_URL
         context['url_voorwaarden_wedstrijden'] = settings.VERKOOPVOORWAARDEN_WEDSTRIJDEN_URL

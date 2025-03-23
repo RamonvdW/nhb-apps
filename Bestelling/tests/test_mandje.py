@@ -6,24 +6,16 @@
 
 from django.test import TestCase, override_settings
 from django.conf import settings
-from django.utils import timezone
-from BasisTypen.models import BoogType, KalenderWedstrijdklasse
 from Bestelling.definities import (BESTELLING_TRANSPORT_VERZEND, BESTELLING_TRANSPORT_OPHALEN,
-                                   BESTELLING_MUTATIE_VERWIJDER, BESTELLING_REGEL_CODE_WEDSTRIJD,
-                                   BESTELLING_REGEL_CODE_WEBWINKEL)
+                                   BESTELLING_REGEL_CODE_WEDSTRIJD, BESTELLING_REGEL_CODE_WEBWINKEL)
 from Bestelling.models import Bestelling, BestellingMutatie, BestellingMandje, BestellingRegel
 from Betaal.models import BetaalInstellingenVereniging
-from Functie.models import Functie
 from Geo.models import Regio
-from Locatie.models import WedstrijdLocatie
 from Registreer.definities import REGISTRATIE_FASE_COMPLEET
 from Registreer.models import GastRegistratie
-from Sporter.models import Sporter, SporterBoog
+from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
-from Wedstrijden.definities import WEDSTRIJD_STATUS_GEACCEPTEERD, WEDSTRIJD_KORTING_COMBI, WEDSTRIJD_KORTING_VERENIGING
-from Wedstrijden.models import Wedstrijd, WedstrijdSessie, WedstrijdInschrijving, WedstrijdKorting
-from Webwinkel.models import WebwinkelProduct, WebwinkelKeuze
 from decimal import Decimal
 
 
@@ -54,14 +46,6 @@ class TestBestellingMandje(E2EHelpers, TestCase):
         ver_bond.save()
         self.ver_bond = ver_bond
 
-        instellingen = BetaalInstellingenVereniging(
-                            vereniging=ver_bond,
-                            mollie_api_key='test_1234')
-        instellingen.save()
-        self.instellingen_bond = instellingen
-
-        self.assertEqual(settings.BETAAL_VIA_BOND_VER_NR, settings.WEBWINKEL_VERKOPER_VER_NR)
-
         ver = Vereniging(
                     ver_nr=1000,
                     naam="Grote Club",
@@ -85,94 +69,6 @@ class TestBestellingMandje(E2EHelpers, TestCase):
                         postadres_1='Postadres1')
         sporter.save()
         self.sporter = sporter
-
-        boog_r = BoogType.objects.get(afkorting='R')
-
-        sporterboog = SporterBoog(
-                            sporter=sporter,
-                            boogtype=boog_r,
-                            voor_wedstrijd=True)
-        sporterboog.save()
-
-        now = timezone.now()
-        datum = now.date()      # pas op met testen ronde 23:59
-
-        locatie = WedstrijdLocatie(
-                        naam='Test locatie',
-                        discipline_outdoor=True,
-                        buiten_banen=10,
-                        buiten_max_afstand=90,
-                        adres='Schietweg 1, Boogdorp',
-                        plaats='Boogdrop')
-        locatie.save()
-        locatie.verenigingen.add(ver)
-
-        sessie = WedstrijdSessie(
-                    datum=datum,
-                    tijd_begin='10:00',
-                    tijd_einde='11:00',
-                    max_sporters=50)
-        sessie.save()
-        # sessie.wedstrijdklassen.add()
-
-        # maak een kalenderwedstrijd aan, met sessie
-        wedstrijd = Wedstrijd(
-                        titel='Test',
-                        status=WEDSTRIJD_STATUS_GEACCEPTEERD,
-                        datum_begin=datum,
-                        datum_einde=datum,
-                        locatie=locatie,
-                        organiserende_vereniging=ver,
-                        voorwaarden_a_status_when=now,
-                        prijs_euro_normaal=10.00,
-                        prijs_euro_onder18=10.00)
-        wedstrijd.save()
-        wedstrijd.sessies.add(sessie)
-        # wedstrijd.boogtypen.add()
-
-        wkls_r = KalenderWedstrijdklasse.objects.filter(boogtype=boog_r, buiten_gebruik=False)
-
-        inschrijving = WedstrijdInschrijving(
-                            wanneer=now,
-                            wedstrijd=wedstrijd,
-                            sessie=sessie,
-                            wedstrijdklasse=wkls_r[0],
-                            sporterboog=sporterboog,
-                            koper=account)
-        inschrijving.save()
-        self.inschrijving = inschrijving
-
-        korting = WedstrijdKorting(
-                    geldig_tot_en_met=datum,
-                    soort=WEDSTRIJD_KORTING_VERENIGING,
-                    uitgegeven_door=ver,
-                    percentage=42)
-        korting.save()
-        korting.voor_wedstrijden.add(wedstrijd)
-        self.korting = korting
-
-        self.functie_mww = Functie.objects.filter(rol='MWW').first()
-
-        # product = WebwinkelProduct(
-        #                 omslag_titel='Test titel 1',
-        #                 onbeperkte_voorraad=False,
-        #                 aantal_op_voorraad=10,
-        #                 bestel_begrenzing='1-5',
-        #                 eenheid='test,tests',
-        #                 bevat_aantal=6,
-        #                 prijs_euro="1.23")
-        # product.save()
-        # self.product = product
-
-        # keuze = WebwinkelKeuze(
-        #                 wanneer=now,
-        #                 koper=self.account_admin,
-        #                 product=product,
-        #                 aantal=2,
-        #                 totaal_euro=Decimal('1.23'),
-        #                 log='test')
-        # keuze.save()
-        # self.keuze = keuze
 
     @staticmethod
     def _vul_mandje(account, transport=BESTELLING_TRANSPORT_VERZEND):
@@ -208,7 +104,7 @@ class TestBestellingMandje(E2EHelpers, TestCase):
         resp = self.client.get(self.url_mandje_verwijder)
         self.assert403(resp)
 
-    def NOT_test_bekijk_mandje(self):
+    def test_bekijk_mandje(self):
         self.e2e_login_and_pass_otp(self.account_admin)
         self.e2e_check_rol('sporter')
 
@@ -236,7 +132,7 @@ class TestBestellingMandje(E2EHelpers, TestCase):
         self.assertFalse(self.url_kies_transport in urls)
 
         # vul het mandje
-        product1, product2 = self._vul_mandje(self.account_admin)
+        regel1, regel2 = self._vul_mandje(self.account_admin)
 
         with override_settings(WEBWINKEL_TRANSPORT_OPHALEN_MAG=True):
             with self.assert_max_queries(20):
@@ -249,63 +145,27 @@ class TestBestellingMandje(E2EHelpers, TestCase):
         urls = self.extract_all_urls(resp, skip_menu=True)
         self.assertTrue(self.url_kies_transport in urls)
 
-        # corner case: sporter zonder vereniging
-        self.sporter.bij_vereniging = None
-        self.sporter.save()
-
-        # corner case: te hoge korting
-        product1.korting_euro = 999
-        product1.save()
-
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_mandje_toon)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('bestelling/toon-mandje.dtl', 'plein/site_layout.dtl'))
-
-        # koppel een korting
-        self.inschrijving.korting = self.korting
-        self.inschrijving.save()
-
-        # veroorzaak een uitzondering
-        self.instellingen_bond.mollie_api_key = ''
-        self.instellingen_bond.save()
-
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_mandje_toon)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('bestelling/toon-mandje.dtl', 'plein/site_layout.dtl'))
-
-        # verander de korting in een combi-korting
-        self.korting.soort = WEDSTRIJD_KORTING_COMBI
-        self.korting.save()
-
-        # leg een product in het mandje wat geen wedstrijd inschrijving is
-        regel = BestellingRegel()
-        regel.save()
-        self.assertTrue(str(regel) != '')
-        self.assertTrue(regel.korte_beschrijving() != '')
-
         mandje = BestellingMandje.objects.get(account=self.account_admin)
-        mandje.regels.add(regel)
-        self.assertTrue(str(mandje) != '')
+        # self.assertTrue(str(mandje) != '')
 
         self.instellingen.akkoord_via_bond = False
         self.instellingen.save()
 
+        # corner case: geen geld beloven
+        regel1.bedrag_euro = -900.0
+        regel1.save(update_fields=['bedrag_euro'])
+
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_mandje_toon)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('bestelling/toon-mandje.dtl', 'plein/site_layout.dtl'))
-        self.assertContains(resp, 'Onbekend product')
 
         mandje.delete()
         resp = self.client.post(self.url_mandje_toon)
         self.assert404(resp, 'Mandje niet gevonden')
 
-        # veroorzaak een exception
+        # corner case
         BetaalInstellingenVereniging.objects.all().delete()
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_mandje_toon)
@@ -343,7 +203,9 @@ class TestBestellingMandje(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('bestelling/toon-mandje.dtl', 'plein/site_layout.dtl'))
 
-    def NOT_test_verwijder(self):
+        # test_gast.py checkt invoeren afleveradres
+
+    def test_verwijder(self):
         self.e2e_login_and_pass_otp(self.account_admin)
         self.e2e_check_rol('sporter')
 
@@ -377,29 +239,8 @@ class TestBestellingMandje(E2EHelpers, TestCase):
             resp = self.client.post(self.url_mandje_verwijder % product2.pk, {'snel': 1})
         self.assert_is_redirect(resp, self.url_mandje_toon)
 
+        # laat de achtergrondtaak de producten verwijderen uit het mandje
         self.verwerk_bestel_mutaties()
-
-        # maak een verwijder mutatie aan zonder product
-        BestellingMutatie(
-            code=BESTELLING_MUTATIE_VERWIJDER,
-            account=self.account_admin).save()
-
-        # maak een eigen verwijder mutatie met onbekend product
-        regel = BestellingRegel()
-        regel.save()
-
-        mandje = BestellingMandje.objects.get(account=self.account_admin)
-        mandje.regels.add(regel)
-
-        BestellingMutatie(
-            code=BESTELLING_MUTATIE_VERWIJDER,
-            regel=regel,
-            account=self.account_admin).save()
-
-        f1, f2 = self.verwerk_bestel_mutaties(show_warnings=False, fail_on_error=False)
-        # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
-        self.assertTrue(": Type niet ondersteund" in f1.getvalue())
-        self.assertTrue(" niet meer in het mandje gevonden" in f2.getvalue())
 
         # nog een keer verwijderen
         with self.assert_max_queries(20):
@@ -415,13 +256,13 @@ class TestBestellingMandje(E2EHelpers, TestCase):
             resp = self.client.post(self.url_mandje_verwijder % product1.pk, {'snel': 1})
         self.assert404(resp, 'Niet gevonden')
 
-    def NOT_test_bestellen(self):
+    def test_bestellen_ophalen(self):
         self.e2e_login_and_pass_otp(self.account_admin)
         self.e2e_check_rol('sporter')
         url = self.url_mandje_toon
 
         # vul het mandje
-        self._vul_mandje(self.account_admin)
+        self._vul_mandje(self.account_admin, transport=BESTELLING_TRANSPORT_OPHALEN)
 
         with self.assert_max_queries(20):
             resp = self.client.get(url)
@@ -459,7 +300,35 @@ class TestBestellingMandje(E2EHelpers, TestCase):
         bestelling = Bestelling.objects.first()
         self.assertTrue(str(bestelling) != '')
 
-    def NOT_test_transport(self):
+    def test_bestellen_verzend(self):
+        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_check_rol('sporter')
+        url = self.url_mandje_toon
+
+        # vul het mandje (webwinkel + wedstrijd)
+        self._vul_mandje(self.account_admin)
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('bestelling/toon-mandje.dtl', 'plein/site_layout.dtl'))
+
+        Bestelling.objects.all().delete()
+
+        # doe de bestelling
+        self.assertEqual(0, BestellingMutatie.objects.count())
+        self.assertEqual(0, Bestelling.objects.count())
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'snel': 1})
+        self.assert_is_redirect(resp, self.url_bestellingen_overzicht)
+        self.assertEqual(1, BestellingMutatie.objects.count())
+
+        self.assertEqual(0, Bestelling.objects.count())
+        self.verwerk_bestel_mutaties()
+        self.assertEqual(1, Bestelling.objects.count())
+
+    def test_transport(self):
         self.e2e_login_and_pass_otp(self.account_admin)
         self.e2e_check_rol('sporter')
 
@@ -503,7 +372,6 @@ class TestBestellingMandje(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('bestelling/toon-mandje.dtl', 'plein/site_layout.dtl'))
 
-        # controleer dat er geen knop is om transport in te stellen
         urls = self.extract_all_urls(resp, skip_menu=True)
         self.assertFalse(self.url_kies_transport in urls)
 
