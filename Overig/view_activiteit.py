@@ -41,7 +41,6 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-
         account = get_account(self.request)
         if account.is_authenticated:
             self.rol_nu = rol_get_huidige(self.request)
@@ -325,8 +324,13 @@ class OTPLoskoppelenView(UserPassesTestMixin, View):
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        rol_nu = rol_get_huidige(self.request)
-        return rol_nu == Rol.ROL_BB
+        account = get_account(self.request)
+        if account.is_authenticated:
+            rol_nu = rol_get_huidige(self.request)
+            if rol_nu in (Rol.ROL_BB, Rol.ROL_MLA, Rol.ROL_SUP):
+                return True
+
+        return False
 
     @staticmethod
     def post(request, *args, **kwargs):
