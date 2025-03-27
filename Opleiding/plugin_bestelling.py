@@ -45,7 +45,8 @@ class OpleidingBestelPlugin(BestelPluginBase):
 
             # onthoud in welk mandje deze lag
             mandje = regel.bestellingmandje_set.first()
-            mandje_pks.append(mandje)
+            if mandje.pk not in mandje_pks:
+                mandje_pks.append(mandje.pk)
 
             self.annuleer(regel)
 

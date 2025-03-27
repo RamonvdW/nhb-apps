@@ -26,9 +26,9 @@ from Vereniging.models import Vereniging
 import datetime
 
 
-class TestEvenementAfmelden(E2EHelpers, TestCase):
+class TestEvenementAanmeldingen(E2EHelpers, TestCase):
 
-    """ tests voor de Evenement applicatie, module Afmelden """
+    """ tests voor de Evenement applicatie, module Aanmeldingen """
 
     test_after = ('Evenement.tests.test_inschrijven',)
 

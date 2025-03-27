@@ -38,7 +38,7 @@ class WebwinkelBestelPlugin(BestelPluginBase):
             # onthoud in welk mandje deze lag
             mandje = regel.bestellingmandje_set.first()
             if mandje.pk not in mandje_pks:
-                mandje_pks.append(mandje)
+                mandje_pks.append(mandje.pk)
 
             self.annuleer(regel)
 

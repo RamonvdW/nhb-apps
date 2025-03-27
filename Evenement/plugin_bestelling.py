@@ -89,13 +89,13 @@ class EvenementBestelPlugin(BestelPluginBase):
 
             regel = inschrijving.bestelling
 
-            self.stdout.write('[INFO] Vervallen: BestellingRegel pk=%s inschrijving (%s) in mandje van %s' % (
+            self.stdout.write('[INFO] Vervallen: BestellingRegel pk=%s EvenementInschrijving (%s) in mandje van %s' % (
                               regel.pk, inschrijving, inschrijving.koper))
 
             # onthoud in welk mandje deze lag
             mandje = regel.bestellingmandje_set.first()
             if mandje.pk not in mandje_pks:
-                mandje_pks.append(mandje)
+                mandje_pks.append(mandje.pk)
 
             self.annuleer(regel)
 
