@@ -227,7 +227,8 @@ class Command(BaseCommand):
                                                                         for deelnemer in feitelijke_deelnemers]))
 
         if len(feitelijke_deelnemers) == 0:
-            self.stderr.write('[WARNING]   Geen feitelijke deelnemers voor team %s' % kamp_team.team_naam)
+            self.stdout.write('[WARNING]   Geen feitelijke deelnemers voor team %s' % kamp_team.team_naam)
+
         elif len(feitelijke_deelnemers) < 3:
             self.stderr.write('[ERROR]   Maar %s deelnemers in team %s' % (len(feitelijke_deelnemers),
                                                                            kamp_team.team_naam))
@@ -519,10 +520,11 @@ class Command(BaseCommand):
         final_8 = list()
         for row_nr in (12, 14, 18, 20, 24, 26, 30, 32):
             team_naam = self._lees_team_naam(ws, 'B' + str(row_nr))
-            if team_naam in self.deelnemende_teams.keys():
-                final_8.append(team_naam)
-            else:
-                self.stdout.write('[WARNING] Kwartfinale team %s op finale blad wordt niet herkend' % repr(team_naam))
+            if team_naam:
+                if team_naam in self.deelnemende_teams.keys():
+                    final_8.append(team_naam)
+                else:
+                    self.stdout.write('[WARNING] Kwartfinale team %s op finale blad wordt niet herkend' % repr(team_naam))
         # for
         # self.stdout.write('final_8: %s' % repr(final_8))
 
