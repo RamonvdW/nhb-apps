@@ -22,7 +22,7 @@ charset-normalizer==3.4.1
     # via
     #   -r requirements.txt
     #   requests
-coverage==7.6.12
+coverage==7.7.1
     # via
     #   -r requirements_dev.in
     #   django-coverage-plugin
@@ -49,7 +49,9 @@ google-api-core==2.24.2
     # via
     #   -r requirements.txt
     #   google-api-python-client
-google-api-python-client==2.164.0
+    #   google-geo-type
+    #   google-maps-routing
+google-api-python-client==2.166.0
     # via -r requirements.txt
 google-auth==2.38.0
     # via
@@ -57,16 +59,34 @@ google-auth==2.38.0
     #   google-api-core
     #   google-api-python-client
     #   google-auth-httplib2
+    #   google-geo-type
+    #   google-maps-routing
 google-auth-httplib2==0.2.0
     # via
     #   -r requirements.txt
     #   google-api-python-client
-googleapis-common-protos==1.69.1
+google-geo-type==0.3.12
+    # via
+    #   -r requirements.txt
+    #   google-maps-routing
+google-maps-routing==0.6.15
+    # via -r requirements.txt
+googleapis-common-protos==1.69.2
     # via
     #   -r requirements.txt
     #   google-api-core
+    #   grpcio-status
 googlemaps==4.10.0
     # via -r requirements.txt
+grpcio==1.71.0
+    # via
+    #   -r requirements.txt
+    #   google-api-core
+    #   grpcio-status
+grpcio-status==1.71.0
+    # via
+    #   -r requirements.txt
+    #   google-api-core
 html5validator==0.4.2
     # via -r requirements_dev.in
 httplib2==0.22.0
@@ -100,11 +120,16 @@ proto-plus==1.26.1
     # via
     #   -r requirements.txt
     #   google-api-core
-protobuf==5.29.3
+    #   google-geo-type
+    #   google-maps-routing
+protobuf==5.29.4
     # via
     #   -r requirements.txt
     #   google-api-core
+    #   google-geo-type
+    #   google-maps-routing
     #   googleapis-common-protos
+    #   grpcio-status
     #   proto-plus
 psycopg==3.2.6
     # via -r requirements.txt
