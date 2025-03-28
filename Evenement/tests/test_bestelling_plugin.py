@@ -5,12 +5,10 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from django.core.management.base import OutputWrapper
-from django.conf import settings
 from django.utils import timezone
+from django.core.management.base import OutputWrapper
 from Bestelling.definities import BESTELLING_REGEL_CODE_EVENEMENT
 from Bestelling.models import BestellingRegel, BestellingMandje
-from Betaal.models import BetaalInstellingenVereniging
 from Evenement.plugin_bestelling import EvenementBestelPlugin
 from Evenement.definities import (EVENEMENT_STATUS_GEACCEPTEERD,
                                   EVENEMENT_INSCHRIJVING_STATUS_RESERVERING_MANDJE,
@@ -20,9 +18,9 @@ from Evenement.definities import (EVENEMENT_STATUS_GEACCEPTEERD,
                                   EVENEMENT_AFMELDING_STATUS_AFGEMELD,
                                   EVENEMENT_AFMELDING_STATUS_GEANNULEERD)
 from Evenement.models import Evenement, EvenementInschrijving, EvenementAfgemeld
-# from Functie.tests.helpers import maak_functie
 from Geo.models import Regio
 from Locatie.models import EvenementLocatie
+from Mailer.models import MailQueue
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
@@ -49,6 +47,7 @@ class TestEvenementBestellingPlugin(E2EHelpers, TestCase):
                     contact_email='info@bb.not',
                     telefoonnummer='12345678')
         ver.save()
+        self.ver = ver
 
         locatie = EvenementLocatie(
                     naam='Arnhemhal',
@@ -111,6 +110,20 @@ class TestEvenementBestellingPlugin(E2EHelpers, TestCase):
         sporter.save()
         sporter.refresh_from_db()        # geeft opgeslagen datum/tijd formaat
         self.sporter_100000 = sporter
+
+        sporter = Sporter(
+                        lid_nr=100001,
+                        voornaam='And',
+                        achternaam='Ere',
+                        geboorte_datum='1988-08-09',
+                        sinds_datum='2020-02-21',
+                        account=None,
+                        email='sporter100001@khsn.not',
+                        bij_vereniging=ver,
+                        adres_code='1234YY')
+        sporter.save()
+        sporter.refresh_from_db()        # geeft opgeslagen datum/tijd formaat
+        self.sporter_100001 = sporter
 
         self.mandje = BestellingMandje(
                             account=self.account_100000)
@@ -334,21 +347,156 @@ class TestEvenementBestellingPlugin(E2EHelpers, TestCase):
         plugin = EvenementBestelPlugin()
         plugin.zet_stdout(stdout)
 
-        plugin.is_besteld(None)
+        regel = BestellingRegel(
+                    korte_beschrijving='evenement',
+                    bedrag_euro=Decimal(1.0),
+                    code=BESTELLING_REGEL_CODE_EVENEMENT)
+        regel.save()
 
-    def test_is_bepaald(self):
+        plugin.is_besteld(regel)
+        self.assertTrue("[ERROR] Kan EvenementInschrijving voor regel met pk=" in stdout.getvalue())
+
+        inschrijving = EvenementInschrijving(
+                            wanneer=timezone.now(),
+                            nummer=1,
+                            status=EVENEMENT_INSCHRIJVING_STATUS_RESERVERING_MANDJE,
+                            evenement=self.evenement1,
+                            sporter=self.sporter_100000,
+                            bestelling=regel,
+                            koper=self.account_100000)
+        inschrijving.save()
+
+        plugin.is_besteld(regel)
+
+        inschrijving.refresh_from_db()
+        self.assertEqual(inschrijving.status, EVENEMENT_INSCHRIJVING_STATUS_BESTELD)
+        self.assertTrue("Omgezet in een bestelling" in inschrijving.log)
+
+    def test_is_betaald_zelf(self):
         stdout = OutputWrapper(io.StringIO())
         plugin = EvenementBestelPlugin()
         plugin.zet_stdout(stdout)
 
-        plugin.is_betaald(None)
+        regel = BestellingRegel(
+                    korte_beschrijving='evenement',
+                    bedrag_euro=Decimal(1.0),
+                    code=BESTELLING_REGEL_CODE_EVENEMENT)
+        regel.save()
+
+        bedrag_ontvangen = Decimal(10.22)
+
+        plugin.is_betaald(regel, bedrag_ontvangen)
+        self.assertTrue("[ERROR] Kan EvenementInschrijving voor regel met pk=" in stdout.getvalue())
+
+        inschrijving = EvenementInschrijving(
+                            wanneer=timezone.now(),
+                            nummer=1,
+                            status=EVENEMENT_INSCHRIJVING_STATUS_BESTELD,
+                            evenement=self.evenement1,
+                            sporter=self.sporter_100000,
+                            bestelling=regel,
+                            koper=self.account_100000)
+        inschrijving.save()
+
+        stdout = OutputWrapper(io.StringIO())       # weer leeg
+        plugin.zet_stdout(stdout)
+
+        plugin.is_betaald(regel, bedrag_ontvangen)
+
+        inschrijving.refresh_from_db()
+        self.assertEqual(inschrijving.status, EVENEMENT_INSCHRIJVING_STATUS_DEFINITIEF)
+        self.assertEqual(round(inschrijving.bedrag_ontvangen, 2), round(bedrag_ontvangen, 2))
+        self.assertTrue("Betaling ontvangen" in inschrijving.log)
+        self.assertFalse("] Informatieve e-mail is gestuurd naar sporter" in inschrijving.log)
+
+        # betaling was voor "zelf", dus er wordt geen extra mail gestuurd
+        self.assertEqual(MailQueue.objects.count(), 0)
+
+    def test_is_betaald_koper(self):
+        # koop evenement deelname voor iemand anders
+        stdout = OutputWrapper(io.StringIO())
+        plugin = EvenementBestelPlugin()
+        plugin.zet_stdout(stdout)
+
+        regel = BestellingRegel(
+                    korte_beschrijving='evenement',
+                    bedrag_euro=Decimal(1.0),
+                    code=BESTELLING_REGEL_CODE_EVENEMENT)
+        regel.save()
+
+        inschrijving = EvenementInschrijving(
+                            wanneer=timezone.now(),
+                            nummer=1,
+                            status=EVENEMENT_INSCHRIJVING_STATUS_BESTELD,
+                            evenement=self.evenement1,
+                            sporter=self.sporter_100001,        # niet gelijk aan koper
+                            bestelling=regel,
+                            koper=self.account_100000)
+        inschrijving.save()
+
+        stdout = OutputWrapper(io.StringIO())       # weer leeg
+        plugin.zet_stdout(stdout)
+
+        bedrag_ontvangen = Decimal(10.22)
+        plugin.is_betaald(regel, bedrag_ontvangen)
+
+        inschrijving.refresh_from_db()
+        self.assertEqual(inschrijving.status, EVENEMENT_INSCHRIJVING_STATUS_DEFINITIEF)
+        self.assertEqual(round(inschrijving.bedrag_ontvangen, 2), round(bedrag_ontvangen, 2))
+        self.assertTrue("] Betaling ontvangen" in inschrijving.log)
+        self.assertTrue("] Informatieve e-mail is gestuurd naar sporter" in inschrijving.log)
+
+        self.assertEqual(MailQueue.objects.count(), 1)
+        mail = MailQueue.objects.first()
+        self.assert_consistent_email_html_text(mail)
+        self.assert_email_html_ok(mail, 'email_evenement/info-inschrijving-evenement.dtl')
+
+        # nog een keer, nu heeft de sporter geen valide e-mail
+        self.sporter_100001.email = ''
+        self.sporter_100001.save(update_fields=['email'])
+        MailQueue.objects.all().delete()
+        plugin.is_betaald(regel, bedrag_ontvangen)
+        self.assertEqual(MailQueue.objects.count(), 0)
+
+        # nog een keer, nu heeft de sporter een account
+        account_100001 = self.e2e_create_account('100001', 'sporter1000001@test.not', 'Sporter')
+        self.sporter_100001.account = account_100001
+        self.sporter_100001.save(update_fields=['account'])
+        plugin.is_betaald(regel, bedrag_ontvangen)
+        self.assertEqual(MailQueue.objects.count(), 1)
+
+        mail = MailQueue.objects.first()
+        self.assert_consistent_email_html_text(mail)
+        self.assert_email_html_ok(mail, 'email_evenement/info-inschrijving-evenement.dtl')
+        # print(mail.mail_text)
 
     def test_get_verkoper_ver_nr(self):
-        stdout = OutputWrapper(io.StringIO())
         plugin = EvenementBestelPlugin()
+        stdout = OutputWrapper(io.StringIO())
         plugin.zet_stdout(stdout)
 
-        plugin.get_verkoper_ver_nr(None)
+        regel = BestellingRegel(
+                    korte_beschrijving='evenement',
+                    bedrag_euro=Decimal(1.0),
+                    code=BESTELLING_REGEL_CODE_EVENEMENT)
+        regel.save()
+
+        ver_nr = plugin.get_verkoper_ver_nr(regel)
+        self.assertEqual(ver_nr, -1)
+        self.assertTrue('[ERROR] Kan EvenementInschrijving voor regel met pk=' in stdout.getvalue())
+
+        inschrijving = EvenementInschrijving(
+                            wanneer=timezone.now(),
+                            nummer=1,
+                            status=EVENEMENT_INSCHRIJVING_STATUS_DEFINITIEF,
+                            evenement=self.evenement1,
+                            sporter=self.sporter_100000,
+                            bestelling=regel,
+                            koper=self.account_100000)
+        inschrijving.save()
+
+        ver_nr = plugin.get_verkoper_ver_nr(regel)
+        self.assertEqual(ver_nr, self.ver.ver_nr)
 
 
 # end of file

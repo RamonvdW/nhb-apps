@@ -222,7 +222,7 @@ class EvenementBestelPlugin(BestelPluginBase):
             Verander de status van het gevraagde product naar 'besteld maar nog niet betaald'
         """
         inschrijving = EvenementInschrijving.objects.filter(bestelling=regel).first()
-        if not inschrijving:            # pragma: no cover
+        if not inschrijving:
             self.stdout.write('[ERROR] Kan EvenementInschrijving voor regel met pk=%s niet vinden' % regel.pk)
             return
 
@@ -241,7 +241,7 @@ class EvenementBestelPlugin(BestelPluginBase):
         """
 
         inschrijving = EvenementInschrijving.objects.filter(bestelling=regel).first()
-        if not inschrijving:            # pragma: no cover
+        if not inschrijving:
             self.stdout.write('[ERROR] Kan EvenementInschrijving voor regel met pk=%s niet vinden' % regel.pk)
             return
 
@@ -259,7 +259,7 @@ class EvenementBestelPlugin(BestelPluginBase):
 
         # stuur een e-mail naar de sporter, als dit niet de koper is
         sporter = inschrijving.sporter
-        sporter_account = sporter.account
+        sporter_account = sporter.account       # kan None zijn
         koper_account = inschrijving.koper
         if sporter_account != koper_account:
             email = None
