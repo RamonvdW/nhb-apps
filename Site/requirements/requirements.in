@@ -26,6 +26,7 @@ google-api-python-client
 
 # lat/lon en reistijd berekenen
 googlemaps
+google-maps-routing
 
 # collecting payment service provide
 mollie-api-python
