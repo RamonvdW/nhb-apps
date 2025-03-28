@@ -7,7 +7,7 @@
 from django.conf import settings
 from django.utils import timezone
 from Bestelling.bestel_plugin_base import BestelPluginBase
-from Bestelling.definities import BESTELLING_REGEL_CODE_OPLEIDING
+from Bestelling.definities import BESTELLING_REGEL_CODE_OPLEIDING, BESTELLING_KORT_BREAK
 from Bestelling.models import BestellingRegel
 from Betaal.format import format_bedrag_euro
 from Functie.models import Functie
@@ -63,13 +63,16 @@ class OpleidingBestelPlugin(BestelPluginBase):
         """
 
         opleiding = inschrijving.opleiding
-        kort = opleiding.titel
+        sporter = inschrijving.sporter
+
         # (nog) geen aantallen om bij te werken
+        kort_lijst = ['Opleiding "%s"' % opleiding.titel,
+                      'voor %s' % sporter.lid_nr_en_volledige_naam()]
         # btw, korting en gewicht zijn niet van toepassing
 
         # maak een product regel aan voor de bestelling
         regel = BestellingRegel(
-                        korte_beschrijving=kort,
+                        korte_beschrijving=BESTELLING_KORT_BREAK.join(kort_lijst),
                         bedrag_euro=opleiding.kosten_euro,
                         code=BESTELLING_REGEL_CODE_OPLEIDING)
         regel.save()
@@ -126,7 +129,7 @@ class OpleidingBestelPlugin(BestelPluginBase):
             zodat deze door iemand anders te kiezen zijn.
         """
         inschrijving = OpleidingInschrijving.objects.filter(bestelling=regel).first()
-        if not inschrijving:            # pragma: no cover
+        if not inschrijving:
             self.stdout.write('[ERROR] Kan OpleidingInschrijving voor regel met pk=%s niet vinden' % regel.pk)
             return
 
@@ -175,7 +178,7 @@ class OpleidingBestelPlugin(BestelPluginBase):
             Verander de status van het gevraagde product naar 'besteld maar nog niet betaald'
         """
         inschrijving = OpleidingInschrijving.objects.filter(bestelling=regel).first()
-        if not inschrijving:            # pragma: no cover
+        if not inschrijving:
             self.stdout.write('[ERROR] Kan OpleidingInschrijving voor regel met pk=%s niet vinden' % regel.pk)
             return
 
@@ -193,7 +196,7 @@ class OpleidingBestelPlugin(BestelPluginBase):
             Wordt ook aangeroepen als een bestelling niet betaald hoeft te worden (totaal bedrag nul).
         """
         inschrijving = OpleidingInschrijving.objects.filter(bestelling=regel).first()
-        if not inschrijving:            # pragma: no cover
+        if not inschrijving:
             self.stdout.write('[ERROR] Kan OpleidingInschrijving voor regel met pk=%s niet vinden' % regel.pk)
             return
 
