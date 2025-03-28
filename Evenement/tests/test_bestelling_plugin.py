@@ -175,6 +175,10 @@ class TestEvenementBestellingPlugin(E2EHelpers, TestCase):
         self.assertEqual(len(mandje_pks), 1)
         self.assertEqual(mandje_pks, [self.mandje.pk])
 
+        self.assertTrue('[INFO] Vervallen: BestellingRegel pk=' in stdout.getvalue())
+        self.assertTrue('[INFO] BestellingRegel met pk=' in stdout.getvalue())
+        self.assertTrue('wordt verwijderd' in stdout.getvalue())
+
     def test_reserveer(self):
         stdout = OutputWrapper(io.StringIO())
         plugin = EvenementBestelPlugin()
@@ -242,6 +246,10 @@ class TestEvenementBestellingPlugin(E2EHelpers, TestCase):
                     bedrag_euro=Decimal(1.0),
                     code=BESTELLING_REGEL_CODE_EVENEMENT)
         regel.save()
+
+        # inschrijving bestaat niet
+        plugin.annuleer(regel)
+        self.assertTrue("[ERROR] Kan EvenementInschrijving voor regel met pk=" in stdout.getvalue())
 
         inschrijving = EvenementInschrijving(
                             wanneer=timezone.now(),

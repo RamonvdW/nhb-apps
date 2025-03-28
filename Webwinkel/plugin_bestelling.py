@@ -59,6 +59,7 @@ class WebwinkelBestelPlugin(BestelPluginBase):
 
         if not product.onbeperkte_voorraad:
             # Noteer: geen concurrency risico want serialisatie via deze achtergrondtaak
+            # TODO: waar zit de bescherming tegen "geen voorraad meer"?
             product.aantal_op_voorraad -= aantal
             product.save(update_fields=['aantal_op_voorraad'])
 
@@ -166,13 +167,6 @@ class VerzendkostenBestelPlugin(BestelPluginBase):
         # nothing to do
         return []
 
-    def beschrijf_product(self, obj) -> list:
-        """
-            Geef een lijst van tuples terug waarin aspecten van het product beschreven staan.
-        """
-        # TODO
-        raise NotImplementedError()
-
     def bereken_verzendkosten(self, obj: BestellingMandje | Bestelling) -> Decimal:
         """
             Bereken de verzendkosten van toepassing op het mandje of de bestelling
@@ -191,9 +185,11 @@ class VerzendkostenBestelPlugin(BestelPluginBase):
             webwinkel_pakketpost = qset.filter(product__type_verzendkosten=VERZENDKOSTEN_PAKKETPOST).count()
 
             if webwinkel_briefpost > 0:
+                # TODO: meerdere brieven (voorbeeld: 1 per muts)
                 verzendkosten_euro = Decimal(settings.WEBWINKEL_BRIEF_VERZENDKOSTEN_EURO)
 
             if webwinkel_pakketpost > 0:
+                # TODO: gewicht pakketpost
                 verzendkosten_euro = Decimal(settings.WEBWINKEL_PAKKET_GROOT_VERZENDKOSTEN_EURO)
 
         return verzendkosten_euro
