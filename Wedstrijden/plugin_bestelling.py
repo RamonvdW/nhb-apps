@@ -129,7 +129,7 @@ class WedstrijdBestelPlugin(BestelPluginBase):
             Geef een eerder gemaakte reservering voor een wedstrijd weer vrij.
         """
         inschrijving = WedstrijdInschrijving.objects.filter(bestelling=regel).first()
-        if not inschrijving:                # pragma: no cover
+        if not inschrijving:
             self.stdout.write(
                 '[ERROR] Kan WedstrijdInschrijving voor regel met pk=%s niet vinden {annuleer}' % regel.pk)
             return
@@ -175,7 +175,7 @@ class WedstrijdBestelPlugin(BestelPluginBase):
             Verander de status van het gevraagde product naar 'besteld maar nog niet betaald'
         """
         inschrijving = WedstrijdInschrijving.objects.filter(bestelling=regel).first()
-        if not inschrijving:                # pragma: no cover
+        if not inschrijving:
             self.stdout.write(
                 '[ERROR] Kan WedstrijdInschrijving voor regel met pk=%s niet vinden {is_besteld}' % regel.pk)
             return
@@ -194,7 +194,7 @@ class WedstrijdBestelPlugin(BestelPluginBase):
             Wordt ook aangeroepen als een bestelling niet betaald hoeft te worden (totaal bedrag nul).
         """
         inschrijving = WedstrijdInschrijving.objects.filter(bestelling=regel).first()
-        if not inschrijving:                # pragma: no cover
+        if not inschrijving:
             self.stdout.write(
                 '[ERROR] Kan WedstrijdInschrijving voor regel met pk=%s niet vinden {is_betaald}' % regel.pk)
             return
@@ -297,26 +297,6 @@ class WedstrijdKortingBestelPlugin(BestelPluginBase):
     def mandje_opschonen(self, verval_datum):
         # nothing to do
         return []
-
-    def beschrijf_product(self, obj: WedstrijdKorting) -> list:
-        """
-            Geef een lijst van tuples terug waarin aspecten van het product beschreven staan.
-        """
-        # TODO als de aankoop geannuleerd is, dan hoeven we de korting niet meer te laten zien?
-
-        kort, redenen = beschrijf_korting(obj)
-
-        beschrijving = list()
-
-        tup = ('Korting', kort)
-        beschrijving.append(tup)
-
-        # elke reden is een wedstrijd waarvoor de combi-korting gegeven is
-        if len(redenen) > 0:
-            tup = ('Combinatie', " en ".join(redenen))
-            beschrijving.append(tup)
-
-        return redenen
 
     def annuleer(self, regel: BestellingRegel):
         """ niets te doen """
