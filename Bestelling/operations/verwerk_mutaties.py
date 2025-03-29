@@ -247,6 +247,7 @@ class VerwerkBestelMutaties:
         """ Verwerk een mutatie via de achtergrondtaak voor inschrijving op een wedstrijd
             Voeg deze toe aan het mandje van de gebruiker
         """
+        self.stdout.write('[INFO] Verwerk mutatie %s: inschrijven op wedstrijd' % mutatie.pk)
         mandje = self._get_mandje(mutatie)
         if mandje:  # pragma: no branch
             inschrijving = mutatie.wedstrijd_inschrijving
@@ -271,6 +272,7 @@ class VerwerkBestelMutaties:
         """ Verwerk een mutatie via de achtergrondtaak voor inschrijving op een evenement
             Voeg deze toe aan het mandje van de gebruiker
         """
+        self.stdout.write('[INFO] Verwerk mutatie %s: inschrijven op evenement' % mutatie.pk)
         mandje = self._get_mandje(mutatie)
         if mandje:  # pragma: no branch
             inschrijving = mutatie.evenement_inschrijving
@@ -295,6 +297,7 @@ class VerwerkBestelMutaties:
         """ Verwerk een mutatie via de achtergrondtaak voor inschrijving op een opleiding
             Voeg deze toe aan het mandje van de gebruiker
         """
+        self.stdout.write('[INFO] Verwerk mutatie %s: inschrijven op opleiding' % mutatie.pk)
         mandje = self._get_mandje(mutatie)
         if mandje:  # pragma: no branch
 
@@ -320,6 +323,7 @@ class VerwerkBestelMutaties:
         """ Verwerk een mutatie via de achtergrondtaak voor selectie van een product uit de webwinkel
             Voeg deze toe aan het mandje van de gebruiker
         """
+        self.stdout.write('[INFO] Verwerk mutatie %s: webwinkel keuze' % mutatie.pk)
         mandje = self._get_mandje(mutatie)
         if mandje:  # pragma: no branch
 
@@ -345,6 +349,7 @@ class VerwerkBestelMutaties:
 
     def _verwerk_mutatie_verwijder_uit_mandje(self, mutatie: BestellingMutatie):
         """ een bestelling mag uit het mandje voordat de betaling gestart is """
+        self.stdout.write('[INFO] Verwerk mutatie %s: verwijder regel uit mandje' % mutatie.pk)
 
         mandje = self._get_mandje(mutatie)
         if not mandje:
@@ -379,6 +384,7 @@ class VerwerkBestelMutaties:
             mandje.bepaal_totaalprijs_opnieuw()
 
     def _verwerk_mutatie_maak_bestellingen(self, mutatie: BestellingMutatie):
+        self.stdout.write('[INFO] Verwerk mutatie %s: mandje omzetten in bestelling(en)' % mutatie.pk)
 
         now = timezone.now()
         when_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
@@ -525,31 +531,32 @@ class VerwerkBestelMutaties:
         _mandje_bepaal_btw(mandje)
         mandje.bepaal_totaalprijs_opnieuw()
 
-    @staticmethod
-    def _verwerk_mutatie_wedstrijd_afmelden(mutatie: BestellingMutatie):
+    def _verwerk_mutatie_wedstrijd_afmelden(self, mutatie: BestellingMutatie):
         """ serialisatie van verzoek tot afmelden voor een wedstrijd, ingediend door de HWL
             product ligt niet meer in een mandje
             het kan een handmatige inschrijving zijn, zonder bestelling
         """
+        self.stdout.write('[INFO] Verwerk mutatie %s: afmelden voor wedstrijd' % mutatie.pk)
         wedstrijd_bestel_plugin.afmelden(mutatie.wedstrijd_inschrijving)
 
-    @staticmethod
-    def _verwerk_mutatie_evenement_afmelden(mutatie: BestellingMutatie):
+    def _verwerk_mutatie_evenement_afmelden(self, mutatie: BestellingMutatie):
         """ serialisatie van verzoek tot afmelden voor een wedstrijd, ingediend door de HWL
             product ligt niet meer in een mandje
             het kan een handmatige inschrijving zijn, zonder bestelling
         """
+        self.stdout.write('[INFO] Verwerk mutatie %s: afmelden voor evenement' % mutatie.pk)
         evenement_bestel_plugin.afmelden(mutatie.evenement_inschrijving)
 
-    @staticmethod
-    def _verwerk_mutatie_opleiding_afmelden(mutatie: BestellingMutatie):
+    def _verwerk_mutatie_opleiding_afmelden(self, mutatie: BestellingMutatie):
         """ serialisatie van verzoek tot afmelden voor een wedstrijd, ingediend door de HWL
             product ligt niet meer in een mandje
             het kan een handmatige inschrijving zijn, zonder bestelling
         """
+        self.stdout.write('[INFO] Verwerk mutatie %s: afmelden voor opleiding' % mutatie.pk)
         opleiding_bestel_plugin.afmelden(mutatie.opleiding_inschrijving)
 
     def _verwerk_mutatie_betaling_afgerond(self, mutatie: BestellingMutatie):
+        self.stdout.write('[INFO] Verwerk mutatie %s: betaling afgerond' % mutatie.pk)
         now = timezone.now()
         when_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
 
@@ -629,6 +636,7 @@ class VerwerkBestelMutaties:
         bestelling.save(update_fields=['betaal_actief', 'status'])
 
     def _verwerk_mutatie_overboeking_ontvangen(self, mutatie: BestellingMutatie):
+        self.stdout.write('[INFO] Verwerk mutatie %s: overboeking ontvangen' % mutatie.pk)
         now = timezone.now()
         when_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
 
@@ -693,9 +701,9 @@ class VerwerkBestelMutaties:
 
     def _verwerk_mutatie_annuleer_bestelling(self, mutatie: BestellingMutatie):
         """ Annulering van een bestelling + verwijderen van de reserveringen + bevestig via e-mail """
+        self.stdout.write('[INFO] Verwerk mutatie %s: annuleer bestelling' % mutatie.pk)
 
         bestelling = mutatie.bestelling
-
         status = bestelling.status
         if status not in (BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_BETALING_ACTIEF):
             self.stdout.write('[WARNING] Kan bestelling %s (pk=%s) niet annuleren, want status = %s' % (
@@ -723,6 +731,7 @@ class VerwerkBestelMutaties:
 
     def _verwerk_mutatie_transport(self, mutatie: BestellingMutatie):
         """ Wijzig keuze voor transport tussen ophalen en verzender; alleen voor webwinkel aankopen """
+        self.stdout.write('[INFO] Verwerk mutatie %s: wijzig transport' % mutatie.pk)
 
         # TODO: hoe is deze code anders dan in verwerk_mutatie_webwinkel_keuze()
         mandje = self._get_mandje(mutatie)
@@ -747,70 +756,35 @@ class VerwerkBestelMutaties:
         else:
             self.stdout.write('[WARNING] Kan mandje niet vinden voor mutatie pk=%s' % mutatie.pk)
 
+    HANDLERS = {
+        BESTELLING_MUTATIE_WEDSTRIJD_INSCHRIJVEN: _verwerk_mutatie_wedstrijd_inschrijven,
+        BESTELLING_MUTATIE_EVENEMENT_INSCHRIJVEN: _verwerk_mutatie_evenement_inschrijven,
+        BESTELLING_MUTATIE_OPLEIDING_INSCHRIJVEN: _verwerk_mutatie_opleiding_inschrijven,
+        BESTELLING_MUTATIE_WEBWINKEL_KEUZE: _verwerk_mutatie_webwinkel_keuze,
+        BESTELLING_MUTATIE_VERWIJDER: _verwerk_mutatie_verwijder_uit_mandje,
+        BESTELLING_MUTATIE_MAAK_BESTELLINGEN: _verwerk_mutatie_maak_bestellingen,
+        BESTELLING_MUTATIE_WEDSTRIJD_AFMELDEN: _verwerk_mutatie_wedstrijd_afmelden,
+        BESTELLING_MUTATIE_EVENEMENT_AFMELDEN: _verwerk_mutatie_evenement_afmelden,
+        BESTELLING_MUTATIE_OPLEIDING_AFMELDEN: _verwerk_mutatie_opleiding_afmelden,
+        BESTELLING_MUTATIE_BETALING_AFGEROND: _verwerk_mutatie_betaling_afgerond,
+        BESTELLING_MUTATIE_OVERBOEKING_ONTVANGEN: _verwerk_mutatie_overboeking_ontvangen,
+        BESTELLING_MUTATIE_ANNULEER: _verwerk_mutatie_annuleer_bestelling,
+        BESTELLING_MUTATIE_TRANSPORT: _verwerk_mutatie_transport
+    }
+
     def verwerk(self, mutatie: BestellingMutatie):
         """ Verwerk een mutatie die via de database tabel ontvangen is """
         code = mutatie.code
-
-        if code == BESTELLING_MUTATIE_WEDSTRIJD_INSCHRIJVEN:
-            self.stdout.write('[INFO] Verwerk mutatie %s: inschrijven op wedstrijd' % mutatie.pk)
-            self._verwerk_mutatie_wedstrijd_inschrijven(mutatie)
-
-        elif code == BESTELLING_MUTATIE_EVENEMENT_INSCHRIJVEN:
-            self.stdout.write('[INFO] Verwerk mutatie %s: inschrijven op evenement' % mutatie.pk)
-            self._verwerk_mutatie_evenement_inschrijven(mutatie)
-
-        elif code == BESTELLING_MUTATIE_OPLEIDING_INSCHRIJVEN:
-            self.stdout.write('[INFO] Verwerk mutatie %s: inschrijven op opleiding' % mutatie.pk)
-            self._verwerk_mutatie_opleiding_inschrijven(mutatie)
-
-        elif code == BESTELLING_MUTATIE_WEBWINKEL_KEUZE:
-            self.stdout.write('[INFO] Verwerk mutatie %s: webwinkel keuze' % mutatie.pk)
-            self._verwerk_mutatie_webwinkel_keuze(mutatie)
-
-        elif code == BESTELLING_MUTATIE_VERWIJDER:
-            self.stdout.write('[INFO] Verwerk mutatie %s: verwijder regel uit mandje' % mutatie.pk)
-            self._verwerk_mutatie_verwijder_uit_mandje(mutatie)
-
-        elif code == BESTELLING_MUTATIE_MAAK_BESTELLINGEN:
-            self.stdout.write('[INFO] Verwerk mutatie %s: mandje omzetten in bestelling(en)' % mutatie.pk)
-            self._verwerk_mutatie_maak_bestellingen(mutatie)
-
-        elif code == BESTELLING_MUTATIE_WEDSTRIJD_AFMELDEN:
-            self.stdout.write('[INFO] Verwerk mutatie %s: afmelden voor wedstrijd' % mutatie.pk)
-            self._verwerk_mutatie_wedstrijd_afmelden(mutatie)
-
-        elif code == BESTELLING_MUTATIE_EVENEMENT_AFMELDEN:
-            self.stdout.write('[INFO] Verwerk mutatie %s: afmelden voor evenement' % mutatie.pk)
-            self._verwerk_mutatie_evenement_afmelden(mutatie)
-
-        elif code == BESTELLING_MUTATIE_OPLEIDING_AFMELDEN:
-            self.stdout.write('[INFO] Verwerk mutatie %s: afmelden voor opleiding' % mutatie.pk)
-            self._verwerk_mutatie_opleiding_afmelden(mutatie)
-
-        elif code == BESTELLING_MUTATIE_BETALING_AFGEROND:
-            self.stdout.write('[INFO] Verwerk mutatie %s: betaling afgerond' % mutatie.pk)
-            self._verwerk_mutatie_betaling_afgerond(mutatie)
-
-        elif code == BESTELLING_MUTATIE_OVERBOEKING_ONTVANGEN:
-            self.stdout.write('[INFO] Verwerk mutatie %s: overboeking ontvangen' % mutatie.pk)
-            self._verwerk_mutatie_overboeking_ontvangen(mutatie)
+        try:
+            mutatie_code_verwerk_functie = self.HANDLERS[code]
+        except KeyError:
+            self.stdout.write('[ERROR] Onbekende mutatie code %s (pk=%s)' % (code, mutatie.pk))
+        else:
+            mutatie_code_verwerk_functie(self, mutatie)
 
         # elif code == BESTELLING_MUTATIE_RESTITUTIE_UITBETAALD:
         #     self.stdout.write('[INFO] Verwerk mutatie %s: restitutie uitbetaald' % mutatie.pk)
         #     verwerk_mutatie_restitutie_uitbetaald(stdout, mutatie)
-
-        elif code == BESTELLING_MUTATIE_ANNULEER:
-            self.stdout.write('[INFO] Verwerk mutatie %s: annuleer bestelling' % mutatie.pk)
-            self._verwerk_mutatie_annuleer_bestelling(mutatie)
-
-        elif code == BESTELLING_MUTATIE_TRANSPORT:
-            self.stdout.write('[INFO] Verwerk mutatie %s: wijzig transport' % mutatie.pk)
-            self._verwerk_mutatie_transport(mutatie)
-
-        else:
-            self.stdout.write('[ERROR] Onbekende mutatie code %s (pk=%s)' % (code, mutatie.pk))
-
-
 
 
 def _btw_optellen(regels: list[BestellingRegel]) -> dict:

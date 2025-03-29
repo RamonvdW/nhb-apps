@@ -46,7 +46,7 @@ class Command(BaseCommand):
             # full traceback to syslog
             my_logger.error(tb_msg)
 
-            self.stderr.write('[ERROR] Onverwachte fout tijdens reistijd_bijwerken: ' + str(exc))
+            self.stderr.write('[ERROR] Onverwachte fout (%s) tijdens reistijd_bijwerken: %s' % (type(exc), str(exc)))
             self.stderr.write('Traceback:')
             self.stderr.write(''.join(lst))
 

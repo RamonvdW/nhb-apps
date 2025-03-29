@@ -72,7 +72,7 @@ class Command(BaseCommand):
             tups = sys.exc_info()
             lst = traceback.format_tb(tups[2])
 
-            self.stderr.write('[ERROR] Onverwachte fout tijdens import_crm_json: ' + str(exc))
+            self.stderr.write('[ERROR] Onverwachte fout (%s) tijdens dump_educations: %s' % (type(exc), str(exc)))
             self.stderr.write('Traceback:')
             self.stderr.write(''.join(lst))
 

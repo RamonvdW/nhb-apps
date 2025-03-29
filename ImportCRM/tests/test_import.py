@@ -789,7 +789,8 @@ class TestImportCRMImport(E2EHelpers, TestCase):
                                   stdout=f2)
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
-        self.assertTrue("[ERROR] Onverwachte fout tijdens import_crm_json: crash test" in f1.getvalue())
+        self.assertTrue("[ERROR] Onverwachte fout (" in f1.getvalue())
+        self.assertTrue("tijdens import_crm_json: crash test" in f1.getvalue())
 
         self.assertEqual(1, MailQueue.objects.count())
 

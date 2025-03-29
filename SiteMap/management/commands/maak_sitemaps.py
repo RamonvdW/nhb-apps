@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2024 Ramon van der Winkel.
+#  Copyright (c) 2024-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -159,7 +159,7 @@ class Command(BaseCommand):
             # full traceback to syslog
             my_logger.error(tb_msg)
 
-            self.stderr.write('[ERROR] Onverwachte fout tijdens maak_sitemaps: ' + str(exc))
+            self.stderr.write('[ERROR] Onverwachte fout (%s) tijdens maak_sitemaps: %s' % (type(exc), str(exc)))
             self.stderr.write('Traceback:')
             self.stderr.write(''.join(lst))
 

@@ -1777,7 +1777,7 @@ class Command(BaseCommand):
             # full traceback to syslog
             my_logger.error(tb_msg)
 
-            self.stderr.write('[ERROR] Onverwachte fout tijdens regiocomp_mutaties: ' + str(exc))
+            self.stderr.write('[ERROR] Onverwachte fout (%s) tijdens regiocomp_mutaties: %s' % (type(exc), str(exc)))
             self.stderr.write('Traceback:')
             self.stderr.write(''.join(lst))
 

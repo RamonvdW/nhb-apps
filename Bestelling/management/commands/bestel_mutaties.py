@@ -188,7 +188,7 @@ class Command(BaseCommand):
             tb_msg_start = 'Onverwachte fout tijdens bestel_mutaties\n'
             tb_msg_start += '\n'
 
-            self.stderr.write('[ERROR] Onverwachte fout tijdens bestel_mutaties: ' + str(exc))
+            self.stderr.write('[ERROR] Onverwachte fout (%s) tijdens bestel_mutaties: %s' % (type(exc), str(exc)))
             self.stderr.write('Traceback:')
             self.stderr.write(''.join(lst))
 

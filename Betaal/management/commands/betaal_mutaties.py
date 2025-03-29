@@ -606,7 +606,7 @@ class Command(BaseCommand):
             tb_msg_start = 'Onverwachte fout tijdens betaal_mutaties\n'
             tb_msg_start += '\n'
 
-            self.stderr.write('[ERROR] Onverwachte fout tijdens betaal_mutaties: ' + str(exc))
+            self.stderr.write('[ERROR] Onverwachte fout (%s) tijdens betaal_mutaties: %s' % (type(exc), str(exc)))
             self.stderr.write('Traceback:')
             self.stderr.write(''.join(lst))
 

@@ -227,7 +227,7 @@ class TestBestellingOverboeking(E2EHelpers, TestCase):
         resp = self.client.get(self.url_overboeking_ontvangen)
         self.assert403(resp)
 
-    def NOT_test_invoeren(self):
+    def test_invoeren(self):
         self.e2e_login_and_pass_otp(self.account_admin)
         self.e2e_wissel_naar_functie(self.functie_hwl)
         self.e2e_check_rol('HWL')
@@ -240,7 +240,7 @@ class TestBestellingOverboeking(E2EHelpers, TestCase):
 
         self.e2e_assert_other_http_commands_not_supported(self.url_overboeking_ontvangen, post=False)
 
-        # gaan parameters --> invoerscherm wordt weer getoond
+        # geen parameters --> invoerscherm wordt weer getoond
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_overboeking_ontvangen)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
@@ -294,6 +294,7 @@ class TestBestellingOverboeking(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('bestelling/overboeking-ontvangen.dtl', 'plein/site_layout.dtl'))
+
         # coverage: 2e verzoek voor dezelfde mutatie
         resp = self.client.post(self.url_overboeking_ontvangen,
                                 {'kenmerk': '1234', 'bedrag': '10,50', 'actie': 'registreer', 'snel': '1'})
@@ -341,7 +342,7 @@ class TestBestellingOverboeking(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('bestelling/overboeking-ontvangen.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, 'Bestelnummer is niet voor jullie vereniging')
 
-    def NOT_test_mww(self):
+    def test_mww(self):
         self.e2e_login_and_pass_otp(self.account_admin)
         self.e2e_wissel_naar_functie(self.functie_mww)
 
