@@ -5,19 +5,21 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.conf import settings
+from django.urls import reverse
 from django.utils import timezone
 from BasisTypen.definities import ORGANISATIE_IFAA
 from Bestelling.definities import BESTELLING_REGEL_CODE_WEDSTRIJD, BESTELLING_KORT_BREAK
 from Bestelling.bestel_plugin_base import BestelPluginBase
 from Bestelling.models import BestellingRegel
 from Betaal.format import format_bedrag_euro
+from Kalender.view_maand import maak_compacte_wanneer_str
 from Mailer.operations import mailer_email_is_valide, mailer_queue_email, render_email_template
 from Wedstrijden.definities import (WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_MANDJE,
                                     WEDSTRIJD_INSCHRIJVING_STATUS_BESTELD,
                                     WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF,
                                     WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD,
                                     WEDSTRIJD_INSCHRIJVING_STATUS_VERWIJDERD)
-from Wedstrijden.models import WedstrijdInschrijving, WedstrijdKorting, beschrijf_korting
+from Wedstrijden.models import WedstrijdInschrijving, Wedstrijd, WedstrijdKorting, beschrijf_korting
 from decimal import Decimal
 import datetime
 
@@ -287,6 +289,37 @@ class WedstrijdBestelPlugin(BestelPluginBase):
             self.stdout.write(
                 '[ERROR] Kan WedstrijdInschrijving voor regel met pk=%s niet vinden {get_verkoper_ver_nr}' % regel.pk)
         return ver_nr
+
+    def wil_kwalificatiescores(self, regel: BestellingRegel) -> Wedstrijd | None:
+        """
+            Controleer of de bestelling invoer van kwalificatiescores nodig heeft
+            Verwachting: regel.code == BESTELLING_REGEL_CODE_WEDSTRIJD
+            Geeft een lijst van Wedstrijd records terug met daarin:
+                - datum_str
+                - plaats_str
+                - sporter_str
+                - url_kwalificatie_scores    Voor het bijwerken van de kwalificatie scores
+        """
+        inschrijving = (WedstrijdInschrijving
+                        .objects
+                        .filter(bestelling=regel)
+                        .select_related('wedstrijd',
+                                        'wedstrijd__locatie',
+                                        'sporterboog__sporter')
+                        .first())
+        if inschrijving:
+            wedstrijd = inschrijving.wedstrijd
+
+            if wedstrijd.eis_kwalificatie_scores:  # TODO: einddatum voor wijzigingen
+
+                wedstrijd.datum_str = maak_compacte_wanneer_str(wedstrijd.datum_begin, wedstrijd.datum_einde)
+                wedstrijd.plaats_str = wedstrijd.locatie.plaats
+                wedstrijd.sporter_str = inschrijving.sporterboog.sporter.lid_nr_en_volledige_naam()
+                wedstrijd.url_kwalificatie_scores = reverse('WedstrijdInschrijven:inschrijven-kwalificatie-scores',
+                                                            kwargs={'inschrijving_pk': inschrijving.pk})
+                return wedstrijd
+
+        return None
 
 
 class WedstrijdKortingBestelPlugin(BestelPluginBase):

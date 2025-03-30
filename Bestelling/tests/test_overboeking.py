@@ -10,7 +10,7 @@ from django.utils import timezone
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse
 from Bestelling.definities import (BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_BETALING_ACTIEF,
                                    BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_GEANNULEERD,
-                                   BESTELLING_REGEL_CODE_WEBWINKEL)
+                                   BESTELLING_REGEL_CODE_WEBWINKEL, BESTELLING_REGEL_CODE_WEDSTRIJD)
 from Bestelling.models import Bestelling, BestellingMutatie, BestellingRegel
 from Betaal.models import BetaalInstellingenVereniging
 from Functie.models import Functie
@@ -123,7 +123,8 @@ class TestBestellingOverboeking(E2EHelpers, TestCase):
 
         regel = BestellingRegel(
                     korte_beschrijving='wedstrijd',
-                    bedrag_euro=Decimal(10.0))
+                    bedrag_euro=Decimal(10.0),
+                    code=BESTELLING_REGEL_CODE_WEDSTRIJD)
         regel.save()
 
         inschrijving = WedstrijdInschrijving(
@@ -298,6 +299,9 @@ class TestBestellingOverboeking(E2EHelpers, TestCase):
         # coverage: 2e verzoek voor dezelfde mutatie
         resp = self.client.post(self.url_overboeking_ontvangen,
                                 {'kenmerk': '1234', 'bedrag': '10,50', 'actie': 'registreer', 'snel': '1'})
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('bestelling/overboeking-ontvangen.dtl', 'plein/site_layout.dtl'))
 
         self.assertEqual(1, BestellingMutatie.objects.count())
         f1, f2 = self.verwerk_bestel_mutaties()
@@ -307,7 +311,7 @@ class TestBestellingOverboeking(E2EHelpers, TestCase):
         self.bestelling = Bestelling.objects.get(pk=self.bestelling.pk)
         self.assertEqual(self.bestelling.status, BESTELLING_STATUS_AFGEROND)
         self.assertEqual(1, self.bestelling.transacties.count())
-        transactie = self.bestelling.transacties.first()
+        # transactie = self.bestelling.transacties.first()
 
         # bestelling is al afgerond
         with self.assert_max_queries(20):
@@ -372,7 +376,7 @@ class TestBestellingOverboeking(E2EHelpers, TestCase):
         self.assertEqual(self.bestelling2.status, BESTELLING_STATUS_AFGEROND)
         self.assertEqual(1, self.bestelling2.transacties.count())
 
-    def NOT_test_afwijkend_bedrag(self):
+    def test_afwijkend_bedrag(self):
         self.e2e_login_and_pass_otp(self.account_admin)
         self.e2e_wissel_naar_functie(self.functie_mww)
 
@@ -384,7 +388,8 @@ class TestBestellingOverboeking(E2EHelpers, TestCase):
         self.assertEqual(0, self.bestelling2.transacties.count())
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_overboeking_ontvangen,
-                                    {'kenmerk': self.bestelling2.bestel_nr, 'bedrag': '1,00',  # moet zijn: 1,23
+                                    {'kenmerk': self.bestelling2.bestel_nr,
+                                     'bedrag': '1,00',  # moet zijn: 1,23
                                      'actie': 'registreer', 'snel': '1'})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -396,7 +401,8 @@ class TestBestellingOverboeking(E2EHelpers, TestCase):
 
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_overboeking_ontvangen,
-                                    {'kenmerk': self.bestelling2.bestel_nr, 'bedrag': '1,00',  # moet zijn: 1,23
+                                    {'kenmerk': self.bestelling2.bestel_nr,
+                                     'bedrag': '1,00',  # moet zijn: 1,23
                                      'actie': 'registreer', 'accept_bedrag': 'ja', 'snel': '1'})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)

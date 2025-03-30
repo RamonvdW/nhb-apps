@@ -659,8 +659,7 @@ class VerwerkBestelMutaties:
         transactie = maak_transactie_handmatige_overboeking(bestelling.mh_bestel_nr(), bedrag_euro)
         bestelling.transacties.add(transactie)
 
-        msg = "\n[%s] Bestelling heeft een overboeking van %s euro ontvangen" % (
-            when_str, bedrag_euro)
+        msg = "\n[%s] Bestelling heeft een overboeking van %s euro ontvangen" % (when_str, bedrag_euro)
         bestelling.log += msg
 
         # controleer of we voldoende ontvangen hebben
@@ -763,13 +762,13 @@ class VerwerkBestelMutaties:
         BESTELLING_MUTATIE_WEBWINKEL_KEUZE: _verwerk_mutatie_webwinkel_keuze,
         BESTELLING_MUTATIE_VERWIJDER: _verwerk_mutatie_verwijder_uit_mandje,
         BESTELLING_MUTATIE_MAAK_BESTELLINGEN: _verwerk_mutatie_maak_bestellingen,
-        BESTELLING_MUTATIE_WEDSTRIJD_AFMELDEN: _verwerk_mutatie_wedstrijd_afmelden,
-        BESTELLING_MUTATIE_EVENEMENT_AFMELDEN: _verwerk_mutatie_evenement_afmelden,
-        BESTELLING_MUTATIE_OPLEIDING_AFMELDEN: _verwerk_mutatie_opleiding_afmelden,
         BESTELLING_MUTATIE_BETALING_AFGEROND: _verwerk_mutatie_betaling_afgerond,
         BESTELLING_MUTATIE_OVERBOEKING_ONTVANGEN: _verwerk_mutatie_overboeking_ontvangen,
         BESTELLING_MUTATIE_ANNULEER: _verwerk_mutatie_annuleer_bestelling,
-        BESTELLING_MUTATIE_TRANSPORT: _verwerk_mutatie_transport
+        BESTELLING_MUTATIE_TRANSPORT: _verwerk_mutatie_transport,
+        BESTELLING_MUTATIE_WEDSTRIJD_AFMELDEN: _verwerk_mutatie_wedstrijd_afmelden,
+        BESTELLING_MUTATIE_EVENEMENT_AFMELDEN: _verwerk_mutatie_evenement_afmelden,
+        BESTELLING_MUTATIE_OPLEIDING_AFMELDEN: _verwerk_mutatie_opleiding_afmelden,
     }
 
     def verwerk(self, mutatie: BestellingMutatie):
@@ -780,7 +779,7 @@ class VerwerkBestelMutaties:
         except KeyError:
             self.stdout.write('[ERROR] Onbekende mutatie code %s (pk=%s)' % (code, mutatie.pk))
         else:
-            mutatie_code_verwerk_functie(self, mutatie)
+            mutatie_code_verwerk_functie(self, mutatie)     # noqa
 
         # elif code == BESTELLING_MUTATIE_RESTITUTIE_UITBETAALD:
         #     self.stdout.write('[INFO] Verwerk mutatie %s: restitutie uitbetaald' % mutatie.pk)

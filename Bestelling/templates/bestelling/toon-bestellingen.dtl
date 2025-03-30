@@ -73,14 +73,16 @@
                     <td>Neem contact op met de organisator</td>
                     <td></td>
                 </tr>
-                <tr>
-                    <td>Vragen over bestellingen in de <b>webshop</b></td>
-                    <td><code>{{ email_webshop }}</code></td>
-                    <td>
-                        <a class="btn-sv-rood" href="mailto:{{ email_webshop }}">
-                            <i class="notranslate material-icons-round">mail</i></a>
-                    </td>
-                </tr>
+                {% if email_webshop %}
+                    <tr>
+                        <td>Vragen over bestellingen in de <b>webshop</b></td>
+                        <td><code>{{ email_webshop }}</code></td>
+                        <td>
+                            <a class="btn-sv-rood" href="mailto:{{ email_webshop }}">
+                                <i class="notranslate material-icons-round">mail</i></a>
+                        </td>
+                    </tr>
+                {% endif %}
                 {% if email_opleidingen %}
                     <tr>
                         <td>Vragen over bestelde <b>opleidingen</b></td>

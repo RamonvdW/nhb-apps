@@ -5,6 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.conf import settings
+from django.http import Http404
 from django.utils import timezone
 from django.shortcuts import redirect, reverse
 from django.views.generic import TemplateView
@@ -343,6 +344,9 @@ class ProfielView(UserPassesTestMixin, TemplateView):
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
+
+        if not self.sporter:
+            raise Http404('Sporter niet gevonden')
 
         self.voorkeuren = get_sporter_voorkeuren(self.sporter)
 

@@ -6,7 +6,7 @@
 
 from django.urls import path
 from Bestelling import (view_mandje, view_bestelling, view_activiteit, view_overboeking,
-                        view_kies_transport, view_afleveradres)
+                        view_kies_transport, view_afleveradres, view_afrekenen)
 
 app_name = 'Bestelling'
 
@@ -26,10 +26,14 @@ urlpatterns = [
          view_kies_transport.KiesTransportView.as_view(),
          name='kies-transport'),
 
+
+    # afleveradres
     path('mandje/afleveradres/',
          view_afleveradres.WijzigAfleveradresView.as_view(),
          name='wijzig-afleveradres'),
 
+
+    # bestelling
     path('overzicht/',
          view_bestelling.ToonBestellingenView.as_view(),
          name='toon-bestellingen'),
@@ -38,20 +42,22 @@ urlpatterns = [
          view_bestelling.ToonBestellingDetailsView.as_view(),
          name='toon-bestelling-details'),
 
-    path('afrekenen/<bestel_nr>/',
-         view_bestelling.BestellingAfrekenenView.as_view(),
-         name='bestelling-afrekenen'),
-
     path('annuleer/<bestel_nr>/',
          view_bestelling.AnnuleerBestellingView.as_view(),
          name='annuleer-bestelling'),
 
+
+    # afrekenen
+    path('afrekenen/<bestel_nr>/',
+         view_afrekenen.BestellingAfrekenenView.as_view(),
+         name='bestelling-afrekenen'),
+
     path('check-status/<bestel_nr>/',
-         view_bestelling.DynamicBestellingCheckStatus.as_view(),
+         view_afrekenen.DynamicBestellingCheckStatus.as_view(),
          name='dynamic-check-status'),
 
     path('na-de-betaling/<bestel_nr>/',
-         view_bestelling.BestellingAfgerondView.as_view(),
+         view_afrekenen.BestellingAfgerondView.as_view(),
          name='na-de-betaling'),
 
 

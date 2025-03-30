@@ -73,4 +73,15 @@ class BestelPluginBase:
         """
         raise NotImplementedError(regel)        # pragma: no cover
 
+    def wil_kwalificatiescores(self, regel: BestellingRegel) -> object | None:
+        """
+            Controleer of deze regel invoer van kwalificatiescores nodig heeft.
+            Zoja, geeft Wedstrijd records terug met daarin:
+                - datum_str
+                - plaats_str
+                - sporter_str
+                - url_kwalificatie_scores    Voor het bijwerken van de kwalificatie scores
+        """
+        raise NotImplementedError(regel)        # pragma: no cover
+
 # end of file
