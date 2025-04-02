@@ -1,7 +1,7 @@
 #!/bin/bash
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -11,6 +11,7 @@
 "exec" "python3" "-u" "$0" "$@"     # noqa
 
 from django.core.management import execute_from_command_line
+from Site.core.main_exceptions import SpecificExitCode
 from TestHelpers.template_status import end_of_run
 from traceback import StackSummary
 import sys
@@ -65,6 +66,12 @@ def main():
 
         # if stars:                   # pragma: no cover
         #     print("\nDone!")
+
+    except SpecificExitCode as exc:
+        code = exc.args[0]
+        print('\nSpecific exit code: %s' % repr(code))
+        sys.exit(code)
+
     except (KeyboardInterrupt, SystemExit):       # pragma: no cover
         print('\nInterrupted!')
         sys.exit(3)                 # allows test suite to detect test abort
