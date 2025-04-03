@@ -9,7 +9,6 @@
 from django.core.management.base import BaseCommand
 from Site.core.main_exceptions import SpecificExitCode
 import json
-import sys
 
 # expected keys at each level
 EXPECTED_DATA_KEYS = ('rayons', 'regions', 'clubs', 'members')
@@ -40,7 +39,7 @@ class Command(BaseCommand):
         parser.add_argument('max_club_changes', type=int, help="Maximum aantal wijzigingen in sectie 'clubs'")
         parser.add_argument('max_member_changes', type=int, help="Maximum aantal wijzigingen in sectie 'members'")
 
-    def _check_keys(self, keys, expected_keys, optional_keys, level):
+    def _check_keys(self, keys, expected_keys, level):
         has_error = False
         keys = list(keys)
         for key in expected_keys:
@@ -51,11 +50,6 @@ class Command(BaseCommand):
                                     repr(key), repr(level)))
                 has_error = True
         # for
-        for key in optional_keys:
-            try:
-                keys.remove(key)
-            except ValueError:
-                pass
         if len(keys):
             self.stdout.write("[WARNING] Extra sleutel aanwezig in de %s data: %s" % (repr(level), repr(keys)))
         return has_error
@@ -74,7 +68,7 @@ class Command(BaseCommand):
             self.stderr.write("[ERROR] Bestand heeft unicode problemen (%s)" % str(exc))
             return
 
-        if self._check_keys(data.keys(), EXPECTED_DATA_KEYS, (), "top-level"):
+        if self._check_keys(data.keys(), EXPECTED_DATA_KEYS, "top-level"):
             return
 
         for key in EXPECTED_DATA_KEYS:
@@ -117,18 +111,26 @@ class Command(BaseCommand):
                 self.stdout.write('   +club %s' % ver_nr)
             else:
                 self._diff_club(ver_nr, club1, club2)
+                del clubs[ver_nr]
+        # for
+
+        for ver_nr in clubs.keys():
+            self.stdout.write('   -club %s' % ver_nr)
+            self.club_changes += 1
         # for
 
     def _diff_member(self, lid_nr, member1, member2):
         first = True
         keys = set(list(member1.keys()) + list(member2.keys()))
         for key in keys:
-            val1 = member1[key]
-            val2 = member2[key]
+            val1 = member1.get(key, None)
+            val2 = member2.get(key, None)
             if val1 != val2:
                 if first:
                     self.stdout.write('    lid %s' % lid_nr)
                     first = False
+                val1 = str(val1).replace('\n', '; ')
+                val2 = str(val2).replace('\n', '; ')
                 self.stdout.write('        -%s: %s' % (key, val1))
                 self.stdout.write('        +%s: %s' % (key, val2))
                 self.member_changes += 1
@@ -151,6 +153,12 @@ class Command(BaseCommand):
                 self.stdout.write('   +lid: %s' % lid_nr)
             else:
                 self._diff_member(lid_nr, member1, member2)
+                del members[lid_nr]
+        # for
+
+        for lid_nr in members.keys():
+            self.stdout.write('   -lid %s' % lid_nr)
+            self.member_changes += 1
         # for
 
     def _diff(self, data1, data2):
@@ -168,11 +176,12 @@ class Command(BaseCommand):
         self.stdout.write('   %s' % repr(fname2))
         json2 = self._load_json(fname2)
 
-        self._diff(json1, json2)
+        if json1 and json2:
+            self._diff(json1, json2)
 
-        self.stdout.write('totals:')
-        self.stdout.write('    club_changes: %s' % self.club_changes)
-        self.stdout.write('    member_changes: %s' % self.member_changes)
+            self.stdout.write('totals:')
+            self.stdout.write('    club_changes: %s' % self.club_changes)
+            self.stdout.write('    member_changes: %s' % self.member_changes)
 
         # sys.exit raises SystemExit, which is caught in manage.py, which changes the exit status to 3
         # but that is fine
@@ -184,6 +193,5 @@ class Command(BaseCommand):
         if self.club_changes > options['max_club_changes']:
             self.stdout.write('[ERROR] Too many club changes! (limit: %s)' % options['max_club_changes'])
             raise SpecificExitCode(2)
-
 
 # end of file

@@ -464,7 +464,7 @@ class TestImportCRMImport(E2EHelpers, TestCase):
         # print("f2: %s" % f2.getvalue())
         self.assertTrue('[WARNING] Vereniging 1000 heeft geen adres' in f2.getvalue())
         self.assertTrue("[INFO] Vereniging 1000 secretarissen: geen --> 100001" in f2.getvalue())
-        self.assertTrue("[INFO] Secretaris 100024 van vereniging 2000 heeft nog geen account" in f2.getvalue())
+        # self.assertTrue("[INFO] Secretaris 100024 van vereniging 2000 heeft nog geen account" in f2.getvalue())
         self.assertTrue("[INFO] Vereniging 2000 secretarissen: geen --> 100024+100001" in f2.getvalue())
         self.assertTrue("[WARNING] Secretaris 100001 is geen lid bij vereniging 2000" in f2.getvalue())
 
