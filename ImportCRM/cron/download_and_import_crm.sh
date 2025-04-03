@@ -11,10 +11,6 @@ SPOOL_DIR="/var/spool/crm"
 CONFIG_FILE="download_crm_config.txt"
 USER_WWW="$1"
 
-# maximum number of changes allowed without human check
-MAX_CLUB_CHANGES=20
-MAX_MEMBER_CHANGES=50
-
 ID=$(id -u)
 ID_ROOT=$(id -u root)
 ID_WWW=$(id -u "$USER_WWW")
@@ -110,7 +106,7 @@ then
         then
             echo "[INFO] Checking differences with previous import"
             # -u = unbuffered --> needed to maintain the order of stdout and stderr lines
-            python3 -u ./manage.py diff_crm_jsons "$OLD_CRM" "$TMP_FILE" $MAX_CLUB_CHANGES $MAX_MEMBER_CHANGES &>> "$LOG"
+            python3 -u ./manage.py diff_crm_jsons "$OLD_CRM" "$TMP_FILE" &>> "$LOG"
             DIFF_RES=$?
         else
             echo "[WARNING] No previous data set to diff against"

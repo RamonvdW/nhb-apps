@@ -6,6 +6,7 @@
 
 from django.test import TestCase
 from django.core.management import call_command
+from ImportCRM.models import ImportLimieten
 from TestHelpers.e2ehelpers import E2EHelpers
 from Site.core.main_exceptions import SpecificExitCode
 import io
@@ -57,8 +58,7 @@ class TestImportCRMImport(E2EHelpers, TestCase):
 
         f1, f2 = self.run_management_command(DIFF_CRM_JSONS_COMMAND,
                                              TESTFILE_NOT_EXISTING,
-                                             TESTFILE_NOT_EXISTING,
-                                             1, 1)
+                                             TESTFILE_NOT_EXISTING)
         self.assertTrue(f1.getvalue().startswith('[ERROR] Bestand kan niet gelezen worden'))
 
     def test_bad_json(self):
@@ -70,8 +70,7 @@ class TestImportCRMImport(E2EHelpers, TestCase):
 
         f1, f2 = self.run_management_command(DIFF_CRM_JSONS_COMMAND,
                                              TESTFILE_01_EMPTY,
-                                             TESTFILE_01_EMPTY,
-                                             1, 1)
+                                             TESTFILE_01_EMPTY)
         self.assertTrue(f1.getvalue().startswith('[ERROR] Probleem met het JSON formaat in bestand'))
 
     def test_import(self):
@@ -92,8 +91,7 @@ class TestImportCRMImport(E2EHelpers, TestCase):
 
         f1, f2 = self.run_management_command(DIFF_CRM_JSONS_COMMAND,
                                              TESTFILE_04_UNICODE_ERROR,
-                                             TESTFILE_04_UNICODE_ERROR,
-                                             1, 1)
+                                             TESTFILE_04_UNICODE_ERROR)
         self.assertTrue(
             "[ERROR] Bestand heeft unicode problemen ('rawunicodeescape' codec can't decode bytes in position 180-181:"
             in f1.getvalue())
@@ -121,8 +119,6 @@ class TestImportCRMImport(E2EHelpers, TestCase):
         call_command(DIFF_CRM_JSONS_COMMAND,
                      TESTFILE_02_INCOMPLETE,
                      TESTFILE_02_INCOMPLETE,
-                     1,
-                     1,
                      stderr=f1,  # noodzakelijk voor de test!
                      stdout=f2)
         # print("f1: %s" % f1.getvalue())
@@ -130,32 +126,52 @@ class TestImportCRMImport(E2EHelpers, TestCase):
         self.assertTrue('[ERROR] [FATAL] Verplichte sleutel' in f1.getvalue())
 
     def test_diff(self):
+
+        limieten = ImportLimieten.objects.first()
+
         # te veel member changes
+        limieten.use_limits = True
+        limieten.max_member_changes = 1
+        limieten.max_club_changes = 1
+        limieten.save()
         with self.assertRaises(SpecificExitCode):
             f1, f2 = self.run_management_command(DIFF_CRM_JSONS_COMMAND,
                                                  TESTFILE_19_STR_NOT_NR,
-                                                 TESTFILE_23_DIPLOMA,
-                                                 1, 1)
+                                                 TESTFILE_23_DIPLOMA)
 
         # te veel club changes
+        limieten.max_member_changes = 50
+        limieten.max_club_changes = 1
+        limieten.save()
         with self.assertRaises(SpecificExitCode):
             f1, f2 = self.run_management_command(DIFF_CRM_JSONS_COMMAND,
                                                  TESTFILE_03_BASE_DATA,
-                                                 TESTFILE_09_LID_MUTATIES,
-                                                 1, 50)
+                                                 TESTFILE_09_LID_MUTATIES)
 
         # member changes
+        limieten.max_member_changes = 50
+        limieten.max_club_changes = 50
+        limieten.save()
         f1, f2 = self.run_management_command(DIFF_CRM_JSONS_COMMAND,
                                              TESTFILE_03_BASE_DATA,
-                                             TESTFILE_09_LID_MUTATIES,
-                                             50, 50)
+                                             TESTFILE_09_LID_MUTATIES)
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
 
         # geen clubs
+        limieten.max_member_changes = 10
+        limieten.max_club_changes = 10
+        limieten.save()
         f1, f2 = self.run_management_command(DIFF_CRM_JSONS_COMMAND,
                                              TESTFILE_07_NO_CLUBS,
-                                             TESTFILE_07_NO_CLUBS,
-                                             10, 10)
+                                             TESTFILE_07_NO_CLUBS)
+
+        # geen limieten
+        limieten.use_limits = False
+        limieten.save()
+        f1, f2 = self.run_management_command(DIFF_CRM_JSONS_COMMAND,
+                                             TESTFILE_03_BASE_DATA,
+                                             TESTFILE_09_LID_MUTATIES)
+
 
 # end of file

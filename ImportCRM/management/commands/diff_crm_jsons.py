@@ -7,6 +7,7 @@
 """ vergelijk twee JSON bestanden met data uit het CRM-systeem van de bond """
 
 from django.core.management.base import BaseCommand
+from ImportCRM.models import IMPORT_LIMIETEN_PK, ImportLimieten
 from Site.core.main_exceptions import SpecificExitCode
 import json
 
@@ -34,10 +35,11 @@ class Command(BaseCommand):
         self.club_changes = 0
         self.member_changes = 0
 
+        # haal de limieten uit de database
+        self.limieten = ImportLimieten.objects.filter(pk=IMPORT_LIMIETEN_PK).first()
+
     def add_arguments(self, parser):
         parser.add_argument('filenames', nargs=2, help="Pad naar twee JSON bestanden")
-        parser.add_argument('max_club_changes', type=int, help="Maximum aantal wijzigingen in sectie 'clubs'")
-        parser.add_argument('max_member_changes', type=int, help="Maximum aantal wijzigingen in sectie 'members'")
 
     def _check_keys(self, keys, expected_keys, level):
         has_error = False
@@ -186,12 +188,15 @@ class Command(BaseCommand):
         # sys.exit raises SystemExit, which is caught in manage.py, which changes the exit status to 3
         # but that is fine
 
-        if self.member_changes > options['max_member_changes']:
-            self.stdout.write('[ERROR] Too many member changes! (limit: %s)' % options['max_member_changes'])
-            raise SpecificExitCode(1)
+        if self.limieten.use_limits:
+            if self.member_changes > self.limieten.max_member_changes:
+                self.stdout.write('[ERROR] Too many member changes! (limit: %s)' % self.limieten.max_member_changes)
+                raise SpecificExitCode(1)
 
-        if self.club_changes > options['max_club_changes']:
-            self.stdout.write('[ERROR] Too many club changes! (limit: %s)' % options['max_club_changes'])
-            raise SpecificExitCode(2)
+            if self.club_changes > self.limieten.max_club_changes:
+                self.stdout.write('[ERROR] Too many club changes! (limit: %s)' % self.limieten.max_club_changes)
+                raise SpecificExitCode(2)
+        else:
+            self.stdout.write('[WARNING] Limieten zijn uitgeschakeld')
 
 # end of file
