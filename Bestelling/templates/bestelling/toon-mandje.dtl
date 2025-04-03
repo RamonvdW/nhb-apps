@@ -158,7 +158,6 @@
                             {% if not bevat_fout %}
                                 {% if kan_gesplitst_worden %}
                                     <tr>
-                                        <td class="hide-on-small-only"></td>
                                         <td colspan="3" class="center">Mandje kan worden opgesplitst in meerdere bestellingen (één per verkopende partij).</td>
                                     </tr>
                                 {% endif %}
