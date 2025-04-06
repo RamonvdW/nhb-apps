@@ -135,6 +135,7 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
                             koper=self.account_normaal)
         inschrijving.save()
         self.wedstrijd_inschrijving = inschrijving
+
     def test_anon(self):
         self.client.logout()
 
@@ -289,6 +290,11 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('bestelling/toon-bestelling-details.dtl', 'plein/site_layout.dtl'))
+
+        # coverage
+        self.assertFalse(regel.is_webwinkel())
+        regel.korte_beschrijving = "Dit is een erg lange beschrijving die afgekapt gaat worden op 60 tekens"
+        self.assertTrue(str(regel) != '')
 
     def test_details_mislukt(self):
         self.e2e_login(self.account_normaal)

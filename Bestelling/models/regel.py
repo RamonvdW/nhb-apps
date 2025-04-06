@@ -53,7 +53,7 @@ class BestellingRegel(models.Model):
         msg = self.korte_beschrijving[:60]
         if len(self.korte_beschrijving) > 60:
             msg += '..'
-        return "[%s] %s %s" % (self.pk, self.code, msg)
+        return "[%s] %s: %s" % (self.pk, self.code, msg)
 
     class Meta:
         verbose_name = "Bestelling regel"

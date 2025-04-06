@@ -11,9 +11,26 @@ from Bestelling.models import BestellingRegel, BestellingMandje, Bestelling, Bes
 from Vereniging.models import Vereniging
 
 
+class BtwFilter(admin.SimpleListFilter):
+
+    title = 'btw'
+
+    parameter_name = 'btw'
+
+    def lookups(self, request, model_admin):
+        return (
+            ('Ja', 'Heeft BTW'),
+        )
+
+    def queryset(self, request, queryset):
+        if self.value() == 'Ja':
+            queryset = queryset.exclude(btw_percentage='')
+        return queryset
+
+
 class BestellingRegelAdmin(admin.ModelAdmin):
 
-    list_filter = ('code', )
+    list_filter = ('code', BtwFilter)
 
     search_fields = ('korte_beschrijving', )
 

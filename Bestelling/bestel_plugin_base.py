@@ -60,7 +60,7 @@ class BestelPluginBase:
         """
         raise NotImplementedError()             # pragma: no cover
 
-    def bereken_verzendkosten(self, obj: BestellingMandje | Bestelling) -> Decimal:
+    def bereken_verzendkosten(self, obj: BestellingMandje | Bestelling) -> (Decimal, str, Decimal):
         """
             Bereken de verzendkosten van toepassing op het mandje of de bestelling
         """

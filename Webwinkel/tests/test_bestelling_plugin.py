@@ -104,10 +104,8 @@ class TestWebwinkelBestellingPlugin(E2EHelpers, TestCase):
                     wanneer=vervallen,
                     status=KEUZE_STATUS_RESERVERING_MANDJE,
                     bestelling=regel1,
-                    koper=self.account_100000,
                     product=self.product,
-                    aantal=1,
-                    totaal_euro=Decimal(10.22))
+                    aantal=1)
         keuze1.save()
 
         regel2 = BestellingRegel(
@@ -120,10 +118,8 @@ class TestWebwinkelBestellingPlugin(E2EHelpers, TestCase):
                     wanneer=vervallen,
                     status=KEUZE_STATUS_RESERVERING_MANDJE,
                     bestelling=regel2,
-                    koper=self.account_100000,
                     product=self.product,
-                    aantal=1,
-                    totaal_euro=Decimal(10.22))
+                    aantal=1)
         keuze2.save()
 
         self.mandje.regels.add(regel1)
@@ -155,10 +151,8 @@ class TestWebwinkelBestellingPlugin(E2EHelpers, TestCase):
                     wanneer=timezone.now(),
                     status=KEUZE_STATUS_RESERVERING_MANDJE,
                     bestelling=None,
-                    koper=self.account_100000,
                     product=self.product,
-                    aantal=1,
-                    totaal_euro=Decimal(10.22))
+                    aantal=1)
         keuze.save()
 
         regel = plugin.reserveer(keuze, 'Mandje test')
@@ -199,10 +193,8 @@ class TestWebwinkelBestellingPlugin(E2EHelpers, TestCase):
                     wanneer=timezone.now(),
                     status=KEUZE_STATUS_RESERVERING_MANDJE,
                     bestelling=regel,
-                    koper=self.account_100000,
                     product=self.product,
-                    aantal=1,
-                    totaal_euro=Decimal(10.22))
+                    aantal=1)
         keuze.save()
 
         n = self.product.aantal_op_voorraad
@@ -220,10 +212,8 @@ class TestWebwinkelBestellingPlugin(E2EHelpers, TestCase):
                     wanneer=timezone.now(),
                     status=KEUZE_STATUS_RESERVERING_MANDJE,
                     bestelling=regel,
-                    koper=self.account_100000,
                     product=self.product,
-                    aantal=1,
-                    totaal_euro=Decimal(10.22))
+                    aantal=1)
         keuze.save()
 
         plugin.annuleer(regel)
@@ -246,10 +236,8 @@ class TestWebwinkelBestellingPlugin(E2EHelpers, TestCase):
                     wanneer=timezone.now(),
                     status=KEUZE_STATUS_RESERVERING_MANDJE,
                     bestelling=regel,
-                    koper=self.account_100000,
                     product=self.product,
-                    aantal=1,
-                    totaal_euro=Decimal(10.22))
+                    aantal=1)
         keuze.save()
 
         plugin.is_besteld(regel)
@@ -284,17 +272,14 @@ class TestWebwinkelBestellingPlugin(E2EHelpers, TestCase):
                     wanneer=timezone.now(),
                     status=KEUZE_STATUS_RESERVERING_MANDJE,
                     bestelling=regel,
-                    koper=self.account_100000,
                     product=self.product,
-                    aantal=1,
-                    totaal_euro=Decimal(10.22))
+                    aantal=1)
         keuze.save()
 
         plugin.is_betaald(regel, bedrag_ontvangen)
 
         keuze.refresh_from_db()
         self.assertEqual(keuze.status, KEUZE_STATUS_BACKOFFICE)
-        self.assertEqual(round(keuze.ontvangen_euro, 2), round(bedrag_ontvangen, 2))
         self.assertTrue("] Betaling is ontvangen" in keuze.log)
 
         # coverage
@@ -343,10 +328,8 @@ class TestWebwinkelBestellingPlugin(E2EHelpers, TestCase):
                     wanneer=timezone.now(),
                     status=KEUZE_STATUS_RESERVERING_MANDJE,
                     bestelling=regel,
-                    koper=self.account_100000,
                     product=self.product,
-                    aantal=1,
-                    totaal_euro=Decimal(10.22))
+                    aantal=1)
         keuze2.save()
 
         # pakketpost

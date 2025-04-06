@@ -36,6 +36,7 @@ class TestOpleidingAfmelden(E2EHelpers, TestCase):
     url_bestelling_overzicht = '/bestel/overzicht/'
     url_afmelden = '/opleiding/afmelden/%s/'                    # inschrijving_pk
     url_aanmeldingen = '/opleiding/aanmeldingen/%s/'            # opleiding_pk
+    url_afmelding_details = '/opleiding/details-afmelding/%s/'  # afmelding_pk
 
     def setUp(self):
         """ initialisatie van de test case """
@@ -248,5 +249,14 @@ class TestOpleidingAfmelden(E2EHelpers, TestCase):
         self.verwerk_bestel_mutaties()
 
         self.assertEqual(OpleidingAfgemeld.objects.count(), 1)
+        afmelding = OpleidingAfgemeld.objects.first()
+
+        # vraag de details van de afmelding op
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_afmelding_details % afmelding.pk)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('opleiding/afmelding-details.dtl', 'plein/site_layout.dtl'))
+
 
 # end of file

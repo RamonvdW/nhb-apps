@@ -17,6 +17,7 @@ from Registreer.models import GastRegistratie
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
+from Webwinkel.definities import VERZENDKOSTEN_PAKKETPOST
 from Webwinkel.models import WebwinkelProduct, WebwinkelKeuze
 from decimal import Decimal
 
@@ -86,16 +87,15 @@ class TestBestellingGast(E2EHelpers, TestCase):
                         aantal_op_voorraad=10,
                         eenheid='meervoud',
                         bestel_begrenzing='1-5',
-                        prijs_euro="1.23")
+                        prijs_euro=Decimal(1.23),
+                        type_verzendkosten=VERZENDKOSTEN_PAKKETPOST)
         product.save()
         self.product = product
 
         keuze = WebwinkelKeuze(
                         wanneer=now,
-                        koper=self.account_gast,
                         product=product,
                         aantal=1,
-                        totaal_euro=Decimal('1.23'),
                         log='test')
         keuze.save()
         self.keuze = keuze
@@ -164,7 +164,9 @@ class TestBestellingGast(E2EHelpers, TestCase):
         mail = MailQueue.objects.first()
         self.assert_email_html_ok(mail, 'email_bestelling/bevestig-bestelling.dtl')
         self.assert_consistent_email_html_text(mail, ignore=('>Bedrag:', '>Korting:'))
+        # self.e2e_show_email_in_browser(mail)
         self.assertTrue('Verzendkosten' in mail.mail_text)
+        self.assertTrue('10,42' in mail.mail_text)
 
         self.assertTrue('Adresregel1' in mail.mail_text)
         self.assertTrue('Adresregel2' in mail.mail_text)

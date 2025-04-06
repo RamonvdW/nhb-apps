@@ -37,13 +37,7 @@
                 {% endfor %}
 
                 <!-- verzendkosten -->
-                {% if bestelling.verzendkosten_euro > 0 %}
-                    <tr>
-                        <td class="hide-on-small-only" style="padding-left:20px"></td>
-                        <td>Verzendkosten</td>
-                        <td class="right-align" style="padding-right:20px">&euro;&nbsp;{{ bestelling.verzendkosten_euro }}</td>
-                    </tr>
-                {% elif transport_ophalen %}
+                {% if transport_ophalen %}
                     <!-- ophalen -->
                     <tr>
                         <td class="hide-on-small-only" style="padding-left:20px"></td>

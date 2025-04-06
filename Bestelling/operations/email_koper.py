@@ -35,20 +35,6 @@ def _beschrijf_bestelling(bestelling: Bestelling) -> list:
         regel.bedrag_euro_str = format_bedrag_euro(regel.bedrag_euro)
     # for
 
-    # voeg de eventuele verzendkosten toe als aparte regel op de bestelling
-    if bestelling.verzendkosten_euro > 0.001:
-
-        verzendkosten_euro_str = format_bedrag_euro(bestelling.verzendkosten_euro)
-
-        # nieuwe regel op de bestelling
-        regel_nr += 1
-        regel = SimpleNamespace(
-                        regel_nr=regel_nr,
-                        beschrijving=["Verzendkosten"],       # TODO: specialiseren in pakket/briefpost
-                        # geen btw op transport
-                        bedrag_euro_str=verzendkosten_euro_str)
-        regels.append(regel)
-
     if bestelling.transport == BESTELLING_TRANSPORT_OPHALEN:
 
         nul_euro_str = format_bedrag_euro(Decimal(0))

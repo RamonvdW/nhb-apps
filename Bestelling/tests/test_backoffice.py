@@ -4,261 +4,241 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
+from django.conf import settings
 from django.test import TestCase
 from django.utils import timezone
-from BasisTypen.models import BoogType, KalenderWedstrijdklasse
-from Bestelling.definities import (BESTELLING_STATUS_BETALING_ACTIEF, BESTELLING_STATUS_AFGEROND,
-                                   BESTELLING_REGEL_CODE_WEBWINKEL, BESTELLING_REGEL_CODE_WEDSTRIJD,
-                                   BESTELLING_REGEL_CODE_WEDSTRIJD_KORTING)
-from Bestelling.models import Bestelling, BestellingMutatie, BestellingRegel
-from Betaal.definities import TRANSACTIE_TYPE_MOLLIE_PAYMENT, TRANSACTIE_TYPE_MOLLIE_RESTITUTIE
-from Betaal.models import BetaalInstellingenVereniging, BetaalTransactie
+from Bestelling.definities import BESTELLING_STATUS_AFGEROND, BESTELLING_TRANSPORT_VERZEND, BESTELLING_TRANSPORT_OPHALEN
+from Bestelling.models import BestellingMandje, Bestelling
+from Bestelling.operations.mutaties import (bestel_mutatieverzoek_webwinkel_keuze,
+                                            bestel_mutatieverzoek_maak_bestellingen)
+from Bestelling.operations.email_backoffice import stuur_email_webwinkel_backoffice
+from Betaal.models import BetaalInstellingenVereniging
 from Functie.models import Functie
 from Geo.models import Regio
-from Locatie.models import WedstrijdLocatie
 from Mailer.models import MailQueue
-from Sporter.models import Sporter, SporterBoog
-from Vereniging.models import Vereniging
-from Webwinkel.models import WebwinkelProduct, WebwinkelKeuze
-from Wedstrijden.definities import WEDSTRIJD_INSCHRIJVING_STATUS_BESTELD, WEDSTRIJD_KORTING_COMBI
-from Wedstrijden.models import Wedstrijd, WedstrijdSessie, WedstrijdInschrijving, WedstrijdKorting
+from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
+from TestHelpers.betaal_sim import fake_betaling
+from Vereniging.models import Vereniging
+from Webwinkel.definities import VERZENDKOSTEN_BRIEFPOST
+from Webwinkel.models import WebwinkelProduct, WebwinkelKeuze
 from decimal import Decimal
 
 
-class TestBestelBetaling(E2EHelpers, TestCase):
+class TestBestellingBackoffice(E2EHelpers, TestCase):
 
-    """ tests voor de applicatie Bestel: verstuur mail backoffice Webwinkel """
+    """ tests voor de applicatie Webwinkel: mail naar backoffice, na betaling """
 
-    test_after = ('Bestelling.tests.test_betaling', 'Bestelling.tests.test_overboeking')
+    test_after = ('Bestelling.tests.test_bestelling',)
 
-    url_overboeking_ontvangen = '/bestel/vereniging/overboeking-ontvangen/'
-    bestel_nr = 1234
+    email_backoffice = 'backoffice@khsn.not'
 
     def setUp(self):
         """ initialisatie van de test case """
 
-        self.account_admin = account = self.e2e_create_account_admin()
-        self.account_admin.is_BB = True
-        self.account_admin.save()
-        self.account_email = 'admin@test.com'
-
-        self.functie_mww = Functie.objects.get(rol='MWW')       # bestaat altijd
-        self.functie_mww.bevestigde_email = 'webwinkel@hoofdkantoor'
-        self.functie_mww.save(update_fields=['bevestigde_email'])
-
-        instellingen = BetaalInstellingenVereniging(
-                            vereniging=self.functie_mww.vereniging,
-                            akkoord_via_bond=False)
-        instellingen.save()
-        self.instellingen = instellingen
+        functie_mww = Functie.objects.get(rol='MWW')
+        functie_mww.bevestigde_email = self.email_backoffice
+        functie_mww.save(update_fields=['bevestigde_email'])
 
         ver = Vereniging(
-                ver_nr=1000,
-                naam="Grote Club",
-                regio=Regio.objects.get(regio_nr=112))
+                    ver_nr=1000,
+                    naam="Grote Club",
+                    regio=Regio.objects.get(regio_nr=112))
         ver.save()
-        self.ver1 = ver
+
+        self.account_normaal = self.e2e_create_account('100000', 'normaal@test.com', 'Normaal')
 
         sporter = Sporter(
                         lid_nr=100000,
-                        voornaam='Ad',
-                        achternaam='de Admin',
-                        geboorte_datum='1966-06-06',
-                        sinds_datum='2020-02-02',
-                        account=account,
+                        voornaam='Nor',
+                        achternaam='Maal',
+                        geboorte_datum='1977-07-07',
+                        sinds_datum='2023-04-05',
+                        account=self.account_normaal,
                         bij_vereniging=ver,
-                        postadres_1='Grote weg 1',
-                        postadres_2='12345 Plaats',
-                        postadres_3='Buitenland')
+                        postadres_1='Doelpak baan 12',
+                        postadres_2='Appartement 10',
+                        postadres_3='1234XY Boogstad')
         sporter.save()
         self.sporter = sporter
 
-        boog_r = BoogType.objects.get(afkorting='R')
-        sporterboog = SporterBoog(
-                        sporter=sporter,
-                        boogtype=boog_r)
-        sporterboog.save()
-
-        product = WebwinkelProduct()
-        product.save()
-
-        now = timezone.now()
-
-        regel1 = BestellingRegel(
-                        korte_beschrijving='webwinkel',
-                        bedrag_euro=Decimal(10.0),
-                        code=BESTELLING_REGEL_CODE_WEBWINKEL)
-        regel1.save()
+        product1 = WebwinkelProduct(
+                        omslag_titel='Test titel 1',
+                        volgorde=1,
+                        onbeperkte_voorraad=True,
+                        bestel_begrenzing='',
+                        prijs_euro="1.23")
+        product1.save()
+        self.product1 = product1
 
         keuze = WebwinkelKeuze(
-                        wanneer=now,
-                        koper=account,
-                        product=product,
-                        totaal_euro=Decimal(10.0),
-                        bestelling=regel1,
-                        log='test\n')
+                        wanneer=timezone.now(),
+                        product=product1,
+                        aantal=1)
         keuze.save()
-        self.webwinkel_keuze = keuze
+        self.keuze1 = keuze
 
-        locatie = WedstrijdLocatie(naam='test')
-        locatie.save()
+        product2 = WebwinkelProduct(
+                        omslag_titel='Test titel 2',
+                        volgorde=2,
+                        onbeperkte_voorraad=False,
+                        aantal_op_voorraad=10,
+                        eenheid='doos,dozen',
+                        bestel_begrenzing='1-20',
+                        prijs_euro="42.00")
+        product2.save()
 
-        wedstrijd = Wedstrijd(
-                        titel='test',
-                        datum_begin='2000-01-01',
-                        datum_einde='2000-01-01',
-                        organiserende_vereniging=ver,
-                        locatie=locatie,
-                        verkoopvoorwaarden_status_acceptatie=True,
-                        prijs_euro_normaal=Decimal(5.0),
-                        prijs_euro_onder18=Decimal(5.0))
-        wedstrijd.save()
+        keuze = WebwinkelKeuze(
+                        wanneer=timezone.now(),
+                        product=product2,
+                        aantal=2)
+        keuze.save()
+        self.keuze2 = keuze
 
-        sessie = WedstrijdSessie(
-                        datum='2000-01-01',
-                        tijd_begin='20:00',
-                        tijd_einde='23:00',
-                        beschrijving='Avondverschieting')
-        sessie.save()
+        ver_bond = Vereniging(
+                        ver_nr=settings.BETAAL_VIA_BOND_VER_NR,
+                        naam='Bondsbureau',
+                        plaats='Schietstad',
+                        kvk_nummer='kvk1234',
+                        contact_email='webwinkel@khsn.not',
+                        telefoonnummer='0123456789',
+                        regio=Regio.objects.get(regio_nr=100))
+        ver_bond.save()
+        self.ver_bond = ver_bond
 
-        klasse = KalenderWedstrijdklasse.objects.first()
+        instellingen = BetaalInstellingenVereniging(
+                            vereniging=ver_bond,
+                            mollie_api_key='test_1234')
+        instellingen.save()
+        self.instellingen_bond = instellingen
 
-        korting = WedstrijdKorting(
-                        geldig_tot_en_met='2000-01-01',
-                        soort=WEDSTRIJD_KORTING_COMBI,
-                        uitgegeven_door=ver,
-                        percentage=50,
-                        voor_sporter=sporter)
-        korting.save()
-        korting.voor_wedstrijden.add(wedstrijd)
+        self.mandje, is_created = BestellingMandje.objects.get_or_create(account=self.account_normaal)
 
-        regel2 = BestellingRegel(
-                        korte_beschrijving='wedstrijd',
-                        bedrag_euro=Decimal(2.5),
-                        code=BESTELLING_REGEL_CODE_WEDSTRIJD)
-        regel2.save()
+    def test_pakket(self):
+        self.e2e_login(self.account_normaal)
 
-        inschrijving = WedstrijdInschrijving(
-                            wanneer=now,
-                            status=WEDSTRIJD_INSCHRIJVING_STATUS_BESTELD,
-                            wedstrijd=wedstrijd,
-                            sessie=sessie,
-                            sporterboog=sporterboog,
-                            wedstrijdklasse=klasse,
-                            koper=self.account_admin,
-                            korting=korting,
-                            bestelling=regel2)
-        inschrijving.save()
+        # leg twee webwinkel producten in het mandje en zet het mandje om in een bestelling
+        self.assertEqual(0, Bestelling.objects.count())
+        bestel_mutatieverzoek_webwinkel_keuze(self.account_normaal, self.keuze1, snel=True)
+        bestel_mutatieverzoek_webwinkel_keuze(self.account_normaal, self.keuze2, snel=True)
+        self.verwerk_bestel_mutaties()
 
-        regel3 = BestellingRegel(
-                    korte_beschrijving='korting',
-                    bedrag_euro=Decimal(-2.5),
-                    code=BESTELLING_REGEL_CODE_WEDSTRIJD_KORTING)
-        regel3.save()
+        self.mandje.refresh_from_db()
+        self.mandje.afleveradres_regel_1 = self.sporter.postadres_1
+        self.mandje.afleveradres_regel_2 = self.sporter.postadres_2
+        self.mandje.afleveradres_regel_3 = self.sporter.postadres_3
+        self.mandje.save()
 
-        bestelling = Bestelling(
-                        bestel_nr=self.bestel_nr,
-                        account=self.account_admin,
-                        ontvanger=instellingen,
-                        verkoper_naam='Grote club',
-                        verkoper_adres1='Adres 1',
-                        verkoper_adres2='Adres 2',
-                        verkoper_kvk='Kvk',
-                        verkoper_email='contact@grote.club',
-                        verkoper_telefoon='0123456789',
-                        verkoper_iban='NL2BANK0123456789',
-                        verkoper_bic='VER2BIC',
-                        verkoper_heeft_mollie=False,
-                        totaal_euro='10.00',
-                        status=BESTELLING_STATUS_BETALING_ACTIEF,
-                        log='Een beginnetje\n',
-                        afleveradres_regel_1='Adres regel 1',
-                        afleveradres_regel_2='Adres regel 2',
-                        afleveradres_regel_3='Adres regel 3',
-                        afleveradres_regel_4='Adres regel 4',
-                        afleveradres_regel_5='Adres regel 5',
-                        btw_percentage_cat1=1,
-                        btw_euro_cat1=Decimal('0.10'),
-                        btw_percentage_cat2=2,
-                        btw_euro_cat2=Decimal('0.20'),
-                        btw_percentage_cat3=3,
-                        btw_euro_cat3=Decimal('0.30'))
-        bestelling.save()
-        self.bestelling = bestelling
+        bestel_mutatieverzoek_maak_bestellingen(self.account_normaal, snel=True)
+        self.verwerk_bestel_mutaties()
+        self.assertEqual(1, Bestelling.objects.count())
 
-        bestelling.regels.add(regel1)
-        bestelling.regels.add(regel2)
-        bestelling.regels.add(regel3)
+        bestelling = Bestelling.objects.first()
+        fake_betaling(bestelling, self.instellingen_bond)
+        self.verwerk_bestel_mutaties()
+        bestelling.refresh_from_db()
+        self.assertEqual(bestelling.status, BESTELLING_STATUS_AFGEROND)
+        self.assertEqual(1, bestelling.transacties.count())
 
-    def test_mail_backoffice(self):
-        self.e2e_login_and_pass_otp(self.account_admin)
-        self.e2e_wissel_naar_functie(self.functie_mww)
-        self.e2e_check_rol('MWW')
-
-        self.assertEqual(0, MailQueue.objects.count())
-        self.assertEqual(0, self.bestelling.transacties.count())
-        self.assertEqual(self.bestelling.status, BESTELLING_STATUS_BETALING_ACTIEF)
-
-        # maak een restitutie-transactie aan
-        transactie = BetaalTransactie(
-                        when=timezone.now(),
-                        payment_id='mollie42',
-                        transactie_type=TRANSACTIE_TYPE_MOLLIE_RESTITUTIE,
-                        beschrijving='Tikkie terug',
-                        bedrag_terugbetaald=Decimal(1.0),
-                        klant_naam='Test naam',
-                        klant_account='Whatever',
-                        refund_id='refund1234',
-                        refund_status='paid',
-                        bedrag_refund=Decimal(1.0))
-        transactie.save()
-        self.bestelling.transacties.add(transactie)
-
-        # maak een mollie-transactie aan
-        transactie = BetaalTransactie(
-                        when=timezone.now(),
-                        payment_id='mollie42',
-                        transactie_type=TRANSACTIE_TYPE_MOLLIE_PAYMENT,
-                        beschrijving='Ontvangen',
-                        bedrag_beschikbaar=Decimal(1.0),
-                        klant_naam='Test naam',
-                        klant_account='Whatever')
-        transactie.save()
-        self.bestelling.transacties.add(transactie)
-
-        with self.assert_max_queries(20):
-            resp = self.client.post(self.url_overboeking_ontvangen,
-                                    {'kenmerk': self.bestel_nr, 'bedrag': '10,00', 'actie': 'registreer', 'snel': '1'})
-        self.assertEqual(resp.status_code, 200)  # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('bestelling/overboeking-ontvangen.dtl', 'plein/site_layout.dtl'))
-
-        self.assertEqual(1, BestellingMutatie.objects.count())
-        f1, f2 = self.verwerk_bestel_mutaties()
-        # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
-        self.assertTrue("[INFO] Overboeking 10.00 euro ontvangen voor bestelling MH-%s" % self.bestel_nr
-                        in f2.getvalue())
-        self.assertTrue("[INFO] Betaling is gelukt voor bestelling MH-%s" % self.bestel_nr in f2.getvalue())
-        self.bestelling = Bestelling.objects.get(pk=self.bestelling.pk)
-        self.assertEqual(self.bestelling.status, BESTELLING_STATUS_AFGEROND)
-        self.assertEqual(3, self.bestelling.transacties.count())
-        # transactie = self.bestelling.transacties.first()
-
-        self.assertEqual(2, MailQueue.objects.count())
-
-        # controleer de betalingsbevestiging
-        mail = MailQueue.objects.filter(mail_to=self.account_email)[0]
-        self.assert_email_html_ok(mail, 'email_bestelling/bevestig-betaling.dtl')
-        # print(mail.mail_text)
-        # print(mail.mail_html.replace('<', '\n<'))
-        self.assert_consistent_email_html_text(mail, ignore=('>Korting:', 'Verenigingskorting: 50%<', 'Betaling:'))
-
-        mail = MailQueue.objects.exclude(pk=mail.pk)[0]
-        # print(mail.mail_text)
-        # print(mail.mail_html.replace('<', '\n<'))
+        # controleer de mail naar het backoffice
+        self.assertEqual(MailQueue.objects.count(), 3)      # 1=bevestig bestelling, 2=bevestig betaling, 3=backoffice
+        mail = MailQueue.objects.filter(mail_to=self.email_backoffice).first()
+        # self.e2e_show_email_in_browser(mail)
         self.assert_email_html_ok(mail, 'email_bestelling/backoffice-versturen.dtl')
         self.assert_consistent_email_html_text(mail, ignore=('>Korting:', 'Verenigingskorting: 50%<', 'Betaling:'))
-        self.assertEqual(mail.mail_to, self.functie_mww.bevestigde_email)
+
+        self.assertTrue(self.sporter.postadres_1 in mail.mail_text)
+        self.assertTrue(self.sporter.postadres_2 in mail.mail_text)
+        self.assertTrue(self.sporter.postadres_3 in mail.mail_text)
+
+    def test_brief(self):
+        # het enige product that we gaan kopen kan per brief verstuurd worden
+        self.product1.type_verzendkosten = VERZENDKOSTEN_BRIEFPOST
+        self.product1.save(update_fields=['type_verzendkosten'])
+
+        self.e2e_login(self.account_normaal)
+        self.assertEqual(0, Bestelling.objects.count())
+        bestel_mutatieverzoek_webwinkel_keuze(self.account_normaal, self.keuze1, snel=True)
+        bestel_mutatieverzoek_maak_bestellingen(self.account_normaal, snel=True)
+
+        self.verwerk_bestel_mutaties(kosten_brief=9.87)
+        self.assertEqual(1, Bestelling.objects.count())
+        bestelling = Bestelling.objects.first()
+
+        self.assertEqual(bestelling.transport, BESTELLING_TRANSPORT_VERZEND)
+
+    def test_ophalen(self):
+        self.e2e_login(self.account_normaal)
+
+        # leg twee webwinkel producten in het mandje en zet het mandje om in een bestelling
+        self.assertEqual(0, Bestelling.objects.count())
+        bestel_mutatieverzoek_webwinkel_keuze(self.account_normaal, self.keuze1, snel=True)
+        bestel_mutatieverzoek_webwinkel_keuze(self.account_normaal, self.keuze2, snel=True)
+        self.verwerk_bestel_mutaties()
+
+        self.mandje.refresh_from_db()
+        self.mandje.transport = BESTELLING_TRANSPORT_OPHALEN
+        self.mandje.save()
+
+        bestel_mutatieverzoek_maak_bestellingen(self.account_normaal, snel=True)
+        self.verwerk_bestel_mutaties()
+        self.assertEqual(1, Bestelling.objects.count())
+
+        bestelling = Bestelling.objects.first()
+        fake_betaling(bestelling, self.instellingen_bond)
+        self.verwerk_bestel_mutaties()
+        bestelling.refresh_from_db()
+        self.assertEqual(bestelling.status, BESTELLING_STATUS_AFGEROND)
+        self.assertEqual(1, bestelling.transacties.count())
+
+        # controleer de mail naar het backoffice
+        self.assertEqual(MailQueue.objects.count(), 3)      # 1=bevestig bestelling, 2=bevestig betaling, 3=backoffice
+        mail = MailQueue.objects.filter(mail_to=self.email_backoffice).first()
+        # self.e2e_show_email_in_browser(mail)
+        self.assert_email_html_ok(mail, 'email_bestelling/backoffice-versturen.dtl')
+        self.assert_consistent_email_html_text(mail, ignore=('>Korting:', 'Verenigingskorting: 50%<', 'Betaling:'))
+
+        self.assertTrue("Ophalen op het bondsbureau" in mail.mail_text)
+
+    def test_email(self):
+        # 3 soorten BTW en alle adresregels
+        bestel_mutatieverzoek_webwinkel_keuze(self.account_normaal, self.keuze1, snel=True)
+        bestel_mutatieverzoek_webwinkel_keuze(self.account_normaal, self.keuze2, snel=True)
+        bestel_mutatieverzoek_maak_bestellingen(self.account_normaal, snel=True)
+        self.verwerk_bestel_mutaties()
+        self.assertEqual(1, Bestelling.objects.count())
+        bestelling = Bestelling.objects.first()
+
+        bestelling.afleveradres_regel_1 = 'regel 1'
+        bestelling.afleveradres_regel_2 = 'regel 2'
+        bestelling.afleveradres_regel_3 = 'regel 3'
+        bestelling.afleveradres_regel_4 = 'regel 4'
+        bestelling.afleveradres_regel_5 = 'regel 5'
+
+        bestelling.btw_percentage_cat1 = '1,42'
+        bestelling.btw_percentage_cat2 = '8,6'
+        bestelling.btw_percentage_cat3 = '25'
+
+        bestelling.btw_euro_cat1 = Decimal(1)
+        bestelling.btw_euro_cat2 = Decimal(2)
+        bestelling.btw_euro_cat3 = Decimal(3)
+        bestelling.save()
+
+        MailQueue.objects.all().delete()
+        stuur_email_webwinkel_backoffice(bestelling)
+        mail = MailQueue.objects.first()
+        # self.e2e_show_email_in_browser(mail)
+
+        self.assertTrue("Waarvan BTW 1,42%" in mail.mail_text)
+        self.assertTrue("Waarvan BTW 8,6%" in mail.mail_text)
+        self.assertTrue("Waarvan BTW 25%" in mail.mail_text)
+        self.assertTrue("1,00" in mail.mail_text)
+        self.assertTrue("2,00" in mail.mail_text)
+        self.assertTrue("3,00" in mail.mail_text)
+        self.assertTrue('regel 1' in mail.mail_text)
+        self.assertTrue('regel 2' in mail.mail_text)
+        self.assertTrue('regel 3' in mail.mail_text)
+        self.assertTrue('regel 4' in mail.mail_text)
+        self.assertTrue('regel 5' in mail.mail_text)
 
 # end of file

@@ -530,7 +530,7 @@ class TestRegistreerBeheer(E2EHelpers, TestCase):
         webwinkel_product.save()
         keuze = WebwinkelKeuze(
                     wanneer=timezone.now(),
-                    koper=self.account_800001,
+                    # TODO: check that webwinkel product overgezet wordt, nu we "koper" hier verwijderd hebben
                     product=webwinkel_product)
         keuze.save()
 

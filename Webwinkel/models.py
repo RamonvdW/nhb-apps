@@ -123,24 +123,11 @@ class WebwinkelKeuze(models.Model):
     # koppeling aan de bestelling
     bestelling = models.ForeignKey(BestellingRegel, on_delete=models.PROTECT, null=True)
 
-    # wie is de koper?
-    # (BestellingProduct verwijst naar dit record)                  # TODO: klopt dit nog?
-    koper = models.ForeignKey(Account, on_delete=models.PROTECT)    # TODO: Bestelling heeft koper, dus waarom hier ook?
-
     # om welk product gaat het
     product = models.ForeignKey(WebwinkelProduct, on_delete=models.PROTECT)
 
     # aantal producten wat gekozen is
     aantal = models.PositiveSmallIntegerField(default=1)
-
-    # TODO: ondersteun kortingen
-
-    # hoeveel moet er betaald worden voor het aantal gekozen producten?
-    totaal_euro = models.DecimalField(max_digits=6, decimal_places=2, default=Decimal(0))       # max 9999,99
-
-    # hoeveel is ontvangen?         # TODO: waarom hier bijhouden? Dit hoort bij Betalen
-    # (wordt ingevuld als de bestelling volledig betaald is)
-    ontvangen_euro = models.DecimalField(max_digits=6, decimal_places=2, default=Decimal(0))    # max 9999,99
 
     # log van bestelling, betalingen en eventuele wijzigingen
     log = models.TextField(blank=True)

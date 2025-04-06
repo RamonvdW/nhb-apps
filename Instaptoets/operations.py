@@ -107,7 +107,13 @@ def toets_geldig(toets: Instaptoets):
             dagen:  aantal dagen dat de toets nog geldig is
     """
     if toets.geslaagd:
-        verloopt = datetime.date(toets.afgerond.year + 1, toets.afgerond.month, toets.afgerond.day)
+        try:
+            verloopt = datetime.date(toets.afgerond.year + 1, toets.afgerond.month, toets.afgerond.day)
+        except ValueError:
+            # we get here on Feb 29 only
+            verloopt = toets.afgerond + datetime.timedelta(days=365)
+            verloopt = verloopt.date()
+
         vandaag = timezone.now().date()
         if verloopt >= vandaag:
             # nog niet verlopen

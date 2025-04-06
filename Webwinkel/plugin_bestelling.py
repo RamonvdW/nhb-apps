@@ -27,18 +27,17 @@ class WebwinkelBestelPlugin(BestelPluginBase):
                       .objects
                       .filter(status=KEUZE_STATUS_RESERVERING_MANDJE,
                               wanneer__lt=verval_datum)
-                      .select_related('bestelling',
-                                      'koper')):
+                      .select_related('bestelling')):
 
             regel = keuze.bestelling
-
-            self.stdout.write('[INFO] Vervallen: BestellingRegel pk=%s webwinkel keuze (%s) in mandje van %s' % (
-                              regel.pk, keuze, keuze.koper))
 
             # onthoud in welk mandje deze lag
             mandje = regel.bestellingmandje_set.first()
             if mandje.pk not in mandje_pks:
                 mandje_pks.append(mandje.pk)
+
+            self.stdout.write('[INFO] Vervallen: BestellingRegel pk=%s webwinkel keuze (%s) in mandje van %s' % (
+                              regel.pk, keuze, mandje.account))
 
             self.annuleer(regel)
 
@@ -65,12 +64,15 @@ class WebwinkelBestelPlugin(BestelPluginBase):
 
         prijs_euro = aantal * product.prijs_euro
 
+        # TODO: bij levering aan het buitenland (ook particulieren) 0% btw in rekening brengen
+        # zie https://www.belastingdienst.nl/wps/wcm/connect/bldcontentnl/belastingdienst/zakelijk/btw/zakendoen_met_het_buitenland/zakendoen_buiten_de_eu/btw_berekenen/btw_berekenen_bij_export_van_goederen_naar_niet_eu_landen/btw_berekenen_bij_het_uitvoeren_naar_niet_eu_landen
+
         btw_str = "%.2f" % settings.WEBWINKEL_BTW_PERCENTAGE
         while btw_str[-1] == '0':
             btw_str = btw_str[:-1]              # 21,10 --> 21,1 / 21,00 --> 21,
         btw_str = btw_str.replace('.', ',')     # localize
         if btw_str[-1] == ",":
-            btw_str = btw_str[:-1]              # drop the trailing dot/comma
+            btw_str = btw_str[:-1]              # drop the trailing dot/comma: 21, --> 21
 
         # de prijs is inclusief BTW, dus 100% + BTW% (voorbeeld: 121%)
         # reken uit hoeveel daarvan de BTW is (voorbeeld: 21 / 121)
@@ -143,15 +145,13 @@ class WebwinkelBestelPlugin(BestelPluginBase):
             self.stdout.write('[ERROR] Kan WebwinkelKeuze voor regel met pk=%s niet vinden' % regel.pk)
             return
 
-        keuze.ontvangen_euro = bedrag_ontvangen
-
         stamp_str = timezone.localtime(timezone.now()).strftime('%Y-%m-%d om %H:%M')
         bedrag_str = format_bedrag_euro(bedrag_ontvangen)
         msg = "[%s] Betaling is ontvangen (%s); overgedragen aan backoffice\n" % (stamp_str, bedrag_str)
         keuze.log += msg
 
         keuze.status = KEUZE_STATUS_BACKOFFICE
-        keuze.save(update_fields=['ontvangen_euro', 'status', 'log'])
+        keuze.save(update_fields=['status', 'log'])
 
     def get_verkoper_ver_nr(self, regel: BestellingRegel) -> int:
         """
@@ -167,7 +167,9 @@ class VerzendkostenBestelPlugin(BestelPluginBase):
         # nothing to do
         return []
 
-    def bereken_verzendkosten(self, obj: BestellingMandje | Bestelling) -> Decimal:
+    # TODO: ook een verklaring voor de transportkosten terug geven (tekst regel): gram + afstand
+    # TODO: ook btw teruggeven, want sommige(!) pakketkosten zijn inclusief btw
+    def bereken_verzendkosten(self, obj: BestellingMandje | Bestelling) -> (Decimal, str, Decimal):
         """
             Bereken de verzendkosten van toepassing op het mandje of de bestelling
             0 = geen producten zijn die verstuurd hoeven te worden
@@ -178,6 +180,8 @@ class VerzendkostenBestelPlugin(BestelPluginBase):
         webwinkel_count = len(regel_pks)
 
         verzendkosten_euro = Decimal(0)
+        btw_percentage = ''
+        btw_euro = Decimal(0)
 
         if webwinkel_count > 0:
             qset = WebwinkelKeuze.objects.filter(bestelling__pk__in=regel_pks)
@@ -192,7 +196,7 @@ class VerzendkostenBestelPlugin(BestelPluginBase):
                 # TODO: gewicht pakketpost
                 verzendkosten_euro = Decimal(settings.WEBWINKEL_PAKKET_GROOT_VERZENDKOSTEN_EURO)
 
-        return verzendkosten_euro
+        return verzendkosten_euro, btw_percentage, btw_euro
 
     def is_besteld(self, regel: BestellingRegel):
         """

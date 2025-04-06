@@ -14,8 +14,8 @@ from Bestelling.definities import (BESTELLING_MUTATIE_WEDSTRIJD_INSCHRIJVEN, BES
                                    BESTELLING_MUTATIE_ANNULEER, BESTELLING_MUTATIE_TRANSPORT,
                                    BESTELLING_MUTATIE_EVENEMENT_INSCHRIJVEN, BESTELLING_MUTATIE_EVENEMENT_AFMELDEN,
                                    BESTELLING_MUTATIE_OPLEIDING_INSCHRIJVEN, BESTELLING_MUTATIE_OPLEIDING_AFMELDEN,
-                                   BESTELLING_TRANSPORT_NVT, BESTELLING_TRANSPORT_VERZEND,
-                                   BESTELLING_REGEL_CODE_WEBWINKEL)
+                                   BESTELLING_TRANSPORT_NVT, BESTELLING_TRANSPORT_VERZEND, BESTELLING_TRANSPORT_OPHALEN,
+                                   BESTELLING_REGEL_CODE_WEBWINKEL, BESTELLING_REGEL_CODE_VERZENDKOSTEN)
 from Bestelling.definities import (BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_BETALING_ACTIEF,
                                    BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_MISLUKT, BESTELLING_STATUS_GEANNULEERD,
                                    BESTELLING_STATUS2STR, BESTELLING_HOOGSTE_BESTEL_NR_FIXED_PK,
@@ -169,17 +169,17 @@ class VerwerkBestelMutaties:
     def _bepaal_verzendkosten_mandje(mandje):
         """ bereken de verzendkosten voor fysieke producten in het mandje """
 
-        mandje.verzendkosten_euro = verzendkosten_bestel_plugin.bereken_verzendkosten(mandje)
+        mandje.verzendkosten_euro, _, _ = verzendkosten_bestel_plugin.bereken_verzendkosten(mandje)
 
-        if mandje.verzendkosten_euro > 0.00:
+        if mandje.verzendkosten_euro < Decimal(0.001):
+            # geen fysieke producten (meer)
+            mandje.transport = BESTELLING_TRANSPORT_NVT
+        else:
             # wel fysieke producten
             if mandje.transport == BESTELLING_TRANSPORT_NVT:
                 # bij toevoegen eerste product schakelen we over op verzenden
                 # gebruiker kan deze op "ophalen" zetten
                 mandje.transport = BESTELLING_TRANSPORT_VERZEND
-        else:
-            # geen fysieke producten (meer)
-            mandje.transport = BESTELLING_TRANSPORT_NVT
 
         mandje.save(update_fields=['verzendkosten_euro', 'transport'])
 
@@ -187,57 +187,90 @@ class VerwerkBestelMutaties:
     def _bepaal_verzendkosten_bestelling(transport, bestelling):
         """ bereken de verzendkosten voor fysieke producten van de bestelling
             transport: de transport keuze gemaakt door de gebruiker: ophalen of verzenden
+
+            de verzendkosten worden in een BestellingRegel gezet
         """
 
-        bestelling.verzendkosten_euro = verzendkosten_bestel_plugin.bereken_verzendkosten(bestelling)
-        bestelling.transport = transport
+        verzendkosten_euro, btw_percentage, btw_euro = verzendkosten_bestel_plugin.bereken_verzendkosten(bestelling)
 
-        if bestelling.verzendkosten_euro < Decimal(0.001):
+        if verzendkosten_euro < Decimal(0.001):
             # geen fysieke producten, dus transport is niet van toepassing
-            bestelling.transport = BESTELLING_TRANSPORT_NVT
+            transport = BESTELLING_TRANSPORT_NVT
 
-        bestelling.save(update_fields=['verzendkosten_euro', 'transport'])
+        bestelling.transport = transport
+        bestelling.save(update_fields=['transport'])
+
+        if transport == BESTELLING_TRANSPORT_VERZEND:
+            regel, is_created = BestellingRegel.objects.get_or_create(
+                                                                bestelling=bestelling,
+                                                                code=BESTELLING_REGEL_CODE_VERZENDKOSTEN)
+            regel.korte_beschrijving = 'Verzendkosten'
+            regel.bedrag_euro = verzendkosten_euro
+            regel.btw_percentage = btw_percentage
+            regel.btw_euro = btw_euro
+
+            regel.save()
+            bestelling.regels.add(regel)
+        else:
+            # transportkosten mogen weg
+            BestellingRegel.objects.filter(bestelling=bestelling,
+                                           code=BESTELLING_REGEL_CODE_VERZENDKOSTEN).delete()
 
     @staticmethod
     def _bestelling_bepaal_btw(bestelling: Bestelling):
-        """ bereken de btw voor de producten in een bestelling """
+        """ bepaal de btw percentages en bedragen voor een bestelling """
 
-        # TODO: meerdere BTW percentages ondersteunen
+        regels = list(bestelling.regels.all())
 
-        # begin met een schone lei
-        bestelling.btw_percentage_cat1 = ""
-        bestelling.btw_euro_cat1 = Decimal(0)
-
-        bestelling.btw_percentage_cat2 = ""
-        bestelling.btw_euro_cat2 = Decimal(0)
-
-        bestelling.btw_percentage_cat3 = ""
-        bestelling.btw_euro_cat3 = Decimal(0)
-
-        # kijk hoeveel euro aan webwinkelproducten in deze bestelling zitten
-        totaal_euro = Decimal(0)
-        for product in bestelling.regels.all():
-            totaal_euro += product.bedrag_euro
+        # zoek uit welke percentages nodig zijn
+        perc2btw = dict()
+        for regel in regels:
+            if regel.btw_percentage:
+                try:
+                    perc2btw[regel.btw_percentage] += regel.btw_euro
+                except KeyError:
+                    perc2btw[regel.btw_percentage] = regel.btw_euro
         # for
 
-        totaal_euro += bestelling.verzendkosten_euro
+        percentages = list(perc2btw.keys())     # alle percentages
+        percentages.sort()                      # vaste volgorde
+        percentages.extend(['', '', ''])        # altijd 3 categorieën
 
-        if totaal_euro > 0:
-            # converteer percentage (21.1) naar string "21,1"
-            btw_str = "%.2f" % settings.WEBWINKEL_BTW_PERCENTAGE
-            while btw_str[-1] == '0':
-                btw_str = btw_str[:-1]  # 21,10 --> 21,1 / 21,00 --> 21,
-            btw_str = btw_str.replace('.', ',')  # localize
-            if btw_str[-1] == ",":
-                btw_str = btw_str[:-1]  # drop the trailing dot/comma
-            bestelling.btw_percentage_cat1 = btw_str
+        perc2btw[''] = Decimal(0)
 
-            # het totaalbedrag is inclusief BTW, dus 100% + BTW% (was: 121%)
-            # reken uit hoeveel daarvan de BTW is
-            btw_deel = Decimal(settings.WEBWINKEL_BTW_PERCENTAGE / (100 + settings.WEBWINKEL_BTW_PERCENTAGE))
-            btw = totaal_euro * btw_deel
-            btw = round(btw, 2)  # afronden op 2 decimalen
-            bestelling.btw_euro_cat1 = btw
+        # begin met een schone lei
+        bestelling.btw_percentage_cat1 = percentages[0]
+        bestelling.btw_euro_cat1 = perc2btw[percentages[0]]
+
+        bestelling.btw_percentage_cat2 = percentages[1]
+        bestelling.btw_euro_cat2 = perc2btw[percentages[1]]
+
+        bestelling.btw_percentage_cat3 = percentages[2]
+        bestelling.btw_euro_cat3 = perc2btw[percentages[2]]
+
+        # # kijk hoeveel euro aan webwinkelproducten in deze bestelling zitten
+        # totaal_euro = Decimal(0)
+        # for regel in bestelling.regels.all():
+        #     # TODO: meerdere BTW percentages ondersteunen
+        #     totaal_euro += product.bedrag_euro
+        # # for
+        #
+        # if totaal_euro > 0:
+        #     # converteer percentage (21.1) naar string "21,1"
+        #     btw_str = "%.2f" % settings.WEBWINKEL_BTW_PERCENTAGE
+        #     while btw_str[-1] == '0':
+        #         btw_str = btw_str[:-1]  # 21,10 --> 21,1 / 21,00 --> 21,
+        #     btw_str = btw_str.replace('.', ',')  # localize
+        #     if btw_str[-1] == ",":
+        #         btw_str = btw_str[:-1]  # drop the trailing dot/comma
+        #     bestelling.btw_percentage_cat1 = btw_str
+        #
+        #     # het totaalbedrag is inclusief BTW, dus 100% + BTW% (was: 121%)
+        #     # reken uit hoeveel daarvan de BTW is
+        #     btw_deel = Decimal(settings.WEBWINKEL_BTW_PERCENTAGE / (100 + settings.WEBWINKEL_BTW_PERCENTAGE))
+        #     btw = totaal_euro * btw_deel
+        #     btw = round(btw, 2)  # afronden op 2 decimalen
+        #     bestelling.btw_euro_cat1 = btw
 
         bestelling.save(update_fields=['btw_percentage_cat1', 'btw_euro_cat1',
                                        'btw_percentage_cat2', 'btw_euro_cat2',
@@ -328,8 +361,8 @@ class VerwerkBestelMutaties:
         if mandje:  # pragma: no branch
 
             regel = webwinkel_bestel_plugin.reserveer(
-                mutatie.webwinkel_keuze,
-                mandje.account.get_account_full_name())
+                        mutatie.webwinkel_keuze,
+                        mandje.account.get_account_full_name())
             mandje.regels.add(regel)
 
             transport_oud = mandje.transport
@@ -427,16 +460,10 @@ class VerwerkBestelMutaties:
             # neem een bestelnummer uit
             bestel_nr = _bestel_get_volgende_bestel_nr()
 
-            totaal_euro = Decimal('0')
-            for regel in regels:
-                totaal_euro += regel.bedrag_euro
-            # for
-
             bestelling = Bestelling(
                             bestel_nr=bestel_nr,
                             account=mutatie.account,
                             ontvanger=instellingen,
-                            totaal_euro=totaal_euro,
                             verkoper_kvk=ver.kvk_nummer,
                             verkoper_bic=ver.bank_bic,
                             verkoper_iban=ver.bank_iban,
@@ -465,20 +492,23 @@ class VerwerkBestelMutaties:
 
             self._bepaal_verzendkosten_bestelling(mandje.transport, bestelling)
 
-            totaal_euro += bestelling.verzendkosten_euro
+            # doorloop nu alle regels, inclusief de verzendkosten
+            for regel in bestelling.regels.all():
+                bestelling.totaal_euro += regel.bedrag_euro
+            # for
 
             self._bestelling_bepaal_btw(bestelling)
 
             # toon het BTW-nummer alleen als het relevant is
             if ver_nr == settings.WEBWINKEL_VERKOPER_VER_NR:
-                if bestelling.btw_percentage_cat1:
+                if bestelling.btw_percentage_cat1 != '':
+                    # BTW is van toepassing (wordt alleen gebruikt voor de webwinkel)
                     bestelling.verkoper_btw_nr = settings.WEBWINKEL_VERKOPER_BTW_NR
 
-            bestelling.totaal_euro = totaal_euro
             bestelling.save(update_fields=['totaal_euro', 'verkoper_btw_nr'])
 
             when_str = timezone.localtime(bestelling.aangemaakt).strftime('%Y-%m-%d om %H:%M')
-            totaal_euro_str = format_bedrag_euro(totaal_euro)
+            totaal_euro_str = format_bedrag_euro(bestelling.totaal_euro)
 
             msg = "[%s] Bestelling aangemaakt met %s producten voor totaal %s" % (
                     when_str, len(regels), totaal_euro_str)
@@ -495,8 +525,6 @@ class VerwerkBestelMutaties:
                 plugin = bestel_plugins[regel.code]
                 plugin.is_besteld(regel)
             # for
-
-            totaal_euro_str = format_bedrag_euro(totaal_euro)
 
             self.stdout.write(
                 "[INFO] %s producten voor totaal %s uit mandje account %s omgezet in bestelling pk=%s" % (
@@ -612,16 +640,15 @@ class VerwerkBestelMutaties:
                 for regel in bestelling.regels.all():
                     plugin = bestel_plugins[regel.code]
                     plugin.is_betaald(regel, regel.bedrag_euro)
-
-                    bevat_webwinkel |= regel.code == BESTELLING_REGEL_CODE_WEBWINKEL
+                    bevat_webwinkel |= regel.is_webwinkel()
                 # for
-
-                # stuur een e-mail aan de koper
-                stuur_email_naar_koper_betaalbevestiging(bestelling)
 
                 # stuur een e-mail naar het backoffice
                 if bevat_webwinkel:
                     stuur_email_webwinkel_backoffice(bestelling)
+
+                # stuur een e-mail aan de koper
+                stuur_email_naar_koper_betaalbevestiging(bestelling)
         else:
             self.stdout.write('[INFO] Betaling niet gelukt voor bestelling %s (pk=%s)' % (
                                 bestelling.mh_bestel_nr(), bestelling.pk))
@@ -684,8 +711,7 @@ class VerwerkBestelMutaties:
             for regel in bestelling.regels.all():
                 plugin = bestel_plugins[regel.code]
                 plugin.is_betaald(regel, regel.bedrag_euro)
-
-                bevat_webwinkel |= regel.code == BESTELLING_REGEL_CODE_WEBWINKEL
+                bevat_webwinkel |= regel.is_webwinkel()
             # for
 
             # stuur een e-mail naar het backoffice
@@ -836,7 +862,7 @@ def _mandje_bepaal_btw(mandje):
     #totaal_euro += mandje.verzendkosten_euro
 
     if not mandje:
-        # converteer percentage (21,0) naar string "21.0%"
+        # converteer percentage (21.0) naar string "21,0"
         btw_str = "%.2f" % settings.WEBWINKEL_BTW_PERCENTAGE
         while btw_str[-1] == '0':
             btw_str = btw_str[:-1]      # 21,10 --> 21,1 / 21,00 --> 21,

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2025 Ramon van der Winkel.
+#  Copyright (c) 2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -25,11 +25,9 @@ from decimal import Decimal
 import re
 
 
-# TODO: strip intieme kennis over bestellingen en betalingen --> laat bestelling/betaal helper dat regelen
+class TestWedstrijdInschrijvenBestelEnBetaal(E2EHelpers, TestCase):
 
-class TestBestellingBetaling(E2EHelpers, TestCase):
-
-    """ tests voor de applicatie Bestelling, samenwerking met applicatie Bestelling en Betaal """
+    """ tests voor de applicatie WedstrijdInschrijven: van mandje tot betaalde definitieve inschrijving """
 
     test_after = ('Bestelling.tests.test_bestelling',)
 

@@ -284,10 +284,8 @@ class ProductView(TemplateView):
 
         keuze = WebwinkelKeuze(
                         wanneer=now,
-                        koper=account_koper,
                         product=product,
                         aantal=aantal,
-                        totaal_euro=totaal_euro,
                         log=msg)
         keuze.save()
 

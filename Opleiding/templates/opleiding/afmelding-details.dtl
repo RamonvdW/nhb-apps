@@ -38,8 +38,8 @@
                     <td><code>{{ sporter.email }}</code></td>
                 </tr>
                 <tr>
-                    <th>Evenement</th>
-                    <td>{{ afmelding.evenement.titel }}<br>bij {{ afmelding.evenement.organiserende_vereniging }}</td>
+                    <th>Opleiding</th>
+                    <td>{{ afmelding.opleiding.titel }}</td>
                 </tr>
                 <tr>
                     <th>Ingeschreven</th>

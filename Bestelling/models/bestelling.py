@@ -60,11 +60,12 @@ class Bestelling(models.Model):
     afleveradres_regel_4 = models.CharField(max_length=100, default='', blank=True)      # postcode + plaats
     afleveradres_regel_5 = models.CharField(max_length=100, default='', blank=True)      # land
 
-    # verzendkosten
+    # transport (verzenden of ophalen)
+    # bedrag staat in een BestellingRegel
     transport = models.CharField(max_length=1, default=BESTELLING_TRANSPORT_NVT, choices=BESTELLING_TRANSPORT_OPTIES)
-    verzendkosten_euro = models.DecimalField(max_digits=6, decimal_places=2, default=Decimal(0))    # max 9999,99
 
     # belasting in verschillende categorieën: leeg = niet gebruikt
+    # btw percentage, zonder het % teken: 21 / 20,5
     btw_percentage_cat1 = models.CharField(max_length=5, default='', blank=True)
     btw_percentage_cat2 = models.CharField(max_length=5, default='', blank=True)
     btw_percentage_cat3 = models.CharField(max_length=5, default='', blank=True)

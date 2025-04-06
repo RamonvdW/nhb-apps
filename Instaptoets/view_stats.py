@@ -221,7 +221,9 @@ class GezaktView(UserPassesTestMixin, TemplateView):
                               geslaagd=False)
                       .select_related('sporter')):
             lid_nr = toets.sporter.lid_nr
+
             if lid_nr in geslaagd:
+                # zowel geslaagd als gezakt
                 continue
 
             try:
@@ -235,12 +237,13 @@ class GezaktView(UserPassesTestMixin, TemplateView):
                             laatste_poging=None)
                 sporters[lid_nr] = data
 
-            data.laatste_poging = toets.opgestart.date()
+            poging = toets.opgestart.date()
+            if not data.laatste_poging or poging > data.laatste_poging:
+                data.laatste_poging = poging
 
-            if toets.is_afgerond:
-                data.aantal_goed += toets.aantal_goed
-                data.aantal_fout += (toets.aantal_vragen - toets.aantal_goed)
-                data.aantal_keer_gezakt += 1
+            data.aantal_goed += toets.aantal_goed
+            data.aantal_fout += (toets.aantal_vragen - toets.aantal_goed)
+            data.aantal_keer_gezakt += 1
         # for
 
         lijst = list()

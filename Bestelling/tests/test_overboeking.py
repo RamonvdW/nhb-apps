@@ -4,26 +4,17 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.test import TestCase
 from django.conf import settings
-from django.utils import timezone
-from BasisTypen.models import BoogType, KalenderWedstrijdklasse
+from django.test import TestCase
 from Bestelling.definities import (BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_BETALING_ACTIEF,
-                                   BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_GEANNULEERD,
-                                   BESTELLING_REGEL_CODE_WEBWINKEL, BESTELLING_REGEL_CODE_WEDSTRIJD)
-from Bestelling.models import Bestelling, BestellingMutatie, BestellingRegel
+                                   BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_GEANNULEERD)
+from Bestelling.models import Bestelling, BestellingMutatie
 from Betaal.models import BetaalInstellingenVereniging
 from Functie.models import Functie
 from Functie.tests.helpers import maak_functie
 from Geo.models import Regio
-from Locatie.models import WedstrijdLocatie
-from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
-from Wedstrijden.definities import WEDSTRIJD_STATUS_GEACCEPTEERD
-from Wedstrijden.models import Wedstrijd, WedstrijdSessie, WedstrijdInschrijving
-from Webwinkel.models import WebwinkelProduct, WebwinkelKeuze
-from decimal import Decimal
 
 
 class TestBestellingOverboeking(E2EHelpers, TestCase):
@@ -62,81 +53,6 @@ class TestBestellingOverboeking(E2EHelpers, TestCase):
                                     vereniging=ver_webshop,
                                     akkoord_via_bond=False)
         instellingen_webshop.save()
-        self.instellingen_webshop = instellingen_webshop
-
-        sporter = Sporter(
-                        lid_nr=100000,
-                        voornaam='Ad',
-                        achternaam='de Admin',
-                        geboorte_datum='1966-06-06',
-                        sinds_datum='2020-02-02',
-                        account=account,
-                        bij_vereniging=ver)
-        sporter.save()
-        self.sporter = sporter
-
-        boog_r = BoogType.objects.get(afkorting='R')
-
-        sporterboog = SporterBoog(
-                            sporter=sporter,
-                            boogtype=boog_r,
-                            voor_wedstrijd=True)
-        sporterboog.save()
-
-        now = timezone.now()
-        datum = now.date()      # pas op met testen ronde 23:59
-
-        locatie = WedstrijdLocatie(
-                        naam='Test locatie',
-                        discipline_outdoor=True,
-                        buiten_banen=10,
-                        buiten_max_afstand=90,
-                        adres='Schietweg 1, Boogdorp',
-                        plaats='Boogdrop')
-        locatie.save()
-        locatie.verenigingen.add(ver)
-
-        sessie = WedstrijdSessie(
-                    datum=datum,
-                    tijd_begin='10:00',
-                    tijd_einde='11:00',
-                    max_sporters=50)
-        sessie.save()
-        # sessie.wedstrijdklassen.add()
-
-        # maak een kalenderwedstrijd aan, met sessie
-        wedstrijd = Wedstrijd(
-                        titel='Test',
-                        status=WEDSTRIJD_STATUS_GEACCEPTEERD,
-                        datum_begin=datum,
-                        datum_einde=datum,
-                        locatie=locatie,
-                        organiserende_vereniging=ver,
-                        voorwaarden_a_status_when=now,
-                        prijs_euro_normaal=10.00,
-                        prijs_euro_onder18=10.00)
-        wedstrijd.save()
-        wedstrijd.sessies.add(sessie)
-        # wedstrijd.boogtypen.add()
-
-        wkls_r = KalenderWedstrijdklasse.objects.filter(boogtype=boog_r, buiten_gebruik=False)
-
-        regel = BestellingRegel(
-                    korte_beschrijving='wedstrijd',
-                    bedrag_euro=Decimal(10.0),
-                    code=BESTELLING_REGEL_CODE_WEDSTRIJD)
-        regel.save()
-
-        inschrijving = WedstrijdInschrijving(
-                            wanneer=now,
-                            wedstrijd=wedstrijd,
-                            sessie=sessie,
-                            wedstrijdklasse=wkls_r[0],
-                            sporterboog=sporterboog,
-                            koper=account,
-                            bestelling=regel)
-        inschrijving.save()
-        self.inschrijving = inschrijving
 
         bestelling = Bestelling(
                         bestel_nr=1234,
@@ -155,7 +71,6 @@ class TestBestellingOverboeking(E2EHelpers, TestCase):
                         status=BESTELLING_STATUS_BETALING_ACTIEF,
                         log='Een beginnetje\n')
         bestelling.save()
-        bestelling.regels.add(regel)
         self.bestelling = bestelling
 
         ver2 = Vereniging(
@@ -166,31 +81,6 @@ class TestBestellingOverboeking(E2EHelpers, TestCase):
         self.ver2 = ver2
 
         self.functie_mww = Functie.objects.filter(rol='MWW').first()
-
-        product = WebwinkelProduct(
-                        omslag_titel='Test titel 1',
-                        onbeperkte_voorraad=True,
-                        bestel_begrenzing='',
-                        prijs_euro="1.23")
-        product.save()
-        self.product = product
-
-        regel = BestellingRegel(
-                        korte_beschrijving='webwinkel',
-                        bedrag_euro=Decimal(1.23),
-                        code=BESTELLING_REGEL_CODE_WEBWINKEL)
-        regel.save()
-        self.regel2 = regel
-
-        keuze = WebwinkelKeuze(
-                        wanneer=now,
-                        koper=self.account_admin,
-                        product=product,
-                        aantal=1,
-                        totaal_euro=Decimal('1.23'),
-                        log='test',
-                        bestelling=regel)
-        keuze.save()
 
         bestelling = Bestelling(
                         bestel_nr=1235,
@@ -209,7 +99,6 @@ class TestBestellingOverboeking(E2EHelpers, TestCase):
                         status=BESTELLING_STATUS_BETALING_ACTIEF,
                         log='Een beginnetje\n')
         bestelling.save()
-        bestelling.regels.add(self.regel2)
         self.bestelling2 = bestelling
 
     def test_anon(self):
