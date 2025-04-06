@@ -198,6 +198,13 @@ class VerzendkostenBestelPlugin(BestelPluginBase):
 
         return verzendkosten_euro, btw_percentage, btw_euro
 
+    def annuleer(self, regel: BestellingRegel):
+        """
+            Het product wordt uit het mandje gehaald of de bestelling wordt geannuleerd (voordat deze betaald is)
+            Geef een eerder gemaakte reservering voor het webwinkel product weer vrij.
+        """
+        pass
+
     def is_besteld(self, regel: BestellingRegel):
         """
             Het gereserveerde product in het mandje is nu omgezet in een bestelling.

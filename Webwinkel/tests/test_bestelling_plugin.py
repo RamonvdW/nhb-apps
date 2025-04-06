@@ -315,7 +315,7 @@ class TestWebwinkelBestellingPlugin(E2EHelpers, TestCase):
         plugin.zet_stdout(stdout)
 
         # leeg mandje
-        kosten = plugin.bereken_verzendkosten(self.mandje)
+        kosten, btw_perc, btw_euro = plugin.bereken_verzendkosten(self.mandje)
         self.assertEqual(kosten, 0)
 
         regel = BestellingRegel(
@@ -334,13 +334,13 @@ class TestWebwinkelBestellingPlugin(E2EHelpers, TestCase):
 
         # pakketpost
         self.mandje.regels.add(regel)
-        kosten = plugin.bereken_verzendkosten(self.mandje)
+        kosten, btw_perc, btw_euro = plugin.bereken_verzendkosten(self.mandje)
         self.assertEqual(kosten, Decimal(settings.WEBWINKEL_PAKKET_GROOT_VERZENDKOSTEN_EURO))
 
         # briefpost
         self.product.type_verzendkosten = VERZENDKOSTEN_BRIEFPOST
         self.product.save(update_fields=['type_verzendkosten'])
-        kosten = plugin.bereken_verzendkosten(self.mandje)
+        kosten, btw_perc, btw_euro = plugin.bereken_verzendkosten(self.mandje)
         self.assertEqual(kosten, Decimal(settings.WEBWINKEL_BRIEF_VERZENDKOSTEN_EURO))
 
 
