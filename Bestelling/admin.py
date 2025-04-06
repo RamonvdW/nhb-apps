@@ -124,8 +124,7 @@ class BestellingAdmin(admin.ModelAdmin):
                         'afleveradres_regel_4', 'afleveradres_regel_5')
              }),
         ('Kosten',
-            {'fields': ('verzendkosten_euro',
-                        'btw_percentage_cat1',
+            {'fields': ('btw_percentage_cat1',
                         'btw_percentage_cat2',
                         'btw_percentage_cat3',
                         'btw_euro_cat1',

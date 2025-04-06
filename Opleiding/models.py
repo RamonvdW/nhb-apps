@@ -261,7 +261,10 @@ class OpleidingAfgemeld(models.Model):
     sporter = models.ForeignKey(Sporter, on_delete=models.PROTECT)
 
     # wanneer was de aanmelding gedaan?
-    wanneer_aangemeld = models.DateTimeField(default='2000-01-01')
+    wanneer_aangemeld = models.DateTimeField(default=datetime.datetime(
+                                                                year=2000,
+                                                                month=1,
+                                                                day=1).replace(tzinfo=datetime.timezone.utc))
 
     # het originele reserveringsnummer
     nummer = models.BigIntegerField(default=0)

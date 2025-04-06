@@ -19,7 +19,7 @@ import io
 
 
 # updaten met dit commando (vereist ENABLE_DJANGO_EXTENSIONS = True in settings_dev.py):
-# noqa: for x in `./manage.py show_urls --settings=Site.settings_dev | rev | cut -d'/' -f2- | rev | grep '/beheer/'`; do echo "'$x/',"; done | grep -vE ':object_id>/|/add/|/autocomplete/|<app_label>|<id>|bondscompetities/beheer/'
+# noqa: for x in `./manage.py show_urls --settings=Site.settings_dev | rev | cut -d'/' -f2- | rev | grep -E '^/beheer/'`; do echo "'$x/',"; done | grep -vE ':object_id>/|/add/|/autocomplete/|<app_label>|<id>|bondscompetities/beheer/'
 BEHEER_URLS = (
     '/beheer/Account/account/',
     '/beheer/Account/accountverzoekenteller/',
@@ -68,12 +68,12 @@ BEHEER_URLS = (
     '/beheer/HistComp/histkampindivbk/',
     '/beheer/HistComp/histkampindivrk/',
     '/beheer/HistComp/histkampteam/',
+    '/beheer/ImportCRM/importlimieten/',
     '/beheer/Instaptoets/categorie/',
     '/beheer/Instaptoets/instaptoets/',
     '/beheer/Instaptoets/quiz/',
     '/beheer/Instaptoets/toetsantwoord/',
     '/beheer/Instaptoets/uitdaging/',
-    '/beheer/Instaptoets/voorstelvraag/',
     '/beheer/Instaptoets/vraag/',
     '/beheer/Locatie/evenementlocatie/',
     '/beheer/Locatie/reistijd/',
@@ -81,8 +81,9 @@ BEHEER_URLS = (
     '/beheer/Logboek/logboekregel/',
     '/beheer/Mailer/mailqueue/',
     '/beheer/Opleiding/opleiding/',
-    '/beheer/Opleiding/opleidingdeelnemer/',
+    '/beheer/Opleiding/opleidingafgemeld/',
     '/beheer/Opleiding/opleidingdiploma/',
+    '/beheer/Opleiding/opleidinginschrijving/',
     '/beheer/Opleiding/opleidingmoment/',
     '/beheer/Records/anderrecord/',
     '/beheer/Records/besteindivrecords/',
