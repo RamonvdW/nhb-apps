@@ -42,7 +42,7 @@ class KlassengrenzenTonenView(View):
         for obj in klassen:
             if obj.min_ag > AG_NUL:
                 ag_str = "%5.3f" % obj.min_ag
-                obj.min_ag_str = ag_str.replace('.', ',')       # nederlands: komma ipv punt
+                obj.min_ag_str = ag_str.replace('.', ',')       # Nederlands: komma ipv punt
 
             if toon_aantal:
                 obj.aantal = obj.regiocompetitiesporterboog_set.count()
@@ -70,7 +70,7 @@ class KlassengrenzenTonenView(View):
         for obj in klassen:
             if obj.min_ag > AG_NUL:
                 ag_str = "%5.1f" % (obj.min_ag * aantal_pijlen)
-                obj.min_ag_str = ag_str.replace('.', ',')  # nederlands: komma ipv punt
+                obj.min_ag_str = ag_str.replace('.', ',')  # Nederlands: komma ipv punt
 
             obj.blazoen_regio_str = BLAZOEN2STR[obj.blazoen1_regio]
             if obj.blazoen2_regio != obj.blazoen1_regio:

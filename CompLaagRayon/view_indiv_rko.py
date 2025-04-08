@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -304,7 +304,7 @@ class LijstRkSelectieAlsBestandView(LijstRkSelectieView):
                     label += "(deelname onzeker)"
 
                 gem_str = "%.3f" % deelnemer.gemiddelde
-                gem_str = gem_str.replace('.', ',')     # nederlands
+                gem_str = gem_str.replace('.', ',')     # Nederlands
 
                 para_notities = ''
 
