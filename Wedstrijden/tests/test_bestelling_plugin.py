@@ -5,7 +5,6 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from django.conf import settings
 from django.utils import timezone
 from django.core.management.base import OutputWrapper
 from BasisTypen.definities import ORGANISATIE_IFAA
@@ -15,7 +14,6 @@ from Bestelling.models import BestellingRegel, BestellingMandje
 from Geo.models import Regio
 from Locatie.models import WedstrijdLocatie
 from Sporter.models import Sporter, SporterBoog
-from Taken.models import Taak
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
 from Wedstrijden.definities import (WEDSTRIJD_STATUS_GEACCEPTEERD,
@@ -52,7 +50,7 @@ class TestWedstrijdenBestellingPlugin(E2EHelpers, TestCase):
 
         locatie = WedstrijdLocatie(
                         naam='Test locatie',
-                        adres='Boogstad')
+                        plaats='Boogstad')
         locatie.save()
 
         date_next_month = timezone.now() + datetime.timedelta(days=31)
@@ -480,6 +478,45 @@ class TestWedstrijdenBestellingPlugin(E2EHelpers, TestCase):
 
         ver_nr = plugin.get_verkoper_ver_nr(regel)
         self.assertEqual(ver_nr, 1234)
+
+    def test_kwalificatiescores(self):
+        stdout = OutputWrapper(io.StringIO())
+        plugin = WedstrijdBestelPlugin()
+        plugin.zet_stdout(stdout)
+
+        # niet bestaande wedstrijd
+        regel = BestellingRegel(code=BESTELLING_REGEL_CODE_WEDSTRIJD)
+        regel.save()
+        res = plugin.wil_kwalificatiescores(regel)
+        self.assertIsNone(res)
+
+        inschrijving = WedstrijdInschrijving(
+                                wanneer=timezone.now(),
+                                status=WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_MANDJE,
+                                wedstrijd=self.wedstrijd,
+                                sessie=self.sessie,
+                                sporterboog=self.sporterboog_r,
+                                wedstrijdklasse=self.wedstrijdklasse_r,
+                                bestelling=None,
+                                koper=self.account_100000)
+        inschrijving.save()
+
+        regel = plugin.reserveer(inschrijving, 'Mandje test')
+        self.assertEqual(regel.korte_beschrijving,
+                         'Wedstrijd "Test wedstrijd"||deelname door [100000] Nor Maal||met boog Recurve')
+
+        # wedstrijd heeft geen kwalificatie scores nodig
+        wedstrijd = plugin.wil_kwalificatiescores(regel)
+        self.assertIsNone(res)
+
+        self.wedstrijd.eis_kwalificatie_scores = True
+        self.wedstrijd.save(update_fields=['eis_kwalificatie_scores'])
+
+        wedstrijd = plugin.wil_kwalificatiescores(regel)
+        self.assertTrue(wedstrijd.datum_str != '')
+        self.assertTrue(wedstrijd.plaats_str != '')
+        self.assertTrue(wedstrijd.sporter_str != '')
+        self.assertTrue(wedstrijd.url_kwalificatie_scores != '')
 
 
 # end of file

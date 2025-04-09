@@ -293,12 +293,12 @@ class WedstrijdBestelPlugin(BestelPluginBase):
     def wil_kwalificatiescores(self, regel: BestellingRegel) -> Wedstrijd | None:
         """
             Controleer of de bestelling invoer van kwalificatiescores nodig heeft
-            Verwachting: regel.code == BESTELLING_REGEL_CODE_WEDSTRIJD
-            Geeft een lijst van Wedstrijd records terug met daarin:
+            Indien nodig, geeft een Wedstrijd record terug met daarin:
                 - datum_str
                 - plaats_str
                 - sporter_str
                 - url_kwalificatie_scores    Voor het bijwerken van de kwalificatie scores
+            Verwachting: regel.code == BESTELLING_REGEL_CODE_WEDSTRIJD
         """
         inschrijving = (WedstrijdInschrijving
                         .objects
