@@ -10,7 +10,12 @@ from django.utils import timezone
 from Functie.models import Functie
 from Geo.models import Regio
 from Instaptoets.models import Vraag
-from Opleiding.definities import OPLEIDING_STATUS_INSCHRIJVEN, OPLEIDING_AFMELDING_STATUS_AFGEMELD
+from Opleiding.definities import (OPLEIDING_STATUS_INSCHRIJVEN, OPLEIDING_AFMELDING_STATUS_AFGEMELD,
+                                  OPLEIDING_INSCHRIJVING_STATUS_INSCHRIJVEN,         # 'I'  nog niet in mandje
+                                  OPLEIDING_INSCHRIJVING_STATUS_RESERVERING_MANDJE,  # 'R'  in mandje
+                                  OPLEIDING_INSCHRIJVING_STATUS_BESTELD,             # 'B'  besteld
+                                  OPLEIDING_INSCHRIJVING_STATUS_DEFINITIEF,          # 'D'  betaald
+                                  OPLEIDING_INSCHRIJVING_STATUS_AFGEMELD)            # 'A'  geannuleerd
 from Opleiding.models import Opleiding, OpleidingInschrijving, OpleidingAfgemeld
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -95,12 +100,36 @@ class TestOpleidingVereniging(E2EHelpers, TestCase):
         Vraag().save()
 
         inschrijving = OpleidingInschrijving(
-                        opleiding=opleiding,
-                        sporter=sporter,
-                        # status=OPLEIDING_INSCHRIJVING_STATUS_RESERVERING_MANDJE,
-                        koper=self.account_normaal)
+                            opleiding=opleiding,
+                            sporter=sporter,
+                            status=OPLEIDING_INSCHRIJVING_STATUS_RESERVERING_MANDJE,
+                            koper=self.account_normaal)
         inschrijving.save()
-        self.inschrijving = inschrijving
+        self.inschrijving1 = inschrijving
+
+        inschrijving = OpleidingInschrijving(
+                            opleiding=opleiding,
+                            sporter=sporter,
+                            status=OPLEIDING_INSCHRIJVING_STATUS_BESTELD,
+                            koper=self.account_normaal)
+        inschrijving.save()
+        self.inschrijving2 = inschrijving
+
+        inschrijving = OpleidingInschrijving(
+                            opleiding=opleiding,
+                            sporter=sporter,
+                            status=OPLEIDING_INSCHRIJVING_STATUS_DEFINITIEF,
+                            koper=self.account_normaal)
+        inschrijving.save()
+        self.inschrijving3 = inschrijving
+
+        inschrijving = OpleidingInschrijving(
+                            opleiding=opleiding,
+                            sporter=sporter,
+                            status=OPLEIDING_INSCHRIJVING_STATUS_AFGEMELD,
+                            koper=self.account_normaal)
+        inschrijving.save()
+        self.inschrijving4 = inschrijving
 
         afgemeld = OpleidingAfgemeld(
                         wanneer_afgemeld=now,
@@ -150,7 +179,7 @@ class TestOpleidingVereniging(E2EHelpers, TestCase):
         self.assert403(resp, 'Geen toegang')
 
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_details_aanmelding % self.inschrijving.pk)
+            resp = self.client.get(self.url_details_aanmelding % self.inschrijving1.pk)
         self.assert403(resp, 'Geen toegang')
 
     def test_lijst(self):
@@ -237,8 +266,6 @@ class TestOpleidingVereniging(E2EHelpers, TestCase):
     def test_details_aanmelding(self):
         self.e2e_login_and_pass_otp(self.account_normaal)
 
-        url = self.url_details_aanmelding % self.inschrijving.pk
-
         # HWL
         self.e2e_wissel_naar_functie(self.functie_hwl)
         with self.assert_max_queries(20):
@@ -251,6 +278,8 @@ class TestOpleidingVereniging(E2EHelpers, TestCase):
         self.assert404(resp, 'Aanmelding niet gevonden')
 
         # SEC
+        url = self.url_details_aanmelding % self.inschrijving1.pk
+
         self.e2e_wissel_naar_functie(self.functie_sec)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
@@ -259,12 +288,17 @@ class TestOpleidingVereniging(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('opleiding/aanmelding-details.dtl', 'plein/site_layout.dtl'))
 
         # MO
-        self.e2e_wissel_naar_functie(self.functie_mo)
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('opleiding/aanmelding-details.dtl', 'plein/site_layout.dtl'))
+        for url in (self.url_details_aanmelding % self.inschrijving2.pk,
+                    self.url_details_aanmelding % self.inschrijving3.pk,
+                    self.url_details_aanmelding % self.inschrijving4.pk):
+
+            self.e2e_wissel_naar_functie(self.functie_mo)
+            with self.assert_max_queries(20):
+                resp = self.client.get(url)
+            self.assertEqual(resp.status_code, 200)     # 200 = OK
+            self.assert_html_ok(resp)
+            self.assert_template_used(resp, ('opleiding/aanmelding-details.dtl', 'plein/site_layout.dtl'))
+        # for
 
         # BB
         self.account_normaal.is_BB = True

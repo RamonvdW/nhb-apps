@@ -14,13 +14,14 @@ from Betaal.mutaties import betaal_mutatieverzoek_start_ontvangst
 from Functie.models import Functie
 from Geo.models import Regio
 from Instaptoets.models import Vraag, Instaptoets
+from Locatie.models import EvenementLocatie
 from Mailer.models import MailQueue
 from Opleiding.definities import (OPLEIDING_STATUS_INSCHRIJVEN, OPLEIDING_STATUS_GEANNULEERD,
                                   OPLEIDING_INSCHRIJVING_STATUS_INSCHRIJVEN,
                                   OPLEIDING_INSCHRIJVING_STATUS_RESERVERING_MANDJE,
                                   OPLEIDING_INSCHRIJVING_STATUS_BESTELD,
                                   OPLEIDING_INSCHRIJVING_STATUS_DEFINITIEF)
-from Opleiding.models import Opleiding, OpleidingInschrijving, OpleidingAfgemeld
+from Opleiding.models import Opleiding, OpleidingInschrijving, OpleidingAfgemeld, OpleidingMoment
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
@@ -128,6 +129,20 @@ class TestOpleidingInschrijven(E2EHelpers, TestCase):
         self.toets = toets
         self.toets_niet_afgerond_datetime = toets.afgerond
 
+        locatie = EvenementLocatie(
+                        naam='Opleidingencentrum',
+                        vereniging=self.ver_bond,
+                        plaats='Leerdam')
+        locatie.save()
+        self.locatie1 = locatie
+
+        locatie = EvenementLocatie(
+                        naam='Omgeving Haarlem',
+                        vereniging=self.ver_bond,
+                        plaats='')
+        locatie.save()
+        self.locatie2 = locatie
+
     def _zet_instaptoets_gehaald(self):
         now = timezone.now() - datetime.timedelta(days=10)
         Instaptoets.objects.filter(pk=self.toets.pk).update(
@@ -152,6 +167,33 @@ class TestOpleidingInschrijven(E2EHelpers, TestCase):
                 is_afgerond=False,
                 aantal_goed=0,
                 geslaagd=False)
+
+    def _zet_opleiding_momenten(self):
+        # voeg momenten toe aan de opleiding
+        moment = OpleidingMoment(
+                    datum=self.opleiding.periode_begin,
+                    duur_minuten=180,
+                    locatie=self.locatie1,
+                    opleider_naam='Do Cent',
+                    opleider_email='do.cent@khsn.not',
+                    opleider_telefoon='0123456789')
+        moment.save()
+        self.opleiding.momenten.add(moment)
+
+        # locatie nog niet bekend
+        moment = OpleidingMoment(
+                    datum=self.opleiding.periode_einde,
+                    duur_minuten=180,
+                    locatie=self.locatie2)
+        moment.save()
+        self.opleiding.momenten.add(moment)
+
+        # zonder locatie
+        moment = OpleidingMoment(
+                    datum=self.opleiding.periode_einde,
+                    duur_minuten=180)
+        moment.save()
+        self.opleiding.momenten.add(moment)
 
     def test_anon(self):
         self.e2e_logout()
@@ -300,6 +342,9 @@ class TestOpleidingInschrijven(E2EHelpers, TestCase):
                                     content_type='application/json')
         self.assert200_json(resp)
         self.assertEqual(OpleidingInschrijving.objects.count(), 1)
+
+        # extra coverage
+        self._zet_opleiding_momenten()
 
         # get toont ingevoerde gegevens
         with self.assert_max_queries(20):
@@ -669,5 +714,37 @@ class TestOpleidingInschrijven(E2EHelpers, TestCase):
         self.assert404(resp, 'Dubbel inschrijven niet mogelijk')
         self.assertEqual(mandje.aantal_in_mandje(), 0)
 
+    def test_wanneer(self):
+        # 1 dag
+        moment = OpleidingMoment(
+                    datum=datetime.date(year=2000, month=12, day=1),
+                    aantal_dagen=1)
+        res = moment.wanneer_compact()
+        self.assertEqual(res, "1 december 2000")
+
+        # 2 dagen
+        moment.aantal_dagen = 2
+        res = moment.wanneer_compact()
+        self.assertEqual(res, "1 + 2 december 2000")
+
+        # reeks van dagen in dezelfde maand/jaar
+        moment.aantal_dagen = 4
+        res = moment.wanneer_compact()
+        self.assertEqual(res, "1 - 4 december 2000")
+
+        # reeks van dagen over maandgrens in zelfde jaar
+        moment.datum = datetime.date(year=2000, month=11, day=30)
+        res = moment.wanneer_compact()
+        self.assertEqual(res, "30 november 2000 - 3 december 2000")
+
+        # reeks van dagen over jaargrens
+        moment.datum = datetime.date(year=2000, month=12, day=30)
+        res = moment.wanneer_compact()
+        self.assertEqual(res, "30 december 2000 - 2 januari 2001")
+
+        # coverage
+        self.assertTrue(str(moment) != '')
+        moment.locatie = self.locatie1
+        self.assertTrue(str(moment) != '')
 
 # end of file
