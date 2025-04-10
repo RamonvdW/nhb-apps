@@ -106,7 +106,7 @@ class TestInstaptoetsOperations(E2EHelpers, TestCase):
         self.assertFalse(operations.instaptoets_is_beschikbaar())
 
     def test_toets_geldig(self):
-        now = timezone.now().date()
+        now = timezone.now()
 
         toets = Instaptoets(
                     afgerond=now,
@@ -115,15 +115,24 @@ class TestInstaptoetsOperations(E2EHelpers, TestCase):
         self.assertEqual(operations.toets_geldig(toets), (True, 365))
 
         toets = Instaptoets(
-                    afgerond=datetime.date(now.year-1, now.month, now.day),
+                    afgerond=datetime.datetime(now.year-1, now.month, now.day, tzinfo=now.tzinfo),
                     sporter=self.sporter_100000,
                     geslaagd=True)
         self.assertEqual(operations.toets_geldig(toets), (True, 0))
 
         toets = Instaptoets(
-                    afgerond=timezone.now().date() - datetime.timedelta(days=366),
+                    afgerond=timezone.now() - datetime.timedelta(days=366),
                     sporter=self.sporter_100000,
                     geslaagd=True)
+        self.assertEqual(operations.toets_geldig(toets), (False, 0))
+
+        # Feb 29 is a special
+        toets = Instaptoets(
+                    afgerond=datetime.datetime(year=2020, month=2, day=29, tzinfo=now.tzinfo),
+                    sporter=self.sporter_100000,
+                    geslaagd=True)
+        toets.save()
+        toets.refresh_from_db()
         self.assertEqual(operations.toets_geldig(toets), (False, 0))
 
     def test_vind_toets(self):

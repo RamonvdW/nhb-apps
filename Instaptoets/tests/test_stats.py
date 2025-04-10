@@ -11,6 +11,7 @@ from Instaptoets.models import Categorie, Vraag, ToetsAntwoord, Instaptoets
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
+import datetime
 
 
 class TestInstaptoetsStats(E2EHelpers, TestCase):
@@ -20,6 +21,7 @@ class TestInstaptoetsStats(E2EHelpers, TestCase):
     test_after = ('Sporter.tests.test_login',)
 
     url_stats = '/opleiding/instaptoets/stats/'
+    url_gezakt = '/opleiding/instaptoets/gezakt/'
 
     def setUp(self):
         """ initialisatie van de test case """
@@ -179,6 +181,57 @@ class TestInstaptoetsStats(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('instaptoets/stats-antwoorden.dtl', 'plein/site_layout.dtl'))
+
+    def test_gezakt(self):
+        self.e2e_login_and_pass_otp(self.account_100000)
+        self.e2e_wissel_naar_functie(self.functie_mo)
+
+        Instaptoets(
+            sporter=self.sporter_100000,
+            aantal_vragen=20,
+            aantal_antwoorden=20,
+            is_afgerond=True,
+            aantal_goed=18,
+            geslaagd=False,
+        ).save()
+
+        toets = Instaptoets(
+            sporter=self.sporter_100000,
+            aantal_vragen=20,
+            aantal_antwoorden=20,
+            is_afgerond=True,
+            aantal_goed=15,
+            geslaagd=False,
+        )
+        toets.save()
+        toets.opgestart -= datetime.timedelta(days=14)
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_gezakt)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('instaptoets/gezakt.dtl', 'plein/site_layout.dtl'))
+
+        # zowel gezakt maar later ook geslaagd
+        Instaptoets(
+            sporter=self.sporter_100000,
+            aantal_vragen=20,
+            aantal_antwoorden=20,
+            is_afgerond=True,
+            aantal_goed=18,
+            geslaagd=True,
+        ).save()
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_gezakt)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('instaptoets/gezakt.dtl', 'plein/site_layout.dtl'))
+
+        # instaptoets niet beschikbaar
+        Vraag.objects.all().delete()
+        resp = self.client.get(self.url_gezakt)
+        self.assert_is_redirect(resp, '/opleiding/')
 
 
 # end of file

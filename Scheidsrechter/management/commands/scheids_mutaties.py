@@ -19,7 +19,7 @@ from BasisTypen.definities import SCHEIDS_NIET, SCHEIDS_VERENIGING
 from Competitie.models import CompetitieMatch
 from Functie.models import Functie
 from Locatie.models import Reistijd, WedstrijdLocatie
-from Locatie.operations import ReistijdBepalen
+from Locatie.operations.reistijd_bepalen import ReistijdBepalen
 from Mailer.operations import mailer_queue_email, render_email_template
 from Site.core.background_sync import BackgroundSync
 from Scheidsrechter.definities import (SCHEIDS_MUTATIE_WEDSTRIJD_BESCHIKBAARHEID_OPVRAGEN,
@@ -238,12 +238,13 @@ class Command(BaseCommand):
         ver_nr = settings.WEDSTRIJDEN_KIES_UITVOERENDE_VERENIGING[0]
         self.ver_bondsbureau = Vereniging.objects.get(ver_nr=ver_nr)
 
-        loc, is_created = WedstrijdLocatie.objects.get_or_create(naam='Placeholder RK/BK voor SR',
-                                                                 zichtbaar=False,
-                                                                 discipline_indoor=True,
-                                                                 adres='(diverse)',
-                                                                 plaats='(diverse)',
-                                                                 notities='Automatisch aangemaakt voor opvragen SR naar RK/BK')
+        loc, is_created = WedstrijdLocatie.objects.get_or_create(
+                                    naam='Placeholder RK/BK voor SR',
+                                    zichtbaar=False,
+                                    discipline_indoor=True,
+                                    adres='(diverse)',
+                                    plaats='(diverse)',
+                                    notities='Automatisch aangemaakt voor opvragen SR naar RK/BK')
         if is_created:
             loc.verenigingen.add(self.ver_bondsbureau)
         self.locatie_placeholder = loc
@@ -259,14 +260,13 @@ class Command(BaseCommand):
     def _reistijd_opvragen(self, locatie, sporter):
         """ vraag de reistijd op tussen de postcode van de sporter/scheidsrechter en de locatie """
 
-        # nieuwe verzoeken worden door het management commando "reistijd berekenen" verwerkt
         if sporter.adres_lat and sporter.adres_lon:
+            # vraag de achtergrondtaak om de reistijd te berekenen
             _ = Reistijd.objects.get_or_create(
                                     vanaf_lat=sporter.adres_lat,
                                     vanaf_lon=sporter.adres_lon,
                                     naar_lat=locatie.adres_lat,
                                     naar_lon=locatie.adres_lon)
-            # wordt later verwerkt (door een achtergrondtaak)
         else:
             self.stdout.write('[WARNING] Nog geen lat/lon bekend voor sporter %s' % sporter.lid_nr)
 
@@ -301,10 +301,16 @@ class Command(BaseCommand):
         if wedstrijd.aantal_scheids <= 1:
             qset = qset.exclude(scheids=SCHEIDS_VERENIGING)
 
+        locatie = wedstrijd.locatie
+        vraag_reistijd = locatie.adres_lat and locatie.adres_lon
+        if not vraag_reistijd:
+            self.stdout.write('[WARNING] Geen lat/lon bekend voor locatie met pk=%s' % locatie.pk)
+
         for sporter in qset:
 
-            # reisafstand laten berekenen voor deze SR
-            self._reistijd_opvragen(wedstrijd.locatie, sporter)
+            if vraag_reistijd:
+                # reisafstand laten berekenen voor deze SR
+                self._reistijd_opvragen(locatie, sporter)
 
             # stuur een e-mail
             if len(vraag):
@@ -313,7 +319,7 @@ class Command(BaseCommand):
         # for
 
         # verwerk de nieuwe verzoeken voor reistijd
-        bepaler = ReistijdBepalen(self.stdout, self.stderr)
+        bepaler = ReistijdBepalen(self.stdout, self.stderr, 75)
         bepaler.run()
 
     def _adjust_rk_bk_datum_reeks(self, wedstrijd, alle_datums):
@@ -712,10 +718,12 @@ class Command(BaseCommand):
                           .select_related('locatie')):
 
             locatie = wedstrijd.locatie
-
-            for scheids in Sporter.objects.exclude(scheids=SCHEIDS_NIET):
-                self._reistijd_opvragen(locatie, scheids)
-            # for
+            if locatie.adres_lat and locatie.adres_lon:
+                for scheids in Sporter.objects.exclude(scheids=SCHEIDS_NIET):
+                    self._reistijd_opvragen(locatie, scheids)
+                # for
+            else:
+                self.stdout.write('[WARNING] Geen lat/lon bekend voor locatie met pk=%s' % locatie.pk)
         # for
 
         # reistijd opvragen naar locaties van toekomstige bondscompetities Indoor RK/BK matches
@@ -727,10 +735,12 @@ class Command(BaseCommand):
                       .select_related('locatie')):
 
             locatie = match.locatie
-
-            for scheids in Sporter.objects.exclude(scheids=SCHEIDS_NIET):
-                self._reistijd_opvragen(locatie, scheids)
-            # for
+            if locatie.adres_lat and locatie.adres_lon:
+                for scheids in Sporter.objects.exclude(scheids=SCHEIDS_NIET):
+                    self._reistijd_opvragen(locatie, scheids)
+                # for
+            else:
+                self.stdout.write('[WARNING] Geen lat/lon bekend voor locatie met pk=%s' % locatie.pk)
         # for
 
     def _verwerk_mutatie(self, mutatie):

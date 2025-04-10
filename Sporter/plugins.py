@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2024 Ramon van der Winkel.
+#  Copyright (c) 2020-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -80,7 +80,7 @@ def sporter_login_plugin(request, from_ip, account):
 account_add_plugin_login_gate(20, sporter_login_plugin, False)
 
 
-def sporter_ww_vergeten_plugin(request, from_ip, account):
+def sporter_ww_vergeten_plugin(_request, _from_ip, account):
     """ Deze functie wordt aangeroepen vanuit de Account wachtwoord vergeten view
         Hier zetten we een eventueel aangepast e-mailadres uit het CRM door naar het account.
     """

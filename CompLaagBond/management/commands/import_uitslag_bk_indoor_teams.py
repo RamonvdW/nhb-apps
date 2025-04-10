@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023-2024 Ramon van der Winkel.
+#  Copyright (c) 2023-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -226,7 +226,10 @@ class Command(BaseCommand):
         self.stdout.write('[DEBUG]   Feitelijke deelnemers: %s' % repr([deelnemer.lid_nr
                                                                         for deelnemer in feitelijke_deelnemers]))
 
-        if len(feitelijke_deelnemers) < 3:
+        if len(feitelijke_deelnemers) == 0:
+            self.stdout.write('[WARNING]   Geen feitelijke deelnemers voor team %s' % kamp_team.team_naam)
+
+        elif len(feitelijke_deelnemers) < 3:
             self.stderr.write('[ERROR]   Maar %s deelnemers in team %s' % (len(feitelijke_deelnemers),
                                                                            kamp_team.team_naam))
 
@@ -517,10 +520,11 @@ class Command(BaseCommand):
         final_8 = list()
         for row_nr in (12, 14, 18, 20, 24, 26, 30, 32):
             team_naam = self._lees_team_naam(ws, 'B' + str(row_nr))
-            if team_naam in self.deelnemende_teams.keys():
-                final_8.append(team_naam)
-            else:
-                self.stdout.write('[WARNING] Kwartfinale team %s op finale blad wordt niet herkend' % repr(team_naam))
+            if team_naam:
+                if team_naam in self.deelnemende_teams.keys():
+                    final_8.append(team_naam)
+                else:
+                    self.stdout.write('[WARNING] Kwartfinale team %s op finale blad wordt niet herkend' % repr(team_naam))
         # for
         # self.stdout.write('final_8: %s' % repr(final_8))
 

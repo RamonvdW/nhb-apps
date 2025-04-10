@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2024 Ramon van der Winkel.
+#  Copyright (c) 2022-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -343,7 +343,8 @@ class Command(BaseCommand):
             # schrijf in de output
             tups = sys.exc_info()
             lst = traceback.format_tb(tups[2])
-            self.stderr.write('[ERROR] Onverwachte fout tijdens mollie_refunds_ophalen: ' + str(exc))
+            self.stderr.write('[ERROR] Onverwachte fout (%s) tijdens mollie_refunds_ophalen: %s' % (type(exc),
+                                                                                                    str(exc)))
             self.stderr.write('Traceback:')
             self.stderr.write(''.join(lst))
 

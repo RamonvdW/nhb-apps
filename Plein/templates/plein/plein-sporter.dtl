@@ -69,7 +69,7 @@
 
             <!-- records -->
             {% url 'Records:overzicht' as card_url %}
-            {% include 'plein/card_icon.dtl' with title="Records" text="Alle handboogsport records van nederlandse sporters." icon="insights" url=card_url %}
+            {% include 'plein/card_icon.dtl' with title="Records" text="Alle handboogsport records van Nederlandse sporters." icon="insights" url=card_url %}
 
             <!-- ledenvoordeel -->
             {% if url_voordeel %}

@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023-2024 Ramon van der Winkel.
+#  Copyright (c) 2023-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase, override_settings
+from django.core.management.base import OutputWrapper
 from BasisTypen.definities import SCHEIDS_BOND
 from Locatie.models import WedstrijdLocatie, Reistijd
 from Locatie.operations import ReistijdBepalen
@@ -16,6 +17,11 @@ import io
 class TestLocatieCliReistijd(E2EHelpers, TestCase):
 
     """ tests voor de Locatie applicatie, management commando's """
+
+    SR3_LAT = 1.0
+    SR3_LON = 1.1
+    ZELF_LAT = 2.0
+    ZELF_LON = 2.1
 
     def setUp(self):
         scheids = Sporter(
@@ -38,10 +44,10 @@ class TestLocatieCliReistijd(E2EHelpers, TestCase):
     @staticmethod
     def _reistijd_bijwerken():
         # gebruik een verse instantie met "schone" stdout/stderr
-        stdout = io.StringIO()
-        stderr = io.StringIO()
+        stdout = OutputWrapper(io.StringIO())
+        stderr = OutputWrapper(io.StringIO())
 
-        bepaler = ReistijdBepalen(stdout, stderr)
+        bepaler = ReistijdBepalen(stdout, stderr, 25)
         bepaler.run()
 
         return stderr, stdout
@@ -53,18 +59,19 @@ class TestLocatieCliReistijd(E2EHelpers, TestCase):
         self.assertEqual(f1.getvalue(), '')
 
         # trigger hergebruik gmaps instantie
-        stdout = io.StringIO()
-        stderr = io.StringIO()
-        bepaler = ReistijdBepalen(stdout, stderr)
+        stdout = OutputWrapper(io.StringIO())
+        stderr = OutputWrapper(io.StringIO())
+
+        bepaler = ReistijdBepalen(stdout, stderr, 25)
         bepaler.run()
         bepaler.run()  # triggers gmap connection already done
 
     def test_bad_key(self):
-        stdout = io.StringIO()
-        stderr = io.StringIO()
+        stdout = OutputWrapper(io.StringIO())
+        stderr = OutputWrapper(io.StringIO())
 
         with override_settings(GMAPS_KEY='garbage'):
-            bepaler = ReistijdBepalen(stdout, stderr)
+            bepaler = ReistijdBepalen(stdout, stderr, 25)
             bepaler.run()
         # print('\nf1: %s\nf2: %s' % (stdout.getvalue(), stderr.getvalue()))
         self.assertTrue('[ERROR] Fout tijdens gmaps init: Invalid API key provided' in stderr.getvalue())
@@ -284,17 +291,17 @@ class TestLocatieCliReistijd(E2EHelpers, TestCase):
         self.scheids.save()
 
         # maak een reistijd verzoek
-        reistijd = Reistijd(vanaf_lat='sr3_lat',
-                            vanaf_lon='sr3_lon',
-                            naar_lat='zelf_lat',
-                            naar_lon='zelf_lon',
+        reistijd = Reistijd(vanaf_lat=self.SR3_LAT,
+                            vanaf_lon=self.SR3_LON,
+                            naar_lat=self.ZELF_LAT,
+                            naar_lon=self.ZELF_LON,
                             reistijd_min=0)         # 0 = nog niet uitgerekend
         reistijd.save()
 
         f1, f2 = self._reistijd_bijwerken()
         # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
         self.assertEqual(f1.getvalue(), '')
-        self.assertTrue("[INFO] Reistijd '17 mins' is 1030 seconden; is 17 minuten" in f2.getvalue())
+        self.assertTrue("[INFO] Aantal verzoeken naar Routes API: 1" in f2.getvalue())
 
         scheids = Sporter.objects.get(lid_nr=self.scheids.lid_nr)
         self.assertEqual(scheids.adres_lat, '42.000000')
@@ -304,36 +311,36 @@ class TestLocatieCliReistijd(E2EHelpers, TestCase):
         self.assertEqual(reistijd.reistijd_min, 17)
         self.assertTrue(str(reistijd) != '')
 
-        # incompleet verzoek
-        reistijd = Reistijd(vanaf_lat='sr3_lat',
-                            vanaf_lon='sr3_lon',
-                            naar_lat='incompleet',
-                            naar_lon='zelf_lon',
+        # input wordt niet geaccepteerd
+        Reistijd.objects.all().delete()
+        reistijd = Reistijd(vanaf_lat=self.SR3_LAT,
+                            vanaf_lon=self.SR3_LON,
+                            naar_lat='BAD',
+                            naar_lon=self.ZELF_LON,
                             reistijd_min=0)         # 0 = nog niet uitgerekend
         reistijd.save()
 
         f1, f2 = self._reistijd_bijwerken()
         # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
-        self.assertTrue("[ERROR] Onvolledig directions antwoord: " in f1.getvalue())
-
-        scheids = Sporter.objects.get(lid_nr=self.scheids.lid_nr)
-        self.assertEqual(scheids.adres_lat, '42.000000')
-        self.assertEqual(scheids.adres_lon, '5.123000')
+        self.assertTrue("[WARNING] Fout in lat/lon (geen float?) voor reistijd pk=" in f2.getvalue())
 
         reistijd.refresh_from_db()
-        self.assertEqual(reistijd.reistijd_min, 17 * 60)
+        self.assertEqual(reistijd.reistijd_min, 0)      # niet bijgewerkt
 
-        # fout
-        reistijd = Reistijd(vanaf_lat='sr3_lat',
-                            vanaf_lon='sr3_lon',
-                            naar_lat='geef fout',
-                            naar_lon='zelf_lon',
+        # speciaal verzoek: simulator geeft een leeg antwoord
+        Reistijd.objects.all().delete()
+        reistijd = Reistijd(vanaf_lat=self.SR3_LAT,
+                            vanaf_lon=self.SR3_LON,
+                            naar_lat=420.0,
+                            naar_lon=self.ZELF_LON,
                             reistijd_min=0)         # 0 = nog niet uitgerekend
         reistijd.save()
 
         f1, f2 = self._reistijd_bijwerken()
         # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
-        self.assertTrue("[ERROR] Fout van gmaps directions route van" in f1.getvalue())
+        self.assertTrue("[ERROR] Onvolledig routes antwoord:" in f1.getvalue())
 
+        reistijd.refresh_from_db()
+        self.assertGreater(reistijd.reistijd_min, 5 * 60)       # speciaal getal (16 of 17 uur)
 
 # end of file

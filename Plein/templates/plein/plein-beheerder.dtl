@@ -59,7 +59,7 @@
                 <!-- records -->
                 {% if rol_is_bb or rol_is_mwz or rol_is_hwl or rol_is_wl or rol_is_cs %}
                     {% url 'Records:overzicht' as card_url %}
-                    {% include 'plein/card_icon.dtl' with title="Records" text="Alle handboogsport records van nederlandse sporters." icon="insights" url=card_url %}
+                    {% include 'plein/card_icon.dtl' with title="Records" text="Alle handboogsport records van Nederlandse sporters." icon="insights" url=card_url %}
                 {% endif %}
             </div>
         </div>

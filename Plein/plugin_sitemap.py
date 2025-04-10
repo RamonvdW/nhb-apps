@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2024 Ramon van der Winkel.
+#  Copyright (c) 2024-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -24,7 +24,6 @@ def generate_urls():
 
     # handleidingen
     yield CHECK_LOW, settings.URL_PDF_HANDLEIDING_LEDEN
-    yield CHECK_LOW, settings.URL_PDF_HANDLEIDING_LEDEN.replace('voor-leden', 'voor-nhb-leden')     # old
     yield CHECK_LOW, settings.URL_PDF_HANDLEIDING_BEHEERDERS
     yield CHECK_LOW, settings.URL_PDF_HANDLEIDING_VERENIGINGEN
     # yield CHECK_LOW, settings.URL_PDF_HANDLEIDING_SCHEIDSRECHTERS

@@ -36,6 +36,7 @@ from Site.core.settings_base import *         # noqa
 DEBUG = True
 
 # ask the template engine to insert a special pattern in the output in case of template problems
+# pattern is detected in html_assert_template_bug in TestHelpers/test_asserts.py
 TEMPLATES[0]['OPTIONS']['string_if_invalid'] = '##BUG %s ##'
 
 # template debugging must be enabled for coverage measurement with django-coverage-plugin

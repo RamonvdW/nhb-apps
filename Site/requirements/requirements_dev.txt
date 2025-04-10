@@ -22,7 +22,7 @@ charset-normalizer==3.4.1
     # via
     #   -r requirements.txt
     #   requests
-coverage==7.6.12
+coverage==7.7.1
     # via
     #   -r requirements_dev.in
     #   django-coverage-plugin
@@ -33,7 +33,7 @@ django==4.2.20
     #   django-extensions
 django-coverage-plugin==3.1.0
     # via -r requirements_dev.in
-django-debug-toolbar==5.0.1
+django-debug-toolbar==5.1.0
     # via -r requirements_dev.in
 django-extensions==3.2.3
     # via -r requirements_dev.in
@@ -49,7 +49,9 @@ google-api-core==2.24.2
     # via
     #   -r requirements.txt
     #   google-api-python-client
-google-api-python-client==2.164.0
+    #   google-geo-type
+    #   google-maps-routing
+google-api-python-client==2.166.0
     # via -r requirements.txt
 google-auth==2.38.0
     # via
@@ -57,16 +59,34 @@ google-auth==2.38.0
     #   google-api-core
     #   google-api-python-client
     #   google-auth-httplib2
+    #   google-geo-type
+    #   google-maps-routing
 google-auth-httplib2==0.2.0
     # via
     #   -r requirements.txt
     #   google-api-python-client
-googleapis-common-protos==1.69.1
+google-geo-type==0.3.12
+    # via
+    #   -r requirements.txt
+    #   google-maps-routing
+google-maps-routing==0.6.15
+    # via -r requirements.txt
+googleapis-common-protos==1.69.2
     # via
     #   -r requirements.txt
     #   google-api-core
+    #   grpcio-status
 googlemaps==4.10.0
     # via -r requirements.txt
+grpcio==1.71.0
+    # via
+    #   -r requirements.txt
+    #   google-api-core
+    #   grpcio-status
+grpcio-status==1.71.0
+    # via
+    #   -r requirements.txt
+    #   google-api-core
 html5validator==0.4.2
     # via -r requirements_dev.in
 httplib2==0.22.0
@@ -94,17 +114,22 @@ pip-licenses==5.0.0
     # via -r requirements_dev.in
 pip-review==1.3.0
     # via -r requirements_dev.in
-prettytable==3.15.1
+prettytable==3.16.0
     # via pip-licenses
 proto-plus==1.26.1
     # via
     #   -r requirements.txt
     #   google-api-core
-protobuf==5.29.3
+    #   google-geo-type
+    #   google-maps-routing
+protobuf==5.29.4
     # via
     #   -r requirements.txt
     #   google-api-core
+    #   google-geo-type
+    #   google-maps-routing
     #   googleapis-common-protos
+    #   grpcio-status
     #   proto-plus
 psycopg==3.2.6
     # via -r requirements.txt
@@ -113,17 +138,17 @@ pyasn1==0.6.1
     #   -r requirements.txt
     #   pyasn1-modules
     #   rsa
-pyasn1-modules==0.4.1
+pyasn1-modules==0.4.2
     # via
     #   -r requirements.txt
     #   google-auth
 pyotp==2.9.0
     # via -r requirements.txt
-pyparsing==3.2.1
+pyparsing==3.2.3
     # via
     #   -r requirements.txt
     #   httplib2
-pypdf==5.3.1
+pypdf==5.4.0
     # via -r requirements.txt
 pyyaml==6.0.2
     # via html5validator
@@ -153,7 +178,7 @@ sqlparse==0.5.3
     #   django-debug-toolbar
 tomli==2.2.1
     # via pip-licenses
-typing-extensions==4.12.2
+typing-extensions==4.13.0
     # via
     #   -r requirements.txt
     #   beautifulsoup4

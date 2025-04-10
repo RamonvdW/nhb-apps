@@ -86,6 +86,7 @@ class Command(BaseCommand):
         self._count_sec_no_account = 0
         self._count_uitgeschreven = 0
         self._count_lang_ex_lid = 0
+        self._count_recordhouders = 0
 
         self._nieuwe_clubs = list()
         self._recordhouder_lid_nrs = list()
@@ -832,8 +833,8 @@ class Command(BaseCommand):
                     account = self._vind_account(sporter.lid_nr)
                     if not account:
                         # SEC heeft nog geen account
-                        self.stdout.write("[INFO] Secretaris %s van vereniging %s heeft nog geen account" % (
-                                                sporter.lid_nr, obj.ver_nr))
+                        # self.stdout.write("[INFO] Secretaris %s van vereniging %s heeft nog geen account" % (
+                        #                         sporter.lid_nr, obj.ver_nr))
                         self._count_sec_no_account += 1
                     else:
                         if account.pk in functie_account_pks:
@@ -1619,7 +1620,8 @@ class Command(BaseCommand):
             elif obj.lid_nr in self._recordhouder_lid_nrs:
                 # lid heeft een record op zijn naam --> behoud het hele record
                 # de CRM applicatie heeft hier nog geen veld voor
-                self.stdout.write('[INFO] Lid %s is recordhouder en wordt daarom niet verwijderd' % obj.lid_nr)
+                # self.stdout.write('[INFO] Lid %s is recordhouder en wordt daarom niet verwijderd' % obj.lid_nr)
+                self._count_recordhouders += 1
             else:
                 # lid echt verwijderen
                 #
@@ -1826,27 +1828,26 @@ class Command(BaseCommand):
         count_diploma = OpleidingDiploma.objects.count()
 
         # rapporteer de samenvatting en schrijf deze ook in het logboek
-        samenvatting = "Samenvatting: %s fouten; %s waarschuwingen; %s nieuw; %s wijzigingen; %s verwijderingen; "\
-                       "%s leden, %s recent ex-lid, %s langer ex-lid, %s uitgeschreven, %s administratief aanwezig; "\
-                       "%s verenigingen, %s speelsterktes, %s opleiding diploma's, %s secretarissen zonder account; "\
-                       "%s regios; %s rayons; %s actieve leden zonder e-mail" % (
-                            self._count_errors,
-                            self._count_warnings,
-                            self._count_toevoegingen,
-                            self._count_wijzigingen,
-                            self._count_verwijderingen,
-                            self._count_members - self._count_blocked - self._count_admin,
-                            self._count_blocked,
-                            self._count_lang_ex_lid,
-                            self._count_uitgeschreven,
-                            self._count_admin,
-                            self._count_clubs,
-                            count_sterkte,
-                            count_diploma,
-                            self._count_sec_no_account,
-                            self._count_regios,
-                            self._count_rayons,
-                            self._count_lid_no_email)
+        delen = [
+            "%s fouten" % self._count_errors,
+            "%s waarschuwingen" % self._count_warnings,
+            "%s nieuw" % self._count_toevoegingen,
+            "%s wijzigingen" % self._count_wijzigingen,
+            "%s verwijderingen" % self._count_verwijderingen,
+            "%s leden" % (self._count_members - self._count_blocked - self._count_admin),
+            "%s recent ex-lid" % self._count_blocked,
+            "%s langer ex-lid" % self._count_lang_ex_lid,
+            "%s recordhouders ex-lid" % self._count_recordhouders,
+            "%s uitgeschreven" % self._count_uitgeschreven,
+            "%s administratief aanwezig" % self._count_admin,
+            "%s speelsterktes" % count_sterkte,
+            "%s opleiding diploma's" % count_diploma,
+            "%s verenigingen" % self._count_clubs,
+            "%s secretarissen zonder account" % self._count_sec_no_account,
+            "%s regios" % self._count_regios,
+            "%s rayons" % self._count_rayons,
+            "%s actieve leden zonder e-mail" % self._count_lid_no_email,
+        ]
 
         if self.dryrun:
             self.stdout.write("\nDRY RUN")
@@ -1854,12 +1855,15 @@ class Command(BaseCommand):
             schrijf_in_logboek(
                         None, 'CRM-import',
                         'Import van CRM data is uitgevoerd\n' +
-                        samenvatting)
+                        "Samenvatting: %s" % "; ".join(delen))
 
         opleiding_post_import_crm(self.stdout)
 
         self.stdout.write("\n")
-        self.stdout.write(samenvatting)
+        self.stdout.write("Samenvatting:")
+        for deel in delen:
+            self.stdout.write('   %s' % deel)
+        # for
 
         self.stdout.write('Done')
 
@@ -1897,7 +1901,7 @@ class Command(BaseCommand):
             # full traceback to syslog
             my_logger.error(tb_msg)
 
-            self.stderr.write('[ERROR] Onverwachte fout tijdens import_crm_json: ' + str(exc))
+            self.stderr.write('[ERROR] Onverwachte fout (%s) tijdens import_crm_json: %s' % (type(exc), str(exc)))
             self.stderr.write('Traceback:')
             self.stderr.write(''.join(lst))
 

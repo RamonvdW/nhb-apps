@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2024 Ramon van der Winkel.
+#  Copyright (c) 2020-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -191,6 +191,42 @@ class MyServer(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write("GET request for {}".format(self.path).encode('utf-8'))
 
+    def handle_compute_routes(self, body):
+
+        data = json.loads(body)
+        # print('{websim_gmaps} compute routes: body=%s' % repr(data))
+
+        if data['destination']['location']['latLng']['latitude'] == 420.0:
+            # geen antwoord geven
+            resp = {}
+        else:
+            resp = {
+                'routes': [
+                    {
+                        'distance_meters': '42000',
+                        'duration': '1020s',
+                        'static_duration': '1020s',     # 1020 seconds = 17 minutes
+                    }
+                ]
+            }
+
+        data = json.dumps(resp)
+        enc_data = data.encode()  # convert string to bytes
+        enc_data_len = len(enc_data)
+
+        self.send_response(200)
+        self.send_header('Content-type', 'application/hal+json')
+        self.send_header('Content-length', str(enc_data_len))
+        self.end_headers()
+
+        # stuur de data zelf
+        if enc_data_len > 0:
+            self.wfile.write(enc_data)
+            self.wfile.flush()
+        self.send_header('Content-type', 'application/json')
+        self.end_headers()
+        self.wfile.write("POST request for {}".format(self.path).encode('utf-8'))
+
     def do_GET(self):       # noqa
         # print("GET request,\nPath: %s\nHeaders:\n%s" % (str(self.path), str(self.headers)))
 
@@ -200,6 +236,16 @@ class MyServer(BaseHTTPRequestHandler):
         elif self.path.startswith('/maps/api/geocode/json?'):
             return self.handle_get_geocode(self.path[23:])
 
+        print('{websim_gmaps} Unknown GET url: %s' % repr(self.path))
+        self.send_response(404)
+
+    def do_POST(self):
+        if self.path.startswith('/directions/v2:computeRoutes'):
+            content_len = int(self.headers.get('Content-Length'))
+            body = self.rfile.read(content_len)
+            return self.handle_compute_routes(body)
+
+        print('{websim_gmaps} Unknown POST url: %s' % repr(self.path))
         self.send_response(404)
 
 
