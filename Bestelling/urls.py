@@ -26,10 +26,14 @@ urlpatterns = [
          view_kies_transport.KiesTransportView.as_view(),
          name='kies-transport'),
 
+
+    # afleveradres
     path('mandje/afleveradres/',
          view_afleveradres.WijzigAfleveradresView.as_view(),
          name='wijzig-afleveradres'),
 
+
+    # bestelling
     path('overzicht/',
          view_bestelling.ToonBestellingenView.as_view(),
          name='toon-bestellingen'),
@@ -38,13 +42,15 @@ urlpatterns = [
          view_bestelling.ToonBestellingDetailsView.as_view(),
          name='toon-bestelling-details'),
 
-    path('afrekenen/<bestel_nr>/',
-         view_bestelling.BestellingAfrekenenView.as_view(),
-         name='bestelling-afrekenen'),
-
     path('annuleer/<bestel_nr>/',
          view_bestelling.AnnuleerBestellingView.as_view(),
          name='annuleer-bestelling'),
+
+
+    # afrekenen
+    path('afrekenen/<bestel_nr>/',
+         view_bestelling.BestellingAfrekenenView.as_view(),
+         name='bestelling-afrekenen'),
 
     path('check-status/<bestel_nr>/',
          view_bestelling.DynamicBestellingCheckStatus.as_view(),
@@ -59,6 +65,7 @@ urlpatterns = [
     path('vereniging/overboeking-ontvangen/',
          view=view_overboeking.OverboekingOntvangenView.as_view(),
          name='overboeking-ontvangen'),
+
 
     # manager view
     path('activiteit/',

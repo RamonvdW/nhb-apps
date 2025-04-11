@@ -20,14 +20,6 @@ class Migration(migrations.Migration):
 
     """ Migratie class voor dit deel van de applicatie """
 
-    replaces = [
-        ('Opleiding', 'm0001_diploma'),
-        ('Opleiding', 'm0002_opleiding'),
-        ('Opleiding', 'm0003_log'),
-        ('Opleiding', 'm0004_periode'),
-        ('Opleiding', 'm0005_inschrijven')
-    ]
-
     # dit is de eerste
     initial = True
 

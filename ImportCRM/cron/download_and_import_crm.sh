@@ -52,7 +52,7 @@ DOWNLOAD=0
 echo "[INFO] retrieving headers" >> "$LOG"
 
 # kijk of een download nodig is
-PREV_LAST=$(grep "Last-Modified:" "$LOG" | tail -1)     # empty at start of new month
+PREV_LAST=$(grep "Last-Modified:" "$LOG" | tail -1)     # empty at start of new day
 
 # download the headers only
 curl -sS -H "secret: $SECRET" -I "$URL" &>> "$LOG"
@@ -77,23 +77,57 @@ fi
 
 if [ $DOWNLOAD -eq 1 ]
 then
-    SPOOL_FILE="$SPOOL_DIR/crm_${STAMP}.json"
-    echo "[INFO] Downloading complete crm data set to $SPOOL_FILE" >> "$LOG"
+    TMP_FILE="/tmp/crm_${STAMP}.json"
+
+    echo "[INFO] Downloading complete crm data set to $TMP_FILE" >> "$LOG"
 
     # download
-    curl -sS -H "secret: $SECRET" "$URL" > "$SPOOL_FILE" 2>>"$LOG"
+    curl -sS -H "secret: $SECRET" "$URL" > "$TMP_FILE" 2>>"$LOG"
     RES=$?
     if [ $RES -ne 0 ]
     then
         echo "[ERROR] Unexpected exit code $RES from curl" >> "$LOG"
+        rm -f "$TMP_FILE"
     else
-        echo "[INFO] Importing new data set" >> "$LOG"
-
         # move from ImportCRM/cron/ to top-dir
         cd ../..
 
-        # -u = unbuffered --> needed to maintain the order of stdout and stderr lines
-        python3 -u ./manage.py import_crm_json "$SPOOL_FILE" &>> "$LOG"
+        # find the previous download
+        unset -v OLD_CRM
+        for file in "$SPOOL_DIR/crm_"*;
+        do
+            [[ $file -nt $OLD_CRM ]] && OLD_CRM=$file
+        done
+
+        echo "[DEBUG] Previous data set: $OLD_CRM"
+
+        # if present, compare the number of changes
+        if [ -e "$OLD_CRM" ]
+        then
+            echo "[INFO] Checking differences with previous import"
+            # -u = unbuffered --> needed to maintain the order of stdout and stderr lines
+            python3 -u ./manage.py diff_crm_jsons "$OLD_CRM" "$TMP_FILE" &>> "$LOG"
+            DIFF_RES=$?
+        else
+            echo "[WARNING] No previous data set to diff against"
+            DIFF_RES=0
+        fi
+
+        if [ $DIFF_RES -eq 0 ]
+        then
+            echo "[INFO] Accepted newly downloaded data set"
+            SPOOL_FILE="$SPOOL_DIR/crm_${STAMP}.json"
+            cat "$TMP_FILE" > "$SPOOL_FILE"
+            rm "$TMP_FILE"
+
+            echo "[INFO] Importing new data set" >> "$LOG"
+
+            # -u = unbuffered --> needed to maintain the order of stdout and stderr lines
+            python3 -u ./manage.py import_crm_json "$SPOOL_FILE" &>> "$LOG"
+        else
+            echo "[ERROR] Too many differences; blocking automatic import"
+            # TODO: e-mail for support
+        fi
     fi
 
     echo "[INFO] Import finished" >> "$LOG"

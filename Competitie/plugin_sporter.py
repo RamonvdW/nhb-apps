@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2024 Ramon van der Winkel.
+#  Copyright (c) 2024-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -124,7 +124,7 @@ def get_sporter_competities(sporter: Sporter,
                 if comp.fase_indiv == 'C':
                     comp.fase = FASE_INSCHRIJVEN
                     comp.status_str = 'De inschrijving is open tot %s' % localize(comp.begin_fase_D_indiv)
-                elif 'C' < comp.fase_indiv <= 'F':
+                elif 'C' < comp.fase_indiv <= 'G':
                     # tijdens de hele wedstrijden fase kan er aangemeld worden
                     comp.fase = FASE_REGIOWEDSTRIJDEN
                     if now <= comp.einde_fase_F:

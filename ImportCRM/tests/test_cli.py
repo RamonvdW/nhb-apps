@@ -6,11 +6,14 @@
 
 from django.test import TestCase
 from django.core.management import call_command
+from ImportCRM.models import ImportLimieten
 from TestHelpers.e2ehelpers import E2EHelpers
+from Site.core.main_exceptions import SpecificExitCode
 import io
 
 
 DUMP_EDUCATIONS_COMMAND = 'dump_educations'
+DIFF_CRM_JSONS_COMMAND = 'diff_crm_jsons'
 
 TESTFILES_PATH = './ImportCRM/test-files/'
 
@@ -48,21 +51,27 @@ class TestImportCRMImport(E2EHelpers, TestCase):
 
     def test_file_not_found(self):
         # afhandelen niet bestaand bestand
-        with self.assert_max_queries(20):
-            f1, f2 = self.run_management_command(DUMP_EDUCATIONS_COMMAND,
-                                                 TESTFILE_NOT_EXISTING)
-
+        f1, f2 = self.run_management_command(DUMP_EDUCATIONS_COMMAND,
+                                             TESTFILE_NOT_EXISTING)
         self.assertTrue(f1.getvalue().startswith('[ERROR] Bestand kan niet gelezen worden'))
         # self.assertEqual(f2.getvalue(), '')
 
+        f1, f2 = self.run_management_command(DIFF_CRM_JSONS_COMMAND,
+                                             TESTFILE_NOT_EXISTING,
+                                             TESTFILE_NOT_EXISTING)
+        self.assertTrue(f1.getvalue().startswith('[ERROR] Bestand kan niet gelezen worden'))
+
     def test_bad_json(self):
         # afhandelen slechte/lege JSON file
-        with self.assert_max_queries(20):
-            f1, f2 = self.run_management_command(DUMP_EDUCATIONS_COMMAND,
-                                                 TESTFILE_01_EMPTY)
-
+        f1, f2 = self.run_management_command(DUMP_EDUCATIONS_COMMAND,
+                                             TESTFILE_01_EMPTY)
         self.assertTrue(f1.getvalue().startswith('[ERROR] Probleem met het JSON formaat in bestand'))
         # self.assertEqual(f2.getvalue(), '')
+
+        f1, f2 = self.run_management_command(DIFF_CRM_JSONS_COMMAND,
+                                             TESTFILE_01_EMPTY,
+                                             TESTFILE_01_EMPTY)
+        self.assertTrue(f1.getvalue().startswith('[ERROR] Probleem met het JSON formaat in bestand'))
 
     def test_import(self):
         with self.assert_max_queries(20):
@@ -73,13 +82,19 @@ class TestImportCRMImport(E2EHelpers, TestCase):
 
     def test_unicode_error(self):
         # UnicodeDecodeError
-        with self.assert_max_queries(20):
-            f1, f2 = self.run_management_command(DUMP_EDUCATIONS_COMMAND,
-                                                 TESTFILE_04_UNICODE_ERROR)
+        f1, f2 = self.run_management_command(DUMP_EDUCATIONS_COMMAND,
+                                             TESTFILE_04_UNICODE_ERROR)
         self.assertTrue(
             "[ERROR] Bestand heeft unicode problemen ('rawunicodeescape' codec can't decode bytes in position 180-181:"
             in f1.getvalue())
         # self.assertEqual(f2.getvalue(), '')
+
+        f1, f2 = self.run_management_command(DIFF_CRM_JSONS_COMMAND,
+                                             TESTFILE_04_UNICODE_ERROR,
+                                             TESTFILE_04_UNICODE_ERROR)
+        self.assertTrue(
+            "[ERROR] Bestand heeft unicode problemen ('rawunicodeescape' codec can't decode bytes in position 180-181:"
+            in f1.getvalue())
 
     def test_bad_nrs(self):
         # controleer dat de import tegen niet-nummers kan
@@ -98,6 +113,65 @@ class TestImportCRMImport(E2EHelpers, TestCase):
                          stdout=f2)
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
+
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        call_command(DIFF_CRM_JSONS_COMMAND,
+                     TESTFILE_02_INCOMPLETE,
+                     TESTFILE_02_INCOMPLETE,
+                     stderr=f1,  # noodzakelijk voor de test!
+                     stdout=f2)
+        # print("f1: %s" % f1.getvalue())
+        # print("f2: %s" % f2.getvalue())
+        self.assertTrue('[ERROR] [FATAL] Verplichte sleutel' in f1.getvalue())
+
+    def test_diff(self):
+
+        limieten = ImportLimieten.objects.first()
+
+        # te veel member changes
+        limieten.use_limits = True
+        limieten.max_member_changes = 1
+        limieten.max_club_changes = 1
+        limieten.save()
+        with self.assertRaises(SpecificExitCode):
+            f1, f2 = self.run_management_command(DIFF_CRM_JSONS_COMMAND,
+                                                 TESTFILE_19_STR_NOT_NR,
+                                                 TESTFILE_23_DIPLOMA)
+
+        # te veel club changes
+        limieten.max_member_changes = 50
+        limieten.max_club_changes = 1
+        limieten.save()
+        with self.assertRaises(SpecificExitCode):
+            f1, f2 = self.run_management_command(DIFF_CRM_JSONS_COMMAND,
+                                                 TESTFILE_03_BASE_DATA,
+                                                 TESTFILE_09_LID_MUTATIES)
+
+        # member changes
+        limieten.max_member_changes = 50
+        limieten.max_club_changes = 50
+        limieten.save()
+        f1, f2 = self.run_management_command(DIFF_CRM_JSONS_COMMAND,
+                                             TESTFILE_03_BASE_DATA,
+                                             TESTFILE_09_LID_MUTATIES)
+        # print("f1: %s" % f1.getvalue())
+        # print("f2: %s" % f2.getvalue())
+
+        # geen clubs
+        limieten.max_member_changes = 10
+        limieten.max_club_changes = 10
+        limieten.save()
+        f1, f2 = self.run_management_command(DIFF_CRM_JSONS_COMMAND,
+                                             TESTFILE_07_NO_CLUBS,
+                                             TESTFILE_07_NO_CLUBS)
+
+        # geen limieten
+        limieten.use_limits = False
+        limieten.save()
+        f1, f2 = self.run_management_command(DIFF_CRM_JSONS_COMMAND,
+                                             TESTFILE_03_BASE_DATA,
+                                             TESTFILE_09_LID_MUTATIES)
 
 
 # end of file
