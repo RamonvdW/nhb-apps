@@ -4,8 +4,6 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-""" Deze module levert functionaliteit voor de Bestelling-applicatie, met kennis van alle kortingen. """
-
 from Betaal.format import format_bedrag_euro
 from Bestelling.definities import BESTELLING_REGEL_CODE_WEDSTRIJD_KORTING, BESTELLING_KORT_BREAK
 from Bestelling.models import BestellingRegel
@@ -17,9 +15,13 @@ from decimal import Decimal
 
 class BepaalAutomatischeKorting(object):
 
+    """
+        Bepaal de beste, toegestane wedstrijdkorting voor een sporter uitzoeken.
+        Wordt gebruikt vanuit de Bestellingen applicatie, als het mandje wijzigt (toevoegen, verwijderen, opschonen).
+    """
+
     def __init__(self, stdout):
         self._stdout = stdout
-
         self._org_ver_nrs = list()                                # verenigingen die voorkomen in het mandje
         self._lid_nr2ver_nr = dict()                              # [lid_nr] = ver_nr
         self._lid_nr2wedstrijd_pks = dict()                       # [lid_nr] = [wedstrijd.pk, ...]
@@ -30,11 +32,11 @@ class BepaalAutomatischeKorting(object):
         self._max_korting_pks = None
 
     def _analyseer_inschrijvingen(self, regel_pks: list):
-        """ laad de inhoud van het mandje en reset all kortingen """
-
+        # laad de inhoud van het mandje en reset all kortingen
         for inschrijving in (WedstrijdInschrijving
                              .objects
                              .filter(bestelling__pk__in=regel_pks)
+                             .exclude(sporterboog__sporter__bij_vereniging=None)
                              .select_related('korting',
                                              'sporterboog',
                                              'sporterboog__sporter',
@@ -56,11 +58,8 @@ class BepaalAutomatischeKorting(object):
 
             sporter = inschrijving.sporterboog.sporter
             lid_nr = sporter.lid_nr
-            if sporter.bij_vereniging:
-                ver_nr = sporter.bij_vereniging.ver_nr
-                self._lid_nr2ver_nr[lid_nr] = ver_nr
-            else:
-                self._lid_nr2ver_nr[lid_nr] = -1
+            ver_nr = sporter.bij_vereniging.ver_nr
+            self._lid_nr2ver_nr[lid_nr] = ver_nr
 
             try:
                 self._lid_nr2wedstrijd_pks[lid_nr].append(inschrijving.wedstrijd.pk)
@@ -77,7 +76,7 @@ class BepaalAutomatischeKorting(object):
             pks = list(WedstrijdInschrijving
                        .objects
                        .filter(sporterboog__sporter__lid_nr=lid_nr)
-                       .filter(korting=None)                            # niet stapelen
+                       .filter(korting=None)                            # voorkom stapelen van kortingen
                        .exclude(status__in=(WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD,
                                             WEDSTRIJD_INSCHRIJVING_STATUS_VERWIJDERD))
                        .exclude(wedstrijd__pk__in=nieuwe_pks)

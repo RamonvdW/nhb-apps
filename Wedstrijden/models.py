@@ -216,7 +216,7 @@ class WedstrijdKorting(models.Model):
                                         null=True, blank=True,
                                         related_name='wedstrijd_korting_uitgever')
 
-    # hoeveel korting (0% .. 100%)
+    # hoeveel korting: 0..100 (procent)
     percentage = models.PositiveSmallIntegerField(default=100)
 
     # voor welke wedstrijden is deze geldig?
