@@ -15,7 +15,8 @@ from Bestelling.definities import (BESTELLING_REGEL_CODE_WEBWINKEL,
                                    BESTELLING_MUTATIE_VERWIJDER,
                                    BESTELLING_MUTATIE_TRANSPORT)
 from Bestelling.models import BestellingMandje, Bestelling, BestellingRegel, BestellingMutatie
-from Betaal.models import BetaalInstellingenVereniging
+from Betaal.definities import TRANSACTIE_TYPE_HANDMATIG, TRANSACTIE_TYPE_MOLLIE_RESTITUTIE
+from Betaal.models import BetaalInstellingenVereniging, BetaalTransactie
 from Functie.models import Functie
 from Geo.models import Regio
 from Mailer.models import MailQueue
@@ -25,6 +26,11 @@ from Vereniging.models import Vereniging
 from decimal import Decimal
 import datetime
 import time
+
+STUUR_OVERBOEKEN_HERINNERING_COMMAND = 'stuur_overboeken_herinneringen'
+STUUR_MANDJE_HERINNERING_COMMAND = 'stuur_mandje_herinneringen'
+BESTEL_MUTATIES_COMMAND = 'bestel_mutaties'
+KOPPEL_BETALINGEN_COMMAND = 'koppel_betalingen'
 
 
 class TestBestellingCli(E2EHelpers, TestCase):
@@ -112,13 +118,13 @@ class TestBestellingCli(E2EHelpers, TestCase):
 
         self.assertEqual(0, Taak.objects.count())
         with self.assert_max_queries(20):
-            f1, f2, = self.run_management_command('stuur_overboeken_herinneringen')
+            f1, f2, = self.run_management_command(STUUR_OVERBOEKEN_HERINNERING_COMMAND)
         # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
         self.assertTrue(' 1 onbetaalde bestellingen voor vereniging [1000] Grote Club' in f2.getvalue())
         self.assertEqual(1, Taak.objects.count())
 
         # nog een keer; controleer dat geen nieuwe taak aangemaakt wordt
-        f1, f2, = self.run_management_command('stuur_overboeken_herinneringen')
+        f1, f2, = self.run_management_command(STUUR_OVERBOEKEN_HERINNERING_COMMAND)
         self.assertTrue(' 1 onbetaalde bestellingen voor vereniging [1000] Grote Club' in f2.getvalue())
         self.assertEqual(1, Taak.objects.count())
 
@@ -133,7 +139,7 @@ class TestBestellingCli(E2EHelpers, TestCase):
 
         self.assertEqual(MailQueue.objects.count(), 0)
 
-        f1, f2 = self.run_management_command('stuur_mandje_herinneringen')
+        f1, f2 = self.run_management_command(STUUR_MANDJE_HERINNERING_COMMAND)
         # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
         self.assertTrue(f1.getvalue() == '')
         self.assertTrue('[INFO] Mandje met producten: 424242' in f2.getvalue())     # 424242 == self.account.username
@@ -153,7 +159,7 @@ class TestBestellingCli(E2EHelpers, TestCase):
         regel2.save()
         self.mandje.regels.add(regel2)
 
-        f1, f2 = self.run_management_command('stuur_mandje_herinneringen')
+        f1, f2 = self.run_management_command(STUUR_MANDJE_HERINNERING_COMMAND)
         # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
         self.assertTrue(f1.getvalue() == '')
         self.assertTrue('[INFO] Mandje met producten: 424242' in f2.getvalue())     # 424242 == self.account.username
@@ -166,22 +172,21 @@ class TestBestellingCli(E2EHelpers, TestCase):
         mail.delete()
 
     def test_mutatie(self):
-
         # geen werk
         BestellingMutatie.objects.all().delete()
         BestellingMutatie(code=BESTELLING_MUTATIE_TRANSPORT, is_verwerkt=True).save()       # al verwerkt
-        f1, f2 = self.run_management_command('bestel_mutaties', '1', '--quick')
+        f1, f2 = self.run_management_command(BESTEL_MUTATIES_COMMAND, '1', '--quick')
         # print('\nf1:', f1.getvalue(), '\nf2:', f2.getvalue())
 
         BestellingMutatie(code=9999).save()                                                 # onbekende mutatie
-        f1, f2 = self.run_management_command('bestel_mutaties', '60', '--quick')            # 60 == fake-hoogste
+        f1, f2 = self.run_management_command(BESTEL_MUTATIES_COMMAND, '60', '--quick')            # 60 == fake-hoogste
         # print('\nf1:', f1.getvalue(), '\nf2:', f2.getvalue())
         self.assertTrue('[INFO] vorige hoogste BestellingMutatie pk is 0' in f2.getvalue())
         self.assertTrue('[ERROR] Onbekende mutatie code 9999' in f2.getvalue())
 
         # trigger een exceptie
         BestellingMutatie(code=BESTELLING_MUTATIE_VERWIJDER).save()
-        f1, f2 = self.run_management_command('bestel_mutaties', '60', '--quick')
+        f1, f2 = self.run_management_command(BESTEL_MUTATIES_COMMAND, '60', '--quick')
         # print('\nf1:', f1.getvalue(), '\nf2:', f2.getvalue())
         self.assertTrue('Traceback:' in f1.getvalue())
         BestellingMutatie.objects.all().delete()
@@ -204,12 +209,12 @@ class TestBestellingCli(E2EHelpers, TestCase):
             # while
 
         # trigger the current minute
-        f1, f2 = self.run_management_command('bestel_mutaties', '1', '--quick',
+        f1, f2 = self.run_management_command(BESTEL_MUTATIES_COMMAND, '1', '--quick',
                                              '--stop_exactly=%s' % now.minute)
         # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
 
         # trigger the negative case
-        f1, f2 = self.run_management_command('bestel_mutaties', '1', '--quick',
+        f1, f2 = self.run_management_command(BESTEL_MUTATIES_COMMAND, '1', '--quick',
                                              '--stop_exactly=%s' % (now.minute - 1))
         # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
 
@@ -222,8 +227,67 @@ class TestBestellingCli(E2EHelpers, TestCase):
             # while
 
         # trigger the positive case
-        f1, f2 = self.run_management_command('bestel_mutaties', '1', '--quick',
+        f1, f2 = self.run_management_command(BESTEL_MUTATIES_COMMAND, '1', '--quick',
                                              '--stop_exactly=%s' % (now.minute + 1))
         # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
+
+    def test_koppel_betalingen(self):
+        # geen transacties
+        f1, f2 = self.run_management_command(KOPPEL_BETALINGEN_COMMAND)
+
+        # transactie zonder bestelling
+        transactie1 = BetaalTransactie(
+                        transactie_type=TRANSACTIE_TYPE_HANDMATIG,
+                        beschrijving='MH-9002',
+                        payment_id='id_tr1',
+                        when=timezone.now())
+        transactie1.save()
+
+        # transactie zonder het bestelnummer in de beschrijving
+        transactie2 = BetaalTransactie(
+                            transactie_type=TRANSACTIE_TYPE_HANDMATIG,
+                            when=timezone.now())
+        transactie2.save()
+
+        # bestelling met 1 transactie
+        bestelling = Bestelling(bestel_nr=9001)
+        bestelling.save()
+        bestelling.transacties.add(transactie2)
+
+        # bestelling zonder transacties
+        bestelling = Bestelling(bestel_nr=9002)
+        bestelling.save()
+
+        f1, f2 = self.run_management_command(KOPPEL_BETALINGEN_COMMAND)
+        # print('\nf1:', f1.getvalue(), '\nf2:', f2.getvalue())
+        self.assertTrue(
+            '[ERROR] BetaalTransactie pk=' + str(transactie1.pk) + ' heeft raar aantal bestellingen: 0'
+            in f2.getvalue())
+        self.assertTrue(
+            '[WARNING] MH-9001 toegevoegd aan beschrijving van BetaalTransactie pk='
+            in f2.getvalue())
+
+        # nog een keer: nu hoeft er niets meer toegevoegd te worden
+        f1, f2 = self.run_management_command(KOPPEL_BETALINGEN_COMMAND)
+        # print('\nf1:', f1.getvalue(), '\nf2:', f2.getvalue())
+
+        # maak een restitutie aan
+        transactie4 = BetaalTransactie(
+                            transactie_type=TRANSACTIE_TYPE_MOLLIE_RESTITUTIE,
+                            payment_id='id_tr1',
+                            when=timezone.now())
+        transactie4.save()
+
+        # twee bestellingen met dezelfde transactie = raar
+        bestelling.transacties.add(transactie2)
+
+        f1, f2 = self.run_management_command(KOPPEL_BETALINGEN_COMMAND)
+        # print('\nf1:', f1.getvalue(), '\nf2:', f2.getvalue())
+        self.assertTrue(
+            '[ERROR] BetaalTransactie pk=' + str(transactie2.pk) + ' heeft raar aantal bestellingen: 2'
+            in f2.getvalue())
+
+        self.assertEqual(transactie4.bestelling_set.count(), 1)
+
 
 # end of file
