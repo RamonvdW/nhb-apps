@@ -468,6 +468,7 @@ OPLEIDING_CODES = (
 
     ('017', 'HBI2', 'Handboog instructeur 2', ('018',)),
     ('018', 'HBI3', 'Handboog instructeur 3', ()),
+    ('020', '', 'Basiscursus arbitrage', ()),
 
     ('030', 'WL', 'Wedstrijdleider 25m1pijl', ()),
     ('031', 'WL', 'Wedstrijdleider Indoor/Outdoor', ()),
@@ -499,7 +500,7 @@ OPLEIDING_CODES = (
     ('074', '', 'Sportief coachen', ()),
 
     ('080', 'PB', 'Praktijkbegeleider voor trainer/coach', ()),
-    ('081', '', 'Mentor van cursisten Tr.A', ()),
+    ('081', '', 'Mentor van cursisten Trainer A', ()),
     ('082', '', 'Leercoach', ()),
     ('083', '', 'Beoordelaar (portfolio/pvb)', ()),
     ('084a', '', '(Bij-)scholing opl. opleiders-expert ASK', ()),
