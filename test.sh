@@ -4,7 +4,9 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-ARGS="$*"
+ARGS=("$@")
+#for idx in "${!ARGS[@]}"; do echo "ARGS[$idx]=${ARGS[$idx]}"; done
+
 COV_AT_LEAST=96.70
 RED="\e[31m"
 RESET="\e[0m"
@@ -21,7 +23,7 @@ COVERAGE_FILE="/tmp/.coverage.$$"
 DATABASE="test_data3"
 
 # -Wa = enable deprecation warnings
-PY_OPTS="-Wa"
+PY_OPTS=(-Wa)
 
 if [ -z "$VIRTUAL_ENV" ]
 then
@@ -37,8 +39,8 @@ COV_INCLUDE_3RD_PARTY=""
 #COV_INCLUDE_3RD_PARTY="mollie"
 
 COVRC="--rcfile=$COVERAGE_RC"
-PYCOV="-m coverage run $COVRC --append --branch"       # --pylib
-[ -n "$COV_INCLUDE_3RD_PARTY" ] && PYCOV+=" --include=*${COV_INCLUDE_3RD_PARTY}*"
+PYCOV=(-m coverage run "$COVRC" --append --branch)       # --pylib
+[ -n "$COV_INCLUDE_3RD_PARTY" ] && PYCOV+=(--include="*${COV_INCLUDE_3RD_PARTY}*")
 
 export PYTHONDONTWRITEBYTECODE=1
 
@@ -59,83 +61,82 @@ rm -rf "$TEST_DIR" &> /dev/null
 mkdir "$TEST_DIR"
 mkdir "$TEST_DIR_FOTOS_WEBWINKEL"
 
-echo
-echo "****************************** START OF TEST RUN ******************************"
-echo
-
 STAMP=$(date +"%Y-%m-%d %H:%M:%S")
 echo "[INFO] Now is $STAMP"
 
-if [[ "$ARGS" =~ "-h" ]]
-then
-    echo "./test.sh [options] [testcase selector(s)]"
-    echo ""
-    echo "options:"
-    echo "  --force     Force generate of coverage, even when tests fail"
-    echo "  --fullcov   Do not focus the coverage report"
-    echo "  --clean     Remove database (automatic for full run)"
-    echo
-    echo "Example selector: App_dir.tests_dir.test_filename.TestCaseClass.test_func"
-    exit
-fi
-
 FORCE_REPORT=0
-if [[ "$ARGS" =~ "--force" ]]
-then
-    echo "[INFO] Forcing coverage report"
-    FORCE_REPORT=1
-    # remove from ARGS used to decide focus
-    # will still be given to ./manage.py where --force has no effect
-    ARGS=${ARGS/--force/}
-fi
-
 FORCE_FULL_COV=0
-if [[ "$ARGS" =~ "--fullcov" ]]
-then
-    echo "[INFO] Forcing full coverage report"
-    FORCE_FULL_COV=1
-    # remove from ARGS used to decide focus
-    # will still be given to ./manage.py where --force has no effect
-    ARGS=${ARGS/--fullcov/}
-fi
-
 KEEP_DB=1
-if [[ "$ARGS" =~ "--clean" ]]
-then
-    KEEP_DB=0
-    # remove from ARGS used to decide focus
-    # will still be given to ./manage.py where --force has no effect
-    ARGS=${ARGS/--clean/}
-    echo "ARGS without --clean: $ARGS"
-fi
 
-echo "[INFO] Provided  arguments: $ARGS"
+FOCUS_ARGS=()
+for arg in "${ARGS[@]}"
+do
+    # echo "[DEBUG] arg=$arg"
 
-# convert a path to a module or test.py file into a test case
-ARGS=${ARGS//\//.}                              # replace all (//) occurrences of / with .
-[ "${ARGS: -1}" == "." ] && ARGS=${ARGS:0:-1}   # strip last . (case: Plein/)
-ARGS=${ARGS/.py/}                               # strip .py at the end
-echo "[INFO] Converted arguments: $ARGS"
+    if [[ "$arg" == "-h" || "$arg" == "--help" ]]
+    then
+        echo "./test.sh [options] [testcase selector(s)]"
+        echo ""
+        echo "options:"
+        echo "  --force     Force generate of coverage, even when tests fail"
+        echo "  --fullcov   Do not focus the coverage report"
+        echo "  --clean     Remove database (automatic for full run)"
+        echo
+        echo "Example selector: App_dir.tests_dir.test_filename.TestCaseClass.test_func"
+
+        exit 1
+
+    elif [[ "$arg" == "--force" ]]
+    then
+        echo "[INFO] Forcing coverage report"
+        FORCE_REPORT=1
+        # remove from ARGS used to decide focus
+        # will still be given to ./manage.py where --force has no effect
+
+    elif [[ "$arg" == "--fullcov" ]]
+    then
+        echo "[INFO] Forcing full coverage report"
+        FORCE_FULL_COV=1
+        # remove from ARGS used to decide focus
+        # will still be given to ./manage.py where --fullcov has no effect
+
+    elif [[ "$arg" == "--clean" ]]
+    then
+        KEEP_DB=0
+        # remove from ARGS used to decide focus
+        # will still be given to ./manage.py where --clean has no effect
+
+    else
+        # convert a path to a module or test.py file into a test case
+        arg=${arg//\//.}                              # replace all (//) occurrences of / with .
+        [ "${arg: -1}" == "." ] && arg=${arg:0:-1}    # strip last . (case: Plein/)
+        arg=${arg/.py/}                               # strip .py at the end
+
+        FOCUS_ARGS+=("$arg")
+    fi
+done
 
 FOCUS=""
 FOCUS_SPECIFIC_TEST=0
-if [ -z "$ARGS" ]
+if [ ${#FOCUS_ARGS[@]} -eq 0 ]
 then
     # no args = test all = remove database
     KEEP_DB=0
     COV_INCLUDE=""
 else
+    echo "[INFO] Focus arguments: \"${FOCUS_ARGS[*]}\" (${#FOCUS_ARGS[@]} arguments)"
+
     # convert Function.testfile.TestCase.test_functie into "Function"
     # also works for just "Function"
     FOCUS1=""
-    for arg in $ARGS;
+    for arg in "${FOCUS_ARGS[@]}";
     do
         [[ "$arg" == *".tests."* ]] && FOCUS_SPECIFIC_TEST=1
         clean_focus=$(echo "$arg" | cut -d'.' -f1)
         FOCUS1="$clean_focus $FOCUS1"
     done
 
-    # support Func1 Func2 by converting to Func1|Func2
+    # support Func1 Func2 by converting to "Func1, Func2"
     # after removing initial and trailing whitespace
     FOCUS=$(echo "$FOCUS1" | sed 's/^[[:blank:]]*//;s/[[:blank:]]*$//;s/  / /g;s/ /, /g')
     echo "[INFO] Focus set to $FOCUS"
@@ -150,7 +151,7 @@ fi
 if [ $KEEP_DB -eq 0 ]
 then
     echo "[INFO] Checking application is free of fatal errors"
-    python3 $PY_OPTS ./manage.py check --tag admin --tag models || exit $?
+    python3 "${PY_OPTS[@]}" ./manage.py check --tag admin --tag models || exit $?
 fi
 
 echo "[INFO] Refreshing static files"
@@ -170,7 +171,7 @@ mkdir -p "$TMP_HTML"
 ln -s "$STATIC_DIR" "$TMP_HTML/static"
 
 export COVERAGE_FILE        # where to write coverage data to
-python3 $PY_OPTS -m coverage erase
+python3 "${PY_OPTS[@]}" -m coverage erase
 
 echo "[INFO] Capturing output in $LOG"
 # --pid=$$ means: stop when parent stops
@@ -195,32 +196,32 @@ then
 
     echo "[INFO] Running migrations and performing run with nodebug"
     # ..and add coverage with no-debug
-    python3 $PY_OPTS -u $PYCOV ./manage.py test --keepdb --noinput --settings=$SETTINGS_AUTOTEST_NODEBUG -v 2 Plein.tests.tests.TestPlein.test_quick &>>"$LOG"
+    python3 "${PY_OPTS[@]}" -u "${PYCOV[@]}" ./manage.py test --keepdb --noinput --settings=$SETTINGS_AUTOTEST_NODEBUG -v 2 Plein.tests.tests.TestPlein.test_quick &>>"$LOG"
     RES=$?
     [ $RES -eq 0 ] || ABORTED=1
-    echo "[DEBUG] Debug run result: $RES --> ABORTED=$ABORTED"
+    # echo "[DEBUG] Debug run result: $RES --> ABORTED=$ABORTED"
 
     echo "[INFO] Running manage.py exit test"
     # trigger diff that generates exit code
     ./manage.py shell -c 'from ImportCRM.models import ImportLimieten as L; l = L.objects.first(); l.max_club_changes=1; l.save()'
-    python3 $PY_OPTS -u $PYCOV ./manage.py diff_crm_jsons ./ImportCRM/test-files/testfile_19.json ./ImportCRM/test-files/testfile_23.json >/dev/null
+    python3 "${PY_OPTS[@]}" -u "${PYCOV[@]}" ./manage.py diff_crm_jsons ./ImportCRM/test-files/testfile_19.json ./ImportCRM/test-files/testfile_23.json >/dev/null
     RES=$?
     [ $RES -ne 0 ] || ABORTED=1
-    echo "[DEBUG] Debug run result: $RES --> ABORTED=$ABORTED"
+    # echo "[DEBUG] Debug run result: $RES --> ABORTED=$ABORTED"
 fi
 
 echo "[INFO] Starting websim tasks"
 
 # start the mail transport service simulator
-python3 -u $PY_OPTS ./Mailer/test_tools/websim_mailer.py &
+python3 -u "${PY_OPTS[@]}" ./Mailer/test_tools/websim_mailer.py &
 PID_WEBSIM1=$!
 
 # start the payment service simulator
-python3 -u $PY_OPTS ./Betaal/test-tools/websim_betaal_test.py &
+python3 -u "${PY_OPTS[@]}" ./Betaal/test-tools/websim_betaal_test.py &
 PID_WEBSIM2=$!
 
 # start the payment service simulator
-python3 -u $PY_OPTS ./Locatie/test_tools/websim_gmaps.py &
+python3 -u "${PY_OPTS[@]}" ./Locatie/test_tools/websim_gmaps.py &
 PID_WEBSIM3=$!
 
 # check all websim programs have started properly
@@ -250,7 +251,6 @@ then
 fi
 
 # set high performance
-OLD_PERF=$(powerprofilesctl get)
 powerprofilesctl set performance
 
 # -u = unbuffered stdin/stdout --> also ensures the order of stdout/stderr lines
@@ -259,7 +259,8 @@ powerprofilesctl set performance
 if [ $ABORTED -eq 0 ]
 then
     echo "[INFO] Starting main test run" >>"$LOG"
-    python3 $PY_OPTS -u $PYCOV ./manage.py test --keepdb --settings=$SETTINGS_AUTOTEST -v 2 $ARGS &>>"$LOG"
+    # echo "[DEBUG] python3 ${PY_OPTS[*]} -u ${PYCOV[*]} ./manage.py test --keepdb --settings=$SETTINGS_AUTOTEST -v 2 ${FOCUS_ARGS[*]}"
+    python3 "${PY_OPTS[@]}" -u "${PYCOV[@]}" ./manage.py test --keepdb --settings=$SETTINGS_AUTOTEST -v 2 "${FOCUS_ARGS[@]}" &>>"$LOG"
     RES=$?
     #echo "[DEBUG] Run result: $RES --> ABORTED=$ABORTED"
     [ $RES -eq 3 ] && ABORTED=1
@@ -274,8 +275,8 @@ then
     if [ $RES2 -eq 0 ]
     then
         # echo "[DEBUG] Found HTML files in $TMP_HTML"
-        HTML_FILES=$(ls -1tr "$TMP_HTML"/*html)   # sorted by creation time
-        firefox $HTML_FILES &
+        read -ra HTML_FILES < <(ls -1tr "$TMP_HTML"/*html)   # sorted by creation time
+        firefox "${HTML_FILES[@]}" &
     fi
 fi
 
@@ -299,7 +300,7 @@ then
             then
                 echo -n '.'
                 echo "[INFO] ./manage.py help $cmd" >>"$LOG"
-                python3 $PY_OPTS -u $PYCOV ./manage.py help "$cmd" &>>"$LOG"
+                python3 "${PY_OPTS[@]}" -u "${PYCOV[@]}" ./manage.py help "$cmd" &>>"$LOG"
             fi
         done
         echo
@@ -314,7 +315,7 @@ then
             cmd=$(basename "$cmd_file")
             echo -n '.'
             echo "[INFO] ./manage.py help $cmd" >>"$LOG"
-            python3 $PY_OPTS -u $PYCOV ./manage.py help "$cmd" &>>/dev/null    # ignore output
+            python3 "${PY_OPTS[@]}" -u "${PYCOV[@]}" ./manage.py help "$cmd" &>>/dev/null    # ignore output
         done
         echo
     fi
@@ -347,8 +348,7 @@ then
     if [ -z "$FOCUS" ] || [ $FORCE_FULL_COV -ne 0 ]
     then
         python3 -m coverage report $COVRC --precision=$PRECISION --skip-covered --fail-under=$COV_AT_LEAST $OMIT 2>&1 | tee -a "$LOG"
-        res=${PIPESTATUS[0]}
-        if [ $res -gt 0 ] && [ -z "$ARGS" ]
+        if [ ${PIPESTATUS[0]} -gt 0 ] && [ ${#FOCUS_ARGS[@]} -eq 0 ]
         then
             COVERAGE_RED=1
         fi
@@ -366,7 +366,7 @@ then
 fi
 
 # restore performance mode
-powerprofilesctl set $OLD_PERF
+powerprofilesctl set balanced
 
 if [ $COVERAGE_RED -ne 0 ]
 then
