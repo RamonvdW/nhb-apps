@@ -10,7 +10,7 @@ from django.utils import timezone
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse
 from Bestelling.definities import BESTELLING_STATUS_AFGEROND
 from Bestelling.models import BestellingMandje, Bestelling
-from Bestelling.operations.mutaties import bestel_mutatieverzoek_inschrijven_wedstrijd
+from Bestelling.operations import bestel_mutatieverzoek_inschrijven_wedstrijd
 from Betaal.models import BetaalInstellingenVereniging, BetaalActief, BetaalMutatie, BetaalTransactie
 from Betaal.mutaties import betaal_mutatieverzoek_start_ontvangst
 from Geo.models import Regio

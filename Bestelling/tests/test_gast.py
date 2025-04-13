@@ -9,7 +9,7 @@ from django.conf import settings
 from django.utils import timezone
 from Bestelling.definities import BESTELLING_TRANSPORT_NVT
 from Bestelling.models import BestellingMandje, Bestelling
-from Bestelling.operations.mutaties import bestel_mutatieverzoek_webwinkel_keuze
+from Bestelling.operations import bestel_mutatieverzoek_webwinkel_keuze
 from Functie.models import Functie
 from Mailer.models import MailQueue
 from Registreer.definities import REGISTRATIE_FASE_COMPLEET

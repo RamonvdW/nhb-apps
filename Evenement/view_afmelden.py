@@ -8,8 +8,8 @@ from django.http import HttpResponseRedirect, Http404
 from django.urls import reverse
 from django.views.generic import View
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Bestelling.operations.mutaties import (bestel_mutatieverzoek_afmelden_evenement,
-                                            bestel_mutatieverzoek_verwijder_regel_uit_mandje)
+from Bestelling.operations import (bestel_mutatieverzoek_afmelden_evenement,
+                                   bestel_mutatieverzoek_verwijder_regel_uit_mandje)
 from Evenement.definities import EVENEMENT_INSCHRIJVING_STATUS_RESERVERING_MANDJE
 from Evenement.models import EvenementInschrijving
 from Functie.definities import Rol

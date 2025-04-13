@@ -12,7 +12,7 @@ from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.db.utils import OperationalError, IntegrityError
 from Bestelling.models import BestellingMutatie
-from Bestelling.operations.verwerk_mutaties import VerwerkBestelMutaties
+from Bestelling.operations import VerwerkBestelMutaties
 from Mailer.operations import mailer_notify_internal_error
 from Site.core.background_sync import BackgroundSync
 import traceback

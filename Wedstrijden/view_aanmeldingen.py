@@ -12,8 +12,8 @@ from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
 from BasisTypen.definities import GESLACHT2STR
-from Bestelling.operations.mutaties import (bestel_mutatieverzoek_afmelden_wedstrijd,
-                                            bestel_mutatieverzoek_verwijder_regel_uit_mandje)
+from Bestelling.operations import (bestel_mutatieverzoek_afmelden_wedstrijd,
+                                   bestel_mutatieverzoek_verwijder_regel_uit_mandje)
 from Betaal.format import format_bedrag_euro
 from Competitie.models import RegiocompetitieSporterBoog
 from Functie.definities import Rol

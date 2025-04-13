@@ -11,7 +11,7 @@ from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Bestelling.definities import BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_GEANNULEERD
 from Bestelling.models import Bestelling
-from Bestelling.operations.mutaties import bestel_overboeking_ontvangen
+from Bestelling.operations import bestel_overboeking_ontvangen
 from Betaal.definities import TRANSACTIE_TYPE_HANDMATIG
 from Betaal.format import format_bedrag_euro
 from Functie.definities import Rol

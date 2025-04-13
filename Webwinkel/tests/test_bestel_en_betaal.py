@@ -9,8 +9,8 @@ from django.conf import settings
 from django.utils import timezone
 from Bestelling.definities import BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_GEANNULEERD
 from Bestelling.models import BestellingMandje, Bestelling
-from Bestelling.operations.mutaties import (bestel_mutatieverzoek_webwinkel_keuze,
-                                            bestel_mutatieverzoek_maak_bestellingen, bestel_mutatieverzoek_annuleer)
+from Bestelling.operations import (bestel_mutatieverzoek_webwinkel_keuze, bestel_mutatieverzoek_maak_bestellingen,
+                                   bestel_mutatieverzoek_annuleer)
 from Betaal.models import BetaalInstellingenVereniging
 from Geo.models import Regio
 from Sporter.models import Sporter

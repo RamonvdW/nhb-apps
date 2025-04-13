@@ -9,9 +9,9 @@ from django.conf import settings
 from django.utils import timezone
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse
 from Bestelling.models import BestellingMandje
-from Bestelling.operations.mutaties import (bestel_mutatieverzoek_inschrijven_wedstrijd,
-                                            bestel_mutatieverzoek_verwijder_regel_uit_mandje,
-                                            bestel_mutatieverzoek_maak_bestellingen)
+from Bestelling.operations import (bestel_mutatieverzoek_inschrijven_wedstrijd,
+                                   bestel_mutatieverzoek_verwijder_regel_uit_mandje,
+                                   bestel_mutatieverzoek_maak_bestellingen)
 from Betaal.models import BetaalInstellingenVereniging
 from Geo.models import Regio
 from Locatie.models import WedstrijdLocatie

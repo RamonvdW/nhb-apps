@@ -13,10 +13,8 @@ from Account.models import get_account
 from Betaal.format import format_bedrag_euro
 from Bestelling.definities import BESTELLING_TRANSPORT_VERZEND, BESTELLING_TRANSPORT_OPHALEN, BESTELLING_KORT_BREAK
 from Bestelling.models import BestellingMandje
-from Bestelling.operations.mandje import mandje_tel_inhoud
-from Bestelling.operations.mutaties import (bestel_mutatieverzoek_maak_bestellingen,
-                                            bestel_mutatieverzoek_verwijder_regel_uit_mandje)
-from Betaal.models import BetaalInstellingenVereniging
+from Bestelling.operations import (mandje_tel_inhoud, bestel_mutatieverzoek_maak_bestellingen,
+                                   bestel_mutatieverzoek_verwijder_regel_uit_mandje)
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige
 from Registreer.definities import REGISTRATIE_FASE_COMPLEET

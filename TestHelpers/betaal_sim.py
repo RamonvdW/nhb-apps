@@ -8,7 +8,7 @@ from Bestelling.definities import BESTELLING_STATUS_BETALING_ACTIEF
 from Bestelling.models import Bestelling
 from Betaal.definities import TRANSACTIE_TYPE_MOLLIE_PAYMENT
 from Betaal.models import BetaalActief, BetaalInstellingenVereniging, BetaalTransactie
-from Bestelling.operations.mutaties import bestel_mutatieverzoek_betaling_afgerond
+from Bestelling.operations import bestel_mutatieverzoek_betaling_afgerond
 
 
 def fake_betaling(bestelling: Bestelling, ontvanger: BetaalInstellingenVereniging):

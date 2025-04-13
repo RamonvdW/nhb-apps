@@ -8,7 +8,7 @@ from django.conf import settings
 from django.test import TestCase
 from django.utils import timezone
 from Bestelling.models import Bestelling
-from Bestelling.operations.mutaties import bestel_mutatieverzoek_maak_bestellingen
+from Bestelling.operations import bestel_mutatieverzoek_maak_bestellingen
 from Functie.models import Functie
 from Geo.models import Regio
 from Instaptoets.models import Vraag, Instaptoets

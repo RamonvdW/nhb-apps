@@ -9,9 +9,8 @@ from django.test import TestCase
 from django.utils import timezone
 from Bestelling.definities import BESTELLING_STATUS_AFGEROND, BESTELLING_TRANSPORT_VERZEND, BESTELLING_TRANSPORT_OPHALEN
 from Bestelling.models import BestellingMandje, Bestelling
-from Bestelling.operations.mutaties import (bestel_mutatieverzoek_webwinkel_keuze,
-                                            bestel_mutatieverzoek_maak_bestellingen)
-from Bestelling.operations.email_backoffice import stuur_email_webwinkel_backoffice
+from Bestelling.operations import (bestel_mutatieverzoek_webwinkel_keuze, bestel_mutatieverzoek_maak_bestellingen,
+                                   stuur_email_webwinkel_backoffice)
 from Betaal.models import BetaalInstellingenVereniging
 from Functie.models import Functie
 from Geo.models import Regio

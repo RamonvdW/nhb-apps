@@ -8,28 +8,15 @@ from django.conf import settings
 from django.http import Http404, HttpResponseRedirect, JsonResponse
 from django.urls import reverse
 from django.views.generic import TemplateView, View
-from django.utils.timezone import localtime
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
-from Bestelling.definities import (BESTELLING_STATUS2STR, BESTELLING_STATUS_BETALING_ACTIEF,
-                                   BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_MISLUKT,
-                                   BESTELLING_STATUS_GEANNULEERD,
-                                   BESTELLING_TRANSPORT_OPHALEN,
-                                   BESTELLING_REGEL_CODE_WEDSTRIJD,
-                                   BESTELLING_REGEL_CODE_WEDSTRIJD_KORTING,
-                                   BESTELLING_KORT_BREAK)
+from Bestelling.definities import (BESTELLING_STATUS_BETALING_ACTIEF, BESTELLING_STATUS_NIEUW,
+                                   BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_MISLUKT)
 from Bestelling.models import Bestelling
-from Bestelling.operations.mutaties import bestel_mutatieverzoek_annuleer
-from Bestelling.plugins.alle_bestel_plugins import wedstrijd_bestel_plugin
-from Betaal.definities import (TRANSACTIE_TYPE_MOLLIE_PAYMENT, TRANSACTIE_TYPE_MOLLIE_RESTITUTIE,
-                               TRANSACTIE_TYPE_HANDMATIG)
-from Betaal.format import format_bedrag_euro
+from Betaal.definities import TRANSACTIE_TYPE_MOLLIE_RESTITUTIE, TRANSACTIE_TYPE_HANDMATIG
 from Betaal.mutaties import betaal_mutatieverzoek_start_ontvangst
 from Functie.definities import Rol
-from Functie.models import Functie
 from Functie.rol import rol_get_huidige
-from Kalender.view_maand import maak_compacte_wanneer_str
-from Wedstrijden.models import WedstrijdInschrijving
 from decimal import Decimal
 from time import sleep
 

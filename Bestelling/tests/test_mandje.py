@@ -9,6 +9,7 @@ from django.conf import settings
 from Bestelling.definities import (BESTELLING_TRANSPORT_VERZEND, BESTELLING_TRANSPORT_OPHALEN,
                                    BESTELLING_REGEL_CODE_WEDSTRIJD, BESTELLING_REGEL_CODE_WEBWINKEL)
 from Bestelling.models import Bestelling, BestellingMutatie, BestellingMandje, BestellingRegel
+from Bestelling.operations import bestel_opschonen
 from Betaal.models import BetaalInstellingenVereniging
 from Geo.models import Regio
 from Registreer.definities import REGISTRATIE_FASE_COMPLEET

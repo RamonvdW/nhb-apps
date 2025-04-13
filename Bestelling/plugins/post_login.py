@@ -6,7 +6,7 @@
 
 from Account.models import Account
 from Account.plugin_manager import account_add_plugin_post_login
-from Bestelling.operations.mandje import mandje_tel_inhoud
+from Bestelling.operations import mandje_tel_inhoud
 
 """
     registratie van de plugins bij importeren van dit bestaand

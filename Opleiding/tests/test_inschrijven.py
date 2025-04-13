@@ -8,7 +8,7 @@ from django.conf import settings
 from django.test import TestCase
 from django.utils import timezone
 from Bestelling.models import Bestelling, BestellingMandje
-from Bestelling.operations.mutaties import bestel_mutatieverzoek_maak_bestellingen
+from Bestelling.operations import bestel_mutatieverzoek_maak_bestellingen
 from Betaal.models import BetaalMutatie, BetaalInstellingenVereniging
 from Betaal.mutaties import betaal_mutatieverzoek_start_ontvangst
 from Functie.models import Functie

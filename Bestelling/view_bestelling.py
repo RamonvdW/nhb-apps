@@ -19,7 +19,7 @@ from Bestelling.definities import (BESTELLING_STATUS2STR, BESTELLING_STATUS_BETA
                                    BESTELLING_REGEL_CODE_WEDSTRIJD_KORTING,
                                    BESTELLING_KORT_BREAK)
 from Bestelling.models import Bestelling
-from Bestelling.operations.mutaties import bestel_mutatieverzoek_annuleer
+from Bestelling.operations import bestel_mutatieverzoek_annuleer
 from Bestelling.plugins.alle_bestel_plugins import wedstrijd_bestel_plugin
 from Betaal.definities import TRANSACTIE_TYPE_MOLLIE_PAYMENT, TRANSACTIE_TYPE_HANDMATIG
 from Betaal.format import format_bedrag_euro
