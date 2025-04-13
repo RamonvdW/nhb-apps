@@ -451,6 +451,42 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
                         status=BESTELLING_STATUS_NIEUW)
         bestelling.save()
 
+        regel = BestellingRegel(
+                    korte_beschrijving='wedstrijd',
+                    code=BESTELLING_REGEL_CODE_WEDSTRIJD)
+        regel.save()
+        bestelling.regels.add(regel)
+
+        # annuleer de bestelling
+        self.assertEqual(BestellingMutatie.objects.count(), 0)
+        url = self.url_annuleer_bestelling % bestelling.bestel_nr
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'snel': 1})
+        self.assert_is_redirect(resp, self.url_bestellingen_overzicht)
+        self.assertEqual(BestellingMutatie.objects.count(), 1)
+
+        # laat de achtergrondtaak het annuleren verwerken
+        f1, f2, = self.verwerk_bestel_mutaties()
+        # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
+        self.assertTrue('wordt nu geannuleerd' in f2.getvalue())
+
+    def test_annuleer_bad(self):
+        # maak een bestelling en annuleer deze weer
+        self.e2e_login_and_pass_otp(self.account_normaal)
+
+        # bestelling bestaat niet
+        resp = self.client.post(self.url_annuleer_bestelling % 999999)
+        self.assert404(resp, 'Niet gevonden')
+
+        # maak een bestelling aan
+        bestelling = Bestelling(
+                        bestel_nr=1,
+                        account=self.account_normaal,
+                        totaal_euro=Decimal(1.0),
+                        ontvanger=self.instellingen,
+                        status=BESTELLING_STATUS_NIEUW)
+        bestelling.save()
+
         self.assertEqual(BestellingMutatie.objects.count(), 0)
 
         # annuleer de bestelling
@@ -476,6 +512,12 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
             resp = self.client.post(url, {'snel': 1})
         self.assert_is_redirect(resp, self.url_bestellingen_overzicht)
 
-        self.assertEqual(BestellingMutatie.objects.count(), 1)
+        self.assertEqual(BestellingMutatie.objects.count(), 1)      # geen nieuwe mutatie toegevoegd
+
+        # laat de achtergrondtaak het annuleren verwerken, van de bestelling met de verkeerde status
+        f1, f2, = self.verwerk_bestel_mutaties(show_warnings=False)
+        # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
+        self.assertTrue('niet annuleren, want status = Voltooid' in f2.getvalue())
+
 
 # end of file

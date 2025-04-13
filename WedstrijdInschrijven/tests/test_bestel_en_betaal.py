@@ -19,9 +19,11 @@ from Locatie.models import WedstrijdLocatie
 from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
-from Wedstrijden.definities import WEDSTRIJD_STATUS_GEACCEPTEERD, WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF
-from Wedstrijden.models import Wedstrijd, WedstrijdSessie, WedstrijdInschrijving
+from Wedstrijden.definities import (WEDSTRIJD_STATUS_GEACCEPTEERD, WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF,
+                                    WEDSTRIJD_KORTING_SPORTER)
+from Wedstrijden.models import Wedstrijd, WedstrijdSessie, WedstrijdInschrijving, WedstrijdKorting
 from decimal import Decimal
+from datetime import timedelta
 import re
 
 
@@ -66,6 +68,7 @@ class TestWedstrijdInschrijvenBestelEnBetaal(E2EHelpers, TestCase):
                     naam="Grote Club",
                     regio=Regio.objects.get(regio_nr=112))
         ver.save()
+        self.ver = ver
 
         instellingen = BetaalInstellingenVereniging(
                             vereniging=ver,
@@ -142,6 +145,16 @@ class TestWedstrijdInschrijvenBestelEnBetaal(E2EHelpers, TestCase):
         inschrijving.save()
         self.inschrijving = inschrijving
 
+        korting = WedstrijdKorting(
+                        soort=WEDSTRIJD_KORTING_SPORTER,
+                        geldig_tot_en_met=timezone.now() + timedelta(days=14),
+                        uitgegeven_door=self.wedstrijd.organiserende_vereniging,
+                        percentage=50,
+                        voor_sporter=self.sporter)
+        korting.save()
+        korting.voor_wedstrijden.add(self.wedstrijd)
+        self.korting = korting
+
         mandje, is_created = BestellingMandje.objects.get_or_create(account=account)
         self.mandje = mandje
 
@@ -151,7 +164,11 @@ class TestWedstrijdInschrijvenBestelEnBetaal(E2EHelpers, TestCase):
 
         # bestel wedstrijddeelname met korting
         bestel_mutatieverzoek_inschrijven_wedstrijd(self.account_admin, self.inschrijving, snel=True)
-        self.verwerk_bestel_mutaties()
+        f1, f2 = self.verwerk_bestel_mutaties()
+        self.assertTrue('[INFO] Maximale korting is' in f2.getvalue())
+
+        self.inschrijving.refresh_from_db()
+        self.assertIsNotNone(self.inschrijving.korting)
 
         # zet het mandje om in een bestelling
         self.assertEqual(0, Bestelling.objects.count())
@@ -164,7 +181,7 @@ class TestWedstrijdInschrijvenBestelEnBetaal(E2EHelpers, TestCase):
         # betaling opstarten
         url_betaling_gedaan = '/plein/'     # FUTURE: betere url kiezen
         description = 'Test betaling 421'       # 421 = paid, iDEAL
-        betaal_mutatieverzoek_start_ontvangst(bestelling, description, self.wedstrijd.prijs_euro_normaal,
+        betaal_mutatieverzoek_start_ontvangst(bestelling, description, bestelling.totaal_euro,
                                               url_betaling_gedaan, snel=True)
         self.verwerk_betaal_mutaties()
 
@@ -220,7 +237,7 @@ class TestWedstrijdInschrijvenBestelEnBetaal(E2EHelpers, TestCase):
         msg = f2.getvalue()
         msg = re.sub(r'pk=[0-9]+', 'pk=X', msg)
         self.assertTrue('[INFO] Betaling is gelukt voor bestelling MH-1002001 (pk=X)' in msg)
-        self.assertTrue('[INFO] Bestelling MH-1002001 (pk=X) heeft € 10,00 van de € 10,00 ontvangen' in msg)
+        self.assertTrue('[INFO] Bestelling MH-1002001 (pk=X) heeft € 5,00 van de € 5,00 ontvangen' in msg)
         self.assertTrue('[INFO] Bestelling MH-1002001 (pk=X) is afgerond' in msg)
 
         self.assertEqual(1, bestelling.transacties.count())

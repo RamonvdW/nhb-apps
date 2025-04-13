@@ -285,7 +285,7 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
         # probeer een GET
         with self.assert_max_queries(20):
             resp = self.client.get('/functie/wijzig/123/ontvang/')
-        self.assertEqual(resp.status_code, 405)  # 405 = Not implemented
+        self.assert405(resp)  # 405 = Not implemented
 
         # probeer een niet-bestaande functie
         with self.assert_max_queries(20):

@@ -4,12 +4,14 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.test import TestCase, override_settings
 from django.conf import settings
+from django.test import TestCase, override_settings
+from django.utils import timezone
+from django.core.management.base import OutputWrapper
 from Bestelling.definities import (BESTELLING_TRANSPORT_VERZEND, BESTELLING_TRANSPORT_OPHALEN,
                                    BESTELLING_REGEL_CODE_WEDSTRIJD, BESTELLING_REGEL_CODE_WEBWINKEL)
 from Bestelling.models import Bestelling, BestellingMutatie, BestellingMandje, BestellingRegel
-from Bestelling.operations import bestel_opschonen
+from Bestelling.operations import VerwerkBestelMutaties
 from Betaal.models import BetaalInstellingenVereniging
 from Geo.models import Regio
 from Registreer.definities import REGISTRATIE_FASE_COMPLEET
@@ -17,7 +19,10 @@ from Registreer.models import GastRegistratie
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
+from Webwinkel.models import WebwinkelKeuze, WebwinkelProduct
 from decimal import Decimal
+import datetime
+import io
 
 
 class TestBestellingMandje(E2EHelpers, TestCase):
@@ -375,5 +380,27 @@ class TestBestellingMandje(E2EHelpers, TestCase):
 
         urls = self.extract_all_urls(resp, skip_menu=True)
         self.assertFalse(self.url_kies_transport in urls)
+
+    def test_opschonen(self):
+        # product dat al te lang in het mandje ligt wordt verwijdert
+        # dit triggert opnieuw berekenen van de kortingen en verzendkosten
+        stdout = OutputWrapper(io.StringIO())
+        verwerk = VerwerkBestelMutaties(stdout)
+
+        # vul het mandje
+        regel1, regel2 = self._vul_mandje(self.account_admin)
+
+        product = WebwinkelProduct(volgorde=1)
+        product.save()
+
+        WebwinkelKeuze(
+                wanneer=timezone.now() - datetime.timedelta(days=4),      # meteen al "te lang in mandje"
+                bestelling=regel2,
+                product=product).save()
+
+        verwerk.mandjes_opschonen()
+        # print('stdout:', stdout.getvalue())
+        self.assertTrue('[INFO] Vervallen:' in stdout.getvalue())
+
 
 # end of file

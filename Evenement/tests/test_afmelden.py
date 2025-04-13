@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2024 Ramon van der Winkel.
+#  Copyright (c) 2024-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -162,7 +162,7 @@ class TestEvenementAfmelden(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_hwl)
 
         resp = self.client.get(self.url_afmelden % 999999)
-        self.assertEqual(resp.status_code, 405)     # method not allowed, want GET bestaat niet
+        self.assert405(resp)     # method not allowed, want GET bestaat niet
 
         resp = self.client.post(self.url_afmelden % 999999)
         self.assert404(resp, "Inschrijving niet gevonden")

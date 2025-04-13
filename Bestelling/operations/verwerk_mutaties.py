@@ -126,7 +126,9 @@ class VerwerkBestelMutaties:
         return mandje
 
     def _automatische_kortingen_toepassen(self, mandje: BestellingMandje):
-
+        """ verwijder de eerder bepaalde kortingen uit het mandje
+            evalueer daarna alle mogelijke kortingen en voeg de beste korting toe aan het mandje
+        """
         mandje.regels.filter(code=BESTELLING_REGEL_CODE_WEDSTRIJD_KORTING).delete()
 
         regel_pks = (mandje
@@ -423,7 +425,7 @@ class VerwerkBestelMutaties:
         when_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
 
         mandje = self._get_mandje(mutatie)
-        if not mandje:  # pragma: no branch
+        if not mandje:  # pragma: no cover
             return
 
         # zorg dat we verse informatie ophalen (anders duurt het 1 uur voordat een update door komt)

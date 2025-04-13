@@ -173,7 +173,8 @@ class DynamicBestellingCheckStatus(UserPassesTestMixin, View):
         elif bestelling.status == BESTELLING_STATUS_MISLUKT:
             out['status'] = 'mislukt'
 
-        else:       # pragma: no cover
+        else:
+            # geannuleerd komt hier
             raise Http404('Onbekende status')
 
         # niet gebruiken: raise Http404('Onbekende status')

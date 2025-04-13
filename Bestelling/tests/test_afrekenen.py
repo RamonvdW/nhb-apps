@@ -8,7 +8,8 @@ from django.test import TestCase
 from django.conf import settings
 from django.utils import timezone
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse
-from Bestelling.definities import BESTELLING_STATUS_AFGEROND
+from Bestelling.definities import (BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_MISLUKT, BESTELLING_STATUS_NIEUW,
+                                   BESTELLING_STATUS_BETALING_ACTIEF, BESTELLING_STATUS_GEANNULEERD)
 from Bestelling.models import BestellingMandje, Bestelling
 from Bestelling.operations import bestel_mutatieverzoek_inschrijven_wedstrijd
 from Betaal.models import BetaalInstellingenVereniging, BetaalActief, BetaalMutatie, BetaalTransactie
@@ -33,14 +34,13 @@ class TestBestellingBetaling(E2EHelpers, TestCase):
 
     test_after = ('Bestelling.tests.test_bestelling',)
 
-    url_mandje_bestellen = '/bestel/mandje/'
-    url_bestellingen_overzicht = '/bestel/overzicht/'
-    url_bestelling_details = '/bestel/details/%s/'          # bestel_nr
     url_afrekenen = '/bestel/afrekenen/%s/'                 # bestel_nr
     url_check_status = '/bestel/check-status/%s/'           # bestel_nr
     url_na_de_betaling = '/bestel/na-de-betaling/%s/'       # bestel_nr
-
     url_betaal_webhook = '/bestel/betaal/webhooks/mollie/'
+
+    url_mandje_bestellen = '/bestel/mandje/'
+    url_bestellingen_overzicht = '/bestel/overzicht/'
 
     def setUp(self):
         """ initialisatie van de test case """
@@ -147,10 +147,7 @@ class TestBestellingBetaling(E2EHelpers, TestCase):
         mandje, is_created = BestellingMandje.objects.get_or_create(account=account)
         self.mandje = mandje
 
-    def test_afrekenen(self):
-        self.e2e_login_and_pass_otp(self.account_admin)
-        self.e2e_check_rol('sporter')
-
+    def _maak_bestelling(self):
         # bestel wedstrijddeelname met korting
         bestel_mutatieverzoek_inschrijven_wedstrijd(self.account_admin, self.inschrijving, snel=True)
         self.verwerk_bestel_mutaties()
@@ -159,9 +156,37 @@ class TestBestellingBetaling(E2EHelpers, TestCase):
         self.assertEqual(0, Bestelling.objects.count())
         resp = self.client.post(self.url_mandje_bestellen, {'snel': 1})
         self.assert_is_redirect(resp, self.url_bestellingen_overzicht)
+
         self.verwerk_bestel_mutaties()
+
         self.assertEqual(1, Bestelling.objects.count())
         bestelling = Bestelling.objects.first()
+        return bestelling
+
+    def test_anon(self):
+        resp = self.client.get(self.url_afrekenen % 999999)
+        self.assert403(resp)
+
+        resp = self.client.get(self.url_check_status % 999999)
+        self.assert403(resp)
+
+        resp = self.client.get(self.url_na_de_betaling % 999999)
+        self.assert403(resp)
+
+    def test_afrekenen(self):
+        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_check_rol('sporter')
+
+        resp = self.client.get(self.url_afrekenen % 999999)
+        self.assert404(resp, 'Niet gevonden')
+
+        bestelling = self._maak_bestelling()
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_afrekenen % bestelling.bestel_nr)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('bestelling/bestelling-afrekenen.dtl', 'plein/site_layout.dtl'))
 
         # betaling opstarten
         url_betaling_gedaan = '/plein/'     # FUTURE: betere url kiezen
@@ -249,5 +274,127 @@ class TestBestellingBetaling(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_afrekenen % bestelling.bestel_nr)
         self.assert_is_redirect(resp, self.url_na_de_betaling % bestelling.bestel_nr)
+
+    def test_afrekenen_nogmaals(self):
+        self.e2e_login(self.account_admin)
+        self.e2e_check_rol('sporter')
+
+        resp = self.client.get(self.url_afrekenen % 999999)
+        self.assert404(resp, 'Niet gevonden')
+
+        bestelling = self._maak_bestelling()
+
+        bestelling.status = BESTELLING_STATUS_MISLUKT
+        bestelling.save(update_fields=['status'])
+
+        url = self.url_afrekenen % bestelling.bestel_nr
+        with self.assert_max_queries(20):
+            resp = self.client.post(url)
+        self.assert_is_redirect(resp, url)
+
+        bestelling.refresh_from_db()
+        self.assertEqual(bestelling.status, BESTELLING_STATUS_NIEUW)
+
+        # nog een keer heeft geen zin
+        resp = self.client.post(url)
+        self.assert_is_redirect(resp, url)
+
+    def test_check_status(self):
+        self.e2e_login(self.account_admin)
+        self.e2e_check_rol('sporter')
+
+        resp = self.client.get(self.url_check_status % 999999)
+        self.assert405(resp)
+
+        resp = self.client.post(self.url_check_status % 999999)
+        self.assert404(resp, 'Niet gevonden')
+
+        bestelling = self._maak_bestelling()
+
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_check_status % bestelling.bestel_nr)
+        data = self.assert200_json(resp)
+        self.assertEqual(data, {'status': 'nieuw'})
+
+        # transitie van Nieuw naar Betaling actief
+        self.verwerk_betaal_mutaties()
+        bestelling.refresh_from_db()
+        self.assertEqual(bestelling.status, BESTELLING_STATUS_BETALING_ACTIEF)
+
+        # lege checkout url
+        mutatie = bestelling.betaal_mutatie
+        mutatie.url_checkout = ''
+        mutatie.save()
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_check_status % bestelling.bestel_nr)
+        data = self.assert200_json(resp)
+        self.assertEqual(data, {'status': 'error'})
+
+        # normale checkout url
+        mutatie.url_checkout = '/checkout/'
+        mutatie.save()
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_check_status % bestelling.bestel_nr)
+        data = self.assert200_json(resp)
+        self.assertEqual(data, {'status': 'betaal', 'checkout_url': '/checkout/'})
+
+        # geen betaling mutatie
+        bestelling.betaal_mutatie = None
+        bestelling.save(update_fields=['betaal_mutatie'])
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_check_status % bestelling.bestel_nr)
+        data = self.assert200_json(resp)
+        self.assertEqual(data, {'status': 'error'})
+
+        # afgerond
+        bestelling.status = BESTELLING_STATUS_AFGEROND
+        bestelling.save(update_fields=['status'])
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_check_status % bestelling.bestel_nr)
+        data = self.assert200_json(resp)
+        self.assertEqual(data, {'status': 'afgerond'})
+
+        # mislukt
+        bestelling.status = BESTELLING_STATUS_MISLUKT
+        bestelling.save(update_fields=['status'])
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_check_status % bestelling.bestel_nr)
+        data = self.assert200_json(resp)
+        # print(repr(data))
+        self.assertEqual(data, {'status': 'mislukt'})
+
+        bestelling.status = BESTELLING_STATUS_GEANNULEERD
+        bestelling.save(update_fields=['status'])
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_check_status % bestelling.bestel_nr)
+        self.assert404(resp, 'Onbekende status')
+
+    def test_afgerond(self):
+        self.e2e_login(self.account_admin)
+        self.e2e_check_rol('sporter')
+
+        resp = self.client.get(self.url_na_de_betaling % 999999)
+        self.assert404(resp, 'Niet gevonden')
+
+        bestelling = self._maak_bestelling()
+
+        bestelling.status = BESTELLING_STATUS_AFGEROND
+        bestelling.save(update_fields=['status'])
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_na_de_betaling % bestelling.bestel_nr, {'snel': 1})
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('bestelling/bestelling-afgerond.dtl', 'plein/site_layout.dtl'))
+
+        bestelling.status = BESTELLING_STATUS_MISLUKT
+        bestelling.save(update_fields=['status'])
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_na_de_betaling % bestelling.bestel_nr, {'snel': 1})
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('bestelling/bestelling-afgerond.dtl', 'plein/site_layout.dtl'))
+
 
 # end of file

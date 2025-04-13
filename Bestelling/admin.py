@@ -28,9 +28,26 @@ class BtwFilter(admin.SimpleListFilter):
         return queryset
 
 
+class OrphanFilter(admin.SimpleListFilter):
+
+    title = 'orphan'
+
+    parameter_name = 'orphan'
+
+    def lookups(self, request, model_admin):
+        return (
+            ('Ja', 'Geen bestelling'),
+        )
+
+    def queryset(self, request, queryset):
+        if self.value() == 'Ja':
+            queryset = queryset.annotate(c=Count('bestelling')).filter(c=0)
+        return queryset
+
+
 class BestellingRegelAdmin(admin.ModelAdmin):
 
-    list_filter = ('code', BtwFilter)
+    list_filter = ('code', BtwFilter, OrphanFilter)
 
     search_fields = ('korte_beschrijving', )
 

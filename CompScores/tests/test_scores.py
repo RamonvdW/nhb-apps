@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2024 Ramon van der Winkel.
+#  Copyright (c) 2020-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -194,7 +194,7 @@ class TestCompScoresScores(E2EHelpers, TestCase):
         # get (bestaat niet)
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_deelnemers_ophalen)
-        self.assertEqual(resp.status_code, 405)       # 405 = method not allowed
+        self.assert405(resp)       # 405 = method not allowed
 
         # post zonder data
         with self.assert_max_queries(20):
@@ -301,7 +301,7 @@ class TestCompScoresScores(E2EHelpers, TestCase):
         # get (bestaat niet)
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_deelnemer_zoeken)
-        self.assertEqual(resp.status_code, 405)        # 405 = method not allowed
+        self.assert405(resp)        # 405 = method not allowed
 
         # post zonder data
         with self.assert_max_queries(20):
@@ -470,7 +470,7 @@ class TestCompScoresScores(E2EHelpers, TestCase):
         # get (bestaat niet)
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_uitslag_opslaan)
-        self.assertEqual(resp.status_code, 405)        # 405 = method not allowed
+        self.assert405(resp)        # 405 = method not allowed
 
         # post zonder data
         with self.assert_max_queries(20):

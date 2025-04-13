@@ -62,6 +62,8 @@ def bestel_opschonen(stdout):
         - verwijder bestellingen die ouder zijn dan 18 maanden
         - verwijder lege mandjes
         - verwijder adresgegevens van bestellingen gast-accounts
+
+        Let op: verwijderen van regels uit het mandje wordt door de bestel_mutaties achtergrondtaak gedaan
     """
 
     # na 2 jaar verwijderen
