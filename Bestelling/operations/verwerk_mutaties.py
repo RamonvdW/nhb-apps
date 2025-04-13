@@ -24,9 +24,8 @@ from Bestelling.definities import (BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS
                                    BESTELLING_REGEL_CODE_WEDSTRIJD_KORTING)
 from Bestelling.models import (Bestelling, BestellingRegel, BestellingMandje,
                                BestellingHoogsteBestelNr, BestellingMutatie)
-from Bestelling.operations.email_backoffice import stuur_email_webwinkel_backoffice
-from Bestelling.operations.email_koper import (stuur_email_naar_koper_bestelling_details,
-                                               stuur_email_naar_koper_betaalbevestiging)
+from Bestelling.operations import (stuur_email_webwinkel_backoffice, stuur_email_naar_koper_bestelling_details,
+                                   stuur_email_naar_koper_betaalbevestiging)
 from Bestelling.plugins.alle_bestel_plugins import bestel_plugins
 from Betaal.definities import TRANSACTIE_TYPE_MOLLIE_RESTITUTIE, TRANSACTIE_TYPE_HANDMATIG
 from Betaal.format import format_bedrag_euro
@@ -142,7 +141,9 @@ class VerwerkBestelMutaties:
             mandje.regels.add(*nieuwe_regels)
 
     def mandjes_opschonen(self):
-        """ Verwijder uit de mandjes de producten die er te lang in liggen """
+        """ Verwijder uit de mandjes de producten die er te lang in liggen
+            Wordt 1x per uur aangeroepen, als bestel_mutaties opnieuw opstart
+        """
         self.stdout.write('[INFO] Opschonen mandjes begint')
 
         verval_datum = timezone.now() - datetime.timedelta(days=settings.MANDJE_VERVAL_NA_DAGEN)
@@ -151,9 +152,8 @@ class VerwerkBestelMutaties:
         # hiervan wordt de reservering verwijderd
         mandje_pks = list()
         for plugin in bestel_plugins.values():
-            mandje_pks.extend(
-                plugin.mandje_opschonen(verval_datum)
-            )
+            pks = plugin.mandje_opschonen(verval_datum)
+            mandje_pks.extend(pks)
         # for
 
         # mandjes bijwerken
@@ -288,8 +288,8 @@ class VerwerkBestelMutaties:
             # handmatige inschrijving heeft meteen status definitief en hoeft dus niet betaald te worden
             if inschrijving.status != WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF:
                 regel = wedstrijd_bestel_plugin.reserveer(
-                    inschrijving,
-                    mandje.account.get_account_full_name())
+                                                    inschrijving,
+                                                    mandje.account.get_account_full_name())
                 mandje.regels.add(regel)
 
                 # kijk of er automatische kortingen zijn die toegepast kunnen worden

@@ -7,7 +7,7 @@
 account_plugins_login_gate = list()         # [tup, tup, ..] with tup = (prio, func, skip_for_login_as)
 account_plugins_post_login = list()         # [tup, tup, ..] with tup = (prio, func)
 account_plugins_ww_vergeten = list()        # [tup, tup, ..] with tup = (prio, func)
-account_plugins_notify_otp_reset = list()   # [func, ..]
+account_plugins_otp_was_reset = list()      # [func, ..]
 
 
 def account_add_plugin_login_gate(prio, func, skip_for_login_as):
@@ -83,8 +83,12 @@ def account_add_plugin_ww_vergeten(prio, func):
     account_plugins_ww_vergeten.sort(key=lambda x: x[0])
 
 
-def account_registreer_notify_otp_reset(func):
-    account_plugins_notify_otp_reset.append(func)
+def account_add_plugin_otp_was_reset(func):
+    """
+        OTP was reset plugins zijn functies die aangeroepen worden nadat de OTP ongeldig verklaard is,
+        omdat het tijd is om de OTP controle te herhalen.
+    """
+    account_plugins_otp_was_reset.append(func)
 
 
 # end of file
