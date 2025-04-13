@@ -43,25 +43,35 @@ class MyTestAsserts(TestCase):
             html = html[:pos] + '<!-- removed debug toolbar --></body></html>'
         return html
 
-    def get_useful_template_name(self, response):
-        lst = [tmpl.name
-               for tmpl in response.templates
-               if (tmpl.name not in included_templates
-                   and not tmpl.name.startswith('django/forms')
-                   and not tmpl.name.startswith('email_'))]
-        if len(lst) == 0:       # pragma: no cover
-            return 'no template!'
-        if len(lst) > 1:        # pragma: no cover
-            self.fail('Too many choices for template name: %s' % repr(lst))
-        return lst[0]
+    @staticmethod
+    def _get_template_names_used(resp: HttpResponse):
+        names = list()
+        if hasattr(resp, "templates"):      # pragma: no branch
+            names = [template.name
+                     for template in resp.templates]
+            # for
+        return names
 
-    def interpreteer_resp(self, resp):                 # pragma: no cover
-        long_msg = list()
-        long_msg.append("status code: %s" % resp.status_code)
-        long_msg.append(repr(resp))
+    def get_useful_template_name(self, resp: HttpResponse):
+        names = [name
+                 for name in self._get_template_names_used(resp)
+                 if (name not in included_templates
+                     and not name.startswith('django/forms')
+                     and not name.startswith('email_'))]
+        if len(names) == 0:       # pragma: no cover
+            return 'no template!'
+        if len(names) > 1:        # pragma: no cover
+            self.fail('Too many choices for template name: %s' % repr(names))
+        return names[0]
+
+    def interpreteer_resp(self, resp: HttpResponse):          # pragma: no cover
+        long_msg = [
+            "status code: %s" % resp.status_code,
+            repr(resp)
+        ]
 
         is_attachment = False
-        if resp.status_code == 302:
+        if resp.status_code == 302 and hasattr(resp, 'url'):
             msg = "redirect to url: %s" % resp.url
             long_msg.append(msg)
             return msg, long_msg
@@ -87,7 +97,8 @@ class MyTestAsserts(TestCase):
 
         is_404 = resp.status_code == 404
         if not is_404:
-            is_404 = any(['plein/fout_404.dtl' in templ.name for templ in resp.templates])
+            is_404 = any(['plein/fout_404.dtl' in name
+                          for name in self._get_template_names_used(resp)])
 
         if is_404:
             pos = content.find('<meta path="')
@@ -110,8 +121,8 @@ class MyTestAsserts(TestCase):
 
         if not is_attachment:
             long_msg.append('templates used:')
-            for templ in resp.templates:
-                long_msg.append('   %s' % repr(templ.name))
+            for name in self._get_template_names_used(resp):
+                long_msg.append('   %s' % repr(name))
             # for
 
         soup = BeautifulSoup(content, features="html.parser")
@@ -552,18 +563,18 @@ class MyTestAsserts(TestCase):
                 #  onsubmit="submit_knop1.disabled=true; submit_knop2.disabled=true; return true;"
                 #  onsubmit="document.getElementById('submit_knop').disabled=true; return true;"
                 pos1 = form.find(' onsubmit="')
-                if pos1 < 0:                                # pragma: no cover
-                    submit = 'form heeft geen onsubmit=".."'
-                else:
+                if pos1 >= 0:
                     pos2 = form.find('"', pos1+11)
                     submit = form[pos1+11:pos2]
                     if '.disabled=true;' not in submit or 'return true;' not in submit:             # pragma: no cover
-                        self.fail('Form onsubmit zonder met dubbelklik bescherming in template %s\n%s' % (repr(dtl),
-                                                                                                          repr(submit)))
+                        self.fail(
+                            'Form onsubmit zonder met dubbelklik bescherming in template %s\n%s' % (repr(dtl),
+                                                                                                    repr(submit)))
 
                     if 'document.getElementById(' not in submit:                                    # pragma: no cover
-                        self.fail('Form onsubmit met slechte dubbelklik bescherming in template %s\n%s' % (repr(dtl),
-                                                                                                           repr(submit)))
+                        self.fail(
+                            'Form onsubmit met slechte dubbelklik bescherming in template %s\n%s' % (repr(dtl),
+                                                                                                     repr(submit)))
 
                 pos_button = form.find('<button')
                 button_count = 0
@@ -585,7 +596,7 @@ class MyTestAsserts(TestCase):
 
                 if button_count > 0:
                     if pos1 < 0 or pos2 < 0:                # pragma: no cover
-                        msg = 'Form without dubbelklik bescherming in button template %s\n'% repr(dtl)
+                        msg = 'Form without dubbelklik bescherming in button template %s\n' % repr(dtl)
                         msg += 'button_count=%s, pos1=%s, pos2=%s' % (button_count, pos1, pos2)
                         self.fail(msg)
 
@@ -716,14 +727,6 @@ class MyTestAsserts(TestCase):
 
         return html
 
-    @staticmethod
-    def _get_template_names_used(resp: HttpResponse):
-        names = list()
-        if hasattr(resp, "templates"):
-            for template in resp.templates:
-                names.append(template.name)
-        return names
-
     def is_fout_pagina(self, resp: HttpResponse):        # pragma: no cover
         is_fout = False
         if resp.status_code == 200:
@@ -811,9 +814,6 @@ class MyTestAsserts(TestCase):
                 found_insert = True
 
             elif sql.startswith('UPDATE '):
-                pos1 = sql.find(' "')
-                pos2 = sql.find('"', pos1 + 2)
-                table_name = sql[pos1 + 2:pos2]
                 found_update = True
 
             elif sql.startswith('DELETE FROM '):
@@ -896,7 +896,7 @@ class MyTestAsserts(TestCase):
         if isinstance(resp, str):
             self.fail(msg='Verkeerde aanroep: resp parameter vergeten?')            # pragma: no cover
 
-        if resp.status_code == 302:
+        if resp.status_code == 302 and hasattr(resp, 'url'):
             if resp.url != '/account/login/':                                       # pragma: no cover
                 self.dump_resp(resp)
                 self.fail(msg="Onverwachte redirect naar %s" % resp.url)

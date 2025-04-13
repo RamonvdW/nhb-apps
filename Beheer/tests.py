@@ -11,6 +11,7 @@ from django.utils import timezone
 from django.contrib.admin.models import LogEntry
 from Beheer.views import beheer_opschonen
 from Geo.models import Regio
+from Bestelling.models import Bestelling
 from Betaal.models import BetaalActief, BetaalInstellingenVereniging, BetaalTransactie
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
@@ -243,6 +244,7 @@ class TestBeheer(E2EHelpers, TestCase):
     def test_admin_specials(self):
         self.e2e_login_and_pass_otp(self.account_admin)
 
+        # sommige filter functies hebben actieve records nodig om hun mogelijke waarden uit te halen
         regio = Regio.objects.get(regio_nr=111)
 
         ver = Vereniging(ver_nr=1234, naam='Test', regio=regio)
@@ -254,12 +256,17 @@ class TestBeheer(E2EHelpers, TestCase):
                         akkoord_via_bond=True)
         ontvanger.save()
 
+        bestelling = Bestelling(
+                        bestel_nr=1,
+                        ontvanger=ontvanger)
+        bestelling.save()
+
         actief = BetaalActief(
                     ontvanger=ontvanger,
                     payment_id='12345')
         actief.save()
 
-        transactie = BetaalTransactie(when=timezone.now())
+        transactie = BetaalTransactie(when=timezone.now(), payment_status='paid')
         transactie.save()
 
         urls = (
@@ -270,9 +277,9 @@ class TestBeheer(E2EHelpers, TestCase):
             '/beheer/Betaal/betaaltransactie/?heeft_restitutie=ja&heeft_terugvordering=ja',
             '/beheer/Betaal/betaaltransactie/?transactietype=HA',
             '/beheer/Betaal/betaaltransactie/?ontvanger=',
-            '/beheer/Betaal/betaaltransactie/?ontvanger=1234',
+            '/beheer/Betaal/betaaltransactie/?ontvanger=%s' % ver.ver_nr,
             '/beheer/Betaal/betaaltransactie/?aantal_bestellingen=0',
-            '/beheer/Betaal/betaaltransactie/?payment_status=paid',
+            '/beheer/Betaal/betaaltransactie/?payment_status2=paid',
             '/beheer/Betaal/betaalactief/?ontvanger=',
             '/beheer/Betaal/betaalactief/?ontvanger=1234',
 
