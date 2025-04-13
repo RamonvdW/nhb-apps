@@ -197,8 +197,16 @@ then
     # ..and add coverage with no-debug
     python3 $PY_OPTS -u $PYCOV ./manage.py test --keepdb --noinput --settings=$SETTINGS_AUTOTEST_NODEBUG -v 2 Plein.tests.tests.TestPlein.test_quick &>>"$LOG"
     RES=$?
-    #echo "[DEBUG] Debug run result: $RES --> ABORTED=$ABORTED"
-    [ $RES -eq 3 ] && ABORTED=1
+    [ $RES -eq 0 ] || ABORTED=1
+    echo "[DEBUG] Debug run result: $RES --> ABORTED=$ABORTED"
+
+    echo "[INFO] Running manage.py exit test"
+    # trigger diff that generates exit code
+    ./manage.py shell -c 'from ImportCRM.models import ImportLimieten as L; l = L.objects.first(); l.max_club_changes=1; l.save()'
+    python3 $PY_OPTS -u $PYCOV ./manage.py diff_crm_jsons ./ImportCRM/test-files/testfile_19.json ./ImportCRM/test-files/testfile_23.json >/dev/null
+    RES=$?
+    [ $RES -ne 0 ] || ABORTED=1
+    echo "[DEBUG] Debug run result: $RES --> ABORTED=$ABORTED"
 fi
 
 echo "[INFO] Starting websim tasks"
@@ -248,27 +256,28 @@ powerprofilesctl set performance
 # -u = unbuffered stdin/stdout --> also ensures the order of stdout/stderr lines
 # -v = verbose
 # note: double quotes not supported around $*
-echo "[INFO] Starting main test run" >>"$LOG"
-python3 $PY_OPTS -u $PYCOV ./manage.py test --keepdb --settings=$SETTINGS_AUTOTEST -v 2 $ARGS &>>"$LOG"
-RES=$?
-#echo "[DEBUG] Run result: $RES --> ABORTED=$ABORTED"
-[ $RES -eq 3 ] && ABORTED=1
-
-echo >>"$LOG"
-echo "[INFO] Finished main test run" >>"$LOG"
-
-
-# launch a browser with all the stored web pages
-find "$TMP_HTML" -type f | grep -q html
-RES2=$?
-# echo "[DEBUG] RES=$RES"
-if [ $RES2 -eq 0 ]
+if [ $ABORTED -eq 0 ]
 then
-    # echo "[DEBUG] Found HTML files in $TMP_HTML"
-    HTML_FILES=$(ls -1tr "$TMP_HTML"/*html)   # sorted by creation time
-    firefox $HTML_FILES &
-fi
+    echo "[INFO] Starting main test run" >>"$LOG"
+    python3 $PY_OPTS -u $PYCOV ./manage.py test --keepdb --settings=$SETTINGS_AUTOTEST -v 2 $ARGS &>>"$LOG"
+    RES=$?
+    #echo "[DEBUG] Run result: $RES --> ABORTED=$ABORTED"
+    [ $RES -eq 3 ] && ABORTED=1
 
+    echo >>"$LOG"
+    echo "[INFO] Finished main test run" >>"$LOG"
+
+    # launch a browser with all the stored web pages
+    find "$TMP_HTML" -type f | grep -q html
+    RES2=$?
+    # echo "[DEBUG] RES=$RES"
+    if [ $RES2 -eq 0 ]
+    then
+        # echo "[DEBUG] Found HTML files in $TMP_HTML"
+        HTML_FILES=$(ls -1tr "$TMP_HTML"/*html)   # sorted by creation time
+        firefox $HTML_FILES &
+    fi
+fi
 
 # stop showing the additions to the logfile, because the rest is less interesting
 # use bash construct to prevent the Terminated message on the console
@@ -279,33 +288,36 @@ wait "$PID_TAIL" 2>/dev/null
 # launch log in editor
 [ $RES -eq 0 ] || geany --new-instance --no-msgwin "$LOG" &
 
-if [ $RES -eq 0 ] && [ "$FOCUS" != "" ] && [ $FOCUS_SPECIFIC_TEST -eq 0 ]
+if [ $ABORTED -eq 0 ]
 then
-    echo "[INFO] Discovering all management commands in $FOCUS"
-    for cmd in $(python3 ./manage.py --help);
-    do
-        if [ -f "$FOCUS/management/commands/$cmd.py" ]
-        then
+    if [ $RES -eq 0 ] && [ "$FOCUS" != "" ] && [ $FOCUS_SPECIFIC_TEST -eq 0 ]
+    then
+        echo "[INFO] Discovering all management commands in $FOCUS"
+        for cmd in $(python3 ./manage.py --help);
+        do
+            if [ -f "$FOCUS/management/commands/$cmd.py" ]
+            then
+                echo -n '.'
+                echo "[INFO] ./manage.py help $cmd" >>"$LOG"
+                python3 $PY_OPTS -u $PYCOV ./manage.py help "$cmd" &>>"$LOG"
+            fi
+        done
+        echo
+    fi
+
+    if [ $RES -eq 0 ] && [ $# -eq 0 ]
+    then
+        echo "[INFO] Running help for each management command" >>"$LOG"
+        echo "[INFO] Running help for each management command"
+        for cmd_file in $(find -- */management/commands -name \*py | sed 's/\.py$//g');
+        do
+            cmd=$(basename "$cmd_file")
             echo -n '.'
             echo "[INFO] ./manage.py help $cmd" >>"$LOG"
-            python3 $PY_OPTS -u $PYCOV ./manage.py help "$cmd" &>>"$LOG"
-        fi
-    done
-    echo
-fi
-
-if [ $RES -eq 0 ] && [ $# -eq 0 ]
-then
-    echo "[INFO] Running help for each management command" >>"$LOG"
-    echo "[INFO] Running help for each management command"
-    for cmd_file in $(find -- */management/commands -name \*py | sed 's/\.py$//g');
-    do
-        cmd=$(basename "$cmd_file")
-        echo -n '.'
-        echo "[INFO] ./manage.py help $cmd" >>"$LOG"
-        python3 $PY_OPTS -u $PYCOV ./manage.py help "$cmd" &>>/dev/null    # ignore output
-    done
-    echo
+            python3 $PY_OPTS -u $PYCOV ./manage.py help "$cmd" &>>/dev/null    # ignore output
+        done
+        echo
+    fi
 fi
 
 # stop the websim tools
