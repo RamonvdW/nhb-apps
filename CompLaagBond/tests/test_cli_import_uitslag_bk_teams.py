@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023-2024 Ramon van der Winkel.
+#  Copyright (c) 2023-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -101,18 +101,21 @@ class TestCompLaagBondCliImportUitslagBkTeams(E2EHelpers, TestCase):
                                              self.real_testfile_indoor_f4_1234,
                                              '--dryrun', '--verbose')
         # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
-        #self.assertTrue('[ERROR] Kan bestand niet vinden' in f1.getvalue())
+        self.assertTrue(
+            "[ERROR] Kan team 'team-4101-bestaat-niet' van vereniging 4101 op regel 33 niet vinden" in f1.getvalue())
 
         f1, f2 = self.run_management_command('import_uitslag_bk_indoor_teams',
                                              self.real_testfile_indoor_f4_2143,
-                                             '--dryrun', '--verbose')
+                                             '--dryrun')
         # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
         #self.assertTrue('[ERROR] Kan bestand niet vinden' in f1.getvalue())
 
         # zonder dryrun en verbose
         f1, f2 = self.run_management_command('import_uitslag_bk_indoor_teams',
-                                             self.real_testfile_indoor_f8)
+                                             self.real_testfile_indoor_f8,
+                                             '--verbose')
         # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
+        #self.assertTrue('[ERROR] Kan bestand niet vinden' in f1.getvalue())
 
         # geef een 25m1pijl blad aan de indoor importer
         f1, f2 = self.run_management_command('import_uitslag_bk_indoor_teams',
