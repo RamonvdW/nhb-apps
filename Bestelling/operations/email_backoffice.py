@@ -69,7 +69,7 @@ def _beschrijf_transacties(bestelling: Bestelling):
     return transacties
 
 
-def stuur_email_webwinkel_backoffice(bestelling: Bestelling):
+def stuur_email_webwinkel_backoffice(stdout, bestelling: Bestelling):
     """ Stuur een e-mail om de betaalde bestelling te bevestigen """
 
     account = bestelling.account
@@ -97,6 +97,8 @@ def stuur_email_webwinkel_backoffice(bestelling: Bestelling):
     mailer_queue_email(email,
                        'Verstuur webwinkel producten (%s)' % bestelling.mh_bestel_nr(),
                        mail_body)
+
+    stdout.write('[INFO] E-mail naar webwinkel back-office voor bestelling %s is verstuurd' % bestelling.mh_bestel_nr())
 
 # end of file
 

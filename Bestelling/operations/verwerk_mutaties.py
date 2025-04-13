@@ -10,22 +10,22 @@ from django.db import transaction
 from Bestelling.definities import (BESTELLING_MUTATIE_WEDSTRIJD_INSCHRIJVEN, BESTELLING_MUTATIE_WEBWINKEL_KEUZE,
                                    BESTELLING_MUTATIE_WEDSTRIJD_AFMELDEN, BESTELLING_MUTATIE_VERWIJDER,
                                    BESTELLING_MUTATIE_MAAK_BESTELLINGEN, BESTELLING_MUTATIE_BETALING_AFGEROND,
-                                   BESTELLING_MUTATIE_OVERBOEKING_ONTVANGEN,
-                                   BESTELLING_MUTATIE_ANNULEER, BESTELLING_MUTATIE_TRANSPORT,
-                                   BESTELLING_MUTATIE_EVENEMENT_INSCHRIJVEN, BESTELLING_MUTATIE_EVENEMENT_AFMELDEN,
-                                   BESTELLING_MUTATIE_OPLEIDING_INSCHRIJVEN, BESTELLING_MUTATIE_OPLEIDING_AFMELDEN,
-                                   BESTELLING_TRANSPORT_NVT, BESTELLING_TRANSPORT_VERZEND, BESTELLING_TRANSPORT_OPHALEN,
-                                   BESTELLING_REGEL_CODE_WEBWINKEL, BESTELLING_REGEL_CODE_VERZENDKOSTEN)
+                                   BESTELLING_MUTATIE_OVERBOEKING_ONTVANGEN, BESTELLING_MUTATIE_ANNULEER,
+                                   BESTELLING_MUTATIE_TRANSPORT, BESTELLING_MUTATIE_EVENEMENT_INSCHRIJVEN,
+                                   BESTELLING_MUTATIE_EVENEMENT_AFMELDEN, BESTELLING_MUTATIE_OPLEIDING_INSCHRIJVEN,
+                                   BESTELLING_MUTATIE_OPLEIDING_AFMELDEN,
+                                   BESTELLING_TRANSPORT_NVT, BESTELLING_TRANSPORT_VERZEND,
+                                   BESTELLING_REGEL_CODE_VERZENDKOSTEN)
 from Bestelling.definities import (BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_BETALING_ACTIEF,
                                    BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_MISLUKT, BESTELLING_STATUS_GEANNULEERD,
-                                   BESTELLING_STATUS2STR, BESTELLING_HOOGSTE_BESTEL_NR_FIXED_PK,
-                                   BESTELLING_TRANSPORT2STR,
-                                   BESTELLING_REGEL_CODE_WEDSTRIJD,
-                                   BESTELLING_REGEL_CODE_WEDSTRIJD_KORTING)
+                                   BESTELLING_HOOGSTE_BESTEL_NR_FIXED_PK,
+                                   BESTELLING_TRANSPORT2STR, BESTELLING_STATUS2STR,
+                                   BESTELLING_REGEL_CODE_WEDSTRIJD, BESTELLING_REGEL_CODE_WEDSTRIJD_KORTING)
 from Bestelling.models import (Bestelling, BestellingRegel, BestellingMandje,
                                BestellingHoogsteBestelNr, BestellingMutatie)
-from Bestelling.operations import (stuur_email_webwinkel_backoffice, stuur_email_naar_koper_bestelling_details,
-                                   stuur_email_naar_koper_betaalbevestiging)
+from Bestelling.operations import (stuur_email_naar_koper_bestelling_details,
+                                   stuur_email_naar_koper_betaalbevestiging,
+                                   stuur_email_webwinkel_backoffice)
 from Bestelling.plugins.alle_bestel_plugins import bestel_plugins
 from Betaal.definities import TRANSACTIE_TYPE_MOLLIE_RESTITUTIE, TRANSACTIE_TYPE_HANDMATIG
 from Betaal.format import format_bedrag_euro
@@ -553,7 +553,7 @@ class VerwerkBestelMutaties:
 
             # stuur voor elke bestelling een bevestiging naar de koper met details van de bestelling
             # en instructies voor betaling (niet nodig / handmatig / via Mollie)
-            stuur_email_naar_koper_bestelling_details(bestelling)
+            stuur_email_naar_koper_bestelling_details(self.stdout, bestelling)
         # for
 
         # zorg dat het totaal van het mandje ook weer klopt
@@ -647,10 +647,10 @@ class VerwerkBestelMutaties:
 
                 # stuur een e-mail naar het backoffice
                 if bevat_webwinkel:
-                    stuur_email_webwinkel_backoffice(bestelling)
+                    stuur_email_webwinkel_backoffice(self.stdout, bestelling)
 
                 # stuur een e-mail aan de koper
-                stuur_email_naar_koper_betaalbevestiging(bestelling)
+                stuur_email_naar_koper_betaalbevestiging(self.stdout, bestelling)
         else:
             self.stdout.write('[INFO] Betaling niet gelukt voor bestelling %s (pk=%s)' % (
                                 bestelling.mh_bestel_nr(), bestelling.pk))
@@ -718,10 +718,10 @@ class VerwerkBestelMutaties:
 
             # stuur een e-mail naar het backoffice
             if bevat_webwinkel:
-                stuur_email_webwinkel_backoffice(bestelling)
+                stuur_email_webwinkel_backoffice(self.stdout, bestelling)
 
             # stuur een e-mail aan de koper
-            stuur_email_naar_koper_betaalbevestiging(bestelling)
+            stuur_email_naar_koper_betaalbevestiging(self.stdout, bestelling)
         else:
             bestelling.status = BESTELLING_STATUS_BETALING_ACTIEF
             bestelling.save(update_fields=['status'])
@@ -748,7 +748,7 @@ class VerwerkBestelMutaties:
         bestelling.save(update_fields=['status', 'log'])
 
         # stuur een e-mail om de annulering te bevestigen
-        stuur_email_naar_koper_bestelling_details(bestelling)
+        stuur_email_naar_koper_bestelling_details(self.stdout, bestelling)
 
         # verwijder de reserveringen
         for regel in bestelling.regels.all():

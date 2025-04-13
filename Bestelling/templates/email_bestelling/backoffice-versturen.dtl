@@ -8,7 +8,7 @@
 {% block inhoud_text %}
     |Hallo backoffice!
     |
-    |Deze e-mail is de bevestiging van een verkoop via {{ naam_site }} en opdracht tot het versturen van de gekochten producten.
+    |Deze e-mail is de bevestiging van een verkoop via {{ naam_site }} en opdracht tot het versturen van de gekochte webwinkel producten.
     |
     {% if waarschuw_test_server %}
         |LET OP: DIT KOMT VAN DE TESTOMGEVING EN IS GEEN ECHTE BESTELLING!
@@ -94,7 +94,7 @@
 {% block inhoud_html %}
     <div>Hallo backoffice!</div>
     <br>
-    <div>Deze e-mail is de bevestiging van een verkoop via {{ naam_site }} en opdracht tot het versturen van de gekochten producten.</div>
+    <div>Deze e-mail is de bevestiging van een verkoop via {{ naam_site }} en opdracht tot het versturen van de gekochte webwinkel producten.</div>
     <br>
 
     {% if waarschuw_test_server %}

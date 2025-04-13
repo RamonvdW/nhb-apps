@@ -366,7 +366,7 @@ class Command(BaseCommand):
         # TODO: Bevestiging bestelling
 
         self.stdout.write('Maak mail voor Bestel - Betaal bevestiging')
-        stuur_email_naar_koper_betaalbevestiging(self.bestelling)
+        stuur_email_naar_koper_betaalbevestiging(self.stdout, self.bestelling)
         self._check_mail_gemaakt()
 
         # TODO: mail naar backoffice

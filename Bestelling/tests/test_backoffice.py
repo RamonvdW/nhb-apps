@@ -6,11 +6,12 @@
 
 from django.conf import settings
 from django.test import TestCase
+from django.core.management.base import OutputWrapper
 from django.utils import timezone
 from Bestelling.definities import BESTELLING_STATUS_AFGEROND, BESTELLING_TRANSPORT_VERZEND, BESTELLING_TRANSPORT_OPHALEN
 from Bestelling.models import BestellingMandje, Bestelling
 from Bestelling.operations import (bestel_mutatieverzoek_webwinkel_keuze, bestel_mutatieverzoek_maak_bestellingen,
-                                   stuur_email_webwinkel_backoffice)
+                                   stuur_email_webwinkel_backoffice, bestel_overboeking_ontvangen)
 from Betaal.models import BetaalInstellingenVereniging
 from Functie.models import Functie
 from Geo.models import Regio
@@ -22,6 +23,7 @@ from Vereniging.models import Vereniging
 from Webwinkel.definities import VERZENDKOSTEN_BRIEFPOST
 from Webwinkel.models import WebwinkelProduct, WebwinkelKeuze
 from decimal import Decimal
+import io
 
 
 class TestBestellingBackoffice(E2EHelpers, TestCase):
@@ -113,7 +115,7 @@ class TestBestellingBackoffice(E2EHelpers, TestCase):
 
         self.mandje, is_created = BestellingMandje.objects.get_or_create(account=self.account_normaal)
 
-    def test_pakket(self):
+    def test_pakketpost(self):
         self.e2e_login(self.account_normaal)
 
         # leg twee webwinkel producten in het mandje en zet het mandje om in een bestelling
@@ -150,7 +152,7 @@ class TestBestellingBackoffice(E2EHelpers, TestCase):
         self.assertTrue(self.sporter.postadres_2 in mail.mail_text)
         self.assertTrue(self.sporter.postadres_3 in mail.mail_text)
 
-    def test_brief(self):
+    def test_briefpost(self):
         # het enige product that we gaan kopen kan per brief verstuurd worden
         self.product1.type_verzendkosten = VERZENDKOSTEN_BRIEFPOST
         self.product1.save(update_fields=['type_verzendkosten'])
@@ -224,8 +226,10 @@ class TestBestellingBackoffice(E2EHelpers, TestCase):
         bestelling.save()
 
         MailQueue.objects.all().delete()
-        stuur_email_webwinkel_backoffice(bestelling)
+        stdout = OutputWrapper(io.StringIO())
+        stuur_email_webwinkel_backoffice(stdout, bestelling)
         mail = MailQueue.objects.first()
+        self.assert_email_html_ok(mail, 'email_bestelling/backoffice-versturen.dtl')
         # self.e2e_show_email_in_browser(mail)
 
         self.assertTrue("Waarvan BTW 1,42%" in mail.mail_text)
@@ -239,5 +243,22 @@ class TestBestellingBackoffice(E2EHelpers, TestCase):
         self.assertTrue('regel 3' in mail.mail_text)
         self.assertTrue('regel 4' in mail.mail_text)
         self.assertTrue('regel 5' in mail.mail_text)
+
+    def test_overboeking(self):
+        bestel_mutatieverzoek_webwinkel_keuze(self.account_normaal, self.keuze1, snel=True)
+        bestel_mutatieverzoek_webwinkel_keuze(self.account_normaal, self.keuze2, snel=True)
+        bestel_mutatieverzoek_maak_bestellingen(self.account_normaal, snel=True)
+        self.verwerk_bestel_mutaties()
+        self.assertEqual(1, Bestelling.objects.count())
+        bestelling = Bestelling.objects.first()
+        MailQueue.objects.all().delete()
+
+        bestel_overboeking_ontvangen(bestelling, bestelling.totaal_euro, snel=True)
+        self.verwerk_bestel_mutaties(show_all=True)
+
+        mail = MailQueue.objects.first()
+        self.assert_email_html_ok(mail, 'email_bestelling/backoffice-versturen.dtl')
+        # self.e2e_show_email_in_browser(mail)
+
 
 # end of file

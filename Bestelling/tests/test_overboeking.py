@@ -9,12 +9,14 @@ from django.test import TestCase
 from Bestelling.definities import (BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_BETALING_ACTIEF,
                                    BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_GEANNULEERD)
 from Bestelling.models import Bestelling, BestellingMutatie
+from Bestelling.operations import bestel_overboeking_ontvangen
 from Betaal.models import BetaalInstellingenVereniging
 from Functie.models import Functie
 from Functie.tests.helpers import maak_functie
 from Geo.models import Regio
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
+from decimal import Decimal
 
 
 class TestBestellingOverboeking(E2EHelpers, TestCase):
@@ -210,8 +212,11 @@ class TestBestellingOverboeking(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('bestelling/overboeking-ontvangen.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, 'Betaling is al geregistreerd')
-        # self.bestelling.status = BESTELLING_STATUS_WACHT_OP_BETALING
-        # self.bestelling.save(update_fields=['status'])
+
+        # toch doordrukken
+        bestel_overboeking_ontvangen(self.bestelling, Decimal(1.0), snel=True)
+        f1, f2 = self.verwerk_bestel_mutaties(show_all=True)
+        self.assertTrue('is al afgerond (status=Voltooid)' in f2.getvalue())
 
         # bestelling is geannuleerd
         self.bestelling.status = BESTELLING_STATUS_GEANNULEERD

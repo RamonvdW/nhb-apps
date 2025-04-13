@@ -69,7 +69,7 @@ def _beschrijf_transacties(bestelling: Bestelling):
     return transacties
 
 
-def stuur_email_naar_koper_bestelling_details(bestelling: Bestelling):
+def stuur_email_naar_koper_bestelling_details(stdout, bestelling: Bestelling):
     """ Stuur een e-mail naar de koper met details van de bestelling en betaalinstructies """
 
     account = bestelling.account
@@ -106,8 +106,10 @@ def stuur_email_naar_koper_bestelling_details(bestelling: Bestelling):
                        'Bestelling op MijnHandboogsport (%s)' % bestelling.mh_bestel_nr(),
                        mail_body)
 
+    stdout.write('[INFO] E-mail naar koper met details van bestelling %s is verstuurd' % bestelling.mh_bestel_nr())
 
-def stuur_email_naar_koper_betaalbevestiging(bestelling: Bestelling):
+
+def stuur_email_naar_koper_betaalbevestiging(stdout, bestelling: Bestelling):
     """ Stuur een e-mail om de betaalde bestelling te bevestigen """
 
     account = bestelling.account
@@ -139,6 +141,9 @@ def stuur_email_naar_koper_betaalbevestiging(bestelling: Bestelling):
     mailer_queue_email(account.bevestigde_email,
                        'Bevestiging aankoop via MijnHandboogsport (%s)' % bestelling.mh_bestel_nr(),
                        mail_body)
+
+    stdout.write('[INFO] E-mail naar koper met betaalbevestiging van bestelling %s is verstuurd' %
+                 bestelling.mh_bestel_nr())
 
 
 # end of file

@@ -288,6 +288,8 @@ class TestBeheer(E2EHelpers, TestCase):
             '/beheer/Bestelling/bestellingmandje/?is_leeg=1',       # noqa
             '/beheer/Bestelling/bestelling/?ontvanger=',
             '/beheer/Bestelling/bestelling/?ontvanger=1',
+            '/beheer/Bestelling/bestellingregel/?btw=Ja',
+            '/beheer/Bestelling/bestellingregel/?orphan=Ja',
 
             # Sporter
             '/beheer/Sporter/sporter/?heeft_wa_id=Ja',
