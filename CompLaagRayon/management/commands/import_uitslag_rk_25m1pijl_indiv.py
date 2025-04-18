@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2024 Ramon van der Winkel.
+#  Copyright (c) 2022-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -61,6 +61,7 @@ class Command(BaseCommand):
             row = str(row_nr)
 
             lid_nr_str = ws[col_lid_nr + row].value
+            # print('row %s lid_nr_str: %s' % (row_nr, lid_nr_str))
             if lid_nr_str:
                 nix_count = 0
                 try:
