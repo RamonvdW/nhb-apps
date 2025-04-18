@@ -71,6 +71,10 @@ urlpatterns = [
          view_manager.NietIngeschrevenView.as_view(),
          name='niet-ingeschreven'),
 
+    path('toevoegen/',
+         view_manager.OpleidingToevoegenView.as_view(),
+         name='toevoegen'),
+
     path('manager/aanpassingen/',
          view_aanpassingen.AanpassingenView.as_view(),
          name='aanpassingen')

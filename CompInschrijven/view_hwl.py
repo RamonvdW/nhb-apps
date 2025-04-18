@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -723,7 +723,7 @@ class LedenIngeschrevenView(UserPassesTestMixin, ListView):
         url_overzicht = reverse('Vereniging:overzicht')
         anker = '#competitie_%s' % self.deelcomp.competitie.pk
         context['kruimels'] = (
-            (url_overzicht, 'Beheer Vereniging'),
+            (url_overzicht, 'Beheer vereniging'),
             (url_overzicht + anker, self.deelcomp.competitie.beschrijving.replace(' competitie', '')),
             (None, 'Ingeschreven')
         )

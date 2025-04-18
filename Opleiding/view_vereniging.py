@@ -64,7 +64,7 @@ class VerenigingOpleidingenView(UserPassesTestMixin, View):
         context['url_voorwaarden'] = settings.VERKOOPVOORWAARDEN_OPLEIDINGEN_URL
 
         context['kruimels'] = (
-            (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
+            (reverse('Vereniging:overzicht'), 'Beheer vereniging'),
             (None, 'Opleidingen'),
         )
 

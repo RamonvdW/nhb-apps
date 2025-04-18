@@ -40,9 +40,9 @@ def rol_zet_beschrijving(request, rol, functie_pk=None, functie=None):
         beschr = 'Manager MH'
 
     elif rol in (Rol.ROL_BKO, Rol.ROL_RKO, Rol.ROL_RCL,
-                 Rol.ROL_SEC, Rol.ROL_HWL, Rol.ROL_WL,
-                 Rol.ROL_MWZ, Rol.ROL_MWW, Rol.ROL_MO,
-                 Rol.ROL_MLA, Rol.ROL_SUP):
+                 Rol.ROL_SEC, Rol.ROL_HWL, Rol.ROL_WL, Rol.ROL_LA,
+                 Rol.ROL_MWZ, Rol.ROL_MWW, Rol.ROL_MO, Rol.ROL_MLA,
+                 Rol.ROL_SUP):
         beschr = functie_naam
 
     elif rol == Rol.ROL_CS:

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2024 Ramon van der Winkel.
+#  Copyright (c) 2021-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -138,7 +138,7 @@ class WieSchietWaarView(UserPassesTestMixin, TemplateView):
         url_overzicht = reverse('Vereniging:overzicht')
         anker = '#competitie_%s' % comp.pk
         context['kruimels'] = (
-            (url_overzicht, 'Beheer Vereniging'),
+            (url_overzicht, 'Beheer vereniging'),
             (url_overzicht + anker, comp.beschrijving.replace(' competitie', '')),
             (None, 'Wie schiet waar?')
         )

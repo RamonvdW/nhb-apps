@@ -59,6 +59,18 @@
                     </tr>
                 {% endfor %}
 
+                <!-- toevoegen knop -->
+                <tr>
+                    <td class="center" colspan="4">
+                        <form action="{{ url_toevoegen }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
+                            {% csrf_token %}
+                            <button class="btn-sv-rood" id="submit_knop" type="submit">
+                                <i class="notranslate material-icons-round">add</i>
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            
             </table>
         </div>
     </div>

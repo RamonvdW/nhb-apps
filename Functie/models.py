@@ -79,7 +79,7 @@ class Functie(models.Model):
     # RCL only: regio
     regio = models.ForeignKey(Regio, on_delete=models.PROTECT, null=True, blank=True)
 
-    # SEC/HWL/WL only: vereniging
+    # SEC/HWL/WL/LA only: vereniging
     vereniging = models.ForeignKey(Vereniging, on_delete=models.CASCADE, null=True, blank=True)
 
     def is_indoor(self):

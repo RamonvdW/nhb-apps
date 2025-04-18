@@ -39,7 +39,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.functie_nu and self.rol_nu in (Rol.ROL_SEC, Rol.ROL_HWL, Rol.ROL_WL)
+        return self.functie_nu and self.rol_nu in (Rol.ROL_SEC, Rol.ROL_LA, Rol.ROL_HWL, Rol.ROL_WL)
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -52,19 +52,20 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
 
         context['toon_gast_accounts'] = ver.is_extern and self.rol_nu == Rol.ROL_SEC
 
-        if not ver.is_extern:
-            context['toon_wedstrijden'] = self.rol_nu != Rol.ROL_SEC
+        if self.rol_nu != Rol.ROL_LA:
+            if not ver.is_extern:
+                context['toon_wedstrijden'] = self.rol_nu != Rol.ROL_SEC
 
-        context['toon_evenementen'] = ver.ver_nr in settings.EVENEMENTEN_VERKOPER_VER_NRS
-        context['toon_opleidingen'] = ver.ver_nr in settings.OPLEIDINGEN_VERKOPER_VER_NRS
+            context['toon_evenementen'] = ver.ver_nr in settings.EVENEMENTEN_VERKOPER_VER_NRS
+            context['toon_opleidingen'] = ver.ver_nr in settings.OPLEIDINGEN_VERKOPER_VER_NRS
 
-        if ver.wedstrijdlocatie_set.exclude(baan_type=BAAN_TYPE_EXTERN).filter(zichtbaar=True).count() > 0:
-            context['accommodatie_details_url'] = reverse('Locatie:accommodatie-details',
+            if ver.wedstrijdlocatie_set.exclude(baan_type=BAAN_TYPE_EXTERN).filter(zichtbaar=True).count() > 0:
+                context['accommodatie_details_url'] = reverse('Locatie:accommodatie-details',
+                                                              kwargs={'ver_nr': ver.ver_nr})
+
+            if not ver.is_extern:
+                context['url_externe_locaties'] = reverse('Locatie:externe-locaties',
                                                           kwargs={'ver_nr': ver.ver_nr})
-
-        if not ver.is_extern:
-            context['url_externe_locaties'] = reverse('Locatie:externe-locaties',
-                                                      kwargs={'ver_nr': ver.ver_nr})
 
         comps = list()
         deelcomps = list()
@@ -293,7 +294,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
             context['taken_text'] = "Er zijn %s taken die op jouw aandacht wachten." % aantal
 
         context['kruimels'] = (
-            (None, 'Beheer Vereniging'),
+            (None, 'Beheer vereniging'),
         )
 
         return context

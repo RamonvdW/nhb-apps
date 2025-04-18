@@ -757,7 +757,7 @@ class MatchHWLContactView(UserPassesTestMixin, TemplateView):
             # for
 
         context['kruimels'] = (
-            (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
+            (reverse('Vereniging:overzicht'), 'Beheer vereniging'),
             (reverse('CompScores:wedstrijden'), 'Competitie wedstrijden'),
             (None, 'Scheidsrechters')
         )

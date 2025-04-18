@@ -224,7 +224,7 @@ class WedstrijdAanmeldingenView(UserPassesTestMixin, TemplateView):
 
         if self.rol_nu in (Rol.ROL_HWL, Rol.ROL_SEC):
             context['kruimels'] = (
-                (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
+                (reverse('Vereniging:overzicht'), 'Beheer vereniging'),
                 (reverse('Wedstrijden:vereniging'), 'Wedstrijdkalender'),
                 (None, 'Aanmeldingen'),
             )
@@ -659,7 +659,7 @@ class WedstrijdAanmeldingDetailsView(UserPassesTestMixin, TemplateView):
                 url_aanmeldingen = reverse('Wedstrijden:vereniging')
 
             context['kruimels'] = (
-                (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
+                (reverse('Vereniging:overzicht'), 'Beheer vereniging'),
                 (reverse('Wedstrijden:vereniging'), 'Wedstrijdkalender'),
                 (url_aanmeldingen, 'Aanmeldingen'),
                 (None, 'Details aanmelding')

@@ -27,7 +27,7 @@ class BeheerdersVerenigingView(UserPassesTestMixin, ListView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
-        return rol_nu in (Rol.ROL_SEC, Rol.ROL_HWL, Rol.ROL_WL)
+        return rol_nu in (Rol.ROL_SEC, Rol.ROL_LA, Rol.ROL_HWL, Rol.ROL_WL)
 
     def get_queryset(self):
         """ called by the template system to get the queryset or list of objects for the template """
@@ -36,7 +36,7 @@ class BeheerdersVerenigingView(UserPassesTestMixin, ListView):
         # en de huidige functie selecteert de vereniging
         rol_nu, functie_nu = rol_get_huidige_functie(self.request)
 
-        rol2volg_nr = {'SEC': 1, 'HWL': 2, 'WL': 3}
+        rol2volg_nr = {'SEC': 1, 'LA': 2, 'HWL': 3, 'WL': 4}
 
         # zoek alle rollen binnen deze vereniging
         unsorted = list()
@@ -98,7 +98,7 @@ class BeheerdersVerenigingView(UserPassesTestMixin, ListView):
         context['terug_url'] = reverse('Vereniging:overzicht')
 
         context['kruimels'] = (
-            (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
+            (reverse('Vereniging:overzicht'), 'Beheer vereniging'),
             (None, 'Beheerders'),
         )
 

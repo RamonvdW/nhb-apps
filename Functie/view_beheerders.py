@@ -40,7 +40,7 @@ class LijstBeheerdersView(UserPassesTestMixin, ListView):
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
         return self.rol_nu in (Rol.ROL_BB, Rol.ROL_MO, Rol.ROL_MWZ, Rol.ROL_MWW, Rol.ROL_MLA, Rol.ROL_SUP,
                                Rol.ROL_BKO, Rol.ROL_RKO, Rol.ROL_RCL,
-                               Rol.ROL_SEC, Rol.ROL_HWL, Rol.ROL_WL,
+                               Rol.ROL_SEC, Rol.ROL_HWL, Rol.ROL_WL, Rol.ROL_LA,
                                Rol.ROL_CS)
 
     @staticmethod

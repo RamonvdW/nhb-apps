@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2023 Ramon van der Winkel.
+                Copyright (c) 2020-2025 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -45,8 +45,13 @@
                             <th data-filter="on">Voor<wbr>naam</th>
                             <th data-filter="on">Achter<wbr>naam</th>
                             <th>Leeftijd</th>
-                            <th>Leeftijds<wbr>klasse {{ wedstrijdklasse_jaar }}</th>
+                            {% if not toon_bondspas %}
+                                <th>Leeftijds<wbr>klasse {{ wedstrijdklasse_jaar }}</th>
+                            {% endif %}
                             <th class="hide-on-small-only">Laatste inlog</th>
+                            {% if toon_bondspas %}
+                                <th>Bondspas</th>
+                            {% endif %}
                         </tr>
                     </thead>
 
@@ -57,7 +62,9 @@
                             <td>{{ obj.voornaam }}</td>
                             <td>{{ obj.achternaam }}</td>
                             <td>{{ obj.leeftijd }}</td>
-                            <td>{{ obj.leeftijdsklasse.klasse_kort }}</td>
+                            {% if not toon_bondspas %}
+                                <td>{{ obj.leeftijdsklasse.klasse_kort }}</td>
+                            {% endif %}
                             <td class="hide-on-small-only">
                                 {% if obj.geen_inlog == 2 %}
                                     <i>Onvoltooid account</i>
@@ -67,6 +74,11 @@
                                     <span>{{ obj.laatste_inlog }}</span>
                                 {% endif %}
                             </td>
+                            {% if toon_bondspas %}
+                                <td>
+                                    <a class="btn-sv-rood" href="{{ obj.url_bondspas }}">Toon</a>
+                                </td>
+                            {% endif %}
                         </tr>
                     {% endfor %}
                 </table>
@@ -99,8 +111,13 @@
                         <th>M/V</th>
                         <th data-filter="on">Voor<wbr>naam</th>
                         <th data-filter="on">Achter<wbr>naam</th>
-                        <th>Leeftijds<wbr>klasse {{ wedstrijdklasse_jaar }}</th>
+                        {% if not toon_bondspas %}
+                            <th>Leeftijds<wbr>klasse {{ wedstrijdklasse_jaar }}</th>
+                        {% endif %}
                         <th class="hide-on-small-only">Laatste inlog</th>
+                        {% if toon_bondspas %}
+                            <th>Bondspas</th>
+                        {% endif %}
                     </tr>
                 </thead>
 
@@ -110,7 +127,9 @@
                         <td>{{ obj.geslacht }}</td>
                         <td>{{ obj.voornaam }}</td>
                         <td>{{ obj.achternaam }}</td>
-                        <td>{{ obj.leeftijdsklasse.klasse_kort }}</td>
+                        {% if not toon_bondspas %}
+                            <td>{{ obj.leeftijdsklasse.klasse_kort }}</td>
+                        {% endif %}
 
                         <td class="hide-on-small-only">
                             {% if obj.geen_inlog == 2 %}
@@ -121,6 +140,12 @@
                                 <span>{{ obj.laatste_inlog }}</span>
                             {% endif %}
                         </td>
+
+                        {% if toon_bondspas %}
+                            <td>
+                                <a class="btn-sv-rood" href="{{ obj.url_bondspas }}">Toon</a>
+                            </td>
+                        {% endif %}
                     </tr>
                 {% endfor %}
             </table>

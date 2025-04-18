@@ -94,7 +94,7 @@ class VerenigingWedstrijdenView(UserPassesTestMixin, View):
         context['url_voorwaarden'] = settings.VERKOOPVOORWAARDEN_WEDSTRIJDEN_URL
 
         context['kruimels'] = (
-            (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
+            (reverse('Vereniging:overzicht'), 'Beheer vereniging'),
             (None, 'Wedstrijdkalender'),
         )
 
@@ -141,7 +141,7 @@ class NieuweWedstrijdKiesType(UserPassesTestMixin, View):
         context['url_nieuwe_wedstrijd'] = reverse('Wedstrijden:nieuwe-wedstrijd-kies-type')
 
         context['kruimels'] = (
-            (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
+            (reverse('Vereniging:overzicht'), 'Beheer vereniging'),
             (reverse('Wedstrijden:vereniging'), 'Wedstrijdkalender'),
             (None, 'Nieuwe wedstrijd')
         )

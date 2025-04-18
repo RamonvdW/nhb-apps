@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -248,7 +248,7 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
         comp = deelcomp.competitie
 
         if self.rol_nu == Rol.ROL_HWL:
-            # TODO: deze terug verwijzing klopt niet helemaal meer. Zou Beheer Vereniging kunnen zijn als we een nieuw kaartje maken om de planning in te zien
+            # TODO: deze terug verwijzing klopt niet helemaal meer. Zou Beheer vereniging kunnen zijn als we een nieuw kaartje maken om de planning in te zien
             comp_url = reverse('Competitie:overzicht', kwargs={'comp_pk_of_seizoen': comp.maak_seizoen_url()})
         else:
             comp_url = reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk})
@@ -363,7 +363,7 @@ class RegioClusterPlanningView(UserPassesTestMixin, TemplateView):
         comp = deelcomp.competitie
 
         if self.rol_nu == Rol.ROL_HWL:
-            # TODO: deze terug verwijzing klopt niet helemaal meer. Zou Beheer Vereniging kunnen zijn als we een nieuw kaartje maken om de planning in te zien
+            # TODO: deze terug verwijzing klopt niet helemaal meer. Zou Beheer vereniging kunnen zijn als we een nieuw kaartje maken om de planning in te zien
             comp_url = reverse('Competitie:overzicht', kwargs={'comp_pk_of_seizoen': comp.maak_seizoen_url()})
         else:
             comp_url = reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk})
@@ -593,7 +593,7 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
             context['readonly'] = True
 
         if self.rol_nu == Rol.ROL_HWL:
-            # TODO: deze terug verwijzing klopt niet helemaal meer. Zou Beheer Vereniging kunnen zijn als we een nieuw kaartje maken om de planning in te zien
+            # TODO: deze terug verwijzing klopt niet helemaal meer. Zou Beheer vereniging kunnen zijn als we een nieuw kaartje maken om de planning in te zien
             comp_url = reverse('Competitie:overzicht', kwargs={'comp_pk_of_seizoen': comp.maak_seizoen_url()})
         else:
             comp_url = reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk})
@@ -795,7 +795,7 @@ class RegioRondePlanningMethode1View(UserPassesTestMixin, TemplateView):
         comp = ronde.regiocompetitie.competitie
 
         if self.rol_nu == Rol.ROL_HWL:
-            # TODO: deze terug verwijzing klopt niet helemaal meer. Zou Beheer Vereniging kunnen zijn als we een nieuw kaartje maken om de planning in te zien
+            # TODO: deze terug verwijzing klopt niet helemaal meer. Zou Beheer vereniging kunnen zijn als we een nieuw kaartje maken om de planning in te zien
             comp_url = reverse('Competitie:overzicht', kwargs={'comp_pk_of_seizoen': comp.maak_seizoen_url()})
         else:
             comp_url = reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk})

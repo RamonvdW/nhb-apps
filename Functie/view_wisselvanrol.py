@@ -42,10 +42,12 @@ def functie_volgorde(functie: Functie) -> int:
         volgorde = functie.regio.regio_nr             # 101-116
     elif functie.rol == "SEC":
         volgorde = functie.vereniging.ver_nr          # 1000-9999
-    elif functie.rol == "HWL":
+    elif functie.rol == "LA":
         volgorde = functie.vereniging.ver_nr + 10000  # 11000-19999
-    elif functie.rol == "WL":
+    elif functie.rol == "HWL":
         volgorde = functie.vereniging.ver_nr + 20000  # 21000-29999
+    elif functie.rol == "WL":
+        volgorde = functie.vereniging.ver_nr + 30000  # 31000-39999
     elif functie.rol == "SUP":
         volgorde = 50000                              # 50000
     else:  # pragma: no cover
@@ -179,7 +181,7 @@ class WisselVanRolView(UserPassesTestMixin, TemplateView):
 
             url = reverse('Functie:activeer-functie', kwargs={'functie_pk': functie.pk})
 
-            if rol in (Rol.ROL_SEC, Rol.ROL_HWL, Rol.ROL_WL):
+            if rol in (Rol.ROL_SEC, Rol.ROL_HWL, Rol.ROL_WL, Rol.ROL_LA):
                 # voeg de beschrijving van de vereniging toe
                 volgorde = functie_volgorde(functie)
 

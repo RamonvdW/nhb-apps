@@ -391,7 +391,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
 
         if self.rol_nu == Rol.ROL_HWL:
             context['kruimels'] = (
-                (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
+                (reverse('Vereniging:overzicht'), 'Beheer vereniging'),
                 (reverse('Wedstrijden:vereniging'), 'Wedstrijdkalender'),
                 (None, 'Wijzig wedstrijd')
             )

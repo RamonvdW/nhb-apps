@@ -116,6 +116,7 @@ class E2EHelpers(MyTestAsserts, MyMgmtCommandHelper, TestCase):
 
     WISSEL_VAN_ROL_EXPECTED_URL = {
         'SEC': '/vereniging/',
+        'LA': '/vereniging/',
         'HWL': '/vereniging/',
         'WL':  '/vereniging/',
         'BKO': '/bondscompetities/##',          # startswith = ##

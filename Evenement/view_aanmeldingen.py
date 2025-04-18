@@ -142,7 +142,7 @@ class EvenementAanmeldingenView(UserPassesTestMixin, TemplateView):
                                               kwargs={'evenement_pk': evenement.pk})
 
         context['kruimels'] = (
-            (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
+            (reverse('Vereniging:overzicht'), 'Beheer vereniging'),
             (reverse('Evenement:vereniging'), 'Evenementen'),
             (None, 'Aanmeldingen'),
         )
@@ -360,7 +360,7 @@ class EvenementDetailsAanmeldingView(UserPassesTestMixin, TemplateView):
                                    kwargs={'evenement_pk': inschrijving.evenement.pk})
 
         context['kruimels'] = (
-            (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
+            (reverse('Vereniging:overzicht'), 'Beheer vereniging'),
             (reverse('Evenement:vereniging'), 'Evenementen'),
             (url_aanmeldingen, 'Aanmeldingen'),
             (None, 'Details aanmelding')
@@ -433,7 +433,7 @@ class EvenementDetailsAfmeldingView(UserPassesTestMixin, TemplateView):
                                    kwargs={'evenement_pk': afmelding.evenement.pk})
 
         context['kruimels'] = (
-            (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
+            (reverse('Vereniging:overzicht'), 'Beheer vereniging'),
             (reverse('Evenement:vereniging'), 'Evenementen'),
             (url_aanmeldingen, 'Aanmeldingen'),
             (None, 'Details afmelding')

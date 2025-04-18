@@ -103,7 +103,7 @@ class OverboekingOntvangenView(UserPassesTestMixin, TemplateView):
             )
         else:
             context['kruimels'] = (
-                (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
+                (reverse('Vereniging:overzicht'), 'Beheer vereniging'),
                 (reverse('Wedstrijden:vereniging'), 'Wedstrijdkalender'),
                 (None, 'Overboekingen'),
             )
@@ -185,7 +185,7 @@ class OverboekingOntvangenView(UserPassesTestMixin, TemplateView):
             )
         else:
             context['kruimels'] = (
-                (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
+                (reverse('Vereniging:overzicht'), 'Beheer vereniging'),
                 (reverse('Wedstrijden:vereniging'), 'Wedstrijdkalender'),
                 (None, 'Overboekingen'),
             )

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -30,7 +30,7 @@ def rol_mag_wisselen(request):
 
 
 def rol_zet_mag_wisselen_voor_account(account):
-    """ Deze functie geeft een nieuwe beheerder direct toegang tot Wissel van Rol.
+    """ Deze functie geeft een nieuwe beheerder direct toegang tot Wissel van rol.
 
         Aangezien dit om performance redenen onthouden wordt in de sessie van de gebruiker,
         moeten we op zoek naar alle sessie(s) en daar een aanpassing in doen.

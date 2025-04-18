@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2024 Ramon van der Winkel.
+#  Copyright (c) 2022-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -55,7 +55,7 @@ class BetalingInstellingenView(UserPassesTestMixin, TemplateView):
         context['url_opslaan'] = reverse('Betaal:vereniging-instellingen')
 
         context['kruimels'] = (
-            (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
+            (reverse('Vereniging:overzicht'), 'Beheer vereniging'),
             (reverse('Wedstrijden:vereniging'), 'Wedstrijdkalender'),
             (None, 'Instellingen'),
         )

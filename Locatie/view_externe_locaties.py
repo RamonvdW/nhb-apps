@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -80,7 +80,7 @@ class ExterneLocatiesView(UserPassesTestMixin, TemplateView):
 
         if self.rol_nu in (Rol.ROL_HWL, Rol.ROL_WL, Rol.ROL_SEC):
             context['kruimels'] = (
-                (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
+                (reverse('Vereniging:overzicht'), 'Beheer vereniging'),
                 (None, 'Locaties')
             )
         else:
@@ -189,7 +189,7 @@ class ExterneLocatieDetailsView(TemplateView):
                                        kwargs={'ver_nr': ver.ver_nr})
 
         context['kruimels'] = (
-            (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
+            (reverse('Vereniging:overzicht'), 'Beheer vereniging'),
             (reverse('Locatie:externe-locaties', kwargs={'ver_nr': ver.ver_nr}), 'Locaties'),
             (None, 'Locatie details')
         )

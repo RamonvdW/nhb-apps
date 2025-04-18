@@ -89,7 +89,7 @@
         </div>
     </div>
 
-    <p class="center">Noteer: de secretaris en bijbehorend e-mailadres worden overgenomen uit Onze Relaties en kunnen hier niet aangepast worden.</p>
+    <p class="center">Noteer: de secretaris met bijbehorend e-mailadres en de ledenadministrator(en) worden overgenomen uit Onze Relaties en kunnen hier niet aangepast worden.</p>
 
     {% include 'feedback/sidebar.dtl' with op_pagina="functie-lijst-beheerders-vereniging" %}
 

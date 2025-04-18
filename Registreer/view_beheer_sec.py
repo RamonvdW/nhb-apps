@@ -94,7 +94,7 @@ class GastAccountsView(UserPassesTestMixin, TemplateView):
         context['count_gasten'] = len(gasten)
 
         context['kruimels'] = (
-            (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
+            (reverse('Vereniging:overzicht'), 'Beheer vereniging'),
             (None, "Gast accounts")
         )
 
@@ -339,7 +339,7 @@ class GastAccountDetailsView(UserPassesTestMixin, TemplateView):
             gast.url_ophef = reverse('Registreer:opheffen')
 
         context['kruimels'] = (
-            (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
+            (reverse('Vereniging:overzicht'), 'Beheer vereniging'),
             (reverse('Registreer:beheer-gast-accounts'), "Gast accounts"),
             (None, "Gast account details")
         )

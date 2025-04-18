@@ -26,7 +26,7 @@ import datetime
 
 class TestFunctieWisselVanRol(E2EHelpers, TestCase):
 
-    """ tests voor de Functie applicatie, module Wissel van Rol """
+    """ tests voor de Functie applicatie, module Wissel van rol """
 
     test_after = ('Functie.tests.test_rol',)
 
@@ -73,6 +73,10 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.functie_wl = maak_functie("WL test", "WL")
         self.functie_wl.vereniging = ver
         self.functie_wl.save()
+
+        self.functie_la = maak_functie("LA test", "LA")
+        self.functie_la.vereniging = ver
+        self.functie_la.save()
 
         self.functie_cs = maak_functie("CS test", "CS")
         self.functie_cs.save()
@@ -381,6 +385,24 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.assertNotIn(self.url_activeer_functie % self.functie_rcl.pk, urls)
         self.assertIn(self.url_activeer_functie % self.functie_sec.pk, urls)
         self.assertIn(self.url_activeer_functie % self.functie_hwl.pk, urls)
+        self.assertIn(self.url_activeer_rol % 'sporter', urls)
+
+    def test_la(self):
+        self.functie_la.accounts.add(self.account_normaal)
+
+        self.e2e_account_accepteert_vhpg(self.account_normaal)
+        self.e2e_login_and_pass_otp(self.account_normaal)
+        self.e2e_wissel_naar_functie(self.functie_la)
+        self.e2e_check_rol('LA')
+
+        resp = self.client.get(self.url_wissel_van_rol)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('functie/wissel-van-rol.dtl', 'plein/site_layout.dtl'))
+        self.assertContains(resp, "Sporter")
+        urls = self._get_wissel_urls(resp)
+
+        self.assertIn(self.url_activeer_functie % self.functie_la.pk, urls)
         self.assertIn(self.url_activeer_rol % 'sporter', urls)
 
     def test_hwl(self):

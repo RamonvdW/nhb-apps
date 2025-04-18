@@ -6,11 +6,13 @@
 
 from django.conf import settings
 from django.urls import reverse
+from django.http import HttpResponseRedirect
+from django.utils import timezone
 from django.shortcuts import render
 from django.views.generic import View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Functie.definities import Rol
-from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving
+from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving, rol_get_huidige
 from Instaptoets.models import Instaptoets
 from Opleiding.definities import OPLEIDING_STATUS_TO_STR
 from Opleiding.models import Opleiding, OpleidingInschrijving
@@ -63,6 +65,7 @@ class ManagerOpleidingenView(UserPassesTestMixin, View):
         context['url_gezakt'] = reverse('Instaptoets:gezakt')
         context['url_niet_ingeschreven'] = reverse('Opleiding:niet-ingeschreven')
         context['url_aanpassingen'] = reverse('Opleiding:aanpassingen')
+        context['url_toevoegen'] = reverse('Opleiding:toevoegen')
 
         context['url_voorwaarden'] = settings.VERKOOPVOORWAARDEN_OPLEIDINGEN_URL
 
@@ -71,6 +74,30 @@ class ManagerOpleidingenView(UserPassesTestMixin, View):
         )
 
         return render(request, self.template_name, context)
+
+
+class OpleidingToevoegenView(UserPassesTestMixin, View):
+
+    """ View deze view kan de manager een nieuwe opleiding aanmaken """
+
+    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        rol_nu = rol_get_huidige(self.request)
+        return rol_nu == Rol.ROL_MO
+
+    def post(self, request, *args, **kwargs):
+        now = timezone.now()
+        opleiding = Opleiding(
+                        laten_zien=False,
+                        periode_begin=now,
+                        periode_einde=now)
+        opleiding.save()
+
+        url = reverse('Opleiding:manager')
+        return HttpResponseRedirect(url)
 
 
 class NietIngeschrevenView(UserPassesTestMixin, View):
