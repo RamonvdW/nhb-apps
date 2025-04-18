@@ -544,9 +544,9 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('functie/lijst-beheerders-vereniging.dtl', 'plein/site_layout.dtl'))
         urls = self.extract_all_urls(resp, skip_menu=True)
-        # verwachting: 2x koppelen beheerders, 1x wijzig email
+        # verwachting: 1x koppelen beheerders, 1x wijzig email
         # print('SEC urls: %s' % repr(urls))
-        self.assertEqual(len(urls), 3)
+        self.assertEqual(len(urls), 2)
 
         # poog een lid te koppelen aan de rol SEC
         url = self.url_wijzig % self.functie_sec.pk

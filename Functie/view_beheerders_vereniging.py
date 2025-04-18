@@ -54,12 +54,10 @@ class BeheerdersVerenigingView(UserPassesTestMixin, ListView):
 
             mag_koppelen = False
             mag_email_wijzigen = False
-            if rol_nu == Rol.ROL_SEC and obj.rol in ('SEC', 'HWL'):
-                # SEC mag andere SEC and HWL koppelen
+            if rol_nu == Rol.ROL_SEC and obj.rol == 'HWL':
+                # SEC mag HWL koppelen
                 mag_koppelen = True
-                if obj.rol != 'SEC':
-                    # email voor secretaris komt uit Onze Relaties
-                    mag_email_wijzigen = True
+                mag_email_wijzigen = True
 
             elif rol_nu == Rol.ROL_HWL and obj.rol in ('HWL', 'WL'):
                 # HWL mag andere HWL en WL koppelen
