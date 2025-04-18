@@ -958,6 +958,7 @@ class Command(BaseCommand):
     def _import_members(self, data):
         """ Importeert data van alle leden """
 
+        # check alleen het eerste record
         if self._check_keys(data[0].keys(), EXPECTED_MEMBER_KEYS, OPTIONAL_MEMBER_KEYS, "member"):
             return
 

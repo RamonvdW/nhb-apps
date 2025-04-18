@@ -25,7 +25,7 @@ class TestOverigActiviteit(E2EHelpers, TestCase):
 
     url_activiteit = '/overig/activiteit/'
     url_loskoppelen = '/overig/otp-loskoppelen/'
-    url_bondspas = '/sporter/bondspas/toon/van-lid/%s/'     # lid nr
+    url_bondspas = '/bondspas/toon/van-lid/%s/'     # lid nr
 
     testdata = None
     huidige_jaar = 2020

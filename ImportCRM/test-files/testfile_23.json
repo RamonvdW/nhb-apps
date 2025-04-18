@@ -30,7 +30,8 @@
      "longitude": null,
      "coc_number": null,
      "iban": "",
-     "bic": ""
+     "bic": "",
+     "member_admins": []
     }
   ],
   "members": [
