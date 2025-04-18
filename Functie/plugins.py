@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import reverse
-from Account.plugin_manager import account_add_plugin_post_login, account_registreer_notify_otp_reset
+from Account.plugin_manager import account_add_plugin_post_login, account_add_plugin_otp_was_reset
 from Functie.definities import Rol
 from Functie.rol.bepaal import rol_eval_rechten_simpel
 from Functie.rol.beschrijving import rol_zet_beschrijving
@@ -43,7 +43,7 @@ def functie_post_login_plugin(request, account):
     return None
 
 
-def functie_notify_otp_reset(request):
+def functie_post_otp_reset(request):
     # deze functie wordt aangeroepen als de OTP herhaald moet worden
     # hier resetten we de actieve rol, zodat de beheerder daar geen gebruik meer van mag maken
 
@@ -55,6 +55,6 @@ def functie_notify_otp_reset(request):
 
 # registreer de plugin
 account_add_plugin_post_login(20, functie_post_login_plugin)
-account_registreer_notify_otp_reset(functie_notify_otp_reset)
+account_add_plugin_otp_was_reset(functie_post_otp_reset)
 
 # end of file

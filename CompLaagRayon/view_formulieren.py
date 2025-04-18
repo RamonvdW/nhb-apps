@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2024 Ramon van der Winkel.
+#  Copyright (c) 2020-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -242,7 +242,7 @@ class DownloadRkFormulierView(UserPassesTestMixin, TemplateView):
                                                         kwargs={'match_pk': match.pk})
 
         context['kruimels'] = (
-            (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
+            (reverse('Vereniging:overzicht'), 'Beheer vereniging'),
             (reverse('CompScores:wedstrijden'), 'Competitie wedstrijden'),
             (None, 'RK programma')
         )

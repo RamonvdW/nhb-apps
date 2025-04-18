@@ -83,7 +83,7 @@ class ActiveerRolView(UserPassesTestMixin, View):
                 functie = Functie.objects.get(rol='HWL',
                                               vereniging__ver_nr=ver_nr)
             except (ValueError, TypeError, Functie.DoesNotExist):
-                # in plaats van een foutmelding, stuur door naar Wissel van Rol pagina
+                # in plaats van een foutmelding, stuur door naar Wissel van rol pagina
                 # raise Http404('Slechte parameter (vereniging)')
                 return redirect('Functie:wissel-van-rol')
 
@@ -103,13 +103,13 @@ class ActiveerRolView(UserPassesTestMixin, View):
         eval_open_taken(self.request, forceer=True)
 
         # stuur een aantal rollen door naar een functionele pagina
-        # de rest blijft in Wissel van Rol
+        # de rest blijft in Wissel van rol
         rol_nu, functie_nu = rol_get_huidige_functie(request)
 
         if rol_nu in (Rol.ROL_SPORTER, Rol.ROL_MLA):
             return redirect('Plein:plein')
 
-        if rol_nu in (Rol.ROL_SEC, Rol.ROL_HWL, Rol.ROL_WL):
+        if rol_nu in (Rol.ROL_SEC, Rol.ROL_LA, Rol.ROL_HWL, Rol.ROL_WL):
             return redirect('Vereniging:overzicht')
 
         if rol_nu in (Rol.ROL_BKO, Rol.ROL_RKO, Rol.ROL_RCL):

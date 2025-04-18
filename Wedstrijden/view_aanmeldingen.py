@@ -20,8 +20,10 @@ from Functie.definities import Rol
 from Functie.rol import rol_get_huidige, rol_get_huidige_functie
 from Sporter.models import SporterVoorkeuren, get_sporter
 from Sporter.operations import get_sporter_voorkeuren
-from Wedstrijden.definities import (WEDSTRIJD_INSCHRIJVING_STATUS_TO_SHORT_STR, WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD,
-                                    WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_MANDJE, WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF,
+from Wedstrijden.definities import (WEDSTRIJD_INSCHRIJVING_STATUS_TO_SHORT_STR,
+                                    WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD,
+                                    WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_MANDJE,
+                                    WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF,
                                     WEDSTRIJD_INSCHRIJVING_STATUS_VERWIJDERD,
                                     KWALIFICATIE_CHECK2STR, KWALIFICATIE_CHECK_AFGEKEURD)
 from Wedstrijden.models import Wedstrijd, WedstrijdInschrijving, Kwalificatiescore
@@ -178,7 +180,8 @@ class WedstrijdAanmeldingenView(UserPassesTestMixin, TemplateView):
             sporterboog = aanmelding.sporterboog
             sporter = sporterboog.sporter
 
-            if aanmelding.status not in (WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD, WEDSTRIJD_INSCHRIJVING_STATUS_VERWIJDERD):
+            if aanmelding.status not in (WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD,
+                                         WEDSTRIJD_INSCHRIJVING_STATUS_VERWIJDERD):
                 aantal_aanmeldingen += 1
                 aanmelding.volg_nr = aantal_aanmeldingen
                 aanmelding.reserveringsnummer = aanmelding.pk + settings.TICKET_NUMMER_START__WEDSTRIJD
@@ -221,7 +224,7 @@ class WedstrijdAanmeldingenView(UserPassesTestMixin, TemplateView):
 
         if self.rol_nu in (Rol.ROL_HWL, Rol.ROL_SEC):
             context['kruimels'] = (
-                (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
+                (reverse('Vereniging:overzicht'), 'Beheer vereniging'),
                 (reverse('Wedstrijden:vereniging'), 'Wedstrijdkalender'),
                 (None, 'Aanmeldingen'),
             )
@@ -280,7 +283,8 @@ class DownloadAanmeldingenBestandTSV(UserPassesTestMixin, View):
         aanmeldingen = (WedstrijdInschrijving
                         .objects
                         .filter(wedstrijd=wedstrijd)
-                        .exclude(status__in=(WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD, WEDSTRIJD_INSCHRIJVING_STATUS_VERWIJDERD))
+                        .exclude(status__in=(WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD,
+                                             WEDSTRIJD_INSCHRIJVING_STATUS_VERWIJDERD))
                         .select_related('sessie',
                                         'wedstrijdklasse',
                                         'sporterboog',
@@ -388,7 +392,8 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
         aanmeldingen = (WedstrijdInschrijving
                         .objects
                         .filter(wedstrijd=wedstrijd)
-                        .exclude(status__in=(WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD, WEDSTRIJD_INSCHRIJVING_STATUS_VERWIJDERD))
+                        .exclude(status__in=(WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD,
+                                             WEDSTRIJD_INSCHRIJVING_STATUS_VERWIJDERD))
                         .select_related('sessie',
                                         'wedstrijdklasse',
                                         'sporterboog',
@@ -617,7 +622,8 @@ class WedstrijdAanmeldingDetailsView(UserPassesTestMixin, TemplateView):
 
         inschrijving.bestelnummer_str = get_inschrijving_mh_bestel_nr(inschrijving)
 
-        if inschrijving.status not in (WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD, WEDSTRIJD_INSCHRIJVING_STATUS_VERWIJDERD):
+        if inschrijving.status not in (WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD,
+                                       WEDSTRIJD_INSCHRIJVING_STATUS_VERWIJDERD):
             inschrijving.url_afmelden = reverse('Wedstrijden:afmelden',
                                                 kwargs={'inschrijving_pk': inschrijving.pk})
 
@@ -653,7 +659,7 @@ class WedstrijdAanmeldingDetailsView(UserPassesTestMixin, TemplateView):
                 url_aanmeldingen = reverse('Wedstrijden:vereniging')
 
             context['kruimels'] = (
-                (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
+                (reverse('Vereniging:overzicht'), 'Beheer vereniging'),
                 (reverse('Wedstrijden:vereniging'), 'Wedstrijdkalender'),
                 (url_aanmeldingen, 'Aanmeldingen'),
                 (None, 'Details aanmelding')

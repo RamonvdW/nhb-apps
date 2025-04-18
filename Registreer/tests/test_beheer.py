@@ -23,6 +23,7 @@ from Vereniging.models import Vereniging
 from Webwinkel.models import WebwinkelProduct, WebwinkelKeuze
 from Wedstrijden.definities import WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF
 from Wedstrijden.models import WedstrijdInschrijving, Wedstrijd, WedstrijdSessie
+from decimal import Decimal
 import datetime
 
 

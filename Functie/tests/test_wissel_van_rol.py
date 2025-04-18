@@ -26,7 +26,7 @@ import datetime
 
 class TestFunctieWisselVanRol(E2EHelpers, TestCase):
 
-    """ tests voor de Functie applicatie, module Wissel van Rol """
+    """ tests voor de Functie applicatie, module Wissel van rol """
 
     test_after = ('Functie.tests.test_rol',)
 

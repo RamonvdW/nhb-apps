@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2024 Ramon van der Winkel.
+#  Copyright (c) 2021-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -208,7 +208,7 @@ class TeamsRegioView(UserPassesTestMixin, TemplateView):
         url_overzicht = reverse('Vereniging:overzicht')
         anker = '#competitie_%s' % deelcomp.competitie.pk
         context['kruimels'] = (
-            (url_overzicht, 'Beheer Vereniging'),
+            (url_overzicht, 'Beheer vereniging'),
             (url_overzicht + anker, deelcomp.competitie.beschrijving.replace(' competitie', '')),
             (None, 'Teams Regio')
         )
@@ -377,7 +377,7 @@ class WijzigRegioTeamsView(UserPassesTestMixin, TemplateView):
         comp = deelcomp.competitie
         if self.rol_nu == Rol.ROL_HWL:
             context['kruimels'] = (
-                (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
+                (reverse('Vereniging:overzicht'), 'Beheer vereniging'),
                 (reverse('CompLaagRegio:teams-regio', kwargs={'deelcomp_pk': deelcomp.pk}),
                     'Teams Regio %s' % comp.beschrijving.replace(' competitie', '')),
                 (None, 'Wijzig team')
@@ -552,7 +552,7 @@ class WijzigTeamAGView(UserPassesTestMixin, TemplateView):
 
         if self.rol_nu == Rol.ROL_HWL:
             context['kruimels'] = (
-                (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
+                (reverse('Vereniging:overzicht'), 'Beheer vereniging'),
                 (reverse('CompLaagRegio:teams-regio', kwargs={'deelcomp_pk': deelnemer.regiocompetitie.pk}),
                     'Teams Regio %s' % comp.beschrijving.replace(' competitie', '')),
                 (None, 'Wijzig AG')
@@ -756,7 +756,7 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
             # for
 
         context['kruimels'] = (
-            (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
+            (reverse('Vereniging:overzicht'), 'Beheer vereniging'),
             (reverse('CompLaagRegio:teams-regio', kwargs={'deelcomp_pk': deelcomp.pk}),
                 'Teams Regio %s' % comp.beschrijving.replace(' competitie', '')),
             (None, 'Koppel teamleden')
@@ -988,7 +988,7 @@ class TeamsRegioInvallersView(UserPassesTestMixin, TemplateView):
         url_overzicht = reverse('Vereniging:overzicht')
         anker = '#competitie_%s' % comp.pk
         context['kruimels'] = (
-            (url_overzicht, 'Beheer Vereniging'),
+            (url_overzicht, 'Beheer vereniging'),
             (url_overzicht + anker, comp.beschrijving.replace(' competitie', '')),
             (None, 'Team Invallers')
         )
@@ -1188,7 +1188,7 @@ class TeamsRegioInvallersKoppelLedenView(UserPassesTestMixin, TemplateView):
         url_overzicht = reverse('Vereniging:overzicht')
         anker = '#competitie_%s' % comp.pk
         context['kruimels'] = (
-            (url_overzicht, 'Beheer Vereniging'),
+            (url_overzicht, 'Beheer vereniging'),
             (url_overzicht + anker, comp.beschrijving.replace(' competitie', '')),
             (reverse('CompLaagRegio:teams-regio-invallers', kwargs={'deelcomp_pk': deelcomp.pk}), 'Team Invallers'),
             (None, 'Invallers Koppelen')

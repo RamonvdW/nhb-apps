@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -37,8 +37,8 @@ class LedenLijstView(UserPassesTestMixin, ListView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        self.mag_wijzigen = self.rol_nu in (Rol.ROL_SEC, Rol.ROL_HWL)
-        return self.functie_nu and self.functie_nu.rol in ('SEC', 'HWL', 'WL')
+        self.mag_wijzigen = self.rol_nu in (Rol.ROL_SEC, Rol.ROL_LA, Rol.ROL_HWL)
+        return self.functie_nu and self.functie_nu.rol in ('SEC', 'HWL', 'WL', 'LA')
 
     def get_queryset(self):
         """ called by the template system to get the queryset or list of objects for the template """
@@ -97,6 +97,7 @@ class LedenLijstView(UserPassesTestMixin, ListView):
                 prev_lkl = obj.leeftijdsklasse
                 prev_wedstrijdleeftijd = wedstrijdleeftijd
 
+            obj.url_bondspas = reverse('Bondspas:vereniging-bondspas-van', kwargs={'lid_nr': obj.lid_nr})
             objs.append(obj)
         # for
 
@@ -144,6 +145,7 @@ class LedenLijstView(UserPassesTestMixin, ListView):
             if not obj.is_actief_lid:
                 obj.leeftijd = huidige_jaar - obj.geboorte_datum.year
 
+            obj.url_bondspas = reverse('Bondspas:vereniging-bondspas-van', kwargs={'lid_nr': obj.lid_nr})
             objs.append(obj)
         # for
 
@@ -190,8 +192,11 @@ class LedenLijstView(UserPassesTestMixin, ListView):
         context['wedstrijdklasse_jaar'] = self.huidige_jaar
         context['toon_wijzig_kolom'] = self.rol_nu in (Rol.ROL_SEC, Rol.ROL_HWL)
 
+        if self.rol_nu in (Rol.ROL_SEC, Rol.ROL_LA):
+            context['toon_bondspas'] = True
+
         context['kruimels'] = (
-            (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
+            (reverse('Vereniging:overzicht'), 'Beheer vereniging'),
             (None, self.kruimel)
         )
 

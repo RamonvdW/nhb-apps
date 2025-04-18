@@ -16,6 +16,7 @@ class Rol(enum.IntEnum):
     ROL_HWL = 6         # Hoofdwedstrijdleider van een vereniging, alle competities
     ROL_WL = 7          # Wedstrijdleider van een vereniging, alle competities
     ROL_SEC = 10        # Secretaris van een vereniging
+    ROL_LA = 11         # Leden-administrator van een vereniging
     ROL_SPORTER = 20    # Individuele sporter en (gast-)lid
     ROL_MWZ = 30        # Manager Wedstrijdzaken
     ROL_MO = 40         # Manager Opleidingen
@@ -41,6 +42,7 @@ url2rol = {
     'HWL': Rol.ROL_HWL,
     'WL': Rol.ROL_WL,
     'SEC': Rol.ROL_SEC,
+    'LA': Rol.ROL_LA,
     'MO': Rol.ROL_MO,
     'MWZ': Rol.ROL_MWZ,
     'MWW': Rol.ROL_MWW,
@@ -63,6 +65,7 @@ functie_rol_str2rol = {
     "HWL": Rol.ROL_HWL,
     "WL": Rol.ROL_WL,
     "SEC": Rol.ROL_SEC,
+    "LA": Rol.ROL_LA,
     "MO": Rol.ROL_MO,
     "MWZ": Rol.ROL_MWZ,
     "MWW": Rol.ROL_MWW,

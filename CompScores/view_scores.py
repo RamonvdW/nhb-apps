@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -324,7 +324,7 @@ class WedstrijdUitslagInvoerenView(UserPassesTestMixin, TemplateView):
         else:
             context['url_terug'] = reverse('CompScores:wedstrijden-scores')
             context['kruimels'] = (
-                (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
+                (reverse('Vereniging:overzicht'), 'Beheer vereniging'),
                 (reverse('CompScores:wedstrijden-scores'), 'Scores'),
                 (None, self.kruimel)
             )
@@ -689,7 +689,7 @@ class WedstrijdUitslagBekijkenView(UserPassesTestMixin, TemplateView):
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        # pagina is alleen bereikbaar vanuit Beheer Vereniging
+        # pagina is alleen bereikbaar vanuit Beheer vereniging
         rol_nu = rol_get_huidige(self.request)
         return rol_nu in (Rol.ROL_HWL, Rol.ROL_WL)
 
@@ -747,7 +747,7 @@ class WedstrijdUitslagBekijkenView(UserPassesTestMixin, TemplateView):
         context['aantal_regels'] = 2 + len(scores)
 
         context['kruimels'] = (
-            (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
+            (reverse('Vereniging:overzicht'), 'Beheer vereniging'),
             (reverse('CompScores:wedstrijden'), 'Competitie wedstrijden'),
             (None, 'Uitslag'),
         )

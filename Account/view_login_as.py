@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -46,7 +46,7 @@ set_tijdelijke_codes_receiver(RECEIVER_ACCOUNT_WISSEL, receiver_account_wissel)
 
 class LoginAsZoekView(UserPassesTestMixin, ListView):
 
-    """ Deze view laat Wissel van Rol toe naar een gekozen gebruiker
+    """ Deze view laat Wissel van rol toe naar een gekozen gebruiker
         zodat de website 'door de ogen van' deze gebruiker bekeken kan worden
     """
 

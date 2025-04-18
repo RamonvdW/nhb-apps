@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2024 Ramon van der Winkel.
+#  Copyright (c) 2020-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -17,6 +17,7 @@ from Wedstrijden.definities import (WEDSTRIJD_STATUS_CHOICES, WEDSTRIJD_STATUS_O
                                     WEDSTRIJD_DISCIPLINES, WEDSTRIJD_DISCIPLINE_OUTDOOR,
                                     WEDSTRIJD_WA_STATUS, WEDSTRIJD_WA_STATUS_B,
                                     WEDSTRIJD_KORTING_SOORT_CHOICES, WEDSTRIJD_KORTING_VERENIGING,
+                                    WEDSTRIJD_KORTING_SPORTER, WEDSTRIJD_KORTING_COMBI,
                                     WEDSTRIJD_KORTING_SOORT_TO_STR,
                                     WEDSTRIJD_INSCHRIJVING_STATUS_CHOICES,
                                     WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_MANDJE,
@@ -65,7 +66,7 @@ class Wedstrijd(models.Model):
     """ Een wedstrijd voor op de wedstrijdkalender """
 
     # titel van de wedstrijd
-    titel = models.CharField(max_length=50, default='')
+    titel = models.CharField(max_length=75, default='')
 
     # status van deze wedstrijd: ontwerp --> goedgekeurd --> geannuleerd
     status = models.CharField(max_length=1, choices=WEDSTRIJD_STATUS_CHOICES, default=WEDSTRIJD_STATUS_ONTWERP)
@@ -214,7 +215,7 @@ class WedstrijdKorting(models.Model):
                                         null=True, blank=True,
                                         related_name='wedstrijd_korting_uitgever')
 
-    # hoeveel korting (0% .. 100%)
+    # hoeveel korting: 0..100 (procent)
     percentage = models.PositiveSmallIntegerField(default=100)
 
     # voor welke wedstrijden is deze geldig?
@@ -285,7 +286,9 @@ class WedstrijdInschrijving(models.Model):
         if len(titel) > 60:
             titel = titel[:58] + '..'
 
-        return "%s - %s" % (self.sporterboog.sporter.lid_nr, titel)
+        return "%s - %s - %s" % (self.sporterboog.sporter.lid_nr,
+                                 self.sporterboog.boogtype.beschrijving,
+                                 titel)
 
     class Meta:
         verbose_name = "Wedstrijd inschrijving"
@@ -329,5 +332,21 @@ class Kwalificatiescore(models.Model):
 
     objects = models.Manager()      # for the editor only
 
+
+def beschrijf_korting(korting) -> (str, list):
+    kort_str = ''
+    redenen = list()
+
+    if korting.soort == WEDSTRIJD_KORTING_SPORTER:
+        kort_str = "Persoonlijke korting: %d%%" % korting.percentage
+
+    elif korting.soort == WEDSTRIJD_KORTING_VERENIGING:
+        kort_str = "Verenigingskorting: %d%%" % korting.percentage
+
+    elif korting.soort == WEDSTRIJD_KORTING_COMBI:  # pragma: no branch
+        kort_str = "Combinatiekorting: %d%%" % korting.percentage
+        redenen = [wedstrijd.titel for wedstrijd in korting.voor_wedstrijden.order_by('datum_begin')]
+
+    return kort_str, redenen
 
 # end of file

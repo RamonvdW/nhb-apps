@@ -51,7 +51,7 @@ EXPECTED_REGIO_KEYS = ('rayon_number', 'region_number', 'name')
 EXPECTED_CLUB_KEYS = ('region_number', 'club_number', 'name', 'prefix', 'email', 'website',
                       'has_disabled_facilities', 'address', 'postal_code', 'location_name',
                       'phone_business', 'phone_private', 'phone_mobile', 'coc_number',
-                      'iso_abbr', 'latitude', 'longitude', 'secretaris', 'iban', 'bic')
+                      'iso_abbr', 'latitude', 'longitude', 'secretaris', 'iban', 'bic', 'member_admins')
 OPTIONAL_CLUB_KEYS = ('smoke_free_status',)
 EXPECTED_MEMBER_KEYS = ('club_number', 'member_number', 'name', 'prefix', 'first_name',
                         'initials', 'birthday', 'birthplace', 'email', 'gender', 'member_from', 'member_until',
@@ -411,6 +411,7 @@ class Command(BaseCommand):
          'latitude', 'longitude',
          'iban', 'bic',
          'secretaris': [{'member_number': int}]
+         'member_admins': [{'member_number': int, 'read_only': true/false}, ...]
         }
         """
 
@@ -694,10 +695,10 @@ class Command(BaseCommand):
 
             # maak de functies aan voor deze vereniging
             if obj:
-                # let op: in sync houden met migratie m0012_migrate_cwz_hwl
                 for rol, beschr in (('WL', 'Wedstrijdleider %s'),
                                     ('HWL', 'Hoofdwedstrijdleider %s'),
-                                    ('SEC', 'Secretaris vereniging %s')):
+                                    ('SEC', 'Secretaris vereniging %s'),
+                                    ('LA', 'Ledenadministratie %s')):
 
                     beschrijving = beschr % obj.ver_nr
                     functie = self._vind_functie(rol, beschrijving)
@@ -865,6 +866,84 @@ class Command(BaseCommand):
                         self.stdout.write('[WARNING] Vereniging %s (%s) heeft geen secretaris!' % (ver_nr, ver_naam))
                         self._count_warnings += 1
         # for
+
+    def _import_clubs_member_admin(self, data):
+        """ voor elke club, koppel de ledenadministrator(en) aan de LA-functie """
+
+        if self._check_keys(data[0].keys(), EXPECTED_CLUB_KEYS, OPTIONAL_CLUB_KEYS, "club"):
+            return
+
+        for club in data:
+            ver_nr = club['club_number']
+            try:
+                ver_nr = int(ver_nr)
+            except ValueError:
+                # is al eerder gerapporteerd
+                continue        # met de for
+
+            obj = self._vind_vereniging(ver_nr)
+            if not obj:
+                # zou niet moeten gebeuren
+                self.stderr.write('[ERROR] Kan vereniging %s niet terugvinden' % ver_nr)
+                self._count_errors += 1
+                continue
+
+            # zoek de LA functie op
+            functie_la = self._vind_functie('LA', 'Ledenadministratie %s' % ver_nr)
+            if not functie_la:
+                self.stderr.write('[ERROR] Kan functie LA niet vinden voor vereniging %s' % ver_nr)
+                self._count_errors += 1
+                continue
+
+            # zoek de secretaris op
+            secretaris = self._vind_sec(ver_nr)
+
+            admin_sporters = list()
+            for admin in club['member_admins']:
+                la_lid_nr = admin['member_number']
+                sporter = self._vind_sporter(la_lid_nr)
+                if not sporter:
+                    self.stderr.write('[ERROR] Kan member admin lid %s van vereniging %s niet vinden' % (
+                                            la_lid_nr, ver_nr))
+                    self._count_errors += 1
+                else:
+                    if sporter.bij_vereniging is None or sporter.bij_vereniging.ver_nr != ver_nr:
+                        self.stdout.write('[WARNING] Member admin lid %s is geen lid bij vereniging %s' % (
+                                            sporter.lid_nr, ver_nr))
+                        self._count_warnings += 1
+                    else:
+                        if secretaris and sporter in secretaris.sporters.all():
+                            # self.stdout.write('[WARNING] Member admin lid %s is also SEC %s; skipping' % (
+                            #                     la_lid_nr, ver_nr))
+                            pass        # silently ignore
+                        else:
+                            if sporter.account:
+                                admin_sporters.append(sporter)
+            # for
+
+            # rapporteer de wijzigingen
+            lid_nrs_oud = [account.username for account in functie_la.accounts.all()]
+            lid_nrs_new = [str(sporter.lid_nr) for sporter in admin_sporters]
+
+            if set(lid_nrs_oud) != set(lid_nrs_new):
+
+                str_oud = "+".join([str(lid_nr) for lid_nr in lid_nrs_oud])
+                if str_oud == '':
+                    str_oud = 'geen'
+                str_new = "+".join([str(lid_nr) for lid_nr in lid_nrs_new])
+                if str_new == '':
+                    str_new = 'geen'
+
+                self.stdout.write('[INFO] Vereniging %s member admins: %s --> %s' % (
+                                    ver_nr, str_oud, str_new))
+
+                self._count_wijzigingen += 1
+
+                # wijzigingen doorvoeren
+                if not self.dryrun:
+                    accounts = [sporter.account for sporter in admin_sporters]
+                    functie_la.accounts.set(accounts)
+        # for club
 
     @staticmethod
     def _corrigeer_tussenvoegsel(lid_nr, tussenvoegsel, achternaam):
@@ -1818,6 +1897,7 @@ class Command(BaseCommand):
         self._import_clubs(data['clubs'])
         self._import_members(data['members'])
         self._import_clubs_secretaris(data['clubs'])
+        self._import_clubs_member_admin(data['clubs'])
         self._import_locaties(data['clubs'])
 
         self.stdout.write('Import van CRM data is klaar')

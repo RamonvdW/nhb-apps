@@ -57,7 +57,7 @@ def mag_beheerder_wijzigen_of_403(request, functie):
             # verkeerde vereniging
             raise PermissionDenied('Verkeerde vereniging')
 
-        if functie.rol not in ('SEC', 'HWL'):
+        if functie.rol != 'HWL':
             # niet een rol die de SEC mag wijzigen
             raise PermissionDenied('Niet de beheerder')
 
@@ -253,10 +253,10 @@ class WijzigEmailView(UserPassesTestMixin, View):
         context['functie'] = functie
 
         if self.rol_nu in (Rol.ROL_SEC, Rol.ROL_HWL, Rol.ROL_WL):
-            # komt van Beheer Vereniging
+            # komt van Beheer vereniging
             context['terug_url'] = reverse('Functie:overzicht-vereniging')
             context['kruimels'] = (
-                (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
+                (reverse('Vereniging:overzicht'), 'Beheer vereniging'),
                 (reverse('Functie:overzicht-vereniging'), 'Beheerders'),
                 (None, 'Wijzig e-mail')
             )
@@ -520,7 +520,7 @@ class WijzigBeheerdersView(UserPassesTestMixin, ListView):
         context['form'] = self._form
 
         if self.rol_nu in (Rol.ROL_SEC, Rol.ROL_HWL):
-            # komt van Beheer Vereniging
+            # komt van Beheer vereniging
             context['is_vereniging_rol'] = True
 
             # Je kan hier op twee manieren komen:
@@ -528,7 +528,7 @@ class WijzigBeheerdersView(UserPassesTestMixin, ListView):
             # via Verenging, Beheerders (=Functie:overzicht-vereniging), Koppel beheerders
 
             context['kruimels'] = (
-                (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
+                (reverse('Vereniging:overzicht'), 'Beheer vereniging'),
                 (reverse('Functie:overzicht-vereniging'), 'Beheerders'),
                 (None, 'Wijzig beheerder')
             )

@@ -30,7 +30,7 @@ def rol_mag_wisselen(request):
 
 
 def rol_zet_mag_wisselen_voor_account(account):
-    """ Deze functie geeft een nieuwe beheerder direct toegang tot Wissel van Rol.
+    """ Deze functie geeft een nieuwe beheerder direct toegang tot Wissel van rol.
 
         Aangezien dit om performance redenen onthouden wordt in de sessie van de gebruiker,
         moeten we op zoek naar alle sessie(s) en daar een aanpassing in doen.

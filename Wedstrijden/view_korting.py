@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2024 Ramon van der Winkel.
+#  Copyright (c) 2021-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -87,7 +87,7 @@ class KortingenView(UserPassesTestMixin, TemplateView):
         context['url_nieuwe_korting'] = reverse('Wedstrijden:vereniging-korting-nieuw-kies')
 
         context['kruimels'] = (
-            (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
+            (reverse('Vereniging:overzicht'), 'Beheer vereniging'),
             (reverse('Wedstrijden:vereniging'), 'Wedstrijdkalender'),
             (None, 'Kortingen'),
         )
@@ -120,7 +120,7 @@ class KiesNieuweKortingView(UserPassesTestMixin, View):
         context['url_nieuwe_korting'] = reverse('Wedstrijden:vereniging-korting-nieuw-kies')
 
         context['kruimels'] = (
-            (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
+            (reverse('Vereniging:overzicht'), 'Beheer vereniging'),
             (reverse('Wedstrijden:vereniging'), 'Wedstrijdkalender'),
             (reverse('Wedstrijden:vereniging-kortingen'), 'Kortingen'),
             (None, 'Nieuwe aanmaken')
@@ -241,7 +241,7 @@ class WijzigKortingView(UserPassesTestMixin, View):
             context['url_verwijder'] = context['url_opslaan']
 
         context['kruimels'] = (
-            (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
+            (reverse('Vereniging:overzicht'), 'Beheer vereniging'),
             (reverse('Wedstrijden:vereniging'), 'Wedstrijdkalender'),
             (reverse('Wedstrijden:vereniging-kortingen'), 'Kortingen'),
             (None, 'Wijzig'),

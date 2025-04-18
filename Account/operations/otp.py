@@ -8,7 +8,7 @@ from django.conf import settings
 from django.utils import timezone
 from Account.models import Account, AccountSessions, get_account
 from Account.operations.session_vars import zet_sessionvar_if_changed
-from Account.plugin_manager import account_plugins_notify_otp_reset
+from Account.plugin_manager import account_plugins_otp_was_reset
 from Logboek.models import schrijf_in_logboek
 from Overig.helpers import get_safe_from_ip
 from Mailer.operations import mailer_queue_email, render_email_template
@@ -41,7 +41,7 @@ def otp_zet_controle_niet_gelukt(request):
                                           session_id=request.session.session_key)   # session_id = primary key
 
     # geef de OTP reset door
-    for notify in account_plugins_notify_otp_reset:
+    for notify in account_plugins_otp_was_reset:
         notify(request)
     # for
 

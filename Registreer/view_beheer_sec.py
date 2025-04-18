@@ -24,6 +24,7 @@ from Overig.helpers import get_safe_from_ip
 from Registreer.definities import REGISTRATIE_FASE_AFGEWEZEN
 from Registreer.models import GastRegistratie
 from Sporter.models import Sporter
+from Webwinkel.models import WebwinkelKeuze
 from Wedstrijden.definities import WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF, WEDSTRIJD_INSCHRIJVING_STATUS_TO_STR
 from Wedstrijden.models import WedstrijdInschrijving
 import logging
@@ -93,7 +94,7 @@ class GastAccountsView(UserPassesTestMixin, TemplateView):
         context['count_gasten'] = len(gasten)
 
         context['kruimels'] = (
-            (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
+            (reverse('Vereniging:overzicht'), 'Beheer vereniging'),
             (None, "Gast accounts")
         )
 
@@ -338,7 +339,7 @@ class GastAccountDetailsView(UserPassesTestMixin, TemplateView):
             gast.url_ophef = reverse('Registreer:opheffen')
 
         context['kruimels'] = (
-            (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
+            (reverse('Vereniging:overzicht'), 'Beheer vereniging'),
             (reverse('Registreer:beheer-gast-accounts'), "Gast accounts"),
             (None, "Gast account details")
         )
@@ -473,6 +474,9 @@ class BestellingOverzettenView(UserPassesTestMixin, View):
                         keuze.koper = self.account_new
                         keuze.save(update_fields=['koper'])
             # for
+
+            # TODO: nodig voor evenementen?
+            # niet nodig voor opleidingen
 
             bestelling.save(update_fields=['account'])
         # for
