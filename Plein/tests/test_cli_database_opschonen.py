@@ -24,6 +24,8 @@ from TijdelijkeCodes.models import save_tijdelijke_code
 from Vereniging.models import Vereniging
 import datetime
 
+DATABASE_OPSCHONEN_COMMAND = 'database_opschonen'
+
 
 class TestPleinCliDatabaseOpschonen(E2EHelpers, TestCase):
 
@@ -201,7 +203,7 @@ class TestPleinCliDatabaseOpschonen(E2EHelpers, TestCase):
 
     def test_alles(self):
         with self.assert_max_queries(235, modify_acceptable=True):
-            f1, f2 = self.run_management_command('database_opschonen')
+            f1, f2 = self.run_management_command(DATABASE_OPSCHONEN_COMMAND)
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
         self.assertTrue(f1.getvalue() == '')
@@ -220,7 +222,7 @@ class TestPleinCliDatabaseOpschonen(E2EHelpers, TestCase):
 
         # nog een keer aanroepen terwijl er niets meer te verwijderen valt
         with self.assert_max_queries(20):
-            f1, f2 = self.run_management_command('database_opschonen')
+            f1, f2 = self.run_management_command(DATABASE_OPSCHONEN_COMMAND)
         self.assertTrue(f1.getvalue() == '')
         self.assertTrue("Klaar" in f2.getvalue())
         # self.assertFalse("[INFO]" in f2.getvalue())

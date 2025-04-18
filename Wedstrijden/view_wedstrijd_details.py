@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2024 Ramon van der Winkel.
+#  Copyright (c) 2021-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -9,8 +9,10 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.http import urlencode
 from django.views.generic import TemplateView
+from Account.models import get_account
 from BasisTypen.definities import ORGANISATIE_WA, ORGANISATIE_IFAA
 from Kalender.view_maand import MAAND2URL
+from Sporter.operations import get_sporter
 from Wedstrijden.definities import (WEDSTRIJD_ORGANISATIE_TO_STR, WEDSTRIJD_BEGRENZING_TO_STR,
                                     WEDSTRIJD_WA_STATUS_TO_STR)
 from Wedstrijden.models import Wedstrijd, WedstrijdSessie
@@ -113,6 +115,12 @@ class WedstrijdDetailsView(TemplateView):
             context['hint_inloggen'] = not self.request.user.is_authenticated
 
         if context['kan_aanmelden']:
+            account = get_account(self.request)
+            sporter = get_sporter(account)
+            if not sporter:
+                context['kan_aanmelden'] = False
+
+        if context['kan_aanmelden']:
             context['menu_toon_mandje'] = True
 
             if context['is_voor_sluitingsdatum']:
@@ -130,6 +138,9 @@ class WedstrijdDetailsView(TemplateView):
                 context['toon_inschrijven'] = context['is_voor_sluitingsdatum']
             elif heeft_sessies:
                 context['toon_inschrijven'] = context['is_voor_sluitingsdatum']
+
+            if not context['kan_aanmelden']:
+                context['toon_inschrijven'] = False
 
         url_terug = reverse('Kalender:maand',
                             kwargs={'jaar': wedstrijd.datum_begin.year,

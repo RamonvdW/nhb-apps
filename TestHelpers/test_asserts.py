@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.conf import settings
-from django.http import UnreadablePostError
+from django.http import UnreadablePostError, HttpResponse
 from django.test import TestCase
 from Mailer.models import MailQueue
 from TestHelpers.template_status import consistent_email_templates, included_templates, validated_templates
@@ -43,25 +43,35 @@ class MyTestAsserts(TestCase):
             html = html[:pos] + '<!-- removed debug toolbar --></body></html>'
         return html
 
-    def get_useful_template_name(self, response):
-        lst = [tmpl.name
-               for tmpl in response.templates
-               if (tmpl.name not in included_templates
-                   and not tmpl.name.startswith('django/forms')
-                   and not tmpl.name.startswith('email_'))]
-        if len(lst) == 0:       # pragma: no cover
-            return 'no template!'
-        if len(lst) > 1:        # pragma: no cover
-            self.fail('Too many choices for template name: %s' % repr(lst))
-        return lst[0]
+    @staticmethod
+    def _get_template_names_used(resp: HttpResponse):
+        names = list()
+        if hasattr(resp, "templates"):      # pragma: no branch
+            names = [template.name
+                     for template in resp.templates]
+            # for
+        return names
 
-    def interpreteer_resp(self, resp):                 # pragma: no cover
-        long_msg = list()
-        long_msg.append("status code: %s" % resp.status_code)
-        long_msg.append(repr(resp))
+    def get_useful_template_name(self, resp: HttpResponse):
+        names = [name
+                 for name in self._get_template_names_used(resp)
+                 if (name not in included_templates
+                     and not name.startswith('django/forms')
+                     and not name.startswith('email_'))]
+        if len(names) == 0:       # pragma: no cover
+            return 'no template!'
+        if len(names) > 1:        # pragma: no cover
+            self.fail('Too many choices for template name: %s' % repr(names))
+        return names[0]
+
+    def interpreteer_resp(self, resp: HttpResponse):          # pragma: no cover
+        long_msg = [
+            "status code: %s" % resp.status_code,
+            repr(resp)
+        ]
 
         is_attachment = False
-        if resp.status_code == 302:
+        if resp.status_code == 302 and hasattr(resp, 'url'):
             msg = "redirect to url: %s" % resp.url
             long_msg.append(msg)
             return msg, long_msg
@@ -87,7 +97,8 @@ class MyTestAsserts(TestCase):
 
         is_404 = resp.status_code == 404
         if not is_404:
-            is_404 = any(['plein/fout_404.dtl' in templ.name for templ in resp.templates])
+            is_404 = any(['plein/fout_404.dtl' in name
+                          for name in self._get_template_names_used(resp)])
 
         if is_404:
             pos = content.find('<meta path="')
@@ -110,8 +121,8 @@ class MyTestAsserts(TestCase):
 
         if not is_attachment:
             long_msg.append('templates used:')
-            for templ in resp.templates:
-                long_msg.append('   %s' % repr(templ.name))
+            for name in self._get_template_names_used(resp):
+                long_msg.append('   %s' % repr(name))
             # for
 
         soup = BeautifulSoup(content, features="html.parser")
@@ -149,7 +160,8 @@ class MyTestAsserts(TestCase):
         print("\nresp:")
         print("\n".join(long_msg))
 
-    def extract_all_urls(self, resp, skip_menu=False, skip_smileys=True, skip_broodkruimels=True,
+    def extract_all_urls(self, resp: HttpResponse,
+                         skip_menu=False, skip_smileys=True, skip_broodkruimels=True,
                          skip_hash_links=True, report_dupes=True, skip_external=True):
         content = str(resp.content)
         content = self.remove_debug_toolbar(content)
@@ -551,18 +563,18 @@ class MyTestAsserts(TestCase):
                 #  onsubmit="submit_knop1.disabled=true; submit_knop2.disabled=true; return true;"
                 #  onsubmit="document.getElementById('submit_knop').disabled=true; return true;"
                 pos1 = form.find(' onsubmit="')
-                if pos1 < 0:                                # pragma: no cover
-                    submit = 'form heeft geen onsubmit=".."'
-                else:
+                if pos1 >= 0:
                     pos2 = form.find('"', pos1+11)
                     submit = form[pos1+11:pos2]
                     if '.disabled=true;' not in submit or 'return true;' not in submit:             # pragma: no cover
-                        self.fail('Form onsubmit zonder met dubbelklik bescherming in template %s\n%s' % (repr(dtl),
-                                                                                                          repr(submit)))
+                        self.fail(
+                            'Form onsubmit zonder met dubbelklik bescherming in template %s\n%s' % (repr(dtl),
+                                                                                                    repr(submit)))
 
                     if 'document.getElementById(' not in submit:                                    # pragma: no cover
-                        self.fail('Form onsubmit met slechte dubbelklik bescherming in template %s\n%s' % (repr(dtl),
-                                                                                                           repr(submit)))
+                        self.fail(
+                            'Form onsubmit met slechte dubbelklik bescherming in template %s\n%s' % (repr(dtl),
+                                                                                                     repr(submit)))
 
                 pos_button = form.find('<button')
                 button_count = 0
@@ -584,7 +596,7 @@ class MyTestAsserts(TestCase):
 
                 if button_count > 0:
                     if pos1 < 0 or pos2 < 0:                # pragma: no cover
-                        msg = 'Form without dubbelklik bescherming in button template %s\n'% repr(dtl)
+                        msg = 'Form without dubbelklik bescherming in button template %s\n' % repr(dtl)
                         msg += 'button_count=%s, pos1=%s, pos2=%s' % (button_count, pos1, pos2)
                         self.fail(msg)
 
@@ -661,22 +673,22 @@ class MyTestAsserts(TestCase):
             pos = html.find('<i class=', pos+1)
         # while
 
-    def assert_html_ok(self, response):
+    def assert_html_ok(self, resp: HttpResponse):
         """ Doe een aantal basic checks op een html response """
 
         # check for files
         # 'Content-Disposition': 'attachment; filename="bond_alle.csv"'
-        check = response.get('Content-Disposition', '')
+        check = resp.get('Content-Disposition', '')
         if 'ATTACHMENT;' in str(check).upper():     # pragma: no cover
             self.fail('Found attachment instead of html page')
 
-        html = response.content.decode('utf-8')
+        html = resp.content.decode('utf-8')
         html = self.remove_debug_toolbar(html)
 
         if not settings.ENABLE_MINIFY:          # pragma: no branch
             html = minify_html(html)
 
-        dtl = self.get_useful_template_name(response)
+        dtl = self.get_useful_template_name(resp)
         # print('useful template name:', dtl)
         if dtl not in validated_templates:
             validated_templates.append(dtl)
@@ -698,7 +710,7 @@ class MyTestAsserts(TestCase):
         self.html_assert_template_bug(html, dtl)
         self.html_assert_material_icons(html, dtl)
 
-        urls = self.extract_all_urls(response)
+        urls = self.extract_all_urls(resp)
         for url in urls:
             if url.find(" ") >= 0:                  # pragma: no cover
                 self.fail(msg="Unexpected space in url %s on page %s" % (repr(url), dtl))
@@ -715,27 +727,22 @@ class MyTestAsserts(TestCase):
 
         return html
 
-    @staticmethod
-    def get_templates_not_used(resp, template_names):
-        """ returns True when any of the templates have not been used """
-        lst = list(template_names)
-        for templ in resp.templates:
-            if templ.name in lst:
-                lst.remove(templ.name)
-        # for
-        return lst
-
-    def is_fout_pagina(self, resp):        # pragma: no cover
+    def is_fout_pagina(self, resp: HttpResponse):        # pragma: no cover
+        is_fout = False
         if resp.status_code == 200:
-            lst = self.get_templates_not_used(resp, ('plein/fout_403.dtl', 'plein/site_layout_minimaal.dtl'))
-            if len(lst) == 0:
-                return True
-            lst = self.get_templates_not_used(resp, ('plein/fout_404.dtl', 'plein/site_layout_minimaal.dtl'))
-            if len(lst) == 0:
-                return True
-        return False
+            names = self._get_template_names_used(resp)
+            is_fout = 'plein/fout_403.dtl' in names or 'plein/fout_404.dtl' in names
+        return is_fout
 
-    def assert_template_used(self, resp, template_names):
+    def get_templates_not_used(self, resp: HttpResponse, template_names: tuple | list) -> list:
+        """ returns the names of templates not used in the render of the response """
+        used_names = self._get_template_names_used(resp)
+        # Note: used_names contains additional template names that we don't want to return (like site_layout_fonts.dtl)
+        return [name
+                for name in template_names
+                if name not in used_names]
+
+    def assert_template_used(self, resp: HttpResponse, template_names: tuple | list):
         """ Controleer dat de gevraagde templates gebruikt zijn """
         lst = self.get_templates_not_used(resp, template_names)
         if len(lst):    # pragma: no cover
@@ -745,7 +752,7 @@ class MyTestAsserts(TestCase):
             else:
                 print("\n".join(long_msg))
                 msg = "Following templates should have been used: %s\n" % repr(lst)
-                msg += "Actually used: %s" % repr([t.name for t in resp.templates])
+                msg += "Actually used: %s" % repr(self._get_template_names_used(resp))
                 msg += "\n" + short_msg
             self.fail(msg=msg)
 
@@ -807,9 +814,6 @@ class MyTestAsserts(TestCase):
                 found_insert = True
 
             elif sql.startswith('UPDATE '):
-                pos1 = sql.find(' "')
-                pos2 = sql.find('"', pos1 + 2)
-                table_name = sql[pos1 + 2:pos2]
                 found_update = True
 
             elif sql.startswith('DELETE FROM '):
@@ -885,14 +889,14 @@ class MyTestAsserts(TestCase):
                       '\n   ' +
                       '\n   '.join(explain))
 
-    def assert403(self, resp, expected_msg='Geen toegang'):
+    def assert403(self, resp: HttpResponse, expected_msg='Geen toegang'):
         # controleer dat we op de speciale code-403 handler pagina gekomen zijn
         # of een redirect hebben gekregen naar de login pagina
 
         if isinstance(resp, str):
             self.fail(msg='Verkeerde aanroep: resp parameter vergeten?')            # pragma: no cover
 
-        if resp.status_code == 302:
+        if resp.status_code == 302 and hasattr(resp, 'url'):
             if resp.url != '/account/login/':                                       # pragma: no cover
                 self.dump_resp(resp)
                 self.fail(msg="Onverwachte redirect naar %s" % resp.url)
@@ -914,7 +918,7 @@ class MyTestAsserts(TestCase):
                     pagina = pagina[:pos]
                     self.fail(msg='403 pagina bevat %s in plaats van %s' % (repr(pagina), repr(expected_msg)))
 
-    def assert404(self, resp, expected_msg=''):
+    def assert404(self, resp: HttpResponse, expected_msg=''):
         if isinstance(resp, str):
             self.fail(msg='Verkeerde aanroep: resp parameter vergeten?')            # pragma: no cover
 
@@ -946,7 +950,10 @@ class MyTestAsserts(TestCase):
                 pagina = pagina[:pos]
             self.fail(msg='404 pagina, maar geen expected_msg! Inhoud pagina: %s' % repr(pagina))
 
-    def assert_bestand(self, resp, expected_content_type):
+    def assert405(self, resp: HttpResponse):
+        self.assertEqual(resp.status_code, 405)
+
+    def assert_bestand(self, resp: HttpResponse, expected_content_type):
         if resp.status_code != 200:                                 # pragma: no cover
             self.dump_resp(resp)
             self.fail(msg="Onverwachte foutcode %s in plaats van 200" % resp.status_code)
@@ -961,7 +968,7 @@ class MyTestAsserts(TestCase):
         # ensure the file is not empty
         self.assertTrue(len(str(resp.content)) > 30)
 
-    def assert200_json(self, resp):
+    def assert200_json(self, resp: HttpResponse):
         if resp.status_code != 200:                                 # pragma: no cover
             self.dump_resp(resp)
             self.fail(msg="Onverwachte foutcode %s in plaats van 200" % resp.status_code)
@@ -978,13 +985,13 @@ class MyTestAsserts(TestCase):
 
         return json_data
 
-    def assert200_is_bestand_csv(self, resp):
+    def assert200_is_bestand_csv(self, resp: HttpResponse):
         self.assert_bestand(resp, 'text/csv; charset=UTF-8')
 
-    def assert200_is_bestand_tsv(self, resp):
+    def assert200_is_bestand_tsv(self, resp: HttpResponse):
         self.assert_bestand(resp, 'text/tab-separated-values; charset=UTF-8')
 
-    def assert200_is_bestand_xlsx(self, resp):
+    def assert200_is_bestand_xlsx(self, resp: HttpResponse):
         self.assert_bestand(resp, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
 
     # def assert200_is_bestand_xlsm(self, resp):

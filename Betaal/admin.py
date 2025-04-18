@@ -63,14 +63,14 @@ class OntvangerFilter(admin.SimpleListFilter):
                               .distinct('ontvanger')
                               .values_list('ontvanger__vereniging__ver_nr', flat=True))
         # print('actieve_ontvangers: %s' % actieve_ontvangers)
-        return [(ver.vereniging.ver_nr, ver.vereniging.ver_nr_en_naam())
-                for ver in (BetaalInstellingenVereniging
-                            .objects
-                            .select_related('vereniging')
-                            .filter(vereniging__ver_nr__in=actieve_ontvangers)
-                            .order_by('vereniging__ver_nr'))]
+        return [(instellingen.vereniging.ver_nr, instellingen.vereniging.ver_nr_en_naam())
+                for instellingen in (BetaalInstellingenVereniging
+                                     .objects
+                                     .select_related('vereniging')
+                                     .filter(vereniging__ver_nr__in=actieve_ontvangers)
+                                     .order_by('vereniging__ver_nr'))]
 
-    def queryset(self, request, queryset):      # pragma: no cover
+    def queryset(self, request, queryset):
         ver_nr = self.value()
         # print('ver_nr: %s' % repr(ver_nr))
         if ver_nr:

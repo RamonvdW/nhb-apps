@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -1292,7 +1292,7 @@ class TestCompLaagRegioPlanning(E2EHelpers, TestCase):
         url = self.url_verwijder_wedstrijd % match_pk
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 405)     # GET bestaat niet
+        self.assert405(resp)     # GET bestaat niet
         with self.assert_max_queries(20):
             resp = self.client.post(url)
         self.assert_is_redirect_not_plein(resp)  # check for success

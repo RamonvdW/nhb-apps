@@ -14,7 +14,9 @@ from django.views.generic import View
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
-from BasisTypen.definities import GESLACHT_ALLE, ORGANISATIES2LONG_STR, ORGANISATIE_WA, ORGANISATIE_IFAA
+from BasisTypen.definities import (GESLACHT_ALLE,
+                                   ORGANISATIES2LONG_STR, ORGANISATIES2SHORT_STR,
+                                   ORGANISATIE_WA, ORGANISATIE_IFAA)
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse
 from BasisTypen.operations import get_organisatie_boogtypen, get_organisatie_klassen
 from Functie.definities import Rol
@@ -210,7 +212,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
 
         disc2str = ORGANISATIE_WEDSTRIJD_DISCIPLINE_STRS[wedstrijd.organisatie]
 
-        wedstrijd.disc_str = (ORGANISATIES2LONG_STR[wedstrijd.organisatie] + ' / ' + disc2str[wedstrijd.discipline])
+        wedstrijd.disc_str = (ORGANISATIES2SHORT_STR[wedstrijd.organisatie] + ' / ' + disc2str[wedstrijd.discipline])
 
         context['opt_disc'] = opt_disc = list()
         for afk, disc in disc2str.items():
@@ -464,7 +466,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
 
             disc2str = ORGANISATIE_WEDSTRIJD_DISCIPLINE_STRS[wedstrijd.organisatie]
 
-            wedstrijd.titel = request.POST.get('titel', wedstrijd.titel)[:50]
+            wedstrijd.titel = request.POST.get('titel', wedstrijd.titel)[:75]
 
             if not limit_edits:
                 akkoord = request.POST.get('akkoord_verkoop', '')

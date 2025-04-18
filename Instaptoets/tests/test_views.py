@@ -326,7 +326,7 @@ class TestInstaptoetsViews(E2EHelpers, TestCase):
         # get terwijl er een toets gestart is --> get wordt niet ondersteund
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_ontvang_antwoord)
-        self.assertEqual(resp.status_code, 405)
+        self.assert405(resp)
 
         # vraag overslaan (post zonder keuze)
         with self.assert_max_queries(20):
