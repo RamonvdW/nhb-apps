@@ -10,11 +10,11 @@ from django.shortcuts import redirect, reverse
 from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
-from Betaal.format import format_bedrag_euro
 from Bestelling.definities import BESTELLING_TRANSPORT_VERZEND, BESTELLING_TRANSPORT_OPHALEN, BESTELLING_KORT_BREAK
 from Bestelling.models import BestellingMandje
 from Bestelling.operations import (mandje_tel_inhoud, bestel_mutatieverzoek_maak_bestellingen,
                                    bestel_mutatieverzoek_verwijder_regel_uit_mandje)
+from Betaal.format import format_bedrag_euro
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige
 from Registreer.definities import REGISTRATIE_FASE_COMPLEET
@@ -260,7 +260,7 @@ class VerwijderProductUitMandje(UserPassesTestMixin, View):
                 # product zit in het mandje
 
                 bestel_mutatieverzoek_verwijder_regel_uit_mandje(account, regel, snel == '1')
-                # achtergrondtaak geeft dit door aan de achtergrondtaak
+                # achtergrondtaak geeft dit door aan een van de plugins
 
                 mandje_tel_inhoud(self.request, account)
             else:

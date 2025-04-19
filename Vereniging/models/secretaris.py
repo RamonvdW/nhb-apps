@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2023 Ramon van der Winkel.
+#  Copyright (c) 2020-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -9,6 +9,7 @@ from Sporter.models import Sporter
 from Vereniging.models import Vereniging
 
 
+# TODO: weglaten en direct koppelen aan Functie SEC door import_crm
 class Secretaris(models.Model):
 
     """ de secretaris van een vereniging, volgens het CRM

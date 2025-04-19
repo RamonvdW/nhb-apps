@@ -40,7 +40,7 @@ def bepaal_jaar_bondspas_en_wedstrijden():
 def maak_bondspas_regels(sporter, jaar_pas, jaar_wedstrijdklasse):
     """ Bepaal de regels tekst die op de bondspas moeten komen voor deze specifieke sporter
     """
-    regels = list()
+    regels = []
 
     voorkeur = get_sporter_voorkeuren(sporter)
 
@@ -90,14 +90,21 @@ def maak_bondspas_regels(sporter, jaar_pas, jaar_wedstrijdklasse):
     # speelsterkte
     afkortingen = list()
     afkortingen_basis = list()
-    prev_disc = None
+    prev_cat_disc = None
     for sterkte in sporter.speelsterkte_set.order_by('volgorde'):    # laagste eerst = beste eerst
-        if sterkte.discipline != prev_disc:
+        cat_disc = sterkte.discipline
+        if sterkte.category == 'Cadet':
+            # toon cadet codes totdat er een senior code geregistreerd is
+            cat_disc += 'Senior'
+        else:
+            cat_disc += sterkte.category    # Senior / Master
+
+        if cat_disc != prev_cat_disc:
             if sterkte.volgorde >= 600:
                 afkortingen_basis.append(sterkte.pas_code)
             else:
                 afkortingen.append(sterkte.pas_code)
-            prev_disc = sterkte.discipline
+            prev_cat_disc = cat_disc
     # for
 
     # toon de basis codes alleen als er geen hogere codes zijn
@@ -274,22 +281,23 @@ def plaatje_teken(regels):
     _, _, text_width, text_height = draw.textbbox((0, 0),
                                                   lid_nr, font=font_bold)
 
-    wa_id_x = bondsnr_x = witte_kader_x1
+    wa_id_x = lid_nr_x = witte_kader_x1
     wa_id_y = witte_kader_y_midden + 25
 
     if len(wa_id):
-        bondsnr_y = witte_kader_y_midden - 25
+        lid_nr_y = witte_kader_y_midden - 25
     else:
-        bondsnr_y = witte_kader_y_midden
+        lid_nr_y = witte_kader_y_midden
 
     # bondsnummer
     # text anchors: https://pillow.readthedocs.io/en/stable/handbook/text-anchors.html
-    bondsnr_width = draw.textlength("Bondsnummer: ", font=font)
-    draw.text((bondsnr_x, bondsnr_y),
+    lid_nr_width = draw.textlength("Bondsnummer: ", font=font)
+    draw.text((lid_nr_x, lid_nr_y),
               "Bondsnummer: ", color_black, font=font, anchor="lb")
-    draw.text((bondsnr_x + bondsnr_width, bondsnr_y+5),
+    draw.text((lid_nr_x + lid_nr_width, lid_nr_y+5),
               lid_nr, color_black, font=font_bold_groter, anchor="lb")
 
+    # WA id
     if len(wa_id):
         draw.text((wa_id_x, wa_id_y),
                   "World Archery ID: " + wa_id, color_black, font=font, anchor="lt")
@@ -311,7 +319,6 @@ def plaatje_teken(regels):
     header_width_wkl = 1
     wkl = False
     for header, _ in regels:
-
         header += ': '
         text_width = draw.textlength(header, font=font_bold)
 

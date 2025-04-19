@@ -73,7 +73,7 @@ def bestel_opschonen(stdout):
     _verwijder_oude_bestellingen(stdout, max_age)
     _verwijder_lege_mandjes(stdout, max_age)
     _verwijder_oude_mutaties(stdout, max_age)
-    #_verwijder_orphan_regels(stdout)
+    #_verwijder_orphan_regels(stdout)       # TODO: enable
 
 
 # end of file

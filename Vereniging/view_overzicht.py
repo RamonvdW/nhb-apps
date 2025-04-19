@@ -35,78 +35,52 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.rol_nu, self.functie_nu = None, None
+        self.ver = None
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
+        if self.functie_nu:
+            self.ver = self.functie_nu.vereniging
         return self.functie_nu and self.rol_nu in (Rol.ROL_SEC, Rol.ROL_LA, Rol.ROL_HWL, Rol.ROL_WL)
 
-    def get_context_data(self, **kwargs):
-        """ called by the template system to get the context data for the template """
-        context = super().get_context_data(**kwargs)
-
-        context['ver'] = ver = self.functie_nu.vereniging
-        context['huidige_rol'] = rol_get_beschrijving(self.request)
-
-        context['clusters'] = ver.clusters.all()
-
-        context['toon_gast_accounts'] = ver.is_extern and self.rol_nu == Rol.ROL_SEC
-
-        if self.rol_nu != Rol.ROL_LA:
-            if not ver.is_extern:
-                context['toon_wedstrijden'] = self.rol_nu != Rol.ROL_SEC
-
-            context['toon_evenementen'] = ver.ver_nr in settings.EVENEMENTEN_VERKOPER_VER_NRS
-            context['toon_opleidingen'] = ver.ver_nr in settings.OPLEIDINGEN_VERKOPER_VER_NRS
-
-            if ver.wedstrijdlocatie_set.exclude(baan_type=BAAN_TYPE_EXTERN).filter(zichtbaar=True).count() > 0:
-                context['accommodatie_details_url'] = reverse('Locatie:accommodatie-details',
-                                                              kwargs={'ver_nr': ver.ver_nr})
-
-            if not ver.is_extern:
-                context['url_externe_locaties'] = reverse('Locatie:externe-locaties',
-                                                          kwargs={'ver_nr': ver.ver_nr})
-
+    def _zoek_wedstrijden(self, context):
         comps = list()
         deelcomps = list()
         deelkamps_rk = list()
 
-        if self.rol_nu == Rol.ROL_SEC:
-            # SEC
-            pass
-        else:
-            # HWL of WL
-            if self.rol_nu == Rol.ROL_HWL:
-                context['toon_wedstrijdkalender'] = True
+        # HWL of WL
+        if self.rol_nu == Rol.ROL_HWL:
+            context['toon_wedstrijdkalender'] = True
 
-            if not ver.regio.is_administratief:
-                context['toon_competities'] = True
+        if not self.ver.regio.is_administratief:
+            context['toon_competities'] = True
 
-                comps = (Competitie
+            comps = (Competitie
+                     .objects
+                     .filter(is_afgesloten=False)
+                     .order_by('afstand',
+                               'begin_jaar'))
+
+            deelcomps = (Regiocompetitie
                          .objects
-                         .filter(is_afgesloten=False)
-                         .order_by('afstand',
-                                   'begin_jaar'))
+                         .filter(competitie__is_afgesloten=False,
+                                 regio=self.ver.regio)
+                         .select_related('competitie'))
 
-                deelcomps = (Regiocompetitie
-                             .objects
-                             .filter(competitie__is_afgesloten=False,
-                                     regio=ver.regio)
-                             .select_related('competitie'))
+            deelkamps_rk = (Kampioenschap
+                            .objects
+                            .filter(deel=DEEL_RK,
+                                    competitie__is_afgesloten=False,
+                                    rayon=self.ver.regio.rayon)
+                            .select_related('competitie'))
 
-                deelkamps_rk = (Kampioenschap
-                                .objects
-                                .filter(deel=DEEL_RK,
-                                        competitie__is_afgesloten=False,
-                                        rayon=ver.regio.rayon)
-                                .select_related('competitie'))
-
-                if (RegiocompetitieRonde
-                    .objects
-                    .filter(regiocompetitie__is_afgesloten=False,
-                            matches__vereniging=ver)).count() > 0:
-                    # er zijn wedstrijden voor deze vereniging
-                    context['heeft_wedstrijden'] = True
+            if (RegiocompetitieRonde
+                .objects
+                .filter(regiocompetitie__is_afgesloten=False,
+                        matches__vereniging=self.ver)).count() > 0:
+                # er zijn wedstrijden voor deze vereniging
+                context['heeft_wedstrijden'] = True
 
         # bepaal de volgorde waarin de kaartjes getoond worden
         # 0 - tijdlijn
@@ -287,6 +261,33 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
             kaartje = SimpleNamespace()
             kaartje.einde_blok = True
             kaartjes.append(kaartje)
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        context['ver'] = ver = self.ver
+        context['huidige_rol'] = rol_get_beschrijving(self.request)
+
+        context['clusters'] = ver.clusters.all()
+
+        context['toon_gast_accounts'] = ver.is_extern and self.rol_nu == Rol.ROL_SEC
+
+        if self.rol_nu != Rol.ROL_LA:
+            if not ver.is_extern:
+                context['toon_wedstrijden'] = self.rol_nu != Rol.ROL_SEC
+                self._zoek_wedstrijden(context)
+
+            context['toon_evenementen'] = ver.ver_nr in settings.EVENEMENTEN_VERKOPER_VER_NRS
+            context['toon_opleidingen'] = ver.ver_nr in settings.OPLEIDINGEN_VERKOPER_VER_NRS
+
+            if ver.wedstrijdlocatie_set.exclude(baan_type=BAAN_TYPE_EXTERN).filter(zichtbaar=True).count() > 0:
+                context['accommodatie_details_url'] = reverse('Locatie:accommodatie-details',
+                                                              kwargs={'ver_nr': ver.ver_nr})
+
+            if not ver.is_extern:
+                context['url_externe_locaties'] = reverse('Locatie:externe-locaties',
+                                                          kwargs={'ver_nr': ver.ver_nr})
 
         eval_open_taken(self.request)
         aantal = cached_aantal_open_taken(self.request)

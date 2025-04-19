@@ -76,6 +76,7 @@ class TestWedstrijdInschrijvenBestelEnBetaal(E2EHelpers, TestCase):
         instellingen.save()
         self.instellingen = instellingen
 
+        # sporter die bij het koper account hoort
         sporter = Sporter(
                         lid_nr=100000,
                         voornaam='Ad',
@@ -83,6 +84,18 @@ class TestWedstrijdInschrijvenBestelEnBetaal(E2EHelpers, TestCase):
                         geboorte_datum='1966-06-06',
                         sinds_datum='2020-02-02',
                         account=account,
+                        bij_vereniging=ver)
+        sporter.save()
+
+        # sporter waar we een inschrijving voor gaan doen
+        sporter = Sporter(
+                        lid_nr=100001,
+                        voornaam='Sp',
+                        achternaam='Or Ter',
+                        geboorte_datum='1966-06-07',
+                        sinds_datum='2020-02-02',
+                        email='100001@khsn.not',        # nodig, anders wordt geen informatieve mail gestuurd
+                        account=None,
                         bij_vereniging=ver)
         sporter.save()
         self.sporter = sporter
@@ -126,6 +139,8 @@ class TestWedstrijdInschrijvenBestelEnBetaal(E2EHelpers, TestCase):
                         locatie=locatie,
                         organiserende_vereniging=ver,
                         voorwaarden_a_status_when=now,
+                        contact_email='wedstrijd@khsn.not',
+                        contact_telefoon='+31098765432',
                         prijs_euro_normaal=10.00,
                         prijs_euro_onder18=10.00)
         wedstrijd.save()
@@ -243,12 +258,16 @@ class TestWedstrijdInschrijvenBestelEnBetaal(E2EHelpers, TestCase):
         self.assertEqual(1, bestelling.transacties.count())
 
         # controleer dat een e-mailbevestiging van de betaling aangemaakt is
-        self.assertEqual(1, MailQueue.objects.count())
-        mail = MailQueue.objects.first()
+        self.assertEqual(2, MailQueue.objects.count())
+        mail = MailQueue.objects.filter(mail_to=self.account_admin.bevestigde_email).first()
         self.assert_email_html_ok(mail, 'email_bestelling/bevestig-betaling.dtl')
         self.assert_consistent_email_html_text(mail, ignore=('>Prijs:', '>Korting:'))
 
-        bestelling = Bestelling.objects.get(pk=bestelling.pk)
+        mail = MailQueue.objects.filter(mail_to=self.sporter.email).first()
+        self.assert_email_html_ok(mail, 'email_wedstrijden/info-inschrijving-wedstrijd.dtl')
+        self.assert_consistent_email_html_text(mail)
+
+        bestelling.refresh_from_db()
         self.assertEqual(bestelling.status, BESTELLING_STATUS_AFGEROND)
         self.assertIsNotNone(bestelling.betaal_mutatie)     # BetaalMutatie
         self.assertIsNone(bestelling.betaal_actief)         # BetaalActief
