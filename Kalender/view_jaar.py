@@ -187,7 +187,7 @@ class KalenderJaarView(TemplateView):
             if wed.inschrijven_dagen < -30:
                 wed.is_ter_info = True
 
-            tup = (wed.datum_begin, wed.pk, wed)
+            tup = (wed.datum_begin, wed.pk, len(regels), wed)       # len(regels) prevents sorting on different objects
             regels.append(tup)
             aantal_wedstrijden += 1
         # for
@@ -208,7 +208,7 @@ class KalenderJaarView(TemplateView):
             if evenement.inschrijven_dagen < -30:
                 evenement.is_ter_info = True
 
-            tup = (evenement.datum, evenement.pk, evenement)
+            tup = (evenement.datum, evenement.pk, len(regels), evenement)
             regels.append(tup)
             aantal_evenementen += 1
         # for
@@ -311,5 +311,6 @@ class KalenderJaarView(TemplateView):
         self._maak_pagina(context, jaar, maand, gekozen_soort, gekozen_bogen, gekozen_discipline, zoekterm)
 
         return render(request, self.template_name, context)
+
 
 # end of file
