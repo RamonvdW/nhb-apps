@@ -12,9 +12,8 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
 from Bestelling.definities import BESTELLING_TRANSPORT_VERZEND, BESTELLING_TRANSPORT_OPHALEN
 from Bestelling.models import BestellingMandje
-from Bestelling.operations.mandje import mandje_tel_inhoud
-from Bestelling.operations.mutaties import (bestel_mutatieverzoek_maak_bestellingen,
-                                            bestel_mutatieverzoek_verwijder_product_uit_mandje)
+from Bestelling.operations import (mandje_tel_inhoud, bestel_mutatieverzoek_maak_bestellingen,
+                                   bestel_mutatieverzoek_verwijder_product_uit_mandje)
 from Bestelling.plugins.product_info import beschrijf_product, beschrijf_korting
 from Betaal.models import BetaalInstellingenVereniging
 from Functie.definities import Rol
@@ -62,7 +61,7 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
 
     @staticmethod
     def _beschrijf_inhoud_mandje(account):
-        """ gezamenlijk programma voor het tonen van de inhoud van het mandje en het afrekenen """
+        """ beschrijf de producten die in het mandje liggen """
 
         mandje_is_leeg = True
         bevat_fout = False
@@ -228,11 +227,12 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
                     break       # from the for
             # for
 
+        context['mandje'] = mandje
+        context['mandje_is_leeg'] = mandje_is_leeg
+        context['producten'] = producten
+
         context['geen_afleveradres'] = geen_afleveradres
         context['toon_transport'] = toon_transport
-        context['mandje_is_leeg'] = mandje_is_leeg
-        context['mandje'] = mandje
-        context['producten'] = producten
         context['bevat_fout'] = bevat_fout
         context['aantal_betalingen'] = len(ontvanger2product_pks.keys())
         context['url_kies_transport'] = reverse('Bestelling:kies-transport')

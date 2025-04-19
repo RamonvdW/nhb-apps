@@ -78,4 +78,16 @@ BESTELLING_TRANSPORT2STR = {
     BESTELLING_TRANSPORT_OPHALEN: "Ophalen",
 }
 
+# max-length: 25
+BESTELLING_REGEL_CODE_WEDSTRIJD_KORTING = "wedstrijd_korting"  # length: 17
+BESTELLING_REGEL_CODE_EVENEMENT         = "evenement"
+BESTELLING_REGEL_CODE_OPLEIDING         = "opleiding"
+BESTELLING_REGEL_CODE_WEDSTRIJD         = "wedstrijd"
+BESTELLING_REGEL_CODE_WEBWINKEL         = "Y_webwinkel"        # Y = sorteervolgorde
+BESTELLING_REGEL_CODE_VERZENDKOSTEN     = "Z_verzendkosten"    # Z = sorteervolgorde
+
+
+# speciale tekens die BestellingRegel.korte_beschrijving opsplitsen in aparte regels
+BESTELLING_KORT_BREAK = '||'
+
 # end of file

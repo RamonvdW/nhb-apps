@@ -12,7 +12,7 @@ from Betaal.format import format_bedrag_euro
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige
 from Instaptoets.operations import vind_toets
-from Opleiding.definities import (OPLEIDING_STATUS_GEANNULEERD, OPLEIDING_STATUS_VOORBEREID,
+from Opleiding.definities import (OPLEIDING_STATUS_GEANNULEERD, OPLEIDING_STATUS_VOORBEREIDEN,
                                   OPLEIDING_STATUS_INSCHRIJVEN, OPLEIDING_STATUS_TO_STR)
 from Opleiding.models import Opleiding, OpleidingDiploma
 from Sporter.models import get_sporter
@@ -33,7 +33,7 @@ class OpleidingenOverzichtView(TemplateView):
 
         opleidingen = (Opleiding
                        .objects
-                       .exclude(status=OPLEIDING_STATUS_VOORBEREID)
+                       .exclude(status=OPLEIDING_STATUS_VOORBEREIDEN)
                        .order_by('periode_begin', 'periode_einde'))     # recent bovenaan
         context['opleidingen'] = opleidingen
 
@@ -97,7 +97,7 @@ class OpleidingDetailsView(TemplateView):
         try:
             opleiding_pk = kwargs['opleiding_pk'][:6]     # afkappen voor de veiligheid
             opleiding_pk = int(opleiding_pk)
-            opleiding = Opleiding.objects.exclude(status=OPLEIDING_STATUS_VOORBEREID).get(pk=opleiding_pk)
+            opleiding = Opleiding.objects.exclude(status=OPLEIDING_STATUS_VOORBEREIDEN).get(pk=opleiding_pk)
         except (IndexError, ValueError, TypeError, Opleiding.DoesNotExist):
             raise Http404('Slechte parameter')
 
@@ -131,7 +131,7 @@ class OpleidingDetailsView(TemplateView):
 
         if rol_kruimels in (Rol.ROL_SEC, Rol.ROL_HWL):
             context['kruimels'] = (
-                (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
+                (reverse('Vereniging:overzicht'), 'Beheer vereniging'),
                 (reverse('Opleiding:vereniging'), 'Opleidingen'),
                 (None, opleiding.titel),
             )

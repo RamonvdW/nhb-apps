@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2024 Ramon van der Winkel.
+#  Copyright (c) 2024-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -8,8 +8,8 @@ from django.http import HttpResponseRedirect, Http404
 from django.urls import reverse
 from django.views.generic import View
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Bestelling.operations.mutaties import (bestel_mutatieverzoek_afmelden_evenement,
-                                            bestel_mutatieverzoek_verwijder_product_uit_mandje)
+from Bestelling.operations import (bestel_mutatieverzoek_afmelden_evenement,
+                                   bestel_mutatieverzoek_verwijder_product_uit_mandje)
 from Evenement.definities import EVENEMENT_INSCHRIJVING_STATUS_RESERVERING_MANDJE
 from Evenement.models import EvenementInschrijving
 from Functie.definities import Rol

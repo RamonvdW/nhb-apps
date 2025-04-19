@@ -25,11 +25,13 @@ class Command(BaseCommand):
 
     def __init__(self, stdout=None, stderr=None, no_color=False, force_color=False):
         super().__init__(stdout, stderr, no_color, force_color)
+
         now = timezone.now()
+        self._stamp_str = now.strftime('%Y-%m-%d om %H:%M')
+
         self._kort_geleden = now - datetime.timedelta(days=2)
         self._lang_geleden = now - datetime.timedelta(days=90)
         self._taak_deadline = now + datetime.timedelta(days=7)
-        self._stamp_str = now.strftime('%Y-%m-%d om %H:%M')
 
         self._functie_hwl = dict()      # [ver_nr] = Functie
         for functie in Functie.objects.filter(rol='HWL').select_related('vereniging'):
@@ -39,7 +41,7 @@ class Command(BaseCommand):
     def _maak_taak(self, ver: Vereniging, aantal: int, producten: str):
         regels = list()
 
-        regels.append('Dit is een wekelijkse herinnering '+
+        regels.append('Dit is een wekelijkse herinnering ' +
                       'om handmatige bankoverschrijvingen in te voeren in MijnHandboogsport.')
         regels.append('')
         regels.append('Er zijn %s onbetaalde bestellingen voor %s bij jullie vereniging.' % (aantal, producten))

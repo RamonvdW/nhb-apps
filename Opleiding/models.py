@@ -8,7 +8,7 @@ from django.db import models
 from django.utils.formats import localize
 from Account.models import Account
 from Locatie.models import EvenementLocatie
-from Opleiding.definities import (OPLEIDING_STATUS_CHOICES, OPLEIDING_STATUS_VOORBEREID,
+from Opleiding.definities import (OPLEIDING_STATUS_CHOICES, OPLEIDING_STATUS_VOORBEREIDEN,
                                   OPLEIDING_INSCHRIJVING_STATUS_CHOICES,
                                   OPLEIDING_INSCHRIJVING_STATUS_INSCHRIJVEN,
                                   OPLEIDING_AFMELDING_STATUS_CHOICES, OPLEIDING_AFMELDING_STATUS_TO_STR)
@@ -146,7 +146,7 @@ class Opleiding(models.Model):
     beschrijving = models.TextField(default='', blank=True)
 
     # de status van deze opleiding
-    status = models.CharField(max_length=1, choices=OPLEIDING_STATUS_CHOICES, default=OPLEIDING_STATUS_VOORBEREID)
+    status = models.CharField(max_length=1, choices=OPLEIDING_STATUS_CHOICES, default=OPLEIDING_STATUS_VOORBEREIDEN)
 
     # is de instaptoets een vereiste?
     eis_instaptoets = models.BooleanField(default=False, blank=True)

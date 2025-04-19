@@ -11,6 +11,7 @@ from django.utils import timezone
 from django.contrib.admin.models import LogEntry
 from Beheer.views import beheer_opschonen
 from Geo.models import Regio
+from Bestelling.models import Bestelling
 from Betaal.models import BetaalActief, BetaalInstellingenVereniging, BetaalTransactie
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
@@ -254,6 +255,11 @@ class TestBeheer(E2EHelpers, TestCase):
                         mollie_api_key='',
                         akkoord_via_bond=True)
         ontvanger.save()
+
+        bestelling = Bestelling(
+                        bestel_nr=1,
+                        ontvanger=ontvanger)
+        bestelling.save()
 
         actief = BetaalActief(
                     ontvanger=ontvanger,

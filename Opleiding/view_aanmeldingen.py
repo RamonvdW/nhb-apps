@@ -166,7 +166,7 @@ class OpleidingAanmeldingenView(UserPassesTestMixin, TemplateView):
             )
         else:
             context['kruimels'] = (
-                (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
+                (reverse('Vereniging:overzicht'), 'Beheer vereniging'),
                 (reverse('Opleiding:vereniging'), 'Opleidingen'),
                 (None, 'Aanmeldingen'),
             )
@@ -405,7 +405,7 @@ class OpleidingDetailsAanmeldingView(UserPassesTestMixin, TemplateView):
             )
         else:
             context['kruimels'] = (
-                (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
+                (reverse('Vereniging:overzicht'), 'Beheer vereniging'),
                 (reverse('Opleiding:vereniging'), 'Opleidingen'),
                 (url_aanmeldingen, 'Aanmeldingen'),
                 (None, 'Details aanmelding')
@@ -482,7 +482,7 @@ class OpleidingDetailsAfmeldingView(UserPassesTestMixin, TemplateView):
             )
         else:
             context['kruimels'] = (
-                (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
+                (reverse('Vereniging:overzicht'), 'Beheer vereniging'),
                 (reverse('Opleiding:vereniging'), 'Opleidingen'),
                 (url_aanmeldingen, 'Aanmeldingen'),
                 (None, 'Details afmelding')

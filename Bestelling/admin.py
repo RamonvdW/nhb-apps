@@ -94,9 +94,7 @@ class BestellingAdmin(admin.ModelAdmin):
 
     auto_complete = ('account', 'ontvanger')
 
-    # filter_horizontal = ('producten', 'transacties')
-
-    list_filter = ('status', OntvangerFilter)
+    list_filter = ('status', 'transport', OntvangerFilter)
 
     fieldsets = (
         ('Inhoud',
@@ -166,9 +164,9 @@ class BestellingMutatieAdmin(admin.ModelAdmin):
         return msg
 
 
-admin.site.register(BestellingProduct, BestellingProductAdmin)
 admin.site.register(BestellingMandje, BestellingMandjeAdmin)
 admin.site.register(Bestelling, BestellingAdmin)
+admin.site.register(BestellingProduct, BestellingProductAdmin)
 admin.site.register(BestellingMutatie, BestellingMutatieAdmin)
 
 # end of file

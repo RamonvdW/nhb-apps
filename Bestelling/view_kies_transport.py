@@ -13,7 +13,7 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
 from Bestelling.definities import BESTELLING_TRANSPORT_NVT, BESTELLING_TRANSPORT_VERZEND, BESTELLING_TRANSPORT_OPHALEN
 from Bestelling.models import BestellingMandje
-from Bestelling.operations.mutaties import bestel_mutatieverzoek_transport
+from Bestelling.operations import bestel_mutatieverzoek_transport
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige
 from Vereniging.models import Vereniging

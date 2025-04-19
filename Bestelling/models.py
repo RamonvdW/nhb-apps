@@ -239,7 +239,8 @@ class Bestelling(models.Model):
         msg = "%s" % self.bestel_nr
         msg += " %s" % BESTELLING_STATUS2STR[self.status]
         msg += " [%s]" % timezone.localtime(self.aangemaakt).strftime('%Y-%m-%d %H:%M:%S')
-        msg += " koper=%s" % self.account.username
+        if self.account:
+            msg += " koper=%s" % self.account.username
         msg += " " + format_bedrag_euro(self.totaal_euro)
 
         return msg

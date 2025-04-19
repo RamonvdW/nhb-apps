@@ -16,9 +16,9 @@ from unittest.mock import patch
 import datetime
 
 
-class TestBondspas(E2EHelpers, TestCase):
+class TestBondspasOnline(E2EHelpers, TestCase):
 
-    """ tests voor de Bondspas applicatie """
+    """ tests voor de Bondspas applicatie, ophalen van de bondspas """
 
     url_toon_sporter = '/bondspas/toon/'
     url_toon_van = '/bondspas/toon/van-lid/%s/'         # lid_nr
@@ -330,7 +330,6 @@ class TestBondspas(E2EHelpers, TestCase):
         self.e2e_login(self.account)
 
         with patch('django.utils.timezone.localtime') as mock_timezone:
-            # te vroeg/laat om een mail te sturen
             dt = datetime.datetime(year=2000, month=1, day=1, hour=19)
             mock_timezone.return_value = dt
 

@@ -17,7 +17,7 @@ from Bestelling.definities import (BESTELLING_STATUS2STR, BESTELLING_STATUS_BETA
                                    BESTELLING_TRANSPORT_OPHALEN)
 from Bestelling.models import Bestelling
 from Bestelling.plugins.product_info import beschrijf_product, beschrijf_korting
-from Bestelling.operations.mutaties import bestel_mutatieverzoek_annuleer
+from Bestelling.operations import bestel_mutatieverzoek_annuleer
 from Betaal.definities import (TRANSACTIE_TYPE_MOLLIE_PAYMENT, TRANSACTIE_TYPE_MOLLIE_RESTITUTIE,
                                TRANSACTIE_TYPE_HANDMATIG)
 from Betaal.format import format_bedrag_euro

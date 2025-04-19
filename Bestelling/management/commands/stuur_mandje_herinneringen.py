@@ -32,11 +32,7 @@ class Command(BaseCommand):
             'voornaam': account.get_first_name(),
             'naam_site': settings.NAAM_SITE,
             'num_prod': num_prod,
-            'producten': 'producten',
         }
-
-        if num_prod == 1:
-            context['prod'] = 'product'
 
         mail_body = render_email_template(context, EMAIL_TEMPLATE_HERINNERING_MANDJE)
 

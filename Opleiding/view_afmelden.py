@@ -8,8 +8,8 @@ from django.http import HttpResponseRedirect, Http404
 from django.urls import reverse
 from django.views.generic import View
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Bestelling.operations.mutaties import (bestel_mutatieverzoek_afmelden_opleiding,
-                                            bestel_mutatieverzoek_verwijder_product_uit_mandje)
+from Bestelling.operations import (bestel_mutatieverzoek_afmelden_opleiding,
+                                   bestel_mutatieverzoek_verwijder_product_uit_mandje)
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
 from Opleiding.definities import OPLEIDING_INSCHRIJVING_STATUS_RESERVERING_MANDJE

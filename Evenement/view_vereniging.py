@@ -78,7 +78,7 @@ class VerenigingEvenementenView(UserPassesTestMixin, View):
         context['url_voorwaarden'] = settings.VERKOOPVOORWAARDEN_WEDSTRIJDEN_URL
 
         context['kruimels'] = (
-            (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
+            (reverse('Vereniging:overzicht'), 'Beheer vereniging'),
             (None, 'Evenementen'),
         )
 
