@@ -35,7 +35,7 @@ import logging
 import json
 import sys
 
-my_logger = logging.getLogger('MH.ImportCRM')
+my_logger = logging.getLogger('MH.ImportCRM.import_crm_json')
 
 
 def get_vereniging_str(ver):

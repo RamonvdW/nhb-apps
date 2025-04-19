@@ -39,7 +39,7 @@ TESTFILE_18_LID_UITGESCHREVEN = TESTFILES_PATH + 'testfile_18.json'
 TESTFILE_19_STR_NOT_NR = TESTFILES_PATH + 'testfile_19.json'
 TESTFILE_20_SPEELSTERKTE = TESTFILES_PATH + 'testfile_20.json'
 TESTFILE_21_IBAN_BIC = TESTFILES_PATH + 'testfile_21.json'
-TESTFILE_22_CRASH = TESTFILES_PATH + 'testfile_22.json'
+TESTFILE_22_CRASH = TESTFILES_PATH + 'testfile_22.json'         # TODO: wordt niet gebruikt?!
 TESTFILE_23_DIPLOMA = TESTFILES_PATH + 'testfile_23.json'
 
 
@@ -103,7 +103,7 @@ class TestImportCRMImport(E2EHelpers, TestCase):
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
 
-    def test_crash(self):
+    def test_missing_mandatory_key(self):
         f1 = io.StringIO()
         f2 = io.StringIO()
         with self.assertRaises(SystemExit):
@@ -126,7 +126,6 @@ class TestImportCRMImport(E2EHelpers, TestCase):
         self.assertTrue('[ERROR] [FATAL] Verplichte sleutel' in f1.getvalue())
 
     def test_diff(self):
-
         limieten = ImportLimieten.objects.first()
 
         # te veel member changes
@@ -172,6 +171,16 @@ class TestImportCRMImport(E2EHelpers, TestCase):
         f1, f2 = self.run_management_command(DIFF_CRM_JSONS_COMMAND,
                                              TESTFILE_03_BASE_DATA,
                                              TESTFILE_09_LID_MUTATIES)
+        # geen exception
+        # print("f1: %s" % f1.getvalue())
+        # print("f2: %s" % f2.getvalue())
+        self.assertTrue('[WARNING] Limieten zijn uitgeschakeld' in f2.getvalue())
 
+        # crash
+        with self.assertRaises(SpecificExitCode):
+            f1, f2 = self.run_management_command(DIFF_CRM_JSONS_COMMAND,
+                                                 TESTFILE_22_CRASH,
+                                                 TESTFILE_22_CRASH)
+        self.assertTrue('[WARNING] Stuur crash mail naar ontwikkelaar' in f2.getvalue())
 
 # end of file
