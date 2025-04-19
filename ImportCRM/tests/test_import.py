@@ -118,7 +118,7 @@ class TestImportCRMImport(E2EHelpers, TestCase):
         # self.assertEqual(f2.getvalue(), '')
 
     def test_import(self):
-        with self.assert_max_queries(133):
+        with self.assert_max_queries(155):
             f1, f2 = self.run_management_command(IMPORT_COMMAND,
                                                  TESTFILE_03_BASE_DATA,
                                                  OPTION_SIM)
@@ -176,7 +176,7 @@ class TestImportCRMImport(E2EHelpers, TestCase):
 
     def test_extra_geo_structuur(self):
         # extra rayon/regio
-        with self.assert_max_queries(64):
+        with self.assert_max_queries(70):
             f1, f2 = self.run_management_command(IMPORT_COMMAND,
                                                  TESTFILE_06_BAD_RAYON_REGIO)
         self.assertTrue("[ERROR] Onbekend rayon {'rayon_number': 0, 'name': 'Rayon 0'}" in f1.getvalue())
@@ -326,7 +326,7 @@ class TestImportCRMImport(E2EHelpers, TestCase):
         # andere leden hebben een toevoeging achter hun voornaam: "Tineke (Tini)" - niet over klagen
         # some ontbreekt er een haakje
         # import verwijderd dit
-        with self.assert_max_queries(75):
+        with self.assert_max_queries(81):
             f1, f2 = self.run_management_command(IMPORT_COMMAND,
                                                  TESTFILE_10_TOEVOEGING_NAAM,
                                                  OPTION_SIM)
@@ -339,7 +339,7 @@ class TestImportCRMImport(E2EHelpers, TestCase):
 
     def test_datum_zonder_eeuw(self):
         # sommige leden hebben een geboortedatum zonder eeuw
-        with self.assert_max_queries(69):
+        with self.assert_max_queries(75):
             f1, f2 = self.run_management_command(IMPORT_COMMAND,
                                                  TESTFILE_11_BAD_DATE,
                                                  OPTION_SIM)
@@ -361,7 +361,7 @@ class TestImportCRMImport(E2EHelpers, TestCase):
         # sommige leden worden niet geïmporteerd
         # geen (valide) geboortedatum
         # geen (valid) datum van lidmaatschap
-        with self.assert_max_queries(63):
+        with self.assert_max_queries(69):
             self.run_management_command(IMPORT_COMMAND,
                                         TESTFILE_12_MEMBER_INCOMPLETE_1,
                                         OPTION_SIM)
@@ -378,7 +378,7 @@ class TestImportCRMImport(E2EHelpers, TestCase):
                     regio=Regio.objects.get(pk=116))
         ver.save()
 
-        with self.assert_max_queries(81):
+        with self.assert_max_queries(87):
             f1, f2 = self.run_management_command(IMPORT_COMMAND,
                                                  TESTFILE_12_MEMBER_INCOMPLETE_1,
                                                  OPTION_SIM)
@@ -402,7 +402,7 @@ class TestImportCRMImport(E2EHelpers, TestCase):
                     is_actief_lid=False)
         sporter.save()
 
-        with self.assert_max_queries(65):
+        with self.assert_max_queries(71):
             f1, f2 = self.run_management_command(IMPORT_COMMAND,
                                                  TESTFILE_13_WIJZIG_GESLACHT_1,
                                                  OPTION_SIM)
@@ -445,7 +445,7 @@ class TestImportCRMImport(E2EHelpers, TestCase):
         self.assertTrue("[INFO] Lid 100001 voorkeuren: wedstrijd geslacht instelbaar gemaakt" in f2.getvalue())
 
         # nu weer de andere kant op (X --> M)
-        with self.assert_max_queries(66):
+        with self.assert_max_queries(70):
             f1, f2 = self.run_management_command(IMPORT_COMMAND,
                                                  TESTFILE_14_WIJZIG_GESLACHT_2,
                                                  OPTION_SIM)
@@ -456,7 +456,7 @@ class TestImportCRMImport(E2EHelpers, TestCase):
 
     def test_maak_secretaris(self):
         # een lid secretaris maken
-        with self.assert_max_queries(101):
+        with self.assert_max_queries(114):
             f1, f2 = self.run_management_command(IMPORT_COMMAND,
                                                  TESTFILE_14_WIJZIG_GESLACHT_2,
                                                  OPTION_SIM)
@@ -516,7 +516,7 @@ class TestImportCRMImport(E2EHelpers, TestCase):
     def test_club_1377(self):
         # een paar speciale import gevallen
 
-        with self.assert_max_queries(94):
+        with self.assert_max_queries(106):
             self.run_management_command(IMPORT_COMMAND,
                                         TESTFILE_15_CLUB_1377,
                                         OPTION_SIM)
@@ -602,14 +602,14 @@ class TestImportCRMImport(E2EHelpers, TestCase):
 
     def test_import_nhb_crm_dryrun(self):
         # dryrun
-        with self.assert_max_queries(51):
+        with self.assert_max_queries(60):
             f1, f2 = self.run_management_command(IMPORT_COMMAND,
                                                  TESTFILE_08_VER_MUTATIES,
                                                  OPTION_SIM,
                                                  OPTION_DRY_RUN)
         self.assertTrue("DRY RUN" in f2.getvalue())
 
-        with self.assert_max_queries(106):
+        with self.assert_max_queries(117):
             self.run_management_command(IMPORT_COMMAND,
                                         TESTFILE_03_BASE_DATA,
                                         OPTION_SIM)
@@ -648,7 +648,7 @@ class TestImportCRMImport(E2EHelpers, TestCase):
 
     def test_incomplete_data(self):
         # test import met een incomplete entry van een nieuw lid
-        with self.assert_max_queries(79):
+        with self.assert_max_queries(85):
             f1, f2 = self.run_management_command(IMPORT_COMMAND,
                                                  TESTFILE_17_MEMBER_INCOMPLETE_2,
                                                  OPTION_SIM)

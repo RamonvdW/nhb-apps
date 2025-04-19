@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2024 Ramon van der Winkel.
+#  Copyright (c) 2020-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -226,7 +226,7 @@ class TestFunctieCli(E2EHelpers, TestCase):
         self.account_normaal.is_staff = False
         self.account_normaal.save(update_fields=['is_staff'])
 
-        with self.assert_max_queries(56):
+        with self.assert_max_queries(57):
             f1, f2 = self.run_management_command('check_beheerders', '--otp_uit')
         # print('f1:', f1.getvalue())
         # print('f2:', f2.getvalue())

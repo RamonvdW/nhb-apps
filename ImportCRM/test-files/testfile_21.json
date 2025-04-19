@@ -34,7 +34,8 @@
      "longitude": null,
      "coc_number": null,
      "iban": "NL91ABNA0417164300",
-     "bic": "HUH2HUH2"
+     "bic": "HUH2HUH2",
+     "member_admins": []
     },
     {"club_number": 1001,
      "region_number": 101,
@@ -57,7 +58,8 @@
      "longitude": null,
      "coc_number": null,
      "iban": "NL91ABNA0417164300",
-     "bic": null
+     "bic": null,
+     "member_admins": []
     },
     {"club_number": 1042,
      "region_number": 113,
@@ -78,7 +80,8 @@
      "longitude": null,
      "coc_number": null,
      "iban": null,
-     "bic": "ABNANL2A"
+     "bic": "ABNANL2A",
+     "member_admins": []
     },
     {"club_number": 1043,
      "region_number": 113,
@@ -99,7 +102,8 @@
      "longitude": null,
      "coc_number": null,
      "iban": "NL91ABNA0417164309",
-     "bic": "ABNANL2A"
+     "bic": "ABNANL2A",
+     "member_admins": []
     },
     {"club_number": 1044,
      "region_number": 113,
@@ -120,7 +124,8 @@
      "longitude": null,
      "coc_number": null,
      "iban": "NL91ABNA0TEKORT",
-     "bic": "ABNANL2A"
+     "bic": "ABNANL2A",
+     "member_admins": []
     },
     {"club_number": 1045,
      "region_number": 113,
@@ -141,7 +146,8 @@
      "longitude": null,
      "coc_number": null,
      "iban": "NL91abna0417164309",
-     "bic": "ABNANL2A"
+     "bic": "ABNANL2A",
+     "member_admins": []
     }
   ],
   "members": [

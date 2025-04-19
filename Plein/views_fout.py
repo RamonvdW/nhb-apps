@@ -46,9 +46,9 @@ def site_handler403_permission_denied(request, exception=None):
         # whitelist een aantal urls die we willen ondersteunen
         params = dict()
 
-        if request.path.startswith('/sporter/bondspas/'):
+        if request.path.startswith('/bondspas/'):
             # vervang alle mogelijke urls naar een basale
-            params['next'] = '/sporter/bondspas/toon/'
+            params['next'] = '/bondspas/toon/'
 
         elif request.path.startswith('/sporter/'):
             # sporter, geen dynamische url voor de bondspas

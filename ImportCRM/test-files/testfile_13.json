@@ -35,7 +35,8 @@
      "longitude": null,
      "coc_number": null,
      "iban": "NL91ABNA0417164300",
-     "bic": "ABNANL2A"
+     "bic": "ABNANL2A",
+     "member_admins": []
     }
   ],
   "members": [

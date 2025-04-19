@@ -190,7 +190,7 @@ class KalenderMaandView(TemplateView):
             if wed.inschrijven_dagen < -30:
                 wed.is_ter_info = True
 
-            tup = (wed.datum_begin, wed.pk, wed)
+            tup = (wed.datum_begin, wed.pk, len(regels), wed)       # len(regels) prevents sorting on different objects
             regels.append(tup)
             aantal_wedstrijden += 1
         # for
@@ -211,7 +211,7 @@ class KalenderMaandView(TemplateView):
             if evenement.inschrijven_dagen < -30:
                 evenement.is_ter_info = True
 
-            tup = (evenement.datum, evenement.pk, evenement)
+            tup = (evenement.datum, evenement.pk, len(regels), evenement)
             regels.append(tup)
             aantal_evenementen += 1
         # for

@@ -559,22 +559,14 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
         url = self.url_wijzig_ontvang % self.functie_sec.pk
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'add': self.account_normaal.pk})
-        self.assert_is_redirect_not_plein(resp)
-        self.assertEqual(self.functie_sec.accounts.count(), 2)
+        self.assert403(resp, 'Niet de beheerder')
 
         # koppel SEC voor een andere vereniging
         url = self.url_wijzig_ontvang % self.functie_sec2.pk
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'add': self.account_ander.pk})    # silently ignored
         self.assert403(resp)
-        self.assertEqual(self.functie_sec.accounts.count(), 2)
-
-        # koppel een niet-verenigingslid aan de rol SEC
-        url = self.url_wijzig_ontvang % self.functie_sec.pk
-        with self.assert_max_queries(20):
-            resp = self.client.post(url, {'add': self.account_ander.pk})
-        self.assert403(resp)
-        self.assertEqual(self.functie_sec.accounts.count(), 2)
+        self.assertEqual(self.functie_sec.accounts.count(), 1)
 
         # koppel een verenigingslid aan de rol HWL
         self.assertEqual(self.functie_hwl.accounts.count(), 0)

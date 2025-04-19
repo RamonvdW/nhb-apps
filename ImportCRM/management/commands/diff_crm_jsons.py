@@ -8,8 +8,12 @@
 
 from django.core.management.base import BaseCommand
 from ImportCRM.models import IMPORT_LIMIETEN_PK, ImportLimieten
+from Mailer.operations import mailer_notify_internal_error
 from Site.core.main_exceptions import SpecificExitCode
+import traceback
+import logging
 import json
+import sys
 
 # expected keys at each level
 EXPECTED_DATA_KEYS = ('rayons', 'regions', 'clubs', 'members')
@@ -25,6 +29,8 @@ EXPECTED_MEMBER_KEYS = ('club_number', 'member_number', 'name', 'prefix', 'first
                         'phone_business', 'phone_mobile', 'phone_private',
                         'iso_abbr', 'latitude', 'longitude', 'blocked', 'wa_id', 'date_of_death')
 
+my_logger = logging.getLogger('MH.ImportCRM.diff_crm_jsons')
+
 
 class Command(BaseCommand):
 
@@ -32,6 +38,7 @@ class Command(BaseCommand):
 
     def __init__(self):
         super().__init__()
+        self._exit_code = 0
         self.club_changes = 0
         self.member_changes = 0
 
@@ -85,15 +92,28 @@ class Command(BaseCommand):
         first = True
         keys = set(list(club1.keys()) + list(club2.keys()))
         for key in keys:
-            val1 = club1[key]
-            val2 = club2[key]
-            if val1 != val2:
+            try:
+                val1 = club1[key]
+                val2 = club2[key]
+            except KeyError:
+                # one of the two does not have this key
                 if first:
                     self.stdout.write('    club %s' % ver_nr)
                     first = False
-                self.stdout.write('        -%s: %s' % (key, val1))
-                self.stdout.write('        +%s: %s' % (key, val2))
-                self.club_changes += 1
+                if key in club1:
+                    # removed in club2
+                    self.stdout.write('        -%s' % key)
+                else:
+                    # added in club2
+                    self.stdout.write('        +%s' % key)
+            else:
+                if val1 != val2:
+                    if first:
+                        self.stdout.write('    club %s' % ver_nr)
+                        first = False
+                    self.stdout.write('        -%s: %s' % (key, val1))
+                    self.stdout.write('        +%s: %s' % (key, val2))
+                    self.club_changes += 1
         # for
 
     def _diff_clubs(self, clubs1, clubs2):
@@ -102,6 +122,8 @@ class Command(BaseCommand):
         clubs = dict()
         for club in clubs1:
             ver_nr = club['club_number']
+            if ver_nr == 'crash':
+                raise Exception('crash test')
             clubs[ver_nr] = club
         # for
 
@@ -163,15 +185,11 @@ class Command(BaseCommand):
             self.member_changes += 1
         # for
 
-    def _diff(self, data1, data2):
+    def _diff_data(self, data1, data2):
         self._diff_clubs(data1['clubs'], data2['clubs'])
         self._diff_members(data1['members'], data2['members'])
 
-    def handle(self, *args, **options):
-
-        fname1 = options['filenames'][0]
-        fname2 = options['filenames'][1]
-
+    def _diff_jsons(self, fname1, fname2):
         self.stdout.write('files:')
         self.stdout.write('   %s' % repr(fname1))
         json1 = self._load_json(fname1)
@@ -179,24 +197,59 @@ class Command(BaseCommand):
         json2 = self._load_json(fname2)
 
         if json1 and json2:
-            self._diff(json1, json2)
+            self._diff_data(json1, json2)
 
             self.stdout.write('totals:')
             self.stdout.write('    club_changes: %s' % self.club_changes)
             self.stdout.write('    member_changes: %s' % self.member_changes)
 
-        # sys.exit raises SystemExit, which is caught in manage.py, which changes the exit status to 3
-        # but that is fine
+    def handle(self, *args, **options):
+        fname1 = options['filenames'][0]
+        fname2 = options['filenames'][1]
+
+        # vang generieke fouten af
+        try:
+            self._diff_jsons(fname1, fname2)
+        except Exception as exc:
+            # schrijf in de output
+            tups = sys.exc_info()
+            lst = traceback.format_tb(tups[2])
+            tb = traceback.format_exception(*tups)
+
+            tb_msg_start = 'Unexpected error during import_crm_json\n'
+            tb_msg_start += '\n'
+            tb_msg = tb_msg_start + '\n'.join(tb)
+
+            # full traceback to syslog
+            my_logger.error(tb_msg)
+
+            self.stderr.write('[ERROR] Onverwachte fout (%s) tijdens import_crm_json: %s' % (type(exc), str(exc)))
+            self.stderr.write('Traceback:')
+            self.stderr.write(''.join(lst))
+
+            # stuur een mail naar de ontwikkelaars
+            # reduceer tot de nuttige regels
+            tb = [line for line in tb if '/site-packages/' not in line]
+            tb_msg = tb_msg_start + '\n'.join(tb)
+
+            # deze functie stuurt maximaal 1 mail per dag over hetzelfde probleem
+            self.stdout.write('[WARNING] Stuur crash mail naar ontwikkelaar')
+            mailer_notify_internal_error(tb_msg)
+
+            self._exit_code = 1
 
         if self.limieten.use_limits:
             if self.member_changes > self.limieten.max_member_changes:
                 self.stdout.write('[ERROR] Too many member changes! (limit: %s)' % self.limieten.max_member_changes)
-                raise SpecificExitCode(1)
+                self._exit_code = 1
 
             if self.club_changes > self.limieten.max_club_changes:
                 self.stdout.write('[ERROR] Too many club changes! (limit: %s)' % self.limieten.max_club_changes)
-                raise SpecificExitCode(2)
+                self._exit_code = 2
         else:
             self.stdout.write('[WARNING] Limieten zijn uitgeschakeld')
+
+        if self._exit_code > 0:
+            raise SpecificExitCode(self._exit_code)
 
 # end of file

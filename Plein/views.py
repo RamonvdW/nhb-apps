@@ -165,6 +165,8 @@ class PleinView(View):
                     context['rol_is_wl'] = True
                 elif rol_nu == Rol.ROL_SEC:
                     context['rol_is_sec'] = True
+                elif rol_nu == Rol.ROL_LA:
+                    context['rol_is_la'] = True
                 elif rol_nu == Rol.ROL_SUP:
                     context['rol_is_sup'] = True
                 elif rol_nu == Rol.ROL_CS:
@@ -203,7 +205,7 @@ class PleinView(View):
             Hier kunnen we zaken checken mogen we een database wijziging doen (GET mag geen wijzigingen doen).
 
             We doen een nieuwe evaluatie van de rechten van de gebruiker en het aantal open taken.
-            Als deze van geen-rechten naar wel-rechten gaat, dan komt Wissel van Rol beschikbaar (en OTP, VHPG, etc.)
+            Als deze van geen-rechten naar wel-rechten gaat, dan komt Wissel van rol beschikbaar (en OTP, VHPG, etc.)
         """
 
         # CSRF token is al gecontroleerd
@@ -212,7 +214,7 @@ class PleinView(View):
             account = get_account(request)
 
             # evalueer opnieuw of deze gebruiker van rol mag wisselen
-            # dit wordt in de sessie opgeslagen en gebruikt om het Wissel van Rol menu te tonen
+            # dit wordt in de sessie opgeslagen en gebruikt om het Wissel van rol menu te tonen
             rol_eval_rechten_simpel(request, account)
 
             # kijk hoeveel taken er open staan

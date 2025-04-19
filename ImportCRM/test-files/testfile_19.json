@@ -35,7 +35,8 @@
      "longitude": null,
      "coc_number": null,
      "iban": null,
-     "bic": null
+     "bic": null,
+     "member_admins": []
     },
     {"club_number": 1001,
      "region_number": "z",
@@ -58,7 +59,8 @@
      "longitude": null,
      "coc_number": null,
      "iban": 1234,
-     "bic": 1234
+     "bic": 1234,
+     "member_admins": []
     },
     {"club_number": 1042,
      "region_number": 113,
@@ -79,7 +81,8 @@
      "longitude": null,
      "coc_number": null,
      "iban": "Wat een grap",
-     "bic": "GoedeLengte"
+     "bic": "GoedeLengte",
+     "member_admins": []
     }
   ],
   "members": [

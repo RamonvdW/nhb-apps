@@ -6,6 +6,7 @@
 
 from django.test import TestCase, override_settings
 from BasisTypen.definities import GESLACHT_ANDERS
+from Functie.tests.helpers import maak_functie
 from Geo.models import Regio
 from Opleiding.models import OpleidingDiploma
 from Sporter.models import Sporter, SporterVoorkeuren, Speelsterkte
@@ -19,10 +20,11 @@ class TestBondspas(E2EHelpers, TestCase):
 
     """ tests voor de Bondspas applicatie """
 
-    url_toon_sporter = '/sporter/bondspas/toon/'
-    url_toon_van = '/sporter/bondspas/toon/van-lid/%s/'    # lid_nr
-    url_ophalen = '/sporter/bondspas/dynamic/ophalen/'
-    url_download = '/sporter/bondspas/dynamic/download/'
+    url_toon_sporter = '/bondspas/toon/'
+    url_toon_van = '/bondspas/toon/van-lid/%s/'         # lid_nr
+    url_ver_van = '/bondspas/vereniging/van-lid/%s/'    # lid_nr
+    url_ophalen = '/bondspas/dynamic/ophalen/'
+    url_download = '/bondspas/dynamic/download/'
 
     def setUp(self):
 
@@ -55,6 +57,16 @@ class TestBondspas(E2EHelpers, TestCase):
         self.voorkeuren, _ = SporterVoorkeuren.objects.get_or_create(sporter=self.sporter)
 
         self.account_admin = self.e2e_create_account_admin()
+
+        self.functie_sec = maak_functie('SEC test', 'SEC')
+        self.functie_sec.vereniging = self.ver1
+        self.functie_sec.save()
+        self.functie_sec.accounts.add(self.account_admin)
+
+        self.functie_la = maak_functie('LA test', 'LA')
+        self.functie_la.vereniging = self.ver1
+        self.functie_la.save()
+        self.functie_la.accounts.add(self.account_admin)
 
     def test_toon(self):
         # anon
@@ -91,9 +103,8 @@ class TestBondspas(E2EHelpers, TestCase):
         self.assert403(resp)
 
         self.e2e_assert_other_http_commands_not_supported(self.url_toon_sporter)
-
-        self.e2e_assert_other_http_commands_not_supported(self.url_toon_van % 99999)
-
+        self.e2e_assert_other_http_commands_not_supported(self.url_toon_van % 999999)
+        self.e2e_assert_other_http_commands_not_supported(self.url_ver_van % 999999, post=False)
         self.e2e_assert_other_http_commands_not_supported(self.url_ophalen, post=False)
 
     def _check_bondspas_resp(self, resp):
@@ -203,7 +214,7 @@ class TestBondspas(E2EHelpers, TestCase):
             resp = self.client.post(self.url_download)
         self.assert404(resp, 'Geen bondspas voor gast-accounts')
 
-    def test_beheerder(self):
+    def test_beheerder_van(self):
         self.e2e_login_and_pass_otp(self.account_admin)
         self.e2e_wisselnaarrol_bb()
         self.e2e_check_rol('BB')
@@ -238,8 +249,63 @@ class TestBondspas(E2EHelpers, TestCase):
         resp = self.client.post(url)
         self.assert404(resp, 'Geen valide parameter')
 
-    def test_speelsterkte(self):
+    def test_ver_van(self):
+        self.e2e_login_and_pass_otp(self.account_admin)
 
+        url = self.url_ver_van % self.sporter.lid_nr
+
+        self.e2e_wissel_naar_functie(self.functie_sec)
+        self.e2e_check_rol('SEC')
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('bondspas/toon-bondspas-van.dtl', 'plein/site_layout.dtl'))
+
+        # download de pdf
+        with self.assert_max_queries(20):
+            resp = self.client.post(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self._check_bondspas_pdf(resp)
+
+        self.e2e_wissel_naar_functie(self.functie_la)
+        self.e2e_check_rol('LA')
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('bondspas/toon-bondspas-van.dtl', 'plein/site_layout.dtl'))
+
+        # download de pdf
+        with self.assert_max_queries(20):
+            resp = self.client.post(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self._check_bondspas_pdf(resp)
+
+        # gast-account
+        self.sporter.is_gast = True
+        self.sporter.save(update_fields=['is_gast'])
+        resp = self.client.get(url)
+        self.assert404(resp, 'Geen bondspas voor gast-accounts')
+        resp = self.client.post(url)
+        self.assert404(resp, 'Geen bondspas voor gast-accounts')
+        self.sporter.is_gast = False
+        self.sporter.bij_vereniging = None
+        self.sporter.save(update_fields=['is_gast', 'bij_vereniging'])
+
+        # corner cases
+        resp = self.client.get(url)
+        self.assert404(resp, 'Verkeerde vereniging')
+        resp = self.client.post(url)
+        self.assert404(resp, 'Verkeerde vereniging')
+
+        resp = self.client.get(self.url_ver_van % 99999)
+        resp = self.client.post(self.url_ver_van % 99999)
+        self.assert404(resp, 'Geen valide parameter')
+
+    def test_speelsterkte(self):
         for lp in range(15):
             Speelsterkte(
                 sporter=self.sporter,

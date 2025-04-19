@@ -129,8 +129,6 @@ class WebwinkelKeuze(models.Model):
     # aantal producten wat gekozen is
     aantal = models.PositiveSmallIntegerField(default=1)
 
-    # TODO: ondersteun kortingen
-
     # hoeveel moet er betaald worden voor het aantal gekozen producten?
     totaal_euro = models.DecimalField(max_digits=6, decimal_places=2, default=Decimal(0))       # max 9999,99
 
@@ -142,7 +140,10 @@ class WebwinkelKeuze(models.Model):
     log = models.TextField(blank=True)
 
     def korte_beschrijving(self):
-        return "%s x %s" % (self.aantal, self.product.omslag_titel)
+        kort = "%s x %s" % (self.aantal, self.product.omslag_titel)
+        if self.product.kleding_maat:
+            kort += ' maat %s' % self.product.kleding_maat
+        return kort
 
     def __str__(self):
         return self.korte_beschrijving()

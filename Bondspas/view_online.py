@@ -155,10 +155,6 @@ class ToonBondspasBeheerderView(UserPassesTestMixin, View):
         if sporter.is_gast:
             raise Http404('Geen bondspas voor gast-accounts')
 
-        if self.rol_nu in (Rol.ROL_SEC, Rol.ROL_LA):
-            if not sporter.bij_vereniging or sporter.bij_vereniging != self.functie_nu.vereniging:
-                raise Http404('Verkeerde vereniging')
-
         jaar_pas, jaar_wedstrijden = bepaal_jaar_bondspas_en_wedstrijden()
         regels = maak_bondspas_regels(sporter, jaar_pas, jaar_wedstrijden)
         img_data, _ = maak_bondspas_jpeg_en_pdf(jaar_pas, sporter.lid_nr, regels)
@@ -174,7 +170,8 @@ class ToonBondspasBeheerderView(UserPassesTestMixin, View):
 
         return render(request, self.template_name, context)
 
-    def post(self, request, *args, **kwargs):
+    @staticmethod
+    def post(request, *args, **kwargs):
         """ deze functie wordt aangeroepen als de download knop gebruikt wordt
             om een 'bondspas van ...' op te halen.
         """
@@ -187,10 +184,6 @@ class ToonBondspasBeheerderView(UserPassesTestMixin, View):
 
         if sporter.is_gast:
             raise Http404('Geen bondspas voor gast-accounts')
-
-        if self.rol_nu in (Rol.ROL_SEC, Rol.ROL_LA):
-            if not sporter.bij_vereniging or sporter.bij_vereniging != self.functie_nu.vereniging:
-                raise Http404('Verkeerde vereniging')
 
         jaar_pas, jaar_wedstrijden = bepaal_jaar_bondspas_en_wedstrijden()
         regels = maak_bondspas_regels(sporter, jaar_pas, jaar_wedstrijden)
@@ -233,9 +226,8 @@ class ToonBondspasVerenigingView(UserPassesTestMixin, View):
         if sporter.is_gast:
             raise Http404('Geen bondspas voor gast-accounts')
 
-        if self.rol_nu in (Rol.ROL_SEC, Rol.ROL_LA):
-            if not sporter.bij_vereniging or sporter.bij_vereniging != self.functie_nu.vereniging:
-                raise Http404('Verkeerde vereniging')
+        if not sporter.bij_vereniging or sporter.bij_vereniging != self.functie_nu.vereniging:
+            raise Http404('Verkeerde vereniging')
 
         jaar_pas, jaar_wedstrijden = bepaal_jaar_bondspas_en_wedstrijden()
         regels = maak_bondspas_regels(sporter, jaar_pas, jaar_wedstrijden)
@@ -267,9 +259,8 @@ class ToonBondspasVerenigingView(UserPassesTestMixin, View):
         if sporter.is_gast:
             raise Http404('Geen bondspas voor gast-accounts')
 
-        if self.rol_nu in (Rol.ROL_SEC, Rol.ROL_LA):
-            if not sporter.bij_vereniging or sporter.bij_vereniging != self.functie_nu.vereniging:
-                raise Http404('Verkeerde vereniging')
+        if not sporter.bij_vereniging or sporter.bij_vereniging != self.functie_nu.vereniging:
+            raise Http404('Verkeerde vereniging')
 
         jaar_pas, jaar_wedstrijden = bepaal_jaar_bondspas_en_wedstrijden()
         regels = maak_bondspas_regels(sporter, jaar_pas, jaar_wedstrijden)

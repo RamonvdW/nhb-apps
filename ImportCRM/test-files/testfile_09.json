@@ -34,7 +34,8 @@
      "longitude": null,
      "coc_number": null,
      "iban": "NL91ABNA0417164300",
-     "bic": "ABNANL2A"
+     "bic": "ABNANL2A",
+     "member_admins": []
     },
     {"club_number": 1001,
      "region_number": 101,
@@ -57,7 +58,13 @@
      "longitude": null,
      "coc_number": null,
      "iban": null,
-     "bic": null
+     "bic": null,
+     "member_admins": [
+       {
+         "member_number": 100001,
+         "read_only": true
+       }
+     ]
     }
   ],
   "members": [
@@ -73,7 +80,7 @@
       "date_of_death": null,
       "birthplace": null,
       "member_from": "2000-01-01",
-      "member_until": "9999-12-31",
+      "member_until": "2010-12-31",
       "para_code": null,
       "address": null,
       "postal_code": null,

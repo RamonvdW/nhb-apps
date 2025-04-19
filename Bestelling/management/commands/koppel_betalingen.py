@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2024 Ramon van der Winkel.
+#  Copyright (c) 2024-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -25,23 +25,33 @@ class Command(BaseCommand):
         for transactie in BetaalTransactie.objects.filter(transactie_type=TRANSACTIE_TYPE_HANDMATIG):
             count = transactie.bestelling_set.count()
             if count != 1:
-                print('[ERROR] BetaalTransactie pk=%s heeft raar aantal bestellingen: %s' % (transactie.pk, count))
+                self.stdout.write('[ERROR] BetaalTransactie pk=%s heeft raar aantal bestellingen: %s' % (transactie.pk,
+                                                                                                         count))
                 for bestelling in transactie.bestelling_set.all():
-                    print('    bestelling: %s' % bestelling)
+                    self.stdout.write('    bestelling: %s' % bestelling)
             else:
                 bestelling = transactie.bestelling_set.first()
                 mh_nr = bestelling.mh_bestel_nr()
                 if mh_nr not in transactie.beschrijving:
-                    print('Adding %s to transactie %s beschrijving' % (mh_nr, transactie.pk))
+                    self.stdout.write(
+                        '[WARNING] %s toegevoegd aan beschrijving van BetaalTransactie pk=%s' % (mh_nr, transactie.pk))
                     transactie.beschrijving += ' voor ' + mh_nr
                     transactie.save(update_fields=['beschrijving'])
         # for
 
-    def _zoek_transacties(self, mh_nr: str):
-        return BetaalTransactie.objects.filter(beschrijving__contains=mh_nr).exclude(transactie_type=TRANSACTIE_TYPE_MOLLIE_RESTITUTIE)
+    @staticmethod
+    def _zoek_transacties(mh_nr: str):
+        return (BetaalTransactie
+                .objects
+                .filter(beschrijving__contains=mh_nr)
+                .exclude(transactie_type=TRANSACTIE_TYPE_MOLLIE_RESTITUTIE))
 
-    def _zoek_restituties(self, tr_nrs: list):
-        return BetaalTransactie.objects.filter(transactie_type=TRANSACTIE_TYPE_MOLLIE_RESTITUTIE, payment_id__in=tr_nrs)
+    @staticmethod
+    def _zoek_restituties(tr_ids: list):
+        return (BetaalTransactie
+                .objects
+                .filter(transactie_type=TRANSACTIE_TYPE_MOLLIE_RESTITUTIE,
+                        payment_id__in=tr_ids))
 
     def _check_bestellingen(self):
         for bestelling in Bestelling.objects.prefetch_related('transacties').order_by('pk'):
@@ -49,35 +59,38 @@ class Command(BaseCommand):
 
             pks = list(bestelling.transacties.values_list('pk', flat=True))
 
-            tr_nrs = list()
+            tr_ids = list()
             transacties = self._zoek_transacties(mh_nr)
             for transactie in transacties:
                 # print('  +%s' % transactie)
                 if transactie.payment_id:
-                    tr_nrs.append(transactie.payment_id)
+                    # verzamel de transactie id's die te maken hebben met deze bestelling
+                    tr_ids.append(transactie.payment_id)
                 try:
                     pks.remove(transactie.pk)
                 except ValueError:
-                    print(mh_nr)
-                    print('  toevoegen: %s' % transactie)
+                    self.stdout.write(mh_nr)
+                    self.stdout.write('  toevoegen: %s' % transactie)
                     bestelling.transacties.add(transactie)
             # for
-            # print('  tr_nrs: %s' % repr(tr_nrs))
+            # print('  tr_ids: %s' % repr(tr_ids))
 
-            transacties = self._zoek_restituties(tr_nrs)
+            # zoek restituties voor eerdere ontvangen betalingen
+            # deze hebben hetzelfde transactie id
+            transacties = self._zoek_restituties(tr_ids)
             for transactie in transacties:
                 # print('  -%s' % transactie)
                 try:
                     pks.remove(transactie.pk)
                 except ValueError:
-                    print(mh_nr)
-                    print('  toevoegen: %s' % transactie)
+                    self.stdout.write(mh_nr)
+                    self.stdout.write('  toevoegen: %s' % transactie)
                     bestelling.transacties.add(transactie)
             # for
 
             if len(pks) > 0:
-                print(mh_nr)
-                print('  left over: %s' % repr(pks))
+                self.stdout.write(mh_nr)
+                self.stdout.write('  onduidelijke transacties over: %s' % repr(pks))
 
         # for
 
