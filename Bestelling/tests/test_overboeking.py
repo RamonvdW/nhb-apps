@@ -215,7 +215,7 @@ class TestBestellingOverboeking(E2EHelpers, TestCase):
 
         # toch doordrukken
         bestel_overboeking_ontvangen(self.bestelling, Decimal(1.0), snel=True)
-        f1, f2 = self.verwerk_bestel_mutaties(show_all=True)
+        f1, f2 = self.verwerk_bestel_mutaties(show_warnings=False)
         self.assertTrue('is al afgerond (status=Voltooid)' in f2.getvalue())
 
         # bestelling is geannuleerd

@@ -23,13 +23,6 @@
             |    {{ tekst }}
         {% endfor %}
 
-        {% if product.korting_euro > 0.001 %}
-            |    Verkregen korting: {{ product.gebruikte_korting_str }}
-            {% if product.combi_reden %}
-                |    (combinatie korting voor {{ product.combi_reden }})
-            {% endif %}
-        {% endif %}
-
         |    Bedrag: {{ product.bedrag_euro_str }}
 
     {% endfor %}

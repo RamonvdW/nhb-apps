@@ -36,7 +36,7 @@ try:
         for sheet in result['sheets']:
             sheet_names.append(sheet['properties']['title'])
         # for
-        print('[DEBUG] sheet_names: %s' % repr(sheet_names))
+        print('[INFO] Downloading these sheets: %s' % ", ".join(sheet_names))
 
         # door de naam van een sheet te gebruiken as 'Range' krijg je alle cellen uit de sheet
         sheets = dict()

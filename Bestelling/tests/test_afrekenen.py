@@ -9,8 +9,9 @@ from django.conf import settings
 from django.utils import timezone
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse
 from Bestelling.definities import (BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_MISLUKT, BESTELLING_STATUS_NIEUW,
-                                   BESTELLING_STATUS_BETALING_ACTIEF, BESTELLING_STATUS_GEANNULEERD)
-from Bestelling.models import BestellingMandje, Bestelling
+                                   BESTELLING_STATUS_BETALING_ACTIEF, BESTELLING_STATUS_GEANNULEERD,
+                                   BESTELLING_REGEL_CODE_OPLEIDING)
+from Bestelling.models import BestellingMandje, Bestelling, BestellingRegel
 from Bestelling.operations import bestel_mutatieverzoek_inschrijven_wedstrijd
 from Betaal.models import BetaalInstellingenVereniging, BetaalActief, BetaalMutatie, BetaalTransactie
 from Betaal.mutaties import betaal_mutatieverzoek_start_ontvangst
@@ -148,9 +149,45 @@ class TestBestellingBetaling(E2EHelpers, TestCase):
         self.mandje = mandje
 
     def _maak_bestelling(self):
-        # bestel wedstrijddeelname met korting
+        # bestel wedstrijddeelname in het mandje
         bestel_mutatieverzoek_inschrijven_wedstrijd(self.account_admin, self.inschrijving, snel=True)
         self.verwerk_bestel_mutaties()
+
+        # zorg dat alle mogelijke optionele velden in gebruik zijn
+        mandje = BestellingMandje.objects.get(account=self.account_admin)
+        mandje.afleveradres_regel_1 = 'Ontvanger'
+        mandje.afleveradres_regel_2 = 'Straat'
+        mandje.afleveradres_regel_3 = 'Postcode'
+        mandje.afleveradres_regel_4 = 'Plaats'
+        mandje.afleveradres_regel_5 = 'Land'
+        mandje.save()
+
+        regel = BestellingRegel(
+                    korte_beschrijving='test btw 1',
+                    bedrag_euro=Decimal(2),
+                    btw_percentage='21,1',
+                    btw_euro=Decimal(1),
+                    code=BESTELLING_REGEL_CODE_OPLEIDING)
+        regel.save()
+        mandje.regels.add(regel)
+
+        regel = BestellingRegel(
+                    korte_beschrijving='test btw 2',
+                    bedrag_euro=Decimal(2),
+                    btw_percentage='15',
+                    btw_euro=Decimal(1),
+                    code=BESTELLING_REGEL_CODE_OPLEIDING)
+        regel.save()
+        mandje.regels.add(regel)
+
+        regel = BestellingRegel(
+                    korte_beschrijving='test btw 3',
+                    bedrag_euro=Decimal(2),
+                    btw_percentage='9',
+                    btw_euro=Decimal(1),
+                    code=BESTELLING_REGEL_CODE_OPLEIDING)
+        regel.save()
+        mandje.regels.add(regel)
 
         # zet het mandje om in een bestelling
         self.assertEqual(0, Bestelling.objects.count())
@@ -161,6 +198,7 @@ class TestBestellingBetaling(E2EHelpers, TestCase):
 
         self.assertEqual(1, Bestelling.objects.count())
         bestelling = Bestelling.objects.first()
+
         return bestelling
 
     def test_anon(self):
@@ -180,7 +218,15 @@ class TestBestellingBetaling(E2EHelpers, TestCase):
         resp = self.client.get(self.url_afrekenen % 999999)
         self.assert404(resp, 'Niet gevonden')
 
+        # maak de uitgaande mail queue leeg
+        MailQueue.objects.all().delete()
+
         bestelling = self._maak_bestelling()
+
+        self.assertEqual(1, MailQueue.objects.count())
+        mail = MailQueue.objects.first()
+        self.assert_email_html_ok(mail, 'email_bestelling/bevestig-bestelling.dtl')
+        self.assert_consistent_email_html_text(mail)
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_afrekenen % bestelling.bestel_nr)
@@ -191,7 +237,7 @@ class TestBestellingBetaling(E2EHelpers, TestCase):
         # betaling opstarten
         url_betaling_gedaan = '/plein/'     # FUTURE: betere url kiezen
         description = 'Test betaling 421'       # 421 = paid, iDEAL
-        betaal_mutatieverzoek_start_ontvangst(bestelling, description, self.wedstrijd.prijs_euro_normaal,
+        betaal_mutatieverzoek_start_ontvangst(bestelling, description, bestelling.totaal_euro,
                                               url_betaling_gedaan, snel=True)
         self.verwerk_betaal_mutaties()
 
@@ -236,7 +282,7 @@ class TestBestellingBetaling(E2EHelpers, TestCase):
         self.assertEqual(BetaalTransactie.objects.count(), count+1)
 
         # koppeling van transactie aan bestelling wordt door bestel daemon gedaan
-        bestelling = Bestelling.objects.get(pk=bestelling.pk)
+        bestelling.refresh_from_db()
         self.assertEqual(0, bestelling.transacties.count())
 
         # maak de uitgaande mail queue leeg
@@ -247,7 +293,7 @@ class TestBestellingBetaling(E2EHelpers, TestCase):
         msg = f2.getvalue()
         msg = re.sub(r'pk=[0-9]+', 'pk=X', msg)
         self.assertTrue('[INFO] Betaling is gelukt voor bestelling MH-1002001 (pk=X)' in msg)
-        self.assertTrue('[INFO] Bestelling MH-1002001 (pk=X) heeft € 10,00 van de € 10,00 ontvangen' in msg)
+        self.assertTrue('[INFO] Bestelling MH-1002001 (pk=X) heeft € 16,00 van de € 16,00 ontvangen' in msg)
         self.assertTrue('[INFO] Bestelling MH-1002001 (pk=X) is afgerond' in msg)
 
         self.assertEqual(1, bestelling.transacties.count())
@@ -256,7 +302,7 @@ class TestBestellingBetaling(E2EHelpers, TestCase):
         self.assertEqual(1, MailQueue.objects.count())
         mail = MailQueue.objects.first()
         self.assert_email_html_ok(mail, 'email_bestelling/bevestig-betaling.dtl')
-        self.assert_consistent_email_html_text(mail, ignore=('>Prijs:', '>Korting:'))
+        self.assert_consistent_email_html_text(mail)  #, ignore=('>Prijs:', '>Korting:'))
 
         bestelling = Bestelling.objects.get(pk=bestelling.pk)
         self.assertEqual(bestelling.status, BESTELLING_STATUS_AFGEROND)

@@ -254,7 +254,7 @@ class TestBestellingBackoffice(E2EHelpers, TestCase):
         MailQueue.objects.all().delete()
 
         bestel_overboeking_ontvangen(bestelling, bestelling.totaal_euro, snel=True)
-        self.verwerk_bestel_mutaties(show_all=True)
+        self.verwerk_bestel_mutaties()
 
         mail = MailQueue.objects.first()
         self.assert_email_html_ok(mail, 'email_bestelling/backoffice-versturen.dtl')
