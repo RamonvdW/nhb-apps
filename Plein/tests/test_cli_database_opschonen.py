@@ -55,6 +55,16 @@ class TestPleinCliDatabaseOpschonen(E2EHelpers, TestCase):
         account.date_joined -= datetime.timedelta(days=4)
         account.save()
 
+        # maak een spook-account aan (geen koppeling met een sporter)
+        account = account_create(
+                        'test',
+                        'Voornaam',
+                        'Achternaam',
+                        'maak niet echt uit',      # password
+                        'testje@achternaam.nl',
+                        True)
+        account.save()
+
         # maak een oude logboek regel aan
         schrijf_in_logboek(None, 'Test', 'Just testing')
         regel = LogboekRegel.objects.get(gebruikte_functie='Test')
