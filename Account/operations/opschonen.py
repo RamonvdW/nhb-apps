@@ -37,12 +37,13 @@ def accounts_opschonen_geen_sporter(stdout):
                 .filter(nr_sporters=0)):
 
         try:
-            obj.delete()
             stdout.write('[INFO] Verwijder spook-account %s' % obj)
+            obj.delete()
         except ProtectedError as exc:
             # blokkeer inlog
             obj.is_active = False
             obj.save(update_fields=['is_active'])
+            stdout.write('[INFO] Mislukt --> blokkeer spook-account %s' % obj)
 
             # ruim de sessies op zodat het account niet meer ingelogd is
             AccountSessions.objects.filter(account=obj).delete()

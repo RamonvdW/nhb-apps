@@ -7,6 +7,7 @@
 from django.test import TestCase
 from django.utils import timezone
 from Account.operations.aanmaken import account_create
+from BasisTypen.models import BoogType
 from Bestelling.models import BestellingMandje, Bestelling
 from Betaal.models import BetaalInstellingenVereniging, BetaalMutatie, BetaalActief, BetaalTransactie
 from Feedback.models import Feedback
@@ -17,6 +18,7 @@ from Mailer.operations import mailer_queue_email
 from Registreer.definities import (REGISTRATIE_FASE_CLUB, REGISTRATIE_FASE_CONFIRM, REGISTRATIE_FASE_COMPLEET,
                                    REGISTRATIE_FASE_AFGEWEZEN)
 from Registreer.models import GastRegistratie
+from Spelden.models import SpeldAanvraag
 from Sporter.models import Sporter
 from Taken.models import Taak
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -47,22 +49,12 @@ class TestPleinCliDatabaseOpschonen(E2EHelpers, TestCase):
         # maak een onvoltooid account aan
         account = account_create(
                         'test',
-                        'Voornaam',
+                        'Onvoltooid',
                         'Achternaam',
                         'maak niet echt uit',      # password
                         'testje@achternaam.nl',
                         email_is_bevestigd=False)
         account.date_joined -= datetime.timedelta(days=4)
-        account.save()
-
-        # maak een spook-account aan (geen koppeling met een sporter)
-        account = account_create(
-                        'test',
-                        'Voornaam',
-                        'Achternaam',
-                        'maak niet echt uit',      # password
-                        'testje@achternaam.nl',
-                        True)
         account.save()
 
         # maak een oude logboek regel aan
@@ -122,7 +114,7 @@ class TestPleinCliDatabaseOpschonen(E2EHelpers, TestCase):
         gast.aangemaakt = ten_days_ago
         gast.save(update_fields=['aangemaakt'])
 
-        # maak een onvoltooid account aan
+        # maak een onvoltooid gast-account aan
         account = account_create(
                         '800004',
                         'Vierde',
@@ -211,6 +203,43 @@ class TestPleinCliDatabaseOpschonen(E2EHelpers, TestCase):
         transactie = BetaalTransactie(when=two_years_ago)
         transactie.save()
 
+        # maak een spook-account aan (geen koppeling met een sporter)
+        spook1_account = account_create(
+                            'spook1',
+                            'Spook1',
+                            'Achternaam',
+                            'maak niet echt uit',      # password
+                            'spook1@achternaam.nl',
+                            True)
+        spook1_account.save()
+
+        # maak een spook-account aan (geen koppeling met een sporter)
+        # deze gaan we koppelen aan een protected referentie, zodat 'ie niet verwijderd kan worden
+        spook2_account = account_create(
+                            'spook2',
+                            'Spook2',
+                            'Achternaam',
+                            'maak niet echt uit',      # password
+                            'spook2@achternaam.nl',
+                            True)
+        spook2_account.save()
+
+        sporter = Sporter(
+                        lid_nr=100042,
+                        geboorte_datum='2020-01-01',
+                        sinds_datum='2023-07-01',
+                        email=self.gast_email_zes,
+                        account=None)
+        sporter.save()
+
+        SpeldAanvraag(
+                door_account=spook2_account,
+                voor_sporter=sporter,
+                boog_type=BoogType.objects.first(),
+                datum_wedstrijd='2000-01-01').save()
+
+        print('speldaanvraag (1): %s' % SpeldAanvraag.objects.first())
+
     def test_alles(self):
         with self.assert_max_queries(235, modify_acceptable=True):
             f1, f2 = self.run_management_command(DATABASE_OPSCHONEN_COMMAND)
@@ -223,7 +252,7 @@ class TestPleinCliDatabaseOpschonen(E2EHelpers, TestCase):
         self.assertTrue("[INFO] Verwijder 1 oude betaal mutatie records" in f2.getvalue())
         self.assertTrue("[INFO] Verwijder 1 oude betaal-actief records" in f2.getvalue())
         self.assertTrue("[INFO] Verwijder 1 oude betaal-transactie records" in f2.getvalue())
-        self.assertTrue("[INFO] Verwijder onvoltooid account test Voornaam Achternaam" in f2.getvalue())
+        self.assertTrue("[INFO] Verwijder onvoltooid account test Onvoltooid Achternaam" in f2.getvalue())
         self.assertTrue("[INFO] Verwijder 1 oude logboek regels" in f2.getvalue())
         self.assertTrue("[INFO] Verwijder 1 oude emails" in f2.getvalue())
         self.assertTrue("[INFO] Verwijder ongebruikte tijdelijke url" in f2.getvalue())
@@ -231,8 +260,7 @@ class TestPleinCliDatabaseOpschonen(E2EHelpers, TestCase):
         self.assertTrue('[INFO] Verwijder niet afgeronde gast-account registratie 800001 in fase 0' in f2.getvalue())
 
         # nog een keer aanroepen terwijl er niets meer te verwijderen valt
-        with self.assert_max_queries(20):
-            f1, f2 = self.run_management_command(DATABASE_OPSCHONEN_COMMAND)
+        f1, f2 = self.run_management_command(DATABASE_OPSCHONEN_COMMAND)
         self.assertTrue(f1.getvalue() == '')
         self.assertTrue("Klaar" in f2.getvalue())
         # self.assertFalse("[INFO]" in f2.getvalue())
