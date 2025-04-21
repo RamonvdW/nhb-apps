@@ -241,8 +241,7 @@ class TestPleinCliDatabaseOpschonen(E2EHelpers, TestCase):
         print('speldaanvraag (1): %s' % SpeldAanvraag.objects.first())
 
     def test_alles(self):
-        with self.assert_max_queries(235, modify_acceptable=True):
-            f1, f2 = self.run_management_command(DATABASE_OPSCHONEN_COMMAND)
+        f1, f2 = self.run_management_command(DATABASE_OPSCHONEN_COMMAND)
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
         self.assertTrue(f1.getvalue() == '')

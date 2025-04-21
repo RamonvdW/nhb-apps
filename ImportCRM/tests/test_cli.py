@@ -7,6 +7,7 @@
 from django.test import TestCase
 from django.core.management import call_command
 from ImportCRM.models import ImportLimieten
+from Mailer.models import MailQueue
 from TestHelpers.e2ehelpers import E2EHelpers
 from Site.core.main_exceptions import SpecificExitCode
 import io
@@ -183,5 +184,9 @@ class TestImportCRMImport(E2EHelpers, TestCase):
                                                  TESTFILE_22_CRASH)
         # exception zorgt dat f1, f2 niet gevuld worden
         # self.assertTrue('[WARNING] Stuur crash mail naar ontwikkelaar' in f2.getvalue())
+
+        # mail = MailQueue.objects.first()
+        # print(mail.mail_text)
+        self.assertEqual(MailQueue.objects.count(), 3)
 
 # end of file

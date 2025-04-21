@@ -6,9 +6,11 @@
 
 """ vergelijk twee JSON bestanden met data uit het CRM-systeem van de bond """
 
+from django.conf import settings
+from django.utils import timezone
 from django.core.management.base import BaseCommand
 from ImportCRM.models import IMPORT_LIMIETEN_PK, ImportLimieten
-from Mailer.operations import mailer_notify_internal_error
+from Mailer.operations import mailer_notify_internal_error, mailer_queue_email
 from Site.core.main_exceptions import SpecificExitCode
 import traceback
 import logging
@@ -41,12 +43,20 @@ class Command(BaseCommand):
         self._exit_code = 0
         self.club_changes = 0
         self.member_changes = 0
+        self._redenen = list()
 
         # haal de limieten uit de database
         self.limieten = ImportLimieten.objects.filter(pk=IMPORT_LIMIETEN_PK).first()
 
     def add_arguments(self, parser):
         parser.add_argument('filenames', nargs=2, help="Pad naar twee JSON bestanden")
+
+    def _add_reden(self, msg):
+        self._redenen.append(msg)
+        if "[ERROR]" in msg:
+            self.stderr.write(msg)
+        else:
+            self.stdout.write(msg)
 
     def _check_keys(self, keys, expected_keys, level):
         has_error = False
@@ -55,12 +65,12 @@ class Command(BaseCommand):
             try:
                 keys.remove(key)
             except ValueError:
-                self.stderr.write("[ERROR] [FATAL] Verplichte sleutel %s niet aanwezig in de %s data" % (
+                self._add_reden("[ERROR] [FATAL] Verplichte sleutel %s niet aanwezig in de %s data" % (
                                     repr(key), repr(level)))
                 has_error = True
         # for
         if len(keys):
-            self.stdout.write("[WARNING] Extra sleutel aanwezig in de %s data: %s" % (repr(level), repr(keys)))
+            self._add_reden("[WARNING] Extra sleutel aanwezig in de %s data: %s" % (repr(level), repr(keys)))
         return has_error
 
     def _load_json(self, fname):
@@ -68,13 +78,13 @@ class Command(BaseCommand):
             with open(fname, encoding='raw_unicode_escape') as f_handle:
                 data = json.load(f_handle)
         except IOError as exc:
-            self.stderr.write("[ERROR] Bestand kan niet gelezen worden (%s)" % str(exc))
+            self._add_reden("[ERROR] Bestand kan niet gelezen worden (%s)" % str(exc))
             return
         except json.decoder.JSONDecodeError as exc:
-            self.stderr.write("[ERROR] Probleem met het JSON formaat in bestand %s (%s)" % (repr(fname), str(exc)))
+            self._add_reden("[ERROR] Probleem met het JSON formaat in bestand %s (%s)" % (repr(fname), str(exc)))
             return
         except UnicodeDecodeError as exc:
-            self.stderr.write("[ERROR] Bestand heeft unicode problemen (%s)" % str(exc))
+            self._add_reden("[ERROR] Bestand heeft unicode problemen (%s)" % str(exc))
             return
 
         if self._check_keys(data.keys(), EXPECTED_DATA_KEYS, "top-level"):
@@ -82,7 +92,7 @@ class Command(BaseCommand):
 
         for key in EXPECTED_DATA_KEYS:
             if len(data[key]) < 1:
-                self.stderr.write("[ERROR] Geen data voor top-level sleutel %s" % repr(key))
+                self._add_reden("[ERROR] Geen data voor top-level sleutel %s" % repr(key))
                 return
 
         data['fname'] = fname
@@ -98,26 +108,26 @@ class Command(BaseCommand):
             except KeyError:
                 # one of the two does not have this key
                 if first:
-                    self.stdout.write('    club %s' % ver_nr)
+                    self._add_reden('    club %s' % ver_nr)
                     first = False
                 if key in club1:
                     # removed in club2
-                    self.stdout.write('        -%s' % key)
+                    self._add_reden('        -%s' % key)
                 else:
                     # added in club2
-                    self.stdout.write('        +%s' % key)
+                    self._add_reden('        +%s' % key)
             else:
                 if val1 != val2:
                     if first:
-                        self.stdout.write('    club %s' % ver_nr)
+                        self._add_reden('    club %s' % ver_nr)
                         first = False
-                    self.stdout.write('        -%s: %s' % (key, val1))
-                    self.stdout.write('        +%s: %s' % (key, val2))
+                    self._add_reden('        -%s: %s' % (key, val1))
+                    self._add_reden('        +%s: %s' % (key, val2))
                     self.club_changes += 1
         # for
 
     def _diff_clubs(self, clubs1, clubs2):
-        self.stdout.write('clubs:')
+        self._add_reden('clubs:')
 
         clubs = dict()
         for club in clubs1:
@@ -132,14 +142,14 @@ class Command(BaseCommand):
             try:
                 club1 = clubs[ver_nr]
             except KeyError:
-                self.stdout.write('   +club %s' % ver_nr)
+                self._add_reden('   +club %s' % ver_nr)
             else:
                 self._diff_club(ver_nr, club1, club2)
                 del clubs[ver_nr]
         # for
 
         for ver_nr in clubs.keys():
-            self.stdout.write('   -club %s' % ver_nr)
+            self._add_reden('   -club %s' % ver_nr)
             self.club_changes += 1
         # for
 
@@ -151,17 +161,17 @@ class Command(BaseCommand):
             val2 = member2.get(key, None)
             if val1 != val2:
                 if first:
-                    self.stdout.write('    lid %s' % lid_nr)
+                    self._add_reden('    lid %s' % lid_nr)
                     first = False
                 val1 = str(val1).replace('\n', '; ')
                 val2 = str(val2).replace('\n', '; ')
-                self.stdout.write('        -%s: %s' % (key, val1))
-                self.stdout.write('        +%s: %s' % (key, val2))
+                self._add_reden('        -%s: %s' % (key, val1))
+                self._add_reden('        +%s: %s' % (key, val2))
                 self.member_changes += 1
         # for
 
     def _diff_members(self, members1, members2):
-        self.stdout.write('members:')
+        self._add_reden('members:')
 
         members = dict()
         for member1 in members1:
@@ -174,14 +184,14 @@ class Command(BaseCommand):
             try:
                 member1 = members[lid_nr]
             except KeyError:
-                self.stdout.write('   +lid: %s' % lid_nr)
+                self._add_reden('   +lid: %s' % lid_nr)
             else:
                 self._diff_member(lid_nr, member1, member2)
                 del members[lid_nr]
         # for
 
         for lid_nr in members.keys():
-            self.stdout.write('   -lid %s' % lid_nr)
+            self._add_reden('   -lid %s' % lid_nr)
             self.member_changes += 1
         # for
 
@@ -190,18 +200,18 @@ class Command(BaseCommand):
         self._diff_members(data1['members'], data2['members'])
 
     def _diff_jsons(self, fname1, fname2):
-        self.stdout.write('files:')
-        self.stdout.write('   %s' % repr(fname1))
+        self._add_reden('files:')
+        self._add_reden('   %s' % repr(fname1))
         json1 = self._load_json(fname1)
-        self.stdout.write('   %s' % repr(fname2))
+        self._add_reden('   %s' % repr(fname2))
         json2 = self._load_json(fname2)
 
         if json1 and json2:
             self._diff_data(json1, json2)
 
-            self.stdout.write('totals:')
-            self.stdout.write('    club_changes: %s' % self.club_changes)
-            self.stdout.write('    member_changes: %s' % self.member_changes)
+            self._add_reden('totals:')
+            self._add_reden('    club_changes: %s' % self.club_changes)
+            self._add_reden('    member_changes: %s' % self.member_changes)
 
     def handle(self, *args, **options):
         fname1 = options['filenames'][0]
@@ -216,14 +226,14 @@ class Command(BaseCommand):
             lst = traceback.format_tb(tups[2])
             tb = traceback.format_exception(*tups)
 
-            tb_msg_start = 'Unexpected error during import_crm_json\n'
+            tb_msg_start = 'Unexpected error during diff_crm_json\n'
             tb_msg_start += '\n'
             tb_msg = tb_msg_start + '\n'.join(tb)
 
             # full traceback to syslog
             my_logger.error(tb_msg)
 
-            self.stderr.write('[ERROR] Onverwachte fout (%s) tijdens import_crm_json: %s' % (type(exc), str(exc)))
+            self.stderr.write('[ERROR] Onverwachte fout (%s) tijdens diff_crm_json: %s' % (type(exc), str(exc)))
             self.stderr.write('Traceback:')
             self.stderr.write(''.join(lst))
 
@@ -237,17 +247,32 @@ class Command(BaseCommand):
             mailer_notify_internal_error(tb_msg)
 
             self._exit_code = 1
-
-        if self.limieten.use_limits:
-            if self.member_changes > self.limieten.max_member_changes:
-                self.stdout.write('[ERROR] Too many member changes! (limit: %s)' % self.limieten.max_member_changes)
-                self._exit_code = 1
-
-            if self.club_changes > self.limieten.max_club_changes:
-                self.stdout.write('[ERROR] Too many club changes! (limit: %s)' % self.limieten.max_club_changes)
-                self._exit_code = 2
         else:
-            self.stdout.write('[WARNING] Limieten zijn uitgeschakeld')
+            msg = list()
+            if self.limieten.use_limits:
+                if self.member_changes > self.limieten.max_member_changes:
+                    self._add_reden('[ERROR] Too many member changes! (limit: %s)' % self.limieten.max_member_changes)
+                    self._exit_code = 1
+
+                if self.club_changes > self.limieten.max_club_changes:
+                    self._add_reden('[ERROR] Too many club changes! (limit: %s)' % self.limieten.max_club_changes)
+                    self._exit_code = 2
+            else:
+                self.stdout.write('[WARNING] Limieten zijn uitgeschakeld')
+
+            if self._exit_code != 0:
+                now = timezone.now()
+                now = timezone.localtime(now)
+                stamp_str = now.strftime('op %Y-%m-%d om %H:%M')
+
+                self._redenen.insert(0, 'ImportCRM handrem blokkeert import %s' % stamp_str)
+                self._redenen.insert(1, '')
+
+                mailer_queue_email(
+                    settings.EMAIL_DEVELOPER_TO,
+                    'CRM import geblokkeerd %s' % settings.NAAM_SITE,
+                    "\n".join(self._redenen),
+                    enforce_whitelist=False)
 
         if self._exit_code > 0:
             raise SpecificExitCode(self._exit_code)
