@@ -105,7 +105,7 @@ def get_sporter_competities(sporter: Sporter,
 
             comp.status_str = 'tbd'
 
-            if comp.rk_indiv_afgesloten and comp.rk_teams_afgesloten:
+            if comp.rk_indiv_afgesloten:
                 comp.fase = FASE_BK
                 if comp.fase_indiv < 'P':
                     comp.status_str = 'Voorbereidingen'

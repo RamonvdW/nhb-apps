@@ -61,7 +61,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2025-04-19'
+SITE_VERSIE = '2025-04-23'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -383,6 +383,7 @@ SPEELSTERKTE_VOLGORDE = (
     ('Compound', 'Compound 1100', 104),
     ('Compound', 'Compound 1000', 105),
 
+    # cadet / under18 is andere afstand dan senior
     ('Compound', 'Compound Cadet 1400', 110),
     ('Compound', 'Compound Cadet 1350', 111),
     ('Compound', 'Compound Cadet 1300', 112),
@@ -390,6 +391,7 @@ SPEELSTERKTE_VOLGORDE = (
     ('Compound', 'Compound Cadet 1100', 114),
     ('Compound', 'Compound Cadet 1000', 115),
 
+    # master (50+) is andere afstand dan senior
     ('Compound', 'Compound Master 1400', 120),
     ('Compound', 'Compound Master 1350', 121),
     ('Compound', 'Compound Master 1300', 122),
@@ -397,6 +399,7 @@ SPEELSTERKTE_VOLGORDE = (
     ('Compound', 'Compound Master 1100', 124),
     ('Compound', 'Compound Master 1000', 125),
 
+    # senior
     ('Recurve', 'Recurve 1400', 130),
     ('Recurve', 'Recurve 1350', 131),
     ('Recurve', 'Recurve 1300', 132),
@@ -404,12 +407,14 @@ SPEELSTERKTE_VOLGORDE = (
     ('Recurve', 'Recurve 1100', 134),
     ('Recurve', 'Recurve 1000', 135),
 
+    # cadet is andere afstand dan senior
     ('Recurve', 'Recurve Cadet 1350', 141),
     ('Recurve', 'Recurve Cadet 1300', 142),
     ('Recurve', 'Recurve Cadet 1200', 143),
     ('Recurve', 'Recurve Cadet 1100', 144),
     ('Recurve', 'Recurve Cadet 1000', 145),
 
+    # master (50+) is andere afstand dan senior (60 ipv 70 meter)
     ('Recurve', 'Recurve Master 1350', 151),
     ('Recurve', 'Recurve Master 1300', 152),
     ('Recurve', 'Recurve Master 1200', 153),
