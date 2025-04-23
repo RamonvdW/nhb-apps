@@ -6,7 +6,7 @@
 
 from django.conf import settings
 from django.urls import reverse
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, Http404
 from django.utils import timezone
 from django.shortcuts import render
 from django.views.generic import View
@@ -16,9 +16,14 @@ from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving, rol_get_h
 from Instaptoets.models import Instaptoets
 from Opleiding.definities import OPLEIDING_STATUS_TO_STR
 from Opleiding.models import Opleiding, OpleidingInschrijving
+from decimal import Decimal
+from types import SimpleNamespace
+import datetime
 
 TEMPLATE_OPLEIDING_OVERZICHT_MANAGER = 'opleiding/overzicht-manager.dtl'
 TEMPLATE_OPLEIDING_NIET_INGESCHREVEN = 'opleiding/niet-ingeschreven.dtl'
+TEMPLATE_OPLEIDING_WIJZIG_OPLEIDING = 'opleiding/wijzig-opleiding.dtl'
+TEMPLATE_OPLEIDING_WIJZIG_MOMENT = 'opleiding/wijzig-moment.dtl'
 
 
 class ManagerOpleidingenView(UserPassesTestMixin, View):
@@ -53,8 +58,8 @@ class ManagerOpleidingenView(UserPassesTestMixin, View):
 
         for opleiding in opleidingen:
             opleiding.status_str = OPLEIDING_STATUS_TO_STR[opleiding.status]
-            opleiding.url_details = reverse('Opleiding:details',
-                                            kwargs={'opleiding_pk': opleiding.pk})
+            opleiding.url_wijzig = reverse('Opleiding:wijzig-opleiding',
+                                           kwargs={'opleiding_pk': opleiding.pk})
             opleiding.url_aanmeldingen = reverse('Opleiding:aanmeldingen',
                                                  kwargs={'opleiding_pk': opleiding.pk})
         # for
@@ -88,7 +93,8 @@ class OpleidingToevoegenView(UserPassesTestMixin, View):
         rol_nu = rol_get_huidige(self.request)
         return rol_nu == Rol.ROL_MO
 
-    def post(self, request, *args, **kwargs):
+    @staticmethod
+    def post(request, *args, **kwargs):
         now = timezone.now()
         opleiding = Opleiding(
                         laten_zien=False,
@@ -96,7 +102,7 @@ class OpleidingToevoegenView(UserPassesTestMixin, View):
                         periode_einde=now)
         opleiding.save()
 
-        url = reverse('Opleiding:manager')
+        url = reverse('Opleiding:wijzig-opleiding', kwargs={'opleiding_pk': opleiding.pk})
         return HttpResponseRedirect(url)
 
 
@@ -154,6 +160,155 @@ class NietIngeschrevenView(UserPassesTestMixin, View):
         )
 
         return render(request, self.template_name, context)
+
+
+class WijzigOpleidingView(UserPassesTestMixin, View):
+
+    """ Via deze view kan de Manager Opleidingen de definitie van een opleiding aanpassen.
+    """
+
+    # class variables shared by all instances
+    template_name = TEMPLATE_OPLEIDING_WIJZIG_OPLEIDING
+    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.rol_nu, self.functie_nu = None, None
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
+        return self.rol_nu == Rol.ROL_MO
+
+    def _maak_opt_dagen(self, opleiding: Opleiding):
+        opts = list()
+        for aantal in range(1, 7+1):
+            opt = SimpleNamespace(
+                        sel=str(aantal),
+                        keuze_str="%s dagen" % aantal,
+                        selected=(aantal == opleiding.aantal_dagen))
+            if aantal == 1:
+                opt.keuze_str = "1 dag"
+            opts.append(opt)
+        # for
+        return opts
+
+    def get(self, request, *args, **kwargs):
+        """ deze functie wordt aangeroepen om de GET request af te handelen """
+        context = dict()
+
+        try:
+            opleiding_pk = int(kwargs['opleiding_pk'])
+            opleiding = Opleiding.objects.get(pk=opleiding_pk)
+        except (TypeError, ValueError, Opleiding.DoesNotExist):
+            raise Http404('Niet gevonden')
+
+        context['opleiding'] = opleiding
+
+        context['url_opslaan'] = reverse('Opleiding:wijzig-opleiding', kwargs={'opleiding_pk': opleiding.pk})
+
+        # zorg dat de huidige datum weer gekozen kan worden
+        context['now'] = now = timezone.now()
+        context['begin_jaar'] = min(now.year, opleiding.periode_begin.year)
+        context['min_date'] = datetime.date(now.year, 1, 1)
+        context['max_date'] = datetime.date(now.year + 2, 12, 31)
+
+        context['opt_dagen'] = self._maak_opt_dagen(opleiding)
+
+        context['kruimels'] = (
+            (reverse('Opleiding:manager'), 'Opleidingen'),
+            (None, 'Wijzig opleiding'),
+        )
+
+        return render(request, self.template_name, context)
+
+    @staticmethod
+    def post(request, *args, **kwargs):
+        """ deze functie wordt aangeroepen als de manager de Opslaan knop indrukt """
+
+        try:
+            opleiding_pk = int(kwargs['opleiding_pk'])
+            opleiding = Opleiding.objects.get(pk=opleiding_pk)
+        except (TypeError, ValueError, Opleiding.DoesNotExist):
+            raise Http404('Niet gevonden')
+
+        # titel
+        param = request.POST.get('titel', '?')
+        opleiding.titel = param[:75]
+
+        now = timezone.now()
+        min_date = datetime.date(now.year, 1, 1)
+        max_date = datetime.date(now.year + 2, 12, 31)
+
+        # periode begin
+        datum_ymd = request.POST.get('periode_begin', '')[:10]  # afkappen voor de veiligheid
+        if datum_ymd:
+            try:
+                datum = datetime.datetime.strptime(datum_ymd, '%Y-%m-%d')
+            except ValueError:
+                raise Http404('Geen valide begin datum')
+
+            datum = datetime.date(datum.year, datum.month, datum.day)
+            if min_date <= datum <= max_date:
+                opleiding.periode_begin = datum
+
+        # periode einde
+        datum_ymd = request.POST.get('periode_einde', '')[:10]  # afkappen voor de veiligheid
+        if datum_ymd:
+            try:
+                datum = datetime.datetime.strptime(datum_ymd, '%Y-%m-%d')
+            except ValueError:
+                raise Http404('Geen valide eind datum')
+
+            datum = datetime.date(datum.year, datum.month, datum.day)
+            if opleiding.periode_begin <= datum <= max_date:
+                opleiding.periode_einde = datum
+
+        # aantal dagen
+        param = request.POST.get('dagen', '1')[:2]  # afkappen voor de veiligheid
+        try:
+            param = int(param)
+        except (ValueError, TypeError):
+            raise Http404('Geen valide aantal dagen')
+        opleiding.aantal_dagen = param
+
+        # aantal uren
+        param = request.POST.get('uren', '1')[:2]  # afkappen voor de veiligheid
+        try:
+            param = int(param)
+        except (ValueError, TypeError):
+            raise Http404('Geen valide aantal uren')
+        opleiding.aantal_uren = param
+
+        # beschrijving (text)
+        param = request.POST.get('beschrijving', '')[:1500]     # afkappen voor de veiligheid
+        opleiding.beschrijving = param
+
+        # ingangseisen (text)
+        param = request.POST.get('ingangseisen', '')[:1500]     # afkappen voor de veiligheid
+        opleiding.ingangseisen = param
+
+        # ingangseisen
+        param = request.POST.get('eis_instaptoets', '')[:3]     # afkappen voor de veiligheid
+        print('eis_instaptoets: %s' % repr(param))
+
+        # kosten
+        param = request.POST.get('kosten', '0')
+        param = param.replace(',', '.')     # dutch to standard decimal point
+        try:
+            param = float(param)
+        except ValueError:
+            param = 1.0
+        param = min(param, 9999.99)     # avoid too large numbers
+        param = max(param, 0.0)         # avoid negative numbers
+        opleiding.kosten_euro = Decimal(param)
+
+        opleiding.save()
+
+        # redirect naar de GET pagina, anders geeft F5 in de browser een nieuwe POST
+        url = reverse('Opleiding:wijzig-opleiding', kwargs={'opleiding_pk': opleiding.pk})
+        return HttpResponseRedirect(url)
 
 
 # end of file

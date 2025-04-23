@@ -63,6 +63,7 @@ urlpatterns = [
          view_aanmeldingen.OpleidingDetailsAfmeldingView.as_view(),
          name='details-afmelding'),
 
+    # manager
     path('manager/',
          view_manager.ManagerOpleidingenView.as_view(),
          name='manager'),
@@ -71,13 +72,18 @@ urlpatterns = [
          view_manager.NietIngeschrevenView.as_view(),
          name='niet-ingeschreven'),
 
+    # aanpassingen persoonsgegevens
+    path('manager/aanpassingen/',
+         view_aanpassingen.AanpassingenView.as_view(),
+         name='aanpassingen'),
+
     path('toevoegen/',
          view_manager.OpleidingToevoegenView.as_view(),
          name='toevoegen'),
 
-    path('manager/aanpassingen/',
-         view_aanpassingen.AanpassingenView.as_view(),
-         name='aanpassingen')
+    path('wijzig/<opleiding_pk>/',
+         view_manager.WijzigOpleidingView.as_view(),
+         name='wijzig-opleiding'),
 ]
 
 # end of file

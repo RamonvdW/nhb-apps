@@ -39,13 +39,14 @@
         let ignore_datum_changes = true;
 
         function datum_omzetten(is_initial=false) {
-            // nieuwe datum gekozen met de datepicker
-            let el1 = document.querySelector('#id_datum_begin');
-            let el2 = document.querySelector('#id_datum');
-            el1.value = el2.M_Datepicker.toString('yyyy-mm-dd');
-
             // ignore calls tijdens initialisatie
-            if (!ignore_datum_changes) gewijzigd();
+            if (!ignore_datum_changes) {
+                // nieuwe datum gekozen met de datepicker
+                let el1 = document.querySelector('#id_datum_begin');
+                let el2 = document.querySelector('#id_datum');
+                el1.value = el2.M_Datepicker.toString('yyyy-mm-dd');
+                gewijzigd();
+            }
             if (is_initial) ignore_datum_changes = false;
         }
 
@@ -84,7 +85,7 @@
 
             <!-- dialoog venster -->
             <div class="sv-kader left-align z-depth-3">
-                <div class="form-padding" style="padding-top:0px">
+                <div class="form-padding" style="padding-top:0">
 
                     <form action="{{ url_opslaan }}" method="post" onsubmit="document.getElementById('submit_knop3').disabled=true; return true;">
                         {% csrf_token %}

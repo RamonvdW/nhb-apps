@@ -45,8 +45,8 @@
                         <td>{{ opleiding.titel }}</td>
                         <td>
                             <div style="white-space:nowrap">     <!-- keeps buttons side by side -->
-                                <a class="btn-sv-rood" href="{{ opleiding.url_details }}" style="padding:0; width:35px; margin-right:5px">
-                                    <i class="notranslate material-icons-round">schedule</i></a>
+                                <a class="btn-sv-rood" href="{{ opleiding.url_wijzig }}" style="padding:0; width:35px; margin-right:5px">
+                                    <i class="notranslate material-icons-round">edit</i></a>
                                 <a class="btn-sv-rood" href="{{ opleiding.url_aanmeldingen }}" style="padding:0; width:35px; margin-right:5px">
                                     <i class="notranslate material-icons-round">people_alt</i>
                                 </a>
