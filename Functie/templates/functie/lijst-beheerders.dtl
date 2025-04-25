@@ -146,6 +146,11 @@
                         </td>
                     </tr>
                 {% endfor %}
+
+                <!-- lege regel die niet gefilterd wordt, zodat row border niet buiten afronding tabel uitsteekt -->
+                <tr data-tablefilter="stop">
+                    <td colspan="3" style="padding:5px"></td>
+                </tr>
             </table>
         </div>
     </div>
