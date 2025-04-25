@@ -15,7 +15,7 @@ from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving, rol_get_huidige
 from Instaptoets.models import Instaptoets
 from Opleiding.definities import OPLEIDING_STATUS_TO_STR
-from Opleiding.models import Opleiding, OpleidingInschrijving
+from Opleiding.models import Opleiding, OpleidingInschrijving, OpleidingMoment
 from decimal import Decimal
 from types import SimpleNamespace
 import datetime
@@ -200,7 +200,7 @@ class WijzigOpleidingView(UserPassesTestMixin, View):
 
         try:
             opleiding_pk = int(kwargs['opleiding_pk'])
-            opleiding = Opleiding.objects.get(pk=opleiding_pk)
+            opleiding = Opleiding.objects.prefetch_related('momenten').get(pk=opleiding_pk)
         except (TypeError, ValueError, Opleiding.DoesNotExist):
             raise Http404('Niet gevonden')
 
@@ -215,6 +215,12 @@ class WijzigOpleidingView(UserPassesTestMixin, View):
         context['max_date'] = datetime.date(now.year + 2, 12, 31)
 
         context['opt_dagen'] = self._maak_opt_dagen(opleiding)
+
+        context['momenten'] = momenten = list(opleiding.momenten.all())
+        for moment in momenten:
+            moment.url_edit = reverse('Opleiding:wijzig-moment', kwargs={'opleiding_pk': opleiding.pk,
+                                                                         'moment_pk': moment.pk})
+        # for
 
         context['kruimels'] = (
             (reverse('Opleiding:manager'), 'Opleidingen'),
@@ -232,6 +238,17 @@ class WijzigOpleidingView(UserPassesTestMixin, View):
             opleiding = Opleiding.objects.get(pk=opleiding_pk)
         except (TypeError, ValueError, Opleiding.DoesNotExist):
             raise Http404('Niet gevonden')
+
+        # moment toevoegen
+        param = request.POST.get('add-moment', '')
+        if param == 'y':
+            moment = OpleidingMoment(datum=opleiding.periode_begin)
+            moment.save()
+            opleiding.momenten.add(moment)
+
+            url = reverse('Opleiding:wijzig-moment', kwargs={'opleiding_pk': opleiding.pk,
+                                                             'moment_pk': moment.pk})
+            return HttpResponseRedirect(url)
 
         # titel
         param = request.POST.get('titel', '?')
@@ -285,13 +302,26 @@ class WijzigOpleidingView(UserPassesTestMixin, View):
         param = request.POST.get('beschrijving', '')[:1500]     # afkappen voor de veiligheid
         opleiding.beschrijving = param
 
-        # ingangseisen (text)
+        # ingangseisen
+        param = request.POST.get('eis_instaptoets', '')[:3]     # afkappen voor de veiligheid
+        opleiding.eis_instaptoets = (param != '')
+
         param = request.POST.get('ingangseisen', '')[:1500]     # afkappen voor de veiligheid
         opleiding.ingangseisen = param
 
-        # ingangseisen
-        param = request.POST.get('eis_instaptoets', '')[:3]     # afkappen voor de veiligheid
-        print('eis_instaptoets: %s' % repr(param))
+        param = request.POST.get('leeftijd_min', '16')[:2]
+        try:
+            param = int(param)
+        except (ValueError, TypeError):
+            param = 16
+        opleiding.leeftijd_min = param
+
+        param = request.POST.get('leeftijd_max', '0')[:2]
+        try:
+            param = int(param)
+        except (ValueError, TypeError):
+            param = 0
+        opleiding.leeftijd_max = param
 
         # kosten
         param = request.POST.get('kosten', '0')
@@ -309,6 +339,52 @@ class WijzigOpleidingView(UserPassesTestMixin, View):
         # redirect naar de GET pagina, anders geeft F5 in de browser een nieuwe POST
         url = reverse('Opleiding:wijzig-opleiding', kwargs={'opleiding_pk': opleiding.pk})
         return HttpResponseRedirect(url)
+
+
+class WijzigMomentView(UserPassesTestMixin, View):
+
+    """ Via deze view kan de Manager Opleidingen de definitie van een opleiding-moment aanpassen.
+    """
+
+    # class variables shared by all instances
+    template_name = TEMPLATE_OPLEIDING_WIJZIG_MOMENT
+    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.rol_nu, self.functie_nu = None, None
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
+        return self.rol_nu == Rol.ROL_MO
+
+    def get(self, request, *args, **kwargs):
+        """ deze functie wordt aangeroepen om de GET request af te handelen """
+        context = dict()
+
+        try:
+            opleiding_pk = int(kwargs['opleiding_pk'])
+            opleiding = Opleiding.objects.get(pk=opleiding_pk)
+        except (TypeError, ValueError, Opleiding.DoesNotExist):
+            raise Http404('Opleiding niet gevonden')
+
+        try:
+            moment_pk = int(kwargs['moment_pk'])
+            moment = OpleidingMoment.objects.get(pk=moment_pk)
+        except (TypeError, ValueError, OpleidingMoment.DoesNotExist):
+            raise Http404('Moment niet gevonden')
+
+        context['moment'] = moment
+
+        context['kruimels'] = (
+            (reverse('Opleiding:manager'), 'Opleidingen'),
+            (reverse('Opleiding:wijzig-opleiding', kwargs={'opleiding_pk': opleiding.pk}), 'Wijzig opleiding'),
+            (None, 'Wijzig moment'),
+        )
+
+        return render(request, self.template_name, context)
 
 
 # end of file

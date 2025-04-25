@@ -84,6 +84,10 @@ urlpatterns = [
     path('wijzig/<opleiding_pk>/',
          view_manager.WijzigOpleidingView.as_view(),
          name='wijzig-opleiding'),
+
+    path('wijzig/<opleiding_pk>/data-en-locaties/wijzig/<moment_pk>/',
+         view_manager.WijzigMomentView.as_view(),
+         name='wijzig-moment'),
 ]
 
 # end of file

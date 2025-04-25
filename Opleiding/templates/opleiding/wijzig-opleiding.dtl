@@ -55,22 +55,17 @@
             <div class="sv-kader left-align z-depth-3">
                 <div class="form-padding" style="padding-top:0">
 
-                    <form action="{{ url_opslaan }}" method="post" onsubmit="document.getElementById('submit_knop3').disabled=true; return true;">
+                    <form action="{{ url_opslaan }}" method="post" onsubmit="document.getElementById('submit_knop2').disabled=true; document.getElementById('submit_knop3').disabled=true; return true;">
                         {% csrf_token %}
-
-                        <!-- floating knop: Opslaan -->
-                        <div class="fixed-action-btn" style="display: none">
-                            <button class="btn-sv-rood" id="submit_knop" type="submit" disabled>
-                                <i class="notranslate material-icons-round left">check</i>Opslaan</button>
-                        </div>
 
                         <table class="sv-kader">
 
                             <tr>
-                                <th>Korte titel</th>
+                                <th style="width:25%">Korte titel</th>
                                 <td>
                                     <input type="text" name="titel" maxlength="75" value="{{ opleiding.titel }}" oninput="gewijzigd()">
                                 </td>
+                                <td></td>
                             </tr>
 
                             <tr>
@@ -78,13 +73,33 @@
                                 <td>
                                     <textarea name="beschrijving" class="materialize-textarea" oninput="gewijzigd()">{{ opleiding.beschrijving }}</textarea>
                                 </td>
+                                <td></td>
+                            </tr>
+
+                            <tr>
+                                <th>Status</th>
+                                <td>
+                                    <span class="{% if opleiding.status == 'V' %}sv-blauw-text{% else %}grey-text{% endif %}">Voorbereiden</span><br>
+                                    <span class="{% if opleiding.status == 'I' %}sv-blauw-text{% else %}grey-text{% endif %}">Open voor inschrijven</span><br>
+                                    <span class="{% if opleiding.status == 'A' %}sv-blauw-text{% else %}grey-text{% endif %}">Geannuleerd</span><br>
+                                    <span class="{% if opleiding.status == 'G' %}sv-blauw-text{% else %}grey-text{% endif %}">Gesloten</span><br>
+                                </td>
+                                <td></td>
+                            </tr>
+
+                            <tr>
+                                <th>Kosten deelname</th>
+                                <td>
+                                    <span style="font-size:16px">&euro;&nbsp;</span>
+                                    <input style="width:90%" type="text" name="kosten" value="{{ opleiding.kosten_euro }}" pattern="^\d+(,\d{2})?$" placeholder="123,45" oninput="gewijzigd()">
+                                </td>
+                                <td></td>
                             </tr>
 
 
                             <tr>
-                                <td colspan="2" class="center sv-blauw-text"><h6>Period en belasting</h6></td>
+                                <td colspan="3" class="center sv-blauw-text"><h6>Periode en belasting</h6></td>
                             </tr>
-
 
                             <tr>
                                 <th>Begin periode</th>
@@ -92,6 +107,7 @@
                                     <input type="text" class="nl_datepicker" id="id_begin" onchange="datum_omzetten()">
                                     <input type="hidden" name="periode_begin" id="id_datum_begin"> <!-- voor POST, in juiste formaat -->
                                 </td>
+                                <td></td>
                             </tr>
 
                             <tr>
@@ -100,6 +116,7 @@
                                     <input type="text" class="nl_datepicker" id="id_einde" onchange="datum_omzetten()">
                                     <input type="hidden" name="periode_einde" id="id_datum_einde"> <!-- voor POST, in juiste formaat -->
                                 </td>
+                                <td></td>
                             </tr>
 
                             <tr>
@@ -111,6 +128,7 @@
                                         {% endfor %}
                                     </select>
                                 </td>
+                                <td></td>
                             </tr>
 
                             <tr>
@@ -118,272 +136,94 @@
                                 <td>
                                     <input type="number" min="1" max="99" name="uren" value="{{ opleiding.aantal_uren }}" onchange="gewijzigd()">
                                 </td>
+                                <td></td>
                             </tr>
 
 
                             <tr>
-                                <td colspan="2" class="center sv-blauw-text"><h6>Voorwaarden</h6></td>
+                                <td colspan="3" class="center sv-blauw-text"><h6>Voorwaarden</h6></td>
                             </tr>
 
                             <tr>
-                                <th>Instaptoets nodig?</th>
+                                <th>Instaptoets</th>
                                 <td>
-                                    <input type="checkbox" name="eis_instaptoets" class="filled-in"{% if opleiding.eis_instaptoets %} checked{% endif %} onchange="gewijzigd()">
+                                    <label>
+                                        <input type="checkbox" name="eis_instaptoets" class="filled-in" {% if opleiding.eis_instaptoets %}checked {% endif %}onchange="gewijzigd()">
+                                        <span class="black-text">Instaptoets moet gehaald zijn</span>
+                                    </label>
                                 </td>
-                            </tr>
-
-                            <tr>
-                                <th>Uitleg ingangseisen</th>
-                                <td>
-                                    <textarea name="ingangseisen" class="materialize-textarea" oninput="gewijzigd()">{{ opleiding.ingangseisen }}</textarea>
-                                </td>
+                                <td></td>
                             </tr>
 
                             <tr>
                                 <th>Leeftijd minimaal</th>
                                 <td>
-                                    <input type="number" name="leeftijd_min" value="{{ opleiding.leeftijd_min }}" min="0" max="99">
+                                    <input type="number" name="leeftijd_min" value="{{ opleiding.leeftijd_min }}" min="0" max="99" onchange="gewijzigd()">
                                 </td>
+                                <td></td>
                             </tr>
 
                             <tr>
                                 <th>Leeftijd maximaal (0 = geen grens)</th>
                                 <td>
-                                    <input type="number" name="leeftijd_max" value="{{ opleiding.leeftijd_max }}" min="0" max="99">
+                                    <input type="number" name="leeftijd_max" value="{{ opleiding.leeftijd_max }}" min="0" max="99" onchange="gewijzigd()">
                                 </td>
+                                <td></td>
                             </tr>
 
-
                             <tr>
-                                <th>Status</th>
+                                <th>Overige ingangseisen</th>
                                 <td>
-                                    {% for opt in opt_status %}
-                                        <span class="{% if opt.selected %}sv-blauw-text{% else %}grey-text{% endif %}" style="white-space: nowrap">{{ opt.status_str }}</span><br>
-                                    {% endfor %}
-                                    <br>
-                                    {% if url_prev_tekst %}
-                                        <button form="form_prev" class="btn-sv-blauw vertrek_knop" id="submit_knop2" type="submit">{{ url_prev_tekst }}</button>
-                                        <span>&nbsp;&nbsp;</span>
-                                    {% endif %}
-                                    {% if url_next_tekst %}
-                                        {% if wed.wacht_op_keuze_scheids %}
-                                            <button class="btn-sv-rood" disabled>{{ url_next_tekst }}</button>
-                                            <br><p class="sv-rood-text">Eerst een keuze maken voor de scheidsrechters behoefte.</p>
-                                        {% elif wed.wacht_op_sessies %}
-                                            <button class="btn-sv-rood" disabled>{{ url_next_tekst }}</button>
-                                            <br><p class="sv-rood-text">Eerst sessies aanmaken.</p>
-                                        {% else %}
-                                            <button form="form_next" class="btn-sv-rood vertrek_knop" id="submit_knop1" type="submit">{{ url_next_tekst }}</button>
-                                        {% endif %}
-                                    {% endif %}
-                                    {% if not wed.verkoopvoorwaarden_status_acceptatie %}
-                                        <br><span style="margin-top:16px">Goedkeuring kan aangevraagd worden als de voorwaarden voor gebruik MijnHandboogsport geaccepteerd zijn.</span>
-                                    {% endif %}
+                                    <textarea name="ingangseisen" class="materialize-textarea" oninput="gewijzigd()">{{ opleiding.ingangseisen }}</textarea>
                                 </td>
-                            </tr>
-
-
-
-
-                            <tr>
-                                <th>Wedstrijd locatie</th>
-                                <td>
-                                    {% if block_edits %}
-                                        <span>{{ wed.locatie }}</span>
-                                    {% else %}
-                                        {% if toon_uitvoerende %}
-                                            <select name="uitvoerend" onchange="gewijzigd()">
-                                                {% for opt in opt_uitvoerende_vers %}
-                                                    <option value="{{ opt.sel }}"{% if opt.selected %} selected{% endif %}>{{ opt.keuze_str }}</option>
-                                                {% endfor %}
-                                            </select>
-                                            <br>
-                                        {% endif %}
-
-                                        <ul id="id_locatie">
-                                            {% for opt in opt_locatie %}
-                                               <li>
-                                                    <label class="black-text" for="id_{{ opt.sel }}">
-                                                        <input class="with-gap" type="radio" name="locatie" value="{{ opt.sel }}" required id="id_{{ opt.sel }}"{% if opt.selected %} checked{% endif %} onchange="gewijzigd()">
-                                                        <span>{{ opt.keuze_str|linebreaksbr }}{% if not forloop.last %}<br>&nbsp;{% endif %}</span>
-                                                    </label>
-                                                </li>
-                                            {% endfor %}
-                                        </ul>
-                                    {% endif %}
-                                </td>
+                                <td></td>
                             </tr>
 
                             <tr>
-                                <th>Doelgroep</th>
-                                <td>
-                                    {% if block_edits %}
-                                        <span>{{ wed.begrenzing_str }}</span>
-                                    {% else %}
-                                        <ul id="id_doelgroep">
-                                            {% for opt in opt_begrenzing %}
-                                                <li>
-                                                    <label class="black-text" for="id_{{ opt.sel }}">
-                                                        <input class="with-gap" type="radio" name="begrenzing" value="{{ opt.sel }}" required id="id_{{ opt.sel }}"{% if opt.selected %} checked{% endif %} onchange="gewijzigd()">
-                                                        <span>{{ opt.keuze_str }}</span>
-                                                    </label>
-                                                </li>
-                                            {% endfor %}
-                                        </ul>
-                                    {% endif %}
-                                </td>
+                                <td colspan="3" class="center"><h6 class="sv-blauw-text">Data en locaties</h6></td>
                             </tr>
 
-                            <tr>                         <!-- F = IFAA -->
-                                <th>{% if wed.organisatie == 'F' %}Toegestane schietstijlen{% else %}Toegestane bogen{% endif %}</th>
-                                <td>
-                                    {% if limit_edits %}
-                                        {% for boog in opt_bogen %}
-                                            {% if boog.selected %}
-                                                <span>{{ boog.beschrijving }}</span><br>
-                                            {% endif %}
-                                        {% endfor %}
-                                    {% else %}
-                                        {% for boog in opt_bogen %}
-                                            <label class="black-text">
-                                                <input type="checkbox" name="{{ boog.sel }}"{% if boog.gebruikt %} disabled checked{% else %} class="filled-in"{% if boog.selected %} checked{% endif %}{% endif %} onchange="gewijzigd()">
-                                                <span>{{ boog.beschrijving }}</span>
-                                            </label><br>
-                                        {% endfor %}
-                                    {% endif %}
-                                </td>
-                            </tr>
+                            {% for moment in momenten %}
+                                <tr>
+                                    <th></th>
+                                    <td>{{ moment }}</td>
+                                    <td>
+                                        <!-- wijzig knop -->
+                                        <a class="btn-sv-rood" href="{{ moment.url_edit }}">
+                                            <i class="material-icons-round">edit</i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="3" class="center">
+                                        <i>Nog geen locaties</i>
+                                    </td>
+                                </tr>
+                            {% endfor %}
 
+                            <!-- streep tussen einde tabel en toevoegen knop -->
                             <tr>
-                                <th>Aanwezig melden</th>
-                                <td>
-                                    {% if block_edits %}
-                                        <span>{{ wed.minuten_voor_begin_sessie_aanwezig_zijn }} minuten van te voren</span>
-                                    {% else %}
-                                        <span>Hoe lang van tevoren wil je sporters vragen aanwezig te zijn?</span>
-                                        <select name="aanwezig" onchange="gewijzigd()">
-                                            {% for opt in opt_aanwezig %}
-                                                <option value="{{ opt.sel }}"{% if opt.selected %} selected{% endif %}>{{ opt.keuze_str }}</option>
-                                            {% endfor %}
-                                        </select>
-                                    {% endif %}
-                                </td>
-                            </tr>
-
-
-                            <tr>
-                                <td colspan="2" class="center sv-blauw-text"><h6>Contactgegevens organisatie</h6></td>
-                            </tr>
-
-                            <tr>
-                                <th>Naam van contact<wbr>persoon / wedstrijd<wbr>leider</th>
-                                <td>
-                                    {% if block_edits %}
-                                        <span>{{ wed.contact_naam }}</span>
-                                    {% else %}
-                                        <input type="text" name="contact_naam" value="{{ wed.contact_naam }}" oninput="gewijzigd()">
-                                    {% endif %}
-                                </td>
-                            </tr>
-
-                            <tr>
-                                <th>Telefoon<wbr>nummer</th>
-                                <td>
-                                    {% if block_edits %}
-                                        <span>{{ wed.contact_telefoon }}</span>
-                                    {% else %}
-                                        <input type="tel" name="contact_telefoon" value="{{ wed.contact_telefoon }}" oninput="gewijzigd()">
-                                    {% endif %}
-                                </td>
-                            </tr>
-
-                            {% comment %}
-                            <tr>
-                                <th>E-mail<wbr>adres</th>
-                                <td>
-                                    {% if block_edits %}
-                                        <span>{{ wed.contact_email }}</span>
-                                    {% else %}
-                                        <input type="email" name="contact_email" value="{{ wed.contact_email }}" inputmode="email" oninput="gewijzigd()">
-                                    {% endif %}
-                                </td>
-                            </tr>
-
-                            <tr>
-                                <th>Website</th>
-                                <td>
-                                    {% if block_edits %}
-                                        <span>{{ wed.contact_website }}</span>
-                                    {% else %}
-                                        <input type="url" name="contact_website" value="{{ wed.contact_website }}" inputmode="url" oninput="gewijzigd()">
-                                    {% endif %}
-                                </td>
-                            </tr>
-                            {% endcomment %}
-
-                            <tr>
-                                <th>Extern beheer</th>
-                                <td>
-                                    {% if block_edits %}
-                                        <span>{% if wed.extern_beheerd %}Ja{% else %}Nee{% endif %}</span>
-                                    {% else %}
-                                        <label class="black-text">
-                                            <input type="checkbox" class="filled-in" name="extern"{% if wed.extern_beheerd %} checked{% endif %} onchange="gewijzigd()">
-                                            <span>Inschrijven via bovenstaande website en/of e-mailadres</span>
-                                        </label>
-                                    {% endif %}
-                                </td>
-                            </tr>
-
-
-                            <tr>
-                                <th>Kosten deelname</th>
-                                <td>
-                                    <span style="font-size:16px">&euro;&nbsp;</span>
-                                    <input style="width:90%" type="text" name="kosten" value="{{ opleiding.kosten_euro }}" pattern="^\d+(,\d{2})?$" placeholder="123,45" oninput="gewijzigd()">
-                                </td>
-                            </tr>
-
-                            <tr>
-                                <td colspan="2" class="center">
-                                    <h6 class="sv-blauw-text">Wedstrijdklassen</h6>
-                                                         <!-- N = KHSN -->
-                                    {% if wed.organisatie == 'N' %}
-                                        <p>Klassen zonder man/vrouw benoeming zijn genderneutraal</p>
-                                    {% endif %}
-                                </td>
-                            </tr>
-
-                            <tr>
-                                <th></th>
-                                <td>
-                                    {% for klasse in opt_klasse %}
-                                        <label class="black-text">
-                                            <input type="checkbox" name="{{ klasse.sel }}" {% if klasse.gebruikt %}disabled checked{% else %}class="filled-in" {% if klasse.selected %} checked{% endif %}{% if klasse.disabled %} disabled{% endif %}{% endif %} onchange="gewijzigd('{{ klasse.code_blokkeer }}')" data-code="{{ klasse.code }}">
-                                            <span>{{ klasse.volg_nr }}: {{ klasse.beschrijving }}</span>
-                                        </label><br>
-                                    {% endfor %}
-                                </td>
+                                <td colspan="3"></td>
                             </tr>
                         </table>
 
-
-                        <div class="center">
-                                                 <!-- N = KHSN -->
-                            {% if wed.organisatie == 'N' and wedstrijd_is_a_status %}
-                                <p>Let op! Onder 14 en 60+ klassen mogen op A-status wedstrijd, maar kunnen geen records claimen.</p>
-                            {% endif %}
-
-                            <p>De wedstrijdklasse van de volwassenen is altijd de 'open' klasse waarin alle andere leeftijdsklassen mee mogen doen.</p>
-                            <p>Wedstrijdklassen en bogen die niet aangepast kunnen worden, zijn in gebruik in een sessie.</p>
-                        </div>
-
-                        <div class="fixed-action-btn" style="display: none">
+                        <div class="fixed-action-btn" style="display:none">
                             <button class="btn-sv-rood" id="submit_knop3" type="submit" disabled>
                                 <i class="notranslate material-icons-round left">check</i>Wijzigen opslaan</button>
                         </div>
 
                     </form>
+
+                    <div class="center">
+                        <form action="{{ url_opslaan }}" method="post" onsubmit="document.getElementById('submit_knop2').disabled=true; document.getElementById('submit_knop3').disabled=true; return true;">
+                        {% csrf_token %}
+                        <input type="hidden" name="add-moment" value="y">
+
+                        <button class="btn-sv-rood" id="submit_knop2" type="submit">
+                            <i class="material-icons-round">add</i>
+                        </button>
+                    </div>
 
                 </div>
             </div>
