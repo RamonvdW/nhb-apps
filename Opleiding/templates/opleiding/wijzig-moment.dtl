@@ -1,0 +1,170 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2025 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Wijzig opleiding moment{% endblock %}
+
+{% block pagina %}
+
+    <script>
+        function gewijzigd(code_blokkeer) {
+            // het formulier is aangepast en moet opgeslagen worden
+
+            // enable de 'opslaan' knop
+            const el = document.getElementById("submit_knop3");
+            el.disabled = false;
+            el.parentElement.style.display = "block";
+        }
+
+        let ignore_datum_changes = true;
+
+        function datum_omzetten(is_initial=false) {
+            // ignore calls tijdens initialisatie
+            if (!ignore_datum_changes) {
+                // nieuwe datum gekozen met de datepicker
+                let el1 = document.querySelector('#id_datum_out');        // hidden element
+                let el2 = document.querySelector('#id_datum_in');         // date picker widget
+                el1.value = el2.M_Datepicker.toString('yyyy-mm-dd');
+
+                gewijzigd();
+            }
+            if (is_initial) ignore_datum_changes = false;
+        }
+    </script>
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Wijzig opleiding moment</h3>
+        </div>
+    </div>
+
+    <!-- blauwe balk met dialoog venster -->
+    <div class="row-sv-blauw">
+        <div class="col s12">
+
+            <!-- dialoog venster -->
+            <div class="sv-kader left-align z-depth-3">
+                <div class="form-padding" style="padding-top:0">
+
+                    <form action="{{ url_opslaan }}" method="post" onsubmit="document.getElementById('submit_knop2').disabled=true; document.getElementById('submit_knop3').disabled=true; return true;">
+                        {% csrf_token %}
+
+                        <table class="sv-kader">
+
+                            <tr>
+                                <th style="width:25%">Opleiding</th>
+                                <td>{{ opleiding.titel }} ({{ opleiding.periode_str }})</td>
+                            </tr>
+
+                            <tr>
+                                <td colspan="2" class="center"><h6 class="sv-blauw-text">Wanneer</h6></td>
+                            </tr>
+
+                            <tr>
+                                <th>Datum</th>
+                                <td>
+                                    <input type="text" class="nl_datepicker" id="id_datum_in" onchange="datum_omzetten()">
+                                    <input type="hidden" name="datum" id="id_datum_out"> <!-- voor POST, in juiste formaat -->
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th>Aantal dagen</th>
+                                <td>
+                                    <input type="number" min="1" max="7" name="dagen" value="{{ moment.aantal_dagen }}" onchange="gewijzigd()">
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th>Aantal minuten per dag</th>
+                                <td>
+                                    <input type="number" min="1" max="600" name="minuten" value="{{ moment.duur_minuten }}" onchange="gewijzigd()">
+                                </td>
+                            </tr>
+
+
+                            <tr>
+                                <td colspan="2" class="center"><h6 class="sv-blauw-text">Waar</h6></td>
+                            </tr>
+
+                            <tr>
+                                <th>Locatie</th>
+                                <td>
+                                    <select name="locatie" onchange="gewijzigd()">
+                                        <option value="geen"{% if not moment.locatie %} selected{% endif %}>-- nog niet gekozen --</option>
+                                        {% for locatie in locaties %}
+                                            <option value="{{ locatie.pk }}"{% if locatie.is_selected %} selected{% endif %}>{{ locatie.naam }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td colspan="2" class="center"><h6 class="sv-blauw-text">Contactgegevens docent</h6></td>
+                            </tr>
+
+                            <tr>
+                                <th>Naam</th>
+                                <td>
+                                    <input type="text" name="naam" value="{{ moment.opleider_naam }}" onchange="gewijzigd()">
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th>E-mailadres</th>
+                                <td>
+                                    <input type="email" name="email" value="{{ moment.opleider_email }}" onchange="gewijzigd()">
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th>Telefoonnummer</th>
+                                <td>
+                                    <input type="tel" name="tel" value="{{ moment.opleider_telefoon }}" onchange="gewijzigd()">
+                                </td>
+                            </tr>
+                        </table>
+
+                        <div class="fixed-action-btn" style="display:none">
+                            <button class="btn-sv-rood" id="submit_knop3" type="submit" disabled>
+                                <i class="notranslate material-icons-round left">check</i>Wijzigen opslaan</button>
+                        </div>
+
+                    </form>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- initialisatie van de datum/tijd kiezers -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+                const minDate = new Date("{{ min_date|date:'Y-m-d' }}");
+                const maxDate = new Date("{{ max_date|date:'Y-m-d' }}");
+
+                let el = document.querySelector('#id_datum_in');
+                if (el) {
+                    let options = { defaultDate: new Date("{{ moment.datum|date:'Y-m-d' }}"),
+                                    setDefaultDate: true,
+                                    format: "dddd d mmmm yyyy",
+                                    minDate: minDate, maxDate: maxDate,
+                                    yearRange: 0};
+
+                    M.Datepicker.init(el, options);
+                }
+
+                // zet initiële id_datum_out + activeer conversie van id_datum_in
+                datum_omzetten(true);
+            })
+    </script>
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="opleiding-wijzig-opleiding" %}
+
+{% endblock %}

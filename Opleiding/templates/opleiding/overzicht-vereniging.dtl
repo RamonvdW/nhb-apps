@@ -54,6 +54,12 @@
                             </div>
                         </td>
                     </tr>
+                    {% if forloop.last %}
+                        <!-- lege regel die niet gefilterd wordt, zodat row border niet buiten afronding tabel uitsteekt -->
+                        <tr data-tablefilter="stop">
+                            <td colspan="4" style="padding:5px"></td>
+                        </tr>
+                    {% endif %}
                 {% empty %}
                     <tr data-tablefilter="stop">
                         <td class="center" colspan="4"><i>Er zijn nog geen opleidingen</i></td>

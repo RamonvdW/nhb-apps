@@ -8,12 +8,14 @@ from django.conf import settings
 from django.urls import reverse
 from django.http import HttpResponseRedirect, Http404
 from django.utils import timezone
+from django.db.models import Count
 from django.shortcuts import render
 from django.views.generic import View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving, rol_get_huidige
 from Instaptoets.models import Instaptoets
+from Locatie.models import EvenementLocatie
 from Opleiding.definities import OPLEIDING_STATUS_TO_STR
 from Opleiding.models import Opleiding, OpleidingInschrijving, OpleidingMoment
 from decimal import Decimal
@@ -202,7 +204,7 @@ class WijzigOpleidingView(UserPassesTestMixin, View):
             opleiding_pk = int(kwargs['opleiding_pk'])
             opleiding = Opleiding.objects.prefetch_related('momenten').get(pk=opleiding_pk)
         except (TypeError, ValueError, Opleiding.DoesNotExist):
-            raise Http404('Niet gevonden')
+            raise Http404('Opleiding niet gevonden')
 
         context['opleiding'] = opleiding
 
@@ -216,11 +218,29 @@ class WijzigOpleidingView(UserPassesTestMixin, View):
 
         context['opt_dagen'] = self._maak_opt_dagen(opleiding)
 
-        context['momenten'] = momenten = list(opleiding.momenten.all())
-        for moment in momenten:
+        momenten = list()
+        for moment in opleiding.momenten.all():
             moment.url_edit = reverse('Opleiding:wijzig-moment', kwargs={'opleiding_pk': opleiding.pk,
                                                                          'moment_pk': moment.pk})
+            moment.sel = 'M_%s' % moment.pk
+            moment.is_selected = True
+
+            tup = (moment.datum, moment.pk, moment)
+            momenten.append(tup)
         # for
+
+        for moment in OpleidingMoment.objects.annotate(aantal=Count('opleiding')).filter(aantal=0).all():
+            moment.url_edit = reverse('Opleiding:wijzig-moment', kwargs={'opleiding_pk': opleiding.pk,
+                                                                         'moment_pk': moment.pk})
+            moment.sel = 'M_%s' % moment.pk
+            moment.is_selected = False
+            tup = (moment.datum, moment.pk, moment)
+            momenten.append(tup)
+        # for
+
+        momenten.sort()
+        context['momenten'] = [tup[-1]
+                               for tup in momenten]
 
         context['kruimels'] = (
             (reverse('Opleiding:manager'), 'Opleidingen'),
@@ -336,8 +356,41 @@ class WijzigOpleidingView(UserPassesTestMixin, View):
 
         opleiding.save()
 
+        # momenten
+        old_pks = list(opleiding.momenten.values_list('pk', flat=True))
+        check_pks = list()
+        new_pks = list()
+        for key in request.POST.keys():
+            if key[:2] == 'M_':
+                try:
+                    pk = int(key[2:2+7])        # afkappen voor de veiligheid
+                except (ValueError, TypeError):
+                    pass
+                else:
+                    if pk in old_pks:
+                        new_pks.append(pk)
+                    else:
+                        # controleer dat deze nog niet in gebruik is
+                        check_pks.append(pk)
+        # for
+
+        if len(check_pks):
+            new_pks.extend(
+                    list(
+                        OpleidingMoment
+                        .objects
+                        .filter(pk__in=check_pks)
+                        .annotate(aantal=Count('opleiding'))
+                        .filter(aantal=0)
+                        .values_list('pk', flat=True)
+                    ))
+
+        # vervang de lijst de hele lijst van momenten voor deze opleiding
+        momenten = OpleidingMoment.objects.filter(pk__in=new_pks)
+        opleiding.momenten.set(momenten)
+
         # redirect naar de GET pagina, anders geeft F5 in de browser een nieuwe POST
-        url = reverse('Opleiding:wijzig-opleiding', kwargs={'opleiding_pk': opleiding.pk})
+        url = reverse('Opleiding:manager')
         return HttpResponseRedirect(url)
 
 
@@ -370,13 +423,32 @@ class WijzigMomentView(UserPassesTestMixin, View):
         except (TypeError, ValueError, Opleiding.DoesNotExist):
             raise Http404('Opleiding niet gevonden')
 
+        context['opleiding'] = opleiding
+        min_date = datetime.date(opleiding.periode_begin.year, opleiding.periode_begin.month, 1)
+
+        if opleiding.periode_einde.month == 12:
+            max_date = datetime.date(opleiding.periode_einde.year + 1, 1, 1)
+        else:
+            max_date = datetime.date(opleiding.periode_einde.year, opleiding.periode_einde.month + 1, 1)
+        max_date -= datetime.timedelta(days=1)       # end of previous month
+
+        context['min_date'], context['max_date'] = min_date, max_date
+
         try:
             moment_pk = int(kwargs['moment_pk'])
-            moment = OpleidingMoment.objects.get(pk=moment_pk)
+            moment = OpleidingMoment.objects.select_related('locatie').get(pk=moment_pk)
         except (TypeError, ValueError, OpleidingMoment.DoesNotExist):
             raise Http404('Moment niet gevonden')
 
         context['moment'] = moment
+
+        context['locaties'] = locaties = EvenementLocatie.objects.exclude(zichtbaar=False)
+        for locatie in locaties:
+            locatie.is_selected = (moment.locatie and moment.locatie.pk == locatie.pk)
+        # for
+
+        context['url_opslaan'] = reverse('Opleiding:wijzig-moment', kwargs={'opleiding_pk': opleiding.pk,
+                                                                            'moment_pk': moment.pk})
 
         context['kruimels'] = (
             (reverse('Opleiding:manager'), 'Opleidingen'),
@@ -385,6 +457,97 @@ class WijzigMomentView(UserPassesTestMixin, View):
         )
 
         return render(request, self.template_name, context)
+
+    @staticmethod
+    def post(request, *args, **kwargs):
+        """ deze functie wordt aangeroepen als de manager de Opslaan knop indrukt """
+
+        try:
+            opleiding_pk = int(kwargs['opleiding_pk'])
+            opleiding = Opleiding.objects.get(pk=opleiding_pk)
+        except (TypeError, ValueError, Opleiding.DoesNotExist):
+            raise Http404('Opleiding niet gevonden')
+
+        try:
+            moment_pk = int(kwargs['moment_pk'])
+            moment = OpleidingMoment.objects.get(pk=moment_pk)
+        except (TypeError, ValueError, OpleidingMoment.DoesNotExist):
+            raise Http404('Moment niet gevonden')
+
+        # datum
+        min_date = datetime.date(opleiding.periode_begin.year, opleiding.periode_begin.month, 1)
+
+        if opleiding.periode_einde.month == 12:
+            max_date = datetime.date(opleiding.periode_einde.year + 1, 1, 1)
+        else:
+            max_date = datetime.date(opleiding.periode_einde.year, opleiding.periode_einde.month + 1, 1)
+        max_date -= datetime.timedelta(days=1)       # end of previous month
+
+        datum_ymd = request.POST.get('datum', '')[:10]  # afkappen voor de veiligheid
+        if datum_ymd:
+            try:
+                datum = datetime.datetime.strptime(datum_ymd, '%Y-%m-%d')
+            except ValueError:
+                raise Http404('Geen valide datum')
+
+            datum = datetime.date(datum.year, datum.month, datum.day)
+            if min_date <= datum <= max_date:
+                moment.datum = datum
+
+        # aantal dagen
+        param = request.POST.get('dagen', '1')
+        try:
+            param = int(param)
+            if 1 <= param <= 7:
+                moment.aantal_dagen = param
+        except (ValueError, TypeError):
+            pass
+
+        # begin tijd
+        param = request.POST.get('begin_tijd', '10:00')[:5]
+        try:
+            hours = int(param[0:0+2])
+            mins = int(param[3:3+2])
+            if 0 <= hours <= 23 and 0 <= mins <= 59:
+                moment.begin_tijd = "%02d:%02d" % (hours, mins)
+        except (ValueError, TypeError):
+            pass
+
+        # duur in minuten
+        param = request.POST.get('minuten', '60')
+        try:
+            param = int(param)
+            if 1 <= param <= 600:
+                moment.duur_minuten = param
+        except (ValueError, TypeError):
+            pass
+
+        # locatie
+        param = request.POST.get('locatie')[:6]     # afkappen voor de veiligheid
+        try:
+            locatie = EvenementLocatie.objects.get(pk=int(param))
+        except (ValueError, TypeError, EvenementLocatie.DoesNotExist):
+            pass
+        else:
+            moment.locatie = locatie
+
+        # naam docent
+        param = request.POST.get('naam', '')
+        moment.opleider_naam = param[:150]
+
+        # e-mail docent
+        param = request.POST.get('email', '')
+        moment.opleider_email = param[:254]
+
+        # telefoonnummer docent
+        param = request.POST.get('tel', '')
+        moment.opleider_telefoon = param[:25]
+
+        moment.save()
+
+        # redirect naar de GET pagina, anders geeft F5 in de browser een nieuwe POST
+        url = reverse('Opleiding:wijzig-opleiding', kwargs={'opleiding_pk': opleiding.pk})
+        return HttpResponseRedirect(url)
 
 
 # end of file

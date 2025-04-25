@@ -168,16 +168,16 @@ class Opleiding(models.Model):
         # localize() geeft "1 januari 2024"
         wanneer_str = localize(self.periode_begin)
         # verwijder de dag
-        wanneer_str = wanneer_str.replace(str(self.periode_begin.day), '').strip()
+        wanneer_str = wanneer_str[len(str(self.periode_begin.day)):].strip()
 
-        if self.periode_begin != self.periode_einde:
+        if self.periode_begin.year != self.periode_einde.year or self.periode_begin.month != self.periode_einde.month:
             # localize() geeft "1 januari 2024"
             einde_str = localize(self.periode_einde)
             # verwijder de dag
-            einde_str = einde_str.replace(str(self.periode_einde.day), '').strip()
+            einde_str = einde_str[len(str(self.periode_einde.day)):].strip()
 
+            # verwijder het jaartal indien gelijk --> "april tot mei 2025"
             if self.periode_begin.year == self.periode_einde.year:
-                # verwijder het jaartal
                 wanneer_str = wanneer_str.replace(str(self.periode_begin.year), '').strip()
 
             wanneer_str += " tot " + einde_str

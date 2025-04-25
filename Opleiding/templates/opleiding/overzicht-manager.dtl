@@ -60,7 +60,7 @@
                 {% endfor %}
 
                 <!-- toevoegen knop -->
-                <tr>
+                <tr data-tablefilter="stop">
                     <td class="center" colspan="4">
                         <form action="{{ url_toevoegen }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
                             {% csrf_token %}
@@ -96,15 +96,15 @@
             {% endif %}
 
             {% if url_niet_ingeschreven %}
-                {% include 'plein/card_icon.dtl' with title="Gehaald" text="Wie hebben de instaptoets gehaald, maar zijn niet ingeschreven voor de basiscursus?" icon="radar" url=url_niet_ingeschreven %}
+                {% include 'plein/card_icon.dtl' with title="Niet ingeschreven" text="Wie hebben de instaptoets gehaald, maar zijn niet ingeschreven voor de basiscursus?" icon="radar" url=url_niet_ingeschreven %}
             {% endif %}
 
             {% if url_gezakt %}
-                {% include 'plein/card_icon.dtl' with title="Gezakt" text="Wie hebben de instaptoets gemaakt maar hebben die niet gehaald?" icon="thumb_down_off_alt" url=url_gezakt %}
+                {% include 'plein/card_icon.dtl' with title="Niet gehaald" text="Wie hebben de instaptoets gemaakt maar hebben die niet gehaald?" icon="thumb_down_off_alt" url=url_gezakt %}
             {% endif %}
 
             {% if url_voorwaarden %}
-                {% include 'plein/card_icon.dtl' with title="Opleidingen" text="De verkoopvoorwaarden voor de opleidingen staan beschreven in dit document." icon="article" extern_open=True url=url_voorwaarden %}
+                {% include 'plein/card_icon.dtl' with title="Voorwaarden" text="De verkoopvoorwaarden voor de opleidingen staan beschreven in dit document." icon="article" extern_open=True url=url_voorwaarden %}
             {% endif %}
         </div>
     </div>

@@ -220,8 +220,14 @@
                 <td>{{ account.functies_str }}</td>
                 <td>{{ account.last_login|date:"j b Y" }}</td>   <!--|date:"j b H:i"-->
             </tr>
+            {% if forloop.last %}
+                <!-- lege regel die niet gefilterd wordt, zodat row border niet buiten afronding tabel uitsteekt -->
+                <tr data-tablefilter="stop">
+                    <td colspan="4" style="padding:5px"></td>
+                </tr>
+            {% endif %}
         {% empty %}
-            <tr>
+            <tr data-tablefilter="stop">
                 <td colspan="4">
                     <i>Geen accounts gevonden die hulp nodig hebben</i>
                 </td>

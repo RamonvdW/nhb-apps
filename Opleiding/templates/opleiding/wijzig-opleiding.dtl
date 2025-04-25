@@ -55,7 +55,12 @@
             <div class="sv-kader left-align z-depth-3">
                 <div class="form-padding" style="padding-top:0">
 
-                    <form action="{{ url_opslaan }}" method="post" onsubmit="document.getElementById('submit_knop2').disabled=true; document.getElementById('submit_knop3').disabled=true; return true;">
+                    <form id="form1" action="{{ url_opslaan }}" method="post" onsubmit="document.getElementById('submit_knop2').disabled=true; document.getElementById('submit_knop3').disabled=true; return true;">
+                        {% csrf_token %}
+                        <input type="hidden" name="add-moment" value="y">
+                    </form>
+
+                    <form id="form2" action="{{ url_opslaan }}" method="post" onsubmit="document.getElementById('submit_knop2').disabled=true; document.getElementById('submit_knop3').disabled=true; return true;">
                         {% csrf_token %}
 
                         <table class="sv-kader">
@@ -66,6 +71,49 @@
                                     <input type="text" name="titel" maxlength="75" value="{{ opleiding.titel }}" oninput="gewijzigd()">
                                 </td>
                                 <td></td>
+                            </tr>
+
+
+                            {% if opleiding.titel != '' %}
+                                <tr>
+                                    <td colspan="3" class="center"><h6 class="sv-blauw-text">Datums en locaties</h6></td>
+                                </tr>
+
+                                {% for moment in momenten %}
+                                    <tr>
+                                        <th></th>
+                                        <td>
+                                            <label>
+                                                <input type="checkbox" name="{{ moment.sel }}" class="filled-in" {% if moment.is_selected %}checked {% endif %}onchange="gewijzigd()">
+                                                <span class="black-text">{{ moment }}</span>
+                                            </label>
+                                        </td>
+                                        <td>
+                                            <!-- wijzig knop -->
+                                            <a class="btn-sv-rood" href="{{ moment.url_edit }}">
+                                                <i class="material-icons-round notranslate">edit</i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="3" class="center">
+                                            <i>Nog geen locaties</i>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+
+                                <tr>
+                                    <td colspan="3" class="center">
+                                        <button form="form1" class="btn-sv-rood" id="submit_knop2" type="submit">
+                                            <i class="material-icons-round">add</i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            {% endif %}
+
+                            <tr>
+                                <td colspan="3" class="center"><h6 class="sv-blauw-text">Basisgegevens</h6></td>
                             </tr>
 
                             <tr>
@@ -179,33 +227,6 @@
                                 <td></td>
                             </tr>
 
-                            <tr>
-                                <td colspan="3" class="center"><h6 class="sv-blauw-text">Data en locaties</h6></td>
-                            </tr>
-
-                            {% for moment in momenten %}
-                                <tr>
-                                    <th></th>
-                                    <td>{{ moment }}</td>
-                                    <td>
-                                        <!-- wijzig knop -->
-                                        <a class="btn-sv-rood" href="{{ moment.url_edit }}">
-                                            <i class="material-icons-round">edit</i>
-                                        </a>
-                                    </td>
-                                </tr>
-                            {% empty %}
-                                <tr>
-                                    <td colspan="3" class="center">
-                                        <i>Nog geen locaties</i>
-                                    </td>
-                                </tr>
-                            {% endfor %}
-
-                            <!-- streep tussen einde tabel en toevoegen knop -->
-                            <tr>
-                                <td colspan="3"></td>
-                            </tr>
                         </table>
 
                         <div class="fixed-action-btn" style="display:none">
@@ -214,16 +235,6 @@
                         </div>
 
                     </form>
-
-                    <div class="center">
-                        <form action="{{ url_opslaan }}" method="post" onsubmit="document.getElementById('submit_knop2').disabled=true; document.getElementById('submit_knop3').disabled=true; return true;">
-                        {% csrf_token %}
-                        <input type="hidden" name="add-moment" value="y">
-
-                        <button class="btn-sv-rood" id="submit_knop2" type="submit">
-                            <i class="material-icons-round">add</i>
-                        </button>
-                    </div>
 
                 </div>
             </div>
