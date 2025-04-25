@@ -196,17 +196,21 @@ class WijzigOpleidingView(UserPassesTestMixin, View):
         # for
         return opts
 
+    @staticmethod
+    def _get_opleiding_or_404(kwargs):
+        try:
+            opleiding_pk = int(kwargs['opleiding_pk'])
+            opleiding = Opleiding.objects.get(pk=opleiding_pk)
+        except (TypeError, ValueError, Opleiding.DoesNotExist):
+            raise Http404('Opleiding niet gevonden')
+
+        return opleiding
+
     def get(self, request, *args, **kwargs):
         """ deze functie wordt aangeroepen om de GET request af te handelen """
         context = dict()
 
-        try:
-            opleiding_pk = int(kwargs['opleiding_pk'])
-            opleiding = Opleiding.objects.prefetch_related('momenten').get(pk=opleiding_pk)
-        except (TypeError, ValueError, Opleiding.DoesNotExist):
-            raise Http404('Opleiding niet gevonden')
-
-        context['opleiding'] = opleiding
+        context['opleiding'] = opleiding = self._get_opleiding_or_404(kwargs)
 
         context['url_opslaan'] = reverse('Opleiding:wijzig-opleiding', kwargs={'opleiding_pk': opleiding.pk})
 
@@ -249,15 +253,10 @@ class WijzigOpleidingView(UserPassesTestMixin, View):
 
         return render(request, self.template_name, context)
 
-    @staticmethod
-    def post(request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
         """ deze functie wordt aangeroepen als de manager de Opslaan knop indrukt """
 
-        try:
-            opleiding_pk = int(kwargs['opleiding_pk'])
-            opleiding = Opleiding.objects.get(pk=opleiding_pk)
-        except (TypeError, ValueError, Opleiding.DoesNotExist):
-            raise Http404('Niet gevonden')
+        opleiding = self._get_opleiding_or_404(kwargs)
 
         # moment toevoegen
         param = request.POST.get('add-moment', '')
@@ -284,11 +283,11 @@ class WijzigOpleidingView(UserPassesTestMixin, View):
             try:
                 datum = datetime.datetime.strptime(datum_ymd, '%Y-%m-%d')
             except ValueError:
-                raise Http404('Geen valide begin datum')
-
-            datum = datetime.date(datum.year, datum.month, datum.day)
-            if min_date <= datum <= max_date:
-                opleiding.periode_begin = datum
+                pass
+            else:
+                datum = datetime.date(datum.year, datum.month, datum.day)
+                if min_date <= datum <= max_date:
+                    opleiding.periode_begin = datum
 
         # periode einde
         datum_ymd = request.POST.get('periode_einde', '')[:10]  # afkappen voor de veiligheid
@@ -296,27 +295,27 @@ class WijzigOpleidingView(UserPassesTestMixin, View):
             try:
                 datum = datetime.datetime.strptime(datum_ymd, '%Y-%m-%d')
             except ValueError:
-                raise Http404('Geen valide eind datum')
-
-            datum = datetime.date(datum.year, datum.month, datum.day)
-            if opleiding.periode_begin <= datum <= max_date:
-                opleiding.periode_einde = datum
+                pass
+            else:
+                datum = datetime.date(datum.year, datum.month, datum.day)
+                if opleiding.periode_begin <= datum <= max_date:
+                    opleiding.periode_einde = datum
 
         # aantal dagen
         param = request.POST.get('dagen', '1')[:2]  # afkappen voor de veiligheid
         try:
             param = int(param)
+            opleiding.aantal_dagen = param
         except (ValueError, TypeError):
-            raise Http404('Geen valide aantal dagen')
-        opleiding.aantal_dagen = param
+            pass
 
         # aantal uren
         param = request.POST.get('uren', '1')[:2]  # afkappen voor de veiligheid
         try:
             param = int(param)
+            opleiding.aantal_uren = param
         except (ValueError, TypeError):
-            raise Http404('Geen valide aantal uren')
-        opleiding.aantal_uren = param
+            pass
 
         # beschrijving (text)
         param = request.POST.get('beschrijving', '')[:1500]     # afkappen voor de veiligheid
@@ -413,17 +412,7 @@ class WijzigMomentView(UserPassesTestMixin, View):
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
         return self.rol_nu == Rol.ROL_MO
 
-    def get(self, request, *args, **kwargs):
-        """ deze functie wordt aangeroepen om de GET request af te handelen """
-        context = dict()
-
-        try:
-            opleiding_pk = int(kwargs['opleiding_pk'])
-            opleiding = Opleiding.objects.get(pk=opleiding_pk)
-        except (TypeError, ValueError, Opleiding.DoesNotExist):
-            raise Http404('Opleiding niet gevonden')
-
-        context['opleiding'] = opleiding
+    def _get_min_max_dates(self, opleiding: Opleiding):
         min_date = datetime.date(opleiding.periode_begin.year, opleiding.periode_begin.month, 1)
 
         if opleiding.periode_einde.month == 12:
@@ -432,7 +421,15 @@ class WijzigMomentView(UserPassesTestMixin, View):
             max_date = datetime.date(opleiding.periode_einde.year, opleiding.periode_einde.month + 1, 1)
         max_date -= datetime.timedelta(days=1)       # end of previous month
 
-        context['min_date'], context['max_date'] = min_date, max_date
+        return min_date, max_date
+
+    @staticmethod
+    def _get_opleiding_moment_or_404(kwargs):
+        try:
+            opleiding_pk = int(kwargs['opleiding_pk'])
+            opleiding = Opleiding.objects.get(pk=opleiding_pk)
+        except (TypeError, ValueError, Opleiding.DoesNotExist):
+            raise Http404('Opleiding niet gevonden')
 
         try:
             moment_pk = int(kwargs['moment_pk'])
@@ -440,7 +437,17 @@ class WijzigMomentView(UserPassesTestMixin, View):
         except (TypeError, ValueError, OpleidingMoment.DoesNotExist):
             raise Http404('Moment niet gevonden')
 
+        return opleiding, moment
+
+    def get(self, request, *args, **kwargs):
+        """ deze functie wordt aangeroepen om de GET request af te handelen """
+        context = dict()
+
+        opleiding, moment = self._get_opleiding_moment_or_404(kwargs)
+
+        context['opleiding'] = opleiding
         context['moment'] = moment
+        context['min_date'], context['max_date'] = self._get_min_max_dates(opleiding)
 
         context['locaties'] = locaties = EvenementLocatie.objects.exclude(zichtbaar=False)
         for locatie in locaties:
@@ -458,41 +465,23 @@ class WijzigMomentView(UserPassesTestMixin, View):
 
         return render(request, self.template_name, context)
 
-    @staticmethod
-    def post(request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
         """ deze functie wordt aangeroepen als de manager de Opslaan knop indrukt """
 
-        try:
-            opleiding_pk = int(kwargs['opleiding_pk'])
-            opleiding = Opleiding.objects.get(pk=opleiding_pk)
-        except (TypeError, ValueError, Opleiding.DoesNotExist):
-            raise Http404('Opleiding niet gevonden')
-
-        try:
-            moment_pk = int(kwargs['moment_pk'])
-            moment = OpleidingMoment.objects.get(pk=moment_pk)
-        except (TypeError, ValueError, OpleidingMoment.DoesNotExist):
-            raise Http404('Moment niet gevonden')
+        opleiding, moment = self._get_opleiding_moment_or_404(kwargs)
+        min_date, max_date = self._get_min_max_dates(opleiding)
 
         # datum
-        min_date = datetime.date(opleiding.periode_begin.year, opleiding.periode_begin.month, 1)
-
-        if opleiding.periode_einde.month == 12:
-            max_date = datetime.date(opleiding.periode_einde.year + 1, 1, 1)
-        else:
-            max_date = datetime.date(opleiding.periode_einde.year, opleiding.periode_einde.month + 1, 1)
-        max_date -= datetime.timedelta(days=1)       # end of previous month
-
         datum_ymd = request.POST.get('datum', '')[:10]  # afkappen voor de veiligheid
         if datum_ymd:
             try:
                 datum = datetime.datetime.strptime(datum_ymd, '%Y-%m-%d')
             except ValueError:
-                raise Http404('Geen valide datum')
-
-            datum = datetime.date(datum.year, datum.month, datum.day)
-            if min_date <= datum <= max_date:
-                moment.datum = datum
+                pass
+            else:
+                datum = datetime.date(datum.year, datum.month, datum.day)
+                if min_date <= datum <= max_date:
+                    moment.datum = datum
 
         # aantal dagen
         param = request.POST.get('dagen', '1')
@@ -523,13 +512,11 @@ class WijzigMomentView(UserPassesTestMixin, View):
             pass
 
         # locatie
-        param = request.POST.get('locatie')[:6]     # afkappen voor de veiligheid
+        param = request.POST.get('locatie', '')[:6]     # afkappen voor de veiligheid
         try:
-            locatie = EvenementLocatie.objects.get(pk=int(param))
+            moment.locatie = EvenementLocatie.objects.get(pk=int(param))
         except (ValueError, TypeError, EvenementLocatie.DoesNotExist):
             pass
-        else:
-            moment.locatie = locatie
 
         # naam docent
         param = request.POST.get('naam', '')

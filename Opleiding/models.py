@@ -100,7 +100,7 @@ class OpleidingMoment(models.Model):
         return wanneer_str
 
     def __str__(self):
-        msg = "%s %s (%s min)" % (self.wanneer_compact(), str(self.begin_tijd)[:5], self.duur_minuten)
+        msg = "%s %s" % (self.wanneer_compact(), str(self.begin_tijd)[:5])
         if self.locatie:
             msg += " [%s]" % self.locatie.naam
         msg += " " + self.opleider_naam

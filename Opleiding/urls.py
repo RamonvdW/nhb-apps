@@ -77,15 +77,15 @@ urlpatterns = [
          view_aanpassingen.AanpassingenView.as_view(),
          name='aanpassingen'),
 
-    path('toevoegen/',
+    path('manager/toevoegen/',
          view_manager.OpleidingToevoegenView.as_view(),
          name='toevoegen'),
 
-    path('wijzig/<opleiding_pk>/',
+    path('manager/wijzig/<opleiding_pk>/',
          view_manager.WijzigOpleidingView.as_view(),
          name='wijzig-opleiding'),
 
-    path('wijzig/<opleiding_pk>/data-en-locaties/wijzig/<moment_pk>/',
+    path('manager/wijzig/<opleiding_pk>/data-en-locaties/wijzig/<moment_pk>/',
          view_manager.WijzigMomentView.as_view(),
          name='wijzig-moment'),
 ]
