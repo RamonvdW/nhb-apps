@@ -23,9 +23,9 @@ google-api-core==2.24.2
     #   google-api-python-client
     #   google-geo-type
     #   google-maps-routing
-google-api-python-client==2.166.0
+google-api-python-client==2.168.0
     # via -r requirements.in
-google-auth==2.38.0
+google-auth==2.39.0
     # via
     #   -r requirements.in
     #   google-api-core
@@ -39,17 +39,17 @@ google-geo-type==0.3.12
     # via google-maps-routing
 google-maps-routing==0.6.15
     # via -r requirements.in
-googleapis-common-protos==1.69.2
+googleapis-common-protos==1.70.0
     # via
     #   google-api-core
     #   grpcio-status
 googlemaps==4.10.0
     # via -r requirements.in
-grpcio==1.71.0
+grpcio==1.72.0rc1
     # via
     #   google-api-core
     #   grpcio-status
-grpcio-status==1.71.0
+grpcio-status==1.72.0rc1
     # via google-api-core
 httplib2==0.22.0
     # via
@@ -65,14 +65,14 @@ oauthlib==3.2.2
     # via requests-oauthlib
 openpyxl==3.1.5
     # via -r requirements.in
-pillow==11.1.0
+pillow==11.2.1
     # via -r requirements.in
 proto-plus==1.26.1
     # via
     #   google-api-core
     #   google-geo-type
     #   google-maps-routing
-protobuf==5.29.4
+protobuf==6.30.2
     # via
     #   google-api-core
     #   google-geo-type
@@ -94,7 +94,7 @@ pyparsing==3.2.3
     # via httplib2
 pypdf==5.4.0
     # via -r requirements.in
-qrcode==8.0
+qrcode==8.1
     # via -r requirements.in
 requests==2.32.3
     # via
@@ -104,15 +104,15 @@ requests==2.32.3
     #   requests-oauthlib
 requests-oauthlib==2.0.0
     # via mollie-api-python
-rsa==4.9
+rsa==4.9.1
     # via google-auth
 sqlparse==0.5.3
     # via django
-typing-extensions==4.13.0
+typing-extensions==4.13.2
     # via psycopg
 uritemplate==4.1.1
     # via google-api-python-client
-urllib3==2.3.0
+urllib3==2.4.0
     # via
     #   mollie-api-python
     #   requests

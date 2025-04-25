@@ -8,7 +8,7 @@ asgiref==3.8.1
     # via
     #   -r requirements.txt
     #   django
-beautifulsoup4==4.13.3
+beautifulsoup4==4.13.4
     # via -r requirements_dev.in
 cachetools==5.5.2
     # via
@@ -22,7 +22,7 @@ charset-normalizer==3.4.1
     # via
     #   -r requirements.txt
     #   requests
-coverage==7.7.1
+coverage==7.8.0
     # via
     #   -r requirements_dev.in
     #   django-coverage-plugin
@@ -35,7 +35,7 @@ django-coverage-plugin==3.1.0
     # via -r requirements_dev.in
 django-debug-toolbar==5.1.0
     # via -r requirements_dev.in
-django-extensions==3.2.3
+django-extensions==4.1
     # via -r requirements_dev.in
 esprima==4.0.1
     # via -r requirements_dev.in
@@ -43,7 +43,7 @@ et-xmlfile==2.0.0
     # via
     #   -r requirements.txt
     #   openpyxl
-fonttools==4.56.0
+fonttools==4.57.0
     # via -r requirements_dev.in
 google-api-core==2.24.2
     # via
@@ -51,9 +51,9 @@ google-api-core==2.24.2
     #   google-api-python-client
     #   google-geo-type
     #   google-maps-routing
-google-api-python-client==2.166.0
+google-api-python-client==2.168.0
     # via -r requirements.txt
-google-auth==2.38.0
+google-auth==2.39.0
     # via
     #   -r requirements.txt
     #   google-api-core
@@ -71,19 +71,19 @@ google-geo-type==0.3.12
     #   google-maps-routing
 google-maps-routing==0.6.15
     # via -r requirements.txt
-googleapis-common-protos==1.69.2
+googleapis-common-protos==1.70.0
     # via
     #   -r requirements.txt
     #   google-api-core
     #   grpcio-status
 googlemaps==4.10.0
     # via -r requirements.txt
-grpcio==1.71.0
+grpcio==1.72.0rc1
     # via
     #   -r requirements.txt
     #   google-api-core
     #   grpcio-status
-grpcio-status==1.71.0
+grpcio-status==1.72.0rc1
     # via
     #   -r requirements.txt
     #   google-api-core
@@ -106,9 +106,9 @@ oauthlib==3.2.2
     #   requests-oauthlib
 openpyxl==3.1.5
     # via -r requirements.txt
-packaging==24.2
+packaging==25.0
     # via pip-review
-pillow==11.1.0
+pillow==11.2.1
     # via -r requirements.txt
 pip-licenses==5.0.0
     # via -r requirements_dev.in
@@ -122,7 +122,7 @@ proto-plus==1.26.1
     #   google-api-core
     #   google-geo-type
     #   google-maps-routing
-protobuf==5.29.4
+protobuf==6.30.2
     # via
     #   -r requirements.txt
     #   google-api-core
@@ -152,7 +152,7 @@ pypdf==5.4.0
     # via -r requirements.txt
 pyyaml==6.0.2
     # via html5validator
-qrcode==8.0
+qrcode==8.1
     # via -r requirements.txt
 requests==2.32.3
     # via
@@ -165,11 +165,11 @@ requests-oauthlib==2.0.0
     # via
     #   -r requirements.txt
     #   mollie-api-python
-rsa==4.9
+rsa==4.9.1
     # via
     #   -r requirements.txt
     #   google-auth
-soupsieve==2.6
+soupsieve==2.7
     # via beautifulsoup4
 sqlparse==0.5.3
     # via
@@ -178,7 +178,7 @@ sqlparse==0.5.3
     #   django-debug-toolbar
 tomli==2.2.1
     # via pip-licenses
-typing-extensions==4.13.0
+typing-extensions==4.13.2
     # via
     #   -r requirements.txt
     #   beautifulsoup4
@@ -187,7 +187,7 @@ uritemplate==4.1.1
     # via
     #   -r requirements.txt
     #   google-api-python-client
-urllib3==2.3.0
+urllib3==2.4.0
     # via
     #   -r requirements.txt
     #   mollie-api-python
