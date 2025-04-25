@@ -8,7 +8,7 @@ from django.test import TestCase
 from django.utils import timezone
 from Account.operations.aanmaken import account_create
 from BasisTypen.models import BoogType
-from Bestelling.models import BestellingMandje, Bestelling
+from Bestelling.models import BestellingMandje, Bestelling, BestellingMutatie
 from Betaal.models import BetaalInstellingenVereniging, BetaalMutatie, BetaalActief, BetaalTransactie
 from Feedback.models import Feedback
 from Feedback.operations import store_feedback
@@ -203,6 +203,11 @@ class TestPleinCliDatabaseOpschonen(E2EHelpers, TestCase):
         transactie = BetaalTransactie(when=two_years_ago)
         transactie.save()
 
+        mutatie = BestellingMutatie()
+        mutatie.save()
+        mutatie.when = two_years_ago
+        mutatie.save()
+
         # maak een spook-account aan (geen koppeling met een sporter)
         spook1_account = account_create(
                             'spook1',
@@ -238,8 +243,6 @@ class TestPleinCliDatabaseOpschonen(E2EHelpers, TestCase):
                 boog_type=BoogType.objects.first(),
                 datum_wedstrijd='2000-01-01').save()
 
-        print('speldaanvraag (1): %s' % SpeldAanvraag.objects.first())
-
     def test_alles(self):
         f1, f2 = self.run_management_command(DATABASE_OPSCHONEN_COMMAND)
         # print("f1: %s" % f1.getvalue())
@@ -257,6 +260,7 @@ class TestPleinCliDatabaseOpschonen(E2EHelpers, TestCase):
         self.assertTrue("[INFO] Verwijder ongebruikte tijdelijke url" in f2.getvalue())
         self.assertTrue('[INFO] Verwijder 1 afgehandelde feedback' in f2.getvalue())
         self.assertTrue('[INFO] Verwijder niet afgeronde gast-account registratie 800001 in fase 0' in f2.getvalue())
+        self.assertTrue('[INFO] Verwijder 1 oude bestellingen mutaties' in f2.getvalue())
 
         # nog een keer aanroepen terwijl er niets meer te verwijderen valt
         f1, f2 = self.run_management_command(DATABASE_OPSCHONEN_COMMAND)
