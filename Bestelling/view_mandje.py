@@ -81,7 +81,7 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
 
                 controleer_euro += regel.bedrag_euro
                 regel.bedrag_euro_str = format_bedrag_euro(regel.bedrag_euro)
-                regel.korte_beschrijving = regel.korte_beschrijving.replace(BESTELLING_KORT_BREAK, '\\n')
+                regel.korte_beschrijving = regel.korte_beschrijving.replace(BESTELLING_KORT_BREAK, '\n')
                 regel.korting_redenen = regel.korting_redenen.split(BESTELLING_KORT_BREAK)
 
                 # maak een knop om deze bestelling te verwijderen uit het mandje
