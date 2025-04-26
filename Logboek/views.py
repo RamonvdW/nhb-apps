@@ -62,7 +62,7 @@ class LogboekBasisView(UserPassesTestMixin, ListView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
-        return rol_nu in (Rol.ROL_BB, Rol.ROL_MWZ, Rol.ROL_SUP)
+        return rol_nu in (Rol.ROL_BB, Rol.ROL_MWZ, Rol.ROL_SUP, Rol.ROL_MO)
 
     def _make_link_urls(self, context):
         # voorbereidingen voor een regel met volgende/vorige links
