@@ -1,0 +1,190 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2025 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Evenement locatie details{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Evenement locatie details</h3>
+            <p>Je huidige rol is <b>{{ rol }}</b></p>
+            {% if readonly %}
+                <p>Deze gegevens kunnen worden aangepast door de HWL van de vereniging en de Manager Opleidingen.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        function gewijzigd() {
+            // het formulier is aangepast en moet opgeslagen worden
+
+            // disable alle knoppen waarmee de invoer verloren zou gaan
+            const els = document.getElementsByClassName("wijzig_knop");
+            Array.prototype.forEach.call(els, function (el) {
+                el.classList.add('disabled');
+            })
+
+            // enable de 'opslaan' knop
+            const el = document.getElementById("submit_knop1");
+            el.disabled = false;
+            el.parentElement.style.display = "block";
+        }
+    </script>
+
+
+    <!-- blauwe balk met dialoog venster -->
+    <div class="row-sv-blauw">
+        <div class="col s10 offset-s1 m12 sv-kader{% if url_opslaan %} z-depth-3{% endif %}">
+
+            <!-- dialoog venster -->
+            <div class="left-align">
+
+                {% if url_opslaan %}
+                    <form action="{{ url_opslaan }}" method="post" onsubmit="document.getElementById('submit_knop1').disabled=true; return true;">
+                        {% csrf_token %}
+                {% endif %}
+
+                        <table class="sv-kader">
+                            <tr>
+                                <th>Korte naam van de locatie</th>
+                                <td>
+                                    {% if readonly %}
+                                        <span>{{ locatie.naam }}</span>
+                                    {% else %}
+                                        <input type="text" name="naam" placeholder="Hoe staat deze locatie bekend?" value="{{ locatie.naam }}" maxlength="50" oninput="gewijzigd()">
+                                    {% endif %}
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th>Vereniging</th>
+                                <td>{{ ver }}</td>
+                            </tr>
+
+                            <tr>
+                                <th>Adres van de locatie:<br>(voor de navigatie)</th>
+                                <td>
+                                    {% if readonly %}
+                                        <span>{{ locatie.adres|linebreaksbr }}</span>
+                                    {% else %}
+                                        <textarea name="adres" class="materialize-textarea" oninput="gewijzigd()">{{ locatie.adres }}</textarea>
+                                    {% endif %}
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th>Plaats<br> (voor uitnodigingen)</th>
+                                <td>
+                                    {% if readonly %}
+                                        <span>{{ locatie.plaats }}</span>
+                                    {% else %}
+                                        <input type="text" maxlength="50" name="plaats" value="{{ locatie.plaats }}" oninput="gewijzigd()">
+                                    {% endif %}
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th>Bijzonderheden</th>
+                                <td>
+                                    {% if readonly %}
+                                        <span>{{ locatie.notities|linebreaksbr }}</span>
+                                    {% else %}
+                                        <textarea name="notities" class="materialize-textarea" oninput="gewijzigd()">{{ locatie.notities }}</textarea>
+                                    {% endif %}
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td colspan="2" class="center">
+                                    <h6 class="sv-blauw-text">Gebruik</h6>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th>Evenementen:</th>
+                                <td>
+                                    {% for evenement in gebruik_evenement %}
+                                        <span>{{ evenement }}</span><br>
+                                    {% empty %}
+                                        <i>Niets gevonden</i>
+                                    {% endfor %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Opleidingen:</th>
+                                <td>
+                                    {% for opleiding in gebruik_opleiding %}
+                                        <span>{{ opleiding }}</span><br>
+                                    {% empty %}
+                                        <i>Niets gevonden</i>
+                                    {% endfor %}
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td></td>
+                                <td>
+                                    {% if url_verwijder %}
+                                        <a class="btn-sv-blauw modal-trigger" href="#bevestig_verwijder_locatie">Verwijder deze locatie</a>
+                                    {% else %}
+                                        <a class="btn-sv-blauw" disabled href="#">Verwijder deze locatie</a>
+                                    {% endif %}
+
+                                </td>
+                            </tr>
+                        </table>
+
+                        {% if not readonly %}
+                            <div class="fixed-action-btn" style="display: none">
+                                <button class="btn-sv-rood" id="submit_knop1" type="submit" disabled>
+                                    <i class="notranslate material-icons-round left">check</i>Wijzigingen opslaan</button>
+                            </div>
+                        {% endif %}
+
+                {% if url_opslaan %}
+                    </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    {% if url_verwijder %}
+        <div class="modal" id="bevestig_verwijder_locatie">
+            <div class="modal-content center">
+                <h5>Verwijder locatie?</h5>
+                <p>Wil je deze locatie van vereniging<br><b>{{ ver }}</b><br>verwijderen uit het systeem?</p>
+
+                <form action="{{ url_verwijder }}" method="post" onsubmit="document.getElementById('submit_knop2').disabled=true; return true;">
+                    {% csrf_token %}
+                    <input type="hidden" name="verwijder" value="1">
+
+                    <div class="modal-footer" style="text-align:center; display:block">
+                        <div style="display:inline-block; width:49%">
+                            <button class="btn-sv-rood" id="submit_knop2" type="submit">Ja</button>
+                        </div>
+                        <div style="display:inline-block; width:49%">
+                            <a href="#" class="btn-sv-blauw modal-close">Nee</a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    {% endif %}
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            show_hide_buitenbanen();
+            show_hide_binnenbanen();
+        })
+    </script>
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="locatie-extern-details" %}
+
+{% endblock %}

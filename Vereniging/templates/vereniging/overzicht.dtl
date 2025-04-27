@@ -235,8 +235,13 @@
 
             <!-- externe locaties -->
             {% if url_externe_locaties %}
-                {% include 'plein/card_icon.dtl' with title="Locaties" text="Externe locaties waar jullie vereniging wedstrijden kan organiseren." icon="hiking" url=url_externe_locaties %}
+                {% include 'plein/card_icon.dtl' with title="Locaties" text="Externe locaties, waar jullie vereniging wedstrijden kan organiseren." icon="hiking" url=url_externe_locaties %}
             {% endif %}
+
+            <!-- evenement locaties -->
+            {% if url_evenement_locaties %}
+                {% include 'plein/card_icon.dtl' with title="Locaties" text="Locaties voor evenementen en opleidingen." icon="school" url=url_evenement_locaties %}
+            {% endif %}        
         </div>
     </div>
 

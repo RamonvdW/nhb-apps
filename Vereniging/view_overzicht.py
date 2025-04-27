@@ -40,9 +40,8 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        if self.functie_nu:
-            self.ver = self.functie_nu.vereniging
-        return self.functie_nu and self.rol_nu in (Rol.ROL_SEC, Rol.ROL_LA, Rol.ROL_HWL, Rol.ROL_WL)
+        self.ver = self.functie_nu.vereniging
+        return self.functie_nu and self.rol_nu in (Rol.ROL_SEC, Rol.ROL_LA, Rol.ROL_HWL, Rol.ROL_WL) and self.ver
 
     def _zoek_wedstrijden(self, context):
         comps = list()
@@ -288,6 +287,10 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
             if not ver.is_extern:
                 context['url_externe_locaties'] = reverse('Locatie:externe-locaties',
                                                           kwargs={'ver_nr': ver.ver_nr})
+
+                if ver.ver_nr in (settings.EVENEMENTEN_VERKOPER_VER_NRS + settings.OPLEIDINGEN_VERKOPER_VER_NRS):
+                    context['url_evenement_locaties'] = reverse('Locatie:evenement-locaties',
+                                                                kwargs={'ver_nr': ver.ver_nr})
 
         eval_open_taken(self.request)
         aantal = cached_aantal_open_taken(self.request)

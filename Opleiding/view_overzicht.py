@@ -6,6 +6,7 @@
 
 from django.urls import reverse
 from django.http import Http404
+from django.conf import settings
 from django.views.generic import TemplateView
 from Account.models import get_account
 from Betaal.format import format_bedrag_euro
@@ -52,6 +53,8 @@ class OpleidingenOverzichtView(TemplateView):
         if enable_basiscursus:
             # toon het grote kaartje
             context['url_basiscursus'] = reverse('Opleiding:basiscursus')
+
+        context['url_opleidingen_main_site'] = settings.URL_OPLEIDINGEN
 
         account = get_account(self.request)
         if account.is_authenticated and not account.is_gast:

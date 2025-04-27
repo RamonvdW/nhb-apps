@@ -19,7 +19,7 @@ from BasisTypen.definities import SCHEIDS_NIET, SCHEIDS_VERENIGING
 from Competitie.models import CompetitieMatch
 from Functie.models import Functie
 from Locatie.models import Reistijd, WedstrijdLocatie
-from Locatie.operations.reistijd_bepalen import ReistijdBepalen
+from Locatie.operations.reistijd_bepalen import ReistijdBepaler
 from Mailer.operations import mailer_queue_email, render_email_template
 from Site.core.background_sync import BackgroundSync
 from Scheidsrechter.definities import (SCHEIDS_MUTATIE_WEDSTRIJD_BESCHIKBAARHEID_OPVRAGEN,
@@ -319,7 +319,7 @@ class Command(BaseCommand):
         # for
 
         # verwerk de nieuwe verzoeken voor reistijd
-        bepaler = ReistijdBepalen(self.stdout, self.stderr, 75)
+        bepaler = ReistijdBepaler(self.stdout, self.stderr, 75)
         bepaler.run()
 
     def _adjust_rk_bk_datum_reeks(self, wedstrijd, alle_datums):

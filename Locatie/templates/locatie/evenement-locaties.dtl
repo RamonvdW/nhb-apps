@@ -1,0 +1,76 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2025 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Evenement locaties{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Evenement locaties</h3>
+            <p>Locaties die vereniging <b>{{ ver }}</b> kan gebruiken voor opleidingen en evenementen.</p>
+            <p>Deze gegevens kunnen worden aangepast door de HWL en de Manager Opleidingen.</p>
+        </div>
+    </div>
+
+    <!-- blauwe balk met informatie in een tabel -->
+    <div class="row-sv-blauw">
+        <div class="col s12">
+            <table class="sv-kader">
+
+                <thead>
+                    <tr>
+                        <th>Locatie</th>
+                        <th>Plaats</th>
+                        <th><!-- kolom voor knop --></th>
+                    </tr>
+                </thead>
+
+                {% for locatie in locaties %}
+                    <tr>
+                        <td>{% if locatie.geen_naam %}<i>Nog niet ingevuld</i>{% else %}{{ locatie.naam }}{% endif %}</td>
+
+                        <td>{% if locatie.geen_plaats %}<i>Nog niet ingevuld</i>{% else %}{{ locatie.plaats }}{% endif %}</td>
+
+                        <td class="center">
+                            {% if readonly %}
+                                <a class="btn-sv-rood" href="{{ locatie.url_wijzig }}">Details</a>
+                            {% else %}
+                                <a class="btn-sv-rood" href="{{ locatie.url_wijzig }}">
+                                    <i class="notranslate material-icons-round">edit</i></a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="3" class="center">
+                            <i>Er zijn nog geen locaties aangemaakt</i>
+                        </td>
+                    </tr>
+                {% endfor %}
+
+                {% if url_toevoegen %}
+                    <tr>
+                        <td colspan="3" class="center">
+                            <form action="{{ url_toevoegen }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
+                                {% csrf_token %}
+                                <button class="btn-sv-rood" id="submit_knop" type="submit">
+                                    <i class="notranslate material-icons-round">add</i></button>
+                            </form>
+                        </td>
+                    </tr>
+                {% endif %}
+
+            </table>
+        </div>
+    </div>
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="locatie-extern" %}
+
+{% endblock %}

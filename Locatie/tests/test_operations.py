@@ -8,7 +8,7 @@ from django.test import TestCase, override_settings
 from django.core.management.base import OutputWrapper
 from BasisTypen.definities import SCHEIDS_BOND
 from Locatie.models import WedstrijdLocatie, Reistijd
-from Locatie.operations import ReistijdBepalen
+from Locatie.operations import ReistijdBepaler
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
 import io
@@ -47,7 +47,7 @@ class TestLocatieCliReistijd(E2EHelpers, TestCase):
         stdout = OutputWrapper(io.StringIO())
         stderr = OutputWrapper(io.StringIO())
 
-        bepaler = ReistijdBepalen(stdout, stderr, 25)
+        bepaler = ReistijdBepaler(stdout, stderr, 25)
         bepaler.run()
 
         return stderr, stdout
@@ -62,7 +62,7 @@ class TestLocatieCliReistijd(E2EHelpers, TestCase):
         stdout = OutputWrapper(io.StringIO())
         stderr = OutputWrapper(io.StringIO())
 
-        bepaler = ReistijdBepalen(stdout, stderr, 25)
+        bepaler = ReistijdBepaler(stdout, stderr, 25)
         bepaler.run()
         bepaler.run()  # triggers gmap connection already done
 
@@ -71,7 +71,7 @@ class TestLocatieCliReistijd(E2EHelpers, TestCase):
         stderr = OutputWrapper(io.StringIO())
 
         with override_settings(GMAPS_KEY='garbage'):
-            bepaler = ReistijdBepalen(stdout, stderr, 25)
+            bepaler = ReistijdBepaler(stdout, stderr, 25)
             bepaler.run()
         # print('\nf1: %s\nf2: %s' % (stdout.getvalue(), stderr.getvalue()))
         self.assertTrue('[ERROR] Fout tijdens gmaps init: Invalid API key provided' in stderr.getvalue())
@@ -342,5 +342,11 @@ class TestLocatieCliReistijd(E2EHelpers, TestCase):
 
         reistijd.refresh_from_db()
         self.assertGreater(reistijd.reistijd_min, 5 * 60)       # speciaal getal (16 of 17 uur)
+
+        reistijd = Reistijd(vanaf_lat='')
+        self.assertFalse(reistijd.is_compleet())
+
+        reistijd = Reistijd(naar_lat='', vanaf_lat='x', vanaf_lon='y')
+        self.assertFalse(reistijd.is_compleet())
 
 # end of file

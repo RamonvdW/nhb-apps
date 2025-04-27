@@ -40,13 +40,13 @@ def functie_volgorde(functie: Functie) -> int:
         volgorde = 20 + functie.rayon.rayon_nr        # 21-24
     elif functie.rol == "RCL":
         volgorde = functie.regio.regio_nr             # 101-116
-    elif functie.rol == "SEC":
+    elif functie.rol == "SEC" and functie.vereniging:
         volgorde = functie.vereniging.ver_nr          # 1000-9999
-    elif functie.rol == "LA":
+    elif functie.rol == "LA" and functie.vereniging:
         volgorde = functie.vereniging.ver_nr + 10000  # 11000-19999
-    elif functie.rol == "HWL":
+    elif functie.rol == "HWL" and functie.vereniging:
         volgorde = functie.vereniging.ver_nr + 20000  # 21000-29999
-    elif functie.rol == "WL":
+    elif functie.rol == "WL" and functie.vereniging:
         volgorde = functie.vereniging.ver_nr + 30000  # 31000-39999
     elif functie.rol == "SUP":
         volgorde = 50000                              # 50000

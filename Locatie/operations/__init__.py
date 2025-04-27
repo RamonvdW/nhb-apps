@@ -4,8 +4,8 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from .reistijd_bepalen import ReistijdBepalen
+from .reistijd_bepalen import ReistijdBepaler
 
-__all__ = ['ReistijdBepalen']
+__all__ = ['ReistijdBepaler']
 
 # end of file

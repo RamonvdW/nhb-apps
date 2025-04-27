@@ -73,6 +73,8 @@ class ManagerOpleidingenView(UserPassesTestMixin, View):
         context['url_niet_ingeschreven'] = reverse('Opleiding:niet-ingeschreven')
         context['url_aanpassingen'] = reverse('Opleiding:aanpassingen')
         context['url_toevoegen'] = reverse('Opleiding:toevoegen')
+        ver_nr = settings.OPLEIDINGEN_VERKOPER_VER_NRS[0]
+        context['url_evenement_locaties'] = reverse('Locatie:evenement-locaties', kwargs={'ver_nr': ver_nr})
 
         context['url_voorwaarden'] = settings.VERKOOPVOORWAARDEN_OPLEIDINGEN_URL
 
