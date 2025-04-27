@@ -673,6 +673,18 @@ class MyTestAsserts(TestCase):
             pos = html.find('<i class=', pos+1)
         # while
 
+    def html_assert_no_kort_break(self, html, dtl):
+        # strip all script sections because || is a valid javascript operator
+        clean_html = ''
+        pos = html.find('<script')
+        while pos >= 0:
+            clean_html += html[:pos]
+            pos2 = html.find('</script>', pos)
+            html = html[pos2+9:]
+            pos = html.find('<script')
+        # while
+        self.assertNotIn('||', html, msg='Mogelijk vergeten om regel.korte_beschrijving op te splitsen in %s' % dtl)
+
     def assert_html_ok(self, resp: HttpResponse):
         """ Doe een aantal basic checks op een html response """
 
@@ -709,6 +721,7 @@ class MyTestAsserts(TestCase):
         self.html_assert_notranslate(html, dtl)
         self.html_assert_template_bug(html, dtl)
         self.html_assert_material_icons(html, dtl)
+        self.html_assert_no_kort_break(html, dtl)
 
         urls = self.extract_all_urls(resp)
         for url in urls:

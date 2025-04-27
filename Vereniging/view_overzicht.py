@@ -40,8 +40,10 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        self.ver = self.functie_nu.vereniging
-        return self.functie_nu and self.rol_nu in (Rol.ROL_SEC, Rol.ROL_LA, Rol.ROL_HWL, Rol.ROL_WL) and self.ver
+        if self.functie_nu and self.rol_nu in (Rol.ROL_SEC, Rol.ROL_LA, Rol.ROL_HWL, Rol.ROL_WL):
+            self.ver = self.functie_nu.vereniging
+            return self.ver is not None
+        return False
 
     def _zoek_wedstrijden(self, context):
         comps = list()

@@ -7,7 +7,6 @@
 """ Deze module levert een mapping voor alle bestelling plugins
 """
 
-from Bestelling.bestel_plugin_base import BestelPluginBase
 from Bestelling.definities import (BESTELLING_REGEL_CODE_EVENEMENT,
                                    BESTELLING_REGEL_CODE_OPLEIDING,
                                    BESTELLING_REGEL_CODE_WEDSTRIJD,

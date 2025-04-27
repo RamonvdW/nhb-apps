@@ -61,7 +61,6 @@ class OpleidingBestelPlugin(BestelPluginBase):
         """ Maak een reservering voor de opleiding
             en geef een BestellingRegel terug.
         """
-
         opleiding = inschrijving.opleiding
         sporter = inschrijving.sporter
 
