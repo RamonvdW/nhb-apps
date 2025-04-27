@@ -185,7 +185,8 @@ class WijzigOpleidingView(UserPassesTestMixin, View):
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
         return self.rol_nu == Rol.ROL_MO
 
-    def _maak_opt_dagen(self, opleiding: Opleiding):
+    @staticmethod
+    def _maak_opt_dagen(opleiding: Opleiding):
         opts = list()
         for aantal in range(1, 7+1):
             opt = SimpleNamespace(
@@ -225,21 +226,12 @@ class WijzigOpleidingView(UserPassesTestMixin, View):
         context['opt_dagen'] = self._maak_opt_dagen(opleiding)
 
         momenten = list()
-        for moment in opleiding.momenten.all():
+        pks = list(opleiding.momenten.values_list('pk', flat=True))
+        for moment in OpleidingMoment.objects.all():
             moment.url_edit = reverse('Opleiding:wijzig-moment', kwargs={'opleiding_pk': opleiding.pk,
                                                                          'moment_pk': moment.pk})
             moment.sel = 'M_%s' % moment.pk
-            moment.is_selected = True
-
-            tup = (moment.datum, moment.pk, moment)
-            momenten.append(tup)
-        # for
-
-        for moment in OpleidingMoment.objects.annotate(aantal=Count('opleiding')).filter(aantal=0).all():
-            moment.url_edit = reverse('Opleiding:wijzig-moment', kwargs={'opleiding_pk': opleiding.pk,
-                                                                         'moment_pk': moment.pk})
-            moment.sel = 'M_%s' % moment.pk
-            moment.is_selected = False
+            moment.is_selected = (moment.pk in pks)
             tup = (moment.datum, moment.pk, moment)
             momenten.append(tup)
         # for

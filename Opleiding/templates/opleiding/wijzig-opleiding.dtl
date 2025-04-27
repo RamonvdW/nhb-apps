@@ -11,7 +11,7 @@
 {% block pagina %}
 
     <script>
-        function gewijzigd(code_blokkeer) {
+        function gewijzigd() {
             // het formulier is aangepast en moet opgeslagen worden
 
             // enable de 'opslaan' knop
