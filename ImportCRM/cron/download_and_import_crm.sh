@@ -37,7 +37,7 @@ echo "[INFO] Started at $STAMP" >> "$LOG"
 if [ ! -d "$SPOOL_DIR" ]
 then
     # cannot create, so report error
-    echo "[ERROR] Missing $SPOOL_DIR"
+    echo "[ERROR] Missing $SPOOL_DIR" >> "$LOG"
     exit 1
 fi
 
@@ -99,7 +99,7 @@ then
             [[ $file -nt $OLD_CRM ]] && OLD_CRM=$file
         done
 
-        echo "[DEBUG] Previous data set: $OLD_CRM"
+        echo "[DEBUG] Previous data set: $OLD_CRM" >> "$LOG"
 
         # if present, compare the number of changes
         if [ -e "$OLD_CRM" ]
@@ -109,24 +109,24 @@ then
             python3 -u ./manage.py diff_crm_jsons "$OLD_CRM" "$TMP_FILE" &>> "$LOG"
             DIFF_RES=$?
         else
-            echo "[WARNING] No previous data set to diff against"
+            echo "[WARNING] No previous data set to diff against" >> "$LOG"
             DIFF_RES=0
         fi
 
         if [ $DIFF_RES -eq 0 ]
         then
-            echo "[INFO] Accepted newly downloaded data set"
+            echo "[INFO] Accepted newly downloaded data set"  >> "$LOG"
             SPOOL_FILE="$SPOOL_DIR/crm_${STAMP}.json"
-            cat "$TMP_FILE" > "$SPOOL_FILE"
-            rm "$TMP_FILE"
+            cat "$TMP_FILE" > "$SPOOL_FILE" 2>> "$LOG"
+            rm "$TMP_FILE" 2>> "$LOG"
 
             echo "[INFO] Importing new data set" >> "$LOG"
 
             # -u = unbuffered --> needed to maintain the order of stdout and stderr lines
             python3 -u ./manage.py import_crm_json "$SPOOL_FILE" &>> "$LOG"
         else
-            echo "[ERROR] Too many differences; blocking automatic import"
-            # TODO: e-mail for support
+            echo "[ERROR] Too many differences; blocking automatic import" >> "$LOG"
+            # e-mail aan ontwikkelaar wordt gestuurd door diff_crm_jsons.py
         fi
     fi
 

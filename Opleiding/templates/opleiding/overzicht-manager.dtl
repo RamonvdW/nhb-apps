@@ -91,6 +91,10 @@
                 {% include 'plein/card_icon.dtl' with title="Aanpassingen" text="Persoonsgegevens van de deelnemers die overgenomen moeten worden in het CRM." icon="person_add" url=url_aanpassingen %}
             {% endif %}
 
+            {% if url_evenement_locaties %}
+                {% include 'plein/card_icon.dtl' with title="Locaties" text="Locaties voor evenementen en opleidingen." icon="school" url=url_evenement_locaties %}
+            {% endif %}    
+        
             {% if url_stats_instaptoets %}
                 {% include 'plein/card_icon.dtl' with title="Instaptoets" text="Welke vragen van de instaptoets doen het slecht?" icon="insights" url=url_stats_instaptoets %}
             {% endif %}

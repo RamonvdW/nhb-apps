@@ -111,7 +111,7 @@ class ExterneLocatiesView(UserPassesTestMixin, TemplateView):
         return HttpResponseRedirect(url)
 
 
-class ExterneLocatieDetailsView(TemplateView):
+class ExterneLocatieDetailsView(UserPassesTestMixin, TemplateView):
 
     """ Via deze view kunnen details van een locatie aangepast worden.
         Alleen de HWL van de vereniging(en) die aan deze locatie gekoppeld zijn mogen de details aanpassen.
@@ -119,6 +119,20 @@ class ExterneLocatieDetailsView(TemplateView):
 
     # class variables shared by all instances
     template_name = TEMPLATE_EXTERNE_LOCATIE_DETAILS
+    raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.rol_nu, self.functie_nu = None, None
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
+        # TODO: BB, BKO, RKO hebben geen link naar deze pagina. RCL alleen naar accommodatie pagina.
+        return self.rol_nu in (Rol.ROL_BB,
+                               Rol.ROL_BKO, Rol.ROL_RKO, Rol.ROL_RCL,
+                               Rol.ROL_HWL, Rol.ROL_WL, Rol.ROL_SEC)
 
     def get_locatie(self):
         """ haal de locatie op en geef een 404 als deze niet bestaat

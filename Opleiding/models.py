@@ -58,14 +58,14 @@ class OpleidingMoment(models.Model):
     # wanneer is de bijeenkomst
     datum = models.DateField(default='2000-01-01')
 
+    # TODO: vervang door "aantal_dagdelen"
     # moment kan meerdere dagen aaneengesloten zijn
     aantal_dagen = models.PositiveSmallIntegerField(default=1)
+    # hoe lang duurt deze bijeenkomst
+    duur_minuten = models.PositiveIntegerField(default=1)
 
     # hoe laat moeten de deelnemers aanwezig zijn
     begin_tijd = models.TimeField(default='10:00')
-
-    # hoe lang duurt deze bijeenkomst
-    duur_minuten = models.PositiveIntegerField(default=1)
 
     # waar moeten de deelnemers heen
     locatie = models.ForeignKey(EvenementLocatie, on_delete=models.PROTECT, blank=True, null=True)

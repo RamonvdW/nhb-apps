@@ -138,13 +138,13 @@
                     {% include 'plein/card_icon.dtl' with title="Site feedback" text="Toon de feedback van de gebruikers." icon="feedback" url=card_url %}
                 {% endif %}
 
-                {% if rol_is_bb or rol_is_mwz %}
+                {% if rol_is_bb or rol_is_mwz or rol_is_mo %}
                     <!-- betalingen -->
                     {% url 'Bestelling:activiteit' as card_url %}
                     {% include 'plein/card_icon.dtl' with title='Bestellingen' text="Toon de bestellingen en betalingen." icon="shopping_cart" url=card_url %}
                 {% endif %}
 
-                {% if rol_is_bb or rol_is_mwz or rol_is_sup %}
+                {% if rol_is_bb or rol_is_mwz or rol_is_sup or rol_is_mo %}
                     <!-- logboek -->
                     {% url 'Logboek:alles' as card_url %}
                     {% include 'plein/card_icon.dtl' with title="Logboek" text="Bekijk het logboek." icon="book" url=card_url %}

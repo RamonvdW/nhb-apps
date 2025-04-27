@@ -11,7 +11,7 @@
 {% block pagina %}
 
     <script>
-        function gewijzigd(code_blokkeer) {
+        function gewijzigd() {
             // het formulier is aangepast en moet opgeslagen worden
 
             // enable de 'opslaan' knop
@@ -252,7 +252,7 @@
                 if (el) {
                     let options = { defaultDate: new Date("{{ opleiding.periode_begin|date:'Y-m-d' }}"),
                                     setDefaultDate: true,
-                                    format: "dddd d mmmm yyyy",
+                                    format: "mmmm yyyy",
                                     minDate: minDate, maxDate: maxDate,
                                     yearRange: [{{ begin_jaar }}, {{ now.year }} + 2]};
 
@@ -263,7 +263,7 @@
                 if (el) {
                     let options = { defaultDate: new Date("{{ opleiding.periode_einde|date:'Y-m-d' }}"),
                                     setDefaultDate: true,
-                                    format: "dddd d mmmm yyyy",
+                                    format: "mmmm yyyy",
                                     minDate: minDate, maxDate: maxDate,
                                     yearRange: [{{ begin_jaar }}, {{ now.year }} + 2]};
 

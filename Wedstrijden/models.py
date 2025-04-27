@@ -281,8 +281,10 @@ class WedstrijdInschrijving(models.Model):
 
     def __str__(self):
         """ beschrijving voor de admin interface """
-        return "Wedstrijd inschrijving voor %s: [%s]" % (self.sporterboog.sporter.lid_nr_en_volledige_naam(),
-                                                         WEDSTRIJD_INSCHRIJVING_STATUS_TO_STR[self.status])
+        return "Wedstrijd inschrijving voor %s, voor wedstrijd %s, status %s" % (
+                    self.sporterboog.sporter.lid_nr_en_volledige_naam(),
+                    self.wedstrijd.titel,
+                    WEDSTRIJD_INSCHRIJVING_STATUS_TO_STR[self.status])
 
     def korte_beschrijving(self):
         """ geef een one-liner terug met een korte beschrijving van deze inschrijving """

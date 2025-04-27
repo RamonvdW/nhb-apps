@@ -79,6 +79,25 @@
     </div>
 
 
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <p>&nbsp;</p>
+            <h4>Andere sites van de KHSN</h4>
+            <p>De volgende websites zijn misschien ook interessant voor je</p>
+        </div>
+    </div>
+
+    <!-- blauwe balk met links naar andere sites -->
+    <div class="row-sv-blauw">
+        <div class="col s12">
+            <!-- landing page opleidingen -->
+            {% static 'plein/logo_khsn_192x192.webp' as img_src %}
+            {% include 'plein/card_logo.dtl' with title="Opleidingen" text="Uitgebreide beschrijving van alle opleidingen." img_src=img_src img_height=75 img_width=75 url=url_opleidingen_main_site extern_open=True %}
+        </div>
+    </div>
+
+
     {% if diplomas %}
         <!-- witruimte -->
         <div class="row center">

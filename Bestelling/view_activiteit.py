@@ -49,7 +49,7 @@ class BestelActiviteitView(UserPassesTestMixin, TemplateView):
         if self.rol_nu == Rol.ROL_BB:
             account = get_account(self.request)
             self.is_staff = account.is_staff
-        return self.rol_nu in (Rol.ROL_BB, Rol.ROL_MWW)
+        return self.rol_nu in (Rol.ROL_BB, Rol.ROL_MWW, Rol.ROL_MO)
 
     @staticmethod
     def _selecteer_bestellingen(context, form, zoekterm):

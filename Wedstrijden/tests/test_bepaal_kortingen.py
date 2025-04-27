@@ -10,18 +10,14 @@ from django.core.management.base import OutputWrapper
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse
 from Bestelling.definities import BESTELLING_REGEL_CODE_WEDSTRIJD, BESTELLING_REGEL_CODE_WEDSTRIJD_KORTING
 from Bestelling.models import BestellingRegel
-from Competitie.models import Competitie, CompetitieIndivKlasse, Regiocompetitie, RegiocompetitieSporterBoog
-from Functie.models import Functie
-from Functie.tests.helpers import maak_functie
 from Geo.models import Regio
 from Locatie.models import WedstrijdLocatie
 from Sporter.models import Sporter, SporterBoog
-from Sporter.operations import get_sporter_voorkeuren
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
 from Wedstrijden.definities import (WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_MANDJE, WEDSTRIJD_STATUS_GEACCEPTEERD,
                                     WEDSTRIJD_KORTING_SPORTER, WEDSTRIJD_KORTING_VERENIGING, WEDSTRIJD_KORTING_COMBI)
-from Wedstrijden.models import Wedstrijd, WedstrijdSessie, WedstrijdInschrijving, WedstrijdKorting, Kwalificatiescore
+from Wedstrijden.models import Wedstrijd, WedstrijdSessie, WedstrijdInschrijving, WedstrijdKorting
 from Wedstrijden.operations.bepaal_kortingen import BepaalAutomatischeKorting
 from datetime import timedelta
 from decimal import Decimal
@@ -310,9 +306,6 @@ class TestWedstrijdenBepaalKortingen(E2EHelpers, TestCase):
         #
         # self.boog_c = BoogType.objects.get(afkorting='C')
 
-
-
-
         # sporterboog = SporterBoog.objects.get(sporter=sporter1, boogtype=self.boog_c)
         # sporterboog.voor_wedstrijd = True
         # sporterboog.save(update_fields=['voor_wedstrijd'])
@@ -350,8 +343,6 @@ class TestWedstrijdenBepaalKortingen(E2EHelpers, TestCase):
         # self.wedstrijd = Wedstrijd.objects.first()
         # url = self.url_wedstrijden_wijzig_wedstrijd % self.wedstrijd.pk
         # self.assert_is_redirect(resp, url)
-
-
 
         # # maak een C sessie aan
         # sessie = WedstrijdSessie(
@@ -451,10 +442,12 @@ class TestWedstrijdenBepaalKortingen(E2EHelpers, TestCase):
         # self.inschrijving2.korting = korting
         # self.inschrijving2.save(update_fields=['status', 'korting'])
 
-    def test_basis(self):
+    def test_persoonlijke_korting(self):
         stdout = OutputWrapper(io.StringIO())
         bepaal = BepaalAutomatischeKorting(stdout)
+        # regel1 en regel2 zijn wedstrijden
 
+        # geen kortingen
         regels = [self.regel1.pk, self.regel2.pk]
         res = bepaal.kies_kortingen(regels)
         self.assertEqual(res, [])
@@ -467,13 +460,12 @@ class TestWedstrijdenBepaalKortingen(E2EHelpers, TestCase):
         res = bepaal.kies_kortingen(regels)
         self.assertTrue(isinstance(res, list))
         self.assertEqual(len(res), 1)
-
         regel = res[0]
         self.assertTrue(isinstance(regel, BestellingRegel))
         # print(regel)
         self.assertEqual(regel.code, BESTELLING_REGEL_CODE_WEDSTRIJD_KORTING)
         self.assertEqual(regel.korte_beschrijving, 'Persoonlijke korting: 95%')
-        self.assertEqual(regel.korting_redenen, '')     # TODO: klopt dit?
+        self.assertEqual(regel.korting_redenen, '')     # TODO: zou alle redenen voor deze korting moeten bevatten
         self.assertEqual(regel.korting_ver_nr, self.ver.ver_nr)
         self.assertEqual(round(regel.bedrag_euro, 2), -23.75)     # 95% van 25 euro
         self.assertFalse('[ERROR]' in stdout.getvalue())
@@ -491,6 +483,32 @@ class TestWedstrijdenBepaalKortingen(E2EHelpers, TestCase):
         res = bepaal.kies_kortingen(leeg)
         self.assertEqual(res, leeg)
 
+    def test_combi_korting(self):
+        stdout = OutputWrapper(io.StringIO())
+        bepaal = BepaalAutomatischeKorting(stdout)
+        # regel1 en regel2 zijn wedstrijden
 
+        # TODO: test met zowel persoonlijke als combi kortingen
+        #self.korting_s.voor_wedstrijden.add(self.wedstrijd1)
+        #self.korting_s.voor_wedstrijden.add(self.wedstrijd3)  # ligt niet in mandje
+
+        # combi-korting
+        self.korting_c.voor_wedstrijden.add(self.wedstrijd1)
+        self.korting_c.voor_wedstrijden.add(self.wedstrijd2)
+        regels = [self.regel1.pk, self.regel2.pk]
+        res = bepaal.kies_kortingen(regels)
+        self.assertTrue(isinstance(res, list))
+        self.assertEqual(len(res), 1)
+        regel = res[0]
+        self.assertTrue(isinstance(regel, BestellingRegel))
+        self.assertEqual(regel.korte_beschrijving, 'Combinatiekorting: 50%')
+        self.assertEqual(regel.korting_redenen, 'Test wedstrijd 1||Test wedstrijd 2')
+        self.assertEqual(round(regel.bedrag_euro, 2), -25.00)
+
+        # maar 1 van de wedstrijden van de combinatiekorting
+        regels = [self.regel1.pk]
+        leeg = list()
+        res = bepaal.kies_kortingen(regels)
+        self.assertEqual(res, leeg)
 
 # end of file

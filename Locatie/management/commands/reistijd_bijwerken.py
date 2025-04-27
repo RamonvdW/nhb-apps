@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.core.management.base import BaseCommand
-from Locatie.operations import ReistijdBepalen
+from Locatie.operations import ReistijdBepaler
 from Mailer.operations import mailer_notify_internal_error
 import traceback
 import logging
@@ -28,7 +28,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
 
-        bepaler = ReistijdBepalen(self.stdout, self.stderr, self.VERZOEKEN_GRENS)
+        bepaler = ReistijdBepaler(self.stdout, self.stderr, self.VERZOEKEN_GRENS)
 
         # vang generieke fouten af
         try:
