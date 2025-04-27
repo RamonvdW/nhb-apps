@@ -23,7 +23,8 @@ class TestLocatieEvenementLocatie(E2EHelpers, TestCase):
     url_overzicht = '/vereniging/locatie/%s/evenement/'       # ver_nr
     url_wijzig = '/vereniging/locatie/%s/evenement/%s/'       # ver_nr, locatie_pk
 
-    def _maak_vereniging(self, ver_nr, naam, regio):
+    @staticmethod
+    def _maak_vereniging(ver_nr, naam, regio):
         # maak een test vereniging
         ver = Vereniging(
                     ver_nr=ver_nr,

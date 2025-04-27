@@ -57,7 +57,7 @@ class EvenementLocatiesView(UserPassesTestMixin, TemplateView):
 
         return ver
 
-    def _bepaal_readonly(self, ver):
+    def _bepaal_readonly(self):
         # MO mag wijzigen
         if self.rol_nu == Rol.ROL_MO:
             return False
@@ -75,7 +75,7 @@ class EvenementLocatiesView(UserPassesTestMixin, TemplateView):
 
         context['ver'] = ver = self.get_vereniging_or_404()
 
-        context['readonly'] = readonly = self._bepaal_readonly(ver)
+        context['readonly'] = readonly = self._bepaal_readonly()
         if not readonly:
             context['url_toevoegen'] = reverse('Locatie:evenement-locaties',
                                                kwargs={'ver_nr': ver.ver_nr})
@@ -110,7 +110,7 @@ class EvenementLocatiesView(UserPassesTestMixin, TemplateView):
 
         ver = self.get_vereniging_or_404()
 
-        if self._bepaal_readonly(ver):
+        if self._bepaal_readonly():
             raise PermissionDenied('Geen toegang')
 
         locatie = EvenementLocatie(vereniging=ver)
@@ -175,7 +175,7 @@ class EvenementLocatieDetailsView(UserPassesTestMixin, TemplateView):
 
         return ver
 
-    def _bepaal_readonly(self, ver):
+    def _bepaal_readonly(self):
         # MO mag wijzigen
         if self.rol_nu == Rol.ROL_MO:
             return False
@@ -214,7 +214,7 @@ class EvenementLocatieDetailsView(UserPassesTestMixin, TemplateView):
 
         context['gebruik_evenement'], context['gebruik_opleiding'], is_used = self._get_gebruik(locatie)
 
-        context['readonly'] = readonly = self._bepaal_readonly(ver)
+        context['readonly'] = readonly = self._bepaal_readonly()
         if not readonly:
             url = reverse('Locatie:evenement-locatie-details',
                           kwargs={'ver_nr': ver.ver_nr,
