@@ -227,7 +227,10 @@ class WedstrijdKorting(models.Model):
     voor_sporter = models.ForeignKey(Sporter, on_delete=models.SET_NULL, null=True, blank=True)
 
     def __str__(self):
-        return "[%s] %s %d%%" % (self.uitgegeven_door.pk, WEDSTRIJD_KORTING_SOORT_TO_STR[self.soort], self.percentage)
+        return "%s: [%s] %s %d%%" % (self.pk,
+                                     self.uitgegeven_door.pk,
+                                     WEDSTRIJD_KORTING_SOORT_TO_STR[self.soort],
+                                     self.percentage)
 
     class Meta:
         verbose_name = "Wedstrijd korting"
