@@ -15,7 +15,9 @@ from Locatie.models import WedstrijdLocatie
 from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
-from Wedstrijden.definities import (WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_MANDJE, WEDSTRIJD_STATUS_GEACCEPTEERD,
+from Wedstrijden.definities import (WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_MANDJE,
+                                    WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF,
+                                    WEDSTRIJD_STATUS_GEACCEPTEERD,
                                     WEDSTRIJD_KORTING_SPORTER, WEDSTRIJD_KORTING_VERENIGING, WEDSTRIJD_KORTING_COMBI)
 from Wedstrijden.models import Wedstrijd, WedstrijdSessie, WedstrijdInschrijving, WedstrijdKorting
 from Wedstrijden.operations.bepaal_kortingen import BepaalAutomatischeKorting
@@ -47,12 +49,17 @@ class TestWedstrijdenBepaalKortingen(E2EHelpers, TestCase):
     def _maak_ver_en_sporter(self):
         self.regio112 = Regio.objects.get(regio_nr=112)
 
-        # maak een test vereniging
         self.ver = Vereniging(
                             ver_nr=1000,
                             naam="Grote Club",
                             regio=self.regio112)
         self.ver.save()
+
+        self.ver2 = Vereniging(
+                            ver_nr=1001,
+                            naam="Andere Club",
+                            regio=self.regio112)
+        self.ver2.save()
 
         lid_nr = 102030
         self.account_102030 = self.e2e_create_account(str(lid_nr), 'sporter102030@khsn.not', 'Piet')
@@ -83,7 +90,7 @@ class TestWedstrijdenBepaalKortingen(E2EHelpers, TestCase):
                     geboorte_datum='1966-06-04',
                     sinds_datum='2020-02-02',
                     adres_code='1234AB56',
-                    bij_vereniging=self.ver)
+                    bij_vereniging=self.ver2)
         sporter2.save()
         self.sporter2 = sporter2
 
@@ -226,6 +233,13 @@ class TestWedstrijdenBepaalKortingen(E2EHelpers, TestCase):
         inschrijving.save()
         self.inschrijving2 = inschrijving
 
+        regel = BestellingRegel(
+                        korte_beschrijving='Wedstrijd %s' % repr(self.wedstrijd1.titel),
+                        code=BESTELLING_REGEL_CODE_WEDSTRIJD,
+                        bedrag_euro=self.wedstrijd1.prijs_euro_normaal)
+        regel.save()
+        self.regel3 = regel
+
         inschrijving = WedstrijdInschrijving(
                             wanneer=timezone.now(),
                             status=WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_MANDJE,
@@ -248,24 +262,36 @@ class TestWedstrijdenBepaalKortingen(E2EHelpers, TestCase):
                             voor_sporter=self.sporter1)
         korting_s.save()
         self.korting_s = korting_s
+        # print('korting_s: %s' % korting_s)
 
         # korting niet voor sporter in mandje
-        korting_s3 = WedstrijdKorting(
+        korting_s2 = WedstrijdKorting(
                             soort=WEDSTRIJD_KORTING_SPORTER,
                             geldig_tot_en_met='2099-01-01',
                             uitgegeven_door=self.ver,
                             percentage=15,
                             voor_sporter=self.sporter3)
-        korting_s3.save()
-        self.korting_s2 = korting_s3
+        korting_s2.save()
+        self.korting_s2 = korting_s2
+        # print('korting_s2: %s' % korting_s2)
 
         korting_v = WedstrijdKorting(
                             soort=WEDSTRIJD_KORTING_VERENIGING,
                             geldig_tot_en_met='2099-01-01',
                             uitgegeven_door=self.ver,
-                            percentage=75)
+                            percentage=50)
         korting_v.save()
         self.korting_v = korting_v
+        # print('korting_v: %s' % korting_v)
+
+        korting_v2 = WedstrijdKorting(
+                            soort=WEDSTRIJD_KORTING_VERENIGING,
+                            geldig_tot_en_met='2099-01-01',
+                            uitgegeven_door=self.ver2,
+                            percentage=50)
+        korting_v2.save()
+        self.korting_v2 = korting_v2
+        # print('korting_v2: %s' % korting_v2)
 
         korting_c = WedstrijdKorting(
                             soort=WEDSTRIJD_KORTING_COMBI,
@@ -274,13 +300,10 @@ class TestWedstrijdenBepaalKortingen(E2EHelpers, TestCase):
                             percentage=50)
         korting_c.save()
         self.korting_c = korting_c
+        # print('korting_c: %s' % korting_c)
 
     def setUp(self):
         """ initialisatie van de test case """
-
-        # self.account_admin = self.e2e_create_account_admin()
-        # self.account_admin.is_BB = True
-        # self.account_admin.save()
 
         self.boog_r = BoogType.objects.get(afkorting='R')
         self.klasse_r = KalenderWedstrijdklasse.objects.get(volgorde=120)
@@ -290,168 +313,13 @@ class TestWedstrijdenBepaalKortingen(E2EHelpers, TestCase):
         self._maak_inschrijvingen()
         self._maak_kortingen()
 
-        # self.functie_mwz = Functie.objects.get(rol='MWZ')
-        #
-        # self.functie_hwl = maak_functie('HWL Ver 1000', 'HWL')
-        # self.functie_hwl.vereniging = self.ver1
-        # self.functie_hwl.accounts.add(self.account_admin)
-        # self.functie_hwl.save()
-        #
-        # # wordt HWL, stel sporter voorkeuren in en maak een wedstrijd aan
-        # self.e2e_login_and_pass_otp(self.account_admin)
-        # self.e2e_wissel_naar_functie(self.functie_hwl)
-        #
-        # self.lid_nr = 123456
-        # self.account = self.e2e_create_account(str(self.lid_nr), 'test@test.not', 'Voornaam')
-        #
-        # self.boog_c = BoogType.objects.get(afkorting='C')
-
-
-
-
-        # sporterboog = SporterBoog.objects.get(sporter=sporter1, boogtype=self.boog_c)
-        # sporterboog.voor_wedstrijd = True
-        # sporterboog.save(update_fields=['voor_wedstrijd'])
-        # self.sporterboog1c = sporterboog
-        #
-        # sporter2 = Sporter(
-        #             lid_nr=self.lid_nr + 1,
-        #             geslacht='V',
-        #             voornaam='Fa',
-        #             achternaam='Millie',
-        #             geboorte_datum='1966-06-04',
-        #             sinds_datum='2020-02-02',
-        #             adres_code='1234AB56',
-        #             bij_vereniging=self.ver1)
-        # sporter2.save()
-        # self.sporter2 = sporter2
-        # get_sporter_voorkeuren(sporter2)
-        # resp = self.client.post(self.url_sporter_voorkeuren, {'sporter_pk': sporter2.pk})   # maak alle SporterBoog aan
-        # self.assert_is_redirect_not_plein(resp)
-        #
-        # sporterboog = SporterBoog.objects.get(sporter=sporter2, boogtype=self.boog_c)
-        # sporterboog.voor_wedstrijd = True
-        # sporterboog.save(update_fields=['voor_wedstrijd'])
-        # self.sporterboog2c = sporterboog
-        #
-
-        # # wordt HWL en maak een wedstrijd aan
-        # self.e2e_login_and_pass_otp(self.account_admin)
-        # self.e2e_wissel_naar_functie(self.functie_hwl)
-
-        # resp = self.client.post(self.url_wedstrijden_maak_nieuw, {'keuze': 'khsn'})
-        # self.assert_is_redirect_not_plein(resp)
-
-        # self.assertEqual(1, Wedstrijd.objects.count())
-        # self.wedstrijd = Wedstrijd.objects.first()
-        # url = self.url_wedstrijden_wijzig_wedstrijd % self.wedstrijd.pk
-        # self.assert_is_redirect(resp, url)
-
-
-
-        # # maak een C sessie aan
-        # sessie = WedstrijdSessie(
-        #                 datum=self.wedstrijd.datum_begin,
-        #                 tijd_begin='10:00',
-        #                 tijd_einde='15:00',
-        #                 max_sporters=50)
-        # sessie.save()
-        # self.wedstrijd.sessies.add(sessie)
-        # wkls_c = self.wedstrijd.wedstrijdklassen.filter(boogtype__afkorting='C')
-        # sessie.wedstrijdklassen.set(wkls_c)
-        # self.sessie_c = sessie
-        #
-
-        # # schrijf de twee sporters in
-        # self.e2e_login_and_pass_otp(self.account)
-        # # self.e2e_wisselnaarrol_sporter()
-        # # url = self.url_inschrijven_groepje % self.wedstrijd.pk
-        #
-        # # zorg dat de wedstrijd als 'gesloten' gezien wordt
-        # begin = self.wedstrijd.datum_begin
-        # self.wedstrijd.datum_begin = timezone.now().date()
-        # self.wedstrijd.save(update_fields=['datum_begin'])
-        # resp = self.client.post(self.url_inschrijven_toevoegen_mandje, {'snel': 1,
-        #                                                                 'wedstrijd': self.wedstrijd.pk,
-        #                                                                 'sporterboog': self.sporterboog1r.pk,
-        #                                                                 'sessie': self.sessie_r.pk,
-        #                                                                 'klasse': wkls_r[0].pk,
-        #                                                                 'boog': self.boog_r.pk})
-        # self.assert404(resp, 'Inschrijving is gesloten')
-        #
-        # self.wedstrijd.datum_begin += timedelta(days=self.wedstrijd.inschrijven_tot - 1)
-        # self.wedstrijd.save(update_fields=['datum_begin'])
-        # resp = self.client.post(self.url_inschrijven_toevoegen_mandje, {'snel': 1,
-        #                                                                 'wedstrijd': self.wedstrijd.pk,
-        #                                                                 'sporterboog': self.sporterboog1r.pk,
-        #                                                                 'sessie': self.sessie_r.pk,
-        #                                                                 'klasse': wkls_r[0].pk,
-        #                                                                 'boog': self.boog_r.pk})
-        # self.assert404(resp, 'Inschrijving is gesloten')
-        #
-        # self.wedstrijd.datum_begin = begin
-        # self.wedstrijd.save(update_fields=['datum_begin'])
-        #
-        # resp = self.client.post(self.url_inschrijven_toevoegen_mandje, {'snel': 1,
-        #                                                                 'wedstrijd': self.wedstrijd.pk,
-        #                                                                 'sporterboog': self.sporterboog1r.pk,
-        #                                                                 'sessie': self.sessie_r.pk,
-        #                                                                 'klasse': wkls_r[0].pk,
-        #                                                                 'boog': self.boog_r.pk})
-        # self.assertEqual(resp.status_code, 200)     # 200 = OK
-        # self.assert_html_ok(resp)
-        # self.assert_template_used(resp, ('wedstrijdinschrijven/inschrijven-toegevoegd-aan-mandje.dtl',
-        #                                  'plein/site_layout.dtl'))
-        #
-        # self.assertEqual(1, WedstrijdInschrijving.objects.count())
-        # self.inschrijving1r = WedstrijdInschrijving.objects.first()
-        #
-        # resp = self.client.post(self.url_inschrijven_toevoegen_mandje, {'snel': 1,
-        #                                                                 'wedstrijd': self.wedstrijd.pk,
-        #                                                                 'sporterboog': self.sporterboog1c.pk,
-        #                                                                 'sessie': self.sessie_c.pk,
-        #                                                                 'klasse': wkls_c[0].pk,
-        #                                                                 'boog': self.boog_c.pk})
-        # self.assertEqual(resp.status_code, 200)     # 200 = OK
-        # self.assert_html_ok(resp)
-        # self.assert_template_used(resp, ('wedstrijdinschrijven/inschrijven-toegevoegd-aan-mandje.dtl',
-        #                                  'plein/site_layout.dtl'))
-        # self.assertEqual(2, WedstrijdInschrijving.objects.count())
-        # self.inschrijving1c = WedstrijdInschrijving.objects.exclude(pk=self.inschrijving1r.pk)[0]
-        #
-        # resp = self.client.post(self.url_inschrijven_toevoegen_mandje, {'snel': 1,
-        #                                                                 'wedstrijd': self.wedstrijd.pk,
-        #                                                                 'sporterboog': self.sporterboog2c.pk,
-        #                                                                 'sessie': self.sessie_c.pk,
-        #                                                                 'klasse': wkls_c[1].pk,
-        #                                                                 'boog': self.boog_c.pk})
-        # self.assertEqual(resp.status_code, 200)     # 200 = OK
-        # self.assert_html_ok(resp)
-        # self.assert_template_used(resp, ('wedstrijdinschrijven/inschrijven-toegevoegd-aan-mandje.dtl',
-        #                                  'plein/site_layout.dtl'))
-        # self.assertEqual(3, WedstrijdInschrijving.objects.count())
-        # self.inschrijving2 = WedstrijdInschrijving.objects.exclude(pk__in=(self.inschrijving1r.pk,
-        #                                                                    self.inschrijving1c.pk))[0]
-        #
-        # korting = WedstrijdKorting(
-        #                 geldig_tot_en_met='2099-12-31',
-        #                 soort=WEDSTRIJD_KORTING_VERENIGING,
-        #                 uitgegeven_door=self.ver1,
-        #                 percentage=42)
-        # korting.save()
-        #
-        # self.inschrijving1r.korting = korting
-        # self.inschrijving1r.save(update_fields=['korting'])
-        #
-        # self.inschrijving2.status = WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD
-        # self.inschrijving2.korting = korting
-        # self.inschrijving2.save(update_fields=['status', 'korting'])
-
-    def test_basis(self):
+    def test_korting_persoonlijk(self):
         stdout = OutputWrapper(io.StringIO())
-        bepaal = BepaalAutomatischeKorting(stdout)
+        bepaal = BepaalAutomatischeKorting(stdout, verbose=True)
+        # regel1 en regel2 zijn wedstrijden
 
-        regels = [self.regel1.pk, self.regel2.pk]
+        # geen kortingen
+        regels = [self.regel1.pk, self.regel2.pk, self.regel3.pk]
         res = bepaal.kies_kortingen(regels)
         self.assertEqual(res, [])
 
@@ -459,17 +327,19 @@ class TestWedstrijdenBepaalKortingen(E2EHelpers, TestCase):
         self.korting_s.voor_wedstrijden.add(self.wedstrijd1)
         self.korting_s.voor_wedstrijden.add(self.wedstrijd3)        # ligt niet in mandje
 
-        regels = [self.regel1.pk, self.regel2.pk]
+        stdout = OutputWrapper(io.StringIO())
+        bepaal = BepaalAutomatischeKorting(stdout, verbose=True)
+        regels = [self.regel1.pk, self.regel2.pk, self.regel3.pk]
         res = bepaal.kies_kortingen(regels)
+        # print(stdout.getvalue())
         self.assertTrue(isinstance(res, list))
         self.assertEqual(len(res), 1)
-
         regel = res[0]
         self.assertTrue(isinstance(regel, BestellingRegel))
         # print(regel)
         self.assertEqual(regel.code, BESTELLING_REGEL_CODE_WEDSTRIJD_KORTING)
         self.assertEqual(regel.korte_beschrijving, 'Persoonlijke korting: 95%')
-        self.assertEqual(regel.korting_redenen, '')     # TODO: klopt dit?
+        self.assertEqual(regel.korting_redenen, '')     # TODO: zou alle redenen voor deze korting moeten bevatten
         self.assertEqual(regel.korting_ver_nr, self.ver.ver_nr)
         self.assertEqual(round(regel.bedrag_euro, 2), -23.75)     # 95% van 25 euro
         self.assertFalse('[ERROR]' in stdout.getvalue())
@@ -479,6 +349,7 @@ class TestWedstrijdenBepaalKortingen(E2EHelpers, TestCase):
         WedstrijdInschrijving.objects.all().delete()
         leeg = list()
         res = bepaal.kies_kortingen(leeg)
+        # print(stdout.getvalue())
         self.assertEqual(res, leeg)
 
         # geen kortingen
@@ -487,6 +358,125 @@ class TestWedstrijdenBepaalKortingen(E2EHelpers, TestCase):
         res = bepaal.kies_kortingen(leeg)
         self.assertEqual(res, leeg)
 
+    def test_korting_vereniging(self):
+        stdout = OutputWrapper(io.StringIO())
+        bepaal = BepaalAutomatischeKorting(stdout, verbose=True)
+        # regel1 en regel2 zijn wedstrijden
+
+        # geen kortingen
+        regels = [self.regel1.pk, self.regel2.pk]
+        res = bepaal.kies_kortingen(regels)
+        self.assertEqual(res, [])
+
+        # maak een korting beschikbaar voor een wedstrijd
+        self.korting_v.voor_wedstrijden.add(self.wedstrijd1)
+        self.korting_v2.voor_wedstrijden.add(self.wedstrijd3)        # ligt niet in mandje
+
+        regels = [self.regel1.pk, self.regel2.pk]
+        res = bepaal.kies_kortingen(regels)
+        self.assertTrue(isinstance(res, list))
+        self.assertEqual(len(res), 1)
+        regel = res[0]
+        self.assertTrue(isinstance(regel, BestellingRegel))
+        self.assertEqual(regel.code, BESTELLING_REGEL_CODE_WEDSTRIJD_KORTING)
+        self.assertEqual(regel.korte_beschrijving, 'Verenigingskorting: 50%')
+        self.assertEqual(regel.korting_redenen, '')     # TODO: zou alle redenen voor deze korting moeten bevatten
+        self.assertEqual(regel.korting_ver_nr, self.ver.ver_nr)
+        self.assertEqual(round(regel.bedrag_euro, 2), -12.50)     # 50% van 25 euro
+        self.assertFalse('[ERROR]' in stdout.getvalue())
+        self.assertFalse('[WARNING]' in stdout.getvalue())
+
+    def test_korting_combi(self):
+        # combi-korting
+        self.korting_c.voor_wedstrijden.add(self.wedstrijd1)
+        self.korting_c.voor_wedstrijden.add(self.wedstrijd2)
+
+        stdout = OutputWrapper(io.StringIO())
+        bepaal = BepaalAutomatischeKorting(stdout, verbose=True)
+        regels = [self.regel1.pk, self.regel2.pk, self.regel3.pk]
+        res = bepaal.kies_kortingen(regels)
+        # print(stdout.getvalue())
+        self.assertTrue(isinstance(res, list))
+        self.assertEqual(len(res), 1)
+        regel = res[0]
+        self.assertTrue(isinstance(regel, BestellingRegel))
+        self.assertEqual(regel.korte_beschrijving, 'Combinatiekorting: 50%')
+        self.assertEqual(regel.korting_redenen, 'Test wedstrijd 1||Test wedstrijd 2')
+        self.assertEqual(round(regel.bedrag_euro, 2), -25.00)
+
+        # maar 1 van de wedstrijden van de combinatiekorting
+        stdout = OutputWrapper(io.StringIO())
+        bepaal = BepaalAutomatischeKorting(stdout, verbose=True)
+        regels = [self.regel1.pk]
+        res = bepaal.kies_kortingen(regels)
+        # print(stdout.getvalue())
+        leeg = list()
+        self.assertEqual(res, leeg)
+
+        # zowel persoonlijke als combi kortingen
+        self.korting_s.voor_wedstrijden.add(self.wedstrijd1)
+        stdout = OutputWrapper(io.StringIO())
+        bepaal = BepaalAutomatischeKorting(stdout, verbose=True)
+        regels = [self.regel1.pk, self.regel2.pk, self.regel3.pk]
+        res = bepaal.kies_kortingen(regels)
+        # print(stdout.getvalue())
+        self.assertTrue(isinstance(res, list))
+        self.assertEqual(len(res), 1)
+        regel = res[0]
+        # print(regel)
+        self.assertEqual(regel.code, BESTELLING_REGEL_CODE_WEDSTRIJD_KORTING)
+        self.assertEqual(regel.korte_beschrijving, 'Combinatiekorting: 50%')
+        self.assertEqual(round(regel.bedrag_euro, 2), -25.0)
+        self.assertEqual(regel.korting_redenen, 'Test wedstrijd 1||Test wedstrijd 2')
+
+        # persoonlijke korting wordt belangrijker
+        self.regel1.bedrag_euro = Decimal(250.0)
+        self.regel1.save(update_fields=['bedrag_euro'])
+        stdout = OutputWrapper(io.StringIO())
+        bepaal = BepaalAutomatischeKorting(stdout, verbose=True)
+        regels = [self.regel1.pk, self.regel2.pk, self.regel3.pk]
+        res = bepaal.kies_kortingen(regels)
+        # print(stdout.getvalue())
+        self.assertTrue(isinstance(res, list))
+        self.assertEqual(len(res), 1)
+        regel = res[0]
+        self.assertEqual(regel.code, BESTELLING_REGEL_CODE_WEDSTRIJD_KORTING)
+        self.assertEqual(regel.korte_beschrijving, 'Persoonlijke korting: 95%')
+        self.assertEqual(round(regel.bedrag_euro, 2), -237.50)
+        self.assertEqual(regel.korting_redenen, '')
+
+        # nog een keer, zonder verbose
+        self.regel1.bedrag_euro = Decimal(250.0)
+        self.regel1.save(update_fields=['bedrag_euro'])
+        stdout = OutputWrapper(io.StringIO())
+        bepaal = BepaalAutomatischeKorting(stdout, verbose=False)
+        regels = [self.regel1.pk, self.regel2.pk, self.regel3.pk]
+        res = bepaal.kies_kortingen(regels)
+        # print(stdout.getvalue())
+        self.assertTrue(isinstance(res, list))
+        self.assertEqual(len(res), 1)
+
+    def test_eerdere(self):
+        # combi-korting voor situatie: 1x al ingeschreven + 1x in mandje
+        self.korting_c.voor_wedstrijden.add(self.wedstrijd1)
+        self.korting_c.voor_wedstrijden.add(self.wedstrijd2)
+
+        # schrijf in op wedstrijd 1
+        self.inschrijving1.status = WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF
+        self.inschrijving1.save(update_fields=['status'])
+
+        stdout = OutputWrapper(io.StringIO())
+        bepaal = BepaalAutomatischeKorting(stdout, verbose=True)
+        regels = [self.regel2.pk]
+        res = bepaal.kies_kortingen(regels)
+        # print(stdout.getvalue())
+        self.assertTrue(isinstance(res, list))
+        self.assertEqual(len(res), 1)
+        regel = res[0]
+        self.assertTrue(isinstance(regel, BestellingRegel))
+        self.assertEqual(regel.korte_beschrijving, 'Combinatiekorting: 50%')
+        self.assertEqual(regel.korting_redenen, 'Test wedstrijd 1||Test wedstrijd 2')
+        self.assertEqual(round(regel.bedrag_euro, 2), -12.50)
 
 
 # end of file

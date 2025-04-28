@@ -227,7 +227,10 @@ class WedstrijdKorting(models.Model):
     voor_sporter = models.ForeignKey(Sporter, on_delete=models.SET_NULL, null=True, blank=True)
 
     def __str__(self):
-        return "[%s] %s %d%%" % (self.uitgegeven_door.pk, WEDSTRIJD_KORTING_SOORT_TO_STR[self.soort], self.percentage)
+        return "%s: [%s] %s %d%%" % (self.pk,
+                                     self.uitgegeven_door.pk,
+                                     WEDSTRIJD_KORTING_SOORT_TO_STR[self.soort],
+                                     self.percentage)
 
     class Meta:
         verbose_name = "Wedstrijd korting"
@@ -281,8 +284,10 @@ class WedstrijdInschrijving(models.Model):
 
     def __str__(self):
         """ beschrijving voor de admin interface """
-        return "Wedstrijd inschrijving voor %s: [%s]" % (self.sporterboog.sporter.lid_nr_en_volledige_naam(),
-                                                         WEDSTRIJD_INSCHRIJVING_STATUS_TO_STR[self.status])
+        return "Wedstrijd inschrijving voor %s, voor wedstrijd %s, status %s" % (
+                    self.sporterboog.sporter.lid_nr_en_volledige_naam(),
+                    self.wedstrijd.titel,
+                    WEDSTRIJD_INSCHRIJVING_STATUS_TO_STR[self.status])
 
     def korte_beschrijving(self):
         """ geef een one-liner terug met een korte beschrijving van deze inschrijving """
