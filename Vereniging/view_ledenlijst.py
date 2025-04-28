@@ -8,6 +8,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.views.generic import ListView
 from django.contrib.auth.mixins import UserPassesTestMixin
+from Account.models import Account
 from BasisTypen.definities import MAXIMALE_LEEFTIJD_JEUGD, ORGANISATIE_KHSN
 from BasisTypen.models import Leeftijdsklasse
 from Functie.definities import Rol
@@ -18,13 +19,33 @@ TEMPLATE_LEDENLIJST = 'vereniging/ledenlijst.dtl'
 TEMPLATE_LEDEN_VOORKEUREN = 'vereniging/leden-voorkeuren.dtl'
 
 
+def format_last_login(now, account: Account):
+    dt = account.last_login
+    delta = now - dt
+    days = delta.days
+    if days <= 1:
+        return "Vandaag"
+    if days <= 7:
+        return "Afgelopen week"
+    if days <= 31:
+        return "Afgelopen maand"
+    maanden = days / (365 / 12)
+    maanden = round(maanden + 0.5)
+    # print('days: %s --> maanden: %s' % (days, maanden))
+    if maanden <= 14:
+        return "%s maanden geleden" % maanden
+    jaren = int(maanden / 12)
+    maanden -= (jaren * 12)
+    return "%s jaar en %s maanden geleden" % (jaren, maanden)
+
+
 class LedenLijstView(UserPassesTestMixin, ListView):
 
     """ Deze view laat de HWL zijn ledenlijst zien """
 
     # class variables shared by all instances
     template_name = TEMPLATE_LEDENLIJST
-    raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
+    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
     permission_denied_message = 'Geen toegang'
     kruimel = 'Ledenlijst'
 
@@ -150,6 +171,7 @@ class LedenLijstView(UserPassesTestMixin, ListView):
         # for
 
         # zoek de laatste-inlog bij elk lid
+        now = timezone.now()
         for sporter in objs:
             # voorkeuren van de sporters aanpassen
             if self.mag_wijzigen:
@@ -158,7 +180,7 @@ class LedenLijstView(UserPassesTestMixin, ListView):
 
             if sporter.account:
                 if sporter.account.last_login:
-                    sporter.laatste_inlog = sporter.account.last_login
+                    sporter.laatste_inlog = format_last_login(now, sporter.account)
                 else:
                     sporter.geen_inlog = 2
             else:

@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2024 Ramon van der Winkel.
+#  Copyright (c) 2020-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
+from Account.models import Account
 from Competitie.models import Competitie, CompetitieIndivKlasse, RegiocompetitieSporterBoog
 from Competitie.test_utils.tijdlijn import zet_competitie_fase_regio_inschrijven
 from Competitie.operations import competities_aanmaken
@@ -17,6 +18,7 @@ from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 from Vereniging.models import Vereniging
+from Vereniging.view_ledenlijst import format_last_login
 import datetime
 
 
@@ -361,5 +363,36 @@ class TestVerenigingSEC(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('vereniging/overzicht.dtl', 'plein/site_layout.dtl'))
 
+    def test_format_last_login(self):
+        now = datetime.date(2010, 1, 1)
+        account = Account()
+
+        account.last_login = datetime.date(2010, 1, 1)
+        self.assertEqual(format_last_login(now, account), 'Vandaag')
+
+        account.last_login = datetime.date(2009, 12, 30)
+        self.assertEqual(format_last_login(now, account), 'Afgelopen week')
+
+        account.last_login = datetime.date(2009, 12, 1)
+        self.assertEqual(format_last_login(now, account), 'Afgelopen maand')
+
+        account.last_login = datetime.date(2009, 1, 1)
+        self.assertEqual(format_last_login(now, account), '12 maanden geleden')
+
+        account.last_login = datetime.date(2008, 12, 2)
+        self.assertEqual(format_last_login(now, account), '13 maanden geleden')
+
+        account.last_login = datetime.date(2008, 11, 2)
+        self.assertEqual(format_last_login(now, account), '14 maanden geleden')
+
+        account.last_login = datetime.date(2008, 11, 1)
+        self.assertEqual(format_last_login(now, account), '1 jaar en 3 maanden geleden')
+
+        account.last_login = datetime.date(2006, 11, 1)
+        self.assertEqual(format_last_login(now, account), '3 jaar en 3 maanden geleden')
+
+        account.last_login = datetime.date(2023, 9, 30)
+        now = datetime.date(2025, 4, 28)
+        self.assertEqual(format_last_login(now, account), '1 jaar en 7 maanden geleden')
 
 # end of file

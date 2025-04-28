@@ -38,7 +38,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
     url_planning_regio = '/bondscompetities/regio/planning/%s/'                                     # deelcomp_pk
     url_planning_regio_ronde_methode1 = '/bondscompetities/regio/planning/regio-wedstrijden/%s/'    # ronde_pk
     url_wijzig_wedstrijd = '/bondscompetities/regio/planning/wedstrijd/wijzig/%s/'                  # match_pk
-    url_wieschietwaar = '/bondscompetities/regio/wie-schiet-waar/%s/'                               # deelcomp_pk
+    url_wie_schiet_waar = '/bondscompetities/regio/wie-schiet-waar/%s/'                             # deelcomp_pk
 
     testdata = None
 
@@ -339,7 +339,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         # zolang de competitie in fase B..F is
         # en alleen voor een regio met inschrijfmethode 1
 
-        url = self.url_wieschietwaar % self.deelcomp_regio.pk
+        url = self.url_wie_schiet_waar % self.deelcomp_regio.pk
         urls_expected = [url]
 
         # login als HWL
