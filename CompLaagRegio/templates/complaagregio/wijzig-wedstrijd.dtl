@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2024 Ramon van der Winkel.
+                Copyright (c) 2020-2025 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -80,7 +80,7 @@
 
         // omdat materialize-css het option 'hidden' attribuut niet ondersteund, verwijderen we opties
         // hierin stoppen we de kopie om de lijst mee te herstellen
-        let locatie_keuzes_html = ''
+        let locatie_keuzes_html = '';
 
         function locatie_keuze_tonen() {
             // herstel de hele lijst

@@ -61,54 +61,54 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2025-04-28'
+SITE_VERSIE = '2025-05-02'
 
 # modules van de site
 INSTALLED_APPS = [
     'Beheer.apps.BeheerConfig',         # must go first: provides admin template override
     'Beheer.apps.BeheerAdminConfig',    # uitbreiding op admin interface
-    'Account.apps.AccountConfig',
-    'BasisTypen.apps.BasisTypenConfig',
-    'Bestelling.apps.BestellingConfig',
-    'Betaal.apps.BetaalConfig',
-    'Bondspas.apps.BondspasConfig',
-    'Competitie.apps.CompetitieConfig',
-    'CompInschrijven.apps.CompInschrijvenConfig',
-    'CompLaagBond.apps.CompLaagBondConfig',
-    'CompLaagRegio.apps.CompLaagRegioConfig',
-    'CompLaagRayon.apps.CompLaagRayonConfig',
-    'CompBeheer.apps.CompBeheerConfig',
-    'CompScores.apps.CompScoresConfig',
-    'CompUitslagen.apps.CompUitslagenConfig',
-    'Evenement.apps.EvenementConfig',
-    'Feedback.apps.FeedbackConfig',
-    'Functie.apps.FunctieConfig',
-    'Geo.apps.GeoConfig',
-    'HistComp.apps.HistCompConfig',
-    'ImportCRM.apps.ImportCRMConfig',
-    'Instaptoets.apps.InstaptoetsConfig',
-    'Kalender.apps.KalenderConfig',
-    'Locatie.apps.LocatieConfig',
-    'Ledenvoordeel.apps.LedenvoordeelConfig',
-    'Logboek.apps.LogboekConfig',
-    'Mailer.apps.MailerConfig',
-    'Opleiding.apps.OpleidingConfig',
-    'Overig.apps.OverigConfig',
-    'Plein.apps.PleinConfig',
-    'Records.apps.RecordsConfig',
-    'Registreer.apps.RegistreerConfig',
-    'Score.apps.ScoreConfig',
-    'Scheidsrechter.apps.ScheidsrechterConfig',
-    'SiteMap.apps.SiteMapConfig',
-    'Spelden.apps.SpeldenConfig',
-    'Sporter.apps.SporterConfig',
-    'Taken.apps.TakenConfig',
-    'TijdelijkeCodes.apps.TijdelijkeCodesConfig',
-    'Vereniging.apps.VerenigingConfig',
-    'Webwinkel.apps.WebwinkelConfig',
-    'Wedstrijden.apps.WedstrijdenConfig',
-    'WedstrijdInschrijven.apps.WedstrijdInschrijvenConfig',
-    'django.contrib.staticfiles',   # gather static files from modules helper
+    'Account',
+    'BasisTypen',
+    'Bestelling',
+    'Betaal',
+    'Bondspas',
+    'Competitie',
+    'CompBeheer',
+    'CompInschrijven',
+    'CompLaagBond',
+    'CompLaagRegio',
+    'CompLaagRayon',
+    'CompScores',
+    'CompUitslagen',
+    'Evenement',
+    'Feedback',
+    'Functie',
+    'Geo',
+    'HistComp',
+    'ImportCRM',
+    'Instaptoets',
+    'Kalender',
+    'Locatie',
+    'Ledenvoordeel',
+    'Logboek',
+    'Mailer',
+    'Opleiding',
+    'Overig',
+    'Plein',
+    'Records',
+    'Registreer',
+    'Score',
+    'Scheidsrechter',
+    'SiteMap',
+    'Spelden',
+    'Sporter',
+    'Taken',
+    'TijdelijkeCodes',
+    'Vereniging',
+    'Webwinkel',
+    'Wedstrijden',
+    'WedstrijdInschrijven',
+    'django.contrib.staticfiles',   # gather static files from modules helper + serve static files in dev
     'django.contrib.sessions',      # support for database-backed sessions; needed for logged-in user
     'django.contrib.auth',          # authenticatie framework
     'django.contrib.contenttypes',  # permission association to models
@@ -231,8 +231,8 @@ ROOT_URLCONF = 'Site.core.urls'
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
-STATIC_URL = '/static/'             # url
-STATIC_ROOT = 'Site/.static'    # relative to project top-dir
+STATIC_URL = '/static/'             # url where the server is serving the files
+STATIC_ROOT = 'Site/.static'        # relative to project top-dir
 STATICFILES_DIRS = [
     ("webwinkel_fotos", WEBWINKEL_FOTOS_DIR),       # noqa
 ]
