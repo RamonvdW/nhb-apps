@@ -248,8 +248,7 @@ STORAGES = {
     #     "BACKEND": "django.core.files.storage.FileSystemStorage"
     # },
     "staticfiles": {
-        "BACKEND": "Site.core.manifest_storage.MHManifestStaticFilesStorage",       # static files krijgen hash naam
-        # "broken_BACKEND": "django.contrib.staticfiles.storage.ManifestStaticFilesStorage"
+        "BACKEND": "Site.core.static.MHManifestStaticFilesStorage",       # static files krijgen hash naam
     }
 }
 

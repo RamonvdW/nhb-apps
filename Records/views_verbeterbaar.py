@@ -8,12 +8,12 @@ from django.urls import reverse
 from django.http import Http404
 from django.conf import settings
 from django.views.generic import ListView, TemplateView
-from django.templatetags.static import static
 from Records.definities import (disc2str, disc2url, url2disc,
                                 gesl2str, gesl2url, url2gesl,
                                 makl2str, makl2url, url2makl,
                                 lcat2str, lcat2url, url2lcat)
 from Records.models import IndivRecord, BesteIndivRecords
+from Site.core.static import static_safe
 from types import SimpleNamespace
 
 
@@ -32,9 +32,9 @@ class RecordsVerbeterbaarKiesDisc(ListView):
         """ called by the template system to get the queryset or list of objects for the template """
 
         disc2img = {
-            'OD': static('plein/badge_discipline_outdoor.png'),
-            '18': static('plein/badge_discipline_indoor.png'),
-            '25': static('plein/badge_discipline_25m1p.png')
+            'OD': static_safe('plein/badge_discipline_outdoor.png'),
+            '18': static_safe('plein/badge_discipline_indoor.png'),
+            '25': static_safe('plein/badge_discipline_25m1p.png')
         }
 
         objs = (IndivRecord

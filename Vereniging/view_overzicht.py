@@ -9,13 +9,13 @@ from django.conf import settings
 from django.utils.formats import localize
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from django.templatetags.static import static
 from Competitie.definities import DEEL_RK, INSCHRIJF_METHODE_1
 from Competitie.models import Competitie, Regiocompetitie, RegiocompetitieRonde, Kampioenschap
 from Competitie.tijdlijn import maak_comp_fase_beschrijvingen, is_open_voor_inschrijven_rk_teams
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving
 from Locatie.definities import BAAN_TYPE_EXTERN
+from Site.core.static import static_safe
 from Taken.operations import eval_open_taken, cached_aantal_open_taken
 from types import SimpleNamespace
 
@@ -135,9 +135,9 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                 kaartje.tekst = 'Leden aanmelden voor de %s.' % comp.beschrijving
                 kaartje.url = reverse('CompInschrijven:leden-aanmelden', kwargs={'comp_pk': comp.pk})
                 if comp.is_indoor():
-                    kaartje.img = static('plein/badge_discipline_indoor.png')
+                    kaartje.img = static_safe('plein/badge_discipline_indoor.png')
                 else:
-                    kaartje.img = static('plein/badge_discipline_25m1p.png')
+                    kaartje.img = static_safe('plein/badge_discipline_25m1p.png')
                 if comp.fase_indiv < 'C':
                     kaartje.beschikbaar_vanaf = localize(comp.begin_fase_C)
                 kaartjes.append(kaartje)
@@ -222,9 +222,9 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                         kaartje.url = reverse('CompInschrijven:leden-ingeschreven',
                                               kwargs={'deelcomp_pk': deelcomp.pk})
                         if comp.is_indoor():
-                            kaartje.img = static('plein/badge_discipline_indoor.png')
+                            kaartje.img = static_safe('plein/badge_discipline_indoor.png')
                         else:
-                            kaartje.img = static('plein/badge_discipline_25m1p.png')
+                            kaartje.img = static_safe('plein/badge_discipline_25m1p.png')
                         kaartjes.append(kaartje)
 
                     # 5 - wie schiet waar

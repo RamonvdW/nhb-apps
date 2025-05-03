@@ -9,10 +9,10 @@ from django.urls import reverse
 from django.http import Http404
 from django.db.models import Q
 from django.views.generic import ListView, TemplateView
-from django.templatetags.static import static
 from Records.definities import disc2str, gesl2str, makl2str, lcat2str
 from Records.models import IndivRecord, AnderRecord
 from Records.forms import ZoekForm
+from Site.core.static import static_safe
 from Sporter.models import Sporter
 
 
@@ -64,9 +64,9 @@ class RecordsOverzichtView(ListView):
     def get_queryset(self):
         """ called by the template system to get the queryset or list of objects for the template """
         disc2img = {
-            'OD': static('plein/badge_discipline_outdoor.png'),
-            '18': static('plein/badge_discipline_indoor.png'),
-            '25': static('plein/badge_discipline_25m1p.png')
+            'OD': static_safe('plein/badge_discipline_outdoor.png'),
+            '18': static_safe('plein/badge_discipline_indoor.png'),
+            '25': static_safe('plein/badge_discipline_25m1p.png')
         }
 
         # 10 nieuwste records (alle disciplines)

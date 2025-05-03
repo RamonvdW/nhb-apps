@@ -9,13 +9,13 @@ from django.urls import reverse
 from django.conf import settings
 from django.utils import timezone
 from django.shortcuts import render
-from django.templatetags.static import static
 from django.views.generic import TemplateView
 from Account.models import get_account
 from Bestelling.operations import mandje_tel_inhoud, bestel_mutatieverzoek_webwinkel_keuze
 from Betaal.format import format_bedrag_euro
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige
+from Site.core.static import static_safe
 from Webwinkel.models import WebwinkelProduct, WebwinkelKeuze
 
 
@@ -57,9 +57,9 @@ class OverzichtView(TemplateView):
                 prev_sectie = product.sectie
 
             if product.omslag_foto:
-                product.omslag_foto_src = static("webwinkel_fotos/" + product.omslag_foto.locatie)
+                product.omslag_foto_src = static_safe("webwinkel_fotos/" + product.omslag_foto.locatie)
             else:
-                product.omslag_foto_src = static("plein/logo_khsn_192x192.webp")
+                product.omslag_foto_src = static_safe("plein/logo_khsn_192x192.webp")
 
             if not product.onbeperkte_voorraad:
                 if product.aantal_op_voorraad < 1:
@@ -87,7 +87,7 @@ class OverzichtView(TemplateView):
         # begrenzing voor bestellen (alleen leden) volgt verderop
         if settings.WEBWINKEL_TOON_PRESTATIESPELDEN:
             context['url_spelden'] = reverse('Spelden:begin')
-            context['img_spelden'] = static('spelden/ster_1200.webp')
+            context['img_spelden'] = static_safe('spelden/ster_1200.webp')
 
         if rol_get_huidige(self.request) == Rol.ROL_SPORTER:
             context['menu_toon_mandje'] = True
@@ -189,8 +189,8 @@ class ProductView(TemplateView):
 
         context['fotos'] = fotos = product.fotos.order_by('volgorde')
         for foto in fotos:
-            foto.img_src = static("webwinkel_fotos/" + foto.locatie)
-            foto.thumb_src = static("webwinkel_fotos/" + foto.locatie_thumb)
+            foto.img_src = static_safe("webwinkel_fotos/" + foto.locatie)
+            foto.thumb_src = static_safe("webwinkel_fotos/" + foto.locatie_thumb)
             context['heeft_fotos'] = True
         # for
 

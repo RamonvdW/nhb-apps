@@ -1,17 +1,17 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import reverse
 from django.views.generic import TemplateView
-from django.templatetags.static import static
 from CompBeheer.operations import is_competitie_openbaar_voor_rol
 from Competitie.models import Competitie
 from Competitie.operations import bepaal_startjaar_nieuwe_competitie
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige, rol_get_beschrijving
+from Site.core.static import static_safe
 
 
 TEMPLATE_COMPETITIE_KIES_SEIZOEN = 'competitie/kies.dtl'
@@ -68,9 +68,9 @@ class CompetitieKiesView(TemplateView):
                 comps.append(comp)
 
                 if comp.is_indoor():
-                    comp.img_src = static('plein/badge_discipline_indoor.png')
+                    comp.img_src = static_safe('plein/badge_discipline_indoor.png')
                 else:
-                    comp.img_src = static('plein/badge_discipline_25m1p.png')
+                    comp.img_src = static_safe('plein/badge_discipline_25m1p.png')
 
                 if link_naar_beheer:
                     comp.card_url = reverse('CompBeheer:overzicht',
