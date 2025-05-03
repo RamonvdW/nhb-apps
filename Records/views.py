@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -21,13 +21,6 @@ TEMPLATE_RECORDS_SPECIFIEK = 'records/records_specifiek.dtl'
 TEMPLATE_RECORDS_ZOEK = 'records/records_zoek.dtl'
 
 
-DISCIPLINE_TO_IMG = {
-    'OD': static('plein/badge_discipline_outdoor.png'),
-    '18': static('plein/badge_discipline_indoor.png'),
-    '25': static('plein/badge_discipline_25m1p.png')
-}
-
-
 class RecordsOverzichtView(ListView):
     """ Dit is de top-level pagina van de records met een overzicht van de meest
         recente records
@@ -39,7 +32,6 @@ class RecordsOverzichtView(ListView):
     @staticmethod
     def set_url_specifiek(obj):
         obj.url = reverse('Records:specifiek', kwargs={'nummer': obj.volg_nr, 'discipline': obj.discipline})
-        obj.img = DISCIPLINE_TO_IMG[obj.discipline]
 
         if obj.is_world_record:
             obj.title_str = "Wereld Record"
@@ -71,11 +63,18 @@ class RecordsOverzichtView(ListView):
 
     def get_queryset(self):
         """ called by the template system to get the queryset or list of objects for the template """
+        disc2img = {
+            'OD': static('plein/badge_discipline_outdoor.png'),
+            '18': static('plein/badge_discipline_indoor.png'),
+            '25': static('plein/badge_discipline_25m1p.png')
+        }
+
         # 10 nieuwste records (alle disciplines)
         # op datum (nieuwste boven) en volg_nr (hoogste boven)
         objs = IndivRecord.objects.all().order_by('-datum', '-volg_nr')[:10]
         for obj in objs:
             self.set_url_specifiek(obj)
+            obj.img = disc2img[obj.discipline]
         # for
         return objs
 
