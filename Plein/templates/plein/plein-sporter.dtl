@@ -115,7 +115,7 @@
     </div>
 
     {% if url_ping %}
-        <script src="{% static 'plein_js_min/plein/simple_post_min.js' %}"></script>
+        <script src="{% static 'plein_js_min/simple_post_min.js' %}"></script>
         <script>
             window.addEventListener("load", function() {
                 // alles is opgehaald en ingeladen
