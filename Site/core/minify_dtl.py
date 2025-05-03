@@ -107,7 +107,7 @@ def minify_js(script):
             deel = re.sub(r'\)\ncontinue', ')continue', deel)
 
             # verwijder onnodige newlines aan het begin van het script
-            if clean == '' and deel[0] == '\n':
+            if clean == '' and deel[0] == '\n':         # pragma: no cover
                 deel = deel[1:]
 
             clean += deel

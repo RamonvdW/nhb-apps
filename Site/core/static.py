@@ -32,7 +32,7 @@ def static_safe(resource: str) -> str:
         url = static(resource)
     except ValueError:
         # hier komen als ManifestStaticFilesStorage de resource niet herkend
-        url = static('plein/oeps.png')
+        url = static('plein/oeps.webp')
 
     return url
 

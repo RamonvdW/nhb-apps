@@ -21,7 +21,6 @@ class AppJsMinifyFinder(BaseFinder):
     """
 
     def __init__(self, app_names=None, *args, **kwargs):
-        self.apps_done = list()
         self.apps_with_js = dict()
         self.main = ''
 
@@ -38,36 +37,39 @@ class AppJsMinifyFinder(BaseFinder):
     def _find_apps_with_js(self, app_configs):
         # note: this method is also invoked for each management command, so do very little work
         for app_config in app_configs:
-            if app_config.name not in self.apps_done:
-                js_dir = os.path.join(app_config.path, "js")
-                if os.path.isdir(js_dir):
-                    self.apps_with_js[app_config.name] = app_config.path
-                    self.apps_done.append(app_config.name)
-            else:
-                # TODO: we never seem to get here
-                print('[DEBUG] double work')
+            app_name = app_config.name
+            js_dir = os.path.join(app_config.path, "js")
+            if os.path.isdir(js_dir):
+                self.apps_with_js[app_name] = app_config.path
         # for
 
-    def list(self, ignore_patterns):
+    def list(self, ignore_patterns=None):
         # invoked to find static files
         # we use this to minify javascript files and create new static files on the fly
         for app_name, app_path in self.apps_with_js.items():
+            print('[DEBUG] Minify JS for app %s' % app_name)
             js_dir = os.path.join(app_path, "js")
+
+            # zorg dat app/static/ bestaat
             static_dir = os.path.join(app_path, "static")
             if not os.path.isdir(static_dir):
                 os.mkdir(static_dir)
+
+            # zorg dat app/static/app_js_min/ bestaat
             js_min_dir = os.path.join(app_path, "static", "%s_js_min" % app_name.lower())
             if not os.path.isdir(js_min_dir):
                 os.mkdir(js_min_dir)
-            print('[DEBUG] Minify JS for app %s' % app_name)
+
             self._list_dir_recursive(js_dir, js_min_dir)
 
             # fake yield to make this a generator function
-            if js_dir == '':
+            if js_dir == '':        # pragma: no cover
                 yield
         # for
 
     def _list_dir_recursive(self, fpath, js_min_dir):
+        # minify elke file.js
+        # opslaan als file_min.js
         for fname in os.listdir(fpath):
             if fname.endswith('.js'):
                 fname_min = fname[:-3] + '_min.js'
@@ -78,10 +80,12 @@ class AppJsMinifyFinder(BaseFinder):
             else:
                 fpath_sub = os.path.join(fpath, fname)
                 if os.path.isdir(fpath_sub):
+                    # subdirectories recursief afhandelen
                     self._list_dir_recursive(fpath_sub, js_min_dir)
         # for
 
     def find(self, path, all=False):
+        # niet nodig, wel verplicht
         return []
 
     def _minify_js_file(self, fpath_in, fpath_out):
@@ -102,8 +106,8 @@ class AppJsMinifyFinder(BaseFinder):
 
         while len(script):
             # zoek strings zodat we die niet wijzigen
-            pos_sq = script.find('"')
-            pos_dq = script.find("'")
+            pos_dq = script.find('"')
+            pos_sq = script.find("'")
 
             if pos_sq >= 0 and pos_dq >= 0:
                 pos_q = min(pos_sq, pos_dq)  # both not -1 --> take first, thus min
@@ -135,11 +139,15 @@ class AppJsMinifyFinder(BaseFinder):
                         pos = script.find('\n')
                         if pos > 0:
                             script = script[pos + 1:]
+                        else:
+                            script = ''
                     else:
                         # verwijder block comment
                         pos = script.find('*/')
                         if pos > 0:
                             script = script[pos + 2:]
+                        else:
+                            script = ''
 
                     # opnieuw evalueren
                     continue
@@ -218,7 +226,7 @@ class AppJsMinifyFinder(BaseFinder):
     @staticmethod
     def _zoek_eind_quote(script, stop_char):
         start = pos = 0
-        while start < len(script):
+        while start < len(script):                  # pragma: no branch (komt door de break)
             pos = script.find(stop_char, start)
             if pos > 0 and script[pos - 1] == '\\':
                 # escaped, dus overslaan
