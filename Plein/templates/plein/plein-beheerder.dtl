@@ -173,15 +173,17 @@
     {% endif %}
 
     {% if url_ping %}
+        <script src="{% static 'plein_js_min/simple_post_min.js' %}"></script>
         <script>
             window.addEventListener("load", function() {
                 // alles is opgehaald en ingeladen
-                let xhr = new XMLHttpRequest();
-                xhr.open("POST", "{{ url_ping }}", true);         // true = async
-                xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
-                xhr.send();
+                const dataset = document.getElementById("ping").dataset;
+                stuur_post(dataset.urlPing, dataset.csrfToken);
             });
         </script>
+        <div id="ping"
+             data-url-ping="{{ url_ping }}"
+             data-csrf-token="{{ csrf_token }}"></div>
     {% endif %}
 
     {% include 'feedback/sidebar.dtl' with op_pagina="plein-beheerder" %}

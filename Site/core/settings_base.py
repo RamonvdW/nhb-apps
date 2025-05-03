@@ -61,7 +61,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2025-05-02'
+SITE_VERSIE = '2025-05-03'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -236,11 +236,17 @@ STATIC_ROOT = 'Site/.static'        # relative to project top-dir
 STATICFILES_DIRS = [
     ("webwinkel_fotos", WEBWINKEL_FOTOS_DIR),       # noqa
 ]
-STATICFILES_FINDER = [
-    'django.contrib.staticfiles.finders.FileSystemFinder',
-    'django.contrib.staticfiles.finders.AppDirectoriesFinder'
+STATICFILES_FINDERS = [
+    'Site.core.minify_js.AppJsMinifyFinder',                    # minifies javascript files + creates new static files
+    'django.contrib.staticfiles.finders.FileSystemFinder',      # zoekt in STATICFILES_DIRS
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',  # zoekt in App/static/
 ]
 
+STORAGES = {
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.ManifestStaticFilesStorage"   # static files krijgen hash naam
+    }
+}
 
 # wordt gebruikt door LoginView als er geen 'next' veld bij de POST zit
 # LOGIN_REDIRECT_URL = '/plein/'

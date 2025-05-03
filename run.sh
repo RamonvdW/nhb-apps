@@ -41,11 +41,10 @@ fi
 
 echo "[INFO] Refreshing static files"
 rm -rf "$STATIC_DIR"*     # keeps top directory
-COLLECT=$(./manage.py collectstatic --link)
+./manage.py collectstatic --link -v0
 RES=$?
 if [ $RES -ne 0 ]
 then
-    echo "$COLLECT"
     exit 1
 fi
 

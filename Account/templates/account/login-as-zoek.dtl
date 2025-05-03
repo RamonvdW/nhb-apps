@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2023 Ramon van der Winkel.
+                Copyright (c) 2020-2025 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -17,32 +17,6 @@
             <h3 class="page-banner">Account wissel</h3>
         </div>
     </div>
-
-    <script>
-        function do_selecteer(id)
-        {
-            // voer een POST uit om toe te voegen
-            const form = document.createElement('form');
-            form.setAttribute('method', 'post');
-            form.setAttribute('action', '{{ url }}');
-
-            let inp = document.createElement('input');
-            inp.type = "hidden";
-            inp.name = "selecteer";
-            inp.value = id.getAttribute("data-pk");
-            form.appendChild(inp);
-
-            inp = document.createElement('input');
-            inp.type = "hidden";
-            inp.name = "csrfmiddlewaretoken";
-            inp.value = getCookie('mh_csrf_token');
-            form.appendChild(inp);
-
-            form.style.display = 'hidden';
-            document.body.appendChild(form);
-            form.submit();
-        }
-    </script>
 
     <!-- blauwe balk met dialoog venster -->
     <div class="row-sv-blauw">
@@ -74,6 +48,13 @@
     <!-- zoekresultaten -->
     {% if zoekterm %}
         {% if object_list.count %}
+
+            <div id="js_data"
+                 data-url="{{ url }}"
+                 data-csrf-token="{{ csrf_token }}">
+            </div>
+
+            <script src="{% static 'account_js_min/login_as_min.js' %}"></script>
 
             <!-- blauwe balk witten tabel met resultaten -->
             <div class="row-sv-blauw">
