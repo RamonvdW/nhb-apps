@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -21,13 +21,6 @@ TEMPLATE_RECORDS_VERBETERBAAR_KIES_DISC = 'records/verbeterbaar_kies_disc.dtl'
 TEMPLATE_RECORDS_VERBETERBAAR_DISCIPLINE = 'records/verbeterbaar.dtl'
 
 
-DISCIPLINE_TO_ICON = {
-    'OD': static('plein/badge_discipline_outdoor.png'),
-    '18': static('plein/badge_discipline_indoor.png'),
-    '25': static('plein/badge_discipline_25m1p.png')
-}
-
-
 class RecordsVerbeterbaarKiesDisc(ListView):
 
     """ Deze view laat de gebruiker een discipline kiezen """
@@ -38,6 +31,12 @@ class RecordsVerbeterbaarKiesDisc(ListView):
     def get_queryset(self):
         """ called by the template system to get the queryset or list of objects for the template """
 
+        disc2img = {
+            'OD': static('plein/badge_discipline_outdoor.png'),
+            '18': static('plein/badge_discipline_indoor.png'),
+            '25': static('plein/badge_discipline_25m1p.png')
+        }
+
         objs = (IndivRecord
                 .objects
                 .distinct('discipline')
@@ -45,7 +44,7 @@ class RecordsVerbeterbaarKiesDisc(ListView):
 
         for obj in objs:
             obj.titel = disc2str[obj.discipline]
-            obj.img_src = DISCIPLINE_TO_ICON[obj.discipline]
+            obj.img_src = disc2img[obj.discipline]
             obj.tekst = "Toon alle verbeterbare records van de discipline %s." % obj.titel
 
             url_disc = disc2url[obj.discipline]
