@@ -58,6 +58,7 @@ from Site.settings_local import *       # noqa
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 PROJ_DIR = os.path.dirname(os.path.abspath(__file__))
 BASE_DIR = os.path.dirname(PROJ_DIR)
+APPS_DIR = os.path.dirname(BASE_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
@@ -243,11 +244,12 @@ STATICFILES_FINDERS = [
 ]
 
 STORAGES = {
-    "default": {
-        "BACKEND": "django.core.files.storage.FileSystemStorage"
-    },
+    # "default": {
+    #     "BACKEND": "django.core.files.storage.FileSystemStorage"
+    # },
     "staticfiles": {
-        "BACKEND": "django.contrib.staticfiles.storage.ManifestStaticFilesStorage"   # static files krijgen hash naam
+        "BACKEND": "Site.core.manifest_storage.MHManifestStaticFilesStorage",       # static files krijgen hash naam
+        # "broken_BACKEND": "django.contrib.staticfiles.storage.ManifestStaticFilesStorage"
     }
 }
 
