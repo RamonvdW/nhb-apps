@@ -129,9 +129,9 @@
     </div>
 
     <div id="js_data"
-         data-url-wijzig="{{ wijzig_url }}"
+         data-url-wijzig="{{ url_wijzig }}"
          data-csrf-token="{{ csrf_token }}"
-         data-begin-jaar="{{ begin_jaar }}"
+         data-begin-jaar="{{ comp.begin_jaar }}"
          data-datum1="{{ comp.datum1|date:'Y-m-d' }}"
          data-datum2="{{ comp.datum2|date:'Y-m-d' }}"
          data-datum3="{{ comp.datum3|date:'Y-m-d' }}"

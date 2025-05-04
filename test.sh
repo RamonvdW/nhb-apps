@@ -155,7 +155,7 @@ then
 fi
 
 echo "[INFO] Refreshing static files"
-rm -rf "$STATIC_DIR"*     # keeps top directory
+[ -d "$STATIC_DIR" ] && rm -rf "$STATIC_DIR"*     # keeps top directory
 COLLECT=$(./manage.py collectstatic --link)
 RES=$?
 if [ $RES -ne 0 ]
@@ -166,7 +166,7 @@ fi
 
 # create a link from /tmp/static to the actual static dir
 # used to load static content from html written by e2e_open_in_browser()
-rm -rf "$TMP_HTML"
+[ -d "$TMP_HTML" ] && rm -rf "$TMP_HTML"
 mkdir -p "$TMP_HTML"
 ln -s "$STATIC_DIR" "$TMP_HTML/static"
 
@@ -204,7 +204,7 @@ then
     echo "[INFO] Running manage.py exit test"
     # trigger diff that generates exit code
     ./manage.py shell -c 'from ImportCRM.models import ImportLimieten as L; l = L.objects.first(); l.max_club_changes=1; l.save()'
-    python3 "${PY_OPTS[@]}" -u "${PYCOV[@]}" ./manage.py diff_crm_jsons ./ImportCRM/test-files/testfile_19.json ./ImportCRM/test-files/testfile_23.json >/dev/null
+    python3 "${PY_OPTS[@]}" -u "${PYCOV[@]}" ./manage.py diff_crm_jsons ./ImportCRM/test-files/testfile_19.json ./ImportCRM/test-files/testfile_23.json &>/dev/null
     RES=$?
     [ $RES -ne 0 ] || ABORTED=1
     # echo "[DEBUG] Debug run result: $RES --> ABORTED=$ABORTED"
@@ -332,7 +332,7 @@ kill $PID_WEBSIM3
 wait $PID_WEBSIM3 2>/dev/null
 
 # cleanup test data directories
-rm -rf "$TEST_DIR"
+[ -d "$TEST_DIR" ] && rm -rf "$TEST_DIR"
 
 ASK_LAUNCH=0
 COVERAGE_RED=0
@@ -343,7 +343,7 @@ then
     echo "[INFO] Generating reports" | tee -a "$LOG"
 
     # delete old coverage report
-    rm -rf "$REPORT_DIR" &>>"$LOG"
+    [ -d "$REPORT_DIR" ] && rm -rf "$REPORT_DIR" &>>"$LOG"
 
     if [ -z "$FOCUS" ] || [ $FORCE_FULL_COV -ne 0 ]
     then

@@ -22,6 +22,13 @@
           provides additional items that are part of the release
       provides changes to to settings for autotest
 
+    Browser testing via browser_test.sh  (uses ./manage.py runserver --settings=Site.settings_browser_test)
+      Site/settings_browser_test.py
+          includes Site/core/settings_base.py
+              includes Site/settings_local.py for site specific settings
+          provides additional items
+      provides changes to to settings for browser testing
+
     Dev server via run.sh  (uses ./manage.py cmd --settings=Site.settings_dev)
       Site/settings_dev.py
           includes Site/core/settings_base.py

@@ -115,17 +115,10 @@
     </div>
 
     {% if url_ping %}
-        <script src="{% static 'plein_js_min/simple_post_min.js' %}"></script>
-        <script>
-            window.addEventListener("load", function() {
-                // alles is opgehaald en ingeladen
-                const dataset = document.getElementById("ping").dataset;
-                stuur_post(dataset.urlPing, dataset.csrfToken);
-            });
-        </script>
-        <div id="ping"
+        <div id="js_data"
              data-url-ping="{{ url_ping }}"
              data-csrf-token="{{ csrf_token }}"></div>
+        <script defer src="{% static 'plein_js_min/simple_post_min.js' %}"></script>
     {% endif %}
 
     {% include 'feedback/sidebar.dtl' with op_pagina="plein-sporter" %}

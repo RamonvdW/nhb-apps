@@ -11,4 +11,10 @@ function stuur_post(url, csrfToken){
     xhr.send();
 }
 
+window.addEventListener("load", function() {
+    // alles is opgehaald en ingeladen
+    const dataset = document.getElementById("js_data").dataset;
+    stuur_post(dataset.urlPing, dataset.csrfToken);
+});
+
 /* end of file */

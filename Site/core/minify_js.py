@@ -47,7 +47,7 @@ class AppJsMinifyFinder(BaseFinder):
         # invoked to find static files
         # we use this to minify javascript files and create new static files on the fly
         for app_name, app_path in self.apps_with_js.items():
-            print('[DEBUG] Minify JS for app %s' % app_name)
+            # print('[DEBUG] Minify JS for app %s' % app_name)
             js_dir = os.path.join(app_path, "js")
 
             # zorg dat app/static/ bestaat
@@ -90,11 +90,14 @@ class AppJsMinifyFinder(BaseFinder):
 
     def _minify_js_file(self, fpath_in, fpath_out):
         # print('[INFO] loading %s' % repr(fpath_in))
-        contents = open(fpath_in, 'r').read()
+        with open(fpath_in, 'r') as f:
+            contents = f.read()
 
         new_contents = self._minify_javascript(contents)
+
         # print('[INFO] writing %s' % repr(fpath_out))
-        open(fpath_out, 'w').write(new_contents)
+        with open(fpath_out, 'w') as f:
+            f.write(new_contents)
 
     def _minify_javascript(self, script):
         """ Doorloop javascript en minify alles behalve strings (rudimentair!)

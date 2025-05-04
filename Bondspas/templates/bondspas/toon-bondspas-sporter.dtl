@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2022-2023 Ramon van der Winkel.
+                Copyright (c) 2022-2025 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -41,60 +41,12 @@
         </div>
     </div>
 
-    <script>
-        function ophalen_klaar(xhr, el_img)
-        {
-            // console.log('ophalen_klaar: ready=',xhr.readyState, 'status=', xhr.status);
-            if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200)
-            {
-                // verzoek is klaar en we hebben een antwoord
-                // responseText is leeg bij connection failure
-                if (xhr.responseText !== "")
-                {
-                    const rsp = JSON.parse(xhr.responseText);
-                    const bondspas_data = rsp['bondspas_base64'];
+    <div id="js_data"
+         data-url-dynamic="{{ url_dynamic }}"
+         data-csrf-token="{{ csrf_token }}">
+    </div>
 
-                    el_img.src = "data:image/jpeg;base64," + bondspas_data;
-                    el_img.style.display = "inline-block";
-
-                    // "Je bondspas wordt opgehaald" bericht weghalen
-                    const el = document.getElementById('id_even_wachten');
-                    el.style.display = "none";
-
-                    // download knop zichtbaar maken
-                    const el_dl = document.getElementById('id_download_knop');
-                    el_dl.style.display = "inherit";
-                }
-            }
-        }
-
-        function ophalen_timeout(xhr)
-        {
-            // voorkom reactie bij ontvangst laat antwoord
-            xhr.abort();
-
-            // note: ophalen_klaar wordt zo aangeroepen met readyState=0
-            // deze kan een melding doen naar de gebruiker
-        }
-
-        document.addEventListener("DOMContentLoaded", function() {
-            const el_img = document.getElementById('id_image');
-
-            let xhr = new XMLHttpRequest();
-            el_img.dataset.xhr = xhr;       // ter voorkoming parallelle verzoeken
-
-            // POST voorkomt caching
-            xhr.open("POST", "{{ url_dynamic }}", true);         // true = async
-            xhr.timeout = 60000;                                 // 60 sec voor trage verbinding
-            xhr.onloadend = function(){
-                                ophalen_klaar(xhr, el_img)
-                                delete el_img.dataset.xhr       // clean-up
-                            };
-            xhr.ontimeout = function(){ ophalen_timeout(xhr) };
-            xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
-            xhr.send();
-        });
-    </script>
+    <script defer src="{% static 'bondspas_js_min/bondspas_ophalen_min.js' %}"></script>
 
     {% include 'feedback/sidebar.dtl' with op_pagina="bondspas-toon-bondspas-sporter" %}
 

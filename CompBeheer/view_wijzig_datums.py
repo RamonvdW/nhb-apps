@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -44,7 +44,7 @@ class WijzigDatumsView(UserPassesTestMixin, TemplateView):
 
         context['comp'] = comp
 
-        context['wijzig_url'] = reverse('CompBeheer:wijzig-datums',
+        context['url_wijzig'] = reverse('CompBeheer:wijzig-datums',
                                         kwargs={'comp_pk': comp.pk})
 
         comp.datum1 = comp.begin_fase_C
