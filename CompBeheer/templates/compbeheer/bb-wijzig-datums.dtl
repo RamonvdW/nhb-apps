@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2024 Ramon van der Winkel.
+                Copyright (c) 2020-2025 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -9,108 +9,6 @@
 {% block title %}Wijzig datums{% endblock %}
 
 {% block pagina %}
-
-    <script>
-
-        // de 'bezig' vlag voorkomt recursion
-        let bezig = true;
-
-        function post_datums()
-        {
-            // voer een POST uit om toe te voegen
-            const form = document.createElement('form');
-            form.setAttribute('method', 'post');
-            form.setAttribute('action', '{{ wijzig_url }}');
-
-            for (let nr = 1; nr <= 12; nr++)
-            {
-                const el = document.getElementById('datum' + nr);
-                const inp = document.createElement('input');
-                inp.type = "hidden";
-                inp.name = "datum" + nr;
-                inp.value = el.M_Datepicker.toString('yyyy-mm-dd');
-                form.appendChild(inp);
-            }
-
-            const inp = document.createElement('input');
-            inp.type = "hidden";
-            inp.name = "csrfmiddlewaretoken";
-            inp.value = "{{ csrf_token }}";
-            form.appendChild(inp);
-
-            form.style.display = 'hidden';
-            document.body.appendChild(form);
-            form.submit();
-        }
-
-        function rode_datums() {
-            // controleer dat de datums opvolgend zijn
-            if (!bezig) {
-                bezig = true;
-                const el = document.getElementById('datum1');
-                let date = el.M_Datepicker.toString('yyyy-mm-dd');
-
-                for (let nr = 2; nr <= 12; nr++)
-                {
-                    const el2 = document.getElementById('datum' + nr);
-                    const date2 = el2.M_Datepicker.toString('yyyy-mm-dd');
-
-                    el2.classList.remove('sv-rood-text');
-                    if (date2 <= date) {
-                        el2.classList.add('sv-rood-text');
-                    }
-                    date = date2;
-                }
-                bezig = false;
-            }
-        }
-
-        // For a given date, get the ISO week number
-        // Source: https://stackoverflow.com/questions/6117814/
-        function getWeekNumber(d) {
-            // Copy date so don't modify original
-            let weekday = 1 + d.getUTCDay();     // 1 = monday
-            d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
-            // Set to nearest Thursday: current date + 4 - current day number
-            // Make Sunday's day number 7
-            d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
-            // get first day of year
-            let yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
-            // calculate full weeks to nearest Thursday
-            let weekNo = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
-            // Return array of year and week number
-            let year_str = d.getUTCFullYear().toString().substring(2);    // 2021 --> 21
-            let week_str = weekNo.toString();
-            if (weekNo < 10) { week_str = "0" + week_str }
-            return "wk" + year_str + week_str + "." + weekday;
-        }
-
-        function week_nummers() {
-            // vertaal de datum naar het week nummer
-            for (let nr = 1; nr <= 12; nr++) {
-                const el_datum = document.getElementById('datum' + nr);
-                const date = el_datum.M_Datepicker.date;
-
-                const el_week_nr = document.getElementById('week_nr' + nr);
-                el_week_nr.innerHTML = getWeekNumber(date);
-            }
-        }
-
-        function gewijzigd() {
-            // het formulier is aangepast en moet opgeslagen worden
-
-            if (!bezig) {
-                // rode_datums geeft nieuwe aanroepen naar deze functie
-                rode_datums();
-                week_nummers();
-
-                // enable de 'opslaan' knop
-                const el = document.getElementById("opslaan_knop");
-                el.disabled = false;
-                el.parentElement.style.display = "block";
-            }
-        }
-    </script>
 
     <!-- banner -->
     <div class="row center">
@@ -230,92 +128,25 @@
         </div>
     </div>
 
+    <div id="js_data"
+         data-url-wijzig="{{ wijzig_url }}"
+         data-csrf-token="{{ csrf_token }}"
+         data-begin-jaar="{{ begin_jaar }}"
+         data-datum1="{{ comp.datum1|date:'Y-m-d' }}"
+         data-datum2="{{ comp.datum2|date:'Y-m-d' }}"
+         data-datum3="{{ comp.datum3|date:'Y-m-d' }}"
+         data-datum4="{{ comp.datum4|date:'Y-m-d' }}"
+         data-datum5="{{ comp.datum5|date:'Y-m-d' }}"
+         data-datum6="{{ comp.datum6|date:'Y-m-d' }}"
+         data-datum7="{{ comp.datum7|date:'Y-m-d' }}"
+         data-datum8="{{ comp.datum8|date:'Y-m-d' }}"
+         data-datum9="{{ comp.datum9|date:'Y-m-d' }}"
+         data-datum10="{{ comp.datum10|date:'Y-m-d' }}"
+         data-datum11="{{ comp.datum11|date:'Y-m-d' }}"
+         data-datum12="{{ comp.datum12|date:'Y-m-d' }}">
+    </div>
 
-    <!-- initialisatie van de datum pickers -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function()
-        {
-            const minDate = new Date({{ comp.begin_jaar }}, 2-1, 1);          // month is 0-based
-            const maxDate = new Date({{ comp.begin_jaar }} + 1, 6-1, 22);     // month is 0-based
-            const competitieJaren = [{{  comp.begin_jaar }}, {{ comp.begin_jaar }} + 1];
-
-            let el = document.querySelector('#datum1');
-            M.Datepicker.init(el, { defaultDate: new Date("{{ comp.datum1|date:'Y-m-d' }}"),
-                                    setDefaultDate: true,
-                                    minDate: minDate, maxDate: maxDate,
-                                    yearRange: competitieJaren});
-
-            el = document.querySelector('#datum2');
-            M.Datepicker.init(el, { defaultDate: new Date("{{ comp.datum2|date:'Y-m-d' }}"),
-                                    setDefaultDate: true,
-                                    minDate: minDate, maxDate: maxDate,
-                                    yearRange: competitieJaren});
-
-            el = document.querySelector('#datum3');
-            M.Datepicker.init(el, { defaultDate: new Date("{{ comp.datum3|date:'Y-m-d' }}"),
-                                    setDefaultDate: true,
-                                    minDate: minDate, maxDate: maxDate,
-                                    yearRange: competitieJaren});
-
-            el = document.querySelector('#datum4');
-            M.Datepicker.init(el, { defaultDate: new Date("{{ comp.datum4|date:'Y-m-d' }}"),
-                                    setDefaultDate: true,
-                                    minDate: minDate, maxDate: maxDate,
-                                    yearRange: competitieJaren});
-
-            el = document.querySelector('#datum5');
-            M.Datepicker.init(el, { defaultDate: new Date("{{ comp.datum5|date:'Y-m-d' }}"),
-                                    setDefaultDate: true,
-                                    minDate: minDate, maxDate: maxDate,
-                                    yearRange: competitieJaren});
-
-            el = document.querySelector('#datum6');
-            M.Datepicker.init(el, { defaultDate: new Date("{{ comp.datum6|date:'Y-m-d' }}"),
-                                    setDefaultDate: true,
-                                    minDate: minDate, maxDate: maxDate,
-                                    yearRange: competitieJaren});
-
-            el = document.querySelector('#datum7');
-            M.Datepicker.init(el, { defaultDate: new Date("{{ comp.datum7|date:'Y-m-d' }}"),
-                                    setDefaultDate: true,
-                                    minDate: minDate, maxDate: maxDate,
-                                    yearRange: competitieJaren});
-
-            el = document.querySelector('#datum8');
-            M.Datepicker.init(el, { defaultDate: new Date("{{ comp.datum8|date:'Y-m-d' }}"),
-                                    setDefaultDate: true,
-                                    minDate: minDate, maxDate: maxDate,
-                                    yearRange: competitieJaren});
-
-            el = document.querySelector('#datum9');
-            M.Datepicker.init(el, { defaultDate: new Date("{{ comp.datum9|date:'Y-m-d' }}"),
-                                    setDefaultDate: true,
-                                    minDate: minDate, maxDate: maxDate,
-                                    yearRange: competitieJaren});
-
-            el = document.querySelector('#datum10');
-            M.Datepicker.init(el, { defaultDate: new Date("{{ comp.datum10|date:'Y-m-d' }}"),
-                                    setDefaultDate: true,
-                                    minDate: minDate, maxDate: maxDate,
-                                    yearRange: competitieJaren});
-
-            el = document.querySelector('#datum11');
-            M.Datepicker.init(el, { defaultDate: new Date("{{ comp.datum11|date:'Y-m-d' }}"),
-                                    setDefaultDate: true,
-                                    minDate: minDate, maxDate: maxDate,
-                                    yearRange: competitieJaren});
-
-            el = document.querySelector('#datum12');
-            M.Datepicker.init(el, { defaultDate: new Date("{{ comp.datum12|date:'Y-m-d' }}"),
-                                    setDefaultDate: true,
-                                    minDate: minDate, maxDate: maxDate,
-                                    yearRange: competitieJaren});
-
-            bezig = false;   // klaar met initialisatie van alle date pickers (hier boven)
-            rode_datums();
-            week_nummers();
-        })
-    </script>
+    <script src="{% static 'compbeheer_js_min/wijzig_datums_min.js' %}"></script>
 
     {% include 'feedback/sidebar.dtl' with op_pagina="compbeheer-wijzig-datums" %}
 
