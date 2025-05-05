@@ -111,7 +111,7 @@ class WaarschijnlijkeDeelnemersView(UserPassesTestMixin, TemplateView):
 
         context['kruimels'] = (
             (reverse('Vereniging:overzicht'), 'Beheer vereniging'),
-            (reverse('CompScores:wedstrijden'), 'Competitie wedstrijden'),
+            (reverse('CompScores:wedstrijden'), 'Competitiewedstrijden'),
             (None, 'Deelnemers')
         )
 

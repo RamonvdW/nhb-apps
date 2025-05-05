@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2024 Ramon van der Winkel.
+#  Copyright (c) 2021-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -252,22 +252,19 @@ class TestData(object):
         for teamtype in get_organisatie_teamtypen(ORGANISATIE_KHSN):
             self.afkorting2teamtype_khsn[teamtype.afkorting] = teamtype
         # for
-        del teamtype
         for boogtype in get_organisatie_boogtypen(ORGANISATIE_KHSN):
             self.afkorting2boogtype_khsn[boogtype.afkorting] = boogtype
         # for
         for boogtype in get_organisatie_boogtypen(ORGANISATIE_IFAA):
             self.afkorting2boogtype_ifaa[boogtype.afkorting] = boogtype
         # for
-        del boogtype
         for regio in Regio.objects.all():
             self.regio[regio.regio_nr] = regio
+            print('loaded regio: %s' % regio)
         # for
-        del regio
         for rayon in Rayon.objects.all():
             self.rayon[rayon.rayon_nr] = rayon
         # for
-        del rayon
 
     @staticmethod
     def _dump_resp(resp):                                                       # pragma: no cover

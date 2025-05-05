@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2024 Ramon van der Winkel.
+#  Copyright (c) 2022-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -120,7 +120,8 @@ class Command(BaseCommand):
                             lid_ag,
                             "\n".join(["%s / %s / %s" % (deelnemer,
                                                          deelnemer.sporterboog.boogtype.afkorting,
-                                                         deelnemer.gemiddelde) for deelnemer in deelnemer_all])))
+                                                         deelnemer.gemiddelde)
+                                       for deelnemer in deelnemer_all])))
         deelnemer = deelnemer_all[0]
         return deelnemer
 

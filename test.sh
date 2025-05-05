@@ -18,6 +18,7 @@ TMP_HTML="/tmp/tmp_html/"             # used by e2e_open_in_browser()
 STATIC_DIR="$PWD/Site/.static/"   # must be full path
 SETTINGS_AUTOTEST="Site.settings_autotest"
 SETTINGS_AUTOTEST_NODEBUG="Site.settings_autotest_nodebug"
+SETTINGS_BROWSER="Site.settings_browser_test"
 COVERAGE_RC="./Site/utils/coverage.rc"
 COVERAGE_FILE="/tmp/.coverage.$$"
 DATABASE="test_data3"
@@ -259,8 +260,7 @@ powerprofilesctl set performance
 if [ $ABORTED -eq 0 ]
 then
     echo "[INFO] Starting main test run" >>"$LOG"
-    # echo "[DEBUG] python3 ${PY_OPTS[*]} -u ${PYCOV[*]} ./manage.py test --keepdb --settings=$SETTINGS_AUTOTEST -v 2 ${FOCUS_ARGS[*]}"
-    python3 "${PY_OPTS[@]}" -u "${PYCOV[@]}" ./manage.py test --keepdb --settings=$SETTINGS_AUTOTEST -v 2 "${FOCUS_ARGS[@]}" &>>"$LOG"
+    python3 "${PY_OPTS[@]}" -u "${PYCOV[@]}" ./manage.py test --keepdb --settings=$SETTINGS_AUTOTEST --exclude-tag=browser -v 2 "${FOCUS_ARGS[@]}" &>>"$LOG"
     RES=$?
     #echo "[DEBUG] Run result: $RES --> ABORTED=$ABORTED"
     [ $RES -eq 3 ] && ABORTED=1
@@ -278,6 +278,18 @@ then
         read -ra HTML_FILES < <(ls -1tr "$TMP_HTML"/*html)   # sorted by creation time
         firefox "${HTML_FILES[@]}" &
     fi
+fi
+
+if [ $ABORTED -eq 0 ]
+then
+    echo "[INFO] Starting browser test run" >>"$LOG"
+    python3 "${PY_OPTS[@]}" -u "${PYCOV[@]}" ./manage.py test --keepdb --settings=$SETTINGS_AUTOTEST --tag=browser -v 2 "${FOCUS_ARGS[@]}" &>>"$LOG"
+    RES=$?
+    #echo "[DEBUG] Run result: $RES --> ABORTED=$ABORTED"
+    [ $RES -eq 3 ] && ABORTED=1
+
+    echo >>"$LOG"
+    echo "[INFO] Finished browser test run" >>"$LOG"
 fi
 
 # stop showing the additions to the logfile, because the rest is less interesting

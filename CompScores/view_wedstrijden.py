@@ -26,7 +26,7 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
     toon_rk_bk = True
     raise_exception = True      # genereer PermissionDefined als test_func False terug geeft
     permission_denied_message = 'Geen toegang'
-    kruimel = 'Competitie wedstrijden'
+    kruimel = 'Competitiewedstrijden'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
