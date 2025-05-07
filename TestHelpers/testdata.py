@@ -260,7 +260,6 @@ class TestData(object):
         # for
         for regio in Regio.objects.all():
             self.regio[regio.regio_nr] = regio
-            print('loaded regio: %s' % regio)
         # for
         for rayon in Rayon.objects.all():
             self.rayon[rayon.rayon_nr] = rayon
