@@ -84,7 +84,7 @@ class AppJsMinifyFinder(BaseFinder):
                     self._list_dir_recursive(fpath_sub, js_min_dir)
         # for
 
-    def find(self, path, all=False):
+    def find(self, path, all=False, **kwargs):
         # niet nodig, wel verplicht
         return []
 

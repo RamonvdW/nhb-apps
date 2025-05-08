@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023-2024 Ramon van der Winkel.
+#  Copyright (c) 2023-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -23,14 +23,14 @@ class TestRegistreerAdmin(E2EHelpers, TestCase):
 
     def test_filters(self):
         # GastRegistratieFaseFilter
-        worker = (admin.GastRegistratieFaseFilter(None,
-                                                  {'fase_filter': None},
-                                                  GastRegistratie,
-                                                  admin.GastRegistratieAdmin))
+        worker = admin.GastRegistratieFaseFilter(None,
+                                                 {'fase_filter': [None]},
+                                                 GastRegistratie,
+                                                 admin.GastRegistratieAdmin)
         _ = worker.queryset(None, GastRegistratie.objects.all())
 
         worker = (admin.GastRegistratieFaseFilter(None,
-                                                  {'fase_filter': 99},
+                                                  {'fase_filter': [99]},
                                                   GastRegistratie,
                                                   admin.GastRegistratieAdmin))
         _ = worker.queryset(None, GastRegistratie.objects.all())

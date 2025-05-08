@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023-2024 Ramon van der Winkel.
+#  Copyright (c) 2023-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -50,7 +50,7 @@ class TestCompetitieAdmin(E2EHelpers, TestCase):
 
         # TeamAGListFilter
         worker = admin.TeamAGListFilter(None,
-                                        {'TeamAG': None},
+                                        {'TeamAG': [None]},
                                         RegiocompetitieSporterBoog,
                                         admin.RegiocompetitieSporterBoogAdmin)
         _ = worker.queryset(None, RegiocompetitieSporterBoog.objects.all())
@@ -63,59 +63,59 @@ class TestCompetitieAdmin(E2EHelpers, TestCase):
 
         # ZelfstandigIngeschrevenListFilter
         worker = admin.ZelfstandigIngeschrevenListFilter(None,
-                                                         {'Zelfstandig': None},
+                                                         {'Zelfstandig': [None]},
                                                          RegiocompetitieSporterBoog,
                                                          admin.RegiocompetitieSporterBoogAdmin)
         _ = worker.queryset(None, RegiocompetitieSporterBoog.objects.all())
 
         worker = admin.ZelfstandigIngeschrevenListFilter(None,
-                                                         {'Zelfstandig': 'Zelf'},
+                                                         {'Zelfstandig': ['Zelf']},
                                                          RegiocompetitieSporterBoog,
                                                          admin.RegiocompetitieSporterBoogAdmin)
         _ = worker.queryset(None, RegiocompetitieSporterBoog.objects.all())
 
         worker = admin.ZelfstandigIngeschrevenListFilter(None,
-                                                         {'Zelfstandig': 'HWL'},
+                                                         {'Zelfstandig': ['HWL']},
                                                          RegiocompetitieSporterBoog,
                                                          admin.RegiocompetitieSporterBoogAdmin)
         _ = worker.queryset(None, RegiocompetitieSporterBoog.objects.all())
 
         # IncompleetTeamFilter
         worker = admin.IncompleetTeamFilter(None,
-                                            {'incompleet': None},
+                                            {'incompleet': [None]},
                                             KampioenschapTeam,
                                             admin.KampioenschapTeamAdmin)
         _ = worker.queryset(None, KampioenschapTeam.objects.all())
 
         worker = admin.IncompleetTeamFilter(None,
-                                            {'incompleet': 'incompleet'},
+                                            {'incompleet': ['incompleet']},
                                             KampioenschapTeam,
                                             admin.KampioenschapTeamAdmin)
         _ = worker.queryset(None, KampioenschapTeam.objects.all())
 
         worker = admin.IncompleetTeamFilter(None,
-                                            {'incompleet': 'compleet'},
+                                            {'incompleet': ['compleet']},
                                             KampioenschapTeam,
                                             admin.KampioenschapTeamAdmin)
         _ = worker.queryset(None, KampioenschapTeam.objects.all())
 
         # TeamTypeFilter
         worker = admin.TeamTypeFilter(None,
-                                      {'TeamType': None},
+                                      {'TeamType': [None]},
                                       RegiocompetitieTeam,
                                       admin.RegiocompetitieTeamAdmin)
         qs = worker.queryset(None, RegiocompetitieTeam.objects.all())
         self.assertEqual(1, qs.count())
 
         worker = admin.TeamTypeFilter(None,
-                                      {'TeamType': 'R2'},
+                                      {'TeamType': ['R2']},
                                       RegiocompetitieTeam,
                                       admin.RegiocompetitieTeamAdmin)
         qs = worker.queryset(None, RegiocompetitieTeam.objects.all())
         self.assertEqual(0, qs.count())
 
         worker = admin.TeamTypeFilter(None,
-                                      {'TeamType': 'C'},
+                                      {'TeamType': ['C']},
                                       RegiocompetitieTeam,
                                       admin.RegiocompetitieTeamAdmin)
         qs = worker.queryset(None, RegiocompetitieTeam.objects.all())
@@ -124,7 +124,7 @@ class TestCompetitieAdmin(E2EHelpers, TestCase):
         # RondeTeamVerFilter
         request = factory.get('/beheer/Competitie/regiocompetitierondeteam/')
         worker = admin.RondeTeamVerFilter(request,
-                                          {'RondeTeamVer': self.team.pk},
+                                          {'RondeTeamVer': [self.team.pk]},
                                           RegiocompetitieRondeTeam,
                                           admin.RegiocompetitieRondeTeamAdmin)
         qs = worker.queryset(None, RegiocompetitieRondeTeam.objects.all())
@@ -133,7 +133,7 @@ class TestCompetitieAdmin(E2EHelpers, TestCase):
         request = factory.get('/beheer/Competitie/regiocompetitierondeteam/' +
                               '?team__regiocompetitie__competitie__id__exact=7')
         worker = admin.RondeTeamVerFilter(request,
-                                          {'RondeTeamVer': None},
+                                          {'RondeTeamVer': [None]},
                                           RegiocompetitieRondeTeam,
                                           admin.RegiocompetitieRondeTeamAdmin)
         _ = worker.queryset(None, RegiocompetitieRondeTeam.objects.all())
@@ -141,7 +141,7 @@ class TestCompetitieAdmin(E2EHelpers, TestCase):
         request = factory.get('/beheer/Competitie/regiocompetitierondeteam/' +
                               '?team__vereniging__regio__regio_nr__exact=101')
         worker = admin.RondeTeamVerFilter(request,
-                                          {'RondeTeamVer': None},
+                                          {'RondeTeamVer': [None]},
                                           RegiocompetitieRondeTeam,
                                           admin.RegiocompetitieRondeTeamAdmin)
         tups = worker.lookups(None, admin.RegiocompetitieRondeTeamAdmin)
@@ -150,34 +150,34 @@ class TestCompetitieAdmin(E2EHelpers, TestCase):
 
         request = factory.get('/beheer/Competitie/regiocompetitierondeteam/?RondeTeamType=C')
         worker = admin.RondeTeamVerFilter(request,
-                                          {'RondeTeamVer': None},
+                                          {'RondeTeamVer': [None]},
                                           RegiocompetitieRondeTeam,
                                           admin.RegiocompetitieRondeTeamAdmin)
         _ = worker.queryset(None, RegiocompetitieRondeTeam.objects.all())
 
         # RondeTeamTypeFilter
         worker = admin.RondeTeamTypeFilter(None,
-                                           {'RondeTeamType': 'C'},
+                                           {'RondeTeamType': ['C']},
                                            RegiocompetitieRondeTeam,
                                            admin.RegiocompetitieRondeTeamAdmin)
         qs = worker.queryset(None, RegiocompetitieRondeTeam.objects.all())
         self.assertEqual(1, qs.count())
 
         worker = admin.RondeTeamTypeFilter(None,
-                                           {'RondeTeamType': None},
+                                           {'RondeTeamType': [None]},
                                            RegiocompetitieRondeTeam,
                                            admin.RegiocompetitieRondeTeamAdmin)
         _ = worker.queryset(None, RegiocompetitieRondeTeam.objects.all())
 
         # KlasseLimietBoogTypeFilter
         worker = admin.KlasseLimietBoogTypeFilter(None,
-                                                  {'BoogType': None},
+                                                  {'BoogType': [None]},
                                                   KampioenschapIndivKlasseLimiet,
                                                   admin.KampioenschapIndivKlasseLimietAdmin)
         _ = worker.queryset(None, KampioenschapIndivKlasseLimiet.objects.all())
 
         worker = admin.KlasseLimietBoogTypeFilter(None,
-                                                  {'BoogType': 'TR'},
+                                                  {'BoogType': ['TR']},
                                                   KampioenschapIndivKlasseLimiet,
                                                   admin.KampioenschapIndivKlasseLimietAdmin)
         _ = worker.queryset(None, KampioenschapIndivKlasseLimiet.objects.all())

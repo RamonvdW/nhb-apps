@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -35,8 +35,8 @@ class HierarchyRunner(DiscoverRunner):
         Note: add a dot at the end to avoid matching 'MyApp.login' on MyApp.loginas.TestCase
     """
 
-    def build_suite(self, test_labels=None, extra_tests=None, **kwargs):
-        suite = super().build_suite(test_labels, extra_tests, **kwargs)
+    def build_suite(self, test_labels=None, **kwargs):
+        suite = super().build_suite(test_labels, **kwargs)
         assert isinstance(suite, TestSuite)
         return self.rebuild_suite_hierarchical(suite)
 

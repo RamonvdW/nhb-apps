@@ -35,4 +35,7 @@ esprima
 # verkleinen van font files
 fonttools
 
+# testing javascript inside the browser
+selenium
+
 # end of file
