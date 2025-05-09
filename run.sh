@@ -10,6 +10,7 @@ SETTINGS_NORMAL="Site.settings"
 BG_DURATION=60   # minutes (60 is max voor de meeste commando's)
 
 export PYTHONDONTWRITEBYTECODE=1
+export DJANGO_RUNSERVER_HIDE_WARNING=true
 
 # check the port is free
 ss -l | grep -q 8000

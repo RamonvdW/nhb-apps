@@ -18,7 +18,6 @@ TMP_HTML="/tmp/tmp_html/"             # used by e2e_open_in_browser()
 STATIC_DIR="$PWD/Site/.static/"   # must be full path
 SETTINGS_AUTOTEST="Site.settings_autotest"
 SETTINGS_AUTOTEST_NODEBUG="Site.settings_autotest_nodebug"
-SETTINGS_BROWSER="Site.settings_browser_test"
 COVERAGE_RC="./Site/utils/coverage.rc"
 COVERAGE_FILE="/tmp/.coverage.$$"
 DATABASE="test_data3"
@@ -197,6 +196,7 @@ then
 
     echo "[INFO] Running migrations and performing run with nodebug"
     # ..and add coverage with no-debug
+    # -v 2 shows progress of migrations
     python3 "${PY_OPTS[@]}" -u "${PYCOV[@]}" ./manage.py test --keepdb --noinput --settings=$SETTINGS_AUTOTEST_NODEBUG -v 2 Plein.tests.tests.TestPlein.test_quick &>>"$LOG"
     RES=$?
     [ $RES -eq 0 ] || ABORTED=1
@@ -204,7 +204,7 @@ then
 
     echo "[INFO] Running manage.py exit test"
     # trigger diff that generates exit code
-    ./manage.py shell -c 'from ImportCRM.models import ImportLimieten as L; l = L.objects.first(); l.max_club_changes=1; l.save()'
+    ./manage.py shell -c 'from ImportCRM.models import ImportLimieten as L; l = L.objects.first(); l.max_club_changes=1; l.save()' &>>"$LOG"
     python3 "${PY_OPTS[@]}" -u "${PYCOV[@]}" ./manage.py diff_crm_jsons ./ImportCRM/test-files/testfile_19.json ./ImportCRM/test-files/testfile_23.json &>/dev/null
     RES=$?
     [ $RES -ne 0 ] || ABORTED=1

@@ -74,15 +74,15 @@ class TestWebwinkelOverzicht(E2EHelpers, TestCase):
         foto2.save()
         self.foto2 = foto2
 
-        product = WebwinkelProduct(
+        product1 = WebwinkelProduct(
                         omslag_titel='Test titel 1',
                         volgorde=1,
                         onbeperkte_voorraad=True,
                         omslag_foto=foto,
                         bestel_begrenzing='',
                         prijs_euro="1.23")
-        product.save()
-        self.product = product
+        product1.save()
+        self.product1 = product1
 
         product2 = WebwinkelProduct(
                         omslag_titel='Test titel 2',
@@ -106,6 +106,39 @@ class TestWebwinkelOverzicht(E2EHelpers, TestCase):
         self.product3 = product3
         self.product3.fotos.add(foto2)
 
+        product4 = WebwinkelProduct(
+                        omslag_titel='Test titel kleding',
+                        volgorde=4,
+                        sectie='y',         # transitie naar andere titel
+                        eenheid='meervoud',
+                        kleding_maat='XXL',
+                        onbeperkte_voorraad=False,
+                        aantal_op_voorraad=30,
+                        prijs_euro="15.99")
+        product4.save()
+        self.product4 = product4
+        self.product4.fotos.add(foto2)
+
+        product5 = WebwinkelProduct(
+                        omslag_titel='Test titel kleding',      # zelfde titel
+                        volgorde=5,
+                        sectie='x',
+                        eenheid='meervoud',
+                        kleding_maat='XXS',
+                        onbeperkte_voorraad=False,
+                        aantal_op_voorraad=0)       # uitverkocht
+        product5.save()
+        self.product5 = product5
+
+        product6 = WebwinkelProduct(
+                        omslag_titel='Test titel extern',
+                        volgorde=6,
+                        sectie='y',
+                        beschrijving="https://extern.test.not",
+                        onbeperkte_voorraad=True)
+        product6.save()
+        self.product6 = product6
+
     def test_anon(self):
         self.client.logout()
 
@@ -120,12 +153,12 @@ class TestWebwinkelOverzicht(E2EHelpers, TestCase):
         self.assertNotIn(self.url_mandje_bestellen, urls)
 
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_webwinkel_product % self.product.pk)
+            resp = self.client.get(self.url_webwinkel_product % self.product1.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('webwinkel/product.dtl', 'plein/site_layout.dtl'))
 
-        resp = self.client.post(self.url_webwinkel_product % self.product.pk)
+        resp = self.client.post(self.url_webwinkel_product % self.product1.pk)
         self.assert404(resp, 'Geen toegang')
 
         # controleer dat het mandje niet getoond wordt
@@ -152,7 +185,7 @@ class TestWebwinkelOverzicht(E2EHelpers, TestCase):
         urls = self.extract_all_urls(resp)
         self.assertIn(self.url_mandje_bestellen, urls)
 
-        url = self.url_webwinkel_product % self.product.pk
+        url = self.url_webwinkel_product % self.product1.pk
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
@@ -197,13 +230,27 @@ class TestWebwinkelOverzicht(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_normaal)
         self.e2e_wisselnaarrol_sporter()
 
-        url = self.url_webwinkel_product % self.product.pk
+        url = self.url_webwinkel_product % self.product1.pk
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'aantal': '1', 'snel': 1})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('webwinkel/toegevoegd-aan-mandje.dtl', 'plein/site_layout.dtl'))
 
+        # voeg een product met kleding maat toe
+        url = self.url_webwinkel_product % self.product4.pk
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'aantal': '1', 'maat': 'XXL', 'snel': 1})
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('webwinkel/toegevoegd-aan-mandje.dtl', 'plein/site_layout.dtl'))
+
+        # niet bestaande maat
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'aantal': '1', 'maat': 'huh', 'snel': 1})
+        self.assert404(resp, 'Product met maat niet gevonden')
+
+        # probeer een uitverkocht product toe te voegen
         url = self.url_webwinkel_product % self.product3.pk
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'aantal': '1', 'snel': 1})
@@ -253,7 +300,7 @@ class TestWebwinkelOverzicht(E2EHelpers, TestCase):
 
         self.assertEqual(0, WebwinkelKeuze.objects.count())
 
-        url = self.url_webwinkel_product % self.product.pk
+        url = self.url_webwinkel_product % self.product1.pk
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'aantal': '1', 'snel': 1})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
@@ -361,7 +408,7 @@ class TestWebwinkelOverzicht(E2EHelpers, TestCase):
         self.account_normaal.is_gast = True
         self.account_normaal.save(update_fields=['is_gast'])
 
-        url = self.url_webwinkel_product % self.product.pk
+        url = self.url_webwinkel_product % self.product1.pk
 
         with self.assert_max_queries(20):
             resp = self.client.get(url)

@@ -241,7 +241,7 @@ class ProductView(TemplateView):
                            .get(omslag_titel=product.omslag_titel,
                                 mag_tonen=True,
                                 kleding_maat=maat))
-            except (ValueError, TypeError, WebwinkelProduct.DoesNotExist):
+            except (ValueError, TypeError, WebwinkelProduct.DoesNotExist, WebwinkelProduct.MultipleObjectsReturned):
                 raise Http404('Product met maat niet gevonden')
 
         # check of het aantal toegestaan is
