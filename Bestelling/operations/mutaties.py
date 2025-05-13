@@ -13,14 +13,16 @@ from Bestelling.definities import (BESTELLING_MUTATIE_WEDSTRIJD_INSCHRIJVEN, BES
                                    BESTELLING_MUTATIE_OVERBOEKING_ONTVANGEN, BESTELLING_MUTATIE_ANNULEER,
                                    BESTELLING_MUTATIE_TRANSPORT, BESTELLING_STATUS_BETALING_ACTIEF,
                                    BESTELLING_MUTATIE_EVENEMENT_INSCHRIJVEN, BESTELLING_MUTATIE_EVENEMENT_AFMELDEN,
-                                   BESTELLING_MUTATIE_OPLEIDING_INSCHRIJVEN, BESTELLING_MUTATIE_OPLEIDING_AFMELDEN)
+                                   BESTELLING_MUTATIE_OPLEIDING_INSCHRIJVEN, BESTELLING_MUTATIE_OPLEIDING_AFMELDEN,
+                                   BESTELLING_MUTATIE_WEDSTRIJD_AANPASSEN)
 from Bestelling.models import BestellingMutatie, Bestelling, BestellingRegel
 from Betaal.models import BetaalActief
 from Evenement.models import EvenementInschrijving
 from Opleiding.models import OpleidingInschrijving
 from Site.core.background_sync import BackgroundSync
+from Sporter.models import SporterBoog
 from Webwinkel.models import WebwinkelKeuze
-from Wedstrijden.models import WedstrijdInschrijving
+from Wedstrijden.models import WedstrijdInschrijving, WedstrijdSessie, KalenderWedstrijdklasse
 import time
 
 
@@ -309,6 +311,34 @@ def bestel_overboeking_ontvangen(bestelling: Bestelling, bedrag, snel=False):
                                     code=BESTELLING_MUTATIE_OVERBOEKING_ONTVANGEN,
                                     bestelling=bestelling,
                                     bedrag_euro=bedrag,
+                                    is_verwerkt=False)
+
+    if is_created:
+        mutatie.save()
+
+        # wacht kort op de achtergrondtaak
+        _bestel_ping_achtergrondtaak(mutatie, snel)
+
+
+def bestel_mutatieverzoek_wedstrijdinschrijving_aanpassen(inschrijving: WedstrijdInschrijving,
+                                                          sporterboog: SporterBoog,
+                                                          sessie: WedstrijdSessie,
+                                                          klasse: KalenderWedstrijdklasse,
+                                                          door_account: Account,
+                                                          snel=False):
+    """
+        Inschrijving op een wedstrijd aanpassen: andere sessie, wedstrijdklasse of boogtype.
+    """
+
+    # zet dit verzoek door naar het mutaties process
+    # voorkom duplicates (niet 100%)
+    mutatie, is_created = BestellingMutatie.objects.get_or_create(
+                                    code=BESTELLING_MUTATIE_WEDSTRIJD_AANPASSEN,
+                                    account=door_account,
+                                    wedstrijd_inschrijving=inschrijving,
+                                    sporterboog=sporterboog,
+                                    sessie=sessie,
+                                    wedstrijdklasse=klasse,
                                     is_verwerkt=False)
 
     if is_created:

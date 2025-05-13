@@ -33,6 +33,16 @@ class BestelPluginBase:
         """
         raise NotImplementedError()             # pragma: no cover
 
+    def aanpassen(self, inschrijving, door_account_str: str, **kwargs):
+        """
+            Maak een aanpassing in een al gemaakte bestelling.
+            Voorbeeld: sporter will van boogtype wisselen voor een wedstrijd
+
+            inschrijving kan van verschillende typen zijn: Evenement, Opleiding, Webwinkel, Wedstrijd
+            kwargs is een dictionary met alle mutaties
+        """
+        raise NotImplementedError()             # pragma: no cover
+
     def annuleer(self, regel: BestellingRegel):
         """
             Het product wordt uit het mandje gehaald of de bestelling wordt geannuleerd (voordat deze betaald is)

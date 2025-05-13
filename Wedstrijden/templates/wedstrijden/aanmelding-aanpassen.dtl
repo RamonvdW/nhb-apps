@@ -1,0 +1,108 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2025 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Aanmelding aanpassen{% endblock %}
+
+{% block pagina %}
+
+    <div id="js_data"
+         data-url="{{ url_selecteer }}"
+         data-csrf-token="{{ csrf_token }}">
+
+    </div>
+    <script>
+        function aanpassen(id)
+        {
+            const data = document.getElementById('js_data').dataset
+            const id_data = document.getElementById(id).dataset
+
+            // voer een POST uit om toe te voegen
+            let form = document.createElement('form');
+            form.setAttribute('method', 'post');
+            form.setAttribute('action', data.url);
+
+            let inp = document.createElement('input');
+            inp.type = "hidden";
+            inp.name = "csrfmiddlewaretoken";
+            inp.value = data.csrfToken;
+            form.appendChild(inp);
+
+            inp = document.createElement('input');
+            inp.type = "hidden";
+            inp.name = 'sessie';
+            inp.value = id_data.sessie;
+            form.appendChild(inp);
+
+            inp = document.createElement('input');
+            inp.type = "hidden";
+            inp.name = 'klasse';
+            inp.value = id_data.klasse;
+            form.appendChild(inp);
+
+            inp = document.createElement('input');
+            inp.type = "hidden";
+            inp.name = 'sporterboog';
+            inp.value = id_data.sporterboog;
+            form.appendChild(inp);
+
+            form.style.display = 'hidden';
+            document.body.appendChild(form);
+            form.submit();
+        }
+    </script>
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Aanmelding aanpassen</h3>
+            <p>Boogtype, wedstrijdklasse of sessie aanpassen voor <b>{{ sporter.lid_nr_en_volledige_naam }}</b>.</p>
+            <p>We tonen alleen de bogen die de sporter zelf als voorkeur ingesteld heeft.</p>
+        </div>
+    </div>
+
+      <!-- blauwe balk met informatie label : info -->
+    <div class="row-sv-blauw">
+        <div class="col s12 m10 offset-m1 l8 offset-l2">
+            <table class="sv-kader">
+                <thead>
+                    <tr>
+                        <th>Sessie</th>
+                        <th>Boog</th>
+                        <th>Wedstrijdklasse</th>
+                        <th><!-- kolom voor de knoppen --></th>
+                    </tr>
+                </thead>
+                {% for keuze in keuzes %}
+                    <tr>
+                        <td>{{ keuze.sessie.datum }}<br>
+                            {% if keuze.sessie.beschrijving %}<span>{{ keuze.sessie.beschrijving }}</span><br>{% endif %}
+                            <span>Beschikbare: {{ keuze.sessie.aantal_beschikbaar }} (van de {{ keuze.sessie.max_sporters }})</span>
+                        </td>
+                        <td>{{ keuze.sporterboog.boogtype.beschrijving }}</td>
+                        <td>({{ keuze.klasse.afkorting }}) {{ keuze.klasse }}</td>
+                        <td>
+                            {% if keuze.is_gekozen %}
+                                <span>Huidige keuze</span>
+                            {% else %}
+                                <button class="btn-sv-rood"
+                                        id="id_aanpassen_{{ keuze.nr }}"
+                                        onclick="aanpassen('id_aanpassen_{{ keuze.nr }}')"
+                                        data-sessie="{{ keuze.sessie.pk }}"
+                                        data-klasse="{{ keuze.klasse.pk }}"
+                                        data-sporterboog="{{ keuze.sporterboog.pk }}">Selecteer</button>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="wedstrijden-aanmelding-aanpassen" %}
+
+{% endblock %}

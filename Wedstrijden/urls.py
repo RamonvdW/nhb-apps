@@ -1,29 +1,20 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2024 Ramon van der Winkel.
+#  Copyright (c) 2021-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from Wedstrijden import (view_vereniging, view_manager, view_wijzig_wedstrijd, view_wijzig_sessies,
-                         view_kwalificatie_scores, view_aanmeldingen, view_korting, view_wedstrijd_details)
+from Wedstrijden import (view_vereniging, view_manager, view_korting,
+                         view_wijzig_wedstrijd, view_wijzig_sessies,
+                         view_kwalificatie_scores, view_wedstrijd_details,
+                         view_aanmeldingen, view_aanmelding_details)
 
 app_name = 'Wedstrijden'
 
 # basis = /wedstrijden/
 
 urlpatterns = [
-
-    # wedstrijd details
-    path('<wedstrijd_pk>/details/',
-         view_wedstrijd_details.WedstrijdDetailsView.as_view(),
-         name='wedstrijd-details'),
-
-    # afmelden
-    path('afmelden/<inschrijving_pk>/',
-         view_aanmeldingen.AfmeldenView.as_view(),
-         name='afmelden'),
-
 
     # wedstrijden
     path('vereniging/lijst/',
@@ -41,7 +32,6 @@ urlpatterns = [
     path('vereniging/lijst-twee-jaar/',
          view_vereniging.VerenigingTweeJaarWedstrijdenView.as_view(),
          name='vereniging-twee-jaar'),
-
 
     path('vereniging/kies-type/',
          view_vereniging.NieuweWedstrijdKiesType.as_view(),
@@ -62,6 +52,12 @@ urlpatterns = [
          name='vereniging-korting-wijzig'),
 
 
+    # wedstrijd details
+    path('<wedstrijd_pk>/details/',
+         view_wedstrijd_details.WedstrijdDetailsView.as_view(),
+         name='wedstrijd-details'),
+
+
     # manager
     path('manager/',
          view_manager.KalenderManagerView.as_view(),
@@ -80,7 +76,7 @@ urlpatterns = [
          name='check-kwalificatie-scores-wedstrijd'),
 
 
-    # gedeeld
+    # gedeeld (TODO: met wie?)
     path('<wedstrijd_pk>/wijzig/',
          view_wijzig_wedstrijd.WijzigWedstrijdView.as_view(),
          name='wijzig-wedstrijd'),
@@ -97,6 +93,8 @@ urlpatterns = [
          view_wijzig_sessies.WijzigWedstrijdSessieView.as_view(),
          name='wijzig-sessie'),
 
+
+    # aanmeldingen
     path('<wedstrijd_pk>/aanmeldingen/',
          view_aanmeldingen.WedstrijdAanmeldingenView.as_view(),
          name='aanmeldingen'),
@@ -109,9 +107,19 @@ urlpatterns = [
          view_aanmeldingen.DownloadAanmeldingenBestandCSV.as_view(),
          name='download-aanmeldingen-csv'),
 
+
+    # aanmelding details
     path('details-aanmelding/<inschrijving_pk>/',
-         view_aanmeldingen.WedstrijdAanmeldingDetailsView.as_view(),
+         view_aanmelding_details.WedstrijdAanmeldingDetailsView.as_view(),
          name='details-aanmelding'),
+
+    path('aanpassen/<inschrijving_pk>/',
+         view_aanmelding_details.AanpassenView.as_view(),
+         name='aanpassen'),
+
+    path('afmelden/<inschrijving_pk>/',
+         view_aanmelding_details.AfmeldenView.as_view(),
+         name='afmelden'),
 ]
 
 # end of file

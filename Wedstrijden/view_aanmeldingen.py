@@ -5,40 +5,31 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.conf import settings
-from django.http import HttpResponseRedirect, HttpResponse, Http404
+from django.http import HttpResponse, Http404
 from django.urls import reverse
 from django.utils import timezone
 from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Account.models import get_account
 from BasisTypen.definities import GESLACHT2STR
-from Bestelling.operations import (bestel_mutatieverzoek_afmelden_wedstrijd,
-                                   bestel_mutatieverzoek_verwijder_regel_uit_mandje)
 from Betaal.format import format_bedrag_euro
-from Competitie.models import RegiocompetitieSporterBoog
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige, rol_get_huidige_functie
-from Sporter.models import SporterVoorkeuren, get_sporter
-from Sporter.operations import get_sporter_voorkeuren
+from Sporter.models import SporterVoorkeuren
 from Wedstrijden.definities import (WEDSTRIJD_INSCHRIJVING_STATUS_TO_SHORT_STR,
                                     WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD,
-                                    WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_MANDJE,
                                     WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF,
-                                    WEDSTRIJD_INSCHRIJVING_STATUS_VERWIJDERD,
-                                    KWALIFICATIE_CHECK2STR, KWALIFICATIE_CHECK_AFGEKEURD)
-from Wedstrijden.models import Wedstrijd, WedstrijdInschrijving, Kwalificatiescore
+                                    WEDSTRIJD_INSCHRIJVING_STATUS_VERWIJDERD)
+from Wedstrijden.models import Wedstrijd, WedstrijdInschrijving
+from Wedstrijden.operations.kwalificatie_scores import get_kwalificatie_scores
 from decimal import Decimal
 from codecs import BOM_UTF8
 import csv
 
 
 TEMPLATE_WEDSTRIJDEN_AANMELDINGEN = 'wedstrijden/aanmeldingen.dtl'
-TEMPLATE_WEDSTRIJDEN_AANMELDING_DETAILS = 'wedstrijden/aanmelding-details.dtl'
 
 CONTENT_TYPE_TSV = 'text/tab-separated-values; charset=UTF-8'
 CONTENT_TYPE_CSV = 'text/csv; charset=UTF-8'
-
-# TODO: HWL moet sporter kunnen verplaatsen naar een andere sessie
 
 
 def get_inschrijving_mh_bestel_nr(inschrijving: WedstrijdInschrijving):
@@ -49,80 +40,6 @@ def get_inschrijving_mh_bestel_nr(inschrijving: WedstrijdInschrijving):
             return bestelling.mh_bestel_nr()
 
     return ""
-
-
-def get_kwalificatie_scores(inschrijving):
-    """ bepaal de kwalificatie-scores van een inschrijving:
-        - de maximaal 3 opgegeven scores
-        - de 4 beste resultaten uit de regiocompetitie
-
-        Geeft een lijst met 0 tot 5 Kwalificatiescore records terug.
-    """
-    unsorted = list()
-
-    # pak de handmatig opgegeven kwalificatiescores erbij
-    scores = (Kwalificatiescore
-              .objects
-              .filter(inschrijving=inschrijving)
-              .exclude(resultaat=0)
-              .exclude(check_status=KWALIFICATIE_CHECK_AFGEKEURD)
-              .order_by('-resultaat'))  # hoogste eerst
-
-    for score in scores:
-        score.naam = '?' if score.naam == '' else score.naam
-        score.waar = '?' if score.waar == '' else score.waar
-        score.check_str = KWALIFICATIE_CHECK2STR[score.check_status]
-        tup = (score.resultaat, score.datum, score.pk, score)
-        unsorted.append(tup)
-    # for
-
-    now = timezone.now().date()
-
-    # zoek de bondscompetitie Indoor scores erbij
-    try:
-        deelnemer = (RegiocompetitieSporterBoog
-                     .objects
-                     .get(sporterboog=inschrijving.sporterboog,
-                          regiocompetitie__competitie__afstand='18'))
-    except RegiocompetitieSporterBoog.DoesNotExist:
-        # doet niet mee aan de competitie
-        pass
-    else:
-        scores = [deelnemer.score1, deelnemer.score2, deelnemer.score3, deelnemer.score4,
-                  deelnemer.score5, deelnemer.score6, deelnemer.score7]
-        scores = [score for score in scores if score > 0]
-        scores.sort(reverse=True)    # hoogste eerst
-        scores = scores[:4]          # top 4
-        scores.extend([0, 0, 0, 0])  # minimaal 4
-
-        # eerste 60 pijlen score uit de bondscompetitie
-        score = Kwalificatiescore(
-                    inschrijving=inschrijving,
-                    datum=now,
-                    naam='Bondscompetitie Indoor',
-                    waar='',
-                    resultaat=scores[0] + scores[1])
-        if score.resultaat > 0:
-            score.check_str = 'Automatisch'
-            tup = (score.resultaat, score.datum, 1000000000 + inschrijving.pk, score)
-            unsorted.append(tup)
-
-        # tweede 60 pijlen score uit de bondscompetitie
-        score = Kwalificatiescore(
-                    inschrijving=inschrijving,
-                    datum=now,
-                    naam='Bondscompetitie Indoor',
-                    waar='',
-                    resultaat=scores[2] + scores[3])
-        if score.resultaat > 0:
-            score.check_str = 'Automatisch'
-            tup = (score.resultaat, score.datum, 1000000001 + inschrijving.pk, score)
-            unsorted.append(tup)
-
-    # sorteer de samengevoegde lijst van opgegeven wedstrijdresultaten en automatische data van de bondscompetities
-    unsorted.sort(reverse=True)     # hoogste resultaat eerst
-
-    return [score for _, _, _, score in unsorted]
 
 
 class WedstrijdAanmeldingenView(UserPassesTestMixin, TemplateView):
@@ -141,7 +58,7 @@ class WedstrijdAanmeldingenView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu = rol_get_huidige(self.request)
-        return self.rol_nu in (Rol.ROL_SEC, Rol.ROL_HWL, Rol.ROL_MWZ)
+        return self.rol_nu in (Rol.ROL_HWL, Rol.ROL_MWZ)
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -212,24 +129,23 @@ class WedstrijdAanmeldingenView(UserPassesTestMixin, TemplateView):
         context['aantal_aanmeldingen'] = aantal_aanmeldingen
         context['aantal_afmeldingen'] = aantal_afmeldingen
 
-        if self.rol_nu in (Rol.ROL_HWL, Rol.ROL_MWZ):
-            context['url_download_tsv'] = reverse('Wedstrijden:download-aanmeldingen-tsv',
-                                                  kwargs={'wedstrijd_pk': wedstrijd.pk})
-            context['url_download_csv'] = reverse('Wedstrijden:download-aanmeldingen-csv',
-                                                  kwargs={'wedstrijd_pk': wedstrijd.pk})
+        context['url_download_tsv'] = reverse('Wedstrijden:download-aanmeldingen-tsv',
+                                              kwargs={'wedstrijd_pk': wedstrijd.pk})
+        context['url_download_csv'] = reverse('Wedstrijden:download-aanmeldingen-csv',
+                                              kwargs={'wedstrijd_pk': wedstrijd.pk})
 
         if self.rol_nu == Rol.ROL_HWL:
             context['url_toevoegen'] = reverse('WedstrijdInschrijven:inschrijven-handmatig',
                                                kwargs={'wedstrijd_pk': wedstrijd.pk})
 
-        if self.rol_nu in (Rol.ROL_HWL, Rol.ROL_SEC):
+        if self.rol_nu == Rol.ROL_HWL:
             context['kruimels'] = (
                 (reverse('Vereniging:overzicht'), 'Beheer vereniging'),
                 (reverse('Wedstrijden:vereniging'), 'Wedstrijdkalender'),
                 (None, 'Aanmeldingen'),
             )
         else:
-            # BB
+            # MWZ
             context['kruimels'] = (
                 (reverse('Wedstrijden:manager'), 'Wedstrijdkalender'),
                 (None, 'Aanmeldingen'),
@@ -550,166 +466,5 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
 
         return response
 
-
-class WedstrijdAanmeldingDetailsView(UserPassesTestMixin, TemplateView):
-
-    """ Via deze view kunnen beheerders de details van een inschrijving voor een wedstrijd inzien """
-
-    # class variables shared by all instances
-    template_name = TEMPLATE_WEDSTRIJDEN_AANMELDING_DETAILS
-    raise_exception = True          # genereer PermissionDenied als test_func False terug geeft
-    permission_denied_message = 'Geen toegang'
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.rol_nu, self.functie_nu = None, None
-
-    def test_func(self):
-        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu in (Rol.ROL_SEC, Rol.ROL_HWL, Rol.ROL_MWZ, Rol.ROL_SPORTER)
-
-    def get_context_data(self, **kwargs):
-        """ called by the template system to get the context data for the template """
-        context = super().get_context_data(**kwargs)
-
-        try:
-            inschrijving_pk = str(kwargs['inschrijving_pk'])[:7]     # afkappen voor de veiligheid
-            inschrijving_pk = int(inschrijving_pk)
-        except (TypeError, ValueError):
-            raise Http404('Geen valide parameter')
-
-        try:
-            inschrijving = (WedstrijdInschrijving
-                            .objects
-                            .select_related('wedstrijd',
-                                            'wedstrijd__organiserende_vereniging',
-                                            'sessie',
-                                            'wedstrijdklasse',
-                                            'sporterboog',
-                                            'sporterboog__sporter',
-                                            'korting')
-                            .get(pk=inschrijving_pk))
-        except WedstrijdInschrijving.DoesNotExist:
-            raise Http404('Aanmelding niet gevonden')
-
-        if self.rol_nu in (Rol.ROL_SEC, Rol.ROL_HWL):
-            # alleen van de eigen vereniging laten zien
-            if inschrijving.wedstrijd.organiserende_vereniging != self.functie_nu.vereniging:
-                raise Http404('Verkeerde vereniging')
-
-        if self.rol_nu == Rol.ROL_SPORTER:
-            # alleen eigen inschrijvingen laten zien
-            account = get_account(self.request)
-            sporter = get_sporter(account)
-            if inschrijving.sporterboog.sporter.lid_nr != sporter.lid_nr:
-                raise Http404('Niet jouw inschrijving')
-
-        context['inschrijving'] = inschrijving
-        context['sporter'] = sporter = inschrijving.sporterboog.sporter
-        context['ver'] = sporter.bij_vereniging
-
-        if self.rol_nu in (Rol.ROL_MWZ, Rol.ROL_HWL):
-            context['toon_contactgegevens'] = True
-
-        context['voorkeuren'] = voorkeuren = get_sporter_voorkeuren(sporter)
-        voorkeuren.wedstrijdgeslacht_str = GESLACHT2STR[voorkeuren.wedstrijd_geslacht]
-
-        inschrijving.reserveringsnummer = inschrijving.pk + settings.TICKET_NUMMER_START__WEDSTRIJD
-
-        inschrijving.status_str = WEDSTRIJD_INSCHRIJVING_STATUS_TO_SHORT_STR[inschrijving.status]
-
-        inschrijving.bestelnummer_str = get_inschrijving_mh_bestel_nr(inschrijving)
-
-        if inschrijving.status not in (WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD,
-                                       WEDSTRIJD_INSCHRIJVING_STATUS_VERWIJDERD):
-            inschrijving.url_afmelden = reverse('Wedstrijden:afmelden',
-                                                kwargs={'inschrijving_pk': inschrijving.pk})
-
-        if inschrijving.korting:
-            inschrijving.korting_str = '%s%%' % inschrijving.korting.percentage
-        else:
-            inschrijving.korting_str = None
-
-        # TODO: vervang door inschrijving.regel
-        regel = inschrijving.bestelling
-        if regel:
-            inschrijving.bedrag_euro_str = format_bedrag_euro(regel.bedrag_euro)
-        else:
-            inschrijving.bedrag_euro_str = None
-
-        wedstrijd = inschrijving.wedstrijd
-        if wedstrijd.eis_kwalificatie_scores:
-            inschrijving.scores = get_kwalificatie_scores(inschrijving)
-        else:
-            inschrijving.scores = list()
-
-        url_aanmeldingen = reverse('Wedstrijden:aanmeldingen',
-                                   kwargs={'wedstrijd_pk': inschrijving.wedstrijd.pk})
-
-        if self.rol_nu == Rol.ROL_MWZ:
-            context['kruimels'] = (
-                (reverse('Wedstrijden:manager'), 'Wedstrijdkalender'),
-                (url_aanmeldingen, 'Aanmeldingen'),
-                (None, 'Details aanmelding')
-            )
-        else:
-            if not url_aanmeldingen:
-                # exacte wedstrijd weten we niet!
-                url_aanmeldingen = reverse('Wedstrijden:vereniging')
-
-            context['kruimels'] = (
-                (reverse('Vereniging:overzicht'), 'Beheer vereniging'),
-                (reverse('Wedstrijden:vereniging'), 'Wedstrijdkalender'),
-                (url_aanmeldingen, 'Aanmeldingen'),
-                (None, 'Details aanmelding')
-            )
-
-        return context
-
-
-class AfmeldenView(UserPassesTestMixin, View):
-
-    """ Via deze view kunnen beheerders een sporter afmelden voor een wedstrijd """
-
-    raise_exception = True          # genereer PermissionDenied als test_func False terug geeft
-    permission_denied_message = 'Geen toegang'
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.rol_nu, self.functie_nu = None, None
-
-    def test_func(self):
-        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu in (Rol.ROL_SEC, Rol.ROL_HWL, Rol.ROL_MWZ)
-
-    def post(self, request, *args, **kwargs):
-        """ wordt aangeroepen om de POST af te handelen"""
-
-        try:
-            inschrijving_pk = str(kwargs['inschrijving_pk'])[:6]     # afkappen voor de veiligheid
-            inschrijving_pk = int(inschrijving_pk)
-            inschrijving = WedstrijdInschrijving.objects.get(pk=inschrijving_pk)
-        except (TypeError, ValueError, WedstrijdInschrijving.DoesNotExist):
-            raise Http404('Inschrijving niet gevonden')
-
-        if self.rol_nu != Rol.ROL_MWZ:
-            # controleer dat dit een inschrijving is op een wedstrijd van de vereniging
-            ver = self.functie_nu.vereniging
-            if inschrijving.wedstrijd.organiserende_vereniging != ver:
-                raise Http404('Verkeerde vereniging')
-
-        snel = str(request.POST.get('snel', ''))[:1]
-
-        if inschrijving.status == WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_MANDJE:
-            regel = inschrijving.bestelling
-            bestel_mutatieverzoek_verwijder_regel_uit_mandje(inschrijving.koper, regel, snel == '1')
-        else:
-            bestel_mutatieverzoek_afmelden_wedstrijd(inschrijving, snel == '1')
-
-        url = reverse('Wedstrijden:details-aanmelding', kwargs={'inschrijving_pk': inschrijving.pk})
-
-        return HttpResponseRedirect(url)
 
 # end of file

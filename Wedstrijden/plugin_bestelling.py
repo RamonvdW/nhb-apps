@@ -7,6 +7,7 @@
 from django.conf import settings
 from django.urls import reverse
 from django.utils import timezone
+from Account.models import Account
 from BasisTypen.definities import ORGANISATIE_IFAA
 from Bestelling.definities import BESTELLING_REGEL_CODE_WEDSTRIJD, BESTELLING_KORT_BREAK
 from Bestelling.bestel_plugin_base import BestelPluginBase
@@ -124,6 +125,45 @@ class WedstrijdBestelPlugin(BestelPluginBase):
             # inschrijving mag niet verwijderd worden, in verband met mogelijk verwijzing vanuit bestelling
 
             inschrijving.save(update_fields=['status', 'log'])
+
+    def aanpassen(self, inschrijving: WedstrijdInschrijving, door_account_str: str, **kwargs):
+        """
+            Maak een aanpassing in een al gemaakte wedstrijdinschrijving.
+            Voorbeeld: sporter will van boogtype wisselen voor een wedstrijd
+            aanpassing wordt verwijderd de aanroep
+        """
+        sessie = kwargs['sessie']
+        klasse = kwargs['klasse']
+        sporterboog = kwargs['sporterboog']
+
+        aanpassingen = list()
+        if sessie != inschrijving.sessie:
+            # aantallen aanpassen voor elke sessie
+            oude_sessie = inschrijving.sessie
+            oude_sessie.aantal_inschrijvingen -= 1
+            oude_sessie.save(update_fields=['aantal_inschrijvingen'])
+
+            sessie.aantal_inschrijvingen += 1
+            sessie.save(update_fields=['aantal_inschrijvingen'])
+
+            inschrijving.sessie = sessie
+            aanpassingen.append("sessie")
+
+        if sporterboog != inschrijving.sporterboog:
+            inschrijving.sporterboog = sporterboog
+            aanpassingen.append('boog type')
+
+        if klasse != inschrijving.wedstrijdklasse:
+            inschrijving.wedstrijdklasse = klasse
+            aanpassingen.append('wedstrijdklasse')
+
+        stamp_str = timezone.localtime(timezone.now()).strftime('%Y-%m-%d om %H:%M')
+        msg = "[%s] Aanpassingen (%s) door: %s\n" % (stamp_str,
+                                                     ", ".join(aanpassingen),
+                                                     door_account_str)
+        inschrijving.log += msg
+        inschrijving.save()
+        self.stdout.write('[INFO] WedstrijdInschrijving pk=%s is aangepast' % inschrijving.pk)
 
     def annuleer(self, regel: BestellingRegel):
         """
