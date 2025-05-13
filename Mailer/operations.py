@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2024 Ramon van der Winkel.
+#  Copyright (c) 2020-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -8,9 +8,9 @@ from django.conf import settings
 from django.utils import timezone
 from django.db.transaction import TransactionManagementError
 from django.template.loader import render_to_string
-from django.templatetags.static import static
 from Mailer.models import MailQueue
 from Site.core.minify_dtl import minify_scripts, minify_css, remove_html_comments
+from Site.core.static import static_safe
 from html import unescape
 import datetime
 import re
@@ -241,7 +241,7 @@ def render_email_template(context, email_template_name):
         Returns: email body in text, html + email_template_name
     """
 
-    context['logo_url'] = settings.SITE_URL + static('plein/logo_with_text_khsn.png')
+    context['logo_url'] = settings.SITE_URL + static_safe('plein/logo_with_text_khsn.png')
     # aspect ratio: 400x92 --> 217x50
     context['logo_width'] = 217
     context['logo_height'] = 50

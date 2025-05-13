@@ -270,7 +270,7 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
 
                 sporter.functies = account.functie_set.order_by('beschrijving')
 
-            if not sporter.is_gast:
+            if not sporter.is_gast and sporter.is_actief_lid:
                 sporter.url_toon_bondspas = reverse('Bondspas:toon-bondspas-van',
                                                     kwargs={'lid_nr': sporter.lid_nr})
         # for

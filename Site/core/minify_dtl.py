@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -118,29 +118,34 @@ def minify_js(script):
 def minify_scripts(contents):
     """ Verwijder commentaar en onnodige spaties uit
         javascript embedded in templates
+
+        Skipped sourced scripts
+        Skipped application/json script sections
     """
     clean = ""
-    pos = contents.find('<script')
-    while len(contents) and pos >= 0:
-        pos2 = contents.find('</script>')
-        if pos2 > pos:
+    pos_start = contents.find('<script')
+    while len(contents) and pos_start >= 0:
+        pos_close = contents.find('</script>')
+        if pos_close > pos_start:
             # section of <script[...]>..</script>
-            pos3 = contents.find('<script>')
-            if pos3 == pos:
-                # javascript to minify
-                clean += contents[:pos + 8]  # eat complete start tag
-                clean += minify_js(contents[pos + 8:pos2])
-                clean += contents[pos2:pos2 + 9]  # </script>
+            pos_end_start = contents.find('>', pos_start)
+            start_tag = contents[pos_start:pos_end_start+1]
+            if 'type="application/json"' in start_tag or ' src="' in start_tag:
+                # keep as-is
+                clean += contents[:pos_close+9]
             else:
-                # typically  <script src="..."></script>
-                clean += contents[:pos2 + 9]
-            contents = contents[pos2 + 9:]
+                # javascript to minify
+                clean += contents[:pos_end_start+1]      # consume complete start tag
+                clean += minify_js(contents[pos_end_start+2:pos_close])
+                clean += contents[pos_close:pos_close+9]  # </script>
+
+            contents = contents[pos_close + 9:]
         else:  # pragma: no cover
             # unexpected: start-tag but no end-tag
             # print("[WARNING] minify_scripts: missing script end-tag")
             clean += contents
             contents = ""
-        pos = contents.find('<script')
+        pos_start = contents.find('<script')
     # while
     clean += contents
     return clean
@@ -206,6 +211,10 @@ def minify_template(contents):
     # remove whitespace between template tags and html tags
     contents = re.sub(r'%}\s+<', '%}<', contents)
     contents = re.sub(r'>\s+{%', '>{%', contents)
+
+    # trivial removal of newlines inside meta and script tags
+    contents = re.sub(r'\s+data-', ' data-', contents)
+    contents = re.sub(r'\s+content=', ' content=', contents)
 
     # remove whitespace between template variables and html tags
     # NIET DOEN: dit kunnen echte layout spaties zijn!

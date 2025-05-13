@@ -60,6 +60,7 @@ class WebwinkelProduct(models.Model):
                                     null=True, blank=True)      # mag leeg zijn
 
     # de lange beschrijving
+    # product is extern als beschrijving begint met "http"
     beschrijving = models.TextField(default='', blank=True)
 
     # de grote foto's van dit product

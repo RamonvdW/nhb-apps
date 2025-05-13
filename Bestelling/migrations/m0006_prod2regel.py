@@ -70,7 +70,7 @@ def migrate_product2regel_evenement(apps, _):
     bestelling_product_klas = apps.get_model('Bestelling', 'BestellingProduct')
     bestelling_regel_klas = apps.get_model('Bestelling', 'BestellingRegel')
 
-    print(' evenementen: ', end='')
+    # print(' evenementen: ', end='')
 
     prod2regels = dict()        # [product.pk] = [regel, ..]
 
@@ -126,7 +126,7 @@ def migrate_product2regel_evenement(apps, _):
         afgemeld.save(update_fields=['bestelling'])
     # for
 
-    print('%d' % len(prod2regels), end='')
+    # print('%d' % len(prod2regels), end='')
 
     update_mandjes(apps, prod2regels)
     update_bestellingen(apps, prod2regels)
@@ -138,7 +138,7 @@ def migrate_product2regel_opleiding(apps, _):
     bestelling_product_klas = apps.get_model('Bestelling', 'BestellingProduct')
     bestelling_regel_klas = apps.get_model('Bestelling', 'BestellingRegel')
 
-    print(', opleidingen: ', end='')
+    # print(', opleidingen: ', end='')
 
     prod2regels = dict()    # [product.pk] = [regel ..]
 
@@ -197,7 +197,7 @@ def migrate_product2regel_opleiding(apps, _):
         afgemeld.save(update_fields=['bestelling'])
     # for
 
-    print('%d' % len(prod2regels), end='')
+    # print('%d' % len(prod2regels), end='')
 
     update_mandjes(apps, prod2regels)
     update_bestellingen(apps, prod2regels)
@@ -209,7 +209,7 @@ def migrate_product2regel_webwinkel(apps, _):
     bestelling_product_klas = apps.get_model('Bestelling', 'BestellingProduct')
     bestelling_regel_klas = apps.get_model('Bestelling', 'BestellingRegel')
 
-    print(', webwinkel: ', end='')
+    # print(', webwinkel: ', end='')
 
     prod2regels = dict()    # [product.pk] = [regel, ..]
 
@@ -270,7 +270,7 @@ def migrate_product2regel_webwinkel(apps, _):
         keuze.save(update_fields=['bestelling'])
     # for
 
-    print('%d' % len(prod2regels), end='')
+    # print('%d' % len(prod2regels), end='')
 
     update_mandjes(apps, prod2regels)
     update_bestellingen(apps, prod2regels)
@@ -282,7 +282,7 @@ def migrate_product2regel_wedstrijd(apps, _):
     bestelling_product_klas = apps.get_model('Bestelling', 'BestellingProduct')
     bestelling_regel_klas = apps.get_model('Bestelling', 'BestellingRegel')
 
-    print(', wedstrijden: ', end='')
+    # print(', wedstrijden: ', end='')
 
     prod2regels = dict()        # [product.pk] = [regel, ..]
 
@@ -327,7 +327,7 @@ def migrate_product2regel_wedstrijd(apps, _):
             prod2regels[prod.pk].append(regel)
     # for
 
-    print('%d' % len(prod2regels), end='')
+    # print('%d' % len(prod2regels), end='')
 
     update_mandjes(apps, prod2regels)
     update_bestellingen(apps, prod2regels)
@@ -339,7 +339,7 @@ def migrate_product2regel_verzendkosten(apps, _):
     bestelling_klas = apps.get_model('Bestelling', 'Bestelling')
     bestelling_regel_klas = apps.get_model('Bestelling', 'BestellingRegel')
 
-    print(', verzendkosten: ', end='')
+    # print(', verzendkosten: ', end='')
 
     # verzendkosten
     teller = 0
@@ -360,7 +360,7 @@ def migrate_product2regel_verzendkosten(apps, _):
         teller += 1
     # for
 
-    print('%d..' % teller, end='')
+    # print('%d..' % teller, end='')
 
 
 class Migration(migrations.Migration):

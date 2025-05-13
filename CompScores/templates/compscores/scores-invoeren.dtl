@@ -658,11 +658,9 @@
                         </tr>
                     {% endfor %}
 
-                    <tr data-tablefilter="stop" style="display:none">
-                        <td colspan="5"></td>
-                        {% if deelcomp.regio_organiseert_teamcompetitie %}
-                            <td></td>
-                        {% endif %}
+                    <!-- lege regel die niet gefilterd wordt, zodat row border niet buiten afronding tabel uitsteekt -->
+                    <tr data-tablefilter="stop">
+                        <td colspan="{% if deelcomp.regio_organiseert_teamcompetitie %}6{% else %}5{% endif %}" style="padding:5px"></td>
                     </tr>
                 </table>
             </div>

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -8,24 +8,17 @@ from django.urls import reverse
 from django.http import Http404
 from django.conf import settings
 from django.views.generic import ListView, TemplateView
-from django.templatetags.static import static
 from Records.definities import (disc2str, disc2url, url2disc,
                                 gesl2str, gesl2url, url2gesl,
                                 makl2str, makl2url, url2makl,
                                 lcat2str, lcat2url, url2lcat)
 from Records.models import IndivRecord, BesteIndivRecords
+from Site.core.static import static_safe
 from types import SimpleNamespace
 
 
 TEMPLATE_RECORDS_VERBETERBAAR_KIES_DISC = 'records/verbeterbaar_kies_disc.dtl'
 TEMPLATE_RECORDS_VERBETERBAAR_DISCIPLINE = 'records/verbeterbaar.dtl'
-
-
-DISCIPLINE_TO_ICON = {
-    'OD': static('plein/badge_discipline_outdoor.png'),
-    '18': static('plein/badge_discipline_indoor.png'),
-    '25': static('plein/badge_discipline_25m1p.png')
-}
 
 
 class RecordsVerbeterbaarKiesDisc(ListView):
@@ -38,6 +31,12 @@ class RecordsVerbeterbaarKiesDisc(ListView):
     def get_queryset(self):
         """ called by the template system to get the queryset or list of objects for the template """
 
+        disc2img = {
+            'OD': static_safe('plein/badge_discipline_outdoor.png'),
+            '18': static_safe('plein/badge_discipline_indoor.png'),
+            '25': static_safe('plein/badge_discipline_25m1p.png')
+        }
+
         objs = (IndivRecord
                 .objects
                 .distinct('discipline')
@@ -45,7 +44,7 @@ class RecordsVerbeterbaarKiesDisc(ListView):
 
         for obj in objs:
             obj.titel = disc2str[obj.discipline]
-            obj.img_src = DISCIPLINE_TO_ICON[obj.discipline]
+            obj.img_src = disc2img[obj.discipline]
             obj.tekst = "Toon alle verbeterbare records van de discipline %s." % obj.titel
 
             url_disc = disc2url[obj.discipline]

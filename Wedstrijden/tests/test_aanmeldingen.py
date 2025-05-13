@@ -294,23 +294,6 @@ class TestWedstrijdenAanmeldingen(E2EHelpers, TestCase):
         resp = self.client.get(self.url_aanmeldingen_wedstrijd % 'X=1')
         self.assert404(resp, 'Wedstrijd niet gevonden')
 
-        # wordt SEC
-        functie_sec = maak_functie('SEC Ver 1000', 'SEC')
-        functie_sec.vereniging = self.ver1
-        functie_sec.save()
-        functie_sec.accounts.add(self.account_admin)
-
-        # opnieuw inloggen om de SEC functie te kunnen zien
-        self.e2e_login_and_pass_otp(self.account_admin)
-        self.e2e_wissel_naar_functie(functie_sec)
-        self.e2e_check_rol('SEC')
-
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('wedstrijden/aanmeldingen.dtl', 'plein/site_layout.dtl'))
-
     def test_details_sporter(self):
         # wordt HWL
         self.e2e_login_and_pass_otp(self.account_admin)

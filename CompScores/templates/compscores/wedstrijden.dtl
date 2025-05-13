@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2024 Ramon van der Winkel.
+                Copyright (c) 2020-2025 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -13,8 +13,8 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Competitie wedstrijden</h3>
-            <p>Bondscompetitiewedstrijden die geschoten worden bij vereniging <b>{{ vereniging }}</b>.</p>
+            <h3 class="page-banner">Competitie<wbr>wedstrijden</h3>
+            <p>Bondscompetitie<wbr>wedstrijden die geschoten worden bij vereniging <b>{{ vereniging }}</b>.</p>
             <!-- <p>Overige wedstrijden worden beheerd via de Wedstrijdkalender (zie het menu).</p> -->
         </div>
     </div>

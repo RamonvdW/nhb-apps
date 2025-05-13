@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -71,7 +71,7 @@ class BasisTypenTemplateCompetitieIndivKlasseAdmin(BasisTypenReadonlyMetVolgorde
         """
         html = ""
         for lkl in instance.leeftijdsklassen.all():
-            html += '<p>' + format_html(str(lkl)) + '</p>'
+            html += format_html('<p>{}</p>', str(lkl))
         return mark_safe(html)
 
 

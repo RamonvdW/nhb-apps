@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -9,23 +9,16 @@ from django.urls import reverse
 from django.http import Http404
 from django.db.models import Q
 from django.views.generic import ListView, TemplateView
-from django.templatetags.static import static
 from Records.definities import disc2str, gesl2str, makl2str, lcat2str
 from Records.models import IndivRecord, AnderRecord
 from Records.forms import ZoekForm
+from Site.core.static import static_safe
 from Sporter.models import Sporter
 
 
 TEMPLATE_RECORDS_OVERZICHT = 'records/records_overzicht.dtl'
 TEMPLATE_RECORDS_SPECIFIEK = 'records/records_specifiek.dtl'
 TEMPLATE_RECORDS_ZOEK = 'records/records_zoek.dtl'
-
-
-DISCIPLINE_TO_IMG = {
-    'OD': static('plein/badge_discipline_outdoor.png'),
-    '18': static('plein/badge_discipline_indoor.png'),
-    '25': static('plein/badge_discipline_25m1p.png')
-}
 
 
 class RecordsOverzichtView(ListView):
@@ -39,7 +32,6 @@ class RecordsOverzichtView(ListView):
     @staticmethod
     def set_url_specifiek(obj):
         obj.url = reverse('Records:specifiek', kwargs={'nummer': obj.volg_nr, 'discipline': obj.discipline})
-        obj.img = DISCIPLINE_TO_IMG[obj.discipline]
 
         if obj.is_world_record:
             obj.title_str = "Wereld Record"
@@ -71,11 +63,18 @@ class RecordsOverzichtView(ListView):
 
     def get_queryset(self):
         """ called by the template system to get the queryset or list of objects for the template """
+        disc2img = {
+            'OD': static_safe('plein/badge_discipline_outdoor.png'),
+            '18': static_safe('plein/badge_discipline_indoor.png'),
+            '25': static_safe('plein/badge_discipline_25m1p.png')
+        }
+
         # 10 nieuwste records (alle disciplines)
         # op datum (nieuwste boven) en volg_nr (hoogste boven)
         objs = IndivRecord.objects.all().order_by('-datum', '-volg_nr')[:10]
         for obj in objs:
             self.set_url_specifiek(obj)
+            obj.img = disc2img[obj.discipline]
         # for
         return objs
 

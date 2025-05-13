@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2022-2024 Ramon van der Winkel.
+                Copyright (c) 2022-2025 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -21,13 +21,14 @@
     <!-- blauw balk met wit informatie veld -->
     <div class="row-sv-blauw">
         <div class="col s12 center">
-            <!-- thumbnails boven de grote foto's
+            {% comment %}
+            -- thumbnails boven de grote foto's --
             <div>
                 {% for foto in fotos %}
                     <img id="thumb1_{{ foto.volgorde }}" class="sv-foto-thumb" src="{{ foto.thumb_src }}" onclick="kies_foto({{ foto.volgorde }})" alt="thumbnail {{ foto.volgorde }}">
                 {% endfor %}
             </div>
-            -->
+            {% endcomment %}
 
             {% for foto in fotos %}
                 <img id="img_{{ foto.volgorde }}" class="sv-foto-groot" src="{{ foto.img_src }}" hidden loading="lazy" alt="product foto {{ foto.volgorde }}">

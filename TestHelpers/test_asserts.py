@@ -88,7 +88,9 @@ class MyTestAsserts(TestCase):
                 long_msg.append(msg)
                 return msg, long_msg
 
-        content = str(resp.content)
+        # convert bytestring to a normal string
+        content = resp.content.decode('utf-8')
+
         content = self.remove_debug_toolbar(content)
         if len(content) < 50:
             msg = "very short content: %s" % content
@@ -312,21 +314,23 @@ class MyTestAsserts(TestCase):
             pos = html.find('</script>')
             script = html[:pos+9]
 
-            if settings.TEST_VALIDATE_JAVASCRIPT:   # pragma: no cover
-                issues = validate_javascript(script)
-                if len(issues):
-                    msg = 'Invalid script (template: %s):\n' % template_name
-                    for issue in issues:
-                        msg += "    %s\n" % issue
-                    # for
-                    self.fail(msg=msg)
+            if 'type="application/json"' not in script:
+                if settings.TEST_VALIDATE_JAVASCRIPT:   # pragma: no cover
+                    issues = validate_javascript(script)
+                    if len(issues):
+                        msg = 'Invalid script (template: %s):\n' % template_name
+                        for issue in issues:
+                            msg += "    %s\n" % issue
+                        # for
+                        self.fail(msg=msg)
 
-            if not settings.ENABLE_MINIFY:          # pragma: no branch
-                script = minify_scripts(script)
+                    if not settings.ENABLE_MINIFY:          # pragma: no branch
+                        # not already minified by dtl loader, so do now to remove comments
+                        script = minify_scripts(script)
 
-            pos = script.find('console.log')
-            if pos >= 0:                    # pragma: no cover
-                self.fail(msg='Detected console.log usage in script from template %s' % template_name)
+                    pos = script.find('console.log')
+                    if pos >= 0:                    # pragma: no cover
+                        self.fail(msg='Detected console.log usage in script from template %s' % template_name)
 
             pos = script.find('/*')
             if pos >= 0:                    # pragma: no cover
@@ -698,6 +702,7 @@ class MyTestAsserts(TestCase):
         html = self.remove_debug_toolbar(html)
 
         if not settings.ENABLE_MINIFY:          # pragma: no branch
+            # not already minified by dtl loader, so do now to remove comments
             html = minify_html(html)
 
         dtl = self.get_useful_template_name(resp)

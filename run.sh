@@ -10,6 +10,7 @@ SETTINGS_NORMAL="Site.settings"
 BG_DURATION=60   # minutes (60 is max voor de meeste commando's)
 
 export PYTHONDONTWRITEBYTECODE=1
+export DJANGO_RUNSERVER_HIDE_WARNING=true
 
 # check the port is free
 ss -l | grep -q 8000
@@ -41,11 +42,10 @@ fi
 
 echo "[INFO] Refreshing static files"
 rm -rf "$STATIC_DIR"*     # keeps top directory
-COLLECT=$(./manage.py collectstatic --link)
+./manage.py collectstatic --link -v0
 RES=$?
 if [ $RES -ne 0 ]
 then
-    echo "$COLLECT"
     exit 1
 fi
 

@@ -14,8 +14,9 @@ from .mutaties import (bestel_mutatieverzoek_inschrijven_wedstrijd, bestel_mutat
                        bestel_mutatieverzoek_verwijder_regel_uit_mandje, bestel_mutatieverzoek_maak_bestellingen,
                        bestel_mutatieverzoek_afmelden_wedstrijd, bestel_mutatieverzoek_afmelden_evenement,
                        bestel_mutatieverzoek_afmelden_opleiding, bestel_mutatieverzoek_betaling_afgerond,
-                       bestel_mutatieverzoek_annuleer, bestel_mutatieverzoek_transport, bestel_betaling_is_gestart,
-                       bestel_overboeking_ontvangen)
+                       bestel_mutatieverzoek_annuleer, bestel_mutatieverzoek_transport,
+                       bestel_mutatieverzoek_wedstrijdinschrijving_aanpassen,
+                       bestel_betaling_is_gestart, bestel_overboeking_ontvangen)
 
 __all__ = ['stuur_email_webwinkel_backoffice',
            'stuur_email_naar_koper_bestelling_details', 'stuur_email_naar_koper_betaalbevestiging',
@@ -27,7 +28,8 @@ __all__ = ['stuur_email_webwinkel_backoffice',
            'bestel_mutatieverzoek_verwijder_regel_uit_mandje', 'bestel_mutatieverzoek_maak_bestellingen',
            'bestel_mutatieverzoek_afmelden_wedstrijd', 'bestel_mutatieverzoek_afmelden_evenement',
            'bestel_mutatieverzoek_afmelden_opleiding', 'bestel_mutatieverzoek_betaling_afgerond',
-           'bestel_mutatieverzoek_annuleer', 'bestel_mutatieverzoek_transport', 'bestel_betaling_is_gestart',
-           'bestel_overboeking_ontvangen']
+           'bestel_mutatieverzoek_annuleer', 'bestel_mutatieverzoek_transport',
+           'bestel_mutatieverzoek_wedstrijdinschrijving_aanpassen',
+           'bestel_betaling_is_gestart', 'bestel_overboeking_ontvangen']
 
 # end of file

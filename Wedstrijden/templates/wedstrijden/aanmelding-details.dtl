@@ -23,59 +23,62 @@
             <table class="sv-kader">
                 <tr>
                     <th>Reserveringsnummer</th>
-                    <td>{{ inschrijving.reserveringsnummer }}</td>
+                    <td colspan="2">{{ inschrijving.reserveringsnummer }}</td>
                 </tr>
                 <tr>
                     <th>Sporter</th>
-                    <td>{{ sporter.lid_nr_en_volledige_naam }}<br>{{ inschrijving.sporterboog.boogtype.beschrijving }}; {{ voorkeuren.wedstrijdgeslacht_str }}</td>
+                    <td colspan="2">{{ sporter.lid_nr_en_volledige_naam }}</td>
                 </tr>
                 <tr>
                     <th>Van vereniging</th>
-                    <td>{% if ver %}{{ ver.ver_nr_en_naam }}<br>uit {{ ver.plaats }} (regio {{ ver.regio }}; {{ ver.regio.rayon }}){% else %}<i>Onbekend</i>{% endif %}</td>
+                    <td colspan="2">{% if ver %}{{ ver.ver_nr_en_naam }}<br>uit {{ ver.plaats }} (regio {{ ver.regio }}; {{ ver.regio.rayon }}){% else %}<i>Onbekend</i>{% endif %}</td>
                 </tr>
 
                 {% if sporter.para_classificatie %}
                     <tr>
                         <th>Para classificatie</th>
-                        <td>{{ sporter.para_classificatie }}</td>
+                        <td colspan="2">{{ sporter.para_classificatie }}</td>
                     </tr>
                 {% endif %}
 
                 {% if voorkeuren.para_voorwerpen or voorkeuren.opmerking_para_sporter %}
                     <tr>
                         <th>Para notities</th>
-                        <td>{% if voorkeuren.para_voorwerpen %}Sporter laat voorwerpen op de schietlijn staan<br>{% endif %}{{ voorkeuren.opmerking_para_sporter }}</td>
+                        <td colspan="2">{% if voorkeuren.para_voorwerpen %}Sporter laat voorwerpen op de schietlijn staan<br>{% endif %}{{ voorkeuren.opmerking_para_sporter }}</td>
                     </tr>
                 {% endif %}
 
                 {% if toon_contactgegevens %}
                     <tr>
                         <th>E-mail sporter</th>
-                        <td><code>{{ sporter.email }}</code></td>
+                        <td colspan="2"><code>{{ sporter.email }}</code></td>
                     </tr>
                 {% endif %}
 
                 <tr>
                     <th>Wedstrijd</th>
-                    <td>{{ inschrijving.wedstrijd.titel }}<br>bij {{ inschrijving.wedstrijd.organiserende_vereniging }}</td>
+                    <td colspan="2">{{ inschrijving.wedstrijd.titel }}<br>bij {{ inschrijving.wedstrijd.organiserende_vereniging }}</td>
                 </tr>
                 <tr>
                     <th>Sessie</th>
-                    <td>{% if inschrijving.status == 'A' %}<del>{% endif %}{{ inschrijving.sessie.beschrijving }}<br>op {{ inschrijving.sessie.datum }} om {{ inschrijving.sessie.tijd_begin }}{% if inschrijving.status == 'A' %}</del>{% endif %}</td>
+                    <td colspan="2">{% if inschrijving.status == 'A' %}<del>{% endif %}{{ inschrijving.sessie.beschrijving }}<br>op {{ inschrijving.sessie.datum }} om {{ inschrijving.sessie.tijd_begin }}{% if inschrijving.status == 'A' %}</del>{% endif %}</td>
                 </tr>
                 <tr>
                     <th>Wedstrijdklasse</th>
                     <td>{% if inschrijving.status == 'A' %}<del>{% endif %}({{ inschrijving.wedstrijdklasse.afkorting }}) {{ inschrijving.wedstrijdklasse.beschrijving }}{% if inschrijving.status == 'A' %}</del>{% endif %}</td>
+                    <td class="right-align">
+                        <a class="btn-sv-rood" href="{{ inschrijving.url_aanpassen }}" style="margin-right:10px">Aanpassen</a>
+                    </td>
                 </tr>
                 <tr>
                     <th>Ingeschreven</th>
-                    <td>op {{ inschrijving.wanneer }}<br>door {{ inschrijving.koper }}</td>
+                    <td colspan="2">op {{ inschrijving.wanneer }}<br>door {{ inschrijving.koper }}</td>
                 </tr>
 
                 {% if inschrijving.wedstrijd.eis_kwalificatie_scores %}
                     <tr>
                         <th>Kwalificatiescores</th>
-                        <td>
+                        <td colspan="2">
                             <table>
                                 <thead>
                                     <tr>
@@ -100,7 +103,7 @@
 
                 <tr>
                     <th>Status</th>
-                    <td>{% if inschrijving.status == 'R' %}
+                    <td colspan="2">{% if inschrijving.status == 'R' %}
                             <span>In mandje</span><span class="grey-text"> | Besteld | Definitief | Afgemeld | Verwijderd</span>
                         {% elif inschrijving.status == 'B' %}
                             <span class="grey-text">In mandje | </span><span>Besteld</span><span class="grey-text"> | Definitief | Afgemeld | Verwijderd</span>
@@ -118,39 +121,39 @@
                 {% if inschrijving.bestelnummer_str %}
                     <tr>
                         <th>Bestelnummer</th>
-                        <td>{{ inschrijving.bestelnummer_str }}</td>
+                        <td colspan="2">{{ inschrijving.bestelnummer_str }}</td>
                     </tr>
                 {% endif %}
                 <tr>
                     <th>Prijs</th>
-                    <td>{% if inschrijving.bedrag_euro_str %}{{ inschrijving.bedrag_euro_str }}{% else %}<i>Geen</i> (handmatige inschrijving){% endif %}</td>
+                    <td colspan="2">{% if inschrijving.bedrag_euro_str %}{{ inschrijving.bedrag_euro_str }}{% else %}<i>Geen</i> (handmatige inschrijving){% endif %}</td>
                     <!-- TODO: korting_euro -->
                 </tr>
                 <tr>
                     <th>Korting</th>
-                    <td>{% if inschrijving.korting_str %}{{ inschrijving.korting_str }}{% else %}<i>Geen</i>{% endif %}</td>
+                    <td colspan="2">{% if inschrijving.korting_str %}{{ inschrijving.korting_str }}{% else %}<i>Geen</i>{% endif %}</td>
                 </tr>
                 <tr>
                     <th>Inschrijfgeld ontvangen</th>
-                    <td>&euro;&nbsp;{{ inschrijving.ontvangen_euro }}</td>
+                    <td colspan="2">&euro;&nbsp;{{ inschrijving.ontvangen_euro }}</td>
                 </tr>
 
                 {% if inschrijving.retour_euro %}
                     <tr>
                         <th>Inschrijfgeld retour</th>
-                        <td>&euro;&nbsp;{{ inschrijving.retour_euro }}</td>
+                        <td colspan="2">&euro;&nbsp;{{ inschrijving.retour_euro }}</td>
                     </tr>
                 {% endif %}
 
                 <tr>
                     <th>Logboekje</th>
-                    <td>{{ inschrijving.log|linebreaksbr }}</td>
+                    <td colspan="2">{{ inschrijving.log|linebreaksbr }}</td>
                 </tr>
 
                 {% if inschrijving.url_afmelden %}
                     <tr>
                         <th>Afmelden</th>
-                        <td>
+                        <td colspan="3">
                             <a class="btn-sv-rood modal-trigger" href="#bevestig_afmelden_{{ inschrijving.pk }}">
                                 <i class="notranslate material-icons-round">delete</i></a>
                         </td>

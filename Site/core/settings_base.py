@@ -58,10 +58,11 @@ from Site.settings_local import *       # noqa
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 PROJ_DIR = os.path.dirname(os.path.abspath(__file__))
 BASE_DIR = os.path.dirname(PROJ_DIR)
+APPS_DIR = os.path.dirname(BASE_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2025-04-28'
+SITE_VERSIE = '2025-05-13'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -73,11 +74,11 @@ INSTALLED_APPS = [
     'Betaal.apps.BetaalConfig',
     'Bondspas.apps.BondspasConfig',
     'Competitie.apps.CompetitieConfig',
+    'CompBeheer.apps.CompBeheerConfig',
     'CompInschrijven.apps.CompInschrijvenConfig',
     'CompLaagBond.apps.CompLaagBondConfig',
     'CompLaagRegio.apps.CompLaagRegioConfig',
     'CompLaagRayon.apps.CompLaagRayonConfig',
-    'CompBeheer.apps.CompBeheerConfig',
     'CompScores.apps.CompScoresConfig',
     'CompUitslagen.apps.CompUitslagenConfig',
     'Evenement.apps.EvenementConfig',
@@ -108,7 +109,7 @@ INSTALLED_APPS = [
     'Webwinkel.apps.WebwinkelConfig',
     'Wedstrijden.apps.WedstrijdenConfig',
     'WedstrijdInschrijven.apps.WedstrijdInschrijvenConfig',
-    'django.contrib.staticfiles',   # gather static files from modules helper
+    'django.contrib.staticfiles',   # gather static files from modules helper + serve static files in dev
     'django.contrib.sessions',      # support for database-backed sessions; needed for logged-in user
     'django.contrib.auth',          # authenticatie framework
     'django.contrib.contenttypes',  # permission association to models
@@ -231,14 +232,14 @@ ROOT_URLCONF = 'Site.core.urls'
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
-STATIC_URL = '/static/'             # url
-STATIC_ROOT = 'Site/.static'    # relative to project top-dir
+STATIC_URL = '/static/'             # url where the server is serving the files
+STATIC_ROOT = 'Site/.static'        # relative to project top-dir
 STATICFILES_DIRS = [
     ("webwinkel_fotos", WEBWINKEL_FOTOS_DIR),       # noqa
 ]
 STATICFILES_FINDER = [
-    'django.contrib.staticfiles.finders.FileSystemFinder',
-    'django.contrib.staticfiles.finders.AppDirectoriesFinder'
+    'django.contrib.staticfiles.finders.FileSystemFinder',      # zoekt in STATICFILES_DIRS
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',  # zoekt in App/static/
 ]
 
 

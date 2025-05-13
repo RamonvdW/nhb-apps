@@ -110,7 +110,7 @@ def get_sporter_gekozen_bogen(sporter: Sporter, alle_bogen) -> (dict[str: Sporte
     return boogafk2sporterboog, boog_afkorting_wedstrijd
 
 
-def get_sporter_voorkeuren(sporter: Sporter, mag_database_wijzigen=False):
+def get_sporter_voorkeuren(sporter: Sporter, mag_database_wijzigen=False) -> SporterVoorkeuren:
     """ zoek het SporterVoorkeuren object erbij, of maak een nieuwe aan
     """
 

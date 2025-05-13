@@ -8,9 +8,9 @@ asgiref==3.8.1
     # via django
 cachetools==5.5.2
     # via google-auth
-certifi==2025.1.31
+certifi==2025.4.26
     # via requests
-charset-normalizer==3.4.1
+charset-normalizer==3.4.2
     # via requests
 django==4.2.20
     # via
@@ -23,9 +23,9 @@ google-api-core==2.24.2
     #   google-api-python-client
     #   google-geo-type
     #   google-maps-routing
-google-api-python-client==2.168.0
+google-api-python-client==2.169.0
     # via -r requirements.in
-google-auth==2.39.0
+google-auth==2.40.1
     # via
     #   -r requirements.in
     #   google-api-core
@@ -80,7 +80,7 @@ protobuf==6.30.2
     #   googleapis-common-protos
     #   grpcio-status
     #   proto-plus
-psycopg==3.2.6
+psycopg==3.2.7
     # via -r requirements.in
 pyasn1==0.6.1
     # via
@@ -94,7 +94,7 @@ pyparsing==3.2.3
     # via httplib2
 pypdf==5.4.0
     # via -r requirements.in
-qrcode==8.1
+qrcode==8.2
     # via -r requirements.in
 requests==2.32.3
     # via

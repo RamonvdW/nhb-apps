@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -176,7 +176,6 @@ class Command(BaseCommand):
                 val = row[6][:20]
                 if val and val not in settings.RECORDS_TOEGESTANE_PARA_KLASSEN:
                     errors.append('Fout in para klasse: %s is niet bekend' % repr(val))
-                    val = None
                 else:
                     record.para_klasse = val
                 if curr_record:
@@ -459,7 +458,8 @@ class Command(BaseCommand):
 
                 if prev_obj.max_score != obj.max_score:
                     self.stderr.write(
-                        '[ERROR] Max score (afgeleide van aantal pijlen) is niet consistent in soort %s tussen records %s-%s en %s-%s (%s != %s)' % (
+                        '[ERROR] Max score (afgeleide van aantal pijlen) is niet consistent '
+                        'in soort %s tussen records %s-%s en %s-%s (%s != %s)' % (
                             repr(srec), disc, prev_obj.volg_nr, disc, obj.volg_nr, prev_obj.max_score, obj.max_score))
                     self.count_andere_errors += 1
 
@@ -473,21 +473,21 @@ class Command(BaseCommand):
             naam = sheet['range']       # 'Tabblad naam'!A1:AF1006
             if 'Data individueel outdoor' in naam:
                 blad = 'OD'
-                COLS = ['Index', 'Geslacht', 'Leeftijd', 'Materiaalklasse', 'Discipline', 'Soort_record', 'Para klasse',
+                hdrs = ['Index', 'Geslacht', 'Leeftijd', 'Materiaalklasse', 'Discipline', 'Soort_record', 'Para klasse',
                         'Verbeterbaar', 'Pijlen', 'Bondsnummer', 'Naam', 'Datum', 'Plaats', 'Land', 'Score', 'X-count',
                         'Ook ER', 'Ook WR', 'Notities']
             elif 'Data individueel indoor' in naam:
                 blad = '18'
-                COLS = ['Index', 'Geslacht', 'Leeftijd', 'Materiaalklasse', 'Discipline', 'Soort_record', 'Para klasse',
+                hdrs = ['Index', 'Geslacht', 'Leeftijd', 'Materiaalklasse', 'Discipline', 'Soort_record', 'Para klasse',
                         'Verbeterbaar', 'Pijlen', 'Bondsnummer', 'Naam', 'Datum', 'Plaats', 'Land', 'Score', 'X-count',
                         'Ook ER', 'Ook WR', 'Notities']
             elif 'Data individueel 25m1pijl' in naam:
                 blad = '25'
-                COLS = ['Index', 'Geslacht', 'Leeftijd', 'Materiaalklasse', 'Discipline', 'Soort_record', 'Para klasse',
+                hdrs = ['Index', 'Geslacht', 'Leeftijd', 'Materiaalklasse', 'Discipline', 'Soort_record', 'Para klasse',
                         'Verbeterbaar', 'Pijlen', 'Bondsnummer', 'Naam', 'Datum', 'Plaats', 'Land', 'Score', 'Notities']
             elif 'Data team' in naam:
                 blad = 'team'
-                COLS = ['Geslacht', 'Leeftijd', 'Materiaalklasse', 'Discipline', 'Soort_record',
+                hdrs = ['Geslacht', 'Leeftijd', 'Materiaalklasse', 'Discipline', 'Soort_record',
                         'Verbeterbaar', 'Pijlen', 'Bondsnummer', 'Naam', 'Datum', 'Plaats', 'Land', 'Score', 'Notities']
             else:
                 self.stderr.write('[ERROR] Niet ondersteunde tabblad naam: %s' % naam)
@@ -495,15 +495,15 @@ class Command(BaseCommand):
 
             # check the headers
             cols = sheet['values'][0]
-            drop = 0
             if cols[-1] == 'Tekstversie datum':
                 cols = cols[:-1]
             if cols[-1] == '':
                 cols = cols[:-1]
-            if cols != COLS:
+            if cols != hdrs:
                 self.stderr.write('[ERROR] Kolom headers kloppen niet voor range %s' % naam)
-                self.stderr.write('        Verwacht: %s' % repr(COLS))
+                self.stderr.write('        Verwacht: %s' % repr(hdrs))
                 self.stderr.write('        Aanwezig: %s' % repr(cols))
+                # TODO: hier een mail over sturen naar bondsbureau
             else:
                 if blad in ('OD', '18', '25'):
                     self._import_indiv(sheet, blad)
@@ -514,7 +514,8 @@ class Command(BaseCommand):
         # for
 
         # rapporteer de samenvatting en schrijf deze ook in het logboek
-        samenvatting = "Samenvatting: %s records; %s ongewijzigd; %s overgeslagen i.v.m. fouten; %s verwijderd; %s wijzigingen; %s toegevoegd; %s waarschuwingen, %s fouten" % (
+        samenvatting = "Samenvatting: %s records; %s ongewijzigd; %s overgeslagen i.v.m. fouten; %s verwijderd;"\
+                       "%s wijzigingen; %s toegevoegd; %s waarschuwingen, %s fouten" % (
                            self.count_read,
                            self.count_ongewijzigd,
                            self.count_errors_skipped,

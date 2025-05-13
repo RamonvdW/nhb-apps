@@ -499,6 +499,7 @@ class UitslagenRayonTeamsView(TemplateView):
                                        'feitelijke_leden')
                      .order_by('team_klasse__volgorde',
                                'result_rank',
+                               'result_volgorde',            # bij gelijke rank (ook 2x blanco) deze volgorde aanhouden
                                '-aanvangsgemiddelde')):      # sterkste team eerst
 
             if team.team_klasse != prev_klasse:

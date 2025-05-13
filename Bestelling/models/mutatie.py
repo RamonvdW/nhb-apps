@@ -11,8 +11,9 @@ from Bestelling.definities import BESTELLING_MUTATIE_TO_STR, BESTELLING_TRANSPOR
 from Bestelling.models import Bestelling, BestellingRegel
 from Evenement.models import EvenementInschrijving
 from Opleiding.models import OpleidingInschrijving
+from Sporter.models import SporterBoog
 from Webwinkel.models import WebwinkelKeuze
-from Wedstrijden.models import WedstrijdInschrijving
+from Wedstrijden.models import WedstrijdInschrijving, WedstrijdSessie, KalenderWedstrijdklasse
 from decimal import Decimal
 
 
@@ -81,6 +82,11 @@ class BestellingMutatie(models.Model):
 
     # nieuwe transport keuze
     transport = models.CharField(max_length=1, default=BESTELLING_TRANSPORT_NVT, choices=BESTELLING_TRANSPORT_OPTIES)
+
+    # wedstrijd aanpassing
+    sessie = models.ForeignKey(WedstrijdSessie, on_delete=models.SET_NULL, null=True, blank=True)
+    sporterboog = models.ForeignKey(SporterBoog, on_delete=models.SET_NULL, null=True, blank=True)
+    wedstrijdklasse = models.ForeignKey(KalenderWedstrijdklasse, on_delete=models.SET_NULL, null=True, blank=True)
 
     class Meta:
         verbose_name = "Bestelling mutatie"

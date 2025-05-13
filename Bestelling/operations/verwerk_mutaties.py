@@ -13,7 +13,7 @@ from Bestelling.definities import (BESTELLING_MUTATIE_WEDSTRIJD_INSCHRIJVEN, BES
                                    BESTELLING_MUTATIE_OVERBOEKING_ONTVANGEN, BESTELLING_MUTATIE_ANNULEER,
                                    BESTELLING_MUTATIE_TRANSPORT, BESTELLING_MUTATIE_EVENEMENT_INSCHRIJVEN,
                                    BESTELLING_MUTATIE_EVENEMENT_AFMELDEN, BESTELLING_MUTATIE_OPLEIDING_INSCHRIJVEN,
-                                   BESTELLING_MUTATIE_OPLEIDING_AFMELDEN,
+                                   BESTELLING_MUTATIE_OPLEIDING_AFMELDEN, BESTELLING_MUTATIE_WEDSTRIJD_AANPASSEN,
                                    BESTELLING_TRANSPORT_NVT, BESTELLING_TRANSPORT_VERZEND,
                                    BESTELLING_REGEL_CODE_VERZENDKOSTEN)
 from Bestelling.definities import (BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_BETALING_ACTIEF,
@@ -569,6 +569,17 @@ class VerwerkBestelMutaties:
         self.stdout.write('[INFO] Verwerk mutatie %s: afmelden voor wedstrijd' % mutatie.pk)
         wedstrijd_bestel_plugin.afmelden(mutatie.wedstrijd_inschrijving)
 
+    def _verwerk_mutatie_wedstrijd_aanpassen(self, mutatie: BestellingMutatie):
+        """ serialisatie van verzoek tot aanpassen voor een wedstrijd, ingediend door de HWL/MWZ
+        """
+        self.stdout.write('[INFO] Verwerk mutatie %s: wedstrijdinschrijving aanpassen' % mutatie.pk)
+        wedstrijd_bestel_plugin.aanpassen(
+                                    mutatie.wedstrijd_inschrijving,
+                                    mutatie.account.get_account_full_name(),
+                                    sessie=mutatie.sessie,
+                                    klasse=mutatie.wedstrijdklasse,
+                                    sporterboog=mutatie.sporterboog)
+
     def _verwerk_mutatie_evenement_afmelden(self, mutatie: BestellingMutatie):
         """ serialisatie van verzoek tot afmelden voor een wedstrijd, ingediend door de HWL
             product ligt niet meer in een mandje
@@ -797,6 +808,7 @@ class VerwerkBestelMutaties:
         BESTELLING_MUTATIE_WEDSTRIJD_AFMELDEN: _verwerk_mutatie_wedstrijd_afmelden,
         BESTELLING_MUTATIE_EVENEMENT_AFMELDEN: _verwerk_mutatie_evenement_afmelden,
         BESTELLING_MUTATIE_OPLEIDING_AFMELDEN: _verwerk_mutatie_opleiding_afmelden,
+        BESTELLING_MUTATIE_WEDSTRIJD_AANPASSEN: _verwerk_mutatie_wedstrijd_aanpassen,
     }
 
     def verwerk(self, mutatie: BestellingMutatie):
