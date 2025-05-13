@@ -39,5 +39,9 @@ class ZoekBestellingForm(forms.Form):
                         label='Toon gratis producten',
                         required=False)     # allow absence
 
+    def clean(self):
+        super().clean()
+        if "zoekterm" in self._errors:
+            del self._errors["zoekterm"]
 
 # end of file

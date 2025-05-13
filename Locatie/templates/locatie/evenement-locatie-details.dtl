@@ -134,7 +134,7 @@
                                     {% if url_verwijder %}
                                         <a class="btn-sv-blauw modal-trigger" href="#bevestig_verwijder_locatie">Verwijder deze locatie</a>
                                     {% else %}
-                                        <a class="btn-sv-blauw" disabled href="#">Verwijder deze locatie</a>
+                                        <button class="btn-sv-blauw" disabled>Verwijder deze locatie</button>
                                     {% endif %}
 
                                 </td>

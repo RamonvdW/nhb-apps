@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -19,5 +19,11 @@ class ZoekAccountForm(forms.Form):
                     required=False,
                     widget=forms.TextInput(attrs={'autofocus': True}))
 
+    def clean(self):
+        super().clean()
+
+        # ignore errors
+        if 'zoekterm' in self._errors:
+            del self._errors['zoekterm']
 
 # end of file

@@ -207,7 +207,7 @@ class TestOverigActiviteit(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('overig/activiteit.dtl', 'plein/site_layout.dtl'))
         urls = self.extract_all_urls(resp, skip_menu=True)
-        self.assertIn(self.url_bondspas % '100004', urls)
+        self.assertNotIn(self.url_bondspas % '100004', urls)
 
         # gast-account (geen bondspas)
         with self.assert_max_queries(20):

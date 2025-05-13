@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -499,6 +499,7 @@ class UitslagenRayonTeamsView(TemplateView):
                                        'feitelijke_leden')
                      .order_by('team_klasse__volgorde',
                                'result_rank',
+                               'result_volgorde',            # bij gelijke rank (ook 2x blanco) deze volgorde aanhouden
                                '-aanvangsgemiddelde')):      # sterkste team eerst
 
             if team.team_klasse != prev_klasse:

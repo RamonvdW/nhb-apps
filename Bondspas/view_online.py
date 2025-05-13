@@ -45,8 +45,12 @@ class ToonBondspasView(UserPassesTestMixin, View):
 
         account = get_account(request)
         sporter = get_sporter(account)
+
         if sporter.is_gast:
             raise Http404('Geen bondspas voor gast-accounts')
+
+        if not sporter.is_actief_lid:
+            raise Http404('Geen bondspas voor inactieve leden')
 
         context['kruimels'] = (
             (reverse('Sporter:profiel'), 'Mijn pagina'),
@@ -77,8 +81,12 @@ class DynamicBondspasOphalenView(UserPassesTestMixin, View):
 
         account = get_account(request)
         sporter = get_sporter(account)
+
         if sporter.is_gast:
             raise Http404('Geen bondspas voor gast-accounts')
+
+        if not sporter.is_actief_lid:
+            raise Http404('Geen bondspas voor inactieve leden')
 
         jaar_pas, jaar_wedstrijden = bepaal_jaar_bondspas_en_wedstrijden()
         regels = maak_bondspas_regels(sporter, jaar_pas, jaar_wedstrijden)
@@ -108,11 +116,14 @@ class DynamicBondspasDownloadView(UserPassesTestMixin, View):
 
             Dit is een POST by-design, om caching te voorkomen.
         """
-
         account = get_account(request)
         sporter = get_sporter(account)
+
         if sporter.is_gast:
             raise Http404('Geen bondspas voor gast-accounts')
+
+        if not sporter.is_actief_lid:
+            raise Http404('Geen bondspas voor inactieve leden')
 
         jaar_pas, jaar_wedstrijden = bepaal_jaar_bondspas_en_wedstrijden()
         regels = maak_bondspas_regels(sporter, jaar_pas, jaar_wedstrijden)
