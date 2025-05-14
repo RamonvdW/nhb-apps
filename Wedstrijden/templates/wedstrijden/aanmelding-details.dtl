@@ -48,12 +48,10 @@
                     </tr>
                 {% endif %}
 
-                {% if toon_contactgegevens %}
-                    <tr>
-                        <th>E-mail sporter</th>
-                        <td colspan="2"><code>{{ sporter.email }}</code></td>
-                    </tr>
-                {% endif %}
+                <tr>
+                    <th>E-mail sporter</th>
+                    <td colspan="2"><code>{{ sporter.email }}</code></td>
+                </tr>
 
                 <tr>
                     <th>Wedstrijd</th>

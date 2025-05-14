@@ -7,20 +7,18 @@
 from django.conf import settings
 from django.http import HttpResponseRedirect, Http404
 from django.urls import reverse
-from django.utils import timezone
 from django.db.models import ObjectDoesNotExist
 from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
 from BasisTypen.definities import GESLACHT2STR
-from BasisTypen.models import BoogType
 from Bestelling.operations import (bestel_mutatieverzoek_afmelden_wedstrijd,
                                    bestel_mutatieverzoek_verwijder_regel_uit_mandje,
                                    bestel_mutatieverzoek_wedstrijdinschrijving_aanpassen)
 from Betaal.format import format_bedrag_euro
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
-from Sporter.models import get_sporter, SporterBoog, Sporter
+from Sporter.models import SporterBoog
 from Sporter.operations import get_sporter_voorkeuren
 from Wedstrijden.definities import (WEDSTRIJD_INSCHRIJVING_STATUS_TO_SHORT_STR,
                                     WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_MANDJE,
@@ -78,26 +76,16 @@ class WedstrijdAanmeldingDetailsView(UserPassesTestMixin, TemplateView):
                                             'korting')
                             .get(pk=inschrijving_pk))
         except WedstrijdInschrijving.DoesNotExist:
-            raise Http404('Aanmelding niet gevonden')
+            raise Http404('Inschrijving niet gevonden')
 
         if self.rol_nu in (Rol.ROL_SEC, Rol.ROL_HWL):
             # alleen van de eigen vereniging laten zien
             if inschrijving.wedstrijd.organiserende_vereniging != self.functie_nu.vereniging:
                 raise Http404('Verkeerde vereniging')
 
-        if self.rol_nu == Rol.ROL_SPORTER:
-            # alleen eigen inschrijvingen laten zien
-            account = get_account(self.request)
-            sporter = get_sporter(account)
-            if inschrijving.sporterboog.sporter.lid_nr != sporter.lid_nr:
-                raise Http404('Niet jouw inschrijving')
-
         context['inschrijving'] = inschrijving
         context['sporter'] = sporter = inschrijving.sporterboog.sporter
         context['ver'] = sporter.bij_vereniging
-
-        if self.rol_nu in (Rol.ROL_MWZ, Rol.ROL_HWL):
-            context['toon_contactgegevens'] = True
 
         context['voorkeuren'] = voorkeuren = get_sporter_voorkeuren(sporter)
         voorkeuren.wedstrijdgeslacht_str = GESLACHT2STR[voorkeuren.wedstrijd_geslacht]
@@ -188,12 +176,16 @@ class AanpassenView(UserPassesTestMixin, TemplateView):
                                             'wedstrijdklasse',
                                             'sporterboog',
                                             'sporterboog__sporter',
-                                            'korting')
+                                            'sporterboog__sporter__bij_vereniging',
+                                            'sporterboog__sporter__bij_vereniging__regio',
+                                            'sporterboog__sporter__bij_vereniging__regio__rayon',
+                                            'korting',
+                                            'bestelling')
                             .filter(status__in=(WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF,
                                                 WEDSTRIJD_INSCHRIJVING_STATUS_BESTELD))
                             .get(pk=inschrijving_pk))
         except WedstrijdInschrijving.DoesNotExist:
-            raise Http404('Aanmelding niet gevonden')
+            raise Http404('Inschrijving niet gevonden')
 
         if self.rol_nu == Rol.ROL_HWL:
             # alleen van de eigen vereniging laten aanpassen
@@ -212,7 +204,7 @@ class AanpassenView(UserPassesTestMixin, TemplateView):
 
         context['keuzes'] = keuzes = list()
 
-        for sporterboog in SporterBoog.objects.filter(sporter=sporter, voor_wedstrijd=True):
+        for sporterboog in SporterBoog.objects.filter(sporter=sporter, voor_wedstrijd=True).select_related('boogtype'):
 
             tups = get_sessies(inschrijving.wedstrijd, sporter, voorkeuren, sporterboog.boogtype.pk)
             sessies = tups[0]
@@ -288,7 +280,11 @@ class AanpassenView(UserPassesTestMixin, TemplateView):
                             .filter(status__in=(WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF,
                                                 WEDSTRIJD_INSCHRIJVING_STATUS_BESTELD))
                             .select_related('wedstrijd',
-                                            'sporterboog__sporter')
+                                            'wedstrijd__organiserende_vereniging',
+                                            'sporterboog__sporter',
+                                            'sporterboog__sporter__bij_vereniging',
+                                            'sporterboog__sporter__bij_vereniging__regio',
+                                            'sporterboog__sporter__bij_vereniging__regio__rayon')
                             .get(pk=inschrijving_pk))
         except (TypeError, ValueError, WedstrijdInschrijving.DoesNotExist):
             raise Http404('Inschrijving niet gevonden')
@@ -316,7 +312,8 @@ class AanpassenView(UserPassesTestMixin, TemplateView):
             klasse = sessie.wedstrijdklassen.get(pk=klasse_pk)
             sporterboog = (SporterBoog
                            .objects
-                           .select_related('sporter')
+                           .select_related('sporter',
+                                           'boogtype')
                            .filter(sporter=inschrijving.sporterboog.sporter)
                            .get(pk=sporterboog_pk))
         except ObjectDoesNotExist:
@@ -380,6 +377,5 @@ class AfmeldenView(UserPassesTestMixin, View):
         url = reverse('Wedstrijden:details-aanmelding', kwargs={'inschrijving_pk': inschrijving.pk})
 
         return HttpResponseRedirect(url)
-
 
 # end of file

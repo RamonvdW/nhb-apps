@@ -36,7 +36,7 @@ def get_inschrijving_mh_bestel_nr(inschrijving: WedstrijdInschrijving):
     if inschrijving.bestelling:
         regel = inschrijving.bestelling
         bestelling = regel.bestelling_set.first()
-        if bestelling:
+        if bestelling:      # pragma: no branch
             return bestelling.mh_bestel_nr()
 
     return ""
