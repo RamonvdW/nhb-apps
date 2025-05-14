@@ -93,15 +93,26 @@
                     <form action="{{ url }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
                         {% csrf_token %}
 
-                        {% if foutmelding %}
-                            <p class="sv-rood-text">Fout: {{ foutmelding }}</p>
-                            <p>&nbsp;</p>
+                        {% if form.errors %}
+                            <div class="center sv-rood-text" style="margin-bottom:20px">
+                                {% for error in form.non_field_errors %}
+                                    <span>Fout: {{ error|escape }}</span><br>
+                                {% endfor %}
+                            </div>
                         {% endif %}
-
 
                         <!-- form field -->
                         <div class="input-field">
-                            {{ form.login_naam.label_tag }}{{ form.login_naam }}
+                            {{ form.login_naam.label_tag }}
+                            {{ form.login_naam }}
+                        </div>
+
+                        <div class="input-field">
+                            {{ form.email.label_tag }}
+                            {{ form.email }}
+                            {% if form.email.errors %}
+                                <span id="id_email_error" class="sv-rood-text">{{ form.email.errors.0 }}</span><br>
+                            {% endif %}
                         </div>
 
                         <!-- manually constructed field -->
