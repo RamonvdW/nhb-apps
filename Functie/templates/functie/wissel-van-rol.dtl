@@ -113,7 +113,7 @@
                         {% endfor %}
                         </ul>
                         <p class="center">
-                            <button class="btn-sv-rood" onclick="wissel_naar_rol()">Activeer</button>
+                            <button class="btn-sv-rood" id="activeer_eigen" onclick="wissel_naar_rol()">Activeer</button>
                         </p>
                     </div>
                 </div>

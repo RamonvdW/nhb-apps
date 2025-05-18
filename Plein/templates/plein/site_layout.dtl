@@ -196,10 +196,6 @@
         <script src="{% static 'plein_js_min/materialize-mh_min.js' %}"></script>
         <script src="{% static 'plein_js_min/site_layout_min.js' %}"></script>
 
-        <script>
-            document.addEventListener("DOMContentLoaded", sitelayout_loaded);
-        </script>
-
     </body>
 </html>
 

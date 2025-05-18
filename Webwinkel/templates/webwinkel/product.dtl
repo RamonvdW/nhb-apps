@@ -31,7 +31,7 @@
             {% endcomment %}
 
             {% for foto in fotos %}
-                <img id="img_{{ foto.volgorde }}" class="sv-foto-groot" src="{{ foto.img_src }}" hidden loading="lazy" alt="product foto {{ foto.volgorde }}">
+                <img id="img_{{ foto.volgorde }}" class="sv-foto-groot" src="{{ foto.img_src }}" hidden loading="{% if foto.is_eerste %}eager{% else %}lazy{% endif %}" alt="product foto {{ foto.volgorde }}">
             {% endfor %}
 
             <!-- thumbnails onder de grote foto's -->

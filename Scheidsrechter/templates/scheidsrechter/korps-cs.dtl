@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2023 Ramon van der Winkel.
+                Copyright (c) 2023-2025 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -33,7 +33,7 @@
                 <thead>
                     <tr>        <!-- filter veld -->
                         <td colspan="2" class="table-filter">
-                            <input class="table-filter" oninput="myTableFilter(this, 'tabel1')" placeholder="Zoeken" autofocus/>
+                            <input class="table-filter" oninput="tabel_filter(this, 'tabel1')" placeholder="Zoeken" autofocus/>
                         </td>
                         <td colspan="4"></td>
                     </tr>
@@ -64,6 +64,8 @@
             </table>
         </div>
     </div>
+
+    <script src="{% static 'overig_js_min/tabel_filter_min.js' %}"></script>
 
     {% include 'feedback/sidebar.dtl' with op_pagina="scheidsrechter-korps-cs" %}
 

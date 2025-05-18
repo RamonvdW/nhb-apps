@@ -29,7 +29,7 @@
                         <tr>        <!-- filter veld -->
                             <td colspan="2"></td>
                             <td class="table-filter">
-                                <input class="table-filter" oninput="myTableFilter(this, 'tabel1')" placeholder="Zoeken"/>
+                                <input class="table-filter" oninput="tabel_filter(this, 'tabel1')" placeholder="Zoeken"/>
                             </td>
                             <td><!-- kolom voor knoppen --></td>
                         </tr>
@@ -81,7 +81,7 @@
                         <tr>        <!-- filter veld -->
                             <td colspan="2"></td>
                             <td class="table-filter">
-                                <input class="table-filter" oninput="myTableFilter(this, 'tabel2')" placeholder="Zoeken"/>
+                                <input class="table-filter" oninput="tabel_filter(this, 'tabel2')" placeholder="Zoeken"/>
                             </td>
                             <td><!-- kolom voor knoppen --></td>
                         </tr>
@@ -155,6 +155,8 @@
         </div>
 
     {% endif %}
+
+    <script src="{% static 'overig_js_min/tabel_filter_min.js' %}"></script>
 
     {% include 'feedback/sidebar.dtl' with op_pagina="evenement-overzicht-vereniging" %}
 

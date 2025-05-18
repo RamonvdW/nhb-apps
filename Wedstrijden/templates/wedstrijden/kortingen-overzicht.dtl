@@ -27,7 +27,7 @@
                     <tr>        <!-- filter veld -->
                         <td colspan="2"></td>
                         <td colspan="2" class="table-filter">
-                            <input class="table-filter" oninput="myTableFilter(this, 'tabel1')" placeholder="Zoeken"/>
+                            <input class="table-filter" oninput="tabel_filter(this, 'tabel1')" placeholder="Zoeken"/>
                         </td>
                         <td colspan="2"></td>
                     </tr>
@@ -113,6 +113,8 @@
             </div>
         </div>
     </div>
+
+    <script src="{% static 'overig_js_min/tabel_filter_min.js' %}"></script>
 
     {% include 'feedback/sidebar.dtl' with op_pagina="wedstrijden-kortingen-overzicht" %}
 

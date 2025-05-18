@@ -102,7 +102,7 @@
                     <thead>
                         <tr>        <!-- filter veld -->
                             <td class="table-filter" colspan="4">
-                                <input id="table1_zoeken_input" class="table-filter" autofocus oninput="myTableFilter(this, 'table1')" placeholder="Zoeken"/>
+                                <input id="table1_zoeken_input" class="table-filter" autofocus oninput="tabel_filter(this, 'table1')" placeholder="Zoeken"/>
                             </td>
                             <td{% if deelcomp.regio_organiseert_teamcompetitie %} colspan="2"{% endif %}></td>
                         </tr>
@@ -254,6 +254,8 @@
         });
 
     </script>
+
+    <script src="{% static 'overig_js_min/tabel_filter_min.js' %}"></script>
 
     {% include 'feedback/sidebar.dtl' with op_pagina="compscores-scores-invoeren" %}
 

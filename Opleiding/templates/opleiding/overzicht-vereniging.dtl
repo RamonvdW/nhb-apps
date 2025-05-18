@@ -27,7 +27,7 @@
                     <tr>        <!-- filter veld -->
                         <td colspan="2"></td>
                         <td class="table-filter">
-                            <input class="table-filter" oninput="myTableFilter(this, 'tabel1')" placeholder="Zoeken"/>
+                            <input class="table-filter" oninput="tabel_filter(this, 'tabel1')" placeholder="Zoeken"/>
                         </td>
                         <td><!-- kolom voor knoppen --></td>
                     </tr>
@@ -105,6 +105,8 @@
             {% include 'plein/card_icon.dtl' with title="Voorwaarden" text="De verkoopvoorwaarden voor opleidingen staan beschreven in een apart document." icon="article" extern_open=True url=url_voorwaarden %}
         </div>
     </div>
+
+    <script src="{% static 'overig_js_min/tabel_filter_min.js' %}"></script>
 
     {% include 'feedback/sidebar.dtl' with op_pagina="opleiding-overzicht-vereniging" %}
 

@@ -180,10 +180,10 @@ function toevoegen()
     } // for
 
     // table filter uitzetten zodat de nieuwe regel getoond kan worden
-    // maak zoekveld leeg; dit triggert myTableFilter()
+    // maak zoekveld leeg; dit triggert tabel_filter()
     const el_filter = document.getElementById(dataset.tableFilterInputId);
     el_filter.value = "";
-    myTableFilter(el_filter, 'table1');
+    tabel_filter(el_filter, 'table1');
 
     // voeg een regel(s) toe aan de tabel, op de juiste positie
     // doe dit door een kopie te maken
@@ -346,10 +346,10 @@ function deelnemers_ophalen_toevoegen(rsp)
     base_row.cells[2].removeAttribute("data-clean_text");
 
     // table filter uitzetten zodat de nieuwe regels getoond kunnen worden
-    // maak zoekveld leeg; dit triggert myTableFilter()
+    // maak zoekveld leeg; dit triggert tabel_filter()
     const el_filter = document.getElementById("table1_zoeken_input");
     el_filter.value = "";
-    myTableFilter(el_filter, 'table1');
+    tabel_filter(el_filter, 'table1');
 
     let deelnemers = rsp['deelnemers'];
     // sorteer deelnemers op invoeg-volgorde: bondsnummer

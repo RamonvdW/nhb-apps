@@ -68,12 +68,12 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
 
         context['nieuwe_accounts'] = (Account
                                       .objects
-                                      .all()
                                       .order_by('-date_joined')[:50])
 
-        nieuwste = context['nieuwe_accounts'][0]
+        nieuwste = context['nieuwe_accounts'][0]        # at least the currently in use account is present
         jaar = nieuwste.date_joined.year
         maand = nieuwste.date_joined.month
+
         deze_maand = make_aware(datetime.datetime(year=jaar, month=maand, day=1))
 
         context['deze_maand_count'] = (Account
@@ -98,6 +98,7 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
         context['recente_activiteit'] = (Account
                                          .objects
                                          .filter(last_login__isnull=False)
+                                         .filter(username='x')
                                          .order_by('-last_login')[:50])
 
         context['inlog_pogingen'] = (Account

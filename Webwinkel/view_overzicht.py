@@ -188,9 +188,12 @@ class ProductView(TemplateView):
             sel_opts.append((0, 'Sorry, niet beschikbaar'))
 
         context['fotos'] = fotos = product.fotos.order_by('volgorde')
+        is_eerste = True
         for foto in fotos:
             foto.img_src = static_safe("webwinkel_fotos/" + foto.locatie)
             foto.thumb_src = static_safe("webwinkel_fotos/" + foto.locatie_thumb)
+            foto.is_eerste = is_eerste
+            is_eerste = False
             context['heeft_fotos'] = True
         # for
 

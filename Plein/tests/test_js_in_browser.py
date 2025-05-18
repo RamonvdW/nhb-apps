@@ -78,45 +78,45 @@ class TestBrowserPlein(LiveServerTestCase):
         self.regio.delete()
         self.rayon.delete()
 
+    def _login(self):
+        # log in
+        self.driver.get(self.url_login)
+        bh.find_element_by_id(self.driver, 'id_login_naam').send_keys(self.account.username)
+        bh.find_element_by_id(self.driver, 'id_wachtwoord').send_keys(TEST_WACHTWOORD)
+        login_vink = bh.find_element_by_name(self.driver, 'aangemeld_blijven')
+        self.assertTrue(login_vink.is_selected())
+        bh.find_element_by_id(self.driver, 'submit_knop').click()
+        bh.wait_until_url_not(self.driver, self.url_login)
+
     def setUp(self):
         self._database_vullen()
+        self.driver = bh.get_driver(show_browser=False)
 
     def tearDown(self):
+        self.driver.close()      # important, otherwise the server port keeps occupied
         self._database_opschonen()
 
     def test_plein(self):
-        driver = bh.get_driver()    # show_browser=True
-
-        driver.get(self.url_plein)
-        knop = bh.find_element_type_with_text(driver, 'a', 'Inloggen')
+        self.driver.get(self.url_plein)
+        knop = bh.find_element_type_with_text(self.driver, 'a', 'Inloggen')
         self.assertIsNotNone(knop)
-        bh.get_console_log(driver)
+        bh.get_console_log(self.driver)
 
-        # log in
-        driver.get(self.url_login)
-        bh.find_element_by_id(driver, 'id_login_naam').send_keys(self.account.username)
-        bh.find_element_by_id(driver, 'id_wachtwoord').send_keys(TEST_WACHTWOORD)
-        login_vink = bh.find_element_by_name(driver, 'aangemeld_blijven')
-        self.assertTrue(login_vink.is_selected())
-        bh.find_element_by_id(driver, 'submit_knop').click()
-        bh.wait_until_url_not(driver, self.url_login)
+        self._login()
 
         # controleer dat we ingelogd zijn
-        driver.get(self.url_plein)
-        menu = bh.find_element_type_with_text(driver, 'a', 'Wissel van rol')
+        self.driver.get(self.url_plein)
+        menu = bh.find_element_type_with_text(self.driver, 'a', 'Wissel van rol')
         self.assertIsNotNone(menu)
-        menu = bh.find_element_type_with_text(driver, 'a', 'Mijn pagina')
+        menu = bh.find_element_type_with_text(self.driver, 'a', 'Mijn pagina')
         self.assertIsNotNone(menu)
-        menu = bh.find_element_type_with_text(driver, 'a', 'Toon bondspas')
+        menu = bh.find_element_type_with_text(self.driver, 'a', 'Toon bondspas')
         self.assertIsNotNone(menu)
-        menu = bh.find_element_type_with_text(driver, 'a', 'Uitloggen')
+        menu = bh.find_element_type_with_text(self.driver, 'a', 'Uitloggen')
         self.assertIsNotNone(menu)
 
         # controleer dat er geen meldingen van de browser zijn over de JS bestanden
-        regels = bh.get_console_log(driver)
+        regels = bh.get_console_log(self.driver)
         self.assertEqual(regels, [])
-
-        driver.close()      # important, otherwise the server port keeps occupied
-
 
 # end of file

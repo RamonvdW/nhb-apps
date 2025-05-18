@@ -208,11 +208,13 @@
 
 
     <!-- tabel met filter -->
+    <script src="{% static 'overig_js_min/tabel_filter_min.js' %}"></script>
+
     <table class="sv-kader" id="tabel_hulp">
         <thead>
             <tr>        <!-- filter veld -->
                 <td colspan="3" class="table-filter">
-                    <input class="table-filter" oninput="myTableFilter(this, 'tabel_hulp')" placeholder="Zoeken"/>
+                    <input class="table-filter" oninput="tabel_filter(this, 'tabel_hulp')" placeholder="Zoeken"/>
                 </td>
                 <td></td>
             </tr>
@@ -411,7 +413,5 @@
             <i class="notranslate material-icons-round left">check</i>Voorkeuren opslaan</button>
     </div>
 
-
-
-{% include 'feedback/sidebar.dtl' with op_pagina="app-snippets" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="app-snippets" %}
 

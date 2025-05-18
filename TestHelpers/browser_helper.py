@@ -59,6 +59,16 @@ def find_element_type_with_text(driver, elem_type, text_str):
     return el
 
 
+def find_tabel_filter_input(driver, tabel_id):
+    try:
+        el_table = driver.find_element(By.ID, tabel_id)
+    except NoSuchElementException:
+        el_input = None
+    else:
+        el_input = el_table.find_element(By.XPATH, '//input[@class="table-filter"]')
+    return el_input
+
+
 def get_following_sibling(element):
     return element.find_element(By.XPATH, "following-sibling::*[1]")
 
