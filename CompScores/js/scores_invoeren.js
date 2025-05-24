@@ -4,6 +4,8 @@
  * Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
  */
 
+"use strict";
+
 const dataset = document.getElementById("js_data").dataset;
 const wedstrijdMaxScore = parseInt(dataset.wedstrijdMaxScore);
 const toonTeamNaam = dataset.toonTeamNaam === "true";

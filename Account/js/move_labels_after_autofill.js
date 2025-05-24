@@ -4,6 +4,8 @@
  * Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
  */
 
+"use strict";
+
 // respond to browser auto-fill of login dialog, especially password field
 // no events are fired (for security) and the value itself is not accessible,
 // but we need to move the label out of the way to avoid visual overlap

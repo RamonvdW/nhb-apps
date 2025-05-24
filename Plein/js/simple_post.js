@@ -4,6 +4,8 @@
  * Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
  */
 
+"use strict";
+
 function stuur_post(url, csrfToken){
     let xhr = new XMLHttpRequest();
     xhr.open("POST", url, true);         // true = async

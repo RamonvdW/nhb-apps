@@ -4,6 +4,8 @@
  * Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
  */
 
+"use strict";
+
 function do_selecteer(id)
 {
     const dataset = document.getElementById("js_data").dataset;

@@ -4,6 +4,8 @@
  * Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
  */
 
+"use strict";
+
 // de 'bezig' vlag voorkomt recursion
 let bezig = true;
 

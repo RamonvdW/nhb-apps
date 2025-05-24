@@ -4,6 +4,8 @@
  * Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
  */
 
+"use strict";
+
 function ophalen_klaar(xhr)
 {
     // console.log('ophalen_klaar: ready=',xhr.readyState, 'status=', xhr.status);

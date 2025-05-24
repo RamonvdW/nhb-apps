@@ -56,7 +56,7 @@ class AppJsMinifyFinder(BaseFinder):
                 os.mkdir(static_dir)
 
             # zorg dat app/static/app_js_min/ bestaat
-            js_min_dir = os.path.join(app_path, "static", "%s_js_min" % app_name.lower())
+            js_min_dir = os.path.join(static_dir, "%s_js_min" % app_name.lower())
             if not os.path.isdir(js_min_dir):
                 os.mkdir(js_min_dir)
 
