@@ -386,10 +386,10 @@ class TestWebwinkelOverzicht(E2EHelpers, TestCase):
         self.assertTrue("Betaalstatus: Voldaan" in email.mail_text)
         #self.assertTrue('Verzendkosten' in email.mail_text)        # TODO: revive
 
-        self.assertTrue('TOTAAL: € 91,98' in email.mail_text)
+        self.assertTrue('TOTAAL: € 92,18' in email.mail_text)   # 1,23 + 84,00 + 6,95 = 92,18
 
         self.assertTrue('Betaling:' in email.mail_text)
-        self.assertTrue('Ontvangen: € 91,98' in email.mail_text)
+        self.assertTrue('Ontvangen: € 92,18' in email.mail_text)
         self.assertTrue('Beschrijving: Overboeking ontvangen' in email.mail_text)
 
         email.delete()
