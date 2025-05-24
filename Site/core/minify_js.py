@@ -72,10 +72,9 @@ class AppJsMinifyFinder(BaseFinder):
         # opslaan als file_min.js
         for fname in os.listdir(fpath):
             if fname.endswith('.js'):
-                fname_min = fname[:-3] + '_min.js'
                 fpath_in = os.path.join(fpath, fname)
                 if os.path.isfile(fpath_in):
-                    fpath_out = os.path.join(js_min_dir, fname_min)
+                    fpath_out = os.path.join(js_min_dir, fname[:-3] + '_min.js')
                     self._minify_js_file(fpath_in, fpath_out)
             else:
                 fpath_sub = os.path.join(fpath, fname)
@@ -84,7 +83,7 @@ class AppJsMinifyFinder(BaseFinder):
                     self._list_dir_recursive(fpath_sub, js_min_dir)
         # for
 
-    def find(self, path, all=False, **kwargs):
+    def find(self, path, **kwargs):
         # niet nodig, wel verplicht
         return []
 
@@ -95,7 +94,7 @@ class AppJsMinifyFinder(BaseFinder):
 
         new_contents = self._minify_javascript(contents)
 
-        # print('[INFO] writing %s' % repr(fpath_out))
+        print('[INFO] Writing %s' % repr(fpath_out))
         with open(fpath_out, 'w') as f:
             f.write(new_contents)
 
