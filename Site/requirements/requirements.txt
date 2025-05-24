@@ -23,9 +23,9 @@ google-api-core==2.24.2
     #   google-api-python-client
     #   google-geo-type
     #   google-maps-routing
-google-api-python-client==2.169.0
+google-api-python-client==2.170.0
     # via -r requirements.in
-google-auth==2.40.1
+google-auth==2.40.2
     # via
     #   -r requirements.in
     #   google-api-core
@@ -72,7 +72,7 @@ proto-plus==1.26.1
     #   google-api-core
     #   google-geo-type
     #   google-maps-routing
-protobuf==6.30.2
+protobuf==6.31.0
     # via
     #   google-api-core
     #   google-geo-type
@@ -80,7 +80,7 @@ protobuf==6.30.2
     #   googleapis-common-protos
     #   grpcio-status
     #   proto-plus
-psycopg==3.2.7
+psycopg==3.2.9
     # via -r requirements.in
 pyasn1==0.6.1
     # via
@@ -92,7 +92,7 @@ pyotp==2.9.0
     # via -r requirements.in
 pyparsing==3.2.3
     # via httplib2
-pypdf==5.4.0
+pypdf==5.5.0
     # via -r requirements.in
 qrcode==8.2
     # via -r requirements.in
