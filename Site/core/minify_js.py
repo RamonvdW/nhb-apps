@@ -100,7 +100,7 @@ class AppJsMinifyFinder(BaseFinder):
 
         new_contents = self._minify_javascript(contents)
 
-        print('[INFO] Writing %s' % repr(fpath_out))
+        # print('[INFO] Writing %s' % repr(fpath_out))
         with open(fpath_out, 'w') as f:
             f.write(new_contents)
 

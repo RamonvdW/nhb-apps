@@ -166,7 +166,7 @@ class TestBestellingGast(E2EHelpers, TestCase):
         self.assert_consistent_email_html_text(mail, ignore=('>Bedrag:', '>Korting:'))
         # self.e2e_show_email_in_browser(mail)
         self.assertTrue('Verzendkosten' in mail.mail_text)
-        self.assertTrue('10,42' in mail.mail_text)
+        self.assertTrue('8,18' in mail.mail_text)       # 1,23 + 6,95 verzendkosten = 8,18
 
         self.assertTrue('Adresregel1' in mail.mail_text)
         self.assertTrue('Adresregel2' in mail.mail_text)

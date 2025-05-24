@@ -248,7 +248,6 @@ class Command(BaseCommand):
 
             self._exit_code = 1
         else:
-            msg = list()
             if self.limieten.use_limits:
                 if self.member_changes > self.limieten.max_member_changes:
                     self._add_reden('[ERROR] Too many member changes! (limit: %s)' % self.limieten.max_member_changes)

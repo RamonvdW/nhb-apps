@@ -190,11 +190,11 @@ class VerzendkostenBestelPlugin(BestelPluginBase):
 
             if webwinkel_briefpost > 0:
                 # TODO: meerdere brieven (voorbeeld: 1 per muts)
-                verzendkosten_euro = Decimal(settings.WEBWINKEL_BRIEF_VERZENDKOSTEN_EURO)
+                verzendkosten_euro = Decimal(settings.WEBWINKEL_PAKKET_2KG_VERZENDKOSTEN_EURO)
 
             if webwinkel_pakketpost > 0:
                 # TODO: gewicht pakketpost
-                verzendkosten_euro = Decimal(settings.WEBWINKEL_PAKKET_GROOT_VERZENDKOSTEN_EURO)
+                verzendkosten_euro = Decimal(settings.WEBWINKEL_PAKKET_10KG_VERZENDKOSTEN_EURO)
 
         return verzendkosten_euro, btw_percentage, btw_euro
 

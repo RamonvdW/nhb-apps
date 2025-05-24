@@ -49,6 +49,10 @@ class TestSiteCore(TestCase):
             os.mkdir(os.path.join(js_dir, 'real_subdir'))
             obj.apps_with_js['test'] = tmp_dir
 
+            # make app dirs (these are normally made by AppJsMinifyFinder.__init__)
+            os.mkdir(os.path.join(tmp_dir, 'static'))
+            os.mkdir(os.path.join(tmp_dir, 'static', 'test_js_min'))
+
             with open(os.path.join(js_dir, 'unclosed_string.js'), 'w') as f:
                 msg = "/* mandatory copyright */\n"
                 msg += "function x() {\n"

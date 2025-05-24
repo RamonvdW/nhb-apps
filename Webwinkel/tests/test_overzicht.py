@@ -353,7 +353,7 @@ class TestWebwinkelOverzicht(E2EHelpers, TestCase):
 
         self.assertTrue('Verzendkosten' in email.mail_text)
 
-        self.assertTrue('TOTAAL: € 91,98' in email.mail_text)
+        self.assertTrue('TOTAAL: € 92,18' in email.mail_text)   # 1,23 + 84,00 + 6,95 = 92,18
 
         email.delete()
 

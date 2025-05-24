@@ -12,9 +12,43 @@ from Webwinkel.definities import (VERZENDKOSTEN_CHOICES, VERZENDKOSTEN_PAKKETPOS
 from decimal import Decimal
 
 
+class VerzendOptie(models.Model):
+    """ Opties voor verzending """
+
+    # beschrijving
+    beschrijving = models.CharField(max_length=100, default='?')
+
+    # type + kosten voor de emballage
+    emballage_type = models.CharField(max_length=100, default='?')
+    emballage_euro = models.DecimalField(max_digits=6, decimal_places=2, default=Decimal(0))        # max 9999,99
+    emballage_gram = models.PositiveIntegerField(default=0)
+
+    # kosten voor het afhandelen
+    afhandelen_euro = models.DecimalField(max_digits=6, decimal_places=2, default=Decimal(0))       # max 9999,99
+
+    # verzendkosten van transportbedrijf
+    verzendkosten_type = models.CharField(max_length=100, default='?')
+    verzendkosten_euro = models.DecimalField(max_digits=6, decimal_places=2, default=Decimal(0))    # max 9999,99
+
+    # wat kan er maximaal in?
+    max_gewicht_gram = models.PositiveIntegerField(default=0)
+
+    max_lang_1 = models.PositiveIntegerField(default=0)         # langste zijde
+    max_lang_2 = models.PositiveIntegerField(default=0)
+    max_lang_3 = models.PositiveIntegerField(default=0)         # kortste zijde
+
+    max_volume_cm3 = models.PositiveIntegerField(default=0)
+
+    def __str__(self):
+        return "[%s] %s" % (self.pk, self.beschrijving)
+
+    class Meta:
+        """ meta data voor de admin interface """
+        verbose_name = "Verzend optie"
+
+
 class WebwinkelFoto(models.Model):
-    """ Een foto van een product.
-    """
+    """ Een foto van een product """
 
     # locatie van het plaatje op het filesysteem onder settings.FOTOBANK_PATH
     locatie = models.CharField(max_length=100, blank=True)
@@ -96,7 +130,16 @@ class WebwinkelProduct(models.Model):
     # gewicht, voor keuze juiste verzendkosten pakket
     gewicht_gram = models.SmallIntegerField(default=0)
 
+    # flexibele vorm volume (0 = niet gebruik)
+    volume_cm3 = models.PositiveIntegerField(default=0)
+
+    # vaste vorm volume (0 = niet gebruikt)
+    lang_1 = models.PositiveIntegerField(default=0)         # langste zijde
+    lang_2 = models.PositiveIntegerField(default=0)
+    lang_3 = models.PositiveIntegerField(default=0)         # kortste zijde
+
     # verzendkosten
+    # TODO: obsolete
     type_verzendkosten = models.CharField(max_length=5, default=VERZENDKOSTEN_PAKKETPOST, choices=VERZENDKOSTEN_CHOICES)
 
     def __str__(self):
@@ -141,5 +184,6 @@ class WebwinkelKeuze(models.Model):
 
     def __str__(self):
         return self.korte_beschrijving()
+
 
 # end of file
