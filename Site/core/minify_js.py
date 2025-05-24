@@ -32,6 +32,9 @@ class AppJsMinifyFinder(BaseFinder):
                            if ac.name in app_names]
         self._find_apps_with_js(app_configs)
 
+        # maak meteen de static directories aan zodat deze door de AppDirectoriesFinder.__init__ gevonden kunnen worden
+        self._make_static_dirs()
+
         super().__init__(*args, **kwargs)
 
     def _find_apps_with_js(self, app_configs):
@@ -43,13 +46,8 @@ class AppJsMinifyFinder(BaseFinder):
                 self.apps_with_js[app_name] = app_config.path
         # for
 
-    def list(self, ignore_patterns=None):
-        # invoked to find static files
-        # we use this to minify javascript files and create new static files on the fly
+    def _make_static_dirs(self):
         for app_name, app_path in self.apps_with_js.items():
-            # print('[DEBUG] Minify JS for app %s' % app_name)
-            js_dir = os.path.join(app_path, "js")
-
             # zorg dat app/static/ bestaat
             static_dir = os.path.join(app_path, "static")
             if not os.path.isdir(static_dir):
@@ -59,7 +57,15 @@ class AppJsMinifyFinder(BaseFinder):
             js_min_dir = os.path.join(static_dir, "%s_js_min" % app_name.lower())
             if not os.path.isdir(js_min_dir):
                 os.mkdir(js_min_dir)
+        # for
 
+    def list(self, ignore_patterns=None):
+        # invoked to find static files
+        # we use this to minify javascript files and create new static files on the fly
+        for app_name, app_path in self.apps_with_js.items():
+            # print('[DEBUG] Minify JS for app %s' % app_name)
+            js_dir = os.path.join(app_path, "js")
+            js_min_dir = os.path.join(app_path, "static", "%s_js_min" % app_name.lower())
             self._list_dir_recursive(js_dir, js_min_dir)
 
             # fake yield to make this a generator function
