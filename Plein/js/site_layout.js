@@ -162,7 +162,7 @@ window.addEventListener('resize', () => {
     const elems = document.querySelectorAll(".dropdown-trigger");
     Array.from(elems).forEach(elem => {
         const instance = M.Dropdown.getInstance(elem);
-        if (instance.isOpen) {
+        if (instance && instance.isOpen) {
             instance.close();
         }
     });

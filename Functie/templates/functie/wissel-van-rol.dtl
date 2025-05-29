@@ -11,9 +11,9 @@
 {% block extraheader %}
     {% if insert_meta %}
         <!-- deze header is bedoeld voor de testsuite -->
-        <meta property="nhb-apps:rol" content="{{ meta_rol }}">
+        <meta property="mh:rol" content="{{ meta_rol }}">
         {% if meta_functie %}
-            <meta property="nhb-apps:functie" content="{{ meta_functie }}">
+            <meta property="mh:functie" content="{{ meta_functie }}">
         {% endif %}
     {% endif %}
 {% endblock %}

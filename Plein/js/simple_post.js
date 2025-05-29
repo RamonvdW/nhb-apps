@@ -6,7 +6,7 @@
 
 "use strict";
 
-function stuur_post(url, csrfToken){
+function stuur_post(url, csrfToken) {
     let xhr = new XMLHttpRequest();
     xhr.open("POST", url, true);         // true = async
     xhr.setRequestHeader("X-CSRFToken", csrfToken);

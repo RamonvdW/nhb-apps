@@ -105,7 +105,7 @@ class TestBrowserOverig(LiveServerTestCase):
         self.driver.get(self.url_wissel_van_rol)
         radio = bh.find_element_by_id(self.driver, 'id_eigen_90002')        # radio button voor Manager MH
         bh.get_following_sibling(radio).click()
-        bh.find_element_by_id(self.driver,'activeer_eigen').click()         # activeer knop
+        bh.find_element_by_id(self.driver, 'activeer_eigen').click()         # activeer knop
         bh.wait_until_url_not(self.driver, self.url_wissel_van_rol)
 
     def setUp(self):
