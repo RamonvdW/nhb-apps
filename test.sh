@@ -46,7 +46,7 @@ export PYTHONDONTWRITEBYTECODE=1
 
 OMIT="--omit=*/lib/python3*/site-packages/*"    # use , to separate
 
-# kill the http simulator if still running in the background
+# kill the simulators, if still running in the background
 # -f check entire commandline program name is python and does not match
 pgrep -f websim > /dev/null
 RES=$?
@@ -197,7 +197,7 @@ then
     echo "[INFO] Running migrations and performing run with nodebug"
     # ..and add coverage with no-debug
     # -v 2 shows progress of migrations
-    python3 "${PY_OPTS[@]}" -u "${PYCOV[@]}" ./manage.py test --keepdb --noinput --settings=$SETTINGS_AUTOTEST_NODEBUG -v 2 Plein.tests.tests.TestPlein.test_quick &>>"$LOG"
+    python3 "${PY_OPTS[@]}" -u "${PYCOV[@]}" ./manage.py test --keepdb --noinput --settings=$SETTINGS_AUTOTEST_NODEBUG -v 2 Plein.tests.test_basics.TestPleinBasics.test_quick &>>"$LOG"
     RES=$?
     [ $RES -eq 0 ] || ABORTED=1
     # echo "[DEBUG] Debug run result: $RES --> ABORTED=$ABORTED"
@@ -221,7 +221,7 @@ PID_WEBSIM1=$!
 python3 -u "${PY_OPTS[@]}" ./Betaal/test-tools/websim_betaal_test.py &
 PID_WEBSIM2=$!
 
-# start the payment service simulator
+# start the google maps simulator
 python3 -u "${PY_OPTS[@]}" ./Locatie/test_tools/websim_gmaps.py &
 PID_WEBSIM3=$!
 
@@ -278,18 +278,6 @@ then
         read -ra HTML_FILES < <(ls -1tr "$TMP_HTML"/*html)   # sorted by creation time
         firefox "${HTML_FILES[@]}" &
     fi
-fi
-
-if [ $ABORTED -eq 0 ]
-then
-    echo "[INFO] Starting browser test run" >>"$LOG"
-    python3 "${PY_OPTS[@]}" -u "${PYCOV[@]}" ./manage.py test --keepdb --settings=$SETTINGS_AUTOTEST --tag=browser -v 2 "${FOCUS_ARGS[@]}" &>>"$LOG"
-    RES=$?
-    #echo "[DEBUG] Run result: $RES --> ABORTED=$ABORTED"
-    [ $RES -eq 3 ] && ABORTED=1
-
-    echo >>"$LOG"
-    echo "[INFO] Finished browser test run" >>"$LOG"
 fi
 
 # stop showing the additions to the logfile, because the rest is less interesting

@@ -6,7 +6,7 @@
 
 "use strict";
 
-function stuur_post(url, csrfToken) {
+function stuur_ping(url, csrfToken) {
     let xhr = new XMLHttpRequest();
     xhr.open("POST", url, true);         // true = async
     xhr.setRequestHeader("X-CSRFToken", csrfToken);
@@ -16,7 +16,7 @@ function stuur_post(url, csrfToken) {
 window.addEventListener("load", function() {
     // alles is opgehaald en ingeladen
     const dataset = document.getElementById("js_data").dataset;
-    stuur_post(dataset.urlPing, dataset.csrfToken);
+    stuur_ping(dataset.urlPing, dataset.csrfToken);
 });
 
 /* end of file */

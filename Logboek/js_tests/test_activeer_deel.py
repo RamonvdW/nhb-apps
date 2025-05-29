@@ -4,9 +4,7 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.test import LiveServerTestCase, tag
 from django.utils import timezone
-from django.contrib.sessions.backends.db import SessionStore
 from TestHelpers import browser_helper as bh
 from TestHelpers.e2ehelpers import TEST_WACHTWOORD
 from Account.models import Account
@@ -18,8 +16,9 @@ import datetime
 import pyotp
 
 
-@tag("browser")
-class TestBrowserPlein(LiveServerTestCase):
+class TestLogboekActiveerDeel(bh.BrowserTestCase):
+
+    """ Test de Logboek applicatie, gebruik van activeer_deel.js vanuit de browser """
 
     port = bh.port
 

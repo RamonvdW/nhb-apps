@@ -190,12 +190,17 @@ class ProductView(TemplateView):
         context['fotos'] = fotos = product.fotos.order_by('volgorde')
         is_eerste = True
         for foto in fotos:
+            foto.id_img = "id_img_%s" % foto.volgorde
+            foto.id_thumb = "id_thumb_%s" % foto.volgorde
             foto.img_src = static_safe("webwinkel_fotos/" + foto.locatie)
             foto.thumb_src = static_safe("webwinkel_fotos/" + foto.locatie_thumb)
             foto.is_eerste = is_eerste
             is_eerste = False
             context['heeft_fotos'] = True
         # for
+
+        context['js_fotos'] = [(foto.volgorde, foto.id_thumb, foto.id_img)
+                               for foto in fotos]
 
         if not self.request.user.is_authenticated:
             context['moet_inloggen'] = True

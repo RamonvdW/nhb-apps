@@ -4,31 +4,24 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.apps import apps
-from django.test import LiveServerTestCase, tag
 from django.utils import timezone
+from django.contrib.sessions.backends.db import SessionStore
 from TestHelpers import browser_helper as bh
 from TestHelpers.e2ehelpers import TEST_WACHTWOORD
 from Account.models import Account
 from Functie.models import Functie, VerklaringHanterenPersoonsgegevens
 from Geo.models import Regio, Rayon
+from Plein.views import SESSIONVAR_VORIGE_POST
 from Sporter.models import Sporter
 from Vereniging.models import Vereniging
 import datetime
 import pyotp
 import time
-import os
 
 
-@tag("browser")
-class TestBrowser(LiveServerTestCase):
+class TestPleinStuurPing(bh.BrowserTestCase):
 
-    """ entrypoint voor alle in-browser tests van Javascript
-        alle applicaties kunnen testen aanleveren in app/js_tests/
-
-        Na het aanmaken van de standaard inhoud van de database en het openen van de browser,
-        worden alle tests in 1x gedraaid. Dit scheelt een hoop tijd.
-    """
+    """ Test de Plein applicatie, gebruik van stuur_ping.js vanuit de browser """
 
     port = bh.port
 
@@ -118,6 +111,29 @@ class TestBrowser(LiveServerTestCase):
         bh.find_element_by_id(self.driver, 'activeer_eigen').click()        # activeer knop
         bh.wait_until_url_not(self.driver, self.url_wissel_van_rol)         # redirect naar /vereniging/
 
+    def _check_ping(self):
+        mh_session_id = self.driver.get_cookie('mh_session_id')['value']
+        # print('mh_session_id cookie value: %s' % mh_session_id)
+        session = SessionStore(session_key=mh_session_id)
+        session[SESSIONVAR_VORIGE_POST] = 'forceer'
+        session.save()
+
+        self.driver.get(self.url_plein)
+
+        has_ping = "simple_post" in self.driver.page_source
+        # print('has_ping: %s' % has_ping)
+        self.assertTrue(has_ping)
+        # if not has_ping:
+        #     print(self.driver.page_source[:500])
+        #     print(self.driver.page_source[-500:])
+
+        # wacht even en check daarna dat de post gedaan is door de js load event handler
+        # time.sleep(1)
+
+        session = SessionStore(session_key=mh_session_id)
+        stamp = session.get(SESSIONVAR_VORIGE_POST, '')
+        self.assertFalse(stamp == '')
+
     def setUp(self):
         self._database_vullen()
         self.driver = bh.get_driver(show_browser=False)
@@ -126,33 +142,59 @@ class TestBrowser(LiveServerTestCase):
         self.driver.close()      # important, otherwise the server port keeps occupied
         self._database_opschonen()
 
-    def test_all(self):
-        test_modules = list()
-        for app in apps.get_app_configs():
-            js_tests_path = os.path.join(app.name, 'js_tests')
-            if os.path.exists(js_tests_path):
-                for d in os.listdir(js_tests_path):
-                    if d.startswith('test_') and d.endswith('.py'):
-                        test_modules.append(app.name + '.js_tests.' + d[:-3])
-                # for
-        # for
+    def test_sporter(self):
+        # controleer dat we niet ingelogd zijn
+        self.driver.get(self.url_plein)
+        knop = bh.find_element_type_with_text(self.driver, 'a', 'Inloggen')
+        self.assertIsNotNone(knop)
+        bh.get_console_log(self.driver)
 
-        test_modules.sort()     # consistent execution order
-        # print('Found: %s' % test_modules)
+        # log in als sporter
+        self._login()               # redirects naar Plein
 
-        for test_module in test_modules:
-            try:
-                mod = __import__(test_module)
-            except ImportError:
-                pass
-            else:
-                parts = test_module.split('.')
-                for part in parts[1:]:
-                    mod = getattr(mod, part)
-                # print('%s is %s' % (test_module, mod))
-                for name in dir(mod):
-                    obj = getattr(mod, name)
-                    if isinstance(obj, type) and issubclass(obj, bh.BrowserTestCase):
-                        print('found %s in %s' % (name, test_module), obj)
+        # pagina is gebaseerd op template plein-sporter.dtl
+
+        # controleer dat we ingelogd zijn
+        menu = bh.find_element_type_with_text(self.driver, 'a', 'Wissel van rol')
+        self.assertIsNotNone(menu)
+        menu = bh.find_element_type_with_text(self.driver, 'a', 'Mijn pagina')
+        self.assertIsNotNone(menu)
+        menu = bh.find_element_type_with_text(self.driver, 'a', 'Toon bondspas')
+        self.assertIsNotNone(menu)
+        menu = bh.find_element_type_with_text(self.driver, 'a', 'Uitloggen')
+        self.assertIsNotNone(menu)
+
+        self._check_ping()
+
+        # controleer dat er geen meldingen van de browser zijn over de JS bestanden
+        regels = bh.get_console_log(self.driver)
+        self.assertEqual(regels, [])
+
+    def test_beheerder(self):
+        # controleer dat we niet ingelogd zijn
+        self.driver.get(self.url_plein)
+        knop = bh.find_element_type_with_text(self.driver, 'a', 'Inloggen')
+        self.assertIsNotNone(knop)
+        bh.get_console_log(self.driver)
+
+        # log in als sporter en wissel naar de HWL rol
+        self._login()
+        self._otp_controle()
+        self._wissel_naar_hwl()     # redirect naar /vereniging/
+
+        # controleer dat we beheerder zijn
+        self.driver.get(self.url_plein)
+        # pagina is plein-beheerder.dtl
+
+        h3 = bh.find_element_type_with_text(self.driver, 'h3', 'Beheerders Plein')
+        self.assertIsNotNone(h3)
+
+        # check dat de ping gedaan is
+        self._check_ping()
+
+        # controleer dat er geen meldingen van de browser zijn over de JS bestanden
+        regels = bh.get_console_log(self.driver)
+        self.assertEqual(regels, [])
+
 
 # end of file

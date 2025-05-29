@@ -5,11 +5,16 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 """ helpers for testing via de browser """
-
+from django.test import LiveServerTestCase
 from selenium.webdriver import Chrome, ChromeOptions, DesiredCapabilities
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException
+import unittest
 import time
+
+
+class BrowserTestCase(LiveServerTestCase):
+    pass
 
 
 port = 8000
