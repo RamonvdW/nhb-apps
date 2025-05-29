@@ -7,12 +7,12 @@
 from django.apps import apps
 from django.test import LiveServerTestCase, tag
 from django.utils import timezone
-from TestHelpers import browser_helper as bh
-from TestHelpers.e2ehelpers import TEST_WACHTWOORD
 from Account.models import Account
 from Functie.models import Functie, VerklaringHanterenPersoonsgegevens
 from Geo.models import Regio, Rayon
 from Sporter.models import Sporter
+from TestHelpers import browser_helper as bh
+from TestHelpers.e2ehelpers import TEST_WACHTWOORD
 from Vereniging.models import Vereniging
 import datetime
 import pyotp
@@ -30,13 +30,10 @@ class TestBrowser(LiveServerTestCase):
         worden alle tests in 1x gedraaid. Dit scheelt een hoop tijd.
     """
 
-    port = bh.port
+    show_browser = True         # set to True for visibility during debugging
 
-    url_root = bh.url_root
-    url_plein = url_root + '/plein/'
-    url_login = url_root + '/account/login/'
-    url_otp = url_root + '/account/otp-controle/'
-    url_wissel_van_rol = url_root + '/functie/wissel-van-rol/'
+    url_login = '/account/login/'
+    url_otp = '/account/otp-controle/'
 
     def _database_vullen(self):
         Account.objects.filter(username='424200').delete()
@@ -48,7 +45,8 @@ class TestBrowser(LiveServerTestCase):
                                     bevestigde_email='bro@test.not',
                                     email_is_bevestigd=True,
                                     otp_code='whatever',
-                                    otp_is_actief=True)
+                                    otp_is_actief=True,
+                                    is_BB=True)
         self.account.set_password(TEST_WACHTWOORD)
         self.account.save()
 
@@ -92,41 +90,46 @@ class TestBrowser(LiveServerTestCase):
         self.regio.delete()
         self.rayon.delete()
 
-    def _login(self):
-        # log in
-        self.driver.get(self.url_login)
-        bh.find_element_by_id(self.driver, 'id_login_naam').send_keys(self.account.username)
-        bh.find_element_by_id(self.driver, 'id_wachtwoord').send_keys(TEST_WACHTWOORD)
-        login_vink = bh.find_element_by_name(self.driver, 'aangemeld_blijven')
-        self.assertTrue(login_vink.is_selected())
-        bh.find_element_by_id(self.driver, 'submit_knop').click()
-        bh.wait_until_url_not(self.driver, self.url_login)
-
-    def _otp_controle(self):
-        # pass otp
-        self.driver.get(self.url_otp)
-        otp_code = pyotp.TOTP(self.account.otp_code).now()
-        bh.find_element_by_id(self.driver, 'id_otp_code').send_keys(otp_code)
-        bh.find_element_by_id(self.driver, 'submit_knop').click()
-        bh.wait_until_url_not(self.driver, self.url_otp)
-
-    def _wissel_naar_hwl(self):
-        # wissel naar rol HWL
-        self.driver.get(self.url_wissel_van_rol)
-        radio = bh.find_element_by_id(self.driver, 'id_eigen_%s' % self.functie_hwl.pk)    # radio button voor HWL
-        bh.get_following_sibling(radio).click()
-        bh.find_element_by_id(self.driver, 'activeer_eigen').click()        # activeer knop
-        bh.wait_until_url_not(self.driver, self.url_wissel_van_rol)         # redirect naar /vereniging/
-
     def setUp(self):
         self._database_vullen()
-        self.driver = bh.get_driver(show_browser=False)
+        self._driver = bh.get_driver(show_browser=self.show_browser)
 
     def tearDown(self):
-        self.driver.close()      # important, otherwise the server port keeps occupied
+        self._driver.close()      # important, otherwise the server port keeps occupied
         self._database_opschonen()
 
+    def _wait_until_url_not(self, url: str, timeout: float = 2.0):
+        duration = 0.5
+        check_url = self.live_server_url + url
+        curr_url = self._driver.current_url
+        while curr_url == check_url and timeout > 0:
+            time.sleep(duration)
+            timeout -= duration
+            duration *= 2
+            curr_url = self._driver.current_url
+        # while
+
     def test_all(self):
+        # fail early: haal een eerste pagina op
+        self._driver.get(self.live_server_url + bh.BrowserTestCase.url_plein)
+
+        # inloggen
+        self._driver.get(self.live_server_url + self.url_login)
+        self._driver.find_element(bh.By.ID, 'id_login_naam').send_keys(self.account.username)
+        self._driver.find_element(bh.By.ID, 'id_wachtwoord').send_keys(TEST_WACHTWOORD)
+        login_vink = self._driver.find_element(bh.By.NAME, 'aangemeld_blijven')
+        self.assertTrue(login_vink.is_selected())
+        self._driver.find_element(bh.By.ID, 'submit_knop').click()
+        self._wait_until_url_not(self.url_login)
+
+        # pass otp
+        self._driver.get(self.live_server_url + self.url_otp)
+        otp_code = pyotp.TOTP(self.account.otp_code).now()
+        self._driver.find_element(bh.By.ID, 'id_otp_code').send_keys(otp_code)
+        self._driver.find_element(bh.By.ID, 'submit_knop').click()
+        self._wait_until_url_not(self.url_otp)
+
+        print('searching...')
         test_modules = list()
         for app in apps.get_app_configs():
             js_tests_path = os.path.join(app.name, 'js_tests')
@@ -153,6 +156,27 @@ class TestBrowser(LiveServerTestCase):
                 for name in dir(mod):
                     obj = getattr(mod, name)
                     if isinstance(obj, type) and issubclass(obj, bh.BrowserTestCase):
-                        print('found %s in %s' % (name, test_module), obj)
+                        inst = obj()
+
+                        # dirty part: take over all members into the other instance
+                        inst._driver = self._driver
+                        inst.account = self.account
+                        inst.sporter = self.sporter
+                        inst.regio = self.regio
+                        inst.rayon = self.rayon
+                        inst.ver = self.ver
+                        inst.functie_hwl = self.functie_hwl
+                        inst.vhpg = self.vhpg
+                        inst.live_server_url = self.live_server_url
+
+                        for inst_name in dir(inst):
+                            if inst_name.startswith('test_'):
+                                test_func = getattr(inst, inst_name)
+                                if callable(test_func):
+                                    print('%s.%s.%s ...' % (test_module, name, inst_name ), end='')
+                                    test_func()
+                                    # time.sleep(2)
+                                    print('ok')
+                        # for
 
 # end of file
