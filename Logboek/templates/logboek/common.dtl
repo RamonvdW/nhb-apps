@@ -1,22 +1,12 @@
 {% comment %}
-                Copyright (c) 2020-2023 Ramon van der Winkel.
+                Copyright (c) 2020-2025 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 
+{% load static %}
+
 <!-- dit bestand wordt ge-include in alle andere logboek pagina's -->
-
-<script>
-    function activeer_deel() {
-        // vind de gekozen radiobutton
-        const el = document.querySelector("input[type='radio'][name='deel']:checked")
-
-        // haal de url op van het input element
-        const url = el.dataset.url
-
-        window.location.href = url
-    }
-</script>
 
 <!-- banner -->
 <div class="row center">
@@ -24,6 +14,8 @@
         <h3 class="page-banner">Logboek</h3>
     </div>
 </div>
+
+<script src="{% static 'logboek_js_min/activeer_deel_min.js' %}"></script>
 
 <!-- blauwe balk -->
 <div class="row-sv-blauw">
@@ -42,7 +34,7 @@
                 {% endfor %}
             </ul>
             <p class="center">
-                <button class="btn-sv-rood" onclick="activeer_deel()">Activeer</button>
+                <button class="btn-sv-rood" id="id_activeer_knop" onclick="activeer_deel()">Activeer</button>
             </p>
         </div>
     </div>
@@ -74,6 +66,7 @@
 <div class="row center">
     <div class="col s12">
         <h4>Resultaten</h4>
+        <h5>{{ actief_deel }}</h5>
         {% if is_paginated %}
             <ul class="pagination">
                 {% for linkname, url in page_links %}
@@ -95,3 +88,4 @@
         {% endif %}
     </div>
 </div>
+

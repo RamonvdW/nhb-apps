@@ -154,6 +154,9 @@ class LogboekBasisView(UserPassesTestMixin, ListView):
             is_actief = (optie in self.base_url) or (optie == 'rest' and self.base_url == '/logboek/')
             tup = (optie, url, titel, is_actief)
             filters.append(tup)
+
+            if is_actief:
+                context['actief_deel'] = titel
         # for
 
         context['kruimels'] = (
