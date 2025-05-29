@@ -1,5 +1,5 @@
 {% comment %}
-                Copyright (c) 2020-2023 Ramon van der Winkel.
+                Copyright (c) 2020-2025 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -50,7 +50,7 @@
 
             <!-- plaatje -->
             <div style="margin-bottom:8px">
-                <img src="{{ img_src }}" height="{{ img_height }}" {% if img_width %}width="{{ img_width }}" {% endif %}alt="logo"{% if img_style %} style="{{ img_style }}"{% endif %}>
+                <img src="{{ img_src }}" height="{{ img_height }}" {% if img_width %}width="{{ img_width }}" {% endif %}alt="logo"{% if img_style %} style="{{ img_style }}"{% endif %} draggable="false">
             </div>
 
             <div class="card-text">{{ text }}</div>

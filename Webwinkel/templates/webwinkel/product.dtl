@@ -21,72 +21,24 @@
     <!-- blauw balk met wit informatie veld -->
     <div class="row-sv-blauw">
         <div class="col s12 center">
-            {% comment %}
-            -- thumbnails boven de grote foto's --
-            <div>
-                {% for foto in fotos %}
-                    <img id="thumb1_{{ foto.volgorde }}" class="sv-foto-thumb" src="{{ foto.thumb_src }}" onclick="kies_foto({{ foto.volgorde }})" alt="thumbnail {{ foto.volgorde }}">
-                {% endfor %}
-            </div>
-            {% endcomment %}
-
             {% for foto in fotos %}
-                <img id="img_{{ foto.volgorde }}" class="sv-foto-groot" src="{{ foto.img_src }}" hidden loading="{% if foto.is_eerste %}eager{% else %}lazy{% endif %}" alt="product foto {{ foto.volgorde }}">
+                <img id="{{ foto.id_img }}" class="sv-foto-groot" src="{{ foto.img_src }}" hidden loading="{% if foto.is_eerste %}eager{% else %}lazy{% endif %}" alt="product foto {{ foto.volgorde }}" draggable="false">
             {% endfor %}
 
             <!-- thumbnails onder de grote foto's -->
             <div>
                 {% for foto in fotos %}
-                    <img id="thumb2_{{ foto.volgorde }}" class="sv-foto-thumb" src="{{ foto.thumb_src }}" onclick="kies_foto({{ foto.volgorde }})" alt="thumbnail {{ foto.volgorde }}">
+                    <img id="{{ foto.id_thumb }}" class="sv-foto-thumb" src="{{ foto.thumb_src }}" onclick="kies_foto({{ foto.volgorde }})" alt="thumbnail {{ foto.volgorde }}" draggable="false">
                 {% endfor %}
             </div>
         </div>
     </div>
 
 
-    <script>
-
-        const volgordes = [
-            {% for foto in fotos %}
-                [
-                    {{ foto.volgorde }},
-                    // document.getElementById('thumb1_{{ foto.volgorde }}'),
-                    document.getElementById('thumb2_{{ foto.volgorde }}'),
-                    document.getElementById('img_{{ foto.volgorde }}'),
-                ],
-            {% endfor %}
-        ];
-
-        //console.log('volgordes:', volgordes);
-
-        function kies_foto(nr) {
-            //console.log('nr', nr);
-
-            volgordes.forEach(arr => {
-                // let [volgorde, el_thumb1, el_thumb2, el_img] = arr;
-                let [volgorde, el_thumb2, el_img] = arr;
-
-                if (volgorde === nr) {
-                    // el_thumb1.classList.add("sv-foto-thumb-selected")
-                    el_thumb2.classList.add("sv-foto-thumb-selected");
-                    el_img.hidden = false;
-                } else {
-                    // el_thumb1.classList.remove("sv-foto-thumb-selected")
-                    el_thumb2.classList.remove("sv-foto-thumb-selected");
-                    el_img.hidden = true;
-                }
-
-                if (volgorde === nr + 1) {
-                    el_img.loading = 'eager';
-                }
-            })
-        }
-
-        {% if heeft_fotos %}
-            kies_foto({{ fotos.0.volgorde }});
-        {% endif %}
-    </script>
-
+    {% if heeft_fotos %}
+        {{ js_fotos|json_script:"js_fotos" }}
+        <script src="{% static 'webwinkel_js_min/kies_foto_min.js' %}"></script>
+    {% endif %}
 
     {% if url_toevoegen %}
 

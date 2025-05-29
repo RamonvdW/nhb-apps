@@ -37,7 +37,7 @@
 
         <!-- de bondspas (wordt pas getoond na ophalen bondspas plaatje) -->
         <div class="col s12">
-            <img id="id_image" alt="Bondspas" src="#" style="max-width:800px; width:100%; height:auto; display:none"/>
+            <img id="id_image" alt="Bondspas" src="#" style="max-width:800px; width:100%; height:auto; display:none" draggable="false">
         </div>
     </div>
 

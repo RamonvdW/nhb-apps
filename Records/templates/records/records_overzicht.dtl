@@ -36,7 +36,7 @@
         <div class="col s12">
             {% for obj in object_list %}
                 <div class="sv-card">
-                    <a href="{{ obj.url }}">
+                    <a href="{{ obj.url }}" draggable="false">
                         <div class="sv-card-content center-align" style="font-size: 80%">
                             <span class="card-title">{{ obj.title_str }}</span>
                             {% if obj.para_str %}
@@ -46,7 +46,7 @@
                             <p>{{ obj.descr2_str }}</p>
                             <p>&nbsp;</p>
                             <div class="left-align">
-                                <img class="right" src="{{ obj.img }}" height="50" width="41" alt="klein logo">
+                                <img class="right" src="{{ obj.img }}" height="50" width="41" alt="klein logo" draggable="false">
                                 <p>{{ obj.datum }}</p>
                                 <p>Plaats: {{ obj.plaats }}</p>
                                 <p class="truncate"><b>{{ obj.naam }}</b></p>

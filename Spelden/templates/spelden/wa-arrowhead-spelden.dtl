@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2024 Ramon van der Winkel.
+                Copyright (c) 2024-2025 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -32,27 +32,37 @@
 
                 <tr>
                     <td class="center">Groen</td>
-                    <td class="center"><img class="sv-foto-speld" src="{% static 'spelden/arrowhead_groen.webp' %}" alt="speld"></td>
+                    <td class="center">
+                        <img class="sv-foto-speld" src="{% static 'spelden/arrowhead_groen.webp' %}" alt="speld" draggable="false">
+                    </td>
                 </tr>
 
                 <tr>
                     <td class="center">Grijs</td>
-                    <td class="center"><img class="sv-foto-speld" src="{% static 'spelden/arrowhead_grijs.webp' %}" alt="speld"></td>
+                    <td class="center">
+                        <img class="sv-foto-speld" src="{% static 'spelden/arrowhead_grijs.webp' %}" alt="speld" draggable="false">
+                    </td>
                 </tr>
 
                 <tr>
                     <td class="center">Wit</td>
-                    <td class="center"><img class="sv-foto-speld" src="{% static 'spelden/arrowhead_wit.webp' %}" alt="speld"></td>
+                    <td class="center">
+                        <img class="sv-foto-speld" src="{% static 'spelden/arrowhead_wit.webp' %}" alt="speld" draggable="false">
+                    </td>
                 </tr>
 
                 <tr>
                     <td class="center">Zwart</td>
-                    <td class="center"><img class="sv-foto-speld" src="{% static 'spelden/arrowhead_zwart.webp' %}" alt="speld"></td>
+                    <td class="center">
+                        <img class="sv-foto-speld" src="{% static 'spelden/arrowhead_zwart.webp' %}" alt="speld" draggable="false">
+                    </td>
                 </tr>
 
                 <tr>
                     <td class="center">Goud</td>
-                    <td class="center"><img class="sv-foto-speld" src="{% static 'spelden/arrowhead_goud.png' %}" alt="speld"></td>
+                    <td class="center">
+                        <img class="sv-foto-speld" src="{% static 'spelden/arrowhead_goud.png' %}" alt="speld" draggable="false">
+                    </td>
                 </tr>
 
             </table>

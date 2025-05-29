@@ -177,7 +177,7 @@
              data-url-ping="{{ url_ping }}"
              data-csrf-token="{{ csrf_token }}">
         </div>
-        <script src="{% static 'plein_js_min/simple_post_min.js' %}"></script>
+        <script src="{% static 'plein_js_min/stuur_ping_min.js' %}"></script>
     {% endif %}
 
     {% include 'feedback/sidebar.dtl' with op_pagina="plein-beheerder" %}

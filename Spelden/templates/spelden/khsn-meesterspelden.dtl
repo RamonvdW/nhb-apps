@@ -73,17 +73,23 @@
 
                 <tr>
                     <td class="center">Grootmeesterschutter</td>
-                    <td class="center"><img class="sv-foto-speld" src="{% static 'spelden/graadspeld_grootmeesterschutter.webp' %}" alt="speld"></td>
+                    <td class="center">
+                        <img class="sv-foto-speld" src="{% static 'spelden/graadspeld_grootmeesterschutter.webp' %}" alt="speld" draggable="false">
+                    </td>
                 </tr>
 
                 <tr>
                     <td class="center">Meesterschutter</td>
-                    <td class="center"><img class="sv-foto-speld" src="{% static 'spelden/graadspeld_meesterschutter.webp' %}" alt="speld"></td>
+                    <td class="center">
+                        <img class="sv-foto-speld" src="{% static 'spelden/graadspeld_meesterschutter.webp' %}" alt="speld" draggable="false">
+                    </td>
                 </tr>
 
                 <tr>
                     <td class="center">Allroundschutter</td>
-                    <td class="center"><img class="sv-foto-speld" src="{% static 'spelden/graadspeld_allroundschutter.webp' %}" alt="speld"></td>
+                    <td class="center">
+                        <img class="sv-foto-speld" src="{% static 'spelden/graadspeld_allroundschutter.webp' %}" alt="speld" draggable="false">
+                    </td>
                 </tr>
 
             </table>
