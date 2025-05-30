@@ -70,7 +70,7 @@
         </div>
     </div>
 
-    <script src="{% static 'account_js_min/move_labels_after_autofill_min.js' %}"></script>
+    <script src="{% static 'account_js/move_labels_after_autofill.js' %}"></script>
 
     <!-- witruimte -->
     <div class="row center">

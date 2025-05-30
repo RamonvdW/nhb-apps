@@ -54,7 +54,7 @@
                  data-csrf-token="{{ csrf_token }}">
             </div>
 
-            <script src="{% static 'account_js_min/login_as_min.js' %}"></script>
+            <script src="{% static 'account_js/login_as.js' %}"></script>
 
             <!-- blauwe balk witten tabel met resultaten -->
             <div class="row-sv-blauw">

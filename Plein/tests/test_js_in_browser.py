@@ -6,15 +6,11 @@
 
 from django.apps import apps
 from django.test import LiveServerTestCase, tag
-from django.utils import timezone
-from Account.models import Account
-from Functie.models import Functie, VerklaringHanterenPersoonsgegevens
-from Geo.models import Regio, Rayon
-from Sporter.models import Sporter
 from TestHelpers import browser_helper as bh
 from TestHelpers.e2ehelpers import TEST_WACHTWOORD
-from Vereniging.models import Vereniging
-import datetime
+from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.common.by import By
+import inspect
 import pyotp
 import time
 import os
@@ -30,73 +26,27 @@ class TestBrowser(LiveServerTestCase):
         worden alle tests in 1x gedraaid. Dit scheelt een hoop tijd.
     """
 
-    show_browser = True         # set to True for visibility during debugging
+    show_browser = False            # set to True for visibility during debugging
+    pause_after_each_test = False   # 2 seconden wachten aan het einde van de test
 
     url_login = '/account/login/'
     url_otp = '/account/otp-controle/'
 
-    def _database_vullen(self):
-        Account.objects.filter(username='424200').delete()
-        self.account = Account.objects.create(
-                                    username='424200',
-                                    first_name='Bro',
-                                    last_name='dés Browser',
-                                    unaccented_naam='Bro des Browser',
-                                    bevestigde_email='bro@test.not',
-                                    email_is_bevestigd=True,
-                                    otp_code='whatever',
-                                    otp_is_actief=True,
-                                    is_BB=True)
-        self.account.set_password(TEST_WACHTWOORD)
-        self.account.save()
-
-        self.vhpg = VerklaringHanterenPersoonsgegevens.objects.create(
-                                                    account=self.account,
-                                                    acceptatie_datum=timezone.now())
-
-        self.rayon, _ = Rayon.objects.get_or_create(rayon_nr=5, naam="Rayon 5")
-        self.regio, _ = Regio.objects.get_or_create(regio_nr=117, rayon_nr=self.rayon.rayon_nr, rayon=self.rayon)
-
-        self.ver, _ = Vereniging.objects.get_or_create(
-                                    naam="Browser Club",
-                                    ver_nr=4200,
-                                    regio=self.regio)
-
-        Sporter.objects.filter(lid_nr=100001).delete()
-        self.sporter = Sporter.objects.create(
-                                    lid_nr=100001,
-                                    geslacht="V",
-                                    voornaam="Bro",
-                                    achternaam="de Browser",
-                                    geboorte_datum=datetime.date(year=1988, month=8, day=8),
-                                    sinds_datum=datetime.date(year=2020, month=8, day=8),
-                                    bij_vereniging=self.ver,
-                                    account=self.account,
-                                    email=self.account.email)
-
-        self.functie_hwl, _ = Functie.objects.get_or_create(
-                                    rol='HWL',
-                                    beschrijving='HWL 4200',
-                                    bevestigde_email='hwl4200@test.not',
-                                    vereniging=self.ver)
-        self.functie_hwl.accounts.add(self.account)
-
-    def _database_opschonen(self):
-        self.functie_hwl.delete()
-        self.sporter.delete()
-        self.vhpg.delete()
-        self.account.delete()
-        self.ver.delete()
-        self.regio.delete()
-        self.rayon.delete()
-
     def setUp(self):
-        self._database_vullen()
-        self._driver = bh.get_driver(show_browser=self.show_browser)
+        self._test_count = 0
+        self._driver = None
+        self.account = None
+
+        bh.database_vullen(self)
+
+        self.assertIsNotNone(self.account)
 
     def tearDown(self):
-        self._driver.close()      # important, otherwise the server port keeps occupied
-        self._database_opschonen()
+        if self._driver:
+            self._driver.close()      # important, otherwise the server port keeps occupied
+            self._driver = None
+
+        bh.database_opschonen(self)
 
     def _wait_until_url_not(self, url: str, timeout: float = 2.0):
         duration = 0.5
@@ -109,29 +59,91 @@ class TestBrowser(LiveServerTestCase):
             curr_url = self._driver.current_url
         # while
 
-    def test_all(self):
-        # fail early: haal een eerste pagina op
-        self._driver.get(self.live_server_url + bh.BrowserTestCase.url_plein)
+    # browser interacties
+    def _get_console_log(self) -> list[str]:
+        logs = self._driver.get_log('browser')
+        regels = list()
+        for log in logs:
+            msg = log['message']
+            if msg not in regels:
+                regels.append(msg)
+        return regels
 
+    def _login_and_otp(self):
         # inloggen
         self._driver.get(self.live_server_url + self.url_login)
-        self._driver.find_element(bh.By.ID, 'id_login_naam').send_keys(self.account.username)
-        self._driver.find_element(bh.By.ID, 'id_wachtwoord').send_keys(TEST_WACHTWOORD)
-        login_vink = self._driver.find_element(bh.By.NAME, 'aangemeld_blijven')
+        self.assertEqual(self._driver.title, 'Inloggen')
+
+        # controleer dat er geen meldingen van de browser zijn over de JS bestanden
+        regels = self._get_console_log()
+        if len(regels):
+            for regel in regels:
+                print('regel: %s' % repr(regel))
+        # for
+        self.assertEqual(regels, [])
+
+        self._driver.find_element(By.ID, 'id_login_naam').send_keys(self.account.username)
+        self._driver.find_element(By.ID, 'id_wachtwoord').send_keys(TEST_WACHTWOORD)
+        login_vink = self._driver.find_element(By.NAME, 'aangemeld_blijven')
         self.assertTrue(login_vink.is_selected())
-        self._driver.find_element(bh.By.ID, 'submit_knop').click()
-        self._wait_until_url_not(self.url_login)
+        self._driver.find_element(By.ID, 'submit_knop').click()
+        self._wait_until_url_not(self.url_login)        # gaat naar otp control (want: is_BB)
 
         # pass otp
-        self._driver.get(self.live_server_url + self.url_otp)
-        otp_code = pyotp.TOTP(self.account.otp_code).now()
-        self._driver.find_element(bh.By.ID, 'id_otp_code').send_keys(otp_code)
-        self._driver.find_element(bh.By.ID, 'submit_knop').click()
-        self._wait_until_url_not(self.url_otp)
+        # self._driver.get(self.live_server_url + self.url_otp)
+        self.assertEqual(self._driver.title, 'Controle tweede factor MijnHandboogsport')
 
-        print('searching...')
+        # controleer dat er geen meldingen van de browser zijn over de JS bestanden
+        regels = self._get_console_log()
+        if len(regels):
+            for regel in regels:
+                print('regel: %s' % repr(regel))
+        # for
+        self.assertEqual(regels, [])
+
+        otp_code = pyotp.TOTP(self.account.otp_code).now()
+        self._driver.find_element(By.ID, 'id_otp_code').send_keys(otp_code)
+        self._driver.find_element(By.ID, 'submit_knop').click()
+        self._wait_until_url_not(self.url_otp)          # gaat naar wissel-van-rol
+
+    def _run_module_tests(self, test_module):
+        try:
+            mod = __import__(test_module)
+        except ImportError:
+            pass
+        else:
+            parts = test_module.split('.')
+            for part in parts[1:]:
+                mod = getattr(mod, part)
+            # print('%s is %s' % (test_module, mod))
+            for name in dir(mod):
+                obj = getattr(mod, name)
+                if isinstance(obj, type) and issubclass(obj, bh.BrowserTestCase):
+                    # create an instance of the this BrowserTestCase
+                    inst = obj()
+
+                    # populate with promised members
+                    bh.populate_inst(self, inst)
+
+                    # find and invoke the test functions
+                    for inst_name in dir(inst):
+                        if inst_name.startswith('test_'):
+                            test_func = getattr(inst, inst_name)
+                            if callable(test_func):
+                                self._test_count += 1
+                                print('  %s.%s.%s ...' % (test_module, name, inst_name), end='')
+                                test_func()
+                                if self.pause_after_each_test:
+                                    time.sleep(2)
+                                print('ok')
+                    # for
+            # for
+
+    def _run_tests(self, app_filter=None):
         test_modules = list()
         for app in apps.get_app_configs():
+            if app_filter and app_filter not in app.name:
+                continue
             js_tests_path = os.path.join(app.name, 'js_tests')
             if os.path.exists(js_tests_path):
                 for d in os.listdir(js_tests_path):
@@ -141,42 +153,57 @@ class TestBrowser(LiveServerTestCase):
         # for
 
         test_modules.sort()     # consistent execution order
-        # print('Found: %s' % test_modules)
+        if len(test_modules) == 0:
+            self.fail('No tests found with focus %s' % repr(app_filter))
 
+        do_fail = False
+        try:
+            self._driver = bh.get_driver(show_browser=self.show_browser)
+            self._login_and_otp()
+        except NoSuchElementException as exc:
+            print('\n[ERROR] Selenium error: %s' % str(exc))
+            do_fail = True
+
+        # raise outside try-except to avoid repeat
+        if do_fail:
+            self.fail('Test aborted')
+
+        print('js_tests modules found: %s' % len(test_modules))
         for test_module in test_modules:
-            try:
-                mod = __import__(test_module)
-            except ImportError:
-                pass
-            else:
-                parts = test_module.split('.')
-                for part in parts[1:]:
-                    mod = getattr(mod, part)
-                # print('%s is %s' % (test_module, mod))
-                for name in dir(mod):
-                    obj = getattr(mod, name)
-                    if isinstance(obj, type) and issubclass(obj, bh.BrowserTestCase):
-                        inst = obj()
+            self._run_module_tests(test_module)
+        # for
 
-                        # dirty part: take over all members into the other instance
-                        inst._driver = self._driver
-                        inst.account = self.account
-                        inst.sporter = self.sporter
-                        inst.regio = self.regio
-                        inst.rayon = self.rayon
-                        inst.ver = self.ver
-                        inst.functie_hwl = self.functie_hwl
-                        inst.vhpg = self.vhpg
-                        inst.live_server_url = self.live_server_url
+        print('ran %s js tests ...' % self._test_count, end='')
 
-                        for inst_name in dir(inst):
-                            if inst_name.startswith('test_'):
-                                test_func = getattr(inst, inst_name)
-                                if callable(test_func):
-                                    print('%s.%s.%s ...' % (test_module, name, inst_name ), end='')
-                                    test_func()
-                                    # time.sleep(2)
-                                    print('ok')
-                        # for
+        bh.js_cov_save('/tmp/browser_js_cov.json')
+
+    def test_all(self):
+        self._run_tests()
+
+    def _run_focussed_tests(self):
+        # get the function name of the caller
+        caller_func_name = inspect.currentframe().f_back.f_code.co_name
+        self.show_browser = True
+        self.pause_after_each_test = True
+        self._run_tests(app_filter=caller_func_name[6:])
+
+    def focus_Account(self):
+        self._run_focussed_tests()
+
+    def focus_CompScores(self):
+        self._run_focussed_tests()
+
+    def focus_Logboek(self):
+        self._run_focussed_tests()
+
+    def focus_Overig(self):
+        self._run_focussed_tests()
+
+    def focus_Plein(self):
+        self._run_focussed_tests()
+
+    def focus_Webwinkel(self):
+        self._run_focussed_tests()
+
 
 # end of file

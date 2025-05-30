@@ -4,6 +4,7 @@
  * Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
  */
 
+/* jshint esversion: 6 */
 "use strict";
 
 // respond to browser auto-fill of login dialog, especially password field
@@ -15,7 +16,7 @@ function delayedUpdate() {
     els.forEach(el => {
         const el2 = el.previousSibling;
         el2.classList.add('active');
-    })
+    });
 }
 
 document.addEventListener("DOMContentLoaded", function() {
@@ -25,6 +26,6 @@ document.addEventListener("DOMContentLoaded", function() {
     setTimeout(delayedUpdate, 200);
     setTimeout(delayedUpdate, 500);
     setTimeout(delayedUpdate, 1000);
-})
+});
 
 /* end of file */

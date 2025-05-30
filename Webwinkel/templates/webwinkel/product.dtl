@@ -37,7 +37,7 @@
 
     {% if heeft_fotos %}
         {{ js_fotos|json_script:"js_fotos" }}
-        <script src="{% static 'webwinkel_js_min/kies_foto_min.js' %}"></script>
+        <script src="{% static 'webwinkel_js/kies_foto.js' %}"></script>
     {% endif %}
 
     {% if url_toevoegen %}

@@ -69,20 +69,6 @@
         </div>
     </div>
 
-    {{ team_pk2naam|json_script:"team_pk2naam" }}
-
-    <div id="js_data"
-         data-url-check-bondsnummer="{{ url_check_bondsnummer }}"
-         data-url-deelnemers-ophalen="{{ url_deelnemers_ophalen }}"
-         data-url-opslaan="{{ url_opslaan }}"
-         data-csrf-token="{{ csrf_token }}"
-         data-wedstrijd-pk="{{ wedstrijd.pk }}"
-         data-deelcomp-pk="{{ deelcomp.pk }}"
-         data-wedstrijd-max-score="{{ wedstrijd.max_score }}"
-         data-toon-team-naam="{% if deelcomp.regio_organiseert_teamcompetitie %}true{% else %}f{% endif %}">
-    </div>
-
-    <script src="{% static 'compscores_js_min/scores_invoeren_min.js' %}"></script>
 
     <!-- witruimte -->
     <div class="row center">
@@ -241,21 +227,24 @@
     </div>
 
 
-    <script>
+    <div id="js_data"
+         data-url-check-bondsnummer="{{ url_check_bondsnummer }}"
+         data-url-deelnemers-ophalen="{{ url_deelnemers_ophalen }}"
+         data-url-opslaan="{{ url_opslaan }}"
+         data-csrf-token="{{ csrf_token }}"
+         data-wedstrijd-pk="{{ wedstrijd.pk }}"
+         data-deelcomp-pk="{{ deelcomp.pk }}"
+         data-wedstrijd-max-score="{{ wedstrijd.max_score }}"
+         data-toon-team-naam="{% if deelcomp.regio_organiseert_teamcompetitie %}true{% else %}f{% endif %}"
+         data-table-filter-input-id="table1_zoeken_input">
+    </div>
 
-        // geef de <enter> door aan de zoekknop
-        document.getElementById('id_lid_nr').addEventListener("keyup", function(event) {
-            // console.log('event=', event)
-            if (event.key === "Enter")
-            {
-                let el = document.getElementById('id_zoek_knop');
-                el.click();
-            }
-        });
+    <!-- maak een script block van type application/json aan de data erin -->
+    {{ team_pk2naam|json_script:"team_pk2naam" }}
 
-    </script>
+    <script src="{% static 'compscores_js/scores_invoeren.js' %}"></script>
 
-    <script src="{% static 'overig_js_min/tabel_filter_min.js' %}"></script>
+    <script src="{% static 'overig_js/tabel_filter.js' %}"></script>
 
     {% include 'feedback/sidebar.dtl' with op_pagina="compscores-scores-invoeren" %}
 

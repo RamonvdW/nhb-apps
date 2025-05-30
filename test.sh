@@ -173,13 +173,6 @@ ln -s "$STATIC_DIR" "$TMP_HTML/static"
 export COVERAGE_FILE        # where to write coverage data to
 python3 "${PY_OPTS[@]}" -m coverage erase
 
-echo "[INFO] Capturing output in $LOG"
-# --pid=$$ means: stop when parent stops
-# -u = unbuffered stdin/stdout
-tail -f "$LOG" --pid=$$ | python -u ./Site/utils/number_tests.py | grep --color -E "FAIL$|ERROR$|" &
-PID_TAIL=$(jobs -p | tail -1)
-# echo "PID_TAIL=$PID_TAIL"
-
 ABORTED=0
 
 if [ $KEEP_DB -ne 1 ]
@@ -197,7 +190,7 @@ then
     echo "[INFO] Running migrations and performing run with nodebug"
     # ..and add coverage with no-debug
     # -v 2 shows progress of migrations
-    python3 "${PY_OPTS[@]}" -u "${PYCOV[@]}" ./manage.py test --keepdb --noinput --settings=$SETTINGS_AUTOTEST_NODEBUG -v 2 Plein.tests.test_basics.TestPleinBasics.test_quick &>>"$LOG"
+    python3 "${PY_OPTS[@]}" -u "${PYCOV[@]}" ./manage.py test --keepdb --noinput --settings=$SETTINGS_AUTOTEST_NODEBUG -v 2 Plein.tests.test_basics.TestPleinBasics.test_quick
     RES=$?
     [ $RES -eq 0 ] || ABORTED=1
     # echo "[DEBUG] Debug run result: $RES --> ABORTED=$ABORTED"
@@ -250,6 +243,13 @@ then
     echo "[ERROR] Google Maps simulator failed to start"
     exit
 fi
+
+echo "[INFO] Capturing output in $LOG"
+# --pid=$$ means: stop when parent stops
+# -u = unbuffered stdin/stdout
+tail -f "$LOG" --pid=$$ | python -u ./Site/utils/number_tests.py | grep --color -E "FAIL$|ERROR$|" &
+PID_TAIL=$(jobs -p | tail -1)
+# echo "PID_TAIL=$PID_TAIL"
 
 # set high performance
 powerprofilesctl set performance

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -13,7 +13,7 @@ from BasisTypen.definities import (ORGANISATIES, ORGANISATIE_WA,
 
 
 class BoogType(models.Model):
-    """ boog typen: volledige naam en unique afkorting """
+    """ boog typen: volledige naam en unieke afkorting """
 
     # WA, IFAA of nationaal
     organisatie = models.CharField(max_length=1, choices=ORGANISATIES, default=ORGANISATIE_WA)

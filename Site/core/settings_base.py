@@ -62,7 +62,7 @@ APPS_DIR = os.path.dirname(BASE_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2025-05-30'
+SITE_VERSIE = '2025-05-31'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -238,7 +238,7 @@ STATICFILES_DIRS = [
     ("webwinkel_fotos", WEBWINKEL_FOTOS_DIR),       # noqa
 ]
 STATICFILES_FINDERS = [
-    'Site.core.minify_js.AppJsMinifyFinder',                    # minifies javascript files + creates new static files
+    'Site.core.transpose_js.AppJsFinder',                       # create static files from .js + minify/instrument
     'django.contrib.staticfiles.finders.FileSystemFinder',      # zoekt in STATICFILES_DIRS
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',  # zoekt in App/static/
 ]
@@ -622,6 +622,9 @@ ENABLE_DJANGO_EXTENSIONS = False
 
 # minify html en javascript
 ENABLE_MINIFY = True
+
+# instrumentation of javascript
+ENABLE_INSTRUMENT_JS = False
 
 # HTML validation using v.Nu (see TestHelpers/e2ehelpers.py)        # noqa
 TEST_VALIDATE_HTML = False

@@ -189,9 +189,11 @@ class ProductView(TemplateView):
 
         context['fotos'] = fotos = product.fotos.order_by('volgorde')
         is_eerste = True
+        nr = 0
         for foto in fotos:
-            foto.id_img = "id_img_%s" % foto.volgorde
-            foto.id_thumb = "id_thumb_%s" % foto.volgorde
+            nr += 1
+            foto.id_img = "id_img_%s" % nr
+            foto.id_thumb = "id_thumb_%s" % nr
             foto.img_src = static_safe("webwinkel_fotos/" + foto.locatie)
             foto.thumb_src = static_safe("webwinkel_fotos/" + foto.locatie_thumb)
             foto.is_eerste = is_eerste

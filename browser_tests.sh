@@ -37,6 +37,7 @@ STAMP=$(date +"%Y-%m-%d %H:%M:%S")
 echo "[INFO] Now is $STAMP"
 
 KEEP_DB=1
+FOCUS=""
 
 for arg in "${ARGS[@]}"
 do
@@ -53,21 +54,14 @@ do
     elif [[ "$arg" == "--clean" ]]
     then
         KEEP_DB=0
+
+    else
+        FOCUS="$arg"
     fi
 done
 
 echo "[INFO] Checking application is free of fatal errors"
 python3 "${PY_OPTS[@]}" ./manage.py check --tag admin --tag models || exit $?
-
-echo "[INFO] Refreshing static files"
-[ -d "$STATIC_DIR" ] && rm -rf "$STATIC_DIR"*     # keeps top directory
-COLLECT=$(./manage.py collectstatic --link)
-RES=$?
-if [ $RES -ne 0 ]
-then
-    echo "$COLLECT"
-    exit 1
-fi
 
 ABORTED=0
 if [ $KEEP_DB -ne 1 ]
@@ -86,8 +80,18 @@ then
     # cannot run migrations stand-alone because it will not use the test database
     time python3 -u ./manage.py test --keepdb --noinput --settings=$SETTINGS_AUTOTEST_NODEBUG -v 2 Plein.tests.test_basics.TestPleinBasics.test_quick
     RES=$?
-    [ $RES -eq 0 ] || ABORTED=1
+    [ $RES -eq 0 ] || exit 1
     # echo "[DEBUG] Debug run result: $RES --> ABORTED=$ABORTED"
+fi
+
+echo "[INFO] Refreshing static files"       # (webwinkel foto's, minified js, app static contents, etc.)
+[ -d "$STATIC_DIR" ] && rm -rf "$STATIC_DIR"*     # keeps top directory
+COLLECT=$(./manage.py collectstatic --settings=$SETTINGS_AUTOTEST_NODEBUG --link)
+RES=$?
+if [ $RES -ne 0 ]
+then
+    echo "$COLLECT"
+    exit 1
 fi
 
 # set high performance
@@ -105,9 +109,16 @@ PID_TAIL=$(jobs -p | tail -1)
 # note: double quotes not supported around $*
 if [ $ABORTED -eq 0 ]
 then
-    echo "[INFO] Starting browser tests run" >>"$LOG"
-    python3 -u ./manage.py test --keepdb --noinput --settings=$SETTINGS_AUTOTEST_NODEBUG -v 2 Plein.tests.test_js_in_browser &>>"$LOG"
-    RES=$?
+    if [ -z "$FOCUS" ]
+    then
+        echo "[INFO] Starting browser tests run" >>"$LOG"
+        python3 -u ./manage.py test --keepdb --noinput --settings=$SETTINGS_AUTOTEST_NODEBUG -v 2 "Plein.tests.test_js_in_browser" &>>"$LOG"
+        RES=$?
+    else
+        echo "[INFO] Starting browser tests run for focus_$FOCUS" >>"$LOG"
+        python3 -u ./manage.py test --keepdb --noinput --settings=$SETTINGS_AUTOTEST_NODEBUG -v 2 "Plein.tests.test_js_in_browser.TestBrowser.focus_$FOCUS" &>>"$LOG"
+        RES=$?
+    fi
     #echo "[DEBUG] Run result: $RES --> ABORTED=$ABORTED"
     [ $RES -eq 3 ] && ABORTED=1
 

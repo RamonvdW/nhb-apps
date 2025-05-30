@@ -146,7 +146,7 @@
          data-datum12="{{ comp.datum12|date:'Y-m-d' }}">
     </div>
 
-    <script src="{% static 'compbeheer_js_min/wijzig_datums_min.js' %}"></script>
+    <script src="{% static 'compbeheer_js/wijzig_datums.js' %}"></script>
 
     {% include 'feedback/sidebar.dtl' with op_pagina="compbeheer-wijzig-datums" %}
 

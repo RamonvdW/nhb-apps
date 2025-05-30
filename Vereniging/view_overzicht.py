@@ -142,6 +142,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                     kaartje.beschikbaar_vanaf = localize(comp.begin_fase_C)
                 kaartjes.append(kaartje)
 
+            deelcomp = None
             for deelcomp in deelcomps:
                 if deelcomp.competitie == comp:
                     if (deelcomp.regio_organiseert_teamcompetitie and
@@ -172,6 +173,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
             del deelcomp
 
             # 3 - teams RK
+            deelkamp_rk = None
             for deelkamp_rk in deelkamps_rk:
                 if deelkamp_rk.competitie == comp:
                     if deelkamp_rk.heeft_deelnemerslijst:

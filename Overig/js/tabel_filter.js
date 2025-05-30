@@ -4,9 +4,8 @@
  * Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
  */
 
-"use strict";
-
 /* jshint esversion: 6 */
+"use strict";
 
 // ### tabel filter ###
 

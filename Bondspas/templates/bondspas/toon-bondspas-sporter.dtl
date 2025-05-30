@@ -46,7 +46,7 @@
          data-csrf-token="{{ csrf_token }}">
     </div>
 
-    <script defer src="{% static 'bondspas_js_min/bondspas_ophalen_min.js' %}"></script>
+    <script defer src="{% static 'bondspas_js/bondspas_ophalen.js' %}"></script>
 
     {% include 'feedback/sidebar.dtl' with op_pagina="bondspas-toon-bondspas-sporter" %}
 

@@ -15,7 +15,7 @@
     </div>
 </div>
 
-<script src="{% static 'logboek_js_min/activeer_deel_min.js' %}"></script>
+<script src="{% static 'logboek_js/activeer_deel.js' %}"></script>
 
 <!-- blauwe balk -->
 <div class="row-sv-blauw">

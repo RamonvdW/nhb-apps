@@ -7,7 +7,7 @@
 from django.conf import settings
 from django.test import TestCase
 from Site.core.background_sync import BackgroundSync
-from Site.core.minify_js import AppJsMinifyFinder
+from Site.core.transpose_js import AppJsFinder
 import tempfile
 import os
 
@@ -39,7 +39,7 @@ class TestSiteCore(TestCase):
         self.assertFalse(got_ping)
 
     def test_minify_js(self):
-        obj = AppJsMinifyFinder(app_names=['Avoid all real apps'])
+        obj = AppJsFinder(app_names=['Avoid all real apps'])
 
         # add a fake app
         with tempfile.TemporaryDirectory() as tmp_dir:
@@ -51,7 +51,7 @@ class TestSiteCore(TestCase):
 
             # make app dirs (these are normally made by AppJsMinifyFinder.__init__)
             os.mkdir(os.path.join(tmp_dir, 'static'))
-            os.mkdir(os.path.join(tmp_dir, 'static', 'test_js_min'))
+            os.mkdir(os.path.join(tmp_dir, 'static', 'test_js'))
 
             with open(os.path.join(js_dir, 'unclosed_string.js'), 'w') as f:
                 msg = "/* mandatory copyright */\n"

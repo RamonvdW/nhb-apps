@@ -296,7 +296,7 @@
         </script>
     {% endif %}
 
-    <script src="{% static 'overig_js_min/tabel_filter_min.js' %}"></script>
+    <script src="{% static 'overig_js/tabel_filter.js' %}"></script>
 
     {% include 'feedback/sidebar.dtl' with op_pagina="compinschrijven-hwl-leden-aanmelden" %}
 
