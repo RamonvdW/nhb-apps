@@ -28,6 +28,7 @@ coverage_data = dict()
 
 
 def js_cov_add(data: str):
+    # print('js_cov_add: %s' % repr(data))
     data = json.loads(data)
 
     for fpath, cov_data in data.items():
@@ -41,11 +42,10 @@ def js_cov_add(data: str):
     # for
 
 
-def js_cov_save(fname):
-    with open(fname, 'w') as f:
-        f.write(json.dumps(coverage_data) + '\n')
-        f.close()
-    # with
+def js_cov_save():
+    # print('{jscov} saving the data')
+    from Site.js_cov.js_cov_save import save_the_data
+    save_the_data(coverage_data)
 
 
 class BrowserTestCase(TestCase):
@@ -147,7 +147,8 @@ class BrowserTestCase(TestCase):
 
     def do_navigate_to(self, url):
         # capture collected coverage before navigating away
-        test = self._driver.execute_script('return JSON.stringify(_js_cov);')
+        script = 'if (typeof _js_cov !== "undefined") { return JSON.stringify(_js_cov); } else { return ""; }'
+        test = self._driver.execute_script(script)
         self._driver.get(self.live_server_url + url)
         js_cov_add(test)
 
@@ -363,7 +364,7 @@ def database_opschonen(self):
     self.ver.delete()
     self.regio.delete()
     self.rayon.delete()
-    self.boog_r.delete()
+    # self.boog_r.delete()
 
 
 def populate_inst(self, inst):

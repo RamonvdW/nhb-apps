@@ -63,7 +63,7 @@ urlpatterns = [
     # path('sporter/bondspas/', lambda request: redirect('ledenpas/', permanent=True)),
 ]
 
-if settings.DEBUG:          # pragma: no cover
+if settings.ENABLE_DEBUG_TOOLBAR:          # pragma: no cover
     import debug_toolbar
     urlpatterns.insert(0, path('__debug__', include(debug_toolbar.urls)))
 

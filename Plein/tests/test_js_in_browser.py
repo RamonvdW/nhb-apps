@@ -175,7 +175,7 @@ class TestBrowser(LiveServerTestCase):
 
         print('ran %s js tests ...' % self._test_count, end='')
 
-        bh.js_cov_save('/tmp/browser_js_cov.json')
+        bh.js_cov_save()
 
     def test_all(self):
         self._run_tests()

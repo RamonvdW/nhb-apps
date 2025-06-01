@@ -7,6 +7,7 @@
 from django.apps import apps
 from django.conf import settings
 from django.contrib.staticfiles.finders import BaseFinder
+from Site.js_cov.instrument_js import JsCovInstrument
 import os
 import re
 
@@ -27,18 +28,9 @@ class AppJsFinder(BaseFinder):
             tbd
     """
 
-    # name of the global variable
-    js_cov_global = '_js_cov'
-    js_cov_local = '_js_f'
-
     def __init__(self, app_names=None, *args, **kwargs):
         self.apps_with_js = dict()
         self.main = ''
-        self.line_nr = 0
-        self.scope_stack = list()     # [c, ...] c = character that ends the scope
-        self.js_cov_file = ''
-        self.statement_line_nrs = list()
-        self.local_f_counter = 0
 
         if settings.ENABLE_MINIFY and settings.ENABLE_INSTRUMENT_JS:
             raise SystemError('Conflicting settings: ENABLE_MINIFY and ENABLE_INSTRUMENT_JS')
@@ -54,6 +46,8 @@ class AppJsFinder(BaseFinder):
         # maak meteen de static directories aan zodat deze gevonden kunnen worden door de AppDirectoriesFinder.__init__
         # (jammer dat het zoeken niet later gedaan wordt)
         self._make_static_dirs()
+
+        self._instrument_js = JsCovInstrument()
 
         super().__init__(*args, **kwargs)
 
@@ -126,8 +120,8 @@ class AppJsFinder(BaseFinder):
         if settings.ENABLE_MINIFY:
             new_contents = self._minify_javascript(contents)
 
-        elif settings.ENABLE_INSTRUMENT_JS and '/* js_cov: no */' not in contents:
-            new_contents = self._instrument_javascript(contents, app_path)
+        elif settings.ENABLE_INSTRUMENT_JS:
+            new_contents = self._instrument_js.instrument(contents, app_path)
 
         else:
             new_contents = contents
@@ -275,178 +269,6 @@ class AppJsFinder(BaseFinder):
                 break  # from the while
         # while
         return pos
-
-    def _instrument_javascript(self, script, app_path):
-        """ Doorloop javascript en voeg extra code toe voor code coverage instrumentatie
-            Verwijder commentaar regels
-        """
-        # keep the copyright header
-        pos = script.find('*/\n')
-        clean = script[:pos + 3]
-        script = script[pos + 3:]
-
-        self.line_nr = 1 + clean.count('\n')
-        self.scope_stack = list()       # empty list = global scope
-        self.statement_line_nrs = list()
-
-        self.local_f_counter += 1
-        js_cov_f_nr = self.js_cov_local + str(self.local_f_counter)
-        self.js_cov_file = "%s[%s]" % (self.js_cov_global, js_cov_f_nr)
-
-        # if it does not yet exist, create the global variable to track coverage
-        clean += 'var %s = %s || {};\n' % (self.js_cov_global, self.js_cov_global)
-
-        # declare a const that holds the long filename
-        clean += 'const %s = "%s";\n' % (js_cov_f_nr, app_path)
-
-        # initialize the structure to cover the current script
-        # the || {} construction avoids overwriting data
-        clean += '%s = %s || {};\n' % (self.js_cov_file, self.js_cov_file)
-
-        while len(script):
-            # zoek strings zodat we die niet wijzigen
-            pos_dq = script.find('"')
-            pos_sq = script.find("'")
-
-            if pos_sq >= 0 and pos_dq >= 0:
-                pos_q = min(pos_sq, pos_dq)  # both not -1 --> take first, thus min
-            else:
-                pos_q = max(pos_sq, pos_dq)  # either one is -1 --> take max, thus the positive one
-
-            # zoek commentaar zodat we geen quotes in commentaar pakken /* can't */
-            pos_sc = script.find('//')  # single line comment
-            pos_bc = script.find('/*')  # block comment
-
-            if pos_sc >= 0 and pos_bc >= 0:
-                pos_c = min(pos_sc, pos_bc)  # both not -1 --> take first, thus min
-            else:
-                pos_c = max(pos_sc, pos_bc)  # either one is -1 --> take max, thus the positive one
-
-            if pos_c >= 0 and pos_q >= 0:
-                # zowel quote and commentaar
-                if pos_c < pos_q:
-                    # commentaar komt eerst
-
-                    # verwerk het stuk script voordat het commentaar begint
-                    pre_comment = script[:pos_c]
-                    clean += self._instrument_part(pre_comment)
-                    script = script[pos_c:]
-
-                    # verwijder het commentaar
-                    if pos_c == pos_sc:
-                        # verwijder single-line comment
-                        pos = script.find('\n')
-                        if pos > 0:
-                            script = script[pos + 1:]
-                            self.line_nr += 1
-                        else:
-                            script = ''
-                    else:
-                        # verwijder block comment
-                        pos = script.find('*/')
-                        if pos > 0:
-                            comment = script[:pos+2]
-                            self.line_nr += comment.count('\n')
-                            script = script[pos + 2:]
-                        else:
-                            script = ''
-
-                    # opnieuw evalueren
-                    continue
-
-            if pos_q >= 0:
-                pre_string = script[:pos_q]
-                clean += self._instrument_part(pre_string)
-
-                stop_char = script[pos_q]
-                script = script[pos_q + 1:]  # kap pre-string en quote eraf
-                pos = self._zoek_eind_quote(script, stop_char)
-                clean += stop_char  # open char
-                clean_part = script[:pos + 1]  # kopieer string inclusief stop-char
-                clean += clean_part
-                self.line_nr += clean_part.count('\n')
-                script = script[pos + 1:]
-
-            elif pos_c > 0:
-                # comment, no more quotes
-
-                # verwerk het stuk script voordat het commentaar begint
-                pre_comment = script[:pos_c]
-                clean += self._instrument_part(pre_comment)
-                script = script[pos_c:]
-
-                # verwijder het commentaar
-                if pos_c == pos_sc:
-                    # verwijder single-line comment
-                    pos = script.find('\n')
-                    if pos > 0:
-                        script = script[pos + 1:]
-                        self.line_nr += 1
-                    else:
-                        script = ''
-                else:
-                    # verwijder block comment
-                    pos = script.find('*/')
-                    if pos > 0:
-                        comment = script[:pos + 2]
-                        self.line_nr += comment.count('\n')
-                        script = script[pos + 2:]
-                    else:
-                        script = ''
-
-            else:
-                clean += self._instrument_part(script)
-                script = ''
-        # while
-
-        # remove empty lines
-        while '\n\n' in clean:
-            clean = clean.replace('\n\n', '\n')
-        # while
-
-        return clean
-
-    def _instrument_part(self, script):
-        clean = ''
-
-        while len(script) > 0:
-            pos_n = script.find('\n')
-            if pos_n >= 0:
-                line = script[:pos_n]
-                script = script[pos_n+1:]
-            else:
-                line = script
-                script = ''
-
-            if line.strip() != '':
-                # print('[%s] line: %s' % (self.line_nr, repr(line)))
-                if self.line_nr not in self.statement_line_nrs:
-                    self.statement_line_nrs.append(self.line_nr)
-                clean += line
-
-                insert_here = False
-
-                if line[-1] == ';':
-                    # end of statement
-                    insert_here = True
-
-                if line[-1] == '{':
-                    if 'function' in line or 'forEach' in line:
-                        insert_here = True
-
-                if insert_here:
-                    # print('[%s] inserting (%s)' % (self.line_nr, repr(self.statement_line_nrs)))
-                    for line_nr in self.statement_line_nrs:
-                        clean += '\n%s[%s] = 1;' % (self.js_cov_file, line_nr)
-                    # for
-                    self.statement_line_nrs = list()
-
-            if pos_n >= 0:
-                clean += '\n'
-                self.line_nr += 1
-        # while
-
-        return clean
 
 
 # end of file

@@ -1,5 +1,13 @@
 [run]
-plugins = django_coverage_plugin
+plugins =
+    django_coverage_plugin
+    Site.js_cov
+include =
+    ./*/js/*.js
+
+[report]
+include =
+    ./*/js/*.js
 
 [django_coverage_plugin]
 template_extensions = dtl

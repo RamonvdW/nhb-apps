@@ -12,6 +12,8 @@ TEST_DIR_FOTOS_WEBWINKEL="$TEST_DIR/webwinkel"
 LOG="/tmp/browser_test_out.txt"
 STATIC_DIR="$PWD/Site/.static/"   # must be full path
 SETTINGS_AUTOTEST_NODEBUG="Site.settings_autotest_nodebug"
+COVERAGE_RC="./Site/utils/coverage.rc"
+COVERAGE_FILE="/tmp/.coverage.$$"
 DATABASE="test_data3"
 
 # -Wa = enable deprecation warnings
@@ -38,6 +40,9 @@ echo "[INFO] Now is $STAMP"
 
 KEEP_DB=1
 FOCUS=""
+
+export COVERAGE_FILE        # where to write coverage data to
+python3 "${PY_OPTS[@]}" -m coverage erase
 
 for arg in "${ARGS[@]}"
 do
@@ -109,14 +114,16 @@ PID_TAIL=$(jobs -p | tail -1)
 # note: double quotes not supported around $*
 if [ $ABORTED -eq 0 ]
 then
+    PYCOV=(-m coverage run --rcfile="$COVERAGE_RC" --append --branch --debug=trace)
+    TEST=(./manage.py test --keepdb --noinput --settings="$SETTINGS_AUTOTEST_NODEBUG" -v 2)
     if [ -z "$FOCUS" ]
     then
         echo "[INFO] Starting browser tests run" >>"$LOG"
-        python3 -u ./manage.py test --keepdb --noinput --settings=$SETTINGS_AUTOTEST_NODEBUG -v 2 "Plein.tests.test_js_in_browser" &>>"$LOG"
+        python3 -u "${PYCOV[@]}" "${TEST[@]}" "Plein.tests.test_js_in_browser" &>>"$LOG"
         RES=$?
     else
         echo "[INFO] Starting browser tests run for focus_$FOCUS" >>"$LOG"
-        python3 -u ./manage.py test --keepdb --noinput --settings=$SETTINGS_AUTOTEST_NODEBUG -v 2 "Plein.tests.test_js_in_browser.TestBrowser.focus_$FOCUS" &>>"$LOG"
+        python3 -u "${PYCOV[@]}" "${TEST[@]}" "Plein.tests.test_js_in_browser.TestBrowser.focus_$FOCUS" &>>"$LOG"
         RES=$?
     fi
     #echo "[DEBUG] Run result: $RES --> ABORTED=$ABORTED"
@@ -137,6 +144,32 @@ wait "$PID_TAIL" 2>/dev/null
 
 # cleanup test data directories
 [ -d "$TEST_DIR" ] && rm -rf "$TEST_DIR"
+
+if [ $ABORTED -eq 0 ]
+then
+    echo "[INFO] Generating reports" | tee -a "$LOG"
+
+    # delete old coverage report
+    [ -d "$REPORT_DIR" ] && rm -rf "$REPORT_DIR" &>>"$LOG"
+
+    PRECISION=2     # 2 decimalen achter de komma
+    OMIT="--omit=*/lib/python3*/site-packages/*"    # use , to separate
+    JS="*/js/*.js"
+
+    if [ -z "$FOCUS" ]
+    then
+        python3 -m coverage report --rcfile="$COVERAGE_RC" --precision=$PRECISION --include="$JS" "$OMIT" 2>&1 | tee -a "$LOG"
+        python3 -m coverage html --rcfile="$COVERAGE_RC" -d "$REPORT_DIR" --precision=$PRECISION --include="$JS" "$OMIT" &>>"$LOG"
+    else
+
+        [ -n "$COV_INCLUDE" ] && COV_INCLUDE="--include=$COV_INCLUDE"
+        python3 -m coverage report --rcfile="$COVERAGE_RC" --precision=$PRECISION --include="$JS,$FOCUS/*" "$OMIT" 2>&1 | tee -a "$LOG"
+        python3 -m coverage html --rcfile="$COVERAGE_RC" -d "$REPORT_DIR" --precision=$PRECISION --include="$JS,$FOCUS/*" "$OMIT" &>>"$LOG"
+    fi
+
+    echo "COVERAGE_FILE=$COVERAGE_FILE"
+    #rm "$COVERAGE_FILE"
+fi
 
 # restore performance mode
 powerprofilesctl set balanced
