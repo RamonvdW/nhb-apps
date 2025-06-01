@@ -183,6 +183,10 @@ class TestBrowser(LiveServerTestCase):
 
         bh.js_cov_save()
 
+    def import_js_cov(self):
+        res = bh.js_cov_import()
+        self.assertEqual(res, 1)
+
     def test_all(self):
         self._run_tests()
 

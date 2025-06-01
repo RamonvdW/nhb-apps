@@ -39,7 +39,8 @@ class JsCovFind:
                 # for
         # for
 
-    def _make_ranges(self, nrs):
+    @staticmethod
+    def _make_ranges(nrs):
         # convert a list of numbers, partially consecutive, into a list of ranges
         nrs.sort()
         ranges = list()

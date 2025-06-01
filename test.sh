@@ -339,6 +339,12 @@ COVERAGE_RED=0
 
 if [ $ABORTED -eq 0 ] || [ $FORCE_REPORT -eq 1 ]
 then
+    if [ -e "/tmp/browser_js_cov.json" ]
+    then
+        # import the JS coverage data
+        python3 "${PY_OPTS[@]}" -u "${PYCOV[@]}" ./manage.py test --keepdb --settings=$SETTINGS_AUTOTEST "Plein.tests.test_js_in_browser.TestBrowser.import_js_cov"
+    fi
+
     echo "[INFO] Generating reports" | tee -a "$LOG"
 
     # delete old coverage report

@@ -14,6 +14,7 @@ from Competitie.models import (Competitie, Regiocompetitie, RegiocompetitieRonde
 from Functie.models import Functie, VerklaringHanterenPersoonsgegevens
 from Geo.models import Regio, Rayon
 from Sporter.models import Sporter, SporterBoog
+from Site.js_cov.js_cov_save import save_the_data, import_the_data
 from TestHelpers.e2ehelpers import TEST_WACHTWOORD
 from Vereniging.models import Vereniging
 from Webwinkel.models import WebwinkelFoto, WebwinkelProduct
@@ -28,7 +29,7 @@ coverage_data = dict()
 
 
 def js_cov_add(data: str):
-    # print('js_cov_add: %s' % repr(data))
+    print('js_cov_add: %s' % repr(data))
     data = json.loads(data)
 
     for fpath, cov_data in data.items():
@@ -44,9 +45,14 @@ def js_cov_add(data: str):
 
 
 def js_cov_save():
-    # print('{jscov} saving the data')
-    from Site.js_cov.js_cov_save import save_the_data
+    print('{js_cov} saving the data')
     save_the_data(coverage_data)
+
+
+def js_cov_import():
+    print('{js_cov} importing the data')
+    import_the_data()
+    return 1
 
 
 class BrowserTestCase(TestCase):
@@ -369,8 +375,8 @@ def database_opschonen(self):
     self.vhpg.delete()
     self.account.delete()
     self.ver.delete()
-    self.regio.delete()
-    self.rayon.delete()
+    self.regio.delete()         # regio 117
+    self.rayon.delete()         # rayon 5
     # self.boog_r.delete()
 
 
