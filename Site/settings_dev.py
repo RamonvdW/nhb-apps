@@ -45,7 +45,7 @@ USE_SUBSET_FONT_FILES = False
 ENABLE_MINIFY = False
 
 # instrumenteer javascript bestanden
-ENABLE_INSTRUMENT_JS = True
+ENABLE_INSTRUMENT_JS = False
 
 # django-extensions
 #   very useful for show_urls:

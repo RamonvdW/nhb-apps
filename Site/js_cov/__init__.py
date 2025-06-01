@@ -6,14 +6,13 @@
 
 """ In-brosser Javascript coverage measurement plugin for (python) Coverage """
 
-from .coverage_plugin import JsCoveragePluginException  # noqa
-from .coverage_plugin import JsCoveragePlugin
+from .js_cov_plugin import JsCoveragePlugin
 
 
 def coverage_init(reg, options):
-    print('{jscov} registering')
+    # note: cannot (easily) access Django settings, because coverage runs before Django starts
+    # from django.conf import settings
     plugin = JsCoveragePlugin(options)
     reg.add_file_tracer(plugin)
-    #reg.add_configurer(plugin)
 
 # end of file

@@ -35,7 +35,8 @@ def js_cov_add(data: str):
         if fpath not in coverage_data:
             coverage_data[fpath] = list()
 
-        for line_nr in cov_data.keys():
+        for nr_str in cov_data.keys():
+            line_nr = int(nr_str)
             if line_nr not in coverage_data[fpath]:
                 coverage_data[fpath].append(line_nr)
         # for
@@ -145,12 +146,18 @@ class BrowserTestCase(TestCase):
             curr_url = self._driver.current_url
         # while
 
-    def do_navigate_to(self, url):
+    def fetch_js_cov(self):
         # capture collected coverage before navigating away
-        script = 'if (typeof _js_cov !== "undefined") { return JSON.stringify(_js_cov); } else { return ""; }'
+        script = 'if (typeof _js_cov !== "undefined") {'
+        script += 'const data = JSON.stringify(_js_cov); _js_cov = {}; return data;'
+        script += '} else { return "{}"; }'
         test = self._driver.execute_script(script)
-        self._driver.get(self.live_server_url + url)
         js_cov_add(test)
+
+    def do_navigate_to(self, url):
+        self.fetch_js_cov()
+        # ga naar de nieuwe pagina - dit reset the globale variabele
+        self._driver.get(self.live_server_url + url)
 
     # helper functions
     def do_wissel_naar_hwl(self):

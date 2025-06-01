@@ -10,11 +10,14 @@ ARGS=("$@")
 TEST_DIR="./Site/tmp_test_data"
 TEST_DIR_FOTOS_WEBWINKEL="$TEST_DIR/webwinkel"
 LOG="/tmp/browser_test_out.txt"
+REPORT_DIR="/tmp/covhtml"
 STATIC_DIR="$PWD/Site/.static/"   # must be full path
 SETTINGS_AUTOTEST_NODEBUG="Site.settings_autotest_nodebug"
+SETTINGS_AUTOTEST_BROWSER="Site.settings_autotest_browser"
 COVERAGE_RC="./Site/utils/coverage.rc"
 COVERAGE_FILE="/tmp/.coverage.$$"
 DATABASE="test_data3"
+PYCOV=(-m coverage run --rcfile="$COVERAGE_RC" --append --branch)    # --debug=trace
 
 # -Wa = enable deprecation warnings
 PY_OPTS=(-Wa)
@@ -91,11 +94,12 @@ fi
 
 echo "[INFO] Refreshing static files"       # (webwinkel foto's, minified js, app static contents, etc.)
 [ -d "$STATIC_DIR" ] && rm -rf "$STATIC_DIR"*     # keeps top directory
-COLLECT=$(./manage.py collectstatic --settings=$SETTINGS_AUTOTEST_NODEBUG --link)
+# note: it is important to use the autotest_browser settings, otherwise instrumentation of JS will not happen
+python3 -u ./manage.py collectstatic --settings="$SETTINGS_AUTOTEST_BROWSER" --link
 RES=$?
 if [ $RES -ne 0 ]
 then
-    echo "$COLLECT"
+    echo "[ERROR] Terminating"
     exit 1
 fi
 
@@ -114,8 +118,7 @@ PID_TAIL=$(jobs -p | tail -1)
 # note: double quotes not supported around $*
 if [ $ABORTED -eq 0 ]
 then
-    PYCOV=(-m coverage run --rcfile="$COVERAGE_RC" --append --branch --debug=trace)
-    TEST=(./manage.py test --keepdb --noinput --settings="$SETTINGS_AUTOTEST_NODEBUG" -v 2)
+    TEST=(./manage.py test --keepdb --noinput --settings="$SETTINGS_AUTOTEST_BROWSER" -v 2)
     if [ -z "$FOCUS" ]
     then
         echo "[INFO] Starting browser tests run" >>"$LOG"
@@ -152,19 +155,16 @@ then
     # delete old coverage report
     [ -d "$REPORT_DIR" ] && rm -rf "$REPORT_DIR" &>>"$LOG"
 
-    PRECISION=2     # 2 decimalen achter de komma
     OMIT="--omit=*/lib/python3*/site-packages/*"    # use , to separate
-    JS="*/js/*.js"
 
     if [ -z "$FOCUS" ]
     then
-        python3 -m coverage report --rcfile="$COVERAGE_RC" --precision=$PRECISION --include="$JS" "$OMIT" 2>&1 | tee -a "$LOG"
-        python3 -m coverage html --rcfile="$COVERAGE_RC" -d "$REPORT_DIR" --precision=$PRECISION --include="$JS" "$OMIT" &>>"$LOG"
+        python3 -m coverage report --rcfile="$COVERAGE_RC" --include="**/*.js" "$OMIT" 2>&1 | tee -a "$LOG"
+        python3 -m coverage html   --rcfile="$COVERAGE_RC" --include="**/*.js" "$OMIT" -d "$REPORT_DIR" &>>"$LOG"
     else
-
         [ -n "$COV_INCLUDE" ] && COV_INCLUDE="--include=$COV_INCLUDE"
-        python3 -m coverage report --rcfile="$COVERAGE_RC" --precision=$PRECISION --include="$JS,$FOCUS/*" "$OMIT" 2>&1 | tee -a "$LOG"
-        python3 -m coverage html --rcfile="$COVERAGE_RC" -d "$REPORT_DIR" --precision=$PRECISION --include="$JS,$FOCUS/*" "$OMIT" &>>"$LOG"
+        python3 -m coverage report --rcfile="$COVERAGE_RC" --include="$FOCUS/**/*.js" "$OMIT" 2>&1 | tee -a "$LOG"
+        python3 -m coverage html   --rcfile="$COVERAGE_RC" --include="$FOCUS/**/*.js" "$OMIT" -d "$REPORT_DIR" &>>"$LOG"
     fi
 
     echo "COVERAGE_FILE=$COVERAGE_FILE"

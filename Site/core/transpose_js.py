@@ -13,6 +13,8 @@ import re
 
 
 class AppJsFinder(BaseFinder):
+    """ Invoked during collect static, if present in settings.STATICFILES_FINDERS """
+
     """
         Check each app for a "js" directory
         Read each app/js/xx.js file and save in app/static/app_js/xx.js, possibly transposing on the fly:
@@ -113,7 +115,7 @@ class AppJsFinder(BaseFinder):
             - instrument
         """
 
-        print('[INFO] loading %s' % repr(app_path))
+        # print('[INFO] loading %s' % repr(app_path))
         with open(fpath_in, 'r') as f:
             contents = f.read()
 

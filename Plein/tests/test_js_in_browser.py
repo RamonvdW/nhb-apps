@@ -42,8 +42,8 @@ class TestBrowser(LiveServerTestCase):
         self.assertIsNotNone(self.account)
 
     def tearDown(self):
-        if self._driver:
-            self._driver.close()      # important, otherwise the server port keeps occupied
+        if self._driver:                # pragma: no branch
+            self._driver.close()        # important, otherwise the server port remains occupied
             self._driver = None
 
         bh.database_opschonen(self)
@@ -70,6 +70,8 @@ class TestBrowser(LiveServerTestCase):
         return regels
 
     def _login_and_otp(self):
+        # note: no js_cov measurement for this automation
+
         # inloggen
         self._driver.get(self.live_server_url + self.url_login)
         self.assertEqual(self._driver.title, 'Inloggen')
@@ -133,6 +135,7 @@ class TestBrowser(LiveServerTestCase):
                                 self._test_count += 1
                                 print('  %s.%s.%s ...' % (test_module, name, inst_name), end='')
                                 test_func()
+                                inst.fetch_js_cov()
                                 if self.pause_after_each_test:
                                     time.sleep(2)
                                 print('ok')
@@ -164,7 +167,7 @@ class TestBrowser(LiveServerTestCase):
             print('\n[ERROR] Selenium error: %s' % str(exc))
             do_fail = True
 
-        # raise outside try-except to avoid repeat
+        # raise outside try-except to avoid raising exception from inside exception handler
         if do_fail:
             self.fail('Test aborted')
 
@@ -174,6 +177,9 @@ class TestBrowser(LiveServerTestCase):
         # for
 
         print('ran %s js tests ...' % self._test_count, end='')
+
+        # give the developer some time to play with the browser instance
+        # time.sleep(120)
 
         bh.js_cov_save()
 

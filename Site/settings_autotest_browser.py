@@ -22,6 +22,13 @@
               provides additional items that are part of the release
           provides changes to to settings for autotest
 
+    Autotest via browser_test.sh  (uses ./manage.py cmd --settings=Site.settings_autotest_browser)
+      Site/settings_autotest_browser.py
+          includes Site/core/settings_base.py
+              includes Site/settings_local.py for site specific settings
+              provides additional items that are part of the release
+          provides changes to to settings for autotest with remote browser
+
     Dev server via run.sh  (uses ./manage.py cmd --settings=Site.settings_dev)
       Site/settings_dev.py
           includes Site/core/settings_base.py
@@ -34,6 +41,11 @@ from Site.settings_autotest import *         # noqa
 
 # useless because Django forces DEBUG=False anyway
 DEBUG = False
+
+# this configuration is used by browser_tests.sh
+# enable instrumentation of javascript
+ENABLE_MINIFY = False                   # used in Site/core/minify_dtl.py and Site/core/transpose_js.py
+ENABLE_INSTRUMENT_JS = True             # used in Site/core/instrument_js.py
 
 # disable some features, to increase coverage
 USE_SUBSET_FONT_FILES = False           # impacts site_layout_fonts.dtl

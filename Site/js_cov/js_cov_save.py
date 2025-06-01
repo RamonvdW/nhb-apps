@@ -4,6 +4,7 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
+from Site.js_cov.find_js import JsCovFind
 import json
 
 """
@@ -17,6 +18,9 @@ def save_the_data(data):
         f.write(json.dumps(data) + '\n')
         f.close()
     # with
+
+    # trigger the coverage plugin for all JS files
+    JsCovFind(data)
 
 
 # end of file

@@ -336,7 +336,6 @@ wait $PID_WEBSIM3 2>/dev/null
 
 ASK_LAUNCH=0
 COVERAGE_RED=0
-PRECISION=2     # 2 decimalen achter de komma
 
 if [ $ABORTED -eq 0 ] || [ $FORCE_REPORT -eq 1 ]
 then
@@ -347,17 +346,17 @@ then
 
     if [ -z "$FOCUS" ] || [ $FORCE_FULL_COV -ne 0 ]
     then
-        python3 -m coverage report $COVRC --precision=$PRECISION --skip-covered --fail-under=$COV_AT_LEAST $OMIT 2>&1 | tee -a "$LOG"
+        python3 -m coverage report $COVRC --skip-covered --fail-under=$COV_AT_LEAST $OMIT 2>&1 | tee -a "$LOG"
         if [ ${PIPESTATUS[0]} -gt 0 ] && [ ${#FOCUS_ARGS[@]} -eq 0 ]
         then
             COVERAGE_RED=1
         fi
 
-        python3 -m coverage html $COVRC -d "$REPORT_DIR" --precision=$PRECISION --skip-covered $OMIT &>>"$LOG"
+        python3 -m coverage html $COVRC -d "$REPORT_DIR" --skip-covered $OMIT &>>"$LOG"
     else
         [ -n "$COV_INCLUDE" ] && COV_INCLUDE="--include=$COV_INCLUDE"
-        python3 -m coverage report $COVRC --precision=$PRECISION $COV_INCLUDE $OMIT
-        python3 -m coverage html $COVRC -d "$REPORT_DIR" --precision=$PRECISION --skip-covered $COV_INCLUDE $OMIT &>>"$LOG"
+        python3 -m coverage report $COVRC $COV_INCLUDE $OMIT
+        python3 -m coverage html $COVRC -d "$REPORT_DIR" --skip-covered $COV_INCLUDE $OMIT &>>"$LOG"
     fi
 
     rm "$COVERAGE_FILE"
