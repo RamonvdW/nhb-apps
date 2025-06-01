@@ -74,6 +74,7 @@ def minify_js(script):
             deel = re.sub(r'\s+\n', '\n', deel)
 
             # remove whitespace around operators
+            # let op: deze tekens hebben speciale betekenis voor regexp en moeten escaped worden: /*+?.|()[]{}\
             deel = re.sub(r' = ', '=', deel)
             deel = re.sub(r' == ', '==', deel)
             deel = re.sub(r' != ', '!=', deel)
@@ -93,14 +94,14 @@ def minify_js(script):
             deel = re.sub(r'; ', ';', deel)
             deel = re.sub(r' \(', '(', deel)
             deel = re.sub(r'\) ', ')', deel)
-            deel = re.sub(r'{ ', '{', deel)
-            deel = re.sub(r' }', '}', deel)
+            deel = re.sub(r'\{ ', '{', deel)
+            deel = re.sub(r' \}', '}', deel)
 
             # remove unnecessary newlines
-            deel = re.sub(r'\n{', '{', deel)
-            deel = re.sub(r'{\n', '{', deel)
-            deel = re.sub(r'\n}', '}', deel)
-            deel = re.sub(r'}\n', '}', deel)  # breekt javascript als er een ; ontbreekt!
+            deel = re.sub(r'\n\{', '{', deel)
+            deel = re.sub(r'\{\n', '{', deel)
+            deel = re.sub(r'\n\}', '}', deel)
+            deel = re.sub(r'\}\n', '}', deel)  # breekt javascript als er een ; ontbreekt!
             deel = re.sub(r';\n', ';', deel)
             deel = re.sub(r',\n', ',', deel)
             deel = re.sub(r'\)\ncontinue', ')continue', deel)
@@ -136,7 +137,7 @@ def minify_scripts(contents):
             else:
                 # javascript to minify
                 clean += contents[:pos_end_start+1]      # consume complete start tag
-                clean += minify_js(contents[pos_end_start+2:pos_close])
+                clean += minify_js(contents[pos_end_start+1:pos_close])
                 clean += contents[pos_close:pos_close+9]  # </script>
 
             contents = contents[pos_close + 9:]
