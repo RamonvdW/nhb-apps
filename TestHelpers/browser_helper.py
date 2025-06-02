@@ -22,6 +22,7 @@ from selenium.webdriver import Chrome, ChromeOptions
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException
 import datetime
+import pyotp
 import time
 import json
 
@@ -29,7 +30,7 @@ coverage_data = dict()
 
 
 def js_cov_add(data: str):
-    print('js_cov_add: %s' % repr(data))
+    # print('js_cov_add: %s' % repr(data))
     data = json.loads(data)
 
     for fpath, cov_data in data.items():
@@ -45,12 +46,12 @@ def js_cov_add(data: str):
 
 
 def js_cov_save():
-    print('{js_cov} saving the data')
+    # print('{js_cov} saving the data')
     save_the_data(coverage_data)
 
 
 def js_cov_import():
-    print('{js_cov} importing the data')
+    # print('{js_cov} importing the data')
     import_the_data()
     return 1
 
@@ -66,24 +67,43 @@ class BrowserTestCase(TestCase):
     match = None                # competitie match
 
     # urls voor do_navigate_to()
+    url_otp = '/account/otp-controle/'
     url_plein = '/plein/'
+    url_login = '/account/login/'
     url_logout = '/account/logout/'
     url_wissel_van_rol = '/functie/wissel-van-rol/'
 
     _driver = None
     live_server_url = ''
+    show_browser = False            # set to True for visibility during debugging
+    pause_after_console_log = 0     # seconden wachten als we een console error zien
 
     lid_nr = 100001
 
+    # state of the session
+    session_state = "?"
+
     # browser interacties
     def get_console_log(self) -> list[str]:
-        logs = self._driver.get_log('browser')
+        logs = self._driver.get_log('browser')      # gets the log + clears it!
         regels = list()
         for log in logs:
-            msg = log['message']
+            #msg = log['message']
+            msg = repr(log)
             if msg not in regels:
                 regels.append(msg)
         return regels
+
+    def assert_no_console_log(self):
+        regels = self.get_console_log()
+        if self.show_browser and len(regels) > 0 and self.pause_after_console_log > 0:
+            print('\n[ERROR] Unexpected console output:')
+            for regel in regels:
+                print(regel)
+            # for
+            print('[INFO] Sleeping for %s seconds' % self.pause_after_console_log)
+            time.sleep(self.pause_after_console_log)
+        self.assertEqual(regels, [])
 
     @staticmethod
     def get_following_sibling(element):
@@ -141,6 +161,14 @@ class BrowserTestCase(TestCase):
         # for
         return None
 
+    def fetch_js_cov(self):
+        # capture collected coverage before navigating away
+        script = 'if (window._js_cov !== undefined) {'
+        script += 'const data = JSON.stringify(window._js_cov); window._js_cov = {}; return data;'
+        script += '} else { return "{}"; }'
+        test = self._driver.execute_script(script)
+        js_cov_add(test)
+
     def wait_until_url_not(self, url: str, timeout: float = 2.0):
         duration = 0.5
         check_url = self.live_server_url + url
@@ -152,22 +180,73 @@ class BrowserTestCase(TestCase):
             curr_url = self._driver.current_url
         # while
 
-    def fetch_js_cov(self):
-        # capture collected coverage before navigating away
-        script = 'if (typeof _js_cov !== "undefined") {'
-        script += 'const data = JSON.stringify(_js_cov); _js_cov = {}; return data;'
-        script += '} else { return "{}"; }'
-        test = self._driver.execute_script(script)
-        js_cov_add(test)
+    def do_login(self):
+        # print('do_login: session_state=%s' % self.session_state)
+        if self.session_state == "logged in":
+            return
+
+        # inloggen
+        self._driver.get(self.live_server_url + self.url_login)
+        self.assertEqual(self._driver.title, 'Inloggen')
+        self.assert_no_console_log()
+
+        self._driver.find_element(By.ID, 'id_login_naam').send_keys(self.account.username)
+        self._driver.find_element(By.ID, 'id_wachtwoord').send_keys(TEST_WACHTWOORD)
+        login_vink = self._driver.find_element(By.NAME, 'aangemeld_blijven')
+        self.assertTrue(login_vink.is_selected())
+        self._driver.find_element(By.ID, 'submit_knop').click()
+        self.wait_until_url_not(self.url_login)        # gaat naar otp control (want: is_BB)
+
+        self.session_state = "logged in"
+
+    def do_pass_otp(self):
+        # print('do_pass_otp: session_state=%s' % self.session_state)
+        if self.session_state == "passed otp":
+            return
+
+        # zorg dat we ingelogd zijn
+        self.do_login()
+
+        # pass otp
+        self._driver.get(self.live_server_url + self.url_otp)
+        self.assertEqual(self._driver.title, 'Controle tweede factor MijnHandboogsport')
+        self.assert_no_console_log()
+
+        otp_code = pyotp.TOTP(self.account.otp_code).now()
+        self._driver.find_element(By.ID, 'id_otp_code').send_keys(otp_code)
+        self._driver.find_element(By.ID, 'submit_knop').click()
+        self.wait_until_url_not(self.url_otp)          # gaat naar wissel-van-rol
+
+        self.session_state = "passed otp"
+
+    def do_logout(self):
+        # print('do_logout: session_state=%s' % self.session_state)
+        if self.session_state == "logged out":
+            return
+
+        # uitloggen
+        self.do_navigate_to(self.url_logout)
+        h3 = self.find_element_type_with_text('h3', 'Uitloggen')
+        self.assertIsNotNone(h3)
+
+        self.find_element_by_id('submit_knop').click()
+        self.wait_until_url_not(self.url_logout)
+
+        self.session_state = "logged out"
 
     def do_navigate_to(self, url):
+        # capture the coverage before it gets lost due to the page load
         self.fetch_js_cov()
+
+        # controleer dat er geen meldingen van de browser zijn over de JS bestanden
+        self.assert_no_console_log()
+
         # ga naar de nieuwe pagina - dit reset the globale variabele
         self._driver.get(self.live_server_url + url)
 
-    # helper functions
     def do_wissel_naar_hwl(self):
         # wissel naar rol HWL
+        self.do_pass_otp()
         self.do_navigate_to(self.url_wissel_van_rol)
         radio = self.find_element_by_id('id_eigen_%s' % self.functie_hwl.pk)    # radio button voor HWL
         self.get_following_sibling(radio).click()
@@ -176,6 +255,7 @@ class BrowserTestCase(TestCase):
 
     def do_wissel_naar_bb(self):
         # wissel naar rol Manager MH
+        self.do_pass_otp()
         self.do_navigate_to(self.url_wissel_van_rol)
         radio = self.find_element_by_id('id_eigen_90002')       # radio button voor Manager MH
         self.get_following_sibling(radio).click()
@@ -184,20 +264,12 @@ class BrowserTestCase(TestCase):
 
     def do_wissel_naar_sporter(self):
         # wissel naar rol Sporter
+        self.do_pass_otp()
         self.do_navigate_to(self.url_wissel_van_rol)
         radio = self.find_element_by_id('id_eigen_90000')       # radio button voor Sporter
         self.get_following_sibling(radio).click()
         self.find_element_by_id('activeer_eigen').click()       # activeer knop
         self.wait_until_url_not(self.url_wissel_van_rol)
-
-    def do_logout(self):
-        # uitloggen
-        self.do_navigate_to(self.url_logout)
-        h3 = self.find_element_type_with_text('h3', 'Uitloggen')
-        self.assertIsNotNone(h3)
-
-        self.find_element_by_id('submit_knop').click()
-        self.wait_until_url_not(self.url_logout)
 
     def get_browser_cookie_value(self, cookie_name):
         return self._driver.get_cookie(cookie_name)['value']
@@ -262,8 +334,9 @@ def database_vullen(self):
                                     geboorte_datum=datetime.date(year=1988, month=8, day=8),
                                     sinds_datum=datetime.date(year=2020, month=8, day=8),
                                     bij_vereniging=self.ver,
-                                    account=self.account,
                                     email=self.account.email)
+    self.sporter.account = self.account
+    self.sporter.save(update_fields=['account'])
 
     self.boog_r, _ = BoogType.objects.get_or_create(
                                     afkorting='R',
@@ -288,12 +361,14 @@ def database_vullen(self):
 
     self.foto1 = WebwinkelFoto(
                     locatie='gulden-1.png',
-                    locatie_thumb='gulden-1_thumb.png')
+                    locatie_thumb='gulden-1_thumb.png',
+                    volgorde=1)
     self.foto1.save()
 
     self.foto2 = WebwinkelFoto(
                     locatie='gulden-2.png',
-                    locatie_thumb='gulden-2_thumb.png')
+                    locatie_thumb='gulden-2_thumb.png',
+                    volgorde=2)
     self.foto2.save()
 
     product = WebwinkelProduct(
@@ -384,16 +459,19 @@ def populate_inst(self, inst):
     # wordt aangeroepen vanuit Plein/tests/test_js_in_browser
 
     # load database object instances into the testcase instance
+    inst.ver = self.ver
+    inst.match = self.match
     inst.account = self.account
     inst.sporter = self.sporter
-    inst.ver = self.ver
     inst.functie_hwl = self.functie_hwl
     inst.webwinkel_product = self.webwinkel_product
-    inst.match = self.match
 
     # load members necessary for communication with the browser
     inst._driver = self._driver
+    inst.show_browser = self.show_browser
+    inst.session_state = self.session_state
     inst.live_server_url = self.live_server_url
+    inst.pause_after_console_log = self.pause_after_console_log
 
 
 # end of file

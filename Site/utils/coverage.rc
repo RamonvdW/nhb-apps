@@ -8,4 +8,5 @@ template_extensions=dtl
 
 [report]
 precision=2
-skip_covered=False
+skip_covered = False
+skip_empty = False

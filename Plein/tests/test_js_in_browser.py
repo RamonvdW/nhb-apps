@@ -7,11 +7,8 @@
 from django.apps import apps
 from django.test import LiveServerTestCase, tag
 from TestHelpers import browser_helper as bh
-from TestHelpers.e2ehelpers import TEST_WACHTWOORD
 from selenium.common.exceptions import NoSuchElementException
-from selenium.webdriver.common.by import By
 import inspect
-import pyotp
 import time
 import os
 
@@ -27,15 +24,15 @@ class TestBrowser(LiveServerTestCase):
     """
 
     show_browser = False            # set to True for visibility during debugging
-    pause_after_each_test = False   # 2 seconden wachten aan het einde van de test
-
-    url_login = '/account/login/'
-    url_otp = '/account/otp-controle/'
+    pause_after_each_test = 2       # seconden wachten na elke test
+    pause_after_console_log = 180   # seconden wachten als we een console error zien
+    pause_after_all_tests = 0       # seconden wachten aan het einde van alle tests
 
     def setUp(self):
         self._test_count = 0
         self._driver = None
         self.account = None
+        self.session_state = "?"
 
         bh.database_vullen(self)
 
@@ -61,52 +58,13 @@ class TestBrowser(LiveServerTestCase):
 
     # browser interacties
     def _get_console_log(self) -> list[str]:
-        logs = self._driver.get_log('browser')
+        logs = self._driver.get_log('browser')      # gets the log + clears it!
         regels = list()
         for log in logs:
             msg = log['message']
             if msg not in regels:
                 regels.append(msg)
         return regels
-
-    def _login_and_otp(self):
-        # note: no js_cov measurement for this automation
-
-        # inloggen
-        self._driver.get(self.live_server_url + self.url_login)
-        self.assertEqual(self._driver.title, 'Inloggen')
-
-        # controleer dat er geen meldingen van de browser zijn over de JS bestanden
-        regels = self._get_console_log()
-        if len(regels):
-            for regel in regels:
-                print('regel: %s' % repr(regel))
-        # for
-        self.assertEqual(regels, [])
-
-        self._driver.find_element(By.ID, 'id_login_naam').send_keys(self.account.username)
-        self._driver.find_element(By.ID, 'id_wachtwoord').send_keys(TEST_WACHTWOORD)
-        login_vink = self._driver.find_element(By.NAME, 'aangemeld_blijven')
-        self.assertTrue(login_vink.is_selected())
-        self._driver.find_element(By.ID, 'submit_knop').click()
-        self._wait_until_url_not(self.url_login)        # gaat naar otp control (want: is_BB)
-
-        # pass otp
-        # self._driver.get(self.live_server_url + self.url_otp)
-        self.assertEqual(self._driver.title, 'Controle tweede factor MijnHandboogsport')
-
-        # controleer dat er geen meldingen van de browser zijn over de JS bestanden
-        regels = self._get_console_log()
-        if len(regels):
-            for regel in regels:
-                print('regel: %s' % repr(regel))
-        # for
-        self.assertEqual(regels, [])
-
-        otp_code = pyotp.TOTP(self.account.otp_code).now()
-        self._driver.find_element(By.ID, 'id_otp_code').send_keys(otp_code)
-        self._driver.find_element(By.ID, 'submit_knop').click()
-        self._wait_until_url_not(self.url_otp)          # gaat naar wissel-van-rol
 
     def _run_module_tests(self, test_module):
         try:
@@ -136,10 +94,13 @@ class TestBrowser(LiveServerTestCase):
                                 print('  %s.%s.%s ...' % (test_module, name, inst_name), end='')
                                 test_func()
                                 inst.fetch_js_cov()
-                                if self.pause_after_each_test:
-                                    time.sleep(2)
+                                if self.show_browser and self.pause_after_each_test:
+                                    time.sleep(self.pause_after_each_test)
                                 print('ok')
                     # for
+
+                    # take over the session state so we can pass it to the next test case
+                    self.session_state = inst.session_state
             # for
 
     def _run_tests(self, app_filter=None):
@@ -162,7 +123,6 @@ class TestBrowser(LiveServerTestCase):
         do_fail = False
         try:
             self._driver = bh.get_driver(show_browser=self.show_browser)
-            self._login_and_otp()
         except NoSuchElementException as exc:
             print('\n[ERROR] Selenium error: %s' % str(exc))
             do_fail = True
@@ -179,7 +139,9 @@ class TestBrowser(LiveServerTestCase):
         print('ran %s js tests ...' % self._test_count, end='')
 
         # give the developer some time to play with the browser instance
-        # time.sleep(120)
+        if self.show_browser and self.pause_after_all_tests:
+            print('[INFO] Sleeping for %s seconds' % self.pause_after_all_tests)
+            time.sleep(self.pause_after_all_tests)
 
         bh.js_cov_save()
 

@@ -12,13 +12,13 @@ class JsCovInstrument:
     """
 
     # name of the global variable
-    js_cov_global = '_js_cov'
+    js_cov_global = 'window._js_cov'        # forced global
     js_cov_local = '_js_f'
 
     def __init__(self):
         self.line_nr = 0
         self.scope_stack = list()     # [c, ...] c = character that ends the scope
-        self.js_cov_file = ''
+        self.js_cov_func = ''         # function to call to store line covered
         self.statement_line_nrs = list()
         self.executable_line_nrs = list()
         self.local_f_counter = 0
@@ -43,19 +43,36 @@ class JsCovInstrument:
         self.executable_line_nrs = list()
 
         self.local_f_counter += 1
-        js_cov_f_nr = self.js_cov_local + str(self.local_f_counter)
-        self.js_cov_file = "%s[%s]" % (self.js_cov_global, js_cov_f_nr)
+        self.js_cov_func = 'js_f%s' % str(self.local_f_counter)
+        const_name = 'js_c%s' % str(self.local_f_counter)
+
+        # declare a const that holds the long filename
+        clean += 'const %s = "%s";\n' % (const_name, app_path)
+
+        clean += 'function %s(line_nr) {\n' % self.js_cov_func
+
+        # initialize the global, if needed (on first use)
+        clean += '  if (%s === undefined) { %s = {}; };\n' % (self.js_cov_global, self.js_cov_global)
+
+        # initialize the file-specific section in the global, if needed (on first use)
+        clean += '  if (%s[%s] === undefined) { %s[%s] = {}; };\n' % (self.js_cov_global, const_name,
+                                                                      self.js_cov_global, const_name)
+
+        # store the covered line
+        clean += '  %s[%s][line_nr] = 1;\n' % (self.js_cov_global, const_name)
+
+        clean += '}'
 
         # if it does not yet exist, create the global variable to track coverage
-        clean += 'if (typeof %s === "undefined") { var %s = {}; };\n' % (self.js_cov_global, self.js_cov_global)
+        # clean += 'if (typeof %s === "undefined") { var %s = {}; };\n' % (self.js_cov_global, self.js_cov_global)
         # clean += 'var %s = %s || {};\n' % (self.js_cov_global, self.js_cov_global)
 
         # declare a const that holds the long filename
-        clean += 'const %s = "%s";\n' % (js_cov_f_nr, app_path)
+        # clean += 'const %s = "%s";\n' % (js_cov_f_nr, app_path)
 
         # initialize the structure to cover the current script
         # the || {} construction avoids overwriting data
-        clean += '%s = %s || {};\n' % (self.js_cov_file, self.js_cov_file)
+        # clean += '%s = %s || {};\n' % (self.js_cov_file, self.js_cov_file)
 
         while len(contents):
             # zoek strings zodat we die niet wijzigen
@@ -192,7 +209,7 @@ class JsCovInstrument:
                 if insert_here:
                     # print('[%s] inserting (%s)' % (self.line_nr, repr(self.statement_line_nrs)))
                     for line_nr in self.statement_line_nrs:
-                        clean += '\n%s[%s] = 1;' % (self.js_cov_file, line_nr)
+                        clean += '\n%s(%s);' % (self.js_cov_func, line_nr)
                     # for
                     self.statement_line_nrs = list()
 

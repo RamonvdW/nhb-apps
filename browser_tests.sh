@@ -174,4 +174,26 @@ fi
 # restore performance mode
 powerprofilesctl set balanced
 
+ASK_LAUNCH=1
+if [ $ASK_LAUNCH -ne 0 ]
+then
+    echo "HTML report is in $REPORT_DIR  (try firefox $REPORT_DIR/index.html)"
+    echo
+    echo -n "Press ENTER to start firefox now, or Ctrl+C to abort"
+    read -r -t 5
+    RES=$?
+    if [ $RES -ne 0 ]
+    then
+        # automatically abort
+        echo "^C"
+        exit 1
+    fi
+
+    echo
+    echo "Launching firefox"
+    firefox $REPORT_DIR/index.html &>/dev/null &
+
+    echo "Done"
+fi
+
 # end of file

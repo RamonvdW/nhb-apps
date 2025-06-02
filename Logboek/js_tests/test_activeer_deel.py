@@ -29,8 +29,7 @@ class TestLogboekActiveerDeel(bh.BrowserTestCase):
         self.wait_until_url_not(self.url_logboek)
 
         # controleer dat er geen meldingen van de browser zijn over de JS bestanden
-        regels = self.get_console_log()
-        self.assertEqual(regels, [])
+        self.assert_no_console_log()
 
 
 # end of file

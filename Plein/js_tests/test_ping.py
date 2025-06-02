@@ -54,16 +54,16 @@ class TestPleinStuurPing(bh.BrowserTestCase):
         self._check_ping()
 
         # controleer dat er geen meldingen van de browser zijn over de JS bestanden
-        regels = self.get_console_log()
-        self.assertEqual(regels, [])
+        self.assert_no_console_log()
 
     def test_beheerder(self):
-        self.do_wissel_naar_hwl()     # redirect naar /vereniging/
+        self.do_wissel_naar_hwl()               # redirect naar /vereniging/
+        self.do_navigate_to(self.url_plein)     # geeft pagina is plein-beheerder.dtl
+
+        # controleer dat er geen meldingen van de browser zijn over de JS bestanden
+        self.assert_no_console_log()
 
         # controleer dat we beheerder zijn
-        self.do_navigate_to(self.url_plein)
-        # pagina is plein-beheerder.dtl
-
         h3 = self.find_element_type_with_text('h3', 'Beheerders Plein')
         self.assertIsNotNone(h3)
 
@@ -71,8 +71,7 @@ class TestPleinStuurPing(bh.BrowserTestCase):
         self._check_ping()
 
         # controleer dat er geen meldingen van de browser zijn over de JS bestanden
-        regels = self.get_console_log()
-        self.assertEqual(regels, [])
+        self.assert_no_console_log()
 
 
 # end of file

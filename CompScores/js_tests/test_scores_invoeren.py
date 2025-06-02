@@ -28,16 +28,14 @@ class TestCompScoresInvoeren(bh.BrowserTestCase):
         time.sleep(0.5)
 
         # controleer dat er geen meldingen van de browser zijn over de JS bestanden
-        regels = self.get_console_log()
-        self.assertEqual(regels, [])
+        self.assert_no_console_log()
 
         # result is opgehaald, wordt getoond en kan toegevoegd worden aan de lijst
         btn = self.find_element_by_id('id_btn_toevoegen')
         btn.click()
 
         # controleer dat er geen meldingen van de browser zijn over de JS bestanden
-        regels = self.get_console_log()
-        self.assertEqual(regels, [])
+        self.assert_no_console_log()
 
         # kaartje "lijst ophalen"
         kaartje = self.find_kaartje_met_titel('Lijst ophalen')
@@ -46,13 +44,11 @@ class TestCompScoresInvoeren(bh.BrowserTestCase):
         time.sleep(0.5)
 
         # controleer dat er geen meldingen van de browser zijn over de JS bestanden
-        regels = self.get_console_log()
-        self.assertEqual(regels, [])
+        self.assert_no_console_log()
 
         # TODO: knop "opslaan" (nadat score ingevoerd is)
 
         # controleer dat er geen meldingen van de browser zijn over de JS bestanden
-        regels = self.get_console_log()
-        self.assertEqual(regels, [])
+        self.assert_no_console_log()
 
 # end of file

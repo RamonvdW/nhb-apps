@@ -12,7 +12,7 @@
 // but we need to move the label out of the way to avoid visual overlap
 
 function delayedUpdate() {
-    const els = document.querySelectorAll('input[type=text]:-webkit-autofill, input[type=password]:-webkit-autofill');
+    const els = document.querySelectorAll('input[autocomplete]');
     els.forEach(el => {
         const el2 = el.previousSibling;
         el2.classList.add('active');
