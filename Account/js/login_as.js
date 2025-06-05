@@ -4,6 +4,7 @@
  * Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
  */
 
+/* jshint esversion: 6 */
 "use strict";
 
 function do_selecteer(id)

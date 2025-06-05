@@ -12,6 +12,7 @@ import time
 class TestAccountLogin(bh.BrowserTestCase):
 
     url_login = '/account/login/'
+    url_login_as = '/account/account-wissel/'
 
     def test_login(self):
         # de support functies doen al een groot deel van de test die we willen doen
@@ -33,9 +34,9 @@ class TestAccountLogin(bh.BrowserTestCase):
         self.assert_no_console_log()
 
         # capture the coverage before it gets lost due to the page load
-        self.fetch_js_cov()
+        #self.fetch_js_cov()
 
-        self.find_element_by_id('id_login_naam').send_keys(self.account.username)
+        self.find_element_by_id('id_login_naam').send_keys(self.account_bb.username)
         self.find_element_by_id('id_wachtwoord').send_keys(TEST_WACHTWOORD)
         login_vink = self.find_element_by_name('aangemeld_blijven')
         self.assertTrue(login_vink.is_selected())
@@ -52,5 +53,28 @@ class TestAccountLogin(bh.BrowserTestCase):
         # zorg dat de volgende test niet in de war raakt (alternatief is weer uitloggen)
         self.session_state = "logged in"
 
+    def test_login_as(self):
+        # inloggen (voor het geval we uitgelogd waren)
+        self.do_login()
+
+        # wordt Manager MH
+        self.do_wissel_naar_bb()
+
+        # ga naar de login-as pagina en zoek op een van de accounts
+        self.do_navigate_to(self.url_login_as + '?zoekterm=%s' % self.account.username)
+
+        # check dat er geen inlaad fouten waren
+        self.assert_no_console_log()
+
+        # vind de knop
+        i = self.find_element_type_with_text('i', 'play_arrow')
+        button = self.get_parent(i)
+        button.click()
+
+        # check dat er geen inlaad fouten waren
+        self.assert_no_console_log()
+
+        # capture the coverage before it gets lost due to the page load
+        #self.fetch_js_cov()
 
 # end of file

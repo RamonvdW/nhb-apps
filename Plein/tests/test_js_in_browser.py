@@ -92,6 +92,7 @@ class TestBrowser(LiveServerTestCase):
                             if callable(test_func):
                                 self._test_count += 1
                                 print('  %s.%s.%s ...' % (test_module, name, inst_name), end='')
+                                inst.init_js_cov()
                                 test_func()
                                 inst.fetch_js_cov()
                                 if self.show_browser and self.pause_after_each_test:
@@ -162,6 +163,9 @@ class TestBrowser(LiveServerTestCase):
     def focus_Account(self):
         self._run_focussed_tests()
 
+    def focus_Bondspas(self):
+        self._run_focussed_tests()
+
     def focus_CompScores(self):
         self._run_focussed_tests()
 
@@ -176,6 +180,5 @@ class TestBrowser(LiveServerTestCase):
 
     def focus_Webwinkel(self):
         self._run_focussed_tests()
-
 
 # end of file

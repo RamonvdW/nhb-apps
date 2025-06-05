@@ -60,7 +60,8 @@ class BrowserTestCase(TestCase):
 
     # deze members worden centraal gevuld in Plein/tests/test_js_in_browser
     sporter = None              # sporter 100001
-    account = None              # account 424200 (gekoppeld aan sporter)
+    account_bb = None           # account 100001 (gekoppeld aan sporter)
+    account = None              # account 100002
     ver = None                  # vereniging van de sporter
     functie_hwl = None          # account is hwl
     webwinkel_product = None    # product in de webwinkel
@@ -163,11 +164,16 @@ class BrowserTestCase(TestCase):
 
     def fetch_js_cov(self):
         # capture collected coverage before navigating away
-        script = 'if (window._js_cov !== undefined) {'
-        script += 'const data = JSON.stringify(window._js_cov); window._js_cov = {}; return data;'
-        script += '} else { return "{}"; }'
+        script = 'const data = localStorage.getItem("js_cov");\n'
+        script += 'localStorage.removeItem("js_cov");\n'
+        script += 'return data;\n'
         test = self._driver.execute_script(script)
         js_cov_add(test)
+
+    def init_js_cov(self):
+        # TODO: make working: script = 'localStorage.removeItem("js_cov");\n'
+        # test = self._driver.execute_script(script)
+        pass
 
     def wait_until_url_not(self, url: str, timeout: float = 2.0):
         duration = 0.5
@@ -190,7 +196,7 @@ class BrowserTestCase(TestCase):
         self.assertEqual(self._driver.title, 'Inloggen')
         self.assert_no_console_log()
 
-        self._driver.find_element(By.ID, 'id_login_naam').send_keys(self.account.username)
+        self._driver.find_element(By.ID, 'id_login_naam').send_keys(self.account_bb.username)
         self._driver.find_element(By.ID, 'id_wachtwoord').send_keys(TEST_WACHTWOORD)
         login_vink = self._driver.find_element(By.NAME, 'aangemeld_blijven')
         self.assertTrue(login_vink.is_selected())
@@ -212,7 +218,7 @@ class BrowserTestCase(TestCase):
         self.assertEqual(self._driver.title, 'Controle tweede factor MijnHandboogsport')
         self.assert_no_console_log()
 
-        otp_code = pyotp.TOTP(self.account.otp_code).now()
+        otp_code = pyotp.TOTP(self.account_bb.otp_code).now()
         self._driver.find_element(By.ID, 'id_otp_code').send_keys(otp_code)
         self._driver.find_element(By.ID, 'submit_knop').click()
         self.wait_until_url_not(self.url_otp)          # gaat naar wissel-van-rol
@@ -301,22 +307,33 @@ def database_vullen(self):
 
     # wordt aangeroepen vanuit Plein/tests/test_js_in_browser
     Account.objects.filter(username=str(lid_nr)).delete()
-    self.account = Account.objects.create(
+    self.account_bb = Account.objects.create(
                                 username=str(lid_nr),
+                                first_name='Boss',
+                                last_name='dés Browser',
+                                unaccented_naam='Boss des Browser',
+                                bevestigde_email='boss@test.not',
+                                email_is_bevestigd=True,
+                                otp_code='whatever',
+                                otp_is_actief=True,
+                                is_BB=True,             # geeft toegang tot rol Manager MH
+                                is_staff=True)          # geeft toegang tot bepaalde kaartjes, zoals login-as
+    self.account_bb.set_password(TEST_WACHTWOORD)
+    self.account_bb.save()
+
+    self.vhpg = VerklaringHanterenPersoonsgegevens.objects.create(
+                                                account=self.account_bb,
+                                                acceptatie_datum=timezone.now())
+
+    Account.objects.filter(username=str(lid_nr + 1)).delete()
+    self.account = Account.objects.create(
+                                username=str(lid_nr + 1),
                                 first_name='Bro',
                                 last_name='dés Browser',
                                 unaccented_naam='Bro des Browser',
                                 bevestigde_email='bro@test.not',
-                                email_is_bevestigd=True,
-                                otp_code='whatever',
-                                otp_is_actief=True,
-                                is_BB=True)
-    self.account.set_password(TEST_WACHTWOORD)
+                                email_is_bevestigd=True)
     self.account.save()
-
-    self.vhpg = VerklaringHanterenPersoonsgegevens.objects.create(
-                                                account=self.account,
-                                                acceptatie_datum=timezone.now())
 
     self.rayon, _ = Rayon.objects.get_or_create(rayon_nr=5, naam="Rayon 5")
     self.regio, _ = Regio.objects.get_or_create(regio_nr=117, rayon_nr=self.rayon.rayon_nr, rayon=self.rayon)
@@ -334,8 +351,8 @@ def database_vullen(self):
                                     geboorte_datum=datetime.date(year=1988, month=8, day=8),
                                     sinds_datum=datetime.date(year=2020, month=8, day=8),
                                     bij_vereniging=self.ver,
-                                    email=self.account.email)
-    self.sporter.account = self.account
+                                    email=self.account_bb.email)
+    self.sporter.account_bb = self.account_bb
     self.sporter.save(update_fields=['account'])
 
     self.boog_r, _ = BoogType.objects.get_or_create(
@@ -353,7 +370,7 @@ def database_vullen(self):
                                 beschrijving='HWL 4200',
                                 bevestigde_email='hwl4200@test.not',
                                 vereniging=self.ver)
-    self.functie_hwl.accounts.add(self.account)
+    self.functie_hwl.accounts.add(self.account_bb)
 
     # maak webwinkel producten aan
     foto = WebwinkelFoto()
@@ -447,8 +464,9 @@ def database_opschonen(self):
     self.functie_hwl.delete()
     self.sporterboog.delete()
     self.sporter.delete()
-    self.vhpg.delete()
     self.account.delete()
+    self.vhpg.delete()
+    self.account_bb.delete()
     self.ver.delete()
     self.regio.delete()         # regio 117
     self.rayon.delete()         # rayon 5
@@ -461,6 +479,7 @@ def populate_inst(self, inst):
     # load database object instances into the testcase instance
     inst.ver = self.ver
     inst.match = self.match
+    inst.account_bb = self.account_bb
     inst.account = self.account
     inst.sporter = self.sporter
     inst.functie_hwl = self.functie_hwl

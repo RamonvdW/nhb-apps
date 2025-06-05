@@ -49,30 +49,25 @@ class JsCovInstrument:
         # declare a const that holds the long filename
         clean += 'const %s = "%s";\n' % (const_name, app_path)
 
-        clean += 'function %s(line_nr) {\n' % self.js_cov_func
+        # add helper function to set coverage and handle missing variables
+        if clean:
+            clean += 'function %s(line_nr) {\n' % self.js_cov_func
 
-        # initialize the global, if needed (on first use)
-        clean += '  if (%s === undefined) { %s = {}; };\n' % (self.js_cov_global, self.js_cov_global)
+            # get from local storage
+            clean += '  let data = localStorage.getItem("js_cov");\n'
+            clean += '  let cov = {};\n'
+            clean += '  if (data !== null) { cov = JSON.parse(data); };\n'
 
-        # initialize the file-specific section in the global, if needed (on first use)
-        clean += '  if (%s[%s] === undefined) { %s[%s] = {}; };\n' % (self.js_cov_global, const_name,
-                                                                      self.js_cov_global, const_name)
+            # initialize the file-specific section, if needed (on first use)
+            clean += '  if (cov[%s] === undefined) { cov[%s] = {}; };\n' % (const_name, const_name)
 
-        # store the covered line
-        clean += '  %s[%s][line_nr] = 1;\n' % (self.js_cov_global, const_name)
+            # store the covered line
+            clean += '  cov[%s][line_nr] = 1;\n' % const_name
 
-        clean += '}'
-
-        # if it does not yet exist, create the global variable to track coverage
-        # clean += 'if (typeof %s === "undefined") { var %s = {}; };\n' % (self.js_cov_global, self.js_cov_global)
-        # clean += 'var %s = %s || {};\n' % (self.js_cov_global, self.js_cov_global)
-
-        # declare a const that holds the long filename
-        # clean += 'const %s = "%s";\n' % (js_cov_f_nr, app_path)
-
-        # initialize the structure to cover the current script
-        # the || {} construction avoids overwriting data
-        # clean += '%s = %s || {};\n' % (self.js_cov_file, self.js_cov_file)
+            # save to local storage
+            clean += '  data = JSON.stringify(cov);\n'
+            clean += '  localStorage.setItem("js_cov", data);\n'
+            clean += '}\n'
 
         while len(contents):
             # zoek strings zodat we die niet wijzigen
