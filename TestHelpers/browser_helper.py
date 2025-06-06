@@ -374,7 +374,7 @@ def database_vullen(self):
                                     sinds_datum=datetime.date(year=2020, month=8, day=8),
                                     bij_vereniging=self.ver,
                                     email=self.account_bb.email)
-    self.sporter.account_bb = self.account_bb
+    self.sporter.account = self.account_bb
     self.sporter.save(update_fields=['account'])
 
     self.boog_r, _ = BoogType.objects.get_or_create(

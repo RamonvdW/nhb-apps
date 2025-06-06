@@ -25,7 +25,7 @@ class TestBrowser(LiveServerTestCase):
 
     show_browser = False            # set to True for visibility during debugging
     pause_after_each_test = 2       # seconden wachten na elke test
-    pause_after_console_log = 180   # seconden wachten als we een console error zien
+    pause_after_console_log = 30    # seconden wachten als we een console error zien
     pause_after_all_tests = 0       # seconden wachten aan het einde van alle tests
 
     def setUp(self):

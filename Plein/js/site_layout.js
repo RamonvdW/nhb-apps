@@ -5,6 +5,7 @@
  */
 
 /* jshint esversion: 6 */
+/* global console, M */
 "use strict";
 
 // helper functie om een opgeslagen cookie in te lezen

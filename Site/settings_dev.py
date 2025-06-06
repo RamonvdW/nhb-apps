@@ -32,7 +32,7 @@
 
 from Site.core.settings_base import *         # noqa
 
-# required for runserver to serve static files
+# DEBUG = True is required for runserver to serve static files
 DEBUG = True
 
 # disable use of subset files in dev, to simplify introduction of new icons
