@@ -56,17 +56,10 @@ then
     pkill -f websim
 fi
 
-# create empty test data directories
-rm -rf "$TEST_DIR" &> /dev/null
-mkdir "$TEST_DIR"
-mkdir "$TEST_DIR_FOTOS_WEBWINKEL"
-
-STAMP=$(date +"%Y-%m-%d %H:%M:%S")
-echo "[INFO] Now is $STAMP"
-
 FORCE_REPORT=0
 FORCE_FULL_COV=0
 KEEP_DB=1
+TEST_ALL=0
 
 FOCUS_ARGS=()
 for arg in "${ARGS[@]}"
@@ -122,6 +115,7 @@ if [ ${#FOCUS_ARGS[@]} -eq 0 ]
 then
     # no args = test all = remove database
     KEEP_DB=0
+    TEST_ALL=1
     COV_INCLUDE=""
 else
     echo "[INFO] Focus arguments: \"${FOCUS_ARGS[*]}\" (${#FOCUS_ARGS[@]} arguments)"
@@ -153,6 +147,21 @@ then
     echo "[INFO] Checking application is free of fatal errors"
     python3 "${PY_OPTS[@]}" ./manage.py check --tag admin --tag models || exit $?
 fi
+
+if [ $TEST_ALL -eq 1 ]
+then
+    # collect browser coverage at start of test-all
+    echo "[INFO] Running JS browser tests"
+    ./browser_tests.sh --auto
+fi
+
+# create empty test data directories
+rm -rf "$TEST_DIR" &> /dev/null
+mkdir "$TEST_DIR"
+mkdir "$TEST_DIR_FOTOS_WEBWINKEL"
+
+STAMP=$(date +"%Y-%m-%d %H:%M:%S")
+echo "[INFO] Now is $STAMP"
 
 echo "[INFO] Refreshing static files"
 [ -d "$STATIC_DIR" ] && rm -rf "$STATIC_DIR"*     # keeps top directory

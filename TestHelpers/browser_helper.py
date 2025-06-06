@@ -164,11 +164,17 @@ class BrowserTestCase(TestCase):
 
     def fetch_js_cov(self):
         # capture collected coverage before navigating away
-        script = 'const data = localStorage.getItem("js_cov");\n'
-        script += 'localStorage.removeItem("js_cov");\n'
-        script += 'return data;\n'
-        test = self._driver.execute_script(script)
-        js_cov_add(test)
+        # the try-catch is to handle an exception that happens because window.localStorage does not yet exist
+        # (no page loaded)
+        script = 'try {\n'
+        script += '  const data = localStorage.getItem("js_cov");\n'
+        script += '  localStorage.removeItem("js_cov");\n'
+        script += '  return data;\n'
+        script += '} catch (e) {}\n'
+        script += 'return "";\n'
+        data = self._driver.execute_script(script)
+        if data:
+            js_cov_add(data)
 
     def init_js_cov(self):
         # TODO: make working: script = 'localStorage.removeItem("js_cov");\n'
@@ -191,17 +197,26 @@ class BrowserTestCase(TestCase):
         if self.session_state == "logged in":
             return
 
-        # inloggen
+        # haal de inlog pagina op
         self._driver.get(self.live_server_url + self.url_login)
-        self.assertEqual(self._driver.title, 'Inloggen')
-        self.assert_no_console_log()
 
-        self._driver.find_element(By.ID, 'id_login_naam').send_keys(self.account_bb.username)
-        self._driver.find_element(By.ID, 'id_wachtwoord').send_keys(TEST_WACHTWOORD)
-        login_vink = self._driver.find_element(By.NAME, 'aangemeld_blijven')
-        self.assertTrue(login_vink.is_selected())
-        self._driver.find_element(By.ID, 'submit_knop').click()
-        self.wait_until_url_not(self.url_login)        # gaat naar otp control (want: is_BB)
+        if self._driver.title == 'Inloggen':
+            # gelukt
+            self.assert_no_console_log()
+
+            self._driver.find_element(By.ID, 'id_login_naam').send_keys(self.account_bb.username)
+            self._driver.find_element(By.ID, 'id_wachtwoord').send_keys(TEST_WACHTWOORD)
+
+            login_vink = self._driver.find_element(By.NAME, 'aangemeld_blijven')
+            self.assertTrue(login_vink.is_selected())
+
+            self._driver.find_element(By.ID, 'submit_knop').click()
+
+            self.wait_until_url_not(self.url_login)        # gaat naar otp control (want: is_BB)
+
+        elif self._driver.title.startswith('MijnHandboogsport'):  # test server & dev hebben toevoeging
+            # we zijn op het plein beland en waren dus al ingelogd
+            pass
 
         self.session_state = "logged in"
 
@@ -230,13 +245,20 @@ class BrowserTestCase(TestCase):
         if self.session_state == "logged out":
             return
 
-        # uitloggen
+        # ga naar de uitloggen pagina
         self.do_navigate_to(self.url_logout)
-        h3 = self.find_element_type_with_text('h3', 'Uitloggen')
-        self.assertIsNotNone(h3)
 
-        self.find_element_by_id('submit_knop').click()
-        self.wait_until_url_not(self.url_logout)
+        if self._driver.title == 'Uitloggen':
+            # we zijn op de uitloggen pagina beland
+            h3 = self.find_element_type_with_text('h3', 'Uitloggen')
+            self.assertIsNotNone(h3)
+
+            self.find_element_by_id('submit_knop').click()
+            self.wait_until_url_not(self.url_logout)
+
+        elif self._driver.title.startswith('MijnHandboogsport'):        # test server & dev hebben toevoeging
+            # we zijn op het plein beland en waren dus niet ingelogd
+            pass
 
         self.session_state = "logged out"
 

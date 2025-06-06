@@ -4,17 +4,15 @@
  * Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
  */
 
+/* jshint esversion: 6 */
 "use strict";
 
-function ophalen_klaar(xhr)
-{
+function ophalen_klaar(xhr) {
     // console.log('ophalen_klaar: ready=',xhr.readyState, 'status=', xhr.status);
-    if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200)
-    {
+    if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
         // verzoek is klaar en we hebben een antwoord
         // responseText is leeg bij connection failure
-        if (xhr.responseText !== "")
-        {
+        if (xhr.responseText !== "") {
             const rsp = JSON.parse(xhr.responseText);
             const bondspas_data = rsp['bondspas_base64'];
             const el_img = document.getElementById('id_image');
@@ -33,8 +31,7 @@ function ophalen_klaar(xhr)
     }
 }
 
-function ophalen_timeout(xhr)
-{
+function ophalen_timeout(xhr) {
     // voorkom reactie bij ontvangst laat antwoord
     xhr.abort();
 
@@ -52,8 +49,10 @@ window.addEventListener("load", function() {
     // POST voorkomt caching
     xhr.open("POST", dataset.urlDynamic, true);         // true = async
     xhr.timeout = 60000;                                 // 60 sec voor trage verbinding
-    xhr.onloadend = function(){ ophalen_klaar(xhr) };
-    xhr.ontimeout = function(){ ophalen_timeout(xhr) };
+    xhr.onloadend = ophalen_klaar;
+    xhr.ontimeout = ophalen_timeout;
+    //xhr.onloadend = function(){ ophalen_klaar(xhr); };
+    //xhr.ontimeout = function(){ ophalen_timeout(xhr); };
     xhr.setRequestHeader("X-CSRFToken", dataset.csrfToken);
     xhr.send();
 });

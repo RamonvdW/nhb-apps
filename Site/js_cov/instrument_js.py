@@ -17,7 +17,7 @@ class JsCovInstrument:
 
     def __init__(self):
         self.line_nr = 0
-        self.scope_stack = list()     # [c, ...] c = character that ends the scope
+        self.brace_level = 0
         self.js_cov_func = ''         # function to call to store line covered
         self.statement_line_nrs = list()
         self.executable_line_nrs = list()
@@ -38,9 +38,9 @@ class JsCovInstrument:
         contents = contents[pos + 3:]
 
         self.line_nr = 1 + clean.count('\n')
-        self.scope_stack = list()       # empty list = global scope
         self.statement_line_nrs = list()
         self.executable_line_nrs = list()
+        self.brace_level = 0
 
         self.local_f_counter += 1
         self.js_cov_func = 'js_f%s' % str(self.local_f_counter)
@@ -51,18 +51,18 @@ class JsCovInstrument:
 
         # add helper function to set coverage and handle missing variables
         if clean:
-            clean += 'function %s(line_nr) {\n' % self.js_cov_func
+            clean += 'function %s(line_nrs) {\n' % self.js_cov_func
 
             # get from local storage
             clean += '  let data = localStorage.getItem("js_cov");\n'
             clean += '  let cov = {};\n'
-            clean += '  if (data !== null) { cov = JSON.parse(data); };\n'
+            clean += '  if (data !== null) { cov = JSON.parse(data); }\n'
 
             # initialize the file-specific section, if needed (on first use)
-            clean += '  if (cov[%s] === undefined) { cov[%s] = {}; };\n' % (const_name, const_name)
+            clean += '  if (cov[%s] === undefined) { cov[%s] = {}; }\n' % (const_name, const_name)
 
             # store the covered line
-            clean += '  cov[%s][line_nr] = 1;\n' % const_name
+            clean += '  line_nrs.forEach(line_nr => { cov[%s][line_nr] = 1; });\n' % const_name
 
             # save to local storage
             clean += '  data = JSON.stringify(cov);\n'
@@ -95,7 +95,7 @@ class JsCovInstrument:
 
                     # verwerk het stuk script voordat het commentaar begint
                     pre_comment = contents[:pos_c]
-                    clean += self._instrument_part(pre_comment)
+                    clean += self._instrument_part(pre_comment, pre=clean[-50:])
                     contents = contents[pos_c:]
 
                     # verwijder het commentaar
@@ -122,13 +122,16 @@ class JsCovInstrument:
 
             if pos_q >= 0:
                 pre_string = contents[:pos_q]
-                clean += self._instrument_part(pre_string)
-
                 stop_char = contents[pos_q]
                 contents = contents[pos_q + 1:]  # kap pre-string en quote eraf
+
                 pos = self._zoek_eind_quote(contents, stop_char)
-                clean += stop_char  # open char
                 clean_part = contents[:pos + 1]  # kopieer string inclusief stop-char
+
+                # print('[DEBUG] clean_part = %s' % repr(clean_part))
+                clean += self._instrument_part(pre_string, pre=clean[-50:])
+
+                clean += stop_char  # open char
                 clean += clean_part
                 self.line_nr += clean_part.count('\n')
                 contents = contents[pos + 1:]
@@ -138,7 +141,7 @@ class JsCovInstrument:
 
                 # verwerk het stuk script voordat het commentaar begint
                 pre_comment = contents[:pos_c]
-                clean += self._instrument_part(pre_comment)
+                clean += self._instrument_part(pre_comment, pre=clean[-50:])
                 contents = contents[pos_c:]
 
                 # verwijder het commentaar
@@ -161,7 +164,7 @@ class JsCovInstrument:
                         contents = ''
 
             else:
-                clean += self._instrument_part(contents)
+                clean += self._instrument_part(contents, pre=clean[-50:])
                 contents = ''
         # while
 
@@ -172,10 +175,19 @@ class JsCovInstrument:
 
         return clean
 
-    def _instrument_part(self, script):
+    def _instrument_part(self, script, pre=''):
+        # script is a section of the JS code, found between comments and strings
+        # possibly with newlines
         clean = ''
 
+        # print('[DEBUG] script=%s' % repr(script))
+        # if pre:
+        #     print('[DEBUG] pre=%s' % repr(pre))
+
+        use_strict_follows = pre and pre.strip()[:10] == 'use strict'
+
         while len(script) > 0:
+            # break out a line (we want to do line coverage)
             pos_n = script.find('\n')
             if pos_n >= 0:
                 line = script[:pos_n]
@@ -185,10 +197,41 @@ class JsCovInstrument:
                 script = ''
 
             if line.strip() != '':
-                # print('[%s] line: %s' % (self.line_nr, repr(line)))
-                if self.line_nr not in self.statement_line_nrs:
-                    self.statement_line_nrs.append(self.line_nr)
-                    self.executable_line_nrs.append(self.line_nr)
+                line = line.rstrip()    # remove whitespace left after removing comment; keep indentation
+
+                # pre_brace_level = self.brace_level
+                self.brace_level = self.brace_level + line.count('(') + line.count('{')
+                self.brace_level = self.brace_level - line.count(')') - line.count('}')
+                # post_brace_level = self.brace_level
+                # print('[%s][%s -> %s] line: %s' % (self.line_nr, pre_brace_level, post_brace_level, repr(line)))
+
+                if self.brace_level > 0:        # skip closing } and });
+                    if self.line_nr not in self.statement_line_nrs:
+                        self.statement_line_nrs.append(self.line_nr)
+                        self.executable_line_nrs.append(self.line_nr)
+
+                insert_here = False
+
+                if self.brace_level == 0 or "break" in line or "return" in line or "window.location.href" in line:
+                    insert_here = True
+
+                    # detect the situation where this is an inline object used as function parameter
+                    # print('[%s] line=%s' % (self.line_nr, repr(line)))
+                    part = pre + clean
+                    part = part[-100:].strip()
+                    # print('[%s] pre? part=%s' % (self.line_nr, repr(part)))
+                    if part and part[-1] in ('=', ',', '[', '"', "'"):
+                        insert_here = False
+
+                if insert_here:
+                    # flush before end of function
+                    # print('[%s] inserting (%s)' % (self.line_nr, repr(self.statement_line_nrs)))
+                    if len(self.statement_line_nrs):
+                        if clean and clean[-1] != '\n':
+                            clean += '\n'
+                        clean += '%s(%s);\n' % (self.js_cov_func, repr(self.statement_line_nrs))
+                        self.statement_line_nrs = list()
+
                 clean += line
 
                 insert_here = False
@@ -197,16 +240,31 @@ class JsCovInstrument:
                     # end of statement
                     insert_here = True
 
-                if line[-1] == '{':
-                    if 'function' in line or 'forEach' in line:
+                if line[-1] == '{' and not use_strict_follows:
+                    # detect the situation where this is an inline object used as function parameter
+                    # print('[%s] line=%s' % (self.line_nr, repr(line)))
+                    part = clean[-50:-1].strip()
+                    if part and (part[-1] == ')' or part[-2:] == '=>' or part[-4:] == 'else'):
+                        insert_here = True
+                    elif part and part[-1] in ('=', ',', '[', '"', "'"):
+                        insert_here = False
+                    else:
+                        # if 'function' in line or 'forEach' in line or 'if ' in line or 'else' in line or 'for' in line:
+                        #     print('[%s] OK part=%s' % (self.line_nr, repr(part)))
+                        # else:
+                        #     print('[%s] ?? part=%s' % (self.line_nr, repr(part)))
                         insert_here = True
 
                 if insert_here:
                     # print('[%s] inserting (%s)' % (self.line_nr, repr(self.statement_line_nrs)))
-                    for line_nr in self.statement_line_nrs:
-                        clean += '\n%s(%s);' % (self.js_cov_func, line_nr)
-                    # for
-                    self.statement_line_nrs = list()
+                    if len(self.statement_line_nrs):
+                        if clean and clean[-1] != '\n':
+                            clean += '\n'
+                        clean += '%s(%s);\n' % (self.js_cov_func, repr(self.statement_line_nrs))
+                        self.statement_line_nrs = list()
+                else:
+                    # print('[%s] not inserting; line[-1] = %s' % (self.line_nr, repr(line[-1])))
+                    pass
 
             if pos_n >= 0:
                 clean += '\n'

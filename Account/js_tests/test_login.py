@@ -17,9 +17,6 @@ class TestAccountLogin(bh.BrowserTestCase):
     def test_login(self):
         # de support functies doen al een groot deel van de test die we willen doen
 
-        # inloggen (voor het geval we uitgelogd waren)
-        self.do_login()
-
         # uitloggen (voor het geval we ingelogd waren)
         self.do_logout()
 
@@ -54,7 +51,7 @@ class TestAccountLogin(bh.BrowserTestCase):
         self.session_state = "logged in"
 
     def test_login_as(self):
-        # inloggen (voor het geval we uitgelogd waren)
+        # inloggen
         self.do_login()
 
         # wordt Manager MH

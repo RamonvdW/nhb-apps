@@ -42,6 +42,8 @@ STAMP=$(date +"%Y-%m-%d %H:%M:%S")
 echo "[INFO] Now is $STAMP"
 
 KEEP_DB=1
+MAKE_REPORT=1
+ASK_LAUNCH=1
 FOCUS=""
 
 export COVERAGE_FILE        # where to write coverage data to
@@ -62,6 +64,12 @@ do
     elif [[ "$arg" == "--clean" ]]
     then
         KEEP_DB=0
+
+    elif [[ "$arg" == "--auto" ]]
+    then
+        # running as sub-test under test.sh
+        MAKE_REPORT=0
+        ASK_LAUNCH=0
 
     else
         FOCUS="$arg"
@@ -142,13 +150,13 @@ sleep 0.1
 kill "$PID_TAIL"
 wait "$PID_TAIL" 2>/dev/null
 
-# launch log in editor
+# launch log in editor with log, in case of problems
 [ $RES -eq 0 ] || geany --new-instance --no-msgwin "$LOG" &
 
 # cleanup test data directories
 [ -d "$TEST_DIR" ] && rm -rf "$TEST_DIR"
 
-if [ $ABORTED -eq 0 ]
+if [ $MAKE_REPORT -eq 1 -a $ABORTED -eq 0 ]
 then
     echo "[INFO] Generating reports" | tee -a "$LOG"
 
@@ -174,7 +182,6 @@ fi
 # restore performance mode
 powerprofilesctl set balanced
 
-ASK_LAUNCH=1
 if [ $ASK_LAUNCH -ne 0 ]
 then
     echo "HTML report is in $REPORT_DIR  (try firefox $REPORT_DIR/index.html)"

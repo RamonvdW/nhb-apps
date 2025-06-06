@@ -59,7 +59,6 @@ function getCookie(name) {
 //     <button class="btn-sv-rood" onclick="filter_activate()">Activeer</button>
 
 function filters_activate() {
-    'use strict';
 
     // get the template url (with the ~1 etc in it)
     let url = document.getElementById("filters").dataset.url;
@@ -99,8 +98,6 @@ function filters_activate() {
 //        -->      onchange="mirror_radio('makl2', 'filter_4')">
 //
 function mirror_radio(src_name, dst_name) {
-    'use strict';
-
     // zoek het geselecteerde element in de bron radiobutton set
     const src_sel = "input[type='radio'][name=" + src_name + "]:checked";
     const src_value = document.querySelector(src_sel).value;
@@ -145,7 +142,7 @@ window.addEventListener("load", () => {
     // de fonts zijn nu helemaal ingeladen, dus we kunnen de iconen tonen
     const icons = document.getElementsByClassName('material-icons-round');
     Array.from(icons).forEach(icon => {
-        icon.style.display = 'inline-block'
+        icon.style.display = 'inline-block';
     });
 
     // evalueer de posities van de labels van de forms
@@ -174,10 +171,10 @@ document.addEventListener("DOMContentLoaded", (event) => {
 
     let elems = document.querySelectorAll(".collapsible");
 
-    M.Collapsible.init(elems, { //inDuration: 100,    // default is 300
-        //outDuration: 100,   // default is 300
-        onOpenEnd: uitklappen_klaar,
-        onCloseEnd: inklappen_klaar,
+    M.Collapsible.init(elems, { onOpenEnd: uitklappen_klaar,
+                                onCloseEnd: inklappen_klaar,
+                                //inDuration: 100,    // default is 300
+                                //outDuration: 100,   // default is 300
     });
 
     elems = document.querySelectorAll(".collapsible-header .secondary-content");
@@ -213,7 +210,9 @@ document.addEventListener("DOMContentLoaded", (event) => {
         // typically happens when opening a manual page in a new window
         const el = document.getElementById("id_kruimels_back");
         // element bestaat niet als broodkruimels uitgezet zijn, zoals op het Plein zelf
-        if (el) el.style.display = "none";
+        if (el) {
+            el.style.display = "none";
+        }
     }
 
 });

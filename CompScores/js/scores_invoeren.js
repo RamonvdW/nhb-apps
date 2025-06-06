@@ -4,6 +4,7 @@
  * Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
  */
 
+/* jshint esversion: 6 */
 "use strict";
 
 const dataset = document.getElementById("js_data").dataset;
@@ -46,10 +47,8 @@ function opzoeken_klaar(xhr, btn) {
 
                 //console.log('btn.dataset:', btn.dataset);
                 is_fail = false;
-                for (let d in btn.dataset)      // geeft keys
-                {
-                    if (d !== 'xhr' && d !== 'opzoeken')      // deze keys overslaan
-                    {
+                for (let d in btn.dataset) {     // geeft keys
+                    if (d !== 'xhr' && d !== 'opzoeken') {      // deze keys overslaan
                         // voor deze key de data uit de response halen
                         let antwoord = rsp[d];
 
@@ -129,7 +128,7 @@ function opzoeken(btn) {
             delete btn.dataset.xhr;                // nieuw verzoek toegestaan
         };
         xhr.ontimeout = function () {
-            opzoeken_timeout(xhr)
+            opzoeken_timeout(xhr);
         };
         xhr.setRequestHeader("X-CSRFToken", dataset.csrfToken);
         xhr.send(data);
@@ -348,9 +347,9 @@ function deelnemers_ophalen_toevoegen(rsp) {
     // sorteer deelnemers op invoeg-volgorde: bondsnummer
     deelnemers.sort(function (a, b) {
         if (a.lid_nr !== b.lid_nr) {
-            return a.lid_nr - b.lid_nr
+            return a.lid_nr - b.lid_nr;
         } else {
-            return a.pk - b.pk
+            return a.pk - b.pk;
         }
     });
     //console.log('sorted deelnemers:', deelnemers);
