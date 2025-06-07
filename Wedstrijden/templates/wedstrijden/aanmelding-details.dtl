@@ -48,12 +48,10 @@
                     </tr>
                 {% endif %}
 
-                {% if toon_contactgegevens %}
-                    <tr>
-                        <th>E-mail sporter</th>
-                        <td colspan="2"><code>{{ sporter.email }}</code></td>
-                    </tr>
-                {% endif %}
+                <tr>
+                    <th>E-mail sporter</th>
+                    <td colspan="2"><code>{{ sporter.email }}</code></td>
+                </tr>
 
                 <tr>
                     <th>Wedstrijd</th>
@@ -153,7 +151,7 @@
                 {% if inschrijving.url_afmelden %}
                     <tr>
                         <th>Afmelden</th>
-                        <td colspan="3">
+                        <td colspan="2">
                             <a class="btn-sv-rood modal-trigger" href="#bevestig_afmelden_{{ inschrijving.pk }}">
                                 <i class="notranslate material-icons-round">delete</i></a>
                         </td>

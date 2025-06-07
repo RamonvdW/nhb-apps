@@ -72,6 +72,7 @@ def minify_js(script):
             # remove whitespace at start and end of the line
             deel = re.sub(r'\n\s+', '\n', deel)
             deel = re.sub(r'\s+\n', '\n', deel)
+            deel = deel.strip()
 
             # remove whitespace around operators
             # let op: deze tekens hebben speciale betekenis voor regexp en moeten escaped worden: /*+?.|()[]{}\
@@ -107,7 +108,7 @@ def minify_js(script):
             deel = re.sub(r'\)\ncontinue', ')continue', deel)
 
             # verwijder onnodige newlines aan het begin van het script
-            if clean == '' and deel[0] == '\n':
+            if clean == '' and deel[0] == '\n':         # pragma: no cover
                 deel = deel[1:]
 
             clean += deel

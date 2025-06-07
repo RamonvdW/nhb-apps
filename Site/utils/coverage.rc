@@ -1,5 +1,12 @@
 [run]
-plugins = django_coverage_plugin
+plugins=
+    django_coverage_plugin
+    Site.js_cov
 
 [django_coverage_plugin]
-template_extensions = dtl
+template_extensions=dtl
+
+[report]
+precision=2
+skip_covered = False
+skip_empty = False

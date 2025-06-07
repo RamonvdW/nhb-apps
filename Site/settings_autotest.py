@@ -13,26 +13,26 @@
       Site/settings.py
           includes Site/core/settings_base.py
               includes Site/settings_local.py for site specific settings  <-- replaced on real deployment
-          provides additional items that are part of the release
+              provides additional items that are part of the release
 
     Autotest via test.sh  (uses ./manage.py cmd --settings=Site.settings_autotest)
       Site/settings_autotest[_nodebug].py
           includes Site/core/settings_base.py
               includes Site/settings_local.py for site specific settings
-          provides additional items that are part of the release
-      provides changes to to settings for autotest
+              provides additional items that are part of the release
+          provides changes to to settings for autotest
 
     Dev server via run.sh  (uses ./manage.py cmd --settings=Site.settings_dev)
       Site/settings_dev.py
           includes Site/core/settings_base.py
               includes Site/settings_local.py for site specific settings
-          provides additional items that are part of the release
-      provides changes to to settings for dev
+              provides additional items that are part of the release
+          provides changes to to settings for dev
 """
 
 from Site.core.settings_base import *         # noqa
 
-# setting DEBUG=True is useless because Django will force it to False anyway
+# DEBUG = True is required for runserver to serve static files
 DEBUG = True
 
 # ask the template engine to insert a special pattern in the output in case of template problems
@@ -46,6 +46,9 @@ TEMPLATES[0]['OPTIONS']['debug'] = True
 PASSWORD_HASHERS = ['django.contrib.auth.hashers.MD5PasswordHasher']
 
 WEBWINKEL_FOTOS_DIR = 'Webwinkel/test-files/'
+STATICFILES_DIRS = [
+    ("webwinkel_fotos", WEBWINKEL_FOTOS_DIR),       # noqa
+]
 
 KALENDER_API_TOKENS = ('autotest',)
 

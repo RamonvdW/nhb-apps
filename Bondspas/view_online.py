@@ -22,6 +22,22 @@ TEMPLATE_BONDSPAS_VAN_TONEN = 'bondspas/toon-bondspas-van.dtl'
 CONTENT_TYPE_PDF = 'application/pdf'
 
 
+def _get_sporter_or_404(request):
+    account = get_account(request)
+    sporter = get_sporter(account)
+
+    if not sporter:
+        raise Http404('Geen bondspas voor dit account')
+
+    if sporter.is_gast:
+        raise Http404('Geen bondspas voor gast-accounts')
+
+    if not sporter.is_actief_lid:
+        raise Http404('Geen bondspas voor inactieve leden')
+
+    return sporter
+
+
 class ToonBondspasView(UserPassesTestMixin, View):
 
     """ Deze view kan de bondspas tonen, of een scherm met 'even wachten, we zoeken je pas op' """
@@ -43,14 +59,7 @@ class ToonBondspasView(UserPassesTestMixin, View):
         context['url_dynamic'] = reverse('Bondspas:dynamic-ophalen')
         context['url_download'] = reverse('Bondspas:dynamic-download')
 
-        account = get_account(request)
-        sporter = get_sporter(account)
-
-        if sporter.is_gast:
-            raise Http404('Geen bondspas voor gast-accounts')
-
-        if not sporter.is_actief_lid:
-            raise Http404('Geen bondspas voor inactieve leden')
+        sporter = _get_sporter_or_404(request)
 
         context['kruimels'] = (
             (reverse('Sporter:profiel'), 'Mijn pagina'),
@@ -79,14 +88,7 @@ class DynamicBondspasOphalenView(UserPassesTestMixin, View):
             Dit is een POST by-design, om caching te voorkomen.
         """
 
-        account = get_account(request)
-        sporter = get_sporter(account)
-
-        if sporter.is_gast:
-            raise Http404('Geen bondspas voor gast-accounts')
-
-        if not sporter.is_actief_lid:
-            raise Http404('Geen bondspas voor inactieve leden')
+        sporter = _get_sporter_or_404(request)
 
         jaar_pas, jaar_wedstrijden = bepaal_jaar_bondspas_en_wedstrijden()
         regels = maak_bondspas_regels(sporter, jaar_pas, jaar_wedstrijden)

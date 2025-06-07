@@ -188,7 +188,7 @@
                             <td>{{ account.last_login|date:"j b Y" }}</td>   <!--|date:"j b H:i"-->
                         </tr>
                     {% empty %}
-                        <tr>
+                        <tr data-tablefilter="stop">
                             <td colspan="4">
                                 <i>Geen accounts gevonden die hulp nodig hebben</i>
                             </td>

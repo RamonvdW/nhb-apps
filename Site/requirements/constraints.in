@@ -7,4 +7,3 @@ django>=4.2,<5.0
 mollie-api-python<3.0
 
 # end of file
-

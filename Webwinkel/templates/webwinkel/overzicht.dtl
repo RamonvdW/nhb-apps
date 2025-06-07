@@ -42,7 +42,7 @@
 
                             <div class="sv-card-image-webwinkel">
                                 <!-- achtergrondplaatje -->
-                                <img src="{{ img_spelden }}" alt="spelden">
+                                <img src="{{ img_spelden }}" alt="spelden" draggable="false">
                             </div>
 
                             <div class="sv-card-webwinkel-titel">Prestatiespelden</div>
@@ -105,7 +105,7 @@
 
                         <div class="sv-card-image-webwinkel">
                             <!-- achtergrondplaatje -->
-                            <img src="{{ product.omslag_foto_src }}" alt="product"{% if product.is_uitverkocht %} class="sv-card-image-onscherp"{% endif %}>
+                            <img src="{{ product.omslag_foto_src }}" alt="product"{% if product.is_uitverkocht %} class="sv-card-image-onscherp"{% endif %} draggable="false">
                         </div>
 
                         {% if product.is_uitverkocht %}

@@ -36,25 +36,33 @@
                 <tr>
                     <td class="center">Wit</td>
                     <td class="center">950</td>
-                    <td class="center"><img class="sv-foto-speld" src="{% static 'spelden/tussenspeld_wit.webp' %}" alt="speld"></td>
+                    <td class="center">
+                        <img class="sv-foto-speld" src="{% static 'spelden/tussenspeld_wit.webp' %}" alt="speld" draggable="false">
+                    </td>
                 </tr>
 
                 <tr>
                     <td class="center">Grijs</td>
                     <td class="center">1050</td>
-                    <td class="center"><img class="sv-foto-speld" src="{% static 'spelden/tussenspeld_grijs.webp' %}" alt="speld"></td>
+                    <td class="center">
+                        <img class="sv-foto-speld" src="{% static 'spelden/tussenspeld_grijs.webp' %}" alt="speld" draggable="false">
+                    </td>
                 </tr>
 
                 <tr>
                     <td class="center">Zwart</td>
                     <td class="center">1150</td>
-                    <td class="center"><img class="sv-foto-speld" src="{% static 'spelden/tussenspeld_zwart.webp' %}" alt="speld"></td>
+                    <td class="center">
+                        <img class="sv-foto-speld" src="{% static 'spelden/tussenspeld_zwart.webp' %}" alt="speld" draggable="false">
+                    </td>
                 </tr>
 
                 <tr>
                     <td class="center">Blauw</td>
                     <td class="center">1250</td>
-                    <td class="center"><img class="sv-foto-speld" src="{% static 'spelden/tussenspeld_blauw.webp' %}" alt="speld"></td>
+                    <td class="center">
+                        <img class="sv-foto-speld" src="{% static 'spelden/tussenspeld_blauw.webp' %}" alt="speld" draggable="false">
+                    </td>
                 </tr>
 
             </table>

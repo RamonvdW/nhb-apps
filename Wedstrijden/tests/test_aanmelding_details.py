@@ -9,7 +9,6 @@ from django.utils import timezone
 from BasisTypen.models import BoogType
 from Bestelling.models import Bestelling
 from Bestelling.operations import bestel_mutatieverzoek_maak_bestellingen
-from Competitie.models import Competitie, CompetitieIndivKlasse, Regiocompetitie, RegiocompetitieSporterBoog
 from Functie.models import Functie
 from Functie.tests.helpers import maak_functie
 from Geo.models import Regio
@@ -19,23 +18,22 @@ from Sporter.operations import get_sporter_voorkeuren
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
 from Wedstrijden.definities import WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD, WEDSTRIJD_KORTING_VERENIGING
-from Wedstrijden.models import Wedstrijd, WedstrijdSessie, WedstrijdInschrijving, WedstrijdKorting, Kwalificatiescore
+from Wedstrijden.models import Wedstrijd, WedstrijdSessie, WedstrijdInschrijving, WedstrijdKorting
 from datetime import timedelta
 
 
 class TestWedstrijdenAanmeldingen(E2EHelpers, TestCase):
 
-    """ tests voor de Wedstrijden applicatie, module Aanmeldingen """
+    """ tests voor de Wedstrijden applicatie, module Aanmelding Details """
 
-    test_after = ('Wedstrijden.tests.test_wedstrijd_details',)
+    test_after = ('Wedstrijden.tests.test_aanmeldingen',)
 
-    url_aanmeldingen_wedstrijd = '/wedstrijden/%s/aanmeldingen/'                    # wedstrijd_pk
-    url_aanmeldingen_download_tsv = '/wedstrijden/%s/aanmeldingen/download/tsv/'    # wedstrijd_pk
-    url_aanmeldingen_download_csv = '/wedstrijden/%s/aanmeldingen/download/csv/'    # wedstrijd_pk
+    url_details = '/wedstrijden/details-aanmelding/%s/'     # inschrijving_pk
+    url_aanpassen = '/wedstrijden/aanpassen/%s/'            # inschrijving_pk
+    url_afmelden = '/wedstrijden/afmelden/%s/'              # inschrijving_pk
 
-    url_wedstrijden_wijzig_wedstrijd = '/wedstrijden/%s/wijzig/'                    # wedstrijd_pk
+    url_wedstrijden_wijzig_wedstrijd = '/wedstrijden/%s/wijzig/'        # wedstrijd_pk
     url_wedstrijden_maak_nieuw = '/wedstrijden/vereniging/kies-type/'
-    url_inschrijven_groepje = '/wedstrijden/inschrijven/%s/groep/'                  # wedstrijd_pk
     url_inschrijven_toevoegen_mandje = '/wedstrijden/inschrijven/toevoegen-mandje/'
     url_sporter_voorkeuren = '/sporter/voorkeuren/'
 
@@ -144,10 +142,11 @@ class TestWedstrijdenAanmeldingen(E2EHelpers, TestCase):
                         tijd_einde='15:00',
                         max_sporters=50)
         sessie.save()
+        self.sessie_r = sessie
         self.wedstrijd.sessies.add(sessie)
         wkls_r = self.wedstrijd.wedstrijdklassen.filter(boogtype__afkorting='R')
         sessie.wedstrijdklassen.set(wkls_r)
-        self.sessie_r = sessie
+        self.klasse_r = wkls_r.first()
 
         # maak een C sessie aan
         sessie = WedstrijdSessie(
@@ -156,15 +155,15 @@ class TestWedstrijdenAanmeldingen(E2EHelpers, TestCase):
                         tijd_einde='15:00',
                         max_sporters=50)
         sessie.save()
+        self.sessie_c = sessie
         self.wedstrijd.sessies.add(sessie)
         wkls_c = self.wedstrijd.wedstrijdklassen.filter(boogtype__afkorting='C')
         sessie.wedstrijdklassen.set(wkls_c)
-        self.sessie_c = sessie
+        self.klasse_c = wkls_c.get(volgorde=221)
+        self.klasse_c_fout = wkls_c.get(volgorde=222)       # vrouwen
 
         # schrijf de twee sporters in
         self.e2e_login_and_pass_otp(self.account)
-        # self.e2e_wisselnaarrol_sporter()
-        # url = self.url_inschrijven_groepje % self.wedstrijd.pk
 
         # zorg dat de wedstrijd als 'gesloten' gezien wordt
         begin = self.wedstrijd.datum_begin
@@ -249,57 +248,116 @@ class TestWedstrijdenAanmeldingen(E2EHelpers, TestCase):
     def test_anon(self):
         self.client.logout()
 
-        resp = self.client.get(self.url_aanmeldingen_wedstrijd % self.wedstrijd.pk)
+        resp = self.client.get(self.url_details % self.inschrijving1r.pk)
         self.assert403(resp)
 
-        resp = self.client.get(self.url_aanmeldingen_download_tsv % self.wedstrijd.pk)
+        resp = self.client.get(self.url_afmelden % self.inschrijving1r.pk)
         self.assert403(resp)
 
-        resp = self.client.get(self.url_aanmeldingen_download_csv % self.wedstrijd.pk)
-        self.assert403(resp)
-
-    def test_aanmeldingen(self):
+    def test_details_sporter(self):
         # wordt HWL
         self.e2e_login_and_pass_otp(self.account_admin)
         self.e2e_wissel_naar_functie(self.functie_hwl)
-        self.e2e_check_rol('HWL')
 
-        url = self.url_aanmeldingen_wedstrijd % self.wedstrijd.pk
+        url = self.url_details % self.inschrijving1r.pk
+
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('wedstrijden/aanmeldingen.dtl', 'plein/site_layout.dtl'))
-
-        # als MWZ (andere kruimels, verder niets)
-        self.e2e_wissel_naar_functie(self.functie_mwz)
-        self.client.get(url)
+        self.assert_template_used(resp, ('wedstrijden/aanmelding-details.dtl', 'plein/site_layout.dtl'))
 
         self.e2e_assert_other_http_commands_not_supported(url)
 
+        # als MWZ
+        self.e2e_wissel_naar_functie(self.functie_mwz)
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('wedstrijden/aanmelding-details.dtl', 'plein/site_layout.dtl'))
+
+        # # maak de sporter niet ingeschreven
+        # self.inschrijving2.delete()
+        #
+        # url = self.url_details_aanmelding % self.inschrijving2.pk      # is afgemeld
+        # print('url=%s' % repr(url))
+        # with self.assert_max_queries(20):
+        #     resp = self.client.get(url)
+        # self.assertEqual(resp.status_code, 200)     # 200 = OK
+        # self.assert_html_ok(resp)
+        # self.assert_template_used(resp, ('wedstrijden/aanmelding-details.dtl', 'plein/site_layout.dtl'))
+
         # bad
-        resp = self.client.get(self.url_aanmeldingen_wedstrijd % 999999)
-        self.assert404(resp, 'Wedstrijd niet gevonden')
+        resp = self.client.get(self.url_details % 'Y<42')
+        self.assert404(resp, 'Geen valide parameter')
 
-        resp = self.client.get(self.url_aanmeldingen_wedstrijd % 'X=1')
-        self.assert404(resp, 'Wedstrijd niet gevonden')
+        resp = self.client.get(self.url_details % 999999)
+        self.assert404(resp, 'Inschrijving niet gevonden')
 
-    def test_download(self):
+        # maak 1 inschrijving afgemeld
+        self.inschrijving1c.status = WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD
+        self.inschrijving1c.save(update_fields=['status'])
+
+        # verkeerde vereniging
+        ver2 = Vereniging(
+                        ver_nr=2000,
+                        naam="Andere Club",
+                        regio=Regio.objects.get(regio_nr=116))
+        ver2.save()
+        self.wedstrijd.organiserende_vereniging = ver2
+        self.wedstrijd.save(update_fields=['organiserende_vereniging'])
+
+        self.e2e_wissel_naar_functie(self.functie_hwl)
+
+        url = self.url_details % self.inschrijving1c.pk
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assert404(resp, 'Verkeerde vereniging')
+
+    def test_afmelden(self):
         # wordt HWL
         self.e2e_login_and_pass_otp(self.account_admin)
         self.e2e_wissel_naar_functie(self.functie_hwl)
 
-        # echte download
-        url = self.url_aanmeldingen_download_tsv % self.wedstrijd.pk
+        url = self.url_afmelden % self.inschrijving1r.pk
         with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assert200_is_bestand_tsv(resp)
+            resp = self.client.post(url, {'snel': 1})
+        self.assert_is_redirect(resp, self.url_details % self.inschrijving1r.pk)
 
-        url = self.url_aanmeldingen_download_csv % self.wedstrijd.pk
+        # maak een tweede vereniging
+        ver2 = Vereniging(
+                        ver_nr=1001,
+                        naam="Kleine Club",
+                        regio=Regio.objects.get(regio_nr=112))
+        ver2.save()
+        self.wedstrijd.organiserende_vereniging = ver2
+        self.wedstrijd.save()
+
+        url = self.url_afmelden % self.inschrijving1r.pk
         with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assert200_is_bestand_csv(resp)
+            resp = self.client.post(url, {'snel': 1})
+        self.assert404(resp, 'Verkeerde vereniging')
 
+        # nogmaals, als MWZ
+        self.e2e_wissel_naar_functie(self.functie_mwz)
+
+        url = self.url_afmelden % self.inschrijving2.pk
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'snel': 1})
+        self.assert_is_redirect(resp, self.url_details % self.inschrijving2.pk)  # is afgemeld
+
+        self.e2e_assert_other_http_commands_not_supported(url, post=False)
+
+        # bad
+        resp = self.client.post(self.url_afmelden % 999999)
+        self.assert404(resp, 'Inschrijving niet gevonden')
+
+        resp = self.client.post(self.url_afmelden % 'X=1')
+        self.assert404(resp, 'Inschrijving niet gevonden')
+
+    def test_aanpassen(self):
         # zet het mandje om in een bestelling zodat er een bestelnummer aan komt te hangen
         self.assertEqual(Bestelling.objects.count(), 0)
         bestel_mutatieverzoek_maak_bestellingen(self.account, snel=True)
@@ -307,130 +365,77 @@ class TestWedstrijdenAanmeldingen(E2EHelpers, TestCase):
         # print('\nf1: %s\nf2: %s\n' % (f1.getvalue(), f2.getvalue()))
         self.assertEqual(Bestelling.objects.count(), 1)
 
-        # zet para voorwerpen
-        self.sporter1_voorkeuren.para_voorwerpen = True
-        self.sporter1_voorkeuren.save()
+        # wordt HWL
+        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_wissel_naar_functie(self.functie_hwl)
 
-        # wedstrijd met kwalificatiescores
-        self.wedstrijd.eis_kwalificatie_scores = True
-        self.wedstrijd.save(update_fields=['eis_kwalificatie_scores'])
+        url = self.url_aanpassen % self.inschrijving1r.pk
 
-        url = self.url_aanmeldingen_download_csv % self.wedstrijd.pk
-        with self.assert_max_queries(21):
+        with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assert200_is_bestand_csv(resp)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('wedstrijden/aanmelding-aanpassen.dtl', 'plein/site_layout.dtl'))
 
-        # geef echte kwalificatiescores op
-        Kwalificatiescore(
-                inschrijving=self.inschrijving1r,
-                resultaat=200,
-                datum=self.wedstrijd.datum_begin - timedelta(days=3),
-                naam='Bovengemiddeld 1',
-                waar='Doeldorp').save()
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'sporterboog': self.sporterboog1c.pk,
+                                          'sessie': self.sessie_c.pk,
+                                          'klasse': self.klasse_c.pk,
+                                          'snel': 1})
+        self.assert_is_redirect(resp, self.url_details % self.inschrijving1r.pk)
+        #self.assert404(resp, 'Slecht verzoek (3)')
 
-        Kwalificatiescore(
-                inschrijving=self.inschrijving1r,
-                resultaat=201,
-                datum=self.wedstrijd.datum_begin - timedelta(days=4),
-                naam='Bovengemiddeld 2',
-                waar='Doeldorp').save()
-
-        # bondscompetitie uitslagen
-        competitie = Competitie(
-                        beschrijving='',
-                        afstand='18',
-                        begin_jaar=1999)
-        competitie.save()
-
-        klasse = CompetitieIndivKlasse(
-                        competitie=competitie,
-                        volgorde=1,
-                        min_ag=0,
-                        boogtype=self.boog_r)
-        klasse.save()
-
-        regiocomp = Regiocompetitie(
-                        competitie=competitie,
-                        regio=self.regio112,
-                        functie=self.functie_hwl)
-        regiocomp.save()
-
-        deelnemer = RegiocompetitieSporterBoog(
-                        regiocompetitie=regiocomp,
-                        sporterboog=self.sporterboog1r,
-                        bij_vereniging=self.ver1,
-                        indiv_klasse=klasse,
-                        score1=220,
-                        score2=221,
-                        score3=210,
-                        score4=0,
-                        score5=0,
-                        score6=230,
-                        score7=240)
-        deelnemer.save()
-
-        url = self.url_aanmeldingen_download_csv % self.wedstrijd.pk
-        with self.assert_max_queries(21):
-            resp = self.client.get(url)
-        self.assert200_is_bestand_csv(resp)
-
-        # minder bondscompetitie scores
-        deelnemer.score1 = deelnemer.score2 = deelnemer.score3 = deelnemer.score6 = deelnemer.score7 = 0
-        deelnemer.save()
-
-        url = self.url_aanmeldingen_download_csv % self.wedstrijd.pk
-        with self.assert_max_queries(21):
-            resp = self.client.get(url)
-        self.assert200_is_bestand_csv(resp)
-
-        # als verkeerde HWL
+        # maak een tweede vereniging
         ver2 = Vereniging(
-                            ver_nr=2000,
-                            naam="Extra Club",
-                            regio=Regio.objects.get(regio_nr=116))
+                        ver_nr=1001,
+                        naam="Kleine Club",
+                        regio=Regio.objects.get(regio_nr=112))
         ver2.save()
-
         self.wedstrijd.organiserende_vereniging = ver2
-        self.wedstrijd.save(update_fields=['organiserende_vereniging'])
+        self.wedstrijd.save()
 
-        resp = self.client.get(self.url_aanmeldingen_download_tsv % self.wedstrijd.pk)
-        self.assert404(resp, 'Wedstrijd is niet bij jullie vereniging')
+        url = self.url_aanpassen % self.inschrijving1r.pk
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assert404(resp, 'Verkeerde vereniging')
 
-        resp = self.client.get(self.url_aanmeldingen_download_csv % self.wedstrijd.pk)
-        self.assert404(resp, 'Wedstrijd is niet bij jullie vereniging')
+        with self.assert_max_queries(20):
+            resp = self.client.post(url)
+        self.assert404(resp, 'Verkeerde vereniging')
 
-        # nu als MWZ
+        # als MWZ
         self.e2e_wissel_naar_functie(self.functie_mwz)
 
-        # koppel een sporter los van een vereniging
-        self.sporter1.bij_vereniging = None
-        self.sporter1.save(update_fields=['bij_vereniging'])
-
-        # sporter zonder gekozen geslacht
-        self.sporter1_voorkeuren.wedstrijd_geslacht_gekozen = False
-        self.sporter1_voorkeuren.save(update_fields=['wedstrijd_geslacht_gekozen'])
-
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_aanmeldingen_download_tsv % self.wedstrijd.pk)
-        self.assert200_is_bestand_tsv(resp)
-
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_aanmeldingen_download_csv % self.wedstrijd.pk)
-        self.assert200_is_bestand_csv(resp)
-
-        # uitzondering: geen voorkeuren
-        self.sporter1_voorkeuren.delete()
-
-        url = self.url_aanmeldingen_download_csv % self.wedstrijd.pk
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assert200_is_bestand_csv(resp)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('wedstrijden/aanmelding-aanpassen.dtl', 'plein/site_layout.dtl'))
 
-        # wedstrijd niet gevonden
-        resp = self.client.get(self.url_aanmeldingen_download_tsv % 999999)
-        self.assert404(resp, 'Wedstrijd niet gevonden')
+        # bad
+        resp = self.client.get(self.url_aanpassen % 'xxxxx')
+        self.assert404(resp, 'Geen valide parameter')
 
-        resp = self.client.get(self.url_aanmeldingen_download_csv % 999999)
-        self.assert404(resp, 'Wedstrijd niet gevonden')
+        resp = self.client.get(self.url_aanpassen % 999999)
+        self.assert404(resp, 'Inschrijving niet gevonden')
+
+        resp = self.client.post(self.url_aanpassen % 999999)
+        self.assert404(resp, 'Inschrijving niet gevonden')
+
+        with self.assert_max_queries(20):
+            resp = self.client.post(url)
+        self.assert404(resp, 'Slecht verzoek (1)')
+
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'sporterboog': 999999, 'sessie': 999999, 'klasse': 999999})
+        self.assert404(resp, 'Slecht verzoek (2)')
+
+        # verkeerde klasse
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'sporterboog': self.sporterboog1c.pk,
+                                          'sessie': self.sessie_c.pk,
+                                          'klasse': self.klasse_c_fout.pk,
+                                          'snel': 1})
+        self.assert404(resp, 'Slecht verzoek (3)')
 
 # end of file

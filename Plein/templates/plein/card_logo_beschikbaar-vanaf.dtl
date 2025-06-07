@@ -1,5 +1,5 @@
 {% comment %}
-                Copyright (c) 2022-2024 Ramon van der Winkel.
+                Copyright (c) 2022-2025 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -32,7 +32,7 @@
 
         <!-- plaatje -->
         <div style="margin-bottom:8px">
-            <img src="{{ img }}" height="60" alt="logo" style="opacity: 0.5">
+            <img src="{{ img }}" height="60" alt="logo" style="opacity: 0.5" draggable="false">
         </div>
 
         <div class="grey-text">{{ text }}</div>

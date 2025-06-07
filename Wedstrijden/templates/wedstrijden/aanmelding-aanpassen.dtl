@@ -13,7 +13,6 @@
     <div id="js_data"
          data-url="{{ url_selecteer }}"
          data-csrf-token="{{ csrf_token }}">
-
     </div>
     <script>
         function aanpassen(id)

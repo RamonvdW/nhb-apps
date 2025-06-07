@@ -124,16 +124,16 @@
     <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
             <div style="margin:10px; display:inline-block">
-                <img class="sv-foto-speld" src="{% static 'spelden/graadspelden_eerste_geel.webp' %}" alt="speld">
+                <img class="sv-foto-speld" src="{% static 'spelden/graadspelden_eerste_geel.webp' %}" alt="speld" draggable="false">
             </div>
             <div style="margin:10px; display:inline-block">
-                <img class="sv-foto-speld" src="{% static 'spelden/graadspelden_eerste_rood.webp' %}" alt="speld">
+                <img class="sv-foto-speld" src="{% static 'spelden/graadspelden_eerste_rood.webp' %}" alt="speld" draggable="false">
             </div>
             <div style="margin:10px; display:inline-block">
-                <img class="sv-foto-speld" src="{% static 'spelden/graadspelden_eerste_blauw.webp' %}" alt="speld">
+                <img class="sv-foto-speld" src="{% static 'spelden/graadspelden_eerste_blauw.webp' %}" alt="speld" draggable="false">
             </div>
             <div style="margin:10px; display:inline-block">
-                <img class="sv-foto-speld" src="{% static 'spelden/graadspelden_derde_groen.webp' %}" alt="speld">
+                <img class="sv-foto-speld" src="{% static 'spelden/graadspelden_derde_groen.webp' %}" alt="speld" draggable="false">
             </div>
         </div>
     </div>

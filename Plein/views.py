@@ -115,6 +115,8 @@ class PleinView(View):
         # site-specifieke default voor deze kaartjes
         context['toon_opleidingen'] = settings.TOON_OPLEIDINGEN
 
+        allow_ping = False
+
         if request.user.is_authenticated:
             rol_nu = rol_get_huidige(request)
 
@@ -124,6 +126,7 @@ class PleinView(View):
 
                 context['url_profiel'] = reverse('Sporter:profiel')
                 context['url_handleiding_leden'] = settings.URL_PDF_HANDLEIDING_LEDEN
+                allow_ping = True
 
                 if gebruiker_is_scheids(self.request):
                     context['url_scheids'] = reverse('Scheidsrechter:overzicht')
@@ -186,16 +189,20 @@ class PleinView(View):
                               Rol.ROL_HWL, Rol.ROL_WL):
                     context['toon_bondscompetities'] = True
 
+                allow_ping = True
+
         context['email_support'] = settings.EMAIL_SUPPORT
         context['url_email_support'] = 'mailto:' + settings.EMAIL_SUPPORT
 
         context['canonical'] = reverse('Plein:plein')
 
-        # laat een POST doen naar onszelf, maar maximaal 1x per minuut
-        # (stamp bevat geen seconden)
-        if request.session.get(SESSIONVAR_VORIGE_POST, '') != plein_datetime_stamp_str():
-            # geen opvallende url
-            context['url_ping'] = reverse('Plein:plein')
+        if allow_ping:
+            # laat een POST doen naar onszelf, maar maximaal 1x per minuut
+            # (stamp bevat geen seconden)
+            prev_stamp = request.session.get(SESSIONVAR_VORIGE_POST, '')
+            do_ping = prev_stamp != plein_datetime_stamp_str()
+            if do_ping:
+                context['url_ping'] = reverse('Plein:plein')        # geen opvallende url
 
         return render(request, template, context)
 

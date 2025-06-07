@@ -42,7 +42,7 @@ fi
 
 echo "[INFO] Refreshing static files"
 rm -rf "$STATIC_DIR"*     # keeps top directory
-./manage.py collectstatic --link -v0
+./manage.py collectstatic --link -v0 --settings="$SETTINGS"
 RES=$?
 if [ $RES -ne 0 ]
 then

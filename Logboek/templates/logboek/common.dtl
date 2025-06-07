@@ -1,8 +1,10 @@
 {% comment %}
-                Copyright (c) 2020-2023 Ramon van der Winkel.
+                Copyright (c) 2020-2025 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
+
+{% load static %}
 
 <!-- dit bestand wordt ge-include in alle andere logboek pagina's -->
 
@@ -42,7 +44,7 @@
                 {% endfor %}
             </ul>
             <p class="center">
-                <button class="btn-sv-rood" onclick="activeer_deel()">Activeer</button>
+                <button class="btn-sv-rood" id="id_activeer_knop" onclick="activeer_deel()">Activeer</button>
             </p>
         </div>
     </div>
@@ -74,6 +76,7 @@
 <div class="row center">
     <div class="col s12">
         <h4>Resultaten</h4>
+        <h5>{{ actief_deel }}</h5>
         {% if is_paginated %}
             <ul class="pagination">
                 {% for linkname, url in page_links %}
@@ -95,3 +98,4 @@
         {% endif %}
     </div>
 </div>
+

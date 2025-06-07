@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2023-2024 Ramon van der Winkel.
+                Copyright (c) 2023-2025 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -28,7 +28,7 @@
 
     <!-- sfeerfoto -->
     <div class="center" style="margin-top:50px; margin-bottom:30px">
-        <img class="sv-foto-groot" src="{% static 'competitie/team_sfeer_1.webp' %}" loading="lazy" alt="sfeerfoto"><br>
+        <img class="sv-foto-groot" src="{% static 'competitie/team_sfeer_1.webp' %}" loading="lazy" alt="sfeerfoto" draggable="false"><br>
         <code style="font-size:12px">Sfeerfoto van een teamwedstrijd</code>
         <p>
             <a class="btn-sv-rood" href="https://handboogsport.smugmug.com/Indoor/" target="_blank" rel="noopener noreferrer">
@@ -153,7 +153,7 @@
 
     <!-- sfeerfoto -->
     <div class="center" style="margin-top:50px; margin-bottom:30px">
-        <img class="sv-foto-groot" src="{% static 'competitie/team_sfeer_4.webp' %}" loading="lazy" alt="sfeerfoto"><br>
+        <img class="sv-foto-groot" src="{% static 'competitie/team_sfeer_4.webp' %}" loading="lazy" alt="sfeerfoto" draggable="false"><br>
         <code style="font-size:12px">Sfeerfoto van een teamwedstrijd</code>
         <p>
             <a class="btn-sv-rood" href="https://handboogsport.smugmug.com/Indoor/" target="_blank" rel="noopener noreferrer">
@@ -235,7 +235,7 @@
 
     <!-- sfeerfoto -->
     <div class="center" style="margin-top:50px; margin-bottom:30px">
-        <img class="sv-foto-groot" src="{% static 'competitie/team_sfeer_5.webp' %}" loading="lazy" alt="sfeerfoto"><br>
+        <img class="sv-foto-groot" src="{% static 'competitie/team_sfeer_5.webp' %}" loading="lazy" alt="sfeerfoto" draggable="false"><br>
         <code style="font-size:12px">Sfeerfoto van een teamwedstrijd</code>
         <p>
             <a class="btn-sv-rood" href="https://handboogsport.smugmug.com/Indoor/" target="_blank" rel="noopener noreferrer">
@@ -374,7 +374,7 @@
 
     <!-- sfeerfoto -->
     <div class="center" style="margin-top:50px; margin-bottom:30px">
-        <img class="sv-foto-groot" src="{% static 'competitie/team_sfeer_2.webp' %}" loading="lazy" alt="sfeerfoto"><br>
+        <img class="sv-foto-groot" src="{% static 'competitie/team_sfeer_2.webp' %}" loading="lazy" alt="sfeerfoto" draggable="false"><br>
         <code style="font-size:12px">Sfeerfoto van een teamwedstrijd</code>
         <p>
             <a class="btn-sv-rood" href="https://handboogsport.smugmug.com/Indoor/" target="_blank" rel="noopener noreferrer">

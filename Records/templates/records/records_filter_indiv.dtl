@@ -397,7 +397,7 @@
                                     <i>Wordt getoond</i>
                                 {% else %}
                                     <a class="btn-sv-rood" href="{{ obj.url }}">
-                                        <img src="{% static 'plein/zoom_in.svg' %}" height="36" alt="Toon">
+                                        <img src="{% static 'plein/zoom_in.svg' %}" height="36" alt="Toon" draggable="false">
                                     </a>
                                 {% endif %}
                             </td>

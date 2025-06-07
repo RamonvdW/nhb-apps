@@ -7,7 +7,7 @@
 ARGS=("$@")
 #for idx in "${!ARGS[@]}"; do echo "ARGS[$idx]=${ARGS[$idx]}"; done
 
-COV_AT_LEAST=96.70
+COV_AT_LEAST=96.80
 RED="\e[31m"
 RESET="\e[0m"
 TEST_DIR="./Site/tmp_test_data"
@@ -46,7 +46,7 @@ export PYTHONDONTWRITEBYTECODE=1
 
 OMIT="--omit=*/lib/python3*/site-packages/*"    # use , to separate
 
-# kill the http simulator if still running in the background
+# kill the simulators, if still running in the background
 # -f check entire commandline program name is python and does not match
 pgrep -f websim > /dev/null
 RES=$?
@@ -56,17 +56,10 @@ then
     pkill -f websim
 fi
 
-# create empty test data directories
-rm -rf "$TEST_DIR" &> /dev/null
-mkdir "$TEST_DIR"
-mkdir "$TEST_DIR_FOTOS_WEBWINKEL"
-
-STAMP=$(date +"%Y-%m-%d %H:%M:%S")
-echo "[INFO] Now is $STAMP"
-
 FORCE_REPORT=0
 FORCE_FULL_COV=0
 KEEP_DB=1
+TEST_ALL=0
 
 FOCUS_ARGS=()
 for arg in "${ARGS[@]}"
@@ -122,6 +115,7 @@ if [ ${#FOCUS_ARGS[@]} -eq 0 ]
 then
     # no args = test all = remove database
     KEEP_DB=0
+    TEST_ALL=1
     COV_INCLUDE=""
 else
     echo "[INFO] Focus arguments: \"${FOCUS_ARGS[*]}\" (${#FOCUS_ARGS[@]} arguments)"
@@ -154,6 +148,14 @@ then
     python3 "${PY_OPTS[@]}" ./manage.py check --tag admin --tag models || exit $?
 fi
 
+# create empty test data directories
+rm -rf "$TEST_DIR" &> /dev/null
+mkdir "$TEST_DIR"
+mkdir "$TEST_DIR_FOTOS_WEBWINKEL"
+
+STAMP=$(date +"%Y-%m-%d %H:%M:%S")
+echo "[INFO] Now is $STAMP"
+
 echo "[INFO] Refreshing static files"
 [ -d "$STATIC_DIR" ] && rm -rf "$STATIC_DIR"*     # keeps top directory
 COLLECT=$(./manage.py collectstatic --link)
@@ -173,13 +175,6 @@ ln -s "$STATIC_DIR" "$TMP_HTML/static"
 export COVERAGE_FILE        # where to write coverage data to
 python3 "${PY_OPTS[@]}" -m coverage erase
 
-echo "[INFO] Capturing output in $LOG"
-# --pid=$$ means: stop when parent stops
-# -u = unbuffered stdin/stdout
-tail -f "$LOG" --pid=$$ | python -u ./Site/utils/number_tests.py | grep --color -E "FAIL$|ERROR$|" &
-PID_TAIL=$(jobs -p | tail -1)
-# echo "PID_TAIL=$PID_TAIL"
-
 ABORTED=0
 
 if [ $KEEP_DB -ne 1 ]
@@ -197,7 +192,7 @@ then
     echo "[INFO] Running migrations and performing run with nodebug"
     # ..and add coverage with no-debug
     # -v 2 shows progress of migrations
-    python3 "${PY_OPTS[@]}" -u "${PYCOV[@]}" ./manage.py test --keepdb --noinput --settings=$SETTINGS_AUTOTEST_NODEBUG -v 2 Plein.tests.tests.TestPlein.test_quick &>>"$LOG"
+    python3 "${PY_OPTS[@]}" -u "${PYCOV[@]}" ./manage.py test --keepdb --noinput --settings=$SETTINGS_AUTOTEST_NODEBUG -v 2 Plein.tests.test_basics.TestPleinBasics.test_quick
     RES=$?
     [ $RES -eq 0 ] || ABORTED=1
     # echo "[DEBUG] Debug run result: $RES --> ABORTED=$ABORTED"
@@ -221,7 +216,7 @@ PID_WEBSIM1=$!
 python3 -u "${PY_OPTS[@]}" ./Betaal/test-tools/websim_betaal_test.py &
 PID_WEBSIM2=$!
 
-# start the payment service simulator
+# start the google maps simulator
 python3 -u "${PY_OPTS[@]}" ./Locatie/test_tools/websim_gmaps.py &
 PID_WEBSIM3=$!
 
@@ -250,6 +245,13 @@ then
     echo "[ERROR] Google Maps simulator failed to start"
     exit
 fi
+
+echo "[INFO] Capturing output in $LOG"
+# --pid=$$ means: stop when parent stops
+# -u = unbuffered stdin/stdout
+tail -f "$LOG" --pid=$$ | python -u ./Site/utils/number_tests.py | grep --color -E "FAIL$|ERROR$|" &
+PID_TAIL=$(jobs -p | tail -1)
+# echo "PID_TAIL=$PID_TAIL"
 
 # set high performance
 powerprofilesctl set performance
@@ -348,10 +350,15 @@ wait $PID_WEBSIM3 2>/dev/null
 
 ASK_LAUNCH=0
 COVERAGE_RED=0
-PRECISION=2     # 2 decimalen achter de komma
 
 if [ $ABORTED -eq 0 ] || [ $FORCE_REPORT -eq 1 ]
 then
+    if [ -e "/tmp/browser_js_cov.json" ]
+    then
+        # import the JS coverage data
+        python3 "${PY_OPTS[@]}" -u "${PYCOV[@]}" ./manage.py test --keepdb --settings=$SETTINGS_AUTOTEST "Plein.tests.test_js_in_browser.TestBrowser.import_js_cov"
+    fi
+
     echo "[INFO] Generating reports" | tee -a "$LOG"
 
     # delete old coverage report
@@ -359,17 +366,17 @@ then
 
     if [ -z "$FOCUS" ] || [ $FORCE_FULL_COV -ne 0 ]
     then
-        python3 -m coverage report $COVRC --precision=$PRECISION --skip-covered --fail-under=$COV_AT_LEAST $OMIT 2>&1 | tee -a "$LOG"
+        python3 -m coverage report $COVRC --skip-covered --fail-under=$COV_AT_LEAST $OMIT 2>&1 | tee -a "$LOG"
         if [ ${PIPESTATUS[0]} -gt 0 ] && [ ${#FOCUS_ARGS[@]} -eq 0 ]
         then
             COVERAGE_RED=1
         fi
 
-        python3 -m coverage html $COVRC -d "$REPORT_DIR" --precision=$PRECISION --skip-covered $OMIT &>>"$LOG"
+        python3 -m coverage html $COVRC -d "$REPORT_DIR" --skip-covered $OMIT &>>"$LOG"
     else
         [ -n "$COV_INCLUDE" ] && COV_INCLUDE="--include=$COV_INCLUDE"
-        python3 -m coverage report $COVRC --precision=$PRECISION $COV_INCLUDE $OMIT
-        python3 -m coverage html $COVRC -d "$REPORT_DIR" --precision=$PRECISION --skip-covered $COV_INCLUDE $OMIT &>>"$LOG"
+        python3 -m coverage report $COVRC $COV_INCLUDE $OMIT
+        python3 -m coverage html $COVRC -d "$REPORT_DIR" --skip-covered $COV_INCLUDE $OMIT &>>"$LOG"
     fi
 
     rm "$COVERAGE_FILE"

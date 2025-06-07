@@ -689,6 +689,16 @@ class MyTestAsserts(TestCase):
         # while
         self.assertNotIn('||', html, msg='Mogelijk vergeten om regel.korte_beschrijving op te splitsen in %s' % dtl)
 
+    def html_assert_img_not_draggable(self, html, dtl):
+        pos = html.find('<img ')
+        while pos > 0:
+            pos_end = html.find('>', pos+4)
+            part = html[pos:pos_end]
+            if ' draggable="false"' not in part:
+                self.fail('Bug in template %s: Missing draggable="false" for img: %s' % (repr(dtl), repr(part)))
+            pos = html.find('<img ', pos+1)
+        # while
+
     def assert_html_ok(self, resp: HttpResponse):
         """ Doe een aantal basic checks op een html response """
 
@@ -727,6 +737,7 @@ class MyTestAsserts(TestCase):
         self.html_assert_template_bug(html, dtl)
         self.html_assert_material_icons(html, dtl)
         self.html_assert_no_kort_break(html, dtl)
+        self.html_assert_img_not_draggable(html, dtl)
 
         urls = self.extract_all_urls(resp)
         for url in urls:

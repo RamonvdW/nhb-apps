@@ -27,7 +27,7 @@ charset-normalizer==3.4.2
     # via
     #   -r requirements.txt
     #   requests
-coverage==7.8.0
+coverage==7.8.2
     # via
     #   -r requirements_dev.in
     #   django-coverage-plugin
@@ -48,17 +48,17 @@ et-xmlfile==2.0.0
     # via
     #   -r requirements.txt
     #   openpyxl
-fonttools==4.57.0
+fonttools==4.58.2
     # via -r requirements_dev.in
-google-api-core==2.24.2
+google-api-core==2.25.0
     # via
     #   -r requirements.txt
     #   google-api-python-client
     #   google-geo-type
     #   google-maps-routing
-google-api-python-client==2.169.0
+google-api-python-client==2.171.0
     # via -r requirements.txt
-google-auth==2.40.1
+google-auth==2.40.3
     # via
     #   -r requirements.txt
     #   google-api-core
@@ -83,12 +83,12 @@ googleapis-common-protos==1.70.0
     #   grpcio-status
 googlemaps==4.10.0
     # via -r requirements.txt
-grpcio==1.72.0rc1
+grpcio==1.72.1
     # via
     #   -r requirements.txt
     #   google-api-core
     #   grpcio-status
-grpcio-status==1.72.0rc1
+grpcio-status==1.72.1
     # via
     #   -r requirements.txt
     #   google-api-core
@@ -134,7 +134,7 @@ proto-plus==1.26.1
     #   google-api-core
     #   google-geo-type
     #   google-maps-routing
-protobuf==6.30.2
+protobuf==6.31.1
     # via
     #   -r requirements.txt
     #   google-api-core
@@ -143,7 +143,7 @@ protobuf==6.30.2
     #   googleapis-common-protos
     #   grpcio-status
     #   proto-plus
-psycopg==3.2.7
+psycopg==3.2.9
     # via -r requirements.txt
 pyasn1==0.6.1
     # via
@@ -160,7 +160,7 @@ pyparsing==3.2.3
     # via
     #   -r requirements.txt
     #   httplib2
-pypdf==5.4.0
+pypdf==5.6.0
     # via -r requirements.txt
 pysocks==1.7.1
     # via urllib3
@@ -204,13 +204,13 @@ trio==0.30.0
     #   trio-websocket
 trio-websocket==0.12.2
     # via selenium
-typing-extensions==4.13.2
+typing-extensions==4.14.0
     # via
     #   -r requirements.txt
     #   beautifulsoup4
     #   psycopg
     #   selenium
-uritemplate==4.1.1
+uritemplate==4.2.0
     # via
     #   -r requirements.txt
     #   google-api-python-client

@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2023 Ramon van der Winkel.
+                Copyright (c) 2020-2025 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -95,7 +95,7 @@
 
                         <td class="center">
                             <a class="btn-sv-rood" href="{{ regio_ronde.url }}">
-                                <img src="{% static 'plein/zoom_in.svg' %}" height="36" alt="Details">
+                                <img src="{% static 'plein/zoom_in.svg' %}" height="36" alt="Details" draggable="false">
                             </a>
                         </td>
                     </tr>
@@ -108,7 +108,7 @@
 
                             <td class="center">
                                 <a class="btn-sv-rood" href="{{ cluster.ronde_url }}">
-                                    <img src="{% static 'plein/zoom_in.svg' %}" height="36" alt="Details">
+                                    <img src="{% static 'plein/zoom_in.svg' %}" height="36" alt="Details" draggable="false">
                                 </a>
                             </td>
                         </tr>

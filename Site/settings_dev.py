@@ -13,26 +13,26 @@
       Site/settings.py
           includes Site/core/settings_base.py
               includes Site/settings_local.py for site specific settings  <-- replaced on real deployment
-          provides additional items that are part of the release
+              provides additional items that are part of the release
 
     Autotest via test.sh  (uses ./manage.py cmd --settings=Site.settings_autotest)
       Site/settings_autotest[_nodebug].py
           includes Site/core/settings_base.py
               includes Site/settings_local.py for site specific settings
-          provides additional items that are part of the release
-      provides changes to to settings for autotest
+              provides additional items that are part of the release
+          provides changes to to settings for autotest
 
     Dev server via run.sh  (uses ./manage.py cmd --settings=Site.settings_dev)
       Site/settings_dev.py
           includes Site/core/settings_base.py
               includes Site/settings_local.py for site specific settings
-          provides additional items that are part of the release
-      provides changes to to settings for dev
+              provides additional items that are part of the release
+          provides changes to to settings for dev
 """
 
 from Site.core.settings_base import *         # noqa
 
-# required for runserver to serve static files
+# DEBUG = True is required for runserver to serve static files
 DEBUG = True
 
 # disable use of subset files in dev, to simplify introduction of new icons
@@ -41,8 +41,11 @@ USE_SUBSET_FONT_FILES = False
 # debug toolbar for database access analysis
 # ENABLE_DEBUG_TOOLBAR = True
 
-# disable minify for debugging (default = True)
-# ENABLE_MINIFY = False
+# disable minify for easy of debugging (default = True)
+ENABLE_MINIFY = False
+
+# instrumenteer javascript bestanden
+ENABLE_INSTRUMENT_JS = True
 
 # django-extensions
 #   very useful for show_urls:

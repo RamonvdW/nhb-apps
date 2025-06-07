@@ -262,7 +262,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
             diplomas = None
         return diplomas
 
-    def _find_scores(self):
+    def _find_regio_scores(self):
         scores = list()
 
         for deelnemer in (RegiocompetitieSporterBoog
@@ -277,24 +277,27 @@ class ProfielView(UserPassesTestMixin, TemplateView):
 
             comp = deelnemer.regiocompetitie.competitie
 
-            if comp.is_indoor():
-                deelnemer.competitie_str = "18m Indoor"
-            else:
-                deelnemer.competitie_str = "25m 1pijl"
+            # na afsluiten BK wordt de histcomp voor het seizoen openbaar gemaakt
+            # tussen afsluiten BK en afsluiten competitie de regio scores dus niet meer tonen
+            if not comp.bk_indiv_afgesloten:
+                if comp.is_indoor():
+                    deelnemer.competitie_str = "18m Indoor"
+                else:
+                    deelnemer.competitie_str = "25m 1pijl"
 
-            deelnemer.seizoen_str = "%s/%s" % (comp.begin_jaar, comp.begin_jaar + 1)
+                deelnemer.seizoen_str = "%s/%s" % (comp.begin_jaar, comp.begin_jaar + 1)
 
-            deelnemer.scores_str = "%s, %s, %s, %s, %s, %s, %s" % (deelnemer.score1,
-                                                                   deelnemer.score2,
-                                                                   deelnemer.score3,
-                                                                   deelnemer.score4,
-                                                                   deelnemer.score5,
-                                                                   deelnemer.score6,
-                                                                   deelnemer.score7)
+                deelnemer.scores_str = "%s, %s, %s, %s, %s, %s, %s" % (deelnemer.score1,
+                                                                       deelnemer.score2,
+                                                                       deelnemer.score3,
+                                                                       deelnemer.score4,
+                                                                       deelnemer.score5,
+                                                                       deelnemer.score6,
+                                                                       deelnemer.score7)
 
-            deelnemer.boog_str = deelnemer.sporterboog.boogtype.beschrijving
+                deelnemer.boog_str = deelnemer.sporterboog.boogtype.beschrijving
 
-            scores.append(deelnemer)
+                scores.append(deelnemer)
         # for
         return scores
 
@@ -394,7 +397,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
                         context['hint_voorkeuren'] = True
                 # for
 
-            context['regiocomp_scores'] = self._find_scores()
+            context['regiocomp_scores'] = self._find_regio_scores()
 
             context['gemiddelden'], context['heeft_ags'] = self._find_gemiddelden()
 

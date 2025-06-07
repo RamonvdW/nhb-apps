@@ -143,15 +143,15 @@ class E2EHelpers(MyTestAsserts, MyMgmtCommandHelper, TestCase):
         resp = self.client.get('/functie/wissel-van-rol/')
         self.assertEqual(resp.status_code, 200)
 
-        # <meta property="nhb-apps:rol" content="SEC">
-        # <meta property="nhb-apps:functie" content="Secretaris vereniging 4444">
+        # <meta property="mh:rol" content="SEC">
+        # <meta property="mh:functie" content="Secretaris vereniging 4444">
         page = str(resp.content)
-        pos = page.find('<meta property="nhb-apps:rol" content="')
+        pos = page.find('<meta property="mh:rol" content="')
         if pos < 0:
             # informatie is niet aanwezig
             rol_nu = "geen meta"            # pragma: no cover
         else:
-            spl = page[pos+39:pos+39+15].split('"')
+            spl = page[pos+33:pos+33+15].split('"')
             rol_nu = spl[0]
         if rol_nu != rol_verwacht:
             raise ValueError('Rol mismatch: rol_nu=%s, rol_verwacht=%s' % (rol_nu, rol_verwacht))

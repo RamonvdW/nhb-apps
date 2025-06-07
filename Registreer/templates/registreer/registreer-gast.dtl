@@ -42,24 +42,37 @@
                         <form action="{{ url_aanmaken }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
                             {% csrf_token %}
 
-                            <div class="input-field">
-                                {{ form.voornaam.label_tag }}{{ form.voornaam }}
-                            </div>
-
-                            <div class="input-field">
-                                {{ form.achternaam.label_tag }}{{ form.achternaam }}
-                            </div>
-
-                            <div class="input-field">
-                                {{ form.email.label_tag }}{{ form.email }}
-                            </div>
-
                             {% if form.errors %}
-                                {% for error in form.non_field_errors %}
-                                    <p class="left-align sv-rood-text">Fout: {{ error|escape }}</p>
-                                {% endfor %}
-                                <p>&nbsp;</p>
+                                <div class="center sv-rood-text" style="margin-bottom:20px">
+                                    {% for error in form.non_field_errors %}
+                                        <span>Fout: {{ error|escape }}</span><br>
+                                    {% endfor %}
+                                </div>
                             {% endif %}
+
+                            <div class="input-field">
+                                {{ form.voornaam.label_tag }}
+                                {{ form.voornaam }}
+                                {% if form.voornaam.errors %}
+                                    <span id="id_voornaam_error" class="sv-rood-text">{{ form.voornaam.errors.0 }}</span><br>
+                                {% endif %}
+                            </div>
+
+                            <div class="input-field">
+                                {{ form.achternaam.label_tag }}
+                                {{ form.achternaam }}
+                                {% if form.achternaam.errors %}
+                                    <span id="id_achternaam_error" class="sv-rood-text">{{ form.achternaam.errors.0 }}</span><br>
+                                {% endif %}
+                            </div>
+
+                            <div class="input-field">
+                                {{ form.email.label_tag }}
+                                {{ form.email }}
+                                {% if form.email.errors %}
+                                    <span id="id_email_error" class="sv-rood-text">{{ form.email.errors.0 }}</span><br>
+                                {% endif %}
+                            </div>
 
                             <div class="center-align">
                                 <input class="btn-sv-rood" name="button_registreer" id="submit_knop" type="submit" value="Aanmaken">

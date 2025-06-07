@@ -86,6 +86,8 @@ class VerwerkBestelMutaties:
         # geen bescherming: dit e-mailadres moet ingesteld zijn
         self._emailadres_backoffice = Functie.objects.get(rol='MWW').bevestigde_email
 
+        self.ver_nr2ver = dict()
+
     def _clear_instellingen_cache(self):
         self._instellingen_cache = dict()
 
@@ -98,14 +100,19 @@ class VerwerkBestelMutaties:
 
         self._instellingen_cache[ver_bond.ver_nr] = self._instellingen_via_bond
 
+        for ver in Vereniging.objects.all():
+            self.ver_nr2ver[ver.ver_nr] = ver
+        # for
+
     def _get_betaal_instellingen(self, ver_nr: int):
         try:
             instellingen = self._instellingen_cache[ver_nr]
         except KeyError:
+            ver = self.ver_nr2ver[ver_nr]
             instellingen, _ = (BetaalInstellingenVereniging
                                .objects
                                .select_related('vereniging')
-                               .get_or_create(vereniging__ver_nr=ver_nr))
+                               .get_or_create(vereniging=ver))
 
             if instellingen.akkoord_via_bond:
                 instellingen = self._instellingen_via_bond

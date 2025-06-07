@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -88,10 +88,12 @@ class RegistreerGastForm(forms.Form):
                         required=True)
 
     def clean_voornaam(self):
-        return scrub_input_name(self.cleaned_data['voornaam'])
+        out = scrub_input_name(self.cleaned_data['voornaam'])
+        return out
 
     def clean_achternaam(self):
-        return scrub_input_name(self.cleaned_data['achternaam'])
+        out = scrub_input_name(self.cleaned_data['achternaam'])
+        return out
 
     def clean_email(self):
         email = self.cleaned_data['email']
