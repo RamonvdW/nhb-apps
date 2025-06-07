@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2019-2023 Ramon van der Winkel.
+                Copyright (c) 2019-2025 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -30,20 +30,38 @@
 
                     {% if form.errors %}
                         {% for error in form.non_field_errors %}
-                            <p class="left-align sv-rood-text">Fout: {{ error|escape }}</p>
+                            <p class="left-align sv-rood-text center">Fout: {{ error|escape }}</p>
                         {% endfor %}
                     {% endif %}
 
-                    <div class="input-field">
-                        {{ form.otp_code.label_tag }}
-                        <!-- in plaats van {{ form.otp_code }} een handmatig veld met on_input handler -->
-                        <input type="text" name="otp_code" id="id_otp_code" autofocus required autocomplete="off" minlength="6" maxlength="6" inputmode="numeric">
+                    <!-- kader met 6 vakjes -->
+                    <div class="row">
+                        <div class="col s12">
+                            <table style="width:1px; margin-left:auto; margin-right:auto">
+                                <tr>
+                                    {% for digit in digits %}
+                                        <td>
+                                            <div style="width:35px; border:2px solid darkgrey; border-radius:5px" class="center">
+                                                <input id="otp{{ digit }}"
+                                                       type="text" autocomplete="off" inputmode="numeric"
+                                                       {% if digit == 1 %}autofocus{% endif %}
+                                                       class="center" style="width:10px; margin:0; border:0">
+                                            </div>
+                                        </td>
+                                    {% endfor %}
+                                </tr>
+                            </table>
+                        </div>
                     </div>
+
+                    <input type="hidden" name="otp_code" id="id_otp_code" required autocomplete="off" minlength="6" maxlength="6" inputmode="numeric">
 
                     <div class="center" style="margin-top:30px">
                         <input class="btn-sv-rood center-align" id="submit_knop" type="submit" value="Controleer">
                     </div>
                 </form>
+
+                <script src="{% static 'account_js/otp_input.js' %}"></script>
             </div>
 
         </div>
@@ -61,7 +79,7 @@
     <div class="row-sv-blauw">
         <div class="col s12 l10 offset-l1 xl8 offset-xl2">
             <div class="sv-kader" style="padding:10px">
-                <p>Tik de 6-cijferige code over uit je authenticatie app (waarschijnlijk op je mobiel).</p>
+                <p>Tik de 6-cijferige code over uit je authenticatie app (waarschijnlijk op je mobiel)</p>
 
                 {% if toon_hulp %}
 

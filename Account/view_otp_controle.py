@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2024 Ramon van der Winkel.
+#  Copyright (c) 2020-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -46,6 +46,8 @@ class OTPControleView(TemplateView):
         # laat deze terug komen in de pagina titel
         # dan laat google authenticator automatisch de passende entries zien
         context['site_name'] = settings.OTP_ISSUER_NAME
+
+        context['digits'] = range(1, 6+1)
 
         context['kruimels'] = (
             (reverse('Functie:wissel-van-rol'), 'Wissel van rol'),
@@ -99,6 +101,8 @@ class OTPControleView(TemplateView):
         # laat deze terug komen in de pagina titel
         # dan laat google authenticator automatisch de passende entries zien
         context['site_name'] = settings.OTP_ISSUER_NAME
+
+        context['digits'] = range(1, 6+1)
 
         context['kruimels'] = (
             (reverse('Functie:wissel-van-rol'), 'Wissel van rol'),

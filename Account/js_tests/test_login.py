@@ -15,8 +15,6 @@ class TestAccountLogin(bh.BrowserTestCase):
     url_login_as = '/account/account-wissel/'
 
     def test_login(self):
-        # de support functies doen al een groot deel van de test die we willen doen
-
         # uitloggen (voor het geval we ingelogd waren)
         self.do_logout()
 
@@ -29,9 +27,6 @@ class TestAccountLogin(bh.BrowserTestCase):
         time.sleep(2)
 
         self.assert_no_console_log()
-
-        # capture the coverage before it gets lost due to the page load
-        #self.fetch_js_cov()
 
         self.find_element_by_id('id_login_naam').send_keys(self.account_bb.username)
         self.find_element_by_id('id_wachtwoord').send_keys(TEST_WACHTWOORD)
@@ -71,7 +66,5 @@ class TestAccountLogin(bh.BrowserTestCase):
         # check dat er geen inlaad fouten waren
         self.assert_no_console_log()
 
-        # capture the coverage before it gets lost due to the page load
-        #self.fetch_js_cov()
 
 # end of file
