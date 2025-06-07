@@ -66,6 +66,7 @@ class BrowserTestCase(TestCase):
     functie_hwl = None          # account is hwl
     webwinkel_product = None    # product in de webwinkel
     match = None                # competitie match
+    comp = None                 # competitie
 
     # urls voor do_navigate_to()
     url_otp = '/account/otp-controle/'
@@ -212,7 +213,7 @@ class BrowserTestCase(TestCase):
 
             self._driver.find_element(By.ID, 'submit_knop').click()
 
-            self.wait_until_url_not(self.url_login)        # gaat naar otp control (want: is_BB)
+            self.wait_until_url_not(self.url_login)        # gaat naar otp controle (want: is_BB)
 
         elif self._driver.title.startswith('MijnHandboogsport'):  # test server & dev hebben toevoeging
             # we zijn op het plein beland en waren dus al ingelogd
@@ -234,7 +235,7 @@ class BrowserTestCase(TestCase):
         self.assert_no_console_log()
 
         otp_code = pyotp.TOTP(self.account_bb.otp_code).now()
-        self._driver.find_element(By.ID, 'id_otp_code').send_keys(otp_code)
+        self._driver.find_element(By.ID, 'otp1').send_keys(otp_code)
         self._driver.find_element(By.ID, 'submit_knop').click()
         self.wait_until_url_not(self.url_otp)          # gaat naar wissel-van-rol
 
@@ -500,6 +501,7 @@ def populate_inst(self, inst):
 
     # load database object instances into the testcase instance
     inst.ver = self.ver
+    inst.comp = self.comp
     inst.match = self.match
     inst.account_bb = self.account_bb
     inst.account = self.account

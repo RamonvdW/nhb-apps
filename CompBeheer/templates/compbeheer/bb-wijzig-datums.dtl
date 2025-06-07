@@ -131,20 +131,9 @@
     <div id="js_data"
          data-url-wijzig="{{ url_wijzig }}"
          data-csrf-token="{{ csrf_token }}"
-         data-begin-jaar="{{ comp.begin_jaar }}"
-         data-datum1="{{ comp.datum1|date:'Y-m-d' }}"
-         data-datum2="{{ comp.datum2|date:'Y-m-d' }}"
-         data-datum3="{{ comp.datum3|date:'Y-m-d' }}"
-         data-datum4="{{ comp.datum4|date:'Y-m-d' }}"
-         data-datum5="{{ comp.datum5|date:'Y-m-d' }}"
-         data-datum6="{{ comp.datum6|date:'Y-m-d' }}"
-         data-datum7="{{ comp.datum7|date:'Y-m-d' }}"
-         data-datum8="{{ comp.datum8|date:'Y-m-d' }}"
-         data-datum9="{{ comp.datum9|date:'Y-m-d' }}"
-         data-datum10="{{ comp.datum10|date:'Y-m-d' }}"
-         data-datum11="{{ comp.datum11|date:'Y-m-d' }}"
-         data-datum12="{{ comp.datum12|date:'Y-m-d' }}">
+         data-begin-jaar="{{ comp.begin_jaar }}">
     </div>
+    {{ alle_datums|json_script:"js_datums" }}
 
     <script src="{% static 'compbeheer_js/wijzig_datums.js' %}"></script>
 

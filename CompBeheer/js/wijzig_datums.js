@@ -4,22 +4,25 @@
  * Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
  */
 
+/* jshint esversion: 6 */
+/* global console, M */
 "use strict";
+
+const dataset = document.getElementById("js_data").dataset;
+const alle_datums = JSON.parse(document.getElementById('js_datums').textContent);
+const aantal_datums = Object.keys(alle_datums).length;
 
 // de 'bezig' vlag voorkomt recursion
 let bezig = true;
 
 function post_datums()
 {
-    const dataset = document.getElementById("js_data").dataset;
-
     // voer een POST uit om toe te voegen
     const form = document.createElement('form');
     form.setAttribute('method', 'post');
     form.setAttribute('action', dataset.urlWijzig);
 
-    for (let nr = 1; nr <= 12; nr++)
-    {
+    for (let nr = 1; nr <= aantal_datums; nr++) {
         const el = document.getElementById('datum' + nr);
         const inp = document.createElement('input');
         inp.type = "hidden";
@@ -46,7 +49,7 @@ function rode_datums() {
         const el = document.getElementById('datum1');
         let date = el.M_Datepicker.toString('yyyy-mm-dd');
 
-        for (let nr = 2; nr <= 12; nr++)
+        for (let nr = 2; nr <= aantal_datums; nr++)
         {
             const el2 = document.getElementById('datum' + nr);
             const date2 = el2.M_Datepicker.toString('yyyy-mm-dd');
@@ -77,7 +80,9 @@ function getWeekNumber(d) {
     // Return array of year and week number
     let year_str = d.getUTCFullYear().toString().substring(2);    // 2021 --> 21
     let week_str = weekNo.toString();
-    if (weekNo < 10) { week_str = "0" + week_str }
+    if (weekNo < 10) {
+        week_str = "0" + week_str;
+    }
     return "wk" + year_str + week_str + "." + weekday;
 }
 
@@ -94,7 +99,6 @@ function week_nummers() {
 
 function gewijzigd() {
     // het formulier is aangepast en moet opgeslagen worden
-
     if (!bezig) {
         // rode_datums geeft nieuwe aanroepen naar deze functie
         rode_datums();
@@ -108,90 +112,25 @@ function gewijzigd() {
 }
 
 // initialisatie van de datum pickers
-document.addEventListener('DOMContentLoaded', function()
-{
-    const dataset = document.getElementById("js_data").dataset;
+document.addEventListener('DOMContentLoaded', function() {
     const beginJaar = parseInt(dataset.beginJaar);
-
-    const minDate = new Date(beginJaar, 2-1, 1);          // month is 0-based
+    const minDate = new Date(beginJaar, 2-1, 1);               // month is 0-based
     const maxDate = new Date(beginJaar + 1, 6-1, 22);     // month is 0-based
     const competitieJaren = [beginJaar, beginJaar + 1];
 
-    let el = document.querySelector('#datum1');
-    M.Datepicker.init(el, { defaultDate: new Date(dataset.datum1),
-                            setDefaultDate: true,
-                            minDate: minDate, maxDate: maxDate,
-                            yearRange: competitieJaren});
-
-    el = document.querySelector('#datum2');
-    M.Datepicker.init(el, { defaultDate: new Date(dataset.datum2),
-                            setDefaultDate: true,
-                            minDate: minDate, maxDate: maxDate,
-                            yearRange: competitieJaren});
-
-    el = document.querySelector('#datum3');
-    M.Datepicker.init(el, { defaultDate: new Date(dataset.datum3),
-                            setDefaultDate: true,
-                            minDate: minDate, maxDate: maxDate,
-                            yearRange: competitieJaren});
-
-    el = document.querySelector('#datum4');
-    M.Datepicker.init(el, { defaultDate: new Date(dataset.datum4),
-                            setDefaultDate: true,
-                            minDate: minDate, maxDate: maxDate,
-                            yearRange: competitieJaren});
-
-    el = document.querySelector('#datum5');
-    M.Datepicker.init(el, { defaultDate: new Date(dataset.datum5),
-                            setDefaultDate: true,
-                            minDate: minDate, maxDate: maxDate,
-                            yearRange: competitieJaren});
-
-    el = document.querySelector('#datum6');
-    M.Datepicker.init(el, { defaultDate: new Date(dataset.datum6),
-                            setDefaultDate: true,
-                            minDate: minDate, maxDate: maxDate,
-                            yearRange: competitieJaren});
-
-    el = document.querySelector('#datum7');
-    M.Datepicker.init(el, { defaultDate: new Date(dataset.datum7),
-                            setDefaultDate: true,
-                            minDate: minDate, maxDate: maxDate,
-                            yearRange: competitieJaren});
-
-    el = document.querySelector('#datum8');
-    M.Datepicker.init(el, { defaultDate: new Date(dataset.datum8),
-                            setDefaultDate: true,
-                            minDate: minDate, maxDate: maxDate,
-                            yearRange: competitieJaren});
-
-    el = document.querySelector('#datum9');
-    M.Datepicker.init(el, { defaultDate: new Date(dataset.datum9),
-                            setDefaultDate: true,
-                            minDate: minDate, maxDate: maxDate,
-                            yearRange: competitieJaren});
-
-    el = document.querySelector('#datum10');
-    M.Datepicker.init(el, { defaultDate: new Date(dataset.datum10),
-                            setDefaultDate: true,
-                            minDate: minDate, maxDate: maxDate,
-                            yearRange: competitieJaren});
-
-    el = document.querySelector('#datum11');
-    M.Datepicker.init(el, { defaultDate: new Date(dataset.datum11),
-                            setDefaultDate: true,
-                            minDate: minDate, maxDate: maxDate,
-                            yearRange: competitieJaren});
-
-    el = document.querySelector('#datum12');
-    M.Datepicker.init(el, { defaultDate: new Date(dataset.datum12),
-                            setDefaultDate: true,
-                            minDate: minDate, maxDate: maxDate,
-                            yearRange: competitieJaren});
+    for (let nr = 1; nr <= aantal_datums; nr++) {
+        const el = document.getElementById('datum' + nr);
+        M.Datepicker.init(el, {
+            defaultDate: new Date(alle_datums[nr]),
+            setDefaultDate: true,
+            minDate: minDate, maxDate: maxDate,
+            yearRange: competitieJaren
+        });
+    }
 
     bezig = false;   // klaar met initialisatie van alle date pickers (hier boven)
     rode_datums();
     week_nummers();
-})
+});
 
 /* end of file */

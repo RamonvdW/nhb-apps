@@ -47,19 +47,21 @@ class WijzigDatumsView(UserPassesTestMixin, TemplateView):
         context['url_wijzig'] = reverse('CompBeheer:wijzig-datums',
                                         kwargs={'comp_pk': comp.pk})
 
-        comp.datum1 = comp.begin_fase_C
-        # note: begin_fase_D_indiv is nog niet in te stellen
-        comp.datum2 = comp.begin_fase_F
-        comp.datum3 = comp.einde_fase_F
-        comp.datum4 = comp.datum_klassengrenzen_rk_bk_teams
-        comp.datum5 = comp.begin_fase_L_indiv
-        comp.datum6 = comp.einde_fase_L_indiv
-        comp.datum7 = comp.begin_fase_L_teams
-        comp.datum8 = comp.einde_fase_L_teams
-        comp.datum9 = comp.begin_fase_P_indiv
-        comp.datum10 = comp.einde_fase_P_indiv
-        comp.datum11 = comp.begin_fase_P_teams
-        comp.datum12 = comp.einde_fase_P_teams
+        context['alle_datums'] = {
+            1: comp.begin_fase_C,
+            # note: begin_fase_D_indiv is nog niet in te stellen
+            2: comp.begin_fase_F,
+            3: comp.einde_fase_F,
+            4: comp.datum_klassengrenzen_rk_bk_teams,
+            5: comp.begin_fase_L_indiv,
+            6: comp.einde_fase_L_indiv,
+            7: comp.begin_fase_L_teams,
+            8: comp.einde_fase_L_teams,
+            9: comp.begin_fase_P_indiv,
+            10: comp.einde_fase_P_indiv,
+            11: comp.begin_fase_P_teams,
+            12: comp.einde_fase_P_teams,
+        }
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
