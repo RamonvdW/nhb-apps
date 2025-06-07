@@ -7,7 +7,6 @@
 from django.apps import apps
 from django.conf import settings
 from django.contrib.staticfiles.finders import BaseFinder
-from Site.js_cov.instrument_js import JsCovInstrument
 import os
 import re
 
@@ -49,7 +48,10 @@ class AppJsFinder(BaseFinder):
         # (jammer dat het zoeken niet later gedaan wordt)
         self._make_static_dirs()
 
-        self._instrument_js = JsCovInstrument()
+        if settings.ENABLE_INSTRUMENT_JS:
+            # depends on 'coverage', which is not installed on prod
+            from Site.js_cov.instrument_js import JsCovInstrument
+            self._instrument_js = JsCovInstrument()
 
         super().__init__(*args, **kwargs)
 
