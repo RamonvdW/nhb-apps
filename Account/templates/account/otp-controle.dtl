@@ -27,6 +27,7 @@
                 <form action="{% url 'Account:otp-controle' %}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
                     {{ form.next_url }}
                     {% csrf_token %}
+                    <input type="hidden" name="otp_code" id="id_otp_code" required autocomplete="off" minlength="6" maxlength="6" inputmode="numeric">
 
                     {% if form.errors %}
                         {% for error in form.non_field_errors %}
@@ -53,12 +54,10 @@
                                 </tr>
                             </table>
                         </div>
-                    </div>
 
-                    <input type="hidden" name="otp_code" id="id_otp_code" required autocomplete="off" minlength="6" maxlength="6" inputmode="numeric">
-
-                    <div class="center" style="margin-top:30px">
-                        <input class="btn-sv-rood center-align" id="submit_knop" type="submit" value="Controleer">
+                        <div class="col s12" style="margin-top:25px">
+                            <input class="btn-sv-rood center-align" id="submit_knop" type="submit" value="Controleer">
+                        </div>
                     </div>
                 </form>
 
