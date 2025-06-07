@@ -22,17 +22,19 @@ window.addEventListener(
     "keydown",
     (e) => {
         if (!e.defaultPrevented) {
-            if ("0123456789".indexOf(e.key) >= 0) {
-                if (el_code.value.length < 6) {
-                    el_code.value = el_code.value + e.key;
-                    show_otp();
-                    e.preventDefault();
-                }
-            } else if (e.key === "Backspace") {
-                if (el_code.value.length > 0) {
-                    el_code.value = el_code.value.slice(0, -1);
-                    show_otp();
-                    e.preventDefault();
+            if (!e.ctrlKey && !e.altKey && !e.shiftKey) {       /* otherwise Ctrl+0 = "0" */
+                if ("0123456789".indexOf(e.key) >= 0) {
+                    if (el_code.value.length < 6) {
+                        el_code.value = el_code.value + e.key;
+                        show_otp();
+                        e.preventDefault();
+                    }
+                } else if (e.key === "Backspace") {
+                    if (el_code.value.length > 0) {
+                        el_code.value = el_code.value.slice(0, -1);
+                        show_otp();
+                        e.preventDefault();
+                    }
                 }
             }
         }
