@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2024 Ramon van der Winkel.
+#  Copyright (c) 2020-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -358,11 +358,11 @@ class RegiocompetitieAanmeldenView(UserPassesTestMixin, View):
         if mag_team_schieten and request.POST.get('wil_in_team', '') != '':
             aanmelding.inschrijf_voorkeur_team = True
 
-        if request.POST.get('geen_rk', '') != '':
-            # sporter wil zich alvast afmelden voor het RK
-            aanmelding.inschrijf_voorkeur_rk_bk = False
-            msg = '[%s] Bij inschrijving geen voorkeur voor RK\n' % when_str
-            aanmelding.logboekje += msg
+        # if request.POST.get('geen_rk', '') != '':
+        #     # sporter wil zich alvast afmelden voor het RK
+        #     aanmelding.inschrijf_voorkeur_rk_bk = False
+        #     msg = '[%s] Bij inschrijving geen voorkeur voor RK\n' % when_str
+        #     aanmelding.logboekje += msg
 
         # kijk of er velden van een formulier bij zitten
         if methode == INSCHRIJF_METHODE_3:

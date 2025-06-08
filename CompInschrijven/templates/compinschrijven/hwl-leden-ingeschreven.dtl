@@ -17,7 +17,7 @@
             <p>Leden van vereniging [{{ ver.ver_nr }}] {{ ver.naam }} te {{ ver.plaats }}<br>ingeschreven voor de <b>{{ deelcomp }}</b></p>
 
             {% if mag_afmelden %}
-                <p>Als hoofdwedstrijdleider kan je leden afmelden: zet een vinkje bij de naam en druk dan rode knop in de rechter onderhoek</p>
+                <p>Als hoofdwedstrijdleider kan je leden afmelden: zet een vinkje bij de naam en druk dan rode knop in de rechtsonder</p>
             {% else %}
                 <p>De hoofdwedstrijdleider kan leden afmelden tijdens fase B (inschrijven) van de competitie</p>
             {% endif %}
