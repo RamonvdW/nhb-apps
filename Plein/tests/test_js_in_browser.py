@@ -13,7 +13,7 @@ import time
 import os
 
 
-@tag("browser")
+@tag("browser")         # deze tag voorkomt het uitvoeren van deze test tijden de main test run
 class TestBrowser(LiveServerTestCase):
 
     """ entrypoint voor alle in-browser tests van Javascript
@@ -145,10 +145,6 @@ class TestBrowser(LiveServerTestCase):
             time.sleep(self.pause_after_all_tests)
 
         bh.js_cov_save()
-
-    def import_js_cov(self):
-        res = bh.js_cov_import()
-        self.assertEqual(res, 1)
 
     def test_all(self):
         self._run_tests()

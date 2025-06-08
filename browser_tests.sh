@@ -84,7 +84,7 @@ if [ $KEEP_DB -ne 1 ]
 then
     echo "[INFO] Deleting test database"
     old_pwd="$PWD"
-    cd /tmp
+    cd "/tmp"
     sudo -u postgres dropdb --if-exists $DATABASE || exit 1
 
     echo "[INFO] Creating clean database"
@@ -94,7 +94,7 @@ then
 
     echo "[INFO] Running migrations"
     # cannot run migrations stand-alone because it will not use the test database
-    time python3 -u ./manage.py test --keepdb --noinput --settings=$SETTINGS_AUTOTEST_NODEBUG -v 2 Plein.tests.test_basics.TestPleinBasics.test_quick
+    time python3 -u ./manage.py test --keepdb --noinput --settings="$SETTINGS_AUTOTEST_NODEBUG" -v 2 Plein.tests.test_basics.TestPleinBasics.test_quick
     RES=$?
     [ $RES -eq 0 ] || exit 1
     # echo "[DEBUG] Debug run result: $RES --> ABORTED=$ABORTED"
@@ -155,6 +155,8 @@ wait "$PID_TAIL" 2>/dev/null
 
 # cleanup test data directories
 [ -d "$TEST_DIR" ] && rm -rf "$TEST_DIR"
+
+# TODO: consider deleting the database, because LiveServerTestCase/TransactionTestCase has flushed all tables
 
 if [ $MAKE_REPORT -eq 1 -a $ABORTED -eq 0 ]
 then

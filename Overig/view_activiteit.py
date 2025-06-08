@@ -98,7 +98,6 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
         context['recente_activiteit'] = (Account
                                          .objects
                                          .filter(last_login__isnull=False)
-                                         .filter(username='x')
                                          .order_by('-last_login')[:50])
 
         context['inlog_pogingen'] = (Account

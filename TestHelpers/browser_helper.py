@@ -8,11 +8,13 @@
 from django.test import TestCase
 from django.utils import timezone
 from Account.models import Account
-from BasisTypen.models import BoogType
+from BasisTypen.definities import GESLACHT_ALLE
+from BasisTypen.models import BoogType, TeamType, Leeftijdsklasse
 from Competitie.models import (Competitie, Regiocompetitie, RegiocompetitieRonde, RegiocompetitieSporterBoog,
-                               CompetitieIndivKlasse, CompetitieMatch)
+                               CompetitieIndivKlasse, CompetitieTeamKlasse, CompetitieMatch)
 from Functie.models import Functie, VerklaringHanterenPersoonsgegevens
 from Geo.models import Regio, Rayon
+from Score.models import Aanvangsgemiddelde
 from Sporter.models import Sporter, SporterBoog
 from Site.js_cov.js_cov_save import save_the_data, import_the_data
 from TestHelpers.e2ehelpers import TEST_WACHTWOORD
@@ -60,6 +62,7 @@ class BrowserTestCase(TestCase):
 
     # deze members worden centraal gevuld in Plein/tests/test_js_in_browser
     sporter = None              # sporter 100001
+    sporterboog = None          # sporterboog 100001, recurve
     account_bb = None           # account 100001 (gekoppeld aan sporter)
     account = None              # account 100002
     ver = None                  # vereniging van de sporter
@@ -67,6 +70,8 @@ class BrowserTestCase(TestCase):
     webwinkel_product = None    # product in de webwinkel
     match = None                # competitie match
     comp = None                 # competitie
+    regio_comp = None           # regiocompetitie voor regio van sporter
+    regio_deelnemer = None      # RegiocompetitieSporterBoog
 
     # urls voor do_navigate_to()
     url_otp = '/account/otp-controle/'
@@ -230,7 +235,8 @@ class BrowserTestCase(TestCase):
         self.do_login()
 
         # pass otp
-        self._driver.get(self.live_server_url + self.url_otp)
+        if self._driver.title != 'Controle tweede factor MijnHandboogsport':
+            self._driver.get(self.live_server_url + self.url_otp)
         self.assertEqual(self._driver.title, 'Controle tweede factor MijnHandboogsport')
         self.assert_no_console_log()
 
@@ -383,6 +389,13 @@ def database_vullen(self):
                                     beschrijving='Recurve',
                                     volgorde=10)        # zelfde volgorde als het standaard object
 
+    self.team_r, _ = TeamType.objects.get_or_create(
+                                    afkorting='R',
+                                    beschrijving='Recurve Team',
+                                    volgorde=1)
+    self.team_r.save()
+    self.team_r.boog_typen.set([self.boog_r])
+
     self.sporterboog, _ = SporterBoog.objects.get_or_create(
                                     sporter=self.sporter,
                                     boogtype=self.boog_r,
@@ -427,11 +440,22 @@ def database_vullen(self):
     volgende_maand = timezone.now().date()
     volgende_maand += datetime.timedelta(days=31)
 
+    self.lkl_all = Leeftijdsklasse(
+                        afkorting='Alle',
+                        beschrijving='Alle',
+                        klasse_kort='Alle',
+                        wedstrijd_geslacht=GESLACHT_ALLE,
+                        min_wedstrijdleeftijd=0,
+                        max_wedstrijdleeftijd=99,
+                        volgorde=1)
+    self.lkl_all.save()
+
     self.comp = Competitie(
                         beschrijving='Indoor Test',
                         afstand=18,
                         begin_jaar=volgende_maand.year - 1)
     self.comp.save()
+    self.comp.refresh_from_db()     # datum strings omgezet naar datetime object
 
     self.klasse_indiv_r = CompetitieIndivKlasse(
                                 competitie=self.comp,
@@ -440,13 +464,23 @@ def database_vullen(self):
                                 min_ag=0,
                                 is_onbekend=True)
     self.klasse_indiv_r.save()
+    self.klasse_indiv_r.leeftijdsklassen.add(self.lkl_all)
+
+    self.klasse_team_r = CompetitieTeamKlasse(
+                                competitie=self.comp,
+                                team_type=self.team_r,
+                                volgorde=1,
+                                beschrijving="Recurve ERE",
+                                min_ag=0.0,     # sporter heeft geen AG!
+                                is_voor_teams_rk_bk=True)
+    self.klasse_team_r.save()
 
     self.match = CompetitieMatch(
-                    competitie=self.comp,
-                    beschrijving='Test match',
-                    vereniging=self.ver,
-                    datum_wanneer=volgende_maand,
-                    tijd_begin_wedstrijd='20:00')
+                        competitie=self.comp,
+                        beschrijving='Test match',
+                        vereniging=self.ver,
+                        datum_wanneer=volgende_maand,
+                        tijd_begin_wedstrijd='20:00')
     self.match.save()
 
     self.regio_comp = Regiocompetitie(
@@ -469,31 +503,24 @@ def database_vullen(self):
                                 indiv_klasse=self.klasse_indiv_r)
     self.regio_deelnemer.save()
 
+    self.ag = Aanvangsgemiddelde(
+                        sporterboog=self.sporterboog,
+                        boogtype=self.boog_r,
+                        # doel=AG_DOEL_INDIV,
+                        afstand_meter=self.comp.afstand,
+                        waarde=8.0)
+    self.ag.save()
+
 
 def database_opschonen(self):
     # wordt aangeroepen vanuit Plein/tests/test_js_in_browser
 
     # LiveServerTestCase does not run inside a database transaction (like normal test cases)
-    # so we have to clean up after ourselves
-    self.regio_deelnemer.delete()
-    self.regio_ronde.delete()
-    self.match.delete()
-    self.regio_comp.delete()
-    self.klasse_indiv_r.delete()
-    self.comp.delete()
-    self.webwinkel_product.delete()
-    self.foto1.delete()
-    self.foto2.delete()
-    self.functie_hwl.delete()
-    self.sporterboog.delete()
-    self.sporter.delete()
-    self.account.delete()
-    self.vhpg.delete()
-    self.account_bb.delete()
-    self.ver.delete()
-    self.regio.delete()         # regio 117
-    self.rayon.delete()         # rayon 5
-    # self.boog_r.delete()
+    # yet, we don't have to clean up after ourselves
+    # LiveServerTestCase is based on a TransactionTestCase, which flushes all the database tables
+    # at the end of the test run.
+    # this unfortunately deletes all statically created objects (by squash migrations)
+    pass
 
 
 def populate_inst(self, inst):
@@ -503,10 +530,13 @@ def populate_inst(self, inst):
     inst.ver = self.ver
     inst.comp = self.comp
     inst.match = self.match
-    inst.account_bb = self.account_bb
     inst.account = self.account
     inst.sporter = self.sporter
+    inst.account_bb = self.account_bb
+    inst.regio_comp = self.regio_comp
+    inst.sporterboog = self.sporterboog
     inst.functie_hwl = self.functie_hwl
+    inst.regio_deelnemer = self.regio_deelnemer
     inst.webwinkel_product = self.webwinkel_product
 
     # load members necessary for communication with the browser

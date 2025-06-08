@@ -310,7 +310,7 @@ then
             then
                 echo -n '.'
                 echo "[INFO] ./manage.py help $cmd" >>"$LOG"
-                python3 "${PY_OPTS[@]}" -u "${PYCOV[@]}" ./manage.py help --settings=$SETTINGS_AUTOTEST "$cmd" &>>"$LOG"
+                python3 "${PY_OPTS[@]}" -u "${PYCOV[@]}" ./manage.py help --settings="$SETTINGS_AUTOTEST" "$cmd" &>>"$LOG"
             fi
         done
         echo
@@ -325,7 +325,7 @@ then
             cmd=$(basename "$cmd_file")
             echo -n '.'
             echo "[INFO] ./manage.py help $cmd" >>"$LOG"
-            python3 "${PY_OPTS[@]}" -u "${PYCOV[@]}" ./manage.py help "$cmd" --settings=$SETTINGS_AUTOTEST &>>/dev/null    # ignore output
+            python3 "${PY_OPTS[@]}" -u "${PYCOV[@]}" ./manage.py help "$cmd" --settings="$SETTINGS_AUTOTEST" &>>/dev/null    # ignore output
         done
         echo
     fi
@@ -352,7 +352,8 @@ then
     if [ -e "/tmp/browser_js_cov.json" ]
     then
         # import the JS coverage data
-        python3 "${PY_OPTS[@]}" -u "${PYCOV[@]}" ./manage.py test --keepdb --settings=$SETTINGS_AUTOTEST -v 2 "Plein.tests.test_js_in_browser.TestBrowser.import_js_cov"
+        echo "[INFO] Importing coverage from browser tests (/tmp/browser_js_cov.json)"
+        python3 "${PY_OPTS[@]}" -u "${PYCOV[@]}" ./manage.py test --keepdb --settings="$SETTINGS_AUTOTEST" -v 2 "Plein.tests.test_import_js_cov.TestPleinImportJsCov.import_js_cov"
     fi
 
     echo "[INFO] Generating reports" | tee -a "$LOG"
@@ -401,18 +402,17 @@ then
     echo -n "Press ENTER to start firefox now, or Ctrl+C to abort"
     read -r -t 5
     RES=$?
-    if [ $RES -ne 0 ]
+    if [ $RES -eq 0 ]
     then
+        echo
+        echo "Launching firefox"
+        firefox $REPORT_DIR/index.html &>/dev/null &
+        echo "Done"
+    else
         # automatically abort
         echo "^C"
         exit 1
     fi
-
-    echo
-    echo "Launching firefox"
-    firefox $REPORT_DIR/index.html &>/dev/null &
-
-    echo "Done"
 fi
 
 # end of file
