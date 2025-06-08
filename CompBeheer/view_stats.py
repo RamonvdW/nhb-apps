@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -133,6 +133,8 @@ class CompetitieStatistiekView(UserPassesTestMixin, TemplateView):
         aantal_25m_geen_rk = dict()
         aantal_zelfstandig_18m_regio = dict()
         aantal_zelfstandig_25m_regio = dict()
+        aantal_geen_scores_18m_regio = dict()
+        aantal_geen_scores_25m_regio = dict()
         aantal_leden_regio = dict()
 
         for rayon_nr in range(1, 4+1):
@@ -148,8 +150,11 @@ class CompetitieStatistiekView(UserPassesTestMixin, TemplateView):
             aantal_zelfstandig_18m_regio[regio_nr] = 0
             aantal_zelfstandig_25m_regio[regio_nr] = 0
             aantal_leden_regio[regio_nr] = 0
+            aantal_geen_scores_18m_regio[regio_nr] = 0
+            aantal_geen_scores_25m_regio[regio_nr] = 0
         # for
 
+        hoogste_aantal_scores = 0
         for values in (RegiocompetitieSporterBoog       # 14ms
                        .objects
                        .filter(regiocompetitie__competitie__pk__in=pks)
@@ -158,9 +163,10 @@ class CompetitieStatistiekView(UserPassesTestMixin, TemplateView):
                                     'aangemeld_door',
                                     'sporterboog__sporter__account',
                                     'regiocompetitie__competitie__afstand',
-                                    'inschrijf_voorkeur_rk_bk')):
+                                    'inschrijf_voorkeur_rk_bk',
+                                    'aantal_scores')):
 
-            rayon_nr, regio_nr, aangemeld_door, account, afstand, voorkeur_rk_bk = values
+            rayon_nr, regio_nr, aangemeld_door, account, afstand, voorkeur_rk_bk, aantal_scores = values
             zelfstandig = (aangemeld_door == account)
 
             if afstand == '18':
@@ -170,6 +176,8 @@ class CompetitieStatistiekView(UserPassesTestMixin, TemplateView):
                     aantal_18m_geen_rk[rayon_nr] += 1
                 if zelfstandig:
                     aantal_zelfstandig_18m_regio[regio_nr] += 1
+                if aantal_scores == 0:
+                    aantal_geen_scores_18m_regio[regio_nr] += 1
             else:
                 aantal_25m_rayon[rayon_nr] += 1
                 aantal_25m_regio[regio_nr] += 1
@@ -177,6 +185,11 @@ class CompetitieStatistiekView(UserPassesTestMixin, TemplateView):
                     aantal_25m_geen_rk[rayon_nr] += 1
                 if zelfstandig:
                     aantal_zelfstandig_25m_regio[regio_nr] += 1
+                if aantal_scores == 0:
+                    aantal_geen_scores_25m_regio[regio_nr] += 1
+
+            if aantal_scores > hoogste_aantal_scores:
+                hoogste_aantal_scores = aantal_scores
         # for
 
         context['aantal_18m_rayon'] = list()
@@ -196,6 +209,15 @@ class CompetitieStatistiekView(UserPassesTestMixin, TemplateView):
             context['aantal_18m_regio'].append(aantal_18m_regio[regio_nr])
             context['aantal_25m_regio'].append(aantal_25m_regio[regio_nr])
         # for
+
+        if hoogste_aantal_scores > 5:
+            context['toon_geen_scores'] = True
+            context['aantal_18m_geen_scores'] = list()
+            context['aantal_25m_geen_scores'] = list()
+            for regio_nr in range(101, 116+1):
+                context['aantal_18m_geen_scores'].append(aantal_geen_scores_18m_regio[regio_nr])
+                context['aantal_25m_geen_scores'].append(aantal_geen_scores_25m_regio[regio_nr])
+            # for
 
         if True:
             pks1 = list()
@@ -340,11 +362,13 @@ class CompetitieStatistiekView(UserPassesTestMixin, TemplateView):
         actuele_comps = list()
         afstand_gevonden = list()       # afstand
 
+        # selecteer 1x  18m en 1x 25m competitie
+        # begin met de oudste die in de database staat, anders is de eind-statistiek nooit te zijn
         for comp in (Competitie
                      .objects
                      .exclude(is_afgesloten=True)
                      .order_by('afstand',
-                               '-begin_jaar')):     # nieuwste eerst
+                               'begin_jaar')):     # oudste eerst
 
             if comp.afstand not in afstand_gevonden:
                 comp.bepaal_fase()
