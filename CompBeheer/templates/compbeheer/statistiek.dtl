@@ -74,6 +74,15 @@
                         <td class="right-align" style="padding-right:15px"><b>25m1pijl</b>{% for perc_str in perc_zelfstandig_25m_regio %}<br>{{ perc_str }}%{% endfor %}</td>
                     </tr>
 
+                    {% if toon_geen_scores %}
+                    <tr>
+                        <th>Wel ingeschreven, niet deelgenomen per regio</th>
+                        <td class="right-align"><b>Regio</b><br>101<br>102<br>103<br>104<br>105<br>106<br>107<br>108<br>109<br>110<br>111<br>112<br>113<br>114<br>115<br>116</td>
+                        <td class="right-align"><b>Indoor</b>{% for aantal in aantal_18m_geen_scores %}<br>{{ aantal }}{% endfor %}</td>
+                        <td class="right-align" style="padding-right:15px"><b>25m1pijl</b>{% for aantal in aantal_25m_geen_scores %}<br>{{ aantal }}{% endfor %}</td>
+                    </tr>
+                    {% endif %}
+
                     <tr>
                         <th>Deelname alle leden per regio</th>
                         <td class="right-align"><b>Regio</b><br>101<br>102<br>103<br>104<br>105<br>106<br>107<br>108<br>109<br>110<br>111<br>112<br>113<br>114<br>115<br>116</td>
