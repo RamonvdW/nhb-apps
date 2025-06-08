@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2024 Ramon van der Winkel.
+                Copyright (c) 2020-2025 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -17,7 +17,7 @@
             <p>Leden van vereniging [{{ ver.ver_nr }}] {{ ver.naam }} te {{ ver.plaats }}<br>ingeschreven voor de <b>{{ deelcomp }}</b></p>
 
             {% if mag_afmelden %}
-                <p>Als hoofdwedstrijdleider kan je leden afmelden: zet een vinkje bij de naam en druk dan rode knop in de rechter onderhoek</p>
+                <p>Als hoofdwedstrijdleider kan je leden afmelden: zet een vinkje bij de naam en druk dan rode knop in de rechtsonder</p>
             {% else %}
                 <p>De hoofdwedstrijdleider kan leden afmelden tijdens fase B (inschrijven) van de competitie</p>
             {% endif %}

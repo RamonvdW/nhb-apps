@@ -104,6 +104,7 @@
                                 </tr>
                             {% endif %}
 
+                            {% comment %} 2025-06: uitgezet. Sporter kan het nu regelen via Mijn pagina.
                             <tr>
                                 <td>Kies of je na de regiocompetitie ook mee wilt doen aan de Rayonkampioenschappen:<br><br>
                                     <label style="margin-left: 20px">
@@ -112,6 +113,7 @@
                                     </label>
                                 </td>
                             </tr>
+                            {% endcomment %}
 
                             {% if wedstrijden_1 %}    <!-- inschrijfmethode 1 -->
                                 <tr>
