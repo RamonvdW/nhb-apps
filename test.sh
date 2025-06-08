@@ -66,7 +66,7 @@ for arg in "${ARGS[@]}"
 do
     # echo "[DEBUG] arg=$arg"
 
-    if [[ "$arg" == "-h" || "$arg" == "--help" ]]
+    if [ "$arg" = "-h" ] || [ "$arg" = "--help" ]
     then
         echo "./test.sh [options] [testcase selector(s)]"
         echo ""
@@ -79,21 +79,21 @@ do
 
         exit 1
 
-    elif [[ "$arg" == "--force" ]]
+    elif [ "$arg" = "--force" ]
     then
         echo "[INFO] Forcing coverage report"
         FORCE_REPORT=1
         # remove from ARGS used to decide focus
         # will still be given to ./manage.py where --force has no effect
 
-    elif [[ "$arg" == "--fullcov" ]]
+    elif [ "$arg" = "--fullcov" ]
     then
         echo "[INFO] Forcing full coverage report"
         FORCE_FULL_COV=1
         # remove from ARGS used to decide focus
         # will still be given to ./manage.py where --fullcov has no effect
 
-    elif [[ "$arg" == "--clean" ]]
+    elif [ "$arg" = "--clean" ]
     then
         KEEP_DB=0
         # remove from ARGS used to decide focus
@@ -145,6 +145,7 @@ fi
 if [ $KEEP_DB -eq 0 ]
 then
     echo "[INFO] Checking application is free of fatal errors"
+    # note: uses standard database, not test database
     python3 "${PY_OPTS[@]}" ./manage.py check --tag admin --tag models || exit $?
 fi
 
@@ -207,7 +208,7 @@ then
     echo "[INFO] Running manage.py exit test"
     # trigger diff that generates exit code
     ./manage.py shell -c 'from ImportCRM.models import ImportLimieten as L; l = L.objects.first(); l.max_club_changes=1; l.save()' &>>"$LOG"
-    python3 "${PY_OPTS[@]}" -u "${PYCOV[@]}" ./manage.py diff_crm_jsons ./ImportCRM/test-files/testfile_19.json ./ImportCRM/test-files/testfile_23.json &>/dev/null
+    python3 "${PY_OPTS[@]}" -u "${PYCOV[@]}" ./manage.py diff_crm_jsons --settings=$SETTINGS_AUTOTEST ./ImportCRM/test-files/testfile_19.json ./ImportCRM/test-files/testfile_23.json &>/dev/null
     RES=$?
     [ $RES -ne 0 ] || ABORTED=1
     # echo "[DEBUG] Debug run result: $RES --> ABORTED=$ABORTED"
@@ -309,7 +310,7 @@ then
             then
                 echo -n '.'
                 echo "[INFO] ./manage.py help $cmd" >>"$LOG"
-                python3 "${PY_OPTS[@]}" -u "${PYCOV[@]}" ./manage.py help "$cmd" &>>"$LOG"
+                python3 "${PY_OPTS[@]}" -u "${PYCOV[@]}" ./manage.py help --settings=$SETTINGS_AUTOTEST "$cmd" &>>"$LOG"
             fi
         done
         echo
@@ -324,7 +325,7 @@ then
             cmd=$(basename "$cmd_file")
             echo -n '.'
             echo "[INFO] ./manage.py help $cmd" >>"$LOG"
-            python3 "${PY_OPTS[@]}" -u "${PYCOV[@]}" ./manage.py help "$cmd" &>>/dev/null    # ignore output
+            python3 "${PY_OPTS[@]}" -u "${PYCOV[@]}" ./manage.py help "$cmd" --settings=$SETTINGS_AUTOTEST &>>/dev/null    # ignore output
         done
         echo
     fi
@@ -351,7 +352,7 @@ then
     if [ -e "/tmp/browser_js_cov.json" ]
     then
         # import the JS coverage data
-        python3 "${PY_OPTS[@]}" -u "${PYCOV[@]}" ./manage.py test --keepdb --settings=$SETTINGS_AUTOTEST "Plein.tests.test_js_in_browser.TestBrowser.import_js_cov"
+        python3 "${PY_OPTS[@]}" -u "${PYCOV[@]}" ./manage.py test --keepdb --settings=$SETTINGS_AUTOTEST -v 2 "Plein.tests.test_js_in_browser.TestBrowser.import_js_cov"
     fi
 
     echo "[INFO] Generating reports" | tee -a "$LOG"

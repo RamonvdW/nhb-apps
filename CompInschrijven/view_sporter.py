@@ -187,8 +187,8 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
             # for
 
             if len(wedstrijden1):
-                context['wedstrijden_1'] = wedstrijden1
-                context['wedstrijden_2'] = wedstrijden2
+                context['wedstrijden_1'] = wedstrijden1     # 1e keus: binnen cluster
+                context['wedstrijden_2'] = wedstrijden2     # 2e keus: binnen regio, buiten cluster
             else:
                 context['wedstrijden_1'] = wedstrijden2
 

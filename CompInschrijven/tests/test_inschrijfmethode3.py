@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -210,7 +210,7 @@ class TestCompInschrijvenMethode3(E2EHelpers, TestCase):
 
             # schrijf in voor de competitie
             post_params['dagdeel'] = dagdelen.pop(-1)
-            with self.assert_max_queries(29):
+            with self.assert_max_queries(26):
                 resp = self.client.post(self.url_inschrijven % comp.pk, post_params)
             self.assert_is_redirect_not_plein(resp)         # check for success
         # for

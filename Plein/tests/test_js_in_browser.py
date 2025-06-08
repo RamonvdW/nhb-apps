@@ -169,6 +169,9 @@ class TestBrowser(LiveServerTestCase):
     def focus_CompBeheer(self):
         self._run_focussed_tests()
 
+    def focus_CompInschrijven(self):
+        self._run_focussed_tests()
+
     def focus_CompScores(self):
         self._run_focussed_tests()
 

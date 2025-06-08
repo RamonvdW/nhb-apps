@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -781,7 +781,8 @@ class Inschrijfmethode1BehoefteView(UserPassesTestMixin, TemplateView):
         try:
             deelcomp = (Regiocompetitie
                         .objects
-                        .select_related('competitie')
+                        .select_related('competitie',
+                                        'regio')
                         .get(is_afgesloten=False,
                              competitie=comp,
                              regio=regio))
@@ -826,7 +827,7 @@ class Inschrijfmethode1BehoefteView(UserPassesTestMixin, TemplateView):
             wedstrijd.locatie_str = str(wedstrijd.vereniging)
             wedstrijd.keuze_count = wedstrijd.regiocompetitiesporterboog_set.count()
 
-            deelnemer_pks = wedstrijd.regiocompetitiesporterboog_set.values_list('pk', flat=True)
+            deelnemer_pks = list(wedstrijd.regiocompetitiesporterboog_set.values_list('pk', flat=True))
 
             blazoenen_dict = dict()
             for blazoen in COMPETITIE_BLAZOENEN[afstand]:

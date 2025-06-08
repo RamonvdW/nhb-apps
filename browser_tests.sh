@@ -53,7 +53,7 @@ for arg in "${ARGS[@]}"
 do
     # echo "[DEBUG] arg=$arg"
 
-    if [[ "$arg" == "-h" || "$arg" == "--help" ]]
+    if [ "$arg" = "-h" ] || [ "$arg" = "--help" ]
     then
         echo "./browser_tests.sh [options]"
         echo ""
@@ -61,11 +61,11 @@ do
         echo "  --clean     Remove database (automatic for full run)"
         exit 1
 
-    elif [[ "$arg" == "--clean" ]]
+    elif [ "$arg" = "--clean" ]
     then
         KEEP_DB=0
 
-    elif [[ "$arg" == "--auto" ]]
+    elif [ "$arg" = "--auto" ]
     then
         # running as sub-test under test.sh
         MAKE_REPORT=0

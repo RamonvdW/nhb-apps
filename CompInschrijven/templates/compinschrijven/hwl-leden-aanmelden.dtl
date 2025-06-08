@@ -10,27 +10,11 @@
 
 {% block pagina %}
 
-    <script>
-        function tel_wedstrijden() {
-            // tel hoeveel checkboxes aangekruist zijn
-            const count = document.querySelectorAll('input[name^="wedstrijd_"]:checked').length;
-            const el_aantal = document.getElementById('aantal');
-            el_aantal.innerText = count.toString() + ' wedstrijden';
+    <div id="js_data"
+         data-tel="{% if wedstrijden_1 %}1{% else %}0{% endif %}">
+    </div>
 
-            const el = document.getElementById('submit_knop');
-            el.disabled = (count > 7);
-            if (count > 7) {
-                el_aantal.classList.add('sv-rood-text');
-            } else {
-                el_aantal.classList.remove('sv-rood-text');
-            }
-        }
-
-        function toon_wedstrijden_2() {
-            document.getElementById('id_wedstrijden_2').classList.remove('hide');
-            document.getElementById('id_wedstrijden_2_knop').classList.add('hide');
-        }
-    </script>
+    <script src="{% static 'compinschrijven_js/inschrijven.js' %}"></script>
 
     <!-- banner -->
     <div class="row center">
@@ -48,7 +32,7 @@
 
                     <p>Onderstaande lijst toont alleen leden die ingesteld hebben met welke boog ze schieten. Je kan ze hier bij helpen via het kaartje "voorkeuren leden".</p>
 
-                    <p>Aanmelden gaat in bulk: kies de voorkeuren, zet daarna een vinkje bij de sporters die je aan wilt melden en druk op de rode knop in de rechter onderhoek. Leden die al aangemeld zijn hebben een grijs vinkje.</p>
+                    <p>Aanmelden gaat in bulk: kies de voorkeuren, zet daarna een vinkje bij de sporters die je aan wilt melden en druk op de rode knop rechtsonder. Leden die al aangemeld zijn hebben een grijs vinkje.</p>
                     <p>Leden die aangegeven hebben niet mee te willen doen met de bondscompetities worden in grijs weergegeven.</p>
 
                     <p>Let op: bij aanmelden v&oacute;&oacute;r {{ comp.begin_fase_D_indiv }} is deelname gegarandeerd.<br>Bij latere aanmelding bepaalt de regiocompetitieleider (RCL) of er ruimte is in jullie regio.</p>
@@ -102,7 +86,8 @@
                         </tr>
                         {% endcomment %}
 
-                        {% if wedstrijden_1 %}    <!-- inschrijfmethode 1 -->
+                        {% if wedstrijden_1 %}
+                            <!-- inschrijfmethode 1, 1e keus: binnen cluster -->
                             <tr>
                                 <td>Kies wanneer de sporters willen schieten door 7 keuzes te maken in onderstaande lijst. Dit is later nog individueel aan te passen.<br>
                                 <span>Je hebt <b id="aantal">0 wedstrijden</b> gekozen.</span><br><br>
@@ -119,6 +104,7 @@
                         {% endif %}
 
                         {% if wedstrijden_2 %}
+                            <!-- inschrijfmethode 1, 2e keus: binnen regio, buiten cluster -->
                             <tr id="id_wedstrijden_2_knop">
                                 <td><button class="btn-sv-blauw" type="button" onclick="toon_wedstrijden_2()">Toon meer wedstrijden</button>&nbsp;&nbsp;Er zijn nog {{ wedstrijden_2|length }} wedstrijden in de regio, wat verder weg.</td>
                             </tr>
@@ -158,7 +144,8 @@
                             <td>
                                 <span>Eventueel bericht voor de organisatie:</span><br>
                                 <div class="input-text" style="margin-left: 20px">
-                                    <textarea name="opmerking" cols="40" rows="10" placeholder="Tik hier je bericht" data-length="500" class="materialize-textarea" maxlength="500" id="id_opmerkingen"></textarea>
+                                    <textarea name="opmerking" cols="40" rows="10" placeholder="Tik hier je bericht"
+                                              data-length="500" class="materialize-textarea" maxlength="500" id="id_opmerkingen"></textarea>
                                 </div>
                             </td>
                         </tr>
@@ -202,7 +189,9 @@
                                         <td class="center">
                                             {% if mag_aanmelden %}
                                                 <label>
-                                                    <input type="checkbox" name="{{ obj.check }}" {% if obj.is_aangemeld %}disabled checked{% else %}class="filled-in"{%endif%} data-boog="{% if obj.mag_teamschieten %}{{ obj.afkorting }}{% else %}X{% endif %}">
+                                                    <input type="checkbox" name="{{ obj.check }}"
+                                                            {% if obj.is_aangemeld %} disabled checked{% else %} class="filled-in"{%endif%}
+                                                           data-boog="{% if obj.mag_teamschieten %}{{ obj.afkorting }}{% else %}X{% endif %}">
                                                     <span><!-- noodzakelijk --></span>
                                                 </label>
                                             {% else %}
@@ -255,7 +244,9 @@
                                     <td class="center">
                                         {% if mag_aanmelden %}
                                             <label>
-                                                <input type="checkbox" name="{{ obj.check }}" {% if obj.is_aangemeld %}disabled checked{% else %}class="filled-in"{% endif %} data-boog="{{ obj.afkorting }}">
+                                                <input type="checkbox" name="{{ obj.check }}"
+                                                       {% if obj.is_aangemeld %}disabled checked{% else %} class="filled-in"{% endif %}
+                                                       data-boog="{{ obj.afkorting }}">
                                                 <span><!-- noodzakelijk --></span>
                                             </label>
                                         {% else %}

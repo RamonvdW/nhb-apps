@@ -493,6 +493,7 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                                    .objects
                                    .exclude(sporter__is_overleden=True)
                                    .select_related('sporter',
+                                                   'sporter__bij_vereniging',
                                                    'boogtype')
                                    .get(sporter=sporter_pk,
                                         boogtype=boogtype_pk))

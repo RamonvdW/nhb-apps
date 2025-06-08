@@ -24,34 +24,12 @@
         </div>
     </div>
 
-    <script>
-        function do_toggle(id)
-        {
-            // voer een POST uit om toe te voegen
-            const form = document.createElement('form');
-            form.name = 'form2';
-            form.method = 'post';
-            form.action = '{{ afmelden_url }}';
+    <div id="js_data"
+         data-url-afmelden="{{ afmelden_url }}"
+         data-csrf-token="{{ csrf_token }}">
+    </div>
 
-            let inp = document.createElement('input');
-            inp.type = "hidden";
-            inp.name = "toggle_deelnemer_pk";
-            inp.value = id.getAttribute("data-pk");
-            form.appendChild(inp);
-
-            inp = document.createElement('input');
-            inp.type = "hidden";
-            inp.name = "csrfmiddlewaretoken";
-            inp.value = getCookie('mh_csrf_token');
-            form.appendChild(inp);
-
-            form.style.display = 'hidden';
-            document.body.appendChild(form);
-            form.submit();
-
-            return false;    // false prevents default browser behavior
-        }
-    </script>
+    <script src="{% static 'compinschrijven_js/team_toggle.js' %}"></script>
 
     <!-- blauwe balk met informatie in een tabel -->
     <div class="row-sv-blauw">
