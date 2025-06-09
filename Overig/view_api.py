@@ -147,7 +147,7 @@ class ApiCsvLijstView(View):
                             for afkorting in afkortingen])
 
             headers.append('Indoor competities')
-            headers.append('25m1pijl competitie')
+            headers.append('25m1pijl competities')
 
             headers.extend([descr + ' wedstrijden'
                             for disc, descr in WEDSTRIJD_DISCIPLINES])
