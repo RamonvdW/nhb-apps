@@ -10,28 +10,6 @@
 
 {% block pagina %}
 
-    <script>
-        function tel_wedstrijden() {
-            // tel hoeveel checkboxes aangekruist zijn
-            const count = document.querySelectorAll('input[name^="wedstrijd_"]:checked').length;
-            const el_aantal = document.getElementById('aantal');
-            el_aantal.innerText = count.toString() + ' wedstrijden';
-
-            const el = document.getElementById('submit_knop');
-            el.disabled = (count > 7);
-            if (count > 7) {
-                el_aantal.classList.add('sv-rood-text');
-            } else {
-                el_aantal.classList.remove('sv-rood-text');
-            }
-        }
-
-        function toon_wedstrijden_2() {
-            document.getElementById('id_wedstrijden_2').classList.remove('hide');
-            document.getElementById('id_wedstrijden_2_knop').classList.add('hide');
-        }
-    </script>
-
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
@@ -199,14 +177,11 @@
         </div>
     </div>
 
-    {% if wedstrijden_1 %}    <!-- inschrijfmethode 1 -->
-        <!-- initialisatie -->
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                tel_wedstrijden();
-            })
-        </script>
-    {% endif %}
+    <div id="js_data"
+         data-tel="{% if wedstrijden_1 %}1{% else %}0{% endif %}">
+    </div>
+
+    <script src="{% static 'compinschrijven_js/inschrijven.js' %}"></script>
 
     {% include 'feedback/sidebar.dtl' with op_pagina="compinschrijven-sporter-bevestig-aanmelden" %}
 

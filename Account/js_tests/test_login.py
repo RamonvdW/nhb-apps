@@ -9,7 +9,7 @@ from TestHelpers.e2ehelpers import TEST_WACHTWOORD
 import time
 
 
-class TestAccountLogin(bh.BrowserTestCase):
+class TestBrowserAccountLogin(bh.BrowserTestCase):
 
     url_login = '/account/login/'
     url_login_as = '/account/account-wissel/'

@@ -222,7 +222,7 @@
     </div>
 
     <div class="fixed-action-btn">
-        <button class="btn-sv-rood" onclick="opslaan(this)">
+        <button class="btn-sv-rood" id="id_opslaan_knop" onclick="opslaan(this)">
             <i class="notranslate material-icons-round left">check</i>Opslaan</button>
     </div>
 

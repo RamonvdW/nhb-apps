@@ -10,12 +10,6 @@
 
 {% block pagina %}
 
-    <div id="js_data"
-         data-tel="{% if wedstrijden_1 %}1{% else %}0{% endif %}">
-    </div>
-
-    <script src="{% static 'compinschrijven_js/inschrijven.js' %}"></script>
-
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
@@ -280,15 +274,11 @@
         </form>
     {% endif %}     <!-- mag aanmelden -->
 
-    {% if wedstrijden_1 %}    <!-- inschrijfmethode 1 -->
-        <!-- initialisatie -->
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                tel_wedstrijden();
-            })
-        </script>
-    {% endif %}
+    <div id="js_data"
+         data-tel="{% if wedstrijden_1 %}1{% else %}0{% endif %}">
+    </div>
 
+    <script src="{% static 'compinschrijven_js/inschrijven.js' %}"></script>
     <script src="{% static 'overig_js/tabel_filter.js' %}"></script>
 
     {% include 'feedback/sidebar.dtl' with op_pagina="compinschrijven-hwl-leden-aanmelden" %}

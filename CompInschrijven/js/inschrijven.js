@@ -9,7 +9,6 @@
 "use strict";
 
 const dataset = document.getElementById("js_data").dataset;
-const do_tel = dataset.tel === "1";
 
 
 function tel_wedstrijden() {
@@ -28,6 +27,7 @@ function tel_wedstrijden() {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
+    const do_tel = dataset.tel === "1";     // inschrijfmethode 1?
     if (do_tel) {
         // automatisch de eerste update doen
         tel_wedstrijden();

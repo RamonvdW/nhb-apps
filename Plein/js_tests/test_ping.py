@@ -9,7 +9,7 @@ from TestHelpers import browser_helper as bh
 from Plein.views import SESSIONVAR_VORIGE_POST
 
 
-class TestPleinStuurPing(bh.BrowserTestCase):
+class TestBrowserPleinStuurPing(bh.BrowserTestCase):
 
     """ Test de Plein applicatie, gebruik van stuur_ping.js vanuit de browser """
 

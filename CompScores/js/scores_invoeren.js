@@ -31,35 +31,39 @@ function opzoeken_klaar(xhr, btn) {
         // verzoek is klaar en we hebben een antwoord
         // responseText is leeg bij connection failure
         if (xhr.responseText !== "") {
-            const rsp = JSON.parse(xhr.responseText);
-            //console.log('response:', rsp);
+            try {
+                const rsp = JSON.parse(xhr.responseText);
+                //console.log('response:', rsp);
 
-            // sla het resultaat op voor gebruik in toevoegen()
-            const el = document.getElementById('id_zoekresultaat');
-            el.value = rsp;
+                // sla het resultaat op voor gebruik in toevoegen()
+                const el = document.getElementById('id_zoekresultaat');
+                el.value = rsp;
 
-            // antwoord bevat fail=1 in verschillende situaties:
-            // bondsnummer niet gevonden, geen actief lid
-            if (rsp['fail'] === undefined) {
-                // toon het zoekresultaat
-                //let deelnemer = rsp['deelnemers'][0];
-                //console.log('deelnemer:', deelnemer);
+                // antwoord bevat fail=1 in verschillende situaties:
+                // bondsnummer niet gevonden, geen actief lid
+                if (rsp.fail === undefined) {
+                    // toon het zoekresultaat
+                    //let deelnemer = rsp['deelnemers'][0];
+                    //console.log('deelnemer:', deelnemer);
 
-                //console.log('btn.dataset:', btn.dataset);
-                is_fail = false;
-                for (let d in btn.dataset) {     // geeft keys
-                    if (d !== 'xhr' && d !== 'opzoeken') {      // deze keys overslaan
-                        // voor deze key de data uit de response halen
-                        let antwoord = rsp[d];
+                    //console.log('btn.dataset:', btn.dataset);
+                    is_fail = false;
+                    for (let d in btn.dataset) {     // geeft keys
+                        if (d !== 'xhr' && d !== 'opzoeken') {      // deze keys overslaan
+                            // voor deze key de data uit de response halen
+                            let antwoord = rsp[d];
 
-                        if (antwoord !== undefined) {
-                            // zet het resultaat in het veld: naam, vereniging, regio
-                            let el = document.getElementById(btn.dataset[d]);
-                            el.innerHTML = antwoord;
-                            el.style.color = "";
+                            if (antwoord !== undefined) {
+                                // zet het resultaat in het veld: naam, vereniging, regio
+                                let el = document.getElementById(btn.dataset[d]);
+                                el.innerHTML = antwoord;
+                                el.style.color = "";
+                            }
                         }
-                    }
-                } // for
+                    } // for
+                }
+            } catch (e) {
+                // not a valid JSON response, could be because of 404
             }
         }
     }
@@ -91,7 +95,7 @@ function opzoeken(btn) {
     // deze functie wordt aangeroepen bij druk op de knop
 
     // voorkom parallelle verzoeken
-    if (btn.dataset['xhr'] === undefined) {
+    if (btn.dataset.xhr === undefined) {
         opzoeken_toon_status(btn.dataset, "bezig..", "gray");
 
         const xhr = new XMLHttpRequest();
@@ -109,7 +113,7 @@ function opzoeken(btn) {
                 if (lid_nr === '') {
                     return;
                 }
-                obj['lid_nr'] = lid_nr;
+                obj.lid_nr = lid_nr;
             }
         } // for
 
@@ -152,7 +156,7 @@ function toevoegen() {
     const el_gevonden = document.getElementById('id_zoekresultaten');
     el_gevonden.classList.add("hide");
 
-    const lid_nr = rsp['lid_nr'];
+    const lid_nr = rsp.lid_nr;
 
     // zoek het plekje in de tabel waar deze toegevoegd moet worden
     const table = document.getElementById('table1');
@@ -160,7 +164,7 @@ function toevoegen() {
     let row_smaller = 0;
     for (let i = 0; i < body.rows.length; i++) {
         const row = body.rows[i];
-        const filter_cmd = row.dataset["tablefilter"];
+        const filter_cmd = row.dataset.tablefilter;
         if (filter_cmd === "stop") {
             break;           // from the for
         }
@@ -184,12 +188,12 @@ function toevoegen() {
     let focus_row = null;
     let added_new = false;
 
-    rsp['deelnemers'].forEach(deelnemer => {
+    rsp.deelnemers.forEach(deelnemer => {
         // het is mogelijk dat de deelnemer al in de uitslag met 1 van meerdere bogen
         // kijk of de volgende regel toevallig van dit lid is, dan slaan we deze over
         let peek_row = body.rows[row_smaller + 1];
         let peek_pk = peek_row.cells[0].dataset.pk;
-        if (peek_pk === deelnemer['pk']) {
+        if (peek_pk === deelnemer.pk) {
             // sla deze deelnemer en regel over
             row_smaller = row_smaller + 1;
             insert_after_row = peek_row;
@@ -213,23 +217,23 @@ function toevoegen() {
             insert_after_row.parentNode.insertBefore(new_row, insert_after_row.nextSibling);
 
             // pas de nieuwe regel aan met de gevonden data
-            new_row.cells[0].dataset.pk = deelnemer['pk'];
+            new_row.cells[0].dataset.pk = deelnemer.pk;
             new_row.cells[0].innerHTML = lid_nr;
 
-            new_row.cells[1].innerHTML = rsp['naam'];
+            new_row.cells[1].innerHTML = rsp.naam;
 
             let span = new_row.cells[2].firstChild;
-            span.innerHTML = "[" + rsp['ver_nr'] + "]";
-            span.nextSibling.innerHTML = " " + rsp['ver_naam'];    // hidden on small
+            span.innerHTML = "[" + rsp.ver_nr + "]";
+            span.nextSibling.innerHTML = " " + rsp.ver_naam;    // hidden on small
 
-            new_row.cells[3].innerHTML = deelnemer['boog'];
-            let team_gem = deelnemer['team_gem'];
+            new_row.cells[3].innerHTML = deelnemer.boog;
+            let team_gem = deelnemer.team_gem;
             if (team_gem !== '') {
                 new_row.cells[3].innerHTML += ' (' + team_gem + ')';
             }
 
             if (toonTeamNaam) {
-                let team_pk = deelnemer['team_pk'];
+                let team_pk = deelnemer.team_pk;
                 new_row.cells[5].innerHTML = teamPk2Naam[team_pk];
             }
 
@@ -288,7 +292,7 @@ function opslaan(btn) {
     // begin op row 1 om de clone-template over te slaan
     for (let i = 1; i < body.rows.length; i++) {
         let row = body.rows[i];
-        const filter_cmd = row.dataset["tablefilter"];
+        const filter_cmd = row.dataset.tablefilter;
         if (filter_cmd === "stop") {
             break;        // from the for
         }
@@ -343,7 +347,7 @@ function deelnemers_ophalen_toevoegen(rsp) {
     el_filter.value = "";
     tabel_filter(el_filter, 'table1');
 
-    let deelnemers = rsp['deelnemers'];
+    let deelnemers = rsp.deelnemers;
     // sorteer deelnemers op invoeg-volgorde: bondsnummer
     deelnemers.sort(function (a, b) {
         if (a.lid_nr !== b.lid_nr) {
@@ -357,14 +361,14 @@ function deelnemers_ophalen_toevoegen(rsp) {
     let first_added_row;
     let row_nr = 0;
     deelnemers.forEach(deelnemer => {
-        const pk = deelnemer['pk'];
-        const lid_nr = deelnemer['lid_nr'];
+        const pk = deelnemer.pk;
+        const lid_nr = deelnemer.lid_nr;
         let skip = false;
         while (row_nr <= body.rows.length)      // stop eerder: op tablefilter=stop
         {
             const row = body.rows[row_nr];
 
-            const filter_cmd = row.dataset["tablefilter"];
+            const filter_cmd = row.dataset.tablefilter;
             if (filter_cmd === "stop") {
                 row_nr -= 1;     // terug naar een echte regel
                 break;           // from the while
@@ -395,22 +399,22 @@ function deelnemers_ophalen_toevoegen(rsp) {
 
             // pas de nieuwe regel aan met de ontvangen data
             new_row.cells[0].innerHTML = lid_nr;
-            new_row.cells[0].dataset.pk = deelnemer['pk'];
+            new_row.cells[0].dataset.pk = deelnemer.pk;
 
-            new_row.cells[1].innerHTML = deelnemer['naam'];
+            new_row.cells[1].innerHTML = deelnemer.naam;
 
             const span = new_row.cells[2].firstChild;
-            span.innerHTML = "[" + deelnemer['ver_nr'] + "]";
-            span.nextSibling.innerHTML = " " + deelnemer['ver_naam'];
+            span.innerHTML = "[" + deelnemer.ver_nr + "]";
+            span.nextSibling.innerHTML = " " + deelnemer.ver_naam;
 
-            new_row.cells[3].innerHTML = deelnemer['boog'];
-            const team_gem = deelnemer['team_gem'];
+            new_row.cells[3].innerHTML = deelnemer.boog;
+            const team_gem = deelnemer.team_gem;
             if (team_gem !== '') {
                 new_row.cells[3].innerHTML += ' (' + team_gem + ')';
             }
 
             if (toonTeamNaam) {
-                const team_pk = deelnemer['team_pk'];
+                const team_pk = deelnemer.team_pk;
                 new_row.cells[5].innerHTML = teamPk2Naam[team_pk];
             }
 
@@ -433,7 +437,7 @@ function deelnemers_ophalen_toevoegen(rsp) {
         // begin bij 1, want 0 is de clone template
         for (let i = 1; i < body.rows.length; i++) {
             let row = body.rows[i];
-            const filter_cmd = row.dataset["tablefilter"];
+            const filter_cmd = row.dataset.tablefilter;
             if (filter_cmd === "stop") {
                 break;      // from the for
             }
@@ -456,8 +460,12 @@ function deelnemers_ophalen_klaar(xhr, btn) {
             // verzoek is klaar en we hebben een antwoord
             // responseText is leeg bij connection failure
             if (xhr.responseText !== "") {
-                const rsp = JSON.parse(xhr.responseText);
-                deelnemers_ophalen_toevoegen(rsp);
+                try {
+                    const rsp = JSON.parse(xhr.responseText);
+                    deelnemers_ophalen_toevoegen(rsp);
+                } catch (e) {
+                    // bad JSON, which could be because of 404
+                }
 
                 // zet focus op het filter
                 const el = document.getElementById("table1_zoeken_input");

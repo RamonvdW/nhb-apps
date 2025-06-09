@@ -4,67 +4,67 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
+from Competitie.definities import INSCHRIJF_METHODE_1
+from Competitie.test_utils.tijdlijn import zet_competitie_fase_regio_inschrijven
 from TestHelpers import browser_helper as bh
-from TestHelpers.e2ehelpers import TEST_WACHTWOORD
-import time
 
 
-class TestAccountLogin(bh.BrowserTestCase):
+class TestBrowserCompInschrijven(bh.BrowserTestCase):
 
-    url_login = '/account/login/'
-    url_login_as = '/account/account-wissel/'
+    url_sporter_aanmelden = '/bondscompetities/deelnemen/aanmelden/%s/%s/bevestig/'  # deelcomp_pk, sporterboog_pk
 
-    def test_login(self):
-        # uitloggen (voor het geval we ingelogd waren)
-        self.do_logout()
-
-        # inloggen dialoog oproepen
-        self.do_navigate_to(self.url_login)
-        self.assertEqual(self._driver.title, 'Inloggen')
-
-        # move_label_after_autofill draaien op timers
-        # totale tijd: 1000+500+200+100+50 = 1750ms
-        time.sleep(2)
-
-        self.assert_no_console_log()
-
-        self.find_element_by_id('id_login_naam').send_keys(self.account_bb.username)
-        self.find_element_by_id('id_wachtwoord').send_keys(TEST_WACHTWOORD)
-        login_vink = self.find_element_by_name('aangemeld_blijven')
-        self.assertTrue(login_vink.is_selected())
-        # clickable = bh.get_following_sibling(login_vink)
-        # login_vink.click()
-        # self.assertFalse(login_vink.is_selected())
-        self.find_element_by_id('submit_knop').click()
-
-        # controleer dat we ingelogd zijn
-        # self.do_navigate_to(self.url_plein)
-        menu = self.find_element_type_with_text('a', 'Uitloggen')
-        self.assertIsNotNone(menu)
-
-        # zorg dat de volgende test niet in de war raakt (alternatief is weer uitloggen)
-        self.session_state = "logged in"
-
-    def test_login_as(self):
-        # inloggen
+    def test_inschrijven_sporter(self):
+        # inloggen en als sporter de site gebruiken
         self.do_login()
+        self.do_wissel_naar_sporter()
 
-        # wordt Manager MH
-        self.do_wissel_naar_bb()
+        # zet inschrijfmethode 1
+        self.regio_comp.inschrijf_methode = INSCHRIJF_METHODE_1
+        self.regio_comp.save(update_fields=['inschrijf_methode'])
 
-        # ga naar de login-as pagina en zoek op een van de accounts
-        self.do_navigate_to(self.url_login_as + '?zoekterm=%s' % self.account.username)
+        zet_competitie_fase_regio_inschrijven(self.comp)
+        self.regio_deelnemer.delete()       # uitschrijven
 
-        # check dat er geen inlaad fouten waren
-        self.assert_no_console_log()
-
-        # vind de knop
-        i = self.find_element_type_with_text('i', 'play_arrow')
-        button = self.get_parent(i)
-        button.click()
+        # haal de inschrijf pagina op
+        url = self.url_sporter_aanmelden % (self.regio_comp.pk, self.sporterboog.pk)
+        self.do_navigate_to(url)
 
         # check dat er geen inlaad fouten waren
         self.assert_no_console_log()
+
+        # zet checkmarks in alle checkboxes
+        for el in self.find_elements_checkbox():
+            if el.text:
+                self.click_if_possible(el)
+        # for
+
+        # toon 2e keus wedstrijden
+        self.find_element_type_with_text('button', 'Toon meer wedstrijden').click()
+
+        # zet checkmarks in alle checkboxes
+        el_check = list()
+        for el in self.find_elements_checkbox(exclude_selected=True):
+            el_check.append(el)
+            self.click_if_possible(el)
+        # for
+
+        # controleer dat de submit knop niet bruikbaar is
+        # (omdat er meer dan 7 wedstrijden gekozen zijn)
+        knop = self.find_element_by_id('submit_knop')
+        self.assertIsNotNone(knop.get_attribute('disabled'))
+
+        # verwijder een paar checkmarks
+        # (bij maximaal 7 wedstrijden wordt de submit knop weer bruikbaar)
+        for el in el_check[-2:]:
+            self.click_if_possible(el)
+        # for
+
+        # check dat er geen fouten waren
+        self.assert_no_console_log()
+
+        # doe de inschrijving
+        self.assertIsNone(knop.get_attribute('disabled'))
+        knop.click()
 
 
 # end of file

@@ -7,7 +7,7 @@
 from TestHelpers import browser_helper as bh
 
 
-class TestWebwinkelKiesFoto(bh.BrowserTestCase):
+class TestBrowserWebwinkelKiesFoto(bh.BrowserTestCase):
 
     """ Test de Webwinkel applicatie, gebruik van kies_foto.js vanuit de browser """
 

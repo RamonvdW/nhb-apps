@@ -13,7 +13,7 @@ from BasisTypen.models import BoogType, TeamType, Leeftijdsklasse
 from Competitie.models import (Competitie, Regiocompetitie, RegiocompetitieRonde, RegiocompetitieSporterBoog,
                                CompetitieIndivKlasse, CompetitieTeamKlasse, CompetitieMatch)
 from Functie.models import Functie, VerklaringHanterenPersoonsgegevens
-from Geo.models import Regio, Rayon
+from Geo.models import Regio, Rayon, Cluster
 from Score.models import Aanvangsgemiddelde
 from Sporter.models import Sporter, SporterBoog
 from Site.js_cov.js_cov_save import save_the_data, import_the_data
@@ -22,7 +22,8 @@ from Vereniging.models import Vereniging
 from Webwinkel.models import WebwinkelFoto, WebwinkelProduct
 from selenium.webdriver import Chrome, ChromeOptions
 from selenium.webdriver.common.by import By
-from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import NoSuchElementException, ElementNotInteractableException
+from selenium.webdriver.remote.webelement import WebElement
 import datetime
 import pyotp
 import time
@@ -95,7 +96,7 @@ class BrowserTestCase(TestCase):
         logs = self._driver.get_log('browser')      # gets the log + clears it!
         regels = list()
         for log in logs:
-            #msg = log['message']
+            # msg = log['message']
             msg = repr(log)
             if msg not in regels:
                 regels.append(msg)
@@ -133,6 +134,16 @@ class BrowserTestCase(TestCase):
             el = None
         return el
 
+    def find_elements_checkbox(self, exclude_selected=False):
+        spans = list()
+        for el in self._driver.find_elements(By.XPATH, '//input[@type="checkbox"]'):
+            if exclude_selected and el.is_selected():
+                continue
+            span = self.get_following_sibling(el)
+            spans.append(span)
+        # for
+        return spans
+
     def find_title(self):
         el = self._driver.find_element(By.XPATH, '//title')
         if el:
@@ -168,6 +179,38 @@ class BrowserTestCase(TestCase):
         # for
         return None
 
+    @staticmethod
+    def click_if_possible(el: WebElement):
+        try:
+            el.click()
+        except ElementNotInteractableException:
+            # waarschijnlijk hidden
+            pass
+
+    @staticmethod
+    def debug_describe_element(el: WebElement):
+        msgs = list()
+
+        tag = el.tag_name
+        msgs.append('tag=%s' % repr(tag))
+
+        text = el.text
+        msgs.append('text=%s' % repr(text))
+
+        attrs = ['id', 'name']
+
+        if tag == 'input':
+            attrs.append('type')
+            attrs.append('hidden')
+
+        for attr in attrs:
+            val = el.get_attribute(attr)
+            if val:
+                msgs.append('%s=%s' % (attr, repr(val)))
+        # for
+
+        return ", ".join(msgs)
+
     def fetch_js_cov(self):
         # capture collected coverage before navigating away
         # the try-catch is to handle an exception that happens because window.localStorage does not yet exist
@@ -200,7 +243,7 @@ class BrowserTestCase(TestCase):
 
     def do_login(self):
         # print('do_login: session_state=%s' % self.session_state)
-        if self.session_state == "logged in":
+        if self.session_state in ("logged in", "passed otp"):
             return
 
         # haal de inlog pagina op
@@ -282,7 +325,8 @@ class BrowserTestCase(TestCase):
     def do_wissel_naar_hwl(self):
         # wissel naar rol HWL
         self.do_pass_otp()
-        self.do_navigate_to(self.url_wissel_van_rol)
+        if self._driver.title != 'Kies je rol':
+            self.do_navigate_to(self.url_wissel_van_rol)
         radio = self.find_element_by_id('id_eigen_%s' % self.functie_hwl.pk)    # radio button voor HWL
         self.get_following_sibling(radio).click()
         self.find_element_by_id('activeer_eigen').click()       # activeer knop
@@ -291,7 +335,8 @@ class BrowserTestCase(TestCase):
     def do_wissel_naar_bb(self):
         # wissel naar rol Manager MH
         self.do_pass_otp()
-        self.do_navigate_to(self.url_wissel_van_rol)
+        if self._driver.title != 'Kies je rol':
+            self.do_navigate_to(self.url_wissel_van_rol)
         radio = self.find_element_by_id('id_eigen_90002')       # radio button voor Manager MH
         self.get_following_sibling(radio).click()
         self.find_element_by_id('activeer_eigen').click()       # activeer knop
@@ -300,7 +345,8 @@ class BrowserTestCase(TestCase):
     def do_wissel_naar_sporter(self):
         # wissel naar rol Sporter
         self.do_pass_otp()
-        self.do_navigate_to(self.url_wissel_van_rol)
+        if self._driver.title != 'Kies je rol':
+            self.do_navigate_to(self.url_wissel_van_rol)
         radio = self.find_element_by_id('id_eigen_90000')       # radio button voor Sporter
         self.get_following_sibling(radio).click()
         self.find_element_by_id('activeer_eigen').click()       # activeer knop
@@ -324,7 +370,7 @@ def get_driver(show_browser=False):
     if not show_browser:
         options.add_argument('--headless')
 
-    options.add_argument('--window-size=1024,800')
+    options.add_argument('--window-size=1024,1200')
     options.set_capability('goog:loggingPrefs', {'browser': 'ALL'})
 
     driver = Chrome(options=options)
@@ -367,10 +413,31 @@ def database_vullen(self):
     self.rayon, _ = Rayon.objects.get_or_create(rayon_nr=5, naam="Rayon 5")
     self.regio, _ = Regio.objects.get_or_create(regio_nr=117, rayon_nr=self.rayon.rayon_nr, rayon=self.rayon)
 
+    self.cluster_117a = Cluster(
+                            regio=self.regio,
+                            letter='A',
+                            naam='Cluster A',
+                            gebruik='18')
+    self.cluster_117a.save()
+
+    self.cluster_117b = Cluster(
+                            regio=self.regio,
+                            letter='B',
+                            naam='Cluster B',
+                            gebruik='18')
+    self.cluster_117b.save()
+
     self.ver, _ = Vereniging.objects.get_or_create(
                                 naam="Browser Club",
                                 ver_nr=4200,
                                 regio=self.regio)
+    self.ver.clusters.add(self.cluster_117a)
+
+    self.ver2, _ = Vereniging.objects.get_or_create(
+                                naam="Browser Club 2",
+                                ver_nr=4201,
+                                regio=self.regio)
+    self.ver.clusters.add(self.cluster_117b)
 
     self.sporter, _ = Sporter.objects.get_or_create(
                                     lid_nr=lid_nr,
@@ -475,14 +542,6 @@ def database_vullen(self):
                                 is_voor_teams_rk_bk=True)
     self.klasse_team_r.save()
 
-    self.match = CompetitieMatch(
-                        competitie=self.comp,
-                        beschrijving='Test match',
-                        vereniging=self.ver,
-                        datum_wanneer=volgende_maand,
-                        tijd_begin_wedstrijd='20:00')
-    self.match.save()
-
     self.regio_comp = Regiocompetitie(
                             competitie=self.comp,
                             regio=self.regio,
@@ -494,7 +553,35 @@ def database_vullen(self):
                             week_nr=1,
                             beschrijving='Ronde 1')
     self.regio_ronde.save()
+
+    self.match = CompetitieMatch(
+                        competitie=self.comp,
+                        beschrijving='Test match 1a',
+                        vereniging=self.ver,
+                        datum_wanneer=volgende_maand,
+                        tijd_begin_wedstrijd='20:00')
+    self.match.save()
     self.regio_ronde.matches.add(self.match)
+
+    match = CompetitieMatch(
+                        competitie=self.comp,
+                        beschrijving='Test match 2a',
+                        vereniging=self.ver,
+                        datum_wanneer=volgende_maand + datetime.timedelta(days=3),
+                        tijd_begin_wedstrijd='20:01')
+    match.save()
+    self.regio_ronde.matches.add(match)
+
+    for lp in range(7):
+        match = CompetitieMatch(
+                            competitie=self.comp,
+                            beschrijving='Test match %sb' % lp,
+                            vereniging=self.ver2,
+                            datum_wanneer=volgende_maand,
+                            tijd_begin_wedstrijd='19:00')
+        match.save()
+        self.regio_ronde.matches.add(match)
+    # for
 
     self.regio_deelnemer = RegiocompetitieSporterBoog(
                                 regiocompetitie=self.regio_comp,
