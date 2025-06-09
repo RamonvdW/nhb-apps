@@ -47,9 +47,8 @@ class BestelActiviteitView(UserPassesTestMixin, TemplateView):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu = rol_get_huidige(self.request)
         if self.rol_nu == Rol.ROL_BB:
-            account = get_account(self.request)
-            self.is_staff = account.is_staff
-        return self.rol_nu in (Rol.ROL_BB, Rol.ROL_MWW, Rol.ROL_MO)
+            self.is_staff = get_account(self.request).is_staff
+        return self.rol_nu in (Rol.ROL_BB, Rol.ROL_MWW, Rol.ROL_MO, Rol.ROL_MWZ)
 
     @staticmethod
     def _selecteer_bestellingen(context, form, zoekterm):
