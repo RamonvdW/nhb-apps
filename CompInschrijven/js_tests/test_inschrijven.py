@@ -15,7 +15,7 @@ class TestBrowserCompInschrijven(bh.BrowserTestCase):
 
     def test_inschrijven_sporter(self):
         # inloggen en als sporter de site gebruiken
-        self.do_login()
+        self.do_pass_otp()
         self.do_wissel_naar_sporter()
 
         # zet inschrijfmethode 1
