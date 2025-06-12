@@ -27,11 +27,11 @@ charset-normalizer==3.4.2
     # via
     #   -r requirements.txt
     #   requests
-coverage==7.8.2
+coverage==7.9.0
     # via
     #   -r requirements_dev.in
     #   django-coverage-plugin
-django==5.2.2
+django==5.2.3
     # via
     #   -r requirements.txt
     #   django-debug-toolbar
@@ -56,7 +56,7 @@ google-api-core==2.25.0
     #   google-api-python-client
     #   google-geo-type
     #   google-maps-routing
-google-api-python-client==2.171.0
+google-api-python-client==2.172.0
     # via -r requirements.txt
 google-auth==2.40.3
     # via
@@ -70,11 +70,11 @@ google-auth-httplib2==0.2.0
     # via
     #   -r requirements.txt
     #   google-api-python-client
-google-geo-type==0.3.12
+google-geo-type==0.3.13
     # via
     #   -r requirements.txt
     #   google-maps-routing
-google-maps-routing==0.6.15
+google-maps-routing==0.6.16
     # via -r requirements.txt
 googleapis-common-protos==1.70.0
     # via
@@ -83,12 +83,12 @@ googleapis-common-protos==1.70.0
     #   grpcio-status
 googlemaps==4.10.0
     # via -r requirements.txt
-grpcio==1.72.1
+grpcio==1.73.0
     # via
     #   -r requirements.txt
     #   google-api-core
     #   grpcio-status
-grpcio-status==1.72.1
+grpcio-status==1.73.0
     # via
     #   -r requirements.txt
     #   google-api-core
@@ -168,7 +168,7 @@ pyyaml==6.0.2
     # via html5validator
 qrcode==8.2
     # via -r requirements.txt
-requests==2.32.3
+requests==2.32.4
     # via
     #   -r requirements.txt
     #   google-api-core
