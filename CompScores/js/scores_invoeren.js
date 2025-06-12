@@ -5,6 +5,7 @@
  */
 
 /* jshint esversion: 6 */
+/* global M, tabel_filter */
 "use strict";
 
 const dataset = document.getElementById("js_data").dataset;
@@ -222,19 +223,21 @@ function toevoegen() {
 
             new_row.cells[1].innerHTML = rsp.naam;
 
-            let span = new_row.cells[2].firstChild;
+            const span = new_row.cells[2].firstChild;
             span.innerHTML = "[" + rsp.ver_nr + "]";
             span.nextSibling.innerHTML = " " + rsp.ver_naam;    // hidden on small
 
-            new_row.cells[3].innerHTML = deelnemer.boog;
-            let team_gem = deelnemer.team_gem;
+            const team_gem = deelnemer.team_gem;
             if (team_gem !== '') {
-                new_row.cells[3].innerHTML += ' (' + team_gem + ')';
+                new_row.cells[3].innerHTML = deelnemer.boog + ' (' + team_gem + ')';
+            } else {
+                new_row.cells[3].innerHTML = deelnemer.boog;
             }
 
             if (toonTeamNaam) {
-                let team_pk = deelnemer.team_pk;
-                new_row.cells[5].innerHTML = teamPk2Naam[team_pk];
+                const team_pk = deelnemer.team_pk;
+                const team_naam = teamPk2Naam[team_pk];
+                new_row.cells[5].innerHTML = team_naam;
             }
 
             // maak de nieuwe row zichtbaar
@@ -407,10 +410,11 @@ function deelnemers_ophalen_toevoegen(rsp) {
             span.innerHTML = "[" + deelnemer.ver_nr + "]";
             span.nextSibling.innerHTML = " " + deelnemer.ver_naam;
 
-            new_row.cells[3].innerHTML = deelnemer.boog;
             const team_gem = deelnemer.team_gem;
             if (team_gem !== '') {
-                new_row.cells[3].innerHTML += ' (' + team_gem + ')';
+                new_row.cells[3].innerHTML = deelnemer.boog + ' (' + team_gem + ')';
+            } else {
+                new_row.cells[3].innerHTML = deelnemer.boog;
             }
 
             if (toonTeamNaam) {
