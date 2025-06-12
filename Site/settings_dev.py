@@ -42,7 +42,7 @@ USE_SUBSET_FONT_FILES = False
 # ENABLE_DEBUG_TOOLBAR = True
 
 # disable minify for easy of debugging (default = True)
-ENABLE_MINIFY = False
+ENABLE_MINIFY = True
 
 # instrumenteer javascript bestanden
 ENABLE_INSTRUMENT_JS = True

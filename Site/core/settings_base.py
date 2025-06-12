@@ -62,7 +62,7 @@ APPS_DIR = os.path.dirname(BASE_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2025-06-09'
+SITE_VERSIE = '2025-06-12'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -237,7 +237,8 @@ STATIC_ROOT = 'Site/.static'        # relative to project top-dir
 STATICFILES_DIRS = [
     ("webwinkel_fotos", WEBWINKEL_FOTOS_DIR),       # noqa
 ]
-STATICFILES_FINDER = [
+STATICFILES_FINDERS = [
+    'Site.core.transpose_js.AppJsFinder',                       # create static files from .js + minify/instrument
     'django.contrib.staticfiles.finders.FileSystemFinder',      # zoekt in STATICFILES_DIRS
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',  # zoekt in App/static/
 ]
