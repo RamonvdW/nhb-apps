@@ -41,11 +41,11 @@ USE_SUBSET_FONT_FILES = False
 # debug toolbar for database access analysis
 # ENABLE_DEBUG_TOOLBAR = True
 
-# disable minify for easy of debugging (default = True)
-ENABLE_MINIFY = False
-
 # instrumenteer javascript bestanden
-ENABLE_INSTRUMENT_JS = True
+#ENABLE_INSTRUMENT_JS = True    # let op: vereist ENABLE_MINIFY_JS = False
+
+# disable minify for easy of debugging (default = True)
+ENABLE_MINIFY = not ENABLE_INSTRUMENT_JS
 
 # django-extensions
 #   very useful for show_urls:

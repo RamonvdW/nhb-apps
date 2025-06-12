@@ -230,7 +230,13 @@ def minify_template(contents):
     contents = re.sub(r'>\s+@import', '>@import', contents)
 
     # whitespace tussen een css-syntax puntkomma en een block
-    contents = re.sub(r';\s+{%', ';{%', contents)
+    # contents = re.sub(r';\s+{%', ';{%', contents)
+
+    # whitespace/newlines voor een tag
+    contents = re.sub(r'\s+{%', ' {%', contents)
+
+    # whitespace/newlines na een tag
+    contents = re.sub(r'%}\s+', '%} ', contents)
 
     # whitespace tussen laatste javascript statement en </script>
     contents = re.sub(r'\s+</script>', '</script>', contents)

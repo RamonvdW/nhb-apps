@@ -10,8 +10,15 @@
 
 const dataset = document.getElementById("js_data").dataset;
 const wedstrijdMaxScore = parseInt(dataset.wedstrijdMaxScore);
-const toonTeamNaam = dataset.toonTeamNaam === "true";
-const teamPk2Naam = JSON.parse(document.getElementById('team_pk2naam').textContent);
+let toonTeamNaam = dataset.toonTeamNaam === "true";
+let teamPk2Naam = {};
+
+try {
+    teamPk2Naam = JSON.parse(document.getElementById('team_pk2naam').textContent);
+} catch (e) {
+    toonTeamNaam = false;
+}
+
 
 function opzoeken_hide_status() {
     const el = document.getElementById("id_zoekstatus");
@@ -236,8 +243,7 @@ function toevoegen() {
 
             if (toonTeamNaam) {
                 const team_pk = deelnemer.team_pk;
-                const team_naam = teamPk2Naam[team_pk];
-                new_row.cells[5].innerHTML = team_naam;
+                new_row.cells[5].innerHTML = teamPk2Naam[team_pk];
             }
 
             // maak de nieuwe row zichtbaar
@@ -300,14 +306,10 @@ function opslaan(btn) {
             break;        // from the for
         }
 
+        // let op: lege scores juist wel meesturen
+        // dan kan een verkeerd bondsnummer  nog uit de uitslag gehaald worden door de score leeg te maken!
         const pk = row.cells[0].dataset.pk;
-        const score = row.cells[4].firstChild.value;
-        //console.log('pk:', pk, 'score:', score);
-
-        // lege scores juist wel meesturen, dan kan een verkeerd bondsnummer
-        // nog uit de uitslag gehaald worden door de score leeg te maken!
-        //if (score !== "")
-        obj[pk] = score;
+        obj[pk] = row.cells[4].firstChild.value;
     } // for
 
     const data = JSON.stringify(obj);
