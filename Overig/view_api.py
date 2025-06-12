@@ -7,6 +7,8 @@
 from django.conf import settings
 from django.http import HttpResponse
 from django.views import View
+from django.views.decorators.gzip import gzip_page
+from django.utils import timezone
 from BasisTypen.definities import ORGANISATIE_IFAA, ORGANISATIE_WA
 from BasisTypen.models import BoogType
 from Competitie.models import RegiocompetitieSporterBoog
@@ -23,6 +25,7 @@ CONTENT_TYPE_CSV = 'text/csv; charset=UTF-8'
 class ApiCsvLijstView(View):
 
     @staticmethod
+    @gzip_page
     def get(request, *args, **kwargs):
         """ Geeft een lijst met evenementen/wedstrijden/opleidingen terug
 
@@ -66,36 +69,48 @@ class ApiCsvLijstView(View):
             alle_lid_nrs = list()
 
             # informatie over de leden ophalen
-            for sporter in (Sporter
-                            .objects
-                            .select_related('bij_vereniging')
-                            .filter(is_actief_lid=True)
-                            .exclude(bij_vereniging=None)
-                            .order_by('lid_nr')):
+            now = timezone.localtime(timezone.now())
+            for tup in (Sporter
+                        .objects
+                        .exclude(bij_vereniging=None)
+                        .filter(is_actief_lid=True)
+                        .select_related('bij_vereniging')
+                        .order_by('lid_nr')
+                        .values_list('lid_nr',
+                                     'bij_vereniging__ver_nr',
+                                     'geboorte_datum',
+                                     'account')):
+                lid_nr, ver_nr, geboortedatum, account = tup
 
-                alle_lid_nrs.append(sporter.lid_nr)
-                lid2ver_nr[sporter.lid_nr] = sporter.bij_vereniging.ver_nr
-                lid2leeftijd[sporter.lid_nr] = sporter.bereken_leeftijd()
+                alle_lid_nrs.append(lid_nr)
+                lid2ver_nr[lid_nr] = ver_nr
 
-                if sporter.account:
-                    lid2account[sporter.lid_nr] = 1
+                # ga uit van de te bereiken leeftijd in dit jaar
+                leeftijd = now.year - geboortedatum.year
+                if (now.month, now.day) < (geboortedatum.month, geboortedatum.day):
+                    # nog voor de verjaardag
+                    leeftijd -= 1
+                lid2leeftijd[lid_nr] = leeftijd
+
+                if account:
+                    lid2account[lid_nr] = 1
                 else:
-                    lid2account[sporter.lid_nr] = 0
+                    lid2account[lid_nr] = 0
             # for
 
-            # informatie over de gekozen bogen ophalen
-            for tup in (SporterBoog
-                        .objects
-                        .select_related('sporter',
-                                        'boogtype')
-                        .values_list('sporter__lid_nr',
-                                     'boogtype__afkorting')):
-                lid_nr, afkorting = tup
-                try:
-                    bogen = lid2bogen[lid_nr]
-                except KeyError:
-                    lid2bogen[lid_nr] = bogen = list()
-                bogen.append(afkorting)
+            for afkorting in boog2beschrijving.keys():
+                # informatie over de gekozen bogen ophalen
+                for lid_nr in (SporterBoog
+                               .objects
+                               .filter(boogtype__afkorting=afkorting)
+                               .select_related('sporter')
+                               .values_list('sporter__lid_nr', flat=True)):
+                    try:
+                        bogen = lid2bogen[lid_nr]
+                    except KeyError:
+                        lid2bogen[lid_nr] = bogen = list()
+                    bogen.append(afkorting)
+                # for
             # for
 
             # informatie over historische competitie deelname
@@ -106,47 +121,58 @@ class ApiCsvLijstView(View):
                              .distinct('seizoen')
                              .values_list('seizoen', flat=True))[:2]
             seizoen_pks = list(HistCompSeizoen.objects.filter(seizoen__in=seizoenen).values_list('pk', flat=True))
-            for tup in (HistCompRegioIndiv
-                        .objects
-                        .filter(seizoen__pk__in=seizoen_pks)
-                        .select_related('seizoen',
-                                        'sporter')
-                        .values_list('seizoen__comp_type',
-                                     'sporter_lid_nr')):
-                comp_type, lid_nr = tup
-                if comp_type == '18':
-                    lid2comp18[lid_nr] = lid2comp18.get(lid_nr, 0) + 1
-                elif comp_type == '25':     # pragma: no branch
-                    lid2comp25[lid_nr] = lid2comp25.get(lid_nr, 0) + 1
+
+            seizoenen18 = HistCompSeizoen.objects.filter(pk__in=seizoen_pks, comp_type='18', is_openbaar=True)
+            for lid_nr in (HistCompRegioIndiv
+                           .objects
+                           .filter(seizoen__in=seizoenen18)
+                           .values_list('sporter_lid_nr', flat=True)):
+                lid2comp18[lid_nr] = lid2comp18.get(lid_nr, 0) + 1
+            # for
+
+            seizoenen25 = HistCompSeizoen.objects.filter(pk__in=seizoen_pks, comp_type='25', is_openbaar=True)
+            for lid_nr in (HistCompRegioIndiv
+                           .objects
+                           .filter(seizoen__in=seizoenen25)
+                           .values_list('sporter_lid_nr', flat=True)):
+                lid2comp25[lid_nr] = lid2comp25.get(lid_nr, 0) + 1
             # for
 
             # informatie over de huidige competitie deelname
-            for tup in (RegiocompetitieSporterBoog
-                        .objects
-                        .select_related('regiocompetitie__competitie',
-                                        'sporterboog__sporter')
-                        .exclude(aantal_scores=0)
-                        .values_list('regiocompetitie__competitie__afstand',
-                                     'sporterboog__sporter__lid_nr')):
-                comp_type, lid_nr = tup
-                if comp_type == '18':
-                    lid2comp18[lid_nr] = lid2comp18.get(lid_nr, 0) + 1
-                elif comp_type == '25':     # pragma: no branch
-                    lid2comp25[lid_nr] = lid2comp25.get(lid_nr, 0) + 1
+            for lid_nr in (RegiocompetitieSporterBoog
+                           .objects
+                           .select_related('regiocompetitie__competitie',
+                                           'sporterboog__sporter')
+                           .filter(regiocompetitie__competitie__afstand='18')
+                           .exclude(aantal_scores=0)
+                           .values_list('sporterboog__sporter__lid_nr', flat=True)):
+                lid2comp18[lid_nr] = lid2comp18.get(lid_nr, 0) + 1
+            # for
+            for lid_nr in (RegiocompetitieSporterBoog
+                           .objects
+                           .select_related('regiocompetitie__competitie',
+                                           'sporterboog__sporter')
+                           .filter(regiocompetitie__competitie__afstand='25')
+                           .exclude(aantal_scores=0)
+                           .values_list('sporterboog__sporter__lid_nr', flat=True)):
+                lid2comp25[lid_nr] = lid2comp25.get(lid_nr, 0) + 1
             # for
 
             # wedstrijd deelname
-            for tup in (WedstrijdInschrijving
-                        .objects
-                        .filter(status=WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF)
-                        .select_related('wedstrijd',
-                                        'sporterboog__sporter')
-                        .values_list('sporterboog__sporter__lid_nr',
-                                     'wedstrijd__discipline')):
-                lid_nr, discipline = tup
-                disc2count = lid2wedstrijd.get(lid_nr, dict())
-                disc2count[discipline] = disc2count.get(discipline, 0) + 1
-                lid2wedstrijd[lid_nr] = disc2count
+            for discipline, _ in WEDSTRIJD_DISCIPLINES:
+                for lid_nr in (WedstrijdInschrijving
+                               .objects
+                               .select_related('wedstrijd',
+                                               'sporterboog__sporter')
+                               .filter(status=WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF,
+                                       wedstrijd__discipline=discipline)
+                               .values_list('sporterboog__sporter__lid_nr', flat=True)):
+                    try:
+                        disc2count = lid2wedstrijd[lid_nr]
+                    except KeyError:
+                        lid2wedstrijd[lid_nr] = disc2count = dict()
+                    disc2count[discipline] = disc2count.get(discipline, 0) + 1
+                # for
             # for
 
             # output de informatie
@@ -162,7 +188,6 @@ class ApiCsvLijstView(View):
                             for _, descr in WEDSTRIJD_DISCIPLINES])
 
             writer.writerow(headers)
-            has_no_data = 'null'
 
             for lid_nr in alle_lid_nrs:
                 regel = [lid2ver_nr[lid_nr],
@@ -183,21 +208,11 @@ class ApiCsvLijstView(View):
                 comp25 = lid2comp25.get(lid_nr, 0)
                 regel.append(str(comp25))
 
-                disc2count = lid2wedstrijd.get(lid_nr, None)
-                if disc2count is None:
-                    print('no mathces for %s; account = %s' % (lid_nr, lid2account[lid_nr]))
-                    if lid2account[lid_nr] > 0:
-                        disc2count = dict()     # toon 0-en
-
-                if disc2count is None:          # let op: "is None" is nodig, anders ook hierin bij lege dict
-                    for discipline, _ in WEDSTRIJD_DISCIPLINES:
-                        regel.append(has_no_data)
-                    # for
-                else:
-                    for discipline, _ in WEDSTRIJD_DISCIPLINES:
-                        count = disc2count.get(discipline, 0)
-                        regel.append(count)
-                    # for
+                disc2count = lid2wedstrijd.get(lid_nr, dict())
+                for discipline, _ in WEDSTRIJD_DISCIPLINES:
+                    count = disc2count.get(discipline, 0)
+                    regel.append(count)
+                # for
 
                 writer.writerow(regel)
             # for
