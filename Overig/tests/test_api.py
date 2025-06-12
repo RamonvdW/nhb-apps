@@ -16,7 +16,7 @@ from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
 from Wedstrijden.definities import WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF
-from Wedstrijden.models import Wedstrijd, Sessie, WedstrijdInschrijving
+from Wedstrijden.models import Wedstrijd, WedstrijdSessie, WedstrijdInschrijving
 
 
 class TestOverigAPI(E2EHelpers, TestCase):

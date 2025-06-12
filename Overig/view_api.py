@@ -58,21 +58,29 @@ class ApiCsvLijstView(View):
 
             lid2ver_nr = dict()         # [lid_nr] = ver_nr
             lid2leeftijd = dict()       # [lid_nr] = leeftijd
+            lid2account = dict()        # [lid_nr] = 0/1
             lid2bogen = dict()          # [lid_nr] = [afkorting, ..]
             lid2comp18 = dict()         # [lid_nr] = n
             lid2comp25 = dict()         # [lid_nr] = n
-            lid2wedstrijd = dict()      # [lid_nr] =
+            lid2wedstrijd = dict()      # [lid_nr] = disc2count[discipline] = aantal
             alle_lid_nrs = list()
 
             # informatie over de leden ophalen
             for sporter in (Sporter
                             .objects
                             .select_related('bij_vereniging')
+                            .filter(is_actief_lid=True)
                             .exclude(bij_vereniging=None)
                             .order_by('lid_nr')):
+
                 alle_lid_nrs.append(sporter.lid_nr)
                 lid2ver_nr[sporter.lid_nr] = sporter.bij_vereniging.ver_nr
                 lid2leeftijd[sporter.lid_nr] = sporter.bereken_leeftijd()
+
+                if sporter.account:
+                    lid2account[sporter.lid_nr] = 1
+                else:
+                    lid2account[sporter.lid_nr] = 0
             # for
 
             # informatie over de gekozen bogen ophalen
@@ -138,10 +146,11 @@ class ApiCsvLijstView(View):
                 lid_nr, discipline = tup
                 disc2count = lid2wedstrijd.get(lid_nr, dict())
                 disc2count[discipline] = disc2count.get(discipline, 0) + 1
+                lid2wedstrijd[lid_nr] = disc2count
             # for
 
             # output de informatie
-            headers = ['VerNr', 'Leeftijd']
+            headers = ['VerNr', 'Leeftijd', 'MH-account']
 
             headers.extend([boog2beschrijving[afkorting]
                             for afkorting in afkortingen])
@@ -150,20 +159,22 @@ class ApiCsvLijstView(View):
             headers.append('25m1pijl competities')
 
             headers.extend([descr + ' wedstrijden'
-                            for disc, descr in WEDSTRIJD_DISCIPLINES])
+                            for _, descr in WEDSTRIJD_DISCIPLINES])
 
             writer.writerow(headers)
+            has_no_data = 'null'
 
             for lid_nr in alle_lid_nrs:
                 regel = [lid2ver_nr[lid_nr],
-                         lid2leeftijd[lid_nr]]
+                         lid2leeftijd[lid_nr],
+                         lid2account[lid_nr]]
 
                 bogen = lid2bogen.get(lid_nr, [])
                 for afkorting in afkortingen:
                     if afkorting in bogen:
-                        regel.append('1')
+                        regel.append(1)
                     else:
-                        regel.append('0')
+                        regel.append(0)
                 # for
 
                 comp18 = lid2comp18.get(lid_nr, 0)
@@ -172,11 +183,21 @@ class ApiCsvLijstView(View):
                 comp25 = lid2comp25.get(lid_nr, 0)
                 regel.append(str(comp25))
 
-                disc2count = lid2wedstrijd.get(lid_nr, dict())
-                for discipline, _ in WEDSTRIJD_DISCIPLINES:
-                    count = disc2count.get(discipline, 0)
-                    regel.append(str(count))
-                # for
+                disc2count = lid2wedstrijd.get(lid_nr, None)
+                if disc2count is None:
+                    print('no mathces for %s; account = %s' % (lid_nr, lid2account[lid_nr]))
+                    if lid2account[lid_nr] > 0:
+                        disc2count = dict()     # toon 0-en
+
+                if disc2count is None:          # let op: "is None" is nodig, anders ook hierin bij lege dict
+                    for discipline, _ in WEDSTRIJD_DISCIPLINES:
+                        regel.append(has_no_data)
+                    # for
+                else:
+                    for discipline, _ in WEDSTRIJD_DISCIPLINES:
+                        count = disc2count.get(discipline, 0)
+                        regel.append(count)
+                    # for
 
                 writer.writerow(regel)
             # for
