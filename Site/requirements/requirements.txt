@@ -12,7 +12,7 @@ certifi==2025.4.26
     # via requests
 charset-normalizer==3.4.2
     # via requests
-django==4.2.20
+django==4.2.23
     # via
     #   -c constraints.in
     #   -r requirements.in
@@ -23,7 +23,7 @@ google-api-core==2.25.0
     #   google-api-python-client
     #   google-geo-type
     #   google-maps-routing
-google-api-python-client==2.171.0
+google-api-python-client==2.172.0
     # via -r requirements.in
 google-auth==2.40.3
     # via
@@ -35,9 +35,9 @@ google-auth==2.40.3
     #   google-maps-routing
 google-auth-httplib2==0.2.0
     # via google-api-python-client
-google-geo-type==0.3.12
+google-geo-type==0.3.13
     # via google-maps-routing
-google-maps-routing==0.6.15
+google-maps-routing==0.6.16
     # via -r requirements.in
 googleapis-common-protos==1.70.0
     # via
@@ -45,11 +45,11 @@ googleapis-common-protos==1.70.0
     #   grpcio-status
 googlemaps==4.10.0
     # via -r requirements.in
-grpcio==1.72.1
+grpcio==1.73.0
     # via
     #   google-api-core
     #   grpcio-status
-grpcio-status==1.72.1
+grpcio-status==1.73.0
     # via google-api-core
 httplib2==0.22.0
     # via
@@ -96,7 +96,7 @@ pypdf==5.6.0
     # via -r requirements.in
 qrcode==8.2
     # via -r requirements.in
-requests==2.32.3
+requests==2.32.4
     # via
     #   google-api-core
     #   googlemaps
