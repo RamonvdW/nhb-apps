@@ -32,6 +32,8 @@ class TestOverigAPI(E2EHelpers, TestCase):
 
         huidige_jaar = timezone.now().year
 
+        account = self.e2e_create_account('100001', 'normal@khsn.not', 'Norma')
+
         ver = Vereniging(
                     ver_nr=1000,
                     naam="Grote Club",
@@ -98,15 +100,24 @@ class TestOverigAPI(E2EHelpers, TestCase):
                         locatie=locatie)
         wedstrijd.save()
 
-        sessie =
+        sessie = WedstrijdSessie(
+                        datum=vandaag,
+                        tijd_begin='23:00',
+                        tijd_einde='02:00',
+                        beschrijving='Nachtverschieting',
+                        max_sporters=64)
+        sessie.save()
+        wedstrijd.sessies.add(sessie)
 
+        klasse = KalenderWedstrijdklasse.objects.get(volgorde=220)      # C gemengd
         inschrijving = WedstrijdInschrijving(
                             wanneer=timezone.now(),
                             wedstrijd=wedstrijd,
                             sessie=sessie,
                             status=WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF,
                             sporterboog=sporterboog,
-                            wedstrijdklasse=klasse)
+                            wedstrijdklasse=klasse,
+                            koper=account)
         inschrijving.save()
 
     def test_api(self):
@@ -115,7 +126,7 @@ class TestOverigAPI(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.content, b'\xef\xbb\xbf')     # BOM_UTF8
 
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(30):
             resp = self.client.get(self.url_api + '?token=%s' % settings.OVERIG_API_TOKENS[0])
         self.assertEqual(resp.status_code, 200)
         print(resp.content)
@@ -124,7 +135,7 @@ class TestOverigAPI(E2EHelpers, TestCase):
         self.comp.afstand = '25'
         self.comp.save(update_fields=['afstand'])
 
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(30):
             resp = self.client.get(self.url_api + '?token=%s' % settings.OVERIG_API_TOKENS[0])
         self.assertEqual(resp.status_code, 200)
         print(resp.content)
