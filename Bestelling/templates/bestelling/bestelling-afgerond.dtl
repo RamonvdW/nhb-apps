@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2022-2024 Ramon van der Winkel.
+                Copyright (c) 2022-2025 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -85,6 +85,7 @@
                         if (xhr.responseText !== "") {
                             let rsp;
                             try {
+                                /** @param rsp.status: string **/
                                 rsp = JSON.parse(xhr.responseText);
                             } catch(e) {
                                 // waarschijnlijk geen goede JSON data
@@ -93,7 +94,7 @@
                             }
                             //console.log('rsp=', rsp);
                             if ("status" in rsp) {
-                                const status = rsp["status"];
+                                const status = rsp.status;
 
                                 // status kan zijn:
                                 // - nieuw: nog niet opgestart
@@ -153,8 +154,10 @@
 
                     // POST voorkomt caching
                     const xhr = new XMLHttpRequest();
-                    xhr.open("POST", "{{ url_status_check }}", true);        // true = async
-                    xhr.timeout = 5000;                                      // 5 sec
+                    xhr.open("POST",
+                             "{{ url_status_check }}",
+                             true);         // true = async
+                    xhr.timeout = 5000;     // 5 sec
                     xhr.onloadend = function() { status_ophalen_klaar(xhr); };
                     xhr.ontimeout = function() { status_ophalen_timeout(xhr); };
                     xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");

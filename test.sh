@@ -185,6 +185,19 @@ python3 "${PY_OPTS[@]}" -m coverage erase
 
 ABORTED=0
 
+# controleer dat de database niet kapot gemaakt is door de browser tests
+if [ $KEEP_DB -eq 1 ]
+then
+    echo "[INFO] Checking database consistency"
+    count=$(echo '\d' | python3 ./manage.py dbshell --database test | grep BasisTypen | wc -l)
+    if [ "$count" != "16" ]
+    then
+        echo "[WARNING] Detected inconsistent database (aantal BasisType tabellen: $count)"
+        echo "[WARNING] Forcing database cleaning"
+        KEEP_DB=0
+    fi
+fi
+
 if [ $KEEP_DB -ne 1 ]
 then
     echo "[INFO] Deleting test database"

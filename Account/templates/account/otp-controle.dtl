@@ -46,8 +46,7 @@
                                                 <input id="otp{{ digit }}"
                                                        type="text" autocomplete="off" inputmode="numeric"
                                                        {% if digit == 1 %}autofocus{% endif %}
-                                                       class="center" style="width:10px; margin:0 0 5px 0; border:0"
-                                                       onkeydown="return false">   <!-- block typing garbage -->
+                                                       class="center" style="width:10px; margin:0 0 5px 0; border:0">
                                             </div>
                                         </td>
                                     {% endfor %}

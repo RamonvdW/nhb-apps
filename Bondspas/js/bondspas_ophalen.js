@@ -5,7 +5,6 @@
  */
 
 /* jshint esversion: 6 */
-/* global console */
 "use strict";
 
 function ophalen_klaar(xhr) {
@@ -14,13 +13,12 @@ function ophalen_klaar(xhr) {
         // verzoek is klaar en we hebben een antwoord
         // responseText is leeg bij connection failure
         if (xhr.responseText !== "") {
-            let rsp;
             try {
-                rsp = JSON.parse(xhr.responseText);
-
+                /** @param rsp.bondspas_base64 **/
+                const rsp = JSON.parse(xhr.responseText);
                 const bondspas_data = rsp.bondspas_base64;
-                const el_img = document.getElementById('id_image');
 
+                const el_img = document.getElementById('id_image');
                 el_img.src = "data:image/jpeg;base64," + bondspas_data;
                 el_img.style.display = "inline-block";
 
@@ -35,9 +33,7 @@ function ophalen_klaar(xhr) {
             } catch(e) {
                 // waarschijnlijk geen goede JSON data
                 // een Http404() geeft een foutmelding pagina met status=200 (OK) en komt hier terecht
-                console.log('ophalen_klaar: no valid JSON data:', xhr.responseText);
-
-                rsp = null;
+                window.console.log('ophalen_klaar: no valid JSON data:', xhr.responseText);
             }
         }
     }
