@@ -72,8 +72,8 @@ class ApiCsvLijstView(View):
             now = timezone.localtime(timezone.now())
             for tup in (Sporter
                         .objects
-                        .exclude(bij_vereniging=None)
                         .filter(is_actief_lid=True)
+                        .exclude(is_overleden=True)
                         .select_related('bij_vereniging')
                         .order_by('lid_nr')
                         .values_list('lid_nr',
@@ -83,7 +83,8 @@ class ApiCsvLijstView(View):
                 lid_nr, ver_nr, geboortedatum, account = tup
 
                 alle_lid_nrs.append(lid_nr)
-                lid2ver_nr[lid_nr] = ver_nr
+                if ver_nr:
+                    lid2ver_nr[lid_nr] = ver_nr
 
                 # ga uit van de te bereiken leeftijd in dit jaar
                 leeftijd = now.year - geboortedatum.year
@@ -180,39 +181,76 @@ class ApiCsvLijstView(View):
 
             headers.extend([boog2beschrijving[afkorting]
                             for afkorting in afkortingen])
+            headers.append('Totaal bogen')
 
             headers.append('Indoor competities')
             headers.append('25m1pijl competities')
+            headers.append('Totaal competities')
 
             headers.extend([descr + ' wedstrijden'
                             for _, descr in WEDSTRIJD_DISCIPLINES])
+            headers.append('Totaal wedstrijden')
 
             writer.writerow(headers)
 
             for lid_nr in alle_lid_nrs:
-                regel = [lid2ver_nr[lid_nr],
+                ver_nr = lid2ver_nr.get(lid_nr, '')
+                regel = [ver_nr,
                          lid2leeftijd[lid_nr],
                          lid2account[lid_nr]]
 
-                bogen = lid2bogen.get(lid_nr, [])
+                totaal = 0
+                bogen = lid2bogen.get(lid_nr, None)
                 for afkorting in afkortingen:
-                    if afkorting in bogen:
-                        regel.append(1)
+                    if bogen:
+                        if afkorting in bogen:
+                            regel.append(1)
+                            totaal += 1
+                        else:
+                            regel.append(0)
                     else:
-                        regel.append(0)
+                        regel.append('')
                 # for
+                if bogen:
+                    regel.append(totaal)
+                else:
+                    regel.append('')
 
-                comp18 = lid2comp18.get(lid_nr, 0)
-                regel.append(str(comp18))
+                totaal = 0
+                comp18 = lid2comp18.get(lid_nr, None)
+                comp25 = lid2comp25.get(lid_nr, None)
+                if comp18 is None:
+                    regel.append('')
+                else:
+                    regel.append(comp18)
+                    totaal += comp18
+                if comp25 is None:
+                    regel.append('')
+                else:
+                    regel.append(comp25)
+                    totaal += comp25
+                if comp18 is None and comp25 is None:
+                    regel.append('')
+                else:
+                    regel.append(totaal)
 
-                comp25 = lid2comp25.get(lid_nr, 0)
-                regel.append(str(comp25))
-
-                disc2count = lid2wedstrijd.get(lid_nr, dict())
+                totaal = 0
+                disc2count = lid2wedstrijd.get(lid_nr, None)
                 for discipline, _ in WEDSTRIJD_DISCIPLINES:
-                    count = disc2count.get(discipline, 0)
-                    regel.append(count)
+                    if disc2count is None:
+                        regel.append('')
+                    else:
+                        count = disc2count.get(discipline, None)
+                        if count is None:
+                            regel.append('')
+                        else:
+                            regel.append(count)
+                            totaal += count
                 # for
+                if disc2count is None:
+                    regel.append('')
+                else:
+                    regel.append(totaal)
 
                 writer.writerow(regel)
             # for
