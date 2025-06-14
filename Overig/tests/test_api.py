@@ -170,8 +170,8 @@ class TestOverigAPI(E2EHelpers, TestCase):
         with self.assert_max_queries(33):
             resp = self.client.get(self.url_api + '?token=%s' % settings.OVERIG_API_TOKENS[0])
         self.assertEqual(resp.status_code, 200)
-        print(resp.content)
         self.assert200_is_bestand_csv(resp)
+        # print(resp.content)
 
         self.comp.afstand = '25'
         self.comp.save(update_fields=['afstand'])

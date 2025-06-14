@@ -50,6 +50,12 @@ class TestOverigActiviteit(E2EHelpers, TestCase):
         account.email_is_bevestigd = True
         account.save(update_fields=['email_is_bevestigd'])
 
+        # maak een account aan waarop inlog mislukt is
+        self.account_mislukt = self.e2e_create_account('100003', 'mislukt@test.not', 'Inblog Mislukt')
+        self.account_mislukt.last_login = timezone.now() - datetime.timedelta(days=7)
+        self.account_mislukt.laatste_inlog_poging = timezone.now() - datetime.timedelta(days=1)
+        self.account_mislukt.save(update_fields=['laatste_inlog_poging', 'last_login'])
+
         now = timezone.now()
         self.huidige_jaar = now.year
 
@@ -350,6 +356,11 @@ class TestOverigActiviteit(E2EHelpers, TestCase):
         self.account_normaal.save()
 
         self.e2e_login_and_pass_otp(self.account_normaal)
+
+        # niet toegestaan om deze pagina te gebruiken
+        resp = self.client.post(self.url_loskoppelen, {})
+        self.assert403(resp)
+
         self.e2e_logout()
 
         self.e2e_login_and_pass_otp(self.testdata.account_admin)
