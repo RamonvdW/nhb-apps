@@ -38,16 +38,17 @@
 //       </tr>
 //     </thead>
 
-function tabel_filter(zoekveld, tableId)
-{
-    'use strict';
-    const table = document.getElementById(tableId);
-    if (table === null) {
-        return;
-    }
+const filter_re = /[\u0300-\u036f]/g;         // precompiled regexp, for performance gain
 
-    const filter = /[\u0300-\u036f]/g;         // precompiled regexp, for performance gain
-    const filter_tekst = zoekveld.value.normalize("NFD").replace(filter, "").toLowerCase();
+function tabel_filter(zoekveld, tableId) {
+    const table = document.getElementById(tableId);
+    const filter_tekst = zoekveld.value.normalize("NFD").replace(filter_re, "").toLowerCase();
+    if (table !== null) {
+        tabel_filter_inner(table, filter_tekst);
+    }
+}
+
+function tabel_filter_inner(table, filter_tekst) {
 
     // doorzoek de header kolommen op data-filter=on
     const filter_kolommen = [];
@@ -73,61 +74,41 @@ function tabel_filter(zoekveld, tableId)
     const row_deferred_show = [];
 
     const body = table.tBodies[0];
-    if (body === undefined)
-        return;
-
-    for (let i=0; i < body.rows.length; i++)     // stops when row=null
-    {
-        const row = body.rows[i];
-        const filter_cmd = row.dataset.tablefilter;
-        if (filter_cmd === "stop") {
-            break;      // from the for
-        }
-
-        // besluit om deze regel te tonen, of niet
-        let show = false;
-
-        if (filter_tekst === "") {
-            // performance optimization: converteren van elke tabel string
-            // stellen we uit tot de gebruiker een eerste letter invoert
-            show = true;
-        } else {
-            // kijk of de zoekterm in een van de gekozen kolommen voorkomt
-            filter_kolommen.forEach(kolom_nr => {
-                const cell = row.cells[kolom_nr];
-                if (cell === undefined) {
-                    window.console.log('missing cell in kolom_nr=', kolom_nr, "in row", i, "of row", row);
-                }
-                let clean_text = cell.dataset.clean_text;    // cached resultaat ophalen
-                //window.console.log("clean_text:", clean_text);
-                if (typeof clean_text === "undefined") {
-                    // eerste keer: voer de vervorming uit en cache het resultaat op
-                    clean_text = cell.innerText.normalize("NFD").replace(filter, "").toLowerCase();
-                    cell.dataset.clean_text = clean_text;
-                }
-                if (clean_text.indexOf(filter_tekst) != -1) {
-                    show = true;
-                }
-            });
-        }
-
-        // onderzoek of een table row getoond of verstopt moet worden
-        // sla het resultaat op, zodat we niet in een read-write-read-write cyclus komen
-        // waarbij de browser steeds het hele scherm update voordat de read doorgang vindt
-        if (show) {
-            if (row.style.display == "none") {
-                row_deferred_show.push(i);      // voeg toe aan lijst
+    if (body !== undefined) {
+        for (let row_nr = 0; row_nr < body.rows.length; row_nr++)     // stops when row=null
+        {
+            const row = body.rows[row_nr];
+            const filter_cmd = row.dataset.tablefilter;
+            if (filter_cmd === "stop") {
+                break;      // from the for
             }
-        }
-        else {
-            if (row.style.display != "none") {
-                row_deferred_hide.push(i);      // voeg toe aan lijst
+
+            // besluit om deze regel te tonen, of niet
+            let show = false;
+
+            if (filter_tekst === "") {
+                // performance optimization: converteren van elke tabel string
+                // uitstellen tot de gebruiker een eerste letter invoert
+                show = true;
+            } else {
+                // kijk of de zoekterm in een van de gekozen kolommen voorkomt
+                show = bepaal_row_show(filter_tekst, row_nr, row, filter_kolommen);
+            }
+
+            // onderzoek of een table row getoond of verstopt moet worden
+            // sla het resultaat op, zodat we niet in een read-write-read-write cyclus komen
+            // waarbij de browser steeds het hele scherm update voordat de read doorgang vindt
+            if (show) {
+                if (row.style.display === "none") {
+                    row_deferred_show.push(row_nr);      // voeg toe aan lijst
+                }
+            } else {
+                if (row.style.display !== "none") {
+                    row_deferred_hide.push(row_nr);      // voeg toe aan lijst
+                }
             }
         }
     }
-
-    //window.console.log("row_deferred_hide:", row_deferred_hide)
-    //window.console.log("row_deferred_show:", row_deferred_show)
 
     // voor de deferred updates uit
     row_deferred_hide.forEach(row_nr => {
@@ -136,6 +117,30 @@ function tabel_filter(zoekveld, tableId)
     row_deferred_show.forEach(row_nr => {
             body.rows[row_nr].style.display = "table-row";
         });
+}
+
+
+function bepaal_row_show(filter_tekst, row_nr, row, kolommen) {
+    let show = false;
+
+    kolommen.forEach(kolom_nr => {
+        const cell = row.cells[kolom_nr];
+        if (cell === undefined) {
+            window.console.log('missing cell in kolom_nr=', kolom_nr, "in row", row_nr, "of row", row);
+        }
+        let clean_text = cell.dataset.clean_text;    // cached resultaat ophalen
+        //window.console.log("clean_text:", clean_text);
+        if (typeof clean_text === "undefined") {
+            // eerste keer: voer de omvorming uit en cache het resultaat op
+            clean_text = cell.innerText.normalize("NFD").replace(filter_re, "").toLowerCase();
+            cell.dataset.clean_text = clean_text;
+        }
+        if (clean_text.indexOf(filter_tekst) >= 0) {
+            show = true;
+        }
+    });
+
+    return show;
 }
 
 
@@ -150,7 +155,9 @@ window.addEventListener("load", () => {
     Array.from(tables).forEach(table => {
         if (table.id !== "") {
             const inputs = table.getElementsByTagName("input");
-            if (inputs.length >= 1) tabel_filter(inputs[0], table.id);
+            if (inputs.length >= 1) {
+                tabel_filter(inputs[0], table.id);
+            }
         }
     });
 });

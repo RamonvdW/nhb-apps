@@ -24,6 +24,7 @@ from selenium.webdriver import Chrome, ChromeOptions
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException, ElementNotInteractableException
 from selenium.webdriver.remote.webelement import WebElement
+from bs4 import BeautifulSoup
 import datetime
 import pyotp
 import time
@@ -160,7 +161,7 @@ class BrowserTestCase(TestCase):
             # input = tag name
             # @attribute = select
             #
-            el_input = el_table.find_element(By.XPATH, '//input[@class="table-filter"]')
+            el_input = el_table.find_element(By.XPATH, 'thead/tr/td/input[@class="table-filter"]')
         return el_input
 
     def find_kaartje_met_titel(self, title):
@@ -356,7 +357,9 @@ class BrowserTestCase(TestCase):
         return self._driver.get_cookie(cookie_name)['value']
 
     def get_page_html(self):
-        return self._driver.page_source
+        content = self._driver.page_source
+        soup = BeautifulSoup(content, features="html.parser")
+        return soup.prettify()
 
 
 # start een browser instantie
