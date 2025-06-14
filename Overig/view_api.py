@@ -83,8 +83,7 @@ class ApiCsvLijstView(View):
                 lid_nr, ver_nr, geboortedatum, account = tup
 
                 alle_lid_nrs.append(lid_nr)
-                if ver_nr:
-                    lid2ver_nr[lid_nr] = ver_nr
+                lid2ver_nr[lid_nr] = ver_nr
 
                 # ga uit van de te bereiken leeftijd in dit jaar
                 leeftijd = now.year - geboortedatum.year

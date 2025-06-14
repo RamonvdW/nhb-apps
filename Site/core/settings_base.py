@@ -518,6 +518,7 @@ OPLEIDING_CODES = (
     ('081', '', 'Mentor van cursisten Trainer A', ()),
     ('082', '', 'Leercoach', ()),
     ('083', '', 'Beoordelaar (portfolio/pvb)', ()),
+    ('084', 'ON5', 'Opleider niveau 5 (docenten)', ()),
     ('084a', '', '(Bij-)scholing opl. opleiders-expert ASK', ()),
 
     ('085', 'TCO', 'Technical Control Officer (IFAA/DFBV)', ()),        # noqa

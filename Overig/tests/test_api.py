@@ -11,6 +11,7 @@ from BasisTypen.models import BoogType, KalenderWedstrijdklasse
 from Competitie.models import Competitie, Regiocompetitie, RegiocompetitieSporterBoog, CompetitieIndivKlasse
 from Functie.tests.helpers import maak_functie
 from Geo.models import Regio
+from HistComp.models import HistCompSeizoen, HistCompRegioIndiv
 from Locatie.models import WedstrijdLocatie
 from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -45,13 +46,20 @@ class TestOverigAPI(E2EHelpers, TestCase):
                     voornaam='Norma',
                     achternaam='de Sporter',
                     unaccented_naam='Norma de Sporter',  # hier wordt op gezocht
-                    geboorte_datum='1980-01-08',
+                    geboorte_datum='1980-01-01',
                     sinds_datum='2008-01-08',
                     lid_tot_einde_jaar=huidige_jaar,
                     bij_vereniging=ver)
         sporter.save()
 
         boog_c = BoogType.objects.get(afkorting='C')
+        boog_r = BoogType.objects.get(afkorting='R')
+
+        sporterboog = SporterBoog(
+                        sporter=sporter,
+                        boogtype=boog_r,
+                        voor_wedstrijd=False)
+        sporterboog.save()
 
         sporterboog = SporterBoog(
                         sporter=sporter,
@@ -120,13 +128,46 @@ class TestOverigAPI(E2EHelpers, TestCase):
                             koper=account)
         inschrijving.save()
 
+        hist_seizoen = HistCompSeizoen(
+                            seizoen='this/that',
+                            comp_type='18')
+        hist_seizoen.save()
+        self.hist_seizoen = hist_seizoen
+
+        hist_indiv = HistCompRegioIndiv(
+                            seizoen=hist_seizoen,
+                            indiv_klasse='',
+                            rank=0,
+                            sporter_lid_nr=sporter.lid_nr,
+                            sporter_naam='',
+                            boogtype='',
+                            vereniging_nr=0,
+                            vereniging_naam='',
+                            vereniging_plaats='',
+                            regio_nr=0,
+                            totaal=0,
+                            gemiddelde=0)
+        hist_indiv.save()
+
+        sporter = Sporter(
+                    lid_nr=100002,
+                    voornaam='Andere',
+                    achternaam='Sporter',
+                    unaccented_naam='Andere Sporter',
+                    geboorte_datum='1980-12-31',         # na de huidige datum (behalve op 31 dec)
+                    sinds_datum='2008-01-08',
+                    lid_tot_einde_jaar=huidige_jaar,
+                    account=account,
+                    bij_vereniging=ver)
+        sporter.save()
+
     def test_api(self):
         # zonder token
         resp = self.client.get(self.url_api)
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.content, b'\xef\xbb\xbf')     # BOM_UTF8
 
-        with self.assert_max_queries(30):
+        with self.assert_max_queries(33):
             resp = self.client.get(self.url_api + '?token=%s' % settings.OVERIG_API_TOKENS[0])
         self.assertEqual(resp.status_code, 200)
         print(resp.content)
@@ -135,11 +176,14 @@ class TestOverigAPI(E2EHelpers, TestCase):
         self.comp.afstand = '25'
         self.comp.save(update_fields=['afstand'])
 
-        with self.assert_max_queries(30):
+        self.hist_seizoen.comp_type = '25'
+        self.hist_seizoen.save(update_fields=['comp_type'])
+
+        with self.assert_max_queries(33):
             resp = self.client.get(self.url_api + '?token=%s' % settings.OVERIG_API_TOKENS[0])
         self.assertEqual(resp.status_code, 200)
-        print(resp.content)
         self.assert200_is_bestand_csv(resp)
+        # print(resp.content)
 
 
 # end of file
