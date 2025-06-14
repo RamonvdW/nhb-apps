@@ -101,16 +101,18 @@ class ApiCsvLijstView(View):
 
             for afkorting in boog2beschrijving.keys():
                 # informatie over de gekozen bogen ophalen
-                for lid_nr in (SporterBoog
-                               .objects
-                               .filter(boogtype__afkorting=afkorting)
-                               .select_related('sporter')
-                               .values_list('sporter__lid_nr', flat=True)):
+                for tup in (SporterBoog
+                            .objects
+                            .filter(boogtype__afkorting=afkorting)
+                            .select_related('sporter')
+                            .values_list('sporter__lid_nr', 'voor_wedstrijd')):
+                    lid_nr, voor_wedstrijd = tup
                     try:
                         bogen = lid2bogen[lid_nr]
                     except KeyError:
                         lid2bogen[lid_nr] = bogen = list()
-                    bogen.append(afkorting)
+                    if voor_wedstrijd:
+                        bogen.append(afkorting)
                 # for
             # for
 
