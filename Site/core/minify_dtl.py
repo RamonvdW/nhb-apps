@@ -96,13 +96,13 @@ def minify_js(script):
             deel = re.sub(r' \(', '(', deel)
             deel = re.sub(r'\) ', ')', deel)
             deel = re.sub(r'\{ ', '{', deel)
-            deel = re.sub(r' \}', '}', deel)
+            deel = re.sub(r' }', '}', deel)
 
             # remove unnecessary newlines
             deel = re.sub(r'\n\{', '{', deel)
             deel = re.sub(r'\{\n', '{', deel)
-            deel = re.sub(r'\n\}', '}', deel)
-            deel = re.sub(r'\}\n', '}', deel)  # breekt javascript als er een ; ontbreekt!
+            deel = re.sub(r'\n}', '}', deel)
+            deel = re.sub(r'}\n', '}', deel)  # breekt javascript als er een ; ontbreekt!
             deel = re.sub(r';\n', ';', deel)
             deel = re.sub(r',\n', ',', deel)
             deel = re.sub(r'\)\ncontinue', ')continue', deel)

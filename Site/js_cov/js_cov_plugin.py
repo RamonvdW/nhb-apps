@@ -25,11 +25,16 @@ class JsCoveragePlugin(coverage.plugin.CoveragePlugin, coverage.plugin.FileTrace
         self._load_js_cov_data()
 
     def _load_js_cov_data(self):
-        with open('/tmp/browser_js_cov.json', 'r') as f:
-            data = f.read()
-        self.js_cov_data = json.loads(data)
-        # for k, v in self.js_cov_data.items():
-        #     print("{js_cov} loaded: %s = %s" % (repr(k), repr(v)))
+        try:
+            with open('/tmp/browser_js_cov.json', 'r') as f:
+                data = f.read()
+        except IOError:
+            # not found
+            pass
+        else:
+            self.js_cov_data = json.loads(data)
+            # for k, v in self.js_cov_data.items():
+            #     print("{js_cov} loaded: %s = %s" % (repr(k), repr(v)))
 
     def file_tracer(self, filename):
         # the trick is to find part of the python program that handles all JS files

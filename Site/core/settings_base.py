@@ -62,7 +62,7 @@ APPS_DIR = os.path.dirname(BASE_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2025-06-12'
+SITE_VERSIE = '2025-06-14'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -510,6 +510,7 @@ OPLEIDING_CODES = (
     ('081', '', 'Mentor van cursisten Trainer A', ()),
     ('082', '', 'Leercoach', ()),
     ('083', '', 'Beoordelaar (portfolio/pvb)', ()),
+    ('084', 'ON5', 'Opleider niveau 5 (docenten)', ()),
     ('084a', '', '(Bij-)scholing opl. opleiders-expert ASK', ()),
 
     ('085', 'TCO', 'Technical Control Officer (IFAA/DFBV)', ()),        # noqa
