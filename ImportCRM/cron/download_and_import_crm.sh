@@ -23,7 +23,7 @@ fi
 # ga naar de directory waar het script staat
 SCRIPT_DIR=$(realpath "$0")             # volg links naar het echte script
 SCRIPT_DIR=$(dirname "$SCRIPT_DIR")     # directory van het script
-cd "$SCRIPT_DIR"
+cd "$SCRIPT_DIR" || exit 2
 
 # everything sent to stdout/stderr will be picked up by crontab and sent in an email
 # avoid this by writing to a logfile
@@ -52,20 +52,20 @@ DOWNLOAD=0
 echo "[INFO] retrieving headers" >> "$LOG"
 
 # kijk of een download nodig is
-PREV_LAST=$(grep "Last-Modified:" "$LOG" | tail -1)     # empty at start of new day
+PREV_LAST=$(grep --binary-files=text "Last-Modified:" "$LOG" | tail -1)     # empty at start of new day
 
 # download the headers only
 # remove DOS newlines
 curl -sS -H "secret: $SECRET" -I "$URL" 2>&1 | sed 's#\r##g' > "$LOG"
 
 # controleer dat bovenstaande HEAD goed werkte
-NEW_HTTP=$(grep "HTTP/1.1 " "$LOG" | tail -1 | tr '\r' '\n')
+NEW_HTTP=$(grep --binary-files=text "HTTP/1.1 " "$LOG" | tail -1 | tr '\r' '\n')
 if [ ! "$NEW_HTTP" == "HTTP/1.1 200 OK" ]
 then
     echo "[ERROR] Failed to download: $NEW_HTTP" >> "$LOG"
 else
     # haal de nieuwe Last-Modified header op
-    NEW_LAST=$(grep "Last-Modified:" "$LOG" | tail -1)
+    NEW_LAST=$(grep --binary-files=text "Last-Modified:" "$LOG" | tail -1)
 
     if [ "$PREV_LAST" != "$NEW_LAST" ]
     then
