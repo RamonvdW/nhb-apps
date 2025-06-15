@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2024 Ramon van der Winkel.
+                Copyright (c) 2020-2025 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -9,17 +9,6 @@
 {% block title %}Voorkeuren{% endblock %}
 
 {% block pagina %}
-
-    <script>
-        function gewijzigd() {
-            // het formulier is aangepast en moet opgeslagen worden
-
-            // enable de 'opslaan' knop
-            const el = document.getElementById("submit_knop");
-            el.disabled = false;
-            el.parentElement.style.display = "block";
-        }
-    </script>
 
     <!-- banner -->
     <div class="row center">
@@ -336,7 +325,7 @@
                     </table>
 
                     <div class="fixed-action-btn" style="display: none">
-                        <button class="btn-sv-rood" id="submit_knop" type="submit" disabled>
+                        <button class="btn-sv-rood" id="opslaan_knop" type="submit" disabled>
                             <i class="notranslate material-icons-round left">check</i>Voorkeuren opslaan</button>
                     </div>
 
@@ -363,6 +352,8 @@
         </div>
 
     {% endif %}
+
+    <script src="{% static 'sporter_js/voorkeuren.js' %}"></script>
 
     {% include 'feedback/sidebar.dtl' with op_pagina="sporter-voorkeuren" %}
 

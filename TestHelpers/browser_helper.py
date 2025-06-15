@@ -63,17 +63,17 @@ def js_cov_import():
 class BrowserTestCase(TestCase):
 
     # deze members worden centraal gevuld in Plein/tests/test_js_in_browser
-    sporter = None              # sporter 100001
-    sporterboog = None          # sporterboog 100001, recurve
-    account_bb = None           # account 100001 (gekoppeld aan sporter)
-    account = None              # account 100002
-    ver = None                  # vereniging van de sporter
-    functie_hwl = None          # account is hwl
-    webwinkel_product = None    # product in de webwinkel
-    match = None                # competitie match
-    comp = None                 # competitie
-    regio_comp = None           # regiocompetitie voor regio van sporter
-    regio_deelnemer = None      # RegiocompetitieSporterBoog
+    sporter: Sporter = None                             # sporter 100001
+    sporterboog: SporterBoog = None                     # sporterboog 100001, recurve
+    account_bb: Account = None                          # account 100001 (gekoppeld aan sporter)
+    account: Account = None                             # account 100002
+    ver: Vereniging = None                              # vereniging van de sporter
+    functie_hwl: Functie = None                         # account is hwl
+    webwinkel_product: WebwinkelProduct = None          # product in de webwinkel
+    match: CompetitieMatch = None
+    comp: Competitie = None
+    regio_comp: Regiocompetitie = None                  # regiocompetitie voor regio van sporter
+    regio_deelnemer: RegiocompetitieSporterBoog = None  # RegiocompetitieSporterBoog
 
     # urls voor do_navigate_to()
     url_otp = '/account/otp-controle/'
@@ -114,12 +114,12 @@ class BrowserTestCase(TestCase):
             time.sleep(self.pause_after_console_log)
         self.assertEqual(regels, [])
 
-    @staticmethod
-    def get_following_sibling(element):
+    def get_following_sibling(self, element):
+        self.assertIsNotNone(element)
         return element.find_element(By.XPATH, "following-sibling::*[1]")
 
-    @staticmethod
-    def get_parent(element):
+    def get_parent(self, element):
+        self.assertIsNotNone(element)
         return element.find_element(By.XPATH, "./..")
 
     def find_element_by_id(self, id_str):
@@ -179,6 +179,33 @@ class BrowserTestCase(TestCase):
                 return a_href
         # for
         return None
+
+    def find_active_button_on_open_modal_dialog(self):
+        # wacht tot de animatie klaar is
+        time.sleep(0.15)
+
+        el = None
+        try:
+            dialog = self._driver.find_element(By.XPATH, '//div[@class="modal open"]')
+        except NoSuchElementException:
+            print('[ERROR] Could not find open modal dialog')
+        else:
+            buttons = list()
+            for button in dialog.find_elements(By.TAG_NAME, 'button'):
+                # skip de knop die alleen de dialog sluit
+                if "modal-close" not in button.get_attribute('class'):
+                    buttons.append(button)
+            # for
+            if len(buttons) != 1:
+                msg = '[ERROR] Te veel knoppen op de modal dialog: %s; verwacht: 1' % len(buttons)
+                for button in buttons:
+                    msg += '\n     button.text = %s' % repr(button.text)
+                # for
+                self.fail(msg)
+            else:
+                el = buttons[0]
+
+        return el
 
     @staticmethod
     def click_if_possible(el: WebElement):
@@ -416,19 +443,17 @@ def database_vullen(self):
     self.rayon, _ = Rayon.objects.get_or_create(rayon_nr=5, naam="Rayon 5")
     self.regio, _ = Regio.objects.get_or_create(regio_nr=117, rayon_nr=self.rayon.rayon_nr, rayon=self.rayon)
 
-    self.cluster_117a = Cluster(
-                            regio=self.regio,
-                            letter='A',
-                            naam='Cluster A',
-                            gebruik='18')
-    self.cluster_117a.save()
+    self.cluster_117a, _ = Cluster.objects.get_or_create(
+                                regio=self.regio,
+                                letter='A',
+                                naam='Cluster A',
+                                gebruik='18')
 
-    self.cluster_117b = Cluster(
-                            regio=self.regio,
-                            letter='B',
-                            naam='Cluster B',
-                            gebruik='18')
-    self.cluster_117b.save()
+    self.cluster_117b, _ = Cluster.objects.get_or_create(
+                                regio=self.regio,
+                                letter='B',
+                                naam='Cluster B',
+                                gebruik='18')
 
     self.ver, _ = Vereniging.objects.get_or_create(
                                 naam="Browser Club",
@@ -525,7 +550,8 @@ def database_vullen(self):
                         afstand=18,
                         begin_jaar=volgende_maand.year - 1)
     self.comp.save()
-    self.comp.refresh_from_db()     # datum strings omgezet naar datetime object
+    self.comp.boogtypen.add(self.boog_r)        # noodzakelijk om in te kunnen schrijven
+    self.comp.refresh_from_db()                 # datum strings omgezet naar datetime object
 
     self.klasse_indiv_r = CompetitieIndivKlasse(
                                 competitie=self.comp,

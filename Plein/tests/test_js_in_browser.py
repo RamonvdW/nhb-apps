@@ -180,6 +180,9 @@ class TestBrowser(LiveServerTestCase):
     def focus_Plein(self):
         self._run_focussed_tests()
 
+    def focus_Sporter(self):
+        self._run_focussed_tests()
+
     def focus_Webwinkel(self):
         self._run_focussed_tests()
 

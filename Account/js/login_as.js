@@ -7,10 +7,10 @@
 /* jshint esversion: 6 */
 "use strict";
 
+const dataset = document.getElementById("js_data").dataset;
+
 function do_selecteer(id)
 {
-    const dataset = document.getElementById("js_data").dataset;
-
     // voer een form POST uit om toe te voegen
     const form = document.createElement('form');
     form.setAttribute('method', 'post');
