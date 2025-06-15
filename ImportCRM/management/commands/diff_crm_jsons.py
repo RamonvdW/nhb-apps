@@ -98,6 +98,23 @@ class Command(BaseCommand):
         data['fname'] = fname
         return data
 
+    def _diff_club_lists(self, sub1, sub2):
+        # sub1, sub2 zijn lists of dictionaries
+        if sub1 is None:
+            sub1 = list()
+        if sub2 is None:
+            sub2 = list()
+        for sub in sub1:
+            if sub not in sub2:
+                self._add_reden('            -%s' % repr(sub))
+                self.club_changes += 1
+        # for
+        for sub in sub2:
+            if sub not in sub1:
+                self._add_reden('            +%s' % repr(sub))
+                self.club_changes += 1
+        # for
+
     def _diff_club(self, ver_nr, club1, club2):
         first = True
         keys = set(list(club1.keys()) + list(club2.keys()))
@@ -121,9 +138,13 @@ class Command(BaseCommand):
                     if first:
                         self._add_reden('    club %s' % ver_nr)
                         first = False
-                    self._add_reden('        -%s: %s' % (key, val1))
-                    self._add_reden('        +%s: %s' % (key, val2))
-                    self.club_changes += 1
+                    if key in ('member_admins', 'secretaris'):
+                        self._add_reden('        %s:' % key)
+                        self._diff_club_lists(val1, val2)
+                    else:
+                        self._add_reden('        -%s: %s' % (key, val1))
+                        self._add_reden('        +%s: %s' % (key, val2))
+                        self.club_changes += 1
         # for
 
     def _diff_clubs(self, clubs1, clubs2):
@@ -153,6 +174,23 @@ class Command(BaseCommand):
             self.club_changes += 1
         # for
 
+    def _diff_member_lists(self, sub1, sub2):
+        # sub1, sub2 zijn lists of dictionaries
+        if sub1 is None:
+            sub1 = list()
+        if sub2 is None:
+            sub2 = list()
+        for sub in sub1:
+            if sub not in sub2:
+                self._add_reden('            -%s' % repr(sub))
+                self.member_changes += 1
+        # for
+        for sub in sub2:
+            if sub not in sub1:
+                self._add_reden('            +%s' % repr(sub))
+                self.member_changes += 1
+        # for
+
     def _diff_member(self, lid_nr, member1, member2):
         first = True
         keys = set(list(member1.keys()) + list(member2.keys()))
@@ -163,11 +201,15 @@ class Command(BaseCommand):
                 if first:
                     self._add_reden('    lid %s' % lid_nr)
                     first = False
-                val1 = str(val1).replace('\n', '; ')
-                val2 = str(val2).replace('\n', '; ')
-                self._add_reden('        -%s: %s' % (key, val1))
-                self._add_reden('        +%s: %s' % (key, val2))
-                self.member_changes += 1
+                if key in ('educations', 'skill_levels'):
+                    self._add_reden('        %s:' % key)
+                    self._diff_member_lists(val1, val2)
+                else:
+                    val1 = str(val1).replace('\n', '; ')
+                    val2 = str(val2).replace('\n', '; ')
+                    self._add_reden('        -%s: %s' % (key, val1))
+                    self._add_reden('        +%s: %s' % (key, val2))
+                    self.member_changes += 1
         # for
 
     def _diff_members(self, members1, members2):
