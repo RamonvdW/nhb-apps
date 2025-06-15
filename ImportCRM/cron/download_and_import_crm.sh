@@ -55,7 +55,8 @@ echo "[INFO] retrieving headers" >> "$LOG"
 PREV_LAST=$(grep "Last-Modified:" "$LOG" | tail -1)     # empty at start of new day
 
 # download the headers only
-curl -sS -H "secret: $SECRET" -I "$URL" &>> "$LOG"
+# remove DOS newlines
+curl -sS -H "secret: $SECRET" -I "$URL" 2>&1 | sed 's#\r##g' > "$LOG"
 
 # controleer dat bovenstaande HEAD goed werkte
 NEW_HTTP=$(grep "HTTP/1.1 " "$LOG" | tail -1 | tr '\r' '\n')
