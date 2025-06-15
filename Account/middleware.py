@@ -68,10 +68,11 @@ class HerhaalLoginOTP:
                     # gebruiker is een beheerder
                     herhaal_na = account.otp_controle_gelukt_op + datetime.timedelta(days=settings.HERHAAL_INTERVAL_OTP)
                     if now > herhaal_na:
-                        my_logger.info('Account %s forceer nieuwe OTP controle' % repr(account.username))
                         # we zetten een sessie-variabele die automatisch gebruikt wordt
                         # let op: dit is een database wijziging die in een GET handler kan optreden
-                        otp_zet_controle_niet_gelukt(request)
+                        changed = otp_zet_controle_niet_gelukt(request)
+                        if changed:
+                            my_logger.info('Account %s forceer nieuwe OTP controle' % repr(account.username))
 
             if account.last_login and not skip_checks:
                 herhaal_na = account.last_login + datetime.timedelta(days=settings.HERHAAL_INTERVAL_LOGIN)

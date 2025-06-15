@@ -178,17 +178,30 @@ python3 "${PY_OPTS[@]}" -m coverage erase
 
 ABORTED=0
 
+# controleer dat de database niet kapot gemaakt is door de browser tests
+if [ $KEEP_DB -eq 1 ]
+then
+    echo "[INFO] Checking database consistency"
+    count=$(echo '\d' | python3 ./manage.py dbshell --database test | grep -c BasisTypen)
+    if [ "$count" != "16" ]
+    then
+        echo "[WARNING] Detected inconsistent database (aantal BasisType tabellen: $count)"
+        echo "[WARNING] Forcing database cleaning"
+        KEEP_DB=0
+    fi
+fi
+
 if [ $KEEP_DB -ne 1 ]
 then
     echo "[INFO] Deleting test database"
     old_pwd="$PWD"
-    cd /tmp
+    cd "/tmp" || exit 2
     sudo -u postgres dropdb --if-exists $DATABASE || exit 1
 
     echo "[INFO] Creating clean database"
     sudo -u postgres createdb -E UTF8 $DATABASE || exit 1
     sudo -u postgres psql -d $DATABASE -q -c 'GRANT CREATE ON SCHEMA public TO django' || exit 1
-    cd "$old_pwd"
+    cd "$old_pwd" || exit 2
 
     echo "[INFO] Running migrations and performing run with nodebug"
     # ..and add coverage with no-debug
@@ -361,17 +374,17 @@ then
 
     if [ -z "$FOCUS" ] || [ $FORCE_FULL_COV -ne 0 ]
     then
-        python3 -m coverage report $COVRC --skip-covered --fail-under=$COV_AT_LEAST $OMIT 2>&1 | tee -a "$LOG"
-        if [ ${PIPESTATUS[0]} -gt 0 ] && [ ${#FOCUS_ARGS[@]} -eq 0 ]
+        python3 -m coverage report $COVRC --skip-covered --fail-under=$COV_AT_LEAST "$OMIT" 2>&1 | tee -a "$LOG"
+        if [[ ${PIPESTATUS[0]} -gt 0 ]] && [[ ${#FOCUS_ARGS[@]} -eq 0 ]]
         then
             COVERAGE_RED=1
         fi
 
-        python3 -m coverage html $COVRC -d "$REPORT_DIR" --skip-covered $OMIT &>>"$LOG"
+        python3 -m coverage html $COVRC -d "$REPORT_DIR" --skip-covered "$OMIT" &>>"$LOG"
     else
         [ -n "$COV_INCLUDE" ] && COV_INCLUDE="--include=$COV_INCLUDE"
-        python3 -m coverage report $COVRC $COV_INCLUDE $OMIT
-        python3 -m coverage html $COVRC -d "$REPORT_DIR" --skip-covered $COV_INCLUDE $OMIT &>>"$LOG"
+        python3 -m coverage report $COVRC "$COV_INCLUDE" "$OMIT"
+        python3 -m coverage html $COVRC -d "$REPORT_DIR" --skip-covered "$COV_INCLUDE" "$OMIT" &>>"$LOG"
     fi
 
     rm "$COVERAGE_FILE"

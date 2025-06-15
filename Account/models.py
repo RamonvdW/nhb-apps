@@ -36,6 +36,7 @@ class Account(AbstractUser):
 
     vraag_nieuw_wachtwoord = models.BooleanField(default=False)
 
+    # wanneer is authenticatie mislukt?
     laatste_inlog_poging = models.DateTimeField(blank=True, null=True)
 
     # verkeerd wachtwoord opgegeven via login of wijzig-wachtwoord
