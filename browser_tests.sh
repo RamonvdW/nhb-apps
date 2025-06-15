@@ -84,13 +84,13 @@ if [ $KEEP_DB -ne 1 ]
 then
     echo "[INFO] Deleting test database"
     old_pwd="$PWD"
-    cd "/tmp"
+    cd "/tmp" || exit 2
     sudo -u postgres dropdb --if-exists $DATABASE || exit 1
 
     echo "[INFO] Creating clean database"
     sudo -u postgres createdb -E UTF8 $DATABASE || exit 1
     sudo -u postgres psql -d $DATABASE -q -c 'GRANT CREATE ON SCHEMA public TO django' || exit 1
-    cd "$old_pwd"
+    cd "$old_pwd" || exit 2
 
     echo "[INFO] Running migrations"
     # cannot run migrations stand-alone because it will not use the test database
@@ -158,7 +158,7 @@ wait "$PID_TAIL" 2>/dev/null
 
 # TODO: consider deleting the database, because LiveServerTestCase/TransactionTestCase has flushed all tables
 
-if [ $MAKE_REPORT -eq 1 -a $ABORTED -eq 0 ]
+if [ $MAKE_REPORT -eq 1 ] && [ $ABORTED -eq 0 ]
 then
     echo "[INFO] Generating reports" | tee -a "$LOG"
 
