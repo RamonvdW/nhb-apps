@@ -23,10 +23,12 @@ class TestBrowser(LiveServerTestCase):
         worden alle tests in 1x gedraaid. Dit scheelt een hoop tijd.
     """
 
-    show_browser = False            # set to True for visibility during debugging
-    pause_after_each_test = 2       # seconden wachten na elke test
-    pause_after_console_log = 30    # seconden wachten als we een console error zien
-    pause_after_all_tests = 0       # seconden wachten aan het einde van alle tests
+    show_browser = False                # set to True for visibility during debugging
+    pause_after_each_test = False       # is set to True for focussed tests
+
+    pause_after_test_seconds = 2        # seconden wachten na elke test
+    pause_after_console_log = 30        # seconden wachten als we een console error zien
+    pause_after_all_tests_seconds = 0   # seconden wachten aan het einde van alle tests
 
     def setUp(self):
         self._test_count = 0
@@ -96,7 +98,8 @@ class TestBrowser(LiveServerTestCase):
                                 test_func()
                                 inst.fetch_js_cov()
                                 if self.show_browser and self.pause_after_each_test:
-                                    time.sleep(self.pause_after_each_test)
+                                    print('sleeping %s' % self.pause_after_test_seconds)
+                                    time.sleep(self.pause_after_test_seconds)
                                 print('ok')
                     # for
 
@@ -140,9 +143,9 @@ class TestBrowser(LiveServerTestCase):
         print('ran %s js tests ...' % self._test_count, end='')
 
         # give the developer some time to play with the browser instance
-        if self.show_browser and self.pause_after_all_tests:
-            print('[INFO] Sleeping for %s seconds' % self.pause_after_all_tests)
-            time.sleep(self.pause_after_all_tests)
+        if self.show_browser and self.pause_after_all_tests_seconds:
+            print('[INFO] Sleeping for %s seconds' % self.pause_after_all_tests_seconds)
+            time.sleep(self.pause_after_all_tests_seconds)
 
         bh.js_cov_save()
 
@@ -157,6 +160,9 @@ class TestBrowser(LiveServerTestCase):
         self._run_tests(app_filter=caller_func_name[6:])
 
     def focus_Account(self):
+        self._run_focussed_tests()
+
+    def focus_Bestelling(self):
         self._run_focussed_tests()
 
     def focus_Bondspas(self):

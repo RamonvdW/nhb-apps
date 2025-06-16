@@ -24,10 +24,10 @@ class TestBrowserPleinStuurPing(bh.BrowserTestCase):
 
         html = self.get_page_html()
         has_ping = "stuur_ping" in html
-        # print('has_ping: %s' % has_ping)
-        # if not has_ping:
-        #     print(html[:500])
-        #     print(html[-500:])
+        print('has_ping: %s' % has_ping)
+        if not has_ping:
+            print(html[:500])
+            print(html[-500:])
         self.assertTrue(has_ping)
 
         # wacht even en check daarna dat de post gedaan is door de js load event handler

@@ -10,29 +10,6 @@
 
 {% block pagina %}
 
-    <script>
-        function verwijder(id)
-        {
-            const el = document.getElementById(id)
-            const url = el.dataset.url
-
-            // voer een POST uit om toe te voegen
-            let form = document.createElement('form');
-            form.setAttribute('method', 'post');
-            form.setAttribute('action', url);
-
-            let inp = document.createElement('input');
-            inp.type = "hidden";
-            inp.name = "csrfmiddlewaretoken";
-            inp.value = getCookie('mh_csrf_token');
-            form.appendChild(inp);
-
-            form.style.display = 'hidden';
-            document.body.appendChild(form);
-            form.submit();
-        }
-    </script>
-
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
@@ -98,7 +75,6 @@
                     <div class="form-padding" style="padding-top:0">
 
                         <table>
-
                             <tr>
                                 <td colspan="3" class="center">
                                     <h6>Gekozen producten</h6>
@@ -299,6 +275,12 @@
             {% include 'plein/card_icon.dtl' with title="Opleidingen" text="De verkoopvoorwaarden voor de opleidingen staan beschreven in dit document." icon="article" extern_open=True url=url_voorwaarden_opleidingen %}
         </div>
     </div>
+
+    <div id="js_data"
+         data-csrf-token="{{ csrf_token }}">
+    </div>
+
+    <script src="{% static 'bestelling_js/mandje_verwijder.js' %}"></script>
 
     {% include 'feedback/sidebar.dtl' with op_pagina="bestelling-toon-mandje" %}
 

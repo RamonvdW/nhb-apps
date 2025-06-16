@@ -6,10 +6,13 @@
 
 """ helpers for testing via de browser """
 from django.test import TestCase
+from django.conf import settings
 from django.utils import timezone
 from Account.models import Account
 from BasisTypen.definities import GESLACHT_ALLE
 from BasisTypen.models import BoogType, TeamType, Leeftijdsklasse
+from Bestelling.models import BestellingMandje, Bestelling
+from Betaal.models import BetaalInstellingenVereniging
 from Competitie.models import (Competitie, Regiocompetitie, RegiocompetitieRonde, RegiocompetitieSporterBoog,
                                CompetitieIndivKlasse, CompetitieTeamKlasse, CompetitieMatch)
 from Functie.models import Functie, VerklaringHanterenPersoonsgegevens
@@ -23,6 +26,7 @@ from Webwinkel.models import WebwinkelFoto, WebwinkelProduct
 from selenium.webdriver import Chrome, ChromeOptions
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException, ElementNotInteractableException
+from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.remote.webelement import WebElement
 from bs4 import BeautifulSoup
 import datetime
@@ -74,6 +78,8 @@ class BrowserTestCase(TestCase):
     comp: Competitie = None
     regio_comp: Regiocompetitie = None                  # regiocompetitie voor regio van sporter
     regio_deelnemer: RegiocompetitieSporterBoog = None  # RegiocompetitieSporterBoog
+    mandje: BestellingMandje = None
+    bestelling: Bestelling = None
 
     # urls voor do_navigate_to()
     url_otp = '/account/otp-controle/'
@@ -85,7 +91,6 @@ class BrowserTestCase(TestCase):
     _driver = None
     live_server_url = ''
     show_browser = False            # set to True for visibility during debugging
-    pause_after_console_log = 0     # seconden wachten als we een console error zien
 
     lid_nr = 100001
 
@@ -123,9 +128,11 @@ class BrowserTestCase(TestCase):
         return element.find_element(By.XPATH, "./..")
 
     def find_element_by_id(self, id_str):
+        # zoek op het "id" attribute van een element
         return self._driver.find_element(By.ID, id_str)
 
     def find_element_by_name(self, name_str):
+        # zoek op het "name" attribute van een element
         return self._driver.find_element(By.NAME, name_str)
 
     def find_element_type_with_text(self, elem_type, text_str):
@@ -134,6 +141,15 @@ class BrowserTestCase(TestCase):
         except NoSuchElementException:
             el = None
         return el
+
+    def find_elements_buttons(self, must_have_id=True):
+        buttons = list()
+        for button in self._driver.find_elements(By.TAG_NAME, 'button'):
+            id_str = button.get_attribute('id')
+            if id_str:
+                buttons.append(button)
+        # for
+        return buttons
 
     def find_elements_checkbox(self, exclude_selected=False):
         spans = list()
@@ -214,6 +230,19 @@ class BrowserTestCase(TestCase):
         except ElementNotInteractableException:
             # waarschijnlijk hidden
             pass
+
+    def click_not_blocking(self, el: WebElement):
+        # el.click() seems to block until all events have been handled
+        # action.click() does not wait
+        pre_click = time.time()
+
+        action = ActionChains(self._driver)
+        action.click(el).perform()
+
+        post_click = time.time()
+        delta = post_click - pre_click
+        self.assertLess(delta, 0.5)
+        # print('click_not_blocking duration: %.3f' % delta)
 
     @staticmethod
     def debug_describe_element(el: WebElement):
@@ -403,6 +432,12 @@ def get_driver(show_browser=False):
     options.add_argument('--window-size=1024,1200')
     options.set_capability('goog:loggingPrefs', {'browser': 'ALL'})
 
+    # page load strategy: normal / eager / none
+    # effect voor deze sequence: button click() --> script --> xhr post --> wacht 3 sec --> http response
+    # normal: element.click() hangt 3 seconden :-(
+    # eager: element.click() retourneert meteen, maar toch niet altijd :-(
+    # options.page_load_strategy = 'none'
+
     driver = Chrome(options=options)
     return driver
 
@@ -442,6 +477,19 @@ def database_vullen(self):
 
     self.rayon, _ = Rayon.objects.get_or_create(rayon_nr=5, naam="Rayon 5")
     self.regio, _ = Regio.objects.get_or_create(regio_nr=117, rayon_nr=self.rayon.rayon_nr, rayon=self.rayon)
+
+    self.ver_bond = Vereniging.objects.filter(ver_nr=settings.WEBWINKEL_VERKOPER_VER_NR).first()
+    if self.ver_bond is None:
+        self.ver_bond = Vereniging(ver_nr=settings.WEBWINKEL_VERKOPER_VER_NR)
+    # override static object created by migrations
+    self.ver_bond.naam = "Bondsbureau"
+    self.ver_bond.regio = self.regio
+    self.ver_bond.save()
+
+    self.ontvanger = BetaalInstellingenVereniging(
+                            vereniging=self.ver_bond,
+                            mollie_api_key='test_1234')
+    self.ontvanger.save()
 
     self.cluster_117a, _ = Cluster.objects.get_or_create(
                                 regio=self.regio,
@@ -503,6 +551,15 @@ def database_vullen(self):
                                 vereniging=self.ver)
     self.functie_hwl.accounts.add(self.account_bb)
 
+    self.functie_mww, _ = Functie.objects.get_or_create(
+                                rol='MWW')
+    # override static object created by migrations
+    self.functie_mww.beschrijving = 'Manager Webwinkel'
+    self.functie_mww.bevestigde_email = 'mww@test.not'
+    self.functie_mww.save()
+
+    self.functie_mww.accounts.add(self.account_bb)
+
     # maak webwinkel producten aan
     foto = WebwinkelFoto()
     foto.save()
@@ -530,6 +587,20 @@ def database_vullen(self):
     product.fotos.add(self.foto1)
     product.fotos.add(self.foto2)
     self.webwinkel_product = product
+
+    self.mandje = BestellingMandje(
+                    account=self.account)
+    self.mandje.save()
+
+    self.bestelling = Bestelling(
+                        bestel_nr=42000,
+                        account=self.account_bb,
+                        ontvanger=self.ontvanger,
+                        verkoper_naam='V. Verkoper',
+                        #status=BESTELLING_STATUS_CHOICES,
+                        log='Test')
+    self.bestelling.save()
+    #self.bestelling.regels.add(BestellingRegel)
 
     # maak een competitiewedstrijd aan waarop scores ingevoerd kunnen worden
     volgende_maand = timezone.now().date()
@@ -631,7 +702,7 @@ def database_vullen(self):
 def database_opschonen(self):
     # wordt aangeroepen vanuit Plein/tests/test_js_in_browser
 
-    # LiveServerTestCase does not run inside a database transaction (like normal test cases)
+    # LiveServerTestCase does not run inside a database transaction, like normal test cases
     # yet, we don't have to clean up after ourselves
     # LiveServerTestCase is based on a TransactionTestCase, which flushes all the database tables
     # at the end of the test run.
@@ -646,12 +717,14 @@ def populate_inst(self, inst):
     inst.ver = self.ver
     inst.comp = self.comp
     inst.match = self.match
+    inst.mandje = self.mandje
     inst.account = self.account
     inst.sporter = self.sporter
     inst.account_bb = self.account_bb
+    inst.bestelling = self.bestelling
     inst.regio_comp = self.regio_comp
-    inst.sporterboog = self.sporterboog
     inst.functie_hwl = self.functie_hwl
+    inst.sporterboog = self.sporterboog
     inst.regio_deelnemer = self.regio_deelnemer
     inst.webwinkel_product = self.webwinkel_product
 

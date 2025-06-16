@@ -14,6 +14,7 @@ from Bestelling.definities import (BESTELLING_STATUS_BETALING_ACTIEF, BESTELLING
                                    BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_MISLUKT)
 from Bestelling.models import Bestelling
 from Betaal.definities import TRANSACTIE_TYPE_MOLLIE_RESTITUTIE, TRANSACTIE_TYPE_HANDMATIG
+from Betaal.format import format_bedrag_euro
 from Betaal.mutaties import betaal_mutatieverzoek_start_ontvangst
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige
@@ -225,6 +226,8 @@ class BestellingAfgerondView(UserPassesTestMixin, TemplateView):
             bestelling = Bestelling.objects.prefetch_related('transacties').get(pk=bestelling.pk)
         # while
 
+        bestelling.totaal_euro_str = format_bedrag_euro(bestelling.totaal_euro)
+
         context['bestelling'] = bestelling
 
         # TODO: onderstaande moeten we herzien. Er is 1 record van de betaling met alle totalen (in/uit).
@@ -236,7 +239,7 @@ class BestellingAfgerondView(UserPassesTestMixin, TemplateView):
                 transacties_euro += transactie.bedrag_beschikbaar
         # for
 
-        context['ontvangen'] = transacties_euro
+        context['ontvangen_euro_str'] = format_bedrag_euro(transacties_euro)
 
         context['url_afschrift'] = reverse('Bestelling:toon-bestelling-details',
                                            kwargs={'bestel_nr': bestelling.bestel_nr})
