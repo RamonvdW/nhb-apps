@@ -16,7 +16,7 @@ import sys
 
 
 class Command(BaseCommand):
-    help = "Importeer uitslag RK Indoor Individueel"
+    help = "Importeer uitslag RK Indoor individueel"
 
     blad_voorronde = 'Voorronde'
 
