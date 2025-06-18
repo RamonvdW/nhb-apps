@@ -56,7 +56,7 @@ PREV_LAST=$(grep --binary-files=text "Last-Modified:" "$LOG" | tail -1)     # em
 
 # download the headers only
 # remove DOS newlines
-curl -sS -H "secret: $SECRET" -I "$URL" 2>&1 | sed 's#\r##g' > "$LOG"
+curl -sS -H "secret: $SECRET" -I "$URL" 2>&1 | sed 's#\r##g' >> "$LOG"
 
 # controleer dat bovenstaande HEAD goed werkte
 NEW_HTTP=$(grep --binary-files=text "HTTP/1.1 " "$LOG" | tail -1 | tr '\r' '\n')

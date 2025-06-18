@@ -223,7 +223,7 @@ class TestWedstrijdenBestellingPlugin(E2EHelpers, TestCase):
         inschrijving.refresh_from_db()
         self.assertEqual(inschrijving.bestelling, regel)
         self.assertEqual(inschrijving.status, WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_MANDJE)
-        self.assertTrue("] Toegevoegd aan het mandje van Mandje test" in inschrijving.log)
+        self.assertTrue("] Plekje gereserveerd voor de wedstrijd sessie" in inschrijving.log)
 
     def test_afmelden(self):
         stdout = OutputWrapper(io.StringIO())
@@ -255,7 +255,7 @@ class TestWedstrijdenBestellingPlugin(E2EHelpers, TestCase):
 
         inschrijving.refresh_from_db()
         self.assertEqual(inschrijving.status, WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD)
-        self.assertTrue('] Afgemeld voor de wedstrijd' in inschrijving.log)
+        self.assertTrue('] Afgemeld voor de wedstrijd; plekje weer vrijgegeven' in inschrijving.log)
 
         self.sessie.refresh_from_db()
         self.assertEqual(self.sessie.aantal_inschrijvingen, 0)
