@@ -13,7 +13,7 @@ import zipfile
 
 
 class Command(BaseCommand):
-    help = "Importeer uitslag 25m1pijl kampioenschap"
+    help = "Importeer uitslag RK 25m1pijl individueel"
 
     def __init__(self, stdout=None, stderr=None, no_color=False, force_color=False):
         super().__init__(stdout, stderr, no_color, force_color)

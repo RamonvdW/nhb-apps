@@ -20,7 +20,7 @@ SETTINGS_AUTOTEST="Site.settings_autotest"
 SETTINGS_AUTOTEST_NODEBUG="Site.settings_autotest_nodebug"
 COVERAGE_RC="./Site/utils/coverage.rc"
 COVERAGE_FILE="/tmp/.coverage.$$"
-DATABASE="test_data3"
+TEST_DATABASE="test_data3"
 
 # -Wa = enable deprecation warnings
 PY_OPTS=(-Wa)
@@ -182,10 +182,11 @@ ABORTED=0
 if [ $KEEP_DB -eq 1 ]
 then
     echo "[INFO] Checking database consistency"
-    count=$(echo '\d' | python3 ./manage.py dbshell --database test | grep -c BasisTypen)
-    if [ "$count" != "16" ]
+    count=$(echo 'SELECT COUNT(*) FROM "BasisTypen_boogtype"' | python3 ./manage.py dbshell --database test | grep 'row)' --before=1 | head -1)
+    count=$((count + 0))
+    if [ $count -lt 17 ]
     then
-        echo "[WARNING] Detected inconsistent database (aantal BasisType tabellen: $count)"
+        echo "[WARNING] Detected inconsistent database (aantal boogtypen: $count)"
         echo "[WARNING] Forcing database cleaning"
         KEEP_DB=0
     fi
@@ -196,11 +197,11 @@ then
     echo "[INFO] Deleting test database"
     old_pwd="$PWD"
     cd "/tmp" || exit 2
-    sudo -u postgres dropdb --if-exists $DATABASE || exit 1
+    sudo -u postgres dropdb --if-exists $TEST_DATABASE || exit 1
 
     echo "[INFO] Creating clean database"
-    sudo -u postgres createdb -E UTF8 $DATABASE || exit 1
-    sudo -u postgres psql -d $DATABASE -q -c 'GRANT CREATE ON SCHEMA public TO django' || exit 1
+    sudo -u postgres createdb -E UTF8 $TEST_DATABASE || exit 1
+    sudo -u postgres psql -d $TEST_DATABASE -q -c 'GRANT CREATE ON SCHEMA public TO django' || exit 1
     cd "$old_pwd" || exit 2
 
     echo "[INFO] Running migrations and performing run with nodebug"

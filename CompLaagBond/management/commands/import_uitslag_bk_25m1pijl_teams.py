@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2025 Ramon van der Winkel.
+#  Copyright (c) 2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.core.management.base import BaseCommand
-from Competitie.definities import DEEL_RK
+from Competitie.definities import DEEL_RK, DEEL_BK
 from Competitie.models import KampioenschapSporterBoog, KampioenschapTeam
 from openpyxl.utils.exceptions import InvalidFileException
 from decimal import Decimal
@@ -14,7 +14,7 @@ import zipfile
 
 
 class Command(BaseCommand):
-    help = "Importeer uitslag RK teams 25m1pijl"
+    help = "Importeer uitslag team bondskampioenschap 25m1pijl"
 
     def __init__(self, stdout=None, stderr=None, no_color=False, force_color=False):
         super().__init__(stdout, stderr, no_color, force_color)
@@ -36,7 +36,7 @@ class Command(BaseCommand):
         for deelnemer in (KampioenschapSporterBoog
                           .objects
                           .filter(kampioenschap__competitie__afstand='25',
-                                  kampioenschap__deel=DEEL_RK)
+                                  kampioenschap__deel=DEEL_RK)          # RK-gekwalificeerden mogen in team schieten
                           .select_related('kampioenschap',
                                           'kampioenschap__rayon',
                                           'sporterboog__sporter',
@@ -80,7 +80,7 @@ class Command(BaseCommand):
         for team in (KampioenschapTeam
                      .objects
                      .filter(kampioenschap__competitie__afstand='25',
-                             kampioenschap__deel=DEEL_RK)
+                             kampioenschap__deel=DEEL_BK)
                      .select_related('kampioenschap',
                                      'kampioenschap__rayon',
                                      'vereniging',
@@ -148,37 +148,13 @@ class Command(BaseCommand):
 
         return kamp_team
 
-    def handle(self, *args, **options):
-
-        self.dryrun = options['dryrun']
-        self.verbose = options['verbose']
-
-        # open de kopie, zodat we die aan kunnen passen
-        fname = options['bestand']
-        self.stdout.write('[INFO] Lees bestand %s' % repr(fname))
-        try:
-            prg = openpyxl.load_workbook(fname,
-                                         data_only=True)        # do not evaluate formulas; use last calculated values
-        except (OSError, zipfile.BadZipFile, KeyError, InvalidFileException) as exc:
-            self.stderr.write('[ERROR] Kan het excel bestand niet openen (%s)' % str(exc))
-            return
-
-        blad = "Deelnemers en Scores"
-        try:
-            ws = prg[blad]
-        except KeyError:            # pragma: no cover
-            self.stderr.write('[ERROR] Kan blad %s niet vinden' % repr(blad))
-            return
-
+    def lees_ws_deelnemers_en_scores(self, ws):
         col_ver_naam = 'D'
         col_team_naam = 'F'
         col_lid_nr = 'E'
         col_lid_ag = 'G'
         col_score1 = 'H'
         col_score2 = 'I'
-
-        self._deelnemers_ophalen()
-        self._teams_ophalen()
 
         # doorloop alle regels van het excel blad en ga op zoek naar bondsnummers
         row_nr = 9 - 1
@@ -257,8 +233,8 @@ class Command(BaseCommand):
                             self.stdout.write('[WARNING] Geen scores voor sporter %s op regel %s' % (lid_nr, row_nr))
                         else:
                             deelnemer = self._get_deelnemer(lid_nr, lid_ag)
-                            deelnemer.result_rk_teamscore_1 = score1
-                            deelnemer.result_rk_teamscore_2 = score2
+                            deelnemer.result_bk_teamscore_1 = score1
+                            deelnemer.result_bk_teamscore_2 = score2
                             feitelijke_deelnemers.append(deelnemer)
                             gevonden_lid_nrs.append(lid_nr)
             # for
@@ -307,8 +283,8 @@ class Command(BaseCommand):
                 for deelnemer in feitelijke_deelnemers:
                     if not self.dryrun:
                         # uitgestelde save actie
-                        deelnemer.save(update_fields=['result_rk_teamscore_1', 'result_rk_teamscore_2'])
-                    deelnemer_totaal = deelnemer.result_rk_teamscore_1 + deelnemer.result_rk_teamscore_2
+                        deelnemer.save(update_fields=['result_bk_teamscore_1', 'result_bk_teamscore_2'])
+                    deelnemer_totaal = deelnemer.result_bk_teamscore_1 + deelnemer.result_bk_teamscore_2
                     deelnemer_totalen.append(deelnemer_totaal)
                 # for
                 deelnemer_totalen.sort(reverse=True)                        # hoogste eerst
@@ -336,5 +312,32 @@ class Command(BaseCommand):
             if not self.dryrun:
                 kamp_team.save(update_fields=['result_rank', 'result_teamscore'])
         # for
+
+    def handle(self, *args, **options):
+        self.dryrun = options['dryrun']
+        self.verbose = options['verbose']
+
+        # open de kopie, zodat we die aan kunnen passen
+        fname = options['bestand']
+        self.stdout.write('[INFO] Lees bestand %s' % repr(fname))
+        try:
+            prg = openpyxl.load_workbook(fname,
+                                         data_only=True)        # do not evaluate formulas; use last calculated values
+        except (OSError, zipfile.BadZipFile, KeyError, InvalidFileException) as exc:
+            self.stderr.write('[ERROR] Kan het excel bestand niet openen (%s)' % str(exc))
+            return
+
+        blad = "Deelnemers en Scores"
+        try:
+            ws = prg[blad]
+        except KeyError:            # pragma: no cover
+            self.stderr.write('[ERROR] Kan blad %s niet vinden' % repr(blad))
+            return
+
+        self._deelnemers_ophalen()
+        self._teams_ophalen()
+
+        self.lees_ws_deelnemers_en_scores(ws)
+
 
 # end of file

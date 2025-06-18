@@ -14,7 +14,7 @@ import zipfile
 
 
 class Command(BaseCommand):
-    help = "Importeer uitslag RK Indoor Teams"
+    help = "Importeer uitslag RK Indoor teams"
 
     def __init__(self, stdout=None, stderr=None, no_color=False, force_color=False):
         super().__init__(stdout, stderr, no_color, force_color)
