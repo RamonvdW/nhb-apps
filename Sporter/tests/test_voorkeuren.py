@@ -251,6 +251,7 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_voorkeuren + '100001/')
         self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
         self.assert_template_used(resp, ('sporter/voorkeuren.dtl', 'plein/site_layout.dtl'))
 
         # controleer de stand van zaken voordat de HWL iets wijzigt
@@ -405,12 +406,12 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
 
     def test_para_opmerking(self):
         # met schutter-login wel toegankelijk
-        self.e2e_login(self.account_normaal)
+        self.e2e_login(self.sporter_100001.account)
 
         get_sporter_voorkeuren(self.sporter_100001, mag_database_wijzigen=True)
 
         # niet-para sporter mag ook een opmerking invoeren
-        voorkeuren = SporterVoorkeuren.objects.filter(sporter__account=self.account_normaal).first()
+        voorkeuren = SporterVoorkeuren.objects.filter(sporter=self.sporter_100001).first()
         self.assertEqual(voorkeuren.opmerking_para_sporter, '')
         self.assertFalse(voorkeuren.para_voorwerpen)
 
@@ -426,6 +427,13 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
         # maak dit een para sporter
         self.sporter_100001.para_classificatie = 'VI1'
         self.sporter_100001.save()
+
+        # doe een GET die para classificatie toont
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_voorkeuren)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('sporter/voorkeuren.dtl', 'plein/site_layout.dtl'))
 
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_voorkeuren, {'para_notitie': 'Hallo test 2'})
