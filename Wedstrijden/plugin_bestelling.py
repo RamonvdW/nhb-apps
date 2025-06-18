@@ -94,7 +94,7 @@ class WedstrijdBestelPlugin(BestelPluginBase):
         inschrijving.bestelling = regel
 
         stamp_str = timezone.localtime(timezone.now()).strftime('%Y-%m-%d om %H:%M')
-        msg = "[%s] Toegevoegd aan het mandje van %s\n" % (stamp_str, mandje_van_str)
+        msg = "[%s] Plekje gereserveerd voor de wedstrijd sessie\n" % stamp_str
         inschrijving.log += msg
 
         inschrijving.save(update_fields=['bestelling', 'log'])
@@ -116,7 +116,7 @@ class WedstrijdBestelPlugin(BestelPluginBase):
 
             now = timezone.now()
             stamp_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
-            msg = "[%s] Afgemeld voor de wedstrijd\n" % stamp_str
+            msg = "[%s] Afgemeld voor de wedstrijd; plekje weer vrijgegeven\n" % stamp_str
             inschrijving.log += msg
 
             inschrijving.status = WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD
