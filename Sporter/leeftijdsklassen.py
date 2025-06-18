@@ -456,7 +456,8 @@ def bereken_leeftijdsklasse_khsn(wedstrijdleeftijd, wedstrijdgeslacht):
             prev_lkl = lkl
         # for
 
-    if not gevonden_lkl:
+    if not gevonden_lkl:        # pragma: no cover
+        # uitzondering tijdens browser tests
         return "?"
 
     return gevonden_lkl.beschrijving

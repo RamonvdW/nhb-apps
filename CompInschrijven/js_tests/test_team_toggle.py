@@ -6,6 +6,7 @@
 
 from Competitie.test_utils.tijdlijn import zet_competitie_fase_regio_inschrijven
 from TestHelpers import browser_helper as bh
+import time
 
 
 class TestBrowserCompInschrijvenTeamToggle(bh.BrowserTestCase):
@@ -28,6 +29,8 @@ class TestBrowserCompInschrijvenTeamToggle(bh.BrowserTestCase):
 
         knop = self.find_element_type_with_text('a', 'Maak Nee')
         knop.click()        # doet page reload
+
+        time.sleep(0.5)
 
         # check dat er geen inlaad fouten waren
         self.assert_no_console_log()

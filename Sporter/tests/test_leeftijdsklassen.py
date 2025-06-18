@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -9,6 +9,8 @@ from django.utils import timezone
 from BasisTypen.definities import (GESLACHT_ANDERS, GESLACHT_MAN, GESLACHT_VROUW,
                                    ORGANISATIE_IFAA, ORGANISATIE_KHSN, ORGANISATIE_WA)
 from Geo.models import Regio
+from Registreer.definities import REGISTRATIE_FASE_COMPLEET
+from Registreer.models import GastRegistratie
 from Sporter.leeftijdsklassen import (bereken_leeftijdsklassen_wa,
                                       bereken_leeftijdsklassen_khsn,
                                       bereken_leeftijdsklassen_ifaa,
@@ -627,6 +629,31 @@ class TestSporterLeeftijdsklassen(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('sporter/leeftijdsgroepen.dtl', 'plein/site_layout.dtl'))
+
+    def test_gast(self):
+        self.e2e_login(self.account_normaal)
+
+        self.account_normaal.is_gast = True
+        self.account_normaal.save(update_fields=['is_gast'])
+
+        self.sporter1.is_gast = True
+        self.sporter1.save(update_fields=['is_gast'])
+
+        gast = GastRegistratie(
+                    email='',
+                    account=self.account_normaal,
+                    sporter=self.sporter1,
+                    fase=REGISTRATIE_FASE_COMPLEET,
+                    voornaam='',
+                    achternaam='')
+        gast.save()
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_leeftijdsklassen)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('sporter/jouw_leeftijdsklassen.dtl', 'plein/site_layout.dtl'))
+        self.assertContains(resp, 'Je moet lid zijn bij de KHSN om deel te nemen aan de bondscompetities')
 
 
 # end of file
