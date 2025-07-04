@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2024 Ramon van der Winkel.
+#  Copyright (c) 2020-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -19,7 +19,7 @@ from Functie.definities import Rol
 from Functie.rol import rol_get_huidige
 from Score.definities import AG_NUL, AG_DOEL_INDIV, AG_DOEL_TEAM
 from Score.models import AanvangsgemiddeldeHist, Aanvangsgemiddelde
-from Sporter.models import SporterVoorkeuren, SporterBoog, get_sporter
+from Sporter.models import SporterBoog, get_sporter
 from Sporter.operations import get_sporter_voorkeuren
 from decimal import Decimal
 
@@ -135,7 +135,7 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
 
         context['deelcomp'] = deelcomp
         context['sporterboog'] = sporterboog
-        context['voorkeuren'], _ = SporterVoorkeuren.objects.get_or_create(sporter=sporter)
+        context['voorkeuren'] = get_sporter_voorkeuren(sporter)
         context['bevestig_url'] = reverse('CompInschrijven:aanmelden',
                                           kwargs={'sporterboog_pk': sporterboog.pk,
                                                   'deelcomp_pk': deelcomp.pk})
@@ -187,8 +187,8 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
             # for
 
             if len(wedstrijden1):
-                context['wedstrijden_1'] = wedstrijden1
-                context['wedstrijden_2'] = wedstrijden2
+                context['wedstrijden_1'] = wedstrijden1     # 1e keus: binnen cluster
+                context['wedstrijden_2'] = wedstrijden2     # 2e keus: binnen regio, buiten cluster
             else:
                 context['wedstrijden_1'] = wedstrijden2
 
