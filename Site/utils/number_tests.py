@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022 Ramon van der Winkel.
+#  Copyright (c) 2022-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -15,7 +15,7 @@ import datetime
 start = datetime.datetime.now()
 number = 0
 for line in sys.stdin:
-    if line.startswith('test_'):
+    if line.startswith('test_') or '.js_tests.test_' in line:
         number += 1
 
         elapsed = datetime.datetime.now() - start

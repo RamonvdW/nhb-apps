@@ -117,7 +117,7 @@ powerprofilesctl set performance
 echo "[INFO] Capturing output in $LOG"
 # --pid=$$ means: stop when parent stops
 # -u = unbuffered stdin/stdout
-tail -f "$LOG" --pid=$$ | grep --color -E "FAIL$|ERROR$|" &
+tail -f "$LOG" --pid=$$ | python -u ./Site/utils/number_tests.py | grep --color -E "FAIL$|ERROR$|" &
 PID_TAIL=$(jobs -p | tail -1)
 # echo "PID_TAIL=$PID_TAIL"
 

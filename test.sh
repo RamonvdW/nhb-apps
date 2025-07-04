@@ -298,8 +298,9 @@ then
     # echo "[DEBUG] RES=$RES"
     if [ $RES2 -eq 0 ]
     then
-        # echo "[DEBUG] Found HTML files in $TMP_HTML"
-        read -ra HTML_FILES < <(ls -1tr "$TMP_HTML"/*html)   # sorted by creation time
+        #  %T@ is modification time; %p is filename
+        IFS=" " read -r -a HTML_FILES < <(find "$TMP_HTML" -type f -name '*html' -printf '%T@ %p\n' | cut -d' ' -f2 | tr '\n' ' ')
+        echo "HTML_FILES: ${HTML_FILES[*]}"
         firefox "${HTML_FILES[@]}" &
     fi
 fi

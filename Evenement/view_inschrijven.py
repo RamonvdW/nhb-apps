@@ -17,7 +17,7 @@ from Bestelling.operations import mandje_tel_inhoud, bestel_mutatieverzoek_insch
 from Evenement.models import Evenement, EvenementInschrijving
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige
-from Kalender.view_maand import MAAND2URL
+from Kalender.view_zoek import MAAND2URL
 from Sporter.models import Sporter, get_sporter
 from datetime import timedelta
 
@@ -117,12 +117,10 @@ class InschrijvenSporterView(UserPassesTestMixin, TemplateView):
         context['url_toevoegen'] = reverse('Evenement:inschrijven-toevoegen-aan-mandje')
         context['menu_toon_mandje'] = True
 
-        url_terug = reverse('Kalender:maand',
-                            kwargs={'jaar': evenement.datum.year,
-                                    'maand': MAAND2URL[evenement.datum.month],
-                                    'soort': 'alle',
-                                    'bogen': 'auto',
-                                    'discipline': 'alle'})
+        url_terug = reverse('Kalender:simpel',
+                            kwargs={'jaar_of_maand': 'maand',
+                                    'jaar': evenement.datum.year,
+                                    'maand': MAAND2URL[evenement.datum.month]})
 
         context['kruimels'] = (
             (url_terug, 'Kalender'),
@@ -224,12 +222,10 @@ class InschrijvenGroepjeView(UserPassesTestMixin, TemplateView):
         context['url_zoek'] = reverse('Evenement:inschrijven-groepje',
                                       kwargs={'evenement_pk': evenement.pk})
 
-        url_terug = reverse('Kalender:maand',
-                            kwargs={'jaar': evenement.datum.year,
-                                    'maand': MAAND2URL[evenement.datum.month],
-                                    'soort': 'alle',
-                                    'bogen': 'auto',
-                                    'discipline': 'alle'})
+        url_terug = reverse('Kalender:simpel',
+                            kwargs={'jaar_of_maand': 'maand',
+                                    'jaar': evenement.datum.year,
+                                    'maand': MAAND2URL[evenement.datum.month]})
 
         context['kruimels'] = (
             (url_terug, 'Kalender'),
@@ -336,12 +332,10 @@ class InschrijvenFamilieView(UserPassesTestMixin, TemplateView):
         context['menu_toon_mandje'] = True
         context['url_toevoegen'] = reverse('Evenement:inschrijven-toevoegen-aan-mandje')
 
-        url_terug = reverse('Kalender:maand',
-                            kwargs={'jaar': evenement.datum.year,
-                                    'maand': MAAND2URL[evenement.datum.month],
-                                    'soort': 'alle',
-                                    'bogen': 'auto',
-                                    'discipline': 'alle'})
+        url_terug = reverse('Kalender:simpel',
+                            kwargs={'jaar_of_maand': 'maand',
+                                    'jaar': evenement.datum.year,
+                                    'maand': MAAND2URL[evenement.datum.month]})
 
         context['kruimels'] = (
             (url_terug, 'Kalender'),
@@ -424,12 +418,10 @@ class ToevoegenAanMandjeView(UserPassesTestMixin, View):
 
         context = dict()
 
-        url_maand = reverse('Kalender:maand',
-                            kwargs={'jaar': evenement.datum.year,
-                                    'maand': MAAND2URL[evenement.datum.month],
-                                    'soort': 'alle',
-                                    'bogen': 'auto',
-                                    'discipline': 'alle'})
+        url_maand = reverse('Kalender:simpel',
+                            kwargs={'jaar_of_maand': 'maand',
+                                    'jaar': evenement.datum.year,
+                                    'maand': MAAND2URL[evenement.datum.month]})
 
         inschrijven_str = 'Inschrijven'
         url = reverse('Evenement:details', kwargs={'evenement_pk': evenement.pk})

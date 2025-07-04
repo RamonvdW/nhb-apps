@@ -4,9 +4,7 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from Competitie.test_utils.tijdlijn import zet_competitie_fase_regio_inschrijven
 from TestHelpers import browser_helper as bh
-import time
 
 
 class TestBrowserSporterVoorkeuren(bh.BrowserTestCase):

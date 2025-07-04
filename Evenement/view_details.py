@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2024 Ramon van der Winkel.
+#  Copyright (c) 2024-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -13,7 +13,7 @@ from Account.models import get_account
 from Evenement.models import Evenement
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
-from Kalender.view_maand import MAAND2URL
+from Kalender.view_zoek import MAAND2URL
 from datetime import timedelta
 
 
@@ -88,12 +88,10 @@ class DetailsView(TemplateView):
         # inschrijf sectie (kaartjes) tonen voor dit evenement?
         context['toon_inschrijven'] = context['is_voor_sluitingsdatum'] and not is_organiserende_hwl
 
-        url_terug = reverse('Kalender:maand',
-                            kwargs={'jaar': evenement.datum.year,
-                                    'maand': MAAND2URL[evenement.datum.month],
-                                    'soort': 'alle',
-                                    'bogen': 'auto',
-                                    'discipline': 'alle'})
+        url_terug = reverse('Kalender:simpel',
+                            kwargs={'jaar_of_maand': 'maand',
+                                    'jaar': evenement.datum.year,
+                                    'maand': MAAND2URL[evenement.datum.month]})
         context['kruimels'] = (
             (url_terug, 'Kalender'),
             (None, 'Details evenement'),

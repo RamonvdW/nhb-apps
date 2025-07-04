@@ -38,7 +38,7 @@ class TestBrowserBestellingMandjeVerwijder(MyMgmtCommandHelper, bh.BrowserTestCa
         time.sleep(0.25)
 
         # laat de achtergrondtaak de mutatie verwerken, waardoor het product in het mandje komt
-        self.verwerk_bestel_mutaties(show_all=True)
+        self.verwerk_bestel_mutaties()
 
         # bekijk het mandje
         self.do_navigate_to(self.url_mandje)
@@ -55,7 +55,7 @@ class TestBrowserBestellingMandjeVerwijder(MyMgmtCommandHelper, bh.BrowserTestCa
         # TODO: voorkom wachten
 
         # laat verwijderen uit het mandje verwerken
-        self.verwerk_bestel_mutaties(show_all=True)
+        self.verwerk_bestel_mutaties()
 
         # bekijk het mandje
         self.do_navigate_to(self.url_mandje)

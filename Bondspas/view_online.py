@@ -59,7 +59,7 @@ class ToonBondspasView(UserPassesTestMixin, View):
         context['url_dynamic'] = reverse('Bondspas:dynamic-ophalen')
         context['url_download'] = reverse('Bondspas:dynamic-download')
 
-        sporter = _get_sporter_or_404(request)
+        _get_sporter_or_404(request)
 
         context['kruimels'] = (
             (reverse('Sporter:profiel'), 'Mijn pagina'),
