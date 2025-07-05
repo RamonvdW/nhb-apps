@@ -6,7 +6,7 @@
 # add-ons for dev environment:
 
 # license check
-pip-licenses
+pip-licenses-cli
 
 # update check
 pip-review
