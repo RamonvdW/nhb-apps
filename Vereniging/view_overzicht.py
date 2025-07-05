@@ -54,7 +54,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
         if self.rol_nu == Rol.ROL_HWL:
             context['toon_wedstrijdkalender'] = True
 
-        if not self.ver.regio.is_administratief:
+        if not self.ver.regio.is_administratief and self.rol_nu in (Rol.ROL_HWL, Rol.ROL_WL):   # niet SEC
             context['toon_competities'] = True
 
             comps = (Competitie
