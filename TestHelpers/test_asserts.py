@@ -722,19 +722,21 @@ class MyTestAsserts(TestCase):
 
             # controleer dat de link bruikbaar is
             resp = self.client.get(url)
+            # print(resp.status_code, url)
+
             # sta 1 redirect toe op specifieke stukken van de applicatie
             if resp.status_code == 302 and url in ('/kalender/',        # naar huidige jaar/maand
                                                    '/plein/',           # vervolg aanmaken gast-account
                                                    '/account/logout/',  # (menu) naar /plein/ indien niet ingelogd
                                                    '/bondspas/toon/',   # (menu) e-mail nog niet bevestigd
-                                                   '/sporter/'          # (menu) e-mail nog niet bevestigd
-                                                   ):
+                                                   '/sporter/',         # (menu) e-mail nog niet bevestigd
+                                                   '/functie/wissel-van-rol/',
+                                                   '/ledenvoordeel/'):
                 resp = self.client.get(resp.url)
-            # print(resp.status_code, url)
 
             # "403 pagina" is een normale pagina met status_code 200
             if resp.status_code != 200:
-                self.dump_resp(resp)
+                # print('redirected from %s to %s' % (url, resp.url))
                 self.fail(msg='url %s geeft status code %s' % (url, resp.status_code))
 
             # check for files

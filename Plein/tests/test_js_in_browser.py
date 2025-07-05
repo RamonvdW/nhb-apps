@@ -47,31 +47,31 @@ class TestBrowser(LiveServerTestCase):
 
         bh.database_opschonen(self)
 
-    def _wait_until_url_not(self, url: str, timeout: float = 2.0):
-        duration = 0.5
-        check_url = self.live_server_url + url
-        curr_url = self._driver.current_url
-        while curr_url == check_url and timeout > 0:
-            time.sleep(duration)
-            timeout -= duration
-            duration *= 2
-            curr_url = self._driver.current_url
-        # while
+    # def _wait_until_url_not(self, url: str, timeout: float = 2.0):
+    #     duration = 0.5
+    #     check_url = self.live_server_url + url
+    #     curr_url = self._driver.current_url
+    #     while curr_url == check_url and timeout > 0:
+    #         time.sleep(duration)
+    #         timeout -= duration
+    #         duration *= 2
+    #         curr_url = self._driver.current_url
+    #     # while
 
-    # browser interacties
-    def _get_console_log(self) -> list[str]:
-        logs = self._driver.get_log('browser')      # gets the log + clears it!
-        regels = list()
-        for log in logs:
-            msg = log['message']
-            if msg not in regels:
-                regels.append(msg)
-        return regels
+    # # browser interacties
+    # def _get_console_log(self) -> list[str]:
+    #     logs = self._driver.get_log('browser')      # gets the log + clears it!
+    #     regels = list()
+    #     for log in logs:
+    #         msg = log['message']
+    #         if msg not in regels:
+    #             regels.append(msg)
+    #     return regels
 
     def _run_module_tests(self, test_module):
         try:
             mod = __import__(test_module)
-        except ImportError:
+        except ImportError:     # pragma: no cover
             pass
         else:
             parts = test_module.split('.')
@@ -127,12 +127,12 @@ class TestBrowser(LiveServerTestCase):
         do_fail = False
         try:
             self._driver = bh.get_driver(show_browser=self.show_browser)
-        except NoSuchElementException as exc:
+        except NoSuchElementException as exc:       # pragma: no cover
             print('\n[ERROR] Selenium error: %s' % str(exc))
             do_fail = True
 
         # raise outside try-except to avoid raising exception from inside exception handler
-        if do_fail:
+        if do_fail:     # pragma: no cover
             self.fail('Test aborted')
 
         print('js_tests modules found: %s' % len(test_modules))
@@ -152,44 +152,44 @@ class TestBrowser(LiveServerTestCase):
     def test_all(self):
         self._run_tests()
 
-    def _run_focussed_tests(self):
+    def _run_focussed_tests(self):              # pragma: no cover
         # get the function name of the caller
         caller_func_name = inspect.currentframe().f_back.f_code.co_name
         self.show_browser = True
         self.pause_after_each_test = True
         self._run_tests(app_filter=caller_func_name[6:])
 
-    def focus_Account(self):
+    def focus_Account(self):                    # pragma: no cover
         self._run_focussed_tests()
 
-    def focus_Bestelling(self):
+    def focus_Bestelling(self):                 # pragma: no cover
         self._run_focussed_tests()
 
-    def focus_Bondspas(self):
+    def focus_Bondspas(self):                   # pragma: no cover
         self._run_focussed_tests()
 
-    def focus_CompBeheer(self):
+    def focus_CompBeheer(self):                 # pragma: no cover
         self._run_focussed_tests()
 
-    def focus_CompInschrijven(self):
+    def focus_CompInschrijven(self):            # pragma: no cover
         self._run_focussed_tests()
 
-    def focus_CompScores(self):
+    def focus_CompScores(self):                 # pragma: no cover
         self._run_focussed_tests()
 
-    def focus_Logboek(self):
+    def focus_Logboek(self):                    # pragma: no cover
         self._run_focussed_tests()
 
-    def focus_Overig(self):
+    def focus_Overig(self):                     # pragma: no cover
         self._run_focussed_tests()
 
-    def focus_Plein(self):
+    def focus_Plein(self):                      # pragma: no cover
         self._run_focussed_tests()
 
-    def focus_Sporter(self):
+    def focus_Sporter(self):                    # pragma: no cover
         self._run_focussed_tests()
 
-    def focus_Webwinkel(self):
+    def focus_Webwinkel(self):                  # pragma: no cover
         self._run_focussed_tests()
 
 # end of file

@@ -15,7 +15,6 @@ STATIC_DIR="$PWD/Site/.static/"   # must be full path
 SETTINGS_AUTOTEST_NODEBUG="Site.settings_autotest_nodebug"
 SETTINGS_AUTOTEST_BROWSER="Site.settings_autotest_browser"
 COVERAGE_RC="./Site/utils/coverage.rc"
-COVERAGE_FILE="/tmp/.coverage.$$"
 DATABASE="test_data3"
 PYCOV=(-m coverage run --rcfile="$COVERAGE_RC" --append --branch)    # --debug=trace
 
@@ -44,10 +43,8 @@ echo "[INFO] Now is $STAMP"
 KEEP_DB=1
 MAKE_REPORT=1
 ASK_LAUNCH=1
+CLEAN_COV=1
 FOCUS=""
-
-export COVERAGE_FILE        # where to write coverage data to
-python3 "${PY_OPTS[@]}" -m coverage erase
 
 for arg in "${ARGS[@]}"
 do
@@ -70,6 +67,7 @@ do
         # running as sub-test under test.sh
         MAKE_REPORT=0
         ASK_LAUNCH=0
+        CLEAN_COV=0
 
     else
         FOCUS="$arg"
@@ -78,6 +76,16 @@ done
 
 echo "[INFO] Checking application is free of fatal errors"
 python3 "${PY_OPTS[@]}" ./manage.py check --tag admin --tag models || exit $?
+
+# voor stand-alone gebruik
+# bij aanroep vanuit test.sh is COVERAGE_FILE al gezet
+if [ $CLEAN_COV -eq 1 ]
+then
+    COVERAGE_FILE="/tmp/.coverage.$$"
+    export COVERAGE_FILE        # where to write coverage data to
+    python3 "${PY_OPTS[@]}" -m coverage erase
+fi
+# echo "COVERAGE_FILE=$COVERAGE_FILE"
 
 ABORTED=0
 if [ $KEEP_DB -ne 1 ]
@@ -103,7 +111,7 @@ fi
 echo "[INFO] Refreshing static files"       # (webwinkel foto's, minified js, app static contents, etc.)
 [ -d "$STATIC_DIR" ] && rm -rf "$STATIC_DIR"*     # keeps top directory
 # note: it is important to use the autotest_browser settings, otherwise instrumentation of JS will not happen
-python3 -u ./manage.py collectstatic --settings="$SETTINGS_AUTOTEST_BROWSER" --link
+python3 -u "${PYCOV[@]}" ./manage.py collectstatic --settings="$SETTINGS_AUTOTEST_BROWSER" --link
 RES=$?
 if [ $RES -ne 0 ]
 then
@@ -177,8 +185,8 @@ then
         python3 -m coverage html   --rcfile="$COVERAGE_RC" --include="$FOCUS/**/*.js" "$OMIT" -d "$REPORT_DIR" &>>"$LOG"
     fi
 
-    echo "COVERAGE_FILE=$COVERAGE_FILE"
-    #rm "$COVERAGE_FILE"
+    # echo "COVERAGE_FILE=$COVERAGE_FILE"
+    # rm "$COVERAGE_FILE"
 fi
 
 # restore performance mode
