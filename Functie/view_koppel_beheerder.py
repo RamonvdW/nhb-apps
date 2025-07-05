@@ -47,8 +47,8 @@ def mag_beheerder_wijzigen_of_403(request, functie):
     rol_nu, functie_nu = rol_get_huidige_functie(request)
 
     if rol_nu == Rol.ROL_BB:
-        # BB mag BKO koppelen
-        if functie.rol not in ('BKO', 'CS', 'MWW', 'MO', 'MWZ', 'MLA'):
+        # BB mag BKO koppelen + alle globale functies
+        if functie.rol not in ('BKO', 'CS', 'MWW', 'MO', 'MWZ', 'MLA', 'SUP'):
             raise PermissionDenied('Niet de beheerder')
         return
 
@@ -126,8 +126,8 @@ def mag_email_wijzigen_of_403(request, functie):
 
     # special voor BB, want dat is geen functie
     if rol_nu == Rol.ROL_BB:
-        # BB mag BKO email aanpassen
-        if functie.rol not in ('BKO', 'CS', 'MWW', 'MO', 'MWZ', 'MLA'):
+        # BB mag BKO email aanpassen + alle globale rollen
+        if functie.rol not in ('BKO', 'CS', 'MWW', 'MO', 'MWZ', 'MLA', 'SUP'):
             raise PermissionDenied('Niet de beheerder')
         return
 

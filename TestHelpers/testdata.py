@@ -139,8 +139,8 @@ class TestData(object):
         self.account_bb = None
 
         # structuur
-        self.regio = dict()                     # [regio_nr] = NhbRegio
-        self.rayon = dict()                     # [rayon_nr] = NhbRayon
+        self.regio = dict()                     # [regio_nr] = Regio
+        self.rayon = dict()                     # [rayon_nr] = Rayon
 
         # verenigingen
         self.regio_ver_nrs = dict()             # [regio_nr] = list(ver_nrs)

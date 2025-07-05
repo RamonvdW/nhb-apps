@@ -319,6 +319,9 @@ class TestOverigActiviteit(E2EHelpers, TestCase):
         self.e2e_wisselnaarrol_bb()
         self.e2e_check_rol('BB')
 
+        rayon3 = self.testdata.rayon[3]
+        regio116 = self.testdata.regio[116]
+
         functie = maak_functie('Test functie 1', 'MO')
         functie.accounts.add(self.account_100001)
 
@@ -326,18 +329,28 @@ class TestOverigActiviteit(E2EHelpers, TestCase):
         functie.accounts.add(self.account_100001)
 
         functie = maak_functie('Test functie 3', 'RKO')
+        functie.rayon = rayon3
+        functie.save(update_fields=['rayon'])
         functie.accounts.add(self.account_100001)
 
         functie = maak_functie('Test functie 4', 'RCL')
+        functie.regio = regio116
+        functie.save(update_fields=['regio'])
         functie.accounts.add(self.account_100001)
 
         functie = maak_functie('Test functie 5', 'SEC')
+        functie.vereniging = self.ver1
+        functie.save(update_fields=['vereniging'])
         functie.accounts.add(self.account_100001)
 
         functie = maak_functie('Test functie 6', 'HWL')
+        functie.vereniging = self.ver1
+        functie.save(update_fields=['vereniging'])
         functie.accounts.add(self.account_100001)
 
         functie = maak_functie('Test functie 7', 'WL')
+        functie.vereniging = self.ver1
+        functie.save(update_fields=['vereniging'])
         functie.accounts.add(self.account_100001)
 
         # maak dat het account hulp nodig heeft en dus in de lijst komt te staan

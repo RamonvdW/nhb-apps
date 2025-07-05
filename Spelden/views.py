@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2024 Ramon van der Winkel.
+#  Copyright (c) 2024-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -165,12 +165,10 @@ class TussenspeldenView(TemplateView):
             context['menu_toon_mandje'] = True
 
         now = timezone.now()
-        context['url_wedstrijdkalender'] = reverse('Kalender:jaar',
-                                                   kwargs={'maand': now.month,
-                                                           'jaar': now.year,
-                                                           'soort': 'khsn',
-                                                           'bogen': 'alle',
-                                                           'discipline': 'alle'})
+        context['url_wedstrijdkalender'] = reverse('Kalender:simpel',
+                                                   kwargs={'jaar_of_maand': 'jaar',
+                                                           'maand': now.month,
+                                                           'jaar': now.year})
         context['url_wedstrijdkalender'] += '?zoek=Outdoor'
 
         context['kruimels'] = (

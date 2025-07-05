@@ -13,7 +13,7 @@ from Account.models import get_account
 from Evenement.models import Evenement
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
-from Kalender.view_zoek import MAAND2URL
+from Kalender.definities import MAAND2URL
 from datetime import timedelta
 
 

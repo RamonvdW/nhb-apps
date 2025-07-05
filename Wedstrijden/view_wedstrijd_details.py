@@ -11,7 +11,7 @@ from django.utils.http import urlencode
 from django.views.generic import TemplateView
 from Account.models import get_account
 from BasisTypen.definities import ORGANISATIE_WA, ORGANISATIE_IFAA
-from Kalender.view_maand import MAAND2URL
+from Kalender.definities import MAAND2URL
 from Sporter.operations import get_sporter
 from Wedstrijden.definities import (WEDSTRIJD_ORGANISATIE_TO_STR, WEDSTRIJD_BEGRENZING_TO_STR,
                                     WEDSTRIJD_WA_STATUS_TO_STR)
@@ -142,12 +142,11 @@ class WedstrijdDetailsView(TemplateView):
             if not context['kan_aanmelden']:
                 context['toon_inschrijven'] = False
 
-        url_terug = reverse('Kalender:maand',
-                            kwargs={'jaar': wedstrijd.datum_begin.year,
-                                    'maand': MAAND2URL[wedstrijd.datum_begin.month],
-                                    'soort': 'alle',
-                                    'bogen': 'auto',
-                                    'discipline': 'alle'})
+        url_terug = reverse('Kalender:simpel',
+                            kwargs={'jaar_of_maand': 'maand',
+                                    'jaar': wedstrijd.datum_begin.year,
+                                    'maand': MAAND2URL[wedstrijd.datum_begin.month]})
+
         context['kruimels'] = (
             (url_terug, 'Wedstrijdkalender'),
             (None, 'Wedstrijd details'),

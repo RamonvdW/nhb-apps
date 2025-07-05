@@ -13,7 +13,7 @@ from Bestelling.definities import BESTELLING_REGEL_CODE_WEDSTRIJD, BESTELLING_KO
 from Bestelling.bestel_plugin_base import BestelPluginBase
 from Bestelling.models import BestellingRegel
 from Betaal.format import format_bedrag_euro
-from Kalender.view_maand import maak_compacte_wanneer_str
+from Kalender.view_helpers import maak_compacte_wanneer_str
 from Mailer.operations import mailer_email_is_valide, mailer_queue_email, render_email_template
 from Wedstrijden.definities import (WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_MANDJE,
                                     WEDSTRIJD_INSCHRIJVING_STATUS_BESTELD,

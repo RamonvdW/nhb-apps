@@ -14,7 +14,7 @@ from Account.models import get_account
 from Competitie.models import RegiocompetitieSporterBoog
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige
-from Kalender.view_maand import MAAND2URL
+from Kalender.definities import MAAND2URL
 from Wedstrijden.definities import (KWALIFICATIE_CHECK_NOG_DOEN, KWALIFICATIE_CHECK2STR,
                                     WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_MANDJE,
                                     WEDSTRIJD_INSCHRIJVING_STATUS_BESTELD)
@@ -127,12 +127,10 @@ class KwalificatieScoresOpgevenView(UserPassesTestMixin, TemplateView):
             context['url_opslaan'] = reverse('WedstrijdInschrijven:inschrijven-kwalificatie-scores',
                                              kwargs={'inschrijving_pk': inschrijving.pk})
 
-        url_kalender = reverse('Kalender:maand',
-                               kwargs={'jaar': wedstrijd.datum_begin.year,
-                                       'maand': MAAND2URL[wedstrijd.datum_begin.month],
-                                       'soort': 'alle',
-                                       'bogen': 'auto',
-                                       'discipline': 'alle'})
+        url_kalender = reverse('Kalender:simpel',
+                               kwargs={'jaar_of_maand': 'maand',
+                                       'jaar': wedstrijd.datum_begin.year,
+                                       'maand': MAAND2URL[wedstrijd.datum_begin.month]})
 
         context['kruimels'] = (
             (url_kalender, 'Wedstrijdkalender'),
@@ -150,12 +148,10 @@ class KwalificatieScoresOpgevenView(UserPassesTestMixin, TemplateView):
 
         wedstrijd = inschrijving.wedstrijd
 
-        url_maand = reverse('Kalender:maand',
-                            kwargs={'jaar': wedstrijd.datum_begin.year,
-                                    'maand': MAAND2URL[wedstrijd.datum_begin.month],
-                                    'soort': 'alle',
-                                    'bogen': 'auto',
-                                    'discipline': 'alle'})
+        url_maand = reverse('Kalender:simpel',
+                            kwargs={'jaar_of_maand': 'maand',
+                                    'jaar': wedstrijd.datum_begin.year,
+                                    'maand': MAAND2URL[wedstrijd.datum_begin.month]})
 
         url = reverse('Wedstrijden:wedstrijd-details', kwargs={'wedstrijd_pk': wedstrijd.pk})
 
