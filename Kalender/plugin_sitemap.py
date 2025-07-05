@@ -25,15 +25,18 @@ def generate_urls():
     jaar = now.year
     maand = now.month
 
+    # toon 24 maanden vooruit
     for lp in range(24):
-        # jaar/<maand>-<jaar>/
-        yield CHECK_MED, reverse('Kalender:jaar-simpel',
-                                 kwargs={'maand': MAAND2URL[maand],
+        # jaar/<jaar>/<maand>/
+        yield CHECK_MED, reverse('Kalender:simpel',
+                                 kwargs={'jaar_of_maand': 'jaar',
+                                         'maand': MAAND2URL[maand],
                                          'jaar': now.year})
 
-        # maand/<maand>-<jaar>/
-        yield CHECK_MED, reverse('Kalender:maand-simpel',
-                                 kwargs={'maand': MAAND2URL[maand],
+        # maand/<jaar>/<maand>/
+        yield CHECK_MED, reverse('Kalender:simpel',
+                                 kwargs={'jaar_of_maand': 'maand',
+                                         'maand': MAAND2URL[maand],
                                          'jaar': now.year})
 
         maand += 1

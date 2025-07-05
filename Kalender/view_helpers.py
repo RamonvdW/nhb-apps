@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023-2024 Ramon van der Winkel.
+#  Copyright (c) 2023-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -42,12 +42,10 @@ def get_url_eerstvolgende_maand_met_wedstrijd():
             break
     # for
 
-    url = reverse('Kalender:maand',
-                  kwargs={'jaar': jaar,
-                          'maand': MAAND2URL[maand],
-                          'soort': 'alle',
-                          'bogen': 'auto',
-                          'discipline': 'auto'})
+    url = reverse('Kalender:simpel',
+                  kwargs={'jaar_of_maand': 'maand',
+                          'jaar': jaar,
+                          'maand': MAAND2URL[maand]})
 
     return url
 
@@ -181,19 +179,6 @@ def maak_discipline_filter(context, gekozen_discipline):
         )
 
     return gekozen_discipline
-
-
-def split_zoek_urls(context: dict):
-    """ split context entries waarvan de key begint met url_ en de value ~1 bevat
-    """
-    for key in context.keys():
-        if key.startswith('url_'):
-            value = context[key]
-            pos = value.find('~1')
-            if pos > 0:
-                tup = (value[:pos], value[pos:])
-                context[key] = tup
-    # for
 
 
 # end of file

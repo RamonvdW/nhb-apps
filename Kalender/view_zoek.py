@@ -15,7 +15,7 @@ from Evenement.definities import EVENEMENT_STATUS_GEACCEPTEERD, EVENEMENT_STATUS
 from Evenement.models import Evenement
 from Kalender.definities import MAANDEN, MAAND2URL
 from Kalender.view_helpers import (maak_soort_filter, maak_bogen_filter, maak_discipline_filter,
-                                   maak_compacte_wanneer_str, split_zoek_urls)
+                                   maak_compacte_wanneer_str)
 from Wedstrijden.definities import (WEDSTRIJD_STATUS_GEACCEPTEERD, WEDSTRIJD_STATUS_GEANNULEERD,
                                     ORGANISATIE_IFAA, ORGANISATIE_WA, ORGANISATIE_KHSN,
                                     WEDSTRIJD_WA_STATUS_A, WEDSTRIJD_WA_STATUS_B,
@@ -24,14 +24,27 @@ from Wedstrijden.models import Wedstrijd
 from datetime import date, timedelta
 
 TEMPLATE_KALENDER_MAAND = 'kalender/overzicht-maand.dtl'
+TEMPLATE_KALENDER_JAAR = 'kalender/overzicht-jaar.dtl'
 
 
-class KalenderMaandView(TemplateView):
+class KalenderView(TemplateView):
 
     """ Via deze view krijgen gebruikers en sporters de wedstrijdkalender te zien """
 
     # class variables shared by all instances
     template_name = TEMPLATE_KALENDER_MAAND
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.toon_maand = True
+        self.maand = 0
+        self.jaar = 0
+        self.datum_vanaf = timezone.now().date()
+        self.datum_voor = self.datum_vanaf
+        self.jaar_of_maand = 'maand'
+        self.gekozen_soort = 'alle'
+        self.gekozen_bogen = 'alle'
+        self.gekozen_discipline = 'alle'
 
     @staticmethod
     def _maand_to_nr(maand_str):
@@ -51,120 +64,107 @@ class KalenderMaandView(TemplateView):
 
         raise Http404('Geen valide maand')
 
-    @staticmethod
-    def _validate_jaar_maand(jaar, maand):
+    def _validate_jaar_maand(self, jaar, maand):
         if not (2020 <= jaar <= 2050 and 1 <= maand <= 12):
             raise Http404('Geen valide jaar / maand combinatie')
 
-    @staticmethod
-    def _maak_prev_next(context, jaar, maand):
-        prev_jaar = jaar
-        prev_maand = maand - 1
+        self.jaar = jaar
+        self.maand = maand
+
+        self.datum_vanaf = date(year=jaar, month=maand, day=1)
+
+        if self.toon_maand:
+            # bepaal de datum-range voor deze maand
+            if maand == 12:
+                maand = 1
+                jaar += 1
+            else:
+                maand += 1
+        else:
+            # bepaal de datum-range voor het jaar
+            jaar += 1
+
+        self.datum_voor = date(year=jaar, month=maand, day=1)
+
+    def _maak_prev_next(self, context):
+        prev_jaar = self.jaar
+        prev_maand = self.maand - 1
         if prev_maand < 1:
             prev_maand += 12
             prev_jaar -= 1
-        context['url_prev'] = reverse('Kalender:maand',
-                                      kwargs={'jaar': prev_jaar,
-                                              'maand': MAAND2URL[prev_maand],
-                                              'soort': '~1',
-                                              'bogen': '~2',
-                                              'discipline': '~3'})
+        context['url_prev'] = reverse('Kalender:simpel',
+                                      kwargs={'jaar_of_maand': self.jaar_of_maand,
+                                              'jaar': prev_jaar,
+                                              'maand': MAAND2URL[prev_maand]})
 
-        next_jaar = jaar
-        next_maand = maand + 1
+        next_jaar = self.jaar
+        next_maand = self.maand + 1
         if next_maand > 12:
             next_maand -= 12
             next_jaar += 1
-        context['url_next'] = reverse('Kalender:maand',
-                                      kwargs={'jaar': next_jaar,
-                                              'maand': MAAND2URL[next_maand],
-                                              'soort': '~1',
-                                              'bogen': '~2',
-                                              'discipline': '~3'})
+        context['url_next'] = reverse('Kalender:simpel',
+                                      kwargs={'jaar_of_maand': self.jaar_of_maand,
+                                              'jaar': next_jaar,
+                                              'maand': MAAND2URL[next_maand]})
 
-    def _maak_pagina(self, context, jaar, maand, gekozen_soort, gekozen_bogen, gekozen_discipline, zoekterm):
-        # url voor het insturen van de filter keuzes met een POST
-        context['url_keuzes'] = reverse('Kalender:maand',
-                                        kwargs={'jaar': jaar,
-                                                'maand': MAAND2URL[maand],
-                                                'soort': '~1',
-                                                'bogen': '~2',
-                                                'discipline': '~3'})
-
-        context['url_wissel'] = reverse('Kalender:jaar',
-                                        kwargs={'jaar': jaar,
-                                                'maand': MAAND2URL[maand],
-                                                'soort': '~1',
-                                                'bogen': '~2',
-                                                'discipline': '~3'})
-
-        if zoekterm:
+    def _maak_pagina(self, context):
+        if self.zoekterm:
             # url voor het resetten van de filter keuzes en zoekterm
-            context['unfiltered_url'] = reverse('Kalender:maand',
-                                                kwargs={'jaar': jaar,
-                                                        'maand': maand,
-                                                        'soort': 'alle',
-                                                        'bogen': 'alle',
-                                                        'discipline': 'alle'})
+            context['unfiltered_url'] = reverse('Kalender:simpel',
+                                                kwargs={'jaar_of_maand': 'jaar',
+                                                        'jaar': self.jaar,
+                                                        'maand': self.maand})
 
-        self._maak_prev_next(context, jaar, maand)
-
-        # bepaal de datum-range voor deze maand
-        datum_vanaf = date(year=jaar, month=maand, day=1)
-        if maand == 12:
-            maand = 1
-            jaar += 1
-        else:
-            maand += 1
-        datum_voor = date(year=jaar, month=maand, day=1)
-
-        context['datum'] = datum_vanaf
+        context['datum_vanaf'] = self.datum_vanaf
+        context['datum_tot'] = self.datum_voor
 
         wedstrijden = (Wedstrijd
                        .objects
                        .select_related('locatie')
                        .exclude(toon_op_kalender=False)
-                       .filter(datum_begin__gte=datum_vanaf,
-                               datum_begin__lt=datum_voor,
+                       .filter(datum_begin__gte=self.datum_vanaf,
+                               datum_begin__lt=self.datum_voor,
                                status__in=(WEDSTRIJD_STATUS_GEACCEPTEERD,
                                            WEDSTRIJD_STATUS_GEANNULEERD)))
 
         evenementen = (Evenement
                        .objects
                        .select_related('locatie')
-                       .filter(datum__gte=datum_vanaf,
-                               datum__lt=datum_voor,
+                       .filter(datum__gte=self.datum_vanaf,
+                               datum__lt=self.datum_voor,
                                status__in=(EVENEMENT_STATUS_GEACCEPTEERD,
                                            EVENEMENT_STATUS_GEANNULEERD)))
 
-        context['zoekterm'] = zoekterm
-        if zoekterm:
-            wedstrijden = wedstrijden.filter(Q(titel__icontains=zoekterm) | Q(locatie__plaats__icontains=zoekterm))
-            evenementen = evenementen.filter(Q(titel__icontains=zoekterm) | Q(locatie__plaats__icontains=zoekterm))
+        context['zoekterm'] = self.zoekterm
+        if self.zoekterm:
+            wedstrijden = wedstrijden.filter(Q(titel__icontains=self.zoekterm) |
+                                             Q(locatie__plaats__icontains=self.zoekterm))
+            evenementen = evenementen.filter(Q(titel__icontains=self.zoekterm) |
+                                             Q(locatie__plaats__icontains=self.zoekterm))
 
         # filter wedstrijden op organisatie ("soort wedstrijd")
-        if gekozen_soort == 'ifaa':
+        if self.gekozen_soort == 'ifaa':
             wedstrijden = wedstrijden.filter(organisatie=ORGANISATIE_IFAA)
 
-        elif gekozen_soort == 'wa-a':
+        elif self.gekozen_soort == 'wa-a':
             wedstrijden = wedstrijden.filter(organisatie=ORGANISATIE_WA,
                                              wa_status=WEDSTRIJD_WA_STATUS_A)
 
-        elif gekozen_soort == 'wa-b':
+        elif self.gekozen_soort == 'wa-b':
             wedstrijden = wedstrijden.filter(organisatie=ORGANISATIE_WA,
                                              wa_status=WEDSTRIJD_WA_STATUS_B)
 
-        elif gekozen_soort == 'khsn':
+        elif self.gekozen_soort == 'khsn':
             wedstrijden = wedstrijden.filter(organisatie=ORGANISATIE_KHSN)
 
         # filter wedstrijden op bogen
-        if gekozen_bogen != 'alle':
+        if self.gekozen_bogen != 'alle':
             boog_pks = context['boog_pks']      # ingevuld in maak_bogen_filter en gegarandeerd niet leeg
             # distinct is nodig om verdubbeling te voorkomen
             wedstrijden = wedstrijden.filter(boogtypen__pk__in=boog_pks).distinct('datum_begin', 'pk')
 
-        if gekozen_discipline != 'alle':
-            discipline = url2discipline[gekozen_discipline]
+        if self.gekozen_discipline != 'alle':
+            discipline = url2discipline[self.gekozen_discipline]
             wedstrijden = wedstrijden.filter(discipline=discipline)
             evenementen = list()
 
@@ -229,8 +229,7 @@ class KalenderMaandView(TemplateView):
         aantallen += ' gevonden'
         context['aantallen'] = aantallen
 
-        # avoid google indexing (and complaining about) urls with ~1 and ~2 in them
-        split_zoek_urls(context)
+        self._maak_prev_next(context)
 
         context['kan_aanmelden'] = self.request.user.is_authenticated
         context['canonical'] = reverse('Kalender:landing-page')
@@ -242,15 +241,30 @@ class KalenderMaandView(TemplateView):
 
         context['robots'] = 'nofollow'   # prevent crawling linked pages (we provide a sitemap for events+matches)
 
+        # url voor het insturen van de filter keuzes met een POST
+        context['url_jaar'] = reverse('Kalender:simpel',
+                                      kwargs={'jaar_of_maand': 'jaar',
+                                              'jaar': self.jaar,
+                                              'maand': MAAND2URL[self.maand]})
+
+        context['url_maand'] = reverse('Kalender:simpel',
+                                       kwargs={'jaar_of_maand': 'maand',
+                                               'jaar': self.jaar,
+                                               'maand': MAAND2URL[self.maand]})
+
         context['kruimels'] = (
             (None, 'Kalender'),
         )
 
         return context
 
-    def get_context_data(self, **kwargs):
-        """ called by the template system to get the context data for the template """
-        context = super().get_context_data(**kwargs)
+    def _parse_args(self, context, **kwargs):
+        if 'jaar_of_maand' in kwargs:
+            self.jaar_of_maand = kwargs['jaar_of_maand']
+            if self.jaar_of_maand.lower() == 'jaar':
+                self.jaar_of_maand = 'jaar'
+                self.template_name = TEMPLATE_KALENDER_JAAR
+                self.toon_maand = False
 
         jaar = kwargs['jaar']                           # int
         maand = self._maand_to_nr(kwargs['maand'])      # str
@@ -261,14 +275,14 @@ class KalenderMaandView(TemplateView):
             gekozen_soort = gekozen_soort[:6]       # afkappen voor de veiligheid
         else:
             gekozen_soort = 'alle'
-        gekozen_soort = maak_soort_filter(context, gekozen_soort)
+        self.gekozen_soort = maak_soort_filter(context, gekozen_soort)
 
         if 'bogen' in kwargs:
             gekozen_bogen = kwargs['bogen']
             gekozen_bogen = gekozen_bogen[:6]       # afkappen voor de veiligheid
         else:
             gekozen_bogen = 'auto'
-        gekozen_bogen = maak_bogen_filter(self.request, context, gekozen_bogen)
+        self.gekozen_bogen = maak_bogen_filter(self.request, context, gekozen_bogen)
 
         if 'discipline' in kwargs:
             gekozen_discipline = kwargs['discipline']
@@ -276,42 +290,25 @@ class KalenderMaandView(TemplateView):
             gekozen_discipline = gekozen_discipline[:11]        # afkappen voor de veiligheid
         else:
             gekozen_discipline = 'alle'
-        gekozen_discipline = maak_discipline_filter(context, gekozen_discipline)
+        self.gekozen_discipline = maak_discipline_filter(context, gekozen_discipline)
 
         zoekterm = self.request.GET.get('zoek', '')
-        zoekterm = str(zoekterm)[:50]   # afkappen voor de veiligheid
+        self.zoekterm = str(zoekterm)[:50]   # afkappen voor de veiligheid
 
-        self._maak_pagina(context, jaar, maand, gekozen_soort, gekozen_bogen, gekozen_discipline, zoekterm)
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        self._parse_args(context, **kwargs)
+        self._maak_pagina(context)
 
         return context
 
     def post(self, request, *args, **kwargs):
         context = dict()
 
-        jaar = kwargs['jaar']  # int
-        maand = self._maand_to_nr(kwargs['maand'])
-        self._validate_jaar_maand(jaar, maand)
-
-        gekozen_soort = kwargs['soort']
-        gekozen_soort = gekozen_soort[:6]           # afkappen voor de veiligheid
-        gekozen_soort = maak_soort_filter(context, gekozen_soort)
-
-        gekozen_bogen = kwargs['bogen']
-        gekozen_bogen = gekozen_bogen[:6]           # afkappen voor de veiligheid
-        gekozen_bogen = maak_bogen_filter(request, context, gekozen_bogen)
-
-        if 'discipline' in kwargs:
-            gekozen_discipline = kwargs['discipline']
-            gekozen_discipline = gekozen_discipline[:11]    # afkappen voor de veiligheid
-        else:
-            gekozen_discipline = 'alle'
-        gekozen_discipline = maak_discipline_filter(context, gekozen_discipline)
-
-        zoekterm = request.POST.get('zoekterm', '')
-        zoekterm = zoekterm[:50]    # afkappen voor de veiligheid
-        context['zoekterm'] = zoekterm
-
-        self._maak_pagina(context, jaar, maand, gekozen_soort, gekozen_bogen, gekozen_discipline, zoekterm)
+        self._parse_args(context, **kwargs)
+        self._maak_pagina(context)
 
         return render(request, self.template_name, context)
 

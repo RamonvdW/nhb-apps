@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from Kalender import view_landing_page, view_maand, view_jaar, view_api
+from Kalender import view_landing_page, view_zoek, view_api
 
 app_name = 'Kalender'
 
@@ -16,35 +16,40 @@ urlpatterns = [
          view_landing_page.KalenderLandingPageView.as_view(),
          name='landing-page'),
 
+    path('<jaar_of_maand>/<int:jaar>/<maand>/',
+         view_zoek.KalenderView.as_view(),
+         name='simpel'),
+
+    path('<jaar_of_maand>/<int:jaar>/<maand>/<soort>/<bogen>/',
+         view_zoek.KalenderView.as_view(),
+         name='pre-discipline'),
+
+    path('<jaar_of_maand>/<int:jaar>/<maand>/<soort>/<bogen>/<discipline>/',
+         view_zoek.KalenderView.as_view(),
+         name='alles'),
+
+
+    # backwards compatibility
+
     # TODO: verwijderen. 2024-11: wordt nog best veel gebruikt, niet alleen door zoekmachines
-    path('pagina-<int:jaar>-<maand>/',                  # backwards compatibility
-         view_maand.KalenderMaandView.as_view(),
+    path('pagina-<int:jaar>-<maand>/',
+         view_zoek.KalenderView.as_view(),
          name='legacy'),
 
-    path('maand/<maand>-<int:jaar>/<soort>/<bogen>/',
-         view_maand.KalenderMaandView.as_view(),
-         name='maand-pre-discipline'),
+    path('<jaar_of_maand>/<maand>-<int:jaar>/',         
+         view_zoek.KalenderView.as_view(),
+         name='legacy-simpel'),
 
-    path('maand/<maand>-<int:jaar>/<soort>/<bogen>/<discipline>/',
-         view_maand.KalenderMaandView.as_view(),
-         name='maand'),
+    path('<jaar_of_maand>/<maand>-<int:jaar>/<soort>/<bogen>/',
+         view_zoek.KalenderView.as_view(),
+         name='legacy-pre-discipline'),
 
-    path('maand/<maand>-<int:jaar>/',
-         view_maand.KalenderMaandView.as_view(),
-         name='maand-simpel'),
+    path('<jaar_of_maand>/<maand>-<int:jaar>/<soort>/<bogen>/<discipline>/',         # backwards compatibility
+         view_zoek.KalenderView.as_view(),
+         name='legacy-alles'),
 
-    path('jaar/<maand>-<int:jaar>/<soort>/<bogen>/',
-         view_jaar.KalenderJaarView.as_view(),
-         name='jaar-pre-discipline'),
 
-    path('jaar/<maand>-<int:jaar>/<soort>/<bogen>/<discipline>/',
-         view_jaar.KalenderJaarView.as_view(),
-         name='jaar'),
-
-    path('jaar/<maand>-<int:jaar>/',
-         view_jaar.KalenderJaarView.as_view(),
-         name='jaar-simpel'),
-
+    # API voor weergave kalender informatie op de hoofdsite
     path('api/lijst/<aantal_dagen_vooruit>/',
          view_api.ApiView.as_view(),
          name='api-lijst'),

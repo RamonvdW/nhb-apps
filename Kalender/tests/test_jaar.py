@@ -25,9 +25,9 @@ class TestKalenderJaar(E2EHelpers, TestCase):
     """ tests voor de Kalender applicatie, module jaaroverzicht """
 
     url_landing_page = '/kalender/'
-    url_kalender_jaar = '/kalender/jaar/%s-%s/%s/%s/%s/'                    # maand, jaar, soort, bogen, discipline
-    url_kalender_jaar_old = '/kalender/jaar/%s-%s/%s/%s/'                   # maand, jaar, soort, bogen
-    url_jaar_simpel = '/kalender/jaar/%s-%s/'                               # maand, jaar
+    url_kalender_jaar_no_disc = '/kalender/jaar/%s/%s/%s/%s/'               # jaar, maand, soort, bogen
+    url_kalender_jaar = '/kalender/jaar/%s/%s/%s/%s/%s/'                    # jaar, maand, soort, bogen, discipline
+    url_jaar_simpel = '/kalender/jaar/%s/%s/'                               # jaar, maand
     url_kalender_pagina = '/kalender/pagina-%s-%s/'                         # jaar, maand
     url_wedstrijden_vereniging = '/wedstrijden/vereniging/'
     url_wedstrijden_maak_nieuw = '/wedstrijden/vereniging/kies-type/'
@@ -192,50 +192,50 @@ class TestKalenderJaar(E2EHelpers, TestCase):
     def test_jaar(self):
         # maand als getal
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_kalender_jaar_old % (1, 2020, 'alle', 'auto'))
+            resp = self.client.get(self.url_kalender_jaar_no_disc % (2020, 1, 'alle', 'auto'))
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('kalender/overzicht-jaar.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
 
         # illegale maand getallen
-        resp = self.client.get(self.url_kalender_jaar % (0, 2020, 'x', 'y', 'alle'))
+        resp = self.client.get(self.url_kalender_jaar % (2020, 0, 'x', 'y', 'alle'))
         self.assert404(resp, 'Geen valide jaar / maand combinatie')
-        resp = self.client.post(self.url_kalender_jaar % (0, 2020, 'x', 'y', 'alle'))
+        resp = self.client.post(self.url_kalender_jaar % (2020, 0, 'x', 'y', 'alle'))
         self.assert404(resp, 'Geen valide jaar / maand combinatie')
 
         # maand als tekst
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_kalender_jaar % ('mrt', 2020, 'x', 'y', 'alle'))
+            resp = self.client.get(self.url_kalender_jaar % (2020, 'mrt', 'x', 'y', 'alle'))
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('kalender/overzicht-jaar.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
 
         # maand als tekst
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_kalender_jaar % ('maart', 2020, 'x', 'y', 'alle'))
+            resp = self.client.get(self.url_kalender_jaar % (2020, 'maart', 'x', 'y', 'alle'))
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('kalender/overzicht-jaar.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
 
         # illegale maand tekst
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_kalender_jaar % ('xxx', 2020, 'x', 'y', 'alle'))
+            resp = self.client.get(self.url_kalender_jaar % (2020, 'xxx', 'x', 'y', 'alle'))
         self.assert404(resp, 'Geen valide maand')
 
         # illegaal jaar
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_kalender_jaar % ('maart', 2100, 'x', 'y', 'alle'))
+            resp = self.client.get(self.url_kalender_jaar % (2100, 'maart', 'x', 'y', 'alle'))
         self.assert404(resp, 'Geen valide jaar / maand combinatie')
 
         # wrap-around in december voor 'next'
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_kalender_jaar % (12, 2020, 'alle', 'auto', 'alle'))
+            resp = self.client.get(self.url_kalender_jaar % (2020, 12, 'alle', 'auto', 'alle'))
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('kalender/overzicht-jaar.dtl', 'plein/site_layout.dtl'))
 
         # wrap-around in januari voor 'prev'
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_kalender_jaar % (1, 2020, 'alle', 'auto', 'alle'))
+            resp = self.client.get(self.url_kalender_jaar % (2020, 1, 'alle', 'auto', 'alle'))
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('kalender/overzicht-jaar.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
@@ -245,44 +245,44 @@ class TestKalenderJaar(E2EHelpers, TestCase):
 
         # soort filters
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_kalender_jaar % (maand, jaar, 'ifaa', 'auto', 'alle'))
+            resp = self.client.get(self.url_kalender_jaar % (jaar, maand, 'ifaa', 'auto', 'alle'))
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('kalender/overzicht-jaar.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
 
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_kalender_jaar % (maand, jaar, 'wa-a', 'auto', 'alle'))
+            resp = self.client.get(self.url_kalender_jaar % (jaar, maand, 'wa-a', 'auto', 'alle'))
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('kalender/overzicht-jaar.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
 
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_kalender_jaar % (maand, jaar, 'wa-b', 'auto', 'alle'))
+            resp = self.client.get(self.url_kalender_jaar % (jaar, maand, 'wa-b', 'auto', 'alle'))
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('kalender/overzicht-jaar.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
 
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_kalender_jaar % (maand, jaar, 'khsn', 'auto', 'alle'))
+            resp = self.client.get(self.url_kalender_jaar % (jaar, maand, 'khsn', 'auto', 'alle'))
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('kalender/overzicht-jaar.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
 
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_kalender_jaar % (maand, jaar, 'bad', 'auto', 'alle'))
+            resp = self.client.get(self.url_kalender_jaar % (jaar, maand, 'bad', 'auto', 'alle'))
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('kalender/overzicht-jaar.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
 
         # discipline filter
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_kalender_jaar % (maand, jaar, 'bad', 'auto', 'veld'))
+            resp = self.client.get(self.url_kalender_jaar % (jaar, maand, 'bad', 'auto', 'veld'))
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('kalender/overzicht-jaar.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
 
         # zoekterm
-        url = self.url_kalender_jaar % (3, 2020, 'bad', 'auto', 'alle')
+        url = self.url_kalender_jaar % (2020, 3, 'bad', 'auto', 'alle')
         url += '?zoek=lowlands'
         with self.assert_max_queries(20):
             resp = self.client.get(url)
@@ -298,7 +298,7 @@ class TestKalenderJaar(E2EHelpers, TestCase):
 
         # zonder discipline
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_kalender_jaar_old % (3, 2020, 'bad', 'auto'))
+            resp = self.client.post(self.url_kalender_jaar_no_disc % (2020, 3, 'bad', 'auto'))
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('kalender/overzicht-jaar.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
@@ -311,19 +311,19 @@ class TestKalenderJaar(E2EHelpers, TestCase):
         self._zet_boog_voorkeuren(self.sporter)
 
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_kalender_jaar % ('maart', 2020, 'alle', 'auto', 'alle'))
+            resp = self.client.get(self.url_kalender_jaar % (2020, 'maart', 'alle', 'auto', 'alle'))
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('kalender/overzicht-jaar.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
 
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_kalender_jaar % ('maart', 2020, 'alle', 'mijn', 'alle'))
+            resp = self.client.get(self.url_kalender_jaar % (2020, 'maart', 'alle', 'mijn', 'alle'))
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('kalender/overzicht-jaar.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
 
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_kalender_jaar % ('maart', 2020, 'alle', 'bad', 'alle'))
+            resp = self.client.get(self.url_kalender_jaar % (2020, 'maart', 'alle', 'bad', 'alle'))
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('kalender/overzicht-jaar.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
@@ -333,13 +333,13 @@ class TestKalenderJaar(E2EHelpers, TestCase):
         self.sporter.save(update_fields=['is_actief_lid'])
 
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_kalender_jaar % ('maart', 2020, 'x', 'mijn', 'alle'))
+            resp = self.client.get(self.url_kalender_jaar % (2020, 'maart', 'x', 'mijn', 'alle'))
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('kalender/overzicht-jaar.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
 
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_jaar_simpel % ('maart', 2020))
+            resp = self.client.get(self.url_jaar_simpel % (2020, 'maart'))
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('kalender/overzicht-jaar.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
@@ -355,7 +355,7 @@ class TestKalenderJaar(E2EHelpers, TestCase):
         Wedstrijd.objects.exclude(pk=self.wedstrijd.pk).delete()
 
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_kalender_jaar % (datum.month, datum.year, 'alle', 'auto', 'alle'))
+            resp = self.client.get(self.url_kalender_jaar % (datum.year, datum.month, 'alle', 'auto', 'alle'))
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_template_used(resp, ('kalender/overzicht-jaar.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
@@ -366,7 +366,7 @@ class TestKalenderJaar(E2EHelpers, TestCase):
         datum = self.evenement.datum
 
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_kalender_jaar % (datum.month, datum.year, 'alle', 'auto', 'alle'))
+            resp = self.client.get(self.url_kalender_jaar % (datum.year, datum.month, 'alle', 'auto', 'alle'))
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_template_used(resp, ('kalender/overzicht-jaar.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)

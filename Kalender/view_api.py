@@ -11,7 +11,7 @@ from django.utils import timezone
 from django.views import View
 from Evenement.definities import EVENEMENT_STATUS_GEACCEPTEERD, EVENEMENT_STATUS_GEANNULEERD
 from Evenement.models import Evenement
-from Kalender.view_maand import maak_compacte_wanneer_str
+from Kalender.view_zoek import maak_compacte_wanneer_str
 from Wedstrijden.definities import (WEDSTRIJD_STATUS_GEACCEPTEERD, WEDSTRIJD_STATUS_GEANNULEERD,
                                     WEDSTRIJD_DISCIPLINE_TO_STR_KHSN)
 from Wedstrijden.models import Wedstrijd
