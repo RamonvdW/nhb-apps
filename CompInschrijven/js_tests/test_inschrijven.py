@@ -23,10 +23,10 @@ class TestBrowserCompInschrijven(bh.BrowserTestCase):
         self.regio_comp.save(update_fields=['inschrijf_methode'])
 
         zet_competitie_fase_regio_inschrijven(self.comp)
-        self.regio_deelnemer.delete()       # uitschrijven
+        self.regio_deelnemer_r.delete()       # uitschrijven
 
         # haal de inschrijf pagina op
-        url = self.url_sporter_aanmelden % (self.regio_comp.pk, self.sporterboog.pk)
+        url = self.url_sporter_aanmelden % (self.regio_comp.pk, self.sporterboog_r.pk)
         self.do_navigate_to(url)
 
         # check dat er geen inlaad fouten waren

@@ -69,7 +69,7 @@ function opslaan(_el) {
         // let op: lege scores juist wel meesturen
         // dan kan een verkeerd bondsnummer  nog uit de uitslag gehaald worden door de score leeg te maken!
         const pk = row.cells[0].dataset.pk;
-        obj[pk] = row.cells[4].firstChild.value;
+        obj[pk] = row.cells[4].firstElementChild.value;
     } // for
 
     xhr_bezig = true;
@@ -212,9 +212,42 @@ function opzoeken(_el) {
 // TOEVOEGEN knop
 //-------------------------
 
+function populate_cloned_row(new_row, data1, data2) {
+    // verwijder attributen van de template die toegevoegd zijn door de tabel filter
+    new_row.cells[0].removeAttribute("data-clean_text");
+    new_row.cells[1].removeAttribute("data-clean_text");
+    new_row.cells[2].removeAttribute("data-clean_text");
+
+    new_row.cells[0].dataset.pk = data2.pk.toString();
+    new_row.cells[0].innerText = data1.lid_nr;
+
+    new_row.cells[1].innerText = data1.naam;
+
+    const span = new_row.cells[2].firstElementChild;
+    span.innerText = "[" + data1.ver_nr + "]";
+    span.nextSibling.innerText = " " + data1.ver_naam;    // hidden on small
+
+    const team_gem = data2.team_gem;
+    if (team_gem !== '') {
+        new_row.cells[3].innerText = data2.boog + ' (' + team_gem + ')';
+    } else {
+        new_row.cells[3].innerText = data2.boog;
+    }
+
+    // voeg de score-invoer class toe die gebruikt wordt om event handler eraan te hangen
+    // verwijder de heeft_controleer class die aan de template toegevoegd was
+    const el_inp = new_row.cells[4].firstElementChild;   // tr --> td --> input
+    el_inp.classList.add("score-invoer");
+    el_inp.classList.remove('heeft_controleer');
+
+    if (toonTeamNaam) {
+        new_row.cells[5].innerText = teamPk2Naam[data2.team_pk] || "-";
+    }
+}
+
+
 function toevoegen(_el) {
     // voeg de gevonden sporter toe aan de tabel
-    // en geef dit door aan de website via een POST
 
     // als lid_nr al in de tabel staat, dan niet toevoegen
     // zet focus op score invoer veld
@@ -227,6 +260,8 @@ function toevoegen(_el) {
 
     el_zoekresultaten.classList.add("hide");
 
+    // rsp bevat 1 kopie van lid_nr, naam, vereniging, ver_nr, ver_naam, regio
+    // rsp.deelnemers bevatten: pk, boog, team_gem, team_pk
     const lid_nr = rsp.lid_nr;
 
     // zoek het plekje in de tabel waar deze toegevoegd moet worden
@@ -276,36 +311,12 @@ function toevoegen(_el) {
             // deze deelnemer toevoegen
             const new_row = base_row.cloneNode(true);
 
-            // verwijder attributen van de template die toegevoegd zijn door de tabel filter
-            new_row.cells[0].removeAttribute("data-clean_text");
-            new_row.cells[1].removeAttribute("data-clean_text");
-            new_row.cells[2].removeAttribute("data-clean_text");
+            populate_cloned_row(new_row, rsp, deelnemer);
 
             // volgende statement is gelijk aan insertAfter, welke niet bestaat
             // werkt ook aan het einde van de tabel
             // zie https://stackoverflow.com/questions/4793604/how-to-insert-an-element-after-another-element-in-javascript-without-using-a-lib
             insert_after_row.parentNode.insertBefore(new_row, insert_after_row.nextSibling);
-
-            // pas de nieuwe regel aan met de gevonden data
-            new_row.cells[0].dataset.pk = deelnemer_pk;
-            new_row.cells[0].innerText = lid_nr;
-
-            new_row.cells[1].innerText = rsp.naam;
-
-            const span = new_row.cells[2].firstChild;
-            span.innerText = "[" + rsp.ver_nr + "]";
-            span.nextSibling.innerText = " " + rsp.ver_naam;    // hidden on small
-
-            const team_gem = deelnemer.team_gem;
-            if (team_gem !== '') {
-                new_row.cells[3].innerText = deelnemer.boog + ' (' + team_gem + ')';
-            } else {
-                new_row.cells[3].innerText = deelnemer.boog;
-            }
-
-            if (toonTeamNaam) {
-                new_row.cells[5].innerText = teamPk2Naam[deelnemer.team_pk] || "-";
-            }
 
             // maak de nieuwe row zichtbaar
             new_row.classList.remove('hide');
@@ -319,13 +330,12 @@ function toevoegen(_el) {
         }
     });
 
+    attach_event_controleer_score();
+
     // scroll nieuwe regel into view + zet focus op invoer score
     if (focus_row) {
-        const cell = focus_row.cells[4];    // tr --> td
-        const el_input = cell.firstChild;   // td --> input
-        if (el_input.focus) {       // TODO: why sometimes undefined?
-            el_input.focus();
-        }
+        const el_inp = focus_row.cells[4].firstElementChild;  // tr --> td --> input
+        el_inp.focus();
     }
 
     // zoekveld weer leeg maken
@@ -421,35 +431,15 @@ function deelnemers_ophalen_toevoegen(rsp) {
         }
 
         if (!skip) {
-            const row = body.rows[row_nr];
+            const insert_after_row = body.rows[row_nr];
             const new_row = base_row.cloneNode(true);
 
-            // pas de nieuwe regel aan met de ontvangen data
-            new_row.cells[0].innerText = lid_nr;
-            new_row.cells[0].dataset.pk = deelnemer.pk;
-
-            new_row.cells[1].innerText = deelnemer.naam;
-
-            const span = new_row.cells[2].firstChild;
-            span.innerText = "[" + deelnemer.ver_nr + "]";
-            span.nextSibling.innerText = " " + deelnemer.ver_naam;
-
-            const team_gem = deelnemer.team_gem;
-            if (team_gem !== '') {
-                new_row.cells[3].innerText = deelnemer.boog + ' (' + team_gem + ')';
-            } else {
-                new_row.cells[3].innerText = deelnemer.boog;
-            }
-
-            if (toonTeamNaam) {
-                const team_pk = deelnemer.team_pk;
-                new_row.cells[5].innerText = teamPk2Naam[team_pk];
-            }
+            populate_cloned_row(new_row, deelnemer, deelnemer);
 
             // volgende statement is gelijk aan insertAfter, welke niet bestaat
             // werkt ook aan het einde van de tabel
             // zie https://stackoverflow.com/questions/4793604/how-to-insert-an-element-after-another-element-in-javascript-without-using-a-lib
-            row.parentNode.insertBefore(new_row, row.nextSibling);
+            insert_after_row.parentNode.insertBefore(new_row, insert_after_row.nextSibling);
 
             row_nr += 1;         // ga verder op de zojuist toegevoegd regel
 
@@ -480,6 +470,9 @@ function deelnemers_ophalen_toevoegen(rsp) {
             }
         }
     }
+
+    // voeg event listeners toe aan de nieuwe input elements
+    attach_event_controleer_score();
 }
 
 function deelnemers_ophalen_klaar(xhr) {
@@ -536,16 +529,27 @@ function deelnemers_ophalen() {
 // Controleer ingevoerde score
 //----------------------------
 
-function controleer_score(el) {
+function controleer_score(_event) {
+    /* jshint validthis: true */
+
+    const value = this.value;
     let color = "";
 
     // /\D/.test() matches digits and returns true if there are non-digits
-    const value = el.value;
     if (/\D/.test(value) || value < 0 || value > wedstrijdMaxScore) {
         color = "red";
     }
 
-    el.style.color = color;
+    this.style.color = color;
+}
+
+
+function attach_event_controleer_score() {
+    const nodes = document.querySelectorAll(".score-invoer:not(.heeft_controleer)");
+    nodes.forEach(n => {
+        n.addEventListener('input', controleer_score);
+        n.classList.add('heeft_controleer');
+    });
 }
 
 
@@ -563,7 +567,7 @@ document.addEventListener('DOMContentLoaded', function() {
     el_zoek_knop.addEventListener('click', opzoeken);
     el_toevoegen_knop.addEventListener('click', toevoegen);
     el_opslaan_knop.addEventListener('click', opslaan);
-    document.querySelector('.score-invoer').addEventListener('input', controleer_score);
+    attach_event_controleer_score();
 });
 
 /* end of file */

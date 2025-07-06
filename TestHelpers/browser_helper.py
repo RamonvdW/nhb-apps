@@ -67,17 +67,19 @@ def js_cov_import():
 class BrowserTestCase(TestCase):
 
     # deze members worden centraal gevuld in Plein/tests/test_js_in_browser
-    sporter: Sporter = None                             # sporter 100001
-    sporterboog: SporterBoog = None                     # sporterboog 100001, recurve
-    account_bb: Account = None                          # account 100001 (gekoppeld aan sporter)
-    account: Account = None                             # account 100002
-    ver: Vereniging = None                              # vereniging van de sporter
-    functie_hwl: Functie = None                         # account is hwl
-    webwinkel_product: WebwinkelProduct = None          # product in de webwinkel
+    sporter: Sporter = None                                 # sporter 100001
+    sporterboog_r: SporterBoog = None                       # sporterboog 100001, recurve
+    sporterboog_bb: SporterBoog = None                      # sporterboog 100001, barebow
+    account_bb: Account = None                              # account 100001 (gekoppeld aan sporter)
+    account: Account = None                                 # account 100002
+    ver: Vereniging = None                                  # vereniging van de sporter
+    functie_hwl: Functie = None                             # account is hwl
+    webwinkel_product: WebwinkelProduct = None              # product in de webwinkel
     match: CompetitieMatch = None
     comp: Competitie = None
-    regio_comp: Regiocompetitie = None                  # regiocompetitie voor regio van sporter
-    regio_deelnemer: RegiocompetitieSporterBoog = None  # RegiocompetitieSporterBoog
+    regio_comp: Regiocompetitie = None                      # regiocompetitie voor regio van sporter
+    regio_deelnemer_r: RegiocompetitieSporterBoog = None    # RegiocompetitieSporterBoog
+    regio_deelnemer_bb: RegiocompetitieSporterBoog = None   # RegiocompetitieSporterBoog
     mandje: BestellingMandje = None
     bestelling: Bestelling = None
     pause_after_console_log = 2
@@ -161,6 +163,14 @@ class BrowserTestCase(TestCase):
             spans.append(span)
         # for
         return spans
+
+    def find_elements_input(self, with_class=""):
+        # example: with_class=".score-invoer"
+        inputs = list()
+        for inp in self._driver.find_elements(By.TAG_NAME, '//input[]%s' % with_class):
+            inputs.append(inp)
+        # for
+        return inputs
 
     def find_title(self):
         el = self._driver.find_element(By.XPATH, '//title')
@@ -533,6 +543,11 @@ def database_vullen(inst):
                                     beschrijving='Recurve',
                                     volgorde=10)        # zelfde volgorde als het standaard object
 
+    inst.boog_bb, _ = BoogType.objects.get_or_create(
+                                    afkorting='BB',
+                                    beschrijving='Barebow',
+                                    volgorde=12)        # zelfde volgorde als het standaard object
+
     inst.team_r, _ = TeamType.objects.get_or_create(
                                     afkorting='R',
                                     beschrijving='Recurve Team',
@@ -540,9 +555,14 @@ def database_vullen(inst):
     inst.team_r.save()
     inst.team_r.boog_typen.set([inst.boog_r])
 
-    inst.sporterboog, _ = SporterBoog.objects.get_or_create(
+    inst.sporterboog_r, _ = SporterBoog.objects.get_or_create(
                                     sporter=inst.sporter,
                                     boogtype=inst.boog_r,
+                                    voor_wedstrijd=True)
+
+    inst.sporterboog_bb, _ = SporterBoog.objects.get_or_create(
+                                    sporter=inst.sporter,
+                                    boogtype=inst.boog_bb,
                                     voor_wedstrijd=True)
 
     inst.functie_hwl, _ = Functie.objects.get_or_create(
@@ -634,6 +654,15 @@ def database_vullen(inst):
     inst.klasse_indiv_r.save()
     inst.klasse_indiv_r.leeftijdsklassen.add(inst.lkl_all)
 
+    inst.klasse_indiv_bb = CompetitieIndivKlasse(
+                                competitie=inst.comp,
+                                boogtype=inst.boog_bb,
+                                volgorde=3,
+                                min_ag=0,
+                                is_onbekend=True)
+    inst.klasse_indiv_bb.save()
+    inst.klasse_indiv_bb.leeftijdsklassen.add(inst.lkl_all)
+
     inst.klasse_team_r = CompetitieTeamKlasse(
                                 competitie=inst.comp,
                                 team_type=inst.team_r,
@@ -684,15 +713,23 @@ def database_vullen(inst):
         inst.regio_ronde.matches.add(match)
     # for
 
-    inst.regio_deelnemer = RegiocompetitieSporterBoog(
+    inst.regio_deelnemer_r = RegiocompetitieSporterBoog(
                                 regiocompetitie=inst.regio_comp,
-                                sporterboog=inst.sporterboog,
+                                sporterboog=inst.sporterboog_r,
                                 bij_vereniging=inst.ver,
-                                indiv_klasse=inst.klasse_indiv_r)
-    inst.regio_deelnemer.save()
+                                indiv_klasse=inst.klasse_indiv_r,
+                                ag_voor_team=7.0)
+    inst.regio_deelnemer_r.save()
+
+    inst.regio_deelnemer_bb = RegiocompetitieSporterBoog(
+                                regiocompetitie=inst.regio_comp,
+                                sporterboog=inst.sporterboog_bb,
+                                bij_vereniging=inst.ver,
+                                indiv_klasse=inst.klasse_indiv_bb)
+    inst.regio_deelnemer_bb.save()
 
     inst.ag = Aanvangsgemiddelde(
-                        sporterboog=inst.sporterboog,
+                        sporterboog=inst.sporterboog_r,
                         boogtype=inst.boog_r,
                         # doel=AG_DOEL_INDIV,
                         afstand_meter=inst.comp.afstand,
@@ -725,8 +762,10 @@ def populate_inst(self, inst):
     inst.bestelling = self.bestelling
     inst.regio_comp = self.regio_comp
     inst.functie_hwl = self.functie_hwl
-    inst.sporterboog = self.sporterboog
-    inst.regio_deelnemer = self.regio_deelnemer
+    inst.sporterboog_r = self.sporterboog_r
+    inst.sporterboog_bb = self.sporterboog_bb
+    inst.regio_deelnemer_r = self.regio_deelnemer_r
+    inst.regio_deelnemer_bb = self.regio_deelnemer_bb
     inst.webwinkel_product = self.webwinkel_product
 
     # load members necessary for communication with the browser

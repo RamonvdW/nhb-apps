@@ -13,8 +13,37 @@ import time
 import os
 
 
+def outer(app_filter):
+    def inner(inst):
+        inst.run_focussed_tests(app_filter)
+    return inner
+
+
+class AddFocus(type):
+    # create focus_Appname methods before unittest does discovery
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        print('[INFO] adding focus methods for apps with JS tests:')
+
+        # find the apps with JS tests and add a method focus_AppName for use from browser_test.sh
+        for app in apps.get_app_configs():
+            add = False
+            js_tests_path = os.path.join(app.name, 'js_tests')
+            if os.path.exists(js_tests_path):
+                for d in os.listdir(js_tests_path):
+                    if d.startswith('test_') and d.endswith('.py'):
+                        add = True
+                        break
+                # for
+            if add:
+                print('  adding %s' % app.name)
+                setattr(self, 'focus_%s' % app.name, outer(app.name))
+        # for
+
+
 @tag("browser")         # deze tag voorkomt het uitvoeren van deze test tijden de main test run
-class TestBrowser(LiveServerTestCase):
+class TestBrowser(LiveServerTestCase, metaclass=AddFocus):
 
     """ entrypoint voor alle in-browser tests van Javascript
         alle applicaties kunnen testen aanleveren in app/js_tests/
@@ -93,12 +122,12 @@ class TestBrowser(LiveServerTestCase):
                             test_func = getattr(inst, inst_name)
                             if callable(test_func):
                                 self._test_count += 1
-                                print('  %s.%s.%s ...' % (test_module, name, inst_name), end='')
+                                print('  %s.%s.%s ... ' % (test_module, name, inst_name), end='')
                                 inst.init_js_cov()
                                 test_func()
                                 inst.fetch_js_cov()
                                 if self.show_browser and self.pause_after_each_test:
-                                    print('sleeping %s' % self.pause_after_test_seconds)
+                                    print('sleeping %s ... ' % self.pause_after_test_seconds, end='')
                                     time.sleep(self.pause_after_test_seconds)
                                 print('ok')
                     # for
@@ -152,44 +181,10 @@ class TestBrowser(LiveServerTestCase):
     def test_all(self):
         self._run_tests()
 
-    def _run_focussed_tests(self):              # pragma: no cover
-        # get the function name of the caller
-        caller_func_name = inspect.currentframe().f_back.f_code.co_name
+    def run_focussed_tests(self, app_filter):              # pragma: no cover
         self.show_browser = True
         self.pause_after_each_test = True
-        self._run_tests(app_filter=caller_func_name[6:])
+        self._run_tests(app_filter)
 
-    def focus_Account(self):                    # pragma: no cover
-        self._run_focussed_tests()
-
-    def focus_Bestelling(self):                 # pragma: no cover
-        self._run_focussed_tests()
-
-    def focus_Bondspas(self):                   # pragma: no cover
-        self._run_focussed_tests()
-
-    def focus_CompBeheer(self):                 # pragma: no cover
-        self._run_focussed_tests()
-
-    def focus_CompInschrijven(self):            # pragma: no cover
-        self._run_focussed_tests()
-
-    def focus_CompScores(self):                 # pragma: no cover
-        self._run_focussed_tests()
-
-    def focus_Logboek(self):                    # pragma: no cover
-        self._run_focussed_tests()
-
-    def focus_Overig(self):                     # pragma: no cover
-        self._run_focussed_tests()
-
-    def focus_Plein(self):                      # pragma: no cover
-        self._run_focussed_tests()
-
-    def focus_Sporter(self):                    # pragma: no cover
-        self._run_focussed_tests()
-
-    def focus_Webwinkel(self):                  # pragma: no cover
-        self._run_focussed_tests()
 
 # end of file

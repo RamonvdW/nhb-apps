@@ -41,7 +41,7 @@ class TestCompScoresInvoeren(bh.BrowserTestCase):
             self.assert_no_console_log()
 
         if True:
-            # score invoeren: dit triggert the controleer_score functie (oninput)
+            # score invoeren: dit triggert de controleer_score functie
             td = self.find_element_type_with_text('td', str(self.sporter.lid_nr))
             tr = self.get_parent(td)
             the_inp = None

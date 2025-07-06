@@ -116,7 +116,8 @@
                         </td>
                         <td>boogtype</td>
                         <td>
-                            <input class="score-invoer" type="text" placeholder="0" value="" size="3" maxlength="3" inputmode="numeric" style="width:3em; height:2rem; margin:0">
+                            <!-- let op: geen class="score-invoer" in de template -->
+                            <input type="text" placeholder="0" value="" size="3" maxlength="3" inputmode="numeric" style="width:3em; height:2rem; margin:0">
                         </td>
                         {% if deelcomp.regio_organiseert_teamcompetitie %}
                             <td><!-- team name --></td>
@@ -133,7 +134,7 @@
                             </td>
                             <td>{{ score.sporterboog.boogtype.beschrijving }}{% if score.team_gem %} ({{ score.team_gem }}){% endif %}</td>
                             <td>
-                                <input type="text" oninput="controleer_score(this)" placeholder="0" value="{{ score.waarde }}" size="3" maxlength="3" inputmode="numeric" style="width:3em; height:2rem; margin:0">
+                                <input class="score-invoer" type="text" placeholder="0" value="{{ score.waarde }}" size="3" maxlength="3" inputmode="numeric" style="width:3em; height:2rem; margin:0">
                             </td>
                             {% if deelcomp.regio_organiseert_teamcompetitie %}
                                 <td>{{ score.team_naam }}</td>
