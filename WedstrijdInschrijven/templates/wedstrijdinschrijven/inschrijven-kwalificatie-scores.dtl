@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2022-2023 Ramon van der Winkel.
+                Copyright (c) 2022-2025 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -181,7 +181,7 @@
             const minDate = new Date("{{ begin_datum|date:'Y-m-d' }}");
             const maxDate = new Date("{{ eind_datum|date:'Y-m-d' }}");
             const jarenRange = [{{ begin_jaar }}, {{ eind_jaar }}];
-            let el = null;
+            let el;
 
             {% for score in kwalificatie_scores %}
                 el = document.querySelector("#{{ score.datum_id }}");

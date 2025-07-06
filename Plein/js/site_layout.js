@@ -166,7 +166,7 @@ window.addEventListener('resize', () => {
 });
 
 
-document.addEventListener("DOMContentLoaded", (event) => {
+document.addEventListener("DOMContentLoaded", (_event) => {
     // initial HTML document has been completely loaded and parsed, without waiting for stylesheets, images, etc.
     //console.log('loaded!');
 

@@ -55,21 +55,15 @@ window.addEventListener("load", function() {
     let xhr = new XMLHttpRequest();
 
     // POST voorkomt caching
-    xhr.open("POST", dataset.urlDynamic, true);         // true = async
-    xhr.timeout = 60000;                                 // 60 sec voor trage verbinding
-
+    xhr.open("POST", dataset.urlDynamic, true);        // true = async
+    xhr.setRequestHeader("X-CSRFToken", dataset.csrfToken);
+    xhr.timeout = 60000;                                            // 60 sec voor trage verbinding
     xhr.onloadend = function(){
                         ophalen_klaar(xhr);
                     };
     xhr.ontimeout = function(){
                         ophalen_timeout(xhr);
                     };
-
-    //xhr.onloadend = ophalen_klaar;
-    //xhr.ontimeout = ophalen_timeout;
-    //xhr.onloadend = function(){ ophalen_klaar(xhr); };
-    //xhr.ontimeout = function(){ ophalen_timeout(xhr); };
-    xhr.setRequestHeader("X-CSRFToken", dataset.csrfToken);
     xhr.send();
 });
 

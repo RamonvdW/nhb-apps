@@ -4,6 +4,9 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
+# TODO: sometimes inserts coverage statements at inappropriate places, like inside a const object definition.
+# TODO: differentiate global vs function scope? (in addition to just counting braces)
+
 class JsCovInstrument:
 
     """ instrument a javascript file in order to measure coverage inside the browser.
@@ -46,6 +49,9 @@ class JsCovInstrument:
         self.js_cov_func = 'js_f%s' % str(self.local_f_counter)
         const_name = 'js_c%s' % str(self.local_f_counter)
 
+        clean += '/* jshint esversion: 6 */\n'
+        clean += '"use strict";\n'
+
         # declare a const that holds the long filename
         clean += 'const %s = "%s";\n' % (const_name, app_path)
 
@@ -77,7 +83,7 @@ class JsCovInstrument:
             if pos_sq >= 0 and pos_dq >= 0:
                 pos_q = min(pos_sq, pos_dq)  # both not -1 --> take first, thus min
             else:
-                pos_q = max(pos_sq, pos_dq)  # either one is -1 --> take max, thus the positive one
+                pos_q = max(pos_sq, pos_dq)  # either one is -1 --> take the positive one, thus max
 
             # zoek commentaar zodat we geen quotes in commentaar pakken /* can't */
             pos_sc = contents.find('//')  # single line comment
@@ -86,7 +92,7 @@ class JsCovInstrument:
             if pos_sc >= 0 and pos_bc >= 0:
                 pos_c = min(pos_sc, pos_bc)  # both not -1 --> take first, thus min
             else:
-                pos_c = max(pos_sc, pos_bc)  # either one is -1 --> take max, thus the positive one
+                pos_c = max(pos_sc, pos_bc)  # either one is -1 --> take the positive one, thus max
 
             if pos_c >= 0 and pos_q >= 0:
                 # zowel quote and commentaar
@@ -197,7 +203,8 @@ class JsCovInstrument:
                 script = ''
 
             if line.strip() != '':
-                line = line.rstrip()    # remove whitespace left after removing comment; keep indentation
+                if line[-2:] == "  ":
+                    line = line.rstrip()    # remove whitespace left after removing comment; keep indentation
 
                 # pre_brace_level = self.brace_level
                 self.brace_level = self.brace_level + line.count('(') + line.count('{')
@@ -249,7 +256,8 @@ class JsCovInstrument:
                     elif part and part[-1] in ('=', ',', '[', '"', "'"):
                         insert_here = False
                     else:
-                        # if 'function' in line or 'forEach' in line or 'if ' in line or 'else' in line or 'for' in line:
+                        # if ('function' in line or 'forEach' in line or
+                        #         'if ' in line or 'else' in line or 'for' in line):
                         #     print('[%s] OK part=%s' % (self.line_nr, repr(part)))
                         # else:
                         #     print('[%s] ?? part=%s' % (self.line_nr, repr(part)))

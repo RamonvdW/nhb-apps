@@ -124,7 +124,7 @@
         <tr style="border-bottom:none">
             <!-- knop -->
             <td class="right-align">
-                <button class="btn-sv-rood" onclick="stuur_keuzes_prev_next('{{ url_prev }}')">
+                <button class="btn-sv-rood" onclick="stuur_keuzes_prev()">
                     <i class="notranslate material-icons-round">chevron_left</i></button>
             </td>
 
@@ -134,7 +134,7 @@
 
             <!-- knop -->
             <td class="left-align">
-                <button class="btn-sv-rood" onclick="stuur_keuzes_prev_next('{{ url_next }}')">
+                <button class="btn-sv-rood" onclick="stuur_keuzes_next()">
                     <i class="notranslate material-icons-round">chevron_right</i></button>
             </td>
         </tr>
@@ -205,6 +205,8 @@
     </div>
 
     <div id="js_data"
+         data-url-prev="{{ url_prev }}"
+         data-url-next="{{ url_next }}"
          data-url-jaar="{{ url_jaar }}"
          data-url-maand="{{ url_maand }}">
     </div>

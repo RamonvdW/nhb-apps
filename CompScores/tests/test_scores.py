@@ -314,7 +314,10 @@ class TestCompScoresScores(E2EHelpers, TestCase):
             resp = self.client.post(self.url_deelnemer_zoeken,
                                     json.dumps(json_data),
                                     content_type='application/json')
-        self.assert404(resp, 'Geen valide verzoek')
+        self.assertEqual(resp.status_code, 200)       # 200 = OK
+        self.assertEqual(resp['Content-Type'], 'application/json')
+        json_data = resp.json()
+        self.assertTrue('fail' in json_data.keys())     # want geen inschrijvingen
 
         # post met alleen wedstrijd_pk
         json_data = {'wedstrijd_pk': 0}
@@ -322,7 +325,10 @@ class TestCompScoresScores(E2EHelpers, TestCase):
             resp = self.client.post(self.url_deelnemer_zoeken,
                                     json.dumps(json_data),
                                     content_type='application/json')
-        self.assert404(resp, 'Geen valide verzoek')
+        self.assertEqual(resp.status_code, 200)       # 200 = OK
+        self.assertEqual(resp['Content-Type'], 'application/json')
+        json_data = resp.json()
+        self.assertTrue('fail' in json_data.keys())     # want geen inschrijvingen
 
         # post niet-bestand wedstrijd_pk
         json_data = {'wedstrijd_pk': 999999,
@@ -330,7 +336,10 @@ class TestCompScoresScores(E2EHelpers, TestCase):
         resp = self.client.post(self.url_deelnemer_zoeken,
                                 json.dumps(json_data),
                                 content_type='application/json')
-        self.assert404(resp, 'Geen valide verzoek')
+        self.assertEqual(resp.status_code, 200)       # 200 = OK
+        self.assertEqual(resp['Content-Type'], 'application/json')
+        json_data = resp.json()
+        self.assertTrue('fail' in json_data.keys())     # want geen inschrijvingen
 
     def test_rcl_opslaan(self):
         self.e2e_login_and_pass_otp(self.testdata.comp18_account_rcl[101])

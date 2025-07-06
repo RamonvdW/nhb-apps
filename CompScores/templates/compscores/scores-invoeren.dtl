@@ -115,7 +115,9 @@
                             <span class="hide-on-small-only">&nbsp;naam van de vereniging</span>
                         </td>
                         <td>boogtype</td>
-                        <td><input type="text" oninput="controleer_score(this)" placeholder="0" value="" size="3" maxlength="3" inputmode="numeric" style="width:3em; height:2rem; margin:0"></td>
+                        <td>
+                            <input class="score-invoer" type="text" placeholder="0" value="" size="3" maxlength="3" inputmode="numeric" style="width:3em; height:2rem; margin:0">
+                        </td>
                         {% if deelcomp.regio_organiseert_teamcompetitie %}
                             <td><!-- team name --></td>
                         {% endif %}
@@ -130,7 +132,9 @@
                                 <span class="hide-on-small-only">&nbsp;{{ score.sporterboog.sporter.bij_vereniging.naam }}</span>
                             </td>
                             <td>{{ score.sporterboog.boogtype.beschrijving }}{% if score.team_gem %} ({{ score.team_gem }}){% endif %}</td>
-                            <td><input type="text" oninput="controleer_score(this)" placeholder="0" value="{{ score.waarde }}" size="3" maxlength="3" inputmode="numeric" style="width:3em; height:2rem; margin:0"></td>
+                            <td>
+                                <input type="text" oninput="controleer_score(this)" placeholder="0" value="{{ score.waarde }}" size="3" maxlength="3" inputmode="numeric" style="width:3em; height:2rem; margin:0">
+                            </td>
                             {% if deelcomp.regio_organiseert_teamcompetitie %}
                                 <td>{{ score.team_naam }}</td>
                             {% endif %}
@@ -161,7 +165,8 @@
                     </div>
 
                     <div style="display:inline-block; margin-left:100px">
-                        <button id="id_zoek_knop" class="btn-sv-rood" onclick="opzoeken(this)" data-opzoeken="id_lid_nr" data-lid_nr="id_bondsnummer" data-naam="id_naam" data-vereniging="id_ver" data-regio="id_regio_">
+                        <!-- click event binding is at eof -->
+                        <button id="id_zoek_knop" class="btn-sv-rood">
                             <i class="notranslate material-icons-round left">search</i>Zoek</button>
                     </div>
                 </div>
@@ -170,9 +175,6 @@
 
                 <!-- zoekresultaten -->
                 <div id="id_zoekresultaten" class="hide" style="padding:0 30px 0 30px">
-                    <!-- element om ontvangen zoekresultaat in op te slaan -->
-                    <div id="id_zoekresultaat" style="display:none"></div>
-
                     <table>
                         <tr>
                             <th>Bondsnummer</th>
@@ -201,7 +203,8 @@
 
                     <!-- toevoegen knop -->
                     <p class="center">
-                        <button id="id_btn_toevoegen" class="btn-sv-rood" onclick="toevoegen()" disabled>
+                        <!-- click event binding is at eof -->
+                        <button id="id_btn_toevoegen" class="btn-sv-rood" disabled>
                             <i class="notranslate material-icons-round left">add</i>Toevoegen</button>
                     </p>
                 </div>
@@ -215,14 +218,15 @@
         <div class="col s12" style="margin-top:50px">
 
             <!-- waarschijnlijke deelnemers -->
-            {% include 'plein/card_icon.dtl' with title="Lijst ophalen" text="Waarschijnlijke deelnemers toevoegen aan de uitslag." icon="add" onclick="deelnemers_ophalen(this)" %}
+            {% include 'plein/card_icon.dtl' with title="Lijst ophalen" text="Waarschijnlijke deelnemers toevoegen aan de uitslag." icon="add" onclick="deelnemers_ophalen()" %}
 
         </div>
 
     </div>
 
     <div class="fixed-action-btn">
-        <button class="btn-sv-rood" id="id_opslaan_knop" onclick="opslaan(this)">
+        <!-- click event binding is at eof -->
+        <button class="btn-sv-rood" id="id_opslaan_knop">
             <i class="notranslate material-icons-round left">check</i>Opslaan</button>
     </div>
 
@@ -243,7 +247,6 @@
     {{ team_pk2naam|json_script:"team_pk2naam" }}
 
     <script src="{% static 'compscores_js/scores_invoeren.js' %}"></script>
-
     <script src="{% static 'overig_js/tabel_filter.js' %}"></script>
 
     {% include 'feedback/sidebar.dtl' with op_pagina="compscores-scores-invoeren" %}

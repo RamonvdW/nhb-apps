@@ -10,6 +10,8 @@
 const dataset = document.getElementById("js_data").dataset;
 const urlMaand = dataset.urlMaand;
 const urlJaar = dataset.urlJaar;
+const urlPrev = dataset.urlPrev;
+const urlNext = dataset.urlNext;
 
 const el_zoek = document.getElementById('id_zoekterm');
 const el_filter_knop = document.getElementById('id_filter_knop');
@@ -32,9 +34,14 @@ function maak_url(url_main) {
     return url;
 }
 
-function stuur_keuzes_prev_next(url_prev_next) {
-    // wordt gebruikt voor de prev and next knoppen op zowel de jaar als maand pagina's
-    window.location.href = maak_url(url_prev_next);
+function stuur_keuzes_prev() {
+    // wordt gebruikt voor de prev knop op zowel de jaar als maand pagina's
+    window.location.href = maak_url(urlPrev);
+}
+
+function stuur_keuzes_next() {
+    // wordt gebruikt voor de next knop op zowel de jaar als maand pagina's
+    window.location.href = maak_url(urlNext);
 }
 
 function stuur_keuzes_maand() {
@@ -64,7 +71,7 @@ el_zoek.addEventListener("keyup", event => {
 });
 
 // filter uitklappen/inklappen knop
-el_filter_knop.addEventListener("click", function(event) {
+el_filter_knop.addEventListener("click", function(_event) {
     const els = document.getElementsByClassName('collapsible_filter');
     Array.prototype.forEach.call(els, function(el) {
         if (el.style.display === "none") {
