@@ -26,7 +26,7 @@
                     <tr>        <!-- filter veld -->
                         <td colspan="2"></td>
                         <td class="table-filter">
-                            <input class="table-filter" oninput="myTableFilter(this, 'tabel1')" placeholder="Zoeken"/>
+                            <input class="table-filter" oninput="tabel_filter(this, 'tabel1')" placeholder="Zoeken"/>
                         </td>
                         <td><!-- kolom voor knoppen --></td>
                     </tr>

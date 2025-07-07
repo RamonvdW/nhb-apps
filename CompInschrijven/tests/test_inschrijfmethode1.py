@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -11,7 +11,7 @@ from Competitie.models import Competitie, CompetitieMatch, Regiocompetitie, Regi
 from Competitie.operations import competities_aanmaken
 from Competitie.test_utils.tijdlijn import zet_competitie_fase_regio_inschrijven
 from Functie.tests.helpers import maak_functie
-from Geo.models import Rayon, Regio
+from Geo.models import Rayon, Regio, Cluster
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
@@ -68,6 +68,8 @@ class TestCompInschrijvenMethode1(E2EHelpers, TestCase):
         self.rayon_1 = Rayon.objects.get(rayon_nr=1)
         self.rayon_2 = Rayon.objects.get(rayon_nr=2)
         self.regio_101 = Regio.objects.get(regio_nr=101)
+        self.cluster_101a = Cluster.objects.create(regio=self.regio_101, letter='A', naam='Cluster 101a', gebruik='18')
+        self.cluster_101b = Cluster.objects.create(regio=self.regio_101, letter='B', naam='Cluster 101b', gebruik='18')
 
         # maak een test vereniging
         ver = Vereniging(
@@ -75,6 +77,7 @@ class TestCompInschrijvenMethode1(E2EHelpers, TestCase):
                     ver_nr=1000,
                     regio=self.regio_101)
         ver.save()
+        ver.clusters.add(self.cluster_101a)
         self._ver = ver
 
         # maak HWL functie aan voor deze vereniging
@@ -114,16 +117,17 @@ class TestCompInschrijvenMethode1(E2EHelpers, TestCase):
                                                              regio=self.regio_101).functie
 
         # maak nog een test vereniging, zonder HWL functie
-        ver = Vereniging(
+        ver2 = Vereniging(
                     naam="Kleine Club",
                     ver_nr=1100,
                     regio=self.regio_101)
-        ver.save()
-        self._ver2 = ver
+        ver2.save()
+        ver2.clusters.add(self.cluster_101b)
+        self._ver2 = ver2
 
         # maak HWL functie aan voor deze vereniging
-        hwl = maak_functie("HWL Vereniging %s" % ver.ver_nr, "HWL")
-        hwl.vereniging = ver
+        hwl = maak_functie("HWL Vereniging %s" % ver2.ver_nr, "HWL")
+        hwl.vereniging = ver2
         hwl.save()
 
         self._competitie_instellingen()
@@ -155,18 +159,25 @@ class TestCompInschrijvenMethode1(E2EHelpers, TestCase):
         # wissen naar RCL rol
         self.e2e_wissel_naar_functie(self.functie_rcl101_18)
 
-        # maak wedstrijden 1 voor inschrijfmethode 1
-
-        # doe een POST om de eerste ronde aan te maken
+        # doe een POST om de rondes van inschrijfmethode1 aan te maken
+        # 2 cluster-specifieke rondes + 1 niet-cluster ronde
         url = self.url_planning_regio % self.deelcomp.pk
-        with self.assert_max_queries(20):
+        self.assertEqual(RegiocompetitieRonde.objects.count(), 0)
+        with self.assert_max_queries(23):
             resp = self.client.post(url)
         self.assert_is_redirect(resp, url)
+        self.assertEqual(RegiocompetitieRonde.objects.count(), 3)
 
-        ronde_pk = RegiocompetitieRonde.objects.filter(regiocompetitie=self.deelcomp).first().pk
+        ronde_pk = (RegiocompetitieRonde
+                    .objects
+                    .filter(regiocompetitie=self.deelcomp,
+                            cluster=self.cluster_101a)
+                    .first()).pk
         url_ronde = self.url_planning_regio_ronde_methode1 % ronde_pk
 
-        # maak 5 wedstrijden aan
+        # maak 1e keus wedstrijden voor inschrijfmethode 1
+        # maak 5 wedstrijden aan voor de vereniging in cluster 101a
+
         self.assertEqual(CompetitieMatch.objects.count(), 0)
         with self.assert_max_queries(20):
             resp = self.client.post(url_ronde)
@@ -190,6 +201,35 @@ class TestCompInschrijvenMethode1(E2EHelpers, TestCase):
             match.datum_wanneer = '2019-%s-15' % maand
             match.tijd_begin_wedstrijd = '19:00'
             match.vereniging = self._ver
+            match.save(update_fields=['datum_wanneer', 'tijd_begin_wedstrijd', 'vereniging'])
+
+            maand += 1
+        # for
+
+        # maak 2e keus wedstrijden voor inschrijfmethode 1
+        # maak 4 wedstrijden aan voor de vereniging in cluster 101b
+
+        ronde_pk = (RegiocompetitieRonde
+                    .objects
+                    .filter(regiocompetitie=self.deelcomp,
+                            cluster=self.cluster_101b)
+                    .first()).pk
+        url_ronde = self.url_planning_regio_ronde_methode1 % ronde_pk
+
+        with self.assert_max_queries(20):
+            resp = self.client.post(url_ronde)
+        self.assert_is_redirect_not_plein(resp)
+        self.assertTrue(self.url_wijzig_wedstrijd[:-3] in resp.url)     # [:-3] cuts off %s/
+        self.client.post(url_ronde)
+        self.client.post(url_ronde)
+        self.client.post(url_ronde)
+
+        # zet de nieuwe wedstrijden op de 17 van elke maand en vereniging 2
+        maand = 7
+        for match in CompetitieMatch.objects.exclude(pk__in=self.match_pks):
+            match.datum_wanneer = '2019-%s-17' % maand
+            match.tijd_begin_wedstrijd = '19:00'
+            match.vereniging = self._ver2
             match.save(update_fields=['datum_wanneer', 'tijd_begin_wedstrijd', 'vereniging'])
 
             maand += 1
@@ -270,7 +310,7 @@ class TestCompInschrijvenMethode1(E2EHelpers, TestCase):
             # for
 
             # schrijf in voor de competitie
-            with self.assert_max_queries(56):
+            with self.assert_max_queries(53):
                 resp = self.client.post(url_inschrijven, post_params)
             self.assert_is_redirect_not_plein(resp)         # check for success
         # for
@@ -303,7 +343,7 @@ class TestCompInschrijvenMethode1(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_rcl101_18)
 
         # haal het lege overzicht op
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(22):
             resp = self.client.get(self.url_behoefte1 % (self.comp_18.pk, self.regio_101.pk))
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -314,7 +354,7 @@ class TestCompInschrijvenMethode1(E2EHelpers, TestCase):
         self._doe_inschrijven(self.comp_18)     # wisselt naar HWL functie
         self.e2e_wissel_naar_functie(self.functie_rcl101_18)
 
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(26):
             resp = self.client.get(self.url_behoefte1 % (self.comp_18.pk, self.regio_101.pk))
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         html = self.assert_html_ok(resp)
@@ -329,21 +369,25 @@ class TestCompInschrijvenMethode1(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         csv_file = 'Nummer;Wedstrijd;Locatie;Blazoenen:;40cm;DT;DT wens;60cm\r\n'
         csv_file += '1;maandag 15 juli 2019 om 19:00;[1000] Grote Club;;0;0;0;0\r\n'
-        csv_file += '2;donderdag 15 augustus 2019 om 19:00;[1000] Grote Club;;5;2;2;1\r\n'
-        csv_file += '3;zondag 15 september 2019 om 19:00;[1000] Grote Club;;5;2;2;1\r\n'
-        csv_file += '4;dinsdag 15 oktober 2019 om 19:00;[1000] Grote Club;;5;2;2;1\r\n'
-        csv_file += '5;vrijdag 15 november 2019 om 19:00;[1000] Grote Club;;5;2;2;1\r\n'
-        csv_file += '\r\nBondsnummer;Sporter;Vereniging;Wedstrijdklasse (individueel);1;2;3;4;5\r\n'
-        csv_file += '110001;Lid 110001 de Tester;[1000] Grote Club;Barebow Onder 14 Jongens;;X;X;X;X\r\n'
-        csv_file += '110002;Lid 110002 de Tester;[1000] Grote Club;Recurve Onder 21 klasse onbekend;;X;X;X;X\r\n'
-        csv_file += '110003;Lid 110003 de Tester;[1000] Grote Club;Compound Onder 21 klasse onbekend;;X;X;X;X\r\n'
-        csv_file += '110004;Lid 110004 de Tester;[1000] Grote Club;Recurve Onder 21 klasse onbekend;;X;X;X;X\r\n'
-        csv_file += '110005;Lid 110005 de Tester;[1000] Grote Club;Recurve Onder 21 klasse onbekend;;X;X;X;X\r\n'
-        csv_file += '110006;Lid 110006 de Tester;[1100] Kleine Club;Recurve Onder 21 klasse onbekend;;X;X;X;X\r\n'
-        csv_file += '110007;Lid 110007 de Tester;[1100] Kleine Club;Recurve Onder 21 klasse onbekend;;X;X;X;X\r\n'
-        csv_file += '110008;Lid 110008 de Tester;[1100] Kleine Club;Compound Onder 21 klasse onbekend;;X;X;X;X\r\n'
-        csv_file += '110009;Lid 110009 de Tester;[1100] Kleine Club;Recurve Onder 21 klasse onbekend;;X;X;X;X\r\n'
-        csv_file += '110010;Lid 110010 de Tester;[1100] Kleine Club;Recurve Onder 21 klasse onbekend;;X;X;X;X\r\n'
+        csv_file += '2;woensdag 17 juli 2019 om 19:00;[1100] Kleine Club;;0;0;0;0\r\n'
+        csv_file += '3;donderdag 15 augustus 2019 om 19:00;[1000] Grote Club;;5;2;2;1\r\n'
+        csv_file += '4;zaterdag 17 augustus 2019 om 19:00;[1100] Kleine Club;;0;0;0;0\r\n'
+        csv_file += '5;zondag 15 september 2019 om 19:00;[1000] Grote Club;;5;2;2;1\r\n'
+        csv_file += '6;dinsdag 17 september 2019 om 19:00;[1100] Kleine Club;;0;0;0;0\r\n'
+        csv_file += '7;dinsdag 15 oktober 2019 om 19:00;[1000] Grote Club;;5;2;2;1\r\n'
+        csv_file += '8;donderdag 17 oktober 2019 om 19:00;[1100] Kleine Club;;0;0;0;0\r\n'
+        csv_file += '9;vrijdag 15 november 2019 om 19:00;[1000] Grote Club;;5;2;2;1\r\n'
+        csv_file += '\r\nBondsnummer;Sporter;Vereniging;Wedstrijdklasse (individueel);1;2;3;4;5;6;7;8;9\r\n'
+        csv_file += '110001;Lid 110001 de Tester;[1000] Grote Club;Barebow Onder 14 Jongens;;;X;;X;;X;;X\r\n'
+        csv_file += '110002;Lid 110002 de Tester;[1000] Grote Club;Recurve Onder 21 klasse onbekend;;;X;;X;;X;;X\r\n'
+        csv_file += '110003;Lid 110003 de Tester;[1000] Grote Club;Compound Onder 21 klasse onbekend;;;X;;X;;X;;X\r\n'
+        csv_file += '110004;Lid 110004 de Tester;[1000] Grote Club;Recurve Onder 21 klasse onbekend;;;X;;X;;X;;X\r\n'
+        csv_file += '110005;Lid 110005 de Tester;[1000] Grote Club;Recurve Onder 21 klasse onbekend;;;X;;X;;X;;X\r\n'
+        csv_file += '110006;Lid 110006 de Tester;[1100] Kleine Club;Recurve Onder 21 klasse onbekend;;;X;;X;;X;;X\r\n'
+        csv_file += '110007;Lid 110007 de Tester;[1100] Kleine Club;Recurve Onder 21 klasse onbekend;;;X;;X;;X;;X\r\n'
+        csv_file += '110008;Lid 110008 de Tester;[1100] Kleine Club;Compound Onder 21 klasse onbekend;;;X;;X;;X;;X\r\n'
+        csv_file += '110009;Lid 110009 de Tester;[1100] Kleine Club;Recurve Onder 21 klasse onbekend;;;X;;X;;X;;X\r\n'
+        csv_file += '110010;Lid 110010 de Tester;[1100] Kleine Club;Recurve Onder 21 klasse onbekend;;;X;;X;;X;;X\r\n'
         self.assertContains(resp, csv_file, msg_prefix="(was: %s)" % resp.content)
 
     def test_bad_hwl(self):

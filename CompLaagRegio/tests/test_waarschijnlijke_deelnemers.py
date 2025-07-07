@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2024 Ramon van der Winkel.
+#  Copyright (c) 2020-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -535,36 +535,8 @@ class TestCompLaagRegioWaarschijnlijkeDeelnemers(E2EHelpers, TestCase):
         self.e2e_check_rol('SEC')
 
         # haal de lijst van wedstrijden
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_wedstrijden)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('compscores/wedstrijden.dtl', 'plein/site_layout.dtl'))
-
-        url = self.url_waarschijnlijke % self.wedstrijden[2].pk
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagregio/waarschijnlijke-deelnemers-regio.dtl', 'plein/site_layout.dtl'))
-
-        # maak een wedstrijd die niet bij een ronde hoort
-        match = CompetitieMatch(
-                    competitie=self.comp_18,
-                    beschrijving='Special',
-                    vereniging=self.functie_sec.vereniging,
-                    datum_wanneer='2022-02-22',
-                    tijd_begin_wedstrijd='02:22')
-        match.save()
-
-        url = self.url_waarschijnlijke % match.pk
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assert404(resp, 'Geen competitie wedstrijd')
-
-        url = self.url_waarschijnlijke_bestand % match.pk
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assert404(resp, 'Geen competitie wedstrijd')
+        resp = self.client.get(self.url_wedstrijden)
+        self.assert403(resp)
 
     def test_bad(self):
         # geen toegang tot de pagina

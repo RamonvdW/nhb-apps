@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2022-2023 Ramon van der Winkel.
+                Copyright (c) 2022-2025 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -37,7 +37,7 @@
 
         <!-- de bondspas (wordt pas getoond na ophalen bondspas plaatje) -->
         <div class="col s12">
-            <img id="id_image" alt="Bondspas" src="#" style="max-width:800px; width:100%; height:auto; display:none"/>
+            <img id="id_image" alt="Bondspas" src="#" style="max-width:800px; width:100%; height:auto; display:none" draggable="false">
         </div>
     </div>
 

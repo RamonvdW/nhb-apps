@@ -252,10 +252,10 @@
             } // for
 
             // table filter uitzetten zodat de nieuwe regel getoond kan worden
-            // maak zoekveld leeg; dit triggert myTableFilter()
+            // maak zoekveld leeg; dit triggert tabel_filter()
             const el_filter = document.getElementById("table1_zoeken_input");
             el_filter.value = "";
-            myTableFilter(el_filter, 'table1');
+            tabel_filter(el_filter, 'table1');
 
             // voeg een regel(s) toe aan de tabel, op de juiste positie
             // doe dit door een kopie te maken
@@ -418,10 +418,10 @@
             base_row.cells[2].removeAttribute("data-clean_text");
 
             // table filter uitzetten zodat de nieuwe regels getoond kunnen worden
-            // maak zoekveld leeg; dit triggert myTableFilter()
+            // maak zoekveld leeg; dit triggert tabel_filter()
             const el_filter = document.getElementById("table1_zoeken_input");
             el_filter.value = "";
-            myTableFilter(el_filter, 'table1');
+            tabel_filter(el_filter, 'table1');
 
             let deelnemers = rsp['deelnemers'];
             // sorteer deelnemers op invoeg-volgorde: bondsnummer
@@ -609,7 +609,7 @@
                     <thead>
                         <tr>        <!-- filter veld -->
                             <td class="table-filter" colspan="4">
-                                <input id="table1_zoeken_input" class="table-filter" autofocus oninput="myTableFilter(this, 'table1')" placeholder="Zoeken"/>
+                                <input id="table1_zoeken_input" class="table-filter" autofocus oninput="tabel_filter(this, 'table1')" placeholder="Zoeken"/>
                             </td>
                             <td{% if deelcomp.regio_organiseert_teamcompetitie %} colspan="2"{% endif %}></td>
                         </tr>

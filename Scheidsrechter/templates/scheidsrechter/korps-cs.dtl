@@ -33,7 +33,7 @@
                 <thead>
                     <tr>        <!-- filter veld -->
                         <td colspan="2" class="table-filter">
-                            <input class="table-filter" oninput="myTableFilter(this, 'tabel1')" placeholder="Zoeken" autofocus/>
+                            <input class="table-filter" oninput="tabel_filter(this, 'tabel1')" placeholder="Zoeken" autofocus/>
                         </td>
                         <td colspan="4"></td>
                     </tr>

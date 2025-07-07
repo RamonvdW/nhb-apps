@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -461,10 +461,10 @@ class TestCompLaagRegioTeamsRCL(E2EHelpers, TestCase):
         self.assert403(resp, 'Verkeerde beheerder')
 
     def test_ag_controle(self):
-        self.e2e_login_and_pass_otp(self.account_rcl112_18)
-        self.e2e_wissel_naar_functie(self.functie_rcl112_18)
+        self.e2e_login_and_pass_otp(self.account_rcl101_18)
+        self.e2e_wissel_naar_functie(self.functie_rcl101_18)
 
-        url = self.url_ag_controle % (self.comp_18.pk, 112)
+        url = self.url_ag_controle % (self.comp_18.pk, 101)
 
         with self.assert_max_queries(20):
             resp = self.client.get(url)
@@ -476,7 +476,7 @@ class TestCompLaagRegioTeamsRCL(E2EHelpers, TestCase):
         RegiocompetitieSporterBoog(
                 sporterboog=self.sporterboog,
                 bij_vereniging=self.sporterboog.sporter.bij_vereniging,
-                regiocompetitie=self.deelcomp_regio112_18,
+                regiocompetitie=self.deelcomp_regio101_18,
                 indiv_klasse=self.klasse_recurve_onbekend,
                 inschrijf_voorkeur_team=True,
                 ag_voor_team_mag_aangepast_worden=True,
@@ -533,6 +533,7 @@ class TestCompLaagRegioTeamsRCL(E2EHelpers, TestCase):
         team1, poule = self._maak_teams(self.deelcomp_regio112_18)
 
         # maak 1 team niet af
+        old_klasse = team1.team_klasse
         team1.team_klasse = None
         team1.save(update_fields=['team_klasse'])
         # TODO: voorkom opstarten ronde1 zonder de team_klasse ingevuld
@@ -546,12 +547,15 @@ class TestCompLaagRegioTeamsRCL(E2EHelpers, TestCase):
         # print('urls: %s' % repr(urls))
         self.assertTrue(len(urls) == 0)
 
+        team1.team_klasse = old_klasse
+        team1.save(update_fields=['team_klasse'])
+
         # start de eerste ronde op
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'snel': 1})
         self.assert_is_redirect(resp, self.url_overzicht_beheer % self.deelcomp_regio112_18.competitie.pk)
 
-        # nog een paar om concurrency echt flink te testen
+        # nog een paar, om concurrency protection te testen
         self.client.post(url, {'snel': 1})
         self.client.post(url, {'snel': 1})
 

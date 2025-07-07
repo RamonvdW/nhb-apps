@@ -167,7 +167,7 @@
                 <thead>
                     <tr>        <!-- filter veld -->
                         <td colspan="3" class="table-filter">
-                            <input class="table-filter" oninput="myTableFilter(this, 'tabel_hulp')" placeholder="Zoeken"/>
+                            <input class="table-filter" oninput="tabel_filter(this, 'tabel_hulp')" placeholder="Zoeken"/>
                         </td>
                         <td></td>
                     </tr>
@@ -217,7 +217,7 @@
                     <tr>        <!-- filter veld -->
                         <td></td>
                         <td colspan="2" class="table-filter">
-                            <input class="table-filter" oninput="myTableFilter(this, 'tabel_nieuwe')" placeholder="Zoeken"/>
+                            <input class="table-filter" oninput="tabel_filter(this, 'tabel_nieuwe')" placeholder="Zoeken"/>
                         </td>
                         <td colspan="4"></td>
                     </tr>
@@ -266,7 +266,7 @@
                     <tr>        <!-- filter veld -->
                         <td></td>
                         <td colspan="2" class="table-filter">
-                            <input class="table-filter" oninput="myTableFilter(this, 'tabel_activiteit')" placeholder="Zoeken"/>
+                            <input class="table-filter" oninput="tabel_filter(this, 'tabel_activiteit')" placeholder="Zoeken"/>
                         </td>
                         <td colspan="3"></td>
                     </tr>
@@ -312,7 +312,7 @@
                     <tr>        <!-- filter veld -->
                         <td colspan="2"></td>
                         <td colspan="2" class="table-filter">
-                            <input class="table-filter" oninput="myTableFilter(this, 'tabel_inlog')" placeholder="Zoeken"/>
+                            <input class="table-filter" oninput="tabel_filter(this, 'tabel_inlog')" placeholder="Zoeken"/>
                         </td>
                         <td colspan="3"></td>
                     </tr>

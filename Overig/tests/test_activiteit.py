@@ -50,6 +50,12 @@ class TestOverigActiviteit(E2EHelpers, TestCase):
         account.email_is_bevestigd = True
         account.save(update_fields=['email_is_bevestigd'])
 
+        # maak een account aan waarop inlog mislukt is
+        self.account_mislukt = self.e2e_create_account('100003', 'mislukt@test.not', 'Inlog Mislukt')
+        self.account_mislukt.last_login = timezone.now() - datetime.timedelta(days=7)
+        self.account_mislukt.laatste_inlog_poging = timezone.now() - datetime.timedelta(days=1)
+        self.account_mislukt.save(update_fields=['laatste_inlog_poging', 'last_login'])
+
         now = timezone.now()
         self.huidige_jaar = now.year
 
@@ -207,7 +213,7 @@ class TestOverigActiviteit(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('overig/activiteit.dtl', 'plein/site_layout.dtl'))
         urls = self.extract_all_urls(resp, skip_menu=True)
-        self.assertIn(self.url_bondspas % '100004', urls)
+        self.assertNotIn(self.url_bondspas % '100004', urls)
 
         # gast-account (geen bondspas)
         with self.assert_max_queries(20):
@@ -313,6 +319,9 @@ class TestOverigActiviteit(E2EHelpers, TestCase):
         self.e2e_wisselnaarrol_bb()
         self.e2e_check_rol('BB')
 
+        rayon3 = self.testdata.rayon[3]
+        regio116 = self.testdata.regio[116]
+
         functie = maak_functie('Test functie 1', 'MO')
         functie.accounts.add(self.account_100001)
 
@@ -320,18 +329,28 @@ class TestOverigActiviteit(E2EHelpers, TestCase):
         functie.accounts.add(self.account_100001)
 
         functie = maak_functie('Test functie 3', 'RKO')
+        functie.rayon = rayon3
+        functie.save(update_fields=['rayon'])
         functie.accounts.add(self.account_100001)
 
         functie = maak_functie('Test functie 4', 'RCL')
+        functie.regio = regio116
+        functie.save(update_fields=['regio'])
         functie.accounts.add(self.account_100001)
 
         functie = maak_functie('Test functie 5', 'SEC')
+        functie.vereniging = self.ver1
+        functie.save(update_fields=['vereniging'])
         functie.accounts.add(self.account_100001)
 
         functie = maak_functie('Test functie 6', 'HWL')
+        functie.vereniging = self.ver1
+        functie.save(update_fields=['vereniging'])
         functie.accounts.add(self.account_100001)
 
         functie = maak_functie('Test functie 7', 'WL')
+        functie.vereniging = self.ver1
+        functie.save(update_fields=['vereniging'])
         functie.accounts.add(self.account_100001)
 
         # maak dat het account hulp nodig heeft en dus in de lijst komt te staan
@@ -350,6 +369,11 @@ class TestOverigActiviteit(E2EHelpers, TestCase):
         self.account_normaal.save()
 
         self.e2e_login_and_pass_otp(self.account_normaal)
+
+        # niet toegestaan om deze pagina te gebruiken
+        resp = self.client.post(self.url_loskoppelen, {})
+        self.assert403(resp)
+
         self.e2e_logout()
 
         self.e2e_login_and_pass_otp(self.testdata.account_admin)

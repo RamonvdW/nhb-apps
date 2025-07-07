@@ -64,7 +64,7 @@
                     <tr>        <!-- filter veld -->
                         <td></td>
                         <td colspan="3" class="table-filter">
-                            <input class="table-filter" oninput="myTableFilter(this, 'table1')" placeholder="Zoeken"/>
+                            <input class="table-filter" oninput="tabel_filter(this, 'table1')" placeholder="Zoeken"/>
                         </td>
                         <td colspan="2"></td>
                     </tr>

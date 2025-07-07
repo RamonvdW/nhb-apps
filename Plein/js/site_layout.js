@@ -58,7 +58,7 @@ function getCookieNumber(name) {
 //       <tr>        <!-- filter veld -->
 //         <td colspan="2"></td>
 //         <td colspan="2" class="table-filter">
-//            <input class="table-filter" oninput="myTableFilter(this, 'table3')" placeholder="Zoeken"/>
+//            <input class="table-filter" oninput="tabel_filter(this, 'table3')" placeholder="Zoeken"/>
 //         </td>
 //         <td colspan="3"></td>
 //       </tr>
@@ -73,7 +73,7 @@ function getCookieNumber(name) {
 //       </tr>
 //     </thead>
 
-function myTableFilter(zoekveld, tableId)
+function tabel_filter(zoekveld, tableId)
 {
     'use strict';
     const table = document.getElementById(tableId);
@@ -206,13 +206,12 @@ function myTableFilter(zoekveld, tableId)
 //     <button class="btn-sv-rood" onclick="filter_activate()">Activeer</button>
 
 function filters_activate() {
-    'use strict';
 
     // get the template url (with the ~1 etc in it)
     let url = document.getElementById("filters").dataset.url;
 
     // replace the ~1 etc. as far as present in the url
-    for(let nr=1; nr<8; nr++) {
+    for (let nr = 1; nr < 8; nr++) {
         let tilde_nr = '~' + nr;
         if (url.includes(tilde_nr)) {
             let el = document.querySelector("input[name='filter_" + nr + "']:checked");
@@ -246,8 +245,6 @@ function filters_activate() {
 //        -->      onchange="mirror_radio('makl2', 'filter_4')">
 //
 function mirror_radio(src_name, dst_name) {
-    'use strict';
-
     // zoek het geselecteerde element in de bron radiobutton set
     const src_sel = "input[type='radio'][name=" + src_name + "]:checked";
     const src_value = document.querySelector(src_sel).value;
@@ -278,6 +275,7 @@ function set_collapsible_icon(li_el, new_icon) {
 function uitklappen_klaar(id) {
     set_collapsible_icon(id, 'remove');     // expand_less
 }
+
 function inklappen_klaar(id) {
     set_collapsible_icon(id, 'add');        // expand_more
 }
@@ -289,15 +287,18 @@ function sitelayout_loaded() {
     //console.log('loaded!');
 
     let elems = document.querySelectorAll(".collapsible");
-    M.Collapsible.init(elems, { //inDuration: 100,    // default is 300
-                                //outDuration: 100,   // default is 300
-                                onOpenEnd: uitklappen_klaar,
+
+    M.Collapsible.init(elems, { onOpenEnd: uitklappen_klaar,
                                 onCloseEnd: inklappen_klaar,
-                                });
+                                //inDuration: 100,    // default is 300
+                                //outDuration: 100,   // default is 300
+    });
 
     elems = document.querySelectorAll(".collapsible-header .secondary-content");
     // console.log('header icons:', elems)
-    elems.forEach(icon => {icon.innerText = 'add';});    // gelijk houden aan inklappen_klaar
+    elems.forEach(icon => {
+        icon.innerText = 'add';
+    });    // gelijk houden aan inklappen_klaar
 
     // dropdown menu
     elems = document.querySelectorAll(".dropdown-trigger");
@@ -305,7 +306,7 @@ function sitelayout_loaded() {
 
     // tooltips
     elems = document.querySelectorAll(".tooltipped");
-    M.Tooltip.init(elems, { enterDelay: 1000 });
+    M.Tooltip.init(elems, {enterDelay: 1000});
 
     // rolgordijnen
     elems = document.querySelectorAll("select");
@@ -320,12 +321,15 @@ function sitelayout_loaded() {
     M.Materialbox.init(elems, {});
 
     // console.log('history.length:', history.length)
+
     if (history.length < 2) {
         // nothing to go back to
         // typically happens when opening a manual page in a new window
         const el = document.getElementById("id_kruimels_back");
         // element bestaat niet als broodkruimels uitgezet zijn, zoals op het Plein zelf
-        if (el) el.style.display = "none";
+        if (el) {
+            el.style.display = "none";
+        }
     }
 
     // framework init, after everything has been loaded and instantiated
@@ -351,7 +355,7 @@ function sitelayout_load() {
     Array.from(tables).forEach(table => {
         if (table.id !== "") {
             const inputs = table.getElementsByTagName("input");
-            if (inputs.length >= 1) myTableFilter(inputs[0], table.id);
+            if (inputs.length >= 1) tabel_filter(inputs[0], table.id);
         }
     });
 

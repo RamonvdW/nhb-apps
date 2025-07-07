@@ -51,7 +51,7 @@
                         <td class="hide-on-med-and-down"></td>
                     {% endif %}
 
-                    <td colspan="2" class="table-filter"><input class="table-filter" autofocus oninput="myTableFilter(this, 'table1')" placeholder="Zoeken"/></td>
+                    <td colspan="2" class="table-filter"><input class="table-filter" autofocus oninput="tabel_filter(this, 'table1')" placeholder="Zoeken"/></td>
 
                     <td class="hide-on-small-only"><!-- accommodatie details/icoontjes --></td>
 

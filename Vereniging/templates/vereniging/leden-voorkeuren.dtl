@@ -34,7 +34,7 @@
                     <table class="sv-kader" id="table1">   <!-- id is voor filter -->
                         <thead>
                             <tr>        <!-- filter veld -->
-                                <td class="table-filter"><input class="table-filter" oninput="myTableFilter(this, 'table1')" placeholder="Zoeken"/></td>
+                                <td class="table-filter"><input class="table-filter" oninput="tabel_filter(this, 'table1')" placeholder="Zoeken"/></td>
                                 <td colspan="5"></td>
                             </tr>
                             <tr>
@@ -99,7 +99,7 @@
             <table class="sv-kader" id="table2">   <!-- id is voor filter -->
                 <thead>
                     <tr>        <!-- filter veld -->
-                        <td class="table-filter"><input class="table-filter" oninput="myTableFilter(this, 'table2')" placeholder="Zoeken"/></td>
+                        <td class="table-filter"><input class="table-filter" oninput="tabel_filter(this, 'table2')" placeholder="Zoeken"/></td>
                         <td colspan="3"></td>
                     </tr>
                     <tr>

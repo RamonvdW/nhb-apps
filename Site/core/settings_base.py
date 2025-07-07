@@ -238,7 +238,7 @@ STATICFILES_DIRS = [
     ("webwinkel_fotos", WEBWINKEL_FOTOS_DIR),       # noqa
 ]
 STATICFILES_FINDERS = [
-    'Site.core.transpose_js.AppJsFinder',                       # create static files from .js + minify/instrument
+    #'Site.core.transpose_js.AppJsFinder',                       # create static files from .js + minify/instrument
     'django.contrib.staticfiles.finders.FileSystemFinder',      # zoekt in STATICFILES_DIRS
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',  # zoekt in App/static/
 ]
