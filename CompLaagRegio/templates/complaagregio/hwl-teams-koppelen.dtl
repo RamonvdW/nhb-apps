@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2021-2023 Ramon van der Winkel.
+                Copyright (c) 2021-2025 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -41,7 +41,7 @@
                     if (checkbox.checked) count += 1;
                 });
 
-            el.disabled = (count > 4);
+            el.disabled = (count > 3);
             el.parentElement.style.display = "block";
         }
     </script>
@@ -174,7 +174,7 @@
     </div>
 
     <div class="center">
-        <p>De <i>team sterkte</i> wordt berekend uit het aanvangsgemiddelde van de drie sterkste teamleden.</p>
+        <p>De <i>team sterkte</i> wordt berekend uit het aanvangsgemiddelde van de drie teamleden.</p>
         <p>De <i>team wedstrijdklasse</i> wordt bepaald door de team sterkte en de vastgestelde minimum sterkte voor een wedstrijdklasse.</p>
     </div>
 

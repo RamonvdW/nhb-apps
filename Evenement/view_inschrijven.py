@@ -17,7 +17,7 @@ from Bestelling.operations import mandje_tel_inhoud, bestel_mutatieverzoek_insch
 from Evenement.models import Evenement, EvenementInschrijving
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige
-from Kalender.view_maand import MAAND2URL
+from Kalender.definities import MAAND2URL
 from Sporter.models import Sporter, get_sporter
 from datetime import timedelta
 

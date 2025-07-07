@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023-2024 Ramon van der Winkel.
+#  Copyright (c) 2023-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -703,9 +703,9 @@ class FormulierBkTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
         return response
 
 
-class InformatieHWLView(UserPassesTestMixin, TemplateView):
+class MatchInformatieView(UserPassesTestMixin, TemplateView):
 
-    """ Toon de BKO de lijst van BK programma's die gedownload kunnen worden """
+    """ Toon de HWL/WL informatie over de BK wedstrijd (geen deelnemerslijst) """
 
     # class variables shared by all instances
     template_name = TEMPLATE_HWL_BK_MATCH_INFORMATIE
@@ -720,7 +720,7 @@ class InformatieHWLView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.functie_nu and rol_nu == Rol.ROL_HWL
+        return self.functie_nu and rol_nu in (Rol.ROL_HWL, Rol.ROL_WL)
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2024 Ramon van der Winkel.
+#  Copyright (c) 2020-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -426,15 +426,7 @@ class TestCompScoresWedstrijden(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_sec)
         self.e2e_check_rol('SEC')
 
-        # haal de lijst van wedstrijden
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_wedstrijden)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compscores/wedstrijden.dtl', 'plein/site_layout.dtl'))
-
         # geen toegang tot de pagina
-        self.client.logout()
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_wedstrijden)
         self.assert403(resp)

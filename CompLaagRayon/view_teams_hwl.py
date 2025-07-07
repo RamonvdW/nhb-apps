@@ -120,7 +120,7 @@ class TeamsRkView(UserPassesTestMixin, TemplateView):
 
         return deelkamp
 
-    def _get_rk_teams(self, deelkamp, is_vastgesteld):
+    def _get_rk_teams(self, deelkamp: Kampioenschap, is_vastgesteld):
 
         if deelkamp.competitie.is_indoor():
             aantal_pijlen = 30
@@ -644,6 +644,8 @@ class RKTeamsKoppelLedenView(UserPassesTestMixin, TemplateView):
                         pks.append(pk)
                     # silently ignore bad pks
         # for
+
+        pks = pks[:3]   # limiteer tot maximaal 3 leden
 
         if open_inschrijving:
             rk_team.tijdelijke_leden.clear()

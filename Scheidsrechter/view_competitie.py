@@ -225,14 +225,15 @@ class MatchDetailsView(UserPassesTestMixin, TemplateView):
 
         context['match'] = match
 
-        toon_kaart = match.locatie.plaats != '(diverse)' and match.locatie.adres != '(diverse)'
-        if toon_kaart:          # pragma: no branch
-            zoekterm = match.locatie.adres
-            if match.locatie.adres_uit_crm:
-                # voeg de naam van de vereniging toe aan de zoekterm, voor beter resultaat
-                zoekterm = match.vereniging.naam + ' ' + zoekterm
-            zoekterm = zoekterm.replace('\n', ' ').replace('\r', '').replace('  ', ' ')
-            context['url_map'] = 'https://google.nl/maps?' + urlencode({'q': zoekterm})
+        if match.locatie:
+            toon_kaart = match.locatie.plaats != '(diverse)' and match.locatie.adres != '(diverse)'
+            if toon_kaart:          # pragma: no branch
+                zoekterm = match.locatie.adres
+                if match.locatie.adres_uit_crm:
+                    # voeg de naam van de vereniging toe aan de zoekterm, voor beter resultaat
+                    zoekterm = match.vereniging.naam + ' ' + zoekterm
+                zoekterm = zoekterm.replace('\n', ' ').replace('\r', '').replace('  ', ' ')
+                context['url_map'] = 'https://google.nl/maps?' + urlencode({'q': zoekterm})
 
         # contactgegevens van de HWL
         match.contact_naam = ''

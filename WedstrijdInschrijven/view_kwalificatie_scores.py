@@ -14,7 +14,7 @@ from Account.models import get_account
 from Competitie.models import RegiocompetitieSporterBoog
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige
-from Kalender.view_maand import MAAND2URL
+from Kalender.definities import MAAND2URL
 from Wedstrijden.definities import (KWALIFICATIE_CHECK_NOG_DOEN, KWALIFICATIE_CHECK2STR,
                                     WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_MANDJE,
                                     WEDSTRIJD_INSCHRIJVING_STATUS_BESTELD)

@@ -1,14 +1,15 @@
 /*!
- * Copyright (c) 2020-2024 Ramon van der Winkel.
+ * Copyright (c) 2020-2025 Ramon van der Winkel.
  * All rights reserved.
  * Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
  */
 
 /* jshint esversion: 6 */
+/* global console, M */
+"use strict";
 
 // helper functie om een opgeslagen cookie in te lezen
 function getCookie(name) {
-    'use strict';
     let cookieValue = null;
     if (document.cookie && document.cookie !== "") {
         let cookies = document.cookie.split(";");

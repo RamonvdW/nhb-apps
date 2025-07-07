@@ -843,6 +843,8 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
                     # silently ignore bad pks
         # for
 
+        pks = pks[:3]       # maximum aantal leden per team
+
         team.leden.clear()
         team.leden.add(*pks)
 

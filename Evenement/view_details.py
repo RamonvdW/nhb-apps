@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2024 Ramon van der Winkel.
+#  Copyright (c) 2024-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -13,7 +13,7 @@ from Account.models import get_account
 from Evenement.models import Evenement
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
-from Kalender.view_maand import MAAND2URL
+from Kalender.definities import MAAND2URL
 from datetime import timedelta
 
 

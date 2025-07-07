@@ -163,8 +163,8 @@ class MyTestAsserts(TestCase):
         print("\n".join(long_msg))
 
     def extract_all_urls(self, resp: HttpResponse,
-                         skip_menu=False, skip_smileys=True, skip_broodkruimels=True,
-                         skip_hash_links=True, report_dupes=True, skip_external=True):
+                         skip_menu=False, skip_smileys=True, skip_broodkruimels=True, skip_post=False,
+                         skip_hash_links=True, report_dupes=True, skip_external=True, skip_mailto=True):
         content = str(resp.content)
         content = self.remove_debug_toolbar(content)
         if skip_menu:
@@ -192,8 +192,11 @@ class MyTestAsserts(TestCase):
         while len(content):
             # find the start of a new url
             pos1 = content.find('href="')
-            pos2 = content.find('action="')
-            pos3 = content.find('data-url="')
+            if skip_post:
+                pos2 = pos3 = -1
+            else:
+                pos2 = content.find('action="')
+                pos3 = content.find('data-url="')
             could_be_part_url = False
             if pos1 >= 0 and (pos2 == -1 or pos2 > pos1) and (pos3 == -1 or pos3 > pos1):
                 content = content[pos1+6:]       # strip all before href
@@ -211,13 +214,25 @@ class MyTestAsserts(TestCase):
             if pos > 0:
                 url = content[:pos]
                 content = content[pos:]
-                if url != "#":
-                    if not (skip_smileys and url.startswith('/feedback/')):
-                        if not (could_be_part_url and url[0].count('/') == 0):
-                            if not (skip_hash_links and url[0] == '#'):
-                                if not (skip_external and url[:4] == 'http'):
-                                    if report_dupes or url not in urls:     # pragma: no branch
-                                        urls.append(url)
+                skip = url == "#"
+
+                if skip_smileys:
+                    skip |= url.startswith('/feedback/')
+
+                if skip_mailto:
+                    skip |= url.startswith('mailto:')
+
+                if not (could_be_part_url and url[0].count('/') == 0):
+                    if skip_hash_links:
+                        skip |= url[0] == '#'
+                    if skip_external:
+                        skip |= url[:4] == 'http'
+                        if url in ('www.test.not', ):
+                            skip = True
+
+                if not skip:
+                    if report_dupes or url not in urls:     # pragma: no branch
+                        urls.append(url)
         # while
         urls.sort()     # ensure consistent order
         return urls

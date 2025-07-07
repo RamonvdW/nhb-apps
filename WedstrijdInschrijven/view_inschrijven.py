@@ -17,7 +17,7 @@ from Account.models import get_account
 from Bestelling.operations import mandje_tel_inhoud, bestel_mutatieverzoek_inschrijven_wedstrijd
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige, rol_get_huidige_functie
-from Kalender.view_maand import MAAND2URL
+from Kalender.definities import MAAND2URL
 from Sporter.models import Sporter, SporterBoog, get_sporter
 from Sporter.operations import get_sporter_voorkeuren
 from Wedstrijden.definities import (WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD, WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF,

@@ -167,7 +167,7 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
         bestelling.save()
 
         bestelling = Bestelling(
-                        bestel_nr=1,
+                        bestel_nr=2,
                         account=self.account_normaal,
                         status=BESTELLING_STATUS_MISLUKT)
         bestelling.save()

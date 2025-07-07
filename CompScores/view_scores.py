@@ -447,85 +447,86 @@ class DynamicZoekOpBondsnummerView(UserPassesTestMixin, View):
         # zoek een
         # print('data: %s' % repr(data))
 
+        out = dict()
+
         try:
             lid_nr = int(str(data['lid_nr'])[:6])               # afkappen voor extra veiligheid
             match_pk = int(str(data['wedstrijd_pk'])[:6])       # afkappen voor extra veiligheid
             match = CompetitieMatch.objects.get(pk=match_pk)
         except (KeyError, ValueError, CompetitieMatch.DoesNotExist):
             # garbage in
-            raise Http404('Geen valide verzoek')
-
-        rondes = match.regiocompetitieronde_set.all()
-        if len(rondes) == 0:
-            raise Http404('Geen competitie wedstrijd')
-        ronde = rondes[0]
-
-        # zoek schuttersboog die ingeschreven zijn voor deze competitie
-        competitie = ronde.regiocompetitie.competitie
-
-        out = dict()
-
-        deelnemers = (RegiocompetitieSporterBoog
-                      .objects
-                      .select_related('sporterboog',
-                                      'sporterboog__boogtype',
-                                      'sporterboog__sporter',
-                                      'sporterboog__sporter__bij_vereniging')
-                      .filter(regiocompetitie__competitie=competitie,
-                              sporterboog__sporter__lid_nr=lid_nr))
-
-        if len(deelnemers) == 0:
-            out['fail'] = 1         # is niet ingeschreven voor deze competitie
+            out['fail'] = 1
+            # raise Http404('Geen valide verzoek')
         else:
-            out['deelnemers'] = list()
+            rondes = match.regiocompetitieronde_set.all()
+            if len(rondes) == 0:
+                raise Http404('Geen competitie wedstrijd')
+            ronde = rondes[0]
 
-            geen_lid = True
-            for deelnemer in deelnemers:
-                sporterboog = deelnemer.sporterboog
-                sporter = sporterboog.sporter
-                boog = sporterboog.boogtype
+            # zoek schuttersboog die ingeschreven zijn voor deze competitie
+            competitie = ronde.regiocompetitie.competitie
 
-                # volgende blok wordt een paar keer uitgevoerd, maar dat maak niet uit
-                ver = sporter.bij_vereniging
-                if not ver:
-                    # niet lid bij een vereniging, dan niet toe te voegen
-                    geen_lid = True
-                    continue
+            deelnemers = (RegiocompetitieSporterBoog
+                          .objects
+                          .select_related('sporterboog',
+                                          'sporterboog__boogtype',
+                                          'sporterboog__sporter',
+                                          'sporterboog__sporter__bij_vereniging')
+                          .filter(regiocompetitie__competitie=competitie,
+                                  sporterboog__sporter__lid_nr=lid_nr))
 
-                out['vereniging'] = str(ver)
-                out['regio'] = str(ver.regio)
-                out['lid_nr'] = sporter.lid_nr
-                out['naam'] = sporter.volledige_naam()
-                out['ver_nr'] = sporter.bij_vereniging.ver_nr
-                out['ver_naam'] = sporter.bij_vereniging.naam
+            if len(deelnemers) == 0:
+                out['fail'] = 1         # is niet ingeschreven voor deze competitie
+            else:
+                out['deelnemers'] = list()
 
-                sub = {
-                    'pk': sporterboog.pk,
-                    'boog': boog.beschrijving,
-                    'team_pk': 0,
-                    'team_gem': ''
-                }
+                geen_lid = True
+                for deelnemer in deelnemers:
+                    sporterboog = deelnemer.sporterboog
+                    sporter = sporterboog.sporter
+                    boog = sporterboog.boogtype
 
-                if deelnemer.inschrijf_voorkeur_team:
-                    # TODO: gebruikt ronde team ag!
-                    sub['team_gem'] = deelnemer.ag_voor_team
-                    if not ronde.regiocompetitie.regio_heeft_vaste_teams:
-                        if deelnemer.aantal_scores > 0:
-                            sub['team_gem'] = deelnemer.gemiddelde
+                    # volgende blok wordt een paar keer uitgevoerd, maar dat maak niet uit
+                    ver = sporter.bij_vereniging
+                    if not ver:
+                        # niet lid bij een vereniging, dan niet toe te voegen
+                        geen_lid = True
+                        continue
 
-                    sub['vsg'] = sub['team_gem']        # TODO: obsolete vsg
+                    out['vereniging'] = str(ver)
+                    out['regio'] = str(ver.regio)
+                    out['lid_nr'] = sporter.lid_nr
+                    out['naam'] = sporter.volledige_naam()
+                    out['ver_nr'] = sporter.bij_vereniging.ver_nr
+                    out['ver_naam'] = sporter.bij_vereniging.naam
 
-                    # zoek het huidige team erbij
-                    teams = deelnemer.regiocompetitieteam_set.all()
-                    if teams.count() > 0:
-                        # sporter is gekoppeld aan een team
-                        sub['team_pk'] = teams[0].pk
+                    sub = {
+                        'pk': sporterboog.pk,
+                        'boog': boog.beschrijving,
+                        'team_pk': 0,
+                        'team_gem': ''
+                    }
 
-                out['deelnemers'].append(sub)
-            # for
+                    if deelnemer.inschrijf_voorkeur_team:
+                        # TODO: gebruikt ronde team ag!
+                        sub['team_gem'] = deelnemer.ag_voor_team
+                        if not ronde.regiocompetitie.regio_heeft_vaste_teams:
+                            if deelnemer.aantal_scores > 0:
+                                sub['team_gem'] = deelnemer.gemiddelde
 
-            if geen_lid and len(out['deelnemers']) == 0:
-                out['fail'] = 1
+                        sub['vsg'] = sub['team_gem']        # TODO: obsolete vsg
+
+                        # zoek het huidige team erbij
+                        teams = deelnemer.regiocompetitieteam_set.all()
+                        if teams.count() > 0:
+                            # sporter is gekoppeld aan een team
+                            sub['team_pk'] = teams[0].pk
+
+                    out['deelnemers'].append(sub)
+                # for
+
+                if geen_lid and len(out['deelnemers']) == 0:
+                    out['fail'] = 1
 
         return JsonResponse(out)
 

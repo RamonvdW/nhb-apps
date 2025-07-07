@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023-2024 Ramon van der Winkel.
+#  Copyright (c) 2023-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -26,7 +26,7 @@ class TestCompLaagBondFormulieren(E2EHelpers, TestCase):
     url_forms_teams = '/bondscompetities/bk/formulieren/teams/%s/'               # deelkamp_pk
     url_forms_download_indiv = '/bondscompetities/bk/formulieren/indiv/download/%s/%s/'   # match_pk, klasse_pk
     url_forms_download_teams = '/bondscompetities/bk/formulieren/teams/download/%s/%s/'   # match_pk, klasse_pk
-    url_sr_info = '/bondscompetities/bk/informatie-hwl/%s/'    # match_pk
+    url_sr_info = '/bondscompetities/bk/wedstrijd-informatie/%s/'                # match_pk
 
     testdata = None
     ver_nr = 0

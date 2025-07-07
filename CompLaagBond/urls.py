@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -88,9 +88,9 @@ urlpatterns = [
          name='formulier-teams-lijst'),
 
 
-    # HWL: wedstrijd informatie
-    path('informatie-hwl/<match_pk>/',
-         view_formulieren.InformatieHWLView.as_view(),
+    # HWL/WL: wedstrijd informatie
+    path('wedstrijd-informatie/<match_pk>/',
+         view_formulieren.MatchInformatieView.as_view(),
          name='bk-match-informatie'),
 ]
 
