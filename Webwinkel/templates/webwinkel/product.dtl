@@ -21,23 +21,14 @@
     <!-- blauw balk met wit informatie veld -->
     <div class="row-sv-blauw">
         <div class="col s12 center">
-            {% comment %}
-            -- thumbnails boven de grote foto's --
-            <div>
-                {% for foto in fotos %}
-                    <img id="thumb1_{{ foto.volgorde }}" class="sv-foto-thumb" src="{{ foto.thumb_src }}" onclick="kies_foto({{ foto.volgorde }})" alt="thumbnail {{ foto.volgorde }}">
-                {% endfor %}
-            </div>
-            {% endcomment %}
-
             {% for foto in fotos %}
-                <img id="{{ foto.id_img }}" class="sv-foto-groot" src="{{ foto.img_src }}" hidden loading="{% if foto.is_eerste %}eager{% else %}lazy{% endif %}" alt="product foto {{ foto.volgorde }}" draggable="false">
+                <img id="img_{{ foto.volgorde }}" class="sv-foto-groot" src="{{ foto.img_src }}" hidden loading="{% if foto.is_eerste %}eager{% else %}lazy{% endif %}" alt="product foto {{ foto.volgorde }}" draggable="false">
             {% endfor %}
 
             <!-- thumbnails onder de grote foto's -->
             <div>
                 {% for foto in fotos %}
-                    <img id="{{ foto.id_thumb }}" class="sv-foto-thumb" src="{{ foto.thumb_src }}" onclick="kies_foto({{ foto.volgorde }})" alt="thumbnail {{ foto.volgorde }}" draggable="false">
+                    <img id="thumb2_{{ foto.volgorde }}" class="sv-foto-thumb" src="{{ foto.thumb_src }}" onclick="kies_foto({{ foto.volgorde }})" alt="thumbnail {{ foto.volgorde }}" draggable="false">
                 {% endfor %}
             </div>
         </div>
