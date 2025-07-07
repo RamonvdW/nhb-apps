@@ -130,6 +130,9 @@ class BrowserTestCase(TestCase):
         self.assertIsNotNone(element)
         return element.find_element(By.XPATH, "./..")
 
+    def get_active_element(self):
+        return self._driver.switch_to.active_element
+
     def find_element_by_id(self, id_str):
         # zoek op het "id" attribute van een element
         return self._driver.find_element(By.ID, id_str)
@@ -455,6 +458,7 @@ def get_driver(show_browser=False):
 
 def database_vullen(inst):
     lid_nr = BrowserTestCase.lid_nr
+    lid_nr2 = lid_nr + 5
 
     # wordt aangeroepen vanuit Plein/tests/test_js_in_browser
     Account.objects.filter(username=str(lid_nr)).delete()
@@ -529,7 +533,7 @@ def database_vullen(inst):
     inst.sporter, _ = Sporter.objects.get_or_create(
                                     lid_nr=lid_nr,
                                     geslacht="V",
-                                    voornaam="Bro",
+                                    voornaam="Froukje",
                                     achternaam="de Browser",
                                     geboorte_datum=datetime.date(year=1988, month=8, day=8),
                                     sinds_datum=datetime.date(year=2020, month=8, day=8),
@@ -537,6 +541,16 @@ def database_vullen(inst):
                                     email=inst.account_bb.email)
     inst.sporter.account = inst.account_bb
     inst.sporter.save(update_fields=['account'])
+
+    inst.sporter2, _ = Sporter.objects.get_or_create(
+                                    lid_nr=lid_nr2,
+                                    geslacht="M",
+                                    voornaam="Bro",
+                                    achternaam="de Browser",
+                                    geboorte_datum=datetime.date(year=2000, month=1, day=5),
+                                    sinds_datum=datetime.date(year=2022, month=7, day=1),
+                                    bij_vereniging=inst.ver,
+                                    email='')
 
     inst.boog_r, _ = BoogType.objects.get_or_create(
                                     afkorting='R',
@@ -563,6 +577,11 @@ def database_vullen(inst):
     inst.sporterboog_bb, _ = SporterBoog.objects.get_or_create(
                                     sporter=inst.sporter,
                                     boogtype=inst.boog_bb,
+                                    voor_wedstrijd=True)
+
+    inst.sporterboog2_r, _ = SporterBoog.objects.get_or_create(
+                                    sporter=inst.sporter2,
+                                    boogtype=inst.boog_r,
                                     voor_wedstrijd=True)
 
     inst.functie_hwl, _ = Functie.objects.get_or_create(
@@ -714,26 +733,36 @@ def database_vullen(inst):
     # for
 
     inst.regio_deelnemer_r = RegiocompetitieSporterBoog(
-                                regiocompetitie=inst.regio_comp,
-                                sporterboog=inst.sporterboog_r,
-                                bij_vereniging=inst.ver,
-                                indiv_klasse=inst.klasse_indiv_r,
-                                ag_voor_team=7.0)
+                                    regiocompetitie=inst.regio_comp,
+                                    sporterboog=inst.sporterboog_r,
+                                    bij_vereniging=inst.sporterboog_r.sporter.bij_vereniging,
+                                    indiv_klasse=inst.klasse_indiv_r,
+                                    inschrijf_voorkeur_team=True,
+                                    ag_voor_team_mag_aangepast_worden=True,
+                                    ag_voor_team=7.0)
     inst.regio_deelnemer_r.save()
 
     inst.regio_deelnemer_bb = RegiocompetitieSporterBoog(
-                                regiocompetitie=inst.regio_comp,
-                                sporterboog=inst.sporterboog_bb,
-                                bij_vereniging=inst.ver,
-                                indiv_klasse=inst.klasse_indiv_bb)
+                                    regiocompetitie=inst.regio_comp,
+                                    sporterboog=inst.sporterboog_bb,
+                                    bij_vereniging=inst.sporterboog_bb.sporter.bij_vereniging,
+                                    indiv_klasse=inst.klasse_indiv_bb)
     inst.regio_deelnemer_bb.save()
 
+    inst.regio_deelnemer2_r = RegiocompetitieSporterBoog(
+                                    regiocompetitie=inst.regio_comp,
+                                    sporterboog=inst.sporterboog2_r,
+                                    bij_vereniging=inst.sporterboog2_r.sporter.bij_vereniging,
+                                    indiv_klasse=inst.klasse_indiv_r,
+                                    inschrijf_voorkeur_team=True,
+                                    ag_voor_team=9.2)
+    inst.regio_deelnemer2_r.save()
+
     inst.ag = Aanvangsgemiddelde(
-                        sporterboog=inst.sporterboog_r,
-                        boogtype=inst.boog_r,
-                        # doel=AG_DOEL_INDIV,
-                        afstand_meter=inst.comp.afstand,
-                        waarde=8.0)
+                    sporterboog=inst.sporterboog_r,
+                    boogtype=inst.boog_r,
+                    afstand_meter=inst.comp.afstand,
+                    waarde=8.0)
     inst.ag.save()
 
 

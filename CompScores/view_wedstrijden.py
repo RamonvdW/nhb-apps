@@ -17,7 +17,7 @@ TEMPLATE_WEDSTRIJDEN = 'compscores/wedstrijden.dtl'
 
 class WedstrijdenView(UserPassesTestMixin, TemplateView):
 
-    """ Toon de SEC, HWL, WL de competitiewedstrijden die aan deze vereniging toegekend zijn.
+    """ Toon de HWL en WL de competitiewedstrijden die aan deze vereniging toegekend zijn.
     """
 
     # class variables shared by all instances

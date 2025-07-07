@@ -465,7 +465,7 @@ function deelnemers_ophalen_toevoegen(rsp) {
 
             if (i === first_added_row) {
                 const cell = row.cells[4];      // tr --> td
-                const el = cell.firstChild;               // td --> input
+                const el = cell.firstElementChild;     // td --> input
                 el.focus();
             }
         }

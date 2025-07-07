@@ -51,7 +51,7 @@ class TestOverigActiviteit(E2EHelpers, TestCase):
         account.save(update_fields=['email_is_bevestigd'])
 
         # maak een account aan waarop inlog mislukt is
-        self.account_mislukt = self.e2e_create_account('100003', 'mislukt@test.not', 'Inblog Mislukt')
+        self.account_mislukt = self.e2e_create_account('100003', 'mislukt@test.not', 'Inlog Mislukt')
         self.account_mislukt.last_login = timezone.now() - datetime.timedelta(days=7)
         self.account_mislukt.laatste_inlog_poging = timezone.now() - datetime.timedelta(days=1)
         self.account_mislukt.save(update_fields=['laatste_inlog_poging', 'last_login'])
