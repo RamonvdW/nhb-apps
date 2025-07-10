@@ -12,7 +12,7 @@ from django.shortcuts import render, reverse
 from django.views.generic import View
 from django.views.defaults import ERROR_PAGE_TEMPLATE
 from django.core.exceptions import PermissionDenied
-from Functie.definities import rol2url
+from Functie.definities import Rol, rol2url
 from Functie.rol import rol_get_huidige_functie
 from Mailer.operations import mailer_notify_internal_error
 from Site.core import urls
@@ -76,6 +76,13 @@ def site_handler403_permission_denied(request, exception=None):
     context['meta_rol'] = rol2url[rol_nu]
     if functie_nu:
         context['meta_functie'] = functie_nu.beschrijving       # template doet html escaping
+        context['rol'] = functie_nu.beschrijving
+    elif rol_nu == Rol.ROL_BB:
+        context['rol'] = 'Manager MH'
+    elif rol_nu == Rol.ROL_SPORTER:
+        context['rol'] = 'Sporter'
+    elif rol_nu == Rol.ROL_NONE:
+        context['rol'] = 'Bezoeker'
 
     context['robots'] = 'noindex'   # prevent indexing this error message page
 
@@ -127,6 +134,18 @@ def site_handler404_page_not_found(request, exception=None):
         info = str(exception)
     if len(info):
         context['info'] = info
+
+    rol_nu, functie_nu = rol_get_huidige_functie(request)
+    context['meta_rol'] = rol2url[rol_nu]
+    if functie_nu:
+        context['meta_functie'] = functie_nu.beschrijving       # template doet html escaping
+        context['rol'] = functie_nu.beschrijving
+    elif rol_nu == Rol.ROL_BB:
+        context['rol'] = 'Manager MH'
+    elif rol_nu == Rol.ROL_SPORTER:
+        context['rol'] = 'Sporter'
+    elif rol_nu == Rol.ROL_NONE:
+        context['rol'] = 'Bezoeker'
 
     context['robots'] = 'noindex'   # prevent indexing this error message page
 

@@ -33,6 +33,11 @@
         <p>We hebben geen extra informatie over deze situatie.</p>
     {% endif %}
 
+    {% if rol %}
+        <p>Je gebruikte de site in de rol van <b>{{ rol }}</b>.</p>
+    {% endif %}
+
+    <br>
     <p>Soms zijn deze problemen op te lossen, soms niet.</p>
     <p>Suggestie: Gebruikt de <b>terug</b> knop van je browser, pas de invoer aan en probeer het opnieuw.</p>
 
