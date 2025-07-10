@@ -17,12 +17,15 @@ from Competitie.models import (Competitie, Regiocompetitie, RegiocompetitieRonde
                                CompetitieIndivKlasse, CompetitieTeamKlasse, CompetitieMatch)
 from Functie.models import Functie, VerklaringHanterenPersoonsgegevens
 from Geo.models import Regio, Rayon, Cluster
+from Locatie.models import WedstrijdLocatie
 from Score.models import Aanvangsgemiddelde
 from Sporter.models import Sporter, SporterBoog
 from Site.js_cov.js_cov_save import save_the_data, import_the_data
 from TestHelpers.e2ehelpers import TEST_WACHTWOORD
 from Vereniging.models import Vereniging
 from Webwinkel.models import WebwinkelFoto, WebwinkelProduct
+from Wedstrijden.definities import WEDSTRIJD_STATUS_GEACCEPTEERD
+from Wedstrijden.models import Wedstrijd
 from selenium.webdriver import Chrome, ChromeOptions
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException, ElementNotInteractableException
@@ -82,6 +85,8 @@ class BrowserTestCase(TestCase):
     regio_deelnemer_bb: RegiocompetitieSporterBoog = None   # RegiocompetitieSporterBoog
     mandje: BestellingMandje = None
     bestelling: Bestelling = None
+    wedstrijd_1: Wedstrijd = None
+    locatie_outdoor = WedstrijdLocatie = None
     pause_after_console_log = 2
 
     # urls voor do_navigate_to()
@@ -160,6 +165,16 @@ class BrowserTestCase(TestCase):
     def find_elements_checkbox(self, exclude_selected=False):
         spans = list()
         for el in self._driver.find_elements(By.XPATH, '//input[@type="checkbox"]'):
+            if exclude_selected and el.is_selected():
+                continue
+            span = self.get_following_sibling(el)
+            spans.append(span)
+        # for
+        return spans
+
+    def find_elements_radio(self, exclude_selected=False):
+        spans = list()
+        for el in self._driver.find_elements(By.XPATH, '//input[@type="radio"]'):
             if exclude_selected and el.is_selected():
                 continue
             span = self.get_following_sibling(el)
@@ -600,6 +615,15 @@ def database_vullen(inst):
 
     inst.functie_mww.accounts.add(inst.account_bb)
 
+    inst.functie_mwz, _ = Functie.objects.get_or_create(
+                                rol='MWZ')
+    # override static object created by migrations
+    inst.functie_mwz.beschrijving = 'Manager Wedstrijdzaken'
+    inst.functie_mwz.bevestigde_email = 'mwz@test.not'
+    inst.functie_mwz.save()
+
+    inst.functie_mwz.accounts.add(inst.account_bb)
+
     # maak webwinkel producten aan
     foto = WebwinkelFoto()
     foto.save()
@@ -765,6 +789,31 @@ def database_vullen(inst):
                     waarde=8.0)
     inst.ag.save()
 
+    # voeg een locatie toe
+    inst.locatie_outdoor = WedstrijdLocatie(
+                                baan_type='O',
+                                naam='Vereniging outdoor locatie',
+                                discipline_outdoor=True,
+                                buiten_max_afstand=90,
+                                buiten_banen=24)
+    inst.locatie_outdoor.save()
+    inst.locatie_outdoor.verenigingen.add(inst.ver_bond)
+    inst.locatie_outdoor.verenigingen.add(inst.ver2)
+
+    datum = timezone.now() + datetime.timedelta(days=30)
+    if datum.day >= 29:  # pragma: no cover
+        # zorg dat datum+1 dag in dezelfde maand is
+        datum += datetime.timedelta(days=7)
+
+    inst.wedstrijd_1 = Wedstrijd(
+                        titel='Test 1',
+                        status=WEDSTRIJD_STATUS_GEACCEPTEERD,
+                        datum_begin=datum,
+                        datum_einde=datum,
+                        organiserende_vereniging=inst.ver,
+                        locatie=inst.locatie_outdoor)
+    inst.wedstrijd_1.save()
+
 
 def database_opschonen(_inst):
     # wordt aangeroepen vanuit Plein/tests/test_js_in_browser
@@ -791,8 +840,10 @@ def populate_inst(self, inst):
     inst.bestelling = self.bestelling
     inst.regio_comp = self.regio_comp
     inst.functie_hwl = self.functie_hwl
+    inst.wedstrijd_1 = self.wedstrijd_1
     inst.sporterboog_r = self.sporterboog_r
     inst.sporterboog_bb = self.sporterboog_bb
+    inst.locatie_outdoor = self.locatie_outdoor
     inst.regio_deelnemer_r = self.regio_deelnemer_r
     inst.regio_deelnemer_bb = self.regio_deelnemer_bb
     inst.webwinkel_product = self.webwinkel_product

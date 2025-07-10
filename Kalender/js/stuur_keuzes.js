@@ -66,7 +66,7 @@ function stuur_keuzes_zoek() {
 el_zoek.addEventListener("keyup", event => {
     // console.log(event);
     if (event.key === 'Enter') {
-        stuur_keuzes_jaar();
+        stuur_keuzes_zoek();
     }
 });
 

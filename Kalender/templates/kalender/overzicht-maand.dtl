@@ -42,7 +42,7 @@
                 </div>
 
                 <p class="center">
-                    <button class="btn-sv-rood" onclick="stuur_keuzes_zoek()">
+                    <button class="btn-sv-rood" id="id_zoek" onclick="stuur_keuzes_zoek()">
                         <i class="notranslate material-icons-round left">search</i>Zoek</button>
                     {% if unfiltered_url %}
                         <span>&nbsp;&nbsp;</span>
@@ -72,7 +72,7 @@
                     {% endfor %}
                 </ul>
                 <p style="margin-left:35px">
-                    <button class="btn-sv-rood" onclick="stuur_keuzes_maand()">Activeer</button>
+                    <button class="btn-sv-rood" onclick="stuur_keuzes_maand()" id="id_activeer_1">Activeer</button>
                 </p>
             </div>
         </div>
@@ -92,7 +92,7 @@
                     {% endfor %}
                 </ul>
                 <p style="margin-left:35px">
-                    <button class="btn-sv-rood" onclick="stuur_keuzes_maand()">Activeer</button>
+                    <button class="btn-sv-rood" onclick="stuur_keuzes_maand()" id="id_activeer_2">Activeer</button>
                 </p>
             </div>
         </div>
@@ -112,7 +112,7 @@
                     {% endfor %}
                 </ul>
                 <p style="margin-left:35px">
-                    <button class="btn-sv-rood" onclick="stuur_keuzes_maand()">Activeer</button>
+                    <button class="btn-sv-rood" onclick="stuur_keuzes_maand()" id="id_activeer_3">Activeer</button>
                 </p>
             </div>
         </div>
@@ -124,7 +124,7 @@
         <tr style="border-bottom:none">
             <!-- knop -->
             <td class="right-align">
-                <button class="btn-sv-rood" onclick="stuur_keuzes_prev()">
+                <button class="btn-sv-rood" onclick="stuur_keuzes_prev()" id="id_prev">
                     <i class="notranslate material-icons-round">chevron_left</i></button>
             </td>
 
@@ -134,7 +134,7 @@
 
             <!-- knop -->
             <td class="left-align">
-                <button class="btn-sv-rood" onclick="stuur_keuzes_next()">
+                <button class="btn-sv-rood" onclick="stuur_keuzes_next()" id="id_next">
                     <i class="notranslate material-icons-round">chevron_right</i></button>
             </td>
         </tr>
@@ -199,7 +199,7 @@
     <div class="row center">
         <div class="col s12">
             <div class="center">
-                <button class="btn-sv-rood" onclick="stuur_keuzes_jaar()">Toon jaaroverzicht</button>
+                <button class="btn-sv-rood" id="id_switch" onclick="stuur_keuzes_jaar()">Toon jaaroverzicht</button>
             </div>
         </div>
     </div>
