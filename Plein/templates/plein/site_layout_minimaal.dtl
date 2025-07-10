@@ -56,8 +56,9 @@
             {% block terug_naar_af %}
                 <p>&nbsp;</p>
                 <h5>Wat kan je nog meer doen?</h5>
+
+                <p>Onderstaande knop brengt je naar de startpagina van MijnHandboogsport.</p>
                 <a class="btn-sv-rood" href="/plein/"><i class="notranslate material-icons-round left">home</i>Het Plein</a>
-                <p>Bovenstaande knop brengt je naar de startpagina van MijnHandboogsport.</p>
             {% endblock %}
 
             <p>&nbsp;</p>
@@ -66,7 +67,6 @@
             <p>Lukt het niet om het probleem op te lossen? Stuur dan een e-mail naar het volgende adres (druk op de knop om je mailprogramma te starten):</p>
             <a class="btn-sv-blauw" href="mailto:{{ email_support }}"><i class="notranslate material-icons-round left">email</i>{{ email_support }}</a>
             <p>Schrijf de volgende informatie in de e-mail:<br>- Je bondsnummer<br>- Datum en tijdstip waarop het probleem ontstond<br>- Beschrijving van je probleem</p>
-
         </div>
     </body>
 </html>

@@ -22,7 +22,7 @@ from Functie.models import Functie
 from Functie.rol import rol_get_huidige
 from HistComp.definities import HISTCOMP_TYPE2STR
 from HistComp.models import HistCompRegioIndiv
-from Kalender.view_maand import maak_compacte_wanneer_str
+from Kalender.view_helpers import maak_compacte_wanneer_str
 from Records.definities import MATERIAALKLASSE
 from Records.models import IndivRecord
 from Registreer.definities import REGISTRATIE_FASE_COMPLEET

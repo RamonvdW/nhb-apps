@@ -79,7 +79,7 @@ pkill -f scheids_mutaties
 ./manage.py scheids_mutaties --settings="$SETTINGS" $BG_DURATION &
 
 # wacht tot alle achtergrondtaken gestart zijn
-sleep 0.8
+#sleep 0.8
 
 # start the development webserver
 EXTRA_ARGS=''
