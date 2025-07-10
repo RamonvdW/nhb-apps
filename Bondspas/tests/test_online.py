@@ -262,6 +262,8 @@ class TestBondspasOnline(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('bondspas/toon-bondspas-van.dtl', 'plein/site_layout.dtl'))
+        urls = self.extract_all_urls(resp, skip_menu=True)
+        self.assertEqual(urls, [url])
 
         # download de pdf
         with self.assert_max_queries(20):
@@ -277,6 +279,8 @@ class TestBondspasOnline(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('bondspas/toon-bondspas-van.dtl', 'plein/site_layout.dtl'))
+        urls = self.extract_all_urls(resp, skip_menu=True)
+        self.assertEqual(urls, [url])
 
         # download de pdf
         with self.assert_max_queries(20):
@@ -338,5 +342,24 @@ class TestBondspasOnline(E2EHelpers, TestCase):
             self.assertEqual(resp.status_code, 200)     # 200 = OK
             self._check_bondspas_resp(resp)
 
+    def test_corner_cases(self):
+        # sporter
+        self.e2e_login(self.account)
+
+        self.sporter.is_actief_lid = False
+        self.sporter.save(update_fields=['is_actief_lid'])
+
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_ophalen)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert404(resp, 'Geen bondspas voor inactieve leden')
+
+        # geen sporter account
+        self.sporter.delete()
+
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_ophalen)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert404(resp, 'Geen bondspas voor dit account')
 
 # end of file
