@@ -118,14 +118,7 @@ class DynamicBondspasDownloadView(UserPassesTestMixin, View):
 
             Dit is een POST by-design, om caching te voorkomen.
         """
-        account = get_account(request)
-        sporter = get_sporter(account)
-
-        if sporter.is_gast:
-            raise Http404('Geen bondspas voor gast-accounts')
-
-        if not sporter.is_actief_lid:
-            raise Http404('Geen bondspas voor inactieve leden')
+        sporter = _get_sporter_or_404(request)
 
         jaar_pas, jaar_wedstrijden = bepaal_jaar_bondspas_en_wedstrijden()
         regels = maak_bondspas_regels(sporter, jaar_pas, jaar_wedstrijden)
@@ -248,7 +241,7 @@ class ToonBondspasVerenigingView(UserPassesTestMixin, View):
 
         # base64 is nodig voor img in html
         context['bondspas_base64'] = base64.b64encode(img_data).decode()
-        context['url_download'] = reverse('Bondspas:toon-bondspas-van', kwargs={'lid_nr': sporter.lid_nr})
+        context['url_download'] = reverse('Bondspas:vereniging-bondspas-van', kwargs={'lid_nr': sporter.lid_nr})
 
         context['kruimels'] = (
             (reverse('Vereniging:overzicht'), 'Beheer vereniging'),
