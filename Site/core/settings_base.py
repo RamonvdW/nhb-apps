@@ -62,7 +62,7 @@ APPS_DIR = os.path.dirname(BASE_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2025-07-10'
+SITE_VERSIE = '2025-07-12'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -603,7 +603,10 @@ INSTAPTOETS_AANTAL_VRAGEN = 20
 INSTAPTOETS_AANTAL_GOED_EIS = 70        # procent
 INSTAPTOETS_AANTAL_MINUTEN = 30
 
-# defaults for 'dev' and 'test' options
+
+# -------------------------------------------
+# defaults for 'dev' and 'test' options below
+# -------------------------------------------
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # let op: zonder DEBUG=True geen static files in dev omgeving!
