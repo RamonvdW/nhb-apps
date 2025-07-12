@@ -74,11 +74,11 @@
         {% if deelcomp.regio_organiseert_teamcompetitie %}
         // lijst met verenigingen
         const team_pk2naam = {
-                0: '-',                         // nodig voor correct interpretatie template tag binnen javascript dict
+                0: '-',                         /* nodig voor correct interpretatie template tag binnen javascript dict */
                 {% for team in teams %}
                     {{ team.pk }}: '{{ team.naam_str }}',
                 {% endfor %}
-        };                                      // puntkomma moet blijven!
+        };                                      /* puntkomma moet blijven! */
         {% endif %}
 
         function opzoeken_hide_status()
