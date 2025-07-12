@@ -70,7 +70,7 @@
                         let rsp;
                         try {
                             /** @param rsp.status:string **/
-                            /** @param rsp.checkoutUrl **/
+                            /** @param rsp.checkout_url **/
                             rsp = JSON.parse(xhr.responseText);
                         } catch(e) {
                             // waarschijnlijk geen goede JSON data
@@ -94,7 +94,7 @@
 
                             }  else if (status === "betaal") {
                                 // redirect naar de checkout_url
-                                window.location.href = rsp.checkoutUrl;
+                                window.location.href = rsp.checkout_url;
                                 // won't get here
 
                             } else if (status === "mislukt") {
