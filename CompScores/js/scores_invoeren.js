@@ -14,8 +14,11 @@ let toonTeamNaam = dataset.toonTeamNaam === "true";
 let teamPk2Naam = {};
 let xhr_bezig = false;
 let zoek_rsp = {};          // meest recent ontvangen zoekresultaat
+let timeout3s = 3000;
+let timeout5s = 5000;
+const el_lid_nr = document.getElementById("id_lid_nr");
 const rsp_veld_to_el = {
-    opzoeken: document.getElementById("id_lid_nr"),
+    opzoeken: el_lid_nr,
     lid_nr: document.getElementById("id_bondsnummer"),
     naam: document.getElementById("id_naam"),
     vereniging: document.getElementById("id_ver"),
@@ -26,6 +29,7 @@ const el_opslaan_knop = document.getElementById('id_opslaan_knop');
 const el_toevoegen_knop = document.getElementById('id_btn_toevoegen');
 const el_zoekresultaten = document.getElementById("id_zoekresultaten");
 const el_zoekstatus = document.getElementById("id_zoekstatus");
+const el_lijst_ophalen_kaartje = document.getElementById("id_lijst_ophalen");
 const el_filter = document.getElementById(dataset.tableFilterInputId);
 const el_table = document.getElementById('table1');
 
@@ -53,42 +57,46 @@ function opslaan_klaar(xhr) {
 
 // sla de ingevoerde scores op door een POST naar de website
 function opslaan(_el) {
-    const body = el_table.tBodies[0];
+    if (!xhr_bezig) {
+        xhr_bezig = true;
 
-    let obj = {
-        wedstrijd_pk: dataset.wedstrijdPk
-    };
-    // begin op row 1 om de clone-template over te slaan
-    for (let i = 1; i < body.rows.length; i++) {
-        let row = body.rows[i];
-        const filter_cmd = row.dataset.tablefilter;
-        if (filter_cmd === "stop") {
-            break;        // from the for
-        }
+        const body = el_table.tBodies[0];
 
-        // let op: lege scores juist wel meesturen
-        // dan kan een verkeerd bondsnummer  nog uit de uitslag gehaald worden door de score leeg te maken!
-        const pk = row.cells[0].dataset.pk;
-        obj[pk] = row.cells[4].firstElementChild.value;
-    } // for
+        let obj = {
+            wedstrijd_pk: dataset.wedstrijdPk
+        };
+        // begin op row 1 om de clone-template over te slaan
+        for (let i = 1; i < body.rows.length; i++) {
+            let row = body.rows[i];
+            const filter_cmd = row.dataset.tablefilter;
+            if (filter_cmd === "stop") {
+                break;        // from the for
+            }
 
-    xhr_bezig = true;
-    const data = JSON.stringify(obj);
-    const xhr = new XMLHttpRequest();
+            // let op: lege scores juist wel meesturen
+            // dan kan een verkeerd bondsnummer  nog uit de uitslag gehaald worden door de score leeg te maken!
+            const pk = row.cells[0].dataset.pk;
+            obj[pk] = row.cells[4].firstElementChild.value;
+        } // for
 
-    // POST voorkomt caching
-    xhr.open("POST", dataset.urlOpslaan, true);         // true = async
-    xhr.timeout = 3000;                                  // 3 sec
-    xhr.onloadend = function () {
-        xhr_bezig = false;
-        opslaan_klaar(xhr);
-    };
-    xhr.ontimeout = function () {
-        xhr_bezig = false;
-        M.toast({html: 'Opslaan is NIET gelukt'});
-    };
-    xhr.setRequestHeader("X-CSRFToken", dataset.csrfToken);
-    xhr.send(data);
+        const data = JSON.stringify(obj);
+
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST",       // POST voorkomt caching
+                 dataset.urlOpslaan,
+           true);               // true = async
+        xhr.timeout = timeout3s;
+        xhr.onloadend = function () {
+            xhr_bezig = false;
+            opslaan_klaar(xhr);
+        };
+        xhr.ontimeout = function () {
+            xhr_bezig = false;
+            M.toast({html: 'Opslaan is NIET gelukt'});
+        };
+        xhr.setRequestHeader("X-CSRFToken", dataset.csrfToken);
+        xhr.send(data);
+    }
 }
 
 
@@ -108,51 +116,59 @@ function opzoeken_toon_status(tekst, color) {
 
 function opzoeken_klaar(xhr) {
     //console.log('opzoeken_klaar: ready=',xhr.readyState, 'status=', xhr.status)
-    let is_fail = true;
+    if (xhr.readyState === XMLHttpRequest.DONE) {
+        let is_fail = true;
 
-    if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
-        // verzoek is klaar en we hebben een antwoord
-        // responseText is leeg bij connection failure
-        if (xhr.responseText !== "") {
-            try {
-                /** @param {bool} rsp.fail */
-                const rsp = JSON.parse(xhr.responseText);
-                //console.log('response:', rsp);
+        if (xhr.status === 200) {
+            // verzoek is klaar en we hebben een antwoord
+            // responseText is leeg bij connection failure
+            if (xhr.responseText !== "") {
+                try {
+                    /** @param {bool} rsp.fail */
+                    const rsp = JSON.parse(xhr.responseText);
+                    //console.log('response:', rsp);
 
-                // sla het resultaat op voor gebruik in toevoegen()
-                zoek_rsp = rsp;
+                    // sla het resultaat op voor gebruik in toevoegen()
+                    zoek_rsp = rsp;
 
-                // antwoord bevat fail=1 in verschillende situaties:
-                // bondsnummer niet gevonden, geen actief lid
-                if (rsp.fail === undefined) {
-                    // toon het zoekresultaat
-                    //console.log('rsp:', rsp);
-                    is_fail = false;
-                    for (const [rsp_veld, el] of Object.entries(rsp_veld_to_el)) {
-                        // voor deze key de data uit de response halen
-                        let antwoord = rsp[rsp_veld];
+                    // antwoord bevat fail=1 in verschillende situaties:
+                    // bondsnummer niet gevonden, geen actief lid
+                    if (rsp.fail === undefined) {
+                        // toon het zoekresultaat
+                        //console.log('rsp:', rsp);
+                        is_fail = false;
+                        for (const [rsp_veld, el] of Object.entries(rsp_veld_to_el)) {
+                            // voor deze key de data uit de response halen
+                            let antwoord = rsp[rsp_veld];
 
-                        if (antwoord !== undefined) {
-                            // zet het resultaat in het veld: naam, vereniging, regio
-                            el.innerText = antwoord;
-                            el.style.color = "";
-                        }
-                    } // for
+                            if (antwoord !== undefined) {
+                                // zet het resultaat in het veld: naam, vereniging, regio
+                                el.innerText = antwoord;
+                                el.style.color = "";
+                            }
+                        } // for
+                    }
+                /*
+                } catch (e) {
+                    // not a valid JSON response, could be because of 404
                 }
-            } catch (e) {
-                // not a valid JSON response, could be because of 404
+                 */
+                } finally {
+                    is_fail = is_fail;
+                }
             }
         }
-    }
+        // else: er is een fout opgetreden
 
-    if (is_fail) {
-        opzoeken_toon_status("niet gevonden", "red");
-        el_toevoegen_knop.disabled = true;
-        el_zoekresultaten.classList.add("hide");
-    } else {
-        opzoeken_hide_status();
-        el_toevoegen_knop.disabled = false;
-        el_zoekresultaten.classList.remove("hide");
+        if (is_fail) {
+            opzoeken_toon_status("niet gevonden", "red");
+            el_toevoegen_knop.disabled = true;
+            el_zoekresultaten.classList.add("hide");
+        } else {
+            opzoeken_hide_status();
+            el_toevoegen_knop.disabled = false;
+            el_zoekresultaten.classList.remove("hide");
+        }
     }
 }
 
@@ -168,42 +184,42 @@ function opzoeken(_el) {
     // deze functie wordt aangeroepen bij druk op de ZOEK knop
 
     // voorkom parallelle verzoeken
-    if (xhr_bezig) {
-        // verzoek loopt nog, dus laat gebruiker wachten
-        return;
-    }
-
-    const el_zoek = rsp_veld_to_el.opzoeken;
-
-    // haal de data op die we moeten sturen
-    let obj = {
-        wedstrijd_pk: dataset.wedstrijdPk,
-        lid_nr: el_zoek.value.slice(0, 6)
-    };
-
-    // hanteer lege input
-    if (obj.lid_nr !== '') {
-        // voorkom parallelle verzoeken
+    if (!xhr_bezig) {
         xhr_bezig = true;
-        el_toevoegen_knop.disabled = true;
-        opzoeken_toon_status("bezig..", "gray");
 
-        const data = JSON.stringify(obj);
-        const xhr = new XMLHttpRequest();
+        const el_zoek = rsp_veld_to_el.opzoeken;
 
-        // POST voorkomt caching
-        xhr.open("POST", dataset.urlCheckBondsnummer, true);       // true = async
-        xhr.timeout = 5000;                   // 5 seconden
-        xhr.onloadend = function () {
-            opzoeken_klaar(xhr);
-            xhr_bezig = false;                // nieuw verzoek toegestaan
+        // haal de data op die we moeten sturen
+        let obj = {
+            wedstrijd_pk: dataset.wedstrijdPk,
+            lid_nr: el_zoek.value.slice(0, 6)
         };
-        xhr.ontimeout = function () {
+
+        // hanteer lege input
+        if (obj.lid_nr === '') {
             xhr_bezig = false;
-            opzoeken_timeout(xhr);
-        };
-        xhr.setRequestHeader("X-CSRFToken", dataset.csrfToken);
-        xhr.send(data);
+        } else {
+            el_toevoegen_knop.disabled = true;
+            opzoeken_toon_status("bezig..", "gray");
+
+            const data = JSON.stringify(obj);
+
+            const xhr = new XMLHttpRequest();
+            xhr.open("POST",        // POST voorkomt caching
+                     dataset.urlCheckBondsnummer,
+                     true);       // true = async
+            xhr.timeout = timeout5s;
+            xhr.onloadend = function() {
+                xhr_bezig = false;                // nieuw verzoek toegestaan
+                opzoeken_klaar(xhr);
+            };
+            xhr.ontimeout = function() {
+                xhr_bezig = false;
+                opzoeken_timeout(xhr);
+            };
+            xhr.setRequestHeader("X-CSRFToken", dataset.csrfToken);
+            xhr.send(data);
+        }
     }
 }
 
@@ -475,8 +491,8 @@ function deelnemers_ophalen_toevoegen(rsp) {
     attach_event_controleer_score();
 }
 
+
 function deelnemers_ophalen_klaar(xhr) {
-    //let is_fail = true
     //console.log('deelnemers_ophalen_klaar: ready=',xhr.readyState, 'status=', xhr.status)
     if (xhr.readyState === XMLHttpRequest.DONE) {
         if (xhr.status === 200) {
@@ -487,36 +503,42 @@ function deelnemers_ophalen_klaar(xhr) {
                     /** @param {Array} rsp.deelnemers **/
                     const rsp = JSON.parse(xhr.responseText);
                     deelnemers_ophalen_toevoegen(rsp);
+                /*
                 } catch (e) {
                     // bad JSON, which could be because of 404
+                 */
+                } finally {
+                    // zet focus op het filter
+                    const el = document.getElementById("table1_zoeken_input");
+                    el.focus();
                 }
-
-                // zet focus op het filter
-                const el = document.getElementById("table1_zoeken_input");
-                el.focus();
             }
         }
         // else: er is een fout opgetreden
     }
 }
 
+
 function deelnemers_ophalen() {
     if (!xhr_bezig) {
+        xhr_bezig = true;
+
         const obj = {
             deelcomp_pk: dataset.deelcompPk,
             wedstrijd_pk: dataset.wedstrijdPk
         };
         const data = JSON.stringify(obj);
-        const xhr = new XMLHttpRequest();
 
-        // POST voorkomt caching
-        xhr.open("POST", dataset.urlDeelnemersOphalen, true);   // true = async
-        xhr.timeout = 5000;                                       // 5 sec
-        xhr.onloadend = function () {
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST",        // POST voorkomt caching
+                 dataset.urlDeelnemersOphalen,
+           true);   // true = async
+        xhr.timeout = timeout5s;
+        xhr.onloadend = function() {
             deelnemers_ophalen_klaar(xhr);
             xhr_bezig = false;
         };
-        xhr.ontimeout = function () {
+        xhr.ontimeout = function() {
             xhr_bezig = false;
         };     // sta nieuw gebruik knop toe
         xhr.setRequestHeader("X-CSRFToken", dataset.csrfToken);
@@ -554,7 +576,7 @@ function attach_event_controleer_score() {
 
 
 // koppel gebruik van de <enter> knop in het zoekveld aan het klikken op de zoekknop
-document.getElementById('id_lid_nr').addEventListener("keyup", function(event) {
+el_lid_nr.addEventListener("keyup", function(event) {
     //console.log('event=', event)
     if (event.key === "Enter")
     {
@@ -563,11 +585,20 @@ document.getElementById('id_lid_nr').addEventListener("keyup", function(event) {
     }
 });
 
+
 document.addEventListener('DOMContentLoaded', function() {
     el_zoek_knop.addEventListener('click', opzoeken);
     el_toevoegen_knop.addEventListener('click', toevoegen);
     el_opslaan_knop.addEventListener('click', opslaan);
+    el_lijst_ophalen_kaartje.addEventListener('click', deelnemers_ophalen);
     attach_event_controleer_score();
 });
+
+
+// support for testing timeouts
+if (localStorage.getItem("js_cov_short_timeout")) {
+    timeout3s = 1;
+    timeout5s = 1;
+}
 
 /* end of file */

@@ -298,13 +298,15 @@ class WedstrijdUitslagInvoerenView(UserPassesTestMixin, TemplateView):
         context['url_opslaan'] = reverse('CompScores:dynamic-scores-opslaan')
         context['url_deelnemers_ophalen'] = reverse('CompScores:dynamic-deelnemers-ophalen')
 
-        context['team_pk2naam'] = team_pk2naam = dict()
-        for team in (RegiocompetitieTeam
-                     .objects
-                     .filter(regiocompetitie=deelcomp)
-                     .select_related('vereniging')):
-            team_pk2naam[team.pk] = team.maak_team_naam_kort()
-        # for
+        if deelcomp.regio_organiseert_teamcompetitie:
+            context['team_pk2naam'] = team_pk2naam = dict()
+            team_pk2naam[0] = '-'
+            for team in (RegiocompetitieTeam
+                         .objects
+                         .filter(regiocompetitie=deelcomp)
+                         .select_related('vereniging')):
+                team_pk2naam[team.pk] = team.maak_team_naam_kort()
+            # for
 
         # plan = wedstrijd.competitiewedstrijdenplan_set.first()
         # ronde = DeelcompetitieRonde.objects.get(plan=plan)

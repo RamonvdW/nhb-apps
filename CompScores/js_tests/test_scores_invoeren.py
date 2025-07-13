@@ -20,7 +20,7 @@ class TestCompScoresInvoeren(bh.BrowserTestCase):
         self.do_wissel_naar_hwl()       # redirect naar /vereniging/
 
         # ga naar de uitslag invoeren pagina
-        url = self.url_uitslag_invoeren % self.match.pk
+        url = self.url_uitslag_invoeren % self.regio_match.pk
         self.do_navigate_to(url)
 
         if True:
@@ -28,7 +28,7 @@ class TestCompScoresInvoeren(bh.BrowserTestCase):
             self.find_element_by_id('id_lid_nr').send_keys(str(self.sporter.lid_nr))
             self.find_element_by_id('id_zoek_knop').click()
             # JS: dynamische interactie met server + update van de getoonde lijst
-            time.sleep(0.5)
+            time.sleep(0.25)
 
             # controleer dat er geen meldingen van de browser zijn over de JS bestanden
             self.assert_no_console_log()
@@ -39,6 +39,18 @@ class TestCompScoresInvoeren(bh.BrowserTestCase):
 
             # controleer dat er geen meldingen van de browser zijn over de JS bestanden
             self.assert_no_console_log()
+
+        if True:
+            # probeer snel achter elkaar te klikken op de zoek en opslaan knoppen
+            nr_inp = self.find_element_by_id('id_lid_nr')
+            nr_inp.clear()
+            nr_inp.send_keys(str(self.sporter.lid_nr))
+
+            opslaan_knop = self.find_element_by_id('id_opslaan_knop')
+            zoek_knop = self.find_element_by_id('id_zoek_knop')
+
+            opslaan_knop.click()
+            zoek_knop.click()
 
         if True:
             # score invoeren: dit triggert de controleer_score functie
@@ -130,6 +142,29 @@ class TestCompScoresInvoeren(bh.BrowserTestCase):
             self.find_element_by_id('id_zoek_knop').click()
             # JS: dynamische interactie met server + update van de getoonde lijst
             time.sleep(0.5)
+
+            # controleer dat er geen meldingen van de browser zijn over de JS bestanden
+            self.assert_no_console_log()
+
+        # variant: met teamcompetitie
+        self.regio_comp.regio_organiseert_teamcompetitie = False
+        self.regio_comp.save(update_fields=['regio_organiseert_teamcompetitie'])
+
+        if True:
+            # korte timeouts
+            self.set_short_xhr_timeouts()
+
+            self.do_navigate_to(url)
+
+            self.find_element_by_id('id_lid_nr').send_keys("999999")
+            self.find_element_by_id('id_lid_nr').send_keys(Keys.RETURN)
+            time.sleep(0.1)
+
+            self.find_element_by_id('id_opslaan_knop').click()
+            time.sleep(0.1)
+
+            self.find_kaartje_met_titel('Lijst ophalen').click()
+            time.sleep(0.1)
 
             # controleer dat er geen meldingen van de browser zijn over de JS bestanden
             self.assert_no_console_log()

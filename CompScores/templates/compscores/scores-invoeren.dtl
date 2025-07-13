@@ -219,7 +219,7 @@
         <div class="col s12" style="margin-top:50px">
 
             <!-- waarschijnlijke deelnemers -->
-            {% include 'plein/card_icon.dtl' with title="Lijst ophalen" text="Waarschijnlijke deelnemers toevoegen aan de uitslag." icon="add" onclick="deelnemers_ophalen()" %}
+            {% include 'plein/card_icon.dtl' with title="Lijst ophalen" text="Waarschijnlijke deelnemers toevoegen aan de uitslag." icon="add" js_id="id_lijst_ophalen" %}
 
         </div>
 
@@ -244,8 +244,10 @@
          data-table-filter-input-id="table1_zoeken_input">
     </div>
 
-    <!-- maak een script block van type application/json aan de data erin -->
-    {{ team_pk2naam|json_script:"team_pk2naam" }}
+    {% if team_pk2naam %}
+        <!-- maak een script block van type application/json aan, met de data erin -->
+        {{ team_pk2naam|json_script:"team_pk2naam" }}
+    {% endif %}
 
     <script src="{% static 'compscores_js/scores_invoeren.js' %}"></script>
     <script src="{% static 'overig_js/tabel_filter.js' %}"></script>
