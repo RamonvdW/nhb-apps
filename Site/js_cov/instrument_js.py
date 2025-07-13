@@ -174,6 +174,12 @@ class JsCovInstrument:
                 contents = ''
         # while
 
+        # insert the last few lines of code
+        if len(self.statement_line_nrs):
+            if clean and clean[-1] != '\n':
+                clean += '\n'
+            clean += '%s(%s);\n' % (self.js_cov_func, repr(self.statement_line_nrs))
+
         # remove empty lines
         while '\n\n' in clean:
             clean = clean.replace('\n\n', '\n')
@@ -212,7 +218,7 @@ class JsCovInstrument:
                 # post_brace_level = self.brace_level
                 # print('[%s][%s -> %s] line: %s' % (self.line_nr, pre_brace_level, post_brace_level, repr(line)))
 
-                if self.brace_level > 0:        # skip closing } and });
+                if self.brace_level > 0:        # skip closing } and });        # TODO: why?
                     if self.line_nr not in self.statement_line_nrs:
                         self.statement_line_nrs.append(self.line_nr)
                         self.executable_line_nrs.append(self.line_nr)

@@ -311,11 +311,6 @@ class BrowserTestCase(TestCase):
         if data:
             js_cov_add(data)
 
-    def init_js_cov(self):
-        # TODO: make working: script = 'localStorage.removeItem("js_cov");\n'
-        # test = self._driver.execute_script(script)
-        pass
-
     def wait_until_url_not(self, url: str, timeout: float = 2.0):
         duration = 0.5
         check_url = self.live_server_url + url
@@ -445,6 +440,14 @@ class BrowserTestCase(TestCase):
         content = self._driver.page_source
         soup = BeautifulSoup(content, features="html.parser")
         return soup.prettify()
+
+    def set_short_xhr_timeouts(self):
+        script = 'localStorage.setItem("js_cov_short_timeout", true);'
+        self._driver.execute_script(script)
+
+    def set_normal_xhr_timeouts(self):
+        script = 'localStorage.removeItem("js_cov_short_timeout");'
+        self._driver.execute_script(script)
 
 
 # start een browser instantie

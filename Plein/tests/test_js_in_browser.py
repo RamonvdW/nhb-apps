@@ -8,7 +8,6 @@ from django.apps import apps
 from django.test import LiveServerTestCase, tag
 from TestHelpers import browser_helper as bh
 from selenium.common.exceptions import NoSuchElementException
-import inspect
 import time
 import os
 
@@ -74,28 +73,7 @@ class TestBrowser(LiveServerTestCase, metaclass=AddFocus):
             self._driver.close()        # important, otherwise the server port remains occupied
             self._driver = None
 
-        bh.database_opschonen(self)
-
-    # def _wait_until_url_not(self, url: str, timeout: float = 2.0):
-    #     duration = 0.5
-    #     check_url = self.live_server_url + url
-    #     curr_url = self._driver.current_url
-    #     while curr_url == check_url and timeout > 0:
-    #         time.sleep(duration)
-    #         timeout -= duration
-    #         duration *= 2
-    #         curr_url = self._driver.current_url
-    #     # while
-
-    # # browser interacties
-    # def _get_console_log(self) -> list[str]:
-    #     logs = self._driver.get_log('browser')      # gets the log + clears it!
-    #     regels = list()
-    #     for log in logs:
-    #         msg = log['message']
-    #         if msg not in regels:
-    #             regels.append(msg)
-    #     return regels
+        bh.database_opschonen(self)     # TODO: niet nodig, want alle tables worden geflushed for LiveServerTestCase :(
 
     def _run_module_tests(self, test_module):
         try:
@@ -123,9 +101,9 @@ class TestBrowser(LiveServerTestCase, metaclass=AddFocus):
                             if callable(test_func):
                                 self._test_count += 1
                                 print('  %s.%s.%s ... ' % (test_module, name, inst_name), end='')
-                                inst.init_js_cov()
                                 test_func()
-                                inst.fetch_js_cov()
+                                inst.fetch_js_cov()                 # collect captured coverage
+                                inst.set_normal_xhr_timeouts()      # for the next test
                                 if self.show_browser and self.pause_after_each_test:
                                     print('sleeping %s ... ' % self.pause_after_test_seconds, end='')
                                     time.sleep(self.pause_after_test_seconds)
@@ -163,6 +141,12 @@ class TestBrowser(LiveServerTestCase, metaclass=AddFocus):
         # raise outside try-except to avoid raising exception from inside exception handler
         if do_fail:     # pragma: no cover
             self.fail('Test aborted')
+
+        # navigate to "plein" and reset the localStorage
+        self._driver.get(self.live_server_url + '/plein/')
+        script = 'localStorage.removeItem("js_cov");\n'
+        script += 'localStorage.removeItem("js_cov_short_timeout");\n'
+        self._driver.execute_script(script)
 
         print('js_tests modules found: %s' % len(test_modules))
         for test_module in test_modules:

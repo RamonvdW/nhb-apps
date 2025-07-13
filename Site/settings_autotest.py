@@ -55,10 +55,6 @@ KALENDER_API_TOKENS = ('autotest',)
 # Mollie endpoint URL override
 BETAAL_API_URL = 'http://localhost:8125'        # gebruik de simulator
 
-# zet minify uit ivm coverage meting van de template files
-# (die kan niet tegen aanpassing ten opzicht van source files)
-ENABLE_MINIFY = False
-
 # enable javascript validation using ESprima
 TEST_VALIDATE_JAVASCRIPT = True
 
@@ -66,5 +62,9 @@ TEST_VALIDATE_JAVASCRIPT = True
 # WARNING: increases test run duration significantly (triple!)
 #TEST_VALIDATE_HTML = True
 
+# zet minify uit ivm coverage meting van de template files
+# (die kan niet tegen aanpassing ten opzicht van source files)
+# om toch MET minify te testen doen we dit tijdens HTML validatie
+ENABLE_MINIFY = not TEST_VALIDATE_HTML
 
 # end of file
