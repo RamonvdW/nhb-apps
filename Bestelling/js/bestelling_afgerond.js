@@ -109,7 +109,7 @@ function check_status_bestelling() {
 
 
 window.addEventListener("load", function()  {
-    // doe de eerste status check over 500ms
+    // doe de eerste status check over 250ms
     setTimeout(check_status_bestelling, 250);
 });
 

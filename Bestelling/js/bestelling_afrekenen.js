@@ -16,6 +16,12 @@ const el_teller = document.getElementById('id_teller');
 let timeout5s = 5000;
 
 
+function toon_melding_in_rood(msg) {
+    el_bericht.innerText = msg;
+    el_bericht.classList.add('sv-rood-text');
+}
+
+
 function status_ophalen_klaar(xhr)
 {
     let retry = true;
@@ -34,7 +40,7 @@ function status_ophalen_klaar(xhr)
                 } catch(e) {
                     // waarschijnlijk geen goede JSON data
                     // een Http404() geeft een foutmelding pagina met status=200 (OK) en komt hier terecht
-                    rsp = "fout";
+                    rsp = {};
                 }
                 //console.log('rsp=', rsp);
                 if ("status" in rsp) {
@@ -64,8 +70,7 @@ function status_ophalen_klaar(xhr)
 
                     } else if (status === "error") {
                         // intern probleem
-                        el_bericht.innerText = "Er is een probleem opgetreden met deze bestelling";
-                        el_bericht.classList.add('sv-rood-text');
+                        toon_melding_in_rood("Er is een probleem opgetreden met deze bestelling");
 
                         retry = false;      // stop trying
                     }
@@ -114,15 +119,14 @@ function check_status_bestelling() {
         xhr.setRequestHeader("X-CSRFToken", dataset.csrfToken);
         xhr.send();     // no data
     } else {
-        el_bericht.innerText = "Het is op dit moment niet mogelijk om te betalen. Probeer het later nog eens";
-        el_bericht.classList.add('sv-rood-text');
+        toon_melding_in_rood("Het is op dit moment niet mogelijk om te betalen. Probeer het later nog eens");
     }
 }
 
 
 window.addEventListener("load", function() {
-    // doe de eerste status check over 500ms
-    setTimeout(check_status_bestelling, 500);
+    // doe de eerste status check over 250ms
+    setTimeout(check_status_bestelling, 250);
 });
 
 

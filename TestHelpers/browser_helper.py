@@ -194,10 +194,11 @@ class BrowserTestCase(TestCase):
         return inputs
 
     def find_title(self):
-        el = self._driver.find_element(By.XPATH, '//title')
-        if el:
-            return el.text
-        return '?? title element not found ??'
+        return self._driver.title
+        # el = self._driver.find_element(By.XPATH, '//title')
+        # if el:
+        #     return el.text
+        # return '?? title element not found ??'
 
     def find_tabel_filter_input(self, tabel_id):
         try:
@@ -466,6 +467,9 @@ class BrowserTestCase(TestCase):
 
     def get_browser_cookie_value(self, cookie_name):
         return self._driver.get_cookie(cookie_name)['value']
+
+    def get_current_url(self):
+        return self._driver.current_url
 
     def get_page_html(self):
         content = self._driver.page_source

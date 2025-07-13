@@ -13,7 +13,7 @@ import time
 
 class TestBrowserBestellingMandjeVerwijder(MyMgmtCommandHelper, bh.BrowserTestCase):
 
-    """ Test de Bestelling applicatie, gebruik van mandje_verwijder.js vanuit de browser """
+    """ Test de Bestelling applicatie, gebruik van bestelling_afgerond.js vanuit de browser """
 
     url_afgerond = '/bestel/na-de-betaling/%s/'     # bestel_nr
 
@@ -49,7 +49,6 @@ class TestBrowserBestellingMandjeVerwijder(MyMgmtCommandHelper, bh.BrowserTestCa
         self.bestelling.status = BESTELLING_STATUS_BETALING_ACTIEF
         self.bestelling.save(update_fields=['status'])
         self.do_navigate_to(url)
-        time.sleep(60)
         time.sleep(0.5)     # eerste check wordt na 250ms gedaan
 
         # controleer dat er geen meldingen van de browser zijn over de JS bestanden
