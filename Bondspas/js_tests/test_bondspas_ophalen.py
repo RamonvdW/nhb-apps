@@ -23,10 +23,19 @@ class TestBondspasOphalen(bh.BrowserTestCase):
         self.do_navigate_to(self.url_bondspas)
 
         # wacht even totdat het plaatje binnen is
-        time.sleep(5)
+        time.sleep(0.5)
 
         # controleer dat er geen fouten in de console log staan
         self.assert_no_console_log()
 
+        # forceer de timeout hantering in de JS code
+        self.set_short_xhr_timeouts()
+        self.do_navigate_to(self.url_bondspas)
+        time.sleep(0.1)
+
+        self.set_normal_xhr_timeouts()
+
+        # controleer dat er geen fouten in de console log staan
+        self.assert_no_console_log()
 
 # end of file
