@@ -32,10 +32,12 @@ from selenium.common.exceptions import NoSuchElementException, ElementNotInterac
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.remote.webelement import WebElement
 from bs4 import BeautifulSoup
+import traceback
 import datetime
 import pyotp
 import time
 import json
+import sys
 
 coverage_data = dict()
 
@@ -97,6 +99,7 @@ class BrowserTestCase(TestCase):
     url_wissel_van_rol = '/functie/wissel-van-rol/'
 
     _driver = None
+    _nav_hist = list()
     live_server_url = ''
     show_browser = False            # set to True for visibility during debugging
 
@@ -322,13 +325,51 @@ class BrowserTestCase(TestCase):
             curr_url = self._driver.current_url
         # while
 
+    def do_navigate_to(self, url, check_console_log=True):
+        if check_console_log:
+            # capture console output before loading a new page
+            self.assert_no_console_log()
+
+        # store invocation order
+        found_frame = None
+        for frame in traceback.extract_stack(limit=2):
+            # print('frame: %s' % repr(frame))
+            # interested frames contain /js_tests/, /tests/ or TestHelpers/browser_helper.py
+            if "tests/" in frame.filename or "/TestHelpers/" in frame.filename:
+                found_frame = frame
+                break
+        # for
+
+        # ga naar de nieuwe pagina - dit reset the globale variabele
+        t1 = time.time()
+        print('do_navigate_to:', url)
+        self._driver.get(self.live_server_url + url)
+        t2 = time.time()
+        if t2 - t1 > 1:
+            # dat duurde meer dan 1 seconde
+            print('\n[ERROR] HTTP GET took very long: %s seconds' % (t2 - t1))
+            if len(self._nav_hist) > 0:
+                prev_url, prev_frame = self._nav_hist[-1]
+                print('        url = %s' % repr(url))
+                if found_frame:
+                    print('        caller:')
+                    print("\n".join(traceback.format_list([found_frame])))
+                else:
+                    print('        caller: ???')
+                print('        prev url = %s' % repr(prev_url))
+                print('        caller:')
+                print("\n".join(traceback.format_list([prev_frame])))
+
+        if found_frame:
+            self._nav_hist.append((url, found_frame))
+
     def do_login(self):
         # print('do_login: session_state=%s' % self.session_state)
         if self.session_state in ("logged in", "passed otp"):
             return
 
         # haal de inlog pagina op
-        self._driver.get(self.live_server_url + self.url_login)
+        self.do_navigate_to(self.url_login, check_console_log=False)
 
         if self._driver.title == 'Inloggen':
             # gelukt
@@ -360,7 +401,7 @@ class BrowserTestCase(TestCase):
 
         # pass otp
         if self._driver.title != 'Controle tweede factor MijnHandboogsport':
-            self._driver.get(self.live_server_url + self.url_otp)
+            self.do_navigate_to(self.url_otp, check_console_log=False)
         self.assertEqual(self._driver.title, 'Controle tweede factor MijnHandboogsport')
         self.assert_no_console_log()
 
@@ -377,7 +418,7 @@ class BrowserTestCase(TestCase):
             return
 
         # ga naar de uitloggen pagina
-        self.do_navigate_to(self.url_logout)
+        self.do_navigate_to(self.url_logout, check_console_log=False)
 
         if self._driver.title == 'Uitloggen':
             # we zijn op de uitloggen pagina beland
@@ -393,21 +434,11 @@ class BrowserTestCase(TestCase):
 
         self.session_state = "logged out"
 
-    def do_navigate_to(self, url):
-        # capture the coverage before it gets lost due to the page load
-        self.fetch_js_cov()
-
-        # controleer dat er geen meldingen van de browser zijn over de JS bestanden
-        self.assert_no_console_log()
-
-        # ga naar de nieuwe pagina - dit reset the globale variabele
-        self._driver.get(self.live_server_url + url)
-
     def do_wissel_naar_hwl(self):
         # wissel naar rol HWL
         self.do_pass_otp()
         if self._driver.title != 'Kies je rol':
-            self.do_navigate_to(self.url_wissel_van_rol)
+            self.do_navigate_to(self.url_wissel_van_rol, check_console_log=False)
         radio = self.find_element_by_id('id_eigen_%s' % self.functie_hwl.pk)    # radio button voor HWL
         self.get_following_sibling(radio).click()
         self.find_element_by_id('activeer_eigen').click()       # activeer knop
@@ -853,6 +884,7 @@ def populate_inst(self, inst):
 
     # load members necessary for communication with the browser
     inst._driver = self._driver
+    inst._nav_hist = self._nav_hist
     inst.show_browser = self.show_browser
     inst.session_state = self.session_state
     inst.live_server_url = self.live_server_url

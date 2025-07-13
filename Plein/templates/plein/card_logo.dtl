@@ -16,7 +16,7 @@
         img_reduce_top = meer ruimte aan de bovenkant: 24=standaard
         text           = "Toon overzicht van de recent gebruikte en aangemaakte accounts."
         url            = de url waar je heen gaat na klikken op het kaartje
-        onclick        = alternatief voor de url - roept een javascript functie aan
+        onclick        = alternatief voor de url - roept een javascript functie aan   # TODO: vervang door js_id
 
     Hierdoor is mogelijk om centraal de code van een kaartje aan te passen.
 

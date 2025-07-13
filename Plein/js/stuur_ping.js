@@ -4,19 +4,23 @@
  * Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
  */
 
+/* jshint esversion: 6 */
 "use strict";
 
-function stuur_ping(url, csrfToken) {
+const dataset = document.getElementById("js_data").dataset;
+
+function stuur_ping() {
     let xhr = new XMLHttpRequest();
-    xhr.open("POST", url, true);         // true = async
-    xhr.setRequestHeader("X-CSRFToken", csrfToken);
+    xhr.open("POST",
+             dataset.urlPing,
+       true);               // true = async
+    xhr.setRequestHeader("X-CSRFToken", dataset.csrfToken);
     xhr.send();
 }
 
 window.addEventListener("load", function() {
     // alles is opgehaald en ingeladen
-    const dataset = document.getElementById("js_data").dataset;
-    stuur_ping(dataset.urlPing, dataset.csrfToken);
+    stuur_ping();
 });
 
 /* end of file */

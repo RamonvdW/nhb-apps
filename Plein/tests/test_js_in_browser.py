@@ -54,7 +54,7 @@ class TestBrowser(LiveServerTestCase, metaclass=AddFocus):
     """
 
     show_browser = False                # set to True for visibility during debugging
-    pause_after_each_test = False       # is set to True for focussed tests
+    pause_after_each_test = False       # is automatically set to True for focussed tests
 
     pause_after_test_seconds = 2        # seconden wachten na elke test
     pause_after_console_log = 30        # seconden wachten als we een console error zien
@@ -63,6 +63,7 @@ class TestBrowser(LiveServerTestCase, metaclass=AddFocus):
     def setUp(self):
         self._test_count = 0
         self._driver = None
+        self._nav_hist = list()
         self.account = None
         self.session_state = "?"
 
@@ -96,6 +97,13 @@ class TestBrowser(LiveServerTestCase, metaclass=AddFocus):
                     # populate with promised members
                     bh.populate_inst(self, inst)
 
+                    if self.init_before_first_test:
+                        self.init_before_first_test = False
+                        inst.do_navigate_to('/plein/')
+                        script = 'localStorage.removeItem("js_cov");\n'
+                        script += 'localStorage.removeItem("js_cov_short_timeout");\n'
+                        self._driver.execute_script(script)
+
                     # find and invoke the test functions
                     for inst_name in dir(inst):
                         if inst_name.startswith('test_'):
@@ -128,7 +136,6 @@ class TestBrowser(LiveServerTestCase, metaclass=AddFocus):
                         test_modules.append(app.name + '.js_tests.' + d[:-3])
                 # for
         # for
-
         test_modules.sort()     # consistent execution order
         if len(test_modules) == 0:
             self.fail('No tests found with focus %s' % repr(app_filter))
@@ -145,10 +152,7 @@ class TestBrowser(LiveServerTestCase, metaclass=AddFocus):
             self.fail('Test aborted')
 
         # navigate to "plein" and reset the localStorage
-        self._driver.get(self.live_server_url + '/plein/')
-        script = 'localStorage.removeItem("js_cov");\n'
-        script += 'localStorage.removeItem("js_cov_short_timeout");\n'
-        self._driver.execute_script(script)
+        self.init_before_first_test = True
 
         print('js_tests modules found: %s' % len(test_modules))
         for test_module in test_modules:
@@ -168,6 +172,8 @@ class TestBrowser(LiveServerTestCase, metaclass=AddFocus):
         self._run_tests()
 
     def run_focussed_tests(self, app_filter):              # pragma: no cover
+        # this method is invoked from outer(), see top of this file
+        # for each app with a js_tests directory, a function named focus_AppName is added that calls outer
         self.show_browser = True
         self.pause_after_each_test = True
         self._run_tests(app_filter)
