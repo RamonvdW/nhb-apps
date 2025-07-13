@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2021-2024 Ramon van der Winkel.
+                Copyright (c) 2021-2025 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -56,7 +56,8 @@
             <p>Als je een applicatie of plug-in ge&iuml;nstalleerd hebt, dan kan je door naar de volgende stap.</p>
             <form action="{{ url_stap_2 }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
                 {% csrf_token %}
-                <button class="btn-sv-rood" id="submit_knop" type="submit" style="margin:1em; margin-top:0">
+                <!--                                                                    top r+l bottom -->
+                <button class="btn-sv-rood" id="submit_knop" type="submit" style="margin: 0 1em 1em;">
                     <i class="notranslate material-icons-round right">arrow_forward_ios</i>Verder naar stap 2</button>
             </form>
         </div>
