@@ -78,9 +78,9 @@ class BrowserTestCase(TestCase):
     ver: Vereniging = None                                  # vereniging van de sporter
     functie_hwl: Functie = None                             # account is hwl
     webwinkel_product: WebwinkelProduct = None              # product in de webwinkel
-    match: CompetitieMatch = None
     comp: Competitie = None
     regio_comp: Regiocompetitie = None                      # regiocompetitie voor regio van sporter
+    regio_match: CompetitieMatch = None
     regio_deelnemer_r: RegiocompetitieSporterBoog = None    # RegiocompetitieSporterBoog
     regio_deelnemer_bb: RegiocompetitieSporterBoog = None   # RegiocompetitieSporterBoog
     mandje: BestellingMandje = None
@@ -730,14 +730,14 @@ def database_vullen(inst):
                             beschrijving='Ronde 1')
     inst.regio_ronde.save()
 
-    inst.match = CompetitieMatch(
+    inst.regio_match = CompetitieMatch(
                         competitie=inst.comp,
                         beschrijving='Test match 1a',
                         vereniging=inst.ver,
                         datum_wanneer=volgende_maand,
                         tijd_begin_wedstrijd='20:00')
-    inst.match.save()
-    inst.regio_ronde.matches.add(inst.match)
+    inst.regio_match.save()
+    inst.regio_ronde.matches.add(inst.regio_match)
 
     match = CompetitieMatch(
                         competitie=inst.comp,
@@ -835,13 +835,13 @@ def populate_inst(self, inst):
     # load database object instances into the testcase instance
     inst.ver = self.ver
     inst.comp = self.comp
-    inst.match = self.match
     inst.mandje = self.mandje
     inst.account = self.account
     inst.sporter = self.sporter
     inst.account_bb = self.account_bb
     inst.bestelling = self.bestelling
     inst.regio_comp = self.regio_comp
+    inst.regio_match = self.regio_match
     inst.functie_hwl = self.functie_hwl
     inst.wedstrijd_1 = self.wedstrijd_1
     inst.sporterboog_r = self.sporterboog_r

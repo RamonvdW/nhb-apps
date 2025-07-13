@@ -212,6 +212,15 @@ class JsCovInstrument:
                 if line[-2:] == "  ":
                     line = line.rstrip()    # remove whitespace left after removing comment; keep indentation
 
+                flush = "if(" in line or "if (" in line
+                if flush:
+                    # print('[%s] {flush} inserting (%s)' % (self.line_nr, repr(self.statement_line_nrs)))
+                    if len(self.statement_line_nrs):
+                        if clean and clean[-1] != '\n':
+                            clean += '\n'
+                        clean += '%s(%s);\n' % (self.js_cov_func, repr(self.statement_line_nrs))
+                        self.statement_line_nrs = list()
+
                 # pre_brace_level = self.brace_level
                 self.brace_level = self.brace_level + line.count('(') + line.count('{')
                 self.brace_level = self.brace_level - line.count(')') - line.count('}')

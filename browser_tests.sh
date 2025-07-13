@@ -119,6 +119,9 @@ then
     exit 1
 fi
 
+# flush de database zodat we geen foutmeldingen krijgen over al bestaande records nadat de vorige test afgebroken was
+./manage.py flush --database=test --noinput
+
 # set high performance
 powerprofilesctl set performance
 

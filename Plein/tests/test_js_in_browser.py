@@ -23,7 +23,7 @@ class AddFocus(type):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        print('[INFO] adding focus methods for apps with JS tests:')
+        added = list()
 
         # find the apps with JS tests and add a method focus_AppName for use from browser_test.sh
         for app in apps.get_app_configs():
@@ -36,9 +36,11 @@ class AddFocus(type):
                         break
                 # for
             if add:
-                print('  adding %s' % app.name)
                 setattr(self, 'focus_%s' % app.name, outer(app.name))
+                added.append(app.name)
         # for
+
+        print('[INFO] added focus methods for apps with JS tests: ' + ", ".join(added))
 
 
 @tag("browser")         # deze tag voorkomt het uitvoeren van deze test tijden de main test run
