@@ -35,6 +35,7 @@
                         </div>
 
                         <div class="input-field">
+                            <!-- HTML validation: element with id=id_email_error ontbreekt (nodig bij form input error) -->
                             {{ form.email.label_tag }}{{ form.email }}
                         </div>
 
