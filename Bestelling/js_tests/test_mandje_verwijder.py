@@ -35,7 +35,7 @@ class TestBrowserBestellingMandjeVerwijder(MyMgmtCommandHelper, bh.BrowserTestCa
         self.click_not_blocking(knop)
 
         # geef het script en de server wat tijd om de bestelmutatie te maken
-        time.sleep(0.25)
+        time.sleep(0.1)
 
         # laat de achtergrondtaak de mutatie verwerken, waardoor het product in het mandje komt
         self.verwerk_bestel_mutaties()
@@ -46,10 +46,12 @@ class TestBrowserBestellingMandjeVerwijder(MyMgmtCommandHelper, bh.BrowserTestCa
         # verwijder het product uit het mandje
         buttons = self.find_elements_buttons()
         if len(buttons) == 0:
+            # print('[ERROR] Verwijder knop niet gevonden - sleep 30')
+            # time.sleep(30)
             self.fail('Verwijder knop niet gevonden!')
 
         button = buttons[0]
-        button.click()
+        self.click_not_blocking(button)
         # click doet een POST naar de webserver
         # deze wacht 3 seconden wacht op de achtergrondtaak voordat "Product is gereserveerd" volgt
         # TODO: voorkom wachten

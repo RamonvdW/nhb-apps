@@ -4,7 +4,8 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from Bestelling.definities import BESTELLING_STATUS_BETALING_ACTIEF
+from Bestelling.definities import (BESTELLING_STATUS_BETALING_ACTIEF, BESTELLING_STATUS_AFGEROND,
+                                   BESTELLING_STATUS_MISLUKT)
 from TestHelpers import browser_helper as bh
 from TestHelpers.mgmt_cmds_helper import MyMgmtCommandHelper
 import time
@@ -19,37 +20,37 @@ class TestBrowserBestellingMandjeVerwijder(MyMgmtCommandHelper, bh.BrowserTestCa
     def test_bestelling_afgerond(self):
         self.do_wissel_naar_sporter()       # redirect naar /plein/
 
+        # GET kan wachten op de achtergrondtaak, maar dat willen we hier niet
+        snel = '?snel=1'
+        url = self.url_afgerond % self.bestelling.bestel_nr + snel
+
+        # betaling actief --> afgerond
         self.bestelling.status = BESTELLING_STATUS_BETALING_ACTIEF
         self.bestelling.save(update_fields=['status'])
+        self.do_navigate_to(url)
 
-        self.do_navigate_to(self.url_afgerond % self.bestelling.bestel_nr)
-        time.sleep(1)
-        return
+        # eerste check is na 250ms, daarna volgt een retry
+        time.sleep(0.5)
 
-        knop = self.find_element_type_with_text('button', 'Leg in mijn mandje')
-        knop.click()
-        # click doet een POST naar de webserver
-        # deze wacht 3 seconden wacht op de achtergrondtaak voordat "Product is gereserveerd" volgt
-        # TODO: voorkom wachten
+        self.bestelling.status = BESTELLING_STATUS_AFGEROND
+        self.bestelling.save(update_fields=['status'])
+        time.sleep(1)     # wacht tot de nieuwe status opgepikt is (1250ms minimum)
 
-        # laat de achtergrondtaak de mutatie verwerken, waardoor het product in het mandje komt
-        self.verwerk_bestel_mutaties(show_all=True)
+        # betaling actief --> mislukt
+        self.bestelling.status = BESTELLING_STATUS_BETALING_ACTIEF
+        self.bestelling.save(update_fields=['status'])
+        self.do_navigate_to(url)
+        self.bestelling.status = BESTELLING_STATUS_MISLUKT
+        self.bestelling.save(update_fields=['status'])
+        time.sleep(0.5)     # wacht tot de nieuwe status opgepikt is (eerste query is na 250ms)
 
-        # bekijk het mandje
-        self.do_navigate_to(self.url_mandje)
-
-        # verwijder het product uit het mandje
-        button = self.find_elements_buttons()[0]
-        button.click()
-        # click doet een POST naar de webserver
-        # deze wacht 3 seconden wacht op de achtergrondtaak voordat "Product is gereserveerd" volgt
-        # TODO: voorkom wachten
-
-        # laat verwijderen uit het mandje verwerken
-        self.verwerk_bestel_mutaties(show_all=True)
-
-        # bekijk het mandje
-        self.do_navigate_to(self.url_mandje)
+        # test afhandeling van timeouts
+        self.set_short_xhr_timeouts()
+        self.bestelling.status = BESTELLING_STATUS_BETALING_ACTIEF
+        self.bestelling.save(update_fields=['status'])
+        self.do_navigate_to(url)
+        time.sleep(60)
+        time.sleep(0.5)     # eerste check wordt na 250ms gedaan
 
         # controleer dat er geen meldingen van de browser zijn over de JS bestanden
         self.assert_no_console_log()

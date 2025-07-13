@@ -29,6 +29,8 @@ import re
 
 # TODO: strip intieme kennis over bestellingen en betalingen --> laat bestelling/betaal helper dat regelen
 
+# TODO: voeg een test toe die controleert dat we echt op een checkout pagina terecht komen
+
 class TestBestellingBetaling(E2EHelpers, TestCase):
 
     """ tests voor de applicatie Bestelling, samenwerking met applicatie Bestelling en Betaal """

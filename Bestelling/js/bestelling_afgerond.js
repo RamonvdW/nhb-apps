@@ -8,7 +8,12 @@
 "use strict";
 
 const dataset = document.getElementById("js_data").dataset;
-let pogingen = 20; // 20 seconden
+let pogingen = 20;      // komt overeen met 20 seconden
+
+const el_status = document.getElementById("id_status");
+const el_knop = document.getElementById("id_afschrift");
+
+let timeout5s = 5000;
 
 
 function status_ophalen_klaar(xhr)
@@ -42,11 +47,9 @@ function status_ophalen_klaar(xhr)
 
                 if (status === "afgerond") {
                     // toon de gebruiker dat de betaling binnen is
-                    const el = document.getElementById("id_status");
-                    el.innerText = "De betaling is gelukt";
+                    el_status.innerText = "De betaling is gelukt";
 
                     // enable de knop 'Toon afschrift'
-                    const el_knop = document.getElementById("id_afschrift");
                     el_knop.style.display = "inline-block";
 
                     // niet nodig om te blijven checken
@@ -54,8 +57,7 @@ function status_ophalen_klaar(xhr)
                     retry = false;
                 } else if (status === "mislukt") {
                     // toon de gebruiker dat de betaling afgebroken/mislukt is
-                    const el = document.getElementById("id_status");
-                    el.innerText = "De betaling is niet gelukt";
+                    el_status.innerText = "De betaling is niet gelukt";
 
                     // niet nodig om te blijven checken
                     pogingen = 0;
@@ -93,9 +95,13 @@ function check_status_bestelling() {
         xhr.open("POST",
                  dataset.urlStatusCheck,
                  true);          // true = async
-        xhr.timeout = 5000;            // 5 sec
-        xhr.onloadend = function() {status_ophalen_klaar(xhr);};
-        xhr.ontimeout = function() {status_ophalen_timeout(xhr);};
+        xhr.timeout = timeout5s;
+        xhr.onloadend = function() {
+                            status_ophalen_klaar(xhr);
+                        };
+        xhr.ontimeout = function() {
+                            status_ophalen_timeout(xhr);
+                        };
         xhr.setRequestHeader("X-CSRFToken", dataset.csrfToken);
         xhr.send();     // no data
     }
@@ -104,8 +110,14 @@ function check_status_bestelling() {
 
 window.addEventListener("load", function()  {
     // doe de eerste status check over 500ms
-    setTimeout(check_status_bestelling, 500);
+    setTimeout(check_status_bestelling, 250);
 });
+
+
+// support for testing timeouts
+if (localStorage.getItem("js_cov_short_timeout")) {
+    timeout5s = 1;
+}
 
 
 /* end of file */
