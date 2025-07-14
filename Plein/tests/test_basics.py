@@ -19,8 +19,7 @@ class TestPleinBasics(E2EHelpers, TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        cls.testdata = data = testdata.TestData()
-        data.maak_accounts_admin_en_bb()
+        cls.testdata = testdata.TestData()
 
     def test_root_redirect(self):
         with self.assert_max_queries(20):
@@ -39,6 +38,8 @@ class TestPleinBasics(E2EHelpers, TestCase):
     def test_quick(self):
         # voor test.sh om met een snelle run in debug mode
         # wissel naar BB zodat we het beheerders plein krijgen
+        self.testdata.maak_accounts_admin_en_bb()
+
         self.e2e_login_and_pass_otp(self.testdata.account_admin)
         self.e2e_wisselnaarrol_bb()
         self.e2e_check_rol('BB')

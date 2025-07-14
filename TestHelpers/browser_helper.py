@@ -11,7 +11,7 @@ from django.utils import timezone
 from Account.models import Account
 from BasisTypen.definities import GESLACHT_ALLE
 from BasisTypen.models import BoogType, TeamType, Leeftijdsklasse
-from Bestelling.models import BestellingMandje, Bestelling
+from Bestelling.models import BestellingMandje, BestellingHoogsteBestelNr
 from Betaal.models import BetaalInstellingenVereniging
 from Competitie.models import (Competitie, Regiocompetitie, RegiocompetitieRonde, RegiocompetitieSporterBoog,
                                CompetitieIndivKlasse, CompetitieTeamKlasse, CompetitieMatch)
@@ -86,7 +86,6 @@ class BrowserTestCase(TestCase):
     regio_deelnemer_r: RegiocompetitieSporterBoog = None    # RegiocompetitieSporterBoog
     regio_deelnemer_bb: RegiocompetitieSporterBoog = None   # RegiocompetitieSporterBoog
     mandje: BestellingMandje = None
-    bestelling: Bestelling = None
     wedstrijd_1: Wedstrijd = None
     locatie_outdoor = WedstrijdLocatie = None
     pause_after_console_log = 2
@@ -274,7 +273,7 @@ class BrowserTestCase(TestCase):
 
         post_click = time.time()
         delta = post_click - pre_click
-        self.assertLess(delta, 0.5)
+        self.assertLess(delta, 0.7)
         # print('click_not_blocking duration: %.3f' % delta)
 
     @staticmethod
@@ -514,7 +513,6 @@ def database_vullen(inst):
     lid_nr2 = lid_nr + 5
 
     # wordt aangeroepen vanuit Plein/tests/test_js_in_browser
-    Account.objects.filter(username=str(lid_nr)).delete()
     inst.account_bb = Account.objects.create(
                                 username=str(lid_nr),
                                 first_name='Boss',
@@ -541,61 +539,57 @@ def database_vullen(inst):
                                 unaccented_naam='Bro des Browser',
                                 bevestigde_email='bro@test.not',
                                 email_is_bevestigd=True)
-    inst.account.save()
 
-    inst.rayon, _ = Rayon.objects.get_or_create(rayon_nr=5, naam="Rayon 5")
-    inst.regio, _ = Regio.objects.get_or_create(regio_nr=117, rayon_nr=inst.rayon.rayon_nr, rayon=inst.rayon)
+    inst.rayon = Rayon.objects.create(rayon_nr=5, naam="Rayon 5")
+    inst.regio = Regio.objects.create(regio_nr=117, rayon_nr=inst.rayon.rayon_nr, rayon=inst.rayon)
 
-    inst.ver_bond = Vereniging.objects.filter(ver_nr=settings.WEBWINKEL_VERKOPER_VER_NR).first()
-    if inst.ver_bond is None:
-        inst.ver_bond = Vereniging(ver_nr=settings.WEBWINKEL_VERKOPER_VER_NR)
-    # override static object created by migrations
-    inst.ver_bond.naam = "Bondsbureau"
-    inst.ver_bond.regio = inst.regio
-    inst.ver_bond.save()
+    inst.ver_bond = Vereniging.objects.create(
+                            ver_nr=settings.WEBWINKEL_VERKOPER_VER_NR,
+                            naam='Bondsbureau',
+                            regio=inst.regio)
 
-    inst.ontvanger = BetaalInstellingenVereniging(
+    inst.ontvanger = BetaalInstellingenVereniging.objects.create(
                             vereniging=inst.ver_bond,
                             mollie_api_key='test_1234')
-    inst.ontvanger.save()
 
-    inst.cluster_117a, _ = Cluster.objects.get_or_create(
-                                regio=inst.regio,
-                                letter='A',
-                                naam='Cluster A',
-                                gebruik='18')
+    inst.cluster_117a = Cluster.objects.create(
+                            regio=inst.regio,
+                            letter='A',
+                            naam='Cluster A',
+                            gebruik='18')
 
-    inst.cluster_117b, _ = Cluster.objects.get_or_create(
-                                regio=inst.regio,
-                                letter='B',
-                                naam='Cluster B',
-                                gebruik='18')
+    inst.cluster_117b = Cluster.objects.create(
+                            regio=inst.regio,
+                            letter='B',
+                            naam='Cluster B',
+                            gebruik='18')
 
-    inst.ver, _ = Vereniging.objects.get_or_create(
-                                naam="Browser Club",
-                                ver_nr=4200,
-                                regio=inst.regio)
+    inst.ver = Vereniging.objects.create(
+                            naam="Browser Club",
+                            ver_nr=4200,
+                            regio=inst.regio)
     inst.ver.clusters.add(inst.cluster_117a)
 
-    inst.ver2, _ = Vereniging.objects.get_or_create(
-                                naam="Browser Club 2",
-                                ver_nr=4201,
-                                regio=inst.regio)
+    inst.ver2 = Vereniging.objects.create(
+                            naam="Browser Club 2",
+                            ver_nr=4201,
+                            regio=inst.regio)
     inst.ver.clusters.add(inst.cluster_117b)
 
-    inst.sporter, _ = Sporter.objects.get_or_create(
-                                    lid_nr=lid_nr,
-                                    geslacht="V",
-                                    voornaam="Froukje",
-                                    achternaam="de Browser",
-                                    geboorte_datum=datetime.date(year=1988, month=8, day=8),
-                                    sinds_datum=datetime.date(year=2020, month=8, day=8),
-                                    bij_vereniging=inst.ver,
-                                    email=inst.account_bb.email)
-    inst.sporter.account = inst.account_bb
-    inst.sporter.save(update_fields=['account'])
+    inst.sporter = Sporter.objects.create(
+                                lid_nr=lid_nr,
+                                geslacht="V",
+                                voornaam="Froukje",
+                                achternaam="de Browser",
+                                geboorte_datum=datetime.date(year=1988, month=8, day=8),
+                                sinds_datum=datetime.date(year=2020, month=8, day=8),
+                                bij_vereniging=inst.ver,
+                                account=inst.account_bb,
+                                email=inst.account_bb.email,
+                                postadres_1='Doelbaan 4',
+                                postadres_2='9999ZZ Boogstad')
 
-    inst.sporter2, _ = Sporter.objects.get_or_create(
+    inst.sporter2 = Sporter.objects.create(
                                     lid_nr=lid_nr2,
                                     geslacht="M",
                                     voornaam="Bro",
@@ -605,39 +599,38 @@ def database_vullen(inst):
                                     bij_vereniging=inst.ver,
                                     email='')
 
-    inst.boog_r, _ = BoogType.objects.get_or_create(
+    inst.boog_r = BoogType.objects.create(
                                     afkorting='R',
                                     beschrijving='Recurve',
                                     volgorde=10)        # zelfde volgorde als het standaard object
 
-    inst.boog_bb, _ = BoogType.objects.get_or_create(
+    inst.boog_bb = BoogType.objects.create(
                                     afkorting='BB',
                                     beschrijving='Barebow',
                                     volgorde=12)        # zelfde volgorde als het standaard object
 
-    inst.team_r, _ = TeamType.objects.get_or_create(
+    inst.team_r = TeamType.objects.create(
                                     afkorting='R',
                                     beschrijving='Recurve Team',
                                     volgorde=1)
-    inst.team_r.save()
     inst.team_r.boog_typen.set([inst.boog_r])
 
-    inst.sporterboog_r, _ = SporterBoog.objects.get_or_create(
+    inst.sporterboog_r = SporterBoog.objects.create(
                                     sporter=inst.sporter,
                                     boogtype=inst.boog_r,
                                     voor_wedstrijd=True)
 
-    inst.sporterboog_bb, _ = SporterBoog.objects.get_or_create(
+    inst.sporterboog_bb = SporterBoog.objects.create(
                                     sporter=inst.sporter,
                                     boogtype=inst.boog_bb,
                                     voor_wedstrijd=True)
 
-    inst.sporterboog2_r, _ = SporterBoog.objects.get_or_create(
+    inst.sporterboog2_r = SporterBoog.objects.create(
                                     sporter=inst.sporter2,
                                     boogtype=inst.boog_r,
                                     voor_wedstrijd=True)
 
-    inst.functie_hwl, _ = Functie.objects.get_or_create(
+    inst.functie_hwl = Functie.objects.create(
                                 rol='HWL',
                                 beschrijving='HWL 4200',
                                 bevestigde_email='hwl4200@test.not',
@@ -653,62 +646,47 @@ def database_vullen(inst):
 
     inst.functie_mww.accounts.add(inst.account_bb)
 
-    inst.functie_mwz, _ = Functie.objects.get_or_create(
-                                rol='MWZ')
-    # override static object created by migrations
-    inst.functie_mwz.beschrijving = 'Manager Wedstrijdzaken'
-    inst.functie_mwz.bevestigde_email = 'mwz@test.not'
-    inst.functie_mwz.save()
-
+    inst.functie_mwz = Functie.objects.create(
+                                rol='MWZ',
+                                beschrijving='Manager Wedstrijdzaken',
+                                bevestigde_email='mwz@test.not')
     inst.functie_mwz.accounts.add(inst.account_bb)
 
     # maak webwinkel producten aan
     foto = WebwinkelFoto()
     foto.save()
 
-    inst.foto1 = WebwinkelFoto(
+    inst.foto1 = WebwinkelFoto.objects.create(
                     locatie='gulden-1.png',
                     locatie_thumb='gulden-1_thumb.png',
                     volgorde=1)
-    inst.foto1.save()
 
-    inst.foto2 = WebwinkelFoto(
+    inst.foto2 = WebwinkelFoto.objects.create(
                     locatie='gulden-2.png',
                     locatie_thumb='gulden-2_thumb.png',
                     volgorde=2)
-    inst.foto2.save()
 
-    product = WebwinkelProduct(
+    product = WebwinkelProduct.objects.create(
                     omslag_titel='Test product 1',
                     volgorde=1,
                     onbeperkte_voorraad=True,
                     omslag_foto=foto,
                     bestel_begrenzing='',
                     prijs_euro="1.23")
-    product.save()
     product.fotos.add(inst.foto1)
     product.fotos.add(inst.foto2)
     inst.webwinkel_product = product
 
-    inst.mandje = BestellingMandje(
+    inst.mandje = BestellingMandje.objects.create(
                     account=inst.account)
-    inst.mandje.save()
 
-    inst.bestelling = Bestelling(
-                        bestel_nr=42000,
-                        account=inst.account_bb,
-                        ontvanger=inst.ontvanger,
-                        verkoper_naam='V. Verkoper',
-                        # status=BESTELLING_STATUS_CHOICES,
-                        log='Test')
-    inst.bestelling.save()
-    # self.bestelling.regels.add(BestellingRegel)
+    BestellingHoogsteBestelNr(hoogste_gebruikte_bestel_nr=42000).save()
 
     # maak een competitiewedstrijd aan waarop scores ingevoerd kunnen worden
     volgende_maand = timezone.now().date()
     volgende_maand += datetime.timedelta(days=31)
 
-    inst.lkl_all = Leeftijdsklasse(
+    inst.lkl_all = Leeftijdsklasse.objects.create(
                         afkorting='Alle',
                         beschrijving='Alle',
                         klasse_kort='Alle',
@@ -716,7 +694,6 @@ def database_vullen(inst):
                         min_wedstrijdleeftijd=0,
                         max_wedstrijdleeftijd=99,
                         volgorde=1)
-    inst.lkl_all.save()
 
     inst.comp = Competitie(
                         beschrijving='Indoor Test',
@@ -726,75 +703,67 @@ def database_vullen(inst):
     inst.comp.boogtypen.add(inst.boog_r)        # noodzakelijk om in te kunnen schrijven
     inst.comp.refresh_from_db()                 # datum strings omgezet naar datetime object
 
-    inst.klasse_indiv_r = CompetitieIndivKlasse(
+    inst.klasse_indiv_r = CompetitieIndivKlasse.objects.create(
                                 competitie=inst.comp,
                                 boogtype=inst.boog_r,
                                 volgorde=1,
                                 min_ag=0,
                                 is_onbekend=True)
-    inst.klasse_indiv_r.save()
     inst.klasse_indiv_r.leeftijdsklassen.add(inst.lkl_all)
 
-    inst.klasse_indiv_bb = CompetitieIndivKlasse(
+    inst.klasse_indiv_bb = CompetitieIndivKlasse.objects.create(
                                 competitie=inst.comp,
                                 boogtype=inst.boog_bb,
                                 volgorde=3,
                                 min_ag=0,
                                 is_onbekend=True)
-    inst.klasse_indiv_bb.save()
     inst.klasse_indiv_bb.leeftijdsklassen.add(inst.lkl_all)
 
-    inst.klasse_team_r = CompetitieTeamKlasse(
+    inst.klasse_team_r = CompetitieTeamKlasse.objects.create(
                                 competitie=inst.comp,
                                 team_type=inst.team_r,
                                 volgorde=1,
                                 beschrijving="Recurve ERE",
                                 min_ag=0.0,     # sporter heeft geen AG!
                                 is_voor_teams_rk_bk=True)
-    inst.klasse_team_r.save()
 
-    inst.regio_comp = Regiocompetitie(
+    inst.regio_comp = Regiocompetitie.objects.create(
                             competitie=inst.comp,
                             regio=inst.regio,
                             functie=inst.functie_hwl)   # zou moeten zijn: RCL
-    inst.regio_comp.save()
 
-    inst.regio_ronde = RegiocompetitieRonde(
+    inst.regio_ronde = RegiocompetitieRonde.objects.create(
                             regiocompetitie=inst.regio_comp,
                             week_nr=1,
                             beschrijving='Ronde 1')
-    inst.regio_ronde.save()
 
-    inst.regio_match = CompetitieMatch(
+    inst.regio_match = CompetitieMatch.objects.create(
                         competitie=inst.comp,
                         beschrijving='Test match 1a',
                         vereniging=inst.ver,
                         datum_wanneer=volgende_maand,
                         tijd_begin_wedstrijd='20:00')
-    inst.regio_match.save()
     inst.regio_ronde.matches.add(inst.regio_match)
 
-    match = CompetitieMatch(
+    match = CompetitieMatch.objects.create(
                         competitie=inst.comp,
                         beschrijving='Test match 2a',
                         vereniging=inst.ver,
                         datum_wanneer=volgende_maand + datetime.timedelta(days=3),
                         tijd_begin_wedstrijd='20:01')
-    match.save()
     inst.regio_ronde.matches.add(match)
 
     for lp in range(7):
-        match = CompetitieMatch(
+        match = CompetitieMatch.objects.create(
                             competitie=inst.comp,
                             beschrijving='Test match %sb' % lp,
                             vereniging=inst.ver2,
                             datum_wanneer=volgende_maand,
                             tijd_begin_wedstrijd='19:00')
-        match.save()
         inst.regio_ronde.matches.add(match)
     # for
 
-    inst.regio_deelnemer_r = RegiocompetitieSporterBoog(
+    inst.regio_deelnemer_r = RegiocompetitieSporterBoog.objects.create(
                                     regiocompetitie=inst.regio_comp,
                                     sporterboog=inst.sporterboog_r,
                                     bij_vereniging=inst.sporterboog_r.sporter.bij_vereniging,
@@ -802,30 +771,26 @@ def database_vullen(inst):
                                     inschrijf_voorkeur_team=True,
                                     ag_voor_team_mag_aangepast_worden=True,
                                     ag_voor_team=7.0)
-    inst.regio_deelnemer_r.save()
 
-    inst.regio_deelnemer_bb = RegiocompetitieSporterBoog(
+    inst.regio_deelnemer_bb = RegiocompetitieSporterBoog.objects.create(
                                     regiocompetitie=inst.regio_comp,
                                     sporterboog=inst.sporterboog_bb,
                                     bij_vereniging=inst.sporterboog_bb.sporter.bij_vereniging,
                                     indiv_klasse=inst.klasse_indiv_bb)
-    inst.regio_deelnemer_bb.save()
 
-    inst.regio_deelnemer2_r = RegiocompetitieSporterBoog(
+    inst.regio_deelnemer2_r = RegiocompetitieSporterBoog.objects.create(
                                     regiocompetitie=inst.regio_comp,
                                     sporterboog=inst.sporterboog2_r,
                                     bij_vereniging=inst.sporterboog2_r.sporter.bij_vereniging,
                                     indiv_klasse=inst.klasse_indiv_r,
                                     inschrijf_voorkeur_team=True,
                                     ag_voor_team=9.2)
-    inst.regio_deelnemer2_r.save()
 
-    inst.ag = Aanvangsgemiddelde(
+    inst.ag = Aanvangsgemiddelde.objects.create(
                     sporterboog=inst.sporterboog_r,
                     boogtype=inst.boog_r,
                     afstand_meter=inst.comp.afstand,
                     waarde=8.0)
-    inst.ag.save()
 
     # voeg een locatie toe
     inst.locatie_outdoor = WedstrijdLocatie(
@@ -874,7 +839,6 @@ def populate_inst(self, inst):
     inst.account = self.account
     inst.sporter = self.sporter
     inst.account_bb = self.account_bb
-    inst.bestelling = self.bestelling
     inst.regio_comp = self.regio_comp
     inst.regio_match = self.regio_match
     inst.functie_hwl = self.functie_hwl

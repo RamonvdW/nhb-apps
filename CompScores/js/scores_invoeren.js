@@ -56,7 +56,7 @@ function opslaan_klaar(xhr) {
 }
 
 // sla de ingevoerde scores op door een POST naar de website
-function opslaan(_el) {
+function opslaan(_event) {
     if (!xhr_bezig) {
         xhr_bezig = true;
 
@@ -180,7 +180,7 @@ function opzoeken_timeout(xhr) {
     // deze zet de foutmelding-status op het scherm
 }
 
-function opzoeken(_el) {
+function opzoeken(_event) {
     // deze functie wordt aangeroepen bij druk op de ZOEK knop
 
     // voorkom parallelle verzoeken
@@ -262,7 +262,7 @@ function populate_cloned_row(new_row, data1, data2) {
 }
 
 
-function toevoegen(_el) {
+function toevoegen(_event) {
     // voeg de gevonden sporter toe aan de tabel
 
     // als lid_nr al in de tabel staat, dan niet toevoegen
@@ -519,7 +519,7 @@ function deelnemers_ophalen_klaar(xhr) {
 }
 
 
-function deelnemers_ophalen() {
+function deelnemers_ophalen(_event) {
     if (!xhr_bezig) {
         xhr_bezig = true;
 

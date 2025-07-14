@@ -8,9 +8,17 @@
 "use strict";
 
 const dataset = document.getElementById("js_data").dataset;
+let verwijder_ids = [];
 
-function verwijder(id) {
-    const el = document.getElementById(id);
+try {
+    verwijder_ids = JSON.parse(document.getElementById('verwijder_ids').textContent);
+} catch (e) {
+    verwijder_ids = [];
+}
+
+
+function verwijder(event) {
+    const el = event.currentTarget;        // the element with the event handler
     const url = el.dataset.url;
 
     // voer een POST uit om toe te voegen
@@ -27,6 +35,18 @@ function verwijder(id) {
     form.style.display = 'hidden';
     document.body.appendChild(form);
     form.submit();
+
+    // POST is synchroon
+    // antwoord bevat een nieuwe pagina (of een redirect)
 }
+
+
+// koppel de knop click events aan de verwijder functie
+document.addEventListener('DOMContentLoaded', function() {
+    verwijder_ids.forEach(knop_id => {
+        const el_knop = document.getElementById(knop_id);
+        el_knop.addEventListener('click', verwijder);
+    });
+});
 
 /* end of file */

@@ -12,7 +12,7 @@ from django.conf import settings
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.formats import date_format
-from django.db.utils import DataError, OperationalError, IntegrityError
+from django.db.utils import DataError, OperationalError, IntegrityError, DEFAULT_DB_ALIAS
 from django.core.management.base import BaseCommand
 from Account.models import Account
 from BasisTypen.definities import SCHEIDS_NIET, SCHEIDS_VERENIGING

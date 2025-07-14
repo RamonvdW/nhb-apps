@@ -10,7 +10,7 @@
 
 from django.conf import settings
 from django.core.management.base import BaseCommand
-from django.db.utils import OperationalError, IntegrityError
+from django.db.utils import OperationalError, IntegrityError, DEFAULT_DB_ALIAS
 from Bestelling.models import BestellingMutatie
 from Bestelling.operations import VerwerkBestelMutaties
 from Mailer.operations import mailer_notify_internal_error
@@ -44,7 +44,8 @@ class Command(BaseCommand):
                             help="Maximum aantal minuten actief blijven")
         parser.add_argument('--stop_exactly', type=int, default=None, choices=range(60),
                             help="Stop op deze minuut")
-        parser.add_argument('--quick', action='store_true')             # for testing
+        parser.add_argument('--quick', action='store_true')                 # for testing
+        parser.add_argument('--use-test-database', action='store_true')     # for testing
 
     def _verwerk_nieuwe_mutaties(self):
         begin = datetime.datetime.now()
@@ -159,6 +160,14 @@ class Command(BaseCommand):
         self.stdout.write('[INFO] Taak loopt tot %s' % str(self.stop_at))
 
     def handle(self, *args, **options):
+
+        if options['use_test_database']:
+            # voor gebruik tijdens browser tests
+            from django.db import connection
+            connection.close()
+            test_database_name = "test_" + settings.DATABASES[DEFAULT_DB_ALIAS]["NAME"]
+            settings.DATABASES[DEFAULT_DB_ALIAS]["NAME"] = test_database_name
+            connection.settings_dict["NAME"] = test_database_name
 
         self.verwerk_mutaties = VerwerkBestelMutaties(self.stdout)
 

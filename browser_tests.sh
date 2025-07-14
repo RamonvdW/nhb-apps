@@ -15,8 +15,9 @@ STATIC_DIR="$PWD/Site/.static/"   # must be full path
 SETTINGS_AUTOTEST_NODEBUG="Site.settings_autotest_nodebug"
 SETTINGS_AUTOTEST_BROWSER="Site.settings_autotest_browser"
 COVERAGE_RC="./Site/utils/coverage.rc"
-DATABASE="test_data3"
+TEST_DATABASE="test_data3"
 PYCOV=(-m coverage run --rcfile="$COVERAGE_RC" --append --branch)    # --debug=trace
+BG_DURATION=60
 
 # -Wa = enable deprecation warnings
 PY_OPTS=(-Wa)
@@ -93,16 +94,16 @@ then
     echo "[INFO] Deleting test database"
     old_pwd="$PWD"
     cd "/tmp" || exit 2
-    sudo -u postgres dropdb --if-exists $DATABASE || exit 1
+    sudo -u postgres dropdb --if-exists $TEST_DATABASE || exit 1
 
     echo "[INFO] Creating clean database"
-    sudo -u postgres createdb -E UTF8 $DATABASE || exit 1
-    sudo -u postgres psql -d $DATABASE -q -c 'GRANT CREATE ON SCHEMA public TO django' || exit 1
+    sudo -u postgres createdb -E UTF8 $TEST_DATABASE || exit 1
+    sudo -u postgres psql -d $TEST_DATABASE -q -c 'GRANT CREATE ON SCHEMA public TO django' || exit 1
     cd "$old_pwd" || exit 2
 
     echo "[INFO] Running migrations"
     # cannot run migrations stand-alone because it will not use the test database
-    time python3 -u ./manage.py test --keepdb --noinput --settings="$SETTINGS_AUTOTEST_NODEBUG" -v 2 Plein.tests.test_basics.TestPleinBasics.test_quick
+    time python3 -u ./manage.py test --keepdb --noinput --settings="$SETTINGS_AUTOTEST_NODEBUG" -v 2 Plein.tests.test_basics.TestPleinBasics.test_root_redirect
     RES=$?
     [ $RES -eq 0 ] || exit 1
     # echo "[DEBUG] Debug run result: $RES --> ABORTED=$ABORTED"
@@ -119,9 +120,6 @@ then
     exit 1
 fi
 
-# flush de database zodat we geen foutmeldingen krijgen over al bestaande records nadat de vorige test afgebroken was
-./manage.py flush --database=test --noinput
-
 # set high performance
 powerprofilesctl set performance
 
@@ -131,6 +129,50 @@ echo "[INFO] Capturing output in $LOG"
 tail -f "$LOG" --pid=$$ | python -u ./Site/utils/number_tests.py | grep --color -E "FAIL$|ERROR$|" &
 PID_TAIL=$(jobs -p | tail -1)
 # echo "PID_TAIL=$PID_TAIL"
+
+# flush de database zodat we geen foutmeldingen krijgen over al bestaande records nadat de vorige test afgebroken was
+# let op: dit reset NIET de migraties, die blijven gedaan. Statische records aangemaakt door migratie zijn dus weg.
+./manage.py flush --database=test --noinput &>>"$LOG"
+
+# start de achtergrondtaken
+
+# start the mail transport service simulator
+pkill -f websim_mailer
+python3 -u ./Mailer/test_tools/websim_mailer.py &>>"$LOG" &
+
+# start the payment service simulator
+echo "[INFO] Starting Mollie simulator" >>"$LOG"
+pkill -f websim_betaal
+python3 -u ./Betaal/test-tools/websim_betaal.py &>>"$LOG" &
+
+# start the google maps simulator
+echo "[INFO] Starting Google Maps simulator" >>"$LOG"
+pkill -f websim_gmaps
+python3 -u ./Locatie/test_tools/websim_gmaps.py &>>"$LOG" &
+
+echo "[INFO] Starting betaal_mutaties (runtime: $BG_DURATION minutes)" >>"$LOG"
+pkill -f betaal_mutaties
+./manage.py betaal_mutaties --settings="$SETTINGS_AUTOTEST_BROWSER" --use-test-database $BG_DURATION &>>"$LOG" &
+
+echo "[INFO] Starting bestel_mutaties (runtime: $BG_DURATION minutes)" >>"$LOG"
+pkill -f bestel_mutaties
+./manage.py bestel_mutaties --settings="$SETTINGS_AUTOTEST_BROWSER" --use-test-database $BG_DURATION &>>"$LOG" &
+
+echo "[INFO] Starting regiocomp_mutaties (runtime: $BG_DURATION minutes)" >>"$LOG"
+pkill -f regiocomp_mutaties
+./manage.py regiocomp_mutaties --settings="$SETTINGS_AUTOTEST_BROWSER" --use-test-database $BG_DURATION &>>"$LOG" &
+
+echo "[INFO] Starting regiocomp_tussenstand (runtime: $BG_DURATION minutes)" >>"$LOG"
+pkill -f regiocomp_tussenstand
+./manage.py regiocomp_tussenstand --settings="$SETTINGS_AUTOTEST_BROWSER" --use-test-database $BG_DURATION &>>"$LOG" &
+
+echo "[INFO] Starting scheids_mutaties (runtime: $BG_DURATION minutes)" >>"$LOG"
+pkill -f scheids_mutaties
+./manage.py scheids_mutaties --settings="$SETTINGS_AUTOTEST_BROWSER" --use-test-database $BG_DURATION &>>"$LOG" &
+
+# geef de achtergrondtaken wat tijd om op te starten
+sleep 1
+echo "" >>"$LOG"
 
 # -u = unbuffered stdin/stdout --> also ensures the order of stdout/stderr lines
 # -v = verbose
@@ -191,6 +233,17 @@ then
     # echo "COVERAGE_FILE=$COVERAGE_FILE"
     # rm "$COVERAGE_FILE"
 fi
+
+# kill the background processes
+echo "[INFO] Stopping background tasks"
+pkill -f regiocomp_tussenstand
+pkill -f regiocomp_mutaties
+pkill -f bestel_mutaties
+pkill -f betaal_mutaties
+pkill -f scheids_mutaties
+pkill -f websim_gmaps
+pkill -f websim_betaal
+pkill -f websim_mailer
 
 # restore performance mode
 powerprofilesctl set balanced
