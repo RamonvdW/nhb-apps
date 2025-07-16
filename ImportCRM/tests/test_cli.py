@@ -9,7 +9,6 @@ from django.core.management import call_command
 from ImportCRM.models import ImportLimieten
 from Mailer.models import MailQueue
 from TestHelpers.e2ehelpers import E2EHelpers
-from Site.core.main_exceptions import SpecificExitCode
 import io
 
 
@@ -59,8 +58,10 @@ class TestImportCRMImport(E2EHelpers, TestCase):
 
         f1, f2 = self.run_management_command(DIFF_CRM_JSONS_COMMAND,
                                              TESTFILE_NOT_EXISTING,
-                                             TESTFILE_NOT_EXISTING)
+                                             TESTFILE_NOT_EXISTING,
+                                             report_exit_code=False)
         self.assertTrue(f1.getvalue().startswith('[ERROR] Bestand kan niet gelezen worden'))
+        self.assertTrue('[TEST] Management command raised SpecificExitCode(3)' in f1.getvalue())
 
     def test_bad_json(self):
         # afhandelen slechte/lege JSON file
@@ -71,8 +72,12 @@ class TestImportCRMImport(E2EHelpers, TestCase):
 
         f1, f2 = self.run_management_command(DIFF_CRM_JSONS_COMMAND,
                                              TESTFILE_01_EMPTY,
-                                             TESTFILE_01_EMPTY)
+                                             TESTFILE_01_EMPTY,
+                                             report_exit_code=False)
+        # print("f1: %s" % f1.getvalue())
+        # print("f2: %s" % f2.getvalue())
         self.assertTrue(f1.getvalue().startswith('[ERROR] Probleem met het JSON formaat in bestand'))
+        self.assertTrue('[TEST] Management command raised SpecificExitCode(3)' in f1.getvalue())
 
     def test_import(self):
         with self.assert_max_queries(20):
@@ -84,18 +89,21 @@ class TestImportCRMImport(E2EHelpers, TestCase):
     def test_unicode_error(self):
         # UnicodeDecodeError
         f1, f2 = self.run_management_command(DUMP_EDUCATIONS_COMMAND,
-                                             TESTFILE_04_UNICODE_ERROR)
-        self.assertTrue(
-            "[ERROR] Bestand heeft unicode problemen ('rawunicodeescape' codec can't decode bytes in position 180-181:"
-            in f1.getvalue())
-        # self.assertEqual(f2.getvalue(), '')
+                                             TESTFILE_04_UNICODE_ERROR,
+                                             report_exit_code=False)
+        # print("f1: %s" % f1.getvalue())
+        # print("f2: %s" % f2.getvalue())
+        self.assertTrue("[ERROR] Bestand heeft unicode problemen ('rawunicodeescape'" in f1.getvalue())
+        self.assertEqual(f2.getvalue(), '')
 
         f1, f2 = self.run_management_command(DIFF_CRM_JSONS_COMMAND,
                                              TESTFILE_04_UNICODE_ERROR,
-                                             TESTFILE_04_UNICODE_ERROR)
+                                             TESTFILE_04_UNICODE_ERROR,
+                                             report_exit_code=False)
         self.assertTrue(
             "[ERROR] Bestand heeft unicode problemen ('rawunicodeescape' codec can't decode bytes in position 180-181:"
             in f1.getvalue())
+        self.assertTrue('[TEST] Management command raised SpecificExitCode(3)' in f1.getvalue())
 
     def test_bad_nrs(self):
         # controleer dat de import tegen niet-nummers kan
@@ -115,16 +123,14 @@ class TestImportCRMImport(E2EHelpers, TestCase):
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
 
-        f1 = io.StringIO()
-        f2 = io.StringIO()
-        call_command(DIFF_CRM_JSONS_COMMAND,
-                     TESTFILE_02_INCOMPLETE,
-                     TESTFILE_02_INCOMPLETE,
-                     stderr=f1,  # noodzakelijk voor de test!
-                     stdout=f2)
+        f1, f2 = self.run_management_command(DIFF_CRM_JSONS_COMMAND,
+                                             TESTFILE_02_INCOMPLETE,
+                                             TESTFILE_02_INCOMPLETE,
+                                             report_exit_code=False)
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
         self.assertTrue('[ERROR] [FATAL] Verplichte sleutel' in f1.getvalue())
+        self.assertTrue('[TEST] Management command raised SpecificExitCode(3)' in f1.getvalue())
 
     def test_diff(self):
         limieten = ImportLimieten.objects.first()
@@ -134,19 +140,26 @@ class TestImportCRMImport(E2EHelpers, TestCase):
         limieten.max_member_changes = 1
         limieten.max_club_changes = 1
         limieten.save()
-        with self.assertRaises(SpecificExitCode):
-            f1, f2 = self.run_management_command(DIFF_CRM_JSONS_COMMAND,
-                                                 TESTFILE_19_STR_NOT_NR,
-                                                 TESTFILE_23_DIPLOMA)
+        f1, f2 = self.run_management_command(DIFF_CRM_JSONS_COMMAND,
+                                             TESTFILE_19_STR_NOT_NR,
+                                             TESTFILE_23_DIPLOMA,
+                                             report_exit_code=False)
+        # print("f1: %s" % f1.getvalue())
+        # print("f2: %s" % f2.getvalue())
+        self.assertTrue('[ERROR] Too many member changes! (limit: 1)' in f1.getvalue())
+        self.assertTrue('[ERROR] Too many club changes! (limit: 1)' in f1.getvalue())
+        self.assertTrue('[TEST] Management command raised SpecificExitCode(2)' in f1.getvalue())
 
         # te veel club changes
         limieten.max_member_changes = 50
         limieten.max_club_changes = 1
         limieten.save()
-        with self.assertRaises(SpecificExitCode):
-            f1, f2 = self.run_management_command(DIFF_CRM_JSONS_COMMAND,
-                                                 TESTFILE_03_BASE_DATA,
-                                                 TESTFILE_09_LID_MUTATIES)
+        f1, f2 = self.run_management_command(DIFF_CRM_JSONS_COMMAND,
+                                             TESTFILE_03_BASE_DATA,
+                                             TESTFILE_09_LID_MUTATIES,
+                                             report_exit_code=False)
+        self.assertTrue('[ERROR] Too many club changes! (limit: 1)' in f1.getvalue())
+        self.assertTrue('[TEST] Management command raised SpecificExitCode(2)' in f1.getvalue())
 
         # member changes
         limieten.max_member_changes = 50
@@ -154,9 +167,13 @@ class TestImportCRMImport(E2EHelpers, TestCase):
         limieten.save()
         f1, f2 = self.run_management_command(DIFF_CRM_JSONS_COMMAND,
                                              TESTFILE_03_BASE_DATA,
-                                             TESTFILE_09_LID_MUTATIES)
+                                             TESTFILE_09_LID_MUTATIES,
+                                             report_exit_code=False)
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
+        self.assertTrue(f1.getvalue() == '')
+        self.assertTrue('   club_changes: 9' in f2.getvalue())
+        self.assertTrue('   member_changes: 39' in f2.getvalue())
 
         # geen clubs
         limieten.max_member_changes = 10
@@ -164,7 +181,12 @@ class TestImportCRMImport(E2EHelpers, TestCase):
         limieten.save()
         f1, f2 = self.run_management_command(DIFF_CRM_JSONS_COMMAND,
                                              TESTFILE_07_NO_CLUBS,
-                                             TESTFILE_07_NO_CLUBS)
+                                             TESTFILE_07_NO_CLUBS,
+                                             report_exit_code=False)
+        # print("f1: %s" % f1.getvalue())
+        # print("f2: %s" % f2.getvalue())
+        self.assertTrue("[ERROR] Geen data voor top-level sleutel 'clubs'" in f1.getvalue())
+        self.assertTrue('[TEST] Management command raised SpecificExitCode(3)' in f1.getvalue())
 
         # geen limieten
         limieten.use_limits = False
@@ -173,20 +195,21 @@ class TestImportCRMImport(E2EHelpers, TestCase):
                                              TESTFILE_03_BASE_DATA,
                                              TESTFILE_09_LID_MUTATIES)
         # geen exception
-        # print("f1: %s" % f1.getvalue())
-        # print("f2: %s" % f2.getvalue())
         self.assertTrue('[WARNING] Limieten zijn uitgeschakeld' in f2.getvalue())
 
         # crash
-        with self.assertRaises(SpecificExitCode):
-            f1, f2 = self.run_management_command(DIFF_CRM_JSONS_COMMAND,
-                                                 TESTFILE_22_CRASH,
-                                                 TESTFILE_22_CRASH)
-        # exception zorgt dat f1, f2 niet gevuld worden
-        # self.assertTrue('[WARNING] Stuur crash mail naar ontwikkelaar' in f2.getvalue())
+        self.assertEqual(MailQueue.objects.count(), 3)
+        f1, f2 = self.run_management_command(DIFF_CRM_JSONS_COMMAND,
+                                             TESTFILE_22_CRASH,
+                                             TESTFILE_22_CRASH,
+                                             report_exit_code=False)
+        # print("f1: %s" % f1.getvalue())
+        # print("f2: %s" % f2.getvalue())
+        self.assertTrue('[TEST] Management command raised SpecificExitCode(1)' in f1.getvalue())
+        self.assertTrue('[WARNING] Stuur crash mail naar ontwikkelaar' in f2.getvalue())
 
         # mail = MailQueue.objects.first()
         # print(mail.mail_text)
-        self.assertEqual(MailQueue.objects.count(), 3)
+        self.assertEqual(MailQueue.objects.count(), 4)
 
 # end of file

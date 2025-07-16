@@ -304,7 +304,7 @@ then
     then
         #  %T@ is modification time; %p is filename
         IFS=" " read -r -a HTML_FILES < <(find "$TMP_HTML" -type f -name '*html' -printf '%T@ %p\n' | cut -d' ' -f2 | tr '\n' ' ')
-        echo "HTML_FILES: ${HTML_FILES[*]}"
+        # echo "HTML_FILES: ${HTML_FILES[*]}"
         firefox "${HTML_FILES[@]}" &
     fi
 fi
