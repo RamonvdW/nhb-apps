@@ -149,6 +149,10 @@ then
     python3 "${PY_OPTS[@]}" ./manage.py check --tag admin --tag models || exit $?
 fi
 
+export COVERAGE_FILE        # where to write coverage data to
+python3 "${PY_OPTS[@]}" -m coverage erase
+
+
 # create empty test data directories
 rm -rf "$TEST_DIR" &> /dev/null
 mkdir "$TEST_DIR"
@@ -158,8 +162,12 @@ STAMP=$(date +"%Y-%m-%d %H:%M:%S")
 echo "[INFO] Now is $STAMP"
 
 echo "[INFO] Refreshing static files"
+# with minification (purely for coverage)
 [ -d "$STATIC_DIR" ] && rm -rf "$STATIC_DIR"*     # keeps top directory
-COLLECT=$(./manage.py collectstatic --link)
+COLLECT=$(python3 -u "${PYCOV[@]}" ./manage.py collectstatic --link --settings "$SETTINGS_AUTOTEST_NODEBUG")
+# without minification
+[ -d "$STATIC_DIR" ] && rm -rf "$STATIC_DIR"*     # keeps top directory
+COLLECT=$(python3 -u "${PYCOV[@]}" ./manage.py collectstatic --link --settings "$SETTINGS_AUTOTEST")
 RES=$?
 if [ $RES -ne 0 ]
 then
@@ -172,9 +180,6 @@ fi
 [ -d "$TMP_HTML" ] && rm -rf "$TMP_HTML"
 mkdir -p "$TMP_HTML"
 ln -s "$STATIC_DIR" "$TMP_HTML/static"
-
-export COVERAGE_FILE        # where to write coverage data to
-python3 "${PY_OPTS[@]}" -m coverage erase
 
 ABORTED=0
 
@@ -207,7 +212,7 @@ then
     echo "[INFO] Running migrations and performing run with nodebug"
     # ..and add coverage with no-debug
     # -v 2 shows progress of migrations
-    python3 "${PY_OPTS[@]}" -u "${PYCOV[@]}" ./manage.py test --keepdb --noinput --settings=$SETTINGS_AUTOTEST_NODEBUG -v 2 Plein.tests.test_basics.TestPleinBasics.test_quick
+    python3 -u "${PY_OPTS[@]}" "${PYCOV[@]}" ./manage.py test --keepdb --noinput --settings=$SETTINGS_AUTOTEST_NODEBUG -v 2 Plein.tests.test_basics.TestPleinBasics.test_quick
     RES=$?
     [ $RES -eq 0 ] || ABORTED=1
     # echo "[DEBUG] Debug run result: $RES --> ABORTED=$ABORTED"
@@ -215,7 +220,7 @@ then
     echo "[INFO] Running manage.py exit test"
     # trigger diff that generates exit code
     ./manage.py shell -c 'from ImportCRM.models import ImportLimieten as L; l = L.objects.first(); l.max_club_changes=1; l.save()' &>>"$LOG"
-    python3 "${PY_OPTS[@]}" -u "${PYCOV[@]}" ./manage.py diff_crm_jsons --settings=$SETTINGS_AUTOTEST ./ImportCRM/test-files/testfile_19.json ./ImportCRM/test-files/testfile_23.json &>/dev/null
+    python3 -u "${PY_OPTS[@]}" "${PYCOV[@]}" ./manage.py diff_crm_jsons --settings=$SETTINGS_AUTOTEST ./ImportCRM/test-files/testfile_19.json ./ImportCRM/test-files/testfile_23.json &>/dev/null
     RES=$?
     [ $RES -ne 0 ] || ABORTED=1
     # echo "[DEBUG] Debug run result: $RES --> ABORTED=$ABORTED"
@@ -291,8 +296,9 @@ then
     # echo "[DEBUG] RES=$RES"
     if [ $RES2 -eq 0 ]
     then
-        # echo "[DEBUG] Found HTML files in $TMP_HTML"
-        read -ra HTML_FILES < <(ls -1tr "$TMP_HTML"/*html)   # sorted by creation time
+        #  %T@ is modification time; %p is filename
+        IFS=" " read -r -a HTML_FILES < <(find "$TMP_HTML" -type f -name '*html' -printf '%T@ %p\n' | cut -d' ' -f2 | tr '\n' ' ')
+        # echo "HTML_FILES: ${HTML_FILES[*]}"
         firefox "${HTML_FILES[@]}" &
     fi
 fi

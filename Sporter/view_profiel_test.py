@@ -70,8 +70,8 @@ class ProfielTestView(UserPassesTestMixin, TemplateView):
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
-        context['case_nr'] = case_nr = kwargs['case'][:6]                     # afkappen voor de veiligheid
-        context['case_tekst'] = self.request.GET.get('tekst', '??')[:100]     # afkappen voor de veiligheid
+        context['case_nr'] = kwargs['case'][:6]                             # afkappen voor de veiligheid
+        context['case_tekst'] = self.request.GET.get('tekst', '??')[:100]   # afkappen voor de veiligheid
 
         context['sporter'] = self.sporter
         self.voorkeuren = get_sporter_voorkeuren(self.sporter)

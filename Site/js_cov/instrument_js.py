@@ -174,6 +174,12 @@ class JsCovInstrument:
                 contents = ''
         # while
 
+        # insert the last few lines of code
+        if len(self.statement_line_nrs):
+            if clean and clean[-1] != '\n':
+                clean += '\n'
+            clean += '%s(%s);\n' % (self.js_cov_func, repr(self.statement_line_nrs))
+
         # remove empty lines
         while '\n\n' in clean:
             clean = clean.replace('\n\n', '\n')
@@ -206,13 +212,22 @@ class JsCovInstrument:
                 if line[-2:] == "  ":
                     line = line.rstrip()    # remove whitespace left after removing comment; keep indentation
 
+                flush = "if(" in line or "if (" in line
+                if flush:
+                    # print('[%s] {flush} inserting (%s)' % (self.line_nr, repr(self.statement_line_nrs)))
+                    if len(self.statement_line_nrs):
+                        if clean and clean[-1] != '\n':
+                            clean += '\n'
+                        clean += '%s(%s);\n' % (self.js_cov_func, repr(self.statement_line_nrs))
+                        self.statement_line_nrs = list()
+
                 # pre_brace_level = self.brace_level
                 self.brace_level = self.brace_level + line.count('(') + line.count('{')
                 self.brace_level = self.brace_level - line.count(')') - line.count('}')
                 # post_brace_level = self.brace_level
                 # print('[%s][%s -> %s] line: %s' % (self.line_nr, pre_brace_level, post_brace_level, repr(line)))
 
-                if self.brace_level > 0:        # skip closing } and });
+                if self.brace_level > 0:        # skip closing } and });        # TODO: why?
                     if self.line_nr not in self.statement_line_nrs:
                         self.statement_line_nrs.append(self.line_nr)
                         self.executable_line_nrs.append(self.line_nr)

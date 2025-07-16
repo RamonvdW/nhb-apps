@@ -208,8 +208,8 @@ class PleinView(View):
 
     @staticmethod
     def post(request, *args, **kwargs):
-        """ Deze method wordt aangeroepen als de javascript van de plein pagina een POST doet.
-            Hier kunnen we zaken checken mogen we een database wijziging doen (GET mag geen wijzigingen doen).
+        """ Deze methode wordt aangeroepen als de javascript van de plein pagina een POST doet.
+            Hier kunnen we zaken checken en mogen we een database wijziging doen (GET mag geen wijzigingen doen).
 
             We doen een nieuwe evaluatie van de rechten van de gebruiker en het aantal open taken.
             Als deze van geen-rechten naar wel-rechten gaat, dan komt Wissel van rol beschikbaar (en OTP, VHPG, etc.)

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2024 Ramon van der Winkel.
+#  Copyright (c) 2020-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -241,9 +241,20 @@ class TestSporterProfielBondscompetities(E2EHelpers, TestCase):
         case_tekst = 'niet ingeschreven, kan inschrijven op beide competities met recurve boog'
 
         self.e2e_login(self.account_normaal)
-        self._prep_voorkeuren(self.sporter1)
         self._competitie_aanmaken()                 # zet fase C, dus openbaar en klaar voor inschrijving
 
+        # geen bogen ingesteld --> hint
+        SporterBoog.objects.filter(sporter=self.sporter1).delete()
+        resp = self.client.get(self.url_profiel_test % (case_nr + '-1'), data={"tekst": case_tekst})
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.e2e_open_in_browser(resp, self.show_in_browser)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('sporter/profiel.dtl', 'plein/site_layout.dtl'))
+        self.assertContains(resp, 'Meteen even doen')
+        self.assertContains(resp, 'We willen je vragen om persoonlijke keuzes door te geven')
+
+        # stel de bogen in
+        self._prep_voorkeuren(self.sporter1)
         resp = self.client.get(self.url_profiel_test % case_nr, data={"tekst": case_tekst})
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.e2e_open_in_browser(resp, self.show_in_browser)
@@ -811,5 +822,6 @@ class TestSporterProfielBondscompetities(E2EHelpers, TestCase):
             case_tekst = 'test server'
             resp = self.client.get(self.url_profiel_test % case_nr, data={"tekst": case_tekst})
             self.assertEqual(resp.status_code, 410)
+
 
 # end of file

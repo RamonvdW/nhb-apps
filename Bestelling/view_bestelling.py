@@ -94,11 +94,13 @@ class ToonBestellingenView(UserPassesTestMixin, TemplateView):
         self._get_bestellingen(account, context)
 
         # contactgegevens voor hulpvragen
-        functie = Functie.objects.filter(rol='MWW')[0]
-        context['email_webshop'] = functie.bevestigde_email
+        functie = Functie.objects.filter(rol='MWW').first()
+        if functie:
+            context['email_webshop'] = functie.bevestigde_email
 
-        functie = Functie.objects.filter(rol='MO')[0]
-        context['email_opleidingen'] = functie.bevestigde_email
+        functie = Functie.objects.filter(rol='MO').first()
+        if functie:
+            context['email_opleidingen'] = functie.bevestigde_email
 
         context['email_support'] = settings.EMAIL_SUPPORT
 

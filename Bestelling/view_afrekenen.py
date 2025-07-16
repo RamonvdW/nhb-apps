@@ -79,7 +79,8 @@ class BestellingAfrekenenView(UserPassesTestMixin, TemplateView):
         # de details worden via DynamicBestellingCheckStatus opgehaald
         context['bestelling'] = bestelling = self.bestelling
 
-        context['url_status_check'] = reverse('Bestelling:dynamic-check-status', kwargs={'bestel_nr': bestelling.bestel_nr})
+        context['url_status_check'] = reverse('Bestelling:dynamic-check-status',
+                                              kwargs={'bestel_nr': bestelling.bestel_nr})
 
         context['kruimels'] = (
             (reverse('Sporter:profiel'), 'Mijn pagina'),

@@ -6,15 +6,16 @@
 
 {% comment %}
 
-    Deze file formatteert een kaartje aan de hand van de vier parameters:
+    Deze file formatteert een kaartje aan de hand van de volgende parameters:
 
         title       = "Account activiteit"
         icon        = "recent_actors"
         text        = "Toon overzicht van de recent gebruikte en aangemaakte accounts."
         url         = de url waar je heen gaat na klikken op het kaartje
-        onclick     = alternatief voor de url - roept een javascript functie aan
+        onclick     = alternatief voor de url - roept een javascript functie aan  # TODO: obsolete
         extern_open = openen in een apart tabblad
         modal_id    = id van de modal dialog die geopend moet worden (optioneel)
+        js_id       = id voor gebruik in javascript
 
     Hierdoor is mogelijk om centraal de code van een kaartje aan te passen.
 
@@ -26,8 +27,12 @@
 <div class="sv-card">
 
     <!-- de hele kaart is klikbaar -->
+    <!-- TODO: obsolete "onclick" -->
     <a
-        {% if onclick %}
+        {% if js_id %}
+            href="#"
+            id="{{ js_id }}"
+        {% elif onclick %}
             href="#"
             onclick="{{ onclick }}"
         {% elif modal_id %}
@@ -53,9 +58,12 @@
                     <div class="card-title">{{ title }}</div>
                 {% endif %}
 
-                <!-- icoon -->
+                <!-- icon -->
                 <div style="margin-bottom:4px{% if not icon_font_size %}; height:64px{% endif %}">
-                    <i class="notranslate material-icons-round medium sv-rood-text"{% if icon_font_size %} style="font-size:{{ icon_font_size }}"{% endif %}>{{ icon }}</i>
+                    <i class="notranslate material-icons-round medium sv-rood-text"
+                            {% if icon_font_size %}
+                                style="font-size:{{ icon_font_size }}"
+                            {% endif %}>{{ icon }}</i>
                 </div>
 
                 <div>{{ text }}</div>

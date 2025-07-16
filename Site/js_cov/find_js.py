@@ -12,13 +12,13 @@ class JsCovFind:
     """ Invoked from Plein.tests.test_js_in_browser, when all browser tests have been run
         and the coverage data is available """
 
-    """ find javascript files, in order to have them in scope during execution, for js_cov to capture.
-    """
+    # we simulate the application executing JS files
+    # by running filename + line number ranges through a helper function
+    # the helper function calls are picked up in js_cov_plugin and given to coverage
 
     def __init__(self, data):
         self._js_files = list()
 
-        # instead of only reporting the files that are in the coverage report,
         # process all application JS files
         for app_config in apps.get_app_configs():
             app_name = app_config.name
@@ -65,7 +65,8 @@ class JsCovFind:
         return ranges
 
     def _found_js_cov(self, js_fname: str, range_start: int, range_end: int):
-        """ special function that is used by js_cov to inject all JS filenames and executed ranges """
+        """ special function that is used by js_cov to inject all JS filenames and covered lines """
+        # important: function parameter names must stay in sync with usage in js_cov_plugin.py
         self._js_files.append(js_fname)     # avoids optimization
 
 
