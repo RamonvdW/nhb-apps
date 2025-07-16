@@ -13,7 +13,6 @@ from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
 import datetime
-import argparse
 
 
 class TestInstaptoetsCli(E2EHelpers, TestCase):
@@ -60,8 +59,10 @@ class TestInstaptoetsCli(E2EHelpers, TestCase):
         self.sporter_100000 = sporter
 
     def test_basis(self):
-        with self.assertRaises(CommandError):
-            self.run_management_command('import_instaptoets')
+        f1, f2 = self.run_management_command('import_instaptoets',
+                                             report_exit_code=False)
+        # print('\nf1:', f1.getvalue())
+        self.assertTrue("raised CommandError('Error: the following arguments are required: filename" in f1.getvalue())
 
         f1, f2 = self.run_management_command('import_instaptoets', 'bestaat-niet')
         self.assertTrue("[ERROR] Kan bestand bestaat-niet niet lezen" in f1.getvalue())
@@ -140,8 +141,10 @@ class TestInstaptoetsCli(E2EHelpers, TestCase):
         self.assertTrue('[WARNING] Incomplete vraag wordt overgeslagen' in f2.getvalue())
 
     def test_fake(self):
-        with self.assertRaises(CommandError):
-            f1, f2 = self.run_management_command('fake_instaptoets_gehaald', 'NaN', '2000-01-01')
+        f1, f2 = self.run_management_command('fake_instaptoets_gehaald', 'NaN', '2000-01-01',
+                                             report_exit_code=False)
+        # print('\nf1:', f1.getvalue())
+        self.assertTrue(' raised CommandError("Error: argument bondsnummer: invalid int value' in f1.getvalue())
 
         f1, f2 = self.run_management_command('fake_instaptoets_gehaald', 1234, '1234')
         # print("f1: %s" % f1.getvalue())
