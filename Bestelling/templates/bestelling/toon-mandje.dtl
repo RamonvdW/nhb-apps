@@ -86,7 +86,7 @@
                                     <td>{{ regel.korte_beschrijving|linebreaksbr }}</td>
                                     <td class="right-align">{{ regel.bedrag_euro_str }}</td>
                                     <td class="right-align">
-                                        <button class="btn-sv-blauw" id="id_verwijder_{{ regel.pk }}" onclick="verwijder('id_verwijder_{{ regel.pk }}')" data-url="{{ regel.url_verwijder }}">
+                                        <button class="btn-sv-blauw" id="{{ regel.verwijder_id }}" data-url="{{ regel.url_verwijder }}">
                                             <i class="notranslate material-icons-round">delete</i></button>
                                     </td>
                                 </tr>
@@ -275,6 +275,9 @@
             {% include 'plein/card_icon.dtl' with title="Opleidingen" text="De verkoopvoorwaarden voor de opleidingen staan beschreven in dit document." icon="article" extern_open=True url=url_voorwaarden_opleidingen %}
         </div>
     </div>
+
+    <!-- maak een script block van type application/json aan, met de data erin -->
+    {{ verwijder_ids|json_script:"verwijder_ids" }}
 
     <div id="js_data"
          data-csrf-token="{{ csrf_token }}">

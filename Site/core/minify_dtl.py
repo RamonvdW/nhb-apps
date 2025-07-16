@@ -233,6 +233,7 @@ def minify_template(contents):
     # contents = re.sub(r';\s+{%', ';{%', contents)
 
     # whitespace/newlines voor een tag
+    # gevaar: template tags binnen JS script met // comment op vorige regel
     contents = re.sub(r'\s+{%', ' {%', contents)
 
     # whitespace/newlines na een tag

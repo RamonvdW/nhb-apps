@@ -78,15 +78,11 @@ class VerwerkBestelMutaties:
 
         self._instellingen_via_bond = None
         self._instellingen_cache = dict()  # [ver_nr] = BetaalInstellingenVereniging
-
-        # geen bescherming: deze vereniging moet bestaan
-        ophalen_ver = Vereniging.objects.get(ver_nr=settings.WEBWINKEL_VERKOPER_VER_NR)
-        self._adres_backoffice = (ophalen_ver.adres_regel1, ophalen_ver.adres_regel2)
-
-        # geen bescherming: dit e-mailadres moet ingesteld zijn
-        self._emailadres_backoffice = Functie.objects.get(rol='MWW').bevestigde_email
-
         self.ver_nr2ver = dict()
+
+        # wordt gevuld door clear_instellingen_cache
+        self._emailadres_backoffice = ""
+        self._adres_backoffice = ("", "")
 
     def _clear_instellingen_cache(self):
         self._instellingen_cache = dict()
@@ -99,6 +95,11 @@ class VerwerkBestelMutaties:
                                           .get_or_create(vereniging=ver_bond))
 
         self._instellingen_cache[ver_bond.ver_nr] = self._instellingen_via_bond
+
+        # geen bescherming: deze vereniging en functie moeten bestaan
+        ophalen_ver = Vereniging.objects.get(ver_nr=settings.WEBWINKEL_VERKOPER_VER_NR)
+        self._adres_backoffice = (ophalen_ver.adres_regel1, ophalen_ver.adres_regel2)
+        self._emailadres_backoffice = Functie.objects.get(rol='MWW').bevestigde_email
 
         for ver in Vereniging.objects.all():
             self.ver_nr2ver[ver.ver_nr] = ver
@@ -820,6 +821,10 @@ class VerwerkBestelMutaties:
 
     def verwerk(self, mutatie: BestellingMutatie):
         """ Verwerk een mutatie die via de database tabel ontvangen is """
+
+        if self._emailadres_backoffice == "":
+            self._clear_instellingen_cache()
+
         code = mutatie.code
         try:
             mutatie_code_verwerk_functie = self.HANDLERS[code]

@@ -71,7 +71,10 @@ do
         CLEAN_COV=0
 
     else
+        arg=${arg//\//.}                              # replace all (//) occurrences of / with .
+        [ "${arg: -1}" == "." ] && arg=${arg:0:-1}    # strip last . (case: Plein/)
         FOCUS="$arg"
+        echo "[INFO] Focus is set to $FOCUS"
     fi
 done
 

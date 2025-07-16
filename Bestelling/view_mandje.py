@@ -83,6 +83,7 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
                 regel.bedrag_euro_str = format_bedrag_euro(regel.bedrag_euro)
                 regel.korte_beschrijving = regel.korte_beschrijving.replace(BESTELLING_KORT_BREAK, '\n')
                 regel.korting_redenen = regel.korting_redenen.split(BESTELLING_KORT_BREAK)
+                regel.verwijder_id = "id_verwijder_%s" % regel.pk
 
                 # maak een knop om deze bestelling te verwijderen uit het mandje
                 regel.url_verwijder = reverse('Bestelling:mandje-verwijder-product',
@@ -149,6 +150,7 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
         context['mandje'] = mandje
         context['mandje_is_leeg'] = mandje_is_leeg
         context['regels'] = regels
+        context['verwijder_ids'] = [regel.verwijder_id for regel in regels]
         context['kan_gesplitst_worden'] = len(regels) > 1
 
         context['geen_afleveradres'] = geen_afleveradres
