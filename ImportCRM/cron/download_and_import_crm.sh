@@ -55,8 +55,8 @@ echo "[INFO] retrieving headers" >> "$LOG"
 PREV_LAST=$(grep --binary-files=text "Last-Modified:" "$LOG" | tail -1)     # empty at start of new day
 
 # download the headers only
-# remove DOS newlines
-curl -sS -H "secret: $SECRET" -I "$URL" 2>&1 | sed 's#\r##g' >> "$LOG"
+#                                                 remove DOS newlines
+curl -6 -sS -H "secret: $SECRET" -I "$URL" 2>&1 | sed 's#\r##g' >> "$LOG"
 
 # controleer dat bovenstaande HEAD goed werkte
 NEW_HTTP=$(grep --binary-files=text "HTTP/1.1 " "$LOG" | tail -1 | tr '\r' '\n')
@@ -83,7 +83,7 @@ then
     echo "[INFO] Downloading complete crm data set to $TMP_FILE" >> "$LOG"
 
     # download
-    curl -sS -H "secret: $SECRET" "$URL" > "$TMP_FILE" 2>>"$LOG"
+    curl -6 -sS -H "secret: $SECRET" "$URL" > "$TMP_FILE" 2>>"$LOG"
     RES=$?
     if [ $RES -ne 0 ]
     then

@@ -55,6 +55,7 @@ class Command(BaseCommand):
         self._redenen.append(msg)
         if "[ERROR]" in msg:
             self.stderr.write(msg)
+            self._exit_code = 3
         else:
             self.stdout.write(msg)
 
@@ -290,16 +291,17 @@ class Command(BaseCommand):
 
             self._exit_code = 1
         else:
-            if self.limieten.use_limits:
-                if self.member_changes > self.limieten.max_member_changes:
-                    self._add_reden('[ERROR] Too many member changes! (limit: %s)' % self.limieten.max_member_changes)
-                    self._exit_code = 1
+            if self._exit_code == 0:
+                if self.limieten.use_limits:
+                    if self.member_changes > self.limieten.max_member_changes:
+                        self._add_reden('[ERROR] Too many member changes! (limit: %s)' % self.limieten.max_member_changes)
+                        self._exit_code = 1
 
-                if self.club_changes > self.limieten.max_club_changes:
-                    self._add_reden('[ERROR] Too many club changes! (limit: %s)' % self.limieten.max_club_changes)
-                    self._exit_code = 2
-            else:
-                self.stdout.write('[WARNING] Limieten zijn uitgeschakeld')
+                    if self.club_changes > self.limieten.max_club_changes:
+                        self._add_reden('[ERROR] Too many club changes! (limit: %s)' % self.limieten.max_club_changes)
+                        self._exit_code = 2
+                else:
+                    self.stdout.write('[WARNING] Limieten zijn uitgeschakeld')
 
             if self._exit_code != 0:
                 now = timezone.now()
