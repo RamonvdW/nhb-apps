@@ -109,7 +109,8 @@ class Command(BaseCommand):
             new_count = BestellingMutatie.objects.count()
             if new_count != mutatie_count:
                 mutatie_count = new_count
-                self._verwerk_nieuwe_mutaties()
+                if mutatie_count:
+                    self._verwerk_nieuwe_mutaties()
                 now = datetime.datetime.now()
 
             # wacht 5 seconden voordat we opnieuw in de database kijken

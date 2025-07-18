@@ -5,6 +5,7 @@
  */
 
 /* jshint esversion: 6 */
+/* global console */
 "use strict";
 
 const dataset = document.getElementById("js_data").dataset;
@@ -20,7 +21,7 @@ function status_ophalen_klaar(xhr)
 {
     let retry = true;
 
-    //console.log('xhr: ready=',xhr.readyState, 'status=', xhr.status);
+    //console.log('xhr:', xhr);
     if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
         // verzoek is klaar en we hebben een antwoord
         // responseText is leeg bij connection failure
@@ -32,7 +33,7 @@ function status_ophalen_klaar(xhr)
             } catch(e) {
                 // waarschijnlijk geen goede JSON data
                 // een Http404() geeft een foutmelding pagina met status=200 (OK) en komt hier terecht
-                rsp = "fout";
+                rsp = {};
             }
             //console.log('rsp=', rsp);
             if ("status" in rsp) {

@@ -7,7 +7,6 @@
 from Bestelling.definities import (BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_MISLUKT, BESTELLING_STATUS_GEANNULEERD,
                                    BESTELLING_STATUS_BETALING_ACTIEF)
 from Bestelling.models import Bestelling
-from Betaal.definities import BETAAL_MUTATIE_START_ONTVANGST
 from Betaal.models import BetaalMutatie
 from TestHelpers import browser_helper as bh
 from TestHelpers.mgmt_cmds_helper import MyMgmtCommandHelper
@@ -18,10 +17,10 @@ class TestBrowserBestellingAfrekenen(MyMgmtCommandHelper, bh.BrowserTestCase):
 
     """ Test de Bestelling applicatie, gebruik van bestelling_afrekenen.js vanuit de browser """
 
-    url_afrekenen = '/bestel/afrekenen/%s/'         # bestel_nr
-    url_bestelling_details = '/bestel/details/%s/'  # bestel_nr
     url_mandje = '/bestel/mandje/'
+    url_afrekenen = '/bestel/afrekenen/%s/'             # bestel_nr
     url_webwinkel_product = '/webwinkel/product-%s/'    # webwinkelproduct.pk
+    url_bestelling_details = '/bestel/details/%s/'      # bestel_nr
 
     def test_bestelling_afrekenen(self):
         self.do_wissel_naar_sporter()       # redirect naar /plein/
@@ -39,7 +38,7 @@ class TestBrowserBestellingAfrekenen(MyMgmtCommandHelper, bh.BrowserTestCase):
         time.sleep(0.5)
 
         bestelling = Bestelling.objects.first()
-        print('bestelling: %s' % bestelling)
+        # print('bestelling: %s' % bestelling)
 
         url = self.url_bestelling_details % bestelling.bestel_nr
         self.do_navigate_to(url)

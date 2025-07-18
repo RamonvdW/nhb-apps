@@ -5,6 +5,7 @@
  */
 
 /* jshint esversion: 6 */
+/* global console */
 "use strict";
 
 const dataset = document.getElementById("js_data").dataset;

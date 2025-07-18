@@ -5,6 +5,7 @@
  */
 
 /* jshint esversion: 6 */
+/* global console */
 "use strict";
 
 // respond to browser auto-fill of login dialog, especially password field
