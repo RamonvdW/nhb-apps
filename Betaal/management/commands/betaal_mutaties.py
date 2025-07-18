@@ -8,10 +8,11 @@
     deze komen binnen via BetaalMutatie
 """
 
+from django.db import connection
 from django.conf import settings
 from django.urls import reverse
 from django.utils import timezone
-from django.db.utils import OperationalError, IntegrityError
+from django.db.utils import OperationalError, IntegrityError, DEFAULT_DB_ALIAS
 from django.core.management.base import BaseCommand
 from Bestelling.operations import bestel_mutatieverzoek_betaling_afgerond, bestel_betaling_is_gestart
 from Betaal.definities import (BETAAL_MUTATIE_START_ONTVANGST, BETAAL_MUTATIE_START_RESTITUTIE,
@@ -78,7 +79,8 @@ class Command(BaseCommand):
                             help="Maximum aantal minuten actief blijven")
         parser.add_argument('--stop_exactly', type=int, default=None, choices=range(60),
                             help="Stop op deze minuut")
-        parser.add_argument('--quick', action='store_true')     # for testing
+        parser.add_argument('--quick', action='store_true')                 # for testing
+        parser.add_argument('--use-test-database', action='store_true')     # for testing
 
     def _verwerk_mutatie_start_ontvangst(self, mutatie: BetaalMutatie):
         instellingen = mutatie.ontvanger
@@ -530,7 +532,8 @@ class Command(BaseCommand):
             new_count = BetaalMutatie.objects.count()
             if new_count != mutatie_count:
                 mutatie_count = new_count
-                self._verwerk_nieuwe_mutaties()
+                if mutatie_count:
+                    self._verwerk_nieuwe_mutaties()
                 now = datetime.datetime.now()
 
             # wacht 5 seconden voordat we opnieuw in de database kijken
@@ -580,6 +583,13 @@ class Command(BaseCommand):
         self.stdout.write('[INFO] Taak loopt tot %s' % str(self.stop_at))
 
     def handle(self, *args, **options):
+
+        if options['use_test_database']:
+            # voor gebruik tijdens browser tests
+            connection.close()
+            test_database_name = "test_" + settings.DATABASES[DEFAULT_DB_ALIAS]["NAME"]
+            settings.DATABASES[DEFAULT_DB_ALIAS]["NAME"] = test_database_name
+            connection.settings_dict["NAME"] = test_database_name
 
         self._set_stop_time(**options)
 

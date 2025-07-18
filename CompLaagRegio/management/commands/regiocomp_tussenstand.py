@@ -1,15 +1,17 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2024 Ramon van der Winkel.
+#  Copyright (c) 2020-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 # zodra er nieuwe ScoreHist records zijn, de tussenstand bijwerken voor regiocompetities die niet afgesloten zijn
 # voor zowel individueel als team score aspecten
 
-from django.core.management.base import BaseCommand
+from django.db import connection
+from django.conf import settings
+from django.db.utils import DataError, OperationalError, IntegrityError, DEFAULT_DB_ALIAS
 from django.db.models import F, Q
-from django.db.utils import DataError, OperationalError, IntegrityError
+from django.core.management.base import BaseCommand
 from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTaken,
                                Regiocompetitie, RegiocompetitieRonde, RegiocompetitieSporterBoog,
                                RegiocompetitieTeam, RegiocompetitieRondeTeam)
@@ -40,8 +42,9 @@ class Command(BaseCommand):
                             help="Maximum aantal minuten actief blijven")
         parser.add_argument('--stop_exactly', type=int, default=None, choices=range(60),
                             help="Stop op deze minuut")
-        parser.add_argument('--all', action='store_true')       # alles opnieuw vaststellen
-        parser.add_argument('--quick', action='store_true')     # for testing
+        parser.add_argument('--all', action='store_true')                   # alles opnieuw vaststellen
+        parser.add_argument('--quick', action='store_true')                 # for testing
+        parser.add_argument('--use-test-database', action='store_true')     # for testing
 
     def _verwerk_overstappers_regio(self, regio_comp_pks):
         objs = (RegiocompetitieSporterBoog
@@ -501,6 +504,14 @@ class Command(BaseCommand):
         self.stdout.write('[INFO] Taak loopt tot %s' % str(self.stop_at))
 
     def handle(self, *args, **options):
+
+        if options['use_test_database']:
+            # voor gebruik tijdens browser tests
+            connection.close()
+            test_database_name = "test_" + settings.DATABASES[DEFAULT_DB_ALIAS]["NAME"]
+            settings.DATABASES[DEFAULT_DB_ALIAS]["NAME"] = test_database_name
+            connection.settings_dict["NAME"] = test_database_name
+
         self._set_stop_time(**options)
 
         if options['all']:

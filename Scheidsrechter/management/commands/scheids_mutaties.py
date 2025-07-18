@@ -8,6 +8,7 @@
     deze komen binnen via ScheidsMutatie
 """
 
+from django.db import connection
 from django.conf import settings
 from django.urls import reverse
 from django.utils import timezone
@@ -255,7 +256,8 @@ class Command(BaseCommand):
                             help="Maximum aantal minuten actief blijven")
         parser.add_argument('--stop_exactly', type=int, default=None, choices=range(60),
                             help="Stop op deze minuut")
-        parser.add_argument('--quick', action='store_true')     # for testing
+        parser.add_argument('--quick', action='store_true')                 # for testing
+        parser.add_argument('--use-test-database', action='store_true')     # for testing
 
     def _reistijd_opvragen(self, locatie, sporter):
         """ vraag de reistijd op tussen de postcode van de sporter/scheidsrechter en de locatie """
@@ -873,6 +875,13 @@ class Command(BaseCommand):
         self.stdout.write('[INFO] Taak loopt tot %s' % str(self.stop_at))
 
     def handle(self, *args, **options):
+
+        if options['use_test_database']:
+            # voor gebruik tijdens browser tests
+            connection.close()
+            test_database_name = "test_" + settings.DATABASES[DEFAULT_DB_ALIAS]["NAME"]
+            settings.DATABASES[DEFAULT_DB_ALIAS]["NAME"] = test_database_name
+            connection.settings_dict["NAME"] = test_database_name
 
         self._set_stop_time(**options)
 

@@ -150,7 +150,8 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
         context['mandje'] = mandje
         context['mandje_is_leeg'] = mandje_is_leeg
         context['regels'] = regels
-        context['verwijder_ids'] = [regel.verwijder_id for regel in regels]
+        if len(regels):
+            context['verwijder_ids'] = [regel.verwijder_id for regel in regels]
         context['kan_gesplitst_worden'] = len(regels) > 1
 
         context['geen_afleveradres'] = geen_afleveradres

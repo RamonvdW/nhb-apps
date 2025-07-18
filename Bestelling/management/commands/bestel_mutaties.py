@@ -8,6 +8,7 @@
     deze komen binnen via BestellingMutatie
 """
 
+from django.db import connection
 from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.db.utils import OperationalError, IntegrityError, DEFAULT_DB_ALIAS
@@ -164,7 +165,6 @@ class Command(BaseCommand):
 
         if options['use_test_database']:
             # voor gebruik tijdens browser tests
-            from django.db import connection
             connection.close()
             test_database_name = "test_" + settings.DATABASES[DEFAULT_DB_ALIAS]["NAME"]
             settings.DATABASES[DEFAULT_DB_ALIAS]["NAME"] = test_database_name

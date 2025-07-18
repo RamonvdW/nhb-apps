@@ -8,10 +8,11 @@
     deze komen binnen via CompetitieMutatie
 """
 
+from django.db import connection
 from django.conf import settings
 from django.utils import timezone
 from django.db.models import F
-from django.db.utils import DataError, OperationalError, IntegrityError
+from django.db.utils import DataError, OperationalError, IntegrityError, DEFAULT_DB_ALIAS
 from django.core.management.base import BaseCommand
 from BasisTypen.definities import ORGANISATIE_KHSN
 from BasisTypen.operations import get_organisatie_teamtypen
@@ -80,8 +81,9 @@ class Command(BaseCommand):
                             help="Maximum aantal minuten actief blijven")
         parser.add_argument('--stop_exactly', type=int, default=None, choices=range(60),
                             help="Stop op deze minuut")
-        parser.add_argument('--all', action='store_true')       # alles opnieuw vaststellen
-        parser.add_argument('--quick', action='store_true')     # for testing
+        parser.add_argument('--all', action='store_true')                   # alles opnieuw vaststellen
+        parser.add_argument('--quick', action='store_true')                 # for testing
+        parser.add_argument('--use-test-database', action='store_true')     # for testing
 
     def _bepaal_boog2team(self):
         """ bepaalde boog typen mogen meedoen in bepaalde team types
@@ -1738,6 +1740,13 @@ class Command(BaseCommand):
         self.stdout.write('[INFO] Taak loopt tot %s' % str(self.stop_at))
 
     def handle(self, *args, **options):
+
+        if options['use_test_database']:
+            # voor gebruik tijdens browser tests
+            connection.close()
+            test_database_name = "test_" + settings.DATABASES[DEFAULT_DB_ALIAS]["NAME"]
+            settings.DATABASES[DEFAULT_DB_ALIAS]["NAME"] = test_database_name
+            connection.settings_dict["NAME"] = test_database_name
 
         self._bepaal_boog2team()
         self._set_stop_time(**options)
