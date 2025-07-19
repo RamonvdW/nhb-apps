@@ -12,14 +12,15 @@
     having to edit the settings.py file.
 """
 
+# NOTE: Site.core.setting_base has priority over this file (unable to override)
+
 # the secret below ensures an adversary cannot fake aspects like a session-id
 # just make sure it is unique per installation and keep it private
 # details: https://docs.djangoproject.com/en/4.2/ref/settings/#secret-key
 SECRET_KEY = '1234-replace-with-your-own-secret-key-56789abcdefg'       # noqa
 
-BASE_URL = "yourdomain.com"
-
 # SITE_URL wordt gebruikt door TijdelijkeCodes, maar ook voor alle urls in e-mails
+BASE_URL = "yourdomain.com"
 #SITE_URL = "https://" + BASE_URL
 SITE_URL = "http://localhost:8000"
 
@@ -39,7 +40,15 @@ DATABASES = {
         'PASSWORD': 'database-pwd',
         'HOST': 'localhost',
         'PORT': '5432'
-    }
+    },
+    'test': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'database-name',
+        'USER': 'database-user',
+        'PASSWORD': 'database-pwd',
+        'HOST': 'localhost',
+        'PORT': '5432'
+    },
 }
 
 # allow the database connections to stay open
@@ -57,7 +66,9 @@ AFSCHRIFT_SITE_URL = "yourdomain.com"
 # contactgegevens eerste- en tweedelijns support
 EMAIL_BONDSBUREAU = "info@yourdomain.com"
 EMAIL_SUPPORT = EMAIL_BONDSBUREAU
+EMAIL_TECH_SUPPORT = 'support@yourdomain.com'
 
+# manuals (pdf)
 URL_PDF_HANDLEIDING_LEDEN = 'https://yoursite/static/manual_members.pdf'
 URL_PDF_HANDLEIDING_BEHEERDERS = 'https://yoursite/static/manual_managers.pdf'
 URL_PDF_HANDLEIDING_VERENIGINGEN = 'https://yoursite/static/manual_clubs.pdf'
@@ -189,6 +200,8 @@ WALIBI_URL_KORTING = 'https://bit.ly/yourcode'
 
 # toegestane tokens voor /kalender/api/lijst/30/?token=xxxx
 KALENDER_API_TOKENS = ()
+
+OVERIG_API_TOKENS = ()
 
 # google doc id van het gsheet document
 INSTAPTOETS_GSHEET_FILE_ID = 'another.google.sheets.id'     # noqa
