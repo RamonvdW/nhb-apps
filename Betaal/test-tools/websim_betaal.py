@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2024 Ramon van der Winkel.
+#  Copyright (c) 2022-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -34,7 +34,8 @@ MY_URL_CHECKOUT_DONE = MY_URL_BASE + '/checkout/done/%s'
 
 
 def out_debug(msg):
-    print('[DEBUG] {websim_betaal} ' + msg)
+    # print('[DEBUG] {websim_betaal} ' + msg)
+    pass
 
 
 def out_warning(msg):
@@ -198,6 +199,7 @@ def monitor_payment_changes():
                 if reported_status != status:
                     if status != 'open':
                         # roep de webhook aan
+                        out_debug('webhook_url: %s' % repr(webhook_url))
                         try:
                             r = requests.post(webhook_url, data={'id': payment_id})
                         except requests.exceptions.ConnectionError as exc:
@@ -309,6 +311,7 @@ class MyHandler(BaseHTTPRequestHandler):
 
         page = '<!DOCTYPE html><html lang="nl">'
         page += '<head><title>Betalen</title>'
+        page += '<link rel="shortcut icon" href="#">'       # prevents favicon.ico retrieval attempt + resulting 404
         page += """<style>
 button {
 font-size: 20px;

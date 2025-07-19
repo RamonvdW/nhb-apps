@@ -23,6 +23,8 @@ class TestBrowserBestellingAfgerond(MyMgmtCommandHelper, bh.BrowserTestCase):
     def test_bestelling_afgerond(self):
         self.do_wissel_naar_sporter()       # redirect naar /plein/
 
+        Bestelling.objects.all().delete()
+
         # leg een product in het mandje
         self.do_navigate_to(self.url_webwinkel_product % self.webwinkel_product.pk)
         knop = self.find_element_type_with_text('button', 'Leg in mijn mandje')

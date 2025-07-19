@@ -316,14 +316,16 @@ class BrowserTestCase(TestCase):
 
     def wait_until_url_not(self, url: str, timeout: float = 2.0):
         duration = 0.5
-        check_url = self.live_server_url + url
+        if '://' not in url:
+            url = self.live_server_url + url    # convert relative url into absolute url as reported back by browser
         curr_url = self._driver.current_url
-        while curr_url == check_url and timeout > 0:
+        while curr_url == url and timeout > 0:
             time.sleep(duration)
             timeout -= duration
             duration *= 2
             curr_url = self._driver.current_url
         # while
+        return self._driver.current_url.replace(self.live_server_url, '')
 
     def do_navigate_to(self, url, check_console_log=True):
         if check_console_log:

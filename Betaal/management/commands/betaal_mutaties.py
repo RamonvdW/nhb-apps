@@ -71,7 +71,17 @@ class Command(BaseCommand):
         #  - OS, hostname, kernel versie + distributie, machine arch
         self._mollie_client.UNAME = settings.NAAM_SITE      # MijnHandboogsport [test]
 
-        self._mollie_webhook_url = settings.SITE_URL + reverse('Betaal:mollie-webhook')
+        self._mollie_webhook_url = ""
+
+    def _get_mollie_webhook_url(self, url_betaling_gedaan):
+        if not self._mollie_webhook_url:
+            # dynamische url voor LiveServerTestCase
+            # url_betaling_gedaan is "http[s]://host[:port]/bestel/na-de-betaling/<bestel_nr>/"
+            # self.stdout.write('[DEBUG] url_betaling_gedaan: %s' % url_betaling_gedaan)
+            pos = url_betaling_gedaan.find('/bestel/na-de-betaling/')
+            site_url = url_betaling_gedaan[:pos]
+            self._mollie_webhook_url = site_url + reverse('Betaal:mollie-webhook')
+        return self._mollie_webhook_url
 
     def add_arguments(self, parser):
         parser.add_argument('duration', type=int,
@@ -103,7 +113,7 @@ class Command(BaseCommand):
             data = {
                 'amount': {'currency': 'EUR', 'value': bedrag_euro_str},
                 'description': beschrijving,
-                'webhookUrl': self._mollie_webhook_url,
+                'webhookUrl': self._get_mollie_webhook_url(mutatie.url_betaling_gedaan),
                 'redirectUrl': mutatie.url_betaling_gedaan,
             }
 

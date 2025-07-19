@@ -21,7 +21,6 @@ class TestBrowserBestellingMandjeVerwijder(MyMgmtCommandHelper, bh.BrowserTestCa
         self.do_wissel_naar_sporter()       # redirect naar /plein/
 
         BestellingMutatie.objects.all().delete()
-        self.assertEqual(BestellingMutatie.objects.count(), 0)
 
         # leg een product in het mandje
         self.do_navigate_to(self.url_webwinkel_product % self.webwinkel_product.pk)

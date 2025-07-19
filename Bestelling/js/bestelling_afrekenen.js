@@ -42,6 +42,7 @@ function status_ophalen_klaar(xhr)
                     // waarschijnlijk geen goede JSON data
                     // een Http404() geeft een foutmelding pagina met status=200 (OK) en komt hier terecht
                     rsp = {};
+                    pogingen = 0;
                 }
                 //console.log('rsp=', rsp);
                 if ("status" in rsp) {
@@ -66,13 +67,11 @@ function status_ophalen_klaar(xhr)
                     } else if (status === "mislukt") {
                         // betaling is afgebroken / expired
                         el_bericht.innerText = "De betaling is niet gelukt";
-
                         retry = false;      // stop trying
 
                     } else if (status === "error") {
                         // intern probleem
                         toon_melding_in_rood("Er is een probleem opgetreden met deze bestelling");
-
                         retry = false;      // stop trying
                     }
                 }

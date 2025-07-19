@@ -145,6 +145,7 @@ python3 -u ./Mailer/test_tools/websim_mailer.py &>>"$LOG" &
 
 # start the payment service simulator
 echo "[INFO] Starting Mollie simulator" >>"$LOG"
+rm -f websim_data.json
 pkill -f websim_betaal
 python3 -u ./Betaal/test-tools/websim_betaal.py &>>"$LOG" &
 
