@@ -103,6 +103,117 @@
                                 </td>
                             </tr>
 
+                            {% if toon_ter_info %}
+                                <tr>
+                                    <th>Ter info op de kalender zetten?</th>
+                                    <td>
+                                        <ul id="id_ter_info">
+                                            <li>
+                                                <label>
+                                                    <input type="checkbox" class="filled-in" name="ter_info" onchange="gewijzigd()"{% if wed.is_ter_info %} checked{% endif %}>
+                                                    <span class="black-text">&nbsp;Ja (geen inschrijvingen toestaan)</span>
+                                                </label>
+                                            </li>
+                                        </ul>
+                                    </td>
+                                </tr>
+                            {% endif %}
+
+                            <tr>
+                                <th>Acceptatie voorwaarden gebruik MijnHandboogsport</th>
+                                <td>
+                                    {% if wed.verkoopvoorwaarden_status_acceptatie %}
+                                        <span>Akkoord voor de Verkoopvoorwaarden Evenementen is gegeven<br>op {{ wed.verkoopvoorwaarden_status_when }} door {{ wed.verkoopvoorwaarden_status_who }}</span><br>
+                                        <a class="btn-sv-blauw btn-small" href="{{ url_voorwaarden_verkoop }}" target="_blank" rel="noopener noreferrer" style="margin-top:16px">
+                                            <i class="notranslate material-icons-round left">open_in_new</i>Verkoopvoorwaarden lezen</a>
+                                    {% else %}
+                                        <span>Voor verkopen via MijnHandboogsport zijn de Verkoopvoorwaarden Evenementen van toepassing.<br>Lees het document en geef akkoord met de knop.</span><br>
+                                        <a class="btn-sv-blauw btn-small" href="{{ url_voorwaarden_verkoop }}" target="_blank" rel="noopener noreferrer" style="margin-top:16px">
+                                            <i class="notranslate material-icons-round left">open_in_new</i>Verkoopvoorwaarden lezen</a>
+
+                                        <ul id="id_verkoop">
+                                            <li>
+                                                <label>
+                                                    <input type="checkbox" class="filled-in" name="akkoord_verkoop" onchange="gewijzigd()">
+                                                    <span class="black-text">&nbsp;Ik ga akkoord met de voorwaarden</span>
+                                                </label>
+                                            </li>
+                                        </ul>
+                                    {% endif %}
+                                </td>
+                            </tr>
+
+                            {% if toon_wa_status %}
+                                <tr>
+                                    <th>WA-status</th>
+                                    <td>
+                                        {% if limit_edits %}
+                                            <span>{{ wed.wa_status_str }}</span>
+                                            <br><br>
+                                        {% else %}
+                                            <ul id="id_wa_status">
+                                                {% for opt in opt_wa %}
+                                                    <li>
+                                                        <label class="black-text" for="id_{{ opt.sel }}">
+                                                            <input class="with-gap" type="radio" name="wa_status" value="{{ opt.sel }}" required id="id_{{ opt.sel }}"{% if opt.selected %} checked{% endif %}{% if opt.disabled %} disabled{% endif %} onchange="gewijzigd()">
+                                                            <span>{{ opt.keuze_str }}</span>
+                                                        </label>
+                                                    </li>
+                                                {% endfor %}
+                                            </ul>
+                                        {% endif %}
+
+                                        {% if wed.voorwaarden_a_status_acceptatie %}
+                                            <span>Akkoord voor A-status voorwaarden is gegeven<br>op {{ wed.voorwaarden_a_status_when }} door {{ wed.voorwaarden_a_status_who }}</span><br>
+                                            <a class="btn-sv-blauw btn-small" href="{{ url_voorwaarden_a_status }}" target="_blank" rel="noopener noreferrer" style="margin-top:16px">
+                                                <i class="notranslate material-icons-round left">open_in_new</i>Voorwaarden lezen</a>
+                                        {% else %}
+                                            <span>Voordat A-status gekozen kan worden moet je akkoord gaan met de voorwaarden.</span><br>
+                                            <a class="btn-sv-blauw btn-small" href="{{ url_voorwaarden_a_status }}" target="_blank" rel="noopener noreferrer" style="margin-top:16px">
+                                                <i class="notranslate material-icons-round left">open_in_new</i>Voorwaarden lezen</a>
+                                            {% if not limit_edits %}
+                                                <ul id="id_teams">
+                                                    <li>
+                                                        <label>
+                                                            <input type="checkbox" class="filled-in" name="akkoord_a_status" onchange="akkoord_gewijzigd()">
+                                                            <span class="black-text">&nbsp;Ik ga akkoord met de voorwaarden</span>
+                                                        </label>
+                                                    </li>
+                                                </ul>
+                                            {% endif %}
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endif %}     <!-- toon_wa_status -->
+
+                            <tr>
+                                <th>Status</th>
+                                <td>
+                                    {% for opt in opt_status %}
+                                        <span class="{% if opt.selected %}sv-blauw-text{% else %}grey-text{% endif %}" style="white-space: nowrap">{{ opt.status_str }}</span><br>
+                                    {% endfor %}
+                                    <br>
+                                    {% if url_prev_tekst %}
+                                        <button form="form_prev" class="btn-sv-blauw vertrek_knop" id="submit_knop2" type="submit">{{ url_prev_tekst }}</button>
+                                        <span>&nbsp;&nbsp;</span>
+                                    {% endif %}
+                                    {% if url_next_tekst %}
+                                        {% if wed.wacht_op_keuze_scheids %}
+                                            <button class="btn-sv-rood" disabled>{{ url_next_tekst }}</button>
+                                            <br><p class="sv-rood-text">Eerst een keuze maken voor de scheidsrechters behoefte.</p>
+                                        {% elif wed.wacht_op_sessies %}
+                                            <button class="btn-sv-rood" disabled>{{ url_next_tekst }}</button>
+                                            <br><p class="sv-rood-text">Eerst sessies aanmaken.</p>
+                                        {% else %}
+                                            <button form="form_next" class="btn-sv-rood vertrek_knop" id="submit_knop1" type="submit">{{ url_next_tekst }}</button>
+                                        {% endif %}
+                                    {% endif %}
+                                    {% if not wed.verkoopvoorwaarden_status_acceptatie %}
+                                        <br><span style="margin-top:16px">Goedkeuring kan aangevraagd worden als de voorwaarden voor gebruik MijnHandboogsport geaccepteerd zijn.</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+
                             <tr>
                                 <th>Organiserende vereniging</th>
                                 <td>{{ wed.organiserende_vereniging }}</td>
@@ -147,48 +258,20 @@
                             </tr>
 
                             <tr>
-                                <th>Status</th>
+                                <th>Aanwezig melden</th>
                                 <td>
-                                    {% for opt in opt_status %}
-                                        <span class="{% if opt.selected %}sv-blauw-text{% else %}grey-text{% endif %}" style="white-space: nowrap">{{ opt.status_str }}</span><br>
-                                    {% endfor %}
-                                    <br>
-                                    {% if url_prev_tekst %}
-                                        <button form="form_prev" class="btn-sv-blauw vertrek_knop" id="submit_knop2" type="submit">{{ url_prev_tekst }}</button>
-                                        <span>&nbsp;&nbsp;</span>
-                                    {% endif %}
-                                    {% if url_next_tekst %}
-                                        {% if wed.wacht_op_keuze_scheids %}
-                                            <button class="btn-sv-rood" disabled>{{ url_next_tekst }}</button>
-                                            <br><p class="sv-rood-text">Eerst een keuze maken voor de scheidsrechters behoefte.</p>
-                                        {% elif wed.wacht_op_sessies %}
-                                            <button class="btn-sv-rood" disabled>{{ url_next_tekst }}</button>
-                                            <br><p class="sv-rood-text">Eerst sessies aanmaken.</p>
-                                        {% else %}
-                                            <button form="form_next" class="btn-sv-rood vertrek_knop" id="submit_knop1" type="submit">{{ url_next_tekst }}</button>
-                                        {% endif %}
-                                    {% endif %}
-                                    {% if not wed.verkoopvoorwaarden_status_acceptatie %}
-                                        <br><span style="margin-top:16px">Goedkeuring kan aangevraagd worden als de voorwaarden voor gebruik MijnHandboogsport geaccepteerd zijn.</span>
+                                    {% if block_edits %}
+                                        <span>{{ wed.minuten_voor_begin_sessie_aanwezig_zijn }} minuten van te voren</span>
+                                    {% else %}
+                                        <span>Hoe lang van tevoren wil je sporters vragen aanwezig te zijn?</span>
+                                        <select name="aanwezig" onchange="gewijzigd()">
+                                            {% for opt in opt_aanwezig %}
+                                                <option value="{{ opt.sel }}"{% if opt.selected %} selected{% endif %}>{{ opt.keuze_str }}</option>
+                                            {% endfor %}
+                                        </select>
                                     {% endif %}
                                 </td>
                             </tr>
-
-                            {% if toon_ter_info %}
-                                <tr>
-                                    <th>Ter info op de kalender zetten?</th>
-                                    <td>
-                                        <ul id="id_ter_info">
-                                            <li>
-                                                <label>
-                                                    <input type="checkbox" class="filled-in" name="ter_info" onchange="gewijzigd()"{% if wed.is_ter_info %} checked{% endif %}>
-                                                    <span class="black-text">&nbsp;Ja, geen inschrijvingen toestaan</span>
-                                                </label>
-                                            </li>
-                                        </ul>
-                                    </td>
-                                </tr>
-                            {% endif %}
 
                             {% if wijzig_kwalificatie_scores %}
                                 <tr>
@@ -254,48 +337,25 @@
                                 </td>
                             </tr>
 
-                            {% if toon_wa_status %}
-                                <tr>
-                                    <th>WA-status</th>
-                                    <td>
-                                        {% if limit_edits %}
-                                            <span>{{ wed.wa_status_str }}</span>
-                                            <br><br>
-                                        {% else %}
-                                            <ul id="id_wa_status">
-                                                {% for opt in opt_wa %}
-                                                    <li>
-                                                        <label class="black-text" for="id_{{ opt.sel }}">
-                                                            <input class="with-gap" type="radio" name="wa_status" value="{{ opt.sel }}" required id="id_{{ opt.sel }}"{% if opt.selected %} checked{% endif %}{% if opt.disabled %} disabled{% endif %} onchange="gewijzigd()">
-                                                            <span>{{ opt.keuze_str }}</span>
-                                                        </label>
-                                                    </li>
-                                                {% endfor %}
-                                            </ul>
-                                        {% endif %}
-
-                                        {% if wed.voorwaarden_a_status_acceptatie %}
-                                            <span>Akkoord voor A-status voorwaarden is gegeven<br>op {{ wed.voorwaarden_a_status_when }} door {{ wed.voorwaarden_a_status_who }}</span><br>
-                                            <a class="btn-sv-blauw btn-small" href="{{ url_voorwaarden_a_status }}" target="_blank" rel="noopener noreferrer" style="margin-top:16px">
-                                                <i class="notranslate material-icons-round left">open_in_new</i>Voorwaarden lezen</a>
-                                        {% else %}
-                                            <span>Voordat A-status gekozen kan worden moet je akkoord gaan met de voorwaarden.</span><br>
-                                            <a class="btn-sv-blauw btn-small" href="{{ url_voorwaarden_a_status }}" target="_blank" rel="noopener noreferrer" style="margin-top:16px">
-                                                <i class="notranslate material-icons-round left">open_in_new</i>Voorwaarden lezen</a>
-                                            {% if not limit_edits %}
-                                                <ul id="id_teams">
-                                                    <li>
-                                                        <label>
-                                                            <input type="checkbox" class="filled-in" name="akkoord_a_status" onchange="akkoord_gewijzigd()">
-                                                            <span class="black-text">&nbsp;Ik ga akkoord met de voorwaarden</span>
-                                                        </label>
-                                                    </li>
-                                                </ul>
-                                            {% endif %}
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                            {% endif %}     <!-- toon_wa_status -->
+                            <tr>
+                                <th>Doelgroep</th>
+                                <td>
+                                    {% if block_edits %}
+                                        <span>{{ wed.begrenzing_str }}</span>
+                                    {% else %}
+                                        <ul id="id_doelgroep">
+                                            {% for opt in opt_begrenzing %}
+                                                <li>
+                                                    <label class="black-text" for="id_{{ opt.sel }}">
+                                                        <input class="with-gap" type="radio" name="begrenzing" value="{{ opt.sel }}" required id="id_{{ opt.sel }}"{% if opt.selected %} checked{% endif %} onchange="gewijzigd()">
+                                                        <span>{{ opt.keuze_str }}</span>
+                                                    </label>
+                                                </li>
+                                            {% endfor %}
+                                        </ul>
+                                    {% endif %}
+                                </td>
+                            </tr>
 
                             <tr>
                                 <th>Wedstrijd locatie</th>
@@ -326,26 +386,6 @@
                                 </td>
                             </tr>
 
-                            <tr>
-                                <th>Doelgroep</th>
-                                <td>
-                                    {% if block_edits %}
-                                        <span>{{ wed.begrenzing_str }}</span>
-                                    {% else %}
-                                        <ul id="id_doelgroep">
-                                            {% for opt in opt_begrenzing %}
-                                                <li>
-                                                    <label class="black-text" for="id_{{ opt.sel }}">
-                                                        <input class="with-gap" type="radio" name="begrenzing" value="{{ opt.sel }}" required id="id_{{ opt.sel }}"{% if opt.selected %} checked{% endif %} onchange="gewijzigd()">
-                                                        <span>{{ opt.keuze_str }}</span>
-                                                    </label>
-                                                </li>
-                                            {% endfor %}
-                                        </ul>
-                                    {% endif %}
-                                </td>
-                            </tr>
-
                             <tr>                         <!-- F = IFAA -->
                                 <th>{% if wed.organisatie == 'F' %}Toegestane schietstijlen{% else %}Toegestane bogen{% endif %}</th>
                                 <td>
@@ -362,22 +402,6 @@
                                                 <span>{{ boog.beschrijving }}</span>
                                             </label><br>
                                         {% endfor %}
-                                    {% endif %}
-                                </td>
-                            </tr>
-
-                            <tr>
-                                <th>Aanwezig melden</th>
-                                <td>
-                                    {% if block_edits %}
-                                        <span>{{ wed.minuten_voor_begin_sessie_aanwezig_zijn }} minuten van te voren</span>
-                                    {% else %}
-                                        <span>Hoe lang van tevoren wil je sporters vragen aanwezig te zijn?</span>
-                                        <select name="aanwezig" onchange="gewijzigd()">
-                                            {% for opt in opt_aanwezig %}
-                                                <option value="{{ opt.sel }}"{% if opt.selected %} selected{% endif %}>{{ opt.keuze_str }}</option>
-                                            {% endfor %}
-                                        </select>
                                     {% endif %}
                                 </td>
                             </tr>
@@ -465,31 +489,6 @@
                                     <input style="width:90%" type="text" name="prijs_onder18" value="{{ prijs_euro_onder18_str }}" pattern="^\d+(,\d{2})?$" placeholder="123,45" oninput="gewijzigd()">
                                 </td>
                             </tr>
-
-                            <tr>
-                                <th>Acceptatie voorwaarden gebruik MijnHandboogsport</th>
-                                <td>
-                                    {% if wed.verkoopvoorwaarden_status_acceptatie %}
-                                        <span>Akkoord voor de Verkoopvoorwaarden Wedstrijden is gegeven<br>op {{ wed.verkoopvoorwaarden_status_when }} door {{ wed.verkoopvoorwaarden_status_who }}</span><br>
-                                        <a class="btn-sv-blauw btn-small" href="{{ url_voorwaarden_verkoop }}" target="_blank" rel="noopener noreferrer" style="margin-top:16px">
-                                            <i class="notranslate material-icons-round left">open_in_new</i>Verkoopvoorwaarden lezen</a>
-                                    {% else %}
-                                        <span>Voor verkopen via MijnHandboogsport zijn de Verkoopvoorwaarden Wedstrijden van toepassing.<br>Lees het document en geef akkoord met de knop.</span><br>
-                                        <a class="btn-sv-blauw btn-small" href="{{ url_voorwaarden_verkoop }}" target="_blank" rel="noopener noreferrer" style="margin-top:16px">
-                                            <i class="notranslate material-icons-round left">open_in_new</i>Verkoopvoorwaarden lezen</a>
-
-                                        <ul id="id_verkoop">
-                                            <li>
-                                                <label>
-                                                    <input type="checkbox" class="filled-in" name="akkoord_verkoop" onchange="gewijzigd()">
-                                                    <span class="black-text">&nbsp;Ik ga akkoord met de voorwaarden</span>
-                                                </label>
-                                            </li>
-                                        </ul>
-                                    {% endif %}
-                                </td>
-                            </tr>
-
 
                             <tr>
                                 <td colspan="2" class="center sv-blauw-text"><h6>Scheidsrechter behoefte</h6></td>

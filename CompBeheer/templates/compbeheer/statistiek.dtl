@@ -124,7 +124,7 @@
                     </tr>
 
                     <tr>
-                        <th>Bij inschrijving afgemeld voor RK</th>
+                        <th>Alvast afgemeld voor RK/BK</th>
                         <td class="right-align"><b>Rayon</b><br>1<br>2<br>3<br>4</td>
                         <td class="right-align"><b>Indoor</b>{% for aantal in aantal_18m_geen_rk %}<br>{{ aantal }}{% endfor %}</td>
                         <td class="right-align" style="padding-right:15px"><b>25m1pijl</b>{% for aantal in aantal_25m_geen_rk %}<br>{{ aantal }}{% endfor %}</td>
