@@ -277,7 +277,9 @@
     </div>
 
     <!-- maak een script block van type application/json aan, met de data erin -->
-    {{ verwijder_ids|json_script:"verwijder_ids" }}
+    {% if verwijder_ids %}
+        {{ verwijder_ids|json_script:"verwijder_ids" }}
+    {% endif %}
 
     <div id="js_data"
          data-csrf-token="{{ csrf_token }}">

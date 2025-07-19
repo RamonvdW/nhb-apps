@@ -23,23 +23,18 @@ class TestBrowserBestellingMandjeVerwijder(MyMgmtCommandHelper, bh.BrowserTestCa
         BestellingMutatie.objects.all().delete()
 
         # leg een product in het mandje
-        self.do_navigate_to(self.url_webwinkel_product % self.webwinkel_product.pk)
+        url = self.url_webwinkel_product % self.webwinkel_product.pk
+        self.do_navigate_to(url)
 
         knop = self.find_element_type_with_text('button', 'Leg in mijn mandje')
         self.click_not_blocking(knop)
-        # geef het script en de server wat tijd om de bestelmutatie te maken
-        time.sleep(0.25)
-
         # click handler JS script heeft een POST gedaan
-        # die maakt een mutatie record voor de achtergrond taak
-        # wacht daarna tot 3 seconden op de achtergrondtaak (welke niet draait)
-        # en geeft daarna de http response ("Product is gereserveerd" pagina)
-        # hier willen we niet op wachten
+        # de POST handler maakt een mutatie record voor de achtergrond taak
+        # en wacht daarna tot 3 seconden op de achtergrondtaak
+        # geeft daarna de http response ("Product is gereserveerd" pagina)
+        self.wait_until_url_not(url)
 
-        # laat de achtergrondtaak de mutatie verwerken, waardoor het product in het mandje komt
-        self.verwerk_bestel_mutaties()
-
-        # bekijk het mandje
+        # ga naar het mandje
         self.do_navigate_to(self.url_mandje)
 
         # verwijder het product uit het mandje
