@@ -12,14 +12,15 @@
     having to edit the settings.py file.
 """
 
+# NOTE: Site.core.setting_base has priority over this file (unable to override)
+
 # the secret below ensures an adversary cannot fake aspects like a session-id
 # just make sure it is unique per installation and keep it private
 # details: https://docs.djangoproject.com/en/4.2/ref/settings/#secret-key
 SECRET_KEY = '1234-replace-with-your-own-secret-key-56789abcdefg'       # noqa
 
-BASE_URL = "yourdomain.com"
-
 # SITE_URL wordt gebruikt door TijdelijkeCodes, maar ook voor alle urls in e-mails
+BASE_URL = "yourdomain.com"
 #SITE_URL = "https://" + BASE_URL
 SITE_URL = "http://localhost:8000"
 
@@ -39,7 +40,15 @@ DATABASES = {
         'PASSWORD': 'database-pwd',
         'HOST': 'localhost',
         'PORT': '5432'
-    }
+    },
+    'test': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'database-name',
+        'USER': 'database-user',
+        'PASSWORD': 'database-pwd',
+        'HOST': 'localhost',
+        'PORT': '5432'
+    },
 }
 
 # allow the database connections to stay open
@@ -50,6 +59,10 @@ OTP_ISSUER_NAME = "Your Site"
 
 NAAM_SITE = "YourSite (dev)"
 
+# begrens re-auth in dev omgeving
+HERHAAL_INTERVAL_LOGIN = None
+HERHAAL_INTERVAL_OTP = None
+
 # aparte namen voor gebruik in e-mailafschrift bestelling
 AFSCHRIFT_SITE_NAAM = "Your Site"
 AFSCHRIFT_SITE_URL = "yourdomain.com"
@@ -57,7 +70,9 @@ AFSCHRIFT_SITE_URL = "yourdomain.com"
 # contactgegevens eerste- en tweedelijns support
 EMAIL_BONDSBUREAU = "info@yourdomain.com"
 EMAIL_SUPPORT = EMAIL_BONDSBUREAU
+EMAIL_TECH_SUPPORT = "support@yourdomain.com"
 
+# manuals (pdf)
 URL_PDF_HANDLEIDING_LEDEN = 'https://yoursite/static/manual_members.pdf'
 URL_PDF_HANDLEIDING_BEHEERDERS = 'https://yoursite/static/manual_managers.pdf'
 URL_PDF_HANDLEIDING_VERENIGINGEN = 'https://yoursite/static/manual_clubs.pdf'
@@ -72,19 +87,22 @@ URL_PDF_HANDLEIDING_SCHEIDSRECHTERS = 'https://yoursite/static/manual_judges.pdf
 EMAIL_DEVELOPER_TO = 'developer@yourdomain.com'
 EMAIL_DEVELOPER_SUBJ = 'Internal Server Error: ' + NAAM_SITE
 
-# users allowed to send to in this test setup
-# if empty, allows sending to anybody
+# wie mogen een mail krijgen?
+#
+# LET OP: registratie nieuw account gebruikt de whitelist niet!
+#
+# lege lijst --> mag naar iedereen mailen
 EMAIL_ADDRESS_WHITELIST = ()
 
 # url van het document privacyverklaring
 PRIVACYVERKLARING_URL = 'url to privacy statement html, pdf or googledoc, etc'
 
-# url van het document met voorwaarden voor A-status wedstrijden
+# url van het document met voorwaarden voor A-status wedstrijden / alcoholbeleid
 VOORWAARDEN_A_STATUS_URL = 'https://docs.google.com/document/d/random google document number/view'
 
 # url van de documenten met de verkoopvoorwaarden
-VERKOOPVOORWAARDEN_WEDSTRIJDEN_URL = 'https://docs.google.com/document/d/another random google document number/pub'
 VERKOOPVOORWAARDEN_WEBWINKEL_URL = 'https://docs.google.com/document/d/yet another random google document number/pub'
+VERKOOPVOORWAARDEN_WEDSTRIJDEN_URL = 'https://docs.google.com/document/d/another random google document number/pub'
 VERKOOPVOORWAARDEN_OPLEIDINGEN_URL = 'https://docs.google.com/document/d/yet another random google document number/pub'
 
 # google doc id van het gsheet document
@@ -109,7 +127,7 @@ BONDSPAS_FONT_BOLD = '/usr/share/fonts/truetype/liberation2/LiberationSans-Bold.
 INSTALL_PATH = '/directory/on/server/nhbapps-venv/project/'
 
 # toon het kaartje Opleidingen?
-TOON_OPLEIDINGEN = False
+TOON_OPLEIDINGEN = True
 
 # bekende BIC codes, voor controle rekeninggegevens tijdens import uit CRM
 BEKENDE_BIC_CODES = (
@@ -135,6 +153,9 @@ URL_SPELDEN_PROCEDURES = 'https://www.handboogsport.nl/de-khsn/#procedures'     
 
 # online aanvraagformulier voor nieuwe records
 URL_RECORD_AANVRAAGFORMULIER = 'https://docs.google.com/spreadsheets/1234_your_doc_7890'   # noqa
+
+# landing page voor alle opleidingen
+URL_OPLEIDINGEN = 'https://www.handboogsport.nl/opleidingen/'
 
 # locatie op disk waar de foto's staan (bron)
 # deze worden door collectstatic naar deployment gezet  # noqa
@@ -183,12 +204,14 @@ GEOCODE_FALLBACK = {
 LID_NRS_GEEN_SCHEIDS_BESCHIKBAARHEID_OPVRAGEN = ()
 
 # Ledenvoordeel
-TOON_LEDENVOORDEEL = True
+TOON_LEDENVOORDEEL = False
 WALIBI_URL_ALGEMEEN = 'https://www.walibi.nl/'
 WALIBI_URL_KORTING = 'https://bit.ly/yourcode'
 
 # toegestane tokens voor /kalender/api/lijst/30/?token=xxxx
 KALENDER_API_TOKENS = ()
+
+OVERIG_API_TOKENS = ()
 
 # google doc id van het gsheet document
 INSTAPTOETS_GSHEET_FILE_ID = 'another.google.sheets.id'     # noqa
