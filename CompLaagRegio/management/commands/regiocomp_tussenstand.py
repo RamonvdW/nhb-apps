@@ -30,7 +30,7 @@ class Command(BaseCommand):
         super().__init__(stdout, stderr, no_color, force_color)
         self.stop_at = datetime.datetime(2000, 1, 1)
 
-        self.taken = CompetitieTaken.objects.first()
+        self.taken, _ = CompetitieTaken.objects.get_or_create()
 
         self.sporterboog2scores = dict()   # [SporterBoog.pk] = [(afstand, Score), ..]
 

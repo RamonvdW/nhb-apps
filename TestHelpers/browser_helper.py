@@ -344,7 +344,8 @@ class BrowserTestCase(TestCase):
 
         # ga naar de nieuwe pagina - dit reset the globale variabele
         t1 = time.time()
-        print('do_navigate_to:', url)
+        if self.show_browser:
+            print('do_navigate_to:', url)
         self._driver.get(self.live_server_url + url)
         t2 = time.time()
         if t2 - t1 > 1:
