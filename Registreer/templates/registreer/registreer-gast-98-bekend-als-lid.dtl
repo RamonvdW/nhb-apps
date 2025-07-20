@@ -16,7 +16,7 @@
             <h3 class="page-banner">E-mailadres al gebruikt</h3>
 
             {% if lid_nr_str %}
-                <p>Volgens onze administratie wordt dit e-mailadres gebruikt door het lid met bondsnummer {{ lid_nr_str }}.</p>
+                <p>Volgens onze administratie wordt dit e-mailadres gebruikt door het lid met bondsnummer <b>{{ lid_nr_str }}</b>.</p>
                 <p>Als dit jouw bondsnummer is, maak dan een gewoon account aan in plaats van een gastaccount.</p>
             {% endif %}
             {% if lid_nrs_str %}
@@ -27,7 +27,7 @@
             <div class="row">
                 <div style="padding:10px">
                     <div class="col s12 m8 offset-m2 sv-rood white-text z-depth-3 center">
-                        <p>Het is niet mogelijk om een gastaccount aan te maken met <code>{{ email }}</code></p>
+                        <p>Het is niet mogelijk om een gastaccount aan te maken met e-mailadres<br><code>{{ email }}</code></p>
                     </div>
                 </div>
             </div>
