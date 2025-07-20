@@ -8,10 +8,10 @@
     Django settings for the NhbApps project.
 
     For more information on this file, see
-    https://docs.djangoproject.com/en/4.2/topics/settings/
+    https://docs.djangoproject.com/en/5.2/topics/settings/
 
     For the full list of settings and their values, see
-    https://docs.djangoproject.com/en/4.2/ref/settings/
+    https://docs.djangoproject.com/en/5.2/ref/settings/
 
     this file is included by django.conf.settings
 
@@ -62,7 +62,7 @@ APPS_DIR = os.path.dirname(BASE_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2025-07-19'
+SITE_VERSIE = '2025-07-20'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -120,7 +120,7 @@ INSTALLED_APPS = [
 # AuthenticationMiddleware must be after SessionMiddleware
 #        MessageMiddleware must be after SessionMiddleware
 #
-# SecurityMiddleware provides:  (see https://docs.djangoproject.com/en/4.2/ref/middleware/)
+# SecurityMiddleware provides:  (see https://docs.djangoproject.com/en/5.2/ref/middleware/)
 # - Strict-Transport-Security header (max-age = settings.SECURE_HSTS_SECONDS)
 # - Referrer-Policy header (='same-origin')
 # - Cross-Origin-Opener-Policy header (='same-origin')
@@ -193,7 +193,7 @@ SECURE_HSTS_SECONDS = 17280000      # 17280000 = 200 days
 
 
 # Password validation
-# https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
+# https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -215,7 +215,7 @@ HERHAAL_INTERVAL_LOGIN = 21     # elke 21 dagen opnieuw inloggen
 HERHAAL_INTERVAL_OTP = 7        # elke 7 dagen opnieuw OTP controle
 
 # Internationalization
-# https://docs.djangoproject.com/en/4.2/topics/i18n/
+# https://docs.djangoproject.com/en/5.2/topics/i18n/
 LANGUAGE_CODE = 'nl-NL'     # provides wanted date/time output format
 TIME_ZONE = 'Europe/Amsterdam'
 USE_I18N = True
@@ -231,7 +231,7 @@ ROOT_URLCONF = 'Site.core.urls'
 
 
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/4.2/howto/static-files/
+# https://docs.djangoproject.com/en/5.2/howto/static-files/
 STATIC_URL = '/static/'             # url where the server is serving the files
 STATIC_ROOT = 'Site/.static'        # relative to project top-dir
 STATICFILES_DIRS = [
