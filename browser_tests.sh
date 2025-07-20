@@ -10,6 +10,7 @@ ARGS=("$@")
 TEST_DIR="./Site/tmp_test_data"
 TEST_DIR_FOTOS_WEBWINKEL="$TEST_DIR/webwinkel"
 LOG="/tmp/browser_test_out.txt"
+LOG2="/tmp/.browser_test.log"
 REPORT_DIR="/tmp/covhtml"
 STATIC_DIR="$PWD/Site/.static/"   # must be full path
 SETTINGS_AUTOTEST_NODEBUG="Site.settings_autotest_nodebug"
@@ -28,8 +29,8 @@ then
     exit 1
 fi
 
-[ -e "$LOG" ] && rm "$LOG"
-touch "$LOG"
+rm -f "$LOG" "$LOG2"
+touch "$LOG" "$LOG2"
 
 export PYTHONDONTWRITEBYTECODE=1
 
@@ -46,6 +47,7 @@ MAKE_REPORT=1
 ASK_LAUNCH=1
 CLEAN_COV=1
 FOCUS=""
+VERBOSE=0
 
 for arg in "${ARGS[@]}"
 do
@@ -70,10 +72,15 @@ do
         ASK_LAUNCH=0
         CLEAN_COV=0
 
+    elif [ "$arg" = "-v" ]
+    then
+        VERBOSE=1
+
     else
         arg=${arg//\//.}                              # replace all (//) occurrences of / with .
         [ "${arg: -1}" == "." ] && arg=${arg:0:-1}    # strip last . (case: Plein/)
         FOCUS="$arg"
+        VERBOSE=1
         echo "[INFO] Focus is set to $FOCUS"
     fi
 done
@@ -129,7 +136,9 @@ powerprofilesctl set performance
 echo "[INFO] Capturing output in $LOG"
 # --pid=$$ means: stop when parent stops
 # -u = unbuffered stdin/stdout
-tail -f "$LOG" --pid=$$ | python -u ./Site/utils/number_tests.py | grep --color -E "FAIL$|ERROR$|" &
+TAIL_FILE="$LOG2"
+[ $VERBOSE -eq 1 ] && TAIL_FILE="$LOG"
+tail -f "$TAIL_FILE" --pid=$$ | python -u ./Site/utils/number_tests.py | grep --color -E "FAIL$|ERROR$|" &
 PID_TAIL=$(jobs -p | tail -1)
 # echo "PID_TAIL=$PID_TAIL"
 
@@ -186,19 +195,19 @@ then
     TEST=(./manage.py test --keepdb --noinput --settings="$SETTINGS_AUTOTEST_BROWSER" -v 2)
     if [ -z "$FOCUS" ]
     then
-        echo "[INFO] Starting browser tests run" >>"$LOG"
-        python3 -u "${PYCOV[@]}" "${TEST[@]}" "Plein.tests.test_js_in_browser" &>>"$LOG"
+        echo "[INFO] Starting browser tests run" >>"$LOG2"
+        python3 -u "${PYCOV[@]}" "${TEST[@]}" "Plein.tests.test_js_in_browser" 2>&1 | tee -a "$LOG" >> "$LOG2"
         RES=$?
     else
-        echo "[INFO] Starting browser tests run for focus_$FOCUS" >>"$LOG"
-        python3 -u "${PYCOV[@]}" "${TEST[@]}" "Plein.tests.test_js_in_browser.TestBrowser.focus_$FOCUS" &>>"$LOG"
+        echo "[INFO] Starting browser tests run for focus_$FOCUS" >>"$LOG2"
+        python3 -u "${PYCOV[@]}" "${TEST[@]}" "Plein.tests.test_js_in_browser.TestBrowser.focus_$FOCUS"  2>&1 | tee -a "$LOG" >> "$LOG2"
         RES=$?
     fi
     #echo "[DEBUG] Run result: $RES --> ABORTED=$ABORTED"
     [ $RES -eq 3 ] && ABORTED=1
 
-    echo >>"$LOG"
-    echo "[INFO] Finished browser tests run" >>"$LOG"
+    echo >>"$LOG2"
+    echo "[INFO] Finished browser tests run" >>"$LOG2"
 fi
 
 # stop showing the additions to the logfile, because the rest is less interesting
