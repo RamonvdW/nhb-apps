@@ -17,7 +17,7 @@
 
             {% if lid_nr_str %}
                 <p>Volgens onze administratie wordt dit e-mailadres gebruikt door het lid met bondsnummer <b>{{ lid_nr_str }}</b>.</p>
-                <p>Als dit jouw bondsnummer is, maak dan een gewoon account aan in plaats van een gastaccount.</p>
+                <p>Als dit jouw bondsnummer is, maak dan een account voor KHSN leden aan, in plaats van een gastaccount.</p>
             {% endif %}
             {% if lid_nrs_str %}
                 <p>Volgens onze administratie wordt dit e-mailadres gebruikt door leden met de volgende bondsnummers: {{ lid_nrs_str }}.</p>
