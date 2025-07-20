@@ -5,6 +5,7 @@
  */
 
 /* jshint esversion: 6 */
+/* global console */
 "use strict";
 
 const dataset = document.getElementById("js_data").dataset;
@@ -69,22 +70,30 @@ function ophalen_timeout(xhr) {
 }
 
 
-window.addEventListener("load", function() {
-    // alles is opgehaald en ingeladen
-
+function ophalen() {
     let xhr = new XMLHttpRequest();
 
     // POST voorkomt caching
-    xhr.open("POST", dataset.urlDynamic, true);        // true = async
-    xhr.setRequestHeader("X-CSRFToken", dataset.csrfToken);
+    xhr.open("POST",
+             dataset.urlDynamic,
+       true);        // true = async
+    xhr.setRequestHeader("X-CSRFToken",
+                         dataset.csrfToken);
     xhr.timeout = timeout60s;
-    xhr.onloadend = function() {
-                        ophalen_klaar(xhr);
-                    };
-    xhr.ontimeout = function() {
-                        ophalen_timeout(xhr);
-                    };
+    xhr.onloadend = function () {
+        ophalen_klaar(xhr);
+    };
+    xhr.ontimeout = function () {
+        ophalen_timeout(xhr);
+    };
     xhr.send();
+}
+
+
+window.addEventListener("load", function() {
+    // html, css en fonts zijn opgehaald en ingeladen
+    // kleine vertragen, bedoeld voor testomgeving
+    setTimeout(ophalen, 100);
 });
 
 
