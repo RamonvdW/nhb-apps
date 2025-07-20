@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023 Ramon van der Winkel.
+#  Copyright (c) 2023-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -16,6 +16,7 @@ REGISTRATIE_FASE_TEL = 8
 REGISTRATIE_FASE_WA_ID = 9
 REGISTRATIE_FASE_GENDER = 10
 REGISTRATIE_FASE_CONFIRM = 25
+REGISTRATIE_FASE_BEKEND_LID = 98
 REGISTRATIE_FASE_COMPLEET = 99
 REGISTRATIE_FASE_AFGEWEZEN = 100
 
@@ -30,6 +31,7 @@ REGISTRATIE_FASE2STR = {
     REGISTRATIE_FASE_WA_ID: "WA ID",
     REGISTRATIE_FASE_GENDER: "Geslacht",
     REGISTRATIE_FASE_CONFIRM: "Bevestigen",
+    REGISTRATIE_FASE_BEKEND_LID: "Bekend lid",
     REGISTRATIE_FASE_COMPLEET: "Compleet",
     REGISTRATIE_FASE_AFGEWEZEN: "Afgewezen"
 }

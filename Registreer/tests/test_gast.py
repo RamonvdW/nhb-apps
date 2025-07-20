@@ -6,6 +6,7 @@
 
 from django.test import TestCase
 from django.utils import timezone
+from BasisTypen.definities import GESLACHT_MAN
 from Mailer.models import MailQueue
 from Registreer.definities import (REGISTRATIE_FASE_EMAIL, REGISTRATIE_FASE_PASS, REGISTRATIE_FASE_CLUB,
                                    REGISTRATIE_FASE_LAND, REGISTRATIE_FASE_AGE, REGISTRATIE_FASE_TEL,
@@ -733,6 +734,118 @@ class TestRegistreerGast(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, '/plein/')
         resp = self.client.get(self.url_volgende_vraag)
         self.assert_is_redirect(resp, '/plein/')
+
+    def test_bekend_als_lid(self):
+        # emailadres is in gebruikt voor een sporter
+        now = timezone.now()
+        Sporter.objects.create(
+                            lid_nr=150001,
+                            voornaam='Test',
+                            achternaam='Test',
+                            email=self.test_email,
+                            geboorte_datum='2000-01-01',
+                            geslacht=GESLACHT_MAN,
+                            sinds_datum='2020-01-01',
+                            lid_tot_einde_jaar=now.year)
+
+        # ontvang naam en e-mailadres + stuur e-mail voor bevestigen
+        self.assertEqual(0, GastRegistratie.objects.count())
+        self.assertEqual(0, MailQueue.objects.count())
+        self.assertEqual(0, TijdelijkeCode.objects.count())
+
+        resp = self.client.post(self.url_registreer_gast,
+                                {'achternaam': self.test_achternaam,
+                                 'voornaam': self.test_voornaam,
+                                 'email': self.test_email},
+                                follow=True)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_template_used(resp, ('registreer/registreer-gast-01-bevestig-email.dtl', 'plein/site_layout.dtl'))
+
+        self.assertEqual(1, GastRegistratie.objects.count())
+        gast = GastRegistratie.objects.first()
+        self.assertEqual(gast.voornaam, self.test_voornaam)
+        self.assertEqual(gast.achternaam, self.test_achternaam)
+        self.assertEqual(gast.email, self.test_email)
+        self.assertFalse(gast.email_is_bevestigd)
+        self.assertEqual(gast.fase, REGISTRATIE_FASE_EMAIL)
+
+        # volg de link om de email te bevestigen
+        self.assertEqual(1, TijdelijkeCode.objects.count())
+        obj = TijdelijkeCode.objects.first()
+        url = self.url_tijdelijk % obj.url_code
+
+        # haal de pagina op - deze bevat een POST url
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        post_url = self.extract_all_urls(resp, skip_menu=True)[0]
+
+        # gebruik de POST
+        resp = self.client.post(post_url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('registreer/registreer-gast-98-bekend-als-lid.dtl', 'plein/site_layout.dtl'))
+        self.e2e_open_in_browser(resp)
+
+    def test_bekend_voor_leden(self):
+        # e-mailadres is in gebruikt voor meerdere sporters
+        # emailadres is in gebruikt voor een sporter
+        now = timezone.now()
+        Sporter.objects.create(
+                            lid_nr=150001,
+                            voornaam='Test1',
+                            achternaam='Test',
+                            email=self.test_email,
+                            geboorte_datum='2000-01-01',
+                            geslacht=GESLACHT_MAN,
+                            sinds_datum='2020-01-01',
+                            lid_tot_einde_jaar=now.year)
+        Sporter.objects.create(
+                            lid_nr=150002,
+                            voornaam='Test2',
+                            achternaam='Test',
+                            email=self.test_email,
+                            geboorte_datum='2000-01-01',
+                            geslacht=GESLACHT_MAN,
+                            sinds_datum='2020-01-01',
+                            lid_tot_einde_jaar=now.year)
+
+        # ontvang naam en e-mailadres + stuur e-mail voor bevestigen
+        self.assertEqual(0, GastRegistratie.objects.count())
+        self.assertEqual(0, MailQueue.objects.count())
+        self.assertEqual(0, TijdelijkeCode.objects.count())
+
+        resp = self.client.post(self.url_registreer_gast,
+                                {'achternaam': self.test_achternaam,
+                                 'voornaam': self.test_voornaam,
+                                 'email': self.test_email},
+                                follow=True)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_template_used(resp, ('registreer/registreer-gast-01-bevestig-email.dtl', 'plein/site_layout.dtl'))
+
+        self.assertEqual(1, GastRegistratie.objects.count())
+        gast = GastRegistratie.objects.first()
+        self.assertEqual(gast.voornaam, self.test_voornaam)
+        self.assertEqual(gast.achternaam, self.test_achternaam)
+        self.assertEqual(gast.email, self.test_email)
+        self.assertFalse(gast.email_is_bevestigd)
+        self.assertEqual(gast.fase, REGISTRATIE_FASE_EMAIL)
+
+        # volg de link om de email te bevestigen
+        self.assertEqual(1, TijdelijkeCode.objects.count())
+        obj = TijdelijkeCode.objects.first()
+        url = self.url_tijdelijk % obj.url_code
+
+        # haal de pagina op - deze bevat een POST url
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        post_url = self.extract_all_urls(resp, skip_menu=True)[0]
+
+        # gebruik de POST
+        resp = self.client.post(post_url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('registreer/registreer-gast-98-bekend-als-lid.dtl', 'plein/site_layout.dtl'))
+        self.e2e_open_in_browser(resp)
 
 
 # end of file

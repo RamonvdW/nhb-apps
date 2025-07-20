@@ -254,19 +254,19 @@
                 <tr>
                     <th>Koper</th>
                     <td>
-                        {% for obj in gast_koper_1a %}
+                        {% for obj in gast_koper_1a %}      <!-- 1a = EvenementInschrijving -->
                             <span>{{ obj }}</span><br>
                         {% endfor %}
-                        {% for obj in gast_koper_1b %}
+                        {% for obj in gast_koper_1b %}      <!-- 1b = EvenementAfgemeld -->
                             <span>{{ obj }}</span><br>
                         {% endfor %}
-                        {% for obj in gast_koper_2a %}
+                        {% for obj in gast_koper_2a %}      <!-- 2a = OpleidingInschrijving -->
                             <span>{{ obj }}</span><br>
                         {% endfor %}
-                        {% for obj in gast_koper_2b %}
+                        {% for obj in gast_koper_2b %}      <!-- 2a = OpleidingAfgemeld -->
                             <span>{{ obj }}</span><br>
                         {% endfor %}
-                        {% for obj in gast_koper_3a %}
+                        {% for obj in gast_koper_3a %}      <!-- 3a = WedstrijdInschrijving -->
                             <span>{{ obj }}</span><br>
                         {% endfor %}
                         {% if gast_koper_geen %}

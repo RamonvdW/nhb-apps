@@ -290,7 +290,7 @@ class GastAccountDetailsView(UserPassesTestMixin, TemplateView):
         # for
 
         # zoek koper van wedstrijd/evenement/opleiding
-        context['gast_koper_1a'] = EvenementAfgemeld.objects.filter(koper=gast.account)[:10]
+        context['gast_koper_1a'] = EvenementInschrijving.objects.filter(koper=gast.account)[:10]
         context['gast_koper_1b'] = EvenementAfgemeld.objects.filter(koper=gast.account)[:10]
         context['gast_koper_2a'] = OpleidingInschrijving.objects.filter(koper=gast.account)[:10]
         context['gast_koper_2b'] = OpleidingAfgemeld.objects.filter(koper=gast.account)[:10]
