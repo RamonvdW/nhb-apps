@@ -30,7 +30,11 @@ class Command(BaseCommand):
         super().__init__(stdout, stderr, no_color, force_color)
         self.stop_at = datetime.datetime(2000, 1, 1)
 
-        self.taken, _ = CompetitieTaken.objects.get_or_create()
+        # herstel test database van een flush actie
+        if CompetitieTaken.objects.count() == 0:
+            CompetitieTaken.objects.create()
+
+        self.taken = CompetitieTaken.objects.first()
 
         self.sporterboog2scores = dict()   # [SporterBoog.pk] = [(afstand, Score), ..]
 
@@ -167,7 +171,7 @@ class Command(BaseCommand):
         allowed_sporterboog_pks = qset.values_list('score__sporterboog__pk', flat=True)
 
         self.taken.hoogste_scorehist = scorehist_latest
-        self.taken.save(update_fields=['hoogste_scorehist'])
+        self.taken.save()
         self.stdout.write('[INFO] nieuwe hoogste ScoreHist pk is %s' % self.taken.hoogste_scorehist.pk)
 
         # een regiocompetitie heeft ingeschreven schuttersboog (RegioCompetitieSporterBoog);
