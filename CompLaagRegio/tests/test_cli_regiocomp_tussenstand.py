@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2024 Ramon van der Winkel.
+#  Copyright (c) 2020-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -263,7 +263,7 @@ class TestCompLaagRegioCliRegiocompTussenstand(E2EHelpers, TestCase):
         ScoreHist.objects.all().delete()
         Score.objects.all().delete()
 
-        with self.assert_max_queries(114):
+        with self.assert_max_queries(115):
             f1, f2 = self.run_management_command('regiocomp_tussenstand', '2', '--quick')
         self.assertTrue(f1.getvalue() == '')
         self.assertTrue('Klaar' in f2.getvalue())

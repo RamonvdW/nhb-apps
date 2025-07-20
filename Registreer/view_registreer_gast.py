@@ -237,7 +237,7 @@ def receive_bevestiging_gast_email(request, gast):
     gast.save(update_fields=['email_is_bevestigd', 'logboek'])
 
     # controleer dat e-mailadres niet bekend is in het CRM
-    lid_nrs = list(Sporter.objects.filter(email=gast.email).values_list('lid_nr', flat=True))
+    lid_nrs = list(Sporter.objects.filter(email=gast.email, is_actief_lid=True).values_list('lid_nr', flat=True))
     if len(lid_nrs) > 0:
         context = {
             'email': gast.email,

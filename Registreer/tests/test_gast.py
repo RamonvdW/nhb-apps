@@ -784,7 +784,7 @@ class TestRegistreerGast(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('registreer/registreer-gast-98-bekend-als-lid.dtl', 'plein/site_layout.dtl'))
-        self.e2e_open_in_browser(resp)
+        # self.e2e_open_in_browser(resp)
 
     def test_bekend_voor_leden(self):
         # e-mailadres is in gebruikt voor meerdere sporters
@@ -845,7 +845,7 @@ class TestRegistreerGast(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('registreer/registreer-gast-98-bekend-als-lid.dtl', 'plein/site_layout.dtl'))
-        self.e2e_open_in_browser(resp)
+        # self.e2e_open_in_browser(resp)
 
 
 # end of file
