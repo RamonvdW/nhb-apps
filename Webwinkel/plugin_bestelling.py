@@ -48,10 +48,15 @@ class WebwinkelBestelPlugin(BestelPluginBase):
 
         return mandje_pks
 
-    def reserveer(self, webwinkel_keuze: WebwinkelKeuze, mandje_van_str: str) -> BestellingRegel:
+    def reserveer(self, product_pk: int, mandje_van_str: str) -> BestellingRegel:
         """ Maak een reservering voor het webwinkel product (zodat iemand anders deze niet kan reserveren)
             en geef een BestellingRegel terug.
         """
+        webwinkel_keuze = (WebwinkelKeuze
+                           .objects
+                           .select_related('product')
+                           .get(pk=product_pk))
+
         product = webwinkel_keuze.product
         aantal = webwinkel_keuze.aantal
         kort = webwinkel_keuze.korte_beschrijving()

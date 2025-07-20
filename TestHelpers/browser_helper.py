@@ -111,7 +111,7 @@ class BrowserTestCase(TestCase):
     def get_console_log(self) -> list[str]:
         logs = self._driver.get_log('browser')      # gets the log + clears it!
         regels = list()
-        for log in logs:
+        for log in logs:                            # pragma: no cover
             # msg = log['message']
             msg = repr(log)
             if msg not in regels:
@@ -120,7 +120,7 @@ class BrowserTestCase(TestCase):
 
     def assert_no_console_log(self):
         regels = self.get_console_log()
-        if self.show_browser and len(regels) > 0 and self.pause_after_console_log > 0:
+        if self.show_browser and len(regels) > 0 and self.pause_after_console_log > 0:      # pragma: no cover
             print('\n[ERROR] Unexpected console output:')
             for regel in regels:
                 print(regel)
@@ -277,7 +277,7 @@ class BrowserTestCase(TestCase):
         # print('click_not_blocking duration: %.3f' % delta)
 
     @staticmethod
-    def debug_describe_element(el: WebElement):
+    def debug_describe_element(el: WebElement):         # pragma: no cover
         msgs = list()
 
         tag = el.tag_name
@@ -311,7 +311,7 @@ class BrowserTestCase(TestCase):
         script += '} catch (e) {}\n'
         script += 'return "";\n'
         data = self._driver.execute_script(script)
-        if data:
+        if data:                                            # pragma: no branch
             js_cov_add(data)
 
     def wait_until_url_not(self, url: str, timeout: float = 2.0):
@@ -334,21 +334,21 @@ class BrowserTestCase(TestCase):
 
         # store invocation order
         found_frame = None
-        for frame in traceback.extract_stack(limit=2):
+        for frame in traceback.extract_stack(limit=2):                              # pragma: no branch
             # print('frame: %s' % repr(frame))
             # interested frames contain /js_tests/, /tests/ or TestHelpers/browser_helper.py
-            if "tests/" in frame.filename or "/TestHelpers/" in frame.filename:
+            if "tests/" in frame.filename or "/TestHelpers/" in frame.filename:     # pragma: no branch
                 found_frame = frame
                 break
         # for
 
         # ga naar de nieuwe pagina - dit reset the globale variabele
         t1 = time.time()
-        if self.show_browser:
+        if self.show_browser:                   # pragma: no cover
             print('do_navigate_to:', url)
         self._driver.get(self.live_server_url + url)
         t2 = time.time()
-        if t2 - t1 > 1:
+        if t2 - t1 > 1:                         # pragma: no cover
             # dat duurde meer dan 1 seconde
             print('\n[ERROR] HTTP GET took very long: %s seconds' % (t2 - t1))
             if len(self._nav_hist) > 0:
@@ -473,7 +473,7 @@ class BrowserTestCase(TestCase):
     def get_current_url(self):
         return self._driver.current_url
 
-    def get_page_html(self):
+    def get_page_html(self):                                    # pragma: no cover
         content = self._driver.page_source
         soup = BeautifulSoup(content, features="html.parser")
         return soup.prettify()
@@ -495,7 +495,7 @@ def get_driver(show_browser=False):
     options.add_argument('--incognito')
 
     # fixed window size, do not show
-    if not show_browser:
+    if not show_browser:                        # pragma: no branch
         options.add_argument('--headless')
 
     options.add_argument('--window-size=1024,1200')

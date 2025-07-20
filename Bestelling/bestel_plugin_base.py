@@ -23,22 +23,22 @@ class BestelPluginBase:
     def mandje_opschonen(self, verval_datum):
         raise NotImplementedError()             # pragma: no cover
 
-    def reserveer(self, inschrijving, mandje_van_str: str) -> BestellingRegel:
+    def reserveer(self, product_pk, mandje_van_str: str) -> BestellingRegel:
         """
             Zet een reservering voor het gevraagde product, zodat deze na betaling gegarandeerd is.
             Voorbeeld: webwinkel product met beperkte voorraad
                        wedstrijd met beperkt aantal deelnemers
 
-            inschrijving kan van verschillende typen zijn: Evenement, Opleiding, Webwinkel, Wedstrijd
+            product_pk kan verwijzen naar: Evenement, Opleiding, WebwinkelKeuze, WedstrijdInschrijving
         """
         raise NotImplementedError()             # pragma: no cover
 
-    def aanpassen(self, inschrijving, door_account_str: str, **kwargs):
+    def aanpassen(self, product_pk, door_account_str: str, **kwargs):
         """
             Maak een aanpassing in een al gemaakte bestelling.
             Voorbeeld: sporter will van boogtype wisselen voor een wedstrijd
 
-            inschrijving kan van verschillende typen zijn: Evenement, Opleiding, Webwinkel, Wedstrijd
+            product_pk kan verwijzen naar: Evenement, Opleiding, WebwinkelKeuze, WedstrijdInschrijving
             kwargs is een dictionary met alle mutaties
         """
         raise NotImplementedError()             # pragma: no cover
@@ -64,9 +64,10 @@ class BestelPluginBase:
         """
         raise NotImplementedError(regel)        # pragma: no cover
 
-    def afmelden(self, obj):
+    def afmelden(self, product_pk):
         """
             Verwerk het verzoek tot afmelden voor een wedstrijd/evenement/opleiding.
+            product_pk kan verwijzen naar: Evenement, Opleiding, WedstrijdInschrijving
         """
         raise NotImplementedError()             # pragma: no cover
 

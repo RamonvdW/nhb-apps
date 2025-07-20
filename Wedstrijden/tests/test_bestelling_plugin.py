@@ -216,7 +216,7 @@ class TestWedstrijdenBestellingPlugin(E2EHelpers, TestCase):
                                 koper=self.account_100000)
         inschrijving.save()
 
-        regel = plugin.reserveer(inschrijving, 'Mandje test')
+        regel = plugin.reserveer(inschrijving.pk, 'Mandje test')
         self.assertEqual(regel.korte_beschrijving,
                          'Wedstrijd "Test wedstrijd"||deelname door [100000] Nor Maal||met boog Recurve')
 
@@ -251,7 +251,7 @@ class TestWedstrijdenBestellingPlugin(E2EHelpers, TestCase):
         self.sessie.aantal_inschrijvingen = 1
         self.sessie.save(update_fields=['aantal_inschrijvingen'])
 
-        plugin.afmelden(inschrijving)
+        plugin.afmelden(inschrijving.pk)
 
         inschrijving.refresh_from_db()
         self.assertEqual(inschrijving.status, WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD)
@@ -261,7 +261,7 @@ class TestWedstrijdenBestellingPlugin(E2EHelpers, TestCase):
         self.assertEqual(self.sessie.aantal_inschrijvingen, 0)
 
         # coverage: al afgemeld
-        plugin.afmelden(inschrijving)
+        plugin.afmelden(inschrijving.pk)
 
         self.sessie.refresh_from_db()
         self.assertEqual(self.sessie.aantal_inschrijvingen, 0)
@@ -501,7 +501,7 @@ class TestWedstrijdenBestellingPlugin(E2EHelpers, TestCase):
                                 koper=self.account_100000)
         inschrijving.save()
 
-        regel = plugin.reserveer(inschrijving, 'Mandje test')
+        regel = plugin.reserveer(inschrijving.pk, 'Mandje test')
         self.assertEqual(regel.korte_beschrijving,
                          'Wedstrijd "Test wedstrijd"||deelname door [100000] Nor Maal||met boog Recurve')
 
@@ -513,6 +513,7 @@ class TestWedstrijdenBestellingPlugin(E2EHelpers, TestCase):
         self.wedstrijd.save(update_fields=['eis_kwalificatie_scores'])
 
         wedstrijd = plugin.wil_kwalificatiescores(regel)
+        # controleer de extra velden die door de plugin toegevoegd zijn
         self.assertTrue(wedstrijd.datum_str != '')
         self.assertTrue(wedstrijd.plaats_str != '')
         self.assertTrue(wedstrijd.sporter_str != '')

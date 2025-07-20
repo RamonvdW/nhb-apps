@@ -194,7 +194,7 @@ class TestEvenementBestellingPlugin(E2EHelpers, TestCase):
                             koper=self.account_100000)
         inschrijving.save()
 
-        regel = plugin.reserveer(inschrijving, 'Mandje test')
+        regel = plugin.reserveer(inschrijving.pk, 'Mandje test')
         self.assertEqual(regel.korte_beschrijving, 'Evenement "Test evenement 1"||voor [100000] Nor Maal')
 
         inschrijving.refresh_from_db()
@@ -223,7 +223,7 @@ class TestEvenementBestellingPlugin(E2EHelpers, TestCase):
         inschrijving.save()
         inschrijving.refresh_from_db()
 
-        plugin.afmelden(inschrijving)
+        plugin.afmelden(inschrijving.pk)
 
         inschrijving.refresh_from_db()
         self.assertEqual(inschrijving.status, EVENEMENT_INSCHRIJVING_STATUS_AFGEMELD)

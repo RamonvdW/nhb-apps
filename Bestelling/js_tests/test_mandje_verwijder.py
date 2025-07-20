@@ -4,7 +4,7 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from Bestelling.models import BestellingMutatie
+from Bestelling.models import Bestelling
 from TestHelpers import browser_helper as bh
 from TestHelpers.mgmt_cmds_helper import MyMgmtCommandHelper
 import time
@@ -20,7 +20,7 @@ class TestBrowserBestellingMandjeVerwijder(MyMgmtCommandHelper, bh.BrowserTestCa
     def test_mandje_verwijder(self):
         self.do_wissel_naar_sporter()       # redirect naar /plein/
 
-        BestellingMutatie.objects.all().delete()
+        Bestelling.objects.all().delete()
 
         # leg een product in het mandje
         url = self.url_webwinkel_product % self.webwinkel_product.pk

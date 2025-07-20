@@ -57,10 +57,16 @@ class OpleidingBestelPlugin(BestelPluginBase):
 
         return mandje_pks
 
-    def reserveer(self, inschrijving: OpleidingInschrijving, mandje_van_str: str) -> BestellingRegel:
+    def reserveer(self, product_pk: int, mandje_van_str: str) -> BestellingRegel:
         """ Maak een reservering voor de opleiding
             en geef een BestellingRegel terug.
         """
+        inschrijving = (OpleidingInschrijving
+                        .objects
+                        .select_related('opleiding',
+                                        'sporter')
+                        .get(pk=product_pk))
+
         opleiding = inschrijving.opleiding
         sporter = inschrijving.sporter
 
@@ -91,10 +97,17 @@ class OpleidingBestelPlugin(BestelPluginBase):
 
         return regel
 
-    def afmelden(self, inschrijving: OpleidingInschrijving):
+    def afmelden(self, product_pk: int):
         """
             Verwerk het verzoek tot afmelden voor een opleiding.
         """
+        inschrijving = (OpleidingInschrijving
+                        .objects
+                        .select_related('opleiding',
+                                        'sporter',
+                                        'koper')
+                        .get(pk=product_pk))
+
         now = timezone.now()
         stamp_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
         msg = "[%s] Afgemeld voor deze opleiding\n" % stamp_str

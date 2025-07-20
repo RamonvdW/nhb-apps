@@ -56,7 +56,7 @@ def bestel_mutatieverzoek_inschrijven_wedstrijd(account: Account, inschrijving: 
     mutatie, is_created = BestellingMutatie.objects.get_or_create(
                                     code=BESTELLING_MUTATIE_WEDSTRIJD_INSCHRIJVEN,
                                     account=account,
-                                    wedstrijd_inschrijving=inschrijving,
+                                    product_pk=inschrijving.pk,
                                     is_verwerkt=False)
 
     if is_created:
@@ -73,7 +73,7 @@ def bestel_mutatieverzoek_inschrijven_evenement(account: Account, inschrijving: 
     mutatie, is_created = BestellingMutatie.objects.get_or_create(
                                     code=BESTELLING_MUTATIE_EVENEMENT_INSCHRIJVEN,
                                     account=account,
-                                    evenement_inschrijving=inschrijving,
+                                    product_pk=inschrijving.pk,
                                     is_verwerkt=False)
 
     if is_created:
@@ -90,7 +90,7 @@ def bestel_mutatieverzoek_inschrijven_opleiding(account: Account, inschrijving: 
     mutatie, is_created = BestellingMutatie.objects.get_or_create(
                                     code=BESTELLING_MUTATIE_OPLEIDING_INSCHRIJVEN,
                                     account=account,
-                                    opleiding_inschrijving=inschrijving,
+                                    product_pk=inschrijving.pk,
                                     is_verwerkt=False)
 
     if is_created:
@@ -107,7 +107,7 @@ def bestel_mutatieverzoek_webwinkel_keuze(account: Account, keuze: WebwinkelKeuz
     mutatie, is_created = BestellingMutatie.objects.get_or_create(
                                     code=BESTELLING_MUTATIE_WEBWINKEL_KEUZE,
                                     account=account,
-                                    webwinkel_keuze=keuze,
+                                    product_pk=keuze.pk,
                                     is_verwerkt=False)
 
     if is_created:
@@ -171,7 +171,7 @@ def bestel_mutatieverzoek_afmelden_wedstrijd(inschrijving: WedstrijdInschrijving
     # voorkom duplicates (niet 100%)
     mutatie, is_created = BestellingMutatie.objects.get_or_create(
                                     code=BESTELLING_MUTATIE_WEDSTRIJD_AFMELDEN,
-                                    wedstrijd_inschrijving=inschrijving,
+                                    product_pk=inschrijving.pk,
                                     is_verwerkt=False)
 
     if is_created:
@@ -190,7 +190,7 @@ def bestel_mutatieverzoek_afmelden_evenement(inschrijving: EvenementInschrijving
     # voorkom duplicates (niet 100%)
     mutatie, is_created = BestellingMutatie.objects.get_or_create(
                                     code=BESTELLING_MUTATIE_EVENEMENT_AFMELDEN,
-                                    evenement_inschrijving=inschrijving,
+                                    product_pk=inschrijving.pk,
                                     is_verwerkt=False)
 
     if is_created:
@@ -209,7 +209,7 @@ def bestel_mutatieverzoek_afmelden_opleiding(inschrijving: OpleidingInschrijving
     # voorkom duplicates (niet 100%)
     mutatie, is_created = BestellingMutatie.objects.get_or_create(
                                     code=BESTELLING_MUTATIE_OPLEIDING_AFMELDEN,
-                                    opleiding_inschrijving=inschrijving,
+                                    product_pk=inschrijving.pk,
                                     is_verwerkt=False)
 
     if is_created:
@@ -335,7 +335,7 @@ def bestel_mutatieverzoek_wedstrijdinschrijving_aanpassen(inschrijving: Wedstrij
     mutatie, is_created = BestellingMutatie.objects.get_or_create(
                                     code=BESTELLING_MUTATIE_WEDSTRIJD_AANPASSEN,
                                     account=door_account,
-                                    wedstrijd_inschrijving=inschrijving,
+                                    product_pk=inschrijving.pk,
                                     sporterboog=sporterboog,
                                     sessie=sessie,
                                     wedstrijdklasse=klasse,

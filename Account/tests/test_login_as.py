@@ -95,7 +95,7 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
         # deze test faalt als de datum verandert
         now = datetime.datetime.now()
         if now.hour == 23 and now.minute == 59 and now.second > 55:    # pragma: no cover
-            print('Waiting until clock is past 23:59:59')
+            print('Waiting until clock is past 23:59:59 .. ', end='')
             while now.second > 55:
                 time.sleep(1)
                 now = datetime.datetime.now()

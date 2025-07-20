@@ -53,17 +53,8 @@ class BestellingMutatie(models.Model):
     # mandje van dit account
     account = models.ForeignKey(Account, on_delete=models.SET_NULL, null=True, blank=True)
 
-    # de wedstrijd inschrijving
-    wedstrijd_inschrijving = models.ForeignKey(WedstrijdInschrijving, on_delete=models.SET_NULL, null=True, blank=True)
-
-    # inschrijving voor een evenement
-    evenement_inschrijving = models.ForeignKey(EvenementInschrijving, on_delete=models.SET_NULL, null=True, blank=True)
-
-    # inschrijving voor een opleiding
-    opleiding_inschrijving = models.ForeignKey(OpleidingInschrijving, on_delete=models.SET_NULL, null=True, blank=True)
-
-    # de webwinkel keuze
-    webwinkel_keuze = models.ForeignKey(WebwinkelKeuze, on_delete=models.SET_NULL, null=True, blank=True)
+    # anonieme verwijzing naar een product: evenement, opleiding, webwinkel keuze of wedstrijd
+    product_pk = models.PositiveBigIntegerField(default=0)
 
     # het product waar deze mutatie betrekking op heeft
     regel = models.ForeignKey(BestellingRegel, on_delete=models.SET_NULL, null=True, blank=True)

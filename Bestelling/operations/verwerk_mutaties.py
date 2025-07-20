@@ -31,14 +31,17 @@ from Betaal.definities import TRANSACTIE_TYPE_MOLLIE_RESTITUTIE, TRANSACTIE_TYPE
 from Betaal.format import format_bedrag_euro
 from Betaal.models import BetaalInstellingenVereniging, BetaalTransactie
 from Betaal.operations import maak_transactie_handmatige_overboeking
-from Evenement.definities import (EVENEMENT_INSCHRIJVING_STATUS_DEFINITIEF)
+from Evenement.definities import EVENEMENT_INSCHRIJVING_STATUS_DEFINITIEF
+from Evenement.models import EvenementInschrijving
 from Evenement.plugin_bestelling import evenement_bestel_plugin
 from Functie.models import Functie
-from Opleiding.definities import (OPLEIDING_INSCHRIJVING_STATUS_DEFINITIEF)
+from Opleiding.definities import OPLEIDING_INSCHRIJVING_STATUS_DEFINITIEF
+from Opleiding.models import OpleidingInschrijving
 from Opleiding.plugin_bestelling import opleiding_bestel_plugin
 from Vereniging.models import Vereniging
 from Webwinkel.plugin_bestelling import webwinkel_bestel_plugin, verzendkosten_bestel_plugin
-from Wedstrijden.definities import (WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF)
+from Wedstrijden.definities import WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF
+from Wedstrijden.models import WedstrijdInschrijving
 from Wedstrijden.operations.bepaal_kortingen import BepaalAutomatischeKorting
 from Wedstrijden.plugin_bestelling import wedstrijd_bestel_plugin
 from mollie.api.client import Client, RequestSetupError
@@ -290,15 +293,17 @@ class VerwerkBestelMutaties:
         """ Verwerk een mutatie via de achtergrondtaak voor inschrijving op een wedstrijd
             Voeg deze toe aan het mandje van de gebruiker
         """
-        self.stdout.write('[INFO] Verwerk mutatie %s: inschrijven op wedstrijd' % mutatie.pk)
+        self.stdout.write('[INFO] Verwerk mutatie %s: inschrijven op wedstrijd (product_pk=%s)' % (mutatie.pk,
+                                                                                                   mutatie.product_pk))
         mandje = self._get_mandje(mutatie)
         if mandje:  # pragma: no branch
-            inschrijving = mutatie.wedstrijd_inschrijving
+
+            inschrijving = WedstrijdInschrijving.objects.get(pk=mutatie.product_pk)
 
             # handmatige inschrijving heeft meteen status definitief en hoeft dus niet betaald te worden
             if inschrijving.status != WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF:
                 regel = wedstrijd_bestel_plugin.reserveer(
-                                                    inschrijving,
+                                                    mutatie.product_pk,
                                                     mandje.account.get_account_full_name())
                 mandje.regels.add(regel)
 
@@ -315,15 +320,16 @@ class VerwerkBestelMutaties:
         """ Verwerk een mutatie via de achtergrondtaak voor inschrijving op een evenement
             Voeg deze toe aan het mandje van de gebruiker
         """
-        self.stdout.write('[INFO] Verwerk mutatie %s: inschrijven op evenement' % mutatie.pk)
+        self.stdout.write('[INFO] Verwerk mutatie %s: inschrijven op evenement (product_pk=%s)' % (mutatie.pk,
+                                                                                                   mutatie.product_pk))
         mandje = self._get_mandje(mutatie)
         if mandje:  # pragma: no branch
-            inschrijving = mutatie.evenement_inschrijving
+            inschrijving = EvenementInschrijving.objects.get(pk=mutatie.product_pk)
 
             # handmatige inschrijving heeft meteen status definitief en hoeft dus niet betaald te worden
             if inschrijving.status != EVENEMENT_INSCHRIJVING_STATUS_DEFINITIEF:
                 regel = evenement_bestel_plugin.reserveer(
-                    mutatie.evenement_inschrijving,
+                    mutatie.product_pk,
                     mandje.account.get_account_full_name())
                 mandje.regels.add(regel)
 
@@ -340,17 +346,18 @@ class VerwerkBestelMutaties:
         """ Verwerk een mutatie via de achtergrondtaak voor inschrijving op een opleiding
             Voeg deze toe aan het mandje van de gebruiker
         """
-        self.stdout.write('[INFO] Verwerk mutatie %s: inschrijven op opleiding' % mutatie.pk)
+        self.stdout.write('[INFO] Verwerk mutatie %s: inschrijven op opleiding (product_pk=%s)' % (mutatie.pk,
+                                                                                                   mutatie.product_pk))
         mandje = self._get_mandje(mutatie)
         if mandje:  # pragma: no branch
 
-            inschrijving = mutatie.opleiding_inschrijving
+            inschrijving = OpleidingInschrijving.objects.get(pk=mutatie.product_pk)
 
             # handmatige inschrijving heeft meteen status definitief en hoeft dus niet betaald te worden
             if inschrijving.status != OPLEIDING_INSCHRIJVING_STATUS_DEFINITIEF:
                 regel = opleiding_bestel_plugin.reserveer(
-                    mutatie.opleiding_inschrijving,
-                    mandje.account.get_account_full_name())
+                            mutatie.product_pk,
+                            mandje.account.get_account_full_name())
                 mandje.regels.add(regel)
 
                 inschrijving.nummer = inschrijving.pk
@@ -366,12 +373,13 @@ class VerwerkBestelMutaties:
         """ Verwerk een mutatie via de achtergrondtaak voor selectie van een product uit de webwinkel
             Voeg deze toe aan het mandje van de gebruiker
         """
-        self.stdout.write('[INFO] Verwerk mutatie %s: webwinkel keuze' % mutatie.pk)
+        self.stdout.write('[INFO] Verwerk mutatie %s: webwinkel keuze (product_pk=%s)' % (mutatie.pk,
+                                                                                          mutatie.product_pk))
         mandje = self._get_mandje(mutatie)
         if mandje:  # pragma: no branch
 
             regel = webwinkel_bestel_plugin.reserveer(
-                        mutatie.webwinkel_keuze,
+                        mutatie.product_pk,
                         mandje.account.get_account_full_name())
             mandje.regels.add(regel)
 
@@ -574,15 +582,17 @@ class VerwerkBestelMutaties:
             product ligt niet meer in een mandje
             het kan een handmatige inschrijving zijn, zonder bestelling
         """
-        self.stdout.write('[INFO] Verwerk mutatie %s: afmelden voor wedstrijd' % mutatie.pk)
-        wedstrijd_bestel_plugin.afmelden(mutatie.wedstrijd_inschrijving)
+        self.stdout.write('[INFO] Verwerk mutatie %s: afmelden voor wedstrijd (product_pk=%s0' % (
+                        mutatie.pk, mutatie.product_pk))
+        wedstrijd_bestel_plugin.afmelden(mutatie.product_pk)
 
     def _verwerk_mutatie_wedstrijd_aanpassen(self, mutatie: BestellingMutatie):
         """ serialisatie van verzoek tot aanpassen voor een wedstrijd, ingediend door de HWL/MWZ
         """
-        self.stdout.write('[INFO] Verwerk mutatie %s: wedstrijdinschrijving aanpassen' % mutatie.pk)
+        self.stdout.write('[INFO] Verwerk mutatie %s: wedstrijdinschrijving aanpassen (product_pk=%s)' % (
+                        mutatie.pk, mutatie.product_pk))
         wedstrijd_bestel_plugin.aanpassen(
-                                    mutatie.wedstrijd_inschrijving,
+                                    mutatie.product_pk,
                                     mutatie.account.get_account_full_name(),
                                     sessie=mutatie.sessie,
                                     klasse=mutatie.wedstrijdklasse,
@@ -593,16 +603,18 @@ class VerwerkBestelMutaties:
             product ligt niet meer in een mandje
             het kan een handmatige inschrijving zijn, zonder bestelling
         """
-        self.stdout.write('[INFO] Verwerk mutatie %s: afmelden voor evenement' % mutatie.pk)
-        evenement_bestel_plugin.afmelden(mutatie.evenement_inschrijving)
+        self.stdout.write('[INFO] Verwerk mutatie %s: afmelden voor evenement (product_pk=%s)' % (mutatie.pk,
+                                                                                                  mutatie.product_pk))
+        evenement_bestel_plugin.afmelden(mutatie.product_pk)
 
     def _verwerk_mutatie_opleiding_afmelden(self, mutatie: BestellingMutatie):
         """ serialisatie van verzoek tot afmelden voor een wedstrijd, ingediend door de HWL
             product ligt niet meer in een mandje
             het kan een handmatige inschrijving zijn, zonder bestelling
         """
-        self.stdout.write('[INFO] Verwerk mutatie %s: afmelden voor opleiding' % mutatie.pk)
-        opleiding_bestel_plugin.afmelden(mutatie.opleiding_inschrijving)
+        self.stdout.write('[INFO] Verwerk mutatie %s: afmelden voor opleiding (product_pk=%s)' % (mutatie.pk,
+                                                                                                  mutatie.product_pk))
+        opleiding_bestel_plugin.afmelden(mutatie.product_pk)
 
     def _verwerk_mutatie_betaling_afgerond(self, mutatie: BestellingMutatie):
         self.stdout.write('[INFO] Verwerk mutatie %s: betaling afgerond' % mutatie.pk)
@@ -900,7 +912,7 @@ def _mandje_bepaal_btw(mandje):
         # het totaalbedrag is inclusief BTW, dus 100% + BTW% (was: 121%)
         # reken uit hoeveel daarvan de BTW is (voorbeeld: 21 / 121)
         btw_deel = Decimal(settings.WEBWINKEL_BTW_PERCENTAGE / (100 + settings.WEBWINKEL_BTW_PERCENTAGE))
-        btw = totaal_euro * btw_deel
+        btw = 1 #totaal_euro * btw_deel
         btw = round(btw, 2)             # afronden op 2 decimalen
         mandje.btw_euro_cat1 = btw
 

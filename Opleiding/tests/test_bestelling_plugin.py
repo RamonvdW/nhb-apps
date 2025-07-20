@@ -154,7 +154,7 @@ class TestOpleidingBestellingPlugin(E2EHelpers, TestCase):
                             koper=self.account_100000)
         inschrijving.save()
 
-        regel = plugin.reserveer(inschrijving, 'Mandje test')
+        regel = plugin.reserveer(inschrijving.pk, 'Mandje test')
         self.assertEqual(regel.korte_beschrijving, 'Opleiding "Test opleiding"||voor [100000] Nor Maal')
 
         inschrijving.refresh_from_db()
@@ -186,7 +186,7 @@ class TestOpleidingBestellingPlugin(E2EHelpers, TestCase):
         inschrijving.save(update_fields=['wanneer_aangemeld'])
         inschrijving.refresh_from_db()
 
-        plugin.afmelden(inschrijving)
+        plugin.afmelden(inschrijving.pk)
 
         inschrijving.refresh_from_db()
         self.assertEqual(inschrijving.status, OPLEIDING_INSCHRIJVING_STATUS_AFGEMELD)

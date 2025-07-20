@@ -7,7 +7,6 @@
 from django.conf import settings
 from django.urls import reverse
 from django.utils import timezone
-from Account.models import Account
 from BasisTypen.definities import ORGANISATIE_IFAA
 from Bestelling.definities import BESTELLING_REGEL_CODE_WEDSTRIJD, BESTELLING_KORT_BREAK
 from Bestelling.bestel_plugin_base import BestelPluginBase
@@ -20,7 +19,7 @@ from Wedstrijden.definities import (WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_MA
                                     WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF,
                                     WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD,
                                     WEDSTRIJD_INSCHRIJVING_STATUS_VERWIJDERD)
-from Wedstrijden.models import WedstrijdInschrijving, Wedstrijd, WedstrijdKorting, beschrijf_korting
+from Wedstrijden.models import WedstrijdInschrijving, Wedstrijd
 from decimal import Decimal
 import datetime
 
@@ -62,10 +61,17 @@ class WedstrijdBestelPlugin(BestelPluginBase):
 
         return mandje_pks
 
-    def reserveer(self, inschrijving: WedstrijdInschrijving, mandje_van_str: str) -> BestellingRegel:
+    def reserveer(self, product_pk: int, mandje_van_str: str) -> BestellingRegel:
         """ Maak een reservering voor de wedstrijd sessie (zodat iemand anders deze niet kan reserveren)
             en geef een BestellingRegel terug.
         """
+
+        inschrijving = (WedstrijdInschrijving
+                        .objects
+                        .select_related('sessie',
+                                        'wedstrijd',
+                                        'sporterboog__sporter')
+                        .get(pk=product_pk))
 
         # verhoog het aantal inschrijvingen op deze sessie
         # hiermee geven we een garantie op een plekje
@@ -101,10 +107,12 @@ class WedstrijdBestelPlugin(BestelPluginBase):
 
         return regel
 
-    def afmelden(self, inschrijving: WedstrijdInschrijving):
+    def afmelden(self, product_pk: int):
         """
             Verwerk het verzoek tot afmelden voor een wedstrijd.
         """
+        inschrijving = WedstrijdInschrijving.objects.select_related('sessie').get(pk=product_pk)
+
         if inschrijving.status not in (WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD,
                                        WEDSTRIJD_INSCHRIJVING_STATUS_VERWIJDERD):
             self.stdout.write('[INFO] WedstrijdInschrijving met pk=%s afmelden' % inschrijving.pk)
@@ -126,15 +134,23 @@ class WedstrijdBestelPlugin(BestelPluginBase):
 
             inschrijving.save(update_fields=['status', 'log'])
 
-    def aanpassen(self, inschrijving: WedstrijdInschrijving, door_account_str: str, **kwargs):
+    def aanpassen(self, product_pk: int, door_account_str: str, **kwargs):
         """
             Maak een aanpassing in een al gemaakte wedstrijdinschrijving.
             Voorbeeld: sporter will van boogtype wisselen voor een wedstrijd
             aanpassing wordt verwijderd de aanroep
         """
+
         sessie = kwargs['sessie']
         klasse = kwargs['klasse']
         sporterboog = kwargs['sporterboog']
+
+        inschrijving = (WedstrijdInschrijving
+                        .objects
+                        .select_related('sessie',
+                                        'sporterboog',
+                                        'wedstrijdklasse')
+                        .get(pk=product_pk))
 
         aanpassingen = list()
         if sessie != inschrijving.sessie:
@@ -176,7 +192,7 @@ class WedstrijdBestelPlugin(BestelPluginBase):
                 '[ERROR] Kan WedstrijdInschrijving voor regel met pk=%s niet vinden {annuleer}' % regel.pk)
             return
 
-        self.afmelden(inschrijving)
+        self.afmelden(inschrijving.pk)
 
         # # zet de inschrijving om in een afmelding
         # now = timezone.now()

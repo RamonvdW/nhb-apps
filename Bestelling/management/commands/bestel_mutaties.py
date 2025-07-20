@@ -81,10 +81,6 @@ class Command(BaseCommand):
             mutatie = (BestellingMutatie
                        .objects
                        .select_related('account',
-                                       'wedstrijd_inschrijving',
-                                       'evenement_inschrijving',
-                                       'opleiding_inschrijving',
-                                       'webwinkel_keuze',
                                        'bestelling',
                                        'regel')
                        .get(pk=pk))

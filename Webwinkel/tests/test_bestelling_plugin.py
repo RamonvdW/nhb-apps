@@ -155,7 +155,7 @@ class TestWebwinkelBestellingPlugin(E2EHelpers, TestCase):
                     aantal=1)
         keuze.save()
 
-        regel = plugin.reserveer(keuze, 'Mandje test')
+        regel = plugin.reserveer(keuze.pk, 'Mandje test')
         self.assertEqual(regel.korte_beschrijving, '1 x product')
         self.assertEqual(regel.btw_percentage, '21')
         self.assertEqual(round(regel.btw_euro, 2), round(Decimal(1.74), 2))
@@ -169,7 +169,7 @@ class TestWebwinkelBestellingPlugin(E2EHelpers, TestCase):
         self.product.onbeperkte_voorraad = True
         self.product.save(update_fields=['onbeperkte_voorraad'])
         with override_settings(WEBWINKEL_BTW_PERCENTAGE=21.1):
-            regel = plugin.reserveer(keuze, 'Mandje test')
+            regel = plugin.reserveer(keuze.pk, 'Mandje test')
 
     def test_annuleer(self):
         stdout = OutputWrapper(io.StringIO())

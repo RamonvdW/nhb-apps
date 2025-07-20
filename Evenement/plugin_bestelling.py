@@ -59,10 +59,16 @@ class EvenementBestelPlugin(BestelPluginBase):
 
         return mandje_pks
 
-    def reserveer(self, inschrijving: EvenementInschrijving, mandje_van_str: str) -> BestellingRegel:
+    def reserveer(self, product_pk: int, mandje_van_str: str) -> BestellingRegel:
         """ Maak een reservering voor het evenement (zodat iemand anders deze niet kan reserveren)
             en geef een BestellingRegel terug.
         """
+        inschrijving = (EvenementInschrijving
+                        .objects
+                        .select_related('evenement',
+                                        'sporter')
+                        .get(pk=product_pk))
+
         evenement = inschrijving.evenement
         sporter = inschrijving.sporter
 
@@ -91,13 +97,20 @@ class EvenementBestelPlugin(BestelPluginBase):
 
         return regel
 
-    def afmelden(self, inschrijving: EvenementInschrijving):
+    def afmelden(self, product_pk: int):
         """
             Verwerk het verzoek tot afmelden voor een evenement.
         """
         now = timezone.now()
         stamp_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
         msg = "[%s] Afgemeld voor dit evenement\n" % stamp_str
+
+        inschrijving = (EvenementInschrijving
+                        .objects
+                        .select_related('evenement',
+                                        'sporter',
+                                        'koper')
+                        .get(pk=product_pk))
 
         # (nog) geen aantallen om bij te werken
 
