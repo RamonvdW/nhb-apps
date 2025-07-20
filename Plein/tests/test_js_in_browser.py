@@ -30,7 +30,7 @@ class AddFocus(type):
             add = False
             js_tests_path = os.path.join(app.name, 'js_tests')
             if os.path.exists(js_tests_path):
-                for d in os.listdir(js_tests_path):
+                for d in os.listdir(js_tests_path):                     # pragma: no branch
                     if d.startswith('test_') and d.endswith('.py'):
                         add = True
                         break
@@ -108,13 +108,13 @@ class TestBrowser(LiveServerTestCase, metaclass=AddFocus):
                     for inst_name in dir(inst):
                         if inst_name.startswith('test_'):
                             test_func = getattr(inst, inst_name)
-                            if callable(test_func):
+                            if callable(test_func):                 # pragma: no branch
                                 self._test_count += 1
                                 print('  %s.%s.%s ... ' % (test_module, name, inst_name), end='')
                                 test_func()
                                 inst.fetch_js_cov()                 # collect captured coverage
                                 inst.set_normal_xhr_timeouts()      # for the next test
-                                if self.show_browser and self.pause_after_each_test:
+                                if self.show_browser and self.pause_after_each_test:        # pragma: no cover
                                     print('sleeping %s ... ' % self.pause_after_test_seconds, end='')
                                     time.sleep(self.pause_after_test_seconds)
                                 print('ok')
@@ -127,8 +127,8 @@ class TestBrowser(LiveServerTestCase, metaclass=AddFocus):
     def _run_tests(self, app_filter=None):
         test_modules = list()
         for app in apps.get_app_configs():
-            if app_filter and app_filter not in app.name:
-                continue
+            if app_filter and app_filter not in app.name:       # pragma: no branch
+                continue                                        # pragma: no cover
             js_tests_path = os.path.join(app.name, 'js_tests')
             if os.path.exists(js_tests_path):
                 for d in os.listdir(js_tests_path):
@@ -137,7 +137,7 @@ class TestBrowser(LiveServerTestCase, metaclass=AddFocus):
                 # for
         # for
         test_modules.sort()     # consistent execution order
-        if len(test_modules) == 0:
+        if len(test_modules) == 0:                              # pragma: no cover
             self.fail('No tests found with focus %s' % repr(app_filter))
 
         do_fail = False

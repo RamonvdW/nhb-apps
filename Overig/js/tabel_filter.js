@@ -5,6 +5,7 @@
  */
 
 /* jshint esversion: 6 */
+/* global console */
 "use strict";
 
 // ### tabel filter ###
@@ -126,17 +127,18 @@ function bepaal_row_show(filter_tekst, row_nr, row, kolommen) {
     kolommen.forEach(kolom_nr => {
         const cell = row.cells[kolom_nr];
         if (cell === undefined) {
-            window.console.log('missing cell in kolom_nr=', kolom_nr, "in row", row_nr, "of row", row);
-        }
-        let clean_text = cell.dataset.clean_text;    // cached resultaat ophalen
-        //window.console.log("clean_text:", clean_text);
-        if (typeof clean_text === "undefined") {
-            // eerste keer: voer de omvorming uit en cache het resultaat op
-            clean_text = cell.innerText.normalize("NFD").replace(filter_re, "").toLowerCase();
-            cell.dataset.clean_text = clean_text;
-        }
-        if (clean_text.indexOf(filter_tekst) >= 0) {
-            show = true;
+            console.log('missing cell in kolom_nr=', kolom_nr, "in row", row_nr, "of row", row);
+        } else {
+            let clean_text = cell.dataset.clean_text;    // cached resultaat ophalen
+            //window.console.log("clean_text:", clean_text);
+            if (typeof clean_text === "undefined") {
+                // eerste keer: voer de omvorming uit en cache het resultaat op
+                clean_text = cell.innerText.normalize("NFD").replace(filter_re, "").toLowerCase();
+                cell.dataset.clean_text = clean_text;
+            }
+            if (clean_text.indexOf(filter_tekst) >= 0) {
+                show = true;
+            }
         }
     });
 
