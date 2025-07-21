@@ -21,7 +21,7 @@ def _verwijder_oude_bestellingen(stdout, max_age):
         objs.delete()
 
 
-def _verwijder_lege_mandjes(stdout, max_age):
+def _verwijder_lege_mandjes(stdout):
     objs = (BestellingMandje
             .objects
             .annotate(num_producten=Count("regels"))
@@ -68,12 +68,13 @@ def bestel_opschonen(stdout):
 
     # na 2 jaar verwijderen
     now = timezone.now()
-    max_age = now - timedelta(days=2*365)
+    max_age3 = now - timedelta(days=3*365)
+    max_age2 = now - timedelta(days=2*365)
 
-    _verwijder_oude_bestellingen(stdout, max_age)
-    _verwijder_lege_mandjes(stdout, max_age)
-    _verwijder_oude_mutaties(stdout, max_age)
-    #_verwijder_orphan_regels(stdout)       # TODO: enable
+    _verwijder_oude_bestellingen(stdout, max_age3)
+    _verwijder_lege_mandjes(stdout)
+    _verwijder_oude_mutaties(stdout, max_age2)
+    # _verwijder_orphan_regels(stdout)       # TODO: enable
 
 
 # end of file
