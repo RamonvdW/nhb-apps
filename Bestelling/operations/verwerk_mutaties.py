@@ -31,22 +31,18 @@ from Betaal.definities import TRANSACTIE_TYPE_MOLLIE_RESTITUTIE, TRANSACTIE_TYPE
 from Betaal.format import format_bedrag_euro
 from Betaal.models import BetaalInstellingenVereniging, BetaalTransactie
 from Betaal.operations import maak_transactie_handmatige_overboeking
-from Evenement.definities import EVENEMENT_INSCHRIJVING_STATUS_DEFINITIEF
-from Evenement.models import EvenementInschrijving
-from Evenement.plugin_bestelling import evenement_bestel_plugin
 from Functie.models import Functie
-from Opleiding.definities import OPLEIDING_INSCHRIJVING_STATUS_DEFINITIEF
-from Opleiding.models import OpleidingInschrijving
-from Opleiding.plugin_bestelling import opleiding_bestel_plugin
 from Vereniging.models import Vereniging
-from Webwinkel.plugin_bestelling import webwinkel_bestel_plugin, verzendkosten_bestel_plugin
-from Wedstrijden.definities import WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF
-from Wedstrijden.models import WedstrijdInschrijving
-from Wedstrijden.operations.bepaal_kortingen import BepaalAutomatischeKorting
-from Wedstrijden.plugin_bestelling import wedstrijd_bestel_plugin
 from mollie.api.client import Client, RequestSetupError
 from decimal import Decimal
 import datetime
+
+# plugins
+from Evenement.plugin_bestelling import evenement_bestel_plugin
+from Opleiding.plugin_bestelling import opleiding_bestel_plugin
+from Webwinkel.plugin_bestelling import webwinkel_bestel_plugin, verzendkosten_bestel_plugin
+from Wedstrijden.plugin_bestelling import wedstrijd_bestel_plugin
+from Wedstrijden.operations.bepaal_kortingen import BepaalAutomatischeKorting
 
 
 def _bestel_get_volgende_bestel_nr():
@@ -297,14 +293,10 @@ class VerwerkBestelMutaties:
                                                                                                    mutatie.product_pk))
         mandje = self._get_mandje(mutatie)
         if mandje:  # pragma: no branch
-
-            inschrijving = WedstrijdInschrijving.objects.get(pk=mutatie.product_pk)
-
-            # handmatige inschrijving heeft meteen status definitief en hoeft dus niet betaald te worden
-            if inschrijving.status != WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF:
-                regel = wedstrijd_bestel_plugin.reserveer(
-                                                    mutatie.product_pk,
-                                                    mandje.account.get_account_full_name())
+            regel = wedstrijd_bestel_plugin.reserveer(
+                                                mutatie.product_pk,
+                                                mandje.account.get_account_full_name())
+            if regel:
                 mandje.regels.add(regel)
 
                 # kijk of er automatische kortingen zijn die toegepast kunnen worden
@@ -324,17 +316,11 @@ class VerwerkBestelMutaties:
                                                                                                    mutatie.product_pk))
         mandje = self._get_mandje(mutatie)
         if mandje:  # pragma: no branch
-            inschrijving = EvenementInschrijving.objects.get(pk=mutatie.product_pk)
-
-            # handmatige inschrijving heeft meteen status definitief en hoeft dus niet betaald te worden
-            if inschrijving.status != EVENEMENT_INSCHRIJVING_STATUS_DEFINITIEF:
-                regel = evenement_bestel_plugin.reserveer(
-                    mutatie.product_pk,
-                    mandje.account.get_account_full_name())
+            regel = evenement_bestel_plugin.reserveer(
+                                                mutatie.product_pk,
+                                                mandje.account.get_account_full_name())
+            if regel:
                 mandje.regels.add(regel)
-
-                inschrijving.nummer = inschrijving.pk
-                inschrijving.save(update_fields=['nummer'])
 
                 # bereken het totaal opnieuw
                 _mandje_bepaal_btw(mandje)
@@ -350,18 +336,11 @@ class VerwerkBestelMutaties:
                                                                                                    mutatie.product_pk))
         mandje = self._get_mandje(mutatie)
         if mandje:  # pragma: no branch
-
-            inschrijving = OpleidingInschrijving.objects.get(pk=mutatie.product_pk)
-
-            # handmatige inschrijving heeft meteen status definitief en hoeft dus niet betaald te worden
-            if inschrijving.status != OPLEIDING_INSCHRIJVING_STATUS_DEFINITIEF:
-                regel = opleiding_bestel_plugin.reserveer(
-                            mutatie.product_pk,
-                            mandje.account.get_account_full_name())
+            regel = opleiding_bestel_plugin.reserveer(
+                        mutatie.product_pk,
+                        mandje.account.get_account_full_name())
+            if regel:
                 mandje.regels.add(regel)
-
-                inschrijving.nummer = inschrijving.pk
-                inschrijving.save(update_fields=['nummer'])
 
                 # bereken het totaal opnieuw
                 _mandje_bepaal_btw(mandje)
@@ -377,24 +356,24 @@ class VerwerkBestelMutaties:
                                                                                           mutatie.product_pk))
         mandje = self._get_mandje(mutatie)
         if mandje:  # pragma: no branch
-
             regel = webwinkel_bestel_plugin.reserveer(
-                        mutatie.product_pk,
-                        mandje.account.get_account_full_name())
-            mandje.regels.add(regel)
+                                                mutatie.product_pk,
+                                                mandje.account.get_account_full_name())
+            if regel:
+                mandje.regels.add(regel)
 
-            transport_oud = mandje.transport
+                transport_oud = mandje.transport
 
-            # bereken het totaal opnieuw
-            self._bepaal_verzendkosten_mandje(mandje)
-            _mandje_bepaal_btw(mandje)
-            mandje.bepaal_totaalprijs_opnieuw()
+                # bereken het totaal opnieuw
+                self._bepaal_verzendkosten_mandje(mandje)
+                _mandje_bepaal_btw(mandje)
+                mandje.bepaal_totaalprijs_opnieuw()
 
-            transport_nieuw = mandje.transport
+                transport_nieuw = mandje.transport
 
-            if transport_oud != transport_nieuw:
-                self.stdout.write('[INFO] Transport: %s --> %s' % (BESTELLING_TRANSPORT2STR[transport_oud],
-                                                                   BESTELLING_TRANSPORT2STR[transport_nieuw]))
+                if transport_oud != transport_nieuw:
+                    self.stdout.write('[INFO] Transport: %s --> %s' % (BESTELLING_TRANSPORT2STR[transport_oud],
+                                                                       BESTELLING_TRANSPORT2STR[transport_nieuw]))
         else:
             self.stdout.write('[WARNING] Kan mandje niet vinden voor mutatie pk=%s' % mutatie.pk)
 
@@ -850,19 +829,19 @@ class VerwerkBestelMutaties:
         #     verwerk_mutatie_restitutie_uitbetaald(stdout, mutatie)
 
 
-def _btw_optellen(regels: list[BestellingRegel]) -> dict:
-    perc2btw = dict()       # [percentage] = Decimal()
-
-    for regel in regels:
-        if regel.btw_percentage:
-            # is gezet
-            try:
-                perc2btw[regel.btw_percentage] += regel.btw_euro
-            except KeyError:
-                perc2btw[regel.btw_percentage] = regel.btw_euro
-    # for
-
-    return perc2btw
+# def _btw_optellen(regels: list[BestellingRegel]) -> dict:
+#     perc2btw = dict()       # [percentage] = Decimal()
+#
+#     for regel in regels:
+#         if regel.btw_percentage:
+#             # is gezet
+#             try:
+#                 perc2btw[regel.btw_percentage] += regel.btw_euro
+#             except KeyError:
+#                 perc2btw[regel.btw_percentage] = regel.btw_euro
+#     # for
+#
+#     return perc2btw
 
 
 def bereken_som_betalingen(bestelling: Bestelling) -> Decimal:
@@ -912,7 +891,7 @@ def _mandje_bepaal_btw(mandje):
         # het totaalbedrag is inclusief BTW, dus 100% + BTW% (was: 121%)
         # reken uit hoeveel daarvan de BTW is (voorbeeld: 21 / 121)
         btw_deel = Decimal(settings.WEBWINKEL_BTW_PERCENTAGE / (100 + settings.WEBWINKEL_BTW_PERCENTAGE))
-        btw = 1 #totaal_euro * btw_deel
+        btw = totaal_euro * btw_deel
         btw = round(btw, 2)             # afronden op 2 decimalen
         mandje.btw_euro_cat1 = btw
 

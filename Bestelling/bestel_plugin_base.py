@@ -23,7 +23,7 @@ class BestelPluginBase:
     def mandje_opschonen(self, verval_datum):
         raise NotImplementedError()             # pragma: no cover
 
-    def reserveer(self, product_pk, mandje_van_str: str) -> BestellingRegel:
+    def reserveer(self, product_pk, mandje_van_str: str) -> BestellingRegel | None:
         """
             Zet een reservering voor het gevraagde product, zodat deze na betaling gegarandeerd is.
             Voorbeeld: webwinkel product met beperkte voorraad

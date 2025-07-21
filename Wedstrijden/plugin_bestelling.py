@@ -61,17 +61,26 @@ class WedstrijdBestelPlugin(BestelPluginBase):
 
         return mandje_pks
 
-    def reserveer(self, product_pk: int, mandje_van_str: str) -> BestellingRegel:
+    def reserveer(self, product_pk: int, mandje_van_str: str) -> BestellingRegel | None:
         """ Maak een reservering voor de wedstrijd sessie (zodat iemand anders deze niet kan reserveren)
             en geef een BestellingRegel terug.
         """
-
         inschrijving = (WedstrijdInschrijving
                         .objects
                         .select_related('sessie',
                                         'wedstrijd',
                                         'sporterboog__sporter')
-                        .get(pk=product_pk))
+                        .filter(pk=product_pk)
+                        .first())
+
+        if not inschrijving:
+            self.stdout.write('[WARNING] {wedstrijden bestel plugin}.reserveer: ' +
+                              'kan WedstrijdInschrijving met pk=%s niet vinden' % product_pk)
+            return None
+
+        # handmatige inschrijving heeft meteen status definitief en hoeft dus niet betaald te worden
+        if inschrijving.status == WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF:
+            return None
 
         # verhoog het aantal inschrijvingen op deze sessie
         # hiermee geven we een garantie op een plekje

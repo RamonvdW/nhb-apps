@@ -59,7 +59,7 @@ class EvenementBestelPlugin(BestelPluginBase):
 
         return mandje_pks
 
-    def reserveer(self, product_pk: int, mandje_van_str: str) -> BestellingRegel:
+    def reserveer(self, product_pk: int, mandje_van_str: str) -> BestellingRegel | None:
         """ Maak een reservering voor het evenement (zodat iemand anders deze niet kan reserveren)
             en geef een BestellingRegel terug.
         """
@@ -67,7 +67,17 @@ class EvenementBestelPlugin(BestelPluginBase):
                         .objects
                         .select_related('evenement',
                                         'sporter')
-                        .get(pk=product_pk))
+                        .filter(pk=product_pk)
+                        .first())
+
+        if not inschrijving:
+            self.stdout.write('[WARNING] {evenement bestel plugin}.reserveer: ' +
+                              'kan EvenementInschrijving met pk=%s niet vinden' % product_pk)
+            return None
+
+        # handmatige inschrijving heeft meteen status definitief en hoeft dus niet betaald te worden
+        if inschrijving.status == EVENEMENT_INSCHRIJVING_STATUS_DEFINITIEF:
+            return None
 
         evenement = inschrijving.evenement
         sporter = inschrijving.sporter
@@ -88,12 +98,13 @@ class EvenementBestelPlugin(BestelPluginBase):
         inschrijving.bestelling = regel
 
         inschrijving.status = EVENEMENT_INSCHRIJVING_STATUS_RESERVERING_MANDJE
+        inschrijving.nummer = inschrijving.pk
 
         stamp_str = timezone.localtime(timezone.now()).strftime('%Y-%m-%d om %H:%M')
         msg = "[%s] Toegevoegd aan het mandje van %s\n" % (stamp_str, mandje_van_str)
         inschrijving.log += msg
 
-        inschrijving.save(update_fields=['bestelling', 'status', 'log'])
+        inschrijving.save(update_fields=['bestelling', 'status', 'log', 'nummer'])
 
         return regel
 

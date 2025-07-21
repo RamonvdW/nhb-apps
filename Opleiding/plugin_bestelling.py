@@ -57,7 +57,7 @@ class OpleidingBestelPlugin(BestelPluginBase):
 
         return mandje_pks
 
-    def reserveer(self, product_pk: int, mandje_van_str: str) -> BestellingRegel:
+    def reserveer(self, product_pk: int, mandje_van_str: str) -> BestellingRegel | None:
         """ Maak een reservering voor de opleiding
             en geef een BestellingRegel terug.
         """
@@ -65,7 +65,17 @@ class OpleidingBestelPlugin(BestelPluginBase):
                         .objects
                         .select_related('opleiding',
                                         'sporter')
-                        .get(pk=product_pk))
+                        .filter(pk=product_pk)
+                        .first())
+
+        if not inschrijving:
+            self.stdout.write('[WARNING] {opleiding bestel plugin}.reserveer: ' +
+                              'kan OpleidingInschrijving met pk=%s niet vinden' % product_pk)
+            return None
+
+        # handmatige inschrijving heeft meteen status definitief en hoeft dus niet betaald te worden
+        if inschrijving.status == OPLEIDING_INSCHRIJVING_STATUS_DEFINITIEF:
+            return None
 
         opleiding = inschrijving.opleiding
         sporter = inschrijving.sporter
@@ -84,12 +94,13 @@ class OpleidingBestelPlugin(BestelPluginBase):
 
         inschrijving.bestelling = regel
         inschrijving.status = OPLEIDING_INSCHRIJVING_STATUS_RESERVERING_MANDJE
+        inschrijving.nummer = inschrijving.pk
 
         stamp_str = timezone.localtime(timezone.now()).strftime('%Y-%m-%d om %H:%M')
         msg = "[%s] Toegevoegd aan het mandje van %s\n" % (stamp_str, mandje_van_str)
         inschrijving.log += msg
 
-        inschrijving.save(update_fields=['bestelling', 'log', 'status'])
+        inschrijving.save(update_fields=['bestelling', 'log', 'status', 'nummer'])
 
         self.stdout.write('[DEBUG] Opleiding inschrijving pk=%s heeft status %s (%s)' % (
                           inschrijving.pk, inschrijving.status,
