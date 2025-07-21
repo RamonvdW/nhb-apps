@@ -12,14 +12,12 @@ from django.views.generic import TemplateView
 from django.urls import reverse
 from Account.models import get_account
 from Bestelling.definities import (BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_BETALING_ACTIEF,
-                                   BESTELLING_STATUS_MISLUKT, BESTELLING_STATUS2STR,
+                                   BESTELLING_STATUS_MISLUKT, BESTELLING_STATUS2STR, BESTELLING_REGEL_CODE2STR,
                                    BESTELLING_KORT_BREAK,
-                                   BESTELLING_REGEL_CODE_WEBWINKEL,
-                                   BESTELLING_REGEL_CODE_WEDSTRIJD,
-                                   BESTELLING_REGEL_CODE_OPLEIDING,
-                                   BESTELLING_REGEL_CODE_EVENEMENT)
+                                   BESTELLING_REGEL_CODE_WEBWINKEL, BESTELLING_REGEL_CODE_WEDSTRIJD,
+                                   BESTELLING_REGEL_CODE_OPLEIDING, BESTELLING_REGEL_CODE_EVENEMENT)
 from Bestelling.forms import ZoekBestellingForm
-from Bestelling.models import Bestelling, BestellingRegel
+from Bestelling.models import Bestelling
 from Betaal.definities import TRANSACTIE_TYPE_MOLLIE_PAYMENT
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige
@@ -297,13 +295,14 @@ class BestelOmzetView(UserPassesTestMixin, TemplateView):
         if len(self.exclude_ver_nr):
             bestellingen = bestellingen.exclude(ontvanger__vereniging__in=self.exclude_ver_nr)
 
-        aantal = dict()         # [(jaar, maand)] = integer     (aantal verkopen)
-        omzet = dict()          # [(jaar, maand)] = Decimal
-        vers = dict()           # [(jaar, maand)] = [ver_nr, ..]
+        aantal = dict()         # [jaar] = integer     (aantal verkopen)
+        omzet = dict()          # [jaar] = Decimal
+        vers = dict()           # [jaar] = [ver_nr, ..]
         jaar_aantal = dict()    # [jaar] = integer (aantal verkopen)
         jaar_omzet = dict()     # [jaar] = Decimal
         jaar_vers = dict()      # [jaar] = [ver_nr, ..]
         jaar_code = dict()      # [(jaar, code)] = integer
+        jaar_maanden = dict()   # [jaar] = [maand nr, ..]
 
         for bestelling in bestellingen:
             tup = (bestelling.aangemaakt.year, bestelling.aangemaakt.month)
@@ -338,17 +337,26 @@ class BestelOmzetView(UserPassesTestMixin, TemplateView):
                     except KeyError:
                         jaar_code[tup] = 1
                 # for
+
+                maand = bestelling.aangemaakt.month
+                try:
+                    if maand not in jaar_maanden[jaar]:
+                        jaar_maanden[jaar].append(maand)
+                except KeyError:
+                    jaar_maanden[jaar] = [maand]
         # for
 
         lijst = [(datetime.date(tup[0], tup[1], 1), aantal[tup], omzet[tup], len(vers[tup])) for tup in aantal.keys()]
         lijst.sort(reverse=True)        # nieuwste bovenaan
         context['lijst'] = lijst
 
-        context['codes'] = codes = list(set([code for _, code in jaar_code.keys()]))
+        codes = list(set([code for _, code in jaar_code.keys()]))
         codes.sort()
+        context['codes'] = [BESTELLING_REGEL_CODE2STR[code]
+                            for code in codes]
 
+        per_jaar = list()
         jaren = set(list(jaar_aantal.keys()) + list(jaar_omzet.keys()))
-        context['per_jaar'] = per_jaar = list()
         for jaar in jaren:
             aantallen = list()
             for code in codes:
@@ -358,10 +366,11 @@ class BestelOmzetView(UserPassesTestMixin, TemplateView):
                     code_aantal = '-'
                 aantallen.append(code_aantal)
             # for
-            tup = (jaar, jaar_aantal[jaar], jaar_omzet[jaar], len(jaar_vers[jaar]), aantallen)
+            tup = (jaar, len(jaar_maanden[jaar]), jaar_aantal[jaar], jaar_omzet[jaar], len(jaar_vers[jaar]), aantallen)
             per_jaar.append(tup)
         # for
         per_jaar.sort(reverse=True)        # nieuwste bovenaan
+        context['per_jaar'] = per_jaar
 
         context['totaal_aantal'] = sum(aantal.values())
         context['totaal_omzet'] = sum(omzet.values())

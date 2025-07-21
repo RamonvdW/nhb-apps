@@ -88,6 +88,15 @@ BESTELLING_REGEL_CODE_WEDSTRIJD         = "wedstrijd"
 BESTELLING_REGEL_CODE_WEBWINKEL         = "Y_webwinkel"        # Y = sorteervolgorde
 BESTELLING_REGEL_CODE_VERZENDKOSTEN     = "Z_verzendkosten"    # Z = sorteervolgorde
 
+# voor tonen op bijvoorbeeld de Omzet pagina
+BESTELLING_REGEL_CODE2STR = {
+    BESTELLING_REGEL_CODE_WEDSTRIJD_KORTING: "Korting",
+    BESTELLING_REGEL_CODE_EVENEMENT: "Evenement",
+    BESTELLING_REGEL_CODE_OPLEIDING: "Opleiding",
+    BESTELLING_REGEL_CODE_WEDSTRIJD: "Wedstrijd",
+    BESTELLING_REGEL_CODE_WEBWINKEL: "Webwinkel",
+    BESTELLING_REGEL_CODE_VERZENDKOSTEN: "Verzendkosten",
+}
 
 # speciale tekens die BestellingRegel.korte_beschrijving opsplitsen in aparte regels
 BESTELLING_KORT_BREAK = '||'

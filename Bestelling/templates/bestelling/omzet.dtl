@@ -31,19 +31,21 @@
                 <table class="sv-kader">
                     <thead>
                         <tr>
-                            <th class="right-align">Jaar</th>
+                            <th class="center-align">Jaar</th>
+                            <th class="center-align">Maanden</th>
                             <th class="right-align">Omzet</th>
                             <th class="center">Verkopers</th>
                             <th class="center">Verkopen</th>
                             {% for code in codes %}
-                                <th class="center">{{ code|capfirst }}</th>
+                                <th class="center">{{ code }}</th>
                             {% endfor %}
                         </tr>
                     </thead>
 
-                    {% for jaar, aantal, omzet, aantal_vers, aantallen in per_jaar %}
+                    {% for jaar, maanden, aantal, omzet, aantal_vers, aantallen in per_jaar %}
                         <tr>
-                            <td class="right-align">{{ jaar }}</td>
+                            <td class="center-align">{{ jaar }}</td>
+                            <td class="center-align">{{ maanden }}</td>
                             <td class="right-align">&euro;&nbsp;{{ omzet }}</td>
                             <td class="center">{{ aantal_vers }}</td>
                             <td class="center">{{ aantal }}</td>
