@@ -16,7 +16,7 @@
 
 # the secret below ensures an adversary cannot fake aspects like a session-id
 # just make sure it is unique per installation and keep it private
-# details: https://docs.djangoproject.com/en/4.2/ref/settings/#secret-key
+# details: https://docs.djangoproject.com/en/5.2/ref/settings/#secret-key
 SECRET_KEY = '1234-replace-with-your-own-secret-key-56789abcdefg'       # noqa
 
 # SITE_URL wordt gebruikt door TijdelijkeCodes, maar ook voor alle urls in e-mails
@@ -31,7 +31,7 @@ ALLOWED_HOSTS = [
 IS_TEST_SERVER = True
 
 # Database
-# https://docs.djangoproject.com/en/4.2/ref/settings/#databases
+# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -101,7 +101,7 @@ PRIVACYVERKLARING_URL = 'url to privacy statement html, pdf or googledoc, etc'
 VOORWAARDEN_A_STATUS_URL = 'https://docs.google.com/document/d/random google document number/view'
 
 # url van de documenten met de verkoopvoorwaarden
-VERKOOPVOORWAARDEN_WEBWINKEL_URL = 'https://docs.google.com/document/d/yet another random google document number/pub'
+VERKOOPVOORWAARDEN_WEBWINKEL_URL   = 'https://docs.google.com/document/d/yet another random google document number/pub'
 VERKOOPVOORWAARDEN_WEDSTRIJDEN_URL = 'https://docs.google.com/document/d/another random google document number/pub'
 VERKOOPVOORWAARDEN_OPLEIDINGEN_URL = 'https://docs.google.com/document/d/yet another random google document number/pub'
 
@@ -149,7 +149,7 @@ MANDJE_VERVAL_NA_DAGEN = 3
 URL_VCP_CONTACTGEGEVENS = 'https://yourfrontend/contactgegevens-vcp/'   # noqa
 
 # pagina met instructies en aanvraagformulier prestatiespelden
-URL_SPELDEN_PROCEDURES = 'https://www.handboogsport.nl/de-khsn/#procedures'     # noqa
+URL_PROCEDURES = 'https://your.site/relevant/url/'     # noqa
 
 # online aanvraagformulier voor nieuwe records
 URL_RECORD_AANVRAAGFORMULIER = 'https://docs.google.com/spreadsheets/1234_your_doc_7890'   # noqa
