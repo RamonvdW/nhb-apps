@@ -164,7 +164,7 @@
                     <a class="btn-sv-rood" href="{{ url_record_formulier }}" target="_blank" rel="noopener noreferrer">
                         <i class="notranslate material-icons-round left">open_in_new</i>Openen</a></p>
                 <p>Mocht deze niet werken, kijk dan <code>www.handboogsport.nl</code> onder Procedures:
-                    <a class="btn-sv-rood" href="{{ url_spelden_procedures }}" target="_blank" rel="noopener noreferrer">
+                    <a class="btn-sv-rood" href="{{ url_procedures }}" target="_blank" rel="noopener noreferrer">
                         <i class="notranslate material-icons-round left">open_in_new</i>Link</a></p>
 
             </div>
