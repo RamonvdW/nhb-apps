@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2023 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -149,8 +149,6 @@ def _zet_competitie_team_fase(comp, team_fase):
         if team_fase == 'J':
             comp.klassengrenzen_vastgesteld_rk_bk = False
             return
-
-        # comp.klassengrenzen_vastgesteld_rk_bk = True
 
         if team_fase == 'K':
             comp.begin_fase_L_teams = morgen

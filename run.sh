@@ -13,7 +13,7 @@ export PYTHONDONTWRITEBYTECODE=1
 export DJANGO_RUNSERVER_HIDE_WARNING=true
 
 # check the port is free
-ss -l | grep -q 8000
+ss -l | grep -q :8000
 RES=$?
 if [ $RES -eq 0 ]
 then
