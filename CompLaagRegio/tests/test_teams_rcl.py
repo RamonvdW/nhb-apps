@@ -559,7 +559,7 @@ class TestCompLaagRegioTeamsRCL(E2EHelpers, TestCase):
         self.client.post(url, {'snel': 1})
         self.client.post(url, {'snel': 1})
 
-        self.verwerk_regiocomp_mutaties(show_warnings=False)
+        self.verwerk_competitie_mutaties(show_warnings=False)
 
         self.deelcomp_regio112_18 = Regiocompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
         self.assertEqual(self.deelcomp_regio112_18.huidige_team_ronde, 1)
@@ -572,7 +572,7 @@ class TestCompLaagRegioTeamsRCL(E2EHelpers, TestCase):
         self.deelcomp_regio112_18 = Regiocompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
         self.assertEqual(self.deelcomp_regio112_18.huidige_team_ronde, 1)
 
-        self.verwerk_regiocomp_mutaties()
+        self.verwerk_competitie_mutaties()
 
         self.deelcomp_regio112_18 = Regiocompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
         self.assertEqual(self.deelcomp_regio112_18.huidige_team_ronde, 1)
@@ -587,7 +587,7 @@ class TestCompLaagRegioTeamsRCL(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'snel': 1})
         self.assert_is_redirect(resp, self.url_overzicht_beheer % self.deelcomp_regio112_18.competitie.pk)
-        self.verwerk_regiocomp_mutaties()
+        self.verwerk_competitie_mutaties()
 
         self.deelcomp_regio112_18 = Regiocompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
         self.assertEqual(self.deelcomp_regio112_18.huidige_team_ronde, 2)
@@ -610,7 +610,7 @@ class TestCompLaagRegioTeamsRCL(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'snel': 1})
         self.assert_is_redirect(resp, self.url_overzicht_beheer % self.deelcomp_regio112_18.competitie.pk)
-        self.verwerk_regiocomp_mutaties()
+        self.verwerk_competitie_mutaties()
 
         self.deelcomp_regio112_18 = Regiocompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
         self.assertEqual(self.deelcomp_regio112_18.huidige_team_ronde, 3)
@@ -655,7 +655,7 @@ class TestCompLaagRegioTeamsRCL(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, self.url_overzicht_beheer % self.deelcomp_regio112_18.competitie.pk)
 
         self.assertEqual(0, Taak.objects.count())
-        self.verwerk_regiocomp_mutaties()
+        self.verwerk_competitie_mutaties()
 
         # controleer dat de HWLs een taak gekregen hebben
         self.assertTrue(Taak.objects.count() > 0)
@@ -678,7 +678,7 @@ class TestCompLaagRegioTeamsRCL(E2EHelpers, TestCase):
         self.deelcomp_regio112_18 = Regiocompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
         self.assertEqual(self.deelcomp_regio112_18.huidige_team_ronde, 1)
 
-        self.verwerk_regiocomp_mutaties()
+        self.verwerk_competitie_mutaties()
 
         self.deelcomp_regio112_18 = Regiocompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
         self.assertEqual(self.deelcomp_regio112_18.huidige_team_ronde, 1)
@@ -698,7 +698,7 @@ class TestCompLaagRegioTeamsRCL(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'snel': 1})
         self.assert_is_redirect(resp, self.url_overzicht_beheer % self.deelcomp_regio112_18.competitie.pk)
-        self.verwerk_regiocomp_mutaties()
+        self.verwerk_competitie_mutaties()
 
         self.deelcomp_regio112_18 = Regiocompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
         self.assertEqual(self.deelcomp_regio112_18.huidige_team_ronde, 2)
@@ -731,7 +731,7 @@ class TestCompLaagRegioTeamsRCL(E2EHelpers, TestCase):
             resp = self.client.post(url, {'snel': 1})
         self.assert_is_redirect(resp, self.url_overzicht_beheer % self.deelcomp_regio112_18.competitie.pk)
 
-        self.verwerk_regiocomp_mutaties()
+        self.verwerk_competitie_mutaties()
 
         self.deelcomp_regio112_18 = Regiocompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
         self.assertEqual(self.deelcomp_regio112_18.huidige_team_ronde, 1)
@@ -751,7 +751,7 @@ class TestCompLaagRegioTeamsRCL(E2EHelpers, TestCase):
         self.deelcomp_regio112_18 = Regiocompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
         self.assertEqual(self.deelcomp_regio112_18.huidige_team_ronde, 1)
 
-        self.verwerk_regiocomp_mutaties()
+        self.verwerk_competitie_mutaties()
 
         self.deelcomp_regio112_18 = Regiocompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
         self.assertEqual(self.deelcomp_regio112_18.huidige_team_ronde, 1)
@@ -766,7 +766,7 @@ class TestCompLaagRegioTeamsRCL(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'snel': 1})
         self.assert_is_redirect(resp, self.url_overzicht_beheer % self.deelcomp_regio112_18.competitie.pk)
-        self.verwerk_regiocomp_mutaties()
+        self.verwerk_competitie_mutaties()
 
         self.deelcomp_regio112_18 = Regiocompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
         self.assertEqual(self.deelcomp_regio112_18.huidige_team_ronde, 2)
@@ -795,7 +795,7 @@ class TestCompLaagRegioTeamsRCL(E2EHelpers, TestCase):
             resp = self.client.post(url, {'snel': 1})
         self.assert_is_redirect(resp, self.url_overzicht_beheer % self.deelcomp_regio112_18.competitie.pk)
 
-        self.verwerk_regiocomp_mutaties()
+        self.verwerk_competitie_mutaties()
 
         self.deelcomp_regio112_18 = Regiocompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
         self.assertEqual(self.deelcomp_regio112_18.huidige_team_ronde, 1)
@@ -829,7 +829,7 @@ class TestCompLaagRegioTeamsRCL(E2EHelpers, TestCase):
             resp = self.client.post(url, {'snel': 1})
         self.assert_is_redirect(resp, self.url_overzicht_beheer % self.deelcomp_regio112_18.competitie.pk)
 
-        self.verwerk_regiocomp_mutaties()
+        self.verwerk_competitie_mutaties()
 
         self.assertEqual(0, Taak.objects.count())
 

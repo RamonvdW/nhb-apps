@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2024 Ramon van der Winkel.
+#  Copyright (c) 2020-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
 from Competitie.models import Competitie
 from Competitie.test_utils.tijdlijn import zet_competitie_fases
-from CompBeheer.operations import is_competitie_openbaar_voor_rol
+from CompBeheer.operations.toegang import is_competitie_openbaar_voor_rol
 from Functie.definities import Rol
 from TestHelpers.e2ehelpers import E2EHelpers
 import datetime

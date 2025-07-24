@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2024 Ramon van der Winkel.
+#  Copyright (c) 2020-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -660,7 +660,7 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
         self.assert_is_redirect_not_plein(resp)  # check for success
 
         # laat de mutaties verwerken
-        self.verwerk_regiocomp_mutaties()
+        self.verwerk_competitie_mutaties()
 
         # controleer de 'deelname' instelling voor de KampioenschapSporterBoog
         kampioen = KampioenschapSporterBoog.objects.get(sporterboog=self.sporterboog)
@@ -690,7 +690,7 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
         self.assert_is_redirect_not_plein(resp)  # check for success
 
         # laat de mutaties verwerken
-        self.verwerk_regiocomp_mutaties()
+        self.verwerk_competitie_mutaties()
 
         # zet een limiet
         limiet = KampioenschapIndivKlasseLimiet(kampioenschap=self.deelkamp_rayon1_18,
@@ -1021,21 +1021,21 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(url, {isel: 20, tsel: 10, 'snel': 1})
         self.assert_is_redirect_not_plein(resp)  # check for success
-        self.verwerk_regiocomp_mutaties()
+        self.verwerk_competitie_mutaties()
         self.assertEqual(KampioenschapIndivKlasseLimiet.objects.count(), 1)
 
         # limiet opnieuw zetten, geen wijziging
         with self.assert_max_queries(20):
             resp = self.client.post(url, {isel: 20, tsel: 10, 'snel': 1})
         self.assert_is_redirect_not_plein(resp)  # check for success
-        self.verwerk_regiocomp_mutaties()
+        self.verwerk_competitie_mutaties()
         self.assertEqual(KampioenschapIndivKlasseLimiet.objects.count(), 1)
 
         # limiet aanpassen
         with self.assert_max_queries(20):
             resp = self.client.post(url, {isel: 16, tsel: 8, 'snel': 1})
         self.assert_is_redirect_not_plein(resp)  # check for success
-        self.verwerk_regiocomp_mutaties()
+        self.verwerk_competitie_mutaties()
         self.assertEqual(KampioenschapIndivKlasseLimiet.objects.count(), 1)
 
         # met limiet aanwezig
@@ -1050,7 +1050,7 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(url, {isel: 24})
         self.assert_is_redirect_not_plein(resp)  # check for success
-        self.verwerk_regiocomp_mutaties()
+        self.verwerk_competitie_mutaties()
         self.assertEqual(KampioenschapIndivKlasseLimiet.objects.count(), 0)
         time.sleep = sleep_oud
 
@@ -1065,7 +1065,7 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(url, {isel: 4, 'snel': 1})
         self.assert_is_redirect_not_plein(resp)  # check for success
-        self.verwerk_regiocomp_mutaties()
+        self.verwerk_competitie_mutaties()
         self.assertEqual(CompetitieMutatie.objects.count(), aantal + 1)
 
 

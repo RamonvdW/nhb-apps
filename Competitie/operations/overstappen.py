@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2024 Ramon van der Winkel.
+#  Copyright (c) 2024-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -14,7 +14,7 @@ from Competitie.models import KampioenschapSporterBoog
 
 def competitie_hanteer_overstap_sporter(stdout):
 
-    """ wordt 1x per uur aangeroepen vanuit regiocomp_mutaties"""
+    """ wordt 1x per uur aangeroepen vanuit competitie_mutaties"""
 
     for kampioen in (KampioenschapSporterBoog
                      .objects

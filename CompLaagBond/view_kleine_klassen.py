@@ -23,7 +23,7 @@ import json
 
 TEMPLATE_COMPBOND_KLEINE_KLASSEN_INDIV = 'complaagbond/kleine-klassen-indiv.dtl'
 
-mutatie_ping = BackgroundSync(settings.BACKGROUND_SYNC__REGIOCOMP_MUTATIES)
+mutatie_ping = BackgroundSync(settings.BACKGROUND_SYNC__COMPETITIE_MUTATIES)
 
 
 class KleineKlassenIndivView(UserPassesTestMixin, TemplateView):

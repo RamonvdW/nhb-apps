@@ -37,7 +37,7 @@ TEMPLATE_COMPREGIO_RCL_TEAM_RONDE = 'complaagregio/rcl-team-ronde.dtl'
 
 CONTENT_TYPE_CSV = 'text/csv; charset=UTF-8'
 
-mutatie_ping = BackgroundSync(settings.BACKGROUND_SYNC__REGIOCOMP_MUTATIES)
+mutatie_ping = BackgroundSync(settings.BACKGROUND_SYNC__COMPETITIE_MUTATIES)
 
 
 class RegioTeamsTemplateView(TemplateView):

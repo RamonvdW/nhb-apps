@@ -23,7 +23,7 @@ import time
 
 TEMPLATE_COMPBOND_BK_TEAMS = 'complaagbond/bk-teams.dtl'
 
-mutatie_ping = BackgroundSync(settings.BACKGROUND_SYNC__REGIOCOMP_MUTATIES)
+mutatie_ping = BackgroundSync(settings.BACKGROUND_SYNC__COMPETITIE_MUTATIES)
 
 
 class LijstBkTeamsView(UserPassesTestMixin, TemplateView):

@@ -28,7 +28,7 @@ import time
 TEMPLATE_COMPRAYON_EXTRA_DEELNEMER = 'complaagrayon/bko-extra-deelnemer.dtl'
 TEMPLATE_COMPRAYON_BLANCO_RESULTAAT = 'complaagrayon/bko-blanco-resultaat.dtl'
 
-competitie_mutaties_ping = BackgroundSync(settings.BACKGROUND_SYNC__REGIOCOMP_MUTATIES)
+competitie_mutaties_ping = BackgroundSync(settings.BACKGROUND_SYNC__COMPETITIE_MUTATIES)
 
 
 class ExtraDeelnemerView(UserPassesTestMixin, TemplateView):

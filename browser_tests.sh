@@ -171,9 +171,9 @@ echo "[INFO] Starting bestel_mutaties (runtime: $BG_DURATION minutes)" >>"$LOG"
 pkill -f bestel_mutaties
 ./manage.py bestel_mutaties --settings="$SETTINGS_AUTOTEST_BROWSER" --use-test-database $BG_DURATION &>>"$LOG" &
 
-echo "[INFO] Starting regiocomp_mutaties (runtime: $BG_DURATION minutes)" >>"$LOG"
-pkill -f regiocomp_mutaties
-./manage.py regiocomp_mutaties --settings="$SETTINGS_AUTOTEST_BROWSER" --use-test-database $BG_DURATION &>>"$LOG" &
+echo "[INFO] Starting competitie_mutaties (runtime: $BG_DURATION minutes)" >>"$LOG"
+pkill -f competitie_mutaties
+./manage.py competitie_mutaties --settings="$SETTINGS_AUTOTEST_BROWSER" --use-test-database $BG_DURATION &>>"$LOG" &
 
 echo "[INFO] Starting regiocomp_tussenstand (runtime: $BG_DURATION minutes)" >>"$LOG"
 pkill -f regiocomp_tussenstand
@@ -250,7 +250,7 @@ fi
 # kill the background processes
 echo "[INFO] Stopping background tasks"
 pkill -f regiocomp_tussenstand
-pkill -f regiocomp_mutaties
+pkill -f competitie_mutaties
 pkill -f bestel_mutaties
 pkill -f betaal_mutaties
 pkill -f scheids_mutaties

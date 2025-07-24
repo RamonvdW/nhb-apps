@@ -36,7 +36,7 @@ TEMPLATE_COMPRAYON_LIJST_RK = 'complaagrayon/rko-rk-selectie.dtl'
 TEMPLATE_COMPRAYON_WIJZIG_STATUS_RK_DEELNEMER = 'complaagrayon/wijzig-status-rk-deelnemer.dtl'
 TEMPLATE_COMPRAYON_WIJZIG_LIMIETEN_RK = 'complaagrayon/wijzig-limieten-rk.dtl'
 
-mutatie_ping = BackgroundSync(settings.BACKGROUND_SYNC__REGIOCOMP_MUTATIES)
+mutatie_ping = BackgroundSync(settings.BACKGROUND_SYNC__COMPETITIE_MUTATIES)
 
 
 class RayonPlanningView(UserPassesTestMixin, TemplateView):

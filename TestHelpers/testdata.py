@@ -300,15 +300,15 @@ class TestData(object):
             raise ValueError('Wissel naar functie HWL failed')
 
     @staticmethod
-    def _verwerk_regiocomp_mutaties(show_warnings=True, show_all=False):
+    def _verwerk_competitie_mutaties(show_warnings=True, show_all=False):
         # vraag de achtergrond taak om de mutaties te verwerken
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('regiocomp_mutaties', '1', '--quick', stderr=f1, stdout=f2)
+        management.call_command('competitie_mutaties', '1', '--quick', stderr=f1, stdout=f2)
 
         err_msg = f1.getvalue()
         if '[ERROR]' in err_msg:                                                # pragma: no cover
-            print('Onverwachte fout van regiocomp_mutaties:\n' + err_msg)
+            print('Onverwachte fout van competitie_mutaties:\n' + err_msg)
 
         if show_all:                                                            # pragma: no cover
             print(f1.getvalue())
@@ -341,7 +341,7 @@ class TestData(object):
         url = self.url_volgende_ronde % deelcomp.pk
         client.post(url, {'snel': 1})
 
-        self._verwerk_regiocomp_mutaties()
+        self._verwerk_competitie_mutaties()
 
     def maak_accounts_admin_en_bb(self):
         """

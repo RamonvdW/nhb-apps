@@ -36,7 +36,7 @@ class MyMgmtCommandHelper(TestCase):
                 f1.write('[TEST] Management command raised %s\n' % repr(exc))
         return f1, f2
 
-    def verwerk_regiocomp_mutaties(self, show_warnings=True, show_all=False):
+    def verwerk_competitie_mutaties(self, show_warnings=True, show_all=False):
         # vraag de achtergrondtaak om de mutaties te verwerken
         f1 = io.StringIO()
         f2 = io.StringIO()

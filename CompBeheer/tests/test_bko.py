@@ -515,7 +515,7 @@ class TestCompBeheerBko(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, '/bondscompetities/')       # redirect = Success
 
         # laat de mutatie verwerken
-        self.verwerk_regiocomp_mutaties()
+        self.verwerk_competitie_mutaties()
 
         self.assertEqual(3, KampioenschapSporterBoog.objects.count())
         self.assertEqual(2, HistCompRegioTeam.objects.count())
@@ -545,7 +545,7 @@ class TestCompBeheerBko(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, '/bondscompetities/')       # redirect = Success
 
         # laat de mutatie verwerken
-        f1, f2 = self.verwerk_regiocomp_mutaties(show_warnings=False)
+        f1, f2 = self.verwerk_competitie_mutaties(show_warnings=False)
         # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
         self.assertTrue(
             "[WARNING] Sporter 100005 - Compound is geen RK deelnemer want heeft geen vereniging" in f2.getvalue())
@@ -582,7 +582,7 @@ class TestCompBeheerBko(E2EHelpers, TestCase):
         url = self.url_doorzetten_regio_naar_rk % self.testdata.comp25.pk
         resp = self.client.post(url)
         self.assert_is_redirect_not_plein(resp)
-        self.verwerk_regiocomp_mutaties()
+        self.verwerk_competitie_mutaties()
 
         comp = Competitie.objects.get(pk=self.testdata.comp25.pk)
         comp.bepaal_fase()
@@ -637,7 +637,7 @@ class TestCompBeheerBko(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, self.url_competitie_beheer % self.comp_25.pk)       # redirect = Success
 
         # kietel de achtergrondtaak
-        self.verwerk_regiocomp_mutaties()
+        self.verwerk_competitie_mutaties()
 
         self.comp_25 = Competitie.objects.get(pk=self.comp_25.pk)
         self.comp_25.bepaal_fase()
@@ -678,7 +678,7 @@ class TestCompBeheerBko(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, self.url_competitie_beheer % self.comp_25.pk)       # redirect = Success
 
         # kietel de achtergrondtaak
-        self.verwerk_regiocomp_mutaties(show_warnings=False)
+        self.verwerk_competitie_mutaties(show_warnings=False)
 
         self.comp_25 = Competitie.objects.get(pk=self.comp_25.pk)
         self.comp_25.bepaal_fase()
@@ -801,7 +801,7 @@ class TestCompBeheerBko(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, self.url_competitie_beheer % self.comp_25.pk)
 
         # kietel de achtergrondtaak
-        self.verwerk_regiocomp_mutaties(show_warnings=False)
+        self.verwerk_competitie_mutaties(show_warnings=False)
 
         # check nieuwe fase
         self.comp_25 = Competitie.objects.get(pk=self.comp_25.pk)
@@ -847,7 +847,7 @@ class TestCompBeheerBko(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, self.url_competitie_beheer % self.comp_25.pk)
 
         # kietel de achtergrondtaak
-        self.verwerk_regiocomp_mutaties(show_warnings=False)
+        self.verwerk_competitie_mutaties(show_warnings=False)
 
         # check nieuwe fase
         self.comp_25 = Competitie.objects.get(pk=self.comp_25.pk)

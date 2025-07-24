@@ -13,22 +13,33 @@ def zet_product_pk(apps, _):
 
     # zet alle specifieke verwijzingen over in een anonieme verwijzing
 
-    for mutatie in mutatie_klas.objects.exclude(wedstrijd_inschrijving=None).select_related('wedstrijd_inschrijving'):
+    for mutatie in (mutatie_klas
+                    .objects
+                    .exclude(wedstrijd_inschrijving=None)
+                    .select_related('wedstrijd_inschrijving')):     # pragma: no cover
         mutatie.product_pk = mutatie.wedstrijd_inschrijving.pk
         mutatie.save(update_fields=['product_pk'])
     # for
 
-    for mutatie in mutatie_klas.objects.exclude(evenement_inschrijving=None).select_related('evenement_inschrijving'):
+    for mutatie in (mutatie_klas
+                    .objects
+                    .exclude(evenement_inschrijving=None)
+                    .select_related('evenement_inschrijving')):     # pragma: no cover
         mutatie.product_pk = mutatie.evenement_inschrijving.pk
         mutatie.save(update_fields=['product_pk'])
     # for
 
-    for mutatie in mutatie_klas.objects.exclude(opleiding_inschrijving=None).select_related('opleiding_inschrijving'):
+    for mutatie in (mutatie_klas
+                    .objects
+                    .exclude(opleiding_inschrijving=None)
+                    .select_related('opleiding_inschrijving')):     # pragma: no cover
         mutatie.product_pk = mutatie.opleiding_inschrijving.pk
         mutatie.save(update_fields=['product_pk'])
     # for
 
-    for mutatie in mutatie_klas.objects.exclude(webwinkel_keuze=None).select_related('webwinkel_keuze'):
+    for mutatie in (mutatie_klas
+                    .objects.exclude(webwinkel_keuze=None)
+                    .select_related('webwinkel_keuze')):            # pragma: no cover
         mutatie.product_pk = mutatie.webwinkel_keuze.pk
         mutatie.save(update_fields=['product_pk'])
     # for

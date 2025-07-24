@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2024 Ramon van der Winkel.
+#  Copyright (c) 2020-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -132,7 +132,7 @@ class TestCompUitslagenRK(E2EHelpers, TestCase):
         url = self.url_doorzetten_regio_naar_rk % self.testdata.comp18.pk
         resp = self.client.post(url)
         self.assert_is_redirect_not_plein(resp)
-        self.verwerk_regiocomp_mutaties()
+        self.verwerk_competitie_mutaties()
 
         comp = Competitie.objects.get(pk=self.testdata.comp18.pk)
         comp.bepaal_fase()
@@ -258,7 +258,7 @@ class TestCompUitslagenRK(E2EHelpers, TestCase):
         url = self.url_doorzetten_regio_naar_rk % self.testdata.comp25.pk
         resp = self.client.post(url)
         self.assert_is_redirect_not_plein(resp)
-        self.verwerk_regiocomp_mutaties()
+        self.verwerk_competitie_mutaties()
 
         comp = Competitie.objects.get(pk=self.testdata.comp25.pk)
         comp.bepaal_fase()

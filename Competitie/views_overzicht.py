@@ -8,7 +8,7 @@ from django.urls import reverse
 from django.views.generic import TemplateView
 from django.utils.safestring import mark_safe
 from Account.models import get_account
-from CompBeheer.operations import is_competitie_openbaar_voor_rol
+from CompBeheer.operations.toegang import is_competitie_openbaar_voor_rol
 from Competitie.models import Competitie, get_competitie_boog_typen
 from Competitie.seizoenen import get_comp_pk
 from Functie.definities import Rol

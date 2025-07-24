@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2024 Ramon van der Winkel.
+#  Copyright (c) 2020-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -898,7 +898,7 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
             resp = self.client.post(url, {'snel': 1})
         self.assert_is_redirect(resp, self.url_overzicht_beheer % self.comp_18.pk)
 
-        self.verwerk_regiocomp_mutaties()
+        self.verwerk_competitie_mutaties()
         self.assertEqual(2, RegiocompetitieRondeTeam.objects.count())
 
         pks0 = [self.deelnemer_100002_18.pk, self.deelnemer_100003_18.pk, self.deelnemer_100004_18.pk]

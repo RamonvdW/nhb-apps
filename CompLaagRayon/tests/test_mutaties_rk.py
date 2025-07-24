@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2024 Ramon van der Winkel.
+#  Copyright (c) 2020-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -226,12 +226,12 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
             resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
         self.assert_is_redirect(resp, self.url_lijst_rko)        # 302 = redirect = success
 
-        self.verwerk_regiocomp_mutaties()
+        self.verwerk_competitie_mutaties()
         # self._dump_deelnemers()
 
         CompetitieMutatie(mutatie=MUTATIE_INITIEEL,
                           kampioenschap=self.deelkamp_rk).save()
-        self.verwerk_regiocomp_mutaties()
+        self.verwerk_competitie_mutaties()
         # self._dump_deelnemers()
         self._check_volgorde_en_rank()
 
@@ -240,7 +240,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
         KampioenschapTeamKlasseLimiet.objects.all().delete()
         CompetitieMutatie(mutatie=MUTATIE_INITIEEL,
                           kampioenschap=self.deelkamp_rk).save()
-        self.verwerk_regiocomp_mutaties()
+        self.verwerk_competitie_mutaties()
 
     def test_rko_bevestigen(self):
         # bevestig deelname door een sporter en een reserve
@@ -256,7 +256,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
             resp = self.client.post(url, {'bevestig': 1, 'snel': 1})
         self.assert_is_redirect(resp, self.url_lijst_rko)        # 302 = redirect = success
 
-        self.verwerk_regiocomp_mutaties()
+        self.verwerk_competitie_mutaties()
 
         deelnemer = KampioenschapSporterBoog.objects.filter(indiv_klasse=self.klasse).get(pk=deelnemer.pk)
         self.assertEqual(deelnemer.deelname, DEELNAME_JA)
@@ -280,7 +280,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
             resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
         self.assert_is_redirect(resp, self.url_lijst_rko)        # 302 = redirect = success
 
-        self.verwerk_regiocomp_mutaties()
+        self.verwerk_competitie_mutaties()
 
         # self._dump_deelnemers()
         deelnemer = KampioenschapSporterBoog.objects.get(pk=deelnemer.pk)
@@ -311,7 +311,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
             resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
         self.assert_is_redirect(resp, self.url_lijst_rko)        # 302 = redirect = success
 
-        self.verwerk_regiocomp_mutaties()
+        self.verwerk_competitie_mutaties()
 
         # self._dump_deelnemers()
         deelnemer = KampioenschapSporterBoog.objects.get(pk=deelnemer.pk)
@@ -346,7 +346,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
             resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
         self.assert_is_redirect(resp, self.url_lijst_rko)        # 302 = redirect = success
 
-        self.verwerk_regiocomp_mutaties()
+        self.verwerk_competitie_mutaties()
 
         deelnemer = KampioenschapSporterBoog.objects.get(pk=deelnemer.pk)
         self.assertEqual(deelnemer.deelname, DEELNAME_NEE)
@@ -357,7 +357,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
             resp = self.client.post(url, {'bevestig': 1, 'snel': 1})
         self.assert_is_redirect(resp, self.url_lijst_rko)        # 302 = redirect = success
 
-        self.verwerk_regiocomp_mutaties()
+        self.verwerk_competitie_mutaties()
 
         self._check_volgorde_en_rank()
 
@@ -368,7 +368,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
             resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
         self.assert_is_redirect(resp, self.url_lijst_rko)        # 302 = redirect = success
 
-        self.verwerk_regiocomp_mutaties()
+        self.verwerk_competitie_mutaties()
         # self._dump_deelnemers()
 
         deelnemer = KampioenschapSporterBoog.objects.get(pk=deelnemer.pk)
@@ -380,7 +380,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
             resp = self.client.post(url, {'bevestig': 1, 'snel': 1})
         self.assert_is_redirect(resp, self.url_lijst_rko)        # 302 = redirect = success
 
-        self.verwerk_regiocomp_mutaties()
+        self.verwerk_competitie_mutaties()
         # self._dump_deelnemers()
 
         self._check_volgorde_en_rank()
@@ -402,7 +402,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
             resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
         self.assert_is_redirect(resp, self.url_lijst_rko)        # 302 = redirect = success
 
-        self.verwerk_regiocomp_mutaties()
+        self.verwerk_competitie_mutaties()
 
         # self._dump_deelnemers()
         reserve = KampioenschapSporterBoog.objects.get(pk=reserve.pk)
@@ -415,7 +415,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
             resp = self.client.post(url, {'bevestig': 1, 'snel': 1})
         self.assert_is_redirect(resp, self.url_lijst_rko)        # 302 = redirect = success
 
-        self.verwerk_regiocomp_mutaties()
+        self.verwerk_competitie_mutaties()
 
         # self._dump_deelnemers()
         reserve = KampioenschapSporterBoog.objects.get(pk=reserve.pk)
@@ -443,7 +443,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
             resp = self.client.post(url, {'bevestig': 1, 'snel': 1})
         self.assert_is_redirect(resp, self.url_lijst_rko)        # 302 = redirect = success
 
-        self.verwerk_regiocomp_mutaties()
+        self.verwerk_competitie_mutaties()
         self._check_volgorde_en_rank()
 
     def test_rko_opnieuw_aanmelden_boven_cut(self):
@@ -465,7 +465,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
             resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
         self.assert_is_redirect(resp, self.url_lijst_rko)        # 302 = redirect = success
 
-        self.verwerk_regiocomp_mutaties()
+        self.verwerk_competitie_mutaties()
         # self._dump_deelnemers()
         # self._check_volgorde_en_rank()
 
@@ -476,7 +476,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
             resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
         self.assert_is_redirect(resp, self.url_lijst_rko)        # 302 = redirect = success
 
-        self.verwerk_regiocomp_mutaties()
+        self.verwerk_competitie_mutaties()
         # self._dump_deelnemers()
         self._check_volgorde_en_rank()
 
@@ -492,7 +492,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
             resp = self.client.post(url, {'bevestig': 1, 'snel': 1})
         self.assert_is_redirect(resp, self.url_lijst_rko)        # 302 = redirect = success
 
-        self.verwerk_regiocomp_mutaties()
+        self.verwerk_competitie_mutaties()
         # self._dump_deelnemers()
 
         reserve = KampioenschapSporterBoog.objects.get(pk=reserve.pk)
@@ -521,7 +521,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
             resp = self.client.post(url, {'bevestig': 1, 'snel': 1})
         self.assert_is_redirect(resp, self.url_lijst_rko)        # 302 = redirect = success
 
-        self.verwerk_regiocomp_mutaties()
+        self.verwerk_competitie_mutaties()
 
         reserve = KampioenschapSporterBoog.objects.get(pk=deelnemer.pk)
         self.assertEqual(reserve.volgorde, 17)
@@ -534,7 +534,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
         self.client.post(url, {'afmelden': 1, 'snel': 1})
         # self._dump_deelnemers()
 
-        self.verwerk_regiocomp_mutaties()
+        self.verwerk_competitie_mutaties()
 
         ex_reserve = KampioenschapSporterBoog.objects.get(pk=reserve.pk)
         self.assertEqual(ex_reserve.volgorde, 3)
@@ -568,7 +568,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
             resp = self.client.post(url, {'bevestig': 1, 'snel': 1})
         self.assert_is_redirect(resp, self.url_lijst_rko)        # 302 = redirect = success
 
-        self.verwerk_regiocomp_mutaties()
+        self.verwerk_competitie_mutaties()
         # self._dump_deelnemers()
 
         # kijk wat er met de kampioen gebeurd is
@@ -601,7 +601,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
             self.assert_is_redirect(resp, self.url_lijst_rko)        # 302 = redirect = success
         # for
 
-        self.verwerk_regiocomp_mutaties()
+        self.verwerk_competitie_mutaties()
         # self._dump_deelnemers()
 
         # de laatste regiokampioen staat nog steeds onderaan in de lijst
@@ -625,7 +625,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
             resp = self.client.post(url, {'bevestig': 1, 'snel': 1})
         self.assert_is_redirect(resp, self.url_lijst_rko)        # 302 = redirect = success
 
-        self.verwerk_regiocomp_mutaties()
+        self.verwerk_competitie_mutaties()
         # self._dump_deelnemers()
 
         # controleer dat ze in de reserve sporters lijst staan, gesorteerd op gemiddelde
@@ -667,7 +667,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
             self.assert_is_redirect(resp, self.url_lijst_rko)        # 302 = redirect = success
         # for
 
-        self.verwerk_regiocomp_mutaties()
+        self.verwerk_competitie_mutaties()
         # self._dump_deelnemers()
 
         # de laatste kampioen staat nog steeds in de lijst en boven de cut
@@ -691,7 +691,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
             resp = self.client.post(url, {'bevestig': 1, 'snel': 1})
         self.assert_is_redirect(resp, self.url_lijst_rko)        # 302 = redirect = success
 
-        self.verwerk_regiocomp_mutaties()
+        self.verwerk_competitie_mutaties()
         # self._dump_deelnemers()
 
         # controleer dat de kampioenen nu als reserve in de lijst staan
@@ -724,7 +724,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
             self.assert_is_redirect(resp, self.url_lijst_rko)        # 302 = redirect = success
         # for
 
-        self.verwerk_regiocomp_mutaties()
+        self.verwerk_competitie_mutaties()
         # self._dump_deelnemers()
 
         # controleer dat de kampioenen nu als deelnemer in de lijst staan
@@ -781,7 +781,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
             resp = self.client.post(url, {sel: 8, 'snel': 1})
         self.assert_is_redirect_not_plein(resp)     # check success
 
-        self.verwerk_regiocomp_mutaties()
+        self.verwerk_competitie_mutaties()
         # self._dump_deelnemers()
 
         rank, volg = self._get_rank_volg(alleen_kampioenen=True)
@@ -805,7 +805,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
             resp = self.client.post(url, {sel: 24, 'snel': 1})
         self.assert_is_redirect_not_plein(resp)     # check success
 
-        self.verwerk_regiocomp_mutaties()
+        self.verwerk_competitie_mutaties()
 
         # meld iemand af
         url = self.url_wijzig_stat % KampioenschapSporterBoog.objects.filter(indiv_klasse=self.klasse).get(rank=2).pk
@@ -820,7 +820,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
             resp = self.client.post(url, {sel: 20, 'snel': 1})
         self.assert_is_redirect_not_plein(resp)     # check success
 
-        self.verwerk_regiocomp_mutaties()
+        self.verwerk_competitie_mutaties()
         # self._dump_deelnemers()
 
         rank, volg = self._get_rank_volg(alle=True)
@@ -842,7 +842,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
     #         self.assert_is_redirect(resp, self.url_lijst)  # 302 = redirect = success
     #     # for
     #
-    #     self.verwerk_regiocomp_mutaties()
+    #     self.verwerk_competitie_mutaties()
     #
     #     self._check_volgorde_en_rank()
 
@@ -871,7 +871,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
             resp = self.client.post(url, {'bevestig': 1, 'snel': 1})
         self.assert_is_redirect(resp, self.url_lijst_rko)        # 302 = redirect = success
 
-        self.verwerk_regiocomp_mutaties()
+        self.verwerk_competitie_mutaties()
 
     def test_bad(self):
         self.e2e_login_and_pass_otp(self.account_bko)
@@ -927,7 +927,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
                           cut_nieuw=24,
                           door='Tester').save()
 
-        self.verwerk_regiocomp_mutaties()
+        self.verwerk_competitie_mutaties()
 
     def test_verwerk_all(self):
         # vraag de achtergrond taak om de mutaties te verwerken
@@ -944,14 +944,14 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
                           door='Tester').save()
         CompetitieMutatie(mutatie=MUTATIE_COMPETITIE_OPSTARTEN,  # triggered "al opgestart" pad
                           door='Tester').save()
-        self.verwerk_regiocomp_mutaties()
+        self.verwerk_competitie_mutaties()
 
         # AG vaststellen
         CompetitieMutatie(mutatie=MUTATIE_AG_VASTSTELLEN_18M,
                           door='Tester').save()
         CompetitieMutatie(mutatie=MUTATIE_AG_VASTSTELLEN_25M,
                           door='Tester').save()
-        self.verwerk_regiocomp_mutaties()
+        self.verwerk_competitie_mutaties()
 
     def test_hwl_mutaties(self):
         # de HWL meldt leden van zijn eigen vereniging aan/af
@@ -1028,7 +1028,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
             resp = self.client.post(url, {'bevestig': 1, 'snel': 1})
         self.assert_is_redirect(resp, self.url_lijst_hwl)        # 302 = redirect = success
 
-        self.verwerk_regiocomp_mutaties()
+        self.verwerk_competitie_mutaties()
 
         zet_competitie_fase_rk_wedstrijden(comp)
         with self.assert_max_queries(20):

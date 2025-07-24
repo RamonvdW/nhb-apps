@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023-2024 Ramon van der Winkel.
+#  Copyright (c) 2023-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -72,7 +72,7 @@ class TestCompLaagRayonCliOverig(E2EHelpers, TestCase):
     def test_check_rk(self):
         CompetitieMutatie(mutatie=MUTATIE_INITIEEL,
                           kampioenschap=self.testdata.deelkamp18_rk[self.rayon_nr]).save()
-        self.verwerk_regiocomp_mutaties()
+        self.verwerk_competitie_mutaties()
 
         # verpruts een ranking/volgorde
         deelnemer = (KampioenschapSporterBoog
