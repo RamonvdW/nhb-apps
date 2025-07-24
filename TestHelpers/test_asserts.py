@@ -714,6 +714,70 @@ class MyTestAsserts(TestCase):
             pos = html.find('<img ', pos+1)
         # while
 
+    def html_assert_urls_usable(self, resp, html, dtl):
+        urls = self.extract_all_urls(resp, skip_external=True, skip_hash_links=True, skip_post=True)
+        for url in urls:
+            if url.find(" ") >= 0:                  # pragma: no cover
+                self.fail(msg="Unexpected space in url %s on page %s" % (repr(url), dtl))
+
+            # controleer dat de link bruikbaar is
+            resp = self.client.get(url)
+            # print(resp.status_code, url)
+
+            # sta 1 redirect toe op specifieke stukken van de applicatie
+            if resp.status_code == 302 and url in ('/kalender/',        # naar huidige jaar/maand
+                                                   '/plein/',           # vervolg aanmaken gast-account
+                                                   '/account/logout/',  # (menu) naar /plein/ indien niet ingelogd
+                                                   '/bondspas/toon/',   # (menu) e-mail nog niet bevestigd
+                                                   '/sporter/',         # (menu) e-mail nog niet bevestigd
+                                                   '/functie/wissel-van-rol/',
+                                                   '/ledenvoordeel/'):
+                resp = self.client.get(resp.url)
+
+            # "403 pagina" is een normale pagina met status_code 200
+            if resp.status_code != 200:
+                # print('redirected from %s to %s' % (url, resp.url))
+                self.fail(msg='url %s geeft status code %s' % (url, resp.status_code))
+
+            # check for files
+            # 'Content-Disposition': 'attachment; filename="bond_alle.csv"'
+            check = resp.get('Content-Disposition', '')
+            is_attachment = 'ATTACHMENT;' in str(check).upper()
+            if is_attachment:
+                continue
+
+            pagina = resp.content.decode('utf-8')
+            is_403 = '<title>Geen toegang</title>' in pagina
+
+            if is_403:
+                pos = pagina.find('<code>')
+                msg = pagina[pos+6:]
+                pos = msg.find('</code>')
+                msg = msg[:pos]
+
+                # <meta property="mh:rol" content="SEC">
+                pos = pagina.find('<meta property="mh:rol" content="')
+                if pos >= 0:
+                    pos += 33
+                    spl = pagina[pos:pos+15].split('"')
+                    rol_nu = spl[0]
+                else:
+                    rol_nu = '?'
+
+                # <meta property="mh:functie" content="Secretaris vereniging 4444">
+                pos = pagina.find('<meta property="mh:functie" content="')
+                if pos >= 0:
+                    pos += 37
+                    spl = pagina[pos:pos+30].split('"')
+                    functie_nu = spl[0]
+                else:
+                    functie_nu = '-'
+
+                self.fail(
+                    msg='url %s geeft 403 pagina met uitleg %s (rol: %s, functie: %s)' % (
+                            url, repr(msg), rol_nu, functie_nu))
+        # for
+
     def assert_html_ok(self, resp: HttpResponse):
         """ Doe een aantal basic checks op een html response """
 
@@ -753,12 +817,7 @@ class MyTestAsserts(TestCase):
         self.html_assert_material_icons(html, dtl)
         self.html_assert_no_kort_break(html, dtl)
         self.html_assert_img_not_draggable(html, dtl)
-
-        urls = self.extract_all_urls(resp)
-        for url in urls:
-            if url.find(" ") >= 0:                  # pragma: no cover
-                self.fail(msg="Unexpected space in url %s on page %s" % (repr(url), dtl))
-        # for
+        self.html_assert_urls_usable(resp, html, dtl)
 
         if settings.TEST_VALIDATE_HTML:             # pragma: no cover
             issues = validate_html(html)

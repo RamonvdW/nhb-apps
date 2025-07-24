@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.conf import settings
-from django.http import Http404, HttpResponseRedirect, JsonResponse
+from django.http import Http404, HttpResponseRedirect, JsonResponse, HttpResponse
 from django.urls import reverse
 from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
@@ -145,8 +145,13 @@ class DynamicBestellingCheckStatus(UserPassesTestMixin, View):
 
             te_betalen_euro = bestelling.totaal_euro
 
-            url_na_de_betaling = settings.SITE_URL + reverse('Bestelling:na-de-betaling',
-                                                              kwargs={'bestel_nr': bestelling.bestel_nr})
+            site_url = settings.SITE_URL
+            if 'localhost:8000' in site_url:
+                # insert actual port number during LiveServerTestCase
+                site_url = site_url.replace('localhost:8000', request.get_host())
+
+            url_na_de_betaling = site_url + reverse('Bestelling:na-de-betaling',
+                                                    kwargs={'bestel_nr': bestelling.bestel_nr})
 
             # start de bestelling via de achtergrond taak
             # deze slaat de referentie naar de mutatie op in de bestelling

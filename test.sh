@@ -303,18 +303,6 @@ then
     fi
 fi
 
-if [ $ABORTED -eq 0 ]
-then
-    echo "[INFO] Starting browser test run" >>"$LOG"
-    python3 "${PY_OPTS[@]}" -u "${PYCOV[@]}" ./manage.py test --keepdb --settings=$SETTINGS_AUTOTEST --tag=browser -v 2 "${FOCUS_ARGS[@]}" &>>"$LOG"
-    RES=$?
-    #echo "[DEBUG] Run result: $RES --> ABORTED=$ABORTED"
-    [ $RES -eq 3 ] && ABORTED=1
-
-    echo >>"$LOG"
-    echo "[INFO] Finished browser test run" >>"$LOG"
-fi
-
 # stop showing the additions to the logfile, because the rest is less interesting
 # use bash construct to prevent the Terminated message on the console
 sleep 0.1

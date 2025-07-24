@@ -65,6 +65,6 @@ TEST_VALIDATE_JAVASCRIPT = True
 # zet minify uit ivm coverage meting van de template files
 # (die kan niet tegen aanpassing ten opzicht van source files)
 # om toch MET minify te testen doen we dit tijdens HTML validatie
-ENABLE_MINIFY = not TEST_VALIDATE_HTML
+ENABLE_MINIFY = TEST_VALIDATE_HTML
 
 # end of file

@@ -101,7 +101,7 @@
 
                                 <tr>
                                     {% if mag_wijzigen %}
-                                        <td style="vertical-align: top">Selecteer 3 of 4 sporters</td>
+                                        <td style="vertical-align: top">Selecteer 3 sporters</td>
 
                                         {% if not deelnemers.count %}
                                             <td colspan="3"><i class="sv-rood-text">Geen sporters gevonden met toegestaan boog type</i></td>

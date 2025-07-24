@@ -407,7 +407,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
                     context['toon_bondscompetities'] = False
 
             context['speelsterktes'] = self._find_speelsterktes()
-            context['url_spelden_procedures'] = settings.URL_SPELDEN_PROCEDURES
+            context['url_procedures'] = settings.URL_PROCEDURES
 
             context['diplomas'] = self._find_diplomas()
 

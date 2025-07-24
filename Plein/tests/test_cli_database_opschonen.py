@@ -44,7 +44,8 @@ class TestPleinCliDatabaseOpschonen(E2EHelpers, TestCase):
 
         ten_days_ago = timezone.now() - datetime.timedelta(days=10)
         one_year_go = timezone.now() - datetime.timedelta(days=365)
-        two_years_ago = timezone.now() - datetime.timedelta(days=365+365+1)
+        two_years_ago = timezone.now() - datetime.timedelta(days=2*365+1)
+        three_years_ago = timezone.now() - datetime.timedelta(days=3*365+1)
 
         # maak een onvoltooid account aan
         account = account_create(
@@ -183,7 +184,7 @@ class TestPleinCliDatabaseOpschonen(E2EHelpers, TestCase):
 
         bestelling = Bestelling(bestel_nr=1)
         bestelling.save()
-        bestelling.aangemaakt = two_years_ago
+        bestelling.aangemaakt = three_years_ago
         bestelling.save()
 
         mutatie = BetaalMutatie()

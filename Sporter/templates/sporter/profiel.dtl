@@ -883,7 +883,7 @@
                     <tr>
                         <td colspan="4" class="center">
                             <span>Kijk op <code>www.handboogsport.nl</code> onder Procedures hoe je een prestatiespeld aan kan vragen:</span><br><br>
-                            <a class="btn-sv-rood" href="{{ url_spelden_procedures }}" target="_blank" rel="noopener noreferrer">
+                            <a class="btn-sv-rood" href="{{ url_procedures }}" target="_blank" rel="noopener noreferrer">
                                 <i class="notranslate material-icons-round left">open_in_new</i>Link</a>
                         </td>
                     </tr>

@@ -223,7 +223,7 @@ class RecordsVerbeterbaarInDiscipline(TemplateView):
         context['lege_lijst'] = (aantal_gekozen == 0)
         context['aantal_regels'] = aantal_gekozen + 2
 
-        context['url_spelden_procedures'] = settings.URL_SPELDEN_PROCEDURES
+        context['url_procedures'] = settings.URL_PROCEDURES
         context['url_record_formulier'] = settings.URL_RECORD_AANVRAAGFORMULIER
 
         context['robots'] = 'nofollow'   # prevent crawling filter result pages
