@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023-2024 Ramon van der Winkel.
+#  Copyright (c) 2023-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.conf import settings
 from Competitie.definities import DEEL_RK, DEEL_BK, KAMP_RANK_BLANCO, KAMP_RANK_ALLEEN_TEAM, DEELNAME_NEE
-from Competitie.models import (CompetitieIndivKlasse,
+from Competitie.models import (Competitie, CompetitieIndivKlasse,
                                RegiocompetitieSporterBoog, RegiocompetitieRondeTeam,
                                KampioenschapSporterBoog, KampioenschapTeam)
 from HistComp.definities import (HISTCOMP_RK, HISTCOMP_BK,
@@ -16,19 +16,29 @@ from HistComp.models import (HistCompSeizoen,
                              HistKampIndivRK, HistKampIndivBK, HistKampTeam)
 
 
-def uitslag_regio_indiv_naar_histcomp(comp):
-    """ uitslag regiocompetitie individueel overnemen als nieuwe histcomp """
+def _maak_seizoen_str(comp: Competitie):
+    return "%s/%s" % (comp.begin_jaar, comp.begin_jaar + 1)
 
-    seizoen = "%s/%s" % (comp.begin_jaar, comp.begin_jaar + 1)
+
+def _get_seizoen(comp: Competitie):
+    seizoen = _maak_seizoen_str(comp)
 
     try:
-        histcomps = HistCompSeizoen.objects.filter(seizoen=seizoen,
-                                                   comp_type=comp.afstand)
+        hist_seizoen = HistCompSeizoen.objects.get(seizoen=seizoen, comp_type=comp.afstand)
     except HistCompSeizoen.DoesNotExist:        # pragma: no cover
-        pass
-    else:
-        # er bestaat al een uitslag - verwijder deze eerst
-        histcomps.delete()
+        hist_seizoen = None
+
+    return hist_seizoen
+
+
+def uitslag_regio_indiv_naar_histcomp(comp: Competitie):
+    """ uitslag regiocompetitie individueel overnemen als nieuwe histcomp """
+
+    seizoen = _maak_seizoen_str(comp)
+
+    # verwijder seizoen als deze al bestaat
+    HistCompSeizoen.objects.filter(seizoen=seizoen,
+                                   comp_type=comp.afstand).delete()
 
     bogen = ",".join(list(comp.boogtypen.order_by('volgorde').values_list('afkorting', flat=True)))
 
@@ -80,8 +90,7 @@ def uitslag_regio_indiv_naar_histcomp(comp):
             try:
                 rank, prev_totaal = regio_klasse2rank[tup]
             except KeyError:
-                rank = 0
-                prev_totaal = 0
+                rank, prev_totaal = 0, 0
 
             if deelnemer.totaal != prev_totaal:
                 rank += 1
@@ -179,16 +188,13 @@ def uitslag_regio_indiv_naar_histcomp(comp):
         HistCompRegioIndiv.objects.bulk_create(bulk)
 
 
-def uitslag_rk_indiv_naar_histcomp(comp):
+def uitslag_rk_indiv_naar_histcomp(comp: Competitie):
     """ uitslag rk individueel overnemen als histcomp
         maak voor elke sporter een HistCompKampioenschapIndiv record aan
     """
 
-    seizoen = "%s/%s" % (comp.begin_jaar, comp.begin_jaar + 1)
-
-    try:
-        hist_seizoen = HistCompSeizoen.objects.get(seizoen=seizoen, comp_type=comp.afstand)
-    except HistCompSeizoen.DoesNotExist:        # pragma: no cover
+    hist_seizoen = _get_seizoen(comp)
+    if not hist_seizoen:
         return
 
     beschrijving2boogtype_pk = dict()
@@ -250,14 +256,11 @@ def uitslag_rk_indiv_naar_histcomp(comp):
     hist_seizoen.save(update_fields=['heeft_uitslag_rk_indiv'])
 
 
-def uitslag_bk_indiv_naar_histcomp(comp):
+def uitslag_bk_indiv_naar_histcomp(comp: Competitie):
     """ uitslag bk individueel overnemen als histcomp """
 
-    seizoen = "%s/%s" % (comp.begin_jaar, comp.begin_jaar + 1)
-
-    try:
-        hist_seizoen = HistCompSeizoen.objects.get(seizoen=seizoen, comp_type=comp.afstand)
-    except HistCompSeizoen.DoesNotExist:        # pragma: no cover
+    hist_seizoen = _get_seizoen(comp)
+    if not hist_seizoen:
         return
 
     bulk = list()
@@ -308,14 +311,11 @@ def uitslag_bk_indiv_naar_histcomp(comp):
     hist_seizoen.save(update_fields=['heeft_uitslag_bk_indiv'])
 
 
-def uitslag_regio_teams_naar_histcomp(comp):
+def uitslag_regio_teams_naar_histcomp(comp: Competitie):
     """ uitslag regiocompetitie teams overnemen als histcomp """
 
-    seizoen = "%s/%s" % (comp.begin_jaar, comp.begin_jaar + 1)
-
-    try:
-        hist_seizoen = HistCompSeizoen.objects.get(seizoen=seizoen, comp_type=comp.afstand)
-    except HistCompSeizoen.DoesNotExist:        # pragma: no cover
+    hist_seizoen = _get_seizoen(comp)
+    if not hist_seizoen:
         return
 
     bulk = list()
@@ -415,14 +415,11 @@ def uitslag_regio_teams_naar_histcomp(comp):
     hist_seizoen.save(update_fields=['heeft_uitslag_regio_teams'])
 
 
-def uitslag_rk_teams_naar_histcomp(comp):
+def uitslag_rk_teams_naar_histcomp(comp: Competitie):
     """ uitslag rk teams overnemen als histcomp """
 
-    seizoen = "%s/%s" % (comp.begin_jaar, comp.begin_jaar + 1)
-
-    try:
-        hist_seizoen = HistCompSeizoen.objects.get(seizoen=seizoen, comp_type=comp.afstand)
-    except HistCompSeizoen.DoesNotExist:        # pragma: no cover
+    hist_seizoen = _get_seizoen(comp)
+    if not hist_seizoen:
         return
 
     indiv_klasse_lid_nr2hist = dict()
@@ -532,14 +529,11 @@ def uitslag_rk_teams_naar_histcomp(comp):
     hist_seizoen.save(update_fields=['heeft_uitslag_rk_teams'])
 
 
-def uitslag_bk_teams_naar_histcomp(comp):
+def uitslag_bk_teams_naar_histcomp(comp: Competitie):
     """ uitslag bk teams overnemen als histcomp """
 
-    seizoen = "%s/%s" % (comp.begin_jaar, comp.begin_jaar + 1)
-
-    try:
-        hist_seizoen = HistCompSeizoen.objects.get(seizoen=seizoen, comp_type=comp.afstand)
-    except HistCompSeizoen.DoesNotExist:        # pragma: no cover
+    hist_seizoen = _get_seizoen(comp)
+    if not hist_seizoen:
         return
 
     indiv_klasse_lid_nr2hist = dict()
