@@ -103,7 +103,7 @@ class Command(BaseCommand):
                                        'deelnemer__sporterboog__sporter',
                                        'deelnemer__indiv_klasse')
                        .get(pk=pk))
-            if not mutatie.is_verwerkt:
+            if not mutatie.is_verwerkt:     # pragma: no branch
                 self._verwerk_mutatie(mutatie)
                 mutatie.is_verwerkt = True
                 mutatie.save(update_fields=['is_verwerkt'])

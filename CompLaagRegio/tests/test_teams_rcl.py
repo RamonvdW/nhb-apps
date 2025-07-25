@@ -854,7 +854,7 @@ class TestCompLaagRegioTeamsRCL(E2EHelpers, TestCase):
         mutatie.is_verwerkt = False
         mutatie.save(update_fields=['is_verwerkt'])
         # laat deze herstelde mutatie verwerken
-        self.run_management_command('regiocomp_mutaties', '1', '--quick', '--all')
+        self.run_management_command('competitie_mutaties', '1', '--quick', '--all')
 
         self.deelcomp_regio112_18 = Regiocompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
         self.assertEqual(self.deelcomp_regio112_18.huidige_team_ronde, 99)
