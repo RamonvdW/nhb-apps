@@ -284,7 +284,6 @@ class ProductView(TemplateView):
 
         account_koper = get_account(request)
         now = timezone.now()
-        totaal_euro = product.prijs_euro * aantal
 
         stamp_str = timezone.localtime(timezone.now()).strftime('%Y-%m-%d om %H:%M')
         msg = "[%s] %s producten toegevoegd aan het mandje van %s\n" % (stamp_str,

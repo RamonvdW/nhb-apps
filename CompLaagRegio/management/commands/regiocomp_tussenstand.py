@@ -163,9 +163,13 @@ class Command(BaseCommand):
                                 'score__sporterboog')
                 .all())
 
-        if self.taken.hoogste_scorehist:
-            self.stdout.write('[INFO] vorige hoogste ScoreHist pk is %s' % self.taken.hoogste_scorehist.pk)
-            qset = qset.filter(pk__gt=self.taken.hoogste_scorehist.pk)
+        try:
+            if self.taken.hoogste_scorehist:
+                self.stdout.write('[INFO] vorige hoogste ScoreHist pk is %s' % self.taken.hoogste_scorehist.pk)
+                qset = qset.filter(pk__gt=self.taken.hoogste_scorehist.pk)
+        except ScoreHist.DoesNotExist:
+            # CompetitieTaken bevat een ScoreHist die niet meer bestaat?!
+            self.stdout.write('[ERROR] CompetitieTaken.hoogste_scorehist bestaat niet meer!')
 
         # bepaal de sporterboog pk's die we bij moeten werken
         allowed_sporterboog_pks = qset.values_list('score__sporterboog__pk', flat=True)

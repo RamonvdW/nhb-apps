@@ -31,18 +31,24 @@ class TestBrowserBestellingMandjeVerwijder(MyMgmtCommandHelper, bh.BrowserTestCa
         # click handler JS script heeft een POST gedaan
         # de POST handler maakt een mutatie record voor de achtergrond taak
         # en wacht daarna tot 3 seconden op de achtergrondtaak
-        # geeft daarna de http response ("Product is gereserveerd" pagina)
-        self.wait_until_url_not(url)
+        # geeft daarna de http response ("Product is toegevoegd aan je mandje" pagina)
+        # maar de URL is nog steeds die van de webwinkel
+
+        # geef de achtergrondtaak wat tijd
+        time.sleep(1.0)     # 0.5 is te kort!
 
         # ga naar het mandje
         self.do_navigate_to(self.url_mandje)
 
+        leeg = self.find_element_type_with_text('p', 'Je mandje is leeg')
+        if leeg:
+            self.fail('Mandje is onverwachts leeg')
+
         # verwijder het product uit het mandje
         buttons = self.find_elements_buttons()
         if len(buttons) == 0:
-            # print('[ERROR] Verwijder knop niet gevonden - sleep 30')
-            # time.sleep(30)
-            self.fail('Verwijder knop niet gevonden!')
+            page = self.get_page_html()
+            self.fail('[ERROR] Verwijder knop niet gevonden! page:\n%s' % page)
 
         button = buttons[0]
         self.click_not_blocking(button)
@@ -52,8 +58,9 @@ class TestBrowserBestellingMandjeVerwijder(MyMgmtCommandHelper, bh.BrowserTestCa
         time.sleep(0.5)
 
         # bekijk het mandje
-        el_p_je_mandje_is_leeg = self.find_element_type_with_text('p', 'Je mandje is leeg')
-        self.assertIsNotNone(el_p_je_mandje_is_leeg)
+        leeg = self.find_element_type_with_text('p', 'Je mandje is leeg')
+        if not leeg:
+            self.fail('"Je mandje is leeg" tekst niet gevonden')
 
         # controleer dat er geen meldingen van de browser zijn over de JS bestanden
         self.assert_no_console_log()

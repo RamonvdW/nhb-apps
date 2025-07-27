@@ -346,7 +346,7 @@ class BrowserTestCase(TestCase):
         t1 = time.time()
         if self.show_browser:                   # pragma: no cover
             print('do_navigate_to:', url)
-        self._driver.get(self.live_server_url + url)
+        self._driver.get(self.live_server_url + url)        # get() blocks until page is "loaded"
         t2 = time.time()
         if t2 - t1 > 1:                         # pragma: no cover
             # dat duurde meer dan 1 seconde
@@ -442,7 +442,11 @@ class BrowserTestCase(TestCase):
         self.do_pass_otp()
         if self._driver.title != 'Kies je rol':
             self.do_navigate_to(self.url_wissel_van_rol, check_console_log=False)
-        radio = self.find_element_by_id('id_eigen_%s' % self.functie_hwl.pk)    # radio button voor HWL
+        try:
+            radio = self.find_element_by_id('id_eigen_%s' % self.functie_hwl.pk)    # radio button voor HWL
+        except NoSuchElementException:
+            page = self.get_page_html()
+            self.fail('[ERROR] Failed to find radiobutton for HWL role! page:\n%s' % page)
         self.get_following_sibling(radio).click()
         self.find_element_by_id('activeer_eigen').click()       # activeer knop
         self.wait_until_url_not(self.url_wissel_van_rol)        # redirect naar /vereniging/
