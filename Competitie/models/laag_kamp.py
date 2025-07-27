@@ -309,6 +309,8 @@ class KampioenschapTeam(models.Model):
 
     result_teamscore = models.PositiveSmallIntegerField(default=0)          # max = 32767
 
+    # TODO: result_counts kan verwijderd worden: RK/BK teams 25m1p kijkt naar beste bijdrage sporter
+    #       nieuwe format heeft finale rondes
     result_counts = models.CharField(max_length=20, default='', blank=True)     # 25m1pijl: 5x10 3x9
 
     def __str__(self):

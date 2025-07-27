@@ -11,13 +11,13 @@ from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeam
                                Regiocompetitie, RegiocompetitieRonde,
                                Kampioenschap,
                                RegiocompetitieSporterBoog, RegiocompetitieTeam, RegiocompetitieRondeTeam,
-                               KampioenschapSporterBoog)
+                               KampioenschapSporterBoog, KampioenschapTeam)
 from Competitie.operations.vul_histcomp import (uitslag_regio_indiv_naar_histcomp, uitslag_regio_teams_naar_histcomp,
                                                 uitslag_rk_indiv_naar_histcomp, uitslag_rk_teams_naar_histcomp,
                                                 uitslag_bk_indiv_naar_histcomp, uitslag_bk_teams_naar_histcomp)
 from Functie.tests.helpers import maak_functie
 from Geo.models import Regio, Rayon
-from HistComp.models import HistCompSeizoen
+from HistComp.models import HistCompSeizoen, HistKampIndivRK, HistKampIndivBK
 from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
@@ -63,8 +63,8 @@ class TestCompetitieOperationsVulHistComp(E2EHelpers, TestCase):
         boog_c = BoogType.objects.get(afkorting='C')
         self.comp.boogtypen.add(boog_c)
 
-        team_c = TeamType.objects.get(afkorting='C')
-        self.comp.teamtypen.add(team_c)
+        self.team_c = TeamType.objects.get(afkorting='C')
+        self.comp.teamtypen.add(self.team_c)
 
         self.indiv_klasse1 = CompetitieIndivKlasse(
                                 competitie=self.comp,
@@ -100,12 +100,35 @@ class TestCompetitieOperationsVulHistComp(E2EHelpers, TestCase):
                                     competitie=self.comp,
                                     volgorde=1,
                                     beschrijving='Compound ERE',
-                                    team_type=team_c,
-                                    team_afkorting=team_c.afkorting,
-                                    min_ag=0.1,
-                                    is_voor_teams_rk_bk=True)
+                                    team_type=self.team_c,
+                                    team_afkorting=self.team_c.afkorting,
+                                    min_ag=8.0,
+                                    is_voor_teams_rk_bk=True,
+                                    titel_bk='Bondskampioen')
         self.team_klasse1.save()
         self.team_klasse1.boog_typen.add(boog_c)
+
+        self.team_klasse2 = CompetitieTeamKlasse(
+                                    competitie=self.comp,
+                                    volgorde=2,
+                                    beschrijving='Compound A',
+                                    team_type=self.team_c,
+                                    team_afkorting=self.team_c.afkorting,
+                                    min_ag=7.0,
+                                    is_voor_teams_rk_bk=True,
+                                    titel_bk='Nederlands Kampioen')
+        self.team_klasse2.save()
+
+        self.team_klasse3 = CompetitieTeamKlasse(
+                                    competitie=self.comp,
+                                    volgorde=3,
+                                    beschrijving='Compound L',
+                                    team_type=self.team_c,
+                                    team_afkorting=self.team_c.afkorting,
+                                    min_ag=0.1,
+                                    is_voor_teams_rk_bk=True,
+                                    titel_bk='Lantaarn')
+        self.team_klasse3.save()
 
         self.deelcomp = Regiocompetitie(
                             competitie=self.comp,
@@ -124,7 +147,7 @@ class TestCompetitieOperationsVulHistComp(E2EHelpers, TestCase):
                                 regiocompetitie=self.deelcomp,
                                 vereniging=self.ver1,
                                 volg_nr=1,
-                                team_type=team_c,
+                                team_type=self.team_c,
                                 team_naam="Eerste",
                                 team_klasse=self.team_klasse1)
         self.regio_team1.save()
@@ -133,7 +156,7 @@ class TestCompetitieOperationsVulHistComp(E2EHelpers, TestCase):
                                 regiocompetitie=self.deelcomp,
                                 vereniging=self.ver1,
                                 volg_nr=2,
-                                team_type=team_c,
+                                team_type=self.team_c,
                                 team_naam="Tweede",
                                 team_klasse=self.team_klasse1)
         self.regio_team2.save()
@@ -142,7 +165,7 @@ class TestCompetitieOperationsVulHistComp(E2EHelpers, TestCase):
                                 regiocompetitie=self.deelcomp,
                                 vereniging=self.ver1,
                                 volg_nr=3,
-                                team_type=team_c,
+                                team_type=self.team_c,
                                 team_naam="Derde",
                                 team_klasse=self.team_klasse1)
         self.regio_team3.save()
@@ -160,7 +183,7 @@ class TestCompetitieOperationsVulHistComp(E2EHelpers, TestCase):
                             functie=func_rko)
         self.kamp_bk.save()
 
-        self.sporter = Sporter(
+        self.sporter1 = Sporter(
                             lid_nr=100001,
                             geslacht="M",
                             voornaam="Ramon",
@@ -169,13 +192,30 @@ class TestCompetitieOperationsVulHistComp(E2EHelpers, TestCase):
                             geboorte_datum=datetime.date(year=1972, month=3, day=4),
                             sinds_datum=datetime.date(year=2010, month=11, day=12),
                             bij_vereniging=ver)
-        self.sporter.save()
+        self.sporter1.save()
 
-        self.sporterboog = SporterBoog(
-                                sporter=self.sporter,
+        self.sporterboog1 = SporterBoog(
+                                sporter=self.sporter1,
                                 boogtype=boog_c,
                                 voor_wedstrijd=True)
-        self.sporterboog.save()
+        self.sporterboog1.save()
+
+        self.sporter2 = Sporter(
+                            lid_nr=100002,
+                            geslacht="V",
+                            voornaam="Ramona",
+                            achternaam="de Tester",
+                            email="r-adetester@gmail.not",
+                            geboorte_datum=datetime.date(year=1973, month=3, day=5),
+                            sinds_datum=datetime.date(year=2010, month=11, day=12),
+                            bij_vereniging=ver)
+        self.sporter2.save()
+
+        self.sporterboog2 = SporterBoog(
+                                sporter=self.sporter2,
+                                boogtype=boog_c,
+                                voor_wedstrijd=True)
+        self.sporterboog2.save()
 
     def test_regio_indiv(self):
         uitslag_regio_indiv_naar_histcomp(self.comp)
@@ -185,8 +225,8 @@ class TestCompetitieOperationsVulHistComp(E2EHelpers, TestCase):
 
         deelnemer = RegiocompetitieSporterBoog(
                         regiocompetitie=self.deelcomp,
-                        sporterboog=self.sporterboog,
-                        bij_vereniging=self.sporter.bij_vereniging,
+                        sporterboog=self.sporterboog1,
+                        bij_vereniging=self.sporter1.bij_vereniging,
                         indiv_klasse=self.indiv_klasse1,
                         score1=110,
                         score2=120,
@@ -203,8 +243,8 @@ class TestCompetitieOperationsVulHistComp(E2EHelpers, TestCase):
 
         deelnemer = RegiocompetitieSporterBoog(
                         regiocompetitie=self.deelcomp,
-                        sporterboog=self.sporterboog,
-                        bij_vereniging=self.sporter.bij_vereniging,
+                        sporterboog=self.sporterboog1,
+                        bij_vereniging=self.sporter1.bij_vereniging,
                         indiv_klasse=self.indiv_klasse1,
                         score1=110,
                         score2=120,
@@ -221,8 +261,8 @@ class TestCompetitieOperationsVulHistComp(E2EHelpers, TestCase):
 
         deelnemer = RegiocompetitieSporterBoog(
                         regiocompetitie=self.deelcomp,
-                        sporterboog=self.sporterboog,
-                        bij_vereniging=self.sporter.bij_vereniging,
+                        sporterboog=self.sporterboog1,
+                        bij_vereniging=self.sporter1.bij_vereniging,
                         indiv_klasse=self.indiv_klasse2,
                         score1=110,
                         score2=120,
@@ -239,8 +279,8 @@ class TestCompetitieOperationsVulHistComp(E2EHelpers, TestCase):
 
         deelnemer = RegiocompetitieSporterBoog(
                         regiocompetitie=self.deelcomp,
-                        sporterboog=self.sporterboog,
-                        bij_vereniging=self.sporter.bij_vereniging,
+                        sporterboog=self.sporterboog1,
+                        bij_vereniging=self.sporter1.bij_vereniging,
                         indiv_klasse=self.indiv_klasse2,
                         score1=110,
                         score2=120,
@@ -266,9 +306,9 @@ class TestCompetitieOperationsVulHistComp(E2EHelpers, TestCase):
 
         deelnemer = KampioenschapSporterBoog(
                         kampioenschap=self.kamp_rk,
-                        sporterboog=self.sporterboog,
+                        sporterboog=self.sporterboog1,
                         indiv_klasse=self.indiv_klasse1,
-                        bij_vereniging=self.sporter.bij_vereniging,
+                        bij_vereniging=self.sporter1.bij_vereniging,
                         result_score_1=100,
                         result_score_2=200,
                         result_counts="5x10",
@@ -277,9 +317,9 @@ class TestCompetitieOperationsVulHistComp(E2EHelpers, TestCase):
 
         deelnemer = KampioenschapSporterBoog(
                         kampioenschap=self.kamp_rk,
-                        sporterboog=self.sporterboog,
+                        sporterboog=self.sporterboog1,
                         indiv_klasse=self.indiv_klasse1,
-                        bij_vereniging=self.sporter.bij_vereniging,
+                        bij_vereniging=self.sporter1.bij_vereniging,
                         result_score_1=100,
                         result_score_2=200,
                         result_counts="5x10",
@@ -289,9 +329,9 @@ class TestCompetitieOperationsVulHistComp(E2EHelpers, TestCase):
         # schiet alleen in team
         deelnemer = KampioenschapSporterBoog(
                         kampioenschap=self.kamp_rk,
-                        sporterboog=self.sporterboog,
+                        sporterboog=self.sporterboog1,
                         indiv_klasse=self.indiv_klasse1,
-                        bij_vereniging=self.sporter.bij_vereniging,
+                        bij_vereniging=self.sporter1.bij_vereniging,
                         result_rank=77,
                         deelname=DEELNAME_NEE)
         deelnemer.save()
@@ -307,9 +347,9 @@ class TestCompetitieOperationsVulHistComp(E2EHelpers, TestCase):
 
         deelnemer = KampioenschapSporterBoog(
                         kampioenschap=self.kamp_bk,
-                        sporterboog=self.sporterboog,
+                        sporterboog=self.sporterboog1,
                         indiv_klasse=self.indiv_klasse1,
-                        bij_vereniging=self.sporter.bij_vereniging,
+                        bij_vereniging=self.sporter1.bij_vereniging,
                         result_score_1=100,
                         result_score_2=200,
                         result_counts="5x10",
@@ -318,9 +358,9 @@ class TestCompetitieOperationsVulHistComp(E2EHelpers, TestCase):
 
         deelnemer = KampioenschapSporterBoog(
                         kampioenschap=self.kamp_bk,
-                        sporterboog=self.sporterboog,
+                        sporterboog=self.sporterboog1,
                         indiv_klasse=self.indiv_klasse1,
-                        bij_vereniging=self.sporter.bij_vereniging,
+                        bij_vereniging=self.sporter1.bij_vereniging,
                         result_score_1=100,
                         result_score_2=200,
                         result_counts="5x10",
@@ -329,9 +369,9 @@ class TestCompetitieOperationsVulHistComp(E2EHelpers, TestCase):
 
         deelnemer = KampioenschapSporterBoog(
                         kampioenschap=self.kamp_bk,
-                        sporterboog=self.sporterboog,
+                        sporterboog=self.sporterboog1,
                         indiv_klasse=self.indiv_klasse2,
-                        bij_vereniging=self.sporter.bij_vereniging,
+                        bij_vereniging=self.sporter1.bij_vereniging,
                         result_score_1=100,
                         result_score_2=200,
                         result_counts="5x10",
@@ -340,9 +380,9 @@ class TestCompetitieOperationsVulHistComp(E2EHelpers, TestCase):
 
         deelnemer = KampioenschapSporterBoog(
                         kampioenschap=self.kamp_bk,
-                        sporterboog=self.sporterboog,
+                        sporterboog=self.sporterboog1,
                         indiv_klasse=self.indiv_klasse3,
-                        bij_vereniging=self.sporter.bij_vereniging,
+                        bij_vereniging=self.sporter1.bij_vereniging,
                         result_score_1=100,
                         result_score_2=200,
                         result_counts="5x10",
@@ -351,9 +391,9 @@ class TestCompetitieOperationsVulHistComp(E2EHelpers, TestCase):
 
         deelnemer = KampioenschapSporterBoog(
                         kampioenschap=self.kamp_bk,
-                        sporterboog=self.sporterboog,
+                        sporterboog=self.sporterboog1,
                         indiv_klasse=self.indiv_klasse2,
-                        bij_vereniging=self.sporter.bij_vereniging,
+                        bij_vereniging=self.sporter1.bij_vereniging,
                         result_score_1=100,
                         result_score_2=200,
                         result_counts="5x10",
@@ -415,6 +455,73 @@ class TestCompetitieOperationsVulHistComp(E2EHelpers, TestCase):
         uitslag_rk_teams_naar_histcomp(self.comp)       # geen seizoen
         uitslag_regio_indiv_naar_histcomp(self.comp)    # maakt het HistCompSeizoen aan
 
+        # no-show team
+        team = KampioenschapTeam(
+                    kampioenschap=self.kamp_rk,
+                    vereniging=self.ver1,
+                    volg_nr=1,
+                    team_type=self.team_c,
+                    team_naam='Nog show',
+                    team_klasse=self.team_klasse1,
+                    result_rank=0,
+                    result_teamscore=0)
+        team.save()
+
+        # winnaar
+        team = KampioenschapTeam(
+                    kampioenschap=self.kamp_rk,
+                    vereniging=self.ver1,
+                    volg_nr=2,
+                    team_type=self.team_c,
+                    team_naam='Eerste C',
+                    team_klasse=self.team_klasse1,
+                    result_rank=1,
+                    result_teamscore=1234)
+        team.save()
+
+        # tweede
+        team = KampioenschapTeam(
+                    kampioenschap=self.kamp_rk,
+                    vereniging=self.ver1,
+                    volg_nr=3,
+                    team_type=self.team_c,
+                    team_naam='Tweede C',
+                    team_klasse=self.team_klasse1,
+                    result_rank=2,
+                    result_teamscore=1233)
+        team.save()
+
+        # 4 feitelijke leden
+        sb = self.sporterboog2      # alleen voor de eerste
+        for lp in range(4):
+            deelnemer = KampioenschapSporterBoog(
+                            kampioenschap=self.kamp_rk,
+                            sporterboog=sb,
+                            indiv_klasse=self.indiv_klasse1,
+                            bij_vereniging=sb.sporter.bij_vereniging,
+                            result_rk_teamscore_1=100 + lp*10,
+                            result_rk_teamscore_2=150 + lp*10,
+                            result_rank=0)
+            deelnemer.save()
+            team.feitelijke_leden.add(deelnemer)
+            sb = self.sporterboog1
+        # for
+
+        # maak voor een van de sporters een individueel record aan
+        hist_seizoen = HistCompSeizoen.objects.first()
+        sb = self.sporterboog2
+        HistKampIndivRK.objects.create(
+                                seizoen=hist_seizoen,
+                                indiv_klasse=self.indiv_klasse1.beschrijving,
+                                sporter_lid_nr=sb.sporter.lid_nr,
+                                sporter_naam=sb.sporter.volledige_naam(),
+                                boogtype=sb.boogtype.afkorting,
+                                vereniging_nr=sb.sporter.bij_vereniging.ver_nr,
+                                vereniging_naam=sb.sporter.bij_vereniging.naam,
+                                vereniging_plaats=sb.sporter.bij_vereniging.plaats,
+                                rayon_nr=sb.sporter.bij_vereniging.regio.rayon_nr,
+                                rank_rk=10)
+
         uitslag_rk_teams_naar_histcomp(self.comp)
 
         hist_seizoen = HistCompSeizoen.objects.first()
@@ -423,6 +530,97 @@ class TestCompetitieOperationsVulHistComp(E2EHelpers, TestCase):
     def test_bk_teams(self):
         uitslag_bk_teams_naar_histcomp(self.comp)       # geen seizoen
         uitslag_regio_indiv_naar_histcomp(self.comp)    # maakt het HistCompSeizoen aan
+
+        # no-show team
+        team = KampioenschapTeam(
+                    kampioenschap=self.kamp_bk,
+                    vereniging=self.ver1,
+                    volg_nr=1,
+                    team_type=self.team_c,
+                    team_naam='Nog show',
+                    team_klasse=self.team_klasse1,
+                    result_rank=0,
+                    result_teamscore=0)
+        team.save()
+
+        # winnaar
+        team = KampioenschapTeam(
+                    kampioenschap=self.kamp_bk,
+                    vereniging=self.ver1,
+                    volg_nr=2,
+                    team_type=self.team_c,
+                    team_naam='Eerste C',
+                    team_klasse=self.team_klasse1,
+                    result_rank=1,
+                    result_teamscore=1234)
+        team.save()
+
+        # tweede
+        team = KampioenschapTeam(
+                    kampioenschap=self.kamp_bk,
+                    vereniging=self.ver1,
+                    volg_nr=3,
+                    team_type=self.team_c,
+                    team_naam='Tweede C',
+                    team_klasse=self.team_klasse1,
+                    result_rank=2,
+                    result_teamscore=1233)
+        team.save()
+
+        # 4 feitelijke leden
+        sb = self.sporterboog2      # alleen voor de eerste
+        for lp in range(4):
+            deelnemer = KampioenschapSporterBoog(
+                            kampioenschap=self.kamp_rk,          # let op: RK is correct
+                            sporterboog=sb,
+                            indiv_klasse=self.indiv_klasse1,
+                            bij_vereniging=sb.sporter.bij_vereniging,
+                            result_bk_teamscore_1=100 + lp*10,
+                            result_bk_teamscore_2=150 + lp*10,
+                            result_rank=0)
+            deelnemer.save()
+            team.feitelijke_leden.add(deelnemer)
+            sb = self.sporterboog1
+        # for
+
+        # klasse met andere BK titel
+        team = KampioenschapTeam(
+                    kampioenschap=self.kamp_bk,
+                    vereniging=self.ver1,
+                    volg_nr=3,
+                    team_type=self.team_c,
+                    team_naam='Derde C',
+                    team_klasse=self.team_klasse2,
+                    result_rank=1,
+                    result_teamscore=1200)
+        team.save()
+
+        # klasse met andere BK titel
+        team = KampioenschapTeam(
+                    kampioenschap=self.kamp_bk,
+                    vereniging=self.ver1,
+                    volg_nr=3,
+                    team_type=self.team_c,
+                    team_naam='Laatste C',
+                    team_klasse=self.team_klasse3,
+                    result_rank=1,
+                    result_teamscore=500)
+        team.save()
+        
+        # maak voor een van de sporters een individueel record aan
+        hist_seizoen = HistCompSeizoen.objects.first()
+        sb = self.sporterboog2
+        HistKampIndivRK.objects.create(
+                                seizoen=hist_seizoen,
+                                indiv_klasse=self.indiv_klasse1.beschrijving,
+                                sporter_lid_nr=sb.sporter.lid_nr,
+                                sporter_naam=sb.sporter.volledige_naam(),
+                                boogtype=sb.boogtype.afkorting,
+                                vereniging_nr=sb.sporter.bij_vereniging.ver_nr,
+                                vereniging_naam=sb.sporter.bij_vereniging.naam,
+                                vereniging_plaats=sb.sporter.bij_vereniging.plaats,
+                                rayon_nr=sb.sporter.bij_vereniging.regio.rayon_nr,
+                                rank_rk=10)
 
         uitslag_bk_teams_naar_histcomp(self.comp)
 

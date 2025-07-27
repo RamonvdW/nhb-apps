@@ -424,7 +424,7 @@ def uitslag_rk_teams_naar_histcomp(comp: Competitie):
 
     indiv_klasse_lid_nr2hist = dict()
     for hist in HistKampIndivRK.objects.filter(seizoen=hist_seizoen):
-        tup = (hist.indiv_klasse, hist.sporter_lid_nr)
+        tup = (hist.indiv_klasse, hist.sporter_lid_nr, hist.boogtype)
         indiv_klasse_lid_nr2hist[tup] = hist
     # for
 
@@ -450,7 +450,6 @@ def uitslag_rk_teams_naar_histcomp(comp: Competitie):
             if team.result_rank == 1:
                 titel_code = HISTCOMP_TITEL_RK
 
-            # FUTURE: 25m1p counts (9x10 20x9)
             hist = HistKampTeam(
                         seizoen=hist_seizoen,
                         rk_of_bk=HISTCOMP_RK,
@@ -472,7 +471,8 @@ def uitslag_rk_teams_naar_histcomp(comp: Competitie):
                 s2 = team_lid.result_rk_teamscore_2
 
                 lid_nr = team_lid.sporterboog.sporter.lid_nr
-                tup = (team_lid.indiv_klasse.beschrijving, lid_nr)
+                boogtype = team_lid.sporterboog.boogtype.afkorting
+                tup = (team_lid.indiv_klasse.beschrijving, lid_nr, boogtype)
                 try:
                     hist_indiv = indiv_klasse_lid_nr2hist[tup]
                 except KeyError:
@@ -483,7 +483,7 @@ def uitslag_rk_teams_naar_histcomp(comp: Competitie):
                                     indiv_klasse='',
                                     sporter_lid_nr=lid_nr,
                                     sporter_naam=team_lid.sporterboog.sporter.volledige_naam(),
-                                    boogtype=team_lid.sporterboog.boogtype.afkorting,
+                                    boogtype=boogtype,
                                     vereniging_nr=ver.ver_nr,
                                     vereniging_naam=ver.naam,
                                     vereniging_plaats=ver.plaats,
@@ -538,7 +538,7 @@ def uitslag_bk_teams_naar_histcomp(comp: Competitie):
 
     indiv_klasse_lid_nr2hist = dict()
     for hist in HistKampIndivRK.objects.filter(seizoen=hist_seizoen):
-        tup = (hist.indiv_klasse, hist.sporter_lid_nr)
+        tup = (hist.indiv_klasse, hist.sporter_lid_nr, hist.boogtype)
         indiv_klasse_lid_nr2hist[tup] = hist
     # for
 
@@ -589,7 +589,8 @@ def uitslag_bk_teams_naar_histcomp(comp: Competitie):
 
                 sporter = team_lid.sporterboog.sporter
                 lid_nr = sporter.lid_nr
-                tup = (team_lid.indiv_klasse.beschrijving, lid_nr)
+                boogtype = team_lid.sporterboog.boogtype.afkorting
+                tup = (team_lid.indiv_klasse.beschrijving, lid_nr, boogtype)
                 try:
                     hist_indiv = indiv_klasse_lid_nr2hist[tup]
                 except KeyError:
@@ -610,7 +611,7 @@ def uitslag_bk_teams_naar_histcomp(comp: Competitie):
                                     indiv_klasse='',
                                     sporter_lid_nr=lid_nr,
                                     sporter_naam=sporter.volledige_naam(),
-                                    boogtype=team_lid.sporterboog.boogtype.afkorting,
+                                    boogtype=boogtype,
                                     vereniging_nr=ver.ver_nr,
                                     vereniging_naam=ver.naam,
                                     vereniging_plaats=ver.plaats,
