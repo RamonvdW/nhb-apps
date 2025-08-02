@@ -70,7 +70,7 @@ class TestLocatieCliReistijd(E2EHelpers, TestCase):
         stdout = OutputWrapper(io.StringIO())
         stderr = OutputWrapper(io.StringIO())
 
-        with override_settings(GMAPS_KEY='garbage'):
+        with override_settings(GOOGLEMAPS_API_KEY='garbage'):
             bepaler = ReistijdBepaler(stdout, stderr, 25)
             bepaler.run()
         # print('\nf1: %s\nf2: %s' % (stdout.getvalue(), stderr.getvalue()))

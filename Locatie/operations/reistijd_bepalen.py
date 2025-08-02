@@ -39,11 +39,11 @@ class ReistijdBepaler(object):
         """
 
         if not self._gmaps:
-            options = {'key': settings.GMAPS_KEY}
+            options = {'key': settings.GOOGLEMAPS_API_KEY}
 
-            if settings.GMAPS_API_URL:      # pragma: no branch
-                self.stdout.write('[INFO] Server URL %s' % repr(settings.GMAPS_API_URL))
-                options['base_url'] = settings.GMAPS_API_URL
+            if settings.GOOGLEMAPS_API_URL:      # pragma: no branch
+                self.stdout.write('[INFO] Server URL %s' % repr(settings.GOOGLEMAPS_API_URL))
+                options['base_url'] = settings.GOOGLEMAPS_API_URL
 
             try:
                 self._gmaps = googlemaps.Client(**options)
@@ -56,13 +56,13 @@ class ReistijdBepaler(object):
             options = {}
             transport = None
 
-            if settings.GMAPS_API_URL:  # pragma: no branch
+            if settings.GOOGLEMAPS_API_URL:  # pragma: no branch
                 # verification environment
                 # redirect (URL) does not work, so we provide a RoutesTransport implementation
                 from Locatie.test_tools.websim_routes import get_routes_transport
                 transport = get_routes_transport()
             else:
-                creds = Credentials(settings.GMAPS_KEY)
+                creds = Credentials(settings.GOOGLEMAPS_API_KEY)
 
             try:
                 self._client = RoutesClient(credentials=creds, client_options=options, transport=transport)

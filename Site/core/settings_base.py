@@ -44,7 +44,7 @@ BETAAL_API_URL = None
 
 # ability to override the server URL for test purposes
 # None = use built-in default
-GMAPS_API_URL = None
+GOOGLEMAPS_API_URL = None
 
 # toon het kaartje Ledenvoordeel?
 TOON_LEDENVOORDEEL = True

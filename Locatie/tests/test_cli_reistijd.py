@@ -24,7 +24,7 @@ class TestLocatieCliReistijd(E2EHelpers, TestCase):
         # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
         self.assertEqual(f1.getvalue(), '')
 
-        with override_settings(GMAPS_KEY='garbage'):
+        with override_settings(GOOGLEMAPS_API_KEY='garbage'):
             f1, f2 = self.run_management_command('reistijd_bijwerken')
         # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
         self.assertTrue('[ERROR] Fout tijdens gmaps init: Invalid API key provided' in f1.getvalue())

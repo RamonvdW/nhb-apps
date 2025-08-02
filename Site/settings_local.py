@@ -155,7 +155,7 @@ URL_PROCEDURES = 'https://your.site/relevant/url/'     # noqa
 URL_RECORD_AANVRAAGFORMULIER = 'https://docs.google.com/spreadsheets/1234_your_doc_7890'   # noqa
 
 # landing page voor alle opleidingen
-URL_OPLEIDINGEN = 'https://www.handboogsport.nl/opleidingen/'
+URL_OPLEIDINGEN = 'https://your.site/relevant/url/'
 
 # locatie op disk waar de foto's staan (bron)
 # deze worden door collectstatic naar deployment gezet  # noqa
@@ -189,8 +189,8 @@ OPLEIDINGEN_VERKOPER_VER_NRS = (1368,)
 
 # google maps URL (override) and API key
 # (None = use library provided default)
-GMAPS_API_URL = None  
-GMAPS_KEY = 'AIzaDummy'
+GOOGLEMAPS_API_URL = None  
+GOOGLEMAPS_API_KEY = 'AIzaDummy'
 
 # voor sommige adressen werkt de geocode API niet...
 # hier geven we het handmatige antwoord.
