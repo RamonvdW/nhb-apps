@@ -30,15 +30,18 @@
                     <input type="hidden" name="otp_code" id="id_otp_code">
 
                     {% if form.errors %}
-                        {% for error in form.non_field_errors %}
-                            <p class="left-align sv-rood-text center">Fout: {{ error|escape }}</p>
-                        {% endfor %}
+                        <div style="margin-bottom:30px">
+                            {% for error in form.non_field_errors %}
+                                <p class="left-align sv-rood-text center">Fout: {{ error|escape }}</p>
+                            {% endfor %}
+                        </div>
                     {% endif %}
 
                     <!-- kader met 6 vakjes -->
                     <div class="row">
                         <div class="col s12">
-                            <table style="width:1px; margin-left:auto; margin-right:auto">
+                            <label>Tweede factor code:</label>
+                            <table style="width:1px; margin-left:auto; margin-right:auto; margin-top:15px">
                                 <tr>
                                     {% for digit in digits %}
                                         <td>
@@ -55,7 +58,7 @@
                         </div>
 
                         <div class="col s12" style="margin-top:25px">
-                            <input class="btn-sv-rood center-align" id="submit_knop" type="submit" value="Controleer">
+                            <button class="btn-sv-rood" id="submit_knop" type="submit">Controleer</button>
                         </div>
                     </div>
                 </form>
@@ -78,7 +81,7 @@
     <div class="row-sv-blauw">
         <div class="col s12 l10 offset-l1 xl8 offset-xl2">
             <div class="sv-kader" style="padding:10px">
-                <p>Tik de 6-cijferige code over uit je authenticatie app (waarschijnlijk op je mobiel)</p>
+                <p>Tik de 6 cijfers over uit je authenticatie app (waarschijnlijk op je mobiel)</p>
 
                 {% if toon_hulp %}
 

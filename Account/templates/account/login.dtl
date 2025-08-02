@@ -52,15 +52,15 @@
 
                     <div class="row" style="margin-top:90px">
                         {% if show_wachtwoord_vergeten %}
+                            <div class="col s4">
+                                <button class="btn-sv-rood" id="submit_knop" type="submit">Log in</button>
+                            </div>
                             <div class="col s8">
                                 <a class="btn-sv-rood" href="{% url 'Account:wachtwoord-vergeten' %}">Wachtwoord vergeten?</a>
                             </div>
-                            <div class="col s4">
-                                <input class="btn-sv-rood center-align" id="submit_knop" type="submit" value="Log in">
-                            </div>
                         {% else %}
                             <div class="col s12">
-                                <input class="btn-sv-rood center-align" id="submit_knop" type="submit" value="Log in">
+                                <button class="btn-sv-rood" id="submit_knop" type="submit">Log in</button>
                             </div>
                         {% endif %}
                     </div>
