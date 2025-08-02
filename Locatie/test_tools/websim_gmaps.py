@@ -23,76 +23,76 @@ class MyServer(BaseHTTPRequestHandler):
         # no logging please
         pass
 
-    def handle_get_directions(self, url_encoded_args):
-        # split the request
-        args = url_encoded_args.replace('%2C', ',').replace('+', ' ')
-        # spl = args.split('&')
-        # print('args:', repr(spl))
-
-        if 'destination=incompleet' in args:
-            # onvolledig antwoord geven
-            data = {
-                "geocoded_waypoints": [],  # list of dicts
-                "routes": [],
-                "status": "OK",
-            }
-
-        elif 'destination=geef fout' in args:
-            # fout terug geven
-            data = {
-                "status": "STATUS_ERROR",
-            }
-
-        else:
-            leg1 = {
-                "distance": {"text": "15.4km", "value": 15444},
-                "duration": {"text": "17 mins", "value": 1030},
-                "end_address": "whatever",
-                "end_location": {"lat": 0.0, "lng": 0.0},
-                "start_address": "where ever",
-                "start_location": {"lat": 1.0, "lng": 1.1},
-                "steps": [],  # not used
-                "traffic_speed_entry": [],
-                "via_waypoints": []
-            }
-
-            route1 = {
-                "bounds": {'northeast': {'lat': 0.0, 'lng': 0.0},
-                           'southwest': {'lat': 1.0, 'lng': 1.0}},
-                "copyrights": "yeah",
-                "legs": [
-                    leg1,
-                ],
-                "overview_polyline": {"points": "some_encoding"},
-                "summary": "N2",
-                "warnings": [],
-                "waypoint_order": []
-            }
-
-            data = {
-                "geocoded_waypoints": [],  # list of dicts
-                "routes": [
-                    route1,
-                ],
-                "status": "OK",
-            }
-
-        data = json.dumps(data)
-        enc_data = data.encode()  # convert string to bytes
-        enc_data_len = len(enc_data)
-
-        self.send_response(200)
-        self.send_header('Content-type', 'application/hal+json')
-        self.send_header('Content-length', str(enc_data_len))
-        self.end_headers()
-
-        # stuur de data zelf
-        if enc_data_len > 0:
-            self.wfile.write(enc_data)
-            self.wfile.flush()
-        self.send_header('Content-type', 'application/json')
-        self.end_headers()
-        self.wfile.write("GET request for {}".format(self.path).encode('utf-8'))
+    # def handle_get_directions(self, url_encoded_args):
+    #     # split the request
+    #     args = url_encoded_args.replace('%2C', ',').replace('+', ' ')
+    #     # spl = args.split('&')
+    #     # print('args:', repr(spl))
+    #
+    #     if 'destination=incompleet' in args:
+    #         # onvolledig antwoord geven
+    #         data = {
+    #             "geocoded_waypoints": [],  # list of dicts
+    #             "routes": [],
+    #             "status": "OK",
+    #         }
+    #
+    #     elif 'destination=geef fout' in args:
+    #         # fout terug geven
+    #         data = {
+    #             "status": "STATUS_ERROR",
+    #         }
+    #
+    #     else:
+    #         leg1 = {
+    #             "distance": {"text": "15.4km", "value": 15444},
+    #             "duration": {"text": "17 mins", "value": 1030},
+    #             "end_address": "whatever",
+    #             "end_location": {"lat": 0.0, "lng": 0.0},
+    #             "start_address": "where ever",
+    #             "start_location": {"lat": 1.0, "lng": 1.1},
+    #             "steps": [],  # not used
+    #             "traffic_speed_entry": [],
+    #             "via_waypoints": []
+    #         }
+    #
+    #         route1 = {
+    #             "bounds": {'northeast': {'lat': 0.0, 'lng': 0.0},
+    #                        'southwest': {'lat': 1.0, 'lng': 1.0}},
+    #             "copyrights": "yeah",
+    #             "legs": [
+    #                 leg1,
+    #             ],
+    #             "overview_polyline": {"points": "some_encoding"},
+    #             "summary": "N2",
+    #             "warnings": [],
+    #             "waypoint_order": []
+    #         }
+    #
+    #         data = {
+    #             "geocoded_waypoints": [],  # list of dicts
+    #             "routes": [
+    #                 route1,
+    #             ],
+    #             "status": "OK",
+    #         }
+    #
+    #     data = json.dumps(data)
+    #     enc_data = data.encode()  # convert string to bytes
+    #     enc_data_len = len(enc_data)
+    #
+    #     self.send_response(200)
+    #     self.send_header('Content-type', 'application/hal+json')
+    #     self.send_header('Content-length', str(enc_data_len))
+    #     self.end_headers()
+    #
+    #     # stuur de data zelf
+    #     if enc_data_len > 0:
+    #         self.wfile.write(enc_data)
+    #         self.wfile.flush()
+    #     self.send_header('Content-type', 'application/json')
+    #     self.end_headers()
+    #     self.wfile.write("GET request for {}".format(self.path).encode('utf-8'))
 
     def handle_get_geocode(self, url_encoded_args):
         # split the request
@@ -230,10 +230,10 @@ class MyServer(BaseHTTPRequestHandler):
     def do_GET(self):       # noqa
         # print("GET request,\nPath: %s\nHeaders:\n%s" % (str(self.path), str(self.headers)))
 
-        if self.path.startswith('/maps/api/directions/json?'):
-            return self.handle_get_directions(self.path[26:])
+        # if self.path.startswith('/maps/api/directions/json?'):
+        #     return self.handle_get_directions(self.path[26:])
 
-        elif self.path.startswith('/maps/api/geocode/json?'):
+        if self.path.startswith('/maps/api/geocode/json?'):
             return self.handle_get_geocode(self.path[23:])
 
         print('{websim_gmaps} Unknown GET url: %s' % repr(self.path))

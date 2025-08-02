@@ -27,8 +27,8 @@ class ReistijdBepaler(object):
         self.stdout = stdout
         self.stderr = stderr
 
-        self._client = None
-        self._gmaps = None
+        self._client: RoutesClient | None = None
+        self._gmaps: googlemaps.Client | None = None
         self.verzoeken_teller = 0
         self.verzoeken_grens = verzoeken_grens
 
