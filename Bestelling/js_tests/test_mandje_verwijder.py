@@ -35,7 +35,7 @@ class TestBrowserBestellingMandjeVerwijder(MyMgmtCommandHelper, bh.BrowserTestCa
         # maar de URL is nog steeds die van de webwinkel
 
         # geef de achtergrondtaak wat tijd
-        time.sleep(1.0)     # 0.5 is te kort!
+        time.sleep(2.0)     # 1.0 is te kort!
 
         # ga naar het mandje
         self.do_navigate_to(self.url_mandje)

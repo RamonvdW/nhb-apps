@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -46,8 +46,11 @@ class TestRegistreerLid(E2EHelpers, TestCase):
         self.ver1 = ver
 
         # maak de SEC functie aan
-        functie = Functie(rol='SEC', vereniging=ver, beschrijving='SEC vereniging 1000')
-        functie.save()
+        self.functie_sec = Functie(rol='SEC',
+                                   vereniging=ver,
+                                   beschrijving='SEC vereniging 1000',
+                                   bevestigde_email='sec@ver1.not')
+        self.functie_sec.save()
 
         # maak een test lid aan
         sporter = Sporter(
@@ -193,10 +196,23 @@ class TestRegistreerLid(E2EHelpers, TestCase):
         self.assertContains(resp, "wachtwoord bevat te veel gelijke tekens")
 
     def test_geen_email(self):
-        # vul de sec in
+        # geen secretaris bekend
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_registreer_khsn,
+                                    {'lid_nr': '100002',
+                                     'email': 'rdetester@gmail.not',
+                                     'nieuw_wachtwoord': E2EHelpers.WACHTWOORD},
+                                    follow=True)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('registreer/registreer-lid-fout-geen-email.dtl', 'plein/site_layout.dtl'))
+
+        # vul de SEC in voor deze vereniging
+        self.functie_sec.accounts.add(self.sporter_100001.account)      # voor het e-mailadres
+
         sec = Secretaris(vereniging=self.ver1)
         sec.save()
-        sec.sporters.add(self.sporter_100001)
+        sec.sporters.add(self.sporter_100001)       # voor de naam
 
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_registreer_khsn,
@@ -274,7 +290,7 @@ class TestRegistreerLid(E2EHelpers, TestCase):
         # (dit test een stukje functionaliteit aangeboden door Account)
         objs = TijdelijkeCode.objects.all().order_by('-aangemaakt_op')       # nieuwste eerst
         self.assertTrue(len(objs) > 0)
-        obj = objs[0]
+        obj = objs.first()
         self.assertEqual(obj.hoort_bij_account.nieuwe_email, 'normaal@test.com')
         self.assertFalse(obj.hoort_bij_account.email_is_bevestigd)
         url = self.url_tijdelijk % obj.url_code
@@ -289,15 +305,56 @@ class TestRegistreerLid(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('registreer/registreer-lid-02-email-bevestigd.dtl', 'plein/site_layout.dtl'))
+        self.assertContains(resp, "inloggen")
+        self.assertNotContains(resp, "Sluiten")
 
         account = Account.objects.get(username='100001')
         self.assertTrue(account.email_is_bevestigd)
         self.assertEqual(account.bevestigde_email, 'normaal@test.com')
 
-        # tijdens inlog wordt de volledige naam overgenomen
+        # tijdens inlog wordt de volledige naam weer overgenomen (deze hadden we aangepast)
         self.e2e_login(account)
         account = Account.objects.get(username='100001')
         self.assertEqual(account.volledige_naam(), 'Ramon de Tester')
+
+    def test_registreer_al_ingelogd(self):
+        # variant van test_registreer waarbij sporter al ingelogd is bij volgen tijdelijke link
+        sec = Secretaris(vereniging=self.ver1)
+        sec.save()
+        sec.sporters.add(self.sporter_100002)
+
+        # doorloop de registratie
+        resp = self.client.post(self.url_registreer_khsn,
+                                {'lid_nr': '100001',
+                                 'email': 'normaal@test.com',
+                                 'nieuw_wachtwoord': E2EHelpers.WACHTWOORD},
+                                follow=True)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('registreer/registreer-lid-01-bevestig-email.dtl', 'plein/site_layout.dtl'))
+
+        # volg de link om de email te bevestigen
+        objs = TijdelijkeCode.objects.order_by('-aangemaakt_op')       # nieuwste eerst
+        obj = objs.first()
+        self.assertEqual(obj.hoort_bij_account.nieuwe_email, 'normaal@test.com')
+        url = self.url_tijdelijk % obj.url_code
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        urls = self.extract_all_urls(resp, skip_menu=True, skip_smileys=True)
+        post_url = urls[0]
+
+        # log in
+        self.e2e_login(self.account_normaal)
+
+        # volg de tijdelijke url --> het scherm heeft nu een knop "sluiten" in plaats van "inloggen"
+        with self.assert_max_queries(20):
+            resp = self.client.post(post_url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('registreer/registreer-lid-02-email-bevestigd.dtl', 'plein/site_layout.dtl'))
+        self.assertContains(resp, "Sluiten")
+        self.assertNotContains(resp, "inloggen")
 
     def test_bestaat_al(self):
         with self.assert_max_queries(20):
