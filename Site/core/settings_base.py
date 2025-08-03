@@ -62,7 +62,7 @@ APPS_DIR = os.path.dirname(BASE_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2025-08-02'
+SITE_VERSIE = '2025-08-03'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -129,7 +129,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',                # security (https improvements)
     'django.contrib.sessions.middleware.SessionMiddleware',         # manage sessions across requests
     'django.contrib.auth.middleware.AuthenticationMiddleware',      # geeft request.user
-    'django.middleware.common.CommonMiddleware',                    # adds Content-Length header to http responses
+    'django.middleware.common.CommonMiddleware',                    # adds Content-Length http header + append slash
     'django.middleware.csrf.CsrfViewMiddleware',                    # security (cross-site request forgery)
     'django.contrib.messages.middleware.MessageMiddleware',         # mandatory for admin
     'django.middleware.clickjacking.XFrameOptionsMiddleware',       # security: ask browser to deny (i)frame embedding

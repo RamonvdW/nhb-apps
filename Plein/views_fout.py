@@ -29,6 +29,20 @@ my_logger = logging.getLogger('MH.Plein')
 in_500_handler = False
 
 
+def _add_meta_rol_functie(context, request):
+    rol_nu, functie_nu = rol_get_huidige_functie(request)
+    context['meta_rol'] = rol2url[rol_nu]
+    if functie_nu:
+        context['meta_functie'] = functie_nu.beschrijving       # template doet html escaping
+        context['rol'] = functie_nu.beschrijving
+    elif rol_nu == Rol.ROL_BB:
+        context['rol'] = 'Manager MH'
+    elif rol_nu == Rol.ROL_SPORTER:
+        context['rol'] = 'Sporter'
+    else:                           # pragma: no cover
+        context['rol'] = '?'
+
+
 def site_handler403_permission_denied(request, exception=None):
 
     """ Django view om code-403 fouten af te handelen.
@@ -72,21 +86,10 @@ def site_handler403_permission_denied(request, exception=None):
     if len(info):
         context['info'] = info
 
-    rol_nu, functie_nu = rol_get_huidige_functie(request)
-    context['meta_rol'] = rol2url[rol_nu]
-    if functie_nu:
-        context['meta_functie'] = functie_nu.beschrijving       # template doet html escaping
-        context['rol'] = functie_nu.beschrijving
-    elif rol_nu == Rol.ROL_BB:
-        context['rol'] = 'Manager MH'
-    elif rol_nu == Rol.ROL_SPORTER:
-        context['rol'] = 'Sporter'
-    elif rol_nu == Rol.ROL_NONE:
-        context['rol'] = 'Bezoeker'
-
-    context['robots'] = 'noindex'   # prevent indexing this error message page
-
+    _add_meta_rol_functie(context, request)
+    context['robots'] = 'noindex'           # prevent indexing this error message page
     context['email_support'] = settings.EMAIL_SUPPORT
+
     return render(request, TEMPLATE_HANDLER_403, context)
 
 
@@ -107,12 +110,15 @@ def site_handler404_page_not_found(request, exception=None):
         # dit zijn typisch verzoeken voor icons, robots.txt, etc.
         rauw = True
         try:
-            path = exception.args[0]['path']
-            pos = path.find('/')
-            if pos > 0:
-                sub = path[:pos+1]
-                toplevel = [str(pat.pattern) for pat in urls.urlpatterns if str(pat.pattern) != '']
+            path = exception.args[0]['path']    # important NOT to use request.path_info
+            if path.endswith("/"):              # allow handling by APPEND_SLASH
+                pos = path.find('/')            # find the first path
+                sub = path[:pos+1]              # application path, like 'account/'
+                toplevel = [str(pat.pattern)
+                            for pat in urls.urlpatterns
+                            if str(pat.pattern) != '']
                 if sub in toplevel:
+                    # convert into a soft error message towards the user
                     rauw = False
         except (KeyError, IndexError, TypeError):
             # typical for an internally raised Resolver404()
@@ -135,21 +141,10 @@ def site_handler404_page_not_found(request, exception=None):
     if len(info):
         context['info'] = info
 
-    rol_nu, functie_nu = rol_get_huidige_functie(request)
-    context['meta_rol'] = rol2url[rol_nu]
-    if functie_nu:
-        context['meta_functie'] = functie_nu.beschrijving       # template doet html escaping
-        context['rol'] = functie_nu.beschrijving
-    elif rol_nu == Rol.ROL_BB:
-        context['rol'] = 'Manager MH'
-    elif rol_nu == Rol.ROL_SPORTER:
-        context['rol'] = 'Sporter'
-    elif rol_nu == Rol.ROL_NONE:
-        context['rol'] = 'Bezoeker'
-
-    context['robots'] = 'noindex'   # prevent indexing this error message page
-
+    _add_meta_rol_functie(context, request)
+    context['robots'] = 'noindex'           # prevent indexing this error message page
     context['email_support'] = settings.EMAIL_SUPPORT
+
     return render(request, TEMPLATE_HANDLER_404, context)
 
 

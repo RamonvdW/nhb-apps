@@ -878,6 +878,25 @@ class MyTestAsserts(TestCase):
         else:
             self.assertEqual(expected_url, resp.url)
 
+    def assert_is_permanent_redirect(self, resp, expected_url):
+        if isinstance(resp, str):
+            self.fail(msg='Verkeerde aanroep: resp parameter vergeten?')            # pragma: no cover
+
+        if resp.status_code != 301:                     # pragma: no cover
+            # geef een iets uitgebreider antwoord
+            if resp.status_code == 200:
+                short_msg, _ = self.interpreteer_resp(resp)
+                msg = "no permanent redirect but " + short_msg
+            else:
+                msg = "status_code: %s != 301" % resp.status_code
+                msg += "; templates used: %s" % repr([tmpl.name for tmpl in resp.templates])
+            self.fail(msg=msg)
+        pos = expected_url.find('##')
+        if pos > 0:
+            self.assertTrue(resp.url.startswith(expected_url[:pos]))
+        else:
+            self.assertEqual(expected_url, resp.url)
+
     def assert_is_redirect_not_plein(self, resp):
         if resp.status_code != 302:                     # pragma: no cover
             # geef een iets uitgebreider antwoord

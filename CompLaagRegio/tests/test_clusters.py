@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2023 Ramon van der Winkel.
+#  Copyright (c) 2020-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -83,7 +83,7 @@ class TestCompLaagRegioClusters(E2EHelpers, TestCase):
         # haal het overzicht op
         with self.assert_max_queries(8):
             resp = self.client.get(self.url_clusters)
-        self.assertTrue(resp.status_code, 200)
+        self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
 
         # pas de naam van een cluster aan

@@ -153,7 +153,7 @@ class TestAccountLogin(E2EHelpers, TestCase):
         self.e2e_login(self.testdata.account_admin)
         url = reverse('TijdelijkeCodes:tijdelijke-url', kwargs={'code': code})
         resp = self.client.post(url)
-        self.assertTrue(resp.status_code, 200)
+        self.assertEqual(resp.status_code, 200)
         self.assert_template_used(resp, ('account/email-bevestigd.dtl', 'plein/site_layout.dtl'))
 
     def test_inlog_foutieve_email_nog_niet_bevestigd(self):
@@ -201,7 +201,7 @@ class TestAccountLogin(E2EHelpers, TestCase):
         self.client.logout()
         url = reverse('TijdelijkeCodes:tijdelijke-url', kwargs={'code': code})
         resp = self.client.post(url)
-        self.assertTrue(resp.status_code, 200)
+        self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/email-bevestigd.dtl', 'plein/site_layout.dtl'))
 
