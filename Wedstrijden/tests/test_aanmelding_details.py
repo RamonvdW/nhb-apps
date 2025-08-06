@@ -202,7 +202,7 @@ class TestWedstrijdenAanmeldingen(E2EHelpers, TestCase):
                                          'plein/site_layout.dtl'))
 
         self.assertEqual(1, WedstrijdInschrijving.objects.count())
-        self.inschrijving1r = WedstrijdInschrijving.objects.first()
+        self.inschrijving1r = WedstrijdInschrijving.objects.select_related('wedstrijd').first()
 
         resp = self.client.post(self.url_inschrijven_toevoegen_mandje, {'snel': 1,
                                                                         'wedstrijd': self.wedstrijd.pk,
@@ -271,6 +271,9 @@ class TestWedstrijdenAanmeldingen(E2EHelpers, TestCase):
 
         # als MWZ
         self.e2e_wissel_naar_functie(self.functie_mwz)
+
+        self.inschrijving1r.wedstrijd.eis_kwalificatie_scores = True
+        self.inschrijving1r.wedstrijd.save(update_fields=['eis_kwalificatie_scores'])
 
         with self.assert_max_queries(20):
             resp = self.client.get(url)
