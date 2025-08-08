@@ -16,7 +16,6 @@ from bs4 import BeautifulSoup
 import json
 import re
 
-
 # debug optie: toon waar in de code de queries vandaan komen
 FAIL_UNSAFE_DATABASE_MODIFICATION = False
 
@@ -714,7 +713,7 @@ class MyTestAsserts(TestCase):
             pos = html.find('<img ', pos+1)
         # while
 
-    def html_assert_urls_usable(self, resp, html, dtl):
+    def html_assert_urls_usable(self, resp: HttpResponse, html, dtl):
         urls = self.extract_all_urls(resp, skip_external=True, skip_hash_links=True, skip_post=True)
         for url in urls:
             if url.find(" ") >= 0:                  # pragma: no cover
@@ -870,6 +869,25 @@ class MyTestAsserts(TestCase):
                 msg = "no redirect but " + short_msg
             else:
                 msg = "status_code: %s != 302" % resp.status_code
+                msg += "; templates used: %s" % repr([tmpl.name for tmpl in resp.templates])
+            self.fail(msg=msg)
+        pos = expected_url.find('##')
+        if pos > 0:
+            self.assertTrue(resp.url.startswith(expected_url[:pos]))
+        else:
+            self.assertEqual(expected_url, resp.url)
+
+    def assert_is_permanent_redirect(self, resp, expected_url):
+        if isinstance(resp, str):
+            self.fail(msg='Verkeerde aanroep: resp parameter vergeten?')            # pragma: no cover
+
+        if resp.status_code != 301:                     # pragma: no cover
+            # geef een iets uitgebreider antwoord
+            if resp.status_code == 200:
+                short_msg, _ = self.interpreteer_resp(resp)
+                msg = "no permanent redirect but " + short_msg
+            else:
+                msg = "status_code: %s != 301" % resp.status_code
                 msg += "; templates used: %s" % repr([tmpl.name for tmpl in resp.templates])
             self.fail(msg=msg)
         pos = expected_url.find('##')

@@ -1,3 +1,4 @@
+{% load static %}
 
     <!-- banner -->
     <div class="row center">

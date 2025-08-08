@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.core import management
 from django.test import TestCase, override_settings
+from Site.core.main_exceptions import SpecificExitCode
 import io
 
 
@@ -22,14 +23,17 @@ class MyMgmtCommandHelper(TestCase):
         f2 = io.StringIO()
         try:
             management.call_command(*args, stderr=f1, stdout=f2)
-        except SystemExit as exc:
+        except (SystemExit, SpecificExitCode, Exception) as exc:
             if report_exit_code:                # pragma: no cover
-                msg = '\nmanagement commando genereerde een SystemExit\n'
+                msg = '\n'
+                msg += '{run_management_command} caught %s\n' % repr(exc)
                 msg += 'commando: %s\n' % repr(args)
                 msg += 'stderr:\n'
                 msg += f1.getvalue()
                 msg = msg.replace('\n', '\n  ')
                 raise self.failureException(msg) from exc
+            else:
+                f1.write('[TEST] Management command raised %s\n' % repr(exc))
         return f1, f2
 
     def verwerk_regiocomp_mutaties(self, show_warnings=True, show_all=False):
