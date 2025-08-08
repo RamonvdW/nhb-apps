@@ -16,7 +16,6 @@ from bs4 import BeautifulSoup
 import json
 import re
 
-
 # debug optie: toon waar in de code de queries vandaan komen
 FAIL_UNSAFE_DATABASE_MODIFICATION = False
 
@@ -714,7 +713,7 @@ class MyTestAsserts(TestCase):
             pos = html.find('<img ', pos+1)
         # while
 
-    def html_assert_urls_usable(self, resp, html, dtl):
+    def html_assert_urls_usable(self, resp: HttpResponse, html, dtl):
         urls = self.extract_all_urls(resp, skip_external=True, skip_hash_links=True, skip_post=True)
         for url in urls:
             if url.find(" ") >= 0:                  # pragma: no cover
