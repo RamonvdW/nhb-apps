@@ -62,7 +62,7 @@ APPS_DIR = os.path.dirname(BASE_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2025-08-08'
+SITE_VERSIE = '2025-08-09'
 
 # modules van de site
 INSTALLED_APPS = [
