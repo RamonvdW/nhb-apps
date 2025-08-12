@@ -255,7 +255,7 @@
     <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
             <div class="sv-kader" style="padding:10px">
-                <p>Elk van de 4 rayons organiseert een eigen RK voor de teams van de verenigingen (van de 4 regio's) in het rayon.</p>
+                <p>Elk van de 4 rayons organiseert een eigen RK voor de teams van de verenigingen (van de 4 regio's) in het rayon.<br>Per wedstrijdklasse wordt een RK teams georganiseerd voor minimaal 4 en maximaal 8 teams.</p>
                 <p>De vereniging schrijft de teams in voor het RK.<br>De RK teams hebben een aparte ("open") inschrijving, onafhankelijk van de regiocompetitie.</p>
                 <p>Per team worden 3 sporters van de eigen vereniging opgesteld.<br>Deze sporters moeten 6 of meer scores hebben in de regiocompetitie.</p>
             </div>
@@ -294,8 +294,9 @@
             <div class="sv-kader" style="padding:10px">
                 <p>Bij aankomst en aanmelden worden eventuele invallers genoteerd.</p>
                 <p>Elk van de teams schiet &eacute;&eacute;n wedstrijd tegen elkaar, dus 7 wedstrijden bij volle bezetting.<br>Elke wedstrijd bestaat uit 5 games.</p>
-                <p>Per game en wedstrijd kunnen 0 (verlies), 1 (gelijk) of 2 (winst) punten verdiend worden.</p>
-                <p>De totale punten van de pijlen van de 2 teams bepalen de punten voor een game.<br>De totale punten van de 5 games bepalen de punten voor de wedstrijd.</p>
+                <p>Per game en wedstrijd kunnen punten verdiend worden: 0 (verlies), 1 (gelijk) of 2 (winst).</p>
+                <p>Vergelijking van de scores van de pijlen van elk van de 2 teams bepaalt de punten voor een game.<br>De som van de punten van de 5 games bepaalt de punten voor de wedstrijd.</p>
+                <p>De som van de punten van geschoten wedstrijden bepaalt de eindstand van het team (1e, 2e, 3e, etc).</p>
                 <p></p>
             </div>
         </div>
