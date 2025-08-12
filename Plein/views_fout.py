@@ -111,7 +111,7 @@ def site_handler404_page_not_found(request, exception=None):
         rauw = True
         try:
             path = exception.args[0]['path']    # important NOT to use request.path_info
-            if path.endswith("/"):              # allow handling by APPEND_SLASH
+            if path.endswith("/"):              # allow handling by APPEND_SLASH (when absent)
                 pos = path.find('/')            # find the first path
                 sub = path[:pos+1]              # application path, like 'account/'
                 toplevel = [str(pat.pattern)

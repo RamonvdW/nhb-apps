@@ -102,6 +102,10 @@
                 {% include 'plein/card_icon.dtl' with title="Verenigingen" text=tekst_verenigingen icon="share_location" url=card_url %}
             
                 {% include 'plein/card_icon.dtl' with title="Statistiek" text="Toon statistiek over de inschrijvingen." icon="query_stats" url=url_statistiek %}
+
+                {% if url_toestemming_drive %}
+                    {% include 'plein/card_icon.dtl' with title="Wedstrijdformulieren" text="Geef toestemming voor de wedstrijd formulieren in Google Drive." icon="check" url=url_toestemming_drive %}
+                {% endif %}
             </div>
         </div>
 

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -76,7 +76,7 @@ class TijdelijkeCode(models.Model):
 
 def save_tijdelijke_code(url_code, dispatch_to,
                          geldig_dagen=0, geldig_seconden=0,
-                         account=None, gast=None, functie=None, kampioen=None, wedstrijd=None, sporter=None):
+                         account=None, gast=None, functie=None, kampioen=None):
 
     if geldig_seconden > 0:
         delta = timedelta(seconds=geldig_seconden)
@@ -88,7 +88,7 @@ def save_tijdelijke_code(url_code, dispatch_to,
     # TODO: voorkom dubbele records voor dezelfde url_code
     # (voorbeeld: na elke inlog wordt code gebruikt voor bevestigen email)
 
-    obj, is_created = TijdelijkeCode.objects.get_or_create(
+    obj, _ = TijdelijkeCode.objects.get_or_create(
                             url_code=url_code,
                             aangemaakt_op=now,
                             geldig_tot=now + delta,
