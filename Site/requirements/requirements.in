@@ -20,8 +20,10 @@ pillow
 # QR code generation for 2FA
 qrcode
 
-# NL records download from gsheet
+# Download records gsheet
+# Wedstrijdformulieren in google drive
 google-auth
+google-auth-oauthlib
 google-api-python-client
 
 # lat/lon en reistijd berekenen

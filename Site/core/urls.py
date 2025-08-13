@@ -38,6 +38,7 @@ urlpatterns = [
     path('bondspas/',                       include('Bondspas.urls')),
     path('feedback/',                       include('Feedback.urls')),
     path('functie/',                        include('Functie.urls')),
+    path('google/',                         include('GoogleDrive.urls')),
     path('kalender/',                       include('Kalender.urls')),
     path('kalender/evenement/',             include('Evenement.urls')),
     path('ledenvoordeel/',                  include('Ledenvoordeel.urls')),

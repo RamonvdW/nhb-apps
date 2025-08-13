@@ -62,7 +62,7 @@ APPS_DIR = os.path.dirname(BASE_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2025-08-12'
+SITE_VERSIE = '2025-08-13'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -85,6 +85,7 @@ INSTALLED_APPS = [
     'Feedback',
     'Functie',
     'Geo',
+    'GoogleDrive',
     'HistComp',
     'ImportCRM',
     'Instaptoets',
