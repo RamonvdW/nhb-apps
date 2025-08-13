@@ -60,10 +60,10 @@
 
                 <!-- icon -->
                 <div style="margin-bottom:4px{% if not icon_font_size %}; height:64px{% endif %}">
-                    <i class="notranslate material-icons-round medium sv-rood-text"
-                            {% if icon_font_size %}
-                                style="font-size:{{ icon_font_size }}"
-                            {% endif %}>{{ icon }}</i>
+                    <i {% if icon_font_size %}
+                            style="font-size:{{ icon_font_size }}"
+                       {% endif %}
+                        class="notranslate material-icons-round medium sv-rood-text">{{ icon }}</i>
                 </div>
 
                 <div>{{ text }}</div>

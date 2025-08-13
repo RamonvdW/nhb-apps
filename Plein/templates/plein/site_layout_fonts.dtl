@@ -12,11 +12,6 @@
 
 {% load static %}
 
-{% comment %}
-  FUTURE: is it legal to use @font-face inside a style block?
-          Must it be in a CSS file? It seems to work though
-{% endcomment %}
-
 <style>
 @font-face {
   font-family: 'Fira Sans';
