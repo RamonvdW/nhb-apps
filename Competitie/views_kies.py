@@ -119,6 +119,8 @@ class CompetitieKiesView(TemplateView):
                 if seizoen_afsluiten > 0:
                     context['url_seizoen_afsluiten'] = reverse('CompBeheer:bb-seizoen-afsluiten')
 
+                context['url_toestemming_drive'] = reverse('GoogleDrive:toestemming-drive')
+
             context['toon_beheerders_algemeen'] = (rol_nu == Rol.ROL_HWL)
 
             if rol_nu in (Rol.ROL_BB, Rol.ROL_BKO, Rol.ROL_RKO, Rol.ROL_RCL):

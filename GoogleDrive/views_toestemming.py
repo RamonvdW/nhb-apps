@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
@@ -7,15 +6,17 @@
 from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django.views.generic import TemplateView
+from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige
+from GoogleDrive.models import Token
 from GoogleDrive.operations.authenticatie import get_authorization_url
 
 TEMPLATE_TOESTEMMING = 'googledrive/toestemming.dtl'
 
 
-class ToestemmingView(TemplateView):
+class ToestemmingView(UserPassesTestMixin, TemplateView):
 
     """ Deze view is voor de manage """
 
@@ -33,10 +34,15 @@ class ToestemmingView(TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        context['url_toestemming'] = reverse('GoogleDrive:toestemming-drive')
+        # kijk of de toestemming er al is
+        if Token.objects.exclude(has_failed=True).count() > 0:
+            context['heeft_toestemming'] = True
+        else:
+            context['url_toestemming'] = reverse('GoogleDrive:toestemming-drive')
 
         context['kruimels'] = (
-            (None, 'Toestemming'),
+            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (None, 'Toestemming wedstrijdformulieren'),
         )
 
         return context

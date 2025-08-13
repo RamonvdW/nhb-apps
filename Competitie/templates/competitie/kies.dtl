@@ -104,7 +104,7 @@
                 {% include 'plein/card_icon.dtl' with title="Statistiek" text="Toon statistiek over de inschrijvingen." icon="query_stats" url=url_statistiek %}
 
                 {% if url_toestemming_drive %}
-                    {% include 'plein/card_icon.dtl' with title="Wedstrijdformulieren" text="Geef toestemming voor de wedstrijd formulieren in Google Drive." icon="check" url=url_toestemming_drive %}
+                    {% include 'plein/card_icon.dtl' with title="Toestemming" text="Geef toestemming tot jouw Google Drive voor de RK/BK wedstrijdformulieren." icon="add_to_drive" url=url_toestemming_drive %}
                 {% endif %}
             </div>
         </div>

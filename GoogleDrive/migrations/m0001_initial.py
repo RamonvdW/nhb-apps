@@ -40,6 +40,7 @@ class Migration(migrations.Migration):
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('when', models.DateTimeField(auto_now_add=True)),
                 ('creds', models.JSONField(default=dict)),
+                ('has_failed', models.BooleanField(default=False)),
                 ('log', models.TextField(default='')),
             ],
             options={

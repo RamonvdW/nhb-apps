@@ -52,6 +52,9 @@ class Token(models.Model):
     # logboek met status veranderingen
     log = models.TextField(default='')
 
+    # track when this token did not work anymore
+    has_failed = models.BooleanField(default=False)
+
     class Meta:
         verbose_name = "Token"
 

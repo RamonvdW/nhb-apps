@@ -28,6 +28,7 @@ class Storage:
     # in de root, moet shared zijn met service account
     FOLDER_NAME_WEDSTRIJD_FORMULIEREN = 'MH wedstrijdformulieren'       # let op: globaal uniek!
     FOLDER_NAME_TEMPLATES = 'MH templates RK/BK'
+    FOLDER_NAME_SITE = settings.NAAM_SITE
 
     # MIME types for items in a Google Driver folder
     MIME_TYPE_FOLDER = 'application/vnd.google-apps.folder'
@@ -52,34 +53,38 @@ class Storage:
     def __init__(self, stdout, begin_jaar: int):
         self.stdout = stdout
 
-        self._seizoen_str = 'Bondscompetities %s/%s' % (begin_jaar, begin_jaar + 1)
-        self._folder_id_top = ""
-        self._folder_id_templates = ""
-        self._folder_id_seizoen = ""
-        self._folder_id_indoor = ""
-        self._folder_id_25m1pijl = ""
-        self._comp2folder_id = dict()           # ["Indoor Teams RK"] = folder_id
-        self._comp2template_file_id = dict()    # ["Indoor Teams RK"] = file_id
-
         try:
             self.token = Token.objects.first()
         except Token.DoesNotExist:
             raise StorageError('No token')
 
         js_data = json.loads(self.token.creds)
-        self.creds = Credentials.from_authorized_user_info(js_data)
+        self._creds = Credentials.from_authorized_user_info(js_data)
 
         self._service_files = None
         self._service_perms = None
 
+        self._seizoen_str = 'Bondscompetities %s/%s' % (begin_jaar, begin_jaar + 1)
+
+        self._folder_id_top = ""
+        self._folder_id_templates = ""
+        self._folder_id_site = ""
+        self._folder_id_seizoen = ""
+        self._folder_id_indoor = ""
+        self._folder_id_25m1pijl = ""
+
+        self._comp2folder_id = dict()           # ["Indoor Teams RK"] = folder_id
+        self._comp2template_file_id = dict()    # ["Indoor Teams RK"] = file_id
+
     def _setup_service(self):
-        service = build("drive", "v3", credentials=self.creds)
+        service = build("drive", "v3", credentials=self._creds)
         self._service_files = service.files()
         self._service_perms = service.permissions()
 
     def check_access(self):
         # google api libs refresh the token automatically
-        return self.creds.refresh_token
+        # TODO: try to trigger refresh and check validity of the token
+        return self._creds.refresh_token
 
     @staticmethod
     def _params_to_folder_name(afstand: int, is_teams: bool, is_bk: bool) -> str:
@@ -192,10 +197,15 @@ class Storage:
 
         return folder_id
 
-    def _vind_of_maak_seizoen_folder(self):
+    def _vind_of_maak_site_folder(self):
         if self._folder_id_top:
-            self._folder_id_seizoen = self._vind_of_maak_folder(self._folder_id_top, self._seizoen_str)
-            self.stdout.write('[INFO] %s folder id is %s' % (repr(self._seizoen_str), repr(self._folder_id_seizoen)))
+            self._folder_id_site = self._vind_of_maak_folder(self._folder_id_top, self.FOLDER_NAME_SITE)
+            self.stdout.write('[INFO] site folder id is %s' % repr(self._folder_id_site))
+
+    def _vind_of_maak_seizoen_folder(self):
+        if self._folder_id_site:
+            self._folder_id_seizoen = self._vind_of_maak_folder(self._folder_id_site, self._seizoen_str)
+            self.stdout.write('[INFO] seizoen folder id is %s' % repr(self._folder_id_seizoen))
 
     def _vind_of_maak_deel_folders(self):
         if self._folder_id_seizoen:
@@ -244,14 +254,9 @@ class Storage:
     def _secure_folders(self):
         self._vind_top_folder()                 # MH wedstrijdformulieren
         self._vind_template_folder()            # MH templates RK/BK
+        self._vind_of_maak_site_folder()
         self._vind_of_maak_seizoen_folder()     # Bondscompetities 2025/2026
-
-        share_with = [
-            'mh-support@handboogsport.nl',
-            'mh-wedstrijd-formulieren@tensile-pixel-259816.iam.gserviceaccount.com',
-        ]
-
-        self._share_seizoen_folder(share_with)
+        self._share_seizoen_folder(settings.GOOGLE_DRIVE_SHARE_WITH)
         self._vind_of_maak_deel_folders()       # Indoor Teams RK etc.
 
     def _vind_templates(self):

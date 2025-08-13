@@ -9,7 +9,6 @@ from django.http import Http404, HttpResponseRedirect
 from django.utils import timezone
 from django.views.generic import View
 from GoogleDrive.models import Transactie
-from GoogleDrive.operations.kamp_programmas_google_drive import Storage
 from GoogleDrive.operations.authenticatie import handle_authentication_response
 from datetime import timedelta
 

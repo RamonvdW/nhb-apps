@@ -19,16 +19,20 @@
 
     <!-- blauw balk met wit informatie veld -->
     <div class="row-sv-blauw">
-        <div class="col s12">
+        <div class="col s12 l10 offset-l1 xl6 offset-xl3">
             <div class="sv-kader" style="padding:10px">
                 <p>MijnHandboogsport heeft toegang nodig tot een Google Drive van een gebruiker<br>om daarin de RK/BK wedstrijdformulieren aan te maken, om later te delen met de HWL's.</p>
 
-                <p>Onderstaande knop begint het process waarmee jij toegang kan verlenen aan MijnHandboogsport.</p>
+                {% if heeft_toestemming %}
+                    <p>Volgens onze administratie is de toestemming al gegeven.</p>
+                {% else %}
+                    <p>Onderstaande knop begint het process waarmee jij toegang kan verlenen aan MijnHandboogsport.</p>
 
-                <form action="{{ url_toestemming }}" method="post">
-                    {% csrf_token %}
-                    <button class="btn-sv-rood" type="submit">Begin</button>
-                </form>
+                    <form action="{{ url_toestemming }}" method="post">
+                        {% csrf_token %}
+                        <button class="btn-sv-rood" type="submit">Begin</button>
+                    </form>
+                {% endif %}
             </div>
         </div>
     </div>

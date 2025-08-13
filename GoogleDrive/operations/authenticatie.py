@@ -8,6 +8,7 @@ from django.conf import settings
 from django.urls import reverse
 from django.utils import timezone
 from google_auth_oauthlib.flow import Flow
+from oauthlib.oauth2 import AccessDeniedError
 from GoogleDrive.models import Transactie, Token, maak_unieke_code
 
 
@@ -55,20 +56,22 @@ def handle_authentication_response(webhook_uri):
     # moet overeenkomen met een URI die opgezet is in Google console
     flow.redirect_uri = settings.SITE_URL + reverse('GoogleDrive:oauth-webhook')
 
-    host = settings.SITE_URL.replace('http://', 'https://')
-    flow.fetch_token(authorization_response=host + webhook_uri)
-    creds = flow.credentials
-
-    # TODO: exception handling
-
-    if creds.valid and creds.refresh_token:
-        now = timezone.now()
-        stamp_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
-        msg = "[%s] Token ontvangen\n" % stamp_str
-        token = Token.objects.create(creds=creds.to_json(),
-                                     log=msg)
-    else:
+    try:
+        host = settings.SITE_URL.replace('http://', 'https://')
+        flow.fetch_token(authorization_response=host + webhook_uri)
+    except AccessDeniedError:
+        print('[ERROR] AccessDeniedError')
         token = None
+    else:
+        creds = flow.credentials
+        if creds.valid and creds.refresh_token:
+            now = timezone.now()
+            stamp_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
+            msg = "[%s] Token ontvangen\n" % stamp_str
+            token = Token.objects.create(creds=creds.to_json(),
+                                         log=msg)
+        else:
+            token = None
 
     return token
 
