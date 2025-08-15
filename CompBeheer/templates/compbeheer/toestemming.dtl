@@ -38,6 +38,6 @@
     </div>
 
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="googledrive-toestemming" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="compbeheer-toestemming" %}
 
 {% endblock %}

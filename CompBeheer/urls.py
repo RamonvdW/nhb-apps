@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2023 Ramon van der Winkel.
+#  Copyright (c) 2022-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from CompBeheer import views_bb, views_bko, view_stats, view_overzicht, view_wijzig_datums, view_tijdlijn
+from CompBeheer import (views_bb, views_bko, view_stats, view_overzicht, view_wijzig_datums, view_tijdlijn,
+                        views_toestemming)
 
 app_name = 'CompBeheer'
 
@@ -35,6 +36,14 @@ urlpatterns = [
     path('statistiek/',
          view_stats.CompetitieStatistiekView.as_view(),
          name='statistiek'),
+
+    path('wedstrijdformulieren/toestemming/',
+         views_toestemming.ToestemmingView.as_view(),
+         name='wf-toestemming-drive'),
+
+    path('wedstrijdformulieren/toestemming/',
+         views_toestemming.AanmakenView.as_view(),
+         name='wf-aanmaken'),
 
     path('<comp_pk>/klassengrenzen-vaststellen/',
          views_bb.KlassengrenzenVaststellenView.as_view(),
@@ -88,7 +97,6 @@ urlpatterns = [
     path('<comp_pk>/tijdlijn/',
          view_tijdlijn.CompetitieTijdlijnView.as_view(),
          name='tijdlijn'),
-
 ]
 
 # end of file

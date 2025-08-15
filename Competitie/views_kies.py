@@ -11,6 +11,7 @@ from Competitie.models import Competitie
 from Competitie.operations import bepaal_startjaar_nieuwe_competitie
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige, rol_get_beschrijving
+from GoogleDrive.operations.authenticatie import check_heeft_toestemming
 from Site.core.static import static_safe
 
 
@@ -119,7 +120,11 @@ class CompetitieKiesView(TemplateView):
                 if seizoen_afsluiten > 0:
                     context['url_seizoen_afsluiten'] = reverse('CompBeheer:bb-seizoen-afsluiten')
 
-                context['url_toestemming_drive'] = reverse('GoogleDrive:toestemming-drive')
+                if not check_heeft_toestemming():
+                    context['url_wf_toestemming_drive'] = reverse('CompBeheer:wf-toestemming-drive')
+
+                # TODO: controleer of alle bestanden al aangemaakt zijn
+                context['url_wf_aanmaken'] = reverse('CompBeheer:wf-aanmaken')
 
             context['toon_beheerders_algemeen'] = (rol_nu == Rol.ROL_HWL)
 

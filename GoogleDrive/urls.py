@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from GoogleDrive import views_toestemming, views_webhook
+from GoogleDrive import views_webhook, views_resultaat
 
 app_name = 'GoogleDrive'
 
@@ -13,13 +13,17 @@ app_name = 'GoogleDrive'
 
 urlpatterns = [
 
-    path('toestemming/',
-         views_toestemming.ToestemmingView.as_view(),
-         name='toestemming-drive'),
-
     path('webhook/oauth/',
          views_webhook.OAuthWebhookView.as_view(),
          name='oauth-webhook'),
+
+    path('resultaat-gelukt/',
+         views_resultaat.ResultaatGeluktView.as_view(),
+         name='resultaat-gelukt'),
+
+    path('resultaat-mislukt/',
+         views_resultaat.ResultaatMisluktView.as_view(),
+         name='resultaat-mislukt'),
 ]
 
 # end of file

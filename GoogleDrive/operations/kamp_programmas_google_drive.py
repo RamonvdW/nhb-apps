@@ -7,7 +7,8 @@
 """ aanmaken en vinden van RK/BK programma's in de vorm van Google Sheets in een folder structuur in Google Drive. """
 
 from django.conf import settings
-from GoogleDrive.models import Token
+from django.utils import timezone
+from GoogleDrive.models import Token, Bestand
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError as GoogleApiError
 from google.oauth2.credentials import Credentials
@@ -65,6 +66,7 @@ class Storage:
         self._service_perms = None
 
         self._seizoen_str = 'Bondscompetities %s/%s' % (begin_jaar, begin_jaar + 1)
+        self._begin_jaar = begin_jaar
 
         self._folder_id_top = ""
         self._folder_id_templates = ""
@@ -325,12 +327,29 @@ class Storage:
         if error_msg:
             raise StorageError('{copy_template_to} ' + error_msg)
 
-        self.stdout.write('{copy_template_to} result is %s' % repr(result))
+        self.stdout.write('[DEBUG] {copy_template_to} result is %s' % repr(result))
         file_id = result['id']
         return file_id
 
-    def vind_sheet(self, afstand: int, is_teams: bool, is_bk: bool, fname: str, mag_aanmaken=False):
-        """ vind een Google Sheet aan """
+    def _save_bestand(self, afstand: int, is_teams: bool, is_bk: bool, klasse_pk: int, fname: str, file_id: str):
+        now = timezone.now()
+        stamp_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
+
+        msg = '[%s] Aangemaakt\n' % stamp_str
+        Bestand.objects.create(
+                begin_jaar=self._begin_jaar,
+                afstand=afstand,
+                is_team=is_teams,
+                is_bk=is_bk,
+                klasse_pk=klasse_pk,
+                fname=fname,
+                file_id=file_id,
+                log=msg)
+
+    def maak_sheet_van_template(self, afstand: int, is_teams: bool, is_bk: bool, klasse_pk: int, fname: str) -> str:
+        """ maak een Google Sheet aan """
+
+        # TODO: kijk in bestand in plaats?
 
         error_msg = None
         file_id = None
@@ -345,8 +364,8 @@ class Storage:
             file_id = self._vind_comp_bestand(folder_name, fname)
             if not file_id:
                 # bestaat nog niet
-                if mag_aanmaken:
-                    file_id = self._maak_bestand_uit_template(folder_name, fname)
+                file_id = self._maak_bestand_uit_template(folder_name, fname)
+                self._save_bestand(afstand, is_teams, is_bk, klasse_pk, fname, file_id)
 
         except (IndexError, KeyError, ValueError) as exc:
             error_msg = '[ERROR] Service error: %s' % exc

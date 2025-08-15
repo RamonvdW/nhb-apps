@@ -1,0 +1,81 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2025 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Resultaat: mislukt{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Toestemming Google Drive: mislukt</h3>
+        </div>
+    </div>
+
+    <!-- blauw balk met wit informatie veld -->
+    <div class="row-sv-blauw">
+        <div class="col s12 l10 offset-l1 xl6 offset-xl3">
+            <div class="sv-kader" style="padding:10px">
+                <p class="sv-rood-text">Helaas, het is niet gelukt.<p>
+
+                <p>MijnHandboogsport heeft geen toegang kunnen krijgen tot een Google Drive<br>om daarin de RK/BK wedstrijdformulieren aan te maken, om later te delen met de HWL's.</p>
+
+                <p>
+                    <a class="btn-sv-rood" href="{{ url_next }}">Terug</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- tussenkopje -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>Tips</h4>
+            <p>Mogelijk oorzaken en vervolgstappen</p>
+        </div>
+    </div>
+
+    <div class="row-sv-blauw">
+        <div class="col s12">
+            <div class="sv-kader">
+                <table>
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>Oorzaak</th>
+                            <th>Oplossing</th>
+                        </tr>
+                    </thead>
+                    <tr>
+                        <td>1.</td>
+                        <td>Je hebt de toestemming niet gegeven.</td>
+                        <td>Probeer het opnieuw.</td>
+                    </tr>
+                    <tr>
+                        <td>2.</td>
+                        <td>Je hebt een account gekozen dat niet ingesteld is voor MijnHandboogsport.</td>
+                        <td>In de Google Cloud Console moet de Google Drive API aangezet worden.<br>Onder Credentials moet een OAuth 2.0 Client ID aangemaakt worden.<br>De credentials JSON moeten op de MijnHandboogsport server gezet worden (door de IT beheerder).<br>Herhaal daarna de stappen om toestemming te geven.</td>
+                    </tr>
+                    <tr>
+                        <td>3.</td>
+                        <td>Je hebt eerder toestemming gegeven, maar die is niet (meer) opgeslagen.</td>
+                        <td>Ga naar het Google Account scherm<br>In het "Gegevens en Privacy" menu zoek naar "Apps en services van derden"<br>Selecteer MijnHandboogsport en verwijder deze.<br>Herhaal daarna de stappen om toestemming te geven.</td>
+                    </tr>
+                    <tr>
+                        <td>4.</td>
+                        <td>Er was een tijdelijke storing.</td>
+                        <td>Probeer het later opnieuw.</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="googledrive-resultaat-gelukt" %}
+
+{% endblock %}

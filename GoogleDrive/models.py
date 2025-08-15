@@ -67,19 +67,21 @@ class Token(models.Model):
 class Bestand(models.Model):
     """ Deze tabel houdt bij:
         - welke bestanden aangemaakt hebben
-        - wat het file_id is in de Google Drive
+        - wat het file_id is, in de Google Drive
         - met wie we het bestand gedeeld hebben
     """
 
-    # drie parameters die de folder bepalen
+    # parameters die de folder en fname bepalen
+    begin_jaar = models.SmallIntegerField(default=0)
     afstand = models.PositiveSmallIntegerField(default=0)       # 18 (Indoor) of 25 (25m1pijl)
-    is_team = models.BooleanField(default=False)                # team of individueel
+    is_teams = models.BooleanField(default=False)               # team of individueel
     is_bk = models.BooleanField(default=False)                  # RK of BK
+    klasse_pk = models.PositiveIntegerField(default=0)          # welke CompetitieIndiv/TeamKlasse
 
-    # naam van het bestand is afhankelijk van de wedstrijdklasse
+    # originele naam
     fname = models.CharField(max_length=80)
 
-    # file_id returned by the Google Drive API
+    # file_id van het Google Sheet aangemaakt in de Google Drive
     file_id = models.CharField(max_length=64, default='')       # 32 should be enough
 
     # met welke beheerders is dit bestand gedeeld?

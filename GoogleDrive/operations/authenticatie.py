@@ -18,6 +18,9 @@ SCOPES = ['https://www.googleapis.com/auth/drive']  # edit, create and delete al
 
 
 def get_authorization_url(account_username: str, account_email: str):
+    """ begin het process van toestemming krijgen tot de drive
+        geeft een url terug waar de gebruiker heen gestuurd moet worden
+    """
     now = timezone.now()
     stamp_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
     msg = "[%s] Aangevraagd door %s met e-mail %s\n" % (stamp_str, account_username, account_email)
@@ -60,6 +63,7 @@ def handle_authentication_response(webhook_uri):
         host = settings.SITE_URL.replace('http://', 'https://')
         flow.fetch_token(authorization_response=host + webhook_uri)
     except AccessDeniedError:
+        # gebruiker heeft toestemming niet gegeven
         print('[ERROR] AccessDeniedError')
         token = None
     else:
@@ -71,8 +75,22 @@ def handle_authentication_response(webhook_uri):
             token = Token.objects.create(creds=creds.to_json(),
                                          log=msg)
         else:
+            # niet bruikbaar, want er zit geen refresh token bij
+            # dit gebeurt als de gebruiker al eerder toestemming heeft gegeven en deze procedure nogmaals doorloopt
             token = None
 
     return token
+
+
+def check_heeft_toestemming() -> bool:
+    # geeft True terug als de gebruiker al toestemming gegeven heeft
+
+    heeft_toestemming = False
+
+    if Token.objects.exclude(has_failed=True).count() > 0:
+        heeft_toestemming = True
+
+    return heeft_toestemming
+
 
 # end of file

@@ -74,6 +74,32 @@
     </div>
 
 
+    {% if url_wf_toestemming_drive or url_wf_aanmaken %}
+
+        <!-- witruimte -->
+        <div class="row center">
+            <div class="col s12">
+                <h4>Google Drive</h4>
+            </div>
+        </div>
+
+        <!-- blauwe balk met kaartjes -->
+        <div class="row-sv-blauw">
+            <div class="col s12">
+
+                {% if url_wf_toestemming_drive %}
+                    {% include 'plein/card_icon.dtl' with title="Toestemming" text="Geef toestemming tot jouw Google Drive voor de RK/BK wedstrijdformulieren." icon="add_to_drive" url=url_wf_toestemming_drive %}
+                {% endif %}
+
+                {% if url_wf_aanmaken %}
+                    {% include 'plein/card_icon.dtl' with title="Aanmaken" text="Start aanmaken van alle RK/BK wedstrijdformulieren in de Google Drive." icon="add_to_drive" url=url_wf_aanmaken %}
+                {% endif %}
+            </div>
+        </div>
+
+    {% endif %}
+
+
     {% if toon_management %}
 
         <!-- witruimte -->
@@ -102,10 +128,6 @@
                 {% include 'plein/card_icon.dtl' with title="Verenigingen" text=tekst_verenigingen icon="share_location" url=card_url %}
             
                 {% include 'plein/card_icon.dtl' with title="Statistiek" text="Toon statistiek over de inschrijvingen." icon="query_stats" url=url_statistiek %}
-
-                {% if url_toestemming_drive %}
-                    {% include 'plein/card_icon.dtl' with title="Toestemming" text="Geef toestemming tot jouw Google Drive voor de RK/BK wedstrijdformulieren." icon="add_to_drive" url=url_toestemming_drive %}
-                {% endif %}
             </div>
         </div>
 

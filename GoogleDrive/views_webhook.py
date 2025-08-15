@@ -22,27 +22,25 @@ class OAuthWebhookView(View):
     @staticmethod
     def get(request, *args, **kwargs):
 
-        uri = request.get_full_path()
-        #print('uri: %s' % repr(uri))
-
         # get the query parameters
         state = request.GET.get('state', None)
         if not state:
-            raise Http404('Bad request')
+            raise Http404('Slecht verzoek')
 
         code = request.GET.get('code', None)        # authorization code with typical lifetime of 10 minutes
         error = request.GET.get('error', None)
 
-        # security: filter onvolledige aanroepen zonder database query
+        # security: filter onvolledige aanroepen, zonder database query
         if not (error or code):
             raise Http404('Onvolledig verzoek')
 
-        age_filter = timezone.now() - timedelta(days=3)
+        # kijk in de database of we dit verzoek herkennen
+        age_filter = timezone.now() - timedelta(hours=1)
         try:
             transactie = (Transactie
                           .objects
-                          .exclude(when__lt=age_filter)
                           .exclude(has_been_used=True)
+                          .exclude(when__lt=age_filter)
                           .filter(unieke_code=state)
                           .first())
         except Transactie.DoesNotExist:
@@ -54,22 +52,27 @@ class OAuthWebhookView(View):
         now = timezone.now()
         stamp_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
 
+        uri = request.get_full_path()
+
+        # noteer de ontvangst in het logboek en blokkeer verdere doorgang via deze webhook
         transactie.has_been_used = True
         transactie.log += "[%s] Webhook aanroep: %s\n" % (stamp_str, uri)
         transactie.save(update_fields=['log', 'has_been_used'])
 
         token = handle_authentication_response(uri)
         if not token:
+            # voeg een foutmelding toe aan het logboek van de transactie
             now = timezone.now()
             stamp_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
             transactie.log += "[%s] Geen bruikbaar token of geen refresh token)\n" % stamp_str
             transactie.save(update_fields=['log'])
-            print('[ERROR] Geen token of geen refresh_token')
-            # TODO: toon foutmelding pagina en vervolgstappen
-        else:
-            print('[INFO] Token opgeslagen')
 
-        return HttpResponseRedirect(reverse('Competitie:kies'))
+            next_url = reverse('GoogleDrive:resultaat-mislukt')
+        else:
+            # success: bruikbaar token ontvangen
+            next_url = reverse('GoogleDrive:resultaat-gelukt')
+
+        return HttpResponseRedirect(next_url)
 
 
 # end of file
