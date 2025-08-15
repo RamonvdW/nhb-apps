@@ -521,7 +521,7 @@ class TestCompBeheerBB(E2EHelpers, TestCase):
         self.assert404(resp, 'Onbekende afstand')
 
         resp = self.client.post(self.url_ag_vaststellen_afstand % '42')
-        self.assert404(resp, 'Onbekende afstand')
+        self.assert404(resp, 'Geen competitie in de juiste fase')
 
         # trigger de permissie check (want: geen competitie aangemaakt)
         with self.assert_max_queries(20):

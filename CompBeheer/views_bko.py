@@ -13,11 +13,11 @@ from django.core.exceptions import PermissionDenied
 from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
-from Competitie.definities import MUTATIE_KAMP_INDIV_AFSLUITEN, MUTATIE_KAMP_TEAMS_AFSLUITEN
-from Competitie.models import Competitie, CompetitieTeamKlasse, Regiocompetitie, KampioenschapTeam, CompetitieMutatie
+from Competitie.models import Competitie, CompetitieTeamKlasse, Regiocompetitie, KampioenschapTeam
 from CompBeheer.operations.maak_mutatie import (maak_mutatie_doorzetten_regio_naar_rk,
                                                 maak_mutatie_kamp_indiv_doorzetten_naar_bk,
-                                                maak_mutatie_kamp_teams_doorzetten_naar_bk)
+                                                maak_mutatie_kamp_teams_doorzetten_naar_bk,
+                                                maak_mutatie_kamp_indiv_afsluiten, maak_mutatie_kamp_teams_afsluiten)
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
 from Site.core.background_sync import BackgroundSync
@@ -417,6 +417,7 @@ class DoorzettenBasisView(UserPassesTestMixin, TemplateView):
     check_indiv_fase = True
     url_name = None             # naar POST handler, voor doorzetten
     is_teams = False
+    is_afsluiten = False
 
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
     permission_denied_message = 'Geen toegang'
@@ -483,11 +484,16 @@ class DoorzettenBasisView(UserPassesTestMixin, TemplateView):
 
         snel = True     # we wachten niet tot deze verwerkt is
 
-        if is_teams:
-            maak_mutatie_kamp_teams_doorzetten_naar_bk(comp, door_str, snel)
+        if self.is_afsluiten:
+            if self.is_teams:
+                maak_mutatie_kamp_teams_afsluiten(comp, door_str, snel)
+            else:
+                maak_mutatie_kamp_indiv_afsluiten(comp, door_str, snel)
         else:
-            maak_mutatie_kamp_indiv_doorzetten_naar_bk(comp, door_str, snel)
-
+            if self.is_teams:
+                maak_mutatie_kamp_teams_doorzetten_naar_bk(comp, door_str, snel)
+            else:
+                maak_mutatie_kamp_indiv_doorzetten_naar_bk(comp, door_str, snel)
 
     def post(self, request, *args, **kwargs):
         """ Deze functie wordt aangeroepen als de BKO de knop 'Doorzetten naar de volgende fase' gebruikt """
@@ -558,7 +564,7 @@ class BevestigEindstandBKIndivView(DoorzettenBasisView):
     expected_fase = 'P'
     check_indiv_fase = True
     url_name = 'bko-bevestig-eindstand-bk-indiv'
-    mutatie_code = MUTATIE_KAMP_INDIV_AFSLUITEN
+    is_afsluiten = True
 
 
 class BevestigEindstandBKTeamsView(DoorzettenBasisView):
@@ -569,7 +575,8 @@ class BevestigEindstandBKTeamsView(DoorzettenBasisView):
     expected_fase = 'P'
     check_indiv_fase = False
     url_name = 'bko-bevestig-eindstand-bk-teams'
-    mutatie_code = MUTATIE_KAMP_TEAMS_AFSLUITEN
+    is_teams = True
+    is_afsluiten = True
 
 
 # end of file
