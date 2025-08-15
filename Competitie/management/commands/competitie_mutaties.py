@@ -42,13 +42,21 @@ class Command(BaseCommand):
         self._sync = BackgroundSync(settings.BACKGROUND_SYNC__COMPETITIE_MUTATIES)
         self._count_ping = 0
 
+    def _out_error(self, msg):
+        self.stdout.write('[ERROR] {competitie_mutaties} %s' % msg)
+
+    def _out_debug(self, msg):
+        self.stdout.write('[DEBUG] {competitie_mutaties} %s' % msg)
+
+    def _out_info(self, msg):
+        self.stdout.write('[INFO] {competitie_mutaties} %s' % msg)
+
     def add_arguments(self, parser):
         parser.add_argument('duration', type=int,
                             choices=(1, 2, 5, 7, 10, 15, 20, 30, 45, 60),
                             help="Maximum aantal minuten actief blijven")
         parser.add_argument('--stop_exactly', type=int, default=None, choices=range(60),
                             help="Stop op deze minuut")
-        parser.add_argument('--all', action='store_true')                   # alles opnieuw vaststellen
         parser.add_argument('--quick', action='store_true')                 # for testing
         parser.add_argument('--use-test-database', action='store_true')     # for testing
 
@@ -61,7 +69,7 @@ class Command(BaseCommand):
         # for
 
         if not done:
-            self.stdout.write('[ERROR] Onbekende mutatie code %s in pk=%s' % (mutatie.mutatie, mutatie.pk))
+            self._out_error('Onbekende mutatie code %s in pk=%s' % (mutatie.mutatie, mutatie.pk))
 
     def _verwerk_nieuwe_mutaties(self):
         begin = datetime.datetime.now()
@@ -72,7 +80,7 @@ class Command(BaseCommand):
 
         if self.taken.hoogste_mutatie:
             # gebruik deze informatie om te filteren
-            self.stdout.write('[INFO] vorige hoogste CompetitieMutatie pk is %s' % self.taken.hoogste_mutatie.pk)
+            self._out_info('vorige hoogste CompetitieMutatie pk is %s' % self.taken.hoogste_mutatie.pk)
             qset = (CompetitieMutatie
                     .objects
                     .filter(pk__gt=self.taken.hoogste_mutatie.pk))
@@ -111,17 +119,17 @@ class Command(BaseCommand):
         # for
 
         if did_useful_work:
-            self.stdout.write('[INFO] nieuwe hoogste CompetitieMutatie pk is %s' % self.taken.hoogste_mutatie.pk)
+            self._out_info('nieuwe hoogste CompetitieMutatie pk is %s' % self.taken.hoogste_mutatie.pk)
 
             klaar = datetime.datetime.now()
-            self.stdout.write('[INFO] Mutaties verwerkt in %s seconden' % (klaar - begin))
+            self._out_info('Mutaties verwerkt in %s seconden' % (klaar - begin))
 
     def _monitor_nieuwe_mutaties(self):
         # monitor voor nieuwe mutaties
         mutatie_count = 0      # moet 0 zijn: beschermd tegen query op lege mutatie tabel
         now = datetime.datetime.now()
         while now < self.stop_at:                   # pragma: no branch
-            # self.stdout.write('tick')
+            # self._out_debug('tick')
             new_count = CompetitieMutatie.objects.count()
             if new_count != mutatie_count:
                 mutatie_count = new_count
@@ -158,7 +166,7 @@ class Command(BaseCommand):
                 stop_at_exact = now + datetime.timedelta(minutes=delta)
                 stop_at_exact -= datetime.timedelta(seconds=self.stop_at.second,
                                                     microseconds=self.stop_at.microsecond)
-                self.stdout.write('[INFO] Calculated stop at is %s' % stop_at_exact)
+                self._out_info('Calculated stop at is %s' % stop_at_exact)
                 if stop_at_exact < self.stop_at:
                     # run duration passes the requested stop minute
                     self.stop_at = stop_at_exact
@@ -168,7 +176,7 @@ class Command(BaseCommand):
             self.stop_at = (datetime.datetime.now()
                             + datetime.timedelta(seconds=duration))
 
-        self.stdout.write('[INFO] Taak loopt tot %s' % str(self.stop_at))
+        self._out_info('Taak loopt tot %s' % str(self.stop_at))
 
     def handle(self, *args, **options):
 
@@ -189,8 +197,8 @@ class Command(BaseCommand):
 
         self._set_stop_time(**options)
 
-        if options['all']:
-            self.taken.hoogste_mutatie = None
+        # bij opstarten van de taak, doorloop alle mutaties die nog niet verwerkt zijn
+        self.taken.hoogste_mutatie = None
 
         competitie_hanteer_overstap_sporter(self.stdout)
 
@@ -221,9 +229,9 @@ class Command(BaseCommand):
             # full traceback to syslog
             my_logger.error(tb_msg)
 
-            self.stderr.write('[ERROR] Onverwachte fout (%s) tijdens competitie_mutaties: %s' % (type(exc), str(exc)))
-            self.stderr.write('Traceback:')
-            self.stderr.write(''.join(lst))
+            self._out_error('Onverwachte fout (%s): %s' % (type(exc), str(exc)))
+            self.stdout.write('Traceback:')
+            self.stdout.write(''.join(lst))
 
             # stuur een mail naar de ontwikkelaars
             # reduceer tot de nuttige regels
@@ -233,7 +241,7 @@ class Command(BaseCommand):
             # deze functie stuurt maximaal 1 mail per dag over hetzelfde probleem
             mailer_notify_internal_error(tb_msg)
 
-        self.stdout.write('[DEBUG] Aantal pings ontvangen: %s' % self._count_ping)
+        self._out_debug('Aantal pings ontvangen: %s' % self._count_ping)
 
         self.stdout.write('Klaar')
 

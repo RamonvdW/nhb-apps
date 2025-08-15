@@ -7,13 +7,14 @@
 from django.urls import reverse
 from django.views.generic import TemplateView
 from CompBeheer.operations.toegang import is_competitie_openbaar_voor_rol
+from CompKamp.operations.maak_mutatie import aanmaken_wedstrijdformulieren_is_pending
 from Competitie.models import Competitie
 from Competitie.operations import bepaal_startjaar_nieuwe_competitie
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige, rol_get_beschrijving
 from GoogleDrive.operations.authenticatie import check_heeft_toestemming
+from GoogleDrive.operations.kamp_programmas_google_drive import ontbrekende_wedstrijdformulieren_rk_bk
 from Site.core.static import static_safe
-
 
 TEMPLATE_COMPETITIE_KIES_SEIZOEN = 'competitie/kies.dtl'
 
@@ -122,9 +123,18 @@ class CompetitieKiesView(TemplateView):
 
                 if not check_heeft_toestemming():
                     context['url_wf_toestemming_drive'] = reverse('CompBeheer:wf-toestemming-drive')
-
-                # TODO: controleer of alle bestanden al aangemaakt zijn
-                context['url_wf_aanmaken'] = reverse('CompBeheer:wf-aanmaken')
+                else:
+                    if not aanmaken_wedstrijdformulieren_is_pending():
+                        comp18 = Competitie.objects.exclude(regiocompetitie_is_afgesloten=True).filter(afstand=18).first()
+                        comp25 = Competitie.objects.exclude(regiocompetitie_is_afgesloten=True).filter(afstand=25).first()
+                        if comp18:
+                            lst18 = ontbrekende_wedstrijdformulieren_rk_bk(comp18)
+                            if len(lst18) > 0:
+                                context['url_wf_aanmaken'] = reverse('CompBeheer:wf-aanmaken')
+                        if comp25:
+                            lst25 = ontbrekende_wedstrijdformulieren_rk_bk(comp25)
+                            if len(lst25) > 0:
+                                context['url_wf_aanmaken'] = reverse('CompBeheer:wf-aanmaken')
 
             context['toon_beheerders_algemeen'] = (rol_nu == Rol.ROL_HWL)
 

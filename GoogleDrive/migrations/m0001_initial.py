@@ -51,9 +51,11 @@ class Migration(migrations.Migration):
             name='Bestand',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('begin_jaar', models.SmallIntegerField(default=0)),
                 ('afstand', models.PositiveSmallIntegerField(default=0)),
-                ('is_team', models.BooleanField(default=False)),
+                ('is_teams', models.BooleanField(default=False)),
                 ('is_bk', models.BooleanField(default=False)),
+                ('klasse_pk', models.PositiveIntegerField(default=0)),
                 ('fname', models.CharField(max_length=80)),
                 ('file_id', models.CharField(default='', max_length=64)),
                 ('log', models.TextField(default='')),

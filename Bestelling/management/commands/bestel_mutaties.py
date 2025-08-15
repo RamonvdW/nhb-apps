@@ -30,7 +30,7 @@ class Command(BaseCommand):
 
         # stdout is hier niet beschikbaar in test omgeving
         # (komt binnen via cmdline optie)
-        self.verwerk_mutaties = None  # VerwerkBestelMutaties(self.stdout)
+        self.verwerk_mutaties = None    # VerwerkBestelMutaties()
 
         self.stop_at = datetime.datetime.now()
 
@@ -38,6 +38,15 @@ class Command(BaseCommand):
         self._count_ping = 0
 
         self._hoogste_mutatie_pk = None
+
+    def _out_error(self, msg):
+        self.stdout.write('[ERROR] {bestel_mutaties} %s' % msg)
+
+    def _out_debug(self, msg):
+        self.stdout.write('[DEBUG] {bestel_mutaties} %s' % msg)
+
+    def _out_info(self, msg):
+        self.stdout.write('[INFO] {bestel_mutaties} %s' % msg)
 
     def add_arguments(self, parser):
         parser.add_argument('duration', type=int,
@@ -58,7 +67,7 @@ class Command(BaseCommand):
 
         if self._hoogste_mutatie_pk is not None:
             # gebruik deze informatie om te filteren
-            self.stdout.write('[INFO] vorige hoogste BestellingMutatie pk is %s' % self._hoogste_mutatie_pk)
+            self._out_info('vorige hoogste BestellingMutatie pk is %s' % self._hoogste_mutatie_pk)
             qset = (BestellingMutatie
                     .objects
                     .exclude(is_verwerkt=True)
@@ -92,17 +101,17 @@ class Command(BaseCommand):
         # for
 
         if did_useful_work:
-            self.stdout.write('[INFO] nieuwe hoogste BestellingMutatie pk is %s' % self._hoogste_mutatie_pk)
+            self._out_info('Nieuwe hoogste BestellingMutatie pk is %s' % self._hoogste_mutatie_pk)
 
             klaar = datetime.datetime.now()
-            self.stdout.write('[INFO] Mutaties verwerkt in %s seconden' % (klaar - begin))
+            self._out_info('Mutaties verwerkt in %s seconden' % (klaar - begin))
 
     def _monitor_nieuwe_mutaties(self):
         # monitor voor nieuwe mutaties
         mutatie_count = 0      # moet 0 zijn: beschermd tegen query op lege mutatie tabel
         now = datetime.datetime.now()
         while now < self.stop_at:                   # pragma: no branch
-            # self.stdout.write('tick')
+            # self._out_debug('tick')
             new_count = BestellingMutatie.objects.count()
             if new_count != mutatie_count:
                 mutatie_count = new_count
@@ -140,7 +149,7 @@ class Command(BaseCommand):
                 stop_at_exact = now + datetime.timedelta(minutes=delta)
                 stop_at_exact -= datetime.timedelta(seconds=self.stop_at.second,
                                                     microseconds=self.stop_at.microsecond)
-                self.stdout.write('[INFO] Calculated stop at is %s' % stop_at_exact)
+                self._out_info('Calculated stop at is %s' % stop_at_exact)
                 if stop_at_exact < self.stop_at:
                     # run duration passes the requested stop minute
                     self.stop_at = stop_at_exact
@@ -155,7 +164,7 @@ class Command(BaseCommand):
             self.stop_at = (datetime.datetime.now()
                             + datetime.timedelta(seconds=duration))
 
-        self.stdout.write('[INFO] Taak loopt tot %s' % str(self.stop_at))
+        self._out_info('Taak loopt tot %s' % str(self.stop_at))
 
     def handle(self, *args, **options):
 
@@ -178,9 +187,9 @@ class Command(BaseCommand):
             # OperationalError treed op bij system shutdown, als database gesloten wordt
             _, _, tb = sys.exc_info()
             lst = traceback.format_tb(tb)
-            self.stderr.write('[ERROR] Onverwachte database fout: %s' % str(exc))
-            self.stderr.write('Traceback:')
-            self.stderr.write(''.join(lst))
+            self._out_error('Onverwachte database fout: %s' % str(exc))
+            self.stdout.write('Traceback:')
+            self.stdout.write(''.join(lst))
 
         except KeyboardInterrupt:                       # pragma: no cover
             pass
@@ -194,9 +203,9 @@ class Command(BaseCommand):
             tb_msg_start = 'Onverwachte fout tijdens bestel_mutaties\n'
             tb_msg_start += '\n'
 
-            self.stderr.write('[ERROR] Onverwachte fout (%s) tijdens bestel_mutaties: %s' % (type(exc), str(exc)))
-            self.stderr.write('Traceback:')
-            self.stderr.write(''.join(lst))
+            self._out_error('Onverwachte fout (%s): %s' % (type(exc), str(exc)))
+            self.stdout.write('Traceback:')
+            self.stdout.write(''.join(lst))
 
             # stuur een mail naar de ontwikkelaars
             # reduceer tot de nuttige regels
@@ -206,7 +215,7 @@ class Command(BaseCommand):
             # deze functie stuurt maximaal 1 mail per dag over hetzelfde probleem
             mailer_notify_internal_error(tb_msg)
 
-        self.stdout.write('[DEBUG] Aantal pings ontvangen: %s' % self._count_ping)
+        self._out_debug('Aantal pings ontvangen: %s' % self._count_ping)
 
         self.stdout.write('Klaar')
 

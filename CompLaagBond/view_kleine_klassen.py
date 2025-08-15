@@ -12,7 +12,7 @@ from django.core.exceptions import PermissionDenied
 from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
-from Competitie.definities import DEEL_BK, MUTATIE_KLEINE_KLASSE_INDIV
+from Competitie.definities import DEEL_BK, MUTATIE_KAMP_VERPLAATS_KLASSE_INDIV
 from Competitie.models import CompetitieIndivKlasse, Kampioenschap, KampioenschapSporterBoog, CompetitieMutatie
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
@@ -230,7 +230,7 @@ class VerplaatsDeelnemerView(UserPassesTestMixin, View):
         schrijf_in_logboek(account, "Competitie", msg)
 
         CompetitieMutatie(
-                mutatie=MUTATIE_KLEINE_KLASSE_INDIV,
+                mutatie=MUTATIE_KAMP_VERPLAATS_KLASSE_INDIV,
                 door=door_str,
                 deelnemer=deelnemer,
                 indiv_klasse=klasse).save()

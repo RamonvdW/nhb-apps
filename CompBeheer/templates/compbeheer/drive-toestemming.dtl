@@ -6,7 +6,7 @@
 {% endcomment %}
 {% load static %}
 
-{% block title %}Toestemming{% endblock %}
+{% block title %}Toestemming Google Drive{% endblock %}
 
 {% block pagina %}
 
@@ -21,10 +21,14 @@
     <div class="row-sv-blauw">
         <div class="col s12 l10 offset-l1 xl6 offset-xl3">
             <div class="sv-kader" style="padding:10px">
-                <p>MijnHandboogsport heeft toegang nodig tot een Google Drive van een gebruiker<br>om daarin de RK/BK wedstrijdformulieren aan te maken, om later te delen met de HWL's.</p>
+                <p>MijnHandboogsport heeft toegang nodig tot de Google Drive van een gebruiker<br>om daarin de RK/BK wedstrijdformulieren aan te maken, om later te delen met de HWL's.</p>
 
                 {% if heeft_toestemming %}
                     <p>Volgens onze administratie is de toestemming al gegeven.</p>
+
+                    <p>
+                        <a class="btn-sv-rood" href="{% url 'Competitie:kies' %}">Terug</a>
+                    </p>
                 {% else %}
                     <p>Onderstaande knop begint het process waarmee jij toegang kan verlenen aan MijnHandboogsport.</p>
 
@@ -38,6 +42,6 @@
     </div>
 
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="compbeheer-toestemming" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="compbeheer-drive-toestemming" %}
 
 {% endblock %}

@@ -1,0 +1,40 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2025 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}WF aanmaken{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Aanmaken wedstrijdformulieren</h3>
+            <p>In Google Drive</p>
+        </div>
+    </div>
+
+    <!-- blauw balk met wit informatie veld -->
+    <div class="row-sv-blauw">
+        <div class="col s12 l10 offset-l1 xl6 offset-xl3">
+            <div class="sv-kader" style="padding:20px">
+                <p>MijnHandboogsport heeft toegang tot de Google Drive van een gebruiker<br>om daarin de RK/BK wedstrijdformulieren aan te maken, om later te delen met de HWL's.</p>
+
+                <p>Aantal bestanden aan te maken voor de Indoor: {{ aantal_aanmaken_18 }}<br>Aantal bestanden aan te maken voor de 25m 1pijl: {{ aantal_aanmaken_25 }}</p>
+
+                <form action="{{ url_aanmaken }}" method="post">
+                    {% csrf_token %}
+                    <button class="btn-sv-rood" type="submit">Begin</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="compbeheer-drive-aanmaken" %}
+
+{% endblock %}

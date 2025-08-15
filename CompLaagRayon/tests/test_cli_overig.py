@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from Competitie.definities import MUTATIE_INITIEEL
+from Competitie.definities import MUTATIE_KAMP_REINIT_TEST
 from Competitie.models import (CompetitieMatch, CompetitieIndivKlasse, CompetitieTeamKlasse, CompetitieMutatie,
                                KampioenschapIndivKlasseLimiet, KampioenschapSporterBoog, KampioenschapTeam)
 from Competitie.test_utils.tijdlijn import zet_competitie_fase_rk_prep
@@ -70,7 +70,7 @@ class TestCompLaagRayonCliOverig(E2EHelpers, TestCase):
         pass
 
     def test_check_rk(self):
-        CompetitieMutatie(mutatie=MUTATIE_INITIEEL,
+        CompetitieMutatie(mutatie=MUTATIE_KAMP_REINIT_TEST,
                           kampioenschap=self.testdata.deelkamp18_rk[self.rayon_nr]).save()
         self.verwerk_competitie_mutaties()
 

@@ -185,6 +185,6 @@
         })
     </script>
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="locatie-extern-details" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="locatie-evenement-details" %}
 
 {% endblock %}

@@ -7,7 +7,7 @@
 from django.test import TestCase
 from django.core import management
 from BasisTypen.models import BoogType
-from Competitie.definities import (MUTATIE_INITIEEL, MUTATIE_COMPETITIE_OPSTARTEN,
+from Competitie.definities import (MUTATIE_KAMP_REINIT_TEST, MUTATIE_COMPETITIE_OPSTARTEN,
                                    MUTATIE_AG_VASTSTELLEN_18M, MUTATIE_AG_VASTSTELLEN_25M,
                                    MUTATIE_KAMP_CUT, MUTATIE_KAMP_AFMELDEN_INDIV,
                                    DEELNAME_ONBEKEND, DEELNAME_JA, DEELNAME_NEE)
@@ -229,7 +229,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
         self.verwerk_competitie_mutaties()
         # self._dump_deelnemers()
 
-        CompetitieMutatie(mutatie=MUTATIE_INITIEEL,
+        CompetitieMutatie(mutatie=MUTATIE_KAMP_REINIT_TEST,
                           kampioenschap=self.deelkamp_rk).save()
         self.verwerk_competitie_mutaties()
         # self._dump_deelnemers()
@@ -238,7 +238,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
         # nu zonder limiet
         KampioenschapIndivKlasseLimiet.objects.all().delete()
         KampioenschapTeamKlasseLimiet.objects.all().delete()
-        CompetitieMutatie(mutatie=MUTATIE_INITIEEL,
+        CompetitieMutatie(mutatie=MUTATIE_KAMP_REINIT_TEST,
                           kampioenschap=self.deelkamp_rk).save()
         self.verwerk_competitie_mutaties()
 
@@ -886,7 +886,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
         mutatie.save()
 
         self.assertTrue("???" in str(mutatie))  # geen beschrijving beschikbaar
-        mutatie.mutatie = MUTATIE_INITIEEL
+        mutatie.mutatie = MUTATIE_KAMP_REINIT_TEST
         self.assertTrue(str(mutatie) != "")     # wel een beschrijving
 
         mutatie.mutatie = MUTATIE_KAMP_CUT

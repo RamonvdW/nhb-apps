@@ -8,6 +8,7 @@
 
 from django.conf import settings
 from django.utils import timezone
+from CompKamp.operations.wedstrijdformulieren import iter_wedstrijdformulieren
 from GoogleDrive.models import Token, Bestand
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError as GoogleApiError
@@ -339,7 +340,7 @@ class Storage:
         Bestand.objects.create(
                 begin_jaar=self._begin_jaar,
                 afstand=afstand,
-                is_team=is_teams,
+                is_teams=is_teams,
                 is_bk=is_bk,
                 klasse_pk=klasse_pk,
                 fname=fname,
@@ -384,6 +385,32 @@ class Storage:
             raise StorageError('{vind_sheet} ' + error_msg)
 
         return file_id
+
+
+def ontbrekende_wedstrijdformulieren_rk_bk(comp) -> list:
+    """ geef een lijst terug met de benodigde wedstrijdformulieren die nog niet aangemaakt zijn
+        aan de hand van de informatie in tabel Bestand.
+    """
+    todo = list()
+
+    # maak een map met de huidige bestanden
+    sel2bestand = dict()
+    for bestand in Bestand.objects.filter(begin_jaar=comp.begin_jaar, afstand=comp.afstand):
+        sel = (bestand.begin_jaar, bestand.afstand, bestand.is_teams, bestand.is_bk, bestand.klasse_pk)
+        sel2bestand[sel] = bestand
+    # for
+
+    for tup in iter_wedstrijdformulieren(comp):
+        afstand, is_teams, is_bk, klasse_pk, fname = tup
+        sel = (comp.begin_jaar, afstand, is_teams, is_bk, klasse_pk)
+        try:
+            bestand = sel2bestand[sel]
+        except KeyError:
+            # niet gevonden; voeg toe aan de todo lijst
+            todo.append(tup)
+    # for
+
+    return todo
 
 
 # end of file

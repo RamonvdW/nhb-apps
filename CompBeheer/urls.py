@@ -41,7 +41,7 @@ urlpatterns = [
          views_toestemming.ToestemmingView.as_view(),
          name='wf-toestemming-drive'),
 
-    path('wedstrijdformulieren/toestemming/',
+    path('wedstrijdformulieren/aanmaken/',
          views_toestemming.AanmakenView.as_view(),
          name='wf-aanmaken'),
 

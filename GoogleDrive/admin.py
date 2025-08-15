@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.contrib import admin
-from GoogleDrive.models import Transactie, Token
+from GoogleDrive.models import Transactie, Token, Bestand
 
 
 class TransactieAdmin(admin.ModelAdmin):
@@ -15,7 +15,13 @@ class TransactieAdmin(admin.ModelAdmin):
     ordering = ('-when',)
 
 
+class BestandAdmin(admin.ModelAdmin):
+
+    list_filter = ('afstand', 'is_teams', 'is_bk')
+
+
 admin.site.register(Transactie, TransactieAdmin)
 admin.site.register(Token)
+admin.site.register(Bestand, BestandAdmin)
 
 # end of file

@@ -90,6 +90,9 @@ class Bestand(models.Model):
     # logboekje van acties op deze file: aanmaken, delen met HWL, bijgewerkt, problemen, etc.
     log = models.TextField(default='')
 
+    def __str__(self):
+        return '%s %s' % (self.afstand, self.fname)
+
     class Meta:
         verbose_name = "Bestand"
         verbose_name_plural = "Bestanden"

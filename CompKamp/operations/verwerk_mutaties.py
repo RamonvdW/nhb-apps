@@ -7,14 +7,17 @@
 from django.utils import timezone
 from django.db.models import F
 from Competitie.definities import (DEELNAME_JA, DEELNAME_NEE,
-                                   MUTATIE_INITIEEL, MUTATIE_KAMP_CUT,
+                                   MUTATIE_KAMP_REINIT_TEST, MUTATIE_KAMP_CUT,
                                    MUTATIE_KAMP_AANMELDEN_INDIV, MUTATIE_KAMP_AFMELDEN_INDIV,
-                                   MUTATIE_EXTRA_RK_DEELNEMER,
+                                   MUTATIE_EXTRA_RK_DEELNEMER, MUTATIE_KAMP_VERPLAATS_KLASSE_INDIV,
                                    MUTATIE_KAMP_TEAMS_NUMMEREN,
-                                   MUTATIE_KLEINE_KLASSE_INDIV)
+                                   MUTATIE_MAAK_WEDSTRIJD_FORMULIEREN)
 from Competitie.models import (Kampioenschap, KampioenschapSporterBoog, KampioenschapTeam,
                                KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet,
-                               CompetitieMutatie)
+                               CompetitieMutatie, CompetitieIndivKlasse, CompetitieTeamKlasse)
+from CompKamp.operations.wedstrijdformulieren import iter_wedstrijdformulieren
+from Geo.models import Rayon
+from GoogleDrive.operations.kamp_programmas_google_drive import Storage, StorageError
 
 VOLGORDE_PARKEER = 22222        # hoog en past in PositiveSmallIntegerField
 
@@ -159,8 +162,8 @@ class VerwerkCompKampMutaties:
             self._verwerk_mutatie_initieel_klasse_indiv(deelkamp, deelnemer.indiv_klasse, zet_boven_cut_op_ja)
         # for
 
-    def _verwerk_mutatie_initieel(self, mutatie: CompetitieMutatie):
-        self.stdout.write('[INFO] Verwerk mutatie %s: initieel' % mutatie.pk)
+    def _verwerk_mutatie_kamp_reinit_test(self, mutatie: CompetitieMutatie):
+        self.stdout.write('[INFO] Verwerk mutatie %s: kamp (re-)init test' % mutatie.pk)
         competitie = mutatie.kampioenschap.competitie
         deel = mutatie.kampioenschap.deel
 
@@ -169,7 +172,6 @@ class VerwerkCompKampMutaties:
 
         # Let op: wordt alleen gebruik vanuit test code
 
-        # via deelnemer kunnen we bepalen over welke kampioenschappen dit gaat
         for deelkamp in (Kampioenschap
                          .objects
                          .filter(competitie=competitie,
@@ -683,7 +685,7 @@ class VerwerkCompKampMutaties:
             self._verwerk_mutatie_kamp_cut_team(mutatie.kampioenschap, mutatie.team_klasse,
                                                 mutatie.cut_oud, mutatie.cut_nieuw)
 
-    def _verwerk_mutatie_klein_klassen_indiv(self, mutatie: CompetitieMutatie):
+    def _verwerk_mutatie_kamp_verplaats_deelnemer_naar_andere_klasse(self, mutatie: CompetitieMutatie):
         """ verplaats deelnemer (KampioenschapSporterBoog) van zijn huidige klasse
             naar de klasse indiv_klasse (CompetitieIndivKlasse)
             en pas daarbij de volgorde en rank aan
@@ -734,14 +736,36 @@ class VerwerkCompKampMutaties:
         # gebruik de methode van opnieuw aanmelden om deze sporter op de reserve-lijst te krijgen
         self._opnieuw_aanmelden_indiv(deelnemer)
 
+    def _verwerk_mutatie_maak_wedstrijdformulieren(self, mutatie):
+        """ maak alle Google Sheet wedstrijdformulieren aan in de gedeelde Google Drive folders
+            deze mutatie wordt opgestart zodra de toestemming binnen is.
+        """
+        comp = mutatie.competitie
+        self.stdout.write('[INFO] Maak wedstrijdformulieren voor %s' % comp.beschrijving)
+
+        try:
+            storage = Storage(self.stdout, comp.begin_jaar)
+            storage.check_access()
+
+            for tup in iter_wedstrijdformulieren(comp):
+                afstand, is_teams, is_bk, klasse_pk, fname = tup
+                self.stdout.write('[INFO] Maak %s' % fname)
+                storage.maak_sheet_van_template(afstand, is_teams, is_bk, klasse_pk, fname)
+            # for
+
+        except StorageError as err:
+            self.stdout.write('[ERROR] StorageError: %s' % str(err))
+
+
     HANDLERS = {
-        MUTATIE_INITIEEL: _verwerk_mutatie_initieel,
+        MUTATIE_KAMP_REINIT_TEST: _verwerk_mutatie_kamp_reinit_test,
         MUTATIE_KAMP_CUT: _verwerk_mutatie_kamp_cut,
         MUTATIE_KAMP_AANMELDEN_INDIV: _verwerk_mutatie_kamp_aanmelden_indiv,
         MUTATIE_KAMP_AFMELDEN_INDIV: _verwerk_mutatie_afmelden_indiv,
         MUTATIE_EXTRA_RK_DEELNEMER: _verwerk_mutatie_extra_rk_deelnemer,
-        MUTATIE_KLEINE_KLASSE_INDIV: _verwerk_mutatie_klein_klassen_indiv,
+        MUTATIE_KAMP_VERPLAATS_KLASSE_INDIV: _verwerk_mutatie_kamp_verplaats_deelnemer_naar_andere_klasse,
         MUTATIE_KAMP_TEAMS_NUMMEREN: _verwerk_mutatie_teams_opnieuw_nummeren,
+        MUTATIE_MAAK_WEDSTRIJD_FORMULIEREN: _verwerk_mutatie_maak_wedstrijdformulieren,
     }
 
     def verwerk(self, mutatie: CompetitieMutatie) -> bool:
