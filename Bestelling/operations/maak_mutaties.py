@@ -34,7 +34,7 @@ bestel_mutaties_ping = BackgroundSync(settings.BACKGROUND_SYNC__BESTEL_MUTATIES)
 
 def _bestel_ping_achtergrondtaak(mutatie: BestellingMutatie, snel: bool):
 
-    # ping het achtergrond process
+    # ping de achtergrondtaak
     bestel_mutaties_ping.ping()
 
     if not snel:  # pragma: no cover

@@ -13,10 +13,11 @@ from django.core.exceptions import PermissionDenied
 from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
-from Competitie.definities import (MUTATIE_DOORZETTEN_REGIO_NAAR_RK,
-                                   MUTATIE_KAMP_INDIV_DOORZETTEN_NAAR_BK, MUTATIE_KAMP_TEAMS_DOORZETTEN_NAAR_BK,
-                                   MUTATIE_KAMP_INDIV_AFSLUITEN, MUTATIE_KAMP_TEAMS_AFSLUITEN)
+from Competitie.definities import MUTATIE_KAMP_INDIV_AFSLUITEN, MUTATIE_KAMP_TEAMS_AFSLUITEN
 from Competitie.models import Competitie, CompetitieTeamKlasse, Regiocompetitie, KampioenschapTeam, CompetitieMutatie
+from CompBeheer.operations.maak_mutatie import (maak_mutatie_doorzetten_regio_naar_rk,
+                                                maak_mutatie_kamp_indiv_doorzetten_naar_bk,
+                                                maak_mutatie_kamp_teams_doorzetten_naar_bk)
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
 from Site.core.background_sync import BackgroundSync
@@ -143,13 +144,8 @@ class DoorzettenRegioNaarRKView(UserPassesTestMixin, TemplateView):
         door_str = "BKO %s" % account.volledige_naam()
         door_str = door_str[:149]
 
-        CompetitieMutatie(mutatie=MUTATIE_DOORZETTEN_REGIO_NAAR_RK,
-                          door=door_str,
-                          competitie=comp).save()
-
-        mutatie_ping.ping()
-
-        # we wachten niet tot deze verwerkt is
+        snel = True     # we wachten niet tot deze verwerkt is
+        maak_mutatie_doorzetten_regio_naar_rk(comp, door_str, snel)
 
         return HttpResponseRedirect(reverse('Competitie:kies'))
 
@@ -420,7 +416,7 @@ class DoorzettenBasisView(UserPassesTestMixin, TemplateView):
     expected_fase = '?'
     check_indiv_fase = True
     url_name = None             # naar POST handler, voor doorzetten
-    mutatie_code = None
+    is_teams = False
 
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
     permission_denied_message = 'Geen toegang'
@@ -485,14 +481,13 @@ class DoorzettenBasisView(UserPassesTestMixin, TemplateView):
         door_str = "BKO %s" % door_account.volledige_naam()
         door_str = door_str[:149]
 
-        CompetitieMutatie(mutatie=self.mutatie_code,
-                          door=door_str,
-                          competitie=comp).save()
+        snel = True     # we wachten niet tot deze verwerkt is
 
-        mutatie_ping.ping()
+        if is_teams:
+            maak_mutatie_kamp_teams_doorzetten_naar_bk(comp, door_str, snel)
+        else:
+            maak_mutatie_kamp_indiv_doorzetten_naar_bk(comp, door_str, snel)
 
-        # we wachten niet tot deze verwerkt is
-        # noteer: hierdoor geeft de test ook geen dekking voor de achtergrondtaak
 
     def post(self, request, *args, **kwargs):
         """ Deze functie wordt aangeroepen als de BKO de knop 'Doorzetten naar de volgende fase' gebruikt """
@@ -514,7 +509,6 @@ class DoorzettenIndivRKNaarBKView(DoorzettenBasisView):
     expected_fase = 'L'
     check_indiv_fase = True
     url_name = 'bko-rk-indiv-doorzetten-naar-bk'
-    mutatie_code = MUTATIE_KAMP_INDIV_DOORZETTEN_NAAR_BK
 
 
 class DoorzettenTeamsRKNaarBKView(DoorzettenBasisView):
@@ -525,7 +519,7 @@ class DoorzettenTeamsRKNaarBKView(DoorzettenBasisView):
     expected_fase = 'L'
     check_indiv_fase = False
     url_name = 'bko-rk-teams-doorzetten-naar-bk'
-    mutatie_code = MUTATIE_KAMP_TEAMS_DOORZETTEN_NAAR_BK
+    is_teams = True
 
 
 class KleineBKKlassenZijnSamengevoegdIndivView(DoorzettenBasisView):

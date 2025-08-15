@@ -936,7 +936,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
         f1 = io.StringIO()
         f2 = io.StringIO()
         with self.assert_max_queries(20, check_duration=False):     # 2 seconden is boven de limiet
-            management.call_command('competitie_mutaties', '2', '--quick', '--all', stderr=f1, stdout=f2)
+            management.call_command('competitie_mutaties', '2', '--quick', stderr=f1, stdout=f2)
 
     def test_competitie(self):
         # competitie opstarten

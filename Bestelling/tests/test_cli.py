@@ -181,14 +181,14 @@ class TestBestellingCli(E2EHelpers, TestCase):
         BestellingMutatie(code=9999).save()                                                 # onbekende mutatie
         f1, f2 = self.run_management_command(BESTEL_MUTATIES_COMMAND, '60', '--quick')            # 60 == fake-hoogste
         # print('\nf1:', f1.getvalue(), '\nf2:', f2.getvalue())
-        self.assertTrue('[INFO] vorige hoogste BestellingMutatie pk is 0' in f2.getvalue())
-        self.assertTrue('[ERROR] Onbekende mutatie code 9999' in f2.getvalue())
+        self.assertTrue(' vorige hoogste BestellingMutatie pk is 0' in f2.getvalue())
+        self.assertTrue('Onbekende mutatie code 9999' in f2.getvalue())
 
         # trigger een exceptie
         BestellingMutatie(code=BESTELLING_MUTATIE_VERWIJDER).save()
         f1, f2 = self.run_management_command(BESTEL_MUTATIES_COMMAND, '60', '--quick')
         # print('\nf1:', f1.getvalue(), '\nf2:', f2.getvalue())
-        self.assertTrue('Traceback:' in f1.getvalue())
+        self.assertTrue('Traceback:' in f2.getvalue())
         BestellingMutatie.objects.all().delete()
 
         # test "stop exactly"
@@ -261,10 +261,10 @@ class TestBestellingCli(E2EHelpers, TestCase):
         f1, f2 = self.run_management_command(KOPPEL_BETALINGEN_COMMAND)
         # print('\nf1:', f1.getvalue(), '\nf2:', f2.getvalue())
         self.assertTrue(
-            '[ERROR] BetaalTransactie pk=' + str(transactie1.pk) + ' heeft raar aantal bestellingen: 0'
+            'BetaalTransactie pk=' + str(transactie1.pk) + ' heeft raar aantal bestellingen: 0'
             in f2.getvalue())
         self.assertTrue(
-            '[WARNING] MH-9001 toegevoegd aan beschrijving van BetaalTransactie pk='
+            'MH-9001 toegevoegd aan beschrijving van BetaalTransactie pk='
             in f2.getvalue())
 
         # nog een keer: nu hoeft er niets meer toegevoegd te worden
@@ -284,7 +284,7 @@ class TestBestellingCli(E2EHelpers, TestCase):
         f1, f2 = self.run_management_command(KOPPEL_BETALINGEN_COMMAND)
         # print('\nf1:', f1.getvalue(), '\nf2:', f2.getvalue())
         self.assertTrue(
-            '[ERROR] BetaalTransactie pk=' + str(transactie2.pk) + ' heeft raar aantal bestellingen: 2'
+            'BetaalTransactie pk=' + str(transactie2.pk) + ' heeft raar aantal bestellingen: 2'
             in f2.getvalue())
 
         self.assertEqual(transactie4.bestelling_set.count(), 1)

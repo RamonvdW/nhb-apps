@@ -25,7 +25,7 @@ scheids_mutaties_ping = BackgroundSync(settings.BACKGROUND_SYNC__SCHEIDS_MUTATIE
 
 def _scheids_ping_achtergrondtaak(mutatie, snel: bool):
 
-    # ping het achtergrond process
+    # ping de achtergrondtaak
     scheids_mutaties_ping.ping()
 
     if not snel:  # pragma: no cover

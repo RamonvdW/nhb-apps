@@ -8,8 +8,7 @@
     deze komen binnen via CompetitieMutatie
 """
 
-from Competitie.definities import (MUTATIE_COMPETITIE_OPSTARTEN,
-                                   MUTATIE_AG_VASTSTELLEN_18M, MUTATIE_AG_VASTSTELLEN_25M,
+from Competitie.definities import (MUTATIE_COMPETITIE_OPSTARTEN, MUTATIE_AG_VASTSTELLEN,
                                    MUTATIE_DOORZETTEN_REGIO_NAAR_RK,
                                    MUTATIE_KAMP_INDIV_DOORZETTEN_NAAR_BK, MUTATIE_KAMP_TEAMS_DOORZETTEN_NAAR_BK,
                                    MUTATIE_KAMP_INDIV_AFSLUITEN, MUTATIE_KAMP_TEAMS_AFSLUITEN)
@@ -42,13 +41,11 @@ class VerwerkCompBeheerMutaties:
         if Competitie.objects.filter(begin_jaar=jaar).count() == 0:
             competities_aanmaken(jaar)
 
-    def _verwerk_mutatie_ag_vaststellen_18m(self, mutatie: CompetitieMutatie):
-        self.stdout.write('[INFO] Verwerk mutatie %s: AG vaststellen 18m' % mutatie.pk)
-        aanvangsgemiddelden_vaststellen_voor_afstand(18)
-
-    def _verwerk_mutatie_ag_vaststellen_25m(self, mutatie: CompetitieMutatie):
-        self.stdout.write('[INFO] Verwerk mutatie %s: AG vaststellen 25m' % mutatie.pk)
-        aanvangsgemiddelden_vaststellen_voor_afstand(25)
+    def _verwerk_mutatie_ag_vaststellen(self, mutatie: CompetitieMutatie):
+        comp = mutatie.competitie
+        afstand = int(comp.afstand)
+        self.stdout.write('[INFO] Verwerk mutatie %s: AG vaststellen %dm' % (mutatie.pk, afstand))
+        aanvangsgemiddelden_vaststellen_voor_afstand(afstand)
 
     def _verwerk_mutatie_regio_naar_rk(self, mutatie: CompetitieMutatie):
         """ de BKO heeft gevraagd de regiocompetitie af te sluiten en alles klaar te maken voor het RK """
@@ -145,8 +142,7 @@ class VerwerkCompBeheerMutaties:
 
     HANDLERS = {
         MUTATIE_COMPETITIE_OPSTARTEN: _verwerk_mutatie_competitie_opstarten,
-        MUTATIE_AG_VASTSTELLEN_18M: _verwerk_mutatie_ag_vaststellen_18m,
-        MUTATIE_AG_VASTSTELLEN_25M: _verwerk_mutatie_ag_vaststellen_25m,
+        MUTATIE_AG_VASTSTELLEN: _verwerk_mutatie_ag_vaststellen,
         MUTATIE_DOORZETTEN_REGIO_NAAR_RK: _verwerk_mutatie_regio_naar_rk,
         MUTATIE_KAMP_INDIV_DOORZETTEN_NAAR_BK: _verwerk_mutatie_opstarten_bk_indiv,
         MUTATIE_KAMP_TEAMS_DOORZETTEN_NAAR_BK: _verwerk_mutatie_opstarten_bk_teams,

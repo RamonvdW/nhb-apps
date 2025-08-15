@@ -839,7 +839,7 @@ class TestCompLaagRegioTeamsRCL(E2EHelpers, TestCase):
         url = self.url_team_ronde % self.deelcomp_regio112_18.pk
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 200)  # 200 = OK
+            self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('complaagregio/rcl-team-ronde.dtl', 'plein/site_layout.dtl'))
 
@@ -854,7 +854,7 @@ class TestCompLaagRegioTeamsRCL(E2EHelpers, TestCase):
         mutatie.is_verwerkt = False
         mutatie.save(update_fields=['is_verwerkt'])
         # laat deze herstelde mutatie verwerken
-        self.run_management_command('competitie_mutaties', '1', '--quick', '--all')
+        self.run_management_command('competitie_mutaties', '1', '--quick')
 
         self.deelcomp_regio112_18 = Regiocompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
         self.assertEqual(self.deelcomp_regio112_18.huidige_team_ronde, 99)

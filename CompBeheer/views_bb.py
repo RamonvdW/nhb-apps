@@ -19,6 +19,7 @@ from Competitie.definities import (MUTATIE_COMPETITIE_OPSTARTEN,
 from Competitie.models import Competitie, CompetitieMutatie
 from Competitie.operations import (bepaal_startjaar_nieuwe_competitie, bepaal_klassengrenzen_indiv,
                                    bepaal_klassengrenzen_teams, competitie_klassengrenzen_vaststellen)
+from CompBeheer.operations.maak_mutatie import maak_mutatie_competitie_opstarten, maak_mutatie_ag_vaststellen
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige
 from HistComp.models import HistCompSeizoen
@@ -123,6 +124,8 @@ class CompetitieAanmakenView(UserPassesTestMixin, TemplateView):
         account = get_account(request)
         jaar = bepaal_startjaar_nieuwe_competitie()
 
+        snel = str(request.POST.get('snel', ''))[:1]
+
         # bescherm tegen dubbel aanmaken
         if Competitie.objects.filter(begin_jaar=jaar).count() == 0:
             seizoen = "%s/%s" % (jaar, jaar+1)
@@ -131,23 +134,7 @@ class CompetitieAanmakenView(UserPassesTestMixin, TemplateView):
             # voor concurrency protection, laat de achtergrondtaak de competitie aanmaken
             door_str = "BB %s" % account.volledige_naam()
             door_str = door_str[:149]
-            mutatie = CompetitieMutatie(mutatie=MUTATIE_COMPETITIE_OPSTARTEN,
-                                        door=door_str)
-            mutatie.save()
-
-            mutatie_ping.ping()
-
-            snel = str(request.POST.get('snel', ''))[:1]
-            if snel != '1':         # pragma: no cover
-                # wacht maximaal 3 seconden tot de mutatie uitgevoerd is
-                interval = 0.2      # om steeds te verdubbelen
-                total = 0.0         # om een limiet te stellen
-                while not mutatie.is_verwerkt and total + interval <= 3.0:
-                    time.sleep(interval)
-                    total += interval   # 0.0 --> 0.2, 0.6, 1.4, 3.0
-                    interval *= 2       # 0.2 --> 0.4, 0.8, 1.6, 3.2
-                    mutatie = CompetitieMutatie.objects.get(pk=mutatie.pk)
-                # while
+            maak_mutatie_competitie_opstarten(door_str, snel == '1')
 
         return redirect('Competitie:kies')
 
@@ -235,13 +222,6 @@ class AGVaststellenView(UserPassesTestMixin, TemplateView):
         account = get_account(request)
         afstand = str(kwargs['afstand'])
 
-        if afstand == '18':
-            mutatie = MUTATIE_AG_VASTSTELLEN_18M
-        elif afstand == '25':
-            mutatie = MUTATIE_AG_VASTSTELLEN_25M
-        else:
-            raise Http404('Onbekende afstand')
-
         # alleen toestaan als de competities in fase A is
         comps = Competitie.objects.filter(is_afgesloten=False, afstand=afstand, klassengrenzen_vastgesteld=False)
         if len(comps) != 1:
@@ -250,24 +230,12 @@ class AGVaststellenView(UserPassesTestMixin, TemplateView):
 
         schrijf_in_logboek(account, 'Competitie', 'Aanvangsgemiddelden vaststellen voor de %sm competitie' % afstand)
 
+        snel = str(request.POST.get('snel', ''))[:1]
+
         # voor concurrency protection, laat de achtergrondtaak de competitie aanmaken
         door_str = "BB %s" % account.volledige_naam()
         door_str = door_str[:149]
-        mutatie = CompetitieMutatie(mutatie=mutatie,
-                                    door=door_str)
-        mutatie.save()
-
-        mutatie_ping.ping()
-
-        snel = str(request.POST.get('snel', ''))[:1]
-        if snel != '1':             # pragma: no cover
-            # wacht maximaal 7 seconden tot de mutatie uitgevoerd is
-            total = 0         # om een limiet te stellen
-            while not mutatie.is_verwerkt and total < 7:
-                time.sleep(1)
-                total += 1
-                mutatie = CompetitieMutatie.objects.get(pk=mutatie.pk)
-            # while
+        maak_mutatie_ag_vaststellen(comp, door_str, snel == '1')
 
         return redirect('CompBeheer:overzicht', comp_pk=comp.pk)
 
