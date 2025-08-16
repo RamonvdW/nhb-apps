@@ -614,6 +614,10 @@ INSTAPTOETS_AANTAL_VRAGEN = 20
 INSTAPTOETS_AANTAL_GOED_EIS = 70        # procent
 INSTAPTOETS_AANTAL_MINUTEN = 30
 
+# google drive
+GOOGLE_DRIVE_FOLDER_NAME_TOP = 'MH wedstrijdformulieren'        # moet uniek zijn in de drive
+GOOGLE_DRIVE_FOLDER_NAME_TEMPLATES = 'MH templates RK/BK'       # moet uniek zijn in de drive
+
 
 # -------------------------------------------
 # defaults for 'dev' and 'test' options below
