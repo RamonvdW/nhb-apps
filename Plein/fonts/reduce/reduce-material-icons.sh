@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#  Copyright (c) 2023-2024 Ramon van der Winkel.
+#  Copyright (c) 2023-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -13,7 +13,7 @@ DTL_FONTS="../../templates/plein/site_layout_fonts.dtl"
 
 # ga naar de directory van het script (Plein/fonts/reduce/)
 SCRIPT_DIR=$(dirname "$0")
-cd "$SCRIPT_DIR"
+cd "$SCRIPT_DIR" || exit 1
 
 OTF_SOURCE=$(find "$FONTS_DIR" -name Material-Icons-Round-\*.otf)
 if [ ! -e "$OTF_SOURCE" ]

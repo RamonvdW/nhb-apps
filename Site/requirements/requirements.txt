@@ -4,11 +4,11 @@
 #
 #    pip-compile --strip-extras requirements.in
 #
-asgiref==3.9.0
+asgiref==3.9.1
     # via django
 cachetools==5.5.2
     # via google-auth
-certifi==2025.6.15
+certifi==2025.7.14
     # via requests
 charset-normalizer==3.4.2
     # via requests
@@ -23,7 +23,7 @@ google-api-core==2.25.1
     #   google-api-python-client
     #   google-geo-type
     #   google-maps-routing
-google-api-python-client==2.175.0
+google-api-python-client==2.177.0
     # via -r requirements.in
 google-auth==2.40.3
     # via
@@ -45,11 +45,11 @@ googleapis-common-protos==1.70.0
     #   grpcio-status
 googlemaps==4.10.0
     # via -r requirements.in
-grpcio==1.73.1
+grpcio==1.74.0
     # via
     #   google-api-core
     #   grpcio-status
-grpcio-status==1.73.1
+grpcio-status==1.74.0
     # via google-api-core
 httplib2==0.22.0
     # via
@@ -92,7 +92,7 @@ pyotp==2.9.0
     # via -r requirements.in
 pyparsing==3.2.3
     # via httplib2
-pypdf==5.7.0
+pypdf==5.9.0
     # via -r requirements.in
 qrcode==8.2
     # via -r requirements.in

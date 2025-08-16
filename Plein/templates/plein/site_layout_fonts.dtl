@@ -12,8 +12,6 @@
 
 {% load static %}
 
-<!-- FUTURE: is it legal to use @font-face inside a style block?
-             Must it be in a CSS file? It seems to work though -->
 <style>
 @font-face {
   font-family: 'Fira Sans';
@@ -21,7 +19,7 @@
   font-weight: 500;
   font-display: block;  /* liever later tonen dan verspringende layout */
 {% if font_use_subset_files %}
-  src: url("{% static 'fonts/firasans-medium-subset-mh-v3.ttf' %}") format('truetype');
+  src: url("{% static 'fonts/firasans-medium-subset-mh-v5.woff' %}") format('truetype');
 {% else %}
   src: url("{% static 'fonts/FiraSans-Medium-v17.ttf' %}") format('truetype');
 {% endif %}
@@ -32,7 +30,7 @@
   font-weight: 400;
   font-stretch: normal;
   font-display: block;  /* liever later tonen dan verspringende layout */
-  src: url("{% static 'fonts/OpenSans-Regular-v40.ttf' %}") format('truetype');
+  src: url("{% static 'fonts/OpenSans-Regular-v43.ttf' %}") format('truetype');
 }
 @font-face {
   font-family: 'Material Icons Round';
@@ -42,7 +40,7 @@
 {% if font_use_subset_files %}
   src: url("{% static 'fonts/material-icons-subset-mh-v25.otf' %}") format('opentype');
 {% else %}
-  src: url("{% static 'fonts/Material-Icons-Round-v108.otf' %}") format('opentype');
+  src: url("{% static 'fonts/Material-Icons-Round-v109.otf' %}") format('opentype');
 {% endif %}
 }
 </style>

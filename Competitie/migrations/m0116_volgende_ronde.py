@@ -11,7 +11,7 @@ def zet_indiv_volgende(apps, _):
     # haal de klassen op die van toepassing zijn tijdens deze migratie
     kamp_klas = apps.get_model('Competitie', 'KampioenschapSporterBoog')
 
-    for kamp in kamp_klas.objects.order_by('indiv_klasse').distinct('indiv_klasse'):
+    for kamp in kamp_klas.objects.order_by('indiv_klasse').distinct('indiv_klasse'):        # pragma: no cover
         indiv_klasse = kamp.indiv_klasse
         kamp_klas.objects.filter(indiv_klasse=indiv_klasse).update(indiv_klasse_volgende_ronde=indiv_klasse)
     # for
@@ -21,7 +21,7 @@ def zet_team_volgende(apps, _):
     # haal de klassen op die van toepassing zijn tijdens deze migratie
     team_klas = apps.get_model('Competitie', 'KampioenschapTeam')
 
-    for team in team_klas.objects.order_by('team_klasse').distinct('team_klasse'):
+    for team in team_klas.objects.order_by('team_klasse').distinct('team_klasse'):          # pragma: no cover
         team_klasse = team.team_klasse
         team_klas.objects.filter(team_klasse=team_klasse).update(team_klasse_volgende_ronde=team_klasse)
     # for

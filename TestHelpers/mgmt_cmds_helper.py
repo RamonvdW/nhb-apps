@@ -21,6 +21,7 @@ class MyMgmtCommandHelper(TestCase):
         """ Helper om code duplicate te verminderen en bij een SystemExit toch de traceback (in stderr) te tonen """
         f1 = io.StringIO()
         f2 = io.StringIO()
+        msg = ''
         try:
             management.call_command(*args, stderr=f1, stdout=f2)
         except (SystemExit, SpecificExitCode, Exception) as exc:
@@ -31,9 +32,10 @@ class MyMgmtCommandHelper(TestCase):
                 msg += 'stderr:\n'
                 msg += f1.getvalue()
                 msg = msg.replace('\n', '\n  ')
-                raise self.failureException(msg) from exc
             else:
                 f1.write('[TEST] Management command raised %s\n' % repr(exc))
+        if msg:
+            raise self.failureException(msg)
         return f1, f2
 
     def verwerk_regiocomp_mutaties(self, show_warnings=True, show_all=False):

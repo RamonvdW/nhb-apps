@@ -10,10 +10,11 @@ from Wedstrijden.definities import (WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD, WEDS
                                     WEDSTRIJD_BEGRENZING_VERENIGING, WEDSTRIJD_BEGRENZING_REGIO,
                                     WEDSTRIJD_BEGRENZING_RAYON, WEDSTRIJD_BEGRENZING_WERELD)
 from Wedstrijden.models import Wedstrijd, WedstrijdSessie, WedstrijdInschrijving
+from typing import Tuple
 
 
 def get_sessies(wedstrijd: Wedstrijd, sporter: Sporter,
-                voorkeuren: SporterVoorkeuren, wedstrijdboog_pk: int) -> (list, int, list, str, bool):
+                voorkeuren: SporterVoorkeuren, wedstrijdboog_pk: int) -> Tuple[list, int, list, str, bool]:
     """
         Geef de mogelijke sessies terug waarop de sporter zich in kan schrijven
 

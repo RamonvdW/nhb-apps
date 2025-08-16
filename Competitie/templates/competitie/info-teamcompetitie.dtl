@@ -48,9 +48,9 @@
     <div class="row-sv-blauw">
         <div class="col s12 l10 offset-l1 xl8 offset-xl2">
             <div class="sv-kader" style="padding:10px">
-                <p>De competities Indoor en de 25m1pijl kennen ook een teamcompetitie.<br>Deze doorlopen dezelfde 3 fases en geografische opdeling als de individuele competities: regio, RK en BK.</p>
+                <p>De competities Indoor en de 25m 1pijl kennen ook een teamcompetitie.<br>Deze doorlopen dezelfde 3 fases en geografische opdeling als de individuele competities: regio, RK en BK.</p>
                 <p>Je moet je inschrijven voor de individuele competitie en kan daarna in een team geplaatst worden.</p>
-                <p>De vereniging schrijft de teams in.<br>Per team worden 3 tot 4 sporters van de eigen vereniging opgesteld.</p>
+                <p>De vereniging schrijft de teams in.<br>Per team worden 3 sporters van de eigen vereniging opgesteld.</p>
                 <p>Als je een keer niet kunt, dan kan de vereniging een invaller opstellen (zie uitleg verderop).</p>
             </div>
         </div>
@@ -125,9 +125,9 @@
     <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
             <div class="sv-kader" style="padding:10px">
-                <p>De team sterkte wordt bepaald door de sporters die bij de inschrijving worden opgesteld in het team.<br>Van de 3 tot 4 sporters worden de hoogste 3 aanvangsgemiddelden gebruikt in de berekening.</p>
+                <p>De teamsterkte wordt bepaald door de sporters die bij de inschrijving worden opgesteld in het team.<br>Het aanvangsgemiddelde (AG) van deze sporters wordt opgeteld.</p>
                 <p>Je kan je eigen aanvangsgemiddelde (AG) terug zien op Mijn pagina.<br>Dit is je gemiddelde van vorig seizoen tijdens de regiocompetitie fase.</p>
-                <p>Heb je vorig jaar niet meegedaan met de regiocompetitie?<br>Dan moet de vereniging een geschat AG opgeven. Dit heeft geen invloed op jouw klasse in de individuele competitie.</p>
+                <p>Heb je vorig jaar niet meegedaan met de regiocompetitie? Dan moet de vereniging een geschat AG opgeven.<br>Dit heeft geen invloed op jouw klasse in de individuele competitie.</p>
             </div>
         </div>
     </div>
@@ -185,7 +185,7 @@
     <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
             <div class="sv-kader" style="padding:10px">
-                <p>De teams schieten allemaal 7 rondes.<br>De hoogste 3 individuele scores (van de 3 of 4 sporters) opgeteld is team score voor die ronde.</p>
+                <p>De teams schieten allemaal 7 rondes.<br>De hoogste 3 individuele scores (van de 3 sporters) opgeteld is team score voor die ronde.</p>
                 <p>In een enkele regio wordt gekeken naar de totale teamscore over 7 rondes.</p>
                 <p>In de andere regio's kunnen per ronde wedstrijdpunten verdiend worden<br>aan de hand van de ranking op teamscore of bij winst tegen een directe tegenstander.</p>
             </div>
@@ -255,9 +255,9 @@
     <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
             <div class="sv-kader" style="padding:10px">
-                <p>Elk van de 4 rayons organiseert een eigen RK voor de teams van de verenigingen (van de 4 regio's) in het rayon.</p>
-                <p>De vereniging schrijft de teams in voor het RK.<br>Per team worden 3 tot 4 sporters van de eigen vereniging opgesteld.<br>Deze sporters moeten 6 of meer scores hebben in de regiocompetitie.</p>
-                <p>De RK teams hebben een aparte inschrijving, onafhankelijk van de regiocompetitie.</p>
+                <p>Elk van de 4 rayons organiseert een eigen RK voor de teams van de verenigingen (van de 4 regio's) in het rayon.<br>Per wedstrijdklasse wordt een RK teams georganiseerd voor minimaal 4 en maximaal 8 teams.</p>
+                <p>De vereniging schrijft de teams in voor het RK.<br>De RK teams hebben een aparte ("open") inschrijving, onafhankelijk van de regiocompetitie.</p>
+                <p>Per team worden 3 sporters van de eigen vereniging opgesteld.<br>Deze sporters moeten 6 of meer scores hebben in de regiocompetitie.</p>
             </div>
         </div>
     </div>
@@ -274,8 +274,8 @@
         <div class="col s12 m10 offset-m1 l8 offset-l2">
             <div class="sv-kader" style="padding:10px">
                 <p>Per sporter wordt het gemiddelde uit de individuele regiocompetitie gebruikt als sterkte.</p>
-                <p>De sterkte van elk team wordt bepaald door de 3 sterkste sporters van het team.</p>
-                <p>Nadat de open inschrijving voor het RK is gesloten worden alle teams op sterkte verdeeld over de wedstrijdklassen.<br>Per klasse worden maximaal de 12 sterkste teams uitgenodigd.</p>
+                <p>De sterkte van elk team wordt bepaald door de gemiddelden van de 3 sporters van het team.</p>
+                <p>Nadat de open inschrijving voor het RK is gesloten worden alle teams op sterkte verdeeld over de wedstrijdklassen.<br>Per klasse worden de 8 sterkste teams uitgenodigd.</p>
             </div>
         </div>
     </div>
@@ -292,61 +292,12 @@
     <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
             <div class="sv-kader" style="padding:10px">
-                <p>Bij aankomst en aanmelden worden eventuele invallers gecontroleerd op aanvangsgemiddelde.</p>
-                <p>Het RK teams begint met 60 (Indoor) of 50 (25m1pijl) pijlen per sporter.<br>De team score is de som van de 3 hoogste totaalscores (van de 3 of 4 sporters).</p>
-                <p>De eindstand van de kwalificaties is het eindresultaat van het RK teams 25m1pijl.<br>Bij de Indoor bepaalt dit welke 4 of 8 teams doorgaan naar de finale.</p>
+                <p>Bij aankomst en aanmelden worden eventuele invallers genoteerd.</p>
+                <p>Elk van de teams schiet &eacute;&eacute;n wedstrijd tegen elkaar, dus 7 wedstrijden bij volle bezetting.<br>Elke wedstrijd bestaat uit 5 games.</p>
+                <p>Per game en wedstrijd kunnen punten verdiend worden: 0 (verlies), 1 (gelijk) of 2 (winst).</p>
+                <p>Vergelijking van de scores van de pijlen van elk van de 2 teams bepaalt de punten voor een game.<br>De som van de punten van de 5 games bepaalt de punten voor de wedstrijd.</p>
+                <p>De som van de punten van geschoten wedstrijden bepaalt de eindstand van het team (1e, 2e, 3e, etc).</p>
                 <p></p>
-            </div>
-        </div>
-    </div>
-
-
-    <!-- witruimte -->
-    <div class="row center">
-        <div class="col s12">
-            <h4>Knock-out finales</h4>
-            <p>Alleen voor de Indoor</p>
-        </div>
-    </div>
-
-    <!-- blauw balk met wit informatie veld -->
-    <div class="row-sv-blauw">
-        <div class="col s12">
-            <div class="sv-kader" style="padding:10px">
-                <p>In de ERE wedstrijdklassen beginnen 8 teams in de kwartfinale.<br>Overige wedstrijdklassen beginnen met 4 teams in de half finale.</p>
-                <p>De winnaars van de halve finales gaan naar de gouden finale voor plaats 1 en 2.<br>De overige twee teams uit de halve finales gaan naar de bronzen finale voor plaats 3 en 4.</p>
-
-                <table class="sv-kader">
-                    <tr>
-                        <td class="center"><b>Kwart finale</b><br>(8 teams)</td>
-                        <td class="center"><b>Halve finale</b><br>(4 teams)</td>
-                        <td class="center"><b>Bronzen finale</b><br>(2 teams)</td>
-                        <td class="center"><b>Gouden finale</b><br>(2 teams)</td>
-                    </tr>
-
-                    <tr>
-                        <td class="center">#1 tegen #8</td>
-                        <td class="center" rowspan="2">2 teams</td>
-                        <td class="center" rowspan="4">2 teams</td>
-                        <td class="center" rowspan="4">2 teams</td>
-                    </tr>
-                    <tr>
-                        <td class="center">#5 tegen #4</td>
-                    </tr>
-
-                    <tr>
-                        <td class="center">#3 tegen #6</td>
-                        <td class="center" rowspan="2">2 teams</td>
-                    </tr>
-                    <tr>
-                        <td class="center">#7 tegen #2</td>
-                    </tr>
-
-                </table>
-
-                <p>In de finale heeft elk team 3 sporters die 2 pijlen per ronde schieten, dus 6 pijlen per team per ronde.</p>
-                <p>Compound teams schieten 4 rondes en kijken dan wie de meeste punten heeft ("cumulatief")<br>Andere teams scoren volgens het set-systeem over maximaal 4 rondes.<br>Indien nodig volgt een shoot-off met 3 pijlen per team (1 pijl per sporter).</p>
-
             </div>
         </div>
     </div>
@@ -364,9 +315,9 @@
         <div class="col s12 m10 offset-m1 l8 offset-l2">
             <div class="sv-kader" style="padding:10px">
                 <p>Landelijk wordt per wedstrijdklasse een BK teams georganiseerd.</p>
-                <p>De ERE klassen bestaat uit maximaal 12 teams; overige wedstrijdklassen uit maximaal 8 teams.<br>Dezelfde 3 of 4 sporters als aangemeld voor het RK teams worden verwacht op het BK teams.</p>
-                <p>De teams worden uitgenodigd aan de hand van de eindstand van het RK teams, samengevoegd en landelijk vergeleken.</p>
+                <p>Voor elke klasse worden 8 teams uitgenodigd: nummers 1 en 2 van elk rayon.<br>Van elk RK team worden dezelfde 3 sporters verwacht op het BK.</p>
                 <p>Wedstrijdverloop is gelijk aan het de rayonkampioenschappen.</p>
+                <p>Winnaars in de ERE klassen krijgen de titel Nederlands Kampioen.<br>Winnaars van de overige klassen zijn Bondskampioen.</p>
             </div>
         </div>
     </div>

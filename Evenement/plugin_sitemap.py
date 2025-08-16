@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2024 Ramon van der Winkel.
+#  Copyright (c) 2024-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -15,7 +15,7 @@ import datetime
 def generate_urls():
     """ deze generator geeft URLs terug voor de sitemap """
 
-    # wedstrijden blijven 2 jaar in de sitemap staan
+    # evenementen blijven 2 jaar in de sitemap staan
     now = timezone.now().date()
     lang_geleden = now - datetime.timedelta(days=2 * 365)
 

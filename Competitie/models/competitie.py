@@ -22,6 +22,9 @@ class Competitie(models.Model):
         Elke competitie heeft een beschrijving, een aantal belangrijke datums
         en een lijst van wedstrijdklassen met aanvangsgemiddelden
     """
+
+    # "Indoor competitie 2024/2025"
+    # "25m 1pijl competitie 2024/2025"
     beschrijving = models.CharField(max_length=40)
 
     # 18m of 25m
