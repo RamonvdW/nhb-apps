@@ -29,7 +29,7 @@ class TestBrowserBestellingMandjeVerwijder(MyMgmtCommandHelper, bh.BrowserTestCa
 
         page = self.get_page_html()
         knop = self.find_element_type_with_text('button', 'Leg in mijn mandje')
-        if not knop:
+        if not knop:            # pragma: no cover
             self.fail('Kan knop "Leg in mijn mandje" niet vinden')
 
         print('test_mandje_verwijder: click')

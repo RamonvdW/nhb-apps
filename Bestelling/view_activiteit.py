@@ -69,7 +69,9 @@ class BestelActiviteitView(UserPassesTestMixin, TemplateView):
                                         Q(account__username=nr) |
                                         Q(ontvanger__vereniging__ver_nr=nr) |
                                         Q(regels__korte_beschrijving__icontains=str(nr)))
-                                .order_by('-aangemaakt'))             # recent aangemaakt eerst
+                                .order_by('-aangemaakt',                # recent aangemaakt eerst
+                                          'pk')
+                                .distinct('aangemaakt', 'pk'))          # voorkom dupes
             except ValueError:
                 if zoekterm == "**":
                     bestellingen = (Bestelling
@@ -82,7 +84,7 @@ class BestelActiviteitView(UserPassesTestMixin, TemplateView):
                                     .filter(status__in=(BESTELLING_STATUS_NIEUW,
                                                         BESTELLING_STATUS_BETALING_ACTIEF,
                                                         BESTELLING_STATUS_MISLUKT))
-                                    .order_by('-bestel_nr'))            # nieuwste eerst
+                                    .order_by('-bestel_nr'))        # nieuwste eerst
                     context['zoekt_status'] = True
                 else:
                     bestellingen = (Bestelling
@@ -96,7 +98,8 @@ class BestelActiviteitView(UserPassesTestMixin, TemplateView):
                                             Q(ontvanger__vereniging__naam__icontains=zoekterm) |
                                             Q(regels__korte_beschrijving__icontains=zoekterm) |
                                             Q(transacties__payment_id=zoekterm))
-                                    .order_by('-bestel_nr'))            # nieuwste eerst
+                                    .order_by('-bestel_nr')         # nieuwste eerst
+                                    .distinct('bestel_nr'))         # voorkom dupes
         else:
             # toon de nieuwste bestellingen
             context['nieuwste'] = True
