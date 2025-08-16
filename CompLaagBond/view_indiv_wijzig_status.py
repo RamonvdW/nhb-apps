@@ -12,14 +12,13 @@ from django.core.exceptions import PermissionDenied
 from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
-from Competitie.definities import (DEEL_BK,
-                                   MUTATIE_KAMP_AFMELDEN_INDIV, MUTATIE_KAMP_AANMELDEN_INDIV)
-from Competitie.models import KampioenschapSporterBoog, CompetitieMutatie
+from Competitie.definities import DEEL_BK
+from Competitie.models import KampioenschapSporterBoog
+from CompKamp.operations.maak_mutatie import maak_mutatie_kamp_aanmelden_indiv, maak_mutatie_kamp_afmelden_indiv
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie, rol_get_huidige
 from Site.core.background_sync import BackgroundSync
 from Sporter.operations import get_sporter
-import time
 
 
 TEMPLATE_COMPBOND_WIJZIG_STATUS_BK_DEELNEMER = 'complaagbond/wijzig-status-bk-deelnemer.dtl'
@@ -129,30 +128,11 @@ class WijzigStatusBkDeelnemerView(UserPassesTestMixin, TemplateView):
             if not deelnemer.bij_vereniging:
                 # kan niet bevestigen zonder verenigingslid te zijn
                 raise Http404('Sporter moet lid zijn bij een vereniging')
-            mutatie = CompetitieMutatie(mutatie=MUTATIE_KAMP_AANMELDEN_INDIV,
-                                        deelnemer=deelnemer,
-                                        door=door_str)
+
+            maak_mutatie_kamp_aanmelden_indiv(deelnemer, door_str, snel == '1')
+
         elif afmelden == "1":
-            mutatie = CompetitieMutatie(mutatie=MUTATIE_KAMP_AFMELDEN_INDIV,
-                                        deelnemer=deelnemer,
-                                        door=door_str)
-        else:
-            mutatie = None
-
-        if mutatie:
-            mutatie.save()
-            mutatie_ping.ping()
-
-            if snel != '1':         # pragma: no cover
-                # wacht maximaal 3 seconden tot de mutatie uitgevoerd is
-                interval = 0.2      # om steeds te verdubbelen
-                total = 0.0         # om een limiet te stellen
-                while not mutatie.is_verwerkt and total + interval <= 3.0:
-                    time.sleep(interval)
-                    total += interval   # 0.0 --> 0.2, 0.6, 1.4, 3.0
-                    interval *= 2       # 0.2 --> 0.4, 0.8, 1.6, 3.2
-                    mutatie = CompetitieMutatie.objects.get(pk=mutatie.pk)
-                # while
+            maak_mutatie_kamp_afmelden_indiv(deelnemer, door_str, snel == '1')
 
         url = reverse('CompLaagBond:bk-selectie',
                       kwargs={'deelkamp_pk': deelnemer.kampioenschap.pk})
@@ -212,30 +192,11 @@ class SporterWijzigStatusBkDeelnameView(UserPassesTestMixin, TemplateView):
             if not deelnemer.bij_vereniging:
                 # kan niet bevestigen zonder verenigingslid te zijn
                 raise Http404('Je moet lid zijn bij een vereniging')
-            mutatie = CompetitieMutatie(mutatie=MUTATIE_KAMP_AANMELDEN_INDIV,
-                                        deelnemer=deelnemer,
-                                        door=door_str)
+
+            maak_mutatie_kamp_aanmelden_indiv(deelnemer, door_str, snel =='1')
+
         elif keuze == "N":
-            mutatie = CompetitieMutatie(mutatie=MUTATIE_KAMP_AFMELDEN_INDIV,
-                                        deelnemer=deelnemer,
-                                        door=door_str)
-        else:
-            mutatie = None
-
-        if mutatie:
-            mutatie.save()
-            mutatie_ping.ping()
-
-            if snel != '1':         # pragma: no cover
-                # wacht maximaal 3 seconden tot de mutatie uitgevoerd is
-                interval = 0.2      # om steeds te verdubbelen
-                total = 0.0         # om een limiet te stellen
-                while not mutatie.is_verwerkt and total + interval <= 3.0:
-                    time.sleep(interval)
-                    total += interval   # 0.0 --> 0.2, 0.6, 1.4, 3.0
-                    interval *= 2       # 0.2 --> 0.4, 0.8, 1.6, 3.2
-                    mutatie = CompetitieMutatie.objects.get(pk=mutatie.pk)
-                # while
+            maak_mutatie_kamp_afmelden_indiv(deelnemer, door_str, snel =='1')
 
         url = reverse('Sporter:profiel')
         return HttpResponseRedirect(url)
