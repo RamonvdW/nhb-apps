@@ -13,11 +13,12 @@ from django.core.exceptions import PermissionDenied
 from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
-from Competitie.definities import DEEL_RK, INSCHRIJF_METHODE_1, MUTATIE_KAMP_CUT, DEELNAME_NEE
-from Competitie.models import (CompetitieIndivKlasse, CompetitieTeamKlasse, CompetitieMatch, CompetitieMutatie,
+from Competitie.definities import DEEL_RK, INSCHRIJF_METHODE_1, DEELNAME_NEE
+from Competitie.models import (CompetitieIndivKlasse, CompetitieTeamKlasse, CompetitieMatch,
                                Regiocompetitie, RegiocompetitieRonde,
                                Kampioenschap, KampioenschapSporterBoog, KampioenschapTeam,
                                KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet)
+from CompKamp.operations.maak_mutatie import maak_mutatie_kamp_cut
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
 from Locatie.models import WedstrijdLocatie
@@ -27,8 +28,6 @@ from Scheidsrechter.mutaties import scheids_mutatieverzoek_bepaal_reistijd_naar_
 from Vereniging.models import Vereniging
 from types import SimpleNamespace
 import datetime
-import time
-
 
 TEMPLATE_COMPRAYON_PLANNING = 'complaagrayon/planning-rayon.dtl'
 TEMPLATE_COMPRAYON_WIJZIG_WEDSTRIJD = 'complaagrayon/wijzig-wedstrijd-rk.dtl'
@@ -905,7 +904,8 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
         door_str = "RKO %s" % door_account.volledige_naam()
         door_str = door_str[:149]
 
-        mutatie = None
+        mutaties = list()
+
         for indiv_klasse, nieuwe_limiet, oude_limiet in wijzig_limiet_indiv:
             # schrijf in het logboek
             if oude_limiet != nieuwe_limiet:
@@ -913,13 +913,8 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
                         str(indiv_klasse), str(deelkamp), oude_limiet, nieuwe_limiet)
                 schrijf_in_logboek(door_account, "Competitie", msg)
 
-                mutatie = CompetitieMutatie(mutatie=MUTATIE_KAMP_CUT,
-                                            door=door_str,
-                                            kampioenschap=deelkamp,
-                                            indiv_klasse=indiv_klasse,
-                                            cut_oud=oude_limiet,
-                                            cut_nieuw=nieuwe_limiet)
-                mutatie.save()
+                tup = (indiv_klasse, None, oude_limiet, nieuwe_limiet)
+                mutaties.append(tup)
         # for
 
         for team_klasse, nieuwe_limiet, oude_limiet in wijzig_limiet_team:
@@ -929,34 +924,15 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
                         str(team_klasse), str(deelkamp), oude_limiet, nieuwe_limiet)
                 schrijf_in_logboek(door_account, "Competitie", msg)
 
-                mutatie = CompetitieMutatie(mutatie=MUTATIE_KAMP_CUT,
-                                            door=door_str,
-                                            kampioenschap=deelkamp,
-                                            team_klasse=team_klasse,
-                                            cut_oud=oude_limiet,
-                                            cut_nieuw=nieuwe_limiet)
-                mutatie.save()
+                tup = (None, team_klasse, oude_limiet, nieuwe_limiet)
+                mutaties.append(tup)
         # for
 
-        if mutatie:
-            mutatie_ping.ping()
+        snel = str(request.POST.get('snel', ''))[:1]        # voor autotest
 
-            # wacht op verwerking door achtergrond-taak voordat we verder gaan
-            snel = str(request.POST.get('snel', ''))[:1]        # voor autotest
-
-            if snel != '1':         # pragma: no cover
-                # wacht 3 seconden tot de mutatie uitgevoerd is
-                interval = 0.2      # om steeds te verdubbelen
-                total = 0.0         # om een limiet te stellen
-                while not mutatie.is_verwerkt and total + interval <= 3.0:
-                    time.sleep(interval)
-                    total += interval   # 0.0 --> 0.2, 0.6, 1.4, 3.0, 6.2
-                    interval *= 2       # 0.2 --> 0.4, 0.8, 1.6, 3.2
-                    mutatie = CompetitieMutatie.objects.get(pk=mutatie.pk)
-                # while
+        maak_mutatie_kamp_cut(deelkamp, door_str, mutaties, snel == '1')
 
         url = reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk})
-
         return HttpResponseRedirect(url)
 
 

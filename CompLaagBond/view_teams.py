@@ -4,7 +4,6 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.conf import settings
 from django.urls import reverse
 from django.http import HttpResponseRedirect, Http404
 from django.views.generic import TemplateView, View
@@ -14,16 +13,13 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
 from BasisTypen.definities import ORGANISATIE_WA
 from BasisTypen.models import BoogType
-from Competitie.definities import DEEL_BK, DEELNAME_JA, DEELNAME_NEE, MUTATIE_KAMP_TEAMS_NUMMEREN
-from Competitie.models import Kampioenschap, KampioenschapTeam, CompetitieMutatie
+from Competitie.definities import DEEL_BK, DEELNAME_JA, DEELNAME_NEE
+from Competitie.models import Kampioenschap, KampioenschapTeam
+from CompKamp.operations.maak_mutatie import maak_mutatie_kamp_teams_nummeren
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving
-from Site.core.background_sync import BackgroundSync
-import time
 
 TEMPLATE_COMPBOND_BK_TEAMS = 'complaagbond/bk-teams.dtl'
-
-mutatie_ping = BackgroundSync(settings.BACKGROUND_SYNC__COMPETITIE_MUTATIES)
 
 
 class LijstBkTeamsView(UserPassesTestMixin, TemplateView):
@@ -221,27 +217,9 @@ class WijzigStatusBkTeamView(UserPassesTestMixin, View):
             door_str = "%s %s" % (rol_get_beschrijving(request), account.volledige_naam())
             door_str = door_str[:149]
 
-            mutatie = CompetitieMutatie(mutatie=MUTATIE_KAMP_TEAMS_NUMMEREN,
-                                        door=door_str,
-                                        competitie=comp,
-                                        kampioenschap=team.kampioenschap,
-                                        team_klasse=team.team_klasse)
-            mutatie.save()
-            mutatie_ping.ping()
-
-            # wacht op verwerking door achtergrond-taak voordat we verder gaan
             snel = str(request.POST.get('snel', ''))[:1]        # voor autotest
 
-            if snel != '1':         # pragma: no cover
-                # wacht 3 seconden tot de mutatie uitgevoerd is
-                interval = 0.2      # om steeds te verdubbelen
-                total = 0.0         # om een limiet te stellen
-                while not mutatie.is_verwerkt and total + interval <= 3.0:
-                    time.sleep(interval)
-                    total += interval   # 0.0 --> 0.2, 0.6, 1.4, 3.0, 6.2
-                    interval *= 2       # 0.2 --> 0.4, 0.8, 1.6, 3.2
-                    mutatie = CompetitieMutatie.objects.get(pk=mutatie.pk)
-                # while
+            maak_mutatie_kamp_teams_nummeren(comp, team.kampioenschap, team.team_klasse, door_str, snel == '1')
 
         url = reverse('CompLaagBond:bk-teams',
                       kwargs={'deelkamp_pk': team.kampioenschap.pk})

@@ -12,12 +12,10 @@ from Competitie.definities import (DEELNAME_JA, DEELNAME_NEE,
                                    MUTATIE_EXTRA_RK_DEELNEMER, MUTATIE_KAMP_VERPLAATS_KLASSE_INDIV,
                                    MUTATIE_KAMP_TEAMS_NUMMEREN,
                                    MUTATIE_MAAK_WEDSTRIJD_FORMULIEREN)
-from Competitie.models import (Kampioenschap, KampioenschapSporterBoog, KampioenschapTeam,
-                               KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet,
-                               CompetitieMutatie, CompetitieIndivKlasse, CompetitieTeamKlasse)
+from Competitie.models import (Kampioenschap, KampioenschapSporterBoog, KampioenschapTeam, CompetitieMutatie,
+                               KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet)
 from CompKamp.operations.wedstrijdformulieren import iter_wedstrijdformulieren
-from Geo.models import Rayon
-from GoogleDrive.operations.kamp_programmas_google_drive import Storage, StorageError
+from CompKamp.operations.kamp_programmas import KampStorage, StorageError
 
 VOLGORDE_PARKEER = 22222        # hoog en past in PositiveSmallIntegerField
 
@@ -744,7 +742,7 @@ class VerwerkCompKampMutaties:
         self.stdout.write('[INFO] Maak wedstrijdformulieren voor %s' % comp.beschrijving)
 
         try:
-            storage = Storage(self.stdout, comp.begin_jaar)
+            storage = KampStorage(self.stdout, comp.begin_jaar)
             storage.check_access()
 
             for tup in iter_wedstrijdformulieren(comp):

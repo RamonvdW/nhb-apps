@@ -323,6 +323,8 @@ RECORDS_TOEGESTANE_SOORTEN = (
     '50m (122cm)',
     '40m',
     '30m',
+    '30m (72p)',        # alleen voor VI
+    '30m (144p)',       # alleen voor VI
     '50m (72p)',
     '50m (144p)',
     '60m (72p)',

@@ -9,12 +9,9 @@
 from django.conf import settings
 from Competitie.models import Competitie, CompetitieMutatie
 from Competitie.definities import (MUTATIE_COMPETITIE_OPSTARTEN, MUTATIE_AG_VASTSTELLEN,
-                                   MUTATIE_KAMP_CUT, MUTATIE_KAMP_REINIT_TEST, MUTATIE_KAMP_AFMELDEN_INDIV,
-                                   MUTATIE_KAMP_AANMELDEN_INDIV, MUTATIE_KAMP_TEAMS_NUMMEREN, MUTATIE_REGIO_TEAM_RONDE,
-                                   MUTATIE_DOORZETTEN_REGIO_NAAR_RK, MUTATIE_EXTRA_RK_DEELNEMER,
+                                   MUTATIE_DOORZETTEN_REGIO_NAAR_RK,
                                    MUTATIE_KAMP_INDIV_DOORZETTEN_NAAR_BK, MUTATIE_KAMP_TEAMS_DOORZETTEN_NAAR_BK,
-                                   MUTATIE_KAMP_VERPLAATS_KLASSE_INDIV, MUTATIE_KAMP_INDIV_AFSLUITEN,
-                                   MUTATIE_KAMP_TEAMS_AFSLUITEN, MUTATIE_MAAK_WEDSTRIJD_FORMULIEREN)
+                                   MUTATIE_KAMP_INDIV_AFSLUITEN, MUTATIE_KAMP_TEAMS_AFSLUITEN)
 from Site.core.background_sync import BackgroundSync
 import time
 
@@ -105,21 +102,6 @@ def maak_mutatie_kamp_teams_afsluiten(comp: Competitie, door_str: str, snel: boo
                         door=door_str)
 
     _competitie_ping_achtergrondtaak(mutatie, snel)
-
-
-def maak_mutatie_wedstrijdformulieren(door: str):
-
-    # maak voor elke actuele competitie een mutatie
-    for comp in Competitie.objects.exclude(regiocompetitie_is_afgesloten=True):
-
-        CompetitieMutatie.objects.create(
-                                    mutatie=MUTATIE_MAAK_WEDSTRIJD_FORMULIEREN,
-                                    competitie=comp,
-                                    door=door)
-    # for
-
-    # ping de achtergrondtaak
-    mutatie_ping.ping()
 
 
 # end of file

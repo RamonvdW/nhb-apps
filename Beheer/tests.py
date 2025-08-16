@@ -320,6 +320,10 @@ class TestBeheer(E2EHelpers, TestCase):
 
             # Scheidsrechter
             '/beheer/Scheidsrechter/scheidsbeschikbaarheid/?opgaaf__exact=J',
+
+            # Locatie
+            '/beheer/Locatie/wedstrijdlocatie/?heeft_lat_lon=nee',
+            '/beheer/Locatie/reistijd/?reistijd_vastgesteld=fout',
         )
 
         for url in urls:

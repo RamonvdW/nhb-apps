@@ -19,6 +19,7 @@ from Competitie.models import (Competitie, CompetitieTeamKlasse, CompetitieMutat
                                Regiocompetitie, RegiocompetitieSporterBoog,
                                RegiocompetitieTeam, RegiocompetitieTeamPoule, RegiocompetitieRondeTeam)
 from Competitie.operations.poules import maak_poule_schema
+from CompLaagRegio.operations.maak_mutatie import maak_mutatie_regio_team_ronde
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving
 from Geo.models import Rayon
@@ -830,24 +831,9 @@ class StartVolgendeTeamRondeView(UserPassesTestMixin, TemplateView):
             door_str = "RCL %s" % account.volledige_naam()
             door_str = door_str[:149]
 
-            mutatie = CompetitieMutatie(mutatie=MUTATIE_REGIO_TEAM_RONDE,
-                                        regiocompetitie=deelcomp,
-                                        door=door_str)
-            mutatie.save()
-
-            mutatie_ping.ping()
-
             snel = str(request.POST.get('snel', ''))[:1]
-            if snel != '1':         # pragma: no cover
-                # wacht maximaal 3 seconden tot de mutatie uitgevoerd is
-                interval = 0.2  # om steeds te verdubbelen
-                total = 0.0  # om een limiet te stellen
-                while not mutatie.is_verwerkt and total + interval <= 3.0:
-                    time.sleep(interval)
-                    total += interval  # 0.0 --> 0.2, 0.6, 1.4, 3.0
-                    interval *= 2  # 0.2 --> 0.4, 0.8, 1.6, 3.2
-                    mutatie = CompetitieMutatie.objects.get(pk=mutatie.pk)
-                # while
+
+            maak_mutatie_regio_team_ronde(deelcomp, door_str, snel == '1')
 
         url = reverse('CompBeheer:overzicht',
                       kwargs={'comp_pk': deelcomp.competitie.pk})
