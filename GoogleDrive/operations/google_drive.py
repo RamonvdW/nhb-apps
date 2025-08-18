@@ -6,14 +6,14 @@
 
 """ aanmaken en vinden van bestanden in een folder structuur in Google Drive """
 
-from django.conf import settings
 from django.utils import timezone
 from CompKamp.operations.wedstrijdformulieren import iter_wedstrijdformulieren
 from GoogleDrive.models import Token, Bestand
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError as GoogleApiError
+from google.auth.exceptions import RefreshError
 from google.oauth2.credentials import Credentials
-from GoogleDrive.storage_template import Storage, StorageError
+from GoogleDrive.storage_base import Storage, StorageError
 import socket
 import json
 
@@ -29,26 +29,32 @@ class GoogleDriveStorage(Storage):
     MIME_TYPE_FOLDER = 'application/vnd.google-apps.folder'
     MIME_TYPE_SHEET = 'application/vnd.google-apps.spreadsheet'
 
-    def __init__(self, stdout, begin_jaar: int):
-        super().__init__(stdout, begin_jaar)
+    def __init__(self, stdout, begin_jaar: int, share_with_emails: list):
+        super().__init__(stdout, begin_jaar, share_with_emails)
 
         self._creds = None
         self._service_files = None
         self._service_perms = None
 
-    def _load_credentials_json(self):
-        try:
-            self.token = Token.objects.first()
-        except Token.DoesNotExist:
+    @staticmethod
+    def _load_credentials_json():
+        token = (Token
+                 .objects
+                 .order_by('-when')     # nieuwste eerst
+                 .first())
+        if not token:
             raise StorageError('No token')
 
-        js_data = json.loads(self.token.creds)
+        js_data = json.loads(token.creds)
         return js_data
 
     def check_access(self):
         # google api libs refresh the token automatically
         js_data = self._load_credentials_json()
-        self._creds = Credentials.from_authorized_user_info(js_data)
+        try:
+            self._creds = Credentials.from_authorized_user_info(js_data)
+        except ValueError as exc:
+            raise StorageError('Invalid credentials: %s' % str(exc))
         # TODO: try to trigger refresh and check validity of the token
         return self._creds.refresh_token
 
@@ -63,7 +69,7 @@ class GoogleDriveStorage(Storage):
             "mimeType": self.MIME_TYPE_FOLDER,
             "parents": [parent_folder_id],
         }
-        request = self._service_files.create(body=file_metadata, fields='id')
+        request = self._service_files.create(body=file_metadata, fields='id')   # fields is comma-separated
 
         error_msg = None
         try:
@@ -85,11 +91,13 @@ class GoogleDriveStorage(Storage):
         request = self._service_files.list(q=query)
 
         error_msg = None
+        results = None
         try:
             results = request.execute()
         except GoogleApiError as exc:
             error_msg = 'GoogleApiError: %s' % exc.reason
-            results = None
+        except RefreshError as exc:
+            error_msg = 'RefreshError: %s' % exc
         if error_msg:
             raise StorageError('{vind_folder} ' + error_msg)
 
@@ -117,6 +125,10 @@ class GoogleDriveStorage(Storage):
         except GoogleApiError as exc:
             error_msg = 'GoogleApiError: %s' % exc.reason
             results = None
+        else:
+            if 'files' not in results:
+                error_msg = "Missing 'files' in results"
+
         if error_msg:
             raise StorageError('{list_folder} ' + error_msg)
 
@@ -125,7 +137,7 @@ class GoogleDriveStorage(Storage):
                for obj in results['files']}
         return out
 
-    def _share_seizoen_folder(self, share_with_emails: list):
+    def _share_seizoen_folder(self):
         if self._folder_id_seizoen:
             # request = self._service_files.get(fileId=self._folder_id_seizoen)
             # response = request.execute()
@@ -136,7 +148,7 @@ class GoogleDriveStorage(Storage):
             response = request.execute()
             self.stdout.write('[INFO] {share_seizoen_folder} perms.list response=%s' % repr(response))
 
-            share_with = share_with_emails[:]
+            share_with = self._share_with_emails[:]
             for perm in response['permissions']:
                 if perm['type'] == 'user' and perm['emailAddress'] in share_with:
                     share_with.remove(perm['emailAddress'])
@@ -154,16 +166,8 @@ class GoogleDriveStorage(Storage):
                 self.stdout.write('[INFO] {share_seizoen_folder} perms.create response=%s' % repr(response))
             # for
 
-    def _secure_folders(self):
-        self._vind_top_folder()                 # MH wedstrijdformulieren
-        self._vind_template_folder()            # MH templates RK/BK
-        self._vind_of_maak_site_folder()
-        self._vind_of_maak_seizoen_folder()     # Bondscompetities 2025/2026
-        self._share_seizoen_folder(settings.GOOGLE_DRIVE_SHARE_WITH)
-        self._vind_of_maak_deel_folders()       # Indoor Teams RK etc.
-
     def _vind_comp_bestand(self, folder_name, fname) -> str:
-        folder_id_comp = self._comp2folder_id[folder_name]
+        folder_id_comp = self._comp2folder_id.get(folder_name, None)
         if not folder_id_comp:
             raise StorageError('Folder %s niet gevonden' % repr(folder_name))
 
@@ -246,8 +250,11 @@ class GoogleDriveStorage(Storage):
                 file_id = self._maak_bestand_uit_template(folder_name, fname)
                 self._save_bestand(afstand, is_teams, is_bk, klasse_pk, fname, file_id)
 
-        except (IndexError, KeyError, ValueError) as exc:
-            error_msg = '[ERROR] Service error: %s' % exc
+        except KeyError as exc:
+            error_msg = 'KeyError: %s' % exc
+
+        except (IndexError, ValueError) as exc:
+            error_msg = 'Exception: %s' % exc
 
         except socket.timeout as exc:
             error_msg = 'Socket timeout exception: %s' % exc
@@ -260,7 +267,7 @@ class GoogleDriveStorage(Storage):
             error_msg = 'GoogleApiError: %s' % exc
 
         if error_msg:
-            raise StorageError('{vind_sheet} ' + error_msg)
+            raise StorageError('{maak_sheet_van_template} ' + error_msg)
 
         return file_id
 
@@ -281,9 +288,7 @@ def ontbrekende_wedstrijdformulieren_rk_bk(comp) -> list:
     for tup in iter_wedstrijdformulieren(comp):
         afstand, is_teams, is_bk, klasse_pk, fname = tup
         sel = (comp.begin_jaar, afstand, is_teams, is_bk, klasse_pk)
-        try:
-            bestand = sel2bestand[sel]
-        except KeyError:
+        if sel not in sel2bestand:
             # niet gevonden; voeg toe aan de todo lijst
             todo.append(tup)
     # for

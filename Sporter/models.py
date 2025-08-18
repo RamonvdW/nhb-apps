@@ -158,7 +158,8 @@ class Sporter(models.Model):
         """
         # sinds_datum moet 5 jaar ná het geboortejaar liggen
         if self.sinds_datum.year - self.geboorte_datum.year < 5:
-            raise ValidationError('datum van lidmaatschap moet minimaal 5 jaar na geboortejaar zijn')
+            raise ValidationError(
+                        {'geboorte_datum': 'datum van lidmaatschap moet minimaal 5 jaar na geboortejaar zijn'})
 
     def bereken_leeftijd(self):
         """ bereken de leeftijd van de sporter op dit moment """

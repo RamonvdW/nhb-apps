@@ -36,9 +36,6 @@ class KampStorage(GoogleDriveStorage):
         'Indoor Teams BK': 'template-teams',
     }
 
-    # def __init__(self, stdout, begin_jaar: int):
-    #     super().__init__(stdout, begin_jaar)
-
     @staticmethod
     def _params_to_folder_name(afstand: int, is_teams: bool, is_bk: bool) -> str:
         if afstand == 18:

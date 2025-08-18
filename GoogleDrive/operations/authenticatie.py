@@ -8,7 +8,7 @@ from django.conf import settings
 from django.urls import reverse
 from django.utils import timezone
 from google_auth_oauthlib.flow import Flow
-from oauthlib.oauth2 import AccessDeniedError
+from oauthlib.oauth2 import AccessDeniedError, OAuth2Error
 from GoogleDrive.models import Transactie, Token, maak_unieke_code
 
 
@@ -62,9 +62,10 @@ def handle_authentication_response(webhook_uri):
     try:
         host = settings.SITE_URL.replace('http://', 'https://')
         flow.fetch_token(authorization_response=host + webhook_uri)
-    except AccessDeniedError:
+    except (AccessDeniedError, OAuth2Error):
         # gebruiker heeft toestemming niet gegeven
-        print('[ERROR] AccessDeniedError')
+        # of andere (algemene) fout
+        # print('[ERROR] AccessDeniedError')
         token = None
     else:
         creds = flow.credentials

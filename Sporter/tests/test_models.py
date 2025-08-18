@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -64,28 +64,36 @@ class TestSporterModels(TestCase):
         # geboortejaar in de toekomst
         now = datetime.datetime.now()
         sporter.geboorte_datum = now + datetime.timedelta(days=10)
-        with self.assertRaises(ValidationError):
+        with self.assertRaises(ValidationError) as exc:
             sporter.clean_fields()
+        self.assertEqual(str(exc.exception),
+                         "{'geboorte_datum': ['Geboortejaar 2025 is niet valide (min=1900, max=2020)']}")
 
         # geboortejaar te ver in het verleden (max is 1900)
         sporter.geboorte_datum = datetime.date(year=1890, month=1, day=1)
-        with self.assertRaises(ValidationError):
+        with self.assertRaises(ValidationError) as exc:
             sporter.clean_fields()
+        self.assertEqual(str(exc.exception),
+                         "{'geboorte_datum': ['Geboortejaar 1890 is niet valide (min=1900, max=2020)']}")
 
         # test de clean methode op het Sporter-object
         # deze controleert dat de geboorte_datum en [lid] sinds_datum niet te dicht op elkaar liggen
 
         # sinds_datum (2010) te dicht op geboortejaar (moet 5 jaar tussen zitten)
         sporter.geboorte_datum = datetime.date(year=2009, month=1, day=1)
-        with self.assertRaises(ValidationError):
+        with self.assertRaises(ValidationError) as exc:
             sporter.clean()
+        self.assertEqual(str(exc.exception),
+                         "{'geboorte_datum': ['datum van lidmaatschap moet minimaal 5 jaar na geboortejaar zijn']}")
 
         # test validate_sinds_datum, de field-validator voor sinds_datum
 
         # mag niet lid worden in de toekomst
         sporter.sinds_datum = datetime.date(year=now.year + 1, month=11, day=12)
-        with self.assertRaises(ValidationError):
+        with self.assertRaises(ValidationError) as exc:
             sporter.clean_fields()
+        self.assertEqual(str(exc.exception),
+                         "{'sinds_datum': ['datum van lidmaatschap mag niet in de toekomst liggen']}")
 
         self.assertEqual(sporter.voornaam, "Ramon")
         self.assertEqual(sporter.achternaam, "de Tester")

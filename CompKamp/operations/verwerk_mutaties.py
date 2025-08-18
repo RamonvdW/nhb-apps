@@ -4,6 +4,7 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
+from django.conf import settings
 from django.utils import timezone
 from django.db.models import F
 from Competitie.definities import (DEELNAME_JA, DEELNAME_NEE,
@@ -742,7 +743,7 @@ class VerwerkCompKampMutaties:
         self.stdout.write('[INFO] Maak wedstrijdformulieren voor %s' % comp.beschrijving)
 
         try:
-            storage = KampStorage(self.stdout, comp.begin_jaar)
+            storage = KampStorage(self.stdout, comp.begin_jaar, settings.GOOGLE_DRIVE_SHARE_WITH)
             storage.check_access()
 
             for tup in iter_wedstrijdformulieren(comp):

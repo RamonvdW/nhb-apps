@@ -25,7 +25,7 @@ class OAuthWebhookView(View):
         # get the query parameters
         state = request.GET.get('state', None)
         if not state:
-            raise Http404('Slecht verzoek')
+            raise Http404('Onvolledig verzoek')
 
         code = request.GET.get('code', None)        # authorization code with typical lifetime of 10 minutes
         error = request.GET.get('error', None)
@@ -36,15 +36,14 @@ class OAuthWebhookView(View):
 
         # kijk in de database of we dit verzoek herkennen
         age_filter = timezone.now() - timedelta(hours=1)
-        try:
-            transactie = (Transactie
-                          .objects
-                          .exclude(has_been_used=True)
-                          .exclude(when__lt=age_filter)
-                          .filter(unieke_code=state)
-                          .first())
-        except Transactie.DoesNotExist:
-            transactie = None
+
+        # get the first record, or None
+        transactie = (Transactie
+                      .objects
+                      .exclude(has_been_used=True)
+                      .exclude(when__lt=age_filter)
+                      .filter(unieke_code=state)
+                      .first())        # avoids exception
 
         if not transactie:
             raise Http404('Onbekend verzoek')

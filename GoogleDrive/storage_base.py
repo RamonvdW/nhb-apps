@@ -19,18 +19,19 @@ class Storage:
     #                +--- kampioenschap (bepaald door _params_to_folder_name)
 
     FOLDER_NAME_TEMPLATES = 'templates'     # moet uniek zijn in de drive
-    FOLDER_NAME_TOP = 'forms'               # moet uniek zijn in de drive
+    FOLDER_NAME_TOP = 'top'                 # moet uniek zijn in de drive
     FOLDER_NAME_SITE = 'site'
 
     COMP2TEMPLATE = {
         'comp': 'template-name',
     }
 
-    def __init__(self, stdout, begin_jaar: int):
+    def __init__(self, stdout, begin_jaar: int, share_with_emails: list):
         self.stdout = stdout
 
         self._seizoen_str = 'Bondscompetities %s/%s' % (begin_jaar, begin_jaar + 1)
         self._begin_jaar = begin_jaar
+        self._share_with_emails = share_with_emails
 
         self._folder_id_top = ""
         self._folder_id_templates = ""
@@ -42,22 +43,25 @@ class Storage:
 
     @staticmethod
     def _params_to_folder_name(afstand: int, is_teams: bool, is_bk: bool) -> str:
-        return "%s %s %s" % (afstand, is_teams, is_bk)
+        return "%s %s %s" % (afstand,
+                             {True:"Teams", False:"Indiv"}[is_teams],
+                             {True:"BK", False:"RK"}[is_bk])
 
     def check_access(self):
         # controleer dat de credentials nog bruikbaar zijn
         return self._seizoen_str != ''
 
     def _maak_folder(self, parent_folder_id, folder_name) -> str:
-        folder_id = self._folder_id_top + parent_folder_id + folder_name
+        folder_id = parent_folder_id + folder_name + '/'
         return folder_id
 
-    def _vind_folder(self, folder_name, parent_folder_id=None):
-        folder_id = self._folder_id_top + parent_folder_id + folder_name
+    def _vind_folder(self, folder_name, parent_folder_id=''):
+        folder_id = parent_folder_id + folder_name + '/'
         return folder_id
 
     def _list_folder(self, parent_folder_id, folders_only=False):
-        out = {parent_folder_id: self._folder_id_top + str(folders_only)}
+        out = {parent_folder_id: str(folders_only),
+               'template-name': 'template_file_id'}
         return out
 
     def _vind_of_maak_folder(self, parent_folder_id, folder_name):
@@ -83,17 +87,17 @@ class Storage:
                                                          repr(self._folder_id_templates)))
 
     def _vind_of_maak_site_folder(self):
-        if self._folder_id_top:
+        if self._folder_id_top:     # pragma: no branch
             self._folder_id_site = self._vind_of_maak_folder(self._folder_id_top, self.FOLDER_NAME_SITE)
             self.stdout.write('[INFO] site folder id is %s' % repr(self._folder_id_site))
 
     def _vind_of_maak_seizoen_folder(self):
-        if self._folder_id_site:
+        if self._folder_id_site:     # pragma: no branch
             self._folder_id_seizoen = self._vind_of_maak_folder(self._folder_id_site, self._seizoen_str)
             self.stdout.write('[INFO] seizoen folder id is %s' % repr(self._folder_id_seizoen))
 
     def _vind_of_maak_deel_folders(self):
-        if self._folder_id_seizoen:
+        if self._folder_id_seizoen:     # pragma: no branch
             for afstand in (18, 25):
                 for is_teams in (True, False):
                     for is_bk in (True, False):
@@ -105,17 +109,18 @@ class Storage:
                 # for
             # for
 
-    def _share_seizoen_folder(self, share_with_emails: list):
-        if self._folder_id_seizoen:
-            self._folder_id_templates = share_with_emails
+    def _share_seizoen_folder(self):
+        if self._folder_id_seizoen:     # pragma: no branch
+            self._folder_id_templates = self._share_with_emails[0]
 
     def _secure_folders(self):
-        self._vind_top_folder()                 # "MH wedstrijdformulieren"
-        self._vind_template_folder()            # "MH templates RK/BK"
-        self._vind_of_maak_site_folder()        # "MijnHandboogsport (dev)"
-        self._vind_of_maak_seizoen_folder()     # "Bondscompetities 2025/2026"
-        self._share_seizoen_folder('share@template.not')
-        self._vind_of_maak_deel_folders()       # "Indoor Teams RK etc."
+        if not self._folder_id_top:
+            self._vind_top_folder()                 # "MH wedstrijdformulieren"
+            self._vind_template_folder()            # "MH templates RK/BK"
+            self._vind_of_maak_site_folder()        # "MijnHandboogsport (dev)"
+            self._vind_of_maak_seizoen_folder()     # "Bondscompetities 2025/2026"
+            self._share_seizoen_folder()
+            self._vind_of_maak_deel_folders()       # "Indoor Teams RK etc."
 
     def _vind_templates(self):
         gevonden = self._list_folder(self._folder_id_templates)
@@ -138,11 +143,11 @@ class Storage:
             raise StorageError('Could not find all templates')
 
     def _vind_comp_bestand(self, folder_name, fname) -> str:
-        folder_id_comp = self._comp2folder_id[folder_name]
+        folder_id_comp = self._comp2folder_id.get(folder_name, '')
         if not folder_id_comp:
             raise StorageError('Folder %s niet gevonden' % repr(folder_name))
 
-        file_id =  folder_name + fname
+        file_id = folder_name + fname
         return file_id
 
     def _maak_bestand_uit_template(self, folder_name, fname) -> str:
