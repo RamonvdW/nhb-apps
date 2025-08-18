@@ -7,7 +7,7 @@
 from django.test import TestCase
 from django.core.management.base import OutputWrapper
 from Competitie.models import Competitie
-from GoogleDrive.models import Transactie, Token, Bestand
+from GoogleDrive.models import Token, Bestand
 from GoogleDrive.operations.google_drive import (GoogleDriveStorage, StorageError,
                                                  ontbrekende_wedstrijdformulieren_rk_bk)
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -189,9 +189,9 @@ class TestGoogleDriveGoogleDrive(E2EHelpers, TestCase):
         lst = ontbrekende_wedstrijdformulieren_rk_bk(comp)
         self.assertEqual(lst, [])
 
-        bestand = Bestand.objects.create(
-                        begin_jaar=comp.begin_jaar,
-                        afstand=int(comp.afstand))
+        Bestand.objects.create(
+                    begin_jaar=comp.begin_jaar,
+                    afstand=int(comp.afstand))
 
         tup = (42, False, False, 1, 'fname')
         with patch('GoogleDrive.operations.google_drive.iter_wedstrijdformulieren', return_value=[tup]):
