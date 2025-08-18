@@ -11,13 +11,16 @@ from GoogleDrive.models import Transactie, Token, Bestand
 from GoogleDrive.operations.google_drive import (GoogleDriveStorage, StorageError,
                                                  ontbrekende_wedstrijdformulieren_rk_bk)
 from TestHelpers.e2ehelpers import E2EHelpers
+from googleapiclient.errors import HttpError as GoogleApiError
+from httplib2 import Response
 from unittest.mock import patch
 import io
 
 
 class GoogleApiFilesMock:
 
-    def __init__(self):
+    def __init__(self, mode_str: str):
+        self.mode_str = mode_str
         self.next_resp = {}
 
     def list(self, q:str):
@@ -43,26 +46,44 @@ class GoogleApiFilesMock:
             files.append(file)
 
         if 'mimeType' in q and 'spreadsheet' in q:
-            file = {'id': 'file99', 'name': 'sheet99'}
-            files.append(file)
+            if self.mode_str != 'no files':
+                file = {'id': 'file99', 'name': 'sheet99'}
+                files.append(file)
 
         self.next_resp = {'files': files}
 
         return self
 
     def create(self, body: dict, fields: str):
-        self.next_resp = {'id': 'new1234'}
+        if self.mode_str == 'create_folder_error':
+            self.next_resp = {'GoogleApiError': 'failed to create folder'}
+        else:
+            self.next_resp = {'id': 'new1234'}
+        return self
+
+    def copy(self, fileId: str, body: dict):
+        # fileId=template_file_id,
+        # body={"parents": [folder_id],
+        #       "name": fname}
+        self.next_resp = {'id': 'copy101'}
         return self
 
     def execute(self):
         resp = self.next_resp
         self.next_resp = {}
+
+        if 'GoogleApiError' in resp:
+            http_resp = Response(info={'status': 400})
+            http_resp.reason = resp['GoogleApiError']
+            raise GoogleApiError(resp=http_resp, content=b'duh')
+
         return resp
 
 
 class GoogleApiPermsMock:
 
-    def __init__(self):
+    def __init__(self, mode_str:str=''):
+        self.mode_str = mode_str
         self.next_resp = {}
 
     def list(self, fileId, fields):
@@ -81,13 +102,14 @@ class GoogleApiPermsMock:
 
 class GoogleApiMock:
 
-    @staticmethod
-    def files():
-        return GoogleApiFilesMock()
+    def __init__(self, mode_str:str=''):
+        self.mode_str = mode_str
 
-    @staticmethod
-    def permissions():
-        return GoogleApiPermsMock()
+    def files(self):
+        return GoogleApiFilesMock(self.mode_str)
+
+    def permissions(self):
+        return GoogleApiPermsMock(self.mode_str)
 
 
 class TestGoogleDriveGoogleDrive(E2EHelpers, TestCase):
@@ -111,10 +133,41 @@ class TestGoogleDriveGoogleDrive(E2EHelpers, TestCase):
         Token.objects.create(creds='{"client_secret": "123", "refresh_token": "1234", "client_id": "1234"}')
         drive.check_access()
 
+        # eerste aanroep, bestand bestaat nog niet
+        self.assertEqual(Bestand.objects.count(), 0)
+        my_service = GoogleApiMock('no files')
+        with patch('GoogleDrive.operations.google_drive.build', return_value=my_service):
+            drive._comp2template_file_id[drive._params_to_folder_name(18, False, False)] = 'template101'
+            drive.maak_sheet_van_template(18, False, False, 1, 'fname')
+
+        self.assertEqual(Bestand.objects.count(), 1)
+        bestand = Bestand.objects.first()
+        self.assertEqual(bestand.begin_jaar, 2025)
+        self.assertEqual(bestand.afstand, 18)
+        self.assertFalse(bestand.is_teams)
+        self.assertFalse(bestand.is_bk)
+        self.assertTrue(str(bestand) != '')
+
+        del drive
+        drive = GoogleDriveStorage(out, 2025, share_with_emails)
+
+        # bestand bestaat al wel
         my_service = GoogleApiMock()
         with patch('GoogleDrive.operations.google_drive.build', return_value=my_service):
-            drive.check_access()
+            # eerste aanroep
             drive.maak_sheet_van_template(18, False, False, 1, 'fname')
+
+        del drive
+        drive = GoogleDriveStorage(out, 2025, share_with_emails)
+
+        # trigger an error during maak_folder
+        my_service = GoogleApiMock('create_folder_error')
+        with patch('GoogleDrive.operations.google_drive.build', return_value=my_service):
+            with self.assertRaises(StorageError) as exc:
+                # create folder error
+                drive.maak_sheet_van_template(18, False, False, 1, 'fname')
+            self.assertEqual(str(exc.exception),
+                             '{maak_folder} GoogleApiError: failed to create folder')
 
         print(out.getvalue())
         return

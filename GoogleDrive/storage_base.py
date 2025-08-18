@@ -65,7 +65,7 @@ class Storage:
         return out
 
     def _vind_of_maak_folder(self, parent_folder_id, folder_name):
-        folders = self._list_folder(parent_folder_id)
+        folders = self._list_folder(parent_folder_id, folders_only=True)
         try:
             folder_id = folders[folder_name]
         except KeyError:
