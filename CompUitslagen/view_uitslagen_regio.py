@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -451,7 +451,7 @@ class UitslagenRegioTeamsView(TemplateView):
                 # laat deze voorlopig uit de uitslag
                 pass
             else:
-                tup = (poule_pk2laagste_klasse_volgorde[poule.pk], team.team_klasse.volgorde,
+                tup = (poule_pk2laagste_klasse_volgorde[poule.pk], team.team_klasse.volgorde, poule.pk,
                        0-team.totaal_punten,        # hoogste WP bovenaan
                        0-team.totaal_score,         # hoogste score bovenaan
                        team.pk, poule, team)
