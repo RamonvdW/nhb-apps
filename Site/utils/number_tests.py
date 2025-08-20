@@ -14,7 +14,10 @@ import datetime
 
 start = datetime.datetime.now()
 number = 0
+expected = 0
+
 for line in sys.stdin:
+
     if line.startswith('test_') or '.js_tests.test_' in line:
         number += 1
 
@@ -22,7 +25,19 @@ for line in sys.stdin:
         elapsed = datetime.timedelta(seconds=elapsed.seconds)   # drop milliseconds (round down)
         time_str = str(elapsed)[-5:]    # mm:ss
 
-        print(number, time_str, line.rstrip())
+        if expected > 1:
+            perc_str = '%.2f' % ((number * 100) / expected)
+            print('%s / %s (%s%%) %s %s' % (number, expected, perc_str, time_str, line.rstrip()))
+        else:
+            print('%s %s %s' % (number, time_str, line.rstrip()))
+
+    elif line.startswith('Found '):
+        if ' test(s).' in line:
+            # line = "Found 123 test(s).\n"
+            nr = int(line.split(' ')[1])
+            expected = number + nr
+
+        print(line.rstrip())
     else:
         print(line.rstrip())
 # for
