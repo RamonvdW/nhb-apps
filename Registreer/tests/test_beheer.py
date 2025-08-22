@@ -161,38 +161,55 @@ class TestRegistreerBeheer(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_sec_extern)
         self.e2e_check_rol('SEC')
 
-        # haal de gast-accounts ledenlijst op
+        # haal de gast-accounts ledenlijst op; Laatste login = Nooit & Onvoltooid account
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_gast_accounts)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('registreer/beheer-gast-accounts.dtl', 'plein/site_layout.dtl'))
 
-        # zet een last_login
+        # haal de gast-accounts ledenlijst op; Laatste login = stamp
         self.account_800001.last_login = timezone.now()
         self.account_800001.save(update_fields=['last_login'])
-
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_gast_accounts)
-
-        # ontkoppel het account
-        self.sporter_800001.account = None
-        self.sporter_800001.save(update_fields=['account'])
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('registreer/beheer-gast-accounts.dtl', 'plein/site_layout.dtl'))
 
-        self.gast_800001.account = None
+    def test_overzicht_afgewezen(self):
+        # wordt SEC van de vereniging voor gast-accounts
+        self.e2e_login_and_pass_otp(self.account_sec)
+        self.e2e_wissel_naar_functie(self.functie_sec_extern)
+        self.e2e_check_rol('SEC')
+
         self.gast_800001.fase = REGISTRATIE_FASE_AFGEWEZEN
-        self.gast_800001.save(update_fields=['account', 'fase'])
+        self.gast_800001.save(update_fields=['fase'])
 
+        # lijst met afgewezen gast-accounts; Laatste inlog = nooit
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_gast_accounts)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('registreer/beheer-gast-accounts.dtl', 'plein/site_layout.dtl'))
 
-        self.e2e_assert_other_http_commands_not_supported(self.url_gast_accounts)
+        # lijst met afgewezen gast-accounts; Laatste inlog = stamp
+        self.account_800001.last_login = timezone.now()
+        self.account_800001.save(update_fields=['last_login'])
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_gast_accounts)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('registreer/beheer-gast-accounts.dtl', 'plein/site_layout.dtl'))
+
+        # lijst met afgewezen gast-accounts; Laatste inlog = Onvoltooid account
+        self.gast_800001.account = None
+        self.gast_800001.save(update_fields=['account'])
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_gast_accounts)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('registreer/beheer-gast-accounts.dtl', 'plein/site_layout.dtl'))
 
     def test_details(self):
         # wordt SEC van de vereniging voor gast-accounts

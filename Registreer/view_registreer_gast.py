@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023-2024 Ramon van der Winkel.
+#  Copyright (c) 2023-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -22,8 +22,8 @@ from Mailer.operations import mailer_queue_email, render_email_template
 from Overig.helpers import get_safe_from_ip, maak_unaccented
 from Registreer.definities import (REGISTRATIE_FASE_EMAIL, REGISTRATIE_FASE_PASS, REGISTRATIE_FASE_CLUB,
                                    REGISTRATIE_FASE_LAND, REGISTRATIE_FASE_AGE, REGISTRATIE_FASE_TEL,
-                                   REGISTRATIE_FASE_WA_ID, REGISTRATIE_FASE_GENDER,
-                                   REGISTRATIE_FASE_CONFIRM, REGISTRATIE_FASE_COMPLEET)
+                                   REGISTRATIE_FASE_WA_ID, REGISTRATIE_FASE_GENDER, REGISTRATIE_FASE_CONFIRM,
+                                   REGISTRATIE_FASE_BEKEND_LID, REGISTRATIE_FASE_COMPLEET)
 from Registreer.forms import RegistreerGastForm, scrub_input_name
 from Registreer.models import GastRegistratie, GastRegistratieRateTracker
 from Registreer.operations import registratie_gast_volgende_lid_nr, registratie_gast_is_open
@@ -48,6 +48,7 @@ TEMPLATE_REGISTREER_GAST_TEL = 'registreer/registreer-gast-08-tel.dtl'
 TEMPLATE_REGISTREER_GAST_WA_ID = 'registreer/registreer-gast-09-wa-id.dtl'
 TEMPLATE_REGISTREER_GAST_GENDER = 'registreer/registreer-gast-10-gender.dtl'
 TEMPLATE_REGISTREER_GAST_CONFIRM = 'registreer/registreer-gast-25-confirm.dtl'
+TEMPLATE_REGISTREER_GAST_BEKEND_ALS_LID = 'registreer/registreer-gast-98-bekend-als-lid.dtl'
 
 EMAIL_TEMPLATE_GAST_BEVESTIG_EMAIL = 'email_registreer/gast-bevestig-toegang-email.dtl'
 EMAIL_TEMPLATE_GAST_LID_NR = 'email_registreer/gast-tijdelijk-bondsnummer.dtl'
@@ -234,6 +235,25 @@ def receive_bevestiging_gast_email(request, gast):
     gast.email_is_bevestigd = True
     gast.logboek += '[%s] IP=%s: e-mail is bevestigd\n' % (stamp_str, from_ip)
     gast.save(update_fields=['email_is_bevestigd', 'logboek'])
+
+    # controleer dat e-mailadres niet bekend is in het CRM
+    lid_nrs = list(Sporter.objects.filter(email=gast.email, is_actief_lid=True).values_list('lid_nr', flat=True))
+    if len(lid_nrs) > 0:
+        context = {
+            'email': gast.email,
+            'email_support': settings.EMAIL_BONDSBUREAU,
+            'url_registreer_khsn': reverse('Registreer:lid'),
+        }
+        gast.fase = REGISTRATIE_FASE_BEKEND_LID
+        if len(lid_nrs) == 1:
+            context['lid_nr_str'] = lid_nr_str = '%s' % lid_nrs[0]
+            gast.logboek += '[%s] E-mail overlap gevonden met lid met lid_nr %s\n' % (stamp_str, lid_nr_str)
+        else:
+            context['lid_nrs_str'] = lid_nrs_str = ', '.join([str(lid_nr)
+                                                              for lid_nr in lid_nrs])
+            gast.logboek += '[%s] E-mail overlap gevonden met leden met lid_nrs %s\n' % (stamp_str, lid_nrs_str)
+        gast.save(update_fields=['fase', 'logboek'])
+        return render(request, TEMPLATE_REGISTREER_GAST_BEKEND_ALS_LID, context)
 
     gast.lid_nr = registratie_gast_volgende_lid_nr()
     gast.logboek += "[%s] Lidnummer %s is toegekend\n" % (stamp_str, gast.lid_nr)

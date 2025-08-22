@@ -19,8 +19,10 @@ try {
 
 
 function verwijder(event) {
-    const el = event.currentTarget;        // the element with the event handler
+    const el = event.currentTarget;         // the element with the event handler
     const url = el.dataset.url;
+
+    el.disabled = true;                     // double-click prevention
 
     // voer een POST uit om toe te voegen
     let form = document.createElement('form');

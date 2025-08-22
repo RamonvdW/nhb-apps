@@ -53,7 +53,10 @@ class WedstrijdSessie(models.Model):
 
     def __str__(self):
         """ geef een beschrijving terug voor de admin interface """
-        return "(pk=%s) %s %s (%s plekken)" % (self.pk, self.datum, self.tijd_begin, self.max_sporters)
+        msg = "(pk=%s) %s %s (%s plekken)" % (self.pk, self.datum, self.tijd_begin, self.max_sporters)
+        if self.beschrijving:
+            msg += ' ' + self.beschrijving
+        return msg
 
     class Meta:
         verbose_name = "Wedstrijd sessie"
@@ -254,7 +257,7 @@ class WedstrijdInschrijving(models.Model):
     wedstrijd = models.ForeignKey(Wedstrijd, on_delete=models.PROTECT)
 
     # voor welke sessie?
-    sessie = models.ForeignKey(WedstrijdSessie, on_delete=models.PROTECT)
+    sessie = models.ForeignKey(WedstrijdSessie, on_delete=models.PROTECT, null=True, blank=True)
 
     # voor wie is deze inschrijving
     sporterboog = models.ForeignKey(SporterBoog, on_delete=models.PROTECT)

@@ -226,7 +226,7 @@ class ExtraDeelnemerView(UserPassesTestMixin, TemplateView):
                             door="BKO %s" % account.volledige_naam())
             mutatie.save()
 
-            # ping het achtergrond process
+            # ping de achtergrondtaak
             competitie_mutaties_ping.ping()
 
             snel = str(request.POST.get('snel', ''))[:1]

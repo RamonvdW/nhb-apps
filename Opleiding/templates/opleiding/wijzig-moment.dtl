@@ -165,6 +165,6 @@
             })
     </script>
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="opleiding-wijzig-opleiding" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="opleiding-wijzig-moment" %}
 
 {% endblock %}

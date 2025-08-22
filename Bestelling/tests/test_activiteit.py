@@ -149,6 +149,27 @@ class TestBestellingActiviteit(E2EHelpers, TestCase):
         transactie.save()
         bestelling.transacties.add(transactie)
 
+        # nog een bestelling in dezelfde maand
+        bestelling2 = Bestelling(
+                        bestel_nr=1236,
+                        account=self.account_admin,
+                        ontvanger=self.instellingen_bond,
+                        verkoper_naam='Ver naam',
+                        verkoper_adres1='Ver adres 1',
+                        verkoper_adres2='Ver adres 2',
+                        verkoper_kvk='Ver Kvk',
+                        verkoper_email='contact@ver.not',
+                        verkoper_telefoon='0123456799',
+                        verkoper_iban='NL2BANK0123456799',
+                        verkoper_bic='VER2BIC',
+                        verkoper_heeft_mollie=False,
+                        totaal_euro='42.00',
+                        status=BESTELLING_STATUS_BETALING_ACTIEF,
+                        log='Andere maand\n')
+        bestelling2.save()
+        bestelling2.aangemaakt -= datetime.timedelta(days=2*31)
+        bestelling2.save(update_fields=['aangemaakt'])
+
     def test_anon(self):
         # inlog vereist
         self.client.logout()

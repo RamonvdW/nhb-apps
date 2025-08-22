@@ -513,6 +513,7 @@ class TestWedstrijdenBestellingPlugin(E2EHelpers, TestCase):
         self.wedstrijd.save(update_fields=['eis_kwalificatie_scores'])
 
         wedstrijd = plugin.wil_kwalificatiescores(regel)
+        # controleer de extra velden die door de plugin toegevoegd zijn
         self.assertTrue(wedstrijd.datum_str != '')
         self.assertTrue(wedstrijd.plaats_str != '')
         self.assertTrue(wedstrijd.sporter_str != '')

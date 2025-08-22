@@ -21,7 +21,7 @@ betaal_mutaties_ping = BackgroundSync(settings.BACKGROUND_SYNC__BETAAL_MUTATIES)
 
 def _betaal_ping_achtergrondtaak(mutatie, snel):
 
-    # ping het achtergrond process
+    # ping de achtergrondtaak
     betaal_mutaties_ping.ping()
 
     if not snel:  # pragma: no cover
@@ -87,7 +87,7 @@ def betaal_mutatieverzoek_payment_status_changed(payment_id):
                     payment_id=payment_id)
     mutatie.save()
 
-    # ping het achtergrond process maar wacht niet op een reactie
+    # ping de achtergrondtaak maar wacht niet op een reactie
     betaal_mutaties_ping.ping()
 
 

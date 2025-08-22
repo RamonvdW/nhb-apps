@@ -13,8 +13,7 @@ from decimal import Decimal
 
 
 class WebwinkelFoto(models.Model):
-    """ Een foto van een product.
-    """
+    """ Een foto van een product """
 
     # locatie van het plaatje op het filesysteem onder settings.FOTOBANK_PATH
     locatie = models.CharField(max_length=100, blank=True)

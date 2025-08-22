@@ -18,7 +18,7 @@
             const els = document.getElementsByClassName("vertrek_knop");
             Array.prototype.forEach.call(els, function (el) {
                 el.classList.add('disabled');
-            })
+            });
 
             // enable de 'opslaan' knop
             const el = document.getElementById("submit_knop3");
@@ -605,7 +605,20 @@
                                 <td>
                                     {% for klasse in opt_klasse %}
                                         <label class="black-text">
-                                            <input type="checkbox" name="{{ klasse.sel }}" {% if klasse.gebruikt %}disabled checked{% else %}class="filled-in" {% if klasse.selected %} checked{% endif %}{% if klasse.disabled %} disabled{% endif %}{% endif %} onchange="gewijzigd('{{ klasse.code_blokkeer }}')" data-code="{{ klasse.code }}">
+                                            <input type="checkbox" name="{{ klasse.sel }}"
+                                                    {% if klasse.gebruikt %}
+                                                        disabled checked
+                                                    {% else %}
+                                                        class="filled-in"
+                                                        {% if klasse.selected %}
+                                                            checked
+                                                        {% endif %}
+                                                        {% if klasse.disabled %}
+                                                            disabled
+                                                        {% endif %}
+                                                    {% endif %}
+                                                   onchange="gewijzigd('{{ klasse.code_blokkeer }}')"
+                                                   data-code="{{ klasse.code }}">
                                             <span>{{ klasse.volg_nr }}: {{ klasse.beschrijving }}</span>
                                         </label><br>
                                     {% endfor %}

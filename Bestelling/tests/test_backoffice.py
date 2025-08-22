@@ -122,6 +122,7 @@ class TestBestellingBackoffice(E2EHelpers, TestCase):
         self.assertEqual(0, Bestelling.objects.count())
         bestel_mutatieverzoek_webwinkel_keuze(self.account_normaal, self.keuze1, snel=True)
         bestel_mutatieverzoek_webwinkel_keuze(self.account_normaal, self.keuze2, snel=True)
+        bestel_mutatieverzoek_webwinkel_keuze(self.account_normaal, self.keuze2, snel=True)     # !is_created
         self.verwerk_bestel_mutaties()
 
         self.mandje.refresh_from_db()

@@ -236,7 +236,7 @@
                                                         <button class="btn-sv-rood" onclick="do_uitschrijven(this)" data-url="{{ deelnemer.url_afmelden }}">Ja</button>
                                                     </div>
                                                     <div style="display:inline-block; width:49%">
-                                                        <a href="#" class="btn-sv-blauw modal-close">Nee</a>
+                                                        <button class="btn-sv-blauw modal-close">Nee</button>
                                                     </div>
                                                 </div>
                                             </div>

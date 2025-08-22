@@ -84,6 +84,7 @@ class WedstrijdAanmeldingDetailsView(UserPassesTestMixin, TemplateView):
                 raise Http404('Verkeerde vereniging')
 
         context['inschrijving'] = inschrijving
+        context['toon_sessie'] = inschrijving.sessie is not None
         context['sporter'] = sporter = inschrijving.sporterboog.sporter
         context['ver'] = sporter.bij_vereniging
 

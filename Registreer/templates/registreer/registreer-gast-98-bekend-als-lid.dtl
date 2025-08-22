@@ -1,0 +1,70 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2025 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}E-mailadres al gebruikt{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">E-mailadres al gebruikt</h3>
+
+            {% if lid_nr_str %}
+                <p>Volgens onze administratie wordt dit e-mailadres gebruikt door het lid met bondsnummer <b>{{ lid_nr_str }}</b>.</p>
+                <p>Als dit jouw bondsnummer is, maak dan een account voor KHSN leden aan, in plaats van een gastaccount.</p>
+            {% endif %}
+            {% if lid_nrs_str %}
+                <p>Volgens onze administratie wordt dit e-mailadres gebruikt door leden met de volgende bondsnummers: {{ lid_nrs_str }}.</p>
+            {% endif %}
+
+            <!-- rood bordje -->
+            <div class="row">
+                <div style="padding:10px">
+                    <div class="col s12 m8 offset-m2 sv-rood white-text z-depth-3 center">
+                        <p>Het is niet mogelijk om een gastaccount aan te maken met e-mailadres<br><code>{{ email }}</code></p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- blauw balk met wit informatie veld -->
+    <div class="row-sv-blauw">
+        <div class="col s12 l10 offset-l1 xl8 offset-xl2">
+            <div class="sv-kader" style="padding:10px">
+                <p>Het bondsbureau kan je helpen met problemen met de registratie.</p>
+                <p>Neem daarvoor contact met ons op via <code>{{ email_support }}</code></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>Verder</h4>
+        </div>
+    </div>
+
+    <!-- blauwe balk met kaartjes -->
+    <div class="row-sv-blauw">
+        <div class="col s12">
+            {% if lid_nr_str %}
+                <!-- voor leden -->
+                {% include 'plein/card_icon.dtl' with title="voor KHSN leden" text="Doorloop eenmalig de korte registratie procedure en krijg toegang tot de hele site." icon="badge" url=url_registreer_khsn %}
+            {% endif %}
+
+            {% url 'Plein:plein' as card_url %}
+            {% include 'plein/card_icon.dtl' with title="Het Plein" text="Naar de beginpagina." icon="hub" url=card_url %}
+        </div>
+    </div>
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="registreer-gast-bekend-als-lid" %}
+
+{% endblock %}

@@ -224,7 +224,7 @@ class BestellingAfgerondView(UserPassesTestMixin, TemplateView):
 
         # geef de achtergrondtaak een kans om een callback van de CPSP te verwerken
         max_loops = 6
-        if self.request.GET.get('snel', None):      # pragma: no branch
+        if self.request.GET.get('snel', None):
             max_loops = 1
         while max_loops > 0 and bestelling.status != BESTELLING_STATUS_AFGEROND:
             max_loops -= 1

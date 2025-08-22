@@ -62,7 +62,7 @@ APPS_DIR = os.path.dirname(BASE_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2025-08-20'
+SITE_VERSIE = '2025-08-22'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -243,6 +243,14 @@ STATICFILES_FINDERS = [
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',  # zoekt in App/static/
 ]
 
+STORAGES = {
+    # "default": {
+    #     "BACKEND": "django.core.files.storage.FileSystemStorage"
+    # },
+    "staticfiles": {
+        "BACKEND": "Site.core.static.MHManifestStaticFilesStorage",       # static files krijgen ook hash in de naam
+    }
+}
 
 # wordt gebruikt door LoginView als er geen 'next' veld bij de POST zit
 # LOGIN_REDIRECT_URL = '/plein/'

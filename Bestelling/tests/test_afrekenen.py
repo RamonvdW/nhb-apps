@@ -151,6 +151,7 @@ class TestBestellingBetaling(E2EHelpers, TestCase):
     def _maak_bestelling(self):
         # bestel wedstrijddeelname in het mandje
         bestel_mutatieverzoek_inschrijven_wedstrijd(self.account_admin, self.inschrijving, snel=True)
+        bestel_mutatieverzoek_inschrijven_wedstrijd(self.account_admin, self.inschrijving, snel=True)   # !is_created
         self.verwerk_bestel_mutaties()
 
         # zorg dat alle mogelijke optionele velden in gebruik zijn

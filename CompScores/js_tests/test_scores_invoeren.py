@@ -61,7 +61,7 @@ class TestCompScoresInvoeren(bh.BrowserTestCase):
             for inp in tr.find_elements(By.XPATH, ".//input"):
                 the_inp = inp
             # for
-            if the_inp:
+            if the_inp:     # pragma: no branch
                 # bad score
                 the_inp.send_keys('666')
                 the_inp.send_keys(Keys.TAB)     # go to next field, triggers oninput

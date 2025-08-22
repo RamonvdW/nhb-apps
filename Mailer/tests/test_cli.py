@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2024 Ramon van der Winkel.
+#  Copyright (c) 2020-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -164,7 +164,7 @@ class TestMailerCliGoedBase(E2EHelpers, TestCase):
     def test_stop_exactly(self):
         now = datetime.datetime.now()
         if now.minute == 0:                             # pragma: no cover
-            print('Waiting until clock is past xx:00')
+            print('Waiting until clock is past xx:00 .. ', end='')
             while now.minute == 0:
                 time.sleep(5)
                 now = datetime.datetime.now()
@@ -172,7 +172,7 @@ class TestMailerCliGoedBase(E2EHelpers, TestCase):
 
         now = datetime.datetime.now()
         if now.second > 55:                             # pragma: no cover
-            print('Waiting until clock is past xx:xx:59')
+            print('Waiting until clock is past xx:xx:59 .. ', end='')
             while now.second > 55:
                 time.sleep(5)
                 now = datetime.datetime.now()
@@ -190,7 +190,7 @@ class TestMailerCliGoedBase(E2EHelpers, TestCase):
 
         now = datetime.datetime.now()
         if now.minute == 59:                             # pragma: no cover
-            print('Waiting until clock is past xx:59')
+            print('Waiting until clock is past xx:59 .. ', end='')
             while now.minute == 59:
                 time.sleep(5)
                 now = datetime.datetime.now()
@@ -209,14 +209,19 @@ class TestMailerCliBadBase(E2EHelpers, TestCase):
     test_after = ('Mailer.tests.test_operations',)
 
     def test_stuur_mails_bad_args(self):
-        with self.assertRaises(management.base.CommandError):
-            self.run_management_command('stuur_mails', '99999')
+        f1, f2 = self.run_management_command('stuur_mails', '99999',
+                                             report_exit_code=False)
+        self.assertTrue(" raised CommandError('Error: argument duration: invalid choice: 99999" in f1.getvalue())
 
-        with self.assertRaises(management.base.CommandError):
-            self.run_management_command('stuur_mails', '1', '--quick', '--stop_exactly')
+        f1, f2 = self.run_management_command('stuur_mails', '1', '--quick', '--stop_exactly',
+                                             report_exit_code=False)
+        # print('\nf1:', f1.getvalue())
+        # print('f2:', f2.getvalue())
+        self.assertTrue(" raised CommandError('Error: argument --stop_exactly: expected one argument" in f1.getvalue())
 
-        with self.assertRaises(management.base.CommandError):
-            self.run_management_command('stuur_mails', '1', '--quick', '--stop_exactly=99999')
+        f1, f2, = self.run_management_command('stuur_mails', '1', '--quick', '--stop_exactly=99999',
+                                              report_exit_code=False)
+        self.assertTrue(" raised CommandError('Error: argument --stop_exactly: invalid choice: 99999" in f1.getvalue())
 
     def test_stuur_mail_no_connect(self):
         # deze test eist dat de URL wijst naar een poort waar niet op gereageerd wordt

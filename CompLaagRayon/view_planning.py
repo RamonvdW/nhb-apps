@@ -956,7 +956,6 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
                 # while
 
         url = reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk})
-
         return HttpResponseRedirect(url)
 
 
