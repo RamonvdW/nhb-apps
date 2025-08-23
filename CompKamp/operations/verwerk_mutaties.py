@@ -178,84 +178,6 @@ class VerwerkCompKampMutaties:
             self.verwerk_mutatie_initieel_deelkamp(deelkamp)
         # for
 
-    def _verwerk_mutatie_kamp_afmelden_indiv(self, mutatie: CompetitieMutatie):
-        self.stdout.write('[INFO] Verwerk mutatie %s: afmelden' % mutatie.pk)
-        door = mutatie.door
-        deelnemer = mutatie.deelnemer
-
-        # de deelnemer is al afgemeld en behoudt zijn 'volgorde' zodat de RKO/BKO
-        # 'm in grijs kan zien in de tabel
-
-        # bij een mutatie "boven de cut" wordt de 1e reserve tot deelnemer gepromoveerd.
-        # hiervoor wordt zijn 'volgorde' aangepast en schuift iedereen met een lager gemiddelde een plekje omlaag
-
-        # daarna wordt de 'rank' aan voor alle sporters in deze klasse opnieuw vastgesteld
-
-        now = timezone.now()
-        stamp_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
-        msg = '[%s] Deelname op Nee gezet want afmelding ontvangen van  %s\n' % (stamp_str, door)
-
-        deelnemer.deelname = DEELNAME_NEE
-        deelnemer.logboek += msg
-        deelnemer.save(update_fields=['deelname', 'logboek'])
-        self.stdout.write('[INFO] Afmelding voor (rank=%s, volgorde=%s): %s' % (
-                            deelnemer.rank, deelnemer.volgorde, deelnemer.sporterboog))
-
-        deelkamp = deelnemer.kampioenschap
-        indiv_klasse = deelnemer.indiv_klasse
-
-        limiet = self._get_limiet_indiv(deelkamp, indiv_klasse)
-
-        # haal de 1e reserve op
-        try:
-            reserve = (KampioenschapSporterBoog
-                       .objects
-                       .get(kampioenschap=deelkamp,
-                            indiv_klasse=indiv_klasse,
-                            rank=limiet+1))                 # TODO: dit faalde een keer met 2 resultaten!
-        except KampioenschapSporterBoog.DoesNotExist:
-            # zoveel sporters zijn er niet (meer)
-            pass
-        else:
-            if reserve.volgorde > deelnemer.volgorde:
-                # de afgemelde deelnemer zat binnen de cut
-                # maar de 1e reserve nu deelnemer
-
-                self.stdout.write('[INFO] Reserve (rank=%s, volgorde=%s) wordt deelnemer: %s' % (
-                                    reserve.rank, reserve.volgorde, reserve.sporterboog))
-
-                # het kan zijn dat de 1e reserve een flinke sprong gaat maken in de lijst
-                # het kan zijn dat de 1e reserve op zijn plekje blijft staan
-
-                # bepaal het nieuwe plekje op de deelnemers-lijst
-                # rank = 1..limiet-1
-                slechter = (KampioenschapSporterBoog
-                            .objects
-                            .filter(kampioenschap=deelkamp,
-                                    indiv_klasse=indiv_klasse,
-                                    gemiddelde__lt=reserve.gemiddelde,
-                                    rank__lte=limiet,
-                                    volgorde__lt=reserve.volgorde)
-                            .order_by('volgorde'))      # 10, 11, 12, etc.
-
-                if len(slechter) > 0:
-
-                    # zet het nieuwe plekje
-                    reserve.volgorde = slechter[0].volgorde
-                    reserve.logboek += '[%s] Reserve wordt deelnemer\n' % stamp_str
-                    reserve.save(update_fields=['volgorde', 'logboek'])
-
-                    self.stdout.write('[INFO] Reserve krijgt nieuwe volgorde=%s' % reserve.volgorde)
-
-                    self.stdout.write('[INFO] %s deelnemers krijgen volgorde+1' % len(slechter))
-
-                    # schuif de andere sporters omlaag
-                    slechter.update(volgorde=F('volgorde') + 1)
-
-                # else: geen sporters om op te schuiven
-
-        self._update_rank_nummers(deelkamp, indiv_klasse)
-
     def _opnieuw_aanmelden_indiv(self, deelnemer):
         # meld de deelnemer opnieuw aan door hem bij de reserves te zetten
 
@@ -408,7 +330,7 @@ class VerwerkCompKampMutaties:
                 deelnemer.save(update_fields=['deelname', 'logboek'])
                 # verder hoeven we niets te doen: volgorde en rank blijft hetzelfde
 
-    def _verwerk_mutatie_afmelden_indiv(self, mutatie: CompetitieMutatie):
+    def _verwerk_mutatie_kamp_afmelden_indiv(self, mutatie: CompetitieMutatie):
         self.stdout.write('[INFO] Verwerk mutatie %s: afmelden' % mutatie.pk)
         door = mutatie.door
         deelnemer = mutatie.deelnemer
@@ -760,7 +682,7 @@ class VerwerkCompKampMutaties:
         MUTATIE_KAMP_REINIT_TEST: _verwerk_mutatie_kamp_reinit_test,
         MUTATIE_KAMP_CUT: _verwerk_mutatie_kamp_cut,
         MUTATIE_KAMP_AANMELDEN_INDIV: _verwerk_mutatie_kamp_aanmelden_indiv,
-        MUTATIE_KAMP_AFMELDEN_INDIV: _verwerk_mutatie_afmelden_indiv,
+        MUTATIE_KAMP_AFMELDEN_INDIV: _verwerk_mutatie_kamp_afmelden_indiv,
         MUTATIE_EXTRA_RK_DEELNEMER: _verwerk_mutatie_extra_rk_deelnemer,
         MUTATIE_KAMP_VERPLAATS_KLASSE_INDIV: _verwerk_mutatie_kamp_verplaats_deelnemer_naar_andere_klasse,
         MUTATIE_KAMP_TEAMS_NUMMEREN: _verwerk_mutatie_teams_opnieuw_nummeren,
