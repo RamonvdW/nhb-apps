@@ -20,7 +20,6 @@ class TestGoogleDriveStorageTemplate(E2EHelpers, TestCase):
 
     def test_all(self):
         out = OutputWrapper(io.StringIO())
-
         share_with_emails = ['mgr@test.not']
         storage = Storage(out, 2025, share_with_emails)
 
@@ -51,5 +50,29 @@ class TestGoogleDriveStorageTemplate(E2EHelpers, TestCase):
             with self.assertRaises(StorageError) as exc:
                 storage.maak_sheet_van_template(18, False, False, 1, 'fname')
             self.assertEqual(str(exc.exception), 'Could not find all templates')
+
+    def test_vind_top(self):
+        out = OutputWrapper(io.StringIO())
+        share_with_emails = ['mgr@test.not']
+        storage = Storage(out, 2025, share_with_emails)
+        with patch.object(storage, '_vind_globale_folder', return_value=None):
+            with self.assertRaises(StorageError) as exc:
+                storage.maak_sheet_van_template(18, False, False, 1, 'fname')
+            self.assertEqual(str(exc.exception), "{vind_top_folder} Top folder 'top' not found")
+
+    @staticmethod
+    def _iter_vind_results(arg):
+        if arg == 'templates':
+            return None
+        return 'ok'
+
+    def test_vind_templates(self):
+        out = OutputWrapper(io.StringIO())
+        share_with_emails = ['mgr@test.not']
+        storage = Storage(out, 2025, share_with_emails)
+        with patch.object(storage, '_vind_globale_folder', side_effect=self._iter_vind_results):
+            with self.assertRaises(StorageError) as exc:
+                storage.maak_sheet_van_template(18, False, False, 1, 'fname')
+            self.assertEqual(str(exc.exception), "{vind_templates_folder} Templates folder 'templates' not found")
 
 # end of file

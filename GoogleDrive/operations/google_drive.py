@@ -71,40 +71,27 @@ class GoogleDriveStorage(Storage):
         }
         request = self._service_files.create(body=file_metadata, fields='id')   # fields is comma-separated
 
-        error_msg = None
-        try:
-            results = request.execute()
-        except GoogleApiError as exc:
-            error_msg = 'GoogleApiError: %s' % exc.reason
-            results = None
-        if error_msg:
-            raise StorageError('{maak_folder} ' + error_msg)
+        results = request.execute()
 
         folder_id = results.get("id")
         return folder_id
 
-    def _vind_folder(self, folder_name, parent_folder_id=None):
+    def _vind_globale_folder(self, folder_name):
         query = "mimeType='%s'" % self.MIME_TYPE_FOLDER
+        query += " and trashed=false"
         query += " and name='%s'" % folder_name
-        if parent_folder_id:
-            query += " and '%s' in parents" % parent_folder_id
         request = self._service_files.list(q=query)
 
-        error_msg = None
-        results = None
-        try:
-            results = request.execute()
-        except GoogleApiError as exc:
-            error_msg = 'GoogleApiError: %s' % exc.reason
-        except RefreshError as exc:
-            error_msg = 'RefreshError: %s' % exc
-        if error_msg:
-            raise StorageError('{vind_folder} ' + error_msg)
+        results = request.execute()
 
-        # print('[DEBUG] vind folder results:', results)
+        if 'files' not in results:
+            raise StorageError("{vind_globale_folder} Missing 'files' in results")
+
+        # print('[DEBUG] {vind_globale_folder} results:', results)
         all_files = results['files']
         if len(all_files) > 0:
             first_file = all_files[0]
+            # self.stdout.write('first_file: %s' % repr(first_file))
             folder_id = first_file['id']
         else:
             # niet gevonden
@@ -115,22 +102,15 @@ class GoogleDriveStorage(Storage):
         # haalt de inhoud van een folder op
         # retourneer een dictionary: ["name"] = id
         query = "'%s' in parents" % parent_folder_id
+        query += " and trashed=false"
         if folders_only:
             query += " and mimeType='%s'" % self.MIME_TYPE_FOLDER
         request = self._service_files.list(q=query)
 
-        error_msg = None
-        try:
-            results = request.execute()
-        except GoogleApiError as exc:
-            error_msg = 'GoogleApiError: %s' % exc.reason
-            results = None
-        else:
-            if 'files' not in results:
-                error_msg = "Missing 'files' in results"
+        results = request.execute()
 
-        if error_msg:
-            raise StorageError('{list_folder} ' + error_msg)
+        if 'files' not in results:
+            raise StorageError("{list_folder} Missing 'files' in results")
 
         # print('[DEBUG] list folder results:', results)
         out = {obj['name']: obj['id']
@@ -145,9 +125,10 @@ class GoogleDriveStorage(Storage):
 
             request = self._service_perms.list(fileId=self._folder_id_seizoen,
                                                fields="permissions(id, role, type, emailAddress)")
-            response = request.execute()
-            self.stdout.write('[INFO] {share_seizoen_folder} perms.list response=%s' % repr(response))
 
+            response = request.execute()
+
+            self.stdout.write('[INFO] {share_seizoen_folder} perms.list response=%s' % repr(response))
             share_with = self._share_with_emails[:]
             for perm in response['permissions']:
                 if perm['type'] == 'user' and perm['emailAddress'] in share_with:
@@ -176,14 +157,7 @@ class GoogleDriveStorage(Storage):
         query += " and mimeType='%s'" % self.MIME_TYPE_SHEET
         request = self._service_files.list(q=query)
 
-        error_msg = None
-        try:
-            results = request.execute()
-        except GoogleApiError as exc:
-            error_msg = 'GoogleApiError: %s' % exc.reason
-            results = None
-        if error_msg:
-            raise StorageError('{vind_comp_bestand} ' + error_msg)
+        results = request.execute()
 
         # self.stdout.write('[DEBUG] {vind_comp_bestand} results: %s' % repr(results))
         all_files = results['files']
@@ -194,23 +168,18 @@ class GoogleDriveStorage(Storage):
 
     def _maak_bestand_uit_template(self, folder_name, fname) -> str:
         # kopieer een template naar een nieuw bestand
-
+        # print('[DEBUG] {google_drive.maak_bestand_uit_template} folder_name=%s, fname=%s' % (repr(folder_name),
+        #                                                                                      repr(fname)))
         folder_id = self._comp2folder_id[folder_name]
         template_file_id = self._comp2template_file_id[folder_name]
 
         request = self._service_files.copy(fileId=template_file_id,
                                            body={"parents": [folder_id],
                                                  "name": fname})
-        error_msg = None
-        try:
-            result = request.execute()
-        except GoogleApiError as exc:
-            error_msg = 'GoogleApiError: %s' % exc.reason
-            result = None
-        if error_msg:
-            raise StorageError('{copy_template_to} ' + error_msg)
 
-        self.stdout.write('[DEBUG] {copy_template_to} result is %s' % repr(result))
+        result = request.execute()
+
+        # self.stdout.write('[DEBUG] {maak_bestand_uit_template} result is %s' % repr(result))
         file_id = result['id']
         return file_id
 
@@ -253,21 +222,24 @@ class GoogleDriveStorage(Storage):
         except KeyError as exc:
             error_msg = 'KeyError: %s' % exc
 
-        except (IndexError, ValueError) as exc:
+        except (IndexError, ValueError) as exc:     # pragma: no cover
             error_msg = 'Exception: %s' % exc
 
-        except socket.timeout as exc:
+        except socket.timeout as exc:               # pragma: no cover
             error_msg = 'Socket timeout exception: %s' % exc
 
-        except socket.gaierror as exc:
+        except socket.gaierror as exc:              # pragma: no cover
             # example: [Errno -3] Temporary failure in name resolution
             error_msg = 'Socket exception: %s' % exc
 
         except GoogleApiError as exc:
-            error_msg = 'GoogleApiError: %s' % exc
+            error_msg = 'GoogleApiError: %s' % exc.reason
+
+        except RefreshError as exc:
+            error_msg = 'RefreshError: %s' % exc
 
         if error_msg:
-            raise StorageError('{maak_sheet_van_template} ' + error_msg)
+            raise StorageError('{google_drive} ' + error_msg)
 
         return file_id
 
