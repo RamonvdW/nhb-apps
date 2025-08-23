@@ -179,8 +179,9 @@ class UitslagenRegioIndivView(TemplateView):
                                       'indiv_klasse__boogtype')
                       .filter(indiv_klasse__boogtype=boogtype)
                       .order_by('indiv_klasse__volgorde',
-                                '-gemiddelde',
-                                'pk'))      # consistente volgorde bij gelijk resultaat
+                                '-gemiddelde',          # hoogste eerst
+                                '-ag_voor_indiv',       # hoogste eerst (gebruik: bij 0 scores)
+                                'pk'))                  # consistente volgorde, vooral in klasse onbekend
 
         objs = list()
         objs1 = list()      # primary lijst (genoeg scores)

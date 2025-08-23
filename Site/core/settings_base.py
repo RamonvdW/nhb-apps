@@ -62,7 +62,7 @@ APPS_DIR = os.path.dirname(BASE_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2025-08-20'
+SITE_VERSIE = '2025-08-23'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -249,7 +249,7 @@ STORAGES = {
     #     "BACKEND": "django.core.files.storage.FileSystemStorage"
     # },
     "staticfiles": {
-        "BACKEND": "Site.core.static.MHManifestStaticFilesStorage",       # static files krijgen hash naam
+        "BACKEND": "Site.core.static.MHManifestStaticFilesStorage",       # static files krijgen ook hash in de naam
     }
 }
 
