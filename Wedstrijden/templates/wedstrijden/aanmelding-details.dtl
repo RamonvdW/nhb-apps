@@ -59,11 +59,22 @@
                 </tr>
                 <tr>
                     <th>Sessie</th>
-                    <td colspan="2">{% if inschrijving.status == 'A' %}<del>{% endif %}{{ inschrijving.sessie.beschrijving }}<br>op {{ inschrijving.sessie.datum }} om {{ inschrijving.sessie.tijd_begin }}{% if inschrijving.status == 'A' %}</del>{% endif %}</td>
+                    <td colspan="2">
+                        {% if toon_sessie %}
+                            {% if inschrijving.status == 'A' %}<del>{% endif %}
+                            <span>{{ inschrijving.sessie.beschrijving }}<br>op {{ inschrijving.sessie.datum }} om {{ inschrijving.sessie.tijd_begin }}</span>
+                            {% if inschrijving.status == 'A' %}</del>{% endif %}
+                        {% else %}
+                            <span>n.v.t.</span>
+                        {% endif %}
+                    </td>
                 </tr>
                 <tr>
                     <th>Wedstrijdklasse</th>
-                    <td>{% if inschrijving.status == 'A' %}<del>{% endif %}({{ inschrijving.wedstrijdklasse.afkorting }}) {{ inschrijving.wedstrijdklasse.beschrijving }}{% if inschrijving.status == 'A' %}</del>{% endif %}</td>
+                    <td>
+                        {% if inschrijving.status == 'A' %}<del>{% endif %}
+                        <span>({{ inschrijving.wedstrijdklasse.afkorting }}) {{ inschrijving.wedstrijdklasse.beschrijving }}</span>
+                        {% if inschrijving.status == 'A' %}</del>{% endif %}</td>
                     <td class="right-align">
                         <a class="btn-sv-rood" href="{{ inschrijving.url_aanpassen }}" style="margin-right:10px">Aanpassen</a>
                     </td>

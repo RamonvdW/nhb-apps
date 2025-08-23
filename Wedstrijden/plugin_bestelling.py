@@ -137,11 +137,12 @@ class WedstrijdBestelPlugin(BestelPluginBase):
             inschrijving.log += msg
 
             inschrijving.status = WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD
+            inschrijving.sessie = None
+            # inschrijving.klasse kan niet op None gezet worden
 
-            # inschrijving.sessie en inschrijving.klasse kunnen niet op None gezet worden
             # inschrijving mag niet verwijderd worden, in verband met mogelijk verwijzing vanuit bestelling
 
-            inschrijving.save(update_fields=['status', 'log'])
+            inschrijving.save(update_fields=['status', 'log', 'sessie'])
 
     def aanpassen(self, product_pk: int, door_account_str: str, **kwargs):
         """

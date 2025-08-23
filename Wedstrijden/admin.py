@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2024 Ramon van der Winkel.
+#  Copyright (c) 2020-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -85,7 +85,7 @@ class WedstrijdKortingAdmin(admin.ModelAdmin):
 
 class WedstrijdInschrijvingAdmin(admin.ModelAdmin):
 
-    readonly_fields = ('wanneer', 'wedstrijd', 'sessie', 'sporterboog', 'koper')
+    readonly_fields = ('wanneer', 'wedstrijd', 'sporterboog', 'koper')
 
     list_filter = ('status', 'wedstrijd__organiserende_vereniging', 'wedstrijd')
 
@@ -94,12 +94,14 @@ class WedstrijdInschrijvingAdmin(admin.ModelAdmin):
     def __init__(self, model, admin_site):
         super().__init__(model, admin_site)
         self.vereniging = None
+        self.wedstrijd = None
 
     def get_form(self, request, obj=None, **kwargs):                    # pragma: no cover
         """ initialisatie van het admin formulier
             hier "vangen" we het database object waar we mee bezig gaan
         """
         if obj and obj.wedstrijd:
+            self.wedstrijd = obj.wedstrijd
             self.vereniging = obj.wedstrijd.organiserende_vereniging
 
         return super().get_form(request, obj, **kwargs)
@@ -110,6 +112,9 @@ class WedstrijdInschrijvingAdmin(admin.ModelAdmin):
         if db_field.name == 'korting' and self.vereniging:
             # toon alleen de kortingen van deze vereniging
             kwargs['queryset'] = WedstrijdKorting.objects.filter(uitgegeven_door=self.vereniging)
+
+        elif db_field.name == 'sessie' and self.wedstrijd:
+            kwargs['queryset'] = WedstrijdSessie.objects.filter(wedstrijd=self.wedstrijd)
 
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
