@@ -54,8 +54,6 @@
                  data-csrf-token="{{ csrf_token }}">
             </div>
 
-            <script src="{% static 'account_js/login_as.js' %}"></script>
-
             <!-- blauwe balk witten tabel met resultaten -->
             <div class="row-sv-blauw">
                 <div class="col s12 m8 offset-m2 l6 offset-l3">
@@ -85,6 +83,8 @@
         {% endif %}
 
         <p class="center">Tip: gebruiker moet een account aangemaakt hebben.</p>
+
+        <script src="{% static 'account_js/login_as.js' %}"></script>
     {% endif %}
 
     <!-- geen feedback: with op_pagina="account-login-as-zoek" -->

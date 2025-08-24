@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2021-2024 Ramon van der Winkel.
+                Copyright (c) 2021-2025 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -93,7 +93,7 @@
                     {% endfor %}
                 </ul>
                 <p style="margin-left:35px">
-                    <button class="btn-sv-rood" onclick="filters_activate()">Activeer</button>
+                    <button class="btn-sv-rood btn-sv-activeer-filter">Activeer</button>
                 </p>
             </div>
         </div>
@@ -112,7 +112,7 @@
                     {% endfor %}
                 </ul>
                 <p style="margin-left:35px">
-                    <button class="btn-sv-rood" onclick="filters_activate()">Activeer</button>
+                    <button class="btn-sv-rood btn-sv-activeer-filter">Activeer</button>
                 </p>
             </div>
         </div>
@@ -274,6 +274,8 @@
         </table>
 
     {% endif %}
+
+    <script src="{% static 'overig_js/pagina_filters.js' %}"></script>
 
     {% include 'feedback/sidebar.dtl' with op_pagina="compuitslagen-regio-teams" %}
 

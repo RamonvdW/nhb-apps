@@ -216,13 +216,9 @@ class ProductView(TemplateView):
                         log=msg)
         keuze.save()
 
-        print('ProductView.post: mutatieverzoek begin')
-
         # zet dit verzoek door naar de achtergrondtaak
         snel = str(request.POST.get('snel', ''))[:1]
         bestel_mutatieverzoek_webwinkel_keuze(account_koper, keuze, snel == '1')
-
-        print('ProductView.post: mutatieverzoek klaar')
 
         mandje_tel_inhoud(self.request, account_koper)
 

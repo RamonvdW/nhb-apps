@@ -166,11 +166,12 @@
                     {% endfor %}
                 </ul>
                 <p style="margin-left:35px">
-                    <button class="btn-sv-rood" onclick="filters_activate()">Activeer</button>
+                    <button class="btn-sv-rood btn-sv-activeer-filter">Activeer</button>
                 </p>
             </div>
         </div>
 
+        <script src="{% static 'overig_js/pagina_filters.js' %}"></script>
     </div>
 
 

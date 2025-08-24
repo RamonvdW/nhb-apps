@@ -30,25 +30,31 @@
                     <form action="{{ url_aanmaken }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
                         {% csrf_token %}
 
-                        <div class="input-field">
-                            {{ form.lid_nr.label_tag }}{{ form.lid_nr }}
-                        </div>
-
-                        <div class="input-field">
-                            <!-- HTML validation: element with id=id_email_error ontbreekt (nodig bij form input error) -->
-                            {{ form.email.label_tag }}{{ form.email }}
-                        </div>
-
-                        <div class="input-field">
-                            {{ form.nieuw_wachtwoord.label_tag }}{{ form.nieuw_wachtwoord }}
-                        </div>
-
                         {% if form.errors %}
-                            {% for error in form.non_field_errors %}
-                                <p class="left-align sv-rood-text">Fout: {{ error|escape }}</p>
-                            {% endfor %}
-                            <p>&nbsp;</p>
+                            <div class="center sv-rood-text" style="margin-bottom:20px">
+                                {% for error in form.non_field_errors %}
+                                    <span>Fout: {{ error|escape }}</span><br>
+                                {% endfor %}
+                            </div>
                         {% endif %}
+
+                        <div class="input-field">
+                            {{ form.lid_nr.label_tag }}
+                            {{ form.lid_nr }}
+                        </div>
+
+                        <div class="input-field">
+                            {{ form.email.label_tag }}
+                            {{ form.email }}
+                            {% if form.email.errors %}
+                                <span id="id_email_error" class="sv-rood-text">{{ form.email.errors.0 }}</span><br>
+                            {% endif %}
+                        </div>
+
+                        <div class="input-field">
+                            {{ form.nieuw_wachtwoord.label_tag }}
+                            {{ form.nieuw_wachtwoord }}
+                        </div>
 
                         <div class="center-align">
                             <input class="btn-sv-rood" name="button_registreer" id="submit_knop" type="submit" value="Aanmaken">

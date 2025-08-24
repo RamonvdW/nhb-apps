@@ -192,6 +192,13 @@ class BrowserTestCase(TestCase):
         # for
         return inputs
 
+    def find_elements_with_class(self, with_class: str):
+        inputs = list()
+        for inp in self._driver.find_elements(By.CLASS_NAME, with_class):
+            inputs.append(inp)
+        # for
+        return inputs
+
     def find_title(self):
         return self._driver.title
         # el = self._driver.find_element(By.XPATH, '//title')

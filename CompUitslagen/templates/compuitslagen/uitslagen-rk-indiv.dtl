@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2024 Ramon van der Winkel.
+                Copyright (c) 2020-2025 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -72,7 +72,7 @@
                     {% endfor %}
                 </ul>
                 <p style="margin-left:35px">
-                    <button class="btn-sv-rood" onclick="filters_activate()">Activeer</button>
+                    <button class="btn-sv-rood btn-sv-activeer-filter">Activeer</button>
                 </p>
             </div>
         </div>
@@ -91,7 +91,7 @@
                     {% endfor %}
                 </ul>
                 <p style="margin-left:35px">
-                    <button class="btn-sv-rood" onclick="filters_activate()">Activeer</button>
+                    <button class="btn-sv-rood btn-sv-activeer-filter">Activeer</button>
                 </p>
             </div>
         </div>
@@ -221,6 +221,8 @@
     {% else %}
         <p class="center"><i>Geen deelnemers gevonden voor deze combinatie van filters</i></p>
     {% endif %}
+
+    <script src="{% static 'overig_js/pagina_filters.js' %}"></script>
 
     {% include 'feedback/sidebar.dtl' with op_pagina="compuitslagen-rk-indiv" %}
 
