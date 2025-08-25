@@ -26,29 +26,6 @@ function getCookie(name) {
 }
 
 
-// verander het icon van een collapsible
-// hiermee zetten we het plus/min teken aan de rechter kant
-function set_collapsible_icon(li_el, new_icon) {
-    // li_el = the "li" element that was opened or closed
-    // first child element = the div with the header
-    const header_el = li_el.childNodes[0];
-    // search within the header for the element with the icon class
-    const icons = header_el.getElementsByClassName('material-icons-round secondary-content');
-    if (icons.length > 0) {
-        const icon = icons[0];
-        icon.innerText = new_icon;
-    }
-}
-
-function uitklappen_klaar(id) {
-    set_collapsible_icon(id, 'remove');     // expand_less
-}
-
-function inklappen_klaar(id) {
-    set_collapsible_icon(id, 'add');        // expand_more
-}
-
-
 // framework init, after everything has been loaded and instantiated
 window.addEventListener("load", () => {
     // page is fully loaded
@@ -66,8 +43,8 @@ window.addEventListener("load", () => {
 });
 
 
+// the document view (window) has been resized
 window.addEventListener('resize', () => {
-    // the document view (window) has been resized
 
     // dropdown menu automatisch dichtklappen
     const elems = document.querySelectorAll(".dropdown-trigger");
@@ -80,26 +57,12 @@ window.addEventListener('resize', () => {
 });
 
 
+// initial HTML document has been completely loaded and parsed, without waiting for stylesheets, images, etc.
 document.addEventListener("DOMContentLoaded", (_event) => {
-    // initial HTML document has been completely loaded and parsed, without waiting for stylesheets, images, etc.
     //console.log('loaded!');
 
-    let elems = document.querySelectorAll(".collapsible");
-
-    M.Collapsible.init(elems, { onOpenEnd: uitklappen_klaar,
-                                onCloseEnd: inklappen_klaar,
-                                //inDuration: 100,    // default is 300
-                                //outDuration: 100,   // default is 300
-    });
-
-    elems = document.querySelectorAll(".collapsible-header .secondary-content");
-    // console.log('header icons:', elems)
-    elems.forEach(icon => {
-        icon.innerText = 'add';
-    });    // gelijk houden aan inklappen_klaar
-
     // dropdown menu
-    elems = document.querySelectorAll(".dropdown-trigger");
+    let elems = document.querySelectorAll(".dropdown-trigger");
     M.Dropdown.init(elems, {coverTrigger: false, constrainWidth: false});
 
     // tooltips
@@ -131,7 +94,6 @@ document.addEventListener("DOMContentLoaded", (_event) => {
     }
 
 });
-
 
 
 // end of file

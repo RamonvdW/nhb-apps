@@ -64,7 +64,8 @@
                 <form action="{{ zoek_url }}" method="get" onsubmit="document.getElementById('submit_knop1').disabled=true; return true;">
                     <!-- form field -->
                     <div class="input-field">
-                        {{ zoekform.zoekterm.label_tag }}{{ zoekform.zoekterm }}
+                        {{ zoekform.zoekterm.label_tag }}
+                        {{ zoekform.zoekterm }}
                     </div>
 
                     <!-- button -->
@@ -105,7 +106,7 @@
                             <li>
                                 <div class="collapsible-header white">
                                     <span>[{{ obj.lid_nr_str|highlight:zoekterm }}] {{ obj.volledige_naam|highlight:zoekterm }}</span>
-                                    <i class="material-icons-round notranslate sv-rood-text secondary-content"><!-- wordt gezet in in/uitklappen_klaar() in Plein/js/site_layout.js --></i>
+                                    <i class="material-icons-round notranslate sv-rood-text secondary-content"><!-- wordt gezet in in/uitklappen_klaar() in Overig/js/collapsible_icons.js --></i>
                                 </div>
                                 <div class="collapsible-body white">
                                     <div style="column-count: 2">
@@ -417,6 +418,7 @@
         {% endif %}
     {% endif %}
 
+    <script src="{% static 'overig_js/collapsible_icons.js' %}"></script>
     <script src="{% static 'overig_js/tabel_filter.js' %}"></script>
 
     {% include 'feedback/sidebar.dtl' with op_pagina="overig-activiteit" %}

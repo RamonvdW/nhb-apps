@@ -25,7 +25,7 @@ class TestBrowserPleinStuurPing(bh.BrowserTestCase):
         html = self.get_page_html()
         has_ping = "stuur_ping" in html
         # print('has_ping: %s' % has_ping)
-        if not has_ping:
+        if not has_ping:        # pragma: no cover
             print('[ERROR] Geen ping ontvangen! page=\n%s' % html)  # TODO: verwijder
         self.assertTrue(has_ping)
 

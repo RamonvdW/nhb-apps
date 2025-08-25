@@ -14,7 +14,7 @@ class TestOverigPaginaFilters(bh.BrowserTestCase):
     # wordt gebruikt in: CompUitslagen, HistComp, Records
     url_pagina_met_filters_1 = '/records/indiv/'
 
-    def test_alles(self):
+    def test_pagina_filters(self):
         self.do_wissel_naar_sporter()
 
         # ga naar de pagina waar de filters gebruikt worden
@@ -22,14 +22,14 @@ class TestOverigPaginaFilters(bh.BrowserTestCase):
 
         # klik op een van de radio buttons met mirroring
         mirror_radios = self.find_elements_with_class("sv-mirror-filter")
+        spans = list()
         for radio in mirror_radios:
             if not radio.is_selected():
                 el_span = self.get_following_sibling(radio)
-                # print('span.is_displayed: %s, radio.id=%s' % (el_span.is_displayed(), radio.get_attribute('id')))
                 if el_span.is_displayed():
-                    el_span.click()
-                    break   # from the for
+                    spans.append(el_span)
         # for
+        spans[0].click()
 
         # klik op een van de Activeer knoppen
         # dit roept de activeer_filter functie aan

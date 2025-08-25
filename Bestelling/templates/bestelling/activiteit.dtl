@@ -238,6 +238,7 @@
 
     {% endif %}     <!-- if bestellingen -->
 
+    <script src="{% static 'overig_js/collapsible_icons.js' %}"></script>
 
     {% include 'feedback/sidebar.dtl' with op_pagina="bestelling-activiteit" %}
 

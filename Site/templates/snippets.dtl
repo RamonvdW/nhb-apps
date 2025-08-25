@@ -397,6 +397,7 @@
             </li>
         {% endfor %}
     </ul>
+    <script src="{% static 'overig_js/collapsible_icons.js' %}"></script>
 
 
     <!-- floating action button -->
