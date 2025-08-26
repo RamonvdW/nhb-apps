@@ -228,7 +228,7 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
                     sporter.email_is_bevestigd_str = 'Nee'
 
                 if account.last_login:
-                    if account.last_login.year == now.year:
+                    if account.last_login.year == now.year:     # TODO: verander in "laatste 13 maanden"?
                         sporter.laatste_inlog_str = date_format(account.last_login.astimezone(to_tz),
                                                                 'j F Y H:i').replace(current_year_str, '')
 

@@ -448,7 +448,7 @@ class BrowserTestCase(TestCase):
         # wissel naar rol HWL
         self.do_pass_otp()
         if self._driver.title != 'Kies je rol':
-            print('titel was %s. Ga naar wissel naar rol' % self._driver.title)
+            print('{do_wissel_naar_hwl} titel was %s. Ga naar wissel naar rol' % self._driver.title)
             self.do_navigate_to(self.url_wissel_van_rol, check_console_log=False)
         page = radio = ""
         try:
@@ -465,6 +465,7 @@ class BrowserTestCase(TestCase):
         # wissel naar rol Manager MH
         self.do_pass_otp()
         if self._driver.title != 'Kies je rol':
+            print('{do_wissel_naar_bb} titel was %s. Ga naar wissel naar rol' % self._driver.title)
             self.do_navigate_to(self.url_wissel_van_rol)
         radio = self.find_element_by_id('id_eigen_90002')       # radio button voor Manager MH
         self.get_following_sibling(radio).click()
@@ -475,6 +476,7 @@ class BrowserTestCase(TestCase):
         # wissel naar rol Sporter
         self.do_pass_otp()
         if self._driver.title != 'Kies je rol':
+            print('{do_wissel_naar_sporter} titel was %s. Ga naar wissel naar rol' % self._driver.title)
             self.do_navigate_to(self.url_wissel_van_rol)
         radio = self.find_element_by_id('id_eigen_90000')       # radio button voor Sporter
         self.get_following_sibling(radio).click()
