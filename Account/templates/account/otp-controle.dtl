@@ -40,7 +40,7 @@
                     <!-- kader met 6 vakjes -->
                     <div class="row">
                         <div class="col s12">
-                            <label>Tweede factor code:</label>
+                            <label class="black-text">Tweede factor code:</label>
                             <table style="width:1px; margin-left:auto; margin-right:auto; margin-top:15px">
                                 <tr>
                                     {% for digit in digits %}
@@ -48,7 +48,6 @@
                                             <div style="width:35px; border:2px solid darkgrey; border-radius:5px" class="center">
                                                 <input id="otp{{ digit }}"
                                                        type="text" autocomplete="off" inputmode="numeric"
-                                                       {% if digit == 1 %}autofocus{% endif %}
                                                        class="center" style="width:10px; margin:0 0 5px 0; border:0">
                                             </div>
                                         </td>
