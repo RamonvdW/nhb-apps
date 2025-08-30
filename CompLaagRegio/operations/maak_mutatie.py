@@ -14,7 +14,7 @@ from Competitie.definities import (MUTATIE_COMPETITIE_OPSTARTEN, MUTATIE_AG_VAST
                                    MUTATIE_DOORZETTEN_REGIO_NAAR_RK, MUTATIE_EXTRA_RK_DEELNEMER,
                                    MUTATIE_KAMP_INDIV_DOORZETTEN_NAAR_BK, MUTATIE_KAMP_TEAMS_DOORZETTEN_NAAR_BK,
                                    MUTATIE_KAMP_VERPLAATS_KLASSE_INDIV, MUTATIE_KAMP_INDIV_AFSLUITEN,
-                                   MUTATIE_KAMP_TEAMS_AFSLUITEN, MUTATIE_MAAK_WEDSTRIJD_FORMULIEREN)
+                                   MUTATIE_KAMP_TEAMS_AFSLUITEN, MUTATIE_MAAK_WEDSTRIJDFORMULIEREN)
 from Competitie.operations.competitie_mutaties import ping_achtergrondtaak
 
 

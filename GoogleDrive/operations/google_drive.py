@@ -217,7 +217,7 @@ class GoogleDriveStorage(Storage):
             if not file_id:
                 # bestaat nog niet
                 file_id = self._maak_bestand_uit_template(folder_name, fname)
-                self._save_bestand(afstand, is_teams, is_bk, klasse_pk, fname, file_id)
+            self._save_bestand(afstand, is_teams, is_bk, klasse_pk, fname, file_id)
 
         except KeyError as exc:
             error_msg = 'KeyError: %s' % exc

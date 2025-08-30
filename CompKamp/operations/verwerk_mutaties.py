@@ -12,11 +12,16 @@ from Competitie.definities import (DEELNAME_JA, DEELNAME_NEE,
                                    MUTATIE_KAMP_AANMELDEN_INDIV, MUTATIE_KAMP_AFMELDEN_INDIV,
                                    MUTATIE_EXTRA_RK_DEELNEMER, MUTATIE_KAMP_VERPLAATS_KLASSE_INDIV,
                                    MUTATIE_KAMP_TEAMS_NUMMEREN,
-                                   MUTATIE_MAAK_WEDSTRIJD_FORMULIEREN)
-from Competitie.models import (Kampioenschap, KampioenschapSporterBoog, KampioenschapTeam, CompetitieMutatie,
-                               KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet)
-from CompKamp.operations.wedstrijdformulieren import iter_wedstrijdformulieren
-from CompKamp.operations.kamp_programmas import KampStorage, StorageError
+                                   MUTATIE_MAAK_WEDSTRIJDFORMULIEREN, MUTATIE_UPDATE_DIRTY_WEDSTRIJDFORMULIEREN)
+from Competitie.models import (Kampioenschap, KampioenschapSporterBoog, KampioenschapTeam,
+                               KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet,
+                               Competitie, CompetitieMutatie, CompetitieIndivKlasse, CompetitieTeamKlasse)
+from CompKamp.operations.wedstrijdformulieren import (iter_wedstrijdformulieren,
+                                                      update_wedstrijdformulier_teams,
+                                                      update_wedstrijdformulier_indiv_indoor,
+                                                      update_wedstrijdformulier_indiv_25m1pijl)
+from CompKamp.operations.kamp_programmas import KampStorage, StorageError, iter_dirty_wedstrijdformulieren, zet_dirty
+from GoogleDrive.operations.google_sheets import GoogleSheet
 
 VOLGORDE_PARKEER = 22222        # hoog en past in PositiveSmallIntegerField
 
@@ -31,6 +36,14 @@ class VerwerkCompKampMutaties:
     def __init__(self, stdout, logger):
         self.stdout = stdout
         self.my_logger = logger
+
+    @staticmethod
+    def _zet_dirty(comp: Competitie, klasse_pk: int, is_bk: bool, is_team: bool):
+        zet_dirty(comp.begin_jaar, int(comp.afstand), klasse_pk, is_bk, is_team)
+
+        CompetitieMutatie.objects.create(
+                            mutatie=MUTATIE_UPDATE_DIRTY_WEDSTRIJDFORMULIEREN,
+                            competitie=comp)      # alleen nodig voor begin_jaar
 
     @staticmethod
     def _get_limiet_indiv(deelkamp, indiv_klasse):
@@ -73,6 +86,9 @@ class VerwerkCompKampMutaties:
         # gesorteerde op gemiddelde
 
         self.stdout.write('[INFO] Bepaal deelnemers in indiv_klasse %s van %s' % (indiv_klasse, deelkamp))
+
+        # zorg dat het google sheet bijgewerkt worden
+        self._zet_dirty(deelkamp.competitie, indiv_klasse.pk, is_bk=deelkamp.is_bk(), is_team=False)
 
         limiet = self._get_limiet_indiv(deelkamp, indiv_klasse)
 
@@ -195,6 +211,9 @@ class VerwerkCompKampMutaties:
 
         self.stdout.write('[INFO] Opnieuw aanmelden vanuit oude volgorde=%s: %s' % (oude_volgorde,
                                                                                     deelnemer.sporterboog))
+
+        # zorg dat het google sheet bijgewerkt worden
+        self._zet_dirty(deelkamp.competitie, indiv_klasse.pk, deelkamp.is_bk(), is_team=False)
 
         # verwijder de deelnemer uit de lijst op zijn oude plekje
         # en schuif de rest omhoog
@@ -356,6 +375,9 @@ class VerwerkCompKampMutaties:
         deelkamp = deelnemer.kampioenschap
         indiv_klasse = deelnemer.indiv_klasse
 
+        # zorg dat het google sheet bijgewerkt worden
+        self._zet_dirty(deelkamp.competitie, indiv_klasse.pk, deelkamp.is_bk(), is_team=False)
+
         limiet = self._get_limiet_indiv(deelkamp, indiv_klasse)
 
         # haal de 1e reserve op
@@ -409,7 +431,7 @@ class VerwerkCompKampMutaties:
         self._update_rank_nummers(deelkamp, indiv_klasse)
 
     @staticmethod
-    def _verwerk_mutatie_kamp_verhoog_cut(deelkamp, klasse, cut_nieuw):
+    def _verwerk_mutatie_kamp_indiv_verhoog_cut(deelkamp, klasse, cut_nieuw):
         # de deelnemerslijst opnieuw sorteren op gemiddelde
         # dit is nodig omdat kampioenen naar boven geplaatst kunnen zijn bij het verlagen van de cut
         # nu plaatsen we ze weer terug op hun originele plek
@@ -444,7 +466,7 @@ class VerwerkCompKampMutaties:
         # for
 
     @staticmethod
-    def _verwerk_mutatie_kamp_verlaag_cut(deelkamp, indiv_klasse, cut_oud, cut_nieuw):
+    def _verwerk_mutatie_kamp_indiv_verlaag_cut(deelkamp, indiv_klasse, cut_oud, cut_nieuw):
         # zoek de kampioenen die al deel mochten nemen (dus niet op reserve lijst)
         kampioenen = (KampioenschapSporterBoog
                       .objects
@@ -520,7 +542,8 @@ class VerwerkCompKampMutaties:
                 obj.save(update_fields=['rank', 'volgorde'])
         # for
 
-    def _verwerk_mutatie_kamp_cut_indiv(self, deelkamp, indiv_klasse, cut_oud, cut_nieuw):
+    def _verwerk_mutatie_kamp_cut_indiv(self, deelkamp: Kampioenschap, indiv_klasse: CompetitieIndivKlasse,
+                                        cut_oud: int, cut_nieuw: int):
         try:
             is_nieuw = False
             limiet = (KampioenschapIndivKlasseLimiet
@@ -544,7 +567,10 @@ class VerwerkCompKampMutaties:
                 limiet.save()
 
             # de deelnemerslijst opnieuw sorteren op gemiddelde
-            self._verwerk_mutatie_kamp_verhoog_cut(deelkamp, indiv_klasse, cut_nieuw)
+            self._verwerk_mutatie_kamp_indiv_verhoog_cut(deelkamp, indiv_klasse, cut_nieuw)
+
+            # zorg dat het google sheet bijgewerkt worden
+            self._zet_dirty(deelkamp.competitie, indiv_klasse.pk, deelkamp.is_bk(), is_team=False)
 
         elif cut_nieuw < cut_oud:
             # limiet is omlaag gezet
@@ -552,13 +578,17 @@ class VerwerkCompKampMutaties:
             limiet.limiet = cut_nieuw
             limiet.save()
 
-            self._verwerk_mutatie_kamp_verlaag_cut(deelkamp, indiv_klasse, cut_oud, cut_nieuw)
+            self._verwerk_mutatie_kamp_indiv_verlaag_cut(deelkamp, indiv_klasse, cut_oud, cut_nieuw)
+
+            # zorg dat het google sheet bijgewerkt worden
+            self._zet_dirty(deelkamp.competitie, indiv_klasse.pk, deelkamp.is_bk(), is_team=False)
 
         # else: cut_oud == cut_nieuw --> doe niets
         #   (dit kan voorkomen als 2 gebruikers tegelijkertijd de cut veranderen)
 
     @staticmethod
-    def _verwerk_mutatie_kamp_cut_team(deelkamp, team_klasse, cut_oud, cut_nieuw):
+    def _verwerk_mutatie_kamp_cut_team(deelkamp: Kampioenschap, team_klasse: CompetitieTeamKlasse,
+                                       cut_oud: int, cut_nieuw: int):
         try:
             is_nieuw = False
             limiet = (KampioenschapTeamKlasseLimiet
@@ -620,11 +650,16 @@ class VerwerkCompKampMutaties:
             self.stdout.write('[INFO] Verplaats deelnemer %s van kleine klasse %s naar klasse %s' % (
                                 deelnemer, deelnemer.indiv_klasse, indiv_klasse))
 
+            deelkamp = deelnemer.kampioenschap
+
+            # zorg dat beide google sheets bijgewerkt worden
+            self._zet_dirty(deelkamp.competitie, indiv_klasse.pk, deelkamp.is_bk(), is_team=False)
+            self._zet_dirty(deelkamp.competitie, deelnemer.indiv_klasse.pk, deelkamp.is_bk(), is_team=False)
+
             deelnemer.indiv_klasse = indiv_klasse
             deelnemer.save(update_fields=['indiv_klasse'])
 
             # stel de deelnemerslijst van de nieuwe klasse opnieuw op
-            deelkamp = deelnemer.kampioenschap
             self._verwerk_mutatie_initieel_klasse_indiv(deelkamp, deelnemer.indiv_klasse)
 
     def _verwerk_mutatie_teams_opnieuw_nummeren(self, mutatie: CompetitieMutatie):
@@ -634,6 +669,10 @@ class VerwerkCompKampMutaties:
 
         self.stdout.write('[INFO] Teams opnieuw nummeren voor kampioenschap %s team klasse %s' % (deelkamp,
                                                                                                   team_klasse))
+
+        # zorg dat het google sheet bijgewerkt worden
+        self._zet_dirty(deelkamp.competitie, team_klasse.pk, deelkamp.is_bk(), is_team=True)
+
         # alleen de rank aanpassen
         rank = 0
         for team in (KampioenschapTeam
@@ -677,6 +716,33 @@ class VerwerkCompKampMutaties:
         except StorageError as err:
             self.stdout.write('[ERROR] StorageError: %s' % str(err))
 
+    def _verwerk_mutatie_update_dirty_wedstrijdformulieren(self, mutatie):
+        begin_jaar = mutatie.competitie.begin_jaar
+        self.stdout.write('[INFO] Update dirty wedstrijdformulieren')
+        sheet = None
+        for bestand in iter_dirty_wedstrijdformulieren(begin_jaar):
+            self.stdout.write('[INFO] Update bestand pk=%s' % bestand.pk)
+
+            if not sheet:
+                sheet = GoogleSheet(self.stdout)
+
+            sheet.selecteer_file(bestand.file_id)
+
+            if bestand.is_teams:
+                # teams
+                res = update_wedstrijdformulier_teams(self.stdout, sheet)
+            else:
+                # individueel
+                if bestand.afstand == 18:
+                    res = update_wedstrijdformulier_indiv_indoor(self.stdout, sheet)
+                else:
+                    res = update_wedstrijdformulier_indiv_25m1pijl(self.stdout, sheet)
+
+            msg = '[%s] Bijgewerkt met resultaat %s\n' % res
+            # bestand.is_dirty = False
+            bestand.log += msg
+            bestand.save(update_fields=['is_dirty', 'log'])
+        # for
 
     HANDLERS = {
         MUTATIE_KAMP_REINIT_TEST: _verwerk_mutatie_kamp_reinit_test,
@@ -686,7 +752,8 @@ class VerwerkCompKampMutaties:
         MUTATIE_EXTRA_RK_DEELNEMER: _verwerk_mutatie_extra_rk_deelnemer,
         MUTATIE_KAMP_VERPLAATS_KLASSE_INDIV: _verwerk_mutatie_kamp_verplaats_deelnemer_naar_andere_klasse,
         MUTATIE_KAMP_TEAMS_NUMMEREN: _verwerk_mutatie_teams_opnieuw_nummeren,
-        MUTATIE_MAAK_WEDSTRIJD_FORMULIEREN: _verwerk_mutatie_maak_wedstrijdformulieren,
+        MUTATIE_MAAK_WEDSTRIJDFORMULIEREN: _verwerk_mutatie_maak_wedstrijdformulieren,
+        MUTATIE_UPDATE_DIRTY_WEDSTRIJDFORMULIEREN: _verwerk_mutatie_update_dirty_wedstrijdformulieren,
     }
 
     def verwerk(self, mutatie: CompetitieMutatie) -> bool:

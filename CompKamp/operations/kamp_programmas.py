@@ -7,9 +7,11 @@
 """ aanmaken en vinden van RK/BK programma's in de vorm van Google Sheets in een folder structuur in Google Drive. """
 
 from django.conf import settings
+from django.utils import timezone
 from CompKamp.operations.wedstrijdformulieren import iter_wedstrijdformulieren
 from GoogleDrive.models import Bestand
 from GoogleDrive.operations.google_drive import GoogleDriveStorage, StorageError
+from typing import Generator
 
 
 class KampStorage(GoogleDriveStorage):
@@ -74,14 +76,40 @@ def ontbrekende_wedstrijdformulieren_rk_bk(comp) -> list:
     for tup in iter_wedstrijdformulieren(comp):
         afstand, is_teams, is_bk, klasse_pk, fname = tup
         sel = (comp.begin_jaar, afstand, is_teams, is_bk, klasse_pk)
-        try:
-            bestand = sel2bestand[sel]
-        except KeyError:
+        if sel in sel2bestand:
             # niet gevonden; voeg toe aan de todo lijst
             todo.append(tup)
     # for
 
     return todo
+
+
+def zet_dirty(begin_jaar: int, afstand: int, klasse_pk: int, is_bk: bool, is_teams: bool):
+    bestand = Bestand.objects.filter(begin_jaar=begin_jaar,
+                                     afstand=afstand,
+                                     klasse_pk=klasse_pk,
+                                     is_bk=is_bk,
+                                     is_teams=is_teams).first()
+
+    if bestand:
+        now = timezone.now()
+        stamp_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
+
+        bestand.is_dirty = True
+        bestand.log += '[%s] Dirty gemaakt\n' % stamp_str
+        bestand.save(update_fields=['is_dirty', 'log'])
+    # else:
+    #     print('[DEBUG] Bestand niet gevonden: %s, %s, %s, %s, %s' % (begin_jaar, afstand, klasse_pk, is_bk, is_teams))
+
+
+def iter_dirty_wedstrijdformulieren(begin_jaar: int) -> Generator[Bestand, None, None]:
+    """ geef een lijst terug met de wedstrijdformulieren die de is_dirty vlag gezet hebben in tabel Bestand.
+
+        Returns: [tup, ...] with tup = (afstand, klasse_pk, is_bk, is_teams, file_id)
+    """
+    for bestand in Bestand.objects.filter(begin_jaar=begin_jaar, is_dirty=True):
+        yield bestand
+    # for
 
 
 # end of file

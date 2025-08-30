@@ -10,7 +10,7 @@ from Competitie.models import (Competitie, CompetitieMutatie, KampioenschapSport
                                CompetitieTeamKlasse)
 from Competitie.definities import (MUTATIE_KAMP_CUT, MUTATIE_KAMP_TEAMS_NUMMEREN,
                                    MUTATIE_KAMP_AANMELDEN_INDIV, MUTATIE_KAMP_AFMELDEN_INDIV,
-                                   MUTATIE_MAAK_WEDSTRIJD_FORMULIEREN)
+                                   MUTATIE_MAAK_WEDSTRIJDFORMULIEREN)
 from Competitie.operations.competitie_mutaties import ping_achtergrondtaak
 
 
@@ -70,7 +70,7 @@ def maak_mutatie_kamp_teams_nummeren(comp: Competitie, kamp: Kampioenschap, team
 
 def maak_mutatie_wedstrijdformulieren_aanmaken(comp: Competitie, door: str):
     mutatie = CompetitieMutatie.objects.create(
-                                mutatie=MUTATIE_MAAK_WEDSTRIJD_FORMULIEREN,
+                                mutatie=MUTATIE_MAAK_WEDSTRIJDFORMULIEREN,
                                 competitie=comp,
                                 door=door)
 
@@ -81,7 +81,7 @@ def maak_mutatie_wedstrijdformulieren_aanmaken(comp: Competitie, door: str):
 def aanmaken_wedstrijdformulieren_is_pending():
     # geeft True terug als er nog niet afgehandelde mutaties zijn voor het aanmaken van de wedstrijdformulieren
     cnt = CompetitieMutatie.objects.filter(
-                                mutatie=MUTATIE_MAAK_WEDSTRIJD_FORMULIEREN,
+                                mutatie=MUTATIE_MAAK_WEDSTRIJDFORMULIEREN,
                                 is_verwerkt=False).count()
     return cnt > 0
 

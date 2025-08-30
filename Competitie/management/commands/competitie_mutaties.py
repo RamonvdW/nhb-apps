@@ -103,7 +103,9 @@ class Command(BaseCommand):
                        .objects
                        .select_related('competitie',
                                        'regiocompetitie',
+                                       'regiocompetitie__competitie',
                                        'kampioenschap',
+                                       'kampioenschap__competitie',
                                        'indiv_klasse',
                                        'team_klasse',
                                        'deelnemer',

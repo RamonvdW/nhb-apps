@@ -8,6 +8,8 @@
 
 from Competitie.models import Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse
 from Geo.models import Rayon
+from GoogleDrive.operations.google_sheets import GoogleSheet
+from GoogleDrive.models import Bestand
 
 
 def iter_wedstrijdformulieren(comp: Competitie):
@@ -52,6 +54,55 @@ def iter_wedstrijdformulieren(comp: Competitie):
         #           is_team  is_bk
         yield afstand, True, True, klasse.pk, fname
     # for
+
+
+def update_wedstrijdformulier_teams(stdout, bestand: Bestand, sheet: GoogleSheet):
+    stdout.write('[INFO] Update teams wedstrijdformulier voor bestand pk=%s' % bestand.pk)
+
+    # zoek de wedstrijdklasse erbij
+    klasse = CompetitieTeamKlasse.objects.get(pk=bestand.klasse_pk)
+
+    return "OK"
+
+
+def update_wedstrijdformulier_indiv_indoor(stdout, bestand: Bestand, sheet: GoogleSheet):
+    stdout.write('[INFO] Update Indoor indiv wedstrijdformulier voor bestand pk=%s' % bestand.pk)
+
+    # zoek de wedstrijdklasse erbij
+    klasse = CompetitieIndivKlasse.objects.get(pk=bestand.klasse_pk)
+
+    return "OK"
+
+
+def update_wedstrijdformulier_indiv_25m1pijl(stdout, bestand: Bestand, sheet: GoogleSheet):
+    stdout.write('[INFO] Update 25m1pijl indiv wedstrijdformulier voor bestand pk=%s' % bestand.pk)
+
+    range_titel = 'C2'
+    range_deelnemers = 'D7:I31'
+
+    # zoek de wedstrijdklasse erbij
+    klasse = CompetitieIndivKlasse.objects.get(pk=bestand.klasse_pk)
+
+    if bestand.is_bk:
+        titel = 'Bondskampioenschappen 25m 1pijl'
+    else:
+        titel = 'Rayonkampioenschappen 25m 1pijl'
+
+    titel += ' %s/%s' % (bestand.begin_jaar, bestand.begin_jaar+1)
+
+    if not bestand.is_bk:
+        # benoem het rayon
+        titel += ', Rayon %s' % bestand.rayon_nr
+
+    titel = klasse.beschrijving
+
+    sheet.selecteer_sheet('Wedstrijd')
+
+    sheet.wijzig_cellen(range_titel, [[titel]])
+
+    sheet.execute()
+
+    return "OK"
 
 
 # end of file

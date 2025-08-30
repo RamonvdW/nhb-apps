@@ -16,7 +16,7 @@ class Migration(migrations.Migration):
 
     # volgorde afdwingen
     dependencies = [
-        ('Sporter', 'm0032_email_blank'),
+        ('Account', 'm0032_squashed'),
     ]
 
     # migratie functies
@@ -56,10 +56,12 @@ class Migration(migrations.Migration):
                 ('is_teams', models.BooleanField(default=False)),
                 ('is_bk', models.BooleanField(default=False)),
                 ('klasse_pk', models.PositiveIntegerField(default=0)),
+                ('rayon_nr', models.PositiveSmallIntegerField(default=0)),
                 ('fname', models.CharField(max_length=80)),
                 ('file_id', models.CharField(default='', max_length=64)),
-                ('log', models.TextField(default='')),
-                ('sporters', models.ManyToManyField(to='Sporter.sporter')),
+                ('is_dirty', models.BooleanField(default=True)),
+                ('log', models.TextField(default='', blank=True)),
+                ('gedeeld_met', models.ManyToManyField(to='Account.account', blank=True)),
             ],
             options={
                 'verbose_name': 'Bestand',

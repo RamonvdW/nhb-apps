@@ -43,6 +43,9 @@ class Kampioenschap(models.Model):
     # heeft deze RK/BK al een vastgestelde deelnemerslijst?
     heeft_deelnemerslijst = models.BooleanField(default=False)
 
+    def is_bk(self):
+        return self.deel == DEEL_BK
+
     def __str__(self):
         """ geef een tekstuele afkorting van dit object, voor in de admin interface """
         deel2str = {code: beschrijving for code, beschrijving in self.DEEL}

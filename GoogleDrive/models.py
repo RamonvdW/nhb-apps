@@ -7,7 +7,7 @@
 from django.db import models
 from django.utils import timezone
 from uuid import uuid5, NAMESPACE_URL
-from Sporter.models import Sporter
+from Account.models import Account
 
 uuid_namespace = uuid5(NAMESPACE_URL, 'GoogleDrive.Models.Transactie')
 
@@ -77,6 +77,7 @@ class Bestand(models.Model):
     is_teams = models.BooleanField(default=False)               # team of individueel
     is_bk = models.BooleanField(default=False)                  # RK of BK
     klasse_pk = models.PositiveIntegerField(default=0)          # welke CompetitieIndiv/TeamKlasse
+    rayon_nr = models.PositiveSmallIntegerField(default=0)      # welke Rayon
 
     # originele naam
     fname = models.CharField(max_length=80)
@@ -84,11 +85,14 @@ class Bestand(models.Model):
     # file_id van het Google Sheet aangemaakt in de Google Drive
     file_id = models.CharField(max_length=64, default='')       # 32 should be enough
 
+    # dirty = bestand moeten nog bijgewerkt worden
+    is_dirty = models.BooleanField(default=True)
+
     # met welke beheerders is dit bestand gedeeld?
-    sporters = models.ManyToManyField(Sporter)
+    gedeeld_met = models.ManyToManyField(Account, blank=True)
 
     # logboekje van acties op deze file: aanmaken, delen met HWL, bijgewerkt, problemen, etc.
-    log = models.TextField(default='')
+    log = models.TextField(default='', blank=True)
 
     def __str__(self):
         return '%s %s' % (self.afstand, self.fname)
