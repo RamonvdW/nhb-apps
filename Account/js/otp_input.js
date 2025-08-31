@@ -16,7 +16,17 @@ const el_otp5 = document.getElementById("otp5");
 const el_otp6 = document.getElementById("otp6");
 const el_code = document.getElementById("id_otp_code");
 const el_submit_knop = document.getElementById("submit_knop");
+const kleur_focus = "#f94137";       // sv-rood
+const kleur_blur = "darkgrey";
 
+/*
+    De OTP code wordt opgeslagen in el_code.value
+    Elk ingevoerde cijfer wordt toegevoegd aan el_code.value
+    Met backspace wordt het laatste cijfer verwijderd.
+
+    show_otp() neemt el_code.value en laat in elk vakje 1 cijfer zien
+    en zet daarna de focus op het eerste lege vakje (of het laatste vakje)
+ */
 
 window.addEventListener(
     "keydown",
@@ -96,5 +106,32 @@ function show_otp() {
     const el = boxes[empty];
     el.focus();
 }
+
+
+/* border highlighting */
+function vakje_focus(e) {
+    const el = e.currentTarget.parentElement;
+    el.style.borderColor = kleur_focus;
+}
+
+function vakje_blur(e) {
+    const el = e.currentTarget.parentElement;
+    el.style.borderColor = kleur_blur;
+}
+
+
+[el_otp1, el_otp2, el_otp3, el_otp4, el_otp5, el_otp6].forEach(el_otp => {
+    el_otp.addEventListener("focus", vakje_focus);
+    el_otp.addEventListener("blur", vakje_blur);
+});
+
+
+window.addEventListener("load", function() {
+    // html, css en fonts zijn opgehaald en ingeladen
+
+    // zet input focus op het eerste element
+    // dit triggert het focus event (autofocus op het element doet dit niet)
+    el_otp1.focus();
+});
 
 /* end of file */

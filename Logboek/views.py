@@ -14,7 +14,6 @@ from Functie.rol import rol_get_huidige
 from Logboek.models import LogboekRegel
 from urllib.parse import quote_plus
 
-
 TEMPLATE_LOGBOEK_OTP = 'logboek/otp.dtl'
 TEMPLATE_LOGBOEK_REST = 'logboek/rest.dtl'
 TEMPLATE_LOGBOEK_ROLLEN = 'logboek/rollen.dtl'
@@ -181,10 +180,11 @@ class LogboekRestView(LogboekBasisView):
         return (LogboekRegel
                 .objects
                 .select_related('actie_door_account')
-                .exclude(Q(gebruikte_functie='Records') |
+                .exclude(Q(gebruikte_functie='Records') |            # Records
                          Q(gebruikte_functie='maak_beheerder') |     # Accounts
                          Q(gebruikte_functie='Wachtwoord') |         # Accounts
                          Q(gebruikte_functie='Inloggen') |           # Accounts
+                         Q(gebruikte_functie='Inloggen (code)') |    # Accounts
                          Q(gebruikte_functie='Inlog geblokkeerd') |  # Accounts
                          Q(gebruikte_functie='OTP controle') |       # OTP
                          Q(gebruikte_functie='OTP loskoppelen') |    # OTP
@@ -195,8 +195,8 @@ class LogboekRestView(LogboekBasisView):
                          Q(gebruikte_functie='CRM-import') |        # ImportCRM
                          Q(gebruikte_functie='Competitie') |        # Competitie
                          Q(gebruikte_functie='Accommodaties') |     # Locatie
-                         Q(gebruikte_functie='Clusters') |
-                         Q(gebruikte_functie='Uitrol') |
+                         Q(gebruikte_functie='Clusters') |          # Clusters
+                         Q(gebruikte_functie='Uitrol') |            # Uitrol
                          Q(gebruikte_functie='Opleidingen') |       # Opleidingen
                          Q(gebruikte_functie='Instaptoets'))        # Opleidingen
                 .order_by('-toegevoegd_op'))
@@ -237,6 +237,7 @@ class LogboekAccountsView(LogboekBasisView):
                 .select_related('actie_door_account')
                 .filter(Q(gebruikte_functie='maak_beheerder') |
                         Q(gebruikte_functie='Inloggen') |
+                        Q(gebruikte_functie='Inloggen (code)') |
                         Q(gebruikte_functie='Inlog geblokkeerd') |
                         Q(gebruikte_functie='Bevestig e-mail') |
                         Q(gebruikte_functie='Registreer met bondsnummer') |

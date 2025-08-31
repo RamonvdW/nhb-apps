@@ -192,6 +192,13 @@ class BrowserTestCase(TestCase):
         # for
         return inputs
 
+    def find_elements_with_class(self, with_class: str):
+        inputs = list()
+        for inp in self._driver.find_elements(By.CLASS_NAME, with_class):
+            inputs.append(inp)
+        # for
+        return inputs
+
     def find_title(self):
         return self._driver.title
         # el = self._driver.find_element(By.XPATH, '//title')
@@ -441,7 +448,7 @@ class BrowserTestCase(TestCase):
         # wissel naar rol HWL
         self.do_pass_otp()
         if self._driver.title != 'Kies je rol':
-            print('titel was %s. Ga naar wissel naar rol' % self._driver.title)
+            print('{do_wissel_naar_hwl} titel was %s. Ga naar wissel naar rol' % self._driver.title)
             self.do_navigate_to(self.url_wissel_van_rol, check_console_log=False)
         page = radio = ""
         try:
@@ -458,6 +465,7 @@ class BrowserTestCase(TestCase):
         # wissel naar rol Manager MH
         self.do_pass_otp()
         if self._driver.title != 'Kies je rol':
+            print('{do_wissel_naar_bb} titel was %s. Ga naar wissel naar rol' % self._driver.title)
             self.do_navigate_to(self.url_wissel_van_rol)
         radio = self.find_element_by_id('id_eigen_90002')       # radio button voor Manager MH
         self.get_following_sibling(radio).click()
@@ -468,6 +476,7 @@ class BrowserTestCase(TestCase):
         # wissel naar rol Sporter
         self.do_pass_otp()
         if self._driver.title != 'Kies je rol':
+            print('{do_wissel_naar_sporter} titel was %s. Ga naar wissel naar rol' % self._driver.title)
             self.do_navigate_to(self.url_wissel_van_rol)
         radio = self.find_element_by_id('id_eigen_90000')       # radio button voor Sporter
         self.get_following_sibling(radio).click()
@@ -591,6 +600,7 @@ def database_vullen(inst):
                                 geslacht="V",
                                 voornaam="Froukje",
                                 achternaam="de Browser",
+                                unaccented_naam="Froukje de Browser",
                                 geboorte_datum=datetime.date(year=1988, month=8, day=8),
                                 sinds_datum=datetime.date(year=2020, month=8, day=8),
                                 bij_vereniging=inst.ver,
@@ -604,6 +614,7 @@ def database_vullen(inst):
                                     geslacht="M",
                                     voornaam="Bro",
                                     achternaam="de Browser",
+                                    unaccented_naam="Bro de Browser",
                                     geboorte_datum=datetime.date(year=2000, month=1, day=5),
                                     sinds_datum=datetime.date(year=2022, month=7, day=1),
                                     bij_vereniging=inst.ver,

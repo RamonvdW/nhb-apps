@@ -62,7 +62,7 @@ APPS_DIR = os.path.dirname(BASE_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2025-08-22'
+SITE_VERSIE = '2025-08-31'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -238,7 +238,7 @@ STATICFILES_DIRS = [
     ("webwinkel_fotos", WEBWINKEL_FOTOS_DIR),       # noqa
 ]
 STATICFILES_FINDERS = [
-    #'Site.core.transpose_js.AppJsFinder',                       # create static files from .js + minify/instrument
+    'Site.core.transpose_js.AppJsFinder',                       # create static files from .js + minify/instrument
     'django.contrib.staticfiles.finders.FileSystemFinder',      # zoekt in STATICFILES_DIRS
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',  # zoekt in App/static/
 ]
@@ -612,6 +612,10 @@ WEDSTRIJDEN_KIES_UITVOERENDE_VERENIGING = (1368,)
 INSTAPTOETS_AANTAL_VRAGEN = 20
 INSTAPTOETS_AANTAL_GOED_EIS = 70        # procent
 INSTAPTOETS_AANTAL_MINUTEN = 30
+
+# google drive
+GOOGLE_DRIVE_FOLDER_NAME_TOP = 'MH wedstrijdformulieren'        # moet uniek zijn in de drive
+GOOGLE_DRIVE_FOLDER_NAME_TEMPLATES = 'MH templates RK/BK'       # moet uniek zijn in de drive
 
 
 # -------------------------------------------

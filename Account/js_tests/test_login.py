@@ -40,7 +40,7 @@ class TestBrowserAccountLogin(bh.BrowserTestCase):
         # controleer dat we ingelogd zijn
         # self.do_navigate_to(self.url_plein)
         menu = self.find_element_type_with_text('a', 'Uitloggen')
-        self.assertIsNotNone(menu)
+        self.assertIsNotNone(menu)      # TODO: faalt hier soms, maar dat komt niet door de test. Echte login heeft er ook last van.
 
         # zorg dat de volgende test niet in de war raakt (alternatief is weer uitloggen)
         self.session_state = "logged in"

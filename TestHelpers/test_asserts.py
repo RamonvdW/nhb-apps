@@ -777,6 +777,14 @@ class MyTestAsserts(TestCase):
                             url, repr(msg), rol_nu, functie_nu))
         # for
 
+    def html_assert_collapsible_icons(self, html, dtl):
+        # template containing class "collapsible-header" should also include Overige/js/collapsible_icons.js
+        if "collapsible-header" in html:
+            # note: template tags have been expanded and hash is inserted in the filename: name.hash.js
+            if '<script src="/static/overig_js/collapsible_icons' not in html:
+                # print(html)
+                self.fail(msg='Bug in template %s: Missing JS include for collapsible icons' % repr(dtl))
+
     def assert_html_ok(self, resp: HttpResponse):
         """ Doe een aantal basic checks op een html response """
 
@@ -817,6 +825,7 @@ class MyTestAsserts(TestCase):
         self.html_assert_no_kort_break(html, dtl)
         self.html_assert_img_not_draggable(html, dtl)
         self.html_assert_urls_usable(resp, html, dtl)
+        self.html_assert_collapsible_icons(html, dtl)
 
         if settings.TEST_VALIDATE_HTML:             # pragma: no cover
             issues = validate_html(html)

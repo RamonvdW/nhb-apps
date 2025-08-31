@@ -64,7 +64,8 @@
                 <form action="{{ zoek_url }}" method="get" onsubmit="document.getElementById('submit_knop1').disabled=true; return true;">
                     <!-- form field -->
                     <div class="input-field">
-                        {{ zoekform.zoekterm.label_tag }}{{ zoekform.zoekterm }}
+                        {{ zoekform.zoekterm.label_tag }}
+                        {{ zoekform.zoekterm }}
                     </div>
 
                     <!-- button -->
