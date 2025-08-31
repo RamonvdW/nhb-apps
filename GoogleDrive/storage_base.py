@@ -163,7 +163,7 @@ class Storage:
         file_id = folder_id + template_file_id + 'copy'
         return file_id
 
-    def maak_sheet_van_template(self, afstand: int, is_teams: bool, is_bk: bool, klasse_pk: int, fname: str) -> str:
+    def maak_sheet_van_template(self, afstand: int, is_teams: bool, is_bk: bool, klasse_pk: int, rayon_nr: int, fname: str) -> str:
         """ maak een Google Sheet aan """
 
         self._secure_folders()      # alle folders vinden of maken

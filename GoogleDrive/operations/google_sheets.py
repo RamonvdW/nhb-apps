@@ -10,6 +10,7 @@ from django.utils import timezone
 from googleapiclient.errors import HttpError as GoogleApiError
 from google.oauth2.service_account import Credentials
 from googleapiclient.discovery import build
+from googleapiclient.http import HttpRequest
 import googleapiclient.errors
 import socket
 
@@ -61,8 +62,25 @@ class GoogleSheet:
         }
         self._changes.append(change)
 
-    def execute(self):
+    def _execute(self, request: HttpRequest) -> dict | None:
+        try:
+            response = request.execute()
+        except socket.timeout as exc:
+            self.stdout.write('[ERROR] {execute} Socket timeout: %s' % exc)
+        except socket.gaierror as exc:
+            # example: [Errno -3] Temporary failure in name resolution
+            self.stdout.write('[ERROR] {execute} Socket error: %s' % exc)
+        except googleapiclient.errors.HttpError as exc:
+            self.stdout.write('[ERROR] {execute} HttpError from API: %s' % exc)
+        else:
+            self.stdout.write('[DEBUG] {execute} response=%s' % repr(response))
+            return response
+
+        return None
+
+    def stuur_wijzigingen(self):
         # voor de opgeslagen wijzigingen in een keer door
+        # geeft True terug als het goed ging
 
         body = {
             "valueInputOption": "RAW",      # just store, do not interpret as number, date, etc.
@@ -73,21 +91,33 @@ class GoogleSheet:
         request = self._values_api.batchUpdate(
                                         spreadsheetId=self._file_id,
                                         body=body)
-        try:
-            response = request.execute()
-        except socket.timeout as exc:
-            print('[ERROR] {execute} Socket timeout: %s' % exc)
-        except socket.gaierror as exc:
-            # example: [Errno -3] Temporary failure in name resolution
-            print('[ERROR] {execute} Socket error: %s' % exc)
-        except googleapiclient.errors.HttpError as exc:
-            print('[ERROR] {execute} HttpError from API: %s' % exc)
-        else:
-            print('[DEBUG] {execute} response=%s' % repr(response))
+
+        response = self._execute(request)
+
+        # response is a dict met spreadsheetId, totalUpdated[Rows, Columns, Cells, Sheets] en responses
+        # response['responses'] is a lijst met dict, elk met spreadsheetId, updated[Cells, Columns, Rows, Ranges]
 
     def delete_sheet(self):
         # hiermee kan een blad verwijderd worden, bijvoorbeeld een finales blad
         pass
+
+    def get_range(self, range_a1: str):
+        # haal de values op in een specifieke range (format: A1:B20) in het huidige sheet
+        # geeft een list(rows) terug, met elke row = list(cells)
+
+        request = self._values_api.get(
+                        spreadsheetId=self._file_id,
+                        range=self._sheet_name + '!' + range_a1,
+                        majorDimension="ROWS",
+                        valueRenderOption="UNFORMATTED_VALUE")      # niet aanpassen aan locale
+
+        response = self._execute(request)
+
+        # als er geen getallen zijn gevonden in de range, dan is 'values' ook niet aanwezig
+        values = response.get('values', [[]])
+        # self.stdout.write('[DEBUG] {get_range} values: %s' % repr(values))
+
+        return values
 
 
 # end of file

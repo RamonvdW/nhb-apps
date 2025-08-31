@@ -13,13 +13,12 @@ from Competitie.definities import (DEELNAME_JA, DEELNAME_NEE,
                                    MUTATIE_EXTRA_RK_DEELNEMER, MUTATIE_KAMP_VERPLAATS_KLASSE_INDIV,
                                    MUTATIE_KAMP_TEAMS_NUMMEREN,
                                    MUTATIE_MAAK_WEDSTRIJDFORMULIEREN, MUTATIE_UPDATE_DIRTY_WEDSTRIJDFORMULIEREN)
-from Competitie.models import (Kampioenschap, KampioenschapSporterBoog, KampioenschapTeam,
+from Competitie.models import (Kampioenschap, KampioenschapSporterBoog, KampioenschapTeam, CompetitieMatch,
                                KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet,
                                Competitie, CompetitieMutatie, CompetitieIndivKlasse, CompetitieTeamKlasse)
 from CompKamp.operations.wedstrijdformulieren import (iter_wedstrijdformulieren,
-                                                      update_wedstrijdformulier_teams,
-                                                      update_wedstrijdformulier_indiv_indoor,
-                                                      update_wedstrijdformulier_indiv_25m1pijl)
+                                                      UpdateWedstrijdFormulierIndiv,
+                                                      update_wedstrijdformulier_teams)
 from CompKamp.operations.kamp_programmas import KampStorage, StorageError, iter_dirty_wedstrijdformulieren, zet_dirty
 from GoogleDrive.operations.google_sheets import GoogleSheet
 
@@ -720,25 +719,47 @@ class VerwerkCompKampMutaties:
         begin_jaar = mutatie.competitie.begin_jaar
         self.stdout.write('[INFO] Update dirty wedstrijdformulieren')
         sheet = None
+
+        # note: Indoor en 25m1pijl hebben aparte klassen
+        indiv_klasse_pk2match = dict()
+        team_klasse_pk2match = dict()
+
+        for match in (CompetitieMatch
+                      .objects
+                      .filter(competitie__begin_jaar=begin_jaar)
+                      .prefetch_related('indiv_klassen',
+                                        'team_klassen')
+                      .select_related('vereniging',
+                                      'locatie')):
+
+            for klasse in match.indiv_klassen.all():
+                indiv_klasse_pk2match[klasse.pk] = match
+            # for
+            for klasse in match.team_klassen.all():
+                team_klasse_pk2match[klasse.pk] = match
+            # for
+        # for
+
         for bestand in iter_dirty_wedstrijdformulieren(begin_jaar):
             self.stdout.write('[INFO] Update bestand pk=%s' % bestand.pk)
 
             if not sheet:
                 sheet = GoogleSheet(self.stdout)
-
             sheet.selecteer_file(bestand.file_id)
 
             if bestand.is_teams:
                 # teams
-                res = update_wedstrijdformulier_teams(self.stdout, sheet)
+                match = team_klasse_pk2match[bestand.klasse_pk]
+                res = update_wedstrijdformulier_teams(self.stdout, bestand, sheet, match)
             else:
                 # individueel
-                if bestand.afstand == 18:
-                    res = update_wedstrijdformulier_indiv_indoor(self.stdout, sheet)
-                else:
-                    res = update_wedstrijdformulier_indiv_25m1pijl(self.stdout, sheet)
+                match = indiv_klasse_pk2match[bestand.klasse_pk]
+                updater = UpdateWedstrijdFormulierIndiv(self.stdout, sheet)
+                res = updater.update_wedstrijdformulier(bestand, match)
 
-            msg = '[%s] Bijgewerkt met resultaat %s\n' % res
+            now = timezone.now()
+            stamp_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
+            msg = '[%s] Bijgewerkt met resultaat %s\n' % (stamp_str, res)
             # bestand.is_dirty = False
             bestand.log += msg
             bestand.save(update_fields=['is_dirty', 'log'])

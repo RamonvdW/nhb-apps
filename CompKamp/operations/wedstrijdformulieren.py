@@ -6,10 +6,15 @@
 
 """ helper functies """
 
-from Competitie.models import Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse
+from django.utils import timezone
+from Competitie.definities import DEEL_BK, DEEL_RK, DEELNAME_NEE, DEELNAME2STR
+from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse, CompetitieMatch,
+                               Kampioenschap, KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet,
+                               KampioenschapSporterBoog)
 from Geo.models import Rayon
 from GoogleDrive.operations.google_sheets import GoogleSheet
 from GoogleDrive.models import Bestand
+from Sporter.models import SporterVoorkeuren
 
 
 def iter_wedstrijdformulieren(comp: Competitie):
@@ -56,53 +61,220 @@ def iter_wedstrijdformulieren(comp: Competitie):
     # for
 
 
-def update_wedstrijdformulier_teams(stdout, bestand: Bestand, sheet: GoogleSheet):
+def update_wedstrijdformulier_teams(stdout, bestand: Bestand, sheet: GoogleSheet, match: CompetitieMatch):
     stdout.write('[INFO] Update teams wedstrijdformulier voor bestand pk=%s' % bestand.pk)
 
     # zoek de wedstrijdklasse erbij
     klasse = CompetitieTeamKlasse.objects.get(pk=bestand.klasse_pk)
 
-    return "OK"
+    return "NOK"
 
 
-def update_wedstrijdformulier_indiv_indoor(stdout, bestand: Bestand, sheet: GoogleSheet):
-    stdout.write('[INFO] Update Indoor indiv wedstrijdformulier voor bestand pk=%s' % bestand.pk)
+class UpdateWedstrijdFormulierIndiv:
 
-    # zoek de wedstrijdklasse erbij
-    klasse = CompetitieIndivKlasse.objects.get(pk=bestand.klasse_pk)
+    def __init__(self, stdout, sheet: GoogleSheet):
+        self.stdout = stdout
+        self.sheet = sheet      # kan google sheets bijwerken
 
-    return "OK"
+        self.aantal_regels_deelnemers = 24        # altijd dit aantal overschrijven, voor als de cut omlaag gezet wordt
+        self.aantal_regels_reserves = 0
 
+        self.klasse = None
+        self.kampioenschap = None
+        self.limiet = 0                 # maximaal aantal deelnemers
+        self.aantal_ingeschreven = 0
 
-def update_wedstrijdformulier_indiv_25m1pijl(stdout, bestand: Bestand, sheet: GoogleSheet):
-    stdout.write('[INFO] Update 25m1pijl indiv wedstrijdformulier voor bestand pk=%s' % bestand.pk)
+        self.ranges = {
+            'titel': 'C2',
+            'info': 'F4:F7',
+            'bijgewerkt': 'A37',
+            'scores': 'J11:K35',
+            'deelnemers': 'D11:I%d' % (11 + self.aantal_regels_deelnemers - 1),
+            'deelnemers_notities': 'T11:U%d' % (11 + self.aantal_regels_deelnemers - 1),
+            'reserves': 'D41:I99',                # wordt bijgewerkt in laad_wedstrijd
+            'reserves_notities': 'T41:U99',       # wordt bijgewerkt in laad_wedstrijd
+        }
 
-    range_titel = 'C2'
-    range_deelnemers = 'D7:I31'
+    def _laad_wedstrijd(self, bestand: Bestand):
+        # zoek de wedstrijdklasse erbij
+        self.klasse = CompetitieIndivKlasse.objects.get(pk=bestand.klasse_pk)
 
-    # zoek de wedstrijdklasse erbij
-    klasse = CompetitieIndivKlasse.objects.get(pk=bestand.klasse_pk)
+        competitie = self.klasse.competitie
+        if bestand.is_bk:
+            self.kampioenschap = Kampioenschap.objects.filter(competitie=competitie, deel=DEEL_BK).first()
+        else:
+            self.kampioenschap = Kampioenschap.objects.filter(competitie=competitie, deel=DEEL_RK,
+                                                              rayon__rayon_nr=bestand.rayon_nr).first()
 
-    if bestand.is_bk:
-        titel = 'Bondskampioenschappen 25m 1pijl'
-    else:
-        titel = 'Rayonkampioenschappen 25m 1pijl'
+        self.aantal_ingeschreven = KampioenschapSporterBoog.objects.filter(kampioenschap=self.kampioenschap,
+                                                                           indiv_klasse=self.klasse).count()
 
-    titel += ' %s/%s' % (bestand.begin_jaar, bestand.begin_jaar+1)
+        # haal de limiet op (maximum aantal deelnemers)
+        self.limiet = 24
+        lim = KampioenschapIndivKlasseLimiet.objects.filter(kampioenschap=self.kampioenschap,
+                                                            indiv_klasse=self.klasse).first()
+        if lim:
+            self.limiet = lim.limiet
 
-    if not bestand.is_bk:
-        # benoem het rayon
-        titel += ', Rayon %s' % bestand.rayon_nr
+        # pas de range aan zodat we niet onnodig veel data hoeven te sturen
+        self.aantal_regels_reserves = self.aantal_ingeschreven - self.aantal_regels_deelnemers + 2
+        self.ranges['reserves'] = 'D41:I%d' % (41 + self.aantal_regels_reserves - 1)
+        self.ranges['reserves_notities'] = 'T41:U%d' % (41 + self.aantal_regels_reserves - 1)
 
-    titel = klasse.beschrijving
+        if bestand.is_bk:
+            self.titel = 'BK'
+        else:
+            self.titel = 'RK'
+        self.titel += ' individueel, 25m 1pijl %s/%s, ' % (bestand.begin_jaar, bestand.begin_jaar + 1)
 
-    sheet.selecteer_sheet('Wedstrijd')
+        if not bestand.is_bk:
+            # benoem het rayon
+            self.titel += 'rayon %s, ' % bestand.rayon_nr
 
-    sheet.wijzig_cellen(range_titel, [[titel]])
+        self.titel += self.klasse.beschrijving
 
-    sheet.execute()
+    def _schrijf_kopje(self, match: CompetitieMatch):
+        # zet de titel
+        self.sheet.wijzig_cellen(self.ranges['titel'], [[self.titel]])
 
-    return "OK"
+        # schrijf de info in de heading
+        regels = list()
+
+        # wedstrijdklasse
+        regels.append([self.klasse.beschrijving])
+
+        # datum
+        regels.append([match.datum_wanneer.strftime('%Y-%m-%d')])
+
+        # organisatie
+        ver = match.vereniging
+        if ver:
+            regels.append([ver.ver_nr_en_naam()])
+        else:
+            regels.append(['Nog niet toegekend'])
+
+        # adres
+        loc = match.locatie
+        if loc:
+            regels.append([loc.adres])
+        else:
+            regels.append(['Onbekend'])
+
+        self.sheet.wijzig_cellen(self.ranges['info'], regels)
+
+    def _schrijf_deelnemers(self):
+        deelnemers = list()
+        afgemeld = list()
+
+        for deelnemer in (KampioenschapSporterBoog
+                .objects
+                .filter(kampioenschap=self.kampioenschap,
+                        indiv_klasse=self.klasse)
+                .select_related('sporterboog__sporter',
+                                'bij_vereniging',
+                                'bij_vereniging__regio')
+                .order_by('rank',  # laagste eerst
+                          'volgorde')):  # sorteert afgemeld
+            sporter = deelnemer.sporterboog.sporter
+
+            para_notities = ''
+            try:
+                voorkeuren = SporterVoorkeuren.objects.filter(sporter=sporter).first()
+            except SporterVoorkeuren.DoesNotExist:
+                pass
+            else:
+                if voorkeuren.para_voorwerpen:
+                    para_notities = 'Sporter laat voorwerpen op de schietlijn staan'
+
+                if voorkeuren.opmerking_para_sporter:
+                    if para_notities != '':
+                        para_notities += '\n'
+                    para_notities += voorkeuren.opmerking_para_sporter
+
+            regel = [str(sporter.lid_nr),
+                     sporter.volledige_naam(),
+                     deelnemer.bij_vereniging.ver_nr_en_naam(),
+                     deelnemer.bij_vereniging.regio.regio_nr,
+                     deelnemer.kampioen_label,
+                     str(deelnemer.gemiddelde).replace('.', ','),  # NL format
+                     DEELNAME2STR[deelnemer.deelname],
+                     para_notities]
+
+            if deelnemer.deelname == DEELNAME_NEE:
+                afgemeld.append(regel)
+            else:
+                deelnemers.append(regel)
+        # for
+
+        # pas de cut toe
+        reserves = deelnemers[self.limiet:] + afgemeld
+        deelnemers = deelnemers[:self.limiet]
+
+        # maak beide lijsten op lengte
+        regel = ['', '', '', '', '', '', '', '']  # bondsnr, naam, ver, regio, leeg, gemiddelde, deelname, notities
+        while len(deelnemers) < self.aantal_regels_deelnemers:
+            deelnemers.append(regel)
+        # while
+        while len(reserves) < self.aantal_regels_reserves:
+            reserves.append(regel)
+        # while
+
+        # split de data over 2 ranges: 6 kolommen en 2 kolommen
+        deelnemers_1 = [deelnemer[:6] for deelnemer in deelnemers]
+        deelnemers_2 = [deelnemer[-2:] for deelnemer in deelnemers]
+        self.sheet.wijzig_cellen(self.ranges['deelnemers'], deelnemers_1)
+        self.sheet.wijzig_cellen(self.ranges['deelnemers_notities'], deelnemers_2)
+
+        reserves_1 = [deelnemer[:6] for deelnemer in reserves]
+        reserves_2 = [deelnemer[-2:] for deelnemer in reserves]
+        self.sheet.wijzig_cellen(self.ranges['reserves'], reserves_1)
+        self.sheet.wijzig_cellen(self.ranges['reserves_notities'], reserves_2)
+
+    def _schrijf_bijgewerkt(self):
+        # geef aan wanneer de lijst bijgewerkt is
+        vastgesteld = timezone.localtime(timezone.now())
+        msg = 'Deze gegevens zijn bijgewerkt door MijnHandboogsport op %s' % vastgesteld.strftime('%Y-%m-%d %H:%M:%S')
+        self.sheet.wijzig_cellen(self.ranges['bijgewerkt'], [[msg]])
+
+    def _schrijf_update(self, bestand: Bestand, match: CompetitieMatch):
+        self._schrijf_kopje(match)
+        self._schrijf_deelnemers()
+        self._schrijf_bijgewerkt()
+
+        # voer alle wijzigingen door met 1 transactie
+        self.sheet.stuur_wijzigingen()
+
+    def _heeft_scores(self):
+        values = self.sheet.get_range(self.ranges['scores'])
+        for row in values:
+            for cell in row:
+                if cell:
+                    # cell is niet leeg
+                    self.stdout.write('[DEBUG] score gevonden: %s' % repr(cell))
+                    return True
+            # for
+        # for
+        return False
+
+    def update_wedstrijdformulier(self, bestand: Bestand, match: CompetitieMatch):
+        # zoek de wedstrijdklasse, kampioenschap, limiet, etc. erbij
+        self._laad_wedstrijd(bestand)
+
+        # enige verschil tussen de templates
+        if bestand.afstand == 18:
+            # Indoor
+            self.sheet.selecteer_sheet('Voorronde')
+        else:
+            # 25m1pijl
+            self.sheet.selecteer_sheet('Wedstrijd')
+
+        if self._heeft_scores():
+            self.stdout.write('[DEBUG] heeft scores')
+            return "Heeft scores"
+
+        # update het bestand
+        self._schrijf_update(bestand, match)
+        return "OK"
 
 
 # end of file

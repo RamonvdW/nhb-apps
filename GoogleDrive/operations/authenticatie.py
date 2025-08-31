@@ -11,7 +11,7 @@ from google_auth_oauthlib.flow import Flow
 from oauthlib.oauth2 import AccessDeniedError, OAuth2Error
 from GoogleDrive.models import Transactie, Token, maak_unieke_code
 
-
+# TODO: put in proper place
 CLIENT_ID_AND_SECRET = '/tmp/mh_wedstrijdformulieren_oauth_client_id_and_secret.json'
 
 SCOPES = ['https://www.googleapis.com/auth/drive']  # edit, create and delete all of your google drive files

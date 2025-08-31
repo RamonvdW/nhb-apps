@@ -194,6 +194,7 @@ class WijzigStatusBkTeamView(UserPassesTestMixin, View):
 
         opnieuw_nummeren = False
 
+        # TODO: onderstaande naar de achtergrondtaak verplaatsen
         if status in ("beschikbaar", "toch_ja"):
             # toch_ja is voor eerder afgemelde deelnemers
             # beschikbaar is voor reserve teams

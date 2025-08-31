@@ -183,7 +183,9 @@ class GoogleDriveStorage(Storage):
         file_id = result['id']
         return file_id
 
-    def _save_bestand(self, afstand: int, is_teams: bool, is_bk: bool, klasse_pk: int, fname: str, file_id: str):
+    def _save_bestand(self, afstand: int, is_teams: bool, is_bk: bool, klasse_pk: int, rayon_nr: int,
+                      fname: str, file_id: str):
+
         now = timezone.now()
         stamp_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
 
@@ -194,14 +196,13 @@ class GoogleDriveStorage(Storage):
                 is_teams=is_teams,
                 is_bk=is_bk,
                 klasse_pk=klasse_pk,
+                rayon_nr=rayon_nr,
                 fname=fname,
                 file_id=file_id,
                 log=msg)
 
-    def maak_sheet_van_template(self, afstand: int, is_teams: bool, is_bk: bool, klasse_pk: int, fname: str) -> str:
+    def maak_sheet_van_template(self, afstand: int, is_teams: bool, is_bk: bool, klasse_pk: int, rayon_nr, fname: str) -> str:
         """ maak een Google Sheet aan """
-
-        # TODO: kijk in Bestand ?
 
         error_msg = None
         file_id = None
@@ -217,7 +218,7 @@ class GoogleDriveStorage(Storage):
             if not file_id:
                 # bestaat nog niet
                 file_id = self._maak_bestand_uit_template(folder_name, fname)
-            self._save_bestand(afstand, is_teams, is_bk, klasse_pk, fname, file_id)
+            self._save_bestand(afstand, is_teams, is_bk, klasse_pk, rayon_nr, fname, file_id)
 
         except KeyError as exc:
             error_msg = 'KeyError: %s' % exc
