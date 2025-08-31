@@ -206,4 +206,7 @@ OVERIG_API_TOKENS = ()
 # google doc id van het gsheet document
 INSTAPTOETS_GSHEET_FILE_ID = 'another.google.sheets.id'     # noqa
 
+# met wie de wedstrijdformulieren folder delen?
+GOOGLE_DRIVE_SHARE_WITH = []
+
 # end of file

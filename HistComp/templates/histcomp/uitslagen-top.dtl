@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2019-2023 Ramon van der Winkel.
+                Copyright (c) 2019-2025 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -35,14 +35,18 @@
                         {% for obj in filter_seizoenen %}
                             <li>
                                 <label class="black-text" for="id_{{ obj.sel }}">
-                                    <input class="with-gap" type="radio" name="filter_1" value="{{ obj.sel }}" required id="id_{{ obj.sel }}" {% if obj.selected %}checked{% endif %} data-url="{{ obj.url_part }}">
+                                    <input class="with-gap" type="radio"
+                                           name="filter_1" value="{{ obj.sel }}" required
+                                           id="id_{{ obj.sel }}"
+                                           {% if obj.selected %}checked{% endif %}
+                                           data-url="{{ obj.url_part }}">
                                     <span>{{ obj.beschrijving }}</span>
                                 </label>
                             </li>
                         {% endfor %}
                     </ul>
                     <p style="margin-left:35px">
-                        <button class="btn-sv-rood" onclick="filters_activate()">Activeer</button>
+                        <button class="btn-sv-rood btn-sv-activeer-filter">Activeer</button>
                     </p>
                 </div>
             </div>
@@ -55,14 +59,18 @@
                         {% for obj in filter_histcomp_type %}
                             <li>
                                 <label class="black-text" for="id_{{ obj.sel }}">
-                                    <input class="with-gap" type="radio" name="filter_2" value="{{ obj.sel }}" required id="id_{{ obj.sel }}" {% if obj.selected %}checked{% endif %} data-url="{{ obj.url_part }}">
+                                    <input class="with-gap" type="radio"
+                                           name="filter_2" value="{{ obj.sel }}" required
+                                           id="id_{{ obj.sel }}"
+                                           {% if obj.selected %}checked{% endif %}
+                                           data-url="{{ obj.url_part }}">
                                     <span>{{ obj.beschrijving }}</span>
                                 </label>
                             </li>
                         {% endfor %}
                     </ul>
                     <p style="margin-left:35px">
-                        <button class="btn-sv-rood" onclick="filters_activate()">Activeer</button>
+                        <button class="btn-sv-rood btn-sv-activeer-filter">Activeer</button>
                     </p>
                 </div>
             </div>
@@ -130,6 +138,7 @@
 
     {% endif %}
 
+    <script src="{% static 'overig_js/pagina_filters.js' %}"></script>
 
     {% include 'feedback/sidebar.dtl' with op_pagina="histcomp-top" %}
 

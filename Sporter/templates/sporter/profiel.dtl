@@ -7,58 +7,9 @@
 {% load static %}
 {% load overig_filters %}   <!-- wbr_email en wbr_www filters -->
 
-{% block title %}Profiel{% endblock %}
+{% block title %}Mijn pagina{% endblock %}
 
 {% block pagina %}
-
-    <script>
-        function do_uitschrijven(id)
-        {
-            // voer een POST uit om toe te voegen
-            let form = document.createElement('form');
-            form.setAttribute('method', 'post');
-            form.setAttribute('action', id.getAttribute("data-url"));
-
-            const inp = document.createElement('input');
-            inp.type = "hidden";
-            inp.name = "csrfmiddlewaretoken";
-            inp.value = getCookie('mh_csrf_token');
-            form.appendChild(inp);
-
-            form.style.display = 'hidden';
-            document.body.appendChild(form);
-            form.submit();
-        }
-
-        function keuze_doorgeven(id) {
-            // voer een POST uit om toe te voegen
-            let form = document.createElement('form');
-            form.setAttribute('method', 'post');
-            form.setAttribute('action', id.getAttribute("data-url"));
-
-            const inp1 = document.createElement('input');
-            inp1.type = "hidden";
-            inp1.name = "csrfmiddlewaretoken";
-            inp1.value = getCookie('mh_csrf_token');
-            form.appendChild(inp1);
-
-            const inp2 = document.createElement('input');
-            inp2.type = "hidden";
-            inp2.name = "deelnemer";
-            inp2.setAttribute('value', id.getAttribute("data-deelnemer"));
-            form.appendChild(inp2);
-
-            const inp3 = document.createElement('input');
-            inp3.type = "hidden";
-            inp3.name = "keuze";
-            inp3.setAttribute('value', id.getAttribute("data-keuze"));
-            form.appendChild(inp3);
-
-            form.style.display = 'hidden';
-            document.body.appendChild(form);
-            form.submit();
-        }
-    </script>
 
     <!-- banner -->
     <div class="row center">
@@ -1394,6 +1345,12 @@
             {% include 'plein/card_icon.dtl' with title="Privacyverklaring" text="Lees hier hoe we omgaan met jouw privacy." icon="security" url=card_url %}
         </div>
     </div>
+
+    <div id="js_data"
+         data-csrf-token="{{ csrf_token }}">
+    </div>
+
+    <script src="{% static 'sporter_js/profiel.js' %}"></script>
 
     {% include 'feedback/sidebar.dtl' with op_pagina="sporter-profiel" %}
 

@@ -197,6 +197,8 @@
         {% endfor %}
     {% endif %}
 
+    <script src="{% static 'overig_js/tabel_filter.js' %}"></script>
+
     {% include 'feedback/sidebar.dtl' with op_pagina="complaagbond-bk-teams" %}
 
 {% endblock %}

@@ -146,6 +146,8 @@
 
     {% endif %}
 
-{% include 'feedback/sidebar.dtl' with op_pagina="registreer-beheer-gast-accounts" %}
+    <script src="{% static 'overig_js/tabel_filter.js' %}"></script>
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="registreer-beheer-gast-accounts" %}
 
 {% endblock %}

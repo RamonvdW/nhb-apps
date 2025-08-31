@@ -8,24 +8,14 @@
 
 <!-- dit bestand wordt ge-include in alle andere logboek pagina's -->
 
-<script>
-    function activeer_deel() {
-        // vind de gekozen radiobutton
-        const el = document.querySelector("input[type='radio'][name='deel']:checked")
-
-        // haal de url op van het input element
-        const url = el.dataset.url
-
-        window.location.href = url
-    }
-</script>
-
 <!-- banner -->
 <div class="row center">
     <div class="col s12">
         <h3 class="page-banner">Logboek</h3>
     </div>
 </div>
+
+<script src="{% static 'logboek_js/activeer_deel.js' %}"></script>
 
 <!-- blauwe balk -->
 <div class="row-sv-blauw">

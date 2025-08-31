@@ -193,12 +193,8 @@
             </main>
         </div>
 
-        <script src="{% static 'js/materialize-new-16_min.js' %}"></script>
-        <script src="{% static 'js/site_layout-23_min.js' %}"></script>
-
-        <script>
-            document.addEventListener("DOMContentLoaded", sitelayout_loaded);
-        </script>
+        <script src="{% static 'plein_js/materialize-mh.js' %}"></script>
+        <script src="{% static 'plein_js/site_layout.js' %}"></script>
 
     </body>
 </html>

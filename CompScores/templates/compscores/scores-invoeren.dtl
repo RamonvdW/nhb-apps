@@ -761,6 +761,7 @@
         });
 
     </script>
+    <script src="{% static 'overig_js/tabel_filter.js' %}"></script>
 
     {% include 'feedback/sidebar.dtl' with op_pagina="compscores-scores-invoeren" %}
 

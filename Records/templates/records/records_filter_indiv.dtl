@@ -29,14 +29,18 @@
                     {% for filter in para_filters %}
                         <li>
                             <label class="black-text" for="id_{{ filter.sel }}">
-                                <input class="with-gap" type="radio" name="filter_6" value="{{ filter.sel }}" required id="id_{{ filter.sel }}" {% if filter.selected %}checked{% endif %} data-url="{{ filter.url_part }}">
+                                <input class="with-gap" type="radio"
+                                       name="filter_6" value="{{ filter.sel }}" required
+                                       id="id_{{ filter.sel }}"
+                                       {% if filter.selected %}checked{% endif %}
+                                       data-url="{{ filter.url_part }}">
                                 <span>{{ filter.opt_text }}</span>
                             </label>
                         </li>
                     {% endfor %}
                 </ul>
                 <p style="margin-left:35px">
-                    <button class="btn-sv-rood" onclick="filters_activate()">Activeer</button>
+                    <button class="btn-sv-rood btn-sv-activeer-filter">Activeer</button>
                 </p>
             </div>
         </div>
@@ -50,14 +54,18 @@
                         {% for filter in lcat_filters %}
                             <li>
                                 <label class="black-text" for="id_{{ filter.sel }}">
-                                    <input class="with-gap" type="radio" name="filter_3" value="{{ filter.sel }}" required id="id_{{ filter.sel }}" {% if filter.selected %}checked{% endif %} data-url="{{ filter.url_part }}">
+                                    <input class="with-gap" type="radio"
+                                           name="filter_3" value="{{ filter.sel }}" required
+                                           id="id_{{ filter.sel }}"
+                                           {% if filter.selected %}checked{% endif %}
+                                           data-url="{{ filter.url_part }}">
                                     <span>{{ filter.opt_text }}</span>
                                 </label>
                             </li>
                         {% endfor %}
                     </ul>
                     <p style="margin-left:35px">
-                        <button class="btn-sv-rood" onclick="filters_activate()">Activeer</button>
+                    <button class="btn-sv-rood btn-sv-activeer-filter">Activeer</button>
                     </p>
                 {% else %}
                     <p class="grey-text">Niet van toepassing</p>
@@ -74,14 +82,19 @@
                     {% for filter in makl_filters %}
                         <li>
                             <label class="black-text" for="id_{{ filter.sel }}">
-                                <input class="with-gap" type="radio" name="filter_4" value="{{ filter.sel }}" required id="id_{{ filter.sel }}" {% if filter.selected %}checked{% endif %} data-url="{{ filter.url_part }}" onchange="mirror_radio('filter_4', 'makl2')">
+                                <input class="with-gap sv-mirror-filter" type="radio"
+                                       name="filter_4" value="{{ filter.sel }}" required
+                                       id="id_{{ filter.sel }}"
+                                       {% if filter.selected %}checked{% endif %}
+                                       data-url="{{ filter.url_part }}"
+                                       data-mirror-dest="makl2">
                                 <span>{{ filter.opt_text }}</span>
                             </label>
                         </li>
                     {% endfor %}
                 </ul>
                 <p style="margin-left:35px">
-                    <button class="btn-sv-rood" onclick="filters_activate()">Activeer</button>
+                    <button class="btn-sv-rood btn-sv-activeer-filter">Activeer</button>
                 </p>
             </div>
         </div>
@@ -95,14 +108,19 @@
                         {% for filter in soorten %}
                             <li>
                                 <label class="black-text" for="id_soort1_{{ filter.sel }}">
-                                    <input class="with-gap" type="radio" name="filter_7" value="{{ filter.sel }}" required id="id_soort1_{{ filter.sel }}" {% if filter.selected %}checked{% endif %} data-url="{{ filter.url_part }}" onchange="mirror_radio('filter_7', 'soort2')">
+                                    <input class="with-gap sv-mirror-filter" type="radio"
+                                           name="filter_7" value="{{ filter.sel }}" required
+                                           id="id_soort1_{{ filter.sel }}"
+                                           {% if filter.selected %}checked{% endif %}
+                                           data-url="{{ filter.url_part }}"
+                                           data-mirror-dest="soort2">
                                     <span>{{ filter.soort_record }}</span>
                                 </label>
                             </li>
                         {% endfor %}
                     </ul>
                     <p style="margin-left:35px">
-                        <button class="btn-sv-rood" onclick="filters_activate()">Activeer</button>
+                        <button class="btn-sv-rood btn-sv-activeer-filter">Activeer</button>
                     </p>
                 </div>
             </div>
@@ -122,14 +140,18 @@
                     {% for filter in makl_filters %}
                         <li>
                             <label class="black-text" for="id_{{ filter.sel }}_2">
-                                <input class="with-gap" type="radio" name="makl2" value="{{ filter.sel }}" required id="id_{{ filter.sel }}_2" {% if filter.selected %}checked{% endif %} onchange="mirror_radio('makl2', 'filter_4')">
+                                <input class="with-gap sv-mirror-filter" type="radio"
+                                       name="makl2" value="{{ filter.sel }}" required
+                                       id="id_{{ filter.sel }}_2"
+                                       {% if filter.selected %}checked{% endif %}
+                                       data-mirror-dest="filter_4">
                                 <span>{{ filter.opt_text }}</span>
                             </label>
                         </li>
                     {% endfor %}
                 </ul>
                 <p style="margin-left:35px">
-                    <button class="btn-sv-rood" onclick="filters_activate()">Activeer</button>
+                    <button class="btn-sv-rood btn-sv-activeer-filter">Activeer</button>
                 </p>
             </div>
         </div>
@@ -143,14 +165,18 @@
                         {% for filter in soorten %}
                             <li>
                                 <label class="black-text" for="id_soort2_{{ filter.sel }}">
-                                    <input class="with-gap" type="radio" name="soort2" value="{{ filter.sel }}" required id="id_soort2_{{ filter.sel }}" {% if filter.selected %}checked{% endif %} onchange="mirror_radio('soort2', 'filter_7')">
+                                    <input class="with-gap sv-mirror-filter" type="radio"
+                                           name="soort2" value="{{ filter.sel }}" required
+                                           id="id_soort2_{{ filter.sel }}"
+                                           {% if filter.selected %}checked{% endif %}
+                                           data-mirror-dest="filter_7">
                                     <span>{{ filter.opt_text }}</span>
                                 </label>
                             </li>
                         {% endfor %}
                     </ul>
                     <p style="margin-left:35px">
-                        <button class="btn-sv-rood" onclick="filters_activate()">Activeer</button>
+                        <button class="btn-sv-rood btn-sv-activeer-filter">Activeer</button>
                     </p>
                 </div>
             </div>
@@ -167,14 +193,18 @@
                     {% for filter in gesl_filters %}
                         <li>
                             <label class="black-text" for="id_{{ filter.sel }}">
-                                <input class="with-gap" type="radio" name="filter_1" value="{{ filter.sel }}" required id="id_{{ filter.sel }}" {% if filter.selected %}checked{% endif %} data-url="{{ filter.url_part }}">
+                                <input class="with-gap" type="radio"
+                                       name="filter_1" value="{{ filter.sel }}" required
+                                       id="id_{{ filter.sel }}"
+                                       {% if filter.selected %}checked{% endif %}
+                                       data-url="{{ filter.url_part }}">
                                 <span>{{ filter.opt_text }}</span>
                             </label>
                         </li>
                     {% endfor %}
                 </ul>
                 <p style="margin-left:35px">
-                    <button class="btn-sv-rood" onclick="filters_activate()">Activeer</button>
+                    <button class="btn-sv-rood btn-sv-activeer-filter">Activeer</button>
                 </p>
             </div>
         </div>
@@ -187,14 +217,18 @@
                     {% for filter in disc_filters %}
                         <li>
                             <label class="black-text" for="id_{{ filter.sel }}">
-                                <input class="with-gap" type="radio" name="filter_2" value="{{ filter.sel }}" required id="id_{{ filter.sel }}" {% if filter.selected %}checked{% endif %} data-url="{{ filter.url_part }}">
+                                <input class="with-gap" type="radio"
+                                       name="filter_2" value="{{ filter.sel }}" required
+                                       id="id_{{ filter.sel }}"
+                                       {% if filter.selected %}checked{% endif %}
+                                       data-url="{{ filter.url_part }}">
                                 <span>{{ filter.opt_text }}</span>
                             </label>
                         </li>
                     {% endfor %}
                 </ul>
                 <p style="margin-left:35px">
-                    <button class="btn-sv-rood" onclick="filters_activate()">Activeer</button>
+                    <button class="btn-sv-rood btn-sv-activeer-filter">Activeer</button>
                 </p>
             </div>
         </div>
@@ -208,14 +242,18 @@
                         {% for filter in verb_filters %}
                             <li>
                                 <label class="black-text" for="id_{{ filter.sel }}">
-                                    <input class="with-gap" type="radio" name="filter_5" value="{{ filter.sel }}" required id="id_{{ filter.sel }}" {% if filter.selected %}checked{% endif %} data-url="{{ filter.url_part }}">
+                                    <input class="with-gap" type="radio"
+                                           name="filter_5" value="{{ filter.sel }}" required
+                                           id="id_{{ filter.sel }}"
+                                           {% if filter.selected %}checked{% endif %}
+                                           data-url="{{ filter.url_part }}">
                                     <span>{{ filter.opt_text }}</span>
                                 </label>
                             </li>
                         {% endfor %}
                     </ul>
                     <p style="margin-left:35px">
-                        <button class="btn-sv-rood" onclick="filters_activate()">Activeer</button>
+                        <button class="btn-sv-rood btn-sv-activeer-filter">Activeer</button>
                     </p>
                 {% else %}
                     <p class="grey-text">Niet van toepassing</p>
@@ -418,6 +456,8 @@
         </div>
 
     {% endif %}
+
+    <script src="{% static 'overig_js/pagina_filters.js' %}"></script>
 
     {% include 'feedback/sidebar.dtl' with op_pagina="records-filter-indiv" %}
 

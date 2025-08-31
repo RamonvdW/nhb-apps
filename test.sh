@@ -152,6 +152,12 @@ fi
 export COVERAGE_FILE        # where to write coverage data to
 python3 "${PY_OPTS[@]}" -m coverage erase
 
+if [ $TEST_ALL -eq 1 ]
+then
+    # collect browser coverage at start of test-all
+    echo "[INFO] Running JS browser tests"
+    ./browser_tests.sh --auto
+fi
 
 # create empty test data directories
 rm -rf "$TEST_DIR" &> /dev/null
@@ -362,6 +368,13 @@ COVERAGE_RED=0
 
 if [ $ABORTED -eq 0 ] || [ $FORCE_REPORT -eq 1 ]
 then
+    if [ -e "/tmp/browser_js_cov.json" ]
+    then
+        # import the JS coverage data
+        echo "[INFO] Importing coverage from browser tests (/tmp/browser_js_cov.json)"
+        python3 "${PY_OPTS[@]}" -u "${PYCOV[@]}" ./manage.py test --keepdb --settings="$SETTINGS_AUTOTEST" -v 0 "Plein.tests.test_import_js_cov.TestPleinImportJsCov.import_js_cov"
+    fi
+
     echo "[INFO] Generating reports" | tee -a "$LOG"
 
     # delete old coverage report

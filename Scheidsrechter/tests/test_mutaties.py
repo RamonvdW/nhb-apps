@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023-2024 Ramon van der Winkel.
+#  Copyright (c) 2023-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -166,7 +166,7 @@ class TestScheidsrechterBeschikbaarheid(E2EHelpers, TestCase):
     def test_stop_exactly(self):
         now = datetime.datetime.now()
         if now.second > 55:                             # pragma: no cover
-            print('Waiting until clock is past xx:xx:59')
+            print('Waiting until clock is past xx:xx:59 .. ', end='')
             while now.second > 55:
                 time.sleep(5)
                 now = datetime.datetime.now()
@@ -174,7 +174,7 @@ class TestScheidsrechterBeschikbaarheid(E2EHelpers, TestCase):
 
         now = datetime.datetime.now()
         if now.minute == 0:                             # pragma: no cover
-            print('Waiting until clock is past xx:00')
+            print('Waiting until clock is past xx:00 .. ', end='')
             while now.minute == 0:
                 time.sleep(5)
                 now = datetime.datetime.now()
@@ -192,7 +192,7 @@ class TestScheidsrechterBeschikbaarheid(E2EHelpers, TestCase):
 
         now = datetime.datetime.now()
         if now.minute == 59:                             # pragma: no cover
-            print('Waiting until clock is past xx:59')
+            print('Waiting until clock is past xx:59 .. ', end='')
             while now.minute == 59:
                 time.sleep(5)
                 now = datetime.datetime.now()

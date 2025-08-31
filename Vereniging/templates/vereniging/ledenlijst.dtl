@@ -193,6 +193,8 @@
 
     {% endif %}     <!-- inactieve leden -->
 
-{% include 'feedback/sidebar.dtl' with op_pagina="vereniging-ledenlijst" %}
+    <script src="{% static 'overig_js/tabel_filter.js' %}"></script>
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="vereniging-ledenlijst" %}
 
 {% endblock %}
