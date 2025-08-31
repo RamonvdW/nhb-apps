@@ -190,16 +190,16 @@ class GoogleDriveStorage(Storage):
         stamp_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
 
         msg = '[%s] Aangemaakt\n' % stamp_str
-        Bestand.objects.create(
-                begin_jaar=self._begin_jaar,
-                afstand=afstand,
-                is_teams=is_teams,
-                is_bk=is_bk,
-                klasse_pk=klasse_pk,
-                rayon_nr=rayon_nr,
-                fname=fname,
-                file_id=file_id,
-                log=msg)
+        _ = Bestand.objects.get_or_create(
+                                begin_jaar=self._begin_jaar,
+                                afstand=afstand,
+                                is_teams=is_teams,
+                                is_bk=is_bk,
+                                klasse_pk=klasse_pk,
+                                rayon_nr=rayon_nr,
+                                fname=fname,
+                                file_id=file_id,
+                                log=msg)
 
     def maak_sheet_van_template(self, afstand: int, is_teams: bool, is_bk: bool, klasse_pk: int, rayon_nr, fname: str) -> str:
         """ maak een Google Sheet aan """
