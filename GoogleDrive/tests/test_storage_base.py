@@ -8,7 +8,7 @@ from django.test import TestCase
 from django.core.management.base import OutputWrapper
 from Competitie.models import Competitie
 from GoogleDrive.models import Transactie, Token, Bestand
-from GoogleDrive.storage_base import Storage, StorageError
+from GoogleDrive.storage_base import StorageBase, StorageError
 from TestHelpers.e2ehelpers import E2EHelpers
 from unittest.mock import patch
 import io
@@ -21,7 +21,7 @@ class TestGoogleDriveStorageTemplate(E2EHelpers, TestCase):
     def test_all(self):
         out = OutputWrapper(io.StringIO())
         share_with_emails = ['mgr@test.not']
-        storage = Storage(out, 2025, share_with_emails)
+        storage = StorageBase(out, 2025, share_with_emails)
 
         res = storage.check_access()
         self.assertTrue(res)
@@ -45,7 +45,7 @@ class TestGoogleDriveStorageTemplate(E2EHelpers, TestCase):
         self.assertFalse('[ERROR]' in text_out)
 
         out = OutputWrapper(io.StringIO())
-        storage = Storage(out, 2025, share_with_emails)
+        storage = StorageBase(out, 2025, share_with_emails)
         with patch.object(storage, '_list_folder', return_value={}):
             with self.assertRaises(StorageError) as exc:
                 storage.maak_sheet_van_template(18, False, False, 1, 4, 'fname')
@@ -54,7 +54,7 @@ class TestGoogleDriveStorageTemplate(E2EHelpers, TestCase):
     def test_vind_top(self):
         out = OutputWrapper(io.StringIO())
         share_with_emails = ['mgr@test.not']
-        storage = Storage(out, 2025, share_with_emails)
+        storage = StorageBase(out, 2025, share_with_emails)
         with patch.object(storage, '_vind_globale_folder', return_value=None):
             with self.assertRaises(StorageError) as exc:
                 storage.maak_sheet_van_template(18, False, False, 1, 4, 'fname')
@@ -69,7 +69,7 @@ class TestGoogleDriveStorageTemplate(E2EHelpers, TestCase):
     def test_vind_templates(self):
         out = OutputWrapper(io.StringIO())
         share_with_emails = ['mgr@test.not']
-        storage = Storage(out, 2025, share_with_emails)
+        storage = StorageBase(out, 2025, share_with_emails)
         with patch.object(storage, '_vind_globale_folder', side_effect=self._iter_vind_results):
             with self.assertRaises(StorageError) as exc:
                 storage.maak_sheet_van_template(18, False, False, 1, 3, 'fname')

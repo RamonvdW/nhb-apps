@@ -10,7 +10,7 @@ class StorageError(Exception):
     pass
 
 
-class Storage:
+class StorageBase:
 
     # folder structuur:
     #   - top                           (FOLDER_NAME_TOP)

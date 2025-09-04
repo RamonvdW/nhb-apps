@@ -95,7 +95,7 @@ class UpdateWedstrijdFormulierIndiv:
             'reserves_notities': 'T41:U99',       # wordt bijgewerkt in laad_wedstrijd
         }
 
-    def _laad_wedstrijd(self, bestand: Bestand):
+    def _laad_klasse(self, bestand: Bestand):
         # zoek de wedstrijdklasse erbij
         self.klasse = CompetitieIndivKlasse.objects.get(pk=bestand.klasse_pk)
 
@@ -258,7 +258,7 @@ class UpdateWedstrijdFormulierIndiv:
 
     def update_wedstrijdformulier(self, bestand: Bestand, match: CompetitieMatch):
         # zoek de wedstrijdklasse, kampioenschap, limiet, etc. erbij
-        self._laad_wedstrijd(bestand)
+        self._laad_klasse(bestand)
 
         # enige verschil tussen de templates
         if bestand.afstand == 18:

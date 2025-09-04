@@ -4,6 +4,8 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
+""" Krijg toestemming tot de Google Drive van een gebruiker """
+
 from django.conf import settings
 from django.urls import reverse
 from django.utils import timezone

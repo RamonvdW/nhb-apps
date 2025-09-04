@@ -8,8 +8,8 @@ from django.test import TestCase
 from django.core.management.base import OutputWrapper
 from Competitie.models import Competitie
 from GoogleDrive.models import Token, Bestand
-from GoogleDrive.operations.google_drive import (GoogleDriveStorage, StorageError,
-                                                 ontbrekende_wedstrijdformulieren_rk_bk)
+from GoogleDrive.operations.storage_drive import (StorageGoogleDrive, StorageError,
+                                                  ontbrekende_wedstrijdformulieren_rk_bk)
 from TestHelpers.e2ehelpers import E2EHelpers
 from googleapiclient.errors import HttpError as GoogleApiError
 from google.auth.exceptions import RefreshError
@@ -222,7 +222,7 @@ class TestGoogleDriveGoogleDrive(E2EHelpers, TestCase):
     def test_check_access(self):
         out = OutputWrapper(io.StringIO())
         share_with_emails = ['mgr@test.not']
-        drive = GoogleDriveStorage(out, 2025, share_with_emails)
+        drive = StorageGoogleDrive(out, 2025, share_with_emails)
 
         with self.assertRaises(StorageError) as exc:
             drive.check_access()
@@ -239,7 +239,7 @@ class TestGoogleDriveGoogleDrive(E2EHelpers, TestCase):
     def test_copy(self):
         out = OutputWrapper(io.StringIO())
         share_with_emails = ['mgr@test.not']
-        drive = GoogleDriveStorage(out, 2025, share_with_emails)
+        drive = StorageGoogleDrive(out, 2025, share_with_emails)
 
         folder_18_indiv_rk = drive._params_to_folder_name(18, False, False)
 
@@ -271,7 +271,7 @@ class TestGoogleDriveGoogleDrive(E2EHelpers, TestCase):
         share_with_emails = ['mgr@test.not']
 
         # GoogleApiError
-        drive = GoogleDriveStorage(out, 2025, share_with_emails)
+        drive = StorageGoogleDrive(out, 2025, share_with_emails)
         my_service = GoogleApiMock(verbose=False)
         with patch('GoogleDrive.operations.google_drive.build', return_value=my_service):
             my_service.prime_error('test A', 'top', 'GoogleApiError')
@@ -282,7 +282,7 @@ class TestGoogleDriveGoogleDrive(E2EHelpers, TestCase):
         del drive
 
         # RefreshError
-        drive = GoogleDriveStorage(out, 2025, share_with_emails)
+        drive = StorageGoogleDrive(out, 2025, share_with_emails)
         my_service = GoogleApiMock(verbose=False)
         with patch('GoogleDrive.operations.google_drive.build', return_value=my_service):
             my_service.prime_error('test B', 'top', 'RefreshError')
@@ -293,7 +293,7 @@ class TestGoogleDriveGoogleDrive(E2EHelpers, TestCase):
         del drive
 
         # geen 'files' in response
-        drive = GoogleDriveStorage(out, 2025, share_with_emails)
+        drive = StorageGoogleDrive(out, 2025, share_with_emails)
         my_service = GoogleApiMock(verbose=False)
         with patch('GoogleDrive.operations.google_drive.build', return_value=my_service):
             my_service.prime_error('test C', 'top', 'no files')
@@ -304,7 +304,7 @@ class TestGoogleDriveGoogleDrive(E2EHelpers, TestCase):
         del drive
 
         # kan globale 'templates' folder niet vinden
-        drive = GoogleDriveStorage(out, 2025, share_with_emails)
+        drive = StorageGoogleDrive(out, 2025, share_with_emails)
         my_service = GoogleApiMock(verbose=False)
         with patch('GoogleDrive.operations.google_drive.build', return_value=my_service):
             my_service.prime_error('test D', 'templates', 'empty folder')
@@ -320,7 +320,7 @@ class TestGoogleDriveGoogleDrive(E2EHelpers, TestCase):
         share_with_emails = ['mgr@test.not']
 
         # GoogleApiError
-        drive = GoogleDriveStorage(out, 2025, share_with_emails)
+        drive = StorageGoogleDrive(out, 2025, share_with_emails)
         my_service = GoogleApiMock(verbose=False)
         with patch('GoogleDrive.operations.google_drive.build', return_value=my_service):
             my_service.prime_error('test F', 'folder204', 'GoogleApiError')
@@ -336,7 +336,7 @@ class TestGoogleDriveGoogleDrive(E2EHelpers, TestCase):
         share_with_emails = ['mgr@test.not']
 
         # trigger GoogleApiError tijdens list_folder
-        drive = GoogleDriveStorage(out, 2025, share_with_emails)
+        drive = StorageGoogleDrive(out, 2025, share_with_emails)
         folder_18_indiv_rk = drive._params_to_folder_name(18, False, False)
         my_service = GoogleApiMock(verbose=False)
         with patch('GoogleDrive.operations.google_drive.build', return_value=my_service):
@@ -349,7 +349,7 @@ class TestGoogleDriveGoogleDrive(E2EHelpers, TestCase):
         del drive
 
         # trigger de "no files" fout tijdens list_folder
-        drive = GoogleDriveStorage(out, 2025, share_with_emails)
+        drive = StorageGoogleDrive(out, 2025, share_with_emails)
         my_service = GoogleApiMock(verbose=False)
         with patch('GoogleDrive.operations.google_drive.build', return_value=my_service):
             drive._comp2template_file_id[folder_18_indiv_rk] = 'templ1'
@@ -361,7 +361,7 @@ class TestGoogleDriveGoogleDrive(E2EHelpers, TestCase):
         del drive
 
         # trigger de KeyError fout tijdens list_folder
-        drive = GoogleDriveStorage(out, 2025, share_with_emails)
+        drive = StorageGoogleDrive(out, 2025, share_with_emails)
         my_service = GoogleApiMock(verbose=False)
         with patch('GoogleDrive.operations.google_drive.build', return_value=my_service):
             with self.assertRaises(StorageError) as exc:
@@ -375,7 +375,7 @@ class TestGoogleDriveGoogleDrive(E2EHelpers, TestCase):
         share_with_emails = ['mgr@test.not', 'al-aanwezig@test.not']
 
         # voorkom dat de folder seizoen gevonden wordt
-        drive = GoogleDriveStorage(out, 2025, share_with_emails)
+        drive = StorageGoogleDrive(out, 2025, share_with_emails)
         my_service = GoogleApiMock(verbose=False)
         with patch('GoogleDrive.operations.google_drive.build', return_value=my_service):
             with patch.object(drive, '_vind_of_maak_seizoen_folder', return_value=''):
@@ -387,7 +387,7 @@ class TestGoogleDriveGoogleDrive(E2EHelpers, TestCase):
         del drive
 
         # seizoen folder is al gedeeld
-        drive = GoogleDriveStorage(out, 2025, share_with_emails)
+        drive = StorageGoogleDrive(out, 2025, share_with_emails)
         folder_18_indiv_rk = drive._params_to_folder_name(18, False, False)
         my_service = GoogleApiMock(verbose=False)
         with patch('GoogleDrive.operations.google_drive.build', return_value=my_service):

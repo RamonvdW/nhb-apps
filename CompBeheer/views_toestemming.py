@@ -10,7 +10,7 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
 from Competitie.models import Competitie
 from CompKamp.operations.maak_mutatie import maak_mutatie_wedstrijdformulieren_aanmaken
-from CompKamp.operations.kamp_programmas import ontbrekende_wedstrijdformulieren_rk_bk
+from CompKamp.operations.storage_wedstrijdformulieren import ontbrekende_wedstrijdformulieren_rk_bk
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige
 from GoogleDrive.operations.authenticatie import check_heeft_toestemming

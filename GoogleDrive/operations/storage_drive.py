@@ -13,12 +13,12 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError as GoogleApiError
 from google.auth.exceptions import RefreshError
 from google.oauth2.credentials import Credentials
-from GoogleDrive.storage_base import Storage, StorageError
+from GoogleDrive.storage_base import StorageBase, StorageError
 import socket
 import json
 
 
-class GoogleDriveStorage(Storage):
+class StorageGoogleDrive(StorageBase):
 
     """ let op: genereert StorageError exception """
 

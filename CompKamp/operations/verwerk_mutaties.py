@@ -19,7 +19,7 @@ from Competitie.models import (Kampioenschap, KampioenschapSporterBoog, Kampioen
 from CompKamp.operations.wedstrijdformulieren import (iter_wedstrijdformulieren,
                                                       UpdateWedstrijdFormulierIndiv,
                                                       update_wedstrijdformulier_teams)
-from CompKamp.operations.kamp_programmas import KampStorage, StorageError, iter_dirty_wedstrijdformulieren, zet_dirty
+from CompKamp.operations.storage_wedstrijdformulieren import StorageWedstrijdformulieren, StorageError, iter_dirty_wedstrijdformulieren, zet_dirty
 from GoogleDrive.operations.google_sheets import GoogleSheet
 
 VOLGORDE_PARKEER = 22222        # hoog en past in PositiveSmallIntegerField
@@ -703,7 +703,7 @@ class VerwerkCompKampMutaties:
         self.stdout.write('[INFO] Maak wedstrijdformulieren voor %s' % comp.beschrijving)
 
         try:
-            storage = KampStorage(self.stdout, comp.begin_jaar, settings.GOOGLE_DRIVE_SHARE_WITH)
+            storage = StorageWedstrijdformulieren(self.stdout, comp.begin_jaar, settings.GOOGLE_DRIVE_SHARE_WITH)
             storage.check_access()
 
             for tup in iter_wedstrijdformulieren(comp):

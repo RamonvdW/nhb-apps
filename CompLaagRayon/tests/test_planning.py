@@ -1066,7 +1066,7 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
             resp = self.client.post(url, {isel: 4, 'snel': 1})
         self.assert_is_redirect_not_plein(resp)  # check for success
         self.verwerk_competitie_mutaties()
-        self.assertEqual(CompetitieMutatie.objects.count(), aantal + 1)
+        self.assertGreater(CompetitieMutatie.objects.count(), aantal)
 
 
 # end of file

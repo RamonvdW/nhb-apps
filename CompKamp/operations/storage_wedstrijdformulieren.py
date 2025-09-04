@@ -10,11 +10,11 @@ from django.conf import settings
 from django.utils import timezone
 from CompKamp.operations.wedstrijdformulieren import iter_wedstrijdformulieren
 from GoogleDrive.models import Bestand
-from GoogleDrive.operations.google_drive import GoogleDriveStorage, StorageError
+from GoogleDrive.operations.storage_drive import StorageGoogleDrive, StorageError
 from typing import Generator
 
 
-class KampStorage(GoogleDriveStorage):
+class StorageWedstrijdformulieren(StorageGoogleDrive):
 
     """ let op: genereert StorageError exception """
 
