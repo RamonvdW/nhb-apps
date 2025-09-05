@@ -25,26 +25,131 @@ class GoogleSheet:
 
     def __init__(self, stdout):
         self.stdout = stdout
-        self._gsheets_api = None
+        self._api_spreadsheets = None
+        self._api_sheet_values = None
         self._file_id = ""
         self._sheet_name = ""
-        self._changes = list()
+        self._value_changes = list()
+        self._spreadsheet_requests = list()
+        self._sheet_name2id = dict()
 
     def _connect(self):
-        if self._gsheets_api is None:
+        if self._api_spreadsheets is None:
             # TODO: exception handling
             creds = Credentials.from_service_account_file(self.SERVICE_ACCOUNT_FILE, scopes=self.SCOPES)
             service = build('sheets', 'v4', credentials=creds)
-            self._gsheets_api = service.spreadsheets()          # supports more complex operations, like delete sheet
-            self._values_api = self._gsheets_api.values()       # supports value read/writes only
+            self._api_spreadsheets = service.spreadsheets()          # supports more complex operations, like delete sheet
+            self._api_sheet_values = self._api_spreadsheets.values()       # supports value read/writes only
+
+    def _execute(self, request: HttpRequest) -> dict | None:
+        try:
+            response = request.execute()
+        except socket.timeout as exc:
+            self.stdout.write('[ERROR] {execute} Socket timeout: %s' % exc)
+        except socket.gaierror as exc:
+            # example: [Errno -3] Temporary failure in name resolution
+            self.stdout.write('[ERROR] {execute} Socket error: %s' % exc)
+        except googleapiclient.errors.HttpError as exc:
+            self.stdout.write('[ERROR] {execute} HttpError from API: %s' % exc)
+        else:
+            # self.stdout.write('[DEBUG] {execute} response=%s' % repr(response))
+            return response
+
+        return None
+
+    def _get_sheet_ids(self):
+        self._sheet_name2id = dict()
+
+        request = self._api_spreadsheets.get(spreadsheetId=self._file_id,
+                                             fields="sheets.properties.title,sheets.properties.sheetId")
+
+        response = self._execute(request)
+
+        for sheet in response['sheets']:
+            properties = sheet['properties']
+            # properties = {'title': 'bla', 'sheetId': 1234}
+            self._sheet_name2id[properties['title']] = properties['sheetId']
+        # for
 
     def selecteer_file(self, file_id):
         self._connect()
         self._file_id = file_id
-        self._changes = list()
+        self._value_changes = list()
+        self._spreadsheet_requests = list()
+        self._get_sheet_ids()
 
     def selecteer_sheet(self, sheet_name: str):
-        self._sheet_name = sheet_name
+        # om spaties te ondersteunen moet de sheet_naam tussen quotes gezet worden
+        self._sheet_name = "'" + sheet_name.replace("'", "\\'") + "'"
+
+    def clear_range(self, range_a1: str):
+        """ wis de cells in de range """
+        request = self._api_sheet_values.clear(spreadsheetId=self._file_id,
+                                               range=self._sheet_name + '!' + range_a1)
+        response = self._execute(request)
+
+    def _stuur_value_changes(self):
+        if self._value_changes:
+            body = {
+                "valueInputOption": "RAW",      # just store, do not interpret as number, date, etc.
+                "data": self._value_changes,
+                "includeValuesInResponse": False,
+            }
+
+            request = self._api_sheet_values.batchUpdate(
+                                            spreadsheetId=self._file_id,
+                                            body=body)
+
+            response = self._execute(request)
+
+            # response is a dict met spreadsheetId, totalUpdated[Rows, Columns, Cells, Sheets] en responses
+            # response['responses'] is a lijst met dict, elk met spreadsheetId, updated[Cells, Columns, Rows, Ranges]
+
+            self._value_changes = list()
+
+    def _stuur_spreadsheet_requests(self):
+        if self._spreadsheet_requests:
+            body = {
+                "requests": self._spreadsheet_requests,
+            }
+
+            request = self._api_spreadsheets.batchUpdate(
+                                    spreadsheetId=self._file_id,
+                                    body=body)
+            response = self._execute(request)
+
+            self._spreadsheet_requests = list()
+
+    def stuur_wijzigingen(self):
+        # voor de opgeslagen wijzigingen in een keer door
+        # TODO: error propagation
+        self._stuur_value_changes()
+        self._stuur_spreadsheet_requests()
+
+    def _set_sheet_hidden(self, sheet_name: str, hidden: bool):
+
+        # vertaal de sheet naam naar het sheetId
+        sheet_id = self._sheet_name2id[sheet_name]
+
+        request = {
+            "updateSheetProperties": {
+                "properties": {
+                    "sheetId": sheet_id,
+                    "hidden": hidden,
+                },
+                "fields": "hidden"          # welke properties moeten aangepast worden
+            }
+        }
+
+        self._spreadsheet_requests.append(request)
+
+    def toon_sheet(self, sheet_name: str):
+        # hiermee kan een blad getoond worden
+        self._set_sheet_hidden(sheet_name, False)
+
+    def hide_sheet(self, sheet_name: str):
+        # hiermee kan een blad verstopt worden
+        self._set_sheet_hidden(sheet_name, True)
 
     def wijzig_cellen(self, range_a1: str, values: list):
         """
@@ -60,52 +165,13 @@ class GoogleSheet:
             "values": values,
             "majorDimension": "ROWS",
         }
-        self._changes.append(change)
-
-    def _execute(self, request: HttpRequest) -> dict | None:
-        try:
-            response = request.execute()
-        except socket.timeout as exc:
-            self.stdout.write('[ERROR] {execute} Socket timeout: %s' % exc)
-        except socket.gaierror as exc:
-            # example: [Errno -3] Temporary failure in name resolution
-            self.stdout.write('[ERROR] {execute} Socket error: %s' % exc)
-        except googleapiclient.errors.HttpError as exc:
-            self.stdout.write('[ERROR] {execute} HttpError from API: %s' % exc)
-        else:
-            self.stdout.write('[DEBUG] {execute} response=%s' % repr(response))
-            return response
-
-        return None
-
-    def stuur_wijzigingen(self):
-        # voor de opgeslagen wijzigingen in een keer door
-        # geeft True terug als het goed ging
-
-        body = {
-            "valueInputOption": "RAW",      # just store, do not interpret as number, date, etc.
-            "data": self._changes,
-            "includeValuesInResponse": False,
-        }
-
-        request = self._values_api.batchUpdate(
-                                        spreadsheetId=self._file_id,
-                                        body=body)
-
-        response = self._execute(request)
-
-        # response is a dict met spreadsheetId, totalUpdated[Rows, Columns, Cells, Sheets] en responses
-        # response['responses'] is a lijst met dict, elk met spreadsheetId, updated[Cells, Columns, Rows, Ranges]
-
-    def delete_sheet(self):
-        # hiermee kan een blad verwijderd worden, bijvoorbeeld een finales blad
-        pass
+        self._value_changes.append(change)
 
     def get_range(self, range_a1: str):
         # haal de values op in een specifieke range (format: A1:B20) in het huidige sheet
         # geeft een list(rows) terug, met elke row = list(cells)
 
-        request = self._values_api.get(
+        request = self._api_sheet_values.get(
                         spreadsheetId=self._file_id,
                         range=self._sheet_name + '!' + range_a1,
                         majorDimension="ROWS",

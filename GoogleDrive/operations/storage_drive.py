@@ -7,7 +7,6 @@
 """ aanmaken en vinden van bestanden in een folder structuur in Google Drive """
 
 from django.utils import timezone
-from CompKamp.operations.wedstrijdformulieren import iter_wedstrijdformulieren
 from GoogleDrive.models import Token, Bestand
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError as GoogleApiError
@@ -201,7 +200,7 @@ class StorageGoogleDrive(StorageBase):
                                 file_id=file_id,
                                 log=msg)
 
-    def maak_sheet_van_template(self, afstand: int, is_teams: bool, is_bk: bool, klasse_pk: int, rayon_nr, fname: str) -> str:
+    def maak_sheet_van_template(self, afstand: int, is_teams: bool, is_bk: bool, klasse_pk: int, rayon_nr: int, fname: str) -> str:
         """ maak een Google Sheet aan """
 
         error_msg = None
@@ -243,30 +242,6 @@ class StorageGoogleDrive(StorageBase):
             raise StorageError('{google_drive} ' + error_msg)
 
         return file_id
-
-
-def ontbrekende_wedstrijdformulieren_rk_bk(comp) -> list:
-    """ geef een lijst terug met de benodigde wedstrijdformulieren die nog niet aangemaakt zijn
-        aan de hand van de informatie in tabel Bestand.
-    """
-    todo = list()
-
-    # maak een map met de huidige bestanden
-    sel2bestand = dict()
-    for bestand in Bestand.objects.filter(begin_jaar=comp.begin_jaar, afstand=comp.afstand):
-        sel = (bestand.begin_jaar, bestand.afstand, bestand.is_teams, bestand.is_bk, bestand.klasse_pk)
-        sel2bestand[sel] = bestand
-    # for
-
-    for tup in iter_wedstrijdformulieren(comp):
-        afstand, is_teams, is_bk, klasse_pk, fname = tup
-        sel = (comp.begin_jaar, afstand, is_teams, is_bk, klasse_pk)
-        if sel not in sel2bestand:
-            # niet gevonden; voeg toe aan de todo lijst
-            todo.append(tup)
-    # for
-
-    return todo
 
 
 # end of file

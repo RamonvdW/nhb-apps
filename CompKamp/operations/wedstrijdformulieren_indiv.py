@@ -8,20 +8,19 @@
 
 from django.utils import timezone
 from Competitie.definities import DEEL_BK, DEEL_RK, DEELNAME_NEE, DEELNAME2STR
-from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse, CompetitieMatch,
-                               Kampioenschap, KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet,
-                               KampioenschapSporterBoog)
+from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieMatch,
+                               Kampioenschap, KampioenschapIndivKlasseLimiet, KampioenschapSporterBoog)
 from Geo.models import Rayon
 from GoogleDrive.operations.google_sheets import GoogleSheet
 from GoogleDrive.models import Bestand
 from Sporter.models import SporterVoorkeuren
 
 
-def iter_wedstrijdformulieren(comp: Competitie):
-    """ generator voor alle wedstrijdformulieren
+def iter_indiv_wedstrijdformulieren(comp: Competitie):
+    """ generator voor alle individuele wedstrijdformulieren
 
         generates tuples:
-            (afstand, is_teams, is_bk, klasse_pk, fname)
+            (afstand, is_bk, klasse_pk, rayon_nr, fname)
     """
     afstand = int(comp.afstand)
     rayon_nrs = list(Rayon.objects.all().values_list('rayon_nr', flat=True))
@@ -33,44 +32,18 @@ def iter_wedstrijdformulieren(comp: Competitie):
         for rayon_nr in rayon_nrs:
             fname = "rk-programma_individueel-rayon%s_" % rayon_nr
             fname += klasse_str
-            #            is_team  is_bk
-            yield afstand, False, False, klasse.pk, fname
+            #              is_bk
+            yield afstand, False, klasse.pk, rayon_nr, fname
         # for
 
-        # BK programma
+        # BK programma's
         fname = "bk-programma_individueel_" + klasse_str
-        #            is_team  is_bk
-        yield afstand, False, True, klasse.pk, fname
-    # for
-
-    for klasse in CompetitieTeamKlasse.objects.filter(competitie=comp, is_voor_teams_rk_bk=True):
-        klasse_str = klasse.beschrijving.lower().replace(' ', '-')
-
-        # RK programma's
-        for rayon_nr in rayon_nrs:
-            fname = "rk-programma_teams-rayon%s_" % rayon_nr
-            fname += klasse_str
-            #           is_team  is_bk
-            yield afstand, True, False, klasse.pk, fname
-        # for
-
-        # BK programma
-        fname = "bk-programma_teams_" + klasse_str
-        #           is_team  is_bk
-        yield afstand, True, True, klasse.pk, fname
+        #              is_bk
+        yield afstand, True, klasse.pk, 0, fname
     # for
 
 
-def update_wedstrijdformulier_teams(stdout, bestand: Bestand, sheet: GoogleSheet, match: CompetitieMatch):
-    stdout.write('[INFO] Update teams wedstrijdformulier voor bestand pk=%s' % bestand.pk)
-
-    # zoek de wedstrijdklasse erbij
-    klasse = CompetitieTeamKlasse.objects.get(pk=bestand.klasse_pk)
-
-    return "NOK"
-
-
-class UpdateWedstrijdFormulierIndiv:
+class UpdateIndivWedstrijdFormulier:
 
     def __init__(self, stdout, sheet: GoogleSheet):
         self.stdout = stdout
@@ -125,11 +98,11 @@ class UpdateWedstrijdFormulierIndiv:
             self.titel = 'BK'
         else:
             self.titel = 'RK'
-        self.titel += ' individueel, 25m 1pijl %s/%s, ' % (bestand.begin_jaar, bestand.begin_jaar + 1)
+        self.titel += ' individueel, 25m 1pijl %s/%s' % (bestand.begin_jaar, bestand.begin_jaar + 1)
 
         if not bestand.is_bk:
             # benoem het rayon
-            self.titel += 'rayon %s, ' % bestand.rayon_nr
+            self.titel += ', rayon %s' % bestand.rayon_nr
 
         self.titel += self.klasse.beschrijving
 

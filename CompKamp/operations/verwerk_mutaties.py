@@ -16,10 +16,12 @@ from Competitie.definities import (DEELNAME_JA, DEELNAME_NEE,
 from Competitie.models import (Kampioenschap, KampioenschapSporterBoog, KampioenschapTeam, CompetitieMatch,
                                KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet,
                                Competitie, CompetitieMutatie, CompetitieIndivKlasse, CompetitieTeamKlasse)
-from CompKamp.operations.wedstrijdformulieren import (iter_wedstrijdformulieren,
-                                                      UpdateWedstrijdFormulierIndiv,
-                                                      update_wedstrijdformulier_teams)
-from CompKamp.operations.storage_wedstrijdformulieren import StorageWedstrijdformulieren, StorageError, iter_dirty_wedstrijdformulieren, zet_dirty
+from CompKamp.operations.wedstrijdformulieren_indiv import (iter_indiv_wedstrijdformulieren,
+                                                            UpdateIndivWedstrijdFormulier)
+from CompKamp.operations.wedstrijdformulieren_teams import (iter_teams_wedstrijdformulieren,
+                                                            UpdateTeamsWedstrijdFormulier)
+from CompKamp.operations.storage_wedstrijdformulieren import (StorageWedstrijdformulieren, StorageError,
+                                                              iter_dirty_wedstrijdformulieren, zet_dirty)
 from GoogleDrive.operations.google_sheets import GoogleSheet
 
 VOLGORDE_PARKEER = 22222        # hoog en past in PositiveSmallIntegerField
@@ -706,10 +708,16 @@ class VerwerkCompKampMutaties:
             storage = StorageWedstrijdformulieren(self.stdout, comp.begin_jaar, settings.GOOGLE_DRIVE_SHARE_WITH)
             storage.check_access()
 
-            for tup in iter_wedstrijdformulieren(comp):
-                afstand, is_teams, is_bk, klasse_pk, fname = tup
+            is_teams = False
+            for afstand, is_bk, klasse_pk, rayon_nr, fname in iter_indiv_wedstrijdformulieren(comp):
                 self.stdout.write('[INFO] Maak %s' % fname)
-                storage.maak_sheet_van_template(afstand, is_teams, is_bk, klasse_pk, fname)
+                storage.maak_sheet_van_template(afstand, is_teams, is_bk, klasse_pk, rayon_nr, fname)
+            # for
+
+            is_teams = True
+            for afstand, is_bk, klasse_pk, rayon_nr, fname in iter_teams_wedstrijdformulieren(comp):
+                self.stdout.write('[INFO] Maak %s' % fname)
+                storage.maak_sheet_van_template(afstand, is_teams, is_bk, klasse_pk, rayon_nr, fname)
             # for
 
         except StorageError as err:
@@ -750,11 +758,12 @@ class VerwerkCompKampMutaties:
             if bestand.is_teams:
                 # teams
                 match = team_klasse_pk2match[bestand.klasse_pk]
-                res = update_wedstrijdformulier_teams(self.stdout, bestand, sheet, match)
+                updater = UpdateTeamsWedstrijdFormulier(self.stdout, sheet)
+                res = updater.update_wedstrijdformulier(bestand, match)
             else:
                 # individueel
                 match = indiv_klasse_pk2match[bestand.klasse_pk]
-                updater = UpdateWedstrijdFormulierIndiv(self.stdout, sheet)
+                updater = UpdateIndivWedstrijdFormulier(self.stdout, sheet)
                 res = updater.update_wedstrijdformulier(bestand, match)
 
             now = timezone.now()

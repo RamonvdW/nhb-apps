@@ -8,7 +8,8 @@
 
 from django.conf import settings
 from django.utils import timezone
-from CompKamp.operations.wedstrijdformulieren import iter_wedstrijdformulieren
+from CompKamp.operations.wedstrijdformulieren_indiv import iter_indiv_wedstrijdformulieren
+from CompKamp.operations.wedstrijdformulieren_teams import iter_teams_wedstrijdformulieren
 from GoogleDrive.models import Bestand
 from GoogleDrive.operations.storage_drive import StorageGoogleDrive, StorageError
 from typing import Generator
@@ -73,7 +74,15 @@ def ontbrekende_wedstrijdformulieren_rk_bk(comp) -> list:
         sel2bestand[sel] = bestand
     # for
 
-    for tup in iter_wedstrijdformulieren(comp):
+    for tup in iter_indiv_wedstrijdformulieren(comp):
+        afstand, is_teams, is_bk, klasse_pk, fname = tup
+        sel = (comp.begin_jaar, afstand, is_teams, is_bk, klasse_pk)
+        if sel in sel2bestand:
+            # niet gevonden; voeg toe aan de todo lijst
+            todo.append(tup)
+    # for
+
+    for tup in iter_teams_wedstrijdformulieren(comp):
         afstand, is_teams, is_bk, klasse_pk, fname = tup
         sel = (comp.begin_jaar, afstand, is_teams, is_bk, klasse_pk)
         if sel in sel2bestand:
