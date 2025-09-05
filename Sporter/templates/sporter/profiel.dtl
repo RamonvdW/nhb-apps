@@ -162,7 +162,7 @@
                                     {% if deelnemer.url_schietmomenten %}
                                         <a class="multi-btn-sv-rood" href="{{ deelnemer.url_schietmomenten }}">
                                             <span class="hide-on-small-only">Kies dagen</span>
-                                            <i class="hide-on-med-and-up material-icons-round notranslate">edit</i>
+                                            <i class="hide-on-med-and-up material-symbol notranslate">edit</i>
                                         </a>
                                     {% endif %}
 
@@ -172,7 +172,7 @@
                                         {% endif %}
                                         <a class="multi-btn-sv-blauw modal-trigger" href="#{{ deelnemer.id_afmelden }}">
                                             <span class="hide-on-small-only">Uitschrijven</span>
-                                            <i class="hide-on-med-and-up material-icons-round notranslate">remove</i>
+                                            <i class="hide-on-med-and-up material-symbol notranslate">remove</i>
                                         </a>
 
                                         <!-- modal dialog voor deze specifieke competitie -->
@@ -357,7 +357,7 @@
                                             <!-- geef mogelijkheid om toch mee te doen -->
                                             <a class="multi-btn-sv-rood modal-trigger" href="#id_voorkeur_rk_{{ deelnemer.pk }}">
                                                 <span class="hide-on-small-only">Aanpassen</span>
-                                                <i class="hide-on-med-and-up material-icons-round notranslate">edit</i>
+                                                <i class="hide-on-med-and-up material-symbol notranslate">edit</i>
                                             </a>
 
                                             <!-- modal dialog voor deze specifieke competitie -->
@@ -383,7 +383,7 @@
                                             <!-- geef mogelijkheid om alvast af te melden voor RK  -->
                                             <a class="multi-btn-sv-rood modal-trigger" href="#id_voorkeur_rk_{{ deelnemer.pk }}">
                                                 <span class="hide-on-small-only">Afmelden</span>
-                                                <i class="hide-on-med-and-up material-icons-round notranslate">edit</i>
+                                                <i class="hide-on-med-and-up material-symbol notranslate">edit</i>
                                             </a>
 
                                             <!-- modal dialog voor deze specifieke competitie -->
@@ -624,7 +624,7 @@
                                     {% if deelcomp.url_aanmelden %}
                                         <a class="multi-btn-sv-rood" href="{{ deelcomp.url_aanmelden }}">
                                             <span class="hide-on-small-only">Aanmelden</span>
-                                            <i class="hide-on-med-and-up material-icons-round notranslate">add</i>
+                                            <i class="hide-on-med-and-up material-symbol notranslate">add</i>
                                         </a>
                                     {% endif %}
                                 </td>
@@ -723,7 +723,7 @@
     <div class="row-sv-blauw">
         <div class="col s12">
             {% url 'Sporter:leeftijdsgroepen-persoonlijk' as card_url %}
-            {% include 'plein/card_icon.dtl' with title="Leeftijdsklassen" text="Bekijk in welke leeftijdsklassen jij uit moet komen." icon="grade" url=card_url %}
+            {% include 'plein/card_icon.dtl' with title="Leeftijdsklassen" text="Bekijk in welke leeftijdsklassen jij uit moet komen." icon="star" url=card_url %}
         </div>
     </div>
 
@@ -744,7 +744,7 @@
 
             <!-- wachtwoord wijzigen -->
             {% url 'Account:nieuw-wachtwoord' as card_url %}
-            {% include 'plein/card_icon.dtl' with title="Wachtwoord" text="Wijzig het wachtwoord wat nodig is om in te loggen." icon="https" url=card_url %}
+            {% include 'plein/card_icon.dtl' with title="Wachtwoord" text="Wijzig het wachtwoord wat nodig is om in te loggen." icon="lock" url=card_url %}
         </div>
     </div>
 
@@ -835,7 +835,7 @@
                         <td colspan="4" class="center">
                             <span>Kijk op <code>www.handboogsport.nl</code> onder Procedures hoe je een prestatiespeld aan kan vragen:</span><br><br>
                             <a class="btn-sv-rood" href="{{ url_procedures }}" target="_blank" rel="noopener noreferrer">
-                                <i class="notranslate material-icons-round left">open_in_new</i>Link</a>
+                                <i class="notranslate material-symbol left">open_in_new</i>Link</a>
                         </td>
                     </tr>
                 </table>
@@ -1146,7 +1146,7 @@
 
                             <td>
                                 <a class="btn-sv-rood" href="mailto:{{ rcl18_email }}">
-                                    <i class="notranslate material-icons-round">mail</i></a>
+                                    <i class="notranslate material-symbol">mail</i></a>
                             </td>
                         </tr>
                     {% endif %}
@@ -1176,7 +1176,7 @@
 
                             <td>
                                 <a class="btn-sv-rood" href="mailto:{{ rcl25_email }}">
-                                    <i class="notranslate material-icons-round">mail</i></a>
+                                    <i class="notranslate material-symbol">mail</i></a>
                             </td>
                         </tr>
                     {% endif %}
@@ -1228,7 +1228,7 @@
                         <td>
                             {% if hwl_email %}
                                 <a class="btn-sv-rood" href="mailto:{{ hwl_email }}">
-                                    <i class="notranslate material-icons-round">mail</i></a>
+                                    <i class="notranslate material-symbol">mail</i></a>
                             {% endif %}
                         </td>
                     </tr>
@@ -1276,7 +1276,7 @@
                         <td>
                             {% if sec_email %}
                                 <a class="btn-sv-rood" href="mailto:{{ sec_email }}">
-                                    <i class="notranslate material-icons-round">mail</i></a>
+                                    <i class="notranslate material-symbol">mail</i></a>
                             {% endif %}
                         </td>
                     </tr>
@@ -1305,7 +1305,7 @@
                             <td><code>{{ bb_email|wbr_email }}</code></td>
                             <td>
                                 <a class="btn-sv-rood" href="mailto:{{ bb_email }}">
-                                        <i class="notranslate material-icons-round">mail</i></a>
+                                        <i class="notranslate material-symbol">mail</i></a>
                             </td>
                         </tr>
                     {% endif %}
@@ -1317,7 +1317,7 @@
                             <td><code>{{ url_vcp_contact|wbr_www }}</code></td>
                             <td>
                                 <a class="btn-sv-rood" href="{{ url_vcp_contact }}" target="_blank" rel="noopener noreferrer">
-                                        <i class="notranslate material-icons-round">open_in_new</i></a>
+                                        <i class="notranslate material-symbol">open_in_new</i></a>
                             </td>
                         </tr>
                     {% endif %}

@@ -1,5 +1,5 @@
 {% comment %}
-                Copyright (c) 2023 Ramon van der Winkel.
+                Copyright (c) 2023-2025 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -32,7 +32,7 @@
 
         <!-- icoon -->
         <div style="margin-bottom:8px">
-            <i class="notranslate material-icons-round medium grey-text">{{ icon }}</i>
+            <i class="notranslate material-symbol medium grey-text">{{ icon }}</i>
         </div>
 
         <div class="grey-text">{{ text }}</div>

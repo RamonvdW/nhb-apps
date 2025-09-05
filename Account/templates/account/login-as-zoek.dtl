@@ -31,7 +31,7 @@
                     </div>
 
                     <button class="btn-sv-rood" id="submit_knop" type="submit">
-                        <i class="notranslate material-icons-round left">search</i>Zoek</button>
+                        <i class="notranslate material-symbol left">search</i>Zoek</button>
                 </form>
             </div>
         </div>
@@ -71,7 +71,7 @@
                                 <td>{{ account.volledige_naam|highlight:zoekterm }}</td>
                                 <td>
                                     <button class="btn-sv-rood" onclick="do_selecteer(this)" data-pk="{{ account.pk }}">
-                                        <i class="notranslate material-icons-round">play_arrow</i>
+                                        <i class="notranslate material-symbol">play_arrow</i>
                                     </button>
                                 </td>
                             </tr>

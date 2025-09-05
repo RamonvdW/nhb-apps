@@ -73,7 +73,7 @@
                             <td class="sv-rood-text">{{ account.let_op }}</td>
                             <td class="center">
                                 <a class="btn-sv-rood modal-trigger" href="#bevestig_ontkoppel_{{ account.pk }}">
-                                    <i class="notranslate material-icons-round left">delete</i>Verwijder</a>
+                                    <i class="notranslate material-symbol left">delete</i>Verwijder</a>
 
                                 <!-- modal dialog voor deze specifieke beheerder -->
                                 <div class="modal" id="bevestig_ontkoppel_{{ account.pk }}">
@@ -134,7 +134,7 @@
                     <div class="row"> <!-- style="margin-top:90px">-->
                         <div class="col s12">
                             <button class="btn-sv-rood" id="submit_knop" type="submit">
-                                <i class="notranslate material-icons-round left">search</i>Zoek</button>
+                                <i class="notranslate material-symbol left">search</i>Zoek</button>
                         </div>
                     </div>
 
@@ -176,7 +176,7 @@
                                 <td>{% if is_vereniging_rol %}{{ account.vereniging_naam }}{% else %}{{ account.geo_beschrijving }}{% endif %}</td>
                                 <td>
                                     <button class="btn-sv-rood" onclick="do_wijzig('add', this)" data-pk="{{ account.pk }}">
-                                        <i class="notranslate material-icons-round left">add</i>Koppel</button>
+                                        <i class="notranslate material-symbol left">add</i>Koppel</button>
                                 </td>
                             </tr>
                         {% endfor %}

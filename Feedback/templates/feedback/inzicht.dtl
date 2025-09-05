@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2019-2024 Ramon van der Winkel.
+                Copyright (c) 2019-2025 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -31,11 +31,11 @@
 
                             <td class="center">
                                 {% if obj.bevinding == "4" %}
-                                    <i class="notranslate material-icons-round sv-rood-text">thumb_down</i>
+                                    <i class="notranslate material-symbol sv-rood-text">thumb_down</i>
                                 {% elif obj.bevinding == "6" %}
-                                    <i class="notranslate material-icons-round">thumbs_up_down</i>
+                                    <i class="notranslate material-symbol">thumbs_up_down</i>
                                 {% elif obj.bevinding == "8" %}
-                                    <i class="notranslate material-icons-round green-text">thumb_up</i>
+                                    <i class="notranslate material-symbol green-text">thumb_up</i>
                                 {% endif %}
                             </td>
 
@@ -44,12 +44,12 @@
                                 <!-- button om pagina te openen -->
                                 {% if obj.volledige_url %}
                                     <a class="btn-sv-rood" href="{{ obj.volledige_url }}" target="_blank" rel="noopener noreferrer" style="margin-right:10px">
-                                        <i class="notranslate material-icons-round">open_in_new</i></a>
+                                        <i class="notranslate material-symbol">open_in_new</i></a>
                                 {% endif %}
 
                                 <!-- button for admin site -->
                                 <a class="btn-sv-rood" href="{{ url_admin_site }}{{ obj.pk }}/change/" target="_blank" rel="noopener noreferrer">
-                                    <i class="notranslate material-icons-round">edit</i></a>
+                                    <i class="notranslate material-symbol">edit</i></a>
                             </td>
                         </tr>
 

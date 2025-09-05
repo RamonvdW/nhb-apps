@@ -91,7 +91,7 @@
                                         <td>
                                             <!-- wijzig knop -->
                                             <a class="btn-sv-rood" href="{{ moment.url_edit }}">
-                                                <i class="notranslate material-icons-round">edit</i>
+                                                <i class="notranslate material-symbol">edit</i>
                                             </a>
                                         </td>
                                     </tr>
@@ -106,7 +106,7 @@
                                 <tr>
                                     <td colspan="3" class="center">
                                         <button form="form1" class="btn-sv-rood" id="submit_knop2" type="submit">
-                                            <i class="notranslate material-icons-round">add</i>
+                                            <i class="notranslate material-symbol">add</i>
                                         </button>
                                     </td>
                                 </tr>
@@ -231,7 +231,7 @@
 
                         <div class="fixed-action-btn" style="display:none">
                             <button class="btn-sv-rood" id="submit_knop3" type="submit" disabled>
-                                <i class="notranslate material-icons-round left">check</i>Wijzigen opslaan</button>
+                                <i class="notranslate material-symbol left">check</i>Wijzigen opslaan</button>
                         </div>
 
                     </form>

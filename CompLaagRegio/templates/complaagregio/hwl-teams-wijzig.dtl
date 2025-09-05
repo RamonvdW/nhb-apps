@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2021-2024 Ramon van der Winkel.
+                Copyright (c) 2021-2025 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -85,7 +85,7 @@
                     {% if not readonly %}
                             <div class="center" style="margin-top:30px">
                                 <button class="btn-sv-rood" id="submit_knop1" type="submit">
-                                    <i class="notranslate material-icons-round left">check</i>Opslaan</button>
+                                    <i class="notranslate material-symbol left">check</i>Opslaan</button>
                             </div>
                         </form>
                     {% endif %}

@@ -46,9 +46,9 @@
                         <td>
                             <div style="white-space:nowrap">     <!-- keeps buttons side by side -->
                                 <a class="btn-sv-rood" href="{{ opleiding.url_wijzig }}" style="padding:0; width:35px; margin-right:5px">
-                                    <i class="notranslate material-icons-round">edit</i></a>
+                                    <i class="notranslate material-symbol">edit</i></a>
                                 <a class="btn-sv-rood" href="{{ opleiding.url_aanmeldingen }}" style="padding:0; width:35px; margin-right:5px">
-                                    <i class="notranslate material-icons-round">people_alt</i>
+                                    <i class="notranslate material-symbol">group</i>
                                 </a>
                             </div>
                         </td>
@@ -65,7 +65,7 @@
                         <form action="{{ url_toevoegen }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
                             {% csrf_token %}
                             <button class="btn-sv-rood" id="submit_knop" type="submit">
-                                <i class="notranslate material-icons-round">add</i>
+                                <i class="notranslate material-symbol">add</i>
                             </button>
                         </form>
                     </td>
@@ -104,7 +104,7 @@
             {% endif %}
 
             {% if url_gezakt %}
-                {% include 'plein/card_icon.dtl' with title="Niet gehaald" text="Wie hebben de instaptoets gemaakt maar hebben die niet gehaald?" icon="thumb_down_off_alt" url=url_gezakt %}
+                {% include 'plein/card_icon.dtl' with title="Niet gehaald" text="Wie hebben de instaptoets gemaakt maar hebben die niet gehaald?" icon="thumb_down" url=url_gezakt %}
             {% endif %}
 
             {% if url_voorwaarden %}

@@ -18,7 +18,7 @@ function set_collapsible_icon(el_li, new_icon) {
 
     // the collapsible-header div typically contains a span and an li for an icon
     // when an icon is used, the secondary-content class is present
-    const icons = el_header.getElementsByClassName('material-icons-round secondary-content');
+    const icons = el_header.getElementsByClassName('material-symbol secondary-content');
     if (icons.length > 0) {
         // icon(s) found
         const icon = icons[0];

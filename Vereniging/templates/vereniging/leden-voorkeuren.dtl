@@ -68,8 +68,8 @@
                                     <td class="right-align">
                                         {% if obj.wijzig_url %}
                                             <a class="btn-sv-rood" href="{{ obj.wijzig_url }}">
-                                                <i class="notranslate material-icons-round left hide-on-med-and-down">tune</i>
-                                                <i class="notranslate material-icons-round hide-on-large-and-up">tune</i>
+                                                <i class="notranslate material-symbol left hide-on-med-and-down">tune</i>
+                                                <i class="notranslate material-symbol hide-on-large-and-up">tune</i>
                                                 <span class="hide-on-med-and-down">Wijzig</span>
                                             </a>
                                         {% endif %}
@@ -129,8 +129,8 @@
                             <td class="right-align">
                                 {% if obj.wijzig_url %}
                                     <a class="btn-sv-rood" href="{{ obj.wijzig_url }}">
-                                        <i class="notranslate material-icons-round left hide-on-med-and-down">tune</i>
-                                        <i class="notranslate material-icons-round hide-on-large-and-up">tune</i>
+                                        <i class="notranslate material-symbol left hide-on-med-and-down">tune</i>
+                                        <i class="notranslate material-symbol hide-on-large-and-up">tune</i>
                                         <span class="hide-on-med-and-down">Wijzig</span>
                                     </a>
                                 {% endif %}

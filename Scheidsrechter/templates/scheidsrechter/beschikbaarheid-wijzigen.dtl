@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2023-2024 Ramon van der Winkel.
+                Copyright (c) 2023-2025 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -103,15 +103,15 @@
                                 {% if dag.mag_wijzigen %}
                                     <td class="center">
                                         <button type="button" class="btn-sv-keuze" id="{{ dag.id }}-ja" onclick="wijzig('{{ dag.id }}', 1)">
-                                            <i class="material-icons-round notranslate">done</i>
+                                            <i class="material-symbol notranslate">done</i>
                                         </button>
                                         <br class="hide-on-large-and-up">
                                         <button type="button" class="btn-sv-keuze" id="{{ dag.id }}-mss" onclick="wijzig('{{ dag.id }}', 2)">
-                                            <i class="material-icons-round notranslate">question_mark</i>
+                                            <i class="material-symbol notranslate">question_mark</i>
                                         </button>
                                         <br class="hide-on-large-and-up">
                                         <button type="button" class="btn-sv-keuze" id="{{ dag.id }}-nee" onclick="wijzig('{{ dag.id }}', 3)">
-                                            <i class="material-icons-round notranslate">close</i>
+                                            <i class="material-symbol notranslate">close</i>
                                         </button>
                                     </td>
                                 {% endif %}
@@ -139,7 +139,7 @@
                         <!-- floating action button -->
                         <div class="fixed-action-btn" style="display: none">
                             <button class="btn-sv-rood" id="submit_knop" type="submit" disabled>
-                                <i class="notranslate material-icons-round left">check</i>Opslaan</button>
+                                <i class="notranslate material-symbol left">check</i>Opslaan</button>
                         </div>
                     </form>
                 </div>

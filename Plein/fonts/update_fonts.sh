@@ -1,22 +1,22 @@
 #!/bin/bash
 
-#  Copyright (c) 2023-2024 Ramon van der Winkel.
+#  Copyright (c) 2023-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 URL_SERVER="https://fonts.googleapis.com"
 
-URL_ICONS="$URL_SERVER/icon?family=Material+Icons+Round"
+URL_ICONS="$URL_SERVER/icons?icon.set=Material+Symbols&icon.size=24"
 URL_OPEN_SANS="$URL_SERVER/css2?family=Open+Sans&display=swap"
 URL_FIRA_SANS="$URL_SERVER/css2?family=Fira+Sans:wght@500&display=swap"
 
 CURL_OPTIONS="--silent --proto =https"
 
-FNAME_ICONS="Material-Icons-Round"
+FNAME_ICONS="MaterialSymbolsRounded"
 FNAME_OPEN_SANS="OpenSans-Regular"
 FNAME_FIRA_SANS="FiraSans-Medium"
 
-EXT_ICONS=".otf"
+EXT_ICONS=".woff2"
 EXT_OPEN_SANS=".ttf"
 EXT_FIRA_SANS=".ttf"
 
@@ -88,7 +88,7 @@ update_fonts()
 
 mkdir "$WORK_DIR"
 
-# Material Icons Round are for the icons on the site
+# Material Symbols Rounded are for the icons on the site
 update_fonts "$URL_ICONS" "$FNAME_ICONS" "$EXT_ICONS" "https://www.apache.org/licenses/LICENSE-2.0.html"
 
 # Open Sans is the main font

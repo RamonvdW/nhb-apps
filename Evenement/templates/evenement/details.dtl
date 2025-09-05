@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2024 Ramon van der Winkel.
+                Copyright (c) 2024-2025 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -17,7 +17,7 @@
 
             {% if toon_inschrijven %}
                 <a class="btn-sv-rood" href="#inschrijven">
-                    <i class="material-icons-round left notranslate">arrow_downward</i>Inschrijven</a>
+                    <i class="material-symbol left notranslate">arrow_downward</i>Inschrijven</a>
             {% else %}
                 {% if not is_organiserende_hwl %}   <!-- voorkom verwarring -->
                     <p>Het is niet mogelijk om in te schrijven op dit evenement.</p>
@@ -77,7 +77,7 @@
                         {% if url_map %}
                             <br><br>
                             <a class="btn-sv-blauw" href="{{ url_map }}" target="_blank" rel="noopener noreferrer">
-                                <i class="notranslate material-icons-round left">open_in_new</i>Toon op de kaart</a>
+                                <i class="notranslate material-symbol left">open_in_new</i>Toon op de kaart</a>
                         {% endif %}
                     </td>
                 </tr>
@@ -117,7 +117,7 @@
                     <th>Website</th>
                     <td>                                
                         <a href="{{ evenement.contact_website }}" target="_blank" rel="noopener noreferrer">
-                            <i class="notranslate material-icons-round left sv-blauw-text">open_in_new</i>
+                            <i class="notranslate material-symbol left sv-blauw-text">open_in_new</i>
                             <code>{{ evenement.contact_website }}</code>
                         </a>
                     </td>

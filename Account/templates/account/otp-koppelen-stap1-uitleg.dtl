@@ -24,9 +24,9 @@
         <div class="col s12 m10 offset-m1 l8 offset-l2 xl6 offset-xl3">
             <div class="sv-kader left-align" style="padding:10px">
                 <h5>Stappenplan</h5>
-                <p class="valign-wrapper sv-rood-text"><i class="small notranslate material-icons-round">looks_one</i> <b>Installeer een applicatie op je mobiel of tablet.</b></p>
-                <p class="valign-wrapper"><i class="small notranslate material-icons-round">looks_two</i> Scan een QR-code om de koppeling te maken met MijnHandboogsport.</p>
-                <p class="valign-wrapper"><i class="small notranslate material-icons-round">looks_3</i> Voer 6 cijfers in om koppeling te controleren.</p>
+                <p class="valign-wrapper sv-rood-text"><i class="small notranslate material-symbol">looks_one</i> <b>Installeer een applicatie op je mobiel of tablet.</b></p>
+                <p class="valign-wrapper"><i class="small notranslate material-symbol">looks_two</i> Scan een QR-code om de koppeling te maken met MijnHandboogsport.</p>
+                <p class="valign-wrapper"><i class="small notranslate material-symbol">looks_3</i> Voer 6 cijfers in om koppeling te controleren.</p>
             </div>
         </div>
     </div>
@@ -58,7 +58,7 @@
                 {% csrf_token %}
                 <!--                                                                    top r+l bottom -->
                 <button class="btn-sv-rood" id="submit_knop" type="submit" style="margin: 0 1em 1em;">
-                    <i class="notranslate material-icons-round right">arrow_forward_ios</i>Verder naar stap 2</button>
+                    <i class="notranslate material-symbol right">arrow_forward_ios</i>Verder naar stap 2</button>
             </form>
         </div>
     </div>

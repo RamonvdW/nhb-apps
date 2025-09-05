@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2021-2023 Ramon van der Winkel.
+                Copyright (c) 2021-2025 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -83,7 +83,7 @@
                         -->
                         <td class="center">
                             <a class="btn-sv-rood" href="{{ sessie.url_wijzig }}">
-                                <i class="notranslate material-icons-round">edit</i></a>
+                                <i class="notranslate material-symbol">edit</i></a>
                         </td>
                     </tr>
                 {% empty %}
@@ -101,7 +101,7 @@
                                 {% csrf_token %}
                                 <input type="hidden" name="nieuwe_sessie" value="1">
                                 <button class="btn-sv-rood" id="submit_knop" type="submit">
-                                    <i class="notranslate material-icons-round">add</i></button>
+                                    <i class="notranslate material-symbol">add</i></button>
                             </form>
                         </td>
                     </tr>

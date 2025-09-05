@@ -23,7 +23,7 @@
             
             {% if toets_is_geldig %}
                 <a class="btn-sv-rood" href="#inschrijven">
-                    <i class="material-icons-round left notranslate">arrow_downward</i>Inschrijven</a>
+                    <i class="material-symbol left notranslate">arrow_downward</i>Inschrijven</a>
             {% endif %}
         </div>
     </div>

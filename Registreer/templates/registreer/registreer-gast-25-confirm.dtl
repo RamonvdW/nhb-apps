@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2023-2024 Ramon van der Winkel.
+                Copyright (c) 2023-2025 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -88,10 +88,10 @@
 
                     <p class="center">
                         <a class="btn-sv-rood modal-trigger" style="margin:20px" href="#bevestig">
-                            <i class="notranslate material-icons-round left">check</i>Bevestig</a>
+                            <i class="notranslate material-symbol left">check</i>Bevestig</a>
 
                         <button class="btn-sv-blauw" style="margin:20px" id="submit_knop1" type="submit">
-                            <i class="notranslate material-icons-round left">undo</i>Wijzig</button>
+                            <i class="notranslate material-symbol left">undo</i>Wijzig</button>
                     </p>
                 </form>
             </div>

@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2024 Ramon van der Winkel.
+                Copyright (c) 2024-2025 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -174,7 +174,7 @@
                                 <span>Al ingeschreven</span>
                             {% else %}
                                 <button class="btn-sv-rood" id="id_toevoegen" onclick="toevoegen('id_toevoegen')" data-evenement="{{ evenement.pk }}" data-sporter="{{ geselecteerd.lid_nr }}">
-                                    <i class="notranslate material-icons-round left">add</i>Kies</button>
+                                    <i class="notranslate material-symbol left">add</i>Kies</button>
                             {% endif %}
                         </td>
                     </tr>

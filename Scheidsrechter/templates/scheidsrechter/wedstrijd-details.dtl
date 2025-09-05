@@ -70,7 +70,7 @@
                         {% if url_map %}
                             <br><br>
                             <a class="btn-sv-blauw nav_weg_knop" href="{{ url_map }}" target="_blank" rel="noopener noreferrer">
-                                <i class="notranslate material-icons-round left">open_in_new</i>Toon op de kaart</a>
+                                <i class="notranslate material-symbol left">open_in_new</i>Toon op de kaart</a>
                         {% endif %}
                     </td>
                 </tr>
@@ -181,7 +181,7 @@
                                 {% if sessie.beschrijving %}<span>{{ sessie.beschrijving }}</span><br>{% endif %}
                                 <b>{{ sessie.datum }}, {{ sessie.tijd_begin }} - {{ sessie.tijd_einde }}</b><br>
                                 <span>{{ sessie.klassen|length }} wedstrijdklassen</span>
-                                <i class="material-icons-round notranslate sv-rood-text secondary-content"><!-- wordt gezet in in/uitklappen_klaar() in Plein/js/site_layout.js --></i>
+                                <i class="material-symbol notranslate sv-rood-text secondary-content"><!-- wordt gezet in in/uitklappen_klaar() in Plein/js/site_layout.js --></i>
                             </div>
                             <div class="collapsible-body white center">
                                 <span>

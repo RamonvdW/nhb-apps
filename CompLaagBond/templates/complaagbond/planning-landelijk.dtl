@@ -79,7 +79,7 @@
                         <td>
                             {% if wedstrijd.url_wijzig %}
                                 <a class="btn-sv-rood" href="{{ wedstrijd.url_wijzig }}">
-                                    <i class="notranslate material-icons-round">edit</i></a>
+                                    <i class="notranslate material-symbol">edit</i></a>
                             {% endif %}
                         </td>
                     </tr>
@@ -98,7 +98,7 @@
                             <form action="{{ url_nieuwe_wedstrijd }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
                                 {% csrf_token %}
                                 <button class="btn-sv-rood" id="submit_knop" type="submit">
-                                    <i class="notranslate material-icons-round">add</i></button>
+                                    <i class="notranslate material-symbol">add</i></button>
                             </form>
                         </td>
                     </tr>

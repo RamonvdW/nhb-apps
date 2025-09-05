@@ -11,7 +11,7 @@ cd "$SCRIPT_DIR" || exit 1
 # ga naar de top directory van het project
 cd ../../.. || exit 1
 
-OUT="Plein/fonts/reduce/needed-glyphs_material-icons-round.txt"
+OUT="Plein/fonts/reduce/needed-glyphs_material-symbols.txt"
 HANDLED='@@@'   # dummy, to allow concatenation
 
 OUT_TMP="/tmp/find_icons.txt"
@@ -19,7 +19,7 @@ rm -f "$OUT_TMP"
 touch "$OUT_TMP"
 
 echo "[INFO] Searching for icons in templates and sources"
-grep material-icons-round -- */templates/*/*dtl | grep -v secondary-content | sed -s 's/material-icons-round/@/' | cut -d@ -f2- | cut -d\> -f2- | sed -s 's#</i#@#' | cut -d@ -f1 >> "$OUT_TMP"
+grep material-symbol -- */templates/*/*dtl | grep -vE "secondary-content|subset-mh" | sed -s 's/material-symbol/@/' | cut -d@ -f2- | cut -d\> -f2- | sed -s 's#</i#@#' | cut -d@ -f1 >> "$OUT_TMP"
 
 # handle include 'plein/card_..' icon="xxx"
 grep icon= -- */templates/*/*dtl | sed 's/icon=/@/' | cut -d@ -f2 | cut -d\" -f2 >> "$OUT_TMP"

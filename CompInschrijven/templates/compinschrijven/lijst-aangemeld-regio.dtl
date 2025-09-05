@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2023 Ramon van der Winkel.
+                Copyright (c) 2020-2025 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -91,21 +91,21 @@
             {% if url_download %}
                 <p>
                     <a class="btn-sv-rood" href="{{ url_download }}">
-                        <i class="notranslate material-icons-round left">download</i>Download lijst</a>
+                        <i class="notranslate material-symbol left">download</i>Download lijst</a>
                 </p>
             {% endif %}
 
             {% if show_gekozen_wedstrijden %}
                 <p>
                     <a class="btn-sv-rood" href="{{ url_behoefte }}">
-                        <i class="notranslate material-icons-round left">leaderboard</i>Gekozen wedstrijden</a>
+                        <i class="notranslate material-symbol left">leaderboard</i>Gekozen wedstrijden</a>
                 </p>
             {% endif %}
 
             {% if show_dagdeel_telling %}
                 <p>
                     <a class="btn-sv-rood" href="{{ url_behoefte }}">
-                        <i class="notranslate material-icons-round left">leaderboard</i>Benodigde dagdelen</a>
+                        <i class="notranslate material-symbol left">leaderboard</i>Benodigde dagdelen</a>
                 </p>
             {% endif %}
         </div>

@@ -18,7 +18,7 @@
 
             {% if toon_inschrijven %}
                 <a class="btn-sv-rood" href="#inschrijven">
-                    <i class="material-icons-round left notranslate">arrow_downward</i>Inschrijven</a>
+                    <i class="material-symbol left notranslate">arrow_downward</i>Inschrijven</a>
             {% else %}
                 <p>Het is niet mogelijk om in te schrijven op deze wedstrijd.</p>
             {% endif %}
@@ -102,7 +102,7 @@
                         {% if url_map %}
                             <br><br>
                             <a class="btn-sv-blauw" href="{{ url_map }}" target="_blank" rel="noopener noreferrer">
-                                <i class="notranslate material-icons-round left">open_in_new</i>Toon op de kaart</a>
+                                <i class="notranslate material-symbol left">open_in_new</i>Toon op de kaart</a>
                         {% endif %}
                     </td>
                 </tr>
@@ -117,7 +117,7 @@
                         <th>Nieuwsbericht of brochure</th>
                         <td>
                             <a href="{{ wed.url_flyer }}" target="_blank" rel="noopener noreferrer">
-                                <i class="notranslate material-icons-round left sv-blauw-text">open_in_new</i>
+                                <i class="notranslate material-symbol left sv-blauw-text">open_in_new</i>
                                 <code>{{ wed.url_flyer|wbr_www }}</code>
                             </a>
                         </td>
@@ -173,7 +173,7 @@
                             <th>Website voor inschrijven</th>
                             <td>
                                 <a href="{{ wed.contact_website }}" target="_blank" rel="noopener noreferrer">
-                                    <i class="notranslate material-icons-round left sv-blauw-text">open_in_new</i>
+                                    <i class="notranslate material-symbol left sv-blauw-text">open_in_new</i>
                                     <code>{{ wed.contact_website|wbr_www }}</code>
                                 </a>
                             </td>
@@ -209,7 +209,7 @@
                                 <th></th>
                                 <td>
                                     <a href="{{ url }}" target="_blank" rel="noopener noreferrer">
-                                        <i class="notranslate material-icons-round left sv-blauw-text">open_in_new</i>
+                                        <i class="notranslate material-symbol left sv-blauw-text">open_in_new</i>
                                         <code>{{ url|wbr_www }}</code>
                                     </a>
                                 </td>
@@ -243,7 +243,7 @@
                                     <span>{{ sessie.aantal_beschikbaar }} plaatsen beschikbaar (van de {{ sessie.max_sporters }})</span><br>
                                 {% endif %}
                                 <span>{{ sessie.klassen|length }} wedstrijdklassen</span>
-                                <i class="material-icons-round notranslate sv-rood-text secondary-content"><!-- wordt gezet in in/uitklappen_klaar() in Plein/js/site_layout.js --></i>
+                                <i class="material-symbol notranslate sv-rood-text secondary-content"><!-- wordt gezet in in/uitklappen_klaar() in Plein/js/site_layout.js --></i>
                             </div>
                             <div class="collapsible-body white center">
                                 <span>

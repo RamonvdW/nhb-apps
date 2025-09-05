@@ -43,15 +43,15 @@
 
                 <p class="center">
                     <button class="btn-sv-rood" id="id_zoek" onclick="stuur_keuzes_zoek()">
-                        <i class="notranslate material-icons-round left">search</i>Zoek</button>
+                        <i class="notranslate material-symbol left">search</i>Zoek</button>
                     {% if unfiltered_url %}
                         <span>&nbsp;&nbsp;</span>
                         <a class="btn-sv-rood" href="{{ unfiltered_url }}">
-                            <i class="notranslate material-icons-round left">backspace</i>Toon alles</a>
+                            <i class="notranslate material-symbol left">backspace</i>Toon alles</a>
                     {% endif %}
 
                     <button class="btn-sv-blauw" id="id_filter_knop" style="float:right">
-                        <i class="material-icons-round notranslate">filter_alt</i>
+                        <i class="material-symbol notranslate">filter_alt</i>
                     </button>
                 </p>
             </div>
@@ -125,7 +125,7 @@
             <!-- knop -->
             <td class="right-align">
                 <button class="btn-sv-rood" onclick="stuur_keuzes_prev()" id="id_prev">
-                    <i class="notranslate material-icons-round">chevron_left</i></button>
+                    <i class="notranslate material-symbol">chevron_left</i></button>
             </td>
 
             <td class="center" style="width:60%">       <!-- 60% voorkomt springen van de knoppen -->
@@ -135,7 +135,7 @@
             <!-- knop -->
             <td class="left-align">
                 <button class="btn-sv-rood" onclick="stuur_keuzes_next()" id="id_next">
-                    <i class="notranslate material-icons-round">chevron_right</i></button>
+                    <i class="notranslate material-symbol">chevron_right</i></button>
             </td>
         </tr>
         <!-- FUTURE: drop-down maken om direct naar een jaar/maand te springen -->
@@ -179,7 +179,7 @@
                         <td class="center">
                             {% if regel.url_details %}
                                 <a class="{% if regel.is_voor_sluitingsdatum %}btn-sv-rood{% else %}btn-sv-blauw{% endif %}" href="{{ regel.url_details }}">
-                                    <!--<i class="notranslate material-icons-round">play_arrow</i>-->Details</a>
+                                    <!--<i class="notranslate material-symbol">play_arrow</i>-->Details</a>
                             {% endif %}
                         </td>
                     </tr>

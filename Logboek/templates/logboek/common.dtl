@@ -51,9 +51,9 @@
 
                 <p>
                     <button class="btn-sv-rood" id="submit_knop" type="submit">
-                        <i class="notranslate material-icons-round left">search</i>Zoek</button>
+                        <i class="notranslate material-symbol left">search</i>Zoek</button>
                     {% if unfiltered_url %}
-                        <span>&nbsp;&nbsp;</span><a class="btn-sv-rood" href="{{ unfiltered_url }}"><i class="notranslate material-icons-round left">backspace</i>Toon alles</a>
+                        <span>&nbsp;&nbsp;</span><a class="btn-sv-rood" href="{{ unfiltered_url }}"><i class="notranslate material-symbol left">backspace</i>Toon alles</a>
                     {% endif %}
                 </p>
             </form>
@@ -73,13 +73,13 @@
                     {% if linkname == active %}
                         <li class="active"><a href="{{ url }}">{{ linkname }}</a></li>
                     {% elif linkname == "vorige_disable" %}
-                        <li class="disabled"><a href="#!"><i class="notranslate material-icons-round">chevron_left</i></a></li>
+                        <li class="disabled"><a href="#!"><i class="notranslate material-symbol">chevron_left</i></a></li>
                     {% elif linkname == "vorige" %}
-                        <li class="waves-effect"><a href="{{ url }}"><i class="notranslate material-icons-round">chevron_left</i></a></li>
+                        <li class="waves-effect"><a href="{{ url }}"><i class="notranslate material-symbol">chevron_left</i></a></li>
                     {% elif linkname == "volgende" %}
-                        <li class="waves-effect"><a href="{{ url }}"><i class="notranslate material-icons-round">chevron_right</i></a></li>
+                        <li class="waves-effect"><a href="{{ url }}"><i class="notranslate material-symbol">chevron_right</i></a></li>
                     {% elif linkname == "volgende_disable" %}
-                        <li class="disabled"><a href="#!"><i class="notranslate material-icons-round">chevron_right</i></a></li>
+                        <li class="disabled"><a href="#!"><i class="notranslate material-symbol">chevron_right</i></a></li>
                     {% else %}
                         <li class="waves-effect"><a href="{{ url }}">{{ linkname }}</a></li>
                     {% endif %}

@@ -163,7 +163,7 @@
             {% if mag_wijzigen %}
                             <div class="fixed-action-btn" style="display: none">
                                 <button class="btn-sv-rood" id="submit_knop" type="submit" disabled>
-                                    <i class="notranslate material-icons-round left">check</i>Opslaan</button>
+                                    <i class="notranslate material-symbol left">check</i>Opslaan</button>
                             </div>
                         </form>
                     </div>

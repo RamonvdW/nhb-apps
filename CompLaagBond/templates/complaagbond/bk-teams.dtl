@@ -67,26 +67,26 @@
                 </tr>
 
                 <tr>
-                    <td class="center"><i class="green-text in-table-icon notranslate material-icons-round">check</i></td>
+                    <td class="center"><i class="green-text in-table-icon notranslate material-symbol">check</i></td>
                     <td class="green-text">Deelname aangemeld</td>
                     <td class="center">{{ aantal_aangemeld }}</td>
                 </tr>
 
                 <tr>
-                    <td class="center"><i class="sv-blauw-text in-table-icon notranslate material-icons-round">help</i></td>
+                    <td class="center"><i class="sv-blauw-text in-table-icon notranslate material-symbol">help</i></td>
                     <td class="sv-blauw-text">Onbekend</td>
                     <td class="center">{{ aantal_onbekend }}</td>
                 </tr>
 
                 <tr>
-                    <td class="center"><i class="grey-text in-table-icon notranslate material-icons-round">block</i></td>
+                    <td class="center"><i class="grey-text in-table-icon notranslate material-symbol">block</i></td>
                     <td class="grey-text">Afgemeld</td>
                     <td class="center">{{ aantal_afgemeld }}</td>
                 </tr>
 
                 {% if aantal_attentie %}
                     <tr>
-                        <td class="center"><i class="sv-rood-text in-table-icon notranslate material-icons-round">warning</i></td>
+                        <td class="center"><i class="sv-rood-text in-table-icon notranslate material-symbol">warning</i></td>
                         <td class="sv-rood-text">Attentie</td>
                         <td class="center">{{ aantal_attentie }}</td>
                     </tr>

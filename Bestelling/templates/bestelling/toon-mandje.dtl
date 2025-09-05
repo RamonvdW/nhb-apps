@@ -87,7 +87,7 @@
                                     <td class="right-align">{{ regel.bedrag_euro_str }}</td>
                                     <td class="right-align">
                                         <button class="btn-sv-blauw" id="{{ regel.verwijder_id }}" data-url="{{ regel.url_verwijder }}">
-                                            <i class="notranslate material-icons-round">delete</i></button>
+                                            <i class="notranslate material-symbol">delete</i></button>
                                     </td>
                                 </tr>
                             {% endfor %}
@@ -150,11 +150,11 @@
                                 <form action="{{ url_bestellen }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
                                     {% csrf_token %}
                                     <button class="btn-sv-rood" id="submit_knop" type="submit">
-                                        <i class="notranslate material-icons-round left">shopping_cart_checkout</i>Bestelling afronden</button>
+                                        <i class="notranslate material-symbol left">shopping_cart_checkout</i>Bestelling afronden</button>
                                 </form>
                             {% else %}
                                 <button class="btn-sv-rood" disabled>
-                                    <i class="notranslate material-icons-round left">shopping_cart_checkout</i>Bestelling afronden</button>
+                                    <i class="notranslate material-symbol left">shopping_cart_checkout</i>Bestelling afronden</button>
                             {% endif %}
                         </div>
 
@@ -197,7 +197,7 @@
                         <br>
                         <p>
                             <a class="btn-sv-blauw" href="{{ url_kies_transport }}">
-                                <i class="material-icons-round left notranslate">local_shipping</i>Andere opties</a>
+                                <i class="material-symbol left notranslate">local_shipping</i>Andere opties</a>
                         </p>
                     </div>
                 </div>
@@ -224,7 +224,7 @@
                             <p>We hebben een adres nodig om je bestelling naartoe te sturen</p>
                             <p>
                                 <a class="btn-sv-rood" href="{{ url_afleveradres }}">
-                                    <i class="material-icons-round left notranslate">local_shipping</i>Invoeren</a>
+                                    <i class="material-symbol left notranslate">local_shipping</i>Invoeren</a>
                             </p>
 
                         {% else %}
@@ -246,7 +246,7 @@
 
                             <p style="padding-top:10px">
                                 <a class="btn-sv-blauw" href="{{ url_afleveradres }}">
-                                    <i class="material-icons-round left notranslate">local_shipping</i>Wijzig</a>
+                                    <i class="material-symbol left notranslate">local_shipping</i>Wijzig</a>
                         </p>
                         {% endif %}
                     </div>

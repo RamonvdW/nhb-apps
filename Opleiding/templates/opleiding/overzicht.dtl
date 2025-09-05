@@ -62,7 +62,7 @@
                         <td class="center-align">
                             {% if opleiding.url_details %}
                                 <a class="btn-sv-rood" href="{{ opleiding.url_details }}">
-                                    <i class="notranslate material-icons-round">play_arrow</i></a>
+                                    <i class="notranslate material-symbol">play_arrow</i></a>
                             {% endif %}
                         </td>
                     </tr>

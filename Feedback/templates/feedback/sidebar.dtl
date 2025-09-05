@@ -1,5 +1,5 @@
 {% comment %}
-                Copyright (c) 2019-2024 Ramon van der Winkel.
+                Copyright (c) 2019-2025 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -31,19 +31,19 @@
                 <div class="center" style="display:inline-flex">
                     <div>
                         <a href="{% url 'Feedback:bevinding' bevinding='plus' op_pagina=op_pagina volledige_url=volledige_url %}" target="_blank" rel="noopener noreferrer">
-                            <i class="notranslate material-icons-round green-text" style="font-size:2.5rem; width:50px">sentiment_satisfied</i>
+                            <i class="notranslate material-symbol green-text" style="font-size:2.5rem; width:50px">sentiment_satisfied</i>
                         </a>
                     </div>
 
                     <div>
                         <a href="{% url 'Feedback:bevinding' bevinding='nul'  op_pagina=op_pagina volledige_url=volledige_url %}" target="_blank" rel="noopener noreferrer">
-                            <i class="notranslate material-icons-round sv-blauw-text" style="font-size:2.5rem; width:50px">sentiment_neutral</i>
+                            <i class="notranslate material-symbol sv-blauw-text" style="font-size:2.5rem; width:50px">sentiment_neutral</i>
                         </a>
                     </div>
 
                     <div>
                         <a href="{% url 'Feedback:bevinding' bevinding='min'  op_pagina=op_pagina volledige_url=volledige_url %}" target="_blank" rel="noopener noreferrer">
-                            <i class="notranslate material-icons-round sv-rood-text" style="font-size:2.5rem; width:50px">sentiment_dissatisfied</i>
+                            <i class="notranslate material-symbol sv-rood-text" style="font-size:2.5rem; width:50px">sentiment_dissatisfied</i>
                         </a>
                     </div>
                 </div>

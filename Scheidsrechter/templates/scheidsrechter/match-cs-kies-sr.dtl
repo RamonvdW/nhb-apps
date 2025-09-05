@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2024 Ramon van der Winkel.
+                Copyright (c) 2024-2025 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -125,7 +125,7 @@
 
                             <div class="center" style="margin-top:30px">
                                 <button class="btn-sv-rood" id="submit_knop1" type="submit" disabled>
-                                    <i class="notranslate material-icons-round left">check</i>Wijzigen opslaan</button>
+                                    <i class="notranslate material-symbol left">check</i>Wijzigen opslaan</button>
                             </div>
                         </form>
 
@@ -196,7 +196,7 @@
                             {% if url_map %}
                                 <br><br>
                                 <a class="btn-sv-blauw nav_weg_knop" href="{{ url_map }}" target="_blank" rel="noopener noreferrer">
-                                    <i class="notranslate material-icons-round left">open_in_new</i>Toon op de kaart</a>
+                                    <i class="notranslate material-symbol left">open_in_new</i>Toon op de kaart</a>
                             {% endif %}
                         {% else %}
                             <i>Onbekend</i>

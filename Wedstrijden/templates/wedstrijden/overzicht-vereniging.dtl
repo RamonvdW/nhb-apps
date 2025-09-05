@@ -60,15 +60,15 @@
                             <td>
                                 <div style="white-space:nowrap">     <!-- keeps buttons side by side -->
                                     <a class="btn-sv-rood" href="{{ wed.url_wijzig }}" style="padding:0; width:35px; margin-right:5px">
-                                        <i class="notranslate material-icons-round">edit</i></a>
+                                        <i class="notranslate material-symbol">edit</i></a>
                                     <a class="btn-sv-rood" href="{{ wed.url_sessies}}" style="padding:0; width:35px; margin-right:5px">
-                                        <i class="notranslate material-icons-round">schedule</i></a>
+                                        <i class="notranslate material-symbol">schedule</i></a>
                                     <a class="btn-sv-rood" href="{{ wed.url_aanmeldingen }}" style="padding:0; width:35px; margin-right:5px">
-                                        <i class="notranslate material-icons-round">people_alt</i>
+                                        <i class="notranslate material-symbol">group</i>
                                     </a>
                                     {% if wed.url_check_kwalificatie_scores %}
                                         <a class="btn-sv-blauw" href="{{ wed.url_check_kwalificatie_scores }}" style="padding:0; width:35px; margin-right:5px">
-                                            <i class="notranslate material-icons-round">verified</i></a>
+                                            <i class="notranslate material-symbol">verified</i></a>
                                     {% endif %}
                                 </div>
                             </td>
@@ -83,7 +83,7 @@
                         <tr data-tablefilter="stop">
                             <td colspan="5" class="center">
                                 <a class="btn-sv-rood" href="{{ url_nieuwe_wedstrijd }}">
-                                    <i class="notranslate material-icons-round">add</i></a>
+                                    <i class="notranslate material-symbol">add</i></a>
                             </td>
                         </tr>
                     {% endif %}

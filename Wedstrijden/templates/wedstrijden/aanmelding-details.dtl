@@ -164,7 +164,7 @@
                         <th>Afmelden</th>
                         <td colspan="2">
                             <a class="btn-sv-rood modal-trigger" href="#bevestig_afmelden_{{ inschrijving.pk }}">
-                                <i class="notranslate material-icons-round">delete</i></a>
+                                <i class="notranslate material-symbol">delete</i></a>
                         </td>
                     </tr>
                 {% endif %}

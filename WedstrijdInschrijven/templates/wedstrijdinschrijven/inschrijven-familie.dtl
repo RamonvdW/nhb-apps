@@ -259,7 +259,7 @@
                                         <td class="center">
                                             {% if sessie.kan_aanmelden %}
                                                 <button class="btn-sv-rood" id="id_toevoegen_{{ sessie.pk }}_{{ klasse.pk }}" onclick="toevoegen('id_toevoegen_{{ sessie.pk }}_{{ klasse.pk }}')" data-wedstrijd="{{ wed.pk }}" data-sessie="{{ sessie.pk }}" data-klasse="{{ klasse.pk }}" data-sporterboog="{{ geselecteerd.pk }}">
-                                                    <i class="notranslate material-icons-round">add</i></button>
+                                                    <i class="notranslate material-symbol">add</i></button>
                                             {% else %}
                                                 {% if not sessie.compatible_leeftijd %}<span>(leeftijd)</span><br>{% endif %}
                                                 {% if not sessie.compatible_boog %}<span>(boog)</span><br>{% endif %}

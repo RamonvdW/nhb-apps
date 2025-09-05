@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2023 Ramon van der Winkel.
+                Copyright (c) 2020-2025 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -57,7 +57,7 @@
                         <td colspan="6" class="center">
                             <h5 id="{{ klasse.beschrijving }}">Klasse: {{ klasse.beschrijving }}</h5>
                             <a class="btn-sv-rood" href="{{ klasse.url_download }}">
-                                <i class="notranslate material-icons-round left">get_app</i>Download</a>
+                                <i class="notranslate material-symbol left">download</i>Download</a>
                         </td>
                     </tr>
 

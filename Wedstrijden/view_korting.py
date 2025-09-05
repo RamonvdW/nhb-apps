@@ -74,7 +74,7 @@ class KortingenView(UserPassesTestMixin, TemplateView):
                 korting.voor_wie_str = 'Leden van vereniging %s' % ver.ver_nr
 
             elif korting.soort == WEDSTRIJD_KORTING_COMBI:       # pragma: no branch
-                korting.icon_name = 'join_full'
+                korting.icon_name = 'stack'
 
             else:       # pragma: no cover
                 korting.voor_wie_str = "?"

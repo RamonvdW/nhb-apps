@@ -108,7 +108,7 @@
             {% include 'plein/card_icon.dtl' with title="Wissel van rol" text="Wissel naar een andere beheerdersrol of naar Sporter." icon="switch_account" url=card_url %}
 
             {% url 'Plein:handleidingen' as card_url%}
-            {% include 'plein/card_icon.dtl' with title="Handleidingen" text="Bekijk de handleidingen." icon="help" url=card_url %}
+            {% include 'plein/card_icon.dtl' with title="Handleidingen" text="Bekijk de handleidingen." icon="menu_book" url=card_url %}
         </div>
     </div>
 
@@ -135,7 +135,7 @@
                 {% if rol_is_bb or rol_is_sup %}
                     <!-- feedback -->
                     {% url 'Feedback:inzicht' as card_url %}
-                    {% include 'plein/card_icon.dtl' with title="Site feedback" text="Toon de feedback van de gebruikers." icon="feedback" url=card_url %}
+                    {% include 'plein/card_icon.dtl' with title="Site feedback" text="Toon de feedback van de gebruikers." icon="chat" url=card_url %}
                 {% endif %}
 
                 {% if rol_is_bb or rol_is_mwz or rol_is_mo %}
@@ -159,7 +159,7 @@
                 {% if rol_is_bb or rol_is_mwz %}
                     <!-- Interland lijst -->
                     {% url 'HistComp:interland' as card_url %}
-                    {% include 'plein/card_icon.dtl' with title="Interland lijst" text="Toon de lijst met kandidaat deelnemers voor de Interland." icon="outlined_flag" url=card_url %}
+                    {% include 'plein/card_icon.dtl' with title="Interland lijst" text="Toon de lijst met kandidaat deelnemers voor de Interland." icon="flag" url=card_url %}
                 {% endif %}
 
                 {% if rol_is_bb or rol_is_mwz %}

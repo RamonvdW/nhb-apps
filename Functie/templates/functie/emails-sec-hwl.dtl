@@ -23,7 +23,7 @@
             <h3 class="page-banner">Beheerder e-mailadressen</h3>
             <p>Hieronder staan de {{ aantal }} bij ons bekende e-mailadressen van de SEC en HWL{{ geo_str }}.</p>
 
-            <a class="btn-sv-rood" href="#" onclick="copy_to_clipboard()"><i class="notranslate material-icons-round left">content_copy</i>Kopieer naar mijn klembord</a>
+            <a class="btn-sv-rood" href="#" onclick="copy_to_clipboard()"><i class="notranslate material-symbol left">content_copy</i>Kopieer naar mijn klembord</a>
         </div>
     </div>
 

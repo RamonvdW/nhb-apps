@@ -49,9 +49,9 @@
                             <td>
                                 <div style="white-space:nowrap">     <!-- keeps buttons side by side -->
                                     <a class="{% if evenement.is_in_verleden %}btn-sv-blauw{% else %}btn-sv-rood{% endif %}" href="{{ evenement.url_details }}" style="padding:0; width:35px; margin-right:5px">
-                                        <i class="notranslate material-icons-round">schedule</i></a>
+                                        <i class="notranslate material-symbol">schedule</i></a>
                                     <a class="{% if evenement.is_in_verleden %}btn-sv-blauw{% else %}btn-sv-rood{% endif %}" href="{{ evenement.url_aanmeldingen }}" style="padding:0; width:35px; margin-right:5px">
-                                        <i class="notranslate material-icons-round">people_alt</i>
+                                        <i class="notranslate material-symbol">group</i>
                                     </a>
                                 </div>
                             </td>
@@ -101,9 +101,9 @@
                             <td>
                                 <div style="white-space:nowrap">     <!-- keeps buttons side by side -->
                                     <a class="btn-sv-blauw" href="{{ evenement.url_details }}" style="padding:0; width:35px; margin-right:5px">
-                                        <i class="notranslate material-icons-round">schedule</i></a>
+                                        <i class="notranslate material-symbol">schedule</i></a>
                                     <a class="btn-sv-blauw" href="{{ evenement.url_aanmeldingen }}" style="padding:0; width:35px; margin-right:5px">
-                                        <i class="notranslate material-icons-round">people_alt</i>
+                                        <i class="notranslate material-symbol">group</i>
                                     </a>
                                 </div>
                             </td>

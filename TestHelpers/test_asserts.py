@@ -19,7 +19,7 @@ import re
 # debug optie: toon waar in de code de queries vandaan komen
 FAIL_UNSAFE_DATABASE_MODIFICATION = False
 
-MATERIAL_ICON_GLYPH_NAMES = 'Plein/fonts/reduce/needed-glyphs_material-icons-round.txt'
+MATERIAL_ICON_GLYPH_NAMES = 'Plein/fonts/reduce/needed-glyphs_material-symbols.txt'
 
 GLYPH_NAMES_PRESENT = list()
 with open(MATERIAL_ICON_GLYPH_NAMES, 'r') as f:

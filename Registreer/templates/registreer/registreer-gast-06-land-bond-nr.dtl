@@ -50,7 +50,7 @@
 
                     <p class="center">
                         <button class="btn-sv-rood" id="submit_knop" type="submit">
-                            <i class="notranslate material-icons-round left">check</i>Opslaan</button>
+                            <i class="notranslate material-symbol left">check</i>Opslaan</button>
                     </p>
                 </form>
             </div>

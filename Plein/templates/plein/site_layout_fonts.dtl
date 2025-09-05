@@ -33,14 +33,14 @@
   src: url("{% static 'fonts/OpenSans-Regular-v43.ttf' %}") format('truetype');
 }
 @font-face {
-  font-family: 'Material Icons Round';
+  font-family: 'Material Symbols Rounded';
   font-style: normal;
   font-weight: 400;
   font-display: block;  /* liever later tonen dan verspringende layout */
 {% if font_use_subset_files %}
-  src: url("{% static 'fonts/material-icons-subset-mh-v25.otf' %}") format('opentype');
+  src: url("{% static 'fonts/material-symbols-subset-mh-v4.woff2' %}") format('opentype');
 {% else %}
-  src: url("{% static 'fonts/Material-Icons-Round-v109.otf' %}") format('opentype');
+  src: url("{% static 'fonts/MaterialSymbolsRounded-v277.woff2' %}") format('opentype');
 {% endif %}
 }
 </style>

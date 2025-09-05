@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2021-2023 Ramon van der Winkel.
+                Copyright (c) 2021-2025 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -72,11 +72,11 @@
                         <td>
                             {% if rk_team.url_wijzig %}
                                 <a class="btn-sv-rood" href="{{ rk_team.url_wijzig }}">
-                                    <i class="notranslate material-icons-round">edit</i></a>
+                                    <i class="notranslate material-symbol">edit</i></a>
                                 <span>&nbsp;&nbsp;</span>
                             {% endif %}
                             {% if rk_team.url_koppelen %}
-                                <a class="btn-sv-rood" href="{{ rk_team.url_koppelen }}">{% if rk_bk_klassen_vastgesteld %}<i class="notranslate material-icons-round">visibility</i>{% else %}<i class="notranslate material-icons-round">group</i>{% endif %}</a>
+                                <a class="btn-sv-rood" href="{{ rk_team.url_koppelen }}">{% if rk_bk_klassen_vastgesteld %}<i class="notranslate material-symbol">visibility</i>{% else %}<i class="notranslate material-symbol">group</i>{% endif %}</a>
 
                             {% endif %}
                         </td>
@@ -92,7 +92,7 @@
                     <tr>
                         <td colspan="7" class="center">
                             <a class="btn-sv-rood" href="{{ url_nieuw_team }}">
-                                <i class="notranslate material-icons-round">add</i></a>
+                                <i class="notranslate material-symbol">add</i></a>
                         </td>
                     </tr>
                 {% endif %}

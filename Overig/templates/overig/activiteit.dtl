@@ -71,7 +71,7 @@
                     <!-- button -->
                     <p class="center">
                         <button class="btn-sv-rood" id="submit_knop1" type="submit">
-                            <i class="notranslate material-icons-round left">search</i>Zoek</button>
+                            <i class="notranslate material-symbol left">search</i>Zoek</button>
                     </p>
                 </form>
             </div>
@@ -106,7 +106,7 @@
                             <li>
                                 <div class="collapsible-header white">
                                     <span>[{{ obj.lid_nr_str|highlight:zoekterm }}] {{ obj.volledige_naam|highlight:zoekterm }}</span>
-                                    <i class="material-icons-round notranslate sv-rood-text secondary-content"><!-- wordt gezet in in/uitklappen_klaar() in Overig/js/collapsible_icons.js --></i>
+                                    <i class="material-symbol notranslate sv-rood-text secondary-content"><!-- wordt gezet in in/uitklappen_klaar() in Overig/js/collapsible_icons.js --></i>
                                 </div>
                                 <div class="collapsible-body white">
                                     <div style="column-count: 2">

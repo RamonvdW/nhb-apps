@@ -28,7 +28,7 @@
 
         {% include 'plein/site_layout_fonts.dtl' %}
 
-        <link rel="stylesheet" href="{% static 'css/materialize-new-281.css' %}">
+        <link rel="stylesheet" href="{% static 'css/materialize-new-282.css' %}">
 
         {% include 'plein/site_layout_favicons.dtl' %}
 
@@ -66,10 +66,10 @@
                                 <!-- position:relative + z-index=2: knop boven op het logo -->
                                 <a href="{% url 'Bestelling:toon-inhoud-mandje' %}" class="btn-sv-rood" style="position:relative; margin-top:14px" aria-label="Mandje">
                                     {% if menu_mandje_aantal %}
-                                        <i class="notranslate material-icons-round left" style="line-height:36px">shopping_cart</i>
+                                        <i class="notranslate material-symbol left" style="line-height:36px">shopping_cart</i>
                                         <span>{{ menu_mandje_aantal }}</span>
                                     {% else %}
-                                        <i class="notranslate material-icons-round" style="line-height:36px">shopping_cart</i>
+                                        <i class="notranslate material-symbol" style="line-height:36px">shopping_cart</i>
                                     {% endif %}
                                 </a>
                             </li>
@@ -80,8 +80,8 @@
                                 <!-- position:relative + z-index=2: knop boven op het logo -->
                                 <button class="btn-sv-rood dropdown-trigger" data-target="navbar-dropdown" style="position:relative; margin-top:14px; margin-right:15px" aria-label="Menu">
                                     <span class="hide-on-small-only">{{ menu_voornaam|escape }}</span>
-                                    <i class="notranslate material-icons-round right hide-on-small-only" style="line-height:36px">expand_more</i>
-                                    <i class="notranslate material-icons-round       hide-on-med-and-up" style="line-height:36px">expand_more</i>
+                                    <i class="notranslate material-symbol right hide-on-small-only" style="line-height:36px">expand_more</i>
+                                    <i class="notranslate material-symbol       hide-on-med-and-up" style="line-height:36px">expand_more</i>
                                 </button>
                             </li>
                         {% elif not verberg_login_knop %}
@@ -98,7 +98,7 @@
                         <li class="divider"></li>
                         <li>
                             <a href="{{ menu_url_wissel_van_rol }}">
-                                <i class="notranslate material-icons-round sv-rood-text">people_alt</i>Wissel van rol</a>
+                                <i class="notranslate material-symbol sv-rood-text">group</i>Wissel van rol</a>
                         </li>
                     {% endif %}
 
@@ -106,7 +106,7 @@
                         <li class="divider"></li>
                         <li>
                             <a href="{{ menu_url_admin_site }}" target="_blank" rel="noopener noreferrer">
-                                <i class="notranslate material-icons-round sv-middel-blauw-text">build</i>Admin site</a>
+                                <i class="notranslate material-symbol sv-middel-blauw-text">build</i>Admin site</a>
                         </li>
                     {% endif %}
 
@@ -114,7 +114,7 @@
                         <li class="divider"></li>
                         <li>
                             <a href="{{ menu_url_taken }}">
-                                <i class="notranslate material-icons-round sv-rood-text">inbox</i>Taken <span class="new badge" data-badge-caption="open">{{ menu_aantal_open_taken }}</span>
+                                <i class="notranslate material-symbol sv-rood-text">inbox</i>Taken <span class="new badge" data-badge-caption="open">{{ menu_aantal_open_taken }}</span>
                             </a>
                         </li>
                     {% endif %}
@@ -123,7 +123,7 @@
                         <li class="divider"></li>
                         <li>
                             <a href="{{ menu_url_profiel }}">
-                                <i class="notranslate material-icons-round sv-rood-text">portrait</i>Mijn pagina</a>
+                                <i class="notranslate material-symbol sv-rood-text">account_box</i>Mijn pagina</a>
                         </li>
                     {% endif %}
 
@@ -131,7 +131,7 @@
                         <li class="divider"></li>
                         <li>
                             <a href="{{ menu_url_bondspas }}">
-                                <i class="notranslate material-icons-round sv-rood-text">card_membership</i>Toon bondspas</a>
+                                <i class="notranslate material-symbol sv-rood-text">card_membership</i>Toon bondspas</a>
                         </li>
                     {% endif %}
 
@@ -139,7 +139,7 @@
                         <li class="divider"></li>
                         <li>
                             <a href="{{ menu_url_uitloggen }}">
-                                <i class="notranslate material-icons-round sv-rood-text">logout</i>Uitloggen</a>
+                                <i class="notranslate material-symbol sv-rood-text">logout</i>Uitloggen</a>
                         </li>
                     {% endif %}
                 </ul>

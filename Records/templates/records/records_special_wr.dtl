@@ -46,7 +46,7 @@
                         <td>{{ obj.score_str }}</td>
                         <td>
                             <a class="btn-sv-rood" href="{{ obj.url_details }}">
-                                <i class="notranslate material-icons-round">visibility</i></a>
+                                <i class="notranslate material-symbol">visibility</i></a>
                         </td>
                     </tr>
                 {% endfor %}

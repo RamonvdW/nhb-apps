@@ -125,11 +125,11 @@
                                     {% if wed.verkoopvoorwaarden_status_acceptatie %}
                                         <span>Akkoord voor de Verkoopvoorwaarden Evenementen is gegeven<br>op {{ wed.verkoopvoorwaarden_status_when }} door {{ wed.verkoopvoorwaarden_status_who }}</span><br>
                                         <a class="btn-sv-blauw btn-small" href="{{ url_voorwaarden_verkoop }}" target="_blank" rel="noopener noreferrer" style="margin-top:16px">
-                                            <i class="notranslate material-icons-round left">open_in_new</i>Verkoopvoorwaarden lezen</a>
+                                            <i class="notranslate material-symbol left">open_in_new</i>Verkoopvoorwaarden lezen</a>
                                     {% else %}
                                         <span>Voor verkopen via MijnHandboogsport zijn de Verkoopvoorwaarden Evenementen van toepassing.<br>Lees het document en geef akkoord met de knop.</span><br>
                                         <a class="btn-sv-blauw btn-small" href="{{ url_voorwaarden_verkoop }}" target="_blank" rel="noopener noreferrer" style="margin-top:16px">
-                                            <i class="notranslate material-icons-round left">open_in_new</i>Verkoopvoorwaarden lezen</a>
+                                            <i class="notranslate material-symbol left">open_in_new</i>Verkoopvoorwaarden lezen</a>
 
                                         <ul id="id_verkoop">
                                             <li>
@@ -166,11 +166,11 @@
                                         {% if wed.voorwaarden_a_status_acceptatie %}
                                             <span>Akkoord voor A-status voorwaarden is gegeven<br>op {{ wed.voorwaarden_a_status_when }} door {{ wed.voorwaarden_a_status_who }}</span><br>
                                             <a class="btn-sv-blauw btn-small" href="{{ url_voorwaarden_a_status }}" target="_blank" rel="noopener noreferrer" style="margin-top:16px">
-                                                <i class="notranslate material-icons-round left">open_in_new</i>Voorwaarden lezen</a>
+                                                <i class="notranslate material-symbol left">open_in_new</i>Voorwaarden lezen</a>
                                         {% else %}
                                             <span>Voordat A-status gekozen kan worden moet je akkoord gaan met de voorwaarden.</span><br>
                                             <a class="btn-sv-blauw btn-small" href="{{ url_voorwaarden_a_status }}" target="_blank" rel="noopener noreferrer" style="margin-top:16px">
-                                                <i class="notranslate material-icons-round left">open_in_new</i>Voorwaarden lezen</a>
+                                                <i class="notranslate material-symbol left">open_in_new</i>Voorwaarden lezen</a>
                                             {% if not limit_edits %}
                                                 <ul id="id_teams">
                                                     <li>
@@ -639,7 +639,7 @@
 
                         <div class="fixed-action-btn" style="display: none">
                             <button class="btn-sv-rood" id="submit_knop3" type="submit" disabled>
-                                <i class="notranslate material-icons-round left">check</i>Wijzigen opslaan</button>
+                                <i class="notranslate material-symbol left">check</i>Wijzigen opslaan</button>
                         </div>
 
                     </form>

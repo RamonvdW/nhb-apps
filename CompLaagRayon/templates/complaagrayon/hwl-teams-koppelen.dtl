@@ -110,9 +110,9 @@
                                                     <td>
                                                         {% if alleen_bekijken %}
                                                             {% if obj.geselecteerd %}
-                                                                <i class="notranslate material-icons-round left sv-blauw-text">check</i>
+                                                                <i class="notranslate material-symbol left sv-blauw-text">check</i>
                                                             {% elif obj.blokkeer %}
-                                                                <i class="notranslate material-icons-round left grey-text">square</i>
+                                                                <i class="notranslate material-symbol left grey-text">square</i>
                                                             {% else %}
                                                                 <i>reserve</i>
                                                             {% endif %}
@@ -138,7 +138,7 @@
 
                         <div class="fixed-action-btn" style="display: none">
                             <button class="btn-sv-rood" type="submit" id="submit_knop" disabled>
-                                <i class="notranslate material-icons-round left">check</i>Opslaan</button>
+                                <i class="notranslate material-symbol left">check</i>Opslaan</button>
                         </div>
                     </form>
                 </div>

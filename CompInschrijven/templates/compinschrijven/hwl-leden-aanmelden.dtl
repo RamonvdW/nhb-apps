@@ -190,7 +190,7 @@
                                                 </label>
                                             {% else %}
                                                 {% if obj.is_aangemeld %}
-                                                    <i class="notranslate material-icons-round">check</i>
+                                                    <i class="notranslate material-symbol">check</i>
                                                 {% endif %}
                                             {% endif %}
                                         </td>
@@ -245,7 +245,7 @@
                                             </label>
                                         {% else %}
                                             {% if obj.is_aangemeld %}
-                                                <i class="notranslate material-icons-round">check</i>
+                                                <i class="notranslate material-symbol">check</i>
                                             {% endif %}
                                         {% endif %}
                                     </td>

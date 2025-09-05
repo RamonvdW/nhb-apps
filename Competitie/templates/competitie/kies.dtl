@@ -37,7 +37,7 @@
         <div class="row-sv-blauw">
             <div class="col s12">
                 {% url 'Sporter:profiel' as card_url %}
-                {% include 'plein/card_icon.dtl' with title="Mijn pagina" text="Inschrijven voor de bondscompetities, voorkeuren en informatie toegespitst op jou." icon="portrait" url=card_url %}
+                {% include 'plein/card_icon.dtl' with title="Mijn pagina" text="Inschrijven voor de bondscompetities, voorkeuren en informatie toegespitst op jou." icon="account_box" url=card_url %}
             </div>
         </div>
 

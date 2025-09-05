@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2023 Ramon van der Winkel.
+                Copyright (c) 2023-2025 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -117,13 +117,13 @@
                                 <td class="center">{{ score.resultaat }}</td>
                                 <td class="center" id="{{ score.id }}" data-url="{{ score.url_status }}">
                                     <button type="button" class="btn-sv-keuze" id="{{ score.id }}-ja" onclick="wijzig('{{ score.id }}', 1)">
-                                        <i class="material-icons-round notranslate">done</i>
+                                        <i class="material-symbol notranslate">done</i>
                                     </button>
                                     <button type="button" class="btn-sv-keuze" id="{{ score.id }}-mss" onclick="wijzig('{{ score.id }}', 2)">
-                                        <i class="material-icons-round notranslate">question_mark</i>
+                                        <i class="material-symbol notranslate">question_mark</i>
                                     </button>
                                     <button type="button" class="btn-sv-keuze" id="{{ score.id }}-nee" onclick="wijzig('{{ score.id }}', 3)">
-                                        <i class="material-icons-round notranslate">close</i>
+                                        <i class="material-symbol notranslate">close</i>
                                     </button>
                                 </td>
                             </tr>

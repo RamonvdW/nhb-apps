@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2019-2023 Ramon van der Winkel.
+                Copyright (c) 2019-2025 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -30,12 +30,12 @@
                     <p>Je kan nu inloggen.</p>
                     <p>
                         <a class="btn-sv-rood" href="{% url 'Account:login' %}">
-                            <i class="notranslate material-icons-round left">person</i>inloggen</a>
+                            <i class="notranslate material-symbol left">person</i>inloggen</a>
                     </p>
                 {% else %}
                     <p>
                         <a class="btn-sv-rood" href="{% url 'Plein:plein' %}">
-                            <i class="notranslate material-icons-round left">close</i>Sluiten</a>
+                            <i class="notranslate material-symbol left">close</i>Sluiten</a>
                     </p>
                 {% endif %}
             </div>

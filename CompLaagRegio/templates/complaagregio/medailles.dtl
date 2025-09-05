@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2023 Ramon van der Winkel.
+                Copyright (c) 2020-2025 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -82,9 +82,9 @@
 
                     <tr data-medal="{% if obj.toon_goud or obj.toon_zilver or obj.toon_brons %}1{% else %}0{% endif %}">
                         <td class="center">
-                            {% if obj.toon_goud %}<i class="notranslate material-icons-round" style="color:#d6c372;font-size:30px">looks_one</i>{% endif %}
-                            {% if obj.toon_zilver %}<i class="notranslate material-icons-round" style="color:#bec7c7;font-size:30px">looks_two</i>{% endif %}
-                            {% if obj.toon_brons %}<i class="notranslate material-icons-round" style="color:#cd7f32;font-size:30px">looks_3</i>{% endif %}
+                            {% if obj.toon_goud %}<i class="notranslate material-symbol" style="color:#d6c372;font-size:30px">looks_one</i>{% endif %}
+                            {% if obj.toon_zilver %}<i class="notranslate material-symbol" style="color:#bec7c7;font-size:30px">looks_two</i>{% endif %}
+                            {% if obj.toon_brons %}<i class="notranslate material-symbol" style="color:#cd7f32;font-size:30px">looks_3</i>{% endif %}
                         </td>
                         <td class="center">{{ obj.rank }}</td>
                         <td>{{ obj.naam_str }}</td>

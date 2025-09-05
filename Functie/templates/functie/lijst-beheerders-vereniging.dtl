@@ -55,7 +55,7 @@
                             {% if obj.wijzig_url %}
                                 <br><br>
                                 <a class="btn-sv-rood" href="{{ obj.wijzig_url }}">
-                                    <i class="notranslate material-icons-round left">group_add</i>Wijzig beheerders</a>
+                                    <i class="notranslate material-symbol left">group_add</i>Wijzig beheerders</a>
                             {% endif %}
                         </td>
 
@@ -80,7 +80,7 @@
                             {% if obj.email_url %}
                                 <br><br>
                                 <a class="btn-sv-rood" href="{{ obj.email_url }}">
-                                    <i class="notranslate material-icons-round left">alternate_email</i>Wijzig e-mail</a>
+                                    <i class="notranslate material-symbol left">alternate_email</i>Wijzig e-mail</a>
                             {% endif %}
                         </td>
                     </tr>

@@ -29,7 +29,7 @@
 
         {% include 'plein/site_layout_fonts.dtl' %}
 
-        <link rel="stylesheet" href="{% static 'css/materialize-new-281.css' %}">
+        <link rel="stylesheet" href="{% static 'css/materialize-new-282.css' %}">
 
         {% include 'plein/site_layout_favicons.dtl' %}
 
@@ -58,14 +58,14 @@
                 <h5>Wat kan je nog meer doen?</h5>
 
                 <p>Onderstaande knop brengt je naar de startpagina van MijnHandboogsport.</p>
-                <a class="btn-sv-rood" href="/plein/"><i class="notranslate material-icons-round left">home</i>Het Plein</a>
+                <a class="btn-sv-rood" href="/plein/"><i class="notranslate material-symbol left">home</i>Het Plein</a>
             {% endblock %}
 
             <p>&nbsp;</p>
             <h5>Hulp nodig?</h5>
 
             <p>Lukt het niet om het probleem op te lossen? Stuur dan een e-mail naar het volgende adres (druk op de knop om je mailprogramma te starten):</p>
-            <a class="btn-sv-blauw" href="mailto:{{ email_support }}"><i class="notranslate material-icons-round left">email</i>{{ email_support }}</a>
+            <a class="btn-sv-blauw" href="mailto:{{ email_support }}"><i class="notranslate material-symbol left">mail</i>{{ email_support }}</a>
             <p>Schrijf de volgende informatie in de e-mail:<br>- Je bondsnummer<br>- Datum en tijdstip waarop het probleem ontstond<br>- Beschrijving van je probleem</p>
         </div>
     </body>

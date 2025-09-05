@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2024 Ramon van der Winkel.
+                Copyright (c) 2024-2025 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -53,7 +53,7 @@
             <p>Onderstaande lijst toont de status van alle aanmeldingen</p>
             <p>Download voor:
                 <a class="btn-sv-rood" href="{{ url_download_csv }}" style="margin-left:20px">
-                    <i class="notranslate material-icons-round left">download</i>Spreadsheet</a>
+                    <i class="notranslate material-symbol left">download</i>Spreadsheet</a>
             </p>
         </div>
     </div>
@@ -85,7 +85,7 @@
                             <td>
                                 {% if inschrijving.url_details %}
                                     <a class="btn-sv-rood" href="{{ inschrijving.url_details }}">
-                                        <i class="notranslate material-icons-round">play_arrow</i></a>
+                                        <i class="notranslate material-symbol">play_arrow</i></a>
                                 {% endif %}
                             </td>
                         </tr>
@@ -132,7 +132,7 @@
                         <td>
                             {% if afmelding.url_details %}
                                 <a class="btn-sv-rood" href="{{ afmelding.url_details }}">
-                                    <i class="notranslate material-icons-round">play_arrow</i></a>
+                                    <i class="notranslate material-symbol">play_arrow</i></a>
                             {% endif %}
                         </td>
                     </tr>

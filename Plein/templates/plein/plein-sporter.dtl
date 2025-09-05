@@ -42,7 +42,7 @@
         <div class="col s12">
             <!-- Mijn pagina -->
             {% url 'Sporter:profiel' as card_url %}
-            {% include 'plein/card_icon.dtl' with title="Mijn pagina" text="Voorkeuren en informatie toegespitst op jou." icon="portrait" url=card_url %}
+            {% include 'plein/card_icon.dtl' with title="Mijn pagina" text="Voorkeuren en informatie toegespitst op jou." icon="account_box" url=card_url %}
 
             <!-- bondscompetities -->
             {% url 'Competitie:kies' as card_url %}
@@ -109,8 +109,8 @@
     <!-- blauwe balk met kaartje -->
     <div class="row-sv-blauw">
         <div class="col s12">
-            {% include 'plein/card_icon.dtl' with title="Stuur een e-mail" text="Kies dit kaartje om je mailprogramma te starten" icon="email" extern_open=True url=url_email_support %}
-            {% include 'plein/card_icon.dtl' with title="Handleiding" text="Bekijk de handleiding voor leden" icon="help" extern_open=True url=url_handleiding_leden %}
+            {% include 'plein/card_icon.dtl' with title="Stuur een e-mail" text="Kies dit kaartje om je mailprogramma te starten" icon="mail" extern_open=True url=url_email_support %}
+            {% include 'plein/card_icon.dtl' with title="Handleiding" text="Bekijk de handleiding voor leden" icon="menu_book" extern_open=True url=url_handleiding_leden %}
         </div>
     </div>
 

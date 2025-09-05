@@ -44,14 +44,14 @@
                 {% for korting in kortingen %}
                     <tr>
                         <td>{{ korting.geldig_tot_en_met }}</td>
-                        <td><i class="notranslate material-icons-round sv-blauw-text" style="vertical-align:text-bottom; font-size:30px">{{ korting.icon_name }}</i></td>
+                        <td><i class="notranslate material-symbol sv-blauw-text" style="vertical-align:text-bottom; font-size:30px">{{ korting.icon_name }}</i></td>
                         <td>{{ korting.voor_wie_str|linebreaksbr }}</td>
                         <td>{{ korting.voor_wedstrijden_str|linebreaksbr }}</td>
                         <td>{{ korting.percentage }}%</td>
 
                         <td>
                             <a class="btn-sv-rood" href="{{ korting.url_wijzig }}" style="padding:0; width:35px; margin-right:5px">
-                                <i class="notranslate material-icons-round">edit</i></a>
+                                <i class="notranslate material-symbol">edit</i></a>
                         </td>
                     </tr>
                 {% empty %}
@@ -64,7 +64,7 @@
                     <tr data-tablefilter="stop">
                         <td colspan="6" class="center">
                             <a class="btn-sv-rood" href="{{ url_nieuwe_korting }}">
-                                <i class="notranslate material-icons-round">add</i></a>
+                                <i class="notranslate material-symbol">add</i></a>
                         </td>
                     </tr>
                 {% endif %}
@@ -96,18 +96,18 @@
                 <p>Er zijn drie soorten kortingen: persoonlijk, vereniging en combinatie-korting.</p>
 
                 <br>
-                <h5><i class="notranslate material-icons-round sv-blauw-text" style="vertical-align:middle; font-size:40px; width:40px">account_circle</i> Persoonlijk</h5>
+                <h5><i class="notranslate material-symbol sv-blauw-text" style="vertical-align:middle; font-size:40px; width:40px">account_circle</i> Persoonlijk</h5>
                 <p>Voor een specifieke sporter (bondsnummer).</p>
                 <p>Kan geldig zijn voor meerdere wedstrijden.</p>
                 <p>Voorbeelden: winnaar van vorig jaar, eventueel voor hele serie wedstrijden.</p>
 
                 <br>
-                <h5><i class="notranslate material-icons-round sv-blauw-text" style="vertical-align:middle; font-size:40px; width:40px">home</i> Vereniging</h5>
+                <h5><i class="notranslate material-symbol sv-blauw-text" style="vertical-align:middle; font-size:40px; width:40px">home</i> Vereniging</h5>
                 <p>Voor alle leden van jullie vereniging.</p>
                 <p>Voorbeelden: eigen leden motiveren om aan een wedstrijd mee te doen.</p>
 
                 <br>
-                <h5><i class="notranslate material-icons-round sv-blauw-text" style="vertical-align:middle; font-size:40px; width:40px">join_full</i> Combinatie-korting</h5>
+                <h5><i class="notranslate material-symbol sv-blauw-text" style="vertical-align:middle; font-size:40px; width:40px">stack</i> Combinatie-korting</h5>
                 <p>Korting bij inschrijving op meerdere wedstrijden.</p>
                 <p>Voorbeeld: wedstrijd zaterdag + zondag; korting als je beide dagen mee doet.</p>
             </div>

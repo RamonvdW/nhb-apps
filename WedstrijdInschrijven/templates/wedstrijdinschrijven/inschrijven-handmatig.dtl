@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2022-2023 Ramon van der Winkel.
+                Copyright (c) 2022-2025 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -112,7 +112,7 @@
 
                             <p class="center">
                                 <button class="btn-sv-rood" id="submit_knop1" type="submit">
-                                    <i class="notranslate material-icons-round left">search</i>Zoek</button>
+                                    <i class="notranslate material-symbol left">search</i>Zoek</button>
                             </p>
 
                         </form>
@@ -266,7 +266,7 @@
                                         <td class="center">
                                             {% if sessie.kan_aanmelden %}
                                                 <button class="btn-sv-rood" id="id_toevoegen_{{ sessie.pk }}_{{ klasse.pk }}" onclick="toevoegen('id_toevoegen_{{ sessie.pk }}_{{ klasse.pk }}')" data-wedstrijd="{{ wed.pk }}" data-sessie="{{ sessie.pk }}" data-klasse="{{ klasse.pk }}" data-sporterboog="{{ geselecteerd.pk }}">
-                                                    <i class="notranslate material-icons-round">add</i></button>
+                                                    <i class="notranslate material-symbol">add</i></button>
                                             {% else %}
                                                 {% if not sessie.compatible_leeftijd %}<span>(leeftijd)</span><br>{% endif %}
                                                 {% if not sessie.compatible_boog %}<span>(boog)</span><br>{% endif %}
@@ -311,7 +311,7 @@
 
                             <p class="center">
                                 <button class="btn-sv-rood" id="submit_knop2" type="submit">
-                                    <i class="notranslate material-icons-round left">search</i>Zoek</button>
+                                    <i class="notranslate material-symbol left">search</i>Zoek</button>
                             </p>
 
                         </form>

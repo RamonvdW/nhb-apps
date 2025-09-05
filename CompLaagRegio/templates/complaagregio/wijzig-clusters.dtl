@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2023 Ramon van der Winkel.
+                Copyright (c) 2020-2025 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -140,7 +140,7 @@
 
             <div class="fixed-action-btn" style="display:none">
                 <button class="btn-sv-rood" id="submit_knop" type="submit" disabled>
-                    <i class="notranslate material-icons-round left">check</i>Opslaan</button>
+                    <i class="notranslate material-symbol left">check</i>Opslaan</button>
             </div>
 
         </form>
@@ -161,7 +161,7 @@
                     <p><code>{{ email_support }}</code></p>
                     <p>
                         <a class="btn-sv-rood" href="mailto:{{ email_support }}">
-                            <i class="notranslate material-icons-round">email</i></a>
+                            <i class="notranslate material-symbol">mail</i></a>
                     </p>
                 </div>
             </div>

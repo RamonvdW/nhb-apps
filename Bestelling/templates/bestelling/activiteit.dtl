@@ -101,7 +101,7 @@
                     <!-- button -->
                     <p class="center" style="margin-top:50px">
                         <button class="btn-sv-rood" id="submit_knop" type="submit">
-                            <i class="notranslate material-icons-round left">search</i>Zoek</button>
+                            <i class="notranslate material-symbol left">search</i>Zoek</button>
                     </p>
                 </form>
             </div>
@@ -139,9 +139,9 @@
                                 <table>
                                     <tr>
                                         <td style="width:35px; padding-left:0; padding-right:0">
-                                            {% if bestelling.status == 'A'   %}<i class="material-icons-round notranslate green-text"   style="margin:0">done</i>{% endif %}
-                                            {% if bestelling.status in 'NBF' %}<i class="material-icons-round notranslate sv-rood-text" style="margin:0">hourglass_empty</i>{% endif %}
-                                            {% if bestelling.status == 'G'   %}<i class="material-icons-round notranslate grey-text"    style="margin:0">clear</i>{% endif %}
+                                            {% if bestelling.status == 'A'   %}<i class="material-symbol notranslate green-text"   style="margin:0">done</i>{% endif %}
+                                            {% if bestelling.status in 'NBF' %}<i class="material-symbol notranslate sv-rood-text" style="margin:0">hourglass_empty</i>{% endif %}
+                                            {% if bestelling.status == 'G'   %}<i class="material-symbol notranslate grey-text"    style="margin:0">close</i>{% endif %}
                                         </td>
                                         <td>
                                             <span>{{ bestelling.bestel_nr_str|highlight:zoekterm }}</span>
@@ -149,7 +149,7 @@
                                             <span>{{ bestelling.beschrijving_kort }}</span>
                                         </td>
                                         <td>
-                                            <i class="material-icons-round notranslate sv-rood-text secondary-content"><!-- wordt gezet in in/uitklappen_klaar() in Plein/js/site_layout.js --></i>
+                                            <i class="material-symbol notranslate sv-rood-text secondary-content"><!-- wordt gezet in in/uitklappen_klaar() in Plein/js/site_layout.js --></i>
                                         </td>
                                     </tr>
                                 </table>

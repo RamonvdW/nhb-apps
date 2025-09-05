@@ -8,7 +8,7 @@ FONTS_DIR="../../static/fonts"
 
 DEST="firasans-medium-subset-mh-v"
 WOFF_DEST="$FONTS_DIR/$DEST.woff"
-TTX_DEST="$FONTS_DIR/$DEST.ttx"
+# TTX_DEST="$FONTS_DIR/$DEST.ttx"
 DTL_FONTS="../../templates/plein/site_layout_fonts.dtl"
 
 # ga naar de directory van het script (Plein/fonts/reduce/)
@@ -48,7 +48,7 @@ mv "$WOFF_DEST" "$WOFF_DEST_NEW"
 sed -i "s/firasans-medium-subset-mh-v.*\.woff/firasans-medium-subset-mh-v$NEW_NR.woff/" "$DTL_FONTS"
 
 # maak een dump van de nieuwe subset
-rm -f "$TTX_DEST"     # avoids incremental filenames
+# rm -f "$TTX_DEST"     # avoids incremental filenames
 # ttx "$WOFF_DEST_NEW"
 
 # end of file

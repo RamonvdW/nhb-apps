@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2023-2024 Ramon van der Winkel.
+                Copyright (c) 2023-2025 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -24,7 +24,7 @@
         <div class="col s12">
 
             <!-- korps -->
-            {% include 'plein/card_icon.dtl' with title="Korps" text=tekst_korps icon="grade" url=url_korps %}
+            {% include 'plein/card_icon.dtl' with title="Korps" text=tekst_korps icon="star" url=url_korps %}
 
             <!-- wedstrijdkalender -->
             {% url 'Scheidsrechter:wedstrijden' as card_url %}
@@ -56,7 +56,7 @@
 
             <!--
             {% include 'plein/card_icon.dtl' with title="Een" text="Hier komt het 1e document dat vaak nodig is" icon="description" url='#' %}
-            {% include 'plein/card_icon.dtl' with title="Twee" text="Hier komt het 2e document dat vaak nodig is" icon="create" url='#' %}
+            {% include 'plein/card_icon.dtl' with title="Twee" text="Hier komt het 2e document dat vaak nodig is" icon="edit" url='#' %}
             {% include 'plein/card_icon.dtl' with title="Drie" text="Hier komt het 3e document dat vaak nodig is" icon="gavel" url='#' %}
             -->
 

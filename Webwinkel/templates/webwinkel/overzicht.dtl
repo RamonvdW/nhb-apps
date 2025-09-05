@@ -116,7 +116,7 @@
 
                             {% if product.is_extern %}
                                 <div style="position:absolute; right:6px; top:6px">
-                                    <i class="notranslate material-icons-round sv-blauw-text">open_in_new</i>
+                                    <i class="notranslate material-symbol sv-blauw-text">open_in_new</i>
                                 </div>
                             {% endif %}
 

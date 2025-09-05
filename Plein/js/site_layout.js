@@ -32,7 +32,7 @@ window.addEventListener("load", () => {
     //console.log("load!");
 
     // de fonts zijn nu helemaal ingeladen, dus we kunnen de iconen tonen
-    const icons = document.getElementsByClassName('material-icons-round');
+    const icons = document.getElementsByClassName('material-symbol');
     Array.from(icons).forEach(icon => {
         icon.style.display = 'inline-block';
     });

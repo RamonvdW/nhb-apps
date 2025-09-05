@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2024 Ramon van der Winkel.
+                Copyright (c) 2020-2025 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -65,15 +65,15 @@
                     {% if obj.url_uitslag_controleren %}
 
                         <a class="btn-sv-blauw hide-on-med-and-down" href="{{ obj.url_uitslag_controleren }}">
-                            <i class="notranslate material-icons-round left">visibility</i>Controleer</a>
+                            <i class="notranslate material-symbol left">visibility</i>Controleer</a>
 
                         <a class="btn-sv-blauw hide-on-large-and-up" href="{{ obj.url_uitslag_controleren }}">
-                            <i class="notranslate material-icons-round">visibility</i></a>
+                            <i class="notranslate material-symbol">visibility</i></a>
 
                     {% elif obj.url_uitslag_invoeren %}
 
                         <a class="btn-sv-rood" href="{{ obj.url_uitslag_invoeren }}">
-                            <i class="notranslate material-icons-round">edit</i></a>
+                            <i class="notranslate material-symbol">edit</i></a>
 
                     {% else %}
                         <i>Nog geen</i>

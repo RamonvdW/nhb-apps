@@ -114,7 +114,7 @@
                                     <form action="{{ url_afrekenen }}" method="post" onsubmit="document.getElementById('submit_knop1').disabled=true; return true;">
                                         {% csrf_token %}
                                         <button class="btn-sv-rood" id="submit_knop1" type="submit">
-                                            <i class="notranslate material-icons-round left">shopping_cart_checkout</i>Betalen</button>
+                                            <i class="notranslate material-symbol left">shopping_cart_checkout</i>Betalen</button>
                                     </form>
                                 </td>
                                 <td><!-- bedragen --></td>
@@ -139,7 +139,7 @@
                             <td class="hide-on-small-only"></td>
                             <td class="right-align">
                                 <a class="btn-sv-blauw modal-trigger" href="#bevestig_annuleer">
-                                    <i class="notranslate material-icons-round left">delete</i>Annuleer</a>
+                                    <i class="notranslate material-symbol left">delete</i>Annuleer</a>
                             </td>
                         </tr>
 

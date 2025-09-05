@@ -132,7 +132,7 @@
 
                         <div class="fixed-action-btn" style="display:none">
                             <button class="btn-sv-rood" id="submit_knop3" type="submit" disabled>
-                                <i class="notranslate material-icons-round left">check</i>Wijzigen opslaan</button>
+                                <i class="notranslate material-symbol left">check</i>Wijzigen opslaan</button>
                         </div>
 
                     </form>

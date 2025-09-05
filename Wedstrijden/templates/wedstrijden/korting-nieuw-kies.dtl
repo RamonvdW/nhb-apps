@@ -50,7 +50,7 @@
 
             {% include 'plein/card_icon.dtl' with title="Vereniging" text="Voor alle leden van jullie vereniging." icon="home" onclick="keuze('vereniging')" %}
 
-            {% include 'plein/card_icon.dtl' with title="Combinatie" text="Voor inschrijving op meerdere wedstrijden." icon="join_full" onclick="keuze('combi')" %}
+            {% include 'plein/card_icon.dtl' with title="Combinatie" text="Voor inschrijving op meerdere wedstrijden." icon="stack" onclick="keuze('combi')" %}
         </div>
     </div>
 
