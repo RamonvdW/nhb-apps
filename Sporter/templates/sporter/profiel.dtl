@@ -59,7 +59,7 @@
         <div class="row-sv-blauw">
             <div class="col s12">
                 <!-- bondspas -->
-                {% include 'plein/card_icon.dtl' with title="Bondspas" text="Bekijk je digitale bondspas." icon="card_membership" url=url_bondspas %}
+                {% include 'plein/card_icon.dtl' with title="Bondspas" text="Bekijk je digitale bondspas." icon="id_card" url=url_bondspas %}
             </div>
         </div>
 

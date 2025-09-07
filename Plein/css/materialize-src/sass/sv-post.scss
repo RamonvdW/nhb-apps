@@ -610,26 +610,9 @@ input.table-filter {
   color: white;
 }
 
-
-.material-icons-round {
-    font-family: "Material Icons Round";
-    font-weight: normal;
-    font-style: normal;
-    font-size: 24px;
-    line-height: 1;
-    letter-spacing: normal;
-    text-transform: none;
-    /* display: inline-block; */
-    display: none;    /* wordt aangepast nadat het font geladen is - zie on-load handler */
-    transition: opacity 0.24s ease-in-out;
-    white-space: nowrap;
-    word-wrap: normal;
-    direction: ltr;
-    width: 21px;      /* prevent layout shifts due to width = length of selector text */
-}
-
 .material-symbol {
   font-family: 'Material Symbols Rounded';
+  font-variation-settings: 'FILL' 1;
   font-weight: normal;
   font-style: normal;
   font-size: 24px;

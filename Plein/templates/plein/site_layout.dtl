@@ -28,7 +28,7 @@
 
         {% include 'plein/site_layout_fonts.dtl' %}
 
-        <link rel="stylesheet" href="{% static 'css/materialize-new-282.css' %}">
+        <link rel="stylesheet" href="{% static 'css/materialize-new-283.css' %}">
 
         {% include 'plein/site_layout_favicons.dtl' %}
 
@@ -123,7 +123,7 @@
                         <li class="divider"></li>
                         <li>
                             <a href="{{ menu_url_profiel }}">
-                                <i class="notranslate material-symbol sv-rood-text">account_box</i>Mijn pagina</a>
+                                <i class="notranslate material-symbol sv-rood-text">account_circle</i>Mijn pagina</a>
                         </li>
                     {% endif %}
 
@@ -131,7 +131,7 @@
                         <li class="divider"></li>
                         <li>
                             <a href="{{ menu_url_bondspas }}">
-                                <i class="notranslate material-symbol sv-rood-text">card_membership</i>Toon bondspas</a>
+                                <i class="notranslate material-symbol sv-rood-text">id_card</i>Toon bondspas</a>
                         </li>
                     {% endif %}
 

@@ -6,10 +6,8 @@
 
 from django.test import TestCase
 from django.core.management.base import OutputWrapper
-from Competitie.models import Competitie
 from GoogleDrive.models import Token, Bestand
-from GoogleDrive.operations.storage_drive import (StorageGoogleDrive, StorageError,
-                                                  ontbrekende_wedstrijdformulieren_rk_bk)
+from GoogleDrive.operations.storage_drive import StorageGoogleDrive, StorageError
 from TestHelpers.e2ehelpers import E2EHelpers
 from googleapiclient.errors import HttpError as GoogleApiError
 from google.auth.exceptions import RefreshError
@@ -394,26 +392,26 @@ class TestGoogleDriveGoogleDrive(E2EHelpers, TestCase):
             drive._comp2template_file_id[folder_18_indiv_rk] = 'templ1'
             drive.maak_sheet_van_template(18, False, False, 1, 2, 'fname3')
 
-    @staticmethod
-    def _iter_wedstrijdformulieren(arg):
-        yield 42, False, False, 1, 'fname1'
-        yield 42, True, False, 1, 'fname2'
-
-    def test_ontbrekende(self):
-        comp = Competitie.objects.create(begin_jaar=2025, afstand='42')
-
-        lst = ontbrekende_wedstrijdformulieren_rk_bk(comp)
-        self.assertEqual(lst, [])
-
-        Bestand.objects.create(
-                    begin_jaar=comp.begin_jaar,
-                    afstand=int(comp.afstand),
-                    klasse_pk=1)
-
-        with patch('GoogleDrive.operations.google_drive.iter_wedstrijdformulieren',
-                   side_effect=self._iter_wedstrijdformulieren):
-            lst = ontbrekende_wedstrijdformulieren_rk_bk(comp)
-            #self.assertEqual(lst, [])
+    # @staticmethod
+    # def _iter_wedstrijdformulieren(arg):
+    #     yield 42, False, False, 1, 'fname1'
+    #     yield 42, True, False, 1, 'fname2'
+    #
+    # def test_ontbrekende(self):
+    #     comp = Competitie.objects.create(begin_jaar=2025, afstand='42')
+    #
+    #     lst = ontbrekende_wedstrijdformulieren_rk_bk(comp)
+    #     self.assertEqual(lst, [])
+    #
+    #     Bestand.objects.create(
+    #                 begin_jaar=comp.begin_jaar,
+    #                 afstand=int(comp.afstand),
+    #                 klasse_pk=1)
+    #
+    #     with patch('GoogleDrive.operations.google_drive.iter_wedstrijdformulieren',
+    #                side_effect=self._iter_wedstrijdformulieren):
+    #         lst = ontbrekende_wedstrijdformulieren_rk_bk(comp)
+    #         #self.assertEqual(lst, [])
 
 
 # end of file

@@ -1,9 +1,8 @@
-/* fallback */
 @font-face {
   font-family: 'Material Symbols Rounded';
   font-style: normal;
   font-weight: 400;
-  src: url(https://fonts.gstatic.com/s/materialsymbolsrounded/v277/sykO-zNym6YjUruM-QrEh7-nyTnjDwKNJ_190FjpZIv15yDcOq7BDN-Rb9vUe2jjwjHK-P3BukXX.woff2) format('woff2');
+  src: url(https://fonts.gstatic.com/s/materialsymbolsrounded/v277/syl0-zNym6YjUruM-QrEh7-nyTnjDwKNJ_190FjpZIvDmUSVOK7BDJ_vb9vUSzq3wzLK-P0J-V_Zs-QtQth3-jOcbTCVpeRL2w5rwZu2rIelXxI.ttf) format('truetype');
 }
 
 .material-symbols-rounded {
@@ -18,6 +17,4 @@
   white-space: nowrap;
   word-wrap: normal;
   direction: ltr;
-  -moz-font-feature-settings: 'liga';
-  -moz-osx-font-smoothing: grayscale;
 }
