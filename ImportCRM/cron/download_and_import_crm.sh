@@ -64,7 +64,7 @@ curl -6 -sS -H "secret: $SECRET" -I "$URL" 2>&1 | sed 's#\r##g' >> "$LOG"
 
 # controleer dat bovenstaande HEAD goed werkte
 NEW_HTTP=$(grep --binary-files=text -E "HTTP/1.1 |HTTP/2 " "$LOG" | tail -1 | tr '\r' '\n')
-if [ ! "$NEW_HTTP" == " 200 OK" ]
+if [[ "$NEW_HTTP" != *" 200 OK"* ]]
 then
     echo "[ERROR] Failed to download: missing 'HTTP/* 200 OK' in response" >> "$LOG"
 else
