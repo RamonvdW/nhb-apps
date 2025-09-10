@@ -66,7 +66,7 @@ curl -6 -sS -H "secret: $SECRET" -I "$URL" 2>&1 | sed 's#\r##g' >> "$LOG"
 NEW_HTTP=$(grep --binary-files=text -E "HTTP/1.1 200 OK|HTTP/2 200" "$LOG" | tail -1 | tr '\r' '\n')
 if [ -z "$NEW_HTTP" ]]
 then
-    echo "[ERROR] Failed to download: missing HTTP status 200 in response' >> "$LOG"
+    echo "[ERROR] Failed to download: missing HTTP status 200 in response" >> "$LOG"
 else
     # haal de nieuwe Last-Modified header op
     NEW_LAST=$(grep --binary-files=text --ignore-case "Last-Modified:" "$LOG" | tail -1)
