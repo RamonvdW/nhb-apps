@@ -12,7 +12,7 @@ attrs==25.3.0
     # via
     #   outcome
     #   trio
-beautifulsoup4==4.13.4
+beautifulsoup4==4.13.5
     # via -r requirements_dev.in
 cachetools==5.5.2
     # via
@@ -27,11 +27,11 @@ charset-normalizer==3.4.3
     # via
     #   -r requirements.txt
     #   requests
-coverage==7.10.3
+coverage==7.10.6
     # via
     #   -r requirements_dev.in
     #   django-coverage-plugin
-django==5.2.5
+django==5.2.6
     # via
     #   -r requirements.txt
     #   django-debug-toolbar
@@ -48,7 +48,7 @@ et-xmlfile==2.0.0
     # via
     #   -r requirements.txt
     #   openpyxl
-fonttools==4.59.1
+fonttools==4.59.2
     # via -r requirements_dev.in
 google-api-core==2.25.1
     # via
@@ -56,7 +56,7 @@ google-api-core==2.25.1
     #   google-api-python-client
     #   google-geo-type
     #   google-maps-routing
-google-api-python-client==2.179.0
+google-api-python-client==2.181.0
     # via -r requirements.txt
 google-auth==2.40.3
     # via
@@ -99,7 +99,7 @@ h11==0.16.0
     # via wsproto
 html5validator==0.4.2
     # via -r requirements_dev.in
-httplib2==0.22.0
+httplib2==0.30.0
     # via
     #   -r requirements.txt
     #   google-api-python-client
@@ -148,7 +148,7 @@ protobuf==6.32.0
     #   googleapis-common-protos
     #   grpcio-status
     #   proto-plus
-psycopg==3.2.9
+psycopg==3.2.10
     # via -r requirements.txt
 pyasn1==0.6.1
     # via
@@ -173,7 +173,7 @@ pyyaml==6.0.2
     # via html5validator
 qrcode==8.2
     # via -r requirements.txt
-requests==2.32.4
+requests==2.32.5
     # via
     #   -r requirements.txt
     #   google-api-core
@@ -189,26 +189,26 @@ rsa==4.9.1
     # via
     #   -r requirements.txt
     #   google-auth
-selenium==4.35.0
+selenium==4.32.0
     # via -r requirements_dev.in
 sniffio==1.3.1
     # via trio
 sortedcontainers==2.4.0
     # via trio
-soupsieve==2.7
+soupsieve==2.8
     # via beautifulsoup4
 sqlparse==0.5.3
     # via
     #   -r requirements.txt
     #   django
     #   django-debug-toolbar
-trio==0.30.0
+trio==0.31.0
     # via
     #   selenium
     #   trio-websocket
 trio-websocket==0.12.2
     # via selenium
-typing-extensions==4.14.1
+typing-extensions==4.15.0
     # via
     #   -r requirements.txt
     #   beautifulsoup4
