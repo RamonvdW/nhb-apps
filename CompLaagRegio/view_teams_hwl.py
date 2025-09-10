@@ -71,6 +71,7 @@ class TeamsRegioView(UserPassesTestMixin, TemplateView):
 
     """ Laat de HWL de teams beheren die door deze vereniging opgesteld
         worden voor de regiocompetitie.
+        RCL komt ook hier.
     """
 
     # class variables shared by all instances
@@ -279,7 +280,8 @@ class TeamsRegioView(UserPassesTestMixin, TemplateView):
 class WijzigRegioTeamsView(UserPassesTestMixin, TemplateView):
 
     """ laat de HWL een nieuw team aanmaken of een bestaand team wijzigen (of zelfs verwijderen)
-        voor de regiocompetitie
+        voor de regiocompetitie.
+        Ook de RCL komt hier.
     """
 
     # class variables shared by all instances
@@ -321,8 +323,12 @@ class WijzigRegioTeamsView(UserPassesTestMixin, TemplateView):
         comp.bepaal_fase()
 
         if comp.fase_teams > 'D':
-            # mag niet meer wijzigen
-            raise Http404('Competitie is niet in de juiste fase')
+            if self.rol_nu == Rol.ROL_RCL and comp.fase_teams == 'F' and deelcomp.huidige_team_ronde < 1:
+                # RCL mag nog wijzigingen maken voordat ronde 1 opgestart is
+                pass
+            else:
+                # mag niet meer wijzigen
+                raise Http404('Competitie is niet in de juiste fase')
 
         return deelcomp
 
