@@ -52,7 +52,7 @@ DOWNLOAD=0
 echo "[INFO] retrieving headers" >> "$LOG"
 
 # kijk of een download nodig is
-PREV_LAST=$(grep --binary-files=text "Last-Modified:" "$LOG" | tail -1)     # empty at start of new day
+PREV_LAST=$(grep --binary-files=text --ignore-case "Last-Modified:" "$LOG" | tail -1)     # empty at start of new day
 
 # download the headers only
 # -6 = connect using IPv6 only
@@ -63,13 +63,13 @@ PREV_LAST=$(grep --binary-files=text "Last-Modified:" "$LOG" | tail -1)     # em
 curl -6 -sS -H "secret: $SECRET" -I "$URL" 2>&1 | sed 's#\r##g' >> "$LOG"
 
 # controleer dat bovenstaande HEAD goed werkte
-NEW_HTTP=$(grep --binary-files=text "HTTP/1.1 " "$LOG" | tail -1 | tr '\r' '\n')
-if [ ! "$NEW_HTTP" == "HTTP/1.1 200 OK" ]
+NEW_HTTP=$(grep --binary-files=text -E "HTTP/1.1 200 OK|HTTP/2 200" "$LOG" | tail -1 | tr '\r' '\n')
+if [ -z "$NEW_HTTP" ]
 then
-    echo "[ERROR] Failed to download: $NEW_HTTP" >> "$LOG"
+    echo "[ERROR] Failed to download: missing HTTP status 200 in response" >> "$LOG"
 else
     # haal de nieuwe Last-Modified header op
-    NEW_LAST=$(grep --binary-files=text "Last-Modified:" "$LOG" | tail -1)
+    NEW_LAST=$(grep --binary-files=text --ignore-case "Last-Modified:" "$LOG" | tail -1)
 
     if [ "$PREV_LAST" != "$NEW_LAST" ]
     then
