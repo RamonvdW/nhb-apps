@@ -244,7 +244,7 @@ class TestGoogleDriveGoogleDrive(E2EHelpers, TestCase):
         # eerste aanroep, bestand bestaat nog niet
         self.assertEqual(Bestand.objects.count(), 0)
         my_service = GoogleApiMock(verbose=False)
-        with patch('GoogleDrive.operations.google_drive.build', return_value=my_service):
+        with patch('GoogleDrive.operations.storage_drive.build', return_value=my_service):
             drive._comp2template_file_id[folder_18_indiv_rk] = 'templ1'
             file_id = drive.maak_sheet_van_template(18, False, False, 1, 3, 'fname1')
             self.assertEqual(file_id, 'copy100')
@@ -258,7 +258,7 @@ class TestGoogleDriveGoogleDrive(E2EHelpers, TestCase):
         self.assertTrue(str(bestand) != '')
 
         # tweede aanroep; service is al geïnitialiseerd, file bestaat op
-        with patch('GoogleDrive.operations.google_drive.build', return_value=my_service):
+        with patch('GoogleDrive.operations.storage_drive.build', return_value=my_service):
             file_id = drive.maak_sheet_van_template(18, False, False, 1, 3, 'fname1')
             self.assertEqual(file_id, 'copy100')
         self.assertEqual(Bestand.objects.count(), 1)
@@ -271,7 +271,7 @@ class TestGoogleDriveGoogleDrive(E2EHelpers, TestCase):
         # GoogleApiError
         drive = StorageGoogleDrive(out, 2025, share_with_emails)
         my_service = GoogleApiMock(verbose=False)
-        with patch('GoogleDrive.operations.google_drive.build', return_value=my_service):
+        with patch('GoogleDrive.operations.storage_drive.build', return_value=my_service):
             my_service.prime_error('test A', 'top', 'GoogleApiError')
             with self.assertRaises(StorageError) as exc:
                 drive.maak_sheet_van_template(18, False, False, 1, 3, 'fname')
@@ -282,7 +282,7 @@ class TestGoogleDriveGoogleDrive(E2EHelpers, TestCase):
         # RefreshError
         drive = StorageGoogleDrive(out, 2025, share_with_emails)
         my_service = GoogleApiMock(verbose=False)
-        with patch('GoogleDrive.operations.google_drive.build', return_value=my_service):
+        with patch('GoogleDrive.operations.storage_drive.build', return_value=my_service):
             my_service.prime_error('test B', 'top', 'RefreshError')
             with self.assertRaises(StorageError) as exc:
                 drive.maak_sheet_van_template(18, False, False, 1, 3, 'fname')
@@ -293,7 +293,7 @@ class TestGoogleDriveGoogleDrive(E2EHelpers, TestCase):
         # geen 'files' in response
         drive = StorageGoogleDrive(out, 2025, share_with_emails)
         my_service = GoogleApiMock(verbose=False)
-        with patch('GoogleDrive.operations.google_drive.build', return_value=my_service):
+        with patch('GoogleDrive.operations.storage_drive.build', return_value=my_service):
             my_service.prime_error('test C', 'top', 'no files')
             with self.assertRaises(StorageError) as exc:
                 drive.maak_sheet_van_template(18, False, False, 1, 3, 'fname')
@@ -304,7 +304,7 @@ class TestGoogleDriveGoogleDrive(E2EHelpers, TestCase):
         # kan globale 'templates' folder niet vinden
         drive = StorageGoogleDrive(out, 2025, share_with_emails)
         my_service = GoogleApiMock(verbose=False)
-        with patch('GoogleDrive.operations.google_drive.build', return_value=my_service):
+        with patch('GoogleDrive.operations.storage_drive.build', return_value=my_service):
             my_service.prime_error('test D', 'templates', 'empty folder')
             with self.assertRaises(StorageError) as exc:
                 drive.maak_sheet_van_template(18, False, False, 1, 3, 'fname')
@@ -320,7 +320,7 @@ class TestGoogleDriveGoogleDrive(E2EHelpers, TestCase):
         # GoogleApiError
         drive = StorageGoogleDrive(out, 2025, share_with_emails)
         my_service = GoogleApiMock(verbose=False)
-        with patch('GoogleDrive.operations.google_drive.build', return_value=my_service):
+        with patch('GoogleDrive.operations.storage_drive.build', return_value=my_service):
             my_service.prime_error('test F', 'folder204', 'GoogleApiError')
             with self.assertRaises(StorageError) as exc:
                 drive.maak_sheet_van_template(18, False, False, 1, 3, 'fname')
@@ -337,7 +337,7 @@ class TestGoogleDriveGoogleDrive(E2EHelpers, TestCase):
         drive = StorageGoogleDrive(out, 2025, share_with_emails)
         folder_18_indiv_rk = drive._params_to_folder_name(18, False, False)
         my_service = GoogleApiMock(verbose=False)
-        with patch('GoogleDrive.operations.google_drive.build', return_value=my_service):
+        with patch('GoogleDrive.operations.storage_drive.build', return_value=my_service):
             drive._comp2template_file_id[folder_18_indiv_rk] = 'templ1'
             my_service.prime_error('test L1', 'site1234', 'GoogleApiError')
             with self.assertRaises(StorageError) as exc:
@@ -349,7 +349,7 @@ class TestGoogleDriveGoogleDrive(E2EHelpers, TestCase):
         # trigger de "no files" fout tijdens list_folder
         drive = StorageGoogleDrive(out, 2025, share_with_emails)
         my_service = GoogleApiMock(verbose=False)
-        with patch('GoogleDrive.operations.google_drive.build', return_value=my_service):
+        with patch('GoogleDrive.operations.storage_drive.build', return_value=my_service):
             drive._comp2template_file_id[folder_18_indiv_rk] = 'templ1'
             my_service.prime_error('test L2', 'site1234', 'no files')
             with self.assertRaises(StorageError) as exc:
@@ -361,7 +361,7 @@ class TestGoogleDriveGoogleDrive(E2EHelpers, TestCase):
         # trigger de KeyError fout tijdens list_folder
         drive = StorageGoogleDrive(out, 2025, share_with_emails)
         my_service = GoogleApiMock(verbose=False)
-        with patch('GoogleDrive.operations.google_drive.build', return_value=my_service):
+        with patch('GoogleDrive.operations.storage_drive.build', return_value=my_service):
             with self.assertRaises(StorageError) as exc:
                 drive.maak_sheet_van_template(18, False, False, 1, 3, 'fname3')
             self.assertEqual("{google_drive} KeyError: '18 Indiv RK'",
@@ -375,7 +375,7 @@ class TestGoogleDriveGoogleDrive(E2EHelpers, TestCase):
         # voorkom dat de folder seizoen gevonden wordt
         drive = StorageGoogleDrive(out, 2025, share_with_emails)
         my_service = GoogleApiMock(verbose=False)
-        with patch('GoogleDrive.operations.google_drive.build', return_value=my_service):
+        with patch('GoogleDrive.operations.storage_drive.build', return_value=my_service):
             with patch.object(drive, '_vind_of_maak_seizoen_folder', return_value=''):
                 # omdat de seizoen folder er niet is, zijn de deel-folders er ook niet
                 with self.assertRaises(StorageError) as exc:
@@ -388,7 +388,7 @@ class TestGoogleDriveGoogleDrive(E2EHelpers, TestCase):
         drive = StorageGoogleDrive(out, 2025, share_with_emails)
         folder_18_indiv_rk = drive._params_to_folder_name(18, False, False)
         my_service = GoogleApiMock(verbose=False)
-        with patch('GoogleDrive.operations.google_drive.build', return_value=my_service):
+        with patch('GoogleDrive.operations.storage_drive.build', return_value=my_service):
             drive._comp2template_file_id[folder_18_indiv_rk] = 'templ1'
             drive.maak_sheet_van_template(18, False, False, 1, 2, 'fname3')
 
@@ -408,7 +408,7 @@ class TestGoogleDriveGoogleDrive(E2EHelpers, TestCase):
     #                 afstand=int(comp.afstand),
     #                 klasse_pk=1)
     #
-    #     with patch('GoogleDrive.operations.google_drive.iter_wedstrijdformulieren',
+    #     with patch('GoogleDrive.operations.storage_drive.iter_wedstrijdformulieren',
     #                side_effect=self._iter_wedstrijdformulieren):
     #         lst = ontbrekende_wedstrijdformulieren_rk_bk(comp)
     #         #self.assertEqual(lst, [])
