@@ -7,7 +7,7 @@
 FONTS_DIR="../../static/fonts"
 
 DEST="firasans-medium-subset-mh-v"
-WOFF_DEST="$FONTS_DIR/$DEST.woff"
+WOFF_DEST="$FONTS_DIR/$DEST.woff2"
 # TTX_DEST="$FONTS_DIR/$DEST.ttx"
 DTL_FONTS="../../templates/plein/site_layout_fonts.dtl"
 
@@ -27,7 +27,7 @@ echo "[INFO] Source: $FULL"
 
 # reduceer
 rm -f "$WOFF_DEST"
-pyftsubset "$TTF_SOURCE" --flavor=woff --output-file="$WOFF_DEST" --unicodes=20-7e --no-layout-closure
+pyftsubset "$TTF_SOURCE" --flavor=woff2 --output-file="$WOFF_DEST" --unicodes=20-7e --no-layout-closure
 
 # get the sequence number
 LINE=$(grep "$DEST" "$DTL_FONTS")
@@ -38,14 +38,14 @@ NEW_NR=$(( NR + 1 ))
 echo "[INFO] Decided sequence number: $NEW_NR"
 
 # remove the old file
-rm "$FONTS_DIR/$DEST$NR.*"
+rm "$FONTS_DIR/$DEST$NR"*
 
 # move to the destination
-WOFF_DEST_NEW="$FONTS_DIR/$DEST$NEW_NR.woff"
+WOFF_DEST_NEW="$FONTS_DIR/$DEST$NEW_NR.woff2"
 mv "$WOFF_DEST" "$WOFF_DEST_NEW"
 
 # replace the sequence number in the referencing django template
-sed -i "s/firasans-medium-subset-mh-v.*\.woff/firasans-medium-subset-mh-v$NEW_NR.woff/" "$DTL_FONTS"
+sed -i "s/firasans-medium-subset-mh-v.*\.woff2/firasans-medium-subset-mh-v$NEW_NR.woff2/" "$DTL_FONTS"
 
 # maak een dump van de nieuwe subset
 # rm -f "$TTX_DEST"     # avoids incremental filenames

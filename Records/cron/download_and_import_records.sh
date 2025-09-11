@@ -14,7 +14,7 @@ USER_WWW="$1"
 
 if [ $# -ne 1 ]
 then
-    echo "Provide one argument: user name (for example www-data)"
+    echo "Provide one argument: username (for example www-data)"
     exit 1
 fi
 

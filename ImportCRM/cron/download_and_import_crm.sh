@@ -112,7 +112,7 @@ then
         # if present, compare the number of changes
         if [ -e "$OLD_CRM" ]
         then
-            echo "[INFO] Checking differences with previous import"
+            echo "[INFO] Checking differences with previous import" >> "$LOG"
             # -u = unbuffered --> needed to maintain the order of stdout and stderr lines
             python3 -u ./manage.py diff_crm_jsons "$OLD_CRM" "$TMP_FILE" &>> "$LOG"
             DIFF_RES=$?

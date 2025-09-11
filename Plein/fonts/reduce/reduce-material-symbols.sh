@@ -26,7 +26,7 @@ echo "[INFO] Source: $SOURCE_FULL"
 
 # reduceer
 rm -f "$DEST"
-pyftsubset "$FONTS_SOURCE" --output-file="$DEST" --glyphs-file="$GLYPH_NAMES" --unicodes=5f-7a,30-39 --no-layout-closure --name-IDs=*
+pyftsubset "$FONTS_SOURCE" --output-file="$DEST" --flavor=woff2 --glyphs-file="$GLYPH_NAMES" --unicodes=5f-7a,30-39 --no-layout-closure --name-IDs=*
 
 if [ -e "$DEST" ]
 then
@@ -44,10 +44,10 @@ echo "[INFO] Found current sequence number: $NR"
 NEW_NR=$(( NR + 1 ))
 echo "[INFO] Decided sequence number: $NEW_NR"
 
-DEST_NEW="$FONTS_DIR/$SUBSET_NAME$NR.woff2"
+DEST_NEW="$FONTS_DIR/$SUBSET_NAME${NEW_NR}.woff2"
 
 # remove the old file
-[ -n "$NR" ] && rm "$DEST_NEW"
+[ -f "$DEST_NEW" ] && rm "$DEST_NEW"
 
 # rename the destination
 mv "$DEST" "$DEST_NEW"
