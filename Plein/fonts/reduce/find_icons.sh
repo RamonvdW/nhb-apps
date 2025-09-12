@@ -31,7 +31,7 @@ find . -name \*py ! -name models.py ! -name test_asserts.py -exec grep -E 'icon=
 HANDLED+="|kaartje.icon|kaartje.icoon|ander.icoon|{{ korting.icon_name }}"
 
 # dynamische icons vanuit script
-grep set_collapsible_icon\(id, Plein/js/site_layout.js | tr \" \' |cut -d\' -f2 >> "$OUT_TMP"
+grep set_collapsible_icon\(id, Overig/js/collapsible_icons.js | tr \" \' |cut -d\' -f2 >> "$OUT_TMP"
 
 # icons vanuit de Records module, eervolle vermeldingen
 ./manage.py shell --no-imports -c 'from Records.models import AnderRecord; qset=AnderRecord.objects.values_list("icoon", flat=True); print("\n".join(qset))' | grep -vE "^$" >> "$OUT_TMP"

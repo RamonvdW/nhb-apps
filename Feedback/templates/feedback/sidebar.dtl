@@ -31,19 +31,19 @@
                 <div class="center" style="display:inline-flex">
                     <div>
                         <a href="{% url 'Feedback:bevinding' bevinding='plus' op_pagina=op_pagina volledige_url=volledige_url %}" target="_blank" rel="noopener noreferrer">
-                            <i class="notranslate material-symbol green-text" style="font-size:2.5rem; width:50px">sentiment_satisfied</i>
+                            <i class="notranslate material-symbol-no-fill green-text" style="font-size:2.5rem; width:50px">sentiment_satisfied</i>
                         </a>
                     </div>
 
                     <div>
                         <a href="{% url 'Feedback:bevinding' bevinding='nul'  op_pagina=op_pagina volledige_url=volledige_url %}" target="_blank" rel="noopener noreferrer">
-                            <i class="notranslate material-symbol sv-blauw-text" style="font-size:2.5rem; width:50px">sentiment_neutral</i>
+                            <i class="notranslate material-symbol material-symbol-no-fill sv-blauw-text" style="font-size:2.5rem; width:50px">sentiment_neutral</i>
                         </a>
                     </div>
 
                     <div>
                         <a href="{% url 'Feedback:bevinding' bevinding='min'  op_pagina=op_pagina volledige_url=volledige_url %}" target="_blank" rel="noopener noreferrer">
-                            <i class="notranslate material-symbol sv-rood-text" style="font-size:2.5rem; width:50px">sentiment_dissatisfied</i>
+                            <i class="notranslate material-symbol-no-fill sv-rood-text" style="font-size:2.5rem; width:50px">sentiment_dissatisfied</i>
                         </a>
                     </div>
                 </div>
