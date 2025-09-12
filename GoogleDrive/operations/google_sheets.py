@@ -6,7 +6,7 @@
 
 """ Google Sheet wedstrijdformulier openen, inlezen (uitslag) en bijwerken (deelnemerslijst) """
 
-from django.utils import timezone
+from django.conf import settings
 from googleapiclient.errors import HttpError as GoogleApiError
 from google.oauth2.service_account import Credentials
 from googleapiclient.discovery import build
@@ -19,7 +19,7 @@ import socket
 
 class GoogleSheet:
 
-    SERVICE_ACCOUNT_FILE = '/tmp/mh_wedstrijdformulieren_service-account.json'
+    SERVICE_ACCOUNT_FILE = settings.CREDENTIALS_PATH + 'mh-wedstrijdformulieren_service-account.json'
 
     SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
 

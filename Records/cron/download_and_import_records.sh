@@ -8,8 +8,8 @@
 
 LOG_DIR="/var/log/www"
 SPOOL_DIR="/var/spool/records"
-TMP_DIR="/tmp/downloader"
-RECORDS="/tmp/downloader/records.json"      # note: download_gsheet.py contains the same path
+TMP_DIR="/tmp/downloader_records"
+JSON="$TMP_DIR/records.json"      # note: download_gsheet.py contains the same path
 USER_WWW="$1"
 
 if [ $# -ne 1 ]
@@ -47,7 +47,6 @@ fi
 # prepare to download
 rm -rf "$TMP_DIR"
 mkdir -p "$TMP_DIR"
-cp "./downloader_service-account.json" "$TMP_DIR/service-account.json"
 
 # calculate the checksum for the latest downloaded file
 LATEST_FILE=$(find "$SPOOL_DIR" -name 'records_*json' | sort | tail -1)
@@ -56,51 +55,47 @@ if [ -e "$LATEST_FILE" ]
 then
     echo "[INFO] Latest records file is $LATEST_FILE" >> "$LOG"
     LATEST_HASH=$(sha1sum < "$LATEST_FILE")
-    echo "[INFO] Hash of previously downloaded records: $LATEST_HASH" >> "$LOG"
+    echo "[INFO] Hash van vorige download: $LATEST_HASH" >> "$LOG"
 fi
 
-# download the records
-echo "[INFO] Starting download" >> "$LOG"
-# -u = unbuffered --> needed to maintain the order of stdout and stderr lines
-python3 -u ./download_gsheet.py &>> "$LOG"
+# move from Records/cron/ to top-dir
+cd ../..
+
+# download het bestand en opslaan als JSON
+./manage.py download_records "$JSON" &>> "$LOG"
 
 # import or barf
-if [ -e "$RECORDS" ]
+if [ -e "$JSON" ]
 then
-    echo "[INFO] Download successful" >> "$LOG"
+    echo "[INFO] Download is gelukt" >> "$LOG"
 
     # calculate the hash so we can detect if it has not changed
-    HASH=$(sha1sum < "$RECORDS")
-    echo "[INFO] Hash of newly downloaded records: $HASH" >> "$LOG"
+    HASH=$(sha1sum < "$JSON")
+    echo "[INFO] Hash van nieuwe download: $HASH" >> "$LOG"
 
     if [ "$HASH" != "$LATEST_HASH" ]
     then
-        # file has changed, so store and import!
+        # file has changed, so store and import
 
         SPOOL_FILE="$SPOOL_DIR/records_$STAMP.json"
         echo "[INFO] Storing records file in $SPOOL_FILE" >> "$LOG"
-        cp "$RECORDS" "$SPOOL_FILE"
-
-        # move from Records/cron/ to top-dir
-        #echo "[DEBUG] pwd=$PWD"
-        cd ../..
-        #echo "[DEBUG] pwd=$PWD"
+        cp "$JSON" "$SPOOL_FILE"
 
         # import the records
         echo "[INFO] Importing records" >> "$LOG"
         ./manage.py import_records "$SPOOL_FILE" &>> "$LOG"
 
-        echo "[INFO] Decide best records" >> "$LOG"
+        echo "[INFO] Bepaal beste records" >> "$LOG"
         ./manage.py bepaal_beste_records &>> "$LOG"
     else
-        echo "[INFO] Records have not changed" >> "$LOG"
+        echo "[INFO] Records zijn ongewijzigd" >> "$LOG"
     fi
 
     # clean up
     echo "[INFO] Cleaning up" >> "$LOG"
     rm -rf "$TMP_DIR" &>> "$LOG"
 else
-    echo "[ERROR] Download failed: cannot locate $RECORDS" >> "$LOG"
+    echo "[ERROR] Download is niet gelukt (kan bestand $JSON niet vinden)" >> "$LOG"
 fi
 
 STAMP=$(date +"%Y%m%d_%H%M%S")

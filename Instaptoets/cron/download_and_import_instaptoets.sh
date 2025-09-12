@@ -8,13 +8,13 @@
 
 LOG_DIR="/var/log/www"
 SPOOL_DIR="/var/spool/instaptoets"
-TMP_DIR="/tmp/downloader"
-JSON="/tmp/downloader/instaptoets.json"      # note: download_gsheet.py contains the same path
+TMP_DIR="/tmp/downloader_instaptoets"
+JSON="$TMP_DIR/instaptoets.json"
 USER_WWW="$1"
 
 if [ $# -ne 1 ]
 then
-    echo "Provide one argument: user name (for example www-data)"
+    echo "Provide one argument: username (for example www-data)"
     exit 1
 fi
 
@@ -47,7 +47,6 @@ fi
 # prepare to download
 rm -rf "$TMP_DIR"
 mkdir -p "$TMP_DIR"
-cp "./downloader_service-account.json" "$TMP_DIR/service-account.json"
 
 # calculate the checksum for the latest downloaded file
 LATEST_FILE=$(find "$SPOOL_DIR" -name 'instaptoets_*json' | sort | tail -1)
@@ -59,10 +58,11 @@ then
     echo "[INFO] Hash van vorige download: $LATEST_HASH" >> "$LOG"
 fi
 
-# download the records
-echo "[INFO] Starting download" >> "$LOG"
-# -u = unbuffered --> needed to maintain the order of stdout and stderr lines
-python3 -u ./download_gsheet.py &>> "$LOG"
+# move from Instaptoets/cron/ to top-dir
+cd ../..
+
+# download het bestand en opslaan als JSON
+./manage.py download_vragenlijst "$JSON" &>> "$LOG"
 
 # import or barf
 if [ -e "$JSON" ]
@@ -81,11 +81,8 @@ then
         echo "[INFO] Instaptoets wordt opgeslagen in $SPOOL_FILE" >> "$LOG"
         cp "$JSON" "$SPOOL_FILE"
 
-        # move from Instaptoets/cron/ to top-dir
-        cd ../..
-
         # import the instaptoets
-        echo "[INFO] Instaptoets wordt ingeladen" >> "$LOG"
+        echo "[INFO] Importeer de vragenlijst van de instaptoets" >> "$LOG"
         ./manage.py import_instaptoets "$SPOOL_FILE" &>> "$LOG"
     else
         echo "[INFO] Instaptoets is ongewijzigd" >> "$LOG"

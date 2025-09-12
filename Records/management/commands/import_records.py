@@ -550,6 +550,5 @@ class Command(BaseCommand):
 
         self._import_data(data)
         self.stdout.write('Done')
-        return
 
 # end of file
