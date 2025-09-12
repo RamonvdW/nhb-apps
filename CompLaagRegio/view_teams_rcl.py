@@ -28,7 +28,6 @@ from Site.core.background_sync import BackgroundSync
 from Score.definities import AG_NUL
 from codecs import BOM_UTF8
 from types import SimpleNamespace
-import time
 import csv
 
 
@@ -59,6 +58,8 @@ class RegioTeamsTemplateView(TemplateView):
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
+
+        deelcomp = None
 
         if self.subset_filter:
             # BB/BKO/RKO mode
@@ -244,13 +245,15 @@ class RegioTeamsTemplateView(TemplateView):
             ag_str = "%05.1f" % (team.aanvangsgemiddelde * aantal_pijlen)
             team.ag_str = ag_str.replace('.', ',')
 
-            if comp.fase_teams <= 'D' and self.rol_nu == Rol.ROL_RCL:
-                team.url_aanpassen = reverse('CompLaagRegio:teams-regio-koppelen',
-                                             kwargs={'team_pk': team.pk})
+            if self.rol_nu == Rol.ROL_RCL:
+                if comp.fase_teams <= 'D':
+                    team.url_aanpassen = reverse('CompLaagRegio:teams-regio-koppelen',
+                                                 kwargs={'team_pk': team.pk})
 
-                team.url_verwijder = reverse('CompLaagRegio:teams-regio-wijzig',
-                                             kwargs={'deelcomp_pk': team.regiocompetitie.pk,
-                                                     'team_pk': team.pk})
+                if comp.fase_teams <= 'F' and deelcomp.huidige_team_ronde < 1:
+                    team.url_verwijder = reverse('CompLaagRegio:teams-regio-wijzig',
+                                                 kwargs={'deelcomp_pk': team.regiocompetitie.pk,
+                                                         'team_pk': team.pk})
             totaal_teams += 1
 
             team.break_before = is_eerste
