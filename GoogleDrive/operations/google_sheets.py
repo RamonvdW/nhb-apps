@@ -33,13 +33,25 @@ class GoogleSheet:
         self._spreadsheet_requests = list()
         self._sheet_name2id = dict()
 
-    def _connect(self):
+    def __exit__(self):
+        self._close_api()
+
+    def _setup_api(self):
         if self._api_spreadsheets is None:
             # TODO: exception handling
             creds = Credentials.from_service_account_file(self.SERVICE_ACCOUNT_FILE, scopes=self.SCOPES)
             service = build('sheets', 'v4', credentials=creds)
             self._api_spreadsheets = service.spreadsheets()          # supports more complex operations, like delete sheet
             self._api_sheet_values = self._api_spreadsheets.values()       # supports value read/writes only
+
+    def _close_api(self):
+        for service in (self._api_spreadsheets, self._api_sheet_values):
+            if service:
+                service.close()
+        # for
+
+        self._api_spreadsheets = None
+        self._api_sheet_values = None
 
     def _execute(self, request: HttpRequest) -> dict | None:
         try:
@@ -72,7 +84,7 @@ class GoogleSheet:
         # for
 
     def selecteer_file(self, file_id):
-        self._connect()
+        self._setup_api()
         self._file_id = file_id
         self._value_changes = list()
         self._spreadsheet_requests = list()

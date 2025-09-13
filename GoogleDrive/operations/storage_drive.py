@@ -35,6 +35,9 @@ class StorageGoogleDrive(StorageBase):
         self._service_files = None
         self._service_perms = None
 
+    def __exit__(self):
+        self._close_service()
+
     @staticmethod
     def _load_credentials_json():
         token = (Token
@@ -61,6 +64,15 @@ class StorageGoogleDrive(StorageBase):
         service = build("drive", "v3", credentials=self._creds)
         self._service_files = service.files()
         self._service_perms = service.permissions()
+
+    def _close_service(self):
+        """ disconnect the persistent http2 connections """
+        for service in (self._service_files, self._service_perms):
+            if service:
+                service.close()
+        # for
+        self._service_files = None
+        self._service_perms = None
 
     def _maak_folder(self, parent_folder_id, folder_name):
         file_metadata = {

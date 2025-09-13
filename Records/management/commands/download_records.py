@@ -36,6 +36,10 @@ class Command(BaseCommand):
         creds = Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=SCOPES)
         self._gsheets_api = build('sheets', 'v4', credentials=creds).spreadsheets()
 
+    def _close_api(self):
+        self._gsheets_api.close()
+        self._gsheets_api = None
+
     def _download(self):
         try:
             # door de naam van een sheet te gebruiken as 'Range' krijg je alle cellen uit de sheet
@@ -71,5 +75,7 @@ class Command(BaseCommand):
         if data:
             fname = options['filename'][0]
             self._save_json(fname, data)
+
+        self._close_api()
 
 # end of file

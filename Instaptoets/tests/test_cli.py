@@ -6,7 +6,6 @@
 
 from django.test import TestCase
 from django.utils import timezone
-from django.core.management import CommandError
 from Geo.models import Regio
 from Instaptoets.models import Instaptoets
 from Sporter.models import Sporter
@@ -158,11 +157,10 @@ class TestInstaptoetsCli(E2EHelpers, TestCase):
 
         self.assertEqual(Instaptoets.objects.count(), 0)
         datum_str = (timezone.now() - datetime.timedelta(days=40)).date().strftime("%Y-%m-%d")
-        f1, f2 = self.run_management_command('fake_instaptoets_gehaald', self.lid_nr, datum_str)
+        self.run_management_command('fake_instaptoets_gehaald', self.lid_nr, datum_str)
         self.assertEqual(Instaptoets.objects.count(), 1)
         toets = Instaptoets.objects.first()
         self.assertTrue(toets.is_afgerond)
         self.assertTrue(toets.geslaagd)
-
 
 # end of file

@@ -36,17 +36,25 @@ class Command(BaseCommand):
         creds = Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=SCOPES)
         self._gsheets_api = build('sheets', 'v4', credentials=creds).spreadsheets()
 
+    def _close_api(self):
+        self._gsheets_api.close()
+        self._gsheets_api = None
+
     def _download(self):
         try:
             # haal alle sheet names op
             sheet_names = list()
             request = self._gsheets_api.get(
                                     spreadsheetId=settings.INSTAPTOETS_GSHEET_FILE_ID,
-                                    includeGridData=False)  # not the actual data, just the structure
+                                    # includeGridData=False,  # not the actual data, just the structure
+                                    fields='sheets/properties/title')   # limit amount of data queried
             result = request.execute()
             # self.stdout.write('[DEBUG] result: %s' % repr(result))
-            for sheet in result['sheets']:
-                sheet_names.append(sheet['properties']['title'])
+            for sheet in result.get('sheets', []):
+                props = sheet.get('properties', {})
+                title = props.get('title', None)
+                if title:   # pragma: no branch
+                    sheet_names.append(title)
             # for
             self.stdout.write('[INFO] Downloading %s sheets' % len(sheet_names))
 
@@ -67,9 +75,9 @@ class Command(BaseCommand):
             # example: [Errno -3] Temporary failure in name resolution
             self.stdout.write('[ERROR] Socket error: %s' % exc)
         except googleapiclient.errors.HttpError as exc:
-            self.stdout.write('[ERROR] HttpError from API: %s' % exc)
+            self.stdout.write('[ERROR] HttpError: %s' % exc)
         except google.auth.exceptions.TransportError as exc:
-            self.stdout.write('[ERROR] Error downloading gsheet: %s' % str(exc))
+            self.stdout.write('[ERROR] TransportError: %s' % str(exc))
 
         return None
 
@@ -88,5 +96,7 @@ class Command(BaseCommand):
         if data:
             fname = options['filename'][0]
             self._save_json(fname, data)
+
+        self._close_api()
 
 # end of file
