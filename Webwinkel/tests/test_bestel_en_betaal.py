@@ -7,15 +7,18 @@
 from django.test import TestCase
 from django.conf import settings
 from django.utils import timezone
-from Bestelling.definities import BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_GEANNULEERD
+from Bestelling.definities import (BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_GEANNULEERD,
+                                   BESTELLING_TRANSPORT_OPHALEN, BESTELLING_TRANSPORT_VERZEND)
 from Bestelling.models import BestellingMandje, Bestelling
 from Bestelling.operations import (bestel_mutatieverzoek_webwinkel_keuze, bestel_mutatieverzoek_maak_bestellingen,
                                    bestel_mutatieverzoek_annuleer)
 from Betaal.models import BetaalInstellingenVereniging
 from Geo.models import Regio
+from Mailer.models import MailQueue
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers.betaal_sim import fake_betaling
+from Vereniging.definities import VER_NR_BONDSBUREAU
 from Vereniging.models import Vereniging
 from Webwinkel.definities import KEUZE_STATUS_RESERVERING_MANDJE, KEUZE_STATUS_BESTELD, KEUZE_STATUS_BACKOFFICE
 from Webwinkel.models import WebwinkelProduct, WebwinkelKeuze
@@ -105,13 +108,32 @@ class TestWebwinkelBestelEnBetaal(E2EHelpers, TestCase):
 
         self.mandje, is_created = BestellingMandje.objects.get_or_create(account=self.account_normaal)
 
-    def test_afrekenen(self):
+        ver = Vereniging.objects.get(ver_nr=VER_NR_BONDSBUREAU)
+        ver.naam = 'Bondsbureau'
+        ver.adres_regel1 = 'Sportlaan 1'
+        ver.adres_regel2 = 'Sportstad'
+        ver.kvk_nummer = '123456'
+        ver.telefoonnummer = '123456789'
+        ver.bank_iban = 'IBAN123456789'
+        ver.bank_bic = 'BIC4NL'
+        ver.save()
+
+    def test_afrekenen_verzend(self):
         self.e2e_login(self.account_normaal)
+
+        mandje, _ = BestellingMandje.objects.get_or_create(account=self.account_normaal)
 
         # leg twee webwinkel producten in het mandje en zet het mandje om in een bestelling
         self.assertEqual(0, Bestelling.objects.count())
         bestel_mutatieverzoek_webwinkel_keuze(self.account_normaal, self.keuze1, snel=True)
         bestel_mutatieverzoek_webwinkel_keuze(self.account_normaal, self.keuze2, snel=True)
+
+        mandje.transport = BESTELLING_TRANSPORT_VERZEND
+        mandje.afleveradres_regel_1 = self.sporter.postadres_1
+        mandje.afleveradres_regel_2 = self.sporter.postadres_2
+        mandje.afleveradres_regel_4 = self.sporter.postadres_3
+        mandje.save(update_fields=['transport', 'afleveradres_regel_1', 'afleveradres_regel_2', 'afleveradres_regel_4'])
+
         bestel_mutatieverzoek_maak_bestellingen(self.account_normaal, snel=True)
         self.verwerk_bestel_mutaties()
         self.assertEqual(1, Bestelling.objects.count())
@@ -120,6 +142,15 @@ class TestWebwinkelBestelEnBetaal(E2EHelpers, TestCase):
         self.keuze2.refresh_from_db()
         self.assertEqual(self.keuze1.status, KEUZE_STATUS_BESTELD)
         self.assertEqual(self.keuze2.status, KEUZE_STATUS_BESTELD)
+
+        self.assertEqual(1, MailQueue.objects.count())
+        mail = MailQueue.objects.first()
+        # print(mail.mail_text)
+        self.assertFalse("Ophalen op het bondsbureau" in mail.mail_text)     # vervangt Verzendkosten
+        self.assertTrue("Verzendkosten" in mail.mail_text)
+        self.assertTrue("Levering" in mail.mail_text)
+        self.assertFalse("Ophalen" in mail.mail_text)
+        MailQueue.objects.all().delete()
 
         bestelling = Bestelling.objects.first()
         fake_betaling(bestelling, self.instellingen_bond)
@@ -133,6 +164,56 @@ class TestWebwinkelBestelEnBetaal(E2EHelpers, TestCase):
         self.keuze2.refresh_from_db()
         self.assertEqual(self.keuze1.status, KEUZE_STATUS_BACKOFFICE)
         self.assertEqual(self.keuze2.status, KEUZE_STATUS_BACKOFFICE)
+
+        self.assertEqual(1, MailQueue.objects.count())
+        mail = MailQueue.objects.first()
+
+    def test_afrekenen_ophalen(self):
+        self.e2e_login(self.account_normaal)
+
+        mandje, _ = BestellingMandje.objects.get_or_create(account=self.account_normaal)
+
+        # leg twee webwinkel producten in het mandje en zet het mandje om in een bestelling
+        self.assertEqual(0, Bestelling.objects.count())
+        bestel_mutatieverzoek_webwinkel_keuze(self.account_normaal, self.keuze1, snel=True)
+        bestel_mutatieverzoek_webwinkel_keuze(self.account_normaal, self.keuze2, snel=True)
+
+        mandje.transport = BESTELLING_TRANSPORT_OPHALEN     # geen adres nodig
+        mandje.save(update_fields=['transport'])
+
+        bestel_mutatieverzoek_maak_bestellingen(self.account_normaal, snel=True)
+        self.verwerk_bestel_mutaties()
+        self.assertEqual(1, Bestelling.objects.count())
+
+        self.keuze1.refresh_from_db()
+        self.keuze2.refresh_from_db()
+        self.assertEqual(self.keuze1.status, KEUZE_STATUS_BESTELD)
+        self.assertEqual(self.keuze2.status, KEUZE_STATUS_BESTELD)
+
+        self.assertEqual(1, MailQueue.objects.count())
+        mail = MailQueue.objects.first()
+        # print(mail.mail_text)
+        self.assertFalse("Verzendkosten" in mail.mail_text)
+        self.assertTrue("Ophalen op het bondsbureau" in mail.mail_text)     # vervangt Verzendkosten
+        self.assertFalse("Levering" in mail.mail_text)
+        self.assertTrue("Ophalen" in mail.mail_text)
+        MailQueue.objects.all().delete()
+
+        bestelling = Bestelling.objects.first()
+        fake_betaling(bestelling, self.instellingen_bond)
+        self.verwerk_bestel_mutaties()
+        bestelling.refresh_from_db()
+        self.assertEqual(bestelling.status, BESTELLING_STATUS_AFGEROND)
+        self.assertEqual(1, bestelling.transacties.count())
+
+        # controleer dat de webwinkel bestelling nu op 'betaald' staat
+        self.keuze1.refresh_from_db()
+        self.keuze2.refresh_from_db()
+        self.assertEqual(self.keuze1.status, KEUZE_STATUS_BACKOFFICE)
+        self.assertEqual(self.keuze2.status, KEUZE_STATUS_BACKOFFICE)
+
+        self.assertEqual(1, MailQueue.objects.count())
+        mail = MailQueue.objects.first()
 
     def test_annuleer_bestelling(self):
         self.e2e_login(self.account_normaal)

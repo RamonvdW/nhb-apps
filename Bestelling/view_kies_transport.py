@@ -78,8 +78,8 @@ class KiesTransportView(UserPassesTestMixin, TemplateView):
         return context
 
     def post(self, request, *args, **kwargs):
-        """ Deze functie wordt aangeroepen als de koper op de knop BESTELLING AFRONDEN gedrukt heeft
-            Hier converteren we het mandje in een bevroren bestelling die afgerekend kan worden.
+        """ Deze functie wordt aangeroepen als de koper op de knop OPSLAAN gedrukt heeft
+            De keuze voor transport wordt aangepast in het mandje.
         """
 
         snel = str(request.POST.get('snel', ''))[:1]

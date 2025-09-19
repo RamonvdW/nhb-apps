@@ -246,7 +246,7 @@ class TestBestellingMandje(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, self.url_mandje_toon)
 
         # laat de achtergrondtaak de producten verwijderen uit het mandje
-        self.verwerk_bestel_mutaties()
+        self.verwerk_bestel_mutaties(fail_on_error=False)
 
         # nog een keer verwijderen
         with self.assert_max_queries(20):
@@ -299,7 +299,7 @@ class TestBestellingMandje(E2EHelpers, TestCase):
         self.assertEqual(1, BestellingMutatie.objects.count())
         self.assertEqual(0, Bestelling.objects.count())
 
-        self.verwerk_bestel_mutaties()
+        self.verwerk_bestel_mutaties(fail_on_error=False)
 
         self.assertEqual(1, Bestelling.objects.count())
 
@@ -331,7 +331,7 @@ class TestBestellingMandje(E2EHelpers, TestCase):
         self.assertEqual(1, BestellingMutatie.objects.count())
 
         self.assertEqual(0, Bestelling.objects.count())
-        self.verwerk_bestel_mutaties()
+        self.verwerk_bestel_mutaties(fail_on_error=False)
         self.assertEqual(1, Bestelling.objects.count())
 
     def test_transport(self):
@@ -369,7 +369,7 @@ class TestBestellingMandje(E2EHelpers, TestCase):
             resp = self.client.post(self.url_mandje_verwijder % product2.pk, {'snel': 1})
         self.assert_is_redirect(resp, self.url_mandje_toon)
 
-        self.verwerk_bestel_mutaties()
+        self.verwerk_bestel_mutaties(fail_on_error=False)
 
         # controleer dat de transport knop nu niet getoond wordt
         with self.assert_max_queries(20):

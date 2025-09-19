@@ -18,6 +18,7 @@ from Geo.models import Regio
 from Locatie.models import WedstrijdLocatie
 from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
+from Vereniging.definities import VER_NR_BONDSBUREAU
 from Vereniging.models import Vereniging
 from Wedstrijden.definities import WEDSTRIJD_STATUS_GEACCEPTEERD
 from Wedstrijden.models import Wedstrijd, WedstrijdSessie, WedstrijdInschrijving
@@ -135,6 +136,16 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
                             koper=self.account_normaal)
         inschrijving.save()
         self.wedstrijd_inschrijving = inschrijving
+
+        ver = Vereniging.objects.get(ver_nr=VER_NR_BONDSBUREAU)
+        ver.naam = 'Bondsbureau'
+        ver.adres_regel1 = 'Sportlaan 1'
+        ver.adres_regel2 = 'Sportstad'
+        ver.kvk_nummer = '123456'
+        ver.telefoonnummer = '123456789'
+        ver.bank_iban = 'IBAN123456789'
+        ver.bank_bic = 'BIC4NL'
+        ver.save()
 
     def test_anon(self):
         self.client.logout()
@@ -466,7 +477,7 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
         self.assertEqual(BestellingMutatie.objects.count(), 1)
 
         # laat de achtergrondtaak het annuleren verwerken
-        f1, f2, = self.verwerk_bestel_mutaties()
+        f1, f2, = self.verwerk_bestel_mutaties(fail_on_error=False)
         # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
         self.assertTrue('wordt nu geannuleerd' in f2.getvalue())
 

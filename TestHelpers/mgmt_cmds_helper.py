@@ -72,7 +72,7 @@ class MyMgmtCommandHelper(TestCase):
             management.call_command('bestel_mutaties', '1', '--quick', stderr=f1, stdout=f2)
 
         if fail_on_error:
-            err_msg = f1.getvalue()
+            err_msg = f1.getvalue() + '\n' + f2.getvalue()
             if '[ERROR]' in err_msg or 'Traceback:' in err_msg:                 # pragma: no cover
                 self.fail(msg='Onverwachte fout van bestel_mutaties:\n' + err_msg)
 

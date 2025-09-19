@@ -15,6 +15,8 @@ class BestellingRegel(models.Model):
         Kan zijn: product, korting of transportkosten
 
         Deze kan in het Mandje liggen of onderdeel zijn van een Bestelling
+
+        Koppeling is andersom: van product obj naar deze regel.
     """
 
     # korte beschrijving

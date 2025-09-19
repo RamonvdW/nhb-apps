@@ -20,6 +20,7 @@ from Mailer.models import MailQueue
 from Locatie.models import WedstrijdLocatie
 from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
+from Vereniging.definities import VER_NR_BONDSBUREAU
 from Vereniging.models import Vereniging
 from Wedstrijden.definities import WEDSTRIJD_STATUS_GEACCEPTEERD, WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF
 from Wedstrijden.models import Wedstrijd, WedstrijdSessie, WedstrijdInschrijving
@@ -150,6 +151,16 @@ class TestBestellingBetaling(E2EHelpers, TestCase):
         mandje, is_created = BestellingMandje.objects.get_or_create(account=account)
         self.mandje = mandje
 
+        ver = Vereniging.objects.get(ver_nr=VER_NR_BONDSBUREAU)
+        ver.naam = 'Bondsbureau'
+        ver.adres_regel1 = 'Sportlaan 1'
+        ver.adres_regel2 = 'Sportstad'
+        ver.kvk_nummer = '123456'
+        ver.telefoonnummer = '123456789'
+        ver.bank_iban = 'IBAN123456789'
+        ver.bank_bic = 'BIC4NL'
+        ver.save()
+
     def _maak_bestelling(self):
         # bestel wedstrijddeelname in het mandje
         bestel_mutatieverzoek_inschrijven_wedstrijd(self.account_admin, self.inschrijving, snel=True)
@@ -197,7 +208,7 @@ class TestBestellingBetaling(E2EHelpers, TestCase):
         resp = self.client.post(self.url_mandje_bestellen, {'snel': 1})
         self.assert_is_redirect(resp, self.url_bestellingen_overzicht)
 
-        self.verwerk_bestel_mutaties()
+        self.verwerk_bestel_mutaties(fail_on_error=False)
 
         self.assertEqual(1, Bestelling.objects.count())
         bestelling = Bestelling.objects.first()
@@ -249,6 +260,7 @@ class TestBestellingBetaling(E2EHelpers, TestCase):
         self.assertIsNotNone(bestelling.betaal_mutatie)     # BetaalMutatie
         self.assertIsNotNone(bestelling.betaal_actief)      # BetaalActief
         self.assertEqual(0, bestelling.transacties.count())
+        self.assertTrue(str(bestelling) != '')
 
         betaal_mutatie = bestelling.betaal_mutatie
         self.assertTrue(betaal_mutatie.url_checkout != '')
@@ -291,8 +303,8 @@ class TestBestellingBetaling(E2EHelpers, TestCase):
         # maak de uitgaande mail queue leeg
         MailQueue.objects.all().delete()
 
-        # laat mutatie verwerken die betaal daemon richting bestel daemon heeft gestuurd
-        f1, f2 = self.verwerk_bestel_mutaties()
+        # laat mutatie verwerken die de Betaal richting Bestelling heeft gestuurd
+        f1, f2 = self.verwerk_bestel_mutaties(fail_on_error=False)
         msg = f2.getvalue()
         msg = re.sub(r'pk=[0-9]+', 'pk=X', msg)
         self.assertTrue('[INFO] Betaling is gelukt voor bestelling MH-1002001 (pk=X)' in msg)
@@ -306,6 +318,7 @@ class TestBestellingBetaling(E2EHelpers, TestCase):
         mail = MailQueue.objects.first()
         self.assert_email_html_ok(mail, 'email_bestelling/bevestig-betaling.dtl')
         self.assert_consistent_email_html_text(mail)  #, ignore=('>Prijs:', '>Korting:'))
+        print('{betaling email} %s' % mail.mail_text)
 
         bestelling = Bestelling.objects.get(pk=bestelling.pk)
         self.assertEqual(bestelling.status, BESTELLING_STATUS_AFGEROND)

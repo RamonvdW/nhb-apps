@@ -1,19 +1,23 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2024 Ramon van der Winkel.
+#  Copyright (c) 2024-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
 from django.conf import settings
 from django.utils import timezone
+from Bestelling.definities import BESTELLING_TRANSPORT_NVT
+from Bestelling.models import Bestelling, BestellingMandje
 from Betaal.models import BetaalInstellingenVereniging
 from Evenement.definities import EVENEMENT_STATUS_GEACCEPTEERD
 from Evenement.models import Evenement, EvenementInschrijving
 from Geo.models import Regio
 from Locatie.models import EvenementLocatie
+from Mailer.models import MailQueue
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
+from Vereniging.definities import VER_NR_BONDSBUREAU
 from Vereniging.models import Vereniging
 import datetime
 
@@ -29,6 +33,8 @@ class TestEvenementInschrijven(E2EHelpers, TestCase):
     url_inschrijven_familie = '/kalender/evenement/inschrijven/%s/familie/'         # evenement_pk
     url_inschrijven_familie_lid = '/kalender/evenement/inschrijven/%s/familie/%s/'  # evenement_pk, lid_nr
     url_toevoegen_mandje = '/kalender/evenement/inschrijven/toevoegen-mandje/'      # POST
+    url_mandje_bestellen = '/bestel/mandje/'
+    url_bestellingen_overzicht = '/bestel/overzicht/'
 
     volgende_bestel_nr = 1234567
 
@@ -135,6 +141,16 @@ class TestEvenementInschrijven(E2EHelpers, TestCase):
                         bij_vereniging=ver)
         sporter.save()
         self.sporter_100023 = sporter
+
+        ver = Vereniging.objects.get(ver_nr=VER_NR_BONDSBUREAU)
+        ver.naam = 'Bondsbureau'
+        ver.adres_regel1 = 'Sportlaan 1'
+        ver.adres_regel2 = 'Sportstad'
+        ver.kvk_nummer = '123456'
+        ver.telefoonnummer = '123456789'
+        ver.bank_iban = 'IBAN123456789'
+        ver.bank_bic = 'BIC4NL'
+        ver.save()
 
     def test_anon(self):
         resp = self.client.get(self.url_inschrijven_sporter % 99999)
@@ -409,5 +425,51 @@ class TestEvenementInschrijven(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('evenement/inschrijven-toegevoegd-aan-mandje.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
 
+    def test_bestel_betaal(self):
+        # doorloop het hele bestelproces en control de e-mails
+
+        # inlog vereist
+        self.e2e_login(self.account_100000)
+
+        self.assertEqual(EvenementInschrijving.objects.count(), 0)
+
+        # echte inschrijving
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_toevoegen_mandje, {'evenement': self.evenement.pk,
+                                                                'sporter': self.sporter_100000.pk,
+                                                                'goto': 'S',
+                                                                'snel': '1'})
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('evenement/inschrijven-toegevoegd-aan-mandje.dtl', 'plein/site_layout.dtl'))
+
+        self.assertEqual(EvenementInschrijving.objects.count(), 1)
+
+        f1, f2 = self.verwerk_bestel_mutaties()
+        # print('f1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
+        self.assertTrue(": inschrijven op evenement" in f2.getvalue())
+
+        mandje = BestellingMandje.objects.get(account=self.account_100000)
+        self.assertEqual(mandje.transport, BESTELLING_TRANSPORT_NVT)
+        self.assertEqual(mandje.regels.count(), 1)
+
+        # bestelling afronden
+        resp = self.client.post(self.url_mandje_bestellen, {'snel': 1})
+        self.assert_is_redirect(resp, self.url_bestellingen_overzicht)
+
+        self.assertEqual(MailQueue.objects.count(), 0)
+        self.verwerk_bestel_mutaties()
+        self.assertEqual(Bestelling.objects.count(), 1)
+        self.assertEqual(MailQueue.objects.count(), 1)
+
+        # controleer wat er in de mail staat
+        mail = MailQueue.objects.first()
+        # print('{test_bestel_betaal}', mail.mail_text)
+        self.assert_email_html_ok(mail, 'email_bestelling/bevestig-bestelling.dtl')
+        #self.assert_consistent_email_html_text(mail, ignore=('>Bedrag:', '>Korting:'))
+        self.assertFalse('Verzendkosten' in mail.mail_text)
+        self.assertFalse('Ophalen' in mail.mail_text)
+        self.assertFalse('Levering' in mail.mail_text)
+        self.assertTrue('TOTAAL: € 15,00' in mail.mail_text)
 
 # end of file

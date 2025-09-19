@@ -81,7 +81,13 @@ class OverboekingOntvangenView(UserPassesTestMixin, TemplateView):
                 .prefetch_related('transacties')
                 .order_by('-aangemaakt'))       # nieuwste eerst
 
-        return list(qset[:100])
+        verwacht = list(qset[:100])
+
+        # for bestelling in verwacht:
+        #     bestelling.url_details = reverse()
+        # # for
+
+        return verwacht
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """

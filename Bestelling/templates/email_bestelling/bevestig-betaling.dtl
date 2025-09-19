@@ -48,52 +48,46 @@
         |Betaling:
 
         {% if transactie.is_restitutie %}
-            |    Restitutie: {{ transactie.bedrag_str }}
+            |  Restitutie: {{ transactie.bedrag_str }}
         {% else %}
-            |    Ontvangen: {{ transactie.bedrag_str }}
+            |  Ontvangen: {{ transactie.bedrag_str }}
             {% if transactie.klant_naam %}
                 <!-- geen klant naam bij overschrijving -->
-                |    van {{ transactie.klant_naam }}
+                |  van {{ transactie.klant_naam }}
             {% endif %}
         {% endif %}
 
-        |    op {{ transactie.when_str }}
-        |    Beschrijving: {{ transactie.beschrijving }}
+        |  op {{ transactie.when_str }}
+        |  Beschrijving: {{ transactie.beschrijving }}
     {% endfor %}
 
     |
     |Verkoper:
-    |    {{ bestelling.verkoper_naam }}
-    |    {{ bestelling.verkoper_adres1 }}
-    |    {{ bestelling.verkoper_adres2 }}
-    |    KvK nummer: {{ bestelling.verkoper_kvk }}
+    |  {{ bestelling.verkoper_naam }}
+    |  {{ bestelling.verkoper_adres1 }}
+    |  {{ bestelling.verkoper_adres2 }}
+    |  KvK nummer: {{ bestelling.verkoper_kvk }}
     {% if bestelling.verkoper_btw_nr %}
-    |    BTW nummer: {{ bestelling.verkoper_btw_nr }}
+    |  BTW nummer: {{ bestelling.verkoper_btw_nr }}
     {% endif %}
-    |    E-mail: {{ bestelling.verkoper_email }}
-    |    Telefoon: {{ bestelling.verkoper_telefoon }}
+    |  E-mail: {{ bestelling.verkoper_email }}
+    |  Telefoon: {{ bestelling.verkoper_telefoon }}
 
-    |
-    |Levering:
     {% if wil_ophalen %}
-        |Je hebt gekozen op de producten op te halen op het bondsbureau.
-    {% else %}
-        | Het pakketje zal worden verstuurd naar het volgende adres:
-        {% if heeft_afleveradres %}
-            |    {{ bestelling.afleveradres_regel_1 }}
-            |    {{ bestelling.afleveradres_regel_2 }}
-            {% if bestelling.afleveradres_regel_3 %}
-            |    {{ bestelling.afleveradres_regel_3 }}
-                {% if bestelling.afleveradres_regel_4 %}
-                |    {{ bestelling.afleveradres_regel_4 }}
-                    {% if bestelling.afleveradres_regel_5 %}
-                    |    {{ bestelling.afleveradres_regel_5 }}
-                    {% endif %}
-                {% endif %}
-            {% endif %}
-        {% else %}
-            | Niet opgegeven!
-        {% endif %}
+        |
+        |Ophalen:
+        |  Je hebt gekozen op de producten op te halen op het bondsbureau, op het volgende adres:
+        |    {{ ophalen_adres_regel_1 }}
+        |    {{ ophalen_adres_regel_2 }}
+    {% endif %}
+
+    {% if heeft_afleveradres %}
+        |
+        |Levering:
+        |  Het pakketje zal worden verstuurd naar het volgende adres:
+        {% for adres_regel in afleveradres %}
+        |    {{ adres_regel }}
+        {% endfor %}
     {% endif %}
 
     |
@@ -206,30 +200,23 @@
         <tr><th>Telefoon:</th><td>{{ bestelling.verkoper_telefoon }}</td></tr>
     </table>
 
-
-    <h1>Levering</h1>
-
     {% if wil_ophalen %}
-        <p>Je hebt gekozen op de producten op te halen op het bondsbureau.</p>
-    {% else %}
+        <h1>Ophalen</h1>
+        <p>Je hebt gekozen op de producten op te halen op het bondsbureau, op het volgende adres:</p>
+        <p>
+            <span>{{ ophalen_adres_regel_1 }}</span><br>
+            <span>{{ ophalen_adres_regel_2 }}</span>
+        </p>
+    {% endif %}
+
+    {% if heeft_afleveradres %}
+        <h1>Levering</h1>
         <p>Het pakketje zal worden verstuurd naar het volgende adres:</p>
-        {% if heeft_afleveradres %}
-            <p>
-                <span>{{ bestelling.afleveradres_regel_1 }}</span>
-                <br><span>{{ bestelling.afleveradres_regel_2 }}</span>
-                {% if bestelling.afleveradres_regel_3 %}
-                    <br><span>{{ bestelling.afleveradres_regel_3 }}</span>
-                    {% if bestelling.afleveradres_regel_4 %}
-                        <br><span>{{ bestelling.afleveradres_regel_4 }}</span>
-                        {% if bestelling.afleveradres_regel_5 %}
-                            <br><span>{{ bestelling.afleveradres_regel_5 }}</span>
-                        {% endif %}
-                    {% endif %}
-                {% endif %}
-            </p>
-        {% else %}
-            <p>Niet opgegeven!</p>
-        {% endif %}
+        <p>
+            {% for adres_regel in afleveradres %}
+                <span>{{ adres_regel }}</span><br>
+            {% endfor %}
+        </p>
     {% endif %}
 
     <br>

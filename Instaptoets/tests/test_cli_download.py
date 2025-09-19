@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from certifi import contents
+
 #  Copyright (c) 2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
@@ -63,7 +63,7 @@ class HttpMock:
         return d
 
     @staticmethod
-    def _mock_values(query_params):
+    def _mock_values(_query_params):
         # print('{MockHttp._mock_values}: query_params=%s' % repr(query_params))
         json_data = {"data": "no relevant"}
         return json_data

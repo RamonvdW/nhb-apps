@@ -8,7 +8,7 @@ from django.test import TestCase
 from django.conf import settings
 from django.utils import timezone
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse
-from Bestelling.definities import BESTELLING_STATUS_AFGEROND
+from Bestelling.definities import BESTELLING_STATUS_AFGEROND, BESTELLING_TRANSPORT_NVT
 from Bestelling.models import BestellingMandje, Bestelling
 from Bestelling.operations import bestel_mutatieverzoek_inschrijven_wedstrijd
 from Betaal.models import BetaalInstellingenVereniging, BetaalActief, BetaalMutatie, BetaalTransactie
@@ -18,6 +18,7 @@ from Mailer.models import MailQueue
 from Locatie.models import WedstrijdLocatie
 from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
+from Vereniging.definities import VER_NR_BONDSBUREAU
 from Vereniging.models import Vereniging
 from Wedstrijden.definities import (WEDSTRIJD_STATUS_GEACCEPTEERD, WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF,
                                     WEDSTRIJD_KORTING_SPORTER)
@@ -173,6 +174,16 @@ class TestWedstrijdInschrijvenBestelEnBetaal(E2EHelpers, TestCase):
         mandje, is_created = BestellingMandje.objects.get_or_create(account=account)
         self.mandje = mandje
 
+        ver = Vereniging.objects.get(ver_nr=VER_NR_BONDSBUREAU)
+        ver.naam = 'Bondsbureau'
+        ver.adres_regel1 = 'Sportlaan 1'
+        ver.adres_regel2 = 'Sportstad'
+        ver.kvk_nummer = '123456'
+        ver.telefoonnummer = '123456789'
+        ver.bank_iban = 'IBAN123456789'
+        ver.bank_bic = 'BIC4NL'
+        ver.save()
+
     def test_afrekenen(self):
         self.e2e_login_and_pass_otp(self.account_admin)
         self.e2e_check_rol('sporter')
@@ -205,6 +216,7 @@ class TestWedstrijdInschrijvenBestelEnBetaal(E2EHelpers, TestCase):
         self.assertIsNotNone(bestelling.betaal_mutatie)     # BetaalMutatie
         self.assertIsNotNone(bestelling.betaal_actief)      # BetaalActief
         self.assertEqual(0, bestelling.transacties.count())
+        self.assertEqual(bestelling.transport, BESTELLING_TRANSPORT_NVT)
 
         betaal_mutatie = bestelling.betaal_mutatie
         self.assertTrue(betaal_mutatie.url_checkout != '')
@@ -262,10 +274,15 @@ class TestWedstrijdInschrijvenBestelEnBetaal(E2EHelpers, TestCase):
         mail = MailQueue.objects.filter(mail_to=self.account_admin.bevestigde_email).first()
         self.assert_email_html_ok(mail, 'email_bestelling/bevestig-betaling.dtl')
         self.assert_consistent_email_html_text(mail, ignore=('>Prijs:', '>Korting:'))
+        # print(mail.mail_text)
+        self.assertFalse("Levering" in mail.mail_text)
+        self.assertFalse("Ophalen" in mail.mail_text)
+        self.assertFalse("Verzendkosten" in mail.mail_text)
 
         mail = MailQueue.objects.filter(mail_to=self.sporter.email).first()
         self.assert_email_html_ok(mail, 'email_wedstrijden/info-inschrijving-wedstrijd.dtl')
         self.assert_consistent_email_html_text(mail)
+        # print(mail.mail_text)
 
         bestelling.refresh_from_db()
         self.assertEqual(bestelling.status, BESTELLING_STATUS_AFGEROND)

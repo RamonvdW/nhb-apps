@@ -296,6 +296,11 @@ class WedstrijdBestelPlugin(BestelPluginBase):
                 aanwezig = datetime.datetime.combine(inschrijving.sessie.datum, inschrijving.sessie.tijd_begin)
                 aanwezig -= datetime.timedelta(minutes=inschrijving.wedstrijd.minuten_voor_begin_sessie_aanwezig_zijn)
 
+                if inschrijving.wedstrijd.contact_email == '':
+                    inschrijving.wedstrijd.contact_email = 'onbekend'
+                if inschrijving.wedstrijd.contact_telefoon == '':
+                    inschrijving.wedstrijd.contact_telefoon = 'onbekend'
+
                 context = {
                     'voornaam': sporter.voornaam,
                     'koper_volledige_naam': koper_account.volledige_naam(),

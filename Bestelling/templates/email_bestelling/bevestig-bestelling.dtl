@@ -24,7 +24,6 @@
         {% endfor %}
 
         |    Bedrag: {{ product.bedrag_euro_str }}
-
     {% endfor %}
 
     |
@@ -49,53 +48,45 @@
         |Betaling:
 
         {% if bestelling.verkoper_heeft_mollie %}
+        |  Betalen is mogelijk via online bankieren. Dit is de meest eenvoudige en snelste manier om te betalen.
+        |  Ga hiervoor naar MijnHandboogsport: onder Mijn pagina kan je de bestellingen vinden en de betaling starten.
         |
-        |Betalen is mogelijk via online bankieren. Dit is de meest eenvoudige en snelste manier om te betalen.
-        |Ga hiervoor naar MijnHandboogsport: onder Mijn pagina kan je de bestellingen vinden en de betaling starten.
         {% endif %}
 
-        |
-        |Betalen is mogelijk door overboeking naar de volgende rekening:
-        |  Bedrag: {{ totaal_euro_str }}
-        |  Naam: {{ bestelling.verkoper_naam }}
-        |  IBAN: {{ bestelling.verkoper_iban }}
-        |  BIC: {{ bestelling.verkoper_bic }}
-        |  Kenmerk: Bestelnummer {{ bestelling.mh_bestel_nr }}
+        |  Betalen is {% if bestelling.verkoper_heeft_mollie %}ook {% endif %}mogelijk door overboeking naar de volgende rekening:
+        |    Naam: {{ bestelling.verkoper_naam }}
+        |    IBAN: {{ bestelling.verkoper_iban }}
+        |    BIC: {{ bestelling.verkoper_bic }}
+        |    Kenmerk: Bestelnummer {{ bestelling.mh_bestel_nr }}
     {% endif %}
 
     |
     |Verkoper:
-    |    {{ bestelling.verkoper_naam }}
-    |    {{ bestelling.verkoper_adres1 }}
-    |    {{ bestelling.verkoper_adres2 }}
-    |    KvK nummer: {{ bestelling.verkoper_kvk }}
+    |  {{ bestelling.verkoper_naam }}
+    |  {{ bestelling.verkoper_adres1 }}
+    |  {{ bestelling.verkoper_adres2 }}
+    |  KvK nummer: {{ bestelling.verkoper_kvk }}
     {% if bestelling.verkoper_btw_nr %}
-    |    BTW nummer: {{ bestelling.verkoper_btw_nr }}
+    |  BTW nummer: {{ bestelling.verkoper_btw_nr }}
     {% endif %}
-    |    E-mail: {{ bestelling.verkoper_email }}
-    |    Telefoon: {{ bestelling.verkoper_telefoon }}
+    |  E-mail: {{ bestelling.verkoper_email }}
+    |  Telefoon: {{ bestelling.verkoper_telefoon }}
 
-    |
-    |Levering:
     {% if wil_ophalen %}
-        |Je hebt gekozen op de producten op te halen op het bondsbureau.
-    {% else %}
-        | Het pakketje zal worden verstuurd naar het volgende adres:
-        {% if heeft_afleveradres %}
-            |    {{ bestelling.afleveradres_regel_1 }}
-            |    {{ bestelling.afleveradres_regel_2 }}
-            {% if bestelling.afleveradres_regel_3 %}
-            |    {{ bestelling.afleveradres_regel_3 }}
-                {% if bestelling.afleveradres_regel_4 %}
-                |    {{ bestelling.afleveradres_regel_4 }}
-                    {% if bestelling.afleveradres_regel_5 %}
-                    |    {{ bestelling.afleveradres_regel_5 }}
-                    {% endif %}
-                {% endif %}
-            {% endif %}
-        {% else %}
-            | Niet opgegeven!
-        {% endif %}
+        |
+        |Ophalen:
+        |  Je hebt gekozen op de producten op te halen op het bondsbureau, op het volgende adres:
+        |    {{ ophalen_adres_regel_1 }}
+        |    {{ ophalen_adres_regel_2 }}
+    {% endif %}
+
+    {% if heeft_afleveradres %}
+        |
+        |Levering:
+        |  Het pakketje zal worden verstuurd naar het volgende adres:
+        {% for adres_regel in afleveradres %}
+        |    {{ adres_regel }}
+        {% endfor %}
     {% endif %}
 
     |
@@ -182,9 +173,8 @@
             <br>
         {% endif %}
 
-        <p>Betalen is mogelijk door overboeking naar de volgende rekening:</p>
+        <p>Betalen is {% if bestelling.verkoper_heeft_mollie %}ook {% endif %}mogelijk door overboeking naar de volgende rekening:</p>
         <table>
-            <tr><th>Bedrag:</th><td>{{ totaal_euro_str }}</td></tr>
             <tr><th>Ontvanger:</th><td>{{ bestelling.verkoper_naam }}</td></tr>
             <tr><th>IBAN:</th><td>{{ bestelling.verkoper_iban }}</td></tr>
             <tr><th>BIC:</th><td>{{ bestelling.verkoper_bic }}</td></tr>
@@ -207,30 +197,23 @@
         <tr><th>Telefoon:</th><td>{{ bestelling.verkoper_telefoon }}</td></tr>
     </table>
 
-
-    <h1>Levering</h1>
-
     {% if wil_ophalen %}
-        <p>Je hebt gekozen op de producten op te halen op het bondsbureau.</p>
-    {% else %}
+        <h1>Ophalen</h1>
+        <p>Je hebt gekozen op de producten op te halen op het bondsbureau, op het volgende adres:</p>
+        <p>
+            <span>{{ ophalen_adres_regel_1 }}</span><br>
+            <span>{{ ophalen_adres_regel_2 }}</span>
+        </p>
+    {% endif %}
+
+    {% if heeft_afleveradres %}
+        <h1>Levering</h1>
         <p>Het pakketje zal worden verstuurd naar het volgende adres:</p>
-        {% if heeft_afleveradres %}
-            <p>
-                <span>{{ bestelling.afleveradres_regel_1 }}</span>
-                <br><span>{{ bestelling.afleveradres_regel_2 }}</span>
-                {% if bestelling.afleveradres_regel_3 %}
-                    <br><span>{{ bestelling.afleveradres_regel_3 }}</span>
-                    {% if bestelling.afleveradres_regel_4 %}
-                        <br><span>{{ bestelling.afleveradres_regel_4 }}</span>
-                        {% if bestelling.afleveradres_regel_5 %}
-                            <br><span>{{ bestelling.afleveradres_regel_5 }}</span>
-                        {% endif %}
-                    {% endif %}
-                {% endif %}
-            </p>
-        {% else %}
-            <p>Niet opgegeven!</p>
-        {% endif %}
+        <p>
+            {% for adres_regel in afleveradres %}
+                <span>{{ adres_regel }}</span><br>
+            {% endfor %}
+        </p>
     {% endif %}
 
     <br>

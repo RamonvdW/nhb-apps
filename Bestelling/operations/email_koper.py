@@ -6,20 +6,39 @@
 
 from django.conf import settings
 from django.utils import timezone
-from Bestelling.definities import BESTELLING_KORT_BREAK
+from Bestelling.definities import BESTELLING_KORT_BREAK, BESTELLING_TRANSPORT2STR
 from Bestelling.definities import (BESTELLING_STATUS_AFGEROND,
                                    BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_GEANNULEERD,
                                    BESTELLING_STATUS2STR,
-                                   BESTELLING_TRANSPORT_OPHALEN)
+                                   BESTELLING_TRANSPORT_OPHALEN, BESTELLING_TRANSPORT_VERZEND)
 from Bestelling.models import Bestelling
 from Betaal.definities import TRANSACTIE_TYPE_MOLLIE_RESTITUTIE
 from Betaal.format import format_bedrag_euro
 from Mailer.operations import mailer_queue_email, render_email_template
-from types import SimpleNamespace
-from decimal import Decimal
+from Vereniging.models import Vereniging
 
 EMAIL_TEMPLATE_BEVESTIG_BESTELLING = 'email_bestelling/bevestig-bestelling.dtl'
 EMAIL_TEMPLATE_BEVESTIG_BETALING = 'email_bestelling/bevestig-betaling.dtl'
+
+
+def _beschrijf_transport(bestelling: Bestelling, context: dict):
+
+    if bestelling.transport == BESTELLING_TRANSPORT_OPHALEN:
+        ophalen_ver = Vereniging.objects.get(ver_nr=settings.WEBWINKEL_VERKOPER_VER_NR)
+        context['wil_ophalen'] = True
+        context['ophalen_adres_regel_1'] = ophalen_ver.adres_regel1
+        context['ophalen_adres_regel_2'] = ophalen_ver.adres_regel2
+
+    elif bestelling.transport == BESTELLING_TRANSPORT_VERZEND:
+        afleveradres = [regel
+                        for regel in (bestelling.afleveradres_regel_1, bestelling.afleveradres_regel_2,
+                                      bestelling.afleveradres_regel_3, bestelling.afleveradres_regel_4,
+                                      bestelling.afleveradres_regel_5)
+                        if regel]
+        if len(afleveradres) == 0:
+            afleveradres.append('Probleem: adres is niet bekend!')
+        context['afleveradres'] = afleveradres
+        context['heeft_afleveradres'] = True
 
 
 def _beschrijf_bestelling(bestelling: Bestelling) -> list:
@@ -34,18 +53,6 @@ def _beschrijf_bestelling(bestelling: Bestelling) -> list:
         regel.beschrijving = regel.korte_beschrijving.split(BESTELLING_KORT_BREAK)
         regel.bedrag_euro_str = format_bedrag_euro(regel.bedrag_euro)
     # for
-
-    if bestelling.transport == BESTELLING_TRANSPORT_OPHALEN:
-
-        nul_euro_str = format_bedrag_euro(Decimal(0))
-
-        # nieuwe regel op de bestelling
-        regel_nr += 1
-        regel = SimpleNamespace(
-                        regel_nr=regel_nr,
-                        beschrijving=["Ophalen op het bondsbureau"],
-                        bedrag_euro_str=nul_euro_str)
-        regels.append(regel)
 
     # formatteren van de BTW bedragen
     bestelling.btw_euro_cat1_str = format_bedrag_euro(bestelling.btw_euro_cat1)
@@ -74,28 +81,17 @@ def stuur_email_naar_koper_bestelling_details(stdout, bestelling: Bestelling):
 
     account = bestelling.account
 
-    regels = _beschrijf_bestelling(bestelling)
-
-    totaal_euro_str = format_bedrag_euro(bestelling.totaal_euro)
-
-    heeft_afleveradres = False
-    for nr in (1, 2, 3, 4, 5):
-        regel = getattr(bestelling, 'afleveradres_regel_%s' % nr)
-        if regel:
-            heeft_afleveradres = True
-    # for
-
     context = {
         'voornaam': account.get_first_name(),
         'naam_site': settings.NAAM_SITE,
         'bestelling': bestelling,
-        'totaal_euro_str': totaal_euro_str,
-        'regels': regels,
+        'totaal_euro_str': format_bedrag_euro(bestelling.totaal_euro),
+        'regels': _beschrijf_bestelling(bestelling),
         'bestel_status': BESTELLING_STATUS2STR[bestelling.status],
         'kan_betalen': bestelling.status not in (BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_GEANNULEERD),
-        'heeft_afleveradres': heeft_afleveradres,
-        'wil_ophalen': bestelling.transport == BESTELLING_TRANSPORT_OPHALEN,
     }
+
+    _beschrijf_transport(bestelling, context)
 
     if bestelling.status == BESTELLING_STATUS_NIEUW:
         context['bestel_status'] = 'Te betalen'
@@ -114,27 +110,16 @@ def stuur_email_naar_koper_betaalbevestiging(stdout, bestelling: Bestelling):
 
     account = bestelling.account
 
-    regels = _beschrijf_bestelling(bestelling)
-    transacties = _beschrijf_transacties(bestelling)
-    totaal_euro_str = format_bedrag_euro(bestelling.totaal_euro)
-
-    heeft_afleveradres = False
-    for nr in (1, 2, 3, 4, 5):
-        regel = getattr(bestelling, 'afleveradres_regel_%s' % nr)
-        if regel:
-            heeft_afleveradres = True
-    # for
-
     context = {
         'voornaam': account.get_first_name(),
         'naam_site': settings.NAAM_SITE,
         'bestelling': bestelling,
-        'totaal_euro_str': totaal_euro_str,
-        'regels': regels,
-        'transacties': transacties,
-        'heeft_afleveradres': heeft_afleveradres,
-        'wil_ophalen': bestelling.transport == BESTELLING_TRANSPORT_OPHALEN,
+        'totaal_euro_str': format_bedrag_euro(bestelling.totaal_euro),
+        'regels': _beschrijf_bestelling(bestelling),
+        'transacties': _beschrijf_transacties(bestelling),
     }
+
+    _beschrijf_transport(bestelling, context)
 
     mail_body = render_email_template(context, EMAIL_TEMPLATE_BEVESTIG_BETALING)
 

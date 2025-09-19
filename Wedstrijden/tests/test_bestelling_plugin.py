@@ -13,6 +13,7 @@ from Bestelling.definities import BESTELLING_REGEL_CODE_WEDSTRIJD, BESTELLING_RE
 from Bestelling.models import BestellingRegel, BestellingMandje
 from Geo.models import Regio
 from Locatie.models import WedstrijdLocatie
+from Mailer.models import MailQueue
 from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
@@ -26,6 +27,9 @@ from Wedstrijden.plugin_bestelling import WedstrijdBestelPlugin, WedstrijdKortin
 from decimal import Decimal
 import datetime
 import io
+
+
+# FUTURE: verplaats deze plugin naar WedstrijdInschrijvingen
 
 
 class TestWedstrijdenBestellingPlugin(E2EHelpers, TestCase):
@@ -61,6 +65,8 @@ class TestWedstrijdenBestellingPlugin(E2EHelpers, TestCase):
                         datum_begin=date_next_month,
                         datum_einde=date_next_month,
                         organiserende_vereniging=ver,
+                        contact_email='wedstrijden@groteclub.not',
+                        contact_telefoon='12345678',
                         locatie=locatie,
                         verkoopvoorwaarden_status_acceptatie=True,
                         prijs_euro_normaal=Decimal(10.0),
@@ -387,6 +393,9 @@ class TestWedstrijdenBestellingPlugin(E2EHelpers, TestCase):
         plugin = WedstrijdKortingBestelPlugin()
         plugin.is_betaald(regel, bedrag_ontvangen)      # dummy implementatie
 
+        # betaling was voor "zelf", dus er wordt geen extra mail gestuurd
+        self.assertEqual(MailQueue.objects.count(), 0)
+
     def test_is_betaald_ander(self):
         stdout = OutputWrapper(io.StringIO())
         plugin = WedstrijdBestelPlugin()
@@ -422,6 +431,13 @@ class TestWedstrijdenBestellingPlugin(E2EHelpers, TestCase):
         self.assertEqual(round(inschrijving.ontvangen_euro, 2), round(bedrag_ontvangen, 2))
         self.assertTrue("Betaling ontvangen" in inschrijving.log)
 
+        self.assertEqual(MailQueue.objects.count(), 1)
+        mail = MailQueue.objects.first()
+        self.assert_email_html_ok(mail, 'email_wedstrijden/info-inschrijving-wedstrijd.dtl')
+        self.assert_consistent_email_html_text(mail)
+        self.assertFalse("Levering" in mail.mail_text)
+        MailQueue.objects.all().delete()
+
         self.wedstrijd.organisatie = ORGANISATIE_IFAA
         self.wedstrijd.save(update_fields=['organisatie'])
 
@@ -429,10 +445,17 @@ class TestWedstrijdenBestellingPlugin(E2EHelpers, TestCase):
         self.account_100000.delete()
         plugin.is_betaald(regel, bedrag_ontvangen)
 
+        self.assertEqual(MailQueue.objects.count(), 1)
+        mail = MailQueue.objects.first()
+        self.assert_email_html_ok(mail, 'email_wedstrijden/info-inschrijving-wedstrijd.dtl')
+        self.assert_consistent_email_html_text(mail)
+        MailQueue.objects.all().delete()
+
         # sporter heeft geen account en geen e-mail
         self.sporter_100000.email = ''
         self.sporter_100000.save(update_fields=['email'])
         plugin.is_betaald(regel, bedrag_ontvangen)
+        self.assertEqual(MailQueue.objects.count(), 0)
 
     def test_get_verkoper_ver_nr(self):
         plugin = WedstrijdBestelPlugin()

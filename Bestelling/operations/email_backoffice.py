@@ -23,9 +23,7 @@ def _get_emailadres_backoffice() -> str:
 
 
 def _beschrijf_bestelling(bestelling: Bestelling) -> list:
-
     regel_nr = 0
-
     regels = list(bestelling.regels.order_by('code', 'pk'))
     for regel in regels:
         # nieuwe regel op de bestelling
@@ -34,18 +32,6 @@ def _beschrijf_bestelling(bestelling: Bestelling) -> list:
         regel.beschrijving = regel.korte_beschrijving.split(BESTELLING_KORT_BREAK)
         regel.bedrag_euro_str = format_bedrag_euro(regel.bedrag_euro)
     # for
-
-    if bestelling.transport == BESTELLING_TRANSPORT_OPHALEN:
-
-        nul_euro_str = format_bedrag_euro(Decimal(0))
-
-        # nieuwe regel op de bestelling
-        regel_nr += 1
-        regel = SimpleNamespace(
-                        regel_nr=regel_nr,
-                        beschrijving=["Ophalen op het bondsbureau"],
-                        bedrag_euro_str=nul_euro_str)
-        regels.append(regel)
 
     # formatteren van de BTW bedragen
     bestelling.btw_euro_cat1_str = format_bedrag_euro(bestelling.btw_euro_cat1)

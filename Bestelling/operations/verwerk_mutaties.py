@@ -14,7 +14,7 @@ from Bestelling.definities import (BESTELLING_MUTATIE_WEDSTRIJD_INSCHRIJVEN, BES
                                    BESTELLING_MUTATIE_TRANSPORT, BESTELLING_MUTATIE_EVENEMENT_INSCHRIJVEN,
                                    BESTELLING_MUTATIE_EVENEMENT_AFMELDEN, BESTELLING_MUTATIE_OPLEIDING_INSCHRIJVEN,
                                    BESTELLING_MUTATIE_OPLEIDING_AFMELDEN, BESTELLING_MUTATIE_WEDSTRIJD_AANPASSEN,
-                                   BESTELLING_TRANSPORT_NVT, BESTELLING_TRANSPORT_VERZEND,
+                                   BESTELLING_TRANSPORT_NVT, BESTELLING_TRANSPORT_VERZEND, BESTELLING_TRANSPORT_OPHALEN,
                                    BESTELLING_REGEL_CODE_VERZENDKOSTEN)
 from Bestelling.definities import (BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_BETALING_ACTIEF,
                                    BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_MISLUKT, BESTELLING_STATUS_GEANNULEERD,
@@ -192,8 +192,7 @@ class VerwerkBestelMutaties:
 
         mandje.save(update_fields=['verzendkosten_euro', 'transport'])
 
-    @staticmethod
-    def _bepaal_verzendkosten_bestelling(transport, bestelling):
+    def _bepaal_verzendkosten_bestelling(self, transport, bestelling):
         """ bereken de verzendkosten voor fysieke producten van de bestelling
             transport: de transport keuze gemaakt door de gebruiker: ophalen of verzenden
 
@@ -202,9 +201,14 @@ class VerwerkBestelMutaties:
 
         verzendkosten_euro, btw_percentage, btw_euro = verzendkosten_bestel_plugin.bereken_verzendkosten(bestelling)
 
-        if verzendkosten_euro < Decimal(0.001):
-            # geen fysieke producten, dus transport is niet van toepassing
-            transport = BESTELLING_TRANSPORT_NVT
+        # forceer de keuze "verzend" als er geen keuze gemaakt is (fallback voor bepaalde testen)
+        if transport == BESTELLING_TRANSPORT_NVT and verzendkosten_euro > 0:
+            self.stdout.write('[INFO] {bepaal_verzendkosten_bestelling} transport nvt --> verzend')
+            transport = BESTELLING_TRANSPORT_VERZEND
+
+        # if verzendkosten_euro < Decimal(0.001):
+        #     # geen fysieke producten, dus transport is niet van toepassing
+        #     transport = BESTELLING_TRANSPORT_NVT
 
         bestelling.transport = transport
         bestelling.save(update_fields=['transport'])
@@ -213,13 +217,23 @@ class VerwerkBestelMutaties:
             regel, is_created = BestellingRegel.objects.get_or_create(
                                                                 bestelling=bestelling,
                                                                 code=BESTELLING_REGEL_CODE_VERZENDKOSTEN)
-            regel.korte_beschrijving = 'Verzendkosten'
+            regel.korte_beschrijving = 'Verzendkosten'  # TODO: specificeer duidelijker briefpost / pakket 2kg / 10kg
             regel.bedrag_euro = verzendkosten_euro
             regel.btw_percentage = btw_percentage
             regel.btw_euro = btw_euro
 
             regel.save()
             bestelling.regels.add(regel)
+
+        elif transport == BESTELLING_TRANSPORT_OPHALEN:
+            regel, is_created = BestellingRegel.objects.get_or_create(
+                                                                bestelling=bestelling,
+                                                                code=BESTELLING_REGEL_CODE_VERZENDKOSTEN)
+            regel.korte_beschrijving = 'Ophalen op het bondsbureau'
+            regel.bedrag_euro = Decimal(0)
+            regel.save()
+            bestelling.regels.add(regel)
+
         else:
             # transportkosten mogen weg
             BestellingRegel.objects.filter(bestelling=bestelling,

@@ -458,6 +458,7 @@ class TestEvenementBestellingPlugin(E2EHelpers, TestCase):
         mail = MailQueue.objects.first()
         self.assert_consistent_email_html_text(mail)
         self.assert_email_html_ok(mail, 'email_evenement/info-inschrijving-evenement.dtl')
+        self.assertTrue("(nadat je een account aangemaakt hebt)" in mail.mail_text)
 
         # nog een keer, nu heeft de sporter geen valide e-mail
         self.sporter_100001.email = ''
@@ -477,6 +478,8 @@ class TestEvenementBestellingPlugin(E2EHelpers, TestCase):
         self.assert_consistent_email_html_text(mail)
         self.assert_email_html_ok(mail, 'email_evenement/info-inschrijving-evenement.dtl')
         # print(mail.mail_text)
+        self.assertFalse("(nadat je een account aangemaakt hebt)" in mail.mail_text)
+        self.assertFalse("Levering" in mail.mail_text)
 
     def test_get_verkoper_ver_nr(self):
         plugin = EvenementBestelPlugin()
