@@ -216,4 +216,21 @@ OVERIG_API_TOKENS = ()
 # google doc id van het gsheet document
 INSTAPTOETS_GSHEET_FILE_ID = 'another.google.sheets.id'     # noqa
 
+# met wie de wedstrijdformulieren folder delen?
+GOOGLE_DRIVE_SHARE_WITH = []
+
+# waar staan de json bestanden voor de service accounts etc.
+# wordt gebruikt door diverse diensten: downloaders records/instaptoets, backup uploader, google drive toegang, etc.
+# filenames zijn bekend bij deze diensten
+CREDENTIALS_PATH = '/directory/on/your/server/'
+
+# client id en secret voor toegang tot de Google Drive van een gebruiker
+CREDENTIALS_OAUTH_GOOGLE_DRIVE = 'file_with_credentials.json'
+
+# wedstrijdenformulieren zijn gedeeld met dit service account, voor updaten en importeren
+CREDENTIALS_SERVICE_ACCOUNT_WEDSTRIJDFORMULIEREN = 'file1_with_credentials_service-account.json'
+
+# instaptoets en records bestanden zijn gedeeld met dit service account, voor download
+CREDENTIALS_SERVICE_ACCOUNT_DOWNLOADER = 'file2_with_credentials_service-account.json'
+
 # end of file

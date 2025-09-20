@@ -77,7 +77,7 @@ def ontbrekende_wedstrijdformulieren_rk_bk(comp) -> list:
     for tup in iter_indiv_wedstrijdformulieren(comp):
         afstand, is_teams, is_bk, klasse_pk, fname = tup
         sel = (comp.begin_jaar, afstand, is_teams, is_bk, klasse_pk)
-        if sel in sel2bestand:
+        if sel not in sel2bestand:
             # niet gevonden; voeg toe aan de todo lijst
             todo.append(tup)
     # for
@@ -85,7 +85,7 @@ def ontbrekende_wedstrijdformulieren_rk_bk(comp) -> list:
     for tup in iter_teams_wedstrijdformulieren(comp):
         afstand, is_teams, is_bk, klasse_pk, fname = tup
         sel = (comp.begin_jaar, afstand, is_teams, is_bk, klasse_pk)
-        if sel in sel2bestand:
+        if sel not in sel2bestand:
             # niet gevonden; voeg toe aan de todo lijst
             todo.append(tup)
     # for
