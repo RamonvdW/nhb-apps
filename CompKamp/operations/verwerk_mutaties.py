@@ -23,8 +23,10 @@ from CompKamp.operations.wedstrijdformulieren_teams import (iter_teams_wedstrijd
 from CompKamp.operations.storage_wedstrijdformulieren import (StorageWedstrijdformulieren, StorageError,
                                                               iter_dirty_wedstrijdformulieren, zet_dirty)
 from GoogleDrive.operations.google_sheets import GoogleSheet
+import time
 
 VOLGORDE_PARKEER = 22222        # hoog en past in PositiveSmallIntegerField
+QUOTA_PER_MINUTE = 45           # standard limit is 60 per minute
 
 
 class VerwerkCompKampMutaties:
@@ -748,6 +750,8 @@ class VerwerkCompKampMutaties:
             # for
         # for
 
+        quota = QUOTA_PER_MINUTE
+        start_time = time.time()
         for bestand in iter_dirty_wedstrijdformulieren(begin_jaar):
             self.stdout.write('[INFO] Update bestand pk=%s' % bestand.pk)
 
@@ -769,9 +773,18 @@ class VerwerkCompKampMutaties:
             now = timezone.now()
             stamp_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
             msg = '[%s] Bijgewerkt met resultaat %s\n' % (stamp_str, res)
-            # bestand.is_dirty = False
+            bestand.is_dirty = False
             bestand.log += msg
             bestand.save(update_fields=['is_dirty', 'log'])
+
+            quota -= 1
+            if quota == 0:
+                # sleep until the next minute
+                pause = time.time() - start_time        # difference between two floats
+                if pause > 0:
+                    self.stdout.write('[INFO] Pause for %.2f seconds due to quota' % pause)
+                    time.sleep(pause)
+                quota = QUOTA_PER_MINUTE
         # for
 
     HANDLERS = {
