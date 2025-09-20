@@ -54,9 +54,9 @@ class Command(BaseCommand):
             # example: [Errno -3] Temporary failure in name resolution
             self.stdout.write('[ERROR] Socket error: %s' % exc)
         except googleapiclient.errors.HttpError as exc:
-            self.stdout.write('[ERROR] HttpError from API: %s' % exc)
+            self.stdout.write('[ERROR] HttpError: %s' % exc)
         except google.auth.exceptions.TransportError as exc:
-            self.stdout.write('[ERROR] Error downloading gsheet: %s' % str(exc))
+            self.stdout.write('[ERROR] TransportError: %s' % str(exc))
 
         return None
 
