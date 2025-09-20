@@ -12,11 +12,13 @@ from google.oauth2.service_account import Credentials
 from googleapiclient.discovery import build
 import googleapiclient.errors
 import google.auth.exceptions
+import os.path
 import socket
 import json
 
 # service account dat gebruikt wordt om te downloaden (moet view rechten hebben op het document)
-SERVICE_ACCOUNT_FILE = settings.CREDENTIALS_PATH + 'mh-downloader_service-account.json'
+SERVICE_ACCOUNT_FILE = os.path.join(settings.CREDENTIALS_PATH,
+                                    settings.CREDENTIALS_SERVICE_ACCOUNT_DOWNLOADER)
 
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
 

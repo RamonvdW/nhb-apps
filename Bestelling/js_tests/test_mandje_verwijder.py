@@ -46,7 +46,7 @@ class TestBrowserBestellingMandjeVerwijder(MyMgmtCommandHelper, bh.BrowserTestCa
         print('sleep klaar')
 
         c2 = BestellingMutatie.objects.count()
-        if c1 == c2:
+        if c1 == c2:        # pragma: no cover
             #page = self.get_page_html()
             print('geen mutatie gevonden. page:\n%s' % page)
             self.fail('geen mutatie gevonden')
@@ -55,13 +55,13 @@ class TestBrowserBestellingMandjeVerwijder(MyMgmtCommandHelper, bh.BrowserTestCa
         self.do_navigate_to(self.url_mandje)
 
         leeg = self.find_element_type_with_text('p', 'Je mandje is leeg')
-        if leeg:
+        if leeg:            # pragma: no cover
             self.assert_no_console_log()
             self.fail('Mandje is onverwachts leeg')
 
         # verwijder het product uit het mandje
         buttons = self.find_elements_buttons()
-        if len(buttons) == 0:
+        if len(buttons) == 0:       # pragma: no cover
             page = self.get_page_html()
             self.fail('Verwijder knop niet gevonden! page:\n%s' % page)
 

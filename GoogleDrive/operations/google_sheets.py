@@ -13,13 +13,14 @@ from googleapiclient.discovery import build
 from googleapiclient.http import HttpRequest
 import googleapiclient.errors
 import socket
-
+import os.path
 
 # FUTURE: Google Drive API heeft push notification voor wijzigingen
 
 class GoogleSheet:
 
-    SERVICE_ACCOUNT_FILE = settings.CREDENTIALS_PATH + 'mh-wedstrijdformulieren_service-account.json'
+    SERVICE_ACCOUNT_FILE = os.path.join(settings.CREDENTIALS_PATH,
+                                        settings.CREDENTIALS_SERVICE_ACCOUNT_WEDSTRIJDFORMULIEREN)
 
     SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
 

@@ -318,7 +318,7 @@ class TestBestellingBetaling(E2EHelpers, TestCase):
         mail = MailQueue.objects.first()
         self.assert_email_html_ok(mail, 'email_bestelling/bevestig-betaling.dtl')
         self.assert_consistent_email_html_text(mail)  #, ignore=('>Prijs:', '>Korting:'))
-        print('{betaling email} %s' % mail.mail_text)
+        # print('{betaling email} %s' % mail.mail_text)
 
         bestelling = Bestelling.objects.get(pk=bestelling.pk)
         self.assertEqual(bestelling.status, BESTELLING_STATUS_AFGEROND)

@@ -12,8 +12,10 @@ from django.utils import timezone
 from google_auth_oauthlib.flow import Flow
 from oauthlib.oauth2 import AccessDeniedError, OAuth2Error
 from GoogleDrive.models import Transactie, Token, maak_unieke_code
+import os.path
 
-CLIENT_ID_AND_SECRET = settings.CREDENTIALS_PATH + 'mh_wedstrijdformulieren_oauth_client_id_and_secret.json'
+CLIENT_ID_AND_SECRET = os.path.join(settings.CREDENTIALS_PATH,
+                                    settings.CREDENTIALS_OAUTH_GOOGLE_DRIVE)
 
 SCOPES = ['https://www.googleapis.com/auth/drive']  # edit, create and delete all of your google drive files
 

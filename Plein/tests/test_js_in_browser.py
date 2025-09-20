@@ -14,7 +14,8 @@ import os
 
 def outer(app_filter):
     def inner(inst):
-        inst.run_focussed_tests(app_filter)
+        # wordt alleen gebruikt bij testen van subset
+        inst.run_focussed_tests(app_filter)     # pragma: no cover
     return inner
 
 
@@ -162,7 +163,7 @@ class TestBrowser(LiveServerTestCase, metaclass=AddFocus):
         print('ran %s js tests ...' % self._test_count, end='')
 
         # give the developer some time to play with the browser instance
-        if self.show_browser and self.pause_after_all_tests_seconds:
+        if self.show_browser and self.pause_after_all_tests_seconds:        # pragma: no cover
             print('[INFO] Sleeping for %s seconds' % self.pause_after_all_tests_seconds)
             time.sleep(self.pause_after_all_tests_seconds)
 
