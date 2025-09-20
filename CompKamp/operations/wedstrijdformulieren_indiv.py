@@ -64,8 +64,8 @@ class UpdateIndivWedstrijdFormulier:
             'scores': 'J11:K35',
             'deelnemers': 'D11:I%d' % (11 + self.aantal_regels_deelnemers - 1),
             'deelnemers_notities': 'T11:U%d' % (11 + self.aantal_regels_deelnemers - 1),
-            'reserves': 'D41:I99',                # wordt bijgewerkt in laad_wedstrijd
-            'reserves_notities': 'T41:U99',       # wordt bijgewerkt in laad_wedstrijd
+            'reserves': 'D41:I99',                # wordt bijgewerkt in laad_klasse
+            'reserves_notities': 'T41:U99',       # wordt bijgewerkt in laad_klasse
         }
 
     def _laad_klasse(self, bestand: Bestand):
@@ -90,7 +90,7 @@ class UpdateIndivWedstrijdFormulier:
             self.limiet = lim.limiet
 
         # pas de range aan zodat we niet onnodig veel data hoeven te sturen
-        self.aantal_regels_reserves = self.aantal_ingeschreven - self.aantal_regels_deelnemers + 2
+        self.aantal_regels_reserves = self.aantal_ingeschreven      # iedereen kan afgemeld zijn
         self.ranges['reserves'] = 'D41:I%d' % (41 + self.aantal_regels_reserves - 1)
         self.ranges['reserves_notities'] = 'T41:U%d' % (41 + self.aantal_regels_reserves - 1)
 
