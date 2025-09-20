@@ -102,9 +102,7 @@ class UpdateIndivWedstrijdFormulier:
 
         if not bestand.is_bk:
             # benoem het rayon
-            self.titel += ', rayon %s' % bestand.rayon_nr
-
-        self.titel += self.klasse.beschrijving
+            self.titel += ', Rayon %s' % bestand.rayon_nr
 
     def _schrijf_kopje(self, match: CompetitieMatch):
         # zet de titel
