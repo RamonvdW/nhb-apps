@@ -36,19 +36,6 @@ class HttpMock:
         return json_data
 
     @staticmethod
-    def _mock_list_sheets():
-        sheet1 = {
-            "properties": {
-                "title": "Sheet1",
-            }
-        }
-
-        json_data = {
-            "sheets": [sheet1],
-        }
-        return json_data
-
-    @staticmethod
     def _query_params_to_dict(query_str):
         # a=1&b=2
         d = dict()
@@ -73,9 +60,7 @@ class HttpMock:
             print('{MockHttp._mock_sheets}: doc_id=%s, url=%s, query_params=%s' % (repr(doc_id), repr(url), repr(query_params)))
         query_params = self._query_params_to_dict(query_params)
 
-        if url == '':
-            json_data = self._mock_list_sheets()
-        elif url == 'values:batchGet':
+        if url == 'values:batchGet':
             json_data = self._mock_values(query_params)
         else:       # pragma: no cover
             print('{MockHttp._mock_sheets}: unhandled url: %s' % repr(url))
@@ -109,16 +94,11 @@ class HttpMock:
             json_data = self._mock_oauth()
 
         elif uri.startswith('https://sheets.googleapis.com/v4/spreadsheets/'):
-            # url/doc_id?query_params
             # url/doc_id/sub?query_params
             url, query_params = uri[46:].split('?')
             pos = url.find('/')
-            if pos >= 0:
-                doc_id = url[:pos]
-                url = url[pos+1:]
-            else:
-                doc_id = url
-                url = ''
+            doc_id = url[:pos]
+            url = url[pos+1:]
             json_data = self._mock_spreadsheets(doc_id, url, query_params)
 
         else:   # pragma: no cover
@@ -156,7 +136,7 @@ class TestRecordsCliDownload(E2EHelpers, TestCase):
         #                                      report_exit_code=False)
         # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
 
-        my_service = HttpMock(verbose=True)
+        my_service = HttpMock(verbose=False)
         with patch('httplib2.Http', return_value=my_service):
             f1, f2 = self.run_management_command(self.cli_download, fname,
                                                  report_exit_code=False)
