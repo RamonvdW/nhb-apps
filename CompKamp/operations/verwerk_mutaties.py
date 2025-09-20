@@ -750,7 +750,7 @@ class VerwerkCompKampMutaties:
             # for
         # for
 
-        quota = QUOTA_PER_MINUTE
+        quota = 5       # in case previous run consume a lot
         start_time = time.time()
         for bestand in iter_dirty_wedstrijdformulieren(begin_jaar):
             self.stdout.write('[INFO] Update bestand pk=%s' % bestand.pk)
@@ -780,7 +780,7 @@ class VerwerkCompKampMutaties:
             quota -= 1
             if quota == 0:
                 # sleep until the next minute
-                pause = time.time() - start_time        # difference between two floats
+                pause = 60.0 - (time.time() - start_time)        # difference between two floats
                 if pause > 0:
                     self.stdout.write('[INFO] Pause for %.2f seconds due to quota' % pause)
                     time.sleep(pause)
