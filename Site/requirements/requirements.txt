@@ -23,7 +23,7 @@ google-api-core==2.25.1
     #   google-api-python-client
     #   google-geo-type
     #   google-maps-routing
-google-api-python-client==2.181.0
+google-api-python-client==2.182.0
     # via -r requirements.in
 google-auth==2.40.3
     # via
@@ -48,13 +48,13 @@ googleapis-common-protos==1.70.0
     #   grpcio-status
 googlemaps==4.10.0
     # via -r requirements.in
-grpcio==1.74.0
+grpcio==1.75.0
     # via
     #   google-api-core
     #   grpcio-status
-grpcio-status==1.74.0
+grpcio-status==1.75.0
     # via google-api-core
-httplib2==0.30.0
+httplib2==0.31.0
     # via
     #   google-api-python-client
     #   google-auth-httplib2
@@ -75,7 +75,7 @@ proto-plus==1.26.1
     #   google-api-core
     #   google-geo-type
     #   google-maps-routing
-protobuf==6.32.0
+protobuf==6.32.1
     # via
     #   google-api-core
     #   google-geo-type
@@ -93,7 +93,7 @@ pyasn1-modules==0.4.2
     # via google-auth
 pyotp==2.9.0
     # via -r requirements.in
-pyparsing==3.2.3
+pyparsing==3.2.5
     # via httplib2
 pypdf==6.0.0
     # via -r requirements.in
@@ -114,7 +114,9 @@ rsa==4.9.1
 sqlparse==0.5.3
     # via django
 typing-extensions==4.15.0
-    # via psycopg
+    # via
+    #   grpcio
+    #   psycopg
 uritemplate==4.2.0
     # via google-api-python-client
 urllib3==2.5.0

@@ -48,7 +48,7 @@ et-xmlfile==2.0.0
     # via
     #   -r requirements.txt
     #   openpyxl
-fonttools==4.59.2
+fonttools==4.60.0
     # via -r requirements_dev.in
 google-api-core==2.25.1
     # via
@@ -56,7 +56,7 @@ google-api-core==2.25.1
     #   google-api-python-client
     #   google-geo-type
     #   google-maps-routing
-google-api-python-client==2.181.0
+google-api-python-client==2.182.0
     # via -r requirements.txt
 google-auth==2.40.3
     # via
@@ -86,12 +86,12 @@ googleapis-common-protos==1.70.0
     #   grpcio-status
 googlemaps==4.10.0
     # via -r requirements.txt
-grpcio==1.74.0
+grpcio==1.75.0
     # via
     #   -r requirements.txt
     #   google-api-core
     #   grpcio-status
-grpcio-status==1.74.0
+grpcio-status==1.75.0
     # via
     #   -r requirements.txt
     #   google-api-core
@@ -99,7 +99,7 @@ h11==0.16.0
     # via wsproto
 html5validator==0.4.2
     # via -r requirements_dev.in
-httplib2==0.30.0
+httplib2==0.31.0
     # via
     #   -r requirements.txt
     #   google-api-python-client
@@ -139,7 +139,7 @@ proto-plus==1.26.1
     #   google-api-core
     #   google-geo-type
     #   google-maps-routing
-protobuf==6.32.0
+protobuf==6.32.1
     # via
     #   -r requirements.txt
     #   google-api-core
@@ -161,7 +161,7 @@ pyasn1-modules==0.4.2
     #   google-auth
 pyotp==2.9.0
     # via -r requirements.txt
-pyparsing==3.2.3
+pyparsing==3.2.5
     # via
     #   -r requirements.txt
     #   httplib2
@@ -212,6 +212,7 @@ typing-extensions==4.15.0
     # via
     #   -r requirements.txt
     #   beautifulsoup4
+    #   grpcio
     #   psycopg
     #   selenium
 uritemplate==4.2.0
