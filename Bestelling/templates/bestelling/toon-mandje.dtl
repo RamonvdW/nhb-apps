@@ -93,17 +93,15 @@
                             {% endfor %}
 
                             <!-- verzendkosten -->
-                            {% if mandje.verzendkosten_euro > 0 %}
+                            {% if mandje.transport != 'N' %}
+                                <!-- niet NVT -->
                                 <tr>
-                                    <td>Verzendkosten</td>
+                                    {% if mandje.transport == 'O' %}
+                                        <td>Ophalen op het bondsbureau</td>
+                                    {% else %}
+                                        <td>Verzendkosten</td>
+                                    {% endif %}
                                     <td class="right-align">&euro;&nbsp;{{ mandje.verzendkosten_euro }}</td>
-                                    <td><!-- knoppen --></td>
-                                </tr>
-                            {% elif mandje.transport == 'O' %}
-                                <!-- ophalen -->
-                                <tr>
-                                    <td colspan="2">Ophalen op het bondsbureau</td>
-                                    <td class="right-align">&euro;&nbsp;0,00</td>
                                     <td><!-- knoppen --></td>
                                 </tr>
                             {% endif %}
@@ -114,22 +112,6 @@
                                 <td class="right-align"><b>&euro;&nbsp;{{ mandje.totaal_euro }}</b></td>
                                 <td><!--knoppen--></td>
                             </tr>
-
-                            {% comment %}
-                            <!-- btw -->
-                            {% if mandje.btw_percentage_cat1 or mandje.btw_percentage_cat2 or mandje.btw_percentage_cat3 %}
-                                <tr>
-                                    <td class="hide-on-small-only">Waarvan BTW</td>
-                                    <td>
-                                        {% if mandje.btw_percentage_cat1 %}<span>{{ mandje.btw_percentage_cat1 }}%: &euro;&nbsp;{{ mandje.btw_euro_cat1 }}</span><br>{% endif %}
-                                        {% if mandje.btw_percentage_cat2 %}<span>{{ mandje.btw_percentage_cat2 }}%: &euro;&nbsp;{{ mandje.btw_euro_cat2 }}</span><br>{% endif %}
-                                        {% if mandje.btw_percentage_cat3 %}<span>{{ mandje.btw_percentage_cat3 }}%: &euro;&nbsp;{{ mandje.btw_euro_cat3 }}</span><br>{% endif %}
-                                    </td>
-                                    <td></td>
-                                    <td><!-- knoppen --></td>
-                                </tr>
-                            {% endif %}
-                            {% endcomment %}
 
                             {% if not bevat_fout %}
                                 {% if kan_gesplitst_worden %}

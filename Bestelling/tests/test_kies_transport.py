@@ -5,6 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase, override_settings
+from django.utils import timezone
 from Bestelling.definities import (BESTELLING_TRANSPORT_VERZEND, BESTELLING_TRANSPORT_OPHALEN,
                                    BESTELLING_REGEL_CODE_WEBWINKEL)
 from Bestelling.models import BestellingMandje, Bestelling, BestellingRegel
@@ -14,6 +15,7 @@ from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.definities import VER_NR_BONDSBUREAU
 from Vereniging.models import Vereniging
+from Webwinkel.models import WebwinkelKeuze, WebwinkelProduct
 from decimal import Decimal
 
 
@@ -65,6 +67,14 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
         ver.bank_iban = 'IBAN123456789'
         ver.bank_bic = 'BIC4NL'
         ver.save()
+
+        product = WebwinkelProduct(
+                            omslag_titel='test',
+                            prijs_euro=Decimal(1.0),
+                            #type_verzendkosten=VERZENDKOSTEN_PAKKETPOST
+                            )
+        product.save()
+        self.webwinkel_product = product
 
     def test_anon(self):
         self.client.logout()
@@ -144,6 +154,13 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
             regel.save()
             mandje.regels.add(regel)
 
+            keuze = WebwinkelKeuze(
+                            wanneer=timezone.now(),
+                            bestelling=regel,
+                            product=self.webwinkel_product,
+                            aantal=1)
+            keuze.save()
+
             # wijzig naar verzenden
             with self.assert_max_queries(20):
                 resp = self.client.post(self.url_kies_transport, {'snel': 1, 'keuze': 'verzend'})
@@ -191,6 +208,13 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
                             code=BESTELLING_REGEL_CODE_WEBWINKEL)
             regel.save()
             mandje.regels.add(regel)
+
+            keuze = WebwinkelKeuze(
+                            wanneer=timezone.now(),
+                            bestelling=regel,
+                            product=self.webwinkel_product,
+                            aantal=1)
+            keuze.save()
 
             # nu kan er een keuze gemaakt worden
             with self.assert_max_queries(20):

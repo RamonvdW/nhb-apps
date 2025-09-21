@@ -176,7 +176,19 @@ class VerwerkBestelMutaties:
 
     @staticmethod
     def _bepaal_verzendkosten_mandje(mandje):
-        """ bereken de verzendkosten voor fysieke producten in het mandje """
+        """ bereken de verzendkosten voor fysieke producten in het mandje
+
+            het is genoeg om mandje.verzendkosten_euro te zetten
+            een regel toevoegen hoeft alleen voor een bestelling
+        """
+
+        # transport oud | verzendkosten | transport nieuw
+        # NVT             0               NVT
+        # VERZEND         0               NVT
+        # OPHALEN         0               NVT
+        # NVT             >0              VERZEND
+        # VERZEND         >0              VERZEND
+        # OPHALEN         >0              OPHALEN
 
         mandje.verzendkosten_euro, _, _ = verzendkosten_bestel_plugin.bereken_verzendkosten(mandje)
 
@@ -189,6 +201,9 @@ class VerwerkBestelMutaties:
                 # bij toevoegen eerste product schakelen we over op verzenden
                 # gebruiker kan deze op "ophalen" zetten
                 mandje.transport = BESTELLING_TRANSPORT_VERZEND
+
+            if mandje.transport == BESTELLING_TRANSPORT_OPHALEN:
+                mandje.verzendkosten_euro = Decimal(0)
 
         mandje.save(update_fields=['verzendkosten_euro', 'transport'])
 
@@ -784,7 +799,6 @@ class VerwerkBestelMutaties:
         """ Wijzig keuze voor transport tussen ophalen en verzender; alleen voor webwinkel aankopen """
         self.stdout.write('[INFO] Verwerk mutatie %s: wijzig transport' % mutatie.pk)
 
-        # TODO: hoe is deze code anders dan in verwerk_mutatie_webwinkel_keuze()
         mandje = self._get_mandje(mutatie)
         if mandje:  # pragma: no branch
 
@@ -793,9 +807,8 @@ class VerwerkBestelMutaties:
             mandje.transport = mutatie.transport
             mandje.save(update_fields=['transport'])
 
-            verzendkosten_bestel_plugin.bereken_verzendkosten(mandje)
-
             # bereken het totaal opnieuw
+            self._bepaal_verzendkosten_mandje(mandje)
             _mandje_bepaal_btw(mandje)
             mandje.bepaal_totaalprijs_opnieuw()
 
