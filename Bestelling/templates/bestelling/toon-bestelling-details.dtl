@@ -125,7 +125,7 @@
                         {% if url_afrekenen or moet_handmatig%}
                             <tr>
                                 <td colspan="3">
-                                    <p class="center">Betaling is {% if moet_handmatig %}alleen{% else %}ook{% endif %} mogelijk door overboeking van het verschuldigde bedrag naar onderstaande rekening <br class="hide-on-med-and-down">onder vermelding van "Bestelnummer {{ bestelling.mh_bestel_nr }}"</p>
+                                    <p class="center">Betaling is {% if moet_handmatig %}alleen{% else %}ook{% endif %} mogelijk door overboeking van het verschuldigde bedrag naar onderstaande rekeningnummer (IBAN) <br class="hide-on-med-and-down">onder vermelding van "Bestelnummer {{ bestelling.mh_bestel_nr }}"</p>
                                 </td>
                             </tr>
                         {% endif %}

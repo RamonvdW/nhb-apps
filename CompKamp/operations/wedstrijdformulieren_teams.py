@@ -281,12 +281,12 @@ class UpdateTeamsWedstrijdFormulier:
         return False
 
     def _hide_show_sheets(self):
-        # er zijn wedstrijd sheets voor 4, 5, 6, 7 en 8 teams
+        # er zijn wedstrijd sheets voor 3, 4, 5, 6, 7 en 8 teams
         # toon alleen de het benodigde sheet
         aantal_teams = len(self.teams)
 
-        if 4 <= aantal_teams <= 8:
-            for aantal in (4, 5, 6, 7, 8):
+        if 3 <= aantal_teams <= 8:
+            for aantal in (3, 4, 5, 6, 7, 8):
                 sheet_name = '%s teams' % aantal
                 if aantal == aantal_teams:
                     self.sheet.toon_sheet(sheet_name)
