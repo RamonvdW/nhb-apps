@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2023 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -34,20 +34,20 @@ class Command(BaseCommand):         # pragma: no cover      # FUTURE: commando i
                                .select_related('sporter')
                                .filter(discipline='OD'))
 
-        self._cache_nhb = dict()        # [indiv.pk] = IndivRecord
+        self._cache_indiv = dict()        # [indiv.pk] = IndivRecord
 
         for obj in self._indiv_indoor:
             obj.wa_match = None
-            self._cache_nhb[obj.pk] = obj
+            self._cache_indiv[obj.pk] = obj
         # for
 
         for obj in self._indiv_outdoor:
             obj.wa_match = None
-            self._cache_nhb[obj.pk] = obj
+            self._cache_indiv[obj.pk] = obj
         # for
 
-    def _zoek_passend_nhb_record(self, wa_rec):
-        # zoek een NHB record dat past bij het WA record
+    def _zoek_passend_indiv_record(self, wa_rec):
+        # zoek een indiv record dat past bij het WA record
 
         soort = wa_rec['RecordName']
         soort = soort.replace(' Round', '')
@@ -107,7 +107,7 @@ class Command(BaseCommand):         # pragma: no cover      # FUTURE: commando i
         naam = wa_rec['Naam'].lower()
         for rec in recs:
             if rec.naam.lower() == naam:
-                return self._cache_nhb[rec.pk]
+                return self._cache_indiv[rec.pk]
         # for
 
         self.stdout.write('[WARNING] Geen passend KHSN record gevonden: soort=%s' % soort)
@@ -119,30 +119,30 @@ class Command(BaseCommand):         # pragma: no cover      # FUTURE: commando i
 
         return None
 
-    def _vergelijk_records(self, wa_rec, nhb_rec):
+    def _vergelijk_records(self, wa_rec, indiv_rec):
         # para_klasse = models.CharField(max_length=20, blank=True)
         cat = wa_rec['Cat']       # [0]=R/C/etc, [1]=C/J/S, [2]=M/W/O
         if wa_rec['ParaAr'] == 'True':
             # is een para record
-            if nhb_rec.para_klasse == '':
+            if indiv_rec.para_klasse == '':
                 self.stdout.write('[WARNING] Record %s-%s zou een para klasse moeten hebben (WA: cat=%s)' % (
-                                    nhb_rec.discipline, nhb_rec.volg_nr, cat))
+                    indiv_rec.discipline, indiv_rec.volg_nr, cat))
                 self._warning_count += 1
         else:
             # is geen para record
-            if nhb_rec.para_klasse != '':
+            if indiv_rec.para_klasse != '':
                 self.stdout.write('[WARNING] Record %s-%s is onverwacht een para klasse (WA: cat=%s)' % (
-                                    nhb_rec.discipline, nhb_rec.volg_nr, cat))
+                    indiv_rec.discipline, indiv_rec.volg_nr, cat))
                 self._warning_count += 1
 
-        # nhb_rec.geslacht
-        if nhb_rec.geslacht == 'M' and 'M' not in cat:
+        # geslacht
+        if indiv_rec.geslacht == 'M' and 'M' not in cat:
             self.stdout.write('[WARNING] Record %s-%s is onverwacht geslacht=M (WA: cat=%s)' % (
-                                nhb_rec.discipline, nhb_rec.volg_nr, cat))
+                indiv_rec.discipline, indiv_rec.volg_nr, cat))
             self._warning_count += 1
-        elif nhb_rec.geslacht == 'V' and 'W' not in cat:
+        elif indiv_rec.geslacht == 'V' and 'W' not in cat:
             self.stdout.write('[WARNING] Record %s-%s is onverwacht geslacht=V (WA: cat=%s)' % (
-                                nhb_rec.discipline, nhb_rec.volg_nr, cat))
+                indiv_rec.discipline, indiv_rec.volg_nr, cat))
             self._warning_count += 1
 
         # leeftijdscategorie = models.CharField(max_length=1, choices=LEEFTIJDSCATEGORIE)
@@ -150,32 +150,32 @@ class Command(BaseCommand):         # pragma: no cover      # FUTURE: commando i
         # verbeterbaar = models.BooleanField(default=True)
 
         # datum = models.DateField()               # dates before 1950 mean "no date known"
-        if str(nhb_rec.datum) != wa_rec['Date']:
+        if str(indiv_rec.datum) != wa_rec['Date']:
             self.stdout.write('[WARNING] Record %s-%s heeft andere datum (%s, WA: %s)' % (
-                                nhb_rec.discipline, nhb_rec.volg_nr, nhb_rec.datum, wa_rec['Date']))
+                indiv_rec.discipline, indiv_rec.volg_nr, indiv_rec.datum, wa_rec['Date']))
             self._warning_count += 1
 
         # plaats = models.CharField(max_length=50)
-        if wa_rec['Plaats'] != nhb_rec.plaats:
+        if wa_rec['Plaats'] != indiv_rec.plaats:
             self.stdout.write('[WARNING] Record %s-%s heeft andere plaats (%s, WA: %s)' % (
-                                nhb_rec.discipline, nhb_rec.volg_nr, nhb_rec.plaats, wa_rec['Plaats']))
+                indiv_rec.discipline, indiv_rec.volg_nr, indiv_rec.plaats, wa_rec['Plaats']))
             self._warning_count += 1
 
         # land = models.CharField(max_length=50)
         # wa_rec['Land'] = 3-letter afkorting!
 
         # is_european_record = models.BooleanField(default=False)
-        if nhb_rec.is_european_record and wa_rec['Type'] not in ('WR', 'ER'):
+        if indiv_rec.is_european_record and wa_rec['Type'] not in ('WR', 'ER'):
             # onderdruk bij ER indien ook al WR gematcht
-            if not nhb_rec.wa_match:
+            if not indiv_rec.wa_match:
                 self.stdout.write('[WARNING] Record %s-%s heeft ER vlag maar WA type is %s' % (
-                                    nhb_rec.discipline, nhb_rec.volg_nr, wa_rec['Type']))
+                    indiv_rec.discipline, indiv_rec.volg_nr, wa_rec['Type']))
                 self._warning_count += 1
 
         # is_world_record = models.BooleanField(default=False)
-        if nhb_rec.is_world_record and wa_rec['Type'] != 'WR':
+        if indiv_rec.is_world_record and wa_rec['Type'] != 'WR':
             self.stdout.write('[WARNING] Record %s-%s heeft WR vlag maar WA type is %s' % (
-                                nhb_rec.discipline, nhb_rec.volg_nr, wa_rec['Type']))
+                indiv_rec.discipline, indiv_rec.volg_nr, wa_rec['Type']))
             self._warning_count += 1
 
     def _read_ned_wa(self, csv_reader):
@@ -191,27 +191,27 @@ class Command(BaseCommand):         # pragma: no cover      # FUTURE: commando i
         # for
 
         for wa_rec in eerste + daarna:
-            nhb_rec = self._zoek_passend_nhb_record(wa_rec)
-            if nhb_rec:
+            indiv_rec = self._zoek_passend_indiv_record(wa_rec)
+            if indiv_rec:
                 prev_count = self._warning_count
 
-                self._vergelijk_records(wa_rec, nhb_rec)
+                self._vergelijk_records(wa_rec, indiv_rec)
 
                 if prev_count != self._warning_count:
                     self.stdout.write('          wa_rec=%s' % wa_rec)
-                    self.stdout.write('          nhb_rec=%s' % nhb_rec)
+                    self.stdout.write('          indiv_rec=%s' % indiv_rec)
 
-                if not nhb_rec.wa_match:
-                    nhb_rec.wa_match = wa_rec
+                if not indiv_rec.wa_match:
+                    indiv_rec.wa_match = wa_rec
         # for
 
     def _check_onbekende_os_wr_er(self):
-        for nhb_rec in self._cache_nhb.values():
-            if nhb_rec.is_european_record or nhb_rec.is_world_record:
-                if not nhb_rec.wa_match:
+        for indiv_rec in self._cache_indiv.values():
+            if indiv_rec.is_european_record or indiv_rec.is_world_record:
+                if not indiv_rec.wa_match:
                     self.stdout.write('[WARNING] Record %s-%s heeft ER/WR vlag maar geen WA match' % (
-                                        nhb_rec.discipline, nhb_rec.volg_nr))
-                    self.stdout.write('          nhb_rec=%s' % nhb_rec)
+                                        indiv_rec.discipline, indiv_rec.volg_nr))
+                    self.stdout.write('          indiv_rec=%s' % indiv_rec)
                     self._warning_count += 1
         # for
 

@@ -600,7 +600,7 @@ class TestImportCRMImport(E2EHelpers, TestCase):
                                                  OPTION_SIM)
         self.assertFalse("[INFO] Lid 100024 Voornaam van der Achternaam [V, 2000] wordt nu verwijderd" in f2.getvalue())
 
-    def test_import_nhb_crm_dryrun(self):
+    def test_import_crm_dryrun(self):
         # dryrun
         with self.assert_max_queries(60):
             f1, f2 = self.run_management_command(IMPORT_COMMAND,

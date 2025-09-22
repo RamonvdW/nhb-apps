@@ -54,7 +54,7 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
                                                     accepteer_vhpg=True)
         self.account_beh2 = self.e2e_create_account('testbeheerder2', 'beh2@test.mh', 'Beheerder2',
                                                     accepteer_vhpg=True)
-        self.account_ander = self.e2e_create_account('anderlid', 'anderlid@test.nhb', 'Ander')
+        self.account_ander = self.e2e_create_account('anderlid', 'anderlid@test.not', 'Ander')
 
         self.functie_bko = Functie.objects.get(comp_type='18', rol='BKO')
         self.functie_rko3 = Functie.objects.get(comp_type='18', rol='RKO', rayon=Rayon.objects.get(rayon_nr=3))
@@ -376,7 +376,7 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
         # controleer correctheid toevoeging in het logboek
         regel = LogboekRegel.objects.first()
         self.assertEqual(regel.gebruikte_functie, 'Rollen')
-        # beh1 is geen nhb lid
+        # beh1 is geen lid
         self.assertEqual(regel.activiteit,
                          'Account Beheerder1 (testbeheerder1) is beheerder gemaakt voor functie RCL Regio 111 Indoor')
 

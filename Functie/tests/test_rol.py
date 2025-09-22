@@ -37,7 +37,7 @@ class TestFunctieRol(E2EHelpers, TestCase):
         """ initialisatie van de test case """
 
         self.account_admin = self.e2e_create_account_admin()
-        self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.nhb', 'Normaal')
+        self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.not', 'Normaal')
 
         self.functie_sec = maak_functie("SEC test", "SEC")
         self.functie_tst = maak_functie("Test test", "x")

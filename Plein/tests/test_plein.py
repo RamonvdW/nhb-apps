@@ -4,7 +4,7 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from BasisTypen.definities import SCHEIDS_VERENIGING
 from Bestelling.definities import BESTELLING_REGEL_CODE_WEBWINKEL
 from Bestelling.models import BestellingMandje, BestellingRegel
@@ -42,7 +42,7 @@ class TestPlein(E2EHelpers, TestCase):
     def setUp(self):
         """ initialisatie van de test case """
         self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.com', 'Normaal')
-        self.account_100001 = self.e2e_create_account('100001', 'nhb100001@test.com', 'Ramon')
+        self.account_100001 = self.e2e_create_account('100001', '100001@test.com', 'Ramon')
 
         self.functie_bko = maak_functie('BKO Test', 'BKO')
 
@@ -108,6 +108,7 @@ class TestPlein(E2EHelpers, TestCase):
 
     def test_plein_anon(self):
         self.e2e_logout()
+
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_plein)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
@@ -125,13 +126,14 @@ class TestPlein(E2EHelpers, TestCase):
     def test_plein_normaal(self):
         self.e2e_login(self.account_normaal)        # account, maar geen Sporter
 
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_plein)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assertNotContains(resp, '/admin/')
-        self.assertNotContains(resp, 'Wissel van rol')
-        self.assert_template_used(resp, ('plein/plein-sporter.dtl', 'plein/site_layout.dtl'))
-        self.assert_html_ok(resp)
+        with override_settings(USE_SUBSET_FONT_FILES=False):      # extra coverage for site_layout_fonts.dtl
+            with self.assert_max_queries(20):
+                resp = self.client.get(self.url_plein)
+            self.assertEqual(resp.status_code, 200)     # 200 = OK
+            self.assertNotContains(resp, '/admin/')
+            self.assertNotContains(resp, 'Wissel van rol')
+            self.assert_template_used(resp, ('plein/plein-sporter.dtl', 'plein/site_layout.dtl'))
+            self.assert_html_ok(resp)
 
         # check dat de het scheidsrechters kaartje er niet bij zit
         urls = self.extract_all_urls(resp)
@@ -149,11 +151,12 @@ class TestPlein(E2EHelpers, TestCase):
         self.e2e_login(self.account_100001)
 
         # plein bekijken = mandje opnieuw evalueren
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_plein)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('plein/plein-sporter.dtl', 'plein/site_layout.dtl'))
-        self.assert_html_ok(resp)
+        with override_settings(DEBUG=True):      # extra coverage for site_layout.dtl: menu_toon_schermgrootte
+            with self.assert_max_queries(20):
+                resp = self.client.get(self.url_plein)
+            self.assertEqual(resp.status_code, 200)     # 200 = OK
+            self.assert_template_used(resp, ('plein/plein-sporter.dtl', 'plein/site_layout.dtl'))
+            self.assert_html_ok(resp)
 
         # check dat de mandje-knop erbij zit
         urls = self.extract_all_urls(resp)

@@ -13,6 +13,7 @@ from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
 from Geo.models import Regio
 from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren, get_sporter
+from typing import Tuple
 
 
 def get_request_regio_nr(request, allow_admin_regio=True):
@@ -83,7 +84,7 @@ def get_request_rayon_nr(request):
     return rayon_nr
 
 
-def get_sporter_gekozen_bogen(sporter: Sporter, alle_bogen) -> (dict[str: SporterBoog], list[str]):
+def get_sporter_gekozen_bogen(sporter: Sporter, alle_bogen) -> Tuple[dict[str, SporterBoog], list[str]]:
     """ geeft een dictionary terug met een mapping van boog afkorting naar SporterBoog
         geeft een lijst terug met boog afkortingen waarmee wedstrijden geschoten willen worden
     """

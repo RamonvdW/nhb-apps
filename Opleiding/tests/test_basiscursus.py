@@ -28,7 +28,7 @@ class TestOpleidingBasiscursus(E2EHelpers, TestCase):
 
     def setUp(self):
         """ initialisatie van de test case """
-        self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.nhb', 'Normaal')
+        self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.not', 'Normaal')
 
         ver = Vereniging(
                         ver_nr=1000,

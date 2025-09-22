@@ -191,7 +191,7 @@ class TestSporterLeeftijdsklassen(E2EHelpers, TestCase):
         beschrijving = bereken_leeftijdsklasse_wa(50, GESLACHT_ANDERS)
         self.assertEqual(beschrijving, '?')
 
-    def test_leeftijdsklassen_nhb(self):
+    def test_leeftijdsklassen_khsn(self):
         # Onder 12
         tup = bereken_leeftijdsklassen_khsn(self.huidige_jaar - 9, GESLACHT_MAN, self.huidige_jaar)
         self.assertEqual(tup,
@@ -303,7 +303,7 @@ class TestSporterLeeftijdsklassen(E2EHelpers, TestCase):
                           '60+ Gemengd',
                           ['50+ Gemengd', '60+ Gemengd', '60+ Gemengd', '60+ Gemengd', '60+ Gemengd']))
 
-    def test_leeftijdsklasse_nhb(self):
+    def test_leeftijdsklasse_khsn(self):
         # Onder 12
         tup = bereken_leeftijdsklasse_khsn(9, GESLACHT_MAN)
         self.assertEqual(tup, 'Onder 12 Jongens')

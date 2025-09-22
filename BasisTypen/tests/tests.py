@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -74,7 +74,7 @@ class TestBasisTypen(TestCase):
         html = adm._leeftijdsklassen(obj)
         self.assertTrue(html.count('<p>') == obj.leeftijdsklassen.count())
 
-    def test_max_wedstrijdleeftijd(self):
+    def test_lkl_wedstrijdleeftijd(self):
         lkl = Leeftijdsklasse(
                     wedstrijd_geslacht='M',
                     min_wedstrijdleeftijd=20,
@@ -97,7 +97,7 @@ class TestBasisTypen(TestCase):
         self.assertTrue(lkl.leeftijd_is_compatible(31))
         self.assertTrue(lkl.leeftijd_is_compatible(100))
 
-    def test_geslacht(self):
+    def test_lkl_geslacht(self):
         lkl = Leeftijdsklasse(
                     wedstrijd_geslacht='M',
                     min_wedstrijdleeftijd=20,
@@ -125,7 +125,7 @@ class TestBasisTypen(TestCase):
         self.assertTrue(lkl.geslacht_is_compatible('V'))
         self.assertTrue(lkl.geslacht_is_compatible('X'))
 
-    def test_operations(self):
+    def test_organisatie(self):
         self.assertEqual(get_organisatie_boogtypen(ORGANISATIE_WA).count(), 5)
         self.assertEqual(get_organisatie_boogtypen(ORGANISATIE_KHSN).count(), 5)
         self.assertEqual(get_organisatie_boogtypen(ORGANISATIE_IFAA).count(), 12)
@@ -138,6 +138,7 @@ class TestBasisTypen(TestCase):
         self.assertEqual(get_organisatie_klassen(ORGANISATIE_KHSN).count(), 105)
         self.assertEqual(get_organisatie_klassen(ORGANISATIE_IFAA).count(), 144)
 
+    def test_boogtypen(self):
         bogen_pks = [BoogType.objects.get(afkorting='R').pk]
         klassen = get_organisatie_klassen(ORGANISATIE_WA, filter_bogen=bogen_pks)
         self.assertEqual(klassen.count(), 8)

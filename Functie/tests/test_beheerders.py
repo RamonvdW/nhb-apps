@@ -34,12 +34,12 @@ class TestFunctieBeheerders(E2EHelpers, TestCase):
         #       rol: BKO, RKO (4x), RCL (16x)
 
         self.account_admin = self.e2e_create_account_admin()
-        self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.nhb', 'Normaal')
-        self.account_beh1 = self.e2e_create_account('testbeheerder1', 'beh1@test.nhb', 'Beheerder1',
+        self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.not', 'Normaal')
+        self.account_beh1 = self.e2e_create_account('testbeheerder1', 'beh1@test.not', 'Beheerder1',
                                                     accepteer_vhpg=True)
-        self.account_beh2 = self.e2e_create_account('testbeheerder2', 'beh2@test.nhb', 'Beheerder2',
+        self.account_beh2 = self.e2e_create_account('testbeheerder2', 'beh2@test.not', 'Beheerder2',
                                                     accepteer_vhpg=True)
-        self.account_ander = self.e2e_create_account('anderlid', 'anderlid@test.nhb', 'Ander')
+        self.account_ander = self.e2e_create_account('anderlid', 'anderlid@test.not', 'Ander')
 
         self.functie_mwz = Functie.objects.get(rol='MWZ')
         self.functie_bko_18 = Functie.objects.get(comp_type='18', rol='BKO')

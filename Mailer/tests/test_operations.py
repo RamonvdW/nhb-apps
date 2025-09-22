@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2023 Ramon van der Winkel.
+#  Copyright (c) 2020-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -40,11 +40,11 @@ class TestMailerOperations(TestCase):
     def test_obfuscate_email(self):
         self.assertEqual(mailer_obfuscate_email(''), '')
         self.assertEqual(mailer_obfuscate_email('x'), 'x')
-        self.assertEqual(mailer_obfuscate_email('x@test.nhb'), 'x@test.nhb')
-        self.assertEqual(mailer_obfuscate_email('do@test.nhb'), 'd#@test.nhb')
-        self.assertEqual(mailer_obfuscate_email('tre@test.nhb'), 't#e@test.nhb')
-        self.assertEqual(mailer_obfuscate_email('vier@test.nhb'), 'v##r@test.nhb')
-        self.assertEqual(mailer_obfuscate_email('zeven@test.nhb'), 'ze##n@test.nhb')
+        self.assertEqual(mailer_obfuscate_email('x@test.not'), 'x@test.not')
+        self.assertEqual(mailer_obfuscate_email('do@test.not'), 'd#@test.not')
+        self.assertEqual(mailer_obfuscate_email('tre@test.not'), 't#e@test.not')
+        self.assertEqual(mailer_obfuscate_email('vier@test.not'), 'v##r@test.not')
+        self.assertEqual(mailer_obfuscate_email('zeven@test.not'), 'ze##n@test.not')
         self.assertEqual(mailer_obfuscate_email('hele.lange@maaktnietuit.nl'), 'he#######e@maaktnietuit.nl')
 
     def test_email_is_valide(self):
@@ -52,7 +52,7 @@ class TestMailerOperations(TestCase):
         self.assertTrue(mailer_email_is_valide('jan.de.tester@test.not'))
         self.assertTrue(mailer_email_is_valide('jan.de.tester@hb.nl'))
         self.assertTrue(mailer_email_is_valide('r@hb.nl'))
-        self.assertFalse(mailer_email_is_valide('tester@nhb'))
+        self.assertFalse(mailer_email_is_valide('tester@test'))
         self.assertFalse(mailer_email_is_valide('test er@test.not'))
         self.assertFalse(mailer_email_is_valide('test\ter@test.not'))
         self.assertFalse(mailer_email_is_valide('test\ner@test.not'))

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -69,7 +69,7 @@ def aanvangsgemiddelden_vaststellen_voor_afstand(afstand: int):
     # maak een cache aan van boogtype
     boogtype_dict = get_competitie_bogen()
 
-    # maak een cache aan van nhb leden
+    # maak een cache aan van leden
     # we filteren hier niet op inactieve leden
     sporter_dict = dict()  # [lid_nr] = Sporter
     for obj in Sporter.objects.all():

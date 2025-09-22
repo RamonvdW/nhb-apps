@@ -41,7 +41,7 @@ class TestOpleidingAfmelden(E2EHelpers, TestCase):
     def setUp(self):
         """ initialisatie van de test case """
 
-        self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.nhb', 'Normaal')
+        self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.not', 'Normaal')
         self.e2e_account_accepteert_vhpg(self.account_normaal)
 
         ver_bond = Vereniging(
@@ -62,7 +62,7 @@ class TestOpleidingAfmelden(E2EHelpers, TestCase):
                     voornaam='Thea',
                     achternaam='de Tester',
                     unaccented_naam='Thea de Tester',
-                    email='normaal@test.nhb',
+                    email='normaal@test.not',
                     geboorte_datum="1970-11-15",
                     geboorteplaats='Pijlstad',
                     geslacht='V',

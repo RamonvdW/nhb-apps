@@ -150,7 +150,7 @@
             </div>
         </div>
 
-        <!-- Hieronder: zoekveld voor ander lid (nhb-nr >> naam + vereniging) -->
+        <!-- Hieronder: zoekveld voor ander lid (lid_nr >> naam + vereniging) -->
 
         <div class="col s12 m10 offset-m1" style="margin-top:50px">
             <div class="sv-kader left-align z-depth-3 center">
