@@ -30,7 +30,15 @@
   font-weight: 400;
   font-stretch: normal;
   font-display: block;  /* liever later tonen dan verspringende layout */
-  src: url("{% static 'fonts/OpenSans-Regular-v43.ttf' %}") format('truetype');
+  src: url("{% static 'fonts/OpenSans-Regular-v44.ttf' %}") format('truetype');
+}
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 600;
+  font-stretch: normal;
+  font-display: block;  /* liever later tonen dan verspringende layout */
+  src: url("{% static 'fonts/OpenSans-SemiBold-v44.ttf' %}") format('truetype');
 }
 @font-face {
   font-family: 'Material Symbols Rounded';

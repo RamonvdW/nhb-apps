@@ -9,13 +9,15 @@ URL_SERVER="https://fonts.googleapis.com"
 #URL_MATERIAL_SYMBOLS="$URL_SERVER/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0"         # only filled
 #URL_MATERIAL_SYMBOLS="$URL_SERVER/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0..1,0"      # gives 2 fonts, not variable font
 URL_MATERIAL_SYMBOLS="https://raw.githubusercontent.com/google/material-design-icons/refs/heads/master/variablefont/MaterialSymbolsRounded%5BFILL%2CGRAD%2Copsz%2Cwght%5D.ttf"
-URL_OPEN_SANS="$URL_SERVER/css2?family=Open+Sans&display=swap"
+URL_OPEN_SANS_REGULAR="$URL_SERVER/css2?family=Open+Sans:wght@400&display=swap"
+URL_OPEN_SANS_SEMIBOLD="$URL_SERVER/css2?family=Open+Sans:wght@600&display=swap"
 URL_FIRA_SANS="$URL_SERVER/css2?family=Fira+Sans:wght@500&display=swap"
 
 CURL_OPTIONS=(--silent --proto '=https')
 
 FNAME_MATERIAL_SYMBOLS="Material-Symbols"
-FNAME_OPEN_SANS="OpenSans-Regular"
+FNAME_OPEN_SANS_REGULAR="OpenSans-Regular"
+FNAME_OPEN_SANS_SEMIBOLD="OpenSans-SemiBold"
 FNAME_FIRA_SANS="FiraSans-Medium"
 
 EXT_MATERIAL_SYMBOLS=".ttf"
@@ -118,6 +120,11 @@ gh_update_font()
         echo "[WARNING] Found updated version"
         echo "          NEW: $DL_FILE1"
         echo "          OLD: $OLD_FILE"
+
+        echo "[INFO] Finding differences"
+        ttx "$DL_FILE1" -t hmtx -o "$WORK_DIR/icons-new.ttx"
+        ttx "$OLD_FILE" -t hmtx -o "$WORK_DIR/icons-old.ttx"
+        diff "$WORK_DIR/icons-old.ttx" "$WORK_DIR/icons-new.ttx"
     else
         echo "[ERROR] cmp_res=$cmp_res"
     fi
@@ -130,7 +137,8 @@ mkdir "$WORK_DIR"
 gh_update_font "$URL_MATERIAL_SYMBOLS" "$FNAME_MATERIAL_SYMBOLS" "$EXT_MATERIAL_SYMBOLS" "https://www.apache.org/licenses/LICENSE-2.0.html"
 
 # Open Sans is the main font
-update_font "$URL_OPEN_SANS" "$FNAME_OPEN_SANS" "$EXT_OPEN_SANS" "https://fonts.google.com/specimen/Open+Sans/license"
+update_font "$URL_OPEN_SANS_REGULAR"  "$FNAME_OPEN_SANS_REGULAR"  "$EXT_OPEN_SANS" "https://fonts.google.com/specimen/Open+Sans/license"
+update_font "$URL_OPEN_SANS_SEMIBOLD" "$FNAME_OPEN_SANS_SEMIBOLD" "$EXT_OPEN_SANS" "https://fonts.google.com/specimen/Open+Sans/license"
 
 # Fira Sans is for the headings
 update_font "$URL_FIRA_SANS" "$FNAME_FIRA_SANS" "$EXT_FIRA_SANS" "https://fonts.google.com/specimen/Fira+Sans/license"
