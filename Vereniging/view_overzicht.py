@@ -46,6 +46,8 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
         return False
 
     def _zoek_wedstrijden(self, context):
+        """ maak de kaartjes voor elke competitie """
+        # TODO: verplaats naar plug-in in CompLaag*
         comps = list()
         deelcomps = list()
         deelkamps_rk = list()
@@ -84,13 +86,13 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                 context['heeft_wedstrijden'] = True
 
         # bepaal de volgorde waarin de kaartjes getoond worden
-        # 0 - tijdlijn
-        # 1 - aanmelden
-        # 2 - teams regio aanmelden / aanpassen
-        # 3 - teams rk
-        # 4 - ingeschreven
-        # 5 - wie schiet waar (voor inschrijfmethode 1)
-        # 6 - uitslagen
+        #  0 - tijdlijn
+        #  1 - aanmelden
+        #  2 - teams regio aanmelden / aanpassen
+        #  3 - teams rk
+        #  4 - ingeschreven
+        #  5 - wie schiet waar (voor inschrijfmethode 1)
+        #  6 - uitslagen
         context['kaartjes'] = kaartjes = list()
         prev_jaar = 0
         prev_afstand = 0
@@ -145,21 +147,21 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
             deelcomp = None
             for deelcomp in deelcomps:
                 if deelcomp.competitie == comp:
-                    if (deelcomp.regio_organiseert_teamcompetitie and
-                            comp.fase_teams == 'F' and
-                            1 <= deelcomp.huidige_team_ronde <= 7):
-                        # team invallers opgeven
-                        tekst = "Invallers opgeven voor ronde %s van de regiocompetitie." % deelcomp.huidige_team_ronde
-                        kaartje = SimpleNamespace(
-                                    titel="Team Invallers",
-                                    tekst=tekst,
-                                    url=reverse('CompLaagRegio:teams-regio-invallers',
-                                                kwargs={'deelcomp_pk': deelcomp.pk}),
-                                    icon='how_to_reg')
-                        kaartjes.append(kaartje)
-                    else:
-                        # 2 - teams aanmaken
-                        if deelcomp.regio_organiseert_teamcompetitie and comp.fase_teams == 'C':
+                    if deelcomp.regio_organiseert_teamcompetitie:
+
+                        if comp.fase_teams == 'F' and 1 <= deelcomp.huidige_team_ronde <= 7:
+                            # team invallers opgeven
+                            tekst = "Invallers opgeven voor ronde %s van de regiocompetitie." % deelcomp.huidige_team_ronde
+                            kaartje = SimpleNamespace(
+                                        titel="Team Invallers",
+                                        tekst=tekst,
+                                        url=reverse('CompLaagRegio:teams-regio-invallers',
+                                                    kwargs={'deelcomp_pk': deelcomp.pk}),
+                                        icon='how_to_reg')
+                            kaartjes.append(kaartje)
+
+                        elif comp.fase_teams == 'C':
+                            # 2 - teams aanmaken
                             kaartje = SimpleNamespace()
                             kaartje.titel = "Teams Regio"
                             kaartje.tekst = 'Verenigingsteams voor de regiocompetitie samenstellen.'

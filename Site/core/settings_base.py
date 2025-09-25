@@ -62,7 +62,7 @@ APPS_DIR = os.path.dirname(BASE_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2025-09-22'
+SITE_VERSIE = '2025-09-25'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -608,6 +608,9 @@ BETAAL_VIA_BOND_VER_NR = 1368
 
 # welke vereniging(en) mogen een uitvoerende vereniging aanwijzen (en daar een locatie van kiezen)?
 WEDSTRIJDEN_KIES_UITVOERENDE_VERENIGING = (1368,)
+
+# welke verenigingen mogen de wedstrijdklassen ORGANISATIE_WA_STRIKT gebruiken?
+WEDSTRIJDEN_WA_STRIKT_VER_NRS = (1368,)
 
 # aantal vragen van de instaptoets
 INSTAPTOETS_AANTAL_VRAGEN = 20

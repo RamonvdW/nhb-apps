@@ -15,7 +15,7 @@
     <div class="row center">
         <div class="col s12">
             <h3 class="page-banner">Wijzig AG</h3>
-            <p>Wijzig sporter aanvangsgemiddelde dat gebruikt wordt voor het berekenen van de team sterkte</p>
+            <p>Wijzig sporter aanvangsgemiddelde dat gebruikt wordt voor het berekenen van de team sterkte en het toepassen van de regels voor invallers</p>
         </div>
     </div>
 
@@ -46,6 +46,13 @@
                     <td>{{ deelnemer.ag_str }}</td>
                 </tr>
 
+                {% if deelnemer.gemiddelde_str %}
+                    <tr>
+                        <th>Gemiddelde regiocompetitie</th>
+                        <td>{{ deelnemer.gemiddelde_str }} (over {{ deelnemer.aantal_scores }} scores)</td>
+                    </tr>
+                {% endif %}
+
                 {% if not deelnemer.ag_voor_team_mag_aangepast_worden %}
                     <tr>
                         <td colspan="2"><i class="sv-rood-text">Het aanvangsgemiddelde is automatisch vastgesteld en kan niet gewijzigd worden</i></td>
@@ -69,7 +76,6 @@
         <div class="row center">
             <div class="col s12">
                 <h4>Nieuw AG</h4>
-                <p>Wijzigen kan (door de HWL en RCL) totdat de wedstrijden beginnen</p>
             </div>
         </div>
 
@@ -82,7 +88,6 @@
                     <div class="form-padding">
                         <form action="{{ url_opslaan }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
                             {% csrf_token %}
-
 
                             <input id="id_ag" name="nieuw_ag" type="number" placeholder="1.234" min="1.000" max="9.999" step="0.001" oninput="invoer()">
 
@@ -124,7 +129,7 @@
                 {% for hist in ag_hist %}
                     <tr>
                         <td>{{ hist.when }}</td>
-                        <td>{{ hist.door_account }}</td>
+                        <td>[{{ hist.door_account.username }}] {{ hist.door_account.volledige_naam }}</td>
                         <td>{{ hist.oude_waarde_str }}<span style="position: relative; bottom: .15em;"> &rarr; </span>{{ hist.nieuwe_waarde_str }}</td>
                     </tr>
                 {% empty %}

@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2021-2023 Ramon van der Winkel.
+                Copyright (c) 2021-2025 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -76,7 +76,7 @@
         <div class="row center">
             <div class="col s12">
                 <h4>AG ontbreekt</h4>
-                <p>De volgende sporters hebben geen aanvangsgemiddelde voor de teamcompetitie gekregen van hun HWL en kunnen daarom <span class="sv-rood-text">niet</span> meedoen of invallen in een team.</p>
+                <p>De volgende sporters hebben nog geen aanvangsgemiddelde voor de teamcompetitie gekregen van hun HWL</p>
             </div>
         </div>
 

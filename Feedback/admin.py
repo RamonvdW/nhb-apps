@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -22,6 +22,8 @@ class FeedbackAdmin(admin.ModelAdmin):
               'volledige_url', 'site_versie')
 
     ordering = ('-toegevoegd_op',)      # nieuwste bovenaan
+
+    search_fields = ('gebruiker', 'feedback')
 
     @staticmethod
     def email_adres(obj):                             # pragma: no cover

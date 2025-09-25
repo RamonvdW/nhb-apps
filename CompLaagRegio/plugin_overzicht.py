@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -148,9 +148,10 @@ def get_kaartjes_regio(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_ind
                     # toon het medailles kaartje met een "beschikbaar vanaf"
                     toon_binnenkort = True
                     datum_vanaf = comp.einde_fase_F + datetime.timedelta(days=1)
-                    if datum_vanaf > timezone.now().date():
+                    datum_now = timezone.now().date()
+                    if datum_vanaf > datum_now:
                         toon_binnenkort = False
-                        verschil = (datum_vanaf - timezone.now().date())
+                        verschil = datum_vanaf - datum_now
                         if verschil.days < 30:
                             kaartje = SimpleNamespace(
                                         prio=5,

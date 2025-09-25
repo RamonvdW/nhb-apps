@@ -537,6 +537,10 @@ class WijzigTeamAGView(UserPassesTestMixin, TemplateView):
         ag_str = '%.3f' % deelnemer.ag_voor_team
         deelnemer.ag_str = ag_str.replace('.', ',')
 
+        if deelnemer.aantal_scores > 0:
+            deelnemer.gemiddelde_str = "%.3f" % deelnemer.gemiddelde
+            deelnemer.gemiddelde_str = deelnemer.gemiddelde_str.replace('.', ',')
+
         ag_hist = (AanvangsgemiddeldeHist
                    .objects
                    .filter(ag__sporterboog=deelnemer.sporterboog,
@@ -552,7 +556,7 @@ class WijzigTeamAGView(UserPassesTestMixin, TemplateView):
         comp = deelnemer.regiocompetitie.competitie
         comp.bepaal_fase()
 
-        if comp.fase_teams < 'F':
+        if comp.fase_teams <= 'F':
             context['url_opslaan'] = reverse('CompLaagRegio:wijzig-ag',
                                              kwargs={'deelnemer_pk': deelnemer.pk})
 
@@ -618,7 +622,8 @@ class WijzigTeamAGView(UserPassesTestMixin, TemplateView):
                     "Nieuw handmatig AG voor teams")
 
             deelnemer.ag_voor_team = nieuw_ag
-            deelnemer.save()
+            deelnemer.gemiddelde_begin_team_ronde = nieuw_ag
+            deelnemer.save(update_fields=['ag_voor_team', 'gemiddelde_begin_team_ronde'])
 
             try:
                 team = deelnemer.regiocompetitieteam_set.all()[0]
@@ -629,8 +634,14 @@ class WijzigTeamAGView(UserPassesTestMixin, TemplateView):
                 bepaal_team_sterkte_en_klasse(team)
 
         if self.rol_nu == Rol.ROL_HWL:
-            url = reverse('CompLaagRegio:teams-regio',
-                          kwargs={'deelcomp_pk': deelnemer.regiocompetitie.pk})
+            comp = deelnemer.regiocompetitie.competitie
+            comp.bepaal_fase()
+            if comp.fase_teams == 'C':
+                url = reverse('CompLaagRegio:teams-regio',
+                              kwargs={'deelcomp_pk': deelnemer.regiocompetitie.pk})
+            else:
+                url = reverse('CompLaagRegio:teams-regio-invallers',
+                              kwargs={'deelcomp_pk': deelnemer.regiocompetitie.pk})
         else:
             url = reverse('CompLaagRegio:regio-ag-controle',
                           kwargs={'comp_pk': deelnemer.regiocompetitie.competitie.pk,
@@ -979,6 +990,11 @@ class TeamsRegioInvallersView(UserPassesTestMixin, TemplateView):
             gem = deelnemer.gemiddelde_begin_team_ronde
             gem_str = "%.3f" % gem
             deelnemer.gem_str = gem_str.replace('.', ',')
+
+            if deelnemer.ag_voor_team_mag_aangepast_worden and deelnemer.ag_voor_team < 0.001:
+                # knop geven om Team AG alsnog in te voeren
+                deelnemer.url_wijzig_ag = reverse('CompLaagRegio:wijzig-ag',
+                                                  kwargs={'deelnemer_pk': deelnemer.pk})
 
             tup = (-gem, deelnemer.sporterboog.sporter.lid_nr, deelnemer.pk, deelnemer)
             unsorted_deelnemers.append(tup)
