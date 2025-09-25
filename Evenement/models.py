@@ -59,6 +59,11 @@ class Evenement(models.Model):
     prijs_euro_normaal = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal(0))     # max 999,99
     prijs_euro_onder18 = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal(0))     # max 999,99
 
+    # keuze workshops (optioneel)
+    # 1 regel met keuze
+    # format: "n.m titel" met n = workshop ronde, m = volgorde (1, 2, etc.)
+    workshop_keuze = models.TextField(default='', blank=True)
+
     def bepaal_prijs_voor_sporter(self, sporter):
         leeftijd = sporter.bereken_leeftijd()
         prijs = self.prijs_euro_onder18 if leeftijd < 18 else self.prijs_euro_normaal
@@ -94,6 +99,11 @@ class EvenementInschrijving(models.Model):
 
     # voor welke evenement is dit?
     evenement = models.ForeignKey(Evenement, on_delete=models.PROTECT)
+
+    # workshops gekozen door deze sporter
+    # codes komen overeen met de nummers in Evenement.workshop_keuze
+    # codes zijn gescheiden door een spatie
+    gekozen_workshops = models.CharField(max_length=50, default='', blank=True)
 
     # voor welk lid is deze inschrijving
     sporter = models.ForeignKey(Sporter, on_delete=models.PROTECT)

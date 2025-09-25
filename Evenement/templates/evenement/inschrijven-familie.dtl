@@ -10,48 +10,6 @@
 
 {% block pagina %}
 
-    <script>
-        function toevoegen(id)
-        {
-            // console.log('toevoegen: id=', id)
-            const el = document.getElementById(id)
-            // console.log('el=', el)
-
-            // voer een POST uit om toe te voegen
-            let form = document.createElement('form');
-            form.setAttribute('method', 'post');
-            form.setAttribute('action', '{{ url_toevoegen }}');
-
-            let inp = document.createElement('input');
-            inp.type = "hidden";
-            inp.name = "csrfmiddlewaretoken";
-            inp.value = getCookie('mh_csrf_token');
-            form.appendChild(inp);
-
-            inp = document.createElement('input');
-            inp.type = "hidden";
-            inp.name = 'evenement';
-            inp.value = el.dataset.evenement;
-            form.appendChild(inp);
-
-            inp = document.createElement('input');
-            inp.type = "hidden";
-            inp.name = 'sporter';
-            inp.value = el.dataset.sporter;
-            form.appendChild(inp);
-
-            inp = document.createElement('input');
-            inp.type = "hidden";
-            inp.name = 'goto';
-            inp.value = 'F';
-            form.appendChild(inp);
-
-            form.style.display = 'hidden';
-            document.body.appendChild(form);
-            form.submit();
-        }
-    </script>
-
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
@@ -150,36 +108,70 @@
 
         <!-- blauwe balk met informatie -->
         <div class="row-sv-blauw">
-            <div class="col s12 m10 offset-m1 l8 offset-l2 xl6 offset-xl3">
-                <table class="sv-kader">
-                    <tr>
-                        <th>Sporter</th>
-                        <td>{{ geselecteerd.lid_nr_en_volledige_naam }}</td>
-                    </tr>
+            <div class="col s12 l10 offset-l1 xl8 offset-xl2">
+                <form action="{{ url_toevoegen }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
+                    {% csrf_token %}
+                    <input type="hidden" name="evenement" value="{{ evenement.pk }}">
+                    <input type="hidden" name="sporter" value="{{ geselecteerd.lid_nr }}">
+                    <input type="hidden" name="goto" value="F">
 
-                    <tr>
-                        <th>Lid bij vereniging</th>
-                        <td>{% if geselecteerd.bij_vereniging %}{{ geselecteerd.bij_vereniging }}{% else %}<i class="sv-rood-text">Geen</i>{% endif %}</td>
-                    </tr>
+                    <table class="sv-kader">
+                        <tr>
+                            <th>Sporter</th>
+                            <td>{{ geselecteerd.lid_nr_en_volledige_naam }}</td>
+                        </tr>
 
-                    <tr>
-                        <th>Prijs</th>
-                        <td>&euro;&nbsp;{{ geselecteerd.prijs_euro }}</td>
-                    </tr>
+                        <tr>
+                            <th>Lid bij vereniging</th>
+                            <td>{% if geselecteerd.bij_vereniging %}{{ geselecteerd.bij_vereniging }}{% else %}<i class="sv-rood-text">Geen</i>{% endif %}</td>
+                        </tr>
 
-                    <tr>
-                        <th>Inschrijven</th>
-                        <td>
-                            {% if geselecteerd.al_ingeschreven %}
-                                <span>Al ingeschreven</span>
-                            {% else %}
-                                <button class="btn-sv-rood" id="id_toevoegen" onclick="toevoegen('id_toevoegen')" data-evenement="{{ evenement.pk }}" data-sporter="{{ geselecteerd.lid_nr }}">
-                                    <i class="notranslate material-symbol left">add</i>Kies</button>
+                        {% if not geselecteerd.al_ingeschreven %}
+                            <tr>
+                                <th>Prijs</th>
+                                <td>&euro;&nbsp;{{ geselecteerd.prijs_euro }}</td>
+                            </tr>
+
+                            {% if workshops %}
+                                <tr>
+                                    <th></th>
+                                    <td>Maak hieronder je keuze per ronde: welke workshop spreekt jou het meest aan? Zo zijn we goed voorbereid.<br>Wisselen kan nog, maar kies het liefst meteen je favoriet.</td>
+                                </tr>
                             {% endif %}
-                        </td>
-                    </tr>
 
-                </table>
+                            {% for ronde_nr, ronde_ws in workshops %}
+                                <tr>
+                                    <th>Kies workshop ronde {{ ronde_nr }}</th>
+                                    <td>
+                                        <ul style="margin:0">
+                                            {% for code, titel in ronde_ws %}
+                                                <li>
+                                                    <label class="black-text" for="id_{{ code }}">
+                                                        <input class="with-gap" type="radio" name="ws_{{ ronde_nr }}" value="{{ code }}" required id="id_{{ code }}">
+                                                        <span>{{ titel }}</span>
+                                                    </label>
+                                                </li>
+                                            {% endfor %}
+                                        </ul>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% endif %}
+
+                        <tr>
+                            <th>Inschrijven</th>
+                            <td>
+                                {% if geselecteerd.al_ingeschreven %}
+                                    <span>Al ingeschreven</span>
+                                {% else %}
+                                    <button class="btn-sv-rood" id="submit_knop" type="submit">
+                                        <i class="notranslate material-symbol left">add</i>Kies</button>
+                                {% endif %}
+                            </td>
+                        </tr>
+
+                    </table>
+                </form>
             </div>
         </div>
 

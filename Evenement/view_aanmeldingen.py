@@ -15,6 +15,7 @@ from Evenement.definities import (EVENEMENT_INSCHRIJVING_STATUS_TO_SHORT_STR,
                                   EVENEMENT_INSCHRIJVING_STATUS_DEFINITIEF, EVENEMENT_INSCHRIJVING_STATUS_AFGEMELD,
                                   EVENEMENT_AFMELDING_STATUS_TO_SHORT_STR,)
 from Evenement.models import Evenement, EvenementInschrijving, EvenementAfgemeld
+from Evenement.view_inschrijven import splits_evenement_workshop_keuzes
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
 from decimal import Decimal
@@ -25,6 +26,7 @@ import csv
 TEMPLATE_EVENEMENT_AANMELDINGEN = 'evenement/aanmeldingen.dtl'
 TEMPLATE_EVENEMENT_AFMELDING_DETAILS = 'evenement/afmelding-details.dtl'
 TEMPLATE_EVENEMENT_AANMELDING_DETAILS = 'evenement/aanmelding-details.dtl'
+TEMPLATE_EVENEMENT_WORKSHOP_KEUZES = 'evenement/workshop-keuzes.dtl'
 
 CONTENT_TYPE_CSV = 'text/csv; charset=UTF-8'
 
@@ -168,7 +170,7 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
         return self.rol_nu in (Rol.ROL_SEC, Rol.ROL_HWL)
 
     @staticmethod
-    def _output_aanmeldingen(writer, evenement):
+    def _output_aanmeldingen(writer, evenement: Evenement):
         aanmeldingen = (EvenementInschrijving
                         .objects
                         .filter(evenement=evenement)
@@ -177,9 +179,18 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
                                         'sporter__bij_vereniging')
                         .order_by('nummer'))
 
-        writer.writerow(['Reserveringsnummer', 'Aangemeld op', 'Status',
-                         'Bestelnummer', 'Prijs', 'Ontvangen',
-                         'Lid nr', 'Sporter', 'E-mailadres', 'Ver nr', 'Vereniging'])
+        writer.writerow(['Reserveringsnummer', 'Aangemeld op', '', 'Status',
+                         'Bestelnummer', 'Prijs', 'Ontvangen', '',
+                         'Bondsnummer', 'Sporter', 'E-mailadres', 'Ver nr', 'Vereniging',
+                         'Gekozen workshops'])
+
+        ws_code2beschrijving = dict()
+        if evenement.workshop_keuze:
+            for regel in evenement.workshop_keuze.replace('\r', '\n').split('\n'):
+                pos = regel.find(' ')
+                code = regel[:pos]
+                ws_code2beschrijving[code] = regel
+            # for
 
         for aanmelding in aanmeldingen:
             sporter = aanmelding.sporter
@@ -200,18 +211,27 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
             else:
                 prijs_str = 'Geen (handmatige inschrijving)'
 
+            ws_keuzes = list()
+            for code in aanmelding.gekozen_workshops.split(' '):
+                if code:
+                    ws_keuzes.append(ws_code2beschrijving[code])
+            # for
+
             row = [
                 str(reserveringsnummer),
                 timezone.localtime(aanmelding.wanneer).strftime('%Y-%m-%d %H:%M'),
+                '',     # afgemeld op
                 EVENEMENT_INSCHRIJVING_STATUS_TO_SHORT_STR[aanmelding.status],
                 bestelnummer_str,
                 prijs_str,
                 format_bedrag_euro(aanmelding.bedrag_ontvangen),
+                '',     # retour
                 str(sporter.lid_nr),
                 sporter.volledige_naam(),
                 sporter.email,
                 str(ver_nr),
-                ver_str]
+                ver_str,
+                "\n".join(ws_keuzes)]
 
             writer.writerow(row)
         # for
@@ -227,7 +247,7 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
 
         writer.writerow(['Reserveringsnummer', 'Aangemeld op', 'Afgemeld op', 'Status',
                          'Bestelnummer', 'Prijs', 'Ontvangen', 'Retour',
-                         'Lid nr', 'Sporter', 'E-mailadres', 'Ver nr', 'Vereniging'])
+                         'Bondsnummer', 'Sporter', 'E-mailadres', 'Ver nr', 'Vereniging'])
 
         for afgemeld in afmeldingen:
             sporter = afgemeld.sporter
@@ -334,6 +354,7 @@ class EvenementDetailsAanmeldingView(UserPassesTestMixin, TemplateView):
             raise Http404('Aanmelding niet gevonden')
 
         context['inschrijving'] = inschrijving
+        evenement = inschrijving.evenement
 
         context['sporter'] = sporter = inschrijving.sporter
         context['ver'] = sporter.bij_vereniging
@@ -346,6 +367,20 @@ class EvenementDetailsAanmeldingView(UserPassesTestMixin, TemplateView):
 
         inschrijving.bestelnummer_str = get_inschrijving_mh_bestel_nr(inschrijving)
 
+        if evenement.workshop_keuze:
+            inschrijving.heeft_workshops = True
+            inschrijving.workshops = list()
+            regels = evenement.workshop_keuze.replace('\r', '\n').split('\n')
+            print(inschrijving.gekozen_workshops)
+            for keuze in inschrijving.gekozen_workshops.split(' '):
+                for regel in regels:
+                    if regel.startswith(keuze + ' '):
+                        inschrijving.workshops.append(regel)
+                # for
+            # for
+        else:
+            inschrijving.heeft_workshops = False
+
         inschrijving.url_afmelden = reverse('Evenement:afmelden',
                                             kwargs={'inschrijving_pk': inschrijving.pk})
 
@@ -357,7 +392,7 @@ class EvenementDetailsAanmeldingView(UserPassesTestMixin, TemplateView):
             inschrijving.kosten_euro = None
 
         url_aanmeldingen = reverse('Evenement:aanmeldingen',
-                                   kwargs={'evenement_pk': inschrijving.evenement.pk})
+                                   kwargs={'evenement_pk': evenement.pk})
 
         context['kruimels'] = (
             (reverse('Vereniging:overzicht'), 'Beheer vereniging'),
@@ -441,5 +476,65 @@ class EvenementDetailsAfmeldingView(UserPassesTestMixin, TemplateView):
 
         return context
 
+
+class EvenementWorkshopKeuzesView(TemplateView):
+
+    """ Via deze view kunnen beheerders zien welke workshops favoriet zijn """
+
+    # LET OP: deze pagina is bewust openbaar zodat een externe medewerker organisatie evenement erbij kan
+
+    # class variables shared by all instances
+    template_name = TEMPLATE_EVENEMENT_WORKSHOP_KEUZES
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        try:
+            evenement_pk = str(kwargs['evenement_pk'])[:6]     # afkappen voor de veiligheid
+            evenement = (Evenement
+                         .objects
+                         .get(pk=evenement_pk))
+        except (ValueError, TypeError, Evenement.DoesNotExist):
+            raise Http404('Evenement niet gevonden')
+
+        context['evenement'] = evenement
+
+        keuzes = (EvenementInschrijving
+                  .objects
+                  .filter(evenement=evenement)
+                  .exclude(gekozen_workshops='')
+                  .values_list('gekozen_workshops', flat=True))
+
+        context['aantal_opgaven'] = len(keuzes)
+
+        code_count = dict()
+        for keuze in keuzes:
+            for code in keuze.split(' '):
+                try:
+                    code_count[code] += 1
+                except KeyError:
+                    code_count[code] = 1
+        # for
+
+        context['workshops'] = workshops = list()
+        for ronde_nr, ronde_ws in splits_evenement_workshop_keuzes(evenement, prefix=''):
+            ronde_ws_2 = list()
+            for code, titel in ronde_ws:
+                count = code_count.get(code, 0)
+                tup = (code, count, titel)
+                ronde_ws_2.append(tup)
+            # for
+            tup = (ronde_nr, ronde_ws_2)
+            workshops.append(tup)
+        # for
+
+        context['kruimels'] = (
+            (reverse('Vereniging:overzicht'), 'Beheer vereniging'),
+            (reverse('Evenement:vereniging'), 'Evenementen'),
+            (None, 'Voorkeur workshops')
+        )
+
+        return context
 
 # end of file

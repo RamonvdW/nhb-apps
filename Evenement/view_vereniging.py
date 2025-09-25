@@ -66,6 +66,11 @@ class VerenigingEvenementenView(UserPassesTestMixin, View):
             evenement.url_aanmeldingen = reverse('Evenement:aanmeldingen',
                                                  kwargs={'evenement_pk': evenement.pk})
 
+            if evenement.workshop_keuze.strip():
+                evenement.toon_workshop_keuzes = True
+                evenement.url_workshop_keuzes = reverse('Evenement:workshop-keuzes',
+                                                        kwargs={'evenement_pk': evenement.pk})
+
             if evenement.datum < maand_geleden:
                 evenementen_eerder.append(evenement)
             else:

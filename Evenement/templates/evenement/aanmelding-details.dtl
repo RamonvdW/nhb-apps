@@ -76,6 +76,19 @@
                     <td>&euro;&nbsp;{{ inschrijving.bedrag_ontvangen }}</td>
                 </tr>
 
+                {% if inschrijving.heeft_workshops %}
+                    <tr>
+                        <th>Gekozen workshops</th>
+                        <td>
+                            {% for regel in inschrijving.workshops %}
+                                <span>{{ regel }}</span><br>
+                            {% empty %}
+                                <i>Geen</i>
+                            {% endfor %}
+                        </td>
+                    </tr>
+                {% endif %}
+
                 <tr>
                     <th>Logboekje</th>
                     <td>{{ inschrijving.log|linebreaksbr }}</td>

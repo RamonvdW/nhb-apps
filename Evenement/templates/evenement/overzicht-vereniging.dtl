@@ -37,7 +37,7 @@
                             <th>Wanneer</th>
                             <th>Status</th>
                             <th data-filter="on">Titel</th>
-                            <th><!-- kolom voor knoppen --></th>
+                            <th style="width:132px"><!-- kolom voor knoppen --></th>
                         </tr>
                     </thead>
 
@@ -51,8 +51,11 @@
                                     <a class="{% if evenement.is_in_verleden %}btn-sv-blauw{% else %}btn-sv-rood{% endif %}" href="{{ evenement.url_details }}" style="padding:0; width:35px; margin-right:5px">
                                         <i class="notranslate material-symbol">schedule</i></a>
                                     <a class="{% if evenement.is_in_verleden %}btn-sv-blauw{% else %}btn-sv-rood{% endif %}" href="{{ evenement.url_aanmeldingen }}" style="padding:0; width:35px; margin-right:5px">
-                                        <i class="notranslate material-symbol">group</i>
-                                    </a>
+                                        <i class="notranslate material-symbol">group</i></a>
+                                    {% if evenement.toon_workshop_keuzes %}
+                                        <a class="{% if evenement.is_in_verleden %}btn-sv-blauw{% else %}btn-sv-rood{% endif %}" href="{{ evenement.url_workshop_keuzes }}" style="padding:0; width:35px; margin-right:5px">
+                                            <i class="notranslate material-symbol">favorite</i></a>
+                                    {% endif %}
                                 </div>
                             </td>
                         </tr>
@@ -89,7 +92,7 @@
                             <th>Wanneer</th>
                             <th>Status</th>
                             <th data-filter="on">Titel</th>
-                            <th><!-- kolom voor knoppen --></th>
+                            <th style="width:132px"><!-- kolom voor knoppen --></th>
                         </tr>
                     </thead>
 

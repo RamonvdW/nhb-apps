@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2024 Ramon van der Winkel.
+#  Copyright (c) 2024-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -57,6 +57,10 @@ urlpatterns = [
     path('aanmeldingen/<evenement_pk>/',
          view_aanmeldingen.EvenementAanmeldingenView.as_view(),
          name='aanmeldingen'),
+
+    path('workshop-keuzes/<evenement_pk>/',
+         view_aanmeldingen.EvenementWorkshopKeuzesView.as_view(),
+         name='workshop-keuzes'),
 
     path('details-aanmelding/<inschrijving_pk>/',
          view_aanmeldingen.EvenementDetailsAanmeldingView.as_view(),

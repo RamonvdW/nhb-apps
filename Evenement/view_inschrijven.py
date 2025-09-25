@@ -41,6 +41,62 @@ def inschrijving_open_of_404(evenement):
         raise Http404('Inschrijving is gesloten')
 
 
+def splits_evenement_workshop_keuzes(evenement: Evenement, prefix='ws'):
+    """
+        Splitst het text lijst evenement.workshop_keuzes op in een lijst
+            [(ronde_nr, [("ws1.1", titel),
+                         ("ws1.2", titel),
+                         ...]),
+             ...]
+        waarbij "1.1" in "ws1.1" overeen komt met de code in workshop_keuzes
+
+        Retourneert None als workshop_keuzes leeg is (of geen correcte definities bevat)
+    """
+
+    workshops = list()
+
+    for regel in evenement.workshop_keuze.replace('\r', '\n').split('\n'):      # split de regels
+        regel = regel.strip()
+        if regel:
+            pos = regel.find(' ')
+            if pos > 0:
+                nrs = regel[:pos]
+                titel = regel[pos+1:].strip()
+                if '.' in nrs:
+                    spl = nrs.split('.')
+                    try:
+                        ws_nr = int(spl[0])
+                        volgorde = int(spl[1])
+                    except ValueError:
+                        pass
+                    else:
+                        tup = (ws_nr, volgorde, titel)
+                        workshops.append(tup)
+    # for
+
+    if len(workshops) > 0:
+        workshops.sort()        # laagste nummers eerst
+        rondes = list()
+        prev_nr = 0
+        ws_ronde = list()
+        for ws_nr, volgorde, titel in workshops:
+            if ws_nr != prev_nr:
+                if len(ws_ronde) > 0:
+                    rondes.append((prev_nr, ws_ronde))
+                    ws_ronde = list()
+                prev_nr = ws_nr
+
+            tup = ('%s%s.%s' % (prefix, ws_nr, volgorde), titel)
+            ws_ronde.append(tup)
+        # for
+        if len(ws_ronde) > 0:
+            rondes.append((prev_nr, ws_ronde))
+    else:
+        rondes = None
+
+    return rondes
+
+
 class InschrijvenSporterView(UserPassesTestMixin, TemplateView):
 
     """ Via deze view kan een sporter zichzelf inschrijven voor een evenement """
@@ -79,6 +135,8 @@ class InschrijvenSporterView(UserPassesTestMixin, TemplateView):
         inschrijving_open_of_404(evenement)
 
         evenement.begrenzing_str = "KHSN leden"
+
+        context['workshops'] = splits_evenement_workshop_keuzes(evenement)
 
         account = get_account(self.request)
         try:
@@ -165,6 +223,8 @@ class InschrijvenGroepjeView(UserPassesTestMixin, TemplateView):
         inschrijving_open_of_404(evenement)
 
         evenement.begrenzing_str = "KHSN leden"
+
+        context['workshops'] = splits_evenement_workshop_keuzes(evenement)
 
         try:
             zoek_lid_nr = self.request.GET['bondsnummer']
@@ -271,6 +331,8 @@ class InschrijvenFamilieView(UserPassesTestMixin, TemplateView):
 
         evenement.begrenzing_str = "KHSN leden"
 
+        context['workshops'] = splits_evenement_workshop_keuzes(evenement)
+
         # begrens de mogelijkheden tot leden met dezelfde adres_code als de ingelogde gebruiker
         account = get_account(self.request)
         sporter = get_sporter(account)
@@ -360,6 +422,7 @@ class ToevoegenAanMandjeView(UserPassesTestMixin, View):
         return rol_nu != Rol.ROL_NONE
 
     def post(self, request, *args, **kwargs):
+        """ de gebruiker heeft op de KIES knop gedrukt """
         evenement_str = request.POST.get('evenement', '')[:6]       # afkappen voor de veiligheid
         sporter_str = request.POST.get('sporter', '')[:6]           # afkappen voor de veiligheid
         goto_str = request.POST.get('goto', '')[:6]                 # afkappen voor de veiligheid
@@ -385,6 +448,21 @@ class ToevoegenAanMandjeView(UserPassesTestMixin, View):
         if sporter.is_overleden or not sporter.is_actief_lid or not sporter.bij_vereniging:
             raise Http404('Niet actief lid')
 
+        ws_keuzes = list()
+        workshops = splits_evenement_workshop_keuzes(evenement)
+        if workshops:
+            ws_codes = [code
+                        for _, ronde_ws in workshops
+                        for code, _ in ronde_ws]
+            ws_rondes = ['ws_%s' % ronde_nr             # naam van de radiobutton groep
+                         for ronde_nr, _ in workshops]
+
+            for ws_naam in ws_rondes:
+                keuze = request.POST.get(ws_naam, '')[:10]
+                if keuze in ws_codes:
+                    ws_keuzes.append(keuze[2:])     # verwijder de prefix "ws"
+            # for
+
         account_koper = get_account(request)
 
         now = timezone.now()
@@ -397,6 +475,7 @@ class ToevoegenAanMandjeView(UserPassesTestMixin, View):
                             evenement=evenement,
                             sporter=sporter,
                             koper=account_koper,
+                            gekozen_workshops=" ".join(ws_keuzes),
                             log=msg)
 
         try:
