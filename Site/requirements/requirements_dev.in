@@ -8,9 +8,6 @@
 # license check
 pip-licenses-cli
 
-# update check
-pip-review
-
 # python code coverage measurement and reporting
 coverage
 
@@ -29,11 +26,12 @@ django-extensions
 # html validatie
 html5validator
 
-# javascript/ecmascript validatie
-esprima
-
 # verkleinen van font files
 fonttools
+brotli
+
+# javascript/ecmascript validatie
+esprima
 
 # testing javascript inside the browser
 selenium

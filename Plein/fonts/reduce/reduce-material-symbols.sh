@@ -53,7 +53,7 @@ DEST_NEW="$FONTS_DIR/$SUBSET_NAME${NEW_NR}.woff2"
 mv "$DEST" "$DEST_NEW"
 
 # replace the sequence number in the referencing django template
-sed -i "s#material-symbols-subset-mh-vNEW.woff2#material-symbols-subset-mh-v$NEW_NR.woff2#" "$DTL_FONTS"
+sed -i "s#material-symbols-subset-mh-v$NR.woff2#material-symbols-subset-mh-v$NEW_NR.woff2#" "$DTL_FONTS"
 
 # maak een dump van de nieuwe subset
 # TTX_DEST="$FONTS_DIR/$SUBSET_NAME"

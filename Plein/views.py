@@ -26,6 +26,7 @@ TEMPLATE_PLEIN_BEHEERDER = 'plein/plein-beheerder.dtl'   # beheerder (ROL_BB/BKO
 TEMPLATE_PLEIN_HANDLEIDINGEN = 'plein/handleidingen.dtl'
 TEMPLATE_NIET_ONDERSTEUND = 'plein/niet-ondersteund.dtl'
 TEMPLATE_PRIVACY = 'plein/privacy.dtl'
+TEMPLATE_TEST_UI = 'plein/test-ui.dtl'
 
 SESSIONVAR_VORIGE_POST = 'plein_vorige_post'
 
@@ -301,6 +302,16 @@ class NietOndersteundView(View):
         context = dict()
         context['email_support'] = settings.EMAIL_SUPPORT
         return render(request, TEMPLATE_NIET_ONDERSTEUND, context)
+
+
+class TestUIView(View):
+
+    @staticmethod
+    def get(request, *args, **kwargs):
+        context = {
+            'icon': 'download_for_offline',
+        }
+        return render(request, TEMPLATE_TEST_UI, context)
 
 
 # end of file
