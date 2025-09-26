@@ -568,6 +568,14 @@ LOGGING = {
             'handlers': ['syslog'],
             'level': 'WARNING'
         },
+        'googlemaps': {
+            'handlers': ['syslog'],
+            'level': 'WARNING'
+        },
+        'googleapiclient': {
+            'handlers': ['syslog'],
+            'level': 'WARNING'
+        },
         '': {
             'handlers': ['syslog'],
             'level': 'INFO'
