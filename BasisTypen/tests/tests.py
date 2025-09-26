@@ -134,21 +134,22 @@ class TestBasisTypen(TestCase):
         self.assertEqual(get_organisatie_teamtypen(ORGANISATIE_KHSN).count(), 5)
         self.assertEqual(get_organisatie_teamtypen(ORGANISATIE_IFAA).count(), 0)
 
-        self.assertEqual(get_organisatie_klassen(ORGANISATIE_WA).count(), 40)
-        self.assertEqual(get_organisatie_klassen(ORGANISATIE_KHSN).count(), 105)
-        self.assertEqual(get_organisatie_klassen(ORGANISATIE_IFAA).count(), 144)
+        self.assertEqual(get_organisatie_klassen(ORGANISATIE_WA, ook_strikt=False).count(), 40)
+        self.assertEqual(get_organisatie_klassen(ORGANISATIE_WA, ook_strikt=True).count(), 40 + 18)
+        self.assertEqual(get_organisatie_klassen(ORGANISATIE_KHSN, ook_strikt=False).count(), 105)
+        self.assertEqual(get_organisatie_klassen(ORGANISATIE_IFAA, ook_strikt=False).count(), 144)
 
     def test_boogtypen(self):
         bogen_pks = [BoogType.objects.get(afkorting='R').pk]
-        klassen = get_organisatie_klassen(ORGANISATIE_WA, filter_bogen=bogen_pks)
+        klassen = get_organisatie_klassen(ORGANISATIE_WA, ook_strikt=False, filter_bogen=bogen_pks)
         self.assertEqual(klassen.count(), 8)
 
         bogen_pks = BoogType.objects.filter(afkorting__in=('R', 'C')).values_list('pk', flat=True)
-        klassen = get_organisatie_klassen(ORGANISATIE_WA, filter_bogen=bogen_pks)
+        klassen = get_organisatie_klassen(ORGANISATIE_WA, ook_strikt=False, filter_bogen=bogen_pks)
         self.assertEqual(klassen.count(), 16)
 
         bogen_pks = BoogType.objects.filter(afkorting__in=('R', 'C')).values_list('pk', flat=True)
-        klassen = get_organisatie_klassen(ORGANISATIE_KHSN, filter_bogen=bogen_pks)
+        klassen = get_organisatie_klassen(ORGANISATIE_KHSN, ook_strikt=False, filter_bogen=bogen_pks)
         # for klasse in klassen:
         #     print(klasse)
         self.assertEqual(klassen.count(), 42)
