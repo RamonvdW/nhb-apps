@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2023 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -76,14 +76,16 @@ BLAZOEN_CHOICES = [
 ]
 
 # organisatie, om boogtype, leeftijdsklassen etc. uit elkaar te kunnen houden binnen 1 tabel
-ORGANISATIE_WA = 'W'      # World Archery
-ORGANISATIE_KHSN = 'N'    # Nationaal
-ORGANISATIE_IFAA = 'F'    # International Field Archery Association
+ORGANISATIE_WA = 'W'            # World Archery
+ORGANISATIE_KHSN = 'N'          # Nationaal
+ORGANISATIE_IFAA = 'F'          # International Field Archery Association
+ORGANISATIE_WA_STRIKT = 'S'     # WA klassen begrensd op eigen leeftijd (voor NK)
 
 ORGANISATIES = [
     (ORGANISATIE_WA, 'World Archery'),
     (ORGANISATIE_KHSN, 'KHSN'),
     (ORGANISATIE_IFAA, 'IFAA'),
+    (ORGANISATIE_WA_STRIKT, 'WA strikt'),
 ]
 
 ORGANISATIES2SHORT_STR = {

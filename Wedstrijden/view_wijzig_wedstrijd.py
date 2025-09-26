@@ -16,7 +16,7 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
 from BasisTypen.definities import (GESLACHT_ALLE,
                                    ORGANISATIES2LONG_STR, ORGANISATIES2SHORT_STR,
-                                   ORGANISATIE_WA, ORGANISATIE_IFAA)
+                                   ORGANISATIE_WA, ORGANISATIE_WA_STRIKT, ORGANISATIE_IFAA)
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse
 from BasisTypen.operations import get_organisatie_boogtypen, get_organisatie_klassen
 from Functie.definities import Rol
@@ -251,7 +251,8 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
         code = 0
         code2klasse = dict()
         blokkeer2klasse = dict()
-        for klasse in get_organisatie_klassen(wedstrijd.organisatie, gekozen_boog_pks):
+        ook_strikt = wedstrijd.organiserende_vereniging.ver_nr in settings.WEDSTRIJDEN_WA_STRIKT_VER_NRS
+        for klasse in get_organisatie_klassen(wedstrijd.organisatie, ook_strikt, gekozen_boog_pks):
             klasse.sel = 'klasse_%s' % klasse.pk
             klasse.gebruikt = (klasse.pk in klassen_gebruikt)
             klasse.selected = (klasse.pk in gekozen_pks)

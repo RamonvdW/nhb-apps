@@ -203,7 +203,8 @@ class NieuweWedstrijdKiesType(UserPassesTestMixin, View):
                 bogen = get_organisatie_boogtypen(wed.organisatie)
                 wed.boogtypen.set(bogen)
 
-                klassen = get_organisatie_klassen(wed.organisatie)
+                ook_strikt = wed.organiserende_vereniging.ver_nr in settings.WEDSTRIJDEN_WA_STRIKT_VER_NRS
+                klassen = get_organisatie_klassen(wed.organisatie, ook_strikt)
 
                 if wed.organisatie == ORGANISATIE_KHSN:
                     # voorkom zowel gender-neutrale als man/vrouw klassen
