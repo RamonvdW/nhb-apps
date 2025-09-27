@@ -125,7 +125,7 @@
                 {% endif %}
             
                 <tr>
-                    <th>Bijzonder<wbr>heden</th>
+                    <th style="width:25%">Bijzonder<wbr>heden</th>
                     <td>{{ wed.bijzonderheden|linebreaksbr }}</td>
                 </tr>
 
@@ -216,6 +216,23 @@
                             </tr>
                         {% endif %}
                     {% endfor %}
+                {% endif %}
+
+                {% if wed.url_deelnemerslijst %}
+                    <tr>
+                        <td colspan="2" class="center sv-blauw-text">
+                            <h6>Deelnemers</h6>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Gepubliceerde lijst</th>
+                        <td>
+                            <a href="{{ wed.url_deelnemerslijst }}" target="_blank" rel="noopener noreferrer">
+                                <i class="notranslate material-symbol left sv-blauw-text">open_in_new</i>
+                                <code>{{ wed.url_deelnemerslijst|wbr_www }}</code>
+                            </a>
+                        </td>
+                    </tr>
                 {% endif %}
 
             </table>

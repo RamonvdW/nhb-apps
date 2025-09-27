@@ -173,13 +173,16 @@ class Wedstrijd(models.Model):
     eis_kwalificatie_scores = models.BooleanField(default=False)
 
     # links naar de uitslagen
-    url_uitslag_1 = models.CharField(max_length=128, default='', blank=True)
-    url_uitslag_2 = models.CharField(max_length=128, default='', blank=True)
-    url_uitslag_3 = models.CharField(max_length=128, default='', blank=True)
-    url_uitslag_4 = models.CharField(max_length=128, default='', blank=True)
+    url_uitslag_1 = models.CharField(max_length=200, default='', blank=True)
+    url_uitslag_2 = models.CharField(max_length=200, default='', blank=True)
+    url_uitslag_3 = models.CharField(max_length=200, default='', blank=True)
+    url_uitslag_4 = models.CharField(max_length=200, default='', blank=True)
 
     # link naar een webpagina of pdf met informatie over de wedstrijd
-    url_flyer = models.CharField(max_length=128, default='', blank=True)
+    url_flyer = models.CharField(max_length=200, default='', blank=True)
+
+    # extern geadministreerde deelnemerslijst
+    url_deelnemerslijst = models.CharField(max_length=200, default='', blank=True)
 
     def bepaal_prijs_voor_sporter(self, sporter):
         leeftijd = sporter.bereken_wedstrijdleeftijd(self.datum_begin, self.organisatie)

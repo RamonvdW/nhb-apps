@@ -671,10 +671,15 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
                     wedstrijd.eis_kwalificatie_scores = True
 
             if not block_edits:
+                url = request.POST.get('url_deelnemers', '')
+                url = url[:200]     # voorkom fout tijdens save()
+                wedstrijd.url_deelnemerslijst = url
+
+            if not block_edits:
                 urls = list()
                 for nr in range(4):
                     url = request.POST.get('url_uitslag%d' % (nr + 1), '')
-                    url = url[:128]     # voorkom fout tijdens save()
+                    url = url[:200]     # voorkom fout tijdens save()
                     if len(url) > 4 and url not in urls:
                         urls.append(url)
                 # for
@@ -688,7 +693,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
 
             if not block_edits:
                 url = request.POST.get('url_flyer', '')
-                url = url[:128]     # voorkom fout tijdens save()
+                url = url[:200]     # voorkom fout tijdens save()
                 wedstrijd.url_flyer = url
 
             wedstrijd.save()

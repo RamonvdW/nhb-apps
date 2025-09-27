@@ -6,7 +6,7 @@
 {% endcomment %}
 {% load static %}
 
-{% block title %}Wijzig wedstrijd sessies{% endblock %}
+{% block title %}Wijzig sessies{% endblock %}
 
 {% block pagina %}
 

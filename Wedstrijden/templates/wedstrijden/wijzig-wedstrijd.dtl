@@ -305,6 +305,17 @@
                                 </td>
                             </tr>
 
+                           <tr>
+                                <th>Gepubliceerde deelnemerslijst</th>
+                                <td>
+                                    {% if block_edits %}
+                                        <span>{{ wed.url_deelnemerslijst }}</span>
+                                    {% else %}
+                                        <input type="url" name="url_deelnemers" value="{{ wed.url_deelnemerslijst }}" inputmode="url" placeholder="https://een-site.nl/deelnemers.pdf" oninput="gewijzigd()">
+                                    {% endif %}
+                                </td>
+                            </tr>
+
                             <tr>
                                 <th>Bijzonder<wbr>heden</th>
                                 <td>
