@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -88,6 +88,12 @@ def filter_wbr_www(text):
     """  wbr_email filter looks for places where the e-mail address could be wrapped
          and insert a <wbr> html tag before that character.
     """
+
+    too_long = False
+    if len(text) > 50:
+        too_long = True
+        text = text[:50]
+
     new_text = ""
 
     pos = text.find('://')
@@ -100,30 +106,37 @@ def filter_wbr_www(text):
         pos2 = text.find('grensoverschreiden')
         pos3 = text.find('.')
         pos4 = text.find('/')
+        pos5 = text.find('_')
         if pos4 == len(text)-1:
             pos4 = -1
 
         if pos1 >= 0:
-            if (pos2 < 0 or pos1 < pos2) and (pos3 < 0 or pos1 < pos3) and (pos4 < 0 or pos1 < pos4):
+            if (pos2 < 0 or pos1 < pos2) and (pos3 < 0 or pos1 < pos3) and (pos4 < 0 or pos1 < pos4) and (pos5 < 0 or pos1 < pos5):
                 new_text += escape(text[:pos1+8]) + '<wbr>' + escape('sport')
                 text = text[pos1+13:]
                 continue
 
         if pos2 >= 0:
-            if (pos3 < 0 or pos2 < pos3) and (pos4 < 0 or pos2 < pos4):
+            if (pos3 < 0 or pos2 < pos3) and (pos4 < 0 or pos2 < pos4) and (pos5 < 0 or pos2 < pos5):
                 new_text += escape(text[:pos2+5]) + '<wbr>' + escape('over') + '<wbr>'
                 text = text[pos2+9:]
                 continue        # with the while
 
         if pos3 >= 0:
-            if pos4 < 0 or pos3 < pos4:
+            if (pos4 < 0 or pos3 < pos4) and (pos5 < 0 or pos3 < pos5):
                 new_text += escape(text[:pos3+1:]) + '<wbr>'
                 text = text[pos3 + 1:]
                 continue
 
         if pos4 >= 0:
-            new_text += escape(text[:pos4+1:]) + '<wbr>'
-            text = text[pos4+1:]
+            if pos5 < 0 or pos4 < pos5:
+                new_text += escape(text[:pos4+1:]) + '<wbr>'
+                text = text[pos4+1:]
+                continue
+
+        if pos5 >= 0:
+            new_text += escape(text[:pos5+1:]) + '<wbr>'
+            text = text[pos5+1:]
             continue
 
         # niets meer gevonden
@@ -131,6 +144,9 @@ def filter_wbr_www(text):
         text = ''
 
     # while
+
+    if too_long:
+        new_text += "..."
 
     return mark_safe(new_text)
 
