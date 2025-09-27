@@ -70,7 +70,11 @@ AFSCHRIFT_SITE_URL = "yourdomain.com"
 # contactgegevens eerste- en tweedelijns support
 EMAIL_BONDSBUREAU = "info@yourdomain.com"
 EMAIL_SUPPORT = EMAIL_BONDSBUREAU
+<<<<<<< HEAD
 EMAIL_TECH_SUPPORT = "support@yourdomain.com"
+=======
+EMAIL_TECH_SUPPORT = 'support@yourdomain.com'
+>>>>>>> main
 
 # manuals (pdf)
 URL_PDF_HANDLEIDING_LEDEN = 'https://yoursite/static/manual_members.pdf'
@@ -219,6 +223,7 @@ INSTAPTOETS_GSHEET_FILE_ID = 'another.google.sheets.id'     # noqa
 # met wie de wedstrijdformulieren folder delen?
 GOOGLE_DRIVE_SHARE_WITH = []
 
+<<<<<<< HEAD
 # waar staan de json bestanden voor de service accounts etc.
 # wordt gebruikt door diverse diensten: downloaders records/instaptoets, backup uploader, google drive toegang, etc.
 # filenames zijn bekend bij deze diensten
@@ -233,4 +238,6 @@ CREDENTIALS_SERVICE_ACCOUNT_WEDSTRIJDFORMULIEREN = 'file1_with_credentials_servi
 # instaptoets en records bestanden zijn gedeeld met dit service account, voor download
 CREDENTIALS_SERVICE_ACCOUNT_DOWNLOADER = 'file2_with_credentials_service-account.json'
 
+=======
+>>>>>>> main
 # end of file
