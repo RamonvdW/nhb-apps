@@ -861,14 +861,15 @@ class Command(BaseCommand):
                         functie_sec.accounts.remove(account)
                 # for
 
-                if len(ver_secretarissen) == 0:
-                    if ver_nr not in settings.CRM_IMPORT_GEEN_SECRETARIS_NODIG:
-                        self.stdout.write('[WARNING] Vereniging %s (%s) heeft geen secretaris!' % (ver_nr, ver_naam))
-                        self._count_warnings += 1
+                # deze controle wordt in CRM gedaan
+                # if len(ver_secretarissen) == 0:
+                #     if ver_nr not in settings.CRM_IMPORT_GEEN_SECRETARIS_NODIG:
+                #         self.stdout.write('[WARNING] Vereniging %s (%s) heeft geen secretaris!' % (ver_nr, ver_naam))
+                #         self._count_warnings += 1
         # for
 
     def _import_clubs_member_admin(self, data):
-        """ voor elke club, koppel de ledenadministrator(en) aan de LA-functie """
+        """ voor elke club, koppel de ledenadministrateurs aan de LA-functie """
 
         if self._check_keys(data[0].keys(), EXPECTED_CLUB_KEYS, OPTIONAL_CLUB_KEYS, "club"):
             return
@@ -1033,7 +1034,7 @@ class Command(BaseCommand):
                 toevoeging = lid_achternaam[pos:]
                 new_achternaam = lid_achternaam[:pos].strip()
 
-                if toevoeging in ('(Erelid NHB)', '(Erevoorzitter NHB)'):
+                if toevoeging in ('(Erelid KHSN)', '(Erevoorzitter KHSN)'):
                     lid_is_erelid = True
                 else:
                     self.stdout.write("[WARNING] Lid %s: verwijder toevoeging achternaam: %s --> %s" % (

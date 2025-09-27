@@ -124,7 +124,7 @@ class TestImportCRMImport(E2EHelpers, TestCase):
                                                  OPTION_SIM)
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
-        self.assertTrue("[WARNING] Vereniging 1000 (Grote Club) heeft geen secretaris!" in f2.getvalue())
+        # self.assertTrue("[WARNING] Vereniging 1000 (Grote Club) heeft geen secretaris!" in f2.getvalue())
         self.assertTrue("[ERROR] Kan secretaris 1 van vereniging 1001 niet vinden" in f1.getvalue())
         self.assertTrue("[ERROR] Lid 100024 heeft geen valide e-mail (enige@khsn)" in f1.getvalue())
         self.assertTrue("[INFO] Wijziging naam rayon 4: 'Rayon 4' --> 'Rayon 99'" in f2.getvalue())
@@ -322,7 +322,7 @@ class TestImportCRMImport(E2EHelpers, TestCase):
         self.assertFalse("[INFO] Lid 100025 is overleden op 2018-05-05 en wordt op inactief gezet" in f2.getvalue())
 
     def test_haakjes(self):
-        # sommige leden hebben de toevoeging " (Erelid NHB)" aan hun achternaam toegevoegd
+        # sommige leden hebben de toevoeging " (Erelid KHSN)" aan hun achternaam toegevoegd
         # andere leden hebben een toevoeging achter hun voornaam: "Tineke (Tini)" - niet over klagen
         # some ontbreekt er een haakje
         # import verwijderd dit
