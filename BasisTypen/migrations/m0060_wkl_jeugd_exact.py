@@ -21,8 +21,8 @@ LEEFTIJDSKLASSEN_STRIKT = (
     (26,       'CHS',  GESLACHT_MAN,   14, 17,  'Onder 18', 'Onder 18 Heren (strikt)',   ORGANISATIE_WA_STRIKT),
 
     # 12 t/m 13 jaar
-    (18,       'AV2S', GESLACHT_VROUW, 12, 13,  'Onder 14', 'Onder 14 Meisjes (strikt)', ORGANISATIE_WA_STRIKT),
-    (19,       'AH2S', GESLACHT_MAN,   12, 13,  'Onder 14', 'Onder 14 Jongens (strikt)', ORGANISATIE_WA_STRIKT),
+    # (18,       'AV2S', GESLACHT_VROUW, 12, 13,  'Onder 14', 'Onder 14 Meisjes (strikt)', ORGANISATIE_WA_STRIKT),
+    # (19,       'AH2S', GESLACHT_MAN,   12, 13,  'Onder 14', 'Onder 14 Jongens (strikt)', ORGANISATIE_WA_STRIKT),
 )
 
 
@@ -34,8 +34,8 @@ KALENDERWEDSTRIJDENKLASSEN_STRIKT = (
     (146, 'R',  'CVS',  'R1417D', 'Recurve Onder 18 Dames (strikt)'),
     (147, 'R',  'CHS',  'R1417H', 'Recurve Onder 18 Heren (strikt)'),
 
-    (156, 'R',  'AH2S', 'R1213H', 'Recurve Onder 14 Jongens (strikt)'),
-    (157, 'R',  'AV2S', 'R1213D', 'Recurve Onder 14 Meisjes (strikt)'),
+    # (156, 'R',  'AH2S', 'R1213H', 'Recurve Onder 14 Jongens (strikt)'),
+    # (157, 'R',  'AV2S', 'R1213D', 'Recurve Onder 14 Meisjes (strikt)'),
 
     (236, 'C',  'JVS',  'C1820D', 'Compound Onder 21 jaar Dames (strikt)'),
     (237, 'C',  'JHS',  'C1820H', 'Compound Onder 21 jaar Heren (strikt)'),
@@ -43,8 +43,8 @@ KALENDERWEDSTRIJDENKLASSEN_STRIKT = (
     (246, 'C',  'CVS',  'C1417D', 'Compound Onder 18 jaar Dames (strikt)'),
     (247, 'C',  'CHS',  'C1417H', 'Compound Onder 18 jaar Heren (strikt)'),
 
-    (256, 'C',  'AH2S', 'C1213H', 'Compound Onder 14 Jongens (strikt)'),
-    (257, 'C',  'AV2S', 'C1213D', 'Compound Onder 14 Meisjes (strikt)'),
+    # (256, 'C',  'AH2S', 'C1213H', 'Compound Onder 14 Jongens (strikt)'),
+    # (257, 'C',  'AV2S', 'C1213D', 'Compound Onder 14 Meisjes (strikt)'),
 
     (336, 'BB', 'JVS',  'B1820D', 'Barebow Onder 21 jaar Dames (strikt)'),
     (337, 'BB', 'JHS',  'B1820H', 'Barebow Onder 21 jaar Heren (strikt)'),
@@ -52,8 +52,8 @@ KALENDERWEDSTRIJDENKLASSEN_STRIKT = (
     (346, 'BB', 'CVS',  'B1417D', 'Barebow Onder 18 jaar Dames (strikt)'),
     (347, 'BB', 'CHS',  'B1417H', 'Barebow Onder 18 jaar Heren (strikt)'),
 
-    (356, 'BB', 'AH2S', 'B1213H', 'Barebow Onder 14 Jongens (strikt)'),
-    (357, 'BB', 'AV2S', 'B1213D', 'Barebow Onder 14 Meisjes (strikt)'),
+    # (356, 'BB', 'AH2S', 'B1213H', 'Barebow Onder 14 Jongens (strikt)'),
+    # (357, 'BB', 'AV2S', 'B1213D', 'Barebow Onder 14 Meisjes (strikt)'),
 )
 
 

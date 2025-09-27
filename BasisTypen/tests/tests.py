@@ -135,7 +135,7 @@ class TestBasisTypen(TestCase):
         self.assertEqual(get_organisatie_teamtypen(ORGANISATIE_IFAA).count(), 0)
 
         self.assertEqual(get_organisatie_klassen(ORGANISATIE_WA, ook_strikt=False).count(), 40)
-        self.assertEqual(get_organisatie_klassen(ORGANISATIE_WA, ook_strikt=True).count(), 40 + 18)
+        self.assertEqual(get_organisatie_klassen(ORGANISATIE_WA, ook_strikt=True).count(), 40 + 12)
         self.assertEqual(get_organisatie_klassen(ORGANISATIE_KHSN, ook_strikt=False).count(), 105)
         self.assertEqual(get_organisatie_klassen(ORGANISATIE_IFAA, ook_strikt=False).count(), 144)
 
