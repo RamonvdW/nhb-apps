@@ -113,15 +113,17 @@
                     <td>{{ evenement.contact_email }}</td>
                 </tr>
 
-                <tr>
-                    <th>Website</th>
-                    <td>                                
-                        <a href="{{ evenement.contact_website }}" target="_blank" rel="noopener noreferrer">
-                            <i class="notranslate material-symbol left sv-blauw-text">open_in_new</i>
-                            <code>{{ evenement.contact_website }}</code>
-                        </a>
-                    </td>
-                </tr>
+                {% if evenement.contact_website %}
+                    <tr>
+                        <th>Website</th>
+                        <td>
+                            <a href="{{ evenement.contact_website }}" target="_blank" rel="noopener noreferrer">
+                                <i class="notranslate material-symbol left sv-blauw-text">open_in_new</i>
+                                <code>{{ evenement.contact_website }}</code>
+                            </a>
+                        </td>
+                    </tr>
+                {% endif %}
             
                 <tr>
                     <td colspan="2" class="center sv-blauw-text">
