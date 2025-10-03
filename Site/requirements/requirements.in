@@ -12,6 +12,7 @@ psycopg
 pyotp
 
 # Excel read/write support
+# TODO: kan weg na overstap Google Sheets voor wedstrijdformulieren
 openpyxl
 
 # voor bondspas plaatje maken
