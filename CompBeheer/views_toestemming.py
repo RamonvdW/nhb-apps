@@ -13,8 +13,7 @@ from CompKamp.operations.maak_mutatie import maak_mutatie_wedstrijdformulieren_a
 from CompKamp.operations.storage_wedstrijdformulieren import ontbrekende_wedstrijdformulieren_rk_bk
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige
-from GoogleDrive.operations.authenticatie import check_heeft_toestemming
-from GoogleDrive.operations.authenticatie import get_authorization_url
+from GoogleDrive.operations import check_heeft_toestemming, get_authorization_url
 
 TEMPLATE_COMPBEHEER_DRIVE_TOESTEMMING = 'compbeheer/drive-toestemming.dtl'
 TEMPLATE_COMPBEHEER_DRIVE_AANMAKEN = 'compbeheer/drive-aanmaken.dtl'

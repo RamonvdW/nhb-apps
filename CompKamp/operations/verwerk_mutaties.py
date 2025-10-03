@@ -20,9 +20,9 @@ from CompKamp.operations.wedstrijdformulieren_indiv import (iter_indiv_wedstrijd
                                                             UpdateIndivWedstrijdFormulier)
 from CompKamp.operations.wedstrijdformulieren_teams import (iter_teams_wedstrijdformulieren,
                                                             UpdateTeamsWedstrijdFormulier)
-from CompKamp.operations.storage_wedstrijdformulieren import (StorageWedstrijdformulieren, StorageError,
+from CompKamp.operations.storage_wedstrijdformulieren import (StorageWedstrijdformulieren,
                                                               iter_dirty_wedstrijdformulieren, zet_dirty)
-from GoogleDrive.operations.google_sheets import GoogleSheet
+from GoogleDrive.operations import GoogleSheet, StorageError
 import time
 
 VOLGORDE_PARKEER = 22222        # hoog en past in PositiveSmallIntegerField

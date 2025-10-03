@@ -77,12 +77,12 @@ class GoogleSheet:
                                              fields="sheets.properties.title,sheets.properties.sheetId")
 
         response = self._execute(request)
-
-        for sheet in response['sheets']:
-            properties = sheet['properties']
-            # properties = {'title': 'bla', 'sheetId': 1234}
-            self._sheet_name2id[properties['title']] = properties['sheetId']
-        # for
+        if response:
+            for sheet in response['sheets']:
+                properties = sheet['properties']
+                # properties = {'title': 'bla', 'sheetId': 1234}
+                self._sheet_name2id[properties['title']] = properties['sheetId']
+            # for
 
     def selecteer_file(self, file_id):
         self._setup_api()
@@ -180,7 +180,7 @@ class GoogleSheet:
         }
         self._value_changes.append(change)
 
-    def get_range(self, range_a1: str):
+    def get_range(self, range_a1: str) -> list | None:
         # haal de values op in een specifieke range (format: A1:B20) in het huidige sheet
         # geeft een list(rows) terug, met elke row = list(cells)
 
@@ -192,9 +192,12 @@ class GoogleSheet:
 
         response = self._execute(request)
 
-        # als er geen getallen zijn gevonden in de range, dan is 'values' ook niet aanwezig
-        values = response.get('values', [[]])
-        # self.stdout.write('[DEBUG] {get_range} values: %s' % repr(values))
+        if response:
+            # als er geen getallen zijn gevonden in de range, dan is 'values' ook niet aanwezig
+            values = response.get('values', [[]])
+            # self.stdout.write('[DEBUG] {get_range} values: %s' % repr(values))
+        else:
+            values = None
 
         return values
 

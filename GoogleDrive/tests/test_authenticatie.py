@@ -6,9 +6,7 @@
 
 from django.test import TestCase
 from GoogleDrive.models import Transactie, Token
-from GoogleDrive.operations.authenticatie import (check_heeft_toestemming,
-                                                  get_authorization_url,
-                                                  handle_authentication_response)
+from GoogleDrive.operations import check_heeft_toestemming, get_authorization_url, handle_authentication_response
 from TestHelpers.e2ehelpers import E2EHelpers
 from unittest.mock import patch
 

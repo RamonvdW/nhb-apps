@@ -11,8 +11,8 @@ from Competitie.definities import DEEL_BK, DEEL_RK, DEELNAME_NEE, DEELNAME2STR
 from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieMatch,
                                Kampioenschap, KampioenschapIndivKlasseLimiet, KampioenschapSporterBoog)
 from Geo.models import Rayon
-from GoogleDrive.operations.google_sheets import GoogleSheet
 from GoogleDrive.models import Bestand
+from GoogleDrive.operations import GoogleSheet
 from Sporter.models import SporterVoorkeuren
 
 
@@ -217,14 +217,15 @@ class UpdateIndivWedstrijdFormulier:
 
     def _heeft_scores(self):
         values = self.sheet.get_range(self.ranges['scores'])
-        for row in values:
-            for cell in row:
-                if cell:
-                    # cell is niet leeg
-                    self.stdout.write('[DEBUG] score gevonden: %s' % repr(cell))
-                    return True
+        if values:
+            for row in values:
+                for cell in row:
+                    if cell:
+                        # cell is niet leeg
+                        self.stdout.write('[DEBUG] score gevonden: %s' % repr(cell))
+                        return True
+                # for
             # for
-        # for
         return False
 
     def update_wedstrijdformulier(self, bestand: Bestand, match: CompetitieMatch):

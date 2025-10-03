@@ -13,7 +13,7 @@ from Competitie.operations import bepaal_startjaar_nieuwe_competitie
 from CompKamp.operations.storage_wedstrijdformulieren import ontbrekende_wedstrijdformulieren_rk_bk
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige, rol_get_beschrijving
-from GoogleDrive.operations.authenticatie import check_heeft_toestemming
+from GoogleDrive.operations import check_heeft_toestemming
 from Site.core.static import static_safe
 
 TEMPLATE_COMPETITIE_KIES_SEIZOEN = 'competitie/kies.dtl'
