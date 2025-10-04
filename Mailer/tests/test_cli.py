@@ -211,7 +211,7 @@ class TestMailerCliBadBase(E2EHelpers, TestCase):
     def test_stuur_mails_bad_args(self):
         f1, f2 = self.run_management_command('stuur_mails', '99999',
                                              report_exit_code=False)
-        self.assertTrue(" raised CommandError('Error: argument duration: invalid choice: 99999" in f1.getvalue())
+        self.assertTrue(" raised CommandError(\"Error: argument duration: invalid choice: '99999" in f1.getvalue())
 
         f1, f2 = self.run_management_command('stuur_mails', '1', '--quick', '--stop_exactly',
                                              report_exit_code=False)
@@ -221,7 +221,7 @@ class TestMailerCliBadBase(E2EHelpers, TestCase):
 
         f1, f2, = self.run_management_command('stuur_mails', '1', '--quick', '--stop_exactly=99999',
                                               report_exit_code=False)
-        self.assertTrue(" raised CommandError('Error: argument --stop_exactly: invalid choice: 99999" in f1.getvalue())
+        self.assertTrue(" raised CommandError(\"Error: argument --stop_exactly: invalid choice: '99999" in f1.getvalue())
 
     def test_stuur_mail_no_connect(self):
         # deze test eist dat de URL wijst naar een poort waar niet op gereageerd wordt

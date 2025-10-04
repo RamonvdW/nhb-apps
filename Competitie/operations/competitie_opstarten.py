@@ -20,8 +20,8 @@ import logging
 my_logger = logging.getLogger('MH.Competitie')
 
 
-def competitie_week_nr_to_date(jaar, week_nr):
-    # de competitie begin na de zomer
+def competitie_week_nr_to_date(jaar, week_nr) -> datetime.date | None:
+    # de competitie begint na de zomer
     # dus als het weeknummer voor de zomer valt, dan is het in het volgende jaar
     if week_nr <= 26:
         jaar += 1
@@ -31,8 +31,13 @@ def competitie_week_nr_to_date(jaar, week_nr):
     # %G = jaar
     # %V = met maandag als eerste dag van de week + week 1 bevat 4 januari
     # %u = dag van de week met 1=maandag
-    when = datetime.datetime.strptime("%s-%s-1" % (jaar, week_nr), "%G-%V-%u")
-    when2 = datetime.date(year=when.year, month=when.month, day=when.day)
+    try:
+        when = datetime.datetime.strptime("%s-%s-1" % (jaar, week_nr), "%G-%V-%u")
+    except ValueError:
+        # waarschijnlijk geen valide week
+        when2 = None
+    else:
+        when2 = datetime.date(year=when.year, month=when.month, day=when.day)
     return when2
 
 
@@ -48,8 +53,7 @@ def bepaal_volgende_week_nummer(deelcomp, cluster):
 
     last_week_in_year = 52
     when_wk53 = competitie_week_nr_to_date(begin_jaar, 53)
-    when_wk1 = competitie_week_nr_to_date(begin_jaar, 1)        # doet jaar+1 omdat week_nr <= 26
-    if when_wk53 != when_wk1:
+    if when_wk53:
         # wk53 does exist
         last_week_in_year = 53
 
