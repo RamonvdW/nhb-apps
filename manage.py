@@ -22,7 +22,7 @@ import os
 """
 
 
-def my_format(self):            # pragma: no cover
+def my_format(self, colorize=None):            # pragma: no cover
     """ variant of StackSummary.format that skips all django site-package files in the output
         so focus is on the application source files. This saves ~75% of the output.
     """
