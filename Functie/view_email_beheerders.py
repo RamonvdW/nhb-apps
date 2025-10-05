@@ -41,7 +41,7 @@ class OverzichtEmailsSecHwlView(UserPassesTestMixin, TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        if self.rol_nu in (Rol.ROL_BB, Rol.ROL_BKO):
+        if self.rol_nu in (Rol.ROL_BB, Rol.ROL_BKO, Rol.ROL_MWZ):
             context['geo_str'] = ''
             emails = (Functie
                       .objects
