@@ -33,6 +33,9 @@ class TestPlein(E2EHelpers, TestCase):
     url_mandje = '/bestel/mandje/'
     url_registreer_meer_vragen = '/account/registreer/gast/meer-vragen/'
     url_scheids = '/scheidsrechter/'
+    url_wissel_van_rol = '/functie/wissel-van-rol/'
+    url_ledenvoordeel = '/ledenvoordeel/'
+    url_ping = '/plein/'
 
     @classmethod
     def setUpTestData(cls):
@@ -105,6 +108,8 @@ class TestPlein(E2EHelpers, TestCase):
         self.functie_mww = maak_functie('Manager Webwinkel', 'MWW')
         self.functie_sup = maak_functie('Support', 'SUP')
         self.functie_cs = maak_functie('Commissie Scheidsrechters', 'CS')
+        self.functie_la = maak_functie('Ledenadministrateur', 'LA')
+        self.functie_mla = maak_functie('Manager Ledenadministrateurs', 'MLA')
 
     def test_plein_anon(self):
         self.e2e_logout()
@@ -151,7 +156,8 @@ class TestPlein(E2EHelpers, TestCase):
         self.e2e_login(self.account_100001)
 
         # plein bekijken = mandje opnieuw evalueren
-        with override_settings(DEBUG=True):      # extra coverage for site_layout.dtl: menu_toon_schermgrootte
+        with override_settings(DEBUG=True,                # extra coverage for site_layout.dtl: menu_toon_schermgrootte
+                               TOON_LEDENVOORDEEL=True):
             with self.assert_max_queries(20):
                 resp = self.client.get(self.url_plein)
             self.assertEqual(resp.status_code, 200)     # 200 = OK
@@ -163,8 +169,18 @@ class TestPlein(E2EHelpers, TestCase):
         self.assertTrue(self.url_mandje in urls)
 
         # check dat de het scheidsrechters kaartje er niet bij zit
-        urls = self.extract_all_urls(resp)
         self.assertNotIn(self.url_scheids, urls)
+
+        # check dat ledenvoordeel er wel bij zit
+        self.assertIn(self.url_ledenvoordeel, urls)
+
+        with override_settings(TOON_LEDENVOORDEEL=False):
+            with self.assert_max_queries(20):
+                resp = self.client.get(self.url_plein)
+
+        # check dat ledenvoordeel er niet bij zit
+        urls = self.extract_all_urls(resp)
+        self.assertNotIn(self.url_ledenvoordeel, urls)
 
     def test_plein_scheids(self):
         # sporter met scheidsrechter opleiding
@@ -304,6 +320,24 @@ class TestPlein(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('plein/plein-beheerder.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, 'Support')
 
+        # mla
+        self.e2e_wissel_naar_functie(self.functie_mla)
+        self.e2e_check_rol('MLA')
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_plein)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_template_used(resp, ('plein/plein-beheerder.dtl', 'plein/site_layout.dtl'))
+        self.assertContains(resp, 'Manager Ledenadministrateurs')
+
+        # la
+        self.e2e_wissel_naar_functie(self.functie_la)
+        self.e2e_check_rol('LA')
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_plein)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_template_used(resp, ('plein/plein-beheerder.dtl', 'plein/site_layout.dtl'))
+        self.assertContains(resp, 'Ledenadministrateur')
+
         # geen
         self.e2e_wisselnaarrol_gebruiker()
         self.e2e_check_rol('geen')
@@ -346,6 +380,18 @@ class TestPlein(E2EHelpers, TestCase):
 
         self.e2e_assert_other_http_commands_not_supported(self.url_handleidingen)
 
+    def test_gast(self):
+        self.sporter_100001.is_gast = True
+        self.sporter_100001.save(update_fields=['is_gast'])
+        self.account_100001.is_gast = True
+        self.account_100001.save(update_fields=['is_gast'])
+
+        self.e2e_login(self.account_100001)
+        with override_settings(TOON_LEDENVOORDEEL=True):
+            resp = self.client.get(self.url_plein)
+        urls = self.extract_all_urls(resp)
+        self.assertFalse(self.url_ledenvoordeel in urls)
+
     def test_registreer(self):
         # test doorsturen vast een onvolledig gast-account
 
@@ -367,6 +413,28 @@ class TestPlein(E2EHelpers, TestCase):
         # haal 'het plein' op en controleer dat deze doorstuurt naar de 'meer vragen' pagina
         resp = self.client.get(self.url_plein)
         self.assert_is_redirect(resp, self.url_registreer_meer_vragen)
+
+    def test_ping(self):
+        # niet ingelogged
+        self.client.logout()
+        resp = self.client.post(self.url_ping)
+        data = self.assert200_json(resp)
+        self.assertEqual(data, {'ok': 'n'})
+
+        self.e2e_login(self.account_100001)
+
+        # get --> wel do_ping
+        resp = self.client.get(self.url_plein)
+        self.assertTrue(b'data-url-ping' in resp.content)
+
+        # ingelogged
+        resp = self.client.post(self.url_ping)
+        data = self.assert200_json(resp)
+        self.assertEqual(data, {'ok': 'j'})
+
+        # get --> geen do_ping
+        resp = self.client.get(self.url_plein)
+        self.assertFalse(b'data-url-ping' in resp.content)
 
 
 # end of file
