@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import reverse
-from django.http import Http404
+from django.http import Http404, HttpResponseRedirect
 from django.views.generic import TemplateView
 from django.utils.safestring import mark_safe
 from Account.models import get_account
@@ -16,6 +16,7 @@ from Competitie.models import (Competitie, CompetitieMatch, Regiocompetitie, Reg
 from Competitie.seizoenen import get_comp_pk
 from Functie.rol import rol_get_huidige_functie
 from Geo.models import Rayon
+from HistComp.operations import get_hist_url
 from Sporter.models import Sporter
 from Sporter.operations import get_request_rayon_nr
 import datetime
@@ -31,12 +32,33 @@ class UitslagenRayonIndivView(TemplateView):
     # class variables shared by all instances
     template_name = TEMPLATE_COMPUITSLAGEN_RK_INDIV
 
-    @staticmethod
-    def _maak_filter_knoppen(context, comp, gekozen_rayon_nr, comp_boog):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.comp = None
+
+    def dispatch(self, request, *args, **kwargs):
+        """ converteer het seizoen naar een competitie
+            stuur oude seizoenen door naar histcomp """
+        try:
+            comp_pk = get_comp_pk(kwargs['comp_pk_of_seizoen'])
+            self.comp = (Competitie
+                         .objects
+                         .prefetch_related('boogtypen')
+                         .get(pk=comp_pk))
+        except (ValueError, Competitie.DoesNotExist):
+            url_hist = get_hist_url(kwargs['comp_pk_of_seizoen'], 'indiv', 'rk', kwargs['comp_boog'][:2])
+            if url_hist:
+                return HttpResponseRedirect(url_hist)
+        else:
+            self.comp.bepaal_fase()
+
+        return super().dispatch(request, *args, **kwargs)
+
+    def _maak_filter_knoppen(self, context, gekozen_rayon_nr, comp_boog):
         """ filter knoppen per rayon en per competitie boog type """
 
         # boogtype filters
-        boogtypen = comp.boogtypen.order_by('volgorde')
+        boogtypen = self.comp.boogtypen.order_by('volgorde')
 
         context['comp_boog'] = None
         context['boog_filters'] = boogtypen
@@ -75,19 +97,13 @@ class UitslagenRayonIndivView(TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        try:
-            comp_pk = get_comp_pk(kwargs['comp_pk_of_seizoen'])
-            comp = (Competitie
-                    .objects
-                    .get(pk=comp_pk))
-        except (ValueError, Competitie.DoesNotExist):
+        if not self.comp:
             raise Http404('Competitie niet gevonden')
 
-        comp.bepaal_fase()
-        context['comp'] = comp
+        context['comp'] = self.comp
 
-        if comp.fase_indiv == 'J':
-            context['bevestig_tot_datum'] = comp.begin_fase_L_indiv - datetime.timedelta(days=14)
+        if self.comp.fase_indiv == 'J':
+            context['bevestig_tot_datum'] = self.comp.begin_fase_L_indiv - datetime.timedelta(days=14)
 
         comp_boog = kwargs['comp_boog'][:2]          # afkappen voor de veiligheid
 
@@ -100,10 +116,10 @@ class UitslagenRayonIndivView(TemplateView):
         except ValueError:
             raise Http404('Verkeerd rayonnummer')
 
-        self._maak_filter_knoppen(context, comp, rayon_nr, comp_boog)
+        self._maak_filter_knoppen(context, rayon_nr, comp_boog)
 
         context['url_filters'] = reverse('CompUitslagen:uitslagen-rk-indiv-n',
-                                         kwargs={'comp_pk_of_seizoen': comp.maak_seizoen_url(),
+                                         kwargs={'comp_pk_of_seizoen': self.comp.maak_seizoen_url(),
                                                  'comp_boog': '~1',
                                                  'rayon_nr': '~2'})
 
@@ -117,8 +133,8 @@ class UitslagenRayonIndivView(TemplateView):
                         .select_related('competitie',
                                         'rayon')
                         .prefetch_related('rk_bk_matches')
-                        .get(competitie__is_afgesloten=False,
-                             competitie=comp,
+                        .get(competitie=self.comp,
+                             competitie__is_afgesloten=False,
                              deel=DEEL_RK,
                              rayon__rayon_nr=rayon_nr))
         except Kampioenschap.DoesNotExist:
@@ -178,8 +194,8 @@ class UitslagenRayonIndivView(TemplateView):
             # sporters komen uit de 4 regio's van het rayon
             deelcomp_pks = (Regiocompetitie
                             .objects
-                            .filter(competitie__is_afgesloten=False,
-                                    competitie=comp,
+                            .filter(competitie=self.comp,
+                                    competitie__is_afgesloten=False,
                                     regio__rayon_nr=rayon_nr)
                             .values_list('pk', flat=True))
 
@@ -187,7 +203,7 @@ class UitslagenRayonIndivView(TemplateView):
                           .objects
                           .filter(regiocompetitie__pk__in=deelcomp_pks,
                                   indiv_klasse__boogtype=boogtype,
-                                  aantal_scores__gte=comp.aantal_scores_voor_rk_deelname)
+                                  aantal_scores__gte=self.comp.aantal_scores_voor_rk_deelname)
                           .select_related('indiv_klasse',
                                           'sporterboog__sporter',
                                           'sporterboog__sporter__bij_vereniging',
@@ -282,15 +298,15 @@ class UitslagenRayonIndivView(TemplateView):
         context['heeft_deelnemers'] = (len(deelnemers) > 0)
 
         context['canonical'] = reverse('CompUitslagen:uitslagen-rk-indiv',          # TODO: keep?
-                                       kwargs={'comp_pk_of_seizoen': comp.maak_seizoen_url(),
+                                       kwargs={'comp_pk_of_seizoen': self.comp.maak_seizoen_url(),
                                                'comp_boog': comp_boog})
 
         context['robots'] = 'nofollow'   # prevent crawling filter result pages
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
-            (reverse('Competitie:overzicht', kwargs={'comp_pk_of_seizoen': comp.maak_seizoen_url()}),
-                comp.beschrijving.replace(' competitie', '')),
+            (reverse('Competitie:overzicht', kwargs={'comp_pk_of_seizoen': self.comp.maak_seizoen_url()}),
+                self.comp.beschrijving.replace(' competitie', '')),
             (None, 'Uitslagen RK individueel')
         )
 
@@ -304,13 +320,34 @@ class UitslagenRayonTeamsView(TemplateView):
     # class variables shared by all instances
     template_name = TEMPLATE_COMPUITSLAGEN_RK_TEAMS
 
-    @staticmethod
-    def _maak_filter_knoppen(context, comp, gekozen_rayon_nr, teamtype_afkorting):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.comp = None
+
+    def dispatch(self, request, *args, **kwargs):
+        """ converteer het seizoen naar een competitie
+            stuur oude seizoenen door naar histcomp """
+        try:
+            comp_pk = get_comp_pk(kwargs['comp_pk_of_seizoen'])
+            self.comp = (Competitie
+                         .objects
+                         .prefetch_related('teamtypen')
+                         .get(pk=comp_pk))
+        except (ValueError, Competitie.DoesNotExist):
+            url_hist = get_hist_url(kwargs['comp_pk_of_seizoen'], 'teams', 'rk', kwargs['team_type'][:3])
+            if url_hist:
+                return HttpResponseRedirect(url_hist)
+        else:
+            self.comp.bepaal_fase()
+
+        return super().dispatch(request, *args, **kwargs)
+
+    def _maak_filter_knoppen(self, context, gekozen_rayon_nr, teamtype_afkorting):
         """ filter knoppen per rayon en per competitie boog type """
 
         # team type filter
         context['teamtype'] = None
-        context['teamtype_filters'] = teamtypen = comp.teamtypen.order_by('volgorde')
+        context['teamtype_filters'] = teamtypen = self.comp.teamtypen.order_by('volgorde')
 
         for team in teamtypen:
             team.opt_text = team.beschrijving
@@ -397,16 +434,10 @@ class UitslagenRayonTeamsView(TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        try:
-            comp_pk = get_comp_pk(kwargs['comp_pk_of_seizoen'])
-            comp = (Competitie
-                    .objects
-                    .get(pk=comp_pk))
-        except (ValueError, Competitie.DoesNotExist):
+        if not self.comp:
             raise Http404('Competitie niet gevonden')
 
-        comp.bepaal_fase()
-        context['comp'] = comp
+        context['comp'] = self.comp
 
         teamtype_afkorting = kwargs['team_type'][:3]     # afkappen voor de veiligheid
 
@@ -419,10 +450,10 @@ class UitslagenRayonTeamsView(TemplateView):
         except ValueError:
             raise Http404('Verkeerd rayonnummer')
 
-        self._maak_filter_knoppen(context, comp, rayon_nr, teamtype_afkorting)
+        self._maak_filter_knoppen(context, rayon_nr, teamtype_afkorting)
 
         context['url_filters'] = reverse('CompUitslagen:uitslagen-rk-teams-n',
-                                         kwargs={'comp_pk_of_seizoen': comp.maak_seizoen_url(),
+                                         kwargs={'comp_pk_of_seizoen': self.comp.maak_seizoen_url(),
                                                  'team_type': '~1',
                                                  'rayon_nr': '~2'})
 
@@ -436,7 +467,7 @@ class UitslagenRayonTeamsView(TemplateView):
                         .select_related('competitie',
                                         'rayon')
                         .prefetch_related('rk_bk_matches')
-                        .get(competitie=comp,
+                        .get(competitie=self.comp,
                              competitie__is_afgesloten=False,
                              deel=DEEL_RK,
                              rayon__rayon_nr=rayon_nr))
