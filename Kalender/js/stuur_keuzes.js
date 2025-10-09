@@ -26,7 +26,7 @@ function maak_url(url_main) {
 
     let url = url_main + el_soort.dataset.url + '/' + el_bogen.dataset.url + '/' + el_discipline.dataset.url + '/';
 
-    if (1 <= zoekterm.length <= 50) {
+    if (zoekterm.length > 0 && zoekterm.length <= 50) {
         // voeg de zoekterm toe als query parameter
         url += '?zoek=' + encodeURIComponent(zoekterm);
     }

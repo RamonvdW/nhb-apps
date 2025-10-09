@@ -290,24 +290,33 @@ class TestFunctieBeheerders(E2EHelpers, TestCase):
 
     def test_emails_sec_hwl(self):
         self.e2e_login_and_pass_otp(self.account_admin)
+
+        # Manager MH
         self.e2e_wisselnaarrol_bb()
-
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_email_sec_hwl)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('functie/emails-sec-hwl.dtl', 'plein/site_layout.dtl'))
 
+        # MWZ
+        self.e2e_wissel_naar_functie(self.functie_mwz)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_email_sec_hwl)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('functie/emails-sec-hwl.dtl', 'plein/site_layout.dtl'))
+
+        # RKO
         self.e2e_wissel_naar_functie(self.functie_rko3_18)
-
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_email_sec_hwl)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('functie/emails-sec-hwl.dtl', 'plein/site_layout.dtl'))
 
+        # RCL
         self.e2e_wissel_naar_functie(self.functie_rcl111_18)
-
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_email_sec_hwl)
         self.assertEqual(resp.status_code, 200)     # 200 = OK

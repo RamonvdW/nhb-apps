@@ -10,6 +10,7 @@ from django.urls import reverse
 from django.http import Http404, HttpResponseRedirect
 from django.utils import timezone
 from django.views import View
+from django.db.models import Q
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account, Account
@@ -34,6 +35,131 @@ TEMPLATE_GAST_ACCOUNT_DETAILS = 'registreer/beheer-gast-account-details.dtl'
 EMAIL_TEMPLATE_GAST_AFGEWEZEN = 'email_registreer/gast-afgewezen.dtl'
 
 my_logger = logging.getLogger('MH.Registreer')
+
+
+def analyseer_gast(gast: GastRegistratie):
+    gast.ophef = 0
+    gast.sporter_matches = None
+    gast.overzetten_naar_lid_nr = None
+    gast.overzetten_naar_sporter = None
+    gast.heeft_matches = False
+
+    # zoek naar overeenkomst in CRM
+    try:
+        eigen_lid_nr = int(gast.eigen_lid_nummer)
+    except ValueError:
+        pks1 = list()
+    else:
+        pks1 = list(Sporter
+                    .objects
+                    .exclude(is_gast=True)
+                    .filter(lid_nr=eigen_lid_nr)
+                    .values_list('pk', flat=True))
+
+    if gast.wa_id:
+        pks2 = list(Sporter
+                    .objects
+                    .exclude(is_gast=True)
+                    .filter(wa_id=gast.wa_id)
+                    .values_list('pk', flat=True))
+    else:
+        pks2 = list()
+
+    pks3 = list(Sporter
+                .objects
+                .exclude(is_gast=True)
+                .filter(Q(achternaam__iexact=gast.achternaam) |
+                        Q(voornaam__iexact=gast.voornaam) |
+                        Q(geboorte_datum=gast.geboorte_datum) |
+                        Q(email__iexact=gast.email))
+                .values_list('pk', flat=True))
+
+    match_count = dict()    # [pk] = count
+    for pk in pks1 + pks2 + pks3:
+        try:
+            match_count[pk] += 1
+        except KeyError:
+            match_count[pk] = 1
+    # for
+
+    best = list()
+    for pk, count in match_count.items():
+        tup = (count, pk)
+        best.append(tup)
+    # for
+    best.sort(reverse=True)     # hoogste eerst
+
+    beste_pks = [pk for count, pk in best[:10] if count > 1]
+
+    gast.heeft_matches = len(beste_pks) > 0
+    hoogste_ophef = 0
+
+    matches = (Sporter
+               .objects
+               .select_related('account',
+                               'bij_vereniging')
+               .filter(pk__in=beste_pks))
+    for match in matches:
+        match.is_match_geboorte_datum = match.geboorte_datum == gast.geboorte_datum
+        match.is_match_email = match.email.lower() == gast.email.lower()
+
+        match.is_match_lid_nr = gast.eigen_lid_nummer == str(match.lid_nr)
+        match.is_match_geslacht = gast.geslacht == match.geslacht
+        match.is_match_voornaam = gast.voornaam.upper() in match.voornaam.upper()
+        match.is_match_achternaam = gast.achternaam.upper() in match.achternaam.upper()
+
+        if match.bij_vereniging:
+            match.vereniging_str = match.bij_vereniging.ver_nr_en_naam()
+            match.is_match_vereniging = False
+            for woord in gast.club.upper().split():
+                if woord in match.vereniging_str.upper():   # pragma: no branch
+                    match.is_match_vereniging = True
+            # for
+
+            match.plaats_str = match.bij_vereniging.plaats
+            match.is_match_plaats = (gast.club_plaats.upper().replace('-', ' ') in
+                                     match.plaats_str.upper().replace('-', ' '))
+        else:
+            match.is_match_vereniging = False
+            match.is_match_plaats = False
+
+        match.heeft_account = (match.account is not None)
+
+        match.ophef = 0
+
+        if match.is_match_geboorte_datum:
+            match.ophef += 1
+        if match.is_match_email:
+            match.ophef += 5
+        if match.is_match_lid_nr:
+            match.ophef += 5
+        if match.is_match_voornaam:
+            match.ophef += 1
+        if match.is_match_achternaam:
+            match.ophef += 1
+        if match.is_match_geslacht:
+            match.ophef += 1
+        if match.is_match_vereniging:
+            match.ophef += 1
+        else:
+            match.ophef = 0             # TODO: waarom?!
+        if match.is_match_plaats:
+            match.ophef += 1
+        if match.heeft_account:
+            match.ophef += 5
+
+        if match.ophef > hoogste_ophef:         # pragma: no branch
+            gast.overzetten_naar_lid_nr = match.lid_nr
+            gast.overzetten_naar_sporter = match
+            hoogste_ophef = match.ophef
+
+        gast.ophef += match.ophef
+    # for
+
+    gast.sporter_matches = matches
+    for sporter in matches:
+        sporter.geslacht_str = GESLACHT2STR[sporter.geslacht]
+    # for
 
 
 class GastAccountsView(UserPassesTestMixin, TemplateView):
@@ -61,6 +187,7 @@ class GastAccountsView(UserPassesTestMixin, TemplateView):
         context['gasten'] = gasten = list()
         context['afgewezen'] = afgewezen = list()
 
+        budget = 20     # alleen de nieuwste 20 diep analyseren (andere duurt het te lang)
         for gast in (GastRegistratie
                      .objects
                      .select_related('sporter',
@@ -83,10 +210,17 @@ class GastAccountsView(UserPassesTestMixin, TemplateView):
                 # onvoltooid account
                 gast.geen_inlog = 1
 
+            gast.ophef = 0
+
             if gast.fase == REGISTRATIE_FASE_AFGEWEZEN:
                 afgewezen.append(gast)
             else:
                 gasten.append(gast)
+                if budget > 0:
+                    budget -= 1
+                    analyseer_gast(gast)
+
+            gast.geef_aandacht = gast.ophef > 0
         # for
 
         context['heeft_afgewezen'] = len(afgewezen) > 0
@@ -117,142 +251,6 @@ class GastAccountDetailsView(UserPassesTestMixin, TemplateView):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
         return self.functie_nu and self.functie_nu.rol == 'SEC' and self.functie_nu.vereniging.is_extern
-
-    @staticmethod
-    def _zoek_overeenkomsten(gast, context):
-        # zoek naar overeenkomst in CRM
-        try:
-            eigen_lid_nr = int(gast.eigen_lid_nummer)
-        except ValueError:
-            pks1 = list()
-        else:
-            pks1 = list(Sporter
-                        .objects
-                        .exclude(is_gast=True)
-                        .filter(lid_nr=eigen_lid_nr)
-                        .values_list('pk', flat=True))
-
-        if gast.wa_id:
-            pks2 = list(Sporter
-                        .objects
-                        .exclude(is_gast=True)
-                        .filter(wa_id=gast.wa_id)
-                        .values_list('pk', flat=True))
-        else:
-            pks2 = list()
-
-        pks3 = list(Sporter
-                    .objects
-                    .exclude(is_gast=True)
-                    .filter(achternaam__iexact=gast.achternaam)
-                    .values_list('pk', flat=True))
-
-        pks4 = list(Sporter
-                    .objects
-                    .exclude(is_gast=True)
-                    .filter(voornaam__iexact=gast.voornaam)
-                    .values_list('pk', flat=True))
-
-        pks5 = list(Sporter
-                    .objects
-                    .exclude(is_gast=True)
-                    .filter(geboorte_datum=gast.geboorte_datum)
-                    .values_list('pk', flat=True))
-
-        pks6 = list(Sporter
-                    .objects
-                    .exclude(is_gast=True)
-                    .filter(email__iexact=gast.email)
-                    .values_list('pk', flat=True))
-
-        match_count = dict()    # [pk] = count
-        for pk in pks1 + pks2 + pks3 + pks4 + pks5 + pks6:
-            try:
-                match_count[pk] += 1
-            except KeyError:
-                match_count[pk] = 1
-        # for
-
-        best = list()
-        for pk, count in match_count.items():
-            tup = (count, pk)
-            best.append(tup)
-        # for
-        best.sort(reverse=True)     # hoogste eerst
-
-        beste_pks = [pk for count, pk in best[:10] if count > 1]
-
-        context['heeft_matches'] = len(beste_pks) > 0
-        context['overzetten_naar_lid_nr'] = None
-        hoogste_ophef = 0
-
-        matches = (Sporter
-                   .objects
-                   .select_related('account',
-                                   'bij_vereniging')
-                   .filter(pk__in=beste_pks))
-        for match in matches:
-            match.is_match_geboorte_datum = match.geboorte_datum == gast.geboorte_datum
-            match.is_match_email = match.email.lower() == gast.email.lower()
-
-            match.is_match_lid_nr = gast.eigen_lid_nummer == str(match.lid_nr)
-            match.is_match_geslacht = gast.geslacht == match.geslacht
-            match.is_match_voornaam = gast.voornaam.upper() in match.voornaam.upper()
-            match.is_match_achternaam = gast.achternaam.upper() in match.achternaam.upper()
-
-            if match.bij_vereniging:
-                match.vereniging_str = match.bij_vereniging.ver_nr_en_naam()
-                match.is_match_vereniging = False
-                for woord in gast.club.upper().split():
-                    if woord in match.vereniging_str.upper():   # pragma: no branch
-                        match.is_match_vereniging = True
-                # for
-
-                match.plaats_str = match.bij_vereniging.plaats
-                match.is_match_plaats = (gast.club_plaats.upper().replace('-', ' ') in
-                                         match.plaats_str.upper().replace('-', ' '))
-            else:
-                match.is_match_vereniging = False
-                match.is_match_plaats = False
-
-            match.heeft_account = (match.account is not None)
-
-            match.ophef = 0
-
-            if match.is_match_geboorte_datum:
-                match.ophef += 1
-            if match.is_match_email:
-                match.ophef += 5
-            if match.is_match_lid_nr:
-                match.ophef += 5
-            if match.is_match_voornaam:
-                match.ophef += 1
-            if match.is_match_achternaam:
-                match.ophef += 1
-            if match.is_match_geslacht:
-                match.ophef += 1
-            if match.is_match_vereniging:
-                match.ophef += 1
-            else:
-                match.ophef = 0             # TODO: waarom?!
-            if match.is_match_plaats:
-                match.ophef += 1
-            if match.heeft_account:
-                match.ophef += 5
-
-            if match.ophef > hoogste_ophef:         # pragma: no branch
-                context['overzetten_naar_lid_nr'] = match.lid_nr
-                context['overzetten_naar_sporter'] = match
-                hoogste_ophef = match.ophef
-
-            gast.ophef += match.ophef
-        # for
-
-        context['sporter_matches'] = matches
-
-        for sporter in context['sporter_matches']:
-            sporter.geslacht_str = GESLACHT2STR[sporter.geslacht]
-        # for
 
     @staticmethod
     def _zoek_gebruik(gast, context):
@@ -304,11 +302,11 @@ class GastAccountDetailsView(UserPassesTestMixin, TemplateView):
         else:
             context['gast_koper_geen'] = True
 
-        if gast.ophef < 0 and context['overzetten_naar_lid_nr']:
-            if context['overzetten_naar_sporter'].account:
+        if gast.ophef < 0 and gast.overzetten_naar_lid_nr:
+            if gast.overzetten_naar_sporter.account:
                 context['overzetten_url'] = reverse('Registreer:bestellingen-overzetten',
                                                     kwargs={'van_lid_nr': gast.sporter.lid_nr,
-                                                            'naar_lid_nr': context['overzetten_naar_lid_nr']})
+                                                            'naar_lid_nr': gast.overzetten_naar_lid_nr})
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -325,8 +323,7 @@ class GastAccountDetailsView(UserPassesTestMixin, TemplateView):
         gast.geslacht_str = GESLACHT2STR[gast.geslacht]
         context['gast'] = gast
 
-        gast.ophef = 0
-        self._zoek_overeenkomsten(gast, context)
+        analyseer_gast(gast)
         self._zoek_gebruik(gast, context)
 
         if not gast.account:

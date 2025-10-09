@@ -126,7 +126,8 @@ class E2EHelpers(MyTestAsserts, MyMgmtCommandHelper, TestCase):
         'SUP': '/feedback/inzicht/',
         'MWW': '/webwinkel/manager/',
         'MWZ': '/wedstrijden/manager/wacht/',
-        'CS': '/scheidsrechter/'
+        'CS': '/scheidsrechter/',
+        'MLA': '/plein/',
     }
 
     def e2e_wissel_naar_functie(self, functie: Functie):
@@ -135,7 +136,7 @@ class E2EHelpers(MyTestAsserts, MyMgmtCommandHelper, TestCase):
         try:
             expected_url = self.WISSEL_VAN_ROL_EXPECTED_URL[functie.rol]
         except KeyError:        # pragma: no cover
-            expected_url = 'functie ontbreekt (fout in test suite)'
+            expected_url = 'functie %s ontbreekt (fout in test suite)' % functie.rol
 
         self.assert_is_redirect(resp, expected_url)
 

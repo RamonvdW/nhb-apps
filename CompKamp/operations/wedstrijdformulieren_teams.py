@@ -12,8 +12,8 @@ from Competitie.models import (Competitie, CompetitieTeamKlasse, CompetitieMatch
                                Kampioenschap, KampioenschapTeamKlasseLimiet,
                                KampioenschapTeam, KampioenschapSporterBoog)
 from Geo.models import Rayon
-from GoogleDrive.operations.google_sheets import GoogleSheet
 from GoogleDrive.models import Bestand
+from GoogleDrive.operations import GoogleSheet
 from Sporter.models import SporterVoorkeuren
 
 

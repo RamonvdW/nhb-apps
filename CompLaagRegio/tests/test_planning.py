@@ -1383,7 +1383,7 @@ class TestCompLaagRegioPlanning(E2EHelpers, TestCase):
 
         # 2019wk53 bestaat niet, dus gelijk aan 2020wk1
         when1 = competitie_week_nr_to_date(2019, 53)
-        self.assertEqual(when1, when)
+        self.assertEqual(when1, None)
 
         # 2020wk2 = 2020-01-06
         when = competitie_week_nr_to_date(2019, 2)

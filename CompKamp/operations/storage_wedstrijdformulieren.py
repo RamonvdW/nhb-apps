@@ -11,7 +11,7 @@ from django.utils import timezone
 from CompKamp.operations.wedstrijdformulieren_indiv import iter_indiv_wedstrijdformulieren
 from CompKamp.operations.wedstrijdformulieren_teams import iter_teams_wedstrijdformulieren
 from GoogleDrive.models import Bestand
-from GoogleDrive.operations.storage_drive import StorageGoogleDrive, StorageError
+from GoogleDrive.operations import StorageGoogleDrive, StorageError
 from typing import Generator
 
 

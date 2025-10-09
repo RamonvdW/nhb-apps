@@ -472,26 +472,26 @@ class RegistreerGastVolgendeVraagView(View):
             gast.sporter = sporter
             gast.save(update_fields=['sporter'])
 
-    @staticmethod
-    def _informeer_sec(gast):
-
-        functie_sec = Functie.objects.get(rol='SEC', vereniging__ver_nr=settings.EXTERN_VER_NR)
-
-        now = timezone.now()
-        stamp_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
-        taak_deadline = now + datetime.timedelta(days=7)
-        taak_tekst = "Er is zojuist een nieuwe gast-account aangemaakt. Het bondsnummer is %s.\n" % gast.lid_nr
-        taak_tekst += "Als secretaris van vereniging %s kan je de details inzien." % settings.EXTERN_VER_NR
-        taak_onderwerp = "Nieuw gast-account %s" % gast.lid_nr
-        taak_log = "[%s] Taak aangemaakt" % stamp_str
-
-        # maak een taak aan voor deze BKO
-        maak_taak(toegekend_aan_functie=functie_sec,
-                  deadline=taak_deadline,
-                  aangemaakt_door=None,  # systeem
-                  onderwerp=taak_onderwerp,
-                  beschrijving=taak_tekst,
-                  log=taak_log)
+    # @staticmethod
+    # def _informeer_sec(gast):
+    #
+    #     functie_sec = Functie.objects.get(rol='SEC', vereniging__ver_nr=settings.EXTERN_VER_NR)
+    #
+    #     now = timezone.now()
+    #     stamp_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
+    #     taak_deadline = now + datetime.timedelta(days=7)
+    #     taak_tekst = "Er is zojuist een nieuwe gast-account aangemaakt. Het bondsnummer is %s.\n" % gast.lid_nr
+    #     taak_tekst += "Als secretaris van vereniging %s kan je de details inzien." % settings.EXTERN_VER_NR
+    #     taak_onderwerp = "Nieuw gast-account %s" % gast.lid_nr
+    #     taak_log = "[%s] Taak aangemaakt" % stamp_str
+    #
+    #     # maak een taak aan voor deze BKO
+    #     maak_taak(toegekend_aan_functie=functie_sec,
+    #               deadline=taak_deadline,
+    #               aangemaakt_door=None,  # systeem
+    #               onderwerp=taak_onderwerp,
+    #               beschrijving=taak_tekst,
+    #               log=taak_log)
 
     def post(self, request, *args, **kwargs):
         """ wordt aangeroepen als de OPSLAAN knop gebruikt wordt op het formulier
@@ -710,7 +710,7 @@ class RegistreerGastVolgendeVraagView(View):
                 gast.save(update_fields=['fase', 'logboek'])
 
                 # informeer de secretaris over de nieuwe registratie
-                self._informeer_sec(gast)
+                # self._informeer_sec(gast)
 
                 # stuur de sporter door naar Mijn Pagina, om de voorkeuren aan te passen
                 return HttpResponseRedirect(reverse('Sporter:profiel'))

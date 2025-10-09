@@ -115,7 +115,7 @@
     <div class="row center">
         <div class="col s12">
             <h4>Bekend?</h4>
-            {% if heeft_matches %}
+            {% if gast.heeft_matches %}
                 <p>Hieronder volgen mogelijke overeenkomsten met bestaande leden</p>
                 {% if gast.url_ophef %}
                     <p>
@@ -131,12 +131,12 @@
         </div>
     </div>
 
-    {% if heeft_matches %}
+    {% if gast.heeft_matches %}
         <!-- blauwe balk met informatie label : info -->
         <div class="row-sv-blauw">
             <div class="col s12 m10 offset-m1 l8 offset-l2 xl6 offset-xl3">
                 <table class="sv-kader">
-                    {% for match in sporter_matches %}
+                    {% for match in gast.sporter_matches %}
                         {% if not forloop.first %}
                             <tr>
                                 <td class="sv-table-header"></td>
@@ -216,7 +216,7 @@
             <h4>Gebruik van dit gast-account</h4>
             {% if overzetten_url %}
                 <p>
-                    <a class="btn-sv-rood modal-trigger" href="#bevestig_overzetten">Overzetten naar {{ overzetten_naar_lid_nr }}</a>
+                    <a class="btn-sv-rood modal-trigger" href="#bevestig_overzetten">Overzetten naar {{ gast.overzetten_naar_lid_nr }}</a>
                 </p>
             {% endif %}
         </div>
@@ -283,7 +283,7 @@
             <div class="modal-content center">
                 <h5>Bestellingen overzetten</h5>
                 <p>Je hebt gecontroleerd dat het gast-account overeenkomt een bekend lid.</p>
-                <p>Wil je alle bestellingen van {{ gast.sporter.lid_nr }} overzetten naar {{ overzetten_naar_lid_nr }}?</p>
+                <p>Wil je alle bestellingen van {{ gast.sporter.lid_nr }} overzetten naar {{ gast.overzetten_naar_lid_nr }}?</p>
                 <p>(nadat dit gedaan is kan je het gast-account opheffen)</p>
 
                 <form action="{{ overzetten_url }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">

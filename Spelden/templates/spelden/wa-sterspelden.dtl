@@ -177,7 +177,7 @@
 
                 <tr>
                     <td class="center">1400</td>
-                    <td class="center"><img class="sv-foto-speld" draggable="false" src="{% static 'spelden/ster_1400_compound.png' %}" alt="Ster 1400"></td>
+                    <td class="center"><img class="sv-foto-speld" draggable="false" src="{% static 'spelden/ster_1400_compound.webp' %}" alt="Ster 1400"></td>
                     <td class="center">n.v.t.</td>
                 </tr>
 

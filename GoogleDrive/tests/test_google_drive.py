@@ -7,7 +7,7 @@
 from django.test import TestCase
 from django.core.management.base import OutputWrapper
 from GoogleDrive.models import Token, Bestand
-from GoogleDrive.operations.storage_drive import StorageGoogleDrive, StorageError
+from GoogleDrive.operations import StorageGoogleDrive, StorageError
 from TestHelpers.e2ehelpers import E2EHelpers
 from googleapiclient.errors import HttpError as GoogleApiError
 from google.auth.exceptions import RefreshError
