@@ -346,7 +346,7 @@ class TestCompUitslagenRK(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.testdata.functie_hwl[self.ver_nr])
 
         url = self.url_uitslagen_rk_teams_n % (self.testdata.comp25.pk, 1, 'R2')
-        with self.assert_max_queries(24):
+        with self.assert_max_queries(25):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
@@ -391,5 +391,14 @@ class TestCompUitslagenRK(E2EHelpers, TestCase):
             self.assert_html_ok(resp)
             self.assert_template_used(resp, ('compuitslagen/uitslagen-rk-indiv.dtl', 'plein/site_layout.dtl'))
         # for
+
+    def test_hist(self):
+        # test redirect naar HistComp uitslag
+        resp = self.client.get(self.url_uitslagen_rk_indiv % ('indoor-2000-2001', 'r'))
+        self.assert_is_redirect(resp, '/bondscompetities/hist/2000-2001/indoor-individueel/recurve/rk/')
+
+        resp = self.client.get(self.url_uitslagen_rk_teams % ('25m1pijl-2000-2001', 'c'))
+        self.assert_is_redirect(resp, '/bondscompetities/hist/2000-2001/25m1pijl-teams/compound/rk/')
+
 
 # end of file

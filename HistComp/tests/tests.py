@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -9,6 +9,7 @@ from HistComp.definities import HISTCOMP_TYPE_18, HIST_BOGEN_DEFAULT, HIST_TEAM_
 from HistComp.models import (HistCompSeizoen,
                              HistCompRegioIndiv, HistKampIndivRK, HistKampIndivBK,
                              HistCompRegioTeam, HistKampTeam)
+from HistComp.operations import get_hist_url
 from TestHelpers.e2ehelpers import E2EHelpers
 
 
@@ -576,5 +577,42 @@ class TestHistComp(E2EHelpers, TestCase):
 
         url = self.url_bk_teams % (self.seizoen4url, '18m', 'recurve')
         self.assert404(self.client.get(url), 'Geen data')
+
+    def test_get_hist_url(self):
+        # good weather:
+        url = get_hist_url('indoor-' + self.seizoen4url, 'indiv', 'regio', 'r')
+        self.assertEqual(url, '/bondscompetities/hist/2018-2019/indoor-individueel/recurve/regio/')
+
+        url = get_hist_url('indoor-' + self.seizoen4url, 'indiv', 'rk', 'r')
+        self.assertEqual(url, '/bondscompetities/hist/2018-2019/indoor-individueel/recurve/rk/')
+
+        url = get_hist_url('indoor-' + self.seizoen4url, 'indiv', 'bk', 'lb')
+        self.assertEqual(url, '/bondscompetities/hist/2018-2019/indoor-individueel/longbow/bk/')
+
+        url = get_hist_url('25m1pijl-' + self.seizoen4url, 'teams', 'regio', 'c')
+        self.assertEqual(url, '/bondscompetities/hist/2018-2019/25m1pijl-teams/compound/regio/')
+
+        url = get_hist_url('indoor-' + self.seizoen4url, 'teams', 'rk', 'r')
+        self.assertEqual(url, '/bondscompetities/hist/2018-2019/indoor-teams/recurve/rk/')
+
+        url = get_hist_url('indoor-' + self.seizoen4url, 'teams', 'bk', 'lb')
+        self.assertEqual(url, '/bondscompetities/hist/2018-2019/indoor-teams/longbow/bk/')
+
+        url = get_hist_url('BAD', 'teams', 'bk', 'lb')
+        self.assertIsNone(url)
+
+        url = get_hist_url('indoor-' + self.seizoen4url, 'BAD', 'rk', 'r')
+        self.assertIsNone(url)
+
+        url = get_hist_url('indoor-' + self.seizoen4url, 'teams', 'BAD', 'r')
+        self.assertIsNone(url)
+
+        url = get_hist_url('indoor-' + self.seizoen4url, 'indiv', 'bk', 'BAD')
+        self.assertIsNone(url)
+
+        url = get_hist_url('indoor-' + self.seizoen4url, 'teams', 'bk', 'BAD')
+        self.assertIsNone(url)
+
+
 
 # end of file
