@@ -17,6 +17,7 @@ backspace
 badge
 block
 book
+book_2
 build
 category
 chat

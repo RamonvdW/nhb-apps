@@ -10,9 +10,7 @@ from Instaptoets.models import Categorie, Vraag, ToetsAntwoord, Instaptoets, Qui
 
 class InstaptoetsAdmin(admin.ModelAdmin):
 
-    readonly_fields = ('sporter',)
-
-    filter_horizontal = ('vraag_antwoord',)
+    readonly_fields = ('sporter', 'vraag_antwoord')
 
     search_fields = ('sporter__lid_nr',)
 

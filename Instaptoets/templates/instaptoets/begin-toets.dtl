@@ -52,6 +52,25 @@
     </div>
 
 
+    <!-- tussenkopje -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>Kennisbank</h4>
+            <p>We verwachten niet van je dat je alle antwoorden op basis van parate kennis kunt geven. Daarom helpen we je graag.</p>
+            <p>De antwoorden op de vragen zijn te vinden in diverse (schiettechnische) reglementen.<br>Onderstaand vind je een overzicht van de voor deze toets relevante reglementen.</p>
+        </div>
+    </div>
+
+    <!-- blauwe balk met kaartjes -->
+    <div class="row-sv-blauw">
+        <div class="col s12">
+            {% include 'plein/card_icon.dtl' with icon="book_2" url=lesmateriaal_wa         extern_open=True title="WA boeken" text="Nederlandse vertaling van de Rule Books van World Archery. Deel 2 en 3 zijn relevant voor de toets." %}
+            {% include 'plein/card_icon.dtl' with icon="book_2" url=lesmateriaal_competitie extern_open=True title="Bondscompetities" text="De nationale bepalingen voor de bondscompetities."  %}
+            {% include 'plein/card_icon.dtl' with icon="book_2" url=lesmateriaal_kleding    extern_open=True title="Kleding" text="Het kledingvoorschrift voor alle erkende disciplines in de handboogsport" %}
+        </div>
+    </div>
+
+
     {% include 'feedback/sidebar.dtl' with op_pagina="instaptoets-begin-toets" %}
 
 {% endblock %}
