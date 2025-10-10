@@ -468,6 +468,9 @@ class FormulierIndivAlsBestandView(UserPassesTestMixin, TemplateView):
         response['Content-Disposition'] = 'attachment; filename="%s"' % fname
         prg.save(response)      # noqa
 
+        del prg
+        tmp_file.close()
+
         return response
 
 
@@ -790,6 +793,9 @@ class FormulierTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
         response = HttpResponse(content_type=CONTENT_TYPE_XLSX)
         response['Content-Disposition'] = 'attachment; filename="%s"' % fname
         prg.save(response)      # noqa
+
+        del prg
+        tmp_file.close()
 
         return response
 
