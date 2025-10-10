@@ -86,7 +86,12 @@
                             <table>
                                 {% for score in kwalificatie_scores %}
                                     <tr>
-                                        <td colspan="2"><h6 class="sv-blauw-text center">Jouw resultaat van een 60-pijlen Indoor A-status wedstrijd</h6></td>
+                                        <td colspan="2">
+                                            {% if not score.is_eerste %}
+                                                <br>        <!-- iets meer ruimte tussen de verschillende scores -->
+                                            {% endif %}
+                                            <h6 class="sv-blauw-text center">Jouw resultaat van een 60-pijlen Indoor A-status wedstrijd</h6>
+                                        </td>
                                     </tr>
 
                                     <tr>
@@ -117,6 +122,25 @@
                                             <input type="number" name="{{ score.name_str }}_result" value="{{ score.resultaat }}" min="0" max="600">
                                         </td>
                                     </tr>
+
+                                    {% if score.resultaat > 0 %}
+                                        <tr>
+                                            <th>Controle door bondsbureau</th>
+                                            <td>
+                                                {% if score.check_status == 'A' %}
+                                                    <!-- afgekeurd -->
+                                                    <span class="sv-rood-text">Afgekeurd</span>
+                                                {% elif score.check_status == 'G' %}
+                                                    <!-- goedgekeurd -->
+                                                    <span class="green-text">Goedgekeurd</span>
+                                                {% else %}
+                                                    <!-- nog niet gedaan -->
+                                                    <span>Nog niet gedaan</span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    {% endif %}
+
                                 {% endfor %}
 
                             </table>
@@ -160,6 +184,22 @@
                                     <tr>
                                         <th>Resultaat (totaal 60 pijlen)</th>
                                         <td>{{ score.resultaat }}</td>
+                                    </tr>
+
+                                    <tr>
+                                        <th>Controle door bondsbureau</th>
+                                        <td>
+                                            {% if score.check_status == 'A' %}
+                                                <!-- afgekeurd -->
+                                                <span class="sv-rood-text">Afgekeurd</span>
+                                            {% elif score.check_status == 'G' %}
+                                                <!-- goedgekeurd -->
+                                                <span class="green-text">Goedgekeurd</span>
+                                            {% else %}
+                                                <!-- nog niet gedaan -->
+                                                <span>Nog niet gedaan</span>
+                                            {% endif %}
+                                        </td>
                                     </tr>
                                 {% endfor %}
 
