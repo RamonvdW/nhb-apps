@@ -22,7 +22,7 @@
     <div class="row-sv-blauw">
         <div class="col s12 m8 offset-m2 l6 offset-l3">
             <div class="sv-kader" style="padding:10px">
-                <p>De instaptoets is een online test van {{ aantal_vragen }} meerkeuze vragen en duurt ongeveer {{ aantal_minuten }} minuten om te maken. De eis is {{ eis_percentage }}% goed beantwoord.</p>
+                <p>De instaptoets is een online test van {{ aantal_vragen }} meerkeuzevragen en duurt ongeveer {{ aantal_minuten }} minuten om te maken. Beantwoordt je {{ eis_percentage }}% van de vragen goed, dan ben je geslaagd voor deze toets.</p>
 
                 {% if laat_starten %}
                     <!-- knop om toets op te starten met een POST -->

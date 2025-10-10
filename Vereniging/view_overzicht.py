@@ -298,6 +298,12 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                     context['url_evenement_locaties'] = reverse('Locatie:evenement-locaties',
                                                                 kwargs={'ver_nr': ver.ver_nr})
 
+        context['crm'] = {
+            'url': settings.CRM_URL,
+            'titel': settings.CRM_TITEL,
+            'tekst': settings.CRM_BESCHRIJVING
+        }
+
         eval_open_taken(self.request)
         aantal = cached_aantal_open_taken(self.request)
         if aantal > 0:
