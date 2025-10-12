@@ -79,7 +79,7 @@
         <div class="row-sv-blauw">
             <div class="col s12 xl10 offset-xl1" style="margin-bottom:20px">
 
-                <table class="sv-kader">
+                <table class="sv-kader-tabel">
                     {% if competities %}
                         <tr>
                             <td colspan="3" class="center">
@@ -118,7 +118,7 @@
                 {% for deelnemer in comp_inschrijvingen_sb %}
 
                     <div class="col s12 l10 offset-l1 xl8 offset-xl2" style="margin-top:10px">
-                        <table class="sv-kader">
+                        <table class="sv-kader-tabel">
 
                             <tr>
                                 <td colspan="3" class="center">Je bent ingeschreven voor de <b>{{ deelnemer.competitie.beschrijving }}</b> met de <b>{{ deelnemer.boog_beschrijving }}</b> boog</td>
@@ -601,7 +601,7 @@
             {% if comp_kan_inschrijven %}
 
                 <div class="col s12 m12 l10 offset-l1 xl8 offset-xl2">
-                    <table class="sv-kader">
+                    <table class="sv-kader-tabel">
 
                         <tr>
                             <td colspan="3" class="center">
@@ -680,7 +680,7 @@
         <!-- blauwe balk met informatie -->
         <div class="row-sv-blauw">
             <div class="col s12">
-                <table class="sv-kader">
+                <table class="sv-kader-tabel">
                     <thead>
                         <tr>
                             <th class="center">Wanneer</th>
@@ -762,7 +762,7 @@
         <!-- blauwe balk met informatie -->
         <div class="row-sv-blauw">
             <div class="col s12">
-                <table class="sv-kader">
+                <table class="sv-kader-tabel">
                     <thead>
                         <tr>
                             <th class="center">Datum</th>
@@ -812,7 +812,7 @@
                 <!-- details: https://worldarchery.sport/rulebook/article/17#article-723
                   en: https://worldarchery.sport/sport/education/badge-awards -->
 
-                <table class="sv-kader">
+                <table class="sv-kader-tabel">
                     <thead>
                         <tr>
                             <th class="center">Discipline</th>
@@ -859,7 +859,7 @@
 
             {% if regiocomp_scores %}
                 <div class="col s12">
-                    <table class="sv-kader">
+                    <table class="sv-kader-tabel">
                         <tr>
                             <td colspan="5" class="center">
                                 <h6>Dit zijn jouw scores van het huidige seizoen</h6>
@@ -892,7 +892,7 @@
             </div>
 
             <div class="col s12">
-                <table class="sv-kader">
+                <table class="sv-kader-tabel">
                     <tr>
                         <td colspan="5" class="center">
                             <h6>Dit zijn jouw scores van voorgaande seizoenen</h6>
@@ -941,7 +941,7 @@
         <div class="row-sv-blauw">
             <div class="col s12">
 
-                <table class="sv-kader">
+                <table class="sv-kader-tabel">
                     <thead>
                         <tr>
                             <th class="center">Boog</th>
@@ -984,7 +984,7 @@
         <div class="row-sv-blauw">
             <div class="col s12">
 
-                <table class="sv-kader">
+                <table class="sv-kader-tabel">
                     <thead>
                         <tr>
                             <th>Datum</th>
@@ -1016,7 +1016,7 @@
         <!-- blauwe balk met informatie -->
         <div class="row-sv-blauw">
             <div class="col s12 m10 offset-m1 l8 offset-l2">
-                <table class="sv-kader">
+                <table class="sv-kader-tabel">
                     {% if sporter.is_gast %}
                         <tr>
                             <th>Gast-account aangemaakt op</th>
@@ -1110,7 +1110,7 @@
     <!-- blauwe balk met informatie -->
     <div class="row-sv-blauw">
         <div class="col s12">
-            <table class="sv-kader">
+            <table class="sv-kader-tabel">
 
                 {% if rcl18_email or rcl25_email %}
                     <thead>

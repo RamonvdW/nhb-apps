@@ -22,7 +22,7 @@
     <!-- blauw balk met wit informatie veld -->
     <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
-            <div class="sv-kader" style="padding:10px">
+            <div class="sv-kader">
                 <div style="display:inline-block">
                     <table>
                         <thead>
@@ -75,7 +75,7 @@
     <!-- blauwe balk met informatie in tabel-vorm:  label - info -->
     <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
-            <table class="sv-kader">
+            <table class="sv-kader-tabel">
                 <thead>
                     <tr>
                         <th class="center">Benodigde score</th>
@@ -136,7 +136,7 @@
     <!-- blauwe balk met informatie in tabel-vorm:  label - info -->
     <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
-            <table class="sv-kader">
+            <table class="sv-kader-tabel">
                 <thead>
                     <tr>
                         <th class="center">Benodigde score</th>

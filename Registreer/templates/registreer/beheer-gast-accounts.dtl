@@ -20,7 +20,7 @@
     <!-- blauw balk met wit informatie veld -->
     <div class="row-sv-blauw">
         <div class="col s12">
-            <div class="sv-kader" style="padding:10px">
+            <div class="sv-kader">
                 <h6>Afspraken</h6>
                 <p>Sporters die lid zijn bij World Archery of de IFAA kunnen met een gast-account inschrijven op wedstrijden.</p>
                 <p>Personen die niet lid zijn bij de KHSN kunnen een gast-account aanmaken om de site te ontdekken en in te schrijven op wedstrijden.</p>
@@ -42,7 +42,7 @@
     <div class="row-sv-blauw">
         <div class="col s12">
 
-            <table class="sv-kader" id="table2">
+            <table class="sv-kader-tabel" id="table2">
                 <thead>
                     <tr>        <!-- filter veld -->
                         <td colspan="3" class="table-filter">
@@ -102,7 +102,7 @@
         <div class="row-sv-blauw">
             <div class="col s12">
 
-                <table class="sv-kader" id="table3">
+                <table class="sv-kader-tabel" id="table3">
                     <thead>
                         <tr>        <!-- filter veld -->
                             <td colspan="2" class="table-filter">

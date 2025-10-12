@@ -24,7 +24,7 @@
     <!-- blauwe balk met informatie in een tabel -->
     <div class="row-sv-blauw">
         <div class="col s12 l10 offset-l1 xl8 offset-xl2">
-            <table class="sv-kader" id="table1">
+            <table class="sv-kader-tabel" id="table1">
                 <thead>
                     <tr>        <!-- filter veld -->
                         <td colspan="2" class="table-filter"><input class="table-filter" autofocus oninput="tabel_filter(this, 'table1')" placeholder="Zoeken"/></td>

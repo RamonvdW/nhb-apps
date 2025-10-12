@@ -23,7 +23,7 @@
         <div class="col s12 m8 offset-m2 l6 offset-l3 xl4 offset-xl4">
 
             <!-- dialoog venster -->
-            <div class="sv-kader left-align z-depth-3">
+            <div class="sv-kader-form">
                 <div class="form-padding">
                     <form action="{{ url_opslaan }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
                         {% csrf_token %}
@@ -66,7 +66,7 @@
     <!-- blauw balk met wit informatie veld -->
     <div class="row-sv-blauw">
         <div class="col s12 xl8 offset-xl2">
-            <div class="sv-kader" style="padding:10px">
+            <div class="sv-kader">
                 <p>Dit zijn de mogelijkheden:</p>
                 <p><b>1.</b> Verzending naar jouw postadres (zoals bekend bij de bond).<br>Hiervoor worden kosten voor pakketpost in rekening gebracht.</p>
                 <p><b>2.</b> Je haalt de bestelling op bij het bondsbureau op Papendal<br>We berekenen dan geen verzendkosten.</p>

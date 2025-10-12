@@ -32,7 +32,7 @@
 
         <!-- zoek tekst -->         <!-- margin is to separate filters -->
         <div class="col s12 m12" style="margin-bottom:20px">
-            <div class="sv-kader z-depth-3 left-align" style="padding:10px">
+            <div class="sv-kader-form">
 
                 <p><b>Zoek naar:</b></p>
                 <div class="input-text">
@@ -59,7 +59,7 @@
 
         <!-- filter: bogen -->
         <div class="col s12 m4 collapsible_filter" style="margin-bottom:15px; display:none">
-            <div class="sv-kader left-align" style="padding:10px">
+            <div class="sv-kader-filter">
                 <p><b>Bogen:</b></p>
                 <ul>
                     {% for filter in bogen_filter %}
@@ -79,7 +79,7 @@
 
         <!-- filter: soort wedstrijd -->
         <div class="col s12 m4 collapsible_filter" style="margin-bottom:15px; display:none">
-            <div class="sv-kader left-align" style="padding:10px">
+            <div class="sv-kader-filter">
                 <p><b>Soort wedstrijd:</b></p>
                 <ul>
                     {% for filter in soort_filter %}
@@ -99,7 +99,7 @@
 
         <!-- filter: discipline -->
         <div class="col s12 m4 collapsible_filter" style="display:none">
-            <div class="sv-kader left-align" style="padding:10px">
+            <div class="sv-kader-filter">
                 <p><b>Discipline:</b></p>
                 <ul>
                     {% for filter in soort_discipline %}
@@ -120,7 +120,7 @@
     </div>
 
     <!-- maand titel met knoppen prev/next -->
-    <table class="sv-kader">
+    <table class="sv-kader-tabel">
         <tr style="border-bottom:none">
             <!-- knop -->
             <td class="right-align">
@@ -146,7 +146,7 @@
     <!-- blauwe balk met informatie in een tabel -->
     <div class="row-sv-blauw">
         <div class="col s12">
-            <table class="sv-kader">
+            <table class="sv-kader-tabel">
                 <thead>
                     <tr>
                         <th>Wanneer</th>

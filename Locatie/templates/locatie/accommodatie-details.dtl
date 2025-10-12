@@ -58,7 +58,7 @@
 
                 <!-- blauwe balk met informatie in een tabel -->
                 <div class="row-sv-blauw">
-                    <div class="col s10 offset-s1 m12 sv-kader{% if not readonly %} z-depth-3{% endif %}">
+                    <div class="col s10 offset-s1 m12 {% if readonly %}sv-kader{% else %}sv-kader-form{% endif %}">
 
                         <table>
                             <tr>
@@ -211,7 +211,7 @@
 
                 <!-- blauwe balk met informatie in een tabel -->
                 <div class="row-sv-blauw">
-                    <div class="col s10 offset-s1 m12 sv-kader{% if not readonly %} z-depth-3{% endif %}">
+                    <div class="col s10 offset-s1 m12 {% if readonly %}sv-kader{% else %}sv-kader-form{% endif %}">
                         <table>
 
                             <tr>
@@ -318,7 +318,7 @@
                 <!-- blauwe balk met informatie in een tabel -->
                 <div class="row-sv-blauw">
                     <div class="col s10 offset-s1 m12">
-                        <table class="sv-kader">
+                        <table class="sv-kader-tabel">
                             <tr>
                                 <th>Naam</th>
                                 <th>Disciplines</th>
@@ -359,7 +359,7 @@
         <!-- blauwe balk met informatie in een tabel -->
         <div class="row-sv-blauw">
             <div class="col s12">
-                <table class="sv-kader">
+                <table class="sv-kader-tabel">
                     <tr>
                         <th>Regio</th>
                         <td>{{ ver.regio }}</td>
@@ -459,8 +459,8 @@
         </div>
 
         {% if not readonly %}
-            <div class="fixed-action-btn" style="display: none">
-                <button class="btn-sv-rood" id="submit_knop2" type="submit" disabled>
+            <div style="display: none">
+                <button class="btn-sv-float" id="submit_knop2" type="submit" disabled>
                     <i class="notranslate material-symbol left">check</i>Wijzigingen opslaan</button>
             </div>
         {% endif %}

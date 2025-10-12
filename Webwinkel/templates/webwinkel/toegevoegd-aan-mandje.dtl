@@ -21,7 +21,7 @@
     <!-- blauwe balk met informatie -->
     <div class="row-sv-blauw">
         <div class="col s12 l10 offset-l1 xl8 offset-xl2">
-            <div class="sv-kader" style="padding:10px">
+            <div class="sv-kader">
                 <p>We hebben het gekozen product voor je <b>gereserveerd</b> en toegevoegd aan je mandje.</p>
                 <br>
                 <p>Rechts bovenin vind je de knop voor je winkelmandje.</p>

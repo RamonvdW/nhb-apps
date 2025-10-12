@@ -22,7 +22,7 @@
         <div class="col s12">
 
             <!-- dialoog venster -->
-            <div class="sv-kader left-align z-depth-3">
+            <div class="sv-kader-form">
                 <div class="form-padding">
 
                     {% if not readonly %}
@@ -30,7 +30,7 @@
                             {% csrf_token %}
                     {% endif %}
 
-                            <table class="sv-kader">
+                            <table class="sv-kader-tabel">
                                 <tr>
                                     <th>Vereniging</th>
                                     <td>{{ team.vereniging }}</td>

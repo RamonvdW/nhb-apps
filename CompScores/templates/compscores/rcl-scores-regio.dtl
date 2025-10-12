@@ -21,7 +21,7 @@
     <!-- blauwe balk met informatie label : info -->
     <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
-            <table class="sv-kader">
+            <table class="sv-kader-tabel">
                 <tr>
                     <th>Competitie</th>
                     <td>{{ deelcomp.competitie.beschrijving }}</td>
@@ -44,7 +44,7 @@
 
 
     <!-- blauwe balk met informatie in een tabel -->
-    <table class="sv-kader">
+    <table class="sv-kader-tabel">
 
         <tr class="sv-table-header">
             <td rowspan="{{ aantal_regels }}" class="sv-table-zijrand"></td>

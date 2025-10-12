@@ -29,7 +29,7 @@
     <!-- blauwe balk met informatie in een tabel -->
     <div class="row-sv-blauw">
         <div class="col s12">
-            <table class="sv-kader" id="tabel1">
+            <table class="sv-kader-tabel" id="tabel1">
                 <thead>
                     <tr>        <!-- filter veld -->
                         <td colspan="2" class="table-filter">

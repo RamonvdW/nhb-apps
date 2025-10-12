@@ -20,10 +20,10 @@
 
     <!-- blauwe balk met kaartjes -->
     <div class="row-sv-blauw">
-        <div class="col s10 offset-s1 m8 offset-m2 l6 offset-l3 xl4 offset-xl4 sv-kader z-depth-3">
+        <div class="col s10 offset-s1 m8 offset-m2 l6 offset-l3 xl4 offset-xl4">
 
             <!-- dialoog venster -->
-            <div style="padding:20px">
+            <div class="sv-kader-form">
                 <form action="{% url 'Account:otp-controle' %}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
                     {{ form.next_url }}
                     {% csrf_token %}
@@ -79,7 +79,7 @@
     <!-- blauw balk met wit informatie veld -->
     <div class="row-sv-blauw">
         <div class="col s12 l10 offset-l1 xl8 offset-xl2">
-            <div class="sv-kader" style="padding:10px">
+            <div class="sv-kader">
                 <p>Tik de 6 cijfers over uit je authenticatie app (waarschijnlijk op je mobiel)</p>
 
                 {% if toon_hulp %}
@@ -107,7 +107,7 @@
         <!-- blauw balk met wit informatie veld -->
         <div class="row-sv-blauw">
             <div class="col s12">
-                <div class="sv-kader" style="padding:10px">
+                <div class="sv-kader">
                     <p>De koppeling met je tweede factor moet soms opnieuw gedaan worden, bijvoorbeeld als je een nieuwe mobiel aangeschaft hebt.</p>
                     <p>Neem daarvoor contact met ons op via <code>{{ email_support }}</code></p>
                 </div>

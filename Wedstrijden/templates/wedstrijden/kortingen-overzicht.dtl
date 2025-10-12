@@ -22,7 +22,7 @@
     <!-- blauwe balk met informatie in een tabel -->
     <div class="row-sv-blauw">
         <div class="col s12">
-            <table class="sv-kader" id="tabel1">
+            <table class="sv-kader-tabel" id="tabel1">
                 <thead>
                     <tr>        <!-- filter veld -->
                         <td colspan="2"></td>
@@ -84,7 +84,7 @@
     <!-- blauw balk met wit informatie veld -->
     <div class="row-sv-blauw">
         <div class="col s12">
-            <div class="sv-kader" style="padding:10px">
+            <div class="sv-kader">
                 <h5>Algemeen</h5>
                 <p>Kortingen uitgegeven door jouw vereniging zijn alleen bruikbaar op <b>wedstrijden van jouw vereniging</b>.</p>
                 <p>De korting is een <b>percentage</b> dat afgetrokken wordt van de inschrijfprijs van een wedstrijd.</p>

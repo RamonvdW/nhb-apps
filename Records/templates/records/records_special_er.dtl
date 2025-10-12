@@ -21,7 +21,7 @@
     <!-- blauwe balk met informatie in een tabel -->
     <div class="row-sv-blauw">
         <div class="col s12">
-            <table class="sv-kader">
+            <table class="sv-kader-tabel">
                 <thead>
                     <tr>
                         <th>Datum</th>

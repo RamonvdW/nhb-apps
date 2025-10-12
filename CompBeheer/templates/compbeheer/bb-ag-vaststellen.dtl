@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2023 Ramon van der Winkel.
+                Copyright (c) 2020-2025 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -24,7 +24,7 @@
 
             <!-- wit informatie veld -->
             <div class="col s12">
-                <div class="sv-kader" style="padding:10px">
+                <div class="sv-kader">
                     <p class="sv-rood-text">Er is GEEN HISTORISCHE UITSLAG data beschikbaar, dus deze actie kan nog niet uitgevoerd worden.</p>
                 </div>
             </div>
@@ -33,7 +33,7 @@
 
             <!-- wit informatie veld -->
             <div class="col s12">
-                <div class="sv-kader" style="padding:10px">
+                <div class="sv-kader">
                     <p>Alle huidige aanvangsgemiddelden voor de {{ afstand }}m zullen eerst verwijderd worden.</p>
                     <p>De sporters die in het vorige seizoen genoeg scores neergezet hebben krijgen een nieuw aanvangsgemiddelde (AG) toegekend.</p>
                     <p>Sporters met te weinig scores krijgen geen aanvangsgemiddelde en beginnen daarom in klasse Onbekend.</p>
@@ -42,7 +42,7 @@
 
             <!-- wit informatie veld -->
             <div class="col s12 m10 offset-m1" style="margin-top:30px; margin-bottom:30px">
-                <div class="sv-kader" style="padding:10px">
+                <div class="sv-kader">
                     <h5 class="sv-rood-text">Controleer dat onderstaande gegevens juist zijn.</h5>
                     <p>Gebruik uitslag <b>seizoen {{ seizoen }}</b>, afstand <b>{{ afstand }}m</b>.</p>
                     <p>Aantal scores: <b>minstens {{ aantal_scores }}</b>.</p>
@@ -51,7 +51,7 @@
 
             <!-- wit informatie veld -->
             <div class="col s12 m10 offset-m1">
-                <div class="sv-kader" style="padding:10px">
+                <div class="sv-kader-form">
                     <p>Als bovenstaande gegevens correct zijn, druk dan op de volgende knop:</p>
 
                     <form action="{{ url_vaststellen }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">

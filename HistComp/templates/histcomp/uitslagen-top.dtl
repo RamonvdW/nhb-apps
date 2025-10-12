@@ -29,7 +29,7 @@
 
             <!-- filter: seizoen keuze -->
             <div class="col s12 m6 l4 offset-l2 xl3 offset-xl3" style="margin-bottom:15px">
-                <div class="sv-kader left-align" style="padding:10px">
+                <div class="sv-kader-filter">
                     <p><b>Kies een seizoen:</b></p>
                     <ul id="id_seizoen">
                         {% for obj in filter_seizoenen %}
@@ -52,8 +52,8 @@
             </div>
 
             <!-- filter: competitie type -->
-            <div class="col s12 m6 l3 xl2" style="margin-bottom:15px">
-                <div class="sv-kader left-align" style="padding:10px">
+            <div class="col s12 m6 l4 xl3" style="margin-bottom:15px">
+                <div class="sv-kader-filter">
                     <p><b>Kies een competitie:</b></p>
                     <ul id="id_histcomp_type">
                         {% for obj in filter_histcomp_type %}

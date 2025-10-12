@@ -20,7 +20,7 @@
     <!-- blauwe balk met dialoog venster -->
     <div class="row-sv-blauw">
         <div class="col s12 xl8 offset-xl2">
-            <table class="sv-kader">
+            <table class="sv-kader-tabel">
                 <tr>
                     <th>Titel</th>
                     <td>{{ evenement.titel }}</td>
@@ -74,7 +74,7 @@
         <!-- blauwe balk met informatie -->
         <div class="row-sv-blauw">
             <div class="col s12 m10 offset-m1 l8 offset-l2 xl6 offset-xl3">
-                <table class="sv-kader">
+                <table class="sv-kader-tabel">
                     <thead>
                         <tr>
                             <th>Sporter</th>
@@ -115,7 +115,7 @@
                     <input type="hidden" name="sporter" value="{{ geselecteerd.lid_nr }}">
                     <input type="hidden" name="goto" value="F">
 
-                    <table class="sv-kader">
+                    <table class="sv-kader-tabel">
                         <tr>
                             <th>Sporter</th>
                             <td>{{ geselecteerd.lid_nr_en_volledige_naam }}</td>

@@ -21,7 +21,7 @@
     <!-- blauwe balk met informatie in tabel-vorm:  label - info -->
     <div class="row-sv-blauw">
         <div class="col s12 l10 offset-l1 xl8 offset-xl2">
-            <table class="sv-kader">
+            <table class="sv-kader-tabel">
                 <thead>
                     <tr>
                         <th>Datum</th>
@@ -86,7 +86,7 @@
     <!-- blauwe balk met informatie -->
     <div class="row-sv-blauw">
         <div class="col s12 l10 offset-l1 xl8 offset-xl2">
-            <div class="sv-kader" style="padding:10px">
+            <div class="sv-kader">
                 <p>Sporters mogen scores van 180 pijlen opgeven. Het totaal bepaalt de ranking op de deelnemerslijst.</p>
                 <p>Sporter kunnen 3 resultaten van een 60 pijlen A-status Indoor wedstrijd doorgeven.<br>De wedstrijden moeten tussen {{ begin_datum }} en {{ eind_datum }} gehouden zijn.</p>
                 <p>Sporters mogen ook 4 scores uit de bondscompetitie Indoor gebruiken. Dit gaat automatisch.</p>

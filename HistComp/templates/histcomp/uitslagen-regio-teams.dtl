@@ -21,7 +21,7 @@
     <!-- blauwe balk met informatie -->
     <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
-            <table class="sv-kader">
+            <table class="sv-kader-tabel">
                 <tr>
                     <th>Competitie</th>
                     <td>{{ comp_beschrijving }}</td>
@@ -49,7 +49,7 @@
     <div class="row-sv-blauw">
 
         <div class="col s12 m3 offset-m3" style="margin-bottom:15px">
-            <div class="sv-kader left-align" style="padding:10px">
+            <div class="sv-kader-filter">
                 <p><b>Kies een regio:</b></p>
                 <ul>
                     {% for filter in regio_filters %}
@@ -72,7 +72,7 @@
         </div>
 
         <div class="col s12 m3" style="margin-bottom:15px">
-            <div class="sv-kader left-align" style="padding:10px">
+            <div class="sv-kader-filter">
                 <p><b>Kies een team type:</b></p>
                 <ul>
                     {% for filter in teamtype_filters %}
@@ -98,7 +98,7 @@
 
     {% if heeft_teams %}
 
-        <table class="sv-kader">
+        <table class="sv-kader-tabel">
             {% for team in uitslag %}
                 {% if forloop.first %}      <!-- alleen toevoegen als er teams zijn, anders probleem met colspan=2 -->
                     {% comment %}

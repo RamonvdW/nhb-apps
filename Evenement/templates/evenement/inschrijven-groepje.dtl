@@ -20,7 +20,7 @@
     <!-- blauwe balk met dialoog venster -->
     <div class="row-sv-blauw">
         <div class="col s12 l10 offset-l1 xl8 offset-xl2">
-            <table class="sv-kader">
+            <table class="sv-kader-tabel">
                 <tr>
                     <th>Titel</th>
                     <td>{{ evenement.titel }}</td>
@@ -70,7 +70,7 @@
         <div class="col s10 offset-s1 m8 offset-m2 l6 offset-l3 xl4 offset-xl4">
 
             <!-- dialoog venster -->
-            <div class="sv-kader left-align z-depth-3">
+            <div class="sv-kader-form">
                 <div class="form-padding">
                     <form action="{{ url_zoek }}" method="get" onsubmit="document.getElementById('submit_knop1').disabled=true; return true;">
 
@@ -109,7 +109,7 @@
                     <input type="hidden" name="sporter" value="{{ sporter.pk }}">
                     <input type="hidden" name="goto" value="G">
 
-                    <table class="sv-kader">
+                    <table class="sv-kader-tabel">
                         <tr>
                             <th>Sporter</th>
                             <td>{{ sporter.lid_nr_en_volledige_naam }}</td>

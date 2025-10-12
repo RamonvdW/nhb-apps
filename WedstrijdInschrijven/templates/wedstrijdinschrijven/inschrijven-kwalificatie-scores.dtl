@@ -28,7 +28,7 @@
         <!-- blauwe balk met informatie -->
         <div class="row-sv-blauw">
             <div class="col s12 l10 offset-l1 xl8 offset-xl2">
-                <div class="sv-kader" style="padding:10px">
+                <div class="sv-kader">
                     <p>We hebben een plekje voor je <b>gereserveerd</b> voor de gekozen wedstrijd.</p>
                     <p>Voor deze wedstrijd vragen we om <b>kwalificatie scores</b> door te geven (zie uitleg hieronder).<br>Als er te veel inschrijvingen zijn, dan wordt er geselecteerd op basis van deze scores.</p>
                     <p>Het is mogelijk om deze scores later nog bij te werken<br>(via Mijn pagina of de link in de e-mail).</p>
@@ -48,7 +48,7 @@
     <!-- blauwe balk met informatie -->
     <div class="row-sv-blauw">
         <div class="col s12 l10 offset-l1 xl8 offset-xl2">
-            <div class="sv-kader" style="padding:10px">
+            <div class="sv-kader">
                 <p>Je kan je scores van 180 pijlen opgeven. Het totaal bepaalt je ranking op de deelnemerslijst.</p>
                 <p>Je kan 3 resultaten van een 60 pijlen A-status Indoor wedstrijd doorgeven.<br>De wedstrijden moeten tussen {{ begin_datum }} en {{ eind_datum }} gehouden zijn.</p>
                 <p>Je mag ook 4 scores uit de bondscompetitie Indoor gebruiken. Dit gaat automatisch.{% if indoor_scores %}<br>(jouw 4 beste scores op dit moment zijn: {{ indoor_scores }}){% else %}<br>(we hebben nog geen scores gevonden){% endif %}</p>
@@ -78,7 +78,7 @@
             {% if mag_aanpassen %}
 
                 <!-- dialoog venster -->
-                <div class="sv-kader left-align{% if mag_aanpassen %} z-depth-3{% endif %}">
+                <div class="{% if mag_aanpassen %}sv-kader-form{% else %}sv-kader{% endif %}">
                     <div class="form-padding">
                         <form action="{{ url_opslaan }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
                             {% csrf_token %}
@@ -159,7 +159,7 @@
                 <!-- blauwe balk met informatie in tabel-vorm:  label - info -->
                 <div class="row-sv-blauw">
                     <div class="col s12 l10 offset-l1">
-                        <div class="sv-kader" style="padding:20px">
+                        <div class="sv-kader">
                             <table>
                                 {% for score in kwalificatie_scores %}
                                     <tr>

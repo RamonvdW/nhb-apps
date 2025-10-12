@@ -29,7 +29,7 @@
     <!-- blauwe balk met filters -->
     <div class="row-sv-blauw">
         <div class="col s12 m6 l4" style="margin-bottom:15px">
-            <div class="sv-kader left-align" style="padding:10px">
+            <div class="sv-kader-filter">
                 <p><b>Boog type:</b></p>
                 <ul>
                     {% for filter in makl_filter %}
@@ -52,7 +52,7 @@
         </div>
 
         <div class="col s12 m6 l4" style="margin-bottom:15px">
-            <div class="sv-kader left-align" style="padding:10px">
+            <div class="sv-kader-filter">
                 <p><b>Leeftijdsklasse:</b></p>
                 <ul>
                     {% for filter in lcat_filter %}
@@ -75,7 +75,7 @@
         </div>
 
         <div class="col s12 m6 l4" style="margin-bottom:15px">
-            <div class="sv-kader left-align" style="padding:10px">
+            <div class="sv-kader-filter">
                 <p><b>Geslacht:</b></p>
                 <ul>
                     {% for filter in gesl_filter %}
@@ -110,7 +110,7 @@
 
     {% if not lege_lijst %}
 
-        <table class="sv-kader">
+        <table class="sv-kader-tabel">
             <tr class="sv-table-header">
                 <td rowspan="{{ aantal_regels }}" class="sv-table-zijrand"></td>
                 <th>Soort record</th>
@@ -165,7 +165,7 @@
     <!-- blauw balk met wit informatie veld -->
     <div class="row-sv-blauw">
         <div class="col s12">
-            <div class="sv-kader" style="padding:10px">
+            <div class="sv-kader">
 
                 <p>Om een nieuw record aan te vragen moet je de volgende stappen doorlopen:</p>
                 <p>&nbsp;1. Wedstrijd moet de A-status hebben;</p>

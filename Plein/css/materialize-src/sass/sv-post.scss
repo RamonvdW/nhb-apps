@@ -99,6 +99,16 @@
   }
 }
 
+.btn-sv-float {
+  @extend .btn-sv-rood;
+  @extend .z-depth-3;
+  // zet 'm in de linker onderhoek
+  position: fixed;
+  right: 23px;
+  bottom: 23px;
+  z-index: 997;     // on top of everything else
+}
+
 
 //-----------------------------------
 // meerdere knoppen dicht op elkaar
@@ -756,7 +766,24 @@ input.table-filter {
 //
 .sv-kader {
   @extend .white;
+  padding: 20px;
   border-radius: 7px;   // scherpe hoekje eraf
+}
+
+.sv-kader-tabel {
+  @extend .sv-kader;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.sv-kader-form {
+  @extend .sv-kader;
+  @extend .z-depth-2;
+  text-align: left;
+}
+
+.sv-kader-filter {
+  @extend .sv-kader-form;
 }
 
 

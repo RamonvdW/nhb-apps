@@ -56,7 +56,7 @@
     <!-- blauwe balk -->
     <div class="row-sv-blauw">
         <div class="col s12">
-            <table class="sv-kader">
+            <table class="sv-kader-tabel">
                 {% if huidige_beheerders.count %}
                     <thead>
                         <tr>
@@ -121,7 +121,7 @@
 
     <!-- blauwe balk met zoek dialoog -->
     <div class="row-sv-blauw">
-        <div class="col s10 offset-s1 m8 offset-m2 l6 offset-l3 xl4 offset-xl4 sv-kader z-depth-3">
+        <div class="col s10 offset-s1 m8 offset-m2 l6 offset-l3 xl4 offset-xl4 sv-kader-form">
 
             <!-- dialoog venster -->
             <div style="padding:20px">
@@ -159,7 +159,7 @@
         <!-- blauwe balk -->
         <div class="row-sv-blauw">
             <div class="col s12">
-                <table class="sv-kader">
+                <table class="sv-kader-tabel">
                     {% if object_list|length > 0 %}
                         <thead>
                             <tr>

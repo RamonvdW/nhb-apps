@@ -46,10 +46,10 @@
             <div class="col s12">
 
                 <!-- dialoog venster -->
-                <div class="sv-kader left-align z-depth-3">
+                <div class="sv-kader-form">
                     <div class="form-padding">
 
-                        <table class="sv-kader">
+                        <table class="sv-kader-tabel">
                             <tr>
                                 <th>Klasse</th>
                                 <th>Limiet</th>
@@ -89,38 +89,36 @@
             <div class="col s12">
 
                 <!-- dialoog venster -->
-                <div class="sv-kader left-align z-depth-3">
-                    <div style="padding:30px">
-                        <table class="sv-kader">
+                <div class="sv-kader-form">
+                    <table class="sv-kader-tabel">
+                        <tr>
+                            <th>Klasse</th>
+                            <th>Limiet</th>
+                        </tr>
+
+                        {% for wkl in wkl_teams %}
                             <tr>
-                                <th>Klasse</th>
-                                <th>Limiet</th>
+                                <td>{{ wkl.beschrijving }}</td>
+                                <td>
+                                    <select name="{{ wkl.sel }}" onchange="gewijzigd()">
+                                        <option value="12"{%if wkl.limiet == 12 %} selected{% endif %}>12 teams</option>
+                                        <option value="10"{%if wkl.limiet == 10 %} selected{% endif %}>10 teams</option>
+                                        <option value="8"{%if wkl.limiet == 8 %} selected{% endif %}>8 teams</option>
+                                        <option value="6"{%if wkl.limiet == 6 %} selected{% endif %}>6 teams</option>
+                                        <option value="4"{%if wkl.limiet == 4 %} selected{% endif %}>4 teams</option>
+                                    </select>
+                                </td>
                             </tr>
+                        {% endfor %}
 
-                            {% for wkl in wkl_teams %}
-                                <tr>
-                                    <td>{{ wkl.beschrijving }}</td>
-                                    <td>
-                                        <select name="{{ wkl.sel }}" onchange="gewijzigd()">
-                                            <option value="12"{%if wkl.limiet == 12 %} selected{% endif %}>12 teams</option>
-                                            <option value="10"{%if wkl.limiet == 10 %} selected{% endif %}>10 teams</option>
-                                            <option value="8"{%if wkl.limiet == 8 %} selected{% endif %}>8 teams</option>
-                                            <option value="6"{%if wkl.limiet == 6 %} selected{% endif %}>6 teams</option>
-                                            <option value="4"{%if wkl.limiet == 4 %} selected{% endif %}>4 teams</option>
-                                        </select>
-                                    </td>
-                                </tr>
-                            {% endfor %}
-
-                        </table>
-                    </div>
+                    </table>
                 </div>
 
             </div>
         </div>
 
-        <div class="fixed-action-btn" style="display: none">
-            <button class="btn-sv-rood" id="submit_knop" type="submit" disabled>
+        <div style="display: none">
+            <button class="btn-sv-float" id="submit_knop" type="submit" disabled>
                 <i class="notranslate material-symbol left">check</i>Wijzigingen opslaan</button>
         </div>
     </form>

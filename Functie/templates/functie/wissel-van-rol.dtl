@@ -101,7 +101,7 @@
 
                 <!-- witte rechthoek voor radiobuttons -->
                 <div class="col s12 m8 offset-m2{% if heeft_alle_rollen %} l6{% endif %}">
-                    <div class="sv-kader left-align" style="padding:10px; margin-bottom:20px">  <!-- margin-bottom voor als kaart onder filter komt -->
+                    <div class="sv-kader left-align" style="margin-bottom:20px">  <!-- margin-bottom voor als kaart onder filter komt -->
                         <ul>
                         {% for obj in eigen_rollen %}
                             <li>
@@ -123,7 +123,7 @@
                 <div class="col s12 m8 offset-m2 l6">
 
                     <!-- verenigingen -->
-                    <div class="sv-kader left-align" style="padding:10px; margin-bottom:15px">
+                    <div class="sv-kader left-align" style="margin-bottom:15px">
                         <h6 class="center" style="margin-bottom:10px">Verenigingen</h6>
 
                         <!-- vereniging naar keuze -->
@@ -173,7 +173,7 @@
 
                 <!-- indoor -->
                 <div class="col s12 m6">
-                    <div class="sv-kader left-align" style="padding:10px; margin-bottom:15px">
+                    <div class="sv-kader left-align" style="margin-bottom:15px">
                         <div class="center" style="margin-bottom:10px">
                             <b>Indoor</b>
                         </div>
@@ -190,7 +190,7 @@
 
                 <!-- 25m1pijl -->
                 <div class="col s12 m6">
-                    <div class="sv-kader left-align" style="padding:10px; margin-bottom:15px">
+                    <div class="sv-kader left-align" style="margin-bottom:15px">
                         <div class="center" style="margin-bottom:10px">
                             <b>25m1pijl</b>
                         </div>
@@ -244,7 +244,7 @@
                 <!-- witte rechthoek met de radiobuttons -->
                 {% if show_help_rollen %}
                     <div class="col s12 m10 offset-m1 {% if url_wissel_naar_sec %}l6{% else %}l8 offset-l2{% endif %}">
-                        <div class="sv-kader left-align" style="padding:10px">
+                        <div class="sv-kader-filter">
                             <ul>
                                 {% for obj in help_rollen %}
                                     <li>

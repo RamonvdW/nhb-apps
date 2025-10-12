@@ -30,8 +30,8 @@
         <!-- blauwe balk -->
         <div class="row-sv-blauw">
             <div class="col s12">
-                <div class="sv-kader" style="padding:10px">
-                    <table class="sv-kader" id="table1">   <!-- id is voor filter -->
+                <div class="sv-kader">
+                    <table class="sv-kader-tabel" id="table1">   <!-- id is voor filter -->
                         <thead>
                             <tr>        <!-- filter veld -->
                                 <td class="table-filter"><input class="table-filter" oninput="tabel_filter(this, 'table1')" placeholder="Zoeken"/></td>
@@ -96,7 +96,7 @@
     <div class="row-sv-blauw">
         <div class="col s12">
 
-            <table class="sv-kader" id="table2">   <!-- id is voor filter -->
+            <table class="sv-kader-tabel" id="table2">   <!-- id is voor filter -->
                 <thead>
                     <tr>        <!-- filter veld -->
                         <td class="table-filter"><input class="table-filter" oninput="tabel_filter(this, 'table2')" placeholder="Zoeken"/></td>

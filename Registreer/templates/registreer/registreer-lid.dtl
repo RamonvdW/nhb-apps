@@ -24,7 +24,7 @@
         <div class="col s10 offset-s1 m8 offset-m2 l6 offset-l3 xl4 offset-xl4">
 
             <!-- dialoog venster -->
-            <div class="sv-kader left-align z-depth-3">
+            <div class="sv-kader-form">
                 <div class="form-padding">
 
                     <form action="{{ url_aanmaken }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
@@ -77,7 +77,7 @@
         <!-- blauw balk met wit informatie veld -->
         <div class="row-sv-blauw">
             <div class="col s12">
-                <div class="sv-kader" style="padding:10px">
+                <div class="sv-kader">
                     <p>Je wachtwoord moet <b>9 tekens of langer</b> zijn en <b>5 verschillende</b> tekens bevatten.</p>
                     <p>De woorden<span class="notranslate"> 'wachtwoord', 'password', 'handboog' </span>en je bondsnummer mogen niet voorkomen,<br>maar hoofdletters of speciale tekens zijn niet verplicht.</p>
                     <p>Verder blokkeren we reeksen zoals<span class="notranslate"> 123456 </span>en<span class="notranslate"> QWERTY</span>.</p>
@@ -98,7 +98,7 @@
     <!-- blauw balk -->
     <div class="row-sv-blauw">
         <div class="col s12 l10 offset-l1">
-            <div class="sv-kader" style="padding:10px">
+            <div class="sv-kader">
                 <p>Gebruik het e-mailadres wat bekend is bij de bond. Tip: hier is je digitale bondspas heen gestuurd.</p>
                 <p>Om veiligheidsredenen is er geen manier om je e-mailadres op te vragen.</p>
                 <p>De secretaris van je handboogvereniging kan je verder helpen.</p>

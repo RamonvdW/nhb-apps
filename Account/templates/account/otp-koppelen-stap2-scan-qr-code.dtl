@@ -26,7 +26,7 @@
     <!-- blauw balk met het stappenplan -->
     <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2 xl6 offset-xl3">
-            <div class="sv-kader left-align" style="padding:10px">
+            <div class="sv-kader left-align">
                 <h5>Stappenplan</h5>
                 <p class="valign-wrapper"><i class="small notranslate material-symbol">looks_one</i> Installeer een applicatie op je mobiel of tablet.</p>
                 <p class="valign-wrapper sv-rood-text"><i class="small notranslate material-symbol">looks_two</i> <b>Scan een QR-code om de koppeling te maken met MijnHandboogsport.</b></p>
@@ -46,7 +46,7 @@
     <!-- blauw balk -->
     <div class="row-sv-blauw">
         <div class="col s12">
-            <div class="sv-kader left-align" style="padding:10px">
+            <div class="sv-kader left-align">
                 <p>Open de applicatie op je mobiel en dan:</p>
                 <p>1. Kies "<b>account toevoegen</b>" (bij Google Authenticator: druk op het plus icoon)</p>
                 <p>2. Kies "<b>Scan QR code</b>"</p>
@@ -59,7 +59,7 @@
         </div>
 
         <div class="col s12 l6 offset-l3">
-            <div class="sv-kader" style="padding:10px">
+            <div class="sv-kader">
                 <h5>Scan deze QR-code</h5>
                 {{ qrcode }}    <!-- geeft plaatje in svg tags, welke met display:inline getoond wordt -->
 
@@ -83,7 +83,7 @@
     <!-- blauw balk -->
     <div class="row-sv-blauw">
         <div class="col s12">
-            <div class="sv-kader left-align" style="padding:10px">
+            <div class="sv-kader left-align">
                 <p>Gebruik je een browser plug-in, klik dan op het menu van de plug-in en kies "Scan QR code". Markeer daarna met je muis de QR code op het scherm (teken een vierkant om het plaatje).</p>
             </div>
         </div>
@@ -92,7 +92,7 @@
         </div>
 
         <div class="col s12">
-            <div class="sv-kader left-align" style="padding:10px">
+            <div class="sv-kader left-align">
                 <p>Als het niet lukt om de QR-code te scannen, dan is het ook mogelijk om handmatig een koppeling te maken.</p>
                 <p>Hiervoor moet je deze code over tikken in de applicatie:</p>
                 <p class="center-align"><b>{{ otp_secret }}</b></p>

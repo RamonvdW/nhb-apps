@@ -33,7 +33,7 @@
     <!-- blauw balk met wit informatie veld -->
     <div class="row-sv-blauw">
         <div class="col s12">
-            <div class="sv-kader" style="padding:10px">
+            <div class="sv-kader">
                 <p>Je hebt laten zien dat je toegang hebt tot je e-mail.</p>
 
                 <p>
@@ -48,7 +48,7 @@
     <!-- blauwe balk met informatie in tabel-vorm:  label - info -->
     <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
-            <table class="sv-kader">
+            <table class="sv-kader-tabel">
                 <tr>
                     <th></th>
                     <td>{{ x }}</td>
@@ -89,7 +89,7 @@
         <div class="col s12">
 
             <!-- dialoog venster -->
-            <div class="sv-kader left-align z-depth-3">
+            <div class="sv-kader-form">
                 <div class="form-padding">
                     <form action="{{ url }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
                         {% csrf_token %}
@@ -153,7 +153,7 @@
 
         <!-- filter: xxx -->
         <div class="col s3" style="margin-bottom:15px">
-            <div class="sv-kader left-align" style="padding:10px">
+            <div class="sv-kader-filter">
                 <p><b>Kies een xxx type:</b></p>
                 <ul>
                     {% for filter in xxx_filters %}
@@ -178,7 +178,7 @@
     <!-- blauwe balk met informatie in een tabel -->
     <div class="row-sv-blauw">
         <div class="col s12">
-            <table class="sv-kader">
+            <table class="sv-kader-tabel">
                 <thead>
                     <tr>
                         <th>Datum</th>
@@ -212,7 +212,7 @@
     <!-- tabel met filter -->
     <script src="{% static 'overig_js/tabel_filter.js' %}"></script>
 
-    <table class="sv-kader" id="tabel_hulp">
+    <table class="sv-kader-tabel" id="tabel_hulp">
         <thead>
             <tr>        <!-- filter veld -->
                 <td colspan="3" class="table-filter">
@@ -252,7 +252,7 @@
 
 
     <!-- scherm-brede tabel met dunne blauw rand -->
-    <table class="sv-kader">
+    <table class="sv-kader-tabel">
         {% for obj in deelnemers %}
             {% if forloop.first %}
                 {% comment %}
@@ -411,8 +411,9 @@
             el.parentElement.style.display = "block";
         }
     </script>
-    <div class="fixed-action-btn" style="display: none">
-        <button class="btn-sv-rood" id="submit_knop" type="submit" disabled>
+
+    <div style="display: none">
+        <button class="btn-sv-float" id="submit_knop" type="submit" disabled>
             <i class="notranslate material-symbol left">check</i>Voorkeuren opslaan</button>
     </div>
 

@@ -528,10 +528,10 @@ def get_driver(show_browser=False):
 
 
 def database_vullen(inst):
+    # wordt aangeroepen vanuit Plein/tests/test_js_in_browser
     lid_nr = BrowserTestCase.lid_nr
     lid_nr2 = lid_nr + 5
 
-    # wordt aangeroepen vanuit Plein/tests/test_js_in_browser
     inst.account_bb = Account.objects.create(
                                 username=str(lid_nr),
                                 first_name='Boss',

@@ -25,11 +25,11 @@
     <!-- blauw balk met wit informatie veld -->
     <div class="row-sv-blauw">
         <div class="col s12 l10 offset-l1 xl8 offset-xl2">
-            <div class="sv-kader" style="padding:10px">
+            <div class="sv-kader-form">
                 <form action="{{ url_opslaan }}" method="post" onsubmit="document.getElementById('submit_knop1').disabled=true; document.getElementById('submit_knop2').disabled=true; return true;">
                     {% csrf_token %}
 
-                    <div class="sv-kader left-align" style="padding:10px">
+                    <div class="left-align">
                         <p>{{ vraag.vraag_tekst }}</p>
 
                         <ul>

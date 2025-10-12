@@ -72,7 +72,7 @@
     <!-- blauwe balk met dialoog venster -->
     <div class="row-sv-blauw">
         <div class="col s12 l10 offset-l1 xl8 offset-xl2">
-            <table class="sv-kader">
+            <table class="sv-kader-tabel">
                 <tr>
                     <th>Titel</th>
                     <td>{{ wed.titel }}</td>
@@ -115,7 +115,7 @@
     <!-- blauwe balk met informatie -->
     <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2 xl6 offset-xl3">
-            <table class="sv-kader">
+            <table class="sv-kader-tabel">
                 <thead>
                     <tr>
                         <th>Sporter</th>
@@ -152,7 +152,7 @@
     <!-- blauwe balk met informatie -->
     <div class="row-sv-blauw">
         <div class="col s12 l10 offset-l1 xl8 offset-xl2">
-            <table class="sv-kader">
+            <table class="sv-kader-tabel">
                 <tr>
                     <th>Sporter</th>
                     <td>{{ geselecteerd.sporter.lid_nr_en_volledige_naam }}</td>
@@ -233,7 +233,7 @@
 
             <div class="row-sv-blauw">
                 <div class="col s12">
-                    <table class="sv-kader">
+                    <table class="sv-kader-tabel">
                         <tr>
                             <th class="center">Wanneer</th>
                             <th class="center">Nog beschikbaar</th>

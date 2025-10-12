@@ -22,7 +22,7 @@
 
     <!-- witte rechthoek voor radiobuttons -->
     <div class="col s12 m5">
-        <div class="sv-kader left-align" style="padding:10px; margin-bottom:15px">
+        <div class="sv-kader left-align" style="margin-bottom:15px">
             <ul>
                 {% for optie, url, titel, is_actief in filters %}
                 <li>
@@ -41,7 +41,7 @@
 
     <!-- dialoog venster voor zoekterm -->
     <div class="col s12 m7">
-        <div class="sv-kader left-align z-depth-3" style="padding:50px 30px 30px 30px">
+        <div class="sv-kader-form">
             <!-- dialoog venster -->
             <form action="{{ filter_url }}" method="get" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
                 <div class="input-text">

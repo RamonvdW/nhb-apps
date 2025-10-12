@@ -21,7 +21,7 @@
     <!-- blauwe balk met informatie -->
     <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
-            <table class="sv-kader">
+            <table class="sv-kader-tabel">
                 <tr>
                     <th>Competitie</th>
                     <td>{{ comp_beschrijving }}</td>
@@ -48,7 +48,7 @@
     <!-- blauwe balk met filters -->
     <div class="row-sv-blauw">
         <div class="col s12 m6 l3 offset-l3" style="margin-bottom:15px">
-            <div class="sv-kader left-align" style="padding:10px">
+            <div class="sv-kader-filter">
                 <p><b>Kies een boog type:</b></p>
                 <ul>
                     {% for filter in boog_filters %}
@@ -71,7 +71,7 @@
         </div>
 
         <div class="col s12 m6 l3" style="margin-bottom:15px">
-            <div class="sv-kader left-align" style="padding:10px">
+            <div class="sv-kader-filter">
                 <p><b>Kies een regio:</b></p>
                 <ul>
                     {% for filter in regio_filters %}
@@ -97,7 +97,7 @@
 
     {% if heeft_deelnemers %}
 
-        <table class="sv-kader">
+        <table class="sv-kader-tabel">
             {% for indiv in uitslag %}
                 {% if forloop.first %}      <!-- alleen toevoegen als er deelnemers zijn, anders probleem met colspan=2 -->
                     {% comment %}

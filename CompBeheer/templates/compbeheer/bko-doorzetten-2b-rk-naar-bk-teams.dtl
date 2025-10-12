@@ -20,7 +20,7 @@
     <!-- blauw balk met wit informatie veld -->
     <div class="row-sv-blauw">
         <div class="col s12">
-            <div class="sv-kader" style="padding:10px">
+            <div class="sv-kader">
                 <p>Als BKO wil je de competitie doorzetten naar de volgende fase: van rayonkampioenschappen naar bondskampioenschappen.</p>
                 <p>Dit is een eenmalige maar belangrijke actie, waardoor de teams die voldoen aan de vereisten doorgezet worden naar de BKs.</p>
 
@@ -56,29 +56,25 @@
         <!-- blauw balk met wit informatie veld -->
         <div class="row-sv-blauw">
             <div class="col s12 m8 offset-m2 l6 offset-l3 xl4 offset-xl4">
-                <div class="sv-kader" style="padding:10px">
+                <table class="sv-kader-tabel">
+                    <thead>
+                        <tr>
+                            <th class="center">Rayon</th>
+                            <th class="center">Individueel</th>
+                            <th class="center">Teams</th>
+                            <th class="center">Status</th>
+                        </tr>
+                    </thead>
 
-                    <table class="sv-kader">
-                        <thead>
-                            <tr>
-                                <th class="center">Rayon</th>
-                                <th class="center">Individueel</th>
-                                <th class="center">Teams</th>
-                                <th class="center">Status</th>
-                            </tr>
-                        </thead>
-
-                        {% for obj in rk_status %}
-                            <tr>
-                                <td class="center">{{ obj.rayon_str }}</td>
-                                <td class="center{% if obj.indiv_str != 'Actief' %} green-text{% endif %}">{{ obj.indiv_str }}</td>
-                                <td class="center{% if obj.team_str != 'Actief' %} green-text{% endif %}">{{ obj.team_str }}</td>
-                                <td class="center{% if obj.status_str != 'Actief' %} green-text{% endif %}">{{ obj.status_str }}</td>
-                            </tr>
-                        {% endfor %}
-                    </table>
-
-                </div>
+                    {% for obj in rk_status %}
+                        <tr>
+                            <td class="center">{{ obj.rayon_str }}</td>
+                            <td class="center{% if obj.indiv_str != 'Actief' %} green-text{% endif %}">{{ obj.indiv_str }}</td>
+                            <td class="center{% if obj.team_str != 'Actief' %} green-text{% endif %}">{{ obj.team_str }}</td>
+                            <td class="center{% if obj.status_str != 'Actief' %} green-text{% endif %}">{{ obj.status_str }}</td>
+                        </tr>
+                    {% endfor %}
+                </table>
             </div>
         </div>
 

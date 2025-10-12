@@ -22,7 +22,7 @@
     <!-- blauwe balk met informatie label : info -->
     <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
-            <table class="sv-kader">
+            <table class="sv-kader-tabel">
                 {% for ronde_nr, ronde_ws in workshops %}
                     <tr>
                         <th></th>

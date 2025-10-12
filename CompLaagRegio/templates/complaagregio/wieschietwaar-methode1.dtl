@@ -22,7 +22,7 @@
     <!-- blauw balk met wit informatie veld -->
     <div class="row-sv-blauw">
         <div class="col s12">
-            <div class="sv-kader left-align" style="padding:10px">
+            <div class="sv-kader left-align">
                 <p>Betekenis van de nummers:</p>
                 <table>
                     {% for wedstrijd in wedstrijden %}
@@ -39,7 +39,7 @@
             <div style="margin-top:50px">
             </div>
 
-            <table class="sv-kader">
+            <table class="sv-kader-tabel">
                 <thead>
                     <tr>
                         <th>Sporter</th>

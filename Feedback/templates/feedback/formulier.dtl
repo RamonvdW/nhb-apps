@@ -21,7 +21,7 @@
 
     <!-- blauwe balk met dialoog venster -->
     <div class="row-sv-blauw">
-        <div class="col s10 offset-s1 sv-kader z-depth-3">
+        <div class="col s10 offset-s1 sv-kader-form">
 
             <!-- dialoog venster -->
             <form action="{{ formulier_url }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">

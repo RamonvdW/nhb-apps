@@ -30,7 +30,7 @@
     <!-- blauwe balk -->
     <div class="row-sv-blauw">
         <div class="col s12">
-            <table class="sv-kader">
+            <table class="sv-kader-tabel">
                 <tr>
                     <td>
                         <code id="copy_source" style="font-size: 60%">{{ emails }}</code>
@@ -52,7 +52,7 @@
     <!-- blauwe balk met informatie in een tabel -->
     <div class="row-sv-blauw">
         <div class="col s12">
-            <table class="sv-kader" id="table1">
+            <table class="sv-kader-tabel" id="table1">
                 <thead>
                     <tr>        <!-- filter veld -->
                         <td colspan="3" class="table-filter"><input class="table-filter" oninput="tabel_filter(this, 'table1')" placeholder="Zoeken"/></td>

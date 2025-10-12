@@ -25,10 +25,10 @@
 
     <!-- blauwe balk met dialoog -->
     <div class="row-sv-blauw">
-        <div class="col s10 offset-s1 l8 offset-l2 sv-kader z-depth-3">
+        <div class="col s10 offset-s1 l8 offset-l2">
 
             <!-- dialoog venster -->
-            <div style="padding:20px">
+            <div class="sv-kader">
                 <p>Met onderstaande knop wordt een nieuw tabblad geopend dat automatisch inlogt als account <b>{{ account.username }}</b>.</p>
 
                 <p>De knop moet binnen 60 seconden gebruikt worden.</p>

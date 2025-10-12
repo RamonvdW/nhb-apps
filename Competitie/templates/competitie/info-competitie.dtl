@@ -47,7 +47,7 @@
     <!-- blauwe balk met informatie in een tabel -->
     <div class="row-sv-blauw">
         <div class="col s12">
-            <table class="sv-kader">
+            <table class="sv-kader-tabel">
                 <thead>
                     <tr>
                         <th>Competitie</th>
@@ -103,7 +103,7 @@
     <!-- blauwe balk met informatie in een tabel -->
     <div class="row-sv-blauw">
         <div class="col s12 m8 offset-m2 l6 offset-l3">
-            <table class="sv-kader">
+            <table class="sv-kader-tabel">
                 <thead>
                     <tr>
                         <th>Rayon</th>
@@ -134,7 +134,7 @@
         <!-- blauwe balk met informatie label : info -->
         <div class="row-sv-blauw">
             <div class="col s12 m10 offset-m1 l8 offset-l2">
-                <table class="sv-kader">
+                <table class="sv-kader-tabel">
                     <tr>
                         <th>Naam:</th>
                         <td>{{ mijn_vereniging.naam }}</td>
@@ -175,7 +175,7 @@
     <!-- blauw balk met wit informatie veld -->
     <div class="row-sv-blauw">
         <div class="col s12">
-            <div class="sv-kader" style="padding:10px">
+            <div class="sv-kader">
 
                 <p>De competitie begint met de regiocompetities in elk van de 16 regio's.
 Vraag op je vereniging waar en wanneer de wedstrijden in jouw regio gehouden worden.</p>
@@ -215,7 +215,7 @@ Nieuwe sporters krijgen na 3 scores hun speelsterkte vastgesteld.</p>
     <!-- blauw balk met wit informatie veld -->
     <div class="row-sv-blauw">
         <div class="col s12">
-            <div class="sv-kader" style="padding:10px">
+            <div class="sv-kader">
 
                 <p>De rayonkampioenschappen worden in elk van de 4 rayons georganiseerd voor de sporters uit de 4 regio's van het rayon.</p>
                 <p>In elke wedstrijdklasse nemen 24 sporters het tegen elkaar op, bestaande uit de 4 regiokampioenen aangevuld met de 20 beste sporters uit de regiocompetities.</p>
@@ -269,7 +269,7 @@ Nieuwe sporters krijgen na 3 scores hun speelsterkte vastgesteld.</p>
     <!-- blauw balk met wit informatie veld -->
     <div class="row-sv-blauw">
         <div class="col s12">
-            <div class="sv-kader" style="padding:10px">
+            <div class="sv-kader">
                 <p>Hieronder volgen voorbeelden van de belangrijkste blazoenen voor de competities.</p>
 
                 <table>
@@ -313,11 +313,11 @@ Nieuwe sporters krijgen na 3 scores hun speelsterkte vastgesteld.</p>
     <!-- blauw balk met wit informatie veld -->
     <div class="row-sv-blauw">
         <div class="col s12">
-            <div class="sv-kader" style="padding:10px">
+            <div class="sv-kader">
                 <p>De knock-out finales (alleen voor de Indoor competitie) begint met de beste 16 sporters, waarvan de 8 winnaars doorgaan naar de kwartfinale. Uit de kwartfinale gaan de 4 winnaars door naar de halve finale. Zie het schema hier onder.</p>
                 <p>De winnaars van de halve finales gaan naar de gouden finale voor plaats 1 en 2. De overige twee sporters uit de halve finales gaan naar de bronzen finale voor plaats 3 en 4.</p>
 
-                <table class="sv-kader">
+                <table class="sv-kader-tabel">
                     <tr>
                         <td class="center"><b>Achtste finale</b><br>(16<span class="hide-on-small-only"> sporters</span>)</td>
                         <td class="center"><b>Kwart finale</b><br>(8<span class="hide-on-small-only"> sporters</span>)</td>
@@ -394,7 +394,7 @@ In de shoot-off wordt 1 pijl gesloten en beslist de scheidsrechter welke pijl he
     <!-- blauw balk met wit informatie veld -->
     <div class="row-sv-blauw">
         <div class="col s12">
-            <div class="sv-kader" style="padding:10px">
+            <div class="sv-kader">
                 <p>De bondskampioenschappen worden landelijk georganiseerd.</p>
                 <p>In elke wedstrijdklasse nemen maximaal 24 sporters het tegen elkaar op, bestaande uit de 4 rayonkampioenen aangevuld met de 20 beste sporters uit de rayonkampioenschappen.</p>
 
@@ -416,7 +416,7 @@ In de shoot-off wordt 1 pijl gesloten en beslist de scheidsrechter welke pijl he
     <!-- blauw balk met wit informatie veld -->
     <div class="row-sv-blauw">
         <div class="col s12">
-            <div class="sv-kader" style="padding:10px">
+            <div class="sv-kader">
                 <p>De winnaars in de hoogste wedstrijdklassen van het BK 25m 1pijl krijgen de titel Nederlands Kampioen.</p>
                 <p>Het BK Indoor staat los van de Nederlandse Kampioenschappen Indoor (met open inschrijving).</p>
             </div>
@@ -433,7 +433,7 @@ In de shoot-off wordt 1 pijl gesloten en beslist de scheidsrechter welke pijl he
 
     <div class="row-sv-blauw">
         <div class="col s12">
-            <div class="sv-kader" style="padding:10px">
+            <div class="sv-kader">
                 <p>Als je voor het einde van de regiocompetitie begint met schieten, dan kan je individueel altijd nog aanmelden.</p>
 
                 <table>

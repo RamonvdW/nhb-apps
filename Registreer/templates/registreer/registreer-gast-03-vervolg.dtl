@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2023 Ramon van der Winkel.
+                Copyright (c) 2023-2025 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -21,7 +21,7 @@
     <!-- blauw balk met wit informatie vlak -->
     <div class="row-sv-blauw">
         <div class="col s12 l8 offset-l2">
-            <div class="sv-kader center" style="padding:10px">
+            <div class="sv-kader center">
                 <p>We hebben meer informatie nodig om de registratie van je gast-account af te ronden.</p>
                 <p><a class="btn-sv-rood" href="{% url 'Registreer:gast-volgende-vraag' %}">Ga door</a></p>
             </div>

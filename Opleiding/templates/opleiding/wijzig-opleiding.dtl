@@ -52,7 +52,7 @@
         <div class="col s12">
 
             <!-- dialoog venster -->
-            <div class="sv-kader left-align z-depth-3">
+            <div class="sv-kader-form">
                 <div class="form-padding" style="padding-top:0">
 
                     <form id="form1" action="{{ url_opslaan }}" method="post" onsubmit="document.getElementById('submit_knop2').disabled=true; document.getElementById('submit_knop3').disabled=true; return true;">
@@ -63,7 +63,7 @@
                     <form id="form2" action="{{ url_opslaan }}" method="post" onsubmit="document.getElementById('submit_knop2').disabled=true; document.getElementById('submit_knop3').disabled=true; return true;">
                         {% csrf_token %}
 
-                        <table class="sv-kader">
+                        <table class="sv-kader-tabel">
 
                             <tr>
                                 <th style="width:25%">Korte titel</th>
@@ -229,8 +229,8 @@
 
                         </table>
 
-                        <div class="fixed-action-btn" style="display:none">
-                            <button class="btn-sv-rood" id="submit_knop3" type="submit" disabled>
+                        <div style="display:none">
+                            <button class="btn-sv-float" id="submit_knop3" type="submit" disabled>
                                 <i class="notranslate material-symbol left">check</i>Wijzigen opslaan</button>
                         </div>
 

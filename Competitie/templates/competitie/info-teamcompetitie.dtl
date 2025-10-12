@@ -47,7 +47,7 @@
     <!-- blauw balk met wit informatie veld -->
     <div class="row-sv-blauw">
         <div class="col s12 l10 offset-l1 xl8 offset-xl2">
-            <div class="sv-kader" style="padding:10px">
+            <div class="sv-kader">
                 <p>De competities Indoor en de 25m 1pijl kennen ook een teamcompetitie.<br>Deze doorlopen dezelfde 3 fases en geografische opdeling als de individuele competities: regio, RK en BK.</p>
                 <p>Je moet je inschrijven voor de individuele competitie en kan daarna in een team geplaatst worden.</p>
                 <p>De vereniging schrijft de teams in.<br>Per team worden 3 tot 4 sporters van de eigen vereniging opgesteld.</p>
@@ -68,7 +68,7 @@
     <!-- blauwe balk met informatie in tabel-vorm:  label - info -->
     <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
-            <table class="sv-kader">
+            <table class="sv-kader-tabel">
                 <thead>
                     <tr>
                         <th>Team type</th>
@@ -124,7 +124,7 @@
     <!-- blauw balk met wit informatie veld -->
     <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
-            <div class="sv-kader" style="padding:10px">
+            <div class="sv-kader">
                 <p>De teamsterkte wordt bepaald door de sporters die bij de inschrijving worden opgesteld in het team.<br>Van de 3 tot 4 sporters worden de hoogste 3 aanvangsgemiddelden gebruikt in de berekening.</p>
                 <p>Je kan je eigen aanvangsgemiddelde (AG) terug zien op Mijn pagina.<br>Dit is je gemiddelde van vorig seizoen tijdens de regiocompetitie fase.</p>
                 <p>Heb je vorig jaar niet meegedaan met de regiocompetitie? Dan moet de vereniging een geschat AG opgeven.<br>Dit heeft geen invloed op jouw klasse in de individuele competitie.</p>
@@ -144,7 +144,7 @@
     <!-- blauw balk met wit informatie veld -->
     <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
-            <div class="sv-kader" style="padding:10px">
+            <div class="sv-kader">
                 <p>De recurve teams worden verdeeld over 5 wedstrijdklassen (ERE, A, B, C, D).<br>Compound kent 2 wedstrijdklassen (ERE, A).<br>Barebow, Traditional en Longbow hebben 1 wedstrijdklasse (ERE).</p>
             </div>
         </div>
@@ -184,7 +184,7 @@
     <!-- blauw balk met wit informatie veld -->
     <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
-            <div class="sv-kader" style="padding:10px">
+            <div class="sv-kader">
                 <p>De teams schieten allemaal 7 rondes.<br>De hoogste 3 individuele scores (van de 3 of 4 sporters) opgeteld is team score voor die ronde.</p>
                 <p>In een enkele regio wordt gekeken naar de totale teamscore over 7 rondes.</p>
                 <p>In de andere regio's kunnen per ronde wedstrijdpunten verdiend worden<br>aan de hand van de ranking op teamscore of bij winst tegen een directe tegenstander.</p>
@@ -203,7 +203,7 @@
     <!-- blauw balk met wit informatie veld -->
     <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
-            <div class="sv-kader" style="padding:10px">
+            <div class="sv-kader">
                 <p>De meeste regio's hebben vaste teams waarin altijd dezelfde sporters staan opgesteld.</p>
                 <p>In een paar regio's wordt het systeem "voortschrijdend gemiddelde" gebruikt waarbij de sporters elke ronde kunnen promoveren naar een ander team van dezelfde vereniging in een hogere wedstrijdklasse, maar ook kunnen degraderen naar een lagere klasse.</p>
                 {% if toon_teams_persoonlijk %}
@@ -224,7 +224,7 @@
     <!-- blauw balk met wit informatie veld -->
     <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
-            <div class="sv-kader" style="padding:10px">
+            <div class="sv-kader">
                 <p>Als je een keer niet kan, dan kan jouw vereniging een invaller sturen.<br>Er is afgesproken dat de invaller niet sterker mag zijn dan de uitvaller.</p>
                 <p>Dit geldt tijdens de regiocompetitie, maar ook op het RK en BK.</p>
                 <p>Voor de regiocompetitie wordt de sterkte bepaald door het actuele gemiddelde van de sporter bij de start van de team ronde.</p>
@@ -254,7 +254,7 @@
     <!-- blauw balk met wit informatie veld -->
     <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
-            <div class="sv-kader" style="padding:10px">
+            <div class="sv-kader">
                 <p>Elk van de 4 rayons organiseert een eigen RK voor de teams van de verenigingen (van de 4 regio's) in het rayon.<br>Per wedstrijdklasse wordt een RK teams georganiseerd voor minimaal 4 en maximaal 8 teams.</p>
                 <p>De vereniging schrijft de teams in voor het RK.<br>De RK teams hebben een aparte ("open") inschrijving, onafhankelijk van de regiocompetitie.</p>
                 <p>Per team worden 3 sporters van de eigen vereniging opgesteld.<br>Deze sporters moeten 6 of meer scores hebben in de regiocompetitie.</p>
@@ -272,7 +272,7 @@
     <!-- blauw balk met wit informatie veld -->
     <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
-            <div class="sv-kader" style="padding:10px">
+            <div class="sv-kader">
                 <p>Per sporter wordt het gemiddelde uit de individuele regiocompetitie gebruikt als sterkte.</p>
                 <p>De sterkte van elk team wordt bepaald door de gemiddelden van de 3 sporters van het team.</p>
                 <p>Nadat de open inschrijving voor het RK is gesloten worden alle teams op sterkte verdeeld over de wedstrijdklassen.<br>Per klasse worden de 8 sterkste teams uitgenodigd.</p>
@@ -291,7 +291,7 @@
     <!-- blauw balk met wit informatie veld -->
     <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
-            <div class="sv-kader" style="padding:10px">
+            <div class="sv-kader">
                 <p>Bij aankomst en aanmelden worden eventuele invallers genoteerd.</p>
                 <p>Elk van de teams schiet &eacute;&eacute;n wedstrijd tegen elkaar, dus 7 wedstrijden bij volle bezetting.<br>Elke wedstrijd bestaat uit 5 games.</p>
                 <p>Per game en wedstrijd kunnen punten verdiend worden: 0 (verlies), 1 (gelijk) of 2 (winst).</p>
@@ -313,7 +313,7 @@
     <!-- blauw balk met wit informatie veld -->
     <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
-            <div class="sv-kader" style="padding:10px">
+            <div class="sv-kader">
                 <p>Landelijk wordt per wedstrijdklasse een BK teams georganiseerd.</p>
                 <p>Voor elke klasse worden 8 teams uitgenodigd: nummers 1 en 2 van elk rayon.<br>Van elk RK team worden dezelfde 3 sporters verwacht op het BK.</p>
                 <p>Wedstrijdverloop is gelijk aan het de rayonkampioenschappen.</p>

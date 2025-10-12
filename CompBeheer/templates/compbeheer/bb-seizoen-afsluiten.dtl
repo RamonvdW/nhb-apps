@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2022-2023 Ramon van der Winkel.
+                Copyright (c) 2022-2025 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -20,7 +20,7 @@
     <!-- blauw balk met wit informatie veld -->
     <div class="row-sv-blauw">
         <div class="col s12">
-            <div class="sv-kader left-align center" style="padding:10px">
+            <div class="sv-kader center">
 
                 <p>Je wilt seizoen {{ seizoen }} van de bondscompetities afsluiten.</p>
                 <p>Hierdoor wordt de competitie niet meer getoond en is de uitslag alleen nog te zien onder de historische competitie.</p>
@@ -55,24 +55,22 @@
     <!-- blauw balk met wit informatie veld -->
     <div class="row-sv-blauw">
         <div class="col s12 m8 offset-m2 l6 offset-l3 xl4 offset-xl4">
-            <div class="sv-kader" style="padding:10px">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Competitie</th>
-                            <th class="center">Fase</th>
-                        </tr>
-                    </thead>
+            <table class="sv-kader-tabel">
+                <thead>
+                    <tr>
+                        <th>Competitie</th>
+                        <th class="center">Fase</th>
+                    </tr>
+                </thead>
 
-                    {% for comp in comps %}
-                        <tr>
-                            <td>{{ comp.beschrijving }}</td>
-                            <td class="center {% if comp.fase_indiv == 'Q' %}green-text{% else %}red white-text{% endif %}">{{ comp.fase_indiv }}</td>
-                        </tr>
+                {% for comp in comps %}
+                    <tr>
+                        <td>{{ comp.beschrijving }}</td>
+                        <td class="center {% if comp.fase_indiv == 'Q' %}green-text{% else %}red white-text{% endif %}">{{ comp.fase_indiv }}</td>
+                    </tr>
 
-                    {% endfor %}
-                </table>
-            </div>
+                {% endfor %}
+            </table>
         </div>
     </div>
 

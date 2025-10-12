@@ -19,7 +19,7 @@
 //                  <th>Header2<th>
 
 // Uitgebreider voorbeeld:
-//   <table class="sv-kader" id="table3">
+//   <table class="sv-kader-tabel" id="table3">
 //     <thead>
 //       <tr>        <!-- filter veld -->
 //         <td colspan="2"></td>

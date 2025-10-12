@@ -46,10 +46,10 @@
             <div class="col s12">
 
                 <!-- dialoog venster -->
-                <div class="sv-kader left-align z-depth-3">
+                <div class="sv-kader-form">
                     <div class="form-padding">
 
-                        <table class="sv-kader">
+                        <table class="sv-kader-tabel">
                             <tr>
                                 <th>Klasse</th>
                                 <th>Limiet</th>
@@ -86,9 +86,9 @@
             <div class="col s12">
 
                 <!-- dialoog venster -->
-                <div class="sv-kader left-align z-depth-3">
+                <div class="sv-kader-form">
                     <div style="padding:30px">
-                        <table class="sv-kader">
+                        <table class="sv-kader-tabel">
                             <tr>
                                 <th>Klasse</th>
                                 <th>Limiet</th>
@@ -114,8 +114,8 @@
             </div>
         </div>
 
-        <div class="fixed-action-btn" style="display: none">
-            <button class="btn-sv-rood" type="submit" id="submit_knop" disabled>
+        <div style="display: none">
+            <button class="btn-sv-float" type="submit" id="submit_knop" disabled>
                 <i class="notranslate material-symbol left">check</i>Wijzigingen opslaan</button>
         </div>
     </form>

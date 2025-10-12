@@ -29,7 +29,7 @@
     <!-- blauw balk met wit informatie veld -->
     <div class="row-sv-blauw">
         <div class="col s12">
-            <div class="sv-kader" style="padding:10px">
+            <div class="sv-kader">
 
                 <div class="sv-kader shrink-wrap-5">
 
@@ -114,7 +114,7 @@
 
     {% if object_list.count %}
 
-        <table class="sv-kader">
+        <table class="sv-kader-tabel">
 
             {% for obj in object_list %}
 

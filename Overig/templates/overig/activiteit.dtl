@@ -21,7 +21,7 @@
     <!-- blauwe balk met informatie label : info -->
     <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
-            <table class="sv-kader">
+            <table class="sv-kader-tabel">
                 <tr>
                     <th>Totaal aantal accounts</th>
                     <td>{{ totaal }}</td>
@@ -57,7 +57,7 @@
     <!-- zoekformulier -->
     <!-- blauwe balk met dialoog venster -->
     <div class="row-sv-blauw">
-        <div class="col s10 offset-s1 m8 offset-m2 l6 offset-l3 xl4 offset-xl4 sv-kader z-depth-3">
+        <div class="col s10 offset-s1 m8 offset-m2 l6 offset-l3 xl4 offset-xl4 sv-kader-form">
 
             <!-- dialoog venster -->
             <div style="padding:20px" class="left-align">
@@ -164,7 +164,7 @@
     <!-- blauwe balk met informatie in een tabel -->
     <div class="row-sv-blauw">
         <div class="col s12">
-            <table class="sv-kader" id="tabel_hulp">
+            <table class="sv-kader-tabel" id="tabel_hulp">
                 <thead>
                     <tr>        <!-- filter veld -->
                         <td colspan="3" class="table-filter">
@@ -213,7 +213,7 @@
     <div class="row-sv-blauw">
         <div class="col s12">
 
-            <table class="sv-kader" id="tabel_nieuwe">
+            <table class="sv-kader-tabel" id="tabel_nieuwe">
                 <thead>
                     <tr>        <!-- filter veld -->
                         <td></td>
@@ -262,7 +262,7 @@
     <div class="row-sv-blauw">
         <div class="col s12">
 
-            <table class="sv-kader" id="tabel_activiteit">
+            <table class="sv-kader-tabel" id="tabel_activiteit">
                 <thead>
                     <tr>        <!-- filter veld -->
                         <td></td>
@@ -308,7 +308,7 @@
     <!-- blauwe balk met informatie in een tabel -->
     <div class="row-sv-blauw">
         <div class="col s12">
-            <table class="sv-kader" id="tabel_inlog">
+            <table class="sv-kader-tabel" id="tabel_inlog">
                 <thead>
                     <tr>        <!-- filter veld -->
                         <td colspan="2"></td>
@@ -357,7 +357,7 @@
         <!-- blauwe balk met informatie label : info -->
         <div class="row-sv-blauw">
             <div class="col s12">
-                <table class="sv-kader">
+                <table class="sv-kader-tabel">
                     <thead>
                         <tr class="sv-table-header">
                             <th>Leeftijdsgroep</th>

@@ -22,7 +22,7 @@
     <!-- blauw balk met het stappenplan -->
     <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2 xl6 offset-xl3">
-            <div class="sv-kader left-align" style="padding:10px">
+            <div class="sv-kader left-align">
                 <h5>Stappenplan</h5>
                 <p class="valign-wrapper sv-rood-text"><i class="small notranslate material-symbol">looks_one</i> <b>Installeer een applicatie op je mobiel of tablet.</b></p>
                 <p class="valign-wrapper"><i class="small notranslate material-symbol">looks_two</i> Scan een QR-code om de koppeling te maken met MijnHandboogsport.</p>

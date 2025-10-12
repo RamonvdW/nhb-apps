@@ -31,7 +31,7 @@
     <!-- blauw balk met wit informatie veld -->
     <div class="row-sv-blauw">
         <div class="col s12">
-            <div class="sv-kader" style="padding:10px">
+            <div class="sv-kader">
 
                 <h4 class="sv-middel-blauw-text">Waarom?</h4>
                 <p>Goede wedstrijdleiders en scheidsrechters zijn onmisbaar in de handboogsport.<br>

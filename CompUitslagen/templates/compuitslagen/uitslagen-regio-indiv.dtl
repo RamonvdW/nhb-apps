@@ -44,7 +44,7 @@
     <!-- blauwe balk met informatie -->
     <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
-            <table class="sv-kader">
+            <table class="sv-kader-tabel">
                 <tr>
                     <th>Competitie</th>
                     <td>{{ deelcomp.competitie.beschrijving }}</td>
@@ -72,7 +72,7 @@
     <div class="row-sv-blauw">
     
         <div class="col s12 m6 l3" style="margin-bottom:15px">
-            <div class="sv-kader left-align" style="padding:10px">
+            <div class="sv-kader-filter">
                 <p><b>Kies een boog type:</b></p>
                 <ul>
                     {% for filter in boog_filters %}
@@ -91,7 +91,7 @@
         </div>
 
         <div class="col s12 m6 l3" style="margin-bottom:15px">
-            <div class="sv-kader left-align" style="padding:10px">
+            <div class="sv-kader-filter">
                 <p><b>Kies een regio:</b></p>
                 <ul>
                     {% for filter in regio_filters %}
@@ -110,7 +110,7 @@
         </div>
 
         <div class="col s12 m8 offset-m2 l6">
-            <div class="sv-kader left-align" style="padding:10px">
+            <div class="sv-kader-filter">
                 <p><b>Kies een vereniging:</b></p>
                 <ul id="id_ver">
                     <li>
@@ -135,10 +135,9 @@
         </div>
     </div>
 
-    <!-- rood bordje -->
     {% if comp.aantal_scores_voor_rk_deelname != 6 %}
         <p>&nbsp;</p>
-
+        <!-- rood bordje -->
         <div class="row">
             <div style="padding:10px">
                 <div class="col s12 m8 offset-m2 sv-rood white-text z-depth-3 center">
@@ -150,7 +149,7 @@
     {% endif %}
 
     {% if heeft_deelnemers %}
-        <table class="sv-kader">
+        <table class="sv-kader-tabel">
             {% for obj in deelnemers %}
                 {% if forloop.first %}      <!-- alleen toevoegen als er deelnemers zijn, anders probleem met colspan=2 -->
                     {% comment %}

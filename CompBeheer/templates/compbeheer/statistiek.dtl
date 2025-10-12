@@ -27,7 +27,7 @@
         <!-- blauwe balk met informatie label : info -->
         <div class="row-sv-blauw">
             <div class="col s12 m10 offset-m1 l8 offset-l2 xl6 offset-xl3">
-                <table class="sv-kader">
+                <table class="sv-kader-tabel">
                     <tr>
                         <td colspan="4" class="center sv-blauw-text"><h5>Deelnemers aantallen</h5></td>
                     </tr>

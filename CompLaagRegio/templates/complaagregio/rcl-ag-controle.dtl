@@ -21,7 +21,7 @@
     <!-- blauw balk met wit informatie veld -->
     <div class="row-sv-blauw">
         <div class="col s12">
-            <div class="sv-kader" style="padding:10px">
+            <div class="sv-kader">
                 <p>Op deze pagina kan je als RCL een controle uitvoeren van de aanvangsgemiddelden voor de teamcompetitie.</p>
                 <p>De aanvangsgemiddelden van de 3 beste sporters in een team bepalen de team sterkte en de klasse waarin het team uit mag komen.</p>
                 <p>&nbsp;</p>
@@ -41,7 +41,7 @@
     <!-- blauwe balk met informatie in een tabel -->
     <div class="row-sv-blauw">
         <div class="col s12">
-            <table class="sv-kader">
+            <table class="sv-kader-tabel">
                 <thead>
                     <tr>
                         <th>Vereniging</th>
@@ -83,7 +83,7 @@
         <!-- blauwe balk met informatie in een tabel -->
         <div class="row-sv-blauw">
             <div class="col s12">
-                <table class="sv-kader">
+                <table class="sv-kader-tabel">
                     <thead>
                         <tr>
                             <th>Vereniging</th>

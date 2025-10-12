@@ -71,7 +71,7 @@
             <div class="col s12 l10 offset-l1 xl8 offset-xl2">
 
                 <!-- dialoog venster -->
-                <div class="sv-kader left-align z-depth-3">
+                <div class="sv-kader-form">
                     <div class="form-padding" style="padding-top:0">
 
                         <table>
@@ -159,7 +159,7 @@
             <!-- blauw balk met wit informatie veld -->
             <div class="row-sv-blauw">
                 <div class="col s12 l10 offset-l1 xl8 offset-xl2">
-                    <div class="sv-kader" style="padding:10px">
+                    <div class="sv-kader">
 
                         {% if ophalen_ver %}
 
@@ -200,7 +200,7 @@
             <!-- blauw balk met wit informatie veld -->
             <div class="row-sv-blauw">
                 <div class="col s12 l8 offset-l2">
-                    <div class="sv-kader" style="padding:10px">
+                    <div class="sv-kader">
 
                         {% if geen_afleveradres %}
                             <p>We hebben een adres nodig om je bestelling naartoe te sturen</p>

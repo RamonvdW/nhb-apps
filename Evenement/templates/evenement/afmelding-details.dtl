@@ -20,7 +20,7 @@
     <!-- blauwe balk met informatie label : info -->
     <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1">
-            <table class="sv-kader">
+            <table class="sv-kader-tabel">
                 <tr>
                     <th>Reserveringsnummer</th>
                     <td>{{ afmelding.reserveringsnummer }}</td>

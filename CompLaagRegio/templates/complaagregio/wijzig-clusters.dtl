@@ -20,7 +20,7 @@
     <!-- blauw balk met wit informatie veld -->
     <div class="row-sv-blauw">
         <div class="col s12">
-            <div class="sv-kader" style="padding:10px">
+            <div class="sv-kader">
                 <p>De clusters kunnen optioneel gebruikt worden om een regio op te delen in kleinere geografische gebieden.</p>
                 <p>Dit kan om praktische redenen nodig zijn in jouw regio, bijvoorbeeld in verband met onredelijke reistijden.</p>
 
@@ -55,13 +55,13 @@
 
             <!-- blauwe balk met dialoog venster -->
             <div class="row-sv-blauw">
-                <div class="col s10 offset-s1 l8 offset-l2 sv-kader z-depth-3">
+                <div class="col s10 offset-s1 l8 offset-l2 sv-kader-form">
 
                     <!-- dialoog venster -->
                     <div style="padding:20px" class="left-align">
 
                         <!-- naam van elk cluster in de regio -->
-                        <table class="sv-kader">
+                        <table class="sv-kader-tabel">
                             <thead>
                                 <tr>
                                     <th>Cluster</th>
@@ -99,12 +99,12 @@
 
                     <!-- blauwe balk met dialoog venster -->
             <div class="row-sv-blauw">
-                <div class="col s10 offset-s1 l8 offset-l2 sv-kader z-depth-3">
+                <div class="col s10 offset-s1 l8 offset-l2 sv-kader-form">
 
                     <!-- dialoog venster -->
                     <div style="padding:20px" class="left-align">
 
-                        <table class="sv-kader">
+                        <table class="sv-kader-tabel">
                             <thead>
                                 <tr>
                                     <th>Vereniging</th>
@@ -138,8 +138,8 @@
                 </div>
             </div>
 
-            <div class="fixed-action-btn" style="display:none">
-                <button class="btn-sv-rood" id="submit_knop" type="submit" disabled>
+            <div style="display:none">
+                <button class="btn-sv-float" id="submit_knop" type="submit" disabled>
                     <i class="notranslate material-symbol left">check</i>Opslaan</button>
             </div>
 
@@ -155,7 +155,7 @@
         <!-- blauw balk met wit informatie veld -->
         <div class="row-sv-blauw">
             <div class="col s12">
-                <div class="sv-kader" style="padding:10px">
+                <div class="sv-kader">
                     <p>Heb je meer clusters nodig?</p>
                     <p>Neem dan contact op met MijnHandboogsport Support om cluster(s) aan te laten maken:</p>
                     <p><code>{{ email_support }}</code></p>

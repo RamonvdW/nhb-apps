@@ -23,7 +23,7 @@
     <!-- blauw balk met wit informatie veld -->
     <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
-            <div class="sv-kader center" style="padding:10px">
+            <div class="sv-kader center">
                 <p>Je hebt laten zien dat je toegang hebt tot je e-mail.</p>
 
                 {% if show_login %}

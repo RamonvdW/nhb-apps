@@ -22,7 +22,7 @@
     <!-- blauw balk met wit informatie veld -->
     <div class="row-sv-blauw">
         <div class="col s12 m8 offset-m2 l6 offset-l3">
-            <div class="sv-kader" style="padding:10px">
+            <div class="sv-kader">
                 {% if toets.geslaagd %}
                     <h5 class="sv-rood-text">Gefeliciteerd!</h5>
                     <p>Je bent geslaagd voor de instaptoets.<br>Je had {{ toets.aantal_goed }} van de {{ toets.aantal_vragen }} vragen goed.</p>

@@ -21,7 +21,7 @@
     <!-- blauwe balk met informatie -->
     <div class="row-sv-blauw">
         <div class="col s12 l10 offset-l1 xl8 offset-xl2">
-            <div class="sv-kader" style="padding:10px">
+            <div class="sv-kader">
                 <p>We hebben een plekje voor je <b>gereserveerd</b> voor de gekozen opleiding.</p>
                 <p>Je inschrijving is pas definitief na het <b>afronden</b> van je bestelling en eventuele <b>betaling</b>.</p>
                 <br>

@@ -21,7 +21,7 @@
     <!-- blauwe balk met informatie -->
     <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2 xl6 offset-xl3">
-            <table class="sv-kader">
+            <table class="sv-kader-tabel">
                 <tr>
                     <th>Competitie</th>
                     <td>{{ comp_beschrijving }}</td>
@@ -45,7 +45,7 @@
     <!-- blauwe balk met filters -->
     <div class="row-sv-blauw">
         <div class="col s12 m6 offset-m3 l4 offset-l4 xl2 offset-xl5" style="margin-bottom:15px">
-            <div class="sv-kader left-align" style="padding:10px">
+            <div class="sv-kader-filter">
                 <p><b>Kies een boog type:</b></p>
                 <ul>
                     {% for filter in boog_filters %}
@@ -72,7 +72,7 @@
 
     {% if heeft_deelnemers %}
 
-        <table class="sv-kader">
+        <table class="sv-kader-tabel">
             {% for indiv in uitslag %}
 
                 {% if indiv.break_klasse %}

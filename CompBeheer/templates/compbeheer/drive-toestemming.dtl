@@ -20,7 +20,7 @@
     <!-- blauw balk met wit informatie veld -->
     <div class="row-sv-blauw">
         <div class="col s12 l10 offset-l1 xl6 offset-xl3">
-            <div class="sv-kader" style="padding:10px">
+            <div class="sv-kader">
                 <p>MijnHandboogsport heeft toegang nodig tot de Google Drive van een gebruiker<br>om daarin de RK/BK wedstrijdformulieren aan te maken, om later te delen met de HWL's.</p>
 
                 {% if heeft_toestemming %}

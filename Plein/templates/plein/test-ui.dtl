@@ -10,12 +10,13 @@
 
 {% block pagina %}
 
-    <table class="sv-kader" style="width:auto; margin-left:auto; margin-right:auto; border-collapse:unset; border-spacing:5px">
+    <table class="sv-kader-tabel" style="width:auto; margin-left:auto; margin-right:auto; border-collapse:unset; border-spacing:5px">
 
         <tr>
             <th class="center">Huidige MH</th>
-            <th colspan="2" class="center">Text schaduw aan</th>
-            <th colspan="2" class="center">Text schaduw uit</th>
+            <th class="center" colspan="2">Text schaduw aan</th>
+            <th class="center" colspan="2">Text schaduw uit</th>
+            <th class="center">Off-black</th>
         </tr>
 
         <!-- geel -->
@@ -37,6 +38,11 @@
             </td>
             <td style="border:1px solid red">
                 <button class="btn-sv-rood white-text" style="background-color:#FABE00; text-shadow:none">
+                    <i class="material-symbol left">{{ icon }}</i>Voorbeeld</button>
+            </td>
+
+            <td>
+                <button class="btn-sv-rood" style="background-color:#FABE00; text-shadow:none; color:rgba(0,0,0,0.85)">
                     <i class="material-symbol left">{{ icon }}</i>Voorbeeld</button>
             </td>
         </tr>
@@ -64,6 +70,11 @@
                 <button class="btn-sv-rood white-text" style="background-color:#F94137; text-shadow:none">
                     <i class="material-symbol left">{{ icon }}</i>Voorbeeld</button>
             </td>
+
+            <td>
+                <button class="btn-sv-rood" style="background-color:#F94137; text-shadow:none; color:rgba(0,0,0,0.85)">
+                    <i class="material-symbol left">{{ icon }}</i>Voorbeeld</button>
+            </td>
         </tr>
 
         <!-- lichtblauw -->
@@ -85,6 +96,11 @@
             </td>
             <td style="border:1px solid red">
                 <button class="btn-sv-rood white-text" style="background-color:#0AA0E1; text-shadow:none">
+                    <i class="material-symbol left">{{ icon }}</i>Voorbeeld</button>
+            </td>
+
+            <td>
+                <button class="btn-sv-rood" style="background-color:#0AA0E1; text-shadow:none; color:rgba(0,0,0,0.85)">
                     <i class="material-symbol left">{{ icon }}</i>Voorbeeld</button>
             </td>
         </tr>
@@ -112,9 +128,14 @@
                 <button class="btn-sv-rood white-text" style="background-color:#1C6284; text-shadow:none">
                     <i class="material-symbol left">{{ icon }}</i>Voorbeeld</button>
             </td>
+
+            <td style="border:1px solid red">
+                <button class="btn-sv-rood" style="background-color:#1C6284; text-shadow:none; color:rgba(0,0,0,0.85)">
+                    <i class="material-symbol left">{{ icon }}</i>Voorbeeld</button>
+            </td>
         </tr>
 
-        <!-- wit -->
+        <!-- wit met zwarte tekst -->
         <tr>
             <td></td>
 
@@ -132,6 +153,11 @@
             </td>
             <td style="border:1px solid red">
                 <button class="btn-sv-rood white-text" style="background-color:#fff; text-shadow:none">
+                    <i class="material-symbol left">{{ icon }}</i>Voorbeeld</button>
+            </td>
+
+            <td>
+                <button class="btn-sv-rood" style="background-color:#fff; color:rgba(0,0,0,0.85); text-shadow:none">
                     <i class="material-symbol left">{{ icon }}</i>Voorbeeld</button>
             </td>
         </tr>
@@ -156,8 +182,27 @@
                 <button class="btn-sv-rood white-text" style="background-color:#F7941E; text-shadow:none">
                     <i class="material-symbol left">{{ icon }}</i>Voorbeeld</button>
             </td>
+
+            <td>
+                <button class="btn-sv-rood" style="background-color:#F7941E; text-shadow:none; color:rgba(0,0,0,0.85)">
+                    <i class="material-symbol left">{{ icon }}</i>Voorbeeld</button>
+            </td>
         </tr>
 
+
+        <tr>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td>
+                <button class="btn-sv-rood white" style="background-color:#fff; text-shadow:none; border:2px solid red">
+                    <i class="material-symbol left">{{ icon }}</i>Voorbeeld</button>
+            </td>
+            <td>
+                <button class="btn-sv-rood white" style="background-color:#fff; text-shadow:none">
+                    <i class="material-symbol left">{{ icon }}</i>Voorbeeld</button>
+            </td>
+        </tr>
     </table>
 
 {% endblock %}

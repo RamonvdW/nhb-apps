@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2019-2023 Ramon van der Winkel.
+                Copyright (c) 2019-2025 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -30,7 +30,7 @@
 
         <!-- blauw balk met wit informatie veld -->
         <div class="col s12">
-            <div class="sv-kader" style="padding:10px; margin-bottom:50px">
+            <div class="sv-kader" style="margin-bottom:50px">
                 <p>Sporters worden in een wedstrijd ingedeeld in een <i>wedstrijdklasse</i> aan de hand van hun leeftijd, geslacht en type boog.</p>
 
                 <p>Volgens het reglement van World Archery wordt de klasse bepaald door de leeftijd die je <i>bereikt</i> in een jaar. Dit bepaalt je <i>leeftijdsklasse</i>.</p>
@@ -41,7 +41,7 @@
 
         <div class="col s12">
 
-            <table class="sv-kader">
+            <table class="sv-kader-tabel">
                 <thead>
                     <tr>
                         <th>Jaartal</th>
@@ -98,7 +98,7 @@
 
         <!-- blauw balk met wit informatie veld -->
         <div class="col s12">
-            <div class="sv-kader" style="padding:10px; margin-bottom:50px">
+            <div class="sv-kader" style="margin-bottom:50px">
                 <p>Sporters worden in een wedstrijd ingedeeld in een <i>wedstrijdklasse</i> aan de hand van hun leeftijd en schietstijl.</p>
 
                 <p>Volgens het reglement van IFAA wordt de klasse bepaald door je leeftijd op de eerste dag van de wedstrijd.</p>
@@ -111,7 +111,7 @@
 
         <div class="col s12">
 
-            <table class="sv-kader">
+            <table class="sv-kader-tabel">
                 <thead>
                     <tr>
                         <th>Jaartal</th>
@@ -148,7 +148,7 @@
 
         <!-- blauw balk met wit informatie veld -->
         <div class="col s12">
-            <div class="sv-kader" style="padding:10px; margin-bottom:50px">
+            <div class="sv-kader" style="margin-bottom:50px">
                 <p>Sporters worden in een wedstrijd ingedeeld in een <i>wedstrijdklasse</i> aan de hand van hun leeftijd en/of type boog.</p>
 
                 <p>Volgens het reglement van de KHSN wordt de klasse bepaald door de leeftijd die je <i>bereikt</i> in een jaar. Dit bepaalt je <i>leeftijdsklasse</i>.</p>
@@ -159,7 +159,7 @@
 
         <div class="col s12">
 
-            <table class="sv-kader">
+            <table class="sv-kader-tabel">
                 <thead>
                     <tr>
                         <th>Jaartal</th>
@@ -219,7 +219,7 @@
     <!-- blauw balk met wit informatie veld -->
     <div class="row-sv-blauw">
         <div class="col s12">
-            <div class="sv-kader" style="padding:10px; margin-bottom:50px">
+            <div class="sv-kader" style="margin-bottom:50px">
                 <p>De bondscompetitie is gebaseerd op de wedstrijdklassen van de KHSN en gebruikt gender-neutrale klassen. De klassen 21+, 50+ en 60+ zijn samengevoegd.</p>
                 <p>Omdat de finales van de bondscompetitie in het nieuwe jaar plaatsvinden, moet je de bondscompetitie beginnen in de klasse waarin je volgend jaar uit moet komen.</p>
             </div>
@@ -227,7 +227,7 @@
 
         <div class="col s12">
 
-            <table class="sv-kader">
+            <table class="sv-kader-tabel">
                 <thead>
                     <tr>
                         <th>Seizoen bondscompetitie</th>

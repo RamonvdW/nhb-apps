@@ -28,7 +28,7 @@
         <!-- blauw balk met wit informatie veld -->
         <div class="row-sv-blauw">
             <div class="col s12 l10 offset-l1 xl8 offset-xl2">
-                <div class="sv-kader" style="padding:10px">
+                <div class="sv-kader">
                     <p>Als HWL ben je verantwoordelijk om je teams compleet te houden.</p>
                     <p>Als iemand niet kan ("uitvalt") dan mag deze vervangen worden door een invaller.<br>Voor elke ronde moeten deze invallers opnieuw opgegeven worden.</p>
 
@@ -47,7 +47,7 @@
         <!-- blauwe balk met informatie in een tabel -->
         <div class="row-sv-blauw">
             <div class="col s12">
-                <table class="sv-kader">
+                <table class="sv-kader-tabel">
 
                     <thead>
                         <tr>
@@ -96,7 +96,7 @@
         <!-- blauwe balk met informatie in een tabel -->
         <div class="row-sv-blauw">
             <div class="col s12">
-                <table class="sv-kader">
+                <table class="sv-kader-tabel">
                     <thead>
                         <tr>
                             <th>Boog</th>

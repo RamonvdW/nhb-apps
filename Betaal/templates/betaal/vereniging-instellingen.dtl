@@ -22,13 +22,13 @@
     <!-- blauw balk met wit informatie veld -->
     <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
-            <div class="sv-kader" style="padding:10px">
+            <div class="sv-kader">
                 <p>Sporters die zich inschrijven op een wedstrijd via MijnHandboogsport kunnen direct afrekenen, bijvoorbeeld via iDEAL.</p>
                 <p>Hiervoor maakt MijnHandboogsport gebruik van de betaaldienst <b>Mollie</b>.</p>
                 <p>Met een eigen (gratis) account bij Mollie kunnen jullie inschrijfgelden van een wedstrijd innen, zonder tussenkomst van verdere partijen. Ook terugbetalingen bij afmelding worden via Mollie afgehandeld.</p>
                 <p>Het bondsbureau heeft meer informatie beschikbaar.</p>
             </div>
-            <div class="sv-kader" style="padding:10px; margin-top:30px">
+            <div class="sv-kader" style="margin-top:30px">
                 <p>Zonder Mollie koppeling krijgen sporters een e-mail met het verzoek het geld handmatig over te maken naar jullie rekening.</p>
                 <p>De betaling moet dan handmatig bevestigd worden in MijnHandboogsport.</p>
             </div>
@@ -41,7 +41,7 @@
         <div class="col s12 m10 offset-m1 l8 offset-l2">
 
             <!-- dialoog venster -->
-            <div class="sv-kader left-align z-depth-3">
+            <div class="sv-kader-form">
                 <div class="form-padding">
                     <form action="{{ url_opslaan }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
                         {% csrf_token %}
@@ -101,15 +101,12 @@
     <!-- blauw balk met wit informatie veld -->
     <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
-            <div class="sv-kader" style="padding:10px">
-                <table>
-                    <tr style="border-bottom:none">      <!-- verwijder de streep -->
-                        <th class="right-align">KvK nummer:<br>Naam:<br>Adres:<br><br>IBAN:<br>BIC:<br>E-mailadres:<br>Telefoonnummer:</th>
-                        <td>{{ ver.kvk_nummer }}<br>{{ ver.naam }}<br>{{ ver.adres_regel1 }}<br>{{ ver.adres_regel2 }}<br>{{ ver.bank_iban }}<br>{{ ver.bank_bic }}<br>{{ ver.contact_email }}<br>{{ ver.telefoonnummer }}</td>
-                    </tr>
-                </table>
-            </div>
-
+            <table class="sv-kader-tabel">
+                <tr style="border-bottom:none">      <!-- verwijder de streep -->
+                    <th class="right-align">KvK nummer:<br>Naam:<br>Adres:<br><br>IBAN:<br>BIC:<br>E-mailadres:<br>Telefoonnummer:</th>
+                    <td>{{ ver.kvk_nummer }}<br>{{ ver.naam }}<br>{{ ver.adres_regel1 }}<br>{{ ver.adres_regel2 }}<br>{{ ver.bank_iban }}<br>{{ ver.bank_bic }}<br>{{ ver.contact_email }}<br>{{ ver.telefoonnummer }}</td>
+                </tr>
+            </table>
         </div>
     </div>
 

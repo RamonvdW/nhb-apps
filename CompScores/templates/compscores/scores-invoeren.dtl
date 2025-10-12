@@ -39,7 +39,7 @@
     <!-- blauwe balk met informatie label : info -->
     <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
-            <table class="sv-kader">
+            <table class="sv-kader-tabel">
                 <tr>
                     <th>Competitie</th>
                     <td>{{ deelcomp.competitie.beschrijving }}</td>
@@ -81,9 +81,9 @@
     <div class="row-sv-blauw">
         <div class="col s12">
 
-            <div class="sv-kader left-align z-depth-3">
+            <div class="sv-kader-form">
 
-                <table class="sv-kader" id="table1">
+                <table class="sv-kader-tabel" id="table1">
 
                     <thead>
                         <tr>        <!-- filter veld -->
@@ -153,7 +153,7 @@
         <!-- Hieronder: zoekveld voor ander lid (lid_nr >> naam + vereniging) -->
 
         <div class="col s12 m10 offset-m1" style="margin-top:50px">
-            <div class="sv-kader left-align z-depth-3 center">
+            <div class="sv-kader-form center">
 
                 <!-- dialoog venster -->
                 <h5 style="padding:30px">Zoeken en toevoegen</h5>
@@ -225,9 +225,9 @@
 
     </div>
 
-    <div class="fixed-action-btn">
+    <div>
         <!-- click event binding is at eof -->
-        <button class="btn-sv-rood" id="id_opslaan_knop">
+        <button class="btn-sv-float" id="id_opslaan_knop">
             <i class="notranslate material-symbol left">check</i>Opslaan</button>
     </div>
 

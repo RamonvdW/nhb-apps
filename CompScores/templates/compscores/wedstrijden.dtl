@@ -21,7 +21,7 @@
 
     <div class="row-sv-blauw">
         <div class="col s12">
-            <table class="sv-kader">
+            <table class="sv-kader-tabel">
 
                 {% if geen_wedstrijden %}
 

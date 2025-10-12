@@ -22,7 +22,7 @@
         <!-- blauw balk met wit informatie veld -->
         <div class="row-sv-blauw">
             <div class="col s12">
-                <div class="sv-kader" style="padding:10px">
+                <div class="sv-kader">
                     <p>Op deze pagina kan je de lijst met kandidaat-deelnemers voor jouw RK's inzien en bewerken.</p>
                     <p>Dit is pas mogelijk als alle onderliggende regiocompetities afgesloten zijn. De status hiervan kan je hieronder zien.</p>
                     <p>Tot dat moment kan je de kandidaten voor elke wedstrijdklassen zien op deze pagina:</p>
@@ -45,7 +45,7 @@
         <!-- blauwe balk met informatie in een tabel -->
         <div class="row-sv-blauw">
             <div class="col s12 m8 offset-m2 l6 offset-l3">
-                <table class="sv-kader">
+                <table class="sv-kader-tabel">
                     <thead>
                         <tr>
                             <th class="center">Rayon</th>
@@ -78,7 +78,7 @@
         <!-- blauw balk met wit informatie veld -->
         <div class="row-sv-blauw">
             <div class="col s12 m8 offset-m2 l6 offset-l3">
-                <table class="sv-kader">
+                <table class="sv-kader-tabel">
                     <tr>
                         <td colspan="3" class="center">Deelname-status voor de sporters</td>
                     </tr>
@@ -137,7 +137,7 @@
         <div class="row-sv-blauw">
             <div class="col s12">
 
-                <table class="sv-kader">
+                <table class="sv-kader-tabel">
 
                     {% for obj in deelnemers %}
 

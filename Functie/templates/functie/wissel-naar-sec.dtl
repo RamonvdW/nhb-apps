@@ -19,7 +19,7 @@
     </div>
 
     <div class="sv-blauw-hoofd" style="padding:3px">
-        <table class="sv-kader" id="table1">
+        <table class="sv-kader-tabel" id="table1">
             <thead>
                 <tr>        <!-- filter veld -->
                     <td colspan="2"></td>       <!-- rayon, regio -->

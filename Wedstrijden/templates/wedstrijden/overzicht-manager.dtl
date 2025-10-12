@@ -36,7 +36,7 @@
 
         <!-- filter: status -->
         <div class="col s4 offset-s4" style="margin-bottom:15px">
-            <div class="sv-kader left-align" style="padding:10px">
+            <div class="sv-kader-filter">
                 <p><b>Kies een status:</b></p>
                 <ul id="id_status">
                     {% for obj in status_filters %}
@@ -59,7 +59,7 @@
     <!-- blauwe balk met informatie in een tabel -->
     <div class="row-sv-blauw">
         <div class="col s12">
-            <table class="sv-kader" id="table1">
+            <table class="sv-kader-tabel" id="table1">
                 <thead>
                     <tr>        <!-- filter veld -->
                         <td></td>

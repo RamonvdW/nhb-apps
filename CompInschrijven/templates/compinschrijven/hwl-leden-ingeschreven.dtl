@@ -37,13 +37,13 @@
 
             {% if mag_afmelden %}
                 <!-- dialoog venster -->
-                <div class="sv-kader left-align z-depth-3">
+                <div class="sv-kader-form">
                     <div class="form-padding">
                         <form action="{{ afmelden_url }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
                         {% csrf_token %}
             {% endif %}
 
-                        <table class="sv-kader" id="table1">
+                        <table class="sv-kader-tabel" id="table1">
                             <thead>
                                 <tr>        <!-- filter veld -->
                                     {% if mag_afmelden %}
@@ -134,9 +134,7 @@
                             </table>
 
                             {% if mag_afmelden %}
-                                <div class="fixed-action-btn">
-                                    <input class="btn-sv-rood" id="submit_knop" type="submit" value="Geselecteerde leden afmelden">
-                                </div>
+                                <input class="btn-sv-float" id="submit_knop" type="submit" value="Geselecteerde leden afmelden">
                             {% endif %}
 
                 {% if mag_afmelden %}

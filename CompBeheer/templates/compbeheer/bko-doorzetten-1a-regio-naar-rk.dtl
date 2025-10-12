@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2023 Ramon van der Winkel.
+                Copyright (c) 2020-2025 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -20,7 +20,7 @@
     <!-- blauw balk met wit informatie veld -->
     <div class="row-sv-blauw">
         <div class="col s12">
-            <div class="sv-kader left-align" style="padding:10px">
+            <div class="sv-kader left-align">
 
                 <p>Als BKO wil je de competitie doorzetten naar de volgende fase: van regiocompetitie naar rayonkampioenschappen.</p>
                 <p>Dit is een eenmalige maar belangrijke actie, waardoor:</p>
@@ -57,10 +57,10 @@
     <!-- blauw balk met wit informatie veld -->
     <div class="row-sv-blauw">
         <div class="col s12 m8 offset-m2 l6 offset-l3 xl4 offset-xl4">
-            <div class="sv-kader" style="padding:10px">
+            <div class="sv-kader">
 
                 <h5>Status regiocompetities</h5>
-                <table class="sv-kader">
+                <table class="sv-kader-tabel">
                     <thead>
                         <tr>
                             <th class="center">Rayon</th>

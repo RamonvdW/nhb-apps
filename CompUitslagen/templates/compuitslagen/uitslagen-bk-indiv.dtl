@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2024 Ramon van der Winkel.
+                Copyright (c) 2020-2025 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -34,7 +34,7 @@
     <!-- blauwe balk met informatie -->
     <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
-            <table class="sv-kader">
+            <table class="sv-kader-tabel">
                 <tr>
                     <th>Competitie</th>
                     <td>{{ comp.beschrijving }}</td>
@@ -48,6 +48,7 @@
     </div>
 
     {% if comp.bk_is_afgelast %}
+        <!-- rood bordje -->
         <div class="row">
             <div style="padding:10px">
                 <div class="col s12 m8 offset-m2 sv-rood white-text z-depth-3 center">
@@ -68,7 +69,7 @@
     <!-- blauwe balk met filters -->
     <div class="row-sv-blauw">
         <div class="col s12 m6 offset-m3 l4 offset-l4" style="margin-bottom:15px">
-            <div class="sv-kader left-align" style="padding:10px">
+            <div class="sv-kader-filter">
                 <p><b>Kies een boog type:</b></p>
                 <ul id="id_boog">
                     {% for boog in boog_filters %}
@@ -125,7 +126,7 @@
             </div>
         {% endif %}
 
-        <table class="sv-kader">
+        <table class="sv-kader-tabel">
             {% for obj in deelnemers %}
 
                 {% if obj.break_klasse %}

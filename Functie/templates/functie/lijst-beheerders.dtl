@@ -38,7 +38,7 @@
     <div class="row-sv-blauw">
         <div class="col s12">
 
-            <table class="sv-kader" id="table1">
+            <table class="sv-kader-tabel" id="table1">
                 <thead>
                     <tr>        <!-- filter rij -->
                         <td colspan="2" class="table-filter">

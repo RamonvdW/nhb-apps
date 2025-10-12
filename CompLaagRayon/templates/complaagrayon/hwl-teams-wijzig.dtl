@@ -22,13 +22,13 @@
         <div class="col s12">
 
             <!-- dialoog venster -->
-            <div class="sv-kader left-align z-depth-3">
+            <div class="sv-kader-form">
                 <div class="form-padding">
 
                     <form action="{{ url_opslaan }}" method="post" onsubmit="document.getElementById('submit_knop1').disabled=true; return true;">
                         {% csrf_token %}
 
-                        <table class="sv-kader">
+                        <table class="sv-kader-tabel">
 
                             <tr>
                                 <td>Vereniging</td>

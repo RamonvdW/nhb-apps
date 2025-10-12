@@ -21,7 +21,7 @@
     <!-- blauwe balk met informatie label : info -->
     <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
-            <table class="sv-kader">
+            <table class="sv-kader-tabel">
                 <tr>
                     <th>Competitie</th>
                     <td>{{ deelcomp.competitie.beschrijving }}</td>
@@ -54,12 +54,12 @@
             <div class="col s12">
 
                 <!-- dialoog venster -->
-                <div class="sv-kader left-align z-depth-3">
+                <div class="sv-kader-form">
                     <div class="form-padding">
                         <form action="{{ url_opslaan }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
                             {% csrf_token %}
 
-                            <table class="sv-kader">
+                            <table class="sv-kader-tabel">
                                 {% for regel in alle_regels %}
                                     {% if regel.poule_str %}
                                         <tr>
@@ -142,6 +142,7 @@
                                     {% empty %}
                                         <tr>
                                             <td colspan="3">
+                                                <!-- rood bordje -->
                                                 <div style="padding:10px 30px 10px 30px">
                                                     <div class="sv-rood white-text z-depth-3 center" style="padding:10px">
                                                         <b>LET OP: dit team heeft 0 sporters; vraag de HWL dit te corrigeren</b>
@@ -153,10 +154,8 @@
                                 {% endfor %}
                             </table>
 
-                            <div class="fixed-action-btn">
-                                <button class="btn-sv-rood" id="submit_knop" type="submit">
-                                    <i class="notranslate material-symbol left">check</i>Opslaan</button>
-                            </div>
+                            <button class="btn-sv-float" id="submit_knop" type="submit">
+                                <i class="notranslate material-symbol left">check</i>Opslaan</button>
                         </form>
                     </div>
                 </div>

@@ -41,7 +41,7 @@
 
     <!-- blauwe balk met dialoog venster -->
     <div class="row-sv-blauw">
-        <div class="col s10 offset-s1 m12 sv-kader{% if url_opslaan %} z-depth-3{% endif %}">
+        <div class="col s10 offset-s1 m12 {% if url_opslaan %}sv-kader-form{% else %}sv-kader{% endif %}">
 
             <!-- dialoog venster -->
             <div class="left-align">
@@ -51,7 +51,7 @@
                         {% csrf_token %}
                 {% endif %}
 
-                        <table class="sv-kader">
+                        <table class="sv-kader-tabel">
                             <tr>
                                 <th>Korte naam van de locatie</th>
                                 <td>
@@ -142,8 +142,8 @@
                         </table>
 
                         {% if not readonly %}
-                            <div class="fixed-action-btn" style="display: none">
-                                <button class="btn-sv-rood" id="submit_knop1" type="submit" disabled>
+                            <div style="display: none">
+                                <button class="btn-sv-float" id="submit_knop1" type="submit" disabled>
                                     <i class="notranslate material-symbol left">check</i>Wijzigingen opslaan</button>
                             </div>
                         {% endif %}

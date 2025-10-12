@@ -21,7 +21,7 @@
     <!-- blauwe balk met informatie in een tabel -->
     <div class="row-sv-blauw">
         <div class="col s12">
-            <table class="sv-kader">
+            <table class="sv-kader-tabel">
                 <tr>
                     <td colspan="3" class="center">
                         <h6>Bestelde producten</h6>
@@ -152,7 +152,7 @@
         </div>
 
         <div class="col s12 l8 offset-l2" style="margin-top:30px">
-            <table class="sv-kader">
+            <table class="sv-kader-tabel">
                 <tr>
                     <td colspan="4" class="center">
                         <h6>Verkoper</h6>
@@ -210,7 +210,7 @@
         <!-- blauwe balk met informatie -->
         <div class="row-sv-blauw">
             <div class="col s12">
-                <table class="sv-kader">
+                <table class="sv-kader-tabel">
                     <thead>
                         <tr>
                             <th>Wanneer</th>

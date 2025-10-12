@@ -21,7 +21,7 @@
     <!-- blauw balk met wit informatie veld -->
     <div class="row-sv-blauw">
         <div class="col s12">
-            <div class="sv-kader" style="padding:10px">
+            <div class="sv-kader">
                 {% if rk_bk_klassen_vastgesteld %}
                     <p>De inschrijving voor het RK teams is gesloten.</p>
                 {% else %}
@@ -44,7 +44,7 @@
     <!-- blauwe balk met informatie in een tabel -->
     <div class="row-sv-blauw">
         <div class="col s12">
-            <table class="sv-kader">
+            <table class="sv-kader-tabel">
 
                 <thead>
                     <tr>

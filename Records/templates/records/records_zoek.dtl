@@ -21,7 +21,7 @@
 
     <!-- blauwe balk met dialoog venster -->
     <div class="row-sv-blauw">
-        <div class="col s10 offset-s1 m12 l8 offset-l2 xl6 offset-xl3 sv-kader z-depth-3">
+        <div class="col s10 offset-s1 m12 l8 offset-l2 xl6 offset-xl3 sv-kader-form">
 
             <!-- dialoog venster -->
             <div style="padding:20px" class="left-align">
@@ -64,7 +64,7 @@
         <!-- blauwe balk met informatie in een tabel -->
         <div class="row-sv-blauw">
             <div class="col s12">
-                <table class="sv-kader">
+                <table class="sv-kader-tabel">
                     <thead>
                         <tr>
                             <th>Sporter</th>

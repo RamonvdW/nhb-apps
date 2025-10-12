@@ -55,7 +55,7 @@
     <!-- blauw balk met wit informatie veld -->
     <div class="row-sv-blauw">
         <div class="col s12 m8 offset-m2 l6 offset-l3">
-            <table class="sv-kader">
+            <table class="sv-kader-tabel">
                 <tr>
                     <td colspan="3" class="center">Deelname-status voor de teams</td>
                 </tr>
@@ -107,7 +107,7 @@
     <div class="row-sv-blauw">
         <div class="col s12">
 
-            <table class="sv-kader" id="table1">
+            <table class="sv-kader-tabel" id="table1">
 
                 <thead>
                     <tr>        <!-- filter veld -->

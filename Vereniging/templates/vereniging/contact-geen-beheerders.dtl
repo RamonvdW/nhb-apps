@@ -31,7 +31,7 @@
     <!-- blauwe balk met informatie in een tabel -->
     <div class="row-sv-blauw">
         <div class="col s12">
-            <table class="sv-kader">
+            <table class="sv-kader-tabel">
                 <tr>
                     <td>{% for ver in geen_hwl %}{{ ver.nr_geen_hwl }}<br>{% endfor %}</td>
                     <td>{% for ver in geen_hwl %}{{ ver }}<br>{% endfor %}</td>
@@ -53,7 +53,7 @@
     <!-- blauwe balk met informatie in een tabel -->
     <div class="row-sv-blauw">
         <div class="col s12">
-            <table class="sv-kader">
+            <table class="sv-kader-tabel">
                 <tr>
                     <td>{% for ver in geen_sec %}{{ ver.nr_geen_sec }}<br>{% endfor %}</td>
                     <td>{% for ver in geen_sec %}{{ ver }}<br>{% endfor %}</td>

@@ -38,7 +38,7 @@
     <!-- blauw balk met wit informatie veld -->
     <div class="row-sv-blauw">
         <div class="col s12 l10 offset-l1 xl8 offset-xl2">
-            <div class="sv-kader" style="padding:10px">
+            <div class="sv-kader">
                 <p>Het bondsbureau kan je helpen met problemen met de registratie.</p>
                 <p>Neem daarvoor contact met ons op via <code>{{ email_support }}</code></p>
             </div>

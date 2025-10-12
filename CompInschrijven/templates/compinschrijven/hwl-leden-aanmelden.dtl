@@ -20,7 +20,7 @@
     <!-- blauw balk met wit informatie veld -->
     <div class="row-sv-blauw">
         <div class="col s12">
-            <div class="sv-kader" style="padding:10px">
+            <div class="sv-kader">
                 {% if mag_aanmelden %}
                     <p>Als hoofdwedstrijdleider kan je via deze pagina leden van vereniging [{{ ver.ver_nr }}] {{ ver.naam }} te {{ ver.plaats }} aanmelden voor de <b>{{ comp.beschrijving }}</b>.</p>
 
@@ -51,9 +51,8 @@
         <div class="col s12">
 
             <!-- dialoog venster -->
-            <div class="sv-kader left-align z-depth-3">
-                <div class="form-padding">
-                    <table class="sv-kader">
+            <div class="sv-kader-form">
+                    <table>
                         <tr>
                             <td><b>Voorkeuren voor aanmelden in bulk</b></td>
                         </tr>
@@ -150,7 +149,7 @@
                         <br>
                         <h5 class="center sv-blauw-text">Jeugd</h5>
 
-                        <table class="sv-kader" id="table1">
+                        <table class="sv-kader-tabel" id="table1">
                             <thead>
                                 <tr>        <!-- filter veld -->
                                     <td></td>
@@ -209,7 +208,7 @@
                     <br>
                     <h5 class="center sv-blauw-text">Senioren</h5>
 
-                    <table class="sv-kader" id="table2">
+                    <table class="sv-kader-tabel" id="table2">
                         <thead>
                             <tr>        <!-- filter veld -->
                                 <td></td>
@@ -258,12 +257,9 @@
                     </table>
 
                     {% if mag_aanmelden %}
-                        <div class="fixed-action-btn">
-                            <input class="btn-sv-rood" id="submit_knop" type="submit" value="Geselecteerde sporters aanmelden">
-                        </div>
+                        <input class="btn-sv-float" id="submit_knop" type="submit" value="Geselecteerde sporters aanmelden">
                     {% endif %}
 
-                </div>
             </div>
         </div>
     </div>

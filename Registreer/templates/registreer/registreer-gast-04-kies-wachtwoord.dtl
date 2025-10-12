@@ -19,7 +19,7 @@
 
     <!-- blauwe balk met dialoog venster -->
     <div class="row-sv-blauw">
-        <div class="col s10 offset-s1 m8 offset-m2 l6 offset-l3 xl4 offset-xl4 sv-kader z-depth-3">
+        <div class="col s10 offset-s1 m8 offset-m2 l6 offset-l3 xl4 offset-xl4 sv-kader-form">
 
             <!-- dialoog venster -->
             <div style="padding:20px" class="left-align">
@@ -61,7 +61,7 @@
         <!-- blauw balk met wit informatie veld -->
         <div class="row-sv-blauw">
             <div class="col s12">
-                <div class="sv-kader" style="padding:10px">
+                <div class="sv-kader">
                     <p>Je wachtwoord moet <b>9 tekens of langer</b> zijn en <b>5 verschillende</b> tekens bevatten.</p>
                     <p>De woorden<span class="notranslate"> 'wachtwoord', 'password', 'handboog' </span>en je bondsnummer mogen niet voorkomen,<br>maar hoofdletters of speciale tekens zijn niet verplicht.</p>
                     <p>Verder blokkeren we reeksen zoals<span class="notranslate"> 123456 </span>en<span class="notranslate"> QWERTY</span>.</p>

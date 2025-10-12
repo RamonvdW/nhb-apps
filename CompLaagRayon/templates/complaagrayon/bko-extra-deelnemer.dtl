@@ -21,7 +21,7 @@
     <!-- blauwe balk met informatie in een tabel -->
     <div class="row-sv-blauw">
         <div class="col s12 xl10 offset-xl1">
-            <table class="sv-kader">
+            <table class="sv-kader-tabel">
                 {% for obj in kandidaten %}
                     {% if obj.break_klasse %}
 

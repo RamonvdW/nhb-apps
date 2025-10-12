@@ -22,7 +22,7 @@
 
     <!-- blauwe balk met informatie -->
     <div class="row-sv-blauw">
-        <div class="col s10 offset-s1 l8 offset-l2 sv-kader z-depth-3">
+        <div class="col s10 offset-s1 l8 offset-l2 sv-kader-form">
 
             <!-- dialoog venster -->
             <div style="margin:0 30px 30px 30px">
@@ -33,7 +33,7 @@
                         <input type="hidden" name="sporter_pk" value="{{ sporter_pk }}">
                     {% endif %}
 
-                    <table class="sv-kader">
+                    <table class="sv-kader-tabel">
 
                     {% if bogen_wa %}
                         {% if not is_hwl %}
@@ -324,8 +324,8 @@
 
                     </table>
 
-                    <div class="fixed-action-btn" style="display: none">
-                        <button class="btn-sv-rood" id="submit_knop" type="submit" disabled>
+                    <div style="display: none">
+                        <button class="btn-sv-float" id="submit_knop" type="submit" disabled>
                             <i class="notranslate material-symbol left">check</i>Voorkeuren opslaan</button>
                     </div>
 
@@ -342,7 +342,7 @@
         <!-- blauw balk met wit informatie veld -->
         <div class="row-sv-blauw">
             <div class="col s12 l10 offset-l1">
-                <div class="sv-kader" style="padding:10px">
+                <div class="sv-kader">
                     <h6 class="center-align">Uitleg 'Voorkeur voor eigen blazoen'</h6>
                     <p>Deze voorkeur geeft aan dat je liever op een eigen Dutch Target 3-spot of een 60cm 4-spot wilt schieten in plaats van op een 40cm / 60cm blazoen waar tot 4 sporters op schieten.</p>
                     <p>Als je het vakje aanvinkt zal, waar mogelijk, jouw voorkeur worden doorgegeven aan de wedstrijdleider.</p>

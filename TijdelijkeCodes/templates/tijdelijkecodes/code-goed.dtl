@@ -22,7 +22,7 @@
     <!-- blauw balk -->
     <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
-            <div class="sv-kader" style="padding:10px">
+            <div class="sv-kader">
                 <p>Je hebt verzocht om {{ activiteit }}.</p>
                 <p>Als dit klopt, druk dan op onderstaande knop.</p>
 

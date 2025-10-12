@@ -27,66 +27,62 @@
     <!-- blauwe balk met informatie label : info -->
     <div class="row-sv-blauw">
         <div class="col s12">
-            <div class="sv-kader" style="padding:0 15px 0 15px">
-                <table class="sv-kader">
-                    <thead>
-                        <tr>
-                            <th class="center-align">Jaar</th>
-                            <th class="center-align">Maanden</th>
-                            <th class="right-align">Omzet</th>
-                            <th class="center">Verkopers</th>
-                            <th class="center">Verkopen</th>
-                            {% for code in codes %}
-                                <th class="center">{{ code }}</th>
-                            {% endfor %}
-                        </tr>
-                    </thead>
+            <table class="sv-kader-tabel">
+                <thead>
+                    <tr>
+                        <th class="center-align">Jaar</th>
+                        <th class="center-align">Maanden</th>
+                        <th class="right-align">Omzet</th>
+                        <th class="center">Verkopers</th>
+                        <th class="center">Verkopen</th>
+                        {% for code in codes %}
+                            <th class="center">{{ code }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
 
-                    {% for jaar, maanden, aantal, omzet, aantal_vers, aantallen in per_jaar %}
-                        <tr>
-                            <td class="center-align">{{ jaar }}</td>
-                            <td class="center-align">{{ maanden }}</td>
-                            <td class="right-align">&euro;&nbsp;{{ omzet }}</td>
-                            <td class="center">{{ aantal_vers }}</td>
+                {% for jaar, maanden, aantal, omzet, aantal_vers, aantallen in per_jaar %}
+                    <tr>
+                        <td class="center-align">{{ jaar }}</td>
+                        <td class="center-align">{{ maanden }}</td>
+                        <td class="right-align">&euro;&nbsp;{{ omzet }}</td>
+                        <td class="center">{{ aantal_vers }}</td>
+                        <td class="center">{{ aantal }}</td>
+                        {% for aantal in aantallen %}
                             <td class="center">{{ aantal }}</td>
-                            {% for aantal in aantallen %}
-                                <td class="center">{{ aantal }}</td>
-                            {% endfor %}
-                        </tr>
-                    {% endfor %}
-                </table>
-            </div>
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+            </table>
         </div>
 
         <div class="col s12 m10 offset-m1 l8 offset-l2" style="margin-top:30px">
-            <div class="sv-kader" style="padding:0 15px 0 15px">
-                <table class="sv-kader">
-                    <thead>
-                        <tr>
-                            <th class="right-align">Periode</th>
-                            <th class="right-align">Omzet</th>
-                            <th class="center">Aantal verkopers</th>
-                            <th class="center">Aantal verkopen</th>
-                        </tr>
-                    </thead>
-
-                    {% for datum, aantal, omzet, vers in lijst %}
-                        <tr>
-                            <td class="right-align">{{ datum|date:"F Y" }}</td>
-                            <td class="right-align">&euro;&nbsp;{{ omzet }}</td>
-                            <td class="center">{{ vers }}</td>
-                            <td class="center">{{ aantal }}</td>
-                        </tr>
-                    {% endfor %}
-
+            <table class="sv-kader-tabel">
+                <thead>
                     <tr>
-                        <th class="right-align">Totalen:</th>
-                        <th class="right-align">&euro;&nbsp;{{ totaal_omzet }}</th>
-                        <th class="center">{{ totaal_aantal }}</th>
-                        <th class="center">{{ totaal_vers }}</th>
+                        <th class="right-align">Periode</th>
+                        <th class="right-align">Omzet</th>
+                        <th class="center">Aantal verkopers</th>
+                        <th class="center">Aantal verkopen</th>
                     </tr>
-                </table>
-            </div>
+                </thead>
+
+                {% for datum, aantal, omzet, vers in lijst %}
+                    <tr>
+                        <td class="right-align">{{ datum|date:"F Y" }}</td>
+                        <td class="right-align">&euro;&nbsp;{{ omzet }}</td>
+                        <td class="center">{{ vers }}</td>
+                        <td class="center">{{ aantal }}</td>
+                    </tr>
+                {% endfor %}
+
+                <tr>
+                    <th class="right-align">Totalen:</th>
+                    <th class="right-align">&euro;&nbsp;{{ totaal_omzet }}</th>
+                    <th class="center">{{ totaal_aantal }}</th>
+                    <th class="center">{{ totaal_vers }}</th>
+                </tr>
+            </table>
         </div>
     </div>
 

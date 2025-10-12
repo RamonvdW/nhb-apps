@@ -21,7 +21,7 @@
     <!-- blauw balk met wit informatie veld -->
     <div class="row-sv-blauw">
         <div class="col s12 m8 offset-m2 l6 offset-l3">
-            <div class="sv-kader" style="padding:10px">
+            <div class="sv-kader">
                 <p>De instaptoets is een online test van {{ aantal_vragen }} meerkeuzevragen en duurt ongeveer {{ aantal_minuten }} minuten om te maken. Beantwoordt je {{ eis_percentage }}% van de vragen goed, dan ben je geslaagd voor deze toets.</p>
 
                 {% if laat_starten %}

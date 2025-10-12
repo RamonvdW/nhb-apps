@@ -23,7 +23,7 @@
         <div class="col s12">
 
             <!-- dialoog venster -->
-            <div class="sv-kader left-align z-depth-3">
+            <div class="sv-kader-form">
                 <div class="form-padding">
 
                     <form action="{{ bevestig_url }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
@@ -32,7 +32,7 @@
                         <input type="hidden" name="sporterboog_pk" value="{{ sporterboog.pk }}">
                         <input type="hidden" name="deelcomp_pk" value="{{ deelcomp.pk }}">
 
-                        <table class="sv-kader">
+                        <table class="sv-kader-tabel">
                             <tr>
                                 <td>Je wilt deelnemen met je <b>{{ sporterboog.boogtype.beschrijving }}</b> boog.</td>
                             </tr>

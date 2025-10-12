@@ -26,7 +26,7 @@
     <!-- blauw balk met het stappenplan -->
     <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2 xl6 offset-xl3">
-            <div class="sv-kader left-align" style="padding:10px">
+            <div class="sv-kader left-align">
                 <h5>Stappenplan</h5>
                 <p class="valign-wrapper"><i class="small notranslate material-symbol">looks_one</i> Installeer een applicatie op je mobiel of tablet.</p>
                 <p class="valign-wrapper"><i class="small notranslate material-symbol">looks_two</i> Scan een QR-code om de koppeling te maken met MijnHandboogsport.</p>
@@ -45,10 +45,10 @@
 
     <!-- blauwe balk controle dialoog -->
     <div class="row-sv-blauw">
-        <div class="col s10 offset-s1 m8 offset-m2 l6 offset-l3 xl4 offset-xl4 sv-kader z-depth-3">
+        <div class="col s10 offset-s1 m8 offset-m2 l6 offset-l3 xl4 offset-xl4">
 
             <!-- dialoog venster -->
-            <div style="padding:20px">
+            <div class="sv-kader-form">
                 <p class="left-align">Voer de 6 cijfers in om de koppeling te voltooien</p>
 
                 <form action="{{ url_controleer }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">

@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2019-2023 Ramon van der Winkel.
+                Copyright (c) 2019-2025 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -23,37 +23,34 @@
         <div class="col s12 l10 offset-l1 xl8 offset-xl2">
 
             <!-- dialoog venster -->
-            <div class="sv-kader left-align z-depth-3">
-                <div style="padding:15px 30px 5px 30px">
+            <div class="sv-kader-form">
+                <div class="row">
+                    <div class="col s12">
+                        <h5 class="center sv-rood white-text" style="padding:10px 0 10px 0">Voorwaarden voor het hanteren van persoonsgegevens</h5>
+                        <form action="{% url 'Functie:vhpg-acceptatie' %}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
+                            {% csrf_token %}
 
-                    <div class="row">
-                        <div class="col s12">
-                            <h5 class="center sv-rood white-text" style="padding:10px 0 10px 0">Voorwaarden voor het hanteren van persoonsgegevens</h5>
-                            <form action="{% url 'Functie:vhpg-acceptatie' %}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
-                                {% csrf_token %}
+                            {% include 'functie/vhpg-tekst.dtl' %}
 
-                                {% include 'functie/vhpg-tekst.dtl' %}
-
-                                <div class="row">
-                                    <div class="col s12 center-align">
-                                        <label for="{{ form.accepteert.id_for_label }}">
-                                            <input type="checkbox" class="filled-in" id="id_accepteert" name="accepteert" />
-                                            <span class="black-text">Ik accepteer bovenstaande {% if form.accepteert.errors %}<span class="sv-rood-text"> (verplicht)</span>{% endif %}</span>
-                                        </label>
-                                    </div>
+                            <div class="row">
+                                <div class="col s12 center-align">
+                                    <label for="{{ form.accepteert.id_for_label }}">
+                                        <input type="checkbox" class="filled-in" id="id_accepteert" name="accepteert" />
+                                        <span class="black-text">Ik accepteer bovenstaande {% if form.accepteert.errors %}<span class="sv-rood-text"> (verplicht)</span>{% endif %}</span>
+                                    </label>
                                 </div>
+                            </div>
 
-                                <div class="row" style="margin-bottom:0">
-                                    <div class="col s12 center-align">
-                                        <input class="btn-sv-rood" id="submit_knop" type="submit" value="Verstuur"/>
-                                    </div>
+                            <div class="row" style="margin-bottom:0">
+                                <div class="col s12 center-align">
+                                    <input class="btn-sv-rood" id="submit_knop" type="submit" value="Verstuur"/>
                                 </div>
+                            </div>
 
-                            </form>
-                        </div>
+                        </form>
                     </div>
-
                 </div>
+
             </div>
         </div>
     </div>

@@ -97,12 +97,12 @@
   background-color: $button-raised-background;
   text-align: center;
   letter-spacing: .5px;
-  @extend .z-depth-1;
+  //@extend .z-depth-1;
   transition: background-color .2s ease-out;
   cursor: pointer;
   &:hover {
     background-color: $button-raised-background-hover;
-    @extend .z-depth-1-half;
+    //@extend .z-depth-1-half;
   }
 }
 

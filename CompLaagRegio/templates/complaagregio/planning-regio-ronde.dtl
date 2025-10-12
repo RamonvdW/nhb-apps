@@ -20,7 +20,7 @@
     <!-- blauwe balk met informatie label : info -->
     <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
-            <table class="sv-kader">
+            <table class="sv-kader-tabel">
                 <tr>
                     <th>Competitie</th>
                     <td>{{ ronde.regiocompetitie.competitie.beschrijving }}</td>
@@ -91,7 +91,7 @@
                 <div class="col s12 m10 offset-m1 l6 offset-l3">
 
                     <!-- dialoog venster -->
-                    <div class="sv-kader left-align z-depth-3">
+                    <div class="sv-kader-form">
                         <div class="form-padding">
 
                             <form action="{{ ronde_opslaan_url }}" method="post" onsubmit="document.getElementById('submit_knop1').disabled=true; return true;">
@@ -149,7 +149,7 @@
     <!-- blauwe balk met informatie in een tabel -->
     <div class="row-sv-blauw">
         <div class="col s12">
-            <table class="sv-kader">
+            <table class="sv-kader-tabel">
 
                 <thead>
                     <tr>
@@ -256,44 +256,40 @@
                 <div class="col s12 m10 offset-m1 l6 offset-l3">
 
                     <!-- dialoog venster -->
-                    <div class="sv-kader left-align z-depth-3">
-                        <div style="padding:30px">
+                    <div class="sv-kader-form">
+                        <form action="{{ ronde_opslaan_url }}" method="post" onsubmit="document.getElementById('submit_knop1').disabled=true; return true;">
+                            {% csrf_token %}
 
-                            <form action="{{ ronde_opslaan_url }}" method="post" onsubmit="document.getElementById('submit_knop1').disabled=true; return true;">
-                                {% csrf_token %}
-
-                                {% if readonly %}
+                            {% if readonly %}
+                                {% for opt in opt_week_nrs %}
+                                    {% if opt.actief %}
+                                        <p>Week {{ opt.week_nr }} ({{ opt.maandag|date:"l j F Y" }})</p>
+                                    {% endif %}
+                                {% endfor %}
+                            {% else %}
+                                <select name="ronde_week_nr" onchange="gewijzigd()">
                                     {% for opt in opt_week_nrs %}
-                                        {% if opt.actief %}
-                                            <p>Week {{ opt.week_nr }} ({{ opt.maandag|date:"l j F Y" }})</p>
-                                        {% endif %}
+                                        <option value="{{ opt.choice_name }}"{% if opt.actief %} selected{% endif %}>Week {{ opt.week_nr }} ({{ opt.maandag|date:"l j F Y" }})</option>
                                     {% endfor %}
-                                {% else %}
-                                    <select name="ronde_week_nr" onchange="gewijzigd()">
-                                        {% for opt in opt_week_nrs %}
-                                            <option value="{{ opt.choice_name }}"{% if opt.actief %} selected{% endif %}>Week {{ opt.week_nr }} ({{ opt.maandag|date:"l j F Y" }})</option>
-                                        {% endfor %}
-                                    </select>
-                                {% endif %}
+                                </select>
+                            {% endif %}
 
-                                {% if readonly %}
-                                    <p>{{ ronde.beschrijving }}</p>
-                                {% else %}
-                                    <div class="input-field">
-                                        <input type="text" name="ronde_naam" placeholder="Beschrijving" value="{{ ronde.beschrijving }}" oninput="gewijzigd()">
-                                    </div>
-                                {% endif %}
+                            {% if readonly %}
+                                <p>{{ ronde.beschrijving }}</p>
+                            {% else %}
+                                <div class="input-field">
+                                    <input type="text" name="ronde_naam" placeholder="Beschrijving" value="{{ ronde.beschrijving }}" oninput="gewijzigd()">
+                                </div>
+                            {% endif %}
 
-                                {% if not readonly %}
-                                    <p class="center">
-                                        <button class="btn-sv-rood disabled" id="submit_knop1" type="submit">
-                                            <i class="notranslate material-symbol left">check</i>Instellingen opslaan</button>
-                                    </p>
-                                {% endif %}
+                            {% if not readonly %}
+                                <p class="center">
+                                    <button class="btn-sv-rood disabled" id="submit_knop1" type="submit">
+                                        <i class="notranslate material-symbol left">check</i>Instellingen opslaan</button>
+                                </p>
+                            {% endif %}
 
-                            </form>
-
-                        </div>
+                        </form>
                     </div>
 
                 </div>

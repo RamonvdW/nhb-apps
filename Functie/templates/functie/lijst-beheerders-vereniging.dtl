@@ -25,7 +25,7 @@
 
         <!-- toon de functies met huidige beheerders in een tabel -->
         <div class="col s12">
-            <table class="sv-kader">
+            <table class="sv-kader-tabel">
                 <thead>
                     <tr>
                         <th>Functie / Rol</th>

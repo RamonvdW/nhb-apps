@@ -71,7 +71,7 @@
         <div class="col s12">
 
             <!-- dialoog venster -->
-            <div class="sv-kader left-align z-depth-3" style="margin-top:30px">
+            <div class="sv-kader-form" style="margin-top:30px">
                 <div class="form-padding">
                     <table>
                         <thead>
@@ -137,8 +137,8 @@
 
 
                         <!-- floating action button -->
-                        <div class="fixed-action-btn" style="display: none">
-                            <button class="btn-sv-rood" id="submit_knop" type="submit" disabled>
+                        <div style="display: none">
+                            <button class="btn-sv-float" id="submit_knop" type="submit" disabled>
                                 <i class="notranslate material-symbol left">check</i>Opslaan</button>
                         </div>
                     </form>

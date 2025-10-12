@@ -22,10 +22,10 @@
 
     <!-- blauwe balk met dialoog venster -->
     <div class="row-sv-blauw">
-        <div class="col s10 offset-s1 m8 offset-m2 l6 offset-l3 sv-kader left-align z-depth-3">
+        <div class="col s10 offset-s1 m8 offset-m2 l6 offset-l3">
 
             <!-- dialoog venster -->
-            <div style="padding:20px">
+            <div class="sv-kader-form">
 
                 <form action="{{ url_ophalen }}" method="get" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
 

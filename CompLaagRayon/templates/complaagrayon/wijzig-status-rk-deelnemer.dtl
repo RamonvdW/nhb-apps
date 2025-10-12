@@ -21,7 +21,7 @@
     <!-- blauwe balk met informatie label : info -->
     <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
-            <table class="sv-kader">
+            <table class="sv-kader-tabel">
                 <tr>
                     <th>Competitie</th>
                     <td>{{ deelnemer.kampioenschap.competitie.beschrijving }}</td>
@@ -52,62 +52,59 @@
         <div class="col s12 m10 offset-m1 l8 offset-l2">
 
             <!-- dialoog venster -->
-            <div class="sv-kader left-align z-depth-3">
-                <div class="center" style="padding:30px">
+            <div class="sv-kader-form center">
+                <p>
+                    <span>De status van deelname voor deze sporter is: </span>
+                    {% if not deelnemer.bij_vereniging %}
+                        <span class="sv-rood-text">ATTENTIE</span>
+                    {% elif deelnemer.deelname == 'N' %}
+                        <span class="grey-text">AFGEMELD</span>
+                    {% elif deelnemer.deelname == 'J' %}
+                        <span class="green-text">DEELNAME BEVESTIGD</span>
+                    {% else %}
+                        <span class="sv-blauw-text"><i>ONBEKEND</i></span>
+                    {% endif %}
+                </p>
+
+                {% if not deelnemer.bij_vereniging %}
 
                     <p>
-                        <span>De status van deelname voor deze sporter is: </span>
-                        {% if not deelnemer.bij_vereniging %}
-                            <span class="sv-rood-text">ATTENTIE</span>
-                        {% elif deelnemer.deelname == 'N' %}
-                            <span class="grey-text">AFGEMELD</span>
-                        {% elif deelnemer.deelname == 'J' %}
-                            <span class="green-text">DEELNAME BEVESTIGD</span>
-                        {% else %}
-                            <span class="sv-blauw-text"><i>ONBEKEND</i></span>
-                        {% endif %}
+                        <span class="sv-rood-text">Deze sporter is niet aangemeld bij een vereniging en mag zo niet deelnemen aan het RK.</span>
+                        <br>
+                        <br>
+                        <span>Laat het bondsbureau uitzoeken of dit een niet-afgeronde overschrijving is.</span>
                     </p>
 
-                    {% if not deelnemer.bij_vereniging %}
+                {% else %}
 
-                        <p>
-                            <span class="sv-rood-text">Deze sporter is niet aangemeld bij een vereniging en mag zo niet deelnemen aan het RK.</span>
-                            <br>
-                            <br>
-                            <span>Laat het bondsbureau uitzoeken of dit een niet-afgeronde overschrijving is.</span>
-                        </p>
+                    <!-- als de keuze onbekend is, toon dan twee knoppen (blauw en rood)
+                         toon anders maar 1 knop (de andere keuze)
+                    -->
 
-                    {% else %}
-
-                        <!-- als de keuze onbekend is, toon dan twee knoppen (blauw en rood)
-                             toon anders maar 1 knop (de andere keuze)
-                        -->
-
-                        {% if deelnemer.deelname != 'J' %}
-                            <p>Klik op de blauwe knop om mogelijkheid tot deelname aan het RK te bevestigen</p>
-                            <br>
-                            <form action="{{ url_wijzig }}" method="post" onsubmit="document.getElementById('submit_knop1').disabled=true; return true;">
-                                {% csrf_token %}
-                                <input name="bevestig" type="hidden" value="1">
-                                <button class="btn-sv-blauw" id="submit_knop1" type="submit">
-                                    <i class="notranslate material-symbol left">thumb_up</i>Bevestig deelname</button>
-                            </form>
-                        {% endif %}
-
-                        {% if deelnemer.deelname != 'N' %}
-                            <p>Klik op de rode knop om de sporter af te melden voor het RK</p>
-                            <br>
-                            <form action="{{ url_wijzig }}" method="post" onsubmit="document.getElementById('submit_knop2').disabled=true; return true;">
-                                {% csrf_token %}
-                                <input name="afmelden" type="hidden" value="1">
-                                <button class="btn-sv-rood" id="submit_knop2" type="submit">
-                                    <i class="notranslate material-symbol left">warning</i>Afmelden</button>
-                            </form>
-                        {% endif %}
-
+                    {% if deelnemer.deelname != 'J' %}
+                        <p>Klik op de blauwe knop om mogelijkheid tot deelname aan het RK te bevestigen</p>
+                        <br>
+                        <form action="{{ url_wijzig }}" method="post" onsubmit="document.getElementById('submit_knop1').disabled=true; return true;">
+                            {% csrf_token %}
+                            <input name="bevestig" type="hidden" value="1">
+                            <button class="btn-sv-blauw" id="submit_knop1" type="submit">
+                                <i class="notranslate material-symbol left">thumb_up</i>Bevestig deelname</button>
+                        </form>
                     {% endif %}
 
-                </div>
+                    {% if deelnemer.deelname != 'N' %}
+                        <p>Klik op de rode knop om de sporter af te melden voor het RK</p>
+                        <br>
+                        <form action="{{ url_wijzig }}" method="post" onsubmit="document.getElementById('submit_knop2').disabled=true; return true;">
+                            {% csrf_token %}
+                            <input name="afmelden" type="hidden" value="1">
+                            <button class="btn-sv-rood" id="submit_knop2" type="submit">
+                                <i class="notranslate material-symbol left">warning</i>Afmelden</button>
+                        </form>
+                    {% endif %}
+
+                {% endif %}
+
             </div>
         </div>
     </div>

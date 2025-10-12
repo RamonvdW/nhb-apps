@@ -60,7 +60,7 @@
     <!-- blauwe balk met informatie label : info -->
     <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
-            <table class="sv-kader">
+            <table class="sv-kader-tabel">
                 <tr>
                     <th>Vereniging</th>
                     <td>{{ team.vereniging }}</td>
@@ -107,13 +107,13 @@
         <div class="col s12">
 
             <!-- dialoog venster -->
-            <div class="sv-kader left-align z-depth-3">
+            <div class="sv-kader-form">
                 <div class="form-padding">
 
                     <form action="{{ url_opslaan }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
                         {% csrf_token %}
 
-                        <table class="sv-kader">
+                        <table class="sv-kader-tabel">
                             <tr>
                                 <th>Geselecteerd voor het team</th>
                                 <th>Toegestane invallers</th>
@@ -165,8 +165,8 @@
 
                         </table>
 
-                        <div class="fixed-action-btn" style="display: none">
-                            <button class="btn-sv-rood" id="submit_knop" type="submit" disabled>
+                        <div style="display: none">
+                            <button class="btn-sv-float" id="submit_knop" type="submit" disabled>
                                 <i class="notranslate material-symbol left">check</i>Opslaan</button>
                         </div>
                     </form>
@@ -187,7 +187,7 @@
     <!-- blauw balk met wit informatie veld -->
     <div class="row-sv-blauw">
         <div class="col s12">
-            <div class="sv-kader left-align" style="padding:30px">
+            <div class="sv-kader left-align">
                 <span>{{ logboek|linebreaksbr }}</span>
             </div>
         </div>

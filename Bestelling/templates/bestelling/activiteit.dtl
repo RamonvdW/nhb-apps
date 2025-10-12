@@ -21,7 +21,7 @@
     <!-- blauwe balk met informatie label : info -->
     <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
-            <table class="sv-kader">
+            <table class="sv-kader-tabel">
                 <tr>
                     <th>Bestellingen sinds {{ begin_maand }}</th>
                     <td>{{ aantal_bestellingen }}</td>
@@ -53,10 +53,10 @@
     <!-- zoekformulier -->
     <!-- blauwe balk met dialoog venster -->
     <div class="row-sv-blauw">
-        <div class="col s10 offset-s1 m8 offset-m2 l6 offset-l3 sv-kader z-depth-3">
+        <div class="col s10 offset-s1 m8 offset-m2 l6 offset-l3">
 
             <!-- dialoog venster -->
-            <div style="padding:20px" class="left-align">
+            <div class="sv-kader-form">
                 <form action="{{ zoek_url }}" method="get" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
                     <!-- form field -->
                     <div class="input-field">

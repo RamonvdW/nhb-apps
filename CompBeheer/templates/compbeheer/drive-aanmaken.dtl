@@ -21,7 +21,7 @@
     <!-- blauw balk met wit informatie veld -->
     <div class="row-sv-blauw">
         <div class="col s12 l10 offset-l1 xl6 offset-xl3">
-            <div class="sv-kader" style="padding:20px">
+            <div class="sv-kader">
                 <p>MijnHandboogsport heeft toegang tot de Google Drive van een gebruiker<br>om daarin de RK/BK wedstrijdformulieren aan te maken, om later te delen met de HWL's.</p>
 
                 <p>Aantal bestanden (nog) aan te maken voor de Indoor: {{ aantal_aanmaken_18 }}<br>Aantal bestanden (nog) aan te maken voor de 25m 1pijl: {{ aantal_aanmaken_25 }}</p>
