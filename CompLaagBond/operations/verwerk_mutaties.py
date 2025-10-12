@@ -8,7 +8,7 @@ from django.utils import timezone
 from Competitie.definities import DEEL_RK, DEEL_BK, DEELNAME_JA, DEELNAME_NEE, KAMP_RANK_BLANCO
 from Competitie.models import (Competitie, CompetitieTeamKlasse, KampioenschapTeamKlasseLimiet,
                                Kampioenschap, KampioenschapSporterBoog, KampioenschapTeam)
-from CompKamp.operations.verwerk_mutaties import VerwerkCompKampMutaties
+from CompKampioenschap.operations.verwerk_mutaties import VerwerkCompKampMutaties
 
 
 class VerwerkCompLaagBondMutaties:

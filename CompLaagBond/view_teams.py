@@ -15,7 +15,7 @@ from BasisTypen.definities import ORGANISATIE_WA
 from BasisTypen.models import BoogType
 from Competitie.definities import DEEL_BK, DEELNAME_JA, DEELNAME_NEE
 from Competitie.models import Kampioenschap, KampioenschapTeam
-from CompKamp.operations.maak_mutatie import maak_mutatie_kamp_teams_nummeren
+from CompKampioenschap.operations.maak_mutatie import maak_mutatie_kamp_teams_nummeren
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving
 

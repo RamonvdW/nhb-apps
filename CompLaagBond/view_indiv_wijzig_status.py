@@ -14,7 +14,7 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
 from Competitie.definities import DEEL_BK
 from Competitie.models import KampioenschapSporterBoog
-from CompKamp.operations.maak_mutatie import maak_mutatie_kamp_aanmelden_indiv, maak_mutatie_kamp_afmelden_indiv
+from CompKampioenschap.operations.maak_mutatie import maak_mutatie_kamp_aanmelden_indiv, maak_mutatie_kamp_afmelden_indiv
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie, rol_get_huidige
 from Site.core.background_sync import BackgroundSync

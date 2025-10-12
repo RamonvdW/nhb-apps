@@ -16,12 +16,12 @@ from Competitie.definities import (DEELNAME_JA, DEELNAME_NEE,
 from Competitie.models import (Kampioenschap, KampioenschapSporterBoog, KampioenschapTeam, CompetitieMatch,
                                KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet,
                                Competitie, CompetitieMutatie, CompetitieIndivKlasse, CompetitieTeamKlasse)
-from CompKamp.operations.wedstrijdformulieren_indiv import (iter_indiv_wedstrijdformulieren,
-                                                            UpdateIndivWedstrijdFormulier)
-from CompKamp.operations.wedstrijdformulieren_teams import (iter_teams_wedstrijdformulieren,
-                                                            UpdateTeamsWedstrijdFormulier)
-from CompKamp.operations.storage_wedstrijdformulieren import (StorageWedstrijdformulieren,
-                                                              iter_dirty_wedstrijdformulieren, zet_dirty)
+from CompKampioenschap.operations.wedstrijdformulieren_indiv import (iter_indiv_wedstrijdformulieren,
+                                                                     UpdateIndivWedstrijdFormulier)
+from CompKampioenschap.operations.wedstrijdformulieren_teams import (iter_teams_wedstrijdformulieren,
+                                                                     UpdateTeamsWedstrijdFormulier)
+from CompKampioenschap.operations.storage_wedstrijdformulieren import (StorageWedstrijdformulieren,
+                                                                       iter_dirty_wedstrijdformulieren, zet_dirty)
 from GoogleDrive.operations import GoogleSheet, StorageError
 import time
 
@@ -31,7 +31,7 @@ VOLGORDE_PARKEER = 22222        # hoog en past in PositiveSmallIntegerField
 class VerwerkCompKampMutaties:
 
     """
-        Afhandeling van de mutatie verzoeken voor de CompKamp applicatie.
+        Afhandeling van de mutatie verzoeken voor de CompKampioenschap applicatie.
         Wordt aangeroepen door de competitie_mutaties achtergrondtaak, welke gelijktijdigheid voorkomt.
     """
 

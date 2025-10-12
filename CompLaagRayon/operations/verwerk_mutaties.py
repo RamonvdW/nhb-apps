@@ -9,7 +9,7 @@ from Competitie.definities import DEEL_RK, DEELNAME_NEE, DEELNAME_ONBEKEND
 from Competitie.models import (Competitie,
                                Regiocompetitie, RegiocompetitieSporterBoog,
                                Kampioenschap, KampioenschapSporterBoog, KampioenschapTeam)
-from CompKamp.operations.verwerk_mutaties import VerwerkCompKampMutaties
+from CompKampioenschap.operations.verwerk_mutaties import VerwerkCompKampMutaties
 from Logboek.models import schrijf_in_logboek
 from Taken.operations import maak_taak
 

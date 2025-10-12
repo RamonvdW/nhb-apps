@@ -18,7 +18,7 @@ from Competitie.models import (CompetitieIndivKlasse, CompetitieTeamKlasse, Comp
                                Regiocompetitie, RegiocompetitieRonde,
                                Kampioenschap, KampioenschapSporterBoog, KampioenschapTeam,
                                KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet)
-from CompKamp.operations.maak_mutatie import maak_mutatie_kamp_cut
+from CompKampioenschap.operations.maak_mutatie import maak_mutatie_kamp_cut
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
 from Locatie.models import WedstrijdLocatie

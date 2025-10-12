@@ -9,11 +9,8 @@ from django.utils import timezone
 from Account.models import Account
 from Bestelling.definities import BESTELLING_MUTATIE_TO_STR, BESTELLING_TRANSPORT_NVT, BESTELLING_TRANSPORT_OPTIES
 from Bestelling.models import Bestelling, BestellingRegel
-from Evenement.models import EvenementInschrijving
-from Opleiding.models import OpleidingInschrijving
 from Sporter.models import SporterBoog
-from Webwinkel.models import WebwinkelKeuze
-from Wedstrijden.models import WedstrijdInschrijving, WedstrijdSessie, KalenderWedstrijdklasse
+from Wedstrijden.models import WedstrijdSessie, KalenderWedstrijdklasse
 from decimal import Decimal
 
 
@@ -38,17 +35,21 @@ class BestellingMutatie(models.Model):
     # is deze mutatie al verwerkt?
     is_verwerkt = models.BooleanField(default=False)
 
-    # BESTEL_MUTATIE_WEDSTRIJD_INSCHRIJVEN      account(=mandje), wedstrijd_inschrijving
-    # BESTEL_MUTATIE_WEBWINKEL_KEUZE            account(=mandje), webwinkel_keuze
-    # BESTEL_MUTATIE_VERWIJDER:                 account(=mandje), product
-    # BESTEL_MUTATIE_MAAK_BESTELLING:           account(=mandje)
-    # BESTEL_MUTATIE_WEDSTRIJD_AFMELDEN:        inschrijving
-    # BESTEL_MUTATIE_BETALING_AFGEROND:         bestelling, betaling_is_gelukt
-    # BESTEL_MUTATIE_OVERBOEKING_ONTVANGEN:     bestelling, bedrag_euro
-    # BESTEL_MUTATIE_ANNULEER:                  bestelling
-    # BESTEL_MUTATIE_RESTITUTIE_UITBETAALD:
-    # BESTEL_MUTATIE_TRANSPORT:
-    # BESTEL_MUTATIE_EVENEMENT_INSCHRIJVEN:     evenement_inschrijving
+    # BESTELLING_MUTATIE_WEDSTRIJD_INSCHRIJVEN      account(=mandje), product_pk
+    # BESTELLING_MUTATIE_EVENEMENT_INSCHRIJVEN:     account(=mandje), product_pk
+    # BESTELLING_MUTATIE_OPLEIDING_INSCHRIJVEN:     account(=mandje), product_pk
+    # BESTELLING_MUTATIE_WEBWINKEL_KEUZE            account(=mandje), product_pk
+    # BESTELLING_MUTATIE_WEDSTRIJD_AFMELDEN:        product_pk
+    # BESTELLING_MUTATIE_OPLEIDING_AFMELDEN:        product_pk
+    # BESTELLING_MUTATIE_WEDSTRIJD_AANPASSEN:   account, product_pk, sporterboog, sessie, wedstrijdklasse
+
+    # BESTELLING_MUTATIE_VERWIJDER:                 account(=mandje), regel
+    # BESTELLING_MUTATIE_MAAK_BESTELLING:           account(=mandje)
+    # BESTELLING_MUTATIE_BETALING_AFGEROND:         bestelling, betaling_is_gelukt
+    # BESTELLING_MUTATIE_OVERBOEKING_ONTVANGEN:     bestelling, bedrag_euro
+    # BESTELLING_MUTATIE_ANNULEER:                  bestelling
+    # BESTELLING_MUTATIE_RESTITUTIE_UITBETAALD:
+    # BESTELLING_MUTATIE_TRANSPORT:                 account(=mandje), transport
 
     # mandje van dit account
     account = models.ForeignKey(Account, on_delete=models.SET_NULL, null=True, blank=True)

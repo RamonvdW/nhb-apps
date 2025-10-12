@@ -8,8 +8,9 @@
 
 from django.conf import settings
 from django.utils import timezone
-from CompKamp.operations.wedstrijdformulieren_indiv import iter_indiv_wedstrijdformulieren
-from CompKamp.operations.wedstrijdformulieren_teams import iter_teams_wedstrijdformulieren
+from Competitie.models import Competitie
+from CompKampioenschap.operations.wedstrijdformulieren_indiv import iter_indiv_wedstrijdformulieren
+from CompKampioenschap.operations.wedstrijdformulieren_teams import iter_teams_wedstrijdformulieren
 from GoogleDrive.models import Bestand
 from GoogleDrive.operations import StorageGoogleDrive, StorageError
 from typing import Generator
@@ -61,36 +62,39 @@ class StorageWedstrijdformulieren(StorageGoogleDrive):
         return folder_name
 
 
-def ontbrekende_wedstrijdformulieren_rk_bk(comp) -> list:
-    """ geef een lijst terug met de benodigde wedstrijdformulieren die nog niet aangemaakt zijn
+def aantal_ontbrekende_wedstrijdformulieren_rk_bk(comp: Competitie) -> int:
+    """ tel het aantal wedstrijdformulieren dat nog niet aangemaakt is
         aan de hand van de informatie in tabel Bestand.
     """
-    todo = list()
+    todo_count = 0
 
     # maak een map met de huidige bestanden
     sel2bestand = dict()
     for bestand in Bestand.objects.filter(begin_jaar=comp.begin_jaar, afstand=comp.afstand):
-        sel = (bestand.begin_jaar, bestand.afstand, bestand.is_teams, bestand.is_bk, bestand.klasse_pk)
+        sel = (bestand.begin_jaar, bestand.afstand, bestand.klasse_pk,
+               bestand.is_teams, bestand.is_bk, bestand.rayon_nr)
         sel2bestand[sel] = bestand
     # for
 
     for tup in iter_indiv_wedstrijdformulieren(comp):
-        afstand, is_teams, is_bk, klasse_pk, fname = tup
-        sel = (comp.begin_jaar, afstand, is_teams, is_bk, klasse_pk)
+        afstand, is_bk, klasse_pk, rayon_nr, fname = tup
+        #                                           is_teams
+        sel = (comp.begin_jaar, afstand, klasse_pk, False, is_bk, rayon_nr)
         if sel not in sel2bestand:
             # niet gevonden; voeg toe aan de todo lijst
-            todo.append(tup)
+            todo_count += 1
     # for
 
     for tup in iter_teams_wedstrijdformulieren(comp):
-        afstand, is_teams, is_bk, klasse_pk, fname = tup
-        sel = (comp.begin_jaar, afstand, is_teams, is_bk, klasse_pk)
+        afstand, is_bk, klasse_pk, rayon_nr, fname = tup
+        #                                           is_teams
+        sel = (comp.begin_jaar, afstand, klasse_pk, True, is_bk, rayon_nr)
         if sel not in sel2bestand:
             # niet gevonden; voeg toe aan de todo lijst
-            todo.append(tup)
+            todo_count += 1
     # for
 
-    return todo
+    return todo_count
 
 
 def zet_dirty(begin_jaar: int, afstand: int, klasse_pk: int, is_bk: bool, is_teams: bool):
