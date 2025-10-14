@@ -19,7 +19,7 @@
 
             <p>
                 <a class="btn-sv-rood" href="{{ url_emails }}">
-                    <i class="notranslate material-symbol left">mail</i>Alle e-mailadressen</a>
+                    <i class="notranslate material-symbol-no-fill left">mail</i>Alle e-mailadressen</a>
             </p>
 
             <p class="hide-on-small-only"><i>(kolommen 'deelt' is met korps, wedstrijdorganisatie)</i></p>

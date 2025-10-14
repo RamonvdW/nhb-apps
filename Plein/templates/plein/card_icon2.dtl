@@ -1,0 +1,77 @@
+{% comment %}
+                Copyright (c) 2020-2025 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+
+{% comment %}
+
+    Deze file formatteert een kaartje aan de hand van de volgende parameters:
+
+        title       = "Account activiteit"
+        icon        = "recent_actors"
+        text        = "Toon overzicht van de recent gebruikte en aangemaakte accounts."
+        url         = de url waar je heen gaat na klikken op het kaartje
+        onclick     = alternatief voor de url - roept een javascript functie aan  # TODO: obsolete
+        extern_open = openen in een apart tabblad
+        modal_id    = id van de modal dialog die geopend moet worden (optioneel)
+        js_id       = id voor gebruik in javascript
+
+    Hierdoor is mogelijk om centraal de code van een kaartje aan te passen.
+
+{% endcomment %}
+
+
+<!-- zet breedte, hoogte en side-by-side layout -->
+<!-- bij mouse-over licht de rand op -->
+<div class="sv-card">
+
+    <!-- de hele kaart is klikbaar -->
+    <!-- TODO: obsolete "onclick" -->
+    <a
+        {% if js_id %}
+            href="#"
+            id="{{ js_id }}"
+        {% elif onclick %}
+            href="#"
+            onclick="{{ onclick }}"
+        {% elif modal_id %}
+            class="modal-trigger"
+            href="#{{ modal_id }}"
+        {% else %}
+            href="{{ url }}"
+            {% if extern_open %}target="_blank" rel="noopener noreferrer"{% endif %}
+        {% endif %}
+        draggable="false">
+
+            {% if extern_open %}
+                <div style="position:absolute; right:6px; top:6px">
+                    <i class="notranslate material-symbol sv-blauw-text">open_in_new</i>
+                </div>
+            {% endif %}
+
+            <!-- padding om bij de rand weg te blijven -->
+            <div class="sv-card-content center-align">
+
+                <!-- titel -->
+                {% if title %}
+                    <div class="card-title">{{ title }}</div>
+                {% endif %}
+
+                <!-- icon -->
+                <div style="margin-bottom:6px">
+                    <i {% if icon_font_size %}
+                            style="font-size:{{ icon_font_size }}"
+                       {% endif %}
+                        class="bi bi-{{ icon }} medium sv-rood-text"></i>
+                </div>
+
+                <div>{{ text }}</div>
+
+            </div>
+
+        </a>
+
+</div>
+
+<!-- end of file -->

@@ -645,6 +645,20 @@ input.table-filter {
   display: none;    /* wordt aangepast nadat het font geladen is - zie on-load handler in Plein/js/site_layout.js */
 }
 
+// bootstrap icons
+.bi {
+  display: inline-block;
+  font-family: 'bootstrap-icons';
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+  //vertical-align: -.125em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
 
 /* reduceer de padding rond de content op echt kleine schermen */
 @media only screen and (max-width: 500px) {

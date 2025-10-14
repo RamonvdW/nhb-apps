@@ -47,7 +47,7 @@
 
                     <p class="center-align">
                         <button class="btn-sv-rood" id="submit_knop" type="submit">
-                            <i class="notranslate material-symbol left">mail</i>Verstuur e-mail</button>
+                            <i class="notranslate material-symbol-no-fill left">mail</i>Verstuur e-mail</button>
                     </p>
 
                 </form>

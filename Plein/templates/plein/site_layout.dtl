@@ -28,7 +28,7 @@
 
         {% include 'plein/site_layout_fonts.dtl' %}
 
-        <link rel="stylesheet" href="{% static 'css/materialize-new-301.css' %}">
+        <link rel="stylesheet" href="{% static 'css/materialize-new-311.css' %}">
 
         {% include 'plein/site_layout_favicons.dtl' %}
 
@@ -78,7 +78,10 @@
                         {% if menu_voornaam %}
                             <li>
                                 <!-- position:relative + z-index=2: knop boven op het logo -->
-                                <button class="btn-sv-rood dropdown-trigger" data-target="navbar-dropdown" style="position:relative; margin-top:14px; margin-right:15px" aria-label="Menu">
+                                <button class="btn-sv-rood dropdown-trigger"
+                                        data-target="navbar-dropdown"
+                                        style="position:relative; margin-top:14px; margin-right:15px"
+                                        aria-label="Menu">
                                     <span class="hide-on-small-only">{{ menu_voornaam|escape }}</span>
                                     <i class="notranslate material-symbol right hide-on-small-only" style="line-height:36px">expand_more</i>
                                     <i class="notranslate material-symbol       hide-on-med-and-up" style="line-height:36px">expand_more</i>

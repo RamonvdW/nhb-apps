@@ -161,7 +161,7 @@
                     <p><code>{{ email_support }}</code></p>
                     <p>
                         <a class="btn-sv-rood" href="mailto:{{ email_support }}">
-                            <i class="notranslate material-symbol">mail</i></a>
+                            <i class="notranslate material-symbol-no-fill">mail</i></a>
                     </p>
                 </div>
             </div>

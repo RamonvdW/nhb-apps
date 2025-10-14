@@ -13,45 +13,56 @@
 {% load static %}
 
 <style>
-@font-face {
-  font-family: 'Fira Sans';
-  font-style: normal;
-  font-weight: 500;
-  font-display: block;  /* liever later tonen dan verspringende layout */
-{% if font_use_subset_files %}
-  src: url("{% static 'fonts/firasans-medium-subset-mh-v9.woff2' %}") format('truetype');
-{% else %}
-  src: url("{% static 'fonts/FiraSans-Medium-v18.ttf' %}") format('truetype');
-{% endif %}
-}
-@font-face {
-  font-family: 'Open Sans';
-  font-style: normal;
-  font-weight: 400;
-  font-stretch: normal;
-  font-display: block;  /* liever later tonen dan verspringende layout */
-  src: url("{% static 'fonts/OpenSans-Regular-v44.ttf' %}") format('truetype');
-}
-@font-face {
-  font-family: 'Open Sans';
-  font-style: normal;
-  font-weight: 600;
-  font-stretch: normal;
-  font-display: block;  /* liever later tonen dan verspringende layout */
-  src: url("{% static 'fonts/OpenSans-SemiBold-v44.ttf' %}") format('truetype');
-}
-@font-face {
-  font-family: 'Material Symbols Rounded';
-  font-style: normal;
-  font-weight: 400;
-  font-display: block;  /* liever later tonen dan verspringende layout */
-{% if font_use_subset_files %}
-  src: url("{% static 'fonts/material-symbols-subset-mh-v9.woff2' %}") format('opentype');
-{% else %}
-  src: url("{% static 'fonts/Material-Symbols-v277.ttf' %}") format('truetype');
-{% endif %}
-}
+
+    @font-face {
+      font-family: 'Fira Sans';
+      font-style: normal;
+      font-weight: 500;
+      font-display: block;  /* liever later tonen dan verspringende layout */
+      {% if font_use_subset_files %}
+        src: url("{% static 'fonts/firasans-medium-subset-mh-v9.woff2' %}") format('woff2');
+      {% else %}
+        src: url("{% static 'fonts/FiraSans-Medium-v18.ttf' %}") format('truetype');
+      {% endif %}
+    }
+
+    @font-face {
+      font-family: 'Open Sans';
+      font-style: normal;
+      font-weight: 400;
+      font-stretch: normal;
+      font-display: block;  /* liever later tonen dan verspringende layout */
+      src: url("{% static 'fonts/OpenSans-Regular-v44.ttf' %}") format('truetype');
+    }
+    @font-face {
+      font-family: 'Open Sans';
+      font-style: normal;
+      font-weight: 600;
+      font-stretch: normal;
+      font-display: block;  /* liever later tonen dan verspringende layout */
+      src: url("{% static 'fonts/OpenSans-SemiBold-v44.ttf' %}") format('truetype');
+    }
+
+    @font-face {
+      font-family: 'Material Symbols Rounded';
+      font-style: normal;
+      font-weight: 400;
+      font-display: block;  /* liever later tonen dan verspringende layout */
+      {% if font_use_subset_files %}
+        src: url("{% static 'fonts/material-symbols-subset-mh-v9.woff2' %}") format('woff2');
+      {% else %}
+        src: url("{% static 'fonts/Material-Symbols-v277.ttf' %}") format('truetype');
+      {% endif %}
+    }
+
+    @font-face {
+      font-family: 'bootstrap-icons';
+      font-display: block;  /* liever later tonen dan verspringende layout */
+      src: url("{% static 'fonts/bootstrap-icons-v1_13.woff2' %}") format('woff2');
+    }
 </style>
+
+<link rel="stylesheet" href="{% static 'css/bootstrap-icons.css' %}">
 
 
 <!-- end of file -->

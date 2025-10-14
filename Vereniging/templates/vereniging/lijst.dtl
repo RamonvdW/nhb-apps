@@ -24,7 +24,7 @@
             {% if url_sec_hwl %}
                 <p>
                     <a class="btn-sv-rood" href="{{ url_sec_hwl }}">
-                        <i class="notranslate material-symbol left">mail</i>E-mailadressen van SEC en HWL</a>
+                        <i class="notranslate material-symbol-no-fill left">mail</i>E-mailadressen van SEC en HWL</a>
                 </p>
             {% endif %}
 
