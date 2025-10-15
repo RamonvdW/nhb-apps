@@ -69,6 +69,11 @@ def sporter_login_plugin(request, from_ip, account):
             account.nieuwe_email = sporter.email
             updated.append('nieuwe_email')
 
+        elif account.nieuwe_email:
+            # mogelijk terug veranderd, dus ophouden met nieuwe email bevestiging
+            account.nieuwe_email = ''
+            updated.append('nieuwe_email')
+
         if len(updated):
             account.save(update_fields=updated)
 
