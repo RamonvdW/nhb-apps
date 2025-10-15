@@ -77,6 +77,10 @@ class BeginToetsView(UserPassesTestMixin, TemplateView):
                     context['laat_starten'] = True
                     context['url_starten'] = reverse('Instaptoets:begin')
 
+        context['lesmateriaal_wa'] = settings.INSTAPTOETS_LESMATERIAAL_WA_BOEKEN
+        context['lesmateriaal_competitie'] = settings.INSTAPTOETS_LESMATERIAAL_COMPETITIE
+        context['lesmateriaal_kleding'] = settings.INSTAPTOETS_LESMATERIAAL_KLEDINGVOORSCHRIFT
+
         context['kruimels'] = (
             (reverse('Opleiding:overzicht'), 'Opleidingen'),
             (None, 'Instaptoets'),
@@ -242,6 +246,10 @@ class VolgendeVraagView(UserPassesTestMixin, TemplateView):
         context['url_opslaan'] = reverse('Instaptoets:antwoord')
         context['op_pagina'] = 'instaptoets-vraag-%s' % self.toets.huidige_vraag.pk
 
+        context['lesmateriaal_wa'] = settings.INSTAPTOETS_LESMATERIAAL_WA_BOEKEN
+        context['lesmateriaal_competitie'] = settings.INSTAPTOETS_LESMATERIAAL_COMPETITIE
+        context['lesmateriaal_kleding'] = settings.INSTAPTOETS_LESMATERIAAL_KLEDINGVOORSCHRIFT
+
         if self.toets.aantal_antwoorden + 1 < self.toets.aantal_vragen:
             context['url_overslaan'] = context['url_opslaan']
 
@@ -313,10 +321,10 @@ class OntvangAntwoordView(UserPassesTestMixin, View):
                 self.toets.aantal_antwoorden += 1
                 self.toets.save(update_fields=['aantal_antwoorden'])
 
-                if self.toets.aantal_antwoorden >= self.toets.aantal_vragen:
-                    self.toets.afgerond = timezone.now()
-                    self.toets.is_afgerond = True
-                    self.toets.save(update_fields=['afgerond', 'is_afgerond'])
+            if self.toets.aantal_antwoorden >= self.toets.aantal_vragen:
+                self.toets.afgerond = timezone.now()
+                self.toets.is_afgerond = True
+                self.toets.save(update_fields=['afgerond', 'is_afgerond'])
 
             if self.toets.is_afgerond:
                 controleer_toets(self.toets)

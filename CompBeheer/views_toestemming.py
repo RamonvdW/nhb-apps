@@ -9,8 +9,8 @@ from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
 from Competitie.models import Competitie
-from CompKamp.operations.maak_mutatie import maak_mutatie_wedstrijdformulieren_aanmaken
-from CompKamp.operations.storage_wedstrijdformulieren import ontbrekende_wedstrijdformulieren_rk_bk
+from CompKampioenschap.operations.maak_mutatie import maak_mutatie_wedstrijdformulieren_aanmaken
+from CompKampioenschap.operations.storage_wedstrijdformulieren import aantal_ontbrekende_wedstrijdformulieren_rk_bk
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige
 from GoogleDrive.operations import check_heeft_toestemming, get_authorization_url
@@ -84,13 +84,11 @@ class AanmakenView(UserPassesTestMixin, TemplateView):
 
         comp18 = Competitie.objects.exclude(regiocompetitie_is_afgesloten=True).filter(afstand=18).first()
         if comp18:
-            lst18 = ontbrekende_wedstrijdformulieren_rk_bk(comp18)
-            context['aantal_aanmaken_18'] = len(lst18)
+            context['aantal_aanmaken_18'] = aantal_ontbrekende_wedstrijdformulieren_rk_bk(comp18)
 
         comp25 = Competitie.objects.exclude(regiocompetitie_is_afgesloten=True).filter(afstand=25).first()
         if comp25:
-            lst25 = ontbrekende_wedstrijdformulieren_rk_bk(comp25)
-            context['aantal_aanmaken_25'] = len(lst25)
+            context['aantal_aanmaken_25'] = aantal_ontbrekende_wedstrijdformulieren_rk_bk(comp25)
 
         context['url_aanmaken'] = reverse('CompBeheer:wf-aanmaken')
 

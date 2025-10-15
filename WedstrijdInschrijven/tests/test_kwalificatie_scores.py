@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2024 Ramon van der Winkel.
+#  Copyright (c) 2021-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -20,8 +20,9 @@ from Sporter.operations import get_sporterboog
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
 from Wedstrijden.definities import (WEDSTRIJD_STATUS_GEACCEPTEERD, WEDSTRIJD_DISCIPLINE_INDOOR,
-                                    WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_MANDJE, WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF,
-                                    KWALIFICATIE_CHECK_GOED, KWALIFICATIE_CHECK_NOG_DOEN)
+                                    WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_MANDJE,
+                                    WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF,
+                                    KWALIFICATIE_CHECK_GOED, KWALIFICATIE_CHECK_NOG_DOEN, KWALIFICATIE_CHECK_AFGEKEURD)
 from Wedstrijden.models import Wedstrijd, WedstrijdSessie, WedstrijdInschrijving, Kwalificatiescore
 import datetime
 
@@ -235,8 +236,26 @@ class TestWedstrijdInschrijvenKwalificatieScores(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, '/plein/')
 
         # echte wijziging terwijl al gecontroleerd
+        score.check_status = KWALIFICATIE_CHECK_AFGEKEURD
+        score.save(update_fields=['check_status'])
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('wedstrijdinschrijven/inschrijven-kwalificatie-scores.dtl',
+                                         'plein/site_layout.dtl'))
+
         score.check_status = KWALIFICATIE_CHECK_GOED
         score.save(update_fields=['check_status'])
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('wedstrijdinschrijven/inschrijven-kwalificatie-scores.dtl',
+                                         'plein/site_layout.dtl'))
+
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'score1_datum': self.kwalificatie_datum,
                                           'score1_naam': 'Test naam 2',
@@ -254,7 +273,7 @@ class TestWedstrijdInschrijvenKwalificatieScores(E2EHelpers, TestCase):
         self.assertTrue(str(self.inschrijving1) != '')
         self.assertTrue(self.inschrijving1.korte_beschrijving() != '')
 
-        # maak een extra record te veel aan
+        # maak een object te veel aan
         score.pk = None
         score.save()
 
@@ -288,6 +307,20 @@ class TestWedstrijdInschrijvenKwalificatieScores(E2EHelpers, TestCase):
         # te dicht op de wedstrijd
         self.wedstrijd.datum_begin = timezone.now().date()
         self.wedstrijd.save(update_fields=['datum_begin'])
+
+        score = Kwalificatiescore.objects.exclude(naam='').first()
+        score.check_status = KWALIFICATIE_CHECK_AFGEKEURD
+        score.save(update_fields=['check_status'])
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('wedstrijdinschrijven/inschrijven-kwalificatie-scores.dtl',
+                                         'plein/site_layout.dtl'))
+
+        score.check_status = KWALIFICATIE_CHECK_GOED
+        score.save(update_fields=['check_status'])
 
         with self.assert_max_queries(20):
             resp = self.client.get(url)

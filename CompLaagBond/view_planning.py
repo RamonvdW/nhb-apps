@@ -15,7 +15,7 @@ from Competitie.definities import DEEL_RK, DEEL_BK, DEELNAME_NEE
 from Competitie.models import (CompetitieIndivKlasse, CompetitieTeamKlasse, CompetitieMatch, CompetitieMutatie,
                                Kampioenschap, KampioenschapSporterBoog, KampioenschapTeam,
                                KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet)
-from CompKamp.operations.maak_mutatie import maak_mutatie_kamp_cut
+from CompKampioenschap.operations.maak_mutatie import maak_mutatie_kamp_cut
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
 from Locatie.models import WedstrijdLocatie

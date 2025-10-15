@@ -118,6 +118,7 @@ class KwalificatieScoresOpgevenView(UserPassesTestMixin, TemplateView):
             kwalificatie_scores.append(score)
         # while
         for nr, score in enumerate(kwalificatie_scores):
+            score.is_eerste = (nr == 0)
             score.name_str = 'score%s' % (nr + 1)
             score.datum_id = 'datum%s' % (nr + 1)
         # for

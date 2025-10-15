@@ -13,7 +13,7 @@ from django.core.management.base import BaseCommand
 from Competitie.models import CompetitieMutatie, CompetitieTaken
 from Competitie.operations import competitie_hanteer_overstap_sporter
 from CompLaagRegio.operations.verwerk_mutaties import VerwerkCompLaagRegioMutaties
-from CompKamp.operations.verwerk_mutaties import VerwerkCompKampMutaties
+from CompKampioenschap.operations.verwerk_mutaties import VerwerkCompKampMutaties
 from CompBeheer.operations.verwerk_mutaties import VerwerkCompBeheerMutaties
 from Mailer.operations import mailer_notify_internal_error
 from Site.core.background_sync import BackgroundSync
