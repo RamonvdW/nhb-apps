@@ -26,7 +26,7 @@
                 <p>Neem contact op met het bondsbureau via <code>{{ email_bb }}</code></p>
                 <p>
                     <a class="btn-sv-rood" href="mailto:{{ email_bb }}">
-                        <i class="notranslate material-symbol-no-fill">mail</i></a>
+                        <i class="notranslate material-symbol">mail</i></a>
                 </p>
 
             {% else %}
@@ -74,7 +74,7 @@
 
                         <td>
                             <a class="btn-sv-rood" href="mailto:{{ sec_email }}">
-                                <i class="notranslate material-symbol-no-fill">mail</i></a>
+                                <i class="notranslate material-symbol">mail</i></a>
                         </td>
                     </tr>
                 </table>

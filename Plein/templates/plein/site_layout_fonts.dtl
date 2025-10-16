@@ -54,12 +54,6 @@
         src: url("{% static 'fonts/Material-Symbols-v277.ttf' %}") format('truetype');
       {% endif %}
     }
-
-    @font-face {
-      font-family: 'bootstrap-icons';
-      font-display: block;  /* liever later tonen dan verspringende layout */
-      src: url("{% static 'fonts/bootstrap-icons-v1_13.woff2' %}") format('woff2');
-    }
 </style>
 
 <link rel="stylesheet" href="{% static 'css/bootstrap-icons.css' %}">

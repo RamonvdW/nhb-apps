@@ -622,8 +622,8 @@ input.table-filter {
 
 .material-symbol {
   font-family: 'Material Symbols Rounded';
-  font-variation-settings: 'FILL' 1;
-  font-weight: normal;
+  // font-variation-settings: 'FILL' 1;
+  font-weight: bold;
   font-style: normal;
   font-size: 24px;
   line-height: 1;
@@ -639,11 +639,6 @@ input.table-filter {
   -moz-osx-font-smoothing: grayscale;
 }
 
-.material-symbol-no-fill {
-  @extend .material-symbol;
-  font-variation-settings: 'FILL' 0;
-  display: none;    /* wordt aangepast nadat het font geladen is - zie on-load handler in Plein/js/site_layout.js */
-}
 
 // bootstrap icons
 .bi {

@@ -79,7 +79,7 @@
                         <td><code>{{ email_webshop }}</code></td>
                         <td>
                             <a class="btn-sv-rood" href="mailto:{{ email_webshop }}">
-                                <i class="notranslate material-symbol-no-fill">mail</i></a>
+                                <i class="notranslate material-symbol">mail</i></a>
                         </td>
                     </tr>
                 {% endif %}
@@ -89,7 +89,7 @@
                         <td><code>{{ email_opleidingen }}</code></td>
                         <td>
                             <a class="btn-sv-rood" href="mailto:{{ email_opleidingen }}">
-                                <i class="notranslate material-symbol-no-fill">mail</i></a>
+                                <i class="notranslate material-symbol">mail</i></a>
                         </td>
                     </tr>
                 {% endif %}
@@ -98,7 +98,7 @@
                     <td><code>{{ email_support }}</code></td>
                     <td>
                         <a class="btn-sv-rood" href="mailto:{{ email_support }}">
-                            <i class="notranslate material-symbol-no-fill">mail</i></a></td>
+                            <i class="notranslate material-symbol">mail</i></a></td>
                 </tr>
             </table>
         </div>
