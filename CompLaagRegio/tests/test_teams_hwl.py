@@ -424,7 +424,7 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
             resp = self.client.get(self.url_maak_team % self.deelcomp18_regio111.pk)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagregio/hwl-teams.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagregio/hwl-teams.dtl', 'design/site_layout.dtl'))
 
         self.assertEqual(0, RegiocompetitieTeam.objects.count())
         with self.assert_max_queries(20):
@@ -472,7 +472,7 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
             resp = self.client.get(self.url_wijzig_team % (self.deelcomp18_regio111.pk, team.pk))
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagregio/hwl-teams-wijzig.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagregio/hwl-teams-wijzig.dtl', 'design/site_layout.dtl'))
 
         # no team change + name change
         with self.assert_max_queries(20):
@@ -501,13 +501,13 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
             resp = self.client.get(self.url_regio_teams % self.deelcomp18_regio111.pk)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagregio/hwl-teams.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagregio/hwl-teams.dtl', 'design/site_layout.dtl'))
 
         # haal het teams overzicht op voor de 25m
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_regio_teams % self.deelcomp25_regio111.pk)
         self.assertEqual(resp.status_code, 200)
-        self.assert_template_used(resp, ('complaagregio/hwl-teams.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagregio/hwl-teams.dtl', 'design/site_layout.dtl'))
 
         # team = RegiocompetitieTeam.objects.first()
 
@@ -523,7 +523,7 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_regio_teams % self.deelcomp18_regio111.pk)
         self.assertEqual(resp.status_code, 200)
-        self.assert_template_used(resp, ('complaagregio/hwl-teams.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagregio/hwl-teams.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
 
         # ophalen van de wijzig-team pagina mag, maar krijgt geen opslaan knop
@@ -532,7 +532,7 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagregio/hwl-teams-wijzig.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagregio/hwl-teams-wijzig.dtl', 'design/site_layout.dtl'))
 
         # verwijder een team na de einddatum
         with self.assert_max_queries(20):
@@ -589,7 +589,7 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
             resp = self.client.get(self.url_regio_teams % self.deelcomp18_regio111.pk)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagregio/hwl-teams.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagregio/hwl-teams.dtl', 'design/site_layout.dtl'))
 
     def test_koppel_hwl(self):
         # login als HWL
@@ -629,7 +629,7 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
             resp = self.client.get(self.url_koppelen % team_18.pk)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagregio/hwl-teams-koppelen.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagregio/hwl-teams-koppelen.dtl', 'design/site_layout.dtl'))
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_koppelen % team_25.pk)
@@ -692,14 +692,14 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
             resp = self.client.get(self.url_koppelen % team_18.pk)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagregio/hwl-teams-koppelen.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagregio/hwl-teams-koppelen.dtl', 'design/site_layout.dtl'))
 
         # haal het teams overzicht op, met geblokkeerde leden
         team_bb = RegiocompetitieTeam.objects.get(team_type__afkorting='BB2')
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_koppelen % team_bb.pk)
         self.assertEqual(resp.status_code, 200)
-        self.assert_template_used(resp, ('complaagregio/hwl-teams-koppelen.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagregio/hwl-teams-koppelen.dtl', 'design/site_layout.dtl'))
 
         # probeer te koppelen van andere vereniging
         pks = list(RegiocompetitieTeam.objects.values_list('pk', flat=True))
@@ -726,7 +726,7 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagregio/hwl-teams-koppelen.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagregio/hwl-teams-koppelen.dtl', 'design/site_layout.dtl'))
 
         resp = self.client.post(url)
         self.assert404(resp, 'Voorbij de einddatum voor wijzigingen')
@@ -756,7 +756,7 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagregio/wijzig-team-ag.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagregio/wijzig-team-ag.dtl', 'design/site_layout.dtl'))
 
         # wijzig het AG
         with self.assert_max_queries(20):
@@ -806,7 +806,7 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagregio/wijzig-team-ag.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagregio/wijzig-team-ag.dtl', 'design/site_layout.dtl'))
 
         # verkeerde regio
         self.functie_rcl.regio = Regio.objects.get(regio_nr=101)
@@ -924,7 +924,7 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagregio/hwl-teams-invallers.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagregio/hwl-teams-invallers.dtl', 'design/site_layout.dtl'))
 
         self.e2e_assert_other_http_commands_not_supported(url)
 
@@ -934,7 +934,7 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagregio/hwl-teams-invallers-koppelen.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagregio/hwl-teams-invallers-koppelen.dtl', 'design/site_layout.dtl'))
 
         # koppel een invallers
         #    noteer: 100012 heeft geen team AG

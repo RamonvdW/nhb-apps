@@ -117,19 +117,19 @@ class TestBestellingMandje(E2EHelpers, TestCase):
         # begin met Het Plein, want die gebruik eval_mandje_inhoud
         resp = self.client.get(self.url_plein)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('plein/plein-sporter.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('plein/plein-sporter.dtl', 'design/site_layout.dtl'))
 
         # tweede keer is de timestamp gezet
         resp = self.client.get(self.url_plein)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('plein/plein-sporter.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('plein/plein-sporter.dtl', 'design/site_layout.dtl'))
 
         # leeg mandje
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_mandje_toon)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('bestelling/toon-mandje.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('bestelling/toon-mandje.dtl', 'design/site_layout.dtl'))
 
         self.e2e_assert_other_http_commands_not_supported(self.url_mandje_toon, post=False)
 
@@ -145,7 +145,7 @@ class TestBestellingMandje(E2EHelpers, TestCase):
                 resp = self.client.get(self.url_mandje_toon)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('bestelling/toon-mandje.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('bestelling/toon-mandje.dtl', 'design/site_layout.dtl'))
 
         # controleer dat er nu wel een knop is om transport in te stellen
         urls = self.extract_all_urls(resp, skip_menu=True)
@@ -165,7 +165,7 @@ class TestBestellingMandje(E2EHelpers, TestCase):
             resp = self.client.get(self.url_mandje_toon)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('bestelling/toon-mandje.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('bestelling/toon-mandje.dtl', 'design/site_layout.dtl'))
 
         mandje.delete()
         resp = self.client.post(self.url_mandje_toon)
@@ -177,7 +177,7 @@ class TestBestellingMandje(E2EHelpers, TestCase):
             resp = self.client.get(self.url_mandje_toon)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('bestelling/toon-mandje.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('bestelling/toon-mandje.dtl', 'design/site_layout.dtl'))
 
     def test_gast(self):
         self.e2e_login_and_pass_otp(self.account_admin)
@@ -207,7 +207,7 @@ class TestBestellingMandje(E2EHelpers, TestCase):
             resp = self.client.get(self.url_mandje_toon)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('bestelling/toon-mandje.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('bestelling/toon-mandje.dtl', 'design/site_layout.dtl'))
 
         # test_gast.py checkt invoeren afleveradres
 
@@ -274,7 +274,7 @@ class TestBestellingMandje(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('bestelling/toon-mandje.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('bestelling/toon-mandje.dtl', 'design/site_layout.dtl'))
 
         Bestelling.objects.all().delete()
 
@@ -318,7 +318,7 @@ class TestBestellingMandje(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('bestelling/toon-mandje.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('bestelling/toon-mandje.dtl', 'design/site_layout.dtl'))
 
         Bestelling.objects.all().delete()
 
@@ -343,7 +343,7 @@ class TestBestellingMandje(E2EHelpers, TestCase):
             resp = self.client.get(self.url_mandje_toon)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('bestelling/toon-mandje.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('bestelling/toon-mandje.dtl', 'design/site_layout.dtl'))
 
         # controleer dat er geen knop is om transport in te stellen
         urls = self.extract_all_urls(resp, skip_menu=True)
@@ -358,7 +358,7 @@ class TestBestellingMandje(E2EHelpers, TestCase):
             resp = self.client.get(self.url_mandje_toon)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('bestelling/toon-mandje.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('bestelling/toon-mandje.dtl', 'design/site_layout.dtl'))
 
         # controleer dat er nu wel een knop is om transport in te stellen
         urls = self.extract_all_urls(resp, skip_menu=True)
@@ -376,7 +376,7 @@ class TestBestellingMandje(E2EHelpers, TestCase):
             resp = self.client.get(self.url_mandje_toon)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('bestelling/toon-mandje.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('bestelling/toon-mandje.dtl', 'design/site_layout.dtl'))
 
         urls = self.extract_all_urls(resp, skip_menu=True)
         self.assertFalse(self.url_kies_transport in urls)

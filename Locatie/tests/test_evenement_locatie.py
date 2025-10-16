@@ -103,7 +103,7 @@ class TestLocatieEvenementLocatie(E2EHelpers, TestCase):
             resp = self.client.get(url)
             self.assertEqual(resp.status_code, 200)  # 200 = OK
             self.assert_html_ok(resp)
-            self.assert_template_used(resp, ('locatie/evenement-locaties.dtl', 'plein/site_layout.dtl'))
+            self.assert_template_used(resp, ('locatie/evenement-locaties.dtl', 'design/site_layout.dtl'))
 
             # maak een nieuwe locatie aan
             self.assertEqual(EvenementLocatie.objects.count(), 0)
@@ -116,13 +116,13 @@ class TestLocatieEvenementLocatie(E2EHelpers, TestCase):
             # resp = self.client.get(url2)
             # self.assertEqual(resp.status_code, 200)  # 200 = OK
             # self.assert_html_ok(resp)
-            # self.assert_template_used(resp, ('locatie/evenement-locatie-details.dtl', 'plein/site_layout.dtl'))
+            # self.assert_template_used(resp, ('locatie/evenement-locatie-details.dtl', 'design/site_layout.dtl'))
 
             # overzicht met locaties
             resp = self.client.get(url)
             self.assertEqual(resp.status_code, 200)  # 200 = OK
             self.assert_html_ok(resp)
-            self.assert_template_used(resp, ('locatie/evenement-locaties.dtl', 'plein/site_layout.dtl'))
+            self.assert_template_used(resp, ('locatie/evenement-locaties.dtl', 'design/site_layout.dtl'))
 
         # helper functions
         loc = self._maak_evenement_locatie(self.ver)
@@ -150,7 +150,7 @@ class TestLocatieEvenementLocatie(E2EHelpers, TestCase):
             resp = self.client.get(url)
             self.assertEqual(resp.status_code, 200)  # 200 = OK
             self.assert_html_ok(resp)
-            self.assert_template_used(resp, ('locatie/evenement-locaties.dtl', 'plein/site_layout.dtl'))
+            self.assert_template_used(resp, ('locatie/evenement-locaties.dtl', 'design/site_layout.dtl'))
 
             # probeer toe te voegen (mag niet)
             resp = self.client.post(url)
@@ -162,7 +162,7 @@ class TestLocatieEvenementLocatie(E2EHelpers, TestCase):
             resp = self.client.get(url)
             self.assertEqual(resp.status_code, 200)  # 200 = OK
             self.assert_html_ok(resp)
-            self.assert_template_used(resp, ('locatie/evenement-locatie-details.dtl', 'plein/site_layout.dtl'))
+            self.assert_template_used(resp, ('locatie/evenement-locatie-details.dtl', 'design/site_layout.dtl'))
 
             resp = self.client.post(url)
             self.assert403(resp, 'Wijzigen alleen door HWL en MO')
@@ -178,7 +178,7 @@ class TestLocatieEvenementLocatie(E2EHelpers, TestCase):
             resp = self.client.get(url)
             self.assertEqual(resp.status_code, 200)  # 200 = OK
             self.assert_html_ok(resp)
-            self.assert_template_used(resp, ('locatie/evenement-locaties.dtl', 'plein/site_layout.dtl'))
+            self.assert_template_used(resp, ('locatie/evenement-locaties.dtl', 'design/site_layout.dtl'))
 
             # maak een nieuwe locatie aan
             self.assertEqual(EvenementLocatie.objects.count(), 0)
@@ -191,7 +191,7 @@ class TestLocatieEvenementLocatie(E2EHelpers, TestCase):
             resp = self.client.get(url)
             self.assertEqual(resp.status_code, 200)  # 200 = OK
             self.assert_html_ok(resp)
-            self.assert_template_used(resp, ('locatie/evenement-locatie-details.dtl', 'plein/site_layout.dtl'))
+            self.assert_template_used(resp, ('locatie/evenement-locatie-details.dtl', 'design/site_layout.dtl'))
 
         # verkeerde vereniging
         ver2 = self._maak_vereniging(1001, 'Andere ver', self.ver.regio)
@@ -223,7 +223,7 @@ class TestLocatieEvenementLocatie(E2EHelpers, TestCase):
             resp = self.client.get(url)
             self.assertEqual(resp.status_code, 200)  # 200 = OK
             self.assert_html_ok(resp)
-            self.assert_template_used(resp, ('locatie/evenement-locatie-details.dtl', 'plein/site_layout.dtl'))
+            self.assert_template_used(resp, ('locatie/evenement-locatie-details.dtl', 'design/site_layout.dtl'))
             urls = self.extract_all_urls(resp, skip_menu=True)
             self.assertEqual(urls, [url, url])      # opslaan en verwijder
 
@@ -292,7 +292,7 @@ class TestLocatieEvenementLocatie(E2EHelpers, TestCase):
             resp = self.client.get(url)
             self.assertEqual(resp.status_code, 200)  # 200 = OK
             self.assert_html_ok(resp)
-            self.assert_template_used(resp, ('locatie/evenement-locatie-details.dtl', 'plein/site_layout.dtl'))
+            self.assert_template_used(resp, ('locatie/evenement-locatie-details.dtl', 'design/site_layout.dtl'))
 
             urls = self.extract_all_urls(resp, skip_menu=True)
             self.assertEqual(urls, [url])      # opslaan (niet: verwijder)

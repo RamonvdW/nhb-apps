@@ -334,7 +334,7 @@ class TestCompInschrijvenMethode1(E2EHelpers, TestCase):
             resp = self.client.get(self.url_behoefte1 % (self.comp_18.pk, self.regio_101.pk))
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compinschrijven/inschrijfmethode1-behoefte.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compinschrijven/inschrijfmethode1-behoefte.dtl', 'design/site_layout.dtl'))
 
         self.assertContains(resp, 'Nog geen keuzes gemaakt')
 
@@ -347,7 +347,7 @@ class TestCompInschrijvenMethode1(E2EHelpers, TestCase):
             resp = self.client.get(self.url_behoefte1 % (self.comp_18.pk, self.regio_101.pk))
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compinschrijven/inschrijfmethode1-behoefte.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compinschrijven/inschrijfmethode1-behoefte.dtl', 'design/site_layout.dtl'))
 
         # schrijf een aantal sporters in
         self.e2e_wisselnaarrol_bb()
@@ -358,7 +358,7 @@ class TestCompInschrijvenMethode1(E2EHelpers, TestCase):
             resp = self.client.get(self.url_behoefte1 % (self.comp_18.pk, self.regio_101.pk))
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         html = self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compinschrijven/inschrijfmethode1-behoefte.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compinschrijven/inschrijfmethode1-behoefte.dtl', 'design/site_layout.dtl'))
         # 0 keer de eerste keuze
         self.assertIn('<td>maandag 15 juli 2019 om 19:00</td><td>[1000] Grote Club</td><td class="center">0</td>', html)
         # 10 keer de tweede (en overige) keuzes

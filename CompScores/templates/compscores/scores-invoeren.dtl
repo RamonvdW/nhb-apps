@@ -1,4 +1,4 @@
-{% extends 'plein/site_layout.dtl' %}
+{% extends 'design/site_layout.dtl' %}
 {% comment %}
                 Copyright (c) 2020-2025 Ramon van der Winkel.
                 All rights reserved.
@@ -219,7 +219,7 @@
         <div class="col s12" style="margin-top:50px">
 
             <!-- waarschijnlijke deelnemers -->
-            {% include 'plein/card_icon.dtl' with title="Lijst ophalen" text="Waarschijnlijke deelnemers toevoegen aan de uitslag." icon="add" js_id="id_lijst_ophalen" %}
+            {% include 'design/card_icon.dtl' with title="Lijst ophalen" text="Waarschijnlijke deelnemers toevoegen aan de uitslag." icon="add" js_id="id_lijst_ophalen" %}
 
         </div>
 

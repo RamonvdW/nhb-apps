@@ -59,14 +59,14 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
             resp = self.client.get(self.url_wissel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('account/login-as-zoek.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('account/login-as-zoek.dtl', 'design/site_layout.dtl'))
 
         # probeer de zoek functie
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_wissel + '?zoekterm=normaal')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('account/login-as-zoek.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('account/login-as-zoek.dtl', 'design/site_layout.dtl'))
 
         # controleer aanwezigheid van Selecteer knop, bondsnummer en Vereniging naam
         self.assertNotContains(resp, "Niets gevonden")
@@ -106,7 +106,7 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
             resp = self.client.post(self.url_wissel, {'selecteer': self.account_normaal.pk})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('account/login-as-go.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('account/login-as-go.dtl', 'design/site_layout.dtl'))
 
         # pik de tijdelijke URL op
         urls = self.extract_all_urls(resp, skip_external=False)
@@ -125,14 +125,14 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
             resp = self.client.post(post_url, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('plein/plein-sporter.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('plein/plein-sporter.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, 'Wissel van rol')
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_plein)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('plein/plein-sporter.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('plein/plein-sporter.dtl', 'design/site_layout.dtl'))
 
         # controleer dat de sporter uitgelogd wordt als de login-as datum verandert
         sessie = self.client.session
@@ -146,7 +146,7 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
                 resp = self.client.get(self.url_plein)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('plein/plein-sporter.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('plein/plein-sporter.dtl', 'design/site_layout.dtl'))
 
     def test_wissel_geen_otp(self):
         # login als admin
@@ -160,7 +160,7 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
             resp = self.client.post(self.url_wissel, {'selecteer': self.account_normaal.pk})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('account/login-as-go.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('account/login-as-go.dtl', 'design/site_layout.dtl'))
 
         # pik de tijdelijke URL op
         urls = self.extract_all_urls(resp, skip_external=False)
@@ -179,7 +179,7 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
             resp = self.client.post(post_url, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('plein/plein-sporter.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('plein/plein-sporter.dtl', 'design/site_layout.dtl'))
         self.assertNotContains(resp, 'Wissel van rol')
 
         # controleer dat tijdelijke URL maar 1x gebruikt kan worden
@@ -200,7 +200,7 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
             resp = self.client.post(self.url_wissel, {'selecteer': self.account_normaal.pk})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('account/login-as-go.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('account/login-as-go.dtl', 'design/site_layout.dtl'))
 
         # pik de tijdelijke URL op
         urls = self.extract_all_urls(resp, skip_external=False)
@@ -274,7 +274,7 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
             resp = self.client.post(self.url_wissel, {'selecteer': self.account_normaal.pk})
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('account/login-as-go.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('account/login-as-go.dtl', 'design/site_layout.dtl'))
 
         # pik de tijdelijke URL op
         urls = self.extract_all_urls(resp, skip_external=False)
@@ -290,7 +290,7 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(tijdelijke_url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('tijdelijkecodes/code-fout.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('tijdelijkecodes/code-fout.dtl', 'design/site_layout.dtl'))
 
     def test_login_as_verloopt(self):
         # login als admin

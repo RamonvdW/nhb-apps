@@ -279,7 +279,7 @@ class TestHistComp(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_top)
         self.assertEqual(resp.status_code, 200)
-        self.assert_template_used(resp, ('histcomp/uitslagen-top.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('histcomp/uitslagen-top.dtl', 'design/site_layout.dtl'))
 
         # alle kaartjes activeren
         self.hist_seizoen.heeft_uitslag_regio_teams = True
@@ -293,19 +293,19 @@ class TestHistComp(E2EHelpers, TestCase):
             resp = self.client.get(self.url_top)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('histcomp/uitslagen-top.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('histcomp/uitslagen-top.dtl', 'design/site_layout.dtl'))
 
         # gebruik filters
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_seizoen % (self.seizoen4url, '18m'))
         self.assertEqual(resp.status_code, 200)
-        self.assert_template_used(resp, ('histcomp/uitslagen-top.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('histcomp/uitslagen-top.dtl', 'design/site_layout.dtl'))
 
         # bad filters
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_seizoen % ('x', 'y'))
         self.assertEqual(resp.status_code, 200)
-        self.assert_template_used(resp, ('histcomp/uitslagen-top.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('histcomp/uitslagen-top.dtl', 'design/site_layout.dtl'))
 
         # gebruik de model helpers
         self.assertTrue(str(self.hist_seizoen) != '')
@@ -329,7 +329,7 @@ class TestHistComp(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_seizoen % (self.seizoen4url, '18m'))
         self.assertEqual(resp.status_code, 200)
-        self.assert_template_used(resp, ('histcomp/uitslagen-top.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('histcomp/uitslagen-top.dtl', 'design/site_layout.dtl'))
 
         self.e2e_assert_other_http_commands_not_supported(self.url_top)
 
@@ -339,14 +339,14 @@ class TestHistComp(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('histcomp/uitslagen-regio-indiv.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('histcomp/uitslagen-regio-indiv.dtl', 'design/site_layout.dtl'))
 
         url = self.url_regio_indiv_nr % (self.seizoen4url, '18m', 'recurve', 102)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('histcomp/uitslagen-regio-indiv.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('histcomp/uitslagen-regio-indiv.dtl', 'design/site_layout.dtl'))
 
         url = self.url_regio_indiv % ('x', 'x', 'x')
         resp = self.client.get(url)
@@ -358,7 +358,7 @@ class TestHistComp(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('histcomp/uitslagen-regio-indiv.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('histcomp/uitslagen-regio-indiv.dtl', 'design/site_layout.dtl'))
 
         # empty filter exception
         self.hist_seizoen.indiv_bogen = ''
@@ -367,7 +367,7 @@ class TestHistComp(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
-        self.assert_template_used(resp, ('histcomp/uitslagen-regio-indiv.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('histcomp/uitslagen-regio-indiv.dtl', 'design/site_layout.dtl'))
 
     def test_regio_teams(self):
         url = self.url_regio_teams % (self.seizoen4url, '18m', 'recurve')
@@ -375,14 +375,14 @@ class TestHistComp(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('histcomp/uitslagen-regio-teams.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('histcomp/uitslagen-regio-teams.dtl', 'design/site_layout.dtl'))
 
         url = self.url_regio_teams_nr % (self.seizoen4url, '18m', 'recurve', 102)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('histcomp/uitslagen-regio-teams.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('histcomp/uitslagen-regio-teams.dtl', 'design/site_layout.dtl'))
 
         url = self.url_regio_teams % ('x', 'x', 'x')
         resp = self.client.get(url)
@@ -393,7 +393,7 @@ class TestHistComp(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
-        self.assert_template_used(resp, ('histcomp/uitslagen-regio-teams.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('histcomp/uitslagen-regio-teams.dtl', 'design/site_layout.dtl'))
 
         # empty filter exception
         self.hist_seizoen.team_typen = ''
@@ -402,7 +402,7 @@ class TestHistComp(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
-        self.assert_template_used(resp, ('histcomp/uitslagen-regio-teams.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('histcomp/uitslagen-regio-teams.dtl', 'design/site_layout.dtl'))
 
     def test_rk_indiv(self):
         url = self.url_rk_indiv % (self.seizoen4url, '18m', 'recurve')
@@ -410,7 +410,7 @@ class TestHistComp(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('histcomp/uitslagen-rk-indiv.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('histcomp/uitslagen-rk-indiv.dtl', 'design/site_layout.dtl'))
 
         # geen uitslag
         url = self.url_rk_indiv_nr % (self.seizoen4url, '18m', 'compound', 1)
@@ -418,7 +418,7 @@ class TestHistComp(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('histcomp/uitslagen-rk-indiv.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('histcomp/uitslagen-rk-indiv.dtl', 'design/site_layout.dtl'))
 
         url = self.url_rk_indiv % ('x', 'x', 'x')
         resp = self.client.get(url)
@@ -429,7 +429,7 @@ class TestHistComp(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
-        self.assert_template_used(resp, ('histcomp/uitslagen-rk-indiv.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('histcomp/uitslagen-rk-indiv.dtl', 'design/site_layout.dtl'))
 
         # empty filter exception
         self.hist_seizoen.indiv_bogen = ''
@@ -438,7 +438,7 @@ class TestHistComp(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
-        self.assert_template_used(resp, ('histcomp/uitslagen-rk-indiv.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('histcomp/uitslagen-rk-indiv.dtl', 'design/site_layout.dtl'))
 
     def test_rk_teams(self):
         # geen uitslag
@@ -447,14 +447,14 @@ class TestHistComp(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('histcomp/uitslagen-rk-teams.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('histcomp/uitslagen-rk-teams.dtl', 'design/site_layout.dtl'))
 
         url = self.url_rk_teams_nr % (self.seizoen4url, '18m', 'recurve', 1)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('histcomp/uitslagen-rk-teams.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('histcomp/uitslagen-rk-teams.dtl', 'design/site_layout.dtl'))
 
         url = self.url_rk_teams % ('x', 'x', 'x')
         resp = self.client.get(url)
@@ -465,7 +465,7 @@ class TestHistComp(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
-        self.assert_template_used(resp, ('histcomp/uitslagen-rk-teams.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('histcomp/uitslagen-rk-teams.dtl', 'design/site_layout.dtl'))
 
         # empty filter exception
         self.hist_seizoen.team_typen = ''
@@ -475,7 +475,7 @@ class TestHistComp(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('histcomp/uitslagen-rk-teams.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('histcomp/uitslagen-rk-teams.dtl', 'design/site_layout.dtl'))
 
     def test_bk_indiv(self):
         url = self.url_bk_indiv % (self.seizoen4url, '18m', 'recurve')
@@ -483,7 +483,7 @@ class TestHistComp(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('histcomp/uitslagen-bk-indiv.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('histcomp/uitslagen-bk-indiv.dtl', 'design/site_layout.dtl'))
 
         # geen uitslag
         url = self.url_bk_indiv % (self.seizoen4url, '18m', 'compound')
@@ -491,7 +491,7 @@ class TestHistComp(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('histcomp/uitslagen-bk-indiv.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('histcomp/uitslagen-bk-indiv.dtl', 'design/site_layout.dtl'))
 
         url = self.url_bk_indiv % ('x', 'x', 'x')
         resp = self.client.get(url)
@@ -502,7 +502,7 @@ class TestHistComp(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
-        self.assert_template_used(resp, ('histcomp/uitslagen-bk-indiv.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('histcomp/uitslagen-bk-indiv.dtl', 'design/site_layout.dtl'))
 
         # empty filter exception
         self.hist_seizoen.indiv_bogen = ''
@@ -512,7 +512,7 @@ class TestHistComp(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('histcomp/uitslagen-bk-indiv.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('histcomp/uitslagen-bk-indiv.dtl', 'design/site_layout.dtl'))
 
     def test_bk_teams(self):
         # lege uitslag
@@ -521,14 +521,14 @@ class TestHistComp(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('histcomp/uitslagen-bk-teams.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('histcomp/uitslagen-bk-teams.dtl', 'design/site_layout.dtl'))
 
         url = self.url_bk_teams % (self.seizoen4url, '18m', 'recurve')
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('histcomp/uitslagen-bk-teams.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('histcomp/uitslagen-bk-teams.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, '##COUNTS##')      # 25m1p telling 10-en en 9-ens
 
         url = self.url_bk_teams % ('x', 'x', 'x')
@@ -540,7 +540,7 @@ class TestHistComp(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
-        self.assert_template_used(resp, ('histcomp/uitslagen-bk-teams.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('histcomp/uitslagen-bk-teams.dtl', 'design/site_layout.dtl'))
 
         # empty filter exception
         self.hist_seizoen.team_typen = ''
@@ -550,7 +550,7 @@ class TestHistComp(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('histcomp/uitslagen-bk-teams.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('histcomp/uitslagen-bk-teams.dtl', 'design/site_layout.dtl'))
 
     def test_geen_data(self):
         HistCompSeizoen.objects.all().delete()
@@ -558,7 +558,7 @@ class TestHistComp(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_top)
         self.assertEqual(resp.status_code, 200)
-        self.assert_template_used(resp, ('histcomp/uitslagen-top.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('histcomp/uitslagen-top.dtl', 'design/site_layout.dtl'))
 
         url = self.url_regio_teams % (self.seizoen4url, '18m', 'recurve')
         self.assert404(self.client.get(url), 'Geen data')

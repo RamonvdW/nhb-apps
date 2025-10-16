@@ -73,7 +73,7 @@ class TestScheidsrechterKorps(E2EHelpers, TestCase):
             resp = self.client.get(self.url_korps)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('scheidsrechter/korps.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('scheidsrechter/korps.dtl', 'design/site_layout.dtl'))
         html = resp.content.decode('utf-8').replace('<wbr>', '')
         self.assertFalse('+3123456789' in html)
         self.assertFalse('@ergens' in html)
@@ -87,7 +87,7 @@ class TestScheidsrechterKorps(E2EHelpers, TestCase):
             resp = self.client.get(self.url_korps)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('scheidsrechter/korps.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('scheidsrechter/korps.dtl', 'design/site_layout.dtl'))
         html = resp.content.decode('utf-8').replace('<wbr>', '')
         self.assertTrue('+3123456789' in html)
         self.assertTrue('scheids@ergens.nl' in html)
@@ -98,7 +98,7 @@ class TestScheidsrechterKorps(E2EHelpers, TestCase):
             resp = self.client.get(self.url_korps)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('scheidsrechter/korps.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('scheidsrechter/korps.dtl', 'design/site_layout.dtl'))
 
         # korps overzicht met contactgegevens is niet toegankelijk
         resp = self.client.get(self.url_korps_cs)
@@ -110,7 +110,7 @@ class TestScheidsrechterKorps(E2EHelpers, TestCase):
             resp = self.client.get(self.url_korps)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('scheidsrechter/korps.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('scheidsrechter/korps.dtl', 'design/site_layout.dtl'))
 
         resp = self.client.get(self.url_korps_cs)
         self.assert403(resp, 'Geen toegang')
@@ -130,7 +130,7 @@ class TestScheidsrechterKorps(E2EHelpers, TestCase):
             resp = self.client.get(self.url_korps)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('scheidsrechter/korps.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('scheidsrechter/korps.dtl', 'design/site_layout.dtl'))
 
         # korps met contactgegevens
         self.voorkeuren.delete()            # corner case
@@ -138,14 +138,14 @@ class TestScheidsrechterKorps(E2EHelpers, TestCase):
             resp = self.client.get(self.url_korps_cs)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('scheidsrechter/korps-cs.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('scheidsrechter/korps-cs.dtl', 'design/site_layout.dtl'))
 
         # vraag de e-mailadressen op
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_korps_cs_emails)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('scheidsrechter/korps-cs-emails.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('scheidsrechter/korps-cs-emails.dtl', 'design/site_layout.dtl'))
 
         self.e2e_assert_other_http_commands_not_supported(self.url_korps)
         self.e2e_assert_other_http_commands_not_supported(self.url_korps_cs)

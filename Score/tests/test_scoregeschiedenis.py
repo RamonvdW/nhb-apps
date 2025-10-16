@@ -179,7 +179,7 @@ class TestScoreGeschiedenis(E2EHelpers, TestCase):
             resp = self.client.get(self.url_geschiedenis)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('score/score-geschiedenis.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('score/score-geschiedenis.dtl', 'design/site_layout.dtl'))
 
         uitslag = Uitslag.objects.first()
         self.assertTrue(str(uitslag) != '')
@@ -196,7 +196,7 @@ class TestScoreGeschiedenis(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('score/score-geschiedenis.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('score/score-geschiedenis.dtl', 'design/site_layout.dtl'))
 
         self.assertContains(resp, self.sporter_100001.volledige_naam())
         self.assertContains(resp, 'Recurve')
@@ -220,7 +220,7 @@ class TestScoreGeschiedenis(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('score/score-geschiedenis.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('score/score-geschiedenis.dtl', 'design/site_layout.dtl'))
 
     def test_zoek_bad(self):
         # login als BB
@@ -231,7 +231,7 @@ class TestScoreGeschiedenis(E2EHelpers, TestCase):
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('score/score-geschiedenis.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('score/score-geschiedenis.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, 'Niets gevonden')
 
         url = self.url_geschiedenis + '?zoekterm=xx'

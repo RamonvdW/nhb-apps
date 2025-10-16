@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -163,7 +163,7 @@ class TestRecordsView(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_overzicht)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
-        self.assert_template_used(resp, ('records/records_overzicht.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('records/records_overzicht.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
 
         self.e2e_assert_other_http_commands_not_supported(self.url_overzicht)
@@ -173,7 +173,7 @@ class TestRecordsView(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
-        self.assert_template_used(resp, ('records/records_specifiek.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('records/records_specifiek.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
         self.assertContains(resp, '1234 (56X)')
         self.assertContains(resp, 'Papendal')
@@ -187,7 +187,7 @@ class TestRecordsView(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
-        self.assert_template_used(resp, ('records/records_specifiek.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('records/records_specifiek.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
         self.assertContains(resp, '1235')
         self.assertContains(resp, 'Ergens Anders')
@@ -206,7 +206,7 @@ class TestRecordsView(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_zoek)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
-        self.assert_template_used(resp, ('records/records_zoek.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('records/records_zoek.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
 
         # te lange zoekterm
@@ -235,7 +235,7 @@ class TestRecordsView(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_zoek, {'zoekterm': 'Papendal'})
         self.assertEqual(resp.status_code, 200)  # 200 = OK
-        self.assert_template_used(resp, ('records/records_zoek.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('records/records_zoek.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, "Resultaten")
         self.assertContains(resp, "1 record")
         self.assert_html_ok(resp)
@@ -255,13 +255,13 @@ class TestRecordsView(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_lijst_er)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
-        self.assert_template_used(resp, ('records/records_special_er.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('records/records_special_er.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_lijst_wr)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
-        self.assert_template_used(resp, ('records/records_special_wr.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('records/records_special_wr.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
 
         self.e2e_assert_other_http_commands_not_supported(self.url_lijst_er)
@@ -271,7 +271,7 @@ class TestRecordsView(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_zoek, {'zoekterm': 'Para Schutter'})
         self.assertEqual(resp.status_code, 200)  # 200 = OK
-        self.assert_template_used(resp, ('records/records_zoek.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('records/records_zoek.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
         self.assertContains(resp, 'Para Schutter')
         self.assertContains(resp, 'Open')
@@ -290,7 +290,7 @@ class TestRecordsView(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_overzicht)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
-        self.assert_template_used(resp, ('records/records_overzicht.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('records/records_overzicht.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
 
 # end of file

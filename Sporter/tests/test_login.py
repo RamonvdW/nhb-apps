@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -62,7 +62,7 @@ class TestSporterLogin(E2EHelpers, TestCase):
         resp = self.e2e_login_no_check(self.account_normaal)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('sporter/login-geblokkeerd-geen-vereniging.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('sporter/login-geblokkeerd-geen-vereniging.dtl', 'design/site_layout.dtl'))
 
     def test_inactief_bb(self):
         # inlog als BB met inactief lid moet gewoon werken
@@ -161,7 +161,7 @@ class TestSporterLogin(E2EHelpers, TestCase):
         # self.e2e_dump_resp(resp)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('account/wachtwoord-vergeten-email.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('account/wachtwoord-vergeten-email.dtl', 'design/site_layout.dtl'))
 
         self.assertEqual(1, MailQueue.objects.count())
 

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2024 Ramon van der Winkel.
+#  Copyright (c) 2020-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -203,7 +203,7 @@ class TestVerenigingWL(E2EHelpers, TestCase):
             resp = self.client.get(self.url_overzicht)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('vereniging/overzicht.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('vereniging/overzicht.dtl', 'design/site_layout.dtl'))
 
     def test_ledenlijst(self):
         # anon
@@ -221,7 +221,7 @@ class TestVerenigingWL(E2EHelpers, TestCase):
             resp = self.client.get(self.url_ledenlijst)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('vereniging/ledenlijst.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('vereniging/ledenlijst.dtl', 'design/site_layout.dtl'))
 
         self.assertContains(resp, 'Jeugdleden')
         self.assertContains(resp, 'Volwassenen')
@@ -241,7 +241,7 @@ class TestVerenigingWL(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_voorkeuren)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('vereniging/leden-voorkeuren.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('vereniging/leden-voorkeuren.dtl', 'design/site_layout.dtl'))
 
         # probeer de sporter-boog instellingen van schutters te veranderen
         # maar dat mag de WL niet, dus gebeurt er niets

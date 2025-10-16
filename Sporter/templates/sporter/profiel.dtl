@@ -1,11 +1,12 @@
-{% extends 'plein/site_layout.dtl' %}
+{% extends 'design/site_layout.dtl' %}
 {% comment %}
                 Copyright (c) 2019-2025 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
-{% load overig_filters %}   <!-- wbr_email en wbr_www filters -->
+{% load design_filters %}   <!-- wbr_email en wbr_www filters -->
+{% load design_icons %}
 
 {% block title %}Mijn pagina{% endblock %}
 
@@ -38,7 +39,7 @@
             <div class="col s12">
                 <!-- voorkeuren -->
                 {% url 'Sporter:voorkeuren' as card_url %}
-                {% include 'plein/card_icon.dtl' with title="Voorkeuren" text="Stel in met welke boog je schiet." icon="tune" url=card_url %}
+                {% include 'design/card_icon.dtl' with title="Voorkeuren" text="Stel in met welke boog je schiet." icon="tune" url=card_url %}
             </div>
         </div>
 
@@ -59,7 +60,7 @@
         <div class="row-sv-blauw">
             <div class="col s12">
                 <!-- bondspas -->
-                {% include 'plein/card_icon.dtl' with title="Bondspas" text="Bekijk je digitale bondspas." icon="id_card" url=url_bondspas %}
+                {% include 'design/card_icon.dtl' with title="Bondspas" text="Bekijk je digitale bondspas." icon="id_card" url=url_bondspas %}
             </div>
         </div>
 
@@ -585,16 +586,16 @@
                 {% if hint_voorkeuren %}
                     <!-- voorkeuren -->
                     {% url 'Sporter:voorkeuren' as card_url %}
-                    {% include 'plein/card_icon.dtl' with title="Voorkeuren" text="Pas je persoonlijke voorkeuren aan." icon="tune" url=card_url %}
+                    {% include 'design/card_icon.dtl' with title="Voorkeuren" text="Pas je persoonlijke voorkeuren aan." icon="tune" url=card_url %}
                 {% endif %}
 
                 <!-- algemene informatie over de competities -->
                 {% url 'Competitie:info-competitie' as card_url %}
-                {% include 'plein/card_icon.dtl' with title="Informatie" text="Algemene informatie over de competities." icon="info" url=card_url %}
+                {% include 'design/card_icon.dtl' with title="Informatie" text="Algemene informatie over de competities." icon="info" url=card_url %}
 
                 <!-- algemene informatie over de teamcompetitie -->
                 {% url 'Competitie:info-teamcompetitie' as card_url %}
-                {% include 'plein/card_icon.dtl' with title="Teams" text="Uitleg over de teamcompetities." icon="groups" url=card_url %}
+                {% include 'design/card_icon.dtl' with title="Teams" text="Uitleg over de teamcompetities." icon="groups" url=card_url %}
             </div>
 
             <!-- competities waar op ingeschreven kan worden -->
@@ -660,7 +661,7 @@
         <div class="row-sv-blauw">
             <div class="col s12">
                 {% url 'Bestelling:toon-bestellingen' as card_url %}
-                {% include 'plein/card_icon.dtl' with title="Bestellingen" text="Alle details van je bestellingen." icon="receipt_long" url=card_url %}
+                {% include 'design/card_icon.dtl' with title="Bestellingen" text="Alle details van je bestellingen." icon="receipt_long" url=card_url %}
             </div>
         </div>
 
@@ -723,7 +724,7 @@
     <div class="row-sv-blauw">
         <div class="col s12">
             {% url 'Sporter:leeftijdsgroepen-persoonlijk' as card_url %}
-            {% include 'plein/card_icon.dtl' with title="Leeftijdsklassen" text="Bekijk in welke leeftijdsklassen jij uit moet komen." icon="star" url=card_url %}
+            {% include 'design/card_icon.dtl' with title="Leeftijdsklassen" text="Bekijk in welke leeftijdsklassen jij uit moet komen." icon="star" url=card_url %}
         </div>
     </div>
 
@@ -740,11 +741,11 @@
         <div class="col s12">
             <!-- voorkeuren -->
             {% url 'Sporter:voorkeuren' as card_url %}
-            {% include 'plein/card_icon.dtl' with title="Voorkeuren" text="Pas je persoonlijke voorkeuren aan." icon="tune" url=card_url %}
+            {% include 'design/card_icon.dtl' with title="Voorkeuren" text="Pas je persoonlijke voorkeuren aan." icon="tune" url=card_url %}
 
             <!-- wachtwoord wijzigen -->
             {% url 'Account:nieuw-wachtwoord' as card_url %}
-            {% include 'plein/card_icon.dtl' with title="Wachtwoord" text="Wijzig het wachtwoord wat nodig is om in te loggen." icon="lock" url=card_url %}
+            {% include 'design/card_icon.dtl' with title="Wachtwoord" text="Wijzig het wachtwoord wat nodig is om in te loggen." icon="lock" url=card_url %}
         </div>
     </div>
 
@@ -1145,8 +1146,7 @@
                             </td>
 
                             <td>
-                                <a class="btn-sv-rood" href="mailto:{{ rcl18_email }}">
-                                    <i class="notranslate material-symbol">mail</i></a>
+                                <a class="btn-sv-rood" href="mailto:{{ rcl18_email }}">{% sv-icon 'email' %}</a>
                             </td>
                         </tr>
                     {% endif %}
@@ -1175,8 +1175,7 @@
                             </td>
 
                             <td>
-                                <a class="btn-sv-rood" href="mailto:{{ rcl25_email }}">
-                                    <i class="notranslate material-symbol">mail</i></a>
+                                <a class="btn-sv-rood" href="mailto:{{ rcl25_email }}">{% sv-icon 'email' %}</a>
                             </td>
                         </tr>
                     {% endif %}
@@ -1227,8 +1226,7 @@
 
                         <td>
                             {% if hwl_email %}
-                                <a class="btn-sv-rood" href="mailto:{{ hwl_email }}">
-                                    <i class="notranslate material-symbol">mail</i></a>
+                                <a class="btn-sv-rood" href="mailto:{{ hwl_email }}">{% sv-icon 'email' %}</a>
                             {% endif %}
                         </td>
                     </tr>
@@ -1275,8 +1273,7 @@
 
                         <td>
                             {% if sec_email %}
-                                <a class="btn-sv-rood" href="mailto:{{ sec_email }}">
-                                    <i class="notranslate material-symbol">mail</i></a>
+                                <a class="btn-sv-rood" href="mailto:{{ sec_email }}">{% sv-icon 'email' %}</a>
                             {% endif %}
                         </td>
                     </tr>
@@ -1304,8 +1301,7 @@
                             <td><span class="hide-on-small-only">E-mail:</span></td>
                             <td><code>{{ bb_email|wbr_email }}</code></td>
                             <td>
-                                <a class="btn-sv-rood" href="mailto:{{ bb_email }}">
-                                    <i class="notranslate material-symbol">mail</i></a>
+                                <a class="btn-sv-rood" href="mailto:{{ bb_email }}">{% sv-icon 'email' %}</a>
                             </td>
                         </tr>
                     {% endif %}
@@ -1342,7 +1338,7 @@
     <div class="row-sv-blauw">
         <div class="col s12">
             {% url 'Plein:privacy' as card_url %}
-            {% include 'plein/card_icon.dtl' with title="Privacyverklaring" text="Lees hier hoe we omgaan met jouw privacy." icon="security" url=card_url %}
+            {% include 'design/card_icon.dtl' with title="Privacyverklaring" text="Lees hier hoe we omgaan met jouw privacy." icon="security" url=card_url %}
         </div>
     </div>
 

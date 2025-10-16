@@ -1,4 +1,4 @@
-{% extends 'plein/site_layout.dtl' %}
+{% extends 'design/site_layout.dtl' %}
 {% comment %}
                 Copyright (c) 2022-2025 Ramon van der Winkel.
                 All rights reserved.
@@ -29,11 +29,11 @@
             <div class="col s12">
 
                 {% if url_vervolg_instaptoets %}
-                    {% include 'plein/card_icon.dtl' with title="Instaptoets" text="Ga verder met de online instaptoets." icon="login" url=url_vervolg_instaptoets %}
+                    {% include 'design/card_icon.dtl' with title="Instaptoets" text="Ga verder met de online instaptoets." icon="login" url=url_vervolg_instaptoets %}
                 {% endif %}
 
                 {% if url_basiscursus %}
-                    {% include 'plein/card_icon.dtl' with title="Basiscursus" text="Informatie over de basiscursus." icon="school" url=url_basiscursus %}
+                    {% include 'design/card_icon.dtl' with title="Basiscursus" text="Informatie over de basiscursus." icon="school" url=url_basiscursus %}
                 {% endif %}
 
             </div>
@@ -92,8 +92,8 @@
     <div class="row-sv-blauw">
         <div class="col s12">
             <!-- landing page opleidingen -->
-            {% static 'plein/logo_khsn_192x192.webp' as img_src %}
-            {% include 'plein/card_logo.dtl' with title="Opleidingen" text="Uitgebreide beschrijving van alle opleidingen." img_src=img_src img_height=75 img_width=75 url=url_opleidingen_main_site extern_open=True %}
+            {% static 'design/logo_khsn_192x192.webp' as img_src %}
+            {% include 'design/card_logo.dtl' with title="Opleidingen" text="Uitgebreide beschrijving van alle opleidingen." img_src=img_src img_height=75 img_width=75 url=url_opleidingen_main_site extern_open=True %}
         </div>
     </div>
 

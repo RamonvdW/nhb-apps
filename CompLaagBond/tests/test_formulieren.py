@@ -202,7 +202,7 @@ class TestCompLaagBondFormulieren(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagbond/bko-download-bk-formulieren.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagbond/bko-download-bk-formulieren.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, 'BK individueel')
         self.assertNotContains(resp, 'BK teams')
 
@@ -213,7 +213,7 @@ class TestCompLaagBondFormulieren(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagbond/bko-download-bk-formulieren.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagbond/bko-download-bk-formulieren.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, 'BK teams')
         self.assertNotContains(resp, 'BK individueel')
 
@@ -268,7 +268,7 @@ class TestCompLaagBondFormulieren(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagbond/hwl-bk-match-info.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagbond/hwl-bk-match-info.dtl', 'design/site_layout.dtl'))
 
         # SR nodig
         self.match.aantal_scheids = 1

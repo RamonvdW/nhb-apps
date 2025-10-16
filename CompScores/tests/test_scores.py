@@ -160,14 +160,14 @@ class TestCompScoresScores(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_uitslag_invoeren % self.match18_pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('compscores/scores-invoeren.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compscores/scores-invoeren.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
 
         # nog een keer, dan bestaat de WedstrijdUitslag al
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_uitslag_invoeren % self.match18_pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('compscores/scores-invoeren.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compscores/scores-invoeren.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
 
         # niet bestaande wedstrijd
@@ -423,7 +423,7 @@ class TestCompScoresScores(E2EHelpers, TestCase):
         with self.assert_max_queries(22):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('compscores/scores-invoeren.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compscores/scores-invoeren.dtl', 'design/site_layout.dtl'))
         urls = self.extract_all_urls(resp, skip_menu=True)
         self.assertIn(ack_url, urls)
 
@@ -755,7 +755,7 @@ class TestCompScoresScores(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)       # 200 = OK
-        self.assert_template_used(resp, ('compscores/scores-bekijken.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compscores/scores-bekijken.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
 
     def test_scores_teams(self):
@@ -777,7 +777,7 @@ class TestCompScoresScores(E2EHelpers, TestCase):
         with self.assert_max_queries(49):
             resp = self.client.get(self.url_regio_teams % deelcomp.pk)
         self.assertEqual(resp.status_code, 200)       # 200 = OK
-        self.assert_template_used(resp, ('compscores/rcl-scores-regio-teams.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compscores/rcl-scores-regio-teams.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
 
         # do een post
@@ -802,7 +802,7 @@ class TestCompScoresScores(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_regio_teams % deelcomp.pk)
         self.assertEqual(resp.status_code, 200)       # 200 = OK
-        self.assert_template_used(resp, ('compscores/rcl-scores-regio-teams.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compscores/rcl-scores-regio-teams.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
 
         # zet ronde = 1
@@ -818,7 +818,7 @@ class TestCompScoresScores(E2EHelpers, TestCase):
         with self.assert_max_queries(49):
             resp = self.client.get(self.url_regio_teams % deelcomp.pk)
         self.assertEqual(resp.status_code, 200)       # 200 = OK
-        self.assert_template_used(resp, ('compscores/rcl-scores-regio-teams.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compscores/rcl-scores-regio-teams.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
 
         # regio organiseert geen teamcompetitie

@@ -316,7 +316,7 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagrayon/planning-rayon.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagrayon/planning-rayon.dtl', 'design/site_layout.dtl'))
 
         # haal de wedstrijd op
         wedstrijd_r1 = Kampioenschap.objects.get(pk=self.deelkamp_rayon1_18.pk).rk_bk_matches.first()
@@ -325,7 +325,7 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
             resp = self.client.get(url_w)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagrayon/wijzig-wedstrijd-rk.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagrayon/wijzig-wedstrijd-rk.dtl', 'design/site_layout.dtl'))
 
         # nog een keer ophalen, want dan zijn wedstrijd.vereniging en wedstrijd.locatie al gezet
         with self.assert_max_queries(27):
@@ -468,7 +468,7 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagrayon/wijzig-wedstrijd-rk.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagrayon/wijzig-wedstrijd-rk.dtl', 'design/site_layout.dtl'))
 
         # nu met een vereniging zonder accommodatie
         ver = self.ver_112       # heeft geen locatie
@@ -649,7 +649,7 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagrayon/rko-rk-selectie.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagrayon/rko-rk-selectie.dtl', 'design/site_layout.dtl'))
 
         # nu doorzetten naar RK fase
         zet_competitie_fase_regio_afsluiten(self.comp_18)
@@ -679,7 +679,7 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagrayon/rko-rk-selectie.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagrayon/rko-rk-selectie.dtl', 'design/site_layout.dtl'))
 
         # nu doorzetten naar RK fase
         zet_competitie_fase_regio_afsluiten(self.comp_18)
@@ -726,7 +726,7 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagrayon/rko-rk-selectie.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagrayon/rko-rk-selectie.dtl', 'design/site_layout.dtl'))
 
         deelnemer.deelname = DEELNAME_JA
         deelnemer.save()
@@ -735,7 +735,7 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagrayon/rko-rk-selectie.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagrayon/rko-rk-selectie.dtl', 'design/site_layout.dtl'))
 
         deelnemer.rank = 100
         deelnemer.save()
@@ -744,7 +744,7 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagrayon/rko-rk-selectie.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagrayon/rko-rk-selectie.dtl', 'design/site_layout.dtl'))
 
         deelnemer.bij_vereniging = None
         deelnemer.rank = 1
@@ -759,7 +759,7 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagrayon/rko-rk-selectie.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagrayon/rko-rk-selectie.dtl', 'design/site_layout.dtl'))
 
         url = self.url_lijst_bestand % self.deelkamp_rayon1_18.pk
         with self.assert_max_queries(20):
@@ -865,7 +865,7 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagrayon/wijzig-status-rk-deelnemer.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagrayon/wijzig-status-rk-deelnemer.dtl', 'design/site_layout.dtl'))
 
         # geen vereniging
         deelnemer.bij_vereniging = None
@@ -1004,7 +1004,7 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagrayon/wijzig-limieten-rk.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagrayon/wijzig-limieten-rk.dtl', 'design/site_layout.dtl'))
 
         isel = 'isel_%s' % self.klasse_r.pk
         tsel = 'tsel_%s' % self.klasse_r_ere.pk

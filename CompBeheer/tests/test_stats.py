@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023-2024 Ramon van der Winkel.
+#  Copyright (c) 2023-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -67,7 +67,7 @@ class TestCompBeheerStats(E2EHelpers, TestCase):
             resp = self.client.get(self.url_statistiek)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compbeheer/statistiek.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compbeheer/statistiek.dtl', 'design/site_layout.dtl'))
 
         # cornercase: nul alle inschrijvingen
         RegiocompetitieSporterBoog.objects.all().delete()
@@ -75,7 +75,7 @@ class TestCompBeheerStats(E2EHelpers, TestCase):
             resp = self.client.get(self.url_statistiek)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compbeheer/statistiek.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compbeheer/statistiek.dtl', 'design/site_layout.dtl'))
 
         # anon test
         self.e2e_logout()
@@ -100,7 +100,7 @@ class TestCompBeheerStats(E2EHelpers, TestCase):
             resp = self.client.get(self.url_statistiek)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compbeheer/statistiek.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compbeheer/statistiek.dtl', 'design/site_layout.dtl'))
 
         # haal de (lege) statistiek pagina op als geen competitie in fase C of later is
         zet_competitie_fase_regio_prep(self.testdata.comp18)
@@ -109,7 +109,7 @@ class TestCompBeheerStats(E2EHelpers, TestCase):
             resp = self.client.get(self.url_statistiek)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compbeheer/statistiek.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compbeheer/statistiek.dtl', 'design/site_layout.dtl'))
 
         self.e2e_assert_other_http_commands_not_supported(self.url_statistiek)
 

@@ -377,7 +377,7 @@ class TestCompScoresWedstrijden(E2EHelpers, TestCase):
             resp = self.client.get(self.url_wedstrijden)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compscores/wedstrijden.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compscores/wedstrijden.dtl', 'design/site_layout.dtl'))
 
         self.e2e_assert_other_http_commands_not_supported(self.url_wedstrijden)
 
@@ -386,7 +386,7 @@ class TestCompScoresWedstrijden(E2EHelpers, TestCase):
             resp = self.client.get(self.url_scores)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compscores/wedstrijden.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compscores/wedstrijden.dtl', 'design/site_layout.dtl'))
 
         urls2 = self.extract_all_urls(resp, skip_menu=True)
         url = None
@@ -412,7 +412,7 @@ class TestCompScoresWedstrijden(E2EHelpers, TestCase):
             resp = self.client.get(self.url_wedstrijden)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compscores/wedstrijden.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compscores/wedstrijden.dtl', 'design/site_layout.dtl'))
 
         # trigger het "er zijn geen kampioenschappen" in de view code
         self.deelkamp18_rk1.rk_bk_matches.clear()

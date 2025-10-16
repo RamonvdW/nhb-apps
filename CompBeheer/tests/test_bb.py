@@ -301,7 +301,7 @@ class TestCompBeheerBB(E2EHelpers, TestCase):
             resp = self.client.get(self.url_kies)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/kies.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('competitie/kies.dtl', 'design/site_layout.dtl'))
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_instellingen)
@@ -334,7 +334,7 @@ class TestCompBeheerBB(E2EHelpers, TestCase):
             resp = self.client.get(self.url_instellingen)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compbeheer/bb-instellingen-nieuwe-competitie.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compbeheer/bb-instellingen-nieuwe-competitie.dtl', 'design/site_layout.dtl'))
 
     def test_aanmaken(self):
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
@@ -345,7 +345,7 @@ class TestCompBeheerBB(E2EHelpers, TestCase):
             resp = self.client.get(self.url_aanmaken)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compbeheer/bb-competities-aanmaken.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compbeheer/bb-competities-aanmaken.dtl', 'design/site_layout.dtl'))
 
         # gebruik een post om de competitie aan te laten maken
         # geen parameters nodig
@@ -370,7 +370,7 @@ class TestCompBeheerBB(E2EHelpers, TestCase):
             resp = self.client.get(self.url_aanmaken)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compbeheer/bb-competities-aanmaken.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compbeheer/bb-competities-aanmaken.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, "Wat doe je hier?")
 
         with self.assert_max_queries(20):
@@ -636,7 +636,7 @@ class TestCompBeheerBB(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compbeheer/bb-klassengrenzen-vaststellen.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compbeheer/bb-klassengrenzen-vaststellen.dtl', 'design/site_layout.dtl'))
 
         # nu kunnen we met een POST de klassengrenzen vaststellen
         count = CompetitieIndivKlasse.objects.filter(competitie=comp18, min_ag__gt=0).count()
@@ -687,7 +687,7 @@ class TestCompBeheerBB(E2EHelpers, TestCase):
         resp = self.client.get(self.url_klassengrenzen_tonen % 999999)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/bestaat-niet.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('competitie/bestaat-niet.dtl', 'design/site_layout.dtl'))
 
     def test_klassengrenzen_tonen(self):
         # competitie opstarten
@@ -704,7 +704,7 @@ class TestCompBeheerBB(E2EHelpers, TestCase):
             resp = self.client.get(self.url_klassengrenzen_tonen % comp_18.pk)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/klassengrenzen-tonen.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('competitie/klassengrenzen-tonen.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, 'De klassengrenzen zijn nog niet vastgesteld')
 
         # klassengrenzen vaststellen (18m en 25m)
@@ -724,7 +724,7 @@ class TestCompBeheerBB(E2EHelpers, TestCase):
             resp = self.client.get(self.url_kies)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/kies.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('competitie/kies.dtl', 'design/site_layout.dtl'))
 
         self.e2e_logout()
 
@@ -733,14 +733,14 @@ class TestCompBeheerBB(E2EHelpers, TestCase):
             resp = self.client.get(self.url_kies)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/kies.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('competitie/kies.dtl', 'design/site_layout.dtl'))
 
         # nog een keer
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_klassengrenzen_tonen % comp_25.pk)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/klassengrenzen-tonen.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('competitie/klassengrenzen-tonen.dtl', 'design/site_layout.dtl'))
         self.assertNotContains(resp, ' zijn nog niet vastgesteld')
         self.assertNotContains(resp, 'De klassengrenzen voor de ')
 
@@ -748,7 +748,7 @@ class TestCompBeheerBB(E2EHelpers, TestCase):
             resp = self.client.get(self.url_klassengrenzen_tonen % comp_18.pk)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/klassengrenzen-tonen.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('competitie/klassengrenzen-tonen.dtl', 'design/site_layout.dtl'))
         self.assertNotContains(resp, ' zijn nog niet vastgesteld')
         self.assertNotContains(resp, 'De klassengrenzen voor de ')
 
@@ -764,7 +764,7 @@ class TestCompBeheerBB(E2EHelpers, TestCase):
             resp = self.client.get(self.url_seizoen_afsluiten)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compbeheer/bb-seizoen-afsluiten.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compbeheer/bb-seizoen-afsluiten.dtl', 'design/site_layout.dtl'))
 
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_seizoen_afsluiten)
@@ -789,7 +789,7 @@ class TestCompBeheerBB(E2EHelpers, TestCase):
             resp = self.client.get(self.url_seizoen_afsluiten)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compbeheer/bb-seizoen-afsluiten.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compbeheer/bb-seizoen-afsluiten.dtl', 'design/site_layout.dtl'))
 
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_seizoen_afsluiten)

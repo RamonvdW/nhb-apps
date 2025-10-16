@@ -185,77 +185,77 @@ class TestBestellingActiviteit(E2EHelpers, TestCase):
             resp = self.client.get(self.url_activiteit)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('bestelling/activiteit.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('bestelling/activiteit.dtl', 'design/site_layout.dtl'))
 
         # slechte zoekterm (veel te lang)
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_activiteit + '?zoekterm=' + 'haha' * 100)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('bestelling/activiteit.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('bestelling/activiteit.dtl', 'design/site_layout.dtl'))
 
         # lege zoekterm, gratis filter
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_activiteit + '?zoekterm=&gratis=on')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('bestelling/activiteit.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('bestelling/activiteit.dtl', 'design/site_layout.dtl'))
 
         # lege zoekterm, evenementen filter
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_activiteit + '?zoekterm=&evenementen=on')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('bestelling/activiteit.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('bestelling/activiteit.dtl', 'design/site_layout.dtl'))
 
         # lege zoekterm, webwinkel filter
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_activiteit + '?zoekterm=&webwinkel=on')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('bestelling/activiteit.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('bestelling/activiteit.dtl', 'design/site_layout.dtl'))
 
         # lege zoekterm, wedstrijden filter
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_activiteit + '?zoekterm=&wedstrijden=on')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('bestelling/activiteit.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('bestelling/activiteit.dtl', 'design/site_layout.dtl'))
 
         # lege zoekterm, opleidingen filter
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_activiteit + '?zoekterm=&opleidingen=on')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('bestelling/activiteit.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('bestelling/activiteit.dtl', 'design/site_layout.dtl'))
 
         # zoekterm getal
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_activiteit + '?zoekterm=1234')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('bestelling/activiteit.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('bestelling/activiteit.dtl', 'design/site_layout.dtl'))
 
         # zoekterm tekst
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_activiteit + '?zoekterm=test')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('bestelling/activiteit.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('bestelling/activiteit.dtl', 'design/site_layout.dtl'))
 
         # zoekterm bestelnummer
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_activiteit + '?zoekterm=MH-1234')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('bestelling/activiteit.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('bestelling/activiteit.dtl', 'design/site_layout.dtl'))
 
         # zoekterm nog te betalen / mislukte betalingen
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_activiteit + '?zoekterm=**')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('bestelling/activiteit.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('bestelling/activiteit.dtl', 'design/site_layout.dtl'))
 
         # geen top-4
         BestellingRegel.objects.exclude(code=BESTELLING_REGEL_CODE_WEDSTRIJD_KORTING).delete()
@@ -267,7 +267,7 @@ class TestBestellingActiviteit(E2EHelpers, TestCase):
             resp = self.client.get(self.url_activiteit)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('bestelling/activiteit.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('bestelling/activiteit.dtl', 'design/site_layout.dtl'))
 
     def test_mww(self):
         # controleer dat de MWW ook bij de bestellingen pagina kan
@@ -280,7 +280,7 @@ class TestBestellingActiviteit(E2EHelpers, TestCase):
             resp = self.client.get(self.url_activiteit)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('bestelling/activiteit.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('bestelling/activiteit.dtl', 'design/site_layout.dtl'))
 
 
 # end of file

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2024 Ramon van der Winkel.
+#  Copyright (c) 2020-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -215,7 +215,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagbond/planning-landelijk.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagbond/planning-landelijk.dtl', 'design/site_layout.dtl'))
 
         # maak een nieuwe wedstrijd aan
         CompetitieMatch.objects.all().delete()
@@ -230,7 +230,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagbond/planning-landelijk.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagbond/planning-landelijk.dtl', 'design/site_layout.dtl'))
 
         # verkeerde deelcomp
         resp = self.client.get(self.url_planning % self.deelcomp_rayon1_18.pk)
@@ -255,7 +255,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagbond/planning-landelijk.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagbond/planning-landelijk.dtl', 'design/site_layout.dtl'))
 
     def test_wijzig_wedstrijd(self):
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
@@ -269,7 +269,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagbond/wijzig-wedstrijd.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagbond/wijzig-wedstrijd.dtl', 'design/site_layout.dtl'))
 
         # probeer te wijzigen
         resp = self.client.post(url)
@@ -326,7 +326,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         # resp = self.client.get(url)
         # self.assertEqual(resp.status_code, 200)     # 200 = OK
         # self.assert_html_ok(resp)
-        # self.assert_template_used(resp, ('complaagbond/wijzig-wedstrijd.dtl', 'plein/site_layout.dtl'))
+        # self.assert_template_used(resp, ('complaagbond/wijzig-wedstrijd.dtl', 'design/site_layout.dtl'))
 
         # wedstrijdklassen weer verwijderen
         resp = self.client.post(url, {'weekdag': 0, 'aanvang': '10:00',
@@ -373,7 +373,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagbond/wijzig-limieten.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagbond/wijzig-limieten.dtl', 'design/site_layout.dtl'))
 
         isel_r0 = 'isel_%s' % self.klasse_indiv_r0.pk
         isel_r1 = 'isel_%s' % self.klasse_indiv_r1.pk

@@ -268,7 +268,7 @@ class TestEvenementAanmeldingen(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_aanmeldingen % self.evenement.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('evenement/aanmeldingen.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('evenement/aanmeldingen.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
 
         # geen aanmeldingen
@@ -278,7 +278,7 @@ class TestEvenementAanmeldingen(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_aanmeldingen % self.evenement.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('evenement/aanmeldingen.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('evenement/aanmeldingen.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
 
         self.e2e_assert_other_http_commands_not_supported(self.url_aanmeldingen % self.evenement.pk)
@@ -324,14 +324,14 @@ class TestEvenementAanmeldingen(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_details_aanmelding % self.inschrijving.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('evenement/aanmelding-details.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('evenement/aanmelding-details.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
 
         # handmatige inschrijving
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_details_aanmelding % self.inschrijving2.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('evenement/aanmelding-details.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('evenement/aanmelding-details.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
 
         # in mandje
@@ -341,7 +341,7 @@ class TestEvenementAanmeldingen(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_details_aanmelding % self.inschrijving.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('evenement/aanmelding-details.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('evenement/aanmelding-details.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
 
     def test_details_afmelding(self):
@@ -363,7 +363,7 @@ class TestEvenementAanmeldingen(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_details_afmelding % self.afgemeld.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('evenement/afmelding-details.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('evenement/afmelding-details.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
 
         # geannuleerd
@@ -373,7 +373,7 @@ class TestEvenementAanmeldingen(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_details_afmelding % self.afgemeld.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('evenement/afmelding-details.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('evenement/afmelding-details.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
 
 

@@ -89,7 +89,7 @@ class TestWedstrijdenManager(E2EHelpers, TestCase):
             resp = self.client.get(self.url_wedstrijden_manager_geannuleerd)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('wedstrijden/overzicht-manager.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijden/overzicht-manager.dtl', 'design/site_layout.dtl'))
 
         # wissel naar HWL en maak een wedstrijd aan
         self.e2e_wissel_naar_functie(self.functie_hwl)
@@ -104,7 +104,7 @@ class TestWedstrijdenManager(E2EHelpers, TestCase):
             resp = self.client.get(self.url_wedstrijden_manager)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('wedstrijden/overzicht-manager.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijden/overzicht-manager.dtl', 'design/site_layout.dtl'))
 
         wedstrijd = Wedstrijd.objects.first()
         wedstrijd.eis_kwalificatie_scores = True
@@ -115,7 +115,7 @@ class TestWedstrijdenManager(E2EHelpers, TestCase):
             resp = self.client.get(self.url_wedstrijden_manager)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('wedstrijden/overzicht-manager.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijden/overzicht-manager.dtl', 'design/site_layout.dtl'))
 
         self.e2e_assert_other_http_commands_not_supported(self.url_wedstrijden_manager, post=False)
 

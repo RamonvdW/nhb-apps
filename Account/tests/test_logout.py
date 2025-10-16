@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -39,19 +39,19 @@ class TestAccountLogout(E2EHelpers, TestCase):
             resp = self.client.post(self.url_login, {'login_naam': 'normaal',
                                                      'wachtwoord': E2EHelpers.WACHTWOORD}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('plein/plein-sporter.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('plein/plein-sporter.dtl', 'design/site_layout.dtl'))
 
         # logout pagina ophalen
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_logout)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('account/uitloggen.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('account/uitloggen.dtl', 'design/site_layout.dtl'))
 
         # echt uitloggen via een POST
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_logout, {}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('plein/plein-bezoeker.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('plein/plein-bezoeker.dtl', 'design/site_layout.dtl'))
 
         self.e2e_assert_other_http_commands_not_supported(self.url_login, post=False)
 

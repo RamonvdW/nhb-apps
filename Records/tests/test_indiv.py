@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2023 Ramon van der Winkel.
+#  Copyright (c) 2021-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -183,14 +183,14 @@ class TestRecordsIndiv(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_indiv_all)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
-        self.assert_template_used(resp, ('records/records_filter_indiv.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('records/records_filter_indiv.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
 
         url = self.url_indiv % ('heren', 'outdoor', '50plus', 'recurve', 'ja', 'nvt', 46)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
-        self.assert_template_used(resp, ('records/records_filter_indiv.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('records/records_filter_indiv.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
 
         # para dwingt disc!=25 en lcat=U af
@@ -198,7 +198,7 @@ class TestRecordsIndiv(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
-        self.assert_template_used(resp, ('records/records_filter_indiv.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('records/records_filter_indiv.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
 
         # gewoon een goede para
@@ -206,7 +206,7 @@ class TestRecordsIndiv(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
-        self.assert_template_used(resp, ('records/records_filter_indiv.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('records/records_filter_indiv.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
 
         # niet-para dwingt lcat!=U
@@ -214,14 +214,14 @@ class TestRecordsIndiv(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
-        self.assert_template_used(resp, ('records/records_filter_indiv.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('records/records_filter_indiv.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
 
         url = self.url_indiv % ('heren', 'outdoor', '21plus', 'traditional', 'ja', 'nvt', 0)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
-        self.assert_template_used(resp, ('records/records_filter_indiv.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('records/records_filter_indiv.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
         self.assertContains(resp, 'Traditionele Schutter')
 

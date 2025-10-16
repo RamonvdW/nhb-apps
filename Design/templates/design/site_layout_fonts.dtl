@@ -56,7 +56,5 @@
     }
 </style>
 
-<link rel="stylesheet" href="{% static 'css/bootstrap-icons.css' %}">
-
 
 <!-- end of file -->

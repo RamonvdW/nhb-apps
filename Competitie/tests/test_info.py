@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2024 Ramon van der Winkel.
+#  Copyright (c) 2020-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -114,7 +114,7 @@ class TestCompetitieInfo(E2EHelpers, TestCase):
             resp = self.client.get(self.url_info)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/info-competitie.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('competitie/info-competitie.dtl', 'design/site_layout.dtl'))
 
         # geen lid
         self.e2e_login(self.account_geen_lid)
@@ -122,7 +122,7 @@ class TestCompetitieInfo(E2EHelpers, TestCase):
             resp = self.client.get(self.url_info)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/info-competitie.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('competitie/info-competitie.dtl', 'design/site_layout.dtl'))
 
         # sporter
         self.client.logout()
@@ -131,7 +131,7 @@ class TestCompetitieInfo(E2EHelpers, TestCase):
             resp = self.client.get(self.url_info)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/info-competitie.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('competitie/info-competitie.dtl', 'design/site_layout.dtl'))
 
         # inactief
         self.sporter_100001.bij_vereniging = None
@@ -142,7 +142,7 @@ class TestCompetitieInfo(E2EHelpers, TestCase):
             resp = self.client.get(self.url_info)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/info-competitie.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('competitie/info-competitie.dtl', 'design/site_layout.dtl'))
 
         # redirect oud naar nieuw
         resp = self.client.get('/bondscompetities/info/leeftijden/')
@@ -154,7 +154,7 @@ class TestCompetitieInfo(E2EHelpers, TestCase):
             resp = self.client.get(self.url_info_teams)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/info-teamcompetitie.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('competitie/info-teamcompetitie.dtl', 'design/site_layout.dtl'))
 
         # geen lid
         self.e2e_login(self.account_geen_lid)
@@ -162,7 +162,7 @@ class TestCompetitieInfo(E2EHelpers, TestCase):
             resp = self.client.get(self.url_info_teams)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/info-teamcompetitie.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('competitie/info-teamcompetitie.dtl', 'design/site_layout.dtl'))
 
         # sporter
         self.e2e_login(self.account_lid)
@@ -170,7 +170,7 @@ class TestCompetitieInfo(E2EHelpers, TestCase):
             resp = self.client.get(self.url_info_teams)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/info-teamcompetitie.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('competitie/info-teamcompetitie.dtl', 'design/site_layout.dtl'))
 
         # inactief
         self.sporter_100001.bij_vereniging = None
@@ -181,6 +181,6 @@ class TestCompetitieInfo(E2EHelpers, TestCase):
             resp = self.client.get(self.url_info_teams)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/info-teamcompetitie.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('competitie/info-teamcompetitie.dtl', 'design/site_layout.dtl'))
 
 # end of file

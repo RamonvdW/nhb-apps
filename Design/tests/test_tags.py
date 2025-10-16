@@ -1,17 +1,18 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from Overig.templatetags.overig_filters import (filter_highlight, filter_wbr_email, filter_wbr_dagdeel, filter_wbr_www,
+from Design.templatetags.design_filters import (filter_highlight, filter_wbr_email, filter_wbr_dagdeel, filter_wbr_www,
                                                 filter_wbr_seizoen)
+from Design.templatetags.design_icons import sv_icon
 
 
-class TestOverigTemplatetags(TestCase):
+class TestDesignTemplatetags(TestCase):
 
-    """ tests voor de Overig applicatie, module Template tags """
+    """ tests voor de Design applicatie, module Template tags """
 
     def setUp(self):
         """ initialisatie van de test case """
@@ -78,5 +79,18 @@ class TestOverigTemplatetags(TestCase):
     def test_filter_wbr_seizoen(self):
         self.assertEqual(filter_wbr_seizoen("Testje"), '<wbr>Testje')
         self.assertEqual(filter_wbr_seizoen("2022/2023"), '2022/<wbr>2023')
+
+    def test_icon(self):
+        self.assertEqual(sv_icon('email'), '<i class="notranslate material-symbol sv-rood-text">mail</i>')
+
+        with self.assertRaises(ValueError):
+            sv_icon('#does not exist')
+
+        # varianten
+        out = sv_icon('email', kleur='kleur', extra_class='klass', extra_style='stijl:1')
+        self.assertEqual(out, '<i class="notranslate material-symbol kleur klass" style="stijl:1">mail</i>')
+
+        out = sv_icon('email', kleur='')
+        self.assertTrue('sv-rood-text' not in out)
 
 # end of file

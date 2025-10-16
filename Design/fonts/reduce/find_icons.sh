@@ -11,7 +11,7 @@ cd "$SCRIPT_DIR" || exit 1
 # ga naar de top directory van het project
 cd ../../.. || exit 1
 
-OUT="Plein/fonts/reduce/needed-glyphs_material-symbols.txt"
+OUT="Design/fonts/reduce/needed-glyphs_material-symbols.txt"
 HANDLED='@@@'   # dummy, to allow concatenation
 
 OUT_TMP="/tmp/find_icons.txt"

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023-2024 Ramon van der Winkel.
+#  Copyright (c) 2023-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -164,7 +164,7 @@ class TestScheidsrechterBeschikbaarheid(E2EHelpers, TestCase):
             resp = self.client.get(self.url_beschikbaarheid_wijzigen)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('scheidsrechter/beschikbaarheid-wijzigen.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('scheidsrechter/beschikbaarheid-wijzigen.dtl', 'design/site_layout.dtl'))
 
         self.e2e_assert_other_http_commands_not_supported(self.url_beschikbaarheid_wijzigen, post=False)
 
@@ -199,7 +199,7 @@ class TestScheidsrechterBeschikbaarheid(E2EHelpers, TestCase):
             resp = self.client.get(self.url_beschikbaarheid_wijzigen)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('scheidsrechter/beschikbaarheid-wijzigen.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('scheidsrechter/beschikbaarheid-wijzigen.dtl', 'design/site_layout.dtl'))
 
         # beschikbaarheid opgeven: Nee
         self.assertEqual(0, ScheidsBeschikbaarheid.objects.count())
@@ -223,7 +223,7 @@ class TestScheidsrechterBeschikbaarheid(E2EHelpers, TestCase):
             resp = self.client.get(self.url_beschikbaarheid_wijzigen)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('scheidsrechter/beschikbaarheid-wijzigen.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('scheidsrechter/beschikbaarheid-wijzigen.dtl', 'design/site_layout.dtl'))
 
         # beschikbaarheid opgeven: Unsupported
         with self.assert_max_queries(20):
@@ -245,7 +245,7 @@ class TestScheidsrechterBeschikbaarheid(E2EHelpers, TestCase):
             resp = self.client.get(self.url_beschikbaarheid_wijzigen)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('scheidsrechter/beschikbaarheid-wijzigen.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('scheidsrechter/beschikbaarheid-wijzigen.dtl', 'design/site_layout.dtl'))
 
     def test_sr4(self):
         # beschikbaarheid opvragen voor een wedstrijd
@@ -280,7 +280,7 @@ class TestScheidsrechterBeschikbaarheid(E2EHelpers, TestCase):
             resp = self.client.get(self.url_beschikbaarheid_wijzigen)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('scheidsrechter/beschikbaarheid-wijzigen.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('scheidsrechter/beschikbaarheid-wijzigen.dtl', 'design/site_layout.dtl'))
 
         # beschikbaarheid opgeven: Misschien
         self.assertEqual(0, ScheidsBeschikbaarheid.objects.count())
@@ -297,7 +297,7 @@ class TestScheidsrechterBeschikbaarheid(E2EHelpers, TestCase):
             resp = self.client.get(self.url_beschikbaarheid_wijzigen)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('scheidsrechter/beschikbaarheid-wijzigen.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('scheidsrechter/beschikbaarheid-wijzigen.dtl', 'design/site_layout.dtl'))
 
         # beschikbaarheid wijzigen: Ja
         with self.assert_max_queries(20):
@@ -315,7 +315,7 @@ class TestScheidsrechterBeschikbaarheid(E2EHelpers, TestCase):
             resp = self.client.get(self.url_beschikbaarheid_wijzigen)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('scheidsrechter/beschikbaarheid-wijzigen.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('scheidsrechter/beschikbaarheid-wijzigen.dtl', 'design/site_layout.dtl'))
 
         # beschikbaarheid gelijk houden: Ja --> Ja
         with self.assert_max_queries(20):
@@ -372,7 +372,7 @@ class TestScheidsrechterBeschikbaarheid(E2EHelpers, TestCase):
             resp = self.client.get(self.url_beschikbaarheid_inzien)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('scheidsrechter/beschikbaarheid-inzien-cs.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('scheidsrechter/beschikbaarheid-inzien-cs.dtl', 'design/site_layout.dtl'))
 
         # beschikbaarheid opvragen voor een wedstrijd
         self.assertEqual(0, WedstrijdDagScheidsrechters.objects.count())
@@ -391,7 +391,7 @@ class TestScheidsrechterBeschikbaarheid(E2EHelpers, TestCase):
             resp = self.client.get(self.url_beschikbaarheid_inzien)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('scheidsrechter/beschikbaarheid-inzien-cs.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('scheidsrechter/beschikbaarheid-inzien-cs.dtl', 'design/site_layout.dtl'))
 
         # SR4 geeft beschikbaarheid door
         self.e2e_login(self.sr4_met_account.account)
@@ -408,7 +408,7 @@ class TestScheidsrechterBeschikbaarheid(E2EHelpers, TestCase):
             resp = self.client.get(self.url_beschikbaarheid_inzien)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('scheidsrechter/beschikbaarheid-inzien-cs.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('scheidsrechter/beschikbaarheid-inzien-cs.dtl', 'design/site_layout.dtl'))
 
     def test_stats(self):
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
@@ -420,7 +420,7 @@ class TestScheidsrechterBeschikbaarheid(E2EHelpers, TestCase):
             resp = self.client.get(self.url_beschikbaarheid_stats)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('scheidsrechter/beschikbaarheid-stats-cs.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('scheidsrechter/beschikbaarheid-stats-cs.dtl', 'design/site_layout.dtl'))
 
         sb = ScheidsBeschikbaarheid(scheids=self.sr3_met_account,
                                     datum='2024-01-01',
@@ -446,7 +446,7 @@ class TestScheidsrechterBeschikbaarheid(E2EHelpers, TestCase):
             resp = self.client.get(self.url_beschikbaarheid_stats)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('scheidsrechter/beschikbaarheid-stats-cs.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('scheidsrechter/beschikbaarheid-stats-cs.dtl', 'design/site_layout.dtl'))
 
 
 # end of file

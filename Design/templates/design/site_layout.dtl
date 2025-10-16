@@ -17,6 +17,7 @@
 {% endcomment %}
 
 {% load static %}
+{% load design_icons %}
 
 {% autoescape on %}
 
@@ -26,11 +27,11 @@
 
         <title>{% block title %}{% endblock %}</title>
 
-        {% include 'plein/site_layout_fonts.dtl' %}
+        {% include 'design/site_layout_fonts.dtl' %}
 
         <link rel="stylesheet" href="{% static 'css/materialize-new-313.css' %}">
 
-        {% include 'plein/site_layout_favicons.dtl' %}
+        {% include 'design/site_layout_favicons.dtl' %}
 
         {% if canonical %}
             <!-- advies van Google is om absolute URLs te gebruiken ipv relatieve, ook al werkt het -->
@@ -56,7 +57,7 @@
                     <!-- logo links;         brand-logo voorkomt button wrap -->
                     <a href="/plein/" class="brand-logo left">
                                                            <!-- aspect ratio: 400x92 -> 270x62 -->
-                        <img src="{% static 'plein/logo_with_text_khsn.webp' %}" width="270" height="62" alt="KHSN logo" draggable="false">
+                        <img src="{% static 'design/logo_with_text_khsn.webp' %}" width="270" height="62" alt="KHSN logo" draggable="false">
                     </a>
 
                     <!-- login/quick access knop aan de rechter kant -->
@@ -100,8 +101,7 @@
                     {% if menu_url_wissel_van_rol %}
                         <li class="divider"></li>
                         <li>
-                            <a href="{{ menu_url_wissel_van_rol }}">
-                                <i class="notranslate material-symbol sv-rood-text">group</i>Wissel van rol</a>
+                            <a href="{{ menu_url_wissel_van_rol }}">{% sv-icon 'wissel-van-rol' %}Wissel van rol</a>
                         </li>
                     {% endif %}
 
@@ -109,15 +109,15 @@
                         <li class="divider"></li>
                         <li>
                             <a href="{{ menu_url_admin_site }}" target="_blank" rel="noopener noreferrer">
-                                <i class="notranslate material-symbol sv-middel-blauw-text">build</i>Admin site</a>
+                                {% sv-icon 'admin' kleur='sv-middel-blauw-text' %}Admin site</a>
                         </li>
                     {% endif %}
 
                     {% if menu_url_taken %}
                         <li class="divider"></li>
                         <li>
-                            <a href="{{ menu_url_taken }}">
-                                <i class="notranslate material-symbol sv-rood-text">inbox</i>Taken <span class="new badge" data-badge-caption="open">{{ menu_aantal_open_taken }}</span>
+                            <a href="{{ menu_url_taken }}">{% sv-icon 'taken' %}Taken&nbsp;
+                                <span class="new badge" data-badge-caption="open">{{ menu_aantal_open_taken }}</span>
                             </a>
                         </li>
                     {% endif %}
@@ -125,24 +125,21 @@
                     {% if menu_url_profiel %}
                         <li class="divider"></li>
                         <li>
-                            <a href="{{ menu_url_profiel }}">
-                                <i class="notranslate material-symbol sv-rood-text">account_circle</i>Mijn pagina</a>
+                            <a href="{{ menu_url_profiel }}">{% sv-icon 'mijn-pagina' %}Mijn pagina</a>
                         </li>
                     {% endif %}
 
                     {% if menu_url_bondspas %}
                         <li class="divider"></li>
                         <li>
-                            <a href="{{ menu_url_bondspas }}">
-                                <i class="notranslate material-symbol sv-rood-text">id_card</i>Toon bondspas</a>
+                            <a href="{{ menu_url_bondspas }}">{% sv-icon 'bondspas' %}Toon bondspas</a>
                         </li>
                     {% endif %}
 
                     {% if menu_url_uitloggen %}
                         <li class="divider"></li>
                         <li>
-                            <a href="{{ menu_url_uitloggen }}">
-                                <i class="notranslate material-symbol sv-rood-text">logout</i>Uitloggen</a>
+                            <a href="{{ menu_url_uitloggen }}">{% sv-icon 'uitloggen' %}Uitloggen</a>
                         </li>
                     {% endif %}
                 </ul>

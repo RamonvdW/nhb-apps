@@ -8,9 +8,9 @@ FONTS_DIR="../../static/fonts"
 GLYPH_NAMES="needed-glyphs_material-symbols.txt"        # created by find_icons.sh
 SUBSET_NAME="material-symbols-subset-mh-v"
 DEST="$FONTS_DIR/${SUBSET_NAME}NEW.woff2"
-DTL_FONTS="../../templates/plein/site_layout_fonts.dtl"
+DTL_FONTS="../../templates/design/site_layout_fonts.dtl"
 
-# ga naar de directory van het script (Plein/fonts/reduce/)
+# ga naar de directory van het script (Design/fonts/reduce/)
 SCRIPT_DIR=$(dirname "$0")
 cd "$SCRIPT_DIR" || exit 1
 

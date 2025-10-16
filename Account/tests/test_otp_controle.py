@@ -55,12 +55,12 @@ class TestAccountOtpControle(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_controle, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('plein/plein-bezoeker.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('plein/plein-bezoeker.dtl', 'design/site_layout.dtl'))
 
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_controle, {'otp_code': '123456'}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('plein/plein-bezoeker.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('plein/plein-bezoeker.dtl', 'design/site_layout.dtl'))
 
     def test_niet_nodig(self):
         # controleer redirect naar het plein, omdat OTP koppeling niet nodig is
@@ -68,12 +68,12 @@ class TestAccountOtpControle(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_controle, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('plein/plein-sporter.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('plein/plein-sporter.dtl', 'design/site_layout.dtl'))
 
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_controle, {'otp_code': '123456'}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('plein/plein-sporter.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('plein/plein-sporter.dtl', 'design/site_layout.dtl'))
 
     def test_controle(self):
         self.testdata.account_admin.otp_is_actief = True
@@ -86,14 +86,14 @@ class TestAccountOtpControle(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_controle)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('account/otp-controle.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('account/otp-controle.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
 
         # geen code
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_controle, {'jaja': 'nee'})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('account/otp-controle.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('account/otp-controle.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
         self.assertContains(resp, "de gegevens worden niet geaccepteerd")
 
@@ -101,35 +101,35 @@ class TestAccountOtpControle(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_controle, {'otp_code': ''})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('account/otp-controle.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('account/otp-controle.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, "de gegevens worden niet geaccepteerd")
 
         # illegale code
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_controle, {'otp_code': 'ABCDEF'})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('account/otp-controle.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('account/otp-controle.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, "voer de vereiste code in")
 
         # foute code
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_controle, {'otp_code': '123456'})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('account/otp-controle.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('account/otp-controle.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, "verkeerde code. Probeer het nog eens.")
 
         # juiste otp code
         code = get_otp_code(self.testdata.account_admin)
         resp = self.client.post(self.url_controle, {'otp_code': code}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('functie/wissel-van-rol.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('functie/wissel-van-rol.dtl', 'design/site_layout.dtl'))
 
         # juiste otp code + next url
         code = get_otp_code(self.testdata.account_admin)
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_controle, {'otp_code': code, 'next_url': '/records/niet-bekend/'})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('account/otp-controle.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('account/otp-controle.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, 'de gegevens worden niet geaccepteerd')
 
         # juiste otp code + next url zonder final slash
@@ -153,7 +153,7 @@ class TestAccountOtpControle(E2EHelpers, TestCase):
         code = get_otp_code(self.testdata.account_admin)
         resp = self.client.post(self.url_controle, {'otp_code': code}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('functie/wissel-van-rol.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('functie/wissel-van-rol.dtl', 'design/site_layout.dtl'))
 
         # wijzig de laatste datum van otp controle
         account = self.testdata.account_admin
@@ -165,7 +165,7 @@ class TestAccountOtpControle(E2EHelpers, TestCase):
         resp = self.client.get(self.url_beheer, follow=True)
         self.assertFalse(self.client.session.get(SESSIONVAR_ACCOUNT_OTP_CONTROL_IS_GELUKT))
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('account/otp-controle.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('account/otp-controle.dtl', 'design/site_layout.dtl'))
 
 
 # end of file

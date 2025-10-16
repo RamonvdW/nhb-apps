@@ -1,4 +1,4 @@
-{% extends 'plein/site_layout.dtl' %}
+{% extends 'design/site_layout.dtl' %}
 {% comment %}
                 Copyright (c) 2021-2025 Ramon van der Winkel.
                 All rights reserved.
@@ -45,11 +45,11 @@
     <!-- blauw balk met kaartjes -->
     <div class="row-sv-blauw">
         <div class="col s12">
-            {% static 'plein/logo_freeotp_230x230.png' as img_src %}
-            {% include 'plein/card_logo.dtl' with title="FreeOTP" text="Wikipedia artikel over FreeOTP Authenticator.<br>(engelstalig)" img_src=img_src img_height=75 img_width=75 url="https://en.wikipedia.org/wiki/FreeOTP" extern_open=True %}
+            {% static 'account/logo_freeotp_230x230.png' as img_src %}
+            {% include 'design/card_logo.dtl' with title="FreeOTP" text="Wikipedia artikel over FreeOTP Authenticator.<br>(engelstalig)" img_src=img_src img_height=75 img_width=75 url="https://en.wikipedia.org/wiki/FreeOTP" extern_open=True %}
 
-            {% static 'plein/logo_authenticator_256x256.png' as img_src %}
-            {% include 'plein/card_logo.dtl' with title="Authenticator" text="Wikipedia artikel over Google Authenticator.<br>(engelstalig)" img_src=img_src img_height=75 img_width=75 url="https://en.wikipedia.org/wiki/Google_Authenticator" extern_open=True %}
+            {% static 'account/logo_authenticator_256x256.png' as img_src %}
+            {% include 'design/card_logo.dtl' with title="Authenticator" text="Wikipedia artikel over Google Authenticator.<br>(engelstalig)" img_src=img_src img_height=75 img_width=75 url="https://en.wikipedia.org/wiki/Google_Authenticator" extern_open=True %}
         </div>
 
         <div class="col s8 offset-s2 xl6 offset-xl3 white" style="margin-top:30px; padding:10px">
@@ -77,11 +77,11 @@
     <!-- blauw balk met kaartjes -->
     <div class="row-sv-blauw">
         <div class="col s12">
-            {% static 'plein/logo_chrome_256x256.webp' as img_src %}
-            {% include 'plein/card_logo.dtl' with title="Chrome extensie" text="Authenticator extensie voor de Chrome browser." img_src=img_src img_height=75 img_width=75 url="https://chrome.google.com/webstore/detail/authenticator/bhghoamapcdpbohphigoooaddinpkbai?hl=nl-nl" extern_open=True %}
+            {% static 'account/logo_chrome_256x256.webp' as img_src %}
+            {% include 'design/card_logo.dtl' with title="Chrome extensie" text="Authenticator extensie voor de Chrome browser." img_src=img_src img_height=75 img_width=75 url="https://chrome.google.com/webstore/detail/authenticator/bhghoamapcdpbohphigoooaddinpkbai?hl=nl-nl" extern_open=True %}
 
-            {% static 'plein/logo_firefox_256x256.webp' as img_src %}
-            {% include 'plein/card_logo.dtl' with title="FireFox extensie" text="Authenticator extensie voor de FireFox browser." img_src=img_src img_height=75 img_width=75 url="https://addons.mozilla.org/en-GB/firefox/addon/auth-helper/" extern_open=True %}
+            {% static 'account/logo_firefox_256x256.webp' as img_src %}
+            {% include 'design/card_logo.dtl' with title="FireFox extensie" text="Authenticator extensie voor de FireFox browser." img_src=img_src img_height=75 img_width=75 url="https://addons.mozilla.org/en-GB/firefox/addon/auth-helper/" extern_open=True %}
         </div>
     </div>
 

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -69,7 +69,7 @@ class TestFunctieVHPG(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_acceptatie, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('functie/vhpg-acceptatie.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('functie/vhpg-acceptatie.dtl', 'design/site_layout.dtl'))
         self.assertNotContains(resp, 'verplicht')
 
         self.assertEqual(VerklaringHanterenPersoonsgegevens.objects.count(), 0)
@@ -81,7 +81,7 @@ class TestFunctieVHPG(E2EHelpers, TestCase):
             resp = self.client.post(self.url_acceptatie, {}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('functie/vhpg-acceptatie.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('functie/vhpg-acceptatie.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, 'verplicht')
 
         self.assertEqual(VerklaringHanterenPersoonsgegevens.objects.count(), 0)
@@ -91,7 +91,7 @@ class TestFunctieVHPG(E2EHelpers, TestCase):
             resp = self.client.post(self.url_acceptatie, {'accepteert': 'whatever'}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('functie/wissel-van-rol.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('functie/wissel-van-rol.dtl', 'design/site_layout.dtl'))
 
         self.assertEqual(VerklaringHanterenPersoonsgegevens.objects.count(), 1)
         needs_vhpg, _ = account_needs_vhpg(self.testdata.account_admin)
@@ -120,7 +120,7 @@ class TestFunctieVHPG(E2EHelpers, TestCase):
             resp = self.client.get(self.url_overzicht)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('functie/vhpg-overzicht.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('functie/vhpg-overzicht.dtl', 'design/site_layout.dtl'))
 
         self.e2e_assert_other_http_commands_not_supported(self.url_overzicht)
 
@@ -131,7 +131,7 @@ class TestFunctieVHPG(E2EHelpers, TestCase):
             resp = self.client.get(self.url_afspraken)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('functie/vhpg-afspraken.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('functie/vhpg-afspraken.dtl', 'design/site_layout.dtl'))
 
         self.e2e_assert_other_http_commands_not_supported(self.url_afspraken)
 

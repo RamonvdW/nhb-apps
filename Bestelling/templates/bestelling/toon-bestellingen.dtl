@@ -1,10 +1,11 @@
-{% extends 'plein/site_layout.dtl' %}
+{% extends 'design/site_layout.dtl' %}
 {% comment %}
                 Copyright (c) 2022-2025 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
+{% load design_icons %}
 
 {% block title %}Bestellingen{% endblock %}
 
@@ -78,8 +79,7 @@
                         <td>Vragen over bestellingen in de <b>webshop</b></td>
                         <td><code>{{ email_webshop }}</code></td>
                         <td>
-                            <a class="btn-sv-rood" href="mailto:{{ email_webshop }}">
-                                <i class="notranslate material-symbol">mail</i></a>
+                            <a class="btn-sv-rood" href="mailto:{{ email_webshop }}">{% sv-icon 'email' %}</a>
                         </td>
                     </tr>
                 {% endif %}
@@ -88,8 +88,7 @@
                         <td>Vragen over bestelde <b>opleidingen</b></td>
                         <td><code>{{ email_opleidingen }}</code></td>
                         <td>
-                            <a class="btn-sv-rood" href="mailto:{{ email_opleidingen }}">
-                                <i class="notranslate material-symbol">mail</i></a>
+                            <a class="btn-sv-rood" href="mailto:{{ email_opleidingen }}">{% sv-icon 'email' %}</a>
                         </td>
                     </tr>
                 {% endif %}
@@ -97,8 +96,8 @@
                     <td>Vragen over bestellen en betalen</td>
                     <td><code>{{ email_support }}</code></td>
                     <td>
-                        <a class="btn-sv-rood" href="mailto:{{ email_support }}">
-                            <i class="notranslate material-symbol">mail</i></a></td>
+                        <a class="btn-sv-rood" href="mailto:{{ email_support }}">{% sv-icon 'email' %}</a>
+                    </td>
                 </tr>
             </table>
         </div>

@@ -1,4 +1,4 @@
-{% extends 'plein/site_layout.dtl' %}
+{% extends 'design/site_layout.dtl' %}
 {% comment %}
                 Copyright (c) 2024-2025 Ramon van der Winkel.
                 All rights reserved.
@@ -170,20 +170,20 @@
                 {% if kan_aanmelden %}
 
                     <!-- inschrijven sporter -->
-                    {% include 'plein/card_icon.dtl' with title="Sporter" text="Aanmelden en betalen voor jezelf." icon="person" url=url_inschrijven_sporter %}
+                    {% include 'design/card_icon.dtl' with title="Sporter" text="Aanmelden en betalen voor jezelf." icon="person" url=url_inschrijven_sporter %}
 
                     <!-- inschrijven groepje -->
-                    {% include 'plein/card_icon.dtl' with title="Groep" text="Aanmelden en betalen voor een groepje leden zoals team, vrienden of collega's." icon="group" url=url_inschrijven_groepje %}
+                    {% include 'design/card_icon.dtl' with title="Groep" text="Aanmelden en betalen voor een groepje leden zoals team, vrienden of collega's." icon="group" url=url_inschrijven_groepje %}
 
                     <!-- inschrijven familie -->
-                    {% include 'plein/card_icon.dtl' with title="Familie" text="Aanmelden en betalen voor jonge leden, door ouders." icon="family_restroom" url=url_inschrijven_familie %}
+                    {% include 'design/card_icon.dtl' with title="Familie" text="Aanmelden en betalen voor jonge leden, door ouders." icon="family_restroom" url=url_inschrijven_familie %}
 
                 {% endif %}
 
                 {% if hint_inloggen %}
-                    {% include 'plein/card_niet-beschikbaar.dtl' with waarom="Eerst inloggen" title="Sporter" text="Aanmelden en betalen voor jezelf." icon="person" %}
-                    {% include 'plein/card_niet-beschikbaar.dtl' with waarom="Eerst inloggen" title="Groep" text="Aanmelden en betalen voor een groepje leden zoals team, vrienden of collega's." icon="group" %}
-                    {% include 'plein/card_niet-beschikbaar.dtl' with waarom="Eerst inloggen" title="Familie" text="Aanmelden en betalen voor jonge leden, door ouders." icon="family_restroom" %}
+                    {% include 'design/card_niet-beschikbaar.dtl' with waarom="Eerst inloggen" title="Sporter" text="Aanmelden en betalen voor jezelf." icon="person" %}
+                    {% include 'design/card_niet-beschikbaar.dtl' with waarom="Eerst inloggen" title="Groep" text="Aanmelden en betalen voor een groepje leden zoals team, vrienden of collega's." icon="group" %}
+                    {% include 'design/card_niet-beschikbaar.dtl' with waarom="Eerst inloggen" title="Familie" text="Aanmelden en betalen voor jonge leden, door ouders." icon="family_restroom" %}
                 {% endif %}
 
             </div>

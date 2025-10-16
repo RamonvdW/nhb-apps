@@ -189,7 +189,7 @@ class TestSporterProfielBondscompetities(E2EHelpers, TestCase):
             resp = self.client.get(self.url_profiel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('sporter/profiel.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('sporter/profiel.dtl', 'design/site_layout.dtl'))
 
     def test_case_01(self):
         case_nr = "1a"
@@ -201,7 +201,7 @@ class TestSporterProfielBondscompetities(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.e2e_open_in_browser(resp, self.show_in_browser)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('sporter/profiel.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('sporter/profiel.dtl', 'design/site_layout.dtl'))
         self.assertNotContains(resp, 'De volgende competities worden georganiseerd')
         self.assertContains(resp, 'Er worden op dit moment geen competities georganiseerd')
 
@@ -215,7 +215,7 @@ class TestSporterProfielBondscompetities(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.e2e_open_in_browser(resp, self.show_in_browser)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('sporter/profiel.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('sporter/profiel.dtl', 'design/site_layout.dtl'))
         self.assertNotContains(resp, 'De volgende competities worden georganiseerd')
         self.assertContains(resp, 'Er worden op dit moment geen competities georganiseerd')
 
@@ -233,7 +233,7 @@ class TestSporterProfielBondscompetities(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.e2e_open_in_browser(resp, self.show_in_browser)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('sporter/profiel.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('sporter/profiel.dtl', 'design/site_layout.dtl'))
         self.assertNotContains(resp, 'De volgende competities worden georganiseerd')
 
     def test_case_02a(self):
@@ -249,7 +249,7 @@ class TestSporterProfielBondscompetities(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.e2e_open_in_browser(resp, self.show_in_browser)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('sporter/profiel.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('sporter/profiel.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, 'Meteen even doen')
         self.assertContains(resp, 'We willen je vragen om persoonlijke keuzes door te geven')
 
@@ -259,7 +259,7 @@ class TestSporterProfielBondscompetities(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.e2e_open_in_browser(resp, self.show_in_browser)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('sporter/profiel.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('sporter/profiel.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, 'De volgende competities worden georganiseerd')
         self.assertContains(resp, 'De inschrijving is open tot ')
         self.assertContains(resp, 'De volgende competities passen bij de bogen waar jij mee schiet')
@@ -282,7 +282,7 @@ class TestSporterProfielBondscompetities(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.e2e_open_in_browser(resp, self.show_in_browser)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('sporter/profiel.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('sporter/profiel.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, 'De volgende competities worden georganiseerd')
         self.assertContains(resp, 'De inschrijving is open tot ')
         self.assertContains(resp, 'Pas je persoonlijke voorkeuren aan')
@@ -395,7 +395,7 @@ class TestSporterProfielBondscompetities(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.e2e_open_in_browser(resp, self.show_in_browser)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('sporter/profiel.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('sporter/profiel.dtl', 'design/site_layout.dtl'))
         urls = self.extract_all_urls(resp, skip_menu=True)
         # print('urls:', urls)
         urls2 = [url for url in urls if '/bondscompetities/deelnemen/aanmelden/' in url]
@@ -416,7 +416,7 @@ class TestSporterProfielBondscompetities(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.e2e_open_in_browser(resp, self.show_in_browser)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('sporter/profiel.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('sporter/profiel.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, 'Je bent alvast afgemeld')
         urls = self.extract_all_urls(resp, skip_menu=True)
         # print('urls:', urls)
@@ -440,7 +440,7 @@ class TestSporterProfielBondscompetities(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.e2e_open_in_browser(resp, self.show_in_browser)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('sporter/profiel.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('sporter/profiel.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, 'Deze boog is niet meer ingesteld als wedstrijdboog')
         self.assertContains(resp, 'Je bent nog ingeschreven')
         urls = self.extract_all_urls(resp, skip_menu=True)
@@ -462,7 +462,7 @@ class TestSporterProfielBondscompetities(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.e2e_open_in_browser(resp, self.show_in_browser)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('sporter/profiel.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('sporter/profiel.dtl', 'design/site_layout.dtl'))
         urls = self.extract_all_urls(resp, skip_menu=True)
         # print('urls:', urls)
         urls2 = [url for url in urls if '/bondscompetities/regio/keuze-zeven-wedstrijden/' in url]
@@ -477,7 +477,7 @@ class TestSporterProfielBondscompetities(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.e2e_open_in_browser(resp, self.show_in_browser)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('sporter/profiel.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('sporter/profiel.dtl', 'design/site_layout.dtl'))
         urls = self.extract_all_urls(resp, skip_menu=True)
         # print('urls:', urls)
         urls2 = [url for url in urls if '/bondscompetities/regio/keuze-zeven-wedstrijden/' in url]
@@ -498,7 +498,7 @@ class TestSporterProfielBondscompetities(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.e2e_open_in_browser(resp, self.show_in_browser)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('sporter/profiel.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('sporter/profiel.dtl', 'design/site_layout.dtl'))
         urls = self.extract_all_urls(resp, skip_menu=True)
         # print('urls:', urls)
         urls2 = [url for url in urls if '/bondscompetities/deelnemen/aanmelden/' in url]
@@ -523,7 +523,7 @@ class TestSporterProfielBondscompetities(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.e2e_open_in_browser(resp, self.show_in_browser)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('sporter/profiel.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('sporter/profiel.dtl', 'design/site_layout.dtl'))
         urls = self.extract_all_urls(resp, skip_menu=True)
         # print('urls:', urls)
         urls2 = [url for url in urls if '/bondscompetities/deelnemen/aanmelden/' in url]
@@ -553,7 +553,7 @@ class TestSporterProfielBondscompetities(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.e2e_open_in_browser(resp, self.show_in_browser)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('sporter/profiel.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('sporter/profiel.dtl', 'design/site_layout.dtl'))
         urls = self.extract_all_urls(resp, skip_menu=True)
         # print('urls:', urls)
         urls2 = [url for url in urls if '/bondscompetities/deelnemen/aanmelden/' in url]
@@ -578,7 +578,7 @@ class TestSporterProfielBondscompetities(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.e2e_open_in_browser(resp, self.show_in_browser)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('sporter/profiel.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('sporter/profiel.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, 'Je bent geen deelnemer in het RK')
         urls = self.extract_all_urls(resp, skip_menu=True)
         urls2 = [url for url in urls if '/bondscompetities/deelnemen/afmelden/' in url]
@@ -604,7 +604,7 @@ class TestSporterProfielBondscompetities(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.e2e_open_in_browser(resp, self.show_in_browser)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('sporter/profiel.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('sporter/profiel.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, 'Je hebt je gekwalificeerd voor het RK in Rayon 3')
         self.assertContains(resp, 'Laat weten of je mee kan doen')
         urls = self.extract_all_urls(resp, skip_menu=True)
@@ -631,7 +631,7 @@ class TestSporterProfielBondscompetities(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.e2e_open_in_browser(resp, self.show_in_browser)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('sporter/profiel.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('sporter/profiel.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, 'Je hebt je gekwalificeerd voor het RK in Rayon 3')
         self.assertContains(resp, 'Je bent afgemeld')
         urls = self.extract_all_urls(resp, skip_menu=True)
@@ -659,7 +659,7 @@ class TestSporterProfielBondscompetities(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.e2e_open_in_browser(resp, self.show_in_browser)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('sporter/profiel.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('sporter/profiel.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, 'Je hebt je gekwalificeerd voor het RK in Rayon 3')
         self.assertContains(resp, 'Op de RK lijst sta je op plaats 15')
         self.assertContains(resp, 'Schietweg 5')
@@ -686,7 +686,7 @@ class TestSporterProfielBondscompetities(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.e2e_open_in_browser(resp, self.show_in_browser)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('sporter/profiel.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('sporter/profiel.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, 'Laat weten of je mee kan doen')
         self.assertContains(resp, 'volgt binnenkort')
 
@@ -709,7 +709,7 @@ class TestSporterProfielBondscompetities(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.e2e_open_in_browser(resp, self.show_in_browser)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('sporter/profiel.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('sporter/profiel.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, 'volgt binnenkort')
 
     def test_case_10(self):
@@ -727,7 +727,7 @@ class TestSporterProfielBondscompetities(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.e2e_open_in_browser(resp, self.show_in_browser)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('sporter/profiel.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('sporter/profiel.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, 'Je bent geen deelnemer in het BK')
         urls = self.extract_all_urls(resp, skip_menu=True)
         urls2 = [url for url in urls if '/bondscompetities/deelnemen/afmelden/' in url]
@@ -751,7 +751,7 @@ class TestSporterProfielBondscompetities(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.e2e_open_in_browser(resp, self.show_in_browser)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('sporter/profiel.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('sporter/profiel.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, 'Je hebt je gekwalificeerd voor het BK')
         self.assertContains(resp, 'Laat weten of je mee kan doen')
         urls = self.extract_all_urls(resp, skip_menu=True)
@@ -778,7 +778,7 @@ class TestSporterProfielBondscompetities(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.e2e_open_in_browser(resp, self.show_in_browser)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('sporter/profiel.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('sporter/profiel.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, 'Je hebt je gekwalificeerd voor het BK')
         self.assertContains(resp, 'Je bent afgemeld')
         urls = self.extract_all_urls(resp, skip_menu=True)
@@ -808,7 +808,7 @@ class TestSporterProfielBondscompetities(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.e2e_open_in_browser(resp, self.show_in_browser)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('sporter/profiel.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('sporter/profiel.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, 'Je hebt je gekwalificeerd voor het BK')
         self.assertContains(resp, 'Op de BK lijst sta je op plaats 12')
         urls = self.extract_all_urls(resp, skip_menu=True)

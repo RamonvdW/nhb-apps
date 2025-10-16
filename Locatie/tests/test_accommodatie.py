@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2024 Ramon van der Winkel.
+#  Copyright (c) 2020-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -139,7 +139,7 @@ class TestLocatieAccommodatie(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('locatie/accommodatie-details.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('locatie/accommodatie-details.dtl', 'design/site_layout.dtl'))
 
         # stop de vereniging in een cluster
         self.ver1.clusters.add(self.cluster)
@@ -148,7 +148,7 @@ class TestLocatieAccommodatie(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('locatie/accommodatie-details.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('locatie/accommodatie-details.dtl', 'design/site_layout.dtl'))
         urls = self.extract_all_urls(resp, skip_menu=True)
         self.assertEqual(urls, [])      # geen wijzig knop omdat er geen binnen- of buitenbaan is
 
@@ -165,7 +165,7 @@ class TestLocatieAccommodatie(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('locatie/accommodatie-details.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('locatie/accommodatie-details.dtl', 'design/site_layout.dtl'))
         urls = self.extract_all_urls(resp, skip_menu=True)
         self.assertEqual(urls, [url, url])      # nu wel een opslaan knop + maak buitenbaan knop
 
@@ -178,7 +178,7 @@ class TestLocatieAccommodatie(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('locatie/accommodatie-details.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('locatie/accommodatie-details.dtl', 'design/site_layout.dtl'))
         urls = self.extract_all_urls(resp, skip_menu=True)
         self.assertEqual(urls, [url, url])      # nu wel een opslaan knop + verwijder buitenbaan knop
 
@@ -204,7 +204,7 @@ class TestLocatieAccommodatie(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('locatie/accommodatie-details.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('locatie/accommodatie-details.dtl', 'design/site_layout.dtl'))
         urls = self.extract_all_urls(resp, skip_menu=True)
         self.assertEqual(urls, [url, url])      # nu wel een opslaan knop + maak buitenbaan knop
 
@@ -235,7 +235,7 @@ class TestLocatieAccommodatie(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('locatie/accommodatie-details.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('locatie/accommodatie-details.dtl', 'design/site_layout.dtl'))
 
         # verwijder de buitenbaan, zonder dat deze bestaat
         with self.assert_max_queries(20):
@@ -262,7 +262,7 @@ class TestLocatieAccommodatie(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('locatie/accommodatie-details.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('locatie/accommodatie-details.dtl', 'design/site_layout.dtl'))
         urls = self.extract_all_urls(resp, skip_menu=True)
         self.assertEqual(urls, [])      # geen wijzig knop, want verkeerde SEC
 
@@ -285,7 +285,7 @@ class TestLocatieAccommodatie(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('locatie/accommodatie-details.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('locatie/accommodatie-details.dtl', 'design/site_layout.dtl'))
 
         # geen gekoppelde sec --> toont SEC uit CRM
         self.functie_sec.accounts.clear()
@@ -294,7 +294,7 @@ class TestLocatieAccommodatie(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('locatie/accommodatie-details.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('locatie/accommodatie-details.dtl', 'design/site_layout.dtl'))
 
         # corner cases
         resp = self.client.get(self.url_locaties % 999999)
@@ -327,7 +327,7 @@ class TestLocatieAccommodatie(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('locatie/accommodatie-details.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('locatie/accommodatie-details.dtl', 'design/site_layout.dtl'))
 
     def test_sporter(self):
         url = self.url_locaties % self.ver1.ver_nr
@@ -404,7 +404,7 @@ class TestLocatieAccommodatie(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('locatie/accommodatie-details.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('locatie/accommodatie-details.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, 'Volledig overdekt')
 
         # opslaan zonder wijzigingen (voor extra coverage)

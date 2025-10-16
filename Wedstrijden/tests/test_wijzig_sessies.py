@@ -131,7 +131,7 @@ class TestWedstrijdenWijzigSessies(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('wedstrijden/wijzig-sessies.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijden/wijzig-sessies.dtl', 'design/site_layout.dtl'))
 
         # post zonder actie
         with self.assert_max_queries(20):
@@ -150,7 +150,7 @@ class TestWedstrijdenWijzigSessies(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('wedstrijden/wijzig-sessies.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijden/wijzig-sessies.dtl', 'design/site_layout.dtl'))
 
         # annuleer de wedstrijd
         wedstrijd.status = 'X'
@@ -227,7 +227,7 @@ class TestWedstrijdenWijzigSessies(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('wedstrijden/wijzig-sessie.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijden/wijzig-sessie.dtl', 'design/site_layout.dtl'))
 
         # lege post
         with self.assert_max_queries(20):
@@ -285,7 +285,7 @@ class TestWedstrijdenWijzigSessies(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('wedstrijden/wijzig-sessie.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijden/wijzig-sessie.dtl', 'design/site_layout.dtl'))
 
         # annuleer de wedstrijd
         old_status = wedstrijd.status
@@ -295,7 +295,7 @@ class TestWedstrijdenWijzigSessies(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('wedstrijden/wijzig-sessie.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijden/wijzig-sessie.dtl', 'design/site_layout.dtl'))
 
         # verwijder de sessie
         self.assertEqual(1, WedstrijdSessie.objects.count())

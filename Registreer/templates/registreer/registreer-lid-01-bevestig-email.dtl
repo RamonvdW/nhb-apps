@@ -1,4 +1,4 @@
-{% extends 'plein/site_layout.dtl' %}
+{% extends 'design/site_layout.dtl' %}
 {% comment %}
                 Copyright (c) 2019-2025 Ramon van der Winkel.
                 All rights reserved.

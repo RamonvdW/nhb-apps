@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -231,7 +231,7 @@ class TestCompInschrijvenAangemeld(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compinschrijven/lijst-aangemeld-regio.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compinschrijven/lijst-aangemeld-regio.dtl', 'design/site_layout.dtl'))
 
         # rayon 2
         url = self.url_aangemeld_rayon % (comp.pk, self.rayon_1.pk)
@@ -239,7 +239,7 @@ class TestCompInschrijvenAangemeld(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compinschrijven/lijst-aangemeld-regio.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compinschrijven/lijst-aangemeld-regio.dtl', 'design/site_layout.dtl'))
 
         # regio 101
         url = self.url_aangemeld_regio % (comp.pk, self.regio_101.pk)
@@ -247,7 +247,7 @@ class TestCompInschrijvenAangemeld(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compinschrijven/lijst-aangemeld-regio.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compinschrijven/lijst-aangemeld-regio.dtl', 'design/site_layout.dtl'))
 
         # verkeerde fase
         zet_competitie_fases(comp, 'Z', 'Z')
@@ -291,7 +291,7 @@ class TestCompInschrijvenAangemeld(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compinschrijven/lijst-aangemeld-regio.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compinschrijven/lijst-aangemeld-regio.dtl', 'design/site_layout.dtl'))
 
         # rayon 2
         url = self.url_aangemeld_rayon % (comp.pk, self.rayon_2.pk)
@@ -299,7 +299,7 @@ class TestCompInschrijvenAangemeld(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compinschrijven/lijst-aangemeld-regio.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compinschrijven/lijst-aangemeld-regio.dtl', 'design/site_layout.dtl'))
 
         # regio 101
         url = self.url_aangemeld_regio % (comp.pk, self.regio_101.pk)
@@ -307,7 +307,7 @@ class TestCompInschrijvenAangemeld(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compinschrijven/lijst-aangemeld-regio.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compinschrijven/lijst-aangemeld-regio.dtl', 'design/site_layout.dtl'))
 
     def test_overzicht_rko(self):
         comp = Competitie.objects.get(afstand='25')
@@ -324,7 +324,7 @@ class TestCompInschrijvenAangemeld(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compinschrijven/lijst-aangemeld-regio.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compinschrijven/lijst-aangemeld-regio.dtl', 'design/site_layout.dtl'))
 
         # rayon 2
         url = self.url_aangemeld_rayon % (comp.pk, self.rayon_2.pk)
@@ -332,7 +332,7 @@ class TestCompInschrijvenAangemeld(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compinschrijven/lijst-aangemeld-regio.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compinschrijven/lijst-aangemeld-regio.dtl', 'design/site_layout.dtl'))
 
         # regio 101
         url = self.url_aangemeld_regio % (comp.pk, self.regio_101.pk)
@@ -340,7 +340,7 @@ class TestCompInschrijvenAangemeld(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compinschrijven/lijst-aangemeld-regio.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compinschrijven/lijst-aangemeld-regio.dtl', 'design/site_layout.dtl'))
 
         # corner-case
         url = self.url_aangemeld_rayon % (comp.pk, 999999)
@@ -362,7 +362,7 @@ class TestCompInschrijvenAangemeld(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compinschrijven/lijst-aangemeld-regio.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compinschrijven/lijst-aangemeld-regio.dtl', 'design/site_layout.dtl'))
 
         # rayon 2
         url = self.url_aangemeld_rayon % (comp.pk, self.rayon_2.pk)
@@ -370,7 +370,7 @@ class TestCompInschrijvenAangemeld(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compinschrijven/lijst-aangemeld-regio.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compinschrijven/lijst-aangemeld-regio.dtl', 'design/site_layout.dtl'))
 
         # regio 101
         url = self.url_aangemeld_regio % (comp.pk, self.regio_101.pk)
@@ -378,7 +378,7 @@ class TestCompInschrijvenAangemeld(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compinschrijven/lijst-aangemeld-regio.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compinschrijven/lijst-aangemeld-regio.dtl', 'design/site_layout.dtl'))
 
         # regio 101, bestand
         url = self.url_aangemeld_regio_bestand % (comp.pk, self.regio_101.pk)

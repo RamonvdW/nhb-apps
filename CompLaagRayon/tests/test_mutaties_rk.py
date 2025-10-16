@@ -189,7 +189,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
             resp = self.client.get(self.url_lijst_rko)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagrayon/rko-rk-selectie.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagrayon/rko-rk-selectie.dtl', 'design/site_layout.dtl'))
 
     def test_opnieuw_initieel(self):
         # met de MUTATIE_INITIEEL kunnen we ook een 'reset' uitvoeren
@@ -212,7 +212,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagrayon/wijzig-status-rk-deelnemer.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagrayon/wijzig-status-rk-deelnemer.dtl', 'design/site_layout.dtl'))
 
         deelnemer = KampioenschapSporterBoog.objects.filter(indiv_klasse=self.klasse).get(volgorde=3)
         url = self.url_wijzig_stat % deelnemer.pk
@@ -972,7 +972,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
             resp = self.client.get(self.url_lijst_hwl)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagrayon/hwl-rk-selectie.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagrayon/hwl-rk-selectie.dtl', 'design/site_layout.dtl'))
 
         # bad situaties
         resp = self.client.get(self.url_lijst_rk_hwl % 999999)
@@ -1008,14 +1008,14 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
             resp = self.client.get(self.url_lijst_hwl)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagrayon/hwl-rk-selectie.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagrayon/hwl-rk-selectie.dtl', 'design/site_layout.dtl'))
 
         url = self.url_wijzig_stat % deelnemer_pks[1]
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagrayon/wijzig-status-rk-deelnemer.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagrayon/wijzig-status-rk-deelnemer.dtl', 'design/site_layout.dtl'))
 
         # 1 sporter afmelden
         with self.assert_max_queries(20):
@@ -1035,7 +1035,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
             resp = self.client.get(self.url_lijst_hwl)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagrayon/hwl-rk-selectie.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagrayon/hwl-rk-selectie.dtl', 'design/site_layout.dtl'))
 
         zet_competitie_fases(comp, 'N', 'N')
         with self.assert_max_queries(20):

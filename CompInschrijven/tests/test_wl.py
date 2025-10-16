@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2024 Ramon van der Winkel.
+#  Copyright (c) 2020-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -214,7 +214,7 @@ class TestCompInschrijvenWL(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
-        self.assert_template_used(resp, ('compinschrijven/hwl-leden-ingeschreven.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compinschrijven/hwl-leden-ingeschreven.dtl', 'design/site_layout.dtl'))
 
         # probeer in te schrijven (mag niet)
         with self.assert_max_queries(20):

@@ -199,7 +199,7 @@ class TestWedstrijdenAanmeldingen(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('wedstrijdinschrijven/inschrijven-toegevoegd-aan-mandje.dtl',
-                                         'plein/site_layout.dtl'))
+                                         'design/site_layout.dtl'))
 
         self.assertEqual(1, WedstrijdInschrijving.objects.count())
         self.inschrijving1r = WedstrijdInschrijving.objects.select_related('wedstrijd').first()
@@ -213,7 +213,7 @@ class TestWedstrijdenAanmeldingen(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('wedstrijdinschrijven/inschrijven-toegevoegd-aan-mandje.dtl',
-                                         'plein/site_layout.dtl'))
+                                         'design/site_layout.dtl'))
         self.assertEqual(2, WedstrijdInschrijving.objects.count())
         self.inschrijving1c = WedstrijdInschrijving.objects.exclude(pk=self.inschrijving1r.pk)[0]
 
@@ -226,7 +226,7 @@ class TestWedstrijdenAanmeldingen(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('wedstrijdinschrijven/inschrijven-toegevoegd-aan-mandje.dtl',
-                                         'plein/site_layout.dtl'))
+                                         'design/site_layout.dtl'))
         self.assertEqual(3, WedstrijdInschrijving.objects.count())
         self.inschrijving2 = WedstrijdInschrijving.objects.exclude(pk__in=(self.inschrijving1r.pk,
                                                                            self.inschrijving1c.pk))[0]
@@ -265,7 +265,7 @@ class TestWedstrijdenAanmeldingen(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('wedstrijden/aanmelding-details.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijden/aanmelding-details.dtl', 'design/site_layout.dtl'))
 
         self.e2e_assert_other_http_commands_not_supported(url)
 
@@ -279,7 +279,7 @@ class TestWedstrijdenAanmeldingen(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('wedstrijden/aanmelding-details.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijden/aanmelding-details.dtl', 'design/site_layout.dtl'))
 
         # # maak de sporter niet ingeschreven
         # self.inschrijving2.delete()
@@ -290,7 +290,7 @@ class TestWedstrijdenAanmeldingen(E2EHelpers, TestCase):
         #     resp = self.client.get(url)
         # self.assertEqual(resp.status_code, 200)     # 200 = OK
         # self.assert_html_ok(resp)
-        # self.assert_template_used(resp, ('wedstrijden/aanmelding-details.dtl', 'plein/site_layout.dtl'))
+        # self.assert_template_used(resp, ('wedstrijden/aanmelding-details.dtl', 'design/site_layout.dtl'))
 
         # bad
         resp = self.client.get(self.url_details % 'Y<42')
@@ -378,7 +378,7 @@ class TestWedstrijdenAanmeldingen(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('wedstrijden/aanmelding-aanpassen.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijden/aanmelding-aanpassen.dtl', 'design/site_layout.dtl'))
 
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'sporterboog': self.sporterboog1c.pk,
@@ -413,7 +413,7 @@ class TestWedstrijdenAanmeldingen(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('wedstrijden/aanmelding-aanpassen.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijden/aanmelding-aanpassen.dtl', 'design/site_layout.dtl'))
 
         # bad
         resp = self.client.get(self.url_aanpassen % 'xxxxx')

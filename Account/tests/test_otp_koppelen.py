@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -95,13 +95,13 @@ class TestAccountOtpKoppelen(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_koppel_stap1)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('account/otp-koppelen-stap1-uitleg.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('account/otp-koppelen-stap1-uitleg.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
 
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_koppel_stap2)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('account/otp-koppelen-stap2-scan-qr-code.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('account/otp-koppelen-stap2-scan-qr-code.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
 
         # check dat het OTP secret aangemaakt is
@@ -111,14 +111,14 @@ class TestAccountOtpKoppelen(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_koppel_stap3)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('account/otp-koppelen-stap3-code-invoeren.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('account/otp-koppelen-stap3-code-invoeren.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
 
         # geef een illegale (te korte) otp code op
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_koppel_stap3, {'otp_code': '123'})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('account/otp-koppelen-stap3-code-invoeren.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('account/otp-koppelen-stap3-code-invoeren.dtl', 'design/site_layout.dtl'))
         self.assertNotContains(resp, 'Verkeerde code. Probeer het nog eens')
 
         self.testdata.account_admin = Account.objects.get(username='admin')
@@ -128,7 +128,7 @@ class TestAccountOtpKoppelen(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_koppel_stap3, {'otp_code': '-10000'})      # moet 6 posities zijn
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('account/otp-koppelen-stap3-code-invoeren.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('account/otp-koppelen-stap3-code-invoeren.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, 'Fout: voer de vereiste code in')
         self.assert_html_ok(resp)
 
@@ -136,7 +136,7 @@ class TestAccountOtpKoppelen(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_koppel_stap3, {'otp_code': '123456'})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('account/otp-koppelen-stap3-code-invoeren.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('account/otp-koppelen-stap3-code-invoeren.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, 'Fout: verkeerde code. Probeer het nog eens')
         self.assert_html_ok(resp)
 
@@ -148,7 +148,7 @@ class TestAccountOtpKoppelen(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_koppel_stap3, {'otp_code': code}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('account/otp-koppelen-gelukt.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('account/otp-koppelen-gelukt.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
 
         self.testdata.account_admin = Account.objects.get(username='admin')

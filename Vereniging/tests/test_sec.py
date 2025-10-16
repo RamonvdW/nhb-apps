@@ -207,7 +207,7 @@ class TestVerenigingSEC(E2EHelpers, TestCase):
             resp = self.client.get(self.url_overzicht)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('vereniging/overzicht.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('vereniging/overzicht.dtl', 'design/site_layout.dtl'))
 
     def test_ledenlijst(self):
         # login als SEC
@@ -219,7 +219,7 @@ class TestVerenigingSEC(E2EHelpers, TestCase):
             resp = self.client.get(self.url_ledenlijst)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('vereniging/ledenlijst.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('vereniging/ledenlijst.dtl', 'design/site_layout.dtl'))
 
         self.assertContains(resp, 'Jeugdleden')
         self.assertContains(resp, 'Volwassenen')
@@ -239,7 +239,7 @@ class TestVerenigingSEC(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_voorkeuren)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('vereniging/leden-voorkeuren.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('vereniging/leden-voorkeuren.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
 
         # probeer de sporterboog instellingen van sporters te veranderen
@@ -248,7 +248,7 @@ class TestVerenigingSEC(E2EHelpers, TestCase):
             with self.assert_max_queries(20):
                 resp = self.client.get(url)
             self.assertEqual(resp.status_code, 200)
-            self.assert_template_used(resp, ('sporter/voorkeuren.dtl', 'plein/site_layout.dtl'))
+            self.assert_template_used(resp, ('sporter/voorkeuren.dtl', 'design/site_layout.dtl'))
             self.assert_html_ok(resp)
         # for
         self.assertEqual(SporterBoog.objects.count(), 0)
@@ -361,7 +361,7 @@ class TestVerenigingSEC(E2EHelpers, TestCase):
             resp = self.client.get(self.url_overzicht)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('vereniging/overzicht.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('vereniging/overzicht.dtl', 'design/site_layout.dtl'))
 
     def test_format_last_login(self):
         now = datetime.date(2010, 1, 1)

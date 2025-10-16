@@ -55,7 +55,7 @@ class TestCompUitslagenBK(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compuitslagen/uitslagen-bk-indiv.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compuitslagen/uitslagen-bk-indiv.dtl', 'design/site_layout.dtl'))
 
         # maak een locatie aan
         locatie = self.testdata.maak_wedstrijd_locatie(self.ver_nr)
@@ -85,14 +85,14 @@ class TestCompUitslagenBK(E2EHelpers, TestCase):
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compuitslagen/uitslagen-bk-indiv.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compuitslagen/uitslagen-bk-indiv.dtl', 'design/site_layout.dtl'))
 
         url = self.url_uitslagen_bond_indiv % (self.testdata.comp25.pk, 'R')
         #with self.assert_max_queries(20):
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compuitslagen/uitslagen-bk-indiv.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compuitslagen/uitslagen-bk-indiv.dtl', 'design/site_layout.dtl'))
 
         # zet een paar resultaten
         kamp = self.testdata.comp18_bk_deelnemers[0]
@@ -109,7 +109,7 @@ class TestCompUitslagenBK(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compuitslagen/uitslagen-bk-indiv.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compuitslagen/uitslagen-bk-indiv.dtl', 'design/site_layout.dtl'))
 
         # onbekend boogtype
         url = self.url_uitslagen_bond_indiv % (self.testdata.comp18.pk, 'X')
@@ -140,7 +140,7 @@ class TestCompUitslagenBK(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compuitslagen/uitslagen-bk-teams.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compuitslagen/uitslagen-bk-teams.dtl', 'design/site_layout.dtl'))
 
         # ingelogd geeft teamleden van eigen vereniging
         functie_hwl = list(self.testdata.functie_hwl.values())[5]
@@ -152,7 +152,7 @@ class TestCompUitslagenBK(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compuitslagen/uitslagen-bk-teams.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compuitslagen/uitslagen-bk-teams.dtl', 'design/site_layout.dtl'))
 
         # in de functie HWL krijg je de teamleden van de vereniging die je beheert
         # (dit hoeft niet hetzelfde te zijn als je eigen vereniging)
@@ -163,7 +163,7 @@ class TestCompUitslagenBK(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compuitslagen/uitslagen-bk-teams.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compuitslagen/uitslagen-bk-teams.dtl', 'design/site_layout.dtl'))
 
         url = self.url_uitslagen_bond_teams % (self.testdata.comp18.pk, 'X')
         with self.assert_max_queries(20):
@@ -194,13 +194,13 @@ class TestCompUitslagenBK(E2EHelpers, TestCase):
             resp = self.client.get(self.url_uitslagen_bond_indiv % (self.testdata.comp18.pk, 'r'))
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compuitslagen/uitslagen-bk-indiv.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compuitslagen/uitslagen-bk-indiv.dtl', 'design/site_layout.dtl'))
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_uitslagen_bond_teams % (self.testdata.comp18.pk, 'c'))
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compuitslagen/uitslagen-bk-teams.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compuitslagen/uitslagen-bk-teams.dtl', 'design/site_layout.dtl'))
 
     def test_hist(self):
         # test redirect naar HistComp uitslag

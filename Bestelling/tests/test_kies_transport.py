@@ -124,7 +124,7 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
                 resp = self.client.get(self.url_kies_transport)
             self.assertEqual(resp.status_code, 200)     # 200 = OK
             self.assert_html_ok(resp)
-            self.assert_template_used(resp, ('bestelling/kies-transport.dtl', 'plein/site_layout.dtl'))
+            self.assert_template_used(resp, ('bestelling/kies-transport.dtl', 'design/site_layout.dtl'))
 
             # maak een foutieve wijziging (POST)
             with self.assert_max_queries(20):
@@ -221,7 +221,7 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
                 resp = self.client.get(self.url_kies_transport)
             self.assertEqual(resp.status_code, 200)     # 200 = OK
             self.assert_html_ok(resp)
-            self.assert_template_used(resp, ('bestelling/kies-transport.dtl', 'plein/site_layout.dtl'))
+            self.assert_template_used(resp, ('bestelling/kies-transport.dtl', 'design/site_layout.dtl'))
 
             # wijzig naar ophalen
             with self.assert_max_queries(20):

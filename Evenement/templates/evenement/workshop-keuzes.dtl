@@ -1,4 +1,4 @@
-{% extends 'plein/site_layout.dtl' %}
+{% extends 'design/site_layout.dtl' %}
 {% comment %}
                 Copyright (c) 2025 Ramon van der Winkel.
                 All rights reserved.
@@ -40,6 +40,6 @@
     </div>
 
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="evenement-workshop-keuses" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="evenement-workshop-keuzes" %}
 
 {% endblock %}

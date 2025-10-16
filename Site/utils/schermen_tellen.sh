@@ -1,13 +1,13 @@
 #!/bin/bash
 
-#  Copyright (c) 2021-2023 Ramon van der Winkel.
+#  Copyright (c) 2021-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 EXCLUDE="plein/menu-"
-EXCLUDE+="|plein/site-layout"
+EXCLUDE+="|design/site-layout"
+EXCLUDE+="|design/card"
 EXCLUDE+="|feedback/sidebar.dtl"
-EXCLUDE+="|plein/card"
 EXCLUDE+="|plein/ga-naar-live-server.dtl"
 EXCLUDE+="|plein/andere-sites.dtl"
 EXCLUDE+="|logboek/common"

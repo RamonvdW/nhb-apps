@@ -31,7 +31,7 @@ class TestPleinBasics(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_privacy)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('plein/privacy.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('plein/privacy.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
         self.e2e_assert_other_http_commands_not_supported(self.url_privacy)
 

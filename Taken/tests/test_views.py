@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -113,7 +113,7 @@ class TestTakenViews(E2EHelpers, TestCase):
             resp = self.client.get(self.url_overzicht)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('taken/overzicht.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('taken/overzicht.dtl', 'design/site_layout.dtl'))
 
         self.assertContains(resp, 'Testje taak1')
         self.assertContains(resp, 'Testje taak2')
@@ -125,7 +125,7 @@ class TestTakenViews(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('taken/details.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('taken/details.dtl', 'design/site_layout.dtl'))
 
         # nog niet afgesloten taak bekijken
         # deze heeft "aangemaakt door"
@@ -134,7 +134,7 @@ class TestTakenViews(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('taken/details.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('taken/details.dtl', 'design/site_layout.dtl'))
 
         # doe de post om de taak af te ronden
         url = self.url_details % self.taak1.pk
@@ -161,14 +161,14 @@ class TestTakenViews(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('taken/details.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('taken/details.dtl', 'design/site_layout.dtl'))
 
         # overzicht met afgeronde taak
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_overzicht)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('taken/overzicht.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('taken/overzicht.dtl', 'design/site_layout.dtl'))
 
         self.assertTrue(str(self.taak1) != '')
         self.assertTrue(str(self.taak3) != '')
@@ -215,7 +215,7 @@ class TestTakenViews(E2EHelpers, TestCase):
             resp = self.client.get(self.url_overzicht)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('taken/overzicht.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('taken/overzicht.dtl', 'design/site_layout.dtl'))
 
         # huidige functie WL is niet toegekend, maar we laten wel de taken van die functie zien
 
@@ -230,7 +230,7 @@ class TestTakenViews(E2EHelpers, TestCase):
             resp = self.client.get(self.url_overzicht)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('taken/overzicht.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('taken/overzicht.dtl', 'design/site_layout.dtl'))
 
         self.assertContains(resp, 'Testje taak voor WL')
 

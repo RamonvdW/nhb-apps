@@ -19,7 +19,7 @@ import re
 # debug optie: toon waar in de code de queries vandaan komen
 FAIL_UNSAFE_DATABASE_MODIFICATION = False
 
-MATERIAL_ICON_GLYPH_NAMES = 'Plein/fonts/reduce/needed-glyphs_material-symbols.txt'
+MATERIAL_ICON_GLYPH_NAMES = 'Design/fonts/reduce/needed-glyphs_material-symbols.txt'
 
 GLYPH_NAMES_PRESENT = list()
 with open(MATERIAL_ICON_GLYPH_NAMES, 'r') as f:
@@ -1036,7 +1036,7 @@ class MyTestAsserts(TestCase):
                 self.fail(msg="Onverwachte status code %s; verwacht: 200" % resp.status_code)
 
             self.assertEqual(resp.status_code, 200)
-            self.assert_template_used(resp, ('plein/fout_403.dtl', 'plein/site_layout_minimaal.dtl'))
+            self.assert_template_used(resp, ('plein/fout_403.dtl', 'design/site_layout_minimaal.dtl'))
 
             if expected_msg:                                                        # pragma: no branch
                 pagina = str(resp.content)
@@ -1059,7 +1059,7 @@ class MyTestAsserts(TestCase):
 
         # controleer dat we op de speciale code-404 handler pagina gekomen zijn
         self.assertEqual(resp.status_code, 200)
-        self.assert_template_used(resp, ('plein/fout_404.dtl', 'plein/site_layout_minimaal.dtl'))
+        self.assert_template_used(resp, ('plein/fout_404.dtl', 'design/site_layout_minimaal.dtl'))
 
         if expected_msg:                                                            # pragma: no branch
             pagina = str(resp.content)

@@ -1,4 +1,4 @@
-{% extends 'plein/site_layout.dtl' %}
+{% extends 'design/site_layout.dtl' %}
 {% comment %}
                 Copyright (c) 2019-2025 Ramon van der Winkel.
                 All rights reserved.
@@ -118,7 +118,7 @@
     <div class="row-sv-blauw">
         <div class="col s12">
             {% url 'Plein:privacy' as card_url %}
-            {% include 'plein/card_icon.dtl' with title="Privacyverklaring" text="Lees hier hoe we omgaan met jouw privacy." icon="security" url=card_url %}
+            {% include 'design/card_icon.dtl' with title="Privacyverklaring" text="Lees hier hoe we omgaan met jouw privacy." icon="security" url=card_url %}
         </div>
     </div>
 

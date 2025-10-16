@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2024 Ramon van der Winkel.
+#  Copyright (c) 2021-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -94,7 +94,7 @@ class TestWedstrijdenVereniging(E2EHelpers, TestCase):
             resp = self.client.get(self.url_wedstrijden_vereniging)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('wedstrijden/overzicht-vereniging.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijden/overzicht-vereniging.dtl', 'design/site_layout.dtl'))
 
         self.e2e_assert_other_http_commands_not_supported(self.url_wedstrijden_vereniging)
 
@@ -114,14 +114,14 @@ class TestWedstrijdenVereniging(E2EHelpers, TestCase):
             resp = self.client.get(self.url_wedstrijden_vereniging)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('wedstrijden/overzicht-vereniging.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijden/overzicht-vereniging.dtl', 'design/site_layout.dtl'))
 
         # haal de keuze pagina op
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_wedstrijden_maak_nieuw)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('wedstrijden/nieuwe-wedstrijd-kies-type.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijden/nieuwe-wedstrijd-kies-type.dtl', 'design/site_layout.dtl'))
 
         # maak een nieuwe wedstrijd aan
         with patch('django.utils.timezone.now') as mock_timezone_now:
@@ -173,18 +173,18 @@ class TestWedstrijdenVereniging(E2EHelpers, TestCase):
             resp = self.client.get(self.url_wedstrijden_vereniging_zes_maanden)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('wedstrijden/overzicht-vereniging.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijden/overzicht-vereniging.dtl', 'design/site_layout.dtl'))
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_wedstrijden_vereniging_een_jaar)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('wedstrijden/overzicht-vereniging.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijden/overzicht-vereniging.dtl', 'design/site_layout.dtl'))
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_wedstrijden_vereniging_twee_jaar)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('wedstrijden/overzicht-vereniging.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijden/overzicht-vereniging.dtl', 'design/site_layout.dtl'))
 
 # end of file

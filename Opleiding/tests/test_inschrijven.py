@@ -248,7 +248,7 @@ class TestOpleidingInschrijven(E2EHelpers, TestCase):
             resp = self.client.get(self.url_inschrijven_basiscursus)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('opleiding/inschrijven-basiscursus.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('opleiding/inschrijven-basiscursus.dtl', 'design/site_layout.dtl'))
         urls = self.extract_all_urls(resp, skip_menu=True)
         self.assertEqual(urls, [])
 
@@ -262,7 +262,7 @@ class TestOpleidingInschrijven(E2EHelpers, TestCase):
             resp = self.client.get(self.url_inschrijven_basiscursus)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('opleiding/inschrijven-basiscursus.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('opleiding/inschrijven-basiscursus.dtl', 'design/site_layout.dtl'))
         urls = self.extract_all_urls(resp, skip_menu=True)
         self.assertEqual(urls, [])
 
@@ -276,7 +276,7 @@ class TestOpleidingInschrijven(E2EHelpers, TestCase):
             resp = self.client.get(self.url_inschrijven_basiscursus)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('opleiding/inschrijven-basiscursus.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('opleiding/inschrijven-basiscursus.dtl', 'design/site_layout.dtl'))
         urls = self.extract_all_urls(resp, skip_menu=True)
         self.assertEqual(urls, [])
 
@@ -290,7 +290,7 @@ class TestOpleidingInschrijven(E2EHelpers, TestCase):
             resp = self.client.get(self.url_inschrijven_basiscursus)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('opleiding/inschrijven-basiscursus.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('opleiding/inschrijven-basiscursus.dtl', 'design/site_layout.dtl'))
         urls = self.extract_all_urls(resp, skip_menu=True)
         self.assertEqual(urls, [self.url_toevoegen_aan_mandje])
 
@@ -351,7 +351,7 @@ class TestOpleidingInschrijven(E2EHelpers, TestCase):
             resp = self.client.get(self.url_inschrijven_basiscursus)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('opleiding/inschrijven-basiscursus.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('opleiding/inschrijven-basiscursus.dtl', 'design/site_layout.dtl'))
 
         # gelijk aan bekende gegevens
         data = {'email': self.sporter.email,
@@ -410,7 +410,7 @@ class TestOpleidingInschrijven(E2EHelpers, TestCase):
                                                                     'snel': 1})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('opleiding/inschrijven-toegevoegd-aan-mandje.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('opleiding/inschrijven-toegevoegd-aan-mandje.dtl', 'design/site_layout.dtl'))
         self.assertEqual(OpleidingInschrijving.objects.count(), 1)
 
         inschrijving = OpleidingInschrijving.objects.first()
@@ -428,7 +428,7 @@ class TestOpleidingInschrijven(E2EHelpers, TestCase):
             resp = self.client.get(self.url_mandje_toon)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('bestelling/toon-mandje.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('bestelling/toon-mandje.dtl', 'design/site_layout.dtl'))
 
         # verwijder uit het mandje
         regel = inschrijving.bestelling
@@ -475,7 +475,7 @@ class TestOpleidingInschrijven(E2EHelpers, TestCase):
                                                                     'snel': 1})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('opleiding/inschrijven-toegevoegd-aan-mandje.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('opleiding/inschrijven-toegevoegd-aan-mandje.dtl', 'design/site_layout.dtl'))
         self.assertEqual(OpleidingInschrijving.objects.count(), 1)
 
         # laat de achtergrond taak het toevoegen aan het mandje verwerken
@@ -510,7 +510,7 @@ class TestOpleidingInschrijven(E2EHelpers, TestCase):
                                                                     'snel': 1})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('opleiding/inschrijven-toegevoegd-aan-mandje.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('opleiding/inschrijven-toegevoegd-aan-mandje.dtl', 'design/site_layout.dtl'))
         self.assertEqual(OpleidingInschrijving.objects.count(), 1)
         inschrijving = OpleidingInschrijving.objects.first()
 
@@ -554,7 +554,7 @@ class TestOpleidingInschrijven(E2EHelpers, TestCase):
             resp = self.client.get(self.url_na_de_betaling % bestelling.bestel_nr, {'snel': 1})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('bestelling/bestelling-afgerond.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('bestelling/bestelling-afgerond.dtl', 'design/site_layout.dtl'))
 
         # fake het gebruik van de CPSP checkout en de payment-status-changed callback
         count = BetaalMutatie.objects.count()
@@ -617,7 +617,7 @@ class TestOpleidingInschrijven(E2EHelpers, TestCase):
                                                                     'snel': 1})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('opleiding/inschrijven-toegevoegd-aan-mandje.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('opleiding/inschrijven-toegevoegd-aan-mandje.dtl', 'design/site_layout.dtl'))
         self.assertEqual(OpleidingInschrijving.objects.count(), 1)
 
         # laat de achtergrond taak het toevoegen aan het mandje verwerken
@@ -646,7 +646,7 @@ class TestOpleidingInschrijven(E2EHelpers, TestCase):
             resp = self.client.get(self.url_inschrijven_basiscursus)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('opleiding/inschrijven-basiscursus.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('opleiding/inschrijven-basiscursus.dtl', 'design/site_layout.dtl'))
         urls = self.extract_all_urls(resp, skip_menu=True)
         self.assertTrue(self.url_toevoegen_aan_mandje in urls)
 
@@ -656,7 +656,7 @@ class TestOpleidingInschrijven(E2EHelpers, TestCase):
                                                                     'snel': 1})
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('opleiding/inschrijven-toegevoegd-aan-mandje.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('opleiding/inschrijven-toegevoegd-aan-mandje.dtl', 'design/site_layout.dtl'))
 
         self.verwerk_bestel_mutaties()
 
@@ -672,7 +672,7 @@ class TestOpleidingInschrijven(E2EHelpers, TestCase):
             resp = self.client.get(self.url_inschrijven_basiscursus)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('opleiding/inschrijven-basiscursus.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('opleiding/inschrijven-basiscursus.dtl', 'design/site_layout.dtl'))
         urls = self.extract_all_urls(resp, skip_menu=True)
         self.assertTrue(self.url_toevoegen_aan_mandje not in urls)
 
@@ -704,7 +704,7 @@ class TestOpleidingInschrijven(E2EHelpers, TestCase):
             resp = self.client.get(self.url_inschrijven_basiscursus)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('opleiding/inschrijven-basiscursus.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('opleiding/inschrijven-basiscursus.dtl', 'design/site_layout.dtl'))
         urls = self.extract_all_urls(resp, skip_menu=True)
         self.assertTrue(self.url_toevoegen_aan_mandje not in urls)
 

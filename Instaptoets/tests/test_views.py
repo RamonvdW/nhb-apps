@@ -165,7 +165,7 @@ class TestInstaptoetsViews(E2EHelpers, TestCase):
             resp = self.client.get(self.url_begin)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('instaptoets/begin-toets.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('instaptoets/begin-toets.dtl', 'design/site_layout.dtl'))
 
         # start de toets op
         self.assertEqual(Instaptoets.objects.count(), 0)
@@ -208,7 +208,7 @@ class TestInstaptoetsViews(E2EHelpers, TestCase):
             resp = self.client.get(self.url_begin)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('instaptoets/begin-toets.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('instaptoets/begin-toets.dtl', 'design/site_layout.dtl'))
 
         # GET terwijl er al een afgeronde toets is, maar de sporter niet geslaagd is
         toets_zet_afgerond_niet_geslaagd(toets)
@@ -216,7 +216,7 @@ class TestInstaptoetsViews(E2EHelpers, TestCase):
             resp = self.client.get(self.url_begin)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('instaptoets/begin-toets.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('instaptoets/begin-toets.dtl', 'design/site_layout.dtl'))
 
         # GET terwijl er al een afgeronde maar nog wel geldige toets is
         toets_zet_geslaagd_nog_geldig(toets)
@@ -224,7 +224,7 @@ class TestInstaptoetsViews(E2EHelpers, TestCase):
             resp = self.client.get(self.url_begin)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('instaptoets/begin-toets.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('instaptoets/begin-toets.dtl', 'design/site_layout.dtl'))
 
         # GET terwijl er al een afgeronde maar niet meer geldige toets is
         toets_zet_geslaagd_niet_meer_geldig(toets)
@@ -232,7 +232,7 @@ class TestInstaptoetsViews(E2EHelpers, TestCase):
             resp = self.client.get(self.url_begin)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('instaptoets/begin-toets.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('instaptoets/begin-toets.dtl', 'design/site_layout.dtl'))
 
     def test_uitslag(self):
         self.e2e_login(self.account_100000)
@@ -260,7 +260,7 @@ class TestInstaptoetsViews(E2EHelpers, TestCase):
             resp = self.client.get(self.url_uitslag)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('instaptoets/toon-uitslag.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('instaptoets/toon-uitslag.dtl', 'design/site_layout.dtl'))
 
     def test_volgende_vraag(self):
         self.e2e_login(self.account_100000)
@@ -282,7 +282,7 @@ class TestInstaptoetsViews(E2EHelpers, TestCase):
             resp = self.client.get(self.url_volgende_vraag)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('instaptoets/volgende-vraag.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('instaptoets/volgende-vraag.dtl', 'design/site_layout.dtl'))
 
         # laatste vraag --> geen overslaan knop
         toets.aantal_antwoorden = toets.aantal_vragen - 1
@@ -291,7 +291,7 @@ class TestInstaptoetsViews(E2EHelpers, TestCase):
             resp = self.client.get(self.url_volgende_vraag)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('instaptoets/volgende-vraag.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('instaptoets/volgende-vraag.dtl', 'design/site_layout.dtl'))
 
         # geen valide vraag
         self.assertTrue(str(toets.vraag_antwoord.first()) != '')
@@ -387,7 +387,7 @@ class TestInstaptoetsViews(E2EHelpers, TestCase):
             resp = self.client.get(self.url_uitslag)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('instaptoets/toon-uitslag.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('instaptoets/toon-uitslag.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, 'Gefeliciteerd')
 
     def test_operations(self):

@@ -241,7 +241,7 @@ def render_email_template(context, email_template_name):
         Returns: email body in text, html + email_template_name
     """
 
-    context['logo_url'] = settings.SITE_URL + static_safe('plein/logo_with_text_khsn.png')
+    context['logo_url'] = settings.SITE_URL + static_safe('design/logo_with_text_khsn.png')
     # aspect ratio: 400x92 --> 217x50
     context['logo_width'] = 217
     context['logo_height'] = 50

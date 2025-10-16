@@ -149,7 +149,7 @@ class TestWedstrijdenWedstrijdDetails(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_wedstrijden_wedstrijd_details % self.wedstrijd.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('wedstrijden/wedstrijd-details.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijden/wedstrijd-details.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
 
         # wedstrijd in de toekomst zetten zodat er op ingeschreven kan worden
@@ -160,7 +160,7 @@ class TestWedstrijdenWedstrijdDetails(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_wedstrijden_wedstrijd_details % self.wedstrijd.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('wedstrijden/wedstrijd-details.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijden/wedstrijd-details.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
 
         self.client.logout()
@@ -168,7 +168,7 @@ class TestWedstrijdenWedstrijdDetails(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_wedstrijden_wedstrijd_details % self.wedstrijd.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('wedstrijden/wedstrijd-details.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijden/wedstrijd-details.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
 
     def test_uitslag(self):
@@ -182,7 +182,7 @@ class TestWedstrijdenWedstrijdDetails(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_wedstrijden_wedstrijd_details % self.wedstrijd.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('wedstrijden/wedstrijd-details.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijden/wedstrijd-details.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
 
         urls = self.extract_all_urls(resp, skip_menu=True, skip_external=False)
@@ -198,7 +198,7 @@ class TestWedstrijdenWedstrijdDetails(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_wedstrijden_wedstrijd_details % self.wedstrijd.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('wedstrijden/wedstrijd-details.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijden/wedstrijd-details.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
 
         urls = self.extract_all_urls(resp, skip_menu=True, skip_external=False)
@@ -213,7 +213,7 @@ class TestWedstrijdenWedstrijdDetails(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_wedstrijden_wedstrijd_details % self.wedstrijd.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('wedstrijden/wedstrijd-details.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijden/wedstrijd-details.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
 
 # end of file

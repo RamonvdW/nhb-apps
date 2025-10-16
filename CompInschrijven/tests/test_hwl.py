@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2024 Ramon van der Winkel.
+#  Copyright (c) 2020-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -367,7 +367,7 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compinschrijven/hwl-leden-aanmelden.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compinschrijven/hwl-leden-aanmelden.dtl', 'design/site_layout.dtl'))
 
         self.assertContains(resp, '>[100004] Cadet de Jeugd</')
         self.assertContains(resp, '>14</')                  # leeftijd 2021
@@ -415,7 +415,7 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compinschrijven/hwl-leden-aanmelden.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compinschrijven/hwl-leden-aanmelden.dtl', 'design/site_layout.dtl'))
 
         # nu de POST om een paar leden aan te melden
         with self.assert_max_queries(20):
@@ -451,7 +451,7 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compinschrijven/hwl-leden-aanmelden.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compinschrijven/hwl-leden-aanmelden.dtl', 'design/site_layout.dtl'))
 
         # haal de lijst met ingeschreven schutters op
         url = self.url_ingeschreven % self.deelcomp_regio.pk
@@ -459,7 +459,7 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compinschrijven/hwl-leden-ingeschreven.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compinschrijven/hwl-leden-ingeschreven.dtl', 'design/site_layout.dtl'))
 
     def test_inschrijven_methode3_twee_dagdelen(self):
         self.deelcomp_regio.inschrijf_methode = INSCHRIJF_METHODE_3
@@ -484,7 +484,7 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('compinschrijven/hwl-leden-aanmelden.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compinschrijven/hwl-leden-aanmelden.dtl', 'design/site_layout.dtl'))
 
         # nu de POST om een paar leden aan te melden met een verkeer dagdeel
         self.assertEqual(RegiocompetitieSporterBoog.objects.count(), 0)
@@ -523,7 +523,7 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compinschrijven/hwl-leden-ingeschreven.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compinschrijven/hwl-leden-ingeschreven.dtl', 'design/site_layout.dtl'))
 
     def test_inschrijven_methode3_alle_dagdelen(self):
         self.deelcomp_regio.inschrijf_methode = INSCHRIJF_METHODE_3
@@ -548,7 +548,7 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('compinschrijven/hwl-leden-aanmelden.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compinschrijven/hwl-leden-aanmelden.dtl', 'design/site_layout.dtl'))
 
         # probeer aan te melden met een niet-wedstrijd boog
         sporterboog = SporterBoog.objects.get(sporter__lid_nr=self.sporter_100002.lid_nr,
@@ -613,7 +613,7 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
         with self.assert_max_queries(25):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('compinschrijven/hwl-leden-aanmelden.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compinschrijven/hwl-leden-aanmelden.dtl', 'design/site_layout.dtl'))
 
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'wedstrijd_%s' % match_pks[0]: 'on',
@@ -649,7 +649,7 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('compinschrijven/hwl-leden-aanmelden.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compinschrijven/hwl-leden-aanmelden.dtl', 'design/site_layout.dtl'))
 
         # nu de POST om een paar leden aan te melden
         self.assertEqual(RegiocompetitieSporterBoog.objects.count(), 0)
@@ -685,7 +685,7 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('compinschrijven/hwl-leden-aanmelden.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compinschrijven/hwl-leden-aanmelden.dtl', 'design/site_layout.dtl'))
 
         # nu de POST om een paar leden aan te melden
         self.assertEqual(RegiocompetitieSporterBoog.objects.count(), 0)
@@ -838,7 +838,7 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('compinschrijven/hwl-leden-aanmelden.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compinschrijven/hwl-leden-aanmelden.dtl', 'design/site_layout.dtl'))
 
         # nu de POST om een paar leden aan te melden
         self.assertEqual(RegiocompetitieSporterBoog.objects.count(), 0)
@@ -893,7 +893,7 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
-        self.assert_template_used(resp, ('compinschrijven/hwl-leden-aanmelden.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compinschrijven/hwl-leden-aanmelden.dtl', 'design/site_layout.dtl'))
 
         # nu de POST om een paar leden aan te melden
         self.assertEqual(RegiocompetitieSporterBoog.objects.count(), 0)

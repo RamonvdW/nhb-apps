@@ -9,7 +9,7 @@ FONTS_DIR="../../static/fonts"
 DEST="firasans-medium-subset-mh-v"
 WOFF_DEST="$FONTS_DIR/$DEST.woff2"
 # TTX_DEST="$FONTS_DIR/$DEST.ttx"
-DTL_FONTS="../../templates/plein/site_layout_fonts.dtl"
+DTL_FONTS="../../templates/design/site_layout_fonts.dtl"
 
 # ga naar de directory van het script (Plein/fonts/reduce/)
 SCRIPT_DIR=$(dirname "$0")

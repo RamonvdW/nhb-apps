@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2024 Ramon van der Winkel.
+#  Copyright (c) 2021-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -135,7 +135,7 @@ class TestWedstrijdenKorting(E2EHelpers, TestCase):
             resp = self.client.get(self.url_korting_nieuw)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('wedstrijden/korting-nieuw-kies.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijden/korting-nieuw-kies.dtl', 'design/site_layout.dtl'))
 
         resp = self.client.post(self.url_korting_nieuw)
         self.assert404(resp, 'Niet ondersteund')
@@ -162,7 +162,7 @@ class TestWedstrijdenKorting(E2EHelpers, TestCase):
             resp = self.client.get(self.url_kortingen_overzicht)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('wedstrijden/kortingen-overzicht.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijden/kortingen-overzicht.dtl', 'design/site_layout.dtl'))
 
         korting_sporter = WedstrijdKorting.objects.get(soort=WEDSTRIJD_KORTING_SPORTER)
         korting_ver = WedstrijdKorting.objects.get(soort=WEDSTRIJD_KORTING_VERENIGING)
@@ -173,19 +173,19 @@ class TestWedstrijdenKorting(E2EHelpers, TestCase):
             resp = self.client.get(self.url_korting_wijzig % korting_sporter.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('wedstrijden/wijzig-korting-sporter.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijden/wijzig-korting-sporter.dtl', 'design/site_layout.dtl'))
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_korting_wijzig % korting_ver.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('wedstrijden/wijzig-korting-vereniging.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijden/wijzig-korting-vereniging.dtl', 'design/site_layout.dtl'))
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_korting_wijzig % korting_combi.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('wedstrijden/wijzig-korting-combi.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijden/wijzig-korting-combi.dtl', 'design/site_layout.dtl'))
 
         # vul wat meer details in
         self.assertEqual(korting_sporter.uitgegeven_door, self.ver1)
@@ -206,26 +206,26 @@ class TestWedstrijdenKorting(E2EHelpers, TestCase):
             resp = self.client.get(self.url_kortingen_overzicht)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('wedstrijden/kortingen-overzicht.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijden/kortingen-overzicht.dtl', 'design/site_layout.dtl'))
 
         # wijzig scherm ophalen voor elk type korting
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_korting_wijzig % korting_sporter.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('wedstrijden/wijzig-korting-sporter.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijden/wijzig-korting-sporter.dtl', 'design/site_layout.dtl'))
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_korting_wijzig % korting_ver.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('wedstrijden/wijzig-korting-vereniging.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijden/wijzig-korting-vereniging.dtl', 'design/site_layout.dtl'))
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_korting_wijzig % korting_combi.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('wedstrijden/wijzig-korting-combi.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijden/wijzig-korting-combi.dtl', 'design/site_layout.dtl'))
 
         # wijzig korting sporter
         resp = self.client.post(self.url_korting_wijzig % korting_sporter.pk, {'percentage': 'bla'})

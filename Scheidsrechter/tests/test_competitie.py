@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2024 Ramon van der Winkel.
+#  Copyright (c) 2024-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -211,7 +211,7 @@ class TestScheidsrechterCompetitie(E2EHelpers, TestCase):
             resp = self.client.get(self.url_matches)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('scheidsrechter/matches.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('scheidsrechter/matches.dtl', 'design/site_layout.dtl'))
 
         # haal de details op van een match op (locatie met adres uit CRM)
         url = self.url_match_details % self.match_rk.pk
@@ -219,7 +219,7 @@ class TestScheidsrechterCompetitie(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('scheidsrechter/match-details.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('scheidsrechter/match-details.dtl', 'design/site_layout.dtl'))
 
         # koppel een HWL
         self.functie_hwl1.accounts.add(self.lijst_hsr[0].account)
@@ -234,7 +234,7 @@ class TestScheidsrechterCompetitie(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('scheidsrechter/match-details.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('scheidsrechter/match-details.dtl', 'design/site_layout.dtl'))
 
         # corner-case: geen HWL
         self.functie_hwl1.delete()
@@ -243,7 +243,7 @@ class TestScheidsrechterCompetitie(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('scheidsrechter/match-details.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('scheidsrechter/match-details.dtl', 'design/site_layout.dtl'))
 
         # corner-cases
         resp = self.client.get(self.url_match_details % 999999)
@@ -259,7 +259,7 @@ class TestScheidsrechterCompetitie(E2EHelpers, TestCase):
             resp = self.client.get(self.url_matches)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('scheidsrechter/matches.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('scheidsrechter/matches.dtl', 'design/site_layout.dtl'))
 
         # controleer dat notificaties nog niet gestuurd kunnen worden
         self.assertFalse('Stuur notificatie e-mails' in resp.content.decode('utf-8'))
@@ -287,7 +287,7 @@ class TestScheidsrechterCompetitie(E2EHelpers, TestCase):
             resp = self.client.get(self.url_matches)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('scheidsrechter/matches.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('scheidsrechter/matches.dtl', 'design/site_layout.dtl'))
 
         # wijzig de datum-reeks voor het RK
         self.match_rk.datum_wanneer += timedelta(days=1)
@@ -297,7 +297,7 @@ class TestScheidsrechterCompetitie(E2EHelpers, TestCase):
             resp = self.client.get(self.url_matches)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('scheidsrechter/matches.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('scheidsrechter/matches.dtl', 'design/site_layout.dtl'))
 
         # verwerk wijziging
         ScheidsMutatie.objects.all().delete()       # voorkom blokkade door recent verzoek
@@ -315,7 +315,7 @@ class TestScheidsrechterCompetitie(E2EHelpers, TestCase):
             resp = self.client.get(self.url_matches)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('scheidsrechter/matches.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('scheidsrechter/matches.dtl', 'design/site_layout.dtl'))
 
         # verwerk wijziging
         ScheidsMutatie.objects.all().delete()       # voorkom blokkade door recent verzoek
@@ -332,7 +332,7 @@ class TestScheidsrechterCompetitie(E2EHelpers, TestCase):
             resp = self.client.get(self.url_matches)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('scheidsrechter/matches.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('scheidsrechter/matches.dtl', 'design/site_layout.dtl'))
 
         # verwerk wijziging
         ScheidsMutatie.objects.all().delete()       # voorkom blokkade door recent verzoek
@@ -349,7 +349,7 @@ class TestScheidsrechterCompetitie(E2EHelpers, TestCase):
             resp = self.client.get(self.url_matches)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('scheidsrechter/matches.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('scheidsrechter/matches.dtl', 'design/site_layout.dtl'))
 
         # corner-case: geen BK matches
         CompetitieMatch.objects.filter(beschrijving__startswith='BK').delete()
@@ -358,7 +358,7 @@ class TestScheidsrechterCompetitie(E2EHelpers, TestCase):
             resp = self.client.get(self.url_matches)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('scheidsrechter/matches.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('scheidsrechter/matches.dtl', 'design/site_layout.dtl'))
 
         # corner-case: geen RK matches
         CompetitieMatch.objects.filter(beschrijving__startswith='RK').update(beschrijving='BK test')
@@ -367,7 +367,7 @@ class TestScheidsrechterCompetitie(E2EHelpers, TestCase):
             resp = self.client.get(self.url_matches)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('scheidsrechter/matches.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('scheidsrechter/matches.dtl', 'design/site_layout.dtl'))
 
         # corner-case: geen matches (meer)
         CompetitieMatch.objects.all().delete()
@@ -376,7 +376,7 @@ class TestScheidsrechterCompetitie(E2EHelpers, TestCase):
             resp = self.client.get(self.url_matches)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('scheidsrechter/matches.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('scheidsrechter/matches.dtl', 'design/site_layout.dtl'))
 
     def _zet_beschikbaarheid(self, wedstrijd, dag_offset):
         datum = wedstrijd.datum_begin + timedelta(days=dag_offset)
@@ -433,7 +433,7 @@ class TestScheidsrechterCompetitie(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('scheidsrechter/match-cs-kies-sr.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('scheidsrechter/match-cs-kies-sr.dtl', 'design/site_layout.dtl'))
 
         # post zonder MatchScheidsrechters
         resp = self.client.post(url, {'aantal_scheids': '#'})   # ValueError
@@ -451,7 +451,7 @@ class TestScheidsrechterCompetitie(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('scheidsrechter/match-cs-kies-sr.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('scheidsrechter/match-cs-kies-sr.dtl', 'design/site_layout.dtl'))
 
         # beschikbaarheid opvragen
         ScheidsMutatie.objects.all().delete()       # voorkom blokkade door recent verzoek
@@ -474,7 +474,7 @@ class TestScheidsrechterCompetitie(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('scheidsrechter/match-cs-kies-sr.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('scheidsrechter/match-cs-kies-sr.dtl', 'design/site_layout.dtl'))
 
         # koppel een HWL
         self.functie_hwl2.accounts.add(self.lijst_hsr[0].account)
@@ -484,7 +484,7 @@ class TestScheidsrechterCompetitie(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('scheidsrechter/match-cs-kies-sr.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('scheidsrechter/match-cs-kies-sr.dtl', 'design/site_layout.dtl'))
 
         # geeft SR beschikbaarheid op
         wedstrijd = Wedstrijd.objects.get(titel__startswith='BK')
@@ -495,7 +495,7 @@ class TestScheidsrechterCompetitie(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('scheidsrechter/match-cs-kies-sr.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('scheidsrechter/match-cs-kies-sr.dtl', 'design/site_layout.dtl'))
 
         obj_ja = ScheidsBeschikbaarheid.objects.filter(wedstrijd=wedstrijd, opgaaf=BESCHIKBAAR_JA).first()
         obj_denk = ScheidsBeschikbaarheid.objects.filter(wedstrijd=wedstrijd, opgaaf=BESCHIKBAAR_DENK).first()
@@ -517,7 +517,7 @@ class TestScheidsrechterCompetitie(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('scheidsrechter/match-cs-kies-sr.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('scheidsrechter/match-cs-kies-sr.dtl', 'design/site_layout.dtl'))
 
         # bekijk de andere BK wedstrijd op dezelfde dag - de gekozen hoofd-SR is nu "bezet"
         url2 = self.url_match_cs_koppel_sr % self.match_bk2.pk
@@ -525,7 +525,7 @@ class TestScheidsrechterCompetitie(E2EHelpers, TestCase):
             resp = self.client.get(url2)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('scheidsrechter/match-cs-kies-sr.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('scheidsrechter/match-cs-kies-sr.dtl', 'design/site_layout.dtl'))
 
         # kies een andere hoofd-sr die niet meer beschikbaar is
         match_sr.refresh_from_db()
@@ -537,7 +537,7 @@ class TestScheidsrechterCompetitie(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('scheidsrechter/match-cs-kies-sr.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('scheidsrechter/match-cs-kies-sr.dtl', 'design/site_layout.dtl'))
 
         resp = self.client.post(url, {'aantal_scheids': 2,
                                       'hsr': '#',
@@ -575,7 +575,7 @@ class TestScheidsrechterCompetitie(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('scheidsrechter/match-cs-kies-sr.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('scheidsrechter/match-cs-kies-sr.dtl', 'design/site_layout.dtl'))
 
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'aantal_scheids': 1})
@@ -600,7 +600,7 @@ class TestScheidsrechterCompetitie(E2EHelpers, TestCase):
             resp = self.client.get(self.url_match_hwl_contact % self.match_bk.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('scheidsrechter/match-hwl-contact.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('scheidsrechter/match-hwl-contact.dtl', 'design/site_layout.dtl'))
 
         self.e2e_wissel_naar_functie(self.functie_cs)
         self.e2e_check_rol('CS')
@@ -646,7 +646,7 @@ class TestScheidsrechterCompetitie(E2EHelpers, TestCase):
             resp = self.client.get(self.url_match_hwl_contact % self.match_bk.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('scheidsrechter/match-hwl-contact.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('scheidsrechter/match-hwl-contact.dtl', 'design/site_layout.dtl'))
 
         # corner cases
         self.match_bk.aantal_scheids = 0
@@ -656,7 +656,7 @@ class TestScheidsrechterCompetitie(E2EHelpers, TestCase):
             resp = self.client.get(self.url_match_hwl_contact % self.match_bk.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('scheidsrechter/match-hwl-contact.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('scheidsrechter/match-hwl-contact.dtl', 'design/site_layout.dtl'))
 
         resp = self.client.get(self.url_match_hwl_contact % 999999)
         self.assert404(resp, 'Wedstrijd niet gevonden')

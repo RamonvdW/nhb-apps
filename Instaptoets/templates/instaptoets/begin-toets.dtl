@@ -1,4 +1,4 @@
-{% extends 'plein/site_layout.dtl' %}
+{% extends 'design/site_layout.dtl' %}
 {% comment %}
                 Copyright (c) 2024-2025 Ramon van der Winkel.
                 All rights reserved.
@@ -64,9 +64,9 @@
     <!-- blauwe balk met kaartjes -->
     <div class="row-sv-blauw">
         <div class="col s12">
-            {% include 'plein/card_icon.dtl' with icon="book_2" url=lesmateriaal_wa         extern_open=True title="WA boeken" text="Nederlandse vertaling van de Rule Books van World Archery. Deel 2 en 3 zijn relevant voor de toets." %}
-            {% include 'plein/card_icon.dtl' with icon="book_2" url=lesmateriaal_competitie extern_open=True title="Bondscompetities" text="De nationale bepalingen voor de bondscompetities."  %}
-            {% include 'plein/card_icon.dtl' with icon="book_2" url=lesmateriaal_kleding    extern_open=True title="Kleding" text="Het kledingvoorschrift voor alle erkende disciplines in de handboogsport" %}
+            {% include 'design/card_icon.dtl' with icon="book_2" url=lesmateriaal_wa         extern_open=True title="WA boeken" text="Nederlandse vertaling van de Rule Books van World Archery. Deel 2 en 3 zijn relevant voor de toets." %}
+            {% include 'design/card_icon.dtl' with icon="book_2" url=lesmateriaal_competitie extern_open=True title="Bondscompetities" text="De nationale bepalingen voor de bondscompetities."  %}
+            {% include 'design/card_icon.dtl' with icon="book_2" url=lesmateriaal_kleding    extern_open=True title="Kleding" text="Het kledingvoorschrift voor alle erkende disciplines in de handboogsport" %}
         </div>
     </div>
 

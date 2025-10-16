@@ -106,7 +106,7 @@ class TestOpleidingAanpassingen(E2EHelpers, TestCase):
             resp = self.client.get(self.url_aanpassingen)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('opleiding/aanpassingen.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('opleiding/aanpassingen.dtl', 'design/site_layout.dtl'))
 
         # maak een inschrijving aan
         OpleidingInschrijving(
@@ -118,7 +118,7 @@ class TestOpleidingAanpassingen(E2EHelpers, TestCase):
             resp = self.client.get(self.url_aanpassingen)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('opleiding/aanpassingen.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('opleiding/aanpassingen.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, 'Bad Vizier')
 
         # nadat het CRM ge-update is moet deze aanpassing niet meer getoond worden
@@ -129,7 +129,7 @@ class TestOpleidingAanpassingen(E2EHelpers, TestCase):
             resp = self.client.get(self.url_aanpassingen)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('opleiding/aanpassingen.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('opleiding/aanpassingen.dtl', 'design/site_layout.dtl'))
         self.assertNotContains(resp, 'Bad Vizier')
 
         # corner case

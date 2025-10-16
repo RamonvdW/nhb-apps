@@ -133,7 +133,7 @@ class TestWedstrijdenWijzigWedstrijd(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('wedstrijden/wijzig-wedstrijd.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijden/wijzig-wedstrijd.dtl', 'design/site_layout.dtl'))
 
         # buiten locatie zonder binnen locatie
         locatie_buiten = self._maak_accommodatie_buiten(self.ver1)
@@ -141,7 +141,7 @@ class TestWedstrijdenWijzigWedstrijd(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('wedstrijden/wijzig-wedstrijd.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijden/wijzig-wedstrijd.dtl', 'design/site_layout.dtl'))
 
         # buiten locatie met binnen locatie
         self._maak_accommodatie_binnen(self.ver1)
@@ -149,7 +149,7 @@ class TestWedstrijdenWijzigWedstrijd(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('wedstrijden/wijzig-wedstrijd.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijden/wijzig-wedstrijd.dtl', 'design/site_layout.dtl'))
 
         # wijzig velden via de 'post' interface
         loc_sel = 'loc_%s' % locatie_buiten.pk
@@ -224,7 +224,7 @@ class TestWedstrijdenWijzigWedstrijd(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('wedstrijden/wijzig-wedstrijd.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijden/wijzig-wedstrijd.dtl', 'design/site_layout.dtl'))
 
         # zet de wedstrijd hard door 'Wacht op goedkeuring' en haal de pagina opnieuw op
         wedstrijd.status = 'W'
@@ -233,7 +233,7 @@ class TestWedstrijdenWijzigWedstrijd(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('wedstrijden/wijzig-wedstrijd.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijden/wijzig-wedstrijd.dtl', 'design/site_layout.dtl'))
 
         # probeer wijzigingen te doen aan een wedstrijd die voorbij Ontwerp fase is
         datum = '%s-3-3' % wedstrijd.datum_begin.year
@@ -280,7 +280,7 @@ class TestWedstrijdenWijzigWedstrijd(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('wedstrijden/wijzig-wedstrijd.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijden/wijzig-wedstrijd.dtl', 'design/site_layout.dtl'))
 
         # variaties op aantal scheids
         wedstrijd.aantal_scheids = 1
@@ -289,7 +289,7 @@ class TestWedstrijdenWijzigWedstrijd(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('wedstrijden/wijzig-wedstrijd.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijden/wijzig-wedstrijd.dtl', 'design/site_layout.dtl'))
 
         # variaties op aantal scheids
         wedstrijd.aantal_scheids = 5
@@ -298,7 +298,7 @@ class TestWedstrijdenWijzigWedstrijd(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('wedstrijden/wijzig-wedstrijd.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijden/wijzig-wedstrijd.dtl', 'design/site_layout.dtl'))
 
         # zet de wedstrijd door 'Geannuleerd' en haal de pagina opnieuw op
         wedstrijd.aantal_scheids = AANTAL_SCHEIDS_GEEN_KEUZE
@@ -308,7 +308,7 @@ class TestWedstrijdenWijzigWedstrijd(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('wedstrijden/wijzig-wedstrijd.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijden/wijzig-wedstrijd.dtl', 'design/site_layout.dtl'))
 
         # probeer wijzigingen te doen aan een geannuleerde wedstrijd
         datum = '%s-2-2' % wedstrijd.datum_begin.year
@@ -356,7 +356,7 @@ class TestWedstrijdenWijzigWedstrijd(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('wedstrijden/wijzig-wedstrijd.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijden/wijzig-wedstrijd.dtl', 'design/site_layout.dtl'))
 
         wedstrijd.status = 'W'      # wacht op goedkeuring
         wedstrijd.save()
@@ -694,7 +694,7 @@ class TestWedstrijdenWijzigWedstrijd(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('wedstrijden/wijzig-wedstrijd.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijden/wijzig-wedstrijd.dtl', 'design/site_layout.dtl'))
 
     def test_wijzig_wa(self):
         self.e2e_login_and_pass_otp(self.account_admin)
@@ -717,7 +717,7 @@ class TestWedstrijdenWijzigWedstrijd(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('wedstrijden/wijzig-wedstrijd.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijden/wijzig-wedstrijd.dtl', 'design/site_layout.dtl'))
 
         # zet wat parameters, inclusief de prijzen
         datum = '%s-1-1' % (wedstrijd.datum_begin.year + 1)
@@ -781,7 +781,7 @@ class TestWedstrijdenWijzigWedstrijd(E2EHelpers, TestCase):
                 resp = self.client.get(url)
             self.assertEqual(resp.status_code, 200)  # 200 = OK
             self.assert_html_ok(resp)
-            self.assert_template_used(resp, ('wedstrijden/wijzig-wedstrijd.dtl', 'plein/site_layout.dtl'))
+            self.assert_template_used(resp, ('wedstrijden/wijzig-wedstrijd.dtl', 'design/site_layout.dtl'))
 
             with self.assert_max_queries(20):
                 resp = self.client.post(url, {'uitvoerend': 'ver_%s' % self.ver1.ver_nr})
@@ -797,7 +797,7 @@ class TestWedstrijdenWijzigWedstrijd(E2EHelpers, TestCase):
                 resp = self.client.get(url)
             self.assertEqual(resp.status_code, 200)  # 200 = OK
             self.assert_html_ok(resp)
-            self.assert_template_used(resp, ('wedstrijden/wijzig-wedstrijd.dtl', 'plein/site_layout.dtl'))
+            self.assert_template_used(resp, ('wedstrijden/wijzig-wedstrijd.dtl', 'design/site_layout.dtl'))
 
             with self.assert_max_queries(20):
                 resp = self.client.post(url, {'uitvoerend': 'ver_%s' % self.ver1.ver_nr,
@@ -812,7 +812,7 @@ class TestWedstrijdenWijzigWedstrijd(E2EHelpers, TestCase):
                 resp = self.client.get(url)
             self.assertEqual(resp.status_code, 200)  # 200 = OK
             self.assert_html_ok(resp)
-            self.assert_template_used(resp, ('wedstrijden/wijzig-wedstrijd.dtl', 'plein/site_layout.dtl'))
+            self.assert_template_used(resp, ('wedstrijden/wijzig-wedstrijd.dtl', 'design/site_layout.dtl'))
 
             # zet de uitvoerende vereniging op de eigen vereniging om deze te "resetten"
             with self.assert_max_queries(20):
@@ -891,7 +891,7 @@ class TestWedstrijdenWijzigWedstrijd(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('wedstrijden/wijzig-wedstrijd.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijden/wijzig-wedstrijd.dtl', 'design/site_layout.dtl'))
 
 
 # end of file

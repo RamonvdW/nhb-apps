@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -60,7 +60,7 @@ class TestTijdelijkeCodes(E2EHelpers, TestCase):
             resp = self.client.get(self.url_code % 'test')
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('tijdelijkecodes/code-fout.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('tijdelijkecodes/code-fout.dtl', 'design/site_layout.dtl'))
 
     def test_verlopen(self):
         obj = save_tijdelijke_code('code1', 'iets_anders', geldig_dagen=-1)
@@ -73,7 +73,7 @@ class TestTijdelijkeCodes(E2EHelpers, TestCase):
             resp = self.client.get(self.url_code % 'code1')
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('tijdelijkecodes/code-goed.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('tijdelijkecodes/code-goed.dtl', 'design/site_layout.dtl'))
 
         urls = self.extract_all_urls(resp, skip_menu=True, skip_smileys=True)
         self.assertEqual(1, len(urls))
@@ -96,7 +96,7 @@ class TestTijdelijkeCodes(E2EHelpers, TestCase):
             resp = self.client.get(self.url_code % 'code3')
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('tijdelijkecodes/code-goed.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('tijdelijkecodes/code-goed.dtl', 'design/site_layout.dtl'))
 
         urls = self.extract_all_urls(resp, skip_menu=True, skip_smileys=True)
         # print('urls: %s' % repr(urls))
@@ -150,7 +150,7 @@ class TestTijdelijkeCodes(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('tijdelijkecodes/code-goed.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('tijdelijkecodes/code-goed.dtl', 'design/site_layout.dtl'))
 
         urls = self.extract_all_urls(resp, skip_menu=True, skip_smileys=True)
         # print('urls: %s' % repr(urls))
@@ -165,7 +165,7 @@ class TestTijdelijkeCodes(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(self.callback_count, 2)
         # _my_receiver_func stuurt door naar de feedback-bedankt pagina
-        self.assert_template_used(resp, ('feedback/bedankt.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('feedback/bedankt.dtl', 'design/site_layout.dtl'))
 
     def test_account_wissel(self):
         set_tijdelijke_codes_receiver(RECEIVER_ACCOUNT_WISSEL, self._my_receiver_func_email)
@@ -182,7 +182,7 @@ class TestTijdelijkeCodes(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('tijdelijkecodes/code-goed.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('tijdelijkecodes/code-goed.dtl', 'design/site_layout.dtl'))
 
         urls = self.extract_all_urls(resp, skip_menu=True, skip_smileys=True)
         # print('urls: %s' % repr(urls))
@@ -197,7 +197,7 @@ class TestTijdelijkeCodes(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(self.callback_count, 1)
         # _my_receiver_func stuurt door naar de feedback-bedankt pagina
-        self.assert_template_used(resp, ('feedback/bedankt.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('feedback/bedankt.dtl', 'design/site_layout.dtl'))
 
     def test_wachtwoord_vergeten(self):
         set_tijdelijke_codes_receiver(RECEIVER_WACHTWOORD_VERGETEN, self._my_receiver_func_email)
@@ -213,7 +213,7 @@ class TestTijdelijkeCodes(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('tijdelijkecodes/code-goed.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('tijdelijkecodes/code-goed.dtl', 'design/site_layout.dtl'))
 
         urls = self.extract_all_urls(resp, skip_menu=True, skip_smileys=True)
         # print('urls: %s' % repr(urls))
@@ -228,7 +228,7 @@ class TestTijdelijkeCodes(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(self.callback_count, 1)
         # _my_receiver_func stuurt door naar de feedback-bedankt pagina
-        self.assert_template_used(resp, ('feedback/bedankt.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('feedback/bedankt.dtl', 'design/site_layout.dtl'))
 
     def test_bevestig_email_functie(self):
         set_tijdelijke_codes_receiver(RECEIVER_BEVESTIG_EMAIL_FUNCTIE, self._my_receiver_func_1_arg)
@@ -246,7 +246,7 @@ class TestTijdelijkeCodes(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('tijdelijkecodes/code-goed.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('tijdelijkecodes/code-goed.dtl', 'design/site_layout.dtl'))
 
         urls = self.extract_all_urls(resp, skip_menu=True, skip_smileys=True)
         # print('urls: %s' % repr(urls))
@@ -261,7 +261,7 @@ class TestTijdelijkeCodes(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(self.callback_count, 1)
         # _my_receiver_func stuurt door naar de feedback-bedankt pagina
-        self.assert_template_used(resp, ('feedback/bedankt.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('feedback/bedankt.dtl', 'design/site_layout.dtl'))
 
         self.e2e_assert_other_http_commands_not_supported(self.url_code % '0', post=False)
 
@@ -280,7 +280,7 @@ class TestTijdelijkeCodes(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('tijdelijkecodes/code-goed.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('tijdelijkecodes/code-goed.dtl', 'design/site_layout.dtl'))
 
         urls = self.extract_all_urls(resp, skip_menu=True, skip_smileys=True)
         # print('urls: %s' % repr(urls))
@@ -295,7 +295,7 @@ class TestTijdelijkeCodes(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(self.callback_count, 1)
         # _my_receiver_func stuurt door naar de feedback-bedankt pagina
-        self.assert_template_used(resp, ('feedback/bedankt.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('feedback/bedankt.dtl', 'design/site_layout.dtl'))
 
     def test_registreer_gast(self):
         set_tijdelijke_codes_receiver(RECEIVER_BEVESTIG_EMAIL_REG_GAST, self._my_receiver_func_1_arg)
@@ -314,7 +314,7 @@ class TestTijdelijkeCodes(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('tijdelijkecodes/code-goed.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('tijdelijkecodes/code-goed.dtl', 'design/site_layout.dtl'))
 
         urls = self.extract_all_urls(resp, skip_menu=True, skip_smileys=True)
         # print('urls: %s' % repr(urls))
@@ -329,7 +329,7 @@ class TestTijdelijkeCodes(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(self.callback_count, 1)
         # _my_receiver_func stuurt door naar de feedback-bedankt pagina
-        self.assert_template_used(resp, ('feedback/bedankt.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('feedback/bedankt.dtl', 'design/site_layout.dtl'))
 
     def test_kampioen(self):
         set_tijdelijke_codes_receiver(RECEIVER_DEELNAME_KAMPIOENSCHAP, self._my_receiver_func_1_arg)
@@ -385,7 +385,7 @@ class TestTijdelijkeCodes(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('tijdelijkecodes/code-goed.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('tijdelijkecodes/code-goed.dtl', 'design/site_layout.dtl'))
 
         urls = self.extract_all_urls(resp, skip_menu=True, skip_smileys=True)
         # print('urls: %s' % repr(urls))
@@ -400,7 +400,7 @@ class TestTijdelijkeCodes(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(self.callback_count, 1)
         # _my_receiver_func stuurt door naar de feedback-bedankt pagina
-        self.assert_template_used(resp, ('feedback/bedankt.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('feedback/bedankt.dtl', 'design/site_layout.dtl'))
 
 
 # end of file

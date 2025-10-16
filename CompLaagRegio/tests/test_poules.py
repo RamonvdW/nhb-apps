@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -209,7 +209,7 @@ class TestCompLaagRegioPoules(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagregio/rcl-teams-poules.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagregio/rcl-teams-poules.dtl', 'design/site_layout.dtl'))
 
         # tot en met fase D mag alles nog
         comp = deelcomp.competitie
@@ -246,7 +246,7 @@ class TestCompLaagRegioPoules(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagregio/wijzig-poule.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagregio/wijzig-poule.dtl', 'design/site_layout.dtl'))
 
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'beschrijving': ' hoi test!'})
@@ -292,7 +292,7 @@ class TestCompLaagRegioPoules(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagregio/rcl-teams-poules.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagregio/rcl-teams-poules.dtl', 'design/site_layout.dtl'))
 
         # bad: maak een poule aan
         self.assertEqual(1, RegiocompetitieTeamPoule.objects.count())
@@ -307,7 +307,7 @@ class TestCompLaagRegioPoules(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagregio/wijzig-poule.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagregio/wijzig-poule.dtl', 'design/site_layout.dtl'))
 
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'beschrijving': 'test'})
@@ -322,7 +322,7 @@ class TestCompLaagRegioPoules(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagregio/rcl-teams-poules.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagregio/rcl-teams-poules.dtl', 'design/site_layout.dtl'))
 
         # bad: maak een poule aan
         self.assertEqual(2, RegiocompetitieTeamPoule.objects.count())
@@ -337,7 +337,7 @@ class TestCompLaagRegioPoules(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagregio/wijzig-poule.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagregio/wijzig-poule.dtl', 'design/site_layout.dtl'))
 
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'beschrijving': 'nieuwe test'})
@@ -353,7 +353,7 @@ class TestCompLaagRegioPoules(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagregio/wijzig-poule.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagregio/wijzig-poule.dtl', 'design/site_layout.dtl'))
 
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'beschrijving': 'nieuwe test'})
@@ -431,7 +431,7 @@ class TestCompLaagRegioPoules(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagregio/wijzig-poule.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagregio/wijzig-poule.dtl', 'design/site_layout.dtl'))
 
         # compound team heeft prio indien bij recurve team gestopt
         params['team_%s' % team_c.pk] = 1

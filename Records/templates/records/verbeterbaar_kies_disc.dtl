@@ -1,6 +1,6 @@
-{% extends 'plein/site_layout.dtl' %}
+{% extends 'design/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2019-2023 Ramon van der Winkel.
+                Copyright (c) 2019-2025 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -22,7 +22,7 @@
         <div class="col s12">
 
             {% for obj in object_list %}
-                {% include 'plein/card_logo.dtl' with title=obj.titel text=obj.tekst img_src=obj.img_src img_height=63 url=obj.url %}
+                {% include 'design/card_logo.dtl' with title=obj.titel text=obj.tekst img_src=obj.img_src img_height=63 url=obj.url %}
             {% endfor %}
         </div>
     </div>

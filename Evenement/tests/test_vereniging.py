@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2024 Ramon van der Winkel.
+#  Copyright (c) 2024-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -106,7 +106,7 @@ class TestEvenementVereniging(E2EHelpers, TestCase):
             resp = self.client.get(self.url_lijst_vereniging)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('evenement/overzicht-vereniging.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('evenement/overzicht-vereniging.dtl', 'design/site_layout.dtl'))
 
         # verwijder alle evenementen
         Evenement.objects.all().delete()
@@ -115,7 +115,7 @@ class TestEvenementVereniging(E2EHelpers, TestCase):
             resp = self.client.get(self.url_lijst_vereniging)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('evenement/overzicht-vereniging.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('evenement/overzicht-vereniging.dtl', 'design/site_layout.dtl'))
 
     def test_sec(self):
         functie_sec = maak_functie("SEC test", "SEC")
@@ -130,7 +130,7 @@ class TestEvenementVereniging(E2EHelpers, TestCase):
             resp = self.client.get(self.url_lijst_vereniging)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('evenement/overzicht-vereniging.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('evenement/overzicht-vereniging.dtl', 'design/site_layout.dtl'))
 
 
 # end of file

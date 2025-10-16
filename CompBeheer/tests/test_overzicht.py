@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -230,7 +230,7 @@ class TestCompBeheerOverzicht(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/kies.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('competitie/kies.dtl', 'design/site_layout.dtl'))
         self.e2e_assert_other_http_commands_not_supported(url)
 
     def test_overzicht(self):
@@ -245,7 +245,7 @@ class TestCompBeheerOverzicht(E2EHelpers, TestCase):
             resp = self.client.get(self.url_kies)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/kies.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('competitie/kies.dtl', 'design/site_layout.dtl'))
 
         self._zet_competities_naar_fase_b()
         self._maak_leden_met_voorkeuren()
@@ -258,14 +258,14 @@ class TestCompBeheerOverzicht(E2EHelpers, TestCase):
             resp = self.client.get(self.url_overzicht % comp18.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/overzicht.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('competitie/overzicht.dtl', 'design/site_layout.dtl'))
 
         self.e2e_wisselnaarrol_bb()
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_overzicht_beheer % comp18.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compbeheer/overzicht.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compbeheer/overzicht.dtl', 'design/site_layout.dtl'))
 
         # bad
         resp = self.client.get(self.url_overzicht_beheer % 999999)
@@ -281,7 +281,7 @@ class TestCompBeheerOverzicht(E2EHelpers, TestCase):
             resp = self.client.get(self.url_overzicht_beheer % comp18.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compbeheer/overzicht.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compbeheer/overzicht.dtl', 'design/site_layout.dtl'))
 
         # RKO 25m Rayon 2
         deelkamp = Kampioenschap.objects.get(competitie=comp25, deel=DEEL_RK, rayon=self.rayon_2)
@@ -294,7 +294,7 @@ class TestCompBeheerOverzicht(E2EHelpers, TestCase):
             resp = self.client.get(self.url_overzicht_beheer % comp25.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compbeheer/overzicht.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compbeheer/overzicht.dtl', 'design/site_layout.dtl'))
 
         # RCL
         deelcomp = Regiocompetitie.objects.get(competitie=comp18, regio=self.regio_101)
@@ -310,7 +310,7 @@ class TestCompBeheerOverzicht(E2EHelpers, TestCase):
             resp = self.client.get(self.url_overzicht_beheer % comp18.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compbeheer/overzicht.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compbeheer/overzicht.dtl', 'design/site_layout.dtl'))
 
         zet_competitie_fase_regio_wedstrijden(comp18)
         comp18.einde_fase_F = timezone.now().date() + datetime.timedelta(days=1)
@@ -320,7 +320,7 @@ class TestCompBeheerOverzicht(E2EHelpers, TestCase):
             resp = self.client.get(self.url_overzicht_beheer % comp18.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compbeheer/overzicht.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compbeheer/overzicht.dtl', 'design/site_layout.dtl'))
 
         zet_competitie_fase_regio_wedstrijden(comp18)
         comp18.einde_fase_F = timezone.now().date() + datetime.timedelta(days=31)
@@ -330,7 +330,7 @@ class TestCompBeheerOverzicht(E2EHelpers, TestCase):
             resp = self.client.get(self.url_overzicht_beheer % comp18.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compbeheer/overzicht.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compbeheer/overzicht.dtl', 'design/site_layout.dtl'))
 
         deelcomp.is_afgesloten = True
         deelcomp.save(update_fields=['is_afgesloten'])
@@ -339,13 +339,13 @@ class TestCompBeheerOverzicht(E2EHelpers, TestCase):
             resp = self.client.get(self.url_overzicht_beheer % comp18.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compbeheer/overzicht.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compbeheer/overzicht.dtl', 'design/site_layout.dtl'))
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_tijdlijn % comp18.pk)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compbeheer/tijdlijn.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compbeheer/tijdlijn.dtl', 'design/site_layout.dtl'))
 
         # HWL
         self.e2e_wissel_naar_functie(self.functie_hwl)
@@ -354,13 +354,13 @@ class TestCompBeheerOverzicht(E2EHelpers, TestCase):
             resp = self.client.get(self.url_tijdlijn % comp18.pk)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compbeheer/tijdlijn.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compbeheer/tijdlijn.dtl', 'design/site_layout.dtl'))
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_tijdlijn % comp25.pk)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compbeheer/tijdlijn.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compbeheer/tijdlijn.dtl', 'design/site_layout.dtl'))
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_tijdlijn % 'x')

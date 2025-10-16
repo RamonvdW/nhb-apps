@@ -168,7 +168,7 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
             resp = self.client.get(self.url_bestellingen_overzicht)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('bestelling/toon-bestellingen.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('bestelling/toon-bestellingen.dtl', 'design/site_layout.dtl'))
 
         # maak een bestelling aan
         bestelling = Bestelling(
@@ -188,7 +188,7 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
             resp = self.client.get(self.url_bestellingen_overzicht)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('bestelling/toon-bestellingen.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('bestelling/toon-bestellingen.dtl', 'design/site_layout.dtl'))
 
     def test_details_nieuw(self):
         self.e2e_login(self.account_normaal)
@@ -213,7 +213,7 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('bestelling/toon-bestelling-details.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('bestelling/toon-bestelling-details.dtl', 'design/site_layout.dtl'))
 
         self.e2e_assert_other_http_commands_not_supported(url)
 
@@ -274,7 +274,7 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('bestelling/toon-bestelling-details.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('bestelling/toon-bestelling-details.dtl', 'design/site_layout.dtl'))
 
     def test_details_geannuleerd(self):
         self.e2e_login(self.account_normaal)
@@ -300,7 +300,7 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('bestelling/toon-bestelling-details.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('bestelling/toon-bestelling-details.dtl', 'design/site_layout.dtl'))
 
         # coverage
         self.assertFalse(regel.is_webwinkel())
@@ -323,7 +323,7 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('bestelling/toon-bestelling-details.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('bestelling/toon-bestelling-details.dtl', 'design/site_layout.dtl'))
 
     def test_details_afgerond(self):
         self.e2e_login(self.account_normaal)
@@ -348,7 +348,7 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('bestelling/toon-bestelling-details.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('bestelling/toon-bestelling-details.dtl', 'design/site_layout.dtl'))
 
     def test_details_kwalificatiescores(self):
         self.e2e_login(self.account_normaal)
@@ -379,7 +379,7 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('bestelling/toon-bestelling-details.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('bestelling/toon-bestelling-details.dtl', 'design/site_layout.dtl'))
 
     def test_details_met_mollie_restitutie(self):
         self.e2e_login(self.account_normaal)
@@ -412,7 +412,7 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('bestelling/toon-bestelling-details.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('bestelling/toon-bestelling-details.dtl', 'design/site_layout.dtl'))
 
     def test_details_met_mollie_failed(self):
         self.e2e_login(self.account_normaal)
@@ -443,7 +443,7 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('bestelling/toon-bestelling-details.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('bestelling/toon-bestelling-details.dtl', 'design/site_layout.dtl'))
 
     def test_annuleer(self):
         # maak een bestelling en annuleer deze weer

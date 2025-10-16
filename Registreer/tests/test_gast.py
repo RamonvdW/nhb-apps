@@ -47,7 +47,7 @@ class TestRegistreerGast(E2EHelpers, TestCase):
             resp = self.client.get(self.url_registreer_gast)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('registreer/registreer-gast.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('registreer/registreer-gast.dtl', 'design/site_layout.dtl'))
         self.assertNotContains(resp, 'Fout:')
 
         # admin beschrijving
@@ -68,7 +68,7 @@ class TestRegistreerGast(E2EHelpers, TestCase):
                                     follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('registreer/registreer-gast-01-bevestig-email.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('registreer/registreer-gast-01-bevestig-email.dtl', 'design/site_layout.dtl'))
 
         self.assertEqual(1, GastRegistratie.objects.count())
         gast = GastRegistratie.objects.first()
@@ -109,7 +109,7 @@ class TestRegistreerGast(E2EHelpers, TestCase):
             resp = self.client.post(post_url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('registreer/registreer-gast-02-email-bevestigd.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('registreer/registreer-gast-02-email-bevestigd.dtl', 'design/site_layout.dtl'))
 
         self.assertEqual(0, TijdelijkeCode.objects.count())
         self.assertEqual(1, GastRegistratie.objects.count())
@@ -129,7 +129,7 @@ class TestRegistreerGast(E2EHelpers, TestCase):
                                     follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('registreer/registreer-gast.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('registreer/registreer-gast.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, 'Fout: dubbel verzoek')
 
         self.assertEqual(1, GastRegistratie.objects.count())
@@ -159,7 +159,7 @@ class TestRegistreerGast(E2EHelpers, TestCase):
                                     follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('registreer/registreer-gast.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('registreer/registreer-gast.dtl', 'design/site_layout.dtl'))
 
         self.assertContains(resp,
                             'Registratie van gast-accounts is op dit moment niet mogelijk. Probeer het later nog eens.')
@@ -176,7 +176,7 @@ class TestRegistreerGast(E2EHelpers, TestCase):
                                     follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('registreer/registreer-gast.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('registreer/registreer-gast.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, 'Fout: de gegevens worden niet geaccepteerd')
 
         # voornaam ontbreek
@@ -186,7 +186,7 @@ class TestRegistreerGast(E2EHelpers, TestCase):
                                     follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('registreer/registreer-gast.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('registreer/registreer-gast.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, 'Fout: de gegevens worden niet geaccepteerd')
 
         # email ontbreek
@@ -196,7 +196,7 @@ class TestRegistreerGast(E2EHelpers, TestCase):
                                     follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('registreer/registreer-gast.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('registreer/registreer-gast.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, 'Fout: de gegevens worden niet geaccepteerd')
 
         # achternaam leeg
@@ -206,7 +206,7 @@ class TestRegistreerGast(E2EHelpers, TestCase):
                                     follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('registreer/registreer-gast.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('registreer/registreer-gast.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, 'Fout: de gegevens worden niet geaccepteerd')
 
         # voornaam leeg
@@ -216,7 +216,7 @@ class TestRegistreerGast(E2EHelpers, TestCase):
                                     follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('registreer/registreer-gast.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('registreer/registreer-gast.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, 'Fout: de gegevens worden niet geaccepteerd')
 
         # email leeg
@@ -226,7 +226,7 @@ class TestRegistreerGast(E2EHelpers, TestCase):
                                     follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('registreer/registreer-gast.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('registreer/registreer-gast.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, 'Fout: de gegevens worden niet geaccepteerd')
 
         # slechte email
@@ -238,7 +238,7 @@ class TestRegistreerGast(E2EHelpers, TestCase):
                                     follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('registreer/registreer-gast.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('registreer/registreer-gast.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, 'Fout: de gegevens worden niet geaccepteerd')
 
     def test_bad_create(self):
@@ -308,7 +308,7 @@ class TestRegistreerGast(E2EHelpers, TestCase):
                                     follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('registreer/registreer-gast-01-bevestig-email.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('registreer/registreer-gast-01-bevestig-email.dtl', 'design/site_layout.dtl'))
 
         self.assertEqual(1, GastRegistratie.objects.count())
         self.assertEqual(1, GastRegistratieRateTracker.objects.count())
@@ -328,7 +328,7 @@ class TestRegistreerGast(E2EHelpers, TestCase):
                                     follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('registreer/registreer-gast.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('registreer/registreer-gast.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, 'Fout: te snel')
 
         self.assertEqual(1, GastRegistratie.objects.count())
@@ -349,7 +349,7 @@ class TestRegistreerGast(E2EHelpers, TestCase):
                                     follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('registreer/registreer-gast.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('registreer/registreer-gast.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, 'Fout: te snel')
 
         self.assertEqual(1, GastRegistratie.objects.count())
@@ -373,7 +373,7 @@ class TestRegistreerGast(E2EHelpers, TestCase):
                                     follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('registreer/registreer-gast.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('registreer/registreer-gast.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, 'Fout: dubbel verzoek')
 
         self.assertEqual(1, GastRegistratie.objects.count())
@@ -392,7 +392,7 @@ class TestRegistreerGast(E2EHelpers, TestCase):
                                  'email': self.test_email},
                                 follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('registreer/registreer-gast-01-bevestig-email.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('registreer/registreer-gast-01-bevestig-email.dtl', 'design/site_layout.dtl'))
 
         self.assertEqual(1, GastRegistratie.objects.count())
         gast = GastRegistratie.objects.first()
@@ -416,7 +416,7 @@ class TestRegistreerGast(E2EHelpers, TestCase):
         resp = self.client.post(post_url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('registreer/registreer-gast-02-email-bevestigd.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('registreer/registreer-gast-02-email-bevestigd.dtl', 'design/site_layout.dtl'))
         urls = self.extract_all_urls(resp, skip_menu=True)
         # print('urls: %s' % repr(urls))
         self.assertEqual(urls, [self.url_volgende_vraag])
@@ -432,7 +432,7 @@ class TestRegistreerGast(E2EHelpers, TestCase):
             resp = self.client.get(self.url_meer_vragen)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('registreer/registreer-gast-03-vervolg.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('registreer/registreer-gast-03-vervolg.dtl', 'design/site_layout.dtl'))
         urls = self.extract_all_urls(resp, skip_menu=True)
         # print('urls: %s' % repr(urls))
         self.assertEqual(urls, [self.url_volgende_vraag])
@@ -442,14 +442,14 @@ class TestRegistreerGast(E2EHelpers, TestCase):
             resp = self.client.get(self.url_volgende_vraag)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('registreer/registreer-gast-04-kies-wachtwoord.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('registreer/registreer-gast-04-kies-wachtwoord.dtl', 'design/site_layout.dtl'))
 
         # POST een verkeerd antwoord
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_volgende_vraag)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('registreer/registreer-gast-04-kies-wachtwoord.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('registreer/registreer-gast-04-kies-wachtwoord.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, 'Fout:')
 
         # POST een goed antwoord
@@ -464,14 +464,14 @@ class TestRegistreerGast(E2EHelpers, TestCase):
         resp = self.client.get(self.url_volgende_vraag)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('registreer/registreer-gast-05-club.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('registreer/registreer-gast-05-club.dtl', 'design/site_layout.dtl'))
 
         # POST een verkeerd antwoord
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_volgende_vraag)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('registreer/registreer-gast-05-club.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('registreer/registreer-gast-05-club.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, 'Fout:')
 
         # POST een goed antwoord
@@ -496,14 +496,14 @@ class TestRegistreerGast(E2EHelpers, TestCase):
             resp = self.client.get(self.url_volgende_vraag)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('registreer/registreer-gast-06-land-bond-nr.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('registreer/registreer-gast-06-land-bond-nr.dtl', 'design/site_layout.dtl'))
 
         # POST een verkeerd antwoord
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_volgende_vraag)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('registreer/registreer-gast-06-land-bond-nr.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('registreer/registreer-gast-06-land-bond-nr.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, 'Fout:')
 
         # POST een goed antwoord
@@ -521,14 +521,14 @@ class TestRegistreerGast(E2EHelpers, TestCase):
             resp = self.client.get(self.url_volgende_vraag)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('registreer/registreer-gast-07-age.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('registreer/registreer-gast-07-age.dtl', 'design/site_layout.dtl'))
 
         # POST een verkeerd antwoord
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_volgende_vraag)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('registreer/registreer-gast-07-age.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('registreer/registreer-gast-07-age.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, 'Fout:')
 
         # POST een verkeerd antwoord
@@ -536,7 +536,7 @@ class TestRegistreerGast(E2EHelpers, TestCase):
             resp = self.client.post(self.url_volgende_vraag, {'jaar': '2000', 'maand': '13', 'dag': '01'})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('registreer/registreer-gast-07-age.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('registreer/registreer-gast-07-age.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, 'Fout:')
 
         # POST een verkeerd antwoord
@@ -544,7 +544,7 @@ class TestRegistreerGast(E2EHelpers, TestCase):
             resp = self.client.post(self.url_volgende_vraag, {'jaar': '9999', 'maand': '12', 'dag': '1'})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('registreer/registreer-gast-07-age.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('registreer/registreer-gast-07-age.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, 'Fout:')
 
         # POST een verkeerd antwoord
@@ -552,7 +552,7 @@ class TestRegistreerGast(E2EHelpers, TestCase):
             resp = self.client.post(self.url_volgende_vraag, {'jaar': '0x1234', 'maand': '1-2', 'dag': '#'})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('registreer/registreer-gast-07-age.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('registreer/registreer-gast-07-age.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, 'Fout:')
 
         # POST een goed antwoord
@@ -570,14 +570,14 @@ class TestRegistreerGast(E2EHelpers, TestCase):
             resp = self.client.get(self.url_volgende_vraag)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('registreer/registreer-gast-08-tel.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('registreer/registreer-gast-08-tel.dtl', 'design/site_layout.dtl'))
 
         # POST een verkeerd antwoord
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_volgende_vraag)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('registreer/registreer-gast-08-tel.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('registreer/registreer-gast-08-tel.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, 'Fout:')
 
         # POST een goed antwoord
@@ -593,7 +593,7 @@ class TestRegistreerGast(E2EHelpers, TestCase):
             resp = self.client.get(self.url_volgende_vraag)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('registreer/registreer-gast-09-wa-id.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('registreer/registreer-gast-09-wa-id.dtl', 'design/site_layout.dtl'))
 
         # POST een antwoord (altijd goed)
         with self.assert_max_queries(20):
@@ -608,14 +608,14 @@ class TestRegistreerGast(E2EHelpers, TestCase):
             resp = self.client.get(self.url_volgende_vraag)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('registreer/registreer-gast-10-gender.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('registreer/registreer-gast-10-gender.dtl', 'design/site_layout.dtl'))
 
         # POST een verkeerd antwoord
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_volgende_vraag)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('registreer/registreer-gast-10-gender.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('registreer/registreer-gast-10-gender.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, 'Fout:')
 
         # POST een goed antwoord
@@ -631,7 +631,7 @@ class TestRegistreerGast(E2EHelpers, TestCase):
             resp = self.client.get(self.url_volgende_vraag)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('registreer/registreer-gast-25-confirm.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('registreer/registreer-gast-25-confirm.dtl', 'design/site_layout.dtl'))
 
         # POST een verkeerd antwoord
         with self.assert_max_queries(20):
@@ -653,7 +653,7 @@ class TestRegistreerGast(E2EHelpers, TestCase):
             resp = self.client.get(self.url_volgende_vraag)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('registreer/registreer-gast-07-age.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('registreer/registreer-gast-07-age.dtl', 'design/site_layout.dtl'))
 
         gast.fase = REGISTRATIE_FASE_CONFIRM
         gast.save(update_fields=['fase'])
@@ -700,13 +700,13 @@ class TestRegistreerGast(E2EHelpers, TestCase):
         resp = self.client.get(self.url_plein)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('plein/plein-sporter.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('plein/plein-sporter.dtl', 'design/site_layout.dtl'))
 
         # ga naar Mijn Pagina - deze redirect niet meer naar de meer-vragen pagina
         resp = self.client.get(self.url_sporter_profiel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('sporter/profiel.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('sporter/profiel.dtl', 'design/site_layout.dtl'))
 
         # niet bestaande fase
         gast.fase = 666
@@ -759,7 +759,7 @@ class TestRegistreerGast(E2EHelpers, TestCase):
                                  'email': self.test_email},
                                 follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('registreer/registreer-gast-01-bevestig-email.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('registreer/registreer-gast-01-bevestig-email.dtl', 'design/site_layout.dtl'))
 
         self.assertEqual(1, GastRegistratie.objects.count())
         gast = GastRegistratie.objects.first()
@@ -783,7 +783,7 @@ class TestRegistreerGast(E2EHelpers, TestCase):
         resp = self.client.post(post_url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('registreer/registreer-gast-98-bekend-als-lid.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('registreer/registreer-gast-98-bekend-als-lid.dtl', 'design/site_layout.dtl'))
         # self.e2e_open_in_browser(resp)
 
     def test_bekend_voor_leden(self):
@@ -820,7 +820,7 @@ class TestRegistreerGast(E2EHelpers, TestCase):
                                  'email': self.test_email},
                                 follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('registreer/registreer-gast-01-bevestig-email.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('registreer/registreer-gast-01-bevestig-email.dtl', 'design/site_layout.dtl'))
 
         self.assertEqual(1, GastRegistratie.objects.count())
         gast = GastRegistratie.objects.first()
@@ -844,7 +844,7 @@ class TestRegistreerGast(E2EHelpers, TestCase):
         resp = self.client.post(post_url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('registreer/registreer-gast-98-bekend-als-lid.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('registreer/registreer-gast-98-bekend-als-lid.dtl', 'design/site_layout.dtl'))
         # self.e2e_open_in_browser(resp)
 
 

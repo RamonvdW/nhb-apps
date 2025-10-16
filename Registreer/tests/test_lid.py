@@ -85,7 +85,7 @@ class TestRegistreerLid(E2EHelpers, TestCase):
             resp = self.client.get(self.url_registreer_khsn)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('registreer/registreer-lid.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('registreer/registreer-lid.dtl', 'design/site_layout.dtl'))
 
     def test_post(self):
         # partial fields
@@ -96,7 +96,7 @@ class TestRegistreerLid(E2EHelpers, TestCase):
                                      'nieuw_wachtwoord': ''})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('registreer/registreer-lid.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('registreer/registreer-lid.dtl', 'design/site_layout.dtl'))
         self.assertFormError(resp.context['form'], None, 'niet alle velden zijn ingevuld')
 
         # invalid fields
@@ -107,7 +107,7 @@ class TestRegistreerLid(E2EHelpers, TestCase):
                                      'nieuw_wachtwoord': E2EHelpers.WACHTWOORD})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('registreer/registreer-lid.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('registreer/registreer-lid.dtl', 'design/site_layout.dtl'))
         self.assertFormError(resp.context['form'], None, 'de gegevens worden niet geaccepteerd')
 
         # bad fields
@@ -119,7 +119,7 @@ class TestRegistreerLid(E2EHelpers, TestCase):
                                     follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('registreer/registreer-lid.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('registreer/registreer-lid.dtl', 'design/site_layout.dtl'))
         self.assertFormError(resp.context['form'], None, 'onbekend bondsnummer')
 
         # niet bestaand nummer
@@ -131,7 +131,7 @@ class TestRegistreerLid(E2EHelpers, TestCase):
                                     follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('registreer/registreer-lid.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('registreer/registreer-lid.dtl', 'design/site_layout.dtl'))
         self.assertFormError(resp.context['form'], None, 'onbekend bondsnummer')
 
         # verkeerde email
@@ -143,7 +143,7 @@ class TestRegistreerLid(E2EHelpers, TestCase):
                                     follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('registreer/registreer-lid.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('registreer/registreer-lid.dtl', 'design/site_layout.dtl'))
         self.assertFormError(resp.context['form'], None,
                              'de combinatie van bondsnummer en e-mailadres wordt niet herkend. Probeer het nog eens.')
 
@@ -156,7 +156,7 @@ class TestRegistreerLid(E2EHelpers, TestCase):
                                     follow=False)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('registreer/registreer-lid.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('registreer/registreer-lid.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, "wachtwoord is te kort")
 
         # zwak wachtwoord: verboden reeks
@@ -168,7 +168,7 @@ class TestRegistreerLid(E2EHelpers, TestCase):
                                     follow=False)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('registreer/registreer-lid.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('registreer/registreer-lid.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, "wachtwoord is niet sterk genoeg")
 
         # zwak wachtwoord: bondsnummer in wachtwoord
@@ -180,7 +180,7 @@ class TestRegistreerLid(E2EHelpers, TestCase):
                                     follow=False)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('registreer/registreer-lid.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('registreer/registreer-lid.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, "wachtwoord bevat een verboden reeks")
 
         # zwak wachtwoord: te weinig verschillende tekens
@@ -192,7 +192,7 @@ class TestRegistreerLid(E2EHelpers, TestCase):
                                     follow=False)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('registreer/registreer-lid.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('registreer/registreer-lid.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, "wachtwoord bevat te veel gelijke tekens")
 
     def test_geen_email(self):
@@ -205,7 +205,7 @@ class TestRegistreerLid(E2EHelpers, TestCase):
                                     follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('registreer/registreer-lid-fout-geen-email.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('registreer/registreer-lid-fout-geen-email.dtl', 'design/site_layout.dtl'))
 
         # vul de SEC in voor deze vereniging
         self.functie_sec.accounts.add(self.sporter_100001.account)      # voor het e-mailadres
@@ -222,7 +222,7 @@ class TestRegistreerLid(E2EHelpers, TestCase):
                                     follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('registreer/registreer-lid-fout-geen-email.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('registreer/registreer-lid-fout-geen-email.dtl', 'design/site_layout.dtl'))
 
     def test_geen_email_geen_sec(self):
         with self.assert_max_queries(20):
@@ -233,7 +233,7 @@ class TestRegistreerLid(E2EHelpers, TestCase):
                                     follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('registreer/registreer-lid-fout-geen-email.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('registreer/registreer-lid-fout-geen-email.dtl', 'design/site_layout.dtl'))
 
     def test_geen_email_geen_ver(self):
         self.sporter_100002.bij_vereniging = None
@@ -246,7 +246,7 @@ class TestRegistreerLid(E2EHelpers, TestCase):
                                     follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('registreer/registreer-lid-fout-geen-email.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('registreer/registreer-lid-fout-geen-email.dtl', 'design/site_layout.dtl'))
 
     def test_registreer(self):
         # maak een andere sporter secretaris van de vereniging
@@ -263,7 +263,7 @@ class TestRegistreerLid(E2EHelpers, TestCase):
                                     follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('registreer/registreer-lid-01-bevestig-email.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('registreer/registreer-lid-01-bevestig-email.dtl', 'design/site_layout.dtl'))
 
         # controleer dat het email adres obfuscated is
         self.assertNotContains(resp, 'normaal@test.com')
@@ -304,7 +304,7 @@ class TestRegistreerLid(E2EHelpers, TestCase):
             resp = self.client.post(post_url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('registreer/registreer-lid-02-email-bevestigd.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('registreer/registreer-lid-02-email-bevestigd.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, "inloggen")
         self.assertNotContains(resp, "Sluiten")
 
@@ -331,7 +331,7 @@ class TestRegistreerLid(E2EHelpers, TestCase):
                                 follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('registreer/registreer-lid-01-bevestig-email.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('registreer/registreer-lid-01-bevestig-email.dtl', 'design/site_layout.dtl'))
 
         # volg de link om de email te bevestigen
         objs = TijdelijkeCode.objects.order_by('-aangemaakt_op')       # nieuwste eerst
@@ -352,7 +352,7 @@ class TestRegistreerLid(E2EHelpers, TestCase):
             resp = self.client.post(post_url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('registreer/registreer-lid-02-email-bevestigd.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('registreer/registreer-lid-02-email-bevestigd.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, "Sluiten")
         self.assertNotContains(resp, "inloggen")
 
@@ -365,7 +365,7 @@ class TestRegistreerLid(E2EHelpers, TestCase):
                                     follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('registreer/registreer-lid-01-bevestig-email.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('registreer/registreer-lid-01-bevestig-email.dtl', 'design/site_layout.dtl'))
 
         # tweede poging
         with self.assert_max_queries(20):
@@ -376,7 +376,7 @@ class TestRegistreerLid(E2EHelpers, TestCase):
                                     follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('registreer/registreer-lid.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('registreer/registreer-lid.dtl', 'design/site_layout.dtl'))
         self.assertFormError(resp.context['form'], None, 'Account bestaat al')
 
     def test_inactief(self):
@@ -391,7 +391,7 @@ class TestRegistreerLid(E2EHelpers, TestCase):
                                     follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('registreer/registreer-lid.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('registreer/registreer-lid.dtl', 'design/site_layout.dtl'))
         self.assertFormError(resp.context['form'], None,
                              'Gebruik van KHSN diensten is geblokkeerd.' +
                              ' Neem contact op met de secretaris van je vereniging.')
@@ -415,7 +415,7 @@ class TestRegistreerLid(E2EHelpers, TestCase):
                                     follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('registreer/registreer-lid-01-bevestig-email.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('registreer/registreer-lid-01-bevestig-email.dtl', 'design/site_layout.dtl'))
 
         self.sporter_100001 = Sporter.objects.get(pk=self.sporter_100001.pk)   # refresh
 
@@ -439,7 +439,7 @@ class TestRegistreerLid(E2EHelpers, TestCase):
                                     follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('registreer/registreer-lid.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('registreer/registreer-lid.dtl', 'design/site_layout.dtl'))
         self.assertFormError(resp.context['form'], None,
                              'Gebruik van KHSN diensten is geblokkeerd.' +
                              ' Neem contact op met de secretaris van je vereniging.')

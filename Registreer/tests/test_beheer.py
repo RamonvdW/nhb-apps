@@ -166,7 +166,7 @@ class TestRegistreerBeheer(E2EHelpers, TestCase):
             resp = self.client.get(self.url_gast_accounts)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('registreer/beheer-gast-accounts.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('registreer/beheer-gast-accounts.dtl', 'design/site_layout.dtl'))
 
         # haal de gast-accounts ledenlijst op; Laatste login = stamp
         self.account_800001.last_login = timezone.now()
@@ -175,7 +175,7 @@ class TestRegistreerBeheer(E2EHelpers, TestCase):
             resp = self.client.get(self.url_gast_accounts)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('registreer/beheer-gast-accounts.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('registreer/beheer-gast-accounts.dtl', 'design/site_layout.dtl'))
 
     def test_overzicht_afgewezen(self):
         # wordt SEC van de vereniging voor gast-accounts
@@ -191,7 +191,7 @@ class TestRegistreerBeheer(E2EHelpers, TestCase):
             resp = self.client.get(self.url_gast_accounts)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('registreer/beheer-gast-accounts.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('registreer/beheer-gast-accounts.dtl', 'design/site_layout.dtl'))
 
         # lijst met afgewezen gast-accounts; Laatste inlog = stamp
         self.account_800001.last_login = timezone.now()
@@ -200,7 +200,7 @@ class TestRegistreerBeheer(E2EHelpers, TestCase):
             resp = self.client.get(self.url_gast_accounts)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('registreer/beheer-gast-accounts.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('registreer/beheer-gast-accounts.dtl', 'design/site_layout.dtl'))
 
         # lijst met afgewezen gast-accounts; Laatste inlog = Onvoltooid account
         self.gast_800001.account = None
@@ -209,7 +209,7 @@ class TestRegistreerBeheer(E2EHelpers, TestCase):
             resp = self.client.get(self.url_gast_accounts)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('registreer/beheer-gast-accounts.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('registreer/beheer-gast-accounts.dtl', 'design/site_layout.dtl'))
 
     def test_details(self):
         # wordt SEC van de vereniging voor gast-accounts
@@ -258,7 +258,7 @@ class TestRegistreerBeheer(E2EHelpers, TestCase):
             resp = self.client.get(self.url_gast_details % self.gast_800001.lid_nr)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('registreer/beheer-gast-account-details.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('registreer/beheer-gast-account-details.dtl', 'design/site_layout.dtl'))
         # self.e2e_open_in_browser(resp)
         urls = self.extract_all_urls(resp, skip_menu=True)
         self.assertEqual(urls, [])
@@ -301,7 +301,7 @@ class TestRegistreerBeheer(E2EHelpers, TestCase):
             resp = self.client.get(self.url_gast_details % self.gast_800001.lid_nr)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('registreer/beheer-gast-account-details.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('registreer/beheer-gast-account-details.dtl', 'design/site_layout.dtl'))
         # self.e2e_open_in_browser(resp)
         urls = self.extract_all_urls(resp, skip_menu=True)
         self.assertEqual(urls, [])
@@ -317,7 +317,7 @@ class TestRegistreerBeheer(E2EHelpers, TestCase):
             resp = self.client.get(self.url_gast_details % self.gast_800001.lid_nr)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('registreer/beheer-gast-account-details.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('registreer/beheer-gast-account-details.dtl', 'design/site_layout.dtl'))
         # self.e2e_open_in_browser(resp)
         urls = self.extract_all_urls(resp, skip_menu=True)
         # print('urls: %s' % repr(urls))
@@ -329,7 +329,7 @@ class TestRegistreerBeheer(E2EHelpers, TestCase):
             resp = self.client.get(self.url_gast_details % self.gast_800001.lid_nr)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('registreer/beheer-gast-account-details.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('registreer/beheer-gast-account-details.dtl', 'design/site_layout.dtl'))
         # self.e2e_open_in_browser(resp)
 
         urls = self.extract_all_urls(resp, skip_menu=True)
@@ -349,7 +349,7 @@ class TestRegistreerBeheer(E2EHelpers, TestCase):
             resp = self.client.get(self.url_gast_details % self.gast_800001.lid_nr)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('registreer/beheer-gast-account-details.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('registreer/beheer-gast-account-details.dtl', 'design/site_layout.dtl'))
 
         urls = self.extract_all_urls(resp, skip_menu=True)
         # print('urls: %s' % repr(urls))
@@ -363,7 +363,7 @@ class TestRegistreerBeheer(E2EHelpers, TestCase):
             resp = self.client.get(self.url_gast_details % self.gast_800001.lid_nr)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('registreer/beheer-gast-account-details.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('registreer/beheer-gast-account-details.dtl', 'design/site_layout.dtl'))
 
         urls = self.extract_all_urls(resp, skip_menu=True)
         # print('urls: %s' % repr(urls))
@@ -377,7 +377,7 @@ class TestRegistreerBeheer(E2EHelpers, TestCase):
             resp = self.client.get(self.url_gast_details % self.gast_800001.lid_nr)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('registreer/beheer-gast-account-details.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('registreer/beheer-gast-account-details.dtl', 'design/site_layout.dtl'))
 
         # niet bestaand nummer
         resp = self.client.get(self.url_gast_details % 999999)

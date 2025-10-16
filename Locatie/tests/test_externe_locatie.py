@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2024 Ramon van der Winkel.
+#  Copyright (c) 2020-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -171,7 +171,7 @@ class TestLocatieExterneLocatie(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('locatie/externe-locaties.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('locatie/externe-locaties.dtl', 'design/site_layout.dtl'))
         # controleer dat er geen knop is om een nieuwe locatie toe te voegen
         urls = self.extract_all_urls(resp, skip_menu=True)
         self.assertEqual(urls, [])
@@ -194,7 +194,7 @@ class TestLocatieExterneLocatie(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('locatie/externe-locaties.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('locatie/externe-locaties.dtl', 'design/site_layout.dtl'))
         # controleer dat er een knop is om een nieuwe locatie toe te voegen
         urls = self.extract_all_urls(resp, skip_menu=True)
         self.assertEqual(urls, [url])
@@ -213,7 +213,7 @@ class TestLocatieExterneLocatie(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('locatie/externe-locaties.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('locatie/externe-locaties.dtl', 'design/site_layout.dtl'))
         urls = self.extract_all_urls(resp, skip_menu=True)
         self.assertEqual(len(urls), 2)      # wijzig-knop is erbij gekomen
 
@@ -222,7 +222,7 @@ class TestLocatieExterneLocatie(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('locatie/externe-locaties.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('locatie/externe-locaties.dtl', 'design/site_layout.dtl'))
         urls = self.extract_all_urls(resp, skip_menu=True)
         self.assertEqual(len(urls), 2)      # wijzig-knop is erbij gekomen
 
@@ -251,7 +251,7 @@ class TestLocatieExterneLocatie(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('locatie/externe-locatie-details.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('locatie/externe-locatie-details.dtl', 'design/site_layout.dtl'))
 
         # HWL mag de externe locatie details aanpassen
         with self.assert_max_queries(20):
@@ -399,7 +399,7 @@ class TestLocatieExterneLocatie(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('locatie/externe-locatie-details.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('locatie/externe-locatie-details.dtl', 'design/site_layout.dtl'))
 
         # verkeerde HWL mag de externe locatie details niet aanpassen
         with self.assert_max_queries(20):
@@ -456,6 +456,6 @@ class TestLocatieExterneLocatie(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('locatie/accommodatie-details.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('locatie/accommodatie-details.dtl', 'design/site_layout.dtl'))
 
 # end of file

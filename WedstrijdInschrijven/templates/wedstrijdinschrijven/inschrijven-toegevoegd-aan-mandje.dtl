@@ -1,4 +1,4 @@
-{% extends 'plein/site_layout.dtl' %}
+{% extends 'design/site_layout.dtl' %}
 {% comment %}
                 Copyright (c) 2022-2025 Ramon van der Winkel.
                 All rights reserved.
@@ -46,11 +46,11 @@
         <div class="col s12">
 
             <!-- verder winkelen -->
-            {% include 'plein/card_icon.dtl' with title="Verder winkelen" text="Terug naar de wedstrijd waar je mee bezig was." icon="event_note" url=url_verder %}
+            {% include 'design/card_icon.dtl' with title="Verder winkelen" text="Terug naar de wedstrijd waar je mee bezig was." icon="event_note" url=url_verder %}
 
             <!-- mandje -->
             {% url 'Bestelling:toon-inhoud-mandje' as card_url %}
-            {% include 'plein/card_icon.dtl' with title="Naar mijn mandje" text="Mandje bekijken, bestelling afronden en betalen." icon="shopping_cart" url=card_url %}
+            {% include 'design/card_icon.dtl' with title="Naar mijn mandje" text="Mandje bekijken, bestelling afronden en betalen." icon="shopping_cart" url=card_url %}
 
         </div>
     </div>

@@ -299,7 +299,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
             resp = self.client.get(self.url_overzicht)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('vereniging/overzicht.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('vereniging/overzicht.dtl', 'design/site_layout.dtl'))
 
         # zet de competities door naar andere fases
         zet_competitie_fase_regio_wedstrijden(self.comp_18)
@@ -316,7 +316,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
             resp = self.client.get(self.url_overzicht)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('vereniging/overzicht.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('vereniging/overzicht.dtl', 'design/site_layout.dtl'))
 
         zet_competitie_fase_rk_prep(self.comp_25)
         self.comp_25.begin_fase_F -= datetime.timedelta(days=100)       # forceer 'beschikbaar vanaf' label
@@ -330,7 +330,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
             resp = self.client.get(self.url_overzicht)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('vereniging/overzicht.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('vereniging/overzicht.dtl', 'design/site_layout.dtl'))
 
         self.e2e_assert_other_http_commands_not_supported(self.url_overzicht)
 
@@ -360,7 +360,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
             resp = self.client.get(self.url_overzicht)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('vereniging/overzicht.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('vereniging/overzicht.dtl', 'design/site_layout.dtl'))
         urls = [url for url in self.extract_all_urls(resp, skip_menu=True) if '/wie-schiet-waar/' in url]
         # print('urls als WL: %s' % urls)
         self.assertEqual(urls_expected, urls)
@@ -372,7 +372,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
             resp = self.client.get(self.url_overzicht)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('vereniging/overzicht.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('vereniging/overzicht.dtl', 'design/site_layout.dtl'))
 
         # login als SEC
         self.e2e_login_and_pass_otp(self.account_sec)
@@ -400,7 +400,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
             resp = self.client.get(self.url_ledenlijst)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('vereniging/ledenlijst.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('vereniging/ledenlijst.dtl', 'design/site_layout.dtl'))
 
         self.assertContains(resp, 'Jeugdleden')
         self.assertContains(resp, 'Volwassenen')
@@ -437,7 +437,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_leden_voorkeuren)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('vereniging/leden-voorkeuren.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('vereniging/leden-voorkeuren.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
 
         # nog een keer, nu met sporterboog records aanwezig
@@ -465,7 +465,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_leden_voorkeuren)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('vereniging/leden-voorkeuren.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('vereniging/leden-voorkeuren.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
 
     def test_locatie(self):

@@ -1,6 +1,6 @@
-{% extends 'plein/site_layout.dtl' %}
+{% extends 'design/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2024 Ramon van der Winkel.
+                Copyright (c) 2024-2025 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -36,17 +36,17 @@
             <!-- WA Target awards -->
             {% url 'Spelden:groep-target-awards' as card_url %}
             {% static 'plein/badge_discipline_indoor.png' as img_url %}
-            {% include 'plein/card_logo.dtl' with title="Target Awards" text="World Archery Target Awards. Vanaf score 480" img_src=img_url img_height=75 img_width=61 url=card_url %}
+            {% include 'design/card_logo.dtl' with title="Target Awards" text="World Archery Target Awards. Vanaf score 480" img_src=img_url img_height=75 img_width=61 url=card_url %}
 
             <!-- WA Sterspelden -->
             {% url 'Spelden:groep-sterspelden' as card_url %}
             {% static 'plein/badge_discipline_outdoor.png' as img_url %}
-            {% include 'plein/card_logo.dtl' with title="Sterspelden" text="World Archery sterspelden. Vanaf score 1000" img_src=img_url img_height=75 img_width=61 url=card_url %}
+            {% include 'design/card_logo.dtl' with title="Sterspelden" text="World Archery sterspelden. Vanaf score 1000" img_src=img_url img_height=75 img_width=61 url=card_url %}
 
             <!-- WA Veld - Arrowhead spelden -->
             {% url 'Spelden:groep-arrowhead' as card_url %}
             {% static 'plein/badge_discipline_veld.png' as img_url %}
-            {% include 'plein/card_logo.dtl' with title="Arrowhead spelden" text="Arrowhead spelden voor veldwedstrijden" img_src=img_url img_height=75 img_width=61 url=card_url %}
+            {% include 'design/card_logo.dtl' with title="Arrowhead spelden" text="Arrowhead spelden voor veldwedstrijden" img_src=img_url img_height=75 img_width=61 url=card_url %}
         </div>
     </div>
 
@@ -64,15 +64,15 @@
         <div class="col s12">
             <!-- KHSN tussenspelden (RK Outdoor) -->
             {% url 'Spelden:groep-tussenspelden' as card_url %}
-            {% include 'plein/card_icon.dtl' with title="Tussenspelden" text="KHSN tussenspelden" icon="trending_up" url=card_url %}
+            {% include 'design/card_icon.dtl' with title="Tussenspelden" text="KHSN tussenspelden" icon="trending_up" url=card_url %}
 
             <!-- KHSN graadspelden -->
             {% url 'Spelden:groep-graadspelden' as card_url %}
-            {% include 'plein/card_icon.dtl' with title="Graadspelden" text="In vier disciplines kunnen<br>drie graadspelden behaald worden." icon="zoom_out_map" url=card_url %}
+            {% include 'design/card_icon.dtl' with title="Graadspelden" text="In vier disciplines kunnen<br>drie graadspelden behaald worden." icon="zoom_out_map" url=card_url %}
 
             <!-- KHSN meesterspelden -->
             {% url 'Spelden:groep-meesterspelden' as card_url %}
-            {% include 'plein/card_icon.dtl' with title="Meesterspelden" text="KHSN meesterspelden" icon="category" url=card_url %}
+            {% include 'design/card_icon.dtl' with title="Meesterspelden" text="KHSN meesterspelden" icon="category" url=card_url %}
         </div>
     </div>
 

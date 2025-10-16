@@ -1,6 +1,6 @@
-{% extends 'plein/site_layout.dtl' %}
+{% extends 'design/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2024 Ramon van der Winkel.
+                Copyright (c) 2024-2025 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -27,11 +27,11 @@
         <div class="col s12" style="margin-top:50px">
             <!-- walibi website (extern) -->
             {% static 'ledenvoordeel/logo_walibi_374x374.png' as img_src %}
-            {% include 'plein/card_logo.dtl' with title="Website" text="Bezoek de website van Walibi Holland voor meer informatie" img_src=img_src img_height=75 img_width=75 url=url_walibi_algemeen extern_open=True %}
+            {% include 'design/card_logo.dtl' with title="Website" text="Bezoek de website van Walibi Holland voor meer informatie" img_src=img_src img_height=75 img_width=75 url=url_walibi_algemeen extern_open=True %}
 
             <!-- walibi webshop (extern) -->
             {% static 'ledenvoordeel/logo_walibi_374x374.png' as img_src %}
-            {% include 'plein/card_icon.dtl' with title="Bestellen" text="Naar de webshop<br>(je krijgt automatisch korting)<br><br>Bruikbaar heel 2024" icon="shopping_cart" url=url_walibi_korting extern_open=True %}
+            {% include 'design/card_icon.dtl' with title="Bestellen" text="Naar de webshop<br>(je krijgt automatisch korting)<br><br>Bruikbaar heel 2024" icon="shopping_cart" url=url_walibi_korting extern_open=True %}
         </div>
     </div>
 

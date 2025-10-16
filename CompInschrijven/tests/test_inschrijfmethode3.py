@@ -241,7 +241,7 @@ class TestCompInschrijvenMethode3(E2EHelpers, TestCase):
             resp = self.client.get(self.url_behoefte3 % (comp.pk, self.regio_101.pk))
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compinschrijven/inschrijfmethode3-behoefte.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compinschrijven/inschrijfmethode3-behoefte.dtl', 'design/site_layout.dtl'))
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_behoefte3_bestand % (comp.pk, self.regio_101.pk))
@@ -261,7 +261,7 @@ class TestCompInschrijvenMethode3(E2EHelpers, TestCase):
             resp = self.client.get(self.url_behoefte3 % (comp.pk, self.regio_101.pk))
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compinschrijven/inschrijfmethode3-behoefte.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compinschrijven/inschrijfmethode3-behoefte.dtl', 'design/site_layout.dtl'))
 
     def test_behoefte3_25(self):
         comp = Competitie.objects.filter(afstand='25').first()
@@ -277,7 +277,7 @@ class TestCompInschrijvenMethode3(E2EHelpers, TestCase):
             resp = self.client.get(self.url_behoefte3 % (comp.pk, self.regio_101.pk))
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compinschrijven/inschrijfmethode3-behoefte.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compinschrijven/inschrijfmethode3-behoefte.dtl', 'design/site_layout.dtl'))
 
         # TODO: eigen_blazoen aanzetten zodat 60cm 4-spot ook gekozen wordt
         with self.assert_max_queries(20):
@@ -298,7 +298,7 @@ class TestCompInschrijvenMethode3(E2EHelpers, TestCase):
             resp = self.client.get(self.url_behoefte3 % (comp.pk, self.regio_101.pk))
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compinschrijven/inschrijfmethode3-behoefte.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compinschrijven/inschrijfmethode3-behoefte.dtl', 'design/site_layout.dtl'))
 
         # landelijk
         url = self.url_aangemeld_alles % comp.pk
@@ -306,7 +306,7 @@ class TestCompInschrijvenMethode3(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compinschrijven/lijst-aangemeld-regio.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compinschrijven/lijst-aangemeld-regio.dtl', 'design/site_layout.dtl'))
 
     def test_bad_hwl(self):
         comp = Competitie.objects.get(afstand=18)       # let op: 25 werkt niet

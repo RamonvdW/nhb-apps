@@ -89,7 +89,7 @@ class TestLogboek(E2EHelpers, TestCase):
         # alles
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_logboek)
-        self.assert_template_used(resp, ('logboek/rest.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('logboek/rest.dtl', 'design/site_layout.dtl'))
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
 
@@ -97,7 +97,7 @@ class TestLogboek(E2EHelpers, TestCase):
         with self.assert_max_queries(4):
             resp = self.client.get(self.url_logboek + 'rest/')
         self.assertEqual(resp.status_code, 200)  # 200 = OK
-        self.assert_template_used(resp, ('logboek/rest.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('logboek/rest.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
         self.assertContains(resp, 'test setUp')
         self.assertContains(resp, 'IT beheerder')
@@ -106,7 +106,7 @@ class TestLogboek(E2EHelpers, TestCase):
         with self.assert_max_queries(4):
             resp = self.client.get(self.url_logboek + 'records/')
         self.assertEqual(resp.status_code, 200)  # 200 = OK
-        self.assert_template_used(resp, ('logboek/records.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('logboek/records.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
         self.assertContains(resp, 'import gelukt')
 
@@ -114,7 +114,7 @@ class TestLogboek(E2EHelpers, TestCase):
         with self.assert_max_queries(4):
             resp = self.client.get(self.url_logboek + 'accounts/')
         self.assertEqual(resp.status_code, 200)  # 200 = OK
-        self.assert_template_used(resp, ('logboek/accounts.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('logboek/accounts.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
         self.assertContains(resp, 'wachtwoord vergeten')
 
@@ -122,7 +122,7 @@ class TestLogboek(E2EHelpers, TestCase):
         with self.assert_max_queries(4):
             resp = self.client.get(self.url_logboek + 'otp/')
         self.assertEqual(resp.status_code, 200)  # 200 = OK
-        self.assert_template_used(resp, ('logboek/otp.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('logboek/otp.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
         self.assertContains(resp, 'alweer verkeerd')
 
@@ -130,7 +130,7 @@ class TestLogboek(E2EHelpers, TestCase):
         with self.assert_max_queries(4):
             resp = self.client.get(self.url_logboek + 'rollen/')
         self.assertEqual(resp.status_code, 200)  # 200 = OK
-        self.assert_template_used(resp, ('logboek/rollen.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('logboek/rollen.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
         self.assertContains(resp, 'Jantje is de baas')
 
@@ -138,7 +138,7 @@ class TestLogboek(E2EHelpers, TestCase):
         with self.assert_max_queries(4):
             resp = self.client.get(self.url_logboek + 'crm-import/')
         self.assertEqual(resp.status_code, 200)  # 200 = OK
-        self.assert_template_used(resp, ('logboek/crm-import.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('logboek/crm-import.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
         self.assertContains(resp, 'weer een nieuw lid')
 
@@ -146,7 +146,7 @@ class TestLogboek(E2EHelpers, TestCase):
         with self.assert_max_queries(4):
             resp = self.client.get(self.url_logboek + 'competitie/')
         self.assertEqual(resp.status_code, 200)  # 200 = OK
-        self.assert_template_used(resp, ('logboek/competitie.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('logboek/competitie.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
         self.assertContains(resp, 'Klassengrenzen vastgesteld')
 
@@ -154,7 +154,7 @@ class TestLogboek(E2EHelpers, TestCase):
         with self.assert_max_queries(4):
             resp = self.client.get(self.url_logboek + 'accommodaties/')
         self.assertEqual(resp.status_code, 200)  # 200 = OK
-        self.assert_template_used(resp, ('logboek/accommodaties.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('logboek/accommodaties.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
         self.assertContains(resp, 'Weer een clubhuis')
 
@@ -162,7 +162,7 @@ class TestLogboek(E2EHelpers, TestCase):
         with self.assert_max_queries(4):
             resp = self.client.get(self.url_logboek + 'clusters/')
         self.assertEqual(resp.status_code, 200)  # 200 = OK
-        self.assert_template_used(resp, ('logboek/clusters.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('logboek/clusters.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
         self.assertContains(resp, 'Groepeer ze maar')
 
@@ -170,7 +170,7 @@ class TestLogboek(E2EHelpers, TestCase):
         with self.assert_max_queries(4):
             resp = self.client.get(self.url_logboek + 'betalingen/')
         self.assertEqual(resp.status_code, 200)  # 200 = OK
-        self.assert_template_used(resp, ('logboek/betalingen.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('logboek/betalingen.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
         self.assertContains(resp, 'Betalen maar')
 
@@ -178,7 +178,7 @@ class TestLogboek(E2EHelpers, TestCase):
         with self.assert_max_queries(4):
             resp = self.client.get(self.url_logboek + 'uitrol/')
         self.assertEqual(resp.status_code, 200)  # 200 = OK
-        self.assert_template_used(resp, ('logboek/uitrol.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('logboek/uitrol.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
         self.assertContains(resp, 'Rollen met die hap')
 
@@ -186,7 +186,7 @@ class TestLogboek(E2EHelpers, TestCase):
         with self.assert_max_queries(4):
             resp = self.client.get(self.url_logboek + 'opleidingen/')
         self.assertEqual(resp.status_code, 200)  # 200 = OK
-        self.assert_template_used(resp, ('logboek/opleidingen.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('logboek/opleidingen.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
         self.assertContains(resp, 'Geslaagd')
 
@@ -201,7 +201,7 @@ class TestLogboek(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_logboek + 'crm-import/?page=1')
         self.assertEqual(resp.status_code, 200)  # 200 = OK
-        self.assert_template_used(resp, ('logboek/crm-import.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('logboek/crm-import.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
         self.assertContains(resp, 'weer een nieuw lid')
         self.assertNotContains(resp, 'chevron_')      # icoon van pagination pijltje
@@ -223,7 +223,7 @@ class TestLogboek(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_logboek + 'crm-import/?page=1')
         self.assertEqual(resp.status_code, 200)  # 200 = OK
-        self.assert_template_used(resp, ('logboek/crm-import.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('logboek/crm-import.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
         self.assertContains(resp, 'chevron_')      # icoon van pagination pijltje
 
@@ -292,90 +292,90 @@ class TestLogboek(E2EHelpers, TestCase):
         # alles
         resp = self.client.get(self.url_logboek)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
-        self.assert_template_used(resp, ('logboek/rest.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('logboek/rest.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
         self.assertContains(resp, 'Niets gevonden')
 
         # rest
         resp = self.client.get(self.url_logboek + 'rest/')
         self.assertEqual(resp.status_code, 200)  # 200 = OK
-        self.assert_template_used(resp, ('logboek/rest.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('logboek/rest.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
         self.assertContains(resp, 'Niets gevonden')
 
         # records import
         resp = self.client.get(self.url_logboek + 'records/')
         self.assertEqual(resp.status_code, 200)  # 200 = OK
-        self.assert_template_used(resp, ('logboek/records.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('logboek/records.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
         self.assertContains(resp, 'Niets gevonden')
 
         # accounts
         resp = self.client.get(self.url_logboek + 'accounts/')
         self.assertEqual(resp.status_code, 200)  # 200 = OK
-        self.assert_template_used(resp, ('logboek/accounts.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('logboek/accounts.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
         self.assertContains(resp, 'Niets gevonden')
 
         # otp
         resp = self.client.get(self.url_logboek + 'otp/')
         self.assertEqual(resp.status_code, 200)  # 200 = OK
-        self.assert_template_used(resp, ('logboek/otp.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('logboek/otp.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
         self.assertContains(resp, 'Niets gevonden')
 
         # rollen
         resp = self.client.get(self.url_logboek + 'rollen/')
         self.assertEqual(resp.status_code, 200)  # 200 = OK
-        self.assert_template_used(resp, ('logboek/rollen.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('logboek/rollen.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
 
         # crm import
         resp = self.client.get(self.url_logboek + 'crm-import/')
         self.assertEqual(resp.status_code, 200)  # 200 = OK
-        self.assert_template_used(resp, ('logboek/crm-import.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('logboek/crm-import.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
         self.assertContains(resp, 'Niets gevonden')
 
         # competitie
         resp = self.client.get(self.url_logboek + 'competitie/')
         self.assertEqual(resp.status_code, 200)  # 200 = OK
-        self.assert_template_used(resp, ('logboek/competitie.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('logboek/competitie.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
         self.assertContains(resp, 'Niets gevonden')
 
         # accommodaties
         resp = self.client.get(self.url_logboek + 'accommodaties/')
         self.assertEqual(resp.status_code, 200)  # 200 = OK
-        self.assert_template_used(resp, ('logboek/accommodaties.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('logboek/accommodaties.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
         self.assertContains(resp, 'Niets gevonden')
 
         # clusters
         resp = self.client.get(self.url_logboek + 'clusters/')
         self.assertEqual(resp.status_code, 200)  # 200 = OK
-        self.assert_template_used(resp, ('logboek/clusters.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('logboek/clusters.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
         self.assertContains(resp, 'Niets gevonden')
 
         # betalingen
         resp = self.client.get(self.url_logboek + 'betalingen/')
         self.assertEqual(resp.status_code, 200)  # 200 = OK
-        self.assert_template_used(resp, ('logboek/betalingen.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('logboek/betalingen.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
         self.assertContains(resp, 'Niets gevonden')
 
         # uitrol
         resp = self.client.get(self.url_logboek + 'uitrol/')
         self.assertEqual(resp.status_code, 200)  # 200 = OK
-        self.assert_template_used(resp, ('logboek/uitrol.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('logboek/uitrol.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
         self.assertContains(resp, 'Niets gevonden')
 
         # opleidingen
         resp = self.client.get(self.url_logboek + 'opleidingen/')
         self.assertEqual(resp.status_code, 200)  # 200 = OK
-        self.assert_template_used(resp, ('logboek/opleidingen.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('logboek/opleidingen.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
         self.assertContains(resp, 'Niets gevonden')
 

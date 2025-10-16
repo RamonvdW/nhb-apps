@@ -194,7 +194,7 @@ class TestWedstrijdInschrijvenKwalificatieScores(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('wedstrijdinschrijven/inschrijven-kwalificatie-scores.dtl',
-                                         'plein/site_layout.dtl'))
+                                         'design/site_layout.dtl'))
 
         self.e2e_assert_other_http_commands_not_supported(url, post=False)
 
@@ -210,7 +210,7 @@ class TestWedstrijdInschrijvenKwalificatieScores(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('wedstrijdinschrijven/inschrijven-toegevoegd-aan-mandje.dtl',
-                                         'plein/site_layout.dtl'))
+                                         'design/site_layout.dtl'))
         self.assertEqual(3, Kwalificatiescore.objects.count())
 
         score = Kwalificatiescore.objects.exclude(naam='').first()
@@ -244,7 +244,7 @@ class TestWedstrijdInschrijvenKwalificatieScores(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('wedstrijdinschrijven/inschrijven-kwalificatie-scores.dtl',
-                                         'plein/site_layout.dtl'))
+                                         'design/site_layout.dtl'))
 
         score.check_status = KWALIFICATIE_CHECK_GOED
         score.save(update_fields=['check_status'])
@@ -254,7 +254,7 @@ class TestWedstrijdInschrijvenKwalificatieScores(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('wedstrijdinschrijven/inschrijven-kwalificatie-scores.dtl',
-                                         'plein/site_layout.dtl'))
+                                         'design/site_layout.dtl'))
 
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'score1_datum': self.kwalificatie_datum,
@@ -282,7 +282,7 @@ class TestWedstrijdInschrijvenKwalificatieScores(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('wedstrijdinschrijven/inschrijven-kwalificatie-scores.dtl',
-                                         'plein/site_layout.dtl'))
+                                         'design/site_layout.dtl'))
 
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'score1_datum': self.kwalificatie_datum,
@@ -302,7 +302,7 @@ class TestWedstrijdInschrijvenKwalificatieScores(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('wedstrijdinschrijven/inschrijven-kwalificatie-scores.dtl',
-                                         'plein/site_layout.dtl'))
+                                         'design/site_layout.dtl'))
 
         # te dicht op de wedstrijd
         self.wedstrijd.datum_begin = timezone.now().date()
@@ -317,7 +317,7 @@ class TestWedstrijdInschrijvenKwalificatieScores(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('wedstrijdinschrijven/inschrijven-kwalificatie-scores.dtl',
-                                         'plein/site_layout.dtl'))
+                                         'design/site_layout.dtl'))
 
         score.check_status = KWALIFICATIE_CHECK_GOED
         score.save(update_fields=['check_status'])
@@ -327,7 +327,7 @@ class TestWedstrijdInschrijvenKwalificatieScores(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('wedstrijdinschrijven/inschrijven-kwalificatie-scores.dtl',
-                                         'plein/site_layout.dtl'))
+                                         'design/site_layout.dtl'))
 
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'score1_datum': self.kwalificatie_datum,
@@ -383,7 +383,7 @@ class TestWedstrijdInschrijvenKwalificatieScores(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('wedstrijdinschrijven/inschrijven-kwalificatie-scores.dtl',
-                                         'plein/site_layout.dtl'))
+                                         'design/site_layout.dtl'))
         self.assertContains(resp, '245, 234')
 
 # end of file

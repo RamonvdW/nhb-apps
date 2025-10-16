@@ -103,7 +103,7 @@ class TestOpleidingManager(E2EHelpers, TestCase):
             resp = self.client.get(self.url_manager)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('opleiding/overzicht-manager.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('opleiding/overzicht-manager.dtl', 'design/site_layout.dtl'))
 
         # lege lijst
         Opleiding.objects.all().delete()
@@ -112,7 +112,7 @@ class TestOpleidingManager(E2EHelpers, TestCase):
             resp = self.client.get(self.url_manager)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('opleiding/overzicht-manager.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('opleiding/overzicht-manager.dtl', 'design/site_layout.dtl'))
 
     def test_niet_ingeschreven(self):
         self.e2e_login_and_pass_otp(self.account_normaal)
@@ -129,7 +129,7 @@ class TestOpleidingManager(E2EHelpers, TestCase):
             resp = self.client.get(self.url_niet_ingeschreven)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('opleiding/niet-ingeschreven.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('opleiding/niet-ingeschreven.dtl', 'design/site_layout.dtl'))
 
         # nog een keer, maar nu is de sporter wel ingeschreven
         OpleidingInschrijving(
@@ -142,7 +142,7 @@ class TestOpleidingManager(E2EHelpers, TestCase):
             resp = self.client.get(self.url_niet_ingeschreven)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('opleiding/niet-ingeschreven.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('opleiding/niet-ingeschreven.dtl', 'design/site_layout.dtl'))
 
     def test_toevoegen(self):
         self.e2e_login_and_pass_otp(self.account_normaal)
@@ -173,7 +173,7 @@ class TestOpleidingManager(E2EHelpers, TestCase):
             resp = self.client.get(url_opleiding)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('opleiding/wijzig-opleiding.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('opleiding/wijzig-opleiding.dtl', 'design/site_layout.dtl'))
 
         # zonder parameters
         with self.assert_max_queries(20):
@@ -194,7 +194,7 @@ class TestOpleidingManager(E2EHelpers, TestCase):
             resp = self.client.get(url_opleiding)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('opleiding/wijzig-opleiding.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('opleiding/wijzig-opleiding.dtl', 'design/site_layout.dtl'))
 
         # wijzig parameters
         self.opleiding.refresh_from_db()
@@ -296,7 +296,7 @@ class TestOpleidingManager(E2EHelpers, TestCase):
             resp = self.client.get(url_moment)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('opleiding/wijzig-moment.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('opleiding/wijzig-moment.dtl', 'design/site_layout.dtl'))
 
         # wijzig periode_einde.month naar != 12
         self.opleiding.periode_einde = '2024-11-30'
@@ -306,7 +306,7 @@ class TestOpleidingManager(E2EHelpers, TestCase):
             resp = self.client.get(url_moment)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('opleiding/wijzig-moment.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('opleiding/wijzig-moment.dtl', 'design/site_layout.dtl'))
 
         moment.refresh_from_db()
         self.assertEqual(moment.datum, self.opleiding.periode_begin)

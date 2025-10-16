@@ -32,7 +32,7 @@ class TestGoogleDriveResultaat(E2EHelpers, TestCase):
         resp = self.client.get(self.url_resultaat_gelukt)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('googledrive/resultaat-gelukt.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('googledrive/resultaat-gelukt.dtl', 'design/site_layout.dtl'))
 
     def test_mislukt(self):
         # anon
@@ -48,7 +48,7 @@ class TestGoogleDriveResultaat(E2EHelpers, TestCase):
         resp = self.client.get(self.url_resultaat_mislukt)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('googledrive/resultaat-mislukt.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('googledrive/resultaat-mislukt.dtl', 'design/site_layout.dtl'))
 
 
 # end of file

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2024 Ramon van der Winkel.
+#  Copyright (c) 2022-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -92,7 +92,7 @@ class TestEvenementDetails(E2EHelpers, TestCase):
         resp = self.client.get(self.url_details % self.evenement.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('evenement/details.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('evenement/details.dtl', 'design/site_layout.dtl'))
 
         resp = self.client.get(self.url_details % 999999)
         self.assert404(resp, "Evenement niet gevonden")
@@ -106,13 +106,13 @@ class TestEvenementDetails(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('evenement/details.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('evenement/details.dtl', 'design/site_layout.dtl'))
 
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('evenement/details.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('evenement/details.dtl', 'design/site_layout.dtl'))
 
         # verplaats de "inschrijven tot" datum
         self.evenement.inschrijven_tot = 8
@@ -121,7 +121,7 @@ class TestEvenementDetails(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('evenement/details.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('evenement/details.dtl', 'design/site_layout.dtl'))
 
         # zet datum in het verleden --> kan niet meer inschrijven
         self.evenement.datum = timezone.now().date()       # 1 dag ervoor
@@ -130,7 +130,7 @@ class TestEvenementDetails(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('evenement/details.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('evenement/details.dtl', 'design/site_layout.dtl'))
 
         # coverage
         self.assertTrue(str(self.evenement) != '')
@@ -145,7 +145,7 @@ class TestEvenementDetails(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('evenement/details.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('evenement/details.dtl', 'design/site_layout.dtl'))
 
 
 # end of file

@@ -132,7 +132,7 @@ class TestOpleidingOverzicht(E2EHelpers, TestCase):
             resp = self.client.get(self.url_overzicht)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('opleiding/overzicht.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('opleiding/overzicht.dtl', 'design/site_layout.dtl'))
 
         url = self.url_details % self.opleiding.pk
 
@@ -141,7 +141,7 @@ class TestOpleidingOverzicht(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('opleiding/details.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('opleiding/details.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, 'Om in te schrijven op deze opleiding moet je een account aanmaken en inloggen')
 
         self.assertTrue(str(self.diploma) != '')
@@ -168,7 +168,7 @@ class TestOpleidingOverzicht(E2EHelpers, TestCase):
             resp = self.client.get(self.url_overzicht)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('opleiding/overzicht.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('opleiding/overzicht.dtl', 'design/site_layout.dtl'))
 
         url = self.url_details % self.opleiding_geannuleerd.pk
 
@@ -177,7 +177,7 @@ class TestOpleidingOverzicht(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('opleiding/details.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('opleiding/details.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, 'deze opleiding is GEANNULEERD')
 
         # instaptoets gehaald --> kan aanmelden
@@ -198,7 +198,7 @@ class TestOpleidingOverzicht(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('opleiding/details.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('opleiding/details.dtl', 'design/site_layout.dtl'))
 
         resp = self.client.get(self.url_details % 999999)
         self.assert404(resp, 'Slechte parameter')
@@ -214,7 +214,7 @@ class TestOpleidingOverzicht(E2EHelpers, TestCase):
             resp = self.client.get(self.url_overzicht)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('opleiding/overzicht.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('opleiding/overzicht.dtl', 'design/site_layout.dtl'))
 
         url = self.url_details % self.opleiding.pk
 
@@ -222,7 +222,7 @@ class TestOpleidingOverzicht(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('opleiding/details.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('opleiding/details.dtl', 'design/site_layout.dtl'))
 
     def test_beheerders(self):
         self.e2e_login_and_pass_otp(self.account_normaal)
@@ -235,13 +235,13 @@ class TestOpleidingOverzicht(E2EHelpers, TestCase):
             resp = self.client.get(self.url_overzicht)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('opleiding/overzicht.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('opleiding/overzicht.dtl', 'design/site_layout.dtl'))
 
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('opleiding/details.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('opleiding/details.dtl', 'design/site_layout.dtl'))
 
         # SEC
         self.e2e_wissel_naar_functie(self.functie_sec)
@@ -250,13 +250,13 @@ class TestOpleidingOverzicht(E2EHelpers, TestCase):
             resp = self.client.get(self.url_overzicht)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('opleiding/overzicht.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('opleiding/overzicht.dtl', 'design/site_layout.dtl'))
 
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('opleiding/details.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('opleiding/details.dtl', 'design/site_layout.dtl'))
 
         # HWL
         self.e2e_wissel_naar_functie(self.functie_hwl)
@@ -265,13 +265,13 @@ class TestOpleidingOverzicht(E2EHelpers, TestCase):
             resp = self.client.get(self.url_overzicht)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('opleiding/overzicht.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('opleiding/overzicht.dtl', 'design/site_layout.dtl'))
 
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('opleiding/details.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('opleiding/details.dtl', 'design/site_layout.dtl'))
 
     def test_admin(self):
         # FUTURE: migreer naar Beheer/tests

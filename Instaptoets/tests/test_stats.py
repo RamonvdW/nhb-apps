@@ -147,7 +147,7 @@ class TestInstaptoetsStats(E2EHelpers, TestCase):
             resp = self.client.get(self.url_stats)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('instaptoets/stats-antwoorden.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('instaptoets/stats-antwoorden.dtl', 'design/site_layout.dtl'))
 
         # maak een paar toetsen aan
         Instaptoets(
@@ -180,7 +180,7 @@ class TestInstaptoetsStats(E2EHelpers, TestCase):
             resp = self.client.get(self.url_stats)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('instaptoets/stats-antwoorden.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('instaptoets/stats-antwoorden.dtl', 'design/site_layout.dtl'))
 
     def test_gezakt(self):
         self.e2e_login_and_pass_otp(self.account_100000)
@@ -210,7 +210,7 @@ class TestInstaptoetsStats(E2EHelpers, TestCase):
             resp = self.client.get(self.url_gezakt)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('instaptoets/gezakt.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('instaptoets/gezakt.dtl', 'design/site_layout.dtl'))
 
         # zowel gezakt maar later ook geslaagd
         Instaptoets(
@@ -226,7 +226,7 @@ class TestInstaptoetsStats(E2EHelpers, TestCase):
             resp = self.client.get(self.url_gezakt)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('instaptoets/gezakt.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('instaptoets/gezakt.dtl', 'design/site_layout.dtl'))
 
         # instaptoets niet beschikbaar
         Vraag.objects.all().delete()

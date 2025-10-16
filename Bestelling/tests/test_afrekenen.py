@@ -246,7 +246,7 @@ class TestBestellingBetaling(E2EHelpers, TestCase):
             resp = self.client.get(self.url_afrekenen % bestelling.bestel_nr)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('bestelling/bestelling-afrekenen.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('bestelling/bestelling-afrekenen.dtl', 'design/site_layout.dtl'))
 
         # betaling opstarten
         url_betaling_gedaan = '/plein/'     # FUTURE: betere url kiezen
@@ -276,7 +276,7 @@ class TestBestellingBetaling(E2EHelpers, TestCase):
             resp = self.client.get(self.url_na_de_betaling % bestelling.bestel_nr, {'snel': 1})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('bestelling/bestelling-afgerond.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('bestelling/bestelling-afgerond.dtl', 'design/site_layout.dtl'))
 
         # fake het gebruik van de CPSP checkout en de payment-status-changed callback
         count = BetaalMutatie.objects.count()
@@ -447,7 +447,7 @@ class TestBestellingBetaling(E2EHelpers, TestCase):
             resp = self.client.get(self.url_na_de_betaling % bestelling.bestel_nr, {'snel': 1})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('bestelling/bestelling-afgerond.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('bestelling/bestelling-afgerond.dtl', 'design/site_layout.dtl'))
 
         bestelling.status = BESTELLING_STATUS_MISLUKT
         bestelling.save(update_fields=['status'])
@@ -456,7 +456,7 @@ class TestBestellingBetaling(E2EHelpers, TestCase):
             resp = self.client.get(self.url_na_de_betaling % bestelling.bestel_nr, {'snel': 1})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('bestelling/bestelling-afgerond.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('bestelling/bestelling-afgerond.dtl', 'design/site_layout.dtl'))
 
 
 # end of file

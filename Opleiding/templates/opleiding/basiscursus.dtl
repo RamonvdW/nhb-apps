@@ -1,4 +1,4 @@
-{% extends 'plein/site_layout.dtl' %}
+{% extends 'design/site_layout.dtl' %}
 {% comment %}
                 Copyright (c) 2024-2025 Ramon van der Winkel.
                 All rights reserved.
@@ -99,7 +99,7 @@
             <!-- blauwe balk met kaartjes -->
             <div class="row-sv-blauw">
                 <div class="col s12">
-                    {% include 'plein/card_icon.dtl' with title="Inschrijven" text="Schrijf je in voor de basiscursus." icon="person" url=url_inschrijven %}
+                    {% include 'design/card_icon.dtl' with title="Inschrijven" text="Schrijf je in voor de basiscursus." icon="person" url=url_inschrijven %}
                 </div>
             </div>
 
@@ -118,9 +118,9 @@
                 <div class="col s12">
 
                     {% if url_instaptoets %}
-                        {% include 'plein/card_icon.dtl' with title="Instaptoets" text="Maak de online instaptoets." icon="login" url=url_instaptoets %}
+                        {% include 'design/card_icon.dtl' with title="Instaptoets" text="Maak de online instaptoets." icon="login" url=url_instaptoets %}
                     {% else %}
-                        {% include 'plein/card_icon_beschikbaar-vanaf.dtl' with title="Instaptoets" text="Maak de online instaptoets." icon="login" %}
+                        {% include 'design/card_icon_beschikbaar-vanaf.dtl' with title="Instaptoets" text="Maak de online instaptoets." icon="login" %}
                     {% endif %}
                 </div>
             </div>

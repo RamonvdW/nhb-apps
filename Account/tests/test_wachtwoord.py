@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -49,7 +49,7 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
             resp = self.client.get(self.url_wijzig)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('account/wachtwoord-wijzigen.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('account/wachtwoord-wijzigen.dtl', 'design/site_layout.dtl'))
 
         # controleer dat we nu ingelogd zijn!
         self.e2e_assert_logged_in()
@@ -61,7 +61,7 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
             resp = self.client.post(self.url_wijzig, {'huidige': nieuw_ww, 'nieuwe': nieuw_ww})
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('account/wachtwoord-wijzigen.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('account/wachtwoord-wijzigen.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, 'Huidige wachtwoord komt niet overeen')
 
         with self.assert_max_queries(20):
@@ -80,14 +80,14 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
             resp = self.client.post(self.url_wijzig)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('account/wachtwoord-wijzigen.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('account/wachtwoord-wijzigen.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, 'wachtwoord is te kort')
 
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_wijzig, {'nieuwe': '123412341234'})
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('account/wachtwoord-wijzigen.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('account/wachtwoord-wijzigen.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, 'wachtwoord bevat te veel gelijke tekens')
 
     def test_vergeten_uitgelogd(self):
@@ -98,7 +98,7 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
             resp = self.client.get(self.url_vergeten)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('account/wachtwoord-vergeten.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('account/wachtwoord-vergeten.dtl', 'design/site_layout.dtl'))
 
         self.assertEqual(MailQueue.objects.count(), 0)
         self.assertEqual(TijdelijkeCode.objects.count(), 0)
@@ -109,7 +109,7 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
                                                         'email': 'normaal@test.com'})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('account/wachtwoord-vergeten-email.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('account/wachtwoord-vergeten-email.dtl', 'design/site_layout.dtl'))
 
         # er moet nu een mail in de MailQueue staan met een single-use url
         self.assertEqual(MailQueue.objects.count(), 1)
@@ -137,7 +137,7 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
             resp = self.client.get(self.url_wijzig)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('account/wachtwoord-wijzigen.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('account/wachtwoord-wijzigen.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, 'Nieuwe wachtwoord:')
         self.assertNotContains(resp, 'Huidige wachtwoord:')
 
@@ -162,7 +162,7 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
             resp = self.client.get(self.url_vergeten)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('account/wachtwoord-vergeten.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('account/wachtwoord-vergeten.dtl', 'design/site_layout.dtl'))
 
         self.assertEqual(MailQueue.objects.count(), 0)
         self.assertEqual(TijdelijkeCode.objects.count(), 0)
@@ -176,7 +176,7 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
                                                         'email': 'nieuwe@test.com'})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('account/wachtwoord-vergeten-email.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('account/wachtwoord-vergeten-email.dtl', 'design/site_layout.dtl'))
 
         # er moet nu een mail in de MailQueue staan met een single-use url
         self.assertEqual(MailQueue.objects.count(), 1)
@@ -199,7 +199,7 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
                                                         'email': 'normaal@test.com'})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('account/wachtwoord-vergeten-email.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('account/wachtwoord-vergeten-email.dtl', 'design/site_layout.dtl'))
 
     def test_vergeten_geblokkeerd(self):
         # raak het pad in receive_wachtwoord_vergeten waarbij plugin blokkeert
@@ -213,7 +213,7 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
                                                         'email': 'normaal@test.com'})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('account/wachtwoord-vergeten-email.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('account/wachtwoord-vergeten-email.dtl', 'design/site_layout.dtl'))
 
         self.assertEqual(TijdelijkeCode.objects.count(), 1)
         obj = TijdelijkeCode.objects.first()
@@ -236,7 +236,7 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
             resp = self.client.get(self.url_vergeten)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('account/wachtwoord-vergeten.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('account/wachtwoord-vergeten.dtl', 'design/site_layout.dtl'))
 
         self.assertEqual(MailQueue.objects.count(), 0)
         self.assertEqual(TijdelijkeCode.objects.count(), 0)
@@ -247,7 +247,7 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
                                                         'email': 'normaal@test.com'})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('account/wachtwoord-vergeten-email.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('account/wachtwoord-vergeten-email.dtl', 'design/site_layout.dtl'))
 
         # er moet nu een mail in de MailQueue staan met een single-use url
         self.assertEqual(MailQueue.objects.count(), 1)
@@ -274,7 +274,7 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
             resp = self.client.get(self.url_wijzig)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('account/wachtwoord-wijzigen.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('account/wachtwoord-wijzigen.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, 'Nieuwe wachtwoord:')
         self.assertNotContains(resp, 'Huidige wachtwoord:')
 
@@ -289,14 +289,14 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
             resp = self.client.get(self.url_vergeten)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('account/wachtwoord-vergeten.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('account/wachtwoord-vergeten.dtl', 'design/site_layout.dtl'))
 
         # geen email parameter
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_vergeten)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('account/wachtwoord-vergeten.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('account/wachtwoord-vergeten.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, 'Voer een valide e-mailadres in van een bestaand account')
 
         # niet valide e-mailadres
@@ -304,7 +304,7 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
             resp = self.client.post(self.url_vergeten, {'email': 'not a valid email adres'})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('account/wachtwoord-vergeten.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('account/wachtwoord-vergeten.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, 'Voer een valide e-mailadres in van een bestaand account')
 
         # niet bestaand valide e-mailadres
@@ -313,7 +313,7 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
                                                         'email': 'als.het.maar@test.org'})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('account/wachtwoord-vergeten.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('account/wachtwoord-vergeten.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, 'Voer het e-mailadres en bondsnummer in van een bestaand account')
 
         # niet bestaand account
@@ -322,7 +322,7 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
                                                         'email': 'normaal@test.org'})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('account/wachtwoord-vergeten.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('account/wachtwoord-vergeten.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, 'Voer het e-mailadres en bondsnummer in van een bestaand account')
 
 

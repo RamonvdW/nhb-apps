@@ -206,7 +206,7 @@ class TestEvenementAfmelden(E2EHelpers, TestCase):
                                                                 'snel': '1'})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('evenement/inschrijven-toegevoegd-aan-mandje.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('evenement/inschrijven-toegevoegd-aan-mandje.dtl', 'design/site_layout.dtl'))
 
         self.verwerk_bestel_mutaties()
 

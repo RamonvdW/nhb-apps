@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2024 Ramon van der Winkel.
+#  Copyright (c) 2020-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -351,14 +351,14 @@ class TestCompLaagRayonVerenigingTeams(E2EHelpers, TestCase):
                 resp = self.client.get(self.url_rk_teams % deelkamp_rk3.pk)
             self.assertEqual(resp.status_code, 200)
             self.assert_html_ok(resp)
-            self.assert_template_used(resp, ('complaagrayon/hwl-teams.dtl', 'plein/site_layout.dtl'))
+            self.assert_template_used(resp, ('complaagrayon/hwl-teams.dtl', 'design/site_layout.dtl'))
 
             # team aanmaken pagina
             with self.assert_max_queries(20):
                 resp = self.client.get(self.url_rk_teams_nieuw % deelkamp_rk3.pk)
             self.assertEqual(resp.status_code, 200)
             self.assert_html_ok(resp)
-            self.assert_template_used(resp, ('complaagrayon/hwl-teams-wijzig.dtl', 'plein/site_layout.dtl'))
+            self.assert_template_used(resp, ('complaagrayon/hwl-teams-wijzig.dtl', 'design/site_layout.dtl'))
 
             # maak een team aan zonder team nummer
             with self.assert_max_queries(20):
@@ -395,7 +395,7 @@ class TestCompLaagRayonVerenigingTeams(E2EHelpers, TestCase):
                 resp = self.client.get(url)
             self.assertEqual(resp.status_code, 200)
             self.assert_html_ok(resp)
-            self.assert_template_used(resp, ('complaagrayon/hwl-teams-wijzig.dtl', 'plein/site_layout.dtl'))
+            self.assert_template_used(resp, ('complaagrayon/hwl-teams-wijzig.dtl', 'design/site_layout.dtl'))
 
             # team does not exist
             resp = self.client.get(self.url_rk_teams_wijzig % (deelkamp_rk3.pk, 999999))
@@ -438,7 +438,7 @@ class TestCompLaagRayonVerenigingTeams(E2EHelpers, TestCase):
                 resp = self.client.get(self.url_rk_teams % deelkamp_rk3.pk)
             self.assertEqual(resp.status_code, 200)
             self.assert_html_ok(resp)
-            self.assert_template_used(resp, ('complaagrayon/hwl-teams.dtl', 'plein/site_layout.dtl'))
+            self.assert_template_used(resp, ('complaagrayon/hwl-teams.dtl', 'design/site_layout.dtl'))
 
     def test_rk_teams_koppelen(self):
 
@@ -474,7 +474,7 @@ class TestCompLaagRayonVerenigingTeams(E2EHelpers, TestCase):
                 resp = self.client.get(url)
             self.assertEqual(resp.status_code, 200)
             self.assert_html_ok(resp)
-            self.assert_template_used(resp, ('complaagrayon/hwl-teams-koppelen.dtl', 'plein/site_layout.dtl'))
+            self.assert_template_used(resp, ('complaagrayon/hwl-teams-koppelen.dtl', 'design/site_layout.dtl'))
 
             resp = self.client.post(url, {'deelnemer_999999': 1, 'deelnemer_xyz': 1})
             self.assert_is_redirect_not_plein(resp)
@@ -512,6 +512,6 @@ class TestCompLaagRayonVerenigingTeams(E2EHelpers, TestCase):
                 resp = self.client.get(url)
             self.assertEqual(resp.status_code, 200)
             self.assert_html_ok(resp)
-            self.assert_template_used(resp, ('complaagrayon/hwl-teams-koppelen.dtl', 'plein/site_layout.dtl'))
+            self.assert_template_used(resp, ('complaagrayon/hwl-teams-koppelen.dtl', 'design/site_layout.dtl'))
 
 # end of file

@@ -27,11 +27,11 @@
 
         <title>{% block title %}{% endblock %}</title>
 
-        {% include 'plein/site_layout_fonts.dtl' %}
+        {% include 'design/site_layout_fonts.dtl' %}
 
         <link rel="stylesheet" href="{% static 'css/materialize-new-313.css' %}">
 
-        {% include 'plein/site_layout_favicons.dtl' %}
+        {% include 'design/site_layout_favicons.dtl' %}
 
         {% if robots %}
             <!-- adds flags like nofollow, noindex -->

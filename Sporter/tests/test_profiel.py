@@ -237,7 +237,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         resp = self.client.get(self.url_profiel_test)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('sporter/profiel.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('sporter/profiel.dtl', 'design/site_layout.dtl'))
 
     def test_geen_sec(self):
         # log in as sporter
@@ -280,7 +280,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
             resp = self.client.get(self.url_profiel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('sporter/profiel.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('sporter/profiel.dtl', 'design/site_layout.dtl'))
 
         # check record
         self.assertContains(resp, 'Top stad')
@@ -305,7 +305,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
             resp = self.client.get(self.url_profiel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('sporter/profiel.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('sporter/profiel.dtl', 'design/site_layout.dtl'))
         self.assertNotContains(resp, 'De volgende competities worden georganiseerd')
 
     def test_bestelling(self):
@@ -321,7 +321,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
             resp = self.client.get(self.url_profiel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('sporter/profiel.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('sporter/profiel.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, 'Bestellingen')                           # titel kaartje
         self.assertContains(resp, 'Alle details van je bestellingen.')      # tekst op kaartje
         self.assertContains(resp, '/bestel/overzicht/')                     # href van het kaartje
@@ -388,7 +388,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
             resp = self.client.get(self.url_profiel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('sporter/profiel.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('sporter/profiel.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, 'Wedstrijden')
         self.assertContains(resp, 'Pijlstad')
         urls = self.extract_all_urls(resp)
@@ -404,7 +404,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
             resp = self.client.get(self.url_profiel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('sporter/profiel.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('sporter/profiel.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, 'Wedstrijden')
         self.assertContains(resp, 'Pijlstad')
         urls = self.extract_all_urls(resp)
@@ -444,7 +444,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
             resp = self.client.get(self.url_profiel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('sporter/profiel.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('sporter/profiel.dtl', 'design/site_layout.dtl'))
 
         self.assertContains(resp, 'Gast-account aangemaakt op')
 
@@ -464,7 +464,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
             resp = self.client.get(self.url_profiel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('sporter/profiel.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('sporter/profiel.dtl', 'design/site_layout.dtl'))
 
         self.assertContains(resp, 'test18@mh.not')
         self.assertContains(resp, 'test25@mh.not')
@@ -477,7 +477,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
             resp = self.client.get(self.url_profiel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('sporter/profiel.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('sporter/profiel.dtl', 'design/site_layout.dtl'))
 
     def test_ag(self):
         self.e2e_login(self.account_normaal)
@@ -500,7 +500,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
             resp = self.client.get(self.url_profiel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('sporter/profiel.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('sporter/profiel.dtl', 'design/site_layout.dtl'))
 
         self.assertContains(resp, 'AG test')
         self.assertContains(resp, '4,2')

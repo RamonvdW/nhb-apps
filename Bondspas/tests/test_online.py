@@ -90,7 +90,7 @@ class TestBondspasOnline(E2EHelpers, TestCase):
             resp = self.client.get(self.url_toon_sporter)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('bondspas/toon-bondspas-sporter.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('bondspas/toon-bondspas-sporter.dtl', 'design/site_layout.dtl'))
 
         # gast-account
         self.sporter.is_gast = True
@@ -227,7 +227,7 @@ class TestBondspasOnline(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('bondspas/toon-bondspas-van.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('bondspas/toon-bondspas-van.dtl', 'design/site_layout.dtl'))
 
         # download de pdf
         with self.assert_max_queries(20):
@@ -261,7 +261,7 @@ class TestBondspasOnline(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('bondspas/toon-bondspas-van.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('bondspas/toon-bondspas-van.dtl', 'design/site_layout.dtl'))
         urls = self.extract_all_urls(resp, skip_menu=True)
         self.assertEqual(urls, [url])
 
@@ -278,7 +278,7 @@ class TestBondspasOnline(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('bondspas/toon-bondspas-van.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('bondspas/toon-bondspas-van.dtl', 'design/site_layout.dtl'))
         urls = self.extract_all_urls(resp, skip_menu=True)
         self.assertEqual(urls, [url])
 

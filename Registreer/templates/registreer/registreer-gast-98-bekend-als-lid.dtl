@@ -1,4 +1,4 @@
-{% extends 'plein/site_layout.dtl' %}
+{% extends 'design/site_layout.dtl' %}
 {% comment %}
                 Copyright (c) 2025 Ramon van der Winkel.
                 All rights reserved.
@@ -57,11 +57,11 @@
         <div class="col s12">
             {% if lid_nr_str %}
                 <!-- voor leden -->
-                {% include 'plein/card_icon.dtl' with title="voor KHSN leden" text="Doorloop eenmalig de korte registratie procedure en krijg toegang tot de hele site." icon="badge" url=url_registreer_khsn %}
+                {% include 'design/card_icon.dtl' with title="voor KHSN leden" text="Doorloop eenmalig de korte registratie procedure en krijg toegang tot de hele site." icon="badge" url=url_registreer_khsn %}
             {% endif %}
 
             {% url 'Plein:plein' as card_url %}
-            {% include 'plein/card_icon.dtl' with title="Het Plein" text="Naar de beginpagina." icon="hub" url=card_url %}
+            {% include 'design/card_icon.dtl' with title="Het Plein" text="Naar de beginpagina." icon="hub" url=card_url %}
         </div>
     </div>
 

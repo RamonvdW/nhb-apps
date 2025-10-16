@@ -68,25 +68,25 @@ class TestFeedback(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_feedback_min_plein)
         self.assertEqual(resp.status_code, 200)
-        self.assert_template_used(resp, ('feedback/formulier.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('feedback/formulier.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_feedback_nul_plein)
         self.assertEqual(resp.status_code, 200)
-        self.assert_template_used(resp, ('feedback/formulier.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('feedback/formulier.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_feedback_plus_plein)
         self.assertEqual(resp.status_code, 200)
-        self.assert_template_used(resp, ('feedback/formulier.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('feedback/formulier.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_feedback % ('huh', 'plein', 'plein'))
         self.assertEqual(resp.status_code, 200)
-        self.assert_template_used(resp, ('feedback/formulier.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('feedback/formulier.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
 
         self.e2e_assert_other_http_commands_not_supported(self.url_feedback_nul_plein, post=False)
@@ -105,7 +105,7 @@ class TestFeedback(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_feedback_bedankt)
         self.assertEqual(resp.status_code, 200)
-        self.assert_template_used(resp, ('feedback/bedankt.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('feedback/bedankt.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
 
         self.e2e_assert_other_http_commands_not_supported(self.url_feedback_bedankt)
@@ -148,7 +148,7 @@ class TestFeedback(E2EHelpers, TestCase):
                                     {'bevinding': '4',
                                      'feedback': ''})
         self.assertEqual(resp.status_code, 200)
-        self.assert_template_used(resp, ('feedback/formulier.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('feedback/formulier.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
 
         with self.assert_max_queries(20):
@@ -156,7 +156,7 @@ class TestFeedback(E2EHelpers, TestCase):
                                     {'bevinding': '5',
                                      'feedback': 'Just testing'})
         self.assertEqual(resp.status_code, 200)
-        self.assert_template_used(resp, ('feedback/formulier.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('feedback/formulier.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
 
     def test_form_get(self):
@@ -213,7 +213,7 @@ class TestFeedback(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_feedback_inzicht)
         self.assertEqual(resp.status_code, 200)
-        self.assert_template_used(resp, ('feedback/inzicht.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('feedback/inzicht.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
         self.assertContains(resp, "Aantal afgehandeld:")
 
@@ -247,7 +247,7 @@ class TestFeedback(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_feedback_inzicht)
         self.assertEqual(resp.status_code, 200)
-        self.assert_template_used(resp, ('feedback/inzicht.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('feedback/inzicht.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
 
         urls = self.extract_all_urls(resp, skip_menu=True)

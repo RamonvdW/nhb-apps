@@ -1,4 +1,4 @@
-{% extends 'plein/site_layout.dtl' %}
+{% extends 'design/site_layout.dtl' %}
 {% comment %}
                 Copyright (c) 2022-2025 Ramon van der Winkel.
                 All rights reserved.
@@ -47,13 +47,13 @@
     <div class="row-sv-blauw">
         <div class="col s12">
             {% static 'plein/logo_world_archery_225x246.webp' as img_src %}
-            {% include 'plein/card_logo.dtl' with text="Volgens de regels, bogen en klassen van World Archery. Bij A-status kunnen records aangevraagd worden." img_height=112 img_src=img_src onclick="keuze('wa')" %}
+            {% include 'design/card_logo.dtl' with text="Volgens de regels, bogen en klassen van World Archery. Bij A-status kunnen records aangevraagd worden." img_height=112 img_src=img_src onclick="keuze('wa')" %}
 
-            {% static 'plein/logo_khsn_192x192.webp' as img_src %}
-            {% include 'plein/card_logo.dtl' with text="Meer leeftijdsklassen dan World Archery en eventueel genderneutraal. Gebruik voor verenigingswedstrijden." img_height=112 img_src=img_src onclick="keuze('khsn')" %}
+            {% static 'design/logo_khsn_192x192.webp' as img_src %}
+            {% include 'design/card_logo.dtl' with text="Meer leeftijdsklassen dan World Archery en eventueel genderneutraal. Gebruik voor verenigingswedstrijden." img_height=112 img_src=img_src onclick="keuze('khsn')" %}
 
             {% static 'plein/logo_ifaa_128x200.webp' as img_src %}                                              <!-- 123=112+15-4       4=15-11    (15px = default card padding) -->
-            {% include 'plein/card_logo.dtl' with text="Volgens de regels, bogen en klassen van de IFAA." img_height=123 img_reduce_top=4 img_src=img_src onclick="keuze('ifaa')" %}
+            {% include 'design/card_logo.dtl' with text="Volgens de regels, bogen en klassen van de IFAA." img_height=123 img_reduce_top=4 img_src=img_src onclick="keuze('ifaa')" %}
         </div>
     </div>
 

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2024 Ramon van der Winkel.
+#  Copyright (c) 2020-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -139,7 +139,7 @@ class TestCompLaagRayonFormulieren(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('complaagrayon/hwl-download-rk-formulier.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagrayon/hwl-download-rk-formulier.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
 
         # alleen indiv klassen
@@ -148,7 +148,7 @@ class TestCompLaagRayonFormulieren(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('complaagrayon/hwl-download-rk-formulier.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagrayon/hwl-download-rk-formulier.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
 
         # indiv + teams klassen
@@ -157,7 +157,7 @@ class TestCompLaagRayonFormulieren(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('complaagrayon/hwl-download-rk-formulier.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagrayon/hwl-download-rk-formulier.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
 
         # alleen teams klassen
@@ -165,7 +165,7 @@ class TestCompLaagRayonFormulieren(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('complaagrayon/hwl-download-rk-formulier.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagrayon/hwl-download-rk-formulier.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
 
         # wedstrijd niet in een plan
@@ -383,7 +383,7 @@ class TestCompLaagRayonFormulieren(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('complaagrayon/hwl-download-rk-formulier.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagrayon/hwl-download-rk-formulier.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
 
         # download tests

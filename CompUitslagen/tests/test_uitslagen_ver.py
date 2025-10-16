@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2023 Ramon van der Winkel.
+#  Copyright (c) 2020-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -58,14 +58,14 @@ class TestCompUitslagenVer(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compuitslagen/uitslagen-vereniging-indiv.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compuitslagen/uitslagen-vereniging-indiv.dtl', 'design/site_layout.dtl'))
 
         url = self.url_uitslagen_indiv_ver_n % (self.testdata.comp18.pk, self.ver_nr, 'R')
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compuitslagen/uitslagen-vereniging-indiv.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compuitslagen/uitslagen-vereniging-indiv.dtl', 'design/site_layout.dtl'))
 
         # als je de pagina ophaalt als een ingelogd lid, dan wordt jouw vereniging getoond
         sporter = self.testdata.ver_sporters_met_account[self.ver_nr][0]
@@ -77,7 +77,7 @@ class TestCompUitslagenVer(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertContains(resp, self.club_naam)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compuitslagen/uitslagen-vereniging-indiv.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compuitslagen/uitslagen-vereniging-indiv.dtl', 'design/site_layout.dtl'))
 
         # corner-case: geen lid meer bent bij een vereniging
         sporter.is_actief_lid = False
@@ -86,7 +86,7 @@ class TestCompUitslagenVer(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compuitslagen/uitslagen-vereniging-indiv.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compuitslagen/uitslagen-vereniging-indiv.dtl', 'design/site_layout.dtl'))
 
     def test_ver_teams(self):
         url = self.url_uitslagen_teams_ver_n % (self.testdata.comp18.pk, self.ver_nr, 'R2')
@@ -94,7 +94,7 @@ class TestCompUitslagenVer(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compuitslagen/uitslagen-vereniging-teams.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compuitslagen/uitslagen-vereniging-teams.dtl', 'design/site_layout.dtl'))
 
         # bad comp_pk
         url = self.url_uitslagen_teams_ver_n % (999999, self.ver_nr, 'R')
@@ -127,7 +127,7 @@ class TestCompUitslagenVer(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compuitslagen/uitslagen-vereniging-indiv.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compuitslagen/uitslagen-vereniging-indiv.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, self.club_naam)
 
         # bad
@@ -146,7 +146,7 @@ class TestCompUitslagenVer(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compuitslagen/uitslagen-vereniging-indiv.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compuitslagen/uitslagen-vereniging-indiv.dtl', 'design/site_layout.dtl'))
 
         # bad
         url = self.url_uitslagen_indiv_ver_n % (self.testdata.comp18.pk, 999999, 'R')

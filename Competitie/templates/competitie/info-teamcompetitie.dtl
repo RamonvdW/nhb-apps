@@ -1,4 +1,4 @@
-{% extends 'plein/site_layout.dtl' %}
+{% extends 'design/site_layout.dtl' %}
 {% comment %}
                 Copyright (c) 2023-2025 Ramon van der Winkel.
                 All rights reserved.
@@ -347,7 +347,7 @@
         <div class="col s12">
             <!-- algemene informatie over de competities -->
             {% url 'Competitie:info-competitie' as card_url %}
-            {% include 'plein/card_icon.dtl' with title="Informatie" text="Informatie over de individuele competities." icon="info" url=card_url %}
+            {% include 'design/card_icon.dtl' with title="Informatie" text="Informatie over de individuele competities." icon="info" url=card_url %}
         </div>
     </div>
 

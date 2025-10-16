@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#  Copyright (c) 2019-2023 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -17,8 +17,8 @@ INFILE="$PWD/materialize-src/sass/materialize.scss"
 MINIFY="--style compressed"
 
 # source file to modify when the version number changes
-DTL_FILE1="$PWD/../templates/plein/site_layout.dtl"
-DTL_FILE2="$PWD/../templates/plein/site_layout_minimaal.dtl"
+DTL_FILE1="$PWD/../templates/design/site_layout.dtl"
+DTL_FILE2="$PWD/../templates/design/site_layout_minimaal.dtl"
 
 if [ ! -e "$INFILE" ]
 then

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2024 Ramon van der Winkel.
+#  Copyright (c) 2021-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -242,7 +242,7 @@ class TestWedstrijdenKwalificatieScores(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('wedstrijden/check-kwalificatie-scores.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijden/check-kwalificatie-scores.dtl', 'design/site_layout.dtl'))
 
         # als HWL van de organiserende vereniging
         self.e2e_wissel_naar_functie(self.functie_hwl)
@@ -251,7 +251,7 @@ class TestWedstrijdenKwalificatieScores(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('wedstrijden/check-kwalificatie-scores.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijden/check-kwalificatie-scores.dtl', 'design/site_layout.dtl'))
 
         # corner cases
         resp = self.client.get(self.url_check_lijst % 999999)
@@ -282,7 +282,7 @@ class TestWedstrijdenKwalificatieScores(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('wedstrijden/check-kwalificatie-scores-wedstrijd.dtl',
-                                         'plein/site_layout.dtl'))
+                                         'design/site_layout.dtl'))
 
         # post zonder data
         resp = self.client.post(url)
@@ -369,7 +369,7 @@ class TestWedstrijdenKwalificatieScores(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('wedstrijden/check-kwalificatie-scores-wedstrijd.dtl',
-                                         'plein/site_layout.dtl'))
+                                         'design/site_layout.dtl'))
 
         # post zonder data
         resp = self.client.post(url)

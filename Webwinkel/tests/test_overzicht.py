@@ -146,7 +146,7 @@ class TestWebwinkelOverzicht(E2EHelpers, TestCase):
             resp = self.client.get(self.url_webwinkel_overzicht)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('webwinkel/overzicht.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('webwinkel/overzicht.dtl', 'design/site_layout.dtl'))
 
         # controleer dat het mandje niet getoond wordt
         urls = self.extract_all_urls(resp)
@@ -156,7 +156,7 @@ class TestWebwinkelOverzicht(E2EHelpers, TestCase):
             resp = self.client.get(self.url_webwinkel_product % self.product1.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('webwinkel/product.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('webwinkel/product.dtl', 'design/site_layout.dtl'))
 
         resp = self.client.post(self.url_webwinkel_product % self.product1.pk)
         self.assert404(resp, 'Geen toegang')
@@ -179,7 +179,7 @@ class TestWebwinkelOverzicht(E2EHelpers, TestCase):
             resp = self.client.get(self.url_webwinkel_overzicht)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('webwinkel/overzicht.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('webwinkel/overzicht.dtl', 'design/site_layout.dtl'))
 
         # controleer dat het mandje wel getoond wordt
         urls = self.extract_all_urls(resp)
@@ -190,7 +190,7 @@ class TestWebwinkelOverzicht(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('webwinkel/product.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('webwinkel/product.dtl', 'design/site_layout.dtl'))
 
         # controleer dat het mandje wel getoond wordt
         urls = self.extract_all_urls(resp)
@@ -201,14 +201,14 @@ class TestWebwinkelOverzicht(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('webwinkel/product.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('webwinkel/product.dtl', 'design/site_layout.dtl'))
 
         url = self.url_webwinkel_product % self.product3.pk
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('webwinkel/product.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('webwinkel/product.dtl', 'design/site_layout.dtl'))
 
         # corner cases
         url = self.url_webwinkel_product % "xxx"
@@ -235,7 +235,7 @@ class TestWebwinkelOverzicht(E2EHelpers, TestCase):
             resp = self.client.post(url, {'aantal': '1', 'snel': 1})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('webwinkel/toegevoegd-aan-mandje.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('webwinkel/toegevoegd-aan-mandje.dtl', 'design/site_layout.dtl'))
 
         # voeg een product met kleding maat toe
         url = self.url_webwinkel_product % self.product4.pk
@@ -243,7 +243,7 @@ class TestWebwinkelOverzicht(E2EHelpers, TestCase):
             resp = self.client.post(url, {'aantal': '1', 'maat': 'XXL', 'snel': 1})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('webwinkel/toegevoegd-aan-mandje.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('webwinkel/toegevoegd-aan-mandje.dtl', 'design/site_layout.dtl'))
 
         # niet bestaande maat
         with self.assert_max_queries(20):
@@ -261,7 +261,7 @@ class TestWebwinkelOverzicht(E2EHelpers, TestCase):
             resp = self.client.post(url, {'aantal': '2', 'snel': 1})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('webwinkel/toegevoegd-aan-mandje.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('webwinkel/toegevoegd-aan-mandje.dtl', 'design/site_layout.dtl'))
 
         # corner cases
         with self.assert_max_queries(20):
@@ -305,14 +305,14 @@ class TestWebwinkelOverzicht(E2EHelpers, TestCase):
             resp = self.client.post(url, {'aantal': '1', 'snel': 1})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('webwinkel/toegevoegd-aan-mandje.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('webwinkel/toegevoegd-aan-mandje.dtl', 'design/site_layout.dtl'))
 
         url = self.url_webwinkel_product % self.product2.pk
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'aantal': '2', 'snel': 1})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('webwinkel/toegevoegd-aan-mandje.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('webwinkel/toegevoegd-aan-mandje.dtl', 'design/site_layout.dtl'))
 
         self.assertEqual(2, WebwinkelKeuze.objects.count())
 
@@ -368,7 +368,7 @@ class TestWebwinkelOverzicht(E2EHelpers, TestCase):
                                      'actie': 'registreer', 'snel': '1'})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('bestelling/overboeking-ontvangen.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('bestelling/overboeking-ontvangen.dtl', 'design/site_layout.dtl'))
         self.verwerk_bestel_mutaties()
 
         bestelling = Bestelling.objects.first()
@@ -414,12 +414,12 @@ class TestWebwinkelOverzicht(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('webwinkel/product.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('webwinkel/product.dtl', 'design/site_layout.dtl'))
 
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'aantal': '1', 'snel': 1})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('webwinkel/toegevoegd-aan-mandje.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('webwinkel/toegevoegd-aan-mandje.dtl', 'design/site_layout.dtl'))
 
 # end of file

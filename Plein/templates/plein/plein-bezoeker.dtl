@@ -1,4 +1,4 @@
-{% extends 'plein/site_layout.dtl' %}
+{% extends 'design/site_layout.dtl' %}
 {% comment %}
                 Copyright (c) 2021-2025 Ramon van der Winkel.
                 All rights reserved.
@@ -51,25 +51,25 @@
         <div class="col s12">
             <!-- bondscompetities -->
             {% url 'Competitie:kies' as card_url %}
-            {% include 'plein/card_icon.dtl' with title="Bondscompetities" text="Informatie over de<br>bondscompetities,<br> inclusief alle uitslagen." icon="my_location" url=card_url %}
+            {% include 'design/card_icon.dtl' with title="Bondscompetities" text="Informatie over de<br>bondscompetities,<br> inclusief alle uitslagen." icon="my_location" url=card_url %}
 
             <!-- kalender -->
             {% url 'Kalender:landing-page' as card_url %}
-            {% include 'plein/card_icon.dtl' with title="Kalender" text="Bekijk welke wedstrijden en evenementen georganiseerd worden." icon="event_note" url=card_url %}
+            {% include 'design/card_icon.dtl' with title="Kalender" text="Bekijk welke wedstrijden en evenementen georganiseerd worden." icon="event_note" url=card_url %}
 
             <!-- opleidingen -->
             {% if toon_opleidingen %}
                 {% url 'Opleiding:overzicht' as card_url %}
-                {% include 'plein/card_icon.dtl' with title="Opleidingen" text="Bekijk de opleidingen die aangeboden worden." icon="school" url=card_url %}
+                {% include 'design/card_icon.dtl' with title="Opleidingen" text="Bekijk de opleidingen die aangeboden worden." icon="school" url=card_url %}
             {% endif %}
 
             <!-- webwinkel -->
             {% url 'Webwinkel:overzicht' as card_url %}
-            {% include 'plein/card_icon.dtl' with title="Webwinkel" text="Bekijk onze webwinkel." icon="local_mall" url=card_url %}
+            {% include 'design/card_icon.dtl' with title="Webwinkel" text="Bekijk onze webwinkel." icon="local_mall" url=card_url %}
 
             <!-- records -->
             {% url 'Records:overzicht' as card_url %}
-            {% include 'plein/card_icon.dtl' with title="Records" text="Alle handboogsport records<br>van Nederlandse sporters." icon="insights" url=card_url %}
+            {% include 'design/card_icon.dtl' with title="Records" text="Alle handboogsport records<br>van Nederlandse sporters." icon="insights" url=card_url %}
         </div>
     </div>
 
@@ -86,7 +86,7 @@
     <div class="row-sv-blauw">
         <div class="col s12">
             {% url 'Registreer:begin' as card_url %}
-            {% include 'plein/card_icon.dtl' with title="Account aanmaken" text="Met een account wordt het persoonlijker en krijg je toegang tot meer functionaliteit." icon="fingerprint" url=card_url %}
+            {% include 'design/card_icon.dtl' with title="Account aanmaken" text="Met een account wordt het persoonlijker en krijg je toegang tot meer functionaliteit." icon="fingerprint" url=card_url %}
         </div>
     </div>
 

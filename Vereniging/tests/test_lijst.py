@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -165,7 +165,7 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
             resp = self.client.get(self.url_lijst)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('vereniging/lijst.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('vereniging/lijst.dtl', 'design/site_layout.dtl'))
 
         self.e2e_assert_other_http_commands_not_supported(self.url_lijst)
 
@@ -179,7 +179,7 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
             resp = self.client.get(self.url_lijst)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('vereniging/lijst.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('vereniging/lijst.dtl', 'design/site_layout.dtl'))
 
     def test_competitie_beheerders(self):
         # landelijke lijst met rayon & regio
@@ -191,7 +191,7 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
             resp = self.client.get(self.url_lijst)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('vereniging/lijst.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('vereniging/lijst.dtl', 'design/site_layout.dtl'))
 
         # rayon lijst met regio kolom (geen rayon kolom)
         self.e2e_login_and_pass_otp(self.account_rko)
@@ -202,7 +202,7 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
             resp = self.client.get(self.url_lijst)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('vereniging/lijst.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('vereniging/lijst.dtl', 'design/site_layout.dtl'))
 
         # regio lijst met HWL's (zonder rayon/regio kolommen)
         self.e2e_login_and_pass_otp(self.account_rcl)
@@ -213,7 +213,7 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
             resp = self.client.get(self.url_lijst)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('vereniging/lijst.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('vereniging/lijst.dtl', 'design/site_layout.dtl'))
         self.e2e_assert_other_http_commands_not_supported(self.url_lijst)
 
         # verenigingen 1 en 2 horen beide bij regio 101
@@ -232,13 +232,13 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
             resp = self.client.get(self.url_lijst)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('vereniging/lijst.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('vereniging/lijst.dtl', 'design/site_layout.dtl'))
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_lijst_details % self.ver1.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('vereniging/lijst-details.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('vereniging/lijst-details.dtl', 'design/site_layout.dtl'))
 
         # stop ver2 in hetzelfde cluster
         self.ver2.cluster = cluster
@@ -248,7 +248,7 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
             resp = self.client.get(self.url_lijst)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('vereniging/lijst.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('vereniging/lijst.dtl', 'design/site_layout.dtl'))
 
         # stop ver2 in een apart cluster
         cluster = Cluster(
@@ -264,7 +264,7 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
             resp = self.client.get(self.url_lijst)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('vereniging/lijst.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('vereniging/lijst.dtl', 'design/site_layout.dtl'))
 
     def test_hwl(self):
         # de hwl krijgt dezelfde lijst als de rcl
@@ -276,7 +276,7 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
             resp = self.client.get(self.url_lijst)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('vereniging/lijst.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('vereniging/lijst.dtl', 'design/site_layout.dtl'))
 
         resp = self.client.get(self.url_lijst_details % 999999)
         self.assert404(resp, 'Geen valide vereniging')
@@ -287,7 +287,7 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('vereniging/lijst-details.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('vereniging/lijst-details.dtl', 'design/site_layout.dtl'))
 
         # corner cases
         self.loc_buiten.zichtbaar = False
@@ -296,7 +296,7 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('vereniging/lijst-details.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('vereniging/lijst-details.dtl', 'design/site_layout.dtl'))
 
         self.loc_buiten.delete()
         self.loc_binnen.delete()
@@ -304,7 +304,7 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('vereniging/lijst-details.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('vereniging/lijst-details.dtl', 'design/site_layout.dtl'))
 
         self.assertTrue(str(self.sec) != '')
 
@@ -313,14 +313,14 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('vereniging/lijst-details.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('vereniging/lijst-details.dtl', 'design/site_layout.dtl'))
 
         self.functie_sec.accounts.add(self.account_hwl)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('vereniging/lijst-details.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('vereniging/lijst-details.dtl', 'design/site_layout.dtl'))
 
         self.functie_wl.delete()
         resp = self.client.get(url)
@@ -333,7 +333,7 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('vereniging/lijst-details.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('vereniging/lijst-details.dtl', 'design/site_layout.dtl'))
 
         self.functie_sec.delete()
         resp = self.client.get(url)
@@ -368,7 +368,7 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
             resp = self.client.get(self.url_geen_beheerders)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('vereniging/contact-geen-beheerders.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('vereniging/contact-geen-beheerders.dtl', 'design/site_layout.dtl'))
 
         # corner case
         self.functie_sec.delete()
@@ -376,7 +376,7 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
             resp = self.client.get(self.url_geen_beheerders)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('vereniging/contact-geen-beheerders.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('vereniging/contact-geen-beheerders.dtl', 'design/site_layout.dtl'))
 
         # probeer het met een andere rol
         self.e2e_wisselnaarrol_gebruiker()

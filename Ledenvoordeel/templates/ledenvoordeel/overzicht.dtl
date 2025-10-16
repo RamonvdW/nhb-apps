@@ -1,6 +1,6 @@
-{% extends 'plein/site_layout.dtl' %}
+{% extends 'design/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2024 Ramon van der Winkel.
+                Copyright (c) 2024-2025 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -24,7 +24,7 @@
             <!-- walibi -->
             {% static 'ledenvoordeel/logo_walibi_374x374.png' as img_src %}
             {% url 'Ledenvoordeel:walibi' as card_url %}
-            {% include 'plein/card_logo.dtl' with title="Walibi Holland" text="Met korting naar Walibi Holland." img_src=img_src img_height=75 img_width=75 url=card_url %}
+            {% include 'design/card_logo.dtl' with title="Walibi Holland" text="Met korting naar Walibi Holland." img_src=img_src img_height=75 img_width=75 url=card_url %}
         </div>
     </div>
 

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2024 Ramon van der Winkel.
+#  Copyright (c) 2020-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -68,7 +68,7 @@ class TestCompetitieKies(E2EHelpers, TestCase):
             resp = self.client.get(self.url_kies)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/kies.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('competitie/kies.dtl', 'design/site_layout.dtl'))
 
         now = timezone.now()
 
@@ -83,7 +83,7 @@ class TestCompetitieKies(E2EHelpers, TestCase):
             resp = self.client.get(self.url_kies)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/kies.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('competitie/kies.dtl', 'design/site_layout.dtl'))
 
         # afsluiten
         zet_competitie_fases(comp_18, 'Q', 'Q')
@@ -91,7 +91,7 @@ class TestCompetitieKies(E2EHelpers, TestCase):
             resp = self.client.get(self.url_kies)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/kies.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('competitie/kies.dtl', 'design/site_layout.dtl'))
 
     def test_anon(self):
         self.client.logout()
@@ -105,7 +105,7 @@ class TestCompetitieKies(E2EHelpers, TestCase):
             resp = self.client.get(self.url_kies)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/kies.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('competitie/kies.dtl', 'design/site_layout.dtl'))
 
     def test_sporter(self):
         self.e2e_login(self.account_lid)
@@ -118,7 +118,7 @@ class TestCompetitieKies(E2EHelpers, TestCase):
             resp = self.client.get(self.url_kies)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/kies.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('competitie/kies.dtl', 'design/site_layout.dtl'))
 
     def test_hwl(self):
         self.e2e_login_and_pass_otp(self.account_admin)
@@ -133,7 +133,7 @@ class TestCompetitieKies(E2EHelpers, TestCase):
             resp = self.client.get(self.url_kies)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/kies.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('competitie/kies.dtl', 'design/site_layout.dtl'))
 
     def test_rko(self):
         self.e2e_login_and_pass_otp(self.account_admin)
@@ -148,6 +148,6 @@ class TestCompetitieKies(E2EHelpers, TestCase):
             resp = self.client.get(self.url_kies)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/kies.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('competitie/kies.dtl', 'design/site_layout.dtl'))
 
 # end of file

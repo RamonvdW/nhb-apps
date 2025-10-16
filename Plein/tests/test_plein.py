@@ -117,7 +117,7 @@ class TestPlein(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_plein)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('plein/plein-bezoeker.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('plein/plein-bezoeker.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
 
         with self.assert_max_queries(20):
@@ -137,7 +137,7 @@ class TestPlein(E2EHelpers, TestCase):
             self.assertEqual(resp.status_code, 200)     # 200 = OK
             self.assertNotContains(resp, '/admin/')
             self.assertNotContains(resp, 'Wissel van rol')
-            self.assert_template_used(resp, ('plein/plein-sporter.dtl', 'plein/site_layout.dtl'))
+            self.assert_template_used(resp, ('plein/plein-sporter.dtl', 'design/site_layout.dtl'))
             self.assert_html_ok(resp)
 
         # check dat de het scheidsrechters kaartje er niet bij zit
@@ -161,7 +161,7 @@ class TestPlein(E2EHelpers, TestCase):
             with self.assert_max_queries(20):
                 resp = self.client.get(self.url_plein)
             self.assertEqual(resp.status_code, 200)     # 200 = OK
-            self.assert_template_used(resp, ('plein/plein-sporter.dtl', 'plein/site_layout.dtl'))
+            self.assert_template_used(resp, ('plein/plein-sporter.dtl', 'design/site_layout.dtl'))
             self.assert_html_ok(resp)
 
         # check dat de mandje-knop erbij zit
@@ -215,7 +215,7 @@ class TestPlein(E2EHelpers, TestCase):
             resp = self.client.get(self.url_plein)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, 'Wissel van rol')
-        self.assert_template_used(resp, ('plein/plein-sporter.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('plein/plein-sporter.dtl', 'design/site_layout.dtl'))
         urls = [url for url in self.extract_all_urls(resp) if "beheer" in url]
         self.assertEqual(1, len(urls))      # is globaal beschikbaar bij is_staff
 
@@ -227,7 +227,7 @@ class TestPlein(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_plein)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('plein/plein-beheerder.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('plein/plein-beheerder.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, 'Manager MH')
 
         # bko
@@ -236,7 +236,7 @@ class TestPlein(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_plein)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('plein/plein-beheerder.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('plein/plein-beheerder.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, 'BKO')
 
         # rko
@@ -245,7 +245,7 @@ class TestPlein(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_plein)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('plein/plein-beheerder.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('plein/plein-beheerder.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, 'RKO')
 
         # rcl
@@ -254,7 +254,7 @@ class TestPlein(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_plein)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('plein/plein-beheerder.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('plein/plein-beheerder.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, 'RCL')
 
         # sec
@@ -263,7 +263,7 @@ class TestPlein(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_plein)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('plein/plein-beheerder.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('plein/plein-beheerder.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, 'Hoofdwedstrijdleider 1000')
 
         # wl
@@ -272,7 +272,7 @@ class TestPlein(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_plein)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('plein/plein-beheerder.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('plein/plein-beheerder.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, 'Wedstrijdleider 1000')
 
         # mo
@@ -281,7 +281,7 @@ class TestPlein(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_plein)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('plein/plein-beheerder.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('plein/plein-beheerder.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, 'Manager Opleidingen')
 
         # mwz
@@ -290,7 +290,7 @@ class TestPlein(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_plein)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('plein/plein-beheerder.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('plein/plein-beheerder.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, 'Manager Wedstrijdzaken')
 
         # mww
@@ -299,7 +299,7 @@ class TestPlein(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_plein)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('plein/plein-beheerder.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('plein/plein-beheerder.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, 'Manager Webwinkel')
 
         # cs
@@ -308,7 +308,7 @@ class TestPlein(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_plein)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('plein/plein-beheerder.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('plein/plein-beheerder.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, 'Commissie Scheidsrechters')
 
         # support
@@ -317,7 +317,7 @@ class TestPlein(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_plein)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('plein/plein-beheerder.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('plein/plein-beheerder.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, 'Support')
 
         # mla
@@ -326,7 +326,7 @@ class TestPlein(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_plein)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('plein/plein-beheerder.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('plein/plein-beheerder.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, 'Manager Ledenadministrateurs')
 
         # la
@@ -335,7 +335,7 @@ class TestPlein(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_plein)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('plein/plein-beheerder.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('plein/plein-beheerder.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, 'Ledenadministrateur')
 
         # geen
@@ -344,7 +344,7 @@ class TestPlein(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_plein)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('plein/plein-bezoeker.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('plein/plein-bezoeker.dtl', 'design/site_layout.dtl'))
 
     def test_sec(self):
         # login als secretaris
@@ -360,7 +360,7 @@ class TestPlein(E2EHelpers, TestCase):
             resp = self.client.get(self.url_plein)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, 'Secretaris vereniging 1000')
-        self.assert_template_used(resp, ('plein/plein-beheerder.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('plein/plein-beheerder.dtl', 'design/site_layout.dtl'))
 
         # sporter
         self.e2e_wisselnaarrol_sporter()
@@ -368,14 +368,14 @@ class TestPlein(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_plein)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('plein/plein-sporter.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('plein/plein-sporter.dtl', 'design/site_layout.dtl'))
 
     def test_handleidingen(self):
         self.e2e_login(self.testdata.account_admin)
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_handleidingen)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('plein/handleidingen.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('plein/handleidingen.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
 
         self.e2e_assert_other_http_commands_not_supported(self.url_handleidingen)

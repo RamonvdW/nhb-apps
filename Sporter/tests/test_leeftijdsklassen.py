@@ -579,7 +579,7 @@ class TestSporterLeeftijdsklassen(E2EHelpers, TestCase):
             resp = self.client.get(self.url_leeftijdsklassen)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('sporter/jouw_leeftijdsklassen.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('sporter/jouw_leeftijdsklassen.dtl', 'design/site_layout.dtl'))
 
         get_sporter_voorkeuren(self.sporter1, mag_database_wijzigen=True)
 
@@ -588,7 +588,7 @@ class TestSporterLeeftijdsklassen(E2EHelpers, TestCase):
             resp = self.client.get(self.url_leeftijdsklassen)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('sporter/jouw_leeftijdsklassen.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('sporter/jouw_leeftijdsklassen.dtl', 'design/site_layout.dtl'))
 
         # met geslacht X, geen keuze gemaakt
         self.sporter1.geslacht = GESLACHT_ANDERS
@@ -601,7 +601,7 @@ class TestSporterLeeftijdsklassen(E2EHelpers, TestCase):
             resp = self.client.get(self.url_leeftijdsklassen)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('sporter/jouw_leeftijdsklassen.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('sporter/jouw_leeftijdsklassen.dtl', 'design/site_layout.dtl'))
 
         self.e2e_assert_other_http_commands_not_supported(self.url_leeftijdsklassen)
 
@@ -612,7 +612,7 @@ class TestSporterLeeftijdsklassen(E2EHelpers, TestCase):
             resp = self.client.get(self.url_leeftijdsgroepen)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('sporter/leeftijdsgroepen.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('sporter/leeftijdsgroepen.dtl', 'design/site_layout.dtl'))
 
         self.e2e_assert_other_http_commands_not_supported(self.url_leeftijdsgroepen)
 
@@ -628,7 +628,7 @@ class TestSporterLeeftijdsklassen(E2EHelpers, TestCase):
             resp = self.client.get(self.url_leeftijdsgroepen)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('sporter/leeftijdsgroepen.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('sporter/leeftijdsgroepen.dtl', 'design/site_layout.dtl'))
 
     def test_gast(self):
         self.e2e_login(self.account_normaal)
@@ -652,7 +652,7 @@ class TestSporterLeeftijdsklassen(E2EHelpers, TestCase):
             resp = self.client.get(self.url_leeftijdsklassen)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('sporter/jouw_leeftijdsklassen.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('sporter/jouw_leeftijdsklassen.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, 'Je moet lid zijn bij de KHSN om deel te nemen aan de bondscompetities')
 
 

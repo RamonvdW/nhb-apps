@@ -1,4 +1,4 @@
-{% extends 'plein/site_layout.dtl' %}
+{% extends 'design/site_layout.dtl' %}
 {% comment %}
                 Copyright (c) 2020-2025 Ramon van der Winkel.
                 All rights reserved.
@@ -500,7 +500,7 @@ In de shoot-off wordt 1 pijl gesloten en beslist de scheidsrechter welke pijl he
         <div class="col s12">
             <!-- algemene informatie over de teamcompetitie -->
             {% url 'Competitie:info-teamcompetitie' as card_url %}
-            {% include 'plein/card_icon.dtl' with title="Teams" text="Uitleg over de teamcompetities." icon="groups" url=card_url %}
+            {% include 'design/card_icon.dtl' with title="Teams" text="Uitleg over de teamcompetities." icon="groups" url=card_url %}
         </div>
     </div>
 

@@ -249,27 +249,27 @@ class TestCompLaagRegioPlanning(E2EHelpers, TestCase):
             resp = self.client.get(self.url_planning_bond % self.deelcomp_bond_18.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagbond/planning-landelijk.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagbond/planning-landelijk.dtl', 'design/site_layout.dtl'))
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_planning_rayon % self.deelcomp_rayon2_18.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagrayon/planning-rayon.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagrayon/planning-rayon.dtl', 'design/site_layout.dtl'))
         # TODO: check geen knoppen 'wedstrijd toevoegen' of 'aanpassen wedstrijd'
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_planning_regio % self.deelcomp_regio101_25.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagregio/planning-regio.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagregio/planning-regio.dtl', 'design/site_layout.dtl'))
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_planning_regio_cluster % (self.deelcomp_regio101_18.pk,
                                                                       self.cluster_101a_18.pk))
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagregio/planning-regio-cluster.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagregio/planning-regio-cluster.dtl', 'design/site_layout.dtl'))
 
     def test_overzicht_bko(self):
         self.e2e_login_and_pass_otp(self.account_bko_18)
@@ -279,27 +279,27 @@ class TestCompLaagRegioPlanning(E2EHelpers, TestCase):
             resp = self.client.get(self.url_planning_bond % self.deelcomp_bond_18.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagbond/planning-landelijk.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagbond/planning-landelijk.dtl', 'design/site_layout.dtl'))
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_planning_rayon % self.deelcomp_rayon2_18.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagrayon/planning-rayon.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagrayon/planning-rayon.dtl', 'design/site_layout.dtl'))
         # TODO: check geen knoppen 'wedstrijd toevoegen' of 'aanpassen wedstrijd'
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_planning_regio % self.deelcomp_regio101_18.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagregio/planning-regio.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagregio/planning-regio.dtl', 'design/site_layout.dtl'))
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_planning_regio_cluster % (self.deelcomp_regio101_18.pk,
                                                                       self.cluster_101a_18.pk))
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagregio/planning-regio-cluster.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagregio/planning-regio-cluster.dtl', 'design/site_layout.dtl'))
 
         # check dat de BKO geen wijzigingen mag maken
         with self.assert_max_queries(20):
@@ -323,20 +323,20 @@ class TestCompLaagRegioPlanning(E2EHelpers, TestCase):
             resp = self.client.get(self.url_planning_rayon % self.deelcomp_rayon2_18.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagrayon/planning-rayon.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagrayon/planning-rayon.dtl', 'design/site_layout.dtl'))
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_planning_regio % self.deelcomp_regio101_18.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagregio/planning-regio.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagregio/planning-regio.dtl', 'design/site_layout.dtl'))
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_planning_regio_cluster % (self.deelcomp_regio101_18.pk,
                                                                       self.cluster_101a_18.pk))
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagregio/planning-regio-cluster.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagregio/planning-regio-cluster.dtl', 'design/site_layout.dtl'))
 
         # check dat de RKO geen wijzigingen mag maken
         with self.assert_max_queries(20):
@@ -364,14 +364,14 @@ class TestCompLaagRegioPlanning(E2EHelpers, TestCase):
             resp = self.client.get(self.url_planning_regio % self.deelcomp_regio101_18.pk)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagregio/planning-regio.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagregio/planning-regio.dtl', 'design/site_layout.dtl'))
 
         url = self.url_planning_regio_cluster % (self.deelcomp_regio101_18.pk, self.cluster_101a_18.pk)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagregio/planning-regio-cluster.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagregio/planning-regio-cluster.dtl', 'design/site_layout.dtl'))
 
         # maak een planning aan
         with self.assert_max_queries(20):
@@ -422,14 +422,14 @@ class TestCompLaagRegioPlanning(E2EHelpers, TestCase):
             resp = self.client.get(self.url_planning_regio % self.deelcomp_regio101_18.pk)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagregio/planning-regio.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagregio/planning-regio.dtl', 'design/site_layout.dtl'))
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_planning_regio_cluster % (self.deelcomp_regio101_18.pk,
                                                                       self.cluster_101a_18.pk))
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagregio/planning-regio-cluster.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagregio/planning-regio-cluster.dtl', 'design/site_layout.dtl'))
 
         # check dat de HWL geen wijzigingen mag maken
         with self.assert_max_queries(20):
@@ -536,7 +536,7 @@ class TestCompLaagRegioPlanning(E2EHelpers, TestCase):
             resp = self.client.get(self.url_planning_regio_ronde % ronde_pk)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagregio/planning-regio-ronde.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagregio/planning-regio-ronde.dtl', 'design/site_layout.dtl'))
 
         # pas de instellingen aan
         with self.assert_max_queries(20):
@@ -625,7 +625,7 @@ class TestCompLaagRegioPlanning(E2EHelpers, TestCase):
             resp = self.client.get(self.url_wijzig_wedstrijd % match_pk)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagregio/wijzig-wedstrijd.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagregio/wijzig-wedstrijd.dtl', 'design/site_layout.dtl'))
 
         # niet bestaande wedstrijd
         with self.assert_max_queries(20):
@@ -644,7 +644,7 @@ class TestCompLaagRegioPlanning(E2EHelpers, TestCase):
             resp = self.client.get(self.url_planning_regio_ronde % ronde_pk)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagregio/planning-regio-ronde.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagregio/planning-regio-ronde.dtl', 'design/site_layout.dtl'))
 
         # probeer een wijziging te doen als HWL
         with self.assert_max_queries(20):
@@ -675,7 +675,7 @@ class TestCompLaagRegioPlanning(E2EHelpers, TestCase):
             resp = self.client.get(self.url_planning_regio_ronde % ronde_pk)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagregio/planning-regio-ronde.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagregio/planning-regio-ronde.dtl', 'design/site_layout.dtl'))
 
         # pas de instellingen aan
         with self.assert_max_queries(20):
@@ -748,7 +748,7 @@ class TestCompLaagRegioPlanning(E2EHelpers, TestCase):
             resp = self.client.get(self.url_wijzig_wedstrijd % match_pk)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagregio/wijzig-wedstrijd.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagregio/wijzig-wedstrijd.dtl', 'design/site_layout.dtl'))
 
     def test_rcl_maakt_planning_25_methode1(self):
         self.e2e_login_and_pass_otp(self.account_rcl101_25)
@@ -766,7 +766,7 @@ class TestCompLaagRegioPlanning(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagregio/planning-regio-methode1.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagregio/planning-regio-methode1.dtl', 'design/site_layout.dtl'))
         self.assertEqual(RegiocompetitieRonde.objects.filter(regiocompetitie=self.deelcomp_regio101_25).count(), 0)
 
         # doe een POST om de eerste ronde aan te maken
@@ -786,7 +786,7 @@ class TestCompLaagRegioPlanning(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagregio/planning-regio-methode1.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagregio/planning-regio-methode1.dtl', 'design/site_layout.dtl'))
 
         ronde_pk = RegiocompetitieRonde.objects.filter(regiocompetitie=self.deelcomp_regio101_25)[0].pk
 
@@ -795,7 +795,7 @@ class TestCompLaagRegioPlanning(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagregio/planning-regio-methode1.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagregio/planning-regio-methode1.dtl', 'design/site_layout.dtl'))
 
         # haal de ronde planning op
         url_ronde = self.url_planning_regio_ronde_methode1 % ronde_pk
@@ -803,7 +803,7 @@ class TestCompLaagRegioPlanning(E2EHelpers, TestCase):
             resp = self.client.get(url_ronde)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagregio/planning-regio-ronde-methode1.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagregio/planning-regio-ronde-methode1.dtl', 'design/site_layout.dtl'))
 
         # maak een wedstrijd aan
         self.assertEqual(CompetitieMatch.objects.count(), 0)
@@ -826,7 +826,7 @@ class TestCompLaagRegioPlanning(E2EHelpers, TestCase):
             resp = self.client.get(url_wed)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagregio/wijzig-wedstrijd.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagregio/wijzig-wedstrijd.dtl', 'design/site_layout.dtl'))
 
         # wijzig de datum van deze wedstrijd
         with self.assert_max_queries(20):
@@ -878,7 +878,7 @@ class TestCompLaagRegioPlanning(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagregio/planning-regio-methode1.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagregio/planning-regio-methode1.dtl', 'design/site_layout.dtl'))
 
         # doe een POST om de eerste ronde aan te maken
         self.assertEqual(0, RegiocompetitieRonde.objects.filter(regiocompetitie=self.deelcomp_regio101_18).count())
@@ -905,7 +905,7 @@ class TestCompLaagRegioPlanning(E2EHelpers, TestCase):
             resp = self.client.get(url_wed)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagregio/wijzig-wedstrijd.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagregio/wijzig-wedstrijd.dtl', 'design/site_layout.dtl'))
 
     def test_methode1_bad(self):
         # anon
@@ -993,7 +993,7 @@ class TestCompLaagRegioPlanning(E2EHelpers, TestCase):
             resp = self.client.get(self.url_planning_regio_ronde % ronde_pk)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagregio/planning-regio-ronde.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagregio/planning-regio-ronde.dtl', 'design/site_layout.dtl'))
 
         # pas de instellingen van de ronde (van een cluster) aan
         with self.assert_max_queries(20):
@@ -1018,7 +1018,7 @@ class TestCompLaagRegioPlanning(E2EHelpers, TestCase):
             resp = self.client.get(self.url_wijzig_wedstrijd % match_pk)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagregio/wijzig-wedstrijd.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagregio/wijzig-wedstrijd.dtl', 'design/site_layout.dtl'))
 
         # stop een vereniging in het cluster
         self.ver_101.clusters.add(self.cluster_101a_18)
@@ -1446,7 +1446,7 @@ class TestCompLaagRegioPlanning(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         html = self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagregio/planning-regio.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagregio/planning-regio.dtl', 'design/site_layout.dtl'))
 
         # zoek alle weeknummers op
         parts = list()
@@ -1540,7 +1540,7 @@ class TestCompLaagRegioPlanning(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagregio/rcl-afsluiten-regiocomp.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagregio/rcl-afsluiten-regiocomp.dtl', 'design/site_layout.dtl'))
 
         # probeer afsluiten
         with self.assert_max_queries(20):
@@ -1554,7 +1554,7 @@ class TestCompLaagRegioPlanning(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagregio/rcl-afsluiten-regiocomp.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagregio/rcl-afsluiten-regiocomp.dtl', 'design/site_layout.dtl'))
         hrefs = self.extract_all_urls(resp, skip_menu=True)
         self.assertGreater(len(hrefs), 0)
         self.assertEqual(hrefs[0], url)
@@ -1573,7 +1573,7 @@ class TestCompLaagRegioPlanning(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagregio/rcl-afsluiten-regiocomp.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagregio/rcl-afsluiten-regiocomp.dtl', 'design/site_layout.dtl'))
 
         # nogmaals afsluiten doet niets
         with self.assert_max_queries(20):

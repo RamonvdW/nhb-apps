@@ -1,4 +1,4 @@
-{% extends 'plein/site_layout.dtl' %}
+{% extends 'design/site_layout.dtl' %}
 {% comment %}
                 Copyright (c) 2021-2025 Ramon van der Winkel.
                 All rights reserved.
@@ -37,7 +37,7 @@
         <div class="row-sv-blauw">
             <div class="col s12">
                 {% url 'Sporter:profiel' as card_url %}
-                {% include 'plein/card_icon.dtl' with title="Mijn pagina" text="Inschrijven voor de bondscompetities, voorkeuren en informatie toegespitst op jou." icon="account_box" url=card_url %}
+                {% include 'design/card_icon.dtl' with title="Mijn pagina" text="Inschrijven voor de bondscompetities, voorkeuren en informatie toegespitst op jou." icon="account_box" url=card_url %}
             </div>
         </div>
 
@@ -62,14 +62,14 @@
                 {% endif %}
 
                 {% if obj.is_volgend_seizoen %}
-                    {% include 'plein/card_logo.dtl' with title=obj.titel text=obj.text img_src=obj.img_src img_height=63 url=obj.card_url img_style="filter: grayscale(100%)" %}
+                    {% include 'design/card_logo.dtl' with title=obj.titel text=obj.text img_src=obj.img_src img_height=63 url=obj.card_url img_style="filter: grayscale(100%)" %}
                 {% else %}
-                    {% include 'plein/card_logo.dtl' with title=obj.titel text=obj.text img_src=obj.img_src img_height=63 url=obj.card_url %}
+                    {% include 'design/card_logo.dtl' with title=obj.titel text=obj.text img_src=obj.img_src img_height=63 url=obj.card_url %}
                 {% endif %}
             {% endfor %}
 
             {% url 'HistComp:top' as card_url %}
-            {% include 'plein/card_icon.dtl' with title="Uitslag vorig seizoen" text="De uitslag van eerdere seizoenen is hier in te zien." icon="undo" url=card_url %}
+            {% include 'design/card_icon.dtl' with title="Uitslag vorig seizoen" text="De uitslag van eerdere seizoenen is hier in te zien." icon="undo" url=card_url %}
         </div>
     </div>
 
@@ -88,11 +88,11 @@
             <div class="col s12">
 
                 {% if url_wf_toestemming_drive %}
-                    {% include 'plein/card_icon.dtl' with title="Toestemming" text="Geef toestemming tot jouw Google Drive voor de RK/BK wedstrijdformulieren." icon="add_to_drive" url=url_wf_toestemming_drive %}
+                    {% include 'design/card_icon.dtl' with title="Toestemming" text="Geef toestemming tot jouw Google Drive voor de RK/BK wedstrijdformulieren." icon="add_to_drive" url=url_wf_toestemming_drive %}
                 {% endif %}
 
                 {% if url_wf_aanmaken %}
-                    {% include 'plein/card_icon.dtl' with title="Aanmaken" text="Start aanmaken van alle RK/BK wedstrijdformulieren in de Google Drive." icon="add_to_drive" url=url_wf_aanmaken %}
+                    {% include 'design/card_icon.dtl' with title="Aanmaken" text="Start aanmaken van alle RK/BK wedstrijdformulieren in de Google Drive." icon="add_to_drive" url=url_wf_aanmaken %}
                 {% endif %}
             </div>
         </div>
@@ -114,20 +114,20 @@
             <div class="col s12">
                 <!-- competities opstarten -->
                 {% if url_seizoen_opstarten %}
-                    {% include 'plein/card_icon.dtl' with title="Start competitie" text="Instellingen voor seizoen "|add:nieuwe_seizoen|add:" controleren en nieuwe competities aanmaken." icon="playlist_add" url=url_seizoen_opstarten %}
+                    {% include 'design/card_icon.dtl' with title="Start competitie" text="Instellingen voor seizoen "|add:nieuwe_seizoen|add:" controleren en nieuwe competities aanmaken." icon="playlist_add" url=url_seizoen_opstarten %}
                 {% endif %}
 
                 {% if url_seizoen_afsluiten %}
-                    {% include 'plein/card_icon.dtl' with title="Seizoen afsluiten" text="Sluit het competitie seizoen af (Indoor + 25m1pijl)." icon="waving_hand" url=url_seizoen_afsluiten %}
+                    {% include 'design/card_icon.dtl' with title="Seizoen afsluiten" text="Sluit het competitie seizoen af (Indoor + 25m1pijl)." icon="waving_hand" url=url_seizoen_afsluiten %}
                 {% endif %}
 
                 {% url 'Functie:lijst-beheerders' as card_url %}
-                {% include 'plein/card_icon.dtl' with title="Beheerders" text="Toon wie beheerders van de bondscompetitie zijn, koppel andere beheerders of wijzig contactgegevens." icon="face" url=card_url %}
+                {% include 'design/card_icon.dtl' with title="Beheerders" text="Toon wie beheerders van de bondscompetitie zijn, koppel andere beheerders of wijzig contactgegevens." icon="face" url=card_url %}
 
                 {% url 'Vereniging:lijst' as card_url %}
-                {% include 'plein/card_icon.dtl' with title="Verenigingen" text=tekst_verenigingen icon="share_location" url=card_url %}
+                {% include 'design/card_icon.dtl' with title="Verenigingen" text=tekst_verenigingen icon="share_location" url=card_url %}
             
-                {% include 'plein/card_icon.dtl' with title="Statistiek" text="Toon statistiek over de inschrijvingen." icon="query_stats" url=url_statistiek %}
+                {% include 'design/card_icon.dtl' with title="Statistiek" text="Toon statistiek over de inschrijvingen." icon="query_stats" url=url_statistiek %}
             </div>
         </div>
 
@@ -148,21 +148,21 @@
             <!-- toon en koppel beheerders -->
             {% if toon_beheerders_algemeen %}
                 {% url 'Functie:lijst-beheerders' as card_url %}
-                {% include 'plein/card_icon.dtl' with title="Beheerders" text="Toon wie beheerders van de bondscompetitie zijn, koppel andere beheerders of wijzig contactgegevens." icon="face" url=card_url %}
+                {% include 'design/card_icon.dtl' with title="Beheerders" text="Toon wie beheerders van de bondscompetitie zijn, koppel andere beheerders of wijzig contactgegevens." icon="face" url=card_url %}
             {% endif %}
 
             <!-- algemene informatie over de competities -->
             {% url 'Competitie:info-competitie' as card_url %}
-            {% include 'plein/card_icon.dtl' with title="Informatie" text="Algemene informatie over de competities." icon="info" url=card_url %}
+            {% include 'design/card_icon.dtl' with title="Informatie" text="Algemene informatie over de competities." icon="info" url=card_url %}
 
             <!-- algemene informatie over de teamcompetitie -->
             {% url 'Competitie:info-teamcompetitie' as card_url %}
-            {% include 'plein/card_icon.dtl' with title="Teams" text="Uitleg over de teamcompetities." icon="groups" url=card_url %}
+            {% include 'design/card_icon.dtl' with title="Teams" text="Uitleg over de teamcompetities." icon="groups" url=card_url %}
 
             <!-- leeftijdsgroepen -->
             <!-- let op: kopie van dit kaartje op Wedstrijden / wedstrijd-details -->
             {% url 'Sporter:leeftijdsgroepen' as card_url %}
-            {% include 'plein/card_icon.dtl' with title="Leeftijdsgroepen" text="Algemene informatie over de groepering op leeftijd, voor wedstrijden en de competities." icon="star" url=card_url %}
+            {% include 'design/card_icon.dtl' with title="Leeftijdsgroepen" text="Algemene informatie over de groepering op leeftijd, voor wedstrijden en de competities." icon="star" url=card_url %}
         </div>
     </div>
 

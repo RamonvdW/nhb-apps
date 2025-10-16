@@ -165,14 +165,14 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('functie/koppel-beheerders.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('functie/koppel-beheerders.dtl', 'design/site_layout.dtl'))
 
         # probeer de zoekfunctie
         with self.assert_max_queries(20):
             resp = self.client.get(url + '?zoekterm=beheerder')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('functie/koppel-beheerders.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('functie/koppel-beheerders.dtl', 'design/site_layout.dtl'))
 
         # controleer aanwezigheid van toevoeg-knoppen
         self.assertContains(resp, '</i>Koppel</button>', count=2)
@@ -188,7 +188,7 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('functie/koppel-beheerders.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('functie/koppel-beheerders.dtl', 'design/site_layout.dtl'))
 
         # controleer aanwezigheid van verwijder-knoppen
         self.assertContains(resp, '</i>Verwijder</a>', count=2)
@@ -198,7 +198,7 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
             resp = self.client.get(url + '?zoekterm=xxxx')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('functie/koppel-beheerders.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('functie/koppel-beheerders.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, 'Niemand gevonden')
 
         self.e2e_assert_other_http_commands_not_supported(url)
@@ -216,7 +216,7 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
         with self.assert_max_queries(23):
             resp = self.client.post(self.url_activeer_functie % self.functie_hwl.pk, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('vereniging/overzicht.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('vereniging/overzicht.dtl', 'design/site_layout.dtl'))
 
         # probeer de zoek functie: zoek 'er' --> vind 'beheerder' en 'ander'
         url = self.url_wijzig % self.functie_hwl.pk
@@ -224,7 +224,7 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
             resp = self.client.get(url + '?zoekterm=er', follow=False)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('functie/koppel-beheerders.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('functie/koppel-beheerders.dtl', 'design/site_layout.dtl'))
 
         # controleer aanwezigheid van toevoeg-knoppen
         self.assertContains(resp, '</i>Koppel</button>', count=2)         # 2 leden van de vereniging
@@ -252,7 +252,7 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
             resp = self.client.post(url, {'add': self.account_beh1.pk}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('functie/koppel-beheerders.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('functie/koppel-beheerders.dtl', 'design/site_layout.dtl'))
         self.assertEqual(self.functie_bko.accounts.count(), 1)
 
         # er moet nu een mail in de MailQueue staan met een single-use url
@@ -459,7 +459,7 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
             resp = self.client.get(self.url_beheerders)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('functie/lijst-beheerders.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('functie/lijst-beheerders.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, 'relevante functies en de beheerders')    # reduced list for HWL
         # TODO: check urls
 
@@ -468,7 +468,7 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
             resp = self.client.get(self.url_beheerders_vereniging)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('functie/lijst-beheerders-vereniging.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('functie/lijst-beheerders-vereniging.dtl', 'design/site_layout.dtl'))
 
         # HWL koppelt een lid uit de eigen gelederen
         url = self.url_wijzig_ontvang % self.functie_hwl.pk
@@ -483,7 +483,7 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
             resp = self.client.get(self.url_beheerders_vereniging)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('functie/lijst-beheerders-vereniging.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('functie/lijst-beheerders-vereniging.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, self.account_beh2.volledige_naam())
 
         # poog een lid te koppelen dat niet lid is van de vereniging
@@ -542,7 +542,7 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
             resp = self.client.get(self.url_beheerders_vereniging)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('functie/lijst-beheerders-vereniging.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('functie/lijst-beheerders-vereniging.dtl', 'design/site_layout.dtl'))
         urls = self.extract_all_urls(resp, skip_menu=True)
         # verwachting: 1x koppelen beheerders, 1x wijzig email
         # print('SEC urls: %s' % repr(urls))

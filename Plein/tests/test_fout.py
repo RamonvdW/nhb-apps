@@ -47,14 +47,14 @@ class TestPleinFout(E2EHelpers, TestCase):
 
         resp = self.client.get(self.url_speciale_pagina % '403a')
         self.assertEqual(resp.status_code, 200)
-        self.assert_template_used(resp, ('plein/fout_403.dtl', 'plein/site_layout_minimaal.dtl'))
+        self.assert_template_used(resp, ('plein/fout_403.dtl', 'design/site_layout_minimaal.dtl'))
         self.assert_html_ok(resp)
         self.assertContains(resp, 'property="mh:rol"')
         self.assertContains(resp, 'content="sporter"')
 
         resp = self.client.get(self.url_speciale_pagina % '403b')
         self.assertEqual(resp.status_code, 200)
-        self.assert_template_used(resp, ('plein/fout_403.dtl', 'plein/site_layout_minimaal.dtl'))
+        self.assert_template_used(resp, ('plein/fout_403.dtl', 'design/site_layout_minimaal.dtl'))
         self.assert_html_ok(resp)
 
         # rol
@@ -77,7 +77,7 @@ class TestPleinFout(E2EHelpers, TestCase):
         # niet ingelogd
         resp = self.client.get(self.url_speciale_pagina % '404a')
         self.assertEqual(resp.status_code, 200)
-        self.assert_template_used(resp, ('plein/fout_404.dtl', 'plein/site_layout_minimaal.dtl'))
+        self.assert_template_used(resp, ('plein/fout_404.dtl', 'design/site_layout_minimaal.dtl'))
         self.assert_html_ok(resp)
         self.assertContains(resp, 'property="mh:rol"')
         self.assertContains(resp, 'content="geen"')
@@ -85,17 +85,17 @@ class TestPleinFout(E2EHelpers, TestCase):
 
         resp = self.client.get(self.url_speciale_pagina % '404b')
         self.assertEqual(resp.status_code, 200)
-        self.assert_template_used(resp, ('plein/fout_404.dtl', 'plein/site_layout_minimaal.dtl'))
+        self.assert_template_used(resp, ('plein/fout_404.dtl', 'design/site_layout_minimaal.dtl'))
         self.assert_html_ok(resp)
 
         resp = self.client.get(self.url_speciale_pagina % '404c')
         self.assertEqual(resp.status_code, 200)
-        self.assert_template_used(resp, ('plein/fout_404.dtl', 'plein/site_layout_minimaal.dtl'))
+        self.assert_template_used(resp, ('plein/fout_404.dtl', 'design/site_layout_minimaal.dtl'))
 
         resp = self.client.get(self.url_speciale_pagina % '42')
         self.assertEqual(resp.status_code, 200)
         self.assertContains(resp, 'Niet ondersteunde code')
-        self.assert_template_used(resp, ('plein/fout_404.dtl', 'plein/site_layout_minimaal.dtl'))
+        self.assert_template_used(resp, ('plein/fout_404.dtl', 'design/site_layout_minimaal.dtl'))
 
         resp = self.client.get('/plein/seems-part-of-site/')
         self.assertEqual(resp.status_code, 200)
@@ -141,7 +141,7 @@ class TestPleinFout(E2EHelpers, TestCase):
         self.assertEqual(0, MailQueue.objects.count())
         resp = self.client.get(self.url_speciale_pagina % '500')
         self.assertEqual(resp.status_code, 200)
-        self.assert_template_used(resp, ('plein/fout_500.dtl', 'plein/site_layout_minimaal.dtl'))
+        self.assert_template_used(resp, ('plein/fout_500.dtl', 'design/site_layout_minimaal.dtl'))
         self.assert_html_ok(resp)
         self.assertEqual(1, MailQueue.objects.count())
 

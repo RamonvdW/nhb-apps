@@ -148,7 +148,7 @@ class TestOverigActiviteit(E2EHelpers, TestCase):
             resp = self.client.get(self.url_activiteit)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('overig/activiteit.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('overig/activiteit.dtl', 'design/site_layout.dtl'))
 
         self.e2e_assert_other_http_commands_not_supported(self.url_activiteit)
 
@@ -162,56 +162,56 @@ class TestOverigActiviteit(E2EHelpers, TestCase):
             resp = self.client.get(self.url_activiteit, {'zoekterm': 'x'})
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('overig/activiteit.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('overig/activiteit.dtl', 'design/site_layout.dtl'))
 
         # erg lange zoekterm
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_activiteit, {'zoekterm': 'ramon' * 50})
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('overig/activiteit.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('overig/activiteit.dtl', 'design/site_layout.dtl'))
 
         # zoek op naam, 0 hits want geen sporter
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_activiteit, {'zoekterm': 'normaal'})
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('overig/activiteit.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('overig/activiteit.dtl', 'design/site_layout.dtl'))
 
         # zoek op naam, 1 hit
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_activiteit, {'zoekterm': 'norm'})
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('overig/activiteit.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('overig/activiteit.dtl', 'design/site_layout.dtl'))
 
         # zoek op naam, 1 hit
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_activiteit, {'zoekterm': 'norm'})
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('overig/activiteit.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('overig/activiteit.dtl', 'design/site_layout.dtl'))
 
         # zoek op naam --> 2 hits
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_activiteit, {'zoekterm': 'sporter'})
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('overig/activiteit.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('overig/activiteit.dtl', 'design/site_layout.dtl'))
 
         # status: actief vanaf
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_activiteit, {'zoekterm': '100003'})
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('overig/activiteit.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('overig/activiteit.dtl', 'design/site_layout.dtl'))
 
         # status: verlopen
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_activiteit, {'zoekterm': '100004'})
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('overig/activiteit.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('overig/activiteit.dtl', 'design/site_layout.dtl'))
         urls = self.extract_all_urls(resp, skip_menu=True)
         self.assertNotIn(self.url_bondspas % '100004', urls)
 
@@ -220,7 +220,7 @@ class TestOverigActiviteit(E2EHelpers, TestCase):
             resp = self.client.get(self.url_activiteit, {'zoekterm': '100005'})
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('overig/activiteit.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('overig/activiteit.dtl', 'design/site_layout.dtl'))
         urls = self.extract_all_urls(resp, skip_menu=True)
         self.assertNotIn(self.url_bondspas % '100005', urls)
 
@@ -241,7 +241,7 @@ class TestOverigActiviteit(E2EHelpers, TestCase):
             resp = self.client.get(self.url_activiteit, {'zoekterm': '100001'})
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('overig/activiteit.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('overig/activiteit.dtl', 'design/site_layout.dtl'))
 
         # maak nog wat wijzigingen
         functie = maak_functie('Test functie', 'HWL')
@@ -252,7 +252,7 @@ class TestOverigActiviteit(E2EHelpers, TestCase):
             resp = self.client.get(self.url_activiteit, {'zoekterm': '100001'})
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('overig/activiteit.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('overig/activiteit.dtl', 'design/site_layout.dtl'))
 
         vhpg = self.account_100001.vhpg
         vhpg.acceptatie_datum -= datetime.timedelta(days=365)
@@ -263,7 +263,7 @@ class TestOverigActiviteit(E2EHelpers, TestCase):
             resp = self.client.get(self.url_activiteit, {'zoekterm': 'sporter'})
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('overig/activiteit.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('overig/activiteit.dtl', 'design/site_layout.dtl'))
 
         # maak nog wat wijzigingen
         vhpg.delete()
@@ -273,7 +273,7 @@ class TestOverigActiviteit(E2EHelpers, TestCase):
             resp = self.client.get(self.url_activiteit, {'zoekterm': '100001'})
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('overig/activiteit.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('overig/activiteit.dtl', 'design/site_layout.dtl'))
 
     def test_hulp(self):
         self.e2e_login_and_pass_otp(self.testdata.account_admin)
@@ -290,7 +290,7 @@ class TestOverigActiviteit(E2EHelpers, TestCase):
             resp = self.client.get(self.url_activiteit)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('overig/activiteit.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('overig/activiteit.dtl', 'design/site_layout.dtl'))
 
         self.account_100001.otp_is_actief = False
         self.account_100001.save()
@@ -299,7 +299,7 @@ class TestOverigActiviteit(E2EHelpers, TestCase):
             resp = self.client.get(self.url_activiteit)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('overig/activiteit.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('overig/activiteit.dtl', 'design/site_layout.dtl'))
 
         # maak dat het account geen hulp nodig heeft: 2FA gekoppeld en VHPG geaccepteerd
         self.account_100001.otp_is_actief = True
@@ -311,7 +311,7 @@ class TestOverigActiviteit(E2EHelpers, TestCase):
             resp = self.client.get(self.url_activiteit)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('overig/activiteit.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('overig/activiteit.dtl', 'design/site_layout.dtl'))
 
     def test_alle_rollen(self):
         # controleer dat de rollen van alle mogelijke functies weergegeven kunnen worden
@@ -361,7 +361,7 @@ class TestOverigActiviteit(E2EHelpers, TestCase):
             resp = self.client.get(self.url_activiteit)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('overig/activiteit.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('overig/activiteit.dtl', 'design/site_layout.dtl'))
 
     def test_loskoppelen(self):
         self.account_normaal.otp_is_actief = True

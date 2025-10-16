@@ -1,5 +1,5 @@
 {% comment %}
-                Copyright (c) 2020-2024 Ramon van der Winkel.
+                Copyright (c) 2020-2025 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -9,17 +9,17 @@
 
 
 <!-- hoofd site -->
-{% static 'plein/logo_khsn_192x192.webp' as img_src %}
-{% include 'plein/card_logo.dtl' with title="Handboogsport NL" text="Hoofdwebsite van de KHSN met informatie, publicaties en nieuws." img_src=img_src img_height=75 img_width=75 url="https://www.handboogsport.nl" extern_open=True %}
+{% static 'design/logo_khsn_192x192.webp' as img_src %}
+{% include 'design/card_logo.dtl' with title="Handboogsport NL" text="Hoofdwebsite van de KHSN met informatie, publicaties en nieuws." img_src=img_src img_height=75 img_width=75 url="https://www.handboogsport.nl" extern_open=True %}
 
 
 <!-- Lowlands Archery Series -->
 {% static 'plein/logo_lowlands_109x65.webp' as img_src %}
-{% include 'plein/card_logo.dtl' with title="Lowlands Series" text="Wedstrijden volgens internationaal format,<br>met finales en prijzengeld." img_src=img_src img_height=65 img_width=109 img_style="margin:5px" url="https://www.handboogsport.nl/lowlands-shootout/" extern_open=True %}
+{% include 'design/card_logo.dtl' with title="Lowlands Series" text="Wedstrijden volgens internationaal format,<br>met finales en prijzengeld." img_src=img_src img_height=65 img_width=109 img_style="margin:5px" url="https://www.handboogsport.nl/lowlands-shootout/" extern_open=True %}
 
 
 <!-- Zoek een vereniging -->
-{% include 'plein/card_icon.dtl' with title="Waar?" text="Zoek een vereniging bij jou in de buurt." icon_font_size="75px" icon="travel_explore" url="https://www.handboogsport.nl/zoek-je-vereniging/" extern_open=True %}
+{% include 'design/card_icon.dtl' with title="Waar?" text="Zoek een vereniging bij jou in de buurt." icon_font_size="75px" icon="travel_explore" url="https://www.handboogsport.nl/zoek-je-vereniging/" extern_open=True %}
 
 
 <!-- end of file -->

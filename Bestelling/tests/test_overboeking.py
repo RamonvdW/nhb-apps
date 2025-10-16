@@ -128,7 +128,7 @@ class TestBestellingOverboeking(E2EHelpers, TestCase):
             resp = self.client.get(self.url_overboeking_ontvangen)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('bestelling/overboeking-ontvangen.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('bestelling/overboeking-ontvangen.dtl', 'design/site_layout.dtl'))
 
         self.e2e_assert_other_http_commands_not_supported(self.url_overboeking_ontvangen, post=False)
 
@@ -137,7 +137,7 @@ class TestBestellingOverboeking(E2EHelpers, TestCase):
             resp = self.client.post(self.url_overboeking_ontvangen)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('bestelling/overboeking-ontvangen.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('bestelling/overboeking-ontvangen.dtl', 'design/site_layout.dtl'))
 
         # bedrag, maar geen bestelnummer
         with self.assert_max_queries(20):
@@ -145,7 +145,7 @@ class TestBestellingOverboeking(E2EHelpers, TestCase):
                                     {'bedrag': '1'})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('bestelling/overboeking-ontvangen.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('bestelling/overboeking-ontvangen.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, 'Bestelnummer wordt niet herkend')
 
         # bestelnummer, maar geen bedrag
@@ -154,7 +154,7 @@ class TestBestellingOverboeking(E2EHelpers, TestCase):
                                     {'kenmerk': '1234'})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('bestelling/overboeking-ontvangen.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('bestelling/overboeking-ontvangen.dtl', 'design/site_layout.dtl'))
         self.assertNotContains(resp, 'Bestelnummer wordt niet herkend')
         self.assertContains(resp, 'Verwacht bedrag:')
 
@@ -163,7 +163,7 @@ class TestBestellingOverboeking(E2EHelpers, TestCase):
             resp = self.client.post(self.url_overboeking_ontvangen, {'kenmerk': '1234', 'bedrag': '1', 'snel': '1'})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('bestelling/overboeking-ontvangen.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('bestelling/overboeking-ontvangen.dtl', 'design/site_layout.dtl'))
         self.assertNotContains(resp, 'Bestelnummer wordt niet herkend')
         self.assertContains(resp, 'Verwacht bedrag:')
 
@@ -175,7 +175,7 @@ class TestBestellingOverboeking(E2EHelpers, TestCase):
                                     {'kenmerk': '1234', 'bedrag': '10,50', 'actie': 'check'})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('bestelling/overboeking-ontvangen.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('bestelling/overboeking-ontvangen.dtl', 'design/site_layout.dtl'))
 
         # juiste informatie en bevestiging van de gebruiker
         self.assertEqual(self.bestelling.status, BESTELLING_STATUS_BETALING_ACTIEF)
@@ -185,14 +185,14 @@ class TestBestellingOverboeking(E2EHelpers, TestCase):
                                     {'kenmerk': '1234', 'bedrag': '10,50', 'actie': 'registreer', 'snel': '1'})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('bestelling/overboeking-ontvangen.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('bestelling/overboeking-ontvangen.dtl', 'design/site_layout.dtl'))
 
         # coverage: 2e verzoek voor dezelfde mutatie
         resp = self.client.post(self.url_overboeking_ontvangen,
                                 {'kenmerk': '1234', 'bedrag': '10,50', 'actie': 'registreer', 'snel': '1'})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('bestelling/overboeking-ontvangen.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('bestelling/overboeking-ontvangen.dtl', 'design/site_layout.dtl'))
 
         self.assertEqual(1, BestellingMutatie.objects.count())
         f1, f2 = self.verwerk_bestel_mutaties()
@@ -210,7 +210,7 @@ class TestBestellingOverboeking(E2EHelpers, TestCase):
                                     {'kenmerk': '1234', 'bedrag': '1'})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('bestelling/overboeking-ontvangen.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('bestelling/overboeking-ontvangen.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, 'Betaling is al geregistreerd')
 
         # toch doordrukken
@@ -226,7 +226,7 @@ class TestBestellingOverboeking(E2EHelpers, TestCase):
                                     {'kenmerk': '1234', 'bedrag': '1'})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('bestelling/overboeking-ontvangen.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('bestelling/overboeking-ontvangen.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, 'Bestelling is geannuleerd')
 
         # bestelling voor andere vereniging
@@ -237,7 +237,7 @@ class TestBestellingOverboeking(E2EHelpers, TestCase):
                                     {'kenmerk': '1234', 'bedrag': '1'})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('bestelling/overboeking-ontvangen.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('bestelling/overboeking-ontvangen.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, 'Bestelnummer is niet voor jullie vereniging')
 
     def test_mww(self):
@@ -248,7 +248,7 @@ class TestBestellingOverboeking(E2EHelpers, TestCase):
             resp = self.client.get(self.url_overboeking_ontvangen)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('bestelling/overboeking-ontvangen.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('bestelling/overboeking-ontvangen.dtl', 'design/site_layout.dtl'))
 
         # juiste informatie en bevestiging van de gebruiker
         self.assertEqual(self.bestelling2.status, BESTELLING_STATUS_BETALING_ACTIEF)
@@ -259,7 +259,7 @@ class TestBestellingOverboeking(E2EHelpers, TestCase):
                                      'actie': 'registreer', 'snel': '1'})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('bestelling/overboeking-ontvangen.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('bestelling/overboeking-ontvangen.dtl', 'design/site_layout.dtl'))
 
         self.assertEqual(1, BestellingMutatie.objects.count())
         f1, f2 = self.verwerk_bestel_mutaties()
@@ -287,7 +287,7 @@ class TestBestellingOverboeking(E2EHelpers, TestCase):
                                      'actie': 'registreer', 'snel': '1'})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('bestelling/overboeking-ontvangen.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('bestelling/overboeking-ontvangen.dtl', 'design/site_layout.dtl'))
 
         self.assertContains(resp, 'Afwijkend bedrag')
         self.assertEqual(0, BestellingMutatie.objects.count())
@@ -300,7 +300,7 @@ class TestBestellingOverboeking(E2EHelpers, TestCase):
                                      'actie': 'registreer', 'accept_bedrag': 'ja', 'snel': '1'})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('bestelling/overboeking-ontvangen.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('bestelling/overboeking-ontvangen.dtl', 'design/site_layout.dtl'))
 
         self.assertEqual(1, BestellingMutatie.objects.count())
         f1, f2 = self.verwerk_bestel_mutaties()

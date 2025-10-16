@@ -1,4 +1,4 @@
-{% extends 'plein/site_layout.dtl' %}
+{% extends 'design/site_layout.dtl' %}
 {% comment %}
                 Copyright (c) 2019-2025 Ramon van der Winkel.
                 All rights reserved.
@@ -63,20 +63,20 @@
         <div class="row-sv-blauw">
             <div class="col s12">
                 {% if show_otp_koppelen %}
-                    {% include 'plein/card_icon.dtl' with title="Voor beheerders" text="Instructies voor beheerders: uitleg over de tweede factor en wissel-van-rol." icon="article" extern_open=True url=url_handleiding_beheerders %}
+                    {% include 'design/card_icon.dtl' with title="Voor beheerders" text="Instructies voor beheerders: uitleg over de tweede factor en wissel-van-rol." icon="article" extern_open=True url=url_handleiding_beheerders %}
 
                     {% url 'Account:otp-koppelen-stap1' as card_url %}
-                    {% include 'plein/card_icon.dtl' with title="Koppel 2e factor" text="Verplicht voor gebruikers met toegang tot persoonsgegevens." icon="lock" url=card_url %}
+                    {% include 'design/card_icon.dtl' with title="Koppel 2e factor" text="Verplicht voor gebruikers met toegang tot persoonsgegevens." icon="lock" url=card_url %}
                 {% endif %}
 
                 {% if show_vhpg %}
                     {% url 'Functie:vhpg-acceptatie' as card_url %}
-                    {% include 'plein/card_icon.dtl' with title="Persoonsgegevens" text="Maak afspraken over het omgaan met persoonsgegevens." icon="gavel" url=card_url %}
+                    {% include 'design/card_icon.dtl' with title="Persoonsgegevens" text="Maak afspraken over het omgaan met persoonsgegevens." icon="gavel" url=card_url %}
                 {% endif %}
 
                 {% if show_otp_controle %}
                     {% url 'Account:otp-controle' as card_url %}
-                    {% include 'plein/card_icon.dtl' with title="Controle 2e factor" text="Voer je controle code in." icon="lock" url=card_url %}
+                    {% include 'design/card_icon.dtl' with title="Controle 2e factor" text="Voer je controle code in." icon="lock" url=card_url %}
                 {% endif %}
             </div>
         </div>
@@ -207,7 +207,7 @@
 
                 <!-- kaartjes -->
                 {% if url_login_as %}
-                    {% include 'plein/card_icon.dtl' with title="Account wissel" text="De site bekijken als een andere gebruiker." icon="switch_access_shortcut" url=url_login_as %}
+                    {% include 'design/card_icon.dtl' with title="Account wissel" text="De site bekijken als een andere gebruiker." icon="switch_access_shortcut" url=url_login_as %}
                 {% endif %}
             </div>
 
@@ -271,7 +271,7 @@
 
                 {% if url_wissel_naar_sec %}
                     <div class="col s12{% if show_help_rollen %} l6{% endif %}">
-                        {% include 'plein/card_icon.dtl' with title="Secretaris" text="Wordt secretaris van een van de verenigingen." icon="help" url=url_wissel_naar_sec %}
+                        {% include 'design/card_icon.dtl' with title="Secretaris" text="Wordt secretaris van een van de verenigingen." icon="help" url=url_wissel_naar_sec %}
                     </div>
                 {% endif %}
           </div>
@@ -290,7 +290,7 @@
         <div class="row-sv-blauw">
             <div class="col s12">
                 {% url 'Functie:vhpg-afspraken' as card_url %}
-                {% include 'plein/card_icon.dtl' with title="Afspraken inzien" text="Bekijk de gemaakte afspraken over het omgaan met persoonsgegevens." icon="gavel" url=card_url %}
+                {% include 'design/card_icon.dtl' with title="Afspraken inzien" text="Bekijk de gemaakte afspraken over het omgaan met persoonsgegevens." icon="gavel" url=card_url %}
             </div>
         </div>
 

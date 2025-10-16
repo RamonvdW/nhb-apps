@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2024 Ramon van der Winkel.
+#  Copyright (c) 2020-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -60,56 +60,56 @@ class TestSpeldenInfoViews(E2EHelpers, TestCase):
             resp = self.client.get(self.url_begin)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('spelden/begin.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('spelden/begin.dtl', 'design/site_layout.dtl'))
 
         # meesterspelden
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_meesterspelden)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('spelden/khsn-meesterspelden.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('spelden/khsn-meesterspelden.dtl', 'design/site_layout.dtl'))
 
         # meesterspelden hall of fame
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_hall_of_fame)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('spelden/khsn-meesterspelden_hall-of-fame.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('spelden/khsn-meesterspelden_hall-of-fame.dtl', 'design/site_layout.dtl'))
 
         # graadspelden
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_graadspelden)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('spelden/khsn-graadspelden.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('spelden/khsn-graadspelden.dtl', 'design/site_layout.dtl'))
 
         # tussenspelden
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_tussenspelden)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('spelden/khsn-tussenspelden.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('spelden/khsn-tussenspelden.dtl', 'design/site_layout.dtl'))
 
         # arrowhead
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_arrowhead)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('spelden/wa-arrowhead-spelden.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('spelden/wa-arrowhead-spelden.dtl', 'design/site_layout.dtl'))
 
         # sterspelden
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_sterspelden)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('spelden/wa-sterspelden.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('spelden/wa-sterspelden.dtl', 'design/site_layout.dtl'))
 
         # target
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_target_awards)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('spelden/wa-target-awards.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('spelden/wa-target-awards.dtl', 'design/site_layout.dtl'))
 
         speld = Speld.objects.first()
         self.assertTrue(str(speld) != '')
@@ -128,55 +128,55 @@ class TestSpeldenInfoViews(E2EHelpers, TestCase):
             resp = self.client.get(self.url_begin)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('spelden/begin.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('spelden/begin.dtl', 'design/site_layout.dtl'))
 
         # meesterspelden
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_meesterspelden)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('spelden/khsn-meesterspelden.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('spelden/khsn-meesterspelden.dtl', 'design/site_layout.dtl'))
 
         # meesterspelden hall of fame
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_hall_of_fame)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('spelden/khsn-meesterspelden_hall-of-fame.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('spelden/khsn-meesterspelden_hall-of-fame.dtl', 'design/site_layout.dtl'))
 
         # graadspelden
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_graadspelden)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('spelden/khsn-graadspelden.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('spelden/khsn-graadspelden.dtl', 'design/site_layout.dtl'))
 
         # tussenspelden
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_tussenspelden)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('spelden/khsn-tussenspelden.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('spelden/khsn-tussenspelden.dtl', 'design/site_layout.dtl'))
 
         # arrowhead
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_arrowhead)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('spelden/wa-arrowhead-spelden.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('spelden/wa-arrowhead-spelden.dtl', 'design/site_layout.dtl'))
 
         # sterspelden
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_sterspelden)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('spelden/wa-sterspelden.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('spelden/wa-sterspelden.dtl', 'design/site_layout.dtl'))
 
         # target
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_target_awards)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('spelden/wa-target-awards.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('spelden/wa-target-awards.dtl', 'design/site_layout.dtl'))
 
 # end of file

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -152,7 +152,7 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compinschrijven/sporter-bevestig-aanmelden.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compinschrijven/sporter-bevestig-aanmelden.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, 'eigen blazoen')
 
         with self.assert_max_queries(20):
@@ -188,7 +188,7 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compinschrijven/sporter-bevestig-aanmelden.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compinschrijven/sporter-bevestig-aanmelden.dtl', 'design/site_layout.dtl'))
         self.assertNotContains(resp, 'eigen blazoen')
 
         # uitzondering: AG score zonder hist
@@ -202,7 +202,7 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compinschrijven/sporter-bevestig-aanmelden.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compinschrijven/sporter-bevestig-aanmelden.dtl', 'design/site_layout.dtl'))
 
         # schakel over naar de 25m1pijl, barebow
         sporterboog = SporterBoog.objects.get(boogtype__afkorting='BB')
@@ -214,7 +214,7 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compinschrijven/sporter-bevestig-aanmelden.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compinschrijven/sporter-bevestig-aanmelden.dtl', 'design/site_layout.dtl'))
         self.assertNotContains(resp, 'eigen blazoen')
 
         # schrijf in voor de 25m BB, zonder AG
@@ -489,7 +489,7 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compinschrijven/sporter-bevestig-aanmelden.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compinschrijven/sporter-bevestig-aanmelden.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, 'eigen blazoen')
         self.assertContains(resp, 'Zaterdag')
         self.assertContains(resp, 'Zondagmiddag')
@@ -558,7 +558,7 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compinschrijven/sporter-bevestig-aanmelden.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compinschrijven/sporter-bevestig-aanmelden.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, 'eigen blazoen')
         self.assertContains(resp, 'Zaterdag')
         self.assertContains(resp, 'Zondag')
@@ -613,7 +613,7 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compinschrijven/sporter-bevestig-aanmelden.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compinschrijven/sporter-bevestig-aanmelden.dtl', 'design/site_layout.dtl'))
         self.assertNotContains(resp, 'Onder 12')
         self.assertNotContains(resp, 'Onder 14')
         self.assertContains(resp, 'Onder 18')
@@ -704,7 +704,7 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compinschrijven/sporter-bevestig-aanmelden.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compinschrijven/sporter-bevestig-aanmelden.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, 'eigen blazoen')
         self.assertContains(resp, 'Kies wanneer je wilt schieten')
         self.assertContains(resp, '11 december 2020 om 12:34')
@@ -757,7 +757,7 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagregio/keuze-zeven-wedstrijden-methode1.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagregio/keuze-zeven-wedstrijden-methode1.dtl', 'design/site_layout.dtl'))
 
         # wedstrijd behouden
         with self.assert_max_queries(20):

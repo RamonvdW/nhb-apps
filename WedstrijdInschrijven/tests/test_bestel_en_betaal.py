@@ -232,7 +232,7 @@ class TestWedstrijdInschrijvenBestelEnBetaal(E2EHelpers, TestCase):
             resp = self.client.get(self.url_na_de_betaling % bestelling.bestel_nr, {'snel': 1})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('bestelling/bestelling-afgerond.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('bestelling/bestelling-afgerond.dtl', 'design/site_layout.dtl'))
 
         # fake het gebruik van de CPSP checkout en de payment-status-changed callback
         count = BetaalMutatie.objects.count()
