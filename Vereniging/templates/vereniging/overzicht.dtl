@@ -245,6 +245,22 @@
         </div>
     </div>
 
+
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>Andere sites van de KHSN</h4>
+        </div>
+    </div>
+
+    <!-- blauwe balk met links naar andere sites -->
+    <div class="row-sv-blauw">
+        <div class="col s12">
+            {% include 'plein/card_icon.dtl' with title=crm.titel text=crm.tekst extern_open=True icon="group" url=crm.url %}
+        </div>
+    </div>
+
+
     {% include 'feedback/sidebar.dtl' with op_pagina="vereniging-overzicht" %}
 
 {% endblock %}
