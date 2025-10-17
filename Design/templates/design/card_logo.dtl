@@ -49,7 +49,7 @@
             {% endif %}
 
             <!-- plaatje -->
-            <div style="margin-bottom:8px">
+            <div>
                 <img src="{{ img_src }}" height="{{ img_height }}" {% if img_width %}width="{{ img_width }}" {% endif %}alt="logo"{% if img_style %} style="{{ img_style }}"{% endif %} draggable="false">
             </div>
 

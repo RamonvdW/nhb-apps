@@ -19,7 +19,7 @@
 
 
 <!-- Zoek een vereniging -->
-{% include 'design/card_icon.dtl' with title="Waar?" text="Zoek een vereniging bij jou in de buurt." icon_font_size="75px" icon="travel_explore" url="https://www.handboogsport.nl/zoek-je-vereniging/" extern_open=True %}
+{% include 'design/card_icon.dtl' with title="Waar?" text="Zoek een vereniging bij jou in de buurt." icon_height="75px" sv_icon="zoek vereniging" url="https://www.handboogsport.nl/zoek-je-vereniging/" extern_open=True %}
 
 
 <!-- end of file -->

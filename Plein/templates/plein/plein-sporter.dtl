@@ -47,34 +47,34 @@
 
             <!-- bondscompetities -->
             {% url 'Competitie:kies' as card_url %}
-            {% include 'design/card_icon.dtl' with title="Bondscompetities" text="Informatie over de bonds-competities, inclusief alle uitslagen." icon="my_location" url=card_url %}
+            {% include 'design/card_icon.dtl' with title="Bondscompetities" text="Informatie over de bonds-competities, inclusief alle uitslagen." sv_icon="bondscompetities" url=card_url %}
 
             <!-- kalender -->
             {% url 'Kalender:landing-page' as card_url %}
-            {% include 'design/card_icon.dtl' with title="Kalender" text="Bekijk welke wedstrijden en evenementen georganiseerd worden en schrijf je in." icon="event_note" url=card_url %}
+            {% include 'design/card_icon.dtl' with title="Kalender" text="Bekijk welke wedstrijden en evenementen georganiseerd worden en schrijf je in." sv_icon="kalender" url=card_url %}
 
             <!-- scheids -->
             {% if url_scheids %}
-                {% include 'design/card_icon.dtl' with title="Scheidsrechters" text="Voor leden van het scheidsrechterskorps" icon="sports" url=url_scheids %}
+                {% include 'design/card_icon.dtl' with title="Scheidsrechters" text="Voor leden van het scheidsrechterskorps" sv_icon="scheidsrechters" url=url_scheids %}
             {% endif %}
 
             <!-- opleidingen -->
             {% if toon_opleidingen %}
                 {% url 'Opleiding:overzicht' as card_url %}
-                {% include 'design/card_icon.dtl' with title="Opleidingen" text="Bekijk de opleidingen die aangeboden worden." icon="school" url=card_url %}
+                {% include 'design/card_icon.dtl' with title="Opleidingen" text="Bekijk de opleidingen die aangeboden worden." sv_icon="opleidingen" url=card_url %}
             {% endif %}
 
             <!-- webwinkel -->
             {% url 'Webwinkel:overzicht' as card_url %}
-            {% include 'design/card_icon.dtl' with title="Webwinkel" text="Bekijk onze webwinkel." icon="local_mall" url=card_url %}
+            {% include 'design/card_icon.dtl' with title="Webwinkel" text="Bekijk onze webwinkel." sv_icon="webwinkel" url=card_url %}
 
             <!-- records -->
             {% url 'Records:overzicht' as card_url %}
-            {% include 'design/card_icon.dtl' with title="Records" text="Alle handboogsport records van Nederlandse sporters." icon="insights" url=card_url %}
+            {% include 'design/card_icon.dtl' with title="Records" text="Alle handboogsport records van Nederlandse sporters." sv_icon="records" url=card_url %}
 
             <!-- ledenvoordeel -->
             {% if url_voordeel %}
-                {% include 'design/card_icon.dtl' with title="Ledenvoordeel" text="Bekijk de aanbiedingen voor KHSN leden." icon="redeem" url=url_voordeel %}
+                {% include 'design/card_icon.dtl' with title="Ledenvoordeel" text="Bekijk de aanbiedingen voor KHSN leden." sv_icon="ledenvoordeel" url=url_voordeel %}
             {% endif %}
         </div>
     </div>
@@ -110,8 +110,8 @@
     <!-- blauwe balk met kaartje -->
     <div class="row-sv-blauw">
         <div class="col s12">
-            {% include 'design/card_icon.dtl' with title="Stuur een e-mail" text="Kies dit kaartje om je mailprogramma te starten" icon="mail" extern_open=True url=url_email_support %}
-            {% include 'design/card_icon.dtl' with title="Handleiding" text="Bekijk de handleiding voor leden" icon="menu_book" extern_open=True url=url_handleiding_leden %}
+            {% include 'design/card_icon.dtl' with title="Stuur een e-mail" text="Kies dit kaartje om je mailprogramma te starten" sv_icon="email" extern_open=True url=url_email_support %}
+            {% include 'design/card_icon.dtl' with title="Handleiding" text="Bekijk de handleiding voor leden" sv_icon="handleiding" extern_open=True url=url_handleiding_leden %}
         </div>
     </div>
 

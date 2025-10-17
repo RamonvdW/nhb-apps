@@ -195,7 +195,7 @@
             <td></td>
             <td></td>
             <td>
-                <button class="btn-sv-rood white" style="background-color:#fff; text-shadow:none; border:2px solid red">
+                <button class="btn-sv-rood white" style="background-color:#eff2f5 !important; text-shadow:none; border:1px solid #F7941E; line-height:34px">
                     <i class="material-symbol left">{{ icon }}</i>Voorbeeld</button>
             </td>
             <td>

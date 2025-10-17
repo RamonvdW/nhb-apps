@@ -29,7 +29,7 @@
                 <!-- bondscompetities -->
                 {% if toon_bondscompetities %}
                     {% url 'Competitie:kies' as card_url %}
-                    {% include 'design/card_icon.dtl' with title="Bondscompetities" text="Informatie over de bonds-competities, inclusief alle uitslagen." icon="my_location" url=card_url %}
+                    {% include 'design/card_icon.dtl' with title="Bondscompetities" text="Informatie over de bonds-competities, inclusief alle uitslagen." sv_icon="bondscompetities" url=card_url %}
                 {% endif %}
 
                 <!-- wedstrijdkalender -->
@@ -80,7 +80,7 @@
             <!-- vereniging menu -->
             {% if rol_is_sec or rol_is_la or rol_is_hwl or rol_is_wl %}
                 {% url 'Vereniging:overzicht' as card_url %}
-                {% include 'design/card_icon.dtl' with title="Beheer vereniging" text="Extra functies voor beheerders van jouw vereniging." icon="store" url=card_url %}
+                {% include 'design/card_icon.dtl' with title="Beheer vereniging" text="Extra functies voor beheerders van jouw vereniging." icon="house_siding" url=card_url %}
             {% endif %}
 
             <!-- toon en koppel beheerders -->

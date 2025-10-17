@@ -8,10 +8,11 @@
 
     Deze file formatteert een kaartje aan de hand van deze parameters:
 
-        title = "Account activiteit"
-        icon  = "recent_actors"
-        text  = "Toon overzicht van de recent gebruikte en aangemaakte accounts."
-        waarom = "Korte uitleg waarom"
+        title   = "Account activiteit"
+        sv_icon = "gebruik" (zie Design/templatetags/design_icons.py)
+        icon    = "recent_actors"
+        text    = "Toon overzicht van de recent gebruikte en aangemaakte accounts."
+        waarom  = "Korte uitleg waarom"
 
     Hierdoor is mogelijk om centraal de code van een kaartje aan te passen.
 

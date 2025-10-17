@@ -121,9 +121,10 @@ gh_update_font()
         echo "          NEW: $DL_FILE1"
         echo "          OLD: $OLD_FILE"
 
-        echo "[INFO] Finding differences"
-        ttx "$DL_FILE1" -t hmtx -o "$WORK_DIR/icons-new.ttx"
-        ttx "$OLD_FILE" -t hmtx -o "$WORK_DIR/icons-old.ttx"
+        echo "[INFO] Dumping old and new htmx tables"
+        ttx -q "$DL_FILE1" -t hmtx -o "$WORK_DIR/icons-new.ttx"
+        ttx -q "$OLD_FILE" -t hmtx -o "$WORK_DIR/icons-old.ttx"
+        echo "[INFO] Comparing $WORK_DIR/icons-old.ttx to $WORK_DIR/icons-new.ttx"
         diff "$WORK_DIR/icons-old.ttx" "$WORK_DIR/icons-new.ttx"
     else
         echo "[ERROR] cmp_res=$cmp_res"

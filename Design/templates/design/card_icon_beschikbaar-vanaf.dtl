@@ -8,15 +8,17 @@
 
     Deze file formatteert een kaartje aan de hand van deze parameters:
 
-        title = "Account activiteit"
-        icon  = "recent_actors"
-        text  = "Toon overzicht van de recent gebruikte en aangemaakte accounts."
-        vanaf = datum wanneer kaartje beschikbaar komt (vanaf datum)
+        title   = "Account activiteit"
+        sv_icon = "gebruik" (zie Design/templatetags/design_icons.py)
+        icon    = "recent_actors"
+        text    = "Toon overzicht van de recent gebruikte en aangemaakte accounts."
+        vanaf   = datum wanneer kaartje beschikbaar komt (vanaf datum)
 
     Hierdoor is mogelijk om centraal de code van een kaartje aan te passen.
 
 {% endcomment %}
 
+{% load design_icons %}
 
 <!-- zet breedte, hoogte en side-by-side layout -->
 <!-- bij mouse-over licht de rand NIET op -->
@@ -31,9 +33,13 @@
         {% endif %}
 
         <!-- icoon -->
-        <div style="margin-bottom:4px{% if not icon_font_size %}; height:64px{% endif %}">
-            <i class="notranslate material-symbol medium grey-text"{% if icon_font_size %} style="font-size:{{ icon_font_size }}"{% endif %}>{{ icon }}</i>
-        </div>
+        {% if sv_icon %}
+            {% sv-icon sv_icon extra_class="medium" %}
+        {% else %}
+            <div style="margin-bottom:4px{% if not icon_font_size %}; height:64px{% endif %}">
+                <i class="notranslate material-symbol medium grey-text"{% if icon_font_size %} style="font-size:{{ icon_font_size }}"{% endif %}>{{ icon }}</i>
+            </div>
+        {% endif %}
 
         <div class="grey-text">{{ text }}</div>
 
