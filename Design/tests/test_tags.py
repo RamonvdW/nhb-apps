@@ -58,12 +58,24 @@ class TestDesignTemplatetags(TestCase):
         self.assertEqual(filter_wbr_www('https://test/x.y'),
                          'https://<wbr>test/<wbr>x.<wbr>y')
 
+        # underscore
+        self.assertEqual(filter_wbr_www('https://test/x_y'),
+                         'https://<wbr>test/<wbr>x_<wbr>y')
+
+        # . na _
+        self.assertEqual(filter_wbr_www('https://test/x_y/x.y'),
+                         'https://<wbr>test/<wbr>x_<wbr>y/<wbr>x.<wbr>y')
+
         # lange woorden
         self.assertEqual(filter_wbr_www('handboogsport.nl/grensoverschreidend-gedrag'),
                          'handboog<wbr>sport.<wbr>nl/<wbr>grens<wbr>over<wbr>schreidend-gedrag')
 
         self.assertEqual(filter_wbr_www('grensoverschreidend.nl/handboogsport'),
                          'grens<wbr>over<wbr>schreidend.<wbr>nl/<wbr>handboog<wbr>sport')
+
+        # lange url
+        self.assertEqual(filter_wbr_www('https://dit-is-een-erg-lange-url-die-afgekapt-gaat-worden'),
+                         'https://<wbr>dit-is-een-erg-lange-url-die-afgekapt-gaat...')
 
     def test_filter_wbr_dagdeel(self):
         self.assertEqual(filter_wbr_dagdeel("WO"),
