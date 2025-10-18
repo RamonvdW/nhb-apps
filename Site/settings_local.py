@@ -70,7 +70,7 @@ AFSCHRIFT_SITE_URL = "yourdomain.com"
 # contactgegevens eerste- en tweedelijns support
 EMAIL_BONDSBUREAU = "info@yourdomain.com"
 EMAIL_SUPPORT = EMAIL_BONDSBUREAU
-EMAIL_TECH_SUPPORT = "support@yourdomain.com"
+EMAIL_TECH_SUPPORT = 'support@yourdomain.com'
 
 # manuals (pdf)
 URL_PDF_HANDLEIDING_LEDEN = 'https://yoursite/static/manual_members.pdf'
@@ -167,8 +167,9 @@ WEBWINKEL_VERKOPER_VER_NR = 1368
 WEBWINKEL_VERKOPER_BTW_NR = "012345678B99"
 
 # verzendkosten webwinkel
-WEBWINKEL_BRIEF_VERZENDKOSTEN_EURO = 4.25
-WEBWINKEL_PAKKET_GROOT_VERZENDKOSTEN_EURO = 6.95
+WEBWINKEL_ENVELOP_VERZENDKOSTEN_EURO = 1.21
+WEBWINKEL_PAKKET_2KG_VERZENDKOSTEN_EURO = 4.25
+WEBWINKEL_PAKKET_10KG_VERZENDKOSTEN_EURO = 6.95
 
 # ophalen op bondsbureau aan/uit zetten
 WEBWINKEL_TRANSPORT_OPHALEN_MAG = True
@@ -216,10 +217,13 @@ OVERIG_API_TOKENS = ()
 # google doc id van het gsheet document
 INSTAPTOETS_GSHEET_FILE_ID = 'another.google.sheets.id'     # noqa
 
+INSTAPTOETS_LESMATERIAAL_WA_BOEKEN = 'url'
+INSTAPTOETS_LESMATERIAAL_COMPETITIE = 'url'
+INSTAPTOETS_LESMATERIAAL_KLEDINGVOORSCHRIFT = 'url'
+
 # met wie de wedstrijdformulieren folder delen?
 GOOGLE_DRIVE_SHARE_WITH = []
 
-<<<<<<< HEAD
 # waar staan de json bestanden voor de service accounts etc.
 # wordt gebruikt door diverse diensten: downloaders records/instaptoets, backup uploader, google drive toegang, etc.
 # filenames zijn bekend bij deze diensten
@@ -234,6 +238,9 @@ CREDENTIALS_SERVICE_ACCOUNT_WEDSTRIJDFORMULIEREN = 'file1_with_credentials_servi
 # instaptoets en records bestanden zijn gedeeld met dit service account, voor download
 CREDENTIALS_SERVICE_ACCOUNT_DOWNLOADER = 'file2_with_credentials_service-account.json'
 
-=======
->>>>>>> main
+# link naar het CRM systeem
+CRM_URL = 'url'
+CRM_TITEL = 'title'
+CRM_BESCHRIJVING = 'Persoonsgegevens van leden worden geadministreerd in een apart systeem.'
+
 # end of file
