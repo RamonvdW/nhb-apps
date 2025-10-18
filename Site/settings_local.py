@@ -70,11 +70,7 @@ AFSCHRIFT_SITE_URL = "yourdomain.com"
 # contactgegevens eerste- en tweedelijns support
 EMAIL_BONDSBUREAU = "info@yourdomain.com"
 EMAIL_SUPPORT = EMAIL_BONDSBUREAU
-<<<<<<< HEAD
-EMAIL_TECH_SUPPORT = "support@yourdomain.com"
-=======
 EMAIL_TECH_SUPPORT = 'support@yourdomain.com'
->>>>>>> main
 
 # manuals (pdf)
 URL_PDF_HANDLEIDING_LEDEN = 'https://yoursite/static/manual_members.pdf'
