@@ -31,9 +31,9 @@
         <div class="row-sv-blauw">
             <div class="col s12">
                 <!-- individueel -->
-                {% include 'design/card_icon.dtl' with title="Regio individueel" text=text_regio_indiv icon="view_compact" url=url_regio_indiv %}
-                {% include 'design/card_icon.dtl' with title="RK individueel" text=text_rayon_indiv icon="view_comfy" url=url_rayon_indiv %}
-                {% include 'design/card_icon.dtl' with title="BK individueel" text=text_bond_indiv icon="flag" url=url_bond_indiv %}
+                {% include 'design/card_icon.dtl' with title="Regio individueel" text=text_regio_indiv sv_icon="uitslag regio indiv" url=url_regio_indiv %}
+                {% include 'design/card_icon.dtl' with title="RK individueel" text=text_rayon_indiv sv_icon="uitslag rk indiv" url=url_rayon_indiv %}
+                {% include 'design/card_icon.dtl' with title="BK individueel" text=text_bond_indiv sv_icon="uitslag bk indiv" url=url_bond_indiv %}
             </div>
         </div>
 
@@ -50,9 +50,9 @@
         <div class="row-sv-blauw">
             <div class="col s12">
                 <!-- teams -->
-                {% include 'design/card_icon.dtl' with title="Regio teams" text=text_regio_teams icon="view_compact" url=url_regio_teams %}
-                {% include 'design/card_icon.dtl' with title="RK teams" text=text_rayon_teams icon="view_comfy" url=url_rayon_teams %}
-                {% include 'design/card_icon.dtl' with title="BK teams" text=text_bond_teams icon="flag" url=url_bond_teams %}
+                {% include 'design/card_icon.dtl' with title="Regio teams" text=text_regio_teams sv_icon="uitslag regio teams" url=url_regio_teams %}
+                {% include 'design/card_icon.dtl' with title="RK teams" text=text_rayon_teams sv_icon="uitslag rk teams" url=url_rayon_teams %}
+                {% include 'design/card_icon.dtl' with title="BK teams" text=text_bond_teams sv_icon="uitslag bk teams" url=url_bond_teams %}
             </div>
         </div>
 
@@ -75,20 +75,20 @@
             <!-- toon klassen -->
             {% if comp.fase_indiv > 'A' %}
                 {% url 'Competitie:klassengrenzen-tonen' comp_pk_of_seizoen=comp.maak_seizoen_url as card_url %}
-                {% include 'design/card_icon.dtl' with title="Wedstrijdklassen" text="Toon de wedstrijdklassen, klassengrenzen en blazoenen voor de competitie." icon="equalizer" url=card_url %}
+                {% include 'design/card_icon.dtl' with title="Wedstrijdklassen" text="Toon de wedstrijdklassen, klassengrenzen en blazoenen voor de competitie." sv_icon="wedstrijdklassen" url=card_url %}
             {% endif %}
 
             <!-- algemene informatie over de competities -->
             {% url 'Competitie:info-competitie' as card_url %}
-            {% include 'design/card_icon.dtl' with title="Informatie" text="Algemene informatie over de competities." icon="info" url=card_url %}
+            {% include 'design/card_icon.dtl' with title="Informatie" text="Algemene informatie over de competities." sv_icon="comp info indiv" url=card_url %}
 
             <!-- algemene informatie over de teamcompetitie -->
             {% url 'Competitie:info-teamcompetitie' as card_url %}
-            {% include 'design/card_icon.dtl' with title="Teams" text="Uitleg over de teamcompetities." icon="groups" url=card_url %}
+            {% include 'design/card_icon.dtl' with title="Teams" text="Uitleg over de teamcompetities." sv_icon="comp info teams" url=card_url %}
 
             <!-- informatie over leeftijden -->
             {% url 'Sporter:leeftijdsgroepen' as card_url %}
-            {% include 'design/card_icon.dtl' with title="Leeftijden" text="Informatie over de leeftijds-categori&euml;n voor wedstrijden en de competities." icon="star" url=card_url %}
+            {% include 'design/card_icon.dtl' with title="Leeftijden" text="Informatie over de leeftijds-categori&euml;n voor wedstrijden en de competities." sv_icon="leeftijdsklassen" url=card_url %}
         </div>
     </div>
 
@@ -107,11 +107,11 @@
             <div class="col s12">
 
                 {% if url_beheer %}
-                    {% include 'design/card_icon.dtl' with title="Beheer" text="Extra functies voor beheerders van de competitie." icon="store" url=url_beheer %}
+                    {% include 'design/card_icon.dtl' with title="Beheer" text="Extra functies voor beheerders van de competitie." sv_icon="comp beheer" url=url_beheer %}
                 {% endif %}
 
                 {% if url_tijdlijn %}
-                    {% include 'design/card_icon.dtl' with title="Tijdlijn" text="Toon de fases en planning van deze competitie" icon="schedule" url=url_tijdlijn %}
+                    {% include 'design/card_icon.dtl' with title="Tijdlijn" text="Toon de fases en planning van deze competitie" sv_icon="comp tijdlijn" url=url_tijdlijn %}
                 {% endif %}
 
             </div>

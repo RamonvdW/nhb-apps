@@ -57,11 +57,11 @@
 
                 {% for kaartje in kaartjes_indiv %}
                     {% if kaartje.beschikbaar_vanaf %}
-                        {% include 'design/card_icon_beschikbaar-vanaf.dtl' with title=kaartje.titel text=kaartje.tekst icon=kaartje.icoon vanaf=kaartje.beschikbaar_vanaf %}
+                        {% include 'design/card_icon_beschikbaar-vanaf.dtl' with title=kaartje.titel text=kaartje.tekst sv_icon=kaartje.sv_icon vanaf=kaartje.beschikbaar_vanaf %}
                     {% elif kaartje.beschikbaar_binnenkort %}
-                        {% include 'design/card_icon_beschikbaar-vanaf.dtl' with title=kaartje.titel text=kaartje.tekst icon=kaartje.icoon %}
+                        {% include 'design/card_icon_beschikbaar-vanaf.dtl' with title=kaartje.titel text=kaartje.tekst sv_icon=kaartje.sv_icon %}
                     {% else %}
-                        {% include 'design/card_icon.dtl' with title=kaartje.titel text=kaartje.tekst icon=kaartje.icoon url=kaartje.url %}
+                        {% include 'design/card_icon.dtl' with title=kaartje.titel text=kaartje.tekst sv_icon=kaartje.sv_icon url=kaartje.url %}
                     {% endif %}
                 {% endfor %}
 
@@ -83,7 +83,7 @@
             <div class="col s12">
 
                 {% for kaartje in kaartjes_teams %}
-                    {% include 'design/card_icon.dtl' with title=kaartje.titel text=kaartje.tekst icon=kaartje.icoon url=kaartje.url %}
+                    {% include 'design/card_icon.dtl' with title=kaartje.titel text=kaartje.tekst sv_icon=kaartje.sv_icon url=kaartje.url %}
                 {% endfor %}
 
             </div>

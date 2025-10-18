@@ -98,7 +98,7 @@
 
                 <!-- taken -->
                 {% url 'Taken:overzicht' as card_url %}
-                {% include 'design/card_icon.dtl' with title="Taken" text=taken_text icon="event" url=card_url %}
+                {% include 'design/card_icon.dtl' with title="Taken" text=taken_text sv_icon="taken" url=card_url %}
             </div>
         </div>
 
@@ -121,31 +121,31 @@
                 <!-- competitiewedstrijden -->
                 {% if toon_competities %}
                     {% url 'CompScores:wedstrijden' as card_url %}
-                    {% include 'design/card_icon.dtl' with title="Competitiewedstrijden" text="Wedstrijden die bij deze vereniging geschoten worden." icon="event" url=card_url %}
+                    {% include 'design/card_icon.dtl' with title="Competitiewedstrijden" text="Wedstrijden die bij deze vereniging geschoten worden." sv_icon="ver competitie wedstrijden" url=card_url %}
                 {% endif %}
 
                 <!-- scores invoeren -->
                 {% if heeft_wedstrijden %}
                     {% url 'CompScores:wedstrijden-scores' as card_url %}
-                    {% include 'design/card_icon.dtl' with title="Scores invoeren" text="Scores invoeren voor wedstrijden die bij deze vereniging geschoten worden." icon="edit" url=card_url %}
+                    {% include 'design/card_icon.dtl' with title="Scores invoeren" text="Scores invoeren voor wedstrijden die bij deze vereniging geschoten worden." sv_icon="scores invoeren" url=card_url %}
                 {% endif %}
 
                 <!-- wedstrijdkalender (alleen voor de HWL) -->
                 {% if toon_wedstrijdkalender %}
                     {% url 'Wedstrijden:vereniging' as card_url %}
-                    {% include 'design/card_icon.dtl' with title="Wedstrijdkalender" text="Beheer de wedstrijden die door jullie vereniging georganiseerd worden." icon="event_note" url=card_url %}
+                    {% include 'design/card_icon.dtl' with title="Wedstrijdkalender" text="Beheer de wedstrijden die door jullie vereniging georganiseerd worden." sv_icon="ver wedstrijden" url=card_url %}
                 {% endif %}
 
                 {% if toon_opleidingen %}
                     <!-- opleidingen (alleen voor de HWL) -->
                     {% url 'Opleiding:vereniging' as card_url %}
-                    {% include 'design/card_icon.dtl' with title="Opleidingen" text="Beheer de opleidingen die door jullie vereniging georganiseerd worden." icon="school" url=card_url %}
+                    {% include 'design/card_icon.dtl' with title="Opleidingen" text="Beheer de opleidingen die door jullie vereniging georganiseerd worden." sv_icon="ver opleidingen" url=card_url %}
                 {% endif %}
 
                 {% if toon_evenementen %}
                     <!-- evenementen (alleen voor de HWL) -->
                     {% url 'Evenement:vereniging' as card_url %}
-                    {% include 'design/card_icon.dtl' with title="Evenementen" text="Beheer de evenementen die door jullie vereniging georganiseerd worden." icon="event_note" url=card_url %}
+                    {% include 'design/card_icon.dtl' with title="Evenementen" text="Beheer de evenementen die door jullie vereniging georganiseerd worden." sv_icon="ver evenementen" url=card_url %}
                 {% endif %}
             </div>
         </div>
@@ -186,7 +186,7 @@
                     {% if kaartje.img %}
                         {% include 'design/card_logo_beschikbaar-vanaf.dtl' with title=kaartje.titel text=kaartje.tekst vanaf=kaartje.beschikbaar_vanaf img=kaartje.img %}
                     {% else %}
-                        {% include 'design/card_icon_beschikbaar-vanaf.dtl' with title=kaartje.titel text=kaartje.tekst vanaf=kaartje.beschikbaar_vanaf icon=kaartje.icon %}
+                        {% include 'design/card_icon_beschikbaar-vanaf.dtl' with title=kaartje.titel text=kaartje.tekst vanaf=kaartje.beschikbaar_vanaf sv_icon=kaartje.sv_icon %}
                     {% endif %}
 
         {% elif kaartje.img %}
@@ -195,7 +195,7 @@
 
         {% else %}
 
-                    {% include 'design/card_icon.dtl' with title=kaartje.titel text=kaartje.tekst icon=kaartje.icon url=kaartje.url %}
+                    {% include 'design/card_icon.dtl' with title=kaartje.titel text=kaartje.tekst sv_icon=kaartje.sv_icon url=kaartje.url %}
 
         {% endif %}
     {% endfor %}
@@ -214,33 +214,33 @@
             <!-- ledenlijst -->
             {% if toon_gast_accounts %}
                 {% url 'Registreer:beheer-gast-accounts' as card_url %}
-                {% include 'design/card_icon.dtl' with title="Gast accounts" text="Toon de aangemaakte gast-accounts." icon="import_contacts" url=card_url %}
+                {% include 'design/card_icon.dtl' with title="Gast accounts" text="Toon de aangemaakte gast-accounts." sv_icon="ver gast accounts" url=card_url %}
             {% else %}
                 {% url 'Vereniging:ledenlijst' as card_url %}
-                {% include 'design/card_icon.dtl' with title="Ledenlijst" text="Leden van de vereniging, inclusief wedstrijdklasse jeugdleden en laatste inlog op deze website." icon="import_contacts" url=card_url %}
+                {% include 'design/card_icon.dtl' with title="Ledenlijst" text="Leden van de vereniging, inclusief wedstrijdklasse jeugdleden en laatste inlog op deze website." sv_icon="ver ledenlijst" url=card_url %}
             {% endif %}
 
             <!-- beheerders vereniging -->
             {% url 'Functie:overzicht-vereniging' as card_url %}
-            {% include 'design/card_icon.dtl' with title="Beheerders" text="Beheerders en e-mailadressen van functies aanpassen." icon="supervisor_account" url=card_url %}
+            {% include 'design/card_icon.dtl' with title="Beheerders" text="Beheerders en e-mailadressen van functies aanpassen." sv_icon="ver beheerders" url=card_url %}
 
             <!-- instellingen leden -->
             {% url 'Vereniging:leden-voorkeuren' as card_url %}
-            {% include 'design/card_icon.dtl' with title="Voorkeuren leden" text="Voorkeuren van de leden inzien en boog type instellen." icon="tune" url=card_url %}
+            {% include 'design/card_icon.dtl' with title="Voorkeuren leden" text="Voorkeuren van de leden inzien en boog type instellen." sv_icon="ver voorkeuren leden" url=card_url %}
 
             <!-- accommodatie details -->
             {% if accommodatie_details_url %}
-                {% include 'design/card_icon.dtl' with title="Accommodatie" text="Details over jullie accommodatie die van belang zijn voor wedstrijden." icon="account_balance" url=accommodatie_details_url %}
+                {% include 'design/card_icon.dtl' with title="Accommodatie" text="Details over jullie accommodatie die van belang zijn voor wedstrijden." sv_icon="ver accommodatie" url=accommodatie_details_url %}
             {% endif %}
 
             <!-- externe locaties -->
             {% if url_externe_locaties %}
-                {% include 'design/card_icon.dtl' with title="Locaties" text="Externe locaties, waar jullie vereniging wedstrijden kan organiseren." icon="hiking" url=url_externe_locaties %}
+                {% include 'design/card_icon.dtl' with title="Locaties" text="Externe locaties, waar jullie vereniging wedstrijden kan organiseren." sv_icon="ver externe locaties" url=url_externe_locaties %}
             {% endif %}
 
             <!-- evenement locaties -->
             {% if url_evenement_locaties %}
-                {% include 'design/card_icon.dtl' with title="Locaties" text="Locaties voor evenementen en opleidingen." icon="school" url=url_evenement_locaties %}
+                {% include 'design/card_icon.dtl' with title="Locaties" text="Locaties voor evenementen en opleidingen." sv_icon="ver evenement locaties" url=url_evenement_locaties %}
             {% endif %}        
         </div>
     </div>
@@ -256,7 +256,7 @@
     <!-- blauwe balk met links naar andere sites -->
     <div class="row-sv-blauw">
         <div class="col s12">
-            {% include 'design/card_icon.dtl' with title=crm.titel text=crm.tekst extern_open=True icon="group" url=crm.url %}
+            {% include 'design/card_icon.dtl' with title=crm.titel text=crm.tekst extern_open=True sv_icon="ver ext crm" url=crm.url %}
         </div>
     </div>
 

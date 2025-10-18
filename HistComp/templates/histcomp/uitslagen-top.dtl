@@ -87,21 +87,21 @@
         <div class="row-sv-blauw">
             <div class="col s12">
                 {% if url_regio_indiv %}
-                    {% include 'design/card_icon.dtl' with title="Regio individueel" text="Eindstand voor de regiocompetitie individueel" icon="view_compact" url=url_regio_indiv %}
+                    {% include 'design/card_icon.dtl'             with title="Regio individueel" text="Eindstand voor de regiocompetitie individueel" sv_icon="uitslag regio indiv" url=url_regio_indiv %}
                 {% else %}
-                    {% include 'design/card_niet-beschikbaar.dtl' with title="Regio individueel" text="Eindstand voor de regiocompetitie individueel" icon="view_compact" waarom=waarom %}
+                    {% include 'design/card_niet-beschikbaar.dtl' with title="Regio individueel" text="Eindstand voor de regiocompetitie individueel" sv_icon="uitslag regio indiv" waarom=waarom %}
                 {% endif %}
 
                 {% if url_rayon_indiv %}
-                    {% include 'design/card_icon.dtl' with title="RK individueel" text="Eindstand voor de rayonkampioenschappen individueel" icon="view_comfy" url=url_rayon_indiv %}
+                    {% include 'design/card_icon.dtl'             with title="RK individueel" text="Eindstand voor de rayonkampioenschappen individueel" sv_icon="uitslag rk indiv" url=url_rayon_indiv %}
                 {% else %}
-                    {% include 'design/card_niet-beschikbaar.dtl' with title="RK individueel" text="Eindstand voor de rayonkampioenschappen individueel" icon="view_comfy" waarom=waarom %}
+                    {% include 'design/card_niet-beschikbaar.dtl' with title="RK individueel" text="Eindstand voor de rayonkampioenschappen individueel" sv_icon="uitslag rk indiv" waarom=waarom %}
                 {% endif %}
 
                 {% if url_bond_indiv %}
-                    {% include 'design/card_icon.dtl' with title="BK individueel" text="Eindstand voor de bondskampioenschappen individueel" icon="flag" url=url_bond_indiv %}
+                    {% include 'design/card_icon.dtl'             with title="BK individueel" text="Eindstand voor de bondskampioenschappen individueel" sv_icon="uitslag bk indiv" url=url_bond_indiv %}
                 {% else %}
-                    {% include 'design/card_niet-beschikbaar.dtl' with title="BK individueel" text="Eindstand voor de bondskampioenschappen individueel" icon="flag" waarom=waarom %}
+                    {% include 'design/card_niet-beschikbaar.dtl' with title="BK individueel" text="Eindstand voor de bondskampioenschappen individueel" sv_icon="uitslag bk indiv" waarom=waarom %}
                 {% endif %}
             </div>
         </div>
@@ -117,21 +117,21 @@
         <div class="row-sv-blauw">
             <div class="col s12">
                 {% if url_regio_teams %}
-                {% include 'design/card_icon.dtl' with title="Regio teams" text="Eindstand voor de regiocompetitie teams" icon="view_compact" url=url_regio_teams %}
+                {% include 'design/card_icon.dtl'             with title="Regio teams" text="Eindstand voor de regiocompetitie teams" sv_icon="uitslag regio teams" url=url_regio_teams %}
                 {% else %}
-                {% include 'design/card_niet-beschikbaar.dtl' with title="Regio teams" text="Eindstand voor de regiocompetitie teams" icon="view_compact" waarom=waarom %}
+                {% include 'design/card_niet-beschikbaar.dtl' with title="Regio teams" text="Eindstand voor de regiocompetitie teams" sv_icon="uitslag regio teams" waarom=waarom %}
                 {% endif %}
 
                 {% if url_rayon_teams %}
-                {% include 'design/card_icon.dtl' with title="RK teams" text="Eindstand voor de rayonkampioenschappen teams" icon="view_comfy" url=url_rayon_teams %}
+                {% include 'design/card_icon.dtl'             with title="RK teams" text="Eindstand voor de rayonkampioenschappen teams" sv_icon="uitslag rk teams" url=url_rayon_teams %}
                 {% else %}
-                {% include 'design/card_niet-beschikbaar.dtl' with title="RK teams" text="Eindstand voor de rayonkampioenschappen teams" icon="view_comfy" waarom=waarom %}
+                {% include 'design/card_niet-beschikbaar.dtl' with title="RK teams" text="Eindstand voor de rayonkampioenschappen teams" sv_icon="uitslag rk teams" waarom=waarom %}
                 {% endif %}
 
                 {% if url_bond_teams %}
-                {% include 'design/card_icon.dtl' with title="BK teams" text="Eindstand voor de bondskampioenschappen teams" icon="flag" url=url_bond_teams %}
+                {% include 'design/card_icon.dtl'             with title="BK teams" text="Eindstand voor de bondskampioenschappen teams" sv_icon="uitslag bk teams" url=url_bond_teams %}
                 {% else %}
-                {% include 'design/card_niet-beschikbaar.dtl' with title="BK teams" text="Eindstand voor de bondskampioenschappen teams" icon="flag" waarom=waarom %}
+                {% include 'design/card_niet-beschikbaar.dtl' with title="BK teams" text="Eindstand voor de bondskampioenschappen teams" sv_icon="uitslag bk teams" waarom=waarom %}
                 {% endif %}
             </div>
         </div>

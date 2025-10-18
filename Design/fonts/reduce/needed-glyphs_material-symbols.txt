@@ -1,6 +1,5 @@
 accessibility_new
 account_balance
-account_box
 account_circle
 add
 add_to_drive
@@ -27,12 +26,12 @@ chevron_right
 close
 content_copy
 crop_square
+database
 delete
 description
 done
 done_outline
 download
-download_for_offline
 edit
 equalizer
 error
@@ -59,10 +58,12 @@ group_add
 groups
 group_work
 help
+hike
 hiking
 history
 home
 hourglass_empty
+house_siding
 how_to_reg
 hub
 id_card

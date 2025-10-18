@@ -280,7 +280,7 @@ class TestRecordsView(E2EHelpers, TestCase):
         # eervolle vermelding
         ander = AnderRecord(
                     titel='Guinness Book',
-                    icoon='auto_awesome',
+                    sv_icon='record ander',
                     tekst='test',
                     url='https://www.handboogsport.nl')
         ander.save()

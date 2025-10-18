@@ -43,7 +43,7 @@
         <div class="col s12">
             <!-- Mijn pagina -->
             {% url 'Sporter:profiel' as card_url %}
-            {% include 'design/card_icon.dtl' with title="Mijn pagina" text="Voorkeuren en informatie toegespitst op jou." icon="account_circle" url=card_url %}
+            {% include 'design/card_icon.dtl' with title="Mijn pagina" text="Voorkeuren en informatie toegespitst op jou." sv_icon="mijn pagina" url=card_url %}
 
             <!-- bondscompetities -->
             {% url 'Competitie:kies' as card_url %}

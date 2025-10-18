@@ -39,7 +39,7 @@
             <div class="col s12">
                 <!-- voorkeuren -->
                 {% url 'Sporter:voorkeuren' as card_url %}
-                {% include 'design/card_icon.dtl' with title="Voorkeuren" text="Stel in met welke boog je schiet." icon="tune" url=card_url %}
+                {% include 'design/card_icon.dtl' with title="Voorkeuren" text="Stel in met welke boog je schiet." sv_icon="sporter voorkeuren" url=card_url %}
             </div>
         </div>
 
@@ -60,7 +60,7 @@
         <div class="row-sv-blauw">
             <div class="col s12">
                 <!-- bondspas -->
-                {% include 'design/card_icon.dtl' with title="Bondspas" text="Bekijk je digitale bondspas." icon="id_card" url=url_bondspas %}
+                {% include 'design/card_icon.dtl' with title="Bondspas" text="Bekijk je digitale bondspas." sv_icon="bondspas" url=url_bondspas %}
             </div>
         </div>
 
@@ -586,16 +586,16 @@
                 {% if hint_voorkeuren %}
                     <!-- voorkeuren -->
                     {% url 'Sporter:voorkeuren' as card_url %}
-                    {% include 'design/card_icon.dtl' with title="Voorkeuren" text="Pas je persoonlijke voorkeuren aan." icon="tune" url=card_url %}
+                    {% include 'design/card_icon.dtl' with title="Voorkeuren" text="Pas je persoonlijke voorkeuren aan." sv_icon="sporter voorkeuren" url=card_url %}
                 {% endif %}
 
                 <!-- algemene informatie over de competities -->
                 {% url 'Competitie:info-competitie' as card_url %}
-                {% include 'design/card_icon.dtl' with title="Informatie" text="Algemene informatie over de competities." icon="info" url=card_url %}
+                {% include 'design/card_icon.dtl' with title="Informatie" text="Algemene informatie over de competities." sv_icon="comp info indiv" url=card_url %}
 
                 <!-- algemene informatie over de teamcompetitie -->
                 {% url 'Competitie:info-teamcompetitie' as card_url %}
-                {% include 'design/card_icon.dtl' with title="Teams" text="Uitleg over de teamcompetities." icon="groups" url=card_url %}
+                {% include 'design/card_icon.dtl' with title="Teams" text="Uitleg over de teamcompetities." sv_icon="comp info teams" url=card_url %}
             </div>
 
             <!-- competities waar op ingeschreven kan worden -->
@@ -661,7 +661,7 @@
         <div class="row-sv-blauw">
             <div class="col s12">
                 {% url 'Bestelling:toon-bestellingen' as card_url %}
-                {% include 'design/card_icon.dtl' with title="Bestellingen" text="Alle details van je bestellingen." icon="receipt_long" url=card_url %}
+                {% include 'design/card_icon.dtl' with title="Bestellingen" text="Alle details van je bestellingen." sv_icon="mijn bestellingen" url=card_url %}
             </div>
         </div>
 
@@ -724,7 +724,7 @@
     <div class="row-sv-blauw">
         <div class="col s12">
             {% url 'Sporter:leeftijdsgroepen-persoonlijk' as card_url %}
-            {% include 'design/card_icon.dtl' with title="Leeftijdsklassen" text="Bekijk in welke leeftijdsklassen jij uit moet komen." icon="star" url=card_url %}
+            {% include 'design/card_icon.dtl' with title="Leeftijdsklassen" text="Bekijk in welke leeftijdsklassen jij uit moet komen." sv_icon="leeftijdsklassen" url=card_url %}
         </div>
     </div>
 
@@ -741,11 +741,11 @@
         <div class="col s12">
             <!-- voorkeuren -->
             {% url 'Sporter:voorkeuren' as card_url %}
-            {% include 'design/card_icon.dtl' with title="Voorkeuren" text="Pas je persoonlijke voorkeuren aan." icon="tune" url=card_url %}
+            {% include 'design/card_icon.dtl' with title="Voorkeuren" text="Pas je persoonlijke voorkeuren aan." sv_icon="sporter voorkeuren" url=card_url %}
 
             <!-- wachtwoord wijzigen -->
             {% url 'Account:nieuw-wachtwoord' as card_url %}
-            {% include 'design/card_icon.dtl' with title="Wachtwoord" text="Wijzig het wachtwoord wat nodig is om in te loggen." icon="lock" url=card_url %}
+            {% include 'design/card_icon.dtl' with title="Wachtwoord" text="Wijzig het wachtwoord wat nodig is om in te loggen." sv_icon="account wachtwoord wijzigen" url=card_url %}
         </div>
     </div>
 
@@ -1338,7 +1338,7 @@
     <div class="row-sv-blauw">
         <div class="col s12">
             {% url 'Plein:privacy' as card_url %}
-            {% include 'design/card_icon.dtl' with title="Privacyverklaring" text="Lees hier hoe we omgaan met jouw privacy." icon="security" url=card_url %}
+            {% include 'design/card_icon.dtl' with title="Privacyverklaring" text="Lees hier hoe we omgaan met jouw privacy." sv_icon="privacyverklaring" url=card_url %}
         </div>
     </div>
 

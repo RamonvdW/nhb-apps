@@ -37,7 +37,7 @@
         <div class="row-sv-blauw">
             <div class="col s12">
                 {% url 'Sporter:profiel' as card_url %}
-                {% include 'design/card_icon.dtl' with title="Mijn pagina" text="Inschrijven voor de bondscompetities, voorkeuren en informatie toegespitst op jou." icon="account_box" url=card_url %}
+                {% include 'design/card_icon.dtl' with title="Mijn pagina" text="Inschrijven voor de bondscompetities, voorkeuren en informatie toegespitst op jou." sv_icon="mijn pagina" url=card_url %}
             </div>
         </div>
 
@@ -88,11 +88,11 @@
             <div class="col s12">
 
                 {% if url_wf_toestemming_drive %}
-                    {% include 'design/card_icon.dtl' with title="Toestemming" text="Geef toestemming tot jouw Google Drive voor de RK/BK wedstrijdformulieren." icon="add_to_drive" url=url_wf_toestemming_drive %}
+                    {% include 'design/card_icon.dtl' with title="Toestemming" text="Geef toestemming tot jouw Google Drive voor de RK/BK wedstrijdformulieren." sv_icon="drive toestemming" url=url_wf_toestemming_drive %}
                 {% endif %}
 
                 {% if url_wf_aanmaken %}
-                    {% include 'design/card_icon.dtl' with title="Aanmaken" text="Start aanmaken van alle RK/BK wedstrijdformulieren in de Google Drive." icon="add_to_drive" url=url_wf_aanmaken %}
+                    {% include 'design/card_icon.dtl' with title="Aanmaken" text="Start aanmaken van alle RK/BK wedstrijdformulieren in de Google Drive." sv_icon="drive wedstrijdformulieren maken" url=url_wf_aanmaken %}
                 {% endif %}
             </div>
         </div>
@@ -114,20 +114,20 @@
             <div class="col s12">
                 <!-- competities opstarten -->
                 {% if url_seizoen_opstarten %}
-                    {% include 'design/card_icon.dtl' with title="Start competitie" text="Instellingen voor seizoen "|add:nieuwe_seizoen|add:" controleren en nieuwe competities aanmaken." icon="playlist_add" url=url_seizoen_opstarten %}
+                    {% include 'design/card_icon.dtl' with title="Start competitie" text="Instellingen voor seizoen "|add:nieuwe_seizoen|add:" controleren en nieuwe competities aanmaken." sv_icon="comp seizoen starten" url=url_seizoen_opstarten %}
                 {% endif %}
 
                 {% if url_seizoen_afsluiten %}
-                    {% include 'design/card_icon.dtl' with title="Seizoen afsluiten" text="Sluit het competitie seizoen af (Indoor + 25m1pijl)." icon="waving_hand" url=url_seizoen_afsluiten %}
+                    {% include 'design/card_icon.dtl' with title="Seizoen afsluiten" text="Sluit het competitie seizoen af (Indoor + 25m1pijl)." sv_icon="comp seizoen afsluiten" url=url_seizoen_afsluiten %}
                 {% endif %}
 
                 {% url 'Functie:lijst-beheerders' as card_url %}
-                {% include 'design/card_icon.dtl' with title="Beheerders" text="Toon wie beheerders van de bondscompetitie zijn, koppel andere beheerders of wijzig contactgegevens." icon="face" url=card_url %}
+                {% include 'design/card_icon.dtl' with title="Beheerders" text="Toon wie beheerders van de bondscompetitie zijn, koppel andere beheerders of wijzig contactgegevens." sv_icon="functie beheerders" url=card_url %}
 
                 {% url 'Vereniging:lijst' as card_url %}
-                {% include 'design/card_icon.dtl' with title="Verenigingen" text=tekst_verenigingen icon="share_location" url=card_url %}
+                {% include 'design/card_icon.dtl' with title="Verenigingen" text=tekst_verenigingen sv_icon="verenigingen" url=card_url %}
             
-                {% include 'design/card_icon.dtl' with title="Statistiek" text="Toon statistiek over de inschrijvingen." icon="query_stats" url=url_statistiek %}
+                {% include 'design/card_icon.dtl' with title="Statistiek" text="Toon statistiek over de inschrijvingen." sv_icon="comp statistiek" url=url_statistiek %}
             </div>
         </div>
 
@@ -148,21 +148,21 @@
             <!-- toon en koppel beheerders -->
             {% if toon_beheerders_algemeen %}
                 {% url 'Functie:lijst-beheerders' as card_url %}
-                {% include 'design/card_icon.dtl' with title="Beheerders" text="Toon wie beheerders van de bondscompetitie zijn, koppel andere beheerders of wijzig contactgegevens." icon="face" url=card_url %}
+                {% include 'design/card_icon.dtl' with title="Beheerders" text="Toon wie beheerders van de bondscompetitie zijn, koppel andere beheerders of wijzig contactgegevens." sv_icon="functie beheerders" url=card_url %}
             {% endif %}
 
             <!-- algemene informatie over de competities -->
             {% url 'Competitie:info-competitie' as card_url %}
-            {% include 'design/card_icon.dtl' with title="Informatie" text="Algemene informatie over de competities." icon="info" url=card_url %}
+            {% include 'design/card_icon.dtl' with title="Informatie" text="Algemene informatie over de competities." sv_icon="comp info indiv" url=card_url %}
 
             <!-- algemene informatie over de teamcompetitie -->
             {% url 'Competitie:info-teamcompetitie' as card_url %}
-            {% include 'design/card_icon.dtl' with title="Teams" text="Uitleg over de teamcompetities." icon="groups" url=card_url %}
+            {% include 'design/card_icon.dtl' with title="Teams" text="Uitleg over de teamcompetities." sv_icon="comp info teams" url=card_url %}
 
             <!-- leeftijdsgroepen -->
             <!-- let op: kopie van dit kaartje op Wedstrijden / wedstrijd-details -->
             {% url 'Sporter:leeftijdsgroepen' as card_url %}
-            {% include 'design/card_icon.dtl' with title="Leeftijdsgroepen" text="Algemene informatie over de groepering op leeftijd, voor wedstrijden en de competities." icon="star" url=card_url %}
+            {% include 'design/card_icon.dtl' with title="Leeftijdsgroepen" text="Algemene informatie over de groepering op leeftijd, voor wedstrijden en de competities." sv_icon="leeftijdsklassen" url=card_url %}
         </div>
     </div>
 

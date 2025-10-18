@@ -19,7 +19,7 @@ def get_kaartjes_beheer(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_in
     kaartje = SimpleNamespace(
                     prio=1,
                     titel="Tijdlijn",
-                    icoon="schedule",
+                    sv_icon="comp tijdlijn",
                     tekst="Toon de fases en planning van deze competitie.",
                     url=url)
     kaartjes_algemeen.append(kaartje)
@@ -35,7 +35,7 @@ def get_kaartjes_beheer(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_in
     kaartje = SimpleNamespace(
                     prio=6,
                     titel="Verenigingen",
-                    icoon="share_location",
+                    sv_icon="verenigingen",
                     tekst=tekst,
                     url=url)
     kaartjes_algemeen.append(kaartje)
@@ -45,7 +45,7 @@ def get_kaartjes_beheer(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_in
     kaartje = SimpleNamespace(
                     prio=7,
                     titel="Beheerders",
-                    icoon="face",
+                    sv_icon="functie beheerders",
                     tekst="Toon wie beheerders van de bondscompetitie zijn, " +
                           "koppel andere beheerders of wijzig contactgegevens.",
                     url=url)
@@ -58,7 +58,7 @@ def get_kaartjes_beheer(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_in
             kaartje = SimpleNamespace(
                         prio=8,
                         titel="Clusters",
-                        icoon="group_work",
+                        sv_icon="geo clusters",
                         tekst="Verenigingen groeperen in geografische clusters.",
                         url=url)
             kaartjes_algemeen.append(kaartje)
@@ -69,7 +69,7 @@ def get_kaartjes_beheer(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_in
         kaartje = SimpleNamespace(
                     prio=9,
                     titel="Wedstrijdklassen",
-                    icoon="equalizer",
+                    sv_icon="wedstrijdklassen",
                     tekst="Toon de wedstrijdklassen, klassengrenzen en blazoenen voor de competitie.",
                     url=url)
         kaartjes_algemeen.append(kaartje)
@@ -80,7 +80,7 @@ def get_kaartjes_beheer(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_in
         kaartje = SimpleNamespace(
                     prio=4,
                     titel="Uitslagenlijsten",
-                    icoon="scoreboard",
+                    sv_icon="uitslagen",
                     tekst="Toon de deelnemerslijsten en uitslagen van deze competitie.",
                     url=url)
         kaartjes_algemeen.append(kaartje)
@@ -91,7 +91,7 @@ def get_kaartjes_beheer(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_in
         kaartje = SimpleNamespace(
                     prio=3,
                     titel="Wijzig datums",
-                    icoon="build",
+                    sv_icon="comp wijzig datums",
                     tekst="Belangrijke datums aanpassen voor de fases van deze nieuwe competitie.",
                     url=url)
         kaartjes_algemeen.append(kaartje)
@@ -105,7 +105,7 @@ def get_kaartjes_beheer(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_in
             kaartje = SimpleNamespace(
                             prio=2,
                             titel="Doorzetten",
-                            icoon="mediation",
+                            sv_icon="comp doorzetten",
                             tekst="Kleine BK klassen zijn samengevoegd; deelnemerslijst openbaar maken.",
                             url=url)
             kaartjes_indiv.append(kaartje)
@@ -115,7 +115,7 @@ def get_kaartjes_beheer(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_in
             kaartje = SimpleNamespace(
                             prio=2,
                             titel="Doorzetten",
-                            icoon="mediation",
+                            sv_icon="comp doorzetten",
                             tekst="Kleine BK teams klassen zijn samengevoegd; deelnemerslijst openbaar maken.",
                             url=url)
             kaartjes_teams.append(kaartje)

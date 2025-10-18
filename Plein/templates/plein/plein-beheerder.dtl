@@ -35,31 +35,31 @@
                 <!-- wedstrijdkalender -->
                 {% if rol_is_mwz %}
                     {% url 'Wedstrijden:manager-status' status='wacht' as card_url %}
-                    {% include 'design/card_icon.dtl' with title="Wedstrijdkalender" text="Beheer de wedstrijdkalender." icon="event_note" url=card_url %}
+                    {% include 'design/card_icon.dtl' with title="Wedstrijdkalender" text="Beheer de wedstrijdkalender." sv_icon="kalender" url=card_url %}
                 {% endif %}
 
                 <!-- webwinkel -->
                 {% if rol_is_mww %}
                     {% url 'Webwinkel:manager' as card_url %}
-                    {% include 'design/card_icon.dtl' with title="Webwinkel" text="Beheer de webwinkel." icon="local_mall" url=card_url %}
+                    {% include 'design/card_icon.dtl' with title="Webwinkel" text="Beheer de webwinkel." sv_icon="webwinkel" url=card_url %}
                 {% endif %}
 
                 <!-- scheids -->
                 {% if rol_is_cs %}
                     {% url 'Scheidsrechter:overzicht' as card_url %}
-                    {% include 'design/card_icon.dtl' with title="Scheidsrechters" text="Voor leden van het scheidsrechterskorps" icon="sports" url=card_url %}
+                    {% include 'design/card_icon.dtl' with title="Scheidsrechters" text="Voor leden van het scheidsrechterskorps" sv_icon="scheidsrechters" url=card_url %}
                 {% endif %}
 
                 <!-- opleidingen -->
                 {% if rol_is_mo %}
                     {% url 'Opleiding:manager' as card_url %}
-                    {% include 'design/card_icon.dtl' with title="Opleidingen" text="Beheer de opleidingen en deelnemers." icon="school" url=card_url %}
+                    {% include 'design/card_icon.dtl' with title="Opleidingen" text="Beheer de opleidingen en deelnemers." sv_icon="opleidingen" url=card_url %}
                 {% endif %}
 
                 <!-- records -->
                 {% if rol_is_bb or rol_is_mwz or rol_is_hwl or rol_is_wl or rol_is_cs %}
                     {% url 'Records:overzicht' as card_url %}
-                    {% include 'design/card_icon.dtl' with title="Records" text="Alle handboogsport records van Nederlandse sporters." icon="insights" url=card_url %}
+                    {% include 'design/card_icon.dtl' with title="Records" text="Alle handboogsport records van Nederlandse sporters." sv_icon="records" url=card_url %}
                 {% endif %}
             </div>
         </div>
@@ -80,35 +80,35 @@
             <!-- vereniging menu -->
             {% if rol_is_sec or rol_is_la or rol_is_hwl or rol_is_wl %}
                 {% url 'Vereniging:overzicht' as card_url %}
-                {% include 'design/card_icon.dtl' with title="Beheer vereniging" text="Extra functies voor beheerders van jouw vereniging." icon="house_siding" url=card_url %}
+                {% include 'design/card_icon.dtl' with title="Beheer vereniging" text="Extra functies voor beheerders van jouw vereniging." sv_icon="beheer vereniging" url=card_url %}
             {% endif %}
 
             <!-- toon en koppel beheerders -->
             {% url 'Functie:lijst-beheerders' as card_url %}
-            {% include 'design/card_icon.dtl' with title="Beheerders" text="Toon en koppel beheerders aan rollen en wijzig contactgegevens." icon="face" url=card_url %}
+            {% include 'design/card_icon.dtl' with title="Beheerders" text="Toon en koppel beheerders aan rollen en wijzig contactgegevens." sv_icon="functie beheerders" url=card_url %}
 
             <!-- verenigingen/accommodaties overzicht -->
             {% if rol_is_bb or rol_is_mwz or rol_is_mo or rol_is_cs or rol_is_mla %}
                 {% url 'Vereniging:lijst' as card_url %}
-                {% include 'design/card_icon.dtl' with title="Verenigingen" text="Landelijk overzicht van de verenigingen, accommodaties en indeling in clusters." icon="share_location" url=card_url %}
+                {% include 'design/card_icon.dtl' with title="Verenigingen" text="Landelijk overzicht van de verenigingen, accommodaties en indeling in clusters." sv_icon="verenigingen" url=card_url %}
             {% endif %}
 
             <!-- verenigingen/accommodaties overzicht SEC en HWL -->
             {% if rol_is_sec or rol_is_hwl %}
                 {% url 'Vereniging:lijst' as card_url %}
-                {% include 'design/card_icon.dtl' with title="Verenigingen" text="Overzicht van de verenigingen en accommodaties in jouw regio." icon="share_location" url=card_url %}
+                {% include 'design/card_icon.dtl' with title="Verenigingen" text="Overzicht van de verenigingen en accommodaties in jouw regio." sv_icon="verenigingen" url=card_url %}
             {% endif %}
 
             <!-- taken -->
             {% url 'Taken:overzicht' as card_url %}
-            {% include 'design/card_icon.dtl' with title="Taken" text="Bekijk de taken gerelateerd aan een of meerdere functies waar jij toegang tot hebt." icon="inbox" url=card_url %}
+            {% include 'design/card_icon.dtl' with title="Taken" text="Bekijk de taken gerelateerd aan een of meerdere functies waar jij toegang tot hebt." sv_icon="taken" url=card_url %}
 
             <!-- wissel van rol -->
             {% url 'Functie:wissel-van-rol' as card_url %}
-            {% include 'design/card_icon.dtl' with title="Wissel van rol" text="Wissel naar een andere beheerdersrol of naar Sporter." icon="switch_account" url=card_url %}
+            {% include 'design/card_icon.dtl' with title="Wissel van rol" text="Wissel naar een andere beheerdersrol of naar Sporter." sv_icon="functie wissel van rol" url=card_url %}
 
             {% url 'Plein:handleidingen' as card_url%}
-            {% include 'design/card_icon.dtl' with title="Handleidingen" text="Bekijk de handleidingen." icon="menu_book" url=card_url %}
+            {% include 'design/card_icon.dtl' with title="Handleidingen" text="Bekijk de handleidingen." sv_icon="handleiding" url=card_url %}
         </div>
     </div>
 
@@ -129,43 +129,43 @@
                 {% if rol_is_bb or rol_is_mla or rol_is_sup %}
                     <!-- account activiteit -->
                     {% url 'Overig:activiteit' as card_url %}
-                    {% include 'design/card_icon.dtl' with title="Account activiteit" text="Toon overzicht van de recent gebruikte en aangemaakte accounts." icon="recent_actors" url=card_url %}
+                    {% include 'design/card_icon.dtl' with title="Account activiteit" text="Toon overzicht van de recent gebruikte en aangemaakte accounts." sv_icon="account activiteit" url=card_url %}
                 {% endif %}
 
                 {% if rol_is_bb or rol_is_sup %}
                     <!-- feedback -->
                     {% url 'Feedback:inzicht' as card_url %}
-                    {% include 'design/card_icon.dtl' with title="Site feedback" text="Toon de feedback van de gebruikers." icon="chat" url=card_url %}
+                    {% include 'design/card_icon.dtl' with title="Site feedback" text="Toon de feedback van de gebruikers." sv_icon="site feedback" url=card_url %}
                 {% endif %}
 
                 {% if rol_is_bb or rol_is_mwz or rol_is_mo %}
                     <!-- betalingen -->
                     {% url 'Bestelling:activiteit' as card_url %}
-                    {% include 'design/card_icon.dtl' with title='Bestellingen' text="Toon de bestellingen en betalingen." icon="shopping_cart" url=card_url %}
+                    {% include 'design/card_icon.dtl' with title='Bestellingen' text="Toon de bestellingen en betalingen." sv_icon="bestellingen overzicht" url=card_url %}
                 {% endif %}
 
                 {% if rol_is_bb or rol_is_mwz or rol_is_sup or rol_is_mo %}
                     <!-- logboek -->
                     {% url 'Logboek:alles' as card_url %}
-                    {% include 'design/card_icon.dtl' with title="Logboek" text="Bekijk het logboek." icon="book" url=card_url %}
+                    {% include 'design/card_icon.dtl' with title="Logboek" text="Bekijk het logboek." sv_icon="logboek" url=card_url %}
                 {% endif %}
 
                 {% if rol_is_bb or rol_is_mwz or rol_is_sup or rol_is_mla %}
                     <!-- overzicht VHPG acceptatie -->
                     {% url 'Functie:vhpg-overzicht' as card_url %}
-                    {% include 'design/card_icon.dtl' with title="VHPG status" text="Toon overzicht van beheerders die de verklaring geaccepteerd hebben." icon="verified_user" url=card_url %}
+                    {% include 'design/card_icon.dtl' with title="VHPG status" text="Toon overzicht van beheerders die de verklaring geaccepteerd hebben." sv_icon="functie vhpg status" url=card_url %}
                 {% endif %}
 
                 {% if rol_is_bb or rol_is_mwz %}
                     <!-- Interland lijst -->
                     {% url 'HistComp:interland' as card_url %}
-                    {% include 'design/card_icon.dtl' with title="Interland lijst" text="Toon de lijst met kandidaat deelnemers voor de Interland." icon="flag" url=card_url %}
+                    {% include 'design/card_icon.dtl' with title="Interland lijst" text="Toon de lijst met kandidaat deelnemers voor de Interland." sv_icon="interland lijst" url=card_url %}
                 {% endif %}
 
                 {% if rol_is_bb or rol_is_mwz %}
                     <!-- score geschiedenis -->
                     {% url 'Score:geschiedenis' as card_url %}
-                    {% include 'design/card_icon.dtl' with title="Score geschiedenis" text="Bekijk de wijzigingen / geschiedenis van de scores van een sporter." icon="history" url=card_url %}
+                    {% include 'design/card_icon.dtl' with title="Score geschiedenis" text="Bekijk de wijzigingen / geschiedenis van de scores van een sporter." sv_icon="score geschiedenis" url=card_url %}
                 {% endif %}
             </div>
         </div>

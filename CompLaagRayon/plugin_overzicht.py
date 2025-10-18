@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -26,7 +26,7 @@ def get_kaartjes_rayon(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_ind
             kaartje = SimpleNamespace(
                         prio=2,
                         titel="Doorzetten",
-                        icoon="mediation",
+                        sv_icon="comp doorzetten",
                         tekst="Open inschrijving RK teams sluiten en " +
                               "de klassengrenzen voor het RK teams en BK teams vaststellen.",
                         url=url)
@@ -38,7 +38,7 @@ def get_kaartjes_rayon(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_ind
             kaartje = SimpleNamespace(
                         prio=10,
                         titel="Blanco resultaat",
-                        icoon="fast_forward",
+                        sv_icon="comp blanco resultaat",
                         tekst="Sporters die niet hebben kunnen schieten een blanco resultaat geven",
                         url=url)
             kaartjes_indiv.append(kaartje)
@@ -49,7 +49,7 @@ def get_kaartjes_rayon(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_ind
             kaartje = SimpleNamespace(
                         prio=2,
                         titel="Doorzetten",
-                        icoon="mediation",
+                        sv_icon="comp doorzetten",
                         tekst="%s individueel doorzetten naar de volgende fase (RK naar BK)" % comp.beschrijving,
                         url=url)
             kaartjes_indiv.append(kaartje)
@@ -60,7 +60,7 @@ def get_kaartjes_rayon(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_ind
             kaartje = SimpleNamespace(
                         prio=2,
                         titel="Doorzetten",
-                        icoon="mediation",
+                        sv_icon="comp doorzetten",
                         tekst="%s teams doorzetten naar de volgende fase (RK naar BK)" % comp.beschrijving,
                         url=url)
             kaartjes_teams.append(kaartje)
@@ -71,7 +71,7 @@ def get_kaartjes_rayon(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_ind
             kaartje = SimpleNamespace(
                         prio=5,
                         titel="RK teams",
-                        icoon="api",
+                        sv_icon="comp rk teams",
                         tekst="Alle aangemelde teams voor de Rayonkampioenschappen.",
                         url=url)
             kaartjes_teams.append(kaartje)
@@ -82,7 +82,7 @@ def get_kaartjes_rayon(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_ind
             kaartje = SimpleNamespace(
                         prio=5,
                         titel="Extra deelnemer",
-                        icoon="person_add",
+                        sv_icon="comp rk extra deelnemer",
                         tekst="Voeg een regiocompetitie deelnemer toe aan het RK (aspirant of na score correctie).",
                         url=url)
             kaartjes_indiv.append(kaartje)
@@ -109,7 +109,7 @@ def get_kaartjes_rayon(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_ind
                 kaartje = SimpleNamespace(
                             prio=3,
                             titel="Planning %s" % deelkamp_rk.rayon.naam,
-                            icoon="pending_actions",
+                            sv_icon="comp planning",
                             tekst="Planning voor %s voor deze competitie." % deelkamp_rk.rayon.naam,
                             url=url)
                 kaartjes_algemeen.append(kaartje)
@@ -120,7 +120,7 @@ def get_kaartjes_rayon(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_ind
                 kaartje = SimpleNamespace(
                             prio=5,
                             titel="RK selectie",
-                            icoon="rule",
+                            sv_icon="comp rk selectie",
                             tekst="Selectie van sporters voor de Rayonkampioenschappen.",
                             url=url)
                 kaartjes_indiv.append(kaartje)
@@ -131,7 +131,7 @@ def get_kaartjes_rayon(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_ind
                 kaartje = SimpleNamespace(
                             prio=5,
                             titel="RK limieten",
-                            icoon="accessibility_new",
+                            sv_icon="comp limieten",
                             tekst="Maximum aantal deelnemers in elke wedstrijdklasse van jouw RK instellen.",
                             url=url)
                 kaartjes_indiv.append(kaartje)
@@ -143,7 +143,7 @@ def get_kaartjes_rayon(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_ind
                 kaartje = SimpleNamespace(
                             prio=4,
                             titel="RK teams",
-                            icoon="api",
+                            sv_icon="comp rk teams",
                             tekst="Aangemelde teams voor de Rayonkampioenschappen in %s." % deelkamp_rk.rayon.naam,
                             url=url)
                 kaartjes_teams.append(kaartje)

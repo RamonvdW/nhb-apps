@@ -37,7 +37,7 @@ def get_kaartjes_regio(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_ind
             kaartje = SimpleNamespace(
                         prio=6,
                         titel="Aanvangsgemiddelden",
-                        icoon="how_to_reg",
+                        sv_icon="comp ag vaststellen",
                         tekst=tekst,
                         url=url)
             kaartjes_algemeen.append(kaartje)
@@ -47,7 +47,7 @@ def get_kaartjes_regio(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_ind
             kaartje = SimpleNamespace(
                         prio=6,
                         titel="Zet klassengrenzen",
-                        icoon="equalizer",
+                        sv_icon="comp klassengrenzen vaststellen",
                         tekst="Klassengrenzen vaststellen (eenmalige actie).",
                         url=url)
             kaartjes_algemeen.append(kaartje)
@@ -60,7 +60,7 @@ def get_kaartjes_regio(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_ind
             kaartje = SimpleNamespace(
                 prio=2,
                 titel="Doorzetten",
-                icoon="mediation",
+                sv_icon="comp doorzetten",
                 tekst="%s doorzetten naar de volgende fase (regio naar RK)" % comp.beschrijving,
                 url=url)
             kaartjes_algemeen.append(kaartje)
@@ -72,7 +72,7 @@ def get_kaartjes_regio(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_ind
         kaartje = SimpleNamespace(
                         prio=6,
                         titel="Regio keuzes",
-                        icoon="flaky",
+                        sv_icon="comp regio instellingen teams",
                         tekst="Overzicht van de keuzes gemaakt per regio.",
                         url=url)
         kaartjes_teams.append(kaartje)
@@ -84,7 +84,7 @@ def get_kaartjes_regio(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_ind
             kaartje = SimpleNamespace(
                         prio=5,
                         titel="Regio Teams",
-                        icoon="gamepad",
+                        sv_icon="comp regio teams",
                         tekst="Alle aangemelde teams voor de regio teamcompetitie.",
                         url=url)
             kaartjes_teams.append(kaartje)
@@ -104,7 +104,7 @@ def get_kaartjes_regio(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_ind
                 kaartje = SimpleNamespace(
                             prio=5,
                             titel="Medailles",
-                            icoon="military_tech",
+                            sv_icon="comp medailles",
                             tekst="Toon de toegekende medailles voor elke klasse.",
                             url=url)
                 kaartjes_teams.append(kaartje)
@@ -115,7 +115,7 @@ def get_kaartjes_regio(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_ind
                     kaartje = SimpleNamespace(
                                 prio=3,
                                 titel="Planning Regio %s" % regiocomp.regio.regio_nr,
-                                icoon="pending_actions",
+                                sv_icon="comp planning",
                                 tekst="Planning van de wedstrijden voor deze competitie.",
                                 url=url)
                     kaartjes_indiv.append(kaartje)
@@ -127,7 +127,7 @@ def get_kaartjes_regio(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_ind
                     kaartje = SimpleNamespace(
                                 prio=9,
                                 titel="Instelling teams",
-                                icoon="flaky",
+                                sv_icon="comp regio instellingen teams",
                                 tekst="Instellingen voor de teamcompetitie in de regio.",
                                 url=url)
                     kaartjes_teams.append(kaartje)
@@ -139,7 +139,7 @@ def get_kaartjes_regio(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_ind
                     kaartje = SimpleNamespace(
                                 prio=2,
                                 titel="Scores",
-                                icoon="edit",
+                                sv_icon="scores invoeren",
                                 tekst="Scores invoeren en aanpassen voor %s voor deze competitie." %
                                       regiocomp.regio.naam,
                                 url=url)
@@ -156,8 +156,9 @@ def get_kaartjes_regio(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_ind
                             kaartje = SimpleNamespace(
                                         prio=5,
                                         titel="Medailles",
-                                        icoon="military_tech",
-                                        tekst="Toon de toegekende medailles voor elke klasse (zodra de regiocompetitie afgesloten is).",
+                                        sv_icon="comp medailles",
+                                        tekst="Toon de toegekende medailles voor elke klasse" +
+                                              " (zodra de regiocompetitie afgesloten is).",
                                         beschikbaar_vanaf=datum_vanaf)
                             kaartjes_indiv.append(kaartje)
 
@@ -166,8 +167,9 @@ def get_kaartjes_regio(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_ind
                         kaartje = SimpleNamespace(
                             prio=10,
                             titel="Medailles",
-                            icoon="military_tech",
-                            tekst="Toon de toegekende medailles voor elke klasse (zodra de regiocompetitie afgesloten is).",
+                            sv_icon="comp medailles",
+                            tekst="Toon de toegekende medailles voor elke klasse" +
+                                  " (zodra de regiocompetitie afgesloten is).",
                             beschikbaar_binnenkort=True)
                         kaartjes_indiv.append(kaartje)
 
@@ -180,7 +182,7 @@ def get_kaartjes_regio(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_ind
                     kaartje = SimpleNamespace(
                                 prio=7,
                                 titel="AG controle",
-                                icoon="how_to_reg",
+                                sv_icon="comp ag controle",
                                 tekst="Handmatig ingevoerde aanvangsgemiddelden voor de teamcompetitie.",
                                 url=url)
                     kaartjes_teams.append(kaartje)
@@ -190,7 +192,7 @@ def get_kaartjes_regio(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_ind
                     kaartje = SimpleNamespace(
                                     prio=5,
                                     titel="Ingeschreven Teams",
-                                    icoon="gamepad",
+                                    sv_icon="comp regio ingeschreven teams",
                                     tekst="Teams voor de regiocompetitie inzien voor deze competitie.",
                                     url=url)
                     kaartjes_teams.append(kaartje)
@@ -200,7 +202,7 @@ def get_kaartjes_regio(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_ind
                     kaartje = SimpleNamespace(
                                     prio=5,
                                     titel="Team Poules",
-                                    icoon="grid_4x4",
+                                    sv_icon="comp regio poules",
                                     tekst="Poules voor directe teamwedstrijden tussen teams in deze regiocompetitie.",
                                     url=url)
                     kaartjes_teams.append(kaartje)
@@ -212,7 +214,7 @@ def get_kaartjes_regio(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_ind
                         kaartje = SimpleNamespace(
                                     prio=1,
                                     titel="Team Ronde",
-                                    icoon="mediation",
+                                    sv_icon="comp doorzetten",
                                     tekst="Stel de team punten vast en " +
                                           "zet de teamcompetitie door naar de volgende ronde.",
                                     url=url)
@@ -226,7 +228,7 @@ def get_kaartjes_regio(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_ind
                     kaartje = SimpleNamespace(
                                     prio=5,
                                     titel="Inschrijvingen",
-                                    icoon="receipt",
+                                    sv_icon="comp inschrijvingen",
                                     tekst="Toon lijst met sporters ingeschreven voor de regiocompetitie.",
                                     url=url)
                     kaartjes_indiv.append(kaartje)
@@ -237,7 +239,7 @@ def get_kaartjes_regio(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_ind
                     kaartje = SimpleNamespace(
                                     prio=5,
                                     titel="Sluit Regiocompetitie",
-                                    icoon="done_outline",
+                                    sv_icon="comp regio afsluiten",
                                     tekst="Bevestig eindstand %s voor de %s." % (regiocomp.regio.naam,
                                                                                  regiocomp.competitie.beschrijving),
                                     url=url)

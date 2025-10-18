@@ -101,7 +101,7 @@
                     {% if menu_url_wissel_van_rol %}
                         <li class="divider"></li>
                         <li>
-                            <a href="{{ menu_url_wissel_van_rol }}">{% sv-icon 'wissel-van-rol' %}Wissel van rol</a>
+                            <a href="{{ menu_url_wissel_van_rol }}">{% sv-icon 'functie wissel van rol' %}Wissel van rol</a>
                         </li>
                     {% endif %}
 
@@ -125,7 +125,7 @@
                     {% if menu_url_profiel %}
                         <li class="divider"></li>
                         <li>
-                            <a href="{{ menu_url_profiel }}">{% sv-icon 'mijn-pagina' %}Mijn pagina</a>
+                            <a href="{{ menu_url_profiel }}">{% sv-icon 'mijn pagina' %}Mijn pagina</a>
                         </li>
                     {% endif %}
 

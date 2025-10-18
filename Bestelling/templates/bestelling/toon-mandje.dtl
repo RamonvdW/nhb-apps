@@ -31,19 +31,19 @@
         <div class="row-sv-blauw">
             <div class="col s12">
                 {% url 'Plein:plein' as card_url %}
-                {% include 'design/card_icon.dtl' with title="Het Plein" text="Naar de beginpagina." icon="hub" url=card_url %}
+                {% include 'design/card_icon.dtl' with title="Het Plein" text="Naar de beginpagina." sv_icon="het plein" url=card_url %}
 
                 <!-- kalender -->
                 {% url 'Kalender:landing-page' as card_url %}
-                {% include 'design/card_icon.dtl' with title="Kalender" text="Bekijk welke wedstrijden en evenementen georganiseerd worden en schrijf je in." icon="event_note" url=card_url %}
+                {% include 'design/card_icon.dtl' with title="Kalender" text="Bekijk welke wedstrijden en evenementen georganiseerd worden en schrijf je in." sv_icon="kalender" url=card_url %}
 
                 <!-- opleidingen -->
                 {% url 'Opleiding:overzicht' as card_url %}
-                {% include 'design/card_icon.dtl' with title="Opleidingen" text="Bekijk welke opleidingen georganiseerd worden en schrijf je in." icon="school" url=card_url %}
+                {% include 'design/card_icon.dtl' with title="Opleidingen" text="Bekijk welke opleidingen georganiseerd worden en schrijf je in." sv_icon="opleidingen" url=card_url %}
 
                 <!-- webwinkel -->
                 {% url 'Webwinkel:overzicht' as card_url %}
-                {% include 'design/card_icon.dtl' with title="Webwinkel" text="Bekijk onze webwinkel." icon="local_mall" url=card_url %}
+                {% include 'design/card_icon.dtl' with title="Webwinkel" text="Bekijk onze webwinkel." sv_icon="webwinkel" url=card_url %}
             </div>
         </div>
 
@@ -59,7 +59,7 @@
         <div class="row-sv-blauw">
             <div class="col s12">
                 {% url 'Bestelling:toon-bestellingen' as card_url %}
-                {% include 'design/card_icon.dtl' with title="Bestellingen" text="Alle details van je bestellingen." icon="receipt_long" url=card_url %}
+                {% include 'design/card_icon.dtl' with title="Bestellingen" text="Alle details van je bestellingen." sv_icon="mijn bestellingen" url=card_url %}
             </div>
         </div>
 
@@ -250,11 +250,11 @@
     <!-- blauwe balk met kaartjes -->
     <div class="row-sv-blauw">
         <div class="col s12">
-            {% include 'design/card_icon.dtl' with title="Evenementen" text="De verkoopvoorwaarden voor wedstrijden en evenementen staan beschreven in dit document." icon="article" extern_open=True url=url_voorwaarden_wedstrijden %}
+            {% include 'design/card_icon.dtl' with title="Evenementen" text="De verkoopvoorwaarden voor wedstrijden en evenementen staan beschreven in dit document." sv_icon="evenement verkoopvoorwaarden" extern_open=True url=url_voorwaarden_wedstrijden %}
 
-            {% include 'design/card_icon.dtl' with title="Webwinkel" text="De verkoopvoorwaarden voor de webwinkel staan beschreven in dit document." icon="article" extern_open=True url=url_voorwaarden_webwinkel %}
+            {% include 'design/card_icon.dtl' with title="Webwinkel" text="De verkoopvoorwaarden voor de webwinkel staan beschreven in dit document." sv_icon="webwinkel verkoopvoorwaarden" extern_open=True url=url_voorwaarden_webwinkel %}
 
-            {% include 'design/card_icon.dtl' with title="Opleidingen" text="De verkoopvoorwaarden voor de opleidingen staan beschreven in dit document." icon="article" extern_open=True url=url_voorwaarden_opleidingen %}
+            {% include 'design/card_icon.dtl' with title="Opleidingen" text="De verkoopvoorwaarden voor de opleidingen staan beschreven in dit document." sv_icon="opleiding verkoopvoorwaarden" extern_open=True url=url_voorwaarden_opleidingen %}
         </div>
     </div>
 

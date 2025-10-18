@@ -83,10 +83,10 @@
     <div class="row-sv-blauw">
         <div class="col s12">
             {% url 'Account:wachtwoord-vergeten' as card_url %}
-            {% include 'design/card_icon.dtl' with title="Wachtwoord?" text="Heb je een account aangemaakt maar ben je het wachtwoord vergeten?" icon="help" url=card_url %}
+            {% include 'design/card_icon.dtl' with title="Wachtwoord?" text="Heb je een account aangemaakt maar ben je het wachtwoord vergeten?" sv_icon="account wachtwoord vergeten" url=card_url %}
 
             {% url 'Registreer:begin' as card_url %}
-            {% include 'design/card_icon.dtl' with title="Account aanmaken" text="Met een account wordt het persoonlijker en krijg je toegang tot meer functionaliteit." icon="fingerprint" url=card_url %}
+            {% include 'design/card_icon.dtl' with title="Account aanmaken" text="Met een account wordt het persoonlijker en krijg je toegang tot meer functionaliteit." sv_icon="account aanmaken" url=card_url %}
         </div>
     </div>
 

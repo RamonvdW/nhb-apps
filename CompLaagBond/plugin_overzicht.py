@@ -29,7 +29,7 @@ def get_kaartjes_bond(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_indi
             kaartje = SimpleNamespace(
                         prio=3,
                         titel="Planning",
-                        icoon="pending_actions",
+                        sv_icon="comp planning",
                         tekst="Landelijke planning voor deze competitie.",
                         url=url)
             kaartjes_algemeen.append(kaartje)
@@ -40,7 +40,7 @@ def get_kaartjes_bond(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_indi
             kaartje = SimpleNamespace(
                         prio=2,
                         titel="Kleine klassen",
-                        icoon="merge",
+                        sv_icon="comp kleine klassen",
                         tekst="Kleine wedstrijdklassen samenvoegen voor de individuele Bondskampioenschappen.",
                         url=url)
             kaartjes_indiv.append(kaartje)
@@ -62,7 +62,7 @@ def get_kaartjes_bond(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_indi
             kaartje = SimpleNamespace(
                         prio=5,
                         titel="BK selectie",
-                        icoon="rule",
+                        sv_icon="comp doorzetten",
                         tekst="Selectie van sporters voor de Bondskampioenschappen.",
                         url=url)
             kaartjes_indiv.append(kaartje)
@@ -73,7 +73,7 @@ def get_kaartjes_bond(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_indi
             kaartje = SimpleNamespace(
                         prio=5,
                         titel="BK teams",
-                        icoon="rule",
+                        sv_icon="comp bk teams",
                         tekst="Aanmelden / afmelden teams voor de BK.",
                         url=url)
             kaartjes_teams.append(kaartje)
@@ -84,7 +84,7 @@ def get_kaartjes_bond(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_indi
             kaartje = SimpleNamespace(
                         prio=5,
                         titel="BK limieten",
-                        icoon="accessibility_new",
+                        sv_icon="comp limieten",
                         tekst="Maximum aantal deelnemers in elke wedstrijdklasse van jouw BK instellen.",
                         url=url)
             if 'L' <= comp.fase_indiv <= 'P':
@@ -93,25 +93,26 @@ def get_kaartjes_bond(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_indi
                 kaartjes_teams.append(kaartje)
 
         # BK programma's
-        if comp.fase_indiv in ('O', 'P'):
-            url = reverse('CompLaagBond:formulier-indiv-lijst', kwargs={'deelkamp_pk': deelkamp_bk.pk})
-            kaartje = SimpleNamespace(
-                        prio=2,
-                        titel="BK programma's",
-                        icoon="download_for_offline",
-                        tekst="Download de BK programma's om te versturen",
-                        url=url)
-            kaartjes_indiv.append(kaartje)
-
-        if comp.fase_teams in ('O', 'P'):
-            url = reverse('CompLaagBond:formulier-teams-lijst', kwargs={'deelkamp_pk': deelkamp_bk.pk})
-            kaartje = SimpleNamespace(
-                        prio=2,
-                        titel="BK programma's",
-                        icoon="download_for_offline",
-                        tekst="Download de BK programma's om te versturen",
-                        url=url)
-            kaartjes_teams.append(kaartje)
+        # TODO: deel het google sheets wedstrijdformulier
+        # if comp.fase_indiv in ('O', 'P'):
+        #     url = reverse('CompLaagBond:formulier-indiv-lijst', kwargs={'deelkamp_pk': deelkamp_bk.pk})
+        #     kaartje = SimpleNamespace(
+        #                 prio=2,
+        #                 titel="BK programma's",
+        #                 icoon="download_for_offline",
+        #                 tekst="Download de BK programma's om te versturen",
+        #                 url=url)
+        #     kaartjes_indiv.append(kaartje)
+        #
+        # if comp.fase_teams in ('O', 'P'):
+        #     url = reverse('CompLaagBond:formulier-teams-lijst', kwargs={'deelkamp_pk': deelkamp_bk.pk})
+        #     kaartje = SimpleNamespace(
+        #                 prio=2,
+        #                 titel="BK programma's",
+        #                 icoon="download_for_offline",
+        #                 tekst="Download de BK programma's om te versturen",
+        #                 url=url)
+        #     kaartjes_teams.append(kaartje)
 
         # Doorzetten BK individueel / bevestig uitslag
         if comp.fase_indiv == 'P':
@@ -119,7 +120,7 @@ def get_kaartjes_bond(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_indi
             kaartje = SimpleNamespace(
                         prio=2,
                         titel="Doorzetten",
-                        icoon="mediation",
+                        sv_icon="comp doorzetten",
                         tekst="%s uitslag BK individueel bevestigen" % comp.beschrijving,
                         url=url)
             kaartjes_indiv.append(kaartje)
@@ -130,7 +131,7 @@ def get_kaartjes_bond(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_indi
             kaartje = SimpleNamespace(
                         prio=2,
                         titel="Doorzetten",
-                        icoon="mediation",
+                        sv_icon="comp doorzetten",
                         tekst="%s uitslag BK teams bevestigen" % comp.beschrijving,
                         url=url)
             kaartjes_teams.append(kaartje)
