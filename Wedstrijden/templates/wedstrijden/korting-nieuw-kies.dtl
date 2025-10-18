@@ -46,11 +46,11 @@
     <!-- blauwe balk met kaartjes -->
     <div class="row-sv-blauw">
         <div class="col s12">
-            {% include 'design/card_icon.dtl' with title="Persoonlijk" text="Voor een individuele sporter." icon="account_circle" onclick="keuze('sporter')" %}
+            {% include 'design/card_icon.dtl' with title="Persoonlijk" text="Voor een individuele sporter." sv_icon="korting persoonlijk" onclick="keuze('sporter')" %}
 
-            {% include 'design/card_icon.dtl' with title="Vereniging" text="Voor alle leden van jullie vereniging." icon="home" onclick="keuze('vereniging')" %}
+            {% include 'design/card_icon.dtl' with title="Vereniging" text="Voor alle leden van jullie vereniging." sv_icon="korting vereniging" onclick="keuze('vereniging')" %}
 
-            {% include 'design/card_icon.dtl' with title="Combinatie" text="Voor inschrijving op meerdere wedstrijden." icon="stack" onclick="keuze('combi')" %}
+            {% include 'design/card_icon.dtl' with title="Combinatie" text="Voor inschrijving op meerdere wedstrijden." sv_icon="korting combi" onclick="keuze('combi')" %}
         </div>
     </div>
 

@@ -24,18 +24,18 @@
         <div class="col s12">
 
             <!-- korps -->
-            {% include 'design/card_icon.dtl' with title="Korps" text=tekst_korps icon="star" url=url_korps %}
+            {% include 'design/card_icon.dtl' with title="Korps" text=tekst_korps sv_icon="scheids korps" url=url_korps %}
 
             <!-- wedstrijdkalender -->
             {% url 'Scheidsrechter:wedstrijden' as card_url %}
-            {% include 'design/card_icon.dtl' with title="Wedstrijdkalender" text="Bekijk welke wedstrijden scheidsrechters nodig hebben." icon="event_note" url=card_url %}
+            {% include 'design/card_icon.dtl' with title="Wedstrijdkalender" text="Bekijk welke wedstrijden scheidsrechters nodig hebben." sv_icon="scheids kalender" url=card_url %}
 
             <!-- competitiewedstrijden -->
             {% url 'Scheidsrechter:competitie' as card_url %}
-            {% include 'design/card_icon.dtl' with title="Bondscompetitie" text="Bekijk welke RK/BK wedstrijden een scheidsrechter nodig hebben." icon="my_location" url=card_url %}
+            {% include 'design/card_icon.dtl' with title="Bondscompetitie" text="Bekijk welke RK/BK wedstrijden een scheidsrechter nodig hebben." sv_icon="scheids competitie" url=card_url %}
 
             <!-- beschikbaarheid -->
-            {% include 'design/card_icon.dtl' with title="Beschikbaarheid" text=tekst_beschikbaarheid icon="event_available" url=url_beschikbaarheid %}
+            {% include 'design/card_icon.dtl' with title="Beschikbaarheid" text=tekst_beschikbaarheid sv_icon="scheids beschikbaarheid" url=url_beschikbaarheid %}
 
         </div>
     </div>
@@ -52,13 +52,13 @@
     <div class="row-sv-blauw">
         <div class="col s12">
 
-            {% include 'design/card_icon.dtl' with title="Handleiding" text="Instructies voor gebruik MijnHandboogsport door scheidsrechters en de commissie." icon="article" extern_open=True url=url_handleiding_scheidsrechters %}
+            {% include 'design/card_icon.dtl' with title="Handleiding" text="Instructies voor gebruik MijnHandboogsport door scheidsrechters en de commissie." sv_icon="scheids handleiding" extern_open=True url=url_handleiding_scheidsrechters %}
 
-            <!--
-            {% include 'design/card_icon.dtl' with title="Een" text="Hier komt het 1e document dat vaak nodig is" icon="description" url='#' %}
-            {% include 'design/card_icon.dtl' with title="Twee" text="Hier komt het 2e document dat vaak nodig is" icon="edit" url='#' %}
-            {% include 'design/card_icon.dtl' with title="Drie" text="Hier komt het 3e document dat vaak nodig is" icon="gavel" url='#' %}
-            -->
+            {% comment %}
+            {% include 'design/card_icon.dtl' with title="Een"  text="Hier komt het 1e document dat vaak nodig is" sv_icon="#" url='#' %}
+            {% include 'design/card_icon.dtl' with title="Twee" text="Hier komt het 2e document dat vaak nodig is" sv_icon="#" url='#' %}
+            {% include 'design/card_icon.dtl' with title="Drie" text="Hier komt het 3e document dat vaak nodig is" sv_icon="#" url='#' %}
+            {% endcomment %}
 
         </div>
     </div>

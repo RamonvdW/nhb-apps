@@ -28,7 +28,6 @@ content_copy
 crop_square
 database
 delete
-description
 done
 done_outline
 download

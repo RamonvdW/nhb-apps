@@ -304,24 +304,24 @@
                 {% if kan_aanmelden %}
 
                     <!-- inschrijven sporter -->
-                    {% include 'design/card_icon.dtl' with title="Sporter" text="Aanmelden en betalen voor jezelf." icon="person" url=url_inschrijven_sporter %}
+                    {% include 'design/card_icon.dtl' with title="Sporter" text="Aanmelden en betalen voor jezelf." sv_icon="inschrijven sporter" url=url_inschrijven_sporter %}
 
                     <!-- inschrijven groepje -->
-                    {% include 'design/card_icon.dtl' with title="Groep" text="Aanmelden en betalen voor een groepje leden zoals team, vrienden of collega's." icon="group" url=url_inschrijven_groepje %}
+                    {% include 'design/card_icon.dtl' with title="Groep" text="Aanmelden en betalen voor een groepje leden zoals team, vrienden of collega's." sv_icon="inschrijven groep" url=url_inschrijven_groepje %}
 
                     <!-- inschrijven familie -->
-                    {% include 'design/card_icon.dtl' with title="Familie" text="Aanmelden en betalen voor jonge leden, door ouders." icon="family_restroom" url=url_inschrijven_familie %}
+                    {% include 'design/card_icon.dtl' with title="Familie" text="Aanmelden en betalen voor jonge leden, door ouders." sv_icon="inschrijven familie" url=url_inschrijven_familie %}
 
                 {% endif %}
 
                 {% if hint_inloggen %}
-                    {% include 'design/card_niet-beschikbaar.dtl' with waarom="Eerst inloggen" title="Sporter" text="Aanmelden en betalen voor jezelf." icon="person" %}
-                    {% include 'design/card_niet-beschikbaar.dtl' with waarom="Eerst inloggen" title="Groep" text="Aanmelden en betalen voor een groepje leden zoals team, vrienden of collega's." icon="group" %}
-                    {% include 'design/card_niet-beschikbaar.dtl' with waarom="Eerst inloggen" title="Familie" text="Aanmelden en betalen voor jonge leden, door ouders." icon="family_restroom" %}
+                    {% include 'design/card_niet-beschikbaar.dtl' with waarom="Eerst inloggen" title="Sporter" text="Aanmelden en betalen voor jezelf." sv_icon="inschrijven sporter" %}
+                    {% include 'design/card_niet-beschikbaar.dtl' with waarom="Eerst inloggen" title="Groep" text="Aanmelden en betalen voor een groepje leden zoals team, vrienden of collega's." sv_icon="inschrijven groep" %}
+                    {% include 'design/card_niet-beschikbaar.dtl' with waarom="Eerst inloggen" title="Familie" text="Aanmelden en betalen voor jonge leden, door ouders." sv_icon="inschrijven familie" %}
                 {% endif %}
 
                 {% if wed.extern_beheerd and wed.contact_website %}
-                   {% include 'design/card_icon.dtl' with title='Inschrijven' icon="person" extern_open=1 text="Inschrijven voor deze wedstrijd gaat via de website van de organisatie" url=wed.contact_website %}
+                   {% include 'design/card_icon.dtl' with title='Inschrijven' sv_icon="inschrijven sporter" extern_open=1 text="Inschrijven voor deze wedstrijd gaat via de website van de organisatie" url=wed.contact_website %}
                 {% endif %}
 
             </div>
@@ -344,7 +344,7 @@
             <!-- informatie over leeftijden -->
             <!-- let op: kopie van dit kaartje op Competitie / kies -->
             {% url 'Sporter:leeftijdsgroepen' as card_url %}
-            {% include 'design/card_icon.dtl' with title="Leeftijdsgroepen" text="Algemene informatie over de groepering op leeftijd, voor wedstrijden en de competities." icon="star" url=card_url %}
+            {% include 'design/card_icon.dtl' with title="Leeftijdsgroepen" text="Algemene informatie over de groepering op leeftijd, voor wedstrijden en de competities." sv_icon="leeftijdsklassen" url=card_url %}
 
         </div>
     </div>
