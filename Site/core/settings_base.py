@@ -76,6 +76,7 @@ INSTALLED_APPS = [
     'Competitie',
     'CompBeheer',
     'CompInschrijven',
+    'CompKampioenschap',
     'CompLaagBond',
     'CompLaagRegio',
     'CompLaagRayon',

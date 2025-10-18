@@ -38,15 +38,16 @@ class MyMgmtCommandHelper(TestCase):
             raise self.failureException(msg)
         return f1, f2
 
-    def verwerk_competitie_mutaties(self, show_warnings=True, show_all=False):
+    def verwerk_competitie_mutaties(self, ignore_errors=False, show_warnings=True, show_all=False):
         # vraag de achtergrondtaak om de mutaties te verwerken
         f1 = io.StringIO()
         f2 = io.StringIO()
         management.call_command('competitie_mutaties', '1', '--quick', stderr=f1, stdout=f2)
 
-        err_msg = f1.getvalue()
-        if '[ERROR]' in err_msg or 'Traceback:' in err_msg:  # pragma: no cover
-            self.fail(msg='Onverwachte fout van competitie_mutaties:\n' + err_msg)
+        if not ignore_errors:
+            err_msg = f1.getvalue() + '\n' + f2.getvalue()
+            if '[ERROR]' in err_msg or 'Traceback:' in err_msg:  # pragma: no cover
+                self.fail(msg='Onverwachte fout van competitie_mutaties:\n' + err_msg)
 
         if show_all:                                                            # pragma: no cover
             print(f1.getvalue())

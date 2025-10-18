@@ -730,8 +730,8 @@ class VerwerkCompKampMutaties:
         sheet = None
 
         # note: Indoor en 25m1pijl hebben aparte klassen
-        indiv_klasse_pk2match = dict()
-        team_klasse_pk2match = dict()
+        indiv_klasse_pk2match = dict[int, CompetitieMatch]()
+        team_klasse_pk2match = dict[int, CompetitieMatch]()
 
         for match in (CompetitieMatch
                       .objects
@@ -749,7 +749,6 @@ class VerwerkCompKampMutaties:
             # for
         # for
 
-        start_time = time.time()
         for bestand in iter_dirty_wedstrijdformulieren(begin_jaar):
             self.stdout.write('[INFO] Update bestand pk=%s' % bestand.pk)
 
@@ -761,20 +760,25 @@ class VerwerkCompKampMutaties:
                 sheet = GoogleSheet(self.stdout)
             sheet.selecteer_file(bestand.file_id)
 
+            res = ''
             if bestand.is_teams:
                 # teams
-                match = team_klasse_pk2match[bestand.klasse_pk]
                 updater = UpdateTeamsWedstrijdFormulier(self.stdout, sheet)
-                res = updater.update_wedstrijdformulier(bestand, match)
+                match = team_klasse_pk2match.get(bestand.klasse_pk, None)
             else:
                 # individueel
-                match = indiv_klasse_pk2match[bestand.klasse_pk]
                 updater = UpdateIndivWedstrijdFormulier(self.stdout, sheet)
-                res = updater.update_wedstrijdformulier(bestand, match)
+                match = indiv_klasse_pk2match.get(bestand.klasse_pk, None)
 
             now = timezone.now()
             stamp_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
-            msg = '[%s] Bijgewerkt met resultaat %s\n' % (stamp_str, res)
+
+            if match:
+                res = updater.update_wedstrijdformulier(bestand, match)
+                msg = '[%s] Bijgewerkt met resultaat %s\n' % (stamp_str, res)
+            else:
+                msg = '[%s] ERROR: kan CompetitieMatch niet vinden voor Bestand pk=%s' % (stamp_str, bestand.pk)
+
             bestand.is_dirty = False
             bestand.log += msg
             bestand.save(update_fields=['is_dirty', 'log'])

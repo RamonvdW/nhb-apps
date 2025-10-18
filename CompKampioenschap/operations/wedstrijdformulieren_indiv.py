@@ -138,22 +138,21 @@ class UpdateIndivWedstrijdFormulier:
         afgemeld = list()
 
         for deelnemer in (KampioenschapSporterBoog
-                .objects
-                .filter(kampioenschap=self.kampioenschap,
-                        indiv_klasse=self.klasse)
-                .select_related('sporterboog__sporter',
-                                'bij_vereniging',
-                                'bij_vereniging__regio')
-                .order_by('rank',  # laagste eerst
-                          'volgorde')):  # sorteert afgemeld
+                          .objects
+                          .filter(kampioenschap=self.kampioenschap,
+                                  indiv_klasse=self.klasse)
+                          .exclude(bij_vereniging=None)
+                          .select_related('sporterboog__sporter',
+                                          'bij_vereniging',
+                                          'bij_vereniging__regio')
+                          .order_by('rank',  # laagste eerst
+                                    'volgorde')):  # sorteert afgemeld
+
             sporter = deelnemer.sporterboog.sporter
 
             para_notities = ''
-            try:
-                voorkeuren = SporterVoorkeuren.objects.filter(sporter=sporter).first()
-            except SporterVoorkeuren.DoesNotExist:
-                pass
-            else:
+            voorkeuren = SporterVoorkeuren.objects.filter(sporter=sporter).first()
+            if voorkeuren:      # pragma: no branch
                 if voorkeuren.para_voorwerpen:
                     para_notities = 'Sporter laat voorwerpen op de schietlijn staan'
 

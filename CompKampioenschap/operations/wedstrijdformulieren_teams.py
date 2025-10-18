@@ -126,7 +126,7 @@ class UpdateTeamsWedstrijdFormulier:
         para_notities = ''
 
         voorkeuren = self.lid2voorkeuren.get(sporter.lid_nr, None)
-        if voorkeuren:
+        if voorkeuren:      # pragma: no branch
             if voorkeuren.para_voorwerpen:
                 para_notities = 'Sporter laat voorwerpen op de schietlijn staan'
 
