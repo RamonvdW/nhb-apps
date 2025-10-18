@@ -5,6 +5,7 @@
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
+{% load design_icons %}
 
 {% block title %}E-mail bevestigd{% endblock %}
 
@@ -30,12 +31,12 @@
                     <p>Je kan nu inloggen.</p>
                     <p>
                         <a class="btn-sv-rood" href="{% url 'Account:login' %}">
-                            <i class="notranslate material-symbol left">person</i>inloggen</a>
+                            {% sv-icon 'account inloggen' %}inloggen</a>
                     </p>
                 {% else %}
                     <p>
                         <a class="btn-sv-rood" href="{% url 'Plein:plein' %}">
-                            <i class="notranslate material-symbol left">close</i>Sluiten</a>
+                            {% sv-icon 'sluiten' %}Sluiten</a>
                     </p>
                 {% endif %}
             </div>

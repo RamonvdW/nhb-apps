@@ -7,8 +7,7 @@
 from django.test import TestCase
 from django.core import management
 from BasisTypen.models import BoogType
-from Competitie.definities import (MUTATIE_KAMP_REINIT_TEST, MUTATIE_COMPETITIE_OPSTARTEN,
-                                   MUTATIE_AG_VASTSTELLEN_18M, MUTATIE_AG_VASTSTELLEN_25M,
+from Competitie.definities import (MUTATIE_KAMP_REINIT_TEST, MUTATIE_COMPETITIE_OPSTARTEN, MUTATIE_AG_VASTSTELLEN,
                                    MUTATIE_KAMP_CUT, MUTATIE_KAMP_AFMELDEN_INDIV,
                                    DEELNAME_ONBEKEND, DEELNAME_JA, DEELNAME_NEE)
 from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieMutatie,
@@ -927,7 +926,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
                           cut_nieuw=24,
                           door='Tester').save()
 
-        self.verwerk_competitie_mutaties()
+        self.verwerk_competitie_mutaties(ignore_errors=True)
 
     def test_verwerk_all(self):
         # vraag de achtergrond taak om de mutaties te verwerken
@@ -947,10 +946,12 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
         self.verwerk_competitie_mutaties()
 
         # AG vaststellen
-        CompetitieMutatie(mutatie=MUTATIE_AG_VASTSTELLEN_18M,
-                          door='Tester').save()
-        CompetitieMutatie(mutatie=MUTATIE_AG_VASTSTELLEN_25M,
-                          door='Tester').save()
+        for comp in Competitie.objects.all():
+            CompetitieMutatie.objects.create(
+                                mutatie=MUTATIE_AG_VASTSTELLEN,
+                                competitie=comp,
+                                door='Tester')
+        # for
         self.verwerk_competitie_mutaties()
 
     def test_hwl_mutaties(self):

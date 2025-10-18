@@ -21,15 +21,10 @@ touch "$OUT_TMP"
 echo "[INFO] Searching for icons in templates"
 grep material-symbol -- */templates/*/*dtl | grep -vE "secondary-content|subset-mh|{{ icon }}" | sed -s 's/material-symbol/@/' | cut -d@ -f2- | cut -d\> -f2- | sed -s 's#</i#@#' | cut -d@ -f1 >> "$OUT_TMP"
 
-# handle include 'plein/card_..' icon="xxx"
-# voorkom hits op sv_icon=
-grep ' icon=' -- */templates/*/*dtl | sed 's/icon=/@/' | cut -d@ -f2 | cut -d\" -f2 >> "$OUT_TMP"
-HANDLED+="|{{ icon }}"       # in Plein/templates/plain/card_*dtl
-
 echo "[INFO] Searching for icons in sources"
 # handle {{ korting.icon_name }}
 # handle icon/icoon gezet in view
-find . -name \*py ! -name models.py ! -name test_asserts.py ! -name design_icons.py -exec grep -E 'icon=|icon =|icon_name' {} \+ | grep -vE '#|sv_icon=|admin_list._boolean_icon|MATERIAL_SYMBOLS.get' | cut -d= -f2- | tr \" \' | cut -d\' -f2 >> "$OUT_TMP"
+find . -name \*py ! -name models.py ! -name test_asserts.py ! -name design_icons.py -exec grep -E 'icon=|icon =|icon_name' {} \+ | grep -vE '#|sv_icon|admin_list._boolean_icon|MATERIAL_SYMBOLS.get' | cut -d= -f2- | tr \" \' | cut -d\' -f2 >> "$OUT_TMP"
 HANDLED+="|kaartje.icon|kaartje.icoon|ander.icoon|{{ korting.icon_name }}"
 
 # vertaling van gebruik naar Material Symbols in template tag
@@ -37,9 +32,6 @@ grep '@register.simple_tag' "./Design/templatetags/design_icons.py" --before=100
 
 # dynamische icons vanuit script
 grep 'set_collapsible_icon(id,' "Overig/js/collapsible_icons.js" | tr \" \' |cut -d\' -f2 >> "$OUT_TMP"
-
-# icons vanuit de Records module, eervolle vermeldingen
-./manage.py shell --no-imports -c 'from Records.models import AnderRecord; qset=AnderRecord.objects.values_list("icoon", flat=True); print("\n".join(qset))' | grep -vE "^$" >> "$OUT_TMP"
 
 echo "[INFO] Checking for missed situations"
 grep -vE "$HANDLED" "$OUT_TMP" | sort -u > "$OUT"
