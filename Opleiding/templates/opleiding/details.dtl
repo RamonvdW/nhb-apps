@@ -126,12 +126,12 @@
                 {% comment %}
                 {% if kan_aanmelden %}
                     <!-- inschrijven sporter -->
-                    {% include 'design/card_icon.dtl' with title="Sporter" text="Aanmelden en betalen voor jezelf." icon="person" url=url_inschrijven_sporter %}
+                    {% include 'design/card_icon.dtl' with title="Sporter" text="Aanmelden en betalen voor jezelf." sv_icon="inschrijven sporter" url=url_inschrijven_sporter %}
                 {% endif %}
                 {% endcomment %}
 
                 {% if hint_inloggen %}
-                    {% include 'design/card_niet-beschikbaar.dtl' with waarom="Eerst inloggen" title="Sporter" text="Aanmelden en betalen voor jezelf." icon="person" %}
+                    {% include 'design/card_niet-beschikbaar.dtl' with waarom="Eerst inloggen" title="Sporter" text="Aanmelden en betalen voor jezelf." sv_icon="inschrijven sporter" %}
                 {% endif %}
 
             </div>

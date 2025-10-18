@@ -24,7 +24,7 @@
 
             <!-- vereniging menu -->
             {% url 'Vereniging:overzicht' as card_url %}
-            {% include 'design/card_icon.dtl' with title="Beheer vereniging" text="Extra functies voor beheerders van jouw vereniging." icon="store" url=card_url %}
+            {% include 'design/card_icon.dtl' with title="Beheer vereniging" text="Extra functies voor beheerders van jouw vereniging." sv_icon="webwinkel" url=card_url %}
 
         </div>
     </div>

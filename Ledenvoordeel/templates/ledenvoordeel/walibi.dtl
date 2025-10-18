@@ -31,7 +31,7 @@
 
             <!-- walibi webshop (extern) -->
             {% static 'ledenvoordeel/logo_walibi_374x374.png' as img_src %}
-            {% include 'design/card_icon.dtl' with title="Bestellen" text="Naar de webshop<br>(je krijgt automatisch korting)<br><br>Bruikbaar heel 2024" icon="shopping_cart" url=url_walibi_korting extern_open=True %}
+            {% include 'design/card_icon.dtl' with title="Bestellen" text="Naar de webshop<br>(je krijgt automatisch korting)<br><br>Bruikbaar heel 2024" sv_icon="ledenvoordeel webwinkel" url=url_walibi_korting extern_open=True %}
         </div>
     </div>
 

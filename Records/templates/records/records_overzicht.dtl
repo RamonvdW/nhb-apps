@@ -71,13 +71,13 @@
         <div class="col s12">
 
             {% url 'Records:indiv-verbeterbaar' as card_url %}
-            {% include 'design/card_icon.dtl' with title="Verbeterbaar" text="Vind eenvoudig records die verbeterd kunnen worden." icon="leaderboard" url=card_url %}
+            {% include 'design/card_icon.dtl' with title="Verbeterbaar" text="Vind eenvoudig records die verbeterd kunnen worden." sv_icon="records verbeterbaar" url=card_url %}
 
             {% url 'Records:indiv' as card_url %}
-            {% include 'design/card_icon.dtl' with title="Filteren" text="Vind records van interesse door te filteren op boog, klasse, etc." icon="filter_alt" url=card_url %}
+            {% include 'design/card_icon.dtl' with title="Filteren" text="Vind records van interesse door te filteren op boog, klasse, etc." sv_icon="records filteren" url=card_url %}
 
             {% url 'Records:zoek' as card_url %}
-            {% include 'design/card_icon.dtl' with title="Zoeken" text="Zoek in de records op naam van de sporter of een vereniging." icon="search" url=card_url %}
+            {% include 'design/card_icon.dtl' with title="Zoeken" text="Zoek in de records op naam van de sporter of een vereniging." sv_icon="records zoeken" url=card_url %}
 
         </div>
     </div>
@@ -97,7 +97,7 @@
                 <div class="col s12">
         {% endif %}
 
-        {% include 'design/card_icon.dtl' with title=ander.titel text=ander.tekst icon=ander.icoon url=ander.url extern_open=True %}
+        {% include 'design/card_icon.dtl' with title=ander.titel text=ander.tekst sv_icon=ander.sv_icon url=ander.url extern_open=True %}
 
         {% if forloop.last %}
                 </div>

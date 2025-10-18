@@ -241,7 +241,7 @@
             <!-- blauwe balk met kaartjes -->
             <div class="row-sv-blauw">
                 <div class="col s12">
-                    {% include 'design/card_icon.dtl' with title="Team scores" text="Besluit welke individuele scores bij deze team ronde horen." icon="gavel" url=url_team_scores %}
+                    {% include 'design/card_icon.dtl' with title="Team scores" text="Besluit welke individuele scores bij deze team ronde horen." sv_icon="comp rcl team scores" url=url_team_scores %}
                 </div>
             </div>
         {% endif %}

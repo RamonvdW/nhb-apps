@@ -10,7 +10,6 @@
 
         title       = "Account activiteit"
         sv_icon     = "gebruik" (zie Design/templatetags/design_icons.py)
-        icon        = "recent_actors"
         text        = "Toon overzicht van de recent gebruikte en aangemaakte accounts."
         url         = de url waar je heen gaat na klikken op het kaartje
         onclick     = alternatief voor de url - roept een javascript functie aan  # TODO: obsolete
@@ -67,13 +66,6 @@
                     {% else %}
                         {% sv-icon sv_icon extra_class="medium" %}
                     {% endif %}
-                {% else %}
-                    <div style="margin-bottom:4px{% if not icon_font_size %}; height:64px{% endif %}">
-                        <i {% if icon_font_size %}
-                                style="font-size:{{ icon_font_size }}"
-                           {% endif %}
-                            class="notranslate material-symbol medium sv-rood-text">{{ icon }}</i>
-                    </div>
                 {% endif %}
 
                 <div>{{ text }}</div>

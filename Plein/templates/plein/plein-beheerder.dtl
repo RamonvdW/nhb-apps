@@ -108,7 +108,7 @@
             {% include 'design/card_icon.dtl' with title="Wissel van rol" text="Wissel naar een andere beheerdersrol of naar Sporter." sv_icon="functie wissel van rol" url=card_url %}
 
             {% url 'Plein:handleidingen' as card_url%}
-            {% include 'design/card_icon.dtl' with title="Handleidingen" text="Bekijk de handleidingen." sv_icon="handleiding" url=card_url %}
+            {% include 'design/card_icon.dtl' with title="Handleidingen" text="Bekijk de handleidingen." sv_icon="handleidingen" url=card_url %}
         </div>
     </div>
 

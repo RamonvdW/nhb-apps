@@ -46,11 +46,11 @@
         <div class="col s12">
 
             <!-- verder winkelen -->
-            {% include 'design/card_icon.dtl' with title="Verder winkelen" text="Terug naar het evenement waar je mee bezig was." icon="event_note" url=url_verder %}
+            {% include 'design/card_icon.dtl' with title="Verder winkelen" text="Terug naar de opleiding waar je mee bezig was." sv_icon="verder winkelen" url=url_verder %}
 
             <!-- mandje -->
             {% url 'Bestelling:toon-inhoud-mandje' as card_url %}
-            {% include 'design/card_icon.dtl' with title="Naar mijn mandje" text="Mandje bekijken, bestelling afronden en betalen." icon="shopping_cart" url=card_url %}
+            {% include 'design/card_icon.dtl' with title="Naar mijn mandje" text="Mandje bekijken, bestelling afronden en betalen." sv_icon="mandje" url=card_url %}
 
         </div>
     </div>

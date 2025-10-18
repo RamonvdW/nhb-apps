@@ -29,11 +29,11 @@
             <div class="col s12">
 
                 {% if url_vervolg_instaptoets %}
-                    {% include 'design/card_icon.dtl' with title="Instaptoets" text="Ga verder met de online instaptoets." icon="login" url=url_vervolg_instaptoets %}
+                    {% include 'design/card_icon.dtl' with title="Instaptoets" text="Ga verder met de online instaptoets." sv_icon="opleiding instaptoets" url=url_vervolg_instaptoets %}
                 {% endif %}
 
                 {% if url_basiscursus %}
-                    {% include 'design/card_icon.dtl' with title="Basiscursus" text="Informatie over de basiscursus." icon="school" url=url_basiscursus %}
+                    {% include 'design/card_icon.dtl' with title="Basiscursus" text="Informatie over de basiscursus." sv_icon="opleiding basiscursus" url=url_basiscursus %}
                 {% endif %}
 
             </div>

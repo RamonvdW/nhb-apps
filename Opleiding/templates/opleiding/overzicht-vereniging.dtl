@@ -82,10 +82,10 @@
         <div class="col s12">
 
             <!-- instellingen -->
-            {% include 'design/card_icon.dtl' with title="Instellingen" text="Instellingen om inschrijfgelden te kunnen ontvangen via overschrijving of Mollie." icon="settings" url=url_mollie %}
+            {% include 'design/card_icon.dtl' with title="Instellingen" text="Instellingen om inschrijfgelden te kunnen ontvangen via overschrijving of Mollie." sv_icon="ver mollie" url=url_mollie %}
 
             <!-- betalingen doorgeven -->
-            {% include 'design/card_icon.dtl' with title="Overboekingen" text="Geef de handmatige betalingen door, zodat de reservering voor een sporter definitief kan worden." icon="euro_symbol" url=url_overboeking_ontvangen %}
+            {% include 'design/card_icon.dtl' with title="Overboekingen" text="Geef de handmatige betalingen door, zodat de reservering voor een sporter definitief kan worden." sv_icon="ver overboekingen" url=url_overboeking_ontvangen %}
 
         </div>
     </div>
@@ -102,7 +102,7 @@
     <!-- blauwe balk met kaartjes -->
     <div class="row-sv-blauw">
         <div class="col s12">
-            {% include 'design/card_icon.dtl' with title="Voorwaarden" text="De verkoopvoorwaarden voor opleidingen staan beschreven in een apart document." icon="article" extern_open=True url=url_voorwaarden %}
+            {% include 'design/card_icon.dtl' with title="Voorwaarden" text="De verkoopvoorwaarden voor opleidingen staan beschreven in een apart document." sv_icon="opleiding verkoopvoorwaarden" extern_open=True url=url_voorwaarden %}
         </div>
     </div>
 

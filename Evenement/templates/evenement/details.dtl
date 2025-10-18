@@ -181,9 +181,9 @@
                 {% endif %}
 
                 {% if hint_inloggen %}
-                    {% include 'design/card_niet-beschikbaar.dtl' with waarom="Eerst inloggen" title="Sporter" text="Aanmelden en betalen voor jezelf." sv_icon="inschrijven sporter" %}
-                    {% include 'design/card_niet-beschikbaar.dtl' with waarom="Eerst inloggen" title="Groep" text="Aanmelden en betalen voor een groepje leden zoals team, vrienden of collega's." sv_icon="inschrijven groep" %}
-                    {% include 'design/card_niet-beschikbaar.dtl' with waarom="Eerst inloggen" title="Familie" text="Aanmelden en betalen voor jonge leden, door ouders." sv_icon="inschrijven familie" %}
+                    {% include 'design/card_niet-beschikbaar.dtl' with waarom="Eerst inloggen" title="Sporter" sv_icon="inschrijven sporter" text="Aanmelden en betalen voor jezelf." %}
+                    {% include 'design/card_niet-beschikbaar.dtl' with waarom="Eerst inloggen" title="Groep"   sv_icon="inschrijven groep"   text="Aanmelden en betalen voor een groepje leden zoals team, vrienden of collega's." %}
+                    {% include 'design/card_niet-beschikbaar.dtl' with waarom="Eerst inloggen" title="Familie" sv_icon="inschrijven familie" text="Aanmelden en betalen voor jonge leden, door ouders." %}
                 {% endif %}
 
             </div>

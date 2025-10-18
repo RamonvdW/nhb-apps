@@ -347,7 +347,7 @@
         <div class="col s12">
             <!-- algemene informatie over de competities -->
             {% url 'Competitie:info-competitie' as card_url %}
-            {% include 'design/card_icon.dtl' with title="Informatie" text="Informatie over de individuele competities." icon="info" url=card_url %}
+            {% include 'design/card_icon.dtl' with title="Informatie" text="Informatie over de individuele competities." sv_icon="comp info indiv" url=card_url %}
         </div>
     </div>
 

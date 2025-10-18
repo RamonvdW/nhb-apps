@@ -64,15 +64,15 @@
         <div class="col s12">
             <!-- KHSN tussenspelden (RK Outdoor) -->
             {% url 'Spelden:groep-tussenspelden' as card_url %}
-            {% include 'design/card_icon.dtl' with title="Tussenspelden" text="KHSN tussenspelden" icon="trending_up" url=card_url %}
+            {% include 'design/card_icon.dtl' with title="Tussenspelden" text="KHSN tussenspelden" sv_icon="spelden tussenspelden" url=card_url %}
 
             <!-- KHSN graadspelden -->
             {% url 'Spelden:groep-graadspelden' as card_url %}
-            {% include 'design/card_icon.dtl' with title="Graadspelden" text="In vier disciplines kunnen<br>drie graadspelden behaald worden." icon="zoom_out_map" url=card_url %}
+            {% include 'design/card_icon.dtl' with title="Graadspelden" text="In vier disciplines kunnen<br>drie graadspelden behaald worden." sv_icon="spelden graadspelden" url=card_url %}
 
             <!-- KHSN meesterspelden -->
             {% url 'Spelden:groep-meesterspelden' as card_url %}
-            {% include 'design/card_icon.dtl' with title="Meesterspelden" text="KHSN meesterspelden" icon="category" url=card_url %}
+            {% include 'design/card_icon.dtl' with title="Meesterspelden" text="KHSN meesterspelden" sv_icon="spelden meesterspelden" url=card_url %}
         </div>
     </div>
 

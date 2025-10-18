@@ -80,7 +80,7 @@ def get_kaartjes_beheer(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_in
         kaartje = SimpleNamespace(
                     prio=4,
                     titel="Uitslagenlijsten",
-                    sv_icon="uitslagen",
+                    sv_icon="comp uitslagen",
                     tekst="Toon de deelnemerslijsten en uitslagen van deze competitie.",
                     url=url)
         kaartjes_algemeen.append(kaartje)

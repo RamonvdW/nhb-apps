@@ -22,13 +22,13 @@
         <div class="col s12">
 
             <!-- betalingen doorgeven -->
-            {% include 'design/card_icon.dtl' with title="Overboekingen" text="Geef de ontvangen betaling voor een MH bestelling door." icon="euro_symbol" url=url_overboeking %}
+            {% include 'design/card_icon.dtl' with title="Overboekingen" text="Geef de ontvangen betaling voor een MH bestelling door." sv_icon="ver overboekingen" url=url_overboeking %}
 
             <!-- bestellingen -->
-            {% include 'design/card_icon.dtl' with title='Bestellingen' text="Toon de bestellingen en betalingen." icon="shopping_cart" url=url_bestellingen %}
+            {% include 'design/card_icon.dtl' with title='Bestellingen' text="Toon de bestellingen en betalingen." sv_icon="bestellingen overzicht" url=url_bestellingen %}
 
             <!-- voorraad -->
-            {% include 'design/card_icon.dtl' with title='Voorraad' text="Toon de actuele voorraad." icon="inventory" url=url_voorraad %}
+            {% include 'design/card_icon.dtl' with title='Voorraad' text="Toon de actuele voorraad." sv_icon="webwinkel voorraad" url=url_voorraad %}
         </div>
     </div>
 

@@ -10,7 +10,6 @@
 
         title   = "Account activiteit"
         sv_icon = "gebruik" (zie Design/templatetags/design_icons.py)
-        icon    = "recent_actors"
         text    = "Toon overzicht van de recent gebruikte en aangemaakte accounts."
         waarom  = "Korte uitleg waarom"
 
@@ -18,6 +17,7 @@
 
 {% endcomment %}
 
+{% load design_icons %}
 
 <!-- zet breedte, hoogte en side-by-side layout -->
 <!-- bij mouse-over licht de rand NIET op -->
@@ -32,9 +32,13 @@
         {% endif %}
 
         <!-- icoon -->
-        <div style="margin-bottom:8px">
-            <i class="notranslate material-symbol medium grey-text">{{ icon }}</i>
-        </div>
+        {% if sv_icon %}
+            {% if icon_height %}
+                {% sv-icon sv_icon extra_class="medium" icon_height=icon_height %}
+            {% else %}
+                {% sv-icon sv_icon extra_class="medium" %}
+            {% endif %}
+        {% endif %}
 
         <div class="grey-text">{{ text }}</div>
 

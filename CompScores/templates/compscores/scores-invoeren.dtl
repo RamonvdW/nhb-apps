@@ -219,7 +219,7 @@
         <div class="col s12" style="margin-top:50px">
 
             <!-- waarschijnlijke deelnemers -->
-            {% include 'design/card_icon.dtl' with title="Lijst ophalen" text="Waarschijnlijke deelnemers toevoegen aan de uitslag." icon="add" js_id="id_lijst_ophalen" %}
+            {% include 'design/card_icon.dtl' with title="Lijst ophalen" text="Waarschijnlijke deelnemers toevoegen aan de uitslag." sv_icon="comp scores deelnemers" js_id="id_lijst_ophalen" %}
 
         </div>
 

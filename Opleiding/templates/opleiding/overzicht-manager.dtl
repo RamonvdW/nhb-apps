@@ -88,27 +88,27 @@
         <div class="col s12">
 
             {% if url_aanpassingen %}
-                {% include 'design/card_icon.dtl' with title="Aanpassingen" text="Persoonsgegevens van de deelnemers die overgenomen moeten worden in het CRM." icon="person_add" url=url_aanpassingen %}
+                {% include 'design/card_icon.dtl' with title="Aanpassingen" text="Persoonsgegevens van de deelnemers die overgenomen moeten worden in het CRM." sv_icon="opleiding crm overnemen" url=url_aanpassingen %}
             {% endif %}
 
             {% if url_evenement_locaties %}
-                {% include 'design/card_icon.dtl' with title="Locaties" text="Locaties voor evenementen en opleidingen." icon="school" url=url_evenement_locaties %}
+                {% include 'design/card_icon.dtl' with title="Locaties" text="Locaties voor evenementen en opleidingen." sv_icon="opleiding locaties" url=url_evenement_locaties %}
             {% endif %}    
         
             {% if url_stats_instaptoets %}
-                {% include 'design/card_icon.dtl' with title="Instaptoets" text="Welke vragen van de instaptoets doen het slecht?" icon="insights" url=url_stats_instaptoets %}
+                {% include 'design/card_icon.dtl' with title="Instaptoets" text="Welke vragen van de instaptoets doen het slecht?" sv_icon="opleiding instaptoets inzicht" url=url_stats_instaptoets %}
             {% endif %}
 
             {% if url_niet_ingeschreven %}
-                {% include 'design/card_icon.dtl' with title="Niet ingeschreven" text="Wie hebben de instaptoets gehaald, maar zijn niet ingeschreven voor de basiscursus?" icon="radar" url=url_niet_ingeschreven %}
+                {% include 'design/card_icon.dtl' with title="Niet ingeschreven" text="Wie hebben de instaptoets gehaald, maar zijn niet ingeschreven voor de basiscursus?" sv_icon="opleiding instaptoets niet ingeschreven" url=url_niet_ingeschreven %}
             {% endif %}
 
             {% if url_gezakt %}
-                {% include 'design/card_icon.dtl' with title="Niet gehaald" text="Wie hebben de instaptoets gemaakt maar hebben die niet gehaald?" icon="thumb_down" url=url_gezakt %}
+                {% include 'design/card_icon.dtl' with title="Niet gehaald" text="Wie hebben de instaptoets gemaakt maar hebben die niet gehaald?" sv_icon="opleiding instaptoets niet gehaald" url=url_gezakt %}
             {% endif %}
 
             {% if url_voorwaarden %}
-                {% include 'design/card_icon.dtl' with title="Voorwaarden" text="De verkoopvoorwaarden voor de opleidingen staan beschreven in dit document." icon="article" extern_open=True url=url_voorwaarden %}
+                {% include 'design/card_icon.dtl' with title="Voorwaarden" text="De verkoopvoorwaarden voor de opleidingen staan beschreven in dit document." sv_icon="opleiding verkoopvoorwaarden" extern_open=True url=url_voorwaarden %}
             {% endif %}
         </div>
     </div>

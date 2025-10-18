@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -152,7 +152,7 @@ class AnderRecord(models.Model):
     titel = models.CharField(max_length=30)
 
     # icoon van het kaartje
-    icoon = models.CharField(max_length=20)
+    sv_icon = models.CharField(max_length=20)
 
     # tekst voor op het kaartje
     tekst = models.CharField(max_length=100)

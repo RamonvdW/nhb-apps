@@ -212,7 +212,7 @@
                 <div class="col s12 m10 offset-m1 xl8 offset-xl2">
 
                     {% if url_voorwaarden %}
-                        {% include 'design/card_icon.dtl' with title="Opleidingen" text="De verkoopvoorwaarden voor de opleidingen staan beschreven in dit document." icon="article" extern_open=True url=url_voorwaarden %}
+                        {% include 'design/card_icon.dtl' with title="Opleidingen" text="De verkoopvoorwaarden voor de opleidingen staan beschreven in dit document." sv_icon="opleiding verkoopvoorwaarden" extern_open=True url=url_voorwaarden %}
                     {% endif %}
 
                 </div>

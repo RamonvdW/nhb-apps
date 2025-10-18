@@ -57,11 +57,11 @@
         <div class="col s12">
             {% if lid_nr_str %}
                 <!-- voor leden -->
-                {% include 'design/card_icon.dtl' with title="voor KHSN leden" text="Doorloop eenmalig de korte registratie procedure en krijg toegang tot de hele site." icon="badge" url=url_registreer_khsn %}
+                {% include 'design/card_icon.dtl' with title="voor KHSN leden" text="Doorloop eenmalig de korte registratie procedure en krijg toegang tot de hele site." sv_icon="registreer lid" url=url_registreer_khsn %}
             {% endif %}
 
             {% url 'Plein:plein' as card_url %}
-            {% include 'design/card_icon.dtl' with title="Het Plein" text="Naar de beginpagina." icon="hub" url=card_url %}
+            {% include 'design/card_icon.dtl' with title="Het Plein" text="Naar de beginpagina." sv_icon="het plein" url=card_url %}
         </div>
     </div>
 

@@ -31,7 +31,7 @@
             <div class="col s12">
 
                 {% for kaartje in kaartjes_algemeen %}
-                    {% include 'design/card_icon.dtl' with title=kaartje.titel text=kaartje.tekst icon=kaartje.icoon url=kaartje.url %}
+                    {% include 'design/card_icon.dtl' with title=kaartje.titel text=kaartje.tekst sv_icon=kaartje.sv_icon url=kaartje.url %}
                 {% endfor %}
 
             </div>

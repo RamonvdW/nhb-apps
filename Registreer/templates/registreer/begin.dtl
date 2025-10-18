@@ -23,7 +23,7 @@
     <div class="row-sv-blauw">
         <div class="col s12">
             <!-- voor leden -->
-            {% include 'design/card_icon.dtl' with title="voor KHSN leden" text="Doorloop eenmalig de korte registratie procedure en krijg toegang tot de hele site." icon="badge" url=url_registreer_khsn %}
+            {% include 'design/card_icon.dtl' with title="voor KHSN leden" text="Doorloop eenmalig de korte registratie procedure en krijg toegang tot de hele site." sv_icon="registreer lid" url=url_registreer_khsn %}
         </div>
     </div>
 
@@ -41,7 +41,7 @@
         <div class="row-sv-blauw">
             <div class="col s12">
                 <!-- voor gast-account -->
-                {% include 'design/card_icon.dtl' with title="Gast-account" text="Maak een gast-account aan om deze site te ontdekken en in te schrijven op wedstrijden." icon="explore" modal_id="vang_khsn_lid" %}
+                {% include 'design/card_icon.dtl' with title="Gast-account" text="Maak een gast-account aan om deze site te ontdekken en in te schrijven op wedstrijden." sv_icon="registreer gast" modal_id="vang_khsn_lid" %}
             </div>
         </div>
 
@@ -58,7 +58,7 @@
         <div class="row-sv-blauw">
             <div class="col s12">
                 <!-- gast-account, engels -->
-                {% include 'design/card_icon.dtl' with title="Create account" text="Use only when not a member of the Dutch Archery Federation." icon="public" url=url_registreer_gast %}
+                {% include 'design/card_icon.dtl' with title="Create account" text="Use only when not a member of the Dutch Archery Federation." sv_icon="registreer gast" url=url_registreer_gast %}
             </div>
         </div>
 

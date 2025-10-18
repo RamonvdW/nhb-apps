@@ -69,7 +69,7 @@
             {% endfor %}
 
             {% url 'HistComp:top' as card_url %}
-            {% include 'design/card_icon.dtl' with title="Uitslag vorig seizoen" text="De uitslag van eerdere seizoenen is hier in te zien." icon="undo" url=card_url %}
+            {% include 'design/card_icon.dtl' with title="Uitslag vorig seizoen" text="De uitslag van eerdere seizoenen is hier in te zien." sv_icon="histcomp" url=card_url %}
         </div>
     </div>
 

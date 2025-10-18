@@ -10,7 +10,6 @@
 
         title   = "Account activiteit"
         sv_icon = "gebruik" (zie Design/templatetags/design_icons.py)
-        icon    = "recent_actors"
         text    = "Toon overzicht van de recent gebruikte en aangemaakte accounts."
         vanaf   = datum wanneer kaartje beschikbaar komt (vanaf datum)
 
@@ -34,11 +33,11 @@
 
         <!-- icoon -->
         {% if sv_icon %}
-            {% sv-icon sv_icon extra_class="medium" %}
-        {% else %}
-            <div style="margin-bottom:4px{% if not icon_font_size %}; height:64px{% endif %}">
-                <i class="notranslate material-symbol medium grey-text"{% if icon_font_size %} style="font-size:{{ icon_font_size }}"{% endif %}>{{ icon }}</i>
-            </div>
+            {% if icon_height %}
+                {% sv-icon sv_icon extra_class="medium" icon_height=icon_height %}
+            {% else %}
+                {% sv-icon sv_icon extra_class="medium" %}
+            {% endif %}
         {% endif %}
 
         <div class="grey-text">{{ text }}</div>

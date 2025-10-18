@@ -64,9 +64,9 @@
     <!-- blauwe balk met kaartjes -->
     <div class="row-sv-blauw">
         <div class="col s12">
-            {% include 'design/card_icon.dtl' with icon="book_2" url=lesmateriaal_wa         extern_open=True title="WA boeken" text="Nederlandse vertaling van de Rule Books van World Archery. Deel 2 en 3 zijn relevant voor de toets." %}
-            {% include 'design/card_icon.dtl' with icon="book_2" url=lesmateriaal_competitie extern_open=True title="Bondscompetities" text="De nationale bepalingen voor de bondscompetities."  %}
-            {% include 'design/card_icon.dtl' with icon="book_2" url=lesmateriaal_kleding    extern_open=True title="Kleding" text="Het kledingvoorschrift voor alle erkende disciplines in de handboogsport" %}
+            {% include 'design/card_icon.dtl' with sv_icon="opleiding lesmateriaal" url=lesmateriaal_wa         extern_open=True title="WA boeken" text="Nederlandse vertaling van de Rule Books van World Archery. Deel 2 en 3 zijn relevant voor de toets." %}
+            {% include 'design/card_icon.dtl' with sv_icon="opleiding lesmateriaal" url=lesmateriaal_competitie extern_open=True title="Bondscompetities" text="De nationale bepalingen voor de bondscompetities."  %}
+            {% include 'design/card_icon.dtl' with sv_icon="opleiding lesmateriaal" url=lesmateriaal_kleding    extern_open=True title="Kleding" text="Het kledingvoorschrift voor alle erkende disciplines in de handboogsport" %}
         </div>
     </div>
 
