@@ -22,7 +22,7 @@ from CompKampioenschap.operations.wedstrijdformulieren_teams import (iter_teams_
                                                                      UpdateTeamsWedstrijdFormulier)
 from CompKampioenschap.operations.storage_wedstrijdformulieren import (StorageWedstrijdformulieren,
                                                                        iter_dirty_wedstrijdformulieren, zet_dirty)
-from GoogleDrive.operations import GoogleSheet, StorageError
+from GoogleDrive.operations import StorageGoogleSheet, StorageError
 import time
 
 VOLGORDE_PARKEER = 22222        # hoog en past in PositiveSmallIntegerField
@@ -757,7 +757,7 @@ class VerwerkCompKampMutaties:
             time.sleep(1.0)
 
             if not sheet:
-                sheet = GoogleSheet(self.stdout)
+                sheet = StorageGoogleSheet(self.stdout)
             sheet.selecteer_file(bestand.file_id)
 
             res = ''

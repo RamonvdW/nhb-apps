@@ -168,6 +168,9 @@ class GoogleApiFilesMock:
             print('[DEBUG] {GoogleApiFilesMock.execute} returning %s' % repr(resp))
         return resp
 
+    def close(self):
+        pass
+
 
 class GoogleApiPermsMock:
 
@@ -195,6 +198,9 @@ class GoogleApiPermsMock:
         self.next_resp = {}
         return resp
 
+    def close(self):
+        pass
+
 
 class GoogleApiMock:
 
@@ -215,53 +221,58 @@ class GoogleApiMock:
 
 class TestGoogleDriveGoogleDrive(E2EHelpers, TestCase):
 
-    """ tests voor de GoogleDrive applicatie, module google_drive """
+    """ tests voor de GoogleDrive applicatie, operations storage_drive """
 
     def test_check_access(self):
         out = OutputWrapper(io.StringIO())
         share_with_emails = ['mgr@test.not']
-        drive = StorageGoogleDrive(out, 2025, share_with_emails)
 
-        with self.assertRaises(StorageError) as exc:
-            drive.check_access()
-        self.assertEqual(str(exc.exception), 'No token')
+        # einde van "with" roept __exit__ aan
+        with StorageGoogleDrive(out, 2025, share_with_emails) as drive:
+            with self.assertRaises(StorageError) as exc:
+                drive.check_access()
+            self.assertEqual(str(exc.exception), 'No token')
 
-        Token.objects.create(creds='{"test": "nja"}')
-        with self.assertRaises(StorageError) as exc:
-            drive.check_access()
-        self.assertTrue(str(exc.exception).startswith('Invalid credentials:'))
+            Token.objects.create(creds='{"test": "nja"}')
+            with self.assertRaises(StorageError) as exc:
+                drive.check_access()
+            self.assertTrue(str(exc.exception).startswith('Invalid credentials:'))
 
-        Token.objects.create(creds='{"client_secret": "123", "refresh_token": "1234", "client_id": "1234"}')
-        drive.check_access()    # no exception
+            Token.objects.create(creds='{"client_secret": "123", "refresh_token": "1234", "client_id": "1234"}')
+            drive.check_access()    # no exception
+        # with
 
     def test_copy(self):
         out = OutputWrapper(io.StringIO())
         share_with_emails = ['mgr@test.not']
-        drive = StorageGoogleDrive(out, 2025, share_with_emails)
 
-        folder_18_indiv_rk = drive._params_to_folder_name(18, False, False)
+        # einde van "with" roept __exit__ aan
+        with StorageGoogleDrive(out, 2025, share_with_emails) as drive:
 
-        # eerste aanroep, bestand bestaat nog niet
-        self.assertEqual(Bestand.objects.count(), 0)
-        my_service = GoogleApiMock(verbose=False)
-        with patch('GoogleDrive.operations.storage_drive.build', return_value=my_service):
-            drive._comp2template_file_id[folder_18_indiv_rk] = 'templ1'
-            file_id = drive.maak_sheet_van_template(18, False, False, 1, 3, 'fname1')
-            self.assertEqual(file_id, 'copy100')
+            folder_18_indiv_rk = drive._params_to_folder_name(18, False, False)
 
-        self.assertEqual(Bestand.objects.count(), 1)
-        bestand = Bestand.objects.first()
-        self.assertEqual(bestand.begin_jaar, 2025)
-        self.assertEqual(bestand.afstand, 18)
-        self.assertFalse(bestand.is_teams)
-        self.assertFalse(bestand.is_bk)
-        self.assertTrue(str(bestand) != '')
+            # eerste aanroep, bestand bestaat nog niet
+            self.assertEqual(Bestand.objects.count(), 0)
+            my_service = GoogleApiMock(verbose=False)
+            with patch('GoogleDrive.operations.storage_drive.build', return_value=my_service):
+                drive._comp2template_file_id[folder_18_indiv_rk] = 'templ1'
+                file_id = drive.maak_sheet_van_template(18, False, False, 1, 3, 'fname1')
+                self.assertEqual(file_id, 'copy100')
 
-        # tweede aanroep; service is al geïnitialiseerd, file bestaat op
-        with patch('GoogleDrive.operations.storage_drive.build', return_value=my_service):
-            file_id = drive.maak_sheet_van_template(18, False, False, 1, 3, 'fname1')
-            self.assertEqual(file_id, 'copy100')
-        self.assertEqual(Bestand.objects.count(), 1)
+            self.assertEqual(Bestand.objects.count(), 1)
+            bestand = Bestand.objects.first()
+            self.assertEqual(bestand.begin_jaar, 2025)
+            self.assertEqual(bestand.afstand, 18)
+            self.assertFalse(bestand.is_teams)
+            self.assertFalse(bestand.is_bk)
+            self.assertTrue(str(bestand) != '')
+
+            # tweede aanroep; service is al geïnitialiseerd, file bestaat op
+            with patch('GoogleDrive.operations.storage_drive.build', return_value=my_service):
+                file_id = drive.maak_sheet_van_template(18, False, False, 1, 3, 'fname1')
+                self.assertEqual(file_id, 'copy100')
+            self.assertEqual(Bestand.objects.count(), 1)
+        # with
 
     def test_vind_globale_folder(self):
         # fouten tijdens vind_globale_folder

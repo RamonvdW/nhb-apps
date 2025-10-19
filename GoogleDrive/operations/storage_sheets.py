@@ -17,7 +17,7 @@ import os.path
 
 # FUTURE: Google Drive API heeft push notification voor wijzigingen
 
-class GoogleSheet:
+class StorageGoogleSheet:
 
     SERVICE_ACCOUNT_FILE = os.path.join(settings.CREDENTIALS_PATH,
                                         settings.CREDENTIALS_SERVICE_ACCOUNT_WEDSTRIJDFORMULIEREN)

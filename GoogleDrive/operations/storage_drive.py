@@ -35,7 +35,10 @@ class StorageGoogleDrive(StorageBase):
         self._service_files = None
         self._service_perms = None
 
-    def __exit__(self):
+    def __enter__(self):
+        return self
+
+    def __exit__(self, _exc_type, _exc_val, _exc_tb):
         self._close_service()
 
     @staticmethod

@@ -13,7 +13,7 @@ from Competitie.models import (Competitie, CompetitieTeamKlasse, CompetitieMatch
                                KampioenschapTeam, KampioenschapSporterBoog)
 from Geo.models import Rayon
 from GoogleDrive.models import Bestand
-from GoogleDrive.operations import GoogleSheet
+from GoogleDrive.operations import StorageGoogleSheet
 from Sporter.models import SporterVoorkeuren
 
 
@@ -47,7 +47,7 @@ def iter_teams_wedstrijdformulieren(comp: Competitie):
 
 class UpdateTeamsWedstrijdFormulier:
 
-    def __init__(self, stdout, sheet: GoogleSheet):
+    def __init__(self, stdout, sheet: StorageGoogleSheet):
         self.stdout = stdout
         self.sheet = sheet              # kan google sheets bijwerken
 
