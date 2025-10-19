@@ -219,7 +219,7 @@ class GoogleApiMock:
         return self.perms_service
 
 
-class TestGoogleDriveGoogleDrive(E2EHelpers, TestCase):
+class TestGoogleDriveStorageDrive(E2EHelpers, TestCase):
 
     """ tests voor de GoogleDrive applicatie, operations storage_drive """
 

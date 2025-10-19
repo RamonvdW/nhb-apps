@@ -364,7 +364,7 @@ class TestCompKampioenschapMutaties(E2EHelpers, TestCase):
 
         # geen match op bestand.klasse_pk
         with patch('CompKampioenschap.operations.verwerk_mutaties.time.sleep', return_value=None):
-            with patch('CompKampioenschap.operations.verwerk_mutaties.GoogleSheet', new=SheetMock):
+            with patch('CompKampioenschap.operations.verwerk_mutaties.StorageGoogleSheet', new=SheetMock):
                 _, f2, = self.verwerk_competitie_mutaties()
 
     def test_update_dirty_25(self):
@@ -395,7 +395,7 @@ class TestCompKampioenschapMutaties(E2EHelpers, TestCase):
                             competitie=self.comp_25)      # alleen nodig voor begin_jaar
 
         with patch('CompKampioenschap.operations.verwerk_mutaties.time.sleep', return_value=None):
-            with patch('CompKampioenschap.operations.verwerk_mutaties.GoogleSheet', new=SheetMock):
+            with patch('CompKampioenschap.operations.verwerk_mutaties.StorageGoogleSheet', new=SheetMock):
                 _, f2, = self.verwerk_competitie_mutaties()
 
 

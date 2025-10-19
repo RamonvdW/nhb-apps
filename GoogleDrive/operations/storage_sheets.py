@@ -7,6 +7,7 @@
 """ Google Sheet wedstrijdformulier openen, inlezen (uitslag) en bijwerken (deelnemerslijst) """
 
 from django.conf import settings
+from GoogleDrive.storage_base import StorageError
 from googleapiclient.errors import HttpError as GoogleApiError
 from google.oauth2.service_account import Credentials
 from googleapiclient.discovery import build
@@ -14,6 +15,7 @@ from googleapiclient.http import HttpRequest
 import googleapiclient.errors
 import socket
 import os.path
+
 
 # FUTURE: Google Drive API heeft push notification voor wijzigingen
 
@@ -34,7 +36,10 @@ class StorageGoogleSheet:
         self._spreadsheet_requests = list()
         self._sheet_name2id = dict()
 
-    def __exit__(self):
+    def __enter__(self):
+        return self
+
+    def __exit__(self, _exc_type, _exc_val, _exc_tb):
         self._close_api()
 
     def _setup_api(self):
@@ -57,9 +62,9 @@ class StorageGoogleSheet:
     def _execute(self, request: HttpRequest) -> dict | None:
         try:
             response = request.execute()
-        except socket.timeout as exc:
+        except socket.timeout as exc:           # pragma: no cover
             self.stdout.write('[ERROR] {execute} Socket timeout: %s' % exc)
-        except socket.gaierror as exc:
+        except socket.gaierror as exc:          # pragma: no cover
             # example: [Errno -3] Temporary failure in name resolution
             self.stdout.write('[ERROR] {execute} Socket error: %s' % exc)
         except googleapiclient.errors.HttpError as exc:
@@ -84,6 +89,8 @@ class StorageGoogleSheet:
                 self._sheet_name2id[properties['title']] = properties['sheetId']
             # for
 
+        # TODO: raise StorageError in case sheet not accessible
+
     def selecteer_file(self, file_id):
         self._setup_api()
         self._file_id = file_id
@@ -94,12 +101,6 @@ class StorageGoogleSheet:
     def selecteer_sheet(self, sheet_name: str):
         # om spaties te ondersteunen moet de sheet_naam tussen quotes gezet worden
         self._sheet_name = "'" + sheet_name.replace("'", "\\'") + "'"
-
-    def clear_range(self, range_a1: str):
-        """ wis de cells in de range """
-        request = self._api_sheet_values.clear(spreadsheetId=self._file_id,
-                                               range=self._sheet_name + '!' + range_a1)
-        response = self._execute(request)
 
     def _stuur_value_changes(self):
         if self._value_changes:
@@ -130,6 +131,7 @@ class StorageGoogleSheet:
                                     spreadsheetId=self._file_id,
                                     body=body)
             response = self._execute(request)
+            # TODO: error propagation
 
             self._spreadsheet_requests = list()
 
@@ -158,10 +160,14 @@ class StorageGoogleSheet:
 
     def toon_sheet(self, sheet_name: str):
         # hiermee kan een blad getoond worden
+        if sheet_name not in self._sheet_name2id:
+            raise StorageError('{toon_sheet} Sheet %s niet gevonden' % repr(sheet_name))
         self._set_sheet_hidden(sheet_name, False)
 
     def hide_sheet(self, sheet_name: str):
         # hiermee kan een blad verstopt worden
+        if sheet_name not in self._sheet_name2id:
+            raise StorageError('{hide_sheet} Sheet %s niet gevonden' % repr(sheet_name))
         self._set_sheet_hidden(sheet_name, True)
 
     def wijzig_cellen(self, range_a1: str, values: list):
@@ -200,6 +206,13 @@ class StorageGoogleSheet:
             values = None
 
         return values
+
+    def clear_range(self, range_a1: str):
+        """ wis de cells in de range """
+        request = self._api_sheet_values.clear(spreadsheetId=self._file_id,
+                                               range=self._sheet_name + '!' + range_a1)
+        response = self._execute(request)
+        # TODO: error propagation
 
 
 # end of file
