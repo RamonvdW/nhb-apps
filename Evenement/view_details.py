@@ -51,6 +51,8 @@ class DetailsView(TemplateView):
         evenement.inschrijven_let_op = (evenement.inschrijven_dagen <= 7)
 
         if evenement.inschrijven_dagen < -30:
+            # inschrijven is niet meer relevant
+            # (voorkomt overal "inschrijving gesloten")
             evenement.is_ter_info = True
 
         zoekterm = evenement.locatie.adres

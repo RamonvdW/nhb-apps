@@ -122,9 +122,22 @@ class TestEvenementDetails(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('evenement/details.dtl', 'design/site_layout.dtl'))
+        urls = self.extract_all_urls(resp, skip_menu=True)
+        self.assertEqual(len(urls), 3)      # inschrijven sporter, groep, familie
 
         # zet datum in het verleden --> kan niet meer inschrijven
         self.evenement.datum = timezone.now().date()       # 1 dag ervoor
+        self.evenement.save(update_fields=['datum'])
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('evenement/details.dtl', 'design/site_layout.dtl'))
+        urls = self.extract_all_urls(resp, skip_menu=True)
+        self.assertEqual(len(urls), 0)           # geen inschrijving mogelijk
+
+        # zet datum meer dan 30 dagen in het verleden --> komt ter info op de kalender
+        self.evenement.datum -= datetime.timedelta(days=31)
         self.evenement.save(update_fields=['datum'])
         with self.assert_max_queries(20):
             resp = self.client.get(url)

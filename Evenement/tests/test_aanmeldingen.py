@@ -32,8 +32,9 @@ class TestEvenementAanmeldingen(E2EHelpers, TestCase):
 
     test_after = ('Evenement.tests.test_inschrijven',)
 
-    url_aanmeldingen = '/kalender/evenement/aanmeldingen/%s/'               # evenement_pk
     url_download = '/kalender/evenement/aanmeldingen/%s/download/csv/'      # evenement_pk
+    url_aanmeldingen = '/kalender/evenement/aanmeldingen/%s/'               # evenement_pk
+    url_workshop_keuzes = '/kalender/evenement/workshop-keuzes/%s/'         # evenement_pk
     url_details_aanmelding = '/kalender/evenement/details-aanmelding/%s/'   # inschrijving_pk
     url_details_afmelding = '/kalender/evenement/details-afmelding/%s/'     # afmelding_pk
 
@@ -374,6 +375,52 @@ class TestEvenementAanmeldingen(E2EHelpers, TestCase):
             resp = self.client.get(self.url_details_afmelding % self.afgemeld.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('evenement/afmelding-details.dtl', 'design/site_layout.dtl'))
+        self.assert_html_ok(resp)
+
+    def test_workshop_keuzes(self):
+        # 1 regel met keuze
+        # format: "n.m titel" met n = workshop ronde, m = volgorde (1, 2, etc.)
+        self.evenement.workshop_keuze = "1.1 test A\r\n1.2 test B\nskip\nno-dot x\nerr.or error\n2.1 test C\n3.1 test D"
+        self.evenement.save(update_fields=['workshop_keuze'])
+
+        self.inschrijving.gekozen_workshops = '1.1 2.1'
+        self.inschrijving.save(update_fields=['gekozen_workshops'])
+
+        # anon werk gewoon
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_workshop_keuzes % self.evenement.pk)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_template_used(resp, ('evenement/workshop-keuzes.dtl', 'design/site_layout.dtl'))
+        self.assert_html_ok(resp)
+
+        # corner cases
+        resp = self.client.get(self.url_workshop_keuzes % 999999)
+        self.assert404(resp, 'Evenement niet gevonden')
+
+        # inloggen
+        self.e2e_login_and_pass_otp(self.account_100000)
+        self.e2e_wissel_naar_functie(self.functie_hwl)
+
+        # download aanmeldingen, met workshop keuzes
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_download % self.evenement.pk)
+        self.assert200_is_bestand_csv(resp)
+
+        # details aanmelding, met workshop keuzes
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_details_aanmelding % self.inschrijving.pk)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_template_used(resp, ('evenement/aanmelding-details.dtl', 'design/site_layout.dtl'))
+        self.assert_html_ok(resp)
+
+        # details aanmelding, evenement heeft workshops maar inschrijving heeft geen keuzes gemaakt
+        self.inschrijving.gekozen_workshops = ''
+        self.inschrijving.save(update_fields=['gekozen_workshops'])
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_details_aanmelding % self.inschrijving.pk)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_template_used(resp, ('evenement/aanmelding-details.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
 
 

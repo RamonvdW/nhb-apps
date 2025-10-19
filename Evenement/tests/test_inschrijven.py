@@ -472,4 +472,54 @@ class TestEvenementInschrijven(E2EHelpers, TestCase):
         self.assertFalse('Levering' in mail.mail_text)
         self.assertTrue('TOTAAL: € 15,00' in mail.mail_text)
 
+    def test_workshops(self):
+        # 1 regel met keuze
+        # format: "n.m titel" met n = workshop ronde, m = volgorde (1, 2, etc.)
+        self.evenement.workshop_keuze = "1.1 test A\r\n1.2 test B\nskip\nno-dot x\nerr.or error\n2.1 test C\n3.1 test D"
+        self.evenement.save(update_fields=['workshop_keuze'])
+
+        # inlog vereist
+        self.e2e_login(self.account_100000)
+
+        # sporter
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_inschrijven_sporter % self.evenement.pk)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_template_used(resp, ('evenement/inschrijven-sporter.dtl', 'design/site_layout.dtl'))
+        self.assert_html_ok(resp)
+
+        # groepje
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_inschrijven_groepje % self.evenement.pk, {'bondsnummer': 100022})
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_template_used(resp, ('evenement/inschrijven-groepje.dtl', 'design/site_layout.dtl'))
+        self.assert_html_ok(resp)
+        self.assertNotContains(resp, 'Sporter 100022 niet gevonden.')
+
+        # familie
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_inschrijven_familie_lid % (self.evenement.pk, self.sporter_100022.lid_nr))
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_template_used(resp, ('evenement/inschrijven-familie.dtl', 'design/site_layout.dtl'))
+        self.assert_html_ok(resp)
+
+        # inschrijven
+        resp = self.client.post(self.url_toevoegen_mandje, {'evenement': self.evenement.pk,
+                                                            'sporter': self.sporter_100000.pk,
+                                                            'goto': 'S',
+                                                            'ws_1': 'ws1.2',
+                                                            'ws_2': 'ws2.1',
+                                                            'snel': '1'})
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('evenement/inschrijven-toegevoegd-aan-mandje.dtl', 'design/site_layout.dtl'))
+
+        self.assertEqual(EvenementInschrijving.objects.count(), 1)
+        inschrijving = EvenementInschrijving.objects.first()
+        self.assertEqual(inschrijving.evenement, self.evenement)
+        self.assertEqual(inschrijving.sporter, self.sporter_100000)
+
+        self.assertEqual(inschrijving.gekozen_workshops, '1.2 2.1')
+
+
 # end of file

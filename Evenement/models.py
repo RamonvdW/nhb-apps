@@ -60,7 +60,7 @@ class Evenement(models.Model):
     prijs_euro_onder18 = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal(0))     # max 999,99
 
     # keuze workshops (optioneel)
-    # 1 regel met keuze
+    # 1 regel per keuze
     # format: "n.m titel" met n = workshop ronde, m = volgorde (1, 2, etc.)
     workshop_keuze = models.TextField(default='', blank=True)
 

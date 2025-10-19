@@ -89,8 +89,7 @@ def splits_evenement_workshop_keuzes(evenement: Evenement, prefix='ws'):
             tup = ('%s%s.%s' % (prefix, ws_nr, volgorde), titel)
             ws_ronde.append(tup)
         # for
-        if len(ws_ronde) > 0:
-            rondes.append((prev_nr, ws_ronde))
+        rondes.append((prev_nr, ws_ronde))
     else:
         rondes = None
 

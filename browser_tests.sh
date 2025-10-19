@@ -71,6 +71,7 @@ do
         MAKE_REPORT=0
         ASK_LAUNCH=0
         CLEAN_COV=0
+        KEEP_DB=0
 
     elif [ "$arg" = "-v" ]
     then
