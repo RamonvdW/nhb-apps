@@ -814,15 +814,16 @@ class RondeTeamVerFilter(admin.SimpleListFilter):
             teams = teams.filter(team_type__afkorting=self.limit_teamtype)
 
         tups = list()
-        for team in teams.order_by('vereniging__ver_nr', 'volg_nr'):
-            tups.append((team.pk, team.maak_team_naam()))
+        for team in teams.order_by('vereniging__ver_nr').distinct('vereniging'):
+            ver = team.vereniging
+            tups.append((ver.ver_nr, ver.ver_nr_en_naam()))
         # for
         # print('lookups: aantal=%s' % len(tups))
         return tups
 
     def queryset(self, request, queryset):
         if self.value():
-            queryset = queryset.filter(team__id=self.value())
+            queryset = queryset.filter(team__vereniging__ver_nr=self.value())
         return queryset
 
 
