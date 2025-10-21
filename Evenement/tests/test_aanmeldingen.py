@@ -378,10 +378,10 @@ class TestEvenementAanmeldingen(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
 
     def test_workshop_keuzes(self):
-        # 1 regel met keuze
+        # 1 regel per optie
         # format: "n.m titel" met n = workshop ronde, m = volgorde (1, 2, etc.)
-        self.evenement.workshop_keuze = "1.1 test A\r\n1.2 test B\nskip\nno-dot x\nerr.or error\n2.1 test C\n3.1 test D"
-        self.evenement.save(update_fields=['workshop_keuze'])
+        self.evenement.workshop_opties = "1.1 test A\r\n1.2 test B\nskip\nno-dot x\nerr.or error\n2.1 test C\n3.1 test D"
+        self.evenement.save(update_fields=['workshop_opties'])
 
         self.inschrijving.gekozen_workshops = '1.1 2.1'
         self.inschrijving.save(update_fields=['gekozen_workshops'])

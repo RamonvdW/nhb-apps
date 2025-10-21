@@ -10,6 +10,7 @@ from django.utils import timezone
 from django.utils.http import urlencode
 from django.views.generic import TemplateView
 from Account.models import get_account
+from Evenement.definities import EVENEMENT_BEGRENZING_STR
 from Evenement.models import Evenement
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
@@ -57,18 +58,19 @@ class DetailsView(TemplateView):
 
         zoekterm = evenement.locatie.adres
         zoekterm = zoekterm.replace('\n', ' ').replace('\r', '').replace('  ', ' ')
-        context['url_map'] = 'https://google.nl/maps?' + urlencode({'q': zoekterm})
+        if zoekterm != '' and 'volgt binnenkort' not in zoekterm.lower():
+            context['url_map'] = 'https://google.nl/maps?' + urlencode({'q': zoekterm})
 
         # inschrijven moet voor de sluitingsdatum
         context['is_voor_sluitingsdatum'] = now_date < evenement.inschrijven_voor
 
         # om aan te melden is een account nodig
-        # en je moet lid zijn van de KHSN (dus: geen gast-account)
-        evenement.begrenzing_str = "KHSN leden"
+        evenement.begrenzing_str = EVENEMENT_BEGRENZING_STR
 
         account = get_account(self.request)
-        context['kan_aanmelden'] = account.is_authenticated and not account.is_gast
+        context['kan_aanmelden'] = account.is_authenticated
         context['hint_inloggen'] = not account.is_authenticated
+        context['inschrijven_anderen'] = account.is_authenticated and not account.is_gast
 
         rol_nu, functie_nu = rol_get_huidige_functie(self.request)
         is_organiserende_hwl = (rol_nu == Rol.ROL_HWL and functie_nu.vereniging == evenement.organiserende_vereniging)

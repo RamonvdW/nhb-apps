@@ -14,6 +14,7 @@ from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
 from Bestelling.operations import mandje_tel_inhoud, bestel_mutatieverzoek_inschrijven_evenement
+from Evenement.definities import EVENEMENT_BEGRENZING_STR
 from Evenement.models import Evenement, EvenementInschrijving
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige
@@ -55,7 +56,7 @@ def splits_evenement_workshop_keuzes(evenement: Evenement, prefix='ws'):
 
     workshops = list()
 
-    for regel in evenement.workshop_keuze.replace('\r', '\n').split('\n'):      # split de regels
+    for regel in evenement.workshop_opties.replace('\r', '\n').split('\n'):      # split de regels
         regel = regel.strip()
         if regel:
             pos = regel.find(' ')
@@ -133,7 +134,7 @@ class InschrijvenSporterView(UserPassesTestMixin, TemplateView):
 
         inschrijving_open_of_404(evenement)
 
-        evenement.begrenzing_str = "KHSN leden"
+        evenement.begrenzing_str = EVENEMENT_BEGRENZING_STR
 
         context['workshops'] = splits_evenement_workshop_keuzes(evenement)
 
@@ -146,7 +147,6 @@ class InschrijvenSporterView(UserPassesTestMixin, TemplateView):
         sporter = (Sporter
                    .objects
                    .exclude(is_overleden=True)
-                   .exclude(is_gast=True)         # alleen KHSN leden
                    .filter(lid_nr=lid_nr,
                            is_actief_lid=True)    # moet actief lid zijn
                    .select_related('bij_vereniging')
@@ -221,7 +221,11 @@ class InschrijvenGroepjeView(UserPassesTestMixin, TemplateView):
 
         inschrijving_open_of_404(evenement)
 
-        evenement.begrenzing_str = "KHSN leden"
+        account = get_account(self.request)
+        if account.is_gast:
+            raise Http404('Geen toegang')
+
+        evenement.begrenzing_str = EVENEMENT_BEGRENZING_STR
 
         context['workshops'] = splits_evenement_workshop_keuzes(evenement)
 
@@ -241,7 +245,6 @@ class InschrijvenGroepjeView(UserPassesTestMixin, TemplateView):
             sporter = (Sporter
                        .objects
                        .exclude(is_overleden=True)
-                       .exclude(is_gast=True)           # alleen KHSN leden
                        .filter(lid_nr=zoek_lid_nr,
                                is_actief_lid=True)      # moet actief lid zijn
                        .select_related('bij_vereniging')
@@ -328,12 +331,16 @@ class InschrijvenFamilieView(UserPassesTestMixin, TemplateView):
 
         inschrijving_open_of_404(evenement)
 
-        evenement.begrenzing_str = "KHSN leden"
+        evenement.begrenzing_str = EVENEMENT_BEGRENZING_STR
 
         context['workshops'] = splits_evenement_workshop_keuzes(evenement)
 
         # begrens de mogelijkheden tot leden met dezelfde adres_code als de ingelogde gebruiker
         account = get_account(self.request)
+
+        if account.is_gast:
+            raise Http404('Geen toegang')
+
         sporter = get_sporter(account)
         adres_code = sporter.adres_code
 
@@ -352,7 +359,6 @@ class InschrijvenFamilieView(UserPassesTestMixin, TemplateView):
         context['familie'] = list(Sporter
                                   .objects
                                   .exclude(is_overleden=True)
-                                  .exclude(is_gast=True)            # alleen KHSN leden
                                   .filter(adres_code=adres_code,
                                           is_actief_lid=True)       # moet actief lid zijn
                                   .select_related('bij_vereniging')
@@ -436,7 +442,6 @@ class ToevoegenAanMandjeView(UserPassesTestMixin, View):
             evenement = Evenement.objects.get(pk=evenement_pk)
             sporter = (Sporter
                        .objects
-                       .exclude(is_gast=True)           # alleen KHSN leden
                        .select_related('bij_vereniging')
                        .get(pk=sporter_pk))
         except ObjectDoesNotExist:

@@ -71,4 +71,7 @@ EVENEMENT_AFMELDING_STATUS_TO_SHORT_STR = {
 }
 
 
+EVENEMENT_BEGRENZING_STR = 'KHSN leden + gast-accounts'
+
+
 # end of file

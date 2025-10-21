@@ -58,15 +58,19 @@ class Evenement(models.Model):
     # kosten
     prijs_euro_normaal = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal(0))     # max 999,99
     prijs_euro_onder18 = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal(0))     # max 999,99
+    prijs_euro_gast    = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal(0))     # max 999,99
 
-    # keuze workshops (optioneel)
-    # 1 regel per keuze
+    # workshops (optioneel)
+    # 1 regel per optie
     # format: "n.m titel" met n = workshop ronde, m = volgorde (1, 2, etc.)
-    workshop_keuze = models.TextField(default='', blank=True)
+    workshop_opties = models.TextField(default='', blank=True)
 
     def bepaal_prijs_voor_sporter(self, sporter):
-        leeftijd = sporter.bereken_leeftijd()
-        prijs = self.prijs_euro_onder18 if leeftijd < 18 else self.prijs_euro_normaal
+        if sporter.is_gast:
+            prijs = self.prijs_euro_gast
+        else:
+            leeftijd = sporter.bereken_leeftijd()
+            prijs = self.prijs_euro_onder18 if leeftijd < 18 else self.prijs_euro_normaal
         return prijs
 
     def __str__(self):
@@ -101,7 +105,7 @@ class EvenementInschrijving(models.Model):
     evenement = models.ForeignKey(Evenement, on_delete=models.PROTECT)
 
     # workshops gekozen door deze sporter
-    # codes komen overeen met de nummers in Evenement.workshop_keuze
+    # codes komen overeen met de nummers in Evenement.workshop_opties
     # codes zijn gescheiden door een spatie
     gekozen_workshops = models.CharField(max_length=50, default='', blank=True)
 

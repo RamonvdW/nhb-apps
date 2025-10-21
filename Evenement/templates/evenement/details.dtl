@@ -130,16 +130,21 @@
                         <h6>Inschrijfgeld</h6>
                     </td>
                 </tr>
+
                 <tr>
-                    <th>Standaard</th>
+                    <th>KHSN lid</th>
                     <td>&euro;&nbsp;{{ evenement.prijs_euro_normaal }}</td>
                 </tr>
 
                 <tr>
-                    <th>Tot 18 jaar</th>
+                    <th>KHSN lid tot 18 jaar</th>
                     <td>&euro;&nbsp;{{ evenement.prijs_euro_onder18 }}</td>
                 </tr>
 
+                <tr>
+                    <th>Gast-account</th>
+                    <td>&euro;&nbsp;{{ evenement.prijs_euro_gast }}</td>
+                </tr>
             </table>
         </div>
     </div>
@@ -172,11 +177,13 @@
                     <!-- inschrijven sporter -->
                     {% include 'design/card_icon.dtl' with title="Sporter" text="Aanmelden en betalen voor jezelf." sv_icon="inschrijven sporter" url=url_inschrijven_sporter %}
 
-                    <!-- inschrijven groepje -->
-                    {% include 'design/card_icon.dtl' with title="Groep" text="Aanmelden en betalen voor een groepje leden zoals team, vrienden of collega's." sv_icon="inschrijven groep" url=url_inschrijven_groepje %}
+                    {% if inschrijven_anderen %}
+                        <!-- inschrijven groepje -->
+                        {% include 'design/card_icon.dtl' with title="Groep" text="Aanmelden en betalen voor een groepje leden zoals team, vrienden of collega's." sv_icon="inschrijven groep" url=url_inschrijven_groepje %}
 
-                    <!-- inschrijven familie -->
-                    {% include 'design/card_icon.dtl' with title="Familie" text="Aanmelden en betalen voor jonge leden, door ouders." sv_icon="inschrijven familie" url=url_inschrijven_familie %}
+                        <!-- inschrijven familie -->
+                        {% include 'design/card_icon.dtl' with title="Familie" text="Aanmelden en betalen voor jonge leden, door ouders." sv_icon="inschrijven familie" url=url_inschrijven_familie %}
+                    {% endif %}
 
                 {% endif %}
 

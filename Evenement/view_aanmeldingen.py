@@ -186,8 +186,8 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
                          'Gekozen workshops'])
 
         ws_code2beschrijving = dict()
-        if evenement.workshop_keuze:
-            for regel in evenement.workshop_keuze.replace('\r', '\n').split('\n'):
+        if evenement.workshop_opties:
+            for regel in evenement.workshop_opties.replace('\r', '\n').split('\n'):
                 pos = regel.find(' ')
                 code = regel[:pos]
                 ws_code2beschrijving[code] = regel
@@ -368,10 +368,10 @@ class EvenementDetailsAanmeldingView(UserPassesTestMixin, TemplateView):
 
         inschrijving.bestelnummer_str = get_inschrijving_mh_bestel_nr(inschrijving)
 
-        if evenement.workshop_keuze:
+        if evenement.workshop_opties:
             inschrijving.heeft_workshops = True
             inschrijving.workshops = list()
-            regels = evenement.workshop_keuze.replace('\r', '\n').split('\n')
+            regels = evenement.workshop_opties.replace('\r', '\n').split('\n')
             print(inschrijving.gekozen_workshops)
             for keuze in inschrijving.gekozen_workshops.split(' '):
                 for regel in regels:
@@ -495,7 +495,7 @@ class EvenementWorkshopKeuzesView(TemplateView):
             evenement_pk = str(kwargs['evenement_pk'])[:6]     # afkappen voor de veiligheid
             evenement = (Evenement
                          .objects
-                         .exclude(workshop_keuze='')
+                         .exclude(workshop_opties='')
                          .get(pk=evenement_pk))
         except (ValueError, TypeError, Evenement.DoesNotExist):
             raise Http404('Evenement niet gevonden')
