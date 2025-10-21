@@ -18,6 +18,7 @@ from Evenement.models import Evenement, EvenementInschrijving, EvenementAfgemeld
 from Evenement.view_inschrijven import splits_evenement_workshop_keuzes
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
+from Kalender.view_helpers import get_url_kalender_overzicht_met_datum
 from decimal import Decimal
 from codecs import BOM_UTF8
 import csv
@@ -185,8 +186,8 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
                          'Gekozen workshops'])
 
         ws_code2beschrijving = dict()
-        if evenement.workshop_keuze:
-            for regel in evenement.workshop_keuze.replace('\r', '\n').split('\n'):
+        if evenement.workshop_opties:
+            for regel in evenement.workshop_opties.replace('\r', '\n').split('\n'):
                 pos = regel.find(' ')
                 code = regel[:pos]
                 ws_code2beschrijving[code] = regel
@@ -367,10 +368,10 @@ class EvenementDetailsAanmeldingView(UserPassesTestMixin, TemplateView):
 
         inschrijving.bestelnummer_str = get_inschrijving_mh_bestel_nr(inschrijving)
 
-        if evenement.workshop_keuze:
+        if evenement.workshop_opties:
             inschrijving.heeft_workshops = True
             inschrijving.workshops = list()
-            regels = evenement.workshop_keuze.replace('\r', '\n').split('\n')
+            regels = evenement.workshop_opties.replace('\r', '\n').split('\n')
             print(inschrijving.gekozen_workshops)
             for keuze in inschrijving.gekozen_workshops.split(' '):
                 for regel in regels:
@@ -494,6 +495,7 @@ class EvenementWorkshopKeuzesView(TemplateView):
             evenement_pk = str(kwargs['evenement_pk'])[:6]     # afkappen voor de veiligheid
             evenement = (Evenement
                          .objects
+                         .exclude(workshop_opties='')
                          .get(pk=evenement_pk))
         except (ValueError, TypeError, Evenement.DoesNotExist):
             raise Http404('Evenement niet gevonden')
@@ -509,8 +511,8 @@ class EvenementWorkshopKeuzesView(TemplateView):
         context['aantal_opgaven'] = len(keuzes)
 
         code_count = dict()
-        for keuze in keuzes:
-            for code in keuze.split(' '):
+        for inschrijving_keuzes in keuzes:
+            for code in inschrijving_keuzes.split(' '):
                 try:
                     code_count[code] += 1
                 except KeyError:
@@ -530,8 +532,8 @@ class EvenementWorkshopKeuzesView(TemplateView):
         # for
 
         context['kruimels'] = (
-            (reverse('Vereniging:overzicht'), 'Beheer vereniging'),
-            (reverse('Evenement:vereniging'), 'Evenementen'),
+            (get_url_kalender_overzicht_met_datum(evenement.datum), 'Kalender'),
+            (reverse('Evenement:details', kwargs={'evenement_pk': evenement.pk}), 'Evenement'),
             (None, 'Voorkeur workshops')
         )
 

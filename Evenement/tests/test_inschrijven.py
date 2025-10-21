@@ -355,23 +355,56 @@ class TestEvenementInschrijven(E2EHelpers, TestCase):
         # inlog vereist
         self.e2e_login(self.account_100000)
 
-        resp = self.client.get(self.url_inschrijven_sporter % self.evenement.pk)
+        # groepje is geblokkeerd voor gast-accounts
+        resp = self.client.get(self.url_inschrijven_groepje % self.evenement.pk)
+        self.assert404(resp, 'Geen toegang')
+
+        # familie is geblokkeerd voor gast-accounts
+        resp = self.client.get(self.url_inschrijven_familie % self.evenement.pk)
+        self.assert404(resp, 'Geen toegang')
+
+        url = self.url_inschrijven_sporter % self.evenement.pk
+
+        resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('evenement/inschrijven-sporter.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
-        self.assertContains(resp, 'Het is niet mogelijk om in te schrijven op dit evenement')
 
-        resp = self.client.get(self.url_inschrijven_groepje % self.evenement.pk)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('evenement/inschrijven-groepje.dtl', 'plein/site_layout.dtl'))
-        self.assert_html_ok(resp)
-        self.assertNotContains(resp, 'Het is niet mogelijk om in te schrijven op dit evenement')
+        self.assertEqual(EvenementInschrijving.objects.count(), 0)
 
-        resp = self.client.get(self.url_inschrijven_familie % self.evenement.pk)
+        # echte inschrijving
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_toevoegen_mandje, {'evenement': self.evenement.pk,
+                                                                'sporter': self.sporter_100000.pk,
+                                                                'goto': 'S',
+                                                                'snel': '1'})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('evenement/inschrijven-familie.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
-        self.assertContains(resp, 'Het is niet mogelijk om in te schrijven op dit evenement')
+        self.assert_template_used(resp, ('evenement/inschrijven-toegevoegd-aan-mandje.dtl', 'plein/site_layout.dtl'))
+
+        self.assertEqual(EvenementInschrijving.objects.count(), 1)
+
+        # f1, f2 = self.verwerk_bestel_mutaties()
+        # print('f1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
+        # self.assertTrue(": inschrijven op evenement" in f2.getvalue())
+
+        self.assertEqual(EvenementInschrijving.objects.count(), 1)
+        inschrijving = EvenementInschrijving.objects.first()
+        self.assertEqual(inschrijving.evenement, self.evenement)
+        self.assertEqual(inschrijving.sporter, self.sporter_100000)
+
+        # al ingeschreven
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_template_used(resp, ('evenement/inschrijven-sporter.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
+
+        # zet datum in het verleden
+        self.evenement.datum = timezone.now().date()       # 1 dag ervoor
+        self.evenement.save(update_fields=['datum'])
+        resp = self.client.get(url)
+        self.assert404(resp, "Inschrijving is gesloten")
 
     def test_toevoegen_aan_mandje(self):
         # inlog vereist

@@ -130,16 +130,21 @@
                         <h6>Inschrijfgeld</h6>
                     </td>
                 </tr>
+
                 <tr>
-                    <th>Standaard</th>
+                    <th>KHSN lid</th>
                     <td>&euro;&nbsp;{{ evenement.prijs_euro_normaal }}</td>
                 </tr>
 
                 <tr>
-                    <th>Tot 18 jaar</th>
+                    <th>KHSN lid tot 18 jaar</th>
                     <td>&euro;&nbsp;{{ evenement.prijs_euro_onder18 }}</td>
                 </tr>
 
+                <tr>
+                    <th>Gast-account</th>
+                    <td>&euro;&nbsp;{{ evenement.prijs_euro_gast }}</td>
+                </tr>
             </table>
         </div>
     </div>
@@ -153,6 +158,7 @@
                 <h4 id="inschrijven">Inschrijven</h4>
 
                 {% if hint_inloggen %}
+                    <!-- rood bordje -->
                     <div style="padding:10px">
                         <div class="col s12 m10 offset-m1 l8 offset-l2 xl6 offset-xl3 sv-rood white-text z-depth-3 center">
                             <p>Om in te schrijven op dit evenement moet je een account aanmaken en inloggen</p>
@@ -171,11 +177,13 @@
                     <!-- inschrijven sporter -->
                     {% include 'plein/card_icon.dtl' with title="Sporter" text="Aanmelden en betalen voor jezelf." icon="person" url=url_inschrijven_sporter %}
 
-                    <!-- inschrijven groepje -->
-                    {% include 'plein/card_icon.dtl' with title="Groep" text="Aanmelden en betalen voor een groepje leden zoals team, vrienden of collega's." icon="group" url=url_inschrijven_groepje %}
+                    {% if inschrijven_anderen %}
+                        <!-- inschrijven groepje -->
+                        {% include 'plein/card_icon.dtl' with title="Groep" text="Aanmelden en betalen voor een groepje leden zoals team, vrienden of collega's." icon="group" url=url_inschrijven_groepje %}
 
-                    <!-- inschrijven familie -->
-                    {% include 'plein/card_icon.dtl' with title="Familie" text="Aanmelden en betalen voor jonge leden, door ouders." icon="family_restroom" url=url_inschrijven_familie %}
+                        <!-- inschrijven familie -->
+                        {% include 'plein/card_icon.dtl' with title="Familie" text="Aanmelden en betalen voor jonge leden, door ouders." icon="family_restroom" url=url_inschrijven_familie %}
+                    {% endif %}
 
                 {% endif %}
 

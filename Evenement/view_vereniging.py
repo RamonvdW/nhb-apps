@@ -66,7 +66,7 @@ class VerenigingEvenementenView(UserPassesTestMixin, View):
             evenement.url_aanmeldingen = reverse('Evenement:aanmeldingen',
                                                  kwargs={'evenement_pk': evenement.pk})
 
-            if evenement.workshop_keuze.strip():
+            if evenement.workshop_opties.strip():
                 evenement.toon_workshop_keuzes = True
                 evenement.url_workshop_keuzes = reverse('Evenement:workshop-keuzes',
                                                         kwargs={'evenement_pk': evenement.pk})

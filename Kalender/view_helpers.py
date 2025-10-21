@@ -50,6 +50,18 @@ def get_url_eerstvolgende_maand_met_wedstrijd():
     return url
 
 
+def get_url_kalender_overzicht_met_datum(datum):
+    jaar = datum.year
+    maand = datum.month
+
+    url = reverse('Kalender:simpel',
+                  kwargs={'jaar_of_maand': 'maand',
+                          'jaar': jaar,
+                          'maand': MAAND2URL[maand]})
+
+    return url
+
+
 def maak_compacte_wanneer_str(datum_begin, datum_einde):
 
     if datum_begin == datum_einde:
