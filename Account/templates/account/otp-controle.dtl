@@ -56,7 +56,7 @@
                             </table>
                         </div>
 
-                        <div class="col s12" style="margin-top:25px">
+                        <div class="col s12 center" style="margin-top:25px">
                             <button class="btn-sv-rood" id="submit_knop" type="submit">Controleer</button>
                         </div>
                     </div>
