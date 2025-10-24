@@ -4,11 +4,11 @@
 #
 #    pip-compile --strip-extras requirements_dev.in
 #
-asgiref==3.9.2
+asgiref==3.10.0
     # via
     #   -r requirements.txt
     #   django
-attrs==25.3.0
+attrs==25.4.0
     # via
     #   outcome
     #   trio
@@ -16,29 +16,30 @@ beautifulsoup4==4.14.2
     # via -r requirements_dev.in
 brotli==1.1.0
     # via -r requirements_dev.in
-cachetools==6.2.0
+cachetools==6.2.1
     # via
     #   -r requirements.txt
     #   google-auth
-certifi==2025.8.3
+certifi==2025.10.5
     # via
     #   -r requirements.txt
     #   requests
     #   selenium
-charset-normalizer==3.4.3
+charset-normalizer==3.4.4
     # via
     #   -r requirements.txt
     #   requests
-coverage==7.10.7
+coverage==7.11.0
     # via
     #   -r requirements_dev.in
     #   django-coverage-plugin
 django==5.2.7
     # via
     #   -r requirements.txt
+    #   django-coverage-plugin
     #   django-debug-toolbar
     #   django-extensions
-django-coverage-plugin==3.1.1
+django-coverage-plugin==3.2.0
     # via -r requirements_dev.in
 django-debug-toolbar==6.0.0
     # via -r requirements_dev.in
@@ -52,13 +53,13 @@ et-xmlfile==2.0.0
     #   openpyxl
 fonttools==4.60.1
     # via -r requirements_dev.in
-google-api-core==2.25.2
+google-api-core==2.27.0
     # via
     #   -r requirements.txt
     #   google-api-python-client
     #   google-geo-type
     #   google-maps-routing
-google-api-python-client==2.184.0
+google-api-python-client==2.185.0
     # via -r requirements.txt
 google-auth==2.41.1
     # via
@@ -75,25 +76,27 @@ google-auth-httplib2==0.2.0
     #   google-api-python-client
 google-auth-oauthlib==1.2.2
     # via -r requirements.txt
-google-geo-type==0.3.13
+google-geo-type==0.4.0
     # via
     #   -r requirements.txt
     #   google-maps-routing
-google-maps-routing==0.6.16
+google-maps-routing==0.7.0
     # via -r requirements.txt
-googleapis-common-protos==1.70.0
+googleapis-common-protos==1.71.0
     # via
     #   -r requirements.txt
     #   google-api-core
     #   grpcio-status
 googlemaps==4.10.0
     # via -r requirements.txt
-grpcio==1.75.1
+grpcio==1.76.0
     # via
     #   -r requirements.txt
     #   google-api-core
+    #   google-geo-type
+    #   google-maps-routing
     #   grpcio-status
-grpcio-status==1.75.1
+grpcio-status==1.76.0
     # via
     #   -r requirements.txt
     #   google-api-core
@@ -106,7 +109,7 @@ httplib2==0.31.0
     #   -r requirements.txt
     #   google-api-python-client
     #   google-auth-httplib2
-idna==3.10
+idna==3.11
     # via
     #   -r requirements.txt
     #   requests
@@ -123,11 +126,11 @@ outcome==1.3.0.post0
     # via
     #   trio
     #   trio-websocket
-pillow==11.3.0
+pillow==12.0.0
     # via -r requirements.txt
-pip-licenses-cli==2.0.0
+pip-licenses-cli==3.0.0
     # via -r requirements_dev.in
-pip-licenses-lib==0.6.0
+pip-licenses-lib==1.0.0
     # via pip-licenses-cli
 prettytable==3.16.0
     # via pip-licenses-cli
@@ -137,7 +140,7 @@ proto-plus==1.26.1
     #   google-api-core
     #   google-geo-type
     #   google-maps-routing
-protobuf==6.32.1
+protobuf==6.33.0
     # via
     #   -r requirements.txt
     #   google-api-core
@@ -146,7 +149,7 @@ protobuf==6.32.1
     #   googleapis-common-protos
     #   grpcio-status
     #   proto-plus
-psycopg==3.2.10
+psycopg==3.2.11
     # via -r requirements.txt
 pyasn1==0.6.1
     # via
@@ -163,7 +166,7 @@ pyparsing==3.2.5
     # via
     #   -r requirements.txt
     #   httplib2
-pypdf==6.1.1
+pypdf==6.1.3
     # via -r requirements.txt
 pysocks==1.7.1
     # via urllib3
@@ -187,7 +190,7 @@ rsa==4.9.1
     # via
     #   -r requirements.txt
     #   google-auth
-selenium==4.36.0
+selenium==4.37.0
     # via -r requirements_dev.in
 sniffio==1.3.1
     # via trio
@@ -224,7 +227,7 @@ urllib3==2.5.0
     #   selenium
 wcwidth==0.2.14
     # via prettytable
-websocket-client==1.8.0
+websocket-client==1.9.0
     # via selenium
 wsproto==1.2.0
     # via trio-websocket
