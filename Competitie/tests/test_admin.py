@@ -56,7 +56,7 @@ class TestCompetitieAdmin(E2EHelpers, TestCase):
         _ = worker.queryset(None, RegiocompetitieSporterBoog.objects.all())
 
         worker = admin.TeamAGListFilter(None,
-                                        {'TeamAG': 'Ontbreekt'},
+                                        {'TeamAG': ['Ontbreekt']},
                                         RegiocompetitieSporterBoog,
                                         admin.RegiocompetitieSporterBoogAdmin)
         _ = worker.queryset(None, RegiocompetitieSporterBoog.objects.all())
@@ -124,7 +124,7 @@ class TestCompetitieAdmin(E2EHelpers, TestCase):
         # RondeTeamVerFilter
         request = factory.get('/beheer/Competitie/regiocompetitierondeteam/')
         worker = admin.RondeTeamVerFilter(request,
-                                          {'RondeTeamVer': [self.team.pk]},
+                                          {'RondeTeamVer': [self.team.vereniging.ver_nr]},
                                           RegiocompetitieRondeTeam,
                                           admin.RegiocompetitieRondeTeamAdmin)
         qs = worker.queryset(None, RegiocompetitieRondeTeam.objects.all())
@@ -145,7 +145,7 @@ class TestCompetitieAdmin(E2EHelpers, TestCase):
                                           RegiocompetitieRondeTeam,
                                           admin.RegiocompetitieRondeTeamAdmin)
         tups = worker.lookups(None, admin.RegiocompetitieRondeTeamAdmin)
-        self.assertEqual(tups, [(self.team.pk, str(self.team))])
+        self.assertEqual(tups, [(self.team.vereniging.ver_nr, str(self.team.vereniging))])
         _ = worker.queryset(None, RegiocompetitieRondeTeam.objects.all())
 
         request = factory.get('/beheer/Competitie/regiocompetitierondeteam/?RondeTeamType=C')

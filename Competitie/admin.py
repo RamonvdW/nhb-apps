@@ -332,7 +332,7 @@ class RegiocompetitieTeamAdmin(CreateOnlyAdmin):
         super().__init__(model, admin_site)
         self.obj = None
 
-    def get_form(self, request, obj=None, **kwargs):                    # pragma: no cover
+    def get_form(self, request, obj: RegiocompetitieTeam=None, **kwargs):             # pragma: no cover
         """ initialisatie van het admin formulier
             hier "vangen" we het database object waar we mee bezig gaan
         """
@@ -527,7 +527,7 @@ class KampioenschapTeamAdmin(CreateOnlyAdmin):
         self.competitie = None
         self.boog_pks = list()
 
-    def get_form(self, request, obj=None, **kwargs):                    # pragma: no cover
+    def get_form(self, request, obj: KampioenschapTeam=None, **kwargs):                    # pragma: no cover
         """ initialisatie van het admin formulier
             hier "vangen" we het database object waar we mee bezig gaan
         """
@@ -896,7 +896,7 @@ class RegiocompetitieRondeTeamAdmin(CreateOnlyAdmin):
         self.deelcomp = None
         self.ver = None
 
-    def get_form(self, request, obj=None, **kwargs):                    # pragma: no cover
+    def get_form(self, request, obj: RegiocompetitieRondeTeam=None, **kwargs):      # pragma: no cover
         """ initialisatie van het admin formulier
             hier "vangen" we het database object waar we mee bezig gaan
         """
@@ -909,7 +909,7 @@ class RegiocompetitieRondeTeamAdmin(CreateOnlyAdmin):
 
         return super().get_form(request, obj, **kwargs)
 
-    def formfield_for_foreignkey(self, db_field, request, **kwargs):    # pragma: no cover
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):                # pragma: no cover
         """ bepaal de relevante keuzemogelijkheden voor specifieke velden
         """
         if db_field.name == 'team' and self.deelcomp:
@@ -955,7 +955,7 @@ class RegiocompetitieRondeTeamAdmin(CreateOnlyAdmin):
                                                       'sporterboog__boogtype')
                                       .order_by('sporterboog__sporter__lid_nr'))
 
-        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+        return super().formfield_for_manytomany(db_field, request, **kwargs)
 
 
 class RegiocompetitieTeamPouleAdmin(CreateOnlyAdmin):
@@ -967,7 +967,7 @@ class RegiocompetitieTeamPouleAdmin(CreateOnlyAdmin):
         super().__init__(model, admin_site)
         self.deelcomp = None
 
-    def get_form(self, request, obj=None, **kwargs):                    # pragma: no cover
+    def get_form(self, request, obj: RegiocompetitieTeamPoule=None, **kwargs):                    # pragma: no cover
         """ initialisatie van het admin formulier
             hier "vangen" we het database object waar we mee bezig gaan
         """
