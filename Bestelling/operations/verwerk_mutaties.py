@@ -602,7 +602,7 @@ class VerwerkBestelMutaties:
         wedstrijd_bestel_plugin.aanpassen(
                                     mutatie.product_pk,
                                     mutatie.account.get_account_full_name(),
-                                    sessie=mutatie.sessie,
+                                    sessie_pk=mutatie.sessie_pk,
                                     klasse=mutatie.wedstrijdklasse,
                                     sporterboog=mutatie.sporterboog)
 

@@ -7,10 +7,10 @@
 from django.db import models
 from django.utils import timezone
 from Account.models import Account
+from BasisTypen.models import KalenderWedstrijdklasse
 from Bestelling.definities import BESTELLING_MUTATIE_TO_STR, BESTELLING_TRANSPORT_NVT, BESTELLING_TRANSPORT_OPTIES
 from Bestelling.models import Bestelling, BestellingRegel
 from Sporter.models import SporterBoog
-from Wedstrijden.models import WedstrijdSessie, KalenderWedstrijdklasse
 from decimal import Decimal
 
 
@@ -76,7 +76,7 @@ class BestellingMutatie(models.Model):
     transport = models.CharField(max_length=1, default=BESTELLING_TRANSPORT_NVT, choices=BESTELLING_TRANSPORT_OPTIES)
 
     # wedstrijd aanpassing
-    sessie = models.ForeignKey(WedstrijdSessie, on_delete=models.SET_NULL, null=True, blank=True)
+    sessie_pk = models.PositiveBigIntegerField(default=0)
     sporterboog = models.ForeignKey(SporterBoog, on_delete=models.SET_NULL, null=True, blank=True)
     wedstrijdklasse = models.ForeignKey(KalenderWedstrijdklasse, on_delete=models.SET_NULL, null=True, blank=True)
 

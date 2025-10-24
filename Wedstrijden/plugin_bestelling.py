@@ -19,7 +19,7 @@ from Wedstrijden.definities import (WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_MA
                                     WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF,
                                     WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD,
                                     WEDSTRIJD_INSCHRIJVING_STATUS_VERWIJDERD)
-from Wedstrijden.models import WedstrijdInschrijving, Wedstrijd
+from Wedstrijden.models import WedstrijdInschrijving, Wedstrijd, WedstrijdSessie
 from decimal import Decimal
 import datetime
 
@@ -151,9 +151,11 @@ class WedstrijdBestelPlugin(BestelPluginBase):
             aanpassing wordt verwijderd de aanroep
         """
 
-        sessie = kwargs['sessie']
+        sessie_pk = kwargs['sessie_pk']
         klasse = kwargs['klasse']
         sporterboog = kwargs['sporterboog']
+
+        sessie = WedstrijdSessie.objects.get(pk=sessie_pk)
 
         inschrijving = (WedstrijdInschrijving
                         .objects

@@ -337,7 +337,7 @@ def bestel_mutatieverzoek_wedstrijdinschrijving_aanpassen(inschrijving: Wedstrij
                                     account=door_account,
                                     product_pk=inschrijving.pk,
                                     sporterboog=sporterboog,
-                                    sessie=sessie,
+                                    sessie_pk=sessie.pk,
                                     wedstrijdklasse=klasse,
                                     is_verwerkt=False)
 
