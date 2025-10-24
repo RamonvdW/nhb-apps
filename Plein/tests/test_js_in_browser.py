@@ -21,7 +21,7 @@ def outer(app_filter):
 
 class AddFocus(type):
     # create focus_Appname methods before unittest does discovery
-    def __init__(self, *args, **kwargs):
+    def __init__(cls, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         added = list()
@@ -37,7 +37,7 @@ class AddFocus(type):
                         break
                 # for
             if add:
-                setattr(self, 'focus_%s' % app.name, outer(app.name))
+                setattr(cls, 'focus_%s' % app.name, outer(app.name))
                 added.append(app.name)
         # for
 
@@ -77,7 +77,7 @@ class TestBrowser(LiveServerTestCase, metaclass=AddFocus):
             self._driver.close()        # important, otherwise the server port remains occupied
             self._driver = None
 
-        bh.database_opschonen(self)     # TODO: niet nodig, want alle tables worden geflushed for LiveServerTestCase :(
+        bh.database_opschonen(self)     # TODO: niet nodig: alle tabellen worden leeg gegooid door LiveServerTestCase :(
 
     def _run_module_tests(self, test_module):
         try:

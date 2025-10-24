@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.conf import settings
-from django.http import UnreadablePostError, HttpResponse
+from django.http import UnreadablePostError, HttpResponseBase
 from django.test import TestCase
 from Mailer.models import MailQueue
 from TestHelpers.template_status import consistent_email_templates, included_templates, validated_templates
@@ -43,7 +43,7 @@ class MyTestAsserts(TestCase):
         return html
 
     @staticmethod
-    def _get_template_names_used(resp: HttpResponse):
+    def _get_template_names_used(resp: HttpResponseBase):
         names = list()
         if hasattr(resp, "templates"):      # pragma: no branch
             names = [template.name
@@ -51,7 +51,7 @@ class MyTestAsserts(TestCase):
             # for
         return names
 
-    def get_useful_template_name(self, resp: HttpResponse):
+    def get_useful_template_name(self, resp: HttpResponseBase):
         names = [name
                  for name in self._get_template_names_used(resp)
                  if (name not in included_templates
@@ -63,7 +63,7 @@ class MyTestAsserts(TestCase):
             self.fail('Too many choices for template name: %s' % repr(names))
         return names[0]
 
-    def interpreteer_resp(self, resp: HttpResponse):          # pragma: no cover
+    def interpreteer_resp(self, resp: HttpResponseBase):          # pragma: no cover
         long_msg = [
             "status code: %s" % resp.status_code,
             repr(resp)
@@ -161,7 +161,7 @@ class MyTestAsserts(TestCase):
         print("\nresp:")
         print("\n".join(long_msg))
 
-    def extract_all_urls(self, resp: HttpResponse,
+    def extract_all_urls(self, resp: HttpResponseBase,
                          skip_menu=False, skip_smileys=True, skip_broodkruimels=True, skip_post=False,
                          skip_hash_links=True, report_dupes=True, skip_external=True, skip_mailto=True):
         content = str(resp.content)
@@ -713,7 +713,7 @@ class MyTestAsserts(TestCase):
             pos = html.find('<img ', pos+1)
         # while
 
-    def html_assert_urls_usable(self, resp: HttpResponse, html, dtl):
+    def html_assert_urls_usable(self, resp: HttpResponseBase, html, dtl):
         urls = self.extract_all_urls(resp, skip_external=True, skip_hash_links=True, skip_post=True)
         for url in urls:
             if url.find(" ") >= 0:                  # pragma: no cover
@@ -785,7 +785,7 @@ class MyTestAsserts(TestCase):
                 # print(html)
                 self.fail(msg='Bug in template %s: Missing JS include for collapsible icons' % repr(dtl))
 
-    def assert_html_ok(self, resp: HttpResponse):
+    def assert_html_ok(self, resp: HttpResponseBase):
         """ Doe een aantal basic checks op een html response """
 
         # check for files
@@ -838,14 +838,14 @@ class MyTestAsserts(TestCase):
 
         return html
 
-    def is_fout_pagina(self, resp: HttpResponse):        # pragma: no cover
+    def is_fout_pagina(self, resp: HttpResponseBase):        # pragma: no cover
         is_fout = False
         if resp.status_code == 200:
             names = self._get_template_names_used(resp)
             is_fout = 'plein/fout_403.dtl' in names or 'plein/fout_404.dtl' in names
         return is_fout
 
-    def get_templates_not_used(self, resp: HttpResponse, template_names: tuple | list) -> list:
+    def get_templates_not_used(self, resp: HttpResponseBase, template_names: tuple | list) -> list:
         """ returns the names of templates not used in the render of the response """
         used_names = self._get_template_names_used(resp)
         # Note: used_names contains additional template names that we don't want to return (like site_layout_fonts.dtl)
@@ -853,7 +853,7 @@ class MyTestAsserts(TestCase):
                 for name in template_names
                 if name not in used_names]
 
-    def assert_template_used(self, resp: HttpResponse, template_names: tuple | list):
+    def assert_template_used(self, resp: HttpResponseBase, template_names: tuple | list):
         """ Controleer dat de gevraagde templates gebruikt zijn """
         lst = self.get_templates_not_used(resp, template_names)
         if len(lst):    # pragma: no cover
@@ -905,7 +905,7 @@ class MyTestAsserts(TestCase):
         else:
             self.assertEqual(expected_url, resp.url)
 
-    def assert_is_redirect_not_plein(self, resp):
+    def assert_is_redirect_not_plein(self, resp) -> str:
         if resp.status_code != 302:                     # pragma: no cover
             # geef een iets uitgebreider antwoord
             msg = "status_code: %s != 302" % resp.status_code
@@ -915,6 +915,7 @@ class MyTestAsserts(TestCase):
             self.fail(msg=msg)
 
         self.assertNotEqual(resp.url, '/plein/')    # redirect naar plein is typisch een reject om rechten
+        return resp.url
 
     def assert_is_redirect_login(self, resp, next_url=None):
         if resp.status_code != 302:                     # pragma: no cover
@@ -1019,7 +1020,7 @@ class MyTestAsserts(TestCase):
                       '\n   ' +
                       '\n   '.join(explain))
 
-    def assert403(self, resp: HttpResponse, expected_msg='Geen toegang'):
+    def assert403(self, resp: HttpResponseBase, expected_msg='Geen toegang'):
         # controleer dat we op de speciale code-403 handler pagina gekomen zijn
         # of een redirect hebben gekregen naar de login pagina
 
@@ -1048,7 +1049,7 @@ class MyTestAsserts(TestCase):
                     pagina = pagina[:pos]
                     self.fail(msg='403 pagina bevat %s in plaats van %s' % (repr(pagina), repr(expected_msg)))
 
-    def assert404(self, resp: HttpResponse, expected_msg=''):
+    def assert404(self, resp: HttpResponseBase, expected_msg=''):
         if isinstance(resp, str):
             self.fail(msg='Verkeerde aanroep: resp parameter vergeten?')            # pragma: no cover
 
@@ -1080,10 +1081,10 @@ class MyTestAsserts(TestCase):
                 pagina = pagina[:pos]
             self.fail(msg='404 pagina, maar geen expected_msg! Inhoud pagina: %s' % repr(pagina))
 
-    def assert405(self, resp: HttpResponse):
+    def assert405(self, resp: HttpResponseBase):
         self.assertEqual(resp.status_code, 405)
 
-    def assert_bestand(self, resp: HttpResponse, expected_content_type):
+    def assert_bestand(self, resp: HttpResponseBase, expected_content_type):
         if resp.status_code != 200:                                 # pragma: no cover
             self.dump_resp(resp)
             self.fail(msg="Onverwachte foutcode %s in plaats van 200" % resp.status_code)
@@ -1098,7 +1099,7 @@ class MyTestAsserts(TestCase):
         # ensure the file is not empty
         self.assertTrue(len(str(resp.content)) > 30)
 
-    def assert200_json(self, resp: HttpResponse):
+    def assert200_json(self, resp: HttpResponseBase):
         if resp.status_code != 200:                                 # pragma: no cover
             self.dump_resp(resp)
             self.fail(msg="Onverwachte foutcode %s in plaats van 200" % resp.status_code)
@@ -1115,13 +1116,13 @@ class MyTestAsserts(TestCase):
 
         return json_data
 
-    def assert200_is_bestand_csv(self, resp: HttpResponse):
+    def assert200_is_bestand_csv(self, resp: HttpResponseBase):
         self.assert_bestand(resp, 'text/csv; charset=UTF-8')
 
-    def assert200_is_bestand_tsv(self, resp: HttpResponse):
+    def assert200_is_bestand_tsv(self, resp: HttpResponseBase):
         self.assert_bestand(resp, 'text/tab-separated-values; charset=UTF-8')
 
-    def assert200_is_bestand_xlsx(self, resp: HttpResponse):
+    def assert200_is_bestand_xlsx(self, resp: HttpResponseBase):
         self.assert_bestand(resp, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
 
     # def assert200_is_bestand_xlsm(self, resp):
