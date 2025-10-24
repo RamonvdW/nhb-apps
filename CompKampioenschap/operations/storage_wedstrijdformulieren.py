@@ -68,31 +68,32 @@ def aantal_ontbrekende_wedstrijdformulieren_rk_bk(comp: Competitie) -> int:
     """
     todo_count = 0
 
-    # maak een map met de huidige bestanden
-    sel2bestand = dict()
-    for bestand in Bestand.objects.filter(begin_jaar=comp.begin_jaar, afstand=comp.afstand):
-        sel = (bestand.begin_jaar, bestand.afstand, bestand.klasse_pk,
-               bestand.is_teams, bestand.is_bk, bestand.rayon_nr)
-        sel2bestand[sel] = bestand
-    # for
+    if comp:
+        # maak een map met de huidige bestanden
+        sel2bestand = dict()
+        for bestand in Bestand.objects.filter(begin_jaar=comp.begin_jaar, afstand=comp.afstand):
+            sel = (bestand.begin_jaar, bestand.afstand, bestand.klasse_pk,
+                   bestand.is_teams, bestand.is_bk, bestand.rayon_nr)
+            sel2bestand[sel] = bestand
+        # for
 
-    for tup in iter_indiv_wedstrijdformulieren(comp):
-        afstand, is_bk, klasse_pk, rayon_nr, fname = tup
-        #                                           is_teams
-        sel = (comp.begin_jaar, afstand, klasse_pk, False, is_bk, rayon_nr)
-        if sel not in sel2bestand:
-            # niet gevonden; voeg toe aan de todo lijst
-            todo_count += 1
-    # for
+        for tup in iter_indiv_wedstrijdformulieren(comp):
+            afstand, is_bk, klasse_pk, rayon_nr, fname = tup
+            #                                           is_teams
+            sel = (comp.begin_jaar, afstand, klasse_pk, False, is_bk, rayon_nr)
+            if sel not in sel2bestand:
+                # niet gevonden; voeg toe aan de todo lijst
+                todo_count += 1
+        # for
 
-    for tup in iter_teams_wedstrijdformulieren(comp):
-        afstand, is_bk, klasse_pk, rayon_nr, fname = tup
-        #                                           is_teams
-        sel = (comp.begin_jaar, afstand, klasse_pk, True, is_bk, rayon_nr)
-        if sel not in sel2bestand:
-            # niet gevonden; voeg toe aan de todo lijst
-            todo_count += 1
-    # for
+        for tup in iter_teams_wedstrijdformulieren(comp):
+            afstand, is_bk, klasse_pk, rayon_nr, fname = tup
+            #                                           is_teams
+            sel = (comp.begin_jaar, afstand, klasse_pk, True, is_bk, rayon_nr)
+            if sel not in sel2bestand:
+                # niet gevonden; voeg toe aan de todo lijst
+                todo_count += 1
+        # for
 
     return todo_count
 

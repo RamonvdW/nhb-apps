@@ -83,12 +83,10 @@ class AanmakenView(UserPassesTestMixin, TemplateView):
             raise Http404('Geen toestemming')
 
         comp18 = Competitie.objects.exclude(regiocompetitie_is_afgesloten=True).filter(afstand=18).first()
-        if comp18:
-            context['aantal_aanmaken_18'] = aantal_ontbrekende_wedstrijdformulieren_rk_bk(comp18)
+        context['aantal_aanmaken_18'] = aantal_ontbrekende_wedstrijdformulieren_rk_bk(comp18)
 
         comp25 = Competitie.objects.exclude(regiocompetitie_is_afgesloten=True).filter(afstand=25).first()
-        if comp25:
-            context['aantal_aanmaken_25'] = aantal_ontbrekende_wedstrijdformulieren_rk_bk(comp25)
+        context['aantal_aanmaken_25'] = aantal_ontbrekende_wedstrijdformulieren_rk_bk(comp25)
 
         context['url_aanmaken'] = reverse('CompBeheer:wf-aanmaken')
 
