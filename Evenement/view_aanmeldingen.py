@@ -372,7 +372,6 @@ class EvenementDetailsAanmeldingView(UserPassesTestMixin, TemplateView):
             inschrijving.heeft_workshops = True
             inschrijving.workshops = list()
             regels = evenement.workshop_opties.replace('\r', '\n').split('\n')
-            print(inschrijving.gekozen_workshops)
             for keuze in inschrijving.gekozen_workshops.split(' '):
                 for regel in regels:
                     if regel.startswith(keuze + ' '):
