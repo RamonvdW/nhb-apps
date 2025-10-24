@@ -26,9 +26,9 @@
 
                 <p>Aantal bestanden (nog) aan te maken voor de Indoor: {{ aantal_aanmaken_18 }}<br>Aantal bestanden (nog) aan te maken voor de 25m 1pijl: {{ aantal_aanmaken_25 }}</p>
 
-                <form action="{{ url_aanmaken }}" method="post">
+                <form action="{{ url_aanmaken }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
                     {% csrf_token %}
-                    <button class="btn-sv-rood" type="submit">Begin</button>
+                    <button class="btn-sv-rood" id="submit_knop" type="submit">Begin</button>
                 </form>
             </div>
         </div>

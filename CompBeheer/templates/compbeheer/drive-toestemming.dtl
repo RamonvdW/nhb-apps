@@ -32,9 +32,9 @@
                 {% else %}
                     <p>Onderstaande knop begint het process waarmee jij toegang kan verlenen aan MijnHandboogsport.</p>
 
-                    <form action="{{ url_toestemming }}" method="post">
+                    <form action="{{ url_toestemming }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
                         {% csrf_token %}
-                        <button class="btn-sv-rood" type="submit">Begin</button>
+                        <button class="btn-sv-rood" id="submit_knop" type="submit">Begin</button>
                     </form>
                 {% endif %}
             </div>
