@@ -309,7 +309,7 @@ class TestUIView(View):
     @staticmethod
     def get(request, *args, **kwargs):
         context = {
-            'icon': 'download_for_offline',
+            'icon': 'sluiten',
         }
         return render(request, TEMPLATE_TEST_UI, context)
 

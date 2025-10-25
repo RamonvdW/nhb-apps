@@ -5,6 +5,7 @@
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
+{% load design_icons %}
 
 {% block title %}Test{% endblock %}
 
@@ -25,25 +26,25 @@
 
             <td>
                 <button class="btn-sv-rood black-text" style="background-color:#FABE00">
-                    <i class="material-symbol left">{{ icon }}</i>Voorbeeld</button>
+                    {% sv-icon icon kleur='black-text' extra_class='left' %}Voorbeeld</button>
             </td>
             <td style="border:1px solid red">
                 <button class="btn-sv-rood white-text" style="background-color:#FABE00">
-                    <i class="material-symbol left">{{ icon }}</i>Voorbeeld</button>
+                    {% sv-icon icon kleur='white-text' extra_class='left' %}Voorbeeld</button>
             </td>
 
             <td>
                 <button class="btn-sv-rood black-text" style="background-color:#FABE00; text-shadow:none">
-                    <i class="material-symbol left">{{ icon }}</i>Voorbeeld</button>
+                    {% sv-icon icon kleur='black-text' extra_class='left' %}Voorbeeld</button>
             </td>
             <td style="border:1px solid red">
                 <button class="btn-sv-rood white-text" style="background-color:#FABE00; text-shadow:none">
-                    <i class="material-symbol left">{{ icon }}</i>Voorbeeld</button>
+                    {% sv-icon icon kleur='white-text' extra_class='left' %}Voorbeeld</button>
             </td>
 
             <td>
                 <button class="btn-sv-rood" style="background-color:#FABE00; text-shadow:none; color:rgba(0,0,0,0.85)">
-                    <i class="material-symbol left">{{ icon }}</i>Voorbeeld</button>
+                    {% sv-icon icon kleur='off-black' extra_class='left' %}Voorbeeld</button>
             </td>
         </tr>
 
@@ -51,29 +52,29 @@
         <tr>
             <td>
                 <button class="btn-sv-rood white-text">
-                    <i class="material-symbol left">{{ icon }}</i>Voorbeeld</button>
+                    {% sv-icon icon kleur='white-text' extra_class='left' %}Voorbeeld</button>
             </td>
 
             <td>
                 <button class="btn-sv-rood black-text" style="background-color:#F94137">
-                    <i class="material-symbol left">{{ icon }}</i>Voorbeeld</button>
+                    {% sv-icon icon kleur='black-text' extra_class='left' %}Voorbeeld</button>
             </td>
             <td>
                 <button class="btn-sv-rood white-text" style="background-color:#F94137">
-                    <i class="material-symbol left">{{ icon }}</i>Voorbeeld</button>
+                    {% sv-icon icon kleur='white-text' extra_class='left' %}Voorbeeld</button>
             </td>
             <td>
                 <button class="btn-sv-rood black-text" style="background-color:#F94137; text-shadow:none">
-                    <i class="material-symbol left">{{ icon }}</i>Voorbeeld</button>
+                    {% sv-icon icon kleur='black-text' extra_class='left' %}Voorbeeld</button>
             </td>
             <td style="border:1px solid red">
                 <button class="btn-sv-rood white-text" style="background-color:#F94137; text-shadow:none">
-                    <i class="material-symbol left">{{ icon }}</i>Voorbeeld</button>
+                    {% sv-icon icon kleur='white-text' extra_class='left' %}Voorbeeld</button>
             </td>
 
             <td>
                 <button class="btn-sv-rood" style="background-color:#F94137; text-shadow:none; color:rgba(0,0,0,0.85)">
-                    <i class="material-symbol left">{{ icon }}</i>Voorbeeld</button>
+                    {% sv-icon icon kleur='off-black' extra_class='left' %}Voorbeeld</button>
             </td>
         </tr>
 
@@ -83,25 +84,25 @@
 
             <td>
                 <button class="btn-sv-rood black-text" style="background-color:#0AA0E1">
-                    <i class="material-symbol left">{{ icon }}</i>Voorbeeld</button>
+                    {% sv-icon icon kleur='black-text' extra_class='left' %}Voorbeeld</button>
             </td>
             <td>
                 <button class="btn-sv-rood white-text" style="background-color:#0AA0E1">
-                    <i class="material-symbol left">{{ icon }}</i>Voorbeeld</button>
+                    {% sv-icon icon kleur='white-text' extra_class='left' %}Voorbeeld</button>
             </td>
 
             <td>
                 <button class="btn-sv-rood black-text" style="background-color:#0AA0E1; text-shadow:none">
-                    <i class="material-symbol left">{{ icon }}</i>Voorbeeld</button>
+                    {% sv-icon icon kleur='black-text' extra_class='left' %}Voorbeeld</button>
             </td>
             <td style="border:1px solid red">
                 <button class="btn-sv-rood white-text" style="background-color:#0AA0E1; text-shadow:none">
-                    <i class="material-symbol left">{{ icon }}</i>Voorbeeld</button>
+                    {% sv-icon icon kleur='white-text' extra_class='left' %}Voorbeeld</button>
             </td>
 
             <td>
                 <button class="btn-sv-rood" style="background-color:#0AA0E1; text-shadow:none; color:rgba(0,0,0,0.85)">
-                    <i class="material-symbol left">{{ icon }}</i>Voorbeeld</button>
+                    {% sv-icon icon kleur='off-black' extra_class='left' %}Voorbeeld</button>
             </td>
         </tr>
 
@@ -109,29 +110,29 @@
         <tr>
             <td>
                 <button class="btn-sv-blauw white-text">
-                    <i class="material-symbol left">{{ icon }}</i>Voorbeeld</button>
+                    {% sv-icon icon kleur='white-text' extra_class='left' %}Voorbeeld</button>
             </td>
 
             <td style="border:1px solid red">
                 <button class="btn-sv-rood black-text" style="background-color:#1C6284">
-                    <i class="material-symbol left">{{ icon }}</i>Voorbeeld</button>
+                    {% sv-icon icon kleur='black-text' extra_class='left' %}Voorbeeld</button>
             </td>
             <td>
                 <button class="btn-sv-rood white-text" style="background-color:#1C6284">
-                    <i class="material-symbol left">{{ icon }}</i>Voorbeeld</button>
+                    {% sv-icon icon kleur='white-text' extra_class='left' %}Voorbeeld</button>
             </td>
             <td style="border:1px solid red">
                 <button class="btn-sv-rood black-text" style="background-color:#1C6284; text-shadow:none">
-                    <i class="material-symbol left">{{ icon }}</i>Voorbeeld</button>
+                    {% sv-icon icon kleur='black-text' extra_class='left' %}Voorbeeld</button>
             </td>
             <td>
                 <button class="btn-sv-rood white-text" style="background-color:#1C6284; text-shadow:none">
-                    <i class="material-symbol left">{{ icon }}</i>Voorbeeld</button>
+                    {% sv-icon icon kleur='white-text' extra_class='left' %}Voorbeeld</button>
             </td>
 
             <td style="border:1px solid red">
                 <button class="btn-sv-rood" style="background-color:#1C6284; text-shadow:none; color:rgba(0,0,0,0.85)">
-                    <i class="material-symbol left">{{ icon }}</i>Voorbeeld</button>
+                    {% sv-icon icon kleur='off-black' extra_class='left' %}Voorbeeld</button>
             </td>
         </tr>
 
@@ -141,24 +142,24 @@
 
             <td>
                 <button class="btn-sv-rood black-text" style="background-color:#fff">
-                    <i class="material-symbol left">{{ icon }}</i>Voorbeeld</button>
+                    {% sv-icon icon kleur='black-text' extra_class='left' %}Voorbeeld</button>
             </td>
             <td style="border:1px solid red">
                 <button class="btn-sv-rood white-text" style="background-color:#fff">
-                    <i class="material-symbol left">{{ icon }}</i>Voorbeeld</button>
+                    {% sv-icon icon kleur='white-text' extra_class='left' %}Voorbeeld</button>
             </td>
             <td>
                 <button class="btn-sv-rood black-text" style="background-color:#fff; text-shadow:none">
-                    <i class="material-symbol left">{{ icon }}</i>Voorbeeld</button>
+                    {% sv-icon icon kleur='black-text' extra_class='left' %}Voorbeeld</button>
             </td>
             <td style="border:1px solid red">
                 <button class="btn-sv-rood white-text" style="background-color:#fff; text-shadow:none">
-                    <i class="material-symbol left">{{ icon }}</i>Voorbeeld</button>
+                    {% sv-icon icon kleur='white-text' extra_class='left' %}Voorbeeld</button>
             </td>
 
             <td>
                 <button class="btn-sv-rood" style="background-color:#fff; color:rgba(0,0,0,0.85); text-shadow:none">
-                    <i class="material-symbol left">{{ icon }}</i>Voorbeeld</button>
+                    {% sv-icon icon kleur='off-black' extra_class='left' %}Voorbeeld</button>
             </td>
         </tr>
 
@@ -168,24 +169,24 @@
 
             <td>
                 <button class="btn-sv-rood black-text" style="background-color:#F7941E">
-                    <i class="material-symbol left">{{ icon }}</i>Voorbeeld</button>
+                    {% sv-icon icon kleur='black-text' extra_class='left' %}Voorbeeld</button>
             </td>
             <td>
                 <button class="btn-sv-rood white-text" style="background-color:#F7941E">
-                    <i class="material-symbol left">{{ icon }}</i>Voorbeeld</button>
+                    {% sv-icon icon kleur='white-text' extra_class='left' %}Voorbeeld</button>
             </td>
             <td>
                 <button class="btn-sv-rood black-text" style="background-color:#F7941E; text-shadow:none">
-                    <i class="material-symbol left">{{ icon }}</i>Voorbeeld</button>
+                    {% sv-icon icon kleur='black-text' extra_class='left' %}Voorbeeld</button>
             </td>
             <td style="border:1px solid red">
                 <button class="btn-sv-rood white-text" style="background-color:#F7941E; text-shadow:none">
-                    <i class="material-symbol left">{{ icon }}</i>Voorbeeld</button>
+                    {% sv-icon icon kleur='white-text' extra_class='left' %}Voorbeeld</button>
             </td>
 
             <td>
                 <button class="btn-sv-rood" style="background-color:#F7941E; text-shadow:none; color:rgba(0,0,0,0.85)">
-                    <i class="material-symbol left">{{ icon }}</i>Voorbeeld</button>
+                    {% sv-icon icon kleur='off-black' extra_class='left' %}Voorbeeld</button>
             </td>
         </tr>
 
@@ -196,11 +197,11 @@
             <td></td>
             <td>
                 <button class="btn-sv-rood white" style="background-color:#eff2f5 !important; text-shadow:none; border:1px solid #F7941E; line-height:34px">
-                    <i class="material-symbol left">{{ icon }}</i>Voorbeeld</button>
+                    {% sv-icon icon kleur='white-text' extra_class='left' %}Voorbeeld</button>
             </td>
             <td>
                 <button class="btn-sv-rood white" style="background-color:#fff; text-shadow:none">
-                    <i class="material-symbol left">{{ icon }}</i>Voorbeeld</button>
+                    {% sv-icon icon kleur='white-text' extra_class='left' %}Voorbeeld</button>
             </td>
         </tr>
     </table>

@@ -7,7 +7,7 @@
 ARGS=("$@")
 #for idx in "${!ARGS[@]}"; do echo "ARGS[$idx]=${ARGS[$idx]}"; done
 
-COV_AT_LEAST=96.98
+COV_AT_LEAST=97.0
 RED="\e[31m"
 RESET="\e[0m"
 TEST_DIR="./Site/tmp_test_data"
