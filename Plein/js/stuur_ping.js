@@ -20,7 +20,9 @@ function stuur_ping() {
 
 window.addEventListener("load", function() {
     // alles is opgehaald en ingeladen
-    stuur_ping();
+
+    // wacht 1 seconde en stuur dan de ping
+    setTimeout(stuur_ping, 1000);
 });
 
 /* end of file */

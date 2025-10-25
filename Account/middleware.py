@@ -86,8 +86,9 @@ class HerhaalLoginOTP:
 
                     # redirect naar de inlog pagina
                     url = reverse('Account:login')
-                    url += '?next=' + request.path
-                    return HttpResponseRedirect(url)
+                    if request.path != url:                # voorkom redirect naar dezelfde pagina
+                        url += '?next=' + request.path
+                        return HttpResponseRedirect(url)
 
         # roep de volgende in de keten aan (middleware of view)
         response = self._get_response(request)

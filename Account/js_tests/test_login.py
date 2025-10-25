@@ -36,9 +36,9 @@ class TestBrowserAccountLogin(bh.BrowserTestCase):
         # login_vink.click()
         # self.assertFalse(login_vink.is_selected())
         self.find_element_by_id('submit_knop').click()
+        self.wait_until_url_not(self.url_login)  # gaat naar otp controle (want: is_BB)
 
         # controleer dat we ingelogd zijn
-        # self.do_navigate_to(self.url_plein)
         menu = self.find_element_type_with_text('a', 'Uitloggen')
         self.assertIsNotNone(menu)      # TODO: faalt hier soms, maar dat komt niet door de test. Echte login heeft er ook last van.
 

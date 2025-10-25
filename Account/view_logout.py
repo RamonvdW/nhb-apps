@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -59,8 +59,8 @@ class LogoutView(UserPassesTestMixin, TemplateView):
         session_id = request.session.session_key
         account = get_account(request)
 
-        my_logger.info('Account %s END SESSION %s' % (repr(account.username), repr(session_id)))
         my_logger.info('%s LOGOUT voor account %s' % (from_ip, repr(account.username)))
+        my_logger.info('Account %s END SESSION %s' % (repr(account.username), repr(session_id)))
 
         # integratie met de authenticatie laag van Django
         # dit wist ook de session data gekoppeld aan het cookie van de gebruiker
