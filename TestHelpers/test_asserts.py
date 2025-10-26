@@ -19,12 +19,7 @@ import re
 # debug optie: toon waar in de code de queries vandaan komen
 FAIL_UNSAFE_DATABASE_MODIFICATION = False
 
-MATERIAL_ICON_GLYPH_NAMES = 'Design/fonts/reduce/needed-glyphs_material-symbols.txt'
-
-GLYPH_NAMES_PRESENT = list()
-with open(MATERIAL_ICON_GLYPH_NAMES, 'r') as f:
-    GLYPH_NAMES_PRESENT.extend([name.strip() for name in f.readlines()])
-# with
+GLYPH_NAMES_PRESENT = list()        # TODO: obsolete
 
 
 class MyTestAsserts(TestCase):
@@ -673,6 +668,7 @@ class MyTestAsserts(TestCase):
         # while
 
     def html_assert_material_icons(self, html, dtl):
+        # TODO: check allowed icons in Design/templatetags/design_icons
         pos = html.find('<i class=')
         while pos > 0:
             pos2 = html.find('</i>', pos+1)

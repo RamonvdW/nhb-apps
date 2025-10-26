@@ -22,13 +22,6 @@ register = template.Library()
 @functools.cache
 def sv_link_ext(url=''):
 
-    kleur_class = 'btn-sv-blauw'
-
-    """
-                <i class="notranslate material-symbol left sv-blauw-text">open_in_new</i>
-                <code>{{ wed.contact_website|wbr_www }}</code>
-    """
-
     new_text = '<a href="%s" target="_blank" rel="noopener noreferrer">\n' % url
 
     new_text += '<span style="display:inline-block; padding-right:10px; vertical-align:bottom; height:21px">\n'

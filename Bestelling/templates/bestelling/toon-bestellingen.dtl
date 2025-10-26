@@ -43,8 +43,7 @@
                         <td>{% for regel in bestelling.beschrijving %}{{ regel }}<br>{% endfor %}</td>
                         <td class="center hide-on-small-only">&euro;&nbsp;{{ bestelling.totaal_euro }}</td>
                         <td class="center">
-                            <a class="btn-sv-rood" href="{{ bestelling.url_details }}">
-                                <i class="notranslate material-symbol">play_arrow</i></a>
+                            {% sv-knop-nav url=bestelling.url_details icon='bestelling toon details' tekst='' %}
                         </td>
                     </tr>
                 {% empty %}
@@ -80,7 +79,7 @@
                         <td>Vragen over bestellingen in de <b>webshop</b></td>
                         <td><code>{{ email_webshop }}</code></td>
                         <td>
-                            {% sv-knop-mailto url=email_webshop %}
+                            {% sv-knop-mailto email=email_webshop %}
                         </td>
                     </tr>
                 {% endif %}
@@ -89,7 +88,7 @@
                         <td>Vragen over bestelde <b>opleidingen</b></td>
                         <td><code>{{ email_opleidingen }}</code></td>
                         <td>
-                            {% sv-knop-mailto url=email_opleidingen %}
+                            {% sv-knop-mailto email=email_opleidingen %}
                         </td>
                     </tr>
                 {% endif %}
@@ -97,7 +96,7 @@
                     <td>Vragen over bestellen en betalen</td>
                     <td><code>{{ email_support }}</code></td>
                     <td>
-                        {% sv-knop-mailto url=email_support %}
+                        {% sv-knop-mailto email=email_support %}
                     </td>
                 </tr>
             </table>

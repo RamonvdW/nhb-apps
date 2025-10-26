@@ -47,7 +47,6 @@ def site_layout(request):
                 # we zetten deze niet terug op False,
                 # zodat views deze ook op True kunnen zetten (ook al is het mandje leeg)
                 context['menu_toon_mandje'] = True
-                context['url_toon_mandje'] = reverse('Bestelling:toon-inhoud-mandje')
 
         # wissel van rol toegestaan?
         if rol_mag_wisselen(request):
@@ -70,9 +69,11 @@ def site_layout(request):
             context['menu_url_profiel'] = reverse('Sporter:profiel')
             if not account.is_gast:
                 context['menu_url_bondspas'] = reverse('Bondspas:toon-bondspas')
-
     else:
         context['menu_url_inloggen'] = reverse('Account:login')
+
+    if context.get('menu_toon_mandje', False):
+       context['url_toon_mandje'] = reverse('Bestelling:toon-inhoud-mandje')
 
     # het label met de schermgrootte boven aan het scherm
     context['menu_toon_schermgrootte'] = settings.DEBUG

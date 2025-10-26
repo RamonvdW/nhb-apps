@@ -174,7 +174,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',          # adds 'user' and 'perms
                 'django.contrib.messages.context_processors.messages',  # adds 'messages' and 'DEFAULT_MESSAGE_LEVELS'
 
-                'Design.context_processors.site_layout',                 # voor het menu en fonts
+                'Design.context_processors.site_layout',                # voor het menu en de fonts
             ],
             'loaders': [
                 ('django.template.loaders.cached.Loader', ['Site.core.minify_dtl.Loader']),

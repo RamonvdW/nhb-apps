@@ -22,14 +22,17 @@ register = template.Library()
 
 @register.simple_tag(name='sv-knop-nav')
 @functools.cache
-def sv_knop_nav(kleur='rood', icon='', tekst='tbd', url='', smal=False, extra_style=''):
+def sv_knop_nav(kleur='rood', icon='', tekst='tbd', url='', smal=False, extra_class='', extra_style=''):
 
     if kleur == 'rood':
-        kleur_class = 'btn-sv-rood'
+        a_class = 'btn-sv-rood'
     else:
-        kleur_class = 'btn-sv-blauw'
+        a_class = 'btn-sv-blauw'
 
-    new_text = '<a class="%s" href="%s"' % (kleur_class, url)
+    if extra_class:
+        a_class += ' ' + extra_class
+
+    new_text = '<a class="%s" href="%s"' % (a_class, url)
 
     if smal:
         if extra_style:

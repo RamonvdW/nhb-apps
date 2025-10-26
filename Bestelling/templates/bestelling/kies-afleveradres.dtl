@@ -5,6 +5,7 @@
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
+{% load design_icons %}
 
 {% block title %}Afleveradres{% endblock %}
 
@@ -36,12 +37,11 @@
                         <input type="text" maxlength="100" name="regel4" value="{{ mandje.afleveradres_regel_4 }}">
                         <input type="text" maxlength="100" name="regel5" value="{{ mandje.afleveradres_regel_5 }}">
 
-                        <br>
-                        <!-- button -->
-                        <p class="center">
+                        <div class="center" style="margin-top:30px">
                             <button class="btn-sv-rood" id="submit_knop" type="submit">
-                                <i class="notranslate material-symbol left">check</i>Opslaan</button>
-                        </p>
+                                {% sv-icon-op-button 'mandje transport opslaan' tekst='Opslaan' %}
+                            </button>
+                        </div>
 
                     </form>
                 </div>

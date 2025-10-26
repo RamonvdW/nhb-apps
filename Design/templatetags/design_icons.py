@@ -23,9 +23,15 @@ MATERIAL_SYMBOLS = {
     'account inloggen': 'person',
     'account wachtwoord vergeten': 'help',
     'account wachtwoord wijzigen': 'lock',
+    'account wachtwoord opslaan': 'check',
     'admin': 'database',
     'beheer vereniging': 'house_siding',
+    'bestelling afronden': 'shopping_cart_checkout',
+    'bestelling toon details': 'play_arrow',
+    'annuleer bestelling': 'delete',
     'bestellingen overzicht': 'shopping_cart',
+    'mandje transport opslaan': 'check',
+    'mandje transport opties': 'local_shipping',
     'bondscompetities': 'my_location',
     'bondspas': 'id_card',
     'comp ag controle': 'how_to_reg',
@@ -103,6 +109,7 @@ MATERIAL_SYMBOLS = {
     'logboek': 'book',
     'logboek toon alles': 'backspace',
     'mandje': 'shopping_cart',
+    'verwijder uit mandje': 'delete',
     'mijn bestellingen': 'receipt_long',
     'mijn pagina': 'account_circle',
     'open kaart': 'open_in_new',
@@ -181,6 +188,7 @@ MATERIAL_SYMBOLS = {
     'zoek vereniging': 'travel_explore',
     'zoek': 'search',
     'nav menu dropdown': 'expand_more',
+    'tijdelijke code ga door': 'check',
 }
 
 
@@ -212,13 +220,14 @@ def sv_icon(icon_name, kleur='sv-rood-text', icon_height='', extra_class='', ext
         if kleur:
             svg = svg.replace('<path d=',
                               '<path fill="currentColor" d=')
-            #kleur = "green-text"        # TODO: tijdelijk!
+            kleur = "green-text"        # TODO: tijdelijk!
             svg = svg.replace('<svg',
                               '<svg class="%s"' % kleur)
 
         new_text += svg
 
     else:
+        # TODO: obsolete this
         # bouw deze html:
         # <i class=".." style="..">icon_name</i>
 

@@ -5,6 +5,7 @@
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
+{% load design_icons %}
 
 {% block title %}Eenmalig verzoek{% endblock %}
 
@@ -29,7 +30,8 @@
                 <form style="padding:30px" action="{{ url }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
                     {% csrf_token %}
                     <button class="btn-sv-rood" id="submit_knop" type="submit" value="Ga door">
-                        <i class="notranslate material-symbol left">check</i>Ga door</button>
+                        {% sv-icon-op-button 'tijdelijke code ga door' tekst='Ga door' %}
+                    </button>
                 </form>
 
                 <p>Klopt er helemaal niets van? Sluit dan gewoon dit venster.</p>

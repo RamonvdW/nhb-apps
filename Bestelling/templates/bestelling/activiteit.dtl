@@ -6,6 +6,7 @@
 {% endcomment %}
 {% load static %}
 {% load design_filters %}   <!-- highlight filter -->
+{% load design_icons %}
 
 {% block title %}Bestellingen en Betalingen{% endblock %}
 

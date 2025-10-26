@@ -5,6 +5,8 @@
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
+{% load design_icons %}
+{% load design_knop %}
 
 {% block title %}Mandje{% endblock %}
 
@@ -87,7 +89,8 @@
                                     <td class="right-align">{{ regel.bedrag_euro_str }}</td>
                                     <td class="right-align">
                                         <button class="btn-sv-blauw" id="{{ regel.verwijder_id }}" data-url="{{ regel.url_verwijder }}">
-                                            <i class="notranslate material-symbol">delete</i></button>
+                                            {% sv-icon-op-button 'verwijder uit mandje' %}
+                                        </button>
                                     </td>
                                 </tr>
                             {% endfor %}
@@ -132,11 +135,13 @@
                                 <form action="{{ url_bestellen }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
                                     {% csrf_token %}
                                     <button class="btn-sv-rood" id="submit_knop" type="submit">
-                                        <i class="notranslate material-symbol left">shopping_cart_checkout</i>Bestelling afronden</button>
+                                        {% sv-icon-op-button 'bestelling afronden' tekst='Bestelling afronden' %}
+                                    </button>
                                 </form>
                             {% else %}
                                 <button class="btn-sv-rood" disabled>
-                                    <i class="notranslate material-symbol left">shopping_cart_checkout</i>Bestelling afronden</button>
+                                    {% sv-icon-op-button 'bestelling afronden' tekst='Bestelling afronden' %}
+                                </button>
                             {% endif %}
                         </div>
 
@@ -178,8 +183,7 @@
 
                         <br>
                         <p>
-                            <a class="btn-sv-blauw" href="{{ url_kies_transport }}">
-                                <i class="material-symbol left notranslate">local_shipping</i>Andere opties</a>
+                            {% sv-knop-nav kleur='blauw' url=url_kies_transport icon='mandje transport opties' tekst='Andere opties' %}
                         </p>
                     </div>
                 </div>
@@ -203,10 +207,11 @@
                     <div class="sv-kader">
 
                         {% if geen_afleveradres %}
+                            <!-- alleen voor gast-accounts -->
+
                             <p>We hebben een adres nodig om je bestelling naartoe te sturen</p>
                             <p>
-                                <a class="btn-sv-rood" href="{{ url_afleveradres }}">
-                                    <i class="material-symbol left notranslate">local_shipping</i>Invoeren</a>
+                                {% sv-knop-nav url=url_afleveradres icon='mandje transport opties' tekst='Invoeren' %}
                             </p>
 
                         {% else %}
@@ -227,9 +232,8 @@
                             </p>
 
                             <p style="padding-top:10px">
-                                <a class="btn-sv-blauw" href="{{ url_afleveradres }}">
-                                    <i class="material-symbol left notranslate">local_shipping</i>Wijzig</a>
-                        </p>
+                                {% sv-knop-nav kleur='blauw' url=url_afleveradres icon='mandje transport opties' tekst='Wijzig' %}
+                            </p>
                         {% endif %}
                     </div>
                 </div>

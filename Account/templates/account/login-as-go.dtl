@@ -5,6 +5,8 @@
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
+{% load design_icons %}
+{% load design_knop %}
 
 {% block extraheader %}
     <!-- voorkom dat de knop nog een keer gebruikt wordt (dat werkt toch niet)
@@ -34,8 +36,7 @@
                 <p>De knop moet binnen 60 seconden gebruikt worden.</p>
 
                 <p class="center" style="padding:30px">
-                    <a class="btn-sv-blauw" href="{{ login_as_url }}" target="_blank" rel="noopener noreferrer">
-                        <i class="notranslate material-symbol right">open_in_new</i>Inloggen</a>
+                    {% sv-knop-ext icon='open url' kleur='blauw' url=login_as_url tekst='Inloggen' %}
                 </p>
 
                 <p>Advies: rechts-klikken en openen in een 'incognito window' (Chrome) of 'private window' (Firefox), anders word je hier uitgelogd.</p>
