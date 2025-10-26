@@ -5,7 +5,10 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django import template
+from django.conf import settings
 from django.utils.safestring import mark_safe
+from Design.icon_svg.Material_Symbols.icon_svg import MATERIAL_ICONS_SVG
+import functools
 
 register = template.Library()
 
@@ -14,12 +17,12 @@ register = template.Library()
 
 # mapping van sv-icon gebruik naar Material Symbol icon name
 MATERIAL_SYMBOLS = {
+    'aanpassen': 'edit',
     'account aanmaken': 'fingerprint',
     'account activiteit': 'recent_actors',
+    'account inloggen': 'person',
     'account wachtwoord vergeten': 'help',
     'account wachtwoord wijzigen': 'lock',
-    'account inloggen': 'person',
-    'sluiten': 'close',
     'admin': 'database',
     'beheer vereniging': 'house_siding',
     'bestellingen overzicht': 'shopping_cart',
@@ -55,16 +58,22 @@ MATERIAL_SYMBOLS = {
     'comp tijdlijn': 'schedule',
     'comp uitslagen': 'scoreboard',
     'comp wijzig datums': 'build',
+    'download': 'download',
     'drive toestemming': 'add_to_drive',
     'drive wedstrijdformulieren maken': 'add_to_drive',
     'email': 'mail',
     'evenement verkoopvoorwaarden': 'article',
     'evenementen': 'article',
+    'feedback verstuur': 'done',
+    'feedback bedankt': 'record_voice_over',
+    'feedback duimpje omhoog': 'thumb_up',
+    'feedback neutraal': 'thumbs_up_down',
+    'feedback duimpje omlaag': 'thumb_down',
     'functie 2fa controle': 'lock',
     'functie 2fa koppel': 'lock',
     'functie 2fa uitleg': 'article',
-    'functie beheerders': 'face',
-    'functie login as': 'switch_access_shortcut',
+    'functie beheerders': 'supervisor_account',
+    'functie login as': 'change_circle',
     'functie vhpg inzien': 'gavel',
     'functie vhpg status': 'verified_user',
     'functie vhpg': 'gavel',
@@ -81,6 +90,10 @@ MATERIAL_SYMBOLS = {
     'inschrijven sporter': 'person',
     'interland lijst': 'flag',
     'kalender': 'event_note',
+    'kalender toon alles': 'backspace',
+    'kalender filter': 'filter_alt',
+    'kalender volgende': 'chevron_right',
+    'kalender vorige': 'chevron_left',
     'korting combi': 'stack',
     'korting persoonlijk': 'account_circle',
     'korting vereniging': 'home',
@@ -88,27 +101,31 @@ MATERIAL_SYMBOLS = {
     'ledenvoordeel': 'redeem',
     'leeftijdsklassen': 'star',
     'logboek': 'book',
+    'logboek toon alles': 'backspace',
     'mandje': 'shopping_cart',
     'mijn bestellingen': 'receipt_long',
     'mijn pagina': 'account_circle',
+    'open kaart': 'open_in_new',
+    'open url': 'open_in_new',
     'opleiding basiscursus': 'school',
     'opleiding crm overnemen': 'person_add',
-    'opleiding instaptoets inzicht': 'insights',
+    'opleiding instaptoets inzicht': 'query_stats',
     'opleiding instaptoets niet gehaald': 'thumb_down',
     'opleiding instaptoets niet ingeschreven': 'radar',
     'opleiding instaptoets': 'login',
     'opleiding lesmateriaal': 'book_2',
     'opleiding locaties': 'school',
     'opleiding verkoopvoorwaarden': 'article',
+    'opleiding aanmeldingen': 'group',
     'opleidingen': 'school',
     'privacyverklaring': 'security',
-    'record ander': 'auto_awesome',
+    'record ander': 'star_shine',
     'records filteren': 'filter_alt',
     'records verbeterbaar': 'leaderboard',
     'records zoeken': 'search',
-    'records': 'insights',
+    'records': 'stars_2',
     'registreer gast': 'explore',
-    'registreer lid': 'badge',
+    'registreer lid': 'id_card',
     'scheids beschikbaarheid': 'event_available',
     'scheids competitie': 'my_location',
     'scheids handleiding': 'menu_book',
@@ -117,12 +134,14 @@ MATERIAL_SYMBOLS = {
     'scheidsrechters': 'sports',
     'score geschiedenis': 'history',
     'scores invoeren': 'edit',
-    'site feedback': 'chat',
+    'feedback': 'chat',
+    'sluiten': 'close',
     'spelden graadspelden': 'zoom_out_map',
     'spelden meesterspelden': 'category',
     'spelden tussenspelden': 'trending_up',
     'sporter voorkeuren': 'tune',
     'taken': 'inbox',
+    'toevoegen': 'add',
     'uitloggen': 'logout',
     'uitslag bk indiv': 'flag',
     'uitslag bk teams': 'flag',
@@ -139,7 +158,7 @@ MATERIAL_SYMBOLS = {
     'ver evenementen': 'event_note',
     'ver ext crm': 'group',
     'ver externe locaties': 'hiking',
-    'ver gast accounts': 'import_contacts',
+    'ver gast accounts': 'list_alt_check',
     'ver kortingen': 'sell',
     'ver ledenlijst': 'import_contacts',
     'ver mollie': 'settings',
@@ -160,10 +179,13 @@ MATERIAL_SYMBOLS = {
     'wedstrijden verkoopvoorwaarden': 'article',
     'wedstrijdklassen': 'equalizer',
     'zoek vereniging': 'travel_explore',
+    'zoek': 'search',
+    'nav menu dropdown': 'expand_more',
 }
 
 
 @register.simple_tag(name='sv-icon')
+@functools.cache
 def sv_icon(icon_name, kleur='sv-rood-text', icon_height='', extra_class='', extra_style=''):
 
     # zoek het bijbehorende Material Symbol op
@@ -171,25 +193,78 @@ def sv_icon(icon_name, kleur='sv-rood-text', icon_height='', extra_class='', ext
     if material_symbol is None:
         raise ValueError('Unknown icon name: %s' % repr(icon_name))
 
+    new_text = ''
+    if settings.DEBUG:
+        new_text += '<!-- Material-Symbol: ' + material_symbol + ' -->\n'
+
     # bouw deze html:
-    # <i class=".." style="..">icon_name</i>
+    # <svg ...></svg>
+    svg = MATERIAL_ICONS_SVG.get(material_symbol, None)
+    if svg:
+        if not icon_height:
+            icon_height = 24
 
-    # "notranslate" prevent considering the icon name as translatable text
-    new_text = '<i class="notranslate material-symbol'
+        svg = svg.replace(' height="48"', '')
+        svg = svg.replace(' width="48"', '')
+        svg = svg.replace('><path',
+                          ' height="%s" width="%s"><path' % (icon_height, icon_height))
 
-    if kleur:
-        new_text += ' ' + kleur
+        if kleur:
+            svg = svg.replace('<path d=',
+                              '<path fill="currentColor" d=')
+            #kleur = "green-text"        # TODO: tijdelijk!
+            svg = svg.replace('<svg',
+                              '<svg class="%s"' % kleur)
+
+        new_text += svg
+
+    else:
+        # bouw deze html:
+        # <i class=".." style="..">icon_name</i>
+
+        # "notranslate" prevent considering the icon name as translatable text
+        new_text += '<i class="notranslate material-symbol'
+
+        if kleur:
+            new_text += ' ' + kleur
+
+        if extra_class:
+            new_text += ' ' + extra_class
+
+        if extra_style or icon_height:
+            new_text += '" style="' + extra_style
+
+            if icon_height:
+                # unset the width, otherwise material-symbol css forces it to 21px
+                new_text += '; font-size:%spx; width:unset' % icon_height
+
+        new_text += '">' + material_symbol + '</i>'
+
+    return mark_safe(new_text)
+
+
+@register.simple_tag(name='sv-icon-op-button')
+@functools.cache
+def sv_icon_op_button(icon_name, tekst='', extra_class='', extra_style=''):
+    new_text = '<span'
 
     if extra_class:
-        new_text += ' ' + extra_class
+        new_text += ' class="%s"' % extra_class
 
-    if extra_style or icon_height:
-        new_text += '" style="' + extra_style
+    new_text +=' style="display:inline-block; vertical-align:text-bottom; height:24px'
 
-        if icon_height:
-            new_text += '; font-size:' + icon_height
+    if tekst:
+        new_text += '; padding-right:10px'
 
-    new_text += '">' + material_symbol + '</i>'
+    if extra_style:
+        new_text += '; ' + extra_style
+
+    new_text += '">\n'
+
+    new_text += sv_icon(icon_name, kleur='white-text', icon_height=21)
+    new_text += '</span>\n'
+
+    new_text += tekst
 
     return mark_safe(new_text)
 

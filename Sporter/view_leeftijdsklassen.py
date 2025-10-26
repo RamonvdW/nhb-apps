@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2024 Ramon van der Winkel.
+#  Copyright (c) 2020-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -150,7 +150,8 @@ class InfoLeeftijdenView(TemplateView):
         context['comp_1'] = self._comp_info(huidige_jaar - 1)
         context['comp_2'] = self._comp_info(huidige_jaar)
 
-        context['persoonlijke_leeftijdsklassen'] = self.request.user.is_authenticated
+        if self.request.user.is_authenticated:
+            context['url_leeftijdsgroepen_persoonlijk'] = reverse('Sporter:leeftijdsgroepen-persoonlijk')
 
         rol = rol_get_huidige(self.request)
         if rol == Rol.ROL_SPORTER:

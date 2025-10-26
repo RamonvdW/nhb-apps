@@ -21,7 +21,7 @@
     Hierdoor is mogelijk om centraal de code van een kaartje aan te passen.
 
 {% endcomment %}
-
+{% load design_icons %}
 
 <!-- zet breedte, hoogte en side-by-side layout -->
 <!-- bij mouse-over licht de rand op -->
@@ -36,7 +36,7 @@
 
         {% if extern_open %}
             <div style="position:absolute; right:6px; top:6px">
-                <i class="notranslate material-symbol sv-blauw-text">open_in_new</i>
+                {% sv-icon 'open url' kleur='sv-blauw-text' %}
             </div>
         {% endif %}
 

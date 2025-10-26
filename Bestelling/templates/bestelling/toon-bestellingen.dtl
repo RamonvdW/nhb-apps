@@ -6,6 +6,7 @@
 {% endcomment %}
 {% load static %}
 {% load design_icons %}
+{% load design_knop %}
 
 {% block title %}Bestellingen{% endblock %}
 
@@ -79,7 +80,7 @@
                         <td>Vragen over bestellingen in de <b>webshop</b></td>
                         <td><code>{{ email_webshop }}</code></td>
                         <td>
-                            <a class="btn-sv-rood" href="mailto:{{ email_webshop }}">{% sv-icon 'email' %}</a>
+                            {% sv-knop-mailto url=email_webshop %}
                         </td>
                     </tr>
                 {% endif %}
@@ -88,7 +89,7 @@
                         <td>Vragen over bestelde <b>opleidingen</b></td>
                         <td><code>{{ email_opleidingen }}</code></td>
                         <td>
-                            <a class="btn-sv-rood" href="mailto:{{ email_opleidingen }}">{% sv-icon 'email' %}</a>
+                            {% sv-knop-mailto url=email_opleidingen %}
                         </td>
                     </tr>
                 {% endif %}
@@ -96,7 +97,7 @@
                     <td>Vragen over bestellen en betalen</td>
                     <td><code>{{ email_support }}</code></td>
                     <td>
-                        <a class="btn-sv-rood" href="mailto:{{ email_support }}">{% sv-icon 'email' %}</a>
+                        {% sv-knop-mailto url=email_support %}
                     </td>
                 </tr>
             </table>

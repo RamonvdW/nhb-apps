@@ -620,6 +620,11 @@ input.table-filter {
   color: white;
 }
 
+.collapsible-icon {
+  @extend .secondary-content;
+}
+
+
 .material-symbol {
   font-family: 'Material Symbols Rounded';
   // font-variation-settings: 'FILL' 1;

@@ -1,0 +1,29 @@
+{% extends 'design/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2025 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+{% load design_icons %}
+
+{% block title %}Test Icons{% endblock %}
+
+{% block pagina %}
+
+    <table class="sv-kader-tabel" style="width:auto; margin-left:auto; margin-right:auto; border-collapse:unset; border-spacing:5px">
+
+        {% for setje in icons %}
+            <tr>
+                {% for icon in setje %}
+                    <td>
+                        {% sv-icon icon icon_height=80 %}
+                    </td>
+                {% endfor %}
+            </tr>
+        {% endfor %}
+
+    </table>
+
+{% endblock %}
+

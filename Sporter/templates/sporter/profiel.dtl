@@ -7,6 +7,8 @@
 {% load static %}
 {% load design_filters %}   <!-- wbr_email en wbr_www filters -->
 {% load design_icons %}
+{% load design_knop %}
+{% load design_link %}
 
 {% block title %}Mijn pagina{% endblock %}
 
@@ -1146,7 +1148,7 @@
                             </td>
 
                             <td>
-                                <a class="btn-sv-rood" href="mailto:{{ rcl18_email }}">{% sv-icon 'email' %}</a>
+                                {% sv-knop-mailto email=rcl18_email %}
                             </td>
                         </tr>
                     {% endif %}
@@ -1175,7 +1177,7 @@
                             </td>
 
                             <td>
-                                <a class="btn-sv-rood" href="mailto:{{ rcl25_email }}">{% sv-icon 'email' %}</a>
+                                {% sv-knop-mailto email=rcl25_email %}
                             </td>
                         </tr>
                     {% endif %}
@@ -1226,7 +1228,7 @@
 
                         <td>
                             {% if hwl_email %}
-                                <a class="btn-sv-rood" href="mailto:{{ hwl_email }}">{% sv-icon 'email' %}</a>
+                                {% sv-knop-mailto email=hwl_email %}
                             {% endif %}
                         </td>
                     </tr>
@@ -1273,7 +1275,7 @@
 
                         <td>
                             {% if sec_email %}
-                                <a class="btn-sv-rood" href="mailto:{{ sec_email }}">{% sv-icon 'email' %}</a>
+                                {% sv-knop-mailto email=sec_email %}
                             {% endif %}
                         </td>
                     </tr>
@@ -1301,7 +1303,7 @@
                             <td><span class="hide-on-small-only">E-mail:</span></td>
                             <td><code>{{ bb_email|wbr_email }}</code></td>
                             <td>
-                                <a class="btn-sv-rood" href="mailto:{{ bb_email }}">{% sv-icon 'email' %}</a>
+                                {% sv-knop-mailto email=bb_email %}
                             </td>
                         </tr>
                     {% endif %}
@@ -1310,11 +1312,8 @@
                         <tr>
                             <td class="center">Vertrouwens<wbr>contact<wbr>persoon</td>
                             <td><span class="hide-on-small-only">Website:</span></td>
-                            <td><code>{{ url_vcp_contact|wbr_www }}</code></td>
-                            <td>
-                                <a class="btn-sv-rood" href="{{ url_vcp_contact }}" target="_blank" rel="noopener noreferrer">
-                                        <i class="notranslate material-symbol">open_in_new</i></a>
-                            </td>
+                            <td>{% sv-link-ext url=url_vcp_contact %}</td>
+                            <td></td>
                         </tr>
                     {% endif %}
 

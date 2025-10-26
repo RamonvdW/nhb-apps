@@ -5,6 +5,7 @@
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
+{% load design_knop %}
 
 {% block title %}Leeftijdsgroepen{% endblock %}
 
@@ -23,11 +24,10 @@
             <div class="sv-kader">
                 <p>Sporters worden in een wedstrijd ingedeeld in een wedstrijdklasse aan de hand van hun leeftijd en/of type boog. Vooral voor jonge sporters verandert de klasse waarin je uit mag komen regelmatig, daarom hebben we hieronder een overzicht gemaakt.</p>
 
-                {% if persoonlijke_leeftijdsklassen %}
+                {% if url_leeftijdsgroepen_persoonlijk %}
                     <p>Een persoonlijk overzicht kan je hier inzien:</p>
                     <p>
-                        <a class="btn-sv-rood" href="{% url 'Sporter:leeftijdsgroepen-persoonlijk' %}">
-                            <i class="notranslate material-symbol left">star</i>Mijn leeftijdsklassen</a>
+                        {% sv-knop-nav icon='leeftijdsklassen' tekst='Mijn leeftijdsklassen' url=url_leeftijdsgroepen_persoonlijk %}
                     </p>
                 {% endif %}
 

@@ -32,6 +32,10 @@ urlpatterns = [
          views.TestUIView.as_view(),
          name='test-ui'),
 
+    path('test-icons/',
+         views.TestIconsView.as_view(),
+         name='test-ui'),
+
     path('test-speciale-pagina/<code>/',
          views_fout.TestSpecialePagina.as_view(),
          name='test-speciale-pagina'),

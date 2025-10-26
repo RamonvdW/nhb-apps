@@ -5,6 +5,7 @@
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
+{% load design_icons %}
 
 {% block title %}Feedback{% endblock %}
 
@@ -39,19 +40,22 @@
                             <ul id="id_bevinding">
                                 <li>
                                     <label class="black-text" for="id_bevinding_0">
-                                        <input class="with-gap" type="radio" name="bevinding" value="8" required id="id_bevinding_0"{% if check_0 %} checked{% endif %}>
+                                        <input class="with-gap" type="radio" name="bevinding" value="8" required
+                                               id="id_bevinding_0"{% if check_0 %} checked{% endif %}>
                                         <span>Tevreden</span>
                                     </label>
                                 </li>
                                 <li>
                                     <label class="black-text" for="id_bevinding_1">
-                                        <input class="with-gap" type="radio" name="bevinding" value="6" required id="id_bevinding_1"{% if check_1 %} checked{% endif %}>
+                                        <input class="with-gap" type="radio" name="bevinding" value="6" required
+                                               id="id_bevinding_1"{% if check_1 %} checked{% endif %}>
                                         <span>Bruikbaar</span>
                                     </label>
                                 </li>
                                 <li>
                                     <label class="black-text" for="id_bevinding_2">
-                                        <input class="with-gap" type="radio" name="bevinding" value="4" required id="id_bevinding_2"{% if check_2 %} checked{% endif %}>
+                                        <input class="with-gap" type="radio" name="bevinding" value="4" required
+                                               id="id_bevinding_2"{% if check_2 %} checked{% endif %}>
                                         <span>Moet beter</span>
                                     </label>
                                 </li>
@@ -69,7 +73,8 @@
                         <td></td>
                         <td>
                             <button class="btn-sv-rood" id="submit_knop" type="submit">
-                                <i class="notranslate material-symbol left">done</i>Verstuur</button>
+                                {% sv-icon-op-button 'feedback verstuur' tekst='Verstuur '%}
+                            </button>
                         </td>
                     </tr>
 

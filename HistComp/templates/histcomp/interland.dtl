@@ -5,6 +5,7 @@
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
+{% load design_knop %}
 
 {% block title %}Interland lijst{% endblock %}
 
@@ -56,8 +57,7 @@
                     <tr>
                         <td colspan="6" class="center">
                             <h5 id="{{ klasse.beschrijving }}">Klasse: {{ klasse.beschrijving }}</h5>
-                            <a class="btn-sv-rood" href="{{ klasse.url_download }}">
-                                <i class="notranslate material-symbol left">download</i>Download</a>
+                            {% sv-knop-nav url=klasse.url_download icon='download' tekst='Download' %}
                         </td>
                     </tr>
 

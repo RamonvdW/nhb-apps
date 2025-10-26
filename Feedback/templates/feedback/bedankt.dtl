@@ -5,6 +5,7 @@
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
+{% load design_icons %}
 
 {% block title %}Site feedback{% endblock %}
 
@@ -18,7 +19,9 @@
         <div class="col s12">
             <h3 class="page-banner">Bedankt!</h3>
             <p>Bedankt voor het delen van je mening.</p>
-            <p class="sv-blauw-text"><i class="notranslate material-symbol" style="font-size: 6rem">record_voice_over</i></p>
+            <p>
+                {% sv-icon 'feedback bedankt' icon_height=80 kleur='sv-blauw-text' %}
+            </p>
             <p>Voel je vrij om deze functie vaker te gebruiken. We staan open voor alle tips en tops!</p>
 
             <p>Dit venster kan je sluiten</p>

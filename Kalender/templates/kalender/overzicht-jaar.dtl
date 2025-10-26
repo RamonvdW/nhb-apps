@@ -6,6 +6,8 @@
 {% endcomment %}
 {% load static %}
 {% load design_filters %}   <!-- highlight filter -->
+{% load design_icons %}
+{% load design_knop %}
 
 {% block title %}Jaarkalender {{ datum_vanaf|date:'F Y' }} tot {{ datum_tot|date:'F Y' }}{% endblock %}
 
@@ -43,15 +45,14 @@
 
                 <p class="center">
                     <button class="btn-sv-rood" id="id_zoek" onclick="stuur_keuzes_zoek()">
-                        <i class="notranslate material-symbol left">search</i>Zoek</button>
+                        {% sv-icon-op-button 'zoek' tekst='Zoek' %}
+                    </button>
                     {% if unfiltered_url %}
-                        <span>&nbsp;&nbsp;</span>
-                        <a class="btn-sv-rood" href="{{ unfiltered_url }}">
-                            <i class="notranslate material-symbol left">backspace</i>Toon alles</a>
+                        {% sv-knop-nav url=unfiltered_url icon='kalender toon alles' tekst='Toon alles' extra_style='margin-left:15px' %}
                     {% endif %}
 
                     <button class="btn-sv-blauw" id="id_filter_knop" style="float:right">
-                        <i class="material-symbol notranslate">filter_alt</i>
+                        {% sv-icon-op-button 'kalender filter' %}
                     </button>
                 </p>
             </div>
@@ -125,7 +126,8 @@
             <!-- knop -->
             <td class="right-align">
                 <button class="btn-sv-rood" onclick="stuur_keuzes_prev()" id="id_prev">
-                    <i class="notranslate material-symbol">chevron_left</i></button>
+                    {% sv-icon-op-button 'kalender vorige' %}
+                </button>
             </td>
 
             <td class="center" style="width:60%">       <!-- 60% voorkomt springen van de knoppen -->
@@ -135,7 +137,8 @@
             <!-- knop -->
             <td class="left-align">
                 <button class="btn-sv-rood" onclick="stuur_keuzes_next()" id="id_next">
-                    <i class="notranslate material-symbol">chevron_right</i></button>
+                    {% sv-icon-op-button 'kalender volgende' %}
+                </button>
             </td>
         </tr>
         <!-- FUTURE: drop-down maken om direct naar een jaar/maand te springen -->

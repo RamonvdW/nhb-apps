@@ -5,6 +5,8 @@
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
+{% load design_icons %}
+{% load design_knop %}
 
 {% block title %}Feedback{% endblock %}
 
@@ -20,7 +22,21 @@
 
     <!-- blauwe balk met informatie in een tabel -->
     <div class="row-sv-blauw">
-        <div class="col s12">
+
+        <div class="col s7 m5 xl3">
+            <table class="sv-kader-tabel">
+                <tr>
+                    <th>Aantal nog aanwezig:</th>
+                    <td style="width:10%">{{ count_aanwezig }}</td>
+                </tr>
+                <tr>
+                    <th>Aantal afgehandeld:</th>
+                    <td style="width:10%">{{ count_afgehandeld }}</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="col s12" style="margin-top:50px">
             <div class="sv-kader" style="padding:0 10px 0 10px">
                 <table class="sv-kader-tabel">
                     {% for obj in object_list %}
@@ -31,11 +47,11 @@
 
                             <td class="center">
                                 {% if obj.bevinding == "4" %}
-                                    <i class="notranslate material-symbol sv-rood-text">thumb_down</i>
+                                    {% sv-icon 'feedback duimpje omlaag' kleur='sv-rood-text' %}
                                 {% elif obj.bevinding == "6" %}
-                                    <i class="notranslate material-symbol">thumbs_up_down</i>
+                                    {% sv-icon 'feedback neutraal' kleur='black-text' icon_height=30 %}
                                 {% elif obj.bevinding == "8" %}
-                                    <i class="notranslate material-symbol green-text">thumb_up</i>
+                                    {% sv-icon 'feedback duimpje omhoog' kleur='green-text' %}
                                 {% endif %}
                             </td>
 
@@ -43,13 +59,13 @@
                             <td class="right-align">
                                 <!-- button om pagina te openen -->
                                 {% if obj.volledige_url %}
-                                    <a class="btn-sv-rood" href="{{ obj.volledige_url }}" target="_blank" rel="noopener noreferrer" style="margin-right:10px">
-                                        <i class="notranslate material-symbol">open_in_new</i></a>
+                                    {% sv-knop-ext icon='open url' url=obj.volledige_url tekst='' extra_stijl='margin-right:10px' %}
                                 {% endif %}
 
-                                <!-- button for admin site -->
-                                <a class="btn-sv-rood" href="{{ url_admin_site }}{{ obj.pk }}/change/" target="_blank" rel="noopener noreferrer">
-                                    <i class="notranslate material-symbol">edit</i></a>
+                                <!-- knop naar de admin site -->
+                                {% if obj.url_admin %}
+                                    {% sv-knop-ext icon='aanpassen' url=obj.url_admin tekst='' %}
+                                {% endif %}
                             </td>
                         </tr>
 
@@ -69,19 +85,6 @@
                     {% endfor %}
                 </table>
             </div>
-        </div>
-
-        <div class="col s7 m5 xl3" style="margin-top:50px">
-            <table class="sv-kader-tabel">
-                <tr>
-                    <th>Aantal nog aanwezig:</th>
-                    <td style="width:10%">{{ count_aanwezig }}</td>
-                </tr>
-                <tr>
-                    <th>Aantal afgehandeld:</th>
-                    <td style="width:10%">{{ count_afgehandeld }}</td>
-                </tr>
-            </table>
         </div>
 
     </div>

@@ -5,6 +5,8 @@
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
+{% load design_icons %}
+{% load design_knop %}
 
 {% block title %}Opleidingen{% endblock %}
 
@@ -45,11 +47,8 @@
                         <td>{{ opleiding.titel }}</td>
                         <td>
                             <div style="white-space:nowrap">     <!-- keeps buttons side by side -->
-                                <a class="btn-sv-rood" href="{{ opleiding.url_wijzig }}" style="padding:0; width:35px; margin-right:5px">
-                                    <i class="notranslate material-symbol">edit</i></a>
-                                <a class="btn-sv-rood" href="{{ opleiding.url_aanmeldingen }}" style="padding:0; width:35px; margin-right:5px">
-                                    <i class="notranslate material-symbol">group</i>
-                                </a>
+                                {% sv-knop-nav icon='aanpassen' url=opleiding.url_wijzig tekst='' smal=True extra_style='margin-right:5px' %}
+                                {% sv-knop-nav icon='opleiding aanmeldingen' url=opleiding.url_aanmeldingen tekst='' smal=True %}
                             </div>
                         </td>
                     </tr>
@@ -65,12 +64,12 @@
                         <form action="{{ url_toevoegen }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
                             {% csrf_token %}
                             <button class="btn-sv-rood" id="submit_knop" type="submit">
-                                <i class="notranslate material-symbol">add</i>
+                                {% sv-icon-op-button 'toevoegen' %}
                             </button>
                         </form>
                     </td>
                 </tr>
-            
+
             </table>
         </div>
     </div>
@@ -93,8 +92,8 @@
 
             {% if url_evenement_locaties %}
                 {% include 'design/card_icon.dtl' with title="Locaties" text="Locaties voor evenementen en opleidingen." sv_icon="opleiding locaties" url=url_evenement_locaties %}
-            {% endif %}    
-        
+            {% endif %}
+
             {% if url_stats_instaptoets %}
                 {% include 'design/card_icon.dtl' with title="Instaptoets" text="Welke vragen van de instaptoets doen het slecht?" sv_icon="opleiding instaptoets inzicht" url=url_stats_instaptoets %}
             {% endif %}

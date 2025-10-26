@@ -18,6 +18,7 @@
 
 {% load static %}
 {% load design_icons %}
+{% load design_knop %}
 
 {% autoescape on %}
 
@@ -29,7 +30,7 @@
 
         {% include 'design/site_layout_fonts.dtl' %}
 
-        <link rel="stylesheet" href="{% static 'css/materialize-new-314.css' %}">
+        <link rel="stylesheet" href="{% static 'css/materialize-new-318.css' %}">
 
         {% include 'design/site_layout_favicons.dtl' %}
 
@@ -65,14 +66,7 @@
                         {% if menu_toon_mandje %}
                             <li>
                                 <!-- position:relative + z-index=2: knop boven op het logo -->
-                                <a href="{% url 'Bestelling:toon-inhoud-mandje' %}" class="btn-sv-rood" style="position:relative; margin-top:14px" aria-label="Mandje">
-                                    {% if menu_mandje_aantal %}
-                                        <i class="notranslate material-symbol left" style="line-height:36px">shopping_cart</i>
-                                        <span>{{ menu_mandje_aantal }}</span>
-                                    {% else %}
-                                        <i class="notranslate material-symbol" style="line-height:36px">shopping_cart</i>
-                                    {% endif %}
-                                </a>
+                                {% sv-knop-nav icon='mandje' tekst=menu_mandje_aantal url=url_toon_mandje %}
                             </li>
                         {% endif %}
 
@@ -83,9 +77,8 @@
                                         data-target="navbar-dropdown"
                                         style="position:relative; margin-top:14px; margin-right:15px"
                                         aria-label="Menu">
-                                    <span class="hide-on-small-only">{{ menu_voornaam|escape }}</span>
-                                    <i class="notranslate material-symbol right hide-on-small-only" style="line-height:36px">expand_more</i>
-                                    <i class="notranslate material-symbol       hide-on-med-and-up" style="line-height:36px">expand_more</i>
+                                    <span class="hide-on-small-only" style="padding-right:10px">{{ menu_voornaam|escape }}</span>
+                                    {% sv-icon-op-button 'nav menu dropdown' extra_style='padding-top:2px' %}
                                 </button>
                             </li>
                         {% elif not verberg_login_knop %}
@@ -101,7 +94,8 @@
                     {% if menu_url_wissel_van_rol %}
                         <li class="divider"></li>
                         <li>
-                            <a href="{{ menu_url_wissel_van_rol }}">{% sv-icon 'functie wissel van rol' %}Wissel van rol</a>
+                            <a href="{{ menu_url_wissel_van_rol }}">
+                                <i>{% sv-icon 'functie wissel van rol' %}</i>Wissel van rol</a>
                         </li>
                     {% endif %}
 
@@ -109,14 +103,15 @@
                         <li class="divider"></li>
                         <li>
                             <a href="{{ menu_url_admin_site }}" target="_blank" rel="noopener noreferrer">
-                                {% sv-icon 'admin' kleur='sv-middel-blauw-text' %}Admin site</a>
+                                <i>{% sv-icon 'admin' kleur='sv-middel-blauw-text' %}</i>Admin site</a>
                         </li>
                     {% endif %}
 
                     {% if menu_url_taken %}
                         <li class="divider"></li>
                         <li>
-                            <a href="{{ menu_url_taken }}">{% sv-icon 'taken' %}Taken&nbsp;
+                            <a href="{{ menu_url_taken }}">
+                                <i>{% sv-icon 'taken' %}</i>Taken&nbsp;
                                 <span class="new badge" data-badge-caption="open">{{ menu_aantal_open_taken }}</span>
                             </a>
                         </li>
@@ -125,21 +120,24 @@
                     {% if menu_url_profiel %}
                         <li class="divider"></li>
                         <li>
-                            <a href="{{ menu_url_profiel }}">{% sv-icon 'mijn pagina' %}Mijn pagina</a>
+                            <a href="{{ menu_url_profiel }}">
+                                <i>{% sv-icon 'mijn pagina' %}</i>Mijn pagina</a>
                         </li>
                     {% endif %}
 
                     {% if menu_url_bondspas %}
                         <li class="divider"></li>
                         <li>
-                            <a href="{{ menu_url_bondspas }}">{% sv-icon 'bondspas' %}Toon bondspas</a>
+                            <a href="{{ menu_url_bondspas }}">
+                                <i>{% sv-icon 'bondspas' %}</i>Toon bondspas</a>
                         </li>
                     {% endif %}
 
                     {% if menu_url_uitloggen %}
                         <li class="divider"></li>
                         <li>
-                            <a href="{{ menu_url_uitloggen }}">{% sv-icon 'uitloggen' %}Uitloggen</a>
+                            <a href="{{ menu_url_uitloggen }}">
+                                <i>{% sv-icon 'uitloggen' %}</i>Uitloggen</a>
                         </li>
                     {% endif %}
                 </ul>

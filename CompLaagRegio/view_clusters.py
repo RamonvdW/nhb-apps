@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -104,7 +104,7 @@ class WijzigClustersView(UserPassesTestMixin, TemplateView):
             # for
         # for
 
-        context['email_support'] = settings.EMAIL_SUPPORT
+        context['email_tech_support'] = settings.EMAIL_TECH_SUPPORT
 
         try:
             regiocompetitie = (Regiocompetitie

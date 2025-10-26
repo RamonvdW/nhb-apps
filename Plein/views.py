@@ -27,6 +27,7 @@ TEMPLATE_PLEIN_HANDLEIDINGEN = 'plein/handleidingen.dtl'
 TEMPLATE_NIET_ONDERSTEUND = 'plein/niet-ondersteund.dtl'
 TEMPLATE_PRIVACY = 'plein/privacy.dtl'
 TEMPLATE_TEST_UI = 'plein/test-ui.dtl'
+TEMPLATE_TEST_ICONS = 'plein/test-icons.dtl'
 
 SESSIONVAR_VORIGE_POST = 'plein_vorige_post'
 
@@ -312,6 +313,21 @@ class TestUIView(View):
             'icon': 'sluiten',
         }
         return render(request, TEMPLATE_TEST_UI, context)
+
+
+class TestIconsView(View):
+
+    @staticmethod
+    def get(request, *args, **kwargs):
+        from Design.templatetags.design_icons import MATERIAL_SYMBOLS
+        rev = {v:k for k,v in MATERIAL_SYMBOLS.items()}     # duplicates are overwritten
+        icons = list(rev.values())
+        icons.sort()
+        context = {
+            'icons': [icons[i:i+8]
+                      for i in range(0, len(icons), 8)],
+        }
+        return render(request, TEMPLATE_TEST_ICONS, context)
 
 
 # end of file

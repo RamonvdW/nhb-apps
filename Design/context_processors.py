@@ -41,11 +41,13 @@ def site_layout(request):
 
         # mandje tonen?
         if rol_nu == Rol.ROL_SPORTER:
-            context['menu_mandje_aantal'] = cached_aantal_in_mandje_get(request)
-            if context['menu_mandje_aantal'] > 0:
+            aantal = cached_aantal_in_mandje_get(request)
+            context['menu_mandje_aantal'] = str(aantal)
+            if aantal > 0:
                 # we zetten deze niet terug op False,
                 # zodat views deze ook op True kunnen zetten (ook al is het mandje leeg)
                 context['menu_toon_mandje'] = True
+                context['url_toon_mandje'] = reverse('Bestelling:toon-inhoud-mandje')
 
         # wissel van rol toegestaan?
         if rol_mag_wisselen(request):

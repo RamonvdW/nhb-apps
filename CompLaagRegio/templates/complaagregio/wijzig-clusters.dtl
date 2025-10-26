@@ -6,6 +6,7 @@
 {% endcomment %}
 {% load static %}
 {% load design_icons %}
+{% load design_knop %}
 
 {% block title %}Clusters instellen{% endblock %}
 
@@ -158,11 +159,9 @@
             <div class="col s12">
                 <div class="sv-kader">
                     <p>Heb je meer clusters nodig?</p>
-                    <p>Neem dan contact op met MijnHandboogsport Support om cluster(s) aan te laten maken:</p>
-                    <p><code>{{ email_support }}</code></p>
-                    <p>
-                        <a class="btn-sv-rood" href="mailto:{{ email_support }}">{% sv-icon 'email' %}</a>
-                    </p>
+                    <p>Neem dan contact op met MijnHandboogsport support om cluster(s) aan te laten maken:</p>
+                    <p><code>{{ email_tech_support }}</code></p>
+                    <p>{% sv-knop-mailto email=email_tech_support %}</p>
                 </div>
             </div>
         </div>

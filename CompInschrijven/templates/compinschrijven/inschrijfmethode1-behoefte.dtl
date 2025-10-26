@@ -5,6 +5,7 @@
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
+{% load design_knop %}
 
 {% block title %}Gekozen wedstrijden{% endblock %}
 
@@ -17,8 +18,7 @@
             <p>Wedstrijden gekozen door de sporters aangemeld voor de regiocompetitie <b>{{ competitie.beschrijving }}</b> in <b>{{ regio }}</b></p>
 
             <p>Je kan onderstaande lijst ook downloaden, inclusief de keuzes van elke sporter.</p>
-            <a class="btn-sv-rood" href="{{ url_download }}">
-                <i class="notranslate material-symbol left">download</i>Download lijst</a>
+            {% sv-knop-nav icon='download' url=url_download tekst='Download lijst' %}
         </div>
     </div>
 

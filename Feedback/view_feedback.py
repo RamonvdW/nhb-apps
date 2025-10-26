@@ -170,7 +170,10 @@ class InzichtView(UserPassesTestMixin, ListView):
 
         account = get_account(self.request)
         if account.is_staff:
-            context['url_admin_site'] = reverse('admin:Feedback_feedback_changelist')
+            url_admin_base = reverse('admin:Feedback_feedback_changelist') + '%s/change/'
+            for obj in context['object_list']:
+                obj.url_admin = url_admin_base % obj.pk
+            # for
 
         context['kruimels'] = (
             (None, 'Feedback'),

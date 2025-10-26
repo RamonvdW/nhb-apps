@@ -135,7 +135,7 @@
                 {% if rol_is_bb or rol_is_sup %}
                     <!-- feedback -->
                     {% url 'Feedback:inzicht' as card_url %}
-                    {% include 'design/card_icon.dtl' with title="Site feedback" text="Toon de feedback van de gebruikers." sv_icon="site feedback" url=card_url %}
+                    {% include 'design/card_icon.dtl' with title="Site feedback" text="Toon de feedback van de gebruikers." sv_icon="feedback" url=card_url %}
                 {% endif %}
 
                 {% if rol_is_bb or rol_is_mwz or rol_is_mo %}
@@ -150,7 +150,7 @@
                     {% include 'design/card_icon.dtl' with title="Logboek" text="Bekijk het logboek." sv_icon="logboek" url=card_url %}
                 {% endif %}
 
-                {% if rol_is_bb or rol_is_mwz or rol_is_sup or rol_is_mla %}
+                {% if rol_is_bb or rol_is_mwz or rol_is_mla %}
                     <!-- overzicht VHPG acceptatie -->
                     {% url 'Functie:vhpg-overzicht' as card_url %}
                     {% include 'design/card_icon.dtl' with title="VHPG status" text="Toon overzicht van beheerders die de verklaring geaccepteerd hebben." sv_icon="functie vhpg status" url=card_url %}

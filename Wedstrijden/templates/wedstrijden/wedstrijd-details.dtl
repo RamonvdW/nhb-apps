@@ -6,6 +6,9 @@
 {% endcomment %}
 {% load static %}
 {% load design_filters %}   <!-- wbr_email en wbr_www filters -->
+{% load design_icons %}
+{% load design_knop %}
+{% load design_link %}
 
 {% block title %}Wedstrijd: {{ wed.titel }}{% endblock %}
 
@@ -101,8 +104,7 @@
                         <span>{{ wed.locatie.adres|linebreaksbr }}</span>
                         {% if url_map %}
                             <br><br>
-                            <a class="btn-sv-blauw" href="{{ url_map }}" target="_blank" rel="noopener noreferrer">
-                                <i class="notranslate material-symbol left">open_in_new</i>Toon op de kaart</a>
+                            {% sv-knop-ext kleur='blauw' url=url_map icon='open kaart' tekst='Toon op de kaart' %}
                         {% endif %}
                     </td>
                 </tr>
@@ -172,10 +174,7 @@
                         <tr>
                             <th>Website voor inschrijven</th>
                             <td>
-                                <a href="{{ wed.contact_website }}" target="_blank" rel="noopener noreferrer">
-                                    <i class="notranslate material-symbol left sv-blauw-text">open_in_new</i>
-                                    <code>{{ wed.contact_website|wbr_www }}</code>
-                                </a>
+                                {% sv-link-ext url=wed.contact_website %}
                             </td>
                         </tr>
                     {% endif %}

@@ -6,21 +6,16 @@
 
 URL_SERVER="https://fonts.googleapis.com"
 
-#URL_MATERIAL_SYMBOLS="$URL_SERVER/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0"         # only filled
-#URL_MATERIAL_SYMBOLS="$URL_SERVER/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0..1,0"      # gives 2 fonts, not variable font
-URL_MATERIAL_SYMBOLS="https://raw.githubusercontent.com/google/material-design-icons/refs/heads/master/variablefont/MaterialSymbolsRounded%5BFILL%2CGRAD%2Copsz%2Cwght%5D.ttf"
 URL_OPEN_SANS_REGULAR="$URL_SERVER/css2?family=Open+Sans:wght@400&display=swap"
 URL_OPEN_SANS_SEMIBOLD="$URL_SERVER/css2?family=Open+Sans:wght@600&display=swap"
 URL_FIRA_SANS="$URL_SERVER/css2?family=Fira+Sans:wght@500&display=swap"
 
 CURL_OPTIONS=(--silent --proto '=https')
 
-FNAME_MATERIAL_SYMBOLS="Material-Symbols"
 FNAME_OPEN_SANS_REGULAR="OpenSans-Regular"
 FNAME_OPEN_SANS_SEMIBOLD="OpenSans-SemiBold"
 FNAME_FIRA_SANS="FiraSans-Medium"
 
-EXT_MATERIAL_SYMBOLS=".ttf"
 EXT_OPEN_SANS=".ttf"
 EXT_FIRA_SANS=".ttf"
 
@@ -94,48 +89,7 @@ update_font()
 }
 
 
-# download a font from GitHub, without style information
-gh_update_font()
-{
-    URL="$1"
-    FNAME="$2"
-    EXT="$3"
-    LICENSE_URL="$4"
-
-    echo "[INFO] Checking $FNAME"
-
-    # download the raw file from
-    DL_FILE1="$WORK_DIR/$FNAME"
-    curl "${CURL_OPTIONS[@]}" -o "$DL_FILE1" "$URL"
-
-    OLD_FILE=$(find "$STATIC_DIR" -name "$FNAME-v"\*)
-
-    cmp --silent "$OLD_FILE" "$DL_FILE1"
-    cmp_res=$?
-    if [ $cmp_res -eq 0 ]
-    then
-        echo "[INFO] OK (no change)"
-    elif [ $cmp_res -eq 1 ]
-    then
-        echo "[WARNING] Found updated version"
-        echo "          NEW: $DL_FILE1"
-        echo "          OLD: $OLD_FILE"
-
-        echo "[INFO] Dumping old and new htmx tables"
-        ttx -q "$DL_FILE1" -t hmtx -o "$WORK_DIR/icons-new.ttx"
-        ttx -q "$OLD_FILE" -t hmtx -o "$WORK_DIR/icons-old.ttx"
-        echo "[INFO] Comparing $WORK_DIR/icons-old.ttx to $WORK_DIR/icons-new.ttx"
-        diff "$WORK_DIR/icons-old.ttx" "$WORK_DIR/icons-new.ttx"
-    else
-        echo "[ERROR] cmp_res=$cmp_res"
-    fi
-}
-
-
 mkdir "$WORK_DIR"
-
-# Material Symbols are for the icons on the site
-gh_update_font "$URL_MATERIAL_SYMBOLS" "$FNAME_MATERIAL_SYMBOLS" "$EXT_MATERIAL_SYMBOLS" "https://www.apache.org/licenses/LICENSE-2.0.html"
 
 # Open Sans is the main font
 update_font "$URL_OPEN_SANS_REGULAR"  "$FNAME_OPEN_SANS_REGULAR"  "$EXT_OPEN_SANS" "https://fonts.google.com/specimen/Open+Sans/license"

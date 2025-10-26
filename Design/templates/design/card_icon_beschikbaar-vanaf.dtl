@@ -32,13 +32,15 @@
         {% endif %}
 
         <!-- icoon -->
-        {% if sv_icon %}
-            {% if icon_height %}
-                {% sv-icon sv_icon extra_class="medium" icon_height=icon_height %}
-            {% else %}
-                {% sv-icon sv_icon extra_class="medium" %}
+        <div style="width:unset">       <!-- avoids layout shift of the icon -->
+            {% if sv_icon %}
+                {% if icon_height %}
+                    {% sv-icon sv_icon icon_height=icon_height %}
+                {% else %}
+                    {% sv-icon sv_icon icon_height="64" %}
+                {% endif %}
             {% endif %}
-        {% endif %}
+        </div>
 
         <div class="grey-text">{{ text }}</div>
 

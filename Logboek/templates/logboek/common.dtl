@@ -5,6 +5,8 @@
 {% endcomment %}
 
 {% load static %}
+{% load design_icons %}
+{% load design_knop %}
 
 <!-- dit bestand wordt ge-include in alle andere logboek pagina's -->
 
@@ -51,9 +53,10 @@
 
                 <p>
                     <button class="btn-sv-rood" id="submit_knop" type="submit">
-                        <i class="notranslate material-symbol left">search</i>Zoek</button>
+                        {% sv-icon-op-button 'zoek' tekst='Zoek' %}
+                    </button>
                     {% if unfiltered_url %}
-                        <span>&nbsp;&nbsp;</span><a class="btn-sv-rood" href="{{ unfiltered_url }}"><i class="notranslate material-symbol left">backspace</i>Toon alles</a>
+                        {% sv-knop-nav icon='logboek toon alles' url=unfiltered_url tekst='Toon alles' extra_style="margin-left:10px" %}
                     {% endif %}
                 </p>
             </form>
