@@ -71,7 +71,8 @@
                         <div class="center" style="margin-top:30px">
 
                             <button class="btn-sv-rood" id="submit_knop1" type="submit">
-                                <i class="notranslate material-symbol left">check</i>Controleer</button>
+                                {% sv-icon-op-button 'controleer invoer overboeking' tekst='Controleer' %}
+                            </button>
                         </div>
 
                         {% if was_foutvrij %}

@@ -24,10 +24,12 @@ MATERIAL_SYMBOLS = {
     'account wachtwoord vergeten': 'help',
     'account wachtwoord wijzigen': 'lock',
     'account wachtwoord opslaan': 'check',
+    'bestellingen zoek': 'search',
     'admin': 'database',
     'beheer vereniging': 'house_siding',
     'bestelling afronden': 'shopping_cart_checkout',
     'bestelling toon details': 'play_arrow',
+    'controleer invoer overboeking': 'check',
     'annuleer bestelling': 'delete',
     'bestellingen overzicht': 'shopping_cart',
     'mandje transport opslaan': 'check',
@@ -194,7 +196,7 @@ MATERIAL_SYMBOLS = {
 
 @register.simple_tag(name='sv-icon')
 @functools.cache
-def sv_icon(icon_name, kleur='sv-rood-text', icon_height='', extra_class='', extra_style=''):
+def sv_icon(icon_name, kleur='sv-rood-text', icon_height=''):
 
     # zoek het bijbehorende Material Symbol op
     material_symbol = MATERIAL_SYMBOLS.get(icon_name, None)
@@ -208,46 +210,25 @@ def sv_icon(icon_name, kleur='sv-rood-text', icon_height='', extra_class='', ext
     # bouw deze html:
     # <svg ...></svg>
     svg = MATERIAL_ICONS_SVG.get(material_symbol, None)
-    if svg:
-        if not icon_height:
-            icon_height = 24
+    if not svg:
+        raise ValueError('No svg for material symbol: %s' % repr(material_symbol))
 
-        svg = svg.replace(' height="48"', '')
-        svg = svg.replace(' width="48"', '')
-        svg = svg.replace('><path',
-                          ' height="%s" width="%s"><path' % (icon_height, icon_height))
+    if not icon_height:
+        icon_height = 24
 
-        if kleur:
-            svg = svg.replace('<path d=',
-                              '<path fill="currentColor" d=')
-            kleur = "green-text"        # TODO: tijdelijk!
-            svg = svg.replace('<svg',
-                              '<svg class="%s"' % kleur)
+    svg = svg.replace(' height="48"', '')
+    svg = svg.replace(' width="48"', '')
+    svg = svg.replace('><path',
+                      ' height="%s" width="%s"><path' % (icon_height, icon_height))
 
-        new_text += svg
+    if kleur:
+        svg = svg.replace('<path d=',
+                          '<path fill="currentColor" d=')
+        #kleur = "green-text"        # TODO: tijdelijk!
+        svg = svg.replace('<svg',
+                          '<svg class="%s"' % kleur)
 
-    else:
-        # TODO: obsolete this
-        # bouw deze html:
-        # <i class=".." style="..">icon_name</i>
-
-        # "notranslate" prevent considering the icon name as translatable text
-        new_text += '<i class="notranslate material-symbol'
-
-        if kleur:
-            new_text += ' ' + kleur
-
-        if extra_class:
-            new_text += ' ' + extra_class
-
-        if extra_style or icon_height:
-            new_text += '" style="' + extra_style
-
-            if icon_height:
-                # unset the width, otherwise material-symbol css forces it to 21px
-                new_text += '; font-size:%spx; width:unset' % icon_height
-
-        new_text += '">' + material_symbol + '</i>'
+    new_text += svg
 
     return mark_safe(new_text)
 

@@ -7,12 +7,11 @@
 from django.test import TestCase
 from Design.templatetags.design_filters import (filter_highlight, filter_wbr_email, filter_wbr_dagdeel, filter_wbr_www,
                                                 filter_wbr_seizoen)
-from Design.templatetags.design_icons import sv_icon
 
 
-class TestDesignTemplatetags(TestCase):
+class TestDesignFilters(TestCase):
 
-    """ tests voor de Design applicatie, module Template tags """
+    """ tests voor de Design applicatie, module Filters template tags """
 
     def setUp(self):
         """ initialisatie van de test case """
@@ -92,17 +91,5 @@ class TestDesignTemplatetags(TestCase):
         self.assertEqual(filter_wbr_seizoen("Testje"), '<wbr>Testje')
         self.assertEqual(filter_wbr_seizoen("2022/2023"), '2022/<wbr>2023')
 
-    def test_icon(self):
-        self.assertEqual(sv_icon('email'), '<i class="notranslate material-symbol sv-rood-text">mail</i>')
-
-        with self.assertRaises(ValueError):
-            sv_icon('#does not exist')
-
-        # varianten
-        out = sv_icon('email', kleur='kleur', extra_class='klass', extra_style='stijl:1')
-        self.assertEqual(out, '<i class="notranslate material-symbol kleur klass" style="stijl:1">mail</i>')
-
-        out = sv_icon('email', kleur='')
-        self.assertTrue('sv-rood-text' not in out)
 
 # end of file

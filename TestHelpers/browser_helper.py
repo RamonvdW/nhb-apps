@@ -150,10 +150,18 @@ class BrowserTestCase(TestCase):
 
     def find_element_type_with_text(self, elem_type, text_str):
         try:
-            el = self._driver.find_element(By.XPATH, '//%s[text()="%s"]' % (elem_type, text_str))
+            return self._driver.find_element(By.XPATH, '//%s[text()="%s"]' % (elem_type, text_str))
         except NoSuchElementException:
-            el = None
-        return el
+            pass
+
+        # walk all elements and check the text, which could be upper-cased
+        text_str = text_str.upper()
+        for el in self._driver.find_elements(By.TAG_NAME, elem_type):
+            if el.text.upper() == text_str:
+                return el
+        # for
+
+        return None
 
     def find_elements_buttons(self, must_have_id=True):
         buttons = list()

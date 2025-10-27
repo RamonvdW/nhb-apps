@@ -102,7 +102,8 @@
                     <!-- button -->
                     <p class="center" style="margin-top:50px">
                         <button class="btn-sv-rood" id="submit_knop" type="submit">
-                            <i class="notranslate material-symbol left">search</i>Zoek</button>
+                            {% sv-icon-op-button 'bestellingen zoek' tekst='Zoek' %}
+                        </button>
                     </p>
                 </form>
             </div>

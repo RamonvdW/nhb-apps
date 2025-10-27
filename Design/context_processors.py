@@ -27,6 +27,9 @@ def site_layout(request):
     # om absolute canonical links te maken
     context['site_url'] = settings.SITE_URL
 
+    context['menu_mandje_aantal'] = "0"
+    context['url_toon_mandje'] = reverse('Bestelling:toon-inhoud-mandje')
+
     # zet context variabelen om aan te geven welke optionele delen van het menu getoond moeten worden
     if request.user.is_authenticated:
         # gebruiker is ingelogd
@@ -71,9 +74,6 @@ def site_layout(request):
                 context['menu_url_bondspas'] = reverse('Bondspas:toon-bondspas')
     else:
         context['menu_url_inloggen'] = reverse('Account:login')
-
-    if context.get('menu_toon_mandje', False):
-       context['url_toon_mandje'] = reverse('Bestelling:toon-inhoud-mandje')
 
     # het label met de schermgrootte boven aan het scherm
     context['menu_toon_schermgrootte'] = settings.DEBUG
