@@ -48,7 +48,7 @@
 
                     <p class="center-align">
                         <button class="btn-sv-rood" id="submit_knop" type="submit">
-                            {% sv-icon 'email' extra_class='left' %}Verstuur e-mail</button>
+                            {% sv-icon 'email' %}Verstuur e-mail</button>
                     </p>
 
                 </form>

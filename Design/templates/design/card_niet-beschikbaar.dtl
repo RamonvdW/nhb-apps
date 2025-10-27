@@ -34,9 +34,9 @@
         <!-- icoon -->
         {% if sv_icon %}
             {% if icon_height %}
-                {% sv-icon sv_icon extra_class="medium" icon_height=icon_height %}
+                {% sv-icon sv_icon icon_height=icon_height %}
             {% else %}
-                {% sv-icon sv_icon extra_class="medium" %}
+                {% sv-icon sv_icon %}
             {% endif %}
         {% endif %}
 

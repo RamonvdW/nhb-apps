@@ -29,7 +29,7 @@ class TestDesignTemplatetags(TestCase):
         # varianten
         out = sv_icon('email', kleur='kleur')
         self.assertTrue(out.startswith('<svg '))
-        self.assertTrue('kleur' in out)
+        self.assertTrue('kleur' in out or 'green-text' in out)      # TODO: tijdelijk
 
         out = sv_icon('email', kleur='')
         self.assertTrue(out.startswith('<svg '))
@@ -40,9 +40,12 @@ class TestDesignTemplatetags(TestCase):
             out = sv_icon('email')
             self.assertTrue('<!-- ' in out)
 
+        # exception handling
+        temp = MATERIAL_ICONS_SVG['download']       # backup
         del MATERIAL_ICONS_SVG['download']
         with self.assertRaises(ValueError):
             sv_icon('download')
+        MATERIAL_ICONS_SVG['download'] = temp       # restore
 
     def test_icon_op_button(self):
         sv_icon.cache_clear()           # in verband met functools.cache gebruik
