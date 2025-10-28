@@ -10,6 +10,7 @@
 
         title       = "Account activiteit"
         sv_icon     = "gebruik" (zie Design/templatetags/design_icons.py)
+        icon_height = de gewenste hoogte in px (optioneel)
         text        = "Toon overzicht van de recent gebruikte en aangemaakte accounts."
         url         = de url waar je heen gaat na klikken op het kaartje
         onclick     = alternatief voor de url - roept een javascript functie aan  # TODO: obsolete
@@ -47,7 +48,7 @@
 
             {% if extern_open %}
                 <div style="position:absolute; right:6px; top:6px">
-                    {% sv-icon 'open url' kleur='sv-blauw-text' %}
+                    {% sv-icon 'open url' use='card corner' kleur='blauw' %}
                 </div>
             {% endif %}
 
@@ -63,9 +64,9 @@
                 <div style="width:unset">       <!-- avoids layout shift of the icon -->
                     {% if sv_icon %}
                         {% if icon_height %}
-                            {% sv-icon sv_icon icon_height=icon_height %}
+                            {% sv-icon sv_icon use='card' icon_height=icon_height %}
                         {% else %}
-                            {% sv-icon sv_icon icon_height="64" %}
+                            {% sv-icon sv_icon use='card' %}
                         {% endif %}
                     {% endif %}
                 </div>

@@ -8,10 +8,11 @@
 
     Deze file formatteert een kaartje aan de hand van deze parameters:
 
-        title   = "Account activiteit"
-        sv_icon = "gebruik" (zie Design/templatetags/design_icons.py)
-        text    = "Toon overzicht van de recent gebruikte en aangemaakte accounts."
-        vanaf   = datum wanneer kaartje beschikbaar komt (vanaf datum)
+        title       = "Account activiteit"
+        sv_icon     = "gebruik" (zie Design/templatetags/design_icons.py)
+        icon_height = de gewenste hoogte in px (optioneel)
+        text        = "Toon overzicht van de recent gebruikte en aangemaakte accounts."
+        vanaf       = datum wanneer kaartje beschikbaar komt (vanaf datum)
 
     Hierdoor is mogelijk om centraal de code van een kaartje aan te passen.
 
@@ -35,9 +36,9 @@
         <div style="width:unset">       <!-- avoids layout shift of the icon -->
             {% if sv_icon %}
                 {% if icon_height %}
-                    {% sv-icon sv_icon icon_height=icon_height %}
+                    {% sv-icon sv_icon use='card' icon_height=icon_height %}
                 {% else %}
-                    {% sv-icon sv_icon icon_height="64" %}
+                    {% sv-icon sv_icon use='card' %}
                 {% endif %}
             {% endif %}
         </div>

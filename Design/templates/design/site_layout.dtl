@@ -30,7 +30,7 @@
 
         {% include 'design/site_layout_fonts.dtl' %}
 
-        <link rel="stylesheet" href="{% static 'css/materialize-new-318.css' %}">
+        <link rel="stylesheet" href="{% static 'css/materialize-new-319.css' %}">
 
         {% include 'design/site_layout_favicons.dtl' %}
 
@@ -103,7 +103,7 @@
                         <li class="divider"></li>
                         <li>
                             <a href="{{ menu_url_admin_site }}" target="_blank" rel="noopener noreferrer">
-                                <i>{% sv-icon 'admin' kleur='sv-middel-blauw-text' %}</i>Admin site</a>
+                                <i>{% sv-icon 'admin' kleur='middel-blauw' %}</i>Admin site</a>
                         </li>
                     {% endif %}
 

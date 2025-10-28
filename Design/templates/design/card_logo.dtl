@@ -36,7 +36,7 @@
 
         {% if extern_open %}
             <div style="position:absolute; right:6px; top:6px">
-                {% sv-icon 'open url' kleur='sv-blauw-text' %}
+                {% sv-icon 'open url' use='card corner' kleur='blauw' %}
             </div>
         {% endif %}
 

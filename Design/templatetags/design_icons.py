@@ -24,6 +24,10 @@ MATERIAL_SYMBOLS = {
     'account wachtwoord vergeten': 'help',
     'account wachtwoord wijzigen': 'lock',
     'account wachtwoord opslaan': 'check',
+    'account login as select': 'play_arrow',
+    'otp stap 1': 'looks_one',
+    'otp stap 2': 'looks_two',
+    'otp stap 3': 'looks_3',
     'bestellingen zoek': 'search',
     'admin': 'database',
     'beheer vereniging': 'house_siding',
@@ -194,9 +198,31 @@ MATERIAL_SYMBOLS = {
 }
 
 
+icon_use_to_icon_height = {
+    'card': 64,                 # centrale op het kaartjes
+    'card corner': 24,          # extern open in de rechter bovenhoek
+    'button': 24,
+    'text': 27,
+}
+
+icon_kleur_to_class = {
+    'rood': 'sv-rood-text',
+    'blauw': 'sv-blauw-text',
+    'zwart': 'sv-zwart-text',
+    'middel-blauw': 'sv-middel-blauw-text',
+    'groen': 'green-text',
+    'wit': 'white-text',
+}
+
 @register.simple_tag(name='sv-icon')
 @functools.cache
-def sv_icon(icon_name, kleur='sv-rood-text', icon_height=''):
+def sv_icon(icon_name, use='button', kleur='rood', icon_height=0, extra_style=''):
+    """
+        use is een string die standaard icon_height kies - zie tabel hierboven
+    """
+
+    if not icon_height:
+        icon_height = icon_use_to_icon_height.get(use, 24)
 
     # zoek het bijbehorende Material Symbol op
     material_symbol = MATERIAL_SYMBOLS.get(icon_name, None)
@@ -213,20 +239,25 @@ def sv_icon(icon_name, kleur='sv-rood-text', icon_height=''):
     if not svg:
         raise ValueError('No svg for material symbol: %s' % repr(material_symbol))
 
-    if not icon_height:
-        icon_height = 24
+    if extra_style:
+        extra_style += '; '
+    extra_style += 'min-width:%spx' % icon_height
 
     svg = svg.replace(' height="48"', '')
     svg = svg.replace(' width="48"', '')
     svg = svg.replace('><path',
-                      ' height="%s" width="%s"><path' % (icon_height, icon_height))
+                      ' height="%s" width="%s" style="%s"><path' % (icon_height, icon_height, extra_style))
 
     if kleur:
+        kleur_class = icon_kleur_to_class.get(kleur, None)
+        if not kleur_class:
+            raise ValueError('{sv-icon} kleur niet ondersteund: %s' % repr(kleur))
+
+        #kleur_class = "green-text"        # TODO: tijdelijk!
+        svg = svg.replace('<svg ',
+                          '<svg class="%s" ' % kleur_class)
         svg = svg.replace('<path d=',
                           '<path fill="currentColor" d=')
-        #kleur = "green-text"        # TODO: tijdelijk!
-        svg = svg.replace('<svg',
-                          '<svg class="%s"' % kleur)
 
     new_text += svg
 
@@ -251,7 +282,7 @@ def sv_icon_op_button(icon_name, tekst='', extra_class='', extra_style=''):
 
     new_text += '">\n'
 
-    new_text += sv_icon(icon_name, kleur='white-text', icon_height=21)
+    new_text += sv_icon(icon_name, kleur='wit', use='button')
     new_text += '</span>\n'
 
     new_text += tekst

@@ -20,7 +20,7 @@
             <h3 class="page-banner">Bedankt!</h3>
             <p>Bedankt voor het delen van je mening.</p>
             <p>
-                {% sv-icon 'feedback bedankt' icon_height=80 kleur='sv-blauw-text' %}
+                {% sv-icon 'feedback bedankt' icon_height=80 kleur='blauw' %}
             </p>
             <p>Voel je vrij om deze functie vaker te gebruiken. We staan open voor alle tips en tops!</p>
 

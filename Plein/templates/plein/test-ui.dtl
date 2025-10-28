@@ -30,7 +30,7 @@
             </td>
             <td style="border:1px solid red">
                 <button class="btn-sv-rood white-text" style="background-color:#FABE00">
-                    {% sv-icon icon kleur='white-text' %}Voorbeeld</button>
+                    {% sv-icon icon kleur='wit' %}Voorbeeld</button>
             </td>
 
             <td>
@@ -39,7 +39,7 @@
             </td>
             <td style="border:1px solid red">
                 <button class="btn-sv-rood white-text" style="background-color:#FABE00; text-shadow:none">
-                    {% sv-icon icon kleur='white-text' %}Voorbeeld</button>
+                    {% sv-icon icon kleur='wit' %}Voorbeeld</button>
             </td>
 
             <td>
@@ -52,7 +52,7 @@
         <tr>
             <td>
                 <button class="btn-sv-rood white-text">
-                    {% sv-icon icon kleur='white-text' %}Voorbeeld</button>
+                    {% sv-icon icon kleur='wit' %}Voorbeeld</button>
             </td>
 
             <td>
@@ -61,7 +61,7 @@
             </td>
             <td>
                 <button class="btn-sv-rood white-text" style="background-color:#F94137">
-                    {% sv-icon icon kleur='white-text' %}Voorbeeld</button>
+                    {% sv-icon icon kleur='wit' %}Voorbeeld</button>
             </td>
             <td>
                 <button class="btn-sv-rood black-text" style="background-color:#F94137; text-shadow:none">
@@ -69,7 +69,7 @@
             </td>
             <td style="border:1px solid red">
                 <button class="btn-sv-rood white-text" style="background-color:#F94137; text-shadow:none">
-                    {% sv-icon icon kleur='white-text' %}Voorbeeld</button>
+                    {% sv-icon icon kleur='wit' %}Voorbeeld</button>
             </td>
 
             <td>
@@ -88,7 +88,7 @@
             </td>
             <td>
                 <button class="btn-sv-rood white-text" style="background-color:#0AA0E1">
-                    {% sv-icon icon kleur='white-text' %}Voorbeeld</button>
+                    {% sv-icon icon kleur='wit' %}Voorbeeld</button>
             </td>
 
             <td>
@@ -97,7 +97,7 @@
             </td>
             <td style="border:1px solid red">
                 <button class="btn-sv-rood white-text" style="background-color:#0AA0E1; text-shadow:none">
-                    {% sv-icon icon kleur='white-text' %}Voorbeeld</button>
+                    {% sv-icon icon kleur='wit' %}Voorbeeld</button>
             </td>
 
             <td>
@@ -110,7 +110,7 @@
         <tr>
             <td>
                 <button class="btn-sv-blauw white-text">
-                    {% sv-icon icon kleur='white-text' %}Voorbeeld</button>
+                    {% sv-icon icon kleur='wit' %}Voorbeeld</button>
             </td>
 
             <td style="border:1px solid red">
@@ -119,7 +119,7 @@
             </td>
             <td>
                 <button class="btn-sv-rood white-text" style="background-color:#1C6284">
-                    {% sv-icon icon kleur='white-text' %}Voorbeeld</button>
+                    {% sv-icon icon kleur='wit' %}Voorbeeld</button>
             </td>
             <td style="border:1px solid red">
                 <button class="btn-sv-rood black-text" style="background-color:#1C6284; text-shadow:none">
@@ -127,7 +127,7 @@
             </td>
             <td>
                 <button class="btn-sv-rood white-text" style="background-color:#1C6284; text-shadow:none">
-                    {% sv-icon icon kleur='white-text' %}Voorbeeld</button>
+                    {% sv-icon icon kleur='wit' %}Voorbeeld</button>
             </td>
 
             <td style="border:1px solid red">
@@ -146,7 +146,7 @@
             </td>
             <td style="border:1px solid red">
                 <button class="btn-sv-rood white-text" style="background-color:#fff">
-                    {% sv-icon icon kleur='white-text' %}Voorbeeld</button>
+                    {% sv-icon icon kleur='wit' %}Voorbeeld</button>
             </td>
             <td>
                 <button class="btn-sv-rood black-text" style="background-color:#fff; text-shadow:none">
@@ -154,7 +154,7 @@
             </td>
             <td style="border:1px solid red">
                 <button class="btn-sv-rood white-text" style="background-color:#fff; text-shadow:none">
-                    {% sv-icon icon kleur='white-text' %}Voorbeeld</button>
+                    {% sv-icon icon kleur='wit' %}Voorbeeld</button>
             </td>
 
             <td>
@@ -173,7 +173,7 @@
             </td>
             <td>
                 <button class="btn-sv-rood white-text" style="background-color:#F7941E">
-                    {% sv-icon icon kleur='white-text' %}Voorbeeld</button>
+                    {% sv-icon icon kleur='wit' %}Voorbeeld</button>
             </td>
             <td>
                 <button class="btn-sv-rood black-text" style="background-color:#F7941E; text-shadow:none">
@@ -181,7 +181,7 @@
             </td>
             <td style="border:1px solid red">
                 <button class="btn-sv-rood white-text" style="background-color:#F7941E; text-shadow:none">
-                    {% sv-icon icon kleur='white-text' %}Voorbeeld</button>
+                    {% sv-icon icon kleur='wit' %}Voorbeeld</button>
             </td>
 
             <td>
@@ -197,11 +197,11 @@
             <td></td>
             <td>
                 <button class="btn-sv-rood white" style="background-color:#eff2f5 !important; text-shadow:none; border:1px solid #F7941E; line-height:34px">
-                    {% sv-icon icon kleur='white-text' %}Voorbeeld</button>
+                    {% sv-icon icon kleur='wit' %}Voorbeeld</button>
             </td>
             <td>
                 <button class="btn-sv-rood white" style="background-color:#fff; text-shadow:none">
-                    {% sv-icon icon kleur='white-text' %}Voorbeeld</button>
+                    {% sv-icon icon kleur='wit' %}Voorbeeld</button>
             </td>
         </tr>
     </table>

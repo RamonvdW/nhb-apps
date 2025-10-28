@@ -75,7 +75,7 @@
                                 <td>{{ account.volledige_naam|highlight:zoekterm }}</td>
                                 <td>
                                     <button class="btn-sv-rood" onclick="do_selecteer(this)" data-pk="{{ account.pk }}">
-                                        <i class="notranslate material-symbol">play_arrow</i>
+                                        {% sv-icon-op-button 'account login as select' %}
                                     </button>
                                 </td>
                             </tr>

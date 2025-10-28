@@ -27,12 +27,19 @@ class TestDesignTemplatetags(TestCase):
             sv_icon('#does not exist')
 
         # varianten
-        out = sv_icon('email', kleur='kleur')
+        out = sv_icon('email', kleur='groen')
         self.assertTrue(out.startswith('<svg '))
-        self.assertTrue('kleur' in out or 'green-text' in out)      # TODO: tijdelijk
+        self.assertTrue('green-text' in out)
 
         out = sv_icon('email', kleur='')
         self.assertTrue(out.startswith('<svg '))
+
+        out = sv_icon('email', kleur='', extra_style='stijl:1')
+        self.assertTrue(out.startswith('<svg '))
+        self.assertTrue('stijl:1' in out)
+
+        with self.assertRaises(ValueError):
+            sv_icon('email', kleur='not-a-color')
 
         # toevoeging commentaar met icoon naam
         sv_icon.cache_clear()  # in verband met functools.cache gebruik

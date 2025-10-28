@@ -5,6 +5,7 @@
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
+{% load design_icons %}
 
 {% block title %}Koppel tweede factor{% endblock %}
 
@@ -24,9 +25,18 @@
         <div class="col s12 m10 offset-m1 l8 offset-l2 xl6 offset-xl3">
             <div class="sv-kader left-align">
                 <h5>Stappenplan</h5>
-                <p class="valign-wrapper sv-rood-text"><i class="small notranslate material-symbol">looks_one</i> <b>Installeer een applicatie op je mobiel of tablet.</b></p>
-                <p class="valign-wrapper"><i class="small notranslate material-symbol">looks_two</i> Scan een QR-code om de koppeling te maken met MijnHandboogsport.</p>
-                <p class="valign-wrapper"><i class="small notranslate material-symbol">looks_3</i> Voer 6 cijfers in om koppeling te controleren.</p>
+                <p class="valign-wrapper sv-rood-text">
+                    {% sv-icon 'otp stap 1' use='text' extra_style="margin-right:5px" kleur='rood' %}
+                    <b>Installeer een applicatie op je mobiel of tablet.</b>
+                </p>
+                <p class="valign-wrapper">
+                    {% sv-icon 'otp stap 2' use='text' extra_style="margin-right:5px" kleur='zwart' %}
+                    <span>Scan een QR-code om de koppeling te maken met MijnHandboogsport.</span>
+                </p>
+                <p class="valign-wrapper">
+                    {% sv-icon 'otp stap 3' use='text' extra_style="margin-right:5px" kleur='zwart' %}
+                    <span>Voer 6 cijfers in om koppeling te controleren.</span>
+                </p>
             </div>
         </div>
     </div>

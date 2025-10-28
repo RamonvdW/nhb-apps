@@ -51,7 +51,7 @@ def sv_knop_nav(kleur='rood', icon='', tekst='tbd', url='', smal=False, extra_cl
 
     new_text += '">\n'
 
-    new_text += sv_icon(icon, kleur='white-text', icon_height=21)
+    new_text += sv_icon(icon, kleur='wit', use='button')
     new_text += '</span>\n'
 
     new_text += tekst
@@ -72,7 +72,7 @@ def sv_knop_mailto(kleur='rood', email=''):
     new_text = '<a class="%s" href="mailto:%s">\n' % (kleur_class, email)
 
     new_text += '<span style="display:inline-block; vertical-align:text-bottom; height:24px">\n'
-    new_text += sv_icon('email', kleur='white-text', icon_height=21)
+    new_text += sv_icon('email', kleur='wit', use='text')
     new_text += '</span>\n'
 
     new_text += '</a>\n'
@@ -99,7 +99,7 @@ def sv_knop_ext(kleur='rood', icon='', tekst='tbd', url='', extra_stijl=''):
         new_text += '; padding-right:10px'
     new_text += '">\n'
 
-    new_text += sv_icon(icon, kleur='white-text', icon_height=21)
+    new_text += sv_icon(icon, kleur='wit', use='text')
 
     new_text += '</span>\n'
 
