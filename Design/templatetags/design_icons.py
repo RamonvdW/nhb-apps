@@ -28,6 +28,8 @@ MATERIAL_SYMBOLS = {
     'otp stap 1': 'looks_one',
     'otp stap 2': 'looks_two',
     'otp stap 3': 'looks_3',
+    'otp volgende stap': 'arrow_forward_ios',
+    'otp vorige stap': 'arrow_back_ios',
     'bestellingen zoek': 'search',
     'admin': 'database',
     'beheer vereniging': 'house_siding',
@@ -183,6 +185,7 @@ MATERIAL_SYMBOLS = {
     'ver voorkeuren leden': 'tune',
     'ver voorwaarden': 'article',
     'ver wedstrijden': 'event_note',
+    'opslaan': 'check',
     'verder winkelen': 'event_note',
     'verenigingen': 'share_location',
     'walibi webshop': 'shopping_cart',
@@ -201,7 +204,7 @@ MATERIAL_SYMBOLS = {
 icon_use_to_icon_height = {
     'card': 64,                 # centrale op het kaartjes
     'card corner': 24,          # extern open in de rechter bovenhoek
-    'button': 24,
+    'button': 21,
     'text': 27,
 }
 

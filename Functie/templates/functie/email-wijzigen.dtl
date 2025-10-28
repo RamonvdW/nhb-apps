@@ -6,6 +6,7 @@
 {% endcomment %}
 {% load static %}
 {% load design_filters %}   <!-- highlight filter -->
+{% load design_icons %}
 
 {% block title %}Wijzig e-mailadres{% endblock %}
 
@@ -59,7 +60,8 @@
                     <!-- button -->
                     <p class="center">
                         <button class="btn-sv-rood" id="submit_knop" type="submit">
-                            <i class="notranslate material-symbol left">check</i>Opslaan</button>
+                            {% sv-icon-op-button 'opslaan' tekst='Opslaan' %}
+                        </button>
                     </p>
 
                 </form>

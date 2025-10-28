@@ -5,6 +5,7 @@
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
+{% load design_icons %}
 
 {% block title %}{% if readonly %}Bekijk{% else %}Koppel{% endif %} teamleden{% endblock %}
 
@@ -163,7 +164,8 @@
             {% if mag_wijzigen %}
                             <div style="display: none">
                                 <button class="btn-sv-float" id="submit_knop" type="submit" disabled>
-                                    <i class="notranslate material-symbol left">check</i>Opslaan</button>
+                                    {% sv-icon-op-button 'opslaan' tekst='Opslaan' %}
+                                </button>
                             </div>
                         </form>
                     </div>

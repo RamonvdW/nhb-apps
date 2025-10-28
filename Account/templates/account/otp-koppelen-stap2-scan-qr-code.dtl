@@ -6,6 +6,7 @@
 {% endcomment %}
 {% load static %}
 {% load design_icons %}
+{% load design_knop %}
 
 {% block title %}Koppel tweede factor{% endblock %}
 
@@ -18,7 +19,7 @@
             <p>Voordat je als beheerder aan de slag kant moet je een extra beveiliging activeren: de tweede factor.</p>
 
             <p>
-                <a class="btn-sv-rood" href="{{ url_stap_1 }}"><i class="notranslate material-symbol left">arrow_back_ios</i>Terug naar stap 1</a>
+                {% sv-knop-nav icon='otp vorige stap' url=url_stap_1 tekst='Terug naar stap 1' %}
             </p>
         </div>
     </div>
@@ -75,8 +76,7 @@
 
                 <p>Als het gelukt is dan laat de applicatie de 6 cijfers zien onder het kopje "MijnHandboogsport".</p>
                 <p>
-                    <a class="btn-sv-rood" href="{{ url_stap_3 }}">
-                        <i class="notranslate material-symbol right">arrow_forward_ios</i>Verder naar stap 3</a>
+                    {% sv-knop-nav url=url_stap_3 icon='otp volgende stap' tekst='Verder naar stap 3' %}
                 </p>
             </div>
         </div>

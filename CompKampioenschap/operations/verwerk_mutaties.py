@@ -351,6 +351,9 @@ class VerwerkCompKampMutaties:
                 deelnemer.save(update_fields=['deelname', 'logboek'])
                 # verder hoeven we niets te doen: volgorde en rank blijft hetzelfde
 
+                # zorg dat het google sheet bijgewerkt worden
+                self._zet_dirty(deelkamp.competitie, indiv_klasse.pk, deelkamp.is_bk(), is_team=False)
+
     def _verwerk_mutatie_kamp_afmelden_indiv(self, mutatie: CompetitieMutatie):
         self.stdout.write('[INFO] Verwerk mutatie %s: afmelden' % mutatie.pk)
         door = mutatie.door
@@ -720,6 +723,11 @@ class VerwerkCompKampMutaties:
                 self.stdout.write('[INFO] Maak %s' % fname)
                 storage.maak_sheet_van_template(afstand, is_teams, is_bk, klasse_pk, rayon_nr, fname)
             # for
+
+            # laat alle formulieren vullen
+            CompetitieMutatie.objects.create(
+                                mutatie=MUTATIE_UPDATE_DIRTY_WEDSTRIJDFORMULIEREN,
+                                competitie=comp)      # alleen nodig voor begin_jaar
 
         except StorageError as err:
             self.stdout.write('[ERROR] StorageError: %s' % str(err))

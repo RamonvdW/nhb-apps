@@ -68,7 +68,8 @@
                 {% csrf_token %}
                 <!--                                                                    top r+l bottom -->
                 <button class="btn-sv-rood" id="submit_knop" type="submit" style="margin: 0 1em 1em;">
-                    <i class="notranslate material-symbol right">arrow_forward_ios</i>Verder naar stap 2</button>
+                    {% sv-icon-op-button 'otp volgende stap' tekst='Verder naar stap 2' %}
+                </button>
             </form>
         </div>
     </div>

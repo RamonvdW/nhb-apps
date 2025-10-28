@@ -1,4 +1,5 @@
 {% load static %}
+{% load design_icons %}
 
     <!-- banner -->
     <div class="row center">
@@ -127,7 +128,8 @@
                         <!-- button -->
                         <p class="center">
                             <button class="btn-sv-rood" id="submit_knop" type="submit">
-                                <i class="notranslate material-symbol left">check</i>Opslaan</button>
+                                {% sv-icon-op-button 'opslaan' tekst='Opslaan' %}
+                            </button>
                         </p>
 
                     </form>

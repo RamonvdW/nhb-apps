@@ -47,11 +47,11 @@
 
                             <td class="center">
                                 {% if obj.bevinding == "4" %}
-                                    {% sv-icon 'feedback duimpje omlaag' kleur='sv-rood-text' %}
+                                    {% sv-icon 'feedback duimpje omlaag' kleur='rood' %}
                                 {% elif obj.bevinding == "6" %}
-                                    {% sv-icon 'feedback neutraal' kleur='black-text' icon_height=30 %}
+                                    {% sv-icon 'feedback neutraal' kleur='zwart' icon_height=30 %}
                                 {% elif obj.bevinding == "8" %}
-                                    {% sv-icon 'feedback duimpje omhoog' kleur='green-text' %}
+                                    {% sv-icon 'feedback duimpje omhoog' kleur='groen' %}
                                 {% endif %}
                             </td>
 

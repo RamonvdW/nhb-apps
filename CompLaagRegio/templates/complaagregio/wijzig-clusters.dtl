@@ -142,7 +142,8 @@
 
             <div style="display:none">
                 <button class="btn-sv-float" id="submit_knop" type="submit" disabled>
-                    <i class="notranslate material-symbol left">check</i>Opslaan</button>
+                    {% sv-icon-op-button 'opslaan' tekst='Opslaan' %}
+                </button>
             </div>
 
         </form>

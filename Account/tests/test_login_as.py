@@ -71,8 +71,6 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
         # controleer aanwezigheid van Selecteer knop, bondsnummer en Vereniging naam
         self.assertNotContains(resp, "Niets gevonden")
         self.assertContains(resp, "normaal")
-        self.assertContains(resp, "play_arrow")
-        self.assertContains(resp, "do_selecteer")
         self.assertContains(resp, 'data-pk="%s"' % self.account_normaal.pk)
 
         # te lange zoekterm (max length = 50)

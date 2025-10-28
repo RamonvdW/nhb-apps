@@ -5,6 +5,7 @@
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
+{% load design_icons %}
 
 {% block title %}Wijzig wedstrijd{% endblock %}
 
@@ -284,14 +285,16 @@
 
                         <div style="display: none">
                             <button class="btn-sv-float" id="submit_knop1" type="submit" disabled>
-                                <i class="notranslate material-symbol left">check</i>Opslaan</button>
+                                {% sv-icon-op-button 'opslaan' tekst='Opslaan' %}
+                            </button>
                         </div>
 
                         {% comment %}
                         <br>
                         <p class="center">
                             <button class="btn-sv-rood btn-floating" id="submit_knop1" type="submit" disabled>
-                                <i class="notranslate material-symbol left">check</i>Opslaan</button>
+                                {% sv-icon-op-button 'opslaan' tekst='Opslaan' %}
+                            </button>
                         </p>
                         {% endcomment %}
 
