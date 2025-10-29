@@ -352,6 +352,8 @@ class VerwerkCompKampMutaties:
                 # verder hoeven we niets te doen: volgorde en rank blijft hetzelfde
 
                 # zorg dat het google sheet bijgewerkt worden
+                deelkamp = deelnemer.kampioenschap
+                indiv_klasse = deelnemer.indiv_klasse
                 self._zet_dirty(deelkamp.competitie, indiv_klasse.pk, deelkamp.is_bk(), is_team=False)
 
     def _verwerk_mutatie_kamp_afmelden_indiv(self, mutatie: CompetitieMutatie):

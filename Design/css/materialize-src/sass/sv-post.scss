@@ -657,17 +657,6 @@ input.table-filter {
     }
 }
 
-/* marge rond een formulier dat zich aanpast aan de schermbreedte */
-.form-padding {
-    padding: 30px;
-}
-@media only screen and (max-width : 720px) {
-    .form-padding {
-        padding: 15px;
-    }
-}
-
-
 /*
 // -------------
 // KEEP IN SYNC
@@ -790,6 +779,12 @@ input.table-filter {
   @extend .sv-kader-form;
 }
 
+/* minder marge op klein scherm */
+@media only screen and (max-width : 720px) {
+    .sv-kader {
+        padding: 10px;    // halveer de padding
+    }
+}
 
 //-----------------------------------
 // sv-foto

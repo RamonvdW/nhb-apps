@@ -140,10 +140,18 @@
                             <div class="collapsible-header white">
                                 <table>
                                     <tr>
+                                        <!-- icoontje voor de status -->
                                         <td style="width:35px; padding-left:0; padding-right:0">
-                                            {% if bestelling.status == 'A'   %}<i class="material-symbol notranslate green-text"   style="margin:0">done</i>{% endif %}
-                                            {% if bestelling.status in 'NBF' %}<i class="material-symbol notranslate sv-rood-text" style="margin:0">hourglass_empty</i>{% endif %}
-                                            {% if bestelling.status == 'G'   %}<i class="material-symbol notranslate grey-text"    style="margin:0">close</i>{% endif %}
+                                            {% if bestelling.status == 'A' %}
+                                                <!-- betaald: groene checkmark -->
+                                                {% sv-icon 'bestelling status betaald' kleur='groen' use='text' %}
+                                            {% elif bestelling.status in 'NBF' %}
+                                                <!-- nieuw, betaling actief, betaling mislukt  -->
+                                                {% sv-icon 'bestelling status wacht op betaling' kleur='rood' use='text' %}
+                                            {% elif bestelling.status == 'G' %}
+                                                <!-- geannuleerd: grijs kruis -->
+                                                {% sv-icon 'bestelling status geannuleerd' kleur='grijs' use='text' %}
+                                            {% endif %}
                                         </td>
                                         <td>
                                             <span>{{ bestelling.bestel_nr_str|highlight:zoekterm }}</span>
@@ -151,7 +159,8 @@
                                             <span>{{ bestelling.beschrijving_kort }}</span>
                                         </td>
                                         <td>
-                                            <i class="material-symbol notranslate sv-rood-text secondary-content"><!-- wordt gezet in in/uitklappen_klaar() in Plein/js/site_layout.js --></i>
+                                            <!-- icoon svg wordt gezet in Overige/js/collapsible_icons.js -->
+                                            <span class="collapsible-icon">x</span>
                                         </td>
                                     </tr>
                                 </table>

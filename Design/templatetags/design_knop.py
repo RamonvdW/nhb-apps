@@ -82,7 +82,7 @@ def sv_knop_mailto(kleur='rood', email=''):
 
 @register.simple_tag(name='sv-knop-ext')
 @functools.cache
-def sv_knop_ext(kleur='rood', icon='', tekst='tbd', url='', extra_stijl=''):
+def sv_knop_ext(kleur='rood', icon='open url', tekst='tbd', url='', extra_stijl=''):
 
     if kleur == 'rood':
         kleur_class = 'btn-sv-rood'
@@ -99,7 +99,7 @@ def sv_knop_ext(kleur='rood', icon='', tekst='tbd', url='', extra_stijl=''):
         new_text += '; padding-right:10px'
     new_text += '">\n'
 
-    new_text += sv_icon(icon, kleur='wit', use='text')
+    new_text += sv_icon(icon, kleur='wit')
 
     new_text += '</span>\n'
 

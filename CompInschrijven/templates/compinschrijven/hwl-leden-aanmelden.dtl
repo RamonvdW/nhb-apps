@@ -22,37 +22,27 @@
     <div class="row-sv-blauw">
         <div class="col s12">
             <div class="sv-kader">
-                {% if mag_aanmelden %}
-                    <p>Als hoofdwedstrijdleider kan je via deze pagina leden van vereniging [{{ ver.ver_nr }}] {{ ver.naam }} te {{ ver.plaats }} aanmelden voor de <b>{{ comp.beschrijving }}</b>.</p>
+                <p>Als hoofdwedstrijdleider kan je via deze pagina leden van vereniging [{{ ver.ver_nr }}] {{ ver.naam }} te {{ ver.plaats }} aanmelden voor de <b>{{ comp.beschrijving }}</b>.</p>
 
-                    <p>Onderstaande lijst toont alleen leden die ingesteld hebben met welke boog ze schieten. Je kan ze hier bij helpen via het kaartje "voorkeuren leden".</p>
+                <p>Onderstaande lijst toont alleen leden die ingesteld hebben met welke boog ze schieten. Je kan ze hier bij helpen via het kaartje "voorkeuren leden".</p>
 
-                    <p>Aanmelden gaat in bulk: kies de voorkeuren, zet daarna een vinkje bij de sporters die je aan wilt melden en druk op de rode knop rechtsonder. Leden die al aangemeld zijn hebben een grijs vinkje.</p>
-                    <p>Leden die aangegeven hebben niet mee te willen doen met de bondscompetities worden in grijs weergegeven.</p>
+                <p>Aanmelden gaat in bulk: kies de voorkeuren, zet daarna een vinkje bij de sporters die je aan wilt melden en druk op de rode knop rechtsonder. Leden die al aangemeld zijn hebben een grijs vinkje.</p>
+                <p>Leden die aangegeven hebben niet mee te willen doen met de bondscompetities worden in grijs weergegeven.</p>
 
-                    <p>Let op: bij aanmelden v&oacute;&oacute;r {{ comp.begin_fase_D_indiv }} is deelname gegarandeerd.<br>Bij latere aanmelding bepaalt de regiocompetitieleider (RCL) of er ruimte is in jullie regio.</p>
-                {% else %}
-                    <p>Deze pagina toont voor leden van vereniging [{{ ver.ver_nr }}] {{ ver.naam }} te {{ ver.plaats }} of ze aangemeld zijn voor de <b>{{ comp.beschrijving }}</b>.</p>
-
-                    <p>Onderstaande lijst toont alleen leden die ingesteld hebben met welke boog ze schieten.</p>
-
-                    <p>De hoofdwedstrijdleider kan leden aanmelden voor de bondscompetitie.</p>
-                {% endif %}
+                <p>Let op: bij aanmelden v&oacute;&oacute;r {{ comp.begin_fase_D_indiv }} is deelname gegarandeerd.<br>Bij latere aanmelding bepaalt de regiocompetitieleider (RCL) of er ruimte is in jullie regio.</p>
             </div>
         </div>
     </div>
 
-    {% if mag_aanmelden %}
-        <form action="{{ url_aanmelden }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
-            {% csrf_token %}
-    {% endif %}
+    <form action="{{ url_aanmelden }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
+        {% csrf_token %}
 
-    <!-- blauwe balk met dialoog venster -->
-    <div class="row-sv-blauw">
-        <div class="col s12">
+        <!-- blauwe balk met dialoog venster -->
+        <div class="row-sv-blauw">
+            <div class="col s12">
 
-            <!-- dialoog venster -->
-            <div class="sv-kader-form">
+                <!-- dialoog venster -->
+                <div class="sv-kader-form">
                     <table>
                         <tr>
                             <td><b>Voorkeuren voor aanmelden in bulk</b></td>
@@ -68,17 +58,6 @@
                                 </td>
                             </tr>
                         {% endif %}
-
-                        {% comment %} 2025-06: uitgezet
-                        <tr>
-                            <td>Deelname aan de Rayonkampioenschappen:<br><br>
-                                <label style="margin-left: 20px">
-                                    <input type="checkbox" class="filled-in" name="geen_rk">
-                                    <span class="black-text">Alvast afmelden</span>
-                                </label>
-                            </td>
-                        </tr>
-                        {% endcomment %}
 
                         {% if wedstrijden_1 %}
                             <!-- inschrijfmethode 1, 1e keus: binnen cluster -->
@@ -160,12 +139,15 @@
                                     <td colspan="4"></td>
                                 </tr>
                                 <tr>
-                                    <th class="center">{% if mag_aanmelden %}<!-- kolom voor vinkje -->{% else %}Aangemeld{% endif %}</th>
+                                    <th class="center" style="width:30px"><!-- kolom voor vinkje --></th>
                                     <th data-filter="on">Lid</th>
                                     <th>Leeftijd {{ tweede_jaar }}</th>
                                     <th class="hide-on-small-only">Leeftijdsklasse {{ seizoen }}</th>
                                     <th>Wedstrijd<wbr>boog</th>
-                                    <th class="center"><span class="hide-on-small-only">Aanvangs<wbr>gemiddelde</span><span class="hide-on-med-and-up">AG</span></th>
+                                    <th class="center">
+                                        <span class="hide-on-small-only">Aanvangs<wbr>gemiddelde</span>
+                                        <span class="hide-on-med-and-up">AG</span>
+                                    </th>
                                 </tr>
                             </thead>
 
@@ -219,7 +201,7 @@
                                 <td colspan="2"></td>
                             </tr>
                             <tr>
-                                <th class="center">{% if mag_aanmelden %}<!-- kolom voor vinkje -->{% else %}Aangemeld{% endif %}</th>
+                                <th class="center" style="width:30px"><!-- kolom voor vinkje --></th>
                                 <th data-filter="on">Lid</th>
                                 <th>Wedstrijd<wbr>boog</th>
                                 <th class="center"><span class="hide-on-small-only">Aanvangs<wbr>gemiddelde</span><span class="hide-on-med-and-up">AG</span></th>
@@ -236,18 +218,12 @@
                                     <td><!-- geen aanvangsgemiddelde --></td>
                                 {% else %}
                                     <td class="center">
-                                        {% if mag_aanmelden %}
-                                            <label>
-                                                <input type="checkbox" name="{{ obj.check }}"
-                                                       {% if obj.is_aangemeld %}disabled checked{% else %} class="filled-in"{% endif %}
-                                                       data-boog="{{ obj.afkorting }}">
-                                                <span><!-- noodzakelijk --></span>
-                                            </label>
-                                        {% else %}
-                                            {% if obj.is_aangemeld %}
-                                                <i class="notranslate material-symbol">check</i>
-                                            {% endif %}
-                                        {% endif %}
+                                        <label>
+                                            <input type="checkbox" name="{{ obj.check }}"
+                                                   {% if obj.is_aangemeld %}disabled checked{% else %} class="filled-in"{% endif %}
+                                                   data-boog="{{ obj.afkorting }}">
+                                            <span><!-- noodzakelijk --></span>
+                                        </label>
                                     </td>
                                     <td>{{ obj.lid_nr_en_volledige_naam }}</td>
                                     <td>{% if obj.boogtype %}{{ obj.boogtype }}{% else %}<i class="sv-rood">Niet ingesteld</i>{% endif %}</td>
@@ -257,19 +233,14 @@
                         {% endfor %}
                     </table>
 
-                    {% if mag_aanmelden %}
-                        <input class="btn-sv-float" id="submit_knop" type="submit" value="Geselecteerde sporters aanmelden">
-                    {% endif %}
-
+                    <input class="btn-sv-float" id="submit_knop" type="submit" value="Geselecteerde sporters aanmelden">
+                </div>
             </div>
         </div>
-    </div>
 
-    <p class="center">Sporter naam in grijs: heeft "voorkeur voor de bondscompetities" niet aangevinkt staan (onder voorkeuren) of geen wedstrijdboog ingesteld.</p>
+        <p class="center">Sporter naam in grijs: heeft "voorkeur voor de bondscompetities" niet aangevinkt staan (onder voorkeuren) of geen wedstrijdboog ingesteld.</p>
 
-    {% if mag_aanmelden %}
-        </form>
-    {% endif %}     <!-- mag aanmelden -->
+    </form>
 
     <div id="js_data"
          data-tel="{% if wedstrijden_1 %}1{% else %}0{% endif %}">

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2024 Ramon van der Winkel.
+#  Copyright (c) 2020-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -43,9 +43,19 @@ class Taak(models.Model):
 
     def __str__(self):
         msg = "[" + self.toegekend_aan_functie.kort() + "] "
+        dagen_str = ''
         if self.is_afgerond:
             msg += "(afgerond) "
-        return msg + self.onderwerp
+        else:
+            dagen = (self.deadline - timezone.now().date()).days
+            if dagen == 1:
+                dagen_str = ' [nog 1 dag]'
+            elif dagen >= 0:
+                dagen_str = ' [nog %s dagen]' % dagen
+            else:
+                dagen_str = ' [+%s dagen]' % (0 - dagen)
+
+        return msg + self.onderwerp + dagen_str
 
     class Meta:
         """ meta data voor de admin interface """

@@ -25,6 +25,9 @@ MATERIAL_SYMBOLS = {
     'account wachtwoord wijzigen': 'lock',
     'account wachtwoord opslaan': 'check',
     'account login as select': 'play_arrow',
+    'bestelling status betaald': 'check',
+    'bestelling status wacht op betaling': 'hourglass_empty',
+    'bestelling status geannuleerd': 'close',
     'otp stap 1': 'looks_one',
     'otp stap 2': 'looks_two',
     'otp stap 3': 'looks_3',
@@ -72,6 +75,9 @@ MATERIAL_SYMBOLS = {
     'comp tijdlijn': 'schedule',
     'comp uitslagen': 'scoreboard',
     'comp wijzig datums': 'build',
+    'comp sporter status aangemeld': 'check',
+    'comp benodigde dagdelen': 'leaderboard',
+    'comp gekozen wedstrijden': 'leaderboard',
     'download': 'download',
     'drive toestemming': 'add_to_drive',
     'drive wedstrijdformulieren maken': 'add_to_drive',
@@ -214,6 +220,7 @@ icon_kleur_to_class = {
     'zwart': 'sv-zwart-text',
     'middel-blauw': 'sv-middel-blauw-text',
     'groen': 'green-text',
+    'grijs': 'grey-text',
     'wit': 'white-text',
 }
 

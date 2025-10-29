@@ -5,6 +5,7 @@
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
+{% load design_knop %}
 
 {% block title %}Inschrijvingen{% endblock %}
 
@@ -90,22 +91,19 @@
 
             {% if url_download %}
                 <p>
-                    <a class="btn-sv-rood" href="{{ url_download }}">
-                        <i class="notranslate material-symbol left">download</i>Download lijst</a>
+                    {% sv-knop-nav url=url_download icon='download' tekst='Download lijst' %}
                 </p>
             {% endif %}
 
             {% if show_gekozen_wedstrijden %}
                 <p>
-                    <a class="btn-sv-rood" href="{{ url_behoefte }}">
-                        <i class="notranslate material-symbol left">leaderboard</i>Gekozen wedstrijden</a>
+                    {% sv-knop-nav url=url_behoefte icon='comp gekozen wedstrijden' tekst='Gekozen wedstrijden' %}
                 </p>
             {% endif %}
 
             {% if show_dagdeel_telling %}
                 <p>
-                    <a class="btn-sv-rood" href="{{ url_behoefte }}">
-                        <i class="notranslate material-symbol left">leaderboard</i>Benodigde dagdelen</a>
+                    {% sv-knop-nav url=url_behoefte icon='comp benodigde dagdelen' tekst='Benodigde dagdelen' %}
                 </p>
             {% endif %}
         </div>

@@ -6,6 +6,7 @@
 {% endcomment %}
 {% load static %}
 {% load design_filters %}       <!-- wbr_dagdeel filter -->
+{% load design_knop %}
 
 {% block title %}Benodigde dagdelen{% endblock %}
 
@@ -17,8 +18,7 @@
             <h3 class="page-banner">Benodigde dagdelen</h3>
             <p>Behoefte voor de regiocompetitie <b>{{ competitie.beschrijving }}</b> voor <b>{{ regio }}</b></p>
             <p>Je kan onderstaande lijst ook downloaden:</p>
-            <a class="btn-sv-rood" href="{{ url_download }}">
-                <i class="notranslate material-symbol left">download</i>Download lijst</a>
+            {% sv-knop-nav icon='download' url=url_download tekst='Download lijst' %}
         </div>
     </div>
 

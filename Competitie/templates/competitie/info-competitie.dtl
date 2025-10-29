@@ -5,6 +5,7 @@
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
+{% load design_knop %}
 
 {% block title %}Info Bondscompetities{% endblock %}
 
@@ -30,8 +31,7 @@
         <img class="sv-foto-groot" src="{% static 'competitie/indoor_sfeer_1.webp' %}" loading="lazy" alt="sfeerfoto" draggable="false"><br>
         <code style="font-size:12px">Sfeerfoto van een wedstrijd binnenshuis</code>
         <p>
-            <a class="btn-sv-rood" href="https://handboogsport.smugmug.com/Indoor/" target="_blank" rel="noopener noreferrer">
-                <i class="notranslate material-symbol left">open_in_new</i>Meer foto's</a>
+            {% sv-knop-ext url='https://handboogsport.smugmug.com/Indoor/' tekst="Meer foto's" %}
         </p>
     </div>
 
@@ -89,6 +89,9 @@
     <div class="center" style="margin-top:50px; margin-bottom:30px">
         <img class="sv-foto-groot" src="{% static 'competitie/indoor_sfeer_2.webp' %}" loading="lazy" alt="sfeerfoto" draggable="false"><br>
         <code style="font-size:12px">Sfeerfoto van een wedstrijd binnenshuis</code>
+        <p>
+            {% sv-knop-ext url='https://handboogsport.smugmug.com/Indoor/' tekst="Meer foto's" %}
+        </p>
     </div>
 
 
@@ -162,6 +165,9 @@
     <div class="center" style="margin-top:50px; margin-bottom:30px">
         <img class="sv-foto-groot" src="{% static 'competitie/indoor_sfeer_4.webp' %}" loading="lazy" alt="sfeerfoto" draggable="false"><br>
         <code style="font-size:12px">Sfeerfoto van een wedstrijd binnenshuis</code>
+        <p>
+            {% sv-knop-ext url='https://handboogsport.smugmug.com/Indoor/' tekst="Meer foto's" %}
+        </p>
     </div>
 
 
@@ -202,6 +208,9 @@ Nieuwe sporters krijgen na 3 scores hun speelsterkte vastgesteld.</p>
     <div class="center" style="margin-top:50px; margin-bottom:30px">
         <img class="sv-foto-groot" src="{% static 'competitie/indoor_sfeer_3.webp' %}" loading="lazy" alt="sfeerfoto" draggable="false"><br>
         <code style="font-size:12px">Sfeerfoto van een wedstrijd binnenshuis</code>
+        <p>
+            {% sv-knop-ext url='https://handboogsport.smugmug.com/Indoor/' tekst="Meer foto's" %}
+        </p>
     </div>
 
 
@@ -381,6 +390,9 @@ In de shoot-off wordt 1 pijl gesloten en beslist de scheidsrechter welke pijl he
     <div class="center" style="margin-top:50px; margin-bottom:30px">
         <img class="sv-foto-groot" src="{% static 'competitie/indoor_sfeer_5.webp' %}" loading="lazy" alt="sfeerfoto" draggable="false"><br>
         <code style="font-size:12px">Sfeerfoto van een wedstrijd binnenshuis</code>
+        <p>
+            {% sv-knop-ext url='https://handboogsport.smugmug.com/Indoor/' tekst="Meer foto's" %}
+        </p>
     </div>
 
 

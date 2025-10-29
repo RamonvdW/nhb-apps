@@ -54,11 +54,45 @@ class ToegekendAanFunctieListFilter(admin.SimpleListFilter):
         return queryset
 
 
+class SoortTaakListFilter(admin.SimpleListFilter):
+
+    title = 'soort taak'
+
+    parameter_name = 'SoortTaak'
+
+    def lookups(self, request, model_admin):
+        lijstje = list()
+        onderwerpen = list(Taak
+                           .objects
+                           .distinct('onderwerp')
+                           .values_list('onderwerp', flat=True))
+
+        for onderwerp in onderwerpen:
+            # afkappen waar mogelijk
+            for afkappen in ('Nieuw gast-account', 'Koppel invallers Indoor', 'Koppel invallers 25m 1pijl'):
+                if onderwerp.startswith(afkappen):
+                    onderwerp = afkappen
+            # for
+
+            tup = (onderwerp, onderwerp)
+            if tup not in lijstje:
+                lijstje.append(tup)
+        # for
+        return lijstje
+
+    def queryset(self, request, queryset):                  # pragma: no cover
+        onderwerp = self.value()
+        if onderwerp:
+            queryset = queryset.filter(onderwerp__startswith=onderwerp)
+        return queryset
+
+
 class TaakAdmin(admin.ModelAdmin):
 
     """ Admin configuratie voor Taak klasse """
 
     list_filter = ('is_afgerond',
+                   SoortTaakListFilter,
                    ToegekendAanFunctieListFilter)
 
     list_select_related = ('toegekend_aan_functie',
