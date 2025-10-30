@@ -74,8 +74,7 @@ class TestBrowserBestellingMandjeVerwijder(MyMgmtCommandHelper, bh.BrowserTestCa
 
         # bekijk het mandje
         leeg = self.find_element_type_with_text('p', 'Je mandje is leeg')
-        if not leeg:
-            self.fail('"Je mandje is leeg" tekst niet gevonden')
+        self.assertIsNotNone(leeg, 'Tekst "Je mandje is leeg" niet gevonden')
 
         # controleer dat er geen meldingen van de browser zijn over de JS bestanden
         self.assert_no_console_log()

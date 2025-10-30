@@ -32,7 +32,7 @@ class AddFocus(type):
             js_tests_path = os.path.join(app.name, 'js_tests')
             if os.path.exists(js_tests_path):
                 for d in os.listdir(js_tests_path):                     # pragma: no branch
-                    if d.startswith('test_') and d.endswith('.py'):
+                    if d.startswith('test_') and d.endswith('.py'):     # pragma: no branch
                         add = True
                         break
                 # for
@@ -128,12 +128,12 @@ class TestBrowser(LiveServerTestCase, metaclass=AddFocus):
     def _run_tests(self, app_filter=None):
         test_modules = list()
         for app in apps.get_app_configs():
-            if app_filter and app_filter not in app.name:       # pragma: no branch
-                continue                                        # pragma: no cover
+            if app_filter and app_filter not in app.name:                   # pragma: no branch
+                continue                                                    # pragma: no cover
             js_tests_path = os.path.join(app.name, 'js_tests')
             if os.path.exists(js_tests_path):
                 for d in os.listdir(js_tests_path):
-                    if d.startswith('test_') and d.endswith('.py'):
+                    if d.startswith('test_') and d.endswith('.py'):         # pragma: no branch
                         test_modules.append(app.name + '.js_tests.' + d[:-3])
                 # for
         # for

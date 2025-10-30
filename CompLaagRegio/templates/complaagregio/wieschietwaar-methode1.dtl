@@ -5,6 +5,7 @@
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
+{% load design_knop %}
 
 {% block title %}Wie schiet waar{% endblock %}
 
@@ -72,8 +73,7 @@
 
                         <td class="center">
                             {% if deelnemer.url_wijzig %}
-                                <a class="btn-sv-rood" href="{{ deelnemer.url_wijzig }}">
-                                    <i class="notranslate material-symbol">edit</i></a>
+                                {% sv-knop-nav url=deelnemer.url_wijzig icon='aanpassen' tekst='' %}
                             {% endif %}
                         </td>
                     </tr>

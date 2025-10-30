@@ -390,7 +390,9 @@
             <li>
                 <div class="collapsible-header white">
                     <span>Header {{ x.korte_beschrijving }}</span>
-                    <i class="material-symbol notranslate sv-rood-text secondary-content"><!-- wordt gezet in in/uitklappen_klaar() in Plein/js/site_layout.js --></i>
+
+                    <!-- icoon svg wordt gezet in Overige/js/collapsible_icons.js -->
+                    <span class="collapsible-icon">x</span>
                 </div>
                 <div class="collapsible-body white">
                     <p>Lange {{ x.beschrijving }}</p>
@@ -416,7 +418,7 @@
 
     <div style="display: none">
         <button class="btn-sv-float" id="submit_knop" type="submit" disabled>
-            <i class="notranslate material-symbol left">check</i>Voorkeuren opslaan</button>
+            {% sv-icon-op-button 'opslaan' tekst='Voorkeuren opslaan' %}
     </div>
 
     {% include 'feedback/sidebar.dtl' with op_pagina="app-snippets" %}

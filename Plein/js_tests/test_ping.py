@@ -7,6 +7,7 @@
 from django.contrib.sessions.backends.db import SessionStore
 from TestHelpers import browser_helper as bh
 from Plein.views import SESSIONVAR_VORIGE_POST
+import time
 
 
 class TestBrowserPleinStuurPing(bh.BrowserTestCase):
@@ -30,7 +31,7 @@ class TestBrowserPleinStuurPing(bh.BrowserTestCase):
         self.assertTrue(has_ping)
 
         # wacht even en check daarna dat de post gedaan is door de js load event handler
-        # time.sleep(1)
+        time.sleep(1)
 
         session = SessionStore(session_key=mh_session_id)
         stamp = session.get(SESSIONVAR_VORIGE_POST, '')

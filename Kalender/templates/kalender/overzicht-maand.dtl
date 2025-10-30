@@ -181,8 +181,11 @@
                         </td>
                         <td class="center">
                             {% if regel.url_details %}
-                                <a class="{% if regel.is_voor_sluitingsdatum %}btn-sv-rood{% else %}btn-sv-blauw{% endif %}" href="{{ regel.url_details }}">
-                                    <!--<i class="notranslate material-symbol">play_arrow</i>-->Details</a>
+                                {% if regel.is_voor_sluitingsdatum %}
+                                    <a class="btn-sv-rood" href="{{ regel.url_details }}">Details</a>
+                                {% else %}
+                                    <a class="btn-sv-blauw" href="{{ regel.url_details }}">Details</a>
+                                {% endif %}
                             {% endif %}
                         </td>
                     </tr>

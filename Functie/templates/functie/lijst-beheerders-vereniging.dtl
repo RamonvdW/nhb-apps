@@ -5,6 +5,7 @@
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
+{% load design_knop %}
 
 {% block title %}Beheerders vereniging{% endblock %}
 
@@ -54,8 +55,7 @@
 
                             {% if obj.wijzig_url %}
                                 <br><br>
-                                <a class="btn-sv-rood" href="{{ obj.wijzig_url }}">
-                                    <i class="notranslate material-symbol left">group_add</i>Wijzig beheerders</a>
+                                {% sv-knop-nav url=obj.wijzig_url icon='functie wijzig beheerders' tekst='Wijzig beheerders' %}
                             {% endif %}
                         </td>
 
@@ -79,8 +79,7 @@
 
                             {% if obj.email_url %}
                                 <br><br>
-                                <a class="btn-sv-rood" href="{{ obj.email_url }}">
-                                    <i class="notranslate material-symbol left">alternate_email</i>Wijzig e-mail</a>
+                                {% sv-knop-nav url=obj.email_url icon='functie wijzig email' tekst='Wijzig e-mail' %}
                             {% endif %}
                         </td>
                     </tr>

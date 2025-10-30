@@ -5,6 +5,8 @@
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
+{% load design_knop %}
+{% load design_icons %}
 
 {% block title %}Planning{% endblock %}
 
@@ -78,8 +80,7 @@
                         <!-- knop om wedstrijd te wijzigen -->
                         <td>
                             {% if wedstrijd.url_wijzig %}
-                                <a class="btn-sv-rood" href="{{ wedstrijd.url_wijzig }}">
-                                    <i class="notranslate material-symbol">edit</i></a>
+                                {% sv-knop-nav url=wedstrijd.url_wijzig icon='aanpassen' tekst='' %}
                             {% endif %}
                         </td>
                     </tr>
@@ -98,7 +99,8 @@
                             <form action="{{ url_nieuwe_wedstrijd }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
                                 {% csrf_token %}
                                 <button class="btn-sv-rood" id="submit_knop" type="submit">
-                                    <i class="notranslate material-symbol">add</i></button>
+                                    {% sv-icon-op-button 'toevoegen' %}
+                                </button>
                             </form>
                         </td>
                     </tr>
@@ -153,9 +155,8 @@
                         <td class="center">{{ deelkamp.rayon }}</td>
 
                         <td class="center">
-                            <a class="btn-sv-rood" href="{% url 'CompLaagRayon:planning' deelkamp.pk %}">
-                                <img src="{% static 'plein/zoom_in.svg' %}" height="36" alt="Details" draggable="false">
-                            </a>
+                            {% url 'CompLaagRayon:planning' deelkamp.pk as url_zoom %}
+                            {% sv-knop-nav url=url_zoom icon='comp planning toon details' tekst='' %}
                         </td>
                     </tr>
                 {% endfor %}

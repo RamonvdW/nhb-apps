@@ -19,31 +19,36 @@
 {% endcomment %}
 
 {% load static %}
+{% load design_icons %}
 
 <!-- site feedback alleen tonen als gebruiker ingelogd is -->
 {% if menu_voornaam %}
 
     {% with request.path|slice:"1:-1"|truncatechars:100 as volledige_url %}
+        {% url 'Feedback:bevinding' bevinding='plus' op_pagina=op_pagina volledige_url=volledige_url as url1 %}
+        {% url 'Feedback:bevinding' bevinding='nul'  op_pagina=op_pagina volledige_url=volledige_url as url2 %}
+        {% url 'Feedback:bevinding' bevinding='min'  op_pagina=op_pagina volledige_url=volledige_url as url3 %}
+
         <div class="site-feedback-box z-depth-1">
             <div class="site-feedback">
                 <span>Wat vind je van deze pagina?</span>
                 <br>
                 <div class="center" style="display:inline-flex">
                     <div>
-                        <a href="{% url 'Feedback:bevinding' bevinding='plus' op_pagina=op_pagina volledige_url=volledige_url %}" target="_blank" rel="noopener noreferrer">
-                            <i class="notranslate material-symbol green-text" style="font-size:2.5rem; width:50px; font-weight: normal">sentiment_satisfied</i>
+                        <a href="{{ url1 }}" target="_blank" rel="noopener noreferrer">
+                            {% sv-icon 'feedback smiley tevreden' kleur='groen' use='feedback' extra_style='width:50px' %}
                         </a>
                     </div>
 
                     <div>
-                        <a href="{% url 'Feedback:bevinding' bevinding='nul'  op_pagina=op_pagina volledige_url=volledige_url %}" target="_blank" rel="noopener noreferrer">
-                            <i class="notranslate material-symbol material-symbol sv-blauw-text" style="font-size:2.5rem; width:50px; font-weight: normal">sentiment_neutral</i>
+                        <a href="{{ url2 }}" target="_blank" rel="noopener noreferrer">
+                            {% sv-icon 'feedback smiley bruikbaar' kleur='blauw' use='feedback' extra_style='width:50px' %}
                         </a>
                     </div>
 
                     <div>
-                        <a href="{% url 'Feedback:bevinding' bevinding='min'  op_pagina=op_pagina volledige_url=volledige_url %}" target="_blank" rel="noopener noreferrer">
-                            <i class="notranslate material-symbol sv-rood-text" style="font-size:2.5rem; width:50px; font-weight: normal">sentiment_dissatisfied</i>
+                        <a href="{{ url3 }}" target="_blank" rel="noopener noreferrer">
+                            {% sv-icon 'feedback smiley moet beter' kleur='rood' use='feedback' extra_style='width:50px' %}
                         </a>
                     </div>
                 </div>

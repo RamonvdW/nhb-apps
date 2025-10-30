@@ -6,7 +6,8 @@
 
 from django.test import TestCase, override_settings
 from Design.templatetags.design_icons import sv_icon, sv_icon_op_button
-from Design.icon_svg.Material_Symbols.icon_svg import MATERIAL_ICONS_SVG
+from Design.icon_svg.Material_Symbols.symbol_svg import MATERIAL_SYMBOL_SVG
+from Design.icon_svg.sv_symbols.symbol_svg import SV_SYMBOL_SVG
 
 
 class TestDesignTemplatetags(TestCase):
@@ -17,7 +18,7 @@ class TestDesignTemplatetags(TestCase):
         """ initialisatie van de test case """
         pass
 
-    def test_icon(self):
+    def test_icon_material_symbol(self):
         sv_icon.cache_clear()           # in verband met functools.cache gebruik
 
         out = sv_icon('email')
@@ -48,11 +49,37 @@ class TestDesignTemplatetags(TestCase):
             self.assertTrue('<!-- ' in out)
 
         # exception handling
-        temp = MATERIAL_ICONS_SVG['download']       # backup
-        del MATERIAL_ICONS_SVG['download']
+        temp = MATERIAL_SYMBOL_SVG['download']       # backup
+        del MATERIAL_SYMBOL_SVG['download']
         with self.assertRaises(ValueError):
             sv_icon('download')
-        MATERIAL_ICONS_SVG['download'] = temp       # restore
+        MATERIAL_SYMBOL_SVG['download'] = temp       # restore
+
+    def test_icon_sv_symbol(self):
+        sv_icon_name = 'comp planning toon details'
+        sv_icon.cache_clear()           # in verband met functools.cache gebruik
+
+        out = sv_icon(sv_icon_name)
+        self.assertTrue(out.startswith('<svg '))
+
+        # toevoeging commentaar met icoon naam
+        sv_icon.cache_clear()  # in verband met functools.cache gebruik
+        with override_settings(DEBUG=True):
+            out = sv_icon(sv_icon_name)
+            self.assertTrue('<!-- ' in out)
+
+        sv_icon.cache_clear()  # in verband met functools.cache gebruik
+        out = sv_icon(sv_icon_name, kleur='', extra_style='stijl:1')
+        self.assertTrue(out.startswith('<svg '))
+        self.assertTrue('stijl:1' in out)
+
+        # exception handling
+        sv_icon.cache_clear()  # in verband met functools.cache gebruik
+        temp = SV_SYMBOL_SVG['zoom_in']       # backup
+        del SV_SYMBOL_SVG['zoom_in']
+        with self.assertRaises(ValueError):
+            sv_icon(sv_icon_name)
+        SV_SYMBOL_SVG['zoom_in'] = temp       # restore
 
     def test_icon_op_button(self):
         sv_icon.cache_clear()           # in verband met functools.cache gebruik

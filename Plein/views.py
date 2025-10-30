@@ -319,8 +319,8 @@ class TestIconsView(View):
 
     @staticmethod
     def get(request, *args, **kwargs):
-        from Design.templatetags.design_icons import MATERIAL_SYMBOLS
-        rev = {v:k for k,v in MATERIAL_SYMBOLS.items()}     # duplicates are overwritten
+        from Design.templatetags.design_icons import ICON_NAME2MATERIAL_SYMBOL_NAME
+        rev = {v:k for k,v in ICON_NAME2MATERIAL_SYMBOL_NAME.items()}     # duplicates are overwritten
         icons = list(rev.values())
         icons.sort()
         context = {

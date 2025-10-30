@@ -152,7 +152,7 @@ class LijstView(UserPassesTestMixin, TemplateView):
         context['landelijk'] = self.rol_nu in (Rol.ROL_BB, Rol.ROL_BKO)
 
         if self.rol_nu in (Rol.ROL_BB, Rol.ROL_MLA):
-            context['contact_geen_beheerders'] = reverse('Vereniging:contact-geen-beheerders')
+            context['url_contact_geen_beheerders'] = reverse('Vereniging:contact-geen-beheerders')
 
         if self.rol_nu == Rol.ROL_RKO:
             context['toon_rayon'] = False

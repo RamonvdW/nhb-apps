@@ -39,7 +39,7 @@
 
                         <div class="center" style="margin-top:30px">
                             <button class="btn-sv-rood" id="submit_knop" type="submit">
-                                {% sv-icon-op-button 'mandje transport opslaan' tekst='Opslaan' %}
+                                {% sv-icon-op-button 'opslaan' tekst='Opslaan' %}
                             </button>
                         </div>
 

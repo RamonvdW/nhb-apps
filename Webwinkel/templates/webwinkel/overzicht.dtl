@@ -5,6 +5,7 @@
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
+{% load design_icons %}
 
 {% block title %}Webwinkel{% endblock %}
 
@@ -116,7 +117,7 @@
 
                             {% if product.is_extern %}
                                 <div style="position:absolute; right:6px; top:6px">
-                                    <i class="notranslate material-symbol sv-blauw-text">open_in_new</i>
+                                    {% sv-icon 'open url' use='card corner' kleur='blauw' %}
                                 </div>
                             {% endif %}
 

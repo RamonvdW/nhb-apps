@@ -5,6 +5,7 @@
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
+{% load design_knop %}
 
 {% block title %}Verenigingen{% endblock %}
 
@@ -23,13 +24,14 @@
 
             {% if url_sec_hwl %}
                 <p>
-                    <a class="btn-sv-rood" href="{{ url_sec_hwl }}">
-                        <i class="notranslate material-symbol left">mail</i>E-mailadressen van SEC en HWL</a>
+                    {% sv-knop-nav url=url_sec_hwl icon='email' tekst='E-mailadressen van SEC en HWL' %}
                 </p>
             {% endif %}
 
-            {% if contact_geen_beheerders %}
-                <p><a class="btn-sv-rood" href="{{ contact_geen_beheerders }}">Verenigingen zonder beheerders</a></p>
+            {% if url_contact_geen_beheerders %}
+                <p>
+                    <a class="btn-sv-rood" href="{{ url_contact_geen_beheerders }}">Verenigingen zonder beheerders</a>
+                </p>
             {% endif %}
         </div>
     </div>

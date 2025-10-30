@@ -7,7 +7,8 @@
 from django import template
 from django.conf import settings
 from django.utils.safestring import mark_safe
-from Design.icon_svg.Material_Symbols.icon_svg import MATERIAL_ICONS_SVG
+from Design.icon_svg.Material_Symbols.symbol_svg import MATERIAL_SYMBOL_SVG
+from Design.icon_svg.sv_symbols.symbol_svg import SV_SYMBOL_SVG
 import functools
 
 register = template.Library()
@@ -16,14 +17,13 @@ register = template.Library()
 
 
 # mapping van sv-icon gebruik naar Material Symbol icon name
-MATERIAL_SYMBOLS = {
+ICON_NAME2MATERIAL_SYMBOL_NAME = {
     'aanpassen': 'edit',
     'account aanmaken': 'fingerprint',
     'account activiteit': 'recent_actors',
     'account inloggen': 'person',
     'account wachtwoord vergeten': 'help',
     'account wachtwoord wijzigen': 'lock',
-    'account wachtwoord opslaan': 'check',
     'account login as select': 'play_arrow',
     'bestelling status betaald': 'check',
     'bestelling status wacht op betaling': 'hourglass_empty',
@@ -41,7 +41,6 @@ MATERIAL_SYMBOLS = {
     'controleer invoer overboeking': 'check',
     'annuleer bestelling': 'delete',
     'bestellingen overzicht': 'shopping_cart',
-    'mandje transport opslaan': 'check',
     'mandje transport opties': 'local_shipping',
     'bondscompetities': 'my_location',
     'bondspas': 'id_card',
@@ -89,6 +88,9 @@ MATERIAL_SYMBOLS = {
     'feedback duimpje omhoog': 'thumb_up',
     'feedback neutraal': 'thumbs_up_down',
     'feedback duimpje omlaag': 'thumb_down',
+    'feedback smiley tevreden': 'sentiment_satisfied',
+    'feedback smiley bruikbaar': 'sentiment_neutral',
+    'feedback smiley moet beter': 'sentiment_dissatisfied',
     'functie 2fa controle': 'lock',
     'functie 2fa koppel': 'lock',
     'functie 2fa uitleg': 'article',
@@ -100,6 +102,8 @@ MATERIAL_SYMBOLS = {
     'functie wissel sec': 'help',
     'functie wissel van rol': 'group',
     'functie wissel': 'switch_account',
+    'functie wijzig beheerders': 'group_add',
+    'functie wijzig email': 'alternate_email',
     'geo clusters': 'group_work',
     'handleiding': 'menu_book',
     'handleidingen': 'menu_book',
@@ -206,12 +210,83 @@ MATERIAL_SYMBOLS = {
     'tijdelijke code ga door': 'check',
 }
 
+ICON_NAME2SV_SYMBOL = {
+    'comp planning toon details': 'zoom_in',
+}
+
+
+def _get_icon_material_symbol(icon_name, icon_height, extra_style, kleur_class):
+    new_text = ''
+
+    # zoek het bijbehorende Material Symbol op
+    material_symbol = ICON_NAME2MATERIAL_SYMBOL_NAME.get(icon_name, None)
+    if material_symbol:
+
+        if settings.DEBUG:
+            new_text += '<!-- Material-Symbol: ' + material_symbol + ' -->\n'
+
+        svg = MATERIAL_SYMBOL_SVG.get(material_symbol, None)
+        if not svg:
+            raise ValueError('No svg for material symbol: %s' % repr(material_symbol))
+
+        if extra_style:
+            extra_style += '; '
+        extra_style += 'min-width:%spx' % icon_height
+
+        svg = svg.replace(' height="48"', '')
+        svg = svg.replace(' width="48"', '')
+        svg = svg.replace('><path',
+                          ' height="%s" width="%s" style="%s" draggable="false"><path' % (icon_height, icon_height, extra_style))
+
+        if kleur_class:
+            svg = svg.replace('<svg ',
+                              '<svg class="%s" ' % kleur_class)
+            svg = svg.replace('<path d=',
+                              '<path fill="currentColor" d=')
+
+        new_text += svg
+
+    return new_text
+
+
+def _get_icon_sv(icon_name, icon_height, extra_style, kleur_class):
+    new_text = ''
+
+    # zoek het bijbehorende Material Symbol op
+    sv_symbol = ICON_NAME2SV_SYMBOL.get(icon_name, None)
+    if sv_symbol:
+
+        if settings.DEBUG:
+            new_text += '<!-- sv-symbol: ' + sv_symbol + ' -->\n'
+
+        svg = SV_SYMBOL_SVG.get(sv_symbol, None)
+        if not svg:
+            raise ValueError('No svg for sv symbol: %s' % repr(sv_symbol))
+
+        if extra_style:
+            extra_style += '; '
+        extra_style += 'min-width:%spx' % icon_height
+
+        svg = svg.replace(' viewBox=',
+                          ' height="%s" width="%s" style="%s" draggable="false" viewBox=' % (icon_height, icon_height, extra_style))
+
+        if kleur_class:
+            svg = svg.replace('<svg ',
+                              '<svg class="%s" ' % kleur_class)
+            svg = svg.replace('<g id=',
+                              '<g fill="currentColor" id=')
+
+        new_text += svg
+
+    return new_text
+
 
 icon_use_to_icon_height = {
     'card': 64,                 # centrale op het kaartjes
     'card corner': 24,          # extern open in de rechter bovenhoek
     'button': 21,
     'text': 27,
+    'feedback': 40,
 }
 
 icon_kleur_to_class = {
@@ -224,6 +299,7 @@ icon_kleur_to_class = {
     'wit': 'white-text',
 }
 
+
 @register.simple_tag(name='sv-icon')
 @functools.cache
 def sv_icon(icon_name, use='button', kleur='rood', icon_height=0, extra_style=''):
@@ -234,42 +310,21 @@ def sv_icon(icon_name, use='button', kleur='rood', icon_height=0, extra_style=''
     if not icon_height:
         icon_height = icon_use_to_icon_height.get(use, 24)
 
-    # zoek het bijbehorende Material Symbol op
-    material_symbol = MATERIAL_SYMBOLS.get(icon_name, None)
-    if material_symbol is None:
-        raise ValueError('Unknown icon name: %s' % repr(icon_name))
-
-    new_text = ''
-    if settings.DEBUG:
-        new_text += '<!-- Material-Symbol: ' + material_symbol + ' -->\n'
-
-    # bouw deze html:
-    # <svg ...></svg>
-    svg = MATERIAL_ICONS_SVG.get(material_symbol, None)
-    if not svg:
-        raise ValueError('No svg for material symbol: %s' % repr(material_symbol))
-
-    if extra_style:
-        extra_style += '; '
-    extra_style += 'min-width:%spx' % icon_height
-
-    svg = svg.replace(' height="48"', '')
-    svg = svg.replace(' width="48"', '')
-    svg = svg.replace('><path',
-                      ' height="%s" width="%s" style="%s"><path' % (icon_height, icon_height, extra_style))
-
+    kleur_class = ''
     if kleur:
         kleur_class = icon_kleur_to_class.get(kleur, None)
         if not kleur_class:
             raise ValueError('{sv-icon} kleur niet ondersteund: %s' % repr(kleur))
 
         #kleur_class = "green-text"        # TODO: tijdelijk!
-        svg = svg.replace('<svg ',
-                          '<svg class="%s" ' % kleur_class)
-        svg = svg.replace('<path d=',
-                          '<path fill="currentColor" d=')
 
-    new_text += svg
+    new_text = _get_icon_material_symbol(icon_name, icon_height, extra_style, kleur_class)
+
+    if not new_text:
+        new_text = _get_icon_sv(icon_name, icon_height, extra_style, kleur_class)
+
+    if not new_text:
+        raise ValueError('Unknown icon name: %s' % repr(icon_name))
 
     return mark_safe(new_text)
 
