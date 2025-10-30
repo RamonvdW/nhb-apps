@@ -1,5 +1,6 @@
 {% load static %}
 {% load design_icons %}
+{% load design_knop %}
 
     <!-- banner -->
     <div class="row center">
@@ -38,8 +39,7 @@
                 <p>Je hebt laten zien dat je toegang hebt tot je e-mail.</p>
 
                 <p>
-                    <a class="btn-sv-rood" href="{% url 'Plein:plein' %}">
-                        <i class="notranslate material-symbol left">close</i>Sluiten</a>
+                    {% sv-knop-nav url=url_plein tekst='Sluiten' icon='Sluiten' %}
                 </p>
             </div>
         </div>

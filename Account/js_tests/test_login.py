@@ -58,9 +58,9 @@ class TestBrowserAccountLogin(bh.BrowserTestCase):
         # check dat er geen inlaad fouten waren
         self.assert_no_console_log()
 
-        # vind de knop
-        i = self.find_element_type_with_text('i', 'play_arrow')
-        button = self.get_parent(i)
+        # vind de knop die hoort bij de gevonden gebruiker
+        buttons = self.find_elements_buttons(must_have_id=False, must_have_attributes=['data-pk'])
+        button = buttons[0]
         button.click()
 
         # check dat er geen inlaad fouten waren

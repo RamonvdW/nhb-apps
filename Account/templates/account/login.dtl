@@ -59,7 +59,7 @@
                                 <a class="btn-sv-rood" href="{% url 'Account:wachtwoord-vergeten' %}">Wachtwoord vergeten?</a>
                             </div>
                         {% else %}
-                            <div class="col s12">
+                            <div class="col s12 center">
                                 <button class="btn-sv-rood" id="submit_knop" type="submit">Log in</button>
                             </div>
                         {% endif %}

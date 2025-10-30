@@ -163,11 +163,22 @@ class BrowserTestCase(TestCase):
 
         return None
 
-    def find_elements_buttons(self, must_have_id=True):
+    def find_elements_buttons(self, must_have_id=True, must_have_attributes: list=None):
         buttons = list()
         for button in self._driver.find_elements(By.TAG_NAME, 'button'):
-            id_str = button.get_attribute('id')
-            if id_str:
+            store = True
+            if must_have_id:
+                id_str = button.get_attribute('id')
+                if not id_str:
+                    store = False
+
+            if must_have_attributes:
+                for attr in must_have_attributes:
+                    if not button.get_attribute(attr):
+                        store = False
+                # for
+
+            if store:
                 buttons.append(button)
         # for
         return buttons
@@ -302,6 +313,11 @@ class BrowserTestCase(TestCase):
         msgs.append('text=%s' % repr(text))
 
         attrs = ['id', 'name']
+
+        if tag == 'button':
+            attrs.append('aria-label')
+            attrs.append('class')
+            attrs.append('onclick')
 
         if tag == 'input':
             attrs.append('type')
