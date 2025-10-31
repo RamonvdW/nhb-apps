@@ -18,6 +18,7 @@
 -->
 
 {% load static %}
+{% load design_knop %}
 
 {% autoescape on %}
 
@@ -58,7 +59,7 @@
                 <h5>Wat kan je nog meer doen?</h5>
 
                 <p>Onderstaande knop brengt je naar de startpagina van MijnHandboogsport.</p>
-                <a class="btn-sv-rood" href="/plein/"><i class="notranslate material-symbol left">home</i>Het Plein</a>
+                {% sv-knop-nav url='/plein/' icon='het plein 2' tekst='Het plein' %}
             {% endblock %}
 
             <p>&nbsp;</p>

@@ -198,14 +198,14 @@ then
     then
         echo "[INFO] Starting browser tests run" >>"$LOG2"
         python3 -u "${PYCOV[@]}" "${TEST[@]}" "Plein.tests.test_js_in_browser" 2>&1 | tee -a "$LOG" >> "$LOG2"
-        RES=$?
+        RES=${PIPESTATUS[0]}        # status of 'python3' instead of 'tee'
     else
         echo "[INFO] Starting browser tests run for focus_$FOCUS" >>"$LOG2"
         python3 -u "${PYCOV[@]}" "${TEST[@]}" "Plein.tests.test_js_in_browser.TestBrowser.focus_$FOCUS"  2>&1 | tee -a "$LOG" >> "$LOG2"
-        RES=$?
+        RES=${PIPESTATUS[0]}        # status of 'python3' instead of 'tee'
     fi
-    #echo "[DEBUG] Run result: $RES --> ABORTED=$ABORTED"
     [ $RES -eq 3 ] && ABORTED=1
+    echo "[DEBUG] Run result: $RES --> ABORTED=$ABORTED"
 
     echo >>"$LOG2"
     echo "[INFO] Finished browser tests run" >>"$LOG2"
@@ -282,5 +282,7 @@ then
 
     echo "Done"
 fi
+
+exit $ABORTED
 
 # end of file

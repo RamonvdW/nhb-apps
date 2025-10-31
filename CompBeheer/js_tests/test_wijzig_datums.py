@@ -6,10 +6,9 @@
 
 from TestHelpers import browser_helper as bh
 from selenium.webdriver.common.keys import Keys
-import time
 
 
-class TestAccountLogin(bh.BrowserTestCase):
+class TestCompBeheerWijzigDatum(bh.BrowserTestCase):
 
     url_wijzig_datum = '/bondscompetities/beheer/%s/wijzig-datums/'  # comp_pk
 

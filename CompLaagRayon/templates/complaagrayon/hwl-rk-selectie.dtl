@@ -5,6 +5,7 @@
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
+{% load design_icons %}
 
 {% block title %}RK selectie{% endblock %}
 
@@ -34,19 +35,19 @@
                 </tr>
 
                 <tr>
-                    <td class="center"><i class="sv-blauw-text in-table-icon notranslate material-symbol">help</i></td>
+                    <td class="center">{% sv-icon 'comp kamp selectie status onbekend' use='text' kleur='blauw' %}</td>
                     <td class="sv-blauw-text">Onbekend</td>
                     <td>{{ aantal_onbekend }}</td>
                 </tr>
 
                 <tr>
-                    <td class="center"><i class="green-text in-table-icon notranslate material-symbol">check</i></td>
+                    <td class="center">{% sv-icon 'comp kamp selectie status bevestigd' use='text' kleur='groen' %}</td>
                     <td class="green-text">Deelname bevestigd</td>
                     <td>{{ aantal_bevestigd }}</td>
                 </tr>
 
                 <tr>
-                    <td class="center"><i class="grey-text in-table-icon notranslate material-symbol">block</i></td>
+                    <td class="center">{% sv-icon 'comp kamp selectie status afgemeld' use='text' kleur='grijs' %}</td>
                     <td class="grey-text">Afgemeld</td>
                     <td>{{ aantal_afgemeld }}</td>
                 </tr>
@@ -100,12 +101,12 @@
                         <td class="hide-on-small-only">{{ obj.kampioen_label }}</td>
 
                         {% if obj.deelname == 'J' %}
-                            <td class="center"><i class="green-text in-table-icon notranslate material-symbol">check</i></td>
+                            <td class="center">{% sv-icon 'comp kamp selectie status bevestigd' use='text' kleur='groen' %}</td>
                         {% elif obj.deelname == 'N' %}
-                            <td class="center"><i class="grey-text in-table-icon notranslate material-symbol">block</i></td>
+                            <td class="center">{% sv-icon 'comp kamp selectie status afgemeld' use='text' kleur='grijs' %}</td>
                         {% else %}
                             <!-- onbekend -->
-                            <td class="center"><i class="sv-blauw-text in-table-icon notranslate material-symbol">help</i></td>
+                            <td class="center">{% sv-icon 'comp kamp selectie status onbekend' use='text' kleur='blauw' %}</td>
                         {% endif %}
 
                         <td>

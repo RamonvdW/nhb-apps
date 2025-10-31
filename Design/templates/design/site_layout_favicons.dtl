@@ -13,12 +13,14 @@
 
 {% load static %}
 
-<!-- also supported in root through webserver alias -->
-<!-- 16x16 -->
+{% comment %}
+    16x16 (also supported in root through webserver alias)
+{% endcomment %}
 <link rel="icon" type="image/x-icon" href="{% static 'design/favicon.ico' %}">
 
-<!-- also supported in root through webserver alias -->
-<!-- 180x180 -->
+{% comment %}
+    180x180 (also supported in root through webserver alias)
+{% endcomment %}
 <link rel="apple-touch-icon" href="{% static 'design/apple-touch-icon.png' %}">
 
 <!-- TODO: nog nodig? -->

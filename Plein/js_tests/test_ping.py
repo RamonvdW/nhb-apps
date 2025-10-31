@@ -21,7 +21,7 @@ class TestBrowserPleinStuurPing(bh.BrowserTestCase):
         session[SESSIONVAR_VORIGE_POST] = 'forceer'
         session.save()
 
-        self.do_navigate_to(self.url_plein)
+        self.do_navigate_to(self.url_plein, allow_same=True)
 
         html = self.get_page_html()
         has_ping = "stuur_ping" in html
@@ -38,7 +38,7 @@ class TestBrowserPleinStuurPing(bh.BrowserTestCase):
         self.assertFalse(stamp == '')
 
     def test_sporter(self):
-        self.do_wissel_naar_sporter()       # redirect naar /plein/
+        self.do_wissel_naar_sporter()       # doet redirect naar /plein/
         # pagina is gebaseerd op template plein-sporter.dtl
 
         # controleer dat we ingelogd zijn

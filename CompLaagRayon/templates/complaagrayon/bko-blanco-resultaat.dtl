@@ -5,6 +5,7 @@
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
+{% load design_icons %}
 
 {% block title %}Blanco resultaat{% endblock %}
 
@@ -49,11 +50,17 @@
                                 <span>{{ obj.ver }}</span>
                             {% endif %}
                         </td>
-                        <td class="center hide-on-small-only">{% if obj.geen_ver %}<span class="sv-rood-text">-</span>{% else %}{{ obj.regio_nr }} (Rayon {{ obj.rayon_nr}}){% endif %}</td>
+                        <td class="center hide-on-small-only">
+                            {% if obj.geen_ver %}
+                                <span class="sv-rood-text">-</span>
+                            {% else %}
+                                <span>{{ obj.regio_nr }} (Rayon {{ obj.rayon_nr}})</span>
+                            {% endif %}
+                        </td>
                         <td class="right-align">
                             {% if obj.url %}
                                 <a class="btn-sv-rood modal-trigger" href="#bevestig_{{ obj.pk }}">
-                                    <i class="notranslate material-symbol">fast_forward</i>
+                                    {% sv-icon 'comp blanco resultaat' %}
                                 </a>
                             {% endif %}
                         </td>

@@ -5,6 +5,7 @@
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
+{% load design_icons %}
 
 {% block title %}BK teams{% endblock %}
 
@@ -67,26 +68,26 @@
                 </tr>
 
                 <tr>
-                    <td class="center"><i class="green-text in-table-icon notranslate material-symbol">check</i></td>
+                    <td class="center">{% sv-icon 'comp kamp selectie status bevestigd' use='text' kleur='groen' %}</td>
                     <td class="green-text">Deelname aangemeld</td>
                     <td class="center">{{ aantal_aangemeld }}</td>
                 </tr>
 
                 <tr>
-                    <td class="center"><i class="sv-blauw-text in-table-icon notranslate material-symbol">help</i></td>
+                    <td class="center">{% sv-icon 'comp kamp selectie status onbekend' use='text' kleur='blauw' %}</td>
                     <td class="sv-blauw-text">Onbekend</td>
                     <td class="center">{{ aantal_onbekend }}</td>
                 </tr>
 
                 <tr>
-                    <td class="center"><i class="grey-text in-table-icon notranslate material-symbol">block</i></td>
+                    <td class="center">{% sv-icon 'comp kamp selectie status afgemeld' use='text' kleur='grijs' %}</td>
                     <td class="grey-text">Afgemeld</td>
                     <td class="center">{{ aantal_afgemeld }}</td>
                 </tr>
 
                 {% if aantal_attentie %}
                     <tr>
-                        <td class="center"><i class="sv-rood-text in-table-icon notranslate material-symbol">warning</i></td>
+                        <td class="center">{% sv-icon 'comp kamp selectie status attentie' use='text' kleur='rood' %}</td>
                         <td class="sv-rood-text">Attentie</td>
                         <td class="center">{{ aantal_attentie }}</td>
                     </tr>

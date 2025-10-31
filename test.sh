@@ -7,7 +7,7 @@
 ARGS=("$@")
 #for idx in "${!ARGS[@]}"; do echo "ARGS[$idx]=${ARGS[$idx]}"; done
 
-COV_AT_LEAST=97.0
+COV_AT_LEAST=97.1
 RED="\e[31m"
 RESET="\e[0m"
 TEST_DIR="./Site/tmp_test_data"
@@ -157,6 +157,9 @@ then
     # collect browser coverage at start of test-all
     echo "[INFO] Running JS browser tests"
     ./browser_tests.sh --auto
+    RES=$?
+    echo "[DEBUG] browser_test.sh exit status is $RES"
+    [ $RES -eq 0 ] || exit 1
 fi
 
 # create empty test data directories

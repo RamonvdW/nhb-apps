@@ -5,6 +5,8 @@
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
+{% load design_icons %}
+{% load design_knop %}
 
 {% block title %}BK selectie{% endblock %}
 
@@ -32,26 +34,34 @@
                 </tr>
 
                 <tr>
-                    <td class="center"><i class="sv-blauw-text in-table-icon notranslate material-symbol">help</i></td>
+                    <td class="center">
+                        {% sv-icon 'comp kamp selectie status onbekend' use='text' kleur='blauw' %}
+                    </td>
                     <td class="sv-blauw-text">Onbekend</td>
                     <td class="center">{{ aantal_onbekend }}</td>
                 </tr>
 
                 <tr>
-                    <td class="center"><i class="green-text in-table-icon notranslate material-symbol">check</i></td>
+                    <td class="center">
+                        {% sv-icon 'comp kamp selectie status bevestigd' use='text' kleur='groen' %}
+                    </td>
                     <td class="green-text">Deelname bevestigd</td>
                     <td class="center">{{ aantal_bevestigd }}</td>
                 </tr>
 
                 <tr>
-                    <td class="center"><i class="grey-text in-table-icon notranslate material-symbol">block</i></td>
+                    <td class="center">
+                        {% sv-icon 'comp kamp selectie status afgemeld' use='text' kleur='grijs' %}
+                    </td>
                     <td class="grey-text">Afgemeld</td>
                     <td class="center">{{ aantal_afgemeld }}</td>
                 </tr>
 
                 {% if aantal_attentie %}
                     <tr>
-                        <td class="center"><i class="sv-rood-text in-table-icon notranslate material-symbol">warning</i></td>
+                        <td class="center">
+                            {% sv-icon 'comp kamp selectie status attentie' use='text' kleur='rood' %}
+                        </td>
                         <td class="sv-rood-text">Attentie</td>
                         <td class="center">{{ aantal_attentie }}</td>
                     </tr>
@@ -67,8 +77,7 @@
             <p>In elke klasse wordt met maximaal 48 sporters gewerkt</p>
             {% if url_download %}
                 <p>
-                    <a class="btn-sv-rood" href="{{ url_download }}">
-                        <i class="notranslate material-symbol left">download</i>BK selectie bestand</a>
+                    {% sv-knop-nav url=url_download icon='download' tekst='BK selectie bestand' %}
                 </p>
             {% endif %}
         </div>
@@ -127,20 +136,20 @@
                             <span>{{ obj.notitie_str|linebreaksbr }}</span>
                         </td>
 
-                        {% if not obj.bij_vereniging %}
-                            <td class="center"><i class="sv-rood-text in-table-icon notranslate material-symbol">warning</i></td>
-                        {% elif obj.deelname == 'J' %}
-                            <td class="center"><i class="green-text in-table-icon notranslate material-symbol">check</i></td>
-                        {% elif obj.deelname == 'N' %}
-                            <td class="center"><i class="grey-text in-table-icon notranslate material-symbol">block</i></td>
-                        {% else %}
-                            <!-- onbekend -->
-                            <td class="center"><i class="sv-blauw-text in-table-icon notranslate material-symbol">help</i></td>
-                        {% endif %}
+                        <td class="center">
+                            {% if not obj.bij_vereniging %}
+                                {% sv-icon 'comp kamp selectie status attentie' use='text' kleur='rood' %}
+                            {% elif obj.deelname == 'J' %}
+                                {% sv-icon 'comp kamp selectie status bevestigd' use='text' kleur='groen' %}
+                            {% elif obj.deelname == 'N' %}
+                                {% sv-icon 'comp kamp selectie status afgemeld' use='text' kleur='grijs' %}
+                            {% else %}
+                                {% sv-icon 'comp kamp selectie status onbekend' use='text' kleur='blauw' %}
+                            {% endif %}
+                        </td>
 
                         <td>
-                            <a class="btn-sv-rood" href="{{ obj.url_wijzig }}">
-                                <i class="notranslate material-symbol">edit</i></a>
+                            {% sv-knop-nav url=obj.url_wijzig icon='aanpassen' tekst='' %}
                         </td>
                     </tr>
 

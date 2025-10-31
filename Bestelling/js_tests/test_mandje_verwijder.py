@@ -32,7 +32,6 @@ class TestBrowserBestellingMandjeVerwijder(MyMgmtCommandHelper, bh.BrowserTestCa
         if not knop:            # pragma: no cover
             self.fail('Kan knop "Leg in mijn mandje" niet vinden')
 
-        print('click')
         self.click_not_blocking(knop)
         # click handler JS script heeft een POST gedaan
         # de POST handler maakt een mutatie record voor de achtergrond taak
@@ -41,14 +40,10 @@ class TestBrowserBestellingMandjeVerwijder(MyMgmtCommandHelper, bh.BrowserTestCa
         # maar de URL is nog steeds die van de webwinkel
 
         # geef de achtergrondtaak wat tijd
-        print('sleep begin')
         time.sleep(2.0)     # 1.0 is te kort!
-        print('sleep klaar')
 
         c2 = BestellingMutatie.objects.count()
         if c1 == c2:        # pragma: no cover
-            #page = self.get_page_html()
-            print('geen mutatie gevonden. page:\n%s' % page)
             self.fail('geen mutatie gevonden')
 
         # ga naar het mandje

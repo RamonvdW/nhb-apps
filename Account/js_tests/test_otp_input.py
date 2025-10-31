@@ -22,10 +22,10 @@ class TestBrowserBondspasOphalen(bh.BrowserTestCase):
         self.do_login()
 
         # zorg dat we ingelogd zijn
-        self.do_login()
+        self.do_login()     # navigeert al naar OTP controle check
 
         # OTP controle dialoog oproepen
-        self.do_navigate_to(self.url_otp_controle)
+        self.do_navigate_to(self.url_otp_controle, max_tries=1, may_fail=True)
         self.assertEqual(self._driver.title, 'Controle tweede factor MijnHandboogsport')
 
         # check dat er geen inlaad fouten waren

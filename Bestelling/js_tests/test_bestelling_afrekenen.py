@@ -88,7 +88,7 @@ class TestBrowserBestellingAfrekenen(MyMgmtCommandHelper, bh.BrowserTestCase):
         bestelling.betaal_mutatie = None
         bestelling.status = BESTELLING_STATUS_BETALING_ACTIEF
         bestelling.save(update_fields=['betaal_mutatie', 'status'])
-        self.do_navigate_to(betaal_url)
+        self.do_navigate_to(betaal_url, allow_same=True)
         time.sleep(0.5)        # eerste status check is na 250ms
         el_bericht = self.find_element_by_id('id_bericht')
         self.assertEqual(el_bericht.text, 'Er is een probleem opgetreden met deze bestelling')
@@ -96,7 +96,7 @@ class TestBrowserBestellingAfrekenen(MyMgmtCommandHelper, bh.BrowserTestCase):
         # betaling nieuw --> geannuleerd --> geeft 404 + exception in JSON parsing in JS
         bestelling.status = BESTELLING_STATUS_NIEUW
         bestelling.save(update_fields=['status'])
-        self.do_navigate_to(betaal_url)
+        self.do_navigate_to(betaal_url, allow_same=True)
         bestelling.status = BESTELLING_STATUS_GEANNULEERD
         bestelling.save(update_fields=['status'])
         time.sleep(1.5)         # eerste status check is na 250ms, daarna herhaling na 1 sec
@@ -107,7 +107,7 @@ class TestBrowserBestellingAfrekenen(MyMgmtCommandHelper, bh.BrowserTestCase):
         self.set_short_xhr_timeouts()
         bestelling.status = BESTELLING_STATUS_NIEUW
         bestelling.save(update_fields=['status'])
-        self.do_navigate_to(betaal_url)
+        self.do_navigate_to(betaal_url, allow_same=True)
         time.sleep(0.5)     # eerste check wordt na 250ms gedaan
 
         # controleer dat er geen meldingen van de browser zijn over de JS bestanden

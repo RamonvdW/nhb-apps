@@ -156,9 +156,14 @@ class TestBrowser(LiveServerTestCase, metaclass=AddFocus):
         self.init_before_first_test = True
 
         print('js_tests modules found: %s' % len(test_modules))
-        for test_module in test_modules:
-            self._run_module_tests(test_module)
-        # for
+        try:
+            for test_module in test_modules:
+                self._run_module_tests(test_module)
+            # for
+        except NoSuchElementException as exc:
+            html = self._driver.get_page_html()
+            print('html: %s' % html)
+            self.fail('Selenium.NoSuchElementException: %s' % exc)
 
         print('ran %s js tests ...' % self._test_count, end='')
 

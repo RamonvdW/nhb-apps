@@ -358,7 +358,7 @@ class BrowserTestCase(TestCase):
         # while
         return self._driver.current_url.replace(self.live_server_url, '')
 
-    def do_navigate_to(self, url, check_console_log=True):
+    def do_navigate_to(self, url, check_console_log=True, max_tries=5, may_fail=False, allow_same=False):
         if check_console_log:
             # capture console output before loading a new page
             self.assert_no_console_log()
@@ -377,7 +377,25 @@ class BrowserTestCase(TestCase):
         t1 = time.time()
         if self.show_browser:                   # pragma: no cover
             print('do_navigate_to:', url)
-        self._driver.get(self.live_server_url + url)        # get() blocks until page is "loaded"
+
+        old_title = self._driver.title
+        old_url = self._driver.current_url
+        new_url = self.live_server_url + url
+
+        if new_url != old_url or allow_same:
+            for lp in range(max_tries):
+                self._driver.get(new_url)        # get() should block until page is "loaded"
+                if self._driver.title != old_title:
+                    break
+            # for
+
+            if self._driver.title == old_title and self._driver.current_url == old_url:
+                if not (allow_same or may_fail):
+                    msg = '{do_navigate_to} failed to navigate to %s (tried 5 times).' % repr(new_url)
+                    msg += ' Title remains %s' % repr(old_title)
+                    msg += ' and current_url remains %s' % repr(old_url)
+                    self.fail(msg)
+
         t2 = time.time()
         if t2 - t1 > 1:                         # pragma: no cover
             # dat duurde meer dan 1 seconde
@@ -452,7 +470,7 @@ class BrowserTestCase(TestCase):
             return
 
         # ga naar de uitloggen pagina
-        self.do_navigate_to(self.url_logout, check_console_log=False)
+        self.do_navigate_to(self.url_logout, check_console_log=False, max_tries=1, may_fail=True)
 
         if self._driver.title == 'Uitloggen':
             # we zijn op de uitloggen pagina beland
@@ -472,15 +490,17 @@ class BrowserTestCase(TestCase):
         # wissel naar rol HWL
         self.do_pass_otp()
         if self._driver.title != 'Kies je rol':
-            print('{do_wissel_naar_hwl} titel was %s. Ga naar wissel naar rol' % self._driver.title)
+            if self.show_browser:  # pragma: no cover
+                print('{do_wissel_naar_hwl} titel was %s. Ga naar wissel naar rol' % self._driver.title)
             self.do_navigate_to(self.url_wissel_van_rol, check_console_log=False)
         page = radio = ""
+        hwl_id = 'id_eigen_%s' % self.functie_hwl.pk        # radio button voor HWL
         try:
-            radio = self.find_element_by_id('id_eigen_%s' % self.functie_hwl.pk)    # radio button voor HWL
+            radio = self.find_element_by_id(hwl_id)
         except NoSuchElementException:
             page = self.get_page_html()
         if page:
-            self.fail('[ERROR] Failed to find radiobutton for HWL role! page:\n%s' % page)
+            self.fail('[ERROR] Failed to find radiobutton for HWL role (id=%s)! page:\n%s' % (repr(hwl_id), page))
         self.get_following_sibling(radio).click()
         self.find_element_by_id('activeer_eigen').click()       # activeer knop
         self.wait_until_url_not(self.url_wissel_van_rol)        # redirect naar /vereniging/
@@ -489,7 +509,8 @@ class BrowserTestCase(TestCase):
         # wissel naar rol Manager MH
         self.do_pass_otp()
         if self._driver.title != 'Kies je rol':
-            print('{do_wissel_naar_bb} titel was %s. Ga naar wissel naar rol' % self._driver.title)
+            if self.show_browser:  # pragma: no cover
+                print('{do_wissel_naar_bb} titel was %s. Ga naar wissel naar rol' % self._driver.title)
             self.do_navigate_to(self.url_wissel_van_rol)
         radio = self.find_element_by_id('id_eigen_90002')       # radio button voor Manager MH
         self.get_following_sibling(radio).click()
@@ -500,7 +521,8 @@ class BrowserTestCase(TestCase):
         # wissel naar rol Sporter
         self.do_pass_otp()
         if self._driver.title != 'Kies je rol':
-            print('{do_wissel_naar_sporter} titel was %s. Ga naar wissel naar rol' % self._driver.title)
+            if self.show_browser:  # pragma: no cover
+                print('{do_wissel_naar_sporter} titel was %s. Ga naar wissel naar rol' % self._driver.title)
             self.do_navigate_to(self.url_wissel_van_rol)
         radio = self.find_element_by_id('id_eigen_90000')       # radio button voor Sporter
         self.get_following_sibling(radio).click()
