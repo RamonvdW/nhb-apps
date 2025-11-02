@@ -22,7 +22,8 @@ register = template.Library()
 
 @register.simple_tag(name='sv-knop-nav')
 @functools.cache
-def sv_knop_nav(kleur='rood', icon='', tekst='##BUG', url='', smal=False, extra_class='', extra_style=''):
+def sv_knop_nav(url='', kleur='rood', icon='', tekst='##BUG', knop_id='',
+                smal=False, extra_class='', extra_style=''):
 
     if kleur == 'rood':
         a_class = 'btn-sv-rood'
@@ -34,6 +35,9 @@ def sv_knop_nav(kleur='rood', icon='', tekst='##BUG', url='', smal=False, extra_
 
     new_text = '<a class="%s" href="%s"' % (a_class, url)
 
+    if knop_id:
+        new_text += ' id="%s"' % knop_id
+
     if smal:
         if extra_style:
             extra_style += ';'
@@ -44,15 +48,16 @@ def sv_knop_nav(kleur='rood', icon='', tekst='##BUG', url='', smal=False, extra_
 
     new_text += '>\n'
 
-    new_text += '<span style="display:inline-block; vertical-align:text-bottom; height:24px'
+    if icon:
+        new_text += '<span style="display:inline-block; vertical-align:text-bottom; height:24px'
 
-    if tekst:
-        new_text += '; padding-right:10px'
+        if tekst:
+            new_text += '; padding-right:10px'
 
-    new_text += '">\n'
+        new_text += '">\n'
 
-    new_text += sv_icon(icon, kleur='wit', use='button')
-    new_text += '</span>\n'
+        new_text += sv_icon(icon, kleur='wit', use='button')
+        new_text += '</span>\n'
 
     new_text += tekst
     new_text += '</a>\n'
@@ -111,6 +116,23 @@ def sv_knop_ext(kleur='rood', icon='open url', tekst='tbd', url='', extra_stijl=
     new_text += '</a>\n'
 
     return mark_safe(new_text)
+
+
+@register.simple_tag(name='sv-knop-modal')
+@functools.cache
+def sv_knop_modal(id_prefix, id_specific, kleur='rood', icon='', tekst='##BUG', extra_class='', extra_style=''):
+    """ knop om een modal dialog box mee op te roepen
+
+        href wordt: '#' + id_prefix + id_specific
+
+    """
+
+    url = '#%s%s' % (id_prefix, id_specific)
+    if extra_class:
+        extra_class += ' '
+    extra_class += ' modal-trigger'
+
+    return sv_knop_nav(url=url, kleur=kleur, icon=icon, tekst=tekst, extra_class=extra_class, extra_style=extra_style)
 
 
 # end of file

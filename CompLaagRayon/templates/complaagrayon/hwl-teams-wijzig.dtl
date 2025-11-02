@@ -6,6 +6,7 @@
 {% endcomment %}
 {% load static %}
 {% load design_icons %}
+{% load design_knop %}
 
 {% block title %}Wijzig team{% endblock %}
 
@@ -85,8 +86,7 @@
         <div class="row center">
             <div class="col s12">
                 <h5>Niet meer nodig?</h5>
-
-                <a class="btn-sv-blauw modal-trigger" href="#bevestig_verwijder_team">Verwijder dit team</a>
+                {% sv-knop-modal 'bevestig_verwijder_team' '' kleur='blauw' icon='verwijder' tekst='Verwijder dit team' %}
             </div>
         </div>
 

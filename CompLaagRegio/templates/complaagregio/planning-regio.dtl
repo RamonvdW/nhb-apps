@@ -5,6 +5,7 @@
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
+{% load design_icons %}
 
 {% block title %}Planning{% endblock %}
 
@@ -132,7 +133,8 @@
                             <form action="{{ url_nieuwe_week }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
                                 {% csrf_token %}
                                 <button class="btn-sv-rood" id="submit_knop" type="submit">
-                                    <i class="notranslate material-symbol">add</i></button>
+                                    {% sv-icon-op-button 'toevoegen' %}
+                                </button>
                             </form>
                         </td>
                     </tr>

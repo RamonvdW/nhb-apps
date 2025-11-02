@@ -56,9 +56,8 @@
                         <td class="center">{{ obj.gemiddelde }}</td>
                         <td class="right-align">
                             {% if obj.url %}
-                                {% with "#bevestig_{{ obj.pk }}" as url %}
-                                    {% sv-knop-nav extra_class='modal-trigger' url=url icon='toevoegen' tekst='' %}
-                                {% endwith %}
+                                <!-- obj.url wordt door de modal dialog gebruikt -->
+                                {% sv-knop-modal 'bevestig_' obj.pk icon='toevoegen' tekst='' %}
                             {% endif %}
                         </td>
                     </tr>

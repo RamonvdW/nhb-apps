@@ -127,8 +127,7 @@
                 <p>Deelname-status voor de geselecteerde sporters + maximaal 8 reserves</p>
                 {% if url_download %}
                     <p>
-                        <a class="btn-sv-rood" href="{{ url_download }}">
-                            <i class="notranslate material-symbol left">download</i>RK selectie bestand</a>
+                        {% sv-knop-nav url=url_download icon='download' tekst='RK selectie bestand' %}
                     </p>
                 {% endif %}
             </div>

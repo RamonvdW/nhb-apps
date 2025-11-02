@@ -6,6 +6,7 @@
 {% endcomment %}
 {% load static %}
 {% load design_filters %}   <!-- highlight filter -->
+{% load design_knop %}
 
 {% block title %}Wijzig beheerder{% endblock %}
 
@@ -72,8 +73,7 @@
                             <td>{{ account.geo_beschrijving }}</td>
                             <td class="sv-rood-text">{{ account.let_op }}</td>
                             <td class="center">
-                                <a class="btn-sv-rood modal-trigger" href="#bevestig_ontkoppel_{{ account.pk }}">
-                                    <i class="notranslate material-symbol left">delete</i>Verwijder</a>
+                                {% sv-knop-modal 'bevestig_ontkoppel_' account.pk icon='verwijder' tekst='Verwijder' %}
 
                                 <!-- modal dialog voor deze specifieke beheerder -->
                                 <div class="modal" id="bevestig_ontkoppel_{{ account.pk }}">

@@ -5,6 +5,7 @@
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
+{% load design_icons %}
 
 {% block title %}Wijzig sessies{% endblock %}
 
@@ -101,7 +102,8 @@
                                 {% csrf_token %}
                                 <input type="hidden" name="nieuwe_sessie" value="1">
                                 <button class="btn-sv-rood" id="submit_knop" type="submit">
-                                    <i class="notranslate material-symbol">add</i></button>
+                                    {% sv-icon-op-button 'toevoegen' %}
+                                </button>
                             </form>
                         </td>
                     </tr>

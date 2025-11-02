@@ -5,6 +5,8 @@
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
+{% load design_icons %}
+{% load design_knop %}
 
 {% block title %}RK programma{% endblock %}
 
@@ -102,8 +104,7 @@
                                 <td colspan="6" class="center">
                                     <h5>{{ deelnemer.indiv_klasse.beschrijving }}</h5>
                                     <br>
-                                    <a class="btn-sv-rood" href="{{ deelnemer.url_download_indiv }}">
-                                        <i class="notranslate material-symbol left">download</i>Download excel</a>
+                                    {% sv-knop-nav url=deelnemer.url_download_indiv icon='download' tekst='Download excel' %}
                                 </td>
                             </tr>
 
@@ -123,9 +124,12 @@
                             <td>[{{ deelnemer.lid_nr }}] {{ deelnemer.volledige_naam }}</td>
                             <td class="center">{{ deelnemer.gemiddelde_str }}</td>
                             <td class="center">
-                                {% if deelnemer.deelname == 'J' %}<i class="notranslate material-symbol green-text">check</i>
-                                {% elif deelnemer.deelname == 'N' %}<i class="notranslate material-symbol grey-text">block</i>     <!-- are excluded -->
-                                {% else %}<i class="notranslate material-symbol sv-blauw-text">help</i>
+                                {% if deelnemer.deelname == 'J' %}
+                                    {% sv-icon 'comp kamp selectie status bevestigd' kleur='groen' %}
+                                {% elif deelnemer.deelname == 'N' %}
+                                    {% sv-icon 'comp kamp selectie status afgemeld' kleur='grijs' %}
+                                {% else %}
+                                    {% sv-icon 'comp kamp selectie status onbekend' kleur='blauw' %}
                                 {% endif %}
                             </td>
                             <td>{{ deelnemer.kampioen_label|linebreaksbr }}</td>
@@ -179,8 +183,7 @@
                             <tr class="sv-table-sectie-header">
                                 <td colspan="5" class="center">
                                     <h5>{{ team.team_klasse.beschrijving }}</h5>
-                                    <a class="btn-sv-rood" href="{{ team.url_download_teams }}">
-                                        <i class="notranslate material-symbol left">download</i>Download excel</a>
+                                    {% sv-knop-nav url=team.url_download_teams icon='download' tekst='Download excel' %}
                                 </td>
                             </tr>
                             <tr>

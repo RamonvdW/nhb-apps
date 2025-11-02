@@ -48,7 +48,8 @@
 
                     <p class="center-align">
                         <button class="btn-sv-rood" id="submit_knop" type="submit">
-                            {% sv-icon 'email' %}Verstuur e-mail</button>
+                            {% sv-icon-op-button 'email' tekst='Verstuur e-mail' %}
+                        </button>
                     </p>
 
                 </form>

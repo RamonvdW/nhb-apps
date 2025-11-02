@@ -75,20 +75,19 @@
                                 {% sv-knop-nav url=rk_team.url_wijzig icon='aanpassen' tekst='' extra_style='margin-right:10px' %}
                             {% endif %}
                             {% if rk_team.url_koppelen %}
-                                <a class="btn-sv-rood" href="{{ rk_team.url_koppelen }}">
-                                    {% if rk_bk_klassen_vastgesteld %}
-                                        <i class="notranslate material-symbol">visibility</i>
-                                    {% else %}
-                                        <i class="notranslate material-symbol">group</i>
-                                    {% endif %}
-                                </a>
-
+                                {% if rk_bk_klassen_vastgesteld %}
+                                    {% sv-knop-nav url=rk_team.url_koppelen icon='comp kamp team bekijk' tekst='' %}
+                                {% else %}
+                                    {% sv-knop-nav url=rk_team.url_koppelen icon='comp kamp team koppelen' tekst='' %}
+                                {% endif %}
                             {% endif %}
                         </td>
                     </tr>
                 {% empty %}
                     <tr>
-                        <td colspan="7" class="center"><i>{% if url_nieuw_team %}Er zijn nog geen teams{% else %}Er zijn geen teams aangemaakt{% endif %}</i></td>
+                        <td colspan="7" class="center">
+                            <i>{% if url_nieuw_team %}Er zijn nog geen teams{% else %}Er zijn geen teams aangemaakt{% endif %}</i>
+                        </td>
                     </tr>
                 {% endfor %}
 
@@ -96,8 +95,7 @@
                 {% if url_nieuw_team %}
                     <tr>
                         <td colspan="7" class="center">
-                            <a class="btn-sv-rood" href="{{ url_nieuw_team }}">
-                                <i class="notranslate material-symbol">add</i></a>
+                            {% sv-knop-nav url=url_nieuw_team icon='toevoegen' tekst='' %}
                         </td>
                     </tr>
                 {% endif %}

@@ -6,6 +6,7 @@
 {% endcomment %}
 {% load static %}
 {% load design_icons %}
+{% load design_knop %}
 
 {% block title %}BK teams{% endblock %}
 
@@ -143,7 +144,7 @@
                         <td>{{ team.status_str }}</td>
                         <td>
                             {% if url_wijzig %}
-                                <a class="btn-sv-rood modal-trigger" href="#wijzig_{{ team.pk }}">Wijzig</a>
+                                {% sv-knop-modal 'wijzig_' team.pk icon='verwijder' tekst='Wijzig' %}
                             {% endif %}
                         </td>
                     </tr>

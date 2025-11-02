@@ -6,6 +6,7 @@
 {% endcomment %}
 {% load static %}
 {% load design_icons %}
+{% load design_knop %}
 
 {% block title %}Wijzig RK wedstrijd{% endblock %}
 
@@ -232,7 +233,7 @@
     {% elif url_verwijderen %}
 
         <p class="center">
-            <a class="btn-sv-blauw modal-trigger" href="#bevestig_verwijder_wedstrijd">Verwijder deze wedstrijd</a>
+            {% sv-knop-modal 'bevestig_verwijder_wedstrijd' '' kleur='blauw' icon='verwijder' tekst='Verwijder deze wedstrijd' %}
         </p>
 
         <div class="modal" id="bevestig_verwijder_wedstrijd">

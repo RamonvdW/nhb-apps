@@ -111,15 +111,18 @@
                                                     <td>
                                                         {% if alleen_bekijken %}
                                                             {% if obj.geselecteerd %}
-                                                                <i class="notranslate material-symbol left sv-blauw-text">check</i>
+                                                                {% sv-icon 'comp kamp team lid geselecteerd' kleur='blauw' use='text' %}
                                                             {% elif obj.blokkeer %}
-                                                                <i class="notranslate material-symbol left grey-text">square</i>
+                                                                {% sv-icon 'comp kamp team lid blokkeer' kleur='grijs' use='text' %}
                                                             {% else %}
                                                                 <i>reserve</i>
                                                             {% endif %}
                                                         {% else %}
                                                             <label>
-                                                                <input type="checkbox" class="filled-in" name="{{ obj.sel_str }}"{% if obj.geselecteerd %} checked{% endif %}{% if obj.blokkeer %} disabled{% endif %} onchange="gewijzigd()">
+                                                                <input type="checkbox" class="filled-in" name="{{ obj.sel_str }}"
+                                                                        {% if obj.geselecteerd %}checked{% endif %}
+                                                                        {% if obj.blokkeer %}disabled{% endif %}
+                                                                       onchange="gewijzigd()">
                                                                 <span>&nbsp;</span>
                                                             </label>
                                                         {% endif %}
