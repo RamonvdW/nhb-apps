@@ -18,12 +18,12 @@ django==5.2.7
     #   -r requirements.in
 et-xmlfile==2.0.0
     # via openpyxl
-google-api-core==2.27.0
+google-api-core==2.28.1
     # via
     #   google-api-python-client
     #   google-geo-type
     #   google-maps-routing
-google-api-python-client==2.185.0
+google-api-python-client==2.186.0
     # via -r requirements.in
 google-auth==2.41.1
     # via
@@ -34,9 +34,9 @@ google-auth==2.41.1
     #   google-auth-oauthlib
     #   google-geo-type
     #   google-maps-routing
-google-auth-httplib2==0.2.0
+google-auth-httplib2==0.2.1
     # via google-api-python-client
-google-auth-oauthlib==1.2.2
+google-auth-oauthlib==1.2.3
     # via -r requirements.in
 google-geo-type==0.4.0
     # via google-maps-routing
@@ -85,7 +85,7 @@ protobuf==6.33.0
     #   googleapis-common-protos
     #   grpcio-status
     #   proto-plus
-psycopg==3.2.11
+psycopg==3.2.12
     # via -r requirements.in
 pyasn1==0.6.1
     # via
