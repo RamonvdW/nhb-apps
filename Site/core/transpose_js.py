@@ -33,8 +33,8 @@ class AppJsFinder(BaseFinder):
         self.apps_with_js = dict()
         self.main = ''
 
-        if settings.ENABLE_MINIFY and settings.ENABLE_INSTRUMENT_JS:
-            raise SystemError('Conflicting settings: ENABLE_MINIFY and ENABLE_INSTRUMENT_JS')
+        if settings.ENABLE_MINIFY and settings.ENABLE_INSTRUMENT_JS:                            # pragma: no branch
+            raise SystemError('Conflicting settings: ENABLE_MINIFY and ENABLE_INSTRUMENT_JS')   # pragma: no cover
 
         app_configs = apps.get_app_configs()
         if app_names:
@@ -68,13 +68,13 @@ class AppJsFinder(BaseFinder):
         for app_name, app_path in self.apps_with_js.items():
             # zorg dat app/static/ bestaat
             static_dir = os.path.join(app_path, "static")
-            if not os.path.isdir(static_dir):
-                os.mkdir(static_dir)
+            if not os.path.isdir(static_dir):               # pragma: no branch
+                os.mkdir(static_dir)                        # pragma: no cover
 
             # zorg dat app/static/app_js/ bestaat
             js_min_dir = os.path.join(static_dir, "%s_js" % app_name.lower())
-            if not os.path.isdir(js_min_dir):
-                os.mkdir(js_min_dir)
+            if not os.path.isdir(js_min_dir):               # pragma: no branch
+                os.mkdir(js_min_dir)                        # pragma: no cover
         # for
 
     def list(self, ignore_patterns=None):

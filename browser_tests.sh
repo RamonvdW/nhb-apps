@@ -132,7 +132,7 @@ then
 fi
 
 # set high performance
-powerprofilesctl set performance
+#powerprofilesctl set performance
 
 echo "[INFO] Capturing output in $LOG"
 # --pid=$$ means: stop when parent stops
@@ -260,7 +260,7 @@ pkill -f websim_betaal
 pkill -f websim_mailer
 
 # restore performance mode
-powerprofilesctl set balanced
+#powerprofilesctl set balanced
 
 if [ $ASK_LAUNCH -ne 0 ]
 then

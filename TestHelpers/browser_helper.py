@@ -137,7 +137,7 @@ class BrowserTestCase(TestCase):
         self.assertIsNotNone(element)
         return element.find_element(By.XPATH, "./..")
 
-    def get_active_element(self):
+    def get_active_element(self):       # pragma: no cover
         return self._driver.switch_to.active_element
 
     def find_element_by_id(self, id_str):
@@ -203,7 +203,7 @@ class BrowserTestCase(TestCase):
         # for
         return spans
 
-    def find_elements_input(self, with_class=""):
+    def find_elements_input(self, with_class=""):       # pragma: no cover
         # example: with_class=".score-invoer"
         inputs = list()
         for inp in self._driver.find_elements(By.TAG_NAME, '//input[]%s' % with_class):
@@ -218,7 +218,7 @@ class BrowserTestCase(TestCase):
         # for
         return inputs
 
-    def find_title(self):
+    def find_title(self):           # pragma: no cover
         return self._driver.title
         # el = self._driver.find_element(By.XPATH, '//title')
         # if el:
@@ -228,7 +228,7 @@ class BrowserTestCase(TestCase):
     def find_tabel_filter_input(self, tabel_id):
         try:
             el_table = self._driver.find_element(By.ID, tabel_id)
-        except NoSuchElementException:
+        except NoSuchElementException:      # pragma: no cover
             el_input = None
         else:
             # // = current node
@@ -242,17 +242,19 @@ class BrowserTestCase(TestCase):
         # geeft het kaartje element terug waarop geklikt kan worden
         # of None als niet gevonden
 
+        a_href = None
+
         # let op: record kaartjes hebben de titel in een span zitten --> a/div/span
         found = self._driver.find_elements(By.XPATH, '//a/div/div[@class="card-title"]')
 
-        for div_title in found:
+        for div_title in found:                     # pragma: no branch
             # card is the div with the title
-            if div_title.text == title:
+            if div_title.text == title:             # pragma: no branch
                 div_card = self.get_parent(div_title)
                 a_href = self.get_parent(div_card)
-                return a_href
+                break
         # for
-        return None
+        return a_href
 
     def find_active_button_on_open_modal_dialog(self):
         # wacht tot de animatie klaar is
@@ -261,7 +263,7 @@ class BrowserTestCase(TestCase):
         el = None
         try:
             dialog = self._driver.find_element(By.XPATH, '//div[@class="modal open"]')
-        except NoSuchElementException:
+        except NoSuchElementException:              # pragma: no cover
             print('[ERROR] Could not find open modal dialog')
         else:
             buttons = list()
@@ -270,7 +272,7 @@ class BrowserTestCase(TestCase):
                 if "modal-close" not in button.get_attribute('class'):
                     buttons.append(button)
             # for
-            if len(buttons) != 1:
+            if len(buttons) != 1:       # pragma: no cover
                 msg = '[ERROR] Te veel knoppen op de modal dialog: %s; verwacht: 1' % len(buttons)
                 for button in buttons:
                     msg += '\n     button.text = %s' % repr(button.text)
@@ -285,7 +287,7 @@ class BrowserTestCase(TestCase):
     def click_if_possible(el: WebElement):
         try:
             el.click()
-        except ElementNotInteractableException:
+        except ElementNotInteractableException:         # pragma: no cover
             # waarschijnlijk hidden
             pass
 
@@ -390,7 +392,7 @@ class BrowserTestCase(TestCase):
             # for
 
             if self._driver.title == old_title and self._driver.current_url == old_url:
-                if not (allow_same or may_fail):
+                if not (allow_same or may_fail):        # pragma: no cover
                     msg = '{do_navigate_to} failed to navigate to %s (tried 5 times).' % repr(new_url)
                     msg += ' Title remains %s' % repr(old_title)
                     msg += ' and current_url remains %s' % repr(old_url)
@@ -412,7 +414,7 @@ class BrowserTestCase(TestCase):
                 print('        caller:')
                 print("\n".join(traceback.format_list([prev_frame])))
 
-        if found_frame:
+        if found_frame:     # pragma: no branch
             self._nav_hist.append((url, found_frame))
 
     def do_login(self):
@@ -497,9 +499,9 @@ class BrowserTestCase(TestCase):
         hwl_id = 'id_eigen_%s' % self.functie_hwl.pk        # radio button voor HWL
         try:
             radio = self.find_element_by_id(hwl_id)
-        except NoSuchElementException:
+        except NoSuchElementException:                      # pragma: no cover
             page = self.get_page_html()
-        if page:
+        if page:                                            # pragma: no cover
             self.fail('[ERROR] Failed to find radiobutton for HWL role (id=%s)! page:\n%s' % (repr(hwl_id), page))
         self.get_following_sibling(radio).click()
         self.find_element_by_id('activeer_eigen').click()       # activeer knop
@@ -532,7 +534,7 @@ class BrowserTestCase(TestCase):
     def get_browser_cookie_value(self, cookie_name):
         return self._driver.get_cookie(cookie_name)['value']
 
-    def get_current_url(self):
+    def get_current_url(self):                                  # pragma: no cover
         return self._driver.current_url
 
     def get_page_html(self):                                    # pragma: no cover

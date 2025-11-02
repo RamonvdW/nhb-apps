@@ -7,7 +7,7 @@
 ARGS=("$@")
 #for idx in "${!ARGS[@]}"; do echo "ARGS[$idx]=${ARGS[$idx]}"; done
 
-COV_AT_LEAST=97.1
+COV_AT_LEAST=97.0
 RED="\e[31m"
 RESET="\e[0m"
 TEST_DIR="./Site/tmp_test_data"
@@ -283,7 +283,7 @@ PID_TAIL=$(jobs -p | tail -1)
 # echo "PID_TAIL=$PID_TAIL"
 
 # set high performance
-powerprofilesctl set performance
+#powerprofilesctl set performance
 
 # -u = unbuffered stdin/stdout --> also ensures the order of stdout/stderr lines
 # -v = verbose

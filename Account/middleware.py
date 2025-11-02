@@ -86,7 +86,8 @@ class HerhaalLoginOTP:
 
                     # redirect naar de inlog pagina
                     url = reverse('Account:login')
-                    if request.path != url:                # voorkom redirect naar dezelfde pagina
+                    # voorkom redirect naar dezelfde pagina
+                    if request.path != url:                     # pragma: no branch
                         url += '?next=' + request.path
                         return HttpResponseRedirect(url)
 

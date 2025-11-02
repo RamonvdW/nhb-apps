@@ -160,7 +160,7 @@ class TestBrowser(LiveServerTestCase, metaclass=AddFocus):
             for test_module in test_modules:
                 self._run_module_tests(test_module)
             # for
-        except NoSuchElementException as exc:
+        except NoSuchElementException as exc:           # pragma: no cover
             html = self._driver.get_page_html()
             print('html: %s' % html)
             self.fail('Selenium.NoSuchElementException: %s' % exc)

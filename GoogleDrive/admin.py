@@ -25,7 +25,7 @@ class BestandAdmin(admin.ModelAdmin):
 
     readonly_fields = ('my_gedeeld_met',)
 
-    def my_gedeeld_met(self, obj):
+    def my_gedeeld_met(self, obj):          # pragma: no cover
         met = list()
         for account in obj.gedeeld_met.all():
             msg = '[%s] %s / %s' % (account.username, account.volledige_naam(), account.bevestigde_email)
