@@ -7,6 +7,7 @@
 {% load static %}
 {% load design_filters %}   <!-- highlight filter -->
 {% load design_icons %}
+{% load design_knop %}
 
 {% block title %}Account activiteit{% endblock %}
 
@@ -124,7 +125,7 @@
                                             <a class="btn-sv-rood" href="{{ obj.url_toon_bondspas }}" style="margin-top:15px; margin-right:20px" target="_blank" rel="noopener noreferrer">Toon Bondspas</a>
                                         {% endif %}
                                         {% if obj.kan_loskoppelen %}
-                                            <a class="btn-sv-blauw modal-trigger" href="#bevestig_reset_tweede_factor_{{ obj.inlog_naam_str }}" style="margin-top:15px">Tweede factor loskoppelen</a>
+                                            {% sv-knop-modal 'bevestig_reset_tweede_factor_' obj.inlog_naam_str kleur='blauw' extra_style='margin-top:15px' tekst='Tweede factor loskoppelen' %}
                                         {% endif %}
                                     </div>
                                 </div>

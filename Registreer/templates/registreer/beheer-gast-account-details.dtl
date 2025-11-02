@@ -6,6 +6,7 @@
 {% endcomment %}
 {% load static %}
 {% load design_filters %}
+{% load design_knop %}
 
 {% block title %}Details{% endblock %}
 
@@ -119,7 +120,7 @@
                 <p>Hieronder volgen mogelijke overeenkomsten met bestaande leden</p>
                 {% if gast.url_ophef %}
                     <p>
-                        <a class="btn-sv-rood modal-trigger" href="#bevestig_opheffen">Opheffen</a>
+                        {% sv-knop-modal 'bevestig_opheffen' '' icon='' tekst='Opheffen' %}
                     </p>
                 {% elif not gast.is_afgewezen %}
                     <p>Ophef score: {{ gast.ophef }}</p>
@@ -216,7 +217,7 @@
             <h4>Gebruik van dit gast-account</h4>
             {% if overzetten_url %}
                 <p>
-                    <a class="btn-sv-rood modal-trigger" href="#bevestig_overzetten">Overzetten naar {{ gast.overzetten_naar_lid_nr }}</a>
+                    {% sv-knop-modal 'bevestig_overzetten' '' icon='' tekst='Overzetten naar'|add:gast.overzetten_naar_lid_nr %}
                 </p>
             {% endif %}
         </div>

@@ -5,6 +5,7 @@
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
+{% load design_knop %}
 
 {% block title %}Evenement locatie details{% endblock %}
 
@@ -132,7 +133,7 @@
                                 <td></td>
                                 <td>
                                     {% if url_verwijder %}
-                                        <a class="btn-sv-blauw modal-trigger" href="#bevestig_verwijder_locatie">Verwijder deze locatie</a>
+                                        {% sv-knop-modal 'bevestig_verwijder_locatie' '' kleur='blauw' icon='verwijder' tekst='Verwijder deze locatie' %}
                                     {% else %}
                                         <button class="btn-sv-blauw" disabled>Verwijder deze locatie</button>
                                     {% endif %}

@@ -5,6 +5,7 @@
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
+{% load design_knop %}
 
 {% block title %}Accommodatie details{% endblock %}
 
@@ -294,7 +295,7 @@
                             {% if url_verwijder_buitenbaan %}
                                 <tr>
                                     <td>
-                                        <a class="btn-sv-blauw modal-trigger" href="#bevestig_verwijder_buitenbaan">Verwijder de buitenbaan</a>
+                                        {% sv-knop-modal 'bevestig_verwijder_buitenbaan' '' kleur='blauw' icon='verwijder' tekst='Verwijder de buitenbaan' %}
                                     </td>
                                     <td></td>
                                 </tr>

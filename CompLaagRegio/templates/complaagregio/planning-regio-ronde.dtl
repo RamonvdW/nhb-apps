@@ -6,6 +6,7 @@
 {% endcomment %}
 {% load static %}
 {% load design_icons %}
+{% load design_knop %}
 
 {% block title %}Weekplanning{% endblock %}
 
@@ -308,7 +309,7 @@
                     {% if heeft_wedstrijden %}
                         <p>Blok kan nu niet verwijderd worden<br>Verwijder eerst de wedstrijden</p>
                     {% else %}
-                        <a class="btn-sv-rood modal-trigger vertrek_knop" href="#bevestig_verwijder_blok">Verwijder dit blok</a>
+                        {% sv-knop-modal 'bevestig_verwijder_blok' '' icon='' tekst='Verwijder dit blok' extra_class='vertrek_knop' %}
                     {% endif %}
                 </div>
             </div>

@@ -173,10 +173,7 @@
                                         {% if deelnemer.url_schietmomenten %}
                                             <br>
                                         {% endif %}
-                                        <a class="multi-btn-sv-blauw modal-trigger" href="#{{ deelnemer.id_afmelden }}">
-                                            <span class="hide-on-small-only">Uitschrijven</span>
-                                            <i class="hide-on-med-and-up material-symbol notranslate">remove</i>
-                                        </a>
+                                        {% sv-knop-modal deelnemer.id_afmelden '' kleur='blauw' icon='sporter afmelden' tekst='Uitschrijven' %}
 
                                         <!-- modal dialog voor deze specifieke competitie -->
                                         <div class="modal" id="{{ deelnemer.id_afmelden }}">
@@ -276,6 +273,7 @@
                                                 <!-- deelname onbekend -->
 
                                                 <!-- vraag om bevestiging deelname -->
+                                                {% sv-knop-modal deelnemer.id_deelname_rk '' icon='' tekst='Geef door' %}
                                                 <a class="multi-btn-sv-rood modal-trigger" href="#{{ deelnemer.id_deelname_rk }}">Geef door</a>
 
                                                 <!-- modal dialog voor deze specifieke competitie -->

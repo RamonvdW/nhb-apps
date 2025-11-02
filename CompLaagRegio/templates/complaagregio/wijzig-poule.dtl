@@ -6,6 +6,7 @@
 {% endcomment %}
 {% load static %}
 {% load design_icons %}
+{% load design_knop %}
 
 {% block title %}Wijzig poule{% endblock %}
 
@@ -106,7 +107,7 @@
 
     {% if mag_koppelen %}
         <p style="margin-left:10px">
-            <a class="btn-sv-blauw modal-trigger" href="#verwijder_poule">Verwijder poule</a>
+            {% sv-knop-modal 'verwijder_poule' '' kleur='blauw' tekst='Verwijder poule' icon='' %}
         </p>
 
         <!-- modal dialog -->

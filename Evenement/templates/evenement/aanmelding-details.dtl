@@ -6,6 +6,7 @@
 {% endcomment %}
 {% load static %}
 {% load design_icons %}
+{% load design_knop %}
 
 {% block title %}Details aanmelding{% endblock %}
 
@@ -99,9 +100,7 @@
                     <tr>
                         <th>Afmelden</th>
                         <td>
-                            <a class="btn-sv-rood modal-trigger" href="#bevestig_afmelden_{{ inschrijving.pk }}">
-                                {% sv-icon 'verwijder' %}
-                            </a>
+                            {% sv-knop-modal 'bevestig_afmelden_' inschrijving.pk icon='verwijder' tekst='' %}
                         </td>
                     </tr>
                 {% endif %}

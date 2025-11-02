@@ -5,6 +5,7 @@
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
+{% load design_knop %}
 
 {% block title %}Regio Teams{% endblock %}
 
@@ -147,8 +148,7 @@
                     {% endif %}
                     {% if team.url_verwijder %}
                         <span>&nbsp;&nbsp;</span>
-                        <a class="btn-sv-blauw modal-trigger" href="#bevestig_verwijder_team_{{ team.pk }}">
-                            <i class="notranslate material-symbol">delete</i></a>
+                        {% sv-knop-modal 'bevestig_verwijder_team_' team.pk kleur='blauw' icon='verwijder' tekst='' %}
 
                         <div class="modal" id="bevestig_verwijder_team_{{ team.pk }}">
                             <div class="modal-content center">

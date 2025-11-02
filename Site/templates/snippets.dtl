@@ -341,7 +341,7 @@
 
     <!-- modal dialog -->
     <p style="margin-left:10px">
-        <a class="btn-sv-rood modal-trigger" href="#bevestig_verwijder_buitenbaan">Verwijder de buitenbaan</a>
+        {% sv-knop-modal 'bevestig_verwijder_buitenbaan' '' kleur='blauw' icon='verwijder' tekst='Verwijder de buitenbaan' %}
 
         {% sv-knop-modal 'bevestig_ontkoppel_' account.pk icon='verwijder' tekst='Verwijder' %}
     </p>

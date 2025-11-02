@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from Design.templatetags.design_knop import sv_knop_nav, sv_knop_mailto, sv_knop_ext
+from Design.templatetags.design_knop import sv_knop_nav, sv_knop_mailto, sv_knop_ext, sv_knop_modal
 
 
 class TestDesignTemplatetags(TestCase):
@@ -28,8 +28,9 @@ class TestDesignTemplatetags(TestCase):
         self.assertTrue('stijl:1' in out)
 
         out = sv_knop_nav(icon='open url', smal=True)
-        out = sv_knop_nav(icon='open url', smal=True, extra_style='stijl:2')
+        out = sv_knop_nav(icon='open url', smal=True, extra_style='stijl:2', knop_id='my_id')
         self.assertTrue('stijl:2' in out)
+        self.assertTrue('id="my_id"' in out)
 
     def test_knop_mailto(self):
         sv_knop_mailto.cache_clear()
@@ -37,7 +38,7 @@ class TestDesignTemplatetags(TestCase):
         self.assertTrue('mailto:to@test.not' in out)
         self.assertTrue('btn-sv-rood' in out)
 
-        out = sv_knop_mailto(email='to@test.not', kleur='blauw')
+        out = sv_knop_mailto(email='to@test.not', kleur='blauw', icon='')
         self.assertTrue('mailto:to@test.not' in out)
         self.assertTrue('btn-sv-blauw' in out)
 
@@ -55,5 +56,12 @@ class TestDesignTemplatetags(TestCase):
         self.assertTrue('href="//test.not"' in out)
         self.assertTrue('btn-sv-blauw' in out)
 
+    def test_knop_modal(self):
+        sv_knop_modal.cache_clear()
+        out = sv_knop_modal('eerste_', 'tweede', tekst='test')
+        self.assertTrue('#eerste_tweede' in out)
+        self.assertTrue('modal-trigger' in out)
+
+        out = sv_knop_modal('eerste_', 'tweede', tekst='test', icon='verwijder', extra_class='test')
 
 # end of file

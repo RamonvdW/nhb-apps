@@ -6,6 +6,7 @@
 {% endcomment %}
 {% load static %}
 {% load design_icons %}
+{% load design_knop %}
 
 {% block title %}Wijzig wedstrijd{% endblock %}
 
@@ -323,7 +324,7 @@
             <div class="col s12">
                 <h4>Verwijderen</h4>
                 <p>
-                    <a class="btn-sv-blauw modal-trigger vertrek_knop" href="#bevestig_verwijder_wedstrijd">Verwijder deze wedstrijd</a>
+                    {% sv-knop-modal 'bevestig_verwijder_wedstrijd' '' icon='' tekst='Verwijder deze wedstrijd' extra_class='vertrek_knop' %}
                 </p>
             </div>
         </div>

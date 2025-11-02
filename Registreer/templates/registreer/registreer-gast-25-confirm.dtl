@@ -5,6 +5,8 @@
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
+{% load design_icons %}
+{% load design_knop %}
 
 {% block title %}Controle{% endblock %}
 
@@ -87,11 +89,11 @@
                     </table>
 
                     <p class="center">
-                        <a class="btn-sv-rood modal-trigger" style="margin:20px" href="#bevestig">
-                            <i class="notranslate material-symbol left">check</i>Bevestig</a>
+                        {% sv-knop-modal 'bevestig' '' icon='opslaan' tekst='Bevestig' extra_style='margin:20px' %}
 
                         <button class="btn-sv-blauw" style="margin:20px" id="submit_knop1" type="submit">
-                            <i class="notranslate material-symbol left">undo</i>Wijzig</button>
+                            {% sv-icon-op-button 'registreer gast wijzig' tekst='Wijzig' %}
+                        </button>
                     </p>
                 </form>
             </div>

@@ -5,6 +5,7 @@
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
+{% load design_knop %}
 
 {% block title %}Details aanmelding{% endblock %}
 
@@ -90,8 +91,7 @@
                     <tr>
                         <th>Afmelden</th>
                         <td>
-                            <a class="btn-sv-rood modal-trigger" href="#bevestig_afmelden_{{ inschrijving.pk }}">
-                                <i class="notranslate material-symbol">delete</i></a>
+                            {% sv-knop-modal 'bevestig_afmelden_' inschrijving.pk icon='verwijder' tekst='' %}
                         </td>
                     </tr>
                 {% endif %}

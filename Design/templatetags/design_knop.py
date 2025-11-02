@@ -130,7 +130,7 @@ def sv_knop_modal(id_prefix, id_specific, kleur='rood', icon='', tekst='##BUG', 
     url = '#%s%s' % (id_prefix, id_specific)
     if extra_class:
         extra_class += ' '
-    extra_class += ' modal-trigger'
+    extra_class += 'modal-trigger'
 
     return sv_knop_nav(url=url, kleur=kleur, icon=icon, tekst=tekst, extra_class=extra_class, extra_style=extra_style)
 
