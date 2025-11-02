@@ -5,6 +5,7 @@
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
+{% load design_knop %}
 
 {% block title %}Extra deelnemer{% endblock %}
 
@@ -55,9 +56,9 @@
                         <td class="center">{{ obj.gemiddelde }}</td>
                         <td class="right-align">
                             {% if obj.url %}
-                                <a class="btn-sv-rood modal-trigger" href="#bevestig_{{ obj.pk }}">
-                                    <i class="notranslate material-symbol">add</i>
-                                </a>
+                                {% with "#bevestig_{{ obj.pk }}" as url %}
+                                    {% sv-knop-nav extra_class='modal-trigger' url=url icon='toevoegen' tekst='' %}
+                                {% endwith %}
                             {% endif %}
                         </td>
                     </tr>

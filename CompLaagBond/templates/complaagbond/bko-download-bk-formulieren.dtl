@@ -5,6 +5,7 @@
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
+{% load design_knop %}
 
 {% block title %}BK programma's{% endblock %}
 
@@ -38,10 +39,8 @@
                         <td>{{ regel.klasse.beschrijving }}</td>
                         <td class="hide-on-small-only">{{ regel.match.datum_wanneer }} om {{ regel.match.tijd_begin_wedstrijd }}</td>
                         <td>
-                            <a class="btn-sv-rood hide-on-med-and-up" href="{{ regel.url }}">
-                                <i class="notranslate material-symbol">download</i></a>
-                            <a class="btn-sv-rood hide-on-small-only" href="{{ regel.url }}">
-                                <i class="notranslate material-symbol left">download</i>Download</a>
+                            {% sv-knop-nav url=regel.url icon='download' tekst='' extra_class='hide-on-med-and-up' %}
+                            {% sv-knop-nav url=regel.url icon='download' tekst='Download' extra_class='hide-on-small-only' %}
                         </td>
                     </tr>
                 {% endfor %}

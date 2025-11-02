@@ -141,7 +141,7 @@
                         <tr>
                             <td class="hide-on-small-only"></td>
                             <td class="right-align">
-                                {% sv-knop-nav kleur="blauw" icon='annuleer bestelling' url='#bevestig_annuleer' extra_class="model-trigger" tekst='' %}
+                                {% sv-knop-nav kleur="blauw" icon='annuleer bestelling' url='#bevestig_annuleer' extra_class="modal-trigger" tekst='' %}
                             </td>
                         </tr>
 

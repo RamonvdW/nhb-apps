@@ -5,6 +5,7 @@
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
+{% load design_icons %}
 
 {% block title %}Inschrijven{% endblock %}
 
@@ -131,7 +132,8 @@
 
                         <p class="center">
                             <button class="btn-sv-rood" id="submit_knop" type="submit">
-                                <i class="notranslate material-symbol left">search</i>Zoek</button>
+                                {% sv-icon-op-button 'zoek' tekst='Zoek' %}
+                            </button>
                         </p>
 
                     </form>
@@ -301,7 +303,8 @@
                                             <td class="center">
                                                 {% if sessie.kan_aanmelden %}
                                                     <button class="btn-sv-rood" id="id_toevoegen_{{ sessie.pk }}_{{ klasse.pk }}" onclick="toevoegen('id_toevoegen_{{ sessie.pk }}_{{ klasse.pk }}')" data-wedstrijd="{{ wed.pk }}" data-sessie="{{ sessie.pk }}" data-klasse="{{ klasse.pk }}" data-sporterboog="{{ geselecteerd.pk }}">
-                                                        <i class="notranslate material-symbol">add</i></button>
+                                                        {% sv-icon-op-button 'toevoegen' %}
+                                                    </button>
                                                 {% else %}
                                                     {% if not sessie.compatible_leeftijd %}<span>(leeftijd)</span><br>{% endif %}
                                                     {% if not sessie.compatible_boog %}<span>(boog)</span><br>{% endif %}

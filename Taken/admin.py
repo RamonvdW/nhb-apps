@@ -67,7 +67,7 @@ class SoortTaakListFilter(admin.SimpleListFilter):
                            .distinct('onderwerp')
                            .values_list('onderwerp', flat=True))
 
-        for onderwerp in onderwerpen:
+        for onderwerp in onderwerpen:           # pragma: no cover
             # afkappen waar mogelijk
             for afkappen in ('Nieuw gast-account', 'Koppel invallers Indoor', 'Koppel invallers 25m 1pijl'):
                 if onderwerp.startswith(afkappen):
