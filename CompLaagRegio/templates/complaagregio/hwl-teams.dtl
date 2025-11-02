@@ -5,6 +5,8 @@
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
+{% load design_icons %}
+{% load design_knop %}
 
 {% block title %}Teams Regio{% endblock %}
 
@@ -70,13 +72,10 @@
 
                         <td>
                             {% if mag_wijzigen %}
-                                <a class="btn-sv-rood" href="{{ team.url_koppelen }}">
-                                    <i class="notranslate material-symbol">group</i></a>
+                                {% sv-knop-nav url=team.url_koppelen icon='comp team koppel leden' tekst='' extra_style='margin-right:15px' %}}">
                             {% endif %}
                             {% if team.url_wijzig %}
-                                <span>&nbsp;&nbsp;</span>
-                                <a class="btn-sv-rood" href="{{ team.url_wijzig }}">
-                                    <i class="notranslate material-symbol">edit</i></a>
+                                {% sv-knop-nav url=team.url_wijzig icon='aanpassen' tekst='' %}
                             {% endif %}
                         </td>
                     </tr>
@@ -95,7 +94,8 @@
                             <form action="{{ url_nieuw_team }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
                                 {% csrf_token %}
                                 <button class="btn-sv-rood" id="submit_knop" type="submit">
-                                    <i class="notranslate material-symbol">add</i></button>
+                                    {% sv-icon-op-button 'toevoegen' %}
+                                </button>
                             </form>
                         </td>
                     </tr>
@@ -136,8 +136,7 @@
                         <td{% if deelnemer.rood_ag %} class="sv-rood-text"{% endif %}>{{ deelnemer.ag_str }}</td>
                         <td>
                             {% if deelnemer.url_wijzig_ag %}
-                                <a class="btn-sv-rood" href="{{ deelnemer.url_wijzig_ag }}">
-                                    <i class="notranslate material-symbol">edit</i></a>
+                                {% sv-knop-nav url=deelnemer.url_wijzig_ag icon='aanpassen' tekst='' %}
                             {% endif %}
                         </td>
                     </tr>

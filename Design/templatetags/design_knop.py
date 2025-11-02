@@ -22,7 +22,7 @@ register = template.Library()
 
 @register.simple_tag(name='sv-knop-nav')
 @functools.cache
-def sv_knop_nav(kleur='rood', icon='', tekst='tbd', url='', smal=False, extra_class='', extra_style=''):
+def sv_knop_nav(kleur='rood', icon='', tekst='##BUG', url='', smal=False, extra_class='', extra_style=''):
 
     if kleur == 'rood':
         a_class = 'btn-sv-rood'
@@ -62,7 +62,7 @@ def sv_knop_nav(kleur='rood', icon='', tekst='tbd', url='', smal=False, extra_cl
 
 @register.simple_tag(name='sv-knop-mailto')
 @functools.cache
-def sv_knop_mailto(kleur='rood', email=''):
+def sv_knop_mailto(kleur='rood', icon='email', email='', tekst=''):
 
     if kleur == 'rood':
         kleur_class = 'btn-sv-rood'
@@ -71,9 +71,12 @@ def sv_knop_mailto(kleur='rood', email=''):
 
     new_text = '<a class="%s" href="mailto:%s">\n' % (kleur_class, email)
 
-    new_text += '<span style="display:inline-block; vertical-align:text-bottom; height:24px">\n'
-    new_text += sv_icon('email', kleur='wit', use='text')
-    new_text += '</span>\n'
+    if icon:
+        new_text += '<span style="display:inline-block; vertical-align:text-bottom; height:24px">\n'
+        new_text += sv_icon('email', kleur='wit', use='text')
+        new_text += '</span>\n'
+
+    new_text += tekst
 
     new_text += '</a>\n'
 

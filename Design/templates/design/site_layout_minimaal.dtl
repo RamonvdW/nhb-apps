@@ -66,7 +66,7 @@
             <h5>Hulp nodig?</h5>
 
             <p>Lukt het niet om het probleem op te lossen? Stuur dan een e-mail naar het volgende adres (druk op de knop om je mailprogramma te starten):</p>
-            <a class="btn-sv-blauw" href="mailto:{{ email_support }}"><i class="notranslate material-symbol left">mail</i>{{ email_support }}</a>
+            {% sv-knop-mailto kleur='blauw' email=email_support tekst=email_support icon='' %}
             <p>Schrijf de volgende informatie in de e-mail:<br>- Je bondsnummer<br>- Datum en tijdstip waarop het probleem ontstond<br>- Beschrijving van je probleem</p>
         </div>
     </body>

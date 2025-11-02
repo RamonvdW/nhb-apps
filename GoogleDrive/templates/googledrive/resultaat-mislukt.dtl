@@ -76,6 +76,6 @@
         </div>
     </div>
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="googledrive-resultaat-gelukt" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="googledrive-resultaat-mislukt" %}
 
 {% endblock %}

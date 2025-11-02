@@ -5,6 +5,7 @@
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
+{% load design_knop %}
 
 {% block title %}RK Teams{% endblock %}
 
@@ -129,8 +130,7 @@
                         <td>{{ team.team_type.beschrijving }}</td>
                         <td class="center">
                             {% if team.url_aanpassen %}
-                                <a class="btn-sv-rood" href="{{ team.url_aanpassen }}">
-                                    <i class="notranslate material-symbol">group</i></a>
+                                {% sv-knop-nav url=team.url_aanpassen icon='comp team koppel leden' tekst='' %}
                             {% endif %}
                             {% if team.url_verwijder %}
                                 <span>&nbsp;&nbsp;</span>

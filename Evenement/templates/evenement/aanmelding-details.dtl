@@ -5,6 +5,7 @@
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
+{% load design_icons %}
 
 {% block title %}Details aanmelding{% endblock %}
 
@@ -99,7 +100,8 @@
                         <th>Afmelden</th>
                         <td>
                             <a class="btn-sv-rood modal-trigger" href="#bevestig_afmelden_{{ inschrijving.pk }}">
-                                <i class="notranslate material-symbol">delete</i></a>
+                                {% sv-icon 'verwijder' %}
+                            </a>
                         </td>
                     </tr>
                 {% endif %}

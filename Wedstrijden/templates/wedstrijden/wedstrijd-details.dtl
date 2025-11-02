@@ -20,8 +20,8 @@
             <h3 class="page-banner">Wedstrijd details</h3>
 
             {% if toon_inschrijven %}
-                <a class="btn-sv-rood" href="#inschrijven">
-                    <i class="material-symbol left notranslate">arrow_downward</i>Inschrijven</a>
+                <!-- knop om naar het onderste stuk van de pagina te springen -->
+                {% sv-knop-nav url='#inschrijven' icon='nav omlaag op pagina' tekst='Inschrijven' %}
             {% else %}
                 <p>Het is niet mogelijk om in te schrijven op deze wedstrijd.</p>
             {% endif %}

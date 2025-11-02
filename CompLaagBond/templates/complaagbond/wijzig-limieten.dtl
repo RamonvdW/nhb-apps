@@ -5,6 +5,7 @@
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
+{% load design_icons %}
 
 {% block title %}BK limieten{% endblock %}
 
@@ -116,7 +117,8 @@
 
         <div style="display: none">
             <button class="btn-sv-float" type="submit" id="submit_knop" disabled>
-                <i class="notranslate material-symbol left">check</i>Wijzigingen opslaan</button>
+                {% sv-icon-op-button 'opslaan' tekst='Wijzigingen opslaan' %}
+            </button>
         </div>
     </form>
 

@@ -32,8 +32,6 @@
 
 from Site.core.settings_base import *         # noqa
 
-# DEBUG = True is required for runserver to serve static files
-DEBUG = True
 
 # disable use of subset files in dev, to simplify introduction of new icons
 USE_SUBSET_FONT_FILES = False
@@ -89,5 +87,9 @@ if ENABLE_DEBUG_TOOLBAR:                            # pragma: no cover
     )
 
 INSTAPTOETS_AANTAL_VRAGEN = 2
+
+# DEBUG = True is required for runserver to serve static files
+DEBUG = True
+
 
 # end of file
