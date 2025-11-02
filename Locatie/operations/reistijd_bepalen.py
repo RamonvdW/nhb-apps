@@ -292,7 +292,7 @@ class ReistijdBepaler(object):
         # na 6 maanden verversen we de reistijd
 
         today = timezone.localtime(timezone.now()).date()
-        oud = today - datetime.timedelta(days=183)
+        oud = today - datetime.timedelta(days=settings.REISTIJD_VERVERSEN_NA_DAGEN)
 
         for reistijd in Reistijd.objects.filter(op_datum__lt=oud):
 
