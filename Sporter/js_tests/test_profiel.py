@@ -37,8 +37,7 @@ class TestBrowserSporterProfiel(bh.BrowserTestCase):
         self.assert_no_console_log()
 
         # uitschrijven voor de regiocompetitie
-        span = self.find_element_type_with_text('span', 'Uitschrijven')
-        knop = self.get_parent(span)
+        knop = self.find_element_type_with_text('a', 'Uitschrijven')
         knop.click()        # opent model dialog
 
         button = self.find_active_button_on_open_modal_dialog()

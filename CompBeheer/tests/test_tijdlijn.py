@@ -33,6 +33,7 @@ class TestCompBeheerTijdlijn(E2EHelpers, TestCase):
         comp = Competitie(
                     begin_jaar=2000,
                     afstand=25,
+                    beschrijving='test',
                     klassengrenzen_vastgesteld=True)
         comp.save()
         comp.refresh_from_db()      # echte datums ipv strings

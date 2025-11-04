@@ -103,8 +103,10 @@
             <table class="sv-kader-tabel" id="table2">
                 <thead>
                     <tr>        <!-- filter veld -->
-                        <td colspan="4" class="table-filter"><input class="table-filter" oninput="tabel_filter(this, 'table2')" placeholder="Zoeken"/></td>
-                        <td></td>
+                        <td colspan="4" class="table-filter">
+                            <input class="table-filter" oninput="tabel_filter(this, 'table2')" placeholder="Zoeken"/>
+                        </td>
+                        <td colspan="2"></td>
                     </tr>
                     <tr>
                         <th data-filter="on">Bonds<wbr>nummer</th>

@@ -52,7 +52,9 @@
                     </tr>
                 {% empty %}
                     <tr>
-                        <td colspan="2"><i>Nog geen keuzes gemaakt</i></td>
+                        <th colspan="{{ blazoenen|length|add:3 }}">
+                            <i>Nog geen keuzes gemaakt</i>
+                        </th>
                     </tr>
                 {% endfor %}
 

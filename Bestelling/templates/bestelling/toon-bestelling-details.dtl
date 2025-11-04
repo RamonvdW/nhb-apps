@@ -86,6 +86,7 @@
                     <tr>
                         <td class="hide-on-small-only"></td>
                         <td class="right-align">GEANNULEERD</td>
+                        <td></td>
                     </tr>
                 {% else %}
                     {% if rest_euro %}

@@ -52,6 +52,7 @@
                         <td>[{{ ver.ver_nr }}]<span class="hide-on-small-only"> {{ ver.naam }}</span></td>
                         <td><!-- blazoen --></td>
                         <td colspan="{{ dagdelen|length }}"></td>
+                        <td><!-- totaal --></td>
                     </tr>
                     {% for blazoen_str, counts_list in ver.blazoen_list %}
                         <tr>

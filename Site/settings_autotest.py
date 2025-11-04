@@ -60,7 +60,7 @@ TEST_VALIDATE_JAVASCRIPT = True
 
 # enable html validation using the Nu Html Checker (v.Nu)
 # WARNING: increases test run duration significantly (triple!)
-#TEST_VALIDATE_HTML = True
+TEST_VALIDATE_HTML = True
 
 # zet minify uit ivm coverage meting van de template files
 # (die kan niet tegen aanpassing ten opzicht van source files)

@@ -258,7 +258,7 @@ def _get_icon_material_symbol(icon_name, icon_height, extra_style, kleur_class):
         svg = svg.replace(' height="48"', '')
         svg = svg.replace(' width="48"', '')
         svg = svg.replace('><path',
-                          ' height="%s" width="%s" style="%s" draggable="false"><path' % (icon_height, icon_height, extra_style))
+                          ' height="%s" width="%s" style="%s"><path' % (icon_height, icon_height, extra_style))
 
         if kleur_class:
             svg = svg.replace('<svg ',
@@ -290,7 +290,7 @@ def _get_icon_sv(icon_name, icon_height, extra_style, kleur_class):
         extra_style += 'min-width:%spx' % icon_height
 
         svg = svg.replace(' viewBox=',
-                          ' height="%s" width="%s" style="%s" draggable="false" viewBox=' % (icon_height, icon_height, extra_style))
+                          ' height="%s" width="%s" style="%s" viewBox=' % (icon_height, icon_height, extra_style))
 
         if kleur_class:
             svg = svg.replace('<svg ',

@@ -35,6 +35,7 @@ class Command(BaseCommand):
             CompetitieTaken.objects.create()
 
         self.taken = CompetitieTaken.objects.first()
+        assert self.taken is not None
 
         self.sporterboog2scores = dict()   # [SporterBoog.pk] = [(afstand, Score), ..]
 
