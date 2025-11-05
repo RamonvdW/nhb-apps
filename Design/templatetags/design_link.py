@@ -25,7 +25,7 @@ def sv_link_ext(url=''):
     new_text = '<a href="%s" target="_blank" rel="noopener noreferrer">\n' % url
 
     new_text += '<span style="display:inline-block; padding-right:10px; vertical-align:bottom; height:21px">\n'
-    new_text += sv_icon(icon_name='open url', kleur='blauw', icon_height=21)  # TODO: 'use'
+    new_text += sv_icon(icon_name='open url', kleur='blauw', use='link')
     new_text += '</span>\n'
 
     new_text += '<code style="vertical-align:center">%s</code>' % filter_wbr_www(url)

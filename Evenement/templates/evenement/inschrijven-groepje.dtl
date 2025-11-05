@@ -5,6 +5,7 @@
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
+{% load design_icons %}
 
 {% block title %}Inschrijven{% endblock %}
 
@@ -81,7 +82,8 @@
 
                         <p class="center">
                             <button class="btn-sv-rood" id="submit_knop1" type="submit">
-                                <i class="notranslate material-symbol left">search</i>Zoek</button>
+                                {% sv-icon-op-button 'zoek' tekst='Zoek' %}
+                            </button>
                         </p>
 
                     </form>
@@ -159,7 +161,8 @@
                                     <span>Al ingeschreven</span>
                                 {% else %}
                                     <button class="btn-sv-rood" id="submit_knop2" type="submit">
-                                        <i class="notranslate material-symbol left">add</i>Kies</button>
+                                        {% sv-icon-op-button 'toevoegen' tekst='Kies' %}
+                                    </button>
                                 {% endif %}
                             </td>
                         </tr>

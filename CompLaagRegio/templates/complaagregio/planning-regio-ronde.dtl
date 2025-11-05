@@ -198,8 +198,7 @@
                         <!-- knop om wedstrijd te wijzigen -->
                         <td class="center">
                             {% if wedstrijd.url_wijzig %}
-                                <a class="btn-sv-rood" href="{{ wedstrijd.url_wijzig }}">
-                                    <i class="notranslate material-symbol">edit</i></a>
+                                {% sv-knop-nav url=wedstrijd.url_wijzig icon='aanpassen' tekst='' %}
                             {% endif %}
                         </td>
                     </tr>

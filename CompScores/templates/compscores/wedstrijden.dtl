@@ -5,6 +5,7 @@
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
+{% load design_knop %}
 
 {% block title %}Bondscompetitie wedstrijden{% endblock %}
 
@@ -61,14 +62,11 @@
                             <!-- knop om uitslagen te zien / in te voeren -->
                             <td>
                                 {% if obj.url_uitslag_aanpassen %}
-                                    <a class="btn-sv-rood" href="{{ obj.url_uitslag_aanpassen }}">
-                                        <i class="notranslate material-symbol left">arrow_forward</i>Aanpassen</a>
+                                    {% sv-knop-nav url=obj.url_uitslag_aanpassen icon='volgende' tekst='Aanpassen' %}
                                 {% elif obj.url_score_invoeren %}
-                                    <a class="btn-sv-rood" href="{{ obj.url_score_invoeren }}">
-                                        <i class="notranslate material-symbol left">arrow_forward</i>Invoeren</a>
+                                    {% sv-knop-nav url=obj.url_score_invoeren icon='volgende' tekst='Invoeren' %}
                                 {% elif obj.url_uitslag_bekijken %}
-                                    <a class="btn-sv-rood" href="{{ obj.url_uitslag_bekijken }}">
-                                        <i class="notranslate material-symbol left">arrow_forward</i>Bekijken</a>
+                                    {% sv-knop-nav url=obj.url_uitslag_bekijken icon='volgende' tekst='Bekijken' %}
                                 {% endif %}
 
                                 {% if obj.toon_nvt %}

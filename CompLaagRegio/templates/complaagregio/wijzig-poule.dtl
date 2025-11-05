@@ -66,7 +66,7 @@
                                                             </label>
                                                         {% else %}
                                                             {% if team.geselecteerd %}
-                                                                <i class="notranslate material-symbol">check</i>
+                                                                {% sv-icon 'checkbox check' use='text' kleur='zwart' %}
                                                             {% endif %}
                                                         {% endif %}
                                                     </td>

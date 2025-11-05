@@ -169,7 +169,8 @@
                     <div style="display:inline-block; margin-left:100px">
                         <!-- click event binding is at eof -->
                         <button id="id_zoek_knop" class="btn-sv-rood">
-                            <i class="notranslate material-symbol left">search</i>Zoek</button>
+                            {% sv-icon-op-button 'zoek' tekst='Zoek' %}
+                        </button>
                     </div>
                 </div>
 
@@ -207,7 +208,8 @@
                     <p class="center">
                         <!-- click event binding is at eof -->
                         <button id="id_btn_toevoegen" class="btn-sv-rood" disabled>
-                            <i class="notranslate material-symbol left">add</i>Toevoegen</button>
+                            {% sv-icon-op-button 'toevoegen' tekst='Toevoegen' %}
+                        </button>
                     </p>
                 </div>
 

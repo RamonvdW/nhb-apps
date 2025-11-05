@@ -21,6 +21,7 @@ ICON_NAME2MATERIAL_SYMBOL_NAME = {
     # algemene opties
     'aanpassen': 'edit',
     'bekijken': 'visibility',
+    'checkbox check': 'check',
     'copy': 'content_copy',
     'download': 'download',
     'email': 'mail',
@@ -31,6 +32,7 @@ ICON_NAME2MATERIAL_SYMBOL_NAME = {
     'toevoegen': 'add',
     'toon details': 'play_arrow',
     'verwijder': 'delete',
+    'volgende': 'arrow_forward',
     'zoek': 'search',
 
     # specifiek
@@ -313,6 +315,7 @@ icon_use_to_icon_height = {
     'button': 21,
     'text': 27,
     'feedback': 40,
+    'link': 24,
 }
 
 icon_kleur_to_class = {

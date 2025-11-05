@@ -101,8 +101,7 @@
             {% endif %}
             {% if url_download %}
                 <p>
-                    <a class="btn-sv-rood" href="{{ url_download }}">
-                        <i class="notranslate material-symbol left">download</i>Download lijst</a>
+                    {% sv-knop-nav url=url_download icon='download' tekst='Download lijst' %}
                 </p>
             {% endif %}
         </div>
@@ -143,8 +142,7 @@
                 <td class="center">
                     <!-- knoppen -->
                     {% if team.url_aanpassen %}
-                        <a class="btn-sv-rood" href="{{ team.url_aanpassen }}">
-                            <i class="notranslate material-symbol">edit</i></a>
+                        {% sv-knop-nav url=team.url_aanpassen icon='aanpassen' tekst='' %}
                     {% endif %}
                     {% if team.url_verwijder %}
                         <span>&nbsp;&nbsp;</span>
@@ -210,8 +208,7 @@
                     <td class="center">
                         <!-- knoppen -->
                         {% if team.url_aanpassen %}
-                            <a class="btn-sv-rood" href="{{ team.url_aanpassen }}">
-                                <i class="notranslate material-symbol">edit</i></a>
+                            {% sv-knop-nav url=team.url_aanpassen icon='aanpassen' tekst='' %}
                         {% endif %}
                     </td>
                 </tr>

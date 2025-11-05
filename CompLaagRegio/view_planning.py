@@ -178,6 +178,7 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
         context['rondes'] = list()
         for ronde in rondes:
             ronde.wedstrijd_count = ronde.matches.count()
+            ronde.url_wijzig = reverse('CompLaagRegio:regio-ronde-planning', kwargs={'ronde_pk': ronde.pk})
             context['rondes'].append(ronde)
         # for
 
@@ -352,6 +353,7 @@ class RegioClusterPlanningView(UserPassesTestMixin, TemplateView):
 
         for ronde in context['rondes']:
             ronde.wedstrijd_count = ronde.matches.count()
+            ronde.url_wijzig = reverse('CompLaagRegio:regio-ronde-planning', kwargs={'ronde_pk': ronde.pk})
         # for
 
         # alleen de RCL mag de planning uitbreiden

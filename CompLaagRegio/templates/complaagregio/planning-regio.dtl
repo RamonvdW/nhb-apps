@@ -6,6 +6,7 @@
 {% endcomment %}
 {% load static %}
 {% load design_icons %}
+{% load design_knop %}
 
 {% block title %}Planning{% endblock %}
 
@@ -115,8 +116,7 @@
 
                         <!-- knop naar de ronde van de regioplanning -->
                         <td class="center">
-                            <a class="btn-sv-rood" href="{% url 'CompLaagRegio:regio-ronde-planning' ronde.pk %}">
-                                <i class="notranslate material-symbol">edit</i></a>
+                            {% sv-knop-nav url=ronde.url_wijzig icon='aanpassen' tekst='' %}
                         </td>
                     </tr>
                 {% empty %}

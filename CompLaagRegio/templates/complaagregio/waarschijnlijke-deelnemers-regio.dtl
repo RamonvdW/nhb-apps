@@ -5,6 +5,7 @@
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
+{% load design_knop %}
 
 {% block title %}Waarschijnlijke deelnemers{% endblock %}
 
@@ -57,8 +58,7 @@
     <div class="row center">
         <div class="col s12">
             <p>Deze lijst is gebaseerd op de gegevens van: <b>{{ vastgesteld.date }} om {{ vastgesteld.time }}</b></p>
-            <a class="btn-sv-rood" href="{{ url_download }}">
-                <i class="notranslate material-symbol left">download</i>Download lijst</a>
+            {% sv-knop-nav url=url_download icon='download' tekst='Download lijst' %}
         </div>
     </div>
 
