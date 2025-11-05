@@ -20,6 +20,7 @@ register = template.Library()
 ICON_NAME2MATERIAL_SYMBOL_NAME = {
     # algemene opties
     'aanpassen': 'edit',
+    'bekijken': 'visibility',
     'copy': 'content_copy',
     'download': 'download',
     'email': 'mail',
@@ -83,6 +84,9 @@ ICON_NAME2MATERIAL_SYMBOL_NAME = {
     'comp regio instellingen teams': 'flaky',
     'comp regio poules': 'grid_4x4',
     'comp regio teams': 'gamepad',
+    'medailles 1e plaats': 'looks_one',
+    'medailles 2e plaats': 'looks_two',
+    'medailles 3e plaats': 'looks_3',
     'comp rk extra deelnemer': 'person_add',
     'comp rk selectie': 'rule',
     'comp rk teams': 'api',
@@ -319,6 +323,9 @@ icon_kleur_to_class = {
     'groen': 'green-text',
     'grijs': 'grey-text',
     'wit': 'white-text',
+    'goud': 'sv-goud-text',
+    'zilver': 'sv-zilver-text',
+    'brons': 'sv-brons-text',
 }
 
 

@@ -5,6 +5,7 @@
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
+{% load design_knop %}
 
 {% block title %}Scores regiocompetitie{% endblock %}
 
@@ -64,16 +65,15 @@
                 <td class="center">
                     {% if obj.url_uitslag_controleren %}
 
-                        <a class="btn-sv-blauw hide-on-med-and-down" href="{{ obj.url_uitslag_controleren }}">
-                            <i class="notranslate material-symbol left">visibility</i>Controleer</a>
+                        <!-- knop met icoon + tekst op brede schermen -->
+                        {% sv-knop-nav url=obj.url_uitslag_controleren kleur='blauw' icon='bekijken' tekst='Controleer' extra_class='hide-on-med-and-down' %}
 
-                        <a class="btn-sv-blauw hide-on-large-and-up" href="{{ obj.url_uitslag_controleren }}">
-                            <i class="notranslate material-symbol">visibility</i></a>
+                        <!-- knop met icoon + tekst op smalle schermen -->
+                        {% sv-knop-nav url=obj.url_uitslag_controleren kleur='blauw' icon='bekijken' tekst='' extra_class='hide-on-large-and-up' %}
 
                     {% elif obj.url_uitslag_invoeren %}
 
-                        <a class="btn-sv-rood" href="{{ obj.url_uitslag_invoeren }}">
-                            <i class="notranslate material-symbol">edit</i></a>
+                        {% sv-knop-nav url=obj.url_uitslag_invoeren icon='aanpassen' tekst='' %}
 
                     {% else %}
                         <i>Nog geen</i>

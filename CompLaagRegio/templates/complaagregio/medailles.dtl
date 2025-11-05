@@ -5,6 +5,7 @@
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
+{% load design_icons %}
 
 {% block title %}Uitslagen regiocompetitie{% endblock %}
 
@@ -82,9 +83,15 @@
 
                     <tr data-medal="{% if obj.toon_goud or obj.toon_zilver or obj.toon_brons %}1{% else %}0{% endif %}">
                         <td class="center">
-                            {% if obj.toon_goud %}<i class="notranslate material-symbol" style="color:#d6c372;font-size:30px">looks_one</i>{% endif %}
-                            {% if obj.toon_zilver %}<i class="notranslate material-symbol" style="color:#bec7c7;font-size:30px">looks_two</i>{% endif %}
-                            {% if obj.toon_brons %}<i class="notranslate material-symbol" style="color:#cd7f32;font-size:30px">looks_3</i>{% endif %}
+                            {% if obj.toon_goud %}
+                                {% sv-icon 'medailles 1e plaats' use='text' kleur='goud' icon_height=30 %}
+                            {% endif %}
+                            {% if obj.toon_zilver %}
+                                {% sv-icon 'medailles 2e plaats' use='text' kleur='zilver' icon_height=30 %}
+                            {% endif %}
+                            {% if obj.toon_brons %}
+                                {% sv-icon 'medailles 3e plaats' use='text' kleur='brons' icon_height=30 %}
+                            {% endif %}
                         </td>
                         <td class="center">{{ obj.rank }}</td>
                         <td>{{ obj.naam_str }}</td>

@@ -58,6 +58,18 @@
     color: $off-black;
 }
 
+.sv-goud-text {
+    color: #d6c372;
+}
+
+.sv-zilver-text {
+    color: #bec7c7;
+}
+
+.sv-brons-text {
+    color: #cd7f32;
+}
+
 //-----------------------------------
 // blauwe knop
 //
@@ -338,7 +350,7 @@
 .sv-table-zijrand {
   @extend .sv-blauw-hoofd;
   padding: 0;
-  width: 3px;
+  width: 5px;
 }
 
 // geen separator lijn voor de laatste regel voor een break

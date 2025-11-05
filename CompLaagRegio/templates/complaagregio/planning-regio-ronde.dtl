@@ -124,7 +124,8 @@
                                 {% if not readonly %}
                                     <p class="center">
                                         <button class="btn-sv-rood disabled" id="submit_knop1" type="submit">
-                                            <i class="notranslate material-symbol left">check</i>Instellingen opslaan</button>
+                                            {% sv-icon-op-button 'opslaan' tekst='Instellingen opslaan' %}
+                                        </button>
                                     </p>
                                 {% endif %}
 
@@ -288,7 +289,8 @@
                             {% if not readonly %}
                                 <p class="center">
                                     <button class="btn-sv-rood disabled" id="submit_knop1" type="submit">
-                                        <i class="notranslate material-symbol left">check</i>Instellingen opslaan</button>
+                                        {% sv-icon-op-button 'opslaan' tekst='Instellingen opslaan' %}
+                                    </button>
                                 </p>
                             {% endif %}
 

@@ -5,6 +5,7 @@
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
+{% load design_icons %}
 {% load design_knop %}
 
 {% block title %}Accommodatie details{% endblock %}
@@ -462,7 +463,8 @@
         {% if not readonly %}
             <div style="display: none">
                 <button class="btn-sv-float" id="submit_knop2" type="submit" disabled>
-                    <i class="notranslate material-symbol left">check</i>Wijzigingen opslaan</button>
+                    {% sv-icon-op-button 'opslaan' tekst='Wijzigingen opslaan' %}
+                </button>
             </div>
         {% endif %}
 

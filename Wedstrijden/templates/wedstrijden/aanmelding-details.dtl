@@ -179,9 +179,7 @@
                     <tr>
                         <th>Afmelden</th>
                         <td colspan="2">
-                            {% with "#bevestig_afmelden_{{ inschrijving.pk }}" as url %}
-                                {% sv-knop-nav url=url extra_class='modal-trigger' icon='verwijder' tekst='' %}
-                            {% endwith %}
+                            {% sv-knop-modal 'bevestig_afmelden_' inschrijving.pk icon='verwijder' tekst='' %}
                         </td>
                     </tr>
                 {% endif %}

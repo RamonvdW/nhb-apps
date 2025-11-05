@@ -6,6 +6,7 @@
 {% endcomment %}
 {% load static %}
 {% load design_filters %}
+{% load design_icons %}
 
 {% block title %}Wedstrijd details{% endblock %}
 
@@ -125,7 +126,8 @@
 
                             <div class="center" style="margin-top:30px">
                                 <button class="btn-sv-rood" id="submit_knop1" type="submit" disabled>
-                                    <i class="notranslate material-symbol left">check</i>Wijzigen opslaan</button>
+                                    {% sv-icon-op-button 'opslaan' tekst='Wijzigingen opslaan' %}
+                                </button>
                             </div>
                         </form>
 

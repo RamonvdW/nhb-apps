@@ -181,18 +181,32 @@
                     {% endif %}
 
                     <tr class="sv-table-sectie-header">
-                        <td class="center" colspan="13"><h5>{{ obj.klasse_str }}</h5></td>
+                        <td></td>
+                        <td class="center" colspan="13">
+                            <h5>{{ obj.klasse_str }}</h5>
+                        </td>
+                        <td></td>
                     </tr>
 
                     <tr class="sv-table-header">
                         <td class="sv-table-zijrand" rowspan="{{ obj.aantal_in_groep }}"></td>
+
                         <th><!-- rank --></th>
                         <th>Sporter</th>
-                        <th><span class="hide-on-small-only" style="padding:0">Vereniging</span></th>
+                        <th>
+                            <span class="hide-on-small-only" style="padding:0">Vereniging</span>
+                        </th>
                         <th class="center">Gemiddelde</th>
-                        <th class="right-align" style="padding:0"><span class="hide-on-med-and-up">Scores</span></th>
-                        <th class="center" style="padding:0" colspan="7"><span class="hide-on-small-only">Scores</span></th>
-                        <th class="right-align" style="padding:0"><span class="hide-on-small-only" style="padding-left:5px; padding-right:5px">Totaal</span></th>
+                        <th class="right-align" style="padding:0">
+                            <span class="hide-on-med-and-up">Scores</span>
+                        </th>
+                        <th class="center" style="padding:0" colspan="7">
+                            <span class="hide-on-small-only">Scores</span>
+                        </th>
+                        <th class="right-align" style="padding:0">
+                            <span class="hide-on-small-only" style="padding-left:5px; padding-right:5px">Totaal</span>
+                        </th>
+
                         <td class="sv-table-zijrand" rowspan="{{ obj.aantal_in_groep }}"></td>
                     </tr>
                 {% endif %}

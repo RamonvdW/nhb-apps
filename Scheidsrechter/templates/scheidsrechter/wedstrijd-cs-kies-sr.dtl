@@ -5,6 +5,7 @@
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
+{% load design_icons %}
 
 {% block title %}Kies scheidsrechters{% endblock %}
 
@@ -128,7 +129,8 @@
 
                             <div class="center" style="margin-top:30px">
                                 <button class="btn-sv-rood" id="submit_knop1" type="submit" disabled>
-                                    <i class="notranslate material-symbol left">check</i>Wijzigen opslaan</button>
+                                    {% sv-icon-op-button 'opslaan' tekst='Wijzigingen opslaan' %}
+                                </button>
                             </div>
                         </form>
 
