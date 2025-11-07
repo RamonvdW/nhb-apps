@@ -14,7 +14,7 @@ attrs==25.4.0
     #   trio
 beautifulsoup4==4.14.2
     # via -r requirements_dev.in
-brotli==1.1.0
+brotli==1.2.0
     # via -r requirements_dev.in
 cachetools==6.2.1
     # via
@@ -33,7 +33,7 @@ coverage==7.11.0
     # via
     #   -r requirements_dev.in
     #   django-coverage-plugin
-django==5.2.7
+django==5.2.8
     # via
     #   -r requirements.txt
     #   django-coverage-plugin
@@ -59,7 +59,7 @@ google-api-core==2.28.1
     #   google-api-python-client
     #   google-geo-type
     #   google-maps-routing
-google-api-python-client==2.186.0
+google-api-python-client==2.187.0
     # via -r requirements.txt
 google-auth==2.41.1
     # via
@@ -82,7 +82,7 @@ google-geo-type==0.4.0
     #   google-maps-routing
 google-maps-routing==0.7.0
     # via -r requirements.txt
-googleapis-common-protos==1.71.0
+googleapis-common-protos==1.72.0
     # via
     #   -r requirements.txt
     #   google-api-core
@@ -128,7 +128,7 @@ outcome==1.3.0.post0
     #   trio-websocket
 pillow==12.0.0
     # via -r requirements.txt
-pip-licenses-cli==3.0.0
+pip-licenses-cli==3.0.1
     # via -r requirements_dev.in
 pip-licenses-lib==1.0.0
     # via pip-licenses-cli

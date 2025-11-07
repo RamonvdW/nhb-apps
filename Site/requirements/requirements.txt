@@ -12,7 +12,7 @@ certifi==2025.10.5
     # via requests
 charset-normalizer==3.4.4
     # via requests
-django==5.2.7
+django==5.2.8
     # via
     #   -c constraints.in
     #   -r requirements.in
@@ -23,7 +23,7 @@ google-api-core==2.28.1
     #   google-api-python-client
     #   google-geo-type
     #   google-maps-routing
-google-api-python-client==2.186.0
+google-api-python-client==2.187.0
     # via -r requirements.in
 google-auth==2.41.1
     # via
@@ -42,7 +42,7 @@ google-geo-type==0.4.0
     # via google-maps-routing
 google-maps-routing==0.7.0
     # via -r requirements.in
-googleapis-common-protos==1.71.0
+googleapis-common-protos==1.72.0
     # via
     #   google-api-core
     #   grpcio-status
