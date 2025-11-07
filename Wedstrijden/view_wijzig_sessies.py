@@ -89,7 +89,7 @@ class WedstrijdSessiesView(UserPassesTestMixin, View):
             )
         else:
             context['kruimels'] = (
-                (reverse('Wedstrijden:manager'), 'Wedstrijdkalender'),
+                (reverse('Wedstrijden:manager'), 'Beheer wedstrijdkalender'),
                 (None, 'Wedstrijd sessies'),
             )
 

@@ -5,6 +5,7 @@
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
+{% load design_knop %}
 
 {% block title %}Opleidingen{% endblock %}
 
@@ -61,8 +62,7 @@
                         <td>{{ opleiding.status_str }}</td>
                         <td class="center-align">
                             {% if opleiding.url_details %}
-                                <a class="btn-sv-rood" href="{{ opleiding.url_details }}">
-                                    <i class="notranslate material-symbol">play_arrow</i></a>
+                                {% sv-knop-nav url=opleiding.url_details icon='toon details' tekst='' %}
                             {% endif %}
                         </td>
                     </tr>

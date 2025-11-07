@@ -28,6 +28,12 @@ ICON_NAME2MATERIAL_SYMBOL_NAME = {
     'open url': 'open_in_new',
     'opslaan': 'check',
     'sluiten': 'close',
+    'status goed': 'done',
+    'status onzeker': 'question_mark',
+    'status slecht': 'close',
+    'kies wel': 'done',
+    'kies twijfel': 'question_mark',
+    'kies niet': 'close',
     'terug': 'arrow_back_ios',
     'toevoegen': 'add',
     'toon details': 'play_arrow',
@@ -105,6 +111,8 @@ ICON_NAME2MATERIAL_SYMBOL_NAME = {
     'drive toestemming': 'add_to_drive',
     'drive wedstrijdformulieren maken': 'add_to_drive',
     'evenement verkoopvoorwaarden': 'article',
+    'evenement aanmeldingen': 'group',
+    'evenement workshop keuzes': 'favorite',
     'evenementen': 'article',
     'feedback bedankt': 'record_voice_over',
     'feedback duimpje omhoog': 'thumb_up',
@@ -234,6 +242,9 @@ ICON_NAME2MATERIAL_SYMBOL_NAME = {
     'webwinkel voorraad': 'inventory',
     'webwinkel': 'local_mall',
     'wedstrijden verkoopvoorwaarden': 'article',
+    'wedstrijd aanmeldingen': 'group',
+    'wedstrijd kwalificatiescores': 'verified',
+    'wedstrijd sessies': 'schedule',
     'wedstrijdklassen': 'equalizer',
     'zoek vereniging': 'travel_explore',
 }
@@ -316,6 +327,7 @@ icon_use_to_icon_height = {
     'text': 27,
     'feedback': 40,
     'link': 24,
+    'h5': 40,
 }
 
 icon_kleur_to_class = {
@@ -341,6 +353,16 @@ def sv_icon(icon_name, use='button', kleur='rood', icon_height=0, extra_style=''
 
     if not icon_height:
         icon_height = icon_use_to_icon_height.get(use, 24)
+
+    if use in ('h5',):
+        if extra_style:
+            extra_style += '; '
+
+        # ruimte tussen icoon en heading text
+        extra_style += 'margin-right:10px;'
+
+        # verticale plaatsing t.o.v. tekst
+        extra_style += 'vertical-align:bottom'
 
     kleur_class = ''
     if kleur:

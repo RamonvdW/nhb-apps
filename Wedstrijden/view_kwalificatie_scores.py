@@ -123,7 +123,7 @@ class CheckKwalificatieScoresView(UserPassesTestMixin, TemplateView):
         else:
             context['kruimels'] = (
                 (reverse('Wedstrijden:manager-status',
-                         kwargs={'status': WEDSTRIJD_STATUS_URL_WACHT_OP_GEACCEPTEERD}), 'Wedstrijdkalender'),
+                         kwargs={'status': WEDSTRIJD_STATUS_URL_WACHT_OP_GEACCEPTEERD}), 'Beheer wedstrijdkalender'),
                 (None, 'Check kwalificatiescores'),
             )
 

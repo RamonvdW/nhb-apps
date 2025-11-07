@@ -121,7 +121,7 @@ class KalenderManagerView(UserPassesTestMixin, View):
         self._maak_filter_knoppen(context, status)
 
         context['kruimels'] = (
-            (None, 'Wedstrijdkalender'),
+            (None, 'Beheer wedstrijdkalender'),
         )
 
         return render(request, self.template_name, context)

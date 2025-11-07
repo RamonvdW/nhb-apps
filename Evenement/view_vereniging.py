@@ -46,13 +46,13 @@ class VerenigingEvenementenView(UserPassesTestMixin, View):
         context['huidige_rol'] = rol_get_beschrijving(request)
 
         now = timezone.now().date()
-        jaar_geleden = now - datetime.timedelta(days=365)
+        cut_off_datum = now - datetime.timedelta(days=548)     # 1.5 jaar
         maand_geleden = now - datetime.timedelta(days=30)
 
         evenementen = (Evenement
                        .objects
-                       .filter(organiserende_vereniging=ver)
-                       .exclude(datum__lt=jaar_geleden)
+                       .filter(organiserende_vereniging=ver,
+                               datum__gte=cut_off_datum)
                        .order_by('datum',
                                  'pk'))
 

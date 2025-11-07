@@ -5,6 +5,7 @@
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
+{% load design_icons %}
 
 {% block title %}Check kwalificatie-scores{% endblock %}
 
@@ -117,13 +118,13 @@
                                 <td class="center">{{ score.resultaat }}</td>
                                 <td class="center" id="{{ score.id }}" data-url="{{ score.url_status }}">
                                     <button type="button" class="btn-sv-keuze" id="{{ score.id }}-ja" onclick="wijzig('{{ score.id }}', 1)">
-                                        <i class="material-symbol notranslate">done</i>
+                                        {% sv-icon-op-button 'kies wel' %}
                                     </button>
                                     <button type="button" class="btn-sv-keuze" id="{{ score.id }}-mss" onclick="wijzig('{{ score.id }}', 2)">
-                                        <i class="material-symbol notranslate">question_mark</i>
+                                        {% sv-icon-op-button 'kies twijfel' %}
                                     </button>
                                     <button type="button" class="btn-sv-keuze" id="{{ score.id }}-nee" onclick="wijzig('{{ score.id }}', 3)">
-                                        <i class="material-symbol notranslate">close</i>
+                                        {% sv-icon-op-button 'kies niet' %}
                                     </button>
                                 </td>
                             </tr>

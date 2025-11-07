@@ -5,8 +5,9 @@
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
+{% load design_knop %}
 
-{% block title %}Manager Wedstrijdkalender{% endblock %}
+{% block title %}Manage kalender{% endblock %}
 
 {% block pagina %}
 
@@ -25,8 +26,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Wedstrijdkalender</h3>
-            <p>Beheer van de wedstrijdkalender</p>
+            <h3 class="page-banner">Beheer wedstrijdkalender</h3>
             <p>Je huidige rol is: <b>{{ huidige_rol }}</b></p>
         </div>
     </div>
@@ -87,14 +87,11 @@
                         <td{% if wed.status_val_op %} class="sv-rood-text"{% endif %}>{{ wed.status_str }}</td>
                         <td>
                             <div style="white-space:nowrap">     <!-- keeps buttons side by side -->
-                                <a class="btn-sv-rood" href="{{ wed.url_wijzig }}" style="padding:0; width:35px; margin-right:5px">
-                                    <i class="notranslate material-symbol">edit</i></a>
-                                <a class="btn-sv-rood" href="{{ wed.url_sessies}}" style="padding:0; width:35px; margin-right:5px">
-                                    <i class="notranslate material-symbol">schedule</i></a>
+                                {% sv-knop-nav url=wed.url_wijzig icon='aanpassen' tekst='' smal=True %}
+                                {% sv-knop-nav url=wed.url_sessies icon='wedstrijd sessies' tekst='' smal=True %}
 
                                 {% if wed.url_check_kwalificatie_scores %}
-                                    <a class="btn-sv-blauw" href="{{ wed.url_check_kwalificatie_scores }}" style="padding:0; width:35px; margin-right:5px">
-                                        <i class="notranslate material-symbol">verified</i></a>
+                                    {% sv-knop-nav url=wed.url_check_kwalificatie_scores kleur='blauw' icon='wedstrijd kwalificatiescores' tekst='' smal=True %}
                                 {% endif %}
                             </div>
                         </td>

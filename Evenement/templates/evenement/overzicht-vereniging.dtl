@@ -5,6 +5,7 @@
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
+{% load design_knop %}
 
 {% block title %}Evenementen Vereniging{% endblock %}
 
@@ -48,13 +49,10 @@
                             <td>{{ evenement.titel }}</td>
                             <td>
                                 <div style="white-space:nowrap">     <!-- keeps buttons side by side -->
-                                    <a class="{% if evenement.is_in_verleden %}btn-sv-blauw{% else %}btn-sv-rood{% endif %}" href="{{ evenement.url_details }}" style="padding:0; width:35px; margin-right:5px">
-                                        <i class="notranslate material-symbol">schedule</i></a>
-                                    <a class="{% if evenement.is_in_verleden %}btn-sv-blauw{% else %}btn-sv-rood{% endif %}" href="{{ evenement.url_aanmeldingen }}" style="padding:0; width:35px; margin-right:5px">
-                                        <i class="notranslate material-symbol">group</i></a>
+                                    {% sv-knop-nav url=evenement.url_details icon='toon details' tekst='' smal=True %}
+                                    {% sv-knop-nav url=evenement.url_aanmeldingen icon='evenement aanmeldingen' tekst='' smal=True %}
                                     {% if evenement.toon_workshop_keuzes %}
-                                        <a class="{% if evenement.is_in_verleden %}btn-sv-blauw{% else %}btn-sv-rood{% endif %}" href="{{ evenement.url_workshop_keuzes }}" style="padding:0; width:35px; margin-right:5px">
-                                            <i class="notranslate material-symbol">favorite</i></a>
+                                        {% sv-knop-nav url=evenement.url_workshop_keuzes icon='evenement workshop keuzes' tekst='' smal=True %}
                                     {% endif %}
                                 </div>
                             </td>
@@ -103,11 +101,11 @@
                             <td>{{ evenement.titel }}</td>
                             <td>
                                 <div style="white-space:nowrap">     <!-- keeps buttons side by side -->
-                                    <a class="btn-sv-blauw" href="{{ evenement.url_details }}" style="padding:0; width:35px; margin-right:5px">
-                                        <i class="notranslate material-symbol">schedule</i></a>
-                                    <a class="btn-sv-blauw" href="{{ evenement.url_aanmeldingen }}" style="padding:0; width:35px; margin-right:5px">
-                                        <i class="notranslate material-symbol">group</i>
-                                    </a>
+                                    {% sv-knop-nav url=evenement.url_details icon='toon details' tekst='' smal=True kleur='blauw' %}
+                                    {% sv-knop-nav url=evenement.url_aanmeldingen icon='evenement aanmeldingen' tekst='' smal=True kleur='blauw' %}
+                                    {% if evenement.toon_workshop_keuzes %}
+                                        {% sv-knop-nav url=evenement.url_workshop_keuzes icon='evenement workshop keuzes' tekst='' smal=True kleur='blauw' %}
+                                    {% endif %}
                                 </div>
                             </td>
                         </tr>

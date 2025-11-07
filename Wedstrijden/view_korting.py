@@ -65,16 +65,14 @@ class KortingenView(UserPassesTestMixin, TemplateView):
                                                      .values_list('titel', flat=True))
 
             if korting.soort == WEDSTRIJD_KORTING_SPORTER:
-                korting.icon_name = 'account_circle'
                 if korting.voor_sporter:
                     korting.voor_wie_str = korting.voor_sporter.lid_nr_en_volledige_naam()
 
             elif korting.soort == WEDSTRIJD_KORTING_VERENIGING:
-                korting.icon_name = 'home'
                 korting.voor_wie_str = 'Leden van vereniging %s' % ver.ver_nr
 
             elif korting.soort == WEDSTRIJD_KORTING_COMBI:       # pragma: no branch
-                korting.icon_name = 'stack'
+                pass
 
             else:       # pragma: no cover
                 korting.voor_wie_str = "?"

@@ -5,6 +5,7 @@
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
+{% load design_knop %}
 
 {% block title %}Aanmeldingen{% endblock %}
 
@@ -82,8 +83,7 @@
                             <td>{{ inschrijving.status_str }}</td>
                             <td>
                                 {% if inschrijving.url_details %}
-                                    <a class="btn-sv-rood" href="{{ inschrijving.url_details }}">
-                                        <i class="notranslate material-symbol">play_arrow</i></a>
+                                    {% sv-knop-nav url=inschrijving.url_details icon='toon details' tekst='' %}
                                 {% endif %}
                             </td>
                         </tr>
@@ -129,8 +129,7 @@
                         <td>{{ afmelding.status_str }}</td>
                         <td>
                             {% if afmelding.url_details %}
-                                <a class="btn-sv-rood" href="{{ afmelding.url_details }}">
-                                    <i class="notranslate material-symbol">play_arrow</i></a>
+                                {% sv-knop-nav url=afmelding.url_details icon='toon details' tekst='' %}
                             {% endif %}
                         </td>
                     </tr>

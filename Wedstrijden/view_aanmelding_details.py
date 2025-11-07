@@ -124,7 +124,7 @@ class WedstrijdAanmeldingDetailsView(UserPassesTestMixin, TemplateView):
 
         if self.rol_nu == Rol.ROL_MWZ:
             context['kruimels'] = [
-                (reverse('Wedstrijden:manager'), 'Wedstrijdkalender'),
+                (reverse('Wedstrijden:manager'), 'Beheer wedstrijdkalender'),
             ]
         else:
             # HWL
