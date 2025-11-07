@@ -34,6 +34,7 @@ ICON_NAME2MATERIAL_SYMBOL_NAME = {
     'kies wel': 'done',
     'kies twijfel': 'question_mark',
     'kies niet': 'close',
+    'nieuw': 'priority_high',
     'terug': 'arrow_back_ios',
     'toevoegen': 'add',
     'toon details': 'play_arrow',

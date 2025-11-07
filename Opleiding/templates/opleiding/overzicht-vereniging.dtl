@@ -47,8 +47,8 @@
                         <td>{{ opleiding.titel }}</td>
                         <td>
                             <div style="white-space:nowrap">     <!-- keeps buttons side by side -->
-                                {% sv-knop-nav url=opleiding.url_details icon='opleiding details' smal=True %}
-                                {% sv-knop-nav url=opleiding.url_aanmeldingen icon='opleiding aanmeldingen' smal=True %}
+                                {% sv-knop-nav url=opleiding.url_details icon='opleiding details' tekst='' smal=True %}
+                                {% sv-knop-nav url=opleiding.url_aanmeldingen icon='opleiding aanmeldingen' tekst='' smal=True %}
                             </div>
                         </td>
                     </tr>

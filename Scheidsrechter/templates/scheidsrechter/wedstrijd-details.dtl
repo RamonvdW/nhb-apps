@@ -5,6 +5,7 @@
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
+{% load design_knop %}
 
 {% block title %}Wedstrijd details{% endblock %}
 
@@ -69,8 +70,7 @@
                         <span>{{ wed.locatie.adres|linebreaksbr }}</span>
                         {% if url_map %}
                             <br><br>
-                            <a class="btn-sv-blauw nav_weg_knop" href="{{ url_map }}" target="_blank" rel="noopener noreferrer">
-                                <i class="notranslate material-symbol left">open_in_new</i>Toon op de kaart</a>
+                            {% sv-knop-ext url=url_map kleur='blauw' icon='open url' tekst='Toon op de kaart' %}
                         {% endif %}
                     </td>
                 </tr>

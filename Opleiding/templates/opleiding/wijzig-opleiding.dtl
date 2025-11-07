@@ -6,6 +6,7 @@
 {% endcomment %}
 {% load static %}
 {% load design_icons %}
+{% load design_knop %}
 
 {% block title %}Wijzig opleiding{% endblock %}
 
@@ -91,9 +92,7 @@
                                         </td>
                                         <td>
                                             <!-- wijzig knop -->
-                                            <a class="btn-sv-rood" href="{{ moment.url_edit }}">
-                                                <i class="notranslate material-symbol">edit</i>
-                                            </a>
+                                            {% sv-knop-nav url=moment.url_edit icon='aanpassen' tekst='' %}
                                         </td>
                                     </tr>
                                 {% empty %}

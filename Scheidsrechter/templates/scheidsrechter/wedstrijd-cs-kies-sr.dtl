@@ -6,6 +6,7 @@
 {% endcomment %}
 {% load static %}
 {% load design_icons %}
+{% load design_knop %}
 
 {% block title %}Kies scheidsrechters{% endblock %}
 
@@ -224,8 +225,7 @@
                         <span>{{ wed.locatie.adres|linebreaksbr }}</span>
                         {% if url_map %}
                             <br><br>
-                            <a class="btn-sv-blauw nav_weg_knop" href="{{ url_map }}" target="_blank" rel="noopener noreferrer">
-                                <i class="notranslate material-symbol left">open_in_new</i>Toon op de kaart</a>
+                            {% sv-knop-ext url=url_map kleur='blauw' icon='open url' tekst='Toon op de kaart' %}
                         {% endif %}
                     </td>
                 </tr>
@@ -312,7 +312,9 @@
                                 {% if sessie.beschrijving %}<span>{{ sessie.beschrijving }}</span><br>{% endif %}
                                 <b>{{ sessie.datum }}, {{ sessie.tijd_begin }} - {{ sessie.tijd_einde }}</b><br>
                                 <span>{{ sessie.klassen|length }} wedstrijdklassen</span>
-                                <i class="material-symbol notranslate sv-rood-text secondary-content"><!-- wordt gezet in in/uitklappen_klaar() in Plein/js/site_layout.js --></i>
+
+                                <!-- icoon svg wordt gezet in Overige/js/collapsible_icons.js -->
+                                <span class="collapsible-icon">x</span>
                             </div>
                             <div class="collapsible-body white center">
                                 <span>

@@ -104,15 +104,15 @@
                                 {% if dag.mag_wijzigen %}
                                     <td class="center">
                                         <button type="button" class="btn-sv-keuze" id="{{ dag.id }}-ja" onclick="wijzig('{{ dag.id }}', 1)">
-                                            <i class="material-symbol notranslate">done</i>
+                                            {% sv-icon-op-button 'kies wel' %}
                                         </button>
                                         <br class="hide-on-large-and-up">
                                         <button type="button" class="btn-sv-keuze" id="{{ dag.id }}-mss" onclick="wijzig('{{ dag.id }}', 2)">
-                                            <i class="material-symbol notranslate">question_mark</i>
+                                            {% sv-icon-op-button 'kies twijfel' %}
                                         </button>
                                         <br class="hide-on-large-and-up">
                                         <button type="button" class="btn-sv-keuze" id="{{ dag.id }}-nee" onclick="wijzig('{{ dag.id }}', 3)">
-                                            <i class="material-symbol notranslate">close</i>
+                                            {% sv-icon-op-button 'kies niet' %}
                                         </button>
                                     </td>
                                 {% endif %}

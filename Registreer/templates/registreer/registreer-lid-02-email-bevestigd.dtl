@@ -5,6 +5,7 @@
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
+{% load design_knop %}
 
 {% block title %}E-mail bevestigd{% endblock %}
 
@@ -29,13 +30,11 @@
                 {% if show_login %}
                     <p>Je kan nu inloggen.</p>
                     <p>
-                        <a class="btn-sv-rood" href="{% url 'Account:login' %}">
-                            <i class="notranslate material-symbol left">person</i>inloggen</a>
+                        {% sv-knop-nav url=url_login icon='account inloggen' tekst='Inloggen' %}
                     </p>
                 {% else %}
                     <p>
-                        <a class="btn-sv-rood" href="{% url 'Plein:plein' %}">
-                            <i class="notranslate material-symbol left">close</i>Sluiten</a>
+                        {% sv-knop-nav url=url_plein icon='sluiten' tekst='Sluiten' %}
                     </p>
                 {% endif %}
             </div>

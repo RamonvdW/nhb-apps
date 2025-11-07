@@ -5,6 +5,7 @@
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
+{% load design_knop %}
 
 {% block title %}Korps e-mailadressen{% endblock %}
 
@@ -15,7 +16,14 @@
             const el = document.getElementById('copy_source')
             navigator.clipboard.writeText(el.innerText)
         }
+
+        // koppel het knop click events aan de kopieer functie
+        document.addEventListener('DOMContentLoaded', function() {
+            const el_knop = document.getElementById('id_copy_knop');
+            el_knop.addEventListener('click', copy_to_clipboard);
+        });
     </script>
+
 
     <!-- banner -->
     <div class="row center">
@@ -24,8 +32,7 @@
 
             <p>Hieronder staan de {{ aantal }} bij de KHSN bekende e-mailadressen van de scheidsrechters</p>
 
-            <a class="btn-sv-rood" href="#" onclick="copy_to_clipboard()">
-                <i class="notranslate material-symbol left">content_copy</i>Kopieer naar mijn klembord</a>
+            {% sv-knop-nav url='#' knop_id='id_copy_knop' icon='copy' tekst='Kopieer naar mijn klembord' %}
         </div>
     </div>
 

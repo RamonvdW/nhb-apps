@@ -5,6 +5,7 @@
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
+{% load design_knop %}
 
 {% block title %}Wedstrijden{% endblock %}
 
@@ -61,8 +62,7 @@
                         <td>{{ obj.beschrijving }}<br>({{ obj.indiv_team_str }})</td>
                         <td>
                             {% if obj.nog_opvragen %}
-                                <a class="btn-sv-blauw" href="{{ obj.url_details }}">
-                                    <i class="material-symbol left notranslate">priority_high</i>Nieuw</a>
+                                {% sv-knop-nav url=obj.url_details kleur='blauw' icon='nieuw' tekst='Nieuw' %}
                             {% else %}
                                 {% if obj.mag_wijzigen %}
                                     <a class="btn-sv-rood" href="{{ obj.url_details }}">Wijzig</a>

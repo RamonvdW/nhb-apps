@@ -34,7 +34,9 @@
                             <h6 class="sv-blauw-text">{{ dag.wedstrijd.titel }}</h6>
                             <h6>{{ dag.datum }}</h6>
                             <span>Aantal scheidsrechters nodig: {{ dag.wedstrijd.aantal_scheids }}</span>
-                            <i class="material-symbol notranslate sv-rood-text secondary-content"><!-- wordt gezet in in/uitklappen_klaar() in Plein/js/site_layout.js --></i>
+
+                            <!-- icoon svg wordt gezet in Overige/js/collapsible_icons.js -->
+                            <span class="collapsible-icon">x</span>
                         </div>
                         <div class="collapsible-body white">
                             <table>

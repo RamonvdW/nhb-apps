@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2024 Ramon van der Winkel.
+#  Copyright (c) 2020-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -47,11 +47,14 @@ def registreer_receive_bevestiging_aanmaken_account(request, account):
                        gebruikte_functie="Bevestig e-mail",
                        activiteit=msg)
 
-    context = dict()
+    context = {
+        'verberg_login_knop': True,
+        'url_plein': reverse('Plein:plein'),
+    }
+
     if not request.user.is_authenticated:       # pragma: no branch
         context['show_login'] = True
-
-    context['verberg_login_knop'] = True
+        context['url_login'] = reverse('Account:login')
 
     return render(request, TEMPLATE_REGISTREER_EMAIL_BEVESTIGD, context)
 

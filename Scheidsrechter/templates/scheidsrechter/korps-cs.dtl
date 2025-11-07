@@ -6,6 +6,7 @@
 {% endcomment %}
 {% load static %}
 {% load design_filters %}
+{% load design_knop %}
 
 {% block title %}Korps{% endblock %}
 
@@ -18,8 +19,7 @@
             <p>Hieronder volgt de lijst van alle {{ aantal }} scheidsrechters, inclusief alle bekende contactgegevens</p>
 
             <p>
-                <a class="btn-sv-rood" href="{{ url_emails }}">
-                    <i class="notranslate material-symbol left">mail</i>Alle e-mailadressen</a>
+                {% sv-knop-nav url=url_emails icon='email' tekst='Alle e-mailadressen' %}
             </p>
 
             <p class="hide-on-small-only"><i>(kolommen 'deelt' is met korps, wedstrijdorganisatie)</i></p>
