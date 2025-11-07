@@ -25,7 +25,7 @@ class TestBrowserSporterProfiel(bh.BrowserTestCase):
         self.assert_no_console_log()
 
         # afmelden voor het RK
-        span = self.find_element_type_with_text('span', 'Afmelden')
+        span = self.find_element_type_with_text('a', 'Afmelden')
         knop = self.get_parent(span)
         knop.click()        # opent model dialog
 

@@ -6,6 +6,7 @@
 {% endcomment %}
 {% load static %}
 {% load design_filters %}   <!-- highlight filter -->
+{% load design_icons %}
 {% load design_knop %}
 
 {% block title %}Wijzig beheerder{% endblock %}
@@ -132,9 +133,10 @@
                     </div>
 
                     <div class="row"> <!-- style="margin-top:90px">-->
-                        <div class="col s12">
+                        <div class="col s12 center">
                             <button class="btn-sv-rood" id="submit_knop" type="submit">
-                                <i class="notranslate material-symbol left">search</i>Zoek</button>
+                                {% sv-icon-op-button 'zoek' tekst='Zoek' %}
+                            </button>
                         </div>
                     </div>
 
@@ -176,7 +178,8 @@
                                 <td>{% if is_vereniging_rol %}{{ account.vereniging_naam }}{% else %}{{ account.geo_beschrijving }}{% endif %}</td>
                                 <td>
                                     <button class="btn-sv-rood" onclick="do_wijzig('add', this)" data-pk="{{ account.pk }}">
-                                        <i class="notranslate material-symbol left">add</i>Koppel</button>
+                                        {% sv-icon-op-button 'toevoegen' tekst='Koppel' %}
+                                    </button>
                                 </td>
                             </tr>
                         {% endfor %}

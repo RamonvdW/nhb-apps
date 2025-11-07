@@ -6,6 +6,7 @@
 {% endcomment %}
 {% load static %}
 {% load design_icons %}
+{% load design_knop %}
 
 {% block title %}Locaties{% endblock %}
 
@@ -54,8 +55,7 @@
                             {% if readonly %}
                                 <a class="btn-sv-rood" href="{{ locatie.url_wijzig }}">Details</a>
                             {% else %}
-                                <a class="btn-sv-rood" href="{{ locatie.url_wijzig }}">
-                                    <i class="notranslate material-symbol">edit</i></a>
+                                {% sv-knop-nav url=locatie.url_wijzig icon='aanpassen' tekst='' %}
                             {% endif %}
                         </td>
                     </tr>

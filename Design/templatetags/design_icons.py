@@ -176,6 +176,7 @@ ICON_NAME2MATERIAL_SYMBOL_NAME = {
     'opleiding lesmateriaal': 'book_2',
     'opleiding locaties': 'school',
     'opleiding verkoopvoorwaarden': 'article',
+    'opleiding details': 'schedule',
     'opleidingen': 'school',
     'otp stap 1': 'looks_one',
     'otp stap 2': 'looks_two',
@@ -203,7 +204,7 @@ ICON_NAME2MATERIAL_SYMBOL_NAME = {
     'spelden meesterspelden': 'category',
     'spelden tussenspelden': 'trending_up',
     'sporter voorkeuren': 'tune',
-    'sporter afmelden': 'remove',
+    'sporter afmelden': 'cancel',
     'taken': 'inbox',
     'tijdelijke code ga door': 'check',
     'uitloggen': 'logout',
@@ -404,7 +405,7 @@ def sv_icon_op_button(icon_name, tekst='', extra_class='', extra_style=''):
     new_text += sv_icon(icon_name, kleur='wit', use='button')
     new_text += '</span>\n'
 
-    new_text += tekst
+    new_text += '<span>' + tekst + '</span>\n'
 
     return mark_safe(new_text)
 

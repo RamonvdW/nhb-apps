@@ -38,6 +38,9 @@ def sv_knop_nav(url='', kleur='rood', icon='', tekst='##BUG', knop_id='',
     if knop_id:
         new_text += ' id="%s"' % knop_id
 
+    if smal and len(tekst) > 0:
+        smal = False
+
     if smal:
         if extra_style:
             extra_style += ';'

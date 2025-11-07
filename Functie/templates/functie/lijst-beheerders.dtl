@@ -102,10 +102,7 @@
 
                         <td style="vertical-align: top">
                             {% for beheerder in obj.beheerders %}
-                                {% if not forloop.first %}
-                                    <br>
-                                {% endif %}
-                                <span>{{ beheerder }}</span>
+                                <span>{{ beheerder }}</span><br>
                             {% empty %}
                                 {% if obj.wijzig_url %}
                                     <i class="sv-rood-text">Nog niet gekoppeld</i>
@@ -115,18 +112,14 @@
                             {% endfor %}
 
                             {% if obj.wijzig_url %}
-                                <br><br>
-                                <a class="btn-sv-rood" href="{{ obj.wijzig_url }}">
-                                    <i class="notranslate material-symbol left hide-on-small-only">group_add</i>
-                                    <i class="notranslate material-symbol hide-on-med-and-up">group_add</i>
-                                    <span class="hide-on-small-only">Wijzig</span>
-                                </a>
+                                <br>
+                                {% sv-knop-nav url=obj.wijzig_url icon='functie wijzig beheerders' tekst='Wijzig' %}
                             {% endif %}
                         </td>
 
                         <td style="vertical-align: top">
                             {% if obj.bevestigde_email %}
-                                <code>{{ obj.bevestigde_email|wbr_email }}</code>
+                                <code>{{ obj.bevestigde_email|wbr_email }}</code><br>
                             {% else %}
                                 {% if obj.email_url %}
                                     <i class="sv-rood-text">Geen</i>
@@ -136,12 +129,8 @@
                             {% endif %}
 
                             {% if obj.email_url %}
-                                <br><br>
-                                <a class="btn-sv-rood" href="{{ obj.email_url }}">
-                                    <i class="notranslate material-symbol left hide-on-small-only">alternate_email</i>
-                                    <i class="notranslate material-symbol hide-on-med-and-up">alternate_email</i>
-                                    <span class="hide-on-small-only">Wijzig</span>
-                                </a>
+                                <br>
+                                {% sv-knop-nav url=obj.email_url icon='functie wijzig email' tekst='Wijzig' %}
                             {% endif %}
                         </td>
                     </tr>

@@ -5,6 +5,7 @@
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
+{% load design_knop %}
 
 {% block title %}Opleidingen van de vereniging{% endblock %}
 
@@ -46,11 +47,8 @@
                         <td>{{ opleiding.titel }}</td>
                         <td>
                             <div style="white-space:nowrap">     <!-- keeps buttons side by side -->
-                                <a class="btn-sv-rood" href="{{ opleiding.url_details }}" style="padding:0; width:35px; margin-right:5px">
-                                    <i class="notranslate material-symbol">schedule</i></a>
-                                <a class="btn-sv-rood" href="{{ opleiding.url_aanmeldingen }}" style="padding:0; width:35px; margin-right:5px">
-                                    <i class="notranslate material-symbol">group</i>
-                                </a>
+                                {% sv-knop-nav url=opleiding.url_details icon='opleiding details' smal=True %}
+                                {% sv-knop-nav url=opleiding.url_aanmeldingen icon='opleiding aanmeldingen' smal=True %}
                             </div>
                         </td>
                     </tr>

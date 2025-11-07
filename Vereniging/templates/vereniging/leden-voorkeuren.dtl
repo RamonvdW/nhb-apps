@@ -5,6 +5,7 @@
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
+{% load design_knop %}
 
 {% block title %}Voorkeuren leden{% endblock %}
 
@@ -67,11 +68,8 @@
                                 {% if toon_wijzig_kolom %}
                                     <td class="right-align">
                                         {% if obj.wijzig_url %}
-                                            <a class="btn-sv-rood" href="{{ obj.wijzig_url }}">
-                                                <i class="notranslate material-symbol left hide-on-med-and-down">tune</i>
-                                                <i class="notranslate material-symbol hide-on-large-and-up">tune</i>
-                                                <span class="hide-on-med-and-down">Wijzig</span>
-                                            </a>
+                                            {% sv-knop-nav url=obj.wijzig_url icon='ver voorkeuren leden' extra_class='hide-on-large-and-up' tekst='' %}
+                                            {% sv-knop-nav url=obj.wijzig_url icon='ver voorkeuren leden' extra_class='hide-on-med-and-down' tekst='Wijzig' %}
                                         {% endif %}
                                     </td>
                                 {% endif %}
@@ -128,11 +126,8 @@
                         {% if toon_wijzig_kolom %}
                             <td class="right-align">
                                 {% if obj.wijzig_url %}
-                                    <a class="btn-sv-rood" href="{{ obj.wijzig_url }}">
-                                        <i class="notranslate material-symbol left hide-on-med-and-down">tune</i>
-                                        <i class="notranslate material-symbol hide-on-large-and-up">tune</i>
-                                        <span class="hide-on-med-and-down">Wijzig</span>
-                                    </a>
+                                    {% sv-knop-nav url=obj.wijzig_url icon='ver voorkeuren leden' extra_class='hide-on-large-and-up' tekst='' %}
+                                    {% sv-knop-nav url=obj.wijzig_url icon='ver voorkeuren leden' extra_class='hide-on-med-and-down' tekst='Wijzig' %}
                                 {% endif %}
                             </td>
                         {% endif %}

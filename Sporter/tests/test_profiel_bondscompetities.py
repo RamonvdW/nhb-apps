@@ -266,7 +266,7 @@ class TestSporterProfielBondscompetities(E2EHelpers, TestCase):
         urls = self.extract_all_urls(resp, skip_menu=True)
         # print('urls:', urls)
         urls = [url for url in urls if '/bondscompetities/deelnemen/aanmelden/' in url]
-        self.assertEqual(len(urls), 2)
+        self.assertEqual(len(urls), 4)
 
     def test_case_02b(self):
         case_nr = "2b"
@@ -399,7 +399,7 @@ class TestSporterProfielBondscompetities(E2EHelpers, TestCase):
         urls = self.extract_all_urls(resp, skip_menu=True)
         # print('urls:', urls)
         urls2 = [url for url in urls if '/bondscompetities/deelnemen/aanmelden/' in url]
-        self.assertEqual(len(urls2), 1)
+        self.assertEqual(len(urls2), 2)
         urls2 = [url for url in urls if '/bondscompetities/deelnemen/afmelden/' in url]
         self.assertEqual(len(urls2), 1)
 
@@ -466,7 +466,7 @@ class TestSporterProfielBondscompetities(E2EHelpers, TestCase):
         urls = self.extract_all_urls(resp, skip_menu=True)
         # print('urls:', urls)
         urls2 = [url for url in urls if '/bondscompetities/regio/keuze-zeven-wedstrijden/' in url]
-        self.assertEqual(len(urls2), 1)
+        self.assertEqual(len(urls2), 2)
 
         # zet wedstrijden fase
         case_nr = "6b"
@@ -481,7 +481,7 @@ class TestSporterProfielBondscompetities(E2EHelpers, TestCase):
         urls = self.extract_all_urls(resp, skip_menu=True)
         # print('urls:', urls)
         urls2 = [url for url in urls if '/bondscompetities/regio/keuze-zeven-wedstrijden/' in url]
-        self.assertEqual(len(urls2), 1)
+        self.assertEqual(len(urls2), 2)
 
     def test_case_07a(self):
         case_nr = "7a"
@@ -502,7 +502,7 @@ class TestSporterProfielBondscompetities(E2EHelpers, TestCase):
         urls = self.extract_all_urls(resp, skip_menu=True)
         # print('urls:', urls)
         urls2 = [url for url in urls if '/bondscompetities/deelnemen/aanmelden/' in url]
-        self.assertEqual(len(urls2), 1)
+        self.assertEqual(len(urls2), 2)
         urls2 = [url for url in urls if '/bondscompetities/deelnemen/afmelden/' in url]
         self.assertEqual(len(urls2), 0)
         urls2 = [url for url in urls if '/bondscompetities/regio/voorkeur-rk/' in url]

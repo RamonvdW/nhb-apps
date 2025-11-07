@@ -163,10 +163,8 @@
                                 <!-- knoppen -->
                                 <td class="right-align" style="padding:5px 5px">
                                     {% if deelnemer.url_schietmomenten %}
-                                        <a class="multi-btn-sv-rood" href="{{ deelnemer.url_schietmomenten }}">
-                                            <span class="hide-on-small-only">Kies dagen</span>
-                                            <i class="hide-on-med-and-up material-symbol notranslate">edit</i>
-                                        </a>
+                                        {% sv-knop-nav url=deelnemer.url_schietmomenten icon='aanpassen' extra_class='hide-on-large-and-up' tekst='' %}
+                                        {% sv-knop-nav url=deelnemer.url_schietmomenten icon='aanpassen' extra_class='hide-on-med-and-down' tekst='Kies dagen' %}
                                     {% endif %}
 
                                     {% if deelnemer.url_afmelden %}
@@ -274,7 +272,6 @@
 
                                                 <!-- vraag om bevestiging deelname -->
                                                 {% sv-knop-modal deelnemer.id_deelname_rk '' icon='' tekst='Geef door' %}
-                                                <a class="multi-btn-sv-rood modal-trigger" href="#{{ deelnemer.id_deelname_rk }}">Geef door</a>
 
                                                 <!-- modal dialog voor deze specifieke competitie -->
                                                 <div class="modal" id="{{ deelnemer.id_deelname_rk }}">
@@ -356,10 +353,8 @@
                                             <!-- alvast afgemeld voor het RK -->
 
                                             <!-- geef mogelijkheid om toch mee te doen -->
-                                            <a class="multi-btn-sv-rood modal-trigger" href="#id_voorkeur_rk_{{ deelnemer.pk }}">
-                                                <span class="hide-on-small-only">Aanpassen</span>
-                                                <i class="hide-on-med-and-up material-symbol notranslate">edit</i>
-                                            </a>
+                                            {% sv-knop-modal 'id_voorkeur_rk_' deelnemer.pk icon='aanpassen' extra_class='hide-on-large-and-up' tekst='' %}
+                                            {% sv-knop-modal 'id_voorkeur_rk_' deelnemer.pk icon='aanpassen' extra_class='hide-on-med-and-down' tekst='Aanpassen' %}
 
                                             <!-- modal dialog voor deze specifieke competitie -->
                                             <div class="modal" id="id_voorkeur_rk_{{ deelnemer.pk }}">
@@ -382,10 +377,8 @@
                                         {% else %}
 
                                             <!-- geef mogelijkheid om alvast af te melden voor RK  -->
-                                            <a class="multi-btn-sv-rood modal-trigger" href="#id_voorkeur_rk_{{ deelnemer.pk }}">
-                                                <span class="hide-on-small-only">Afmelden</span>
-                                                <i class="hide-on-med-and-up material-symbol notranslate">edit</i>
-                                            </a>
+                                            {% sv-knop-modal 'id_voorkeur_rk_' deelnemer.pk icon='sporter afmelden' kleur='blauw' extra_class='hide-on-large-and-up' tekst='' %}
+                                            {% sv-knop-modal 'id_voorkeur_rk_' deelnemer.pk icon='sporter afmelden' kleur='blauw' extra_class='hide-on-med-and-down' tekst='Afmelden' %}
 
                                             <!-- modal dialog voor deze specifieke competitie -->
                                             <div class="modal" id="id_voorkeur_rk_{{ deelnemer.pk }}">
@@ -623,10 +616,8 @@
                                 <td class="center">{{ deelcomp.boog_beschrijving }}</td>
                                 <td class="right-align" style="padding:5px 5px">
                                     {% if deelcomp.url_aanmelden %}
-                                        <a class="multi-btn-sv-rood" href="{{ deelcomp.url_aanmelden }}">
-                                            <span class="hide-on-small-only">Aanmelden</span>
-                                            <i class="hide-on-med-and-up material-symbol notranslate">add</i>
-                                        </a>
+                                        {% sv-knop-nav url=deelcomp.url_aanmelden icon='toevoegen' extra_class='hide-on-med-and-up' tekst='' %}
+                                        {% sv-knop-nav url=deelcomp.url_aanmelden icon='toevoegen' extra_class='hide-on-small-only' tekst='Aanmelden' %}
                                     {% endif %}
                                 </td>
                             </tr>
@@ -835,8 +826,7 @@
                     <tr>
                         <td colspan="4" class="center">
                             <span>Kijk op <code>www.handboogsport.nl</code> onder Procedures hoe je een prestatiespeld aan kan vragen:</span><br><br>
-                            <a class="btn-sv-rood" href="{{ url_procedures }}" target="_blank" rel="noopener noreferrer">
-                                <i class="notranslate material-symbol left">open_in_new</i>Link</a>
+                            {% sv-knop-ext url=url_procedures tekst='Link' %}
                         </td>
                     </tr>
                 </table>

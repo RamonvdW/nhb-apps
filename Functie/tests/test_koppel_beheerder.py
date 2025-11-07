@@ -175,7 +175,7 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('functie/koppel-beheerders.dtl', 'design/site_layout.dtl'))
 
         # controleer aanwezigheid van toevoeg-knoppen
-        self.assertContains(resp, 'Koppel</button>', count=2)
+        self.assertContains(resp, '>Koppel<', count=2)
         # controleer afwezigheid van verwijder-knoppen
         self.assertNotContains(resp, 'Verwijder beheerder')
 
@@ -227,7 +227,7 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('functie/koppel-beheerders.dtl', 'design/site_layout.dtl'))
 
         # controleer aanwezigheid van toevoeg-knoppen
-        self.assertContains(resp, 'Koppel</button>', count=2)         # 2 leden van de vereniging
+        self.assertContains(resp, '>Koppel<', count=2)         # 2 leden van de vereniging
         # controleer afwezigheid van verwijder-knoppen
         self.assertContains(resp, 'Verwijder</a>', count=1)      # kan zichzelf verwijderen
 
