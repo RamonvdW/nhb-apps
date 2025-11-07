@@ -118,10 +118,7 @@
                     <tr>
                         <th>Nieuwsbericht of brochure</th>
                         <td>
-                            <a href="{{ wed.url_flyer }}" target="_blank" rel="noopener noreferrer">
-                                <i class="notranslate material-symbol left sv-blauw-text">open_in_new</i>
-                                <code>{{ wed.url_flyer|wbr_www }}</code>
-                            </a>
+                            {% sv-link-ext url=wed.url_flyer %}
                         </td>
                     </tr>
                 {% endif %}
@@ -226,10 +223,7 @@
                     <tr>
                         <th>Gepubliceerde lijst</th>
                         <td>
-                            <a href="{{ wed.url_deelnemerslijst }}" target="_blank" rel="noopener noreferrer">
-                                <i class="notranslate material-symbol left sv-blauw-text">open_in_new</i>
-                                <code>{{ wed.url_deelnemerslijst|wbr_www }}</code>
-                            </a>
+                            {% sv-link-ext url=wed.url_deelnemerslijst %}
                         </td>
                     </tr>
                 {% endif %}

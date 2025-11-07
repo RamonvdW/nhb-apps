@@ -106,7 +106,7 @@
                                 <tr>
                                     <td colspan="3" class="center">
                                         <button form="form1" class="btn-sv-rood" id="submit_knop2" type="submit">
-                                            <i class="notranslate material-symbol">add</i>
+                                            {% sv-icon-op-button 'toevoegen' %}
                                         </button>
                                     </td>
                                 </tr>
