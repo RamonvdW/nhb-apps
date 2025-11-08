@@ -5,6 +5,7 @@
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
+{% load design_knop %}
 
 {% block title %}Handboogsport Wereld Records{% endblock %}
 
@@ -45,8 +46,7 @@
                         <!-- <td>{{ obj.para_klasse }}</td> -->
                         <td>{{ obj.score_str }}</td>
                         <td>
-                            <a class="btn-sv-rood" href="{{ obj.url_details }}">
-                                <i class="notranslate material-symbol">visibility</i></a>
+                            {% sv-knop-nav url=obj.url_details icon='bekijken' tekst='' %}
                         </td>
                     </tr>
                 {% endfor %}

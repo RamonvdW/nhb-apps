@@ -42,18 +42,6 @@
       font-display: block;  /* liever later tonen dan verspringende layout */
       src: url("{% static 'fonts/OpenSans-SemiBold-v44.ttf' %}") format('truetype');
     }
-
-    @font-face {
-      font-family: 'Material Symbols Rounded';
-      font-style: normal;
-      font-weight: 400;
-      font-display: block;  /* liever later tonen dan verspringende layout */
-      {% if font_use_subset_files %}
-        src: url("{% static 'fonts/material-symbols-subset-mh-v11.woff2' %}") format('woff2');
-      {% else %}
-        src: url("{% static 'fonts/Material-Symbols-v277.ttf' %}") format('truetype');
-      {% endif %}
-    }
 </style>
 
 

@@ -425,7 +425,8 @@ class MyTestAsserts(TestCase):
                         elem_pos = 0
                     msg = "Bad HTML (template: %s):" % dtl
                     msg += "\n   Found block-level element '%s' inside 'p'" % elem
-                    msg = msg + "\n   ==> " + sub[elem_pos:elem_pos+40]
+                    msg += "\n   ==> " + sub[elem_pos:elem_pos+40]
+                    msg += '\n full context: %s' % sub
                     self.fail(msg)
             # for
 

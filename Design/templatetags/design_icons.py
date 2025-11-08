@@ -19,6 +19,7 @@ register = template.Library()
 # mapping van sv-icon gebruik naar Material Symbol icon name
 ICON_NAME2MATERIAL_SYMBOL_NAME = {
     # algemene opties
+    'aandacht': 'error',
     'aanpassen': 'edit',
     'bekijken': 'visibility',
     'checkbox check': 'check',
@@ -40,6 +41,8 @@ ICON_NAME2MATERIAL_SYMBOL_NAME = {
     'toon details': 'play_arrow',
     'verwijder': 'delete',
     'volgende': 'arrow_forward',
+    'volgende pagina': 'chevron_right',
+    'vorige pagina': 'chevron_left',
     'zoek': 'search',
 
     # specifiek
@@ -80,7 +83,7 @@ ICON_NAME2MATERIAL_SYMBOL_NAME = {
     'comp kamp selectie status onbekend': 'help',
     'comp kamp team bekijk': 'visibility',
     'comp kamp team koppelen': 'group',
-    'comp kamp team lid blokkeer': 'square',
+    'comp kamp team lid blokkeer': 'crop_square',
     'comp kamp team lid geselecteerd': 'check',
     'comp klassengrenzen vaststellen': 'equalizer',
     'comp kleine klassen': 'merge',
@@ -158,6 +161,11 @@ ICON_NAME2MATERIAL_SYMBOL_NAME = {
     'ledenvoordeel webwinkel': 'shopping_cart',
     'ledenvoordeel': 'redeem',
     'leeftijdsklassen': 'star',
+    'locatie binnen-buiten baan': 'flip',
+    'locatie buiten': 'wb_sunny',
+    'locatie extern': 'hiking',
+    'locatie notities': 'notifications',
+    'locatie volledig overdekte baan': 'crop_square',
     'logboek toon alles': 'backspace',
     'logboek': 'book',
     'mandje transport opties': 'local_shipping',
@@ -330,6 +338,7 @@ icon_use_to_icon_height = {
     'feedback': 40,
     'link': 24,
     'h5': 40,
+    'pagination': 30,
 }
 
 icon_kleur_to_class = {
@@ -348,7 +357,7 @@ icon_kleur_to_class = {
 
 @register.simple_tag(name='sv-icon')
 @functools.cache
-def sv_icon(icon_name, use='button', kleur='rood', icon_height=0, extra_style=''):
+def sv_icon(icon_name, use='button', kleur='rood', icon_height=0, extra_style='', tooltip=''):
     """
         use is een string die standaard icon_height kies - zie tabel hierboven
     """
@@ -381,6 +390,11 @@ def sv_icon(icon_name, use='button', kleur='rood', icon_height=0, extra_style=''
 
     if not new_text:
         raise ValueError('Unknown icon name: %s' % repr(icon_name))
+
+    if tooltip:
+        pre = '<div class="tooltipped" data-tooltip="%s" style="display:inline">' % tooltip
+        post = '</div>'
+        new_text = pre + new_text + post
 
     return mark_safe(new_text)
 

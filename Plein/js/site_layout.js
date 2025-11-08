@@ -31,12 +31,6 @@ window.addEventListener("load", () => {
     // page is fully loaded
     //console.log("load!");
 
-    // de fonts zijn nu helemaal ingeladen, dus we kunnen de iconen tonen
-    const icons = document.querySelectorAll('.material-symbol');
-    Array.from(icons).forEach(icon => {
-        icon.style.display = 'inline-block';
-    });
-
     // evalueer de posities van de labels van de forms
     // zodat het label niet over het ingevulde input veld staat
     M.updateTextFields();

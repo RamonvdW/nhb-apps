@@ -204,10 +204,7 @@
                             <tr>
                                 <th></th>
                                 <td>
-                                    <a href="{{ url }}" target="_blank" rel="noopener noreferrer">
-                                        <i class="notranslate material-symbol left sv-blauw-text">open_in_new</i>
-                                        <code>{{ url|wbr_www }}</code>
-                                    </a>
+                                    {% sv-link-ext url %}
                                 </td>
                             </tr>
                         {% endif %}
@@ -253,7 +250,9 @@
                                     <span>{{ sessie.aantal_beschikbaar }} plaatsen beschikbaar (van de {{ sessie.max_sporters }})</span><br>
                                 {% endif %}
                                 <span>{{ sessie.klassen|length }} wedstrijdklassen</span>
-                                <i class="material-symbol notranslate sv-rood-text secondary-content"><!-- wordt gezet in in/uitklappen_klaar() in Plein/js/site_layout.js --></i>
+
+                                <!-- icoon svg wordt gezet in Overige/js/collapsible_icons.js -->
+                                <span class="collapsible-icon">x</span>
                             </div>
                             <div class="collapsible-body white center">
                                 <span>

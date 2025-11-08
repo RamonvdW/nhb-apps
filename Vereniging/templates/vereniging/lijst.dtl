@@ -5,6 +5,7 @@
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
+{% load design_icons %}
 {% load design_knop %}
 
 {% block title %}Verenigingen{% endblock %}
@@ -129,35 +130,42 @@
                     <td class="hide-on-small-only">
                         {% if obj.locatie %}
                             {% if obj.locatie.baan_type == 'X' %}
-                                <!-- ga er vanuit dat nog niets ingevuld is -->
+                                <!-- nog niets ingevuld is -->
                                 {% if not obj.heeft_externe_locaties %}
-                                    <i class="notranslate material-symbol sv-rood-text" style="vertical-align: bottom; font-size: 20px; cursor: default">error</i>
-                                    <br>
+                                    {% sv-icon 'aandacht' use='text' %}
                                 {% endif %}
                             {% else %}
-                                <!-- toon binnen-buiten icoon -->
                                 {% if obj.locatie.baan_type == 'H' %}
-                                    <i class="notranslate material-symbol tooltipped" style="vertical-align: bottom; font-size: 20px; cursor: default" data-tooltip="Half overdekt">flip</i>
-                                    <span>&nbsp;18m: {{ obj.locatie.banen_18m }}</span>
-                                    <br>
-                                    <i class="notranslate material-symbol white-text" style="vertical-align: bottom; font-size: 20px; cursor: default">flip</i>
-                                    <span>&nbsp;25m: {{ obj.locatie.banen_25m }}</span>
-                                    <br>
+                                    <!-- binnen-buiten -->
+                                    <div style="white-space:nowrap" class="valign-wrapper">
+                                        <div>
+                                            {% sv-icon 'locatie binnen-buiten baan' use='text' kleur='zwart' tooltip='Half overdekt' %}
+                                        </div>
+                                        <div style="margin-left:10px">
+                                            <span>18m: {{ obj.locatie.banen_18m }}</span>
+                                            <br>
+                                            <span>25m: {{ obj.locatie.banen_25m }}</span>
+                                        </div>
+                                    </div>
                                 {% endif %}
-                                <!-- toon volledig-overdekt icoon -->
+
                                 {% if obj.locatie.baan_type == 'O' %}
-                                    <i class="notranslate material-symbol tooltipped" style="vertical-align: bottom; font-size: 20px; cursor: default" data-tooltip="Volledig overdekt">crop_square</i>
-                                    <span>&nbsp;18m: {{ obj.locatie.banen_18m }}</span>
-                                    <br>
-                                    <i class="notranslate material-symbol white-text" style="vertical-align: bottom; font-size: 20px; cursor: default">crop_square</i>
-                                    <span>&nbsp;25m: {{ obj.locatie.banen_25m }}</span>
-                                    <br>
+                                    <!-- toon volledig-overdekt icoon -->
+                                    <div style="white-space:nowrap" class="valign-wrapper">
+                                        <div>
+                                            {% sv-icon 'locatie volledig overdekte baan' use='text' kleur='zwart' tooltip='Volledig overdekt' %}
+                                        </div>
+                                        <div style="margin-left:10px">
+                                            <span>18m: {{ obj.locatie.banen_18m }}</span>
+                                            <br>
+                                            <span>25m: {{ obj.locatie.banen_25m }}</span>
+                                        </div>
+                                    </div>
                                 {% endif %}
 
                                 <!-- toon het belletje icoon als er notities zijn -->
                                 {% if obj.locatie.notities != '' %}
-                                    <i class="notranslate material-symbol" style="vertical-align: bottom; font-size: 20px; cursor: default">notifications</i>
-                                    <br>
+                                    {% sv-icon 'locatie notities' kleur='blauw' use='text' %}
                                 {% endif %}
                             {% endif %}
                         {% else %}
@@ -165,14 +173,19 @@
                         {% endif %}
 
                         {% if obj.buiten_locatie %}
-                            <i class="notranslate material-symbol tooltipped" style="vertical-align: bottom; font-size: 20px; cursor: default" data-tooltip="Buiten locatie">wb_sunny</i>
-                            <span>&nbsp;tot {{ obj.buiten_locatie.buiten_max_afstand }}m: {{ obj.buiten_locatie.buiten_banen }}</span>
-                            <br>
+                            <div style="white-space:nowrap" class="valign-wrapper">
+                                <div>
+                                    {% sv-icon 'locatie buiten' kleur='zwart' use='text' tooltip='Buiten locatie' %}
+                                </div>
+                                <div style="margin-left:10px">
+                                    <span>tot {{ obj.buiten_locatie.buiten_max_afstand }}m: {{ obj.buiten_locatie.buiten_banen }}</span>
+                                </div>
+                            </div>
                         {% endif %}
 
                         <!-- externe locaties -->
                         {% if obj.heeft_externe_locaties %}
-                            <i class="notranslate material-symbol" style="vertical-align: bottom; font-size: 20px; cursor: default">hiking</i>
+                            {% sv-icon 'locatie extern' kleur='zwart' use='text' tooltip='Externe locatie' %}
                         {% endif %}
                     </td>
 

@@ -225,7 +225,6 @@ class TestLogboek(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_template_used(resp, ('logboek/crm-import.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
-        self.assertContains(resp, 'chevron_')      # icoon van pagination pijltje
 
         # haal pagina 2 op voor alternatieve coverage ('previous' wordt actief)
         with self.assert_max_queries(20):

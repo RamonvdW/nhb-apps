@@ -6,6 +6,7 @@
 {% endcomment %}
 {% load static %}
 {% load design_filters %}   <!-- highlight filter -->
+{% load design_icons %}
 
 {% block title %}Handboogsport records doorzoeken{% endblock %}
 
@@ -41,7 +42,8 @@
                     <!-- button -->
                     <div class="center-align">
                         <button class="btn-sv-rood" id="submit_knop" type="submit">
-                            <i class="notranslate material-symbol left">search</i>Zoek</button>
+                            {% sv-icon-op-button 'zoek' tekst='Zoek' %}
+                        </button>
                     </div>
 
                 </form>

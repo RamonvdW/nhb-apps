@@ -126,6 +126,10 @@ class TestEvenementVereniging(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_100000)
         self.e2e_wissel_naar_functie(functie_sec)
 
+        self.evenement.datum -= datetime.timedelta(days=100)
+        self.evenement.workshop_opties = '1.1 test A\n1.2 test B\n2.1 test C\n'
+        self.evenement.save(update_fields=['datum', 'workshop_opties'])
+
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_lijst_vereniging)
         self.assertEqual(resp.status_code, 200)     # 200 = OK

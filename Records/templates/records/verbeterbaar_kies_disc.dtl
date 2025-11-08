@@ -6,14 +6,14 @@
 {% endcomment %}
 {% load static %}
 
-{% block title %}Verbeterbare Records{% endblock %}
+{% block title %}Verbeterbare records{% endblock %}
 
 {% block pagina %}
 
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Verbeterbare Records</h3>
+            <h3 class="page-banner">Verbeterbare records</h3>
         </div>
     </div>
 
