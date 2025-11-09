@@ -19,11 +19,12 @@ class Migration(migrations.Migration):
 
     """ Migratie class voor dit deel van de applicatie """
 
-    replaces = [('Wedstrijden', 'm0053_squashed'),
-                ('Wedstrijden', 'm0053_verstop'),
-                ('Wedstrijden', 'm0054_url_uitslag'),
-                ('Wedstrijden', 'm0055_url_uitslagen'),
-                ('Wedstrijden', 'm0056_url_flyer')]
+    replaces = [('Wedstrijden', 'm0057_squashed'),
+                ('Wedstrijden', 'm0058_allow_blank'),
+                ('Wedstrijden', 'm0059_langere_titel'),
+                ('Wedstrijden', 'm0060_bestelling'),
+                ('Wedstrijden', 'm0061_afmelden_sessie'),
+                ('Wedstrijden', 'm0062_urls')]
 
     # dit is de eerste
     initial = True
@@ -34,8 +35,8 @@ class Migration(migrations.Migration):
         ('BasisTypen', 'm0062_squashed'),
         ('Functie', 'm0025_squashed'),
         ('Locatie', 'm0009_squashed'),
-        ('Score', 'm0019_squashed'),
-        ('Sporter', 'm0031_squashed'),
+        ('Score', 'm0021_squashed'),
+        ('Sporter', 'm0033_squashed'),
         ('Vereniging', 'm0007_squashed'),
     ]
 
@@ -62,7 +63,7 @@ class Migration(migrations.Migration):
             name='Wedstrijd',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('titel', models.CharField(default='', max_length=50)),
+                ('titel', models.CharField(default='', max_length=75)),
                 ('status', models.CharField(choices=[('O', 'Ontwerp'), ('W', 'Wacht op goedkeuring'),
                                                      ('A', 'Geaccepteerd'), ('X', 'Geannuleerd')],
                                             default='O', max_length=1)),
@@ -71,12 +72,11 @@ class Migration(migrations.Migration):
                 ('begrenzing', models.CharField(choices=[('W', 'Wereld'), ('L', 'Landelijk'), ('Y', 'Rayon'),
                                                          ('G', 'Regio'), ('V', 'Vereniging')],
                                                 default='W', max_length=1)),
-                ('organisatie', models.CharField(choices=[('W', 'World Archery'), ('N', 'KHSN'), ('F', 'IFAA')],
-                                                 default='W', max_length=1)),
+                ('organisatie', models.CharField(choices=[('W', 'World Archery'), ('N', 'KHSN'), ('F', 'IFAA'),
+                                                          ('S', 'WA strikt')], default='W', max_length=1)),
                 ('discipline', models.CharField(choices=[('OD', 'Outdoor'), ('IN', 'Indoor'), ('25', '25m 1pijl'),
                                                          ('CL', 'Clout'), ('VE', 'Veld'), ('RA', 'Run Archery'),
-                                                         ('3D', '3D')],
-                                                default='OD', max_length=2)),
+                                                         ('3D', '3D')], default='OD', max_length=2)),
                 ('wa_status', models.CharField(choices=[('A', 'A-status'), ('B', 'B-status')],
                                                default='B', max_length=1)),
                 ('contact_naam', models.CharField(blank=True, default='', max_length=50)),
@@ -110,11 +110,12 @@ class Migration(migrations.Migration):
                 ('eis_kwalificatie_scores', models.BooleanField(default=False)),
                 ('aantal_scheids', models.IntegerField(default=-1)),
                 ('verstop_voor_mwz', models.BooleanField(default=False)),
-                ('url_uitslag_1', models.CharField(default='', max_length=128)),
-                ('url_uitslag_2', models.CharField(default='', max_length=128)),
-                ('url_uitslag_3', models.CharField(default='', max_length=128)),
-                ('url_uitslag_4', models.CharField(default='', max_length=128)),
-                ('url_flyer', models.CharField(default='', max_length=128)),
+                ('url_uitslag_1', models.CharField(blank=True, default='', max_length=200)),
+                ('url_uitslag_2', models.CharField(blank=True, default='', max_length=200)),
+                ('url_uitslag_3', models.CharField(blank=True, default='', max_length=200)),
+                ('url_uitslag_4', models.CharField(blank=True, default='', max_length=200)),
+                ('url_flyer', models.CharField(blank=True, default='', max_length=200)),
+                ('url_deelnemerslijst', models.CharField(blank=True, default='', max_length=200)),
             ],
             options={
                 'verbose_name': 'Wedstrijd',
@@ -154,22 +155,22 @@ class Migration(migrations.Migration):
                 ('korting', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.SET_NULL,
                                               to='Wedstrijden.wedstrijdkorting')),
                 ('koper', models.ForeignKey(on_delete=models.deletion.PROTECT, to='Account.account')),
-                ('sessie', models.ForeignKey(on_delete=models.deletion.PROTECT, to='Wedstrijden.wedstrijdsessie')),
+                ('sessie', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.PROTECT,
+                                             to='Wedstrijden.wedstrijdsessie')),
                 ('sporterboog', models.ForeignKey(on_delete=models.deletion.PROTECT, to='Sporter.sporterboog')),
                 ('wedstrijd', models.ForeignKey(on_delete=models.deletion.PROTECT, to='Wedstrijden.wedstrijd')),
                 ('log', models.TextField(blank=True)),
                 ('wedstrijdklasse', models.ForeignKey(on_delete=models.deletion.PROTECT,
                                                       to='BasisTypen.kalenderwedstrijdklasse')),
+                ('bestelling', models.ForeignKey(null=True, on_delete=models.deletion.PROTECT,
+                                                 to='Bestelling.bestellingregel')),
             ],
             options={
                 'verbose_name': 'Wedstrijd inschrijving',
                 'verbose_name_plural': 'Wedstrijd inschrijvingen',
+                'constraints': [models.UniqueConstraint(fields=('sessie', 'sporterboog'),
+                                                        name='Geen dubbele wedstrijd inschrijving')],
             },
-        ),
-        migrations.AddConstraint(
-            model_name='wedstrijdinschrijving',
-            constraint=models.UniqueConstraint(fields=('sessie', 'sporterboog'),
-                                               name='Geen dubbele wedstrijd inschrijving'),
         ),
         migrations.CreateModel(
             name='Kwalificatiescore',

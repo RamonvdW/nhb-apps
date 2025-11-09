@@ -12,6 +12,9 @@ class Migration(migrations.Migration):
 
     """ Migratie class voor dit deel van de applicatie """
 
+    replaces = [('Sporter', 'm0031_squashed'),
+                ('Sporter', 'm0032_email_blank')]
+
     # dit is de eerste
     initial = True
 
@@ -31,7 +34,7 @@ class Migration(migrations.Migration):
                 ('voornaam', models.CharField(max_length=100)),
                 ('achternaam', models.CharField(max_length=100)),
                 ('unaccented_naam', models.CharField(blank=True, default='', max_length=200)),
-                ('email', models.CharField(max_length=150)),
+                ('email', models.CharField(blank=True, max_length=150)),
                 ('geboorte_datum', models.DateField(validators=[Sporter.models.validate_geboorte_datum])),
                 ('geslacht', models.CharField(choices=[('M', 'Man'), ('V', 'Vrouw'), ('X', 'Anders')], max_length=1)),
                 ('para_classificatie', models.CharField(blank=True, max_length=30)),

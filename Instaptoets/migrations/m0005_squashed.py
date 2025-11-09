@@ -22,7 +22,7 @@ class Migration(migrations.Migration):
 
     # volgorde afdwingen
     dependencies = [
-        ('Sporter', 'm0031_squashed'),
+        ('Sporter', 'm0033_squashed'),
     ]
 
     # migratie functies

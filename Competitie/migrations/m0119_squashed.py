@@ -33,10 +33,10 @@ class Migration(migrations.Migration):
         ('BasisTypen', 'm0062_squashed'),
         ('Functie', 'm0025_squashed'),
         ('Geo', 'm0002_squashed'),
-        ('Score', 'm0019_squashed'),
-        ('Sporter', 'm0031_squashed'),
+        ('Score', 'm0021_squashed'),
+        ('Sporter', 'm0033_squashed'),
         ('Vereniging', 'm0007_squashed'),
-        ('Wedstrijden', 'm0057_squashed'),
+        ('Wedstrijden', 'm0063_squashed'),
     ]
 
     # migratie functies

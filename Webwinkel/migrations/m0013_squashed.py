@@ -24,6 +24,11 @@ class Migration(migrations.Migration):
 
     """ Migratie class voor dit deel van de applicatie """
 
+    replaces = [('Webwinkel', 'm0009_squashed'),
+                ('Webwinkel', 'm0010_bestelling'),
+                ('Webwinkel', 'm0011_remove_bedragen'),
+                ('Webwinkel', 'm0012_verzendopties')]
+
     # dit is de eerste
     initial = True
 
@@ -69,11 +74,16 @@ class Migration(migrations.Migration):
                 ('fotos', models.ManyToManyField(blank=True, to='Webwinkel.webwinkelfoto')),
                 ('omslag_foto', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.SET_NULL,
                                                   related_name='omslagfoto', to='Webwinkel.webwinkelfoto')),
-                ('type_verzendkosten', models.CharField(choices=[('pak', 'Pakketpost'), ('brief', 'Briefpost')],
+                ('type_verzendkosten', models.CharField(choices=[('pak', 'Pakketpost'), ('brief', 'Briefpost'),
+                                                                 ('klein', 'Pakket 2kg'), ('groot', 'Pakket 10kg')],
                                                         default='pak', max_length=5)),
                 ('sectie_subtitel', models.CharField(blank=True, default='', max_length=250)),
                 ('kleding_maat', models.CharField(blank=True, default='', max_length=10)),
                 ('gewicht_gram', models.SmallIntegerField(default=0)),
+                ('lang_1', models.PositiveIntegerField(default=0)),
+                ('lang_2', models.PositiveIntegerField(default=0)),
+                ('lang_3', models.PositiveIntegerField(default=0)),
+                ('volume_cm3', models.PositiveIntegerField(default=0)),
             ],
             options={
                 'verbose_name': 'Webwinkel product',
@@ -88,12 +98,32 @@ class Migration(migrations.Migration):
                 ('status', models.CharField(choices=[('M', 'Reservering'), ('B', 'Besteld'), ('BO', 'Betaald'),
                                                      ('A', 'Geannuleerd')], default='M', max_length=2)),
                 ('aantal', models.PositiveSmallIntegerField(default=1)),
-                ('totaal_euro', models.DecimalField(decimal_places=2, default=Decimal('0'), max_digits=6)),
-                ('ontvangen_euro', models.DecimalField(decimal_places=2, default=Decimal('0'), max_digits=6)),
                 ('log', models.TextField(blank=True)),
-                ('koper', models.ForeignKey(on_delete=models.deletion.PROTECT, to='Account.account')),
                 ('product', models.ForeignKey(on_delete=models.deletion.PROTECT, to='Webwinkel.webwinkelproduct')),
+                ('bestelling', models.ForeignKey(null=True, on_delete=models.deletion.PROTECT,
+                                                 to='Bestelling.bestellingregel')),
             ],
+        ),
+        migrations.CreateModel(
+            name='VerzendOptie',
+            fields=[
+                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('beschrijving', models.CharField(default='?', max_length=100)),
+                ('emballage_type', models.CharField(default='?', max_length=100)),
+                ('emballage_euro', models.DecimalField(decimal_places=2, default=Decimal('0'), max_digits=6)),
+                ('emballage_gram', models.PositiveIntegerField(default=0)),
+                ('afhandelen_euro', models.DecimalField(decimal_places=2, default=Decimal('0'), max_digits=6)),
+                ('verzendkosten_type', models.CharField(default='?', max_length=100)),
+                ('verzendkosten_euro', models.DecimalField(decimal_places=2, default=Decimal('0'), max_digits=6)),
+                ('max_gewicht_gram', models.PositiveIntegerField(default=0)),
+                ('max_lang_1', models.PositiveIntegerField(default=0)),
+                ('max_lang_2', models.PositiveIntegerField(default=0)),
+                ('max_lang_3', models.PositiveIntegerField(default=0)),
+                ('max_volume_cm3', models.PositiveIntegerField(default=0)),
+            ],
+            options={
+                'verbose_name': 'Verzend optie',
+            },
         ),
         migrations.RunPython(maak_functie_mww, reverse_code=migrations.RunPython.noop),
     ]

@@ -4,8 +4,9 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from decimal import Decimal
 from django.db import migrations, models
+from decimal import Decimal
+import datetime
 
 
 def maak_functie_mo(apps, _):
@@ -20,6 +21,13 @@ class Migration(migrations.Migration):
 
     """ Migratie class voor dit deel van de applicatie """
 
+    replaces = [('Opleiding', 'm0006_squashed'),
+                ('Opleiding', 'm0007_moment'),
+                ('Opleiding', 'm0008_bestelling'),
+                ('Opleiding', 'm0009_afgemeld'),
+                ('Opleiding', 'm0010_remove_auto_now'),
+                ('Opleiding', 'm0011_timezone')]
+
     # dit is de eerste
     initial = True
 
@@ -28,7 +36,7 @@ class Migration(migrations.Migration):
         ('Account', 'm0032_squashed'),
         ('Functie', 'm0025_squashed'),
         ('Locatie', 'm0009_squashed'),
-        ('Sporter', 'm0031_squashed'),
+        ('Sporter', 'm0033_squashed'),
     ]
 
     # migratie functies
@@ -55,11 +63,12 @@ class Migration(migrations.Migration):
                 ('datum', models.DateField(default='2000-01-01')),
                 ('begin_tijd', models.TimeField(default='10:00')),
                 ('duur_minuten', models.PositiveIntegerField(default=1)),
-                ('opleider_naam', models.CharField(default='', max_length=150)),
+                ('opleider_naam', models.CharField(blank=True, default='', max_length=150)),
                 ('opleider_email', models.EmailField(blank=True, default='', max_length=254)),
                 ('opleider_telefoon', models.CharField(blank=True, default='', max_length=25)),
                 ('locatie', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.PROTECT,
                                               to='Locatie.evenementlocatie')),
+                ('aantal_dagen', models.PositiveSmallIntegerField(default=1)),
             ],
             options={
                 'verbose_name': 'Opleiding moment',
@@ -95,30 +104,6 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.CreateModel(
-            name='OpleidingAfgemeld',
-            fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('wanneer_afgemeld', models.DateTimeField(auto_now_add=True)),
-                ('status', models.CharField(choices=[('C', 'Geannuleerd'), ('A', 'Afgemeld')], max_length=2)),
-                ('wanneer_aangemeld', models.DateTimeField(auto_now_add=True)),
-                ('nummer', models.BigIntegerField(default=0)),
-                ('bedrag_ontvangen', models.DecimalField(decimal_places=2, default=Decimal('0'), max_digits=5)),
-                ('bedrag_retour', models.DecimalField(decimal_places=2, default=Decimal('0'), max_digits=5)),
-                ('aanpassing_email', models.EmailField(blank=True, max_length=254)),
-                ('aanpassing_telefoon', models.CharField(blank=True, default='', max_length=25)),
-                ('aanpassing_geboorteplaats', models.CharField(blank=True, default='', max_length=100)),
-                ('log', models.TextField(blank=True)),
-                ('koper', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.PROTECT,
-                                            to='Account.account')),
-                ('opleiding', models.ForeignKey(on_delete=models.deletion.PROTECT, to='Opleiding.opleiding')),
-                ('sporter', models.ForeignKey(on_delete=models.deletion.PROTECT, to='Sporter.sporter')),
-            ],
-            options={
-                'verbose_name': 'Opleiding afmelding',
-                'verbose_name_plural': 'Opleiding afmeldingen',
-            },
-        ),
-        migrations.CreateModel(
             name='OpleidingInschrijving',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
@@ -133,13 +118,42 @@ class Migration(migrations.Migration):
                 ('sporter', models.ForeignKey(on_delete=models.deletion.PROTECT, to='Sporter.sporter')),
                 ('nummer', models.BigIntegerField(default=0)),
                 ('status', models.CharField(choices=[('I', 'Inschrijven'), ('R', 'Reservering'), ('B', 'Besteld'),
-                                                     ('D', 'Definitief')],
+                                                     ('D', 'Definitief'), ('A', 'Afgemeld')],
                                             default='I', max_length=2)),
                 ('log', models.TextField(blank=True)),
+                ('bestelling', models.ForeignKey(null=True, on_delete=models.deletion.PROTECT,
+                                                 to='Bestelling.bestellingregel')),
             ],
             options={
                 'verbose_name': 'Opleiding inschrijving',
                 'verbose_name_plural': 'Opleiding inschrijvingen',
+            },
+        ),
+        migrations.CreateModel(
+            name='OpleidingAfgemeld',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('wanneer_afgemeld', models.DateTimeField(auto_now_add=True)),
+                ('status', models.CharField(choices=[('C', 'Geannuleerd'), ('A', 'Afgemeld')], max_length=2)),
+                ('wanneer_aangemeld', models.DateTimeField(default=datetime.datetime(2000, 1, 1, 0, 0,
+                                                                                     tzinfo=datetime.timezone.utc))),
+                ('nummer', models.BigIntegerField(default=0)),
+                ('bedrag_ontvangen', models.DecimalField(decimal_places=2, default=Decimal('0'), max_digits=5)),
+                ('bedrag_retour', models.DecimalField(decimal_places=2, default=Decimal('0'), max_digits=5)),
+                ('aanpassing_email', models.EmailField(blank=True, max_length=254)),
+                ('aanpassing_telefoon', models.CharField(blank=True, default='', max_length=25)),
+                ('aanpassing_geboorteplaats', models.CharField(blank=True, default='', max_length=100)),
+                ('log', models.TextField(blank=True)),
+                ('koper', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.PROTECT,
+                                            to='Account.account')),
+                ('opleiding', models.ForeignKey(on_delete=models.deletion.PROTECT, to='Opleiding.opleiding')),
+                ('sporter', models.ForeignKey(on_delete=models.deletion.PROTECT, to='Sporter.sporter')),
+                ('bestelling', models.ForeignKey(null=True, on_delete=models.deletion.PROTECT,
+                                                 to='Bestelling.bestellingregel')),
+            ],
+            options={
+                'verbose_name': 'Opleiding afmelding',
+                'verbose_name_plural': 'Opleiding afmeldingen',
             },
         ),
         migrations.RunPython(maak_functie_mo),

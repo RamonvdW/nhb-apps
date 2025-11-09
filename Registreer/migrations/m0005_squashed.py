@@ -68,7 +68,7 @@ class Migration(migrations.Migration):
         ('Account', 'm0032_squashed'),
         ('Functie', 'm0025_squashed'),
         ('Geo', 'm0002_squashed'),
-        ('Sporter', 'm0031_squashed'),
+        ('Sporter', 'm0033_squashed'),
         ('Vereniging', 'm0007_squashed'),
     ]
 

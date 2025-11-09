@@ -1483,8 +1483,8 @@ class Migration(migrations.Migration):
     dependencies = [
         ('Account', 'm0032_squashed'),
         ('BasisTypen', 'm0062_squashed'),
-        ('Sporter', 'm0031_squashed'),
-        ('Wedstrijden', 'm0057_squashed'),
+        ('Sporter', 'm0033_squashed'),
+        ('Wedstrijden', 'm0063_squashed'),
     ]
 
     # migratie functies
