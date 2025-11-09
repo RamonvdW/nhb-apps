@@ -167,9 +167,7 @@
 
                         <!-- knop naar de details van de regioplanning -->
                         <td class="center">
-                            <a class="btn-sv-rood" href="{% url 'CompLaagRegio:regio-planning' deelcomp.pk %}">
-                                <img src="{% static 'plein/zoom_in.svg' %}" height="36" alt="Details" draggable="false">
-                            </a>
+                            {% sv-knop-nav url=deelcomp.url_wijzig icon='zoom details' tekst='' %}
                         </td>
                     </tr>
                 {% endfor %}

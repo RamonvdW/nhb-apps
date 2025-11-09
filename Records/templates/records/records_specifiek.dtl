@@ -5,6 +5,7 @@
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
+{% load design_knop %}
 
 <!--                                     25m 1pijl                 Heren                     Longbow                   8 september 2024 -->
 {% block title %}Handboogsport Record {{ obj_record.disc_str }} {{ obj_record.gesl_str }} {{ obj_record.makl_str }} {{ obj_record.datum }} {% endblock %}
@@ -175,9 +176,7 @@
                                 {% if obj.is_specifieke_record %}
                                     <i>Wordt getoond</i>
                                 {% else %}
-                                    <a class="btn-sv-rood" href="{{ obj.url }}">
-                                        <img src="{% static 'plein/zoom_in.svg' %}" height="36" alt="Toon" draggable="false">
-                                    </a>
+                                    {% sv-knop-nav url=obj.url icon='zoom details' tekst='' %}
                                 {% endif %}
                             </td>
                         </tr>

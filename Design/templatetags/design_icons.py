@@ -260,7 +260,8 @@ ICON_NAME2MATERIAL_SYMBOL_NAME = {
 }
 
 ICON_NAME2SV_SYMBOL = {
-    'comp planning toon details': 'zoom_in',
+    # algemeen
+    'zoom details': 'zoom_in',
 }
 
 

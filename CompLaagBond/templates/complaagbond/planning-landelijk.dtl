@@ -156,7 +156,7 @@
 
                         <td class="center">
                             {% url 'CompLaagRayon:planning' deelkamp.pk as url_zoom %}
-                            {% sv-knop-nav url=url_zoom icon='comp planning toon details' tekst='' %}
+                            {% sv-knop-nav url=url_zoom icon='zoom details' tekst='' %}
                         </td>
                     </tr>
                 {% endfor %}

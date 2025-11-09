@@ -56,7 +56,7 @@ class TestDesignTemplatetags(TestCase):
         MATERIAL_SYMBOL_SVG['download'] = temp       # restore
 
     def test_icon_sv_symbol(self):
-        sv_icon_name = 'comp planning toon details'
+        sv_icon_name = 'zoom details'
         sv_icon.cache_clear()           # in verband met functools.cache gebruik
 
         out = sv_icon(sv_icon_name)

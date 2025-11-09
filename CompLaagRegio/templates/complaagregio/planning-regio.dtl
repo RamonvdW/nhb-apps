@@ -75,9 +75,7 @@
 
                             <!-- knop naar de ronde van de regioplanning -->
                             <td class="center">
-                                <a class="btn-sv-rood" href="{{ cluster.url_bekijk }}">
-                                    <img src="{% static 'plein/zoom_in.svg' %}" height="36" alt="Details" draggable="false">
-                                </a>
+                                {% sv-knop-nav url=cluster.url_bekijk icon='zoom details' tekst='' %}
                             </td>
                         </tr>
                     {% endfor %}

@@ -5,6 +5,7 @@
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
+{% load design_knop %}
 
 {% block title %}Taken overzicht{% endblock %}
 
@@ -53,9 +54,7 @@
                             <td class="center">{{ taak.deadline|date:"Y-m-d" }}</td>
                             <td>{{ taak.onderwerp }}</td>
                             <td>
-                                <a class="btn-sv-rood" href="{{ taak.url }}">
-                                    <img src="{% static 'plein/zoom_in.svg' %}" height="36" alt="Toon" draggable="false">
-                                </a>
+                                {% sv-knop-nav url=taak.url icon='zoom details' tekst='' %}
                             </td>
                         </tr>
                     {% endif %}
@@ -109,9 +108,7 @@
                                 <td class="center">{{ taak.deadline|date:"Y-m-d" }}</td>
                                 <td>{{ taak.onderwerp }}</td>
                                 <td>
-                                    <a class="btn-sv-rood" href="{{ taak.url }}">
-                                        <img src="{% static 'plein/zoom_in.svg' %}" height="36" alt="Toon" draggable="false">
-                                    </a>
+                                    {% sv-knop-nav url=taak.url icon='zoom details' tekst='' %}
                                 </td>
                             </tr>
                         {% endif %}

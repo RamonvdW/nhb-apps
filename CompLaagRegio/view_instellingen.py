@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -13,15 +13,16 @@ from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Competitie.definities import (INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_2, TEAM_PUNTEN,
                                    TEAM_PUNTEN_MODEL_FORMULE1, TEAM_PUNTEN_MODEL_TWEE, TEAM_PUNTEN_MODEL_SOM_SCORES)
-from Competitie.models import Competitie, Regiocompetitie
+from Competitie.models import Competitie, Regiocompetitie, RegiocompetitieRonde
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
+from Geo.models import Cluster
 from types import SimpleNamespace
 import datetime
 
 
 TEMPLATE_COMPREGIO_RCL_INSTELLINGEN = 'complaagregio/rcl-instellingen.dtl'
-TEMPLATE_COMPREGIO_INSTELLINGEN_REGIO_GLOBAAL = 'complaagregio/rcl-instellingen-globaal.dtl'
+TEMPLATE_COMPREGIO_REGIO_KEUZES = 'complaagregio/regio-keuzes.dtl'
 
 
 class RegioInstellingenView(UserPassesTestMixin, TemplateView):
@@ -199,18 +200,31 @@ class RegioInstellingenGlobaalView(UserPassesTestMixin, TemplateView):
     """ Deze view geeft een overzicht van de regio keuzes """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_COMPREGIO_INSTELLINGEN_REGIO_GLOBAAL
+    template_name = TEMPLATE_COMPREGIO_REGIO_KEUZES
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
     permission_denied_message = 'Geen toegang'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.rol_nu, self.functie_nu = None, None
+        self.regio2clusters = dict()
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
         return self.rol_nu in (Rol.ROL_BB, Rol.ROL_BKO, Rol.ROL_RKO, Rol.ROL_RCL)
+
+    def _zoek_clusters(self, afstand: str):
+        self.regio2clusters = dict()
+        for ronde in (RegiocompetitieRonde
+                      .objects
+                      .exclude(cluster=None)
+                      .filter(regiocompetitie__competitie__afstand=afstand)
+                      .select_related('regiocompetitie__regio')):
+
+            regio_nr = ronde.regiocompetitie.regio.regio_nr
+            self.regio2clusters[regio_nr] = self.regio2clusters.get(regio_nr, 0) + 1
+        # for
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -221,6 +235,8 @@ class RegioInstellingenGlobaalView(UserPassesTestMixin, TemplateView):
             comp = Competitie.objects.get(pk=comp_pk)
         except (ValueError, Competitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')
+
+        self._zoek_clusters(comp.afstand)
 
         deelcomps = (Regiocompetitie
                      .objects
@@ -249,6 +265,12 @@ class RegioInstellingenGlobaalView(UserPassesTestMixin, TemplateView):
             deelcomp.regio_str = str(deelcomp.regio.regio_nr)
             deelcomp.rayon_str = str(deelcomp.regio.rayon_nr)
 
+            cluster_planning = self.regio2clusters.get(deelcomp.regio.regio_nr, 0)
+            if cluster_planning > 0:
+                deelcomp.clusters_str = 'Ja'
+            else:
+                deelcomp.clusters_str = '-'
+
             if deelcomp.inschrijf_methode == INSCHRIJF_METHODE_1:
                 deelcomp.short_inschrijfmethode_str = '1'
                 deelcomp.inschrijfmethode_str = '1: kies wedstrijden'
@@ -260,7 +282,7 @@ class RegioInstellingenGlobaalView(UserPassesTestMixin, TemplateView):
                 deelcomp.inschrijfmethode_str = '3: voorkeur dagdelen'
 
             if deelcomp.regio_organiseert_teamcompetitie:
-                deelcomp.teamcomp_str = 'Ja'
+                deelcomp.teamcompetitie_str = 'Ja'
 
                 deelcomp.begin_fase_D_str = localize(deelcomp.begin_fase_D)
 
@@ -272,7 +294,7 @@ class RegioInstellingenGlobaalView(UserPassesTestMixin, TemplateView):
                 deelcomp.short_puntenmodel_str = punten2str_short[deelcomp.regio_team_punten_model]
                 deelcomp.puntenmodel_str = punten2str[deelcomp.regio_team_punten_model]
             else:
-                deelcomp.teamcomp_str = 'Nee'
+                deelcomp.teamcompetitie_str = '-'
                 deelcomp.begin_fase_D_str = '-'
                 deelcomp.team_type_str = '-'
                 deelcomp.short_puntenmodel_str = '-'

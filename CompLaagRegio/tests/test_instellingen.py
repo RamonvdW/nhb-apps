@@ -353,7 +353,7 @@ class TestCompLaagRegioInstellingen(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagregio/rcl-instellingen-globaal.dtl', 'design/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagregio/regio-keuzes.dtl', 'design/site_layout.dtl'))
 
         # als RKO
         self.e2e_wissel_naar_functie(self.functie_rko1_18)
@@ -361,7 +361,7 @@ class TestCompLaagRegioInstellingen(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagregio/rcl-instellingen-globaal.dtl', 'design/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagregio/regio-keuzes.dtl', 'design/site_layout.dtl'))
 
         # niet bestaande competitie
         with self.assert_max_queries(20):

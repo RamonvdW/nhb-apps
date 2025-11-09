@@ -137,9 +137,7 @@
                     <td>{{ obj.geslacht_str }}</td>
                     <td>{{ obj.beste.score_str }}</td>
                     <td>
-                        <a class="btn-sv-rood" href="{{ obj.url_details }}">
-                            <img src="{% static 'plein/zoom_in.svg' %}" height="36" alt="Toon" draggable="false">
-                        </a>
+                        {% sv-knop-nav url=obj.url_details icon='zoom details' tekst='' %}
                     </td>
                 </tr>
             {% endfor %}

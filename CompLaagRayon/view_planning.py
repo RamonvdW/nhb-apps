@@ -224,6 +224,7 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
             else:
                 deelcomp.rondes_count = len(rondes)
             deelcomp.wedstrijden_count = sum(ronde.aantal_matches for ronde in rondes)
+            deelcomp.url_wijzig = reverse('CompLaagRegio:regio-planning', kwargs={'deelcomp_pk': deelcomp.pk})
         # for
 
         comp = deelkamp.competitie

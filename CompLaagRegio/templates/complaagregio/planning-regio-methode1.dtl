@@ -5,6 +5,7 @@
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
+{% load design_knop %}
 
 {% block title %}Planning{% endblock %}
 
@@ -94,9 +95,7 @@
                         <td class="center">{{ regio_ronde.wedstrijden_count }}</td>
 
                         <td class="center">
-                            <a class="btn-sv-rood" href="{{ regio_ronde.url }}">
-                                <img src="{% static 'plein/zoom_in.svg' %}" height="36" alt="Details" draggable="false">
-                            </a>
+                            {% sv-knop-nav url=regio_ronde.url icon='zoom details' tekst='' %}
                         </td>
                     </tr>
 
@@ -107,9 +106,7 @@
                             <td class="center">{{ cluster.wedstrijden_count }}</td>
 
                             <td class="center">
-                                <a class="btn-sv-rood" href="{{ cluster.ronde_url }}">
-                                    <img src="{% static 'plein/zoom_in.svg' %}" height="36" alt="Details" draggable="false">
-                                </a>
+                                {% sv-knop-nav url=cluster.ronde_url icon='zoom details' tekst='' %}
                             </td>
                         </tr>
                     {% endfor %}

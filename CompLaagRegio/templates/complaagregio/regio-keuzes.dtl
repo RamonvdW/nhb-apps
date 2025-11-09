@@ -27,6 +27,7 @@
                     <tr>
                         <th class="center hide-on-med-and-down">Rayon</th>
                         <th class="center">Regio</th>
+                        <th class="center">Clusters</th>
                         <th class="center hide-on-large-and-up">Inschrijf<wbr>methode</th>
                         <th class="hide-on-med-and-down">Inschrijf<wbr>methode</th>
                         <th class="center">Team<wbr>competitie</th>
@@ -41,9 +42,10 @@
                     <tr{% if deelcomp.lowlight %} class="grey-text"{% endif %}>
                         <td class="center hide-on-med-and-down">{{ deelcomp.rayon_str }}</td>
                         <td class="center">{{ deelcomp.regio_str }}</td>
+                        <td class="center">{{ deelcomp.clusters_str }}</td>
                         <td class="center hide-on-large-and-up">{{ deelcomp.short_inschrijfmethode_str }}</td>
                         <td class="hide-on-med-and-down">{{ deelcomp.inschrijfmethode_str }}</td>
-                        <td class="center">{{ deelcomp.teamcomp_str }}</td>
+                        <td class="center">{{ deelcomp.teamcompetitie_str }}</td>
                         <td>{{ deelcomp.begin_fase_D_str }}</td>
                         <td class="center">{{ deelcomp.team_type_str }}</td>
                         <td class="center hide-on-med-and-up">{{ deelcomp.short_puntenmodel_str }}</td>

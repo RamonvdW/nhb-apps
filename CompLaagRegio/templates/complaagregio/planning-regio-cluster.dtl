@@ -6,6 +6,7 @@
 {% endcomment %}
 {% load static %}
 {% load design_icons %}
+{% load design_knop %}
 
 {% block title %}Planning Cluster{% endblock %}
 
@@ -72,9 +73,7 @@
 
                         <!-- knop naar de ronde van de regioplanning -->
                         <td class="center">
-                            <a class="btn-sv-rood" href="{% url 'CompLaagRegio:regio-ronde-planning' ronde.pk %}">
-                                <img src="{% static 'plein/zoom_in.svg' %}" height="36" alt="Inzien" draggable="false">
-                            </a>
+                            {% sv-knop-nav url=ronde.url_wijzig icon='zoom details' tekst='' %}
                         </td>
                     </tr>
                 {% empty %}
