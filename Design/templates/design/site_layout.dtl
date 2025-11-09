@@ -30,7 +30,7 @@
 
         {% include 'design/site_layout_fonts.dtl' %}
 
-        <link rel="stylesheet" href="{% static 'css/materialize-new-324.css' %}">
+        <link rel="stylesheet" href="{% static 'css/materialize-new-325.css' %}">
 
         {% include 'design/site_layout_favicons.dtl' %}
 

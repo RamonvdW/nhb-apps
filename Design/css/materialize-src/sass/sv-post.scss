@@ -528,6 +528,12 @@ del {
     padding-right: 2px;
 }
 
+/* smal in de breedte */
+.no-padding {
+    padding-left: 0;
+    padding-right: 0;
+}
+
 .in-table-icon {
     vertical-align: middle;     /* betere alignment met text in andere td */
     font-size: 22px;            /* deze maat aligned beter met de tekst */

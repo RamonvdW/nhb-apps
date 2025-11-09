@@ -153,20 +153,20 @@
                     <td class="center smal">{{ team.rank }}</td>
                     <td class="smal">{{ team.ver_str }}</td>
                     <td class="smal center">{{ team.team_nr }}</td>
-                    <td class="right-align smal"><span class="hide-on-med-and-down">{{ team.ronde_1_score }}</span></td>
-                    <td class="left-align smal"><span class=" hide-on-med-and-down">/ {{ team.ronde_1_punten }}</span></td>
-                    <td class="right-align smal"><span class=" hide-on-med-and-down">{{ team.ronde_2_score }}</span></td>
-                    <td class="left-align smal"><span class=" hide-on-med-and-down">/ {{ team.ronde_2_punten }}</span></td>
-                    <td class="right-align smal"><span class=" hide-on-med-and-down">{{ team.ronde_3_score }}</span></td>
-                    <td class="left-align smal"><span class=" hide-on-med-and-down">/ {{ team.ronde_3_punten }}</span></td>
-                    <td class="right-align smal"><span class=" hide-on-med-and-down">{{ team.ronde_4_score }}</span></td>
-                    <td class="left-align smal"><span class=" hide-on-med-and-down">/ {{ team.ronde_4_punten }}</span></td>
-                    <td class="right-align smal"><span class=" hide-on-med-and-down">{{ team.ronde_5_score }}</span></td>
-                    <td class="left-align smal"><span class=" hide-on-med-and-down">/ {{ team.ronde_5_punten }}</span></td>
-                    <td class="right-align smal"><span class=" hide-on-med-and-down">{{ team.ronde_6_score }}</span></td>
-                    <td class="left-align smal"><span class=" hide-on-med-and-down">/ {{ team.ronde_6_punten }}</span></td>
-                    <td class="right-align smal"><span class=" hide-on-med-and-down">{{ team.ronde_7_score }}</span></td>
-                    <td class="left-align smal"><span class=" hide-on-med-and-down">/ {{ team.ronde_7_punten }}</span></td>
+                    <td class="right-align no-padding"><span class="hide-on-med-and-down smal">{{ team.ronde_1_score }}</span></td>
+                    <td class="left-align  no-padding"><span class="hide-on-med-and-down smal">/ {{ team.ronde_1_punten }}</span></td>
+                    <td class="right-align no-padding"><span class="hide-on-med-and-down smal">{{ team.ronde_2_score }}</span></td>
+                    <td class="left-align  no-padding"><span class="hide-on-med-and-down smal">/ {{ team.ronde_2_punten }}</span></td>
+                    <td class="right-align no-padding"><span class="hide-on-med-and-down smal">{{ team.ronde_3_score }}</span></td>
+                    <td class="left-align  no-padding"><span class="hide-on-med-and-down smal">/ {{ team.ronde_3_punten }}</span></td>
+                    <td class="right-align no-padding"><span class="hide-on-med-and-down smal">{{ team.ronde_4_score }}</span></td>
+                    <td class="left-align  no-padding"><span class="hide-on-med-and-down smal">/ {{ team.ronde_4_punten }}</span></td>
+                    <td class="right-align no-padding"><span class="hide-on-med-and-down smal">{{ team.ronde_5_score }}</span></td>
+                    <td class="left-align  no-padding"><span class="hide-on-med-and-down smal">/ {{ team.ronde_5_punten }}</span></td>
+                    <td class="right-align no-padding"><span class="hide-on-med-and-down smal">{{ team.ronde_6_score }}</span></td>
+                    <td class="left-align  no-padding"><span class="hide-on-med-and-down smal">/ {{ team.ronde_6_punten }}</span></td>
+                    <td class="right-align no-padding"><span class="hide-on-med-and-down smal">{{ team.ronde_7_score }}</span></td>
+                    <td class="left-align  no-padding"><span class="hide-on-med-and-down smal">/ {{ team.ronde_7_punten }}</span></td>
                     <td class="right-align">{{ team.totaal_score }}</td>
                     <td class="right-align">{{ team.totaal_punten }}</td>
                 </tr>
