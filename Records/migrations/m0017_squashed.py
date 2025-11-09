@@ -11,6 +11,10 @@ class Migration(migrations.Migration):
 
     """ Migratie class voor dit deel van de applicatie """
 
+    replaces = [('Records', 'm0014_squashed'),
+                ('Records', 'm0015_volgorde'),
+                ('Records', 'm0016_sv_icon')]
+
     # dit is de eerste
     initial = True
 
@@ -87,10 +91,16 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('titel', models.CharField(max_length=30)),
-                ('icoon', models.CharField(max_length=20)),
+                ('sv_icon', models.CharField(max_length=20)),
                 ('tekst', models.CharField(max_length=100)),
                 ('url', models.CharField(max_length=100)),
+                ('volgorde', models.PositiveSmallIntegerField(default=0)),
+                ('datum', models.DateField(default='2000-01-01')),
             ],
+            options={
+                'verbose_name': 'Ander record',
+                'verbose_name_plural': 'Andere records',
+            },
         ),
     ]
 

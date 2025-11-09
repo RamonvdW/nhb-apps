@@ -33,7 +33,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ('Account', 'm0032_squashed'),
         ('BasisTypen', 'm0062_squashed'),
-        ('Functie', 'm0025_squashed'),
+        ('Functie', 'm0028_squashed'),
         ('Locatie', 'm0009_squashed'),
         ('Score', 'm0021_squashed'),
         ('Sporter', 'm0033_squashed'),

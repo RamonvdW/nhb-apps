@@ -69,9 +69,42 @@ def maak_functie_sup(apps, _):
     functie_klas(rol='SUP', beschrijving='Support').save()
 
 
+def maak_functie_mla(apps, _):
+    """ maak rol aan voor de Manager Ledenadministratie """
+
+    # haal de klassen op die van toepassing zijn op het moment van migratie
+    functie_klas = apps.get_model('Functie', 'Functie')
+
+    functie_klas(rol='MLA', beschrijving='Manager Ledenadministratie').save()
+
+
+def maak_functie_la(apps, _):
+    """ maak rol aan voor de Manager Ledenadministratie """
+
+    # haal de klassen op die van toepassing zijn op het moment van migratie
+    functie_klas = apps.get_model('Functie', 'Functie')
+    ver_klas = apps.get_model('Vereniging', 'Vereniging')
+
+    bulk = list()
+    for ver in ver_klas.objects.all():
+        bulk.append(
+            functie_klas(
+                rol='LA',
+                beschrijving='Ledenadministratie %s' % ver.ver_nr,
+                vereniging=ver)
+        )
+    # for
+
+    functie_klas.objects.bulk_create(bulk)
+
+
 class Migration(migrations.Migration):
 
     """ Migratie class voor dit deel van de applicatie """
+
+    replaces = [('Functie', 'm0025_squashed'),
+                ('Functie', 'm0026_rol_mla'),
+                ('Functie', 'm0027_rol_la')]
 
     # dit is de eerste
     initial = True
@@ -122,6 +155,8 @@ class Migration(migrations.Migration):
         ),
         migrations.RunPython(maak_functie_sup),
         migrations.RunPython(maak_functies_bondscompetitie_2019),
+        migrations.RunPython(maak_functie_mla),
+        migrations.RunPython(maak_functie_la),
     ]
 
 # end of file
