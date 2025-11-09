@@ -48,7 +48,7 @@
     <!-- blauwe balk met filters -->
     <div class="row-sv-blauw">
 
-        <div class="col s12 m3 offset-m3" style="margin-bottom:15px">
+        <div class="col s12 m6 l3 offset-l3" style="margin-bottom:15px">
             <div class="sv-kader-filter">
                 <p><b>Kies een regio:</b></p>
                 <ul>
@@ -71,7 +71,7 @@
             </div>
         </div>
 
-        <div class="col s12 m3" style="margin-bottom:15px">
+        <div class="col s12 m6 l3" style="margin-bottom:15px">
             <div class="sv-kader-filter">
                 <p><b>Kies een team type:</b></p>
                 <ul>
