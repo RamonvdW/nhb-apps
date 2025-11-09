@@ -11,9 +11,9 @@ import functools
 
 """ Centrale plaats om html te genereren voor knoppen
 
-    sv-knop-nav: navigeer naar andere pagina
-    sv-knop-ext: externe link: opent apart tabblad in de browser
-    sv-knop-js: wordt gekoppeld aan een javascript functie
+    sv-knop-nav:   navigeer naar andere pagina
+    sv-knop-ext:   externe link: opent apart tabblad in de browser
+    sv-knop-js:    wordt gekoppeld aan een javascript functie
     sv-knop-float: knop die in de linker onderhoek in beeld komt zodra ...
 
 """
