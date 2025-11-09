@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2024 Ramon van der Winkel.
+#  Copyright (c) 2020-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db import migrations, models
 from BasisTypen.definities import (BLAZOEN_40CM, BLAZOEN_DT, BLAZOEN_60CM, BLAZOEN_60CM_4SPOT,
-                                   ORGANISATIE_WA, ORGANISATIE_KHSN, ORGANISATIE_IFAA,
+                                   ORGANISATIE_WA, ORGANISATIE_KHSN, ORGANISATIE_IFAA, ORGANISATIE_WA_STRIKT,
                                    GESLACHT_MAN, GESLACHT_VROUW, GESLACHT_ALLE)
 
 
@@ -34,15 +34,27 @@ LEEFTIJDSKLASSEN = (
     (32,       'JH',  GESLACHT_MAN,   0, 20,   'Onder 21', 'Onder 21 Heren',          ORGANISATIE_WA),
     (33,       'JA',  GESLACHT_ALLE,  0, 20,   'Onder 21', 'Onder 21 Gemengd',        ORGANISATIE_KHSN),
 
+    # 18 t/m 20 jaar
+    (35,       'JVS', GESLACHT_VROUW, 18, 20,  'Onder 21', 'Onder 21 Dames (strikt)', ORGANISATIE_WA_STRIKT),
+    (36,       'JHS', GESLACHT_MAN,   18, 20,  'Onder 21', 'Onder 21 Heren (strikt)', ORGANISATIE_WA_STRIKT),
+
     # Onder 18 (was: Cadetten)
     (21,       'CV',  GESLACHT_VROUW, 0, 17,   'Onder 18', 'Onder 18 Dames',          ORGANISATIE_WA),
     (22,       'CH',  GESLACHT_MAN,   0, 17,   'Onder 18', 'Onder 18 Heren',          ORGANISATIE_WA),
     (23,       'CA',  GESLACHT_ALLE,  0, 17,   'Onder 18', 'Onder 18 Gemengd',        ORGANISATIE_KHSN),
 
+    # 14 t/m 17 jaar
+    (25,       'CVS', GESLACHT_VROUW, 14, 17,  'Onder 18', 'Onder 18 Dames (strikt)', ORGANISATIE_WA_STRIKT),
+    (26,       'CHS', GESLACHT_MAN,   14, 17,  'Onder 18', 'Onder 18 Heren (strikt)', ORGANISATIE_WA_STRIKT),
+
     # Onder 14 (was: Aspiranten)
     (15,       'AV2', GESLACHT_VROUW, 0, 13,   'Onder 14', 'Onder 14 Meisjes',        ORGANISATIE_KHSN),
     (16,       'AH2', GESLACHT_MAN,   0, 13,   'Onder 14', 'Onder 14 Jongens',        ORGANISATIE_KHSN),
     (17,       'AA2', GESLACHT_ALLE,  0, 13,   'Onder 14', 'Onder 14 Gemengd',        ORGANISATIE_KHSN),
+
+    # 12 t/m 13 jaar
+    # (18,       'AV2S', GESLACHT_VROUW, 12, 13,  'Onder 14', 'Onder 14 Meisjes (strikt)', ORGANISATIE_WA_STRIKT),
+    # (19,       'AH2S', GESLACHT_MAN,   12, 13,  'Onder 14', 'Onder 14 Jongens (strikt)', ORGANISATIE_WA_STRIKT),
 
     # Onder 12 (was: Aspiranten)
     (11,       'AV1', GESLACHT_VROUW, 0, 11,   'Onder 12', 'Onder 12 Meisjes',        ORGANISATIE_KHSN),
@@ -200,149 +212,176 @@ INDIV_VOLGORDE_25M__TITEL_NK = (      1110, 1120, 1150, 1151, 1160, 1161,    # R
 
 KALENDERWEDSTRIJDENKLASSEN = (
     # nr  boog  lkl    afk      beschrijving
-    (100, 'R',  'VA',  'R60U',  'Recurve 60+ Gemengd'),
-    (101, 'R',  'VH',  'R60H',  'Recurve 60+ Heren'),
-    (102, 'R',  'VV',  'R60D',  'Recurve 60+ Dames'),
+    (100, 'R',  'VA',  'R60U',   'Recurve 60+ Gemengd'),
+    (101, 'R',  'VH',  'R60H',   'Recurve 60+ Heren'),
+    (102, 'R',  'VV',  'R60D',   'Recurve 60+ Dames'),
 
-    (110, 'R',  'MA',  'R50U',  'Recurve 50+ Gemengd'),
-    (111, 'R',  'MH',  'R50H',  'Recurve 50+ Heren'),
-    (112, 'R',  'MV',  'R50D',  'Recurve 50+ Dames'),
+    (110, 'R',  'MA',  'R50U',   'Recurve 50+ Gemengd'),
+    (111, 'R',  'MH',  'R50H',   'Recurve 50+ Heren'),
+    (112, 'R',  'MV',  'R50D',   'Recurve 50+ Dames'),
 
-    (120, 'R',  'SA',  'RU',    'Recurve Gemengd'),
-    (121, 'R',  'SH',  'RH',    'Recurve Heren'),
-    (122, 'R',  'SV',  'RD',    'Recurve Dames'),
+    (120, 'R',  'SA',  'RU',     'Recurve Gemengd'),
+    (121, 'R',  'SH',  'RH',     'Recurve Heren'),
+    (122, 'R',  'SV',  'RD',     'Recurve Dames'),
 
-    (130, 'R',  'JA',  'RO21U', 'Recurve Onder 21 Gemengd'),
-    (131, 'R',  'JH',  'RO21H', 'Recurve Onder 21 Heren'),
-    (132, 'R',  'JV',  'RO21D', 'Recurve Onder 21 Dames'),
+    (130, 'R',  'JA',  'RO21U',  'Recurve Onder 21 Gemengd'),
+    (131, 'R',  'JH',  'RO21H',  'Recurve Onder 21 Heren'),
+    (132, 'R',  'JV',  'RO21D',  'Recurve Onder 21 Dames'),
 
-    (140, 'R',  'CA',  'RO18U', 'Recurve Onder 18 Gemengd'),
-    (141, 'R',  'CH',  'RO18H', 'Recurve Onder 18 Heren'),
-    (142, 'R',  'CV',  'RO18D', 'Recurve Onder 18 Dames'),
+    (136, 'R',  'JVS', 'R1820D', 'Recurve Onder 21 Dames (strikt)'),
+    (137, 'R',  'JHS', 'R1820H', 'Recurve Onder 21 Heren (strikt)'),
 
-    (150, 'R',  'AA2', 'RO14U', 'Recurve Onder 14 Gemengd'),
-    (151, 'R',  'AH2', 'RO14H', 'Recurve Onder 14 Jongens'),
-    (152, 'R',  'AV2', 'RO14D', 'Recurve Onder 14 Meisjes'),
+    (140, 'R',  'CA',  'RO18U',  'Recurve Onder 18 Gemengd'),
+    (141, 'R',  'CH',  'RO18H',  'Recurve Onder 18 Heren'),
+    (142, 'R',  'CV',  'RO18D',  'Recurve Onder 18 Dames'),
 
-    (160, 'R',  'AA1', 'RO12U', 'Recurve Onder 12 Gemengd'),
-    (161, 'R',  'AH1', 'RO12H', 'Recurve Onder 12 Jongens'),
-    (162, 'R',  'AV1', 'RO12D', 'Recurve Onder 12 Meisjes'),
+    (146, 'R',  'CVS', 'R1417D', 'Recurve Onder 18 Dames (strikt)'),
+    (147, 'R',  'CHS', 'R1417H', 'Recurve Onder 18 Heren (strikt)'),
 
+    (150, 'R',  'AA2', 'RO14U',  'Recurve Onder 14 Gemengd'),
+    (151, 'R',  'AH2', 'RO14H',  'Recurve Onder 14 Jongens'),
+    (152, 'R',  'AV2', 'RO14D',  'Recurve Onder 14 Meisjes'),
 
-    (200, 'C',  'VA',  'C60U',  'Compound 60+ Gemengd'),
-    (201, 'C',  'VH',  'C60H',  'Compound 60+ Heren'),
-    (202, 'C',  'VV',  'C60D',  'Compound 60+ Dames'),
+    # (156, 'R',  'AH2S', 'R1213H', 'Recurve Onder 14 Jongens (strikt)'),
+    # (157, 'R',  'AV2S', 'R1213D', 'Recurve Onder 14 Meisjes (strikt)'),
 
-    (210, 'C',  'MA',  'C50U',  'Compound 50+ Gemengd'),
-    (211, 'C',  'MH',  'C50H',  'Compound 50+ Heren'),
-    (212, 'C',  'MV',  'C50D',  'Compound 50+ Dames'),
-
-    (220, 'C',  'SA',  'CU',    'Compound Gemengd'),
-    (221, 'C',  'SH',  'CH',    'Compound Heren'),
-    (222, 'C',  'SV',  'CD',    'Compound Dames'),
-
-    (230, 'C',  'JA',  'CO21U', 'Compound Onder 21 Gemengd'),
-    (231, 'C',  'JH',  'CO21H', 'Compound Onder 21 Heren'),
-    (232, 'C',  'JV',  'CO21D', 'Compound Onder 21 Dames'),
-
-    (240, 'C',  'CA',  'CO18U', 'Compound Onder 18 Gemengd'),
-    (241, 'C',  'CH',  'CO18H', 'Compound Onder 18 Heren'),
-    (242, 'C',  'CV',  'CO18D', 'Compound Onder 18 Dames'),
-
-    (250, 'C',  'AA2', 'CO14U', 'Compound Onder 14 Gemengd'),
-    (251, 'C',  'AH2', 'CO14H', 'Compound Onder 14 Jongens'),
-    (252, 'C',  'AV2', 'CO14D', 'Compound Onder 14 Meisjes'),
-
-    (260, 'C',  'AA1', 'CO12U', 'Compound Onder 12 Gemengd'),
-    (261, 'C',  'AH1', 'CO14H', 'Compound Onder 12 Jongens'),
-    (262, 'C',  'AV1', 'CO14D', 'Compound Onder 12 Meisjes'),
+    (160, 'R',  'AA1', 'RO12U',  'Recurve Onder 12 Gemengd'),
+    (161, 'R',  'AH1', 'RO12H',  'Recurve Onder 12 Jongens'),
+    (162, 'R',  'AV1', 'RO12D',  'Recurve Onder 12 Meisjes'),
 
 
-    (300, 'BB', 'VA',  'B60U',  'Barebow 60+ Gemengd'),
-    (301, 'BB', 'VH',  'B60H',  'Barebow 60+ Heren'),
-    (302, 'BB', 'VV',  'B60D',  'Barebow 60+ Dames'),
+    (200, 'C',  'VA',  'C60U',   'Compound 60+ Gemengd'),
+    (201, 'C',  'VH',  'C60H',   'Compound 60+ Heren'),
+    (202, 'C',  'VV',  'C60D',   'Compound 60+ Dames'),
 
-    (310, 'BB', 'MA',  'B50U',  'Barebow 50+ Gemengd'),
-    (311, 'BB', 'MH',  'B50H',  'Barebow 50+ Heren'),
-    (312, 'BB', 'MV',  'B50D',  'Barebow 50+ Dames'),
+    (210, 'C',  'MA',  'C50U',   'Compound 50+ Gemengd'),
+    (211, 'C',  'MH',  'C50H',   'Compound 50+ Heren'),
+    (212, 'C',  'MV',  'C50D',   'Compound 50+ Dames'),
 
-    (320, 'BB', 'SA',  'BU',    'Barebow Gemengd'),
-    (321, 'BB', 'SH',  'BH',    'Barebow Heren'),
-    (322, 'BB', 'SV',  'BD',    'Barebow Dames'),
+    (220, 'C',  'SA',  'CU',     'Compound Gemengd'),
+    (221, 'C',  'SH',  'CH',     'Compound Heren'),
+    (222, 'C',  'SV',  'CD',     'Compound Dames'),
 
-    (330, 'BB', 'JA',  'BO21U', 'Barebow Onder 21 Gemengd'),
-    (331, 'BB', 'JH',  'BO21H', 'Barebow Onder 21 Heren'),
-    (332, 'BB', 'JV',  'BO21D', 'Barebow Onder 21 Dames'),
+    (230, 'C',  'JA',  'CO21U',  'Compound Onder 21 Gemengd'),
+    (231, 'C',  'JH',  'CO21H',  'Compound Onder 21 Heren'),
+    (232, 'C',  'JV',  'CO21D',  'Compound Onder 21 Dames'),
 
-    (340, 'BB', 'CA',  'BO18U', 'Barebow Onder 18 Gemengd'),
-    (341, 'BB', 'CH',  'BO18H', 'Barebow Onder 18 Heren'),
-    (342, 'BB', 'CV',  'BO18D', 'Barebow Onder 18 Dames'),
+    (236, 'C',  'JVS', 'C1820D', 'Compound Onder 21 jaar Dames (strikt)'),
+    (237, 'C',  'JHS', 'C1820H', 'Compound Onder 21 jaar Heren (strikt)'),
 
-    (350, 'BB', 'AA2', 'BO14U', 'Barebow Onder 14 Gemengd'),
-    (351, 'BB', 'AH2', 'BO14H', 'Barebow Onder 14 Jongens'),
-    (352, 'BB', 'AV2', 'BO14D', 'Barebow Onder 14 Meisjes'),
+    (240, 'C',  'CA',  'CO18U',  'Compound Onder 18 Gemengd'),
+    (241, 'C',  'CH',  'CO18H',  'Compound Onder 18 Heren'),
+    (242, 'C',  'CV',  'CO18D',  'Compound Onder 18 Dames'),
 
-    (360, 'BB', 'AA1', 'BO12U', 'Barebow Onder 12 Gemengd'),
-    (361, 'BB', 'AH1', 'BO12H', 'Barebow Onder 12 Jongens'),
-    (362, 'BB', 'AV1', 'BO12D', 'Barebow Onder 12 Meisjes'),
+    (246, 'C',  'CVS', 'C1417D', 'Compound Onder 18 jaar Dames (strikt)'),
+    (247, 'C',  'CHS', 'C1417H', 'Compound Onder 18 jaar Heren (strikt)'),
 
+    (250, 'C',  'AA2', 'CO14U',  'Compound Onder 14 Gemengd'),
+    (251, 'C',  'AH2', 'CO14H',  'Compound Onder 14 Jongens'),
+    (252, 'C',  'AV2', 'CO14D',  'Compound Onder 14 Meisjes'),
 
-    (500, 'TR', 'VA',  'T60U',  'Traditional 60+ Gemengd'),
-    (501, 'TR', 'VH',  'T60H',  'Traditional 60+ Heren'),
-    (502, 'TR', 'VV',  'T60D',  'Traditional 60+ Dames'),
+    # (256, 'C',  'AH2S', 'C1213H', 'Compound Onder 14 Jongens (strikt)'),
+    # (257, 'C',  'AV2S', 'C1213D', 'Compound Onder 14 Meisjes (strikt)'),
 
-    (510, 'TR', 'MA',  'T50U',  'Traditional 50+ Gemengd'),
-    (511, 'TR', 'MH',  'T50H',  'Traditional 50+ Heren'),
-    (512, 'TR', 'MV',  'T50D',  'Traditional 50+ Dames'),
-
-    (520, 'TR', 'SA',  'TU',    'Traditional Gemengd'),
-    (521, 'TR', 'SH',  'TH',    'Traditional Heren'),
-    (522, 'TR', 'SV',  'TD',    'Traditional Dames'),
-
-    (530, 'TR', 'JA',  'TO21U', 'Traditional Onder 21 Gemengd'),
-    (531, 'TR', 'JH',  'TO21H', 'Traditional Onder 21 Heren'),
-    (532, 'TR', 'JV',  'TO21D', 'Traditional Onder 21 Dames'),
-
-    (540, 'TR', 'CA',  'TO18U', 'Traditional Onder 18 Gemengd'),
-    (541, 'TR', 'CH',  'TO18H', 'Traditional Onder 18 Heren'),
-    (542, 'TR', 'CV',  'TO18D', 'Traditional Onder 18 Dames'),
-
-    (550, 'TR', 'AA2', 'TO14U', 'Traditional Onder 14 Gemengd'),
-    (551, 'TR', 'AH2', 'TO14H', 'Traditional Onder 14 Jongens'),
-    (552, 'TR', 'AV2', 'TO14D', 'Traditional Onder 14 Meisjes'),
-
-    (560, 'TR', 'AA1', 'TO12U', 'Traditional Onder 12 Gemengd'),
-    (561, 'TR', 'AH1', 'TO12H', 'Traditional Onder 12 Jongens'),
-    (562, 'TR', 'AV1', 'TO12D', 'Traditional Onder 12 Meisjes'),
+    (260, 'C',  'AA1', 'CO12U',  'Compound Onder 12 Gemengd'),
+    (261, 'C',  'AH1', 'CO14H',  'Compound Onder 12 Jongens'),
+    (262, 'C',  'AV1', 'CO14D',  'Compound Onder 12 Meisjes'),
 
 
-    (600, 'LB', 'VA',  'L60U',  'Longbow 60+ Gemengd'),
-    (601, 'LB', 'VH',  'L60H',  'Longbow 60+ Heren'),
-    (602, 'LB', 'VV',  'L60D',  'Longbow 60+ Dames'),
+    (300, 'BB', 'VA',  'B60U',   'Barebow 60+ Gemengd'),
+    (301, 'BB', 'VH',  'B60H',   'Barebow 60+ Heren'),
+    (302, 'BB', 'VV',  'B60D',   'Barebow 60+ Dames'),
 
-    (610, 'LB', 'MA',  'L50U',  'Longbow 50+ Gemengd'),
-    (611, 'LB', 'MH',  'L50H',  'Longbow 50+ Heren'),
-    (612, 'LB', 'MV',  'L50D',  'Longbow 50+ Dames'),
+    (310, 'BB', 'MA',  'B50U',   'Barebow 50+ Gemengd'),
+    (311, 'BB', 'MH',  'B50H',   'Barebow 50+ Heren'),
+    (312, 'BB', 'MV',  'B50D',   'Barebow 50+ Dames'),
 
-    (620, 'LB', 'SA',  'LU',    'Longbow Gemengd'),
-    (621, 'LB', 'SH',  'LH',    'Longbow Heren'),
-    (622, 'LB', 'SV',  'LD',    'Longbow Dames'),
+    (320, 'BB', 'SA',  'BU',     'Barebow Gemengd'),
+    (321, 'BB', 'SH',  'BH',     'Barebow Heren'),
+    (322, 'BB', 'SV',  'BD',     'Barebow Dames'),
 
-    (630, 'LB', 'JA',  'LO21U', 'Longbow Onder 21 Gemengd'),
-    (631, 'LB', 'JH',  'LO21H', 'Longbow Onder 21 Heren'),
-    (632, 'LB', 'JV',  'LO21D', 'Longbow Onder 21 Dames'),
+    (330, 'BB', 'JA',  'BO21U',  'Barebow Onder 21 Gemengd'),
+    (331, 'BB', 'JH',  'BO21H',  'Barebow Onder 21 Heren'),
+    (332, 'BB', 'JV',  'BO21D',  'Barebow Onder 21 Dames'),
 
-    (640, 'LB', 'CA',  'LO18U', 'Longbow Onder 18 Gemengd'),
-    (641, 'LB', 'CH',  'LO18H', 'Longbow Onder 18 Heren'),
-    (642, 'LB', 'CV',  'LO18D', 'Longbow Onder 18 Dames'),
+    (336, 'BB', 'JVS', 'B1820D', 'Barebow Onder 21 jaar Dames (strikt)'),
+    (337, 'BB', 'JHS', 'B1820H', 'Barebow Onder 21 jaar Heren (strikt)'),
 
-    (650, 'LB', 'AA2', 'LO14U', 'Longbow Onder 14 Gemengd'),
-    (651, 'LB', 'AH2', 'LO14H', 'Longbow Onder 14 Jongens'),
-    (652, 'LB', 'AV2', 'LO14D', 'Longbow Onder 14 Meisjes'),
+    (340, 'BB', 'CA',  'BO18U',  'Barebow Onder 18 Gemengd'),
+    (341, 'BB', 'CH',  'BO18H',  'Barebow Onder 18 Heren'),
+    (342, 'BB', 'CV',  'BO18D',  'Barebow Onder 18 Dames'),
 
-    (660, 'LB', 'AA1', 'LO12U', 'Longbow Onder 12 Gemengd'),
-    (661, 'LB', 'AH1', 'LO12H', 'Longbow Onder 12 Jongens'),
-    (662, 'LB', 'AV1', 'LO12D', 'Longbow Onder 12 Meisjes'),
+    (346, 'BB', 'CVS', 'B1417D', 'Barebow Onder 18 jaar Dames (strikt)'),
+    (347, 'BB', 'CHS', 'B1417H', 'Barebow Onder 18 jaar Heren (strikt)'),
+
+    (350, 'BB', 'AA2', 'BO14U',  'Barebow Onder 14 Gemengd'),
+    (351, 'BB', 'AH2', 'BO14H',  'Barebow Onder 14 Jongens'),
+    (352, 'BB', 'AV2', 'BO14D',  'Barebow Onder 14 Meisjes'),
+
+    # (356, 'BB', 'AH2S', 'B1213H', 'Barebow Onder 14 Jongens (strikt)'),
+    # (357, 'BB', 'AV2S', 'B1213D', 'Barebow Onder 14 Meisjes (strikt)'),
+
+    (360, 'BB', 'AA1', 'BO12U',  'Barebow Onder 12 Gemengd'),
+    (361, 'BB', 'AH1', 'BO12H',  'Barebow Onder 12 Jongens'),
+    (362, 'BB', 'AV1', 'BO12D',  'Barebow Onder 12 Meisjes'),
+
+
+    (500, 'TR', 'VA',  'T60U',   'Traditional 60+ Gemengd'),
+    (501, 'TR', 'VH',  'T60H',   'Traditional 60+ Heren'),
+    (502, 'TR', 'VV',  'T60D',   'Traditional 60+ Dames'),
+
+    (510, 'TR', 'MA',  'T50U',   'Traditional 50+ Gemengd'),
+    (511, 'TR', 'MH',  'T50H',   'Traditional 50+ Heren'),
+    (512, 'TR', 'MV',  'T50D',   'Traditional 50+ Dames'),
+
+    (520, 'TR', 'SA',  'TU',     'Traditional Gemengd'),
+    (521, 'TR', 'SH',  'TH',     'Traditional Heren'),
+    (522, 'TR', 'SV',  'TD',     'Traditional Dames'),
+
+    (530, 'TR', 'JA',  'TO21U',  'Traditional Onder 21 Gemengd'),
+    (531, 'TR', 'JH',  'TO21H',  'Traditional Onder 21 Heren'),
+    (532, 'TR', 'JV',  'TO21D',  'Traditional Onder 21 Dames'),
+
+    (540, 'TR', 'CA',  'TO18U',  'Traditional Onder 18 Gemengd'),
+    (541, 'TR', 'CH',  'TO18H',  'Traditional Onder 18 Heren'),
+    (542, 'TR', 'CV',  'TO18D',  'Traditional Onder 18 Dames'),
+
+    (550, 'TR', 'AA2', 'TO14U',  'Traditional Onder 14 Gemengd'),
+    (551, 'TR', 'AH2', 'TO14H',  'Traditional Onder 14 Jongens'),
+    (552, 'TR', 'AV2', 'TO14D',  'Traditional Onder 14 Meisjes'),
+
+    (560, 'TR', 'AA1', 'TO12U',  'Traditional Onder 12 Gemengd'),
+    (561, 'TR', 'AH1', 'TO12H',  'Traditional Onder 12 Jongens'),
+    (562, 'TR', 'AV1', 'TO12D',  'Traditional Onder 12 Meisjes'),
+
+
+    (600, 'LB', 'VA',  'L60U',   'Longbow 60+ Gemengd'),
+    (601, 'LB', 'VH',  'L60H',   'Longbow 60+ Heren'),
+    (602, 'LB', 'VV',  'L60D',   'Longbow 60+ Dames'),
+
+    (610, 'LB', 'MA',  'L50U',   'Longbow 50+ Gemengd'),
+    (611, 'LB', 'MH',  'L50H',   'Longbow 50+ Heren'),
+    (612, 'LB', 'MV',  'L50D',   'Longbow 50+ Dames'),
+
+    (620, 'LB', 'SA',  'LU',     'Longbow Gemengd'),
+    (621, 'LB', 'SH',  'LH',     'Longbow Heren'),
+    (622, 'LB', 'SV',  'LD',     'Longbow Dames'),
+
+    (630, 'LB', 'JA',  'LO21U',  'Longbow Onder 21 Gemengd'),
+    (631, 'LB', 'JH',  'LO21H',  'Longbow Onder 21 Heren'),
+    (632, 'LB', 'JV',  'LO21D',  'Longbow Onder 21 Dames'),
+
+    (640, 'LB', 'CA',  'LO18U',  'Longbow Onder 18 Gemengd'),
+    (641, 'LB', 'CH',  'LO18H',  'Longbow Onder 18 Heren'),
+    (642, 'LB', 'CV',  'LO18D',  'Longbow Onder 18 Dames'),
+
+    (650, 'LB', 'AA2', 'LO14U',  'Longbow Onder 14 Gemengd'),
+    (651, 'LB', 'AH2', 'LO14H',  'Longbow Onder 14 Jongens'),
+    (652, 'LB', 'AV2', 'LO14D',  'Longbow Onder 14 Meisjes'),
+
+    (660, 'LB', 'AA1', 'LO12U',  'Longbow Onder 12 Gemengd'),
+    (661, 'LB', 'AH1', 'LO12H',  'Longbow Onder 12 Jongens'),
+    (662, 'LB', 'AV1', 'LO12D',  'Longbow Onder 12 Meisjes'),
 )
 
 INDIV_COMP_KRIJGT_SCHEIDS_RK = (1100, 1110, 1120,       # R
@@ -729,8 +768,9 @@ class Migration(migrations.Migration):
 
     """ Migratie class voor dit deel van de applicatie """
 
-    replaces = [('BasisTypen', 'm0057_squashed'),
-                ('BasisTypen', 'm0058_scheids_rk_bk')]
+    replaces = [('BasisTypen', 'm0059_squashed'),
+                ('BasisTypen', 'm0060_wkl_jeugd_exact'),
+                ('BasisTypen', 'm0061_strikt')]
 
     # dit is de eerste
     initial = True
@@ -747,7 +787,8 @@ class Migration(migrations.Migration):
                 ('beschrijving', models.CharField(max_length=50)),
                 ('afkorting', models.CharField(max_length=5)),
                 ('volgorde', models.PositiveSmallIntegerField(default=0)),
-                ('organisatie', models.CharField(choices=[('W', 'World Archery'), ('N', 'KHSN'), ('F', 'IFAA')], default='W', max_length=1)),
+                ('organisatie', models.CharField(choices=[('W', 'World Archery'), ('N', 'KHSN'), ('F', 'IFAA'),
+                                                          ('S', 'WA strikt')], default='W', max_length=1)),
                 ('buiten_gebruik', models.BooleanField(default=False)),
             ],
             options={
@@ -769,8 +810,8 @@ class Migration(migrations.Migration):
                 ('min_wedstrijdleeftijd', models.IntegerField()),
                 ('max_wedstrijdleeftijd', models.IntegerField()),
                 ('volgorde', models.PositiveSmallIntegerField(default=0)),
-                ('organisatie', models.CharField(choices=[('W', 'World Archery'), ('N', 'KHSN'), ('F', 'IFAA')],
-                                                 default='W', max_length=1)),
+                ('organisatie', models.CharField(choices=[('W', 'World Archery'), ('N', 'KHSN'), ('F', 'IFAA'),
+                                                          ('S', 'WA strikt')], default='W', max_length=1)),
             ],
             options={
                 'verbose_name': 'Leeftijdsklasse',
@@ -786,15 +827,16 @@ class Migration(migrations.Migration):
                 ('afkorting', models.CharField(max_length=3)),
                 ('volgorde', models.PositiveSmallIntegerField(default=0)),
                 ('boog_typen', models.ManyToManyField(to='BasisTypen.boogtype')),
-                ('organisatie', models.CharField(choices=[('W', 'World Archery'), ('N', 'KHSN'), ('F', 'IFAA')], default='W', max_length=1)),
+                ('organisatie', models.CharField(choices=[('W', 'World Archery'), ('N', 'KHSN'), ('F', 'IFAA'),
+                                                          ('S', 'WA strikt')], default='W', max_length=1)),
                 ('buiten_gebruik', models.BooleanField(default=False)),
             ],
             options={
                 'verbose_name': 'Team type',
                 'verbose_name_plural': 'Team typen',
                 'ordering': ['volgorde'],
-                'indexes': [models.Index(fields=['afkorting'], name='BasisTypen__afkorti_6ad4da_idx'),  # noqa
-                            models.Index(fields=['volgorde'], name='BasisTypen__volgord_4984e4_idx')],  # noqa
+                'indexes': [models.Index(fields=['afkorting'], name='BasisTypen__afkorti_6ad4da_idx'),
+                            models.Index(fields=['volgorde'], name='BasisTypen__volgord_4984e4_idx')],
             },
         ),
         migrations.CreateModel(
@@ -805,17 +847,17 @@ class Migration(migrations.Migration):
                 ('beschrijving', models.CharField(max_length=80)),
                 ('volgorde', models.PositiveIntegerField()),
                 ('boogtype', models.ForeignKey(on_delete=models.deletion.PROTECT, to='BasisTypen.boogtype')),
-                ('leeftijdsklasse',
-                 models.ForeignKey(on_delete=models.deletion.PROTECT, to='BasisTypen.leeftijdsklasse')),
-                ('organisatie', models.CharField(choices=[('W', 'World Archery'), ('N', 'KHSN'), ('F', 'IFAA')],
-                                                 default='W', max_length=1)),
+                ('leeftijdsklasse', models.ForeignKey(on_delete=models.deletion.PROTECT,
+                                                      to='BasisTypen.leeftijdsklasse')),
+                ('organisatie', models.CharField(choices=[('W', 'World Archery'), ('N', 'KHSN'), ('F', 'IFAA'),
+                                                          ('S', 'WA strikt')], default='W', max_length=1)),
                 ('afkorting', models.CharField(default='?', max_length=10)),
             ],
             options={
                 'verbose_name': 'Kalender Wedstrijdklasse',
                 'verbose_name_plural': 'Kalender Wedstrijdklassen',
                 'ordering': ['volgorde'],
-                'indexes': [models.Index(fields=['volgorde'], name='BasisTypen__volgord_246cec_idx')],  # noqa
+                'indexes': [models.Index(fields=['volgorde'], name='BasisTypen__volgord_246cec_idx')],
             },
         ),
         migrations.CreateModel(

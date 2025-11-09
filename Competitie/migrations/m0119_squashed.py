@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2024 Ramon van der Winkel.
+#  Copyright (c) 2020-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -18,9 +18,11 @@ def init_taken(apps, _):
 class Migration(migrations.Migration):
 
     """ Migratie class voor dit deel van de applicatie """
-
-    replaces = [('Competitie', 'm0113_squashed'),
-                ('Competitie', 'm0114_logboekje')]
+    
+    replaces = [('Competitie', 'm0115_squashed'),
+                ('Competitie', 'm0116_volgende_ronde'),
+                ('Competitie', 'm0117_mutatie_door_langer'),
+                ('Competitie', 'm0118_ordering')]
 
     # dit is de eerste
     initial = True
@@ -28,7 +30,7 @@ class Migration(migrations.Migration):
     # volgorde afdwingen
     dependencies = [
         ('Account', 'm0032_squashed'),
-        ('BasisTypen', 'm0059_squashed'),
+        ('BasisTypen', 'm0062_squashed'),
         ('Functie', 'm0025_squashed'),
         ('Geo', 'm0002_squashed'),
         ('Score', 'm0019_squashed'),
@@ -77,6 +79,11 @@ class Migration(migrations.Migration):
                 ('boogtypen', models.ManyToManyField(to='BasisTypen.boogtype')),
                 ('teamtypen', models.ManyToManyField(to='BasisTypen.teamtype')),
             ],
+            options={
+                'ordering': ['begin_jaar', 'afstand'],
+                'verbose_name': 'Competitie',
+                'verbose_name_plural': 'Competities',
+            },
         ),
         migrations.CreateModel(
             name='CompetitieTeamKlasse',
@@ -288,6 +295,7 @@ class Migration(migrations.Migration):
             options={
                 'verbose_name': 'Kampioenschap',
                 'verbose_name_plural': 'Kampioenschappen',
+                'ordering': ['competitie__afstand', 'deel', 'rayon__rayon_nr'],
             },
         ),
         migrations.CreateModel(
@@ -320,6 +328,10 @@ class Migration(migrations.Migration):
                 ('indiv_klasse', models.ForeignKey(on_delete=models.deletion.CASCADE,
                                                    to='Competitie.competitieindivklasse')),
                 ('logboek', models.TextField(blank=True)),
+                ('indiv_klasse_volgende_ronde', models.ForeignKey(blank=True, null=True,
+                                                                  on_delete=models.deletion.CASCADE,
+                                                                  related_name='indiv_klasse_volgende_ronde',
+                                                                  to='Competitie.competitieindivklasse')),
             ],
             options={
                 'verbose_name': 'Kampioenschap sporterboog',
@@ -445,6 +457,10 @@ class Migration(migrations.Migration):
                 ('deelname', models.CharField(choices=[('?', 'Onbekend'), ('J', 'Bevestigd'), ('N', 'Afgemeld')],
                                               default='?', max_length=1)),
                 ('is_reserve', models.BooleanField(default=False)),
+                ('team_klasse_volgende_ronde', models.ForeignKey(blank=True, null=True,
+                                                                 on_delete=models.deletion.CASCADE,
+                                                                 related_name='team_klasse_volgende_ronde',
+                                                                 to='Competitie.competitieteamklasse')),
             ],
         ),
         migrations.CreateModel(
@@ -454,7 +470,7 @@ class Migration(migrations.Migration):
                 ('when', models.DateTimeField(auto_now_add=True)),
                 ('mutatie', models.PositiveSmallIntegerField(default=0)),
                 ('is_verwerkt', models.BooleanField(default=False)),
-                ('door', models.CharField(default='', max_length=50)),
+                ('door', models.CharField(default='', max_length=150)),
                 ('cut_oud', models.PositiveSmallIntegerField(default=0)),
                 ('cut_nieuw', models.PositiveSmallIntegerField(default=0)),
                 ('regiocompetitie', models.ForeignKey(blank=True, null=True,

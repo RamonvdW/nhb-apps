@@ -407,7 +407,8 @@ ul.staggered-list li {
 
 // Tables
 table, th, td {
-   border: none;
+  border: none;
+  box-shadow: none;
 }
 
 table {
