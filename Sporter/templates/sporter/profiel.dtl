@@ -654,6 +654,18 @@
                 {% url 'Bestelling:toon-bestellingen' as card_url %}
                 {% include 'design/card_icon.dtl' with title="Bestellingen" text="Alle details van je bestellingen." sv_icon="mijn bestellingen" url=card_url %}
             </div>
+
+            {% if evenement_inschrijving %}
+                <div class="col s12 m10 offset-m1 l8 offset-l2" style="margin-top:20px">
+                    <div class="sv-kader">
+                        <p>Je bent ingeschreven voor de <b class="sv-rood-text">{{ evenement_inschrijving.evenement.titel }}</b> op {{ evenement_inschrijving.evenement.datum }}<br>en bent aangemeld voor de volgende workshops:</p>
+                        {% for ronde_label, beschrijving in evenement_inschrijving.rondes %}
+                            <p><b>{{ ronde_label }}:</b> {{ beschrijving }}</p>
+                        {% endfor %}
+                    </div>
+                </div>
+
+            {% endif %}
         </div>
 
     {% endif %}

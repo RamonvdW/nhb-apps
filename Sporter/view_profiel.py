@@ -17,6 +17,9 @@ from BasisTypen.models import BoogType
 from Bestelling.models import Bestelling
 from Competitie.models import RegiocompetitieSporterBoog
 from Competitie.plugin_sporter import get_sporter_competities
+from Evenement.definities import EVENEMENT_INSCHRIJVING_STATUS_DEFINITIEF
+from Evenement.models import EvenementInschrijving
+from Evenement.view_inschrijven import splits_evenement_workshop_keuzes
 from Functie.definities import Rol
 from Functie.models import Functie
 from Functie.rol import rol_get_huidige
@@ -417,6 +420,29 @@ class ProfielView(UserPassesTestMixin, TemplateView):
             context['gast'] = self.sporter.gastregistratie_set.first()
 
         if Bestelling.objects.filter(account=self.account).count() > 0:
+            context['toon_bestellingen'] = True
+
+        een_maand_geleden = timezone.now() - datetime.timedelta(days=30)
+        evenement_inschrijving = (EvenementInschrijving
+                                  .objects
+                                  .filter(status=EVENEMENT_INSCHRIJVING_STATUS_DEFINITIEF,
+                                          sporter=self.sporter,
+                                          evenement__datum__gt=een_maand_geleden)
+                                  .exclude(gekozen_workshops='')
+                                  .first())
+        if evenement_inschrijving:
+            context['evenement_inschrijving'] = evenement_inschrijving
+
+            evenement_inschrijving.rondes = rondes = list()
+            workshops = splits_evenement_workshop_keuzes(evenement_inschrijving.evenement, prefix='')
+            gekozen = evenement_inschrijving.gekozen_workshops.split()
+            for ronde_nr, opties in workshops:
+                for code, beschrijving in opties:
+                    if code in gekozen:
+                        tup = ('Ronde %s' % ronde_nr, beschrijving)
+                        rondes.append(tup)
+                # for
+            # for
             context['toon_bestellingen'] = True
 
         self._find_contactgegevens(context)

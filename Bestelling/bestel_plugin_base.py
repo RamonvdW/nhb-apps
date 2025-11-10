@@ -6,6 +6,7 @@
 
 from Bestelling.models import Bestelling, BestellingRegel, BestellingMandje
 from decimal import Decimal
+from typing import Tuple
 import sys
 
 
@@ -71,7 +72,7 @@ class BestelPluginBase:
         """
         raise NotImplementedError()             # pragma: no cover
 
-    def bereken_verzendkosten(self, obj: BestellingMandje | Bestelling) -> (Decimal, str, Decimal):
+    def bereken_verzendkosten(self, obj: BestellingMandje | Bestelling) -> Tuple[Decimal, str, Decimal]:
         """
             Bereken de verzendkosten van toepassing op het mandje of de bestelling
         """
