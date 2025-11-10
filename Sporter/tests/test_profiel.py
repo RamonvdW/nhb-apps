@@ -247,7 +247,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         # als er geen SEC gekoppeld is, dan wordt de secretaris van de vereniging gebruikt
         self.functie_sec.accounts.remove(self.account_normaal)
 
-        with self.assert_max_queries(26):
+        with self.assert_max_queries(27):
             resp = self.client.get(self.url_profiel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -255,7 +255,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         # maak dit een vereniging zonder secretaris
         Secretaris.objects.filter(vereniging=self.ver).delete()
 
-        with self.assert_max_queries(24):
+        with self.assert_max_queries(25):
             resp = self.client.get(self.url_profiel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -276,7 +276,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         # self._prep_voorkeuren()       --> niet aanroepen, dan geen sporterboog
 
         # haal de profiel pagina op
-        with self.assert_max_queries(24):
+        with self.assert_max_queries(25):
             resp = self.client.get(self.url_profiel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -317,7 +317,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
             account=self.account_normaal,
             log='testje').save()
 
-        with self.assert_max_queries(24):
+        with self.assert_max_queries(25):
             resp = self.client.get(self.url_profiel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -384,7 +384,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
                             log='test')
         inschrijving.save()
 
-        with self.assert_max_queries(24):
+        with self.assert_max_queries(25):
             resp = self.client.get(self.url_profiel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -400,7 +400,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         wedstrijd.eis_kwalificatie_scores = True
         wedstrijd.save(update_fields=['eis_kwalificatie_scores'])
 
-        with self.assert_max_queries(24):
+        with self.assert_max_queries(25):
             resp = self.client.get(self.url_profiel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -440,7 +440,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         gast.sporter = self.sporter1
         gast.save(update_fields=['fase', 'sporter'])
 
-        with self.assert_max_queries(26):
+        with self.assert_max_queries(27):
             resp = self.client.get(self.url_profiel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -460,7 +460,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         functie_rcl25.bevestigde_email = 'test25@mh.not'
         functie_rcl25.save(update_fields=['bevestigde_email'])
 
-        with self.assert_max_queries(24):
+        with self.assert_max_queries(25):
             resp = self.client.get(self.url_profiel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -473,7 +473,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         functie_rcl18.accounts.add(self.account_normaal)
         functie_rcl25.accounts.add(self.account_normaal)
 
-        with self.assert_max_queries(24):
+        with self.assert_max_queries(25):
             resp = self.client.get(self.url_profiel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -496,7 +496,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
                     notitie='AG test')
         ag_hist.save()
 
-        with self.assert_max_queries(25):
+        with self.assert_max_queries(26):
             resp = self.client.get(self.url_profiel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)

@@ -105,7 +105,7 @@ class TestGoogleDriveStorageSheets(E2EHelpers, TestCase):
 
         # einde van "with" roept __exit__ aan
         with StorageGoogleSheet(out) as sheet:
-            my_service = GoogleApiMock(verbose=True)
+            my_service = GoogleApiMock(verbose=False)
             with patch('GoogleDrive.operations.storage_sheets.build', return_value=my_service):
                 sheet.selecteer_file('x')
                 sheet.selecteer_file('x')       # tweede keer is anders in setup_api
@@ -139,7 +139,7 @@ class TestGoogleDriveStorageSheets(E2EHelpers, TestCase):
 
         # einde van "with" roept __exit__ aan
         with StorageGoogleSheet(out) as sheet:
-            my_service = GoogleApiMock(verbose=True)
+            my_service = GoogleApiMock(verbose=False)
             with patch('GoogleDrive.operations.storage_sheets.build', return_value=my_service):
                 sheet.selecteer_file('x')
 
