@@ -98,9 +98,11 @@ def aantal_ontbrekende_wedstrijdformulieren_rk_bk(comp: Competitie) -> int:
     return todo_count
 
 
-def zet_dirty(begin_jaar: int, afstand: int, klasse_pk: int, is_bk: bool, is_teams: bool):
+def zet_dirty(begin_jaar: int, afstand: int, rayon_nr: int, klasse_pk: int, is_bk: bool, is_teams: bool):
+
     bestand = Bestand.objects.filter(begin_jaar=begin_jaar,
                                      afstand=afstand,
+                                     rayon_nr=rayon_nr,
                                      klasse_pk=klasse_pk,
                                      is_bk=is_bk,
                                      is_teams=is_teams).first()

@@ -77,7 +77,7 @@ class Bestand(models.Model):
     is_teams = models.BooleanField(default=False)               # team of individueel
     is_bk = models.BooleanField(default=False)                  # RK of BK
     klasse_pk = models.PositiveIntegerField(default=0)          # welke CompetitieIndiv/TeamKlasse
-    rayon_nr = models.PositiveSmallIntegerField(default=0)      # welke Rayon
+    rayon_nr = models.PositiveSmallIntegerField(default=0)      # welke Rayon (1..4, 0=BK)
 
     # originele naam
     fname = models.CharField(max_length=80)

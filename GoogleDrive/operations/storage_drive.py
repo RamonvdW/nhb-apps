@@ -61,6 +61,13 @@ class StorageGoogleDrive(StorageBase):
         except ValueError as exc:
             raise StorageError('Invalid credentials: %s' % str(exc))
         # TODO: try to trigger refresh and check validity of the token
+        # typische foutmelding:
+        #   [ERROR] StorageError: {google_drive} RefreshError:
+        #   ('invalid_grant: Token has been expired or revoked.',
+        #    {'error': 'invalid_grant',
+        #     'error_description': 'Token has been expired or revoked.'
+        #     }
+        #    )
         return self._creds.refresh_token
 
     def _setup_service(self):

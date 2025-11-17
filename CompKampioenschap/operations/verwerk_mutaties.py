@@ -40,8 +40,17 @@ class VerwerkCompKampMutaties:
         self.my_logger = logger
 
     @staticmethod
-    def _zet_dirty(comp: Competitie, klasse_pk: int, is_bk: bool, is_team: bool):
-        zet_dirty(comp.begin_jaar, int(comp.afstand), klasse_pk, is_bk, is_team)
+    def _zet_dirty(deelkamp: Kampioenschap, klasse_pk: int, is_team: bool):
+        comp = deelkamp.competitie
+
+        if deelkamp.is_bk():
+            is_bk = True
+            rayon_nr = 0
+        else:
+            is_bk = False
+            rayon_nr = deelkamp.rayon.rayon_nr
+
+        zet_dirty(comp.begin_jaar, int(comp.afstand), rayon_nr, klasse_pk, is_bk, is_team)
 
         CompetitieMutatie.objects.create(
                             mutatie=MUTATIE_UPDATE_DIRTY_WEDSTRIJDFORMULIEREN,
@@ -90,7 +99,7 @@ class VerwerkCompKampMutaties:
         self.stdout.write('[INFO] Bepaal deelnemers in indiv_klasse %s van %s' % (indiv_klasse, deelkamp))
 
         # zorg dat het google sheet bijgewerkt worden
-        self._zet_dirty(deelkamp.competitie, indiv_klasse.pk, is_bk=deelkamp.is_bk(), is_team=False)
+        self._zet_dirty(deelkamp, indiv_klasse.pk, is_team=False)
 
         limiet = self._get_limiet_indiv(deelkamp, indiv_klasse)
 
@@ -215,7 +224,7 @@ class VerwerkCompKampMutaties:
                                                                                     deelnemer.sporterboog))
 
         # zorg dat het google sheet bijgewerkt worden
-        self._zet_dirty(deelkamp.competitie, indiv_klasse.pk, deelkamp.is_bk(), is_team=False)
+        self._zet_dirty(deelkamp, indiv_klasse.pk, is_team=False)
 
         # verwijder de deelnemer uit de lijst op zijn oude plekje
         # en schuif de rest omhoog
@@ -354,7 +363,7 @@ class VerwerkCompKampMutaties:
                 # zorg dat het google sheet bijgewerkt worden
                 deelkamp = deelnemer.kampioenschap
                 indiv_klasse = deelnemer.indiv_klasse
-                self._zet_dirty(deelkamp.competitie, indiv_klasse.pk, deelkamp.is_bk(), is_team=False)
+                self._zet_dirty(deelkamp, indiv_klasse.pk, is_team=False)
 
     def _verwerk_mutatie_kamp_afmelden_indiv(self, mutatie: CompetitieMutatie):
         self.stdout.write('[INFO] Verwerk mutatie %s: afmelden' % mutatie.pk)
@@ -383,7 +392,7 @@ class VerwerkCompKampMutaties:
         indiv_klasse = deelnemer.indiv_klasse
 
         # zorg dat het google sheet bijgewerkt worden
-        self._zet_dirty(deelkamp.competitie, indiv_klasse.pk, deelkamp.is_bk(), is_team=False)
+        self._zet_dirty(deelkamp, indiv_klasse.pk, is_team=False)
 
         limiet = self._get_limiet_indiv(deelkamp, indiv_klasse)
 
@@ -577,7 +586,7 @@ class VerwerkCompKampMutaties:
             self._verwerk_mutatie_kamp_indiv_verhoog_cut(deelkamp, indiv_klasse, cut_nieuw)
 
             # zorg dat het google sheet bijgewerkt worden
-            self._zet_dirty(deelkamp.competitie, indiv_klasse.pk, deelkamp.is_bk(), is_team=False)
+            self._zet_dirty(deelkamp, indiv_klasse.pk, is_team=False)
 
         elif cut_nieuw < cut_oud:
             # limiet is omlaag gezet
@@ -588,7 +597,7 @@ class VerwerkCompKampMutaties:
             self._verwerk_mutatie_kamp_indiv_verlaag_cut(deelkamp, indiv_klasse, cut_oud, cut_nieuw)
 
             # zorg dat het google sheet bijgewerkt worden
-            self._zet_dirty(deelkamp.competitie, indiv_klasse.pk, deelkamp.is_bk(), is_team=False)
+            self._zet_dirty(deelkamp, indiv_klasse.pk, is_team=False)
 
         # else: cut_oud == cut_nieuw --> doe niets
         #   (dit kan voorkomen als 2 gebruikers tegelijkertijd de cut veranderen)
@@ -660,8 +669,8 @@ class VerwerkCompKampMutaties:
             deelkamp = deelnemer.kampioenschap
 
             # zorg dat beide google sheets bijgewerkt worden
-            self._zet_dirty(deelkamp.competitie, indiv_klasse.pk, deelkamp.is_bk(), is_team=False)
-            self._zet_dirty(deelkamp.competitie, deelnemer.indiv_klasse.pk, deelkamp.is_bk(), is_team=False)
+            self._zet_dirty(deelkamp, indiv_klasse.pk, is_team=False)
+            self._zet_dirty(deelkamp, deelnemer.indiv_klasse.pk, is_team=False)
 
             deelnemer.indiv_klasse = indiv_klasse
             deelnemer.save(update_fields=['indiv_klasse'])
@@ -678,7 +687,7 @@ class VerwerkCompKampMutaties:
                                                                                                   team_klasse))
 
         # zorg dat het google sheet bijgewerkt worden
-        self._zet_dirty(deelkamp.competitie, team_klasse.pk, deelkamp.is_bk(), is_team=True)
+        self._zet_dirty(deelkamp, team_klasse.pk, is_team=True)
 
         # alleen de rank aanpassen
         rank = 0
@@ -787,7 +796,7 @@ class VerwerkCompKampMutaties:
                 res = updater.update_wedstrijdformulier(bestand, match)
                 msg = '[%s] Bijgewerkt met resultaat %s\n' % (stamp_str, res)
             else:
-                msg = '[%s] ERROR: kan CompetitieMatch niet vinden voor Bestand pk=%s' % (stamp_str, bestand.pk)
+                msg = '[%s] ERROR: kan CompetitieMatch niet vinden voor Bestand pk=%s\n' % (stamp_str, bestand.pk)
 
             bestand.is_dirty = False
             bestand.log += msg

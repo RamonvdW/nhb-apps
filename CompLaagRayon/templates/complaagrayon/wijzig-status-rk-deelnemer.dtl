@@ -53,8 +53,8 @@
         <div class="col s12 m10 offset-m1 l8 offset-l2">
 
             <!-- dialoog venster -->
-            <div class="sv-kader-form center">
-                <p>
+            <div class="sv-kader-form">
+                <p class="center">
                     <span>De status van deelname voor deze sporter is: </span>
                     {% if not deelnemer.bij_vereniging %}
                         <span class="sv-rood-text">ATTENTIE</span>
@@ -69,7 +69,7 @@
 
                 {% if not deelnemer.bij_vereniging %}
 
-                    <p>
+                    <p class="center">
                         <span class="sv-rood-text">Deze sporter is niet aangemeld bij een vereniging en mag zo niet deelnemen aan het RK.</span>
                         <br>
                         <br>
@@ -83,9 +83,9 @@
                     -->
 
                     {% if deelnemer.deelname != 'J' %}
-                        <p>Klik op de blauwe knop om mogelijkheid tot deelname aan het RK te bevestigen</p>
+                        <p class="center">Klik op de blauwe knop om mogelijkheid tot deelname aan het RK te bevestigen</p>
                         <br>
-                        <form action="{{ url_wijzig }}" method="post" onsubmit="document.getElementById('submit_knop1').disabled=true; return true;">
+                        <form class="center" action="{{ url_wijzig }}" method="post" onsubmit="document.getElementById('submit_knop1').disabled=true; return true;">
                             {% csrf_token %}
                             <input name="bevestig" type="hidden" value="1">
                             <button class="btn-sv-blauw" id="submit_knop1" type="submit">
@@ -95,9 +95,9 @@
                     {% endif %}
 
                     {% if deelnemer.deelname != 'N' %}
-                        <p>Klik op de rode knop om de sporter af te melden voor het RK</p>
+                        <p class="center">Klik op de rode knop om de sporter af te melden voor het RK</p>
                         <br>
-                        <form action="{{ url_wijzig }}" method="post" onsubmit="document.getElementById('submit_knop2').disabled=true; return true;">
+                        <form class="center" action="{{ url_wijzig }}" method="post" onsubmit="document.getElementById('submit_knop2').disabled=true; return true;">
                             {% csrf_token %}
                             <input name="afmelden" type="hidden" value="1">
                             <button class="btn-sv-rood" id="submit_knop2" type="submit">
