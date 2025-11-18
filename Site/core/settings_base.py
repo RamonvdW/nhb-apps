@@ -62,7 +62,7 @@ APPS_DIR = os.path.dirname(BASE_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2025-11-17'
+SITE_VERSIE = '2025-11-18'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -496,6 +496,7 @@ OPLEIDING_CODES = (
     ('033', 'WL', 'Wedstrijdleider Outdoor', ()),
     ('034', 'WL', 'Wedstrijdleider Indoor', ()),
     ('035', 'WL', 'Wedstrijdleider Allround (niveau 3)', ()),
+    ('036', 'WL', 'Wedstrijdleider 1', ()),
 
     ('039', '', 'Praktijkbegeleider voor instructeurs', ()),
 
