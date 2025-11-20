@@ -18,7 +18,7 @@ from Evenement.models import Evenement, EvenementInschrijving, EvenementAfgemeld
 from Evenement.view_inschrijven import splits_evenement_workshop_keuzes
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
-from Kalender.view_helpers import get_url_kalender_overzicht_met_datum
+from Kalender.view_helpers import get_url_kalender_maandoverzicht_met_datum
 from decimal import Decimal
 from codecs import BOM_UTF8
 import csv
@@ -531,7 +531,7 @@ class EvenementWorkshopKeuzesView(TemplateView):
         # for
 
         context['kruimels'] = (
-            (get_url_kalender_overzicht_met_datum(evenement.datum), 'Kalender'),
+            (get_url_kalender_maandoverzicht_met_datum(evenement.datum), 'Kalender'),
             (reverse('Evenement:details', kwargs={'evenement_pk': evenement.pk}), 'Evenement'),
             (None, 'Voorkeur workshops')
         )

@@ -16,6 +16,10 @@ urlpatterns = [
          view_landing_page.KalenderLandingPageView.as_view(),
          name='landing-page'),
 
+    path('jaar/',
+         view_landing_page.KalenderLandingPageJaarView.as_view(),
+         name='landing-page-jaar'),
+
     path('<jaar_of_maand>/<int:jaar>/<maand>/',
          view_zoek.KalenderView.as_view(),
          name='simpel'),

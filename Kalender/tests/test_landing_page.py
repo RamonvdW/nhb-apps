@@ -20,10 +20,12 @@ class TestKalender(E2EHelpers, TestCase):
 
     """ tests voor de Kalender applicatie, landing page """
 
-    url_kalender = '/kalender/'
+    url_landing = '/kalender/'
+    url_landing_jaar = '/kalender/jaar/'
     url_kalender_manager = '/wedstrijden/manager/'
     url_kalender_vereniging = '/wedstrijden/vereniging/lijst/'
-    url_kalender_maand = '/kalender/maand/##'          # startswith
+    url_kalender_jaar = '/kalender/jaar/##'            # ##=startswith
+    url_kalender_maand = '/kalender/maand/##'          # ##=startswith
 
     def setUp(self):
         """ initialisatie van de test case """
@@ -77,23 +79,32 @@ class TestKalender(E2EHelpers, TestCase):
         self.client.logout()
 
         # redirect naar openbare overzicht
-        resp = self.client.get(self.url_kalender)
+        resp = self.client.get(self.url_landing)
         self.assert_is_redirect(resp, self.url_kalender_maand)
+
+        resp = self.client.get(self.url_landing_jaar)
+        self.assert_is_redirect(resp, self.url_kalender_jaar)
 
     def test_bb(self):
         self.e2e_login_and_pass_otp(self.account_admin)
         self.e2e_wisselnaarrol_bb()
 
-        resp = self.client.get(self.url_kalender)
+        resp = self.client.get(self.url_landing)
         self.assert_is_redirect(resp, self.url_kalender_manager)
 
-        self.e2e_assert_other_http_commands_not_supported(self.url_kalender)
+        resp = self.client.get(self.url_landing_jaar)
+        self.assert_is_redirect(resp, self.url_kalender_manager)
+
+        self.e2e_assert_other_http_commands_not_supported(self.url_landing)
 
     def test_hwl(self):
         self.e2e_login_and_pass_otp(self.account_admin)
         self.e2e_wissel_naar_functie(self.functie_hwl)
 
-        resp = self.client.get(self.url_kalender)
+        resp = self.client.get(self.url_landing)
+        self.assert_is_redirect(resp, self.url_kalender_vereniging)
+
+        resp = self.client.get(self.url_landing_jaar)
         self.assert_is_redirect(resp, self.url_kalender_vereniging)
 
 # end of file
