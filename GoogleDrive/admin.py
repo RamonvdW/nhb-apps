@@ -5,8 +5,6 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.contrib import admin
-from django.db.models import Count
-from Account.models import Account
 from GoogleDrive.models import Transactie, Token, Bestand
 
 
@@ -19,7 +17,9 @@ class TransactieAdmin(admin.ModelAdmin):
 
 class BestandAdmin(admin.ModelAdmin):
 
-    list_filter = ('afstand', 'is_teams', 'is_bk')
+    search_fields = ('fname', 'file_id', 'log')
+
+    list_filter = ('afstand', 'is_teams', 'is_bk', 'is_dirty')
 
     exclude = ('gedeeld_met',)
 

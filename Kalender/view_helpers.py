@@ -33,14 +33,24 @@ def get_url_eerstvolgende_maand_met_wedstrijd():
                            datum_begin__gte=now)
                    .order_by('datum_begin'))
 
+    url = None
     for wedstrijd in wedstrijden:       # pragma: no branch
         deadline = wedstrijd.datum_begin - timedelta(days=wedstrijd.inschrijven_tot)
         if now.date() <= deadline:
             # hier kan nog op ingeschreven worden
-            jaar = wedstrijd.datum_begin.year
-            maand = wedstrijd.datum_begin.month
+            url = get_url_kalender_maandoverzicht_met_datum(wedstrijd.datum_begin)
             break
     # for
+
+    if not url:
+        url = get_url_kalender_maandoverzicht_met_datum(now)
+
+    return url
+
+
+def get_url_kalender_maandoverzicht_met_datum(datum):
+    jaar = datum.year
+    maand = datum.month
 
     url = reverse('Kalender:simpel',
                   kwargs={'jaar_of_maand': 'maand',
@@ -50,12 +60,12 @@ def get_url_eerstvolgende_maand_met_wedstrijd():
     return url
 
 
-def get_url_kalender_overzicht_met_datum(datum):
+def get_url_kalender_jaaroverzicht_vanaf_datum(datum):
     jaar = datum.year
     maand = datum.month
 
     url = reverse('Kalender:simpel',
-                  kwargs={'jaar_of_maand': 'maand',
+                  kwargs={'jaar_of_maand': 'jaar',
                           'jaar': jaar,
                           'maand': MAAND2URL[maand]})
 
