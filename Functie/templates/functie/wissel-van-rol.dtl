@@ -20,32 +20,6 @@
 
 {% block pagina %}
 
-    <script>
-        function wissel_naar_rol() {
-            // vind de gekozen radiobutton
-            const el = document.querySelector("input[type='radio'][name='rol']:checked");
-
-            // haal de url op van het input element
-            const url = el.dataset.url;
-
-            // do een form post met de url
-            const form = document.createElement('form');
-            form.method = 'post';
-            form.action = url;
-            form.style.display = 'hidden';
-
-            let inp = document.createElement('input');
-            inp.type = "hidden";
-            inp.name = "csrfmiddlewaretoken";
-            inp.value = getCookie('mh_csrf_token');
-            form.appendChild(inp);
-
-            document.body.appendChild(form);
-            form.submit();
-        }
-    </script>
-
-
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
@@ -85,38 +59,37 @@
 
         <!-- volwaardige beheerder en tweede factor is gecontroleerd -->
 
-        {% if show_eigen_rollen %}
-            <!-- rollen waarnaar gewisseld kan worden -->
+        <!-- rollen waarnaar gewisseld kan worden -->
 
-            <!-- witruimte -->
-            <div class="row center">
-                <div class="col s12">
-                    <h4>Eigen rollen</h4>
-                    <p>Wissel naar een van de aan jou toegekende rollen</p>
+        <!-- witruimte -->
+        <div class="row center">
+            <div class="col s12">
+                <h4>Eigen rollen</h4>
+                <p>Wissel naar een van de aan jou toegekende rollen</p>
+            </div>
+        </div>
+
+        <!-- blauwe balk -->
+        <div class="row-sv-blauw">
+
+            <!-- witte rechthoek voor radiobuttons -->
+            <div class="col s12 m8 offset-m2{% if heeft_alle_rollen %} l6{% endif %}">
+                <div class="sv-kader left-align" style="margin-bottom:20px">  <!-- margin-bottom voor als kaart onder filter komt -->
+                    <ul>
+                    {% for obj in eigen_rollen %}
+                        <li>
+                            <label class="black-text" for="id_eigen_{{ obj.pk }}">
+                                <input class="with-gap" type="radio" name="rol" value="{{ obj.pk }}" required id="id_eigen_{{ obj.pk }}" data-url="{{ obj.url }}" {% if obj.selected %}checked{% endif %}>
+                                <span>{{ obj.beschrijving }}{% if obj.ver_naam %}&nbsp;&nbsp;{{ obj.ver_naam }}{% endif %}</span>
+                            </label>
+                        </li>
+                    {% endfor %}
+                    </ul>
+                    <p class="center">
+                        <button class="btn-sv-rood" id="activeer_eigen" onclick="wissel_naar_rol()">Activeer</button>
+                    </p>
                 </div>
             </div>
-
-            <!-- blauwe balk -->
-            <div class="row-sv-blauw">
-
-                <!-- witte rechthoek voor radiobuttons -->
-                <div class="col s12 m8 offset-m2{% if heeft_alle_rollen %} l6{% endif %}">
-                    <div class="sv-kader left-align" style="margin-bottom:20px">  <!-- margin-bottom voor als kaart onder filter komt -->
-                        <ul>
-                        {% for obj in eigen_rollen %}
-                            <li>
-                                <label class="black-text" for="id_eigen_{{ obj.pk }}">
-                                    <input class="with-gap" type="radio" name="rol" value="{{ obj.pk }}" required id="id_eigen_{{ obj.pk }}" data-url="{{ obj.url }}" {% if obj.selected %}checked{% endif %}>
-                                    <span>{{ obj.beschrijving }}{% if obj.ver_naam %}&nbsp;&nbsp;{{ obj.ver_naam }}{% endif %}</span>
-                                </label>
-                            </li>
-                        {% endfor %}
-                        </ul>
-                        <p class="center">
-                            <button class="btn-sv-rood" id="activeer_eigen" onclick="wissel_naar_rol()">Activeer</button>
-                        </p>
-                    </div>
-                </div>
 
             {% if heeft_alle_rollen %}
 
@@ -151,7 +124,7 @@
                                 {% endfor %}
                             </ul>
                             <p class="center">
-                                <button class="btn-sv-rood" onclick="wissel_naar_rol()">Activeer</button>
+                                <button class="btn-sv-rood" id="activeer_hwl">Activeer</button>
                             </p>
                         {% endif %}
                     </div>
@@ -160,9 +133,7 @@
 
             {% endif %}  <!-- heeft alle rollen -->
 
-            </div>
-
-        {% endif %}     <!-- show_eigen_rollen -->
+        </div>
 
 
         <!-- snelmenu voor de bondscompetitie rollen -->
@@ -263,7 +234,7 @@
                                 {% endfor %}
                             </ul>
                             <p class="center">
-                                <button class="btn-sv-rood" onclick="wissel_naar_rol()">Activeer</button>
+                                <button class="btn-sv-rood" id="activeer_hulp">Activeer</button>
                             </p>
                         </div>
                     </div>
@@ -295,6 +266,13 @@
         </div>
 
     {% endif %}         <!-- volwaardig beheerder -->
+
+    <div id="js_data"
+        data-csrf-token="{{ csrf_token }}"
+        data-knop-ids="activeer_eigen,activeer_hwl,activeer_hulp">
+    </div>
+
+    <script src="{% static 'functie_js/wissel_naar_rol.js' %}"></script>
 
     {% include 'feedback/sidebar.dtl' with op_pagina="functie-wissel-van-rol" %}
 
