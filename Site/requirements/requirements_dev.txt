@@ -166,7 +166,7 @@ pyparsing==3.2.5
     # via
     #   -r requirements.txt
     #   httplib2
-pypdf==6.3.0
+pypdf==6.4.0
     # via -r requirements.txt
 pysocks==1.7.1
     # via urllib3

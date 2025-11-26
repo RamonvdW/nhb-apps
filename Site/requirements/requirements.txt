@@ -97,7 +97,7 @@ pyotp==2.9.0
     # via -r requirements.in
 pyparsing==3.2.5
     # via httplib2
-pypdf==6.3.0
+pypdf==6.4.0
     # via -r requirements.in
 qrcode==8.2
     # via -r requirements.in
