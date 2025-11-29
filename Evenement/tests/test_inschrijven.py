@@ -10,7 +10,7 @@ from django.utils import timezone
 from Bestelling.definities import BESTELLING_TRANSPORT_NVT
 from Bestelling.models import Bestelling, BestellingMandje
 from Betaal.models import BetaalInstellingenVereniging
-from Evenement.definities import EVENEMENT_STATUS_GEACCEPTEERD
+from Evenement.definities import EVENEMENT_STATUS_GEACCEPTEERD, EVENEMENT_INSCHRIJVING_STATUS_DEFINITIEF
 from Evenement.models import Evenement, EvenementInschrijving
 from Geo.models import Regio
 from Locatie.models import EvenementLocatie
@@ -35,6 +35,7 @@ class TestEvenementInschrijven(E2EHelpers, TestCase):
     url_toevoegen_mandje = '/kalender/evenement/inschrijven/toevoegen-mandje/'      # POST
     url_mandje_bestellen = '/bestel/mandje/'
     url_bestellingen_overzicht = '/bestel/overzicht/'
+    url_sporter_profiel = '/sporter/'
 
     volgende_bestel_nr = 1234567
 
@@ -551,8 +552,16 @@ class TestEvenementInschrijven(E2EHelpers, TestCase):
         inschrijving = EvenementInschrijving.objects.first()
         self.assertEqual(inschrijving.evenement, self.evenement)
         self.assertEqual(inschrijving.sporter, self.sporter_100000)
-
         self.assertEqual(inschrijving.gekozen_workshops, '1.2 2.1')
+
+        # op de profiel pagina van de sporter worden de keuzes getoond
+        inschrijving.status = EVENEMENT_INSCHRIJVING_STATUS_DEFINITIEF
+        inschrijving.save(update_fields=['status'])
+
+        resp = self.client.get(self.url_sporter_profiel)
+        html = resp.content.decode('utf-8')
+        self.assertTrue('Je bent ingeschreven voor de' in html)
+        self.assertTrue('en bent aangemeld voor de volgende workshops:' in html)
 
 
 # end of file

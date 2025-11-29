@@ -10,7 +10,8 @@ from Competitie.models import Regiocompetitie, Kampioenschap
 from Competitie.operations import competities_aanmaken
 from Functie.tests.helpers import maak_functie
 from Geo.models import Rayon, Regio, Cluster
-from Locatie.definities import BAAN_TYPE_BUITEN, BAAN_TYPE_EXTERN, BAAN_TYPE_ONBEKEND
+from Locatie.definities import (BAAN_TYPE_BUITEN, BAAN_TYPE_EXTERN, BAAN_TYPE_ONBEKEND,
+                                BAAN_TYPE_BINNEN_BUITEN, BAAN_TYPE_BINNEN_VOLLEDIG_OVERDEKT)
 from Locatie.models import WedstrijdLocatie
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -87,7 +88,7 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
         self.account_rko = self._prep_beheerder_lid('RKO')
         self.account_rcl = self._prep_beheerder_lid('RCL')
         self.account_hwl = self._prep_beheerder_lid('HWL')
-        self.account_schutter = self._prep_beheerder_lid('Schutter')
+        self.account_sporter = self._prep_beheerder_lid('Sporter')
 
         # referentie uit de CRM welke leden secretaris zijn
         lid_nr = self._next_lid_nr
@@ -132,16 +133,17 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
         self.ver2 = ver
 
         # geef een verenigingen alle mogelijke externe locaties
-        loc = WedstrijdLocatie(baan_type=BAAN_TYPE_BUITEN)
+        loc = WedstrijdLocatie(baan_type=BAAN_TYPE_BUITEN, adres='Buitendreef 1\n1234XX Boogstad')
         loc.save()
         loc.verenigingen.add(self.ver1)
         self.loc_buiten = loc
 
-        loc = WedstrijdLocatie(baan_type=BAAN_TYPE_EXTERN)
+        loc = WedstrijdLocatie(baan_type=BAAN_TYPE_EXTERN, adres='Externe doelen 1\n1235XX Boogstad')
         loc.save()
         loc.verenigingen.add(self.ver1)
+        self.loc_extern = loc
 
-        loc = WedstrijdLocatie(baan_type=BAAN_TYPE_ONBEKEND)
+        loc = WedstrijdLocatie(baan_type=BAAN_TYPE_ONBEKEND, adres='Ons doel 1\n1236XX Boogstad')
         loc.save()
         loc.verenigingen.add(self.ver1)
         self.loc_binnen = loc
@@ -161,6 +163,10 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
         self.e2e_wisselnaarrol_bb()
         self.e2e_check_rol('BB')
 
+        self.loc_binnen.baan_type = BAAN_TYPE_BINNEN_VOLLEDIG_OVERDEKT
+        self.loc_binnen.notities = 'hallo'
+        self.loc_binnen.save(update_fields=['baan_type', 'notities'])
+
         with self.assert_max_queries(12):
             resp = self.client.get(self.url_lijst)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
@@ -174,6 +180,9 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wisselnaarrol_bb()
         self.e2e_check_rol('BB')
+
+        self.loc_binnen.baan_type = BAAN_TYPE_BINNEN_BUITEN
+        self.loc_binnen.save(update_fields=['baan_type'])
 
         with self.assert_max_queries(11):
             resp = self.client.get(self.url_lijst)
@@ -271,6 +280,8 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_hwl)
         self.e2e_wissel_naar_functie(self.functie_hwl)
         self.e2e_check_rol('HWL')
+
+        self.loc_extern.delete()
 
         with self.assert_max_queries(9):
             resp = self.client.get(self.url_lijst)
