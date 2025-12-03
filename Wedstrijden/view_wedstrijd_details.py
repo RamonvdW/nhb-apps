@@ -107,7 +107,7 @@ class WedstrijdDetailsView(TemplateView):
         context['kan_aanmelden'] = False
         context['hint_inloggen'] = False
 
-        if not wedstrijd.extern_beheerd:
+        if not wedstrijd.extern_beheerd and not wedstrijd.is_ter_info:
             # om aan te melden is een account nodig
             # extern beheerder wedstrijden kan je niet voor aanmelden
             # een wedstrijd zonder sessie is een placeholder op de agenda
@@ -133,12 +133,13 @@ class WedstrijdDetailsView(TemplateView):
                                                                  kwargs={'wedstrijd_pk': wedstrijd.pk})
 
         # inschrijf sectie (kaartjes) tonen voor deze wedstrijd?
-        context['toon_inschrijven'] = False
-        if not wedstrijd.is_ter_info:
-            if wedstrijd.extern_beheerd and wedstrijd.contact_website:
-                context['toon_inschrijven'] = context['is_voor_sluitingsdatum']
-            elif heeft_sessies and context['kan_aanmelden']:
-                context['toon_inschrijven'] = context['is_voor_sluitingsdatum']
+        if context['kan_aanmelden'] and heeft_sessies:
+            context['toon_inschrijven_mh'] = context['is_voor_sluitingsdatum']
+        else:
+            context['toon_inschrijven_mh'] = False
+
+        if wedstrijd.extern_beheerd and wedstrijd.contact_website:
+            context['toon_inschrijven_ext'] = context['is_voor_sluitingsdatum']
 
         url_terug = reverse('Kalender:simpel',
                             kwargs={'jaar_of_maand': 'maand',
