@@ -88,13 +88,19 @@ def get_sessies(wedstrijd: Wedstrijd, sporter: Sporter,
 
     sessie_beschrijvingen = False
     unsorted_wedstrijdklassen = list()
+
+    if wedstrijdleeftijd < 25:
+        sorteer_volgorde = '-volgorde'      # jongste eerst
+    else:
+        sorteer_volgorde = 'volgorde'       # oudste eerst
+
     for sessie in sessies:
         sessie.aantal_beschikbaar = sessie.max_sporters - sessie.aantal_inschrijvingen
         sessie.klassen = (sessie
                           .wedstrijdklassen
                           .select_related('leeftijdsklasse',
                                           'boogtype')
-                          .order_by('volgorde'))        # oudste leeftijdsklasse eerst
+                          .order_by(sorteer_volgorde))
 
         sessie.kan_aanmelden = False
         sessie.al_ingeschreven = False

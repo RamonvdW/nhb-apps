@@ -22,7 +22,7 @@
             {% if toon_inschrijven %}
                 <!-- knop om naar het onderste stuk van de pagina te springen -->
                 {% sv-knop-nav url='#inschrijven' icon='nav omlaag op pagina' tekst='Inschrijven' %}
-            {% else %}
+            {% elif not wed.extern_beheerd %}
                 <p>Het is niet mogelijk om in te schrijven op deze wedstrijd.</p>
             {% endif %}
         </div>
