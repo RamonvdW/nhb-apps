@@ -114,33 +114,31 @@ class WedstrijdDetailsView(TemplateView):
             context['kan_aanmelden'] = self.request.user.is_authenticated
             context['hint_inloggen'] = not self.request.user.is_authenticated
 
-        if context['kan_aanmelden']:
-            account = get_account(self.request)
-            sporter = get_sporter(account)
-            if not sporter:
-                context['kan_aanmelden'] = False
+            if context['kan_aanmelden']:
+                # niet extern beheerd en wel ingelogd
+                account = get_account(self.request)
+                sporter = get_sporter(account)
+                if not sporter:
+                    context['kan_aanmelden'] = False
 
-        if context['kan_aanmelden']:
-            context['menu_toon_mandje'] = True
+            if context['kan_aanmelden']:
+                context['menu_toon_mandje'] = True
 
-            if context['is_voor_sluitingsdatum']:
-                context['url_inschrijven_sporter'] = reverse('WedstrijdInschrijven:inschrijven-sporter',
-                                                             kwargs={'wedstrijd_pk': wedstrijd.pk})
-                context['url_inschrijven_groepje'] = reverse('WedstrijdInschrijven:inschrijven-groepje',
-                                                             kwargs={'wedstrijd_pk': wedstrijd.pk})
-                context['url_inschrijven_familie'] = reverse('WedstrijdInschrijven:inschrijven-familie',
-                                                             kwargs={'wedstrijd_pk': wedstrijd.pk})
+                if context['is_voor_sluitingsdatum']:
+                    context['url_inschrijven_sporter'] = reverse('WedstrijdInschrijven:inschrijven-sporter',
+                                                                 kwargs={'wedstrijd_pk': wedstrijd.pk})
+                    context['url_inschrijven_groepje'] = reverse('WedstrijdInschrijven:inschrijven-groepje',
+                                                                 kwargs={'wedstrijd_pk': wedstrijd.pk})
+                    context['url_inschrijven_familie'] = reverse('WedstrijdInschrijven:inschrijven-familie',
+                                                                 kwargs={'wedstrijd_pk': wedstrijd.pk})
 
         # inschrijf sectie (kaartjes) tonen voor deze wedstrijd?
         context['toon_inschrijven'] = False
         if not wedstrijd.is_ter_info:
             if wedstrijd.extern_beheerd and wedstrijd.contact_website:
                 context['toon_inschrijven'] = context['is_voor_sluitingsdatum']
-            elif heeft_sessies:
+            elif heeft_sessies and context['kan_aanmelden']:
                 context['toon_inschrijven'] = context['is_voor_sluitingsdatum']
-
-            if not context['kan_aanmelden']:
-                context['toon_inschrijven'] = False
 
         url_terug = reverse('Kalender:simpel',
                             kwargs={'jaar_of_maand': 'maand',

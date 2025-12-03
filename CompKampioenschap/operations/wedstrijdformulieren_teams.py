@@ -7,7 +7,7 @@
 """ helper functies """
 
 from django.utils import timezone
-from Competitie.definities import DEEL_BK, DEEL_RK, DEELNAME_NEE, DEELNAME2STR
+from Competitie.definities import DEEL_BK, DEEL_RK, DEELNAME_NEE
 from Competitie.models import (Competitie, CompetitieTeamKlasse, CompetitieMatch,
                                Kampioenschap, KampioenschapTeamKlasseLimiet,
                                KampioenschapTeam, KampioenschapSporterBoog)
@@ -91,7 +91,8 @@ class UpdateTeamsWedstrijdFormulier:
             self.titel = 'BK'
         else:
             self.titel = 'RK'
-        self.titel += ' teams, 25m 1pijl %s/%s' % (bestand.begin_jaar, bestand.begin_jaar + 1)
+        self.titel += ' teams, %s' % self.competitie.beschrijving.replace('competitie ', '')
+        self.titel += ' %s/%s' % (bestand.begin_jaar, bestand.begin_jaar + 1)
 
         if not bestand.is_bk:
             # benoem het rayon
@@ -105,6 +106,9 @@ class UpdateTeamsWedstrijdFormulier:
                       .select_related('vereniging')
                       .prefetch_related('gekoppelde_leden')
                       .order_by('-aanvangsgemiddelde'))         # sterkste team bovenaan
+
+        # maximaal 8 teams in het google sheet zetten
+        self.teams = list(self.teams)[:8]
 
         self.ver_nrs = list()
         for team in self.teams:
@@ -269,6 +273,14 @@ class UpdateTeamsWedstrijdFormulier:
             # while
         # for
 
+        # ongebruikte slots leeg maken
+        while volg_nr < 8:
+            regel = 12 + volg_nr * 5
+            volg_nr += 1
+
+            self.sheet.clear_range('C%s:G%s' % (regel, regel+3))
+        # while
+
     def _heeft_scores(self):
         self.sheet.selecteer_sheet('Stand')
         values = self.sheet.get_range(self.ranges['scores_totaal'])
@@ -294,7 +306,7 @@ class UpdateTeamsWedstrijdFormulier:
                     self.sheet.hide_sheet(sheet_name)
             # for
 
-    def _schrijf_update(self, bestand: Bestand, match: CompetitieMatch):
+    def _schrijf_update(self, _bestand: Bestand, match: CompetitieMatch):
         self._schrijf_kopje(match)
         self._schrijf_toegestane_deelnemers()
         self._schrijf_deelnemers()

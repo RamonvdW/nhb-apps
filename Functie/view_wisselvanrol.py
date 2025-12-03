@@ -319,7 +319,6 @@ class WisselVanRolView(UserPassesTestMixin, TemplateView):
         self.rol_bepaler = RolBepaler(self.account)
 
         context['eigen_rollen'] = self._get_functies_eigen()
-        context['show_eigen_rollen'] = True
 
         context['help_rollen'] = self._get_functies_help_anderen()
         context['show_help_rollen'] = len(context['help_rollen']) > 0

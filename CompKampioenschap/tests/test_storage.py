@@ -44,17 +44,18 @@ class TestCompKampioenschapStorage(E2EHelpers, TestCase):
     def test_zet_dirty(self):
         # object bestaat niet
         Bestand.objects.all().delete()
-        zet_dirty(2025, 25, 1, True, True)
+        zet_dirty(2025, 25, 0, 1, True, True)
 
         # object bestaat wel
         bestand = Bestand.objects.create(
                                     begin_jaar=2025,
                                     afstand=18,
+                                    rayon_nr=0,
                                     is_teams=True,
                                     is_bk=True,
                                     klasse_pk=1,
                                     is_dirty=False)
-        zet_dirty(2025, 18, 1, True, True)
+        zet_dirty(2025, 18, 0, 1, True, True)
         bestand.refresh_from_db()
         self.assertTrue(bestand.is_dirty)
 
