@@ -471,7 +471,11 @@ class ToevoegenAanMandjeView(UserPassesTestMixin, View):
 
         now = timezone.now()
         stamp_str = timezone.localtime(timezone.now()).strftime('%Y-%m-%d om %H:%M')
-        msg = "[%s] Toegevoegd aan het mandje van %s\n" % (stamp_str, account_koper.get_account_full_name())
+
+        msg = "[%s] Inschrijving voor %s aangemaakt." % (stamp_str, sporter.lid_nr_en_volledige_naam())
+        if sporter.account != account_koper:
+            msg += " Koper is %s" % account_koper.get_account_full_name()
+        msg += '\n'
 
         # maak de inschrijving aan
         inschrijving = EvenementInschrijving(

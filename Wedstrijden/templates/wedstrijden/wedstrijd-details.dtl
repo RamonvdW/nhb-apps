@@ -61,22 +61,24 @@
                     </tr>
                 {% endif %}
 
-                {% if not wed.is_ter_info %}
-                    <tr>
-                        <th>Inschrijving moet v&oacute;&oacute;r</th>
-                        <td>
-                            <span>{{ wed.inschrijven_voor }}</span>
-                            {% if not is_voor_sluitingsdatum %}
-                                <span class="sv-rood-text"> (inschrijving is gesloten)</span>
-                            {% else %}
-                                {% if wed.inschrijven_let_op %}
-                                    <span class="sv-rood-text"> (nog maar {{ wed.inschrijven_dagen }} dagen)</span>
+                {% if toon_inschrijven %}
+                    {% if not wed.is_ter_info %}
+                        <tr>
+                            <th>Inschrijving moet v&oacute;&oacute;r</th>
+                            <td>
+                                <span>{{ wed.inschrijven_voor }}</span>
+                                {% if not is_voor_sluitingsdatum %}
+                                    <span class="sv-rood-text"> (inschrijving is gesloten)</span>
                                 {% else %}
-                                    <span> (nog {{ wed.inschrijven_dagen }} dagen)</span>
+                                    {% if wed.inschrijven_let_op %}
+                                        <span class="sv-rood-text"> (nog maar {{ wed.inschrijven_dagen }} dagen)</span>
+                                    {% else %}
+                                        <span> (nog {{ wed.inschrijven_dagen }} dagen)</span>
+                                    {% endif %}
                                 {% endif %}
-                            {% endif %}
-                        </td>
-                    </tr>
+                            </td>
+                        </tr>
+                    {% endif %}
                 {% endif %}
 
                 <tr>
