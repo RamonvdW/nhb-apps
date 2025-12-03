@@ -58,6 +58,7 @@ class EvenementAanmeldingenView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
+        # iedere SEC of HWL wordt doorgelaten, maar vereniging moet matchen met evenement.organiserende_vereniging
         return self.rol_nu in (Rol.ROL_HWL, Rol.ROL_SEC)
 
     def get_context_data(self, **kwargs):
@@ -144,6 +145,9 @@ class EvenementAanmeldingenView(UserPassesTestMixin, TemplateView):
         context['url_download_csv'] = reverse('Evenement:download-aanmeldingen-csv',
                                               kwargs={'evenement_pk': evenement.pk})
 
+        context['url_inschrijven_door_hwl'] = reverse('Evenement:inschrijven-door-hwl',
+                                                      kwargs={'evenement_pk': evenement.pk})
+
         context['kruimels'] = (
             (reverse('Vereniging:overzicht'), 'Beheer vereniging'),
             (reverse('Evenement:vereniging'), 'Evenementen'),
@@ -168,6 +172,7 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
+        # iedere SEC of HWL wordt doorgelaten, maar vereniging moet matchen met evenement.organiserende_vereniging
         return self.rol_nu in (Rol.ROL_SEC, Rol.ROL_HWL)
 
     @staticmethod
@@ -330,6 +335,7 @@ class EvenementDetailsAanmeldingView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
+        # iedere SEC of HWL wordt doorgelaten, maar vereniging moet matchen met evenement.organiserende_vereniging
         return self.rol_nu == Rol.ROL_HWL
 
     def get_context_data(self, **kwargs):
@@ -420,6 +426,7 @@ class EvenementDetailsAfmeldingView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
+        # iedere SEC of HWL wordt doorgelaten, maar vereniging moet matchen met evenement.organiserende_vereniging
         return self.rol_nu == Rol.ROL_HWL
 
     def get_context_data(self, **kwargs):

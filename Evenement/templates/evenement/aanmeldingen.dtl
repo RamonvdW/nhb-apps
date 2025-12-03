@@ -44,6 +44,13 @@
                 </tr>
             </table>
         </div>
+
+        {% if url_inschrijven_door_hwl %}
+            <div class="col s12" style="margin-top:30px">
+                <!-- inschrijven sporter -->
+                {% include 'design/card_icon.dtl' with title="Toevoegen" text="Voeg handmatig een deelnemer toe, zonder dat deze daarvoor hoeft te betalen." sv_icon="toevoegen" url=url_inschrijven_door_hwl %}
+            </div>
+        {% endif %}
     </div>
 
 
