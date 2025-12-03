@@ -40,6 +40,9 @@ urlpatterns = [
          view_inschrijven.InschrijvenFamilieView.as_view(),
          name='inschrijven-familie'),
 
+    path('inschrijven/<evenement_pk>/door-hwl/',
+         view_inschrijven.InschrijvenDoorHWL.as_view(),
+         name='inschrijven-door-hwl'),
 
     # toevoegen aan winkelwagentje
     path('inschrijven/toevoegen-mandje/',
