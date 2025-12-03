@@ -113,7 +113,7 @@ class EvenementInschrijving(models.Model):
     sporter = models.ForeignKey(Sporter, on_delete=models.PROTECT)
 
     # koppeling aan de bestelling
-    bestelling = models.ForeignKey(BestellingRegel, on_delete=models.PROTECT, null=True)
+    bestelling = models.ForeignKey(BestellingRegel, on_delete=models.PROTECT, null=True, blank=True)
 
     # wie is de koper?
     # (BestellingProduct verwijst naar deze inschrijving)

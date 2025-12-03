@@ -742,9 +742,10 @@ class InschrijvenDoorHWL(UserPassesTestMixin, TemplateView):
             pass
         else:
             # inschrijving is definitief
+            inschrijving.nummer = inschrijving.pk
             inschrijving.status = EVENEMENT_INSCHRIJVING_STATUS_DEFINITIEF
             inschrijving.log += "[%s] Betaling niet nodig; inschrijving is definitief.\n" % stamp_str
-            inschrijving.save(update_fields=['status', 'log'])
+            inschrijving.save(update_fields=['status', 'log', 'nummer'])
 
         # terug naar de lijst met inschrijvingen
         url = reverse('Evenement:aanmeldingen', kwargs={'evenement_pk': evenement.pk})
