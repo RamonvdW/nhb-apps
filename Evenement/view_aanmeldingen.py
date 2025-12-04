@@ -512,6 +512,7 @@ class EvenementWorkshopKeuzesView(TemplateView):
                   .objects
                   .filter(evenement=evenement)
                   .exclude(gekozen_workshops='')
+                  .exclude(status=EVENEMENT_INSCHRIJVING_STATUS_AFGEMELD)
                   .values_list('gekozen_workshops', flat=True))
 
         context['aantal_opgaven'] = len(keuzes)
@@ -544,5 +545,6 @@ class EvenementWorkshopKeuzesView(TemplateView):
         )
 
         return context
+
 
 # end of file
