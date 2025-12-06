@@ -116,11 +116,11 @@ class WedstrijdBestelPlugin(BestelPluginBase):
 
         return regel
 
-    def afmelden(self, product_pk: int):
+    def afmelden(self, inschrijving_pk: int):
         """
             Verwerk het verzoek tot afmelden voor een wedstrijd.
         """
-        inschrijving = WedstrijdInschrijving.objects.select_related('sessie').get(pk=product_pk)
+        inschrijving = WedstrijdInschrijving.objects.select_related('sessie').get(pk=inschrijving_pk)
 
         if inschrijving.status not in (WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD,
                                        WEDSTRIJD_INSCHRIJVING_STATUS_VERWIJDERD):
@@ -141,6 +141,7 @@ class WedstrijdBestelPlugin(BestelPluginBase):
             # inschrijving.klasse kan niet op None gezet worden
 
             # inschrijving mag niet verwijderd worden, in verband met mogelijk verwijzing vanuit bestelling
+            # TODO: maak WedstrijdAfgemeld (ref: EvenementAfgemeld)
 
             inschrijving.save(update_fields=['status', 'log', 'sessie'])
 

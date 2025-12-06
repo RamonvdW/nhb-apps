@@ -225,8 +225,9 @@ class TestEvenementBestellingPlugin(E2EHelpers, TestCase):
 
         plugin.afmelden(inschrijving.pk)
 
-        inschrijving.refresh_from_db()
-        self.assertEqual(inschrijving.status, EVENEMENT_INSCHRIJVING_STATUS_AFGEMELD)
+        # originele inschrijving is verwijderd
+        count = EvenementInschrijving.objects.filter(pk=inschrijving.pk).count()
+        self.assertEqual(count, 0)
 
         afmelding = EvenementAfgemeld.objects.filter(nummer=inschrijving.nummer).first()
 
