@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2024 Ramon van der Winkel.
+#  Copyright (c) 2024-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -20,6 +20,8 @@ class EvenementInschrijvingAdmin(admin.ModelAdmin):
     # readonly ivm niet mogen wijzigen, maar ook voor performance
     readonly_fields = ('wanneer', 'evenement', 'sporter', 'koper')
 
+    search_fields = ('sporter__lid_nr', )
+
 
 class EvenementAfgemeldAdmin(admin.ModelAdmin):
 
@@ -27,6 +29,8 @@ class EvenementAfgemeldAdmin(admin.ModelAdmin):
 
     # readonly ivm niet mogen wijzigen, maar ook voor performance
     readonly_fields = ('evenement', 'sporter', 'koper')
+
+    search_fields = ('sporter__lid_nr', )
 
 
 admin.site.register(Evenement, EvenementAdmin)

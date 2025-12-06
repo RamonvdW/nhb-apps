@@ -188,8 +188,8 @@ class TestOpleidingBestellingPlugin(E2EHelpers, TestCase):
 
         plugin.afmelden(inschrijving.pk)
 
-        inschrijving.refresh_from_db()
-        self.assertEqual(inschrijving.status, OPLEIDING_INSCHRIJVING_STATUS_AFGEMELD)
+        count = OpleidingInschrijving.objects.filter(pk=inschrijving.pk).count()
+        self.assertEqual(count, 0)
 
         afmelding = OpleidingAfgemeld.objects.filter(nummer=inschrijving.nummer).first()
 

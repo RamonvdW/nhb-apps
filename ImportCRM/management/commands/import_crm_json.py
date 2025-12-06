@@ -946,6 +946,37 @@ class Command(BaseCommand):
                     functie_la.accounts.set(accounts)
         # for club
 
+    def _corrigeer_achternaam(self, lid_nr, achternaam):
+        """ corrigeer de achternaam van een lid, indien nodig """
+        if achternaam.upper().startswith('IJ'):
+            if achternaam[:2] != 'IJ':
+                new_achternaam = 'IJ' + achternaam[2:]
+                self.stdout.write("[WARNING] Lid %s: corrigeer achternaam: %s --> %s" % (
+                                  lid_nr, repr(achternaam), repr(new_achternaam)))
+                self._count_warnings += 1
+                # TODO: dit kan fout gaan bij niet-NL namen, daarom niet automatisch aanpassen
+                # return new_achternaam
+
+        return achternaam
+
+    def _corrigeer_geboorteplaats(self, lid_nr, plaats):
+        if plaats:
+            upper_plaats = plaats.upper()
+            if plaats[:2] != upper_plaats[:2] and not "'" in plaats[:2]:
+                if upper_plaats[:2] == 'IJ':
+                    new_plaats = 'IJ' + plaats[2:]
+                else:
+                    new_plaats = upper_plaats[0] + plaats[1:]
+
+                if plaats != new_plaats:
+                    self.stdout.write("[WARNING] Lid %s: corrigeer geboorteplaats: %s --> %s" % (
+                        lid_nr, repr(plaats), repr(new_plaats)))
+                    self._count_warnings += 1
+
+                return new_plaats
+
+        return plaats
+
     @staticmethod
     def _corrigeer_tussenvoegsel(lid_nr, tussenvoegsel, achternaam):
         if tussenvoegsel and tussenvoegsel[0].isupper():
@@ -1042,6 +1073,8 @@ class Command(BaseCommand):
                     self._count_warnings += 1
 
                 lid_achternaam = new_achternaam
+
+            lid_achternaam = self._corrigeer_achternaam(lid_nr, lid_achternaam)
 
             if member['prefix']:
                 lid_achternaam = self._corrigeer_tussenvoegsel(lid_nr, member['prefix'], lid_achternaam) + ' ' + lid_achternaam
@@ -1234,6 +1267,8 @@ class Command(BaseCommand):
             lid_geboorteplaats = member['birthplace']
             if not lid_geboorteplaats:
                 lid_geboorteplaats = ''     # vervang None to lege string
+            else:
+                lid_geboorteplaats = self._corrigeer_geboorteplaats(lid_nr, lid_geboorteplaats)
 
             # "educations": [
             #    {"code": "011", "name": "HANDBOOGTRAINER A", "date_start": "1990-01-01", "date_stop": "1990-01-01"},
