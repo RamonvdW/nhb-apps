@@ -13,7 +13,7 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from Betaal.format import format_bedrag_euro
 from Evenement.definities import (EVENEMENT_INSCHRIJVING_STATUS_TO_SHORT_STR,
                                   EVENEMENT_INSCHRIJVING_STATUS_DEFINITIEF, EVENEMENT_INSCHRIJVING_STATUS_AFGEMELD,
-                                  EVENEMENT_AFMELDING_STATUS_TO_SHORT_STR,)
+                                  EVENEMENT_AFMELDING_STATUS_TO_SHORT_STR)
 from Evenement.models import Evenement, EvenementInschrijving, EvenementAfgemeld
 from Evenement.view_inschrijven import splits_evenement_workshop_keuzes
 from Functie.definities import Rol
@@ -272,7 +272,7 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
             if regel:
                 prijs_str = format_bedrag_euro(regel.bedrag_euro)
             else:
-                prijs_str = 'Geen (handmatige inschrijving)'
+                prijs_str = 'Geen'
 
             row = [
                 str(reserveringsnummer),

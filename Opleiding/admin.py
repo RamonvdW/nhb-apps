@@ -121,11 +121,19 @@ class OpleidingInschrijvingAdmin(admin.ModelAdmin):
 
     readonly_fields = ('sporter', 'koper')
 
+    list_filter = ('status', 'opleiding')
+
+    search_fields = ('sporter__lid_nr', )
+
 
 class OpleidingAfgemeldAdmin(admin.ModelAdmin):
     """ Admin configuratie voor OpleidingAfgemeld klasse """
 
     readonly_fields = ('sporter', 'koper')
+
+    list_filter = ('status', 'opleiding')
+
+    search_fields = ('sporter__lid_nr', )
 
 
 class OpleidingDiplomaAdmin(CreateOnlyAdmin):
