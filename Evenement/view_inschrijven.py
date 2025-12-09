@@ -581,11 +581,7 @@ class InschrijvenDoorHWL(UserPassesTestMixin, TemplateView):
 
         context['evenement'] = evenement
 
-        inschrijving_open_of_404(evenement)
-
         account = get_account(self.request)
-        if account.is_gast:
-            raise Http404('Geen toegang')
 
         evenement.begrenzing_str = EVENEMENT_BEGRENZING_STR
 

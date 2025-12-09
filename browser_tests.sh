@@ -146,6 +146,8 @@ PID_TAIL=$(jobs -p | tail -1)
 # flush de database zodat we geen foutmeldingen krijgen over al bestaande records nadat de vorige test afgebroken was
 # let op: dit reset NIET de migraties, die blijven gedaan. Statische records aangemaakt door migratie zijn dus weg.
 ./manage.py flush --database=test --noinput &>>"$LOG"
+./manage.py shell --settings="$SETTINGS_AUTOTEST_BROWSER" -v 0 -c 'CompetitieTaken().save()'
+./manage.py shell --settings="$SETTINGS_AUTOTEST_BROWSER" -v 0 -c 'from Bestelling.definities import BESTELLING_HOOGSTE_BESTEL_NR_FIXED_PK as PK; BestellingHoogsteBestelNr(pk=PK).save()'
 
 # start de achtergrondtaken
 
