@@ -189,6 +189,8 @@ class BestellingMutatieAdmin(admin.ModelAdmin):
           }),
     )
 
+    search_fields = ('account__username',)
+
     @staticmethod
     def code_plus(obj):     # pragma: no cover
         try:
