@@ -6,7 +6,7 @@
 
 """ In de sessie bijhouden wat de meest recent geactiveerde rol en functie is """
 
-from Account.operations.session_vars import zet_sessionvar_if_changed
+from Account.operations import zet_sessionvar_if_changed
 from Functie.definities import Rol
 from Functie.models import Functie
 from typing import Tuple

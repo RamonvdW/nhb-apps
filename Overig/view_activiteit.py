@@ -13,7 +13,7 @@ from django.views.generic import TemplateView, View
 from django.utils.formats import date_format
 from django.db.models import F, Count
 from Account.models import Account, AccountSessions, get_account
-from Account.operations.otp import otp_loskoppelen, otp_stuur_email_losgekoppeld
+from Account.operations import otp_loskoppelen, otp_stuur_email_losgekoppeld
 from Functie.definities import Rol
 from Functie.models import Functie, VerklaringHanterenPersoonsgegevens
 from Functie.rol import rol_get_huidige

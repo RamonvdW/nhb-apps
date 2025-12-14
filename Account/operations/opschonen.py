@@ -10,7 +10,7 @@ from Account.models import Account, AccountSessions
 import datetime
 
 
-def accounts_opschonen_nieuw_niet_voltooid(stdout):
+def _accounts_opschonen_nieuw_niet_voltooid(stdout):
     now = timezone.now()
     wat_ouder = now - datetime.timedelta(days=3)
 
@@ -29,7 +29,7 @@ def accounts_opschonen_nieuw_niet_voltooid(stdout):
     # for
 
 
-def accounts_opschonen_geen_sporter(stdout):
+def _accounts_opschonen_geen_sporter(stdout):
     # zoek naar accounts waar niet naartoe verwezen wordt vanuit een Sporter
     for obj in (Account
                 .objects
@@ -57,8 +57,8 @@ def accounts_opschonen(stdout):
         We verwijderen nieuwe accounts die na 3 dagen nog niet voltooid zijn
         We verwijderen spook-accounts die niet meer gekoppeld zijn aan een Sporter
     """
-    accounts_opschonen_nieuw_niet_voltooid(stdout)
-    accounts_opschonen_geen_sporter(stdout)
+    _accounts_opschonen_nieuw_niet_voltooid(stdout)
+    _accounts_opschonen_geen_sporter(stdout)
 
 
 # end of file

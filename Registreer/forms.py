@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django import forms
-from Account.operations.wachtwoord import account_test_wachtwoord_sterkte
+from Account.operations import account_test_wachtwoord_sterkte
 from Mailer.operations import mailer_email_is_valide
 
 

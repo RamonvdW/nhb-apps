@@ -7,7 +7,7 @@
 from django.utils import timezone
 from datetime import timedelta
 from Account.models import get_account, Account
-from Account.operations.session_vars import zet_sessionvar_if_changed
+from Account.operations import zet_sessionvar_if_changed
 from Bestelling.models import BestellingMandje
 
 

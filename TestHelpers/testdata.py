@@ -10,7 +10,7 @@ from django.test import Client
 from django.core import management
 from django.utils import timezone
 from Account.models import Account
-from Account.operations.aanmaken import account_create
+from Account.operations import account_create
 from BasisTypen.definities import (GESLACHT_ANDERS,
                                    ORGANISATIE_WA, ORGANISATIE_KHSN, ORGANISATIE_IFAA,
                                    MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT,

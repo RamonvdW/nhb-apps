@@ -30,12 +30,11 @@ class TestLocatieCliReistijd(E2EHelpers, TestCase):
         self.assertTrue('[ERROR] Fout tijdens gmaps init: Invalid API key provided' in f1.getvalue())
 
         # unexpected exception handling
-        Reistijd(
+        Reistijd.objects.create(
             vanaf_lat=TEST_TRIGGER,
             vanaf_lon=TEST_TRIGGER,
             naar_lat=TEST_TRIGGER,
-            naar_lon=TEST_TRIGGER,
-        ).save()
+            naar_lon=TEST_TRIGGER)
 
         f1, f2 = self.run_management_command('reistijd_bijwerken', report_exit_code=False)
         # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
@@ -43,6 +42,11 @@ class TestLocatieCliReistijd(E2EHelpers, TestCase):
         self.assertTrue('Traceback:' in f1.getvalue())
         self.assertTrue('[WARNING] Stuur crash mail naar ontwikkelaar' in f2.getvalue())
         self.assertEqual(MailQueue.objects.count(), 1)
+
+    def test_kosten(self):
+        Reistijd.objects.create(op_datum='2000-01-01')
+        f1, f2 = self.run_management_command('reistijd_kosten')
+        print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
 
 
 # end of file

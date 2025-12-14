@@ -13,7 +13,7 @@ from django.views.generic import TemplateView
 from django.utils import timezone
 from Account.forms import LoginForm
 from Account.models import Account
-from Account.operations.otp import otp_zet_controle_niet_gelukt
+from Account.operations import otp_zet_controle_niet_gelukt
 from Account.plugin_manager import account_plugins_login_gate, account_plugins_post_login
 from Logboek.models import schrijf_in_logboek
 from Overig.helpers import get_safe_from_ip

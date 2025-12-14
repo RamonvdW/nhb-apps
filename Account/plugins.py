@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.shortcuts import render
-from Account.operations.email import (account_check_gewijzigde_email,
-                                      account_email_bevestiging_ontvangen,
-                                      account_stuur_email_bevestig_nieuwe_email)
+from Account.operations import (account_check_gewijzigde_email,
+                                account_email_bevestiging_ontvangen,
+                                account_stuur_email_bevestig_nieuwe_email)
 from Account.plugin_manager import account_add_plugin_login_gate
 from Logboek.models import schrijf_in_logboek
 from Mailer.operations import mailer_obfuscate_email

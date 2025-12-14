@@ -11,7 +11,7 @@ from django.urls import Resolver404, reverse
 from django.http import Http404
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
-from Account.operations.session_vars import zet_sessionvar_if_changed
+from Account.operations import zet_sessionvar_if_changed
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige, rol_get_beschrijving
 from Feedback.forms import FeedbackForm

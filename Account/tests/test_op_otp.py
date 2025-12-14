@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
 from django.contrib.auth.models import AnonymousUser
 from Account.models import Account
-from Account.operations.otp import (otp_prepare_koppelen, otp_controleer_code, otp_koppel_met_code,
-                                    otp_is_controle_gelukt, otp_loskoppelen, otp_stuur_email_losgekoppeld)
+from Account.operations import (otp_prepare_koppelen, otp_controleer_code, otp_koppel_met_code,
+                                otp_is_controle_gelukt, otp_loskoppelen, otp_stuur_email_losgekoppeld)
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 from types import SimpleNamespace

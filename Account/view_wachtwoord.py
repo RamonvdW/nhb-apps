@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -12,8 +12,7 @@ from django.contrib.auth import authenticate, update_session_auth_hash
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from Account.models import Account, get_account
-from Account.operations.auto_login import auto_login_lid_account_ww_vergeten
-from Account.operations.wachtwoord import account_test_wachtwoord_sterkte
+from Account.operations import auto_login_lid_account_ww_vergeten, account_test_wachtwoord_sterkte
 from Account.plugin_manager import account_plugins_ww_vergeten
 from Logboek.models import schrijf_in_logboek
 from Mailer.operations import render_email_template, mailer_queue_email, mailer_email_is_valide

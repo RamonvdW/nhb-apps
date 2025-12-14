@@ -8,7 +8,7 @@ from django.contrib import auth
 from django.test import TestCase, Client
 from django.db import connection
 from Account.models import Account
-from Account.operations.aanmaken import account_create
+from Account.operations import account_create
 from Functie.models import Functie
 from Functie.view_vhpg import account_vhpg_is_geaccepteerd
 from Mailer.models import MailQueue
