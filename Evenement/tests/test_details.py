@@ -66,6 +66,7 @@ class TestEvenementDetails(E2EHelpers, TestCase):
                     adres='Papendallaan 9\n6816VD Arnhem',
                     plaats='Arnhem')
         locatie.save()
+        self.locatie = locatie
 
         now_date = timezone.now().date()
         soon_date = now_date + datetime.timedelta(days=10)       # geeft "nog x dagen"
@@ -113,6 +114,17 @@ class TestEvenementDetails(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('evenement/details.dtl', 'design/site_layout.dtl'))
+        self.assertContains(resp, 'https://google.nl/maps?')
+
+        # zet de locatie op onbekend, dan wordt de google maps link niet getoond
+        self.locatie.adres = 'Volgt binnenkort'
+        self.locatie.save()
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('evenement/details.dtl', 'design/site_layout.dtl'))
+        self.assertNotContains(resp, 'https://google.nl/maps?')
 
         # verplaats de "inschrijven tot" datum
         self.evenement.inschrijven_tot = 8

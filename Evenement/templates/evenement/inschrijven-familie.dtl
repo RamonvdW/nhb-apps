@@ -53,131 +53,118 @@
     </div>
 
 
-    {% if niets_gevonden %}
-
-        <!-- witruimte -->
-        <div class="row center">
-            <div class="col s12">
-                <p class="sv-rood-text">Het is niet mogelijk om in te schrijven op dit evenement</p>
-            </div>
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>Gevonden sporters</h4>
+            <p>Geregistreerd op jouw adres</p>
         </div>
+    </div>
 
-    {% else %}
-
-        <!-- witruimte -->
-        <div class="row center">
-            <div class="col s12">
-                <h4>Gevonden sporters</h4>
-                <p>Geregistreerd op jouw adres</p>
-            </div>
-        </div>
-
-        <!-- blauwe balk met informatie -->
-        <div class="row-sv-blauw">
-            <div class="col s12 m10 offset-m1 l8 offset-l2 xl6 offset-xl3">
-                <table class="sv-kader-tabel">
-                    <thead>
-                        <tr>
-                            <th>Sporter</th>
-                            <th><!-- kolom voor knoppen --></th>
-                        </tr>
-                    </thead>
-                    {% for sporter in familie %}
-                        <tr>
-                            <td>{{ sporter.lid_nr_en_volledige_naam }}</td>
-                            <td class="center">
-                                {% if sporter.is_geselecteerd %}
-                                    <i>Geselecteerd</i>
-                                {% endif %}
-                                {% if sporter.url_selecteer %}
-                                    <a class="btn-sv-rood" href="{{ sporter.url_selecteer }}">Selecteer</a>
-                                {% endif %}
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </table>
-            </div>
-        </div>
-
-
-        <!-- witruimte -->
-        <div class="row center">
-            <div class="col s12">
-                <h4>Gekozen sporter</h4>
-            </div>
-        </div>
-
-        <!-- blauwe balk met informatie -->
-        <div class="row-sv-blauw">
-            <div class="col s12 l10 offset-l1 xl8 offset-xl2">
-                <form action="{{ url_toevoegen }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
-                    {% csrf_token %}
-                    <input type="hidden" name="evenement" value="{{ evenement.pk }}">
-                    <input type="hidden" name="sporter" value="{{ geselecteerd.lid_nr }}">
-                    <input type="hidden" name="goto" value="F">
-
-                    <table class="sv-kader-tabel">
-                        <tr>
-                            <th>Sporter</th>
-                            <td>{{ geselecteerd.lid_nr_en_volledige_naam }}</td>
-                        </tr>
-
-                        <tr>
-                            <th>Lid bij vereniging</th>
-                            <td>{% if geselecteerd.bij_vereniging %}{{ geselecteerd.bij_vereniging }}{% else %}<i class="sv-rood-text">Geen</i>{% endif %}</td>
-                        </tr>
-
-                        {% if not geselecteerd.al_ingeschreven %}
-                            <tr>
-                                <th>Prijs</th>
-                                <td>&euro;&nbsp;{{ geselecteerd.prijs_euro }}</td>
-                            </tr>
-
-                            {% if workshops %}
-                                <tr>
-                                    <th></th>
-                                    <td>Maak hieronder je keuze per ronde: welke workshop spreekt jou het meest aan? Zo zijn we goed voorbereid.<br>Wisselen kan nog, maar kies het liefst meteen je favoriet.</td>
-                                </tr>
+    <!-- blauwe balk met informatie -->
+    <div class="row-sv-blauw">
+        <div class="col s12 m10 offset-m1 l8 offset-l2 xl6 offset-xl3">
+            <table class="sv-kader-tabel">
+                <thead>
+                    <tr>
+                        <th>Sporter</th>
+                        <th><!-- kolom voor knoppen --></th>
+                    </tr>
+                </thead>
+                {% for sporter in familie %}
+                    <tr>
+                        <td>{{ sporter.lid_nr_en_volledige_naam }}</td>
+                        <td class="center">
+                            {% if sporter.is_geselecteerd %}
+                                <i>Geselecteerd</i>
                             {% endif %}
+                            {% if sporter.url_selecteer %}
+                                <a class="btn-sv-rood" href="{{ sporter.url_selecteer }}">Selecteer</a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
 
-                            {% for ronde_nr, ronde_ws in workshops %}
-                                <tr>
-                                    <th>Kies workshop ronde {{ ronde_nr }}</th>
-                                    <td>
-                                        <ul style="margin:0">
-                                            {% for code, titel in ronde_ws %}
-                                                <li>
-                                                    <label class="black-text" for="id_{{ code }}">
-                                                        <input class="with-gap" type="radio" name="ws_{{ ronde_nr }}" value="{{ code }}" required id="id_{{ code }}">
-                                                        <span>{{ titel }}</span>
-                                                    </label>
-                                                </li>
-                                            {% endfor %}
-                                        </ul>
-                                    </td>
-                                </tr>
-                            {% endfor %}
+
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>Gekozen sporter</h4>
+        </div>
+    </div>
+
+    <!-- blauwe balk met informatie -->
+    <div class="row-sv-blauw">
+        <div class="col s12 l10 offset-l1 xl8 offset-xl2">
+            <form action="{{ url_toevoegen }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
+                {% csrf_token %}
+                <input type="hidden" name="evenement" value="{{ evenement.pk }}">
+                <input type="hidden" name="sporter" value="{{ geselecteerd.lid_nr }}">
+                <input type="hidden" name="goto" value="F">
+
+                <table class="sv-kader-tabel">
+                    <tr>
+                        <th>Sporter</th>
+                        <td>{{ geselecteerd.lid_nr_en_volledige_naam }}</td>
+                    </tr>
+
+                    <tr>
+                        <th>Lid bij vereniging</th>
+                        <td>{% if geselecteerd.bij_vereniging %}{{ geselecteerd.bij_vereniging }}{% else %}<i class="sv-rood-text">Geen</i>{% endif %}</td>
+                    </tr>
+
+                    {% if not geselecteerd.al_ingeschreven %}
+                        <tr>
+                            <th>Prijs</th>
+                            <td>&euro;&nbsp;{{ geselecteerd.prijs_euro }}</td>
+                        </tr>
+
+                        {% if workshops %}
+                            <tr>
+                                <th></th>
+                                <td>Maak hieronder je keuze per ronde: welke workshop spreekt jou het meest aan? Zo zijn we goed voorbereid.<br>Wisselen kan nog, maar kies het liefst meteen je favoriet.</td>
+                            </tr>
                         {% endif %}
 
-                        <tr>
-                            <th>Inschrijven</th>
-                            <td>
-                                {% if geselecteerd.al_ingeschreven %}
-                                    <span>Al ingeschreven</span>
-                                {% else %}
-                                    <button class="btn-sv-rood" id="submit_knop" type="submit">
-                                        {% sv-icon-op-button 'toevoegen' tekst='Kies' %}
-                                    </button>
-                                {% endif %}
-                            </td>
-                        </tr>
+                        {% for ronde_nr, ronde_ws in workshops %}
+                            <tr>
+                                <th>Kies workshop ronde {{ ronde_nr }}</th>
+                                <td>
+                                    <ul style="margin:0">
+                                        {% for code, titel in ronde_ws %}
+                                            <li>
+                                                <label class="black-text" for="id_{{ code }}">
+                                                    <input class="with-gap" type="radio" name="ws_{{ ronde_nr }}" value="{{ code }}" required id="id_{{ code }}">
+                                                    <span>{{ titel }}</span>
+                                                </label>
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    {% endif %}
 
-                    </table>
-                </form>
-            </div>
+                    <tr>
+                        <th>Inschrijven</th>
+                        <td>
+                            {% if geselecteerd.al_ingeschreven %}
+                                <span>Al ingeschreven</span>
+                            {% else %}
+                                <button class="btn-sv-rood" id="submit_knop" type="submit">
+                                    {% sv-icon-op-button 'toevoegen' tekst='Kies' %}
+                                </button>
+                            {% endif %}
+                        </td>
+                    </tr>
+
+                </table>
+            </form>
         </div>
-
-    {% endif %}
+    </div>
 
     {% include 'feedback/sidebar.dtl' with op_pagina="evenement-inschrijven-familie" %}
 

@@ -59,7 +59,7 @@
             <p>Hieronder kan je een lid zoeken op bondsnummer of (deel van de) naam.</p>
             {% if not sporter %}
                 {% if gezocht_veel_te_veel %}
-                    <p class="center sv-rood-text">Zoekterm <b>{{ gezocht_niet_gevonden }}</b> gaaf te veel resultaten ({{ gezocht_veel_te_veel }}).</p>
+                    <p class="center sv-rood-text">Zoekterm <b>{{ gezocht_niet_gevonden }}</b> gaf te veel resultaten ({{ gezocht_veel_te_veel }}).</p>
                 {% elif gezocht_niet_gevonden %}
                     <p class="center sv-rood-text">Lid <b>{{ gezocht_niet_gevonden }}</b> niet gevonden.</p>
                 {% endif %}

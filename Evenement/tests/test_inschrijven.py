@@ -12,6 +12,7 @@ from Bestelling.models import Bestelling, BestellingMandje
 from Betaal.models import BetaalInstellingenVereniging
 from Evenement.definities import EVENEMENT_STATUS_GEACCEPTEERD, EVENEMENT_INSCHRIJVING_STATUS_DEFINITIEF
 from Evenement.models import Evenement, EvenementInschrijving
+from Functie.tests.helpers import maak_functie
 from Geo.models import Regio
 from Locatie.models import EvenementLocatie
 from Mailer.models import MailQueue
@@ -32,10 +33,12 @@ class TestEvenementInschrijven(E2EHelpers, TestCase):
     url_inschrijven_groepje = '/kalender/evenement/inschrijven/%s/groep/'           # evenement_pk
     url_inschrijven_familie = '/kalender/evenement/inschrijven/%s/familie/'         # evenement_pk
     url_inschrijven_familie_lid = '/kalender/evenement/inschrijven/%s/familie/%s/'  # evenement_pk, lid_nr
+    url_inschrijven_door_hwl = '/kalender/evenement/inschrijven/%s/door-hwl/'       # evenement_pk
     url_toevoegen_mandje = '/kalender/evenement/inschrijven/toevoegen-mandje/'      # POST
     url_mandje_bestellen = '/bestel/mandje/'
     url_bestellingen_overzicht = '/bestel/overzicht/'
     url_sporter_profiel = '/sporter/'
+    url_aanmeldingen = '/kalender/evenement/aanmeldingen/%s/'                       # evenement_pk
 
     volgende_bestel_nr = 1234567
 
@@ -88,6 +91,7 @@ class TestEvenementInschrijven(E2EHelpers, TestCase):
                         account=self.account_100000,
                         bij_vereniging=ver,
                         adres_code='1234XX')
+        sporter.unaccented_naam = sporter.voornaam + ' ' + sporter.achternaam
         sporter.save()
         self.sporter_100000 = sporter
 
@@ -129,6 +133,7 @@ class TestEvenementInschrijven(E2EHelpers, TestCase):
                         account=self.account_100022,
                         bij_vereniging=ver,
                         adres_code='5678YY')
+        sporter.unaccented_naam = sporter.voornaam + ' ' + sporter.achternaam
         sporter.save()
         self.sporter_100022 = sporter
 
@@ -140,8 +145,14 @@ class TestEvenementInschrijven(E2EHelpers, TestCase):
                         geboorte_datum='1966-05-05',
                         sinds_datum='2020-02-02',
                         bij_vereniging=ver)
+        sporter.unaccented_naam = sporter.voornaam + ' ' + sporter.achternaam
         sporter.save()
         self.sporter_100023 = sporter
+
+        self.functie_hwl = maak_functie("HWL test", "HWL")
+        self.functie_hwl.vereniging = ver
+        self.functie_hwl.save()
+        self.functie_hwl.accounts.add(self.account_100000)
 
         ver = Vereniging.objects.get(ver_nr=VER_NR_BONDSBUREAU)
         ver.naam = 'Bondsbureau'
@@ -161,6 +172,12 @@ class TestEvenementInschrijven(E2EHelpers, TestCase):
         self.assert403(resp, "Geen toegang")
 
         resp = self.client.post(self.url_toevoegen_mandje)
+        self.assert403(resp, "Geen toegang")
+
+        resp = self.client.get(self.url_inschrijven_door_hwl % 99999)
+        self.assert403(resp, "Geen toegang")
+
+        resp = self.client.post(self.url_inschrijven_door_hwl % 99999)
         self.assert403(resp, "Geen toegang")
 
     def test_sporter(self):
@@ -563,5 +580,117 @@ class TestEvenementInschrijven(E2EHelpers, TestCase):
         self.assertTrue('Je bent ingeschreven voor de' in html)
         self.assertTrue('en bent aangemeld voor de volgende workshops:' in html)
 
+    def test_door_hwl(self):
+        self.e2e_login_and_pass_otp(self.account_100000)
+        self.e2e_wissel_naar_functie(self.functie_hwl)
+
+        # fout evenement
+        resp = self.client.get(self.url_inschrijven_door_hwl % 999999)
+        self.assert404(resp, "Evenement niet gevonden")
+
+        # initiële pagina
+        url = self.url_inschrijven_door_hwl % self.evenement.pk
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_template_used(resp, ('evenement/inschrijven-door-hwl.dtl', 'design/site_layout.dtl'))
+        self.assert_html_ok(resp)
+
+        # zoek zonder resultaten
+        resp = self.client.get(url + '?zoek=BestaatNiet')
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_template_used(resp, ('evenement/inschrijven-door-hwl.dtl', 'design/site_layout.dtl'))
+        self.assert_html_ok(resp)
+        self.assertContains(resp, 'niet gevonden.')
+
+        # zoek met meerdere resultaten
+        resp = self.client.get(url + '?zoek=Boog')
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_template_used(resp, ('evenement/inschrijven-door-hwl.dtl', 'design/site_layout.dtl'))
+        self.assert_html_ok(resp)
+        self.assertContains(resp, 'Er zijn meerdere hits. Graag de zoektekst preciezer maken.')
+        self.assertContains(resp, 'Pijl de Boog')
+        self.assertContains(resp, 'Pees de Boog')
+
+        # zoek met 1 resultaat
+        resp = self.client.get(url + '?zoek=100023')
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_template_used(resp, ('evenement/inschrijven-door-hwl.dtl', 'design/site_layout.dtl'))
+        self.assert_html_ok(resp)
+        self.assertContains(resp, '[100023] Pees de Boog')
+
+        # post zonder parameters
+        resp = self.client.post(url)
+        self.assert404(resp, "Slecht verzoek")
+
+        # post met evenement, geen sporter
+        resp = self.client.post(url, {'evenement': self.evenement.pk,
+                                      'sporter': 99999})
+        self.assert404(resp, "Onderdeel van verzoek niet gevonden")
+
+        # post met alles, maar sporter is geen actief lid
+        self.sporter_100023.is_actief_lid = False
+        self.sporter_100023.save()
+        resp = self.client.post(url, {'evenement': self.evenement.pk,
+                                      'sporter': self.sporter_100023.lid_nr})
+        self.assert404(resp, "Niet actief lid")
+
+        # post met sporter, maar evenement heeft geen workshops
+        resp = self.client.post(url, {'evenement': self.evenement.pk,
+                                      'sporter': self.sporter_100022.lid_nr,
+                                      'ws1': 'ws1.3'})
+        self.assert_is_redirect(resp, self.url_aanmeldingen % self.evenement.pk)
+
+        # sporter is al ingeschreven
+        # zoek met 1 resultaat
+        resp = self.client.get(url + '?zoek=100022')
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_template_used(resp, ('evenement/inschrijven-door-hwl.dtl', 'design/site_layout.dtl'))
+        self.assert_html_ok(resp)
+        self.assertContains(resp, '[100022] Pijl de Boog')
+        self.assertContains(resp, 'Al ingeschreven')
+
+        # post met alles
+        EvenementInschrijving.objects.all().delete()
+        self.evenement.workshop_opties = "1.1 test A\r\n1.2 test B\nskip\nno-dot x\nerr.or error\n2.1 test C\n3.1 test D"
+        self.evenement.save(update_fields=['workshop_opties'])
+        self.sporter_100023.is_actief_lid = True
+        self.sporter_100023.save()
+
+        resp = self.client.get(url + '?zoek=100023')
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_template_used(resp, ('evenement/inschrijven-door-hwl.dtl', 'design/site_layout.dtl'))
+        self.assert_html_ok(resp)
+
+        resp = self.client.post(url, {'evenement': self.evenement.pk,
+                                      'sporter': self.sporter_100023.lid_nr,
+                                      'ws_1': 'ws1.2',
+                                      'ws_2': 'ws2.1',
+                                      'ws_3': 'ws3.10'})     # bestaat niet
+        self.assert_is_redirect(resp, self.url_aanmeldingen % self.evenement.pk)
+        inschrijving = EvenementInschrijving.objects.first()
+        self.assertEqual(inschrijving.sporter, self.sporter_100023)
+        self.assertEqual(inschrijving.gekozen_workshops, '1.2 2.1')
+
+        # zoek met te veel resultaten (>50)
+        bulk = list()
+        for i in range(50):
+            sporter = Sporter(
+                            lid_nr=100100 + i,
+                            voornaam='Nr%s' % (i + 1),
+                            achternaam='de Boog',
+                            geboorte_datum='1966-06-06',
+                            sinds_datum='2020-02-02',
+                            bij_vereniging=self.sporter_100022.bij_vereniging)
+            sporter.unaccented_naam = sporter.voornaam + ' ' + sporter.achternaam
+            bulk.append(sporter)
+        # for
+        Sporter.objects.bulk_create(bulk)
+        del bulk
+
+        resp = self.client.get(url + '?zoek=Boog')
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_template_used(resp, ('evenement/inschrijven-door-hwl.dtl', 'design/site_layout.dtl'))
+        self.assert_html_ok(resp)
+        self.assertContains(resp, 'gaf te veel resultaten (52).')
 
 # end of file
