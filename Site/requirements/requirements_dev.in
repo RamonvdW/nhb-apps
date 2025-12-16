@@ -27,8 +27,8 @@ django-extensions
 html5validator
 
 # verkleinen van font files
-fonttools
-brotli
+#fonttools
+#brotli
 
 # javascript/ecmascript validatie
 esprima

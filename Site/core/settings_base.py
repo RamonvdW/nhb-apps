@@ -62,7 +62,7 @@ APPS_DIR = os.path.dirname(BASE_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2025-12-14'
+SITE_VERSIE = '2025-12-16'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -490,13 +490,13 @@ OPLEIDING_CODES = (
     ('018', 'HBI3', 'Handboog instructeur 3', ()),
     ('020', '', 'Basiscursus arbitrage', ()),
 
-    ('030', 'WL', 'Wedstrijdleider 25m1pijl', ()),
-    ('031', 'WL', 'Wedstrijdleider Indoor/Outdoor', ()),
-    ('032', 'WL', 'Wedstrijdleider 25m1pijl + Indoor', ()),
-    ('033', 'WL', 'Wedstrijdleider Outdoor', ()),
-    ('034', 'WL', 'Wedstrijdleider Indoor', ()),
-    ('035', 'WL', 'Wedstrijdleider Allround (niveau 3)', ()),
-    ('036', 'WL', 'Wedstrijdleider 1', ()),
+    ('030', 'WL2', 'Wedstrijdleider 25m1pijl', ('036',)),
+    ('031', 'WL2', 'Wedstrijdleider Indoor/Outdoor', ('036',)),
+    ('032', 'WL2', 'Wedstrijdleider 25m1pijl + Indoor', ('036',)),
+    ('033', 'WL2', 'Wedstrijdleider Outdoor', ('036',)),
+    ('034', 'WL2', 'Wedstrijdleider Indoor', ('036',)),
+    ('035', 'WL2', 'Wedstrijdleider Allround (niveau 3)', ('036',)),
+    ('036', 'WL1', 'Wedstrijdleider 1', ()),
 
     ('038', 'IFAA-RM', 'IFAA Range Marshall', ()),
     ('039', '', 'Praktijkbegeleider voor instructeurs', ()),
