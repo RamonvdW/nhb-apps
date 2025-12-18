@@ -73,7 +73,11 @@
 
                     {% elif obj.url_uitslag_invoeren %}
 
-                        {% sv-knop-nav url=obj.url_uitslag_invoeren icon='aanpassen' tekst='' %}
+                        {% if obj.uitslag.is_bevroren %}
+                            {% sv-knop-nav url=obj.url_uitslag_invoeren icon='aanpassen' tekst='' kleur='blauw' %}
+                        {% else %}
+                            {% sv-knop-nav url=obj.url_uitslag_invoeren icon='aanpassen' tekst='' %}
+                        {% endif %}
 
                     {% else %}
                         <i>Nog geen</i>
