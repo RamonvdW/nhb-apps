@@ -23,6 +23,9 @@ def iter_teams_wedstrijdformulieren(comp: Competitie):
         generates tuples:
             (afstand, is_bk, klasse_pk, rayon_nr, fname)
     """
+    # uitgezet omdat we het Excel formulier nog gebruiken
+    return
+
     afstand = int(comp.afstand)
     rayon_nrs = list(Rayon.objects.all().values_list('rayon_nr', flat=True))
 
