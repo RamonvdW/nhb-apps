@@ -57,19 +57,21 @@
 
                     <!-- logo links;         brand-logo voorkomt button wrap -->
                     <a href="/plein/" class="brand-logo left">
-                                                           <!-- aspect ratio: 400x92 -> 270x62 -->
-                        <img src="{% static 'design/logo_with_text_khsn.webp' %}" width="270" height="62" alt="KHSN logo" draggable="false">
+                                                           <!-- aspect ratio: 400x92 -> 270x62 -->                                            <!-- z-index: achter de knoppen -->
+                        <img src="{% static 'design/logo_with_text_khsn.webp' %}" width="270" height="62" alt="KHSN logo" draggable="false" style="z-index:-1">
                     </a>
 
-                    <!-- login/quick access knop aan de rechter kant -->
+                    <!-- knoppen aan de rechter kant -->
                     <ul class="right">
+
+                        <!-- mandje knopje -->
                         {% if menu_toon_mandje %}
                             <li>
-                                <!-- position:relative + z-index=2: knop boven op het logo -->
                                 {% sv-knop-nav icon='mandje' tekst=menu_mandje_aantal url=url_toon_mandje %}
                             </li>
                         {% endif %}
 
+                        <!-- menu knop met/zonder naam -->
                         {% if menu_voornaam %}
                             <li>
                                 <!-- position:relative + z-index=2: knop boven op het logo -->
@@ -83,7 +85,7 @@
                             </li>
                         {% elif not verberg_login_knop %}
                             <li>
-                                <a href="{% url 'Account:login' %}" class="btn-sv-rood" style="position:relative; z-index:2">Inloggen</a>
+                                <a href="{% url 'Account:login' %}" class="btn-sv-rood" style="position:relative">Inloggen</a>
                             </li>
                         {% endif %}
                     </ul>
