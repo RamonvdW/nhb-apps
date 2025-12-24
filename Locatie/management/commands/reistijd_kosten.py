@@ -1,14 +1,11 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023-2025 Ramon van der Winkel.
+#  Copyright (c) 2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.core.management.base import BaseCommand
-from django.utils import timezone
-from Locatie.models import WedstrijdLocatie, Reistijd
-from Sporter.models import Sporter
-import datetime
+from Locatie.models import Reistijd
 
 
 class Command(BaseCommand):

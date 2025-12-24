@@ -93,7 +93,8 @@ class TestCompKampioenschapStorage(E2EHelpers, TestCase):
                             is_dirty=False)
 
         count = aantal_ontbrekende_wedstrijdformulieren_rk_bk(comp)
-        self.assertEqual(count, 10)      # 2 klassen x (bk + 4 rk)
+        # self.assertEqual(count, 10)      # 2 klassen x (bk + 4 rk)
+        self.assertEqual(count, 5)         # teams staat uit: 1 klasse x (bk + 4 rk)
 
         Bestand.objects.create(
                             begin_jaar=2025,
@@ -111,6 +112,6 @@ class TestCompKampioenschapStorage(E2EHelpers, TestCase):
                             is_bk=True)
 
         count = aantal_ontbrekende_wedstrijdformulieren_rk_bk(comp)
-        self.assertEqual(count, 8)
+        self.assertEqual(count, 4)
 
 # end of file

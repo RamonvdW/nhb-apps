@@ -239,7 +239,7 @@ class KalenderView(TemplateView):
             context['menu_toon_mandje'] = True
             eval_mandje_inhoud(self.request)
 
-        context['robots'] = 'nofollow'   # prevent crawling linked pages (we provide a sitemap for events+matches)
+        context['robots'] = 'nofollow'   # prevent crawling linked pages (sitemap bevat alle evenement en wedstrijden)
 
         # url voor het insturen van de filter keuzes met een POST
         context['url_jaar'] = reverse('Kalender:simpel',

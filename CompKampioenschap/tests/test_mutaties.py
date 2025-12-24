@@ -298,12 +298,13 @@ class TestCompKampioenschapMutaties(E2EHelpers, TestCase):
 [INFO] Maak rk-programma_individueel-rayon2_indiv-1
 [INFO] Maak rk-programma_individueel-rayon3_indiv-1
 [INFO] Maak rk-programma_individueel-rayon4_indiv-1
-[INFO] Maak bk-programma_individueel_indiv-1
-[INFO] Maak rk-programma_teams-rayon1_team-1
-[INFO] Maak rk-programma_teams-rayon2_team-1
-[INFO] Maak rk-programma_teams-rayon3_team-1
-[INFO] Maak rk-programma_teams-rayon4_team-1
-[INFO] Maak bk-programma_teams_team-1""" in f2.getvalue())
+[INFO] Maak bk-programma_individueel_indiv-1""" in f2.getvalue())
+            # teams is uitgezet
+            # [INFO] Maak rk-programma_teams-rayon1_team-1
+            # [INFO] Maak rk-programma_teams-rayon2_team-1
+            # [INFO] Maak rk-programma_teams-rayon3_team-1
+            # [INFO] Maak rk-programma_teams-rayon4_team-1
+            # [INFO] Maak bk-programma_teams_team-1
 
     def test_update_dirty_18(self):
         self.assertEqual(CompetitieMutatie.objects.count(), 0)

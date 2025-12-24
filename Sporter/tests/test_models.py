@@ -63,7 +63,7 @@ class TestSporterModels(TestCase):
 
         # geboortejaar in de toekomst
         now = datetime.datetime.now()
-        sporter.geboorte_datum = now + datetime.timedelta(days=10)
+        sporter.geboorte_datum = now    # + datetime.timedelta(days=10)  # unwanted year jump, from Dec 22..31
         with self.assertRaises(ValidationError) as exc:
             sporter.clean_fields()
         self.assertEqual(str(exc.exception),

@@ -46,7 +46,7 @@ class TestLocatieCliReistijd(E2EHelpers, TestCase):
     def test_kosten(self):
         Reistijd.objects.create(op_datum='2000-01-01')
         f1, f2 = self.run_management_command('reistijd_kosten')
-        print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
-
+        # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
+        self.assertEqual(f1.getvalue(), '')
 
 # end of file

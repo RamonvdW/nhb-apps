@@ -317,10 +317,10 @@ class TestCompLaagRayonFormulieren(E2EHelpers, TestCase):
         self.assert404(resp, 'Kan RK programma niet vinden')
 
         # kapot RK programma
-        self._make_bad_file(self.xlsx_fpath_18_teams)
-        with override_settings(INSTALL_PATH='/tmp'):
-            resp = self.client.get(url)
-        self.assert404(resp, 'Kan RK programma niet openen')
+        # self._make_bad_file(self.xlsx_fpath_18_teams)
+        # with override_settings(INSTALL_PATH='/tmp'):
+        #     resp = self.client.get(url)
+        # self.assert404(resp, 'Kan RK programma niet openen')
 
         # niet bestaande wedstrijd
         resp = self.client.get(self.url_forms_download_teams % (999999, 'xxx'))
