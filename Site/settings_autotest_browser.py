@@ -43,6 +43,7 @@ from Site.settings_autotest import *         # noqa
 DEBUG = False
 
 # this configuration is used by browser_tests.sh
+
 # enable instrumentation of javascript
 ENABLE_MINIFY = False                   # used in Site/core/minify_dtl.py and Site/core/transpose_js.py
 ENABLE_INSTRUMENT_JS = True             # used in Site/core/instrument_js.py

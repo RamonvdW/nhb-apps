@@ -432,7 +432,7 @@ class CompetitieMatch(models.Model):
         extra = ""
         if self.vereniging:
             extra = " bij %s" % self.vereniging
-        return "(%s) %s %s%s: %s" % (self.pk, self.datum_wanneer, self.tijd_begin_wedstrijd, extra, self.beschrijving)
+        return "(%s) %s %s%s" % (self.pk, self.datum_wanneer, self.tijd_begin_wedstrijd, extra)
 
     class Meta:
         """ meta data voor de admin interface """

@@ -178,11 +178,11 @@ class Command(BaseCommand):
             self.stop_at = (datetime.datetime.now()
                             + datetime.timedelta(seconds=duration))
 
-        self._out_info('Taak loopt tot %s' % str(self.stop_at))
+        self._out_info('Taak loopt tot %s' % self.stop_at.strftime('%Y-%m-%d %H:%M:%S'))
 
     def handle(self, *args, **options):
 
-        if options['use_test_database']:
+        if options['use_test_database']:                    # pragma: no cover
             # voor gebruik tijdens browser tests
             connection.close()
             test_database_name = "test_" + settings.DATABASES[DEFAULT_DB_ALIAS]["NAME"]
