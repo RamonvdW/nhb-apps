@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -75,7 +75,10 @@ class Regiocompetitie(models.Model):
 
     def __str__(self):
         """ geef een tekstuele afkorting van dit object, voor in de admin interface """
-        return "%s - %s" % (self.competitie, self.regio)
+        msg = "%s - %s" % (self.competitie, self.regio)
+        if self.is_afgesloten:
+            msg = '(afgesloten) ' + msg
+        return msg
 
     objects = models.Manager()      # for the editor only
 

@@ -173,7 +173,7 @@ class Command(BaseCommand):
             self.stdout.write('[ERROR] CompetitieTaken.hoogste_scorehist bestaat niet meer!')
 
         # bepaal de sporterboog pk's die we bij moeten werken
-        allowed_sporterboog_pks = qset.values_list('score__sporterboog__pk', flat=True)
+        allowed_sporterboog_pks = list(qset.values_list('score__sporterboog__pk', flat=True))
 
         self.taken.hoogste_scorehist = scorehist_latest
         self.taken.save(update_fields=['hoogste_scorehist'])
@@ -190,7 +190,7 @@ class Command(BaseCommand):
         for ronde in (RegiocompetitieRonde
                       .objects
                       .select_related('regiocompetitie')
-                      .filter(regiocompetitie__is_afgesloten=False)
+                      # .filter(regiocompetitie__is_afgesloten=False)   # geeft problemen tijdens afsluiten met sporters die verhuisd zijn
                       .all()):
 
             week_nr = ronde.week_nr
@@ -207,15 +207,15 @@ class Command(BaseCommand):
 
         for _, _, ronde in rondes:
             # sorteer de beschikbare scores op het moment van de wedstrijd
-            for wedstrijd in (ronde
-                              .matches
-                              .select_related('uitslag')
-                              .order_by('datum_wanneer',
-                                        'tijd_begin_wedstrijd',
-                                        'pk')
-                              .all()):
+            for match in (ronde
+                          .matches
+                          .select_related('uitslag')
+                          .order_by('datum_wanneer',
+                                    'tijd_begin_wedstrijd',
+                                    'pk')
+                          .all()):
 
-                uitslag = wedstrijd.uitslag
+                uitslag = match.uitslag
                 if uitslag:
                     for score in (uitslag
                                   .scores
@@ -313,12 +313,14 @@ class Command(BaseCommand):
                     curr_scores = deelnemer.scores.all()
                     for score in scores:
                         if score not in curr_scores:
+                            self.stdout.write('[INFO] Deelnemer pk=%s: add score pk=%s' % (deelnemer.pk, score.pk))
                             deelnemer.scores.add(score)
                     # for
 
                     # verwijderde scores doorvoeren
                     for score in curr_scores:
                         if score not in scores:
+                            self.stdout.write('[INFO] Deelnemer pk=%s: remove score pk=%s' % (deelnemer.pk, score.pk))
                             deelnemer.scores.remove(score)
                     # for
 

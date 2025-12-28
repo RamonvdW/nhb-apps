@@ -178,7 +178,7 @@ class Command(BaseCommand):
             self.stop_at = (datetime.datetime.now()
                             + datetime.timedelta(seconds=duration))
 
-        self._out_info('Taak loopt tot %s' % str(self.stop_at))
+        self._out_info('Taak loopt tot %s' % self.stop_at.strftime('%Y-%m-%d %H:%M:%S'))
 
     def handle(self, *args, **options):
 
