@@ -39,7 +39,7 @@ class Command(BaseCommand):
         accounts_opschonen(self.stdout)
         wedstrijden_opschonen(self.stdout)
         reistijd_opschonen(self.stdout)
-        # scheidsrechters: lijkt niet nodig, want allemaal gekoppeld aan een wedstrijd
+        # scheidsrechter gaat volledig via cascade van wedstrijd/competitie match
         # TODO: opleiding
         # TODO: evenement
 

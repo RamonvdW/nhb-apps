@@ -176,7 +176,7 @@ class Command(BaseCommand):
         allowed_sporterboog_pks = qset.values_list('score__sporterboog__pk', flat=True)
 
         self.taken.hoogste_scorehist = scorehist_latest
-        self.taken.save()
+        self.taken.save(update_fields=['hoogste_scorehist'])
         self.stdout.write('[INFO] nieuwe hoogste ScoreHist pk is %s' % self.taken.hoogste_scorehist.pk)
 
         # een regiocompetitie heeft ingeschreven schuttersboog (RegioCompetitieSporterBoog);
@@ -514,7 +514,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
 
-        if options['use_test_database']:
+        if options['use_test_database']:                    # pragma: no cover
             # voor gebruik tijdens browser tests
             connection.close()
             test_database_name = "test_" + settings.DATABASES[DEFAULT_DB_ALIAS]["NAME"]

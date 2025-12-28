@@ -99,7 +99,7 @@ window.addEventListener("load", function() {
 
 // support for testing timeouts
 if (localStorage.getItem("js_cov_short_timeout")) {
-    timeout60s = 1;
+    timeout60s = 1;     // 1ms voor testen
 }
 
 /* end of file */

@@ -32,7 +32,7 @@ class TestBondspasOphalen(bh.BrowserTestCase):
         # dit triggert een apart pad in het JS
 
         # haal de bondspas pagina opnieuw op
-        self.do_navigate_to(self.url_bondspas)
+        self.do_navigate_to(self.url_bondspas, allow_same=True)
 
         # snelle wijziging voordat de browser de pagina opgehaald heeft
         # we hebben 100ms
@@ -50,7 +50,7 @@ class TestBondspasOphalen(bh.BrowserTestCase):
 
         # forceer de timeout hantering in de JS code
         self.set_short_xhr_timeouts()
-        self.do_navigate_to(self.url_bondspas)
+        self.do_navigate_to(self.url_bondspas, allow_same=True)
         time.sleep(0.1)
 
         # controleer dat er geen fouten in de console log staan

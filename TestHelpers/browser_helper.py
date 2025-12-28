@@ -384,7 +384,11 @@ class BrowserTestCase(TestCase):
         old_url = self._driver.current_url
         new_url = self.live_server_url + url
 
-        if new_url != old_url or allow_same:
+        if allow_same:
+            old_url = ''
+            old_title = ''
+
+        if new_url != old_url:
             for lp in range(max_tries):
                 self._driver.get(new_url)        # get() should block until page is "loaded"
                 if self._driver.title != old_title:

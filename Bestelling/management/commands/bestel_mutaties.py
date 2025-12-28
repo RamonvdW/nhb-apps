@@ -110,12 +110,12 @@ class Command(BaseCommand):
         # monitor voor nieuwe mutaties
         mutatie_count = 0      # moet 0 zijn: beschermd tegen query op lege mutatie tabel
         now = datetime.datetime.now()
-        while now < self.stop_at:                   # pragma: no branch
+        while now < self.stop_at:                           # pragma: no branch
             # self._out_debug('tick')
             new_count = BestellingMutatie.objects.count()
             if new_count != mutatie_count:
                 mutatie_count = new_count
-                if mutatie_count:
+                if mutatie_count:                           # pragma: no branch
                     self._verwerk_nieuwe_mutaties()
                 now = datetime.datetime.now()
 
@@ -168,7 +168,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
 
-        if options['use_test_database']:
+        if options['use_test_database']:                    # pragma: no cover
             # voor gebruik tijdens browser tests
             connection.close()
             test_database_name = "test_" + settings.DATABASES[DEFAULT_DB_ALIAS]["NAME"]

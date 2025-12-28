@@ -23,7 +23,9 @@ from CompKampioenschap.operations.wedstrijdformulieren_teams import (iter_teams_
 from CompKampioenschap.operations.storage_wedstrijdformulieren import (StorageWedstrijdformulieren,
                                                                        iter_dirty_wedstrijdformulieren, zet_dirty)
 from GoogleDrive.operations import StorageGoogleSheet, StorageError
+import traceback
 import time
+import sys
 
 VOLGORDE_PARKEER = 22222        # hoog en past in PositiveSmallIntegerField
 
@@ -741,7 +743,9 @@ class VerwerkCompKampMutaties:
                                 competitie=comp)      # alleen nodig voor begin_jaar
 
         except StorageError as err:
-            self.stdout.write('[ERROR] StorageError: %s' % str(err))
+            msg = 'Onverwachte fout in verwerk_mutatie_maak_wedstrijdformulieren:\n'
+            msg += '   %s\n' % str(err)
+            self.stdout.write('[ERROR] {CompKampioenschap.verwerk_mutaties} ' + msg)
 
     def _verwerk_mutatie_update_dirty_wedstrijdformulieren(self, mutatie):
         begin_jaar = mutatie.competitie.begin_jaar

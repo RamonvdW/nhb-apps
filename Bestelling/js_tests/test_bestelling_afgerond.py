@@ -57,8 +57,7 @@ class TestBrowserBestellingAfgerond(MyMgmtCommandHelper, bh.BrowserTestCase):
         # betaling actief --> mislukt
         bestelling.status = BESTELLING_STATUS_BETALING_ACTIEF
         bestelling.save(update_fields=['status'])
-        self.do_navigate_to(url)
-
+        self.do_navigate_to(url, allow_same=True)
         # aanpassen voordat de status opgehaald is
         bestelling.status = BESTELLING_STATUS_MISLUKT
         bestelling.save(update_fields=['status'])
@@ -67,7 +66,7 @@ class TestBrowserBestellingAfgerond(MyMgmtCommandHelper, bh.BrowserTestCase):
         # 404 antwoord
         bestelling.status = BESTELLING_STATUS_BETALING_ACTIEF
         bestelling.save(update_fields=['status'])
-        self.do_navigate_to(url)
+        self.do_navigate_to(url, allow_same=True)
 
         bestelling.status = BESTELLING_STATUS_GEANNULEERD       # resulteert in Http404
         bestelling.save(update_fields=['status'])
@@ -77,7 +76,7 @@ class TestBrowserBestellingAfgerond(MyMgmtCommandHelper, bh.BrowserTestCase):
         self.set_short_xhr_timeouts()
         bestelling.status = BESTELLING_STATUS_BETALING_ACTIEF
         bestelling.save(update_fields=['status'])
-        self.do_navigate_to(url)
+        self.do_navigate_to(url, allow_same=True)
         time.sleep(0.5)     # eerste check wordt na 250ms gedaan
 
         # controleer dat er geen meldingen van de browser zijn over de JS bestanden
