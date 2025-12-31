@@ -21,7 +21,7 @@ class StorageWedstrijdformulieren(StorageGoogleDrive):
     """ let op: genereert StorageError exception """
 
     FOLDER_NAME_TOP = settings.GOOGLE_DRIVE_FOLDER_NAME_TOP
-    FOLDER_NAME_SITE = settings.NAAM_SITE
+    FOLDER_NAME_SITE = settings.GOOGLE_DRIVE_FOLDER_SITE
     FOLDER_NAME_TEMPLATES = settings.GOOGLE_DRIVE_FOLDER_NAME_TEMPLATES
 
     COMP2TEMPLATE = {

@@ -632,7 +632,7 @@ INSTAPTOETS_AANTAL_MINUTEN = 30
 # google drive
 GOOGLE_DRIVE_FOLDER_NAME_TOP = 'MH wedstrijdformulieren'        # moet uniek zijn in de drive
 GOOGLE_DRIVE_FOLDER_NAME_TEMPLATES = 'MH templates RK/BK'       # moet uniek zijn in de drive
-
+GOOGLE_DRIVE_FOLDER_SITE = NAAM_SITE
 
 # -------------------------------------------
 # defaults for 'dev' and 'test' options below
