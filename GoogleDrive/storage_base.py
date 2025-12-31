@@ -105,7 +105,7 @@ class StorageBase:
     def _vind_of_maak_deel_folders(self):
         if self._folder_id_seizoen:     # pragma: no branch
             for afstand in (18, 25):
-                for is_teams in (True, False):
+                for is_teams in (False,):   # (True, False):
                     for is_bk in (True, False):
                         folder_name = self._params_to_folder_name(afstand, is_teams, is_bk)
                         folder_id_comp = self._vind_of_maak_folder(self._folder_id_seizoen, folder_name)
@@ -122,7 +122,7 @@ class StorageBase:
     def _secure_folders(self):
         if not self._folder_id_top:
             self._vind_top_folder()                 # "MH wedstrijdformulieren"
-            self._vind_templates_folder()            # "MH templates RK/BK"
+            self._vind_templates_folder()           # "MH templates RK/BK"
             self._vind_of_maak_site_folder()        # "MijnHandboogsport (dev)"
             self._vind_of_maak_seizoen_folder()     # "Bondscompetities 2025/2026"
             self._share_seizoen_folder()
