@@ -292,7 +292,7 @@ class StorageGoogleDrive(StorageBase):
         if error_msg:
             msg = 'Onverwachte fout in storage_drive:\n'
             msg += '   %s\n' % error_msg
-            if tb_list:
+            if tb_list:                             # pragma: no branch
                 msg += 'Traceback:\n'
                 msg += ''.join(tb_list)
             raise StorageError('{google_drive} ' + msg)

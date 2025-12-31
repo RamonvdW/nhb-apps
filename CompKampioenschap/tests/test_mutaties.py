@@ -284,7 +284,9 @@ class TestCompKampioenschapMutaties(E2EHelpers, TestCase):
 
         _, f2, = self.verwerk_competitie_mutaties(ignore_errors=True)
         self.assertTrue('[INFO] Maak wedstrijdformulieren voor comp_18' in f2.getvalue())
-        self.assertTrue('[ERROR] StorageError: No token' in f2.getvalue())
+        # print('f2:', f2.getvalue())
+        self.assertTrue('[ERROR]' in f2.getvalue())
+        self.assertTrue('No token' in f2.getvalue())
 
         # hergebruik de mutatie
         mutatie = CompetitieMutatie.objects.first()

@@ -4,9 +4,7 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.utils import timezone
-from Scheidsrechter.models import (WedstrijdDagScheidsrechters, MatchScheidsrechters,
-                                   ScheidsBeschikbaarheid, ScheidsMutatie)
+from Scheidsrechter.models import WedstrijdDagScheidsrechters, MatchScheidsrechters
 import datetime
 
 
