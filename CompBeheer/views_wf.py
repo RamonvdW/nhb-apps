@@ -106,11 +106,13 @@ class AanmakenView(UserPassesTestMixin, TemplateView):
         account = get_account(request)
         door_str = account.get_account_full_name()
 
-        comp18 = Competitie.objects.exclude(regiocompetitie_is_afgesloten=True).filter(afstand=18).first()
+        begin_jaar = Competitie.objects.order_by('begin_jaar').first().begin_jaar
+
+        comp18 = Competitie.objects.filter(begin_jaar=begin_jaar, afstand=18).first()
         if comp18:
             maak_mutatie_wedstrijdformulieren_aanmaken(comp18, door_str)
 
-        comp25 = Competitie.objects.exclude(regiocompetitie_is_afgesloten=True).filter(afstand=25).first()
+        comp25 = Competitie.objects.filter(begin_jaar=begin_jaar, afstand=25).first()
         if comp25:
             maak_mutatie_wedstrijdformulieren_aanmaken(comp25, door_str)
 
