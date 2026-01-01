@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2025 Ramon van der Winkel.
+#  Copyright (c) 2019-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import reverse
 from django.views.generic import TemplateView
 from CompBeheer.operations.toegang import is_competitie_openbaar_voor_rol
-from CompKampioenschap.operations.maak_mutatie import aanmaken_wedstrijdformulieren_is_pending
+from CompKampioenschap.operations import aanmaken_wedstrijdformulieren_is_pending
 from Competitie.models import Competitie
 from Competitie.operations import bepaal_startjaar_nieuwe_competitie
-from CompKampioenschap.operations.storage_wedstrijdformulieren import aantal_ontbrekende_wedstrijdformulieren_rk_bk
+from CompKampioenschap.operations import aantal_ontbrekende_wedstrijdformulieren_rk_bk
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige, rol_get_beschrijving
 from GoogleDrive.operations import check_heeft_toestemming

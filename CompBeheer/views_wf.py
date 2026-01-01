@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-#  Copyright (c) 2025 Ramon van der Winkel.
+#  Copyright (c) 2025-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -9,8 +9,8 @@ from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
 from Competitie.models import Competitie
-from CompKampioenschap.operations.maak_mutatie import maak_mutatie_wedstrijdformulieren_aanmaken
-from CompKampioenschap.operations.storage_wedstrijdformulieren import aantal_ontbrekende_wedstrijdformulieren_rk_bk
+from CompKampioenschap.operations import (maak_mutatie_wedstrijdformulieren_aanmaken,
+                                          aantal_ontbrekende_wedstrijdformulieren_rk_bk)
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige
 from GoogleDrive.operations import check_heeft_toestemming, get_authorization_url

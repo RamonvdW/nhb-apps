@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2025 Ramon van der Winkel.
+#  Copyright (c) 2025-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -9,8 +9,8 @@ from BasisTypen.models import BoogType, TeamType
 from Competitie.definities import MUTATIE_UPDATE_DIRTY_WEDSTRIJDFORMULIEREN, DEELNAME_NEE
 from Competitie.models import (CompetitieMutatie, Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
                                CompetitieMatch, Kampioenschap, KampioenschapSporterBoog, KampioenschapTeam)
-from CompKampioenschap.operations.maak_mutatie import (aanmaken_wedstrijdformulieren_is_pending,
-                                                       maak_mutatie_wedstrijdformulieren_aanmaken)
+from CompKampioenschap.operations import (aanmaken_wedstrijdformulieren_is_pending,
+                                          maak_mutatie_wedstrijdformulieren_aanmaken)
 from Functie.tests.helpers import maak_functie
 from Geo.models import Regio
 from GoogleDrive.models import Bestand

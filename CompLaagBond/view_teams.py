@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023-2025 Ramon van der Winkel.
+#  Copyright (c) 2023-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -15,7 +15,7 @@ from BasisTypen.definities import ORGANISATIE_WA
 from BasisTypen.models import BoogType
 from Competitie.definities import DEEL_BK, DEELNAME_JA, DEELNAME_NEE
 from Competitie.models import Kampioenschap, KampioenschapTeam
-from CompKampioenschap.operations.maak_mutatie import maak_mutatie_kamp_teams_nummeren
+from CompKampioenschap.operations import maak_mutatie_kamp_teams_nummeren
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving
 

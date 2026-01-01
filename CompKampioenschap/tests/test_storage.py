@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2025 Ramon van der Winkel.
+#  Copyright (c) 2025-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -8,9 +8,9 @@ from django.test import TestCase
 from django.core.management.base import OutputWrapper
 from BasisTypen.models import BoogType, TeamType
 from Competitie.models import Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse
-from CompKampioenschap.operations.storage_wedstrijdformulieren import (StorageWedstrijdformulieren, StorageError,
-                                                                       zet_dirty, iter_dirty_wedstrijdformulieren,
-                                                                       aantal_ontbrekende_wedstrijdformulieren_rk_bk)
+from CompKampioenschap.operations import (StorageWedstrijdformulieren, StorageError,
+                                          zet_dirty, iter_dirty_wedstrijdformulieren,
+                                          aantal_ontbrekende_wedstrijdformulieren_rk_bk)
 from GoogleDrive.models import Bestand
 from TestHelpers.e2ehelpers import E2EHelpers
 import io

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2025 Ramon van der Winkel.
+#  Copyright (c) 2020-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -13,6 +13,7 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from Competitie.definities import DEEL_RK, DEELNAME_NEE, DEELNAME2STR
 from Competitie.models import (CompetitieIndivKlasse, CompetitieTeamKlasse, CompetitieMatch,
                                KampioenschapIndivKlasseLimiet, KampioenschapSporterBoog, KampioenschapTeam)
+from CompKampioenschap.operations import get_url_wedstrijdformulier
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
 from Scheidsrechter.models import MatchScheidsrechters
@@ -147,9 +148,10 @@ class DownloadRkFormulierView(UserPassesTestMixin, TemplateView):
             for deelnemer in deelnemers:
                 if deelnemer.indiv_klasse != prev_klasse:
                     deelnemer.break_before = True
-                    deelnemer.url_download_indiv = reverse('CompLaagRayon:formulier-indiv-als-bestand',
-                                                           kwargs={'match_pk': match.pk,
-                                                                   'klasse_pk': deelnemer.indiv_klasse.pk})
+                    deelnemer.url_open_indiv = get_url_wedstrijdformulier(comp.begin_jaar, int(comp.afstand),
+                                                                          deelkamp.rayon.rayon_nr,
+                                                                          deelnemer.indiv_klasse.pk,
+                                                                          is_bk=False, is_teams=False)
                     prev_klasse = deelnemer.indiv_klasse
 
                 deelnemer.ver_nr = deelnemer.bij_vereniging.ver_nr

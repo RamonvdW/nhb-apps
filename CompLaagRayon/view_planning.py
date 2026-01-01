@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2025 Ramon van der Winkel.
+#  Copyright (c) 2019-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -18,7 +18,7 @@ from Competitie.models import (CompetitieIndivKlasse, CompetitieTeamKlasse, Comp
                                Regiocompetitie, RegiocompetitieRonde,
                                Kampioenschap, KampioenschapSporterBoog, KampioenschapTeam,
                                KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet)
-from CompKampioenschap.operations.maak_mutatie import maak_mutatie_kamp_cut
+from CompKampioenschap.operations import maak_mutatie_kamp_cut
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
 from Locatie.models import WedstrijdLocatie

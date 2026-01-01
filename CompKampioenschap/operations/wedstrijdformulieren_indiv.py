@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2025 Ramon van der Winkel.
+#  Copyright (c) 2025-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 """ helper functies """
 
 from django.utils import timezone
+from django.templatetags.l10n import localize
 from Competitie.definities import DEEL_BK, DEEL_RK, DEELNAME_NEE, DEELNAME2STR
 from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieMatch,
                                Kampioenschap, KampioenschapIndivKlasseLimiet, KampioenschapSporterBoog)
@@ -98,7 +99,7 @@ class UpdateIndivWedstrijdFormulier:
             self.titel = 'BK'
         else:
             self.titel = 'RK'
-        self.titel += ' individueel, 25m 1pijl %s/%s' % (bestand.begin_jaar, bestand.begin_jaar + 1)
+        self.titel += ' individueel, %s' % competitie.beschrijving.replace('competitie ', '')   # is inclusief seizoen
 
         if not bestand.is_bk:
             # benoem het rayon
@@ -115,7 +116,8 @@ class UpdateIndivWedstrijdFormulier:
         regels.append([self.klasse.beschrijving])
 
         # datum
-        regels.append([match.datum_wanneer.strftime('%Y-%m-%d')])
+        print('pk=%s' % match.pk, match.datum_wanneer, '->', localize(match.datum_wanneer))
+        regels.append([localize(match.datum_wanneer)])      # localize geeft NL formaat "1 januari 2026"
 
         # organisatie
         ver = match.vereniging

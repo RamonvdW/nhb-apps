@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2025 Ramon van der Winkel.
+#  Copyright (c) 2025-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -213,7 +213,7 @@ class StorageGoogleDrive(StorageBase):
                                              body={
                                                  "type": "anyone",
                                                  "role": "writer",
-                                                 # "allowFileDiscovery": "false",
+                                                 "allowFileDiscovery": "true",
                                              })
         result = request.execute()
         self.stdout.write('[DEBUG] {maak_bestand_uit_template} perms create result is %s' % repr(result))

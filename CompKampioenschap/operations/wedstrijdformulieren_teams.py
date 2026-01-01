@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2025 Ramon van der Winkel.
+#  Copyright (c) 2025-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -94,8 +94,7 @@ class UpdateTeamsWedstrijdFormulier:
             self.titel = 'BK'
         else:
             self.titel = 'RK'
-        self.titel += ' teams, %s' % self.competitie.beschrijving.replace('competitie ', '')
-        self.titel += ' %s/%s' % (bestand.begin_jaar, bestand.begin_jaar + 1)
+        self.titel += ' teams, %s' % self.competitie.beschrijving.replace('competitie ', '')    # is inclusief seizoen
 
         if not bestand.is_bk:
             # benoem het rayon
