@@ -12,7 +12,7 @@ from Competitie.models import (CompetitieMutatie, Competitie, CompetitieIndivKla
 from CompKampioenschap.operations import (aanmaken_wedstrijdformulieren_is_pending,
                                           maak_mutatie_wedstrijdformulieren_aanmaken)
 from Functie.tests.helpers import maak_functie
-from Geo.models import Regio
+from Geo.models import Regio, Rayon
 from GoogleDrive.models import Bestand
 from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -128,8 +128,10 @@ class TestCompKampioenschapMutaties(E2EHelpers, TestCase):
                             functie=self.functie_bko)
         kamp.rk_bk_matches.add(match)
 
+        rayon1 = Rayon.objects.get(rayon_nr=1)
         kamp_rk = Kampioenschap.objects.create(
                             deel='RK',
+                            rayon=rayon1,
                             competitie=self.comp_18,
                             functie=self.functie_bko)
         kamp_rk.rk_bk_matches.add(match)

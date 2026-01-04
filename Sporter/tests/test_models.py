@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2025 Ramon van der Winkel.
+#  Copyright (c) 2019-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -63,18 +63,17 @@ class TestSporterModels(TestCase):
 
         # geboortejaar in de toekomst
         now = datetime.datetime.now()
-        sporter.geboorte_datum = now    # + datetime.timedelta(days=10)  # unwanted year jump, from Dec 22..31
+        sporter.geboorte_datum = now  + datetime.timedelta(days=10)
         with self.assertRaises(ValidationError) as exc:
             sporter.clean_fields()
-        self.assertEqual(str(exc.exception),
-                         "{'geboorte_datum': ['Geboortejaar 2025 is niet valide (min=1900, max=2020)']}")
+        self.assertTrue("{'geboorte_datum': ['Geboortejaar 20" in str(exc.exception))
+        self.assertTrue(" is niet valide (min=1900, max=20" in str(exc.exception))
 
         # geboortejaar te ver in het verleden (max is 1900)
         sporter.geboorte_datum = datetime.date(year=1890, month=1, day=1)
         with self.assertRaises(ValidationError) as exc:
             sporter.clean_fields()
-        self.assertEqual(str(exc.exception),
-                         "{'geboorte_datum': ['Geboortejaar 1890 is niet valide (min=1900, max=2020)']}")
+        self.assertTrue("{'geboorte_datum': ['Geboortejaar 1890 is niet valide (min=1900, max=20" in str(exc.exception))
 
         # test de clean methode op het Sporter-object
         # deze controleert dat de geboorte_datum en [lid] sinds_datum niet te dicht op elkaar liggen

@@ -124,8 +124,9 @@ class CompetitieKiesView(TemplateView):
                 if not check_heeft_toestemming():
                     context['url_wf_toestemming_drive'] = reverse('CompBeheer:wf-toestemming-drive')
                 else:
-                    begin_jaar = Competitie.objects.order_by('begin_jaar').first().begin_jaar
-                    if not aanmaken_wedstrijdformulieren_is_pending():
+                    comp = Competitie.objects.order_by('begin_jaar').first()
+                    if comp and not aanmaken_wedstrijdformulieren_is_pending():
+                        begin_jaar = comp.begin_jaar
                         for comp in Competitie.objects.filter(begin_jaar=begin_jaar):
                             count = aantal_ontbrekende_wedstrijdformulieren_rk_bk(comp)
                             if count > 0:

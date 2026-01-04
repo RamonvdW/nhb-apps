@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2025 Ramon van der Winkel.
+#  Copyright (c) 2022-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -355,7 +355,8 @@ class TestWebwinkelOverzicht(E2EHelpers, TestCase):
 
         self.assertTrue('Verzendkosten' in email.mail_text)
 
-        self.assertTrue('TOTAAL: € 92,18' in email.mail_text)   # 1,23 + 84,00 + 6,95 = 92,18
+        # TODO: deze test is afhankelijk van de ingestelde verzendkosten
+        self.assertTrue('TOTAAL: € 92,68' in email.mail_text)   # 1,23 + 84,00 + 7,45 = 92,68
 
         email.delete()
 
@@ -388,10 +389,11 @@ class TestWebwinkelOverzicht(E2EHelpers, TestCase):
         self.assertTrue("Betaalstatus: Voldaan" in email.mail_text)
         #self.assertTrue('Verzendkosten' in email.mail_text)        # TODO: revive
 
-        self.assertTrue('TOTAAL: € 92,18' in email.mail_text)   # 1,23 + 84,00 + 6,95 = 92,18
+        # TODO: deze test is afhankelijk van de ingestelde verzendkosten
+        self.assertTrue('TOTAAL: € 92,68' in email.mail_text)   # 1,23 + 84,00 + 7,45 = 92,68
 
         self.assertTrue('Betaling:' in email.mail_text)
-        self.assertTrue('Ontvangen: € 92,18' in email.mail_text)
+        self.assertTrue('Ontvangen: € 92,68' in email.mail_text)
         self.assertTrue('Beschrijving: Overboeking ontvangen' in email.mail_text)
 
         email.delete()

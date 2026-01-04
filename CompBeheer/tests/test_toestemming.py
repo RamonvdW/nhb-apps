@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2024-2025 Ramon van der Winkel.
+#  Copyright (c) 2024-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -62,18 +62,20 @@ class TestCompBeheerToestemming(E2EHelpers, TestCase):
         # maak de toestemming
         Token.objects.create()
 
+        # geen competities
         resp = self.client.get(self.url_aanmaken)
-        self.assertEqual(resp.status_code, 200)  # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compbeheer/drive-aanmaken.dtl', 'design/site_layout.dtl'))
-
-        # aanmaken zonder competities
+        self.assert404(resp, 'Geen competitie gevonden')
         resp = self.client.post(self.url_aanmaken)
-        self.assert_is_redirect(resp, self.url_kies)
+        self.assert404(resp, 'Geen competitie gevonden')
 
         # aanmaken met competities
         Competitie.objects.create(beschrijving="Indoor", afstand="18", begin_jaar=1900)
         Competitie.objects.create(beschrijving="25m 1pijl", afstand="25", begin_jaar=1900)
+
+        resp = self.client.get(self.url_aanmaken)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('compbeheer/drive-aanmaken.dtl', 'design/site_layout.dtl'))
 
         resp = self.client.post(self.url_aanmaken)
         self.assert_is_redirect(resp, self.url_kies)

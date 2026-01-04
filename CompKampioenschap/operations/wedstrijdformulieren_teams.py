@@ -323,7 +323,7 @@ class UpdateTeamsWedstrijdFormulier:
 
         if self._heeft_scores():
             self.stdout.write('[DEBUG] heeft scores')
-            return "Heeft scores"
+            return "NOK: Heeft scores"
 
         # update het bestand
         self._schrijf_update(bestand, match)

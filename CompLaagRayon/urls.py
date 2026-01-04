@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -92,10 +92,6 @@ urlpatterns = [
     path('download-formulier/<match_pk>/',
          view_formulieren.DownloadRkFormulierView.as_view(),
          name='download-formulier'),
-
-    path('download-formulier-indiv/<match_pk>/<klasse_pk>/',
-         view_formulieren.FormulierIndivAlsBestandView.as_view(),
-         name='formulier-indiv-als-bestand'),
 
     path('download-formulier-teams/<match_pk>/<klasse_pk>/',
          view_formulieren.FormulierTeamsAlsBestandView.as_view(),

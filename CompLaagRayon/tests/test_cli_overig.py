@@ -1,14 +1,18 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023-2025 Ramon van der Winkel.
+#  Copyright (c) 2023-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from Competitie.definities import MUTATIE_KAMP_REINIT_TEST
-from Competitie.models import (CompetitieMatch, CompetitieIndivKlasse, CompetitieTeamKlasse, CompetitieMutatie,
+from Competitie.definities import MUTATIE_KAMP_REINIT_TEST, DEELNAME_ONBEKEND
+from Competitie.models import (Competitie, Kampioenschap,
+                               CompetitieIndivKlasse, CompetitieTeamKlasse,
+                               CompetitieMutatie, CompetitieMatch,
                                KampioenschapIndivKlasseLimiet, KampioenschapSporterBoog, KampioenschapTeam)
 from Competitie.test_utils.tijdlijn import zet_competitie_fase_rk_prep
+from Functie.models import Functie
+from Mailer.models import MailQueue
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 
@@ -16,6 +20,11 @@ from TestHelpers import testdata
 class TestCompLaagRayonCliOverig(E2EHelpers, TestCase):
 
     """ tests voor de CompLaagRayon applicatie, overige management commando's """
+
+    cli_check_rk_inschrijvingen = 'check_rk_inschrijvingen'
+    cli_check_rk_uitslagen = 'check_rk_uitslagen'
+    cli_check_rk_downloads = 'check_rk_downloads'
+    cli_email_rk_indiv_deelnemers = 'email_rk_indiv_deelnemers'
 
     testdata = None
     rayon_nr = 3
@@ -99,7 +108,8 @@ class TestCompLaagRayonCliOverig(E2EHelpers, TestCase):
         deelnemer.save()
 
         with self.assert_max_queries(20):
-            f1, f2 = self.run_management_command('check_rk_inschrijvingen', '18', self.rayon_nr)
+            f1, f2 = self.run_management_command(self.cli_check_rk_inschrijvingen,
+                                                 '18', self.rayon_nr)
         _ = (f1, f2)
         # print('f1:', f1.getvalue())
         # print('f2:', f2.getvalue())
@@ -110,7 +120,8 @@ class TestCompLaagRayonCliOverig(E2EHelpers, TestCase):
         # alle klassen hebben fouten
         KampioenschapSporterBoog.objects.exclude(indiv_klasse=deelnemer.indiv_klasse).delete()
         with self.assert_max_queries(20):
-            f1, f2 = self.run_management_command('check_rk_inschrijvingen', '18', self.rayon_nr, '--verbose')
+            f1, f2 = self.run_management_command(self.cli_check_rk_inschrijvingen,
+                                                 '18', self.rayon_nr, '--verbose')
         _ = (f1, f2)
         # print('f1:', f1.getvalue())
         # print('f2:', f2.getvalue())
@@ -118,7 +129,8 @@ class TestCompLaagRayonCliOverig(E2EHelpers, TestCase):
 
         # niets gevonden
         with self.assert_max_queries(20):
-            f1, f2 = self.run_management_command('check_rk_inschrijvingen', '25', self.rayon_nr)
+            f1, f2 = self.run_management_command(self.cli_check_rk_inschrijvingen,
+                                                 '25', self.rayon_nr)
         self.assertTrue('Geen deelnemers gevonden' in f2.getvalue())
 
     def test_recalc(self):
@@ -128,12 +140,14 @@ class TestCompLaagRayonCliOverig(E2EHelpers, TestCase):
         # print('f2:', f2.getvalue())
 
     def test_check_rk_uitslagen(self):
-        f1, f2 = self.run_management_command('check_rk_uitslagen', '18')
+        f1, f2 = self.run_management_command(self.cli_check_rk_uitslagen,
+                                             '18')
         _ = (f1, f2)
         # print('f1:', f1.getvalue())
         # print('f2:', f2.getvalue())
 
-        f1, f2 = self.run_management_command('check_rk_uitslagen', '25', '--verbose')
+        f1, f2 = self.run_management_command(self.check_rk_uitslagen,
+                                             '25', '--verbose')
         _ = (f1, f2)
         # print('f1:', f1.getvalue())
         # print('f2:', f2.getvalue())
@@ -152,10 +166,12 @@ class TestCompLaagRayonCliOverig(E2EHelpers, TestCase):
         match.team_klassen.add(self.team_klasse)
         deelkamp.rk_bk_matches.add(match)
 
-        f1, f2 = self.run_management_command('check_rk_downloads', '18', 'indiv')
+        f1, f2 = self.run_management_command(self.cli_check_rk_downloads,
+                                             '18', 'indiv')
         _ = (f1, f2)
 
-        f1, f2 = self.run_management_command('check_rk_downloads', '18', 'teams')
+        f1, f2 = self.run_management_command(self.cli_check_rk_downloads,
+                                             '18', 'teams')
         _ = (f1, f2)
         # print('f1:', f1.getvalue())
         # print('f2:', f2.getvalue())
@@ -163,10 +179,99 @@ class TestCompLaagRayonCliOverig(E2EHelpers, TestCase):
         # make nog een competitie aan
         self.testdata.maak_bondscompetities(2018)
 
-        f1, f2 = self.run_management_command('check_rk_downloads', '25', 'indiv')
+        f1, f2 = self.run_management_command(self.cli_check_rk_downloads,
+                                             '25', 'indiv')
         _ = (f1, f2)
-        f1, f2 = self.run_management_command('check_rk_downloads', '25', 'teams')
+        f1, f2 = self.run_management_command(self.cli_check_rk_downloads,
+                                             '25', 'teams')
         _ = (f1, f2)
+
+    def test_email_rk_indiv_deelnemers(self):
+        # 18m
+        _, f2 = self.run_management_command(self.cli_email_rk_indiv_deelnemers,
+                                             '18', '1')
+        self.assertTrue('[INFO] Kampioenschap: Indoor competitie' in f2.getvalue())
+        self.assertTrue(' - RK Rayon 1' in f2.getvalue())
+        self.assertTrue('[INFO] 0 RK wedstrijden gevonden' in f2.getvalue())
+
+        # 25m, zonder deelkamp
+        self.testdata.comp25.regiocompetitie_is_afgesloten = True
+        self.testdata.comp25.save()
+        Kampioenschap.objects.filter(competitie=self.testdata.comp25).delete()
+        _, f2 = self.run_management_command(self.cli_email_rk_indiv_deelnemers,
+                                             '25', '1', '--stuur')
+        self.assertTrue('[ERROR] Competitie niet gevonden' in f2.getvalue())
+
+        ver = self.testdata.vereniging[self.testdata.regio_ver_nrs[self.regio_nr][0]]
+        loc = self.testdata.maak_wedstrijd_locatie(ver.ver_nr)
+
+        deelnemer = self.testdata.comp18_rk_deelnemers[0]
+        # deelnemer.deelname = DEELNAME_ONBEKEND
+        # deelnemer.save(update_fields=['deelname'])
+
+        # maak een wedstrijd aan
+        match = CompetitieMatch(
+                    competitie=self.testdata.comp18,
+                    beschrijving='RK Rayon 1',
+                    datum_wanneer='2021-02-03',
+                    tijd_begin_wedstrijd='12:34',
+                    vereniging=ver,
+                    locatie=loc)
+        match.save()
+        match.indiv_klassen.add(deelnemer.indiv_klasse)
+
+        deelkamp = self.testdata.deelkamp18_rk[self.rayon_nr]
+        deelkamp.rk_bk_matches.add(match)
+
+        # zet functie e-mail
+        Functie.objects.filter(rol='HWL', vereniging=ver).update(bevestigde_email='hwl@org_ver.nl')
+
+        _, f2 = self.run_management_command(self.cli_email_rk_indiv_deelnemers,
+                                             '18', str(self.rayon_nr))
+        self.assertTrue('[INFO] 1 RK wedstrijden gevonden' in f2.getvalue())
+        self.assertTrue('[ERROR] 9 fouten gevonden' in f2.getvalue())
+
+        # zet alle klassen in een tweede match, zonder locatie
+        match = CompetitieMatch(
+                    competitie=self.testdata.comp18,
+                    beschrijving='RK Rayon 1',
+                    datum_wanneer='2021-02-03',
+                    tijd_begin_wedstrijd='12:34',
+                    vereniging=ver)
+        match.save()
+        deelkamp.rk_bk_matches.add(match)
+
+        pks = [deelnemer.indiv_klasse.pk]
+        for deelnemer in self.testdata.comp18_rk_deelnemers:
+            pk = deelnemer.indiv_klasse.pk
+            if pk not in pks:
+                match.indiv_klassen.add(deelnemer.indiv_klasse)
+                pks.append(pk)
+        # for
+
+        self.assertEqual(MailQueue.objects.count(), 0)
+        _, f2 = self.run_management_command(self.cli_email_rk_indiv_deelnemers,
+                                             '18', str(self.rayon_nr), '--stuur')
+        # print('f2:', f2.getvalue())
+        self.assertTrue('[INFO] 10 RK wedstrijden gevonden' in f2.getvalue())
+        self.assertFalse('fouten gevonden' in f2.getvalue())
+        self.assertTrue('[INFO] 8 e-mails verstuurd' in f2.getvalue())
+        self.assertEqual(MailQueue.objects.count(), 8)
+
+        mail = MailQueue.objects.first()
+        self.assert_email_html_ok(mail, 'email_complaagrayon/bevestig-deelname.dtl')
+        self.e2e_show_email_in_browser(mail)
+
+        # verwijder de functie
+        Functie.objects.filter(rol='HWL', vereniging=ver).delete()
+        _, f2 = self.run_management_command(self.cli_email_rk_indiv_deelnemers,
+                                             '18', str(self.rayon_nr))
+
+        # competitie is verkeerde fase
+        Competitie.objects.update(regiocompetitie_is_afgesloten=False)
+        _, f2 = self.run_management_command(self.cli_email_rk_indiv_deelnemers,
+                                             '18', '4')
+        self.assertTrue('[ERROR] Competitie niet gevonden' in f2.getvalue())
 
 
 # end of file

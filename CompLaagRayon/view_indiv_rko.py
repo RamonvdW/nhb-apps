@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2025 Ramon van der Winkel.
+#  Copyright (c) 2019-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -13,6 +13,7 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from Competitie.definities import DEEL_RK, DEELNAME_JA, DEELNAME_NEE
 from Competitie.models import (Regiocompetitie,
                                Kampioenschap, KampioenschapSporterBoog, KampioenschapIndivKlasseLimiet)
+from CompKampioenschap.operations import get_url_wedstrijdformulier
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
 from Sporter.models import SporterVoorkeuren
@@ -103,14 +104,13 @@ class LijstRkSelectieView(UserPassesTestMixin, TemplateView):
         # TODO: check competitie fase
 
         if not deelkamp.heeft_deelnemerslijst:
-            # situatie 1)
+            # we moeten wachten op afsluiten regiocompetitie
             context['url_uitslagen'] = reverse('CompUitslagen:uitslagen-rk-indiv-n',
                                                kwargs={'comp_pk_of_seizoen': deelkamp.competitie.maak_seizoen_url(),
                                                        'comp_boog': 'r',
                                                        'rayon_nr': deelkamp.rayon.rayon_nr})
             deelnemers = list()
         else:
-            # situatie 2)
             deelnemers = (KampioenschapSporterBoog
                           .objects
                           .select_related('kampioenschap',
@@ -153,6 +153,10 @@ class LijstRkSelectieView(UserPassesTestMixin, TemplateView):
             if deelnemer.break_klasse:
                 aantal_klassen += 1
                 deelnemer.klasse_str = deelnemer.indiv_klasse.beschrijving
+                deelnemer.url_open_indiv = get_url_wedstrijdformulier(comp.begin_jaar, int(comp.afstand),
+                                                                      deelkamp.rayon.rayon_nr,
+                                                                      deelnemer.indiv_klasse.pk,
+                                                                      is_bk=False, is_teams=False)
                 klasse = deelnemer.indiv_klasse.volgorde
                 try:
                     limiet = wkl2limiet[deelnemer.indiv_klasse.pk]

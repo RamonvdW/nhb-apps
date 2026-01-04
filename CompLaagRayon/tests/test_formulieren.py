@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2025 Ramon van der Winkel.
+#  Copyright (c) 2020-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -199,93 +199,6 @@ class TestCompLaagRayonFormulieren(E2EHelpers, TestCase):
             resp = self.client.get(self.url_forms % 'xxx')
         self.assert404(resp, 'Wedstrijd niet gevonden')
 
-    def test_download_indiv_18m(self):
-        klasse = self.comp18_klassen_indiv_rk[5]        # Recurve klasse 6 (heeft veel deelnemers in deze test setup)
-        self.match.indiv_klassen.add(klasse)
-        url = self.url_forms_download_indiv % (self.match.pk, klasse.pk)
-
-        deelnemer = KampioenschapSporterBoog.objects.filter(indiv_klasse=klasse)[0]
-        deelnemer.deelname = DEELNAME_NEE
-        deelnemer.save(update_fields=['deelname'])
-
-        # ophalen zonder inlog
-        self.client.logout()
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assert403(resp)
-
-        self.e2e_login_and_pass_otp(self.testdata.account_hwl[self.ver_nr])
-        self.e2e_wissel_naar_functie(self.testdata.functie_hwl[self.ver_nr])
-
-        # normaal
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assert200_is_bestand_xlsx(resp)
-
-        # zonder locatie
-        self.match.locatie = None
-        self.match.save(update_fields=['locatie'])
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assert200_is_bestand_xlsx(resp)
-
-        # niet bestaand RK programma
-        with override_settings(INSTALL_PATH='/tmp'):
-            resp = self.client.get(url)
-        self.assert404(resp, 'Kan RK programma niet vinden')
-
-        # kapot RK programma
-        self._make_bad_file(self.xlsx_fpath_18_indiv)
-        with override_settings(INSTALL_PATH='/tmp'):
-            resp = self.client.get(url)
-        self.assert404(resp, 'Kan RK programma niet openen')
-
-        # niet bestaande wedstrijd
-        resp = self.client.get(self.url_forms_download_indiv % (999999, 'xxx'))
-        self.assert404(resp, 'Wedstrijd niet gevonden')
-
-        # niet bestaande klasse
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_forms_download_indiv % (self.match.pk, 'xxx'))
-        self.assert404(resp, 'Klasse niet gevonden')
-
-        # wedstrijd niet in een plan
-        self.deelkamp_18.rk_bk_matches.remove(self.match.pk)
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assert404(resp, 'Geen kampioenschap')
-
-        # wedstrijd van een niet-RK kampioenschap
-        self.testdata.deelkamp18_bk.rk_bk_matches.add(self.match.pk)
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assert404(resp, 'Geen kampioenschap')
-
-    def test_download_indiv_25m(self):
-        self.e2e_login_and_pass_otp(self.testdata.account_hwl[self.ver_nr])
-        self.e2e_wissel_naar_functie(self.testdata.functie_hwl[self.ver_nr])
-
-        # 25m1p plan
-        self.deelkamp_18.rk_bk_matches.clear()
-        self.deelkamp_25.rk_bk_matches.add(self.match.pk)
-
-        klasse_indiv_rk = None
-        for klasse in self.testdata.comp25_klassen_indiv['R']:      # pragma: no branch
-            if klasse.is_ook_voor_rk_bk:                            # pragma: no branch
-                klasse_indiv_rk = klasse
-                break
-
-        url = self.url_forms_download_indiv % (self.match.pk, klasse_indiv_rk.pk)
-
-        KampioenschapIndivKlasseLimiet(
-                    kampioenschap=self.deelkamp_25,
-                    indiv_klasse=klasse_indiv_rk,
-                    limiet=20).save()
-
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assert200_is_bestand_xlsx(resp)
-
     def test_download_teams(self):
         klasse = self.testdata.comp18_klassen_teams['R2'][1]     # Recurve A met 2 teams
         url = self.url_forms_download_teams % (self.match.pk, klasse.pk)
@@ -385,16 +298,6 @@ class TestCompLaagRayonFormulieren(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('complaagrayon/hwl-download-rk-formulier.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
-
-        # download tests
-        self.e2e_login_and_pass_otp(self.testdata.account_hwl[self.ver_nr])
-        self.e2e_wissel_naar_functie(self.testdata.functie_hwl[self.ver_nr])
-
-        klasse = self.testdata.comp18_klassen_indiv['R'][0]
-        url = self.url_forms_download_indiv % (self.match.pk, klasse.pk)
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assert200_is_bestand_xlsx(resp)
 
 
 # end of file

@@ -74,6 +74,13 @@ class AanmakenView(UserPassesTestMixin, TemplateView):
         rol_nu = rol_get_huidige(self.request)
         return rol_nu == Rol.ROL_BB
 
+    def _get_begin_jaar_or_404(self):
+        comp = Competitie.objects.order_by('begin_jaar').first()
+        if not comp:
+            raise Http404('Geen competitie gevonden')
+
+        return comp.begin_jaar
+
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
@@ -82,7 +89,8 @@ class AanmakenView(UserPassesTestMixin, TemplateView):
         if not check_heeft_toestemming():
             raise Http404('Geen toestemming')
 
-        begin_jaar = Competitie.objects.order_by('begin_jaar').first().begin_jaar
+        begin_jaar = self._get_begin_jaar_or_404()
+
         comp18 = Competitie.objects.filter(begin_jaar=begin_jaar, afstand=18).first()
         context['aantal_aanmaken_18'] = aantal_ontbrekende_wedstrijdformulieren_rk_bk(comp18)
 
@@ -98,15 +106,14 @@ class AanmakenView(UserPassesTestMixin, TemplateView):
 
         return context
 
-    @staticmethod
-    def post(request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
         # gebruiker heeft op de knop BEGIN gedrukt
         # het form heeft een POST gedaan, welke hier uit komt
 
         account = get_account(request)
         door_str = account.get_account_full_name()
 
-        begin_jaar = Competitie.objects.order_by('begin_jaar').first().begin_jaar
+        begin_jaar = self._get_begin_jaar_or_404()
 
         comp18 = Competitie.objects.filter(begin_jaar=begin_jaar, afstand=18).first()
         if comp18:
